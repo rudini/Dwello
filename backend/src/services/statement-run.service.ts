@@ -5,8 +5,9 @@
  */
 import { billsIn, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
 import { getTypedConfig } from './config.service';
-import { getContract, listContracts, type ContractWithDetails } from './contract.service';
+import { billingStart, getContract, listContracts, type ContractWithDetails } from './contract.service';
 import { listHeatingProfiles } from './heating-profile.service';
+import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
 import { listStatements } from './statement.service';
 import { swissToday } from './today';
@@ -233,4 +234,42 @@ export async function runDifferencesOf(buildingId: string, run: RunSettings) {
 		listHeatingProfiles({ limit: 1000 })
 	]);
 	return { statements: runDifferences(run, statements, contracts, heatingProfiles) };
+}
+
+type Billed = Contract & Pick<ContractWithDetails, 'apartmentId'>;
+type Placed = Statement & { id: string; apartmentId: string };
+type HeatingCheck<I> = { heatingWithoutServicePeriod: I[]; oldHeatingRule: string[] };
+
+// A contract moving in or out in the period: by the Heizprofil a heating invoice with a Leistungszeitraum counts only its
+// months (#339)
+const movesIn = (c: Billed, period: Range) => billingStart(c) > period.start || (!!c.endDate && c.endDate < period.end);
+
+/**
+ * H-28: the heating hints of the period's check that concern a run, by the contracts it bills (#335, #339): heating
+ * invoices without Leistungszeitraum only at a move-in or move-out with a Heizprofil, a sent statement under the old
+ * rule only when the run bills another contract of its apartment
+ */
+export function runHeatingHints<I>(
+	run: { period: Range; heatingProfileId: string | null },
+	contracts: Billed[],
+	statements: Placed[],
+	check: HeatingCheck<I>
+): HeatingCheck<I> {
+	const billed = planRun(run.period, contracts, statements).contracts.filter((c) => !c.billed);
+	const change = !!run.heatingProfileId && billed.some((c) => movesIn(c, run.period));
+	const rebilled = (id: string) => {
+		const sent = statements.find((s) => s.id === id);
+		return !!sent && billed.some((c) => c.id !== sent.contractId && c.apartmentId === sent.apartmentId);
+	};
+	return { heatingWithoutServicePeriod: change ? check.heatingWithoutServicePeriod : [], oldHeatingRule: check.oldHeatingRule.filter(rebilled) };
+}
+
+/** The heating hints of the building's check for a run of the period with the Heizprofil (#335, #339, H-28) */
+export async function runHeatingHintsOf(buildingId: string, run: { period: Range; heatingProfileId: string | null }) {
+	const [{ contracts }, { statements }, check] = await Promise.all([
+		listContracts({ buildingId, limit: 1000 }),
+		listStatements({ buildingId, limit: 1000 }),
+		heatingHintsOf(buildingId, run.period)
+	]);
+	return runHeatingHints(run, contracts, statements, check);
 }

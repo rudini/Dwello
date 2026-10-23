@@ -3,7 +3,7 @@
  * which have a statement in its period already, and when it is refused for overlapping a period of the building
  */
 import { describe, expect, it } from 'bun:test';
-import { planRun, runDefaults, runDifferences } from '../services/statement-run.service';
+import { planRun, runDefaults, runDifferences, runHeatingHints } from '../services/statement-run.service';
 
 const year2024 = { start: '2024-01-01', end: '2024-12-31' };
 
@@ -426,5 +426,42 @@ describe('Abweichende Einstellungen bestehender Abrechnungen', () => {
 		const other = kept('1', 'c1', 'hp2', '1.00', { periodStart: '2023-07-01', periodEnd: '2024-06-30' });
 
 		expect(runDifferences(run, [other, kept('2', 'fremd', 'hp2', '1.00')], tenancies, profiles)).toEqual([]);
+	});
+});
+
+// H-28: which heating hints of the period's check a run shows, by the contracts it bills
+describe('Hinweise zu den Heizkosten eines Laufs', () => {
+	const hinted = [{ id: 'i1', billingEntityName: 'Fernwärme AG', description: null, invoiceDate: '2024-03-31', amount: '1520.00', categoryId: 'heiz' }];
+	const tenancy = (id: string, apartmentId: string, startDate: string, endDate: string | null) => ({ ...contract(id, startDate, endDate), apartmentId });
+	const hintsOf = (inBuilding: ReturnType<typeof tenancy>[], heatingProfileId: string | null, statements: object[] = [], oldHeatingRule: string[] = []) =>
+		runHeatingHints({ period: year2024, heatingProfileId }, inBuilding, statements as Parameters<typeof runHeatingHints>[2], { heatingWithoutServicePeriod: hinted, oldHeatingRule });
+
+	// #339 (#451, point 6): only at a move-in or move-out in the period, and with a Heizprofil, a heating invoice with a
+	// Leistungszeitraum counts only its months; only then the hint on those without one
+	it.each([
+		['bei einem Einzug mit Heizprofil', [tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', hinted],
+		['bei einem Auszug mit Heizprofil', [tenancy('auszug', 'w1', '2020-01-01', '2024-03-31')], 'hp1', hinted],
+		['nicht bei einem Mietvertrag über die ganze Periode', [tenancy('ganz', 'w1', '2020-01-01', null)], 'hp1', []],
+		['nicht ohne Heizprofil', [tenancy('einzug', 'w1', '2024-05-01', null)], null, []]
+	] as const)('nennt Heizrechnungen ohne Leistungszeitraum neben solchen mit %s', (_, inBuilding, heatingProfileId, expected) => {
+		expect(hintsOf([...inBuilding], heatingProfileId).heatingWithoutServicePeriod).toEqual([...expected]);
+	});
+
+	it('nennt sie nicht, wenn der Mietvertrag mit dem Einzug schon eine Abrechnung der Periode hat', () => {
+		const billed = [{ ...statement('einzug', '2024-01-01', '2024-12-31'), id: 's1', apartmentId: 'w1' }];
+
+		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', billed).heatingWithoutServicePeriod).toEqual([]);
+	});
+
+	// #335 (#451, point 5): the sent statement of the previous tenant still shares the heating costs without the months in
+	// the Leistungszeitraum (by the check); the preview names it when the run bills the next tenant of the same apartment
+	it.each([
+		['erstellt der Lauf eine Abrechnung derselben Wohnung', [], ['alt']],
+		['hat der Nachmieter schon eine Abrechnung', [{ ...statement('einzug', '2024-01-01', '2024-12-31'), id: 'neu', apartmentId: 'w1' }], []]
+	] as const)('nennt eine versendete Abrechnung nach der alten Regel: %s', (_, more, expected) => {
+		const moved = [tenancy('auszug', 'w1', '2020-01-01', '2024-03-31'), tenancy('einzug', 'w1', '2024-05-01', null), tenancy('andere', 'w2', '2024-05-01', null)];
+		const sent = { ...statement('auszug', '2024-01-01', '2024-12-31', 'sent'), id: 'alt', apartmentId: 'w1' };
+
+		expect(hintsOf(moved, 'hp1', [sent, ...more], ['alt']).oldHeatingRule).toEqual([...expected]);
 	});
 });

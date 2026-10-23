@@ -16,6 +16,7 @@ import calculationRefused from '../../tests/contracts/statement-calculation-refu
 import statements from '../../tests/contracts/statements.json';
 import statementChangedInvoices from '../../tests/contracts/statement-changed-invoices.json';
 import runDifferences from '../../tests/contracts/statement-run-differences.json';
+import runHeating from '../../tests/contracts/statement-run-heating.json';
 import contractAgreements from '../../tests/contracts/contract-agreements.json';
 import category from '../../tests/contracts/category.json';
 import building from '../../tests/contracts/building.json';
@@ -446,29 +447,47 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		]);
 	});
 
-	// #339 (#451, Punkt 6): nur bei einem Ein- oder Auszug in der Periode und mit Heizprofil zählt eine Heizrechnung mit
-	// Leistungszeitraum nur seine Monate; nur dann nennt die Vorschau die Heizrechnungen ohne
-	it.each([
-		['bei einem Einzug mit Heizprofil', [contract('einzug', '2024-05-01', null)], 'hp1', 1],
-		['nicht bei einem Mietvertrag über die ganze Periode', [contract('ganz', '2020-01-01', null)], 'hp1', 0],
-		['nicht ohne Heizprofil', [contract('einzug', '2024-05-01', null)], '', 0]
-	] as const)('nennt Heizrechnungen ohne Leistungszeitraum neben solchen mit %s', async (_, inBuilding, heatingProfileId, count) => {
-		const [hinted] = invoiceCompleteness.heatingWithoutServicePeriod;
-		const fetch = (async (url: string) =>
-			url.includes('/invoices/completeness/')
-				? Response.json(invoiceCompleteness)
-				: url.includes('/contracts?')
-					? Response.json({ contracts: inBuilding })
-					: url.includes('/statements?')
-						? Response.json({ ...statements, data: [] })
-						: url.includes('/categories')
-							? Response.json({ categories: [{ ...category, id: hinted.categoryId, nameDE: 'Heizung' }] })
-							: Response.json([])) as typeof globalThis.fetch;
+	// #339, H-28: which heating invoices without Leistungszeitraum concern the run, the backend decides; here only names
+	const heatingFetch = (forRun: object | null, asked: string[] = [], check: object = invoiceCompleteness) =>
+		(async (url: string) => {
+			const [hinted] = invoiceCompleteness.heatingWithoutServicePeriod;
+			if (url.includes('/statements/run-heating?')) {
+				asked.push(url);
+				return forRun ? Response.json(forRun) : Response.json({ error: 'kaputt' }, { status: 500 });
+			}
+			return url.includes('/invoices/completeness/')
+				? Response.json(check)
+				: url.includes('/statements?')
+					? Response.json({ ...statements, data: [] })
+					: url.includes('/categories')
+						? Response.json({ categories: [{ ...category, id: hinted.categoryId, nameDE: 'Heizung' }] })
+						: Response.json([]);
+		}) as typeof globalThis.fetch;
 
-		const [row] = await invoicesInPeriod(fetch, { ...period, heatingProfileId });
+	it('nennt die Heizrechnungen ohne Leistungszeitraum, die das Backend für den Lauf nennt, mit ihrer Kategorie', async () => {
+		const [hinted] = runHeating.heatingWithoutServicePeriod;
+		const asked: string[] = [];
 
-		// named by its category in the UI language
-		expect(row.check?.heatingWithoutServicePeriod).toEqual(count ? [{ ...hinted, categoryName: 'Heizung' }] : []);
+		const [row] = await invoicesInPeriod(heatingFetch(runHeating, asked), period);
+
+		expect(row.check?.heatingWithoutServicePeriod).toEqual([{ ...hinted, categoryName: 'Heizung' }]);
+		expect(asked).toEqual([`${API}/statements/run-heating?buildingId=b1&periodStart=2024-01-01&periodEnd=2024-12-31&heatingProfileId=hp1`]);
+	});
+
+	it('nennt keine Heizrechnungen ohne Leistungszeitraum, wenn das Backend sie für den Lauf nicht nennt oder nicht antwortet', async () => {
+		const [quiet] = await invoicesInPeriod(heatingFetch({ heatingWithoutServicePeriod: [], oldHeatingRule: [] }), period);
+		const [failed] = await invoicesInPeriod(heatingFetch(null), period);
+
+		expect(quiet.check?.heatingWithoutServicePeriod).toEqual([]);
+		expect(failed.check?.heatingWithoutServicePeriod).toEqual([]);
+	});
+
+	it('fragt nur nach den Hinweisen des Laufs, wenn die Prüfung Hinweise zu Heizkosten hat', async () => {
+		const asked: string[] = [];
+
+		await invoicesInPeriod(heatingFetch(runHeating, asked, { ...invoiceCompleteness, heatingWithoutServicePeriod: [], oldHeatingRule: [] }), period);
+
+		expect(asked).toEqual([]);
 	});
 });
 
@@ -593,24 +612,16 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		expect(await changedOf(fetchWith([before], { '1': ['i2'] }))).toEqual([]);
 	});
 
-	// #335 (#451, Punkt 5): die versendete Abrechnung des Vormieters rechnet die Heizkosten noch ohne die Monate im
-	// Leistungszeitraum (laut Prüfung); erstellt der Lauf die Abrechnung des Nachmieters derselben Wohnung, nennt die
-	// Vorschau sie, sonst nicht
-	it.each([
-		['erstellt der Lauf eine Abrechnung derselben Wohnung', [], true],
-		['hat der Nachmieter schon eine Abrechnung', [{ contractId: 'einzug' }], false]
-	] as const)('nennt eine versendete Abrechnung nach der alten Regel: %s', async (_, more, oldRule) => {
-		const moved = [contract('auszug', '2020-01-01', '2024-03-31'), contract('einzug', '2024-05-01', null)];
-		const sent = statement('1', 'auszug', 'sent', 'hp1', '4.50');
-		const others = more.map((other, i) => ({ ...statement(`n${i}`, other.contractId, 'draft', 'hp1', '4.50') }));
+	// #335, H-28: a sent statement under the old rule the backend names for the run
+	it('nennt eine versendete Abrechnung nach der alten Regel, die das Backend für den Lauf nennt', async () => {
 		const fetch = (async (url: string) =>
 			url.includes('/invoices/completeness/')
-				? Response.json({ ...invoiceCompleteness, oldHeatingRule: ['1'] })
-				: url.includes('/contracts?')
-					? Response.json({ contracts: moved })
-					: fetchWith([sent, ...others])(url)) as typeof globalThis.fetch;
+				? Response.json({ ...invoiceCompleteness, oldHeatingRule: ['1', '2'] })
+				: url.includes('/statements/run-heating?')
+					? Response.json({ heatingWithoutServicePeriod: [], oldHeatingRule: ['1'] })
+					: fetchWith([statement('1', c1, 'sent', 'hp1', '4.50'), statement('2', c1, 'sent', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
 
-		expect((await changedOf(fetch)).filter((one) => one.id === '1')).toEqual(oldRule ? [named('1', { oldRule: true })] : []);
+		expect(await changedOf(fetch)).toEqual([named('1', { oldRule: true })]);
 	});
 
 	// only a hint: without the answer the draft is not named outdated, and the preview still shows
