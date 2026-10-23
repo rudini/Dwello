@@ -23,6 +23,7 @@ import {
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
 import { sendStatement } from '../services/statement-send.service';
+import { runDefaultsOf, runPlan } from '../services/statement-run.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
@@ -46,6 +47,22 @@ const calculationBody = t.Object({
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// The drafts with a change since and the statements due for correcting, for the Übersicht (#454)
 	.get('/outdated', async () => ({ statements: await outdatedStatements() }))
+	// What the wizard starts with, from a link to a building and period or from the settings (A-10, H-28)
+	.get('/run-defaults', ({ query }) => runDefaultsOf(query), {
+		query: t.Object({
+			buildingId: t.Optional(t.String({ format: 'uuid' })),
+			periodStart: t.Optional(t.String()),
+			periodEnd: t.Optional(t.String())
+		})
+	})
+	// The run of a period for a building: its contracts to bill and why it is refused (H-28)
+	.get('/run', ({ query }) => runPlan(query.buildingId, { start: query.periodStart, end: query.periodEnd }), {
+		query: t.Object({
+			buildingId: t.String({ format: 'uuid' }),
+			periodStart: t.String({ format: 'date' }),
+			periodEnd: t.String({ format: 'date' })
+		})
+	})
 	// List all statements
 	.get(
 		'/',

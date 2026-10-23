@@ -8,6 +8,7 @@ import {
 } from '../lib/server/statement-generation';
 // Backend answers as checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import buildingContracts from '../../tests/contracts/building-contracts.json';
+import statementRun from '../../tests/contracts/statement-run.json';
 import statementPreview from '../../tests/contracts/statement-preview.json';
 import statement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
@@ -44,209 +45,112 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding: object[] = contracts) {
+type Planned = { contracts?: object[]; overlap?: object | null; skipped?: object[] };
+
+// The backend decides which contracts a run bills (H-28): by default the two of 2024, neither billed yet
+function backend(
+	statements: {
+		contractId: string;
+		periodStart: string;
+		periodEnd: string;
+		status?: string;
+	}[] = [],
+	inBuilding: object[] = contracts,
+	plan: Planned = {}
+) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
+	const running = inBuilding === contracts ? contracts.slice(1, 3) : inBuilding;
+	const plannedRun = () =>
+		Response.json({
+			contracts: (plan.contracts ?? running).map((c) => ({
+				...statementRun.contracts[0],
+				billed: false,
+				...c
+			})),
+			overlap: plan.overlap ?? null,
+			skipped: plan.skipped ?? []
+		});
+	// the reads by their address; the run of any period of b1
+	const reads: Record<string, () => Response> = {
+		[`${API}/statements?buildingId=b1&limit=1000`]: () => Response.json({ data: statements }),
+		[`${API}/contracts?buildingId=b1&limit=1000`]: () => Response.json({ contracts: inBuilding }),
+		[`${API}/buildings/b1`]: () => Response.json(building)
+	};
+	const read = (url: string) =>
+		url.startsWith(`${API}/statements/run?buildingId=b1&`) ? plannedRun() : reads[url]?.();
+	// the posts: a preview with the costs per contract, otherwise the created statement
+	const post = (url: string, body: Record<string, string>) =>
+		url === `${API}/statements/preview`
+			? Response.json({
+					...statementPreview,
+					totalCosts: body.contractId === 'auszug' ? 300 : 400,
+					balance: -50
+				})
+			: Response.json({ ...statement, id: `s-${body.contractId}` }, { status: 201 });
 	const fetch = async (url: string, init?: RequestInit) => {
-		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
-		if (url === `${API}/contracts?buildingId=b1&limit=1000`) {
-			return Response.json({ contracts: inBuilding });
-		}
-		if (url === `${API}/buildings/b1`) return Response.json(building);
+		const answer = read(url);
+		if (answer) return answer;
 		const body = JSON.parse(String(init?.body));
 		posts.push({ url, body });
-		if (url === `${API}/statements/preview`) {
-			return Response.json({
-				...statementPreview,
-				totalCosts: body.contractId === 'auszug' ? 300 : 400,
-				balance: -50
-			});
-		}
-		return Response.json({ ...statement, id: `s-${body.contractId}` }, { status: 201 });
+		return post(url, body);
 	};
 	return { posts, fetch: fetch as typeof globalThis.fetch };
 }
 
 describe('Schon abgerechnete Mietverträge je Gebäude', () => {
-	it('zählt die Mietverträge der Periode und die mit einer Abrechnung darin, nach der Regel des Laufs', async () => {
-		// a replaced statement and its berichtigte Abrechnung count once; a statement of an earlier period counts not
-		const { fetch } = backend([
-			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'replaced' },
-			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' },
-			{ contractId: 'auszug', periodStart: '2023-01-01', periodEnd: '2023-12-31' }
-		]);
+	it('zählt die Mietverträge der Periode und die mit einer Abrechnung darin, wie das Backend sie plant', async () => {
+		const { fetch } = backend([], contracts, {
+			contracts: [
+				contract('auszug', '2020-01-01', '2024-03-31'),
+				{ ...contract('einzug', '2024-05-01', null), billed: true }
+			]
+		});
 
 		expect(await billedContracts(fetch, period)).toEqual([
 			{ buildingId: 'b1', contracts: 2, billed: 1, overlap: null, withoutFee: [] }
 		]);
 	});
+
+	it('erstellt nur für die Mietverträge, die das Backend noch nicht abgerechnet nennt', async () => {
+		const { fetch, posts } = backend([], contracts, {
+			contracts: [
+				contract('auszug', '2020-01-01', '2024-03-31'),
+				{ ...contract('einzug', '2024-05-01', null), billed: true }
+			]
+		});
+
+		expect(await generateStatements(fetch, period)).toEqual(['s-auszug']);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['auszug']);
+	});
 });
 
-// #199, #408 point 2: one Abrechnungsperiode per day and building; a run whose period overlaps a statement period of
-// the building without being equal would share an invoice out above 100 %
+// #199, #408 point 2: one Abrechnungsperiode per day and building; the backend finds the overlap (statement-run.test.ts),
+// the BFF names it in the refusal
 describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () => {
-	const switched = [
-		{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30' },
-		{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' },
-		{ contractId: 'vorher', periodStart: '2023-07-01', periodEnd: '2024-06-30' }
-	];
-
-	it('lehnt den Lauf für das Gebäude ab und nennt die bestehende Periode und die übrigen Tage', async () => {
-		const { fetch } = backend(switched);
-
-		expect((await billedContracts(fetch, period))[0].overlap).toEqual({
-			periods: [{ start: '2023-07-01', end: '2024-06-30' }],
-			choose: [],
-			short: [{ start: '2024-07-01', end: '2024-12-31' }],
-			vacant: false,
-			statements: 3
-		});
+	const refused = (...periods: [string, string][]) => ({
+		...statementRun.overlap,
+		periods: periods.map(([start, end]) => ({ start, end }))
 	});
 
-	it('bietet die bestehende Periode an, wenn ein Mietvertrag darin noch keine Abrechnung hat', async () => {
-		const { fetch } = backend(switched.filter((s) => s.contractId !== 'vorher'));
+	it('gibt die Überschneidung des Backends an Schritt 2 weiter', async () => {
+		const { fetch } = backend([], contracts, { overlap: statementRun.overlap });
 
-		expect((await billedContracts(fetch, period))[0].overlap?.choose).toEqual([
-			{ start: '2023-07-01', end: '2024-06-30' }
-		]);
-	});
-
-	it('bietet keine kurze Periode für Tage ohne Mietstage an', async () => {
-		// only «einzug» has days after 30.06.2024, and they are billed outside Dwello (#133)
-		const { fetch } = backend(switched, [
-			contract('auszug', '2020-01-01', '2024-03-31'),
-			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2024-12-31' }
-		]);
-
-		const { overlap } = (await billedContracts(fetch, period))[0];
-		expect(overlap?.short).toEqual([]);
-		// Fachreview 199-1 V-3: step 2 says there is nothing to bill
-		expect(overlap?.vacant).toBe(true);
-	});
-
-	it('lässt eine ersetzte Abrechnung und eine Abrechnung genau dieser Periode zu', async () => {
-		const { fetch } = backend([
-			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' },
-			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }
-		]);
-
-		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
-	});
-
-	// code review 199-2 C-8: a replaced statement without its berichtigte Abrechnung still holds its period, else its
-	// correction would overlap the run (#120)
-	it('zählt eine ersetzte Abrechnung ohne berichtigte als Periode des Gebäudes', async () => {
-		const { fetch } = backend([
-			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
-		]);
-
-		expect((await billedContracts(fetch, period))[0].overlap?.periods).toEqual([
-			{ start: '2023-07-01', end: '2024-06-30' }
-		]);
-	});
-
-	// code review 199-1 C-1: the period of a replaced statement is one of the building's: its berichtigte Abrechnung is
-	// created there, also when another, older statement overlaps it
-	it('lässt die Periode einer ersetzten Abrechnung zu, auch wenn eine andere sie schneidet', async () => {
-		const { fetch } = backend([
-			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'replaced' },
-			{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2025-06-30' }
-		]);
-
-		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
-	});
-
-	// Fachreview 199-1 V-2: a statement period inside the run leaves two pieces, each its own short period
-	it('bietet für jedes Stück übriger Tage eine eigene kurze Periode an', async () => {
-		const { fetch } = backend([
-			{ contractId: 'einzug', periodStart: '2024-03-01', periodEnd: '2024-09-30' }
-		]);
-
-		expect((await billedContracts(fetch, period))[0].overlap?.short).toEqual([
-			{ start: '2024-01-01', end: '2024-02-29' },
-			{ start: '2024-10-01', end: '2024-12-31' }
-		]);
-	});
-
-	// Fachreview 199-1 V-4: a short period only for days of an ended period, none for days still to come
-	it('bietet keine kurze Periode für Tage an, die noch nicht vorbei sind', async () => {
-		const { fetch } = backend(
-			[{ contractId: 'einzug', periodStart: '2099-01-01', periodEnd: '2099-06-30' }],
-			[contract('einzug', '2024-05-01', null)]
-		);
-		const later = { ...period, periodStart: '2099-01-01', periodEnd: '2099-12-31' };
-
-		const { overlap } = (await billedContracts(fetch, later))[0];
-		expect(overlap?.short).toEqual([]);
-		expect(overlap?.vacant).toBe(false);
-	});
-
-	// Fachreview 199-1 V-5: «without a statement» counts Mietstage (after «Abgerechnet bis») and no replaced statement
-	it('bietet die bestehende Periode nach den Mietstagen und ohne ersetzte Abrechnungen an', async () => {
-		const billedOutside = backend(switched.slice(0, 2), [
-			contract('auszug', '2020-01-01', '2024-03-31'),
-			contract('einzug', '2024-05-01', null),
-			{ ...contract('vorher', '2020-01-01', '2023-12-31'), billedUntil: '2023-12-31' }
-		]);
-		const replaced = backend([...switched.slice(0, 2), { ...switched[2], status: 'replaced' }]);
-
-		expect((await billedContracts(billedOutside.fetch, period))[0].overlap?.choose).toEqual([]);
-		expect((await billedContracts(replaced.fetch, period))[0].overlap?.choose).toEqual([
-			{ start: '2023-07-01', end: '2024-06-30' }
-		]);
-	});
-
-	// Fachreview 199-1 V-1, product owner: statements made before this rule may overlap each other; a period equal to
-	// one of them is allowed, only one that overlaps and equals none is refused
-	it('lässt bei überschneidenden Altdaten eine Periode zu, die einer bestehenden gleicht', async () => {
-		const { fetch } = backend([
-			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' },
-			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }
-		]);
-		const shifted = { ...period, periodStart: '2024-07-01', periodEnd: '2025-06-30' };
-
-		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
-		// «einzug» has days in 2024 but a statement that overlaps it: the run would bill him no more there
-		expect((await billedContracts(fetch, shifted))[0].overlap?.choose).toEqual([]);
+		expect((await billedContracts(fetch, period))[0].overlap).toEqual(statementRun.overlap);
 	});
 
 	it('nennt in der Ablehnung jede überschnittene Periode', async () => {
-		const { fetch } = backend([
-			...switched,
-			{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2024-09-30' }
-		]);
+		const { fetch } = backend([], contracts, {
+			overlap: refused(['2023-07-01', '2024-06-30'], ['2024-07-01', '2024-09-30'])
+		});
 
 		await expect(previewStatements(fetch, period)).rejects.toThrow(
 			'(01.07.2023 – 30.06.2024, 01.07.2024 – 30.09.2024)'
 		);
 	});
 
-	// code review 199-3 C-12: a replaced statement and its berichtigte Abrechnung are one statement for step 2's text
-	it('zählt eine ersetzte Abrechnung mit ihrer berichtigten einmal', async () => {
-		const { fetch } = backend([
-			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' },
-			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' }
-		]);
-
-		expect((await billedContracts(fetch, period))[0].overlap?.statements).toBe(1);
-	});
-
-	// code review 199-3 C-12: days a replaced statement holds are no days for a short period
-	it('bietet keine kurze Periode für Tage einer ersetzten Abrechnung an', async () => {
-		const { fetch } = backend([
-			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' },
-			{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2024-09-30', status: 'replaced' }
-		]);
-
-		expect((await billedContracts(fetch, period))[0].overlap?.short).toEqual([
-			{ start: '2024-10-01', end: '2024-12-31' }
-		]);
-	});
-
 	// persona Dr. Weber P-5: a calendar year by its days, not «2024»
 	it('nennt in der Ablehnung ein Kalenderjahr mit seinen Tagen', async () => {
-		const { fetch } = backend([
-			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }
-		]);
+		const { fetch } = backend([], contracts, { overlap: refused(['2024-01-01', '2024-12-31']) });
 
 		await expect(
 			previewStatements(fetch, { ...period, periodStart: '2024-07-01', periodEnd: '2025-06-30' })
@@ -257,8 +161,8 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 	it('nennt in der Ablehnung jedes abgelehnte Gebäude', async () => {
 		const fetch = (async (url: string) => {
 			const id = new URL(url).searchParams.get('buildingId') ?? url.split('/').at(-1)!;
-			if (url.includes('/statements?')) return Response.json({ data: switched });
-			if (url.includes('/contracts?')) return Response.json({ contracts });
+			if (url.includes('/statements/run?'))
+				return Response.json({ ...statementRun, overlap: refused(['2023-07-01', '2024-06-30']) });
 			return Response.json({ ...building, id, name: id === 'b1' ? 'Seeblick' : 'Bergsicht' });
 		}) as typeof globalThis.fetch;
 
@@ -268,7 +172,9 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 	});
 
 	it('erstellt und berechnet für ein solches Gebäude nichts', async () => {
-		const { fetch, posts } = backend(switched);
+		const { fetch, posts } = backend([], contracts, {
+			overlap: refused(['2023-07-01', '2024-06-30'])
+		});
 
 		// the building by its name, every overlapped period by its days (Fachreview 199-1 V-7, code review C-3)
 		await expect(generateStatements(fetch, period)).rejects.toThrow(
@@ -282,16 +188,14 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 // #89: the run's rate applies only where the Verwaltungspauschale is agreed; step «Einstellungen» names the others
 describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
 	it('nennt die Mietverträge der Periode, die eine Abrechnung erhalten, ohne vereinbarte Pauschale', async () => {
-		const { fetch } = backend(
-			[{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }],
-			[
+		const { fetch } = backend([], contracts, {
+			contracts: [
 				{ ...contract('auszug', '2020-01-01', '2024-03-31'), managementFeeAgreed: false },
 				// already billed: this run makes no statement for it
-				{ ...contract('einzug', '2024-05-01', null), managementFeeAgreed: false },
-				{ ...contract('vorher', '2020-01-01', '2023-12-31'), managementFeeAgreed: false },
-				{ ...contract('eigen', '2024-01-01', null), managementFeePercent: '2.00' } as never
+				{ ...contract('einzug', '2024-05-01', null), managementFeeAgreed: false, billed: true },
+				{ ...contract('eigen', '2024-01-01', null), managementFeePercent: '2.00' }
 			]
-		);
+		});
 
 		expect((await billedContracts(fetch, period))[0].withoutFee).toEqual([
 			{ id: 'auszug', tenantName: 'Mieter auszug', apartmentNumber: '2.01' }
@@ -339,16 +243,13 @@ describe('Abrechnungen erstellen', () => {
 		]);
 	});
 
-	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; ohne Mietstage danach erhält er keine Abrechnung
-	it('übergeht einen Mietvertrag, der in der Periode nach «Abgerechnet bis» keine Mietstage hat', async () => {
-		const inBuilding = [
-			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
-			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
-		];
-		const { fetch, posts } = backend([], inBuilding);
+	// #453 (#327): the backend names the contracts «Abgerechnet bis» covers (statement-run.test.ts); step 2 shows them
+	it('gibt die Mietverträge weiter, die «Abgerechnet bis» in der Periode abdeckt', async () => {
+		const { fetch } = backend([], contracts, {
+			contracts: [contract('einzug', '2024-05-01', null)],
+			skipped: statementRun.skipped
+		});
 
-		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
-		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
 		expect(await billedContracts(fetch, period)).toEqual([
 			{
 				buildingId: 'b1',
@@ -356,31 +257,8 @@ describe('Abrechnungen erstellen', () => {
 				billed: 0,
 				overlap: null,
 				withoutFee: [],
-				skipped: [{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-03-31' }]
+				skipped: statementRun.skipped
 			}
-		]);
-	});
-
-	// #453 (#327): the preview names a contract «Abgerechnet bis» covers in full, not only those it shortens
-	it('nennt die Mietverträge, die «Abgerechnet bis» in der Periode ganz abdeckt', async () => {
-		const inBuilding = [
-			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
-			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' },
-			{ ...contract('vorher', '2020-01-01', '2023-12-31'), billedUntil: '2023-12-31' }
-		];
-		const { fetch } = backend([], inBuilding);
-
-		expect((await billedContracts(fetch, period))[0].skipped).toEqual([
-			{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-03-31' }
-		]);
-	});
-
-	// fach review 453-1 V-2: billed outside Dwello beyond its end, the contract has no Mietstage left in the period
-	it('nennt einen Mietvertrag, der über sein Vertragsende hinaus ausserhalb von Dwello abgerechnet ist', async () => {
-		const { fetch } = backend([], [{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-06-30' }]);
-
-		expect((await billedContracts(fetch, period))[0].skipped).toEqual([
-			{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-06-30' }
 		]);
 	});
 
@@ -471,46 +349,15 @@ describe('Abrechnungen erstellen', () => {
 		});
 	});
 
-	// Erneut erstellen ergänzt nur: die Abrechnung eines Mietvertrags wird nicht verdoppelt
-	it('übergeht Mietverträge, die in der Periode schon eine Abrechnung haben', async () => {
-		const { fetch, posts } = backend([
-			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31' },
-			{ contractId: 'einzug', periodStart: '2023-01-01', periodEnd: '2023-12-31' } // other period
-		]);
-
-		expect((await previewStatements(fetch, period)).map((row) => row.contractId)).toEqual([
-			'einzug'
-		]);
-		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
-		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
-	});
-
-	// #120: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode; der Lauf erstellt die berichtigte
-	it('erstellt für einen Mietvertrag mit einer ersetzten Abrechnung die berichtigte', async () => {
-		const { fetch, posts } = backend([
-			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'replaced' },
-			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'paid' }
-		]);
-
-		expect(await generateStatements(fetch, period)).toEqual(['s-auszug']);
-		expect(posts.map((post) => post.body.contractId)).toEqual(['auszug']);
-	});
-
-	// Fachreview W2e V-3: eine ersetzte Abrechnung einer anderen, nur überlappenden Periode bleibt abgerechnet; seit
-	// #199 hält sie ihre Periode, und der Lauf wird abgelehnt (code review 199-2 C-8)
-	it('erstellt nichts, wenn eine ersetzte Abrechnung eine andere, überlappende Periode hat', async () => {
-		const { fetch, posts } = backend([
-			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
-		]);
-
-		await expect(generateStatements(fetch, period)).rejects.toThrow('überschneidet sich');
-		expect(posts).toEqual([]);
-	});
-
 	it('meldet in Worten, wenn das Backend die Berechnung ablehnt', async () => {
 		const fetch = (async (url: string) =>
-			url.includes('contracts')
-				? Response.json({ contracts: [contract('auszug', '2020-01-01', null)] })
+			url.includes('/statements/run?')
+				? Response.json({
+						...statementRun,
+						contracts: [{ ...contract('auszug', '2020-01-01', null), billed: false }],
+						overlap: null,
+						skipped: []
+					})
 				: Response.json(calculationRefused, { status: 400 })) as typeof globalThis.fetch;
 
 		await expect(previewStatements(fetch, period)).rejects.toThrow(
@@ -835,8 +682,13 @@ describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
 	const asked: string[] = [];
 	const fetch = (async (url: string) => {
 		asked.push(url);
-		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: [] });
-		if (url === `${API}/contracts?buildingId=b1&limit=1000`) return Response.json({ contracts: [contracts[2]] });
+		if (url.startsWith(`${API}/statements/run?`))
+			return Response.json({
+				...statementRun,
+				contracts: [{ ...contracts[2], billed: false }],
+				overlap: null,
+				skipped: []
+			});
 		if (url === `${API}/categories?limit=1000`) return Response.json({ categories: names });
 		return Response.json(contractAgreements);
 	}) as typeof globalThis.fetch;

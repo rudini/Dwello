@@ -1,0 +1,26 @@
+{
+	"contracts": [
+		{
+			"id": "c1",
+			"apartmentId": "a1",
+			"startDate": "2020-01-01",
+			"endDate": "2024-03-31",
+			"billedUntil": null,
+			"terminated": true,
+			"oldAddress": false,
+			"tenantName": "Eva Frei",
+			"apartmentNumber": "3.01",
+			"managementFeeAgreed": true,
+			"managementFeePercent": null,
+			"billed": false
+		}
+	],
+	"overlap": {
+		"periods": [{ "start": "2023-07-01", "end": "2024-06-30" }],
+		"choose": [{ "start": "2023-07-01", "end": "2024-06-30" }],
+		"short": [{ "start": "2024-07-01", "end": "2024-12-31" }],
+		"vacant": false,
+		"statements": 2
+	},
+	"skipped": [{ "id": "c2", "tenantName": "Marc Huber", "billedUntil": "2024-12-31" }]
+}

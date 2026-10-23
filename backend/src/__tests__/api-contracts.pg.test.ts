@@ -9,9 +9,12 @@ import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
 import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
+import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { createContract, deleteContract } from '../services/contract.service';
 import { loadModel } from '../services/ki-model.service';
 import { resetSetupAttempts } from '../services/setup.service';
+import { createTenant, deleteTenant } from '../services/tenant.service';
 import { app } from '../app';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -174,6 +177,42 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts?buildingId=${rental.building}&limit=1000`)).json();
 		expect(drift(await sample('building-contracts'), actual)).toEqual([]);
+	});
+
+	// A-10, H-28: a link to the statement's building and period takes its Heizprofil and rate
+	it('GET /statements/run-defaults liefert die Felder von statement-run-defaults.json', async () => {
+		const actual = await (
+			await callApi(`/api/v1/statements/run-defaults?buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`)
+		).json();
+		expect(drift(await sample('statement-run-defaults'), actual)).toEqual([]);
+	});
+
+	// H-28 (#5): the contract has its statement of 2024; 2025 has ended without one
+	it('GET /contracts/:id/missing-statements liefert die Felder von contract-missing-statements.json', async () => {
+		const actual = await (await callApi(`/api/v1/contracts/${rental.contract}/missing-statements`)).json();
+		expect(drift(await sample('contract-missing-statements'), actual)).toEqual([]);
+	});
+
+	it('GET /contracts/missing-statements liefert die Felder von contracts-missing-statements.json', async () => {
+		const byContract = (await (await callApi('/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
+		expect(drift(await sample('contracts-missing-statements'), { c1: byContract[rental.contract] })).toEqual([]);
+	});
+
+	// H-28: the run of the statement's period, its contract billed there and one «Abgerechnet bis» covers
+	it('GET /statements/run liefert die Felder von statement-run.json', async () => {
+		const apartment = await createApartment({ buildingId: rental.building, number: '2.02', floor: 2, area: '50', rooms: '2' });
+		const tenant = await createTenant({ firstName: 'Marc', lastName: `Huber ${token}` });
+		const covered = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate: '2020-01-01', billedUntil: '2024-12-31', baseRent: '800', monthlyAdvancePayment: '100' });
+		try {
+			const actual = await (
+				await callApi(`/api/v1/statements/run?buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`)
+			).json();
+			expect(drift(await sample('statement-run'), actual)).toEqual([]);
+		} finally {
+			await deleteContract(covered.id, true);
+			await deleteTenant(tenant.id);
+			await deleteApartment(apartment.id);
+		}
 	});
 
 	// The caretaker costs of 2025 against 2024: a finding with all its fields

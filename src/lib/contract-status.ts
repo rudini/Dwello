@@ -26,8 +26,8 @@ export function billingStart(contract: { startDate: string; billedUntil?: string
 
 /**
  * Whether Dwello bills Mietstage of the contract in the period (dates YYYY-MM-DD): from its Vertragsbeginn, or from the
- * day after «Abgerechnet bis» when that is later (#133), to its Vertragsende. Runs and the hint on missing statements
- * ask it; the backend has the same rule (`billingStart`)
+ * day after «Abgerechnet bis» when that is later (#133), to its Vertragsende. The contract form and the heating hints of
+ * a run's preview ask it; runs and missing statements are decided by the backend (`billsIn`, H-28)
  */
 export function billsIn(
 	contract: { startDate: string; endDate?: string | null; billedUntil?: string | null },

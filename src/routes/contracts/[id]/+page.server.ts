@@ -4,8 +4,6 @@ import type { Actions, PageServerLoad } from './$types';
 import { agreeableCategories } from '$lib/server/category';
 import { agreedNames } from '$lib/contract-form';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { missingWays } from '$lib/accounting-period';
-import { periodType } from '$lib/server/missing-statements';
 import { invoicesOf } from '$lib/overview';
 import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
@@ -87,33 +85,25 @@ async function fixedTermCheckDue(fetch: typeof globalThis.fetch, contract: Row) 
 	return (await successorAfter(fetch, contract, end)) === false;
 }
 
-// The parts of ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first
-// (A-10, #142, #199), each with its way into the wizard: the period of a statement of the building that holds it,
-// else the whole period or a short one (#408 point 2); each to the building's invoices (#211). None when the settings
-// or the statements of the contract or the building cannot be read
-async function missingStatements(
-	fetch: typeof globalThis.fetch,
-	contract: Row,
-	statements: Row[] | null
-) {
-	if (!statements || !contract.startDate) return [];
+type Range = { start: string; end: string };
+type MissingPart = Range & { way: Range & { kind: string }; open: boolean };
+
+// The parts of ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first,
+// each with its way into the wizard, as the backend decides them (A-10, #142, #199, #408 point 2, H-28), and each to the
+// building's invoices (#211). None when they cannot be read: better no hint than a wrong one
+async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) {
+	const response = await fetch(
+		`${BACKEND_URL}/api/v1/contracts/${encodeURIComponent(String(contract.id))}/missing-statements`
+	).catch(() => null);
+	if (!response?.ok) return [];
 	const building = String((contract.building as Row | undefined)?.id);
-	const [type, ofBuilding] = await Promise.all([
-		periodType(fetch),
-		rows(fetch, `statements?buildingId=${encodeURIComponent(building)}&limit=1000`)
-	]);
-	if (!type || !ofBuilding) return [];
-	type Dated = Parameters<typeof missingWays>[2];
-	const dated = contract as Parameters<typeof missingWays>[1];
-	return missingWays(type, dated, statements as Dated, ofBuilding as Dated).map(
-		({ start, end, way, open }) => ({
-			start,
-			end,
-			href: open ? wizardLink(building, way.start, way.end) : null,
-			way,
-			invoices: invoicesOf(way, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
-		})
-	);
+	return ((await response.json()) as MissingPart[]).map(({ start, end, way, open }) => ({
+		start,
+		end,
+		href: open ? wizardLink(building, way.start, way.end) : null,
+		way,
+		invoices: invoicesOf(way, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
+	}));
 }
 
 // Each field as the backend sends it, or its default when empty or when the record is missing
@@ -180,7 +170,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 		const statements = await rows(fetch, `statements?contractId=${data.id}&limit=1000`);
 		return {
 			today: localToday(),
-			missingStatements: await missingStatements(fetch, data, statements),
+			missingStatements: await missingStatements(fetch, data),
 			billedBy:
 				statements?.map((s) => ({
 					id: String(s.id),

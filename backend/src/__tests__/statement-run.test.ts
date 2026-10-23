@@ -1,0 +1,337 @@
+/**
+ * H-28: the rules of a run (moved from the BFF, src/lib/server/statement-generation.ts): which contracts it bills,
+ * which have a statement in its period already, and when it is refused for overlapping a period of the building
+ */
+import { describe, expect, it } from 'bun:test';
+import { planRun, runDefaults } from '../services/statement-run.service';
+
+const year2024 = { start: '2024-01-01', end: '2024-12-31' };
+
+const contract = (id: string, startDate: string, endDate: string | null, billedUntil: string | null = null) => ({
+	id,
+	startDate,
+	endDate,
+	billedUntil,
+	tenantName: `Mieter ${id}`
+});
+
+const contracts = [
+	contract('vorher', '2020-01-01', '2023-12-31'),
+	contract('auszug', '2020-01-01', '2024-03-31'),
+	contract('einzug', '2024-05-01', null),
+	contract('nachher', '2025-01-01', null)
+];
+
+const statement = (contractId: string, periodStart: string, periodEnd: string, status = 'draft') => ({ contractId, periodStart, periodEnd, status });
+
+const billedOf = (plan: ReturnType<typeof planRun>) => plan.contracts.map(({ id, billed }) => ({ id, billed }));
+
+describe('Mietverträge eines Laufs', () => {
+	it('rechnet die Mietverträge mit Mietstagen in der Periode ab, ohne die mit einer Abrechnung darin', () => {
+		// a replaced statement and its berichtigte Abrechnung count once; a statement of an earlier period counts not
+		const plan = planRun(year2024, contracts, [
+			statement('einzug', '2024-01-01', '2024-12-31', 'replaced'),
+			statement('einzug', '2024-01-01', '2024-12-31'),
+			statement('auszug', '2023-01-01', '2023-12-31')
+		]);
+
+		expect(billedOf(plan)).toEqual([
+			{ id: 'auszug', billed: false },
+			{ id: 'einzug', billed: true }
+		]);
+	});
+
+	it('rechnet einen Mietvertrag wieder ab, dessen Abrechnung dieser Periode ersetzt ist', () => {
+		// the run creates the berichtigte Abrechnung (#120)
+		const plan = planRun(year2024, contracts, [statement('einzug', '2024-01-01', '2024-12-31', 'replaced')]);
+
+		expect(billedOf(plan)).toContainEqual({ id: 'einzug', billed: false });
+	});
+
+	// #453 (#327): in the period by its dates, but «Abgerechnet bis» leaves it no Mietstage there
+	it('nennt einen Mietvertrag, den «Abgerechnet bis» in der Periode abdeckt, und rechnet ihn nicht ab', () => {
+		const plan = planRun(year2024, [contract('aussen', '2020-01-01', null, '2024-12-31'), contract('teils', '2020-01-01', null, '2024-06-30')], []);
+
+		expect(billedOf(plan)).toEqual([{ id: 'teils', billed: false }]);
+		expect(plan.skipped).toEqual([{ id: 'aussen', tenantName: 'Mieter aussen', billedUntil: '2024-12-31' }]);
+	});
+
+	// fach review 453-1 V-2: billed outside Dwello beyond its end, the contract has no Mietstage left in the period
+	it('nennt einen Mietvertrag, der über sein Vertragsende hinaus ausserhalb von Dwello abgerechnet ist', () => {
+		const plan = planRun(year2024, [contract('auszug', '2020-01-01', '2024-03-31', '2024-06-30')], []);
+
+		expect(plan.contracts).toEqual([]);
+		expect(plan.skipped).toEqual([{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-06-30' }]);
+	});
+
+	// Erneut erstellen ergänzt nur: a sent or paid statement of the period bills the contract there
+	it('zählt eine bezahlte Abrechnung der Periode als abgerechnet', () => {
+		const plan = planRun(year2024, contracts, [statement('einzug', '2024-01-01', '2024-12-31', 'paid')]);
+
+		expect(billedOf(plan)).toEqual([
+			{ id: 'auszug', billed: false },
+			{ id: 'einzug', billed: true }
+		]);
+	});
+});
+
+// #199, #408 point 2: one Abrechnungsperiode per day and building; a run whose period overlaps a statement period of
+// the building without being equal would share an invoice out above 100 %
+describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () => {
+	const switched = [
+		statement('auszug', '2023-07-01', '2024-06-30'),
+		statement('einzug', '2023-07-01', '2024-06-30'),
+		statement('vorher', '2023-07-01', '2024-06-30')
+	];
+
+	it('lehnt den Lauf für das Gebäude ab und nennt die bestehende Periode und die übrigen Tage', () => {
+		expect(planRun(year2024, contracts, switched).overlap).toEqual({
+			periods: [{ start: '2023-07-01', end: '2024-06-30' }],
+			choose: [],
+			short: [{ start: '2024-07-01', end: '2024-12-31' }],
+			vacant: false,
+			statements: 3
+		});
+	});
+
+	it('bietet die bestehende Periode an, wenn ein Mietvertrag darin noch keine Abrechnung hat', () => {
+		const plan = planRun(year2024, contracts, switched.filter((s) => s.contractId !== 'vorher'));
+
+		expect(plan.overlap?.choose).toEqual([{ start: '2023-07-01', end: '2024-06-30' }]);
+	});
+
+	it('bietet keine kurze Periode für Tage ohne Mietstage an', () => {
+		// only «einzug» has days after 30.06.2024, and they are billed outside Dwello (#133)
+		const plan = planRun(year2024, [contract('auszug', '2020-01-01', '2024-03-31'), contract('einzug', '2024-05-01', null, '2024-12-31')], switched);
+
+		expect(plan.overlap?.short).toEqual([]);
+		// Fachreview 199-1 V-3: step 2 says there is nothing to bill
+		expect(plan.overlap?.vacant).toBe(true);
+	});
+
+	it('lässt eine ersetzte Abrechnung und eine Abrechnung genau dieser Periode zu', () => {
+		const plan = planRun(year2024, contracts, [
+			statement('auszug', '2023-07-01', '2024-06-30', 'replaced'),
+			statement('einzug', '2024-01-01', '2024-12-31')
+		]);
+
+		expect(plan.overlap).toBeNull();
+	});
+
+	// code review 199-2 C-8: a replaced statement without its berichtigte Abrechnung still holds its period, else its
+	// correction would overlap the run (#120)
+	it('zählt eine ersetzte Abrechnung ohne berichtigte als Periode des Gebäudes', () => {
+		const plan = planRun(year2024, contracts, [statement('auszug', '2023-07-01', '2024-06-30', 'replaced')]);
+
+		expect(plan.overlap?.periods).toEqual([{ start: '2023-07-01', end: '2024-06-30' }]);
+	});
+
+	// code review 199-1 C-1: the period of a replaced statement is one of the building's: its berichtigte Abrechnung is
+	// created there, also when another, older statement overlaps it
+	it('lässt die Periode einer ersetzten Abrechnung zu, auch wenn eine andere sie schneidet', () => {
+		const plan = planRun(year2024, contracts, [
+			statement('auszug', '2024-01-01', '2024-12-31', 'replaced'),
+			statement('einzug', '2024-07-01', '2025-06-30')
+		]);
+
+		expect(plan.overlap).toBeNull();
+	});
+
+	// Fachreview 199-1 V-2: a statement period inside the run leaves two pieces, each its own short period
+	it('bietet für jedes Stück übriger Tage eine eigene kurze Periode an', () => {
+		const plan = planRun(year2024, contracts, [statement('einzug', '2024-03-01', '2024-09-30')]);
+
+		expect(plan.overlap?.short).toEqual([
+			{ start: '2024-01-01', end: '2024-02-29' },
+			{ start: '2024-10-01', end: '2024-12-31' }
+		]);
+	});
+
+	// Fachreview 199-1 V-4: a short period only for days of an ended period, none for days still to come
+	it('bietet keine kurze Periode für Tage an, die noch nicht vorbei sind', () => {
+		const plan = planRun(
+			{ start: '2099-01-01', end: '2099-12-31' },
+			[contract('einzug', '2024-05-01', null)],
+			[statement('einzug', '2099-01-01', '2099-06-30')],
+			'2026-10-23'
+		);
+
+		expect(plan.overlap?.short).toEqual([]);
+		expect(plan.overlap?.vacant).toBe(false);
+	});
+
+	// Fachreview 199-1 V-5: «without a statement» counts Mietstage (after «Abgerechnet bis») and no replaced statement
+	it('bietet die bestehende Periode nach den Mietstagen und ohne ersetzte Abrechnungen an', () => {
+		const billedOutside = planRun(
+			year2024,
+			[contract('auszug', '2020-01-01', '2024-03-31'), contract('einzug', '2024-05-01', null), contract('vorher', '2020-01-01', '2023-12-31', '2023-12-31')],
+			switched.slice(0, 2)
+		);
+		const replaced = planRun(year2024, contracts, [...switched.slice(0, 2), { ...switched[2], status: 'replaced' }]);
+
+		expect(billedOutside.overlap?.choose).toEqual([]);
+		expect(replaced.overlap?.choose).toEqual([{ start: '2023-07-01', end: '2024-06-30' }]);
+	});
+
+	// Fachreview 199-1 V-1, product owner: statements made before this rule may overlap each other; a period equal to
+	// one of them is allowed, only one that overlaps and equals none is refused
+	it('lässt bei überschneidenden Altdaten eine Periode zu, die einer bestehenden gleicht', () => {
+		const old = [statement('einzug', '2023-07-01', '2024-06-30'), statement('auszug', '2024-01-01', '2024-12-31')];
+
+		expect(planRun(year2024, contracts, old).overlap).toBeNull();
+		// «einzug» has days in 2024 but a statement that overlaps it: the run would bill him no more there
+		expect(planRun({ start: '2024-07-01', end: '2025-06-30' }, contracts, old).overlap?.choose).toEqual([]);
+	});
+
+	// code review 199-3 C-12: a replaced statement and its berichtigte Abrechnung are one statement for step 2's text
+	it('zählt eine ersetzte Abrechnung mit ihrer berichtigten einmal', () => {
+		const plan = planRun(year2024, contracts, [
+			statement('einzug', '2023-07-01', '2024-06-30', 'replaced'),
+			statement('einzug', '2023-07-01', '2024-06-30')
+		]);
+
+		expect(plan.overlap?.statements).toBe(1);
+	});
+
+	// code review 199-3 C-12: days a replaced statement holds are no days for a short period
+	it('bietet keine kurze Periode für Tage einer ersetzten Abrechnung an', () => {
+		const plan = planRun(year2024, contracts, [
+			statement('einzug', '2023-07-01', '2024-06-30'),
+			statement('einzug', '2024-07-01', '2024-09-30', 'replaced')
+		]);
+
+		expect(plan.overlap?.short).toEqual([{ start: '2024-10-01', end: '2024-12-31' }]);
+	});
+});
+
+
+// A-10: a link from the contract or from a refusal chooses building and period; Heizprofil and Verwaltungspauschale
+// come from the other statements of that building in that period, otherwise from the settings
+describe('Vorgaben des Abrechnungs-Assistenten', () => {
+	const settings = { accountingPeriod: 'july-june' as const, managementFeePercent: 2.5, heatingProfileId: 'hp1' };
+
+	it('nimmt ohne Link Periode, Heizprofil und Verwaltungspauschale aus den Einstellungen', () => {
+		expect(runDefaults(settings, null, [], [], '2026-10-02')).toEqual({
+			period: { start: '2025-07-01', end: '2026-06-30' },
+			buildingId: null,
+			heatingProfileId: 'hp1',
+			managementFeePercent: 2.5,
+			preset: null
+		});
+	});
+
+	const link = { buildingId: 'b1', period: { start: '2025-01-01', end: '2025-12-31' } };
+	const tenancy = (id: string, managementFeeAgreed: boolean, managementFeePercent: string | null, apartmentId = id, startDate = '2020-01-01', endDate: string | null = null) => ({
+		...contract(id, startDate, endDate),
+		apartmentId,
+		managementFeeAgreed,
+		managementFeePercent
+	});
+	const of2025 = (contractId: string, managementFeePercent: string, heatingProfileId: string | null = 'hp9', status = 'sent') => ({
+		...statement(contractId, '2025-01-01', '2025-12-31', status),
+		heatingProfileId,
+		managementFeePercent
+	});
+	const tenancies = [tenancy('nein', false, null), tenancy('eigen', true, '2.00'), tenancy('lauf', true, null), tenancy('lauf2', true, null)];
+
+	it('übernimmt Gebäude, Periode, Heizprofil und Verwaltungspauschale aus den übrigen Abrechnungen', () => {
+		expect(runDefaults(settings, link, tenancies, [of2025('lauf', '4.50')], '2026-10-02')).toEqual({
+			period: link.period,
+			buildingId: 'b1',
+			heatingProfileId: 'hp9',
+			managementFeePercent: 4.5,
+			// personas K1: the wizard says what is chosen and where Heizprofil and Pauschale come from
+			preset: { fromStatements: true, feeFromSettings: false, differing: false, profileFromApartment: false }
+		});
+	});
+
+	// #119: other statements set differently give no template; both come from the settings
+	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen verschiedene Heizprofile haben', () => {
+		expect(runDefaults(settings, link, tenancies, [of2025('lauf', '4.50', 'hp8'), of2025('lauf2', '4.50', 'hp9')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp1',
+			managementFeePercent: 2.5,
+			preset: { differing: true, fromStatements: false, feeFromSettings: true }
+		});
+	});
+
+	// #387 (#406 point 7): at a tenant change the Heizprofil of the same apartment's statement, so both tenants carry
+	// 100 % of the heating costs; the Verwaltungspauschale still from the settings
+	const eva = tenancy('eva', true, null, 'a1', '2024-01-01', '2025-03-31');
+	const marc = tenancy('marc', true, null, 'a1', '2025-05-01');
+
+	it('nimmt beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung', () => {
+		const lea = tenancy('lea', true, null, 'a2');
+		expect(runDefaults(settings, link, [eva, marc, lea], [of2025('eva', '4.50', 'hp8'), of2025('lea', '4.50', 'hp9')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp8',
+			managementFeePercent: 2.5,
+			preset: { differing: true, profileFromApartment: true, fromStatements: true, feeFromSettings: true }
+		});
+	});
+
+	// Fachreview 387-1 V-1: a replaced statement does not count as a statement of the period (glossary «Ersetzt»)
+	it('übergeht eine ersetzte Abrechnung', () => {
+		expect(runDefaults(settings, link, [eva, marc], [of2025('eva', '4.50', 'hp8', 'replaced'), of2025('marc', '4.50', 'hp9')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp9',
+			preset: { differing: false, fromStatements: true }
+		});
+	});
+
+	// Fachreview 387-1 V-4: the apartments of the missing statements name different profiles: none fits both
+	it('nimmt die Einstellungen, wenn die Wohnungen verschiedene Heizprofile haben', () => {
+		const lea = tenancy('lea', true, null, 'a2', '2020-01-01', '2025-06-30');
+		const tim = tenancy('tim', true, null, 'a2', '2025-07-01');
+		expect(runDefaults(settings, link, [eva, marc, lea, tim], [of2025('eva', '4.50', 'hp8'), of2025('lea', '4.50', 'hp9')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp1',
+			preset: { differing: true, profileFromApartment: false }
+		});
+	});
+
+	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen zum Satz des Laufs verschiedene Sätze haben', () => {
+		expect(runDefaults(settings, link, tenancies, [of2025('lauf', '4.50'), of2025('lauf2', '2.50')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp1',
+			managementFeePercent: 2.5,
+			preset: { differing: true }
+		});
+	});
+
+	// fach-review V-5: a statement whose Heizprofil was deleted has none; it differs from no other
+	it('übergeht eine übrige Abrechnung ohne Heizprofil', () => {
+		expect(runDefaults(settings, link, tenancies, [of2025('lauf', '4.50', null), of2025('lauf2', '4.50')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp9',
+			preset: { differing: false }
+		});
+	});
+
+	it('übernimmt gleich eingestellte übrige Abrechnungen', () => {
+		expect(runDefaults(settings, link, tenancies, [of2025('lauf', '4.50'), of2025('lauf2', '4.50')], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp9',
+			managementFeePercent: 4.5,
+			preset: { differing: false, fromStatements: true, feeFromSettings: false }
+		});
+	});
+
+	// #89, fach-review V-1: a statement stores its contract's rate; only one at the run's rate tells the run's rate
+	it('übernimmt den Satz nur von einer Abrechnung zum Satz des Abrechnungslaufs', () => {
+		const mixed = [of2025('nein', '0.00'), of2025('eigen', '2.00'), of2025('lauf', '4.50')];
+		expect(runDefaults(settings, link, tenancies, mixed, '2026-10-02')).toMatchObject({
+			managementFeePercent: 4.5,
+			preset: { fromStatements: true, feeFromSettings: false }
+		});
+		// none at the run's rate: the settings' rate; the heating profile still comes from the other statements, so a
+		// recreated statement shares it (A-10, closing review C-1), and the notice says where each comes from
+		expect(runDefaults(settings, link, tenancies, mixed.slice(0, 2), '2026-10-02')).toMatchObject({
+			managementFeePercent: 2.5,
+			heatingProfileId: 'hp9',
+			preset: { fromStatements: true, feeFromSettings: true }
+		});
+	});
+
+	// statements of another period of the building tell nothing about this one
+	it('übergeht Abrechnungen anderer Perioden des Gebäudes', () => {
+		expect(runDefaults(settings, link, tenancies, [{ ...of2025('lauf', '4.50'), periodStart: '2024-01-01', periodEnd: '2024-12-31' }], '2026-10-02')).toMatchObject({
+			heatingProfileId: 'hp1',
+			preset: { fromStatements: false }
+		});
+	});
+});
+

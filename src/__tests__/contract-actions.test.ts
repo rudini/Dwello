@@ -11,12 +11,15 @@ import advanceDeleteRefused from '../../tests/contracts/contract-advance-delete-
 import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
+import contractMissing from '../../tests/contracts/contract-missing-statements.json';
+import contractsMissing from '../../tests/contracts/contracts-missing-statements.json';
 
 describe('Vertragsstatus', () => {
 	it('gibt Liste und Detail den Tag des Servers mit', async () => {
 		const urls: string[] = [];
 		const fetch = (async (url: string) => {
 			urls.push(url);
+			if (url.endsWith('/missing-statements')) return Response.json([]);
 			return Response.json({ id: 'c1', contracts: [], buildings: [], apartments: [] });
 		}) as typeof globalThis.fetch;
 
@@ -56,6 +59,7 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 					: new Response('down', { status: 500 });
 			if (url.includes('/config') || url.includes('/statements?'))
 				return Response.json({ data: [] });
+			if (url.endsWith('/missing-statements')) return Response.json([]);
 			return Response.json({ id: 'c1', apartmentId: 'a1', startDate: '2024-04-01', ...contract });
 		}) as typeof globalThis.fetch;
 	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
@@ -95,68 +99,67 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 	});
 });
 
-// A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung
+// A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung; the backend decides them and their way
+// into the wizard (H-28, backend/src/__tests__/accounting-period.test.ts), the page links each
 describe('Fehlende Abrechnungen am Mietvertrag', () => {
-	const lastYear = new Date().getFullYear() - 1;
-	// each range leads into the wizard and to the building's invoices of its year (#211)
-	const missing = (start: string, end: string, kind: string, way = { start, end }) => ({
-		start,
-		end,
-		href: `/statements/generate?building=b1&start=${way.start}&end=${way.end}`,
-		way: { kind, ...way },
-		// #454, Fachreview 454-1 V-2: the invoices the offered statement takes, of its period; a calendar year by its number
-		invoices: {
-			href: `/invoices?building=b1&periodStart=${way.start}&periodEnd=${way.end}`,
-			label:
-				way.start.endsWith('-01-01') && way.end === `${way.start.slice(0, 4)}-12-31`
-					? `Rechnungen ${way.start.slice(0, 4)} ansehen`
-					: `Rechnungen für ${day(way.start)} – ${day(way.end)} ansehen`
-		}
-	});
 	const day = (date: string) => date.split('-').reverse().join('.');
-	const missingYear = (y: number) => missing(`${y}-01-01`, `${y}-12-31`, 'whole');
-	// backend answers as checked against the real API (tests/contracts); the statements filter by contractId as the
-	// backend does: a previous tenant's statement in the same apartment comes back only without that filter
 	const statementOf = (contractId: string, y: number) => ({
 		...periodStatements.data[0],
 		contractId,
 		periodStart: `${y}-01-01`,
 		periodEnd: `${y}-12-31`
 	});
+	// backend answers as checked against the real API (tests/contracts)
 	const backend = (
 		statements: ReturnType<typeof statementOf>[],
-		startDate = `${lastYear - 2}-04-01`,
-		billedUntil: string | null = null
+		missing: Response = Response.json(contractMissing)
 	) =>
 		(async (url: string) => {
-			if (url.endsWith('/config'))
-				return Response.json({ data: { accounting_period: 'calendar' } });
+			if (url.endsWith('/c1/missing-statements')) return missing;
 			if (url.includes('/statements?')) {
 				const contractId = new URL(url).searchParams.get('contractId');
 				const data = statements.filter((s) => !contractId || s.contractId === contractId);
 				return Response.json({ data, total: data.length });
 			}
-			return Response.json({
-				...contractDetail,
-				startDate,
-				endDate: null,
-				terminated: false,
-				billedUntil
-			});
+			return Response.json({ ...contractDetail, endDate: null, terminated: false });
 		}) as typeof globalThis.fetch;
 	const missingOf = async (fetch: typeof globalThis.fetch) =>
 		((await load({ params: { id: 'c1' }, fetch } as never)) as { missingStatements: unknown })
 			.missingStatements;
+	const building = contractDetail.building.id;
 
-	it('nennt jede abgelaufene Periode ohne Abrechnung ab Vertragsbeginn, die neueste zuerst', async () => {
-		// three ended years with rent days; the middle one has its statement, the previous tenant's of the last year
-		// does not count
-		const statements = [statementOf('c1', lastYear - 1), statementOf('c0', lastYear)];
-		expect(await missingOf(backend(statements))).toEqual([lastYear, lastYear - 2].map(missingYear));
+	// each part leads into the wizard with its way, and to the building's invoices of that period (#211, #454)
+	it('führt jeden fehlenden Teil in den Assistenten und zu den Rechnungen seiner Periode', async () => {
+		const [short, existing] = contractMissing.map(({ open: _open, ...part }) => part);
+		expect(await missingOf(backend([]))).toEqual([
+			{
+				...short,
+				href: `/statements/generate?building=${building}&start=${short.way.start}&end=${short.way.end}`,
+				invoices: {
+					href: `/invoices?building=${building}&periodStart=${short.way.start}&periodEnd=${short.way.end}`,
+					label: `Rechnungen für ${day(short.way.start)} – ${day(short.way.end)} ansehen`
+				}
+			},
+			{
+				...existing,
+				// Fachreview 199-1 V-1: the contract's own statement cuts that period, the run would not bill it there
+				href: null,
+				invoices: {
+					href: `/invoices?building=${building}&periodStart=${existing.way.start}&periodEnd=${existing.way.end}`,
+					label: `Rechnungen für ${day(existing.way.start)} – ${day(existing.way.end)} ansehen`
+				}
+			}
+		]);
+	});
+
+	// code review 199-1 C-6: better no hint than a wrong one
+	it('nennt nichts, wenn das Backend die fehlenden Abrechnungen nicht liefert', async () => {
+		expect(await missingOf(backend([], new Response(null, { status: 500 })))).toEqual([]);
 	});
 
 	// #116: the delete dialog names them, a Mietvertrag they bill is not deleted
 	it('nennt die Abrechnungen des Mietvertrags', async () => {
+		const lastYear = new Date().getFullYear() - 1;
 		const statements = [statementOf('c1', lastYear - 1), statementOf('c0', lastYear)];
 		const data = (await load({ params: { id: 'c1' }, fetch: backend(statements) } as never)) as {
 			billedBy: unknown;
@@ -181,142 +184,12 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		expect(data.billedBy).toBeNull();
 	});
 
-	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; eine Periode, die darüber hinausreicht, fehlt noch
-	it('übergeht Perioden, die bis «Abgerechnet bis» enden', async () => {
-		const missing = await missingOf(backend([], `${lastYear - 2}-04-01`, `${lastYear - 1}-06-30`));
-		expect(missing).toEqual([lastYear, lastYear - 1].map(missingYear));
-	});
-
-	// #120, Fachreview W2e: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode
-	it('nennt die Periode einer ersetzten Abrechnung ohne berichtigte', async () => {
-		const replaced = { ...statementOf('c1', lastYear), status: 'replaced' };
-		expect(await missingOf(backend([replaced], `${lastYear}-03-01`))).toEqual([
-			missingYear(lastYear)
-		]);
-	});
-
-	// #199, #408 point 2: an overlapping statement counts; the days no statement of the building covers get a short
-	// Abrechnungsperiode
-	it('bietet für die Tage, die keine Abrechnung des Gebäudes abdeckt, eine kurze Abrechnungsperiode an', async () => {
-		const overlapping = {
-			...statementOf('c1', lastYear),
-			periodStart: `${lastYear - 1}-07-01`,
-			periodEnd: `${lastYear}-06-30`
-		};
-		expect(await missingOf(backend([overlapping], `${lastYear}-01-01`))).toEqual([
-			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short')
-		]);
-	});
-
-	// #408 point 2: days inside the period of another contract's statement are billed in exactly that period
-	it('bietet für Tage in der Periode einer Abrechnung des Gebäudes genau diese Periode an', async () => {
-		const other = {
-			...statementOf('c0', lastYear),
-			periodStart: `${lastYear - 1}-07-01`,
-			periodEnd: `${lastYear}-06-30`
-		};
-		expect(await missingOf(backend([other], `${lastYear}-01-01`))).toEqual([
-			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short'),
-			missing(`${lastYear}-01-01`, `${lastYear}-06-30`, 'existing', {
-				start: `${lastYear - 1}-07-01`,
-				end: `${lastYear}-06-30`
-			})
-		]);
-	});
-
-	// code review 199-1 C-2: statements made before #408 point 2 may overlap; days in a period equal to a statement
-	// period of the building go there only, not a second time to an overlapping one
-	it('nennt bei überschneidenden Altdaten dieselben Tage nur einmal', async () => {
-		const older = {
-			...statementOf('c0', lastYear),
-			periodStart: `${lastYear - 1}-07-01`,
-			periodEnd: `${lastYear}-06-30`
-		};
-		expect(
-			await missingOf(backend([older, statementOf('c2', lastYear)], `${lastYear}-01-01`))
-		).toEqual([missingYear(lastYear)]);
-	});
-
-	// code review 199-3 C-12: another contract's replaced statement still holds its period for the building (C-8)
-	it('führt Tage in der Periode einer ersetzten Abrechnung des Gebäudes in diese Periode', async () => {
-		const replaced = {
-			...statementOf('c0', lastYear),
-			periodStart: `${lastYear - 1}-07-01`,
-			periodEnd: `${lastYear}-06-30`,
-			status: 'replaced'
-		};
-		expect(await missingOf(backend([replaced], `${lastYear}-01-01`))).toEqual([
-			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short'),
-			missing(`${lastYear}-01-01`, `${lastYear}-06-30`, 'existing', {
-				start: `${lastYear - 1}-07-01`,
-				end: `${lastYear}-06-30`
-			})
-		]);
-	});
-
-	// code review 199-2 C-9: two older periods with one first day: the longer one, so no missing day is lost
-	it('nennt bei zwei Altperioden mit gleichem Beginn die Tage der längeren', async () => {
-		const period = (contractId: string, end: string) => ({
-			...statementOf(contractId, lastYear),
-			periodEnd: `${lastYear}-${end}`
-		});
-		const missing = (await missingOf(
-			backend([period('c0', '03-31'), period('c2', '06-30')], `${lastYear}-01-01`)
-		)) as { start: string; end: string }[];
-		expect(missing.map(({ start, end }) => [start, end])).toEqual([
-			[`${lastYear}-07-01`, `${lastYear}-12-31`],
-			[`${lastYear}-01-01`, `${lastYear}-06-30`]
-		]);
-	});
-
-	// code review 199-1 C-6: without the building's statements the ways cannot be told: better no hint
-	it('nennt nichts, wenn die Abrechnungen des Gebäudes nicht gelesen werden können', async () => {
-		const answer = backend([]);
-		const fetch = (async (url: string) =>
-			url.includes('/statements?buildingId=')
-				? new Response(null, { status: 500 })
-				: answer(url)) as typeof globalThis.fetch;
-		expect(await missingOf(fetch)).toEqual([]);
-	});
-
-	// a part names the contract's own days: from the Vertragsbeginn, not from the start of the period
-	it('nennt bei einem Teil die Tage ab Vertragsbeginn', async () => {
-		const other = {
-			...statementOf('c0', lastYear),
-			periodStart: `${lastYear - 1}-07-01`,
-			periodEnd: `${lastYear}-06-30`
-		};
-		const missing = (await missingOf(backend([other], `${lastYear}-04-01`))) as {
-			start: string;
-			end: string;
-		}[];
-		expect(missing.map(({ start, end }) => [start, end])).toEqual([
-			[`${lastYear}-07-01`, `${lastYear}-12-31`],
-			[`${lastYear}-04-01`, `${lastYear}-06-30`]
-		]);
-	});
-
-	// Fachreview 199-1 V-1: statements made before #408 point 2 may overlap; a run of the previous tenant's period would
-	// count the contract as billed by its own overlapping statement and bill it no more there: no way into the wizard
-	it('führt nicht in eine Periode, die der Mietvertrag mit einer eigenen Abrechnung schneidet', async () => {
-		const own = { ...statementOf('c1', lastYear), periodEnd: `${lastYear}-06-30` };
-		const missing = (await missingOf(
-			backend([own, statementOf('c0', lastYear)], `${lastYear}-01-01`)
-		)) as { start: string; href: string | null }[];
-		expect(missing.map(({ start, href }) => [start, href])).toEqual([[`${lastYear}-07-01`, null]]);
-	});
-
 	// #211: the list marks each contract with the same rule, without opening it
-	const listed = async (statements: unknown[] | null) => {
-		const fetch = (async (url: string) => {
-			if (url.endsWith('/config'))
-				return Response.json({ data: { accounting_period: 'calendar' } });
-			if (url.includes('/statements?'))
-				return statements
-					? Response.json({ data: statements })
-					: new Response(null, { status: 500 });
-			return Response.json(contractList);
-		}) as typeof globalThis.fetch;
+	const listed = async (missing: Response) => {
+		const fetch = (async (url: string) =>
+			url.endsWith('/contracts/missing-statements')
+				? missing
+				: Response.json(contractList)) as typeof globalThis.fetch;
 		const list = (await listLoad({
 			url: new URL('http://localhost/contracts'),
 			fetch
@@ -325,29 +198,19 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		};
 		return list.contracts[0].missingStatement;
 	};
+	const ofFirst = (ranges: unknown[]) => Response.json({ [contractList.contracts[0].id]: ranges });
 
 	it('kennzeichnet in der Liste einen Mietvertrag mit fehlender Abrechnung', async () => {
-		expect(await listed([statementOf('c1', lastYear)])).toBe(true);
+		expect(await listed(ofFirst(contractsMissing.c1))).toBe(true);
 	});
 
-	it('kennzeichnet in der Liste keinen Mietvertrag, dessen Abrechnungen jeden Mietstag abdecken', async () => {
-		const all = {
-			...statementOf('c1', lastYear),
-			periodStart: '2024-04-01',
-			periodEnd: `${lastYear}-12-31`
-		};
-		expect(await listed([all, statementOf('c0', lastYear)])).toBe(false);
+	it('kennzeichnet in der Liste keinen Mietvertrag ohne fehlende Abrechnung', async () => {
+		expect(await listed(ofFirst([]))).toBe(false);
 	});
 
 	// better no mark than a wrong one
-	it('kennzeichnet nichts, wenn die Abrechnungen nicht geladen werden können', async () => {
-		expect(await listed(null)).toBe(false);
-	});
-
-	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
-		expect(await missingOf(backend([statementOf('c1', lastYear)], `${lastYear}-03-01`))).toEqual(
-			[]
-		);
+	it('kennzeichnet nichts, wenn die fehlenden Abrechnungen nicht geladen werden können', async () => {
+		expect(await listed(new Response(null, { status: 500 }))).toBe(false);
 	});
 });
 
@@ -737,6 +600,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 					: new Response('down', { status: 500 });
 			if (url.includes('/config') || url.includes('/statements?'))
 				return Response.json({ data: [] });
+			if (url.endsWith('/missing-statements')) return Response.json([]);
 			return Response.json({ ...contractDetail, ...contract });
 		}) as typeof globalThis.fetch;
 	const asked = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
@@ -918,7 +782,9 @@ describe('Vereinbarte Nebenkosten am Mietvertrag', () => {
 				? categories
 				: url.endsWith('/contracts/c1')
 					? Response.json(contractDetail)
-					: Response.json({ data: [], contracts: [] })) as typeof globalThis.fetch;
+					: url.endsWith('/missing-statements')
+						? Response.json([])
+						: Response.json({ data: [], contracts: [] })) as typeof globalThis.fetch;
 	const agreedCosts = async (categories: Response) =>
 		(
 			(await load({ params: { id: 'c1' }, fetch: backend(categories) } as never)) as {

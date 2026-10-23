@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { load } from '../routes/dashboard/+page.server';
 import contractList from '../../tests/contracts/contracts.json';
-import periodStatements from '../../tests/contracts/period-statements.json';
 import apartmentList from '../../tests/contracts/apartments.json';
 import config from '../../tests/contracts/config.json';
 import statementList from '../../tests/contracts/statements.json';
@@ -69,29 +68,21 @@ const contracts = [
 	].map((c) => contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01' })),
 	contract({ id: 'f4', apartmentId: 'f3', startDate: '2026-08-01', endDate: null })
 ];
-// #211: statements of all periods; one per contract covers every ended period since its Vertragsbeginn
-const billed = (...ids: string[]) =>
-	ids.map((contractId) => ({
-		...periodStatements.data[0],
-		contractId,
-		periodStart: '2019-07-01',
-		periodEnd: '2026-06-30'
-	}));
-const both = billed('k1', 'k2', 'k3', 'k4', 'k5', 'k7', 'k8');
+type Range = { start: string; end: string };
+const period = (start: string, end: string) => ({ start, end });
+const lastPeriod = period('2025-07-01', '2026-06-30');
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
 function backend(
 	dashboardStatus = 200,
-	statementsOfAllPeriods: unknown[] = both,
+	// #211, H-28: per contract the days of ended periods without a statement, as the backend decides them
+	missing: Record<string, Range[]> = {},
 	overrides: Record<string, unknown> = {}
 ) {
 	const answers: Record<string, unknown> = {
 		// Zahlungsfrist 45 and Mahnfrist 10 days (#87)
 		'/config': config,
-		'/statements?limit=1000': {
-			data: statementsOfAllPeriods,
-			total: statementsOfAllPeriods.length
-		},
+		'/contracts/missing-statements': missing,
 		// overdue and sent in one read (#605)
 		'/statements?status=open&limit=1000': {
 			data: [
@@ -233,7 +224,7 @@ describe('Übersicht laden', () => {
 	it('nennt eine überfällige Rückerstattung gleich nach der Zahlungsfrist, eine Nachzahlung erst nach der Mahnfrist', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const overdue = (balance: string) =>
-			backend(200, both, {
+			backend(200, {}, {
 				'/statements?status=open&limit=1000': {
 					data: [{ ...statementList.data[0], paymentDeadline: '2026-10-05', balance }]
 				}
@@ -252,11 +243,21 @@ describe('Übersicht laden', () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const bruno = { ...statementList.data[0], id: 's9', tenant: { firstName: 'Bruno', lastName: 'Meier' } };
 		const data = await load({
-			fetch: backend(200, both, {
-				'/statements?status=overdue&limit=100': { data: [{ ...bruno, paymentDeadline: '2026-09-28' }] },
-				'/statements?status=sent&limit=100': { data: [{ ...bruno, paymentDeadline: '2026-11-09' }] },
-				'/statements?status=open&limit=1000': { data: [{ ...bruno, paymentDeadline: '2026-09-28' }] }
-			})
+			fetch: backend(
+				200,
+				{},
+				{
+					'/statements?status=overdue&limit=100': {
+						data: [{ ...bruno, paymentDeadline: '2026-09-28' }]
+					},
+					'/statements?status=sent&limit=100': {
+						data: [{ ...bruno, paymentDeadline: '2026-11-09' }]
+					},
+					'/statements?status=open&limit=1000': {
+						data: [{ ...bruno, paymentDeadline: '2026-09-28' }]
+					}
+				}
+			)
 		} as never);
 
 		expect(data.deadlines.filter((d) => d.id === 's9').map((d) => d.date)).toEqual(['2026-09-28']);
@@ -265,7 +266,9 @@ describe('Übersicht laden', () => {
 	// #454 (#408 point 7): the statements no longer current, from the backend; a sent one to correct (Fachreview 454-1 E-3)
 	it('nennt die versendeten Abrechnungen, die zu berichtigen sind', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, both, { '/statements/outdated': outdatedStatements }) } as never);
+		const data = await load({
+			fetch: backend(200, {}, { '/statements/outdated': outdatedStatements })
+		} as never);
 		const task = data.tasks.find((one) => one.id === 'correct-s7')!;
 		expect(task.text).toContain('Seit dem Erstellen der Abrechnung NK-2025-0007 von Eva Frei wurde 1 Rechnung');
 		expect(task.href).toBe('/statements/s7');
@@ -273,7 +276,7 @@ describe('Übersicht laden', () => {
 
 	it('zeigt die Übersicht auch, wenn die nicht aktuellen Abrechnungen nicht zu laden sind', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const failing = backend(200, both);
+		const failing = backend(200, {});
 		const fetch = (async (url: string) =>
 			url.endsWith('/statements/outdated') ? new Response(null, { status: 500 }) : failing(url)) as typeof globalThis.fetch;
 		const data = await load({ fetch } as never);
@@ -284,7 +287,7 @@ describe('Übersicht laden', () => {
 	// #577: how far the local KI's model is; a model the backend cannot tell about shows nothing
 	it('nennt, wie weit das KI-Modell geladen ist', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const answers = backend(200, both);
+		const answers = backend(200, {});
 		const fetch = (async (url: string) =>
 			url.endsWith('/ki/model') ? Response.json(kiModelLoading) : answers(url)) as typeof globalThis.fetch;
 
@@ -293,7 +296,7 @@ describe('Übersicht laden', () => {
 
 	it('zeigt die Übersicht auch, wenn der Stand des KI-Modells nicht zu laden ist', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const answers = backend(200, both);
+		const answers = backend(200, {});
 		const fetch = (async (url: string) =>
 			url.endsWith('/ki/model') ? new Response(null, { status: 500 }) : answers(url)) as typeof globalThis.fetch;
 
@@ -303,7 +306,7 @@ describe('Übersicht laden', () => {
 	// #620: «Später entscheiden» bei der Einrichtung: keine KI gewählt, die Übersicht nennt die Seite «KI»
 	it('meldet, wenn der Liegenschaftsverwalter noch keine KI gewählt hat', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const answers = backend(200, both);
+		const answers = backend(200, {});
 		const fetch = (async (url: string) =>
 			url.endsWith('/ki-settings')
 				? Response.json({ ...kiSettings, mode: 'none' })
@@ -316,7 +319,7 @@ describe('Übersicht laden', () => {
 
 	it('meldet keine fehlende Wahl, wenn der Betreiber die KI abgeschaltet hat', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const answers = backend(200, both);
+		const answers = backend(200, {});
 		const fetch = (async (url: string) =>
 			url.endsWith('/ki-settings')
 				? Response.json({ ...kiSettings, mode: 'none', byOperator: true })
@@ -330,15 +333,32 @@ describe('Übersicht laden', () => {
 	// Fachreview 454-1 V-10: the link of the missing statements names the building of the newest period
 	it('führt von den fehlenden Abrechnungen zu den Rechnungen eines Gebäudes', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, []) } as never);
+		const data = await load({ fetch: backend(200, { k1: [lastPeriod] }) } as never);
 		expect(data.tasks.find((one) => one.id === 'missing-period')!.link!.href).toMatch(
-			/^\/invoices\?building=[^&]+&periodStart=\d{4}-\d{2}-\d{2}&periodEnd=\d{4}-\d{2}-\d{2}$/
+			/^\/invoices\?building=[^&]+&periodStart=2025-07-01&periodEnd=2026-06-30$/
 		);
 	});
 
+	// The backend names the missing days per contract (backend/src/__tests__/accounting-period.test.ts); the overview names
+	// each building with its periods, the latest first
 	it('erinnert an die abgelaufene Abrechnungsperiode, für die es noch keine Abrechnung gibt', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, []) } as never);
+		const missing = {
+			k1: [lastPeriod],
+			k2: [lastPeriod],
+			k3: [lastPeriod],
+			// #211: every ended period since the Vertragsbeginn, also of a contract that ended before the last one
+			k4: [
+				lastPeriod,
+				period('2024-07-01', '2025-06-30'),
+				period('2023-07-01', '2024-06-30'),
+				period('2022-07-01', '2023-06-30')
+			],
+			k5: [period('2024-07-01', '2025-06-30')],
+			k7: [lastPeriod],
+			k8: [lastPeriod]
+		};
+		const data = await load({ fetch: backend(200, missing) } as never);
 
 		expect(data.tasks.map((task) => task.id)).toEqual([
 			'overdue',
@@ -353,7 +373,6 @@ describe('Übersicht laden', () => {
 			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
 			'fixed-term-f1'
 		]);
-		// #211: every ended period since the Vertragsbeginn, also of a contract that ended before the last one
 		expect(data.tasks[2].text).toMatch(
 			/Noch nicht abgerechnet: Ahornhof \(.*\), Birkenhof \(.*\), Erlenhof \(.*\), Leerbau \(.*\), Lindenhof \(.*\), Seeblick \(.*\)\./
 		);
@@ -362,55 +381,19 @@ describe('Übersicht laden', () => {
 		);
 	});
 
-	// The tenant who moved out still gets a statement for the days of the period (A-9)
-	it('nennt jedes Gebäude, das in der Periode einen Mietvertrag ohne Abrechnung hatte', async () => {
+	// two contracts of one building missing the same period: the building names it once
+	it('nennt eine Periode je Gebäude einmal', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const data = await load({
-			fetch: backend(200, billed('k1', 'k2', 'k5', 'k7', 'k8'))
+			fetch: backend(200, { k2: [lastPeriod], k3: [lastPeriod] })
 		} as never);
 		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain(
-			'Noch nicht abgerechnet: Ahornhof (01.07.2025 – 30.06.2026, 01.07.2024 – 30.06.2025, 01.07.2023 – 30.06.2024, 01.07.2022 – 30.06.2023), Lindenhof (01.07.2025 – 30.06.2026).'
-		);
+		expect(task.text).toContain('Noch nicht abgerechnet: Lindenhof (01.07.2025 – 30.06.2026).');
 	});
 
-	// #120: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode, bis es die berichtigte gibt
-	it('nennt das Gebäude einer ersetzten Abrechnung ohne berichtigte', async () => {
-		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const [seeblick, ...others] = both;
-		const data = await load({ fetch: backend(200, [{ ...seeblick, status: 'replaced' }, ...others]) } as never);
-		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toMatch(
-			/Noch nicht abgerechnet: Seeblick \(01\.07\.2025 – 30\.06\.2026, [^)]*\)\./
-		);
-	});
-
-	// #199: an overlapping statement counts, only the days it leaves are missing
-	it('nennt nur die Tage, die keine Abrechnung abdeckt', async () => {
-		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const [seeblick, ...others] = both;
-		const data = await load({
-			fetch: backend(200, [{ ...seeblick, periodEnd: '2026-03-31' }, ...others])
-		} as never);
-		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain('Noch nicht abgerechnet: Seeblick (01.04.2026 – 30.06.2026).');
-	});
-
-	// #133: the days up to «Abgerechnet bis» were billed outside Dwello
-	it('übergeht die Tage bis «Abgerechnet bis»', async () => {
-		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const outside = contracts.map((c) => (c.id === 'k4' ? { ...c, billedUntil: '2025-06-30' } : c));
-		const data = await load({
-			fetch: backend(
-				200,
-				both.filter((s) => s.contractId !== 'k4'),
-				{
-					'/contracts?limit=1000': { contracts: outside, total: outside.length }
-				}
-			)
-		} as never);
-		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof (01.07.2025 – 30.06.2026).');
+	it('erinnert an nichts, wenn das Backend keine fehlende Abrechnung nennt', async () => {
+		const data = await load({ fetch: backend(200, {}) } as never);
+		expect(data.tasks.map((t) => t.id)).not.toContain('missing-period');
 	});
 
 	// The building cards count them too; the overview names when they will be rented
