@@ -207,4 +207,4 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #477 pull request #636 `Fixes #477`, merged on green CI
 - [x] #637 main CI red after #470 (axe `target-size`, `statement-generate draft-restored`): reproduced 2 of 8; DOM test red first; fix: scroll only while «Weiter» is in the window; 16 of 16 green
 - [x] #637 code review rounds 1–2 (`docs/reviews/637-review-{1,2}.md`), C-1 fixed
-- [ ] #637 pull request `Fixes #637`, merged on green CI
+- [ ] #637 pull request #638 `Fixes #637` (body names «No scenario», the check reads it from the event), merged on green CI
