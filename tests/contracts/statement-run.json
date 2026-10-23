@@ -12,9 +12,13 @@
 			"apartmentNumber": "3.01",
 			"managementFeeAgreed": true,
 			"managementFeePercent": null,
-			"billed": false
+			"billed": false,
+			"movedOut": true,
+			"fixedTerm": false,
+			"shortenedTo": null
 		}
 	],
+	"withoutFee": [{ "id": "c3", "tenantName": "Lea Graf", "apartmentNumber": "2.02" }],
 	"overlap": {
 		"periods": [{ "start": "2023-07-01", "end": "2024-06-30" }],
 		"choose": [{ "start": "2023-07-01", "end": "2024-06-30" }],

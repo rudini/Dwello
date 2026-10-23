@@ -2974,6 +2974,13 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Workflow note: commit-msg gate misses `-F` (`docs/reviews/workflow-notes-h28-heating-hints.md`)
 - [x] Merge `main` after #646 (clean), before complete; PR pushed after this archive
 
+## Session H-28 step 1: preview flags from the run plan
+
+#717 (H-28): `movedOut`, `fixedTerm` (#76), `shortenedTo` (#453) and `withoutFee` (#89) come from the backend's run plan; the BFF passes them on. No scenario: behaviour unchanged. Parallel session (checklist in the pull request).
+
+- [x] Backend `planRun` flags and `withoutFee`, contract `statement-run.json`, tests red first
+- [x] BFF passes them on; tests show it passes flags the dates would not give
+- [x] `code-reviewer` round 1 (`docs/reviews/h28d-review-1.md`: H-1 Major, H-2, H-3) and round 2 (`h28d-review-2.md`: fixed)
 ## Session 2026-10-23: link to Discussions
 
 No scenario: repository documents only, no app change.

@@ -46,7 +46,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-type Planned = { contracts?: object[]; overlap?: object | null; skipped?: object[] };
+type Planned = { contracts?: object[]; withoutFee?: object[]; overlap?: object | null; skipped?: object[] };
 
 // The backend decides which contracts a run bills (H-28): by default the two of 2024, neither billed yet
 function backend(
@@ -66,8 +66,12 @@ function backend(
 			contracts: (plan.contracts ?? running).map((c) => ({
 				...statementRun.contracts[0],
 				billed: false,
+				movedOut: false,
+				fixedTerm: false,
+				shortenedTo: null,
 				...c
 			})),
+			withoutFee: plan.withoutFee ?? [],
 			overlap: plan.overlap ?? null,
 			skipped: plan.skipped ?? []
 		});
@@ -188,25 +192,18 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 
 // #89: the run's rate applies only where the Verwaltungspauschale is agreed; step «Einstellungen» names the others
 describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
-	it('nennt die Mietverträge der Periode, die eine Abrechnung erhalten, ohne vereinbarte Pauschale', async () => {
-		const { fetch } = backend([], contracts, {
-			contracts: [
-				{ ...contract('auszug', '2020-01-01', '2024-03-31'), managementFeeAgreed: false },
-				// already billed: this run makes no statement for it
-				{ ...contract('einzug', '2024-05-01', null), managementFeeAgreed: false, billed: true },
-				{ ...contract('eigen', '2024-01-01', null), managementFeePercent: '2.00' }
-			]
-		});
+	// H-28 (#717): which contracts these are, the backend decides (statement-run.test.ts)
+	it('gibt die Mietverträge ohne vereinbarte Pauschale weiter, die das Backend nennt', async () => {
+		const { fetch } = backend([], contracts, { withoutFee: statementRun.withoutFee });
 
-		expect((await billedContracts(fetch, period))[0].withoutFee).toEqual([
-			{ id: 'auszug', tenantName: 'Mieter auszug', apartmentNumber: '2.01' }
-		]);
+		expect((await billedContracts(fetch, period))[0].withoutFee).toEqual(statementRun.withoutFee);
 	});
 });
 
 describe('Abrechnungen erstellen', () => {
 	it('zeigt in der Vorschau jeden Mietvertrag, der in die Periode fällt', async () => {
-		const { fetch } = backend();
+		// the backend says who moved out (H-28, #717)
+		const { fetch } = backend([], contracts, { contracts: [{ ...contracts[1], movedOut: true }, contracts[2]] });
 
 		expect(await previewStatements(fetch, period)).toEqual([
 			{
@@ -263,48 +260,21 @@ describe('Abrechnungen erstellen', () => {
 		]);
 	});
 
-	// #453 (#327): each row names its billed days; «Abgerechnet bis» only where it shortens them in the period
-	it('nennt in jeder Zeile die abgerechneten Tage und «Abgerechnet bis», wo es sie kürzt', async () => {
-		const inBuilding = [
-			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-02-29' },
-			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
-		];
-		const { fetch } = backend([], inBuilding);
+	// H-28 (#717): «ausgezogen», «befristet» and «Abgerechnet bis» where it shortens the Mietstage, as the backend decides
+	// them (statement-run.test.ts); each row names its billed days
+	it('übernimmt je Zeile die Kennzeichen des Backends', async () => {
+		// flags the contract's own dates would not give: the BFF passes them on, it does not decide them
+		const { fetch } = backend([], contracts, {
+			contracts: [
+				{ ...contract('a', '2020-01-01', null), movedOut: true, fixedTerm: true, shortenedTo: '2024-02-29' },
+				{ ...contract('b', '2020-01-01', '2024-03-31'), billedUntil: '2024-02-29', movedOut: false, fixedTerm: false, shortenedTo: null }
+			]
+		});
 
 		const rows = await previewStatements(fetch, period);
-		expect(rows.map(({ contractId, rentalStart, rentalEnd, billedUntil }) => ({ contractId, rentalStart, rentalEnd, billedUntil }))).toEqual([
-			{ contractId: 'auszug', rentalStart: statementPreview.rentalStart, rentalEnd: statementPreview.rentalEnd, billedUntil: '2024-02-29' },
-			{ contractId: 'einzug', rentalStart: statementPreview.rentalStart, rentalEnd: statementPreview.rentalEnd, billedUntil: undefined }
-		]);
-	});
-
-	// Abrechnung 2024 im Jahr 2026 erstellt, Auszug im März 2025: der Mieter ist schon weg, eine Akonto-Erhöhung nützt nichts
-	it('zählt einen Mieter, der bis heute ausgezogen ist, als ausgezogen', async () => {
-		const { fetch } = backend([], [contract('spaeter', '2020-01-01', '2025-03-31'), contract('bleibt', '2020-01-01', '2099-12-31')]);
-
-		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.movedOut])).toEqual([
-			['spaeter', true],
-			['bleibt', false]
-		]);
-	});
-
-	// #76: ein befristeter Mietvertrag läuft ohne Kündigungstermin bis zum vereinbarten Vertragsende
-	it('erkennt einen laufenden befristeten Mietvertrag', async () => {
-		const { fetch } = backend(
-			[],
-			[
-				contract('befristet', '2020-01-01', '2099-12-31'),
-				{ ...contract('gekuendigt', '2020-01-01', '2099-12-31'), terminated: true },
-				contract('unbefristet', '2020-01-01', null),
-				contract('beendet', '2020-01-01', '2024-03-31')
-			]
-		);
-
-		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.fixedTerm])).toEqual([
-			['befristet', true],
-			['gekuendigt', false],
-			['unbefristet', false],
-			['beendet', false]
+		expect(rows.map(({ contractId, rentalStart, movedOut, fixedTerm, billedUntil }) => ({ contractId, rentalStart, movedOut, fixedTerm, billedUntil }))).toEqual([
+			{ contractId: 'a', rentalStart: statementPreview.rentalStart, movedOut: true, fixedTerm: true, billedUntil: '2024-02-29' },
+			{ contractId: 'b', rentalStart: statementPreview.rentalStart, movedOut: false, fixedTerm: false, billedUntil: undefined }
 		]);
 	});
 

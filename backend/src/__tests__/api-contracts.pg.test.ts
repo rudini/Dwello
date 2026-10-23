@@ -247,14 +247,19 @@ describe('API-Verträge des Frontends', () => {
 		const apartment = await createApartment({ buildingId: rental.building, number: '2.02', floor: 2, area: '50', rooms: '2' });
 		const tenant = await createTenant({ firstName: 'Marc', lastName: `Huber ${token}` });
 		const covered = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate: '2020-01-01', billedUntil: '2024-12-31', baseRent: '800', monthlyAdvancePayment: '100' });
+		// H-28 (#717): a contract the run bills without an agreed Verwaltungspauschale (#89)
+		const other = await createApartment({ buildingId: rental.building, number: '2.04', floor: 2, area: '50', rooms: '2' });
+		const unagreed = await createContract({ apartmentId: other.id, tenantId: tenant.id, startDate: '2024-05-01', baseRent: '800', monthlyAdvancePayment: '100', managementFeeAgreed: false });
 		try {
 			const actual = await (
 				await callApi(`/api/v1/statements/run?buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`)
 			).json();
 			expect(drift(await sample('statement-run'), actual)).toEqual([]);
 		} finally {
+			await deleteContract(unagreed.id, true);
 			await deleteContract(covered.id, true);
 			await deleteTenant(tenant.id);
+			await deleteApartment(other.id);
 			await deleteApartment(apartment.id);
 		}
 	});

@@ -8,7 +8,8 @@ import runDefaults from '../../tests/contracts/statement-run-defaults.json';
 // The backend's plan of the run (H-28): these contracts with Mietstage in the period, billed or not
 const plan = (contracts: object[], more: object = {}) =>
 	Response.json({
-		contracts: contracts.map((c) => ({ billed: false, ...c })),
+		contracts: contracts.map((c) => ({ billed: false, movedOut: false, fixedTerm: false, shortenedTo: null, ...c })),
+		withoutFee: [],
 		overlap: null,
 		skipped: [],
 		...more
@@ -148,7 +149,7 @@ describe('Vorschau der Abrechnungen', () => {
 		const befristet = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: '2099-12-31' };
 		const fetch = async (url: string) =>
 			url.includes('/statements/run?')
-				? plan([befristet])
+				? plan([{ ...befristet, fixedTerm: true }]) // the backend says befristet (H-28, #717)
 				: Response.json(
 						url.includes('/for-statement/') ? [] : { contracts: [befristet], data: [], total: 0 }
 					);

@@ -481,3 +481,59 @@ describe('Hinweise zu den Heizkosten eines Laufs', () => {
 		expect(hintsOf(moved, 'hp1', [sent, ...more], ['alt']).oldHeatingRule).toEqual([...expected]);
 	});
 });
+
+// H-28 (#717): what the preview says about each contract of the run, decided here and not in the BFF
+describe('Kennzeichen der Mietverträge eines Laufs', () => {
+	const flagsOf = (inPeriod: Parameters<typeof planRun>[1], today = '2026-01-15') =>
+		planRun(year2024, inPeriod, [], today).contracts.map(({ id, movedOut, fixedTerm, shortenedTo }) => ({ id, movedOut, fixedTerm, shortenedTo }));
+
+	// a statement 2024 made in 2026 for a tenant who left in March 2025: gone by now, a higher Akonto helps nothing
+	it('zählt einen Mieter, der bis heute ausgezogen ist, als ausgezogen', () => {
+		expect(flagsOf([contract('spaeter', '2020-01-01', '2025-03-31'), contract('bleibt', '2020-01-01', '2099-12-31')]).map(({ id, movedOut }) => [id, movedOut])).toEqual([
+			['spaeter', true],
+			['bleibt', false]
+		]);
+	});
+
+	// #76: a befristeter Mietvertrag runs without Kündigungstermin until its agreed end
+	it('erkennt einen laufenden befristeten Mietvertrag', () => {
+		const flags = flagsOf([
+			contract('befristet', '2020-01-01', '2099-12-31'),
+			{ ...contract('gekuendigt', '2020-01-01', '2099-12-31'), terminated: true },
+			contract('unbefristet', '2020-01-01', null),
+			contract('beendet', '2020-01-01', '2024-03-31')
+		]);
+
+		expect(flags.map(({ id, fixedTerm }) => [id, fixedTerm])).toEqual([
+			['befristet', true],
+			['gekuendigt', false],
+			['unbefristet', false],
+			['beendet', false]
+		]);
+	});
+
+	// #453 (#327): «Abgerechnet bis» only where it shortens the Mietstage in the period
+	it('nennt «Abgerechnet bis», wo es die Mietstage in der Periode kürzt', () => {
+		const flags = flagsOf([contract('auszug', '2020-01-01', '2024-03-31', '2024-02-29'), contract('einzug', '2024-05-01', null, '2023-12-31')]);
+
+		expect(flags.map(({ id, shortenedTo }) => [id, shortenedTo])).toEqual([
+			['auszug', '2024-02-29'],
+			['einzug', null]
+		]);
+	});
+
+	// #89: the run's rate applies only where the Verwaltungspauschale is agreed; step «Einstellungen» names the others
+	it('nennt die Mietverträge, die eine Abrechnung erhalten, ohne vereinbarte Pauschale', () => {
+		const fee = (id: string, startDate: string, endDate: string | null, managementFeeAgreed: boolean) => ({
+			...contract(id, startDate, endDate),
+			apartmentNumber: '2.01',
+			managementFeeAgreed
+		});
+		const plan = planRun(year2024, [fee('auszug', '2020-01-01', '2024-03-31', false), fee('einzug', '2024-05-01', null, false), fee('eigen', '2024-01-01', null, true)], [
+			// already billed: this run makes no statement for it
+			statement('einzug', '2024-01-01', '2024-12-31')
+		]);
+
+		expect(plan.withoutFee).toEqual([{ id: 'auszug', tenantName: 'Mieter auszug', apartmentNumber: '2.01' }]);
+	});
+});
