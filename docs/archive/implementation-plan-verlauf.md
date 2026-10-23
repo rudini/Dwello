@@ -3065,3 +3065,18 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] Checks: backend suite 1525 pass (coverage 96.3 % lines), lint, check, type-check, Prettier on added files
 - [x] Code review of the slice: `docs/reviews/invoice-order-review-1.md` (no finding)
 - [x] Archive; PR with `Fixes #759`, `No scenario`, pushed after this archive
+
+## Session H-28 step 2: settings and Tankbestand form checks in the backend
+
+#717 (H-28): the checks of the settings form (PLZ, e-mail, IBAN CH/LI, fee, payment and reminder days, the Firmenadresse an IBAN needs) and of the Tankbestand form (Stichtag, Betrag as typed, a taken day, another category) are the backend's; `PUT /config` and `POST /buildings/:id/fuel-stocks` refuse with `causes` per field, the BFF shows each at its field. `PUT /config` takes the form as typed and resets emptied keys in the same transaction. No scenario: behaviour unchanged (`settings.feature`, `building-detail.feature`). Parallel session (checklist in the pull request).
+
+- [x] Settings: backend codes, typed fee and IBAN, reset in one save, coded IBAN refusal with the missing keys; contracts `config-fields-refused.json`, `config-iban-address-missing.json`; BFF sends as typed
+- [x] Tankbestand: backend reads the amount, codes per field and for both 409s; contracts `fuel-stock-fields-refused.json`, `fuel-stock-date-taken.json`
+- [x] Texts as `backend_<code>` in four languages, 9 unused keys removed
+- [x] `code-reviewer`: `h28g-review-1.md` (5 Minor, fixed), `h28h-review-1.md` (5 Minor, fixed; the 404 text of C-1 stays), closing round `h28i-review-1.md`
+- [x] Before complete; PR pushed after this archive
+
+## Session: grill-me without an issue (workflow note of #643)
+
+- [x] `.claude/skills/grill-me/SKILL.md`: description, intro, steps 1 and 5 cover a request without an issue (product owner decision 2026-10-23, `docs/reviews/workflow-notes-issue-643.md`)
+- [x] Archive, PR: pushed after this archive
