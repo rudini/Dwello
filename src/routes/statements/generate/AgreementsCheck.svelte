@@ -3,7 +3,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 
-	// Step 3 (#91): the check whether the contracts agree the period's Nebenkosten, while it loads or after it failed
+	// Step 3 (#91): the check whether the contracts agree the period's Nebenkosten, after it failed
 	let {
 		status,
 		error,
@@ -15,11 +15,8 @@
 	} = $props();
 </script>
 
-{#if status === 'loading'}
-	<p role="status" class="text-ink-muted" data-testid="agreements-loading">
-		{m.statements_agreements_loading()}
-	</p>
-{:else if status === 'failed'}
+<!-- while it loads, the wizard says so at the top of the step (#470) -->
+{#if status === 'failed'}
 	<Alert tone="critical" title={m.statements_agreements_failed_title()} testid="agreements-failed">
 		<p>{m.statements_agreements_failed_text()}</p>
 		{#snippet action()}

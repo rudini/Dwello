@@ -149,7 +149,7 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 		show(AgreedCosts, { buildingIds: ['b1'], period, error: 'Weiter ohne Antwort' });
 		await settle();
 
-		expect(byTestId('agreements-loading')).not.toBeNull();
+		// #470: that it loads, the wizard says at the top of the step
 		expect(byTestId('agreements-wait')!.textContent).toContain(
 			'Dwello geht weiter, sobald die Mietverträge geprüft sind.'
 		);

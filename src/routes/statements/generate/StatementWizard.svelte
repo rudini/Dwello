@@ -20,6 +20,7 @@
 	import WizardNav from '$lib/ui/WizardNav.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
+	import LateChecks from './LateChecks.svelte';
 	import PresetNotice from './PresetNotice.svelte';
 	import StatementStep from './StatementStep.svelte';
 	import type { PreviewRow } from './preview';
@@ -77,7 +78,18 @@
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
 	let agreementsBlocking = $state(false); // step 3: whether the contracts agree the period's costs is open (#91)
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
-	let loading = $state(false); // the step still loads what it shows: «Weiter» waits (#468)
+	// the step still loads what it shows: «Weiter» waits (#468); step 2 its buildings' rows, step 3 the checks below
+	let buildingsLoading = $state(false);
+	let checksLoading = $state(false);
+	const loading = $derived(buildingsLoading || checksLoading);
+	// #470: said at the top of the step, seen without scrolling
+	const loadingText = $derived(
+		!loading
+			? ''
+			: step === 2
+				? m.statements_buildings_loading()
+				: m.statements_agreements_loading()
+	);
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
 	let restoredAt = $state<Date | null>(null);
@@ -111,6 +123,17 @@
 		const back = new URL(location.href).searchParams.get('schritt') === '3';
 		step = restoredStep(back ? 3 : left, selection, dropped);
 		resumed = back && step === 3;
+	});
+
+	// #470: what a step loads late never moves «Weiter» on the screen: the page scrolls by the height it added above
+	$effect.pre(() => {
+		if (loading) return;
+		const next = untrack(() => wizard?.querySelector<HTMLElement>('[data-testid="wizard-next"]'));
+		const before = next?.getBoundingClientRect().top;
+		tick().then(() => {
+			const moved = before === undefined ? 0 : next!.getBoundingClientRect().top - before;
+			if (moved) window.scrollBy(0, moved);
+		});
 	});
 
 	$effect(() => {
@@ -250,6 +273,9 @@
 			<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
 		</h2>
 		<PresetNotice preset={data.preset} {step} />
+		<p role="status" class="text-ink-muted" class:hidden={!loading} data-testid="step-loading">
+			{loadingText}
+		</p>
 		{#if shownError}
 			<Alert tone="critical" title={m.ui_action_failed()} testid="server-error">
 				<p>{shownError}</p>
@@ -260,8 +286,7 @@
 			{data}
 			bind:selection
 			bind:confirmed
-			bind:agreementsBlocking
-			bind:loading
+			bind:loading={buildingsLoading}
 			{errors}
 			{previewRows}
 			{invoices}
@@ -282,6 +307,14 @@
 			{loading}
 			busyLabel={busyLabels[step]}
 			cancelHref="/statements"
+		/>
+		<LateChecks
+			{step}
+			buildingIds={selection.buildingIds}
+			period={{ start: selection.periodStart, end: selection.periodEnd }}
+			bind:blocking={agreementsBlocking}
+			bind:loading={checksLoading}
+			error={errors.agreements}
 		/>
 	{/if}
 </form>

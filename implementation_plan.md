@@ -191,3 +191,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #465 glossary row «Quelle der Monatsanteile» (decided in #465)
 - [x] #465 closing review (`docs/reviews/465-review-2.md`): no findings
 - [ ] #465 pull request `Fixes #465`, merged on green CI
+- [x] #470 DOM tests red first: loading sentence at the top of steps 2 and 3, step 3's late content below «Weiter», «Weiter» kept on the screen when step 2's rows arrive
+- [x] #470 implementation: FeeNotAgreed and AgreedCosts below «Weiter» (reserved place), the loading sentence at the top (new text step 2 in four languages), the page scrolls by what loads above «Weiter»; No scenario: the loading state cannot be held open in the E2E stack (#468)
+- [ ] #470 code review, persona Marco on a phone, closing review, pull request `Fixes #470`, merged on green CI
