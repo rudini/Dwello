@@ -1,10 +1,10 @@
 # Architekturprinzipien (Phase 1)
 
-> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Die Prinzipien folgen aus den H/H-Szenarien Ä1, U1 und T1 (`utility-tree.md`) und den Risiken in `risks-and-tradeoffs.md`. Sie legen keine Lösung fest. Sie sagen, woran eine Lösung gemessen wird.
+> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Die Prinzipien folgen aus den H/H-Szenarien Ä1, U1, T1 und R1 (`utility-tree.md`) und den Risiken in `risks-and-tradeoffs.md`. Sie legen keine Lösung fest. Sie sagen, woran eine Lösung gemessen wird.
 
 ## AP1 Eine Form hat eine Quelle
 
-Jede Form, die über die Grenze Backend ↔ BFF geht (Antwort, Eingabe, Fehlercode, Statuswerte), wird an **einem** Ort im Backend definiert. BFF und FE leiten sie davon ab, statt sie abzuschreiben. Abgeleitet wird aus der API-Form, nicht aus der Tabelle (TP-Ä1/S1).
+Jede Form, die über die Grenze Backend ↔ BFF geht (Antwort, Eingabe, Fehlercode, Statuswerte), wird an **einem** Ort im Backend definiert. BFF und FE leiten sie davon ab, statt sie abzuschreiben. Abgeleitet wird aus der API-Form, nicht aus der Tabelle (TP-Ä1/S1; vom Nutzer bestätigt).
 
 - **Unterstützt:** Ä1 (primär), Ä4; mindert RI-Ä1-1 bis RI-Ä1-3
 - **Verstoss erkennbar an:**
@@ -24,13 +24,14 @@ Der BFF macht OAuth, Cookies, XSRF, setzt Seiten zusammen und reicht weiter. Was
 
 ## AP3 Kein Update ohne Rückweg
 
-Jedes Update sichert vor der ersten Migration Daten und Schlüssel. Jedes Release für die Vermieter ist als Upgrade von seiner Vorversion mit Daten geprüft. Ein Restore ist ein getesteter, gemessener Weg, keine Anleitung.
+Jedes Update sichert vor der ersten Migration Daten und Schlüssel. Jedes Release für die Vermieter ist als Upgrade von seiner Vorversion mit Daten geprüft, und ein Backup der Vorversion lässt sich darin einspielen. Backups sind mit einem Wiederherstellungscode verschlüsselt. Ein Restore ist ein getesteter, gemessener Weg, keine Anleitung.
 
-- **Unterstützt:** U1 (primär), R1; mindert RI-U1-1, RI-U1-2, RI-U1-5
+- **Unterstützt:** U1, R1 (beide primär); mindert RI-U1-1, RI-U1-2, RI-U1-5, RI-R1-3
 - **Verstoss erkennbar an:**
   - einem Release-Tag, für den kein grüner Upgrade-Test vom vorherigen Release existiert;
   - einem Startpfad, der `migrate` ausführt, ohne dass vorher ein Backup geschrieben wurde;
-  - einem Restore-Test, der das Schlüssel-Volume auslässt oder länger als 5 min dauert.
+  - einem Restore-Test, der das Schlüssel-Volume auslässt, länger als 5 min dauert oder nur ein Backup derselben Version einspielt;
+  - einer Backup-Datei, die ohne Wiederherstellungscode lesbar ist.
 
 ## AP4 Was der Betreiber wissen muss, meldet Dwello selbst
 

@@ -1,6 +1,6 @@
 # Risiken, Sensitivity und Tradeoffs (Phase 1, ATAM-light)
 
-> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Nur die H/H-Szenarien aus `utility-tree.md`: Ä1, U1, T1. Herkunft wie dort: gemessen (Phase 0), gemessen (CI), aus Repo/Config, vom Nutzer bestätigt, Annahme. Ein Beleg nennt die Datei, den Commit oder den CI-Lauf.
+> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Nur die H/H-Szenarien aus `utility-tree.md`: Ä1, U1, T1, R1. Herkunft wie dort: gemessen (Phase 0), gemessen (CI), aus Repo/Config, vom Nutzer bestätigt, Annahme. Ein Beleg nennt die Datei, den Commit oder den CI-Lauf.
 
 ## Ä1 Neues Feld an einer Entität
 
@@ -46,7 +46,7 @@
 | SP-U1-2 | Je eine Transaktion pro Migration. Angewendete Migrationen sind unveränderlich. | Eine fehlgeschlagene Migration hinterlässt keinen halben Zustand. Ein Zurück auf die alte Version gibt es aber nur per Restore. | `backend/src/db/migrate.ts` (BEGIN/COMMIT); CI-Schritt «Migrations unchanged» (aus Repo/Config) |
 | SP-U1-3 | Update = `git pull` + `up -d --build` auf der Maschine des Betreibers. Die Images werden lokal gebaut. | Das Update hängt von Netz, Build-Werkzeugen und Plattenplatz beim Betreiber ab und kann auf halbem Weg scheitern. | `docs/installation.md` §5; `build:` in `docker-compose.prod.yml` (aus Repo/Config) |
 | SP-U1-4 | Die Schlüssel liegen in einem eigenen Volume (`dwello_secrets`) neben der DB. | Ein Backup nur der DB macht verschlüsselte Geheimnisse nach einem Restore unlesbar. | `ki-settings.service.ts` (AES-256-GCM aus `ENCRYPTION_KEY`), `docs/installation.md` §5, PR #644 (aus Repo/Config) |
-| SP-U1-5 | Jeder Merge wird ein Release. | Ein wöchentlicher Takt braucht eine Auswahl. Ohne sie aktualisiert ein Betreiber auf einen beliebigen Merge-Stand. | `release.yml`, README «Versions» (aus Repo/Config); Annahme A1 |
+| SP-U1-5 | Jeder Merge wird ein Release. | Bis das wöchentliche Taggen umgesetzt ist (vom Nutzer bestätigt), aktualisiert ein Betreiber auf einen beliebigen Merge-Stand, der nur in CI geprüft ist. | `release.yml`, README «Versions» (aus Repo/Config) |
 
 **Tradeoff Points:**
 
@@ -54,7 +54,7 @@
 |---|---|---|
 | TP-U1/T1 | U1 ↔ T1 | Ein Upgrade-Test vom letzten Tag mit Daten kostet CI-Zeit (Compose-Start, Migration, Prüfung). Er gehört darum in den Release- oder Nacht-Job, nicht in jeden PR-Lauf. |
 | TP-U1/R1 | U1 ↔ R1 (Restore ≤ 5 min) | Ein Backup vor jeder Migration verlängert das Update um die Dump-Dauer. Belege in der DB machen Dump und Restore gross (A2). |
-| TP-U1/S1 | U1/R1 ↔ S1 | Mehr Backups (auch vor jedem Update) heissen mehr Kopien aller Mieterdaten samt Schlüsseln. Verschlüsselung at rest ist «nicht geplant» (PRD; A7). |
+| TP-U1/S1 | U1/R1 ↔ S1 | Mehr Backups (auch vor jedem Update) heissen mehr Kopien aller Mieterdaten samt Schlüsseln. Entschärft durch die Verschlüsselung der Backups (vom Nutzer bestätigt, R1). |
 
 **Risiken:**
 
@@ -110,6 +110,42 @@
 - Unit-Tests (4 min), Lint und Typen (1,5 min) sowie der Build (1,5 min) sind schnell und laufen parallel.
 - Die Testpyramide und die Regel «auf der niedrigsten Ebene, die das Verhalten zeigt» sind schon dokumentiert (`docs/test-pyramid.md`, `CLAUDE.md` Workflow 2).
 
+## R1 Verschlüsseltes, kompatibles Backup
+
+**Sensitivity Points:**
+
+| SP | Entscheidung heute | Wirkung auf R1 | Beleg |
+|---|---|---|---|
+| SP-R1-1 | Belege (Rechnungsdateien, PDFs) liegen in der DB. | Das Backup ist vollständig mit einem Dump. Seine Grösse wächst aber mit den Jahren, und davon hängt Restore ≤ 5 min ab. | `docs/installation.md` §5 («uploaded invoices and PDFs are stored in the database too») (aus Repo/Config); A2 |
+| SP-R1-2 | Die Schlüssel liegen in `dwello_secrets`, getrennt von der DB. | Ein Backup muss beide umfassen. Beim Restore müssen die Schlüssel vor dem ersten Start zurück. | `docs/installation.md` §5; `ki-settings.service.ts` (aus Repo/Config) |
+| SP-R1-3 | Die angewendeten Migrationen stehen in `schema_migrations` in der DB. Der Start zieht fehlende nach. | Ein Backup aus Release N lässt sich in N+1 einspielen, ohne eigenen Mechanismus. | `backend/src/db/migrate.ts` (aus Repo/Config) |
+| SP-R1-4 | Compose enthält keinen Dienst für zeitgesteuerte Aufgaben und kein Volume für Backups. | Wo das tägliche Backup läuft und wohin es schreibt, ist eine neue Entscheidung. | `docker-compose.prod.yml` (aus Repo/Config) |
+
+**Tradeoff Points:**
+
+| TP | Kollision | Erklärung |
+|---|---|---|
+| TP-R1/Datenverlust | Verschlüsselung ↔ Datenverlust | Geht der Wiederherstellungscode verloren, ist jedes Backup wertlos. Das ist genau der teuerste Fehler. Die Verschlüsselung tauscht ein Datenschutzrisiko gegen ein Verfügbarkeitsrisiko (A8). |
+| TP-R1/RTO | Verschlüsselung und Kompatibilität ↔ Restore ≤ 5 min | Beim Restore kommen Entschlüsseln und das Nachziehen der Migrationen zum Einspielen dazu, bei grossen DBs mit Belegen (A2). |
+| TP-R1/T1 | R1 ↔ T1 | Der Kompatibilitätstest pro Release (Vorversion → HEAD, mit Restore) gehört in den wöchentlichen Release-Job, nicht in jeden PR-Lauf. |
+| TP-R1/U1 | R1 ↔ U1: **Synergie** | Das Backup vor jeder Migration (U1) ist derselbe Mechanismus wie das tägliche Backup. Ein Upgrade-Test und ein Restore-Test teilen Aufbau und Prüfung. |
+
+**Risiken:**
+
+| ID | Risiko | Beleg |
+|---|---|---|
+| RI-R1-1 | **Verlorener Wiederherstellungscode = Datenverlust.** Die Zielgruppe nutzt Dwello wenige Male im Jahr und hat wenig technische Erfahrung. | `CLAUDE.md` «Design-Regeln» (aus Repo/Config); vom Nutzer bestätigte Wahl des Codes |
+| RI-R1-2 | Ein Backup auf derselben Platte wie die DB geht mit ihr verloren. Heute legt die Anleitung die Kopie «auf ein anderes Gerät», von Hand. | `docs/installation.md` §5 (aus Repo/Config) |
+| RI-R1-3 | Kompatibilität ist angelegt (SP-R1-3), aber nie mit Daten einer Vorversion getestet. Eine Migration, die auf echten Daten scheitert (z. B. ein NOT NULL ohne Default), macht das Backup unbrauchbar. | `docs/test-pyramid.md` («migrated fresh») (aus Repo/Config) |
+| RI-R1-4 | Restore-Dauer und DB-Grösse sind unbekannt. 5 min könnten bei 10 Jahren Belegen nicht reichen. | A2 |
+
+**Nicht-Risiken (helfen heute):**
+
+- `schema_migrations` und Migrationen beim Start (SP-R1-3) machen Backups vorwärtskompatibel, ohne eigenen Mechanismus.
+- Je eine Transaktion pro Migration: Ein gescheiterter Restore mit Migration hinterlässt keinen halben Zustand.
+- Backup und Restore samt Schlüsseln sind schon dokumentiert (`docs/installation.md` §5). Die Automatik kann darauf aufbauen.
+- AES-256-GCM ist im Backend schon vorhanden (`ki-settings.service.ts`).
+
 ## Querbezug zu S1 (H/L, kein H/H)
 
-S1 ist keine Phase-6-Analyse wert, weil nur ein Test fehlt. S1 ist aber Gegenspieler in TP-Ä1/S1 und TP-U1/S1. Abgeleitete Typen und zusätzliche Backups müssen den Datenschutz mitdenken.
+S1 ist keine Phase-6-Analyse wert, weil nur ein Test fehlt. S1 ist aber Gegenspieler in TP-Ä1/S1, TP-U1/S1 und TP-R1/Datenverlust. Entschieden: Typen werden aus der API-Form abgeleitet, Backups werden verschlüsselt (vom Nutzer bestätigt).

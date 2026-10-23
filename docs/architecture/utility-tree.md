@@ -20,7 +20,7 @@ Bestehende Szenarien aus `docs/migration-mva.md` (Q1–Q5, D1–D2, S1–S2, P1�
 | Nutzer | Pro Installation ein Benutzer, höchstens 50 Wohnungen, Nutzung wenige Male im Jahr. | aus Repo/Config; für die nächsten 12 Monate vom Nutzer bestätigt |
 | Betrieb | Jede Installation läuft selbst betrieben mit Docker Compose (Postgres 16, Ollama). Dazu kommt eine öffentliche Demo auf einer Oracle-VM (2 OCPU ARM, 12 GB, ohne GPU), die jede Nacht zurückgesetzt wird. Ein gehostetes Angebot ist nicht geplant. | aus Repo/Config (`docker-compose.prod.yml`, `deploy/demo/README.md`); vom Nutzer bestätigt |
 | Daten | Namen und Adressen von Mietern, IBAN, Beträge, Belege (Rechnungsdateien und PDFs liegen in der DB). Es gilt das DSG. Bei einer externen KI gehen Belege an den Anbieter. Aufbewahrung 10 Jahre. | aus Repo/Config (`README.md`, `docs/installation.md` §5, PRD §7.3) |
-| Releases | Jeder Merge auf `main` wird getaggt und als Release veröffentlicht. Ziel ist ein Takt von einer Version pro Woche an die Vermieter. | aus Repo/Config (`release.yml`); Takt vom Nutzer bestätigt |
+| Releases | Heute wird jeder Merge auf `main` getaggt und als Release veröffentlicht. Künftig wird nur noch wöchentlich getaggt. | heute: aus Repo/Config (`release.yml`); künftig: vom Nutzer bestätigt |
 | Backup | Manuelles `pg_dump` und Restore sind dokumentiert (`docs/installation.md` §5). Es gibt keine Automatik, keinen Test und keine Überwachung. | aus Repo/Config |
 | Teuerster Fehler | Datenverlust | vom Nutzer bestätigt |
 | Sofort erkennbar | Fehlgeschlagenes Backup; fehlgeschlagener Start oder Migration | vom Nutzer bestätigt |
@@ -34,7 +34,7 @@ Dwello-Nutzen
 │  ├─ Form eines Felds an einem Ort .......... Ä1 Neues Feld an einer Entität            (H/H)
 │  └─ Fachregel an einem Ort ................. Ä4 Fachregel nur im Backend              (H/M)
 ├─ Verfügbarkeit / Resilienz
-│  ├─ Kein Datenverlust ...................... R1 Backup und Restore mitgeliefert       (H/M)
+│  ├─ Kein Datenverlust ...................... R1 Verschlüsseltes, kompatibles Backup   (H/H)
 │  └─ Sicheres Update ........................ U1 Wöchentliches Update mit Migration    (H/H)
 ├─ Betreibbarkeit / Beobachtbarkeit
 │  └─ Fehler sofort erkennen ................. O1 Fehlgeschlagenes Backup sichtbar      (H/M)
@@ -77,25 +77,42 @@ Dwello-Nutzen
 - **Heute:** **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien (gemessen, Phase 0). Seither sind mehrere #717-PRs gemergt (#641, #646, #649, #762, #763, #767). Ein neuer Wert ist **unbekannt**, bis `run.sh` erneut läuft.
 - **Fitness Function:** CI-Check auf `src/lib/server/**`, `src/routes/**/+page.server.ts` und `+server.ts`: Ein Vergleich gegen einen Statuswert oder eine verankerte Regex schlägt fehl, ausser er steht auf einer Allowlist für technische Prüfungen (UUID, ISO-Datum als Query-Parameter, JWT-Dauer).
 
-### R1 Backup und Restore mitgeliefert
+### R1 Verschlüsseltes, kompatibles Backup
 
-- **Auslöser:** Die Datenbank geht verloren (Disk, Fehlbedienung, missglücktes Update).
+- **Auslöser:** Die Datenbank geht verloren (Disk, Fehlbedienung, missglücktes Update), auch nachdem seit dem Backup ein Update installiert wurde.
 - **Umgebung:** Selbst betriebene Installation, VM wie die Demo.
-- **Reaktion:** Aus dem mitgelieferten, automatisch erstellten Backup stellt der Betreiber den letzten Stand wieder her. Das Backup umfasst die DB samt Belegen und die Schlüssel (`dwello_secrets`).
-- **Messgrösse und Ziel:** Datenverlust **≤ 24 h** (aus Repo/Config: PRD §7.4, tägliches Backup; Dwello liefert Backup mit: vom Nutzer bestätigt). Restore **≤ 5 min** (vom Nutzer bestätigt).
-- **Heute:** Backup und Restore sind manuell dokumentiert (`docs/installation.md` §5). Es gibt keine Automatik und keinen Test (aus Repo/Config). Die Restore-Dauer ist **unbekannt**, ebenso die DB-Grösse einer Installation nach einigen Jahren mit Belegen (Annahme A2).
-- **Fitness Function:** CI- oder Nacht-Job: Demo-Daten laden → Backup mit dem mitgelieferten Mechanismus → leere DB und leeres Schlüssel-Volume → Restore → Zeilenzahlen pro Tabelle, Summen der Abrechnungen und ein entschlüsseltes Geheimnis identisch, Dauer ≤ 5 min. Dazu ein Lasttest mit einer DB in der Grösse von 10 Jahren (A2).
+- **Reaktion:**
+  - Dwello erstellt täglich automatisch ein Backup der DB samt Belegen und der Schlüssel (`dwello_secrets`).
+  - Dwello verschlüsselt das Backup. Der Schlüssel kommt aus einem **Wiederherstellungscode**, den Dwello erzeugt und den der Vermieter ausdruckt oder notiert (vom Nutzer bestätigt).
+  - Mit dem Code stellt der Betreiber den letzten Stand wieder her. Das gilt auch für ein Backup aus Release N, wenn bereits Release N+1 installiert ist: Die Migrationen laufen dann beim Restore automatisch nach (vom Nutzer bestätigt: Datenkompatibilität ist entscheidend).
+- **Messgrösse und Ziel:**
+  - Datenverlust **≤ 24 h** (aus Repo/Config: PRD §7.4, tägliches Backup; Dwello liefert Backup mit: vom Nutzer bestätigt).
+  - Restore **≤ 5 min** (vom Nutzer bestätigt).
+  - **100 %** der Releases sind getestet: Ein Backup der Vorversion lässt sich einspielen (vom Nutzer bestätigt).
+  - **0** Backup-Dateien sind ohne Wiederherstellungscode lesbar (vom Nutzer bestätigt).
+- **Heute:**
+  - Backup und Restore sind manuell und unverschlüsselt dokumentiert (`docs/installation.md` §5). Es gibt keine Automatik und keinen Test (aus Repo/Config).
+  - Der Dump enthält die Tabelle `schema_migrations`. Nach einem Restore zieht der Start fehlende Migrationen nach (`backend/src/db/migrate.ts`). Kompatibilität ist also angelegt, aber nicht getestet (aus Repo/Config).
+  - Die Restore-Dauer ist **unbekannt**, ebenso die DB-Grösse nach einigen Jahren mit Belegen (Annahme A2).
+- **Fitness Function:** Job pro Release:
+  - Demo-Daten mit dem letzten Release-Tag laden.
+  - Backup mit dem mitgelieferten Mechanismus erstellen.
+  - Prüfen, dass die Datei ohne Code nicht lesbar ist (keine Klartext-Namen, kein `CREATE TABLE`).
+  - Leere DB und leeres Schlüssel-Volume mit HEAD aufsetzen.
+  - Restore mit dem Code.
+  - Prüfen: Zeilenzahlen pro Tabelle, Summen der Abrechnungen und ein entschlüsseltes Geheimnis sind identisch, Dauer ≤ 5 min.
+  - Dazu ein Lasttest mit einer DB in der Grösse von 10 Jahren (A2).
 
 ### U1 Wöchentliches Update mit Migration
 
 - **Auslöser:** Der Betreiber installiert das wöchentliche Update. Es enthält eine Migration.
 - **Umgebung:** Selbst betrieben, echte Daten aus mehreren Jahren, Update laut `docs/installation.md` §5 (`git pull`, `up -d --build`).
 - **Reaktion:** Das Update läuft durch. Schlägt es fehl, ist der Fehler sofort erkennbar, und der Stand vor dem Update lässt sich ohne Datenverlust wiederherstellen.
-- **Messgrösse und Ziel:** Datenverlust **0** (vom Nutzer bestätigt: Datenverlust ist der teuerste Fehler). **100 %** der Releases sind als Upgrade von der Vorversion mit Daten getestet (Vorschlag). Ein fehlgeschlagener Start oder eine fehlgeschlagene Migration zeigt sich als «unhealthy», und das Log nennt die Ursache (vom Nutzer bestätigt: muss sofort erkennbar sein).
+- **Messgrösse und Ziel:** Datenverlust **0** (vom Nutzer bestätigt: Datenverlust ist der teuerste Fehler). **100 %** der Releases sind als Upgrade von der Vorversion mit Daten getestet (vom Nutzer bestätigt). Ein fehlgeschlagener Start oder eine fehlgeschlagene Migration zeigt sich als «unhealthy», und das Log nennt die Ursache (vom Nutzer bestätigt: muss sofort erkennbar sein).
 - **Heute:**
   - Migrationen laufen beim Start des Backends (`bun scripts/migrate.ts && exec bun run src/index.ts`), je eine Transaktion pro Migration (`backend/src/db/migrate.ts`). Ein Backup vor der Migration gibt es nicht (aus Repo/Config).
   - E2E testet nur Migrationen auf leere DB («migrated fresh before each run», `docs/test-pyramid.md`). Ein Upgrade-Test mit Daten existiert nicht (aus Repo/Config).
-  - Jeder Merge erzeugt ein Release. Den wöchentlichen Takt setzt heute nichts um (aus Repo/Config: `release.yml`).
+  - Jeder Merge erzeugt ein Release (aus Repo/Config: `release.yml`). Künftig wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). Umgesetzt ist das noch nicht.
 - **Fitness Function:** CI-Job pro Release: Compose mit dem letzten Tag und Demo-Daten starten → auf HEAD aktualisieren → Healthcheck grün, Zeilenzahlen und Summen gleich. Dazu ein Negativtest: Eine absichtlich fehlschlagende Migration lässt die Daten unverändert und macht den Container «unhealthy» mit lesbarer Ursache.
 
 ### O1 Fehlgeschlagenes Backup ist sichtbar
@@ -103,7 +120,7 @@ Dwello-Nutzen
 - **Auslöser:** Das tägliche Backup schlägt fehl oder fehlt.
 - **Umgebung:** Betrieb, selbst betrieben.
 - **Reaktion:** Die App zeigt einen Hinweis. Der Healthcheck meldet den Zustand, und das Log nennt die Ursache (vom Nutzer bestätigt).
-- **Messgrösse und Ziel:** Ein fehlgeschlagenes oder über **26 h** altes Backup ist spätestens beim nächsten Öffnen der App sichtbar und sofort im Healthcheck (Schwelle 26 h: Annahme A3).
+- **Messgrösse und Ziel:** Ist seit mehr als **einem Tag** kein Backup gelungen, sieht der Betreiber das spätestens beim nächsten Öffnen der App und sofort im Healthcheck (vom Nutzer bestätigt). Das Alter dient nur als Signal, dass die Sicherung steht. Ob ein Backup taugt, prüft R1.
 - **Heute:** nicht vorhanden. `/health` und Compose-Healthchecks gibt es (aus Repo/Config), sie kennen kein Backup.
 - **Fitness Function:** E2E-Szenario «altes Backup → Hinweis sichtbar» und ein Backend-Test: `/health` meldet einen Fehler, wenn das letzte Backup älter als die Schwelle ist.
 
@@ -141,11 +158,11 @@ Dwello-Nutzen
 
 ## 4. Priorisierungsmatrix
 
-Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die Matrix ist vom Nutzer bestätigt (23.10.2026), mit zwei Änderungen: S1 Wichtigkeit H, T1 gilt für PR und `main`.
+Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die Matrix ist vom Nutzer bestätigt (23.10.2026), mit drei Änderungen: S1 Wichtigkeit H; T1 gilt für PR und `main`; R1 wird mit Verschlüsselung und Kompatibilität H/H.
 
 | | Schwierigkeit **H** | **M** | **L** |
 |---|---|---|---|
-| **Wichtigkeit H** | **Ä1, U1, T1** | Ä4, R1, O1 | S1 |
+| **Wichtigkeit H** | **Ä1, U1, T1, R1** | Ä4, O1 | S1 |
 | **M** | | P1 | |
 | **L** | | | |
 
@@ -153,23 +170,25 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 |---|---|---|---|---|
 | Ä1 | H | Der PO hat die Zielwerte am 23.10. festgelegt. Ein neues Feld ist die häufigste Änderung (`db:schema` in 31 % der Features). | H | Median 6 → 4, P90 19 → 8. Ohne gemeinsamen Vertrag zwischen den Schichten sinkt der Wert nicht (0 Importe FE/BFF → Backend). |
 | Ä4 | H | Entscheid des PO, #717 | M | #717 ist mit mehreren PRs schon weit gekommen. Der Rest ist nicht neu gemessen. |
-| R1 | H | Datenverlust ist der teuerste Fehler. | M | Das Verfahren ist dokumentiert, aber nicht automatisiert und nicht getestet. Ob 5 min für den Restore reichen, ist unbekannt (A2). |
+| R1 | H | Datenverlust ist der teuerste Fehler. | H | Mehrere Anforderungen zugleich: Automatik, Verschlüsselung mit Wiederherstellungscode, Kompatibilität über Releases und Restore ≤ 5 min. Heute gibt es nur ein manuelles, unverschlüsseltes, ungetestetes Verfahren. Ob 5 min reichen, ist unbekannt (A2). |
 | U1 | H | Wöchentliches Update; Datenverlust und fehlgeschlagene Migration müssen erkennbar sein. | H | Kein Backup vor der Migration, kein Upgrade-Test mit Daten. Migrationen gehen nur vorwärts, ein Zurück gibt es nur per Restore. |
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
-**Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1. **Quick Win (H/L):** S1.
+**Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
 
 ## 5. Offene Annahmen
 
 | ID | Annahme | Betrifft | Zu klären durch |
 |---|---|---|---|
-| A1 | Das Release für die Vermieter ist eine Auswahl der Merge-Tags, z. B. der Tag von Montag. Die Tags pro Merge bleiben. | U1 | Product Owner |
+| A1 | ~~Das Release für die Vermieter ist eine Auswahl der Merge-Tags.~~ **Entschieden:** Es wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). | U1 | erledigt |
 | A2 | Eine Installation enthält nach 10 Jahren Belege für höchstens 50 Wohnungen. Der Restore schafft das in ≤ 5 min. Grösse unbekannt. | R1 | Messung mit synthetischer DB |
-| A3 | Schwelle «Backup zu alt» = 26 h (täglich plus Puffer) | O1 | Product Owner |
+| A3 | ~~Schwelle «Backup zu alt» = 26 h~~ **Entschieden:** Gelingt mehr als einen Tag kein Backup, ist das sichtbar. Ausserdem muss jedes Backup nach einem Update einspielbar sein (vom Nutzer bestätigt). | O1, R1 | erledigt |
 | A4 | Ein CI-Wächter für P1 auf dem GitHub-Runner sagt etwas über die Demo-VM aus. | P1 | Einmal auf beiden messen |
-| A5 | P2 (< 500 ms p95) ist erfüllt und braucht kein eigenes Szenario. | P2 | Im Lauf für P1 mitmessen |
+| A5 | P2 (< 500 ms p95) ist erfüllt und braucht kein eigenes Szenario. Die Rückfrage vom 23.10. blieb unklar. | P2 | Product Owner; im Lauf für P1 mitmessen |
 | A6 | Die rote Quote auf `main` (4/7) kommt von Rennen zwischen parallelen Merges und Browser-Unterschieden, nicht von echten Fehlern. Ursachen nicht untersucht. | T1 | Auswertung der roten Läufe 861, 876, 886, 916 |
-| A7 | Datenschutz der Backup-Dateien (enthalten alle Mieterdaten und Schlüssel) ist Sache des Betreibers. Verschlüsselung at rest ist «Vision, nicht geplant» (PRD, #111, #719, #722). | R1, S1 | Product Owner |
+| A7 | ~~Datenschutz der Backup-Dateien ist Sache des Betreibers.~~ **Entschieden:** Dwello verschlüsselt das Backup, der Schlüssel kommt aus einem generierten Wiederherstellungscode (vom Nutzer bestätigt). Das betrifft nur das Backup. Für die laufende DB bleibt die Verschlüsselung at rest «Vision, nicht geplant» (PRD, #111, #719, #722). | R1, S1 | erledigt |
+| A8 | Der Vermieter verwahrt den Wiederherstellungscode getrennt vom Server. Geht der Code verloren, ist jedes Backup wertlos. Wie Dwello das verhindert (Bestätigung bei der Einrichtung, neuer Code, Hinweis), ist offen. | R1 | Product Owner |
+| A9 | Gemeinsame Typen werden aus der API-Form abgeleitet, nicht aus der DB-Tabelle (TP-Ä1/S1). | Ä1, S1 | erledigt (vom Nutzer bestätigt) |
