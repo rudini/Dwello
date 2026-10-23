@@ -2,6 +2,7 @@ import { question } from '../screenplay/actor';
 import { Checked, OpenedFile, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	belegAmount,
+	belegDetailsToggle,
 	belegRow,
 	belegDeductedRule,
 	belegDistributionKey,
@@ -31,6 +32,7 @@ import {
 
 export const uploadPurposeText = Text.of(uploadPurpose);
 export const belegRowText = (fileName: string) => Text.of(belegRow(fileName));
+export const belegToggleText = (fileName: string) => Text.of(belegDetailsToggle(fileName));
 export const proposedAmount = (fileName: string) => Value.of(belegAmount(fileName));
 export const proposedInvoiceNumber = (fileName: string) => Value.of(belegInvoiceNumber(fileName));
 export const unsureNote = (fileName: string, field: string) => Text.of(belegUnsure(fileName, field));

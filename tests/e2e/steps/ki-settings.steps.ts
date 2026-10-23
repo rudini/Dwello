@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { belegRowText, uploadPurposeText } from '../questions/invoice-upload';
+import { belegRowText, belegToggleText, uploadPurposeText } from '../questions/invoice-upload';
 import { addBelegOnceRead } from '../tasks/invoice-upload';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
@@ -168,5 +168,13 @@ Then(
 	async ({ verwalter }, fileName: string) => {
 		await verwalter.sees(belegRowText(fileName)).toContain(fileName);
 		await verwalter.sees(belegRowText(fileName)).not.toContain('KI');
+	}
+);
+
+// #760: a file nobody read opens its empty fields to enter, not to check
+Then(
+	'bietet der Dialog "Rechnungen hochladen" zur Datei {string} {string} an',
+	async ({ verwalter }, fileName: string, label: string) => {
+		await verwalter.sees(belegToggleText(fileName)).toBe(label);
 	}
 );
