@@ -116,6 +116,6 @@ Before marking anything complete, all of these pass: `bun run lint`, `bun run ch
 - `docs/tech-stack.md`: architecture decisions, performance targets
 - `README.md`: setup, Docker deployment, database and demo data commands
 - `docs/test-pyramid.md`: test layers, runners, rules, coverage target
-- `docs/migration-mva.md`: Minimum Viable Architecture: quality scenarios, their status, deferred decisions
+- `docs/architecture/utility-tree.md`: quality scenarios with targets and status; risks and tradeoffs, principles and the Phase 0 baseline next to it
 - `docs/design/token-referenz.md`: design tokens (colors, typography, spacing, radius, shadow) and components
 - `docs/design/design-decisions.md`: design decisions of the 2026 redesign; open work in GitHub issues

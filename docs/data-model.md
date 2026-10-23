@@ -588,5 +588,5 @@ document. Do not use `db:generate` (Drizzle Kit has no snapshots and would emit 
 ## Not implemented
 
 - Database views.
-- Backups (scenario R2 in `docs/migration-mva.md`).
+- Backups (scenario R1 in `docs/architecture/utility-tree.md`).
 - Encryption of individual columns (e.g. the IBAN).

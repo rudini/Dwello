@@ -1,5 +1,7 @@
 # Architecture: Minimum Viable Architecture for Dwello
 
+> **Archived on 2026-10-23.** Replaced by the quality attribute utility tree in `docs/architecture/utility-tree.md`, with `docs/architecture/risks-and-tradeoffs.md` and `docs/architecture/principles.md`. Its scenarios were taken over or merged there; the structural flaws, the possible modules and the deliberately deferred measures below remain for reference.
+
 ## Goal
 
 Dwello should have a **Minimum Viable Architecture (MVA)** in the sense of _Continuous Architecture in Practice_ (Erder, Pureur, Woods): the smallest architecture that meets the quality requirements, and no more.

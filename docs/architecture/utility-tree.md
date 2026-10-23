@@ -10,7 +10,7 @@
 - **vom Nutzer bestätigt:** Antwort des Product Owners am 23.10.2026
 - **Annahme:** weder belegt noch bestätigt; steht unter «Offene Annahmen»
 
-Bestehende Szenarien aus `docs/migration-mva.md` (Q1–Q5, D1–D2, S1–S2, P1–P2, R1–R2) sind hier aufgenommen oder zusammengeführt. Sie gelten erst, wenn ein ADR sie bestätigt (`migration-mva.md`, Schritt 1). Dieser Baum soll das vorbereiten.
+Bestehende Szenarien aus `docs/archive/migration-mva.md` (Q1–Q5, D1–D2, S1–S2, P1–P2, R1–R2) sind hier aufgenommen oder zusammengeführt. Dieser Baum löst `migration-mva.md` ab (archiviert am 23.10.2026). ADRs in `docs/adr/` gibt es noch nicht.
 
 ## 1. Kontext
 
@@ -55,7 +55,7 @@ Dwello-Nutzen
 | Skalierbarkeit, Last, Mandantenfähigkeit | Ein Benutzer und höchstens 50 Wohnungen pro Installation, kein gehostetes Angebot in 12 Monaten (vom Nutzer bestätigt). |
 | Usability, Barrierefreiheit | CI sichert sie ab (axe mit 0 Verstössen, Personas; `CLAUDE.md` «Design-Regeln»). Sie treiben die Architektur nicht. |
 | Ä2 Statusregel, Ä3 Dateien pro Feature (Baseline §7) | Ä2 geht in Ä4 auf. Ä3 bleibt als Leitplanke in der Baseline, Ä1 und Ä4 erklären sie. |
-| Q1–Q5, D1, D2 (`migration-mva.md`) | Erfüllt und mit Tests belegt (✅). Sie bleiben dort und treiben keine Änderung. |
+| Q1–Q5, D1, D2 (`docs/archive/migration-mva.md`) | Erfüllt und mit Tests belegt (✅); die Belege stehen im Archiv. Ihre Tests bleiben bestehen, die Szenarien treiben keine Änderung. |
 
 ## 3. Szenarien
 
@@ -153,7 +153,7 @@ Dwello-Nutzen
 - **Umgebung:** VM wie die Demo, Daten von 50 Wohnungen über mehrere Jahre.
 - **Reaktion:** Die Seite ist ohne spürbare Wartezeit da.
 - **Messgrösse und Ziel:** Antwortzeit der API **< 500 ms (p95)** (aus Repo/Config: `docs/tech-stack.md`; eigenes Ziel: vom Nutzer bestätigt). Für die Datenbank nennt `docs/tech-stack.md` zusätzlich Abfragen < 100 ms (p95).
-- **Heute:** **unbekannt**, nicht gemessen (aus Repo/Config: `migration-mva.md` P2 ❓).
+- **Heute:** **unbekannt**, nicht gemessen (aus Repo/Config: `docs/archive/migration-mva.md` P2 ❓).
 - **Fitness Function:** Im Benchmark von P1 zusätzlich jede Listen- und Übersichtsroute 100-mal abrufen und p95 bilden, wöchentlich auf der Demo-VM. In CI ein grober Wächter mit derselben Annahme wie A4.
 
 ### S1 Sitzung und Mieterdaten geschützt
@@ -162,7 +162,7 @@ Dwello-Nutzen
 - **Umgebung:** Produktion.
 - **Reaktion:** Das Skript findet kein Token. Der Request bekommt 401 oder eine Weiterleitung zum Login.
 - **Messgrösse und Ziel:** **0** lesbare Tokens im Browser. **100 %** der Endpunkte antworten ohne Sitzung mit 401 (mit der Freigabe vom Nutzer bestätigt).
-- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`). HttpOnly ist so gebaut, aber nicht getestet (aus Repo/Config: `migration-mva.md` S1 ✅, S2 ❓).
+- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`). HttpOnly ist so gebaut, aber nicht getestet (aus Repo/Config: `docs/archive/migration-mva.md` S1 ✅, S2 ❓).
 - **Fitness Function:** E2E: Nach dem Login enthält `document.cookie` kein JWT. Ein API-Test läuft über alle registrierten Routen ohne Sitzung und erwartet 401.
 
 ## 4. Priorisierungsmatrix
@@ -184,7 +184,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
-| P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`migration-mva.md`). |
+| P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`docs/archive/migration-mva.md`). |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
 **Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
