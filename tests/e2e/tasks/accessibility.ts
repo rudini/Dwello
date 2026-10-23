@@ -34,7 +34,7 @@ import {
 import { setUpDwello } from './einrichtung';
 import { invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
-import { buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
+import { agreementsLoading, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -148,6 +148,8 @@ const restoreDraft = (example: Example): Activity => async (actor) => {
 	const start = startDraft[new URL(await actor.answer(pageAddress)).pathname];
 	await actor.attemptsTo(start(example));
 	await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Noch nicht gespeichert'))), Navigate.reload, Wait.until(draftRestored));
+	// the statement wizard's step settles first: rows arriving later scroll the page while axe looks (#637)
+	await actor.attemptsTo(Wait.forCount(agreementsLoading, 0));
 };
 
 const endWithPastDate: Activity = async (actor) => {
