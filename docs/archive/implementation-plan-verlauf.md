@@ -3076,6 +3076,12 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] `code-reviewer`: `h28g-review-1.md` (5 Minor, fixed), `h28h-review-1.md` (5 Minor, fixed; the 404 text of C-1 stays), closing round `h28i-review-1.md`
 - [x] Before complete; PR pushed after this archive
 
+## Session 2026-10-23: #774 Frische Installation im Persona-Stack
+
+- [x] `persona-stack.sh --fresh` (empty database, no OAuth, Einrichtungscode `PERS-FRSH`, KI stand-in downloading at 40 %) and `--fresh --second` (:3310/:3311, `dwello_persona_2`); README "Running a review"; No scenario: persona tooling
+- [x] Tried by hand: default mode unchanged (demo data, sign-in), fresh (setup, code accepted, no buildings), second beside the first, second refused without a fresh first
+- [x] code-reviewer round 1, also the closing round: `docs/reviews/774-review-1.md`; Minors C-1 (the 40 % were never set) and C-2 (second without a fresh stand-in) fixed
+- [x] Workflow note: none (this task answers the note of `docs/reviews/workflow-notes-issue-620.md`); archive
 ## Session: grill-me without an issue (workflow note of #643)
 
 - [x] `.claude/skills/grill-me/SKILL.md`: description, intro, steps 1 and 5 cover a request without an issue (product owner decision 2026-10-23, `docs/reviews/workflow-notes-issue-643.md`)
