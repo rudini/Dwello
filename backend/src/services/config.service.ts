@@ -21,7 +21,7 @@ import { configuration, type Configuration } from '../db/schema';
 import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
 import { recordAudit } from './audit-log.service';
-import { CodedError } from './coded-error';
+import { CodedError, type ErrorCode } from './coded-error';
 
 /**
  * Configuration keys with their types and validators
@@ -34,8 +34,10 @@ export const CONFIG_KEYS = {
 	},
 	management_fee_pct: {
 		type: 'number',
-		validator: (v: number) => v >= 0 && v <= 10,
-		default: 3
+		// #124: at most 10 %, with at most two places after the point
+		validator: (v: number) => v >= 0 && v <= 10 && Number(v.toFixed(2)) === v,
+		default: 3,
+		code: 'MANAGEMENT_FEE_INVALID'
 	},
 	default_heating_profile_id: {
 		type: 'uuid',
@@ -60,7 +62,8 @@ export const CONFIG_KEYS = {
 	company_postal_code: {
 		type: 'string',
 		validator: (v: string) => /^\d{4}$/.test(v),
-		default: ''
+		default: '',
+		code: 'POSTAL_CODE_DIGITS'
 	},
 	company_city: {
 		type: 'string',
@@ -76,23 +79,27 @@ export const CONFIG_KEYS = {
 	company_email: {
 		type: 'string',
 		validator: (v: string) => v === '' || (v.length <= 255 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)),
-		default: ''
+		default: '',
+		code: 'COMPANY_EMAIL_INVALID'
 	},
 	iban: {
 		type: 'string',
 		// Checksum too: the QR-bill cannot be created with a wrong IBAN
 		validator: (v: string) => validateIBAN(v).valid,
-		default: ''
+		default: '',
+		code: 'IBAN_ENTERED_INVALID'
 	},
 	payment_deadline_days: {
 		type: 'number',
-		validator: (v: number) => v >= 7 && v <= 90,
-		default: 30
+		validator: (v: number) => Number.isInteger(v) && v >= 7 && v <= 90,
+		default: 30,
+		code: 'PAYMENT_DEADLINE_DAYS'
 	},
 	reminder_after_days: {
 		type: 'number',
-		validator: (v: number) => v >= 7 && v <= 60,
-		default: 14
+		validator: (v: number) => Number.isInteger(v) && v >= 7 && v <= 60,
+		default: 14,
+		code: 'REMINDER_AFTER_DAYS'
 	},
 	default_language: {
 		type: 'string',
@@ -167,33 +174,22 @@ export async function getAllConfig(): Promise<Record<ConfigKey, string | null>> 
 }
 
 /**
- * Throws when the key is unknown or the value invalid
+ * The value's error, null when it is valid; a field of the settings form names its own (H-28, #717)
  */
-async function validateConfig(key: ConfigKey, value: string) {
-	// Validate the key exists
-	if (!(key in CONFIG_KEYS)) {
-		throw new Error(`Unknown configuration key: ${key}`);
-	}
-
+async function configError(key: ConfigKey, value: string): Promise<ErrorCode | null> {
 	const configDef = CONFIG_KEYS[key];
+	if (!configDef) return { code: 'CONFIG_VALUE_INVALID', params: {} };
 
-	// Validate the value
-	let parsedValue: unknown = value;
+	// a number as digits with a point, not what parseFloat reads into «1e1» or «30,5»
+	const parsedValue = configDef.type === 'number' ? (/^\d+(\.\d+)?$/.test(value) ? Number(value) : NaN) : value;
+	const valid = !Number.isNaN(parsedValue) && (await configDef.validator(parsedValue as never));
+	if (valid) return null;
+	return 'code' in configDef ? { code: configDef.code, params: { field: key } } : { code: 'CONFIG_VALUE_INVALID', params: {} };
+}
 
-	if (configDef.type === 'number') {
-		parsedValue = parseFloat(value);
-		if (isNaN(parsedValue as number)) {
-			throw new Error(`Invalid number value for ${key}`);
-		}
-	}
-
-	const validator = configDef.validator;
-	const isValidResult = validator(parsedValue as never);
-	const isValid = isValidResult instanceof Promise ? await isValidResult : isValidResult;
-
-	if (!isValid) {
-		throw new Error(`Invalid value for ${key}: ${value}`);
-	}
+/** Throws when the key is unknown or the value invalid */
+async function validateConfig(key: ConfigKey, value: string) {
+	if (await configError(key, value)) throw new Error(`Invalid value for ${key}: ${value}`);
 }
 
 /**
@@ -201,12 +197,12 @@ async function validateConfig(key: ConfigKey, value: string) {
  * landlord (#450). The form sends the IBAN it shows with every save; a save without it (the IBAN emptied, reset after)
  * stays possible (code review C-1)
  */
-async function checkCreditor(changes: Partial<Record<ConfigKey, string>>) {
-	if (!changes.iban?.trim()) return;
+async function creditorMissing(changes: Partial<Record<ConfigKey, string>>): Promise<ErrorCode[]> {
+	if (!changes.iban?.trim()) return [];
 	const stored = await getAllConfig();
 	const value = (key: ConfigKey) => (changes[key] ?? stored[key] ?? '').trim();
-	if (!(['company_name', 'company_postal_code', 'company_city'] as const).every(value))
-		throw new CodedError('IBAN_COMPANY_ADDRESS_MISSING', 'An IBAN needs the company name, postal code and town');
+	const missing = (['company_name', 'company_postal_code', 'company_city'] as const).filter((key) => !value(key));
+	return missing.length ? [{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: missing.join(',') } }] : [];
 }
 
 /**
@@ -214,7 +210,8 @@ async function checkCreditor(changes: Partial<Record<ConfigKey, string>>) {
  */
 export async function setConfig(key: ConfigKey, value: string): Promise<Configuration> {
 	await validateConfig(key, value);
-	await checkCreditor({ [key]: value });
+	const [missing] = await creditorMissing({ [key]: value });
+	if (missing) throw new CodedError(missing.code, 'An IBAN needs the company name, postal code and town', missing.params);
 	return saveConfig(db, key, value);
 }
 
@@ -240,50 +237,55 @@ async function saveConfig(
 	return saved;
 }
 
+// As stored: a rate typed with a comma or «%» as a number with a point, an IBAN without its spaces (H-28, #717)
+function asStored(key: string, value: string) {
+	if (key === 'iban') return value.replace(/\s/g, '').toUpperCase();
+	if (key !== 'management_fee_pct') return value;
+	const rate = value.trim().replace(/\s*%$/, '').replace(',', '.');
+	return /^\d+(\.\d+)?$/.test(rate) ? String(Number(rate)) : value;
+}
+
 /**
- * Set multiple configuration values at once
+ * Set multiple configuration values at once, as the settings form sends them; the errors of those it refuses
  */
 export async function setMultipleConfig(
-	configs: Partial<Record<ConfigKey, string>>
-): Promise<{ success: boolean; errors: Record<string, string> }> {
-	const errors: Record<string, string> = {};
-
+	typed: Partial<Record<ConfigKey, string>>
+): Promise<ErrorCode[]> {
+	const configs = Object.fromEntries(
+		Object.entries(typed).map(([key, value]) => [key, value === undefined ? value : asStored(key, value)])
+	) as Partial<Record<ConfigKey, string>>;
+	const errors: ErrorCode[] = [];
 	for (const [key, value] of Object.entries(configs)) {
-		if (value === undefined) continue;
-
-		try {
-			await validateConfig(key as ConfigKey, value);
-		} catch (error) {
-			errors[key] = error instanceof Error ? error.message : 'Unknown error';
-		}
+		// an emptied value is reset to its default
+		const error = value?.trim() ? await configError(key as ConfigKey, value) : null;
+		if (error) errors.push(error);
 	}
+	if (errors.length === 0) errors.push(...(await creditorMissing(configs)));
 
 	// All or nothing: one invalid value, or a write that fails, keeps the others unsaved
-	if (Object.keys(errors).length === 0) {
-		await checkCreditor(configs);
+	if (errors.length === 0) {
 		await db.transaction(async (tx) => {
 			for (const [key, value] of Object.entries(configs)) {
-				if (value !== undefined) await saveConfig(tx, key as ConfigKey, value);
+				if (value === undefined) continue;
+				await (value.trim() ? saveConfig(tx, key as ConfigKey, value) : removeConfig(tx, key as ConfigKey));
 			}
 		});
 	}
-
-	return {
-		success: Object.keys(errors).length === 0,
-		errors
-	};
+	return errors;
 }
 
 /**
  * Delete a configuration value (reset to default)
  */
 export async function deleteConfig(key: ConfigKey): Promise<boolean> {
-	return db.transaction(async (tx) => {
-		const [deleted] = await tx.delete(configuration).where(eq(configuration.key, key)).returning();
-		const to = String(CONFIG_KEYS.management_fee_pct.default);
-		if (key === 'management_fee_pct' && deleted && Number(deleted.value) !== Number(to)) {
-			await recordAudit('management_fee_changed', { from: deleted.value, to }, tx);
-		}
-		return !!deleted;
-	});
+	return db.transaction((tx) => removeConfig(tx, key));
+}
+
+async function removeConfig(tx: Parameters<Parameters<typeof db.transaction>[0]>[0], key: ConfigKey) {
+	const [deleted] = await tx.delete(configuration).where(eq(configuration.key, key)).returning();
+	const to = String(CONFIG_KEYS.management_fee_pct.default);
+	if (key === 'management_fee_pct' && deleted && Number(deleted.value) !== Number(to)) {
+		await recordAudit('management_fee_changed', { from: deleted.value, to }, tx);
+	}
+	return !!deleted;
 }

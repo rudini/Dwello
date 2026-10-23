@@ -1,0 +1,6 @@
+{
+	"error": "Some fields are not valid",
+	"code": "IBAN_COMPANY_ADDRESS_MISSING",
+	"params": { "field": "iban", "missing": "company_name,company_city" },
+	"causes": [{ "code": "IBAN_COMPANY_ADDRESS_MISSING", "params": { "field": "iban", "missing": "company_name,company_city" } }]
+}

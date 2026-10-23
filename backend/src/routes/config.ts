@@ -13,7 +13,7 @@ import {
 	CONFIG_KEYS,
 	type ConfigKey
 } from '../services/config.service';
-import { CodedError, errorBody } from '../services/coded-error';
+import { CodedError, errorBody, fieldsRefused } from '../services/coded-error';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values
@@ -55,21 +55,18 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	.put(
 		'/',
 		async ({ body, set }) => {
-			let result: Awaited<ReturnType<typeof setMultipleConfig>>;
+			let refused: Awaited<ReturnType<typeof setMultipleConfig>>;
 			try {
-				result = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
+				refused = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
 			} catch (error) {
 				if (!(error instanceof CodedError)) throw error;
 				set.status = 400;
 				return errorBody(error, '');
 			}
 
-			if (!result.success) {
+			if (refused.length) {
 				set.status = 400;
-				return {
-					error: 'Configuration not saved: invalid values',
-					errors: result.errors
-				};
+				return fieldsRefused(refused);
 			}
 
 			const updatedConfig = await getAllConfig();

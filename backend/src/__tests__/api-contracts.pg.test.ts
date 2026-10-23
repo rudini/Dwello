@@ -195,6 +195,20 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('tenant-fields-refused'), await response.json())).toEqual([]);
 	});
 
+	// H-28 (#717): the settings form refused, every failed check with its field; nothing is saved
+	it('PUT /config liefert bei ungültigen Feldern die Felder von config-fields-refused.json', async () => {
+		const response = await sendJson('PUT', '/api/v1/config', { company_postal_code: '84', iban: 'DE89 3704 0044 0532 0130 00', management_fee_pct: '11' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('config-fields-refused'), await response.json())).toEqual([]);
+	});
+
+	// #450, H-28: an IBAN without the Firmenadresse the form empties, the fields it misses named
+	it('PUT /config liefert ohne Firmenadresse die Felder von config-iban-address-missing.json', async () => {
+		const response = await sendJson('PUT', '/api/v1/config', { company_name: '', company_city: '', iban: 'CH93 0076 2011 6238 5295 7' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('config-iban-address-missing'), await response.json())).toEqual([]);
+	});
+
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts?buildingId=${rental.building}&limit=1000`)).json();
 		expect(drift(await sample('building-contracts'), actual)).toEqual([]);
