@@ -2913,3 +2913,12 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] #637 code review rounds 1–2 (`docs/reviews/637-review-{1,2}.md`), C-1 fixed
 - [x] #637 pull request #638 `Fixes #637` (body names «No scenario», the check reads it from the event): pushed after this archive
 - [x] Workflow notes `docs/reviews/workflow-notes-session-2026-10-21.md`, collected review `docs/reviews/workflow-rules-review-2026-10-23.md`; stopped after #637 on the product owner's word (next: #484)
+
+## Session 2026-10-23: workflow review 2026-10-23 applied
+
+- [x] Decisions recorded in `docs/reviews/workflow-rules-review-2026-10-23.md` («Decided (product owner, 2026-10-23)»)
+- [x] L1 push checks subjects since origin/main; L6 PR text through the API; tests red first
+- [x] Rule texts L2–L9, `persona-stack.sh` with `setsid nohup`
+- [x] Code review round 1 (`docs/reviews/rules-2026-10-23-review-1.md`): C-1 Blocker (`pull-requests: read`), C-2 Major (`CLAUDE.md` «Open work»), C-3 Minor (test red first), C-4, C-5 fixed
+- [x] Code review round 2 (`docs/reviews/rules-2026-10-23-review-2.md`): all closed
+- [x] Pull request: pushed after this archive

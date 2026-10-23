@@ -2,7 +2,8 @@
 // pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
 // issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
 // waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (skill `issue-work`).
-// CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
+// CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
+// With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
 import { execFileSync } from 'node:child_process';
 
 const repo = process.env.GITHUB_REPOSITORY ?? 'rudini/Dwello';
@@ -26,15 +27,37 @@ for (const line of grep().split('\n').filter(Boolean)) {
 	}
 }
 
+const get = async (path) => {
+	const response = await fetch(`${api}/repos/${repo}/${path}`, {
+		headers: { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, accept: 'application/vnd.github+json' }
+	});
+	if (response.status === 401 || response.status === 403) {
+		console.error(`Cannot read issues of ${repo} (HTTP ${response.status}): check GITHUB_TOKEN`);
+		process.exit(1);
+	}
+	return response;
+};
+/** The pull request's text as it is now; an unreadable one stops the run, as it would switch its checks off */
+async function textOf(number) {
+	const response = await get(`pulls/${number}`);
+	if (!response.ok) {
+		console.error(`Cannot read pull request #${number} (HTTP ${response.status})`);
+		process.exit(1);
+	}
+	return (await response.json()).body ?? '';
+}
+const prBody =
+	process.env.PR_NUMBER && process.env.GITHUB_TOKEN ? await textOf(process.env.PR_NUMBER) : (process.env.PR_BODY ?? '');
+
 const failures = [];
-const closing = [...(process.env.PR_BODY ?? '').matchAll(/\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\s+#(\d+)/gi)];
+const closing = [...prBody.matchAll(/\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\s+#(\d+)/gi)];
 for (const [, n] of closing) {
 	if (refs.has(n)) failures.push(`This pull request closes #${n}, but markers still name it: ${refs.get(n).join(', ')}`);
 }
 
 // `No scenario: <reason>` in the pull request text where none applies, e.g. a refactoring without new behaviour
 const base = process.env.BASE_REF;
-if (base && closing.length && !/\bno scenario:/i.test(process.env.PR_BODY ?? '')) {
+if (base && closing.length && !/\bno scenario:/i.test(prBody)) {
 	const changed = execFileSync('git', ['diff', '--name-only', `origin/${base}...HEAD`], { encoding: 'utf8' }).split('\n');
 	const app = changed.some((file) => /^(src\/(routes|lib)|backend\/src)\//.test(file) && !/__tests__|\.test\.ts$/.test(file));
 	if (app && !changed.some((file) => /^tests\/e2e\/features\/.+\.feature$/.test(file)))
@@ -46,16 +69,6 @@ if (base && closing.length && !/\bno scenario:/i.test(process.env.PR_BODY ?? '')
 if (!process.env.GITHUB_TOKEN) {
 	console.log(`Skipped the issue lookup: GITHUB_TOKEN is not set (CI sets it); ${refs.size} issues named by markers`);
 } else {
-	const get = async (path) => {
-		const response = await fetch(`${api}/repos/${repo}/${path}`, {
-			headers: { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, accept: 'application/vnd.github+json' }
-		});
-		if (response.status === 401 || response.status === 403) {
-			console.error(`Cannot read issues of ${repo} (HTTP ${response.status}): check GITHUB_TOKEN`);
-			process.exit(1);
-		}
-		return response;
-	};
 	for (const [n, places] of refs) {
 		const response = await get(`issues/${n}`);
 		const issue = response.ok ? await response.json() : null;

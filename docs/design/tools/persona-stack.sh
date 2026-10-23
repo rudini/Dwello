@@ -20,12 +20,12 @@ cp package.json /tmp/persona-app/ && ln -sfn "$PWD/node_modules" /tmp/persona-ap
 # their name (backend/scripts/llm-stub.ts); other invoices find no KI. Its own port, so an E2E run that started the one
 # on 2527 cannot take it away when it ends
 fuser -k 2528/tcp 2>/dev/null || true
-(cd backend && LLM_STUB_PORT=2528 nohup bun run llm-stub > /tmp/persona-llm.log 2>&1 &) < /dev/null > /dev/null 2>&1
+(cd backend && LLM_STUB_PORT=2528 setsid nohup bun run llm-stub > /tmp/persona-llm.log 2>&1 &) < /dev/null > /dev/null 2>&1
 # e-mail goes to the mail catcher of the acceptance tests (shared with E2E, which reuses it): read on :2526/messages
-fuser 2525/tcp > /dev/null 2>&1 || (cd backend && nohup bun run mail-catcher > /tmp/persona-mail.log 2>&1 &) < /dev/null > /dev/null 2>&1
-(cd backend && PORT=3301 DATABASE_URL=$DB LLM_LOCAL_URL=http://127.0.0.1:2528/v1 ENCRYPTION_KEY=persona-encryption-key MAIL_TRANSPORT=smtp MAIL_FROM=verwaltung@dwello.test SMTP_HOST=127.0.0.1 SMTP_PORT=2525 nohup bun run src/index.ts > /tmp/persona-backend.log 2>&1 &) < /dev/null > /dev/null 2>&1
+fuser 2525/tcp > /dev/null 2>&1 || (cd backend && setsid nohup bun run mail-catcher > /tmp/persona-mail.log 2>&1 &) < /dev/null > /dev/null 2>&1
+(cd backend && PORT=3301 DATABASE_URL=$DB LLM_LOCAL_URL=http://127.0.0.1:2528/v1 ENCRYPTION_KEY=persona-encryption-key MAIL_TRANSPORT=smtp MAIL_FROM=verwaltung@dwello.test SMTP_HOST=127.0.0.1 SMTP_PORT=2525 setsid nohup bun run src/index.ts > /tmp/persona-backend.log 2>&1 &) < /dev/null > /dev/null 2>&1
 # only the persona-kit's Liegenschaftsverwalter may sign in, as in production (#51)
 # the address search asks the real Gebäuderegister (geo.admin.ch, #479): Node's fetch takes HTTPS_PROXY only with NODE_USE_ENV_PROXY
-NODE_USE_ENV_PROXY=1 ALLOWED_EMAILS=verwalter@example.com PORT=3300 ORIGIN=http://localhost:3300 BODY_SIZE_LIMIT=11M BACKEND_URL=http://localhost:3301 OAUTH_GOOGLE_CLIENT_ID=x OAUTH_GOOGLE_CLIENT_SECRET=x OAUTH_GOOGLE_REDIRECT_URI=http://localhost:3300/auth/callback nohup node /tmp/persona-app < /dev/null > /tmp/persona-frontend.log 2>&1 &
+NODE_USE_ENV_PROXY=1 ALLOWED_EMAILS=verwalter@example.com PORT=3300 ORIGIN=http://localhost:3300 BODY_SIZE_LIMIT=11M BACKEND_URL=http://localhost:3301 OAUTH_GOOGLE_CLIENT_ID=x OAUTH_GOOGLE_CLIENT_SECRET=x OAUTH_GOOGLE_REDIRECT_URI=http://localhost:3300/auth/callback setsid nohup node /tmp/persona-app < /dev/null > /tmp/persona-frontend.log 2>&1 &
 for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:3300/login && curl -s -o /dev/null http://localhost:3301/health && echo ready && exit 0; sleep 1; done
 echo "not ready"; tail -5 /tmp/persona-backend.log /tmp/persona-frontend.log
