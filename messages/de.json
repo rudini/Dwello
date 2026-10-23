@@ -89,7 +89,7 @@
 	"glossary_period_term": "Abrechnungsperiode",
 	"glossary_period_text": "Das Jahr, über das Sie die Nebenkosten abrechnen, zum Beispiel das Kalenderjahr oder Juli bis Juni. Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. Mit Leistungszeitraum zählen dessen Tage in der Abrechnungsperiode.",
 	"glossary_advance_term": "Akonto",
-	"glossary_advance_text": "Der monatliche Vorschuss des Mieters für die Nebenkosten. Die Nebenkostenabrechnung verrechnet ihn mit den tatsächlichen Kosten.",
+	"glossary_advance_text": "Der monatliche Vorschuss des Mieters für die Nebenkosten. Die Nebenkostenabrechnung verrechnet ihn mit den tatsächlichen Kosten. Die Nebenkostenabrechnung zieht das vereinbarte Akonto ab, nicht das bezahlte. Fehlende Zahlungen regeln Sie ausserhalb von Dwello.",
 	"glossary_net_rent_term": "Nettomiete",
 	"glossary_net_rent_text": "Die monatliche Grundmiete ohne Nebenkosten, auch Mietzins genannt.",
 	"glossary_additional_rent_term": "Zusatzmiete",

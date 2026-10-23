@@ -42,6 +42,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
 | Akonto | acompte | acconto | advance payment |
 | Akontobeiträge (#477, bis dahin «Geleistete Akontobeiträge») | acomptes | acconti | advance payments |
+| Gültig ab (Akonto) (#477) | valable dès le | valido dal | valid from |
 | Vereinbarte Nebenkosten / Nicht vereinbart | frais accessoires convenus / non convenue | spese accessorie pattuite / non pattuita | agreed utility costs / not agreed |
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |

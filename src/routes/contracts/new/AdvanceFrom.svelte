@@ -7,7 +7,6 @@
 </script>
 
 {#if value !== undefined}
-	<!-- TODO(fachlich prüfen, #477): «Gültig ab» -->
 	<DateInput
 		id="advancePaymentFrom"
 		label={m.contracts_advance_from_label()}

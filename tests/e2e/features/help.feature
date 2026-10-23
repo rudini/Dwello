@@ -52,11 +52,10 @@ Funktionalität: Hilfe
       | Begriff  | Erklärung                                                  |
       | Erledigt | Ein übertragener Betrag ist damit noch nicht bezahlt       |
 
-    # #477 (Entscheid Product Owner 2026-10-19): abgezogen wird das vereinbarte Akonto, nicht das bezahlte
-    @wip
+    # #477 (Entscheid Product Owner 2026-10-19, Fachreview 477-2 V-1): abgezogen wird das vereinbarte Akonto, nicht das bezahlte
     Beispiele:
-      | Begriff | Erklärung                                                                   |
-      | Akonto  | Die Nebenkostenabrechnung zieht das vereinbarte Akonto ab, nicht das bezahlte. |
+      | Begriff | Erklärung                                                                                                                  |
+      | Akonto  | Die Nebenkostenabrechnung zieht das vereinbarte Akonto ab, nicht das bezahlte. Fehlende Zahlungen regeln Sie ausserhalb von Dwello. |
 
   # Inhaltsverzeichnis (#109)
   Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen

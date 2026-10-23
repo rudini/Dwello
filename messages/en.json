@@ -89,7 +89,7 @@
 	"glossary_period_term": "Billing period",
 	"glossary_period_text": "The year for which you bill the utility costs, for example the calendar year or July to June. Without a service period, the invoice date decides which billing period an invoice belongs to. With a service period, its days in the billing period count.",
 	"glossary_advance_term": "Advance payment",
-	"glossary_advance_text": "The tenant’s monthly advance for the utility costs. The utility cost statement sets it off against the actual costs.",
+	"glossary_advance_text": "The tenant’s monthly advance for the utility costs. The utility cost statement sets it off against the actual costs. The utility cost statement deducts the agreed advance payment, not the amount paid. Settle missing payments outside Dwello.",
 	"glossary_net_rent_term": "Net rent",
 	"glossary_net_rent_text": "The monthly base rent, without utility costs; also simply called the rent.",
 	"glossary_additional_rent_term": "Additional rent",
