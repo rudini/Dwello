@@ -1267,7 +1267,7 @@ BALANCE (refund): CHF 30
 
 **Data at Rest:**
 - No passwords or OAuth tokens are stored
-- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): «Vision, nicht geplant»; an operations decision of the installation (#111; O-3, O-6 in `docs/design/offene-punkte.md`)
+- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): «Vision, nicht geplant»; an operations decision of the installation (#111, #719, #722)
 
 **Audit Logging (Protokoll, #357, decided in #111):**
 - The Protokoll under «Einstellungen» records, each with its time: logins (provider only), changes of the Verwaltungspauschale rate, of a category's allocability, invoices that become not allocable or allocable again, reset payments and corrections of sent statements (#358)
@@ -1869,4 +1869,4 @@ Key Legal Requirements Addressed (see the status note below for what is implemen
 
 ---
 
-*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed as GitHub issues (functional) and in `docs/design/offene-punkte.md` (non-functional); the architecture status is in `docs/migration-mva.md`. Future enhancements are documented in Section 12.*
+*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed as GitHub issues; the architecture status is in `docs/migration-mva.md`. Future enhancements are documented in Section 12.*
