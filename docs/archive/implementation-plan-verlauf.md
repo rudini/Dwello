@@ -3011,3 +3011,12 @@ Request: implement the seven points of the landing review (animations back with 
 - [x] Closing code review on 29cc002: `landing-warm-review-2.md` (C-10 Major, 3 Minor; fixed in bcf2d78)
 - [x] Closing round 3 on bcf2d78: `landing-warm-review-3.md` (all fixed, no new finding)
 - [x] Archive; PR pushed after this archive
+
+## Session H-28 step 2: tenant form checks in the backend
+
+#717 (H-28): every check of the tenant form (names, e-mail form, PLZ in CH and LI, the address the channel needs) is the backend's (`backend/src/services/tenant-fields.ts`); POST/PUT `/tenants` refuse with `causes` per field, the BFF shows each at its field. `fieldsRefused` and `refusedFields` are shared with the building form. No scenario: behaviour unchanged. Parallel session (checklist in the pull request).
+
+- [x] Backend checks with unit and route tests, red first; contract `tenant-fields-refused.json`
+- [x] BFF sends what was entered and maps refusals to fields; texts as `backend_<code>` in four languages, 6 unused keys removed
+- [x] `code-reviewer` round 1 (`docs/reviews/h28f-review-1.md`: K-1 Major, the E2E seed «keine Korrespondenzadresse»; K-2..K-4 Minor), round 2 (`h28f-review-2.md`: K-1..K-3 fixed, K-5 Minor), closing round (`h28f-review-3.md`: K-5 fixed; K-4 stays)
+- [x] Before complete; PR pushed after this archive
