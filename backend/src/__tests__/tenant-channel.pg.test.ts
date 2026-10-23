@@ -95,4 +95,22 @@ describe('Prüfung des Mieterformulars', () => {
 		expect(response.status).toBe(400);
 		expect(await response.json()).toMatchObject({ code: 'TENANT_ADDRESS_LETTER', causes: [{ params: { field: 'address' } }, { params: { field: 'postalCode' } }, { params: { field: 'city' } }] });
 	});
+
+	// code review K-3: a new tenant without the address its channel needs is refused, also when the field is not sent
+	it('verlangt beim Erfassen per E-Mail eine E-Mail-Adresse, auch ohne das Feld', async () => {
+		const response = await send('POST', '', { firstName: 'Dora', lastName: crypto.randomUUID(), correspondenceChannel: 'email' });
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'TENANT_EMAIL_REQUIRED' });
+	});
+
+	// code review K-2: a change of the PLZ alone keeps the stored country
+	it('nimmt beim Ändern die PLZ eines Mieters im Ausland an', async () => {
+		const tenant = (await (await send('POST', '', { firstName: 'Emil', lastName: crypto.randomUUID(), country: 'DE' })).json()) as { id: string };
+		created.push(tenant.id);
+
+		const response = await send('PUT', `/${tenant.id}`, { postalCode: '78462' });
+
+		expect(response.status).toBe(200);
+	});
 });

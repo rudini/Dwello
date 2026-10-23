@@ -56,9 +56,10 @@ describe('Prüfung des Mieterformulars', () => {
 		expect(fields({ ...anna, email: 'anna@' })).toEqual([['email', 'TENANT_EMAIL_INVALID']]);
 	});
 
-	// a change in part checks only what it sends
+	// a change in part checks only what it sends; without the country the PLZ's form is unknown (code review K-2)
 	it('prüft beim Ändern nur die gesendeten Felder', () => {
-		expect(fields({ postalCode: '84' })).toEqual([['postalCode', 'POSTAL_CODE_DIGITS']]);
+		expect(fields({ postalCode: '78462' })).toEqual([]);
+		expect(fields({ postalCode: '84', country: 'CH' })).toEqual([['postalCode', 'POSTAL_CODE_DIGITS']]);
 		expect(fields({ language: 'fr' } as never)).toEqual([]);
 	});
 });

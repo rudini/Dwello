@@ -17,7 +17,7 @@ type Entered = {
 
 const blank = (value: unknown) => String(value ?? '').trim() === '';
 
-/** The tenant's fields; a field not sent (a change in part) is not checked */
+/** The tenant's fields; a field not sent (a change in part) is not checked, see `newTenantFieldErrors` for a new one */
 export function tenantFieldErrors(t: Entered): ErrorCode[] {
 	// one error per field; a later check (an invalid value) replaces an earlier one (a missing value)
 	const errors = new Map<string, string>();
@@ -33,8 +33,13 @@ export function tenantFieldErrors(t: Entered): ErrorCode[] {
 	check('firstName', blank(t.firstName), { code: 'TENANT_FIRST_NAME_REQUIRED' });
 	check('lastName', blank(t.lastName), { code: 'TENANT_LAST_NAME_REQUIRED' });
 	check('email', !blank(t.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email!.trim()), { code: 'TENANT_EMAIL_INVALID' });
-	// Liechtenstein has Swiss postal codes; abroad each country has its own form (#102)
-	const swiss = ['CH', 'LI'].includes(t.country ?? 'CH');
+	// Liechtenstein has Swiss postal codes; abroad each country has its own form (#102); a change without the country
+	// leaves the PLZ's form unknown (code review K-2)
+	const swiss = !!t.country && ['CH', 'LI'].includes(t.country);
 	check('postalCode', swiss && !blank(t.postalCode) && !/^\d{4}$/.test(t.postalCode!.trim()), { code: 'POSTAL_CODE_DIGITS' });
 	return [...errors].map(([field, code]) => ({ code, params: { field } }));
 }
+
+/** A new tenant: what it does not send is stored empty, in Switzerland (code review K-3) */
+export const newTenantFieldErrors = (t: Entered) =>
+	tenantFieldErrors({ email: null, address: null, postalCode: null, city: null, country: 'CH', ...t });

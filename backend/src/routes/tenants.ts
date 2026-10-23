@@ -5,7 +5,7 @@
 
 import { Elysia, t } from 'elysia';
 import { fieldsRefused } from '../services/coded-error';
-import { tenantFieldErrors } from '../services/tenant-fields';
+import { newTenantFieldErrors, tenantFieldErrors } from '../services/tenant-fields';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listTenants,
@@ -113,7 +113,7 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 	.post(
 		'/',
 		async ({ body, set }) => {
-			const invalid = tenantFieldErrors(body);
+			const invalid = newTenantFieldErrors(body);
 			if (invalid.length) {
 				set.status = 400;
 				return fieldsRefused(invalid);
