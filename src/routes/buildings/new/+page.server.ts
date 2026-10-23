@@ -1,7 +1,12 @@
 import { m } from '$lib/paraglide/messages';
 import { backendMessage } from '$lib/backend-error';
 import { redirect } from '@sveltejs/kit';
-import { formError, parseBuildingForm, parseRegisterApartments } from '$lib/server/building-form';
+import {
+	formError,
+	parseBuildingForm,
+	parseRegisterApartments,
+	refusedFields
+} from '$lib/server/building-form';
 import type { Actions } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -9,11 +14,8 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 export const actions: Actions = {
 	default: async ({ request, fetch }) => {
 		const formData = await request.formData();
-		const { building, errors } = parseBuildingForm(formData);
-		const apartments = parseRegisterApartments(formData, errors);
-		if (Object.keys(errors).length > 0) {
-			return { success: false, errors };
-		}
+		const { building } = parseBuildingForm(formData);
+		const { apartments, rows } = parseRegisterApartments(formData);
 
 		let response: Response;
 		try {
@@ -33,6 +35,8 @@ export const actions: Actions = {
 
 		if (!response.ok) {
 			const error = await response.json();
+			// the form's checks are the backend's (H-28, #717): each at its field
+			if (error.causes) return { success: false, errors: refusedFields(error, rows) };
 			return formError(backendMessage(error, m.buildings_create_failed()));
 		}
 
