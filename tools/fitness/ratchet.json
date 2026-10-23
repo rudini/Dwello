@@ -1,0 +1,358 @@
+{
+	"fieldSpread": {
+		"median": 6,
+		"p90": 19,
+		"max": 60
+	},
+	"technical": [
+		{
+			"path": "src/lib/server/jwt-config.ts",
+			"line": "const match = expiry.match(/^(\\d+)([smhd])$/);",
+			"reason": "JWT expiry format of the configuration (technical)"
+		},
+		{
+			"path": "src/routes/api/addresses/[egid]/+server.ts",
+			"line": "if (!/^\\d+$/.test(params.egid)) return json({ error: 'invalid' }, { status: 400 });",
+			"reason": "EGID route parameter is a number (technical)"
+		},
+		{
+			"path": "src/routes/buildings/[id]/+page.server.ts",
+			"line": "const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+			"reason": "UUID of the record id a form posts, checked before it goes into a backend URL (technical)"
+		},
+		{
+			"path": "src/routes/invoices/+page.server.ts",
+			"line": "const day = /^\\d{4}-\\d{2}-\\d{2}$/;",
+			"reason": "ISO date or year of a filter query parameter (technical)"
+		},
+		{
+			"path": "src/routes/invoices/+page.server.ts",
+			"line": "else if (/^\\d{4}$/.test(get('year'))) {",
+			"reason": "ISO date or year of a filter query parameter (technical)"
+		},
+		{
+			"path": "src/routes/invoices/new/+page.server.ts",
+			"line": "const isoDate = (value: string | null) => (value && /^\\d{4}-\\d{2}-\\d{2}$/.test(value) ? value : '');",
+			"reason": "ISO date of a query parameter (technical)"
+		},
+		{
+			"path": "src/routes/statements/+page.server.ts",
+			"line": "/^\\d{4}-\\d{2}-\\d{2}$/.test(value) &&",
+			"reason": "ISO date of a query parameter (technical)"
+		}
+	],
+	"exceptions": {
+		"bffDecisions": [
+			{
+				"path": "src/lib/server/apartment.ts",
+				"line": "const next = contracts.filter((c: Record<string, any>) => contractStatus(c) === 'future').at(-1);",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/server/statement-generation.ts",
+				"line": "const later = status === 'draft' ? await laterChanges(fetch, id) : null;",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/[id]/+page.server.ts",
+				"line": "return statement.contractId === contractId && statement.status === 'draft' ? statement : null;",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/[id]/+page.server.ts",
+				"line": "if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(validFrom)) return fail(400, { validFrom, advanceDeleteError: m.contracts_save_failed() });",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/tenants/[id]/+page.server.ts",
+				"line": "contracts.find((c) => contractStatus(c) === 'active') ??",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/tenants/[id]/+page.server.ts",
+				"line": ".filter((c) => contractStatus(c) === 'future')",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/tenants/[id]/+page.server.ts",
+				"line": "upcoming: contractStatus(contract) === 'future'",
+				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
+				"scenario": "Ä4"
+			}
+		],
+		"literalSets": [
+			{
+				"values": "de|en|fr|it",
+				"files": 6,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "custom|predefined",
+				"files": 6,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "local|none|provider",
+				"files": 4,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "active|ended|future",
+				"files": 4,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "email|letter",
+				"files": 4,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "occupied|relet|reserved|vacant",
+				"files": 3,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "consumption|deviation|gap|missing|new|stock|tank",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "DELETE|PATCH|POST|PUT",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "area|floor|number|rooms",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "invoice_added|payment_received|statement_created",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "billedUntil|endDate|startDate",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "noHeatingMonths|wholePeriod",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "sent|to_send",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"values": "paid|replaced",
+				"files": 2,
+				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
+				"scenario": "Ä1"
+			}
+		],
+		"entityMirrors": [
+			{
+				"table": "buildings",
+				"paths": [
+					"src/lib/server/building-form.ts",
+					"src/lib/server/building-register.ts",
+					"src/lib/server/building.ts",
+					"src/lib/types.ts",
+					"src/routes/buildings/+page.server.ts",
+					"src/routes/buildings/BuildingForm.svelte"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "apartments",
+				"paths": [
+					"src/lib/server/apartment-form.ts",
+					"src/lib/server/apartment.ts",
+					"src/lib/server/building-form.ts",
+					"src/lib/server/building-register.ts",
+					"src/lib/types.ts",
+					"src/lib/ui/icons.ts",
+					"src/routes/apartments/+page.server.ts",
+					"src/routes/apartments/[id]/ApartmentFacts.svelte",
+					"src/routes/buildings/[id]/+page.server.ts",
+					"src/routes/contracts/[id]/+page.server.ts",
+					"src/routes/contracts/new/+page.server.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "tenants",
+				"paths": [
+					"src/lib/server/tenant-form.ts",
+					"src/lib/server/tenant.ts",
+					"src/lib/types.ts",
+					"src/routes/contracts/[id]/+page.server.ts",
+					"src/routes/tenants/+page.server.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "rentalContracts",
+				"paths": [
+					"src/lib/contract-form.ts",
+					"src/lib/contract-wizard.ts",
+					"src/lib/types.ts",
+					"src/routes/contracts/[id]/+page.server.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "contractCategories",
+				"paths": [
+					"src/lib/server/statement-generation.ts",
+					"src/lib/types.ts",
+					"src/routes/statements/generate/AgreementQuestion.svelte"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "categories",
+				"paths": [
+					"src/lib/names.ts",
+					"src/lib/server/category.ts",
+					"src/lib/server/distribution-key.ts",
+					"src/lib/server/heating-profile.ts",
+					"src/lib/types.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "distributionKeys",
+				"paths": [
+					"src/lib/distribution-key.ts",
+					"src/lib/names.ts",
+					"src/lib/server/category.ts",
+					"src/lib/server/distribution-key.ts",
+					"src/lib/server/heating-profile.ts",
+					"src/lib/server/save-form.ts",
+					"src/lib/types.ts",
+					"src/routes/config/NameTranslations.svelte"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "invoices",
+				"paths": [
+					"src/lib/invoice-upload.ts",
+					"src/lib/invoice.ts",
+					"src/lib/server/invoice.ts",
+					"src/lib/types.ts",
+					"src/routes/invoices/[id]/edit/+page.svelte"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "invoiceDocuments",
+				"paths": [
+					"src/lib/server/invoice.ts",
+					"src/lib/types.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "fuelStocks",
+				"paths": [
+					"src/routes/buildings/[id]/+page.server.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "utilityStatements",
+				"paths": [
+					"src/lib/server/statement.ts",
+					"src/lib/types.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "utilityStatementLineItems",
+				"paths": [
+					"src/lib/server/statement.ts",
+					"src/lib/types.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "documents",
+				"paths": [
+					"src/lib/types.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "auditLog",
+				"paths": [
+					"src/lib/server/audit-log.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"table": "kiSettings",
+				"paths": [
+					"src/lib/server/ki-settings.ts"
+				],
+				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
+				"scenario": "Ä1"
+			}
+		],
+		"moduleCycles": [
+			{
+				"modules": "be:services/pdf be:services/reminder-letter",
+				"reason": "Cycle from before phase 2 (baseline cycles-module.csv)",
+				"scenario": "Ä1"
+			},
+			{
+				"modules": "fe:lib/navigation fe:ui",
+				"reason": "Cycle from before phase 2 (baseline cycles-module.csv)",
+				"scenario": "Ä1"
+			}
+		]
+	},
+	"prSizeWarn": {
+		"files": 31,
+		"modules": 20,
+		"layers": 5
+	},
+	"coChangeWarn": 26
+}
