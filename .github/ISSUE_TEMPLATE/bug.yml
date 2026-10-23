@@ -21,6 +21,13 @@ body:
       label: What you expected
     validations:
       required: true
+  - type: dropdown
+    attributes:
+      label: UI language
+      description: The language Dwello was shown in when it happened.
+      options: [Deutsch, Français, Italiano, English]
+    validations:
+      required: true
   - type: input
     attributes:
       label: Version and browser
