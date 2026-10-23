@@ -4,7 +4,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
@@ -196,6 +196,18 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /contracts/missing-statements liefert die Felder von contracts-missing-statements.json', async () => {
 		const byContract = (await (await callApi('/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
 		expect(drift(await sample('contracts-missing-statements'), { c1: byContract[rental.contract] })).toEqual([]);
+	});
+
+	// H-28 (#16): the statement of the period with another Heizprofil and another rate than the run's
+	it('GET /statements/run-differences liefert die Felder von statement-run-differences.json', async () => {
+		const [made] = await db.select({ profile: utilityStatements.heatingProfileId }).from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		const [other] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).where(ne(heatingProfiles.id, made.profile!)).limit(1);
+		const actual = await (
+			await callApi(
+				`/api/v1/statements/run-differences?buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}&heatingProfileId=${other.id}&managementFeePercent=4.5`
+			)
+		).json();
+		expect(drift(await sample('statement-run-differences'), actual)).toEqual([]);
 	});
 
 	// H-28: the run of the statement's period, its contract billed there and one «Abgerechnet bis» covers

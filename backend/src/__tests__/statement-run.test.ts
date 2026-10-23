@@ -3,7 +3,7 @@
  * which have a statement in its period already, and when it is refused for overlapping a period of the building
  */
 import { describe, expect, it } from 'bun:test';
-import { planRun, runDefaults } from '../services/statement-run.service';
+import { planRun, runDefaults, runDifferences } from '../services/statement-run.service';
 
 const year2024 = { start: '2024-01-01', end: '2024-12-31' };
 
@@ -335,3 +335,96 @@ describe('Vorgaben des Abrechnungs-Assistenten', () => {
 	});
 });
 
+
+// #132, H-28 pair #16: what a kept statement of the run's period does differently from the run
+describe('Abweichende Einstellungen bestehender Abrechnungen', () => {
+	const names = (name: string) => ({ name, nameDE: name, nameFR: null, nameIT: null, nameEN: null });
+	const profile = (id: string, name: string, updatedAt = '2024-01-01T00:00:00.000Z') => ({ id, ...names(name), updatedAt: new Date(updatedAt) });
+	const profiles = [profile('hp1', 'Heizung Mittelland'), profile('hp2', 'Winter')];
+	const tenancy = (id: string, managementFeeAgreed = true, managementFeePercent: string | null = null) => ({ id, managementFeeAgreed, managementFeePercent });
+	const tenancies = [tenancy('c1'), tenancy('eigen', true, '2.50'), tenancy('ohne', false)];
+	const kept = (id: string, contractId: string, heatingProfileId: string | null, managementFeePercent: string | null, more: object = {}) => ({
+		id,
+		contractId,
+		heatingProfileId,
+		managementFeePercent,
+		periodStart: '2024-01-01',
+		periodEnd: '2024-12-31',
+		heatingShare: null,
+		createdAt: new Date('2025-01-10T08:00:00.000Z'),
+		...more
+	});
+	const run = { period: year2024, heatingProfileId: 'hp1', managementFeePercent: 4.5 };
+	const differ = (id: string, more: object) => ({ id, profile: null, profileEdited: null, fee: null, ...more });
+
+	it('nennt eine Abrechnung mit einem anderen Heizprofil mit beiden Namen', () => {
+		expect(runDifferences(run, [kept('1', 'c1', 'hp2', '4.50'), kept('2', 'c1', 'hp1', '4.50')], tenancies, profiles)).toEqual([
+			differ('1', { profile: { used: names('Winter'), run: names('Heizung Mittelland') } })
+		]);
+	});
+
+	// a deleted Heizprofil is stored as none; the statement keeps its name since #209
+	it('nennt ein gelöschtes Heizprofil mit dem Namen, den die Abrechnung gespeichert hat', () => {
+		const share = { byDays: false, names: names('Alt') };
+
+		expect(runDifferences(run, [kept('1', 'c1', null, '4.50', { heatingShare: share })], tenancies, profiles)).toEqual([
+			differ('1', { profile: { used: names('Alt'), run: names('Heizung Mittelland') } })
+		]);
+	});
+
+	it('nennt ein unbekanntes Heizprofil ohne Namen', () => {
+		expect(runDifferences(run, [kept('1', 'c1', 'weg', '4.50')], tenancies, profiles)).toEqual([
+			differ('1', { profile: { used: null, run: names('Heizung Mittelland') } })
+		]);
+	});
+
+	// persona Dr. Weber P-2, Fachreview V-8: by days (a contract over the whole period) the Heizprofil changes nothing;
+	// code review C-13: by days for want of heating months, another profile may share differently
+	it('nennt kein anderes Heizprofil, wenn die Abrechnung über die ganze Periode nach Tagen verteilt hat', () => {
+		const whole = kept('1', 'c1', 'hp2', '4.50', { heatingShare: { byDays: true, reason: 'wholePeriod' } });
+		const noMonths = kept('2', 'c1', 'hp2', '4.50', { heatingShare: { byDays: true, reason: 'noHeatingMonths' } });
+
+		expect(runDifferences(run, [whole, noMonths], tenancies, profiles)).toEqual([
+			differ('2', { profile: { used: names('Winter'), run: names('Heizung Mittelland') } })
+		]);
+	});
+
+	// Fachreview V-1: the statement keeps the Monatsanteile of its time, the run takes the profile as it is now
+	it('nennt eine Abrechnung, deren Heizprofil nach dem Erstellen bearbeitet wurde', () => {
+		const made = kept('1', 'c1', 'hp1', '4.50', { heatingShare: { byDays: false, names: names('Heizung Mittelland') } });
+		const later = [profile('hp1', 'Heizung Mittelland', '2025-02-01T08:00:00.000Z')];
+
+		expect(runDifferences(run, [made], tenancies, later)).toEqual([differ('1', { profileEdited: names('Heizung Mittelland') })]);
+		expect(runDifferences(run, [made], tenancies, profiles)).toEqual([]); // edited before
+		// by days, the profile's shares do not count
+		expect(runDifferences(run, [{ ...made, heatingShare: { byDays: true } }], tenancies, later)).toEqual([]);
+	});
+
+	// Fachreview M-1: the rate the run would store for the contract: its own rate before the run's, 0 without an agreed
+	// fee (#89); each case says where the rate comes from
+	it('vergleicht die Verwaltungspauschale mit dem Satz, den der Lauf für den Mietvertrag speichern würde', () => {
+		const statements = [
+			kept('1', 'c1', 'hp1', '3.00'),
+			kept('2', 'eigen', 'hp1', '2.50'),
+			kept('3', 'eigen', 'hp1', '3.00'),
+			kept('4', 'ohne', 'hp1', '0.00'),
+			kept('5', 'ohne', 'hp1', '3.00'),
+			kept('6', 'c1', 'hp1', null)
+		];
+
+		expect(runDifferences(run, statements, tenancies, profiles)).toEqual([
+			differ('1', { fee: { used: 3, now: 4.5, source: 'run' } }),
+			differ('3', { fee: { used: 3, now: 2.5, source: 'contract' } }),
+			differ('5', { fee: { used: 3, now: 0, source: 'none' } }),
+			differ('6', { fee: { used: 0, now: 4.5, source: 'run' } })
+		]);
+	});
+
+	// Fachreview V-4: settings only compare within the same Abrechnungsperiode; code review C-1: a statement of an
+	// unknown contract is not compared
+	it('vergleicht nur Abrechnungen derselben Abrechnungsperiode mit bekanntem Mietvertrag', () => {
+		const other = kept('1', 'c1', 'hp2', '1.00', { periodStart: '2023-07-01', periodEnd: '2024-06-30' });
+
+		expect(runDifferences(run, [other, kept('2', 'fremd', 'hp2', '1.00')], tenancies, profiles)).toEqual([]);
+	});
+});

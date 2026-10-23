@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session H-28 #16: settings of kept statements in the backend
+
+H-28 (`docs/design/offene-punkte.md`), baseline pair #16: whether a kept statement of the run's period used another Heizprofil, one edited since it was made, or another Verwaltungspauschale is decided in the backend, not in `src/lib/server/statement-generation.ts`. No scenario: behaviour unchanged, the preview hints keep their scenarios.
+
+- [ ] Backend: pure comparison `runDifferences` in `statement-run.service.ts` (other Heizprofil, edited since, other rate), tests red first
+- [ ] Backend: route `GET /statements/run-differences`, contract `tests/contracts/statement-run-differences.json`, api-contracts test
+- [ ] BFF: `changedStatements` takes the backend's answer, names in the UI language; `editedSince`, `profileDifference`, `feeDifference` and the profile and contract loads gone
+- [ ] Slice review `code-reviewer`
+- [ ] Before complete, closing round, PR

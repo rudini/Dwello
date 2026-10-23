@@ -125,3 +125,19 @@ describe('Vorgaben des Abrechnungs-Assistenten', () => {
 	});
 });
 
+
+// H-28 (#16): what a kept statement of the period does differently from the run, from the building's real records
+describe('Abweichende Einstellungen bestehender Abrechnungen', () => {
+	it('nennt die Abrechnung der Periode mit einem anderen Heizprofil und Satz als der Lauf', async () => {
+		const [used, other] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(2);
+		const contractId = await rent('9.01', 'Frei', '2023-01-01');
+		const { id } = await generateStatement({ contractId, buildingId, periodStart: '2023-01-01', periodEnd: '2023-12-31', heatingProfileId: used.id, managementFeePercent: 3 });
+		const differences = async (heatingProfileId: string, fee: number) =>
+			(await sendJson('GET', `/api/v1/statements/run-differences?buildingId=${buildingId}&periodStart=2023-01-01&periodEnd=2023-12-31&heatingProfileId=${heatingProfileId}&managementFeePercent=${fee}`)).json();
+
+		const found = (await differences(other.id, 4.5)) as { statements: { id: string; profile: unknown; fee: unknown }[] };
+		expect(found.statements.map(({ id, fee }) => ({ id, fee }))).toEqual([{ id, fee: { used: 3, now: 4.5, source: 'run' } }]);
+		expect(found.statements[0].profile).not.toBeNull();
+		expect(await differences(used.id, 3)).toEqual({ statements: [] });
+	});
+});

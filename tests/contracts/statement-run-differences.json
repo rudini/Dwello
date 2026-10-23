@@ -1,0 +1,19 @@
+{
+	"statements": [
+		{
+			"id": "s1",
+			"profile": {
+				"used": { "name": "Winter", "nameDE": "Winter", "nameFR": null, "nameIT": null, "nameEN": null },
+				"run": {
+					"name": "Heating Mittelland",
+					"nameDE": "Heizung Mittelland",
+					"nameFR": "Chauffage Plateau",
+					"nameIT": "Riscaldamento Altopiano",
+					"nameEN": "Heating Central Plateau"
+				}
+			},
+			"profileEdited": null,
+			"fee": { "used": 3, "now": 4.5, "source": "run" }
+		}
+	]
+}
