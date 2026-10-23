@@ -13,13 +13,14 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 No scenario: tooling and CI only, no app behaviour changes. Request: Phase 2a of the architecture work (fitness functions for the H/H and H/M scenarios of `docs/architecture/utility-tree.md`); Phase 2b waits for the product owner's approval.
 
-- [ ] Re-measure with `tools/arch-baseline/run.sh` (values for the ratchet start)
-- [ ] `tools/fitness/fitness.ts` + `ratchet.json`: Ä1 field spread, AP1 mirrors and literal sets, Ä4 BFF decisions, boundary imports and module cycles, ratchet read from the base, shrink-only exceptions, `--update`
-- [ ] PR change size (warning) and nightly co-change coupling (warning)
-- [ ] T1: CI duration and green rate of `main` (report, warning above 15 min)
-- [ ] U1: upgrade test previous release tag with demo data → HEAD migrations, row counts kept
-- [ ] CI jobs in `ci.yml`
-- [ ] Proof: each check fails on a deliberate local violation
-- [ ] `docs/architecture/fitness-functions.md`
+- [x] Re-measure with `tools/arch-baseline/run.sh` (values for the ratchet start)
+- [x] `tools/fitness/fitness.ts` + `ratchet.json`: Ä1 field spread, AP1 mirrors and literal sets, Ä4 BFF decisions, boundary imports and module cycles, ratchet read from the base, shrink-only exceptions, `--update`
+- [x] PR change size (warning) and nightly co-change coupling (warning)
+- [x] T1: CI duration and green rate of `main` (report, warning above 15 min)
+- [x] U1: upgrade test previous release tag with demo data → HEAD migrations, row counts kept
+- [x] CI jobs in `ci.yml`
+- [x] Proof: each check fails on a deliberate local violation
+- [x] `docs/architecture/fitness-functions.md`
+- [ ] Workflow note: the phase 0 scripts list files with `git ls-files`, so a local fitness run misses new untracked files (`git add -N`); CI sees them
 - [ ] Slice review (`code-reviewer`), "Before marking anything complete"
 - [ ] Report to the product owner, wait for 2b approval

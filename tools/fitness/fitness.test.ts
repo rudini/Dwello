@@ -118,6 +118,18 @@ describe('loosened', () => {
 			expect.stringContaining('moduleCycles')
 		]);
 	});
+
+	it('lets an exception change its text when the list does not grow (a renamed file, a reformatted line)', () => {
+		const base: Ratchet = {
+			...ratchet,
+			exceptions: { ...ratchet.exceptions, bffDecisions: [{ path: 'a.ts', line: 'x', reason: 'r', scenario: 'Ä4' }] }
+		};
+		const renamed: Ratchet = {
+			...base,
+			exceptions: { ...base.exceptions, bffDecisions: [{ path: 'b.ts', line: 'x', reason: 'r', scenario: 'Ä4' }] }
+		};
+		expect(loosened(renamed, base)).toEqual([]);
+	});
 });
 
 describe('tighten', () => {

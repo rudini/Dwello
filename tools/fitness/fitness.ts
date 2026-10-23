@@ -92,22 +92,27 @@ export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number },
 	return findings;
 }
 
-/** One key per unit of each exception list, so a list that grows in entries or in counted files shows as added keys. */
-const exceptionKeys = ({ exceptions: x }: Ratchet) => [
-	...x.bffDecisions.map((e) => `bffDecisions ${e.path}: ${e.line}`),
-	...x.literalSets.flatMap((e) => Array.from({ length: e.files }, (_, i) => `literalSets ${e.values} (file ${i + 1})`)),
-	...x.entityMirrors.flatMap((e) => e.paths.map((p) => `entityMirrors ${e.table} in ${p}`)),
-	...x.moduleCycles.map((e) => `moduleCycles ${e.modules}`)
-];
+/** Size of each exception list: entries, and for value lists the files each may span. */
+const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
+	bffDecisions: x.bffDecisions.length,
+	literalSets: x.literalSets.reduce((n, e) => n + e.files, 0),
+	entityMirrors: x.entityMirrors.reduce((n, e) => n + e.paths.length, 0),
+	moduleCycles: x.moduleCycles.length
+});
 
-/** Ratchet rule: a threshold never rises and an exception list only shrinks, compared with the base branch's file. */
+/**
+ * Ratchet rule: a threshold never rises and an exception list never grows, compared with the base branch's file. An
+ * entry may change (a renamed file, a reformatted line) as long as its list does not grow.
+ */
 export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 	const findings: Finding[] = [];
 	const loose = (message: string) =>
 		findings.push({ check: 'ratchet', message: `tools/fitness/ratchet.json: ${message} The ratchet only tightens; fix the code instead.` });
 	for (const k of ['median', 'p90', 'max'] as const)
 		if (working.fieldSpread[k] > base.fieldSpread[k]) loose(`fieldSpread.${k} rose from ${base.fieldSpread[k]} to ${working.fieldSpread[k]}.`);
-	for (const added of unlisted(exceptionKeys(working), exceptionKeys(base), (k) => k)) loose(`exceptions.${added} was added.`);
+	const [now, before] = [exceptionSizes(working), exceptionSizes(base)];
+	for (const k of Object.keys(now) as (keyof typeof now)[])
+		if (now[k] > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
 	return findings;
 }
 
