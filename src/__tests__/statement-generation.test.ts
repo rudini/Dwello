@@ -488,8 +488,6 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		periodEnd: '2024-12-31'
 	});
 	const c1 = buildingContracts.contracts[0].id;
-	const ownRate = { ...buildingContracts.contracts[0], id: 'eigen', managementFeePercent: '2.50' };
-	const notAgreed = { ...buildingContracts.contracts[0], id: 'ohne', managementFeeAgreed: false };
 	const fetchWith = (
 		data: object[],
 		changed: Record<string, string[]> = {},
@@ -503,7 +501,7 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 				return Response.json({ ...statementChangedInvoices, invoiceIds: changed[id] ?? [], fuelStockChanged: fuelStock.includes(id) });
 			}
 			if (url.includes('/statements?')) return Response.json({ ...statements, data });
-			if (url.includes('/contracts?')) return Response.json({ contracts: [...buildingContracts.contracts, ownRate, notAgreed] });
+			if (url.includes('/contracts?')) return Response.json(buildingContracts);
 			if (url.includes('/statements/run-differences?')) return Response.json({ statements: [] });
 			if (url.includes('/invoices/completeness/')) return Response.json(invoiceCompleteness);
 			return Response.json([]);

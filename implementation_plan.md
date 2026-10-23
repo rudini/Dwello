@@ -13,8 +13,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 
 H-28 (`docs/design/offene-punkte.md`), baseline pair #16: whether a kept statement of the run's period used another Heizprofil, one edited since it was made, or another Verwaltungspauschale is decided in the backend, not in `src/lib/server/statement-generation.ts`. No scenario: behaviour unchanged, the preview hints keep their scenarios.
 
-- [ ] Backend: pure comparison `runDifferences` in `statement-run.service.ts` (other Heizprofil, edited since, other rate), tests red first
-- [ ] Backend: route `GET /statements/run-differences`, contract `tests/contracts/statement-run-differences.json`, api-contracts test
-- [ ] BFF: `changedStatements` takes the backend's answer, names in the UI language; `editedSince`, `profileDifference`, `feeDifference` and the profile and contract loads gone
-- [ ] Slice review `code-reviewer`
+- [x] Backend: pure comparison `runDifferences` in `statement-run.service.ts` (other Heizprofil, edited since, other rate), tests red first
+- [x] Backend: route `GET /statements/run-differences`, contract `tests/contracts/statement-run-differences.json`, api-contracts test
+- [x] BFF: `changedStatements` takes the backend's answer, names in the UI language; `editedSince`, `profileDifference`, `feeDifference` and the profile and contract loads gone
+- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28b-review-1.md`
 - [ ] Before complete, closing round, PR
