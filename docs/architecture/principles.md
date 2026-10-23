@@ -1,6 +1,6 @@
 # Architekturprinzipien (Phase 1)
 
-> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Die Prinzipien folgen aus den H/H-Szenarien Ä1, U1, T1 und R1 (`utility-tree.md`) und den Risiken in `risks-and-tradeoffs.md`. Sie legen keine Lösung fest. Sie sagen, woran eine Lösung gemessen wird.
+> **Vom Product Owner freigegeben am 23.10.2026.** Die Prinzipien folgen aus den H/H-Szenarien Ä1, U1, T1 und R1 (`utility-tree.md`) und den Risiken in `risks-and-tradeoffs.md`. Sie legen keine Lösung fest. Sie sagen, woran eine Lösung gemessen wird.
 
 ## AP1 Eine Form hat eine Quelle
 

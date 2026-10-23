@@ -1,6 +1,6 @@
 # Quality Attribute Utility Tree (Phase 1)
 
-> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Phase 1 nach ATAM und Continuous Architecture; Eingaben: `docs/architecture/baseline.md` (Phase 0), `tools/arch-baseline/out/*.csv`, Repo, CI-Historie und die Antworten des Product Owners vom 23.10.2026.
+> **Vom Product Owner freigegeben am 23.10.2026.** Phase 1 nach ATAM und Continuous Architecture; Eingaben: `docs/architecture/baseline.md` (Phase 0), `tools/arch-baseline/out/*.csv`, Repo, CI-Historie und die Antworten des Product Owners vom 23.10.2026.
 
 **Herkunft jeder Zahl:**
 
@@ -42,7 +42,7 @@ Dwello-Nutzen
 │  └─ Schnelle, verlässliche Rückmeldung ..... T1 CI auf PR und main ≤ 15 min, main grün (H/H)
 ├─ Performance
 │  ├─ Abrechnungslauf ........................ P1 50 Wohnungen samt PDFs ≤ 30 s         (M/M)
-│  └─ Wartezeit nach einem Klick ............. P2 Liste oder Übersicht < 500 ms p95      (M/M)
+│  └─ Wartezeit nach einem Klick ............. P2 Liste oder Übersicht < 500 ms p95      (H/M)
 └─ Security
    └─ Sitzung und Mieterdaten geschützt ...... S1 Kein Token lesbar, 401 ohne Sitzung    (H/L)
 ```
@@ -161,7 +161,7 @@ Dwello-Nutzen
 - **Auslöser:** Ein Skript im Browser versucht, die Sitzung zu lesen, oder ein Request ohne gültige Sitzung erreicht BFF oder Backend.
 - **Umgebung:** Produktion.
 - **Reaktion:** Das Skript findet kein Token. Der Request bekommt 401 oder eine Weiterleitung zum Login.
-- **Messgrösse und Ziel:** **0** lesbare Tokens im Browser. **100 %** der Endpunkte antworten ohne Sitzung mit 401 (Vorschlag).
+- **Messgrösse und Ziel:** **0** lesbare Tokens im Browser. **100 %** der Endpunkte antworten ohne Sitzung mit 401 (mit der Freigabe vom Nutzer bestätigt).
 - **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`). HttpOnly ist so gebaut, aber nicht getestet (aus Repo/Config: `migration-mva.md` S1 ✅, S2 ❓).
 - **Fitness Function:** E2E: Nach dem Login enthält `document.cookie` kein JWT. Ein API-Test läuft über alle registrierten Routen ohne Sitzung und erwartet 401.
 
@@ -171,8 +171,8 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 
 | | Schwierigkeit **H** | **M** | **L** |
 |---|---|---|---|
-| **Wichtigkeit H** | **Ä1, U1, T1, R1** | Ä4, O1 | S1 |
-| **M** | | P1, P2 | |
+| **Wichtigkeit H** | **Ä1, U1, T1, R1** | Ä4, O1, P2 | S1 |
+| **M** | | P1 | |
 | **L** | | | |
 
 | ID | Wichtigkeit | Begründung | Schwierigkeit | Begründung |
@@ -184,7 +184,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
-| P2 | M (Vorschlag) | Als eigenes Ziel gewollt (vom Nutzer bestätigt). Wird es verfehlt, fällt nichts aus. | M (Vorschlag) | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`migration-mva.md`). |
+| P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`migration-mva.md`). |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
 **Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
@@ -197,8 +197,8 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | A2 | Eine Installation enthält nach 10 Jahren Belege für höchstens 50 Wohnungen. Der Restore schafft das in ≤ 5 min. Grösse unbekannt. | R1 | Messung mit synthetischer DB |
 | A3 | ~~Schwelle «Backup zu alt» = 26 h~~ **Entschieden:** Gelingt mehr als einen Tag kein Backup, ist das sichtbar. Ausserdem muss jedes Backup nach einem Update einspielbar sein (vom Nutzer bestätigt). | O1, R1 | erledigt |
 | A4 | Ein CI-Wächter für P1 auf dem GitHub-Runner sagt etwas über die Demo-VM aus. | P1 | Einmal auf beiden messen |
-| A5 | ~~P2 braucht kein eigenes Szenario.~~ **Entschieden:** P2 ist ein eigenes Szenario (vom Nutzer bestätigt). Der Baum hat damit 9 statt höchstens 8 Szenarien. Wichtigkeit und Schwierigkeit M/M sind ein Vorschlag. | P2 | erledigt; Einstufung offen |
+| A5 | ~~P2 braucht kein eigenes Szenario.~~ **Entschieden:** P2 ist ein eigenes Szenario (vom Nutzer bestätigt). Der Baum hat damit 9 statt höchstens 8 Szenarien. Einstufung H/M (vom Nutzer bestätigt). | P2 | erledigt |
 | A6 | Die rote Quote auf `main` (4/7) kommt von Rennen zwischen parallelen Merges und Browser-Unterschieden, nicht von echten Fehlern. Ursachen nicht untersucht. | T1 | Auswertung der roten Läufe 861, 876, 886, 916 |
 | A7 | ~~Datenschutz der Backup-Dateien ist Sache des Betreibers.~~ **Entschieden:** Dwello verschlüsselt das Backup, der Schlüssel kommt aus einem generierten Wiederherstellungscode (vom Nutzer bestätigt). Das betrifft nur das Backup. Für die laufende DB bleibt die Verschlüsselung at rest «Vision, nicht geplant» (PRD, #111, #719, #722). | R1, S1 | erledigt |
-| A8 | Der Vermieter verwahrt den Wiederherstellungscode getrennt vom Server. Geht der Code verloren, ist jedes Backup wertlos. Wie Dwello das verhindert (Bestätigung bei der Einrichtung, neuer Code, Hinweis), ist offen. | R1 | Product Owner |
+| A8 | ~~Wie Dwello den Verlust des Codes verhindert, ist offen.~~ **Entschieden:** Dwello zeigt den Code bei der Einrichtung, der Vermieter bestätigt ihn, erst dann ist das Backup aktiv. Dwello erzeugt ein Notfallblatt (PDF) mit Code und Restore-Anleitung. Ein angemeldeter Vermieter kann einen neuen Code erzeugen; alte Backups bleiben mit dem alten Code lesbar (vom Nutzer bestätigt). | R1 | erledigt |
 | A9 | Gemeinsame Typen werden aus der API-Form abgeleitet, nicht aus der DB-Tabelle (TP-Ä1/S1). | Ä1, S1 | erledigt (vom Nutzer bestätigt) |

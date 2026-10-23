@@ -1,6 +1,6 @@
 # Risiken, Sensitivity und Tradeoffs (Phase 1, ATAM-light)
 
-> **Entwurf, nicht vom Team freigegeben.** Stand 23.10.2026. Nur die H/H-Szenarien aus `utility-tree.md`: Ä1, U1, T1, R1. Herkunft wie dort: gemessen (Phase 0), gemessen (CI), aus Repo/Config, vom Nutzer bestätigt, Annahme. Ein Beleg nennt die Datei, den Commit oder den CI-Lauf.
+> **Vom Product Owner freigegeben am 23.10.2026.** Nur die H/H-Szenarien aus `utility-tree.md`: Ä1, U1, T1, R1. Herkunft wie dort: gemessen (Phase 0), gemessen (CI), aus Repo/Config, vom Nutzer bestätigt, Annahme. Ein Beleg nennt die Datei, den Commit oder den CI-Lauf.
 
 ## Ä1 Neues Feld an einer Entität
 
@@ -125,7 +125,7 @@
 
 | TP | Kollision | Erklärung |
 |---|---|---|
-| TP-R1/Datenverlust | Verschlüsselung ↔ Datenverlust | Geht der Wiederherstellungscode verloren, ist jedes Backup wertlos. Das ist genau der teuerste Fehler. Die Verschlüsselung tauscht ein Datenschutzrisiko gegen ein Verfügbarkeitsrisiko (A8). |
+| TP-R1/Datenverlust | Verschlüsselung ↔ Datenverlust | Geht der Wiederherstellungscode verloren, ist jedes Backup wertlos. Das ist genau der teuerste Fehler. Die Verschlüsselung tauscht ein Datenschutzrisiko gegen ein Verfügbarkeitsrisiko; gemindert nach A8. |
 | TP-R1/RTO | Verschlüsselung und Kompatibilität ↔ Restore ≤ 5 min | Beim Restore kommen Entschlüsseln und das Nachziehen der Migrationen zum Einspielen dazu, bei grossen DBs mit Belegen (A2). |
 | TP-R1/T1 | R1 ↔ T1 | Der Kompatibilitätstest pro Release (Vorversion → HEAD, mit Restore) gehört in den wöchentlichen Release-Job, nicht in jeden PR-Lauf. |
 | TP-R1/U1 | R1 ↔ U1: **Synergie** | Das Backup vor jeder Migration (U1) ist derselbe Mechanismus wie das tägliche Backup. Ein Upgrade-Test und ein Restore-Test teilen Aufbau und Prüfung. |
@@ -134,7 +134,7 @@
 
 | ID | Risiko | Beleg |
 |---|---|---|
-| RI-R1-1 | **Verlorener Wiederherstellungscode = Datenverlust.** Die Zielgruppe nutzt Dwello wenige Male im Jahr und hat wenig technische Erfahrung. | `CLAUDE.md` «Design-Regeln» (aus Repo/Config); vom Nutzer bestätigte Wahl des Codes |
+| RI-R1-1 | **Verlorener Wiederherstellungscode = Datenverlust.** Die Zielgruppe nutzt Dwello wenige Male im Jahr und hat wenig technische Erfahrung. Gemindert durch Bestätigung bei der Einrichtung, Notfallblatt (PDF) und neuen Code (vom Nutzer bestätigt, A8); ein Rest bleibt, wenn Code und Blatt verloren gehen. | `CLAUDE.md` «Design-Regeln» (aus Repo/Config) |
 | RI-R1-2 | Ein Backup auf derselben Platte wie die DB geht mit ihr verloren. Heute legt die Anleitung die Kopie «auf ein anderes Gerät», von Hand. | `docs/installation.md` §5 (aus Repo/Config) |
 | RI-R1-3 | Kompatibilität ist angelegt (SP-R1-3), aber nie mit Daten einer Vorversion getestet. Eine Migration, die auf echten Daten scheitert (z. B. ein NOT NULL ohne Default), macht das Backup unbrauchbar. | `docs/test-pyramid.md` («migrated fresh») (aus Repo/Config) |
 | RI-R1-4 | Restore-Dauer und DB-Grösse sind unbekannt. 5 min könnten bei 10 Jahren Belegen nicht reichen. | A2 |
