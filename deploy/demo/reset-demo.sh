@@ -13,4 +13,4 @@ flock 9
 compose stop backend
 trap 'compose start backend' EXIT
 trap 'exit 1' INT TERM
-compose run --rm --no-deps backend sh -c 'bun scripts/e2e-db.ts && bun scripts/demo-data.ts'
+compose run --rm --no-deps backend sh -c 'export DATABASE_URL=postgresql://dwello:$(cat /run/dwello/db_password)@postgres:5432/dwello && bun scripts/e2e-db.ts && bun scripts/demo-data.ts'

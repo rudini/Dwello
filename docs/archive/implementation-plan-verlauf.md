@@ -2922,3 +2922,12 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] Code review round 1 (`docs/reviews/rules-2026-10-23-review-1.md`): C-1 Blocker (`pull-requests: read`), C-2 Major (`CLAUDE.md` «Open work»), C-3 Minor (test red first), C-4, C-5 fixed
 - [x] Code review round 2 (`docs/reviews/rules-2026-10-23-review-2.md`): all closed
 - [x] Pull request: pushed after this archive
+
+## Session 2026-10-23: demo.dwello.ch does not start since #577
+
+No scenario: the E2E stack does not run the demo's compose files (`deploy/demo`).
+
+- [x] Postgres of the demo gets no `POSTGRES_PASSWORD` beside `POSTGRES_PASSWORD_FILE` (the image refuses both); the demo's check for the password moves to `secrets` (decided by the product owner in this session) — `deploy/demo/docker-compose.yml`, test in `backend/src/__tests__/compose-prod.test.ts`, seen red
+- [x] `reset-demo.sh` sets `DATABASE_URL` from `/run/dwello/db_password` (`compose run … sh -c` replaces the backend's command) — seen red
+- [x] Slice review (`code-reviewer`), `docs/reviews/demo-postgres-review-1.md`: no findings
+- [x] Archive, PR: pushed after this archive
