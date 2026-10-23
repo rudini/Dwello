@@ -8,6 +8,7 @@ import documentList from '../../tests/contracts/documents.json';
 import outdatedStatements from '../../tests/contracts/statements-outdated.json';
 import kiModelLoading from '../../tests/contracts/ki-model-loading.json';
 import kiSettings from '../../tests/contracts/ki-settings.json';
+import contractsMissing from '../../tests/contracts/contracts-missing-statements.json';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -69,7 +70,8 @@ const contracts = [
 	contract({ id: 'f4', apartmentId: 'f3', startDate: '2026-08-01', endDate: null })
 ];
 type Range = { start: string; end: string };
-const period = (start: string, end: string) => ({ start, end });
+// each missing part as the backend answers (tests/contracts/contracts-missing-statements.json)
+const period = (start: string, end: string) => ({ ...contractsMissing.c1[0], start, end });
 const lastPeriod = period('2025-07-01', '2026-06-30');
 
 // The backend as the overview reads it: counts, plus the lists that carry dates

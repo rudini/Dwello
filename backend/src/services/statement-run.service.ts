@@ -6,6 +6,7 @@
 import { billsIn, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
 import { getTypedConfig } from './config.service';
 import { getContract, listContracts, type ContractWithDetails } from './contract.service';
+import { isRealDate } from './real-date';
 import { listStatements } from './statement.service';
 import { swissToday } from './today';
 
@@ -146,12 +147,6 @@ export function runDefaults(settings: Settings, link: Link | null, contracts: Te
 	};
 }
 
-// a real day: not 2025-02-30, not 2025-13-01 (an invalid date has no ISO string)
-function isDay(value?: string) {
-	const day = new Date(`${value}T00:00:00Z`);
-	return !!value && /^\d{4}-\d{2}-\d{2}$/.test(value) && !isNaN(day.getTime()) && day.toISOString().startsWith(value);
-}
-
 /** The wizard's defaults for a link (A-10); a link with an impossible period is ignored: the settings (review K-5) */
 export async function runDefaultsOf(query: { buildingId?: string; periodStart?: string; periodEnd?: string }) {
 	const [accountingPeriod, managementFeePercent, heatingProfileId] = await Promise.all([
@@ -161,7 +156,8 @@ export async function runDefaultsOf(query: { buildingId?: string; periodStart?: 
 	]);
 	const settings = { accountingPeriod: accountingPeriod as AccountingPeriodType, managementFeePercent, heatingProfileId };
 	const { buildingId, periodStart, periodEnd } = query;
-	if (!buildingId || !isDay(periodStart) || !isDay(periodEnd) || periodStart! > periodEnd!) return runDefaults(settings, null, [], []);
+	const real = (day?: string) => !!day && isRealDate(day);
+	if (!buildingId || !real(periodStart) || !real(periodEnd) || periodStart! > periodEnd!) return runDefaults(settings, null, [], []);
 	const [{ contracts }, { statements }] = await Promise.all([
 		listContracts({ buildingId, limit: 1000 }),
 		listStatements({ buildingId, limit: 1000 })

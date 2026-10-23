@@ -76,6 +76,11 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		]);
 	});
 
+	it('antwortet für einen unbekannten Mietvertrag mit 404', async () => {
+		const response = await sendJson('GET', `/api/v1/contracts/${crypto.randomUUID()}/missing-statements`);
+		expect(response.status).toBe(404);
+	});
+
 	// #211: the list and the Übersicht mark each contract with the same rule, without opening it
 	it('nennt je Mietvertrag die Tage abgelaufener Perioden ohne Abrechnung', async () => {
 		const billed = await rent('2.02', 'Gerber', '2024-01-01', '2024-12-31');
