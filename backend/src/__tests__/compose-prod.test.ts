@@ -82,3 +82,20 @@ describe('KI einer Installation mit docker-compose.prod.yml', () => {
 		expect(backendService).toContain('- LLM_LOCAL_URL=http://ollama:11434/v1');
 	});
 });
+
+// The demo (deploy/demo) adds to docker-compose.prod.yml; since #577 Postgres reads its password from the key volume
+describe('Demo mit deploy/demo/docker-compose.yml', () => {
+	const demo = readFileSync(join(root, 'deploy/demo/docker-compose.yml'), 'utf8');
+	const service = (name: string) => demo.slice(demo.indexOf(`\n  ${name}:`) + 1).split(/\n {2}\w/)[0];
+
+	it('gibt Postgres kein POSTGRES_PASSWORD neben der Passwort-Datei, sonst startet die Datenbank nicht', () => {
+		expect(service('postgres')).not.toContain('POSTGRES_PASSWORD');
+		expect(service('secrets')).toContain('POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?');
+	});
+
+	// the backend's own command sets DATABASE_URL from the key volume; «compose run … sh -c» replaces that command
+	it('gibt dem nächtlichen Reset die Datenbank aus der Passwort-Datei', () => {
+		const reset = readFileSync(join(root, 'deploy/demo/reset-demo.sh'), 'utf8');
+		expect(reset).toContain('export DATABASE_URL=postgresql://dwello:$(cat /run/dwello/db_password)@postgres:5432/dwello');
+	});
+});
