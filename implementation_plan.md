@@ -8,3 +8,11 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-10-23: workflow review 2026-10-23 applied
+
+- [x] Decisions recorded in `docs/reviews/workflow-rules-review-2026-10-23.md` («Decided (product owner, 2026-10-23)»)
+- [x] L1 push checks subjects since origin/main; L6 PR text through the API; tests red first
+- [x] Rule texts L2–L9, `persona-stack.sh` with `setsid nohup`
+- [x] Code review round 1 (`docs/reviews/rules-2026-10-23-review-1.md`): C-1 Blocker (`pull-requests: read`), C-2 Major (`CLAUDE.md` «Open work»), C-3 Minor (test red first), C-4, C-5 fixed
+- [ ] Code review round 2, pull request, merged on green CI

@@ -37,10 +37,17 @@ const get = async (path) => {
 	}
 	return response;
 };
+/** The pull request's text as it is now; an unreadable one stops the run, as it would switch its checks off */
+async function textOf(number) {
+	const response = await get(`pulls/${number}`);
+	if (!response.ok) {
+		console.error(`Cannot read pull request #${number} (HTTP ${response.status})`);
+		process.exit(1);
+	}
+	return (await response.json()).body ?? '';
+}
 const prBody =
-	process.env.PR_NUMBER && process.env.GITHUB_TOKEN
-		? ((await (await get(`pulls/${process.env.PR_NUMBER}`)).json()).body ?? '')
-		: (process.env.PR_BODY ?? '');
+	process.env.PR_NUMBER && process.env.GITHUB_TOKEN ? await textOf(process.env.PR_NUMBER) : (process.env.PR_BODY ?? '');
 
 const failures = [];
 const closing = [...prBody.matchAll(/\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\s+#(\d+)/gi)];
