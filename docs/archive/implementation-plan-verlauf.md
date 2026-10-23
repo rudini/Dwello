@@ -3055,3 +3055,11 @@ Request: implement the seven points of the landing review (animations back with 
 - [x] BFF sends what was entered and maps refusals to fields; texts as `backend_<code>` in four languages, 6 unused keys removed
 - [x] `code-reviewer` round 1 (`docs/reviews/h28f-review-1.md`: K-1 Major, the E2E seed «keine Korrespondenzadresse»; K-2..K-4 Minor), round 2 (`h28f-review-2.md`: K-1..K-3 fixed, K-5 Minor), closing round (`h28f-review-3.md`: K-5 fixed; K-4 stays)
 - [x] Before complete; PR pushed after this archive
+
+## Session #768: same-date invoices in a fixed order
+
+`getInvoicesForStatement` ordered only by Rechnungsdatum; invoices of one date came back in PostgreSQL's storage order, so a statement's positions and the agreed categories in its PDF could change order (main run 40003782997, `agreed-from.pg.test.ts:100`, #759). Tie-break by `createdAt`, then `id`. No scenario: the storage order cannot be forced through the E2E stack; the pg test shows it. Parallel session (checklist in the pull request).
+
+- [x] pg test in `invoice-period-filter.pg.test.ts`, red before the fix, green after
+- [x] `code-reviewer` round 1 (`docs/reviews/768-review-1.md`: no finding; two older ties outside the diff → #770)
+- [x] Before complete; PR pushed after this archive
