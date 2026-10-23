@@ -195,5 +195,8 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 		const tagged = outlineFirst.replace('| Seeblick |\n', '| Seeblick |\n\n    @wip\n    Beispiele:\n      | name |\n      | Hof  |\n');
 		const cwd = specRepo(tagged, outlineFirst);
 		expect(await check([], 200, { number: 5, body: '', cwd, base: 'main' })).toMatchObject({ code: 0 });
+		// review spec643-review-3 C-4: a tag after the new block still belongs to the scenario below
+		const retagged = specRepo(tagged.replace('| Hof  |\n', '| Hof  |\n\n  @api'), outlineFirst);
+		expect((await check([], 200, { number: 5, body: '', cwd: retagged, base: 'main' })).out).toContain('«Danach» changes');
 	});
 });

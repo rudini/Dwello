@@ -20,7 +20,9 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `needs-decision`, not closed as not planned)
 - [x] Slice review round 1: `docs/reviews/spec643-review-1.md`
 - [x] Slice review round 2 (C-1, C-2): `docs/reviews/spec643-review-2.md`
-- [ ] Closing round, archive, PR
+- [x] Closing round: `docs/reviews/spec643-review-3.md` (C-4 fixed, round 4 on it)
+- [x] Workflow note: `grill-me` assumes an issue; `docs/reviews/workflow-notes-issue-643.md`
+- [ ] Archive, PR
 =======
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 >>>>>>> origin/main
