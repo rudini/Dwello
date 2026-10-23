@@ -161,10 +161,6 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
-      # U1 (docs/architecture/fitness-functions.md): demo data of the previous release, migrated by this checkout, keeps every row
-      - name: Upgrade from the previous release
-        if: ${{ needs.changes.outputs.backend == 'true' }}
-        run: tools/fitness/upgrade-check.sh
       - name: Frontend unit tests
         # All tests, so the coverage thresholds in vitest.config.ts apply to the whole frontend
         run: bun run test:coverage
@@ -172,6 +168,10 @@ jobs:
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun run test
         working-directory: backend
+      # U1 (docs/architecture/fitness-functions.md): demo data of the previous release, migrated by this checkout, keeps every row
+      - name: Upgrade from the previous release
+        if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
+        run: tools/fitness/upgrade-check.sh
 
   # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
   # Each runs in shards (Playwright --shard) on parallel runners; the job "e2e-results" reports each under its own name
@@ -334,6 +334,7 @@ jobs:
     needs: [changes, build, static-checks, unit-tests, e2e-results, fallow, fitness]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    continue-on-error: true # a report: an API or clock error must not turn the run red
     permissions:
       actions: read
     steps:

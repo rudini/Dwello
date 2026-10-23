@@ -181,4 +181,11 @@ describe('advise', () => {
 		expect(w.map((f) => f.check)).toEqual(['co-change']);
 		expect(w[0].message).toContain('30');
 	});
+
+	it('warns when the list of technical checks grows, so a review confirms the new entry is not a domain rule', () => {
+		const w = advise({ technicalAdded: 1 }, ratchet);
+		expect(w.map((f) => f.check)).toEqual(['technical']);
+		expect(advise({ technicalAdded: 0 }, ratchet)).toEqual([]);
+		expect(advise({ technicalAdded: -1 }, ratchet)).toEqual([]);
+	});
 });

@@ -75,7 +75,7 @@ export function judge(m: Measured, r: Ratchet): Finding[] {
 }
 
 /** Warnings, never failures: metrics that vary with the task or the time window. */
-export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number }, r: Ratchet): Finding[] {
+export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; technicalAdded?: number }, r: Ratchet): Finding[] {
 	const w = r.prSizeWarn;
 	const s = a.prSize;
 	const findings: Finding[] = [];
@@ -88,6 +88,11 @@ export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number },
 		findings.push({
 			check: 'co-change',
 			message: `Ä1/AP1 hidden coupling: ${a.coChange} pairs of production files in different layers changed together in the last 6 months without importing each other (ratchet ${r.coChangeWarn}). Fix: look at the top pairs in m2-file-pairs-units-prod.csv; the knowledge they share belongs in one place.`
+		});
+	if ((a.technicalAdded ?? 0) > 0)
+		findings.push({
+			check: 'technical',
+			message: `Ä4/AP2: tools/fitness/ratchet.json lists ${a.technicalAdded} more technical check(s) in the BFF than the base. Confirm in the review that each new entry checks a format (UUID, ISO date of a query parameter), not a domain rule or form input; those belong to the backend.`
 		});
 	return findings;
 }
@@ -231,7 +236,8 @@ if (import.meta.main) {
 	}
 	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet) : [])];
 	const pairs = cochange ? coChange(out) : undefined;
-	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs }, ratchet);
+	const technicalAdded = baseRatchet ? ratchet.technical.length - baseRatchet.technical.length : 0;
+	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded }, ratchet);
 	if (pairs !== undefined) console.log(`Fitness: ${pairs} production file pairs across layers change together without an import (6 months)`);
 	const say = (level: 'error' | 'warning', f: Finding) => console.log(github ? `::${level} title=Fitness ${f.check}::${f.message}` : `${level} [${f.check}] ${f.message}`);
 	errors.forEach((f) => say('error', f));

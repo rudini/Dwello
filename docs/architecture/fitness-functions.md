@@ -16,7 +16,8 @@ Stand: 23.10.2026, Basis `origin/main` 868aef9. Die Checks prüfen die Szenarien
 | Ä1 | `module-cycle` | Zyklen auf Modulebene, nur Produktivmodule (`cycles-module.csv`, Tarjan aus `02-imports`) | (gleicher Lauf) | wie oben | kein neuer Zyklus; Ausnahmeliste | 2 |
 | AP1, Architektur BFF | `boundary-import` | Laufzeit-Import zwischen `src/` und `backend/` in eine der beiden Richtungen (`imports-file.csv`, `type_only = no`) | (gleicher Lauf) | wie oben | 0, ohne Ausnahme (`import type` bleibt erlaubt, damit AP1 Typen aus dem Backend ableiten kann) | 0 |
 | alle | `ratchet` | `ratchet.json` gegen die Datei der Merge-Base: keine Schwelle höher, keine Ausnahmeliste länger | < 1 s | wie oben | Ausnahmen schrumpfen nur | – |
-| Ä1 (Ä3) | `pr-size` | Produktivdateien, -module und -schichten des PR-Diffs gegen die Merge-Base (Definition M1) | < 1 s | wie oben, nur PR | **Warnung** über P90 der Features: 31 Dateien, 20 Module, 5 Schichten | – |
+| Ä4, AP2 | `technical` | Einträge in `technical` gegenüber der Merge-Base | < 1 s | wie oben | **Warnung** bei jedem neuen Eintrag (Review prüft: Format, keine Fachregel) | 7 |
+| Ä1 (Ä3) | `pr-size` | Produktivdateien, -module und -schichten des PR-Diffs gegen die Merge-Base (Definition M1) | < 1 s | wie oben, PR (gegen die Merge-Base) und Push auf `main` (Diff des Pushs) | **Warnung** über P90 der Features: 31 Dateien, 20 Module, 5 Schichten | – |
 | Ä1, AP1 | `co-change` | Dateipaare verschiedener Produktivschichten, die in den letzten 6 Monaten ≥ 5-mal mit Kopplungsgrad ≥ 30 % gemeinsam geändert wurden, ohne Import (`m2-file-pairs-units-prod.csv`, Skripte 02–04) | 13 s | wie oben, nur nächtlich (`schedule`) | **Warnung** über 26 | 26 |
 | T1 (H/H), AP5 | `ci-duration` | Wanduhrzeit vom Start des Laufs bis zum letzten Ergebnis (`run_started_at` über die Actions-API); nächtlich der Anteil grüner Push-Läufe auf `main` in 7 Tagen | < 10 s | Job «CI duration», jeder Lauf | **Warnung** über 15 min; grüne Quote nur Bericht | PR Median ~18 min, `main` 43–79 min (gemessen, CI, `utility-tree.md`) |
 | U1 (H/H), AP3 | `upgrade` | Demo-Daten mit dem Backend des letzten Release-Tags laden, mit den Migrationen von HEAD migrieren; Migration muss durchlaufen, keine Tabelle verliert Zeilen | ~6 s (+ `bun install` des alten Backends) | Job «Unit tests», Schritt «Upgrade from the previous release», PR mit Backend-Änderung und jeder Push auf `main` (= jedes Release) | 0 verlorene Zeilen, 0 fehlgeschlagene Migrationen | grün, 21 Tabellen (v0.89.11 → HEAD; zusätzlich v0.70.0 und v0.80.0 → HEAD mit 7 bzw. 10 Migrationen grün) |
@@ -45,6 +46,7 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 | `module-cycle` | `src/lib/utils/format.ts` importiert `$lib/accounting-period` | rot: «fe:lib/accounting-period fe:lib/utils import each other» |
 | `boundary-import` | `import { kiSettings } from '../../backend/src/db/schema'` unter `src/lib` | rot, nennt beide Dateien |
 | `ratchet` | `fieldSpread.max` 60 → 61 in `ratchet.json` | rot: «fieldSpread.max rose from 60 to 61» |
+| `technical` | zusätzlicher Eintrag in `technical` | Warnung: «lists 1 more technical check(s) in the BFF than the base» |
 | `pr-size` | `--base v0.80.0` | Warnung: «156 files, 96 modules and 5 layers» |
 | `co-change` | `coChangeWarn` 26 → 20 | Warnung: «26 pairs … (ratchet 20)» |
 | `upgrade` | Migration `DELETE FROM fuel_stocks;` | rot: «fuel_stocks 6 -> 0» |
@@ -67,6 +69,8 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 ## 5. Grenzen der Checks
 
 - Die Messungen sind textbasierte Heuristiken aus Phase 0 (Schlüssel `feld:`, Regex-Literale).
+- «Darf nur schrumpfen» zählt Einträge (bei Wertelisten die Summe der Dateien), nicht ihren Inhalt: Ein PR, der eine Altlast behebt und zugleich eine neue einbaut, kann den alten Eintrag auf die neue umschreiben, und eine Werteliste kann um eine Datei wachsen, wenn eine andere schrumpft. Das ist der Preis dafür, dass Umbenennungen nicht rot werden; der Diff von `ratchet.json` zeigt es im Review.
+- `technical` darf wachsen. Ein neuer Eintrag erzeugt die Warnung `technical`, damit das Review prüft, dass er ein Format und keine Fachregel prüft (Befund C-1, `docs/reviews/fitness-review-1.md`).
 - Ausnahmen hängen am Zeilentext bzw. Dateipfad, nicht an der Zeilennummer. Wird eine Altlast-Zeile umformatiert oder ihre Datei umbenannt, meldet der Check sie als neu; dann wird der Eintrag in `ratchet.json` angepasst (die Liste wird nicht länger, `ratchet` bleibt grün).
 - `upgrade-check.sh` prüft gegen den letzten Tag. Wird künftig nur wöchentlich getaggt, prüft jeder PR gegen das letzte wöchentliche Release, also genau den Weg der Vermieter.
 - Die CI-Dauer misst bis zum Ende der langsamsten Ergebnis-Jobs; Warteschlangen-Zeit vor dem Start zählt nicht.
