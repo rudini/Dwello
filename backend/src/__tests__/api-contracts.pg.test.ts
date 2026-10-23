@@ -210,6 +210,24 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-run-differences'), actual)).toEqual([]);
 	});
 
+	// H-28: a run of 2025 with a move-in names the heating invoice without Leistungszeitraum beside one with
+	it('GET /statements/run-heating liefert die Felder von statement-run-heating.json', async () => {
+		const apartment = await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '50', rooms: '2' });
+		const tenant = await createTenant({ firstName: 'Lea', lastName: `Graf ${token}` });
+		const moving = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate: '2025-05-01', baseRent: '800', monthlyAdvancePayment: '100' });
+		const [profile] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
+		try {
+			const actual = await (
+				await callApi(`/api/v1/statements/run-heating?buildingId=${rental.building}&periodStart=2025-01-01&periodEnd=2025-12-31&heatingProfileId=${profile.id}`)
+			).json();
+			expect(drift(await sample('statement-run-heating'), actual)).toEqual([]);
+		} finally {
+			await deleteContract(moving.id, true);
+			await deleteTenant(tenant.id);
+			await deleteApartment(apartment.id);
+		}
+	});
+
 	// H-28: the run of the statement's period, its contract billed there and one «Abgerechnet bis» covers
 	it('GET /statements/run liefert die Felder von statement-run.json', async () => {
 		const apartment = await createApartment({ buildingId: rental.building, number: '2.02', floor: 2, area: '50', rooms: '2' });

@@ -330,6 +330,12 @@ async function oldHeatingRule(buildingId: string, period: Period, heating: Await
 	return byProfile.filter((statement) => !byMonths.has(statement.id)).map((statement) => statement.id);
 }
 
+/** The hints on heating invoices by the Heizprofil (#335, #339), before a run filters them (statement-run.service.ts) */
+export async function heatingHintsOf(buildingId: string, period: Period) {
+	const heating = await heatingInvoices(buildingId, period);
+	return { heatingWithoutServicePeriod: withoutBesideWith(heating), oldHeatingRule: await oldHeatingRule(buildingId, period, heating) };
+}
+
 /**
  * The check for one building and period, with the period it was compared with; also the invoices without
  * Leistungszeitraum dated shortly after the period (they may belong to it) and, in a period under a year, those
@@ -348,7 +354,6 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 	]);
 	const { hasComparison, findings } = checkCategories(current, previous, period, first ?? undefined);
 	const stock = await stockFinding(buildingId, period, current);
-	const heating = await heatingInvoices(buildingId, period);
 	return {
 		buildingId,
 		comparedWith,
@@ -356,7 +361,6 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		findings: stock ? [stock, ...findings] : findings,
 		lateInvoices,
 		invoicesWithoutServicePeriod,
-		heatingWithoutServicePeriod: withoutBesideWith(heating),
-		oldHeatingRule: await oldHeatingRule(buildingId, period, heating)
+		...(await heatingHintsOf(buildingId, period))
 	};
 }
