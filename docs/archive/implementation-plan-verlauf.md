@@ -3082,3 +3082,7 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] Tried by hand: default mode unchanged (demo data, sign-in), fresh (setup, code accepted, no buildings), second beside the first, second refused without a fresh first
 - [x] code-reviewer round 1, also the closing round: `docs/reviews/774-review-1.md`; Minors C-1 (the 40 % were never set) and C-2 (second without a fresh stand-in) fixed
 - [x] Workflow note: none (this task answers the note of `docs/reviews/workflow-notes-issue-620.md`); archive
+## Session: grill-me without an issue (workflow note of #643)
+
+- [x] `.claude/skills/grill-me/SKILL.md`: description, intro, steps 1 and 5 cover a request without an issue (product owner decision 2026-10-23, `docs/reviews/workflow-notes-issue-643.md`)
+- [x] Archive, PR: pushed after this archive
