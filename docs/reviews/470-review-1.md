@@ -1,0 +1,27 @@
+# Code-Review #470, Runde 1 (6eb2b4a6..5b8b183c)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Major | src/routes/statements/generate/StatementWizard.svelte:160-166, 311-318 | «Weiter» mit unbeantworteten Fragen zu den vereinbarten Nebenkosten setzt den Fokus nicht mehr auf die erste offene Frage: `showErrors()` sucht nur in `section`, `LateChecks` steht jetzt ausserhalb davon. Regression ohne Test. |
+| C-2 | Major | src/routes/statements/generate/StatementWizard.svelte:276 (mit 128-137) | Der Ladesatz ist `hidden` statt reserviert: In Schritt 3 verschwindet er beim Entsperren über «Weiter», und «Weiter» rutscht um seine Höhe plus `gap-6` nach oben. Das Zurückscrollen gleicht das nur aus, wenn die Seite mindestens so weit gescrollt ist. Liegt die Seite oben (z. B. Schritt 3 über einen Gebäude-Link geöffnet), springt «Weiter» trotzdem. |
+
+## C-1 (Major): Fokus auf die offene Frage zur Vereinbarung fehlt
+
+Auf dem Basis-Commit rendert `StatementStep` `AgreedCosts` innerhalb von `<section bind:this={section}>`. `showErrors()` (StatementWizard.svelte:160-166) fokussiert `section?.querySelector('… [role="radiogroup"][aria-invalid="true"] input …')`. Der Fokus landete also auf der ersten Frage, die noch keine Antwort hat (RadioGroup.svelte:36-39 setzt `role="radiogroup"` und `aria-invalid`). Neu stehen die Fragen in `LateChecks` nach `WizardNav` und damit ausserhalb von `section`. Der Selektor findet nichts, der Fokus bleibt auf «Weiter». Wer mit Tastatur oder Screenreader arbeitet, erfährt nicht, dass eine Frage fehlt (`role="status"` gibt es nur für den Ladesatz). Die anderen Fehler des Assistenten werden fokussiert (Tests :259, :566), dieser nicht mehr.
+
+So zeigt sich der Fehler: In einem DOM-Test in `statement-wizard.dom.test.ts` kommt mit `fakeBff` für `/statements/agreements` eine offene Frage zurück. Dann Schritt 3 öffnen, nach dem Laden «Weiter» wählen und `expect(document.activeElement).toBe(<erstes Radio der Frage>)` prüfen: Das ist auf 5b8b183c rot und auf 6eb2b4a6 grün. Abhilfe ist, den Selektor in `showErrors()` auf `wizard` statt auf `section` laufen zu lassen, mit genau diesem Test.
+
+## C-2 (Major): Der verschwindende Ladesatz bewegt «Weiter»
+
+Die Entscheidung im Issue lautet: «late notices of a step appear in a place reserved from the start, so they never move «Weiter»». Done means: Ein Tipp auf «Weiter» gleich nach dem Entsperren trifft in Schritt 3. In Schritt 3 erscheint nach dieser Änderung nichts mehr über «Weiter», aber der Ladesatz mit `role="status"` (:276) wird mit `class:hidden` zu `display:none`. Er nimmt seine Zeilen und die 24 px `gap-6` der Section mit. Auf 390 px hat «Dwello prüft, ob die Mietverträge die Nebenkosten dieser Periode vereinbaren …» rund 3 Zeilen, also etwa 96 px Verschiebung. Auf dem Desktop ist es eine Zeile, also etwa 48 px, so hoch wie die Schaltfläche selbst. Der `$effect.pre` (:128-137) ruft dann `window.scrollBy(0, -96)` auf. Bei `scrollY` unter diesem Wert scrollt der Browser nur bis 0 und «Weiter» steht höher als vorher. Direkt darunter erscheinen jetzt `LateChecks` mit dem Link zum Mietvertrag in `FeeNotAgreed`: Das ist der Fall P-1 aus dem Issue, nur in die andere Richtung. Das trifft jeden, dessen «Weiter» ohne Scrollen oder nach wenig Scrollen sichtbar ist. Typisch ist das auf Tablet und Desktop oder in Schritt 3 direkt aus dem Gebäude-Link (`chosen`, Seite oben). In Schritt 2 überwiegt meist die Höhe der neuen Zeilen, deshalb fällt es dort weniger auf, dieselbe Lücke besteht aber auch dort. Der Mock-Test «hält «Weiter» an seiner Stelle» kann das nicht zeigen, weil er `getBoundingClientRect` und `scrollBy` ersetzt.
+
+So zeigt sich der Fehler: Playwright mit 1280×800 (oder 768×1024), `/api/statements/agreements` um 4 s verzögern, den Assistenten mit vorgewähltem Gebäude öffnen (Schritt 3, Seite oben), dann `boundingBox()` von `wizard-next` vor und nach dem Entsperren vergleichen. Das `y` sinkt um etwa die Höhe des Ladesatzes plus 24 px. Abhilfe ist ein wirklich reservierter Platz, etwa ein Ladesatz, der seine Höhe behält (`invisible` bzw. leerer Text mit fester Mindesthöhe), oder ein Ausgleich, der nicht von `scrollY` abhängt.
+
+## Nicht bestätigt
+
+- bun run lint, bun run check, bunx vitest run statement-wizard.dom.test.ts + agreed-costs.dom.test.ts (99) sowie die i18n- und No-German-Tests, E2E chromium+api für statement-generate und statement-agreed-costs (127), E2E mit den a11y- und Sprachzeilen von statement-generate (177, auf dem Commit davor): vom Aufrufer gemeldet, nicht neu ausgeführt.
+- Dass die drei neuen DOM-Tests vor dem Code rot waren: vom Aufrufer gemeldet. Beim Lesen fällt jeder ohne die Änderung (kein `step-loading`, kein `scrollBy`).
+- Die echte Höhe in Schritt 2 und 3 auf 390 px (ob «Weiter» ohne Scrollen sichtbar ist) habe ich ohne Browser nicht gemessen. Die Pixelwerte in C-2 sind aus Textlänge und `gap-6` geschätzt.
+- Ob der Ladezustand in `tests/a11y/screens.json` stehen müsste: Der Zustand lässt sich im E2E-Stack nicht offen halten (#468). Das «No scenario» steht nicht in der Commit-Nachricht, ich habe es dem Auftrag entnommen.
+
+Geprüft: Texte in allen vier `messages/*.json` (Begriffe «immeubles», «immobili» wie bestehend); Rücksetzen von `loading` beim Verlassen (FeeNotAgreed:36, AgreedCosts:58, BuildingStep:64); E2E-Target `agreementsLoading` bleibt in der Target-Schicht; keine fremden Änderungen im Diff.

@@ -138,7 +138,7 @@ export const notAgreedCostsLink = (contractId: string) =>
 export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));
 // while the questions load, and when they cannot be loaded
 // #470: said at the top of the step while it loads
-export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft', (page) => page.getByTestId('step-loading').filter({ hasText: /\S/ }));
+export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft', (page) => page.getByTestId('step-loading').filter({ visible: true }));
 export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft', (page) => page.getByTestId('agreements-failed'));
 export const agreementsRetry = target('Erneut versuchen', (page) => page.getByTestId('agreements-retry'));
 export const agreementsWait = target('Warten auf die Prüfung der Mietverträge', (page) => page.getByTestId('agreements-wait'));

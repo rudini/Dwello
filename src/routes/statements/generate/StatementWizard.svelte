@@ -83,12 +83,13 @@
 	let checksLoading = $state(false);
 	const loading = $derived(buildingsLoading || checksLoading);
 	// #470: said at the top of the step, seen without scrolling
+	// its place is kept once loaded, so it does not move «Weiter» up (code review 470-1 C-2)
 	const loadingText = $derived(
-		!loading
-			? ''
-			: step === 2
-				? m.statements_buildings_loading()
-				: m.statements_agreements_loading()
+		step === 2
+			? m.statements_buildings_loading()
+			: step === 3
+				? m.statements_agreements_loading()
+				: ''
 	);
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
@@ -103,7 +104,7 @@
 	let invoices = $state(untrack(() => form?.invoices ?? []));
 	let shownError = $state(untrack(() => form?.error ?? '')); // only until the user moves on
 	const confirmationNeeded = $derived(needsConfirmation(invoices));
-	const statusText = $derived(busy ? busyLabels[step] : '');
+	const statusText = $derived(busy ? busyLabels[step] : loading ? loadingText : '');
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
 	);
@@ -157,9 +158,10 @@
 		section?.querySelector<HTMLElement>('h2')?.focus();
 	}
 
+	// in the whole form: step 3's questions are below «Weiter» (#470, code review 470-1 C-1)
 	async function showErrors() {
 		await tick();
-		section
+		wizard
 			?.querySelector<HTMLElement>(
 				':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input, [data-testid="confirm-missing-invoices"]'
 			)
@@ -273,7 +275,14 @@
 			<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
 		</h2>
 		<PresetNotice preset={data.preset} {step} />
-		<p role="status" class="text-ink-muted" class:hidden={!loading} data-testid="step-loading">
+		<!-- read out by the wizard's status above -->
+		<p
+			aria-hidden="true"
+			class="text-ink-muted"
+			class:hidden={!loadingText}
+			class:invisible={!loading}
+			data-testid="step-loading"
+		>
 			{loadingText}
 		</p>
 		{#if shownError}

@@ -1635,10 +1635,37 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 			'Dwello prüft, ob die Mietverträge die Nebenkosten dieser Periode vereinbaren …'
 		);
 		expect(follows('step-loading', 'heating-profile-select')).toBe(true);
+		expect(byTestId('wizard-status')!.textContent).toContain('Dwello prüft, ob die Mietverträge');
 		release();
 		await settle();
-		expect(byTestId('step-loading')!.textContent!.trim()).toBe('');
 		expect(follows('wizard-next', 'management-fee-not-agreed')).toBe(true);
+		// code review 470-1 C-2: its place stays, so «Weiter» does not move up when it is said
+		expect(byTestId('step-loading')!.classList.contains('invisible')).toBe(true);
+		expect(byTestId('step-loading')!.classList.contains('hidden')).toBe(false);
+		expect(byTestId('wizard-status')!.textContent!.trim()).toBe('');
+	});
+
+	// code review 470-1 C-1: the open questions below «Weiter» get the focus as before
+	it('setzt bei «Weiter» mit offenen Fragen den Fokus auf die erste', async () => {
+		const anna = { contractId: 'c1', tenantName: 'Anna Keller', apartmentNumber: '1.01', open: [{ categoryId: 'k1', name: 'Lift' }], notAgreed: [] };
+		fakeBff((call) =>
+			call.path.startsWith('/statements/agreements')
+				? [200, [anna]]
+				: call.path.startsWith('/statements/billed')
+					? [200, [{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }]]
+					: [200, { invoices: [], total: 0 }]
+		);
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		next();
+		await settle();
+
+		expect(document.activeElement!.closest('[role="radiogroup"]')).not.toBeNull();
 	});
 
 	it('hält «Weiter» an seiner Stelle, wenn die Zeilen der Gebäude ankommen', async () => {
