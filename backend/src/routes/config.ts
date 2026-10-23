@@ -13,7 +13,7 @@ import {
 	CONFIG_KEYS,
 	type ConfigKey
 } from '../services/config.service';
-import { CodedError, errorBody, fieldsRefused } from '../services/coded-error';
+import { errorBody, fieldsRefused } from '../services/coded-error';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values
@@ -55,15 +55,7 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	.put(
 		'/',
 		async ({ body, set }) => {
-			let refused: Awaited<ReturnType<typeof setMultipleConfig>>;
-			try {
-				refused = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
-			} catch (error) {
-				if (!(error instanceof CodedError)) throw error;
-				set.status = 400;
-				return errorBody(error, '');
-			}
-
+			const refused = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
 			if (refused.length) {
 				set.status = 400;
 				return fieldsRefused(refused);

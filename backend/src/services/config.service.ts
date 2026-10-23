@@ -85,7 +85,8 @@ export const CONFIG_KEYS = {
 	iban: {
 		type: 'string',
 		// Checksum too: the QR-bill cannot be created with a wrong IBAN
-		validator: (v: string) => validateIBAN(v).valid,
+		// as the QR-bill takes it (#191): CH or LI, the institution's number in digits (code review h28g C-5)
+		validator: (v: string) => /^(CH|LI)\d{7}[A-Z0-9]{12}$/.test(v) && validateIBAN(v).valid,
 		default: '',
 		code: 'IBAN_ENTERED_INVALID'
 	},
@@ -205,10 +206,19 @@ async function creditorMissing(changes: Partial<Record<ConfigKey, string>>): Pro
 	return missing.length ? [{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: missing.join(',') } }] : [];
 }
 
+// As stored: a rate typed with a comma or «%» as a number with a point, an IBAN without its spaces (H-28, #717)
+function asStored(key: string, value: string) {
+	if (key === 'iban') return value.replace(/\s/g, '').toUpperCase();
+	if (key !== 'management_fee_pct') return value;
+	const rate = value.trim().replace(/\s*%$/, '').replace(',', '.');
+	return /^\d+(\.\d+)?$/.test(rate) ? String(Number(rate)) : value;
+}
+
 /**
  * Set a configuration value
  */
-export async function setConfig(key: ConfigKey, value: string): Promise<Configuration> {
+export async function setConfig(key: ConfigKey, typed: string): Promise<Configuration> {
+	const value = asStored(key, typed);
 	await validateConfig(key, value);
 	const [missing] = await creditorMissing({ [key]: value });
 	if (missing) throw new CodedError(missing.code, 'An IBAN needs the company name, postal code and town', missing.params);
@@ -237,14 +247,6 @@ async function saveConfig(
 	return saved;
 }
 
-// As stored: a rate typed with a comma or «%» as a number with a point, an IBAN without its spaces (H-28, #717)
-function asStored(key: string, value: string) {
-	if (key === 'iban') return value.replace(/\s/g, '').toUpperCase();
-	if (key !== 'management_fee_pct') return value;
-	const rate = value.trim().replace(/\s*%$/, '').replace(',', '.');
-	return /^\d+(\.\d+)?$/.test(rate) ? String(Number(rate)) : value;
-}
-
 /**
  * Set multiple configuration values at once, as the settings form sends them; the errors of those it refuses
  */
@@ -260,7 +262,8 @@ export async function setMultipleConfig(
 		const error = value?.trim() ? await configError(key as ConfigKey, value) : null;
 		if (error) errors.push(error);
 	}
-	if (errors.length === 0) errors.push(...(await creditorMissing(configs)));
+	// the Firmenadresse a valid IBAN needs, named with the form's other errors (code review h28g C-1)
+	if (!errors.some((error) => error.params.field === 'iban')) errors.push(...(await creditorMissing(configs)));
 
 	// All or nothing: one invalid value, or a write that fails, keeps the others unsaved
 	if (errors.length === 0) {

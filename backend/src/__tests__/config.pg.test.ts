@@ -11,6 +11,7 @@ import { callApi, sendJson } from './helpers/auth';
 const iban = await getConfig('iban');
 const companyName = await getConfig('company_name');
 const companyCity = await getConfig('company_city');
+const companyPostalCode = await getConfig('company_postal_code');
 
 afterAll(async () => {
 	if (iban) await setConfig('iban', iban);
@@ -19,6 +20,8 @@ afterAll(async () => {
 	else await deleteConfig('company_name');
 	if (companyCity) await setConfig('company_city', companyCity);
 	else await deleteConfig('company_city');
+	if (companyPostalCode) await setConfig('company_postal_code', companyPostalCode);
+	else await deleteConfig('company_postal_code');
 });
 
 describe('Einstellungen speichern', () => {
@@ -222,5 +225,37 @@ describe('Einstellungen prüfen', () => {
 			await (name ? setConfig('company_name', name) : deleteConfig('company_name'));
 			await (city ? setConfig('company_city', city) : deleteConfig('company_city'));
 		}
+	});
+
+	// code review h28g C-1: the Firmenadresse an IBAN needs is named with the form's other errors, as before
+	it('nennt die fehlende Firmenadresse zusammen mit den anderen abgelehnten Feldern', async () => {
+		const response = await sendJson('PUT', '/api/v1/config', { company_email: 'info@muster', company_name: '', iban: 'CH93 0076 2011 6238 5295 7' });
+		const { causes } = (await response.json()) as { causes: { code: string }[] };
+
+		expect(causes.map((cause) => cause.code).sort()).toEqual(['COMPANY_EMAIL_INVALID', 'IBAN_COMPANY_ADDRESS_MISSING']);
+	});
+
+	// code review h28g C-2, C-5: the limits of the days, and an IBAN as the QR-bill takes it (#191): CH or LI, the
+	// institution's number in digits, the check digits right (pinned as before, now in the backend)
+	it.each([
+		['payment_deadline_days', '7', 200],
+		['payment_deadline_days', '90', 200],
+		['payment_deadline_days', '6', 400],
+		['payment_deadline_days', '91', 400],
+		['reminder_after_days', '7', 200],
+		['reminder_after_days', '60', 200],
+		['reminder_after_days', '61', 400],
+		['iban', 'LI22 0881 0000 2324 013A A', 400],
+		['iban', 'CH56 0483 5012 3456 7800 9', 200],
+		['iban', 'CH97 A483 5012 3456 7800 9', 400]
+	])('nimmt %s «%s» mit Status %i', async (key, value, status) => {
+		const before = await getConfig(key as 'iban');
+		await setConfig('company_name', 'Muster Immobilien AG');
+		await setConfig('company_city', 'Winterthur');
+		await setConfig('company_postal_code', '8400');
+		const response = await sendJson('PUT', '/api/v1/config', { [key]: value });
+		await (before ? setConfig(key as 'iban', before) : deleteConfig(key as 'iban'));
+
+		expect(response.status).toBe(status);
 	});
 });
