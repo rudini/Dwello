@@ -335,7 +335,16 @@ Alle vier messen nur Produktivdateien (Entscheid 23.10.2026).
 | Reaktion | Feld ist in DB, API, BFF und UI verfügbar und validiert | Alle Stellen, die nach dem Status entscheiden, folgen der neuen Regel | Regel umgesetzt, Szenario grün | Die Änderung erfolgt nur im Backend; der BFF übernimmt Ergebnis oder Fehlercode |
 | Messgrösse | Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren (`m4-field-spread.csv`) | Produktivdateien, die den Statuswert nennen (`m4-status-literals.csv`) | geänderte Produktivdateien pro feat-PR mit 1 feat-Commit (`m1-summary.csv`, Gruppe `feat-single`) | fachliche Status-Vergleiche und Prüfregeln im BFF (`m4-decisions-outside-backend.csv`, gelesen wie in M4) |
 | Ausgangswert | Median **6**, P90 **19** (125 Felder) | `replaced` **19** Dateien in 4 Schichten (FE 8, BFF 2, Backend 8, Shared 1); `draft` 29, `paid` 21 | Median **9,5**, P90 **25**; Schichten Median 2 / P90 5 | **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien |
-| Zielwert | vom Team festzulegen | vom Team festzulegen | vom Team festzulegen | **0** (aus den Entscheiden vom 23.10.2026; H-28) |
+| Zielwert | Median **≤ 4**, P90 **≤ 8** | BFF **0** Dateien; höchstens **2** Schichten (Backend und FE-Anzeige); insgesamt **≤ 6** Dateien | Leitplanke: Median **≤ 9**, P90 **≤ 18**; Schichten P90 **≤ 4** | **0** (aus den Entscheiden vom 23.10.2026; H-28) |
+
+**Zielwerte (Entscheid Product Owner, 23.10.2026).** Begründung je Szenario:
+
+- **Ä1:** Ein Feld braucht zwingend etwa vier Stellen: die Prüfung im Backend, den einen Mapper im BFF («One mapper per response»), das Formular und die Anzeige. Mehr Dateien heissen Abschreiben, etwa Typen, die nicht aus dem Drizzle-Schema abgeleitet sind, oder mehrere Mapper pro Antwort. Der heutige P90 von 19 zeigt Felder, die quer durch die App kopiert sind. [abgeleitet]
+- **Ä2:** Das Frontend zeigt einen Status nur an (Label, Badge); was er bedeutet, entscheidet das Backend an einer Stelle. Mit H-28 fällt der BFF-Anteil auf 0; die 8 FE-Dateien mit `replaced` sind der nächste Hebel. [abgeleitet]
+- **Ä3:** Der Wert hängt von der Grösse des Features ab. Er ist deshalb eine Leitplanke und kein hartes Ziel: nicht schlechter werden und die Ausreisser halbieren. Jedes Feature mit UI-Text ändert ohnehin die vier Dateien in `messages/`; das ist die Untergrenze. Schichten P90 ≤ 4 heisst: Ein Feature berührt nicht gleichzeitig FE, BFF, Backend, DB und Shared. Das gilt, sobald der BFF nur noch weiterreicht. [abgeleitet]
+- **Ä4:** Ist durch die Entscheide vom 23.10.2026 gesetzt (keine Fachregeln im BFF, Formularprüfungen im Backend).
+
+**Messrhythmus.** Die Werte gelten im 6-Monats-Fenster von `run.sh` und bewegen sich darum langsam. Gemessen wird einmal nach Abschluss von H-28 als Zwischenstand und danach vierteljährlich. Ein Ziel gilt als erreicht, wenn es in zwei Messungen hintereinander hält.
 
 Alle vier Werte lassen sich nach jedem Refactoring mit `tools/arch-baseline/run.sh` neu messen.
 
