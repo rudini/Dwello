@@ -314,6 +314,8 @@ jobs:
   fitness:
     name: Architecture fitness
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
         with:

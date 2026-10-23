@@ -44,44 +44,8 @@
 	"exceptions": {
 		"bffDecisions": [
 			{
-				"path": "src/lib/server/apartment.ts",
-				"line": "const next = contracts.filter((c: Record<string, any>) => contractStatus(c) === 'future').at(-1);",
-				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/server/statement-generation.ts",
-				"line": "const later = status === 'draft' ? await laterChanges(fetch, id) : null;",
-				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.server.ts",
-				"line": "return statement.contractId === contractId && statement.status === 'draft' ? statement : null;",
-				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
-				"scenario": "Ä4"
-			},
-			{
 				"path": "src/routes/contracts/[id]/+page.server.ts",
 				"line": "if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(validFrom)) return fail(400, { validFrom, advanceDeleteError: m.contracts_save_failed() });",
-				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/tenants/[id]/+page.server.ts",
-				"line": "contracts.find((c) => contractStatus(c) === 'active') ??",
-				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/tenants/[id]/+page.server.ts",
-				"line": ".filter((c) => contractStatus(c) === 'future')",
-				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/tenants/[id]/+page.server.ts",
-				"line": "upcoming: contractStatus(contract) === 'future'",
 				"reason": "Domain decision in the BFF from before the decision of 23.10.2026; moves to the backend with #717",
 				"scenario": "Ä4"
 			}
