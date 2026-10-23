@@ -786,6 +786,21 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom "05.01.2025"
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom "31.12.2024"
 
+  # #647: der Lauf einer berichtigten Abrechnung rechnet ihren Mietvertrag wieder ab (#120); zieht der Mieter in der
+  # Periode aus, nennt die Vorschau auch dort die Heizrechnungen ohne Leistungszeitraum (#339)
+  @wip
+  Szenario: Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum beim Lauf einer berichtigten Abrechnung
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1410" Franken vom "2025-01-05" für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum die Rechnung vom "31.03.2024" über "1’520.00"
+
   Szenario: Von einer Rechnung der Heizkosten ohne Leistungszeitraum zur Rechnung
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"

@@ -10,3 +10,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
 
+
+## Session #647: heating hints for a berichtigte Abrechnung
+
+#647 (decided 23.10.2026, option 1): the contracts that count for the heating hints of a run (#339, #335) are the ones the run bills (`planRun`), a contract whose statement of the period is replaced included. Scenario «Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum beim Lauf einer berichtigten Abrechnung» (`statement-generate.feature`).
+
+- [ ] `@wip` scenario, seen failing at the missing hint; `fach-reviewer` on it before implementing
+- [ ] Unit tests in `statement-run.test.ts`: the replaced case flipped (#339), and #335 with a replaced statement; red first
+- [ ] `runHeatingHints` counts by `planRun`
+- [ ] Slice review `code-reviewer`; feature review (`fach-reviewer`; persona not needed: no new text or screen state)
+- [ ] Before complete, closing round, archive, PR `Fixes #647`
