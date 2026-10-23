@@ -11,10 +11,11 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 
 ## Session: spec scenarios need approval (#643)
 
-- [ ] Rule text: `CLAUDE.md` (Workflow 1, "When to ask"), `tests/e2e/CLAUDE.md` ("Rules")
-- [ ] `code-reviewer` checks step definitions for weakened assertions
-- [ ] CI check (`tools/open-work/check-issues.mjs`): a changed or removed line of a scenario that is non-`@wip` on the base branch fails without `Spec change approved: #n`
-- [ ] Additions (new scenario, new Examples row) and `@wip` scenarios pass
-- [ ] Adding `@wip` to a protected scenario fails
-- [ ] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `entscheiden`, not closed as not planned)
-- [ ] Slice review, closing round, archive, PR
+- [x] Rule text: `CLAUDE.md` (Workflow 1, "When to ask"), `tests/e2e/CLAUDE.md` ("Rules")
+- [x] `code-reviewer` checks step definitions for weakened assertions
+- [x] CI check (`tools/open-work/check-issues.mjs`): a changed or removed line of a scenario that is non-`@wip` on the base branch fails without `Spec change approved: #n`
+- [x] Additions (new scenario, new Examples row) and `@wip` scenarios pass
+- [x] Adding `@wip` to a protected scenario fails
+- [x] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `entscheiden`, not closed as not planned)
+- [ ] Slice review round 1: `docs/reviews/spec643-review-1.md`
+- [ ] Closing round, archive, PR
