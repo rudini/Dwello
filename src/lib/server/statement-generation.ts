@@ -1,5 +1,4 @@
 import { backendMessage } from '$lib/backend-error';
-import { billingStart, localToday } from '$lib/contract-status';
 import { periodDays } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
@@ -14,7 +13,6 @@ type Contract = {
 	startDate: string;
 	endDate: string | null;
 	billedUntil?: string | null;
-	terminated?: boolean;
 	tenantName: string;
 	apartmentId?: string;
 	apartmentNumber: string;
@@ -54,7 +52,9 @@ type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 type Range = { start: string; end: string };
 /** The backend's plan of a run for one building (H-28: the backend decides which contracts a run bills) */
 type Plan = {
-	contracts: (Contract & { billed: boolean })[];
+	// what the preview says about each contract (H-28, #717): moved out, befristet, «Abgerechnet bis» where it shortens
+	contracts: (Contract & { billed: boolean; movedOut: boolean; fixedTerm: boolean; shortenedTo: string | null })[];
+	withoutFee: { id: string; tenantName: string; apartmentNumber: string }[];
 	overlap: {
 		periods: Range[];
 		choose: Range[];
@@ -79,6 +79,7 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 				buildingId,
 				inPeriod: plan.contracts,
 				billed,
+				withoutFee: plan.withoutFee,
 				overlap: plan.overlap,
 				skipped: plan.skipped
 			};
@@ -120,14 +121,12 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
 	return (await contractsOf(fetch, request)).map(
-		({ buildingId, inPeriod, billed, overlap, skipped }) => ({
+		({ buildingId, inPeriod, billed, overlap, withoutFee, skipped }) => ({
 			buildingId,
 			contracts: inPeriod.length,
 			billed: billed.length,
 			overlap,
-			withoutFee: inPeriod
-				.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
-				.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber })),
+			withoutFee,
 			...(skipped.length ? { skipped } : {})
 		})
 	);
@@ -163,7 +162,6 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
 	const rows = [];
 	for (const { buildingId, contract } of await contractsInPeriod(fetch, request)) {
-		const movedOut = !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1]; // ended by now
 		const preview = await call(fetch, 'statements/preview', {
 			contractId: contract.id,
 			periodStart,
@@ -182,14 +180,10 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			totalPeriodDays: Number(preview.totalPeriodDays),
 			rentalStart: preview.rentalStart as string,
 			rentalEnd: preview.rentalEnd as string,
-			// #453 (#327): «Abgerechnet bis» where it shortens the Mietstage in the period
-			billedUntil:
-				billingStart(contract) > [contract.startDate.slice(0, 10), periodStart].sort()[1]
-					? contract.billedUntil!
-					: undefined,
-			movedOut,
-			// befristet, its end not reached: no Kündigungstermin before it (#76)
-			fixedTerm: !!contract.endDate && !contract.terminated && !movedOut,
+			// #453 (#327): «Abgerechnet bis» where it shortens the Mietstage in the period, #76 befristet (H-28: the backend's)
+			billedUntil: contract.shortenedTo ?? undefined,
+			movedOut: contract.movedOut,
+			fixedTerm: contract.fixedTerm,
 			oldAddress: !!contract.oldAddress, // A-5: moved out, still with the building's address
 			buildingId
 		});
