@@ -18,5 +18,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] `@wip` scenario, seen failing at the missing hint; `fach-reviewer` on it before implementing: `docs/reviews/647-fachreview-1.md` (F-1, F-2 fixed)
 - [x] Unit tests in `statement-run.test.ts`: the replaced case flipped (#339), and #335 with a replaced statement; red first
 - [x] `runHeatingHints` counts by `planRun`
-- [ ] Slice review `code-reviewer`; feature review (`fach-reviewer`; persona not needed: no new text or screen state)
+- [x] Slice review `code-reviewer`: `docs/reviews/647-review-1.md` (no findings)
+- [ ] Feature review: persona Dr. Weber (`docs/design/personas/weber-647.md`)
 - [ ] Before complete, closing round, archive, PR `Fixes #647`
