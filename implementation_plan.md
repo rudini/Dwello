@@ -198,4 +198,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #470 code review round 3 (`docs/reviews/470-review-3.md`)
 - [x] #470 persona Marco round 2 (`docs/design/personas/marco-470-2.md`)
 - [x] #470 closing review: none needed, no code since round 3
-- [ ] #470 pull request `Fixes #470`, merged on green CI
+- [x] #470 pull request #635 `Fixes #470`, merged on green CI
+- [x] #477 @wip example «Akonto» in `help.feature`, seen red
+- [ ] #477 fach review of the scenario and the texts (`docs/reviews/477-fachreview-2.md`)
+- [ ] #477 glossary rows «Gültig ab (Akonto)» and «Akonto» (decided rows), `glossary_advance_text` in four languages, marker removed
+- [ ] #477 code review, closing review, pull request `Fixes #477`, merged on green CI
