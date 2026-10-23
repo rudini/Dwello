@@ -1,0 +1,4 @@
+layer,files_with_status_comparison,status_comparisons,files_with_anchored_regex,anchored_regex,total_cyclomatic
+FE,20,54,9,14,3128
+BFF,5,9,11,19,1832
+Backend,9,33,6,9,2605

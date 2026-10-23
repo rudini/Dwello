@@ -1,0 +1,409 @@
+id,sha,date,kind,type,type_source,scope,title,branch,commits,feat_commits,files_total,files_prod,files_test,files_other,modules_prod,modules_test,layers_prod,layers_prod_list,layers_all,i18n_files,loc_prod,loc_test,n_FE,n_BFF,n_Backend,n_DB,n_Shared/Contracts,n_Tests-Unit,n_Tests-Acceptance,n_Tooling,n_Docs,n_Process,n_Marketing
+PR#636,d4d508cc20,2026-10-23,pr-merge,fix,title,i18n,fix(i18n): agreed Akonto in the help glossary,ccr-dcf8f8ae-crm0zt,5,0,12,5,1,6,2,1,1,FE,4,4,9,5,5,0,0,0,0,0,1,0,2,4,0
+PR#635,50dce02445,2026-10-23,pr-merge,fix,title,statements,fix(statements): late notices never move «Weiter»,ccr-dcf8f8ae-crm0zt,6,0,22,10,6,6,2,5,1,FE,4,4,164,145,10,0,0,0,0,2,4,0,0,6,0
+PR#634,6eb2b4a66f,2026-10-23,pr-merge,feat,title,statements,"feat(statements): statement PDF as a letter, contact, Heizprofil source, embedded font (#465)",ccr-dcf8f8ae-crm0zt,9,2,47,20,16,11,16,6,4,DB|Backend|FE|BFF,10,4,308,339,7,1,10,2,1,10,5,1,3,7,0
+PR#631,e6b3623a16,2026-10-22,pr-merge,fix,title,statements,fix(statements): Heizprofil of the same apartment at a tenant change (#387),ccr-dcf8f8ae-crm0zt,7,0,16,7,4,5,4,3,2,FE|BFF,6,4,70,148,5,2,0,0,1,2,1,0,0,5,0
+PR#630,6e3ba1e5ff,2026-10-22,pr-merge,feat,title,contracts,feat(contracts): agree Nebenkosten from a day (#368 B),ccr-dcf8f8ae-crm0zt,10,1,51,21,21,9,16,9,5,DB|Backend|FE|Shared/Contracts|BFF,9,4,321,466,10,1,7,2,3,6,13,0,2,7,0
+PR#629,c98684babc,2026-10-22,pr-merge,fix,title,invoices,fix(invoices): say «Keine KI» when uploading,ccr-8b7da2b0-52xa3f,7,0,31,11,13,7,6,8,3,FE|BFF|Shared/Contracts,6,4,56,186,8,2,0,0,1,2,11,0,0,7,0
+PR#627,a4e7fe25e2,2026-10-22,pr-merge,feat,title,auth,feat(auth): choose the KI at the setup,ccr-8b7da2b0-52xa3f,6,1,35,11,15,9,8,9,3,Backend|FE|BFF,8,4,126,207,6,3,2,0,1,5,9,0,3,6,0
+PR#625,fb208f41bb,2026-10-22,pr-merge,fix,title,contracts,fix(contracts): follow-up keeps agreed Nebenkosten,ccr-dcf8f8ae-crm0zt,8,0,27,10,9,8,3,4,2,FE|BFF,6,4,58,96,9,1,0,0,0,4,5,0,2,6,0
+PR#624,00d95ad242,2026-10-22,pr-merge,fix,title,tenants,fix(tenants): anonymise a former tenant,ccr-dcf8f8ae-crm0zt,7,0,40,14,16,10,10,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,215,357,6,2,3,2,2,4,11,0,2,8,0
+PR#622,1eb44cc7d6,2026-10-22,pr-merge,feat,title,config,feat(config): set the KI in the browser,ccr-8b7da2b0-52xa3f,18,2,78,23,27,28,16,12,4,DB|Backend|FE|BFF,10,4,1138,1525,9,3,9,2,4,10,13,3,7,18,0
+PR#621,e3ca7b123e,2026-10-22,pr-merge,fix,title,tenants,fix(tenants): mark former documents as checked,ccr-dcf8f8ae-crm0zt,7,0,32,14,8,10,11,3,4,DB|Backend|FE|BFF,8,4,153,172,8,2,2,2,2,6,0,0,2,8,0
+PR#618,486c2b87a5,2026-10-22,pr-merge,fix,title,statements,fix(statements): no «PDF erstellt» for a draft,ccr-dcf8f8ae-crm0zt,3,0,7,1,3,3,1,3,1,FE,4,0,3,26,1,0,0,0,0,1,2,0,0,3,0
+PR#617,6ac7a7c0d8,2026-10-22,pr-merge,fix,title,statements,fix(statements): warn when sending an old draft,ccr-dcf8f8ae-crm0zt,4,0,18,7,6,5,2,6,1,FE,4,4,68,51,7,0,0,0,0,1,5,0,0,5,0
+PR#615,8e8b832d4c,2026-10-22,pr-merge,fix,title,apartments,fix(apartments): count floors below ground,ccr-dcf8f8ae-crm0zt,5,0,17,2,6,9,2,3,2,Backend|FE,6,0,33,69,1,0,1,0,0,3,3,0,2,7,0
+PR#614,f8ac558265,2026-10-22,squash,fix,title,services,fix(services): keep the model download open (#614),,1,0,4,1,1,2,1,1,1,Backend,4,0,8,16,0,0,1,0,0,1,0,1,0,1,0
+PR#612,562443c65f,2026-10-22,pr-merge,fix,title,tenants,fix(tenants): own file button for documents,ccr-dcf8f8ae-crm0zt,4,0,12,6,2,4,3,2,1,FE,4,4,33,26,6,0,0,0,0,1,1,0,0,4,0
+PR#611,916b035b3b,2026-10-22,pr-merge,feat,title,auth,feat(auth): set Dwello up on the first visit,ccr-8b7da2b0-52xa3f,6,1,83,21,33,29,17,12,3,Backend|FE|BFF,10,4,548,1190,8,7,6,0,7,11,15,4,7,11,7
+PR#610,5fa3f20184,2026-10-22,pr-merge,fix,title,statements,fix(statements): drop a draft's PDF when refused,ccr-dcf8f8ae-crm0zt,5,0,6,1,1,4,1,1,1,Backend,3,0,12,47,0,0,1,0,0,1,0,0,0,4,0
+PR#608,a4b967a462,2026-10-22,pr-merge,fix,title,tests,fix(tests): cancel upload once files are listed,ccr-dcf8f8ae-crm0zt,1,0,3,0,2,1,0,2,0,,2,0,0,6,0,0,0,0,0,0,2,0,0,1,0
+PR#606,5d428b3e54,2026-10-22,pr-merge,fix,title,statements,fix(statements): read due statements at once,ccr-dcf8f8ae-crm0zt,3,0,5,1,1,3,1,1,1,BFF,3,0,10,25,0,1,0,0,0,1,0,0,0,3,0
+PR#604,9e19d11524,2026-10-21,pr-merge,chore,title,config,chore(config): lint skips the E2E HTML report,ccr-dcf8f8ae-crm0zt,2,0,4,0,1,3,0,1,0,,3,0,0,12,0,0,0,0,0,1,0,1,0,2,0
+PR#603,6f186dc38a,2026-10-21,pr-merge,fix,title,statements,fix(statements): count listed drafts on overview,ccr-dcf8f8ae-crm0zt,2,0,7,2,3,2,2,1,2,FE|BFF,4,0,10,18,1,1,0,0,0,3,0,0,0,2,0
+PR#601,354db6f1c9,2026-10-21,pr-merge,fix,title,statements,fix(statements): heating share by profile on page,ccr-dcf8f8ae-crm0zt,5,0,13,5,3,5,2,3,1,FE,4,4,49,43,5,0,0,0,0,1,2,0,0,5,0
+PR#600,b8717081af,2026-10-21,pr-merge,fix,title,statements,fix(statements): no run share in heating note,ccr-dcf8f8ae-crm0zt,8,0,11,1,3,7,1,2,1,Backend,4,0,40,52,0,0,1,0,0,2,1,0,0,7,0
+PR#599,9f03c10c0b,2026-10-21,pr-merge,fix,title,statements,fix(statements): print a flat's floor only once,ccr-dcf8f8ae-crm0zt,5,0,8,1,1,6,1,1,1,Backend,3,0,13,40,0,0,1,0,0,1,0,0,0,6,0
+PR#591,493dac0119,2026-10-21,pr-merge,feat,title,auth,feat(auth): sign in with a Konto mit Passwort,ccr-8b7da2b0-52xa3f,10,2,80,24,27,29,20,10,4,DB|Backend|FE|BFF,11,4,522,926,8,9,5,2,5,9,13,5,6,11,7
+PR#596,09f4d679e4,2026-10-21,pr-merge,fix,title,components,fix(components): translate unexpected error pages,ccr-dcf8f8ae-crm0zt,3,0,10,1,5,4,1,5,1,FE,4,0,10,39,1,0,0,0,0,1,4,0,0,4,0
+PR#595,c7730cd067,2026-10-21,pr-merge,fix,title,ci,fix(ci): retry a stale count of green shards,ccr-dcf8f8ae-crm0zt,2,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,1,0,2,0
+PR#592,6a3caba926,2026-10-21,pr-merge,fix,title,config,fix(config): list every key and heating profile,ccr-dcf8f8ae-crm0zt,3,0,14,6,5,3,5,3,1,BFF,4,0,14,91,0,6,0,0,1,4,0,0,0,3,0
+PR#590,3eab6df75c,2026-10-21,pr-merge,docs,title,styles,docs(styles): shorten the landing page,claude/jolly-mccarthy-9vdez8,3,0,13,0,0,13,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,0,1,5,7
+PR#589,10d12ed66b,2026-10-21,pr-merge,fix,title,categories,fix(categories): list every category everywhere,ccr-dcf8f8ae-crm0zt,3,0,8,3,2,3,3,1,1,BFF,3,0,6,47,0,3,0,0,0,2,0,0,0,3,0
+PR#587,ce9035d8c4,2026-10-21,pr-merge,chore,title,tests,chore(tests): keep the E2E trace of every failure,ccr-dcf8f8ae-crm0zt,2,0,4,0,1,3,0,1,0,,3,0,0,3,0,0,0,0,0,0,1,0,1,2,0
+PR#586,41d253d044,2026-10-21,pr-merge,fix,title,invoices,fix(invoices): offer every Kategorie on the forms,ccr-dcf8f8ae-crm0zt,3,0,7,1,3,3,1,3,1,BFF,4,0,2,42,0,1,0,0,1,2,0,0,0,3,0
+PR#584,54865242c0,2026-10-21,pr-merge,fix,title,contracts,fix(contracts): bill only the Nebenkosten shown,ccr-dcf8f8ae-crm0zt,3,0,19,5,11,3,4,3,2,FE|BFF,5,0,40,120,4,1,0,0,1,10,0,0,0,3,0
+PR#582,ce1b9ecd0b,2026-10-21,pr-merge,fix,title,invoices,fix(invoices): clear key error on invoice forms,ccr-dcf8f8ae-crm0zt,3,0,7,2,2,3,1,2,1,FE,4,0,5,52,2,0,0,0,0,1,1,0,0,3,0
+PR#581,fef00fd248,2026-10-21,pr-merge,feat,title,styles,feat(styles): animate upload and cost split on landing,ccr-8b7da2b0-52xa3f,5,1,14,0,0,14,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,0,7,7
+PR#574,147552780b,2026-10-21,pr-merge,fix,title,invoices,fix(invoices): drop the fields hint once filled,ccr-dcf8f8ae-crm0zt,5,0,11,2,4,5,1,3,1,FE,4,0,9,78,2,0,0,0,0,1,3,0,0,5,0
+PR#571,cf343b6c55,2026-10-21,pr-merge,fix,title,components,fix(components): keep DateInput calendar out of forms,ccr-dcf8f8ae-crm0zt,3,0,7,1,4,2,1,4,1,FE,4,0,3,31,1,0,0,0,0,1,3,0,0,2,0
+PR#572,f88dc5139c,2026-10-21,pr-merge,docs,title,styles,"docs(styles): landing page for laypeople, from persona survey",ccr-8b7da2b0-52xa3f,22,0,39,0,0,39,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,0,2,28,9
+PR#569,254b5e24dd,2026-10-21,pr-merge,fix,title,docker,fix(docker): pass mail settings to the backend,ccr-dcf8f8ae-crm0zt,3,0,5,0,1,4,0,1,0,,3,0,0,38,0,0,0,0,0,1,0,1,0,3,0
+PR#567,855224971e,2026-10-21,pr-merge,fix,title,statements,fix(statements): let the page check the Frist,ccr-75acfcf1-m4asdv,2,0,4,1,1,2,1,1,1,FE,3,0,1,7,1,0,0,0,0,1,0,0,0,2,0
+PR#553,aa3c2da5c7,2026-10-21,pr-merge,chore,title,ci,chore(ci): Bump the actions group with 6 updates,dependabot/github_actions/actions-605cce5af2,1,0,4,0,0,4,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,4,0,0,0
+PR#565,3e3ab8a245,2026-10-21,pr-merge,fix,title,styles,fix(styles): make the website keyboard friendly,claude/dwello-marketing-page-s6uece,1,0,15,0,0,15,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,0,15
+PR#564,bf6a8bc3f3,2026-10-21,pr-merge,fix,title,tests,fix(tests): accept any upload-artifact version,ccr-75acfcf1-m4asdv,2,0,2,0,1,1,0,1,0,,2,0,0,2,0,0,0,0,0,1,0,0,0,1,0
+PR#563,19ae517789,2026-10-21,pr-merge,docs,title,privacy,docs(privacy): publish imprint and privacy statement,claude/dwello-marketing-page-s6uece,3,0,18,0,0,18,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,0,2,16
+PR#562,aa6659c51e,2026-10-21,pr-merge,fix,title,styles,fix(styles): keep disabled select and file button,ccr-75acfcf1-m4asdv,3,0,4,1,1,2,1,1,1,FE,3,0,15,8,1,0,0,0,0,1,0,0,0,2,0
+PR#561,67547a246e,2026-10-21,pr-merge,chore,title,build,chore(build): migrate to Tailwind CSS 4,ccr-75acfcf1-m4asdv,5,0,11,2,1,8,2,1,1,FE,5,0,24,14,2,0,0,0,0,1,0,3,2,3,0
+PR#559,f4f8b420d5,2026-10-20,pr-merge,feat,title,statements,"feat(statements): outdated statements, period filter, Tankbestand (#454)",w2-issue-454,15,1,88,31,44,13,23,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,875,1499,14,8,6,2,7,12,26,0,2,11,0
+PR#554,5a80796643,2026-10-20,pr-merge,chore,title,build,chore(build): Bump the minor-and-patch group across 2 directories with 21 updates,dependabot/bun/minor-and-patch-6e7a21c12e,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,2,0,0,0
+PR#552,79657e8aef,2026-10-20,pr-merge,chore,title,docker,chore(docker): Bump node from 20-alpine to 26-alpine,dependabot/docker/node-26-alpine,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+PR#555,4323d85c57,2026-10-20,pr-merge,chore,title,build,chore(build): Bump prettier-plugin-svelte from 3.5.2 to 4.1.1,dependabot/bun/prettier-plugin-svelte-4.1.1,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+PR#557,7b3140a440,2026-10-20,pr-merge,chore,title,build,chore(build): Bump jsdom from 27.4.0 to 30.1.3,dependabot/bun/jsdom-30.1.3,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+PR#558,9f7b3f9bcc,2026-10-20,pr-merge,chore,title,build,chore(build): Bump svelte-eslint-parser from 0.43.0 to 1.9.0,dependabot/bun/svelte-eslint-parser-1.9.0,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+PR#551,0d060f5be7,2026-10-20,pr-merge,chore,title,ci,chore(ci): add contributor files and PR checks,ccr-8f93386d-k0348h,3,0,13,0,0,13,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,5,5,3,0
+PR#549,df90c0afec,2026-10-20,pr-merge,feat,title,statements,"feat(statements): reminders, letters and the send dialog (#449, #491)",w5-issue-449,10,1,73,27,34,12,20,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,348,596,15,3,6,2,6,11,18,0,3,9,0
+PR#541,0b6a2d7230,2026-10-20,pr-merge,feat,title,invoices,feat(invoices): settle the open upload points,w9-issue-245,12,1,40,16,17,7,4,7,1,FE,5,4,259,308,16,0,0,0,0,3,14,0,1,6,0
+PR#550,d1a2270e1d,2026-10-20,pr-merge,docs,title,config,docs(config): a red main stops only related merges,ccr-5b821854-q8xe9r,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0
+PR#544,f143c81005,2026-10-20,pr-merge,fix,title,config,fix(config): leave the HTTPS redirect to the host,claude/dwello-marketing-page-s6uece,2,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+PR#542,39fd1b64c9,2026-10-20,pr-merge,docs,title,config,docs(config): apply the workflow review of 10-20,ccr-700622f8-02v9st,5,0,22,0,1,21,0,1,0,,4,0,0,7,0,0,0,0,0,0,1,2,2,17,0
+PR#543,1803f7777d,2026-10-20,pr-merge,fix,title,ci,fix(ci): allow deploying into the FTP root,claude/dwello-marketing-page-s6uece,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+PR#539,1110abb8d0,2026-10-20,pr-merge,feat,title,categories,feat(categories): categories and required Verteilschlüssel (#452),w8-issue-452,27,1,122,38,64,20,22,10,5,DB|Backend|FE|BFF|Shared/Contracts,10,4,559,1290,23,6,7,1,2,34,29,5,1,14,0
+PR#531,319335effa,2026-10-20,pr-merge,fix,title,contracts,fix(contracts): no «Abgerechnet bis» over a Dwello statement,w1-issue-499,9,0,27,8,13,6,4,9,2,Backend|FE,6,4,67,241,7,0,1,0,2,3,8,0,0,6,0
+PR#540,f8471e130c,2026-10-20,pr-merge,chore,title,ci,"chore(ci): Chromium on PRs, report a red main",ccr-5b821854-q8xe9r,3,0,7,0,1,6,0,1,0,,4,0,0,2,0,0,0,0,0,0,1,1,2,3,0
+PR#536,2984e2eff7,2026-10-20,pr-merge,docs,title,buildings,docs(buildings): show the register import as live,claude/dwello-marketing-page-s6uece,1,0,8,0,0,8,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,0,7
+PR#537,572115767b,2026-10-20,pr-merge,chore,title,ci,"chore(ci): run E2E on main, skip docs-only pushes",ccr-5b821854-q8xe9r,4,0,8,0,1,7,0,1,0,,4,0,0,75,0,0,0,0,0,1,0,2,2,3,0
+PR#530,0b47e6268a,2026-10-20,pr-merge,fix,title,statements,fix(statements): tenant shares at a tenant change,w3-issue-451,12,1,85,29,35,21,17,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,592,859,15,5,7,1,2,18,16,0,5,16,0
+PR#527,6095bab9f8,2026-10-20,pr-merge,feat,title,statements,feat(statements): carry over Saldo below CHF 5.00,w4-issue-448,13,1,104,33,47,24,20,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,778,1551,17,6,7,2,3,22,23,0,7,17,0
+PR#518,6b99011e58,2026-10-20,pr-merge,feat,title,statements,feat(statements): require the creditor's address,w5-issue-450,14,2,54,18,19,17,13,7,3,Backend|FE|BFF,9,4,167,403,9,3,6,0,2,11,6,1,3,13,0
+PR#525,59c9c2ffff,2026-10-20,pr-merge,feat,title,statements,feat(statements): one billing period per building,w2-issue-199,12,1,56,17,25,14,9,9,3,Backend|FE|BFF,7,4,555,1142,13,3,1,0,0,11,14,0,2,12,0
+PR#515,984a323227,2026-10-20,pr-merge,feat,title,privacy,feat(privacy): split responsibility in legal texts,w6-issue-458,11,4,44,10,19,15,7,8,2,FE|BFF,7,4,215,380,8,2,0,0,0,4,15,2,2,11,0
+PR#526,a828b36850,2026-10-20,pr-merge,feat,title,invoices,"feat(invoices): Akontorechnung, hints at the Betrag, «In Abrechnungen enthalten»",w9-issue-455,9,2,62,25,22,15,8,8,4,Backend|FE|BFF|Shared/Contracts,9,4,367,521,21,1,2,0,3,8,12,1,3,11,0
+PR#516,5ca290064d,2026-10-20,pr-merge,feat,title,contracts,"feat(contracts): «Abgerechnet bis» lines, preview, wizard, refusals",w1-issue-453,10,3,66,19,32,15,11,10,3,Backend|FE|BFF,8,4,336,728,14,2,3,0,3,12,17,0,2,13,0
+PR#514,07406740c0,2026-10-20,pr-merge,fix,override,,"fr/it/en words of #405 and notice hint (#461, #501)",w10-issue-461,13,1,70,21,26,23,15,8,4,DB|Backend|FE|BFF,8,4,1210,362,10,4,6,1,0,18,8,0,5,18,0
+PR#504,7261d21a10,2026-10-20,pr-merge,fix,title,,"fix: 404 for malformed ids, statement gap",claude/fix-invalid-id-and-statement-gap,9,0,29,9,12,8,3,7,2,Backend|FE,6,4,25,118,8,0,1,0,0,3,9,0,1,7,0
+PR#520,3db8976a12,2026-10-20,pr-merge,docs,title,contracts,docs(contracts): mark own rate above 0 as done,w7-glossary-own-rate,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+PR#494,86f1387022,2026-10-20,pr-merge,chore,title,components,chore(components): one list section for the list pages,w9-issue-455-resultlist,5,0,13,7,1,5,7,1,1,FE,4,0,155,14,7,0,0,0,0,0,1,0,1,4,0
+PR#517,facddbb6e6,2026-10-20,pr-merge,feat,title,contracts,"feat(contracts): refuse own rate of 0 %, glossary help texts of #402",w7-issue-447,5,1,39,14,17,8,7,6,2,Backend|FE,6,4,98,133,12,0,2,0,0,7,10,0,2,6,0
+PR#513,3add3b5965,2026-10-20,pr-merge,docs,title,i18n,docs(i18n): glossary term Gebäuderegister,claude/nifty-tesla-gmus4a,1,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,2,1,0
+PR#510,11a6749b41,2026-10-20,pr-merge,chore,override,,ci: website upload over plain FTP for Starter,claude/dwello-marketing-page-s6uece,2,1,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+PR#493,0e0804b015,2026-10-19,pr-merge,docs,title,,"docs: open-source website, brand, AGPL licence",claude/dwello-marketing-page-s6uece,8,0,24,0,0,24,0,0,0,,4,0,0,0,0,0,0,0,0,0,0,3,2,0,18
+PR#505,49f24740c6,2026-10-19,pr-merge,feat,title,buildings,feat(buildings): take building and apartments from the Gebäuderegister,claude/nifty-tesla-gmus4a,6,1,71,22,29,20,14,12,3,Backend|FE|BFF,9,4,771,1179,14,5,3,0,2,10,17,2,6,12,0
+PR#502,a9db22dc97,2026-10-19,pr-merge,chore,title,ci,chore(ci): no second E2E run after a merge,ccr-3510fafb-cx2ywk,2,0,8,0,0,8,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,2,5,0
+PR#492,a50d72e339,2026-10-19,pr-merge,feat,title,contracts,feat(contracts): Akonto with «Gültig ab» and PDF lines months × amount,ccr-6c5f45f8-br8wl9,15,3,86,26,38,22,17,10,5,DB|Backend|FE|Shared/Contracts|BFF,9,4,797,1128,14,1,8,2,5,14,20,0,5,17,0
+PR#473,c09ec4fd07,2026-10-19,pr-merge,chore,title,ci,chore(ci): run E2E in every browser on PRs,ccr-01e823d6-yhj5kc,3,0,7,0,1,6,0,1,0,,4,0,0,4,0,0,0,0,0,0,1,1,3,2,0
+PR#476,e31d8d31c5,2026-10-19,pr-merge,chore,title,tests,chore(tests): code-reviewer reports no Nits,ccr-3dfff432-ljcit4,2,0,3,0,0,3,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,3,0
+PR#475,6b8741ebdf,2026-10-19,pr-merge,chore,title,config,chore(config): cut agent tokens and check time,ccr-3dfff432-ljcit4,3,0,12,0,1,11,0,1,0,,3,0,0,19,0,0,0,0,0,1,0,3,0,8,0
+PR#474,4c422176e3,2026-10-19,pr-merge,feat,title,tenants,feat(tenants): export a tenant's data as ZIP,ccr-6c5f45f8-br8wl9,6,1,32,9,11,12,4,8,3,Backend|FE|BFF,8,4,267,450,6,1,2,0,2,4,5,0,2,10,0
+PR#472,fd77a1776f,2026-10-19,pr-merge,feat,title,buildings,feat(buildings): link a building to its invoices,ccr-6c5f45f8-br8wl9,4,1,10,1,5,4,1,5,1,FE,4,0,6,26,1,0,0,0,0,1,4,0,0,4,0
+PR#471,3b5592bc03,2026-10-19,pr-merge,feat,title,components,feat(components): lock «Weiter» while a step loads,ccr-01e823d6-yhj5kc,6,1,17,7,4,6,3,2,1,FE,4,0,69,172,7,0,0,0,0,2,2,0,0,6,0
+PR#469,4ce177acf1,2026-10-19,pr-merge,feat,title,auth,feat(auth): sign in only with allowed e-mails,ccr-6c5f45f8-br8wl9,3,1,37,11,14,12,6,8,2,FE|BFF,7,4,76,224,4,7,0,0,0,4,10,3,4,5,0
+PR#467,53618b079e,2026-10-19,pr-merge,feat,title,statements,feat(statements): recalculate a single draft,ccr-6c5f45f8-br8wl9,5,1,35,10,16,9,6,7,3,Backend|FE|BFF,7,4,260,199,6,2,2,0,0,5,11,0,2,7,0
+PR#466,499d64afb8,2026-10-19,pr-merge,fix,title,tests,fix(tests): wait for apartment choice in wizard,ccr-01e823d6-yhj5kc,3,0,5,0,2,3,0,1,0,,2,0,0,14,0,0,0,0,0,0,2,0,0,3,0
+PR#463,33fe1d989f,2026-10-19,pr-merge,fix,title,tests,fix(tests): purge sent statements in E2E cleanup,ccr-01e823d6-yhj5kc,3,0,9,0,2,7,0,2,0,,4,0,0,24,0,0,0,0,0,0,2,2,1,4,0
+PR#462,ae6710c9fa,2026-10-19,pr-merge,feat,title,contracts,feat(contracts): objection help names tacit continuation (#457),ccr-6c5f45f8-br8wl9,5,1,15,6,4,5,3,4,1,FE,4,4,12,19,6,0,0,0,0,1,3,0,0,5,0
+PR#460,1cc6266821,2026-10-19,pr-merge,fix,title,invoices,fix(invoices): no gap for a coarser billing rhythm (#130),ccr-6c5f45f8-br8wl9,6,0,10,2,3,5,2,3,2,Backend|FE,5,0,13,78,1,0,1,0,0,1,2,0,0,5,0
+PR#446,3e728e1939,2026-10-19,pr-merge,feat,title,contracts,feat(contracts): warn on Akonto without Nebenkosten (#444),ccr-6c5f45f8-br8wl9,4,1,18,6,7,5,2,5,1,FE,4,4,17,61,6,0,0,0,0,1,6,0,0,5,0
+PR#445,4a18ffd2e1,2026-10-19,pr-merge,feat,title,contracts,feat(contracts): flat-rate warning with Akonto (#432),ccr-6c5f45f8-br8wl9,11,1,22,5,9,8,2,6,1,FE,4,4,13,86,5,0,0,0,0,1,8,0,0,8,0
+PR#443,0d616e8606,2026-10-19,pr-merge,fix,title,statements,fix(statements): Weiter in step 3 while agreements load (#439),ccr-6c5f45f8-br8wl9,7,0,25,7,9,9,2,7,1,FE,5,4,69,74,7,0,0,0,0,2,7,0,1,8,0
+PR#441,98a4877dbe,2026-10-19,pr-merge,chore,title,tests,chore(tests): pin the building limit in all loads,ccr-240d3fd7-ogc0me,2,0,3,0,2,1,0,1,0,,2,0,0,56,0,0,0,0,0,2,0,0,0,1,0
+PR#442,24ef2cea87,2026-10-19,pr-merge,docs,title,config,docs(config): name where unconfirmed points looked,ccr-9b88c9f2-p44e0b,2,0,3,0,0,3,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,3,0
+PR#440,aa48182fcb,2026-10-19,pr-merge,fix,title,buildings,fix(buildings): load up to 1000 buildings in lists,ccr-240d3fd7-ogc0me,2,0,12,8,1,3,4,1,1,BFF,4,0,16,2,0,8,0,0,0,1,0,0,1,2,0
+PR#438,3f0297f655,2026-10-19,pr-merge,fix,title,tests,fix(tests): E2E in Firefox and WebKit (#424) (#438),,8,0,24,6,12,6,5,7,1,FE,4,0,43,114,6,0,0,0,0,4,8,0,0,6,0
+PR#437,93956d8221,2026-10-18,pr-merge,feat,title,invoices,feat(invoices): Akonto hints name one way only,feat/glossary-texts-222,14,4,21,4,3,14,1,2,1,FE,5,4,16,12,4,0,0,0,0,2,1,0,1,13,0
+PR#436,f20fe7b78c,2026-10-18,pr-merge,docs,title,i18n,docs(i18n): update glossary from the decisions of 2026-10-18,claude/brave-babbage-d7bnoa,3,0,15,7,3,5,6,1,2,Backend|FE,5,0,14,6,6,0,1,0,0,0,3,0,2,3,0
+PR#434,f4ec9b0d4c,2026-10-18,pr-merge,feat,title,contracts,feat(contracts): Nebenkostenpauschale on the Mietvertrag,claude/w15c-pauschale-429,9,1,57,20,25,12,14,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,182,320,11,4,2,2,3,6,17,0,2,10,0
+PR#433,51e0e0050c,2026-10-18,pr-merge,docs,override,,Glossary: Anteil nach Heizprofil and Zeitanteil per invoice,claude/glossary-406,1,0,2,1,0,1,1,0,1,Backend,2,0,1,0,0,0,1,0,0,0,0,0,1,0,0
+PR#431,49d949df6e,2026-10-18,pr-merge,docs,override,,"Glossary: Mindestbetrag, Übertrag, Erledigt, Zahlungsfrist einer Mahnung",claude/glossary-403-404,1,0,2,1,0,1,1,0,1,FE,2,0,1,0,1,0,0,0,0,0,0,0,1,0,0
+PR#401,4e59e22455,2026-10-18,pr-merge,feat,title,contracts,"feat(contracts): Akonto hints and Art. 269d rule (Fixes #66, Fixes #388)",claude/w15-akonto-hints-66,16,2,39,8,12,19,4,5,1,FE,5,4,61,152,8,0,0,0,0,6,6,0,2,17,0
+PR#430,7c214178d2,2026-10-18,pr-merge,docs,title,invoices,docs(invoices): record decision on the U-39 badge,claude/w17-292-category-reasons,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+PR#418,c4df7c86c1,2026-10-18,pr-merge,feat,title,categories,"feat(categories): sharpen reasons, show on invoice",claude/w17-292-category-reasons,5,1,32,9,14,9,5,7,3,Backend|FE|Shared/Contracts,7,4,249,293,7,0,1,0,2,4,9,0,1,8,0
+PR#412,6013638ba2,2026-10-18,pr-merge,fix,override,,"QR-bill checked against SIX IG v2.4: character set, blank payable-by field",claude/w13-qr-bill-v24-78,4,0,14,2,5,7,2,3,1,Backend,4,0,64,102,0,0,2,0,0,3,2,0,0,7,0
+PR#425,a070f33ce4,2026-10-18,pr-merge,docs,title,config,docs(config): related issues in one pull request,ccr-576d452d-bj0qyo,3,0,6,0,0,6,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,2,4,0
+PR#426,743c664793,2026-10-18,pr-merge,chore,title,ci,"chore(ci): name failed E2E tests, merge archive",ccr-240d3fd7-ogc0me,3,0,4,0,1,3,0,1,0,,3,0,0,2,0,0,0,0,0,0,1,1,0,2,0
+PR#417,62f08f1bcf,2026-10-18,pr-merge,feat,override,,Categories marked «Brennstoff» hold a Tankbestand (#100),claude/w16-brennstoff-100,7,1,53,15,25,13,11,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,116,338,6,2,4,2,3,9,14,0,4,9,0
+PR#427,26a0c4ed0d,2026-10-18,pr-merge,chore,override,,Fix the E2E races O-36 and O-37,claude/w16b-e2e-races,3,0,10,1,4,5,1,4,1,Backend,5,0,29,34,0,0,1,0,0,1,3,0,1,4,0
+PR#421,ddd2fe2051,2026-10-17,pr-merge,feat,title,config,"feat(config): default KI model qwen3-vl:8b-instruct, KI timeouts for CPU-only servers (#419)",ccr-d43d886f-t02obj,5,0,22,2,6,14,2,6,2,Backend|BFF,7,0,21,57,0,1,1,0,0,2,4,4,4,6,0
+PR#423,cea0fec0b2,2026-10-17,pr-merge,fix,title,ci,fix(ci): give E2E shards on main 60 minutes,ccr-240d3fd7-ogc0me,3,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,1,0,2,0
+PR#420,f6a88ee1ba,2026-10-17,pr-merge,feat,title,contracts,feat(contracts): one rule for missing statements,claude/w9-issue-211-199,12,1,47,14,23,10,9,9,3,FE|BFF|Shared/Contracts,6,4,381,561,8,5,0,0,2,6,16,0,0,10,0
+c:7dde5088,7dde508865,2026-10-17,direct,docs,override,,doc(testdata) added invoice test data,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+PR#414,fe09f93cc8,2026-10-17,pr-merge,feat,title,i18n,"feat(i18n): call wizard input «Ihre Angaben», keep «Entwurf» for the statement status",claude/w18-entwurf-angaben,4,1,33,5,20,8,2,7,1,FE,5,4,52,138,5,0,0,0,0,5,15,0,1,7,0
+PR#416,daf5f0cde7,2026-10-17,pr-merge,fix,title,ci,"fix(ci): finish main runs, five shards, browser cache",ccr-240d3fd7-ogc0me,3,0,5,0,0,5,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,3,0
+PR#394,919e299fd1,2026-10-17,pr-merge,docs,title,tests,docs(tests): name source of Bergregion shares,claude/w14-heating-bergregion-80,3,0,4,0,1,3,0,1,0,,2,0,0,4,0,0,0,0,0,1,0,0,0,3,0
+PR#400,001432c6ce,2026-10-17,pr-merge,fix,override,,Check statement legal sources against Fedlex (#77),claude/w12-fedlex-77,4,0,16,5,5,6,2,5,1,FE,5,4,12,24,5,0,0,0,0,1,4,0,1,5,0
+PR#413,e89d238226,2026-10-17,pr-merge,docs,title,config,docs(config): fewer review rounds per task,ccr-576d452d-bj0qyo,3,0,6,0,0,6,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,6,0
+PR#354,7b1ba108c7,2026-10-17,pr-merge,feat,title,statements,feat(statements): share heating by service period (#71),claude/w7d-heating-period-71,10,1,24,4,5,15,4,3,2,DB|Backend,6,0,183,265,0,0,3,1,0,3,2,0,2,13,0
+PR#396,600f25e5b0,2026-10-17,pr-merge,feat,title,statements,feat(statements): drop the 3-month invoice hint (#65),claude/w8c-gap-rule,4,1,18,8,6,4,3,5,1,FE,4,4,45,65,8,0,0,0,0,2,4,0,0,4,0
+PR#298,83994214e6,2026-10-17,pr-merge,feat,title,statements,"feat(statements): wizard confirmation, Swiss time, drafts",claude/statement-wizard-251-252-201,10,1,46,16,18,12,8,7,2,FE|BFF,5,4,326,551,14,2,0,0,0,7,11,0,0,12,0
+PR#297,6a76fbcfd8,2026-10-17,pr-merge,feat,title,categories,feat(categories): name exclusions in descriptions,claude/w5-category-texts,12,1,25,2,10,13,2,8,2,DB|FE,7,0,29,119,1,0,0,1,0,4,6,1,1,11,0
+PR#313,0f3d5d1d0b,2026-10-17,pr-merge,feat,title,categories,"feat(categories): mark and protect predefined categories, no KI check while the KI is off",claude/w5b-categories-166-219,7,2,38,13,10,15,5,6,3,Backend|FE|BFF,7,4,100,303,9,3,1,0,0,6,4,0,2,13,0
+PR#289,b3cce29d17,2026-10-17,pr-merge,feat,title,invoices,feat(invoices): explain costs over several years,claude/w3-leistungszeitraum-250-254,8,1,25,6,10,9,3,6,1,FE,5,4,36,118,6,0,0,0,0,4,6,0,1,8,0
+PR#359,ca98d666cc,2026-10-17,pr-merge,feat,override,,Privacy statement after #82; former tenants' documents (#178),claude/w9c-privacy-82-178,18,1,72,25,33,14,20,11,3,Backend|FE|BFF,8,4,485,704,13,10,2,0,2,14,17,0,1,13,0
+PR#350,78aa4860ab,2026-10-17,pr-merge,feat,title,contracts,feat(contracts): «Abgerechnet bis» on the Mietvertrag,claude/w5d-billed-until-133,10,1,60,23,21,16,16,9,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,226,437,12,2,6,2,3,6,13,0,3,13,0
+PR#390,b953928745,2026-10-17,pr-merge,feat,title,invoices,feat(invoices): lead to statements an invoice is missing from,claude/w6e-invoice-hints-378-379,7,2,20,5,7,8,2,5,2,BFF|FE,5,0,48,117,4,1,0,0,0,1,6,0,0,8,0
+PR#391,cdc055e17c,2026-10-17,pr-merge,feat,override,,"Fixed-term Akonto hints (#76), mixed presets keep settings (#119)",claude/w3f-befristet-preset-76-119,8,1,31,11,10,10,5,6,2,FE|BFF,6,4,108,205,9,2,0,0,1,4,5,0,0,10,0
+PR#365,9efbfae2d1,2026-10-17,pr-merge,feat,title,statements,feat(statements): waive a Saldo below CHF 5 (#94),claude/w6d-min-saldo-94,10,1,42,14,10,18,8,6,3,Backend|FE|BFF,7,4,106,260,9,1,4,0,0,5,5,0,4,14,0
+PR#389,dba4c89f8a,2026-10-17,pr-merge,feat,title,statements,feat(statements): PDF invoice line names the invoice,claude/w11-pdf-rechnung-236,4,1,13,2,3,8,2,2,1,Backend,5,0,25,57,0,0,2,0,0,2,1,0,1,7,0
+PR#393,f7681f9d3f,2026-10-17,pr-merge,docs,title,ci,docs(ci): collected workflow review 2026-10-17,ccr-97e9e9da-6rf1lb,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+PR#392,74cba612ba,2026-10-17,pr-merge,feat,title,contracts,feat(contracts): agreed Nebenkosten per Mietvertrag,claude/w10c-agreed-categories-91,16,3,99,38,39,22,22,11,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,828,1252,19,8,8,2,4,16,20,0,3,19,0
+PR#384,271e511ccf,2026-10-17,pr-merge,feat,override,,Audit log («Protokoll») under Einstellungen (#357),claude/w7e-audit-log-357,11,2,66,22,22,22,16,11,4,DB|Backend|FE|BFF,9,4,484,730,9,4,7,2,2,8,12,0,4,18,0
+PR#385,93581d9a47,2026-10-17,pr-merge,feat,override,,Correct a sent or paid statement with a berichtigte Abrechnung (A-11),claude/w2e-berichtigte-abrechnung-120,10,3,81,29,34,18,20,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,799,1064,14,6,6,2,3,17,15,0,4,14,0
+PR#381,3311bf9b3b,2026-10-17,pr-merge,feat,title,apartments,feat(apartments): word-wise apartment and building search,claude/w4e-search-160,3,1,27,10,11,6,6,7,2,Backend|FE,5,4,52,167,7,0,3,0,0,3,8,0,0,6,0
+PR#383,8b2c710eb9,2026-10-17,pr-merge,fix,title,i18n,fix(i18n): German wording findings of the native read,claude/w3e-de-wording-348,5,0,61,9,48,4,6,6,2,Backend|FE,5,4,393,247,5,0,4,0,0,34,14,0,0,4,0
+PR#377,009327be94,2026-10-17,pr-merge,fix,title,statements,fix(statements): PDF says Gebäude; draft PDF follows tenant language,claude/w9d-pdf-gebaeude-sprache-351-249,5,0,13,1,3,9,1,2,1,Backend,5,0,12,61,0,0,1,0,0,2,1,0,2,7,0
+PR#371,b0fe7f2726,2026-10-17,pr-merge,feat,title,statements,feat(statements): download a run's PDFs as one ZIP,claude/w5e-zip-111,5,1,36,10,16,10,4,8,2,FE|BFF,7,4,68,205,8,2,0,0,0,4,12,1,1,8,0
+PR#375,c17ab22497,2026-10-17,pr-merge,feat,override,,E-mail statements to tenants who want e-mail (#86),claude/w8d-statement-email-86,9,1,54,18,20,16,12,9,5,DB|Backend|FE|BFF|Shared/Contracts,10,4,347,552,8,3,5,1,3,7,11,1,4,11,0
+PR#372,74f223f36c,2026-10-17,pr-merge,fix,override,,"Monatlich total names and «Tankbestand» panel title (#62, #75)",claude/w3d-monatlich-total-tankbestand-62-75,5,1,31,12,13,6,7,5,3,FE|BFF|Shared/Contracts,6,4,36,83,8,3,0,0,1,5,8,0,0,6,0
+PR#355,92b5427a97,2026-10-17,pr-merge,fix,title,i18n,fix(i18n): Fedlex terms and native wording of tenant texts,claude/w4d-i18n-83-84,9,0,22,5,3,14,3,2,2,Backend|FE,5,3,140,34,3,0,2,0,0,3,0,0,2,12,0
+PR#361,f900e5b70c,2026-10-17,pr-merge,feat,override,,"Korrespondenzadresse with country, old-address warning, LI IBAN",claude/w3c-korrespondenzadresse-68-102-191-114,20,2,119,37,55,27,29,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,350,767,14,8,12,2,6,18,32,0,5,22,0
+PR#312,aaa415f0c2,2026-10-17,pr-merge,fix,title,contracts,fix(contracts): suggest no start the check refuses,claude/w10b-start-year-296,4,0,13,3,5,5,3,3,1,FE,4,0,21,39,3,0,0,0,0,3,2,0,0,5,0
+PR#341,45eadbe254,2026-10-17,pr-merge,fix,title,statements,fix(statements): round Saldo in tenant's favour,claude/w2d-saldo-rounding-79,6,0,26,6,7,13,3,3,3,DB|Backend|FE,7,4,23,155,4,0,1,1,0,6,1,0,4,9,0
+PR#340,611c1a102c,2026-10-17,pr-merge,docs,title,statements,docs(statements): confirm check thresholds (#65),claude/w8c-gap-rule,3,0,7,3,0,4,3,0,2,Backend|FE,3,0,10,0,2,0,1,0,0,0,0,0,0,4,0
+PR#329,69508c236a,2026-10-17,pr-merge,feat,title,statements,feat(statements): add QR payment part to reminders,claude/w6c-reminder-qr-108-59,8,1,18,4,5,9,4,5,1,Backend,5,0,63,113,0,0,4,0,0,1,4,0,1,8,0
+PR#321,8f77372a43,2026-10-17,pr-merge,feat,title,statements,feat(statements): Tankbestand checks in the statement wizard,claude/w8b-tank-checks,8,1,59,22,21,16,13,9,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,257,490,12,4,3,2,2,7,13,0,3,13,0
+PR#326,afa4da976a,2026-10-17,pr-merge,feat,override,,"Zahlungsfrist and Mahnfrist in the settings, overview follows them",claude/w4c-fristen-64-87-55,7,1,35,10,15,10,6,7,2,FE|BFF,7,4,164,255,8,2,0,0,2,7,6,0,1,9,0
+PR#314,a235fdb154,2026-10-17,pr-merge,feat,override,,Statement positions know their invoices; statement detail like the PDF,claude/statement-detail-96-104,13,1,62,20,26,16,14,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,456,801,7,5,5,2,5,8,14,0,3,13,0
+PR#324,f2131ee902,2026-10-17,pr-merge,feat,title,statements,feat(statements): explain Art. 257d OR limits,claude/w6c-reminder-hint-59,1,1,11,6,2,3,3,2,1,FE,4,4,14,8,6,0,0,0,0,1,1,0,0,3,0
+PR#318,7b1aaa3358,2026-10-17,pr-merge,feat,title,contracts,feat(contracts): ask after an expired fixed-term contract (A-6),claude/w7c-fixed-term-115,12,1,51,14,23,14,10,10,4,DB|Backend|FE|BFF,9,4,367,628,8,2,2,2,2,6,15,0,3,11,0
+PR#323,43ce77ea6f,2026-10-17,pr-merge,feat,override,,"Help: contents list, contract terms and domain-reviewed help texts",claude/w2c-help-texts-109-67-69,5,1,30,9,13,8,4,6,1,FE,4,4,209,185,9,0,0,0,0,4,9,0,0,8,0
+PR#320,e11a135211,2026-10-17,pr-merge,feat,title,i18n,feat(i18n): follow the browser language,claude/w9b-issue-110-browser-language,5,1,22,5,7,10,2,6,2,FE|BFF,6,4,20,105,4,1,0,0,0,3,4,3,0,7,0
+PR#319,c3d7758999,2026-10-17,pr-merge,fix,title,statements,fix(statements): pin #74 tank case with a pg test,claude/w5c-fuel-stock-74,4,0,5,0,1,4,0,1,0,,2,0,0,24,0,0,0,0,0,1,0,0,0,4,0
+PR#316,30f160ee81,2026-10-17,pr-merge,feat,override,,"Show an apartment's tenancy: earlier contracts, «Leer seit», «Vermietet ab», Mieter «Künftig»",claude/w4b-mietstatus-117-145-58,7,1,81,26,44,11,17,10,4,Backend|FE|BFF|Shared/Contracts,8,4,400,614,15,7,3,0,4,15,26,0,2,9,0
+PR#306,b0c8cef910,2026-10-17,pr-merge,feat,title,tenants,"feat(tenants): reminders in the tenant's language, no Romansh",claude/w6b-tenant-language-63-105-106,8,1,57,21,20,16,17,7,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,245,201,7,4,7,2,2,9,10,0,6,10,0
+PR#311,bd4b58d91e,2026-10-17,pr-merge,feat,title,contracts,feat(contracts): agree the fee per contract,claude/w9-issue-124-89-60,10,1,86,32,38,16,19,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,408,796,20,4,5,2,3,19,17,0,3,13,0
+PR#310,6a442fa052,2026-10-17,pr-merge,feat,title,buildings,feat(buildings): remove the building map,claude/w2b-remove-map-129,4,1,39,12,11,16,6,6,3,FE|Shared/Contracts|BFF,8,4,107,138,8,3,0,0,1,5,6,4,4,8,0
+PR#299,84ea945789,2026-10-17,pr-merge,feat,title,contracts,"feat(contracts): keep the apartment on the tenant detour, take over the rent",claude/w10-wizard-detour-144,9,1,35,11,16,8,5,8,2,FE|BFF,5,4,153,250,10,1,0,0,0,4,12,0,0,8,0
+PR#287,2287599ddb,2026-10-16,pr-merge,feat,override,,Preview hints for invoices without a Leistungszeitraum,claude/w8-invoice-checks,7,1,36,8,17,11,4,10,2,Backend|FE,7,4,189,319,7,0,1,0,1,6,10,0,1,10,0
+PR#304,c069e250cf,2026-10-16,pr-merge,feat,title,statements,"feat(statements): bound, record and reset the payment",claude/w4-zahlung-138-93-92,7,1,61,21,26,14,13,10,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,251,530,11,4,3,2,5,10,12,0,3,11,0
+PR#300,f562b75fc7,2026-10-16,pr-merge,feat,title,statements,feat(statements): never give a number twice,claude/w3-statement-number-97-101,9,1,27,7,11,9,7,6,3,DB|Backend|BFF,7,0,50,196,0,3,2,2,0,4,7,0,2,7,0
+PR#303,50264e3ca9,2026-10-16,pr-merge,feat,title,contracts,feat(contracts): notice receipt and Kündigungsfrist hint (A-3),claude/w7b-notice-112-52,6,1,37,13,13,11,9,9,5,DB|Backend|FE|Shared/Contracts|BFF,9,4,102,152,7,1,2,2,2,3,9,0,3,8,0
+PR#301,8f308ecfcd,2026-10-16,pr-merge,fix,title,contracts,fix(contracts): say when a notice can be withdrawn,claude/w7b-withdraw-help-52,1,0,11,5,4,2,2,4,1,FE,4,4,12,25,5,0,0,0,0,0,4,0,1,1,0
+PR#288,754542d5f1,2026-10-16,pr-merge,feat,title,statements,feat(statements): tenancy dates and missing PDF in the list,claude/statement-list-248-253,7,1,35,8,15,12,5,8,3,FE|BFF|Shared/Contracts,7,4,68,149,5,2,0,0,3,5,8,0,1,11,0
+PR#295,76424e0968,2026-10-16,pr-merge,feat,override,,"Reminder deadlines: store, enforce, remake on posting",claude/w6-reminders-193-194-107,9,1,60,25,23,12,17,11,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,345,422,14,4,4,2,3,6,15,0,2,10,0
+PR#293,5d5038e221,2026-10-16,pr-merge,feat,override,,Keep the draft when an end is refused; delete a Mietvertrag entered by mistake,claude/w7-contract-delete-141-116,6,1,54,10,32,12,5,10,3,Backend|FE|BFF,8,4,361,450,7,1,2,0,3,18,11,0,2,10,0
+PR#285,5f7e47c856,2026-10-16,pr-merge,feat,title,contracts,feat(contracts): new contract for a moving tenant; contracts that continue by law,claude/w10-contract-moves-156-155,9,1,42,12,17,13,5,8,1,FE,5,4,131,239,12,0,0,0,0,4,13,0,1,12,0
+PR#284,86c8233e81,2026-10-16,pr-merge,feat,title,statements,"feat(statements): Heizprofil effect, help text, rounded months",claude/w4-heizprofil-247-230-232,5,1,34,12,11,11,9,6,4,DB|Backend|FE|BFF,8,4,197,225,5,1,5,1,0,5,6,0,2,9,0
+PR#275,8486d9e3f0,2026-10-16,pr-merge,fix,title,tests,fix(tests): upload axe states use own building (O-34),fix-o34-upload-axe-flake,3,0,5,0,1,4,0,1,0,,3,0,0,41,0,0,0,0,0,0,1,0,1,3,0
+PR#274,87dda97c7a,2026-10-16,pr-merge,docs,title,config,docs(config): load bdd-acceptance in step 1,ccr-4ed2b403-bvtddq,2,0,8,0,1,7,0,1,0,,3,0,0,2,0,0,0,0,0,0,1,0,1,6,0
+PR#273,3ec5a3b66d,2026-10-16,pr-merge,docs,title,config,docs(config): keep only project rules,ccr-4ed2b403-bvtddq,3,0,8,0,0,8,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,8,0
+PR#272,0ac03e6099,2026-10-16,pr-merge,docs,title,config,docs(config): cut bdd-acceptance to Dwello,ccr-4ed2b403-bvtddq,4,0,14,0,0,14,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,2,12,0
+PR#271,55e41e5331,2026-10-16,pr-merge,docs,title,config,docs(config): plain words in the tdd skill,ccr-4ed2b403-bvtddq,3,0,5,0,0,5,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,5,0
+PR#270,adf0576f90,2026-10-16,pr-merge,docs,title,tests,docs(tests): one source for the E2E rules,ccr-4ed2b403-bvtddq,2,0,7,0,1,6,0,1,0,,3,0,0,6,0,0,0,0,0,0,1,0,1,5,0
+PR#269,5abbf26b7e,2026-10-16,pr-merge,docs,title,config,docs(config): shorter rules after the Opus 5.5 guide review,ccr-4ed2b403-bvtddq,9,0,17,0,0,17,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,3,14,0
+PR#266,fb0cd60ab8,2026-10-16,pr-merge,docs,title,config,docs(config): apply the other guardrail proposals,ccr-4ed2b403-bvtddq,2,0,20,0,5,15,0,5,0,,5,0,0,56,0,0,0,0,0,4,1,1,4,10,0
+PR#267,f7435d56f7,2026-10-16,pr-merge,chore,title,ci,chore(ci): run e2e and axe checks in shards,ccr-b3bba6e0-5lma20,3,0,5,0,0,5,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,3,0
+PR#265,b4c103c428,2026-10-16,pr-merge,chore,title,ci,chore(ci): run axe check only on UI changes,ccr-a2156825-0dud7m,2,0,5,0,0,5,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,3,0
+PR#264,e029167c2b,2026-10-16,pr-merge,docs,title,config,docs(config): fewer review rounds and plan notes,ccr-4ed2b403-bvtddq,3,0,6,0,0,6,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,5,0
+PR#260,66c9ec14a0,2026-10-16,pr-merge,chore,title,tests,chore(tests): skip unchanged e2e builds and unused servers locally,ccr-e275340a-dkb1sv,5,0,10,0,5,5,0,4,0,,4,0,0,116,0,0,0,0,0,1,4,1,0,4,0
+PR#259,f746092444,2026-10-16,pr-merge,chore,title,config,chore(config): pin subagent models by benchmark,ccr-53346543-k85q1z,2,0,14,0,0,14,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,14,0
+PR#258,e5ad246c3c,2026-10-16,pr-merge,fix,title,statements,fix(statements): label the invoice lines in the PDF,fix/issue-241-pdf-note,8,0,21,5,3,13,5,2,2,DB|Backend,6,0,109,130,0,0,4,1,0,2,1,0,4,9,0
+PR#255,6b2404eb48,2026-10-16,pr-merge,docs,title,i18n,docs(i18n): add glossary terms from #243,ccr-01c5cd1e-tfcmi8,4,0,7,2,0,5,2,0,2,DB|Backend,4,0,2,0,0,0,1,1,0,0,0,0,1,4,0
+PR#246,8858315157,2026-10-16,pr-merge,feat,title,invoices,feat(invoices): open points of the invoice upload,feat/upload-followups-233,10,3,88,29,40,19,14,11,5,DB|Backend|FE|BFF|Shared/Contracts,10,4,548,784,21,2,3,2,3,12,26,1,3,15,0
+PR#242,3c664d3c7d,2026-10-16,pr-merge,fix,title,statements,fix(statements): list invoices of mixed days in the PDF,fix/issue-226-invoice-days,15,0,25,6,5,14,6,3,2,DB|Backend,6,0,118,146,0,0,4,2,0,3,2,0,2,12,0
+PR#244,443643570b,2026-10-16,pr-merge,docs,title,i18n,docs(i18n): add glossary terms from decisions,ccr-01c5cd1e-tfcmi8,4,0,4,0,0,4,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,3,0
+PR#238,0d970be030,2026-10-16,pr-merge,feat,title,invoices,feat(invoices): create invoices from uploaded files,feat/invoice-upload-217,15,4,118,48,32,38,23,12,5,DB|Backend|FE|BFF|Shared/Contracts,10,4,1864,1747,27,9,9,2,4,14,15,5,10,23,0
+PR#235,fee5c0e9b5,2026-10-16,pr-merge,fix,title,statements,fix(statements): heating share sums and old PDFs,fix/issue-229-heating-share-followups,7,0,25,6,7,12,6,6,3,DB|Backend|BFF,8,0,68,192,0,1,4,1,1,3,3,0,1,11,0
+PR#234,2187df3ff5,2026-10-16,pr-merge,fix,title,config,fix(config): resolve persona kit from its own path,claude/exciting-lovelace-d7xxq8,2,0,5,0,0,5,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,2,3,0
+PR#231,aa36a10a87,2026-10-16,pr-merge,fix,title,statements,fix(statements): keep the heating share as created,fix/issue-209-stored-heating-share,5,0,19,5,4,10,5,4,2,DB|Backend,6,0,51,159,0,0,3,2,0,1,3,0,2,8,0
+PR#228,f106ec6b96,2026-10-16,pr-merge,fix,title,statements,fix(statements): print the Zeitanteil as days,fix/issue-208-pdf-day-share,6,0,24,7,4,13,7,2,2,DB|Backend,6,0,76,139,0,0,5,2,0,3,1,0,3,10,0
+PR#225,ca6cb82f7d,2026-10-16,pr-merge,feat,override,,"Reasons of predefined categories, KI hints, invoice and privacy texts",claude/cool-mccarthy-s93912,15,2,59,14,25,20,8,10,3,Backend|FE|BFF,9,4,265,492,9,2,3,0,2,9,14,2,4,14,0
+PR#224,c91aa8e9a1,2026-10-16,pr-merge,fix,title,components,fix(components): list filters follow the URL,fix/issue-159-list-filters,3,0,17,3,6,8,3,6,1,FE,5,0,12,117,3,0,0,0,0,1,5,0,1,7,0
+c:e81dca63,e81dca6390,2026-10-16,direct,fix,title,permissions,fix(permissions): expand allowed Bash commands in settings,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+PR#218,1d871ef7c6,2026-10-16,pr-merge,fix,title,contracts,fix(contracts): report a failed tenant or apartment load,fix/issue-147-contract-edit-load,4,0,11,5,1,5,2,1,2,FE|BFF,5,4,29,19,4,1,0,0,0,1,0,0,1,4,0
+PR#215,3fa1e2afcd,2026-10-15,pr-merge,docs,title,config,docs(config): apply workflow rules reviews,ccr-d5d7c21b-mnap2t,9,0,31,0,7,24,0,5,0,,4,0,0,77,0,0,0,0,0,5,2,0,6,18,0
+PR#213,4c509ba4b7,2026-10-15,pr-merge,fix,title,contracts,fix(contracts): list every missing statement on the contract page,claude/kind-goldberg-63fawi,6,0,37,8,15,14,4,8,2,FE|BFF,7,4,105,182,7,1,0,0,1,5,9,0,1,13,0
+PR#214,1bc2a8d763,2026-10-15,pr-merge,fix,title,services,fix(services): clearer KI rules for small models,ccr-a94ce1d7-gmryoe,4,0,11,1,4,6,1,4,1,Backend,6,0,15,35,0,0,1,0,1,2,1,1,0,5,0
+PR#210,e445b1e782,2026-10-15,pr-merge,fix,title,statements,fix(statements): heating shared by days shows Mietstage in the PDF,claude/kind-goldberg-63fawi,5,0,27,4,12,11,4,5,1,Backend,5,0,92,195,0,0,4,0,0,5,7,0,2,9,0
+PR#206,82d926eb89,2026-10-15,pr-merge,fix,title,services,fix(services): show KI the predefined categories,ccr-a94ce1d7-gmryoe,3,0,12,2,3,7,2,3,1,Backend,5,0,27,38,0,0,2,0,0,1,2,2,0,5,0
+PR#203,25ce8279a1,2026-10-15,pr-merge,fix,title,statements,fix(statements): wizard names dropped draft values and billed contracts,claude/kind-goldberg-63fawi,6,0,46,11,17,18,6,9,2,FE|BFF,6,4,191,326,9,2,0,0,0,5,12,0,1,17,0
+PR#198,039eb297fb,2026-10-15,pr-merge,fix,title,i18n,fix(i18n): formula error without the engine's English text,claude/kind-goldberg-63fawi,4,0,16,5,3,8,2,3,2,Backend|FE,6,4,20,39,4,0,1,0,0,2,1,0,2,6,0
+PR#197,8d9a259dfb,2026-10-15,pr-merge,fix,title,invoices,"fix(invoices): code schema refusals, hide raw text",claude/kind-goldberg-63fawi,3,0,12,3,5,4,2,3,2,Backend|FE,6,0,20,61,2,0,1,0,2,3,0,0,1,3,0
+PR#196,fc75caf769,2026-10-15,pr-merge,fix,title,statements,fix(statements): code failed reminder e-mails,claude/kind-goldberg-63fawi,6,0,21,7,3,11,4,2,2,Backend|FE,5,4,40,79,5,0,2,0,0,3,0,0,2,9,0
+PR#195,736ffeb7e5,2026-10-15,pr-merge,fix,title,db,fix(db): keep applied migrations unchanged,ccr-0bff2bc5-3qyesu,6,0,14,1,1,12,1,1,1,DB,5,0,8,4,0,0,0,1,0,1,0,1,4,7,0
+PR#192,3db08e815f,2026-10-15,pr-merge,docs,title,,docs: glossary keeps only definitions,docs/issue-188-glossary-definitions,6,0,9,0,0,9,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,5,4,0
+PR#190,ff8cd79814,2026-10-15,pr-merge,feat,override,,KI proposes whether a new category is umlagefähig (#176),claude/cool-mccarthy-s93912,19,4,83,17,31,35,10,11,4,DB|Backend|FE|BFF,10,4,520,1085,10,2,4,1,2,15,14,3,11,21,0
+PR#189,531049d049,2026-10-15,pr-merge,fix,title,statements,fix(statements): code PDF and calculation errors,claude/kind-goldberg-63fawi,6,0,49,14,23,12,9,10,3,Backend|FE|BFF,8,4,156,278,6,3,5,0,4,7,12,0,3,9,0
+PR#183,18be33314e,2026-10-15,pr-merge,feat,override,,Upload documents to a tenant,feat/issue-174-tenant-document-upload,12,3,71,20,29,22,13,11,5,DB|Backend|FE|BFF|Shared/Contracts,10,4,703,872,11,2,4,2,6,7,17,1,6,15,0
+PR#182,03c7708117,2026-10-15,pr-merge,fix,title,services,fix(services): count today from the Swiss day,claude/kind-goldberg-63fawi,3,0,18,8,5,5,8,3,1,Backend,5,0,79,185,0,0,8,0,0,1,4,0,1,4,0
+PR#181,74491f88c6,2026-10-14,pr-merge,fix,title,styles,fix(styles): serve an SVG favicon,claude/kind-goldberg-63fawi,3,0,14,2,5,7,2,5,1,FE,5,0,13,39,2,0,0,0,0,1,4,0,2,5,0
+PR#177,7c62eb468d,2026-10-14,pr-merge,feat,title,config,feat(config): show app version and tag releases,claude/tender-hopper-v7g67q,4,1,36,7,10,19,4,7,1,FE,6,4,27,225,7,0,0,0,0,5,5,9,3,7,0
+PR#175,a344098216,2026-10-14,pr-merge,chore,title,ci,chore(ci): add nightly issue triage skill,claude/relaxed-fermat-1pojxn,4,0,6,0,0,6,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,6,0
+PR#172,8ec20d59f6,2026-10-14,pr-merge,docs,title,config,docs(config): add workflow review after features,claude/dazzling-mayer-o68bzj,4,0,4,0,0,4,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,4,0
+PR#163,ba76d457bc,2026-10-14,pr-merge,chore,override,,Demo deployment for demo.dwello.ch with demo notice,ccr-3bc253a8-1qvu31,12,1,48,7,16,25,3,8,2,FE|BFF,7,4,49,249,6,1,0,0,0,4,12,6,3,16,0
+PR#171,b3840f246a,2026-10-14,pr-merge,docs,title,config,docs(config): merge duplicate open points,ccr-23181eba-8w1srd,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+PR#170,c154a3770f,2026-10-14,pr-merge,chore,title,config,chore(config): point #70 markers to #120,ccr-23181eba-8w1srd,1,0,3,2,0,1,2,0,1,FE,2,0,4,0,2,0,0,0,0,0,0,0,0,1,0
+PR#169,b03b840f89,2026-10-14,pr-merge,docs,title,config,docs(config): apply workflow review findings,ccr-0fed3f33-epi0po,4,0,15,1,2,12,1,2,1,FE,5,1,8,20,1,0,0,0,1,1,0,0,2,10,0
+PR#168,bf9c7bde41,2026-10-14,pr-merge,fix,title,statements,fix(statements): filter the list by contract and period,ccr-1b9652d7-sdys9d,7,0,41,14,16,11,7,8,4,Backend|FE|Shared/Contracts|BFF,8,4,274,358,10,1,2,0,1,6,10,0,2,9,0
+PR#167,fe34de6350,2026-10-14,pr-merge,fix,title,db,fix(db): store whether a category is predefined,ccr-1b9652d7-sdys9d,3,0,22,5,11,6,5,8,4,DB|Backend|BFF|FE,9,0,17,187,1,1,1,2,2,4,5,0,2,4,0
+PR#164,34d18a9a17,2026-10-14,pr-merge,fix,title,i18n,fix(i18n): correct facts on the privacy page,ccr-1b9652d7-sdys9d,4,0,21,8,6,7,5,4,2,FE|BFF,6,4,110,151,5,3,0,0,0,3,3,0,1,6,0
+PR#161,b826af0934,2026-10-14,pr-merge,fix,title,apartments,fix(apartments): search list by number or building,ccr-1b9652d7-sdys9d,4,0,16,2,7,7,2,7,1,Backend,5,0,19,136,0,0,2,0,0,1,6,0,2,5,0
+PR#158,61e47eb291,2026-10-14,pr-merge,chore,title,config,chore(config): improvements from the B-15 instruction check,claude/b15-instruction-improvements,11,0,29,0,4,25,0,3,0,,5,0,0,65,0,0,0,0,0,1,3,3,4,18,0
+PR#157,fab88f6675,2026-10-14,squash,fix,title,contracts,fix(contracts): keep tenant and apartment fixed (B-15) (#157),,1,0,42,13,11,18,7,8,3,Backend|FE|BFF,8,4,276,376,10,1,2,0,1,6,4,0,2,16,0
+c:2efcd567,2efcd5676a,2026-10-14,direct,chore,title,config,chore(config): workflow improvements from B-13,,1,0,24,0,4,20,0,3,0,,5,0,0,111,0,0,0,0,0,2,2,2,3,15,0
+c:db714ecf,db714ecfbc,2026-10-13,direct,docs,title,config,docs(config): update B-13 instruction check,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:6747153f,6747153f1c,2026-10-13,direct,docs,title,contracts,docs(contracts): close B-13 and #151 session,,1,0,6,0,2,4,0,2,0,,3,0,0,4,0,0,0,0,0,0,2,0,1,3,0
+c:f6c086d6,f6c086d607,2026-10-13,direct,chore,title,tests,chore(tests): enable contract retry scenarios,,1,0,3,0,2,1,0,1,0,,2,0,0,2,0,0,0,0,0,0,2,0,0,1,0
+c:3c1125ff,3c1125ff1e,2026-10-13,direct,fix,title,contracts,"fix(contracts): guard contract retries, add tests",,1,0,15,2,10,3,1,7,1,FE,4,0,14,104,2,0,0,0,0,2,8,0,0,3,0
+c:e125573c,e125573cbf,2026-10-13,direct,fix,title,contracts,fix(contracts): mark unchecked apartments in choice,,1,0,12,9,1,2,4,1,1,FE,4,4,34,8,9,0,0,0,0,1,0,0,1,1,0
+c:76136116,76136116ec,2026-10-13,direct,fix,title,contracts,fix(contracts): say the result of a contract retry,,1,0,18,7,4,7,2,3,1,FE,5,4,75,46,7,0,0,0,0,2,2,0,1,6,0
+c:a36d8787,a36d87871b,2026-10-13,direct,fix,title,contracts,fix(contracts): retry unloaded apartment contracts,,1,0,18,10,6,2,2,4,1,FE,4,4,105,77,10,0,0,0,0,2,4,0,0,2,0
+c:1f819293,1f819293d1,2026-10-13,direct,chore,title,tests,chore(tests): add wip scenario for contract retry,,1,0,7,0,6,1,0,6,0,,2,0,0,48,0,0,0,0,0,0,6,0,0,1,0
+c:b3fd0101,b3fd0101d2,2026-10-13,direct,chore,title,tests,chore(tests): check the review hint with axe,,1,0,8,0,4,4,0,3,0,,3,0,0,22,0,0,0,0,0,0,4,0,1,3,0
+c:5c81853f,5c81853fd7,2026-10-13,direct,fix,title,contracts,fix(contracts): name unknown contracts at review,,1,0,12,3,6,3,1,5,1,FE,5,0,19,36,3,0,0,0,0,2,4,0,1,2,0
+c:a008052b,a008052bbf,2026-10-13,direct,docs,title,contracts,docs(contracts): add persona Helga report for B-13,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:d96227d1,d96227d18a,2026-10-13,direct,chore,title,tests,chore(tests): reuse hint target in a11y state,,1,0,4,0,2,2,0,2,0,,2,0,0,4,0,0,0,0,0,0,2,0,0,2,0
+c:2062c4b9,2062c4b983,2026-10-13,direct,fix,title,contracts,fix(contracts): address review of B-13 slice,,1,0,9,4,2,3,2,1,1,FE,4,0,21,35,4,0,0,0,0,2,0,0,1,2,0
+c:11bf89f0,11bf89f02a,2026-10-13,direct,fix,title,contracts,fix(contracts): unloaded apartment is not free,,1,0,20,5,14,1,2,8,1,FE,4,0,78,131,5,0,0,0,0,2,12,0,0,1,0
+c:5d46a539,5d46a53914,2026-10-13,direct,fix,title,config,"fix(config): ask for push -d forms, archive plan",,1,0,4,0,0,4,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,4,0
+c:49467b66,49467b6697,2026-10-13,direct,fix,title,config,fix(config): ask for docker-compose and git forms,,1,0,3,0,0,3,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,3,0
+c:6d6ca9ac,6d6ca9acc3,2026-10-13,direct,fix,title,config,fix(config): cover project's destructive commands,,1,0,6,0,0,6,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,6,0
+c:07a3b2c1,07a3b2c1c8,2026-10-13,direct,docs,title,config,docs(config): align skills with keep-going rule,,1,0,8,0,0,8,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,8,0
+c:28218d92,28218d92ce,2026-10-13,direct,docs,title,config,docs(config): add rules from screenplay run,,1,0,8,0,1,7,0,1,0,,3,0,0,2,0,0,0,0,0,0,1,0,1,6,0
+c:535c12e8,535c12e84e,2026-10-13,direct,docs,title,config,docs(config): apply B-13 workflow improvements,,1,0,13,0,1,12,0,1,0,,4,0,0,13,0,0,0,0,0,1,0,2,2,8,0
+PR#149,5b8b770dcb,2026-10-13,pr-merge,chore,title,tests,chore(tests): e2e tests on a lean Screenplay pattern,claude/screenplay-e2e-v2,16,0,193,0,180,13,0,11,0,,5,0,0,6490,0,0,0,0,0,2,178,2,2,9,0
+PR#146,f1a2f83f84,2026-10-12,pr-merge,docs,title,config,docs(config): archive finished session 18,claude/happy-gauss-ugsyom,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0
+PR#139,b56447fabc,2026-10-12,pr-merge,docs,title,config,"docs(config): review agents, one place for open work",claude/happy-gauss-ugsyom,8,0,80,35,7,38,16,4,2,Backend|FE,7,0,73,91,33,0,2,0,0,4,3,5,16,17,0
+PR#54,bb010ec47c,2026-10-12,pr-merge,feat,title,contracts,"feat(contracts): upcoming end, statements after an end change",claude/relaxed-ride-tciycq,23,2,84,34,39,11,21,8,4,Backend|FE|BFF|Shared/Contracts,8,4,837,1206,22,8,3,0,4,17,19,0,3,8,0
+PR#50,490859fbbf,2026-10-12,pr-merge,docs,title,config,docs(config): enable mmx search for the agent,claude/vibrant-hawking-ie2ale,3,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0
+PR#49,a7571ac008,2026-10-12,pr-merge,feat,title,contracts,"feat(contracts): tell a notice from a fixed term, remind per contract",claude/relaxed-ride-tciycq,8,2,62,23,28,11,14,9,5,DB|Backend|FE|BFF|Shared/Contracts,9,4,221,480,13,5,2,2,4,11,14,0,5,6,0
+PR#48,e6c38be977,2026-10-12,pr-merge,feat,title,i18n,"feat(i18n): UI in German, French, Italian, English",claude/optimistic-clarke-nn8u7t,51,9,347,251,38,58,88,10,4,Backend|FE|BFF|Shared/Contracts,9,4,10322,2161,185,42,23,0,1,28,10,7,31,20,0
+PR#47,f1bc98cf6d,2026-10-12,pr-merge,feat,title,contracts,feat(contracts): end a contract on a chosen day,claude/relaxed-ride-tciycq,26,2,73,20,26,27,14,9,4,DB|Backend|FE|BFF,9,0,533,1036,11,2,5,2,2,12,12,0,5,22,0
+PR#46,5271008163,2026-10-12,pr-merge,fix,title,statements,fix(statements): ask for a missing deadline,fix/categorization-prompt-audit,3,0,12,3,7,2,3,6,3,Backend|BFF|FE,7,0,16,55,1,1,1,0,0,3,4,0,1,1,0
+PR#45,59ea0e89db,2026-10-12,pr-merge,fix,title,invoices,fix(invoices): mark administration non-allocable,fix/categorization-prompt-audit,3,0,12,2,3,7,2,2,1,Backend,6,0,16,38,0,0,2,0,0,2,1,0,1,5,0
+PR#44,3f2a1e3684,2026-10-11,pr-merge,fix,title,ci,"fix(ci): Fallow tsconfig, invoice grouping, PDF screenshot comment",claude/exciting-gauss-4lm9d9,3,0,3,1,1,1,1,1,1,Backend,3,0,18,5,0,0,1,0,0,0,1,1,0,0,0
+PR#43,63c48ff5d1,2026-10-11,pr-merge,feat,title,statements,"feat(statements): fee of own costs, Saldo to 5 Rappen",claude/relaxed-ride-tciycq,10,2,88,37,30,21,20,10,5,DB|Backend|BFF|FE|Shared/Contracts,9,0,605,685,13,4,7,12,3,19,9,0,8,13,0
+PR#42,c72f047831,2026-10-11,pr-merge,feat,title,ci,feat(ci): leave unchanged pages out of screenshots,claude/exciting-gauss-4lm9d9,1,1,5,0,4,1,0,2,0,,3,0,0,36,0,0,0,0,0,2,2,1,0,0,0
+PR#41,e15a3685e6,2026-10-11,pr-merge,chore,title,services,chore(services): deepen the shallow modules from the scan,claude/exciting-gauss-4lm9d9,13,0,33,20,9,4,16,4,3,Backend|BFF|FE,7,0,698,1424,5,13,2,0,0,9,0,2,1,1,0
+PR#40,aa59c0ab9b,2026-10-11,pr-merge,chore,title,build,chore(build): use Bun as the only package manager,ccr-34f04627-sba9kp,4,0,24,0,6,18,0,3,0,,5,0,0,30,0,0,0,0,0,3,3,8,7,3,0
+PR#38,6b1c8e080a,2026-10-11,pr-merge,feat,title,build,feat(build): add deepcheck deep-module tool,claude/exciting-gauss-4lm9d9,39,9,52,0,19,33,0,1,0,,4,0,0,2301,0,0,0,0,0,19,0,27,3,3,0
+PR#39,0f4b3f675a,2026-10-11,pr-merge,feat,title,statements,"feat(statements): Swiss statement PDF, invoice check, date field",claude/relaxed-ride-tciycq,32,6,245,101,114,30,55,12,5,DB|Backend|FE|BFF|Shared/Contracts,10,0,4257,4725,54,13,22,11,7,66,42,2,8,20,0
+c:9dafc390,9dafc39044,2026-10-10,direct,docs,title,build,docs(build): add TDD and review rules to brief,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:8a38c7be,8a38c7be0e,2026-10-10,direct,docs,title,build,docs(build): add deepcheck module brief,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+PR#34,aa1529bd38,2026-10-10,pr-merge,feat,title,buildings,feat(buildings): pass CARTO key to map tiles,feature/new-design,2,1,7,1,1,5,1,1,1,FE,5,0,5,18,1,0,0,0,0,1,0,3,1,1,0
+PR#33,571c0d24fa,2026-10-10,pr-merge,chore,title,ci,chore(ci): run the axe check as its own job,claude/clever-galileo-lemeud,1,0,3,0,0,3,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,1,0
+PR#32,8c7a0e972f,2026-10-10,pr-merge,feat,title,,feat: new design system and guided UI (redesign),feature/new-design,96,29,518,294,161,63,56,12,3,FE|BFF|Shared/Contracts,8,0,20298,8904,269,24,0,0,1,82,79,3,27,33,0
+c:b3371806,b3371806d0,2026-10-09,direct,feat,title,docs,feat(docs): add UI redesign brief outlining new design system and guidelines,,1,1,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:b7112aa8,b7112aa82c,2026-10-08,direct,fix,title,config,fix(config): apply review of the operator notice,,1,0,7,2,4,1,2,3,2,BFF|FE,5,0,10,17,1,1,0,0,0,2,2,0,0,1,0
+c:5406c04b,5406c04bf0,2026-10-08,direct,feat,title,config,feat(config): name the operator in the terms,,1,1,12,2,6,4,2,5,2,BFF|FE,7,0,20,84,1,1,0,0,0,2,4,2,1,1,0
+c:a9c5db8d,a9c5db8dbb,2026-10-08,direct,docs,title,,docs: allow editing the baseline before install,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+c:104c9af6,104c9af6f7,2026-10-08,direct,fix,title,db,fix(db): fold overdue check into the schema,,1,0,4,2,0,2,1,0,1,DB,3,0,12,0,0,0,0,2,0,0,0,0,1,1,0
+c:399bb0a4,399bb0a4ef,2026-10-08,direct,docs,title,,docs: clarify dev restart after .env change,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+c:f6188a2f,f6188a2f7e,2026-10-08,direct,fix,title,tests,fix(tests): always drop the config test trigger,,1,0,1,0,1,0,0,1,0,,1,0,0,7,0,0,0,0,0,1,0,0,0,0,0
+c:8a2b824f,8a2b824f54,2026-10-08,direct,fix,title,tests,fix(tests): ignore shell BACKEND_URL in vite test,,1,0,2,0,1,1,0,1,0,,2,0,0,6,0,0,0,0,0,1,0,1,0,0,0
+c:e4843fc1,e4843fc15a,2026-10-08,direct,fix,title,tests,fix(tests): load vite config like the dev server,,1,0,1,0,1,0,0,1,0,,1,0,0,7,0,0,0,0,0,1,0,0,0,0,0
+c:83f569d8,83f569d81e,2026-10-08,direct,docs,title,,docs: log per-fix reviews in plan,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:f5e0bde7,f5e0bde755,2026-10-08,direct,fix,title,build,fix(build): load .env for BACKEND_URL in dev,,1,0,4,1,2,1,1,1,1,BFF,3,0,2,31,0,1,0,0,0,2,0,1,0,0,0
+c:e82b8f42,e82b8f42dd,2026-10-08,direct,fix,title,config,fix(config): write settings in one transaction,,1,0,3,1,1,1,1,1,1,Backend,3,0,20,30,0,0,1,0,0,1,0,0,1,0,0
+c:80abbfa7,80abbfa7f2,2026-10-08,direct,docs,title,,docs: mark overdue as computed in PRD,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:8749acf1,8749acf15c,2026-10-08,direct,fix,title,tests,fix(tests): keep recategorize test off LLM cache,,1,0,1,0,1,0,0,1,0,,1,0,0,2,0,0,0,0,0,1,0,0,0,0,0
+c:713ef714,713ef714cc,2026-10-08,direct,docs,title,,docs: fix JWT and lock notes after review,,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0
+c:9c730e03,9c730e03d7,2026-10-08,direct,fix,title,invoices,fix(invoices): apply review of bug fixes,,1,0,9,3,4,2,3,2,2,Backend|BFF,5,0,22,51,0,1,2,0,0,4,0,0,1,1,0
+c:51c49c56,51c49c568d,2026-10-08,direct,docs,title,,docs: update API spec for bug fixes,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:93599a07,93599a0784,2026-10-08,direct,fix,title,api,fix(api): read backend from BACKEND_URL only,,1,0,9,3,2,4,2,2,1,BFF,5,0,20,12,0,3,0,0,0,1,1,2,2,0,0
+c:1cbca108,1cbca10855,2026-10-08,direct,fix,title,auth,fix(auth): check JWT issuer and audience,,1,0,3,1,2,0,1,1,1,Backend,2,0,3,9,0,0,1,0,0,2,0,0,0,0,0
+c:b718de04,b718de0476,2026-10-08,direct,fix,title,config,fix(config): save settings all or nothing,,1,0,2,1,1,0,1,1,1,Backend,2,0,20,14,0,0,1,0,0,1,0,0,0,0,0
+c:b75d14f4,b75d14f4e9,2026-10-08,direct,fix,title,invoices,fix(invoices): apply sure category on recategorize,,1,0,2,1,1,0,1,1,1,Backend,2,0,9,34,0,0,1,0,0,1,0,0,0,0,0
+c:a94beff3,a94beff369,2026-10-08,direct,fix,title,statements,"fix(statements): compute overdue, lock fee rate",,1,0,7,4,1,2,4,1,2,DB|Backend,4,0,61,39,0,0,2,2,0,1,0,0,2,0,0
+c:c3522063,c35220638f,2026-10-08,direct,docs,title,,docs: log docs alignment in plan,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:e594edab,e594edab94,2026-10-08,direct,docs,title,,docs: apply consistency review,,1,0,4,0,0,4,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,4,0,0
+c:7fe5385f,7fe5385f78,2026-10-08,direct,docs,title,,docs: rewrite API spec from routes,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:4e95720e,4e95720ef6,2026-10-08,direct,docs,title,,docs: align tech stack and design system,,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0
+c:783f09df,783f09df76,2026-10-08,direct,docs,title,,docs: align PRD with implemented behavior,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:ac69ed3f,ac69ed3f81,2026-10-08,direct,docs,title,,docs: rewrite data model from migrations,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:6033bbec,6033bbecce,2026-10-08,direct,docs,title,,docs: align README and glossary with code,,1,0,5,0,0,5,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,4,1,0
+c:3bacf179,3bacf179c0,2026-10-08,direct,docs,title,,docs: translate MVA and test pyramid to English,,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0
+c:c2583650,c258365090,2026-10-08,direct,fix,title,invoices,fix(invoices): apply review of privacy notice,,1,0,7,2,3,2,2,3,2,Backend|FE,6,0,8,17,1,0,1,0,0,2,1,0,1,1,0
+c:c318e7cd,c318e7cdb9,2026-10-08,direct,feat,title,invoices,feat(invoices): name LLM provider in privacy page,,1,1,18,5,7,6,5,5,3,Backend|BFF|FE,8,0,53,110,1,1,3,0,0,4,3,2,3,1,0
+c:d7024cfe,d7024cfea6,2026-10-08,direct,fix,title,invoices,"fix(invoices): support reasoning LLMs, apply review",,1,0,13,2,2,9,2,1,1,Backend,5,0,12,10,0,0,2,0,0,2,0,1,5,3,0
+c:1e7c849b,1e7c849b52,2026-10-08,direct,feat,title,invoices,feat(invoices): configure any OpenAI-compatible LLM,,1,1,12,4,1,7,4,1,2,Backend|FE,6,0,70,56,1,0,3,0,0,1,0,3,2,2,0
+c:6782d235,6782d2351c,2026-10-08,direct,fix,title,statements,fix(statements): lock every statement but drafts,,1,0,4,1,1,2,1,1,1,Backend,4,0,16,62,0,0,1,0,0,1,0,0,1,1,0
+c:f715a8a3,f715a8a3b1,2026-10-08,direct,docs,title,,docs: apply review of MVA scenarios,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+c:27a6190b,27a6190b6d,2026-10-08,direct,docs,title,,docs: rebuild MVA plan around quality scenarios,,1,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,2,0
+c:5ad84861,5ad848612c,2026-10-08,direct,docs,title,,docs: management fee 3 % is a guideline in PRD,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+c:bda838bf,bda838bff9,2026-10-08,direct,docs,title,,docs: apply second review of Claude instructions,,1,0,4,0,1,3,0,1,0,,3,0,0,2,0,0,0,0,0,0,1,0,1,2,0
+c:01cbdd89,01cbdd891a,2026-10-08,direct,docs,title,,docs: fix facts in Claude instructions,,1,0,3,0,1,2,0,1,0,,2,0,0,9,0,0,0,0,0,0,1,0,0,2,0
+c:eb186cc7,eb186cc783,2026-10-08,direct,docs,title,,docs: restructure Claude instructions,,1,0,5,0,1,4,0,1,0,,3,0,0,30,0,0,0,0,0,0,1,0,1,3,0
+c:5d9f8c43,5d9f8c43ac,2026-10-08,direct,docs,title,tests,"docs(tests): define target coverage, drop counts",,1,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,2,0
+c:c73f414f,c73f414f56,2026-10-08,direct,docs,title,services,docs(services): describe period share precisely,,1,0,1,1,0,0,1,0,1,Backend,1,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+c:5dfc870b,5dfc870b56,2026-10-08,direct,chore,title,services,chore(services): rename period share in calculation,,1,0,5,2,2,1,2,1,1,Backend,3,0,20,22,0,0,2,0,0,2,0,0,0,1,0
+c:0b96c5d5,0b96c5d5f8,2026-10-08,direct,fix,title,statements,"fix(statements): pin cost share, show two decimals",,1,0,4,1,2,1,1,2,1,BFF,4,0,2,21,0,1,0,0,0,1,1,0,0,1,0
+c:3dcb2aed,3dcb2aed11,2026-10-08,direct,fix,title,services,"fix(services): statement year in UTC, test new year",,1,0,2,1,1,0,1,1,1,Backend,2,0,2,6,0,0,1,0,0,1,0,0,0,0,0
+c:28fe5f50,28fe5f50ef,2026-10-08,direct,fix,title,statements,fix(statements): share column is the cost share,,1,0,3,1,1,1,1,1,1,Backend,3,0,3,52,0,0,1,0,0,1,0,0,0,1,0
+c:b566b12e,b566b12e29,2026-10-08,direct,fix,title,services,fix(services): count statement numbers up,,1,0,3,1,1,1,1,1,1,Backend,3,0,27,39,0,0,1,0,0,1,0,0,0,1,0
+c:68b56687,68b56687ee,2026-10-08,direct,fix,title,db,fix(db): paid demo statement like the app marks it,,1,0,6,2,1,3,2,1,1,DB,5,0,10,29,0,0,0,2,0,1,0,1,1,1,0
+c:7f8fcb38,7f8fcb3875,2026-10-08,direct,docs,title,db,docs(db): note demo statements in plan,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:f97a9ddc,f97a9ddcff,2026-10-08,direct,feat,title,db,feat(db): demo statements generated by the app,,1,1,4,1,1,2,1,1,1,DB,4,0,47,45,0,0,0,1,0,1,0,1,1,0,0
+c:07b947bf,07b947bfeb,2026-10-08,direct,docs,title,tests,docs(tests): counts after migration reset,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+c:8737cf60,8737cf60e1,2026-10-08,direct,fix,title,db,fix(db): reset the development database only,,1,0,8,1,2,5,1,1,1,DB,5,0,4,29,0,0,0,1,0,2,0,3,1,1,0
+c:8f50f170,8f50f1704c,2026-10-08,direct,chore,title,db,chore(db): reset migrations to a baseline,,1,0,27,13,4,10,4,1,2,DB|Backend,6,0,314,204,0,0,1,12,0,4,0,6,3,1,0
+c:d16bff16,d16bff16d2,2026-10-08,direct,fix,title,tests,fix(tests): guard type import match with fixture,,1,0,1,0,1,0,0,1,0,,1,0,0,4,0,0,0,0,0,1,0,0,0,0,0
+c:517d9c55,517d9c55e7,2026-10-08,direct,fix,title,ci,fix(ci): no screenshots for type-only changes,,1,0,3,0,2,1,0,2,0,,3,0,0,14,0,0,0,0,0,1,1,0,0,1,0
+c:e58bacf5,e58bacf56d,2026-10-08,direct,docs,title,tests,"docs(tests): final counts, open follow-ups",,1,0,3,0,1,2,0,1,0,,3,0,0,5,0,0,0,0,0,1,0,0,1,1,0
+c:ea26fd01,ea26fd0149,2026-10-08,direct,chore,title,types,chore(types): type check tests and config files,,1,0,6,0,3,3,0,2,0,,5,0,0,12,0,0,0,0,0,2,1,1,1,1,0
+c:67a0fdd0,67a0fdd01e,2026-10-08,direct,fix,title,tests,fix(tests): pin migration expectations,,1,0,2,0,2,0,0,2,0,,1,0,0,18,0,0,0,0,0,2,0,0,0,0,0
+c:a51515d9,a51515d99a,2026-10-08,direct,feat,title,tests,"feat(tests): API contracts for building, tenant lists",,1,1,8,0,6,2,0,3,0,,4,0,0,78,0,0,0,0,3,3,0,0,1,1,0
+c:6b4af813,6b4af813dd,2026-10-08,direct,fix,title,db,fix(db): correct invoices of non-allocable kinds,,1,0,7,4,2,1,4,2,3,DB|Backend|FE,6,0,22,17,1,0,1,2,0,1,1,0,0,1,0
+c:58c3ce4a,58c3ce4a13,2026-10-08,direct,fix,title,invoices,fix(invoices): lock allocable for such categories,,1,0,9,2,6,1,2,5,2,Backend|FE,5,0,23,63,1,0,1,0,0,3,3,0,0,1,0
+c:8ae5beab,8ae5beab1e,2026-10-08,direct,fix,title,services,fix(services): non-allocable category stays so,,1,0,6,1,4,1,1,4,1,Backend,4,0,20,52,0,0,1,0,0,1,3,0,0,1,0
+c:54a6f142,54a6f142da,2026-10-08,direct,docs,title,tests,docs(tests): counts after deleting endpoints,,1,0,3,1,0,2,1,0,1,Backend,3,0,6,0,0,0,1,0,0,0,0,0,1,1,0
+c:ef17c9a0,ef17c9a0ba,2026-10-08,direct,chore,title,api,chore(api): delete endpoints no page calls,,1,0,6,4,1,1,4,1,1,Backend,3,0,336,126,0,0,4,0,0,1,0,0,0,1,0
+c:9824fed6,9824fed6df,2026-10-08,direct,docs,title,tests,"docs(tests): close stale open items, name doubles",,1,0,3,0,0,3,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,1,0
+c:9885b36a,9885b36a9b,2026-10-08,direct,docs,title,tests,"docs(tests): update test pyramid, raise floors",,1,0,4,0,0,4,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,2,1,1,0
+c:4761314a,4761314aa8,2026-10-08,direct,fix,title,tests,fix(tests): contract test checks optional fields,,1,0,7,0,6,1,0,3,0,,3,0,0,73,0,0,0,0,4,2,0,0,0,1,0
+c:ac2679ff,ac2679ffa9,2026-10-08,direct,feat,title,tests,"feat(tests): API contracts for invoices, buildings, tenants",,1,1,14,4,9,1,4,3,3,FE|BFF|Shared/Contracts,5,0,15,124,2,1,0,0,5,5,0,0,0,1,0
+c:84142874,84142874a7,2026-10-08,direct,chore,title,tests,chore(tests): drop env mock from API proxy test,,1,0,2,1,1,0,1,1,1,BFF,2,0,7,28,0,1,0,0,0,1,0,0,0,0,0
+c:1b8f0aff,1b8f0aff62,2026-10-08,direct,fix,title,tests,fix(tests): test API proxy through real cookies,,1,0,2,0,1,1,0,1,0,,2,0,0,95,0,0,0,0,0,1,0,0,0,1,0
+c:8e532508,8e53250863,2026-10-08,direct,fix,title,config,fix(config): check IBAN check digits in the form,,1,0,5,1,3,1,1,2,1,BFF,3,0,5,19,0,1,0,0,0,3,0,0,0,1,0
+c:e36aba73,e36aba739a,2026-10-08,direct,fix,title,services,fix(services): category decides passing on costs,,1,0,7,3,3,1,3,1,1,Backend,3,0,11,99,0,0,3,0,0,3,0,0,0,1,0
+c:16a48dff,16a48dff6c,2026-10-08,direct,chore,title,ci,chore(ci): fail lint on warnings,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,1,0,1,0
+c:15ef38dd,15ef38dda4,2026-10-08,direct,chore,title,ci,"chore(ci): lint and types, contracts run backend",,1,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,2,0,1,0
+c:9000dcb5,9000dcb58a,2026-10-08,direct,fix,title,services,fix(services): store QR reference only for QR-IBAN,,1,0,4,1,2,1,1,1,1,Backend,3,0,5,31,0,0,1,0,0,2,0,0,0,1,0
+c:ae4a56c0,ae4a56c0e6,2026-10-08,direct,fix,title,services,"fix(services): unique QR reference, valid debtor",,1,0,3,2,1,0,2,1,1,Backend,2,0,32,69,0,0,2,0,0,1,0,0,0,0,0
+c:7b1a57bb,7b1a57bb1e,2026-10-07,direct,chore,title,api,chore(api): move statement use cases out of route,,1,0,5,2,1,2,2,1,1,Backend,4,0,324,57,0,0,2,0,0,1,0,0,1,1,0
+c:1c9b0725,1c9b07256e,2026-10-07,direct,fix,title,services,fix(services): store statement and items atomically,,1,0,2,1,1,0,1,1,1,Backend,2,0,82,81,0,0,1,0,0,1,0,0,0,0,0
+c:54329a99,54329a99dc,2026-10-06,direct,docs,title,tests,docs(tests): update test pyramid and plan,,1,0,4,0,0,4,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,2,2,0
+c:27473b4f,27473b4fd6,2026-10-06,direct,fix,title,statements,"fix(statements): show stored fee rate, add API contracts",,1,0,9,1,7,1,1,3,1,BFF,4,0,8,188,0,1,0,0,4,3,0,1,0,0,0
+c:9ad147bc,9ad147bc83,2026-10-06,direct,feat,title,tests,feat(tests): run statement scenarios via API driver,,1,1,5,0,5,0,0,3,0,,1,0,0,134,0,0,0,0,0,0,5,0,0,0,0
+c:3081f4a9,3081f4a9ea,2026-10-05,direct,feat,title,tenants,feat(tenants): write statements in tenant language,,1,1,20,8,12,0,8,8,3,Backend|FE|BFF,5,0,57,111,3,1,4,0,0,3,9,0,0,0,0
+c:9981a96b,9981a96baa,2026-10-05,direct,chore,title,ci,chore(ci): enforce coverage floors in CI,,1,0,7,0,0,7,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,6,1,0,0
+c:90672176,906721767d,2026-10-05,direct,feat,title,tests,feat(tests): add API protocol driver for @api scenarios,,1,1,9,0,6,3,0,5,0,,4,0,0,79,0,0,0,0,0,0,6,1,1,1,0
+c:d8965e7f,d8965e7f48,2026-10-05,direct,chore,title,tests,chore(tests): separate breadcrumb and hydration features,,1,0,20,0,20,0,0,1,0,,1,0,0,185,0,0,0,0,0,0,20,0,0,0,0
+c:3b76cb76,3b76cb762e,2026-10-05,direct,docs,title,tests,docs(tests): add test pyramid and ATDD workflow,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+c:20a4a4b7,20a4a4b787,2026-10-05,direct,docs,title,config,docs(config): align glossary with code and data,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+c:1adb1341,1adb134156,2026-10-05,direct,feat,title,statements,feat(statements): choose key for management fee,,1,1,15,6,9,0,3,6,2,BFF|FE,4,0,66,84,4,2,0,0,0,2,7,0,0,0,0
+c:3130fb79,3130fb7939,2026-10-05,direct,feat,title,services,feat(services): distribute management fee by key,,1,1,7,5,2,0,5,1,2,DB|Backend,3,0,45,134,0,0,2,3,0,2,0,0,0,0,0
+c:29bd3852,29bd3852e5,2026-10-05,direct,fix,title,tests,fix(tests): close E2E false positives with anchors,,1,0,30,5,24,1,5,4,1,FE,3,0,10,69,5,0,0,0,0,0,24,0,0,1,0
+c:5cbd7087,5cbd7087f1,2026-10-05,direct,fix,title,tests,"fix(tests): test real frontend code, drop mirror tests",,1,0,4,0,4,0,0,2,0,,1,0,0,254,0,0,0,0,0,4,0,0,0,0,0
+c:587d3a4d,587d3a4d0e,2026-10-05,direct,fix,title,tests,fix(tests): make backend tests check what they claim,,1,0,5,0,5,0,0,1,0,,1,0,0,69,0,0,0,0,0,5,0,0,0,0,0
+c:a6bc57be,a6bc57be9b,2026-10-05,direct,docs,title,config,docs(config): log ATDD test pyramid session,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:4c7b01bc,4c7b01bc84,2026-10-05,direct,chore,title,tests,chore(tests): run E2E against production build,,1,0,3,0,1,2,0,1,0,,2,0,0,11,0,0,0,0,0,0,1,0,2,0,0
+c:6140f9c7,6140f9c724,2026-10-05,direct,chore,title,tests,chore(tests): replace mirror and DB-mock tests,,1,0,10,0,10,0,0,2,0,,1,0,0,1979,0,0,0,0,0,10,0,0,0,0,0
+c:ea95713e,ea95713ec4,2026-10-05,direct,chore,title,tests,chore(tests): run pg tests on own test database,,1,0,4,0,0,4,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,4,0,0,0
+c:05a8a1fe,05a8a1fe74,2026-10-05,direct,docs,title,config,docs(config): make acceptance tests come first (ATDD),,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:3232703c,3232703c6d,2026-10-05,direct,feat,title,components,feat(components): simplify UI after UX review,,1,1,34,31,2,1,11,1,1,FE,3,0,480,89,31,0,0,0,0,2,0,0,0,1,0
+c:202443bd,202443bdba,2026-10-05,direct,chore,title,components,chore(components): remove unused code and deps,,1,0,28,26,0,2,5,0,1,FE,3,0,2203,0,26,0,0,0,0,0,0,1,0,1,0
+c:14d4c321,14d4c32191,2026-10-05,direct,chore,title,tests,chore(tests): replace any in test fakes with types,,1,0,6,0,6,0,0,2,0,,1,0,0,183,0,0,0,0,0,6,0,0,0,0,0
+c:b0e110b4,b0e110b434,2026-10-05,direct,chore,title,tests,chore(tests): clear backend type errors in tests,,1,0,5,0,5,0,0,1,0,,1,0,0,28,0,0,0,0,0,5,0,0,0,0,0
+c:e5014c9c,e5014c9c46,2026-10-05,direct,chore,title,tests,chore(tests): clear ESLint errors,,1,0,6,0,5,1,0,2,0,,3,0,0,23,0,0,0,0,0,4,1,1,0,0,0
+c:c2fe9758,c2fe97586b,2026-10-05,direct,fix,title,components,fix(components): remove mini map on destroy,,1,0,3,1,1,1,1,1,1,FE,3,0,15,21,1,0,0,0,0,1,0,1,0,0,0
+c:97bece58,97bece58c1,2026-10-05,direct,fix,title,api,fix(api): require fields the database requires,,1,0,3,2,1,0,2,1,1,Backend,2,0,12,60,0,0,2,0,0,1,0,0,0,0,0
+c:4fa6722e,4fa6722e73,2026-10-05,direct,chore,title,tests,chore(tests): set up statement tests via the API,,1,0,2,0,1,1,0,1,0,,2,0,0,167,0,0,0,0,0,1,0,0,0,1,0
+c:92c83a02,92c83a0270,2026-10-05,direct,chore,title,tests,chore(tests): simplify statement generation setup,,1,0,1,0,1,0,0,1,0,,1,0,0,34,0,0,0,0,0,1,0,0,0,0,0
+c:09a7ccd5,09a7ccd51a,2026-10-05,direct,feat,title,tests,feat(tests): pin statement generation results,,1,1,2,0,1,1,0,1,0,,2,0,0,335,0,0,0,0,0,1,0,0,0,1,0
+PR#16,87f1867321,2026-10-05,pr-merge,feat,title,ci,feat(ci): run only affected tests on pull requests,claude/ci-affected-tests,1,1,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,1,0,1,0
+PR#15,9ab0fe7568,2026-10-05,pr-merge,feat,title,ci,feat(ci): frame UI changes on PR screenshots,claude/ui-screenshots-diff,1,1,7,0,4,3,0,3,0,,4,0,0,173,0,0,0,0,0,2,2,2,0,1,0
+PR#12,27aa6406dc,2026-10-05,pr-merge,feat,title,ci,feat(ci): screenshot changed pages on pull requests,claude/ui-screenshots-build-pipeline-sb79rw,4,1,8,0,4,4,0,3,0,,4,0,0,176,0,0,0,0,0,2,2,3,0,1,0
+PR#11,c4607c8d85,2026-10-05,pr-merge,fix,title,invoices,fix(invoices): report KI failure and store override reason,claude/ki-category-fixes,3,0,23,8,13,2,7,8,3,DB|Backend|FE,6,0,39,198,3,0,2,3,0,3,10,0,0,2,0
+PR#10,0e130d750a,2026-10-05,pr-merge,fix,title,components,fix(components): keep input made before hydration,claude/prehydration-input-research,3,0,23,9,13,1,6,5,1,FE,4,0,71,349,9,0,0,0,0,3,10,0,0,1,0
+PR#9,f7ef4e01ad,2026-10-03,pr-merge,fix,title,tests,fix(tests): wait for hydration before input,claude/vigilant-bohr-d3oojn,1,0,3,1,1,1,1,1,1,FE,3,0,5,4,1,0,0,0,0,0,1,0,0,1,0
+PR#8,2772dae085,2026-10-03,pr-merge,fix,title,services,fix(services): omit pdf blob from statement data,claude/vigilant-bohr-d3oojn,1,0,3,1,1,1,1,1,1,Backend,3,0,11,20,0,0,1,0,0,1,0,0,0,1,0
+PR#7,b281b24be4,2026-10-03,pr-merge,chore,override,,"Page unit tests, coverage provider and plan recount",claude/vigilant-bohr-d3oojn,8,0,16,0,13,3,0,1,0,,3,0,0,1125,0,0,0,0,0,13,0,2,0,1,0
+PR#6,e28a3d500a,2026-10-03,pr-merge,fix,override,,"BDD coverage: a scenario for every page exit, plus bug fixes",claude/vigilant-bohr-d3oojn,8,1,75,23,51,1,17,8,4,DB|Backend|FE|BFF,7,0,249,777,17,1,2,3,0,5,46,0,0,1,0
+PR#5,eaa352387a,2026-10-03,pr-merge,chore,title,build,chore(build): vendor ponytail skills for cloud,chore/vendor-ponytail-skills,2,0,7,0,0,7,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,7,0
+PR#4,6b983be247,2026-10-03,pr-merge,feat,override,,"Session 3: rebuilt pages, German E2E, CI workflow",claude/elegant-brahmagupta-mi0wvy,5,0,35,28,5,2,16,3,2,Backend|FE,5,0,2691,219,22,0,6,0,0,5,0,1,0,1,0
+c:ddd977b8,ddd977b87b,2026-10-03,direct,docs,title,,docs: rewrite MVA plan as modular monolith,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+c:c696878b,c696878b3e,2026-10-02,direct,fix,title,invoices,fix(invoices): keep the KI's category apart,,1,0,12,9,2,1,7,2,4,Backend|FE|BFF|Shared/Contracts,6,0,99,57,5,1,2,0,1,2,0,0,0,1,0
+c:11f55ca9,11f55ca95d,2026-10-02,direct,fix,title,build,fix(build): load the shared .env in backend scripts,,1,0,3,0,1,2,0,1,0,,3,0,0,37,0,0,0,0,0,1,0,1,0,1,0
+c:eeb036d9,eeb036d920,2026-10-02,direct,feat,title,invoices,feat(invoices): rebuild invoices with German BDD,,1,1,44,21,22,1,8,9,4,Backend|FE|BFF|Shared/Contracts,7,0,1515,735,13,6,1,0,1,5,17,0,0,1,0
+c:04675a43,04675a43bc,2026-10-02,direct,chore,title,tests,chore(tests): isolate backend unit test files,,1,0,2,0,0,2,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,1,0,1,0
+c:058bbf33,058bbf33de,2026-10-02,direct,fix,title,services,fix(services): return category names in cost rules,,1,0,2,1,0,1,1,0,1,Backend,2,0,4,0,0,0,1,0,0,0,0,0,0,1,0
+c:2100d9a2,2100d9a20f,2026-10-02,direct,fix,title,db,fix(db): remove Per Person and By Consumption keys,,1,0,5,2,2,1,2,1,1,DB,3,0,30,85,0,0,0,2,0,2,0,0,0,1,0
+c:f8c102c2,f8c102c2ba,2026-10-02,direct,fix,title,buildings,"fix(buildings): show API errors, clear building type",,1,0,5,3,2,0,2,2,2,Backend|BFF,3,0,8,73,0,2,1,0,0,2,0,0,0,0,0
+c:9501f087,9501f08756,2026-09-26,direct,chore,title,buildings,chore(buildings): extract shared BuildingForm,,1,0,5,3,1,1,2,1,1,FE,3,0,833,54,3,0,0,0,0,1,0,1,0,0,0
+c:b16cbb3b,b16cbb3bb1,2026-09-26,direct,feat,title,tests,feat(tests): rebuild building E2E tests in German,,1,1,24,5,19,0,2,6,1,FE,2,0,107,677,5,0,0,0,0,0,19,0,0,0,0
+c:41574d6f,41574d6f45,2026-09-26,direct,fix,title,buildings,"fix(buildings): show backend errors, add delete action",,1,0,4,3,1,0,1,1,1,BFF,2,0,26,85,0,3,0,0,0,1,0,0,0,0,0
+c:0d5082a4,0d5082a44c,2026-09-26,direct,chore,title,config,chore(config): add fallow gate and plugins,,1,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,1,0,2,0
+c:5ab5cec6,5ab5cec6ce,2026-09-26,direct,chore,title,config,chore(config): add tdd skill to project,,1,0,4,0,0,4,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,4,0
+c:47ff0bec,47ff0bec5c,2026-09-26,direct,chore,title,config,chore(config): fix bdd-acceptance skill for Dwello,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+c:7889fa39,7889fa39b1,2026-09-26,direct,chore,title,config,chore(config): add bdd-acceptance skill to project,,1,0,1,0,0,1,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0

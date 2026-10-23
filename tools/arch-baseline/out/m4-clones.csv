@@ -1,0 +1,23 @@
+instances,lines,layers,cross_layer,where
+2,15,Backend,no,backend/src/routes/distribution-keys.ts:34 backend/src/routes/heating-profiles.ts:33
+2,11,Backend,no,backend/src/routes/distribution-keys.ts:132 backend/src/routes/heating-profiles.ts:102
+2,13,Backend,no,backend/src/routes/distribution-keys.ts:174 backend/src/routes/heating-profiles.ts:166
+4,10,Backend,no,backend/src/services/reminder-letter.ts:29 backend/src/services/reminder-letter.ts:48 backend/src/services/reminder-letter.ts:67 backend/src/services/reminder-letter.ts:86
+2,6,FE,no,src/lib/ui/EarlySelect.svelte:50 src/routes/contracts/ContractFilters.svelte:39
+2,13,BFF,no,src/routes/apartments/+page.server.ts:7 src/routes/contracts/+page.server.ts:10
+3,9,BFF,no,src/routes/apartments/+page.server.ts:10 src/routes/contracts/+page.server.ts:13 src/routes/tenants/+page.server.ts:10
+4,8,BFF,no,src/routes/apartments/+page.server.ts:11 src/routes/buildings/+page.server.ts:11 src/routes/contracts/+page.server.ts:14 src/routes/tenants/+page.server.ts:11
+2,9,BFF,no,src/routes/apartments/+page.server.ts:50 src/routes/contracts/+page.server.ts:55
+2,7,FE,no,src/routes/apartments/ApartmentFilters.svelte:73 src/routes/invoices/InvoiceSearch.svelte:98
+2,11,FE,no,src/routes/apartments/ApartmentForm.svelte:155 src/routes/config/SaveForm.svelte:85
+7,29,BFF,no,src/routes/api/apartments/[id]/+server.ts:17 src/routes/api/buildings/[id]/+server.ts:17 src/routes/api/categories/[id]/+server.ts:17 src/routes/api/distribution-keys/[id]/+server.ts:17 src/routes/api/invoices/[id]/+server.ts:17 src/routes/api/statements/[id]/+server.ts:17 src/routes/api/tenants/[id]/+server.ts:17
+8,19,BFF,no,src/routes/api/apartments/[id]/+server.ts:17 src/routes/api/buildings/[id]/+server.ts:17 src/routes/api/categories/[id]/+server.ts:17 src/routes/api/contracts/[id]/+server.ts:16 src/routes/api/distribution-keys/[id]/+server.ts:17 src/routes/api/invoices/[id]/+server.ts:17 src/routes/api/statements/[id]/+server.ts:17 src/routes/api/tenants/[id]/+server.ts:17
+9,8,BFF,no,src/routes/api/apartments/[id]/+server.ts:17 src/routes/api/buildings/[id]/+server.ts:17 src/routes/api/categories/[id]/+server.ts:17 src/routes/api/contracts/[id]/+server.ts:16 src/routes/api/distribution-keys/[id]/+server.ts:17 src/routes/api/invoices/[id]/+server.ts:17 src/routes/api/invoices/[id]/statements/+server.ts:9 src/routes/api/statements/[id]/+server.ts:17 src/routes/api/tenants/[id]/+server.ts:17
+2,8,FE,no,src/routes/buildings/[id]/DeleteBuildingDialog.svelte:21 src/routes/config/DeleteDialog.svelte:56
+2,10,FE,no,src/routes/config/categories/[id]/edit/+page.svelte:14 src/routes/config/distribution-keys/[id]/edit/+page.svelte:15
+2,10,FE,no,src/routes/contracts/ContractFilters.svelte:52 src/routes/tenants/TenantFilters.svelte:26
+2,9,FE,no,src/routes/login/+page.svelte:20 src/routes/setup/+page.svelte:28
+2,7,FE,no,src/routes/privacy/+page.svelte:164 src/routes/terms/+page.svelte:56
+2,5,Tests-Acceptance,no,tests/e2e/steps/contracts.steps.ts:53 tests/e2e/steps/contracts.steps.ts:75
+2,5,Tests-Acceptance,no,tests/e2e/steps/demo.steps.ts:39 tests/e2e/steps/demo.steps.ts:52
+2,8,Tests-Acceptance,no,tests/e2e/steps/documents.steps.ts:142 tests/e2e/steps/documents.steps.ts:150

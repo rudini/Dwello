@@ -1,0 +1,15 @@
+path,specs
+src/__tests__/design-guard.test.ts,1
+src/__tests__/e2e-screenplay-lint.test.ts,14
+tests/unit/ui-screenshot-routes.test.ts,6
+tools/claude-hooks/fallow-gate.test.ts,2
+tools/deepcheck/test/calibration.test.ts,6
+tools/deepcheck/test/cli.test.ts,1
+tools/deepcheck/test/detectors.test.ts,3
+tools/deepcheck/test/gaming.test.ts,4
+tools/deepcheck/test/graph.test.ts,11
+tools/deepcheck/test/helpers.ts,1
+tools/deepcheck/test/metrics.test.ts,4
+tools/deepcheck/test/realistic.test.ts,3
+tools/deepcheck/test/reference.test.ts,2
+tools/deepcheck/test/variants.test.ts,9

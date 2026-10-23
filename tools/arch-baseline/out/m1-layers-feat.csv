@@ -1,0 +1,12 @@
+name,layer,kind,units,pct_of_units,file_changes
+Tests-Unit,Tests-Unit,test,107,94.7,909
+Process,Process,other,105,92.9,1016
+Tests-Acceptance,Tests-Acceptance,test,100,88.5,1190
+FE,FE,prod,95,84.1,1410
+Docs,Docs,other,83,73.5,307
+BFF,BFF,prod,72,63.7,314
+Backend,Backend,prod,66,58.4,313
+Shared/Contracts,Shared/Contracts,test,57,50.4,176
+DB,DB,prod,39,34.5,91
+Tooling,Tooling,other,37,32.7,121
+Marketing,Marketing,other,3,2.7,21

@@ -1,0 +1,1938 @@
+sha,date,type,scope,subject,files
+444c1e4f16,2026-10-23,docs,statements,docs(statements): persona Dr. Weber on #477,2
+1e7b036914,2026-10-23,docs,statements,docs(statements): code review of #477,2
+0e283c6147,2026-10-23,fix,i18n,fix(i18n): agreed Akonto in the help glossary,10
+1f7df8bb6d,2026-10-23,docs,statements,docs(statements): plan of #477,1
+572b164823,2026-10-23,docs,tests,docs(tests): scenario for the Akonto help of #477,1
+ca627984d9,2026-10-23,docs,statements,docs(statements): persona Marco round 2 of #470,2
+6f2b2ac44b,2026-10-23,docs,statements,docs(statements): code review round 3 of #470,2
+7224e1afe8,2026-10-23,fix,statements,fix(statements): note failed check above «Weiter»,7
+c825ec9a9d,2026-10-23,fix,statements,fix(statements): say the late notes above «Weiter»,10
+b777e14033,2026-10-23,fix,statements,fix(statements): focus and place of loading text,4
+63925105f5,2026-10-23,fix,statements,fix(statements): late notices never move «Weiter»,12
+c4f6265ddd,2026-10-22,docs,statements,docs(statements): closing review of #465,2
+3bb0902cc5,2026-10-22,fix,statements,fix(statements): minor findings of review 465-1,12
+39dd335140,2026-10-22,docs,config,docs(config): persona report Helga of #465,1
+bf6fdbcbf6,2026-10-22,docs,statements,docs(statements): glossary and plan of #465,2
+ac690222f6,2026-10-22,feat,statements,feat(statements): the statement PDF as a letter,16
+d084856548,2026-10-22,feat,config,feat(config): phone and e-mail of the Verwaltung,10
+60c2edb4e1,2026-10-22,fix,statements,fix(statements): embed the font of the PDFs,8
+33e225e194,2026-10-22,fix,statements,fix(statements): red tests and font of #465,3
+f5de1862dd,2026-10-22,fix,statements,fix(statements): scenarios for the PDF letter,5
+b95931dc97,2026-10-22,docs,statements,docs(statements): review round 2 of #387,2
+03bc74b7eb,2026-10-22,docs,config,docs(config): plan of #387 reviews,1
+9d5dc0f190,2026-10-22,fix,statements,fix(statements): scenario for a replaced statement,5
+5d7e005b17,2026-10-22,docs,config,docs(config): plan of #387,1
+5d6888eb28,2026-10-22,fix,statements,fix(statements): Heizprofil of the same apartment,11
+9c10e3e4e5,2026-10-22,fix,statements,fix(statements): red tests of #387,4
+ff0950a631,2026-10-22,fix,statements,fix(statements): scenario profile at tenant change,1
+d2d05c4cd4,2026-10-22,docs,statements,docs(statements): review round 2 of #368 B,2
+c92b7a95ac,2026-10-22,docs,statements,docs(statements): data check report of #368 B,2
+bd3fba3c62,2026-10-22,fix,tests,fix(tests): reach the refused agreed day states,2
+9132902274,2026-10-22,fix,statements,fix(statements): heating share from agreed day,15
+045d0cca6f,2026-10-22,docs,config,docs(config): plan of #368 slice B,1
+11182cbd39,2026-10-22,feat,contracts,feat(contracts): agree Nebenkosten from a day,24
+b2378c50ad,2026-10-22,fix,statements,fix(statements): bill agreed costs from a day,18
+a165541603,2026-10-22,fix,contracts,fix(contracts): test fachreview findings of #368 B,3
+9e8e81d149,2026-10-22,fix,contracts,fix(contracts): test agreed from a day,1
+7c09f87618,2026-10-22,fix,contracts,fix(contracts): scenarios for agreed from a day,9
+ae321b39c8,2026-10-22,docs,config,docs(config): archive the #626 session,2
+b0ddb748cd,2026-10-22,fix,tests,fix(tests): wait for the read file without KI,3
+aa57375621,2026-10-22,fix,invoices,fix(invoices): keep the preview without KI,8
+87fee8a8bb,2026-10-22,fix,invoices,fix(invoices): send no file to read without KI,5
+a09c313d7b,2026-10-22,fix,invoices,fix(invoices): no KI in the files help without KI,9
+8d6984e33c,2026-10-22,fix,invoices,fix(invoices): say «Keine KI» when uploading,16
+a00c535628,2026-10-22,chore,tests,chore(tests): add the upload without KI as wip,6
+1e2c1bffe9,2026-10-22,docs,config,docs(config): archive the #620 session,3
+6440c9b031,2026-10-22,fix,i18n,fix(i18n): name «Keine KI» on the overview,9
+ae938f9d9e,2026-10-22,docs,contracts,docs(contracts): glossary names follow-up contract,2
+946809d70a,2026-10-22,fix,tests,fix(tests): check the setup answer by operator,2
+1e0f8b8cb0,2026-10-22,docs,auth,docs(auth): name the KI choice at the setup,3
+d66e01db6d,2026-10-22,feat,auth,feat(auth): choose the KI at the setup,22
+6c01b6adca,2026-10-22,docs,contracts,docs(contracts): record persona round 2 of #368 A,2
+30a9333249,2026-10-22,fix,tests,fix(tests): wait for the follow-up help in a11y,3
+e945706f52,2026-10-22,fix,contracts,fix(contracts): keep follow-up ticks over a draft,16
+c5191db526,2026-10-22,chore,tests,chore(tests): add the setup KI choice as wip,5
+c46c71e521,2026-10-22,fix,contracts,fix(contracts): derive the follow-up help,1
+427f893036,2026-10-22,fix,contracts,fix(contracts): follow-up keeps agreed Nebenkosten,12
+1f0ff442c5,2026-10-22,fix,contracts,fix(contracts): test follow-up agreed Nebenkosten,4
+1d622e994b,2026-10-22,fix,contracts,fix(contracts): scenario for follow-up agreements,2
+bd594ebd04,2026-10-22,docs,tenants,docs(tenants): record re-review of #459 B,2
+71c210c09c,2026-10-22,chore,config,chore(config): take back permission rules,3
+6301e41739,2026-10-22,docs,tenants,docs(tenants): record feature review of #459 B,3
+d22c72c566,2026-10-22,fix,tenants,fix(tenants): name tenant in anonymise toast,9
+fa11eab9e1,2026-10-22,chore,config,chore(config): allow the tools sessions ask about,1
+7840d9383d,2026-10-22,fix,tenants,fix(tenants): anonymise a former tenant,31
+04627e21ac,2026-10-22,fix,db,fix(db): renumber the KI settings migration,1
+82f5832bfc,2026-10-22,fix,tenants,fix(tenants): test anonymising a former tenant,1
+35db6f79fa,2026-10-22,fix,tenants,fix(tenants): scenarios to anonymise a tenant,7
+094a5158f6,2026-10-22,docs,config,docs(config): archive the #580 session,3
+5b05919ea6,2026-10-22,docs,tenants,docs(tenants): record closing round of #459 A,2
+d8b1314614,2026-10-22,docs,tenants,docs(tenants): record reviews of #459 slice A,4
+3846832440,2026-10-22,docs,tests,docs(tests): add the workflow notes of #580,1
+f5a62e2b42,2026-10-22,fix,tenants,fix(tenants): explain marking documents checked,9
+2b03de4702,2026-10-22,fix,config,fix(config): answer the second KI reviews,12
+e957391ff8,2026-10-22,fix,config,fix(config): name every country of the KI provider,10
+22d231db4d,2026-10-22,docs,tests,docs(tests): add the second run of Anna on #580,1
+403afe0351,2026-10-22,fix,config,fix(config): answer reviews of the KI settings,39
+7073952677,2026-10-22,fix,tenants,fix(tenants): focus notice after documents check,6
+b52b07cddd,2026-10-22,chore,tests,chore(tests): unlock the KI in the persona stack,2
+a408918699,2026-10-22,docs,config,docs(config): set the KI in the browser,9
+8419e6c5ce,2026-10-22,feat,config,feat(config): choose the KI on the settings page,29
+9b032eeec4,2026-10-22,fix,tenants,fix(tenants): mark former documents as checked,19
+6ef1eeff6f,2026-10-22,fix,tenants,fix(tenants): test fachreview findings of #459,5
+8b502c5714,2026-10-22,fix,tenants,fix(tenants): test documents marked as checked,5
+c0f715cdce,2026-10-22,docs,statements,docs(statements): #609 persona report,2
+09610ae715,2026-10-22,feat,services,feat(services): set the KI in the browser,12
+d59a5fdc5b,2026-10-22,docs,statements,docs(statements): #609 code review report,2
+12fe1901e5,2026-10-22,chore,tests,chore(tests): answer domain review 580-2,8
+37717ca474,2026-10-22,fix,statements,fix(statements): no «PDF erstellt» for a draft,5
+88c665ce7c,2026-10-22,chore,tests,chore(tests): test the KI review decisions,1
+5a7f10be91,2026-10-22,chore,tests,chore(tests): revise the KI scenarios after review,8
+f4d233fb1a,2026-10-22,chore,tests,chore(tests): add red tests of the KI settings,7
+857b838316,2026-10-22,chore,tests,chore(tests): add the KI settings scenarios as wip,10
+1a68c69d9c,2026-10-22,docs,statements,docs(statements): #547 closing review report,2
+b213c28e9b,2026-10-22,fix,tests,fix(tests): pin focus after recalculating,4
+ff358ab735,2026-10-22,fix,i18n,fix(i18n): Italian «recapitare» for delivering,3
+fc52082c02,2026-10-22,fix,statements,fix(statements): warn when sending an old draft,14
+f8ac558265,2026-10-22,fix,services,fix(services): keep the model download open (#614),4
+9398296c04,2026-10-22,docs,apartments,docs(apartments): #597 closing review report,2
+24fa35d217,2026-10-22,fix,tests,fix(tests): scenario for a second basement,4
+b8b2a62ff3,2026-10-22,fix,apartments,fix(apartments): offer a second floor below ground,8
+4874c0f689,2026-10-22,fix,apartments,fix(apartments): count floors below ground,6
+ffbde89f7b,2026-10-22,fix,apartments,fix(apartments): test floors below ground,5
+127951fc78,2026-10-22,docs,tenants,docs(tenants): #489 closing review report,2
+4cbc6544b6,2026-10-22,docs,tenants,docs(tenants): #489 persona report,2
+fbac5d357f,2026-10-22,fix,tenants,fix(tenants): test the chosen file resets,3
+c547714c0d,2026-10-22,fix,tenants,fix(tenants): own file button for documents,9
+2a52b53df0,2026-10-22,docs,statements,docs(statements): #503 closing review report,2
+3db2a2d6a3,2026-10-22,docs,tests,docs(tests): add review 577-2 and the session,3
+807d3ee8c8,2026-10-22,docs,statements,docs(statements): #503 persona result in plan,1
+1c5936cc24,2026-10-21,fix,auth,fix(auth): answer code review 577-1 and Sven,31
+3ce3624825,2026-10-21,docs,statements,docs(statements): #503 persona report,1
+8987c77a27,2026-10-21,fix,statements,fix(statements): test sent PDF stays when refused,3
+889d06bf29,2026-10-21,fix,statements,fix(statements): drop a draft's PDF when refused,3
+b74faf07d4,2026-10-21,fix,auth,fix(auth): answer the first reviews of the setup,23
+80a0e4f698,2026-10-21,feat,auth,feat(auth): set Dwello up on the first visit,64
+10a12daa25,2026-10-21,fix,tests,fix(tests): cancel upload once files are listed,3
+eed422f7f0,2026-10-21,docs,statements,docs(statements): #605 closing review report,2
+1eaebd43fd,2026-10-21,fix,statements,fix(statements): read due statements at once,4
+954a4365db,2026-10-21,fix,statements,fix(statements): list each due statement once,3
+b325da0a7e,2026-10-21,chore,tests,chore(tests): add the setup scenarios as wip,11
+d7e3f339f9,2026-10-21,docs,config,docs(config): lint ignore review report,2
+2d4365f1ae,2026-10-21,chore,config,chore(config): lint skips the E2E HTML report,3
+895359eef4,2026-10-21,docs,tests,docs(tests): add workflow notes of #576,1
+3d8ed95254,2026-10-21,docs,statements,docs(statements): #602 code review report,2
+618786772d,2026-10-21,fix,statements,fix(statements): count listed drafts on overview,6
+f369ff0190,2026-10-21,docs,statements,docs(statements): #507 data check report,2
+ba36ad6479,2026-10-21,docs,statements,docs(statements): #507 persona report,2
+c4d03ba4b2,2026-10-21,docs,statements,docs(statements): #507 code review report,2
+b22d280d53,2026-10-21,docs,statements,docs(statements): #507 fachreview report,2
+575416f257,2026-10-21,fix,statements,fix(statements): heating share by profile on page,9
+ac80d9b29f,2026-10-21,docs,statements,docs(statements): #509 closing review report,2
+214c224895,2026-10-21,docs,statements,docs(statements): #509 data check report,2
+bc7c8fb4f1,2026-10-21,docs,statements,docs(statements): #509 persona report,2
+ac7745f0be,2026-10-21,docs,statements,docs(statements): #509 review reports in plan,2
+39c9db8330,2026-10-21,fix,statements,fix(statements): name test after #509 behaviour,2
+381c7c71c5,2026-10-21,fix,statements,fix(statements): no run share in heating note,6
+35c194aa48,2026-10-21,docs,statements,docs(statements): plan items for #509,1
+6cfaf87b54,2026-10-21,fix,statements,fix(statements): test heating note w/o run share,2
+b391806c4b,2026-10-21,docs,tests,docs(tests): add closing review 500-2,2
+eb903cd9b2,2026-10-21,docs,tests,docs(tests): add data check 500-1,2
+67a358488a,2026-10-21,fix,statements,fix(statements): keep a floor that contradicts,5
+e214aa7a7e,2026-10-21,fix,statements,fix(statements): print a flat's floor only once,4
+677a584559,2026-10-21,docs,tests,docs(tests): pin the floor of a floor-named flat,2
+cee2f0e365,2026-10-21,fix,ci,fix(ci): pass the summary when every shard passed,1
+9c968e688d,2026-10-21,docs,tests,docs(tests): add closing review 519-2,2
+234391ea8f,2026-10-21,docs,tests,docs(tests): wait for the failed load's error page,4
+3b9373ec23,2026-10-21,fix,components,fix(components): translate unexpected error pages,7
+49af17938a,2026-10-21,docs,tests,docs(tests): add review ci-1,2
+b28a7b3646,2026-10-21,fix,ci,fix(ci): retry a stale count of green shards,2
+d96838d000,2026-10-21,docs,tests,docs(tests): add code review 576-3,1
+074d6c3d6d,2026-10-21,fix,auth,fix(auth): name the lock on the 5th attempt,5
+2129c10d8a,2026-10-21,docs,tests,docs(tests): add closing review 588-2,2
+50d81c23c9,2026-10-21,docs,tests,docs(tests): test the run's Heizprofil names,3
+689e3608e5,2026-10-21,fix,config,fix(config): list every key and heating profile,11
+7db83d879c,2026-10-21,docs,styles,docs(styles): add landing review reports,3
+3def8f95f8,2026-10-21,docs,tests,docs(tests): add closing review 585-2,2
+67e33ff15a,2026-10-21,fix,styles,fix(styles): follow landing review round 1,9
+9ee3fed995,2026-10-21,docs,tests,docs(tests): check the Tankbestand category name,3
+264fb37a13,2026-10-21,fix,categories,fix(categories): list every category everywhere,6
+db02df8d23,2026-10-21,fix,auth,fix(auth): answer reviews of the password sign-in,29
+eac00355e0,2026-10-21,docs,styles,docs(styles): shorten the landing page,8
+5f658513ae,2026-10-21,docs,tests,docs(tests): add review o47-1,2
+2ae3f666e6,2026-10-21,chore,tests,chore(tests): keep the E2E trace of every failure,3
+24e91d705d,2026-10-21,feat,auth,feat(auth): sign in with a Konto mit Passwort,52
+4276431899,2026-10-21,docs,tests,docs(tests): add closing review 583-2,2
+7c2ee61d64,2026-10-21,docs,tests,docs(tests): add the contract of the category list,5
+02283af2af,2026-10-21,fix,invoices,fix(invoices): offer every Kategorie on the forms,3
+3b1e17b940,2026-10-21,feat,auth,feat(auth): local accounts with password,12
+bf89c7b7c9,2026-10-21,chore,tests,chore(tests): follow domain review on sign-in,7
+94e70782ed,2026-10-21,docs,tests,docs(tests): add closing review 522-2,2
+fb99d3ff3d,2026-10-21,fix,contracts,fix(contracts): share the rule for ticked boxes,4
+68ab4a09d2,2026-10-21,fix,contracts,fix(contracts): bill only the Nebenkosten shown,17
+caf2895cdd,2026-10-21,chore,tests,chore(tests): add local account backend tests,1
+9dfdaf1dda,2026-10-21,chore,tests,chore(tests): add wip scenarios for local sign-in,8
+ba1190ae28,2026-10-21,docs,tests,docs(tests): add persona report helga-573,2
+7c1887915a,2026-10-21,docs,tests,docs(tests): add slice review 573-1,2
+719b50900e,2026-10-21,fix,invoices,fix(invoices): clear key error on invoice forms,5
+3e4bd62bd1,2026-10-21,docs,styles,docs(styles): archive the animation session,3
+9f27ab940b,2026-10-21,fix,styles,fix(styles): follow the animation reviews,9
+c088ff5cd4,2026-10-21,docs,styles,docs(styles): add Helga's animation report,1
+f0b946d0c4,2026-10-21,docs,styles,"docs(styles): add animation review, Marco report",2
+898038f347,2026-10-21,feat,styles,feat(styles): animate upload and split on click,8
+f594e12b99,2026-10-21,docs,tests,docs(tests): add review 548-3,2
+cc5fd3a963,2026-10-21,docs,tests,docs(tests): add scenario for the key error,4
+dfd07acb64,2026-10-21,fix,invoices,fix(invoices): clear key error once a key is set,4
+8dd31d0545,2026-10-21,docs,tests,docs(tests): pin fields hint while one is empty,3
+6f963dac41,2026-10-21,fix,invoices,fix(invoices): drop the fields hint once filled,5
+421ae3959a,2026-10-21,docs,tests,docs(tests): note the commit-msg hook gap,1
+f7ae13a0c1,2026-10-21,docs,tests,docs(tests): add slice review 566-1,2
+f003e22e4b,2026-10-21,fix,components,fix(components): keep date calendar out of forms,6
+447c90cae6,2026-10-21,docs,styles,docs(styles): archive the landing page session,2
+9527981cea,2026-10-21,docs,config,docs(config): describe mail settings in the guide,1
+a36f2ced43,2026-10-21,docs,styles,docs(styles): follow landing domain review 2,8
+43e4b9bc85,2026-10-21,fix,styles,fix(styles): deduct the agreed Akonto on landing,9
+bd5ec80362,2026-10-21,docs,styles,docs(styles): compare landing survey rounds,1
+55f6bb9044,2026-10-21,fix,styles,fix(styles): close the landing menu after a choice,13
+1d2854ec36,2026-10-21,docs,styles,docs(styles): add Anna's second landing survey,1
+8d029a3fc6,2026-10-21,docs,i18n,docs(i18n): translate the reworked landing page,7
+a19374a2b0,2026-10-21,docs,styles,docs(styles): warm up the landing page,2
+92833cf9e0,2026-10-21,docs,styles,docs(styles): record persona vote on the claim,6
+97b74d9851,2026-10-21,docs,tests,docs(tests): add closing review 568-2,2
+81a9169a20,2026-10-21,fix,docker,"fix(docker): pin SMTP_PORT default, fix comment",4
+2d7b1397f0,2026-10-21,docs,styles,docs(styles): summarize landing warmth survey,3
+a8f2c945bb,2026-10-21,fix,docker,fix(docker): pass mail settings to the backend,3
+9d79191b76,2026-10-21,docs,styles,docs(styles): follow landing domain review,7
+eedc5e9bfc,2026-10-21,docs,styles,docs(styles): add warmth questions to survey,1
+8d6d26c28a,2026-10-21,docs,styles,docs(styles): address landing page for laypeople,3
+5f175c57a1,2026-10-21,docs,styles,docs(styles): check landing findings against app,1
+6f57f47b0f,2026-10-21,docs,styles,docs(styles): correct rounding finding,1
+259dd26f8c,2026-10-21,docs,styles,docs(styles): summarize landing page survey,2
+07ab1e60c9,2026-10-21,docs,styles,docs(styles): add Dr. Weber's landing page survey,1
+5ce33e8f7a,2026-10-21,docs,styles,docs(styles): add Helga's landing page survey,1
+7975483a97,2026-10-21,docs,styles,docs(styles): add Marco's landing page survey,1
+2312e4a2e5,2026-10-21,docs,styles,docs(styles): add Anna's landing page survey,1
+1b58816bf2,2026-10-21,docs,styles,docs(styles): add landing page persona survey,1
+ca67625752,2026-10-21,docs,tests,docs(tests): archive the WebKit statement-edit fix,2
+780b6d6538,2026-10-21,fix,statements,fix(statements): let the page check the Frist,2
+b442b7a9ab,2026-10-21,fix,styles,fix(styles): make the website keyboard friendly,15
+c04ac05f49,2026-10-21,docs,tests,docs(tests): archive the #553 CI fix session,1
+da7bee1d0f,2026-10-21,fix,tests,fix(tests): accept any upload-artifact version,1
+4190897afd,2026-10-21,fix,privacy,fix(privacy): shorten the French GitHub sentence,3
+3247c78a95,2026-10-21,fix,privacy,fix(privacy): apply legal review 2 to the pages,15
+873e3a50d6,2026-10-21,docs,privacy,docs(privacy): publish imprint and privacy page,16
+875db5a3f2,2026-10-21,docs,tests,docs(tests): archive the Tailwind 4 follow-up,1
+c727c08522,2026-10-21,fix,styles,fix(styles): drop dead file button border colour,2
+7bc851257f,2026-10-21,fix,styles,fix(styles): keep disabled select and file button,2
+5a69e3e816,2026-10-21,docs,tests,docs(tests): archive the Tailwind 4 session,1
+b2a14cc33d,2026-10-20,docs,tests,docs(tests): add Tailwind 4 closing review report,1
+47f06d2e89,2026-10-20,fix,styles,fix(styles): test the base border colour rule,4
+675be711c3,2026-10-20,fix,styles,fix(styles): load Inter font through Vite,3
+afceb9e534,2026-10-20,chore,build,chore(build): migrate to Tailwind CSS 4,5
+d3b47ac97e,2026-10-20,fix,tests,fix(tests): drafts task with a draft of its own,2
+dee65e26b4,2026-10-20,fix,statements,fix(statements): code review 454-3 findings,6
+449453ef98,2026-10-20,chore,build,chore(build): Bump the minor-and-patch group across 2 directories with 21 updates,2
+6ede12eda5,2026-10-20,chore,build,chore(build): Bump svelte-eslint-parser from 0.43.0 to 1.9.0,1
+697a9f101b,2026-10-20,chore,build,chore(build): Bump jsdom from 27.4.0 to 30.1.3,1
+347f34086b,2026-10-20,chore,build,chore(build): Bump prettier-plugin-svelte from 3.5.2 to 4.1.1,1
+34ea943559,2026-10-20,chore,ci,chore(ci): Bump the actions group with 6 updates,4
+f5feabf84a,2026-10-20,fix,statements,"fix(statements): review 454-2, 454-3 decisions",20
+d3d05184cb,2026-10-20,chore,docker,chore(docker): Bump node from 20-alpine to 26-alpine,1
+f1bb6ec385,2026-10-20,docs,config,docs(config): archive contributor files session,3
+626231a0be,2026-10-20,docs,config,docs(config): fix CODEOWNERS and conduct contact,4
+fc77921942,2026-10-20,chore,ci,chore(ci): add contributor files and PR checks,11
+ce4a8510d6,2026-10-20,docs,config,docs(config): a red main stops only related merges,2
+f47c49f213,2026-10-20,docs,statements,docs(statements): archive session W5-449,4
+264edc4d14,2026-10-20,docs,invoices,docs(invoices): add review 245-2 round 6,1
+753dc7e4e8,2026-10-20,fix,statements,fix(statements): reminder letter without e-mail,16
+a96fc0a03b,2026-10-20,fix,statements,fix(statements): domain review 454-3 findings,13
+cff869b28a,2026-10-20,fix,statements,fix(statements): correct from the hint,5
+808aab463c,2026-10-20,fix,statements,fix(statements): code review 454-1 findings,20
+c137735ad7,2026-10-20,docs,config,docs(config): point issue rules to issue-work,5
+ef6e4f0e61,2026-10-20,docs,config,docs(config): move occasion-bound rules to skills,7
+92328bd466,2026-10-20,fix,invoices,fix(invoices): open reason in the row's order,3
+1183e5ab2b,2026-10-20,fix,config,fix(config): leave the HTTPS redirect to the host,1
+fa464b46ca,2026-10-20,fix,statements,fix(statements): correct overdue statements too,2
+048c8b8cb7,2026-10-20,fix,invoices,fix(invoices): name the Kategorie first as open,2
+823dfa4023,2026-10-20,fix,config,fix(config): end the HTTPS redirect loop,1
+94d757683e,2026-10-20,fix,db,fix(db): number the recipient migration 0030,1
+026677dbc8,2026-10-20,fix,statements,fix(statements): follow code review 1 and Helga P-2,13
+02334cdd77,2026-10-20,fix,ci,fix(ci): allow deploying into the FTP root,1
+25fa877f14,2026-10-20,docs,config,"docs(config): fix review W1-1, archive session W1",7
+1777fd9a44,2026-10-20,docs,invoices,docs(invoices): add review 245-2 round 4,1
+6b1266323c,2026-10-20,docs,config,docs(config): apply the workflow review of 10-20,12
+5dde9bb981,2026-10-20,feat,statements,"feat(statements): outdated statements, Tankbestand",51
+2d73f44951,2026-10-20,docs,tests,docs(tests): code review round 6 of #452,1
+fafade0bf0,2026-10-20,fix,tests,fix(tests): give the upload states a proposed key,1
+9498997891,2026-10-20,docs,invoices,docs(invoices): add review 245-2 round 3,1
+61493b3151,2026-10-20,feat,statements,"feat(statements): send by letter, reminder state",39
+39af254603,2026-10-20,docs,invoices,docs(invoices): add review 245-2 round 2,1
+2e017a5f7e,2026-10-20,chore,tests,chore(tests): pin the gone Kategorie hint,3
+c8ddbb3024,2026-10-20,docs,tests,"docs(tests): reviews 4 and 5 of #452, archive",3
+10f067c25b,2026-10-20,docs,ci,docs(ci): archive the Chromium-on-PRs session,2
+5fda8ebe0c,2026-10-20,fix,ci,fix(ci): count a cancelled job as a red main,4
+82e194139f,2026-10-20,chore,ci,"chore(ci): Chromium on PRs, report a red main",6
+e002d0a65e,2026-10-20,docs,ci,docs(ci): add collected workflow review 10-20,1
+72645866ea,2026-10-20,chore,tests,chore(tests): red tests for review 454-2,13
+11b686c3c7,2026-10-20,fix,tests,fix(tests): record the amount test with a key,1
+3275ae9529,2026-10-20,fix,tests,fix(tests): pass the url to the edit load (#530),1
+930c1ae789,2026-10-20,docs,ci,docs(ci): archive the CI round-trip session,2
+70db69adac,2026-10-20,docs,ci,docs(ci): describe E2E on main in the tech stack,3
+b5a260b6d0,2026-10-20,docs,config,"docs(config): use auto-merge, drop behind merges",2
+63fd5d1570,2026-10-20,chore,ci,"chore(ci): run E2E on main, skip docs-only pushes",6
+55f4d74bda,2026-10-20,fix,tests,fix(tests): scenarios for the persona fixes,4
+6c3e95f3d5,2026-10-20,chore,tests,chore(tests): scenarios for the #454 decisions,22
+e5301e75e6,2026-10-20,docs,buildings,docs(buildings): show the register import as live,8
+6adbcf1ada,2026-10-20,chore,tests,chore(tests): add red tests of review round 2,8
+9648d1f1a7,2026-10-20,docs,contracts,docs(contracts): closing review 3 of #499,1
+709ea965db,2026-10-20,fix,invoices,fix(invoices): drop the Kategorie hint once chosen,6
+6f93be93f1,2026-10-20,chore,invoices,chore(invoices): undo the untested upload change,1
+ca1ead6197,2026-10-20,chore,categories,chore(categories): keep main's line unformatted,1
+e7097c5ebd,2026-10-20,fix,invoices,fix(invoices): refuse control chars in returnTo,2
+bb96544235,2026-10-20,chore,tests,chore(tests): follow the decisions on the review,6
+ba431addcd,2026-10-20,fix,contracts,fix(contracts): count settled statements for #499,2
+e851b4ce70,2026-10-20,chore,db,chore(db): renumber migration to 0029,1
+47294e9be7,2026-10-20,chore,tests,chore(tests): add red tests for a reminder to send,3
+42e7238174,2026-10-20,fix,invoices,fix(invoices): code review 245-1 of upload rows,9
+4f610eb861,2026-10-20,docs,config,docs(config): archive session W1b (#499),2
+ed086c9e35,2026-10-20,docs,statements,docs(statements): add review 8 of 451,2
+b77a98aa13,2026-10-20,chore,tests,chore(tests): add red tests for review 454-1,5
+a3d082adb9,2026-10-20,docs,contracts,docs(contracts): persona report for #499,1
+4579033af5,2026-10-20,chore,tests,chore(tests): add contract of the paid refusal,4
+156ab50fb5,2026-10-20,chore,tests,"chore(tests): add red tests for reminders, sending",21
+fb0dbcb5ba,2026-10-20,fix,tests,fix(tests): choose the key of uploaded invoices,3
+ae58cff272,2026-10-20,fix,i18n,fix(i18n): name Par logement as main's key,2
+e0f513b5e9,2026-10-20,fix,tests,fix(tests): name the split month parts in a test,1
+af45a067b1,2026-10-20,docs,statements,docs(statements): add closing review 7 of 451,2
+50c682c7e3,2026-10-20,docs,tests,docs(tests): workflow notes of #452,1
+b4406ebda1,2026-10-20,fix,invoices,fix(invoices): clarify the missing key note,5
+e9e87f0a38,2026-10-20,fix,contracts,fix(contracts): review findings of #499,7
+3ecc7db2c6,2026-10-20,fix,tests,fix(tests): pass the url to the edit load,1
+d5f230a743,2026-10-20,chore,tests,chore(tests): read the Tankbestand list as it is,1
+72a3c2e5b0,2026-10-20,docs,tests,docs(tests): persona and data reviews of #452,3
+0c0d24373e,2026-10-20,docs,statements,docs(statements): add merge review 448-6,1
+356b1cd24f,2026-10-20,fix,i18n,fix(i18n): name ramonage in heating help,1
+61da069d67,2026-10-20,fix,categories,fix(categories): restore choice after cancel,3
+f21d5101dc,2026-10-20,fix,invoices,fix(invoices): return to the wizard after editing,6
+dfb0efa234,2026-10-20,fix,statements,fix(statements): keep the reviewed Italian tank note,2
+1ceee9732d,2026-10-20,chore,tests,chore(tests): red lower-layer tests for #454,7
+8a6c757cb0,2026-10-20,chore,tests,chore(tests): add @wip scenarios for #454,16
+1ce6d08696,2026-10-20,docs,statements,docs(statements): add merge review 448-5,1
+34c6930bf8,2026-10-20,fix,invoices,fix(invoices): drop key proposal on new category,3
+b39a53d535,2026-10-20,fix,contracts,fix(contracts): no «Abgerechnet bis» over billing,11
+9353cc58da,2026-10-20,feat,invoices,feat(invoices): explain the upload rows of 245,28
+136523af37,2026-10-20,docs,statements,docs(statements): archive the session of 451,4
+7a1f69a237,2026-10-20,docs,statements,docs(statements): add the merge review of #199,1
+41a7b67078,2026-10-20,chore,tests,chore(tests): red tests for decisions of #499,5
+5c3ed7a09e,2026-10-20,docs,statements,docs(statements): add re-review 448-4,1
+0b23ba3306,2026-10-20,docs,statements,docs(statements): add closing review 448-3,1
+f161635043,2026-10-20,fix,statements,"fix(statements): restore merged texts, settled 0",7
+7510099429,2026-10-20,chore,tests,chore(tests): red tests for #499 review findings,9
+822c6c6c31,2026-10-20,chore,tests,chore(tests): add steps and red tests of 245,8
+eae980e642,2026-10-20,chore,tests,chore(tests): add wip scenarios of upload fixes,2
+80df615e9f,2026-10-20,chore,tests,chore(tests): wip scenarios for #499,3
+c80e230918,2026-10-20,chore,db,chore(db): renumber carry-over migration to 0028,1
+e6de1d963f,2026-10-20,fix,statements,fix(statements): give «Erledigt» its own icon,10
+e9b8c42040,2026-10-20,docs,i18n,docs(i18n): add review round 5 of issue 458,1
+13ce250693,2026-10-20,fix,tests,fix(tests): screen data for one period a building,2
+0788d27d97,2026-10-20,docs,invoices,docs(invoices): add the re-check report of 455,2
+7eb3125fea,2026-10-20,fix,tests,fix(tests): let the page settle before axe,1
+28d5f7f68c,2026-10-20,fix,invoices,fix(invoices): name the deleted invoice in drafts,10
+5f92902c2b,2026-10-20,fix,i18n,fix(i18n): closing review of #199,4
+f3c906bcd4,2026-10-20,docs,statements,docs(statements): archive the session of #199,2
+c3378998a0,2026-10-20,fix,statements,fix(statements): explain «Erledigt» and the offset,14
+a237093ca2,2026-10-20,chore,tests,chore(tests): complete the step 3 fake of a test,1
+0153976548,2026-10-20,fix,invoices,fix(invoices): record the Schlussrechnung first,8
+16b81758e2,2026-10-20,fix,statements,fix(statements): decided help text at short period,10
+383af96da0,2026-10-20,docs,tests,docs(tests): code review round 3 of #452,1
+81d71e8b5d,2026-10-20,fix,i18n,fix(i18n): closing review fixes on the merge,4
+fcd0ac0d48,2026-10-20,docs,tests,docs(tests): add the review of the merge of main,1
+145c5668c8,2026-10-20,docs,tests,docs(tests): add the review of the CI fix,1
+7e21e1f28f,2026-10-20,docs,tests,docs(tests): review of the building search fix,1
+8334f71f82,2026-10-20,docs,contracts,docs(contracts): mark own rate above 0 as done,1
+e20713bc2f,2026-10-20,docs,tests,docs(tests): add review round 4 of issue 458,1
+d71d3dedc3,2026-10-20,fix,buildings,fix(buildings): keep a typed search term,4
+a02b4c1d7b,2026-10-20,docs,tests,docs(tests): note empty dashboard in one axe run,1
+8e88ca48d2,2026-10-20,fix,contracts,fix(contracts): warn when no shown box is ticked,2
+c145ba5fca,2026-10-20,fix,tests,fix(tests): find the replaced statement by status,2
+0cee7aa0b9,2026-10-20,fix,categories,fix(categories): name the category in the UI language,3
+6f7f5c8a77,2026-10-20,docs,tests,docs(tests): review of the axe settle fix,1
+a079600f88,2026-10-20,fix,tests,fix(tests): let the page settle before axe,1
+524180696d,2026-10-20,docs,tests,docs(tests): add closing review 3 of b1,2
+cff0a4eab2,2026-10-20,fix,tests,fix(tests): reach server-error by a failed load,3
+fa62cdabd1,2026-10-20,docs,tests,docs(tests): note review rounds 3 and 4 of #450,3
+ea5dc53192,2026-10-20,fix,tests,fix(tests): wait for the page of each wizard link,3
+d32a7ffe21,2026-10-20,docs,privacy,docs(privacy): add review round 3 of issue 458,2
+5f7b07e63f,2026-10-20,docs,i18n,docs(i18n): glossary term Gebäuderegister,3
+b137702340,2026-10-20,docs,tests,docs(tests): close O-34 with the settings lock,2
+5474954d52,2026-10-20,fix,statements,fix(statements): name overlapped periods by days,8
+e76743890f,2026-10-20,fix,privacy,fix(privacy): date the legal texts to merge day,6
+a72fab67e5,2026-10-20,fix,tests,fix(tests): wait for the contract page to load,1
+13a9776645,2026-10-20,docs,i18n,docs(i18n): data check and archive of #461,2
+70341d17f9,2026-10-19,fix,invoices,fix(invoices): test tank help in upload dialog,3
+571d248110,2026-10-19,fix,statements,fix(statements): review findings of #199 round 3,5
+0bb4085ed1,2026-10-19,fix,statements,fix(statements): review findings of #199 round 2,8
+2736fe644f,2026-10-19,fix,invoices,fix(invoices): explain tank delivery only with tank,14
+8e958edece,2026-10-19,docs,i18n,docs(i18n): reviews and persona reports of #461,5
+65659302f9,2026-10-19,docs,contracts,docs(contracts): closing reviews of #453,1
+5ffce59413,2026-10-19,fix,invoices,fix(invoices): record the Schlussrechnung in full,17
+32bd4e07f1,2026-10-19,fix,categories,fix(categories): heating statement service in prompt,6
+9c3f070ce5,2026-10-19,feat,ci,feat(ci): allow plain FTP for the website upload,1
+0030d7dd13,2026-10-19,fix,ci,fix(ci): say when the host offers no SSH,1
+770e9ec09c,2026-10-19,fix,categories,fix(categories): heating rules in the KI prompt,4
+f72f18127d,2026-10-19,fix,invoices,fix(invoices): explain tank deliveries at a tank,22
+b6e0791736,2026-10-19,fix,statements,fix(statements): name the offset of a #94 refund,11
+07882d0469,2026-10-19,chore,tests,chore(tests): pin Akonto lines after billed date,3
+6ba20ebc1b,2026-10-19,fix,i18n,fix(i18n): round 2 review fixes of #461,7
+732a4c7af8,2026-10-19,docs,i18n,docs(i18n): add closing review of #447,1
+40befd4425,2026-10-19,chore,ci,chore(ci): upload the site without pending pages,1
+b55b21e2b0,2026-10-19,fix,statements,fix(statements): review findings of #199 round 1,15
+922147fb12,2026-10-19,fix,invoices,fix(invoices): review round 1 of #452,31
+e68bf0ecee,2026-10-19,docs,tests,docs(tests): archive Session G1 of #479,4
+ced079950e,2026-10-19,docs,config,docs(config): archive session W1 (#453),1
+f89e211d77,2026-10-19,fix,tests,fix(tests): give the IBAN scenarios the settings,10
+f86e18796e,2026-10-19,docs,privacy,docs(privacy): add imprint and privacy statement,13
+f6c4bb4529,2026-10-19,fix,statements,fix(statements): apply round 2 and 3 of #451,13
+7bff891b82,2026-10-19,docs,i18n,docs(i18n): archive session of #447,1
+cfd4be1c23,2026-10-19,fix,statements,fix(statements): offset only a sent Übertrag,29
+98b8b9ac66,2026-10-19,fix,contracts,fix(contracts): proposed Ersatzmieter in hint,6
+c02b75ee67,2026-10-19,docs,tests,docs(tests): add closing review of b1,1
+8d62eb537e,2026-10-19,docs,tests,docs(tests): archive session B1,2
+e234662603,2026-10-19,chore,tests,chore(tests): turn the #461 scenarios green,2
+b5b7dcb317,2026-10-19,chore,tests,chore(tests): pin the correction of a refund chain,11
+0e12833037,2026-10-19,docs,tests,docs(tests): add Sven's persona report on b1,1
+8df1863ed2,2026-10-19,fix,tests,fix(tests): pin the statement gap to 32 px,3
+3b263d5802,2026-10-19,docs,tests,docs(tests): archive the #450 session,2
+30d41e4954,2026-10-19,docs,contracts,docs(contracts): review 2 and workflow notes #453,2
+e05ce88114,2026-10-19,fix,statements,fix(statements): point to what the creditor lacks,17
+e3b084c1cc,2026-10-19,chore,ci,chore(ci): deploy the website to Infomaniak,1
+5b5dd2f134,2026-10-19,fix,statements,fix(statements): apply reviews of #451,31
+eb57b67199,2026-10-19,fix,i18n,fix(i18n): apply native reads and review of #461,20
+dfd00317e6,2026-10-19,docs,privacy,docs(privacy): archive session of issue 458,3
+2caa6692ad,2026-10-19,feat,invoices,feat(invoices): categories and keys per #452,82
+5d964822db,2026-10-19,docs,tests,docs(tests): note workflow points of session B1,2
+91b692e160,2026-10-19,chore,config,chore(config): add Apache settings for the site,1
+b20dc52fdc,2026-10-19,fix,statements,fix(statements): close the gap above the cost panel,10
+b600697029,2026-10-19,feat,privacy,feat(privacy): tell landlords how to inform tenant,11
+6ecb2d753d,2026-10-19,fix,buildings,fix(buildings): persona findings on GWR preview,17
+29b808b41f,2026-10-19,docs,ci,docs(ci): review C2 and archive the session,4
+e0e3c71245,2026-10-19,chore,ci,chore(ci): no second E2E run after a merge,6
+e3cb329ecc,2026-10-19,fix,invoices,fix(invoices): review findings of issue 455,25
+c326846d02,2026-10-19,feat,statements,feat(statements): carry over a Saldo below CHF 5,72
+bf513f61fa,2026-10-19,feat,statements,feat(statements): one billing period per building,41
+206c6877d5,2026-10-19,fix,api,fix(api): answer 404 for a malformed path id,13
+8807e6aef9,2026-10-19,feat,privacy,feat(privacy): add anchors to privacy sections,6
+89883897eb,2026-10-19,feat,statements,feat(statements): share each invoice at a change,40
+f09218a217,2026-10-19,docs,i18n,"docs(i18n): add FR, IT and EN marketing pages",10
+c200d5c6b8,2026-10-19,chore,config,chore(config): license Dwello under AGPL-3.0,4
+6ab79f7bf0,2026-10-19,fix,contracts,fix(contracts): review findings of #453,19
+a4a7ebcf14,2026-10-19,feat,i18n,feat(i18n): apply the fr/it/en words of #405,40
+cd08fd80ef,2026-10-19,feat,invoices,"feat(invoices): akonto hint at the amount, keys",23
+0ecf03c117,2026-10-19,fix,buildings,fix(buildings): check register apartment numbers,32
+aef1bbbb32,2026-10-19,feat,i18n,feat(i18n): say what an IBAN needs in its help,8
+dfffc70241,2026-10-19,docs,components,docs(components): add the closing review report,2
+443df22f47,2026-10-19,feat,contracts,feat(contracts): help names contracts ending early,8
+16c4f10b17,2026-10-19,fix,config,fix(config): let a save without the IBAN through,4
+26c7f2ce2b,2026-10-19,feat,buildings,feat(buildings): take apartments from GWR register,49
+045fa1a376,2026-10-19,chore,components,chore(components): use the list section for flats,4
+5d04909afa,2026-10-19,docs,statements,docs(statements): glossary term Akontobeiträge,1
+ab6bcc5892,2026-10-19,feat,privacy,feat(privacy): apply PO wording of review 458-1,11
+e45b43b4ff,2026-10-19,docs,styles,docs(styles): base marketing site on the app,8
+fdd72b0d66,2026-10-19,feat,statements,feat(statements): Akonto line «Akontobeiträge ab»,4
+ee222a25d3,2026-10-19,docs,tests,docs(tests): archive Session I2,3
+aaab847504,2026-10-19,feat,statements,feat(statements): the line is named Akontobeiträge,16
+91b985439b,2026-10-19,chore,components,chore(components): share the list section of lists,6
+2ec1daacb3,2026-10-19,chore,components,chore(components): share the list section of lists,6
+4ea6c800a4,2026-10-19,feat,statements,feat(statements): require the creditor's address,22
+f6fb5d95b1,2026-10-19,feat,contracts,"feat(contracts): «Abgerechnet bis» lines, checks",43
+231e42ad3e,2026-10-19,chore,tests,chore(tests): wip scenario for the Akonto line name,3
+cfd2c8efa8,2026-10-19,fix,contracts,fix(contracts): toast after deleting an Akonto,10
+bcb8631976,2026-10-19,docs,tests,docs(tests): reports and workflow notes of #464,4
+3fa73919b6,2026-10-19,fix,contracts,fix(contracts): Akonto refusals say what to do,29
+aa2e0360a0,2026-10-19,fix,contracts,fix(contracts): first Akonto moves with the start,6
+024251df65,2026-10-19,feat,invoices,feat(invoices): akonto hints and advance invoices,37
+151a17c8a9,2026-10-19,feat,contracts,feat(contracts): refuse own rate of 0 %,31
+26323c37fc,2026-10-19,docs,styles,docs(styles): add marketing site and brand manual,7
+37b6a098d9,2026-10-19,chore,tests,chore(tests): apply fach review to GWR scenarios,3
+0d847905be,2026-10-19,feat,privacy,feat(privacy): split responsibility in legal texts,22
+281cdd1647,2026-10-19,chore,tests,chore(tests): add wip scenarios of #452,20
+61442eec42,2026-10-19,chore,tests,chore(tests): add @wip scenarios for #199,8
+42231a004a,2026-10-19,chore,tests,chore(tests): add wip scenarios for #448 payments,14
+2e066edfcb,2026-10-19,chore,tests,chore(tests): add GWR import scenarios,4
+013b32c046,2026-10-19,docs,statements,docs(statements): add @wip scenarios for #451,8
+6f16ab0f66,2026-10-19,chore,tests,chore(tests): add wip scenarios of akonto hints,4
+9945733f9f,2026-10-19,chore,tests,chore(tests): add contract of the creditor refusal,4
+df62c68896,2026-10-19,chore,tests,chore(tests): wip scenarios for «Abgerechnet bis»,12
+d93a668883,2026-10-19,chore,tests,chore(tests): add red tests for the QR creditor,7
+0dcdbceaba,2026-10-19,chore,tests,chore(tests): add red tests for own rate above 0,13
+84c3d81c8a,2026-10-19,chore,tests,chore(tests): add wip scenarios for #461,5
+9251867bd4,2026-10-19,chore,tests,chore(tests): add wip scenarios for legal texts,11
+06aac4c591,2026-10-19,fix,contracts,fix(contracts): Akonto review findings of #464,29
+8fd1c70088,2026-10-19,fix,db,fix(db): demo contracts get their Akonto rows,1
+b71bb4c53c,2026-10-19,feat,contracts,feat(contracts): Akonto with «Gültig ab» in the UI,43
+7ff3c3db17,2026-10-19,feat,contracts,feat(contracts): Akonto amounts with a start day,17
+fccaa29733,2026-10-19,chore,tests,chore(tests): Akonto scenarios after domain review,7
+9bc1494906,2026-10-19,chore,tests,chore(tests): add steps for Akonto with dates,11
+7addda2db4,2026-10-19,chore,tests,chore(tests): add wip scenarios for Akonto dates,4
+30e578a37b,2026-10-19,chore,tests,chore(tests): keep ponytail findings as defects,4
+557a9d876e,2026-10-19,chore,tests,chore(tests): code-reviewer reports no Nits,2
+19fe2a967c,2026-10-19,docs,tests,docs(tests): record Firefox search flake as O-40,2
+214d67e9a5,2026-10-19,docs,tests,docs(tests): add closing review of token slice,2
+66b2d317d2,2026-10-19,chore,config,chore(config): fix token slice review findings,6
+569633f18c,2026-10-19,docs,tests,"docs(tests): archive session I1, workflow review",8
+20594ded6e,2026-10-19,chore,config,chore(config): cut agent tokens and check time,9
+db318be9f5,2026-10-19,fix,tenants,"fix(tenants): export no draft dates, add contract",5
+348dd1cf79,2026-10-19,fix,tenants,fix(tenants): date exported files by the Swiss day,8
+0d67616bdb,2026-10-19,docs,ci,docs(ci): name every browser on PRs in tech stack,3
+1b948848ed,2026-10-19,chore,ci,chore(ci): run E2E in every browser on PRs,4
+bd423e0e66,2026-10-19,feat,tenants,feat(tenants): export a tenant's data as ZIP,21
+edc0ce9b29,2026-10-19,chore,tests,chore(tests): add steps for the tenant export,5
+80b68d52cc,2026-10-19,chore,tests,chore(tests): add wip scenario for tenant export,2
+23258a6149,2026-10-19,docs,tests,docs(tests): add closing review 456-2,2
+87bfeb4a35,2026-10-19,docs,tests,docs(tests): add closing review 468-3,2
+3239adeb0a,2026-10-19,docs,tests,docs(tests): record decision on Marco 468 P-1,1
+d472ca96f8,2026-10-19,docs,tests,docs(tests): add persona report helga-456,2
+1f0672d0bd,2026-10-19,docs,tests,docs(tests): add persona reports for #468,3
+b523a28260,2026-10-19,fix,buildings,fix(buildings): reuse the invoices link text,8
+e6b51c4f1b,2026-10-19,fix,tests,fix(tests): pin left settings answer for #468,3
+4c51cbb798,2026-10-19,fix,components,fix(components): ignore answers of a step left,6
+8c0ebca229,2026-10-19,feat,buildings,feat(buildings): link a building to its invoices,11
+f1a657bc2c,2026-10-19,feat,components,feat(components): lock «Weiter» while a step loads,12
+4f7fa1ca4d,2026-10-19,docs,tests,docs(tests): add closing reviews 51,3
+849cb84ae0,2026-10-19,fix,auth,fix(auth): let Google choose the account,11
+4c99d34995,2026-10-19,feat,auth,feat(auth): sign in only with allowed e-mails,31
+f9fc00431c,2026-10-19,docs,tests,docs(tests): add closing reviews 338,3
+52c3f3042f,2026-10-19,docs,tests,docs(tests): add re-review 612-2,2
+4ad1e9ba9c,2026-10-19,fix,tests,fix(tests): wait for apartment in toRentStep,4
+33d3408199,2026-10-19,fix,tests,fix(tests): wait for apartment choice in wizard,3
+8dca333d8f,2026-10-19,docs,tests,docs(tests): add data check report 338,1
+03e3216f09,2026-10-19,fix,tests,fix(tests): pin the saldo of a recalculated draft,5
+4f6d52d9fd,2026-10-19,fix,statements,"fix(statements): keep payments, confirm recalc",26
+7f8798f393,2026-10-19,feat,statements,feat(statements): recalculate a single draft,26
+b8178c5fb7,2026-10-19,docs,tests,docs(tests): add re-review o38-2,2
+79268cc13d,2026-10-19,fix,tests,fix(tests): clean up every seeded E2E name,4
+f8cf2c85f5,2026-10-19,docs,tests,docs(tests): add closing review 457-2,2
+626ad08406,2026-10-19,docs,tests,docs(tests): add persona report weber-457,2
+06eca2c4c3,2026-10-19,docs,tests,"docs(tests): add review 457-1, rename scenario",3
+44f25e933c,2026-10-19,feat,contracts,feat(contracts): objection help names continuation,10
+2d0596d673,2026-10-19,docs,tests,docs(tests): add wip scenario for #457,5
+81bc1d71bd,2026-10-19,fix,tests,fix(tests): purge sent statements in E2E cleanup,6
+603cfe1fe2,2026-10-19,docs,tests,docs(tests): add closing review 130-2,3
+e34205adc3,2026-10-19,docs,tests,docs(tests): add persona report weber-130,2
+dbe20edbe7,2026-10-19,docs,tests,"docs(tests): add review 130-1, apply its nits",5
+7e10cba86c,2026-10-19,chore,statements,chore(statements): drop the settled #130 marker,2
+d10a7ceb3f,2026-10-19,fix,invoices,fix(invoices): no gap for a coarser billing rhythm,5
+0e382240de,2026-10-19,docs,tests,docs(tests): add wip scenario for #130,4
+1edc6d8fb0,2026-10-19,docs,tests,docs(tests): add closing review 444-2,2
+1abca1eea5,2026-10-19,docs,tests,"docs(tests): add reviews of #444, check the tone",6
+462621fb98,2026-10-19,feat,contracts,feat(contracts): warn on Akonto without any costs,14
+ac118888f4,2026-10-19,docs,tests,docs(tests): add wip scenario for #444,3
+df1ead0141,2026-10-19,docs,tests,docs(tests): add closing review 432-3,2
+205253d8f0,2026-10-19,docs,tests,docs(tests): add persona report helga-432-2,2
+a6e6fda5d4,2026-10-19,docs,tests,docs(tests): add review 432-2,2
+4cbed469b0,2026-10-19,fix,contracts,fix(contracts): Akonto warning only if all ticked,9
+fe21d45adf,2026-10-19,docs,tests,docs(tests): add persona report weber-432,2
+dd7d3e9e41,2026-10-19,docs,tests,docs(tests): add persona report helga-432,1
+9f2ff5e59b,2026-10-19,docs,tests,"docs(tests): add slice review 432-1, pin Akonto 0",3
+9ffbb20f96,2026-10-19,feat,contracts,feat(contracts): warn on Pauschale with Akonto too,11
+0c432a1f9f,2026-10-19,docs,tests,docs(tests): add domain review 432-1,2
+75f8405f00,2026-10-19,docs,tests,docs(tests): add red unit test for #432,1
+a0c0bf90df,2026-10-19,docs,tests,docs(tests): add wip scenario for #432,4
+b9f8e85d05,2026-10-19,docs,tests,docs(tests): add closing review 439-3,2
+026ab5f2f6,2026-10-19,fix,i18n,fix(i18n): no-break spaces in French guillemets,1
+890aaaae24,2026-10-19,fix,tests,fix(tests): pin going on after a retried check,9
+dd42b948d8,2026-10-19,fix,statements,fix(statements): go on once agreements are checked,12
+778c21c96b,2026-10-19,docs,tests,docs(tests): add persona report helga-439,1
+a0dd55e537,2026-10-19,docs,config,docs(config): archive session R1 with its review,3
+d7932d45ec,2026-10-19,docs,tests,docs(tests): add slice review 439-1,3
+2877e3de72,2026-10-19,docs,config,docs(config): name where unconfirmed points looked,2
+a8c6e871a4,2026-10-19,chore,tests,chore(tests): name building limit cases by route,1
+ae91957ca8,2026-10-19,fix,statements,fix(statements): say why step 3 waits on Weiter,14
+7b34029951,2026-10-19,chore,tests,chore(tests): pin the building limit in all loads,3
+8b4384cf38,2026-10-19,docs,tests,docs(tests): name the contract list in O-38,1
+1317861a88,2026-10-19,fix,buildings,fix(buildings): load up to 1000 buildings in lists,12
+cf66b3c50a,2026-10-18,docs,tests,docs(tests): add closing review 424-4,1
+89ae00969d,2026-10-18,docs,tests,docs(tests): archive the #424 session,3
+9c6bfe60c6,2026-10-18,docs,tests,docs(tests): add review 424-3,2
+5a53dc388a,2026-10-18,fix,statements,fix(statements): wrap correction rows at 390 px,2
+7c6eda2d9f,2026-10-18,fix,tests,fix(tests): pin step 2 counts despite a failure,4
+e3fcfc544e,2026-10-18,fix,statements,fix(statements): no row shift in the building step,6
+115fe0249e,2026-10-18,docs,invoices,docs(invoices): workflow notes of #222,2
+81b5efa744,2026-10-18,docs,invoices,docs(invoices): archive the plan session of #222,4
+778f061e8b,2026-10-18,docs,invoices,docs(invoices): triage code review 222 round 2,2
+1c81c7e468,2026-10-18,feat,invoices,feat(invoices): Akonto hints name place and period,9
+a6e4ac61db,2026-10-18,fix,tests,"fix(tests): pin download links, review 424-1",7
+9dce38716c,2026-10-18,docs,i18n,docs(i18n): add Ersatzmieter term row,3
+c6acdcd08f,2026-10-18,docs,i18n,docs(i18n): fix glossary review findings,12
+ecbb9e3de3,2026-10-18,fix,tests,fix(tests): E2E in Firefox and WebKit,10
+e2b1ea774b,2026-10-18,docs,i18n,docs(i18n): update glossary from decisions,6
+de43bedb33,2026-10-18,docs,contracts,docs(contracts): archive the 429 session,3
+5ebcc21ce5,2026-10-18,fix,contracts,fix(contracts): test the Pauschale note tone,8
+21960fe16b,2026-10-18,docs,statements,docs(statements): glossary heating share terms,2
+84f2ef61e1,2026-10-18,docs,contracts,docs(contracts): record 429 product decisions,1
+d23b705447,2026-10-18,fix,contracts,fix(contracts): apply 429 feature review findings,15
+9ee92347aa,2026-10-18,docs,contracts,docs(contracts): tick the 429 plan items,1
+fa9cc05658,2026-10-18,feat,contracts,feat(contracts): add Nebenkostenpauschale field,34
+4e1cb9c74e,2026-10-17,docs,contracts,docs(contracts): apply fach review 429 scenarios,9
+0b22c9db63,2026-10-17,docs,statements,"docs(statements): glossary terms from #403, #404",2
+cecd7a2dac,2026-10-17,chore,tests,chore(tests): add red tests for the flat rate,4
+111947784e,2026-10-17,docs,contracts,docs(contracts): add flat-rate charge scenarios,12
+3f11577f11,2026-10-17,docs,invoices,docs(invoices): record decision on the U-39 badge,1
+3b46176277,2026-10-17,docs,contracts,docs(contracts): archive the #66b session,4
+d62f4e9a11,2026-10-17,docs,contracts,docs(contracts): add code review 2 of #66b,1
+821717c4bd,2026-10-17,fix,contracts,fix(contracts): no ticks for a Pauschale,8
+108285b8a8,2026-10-17,fix,contracts,fix(contracts): apply code review 66b nits,5
+057c159cc8,2026-10-17,fix,statements,fix(statements): drop stale #388 marker,3
+7d8d27968b,2026-10-17,feat,contracts,"feat(contracts): hint without Akonto, form rule",17
+d19bae059c,2026-10-17,chore,tests,"chore(tests): close W16b review, archive session",4
+a4c103d7cd,2026-10-17,fix,tests,fix(tests): draft rows tick their own building,5
+2116d8b871,2026-10-17,docs,ci,docs(ci): add review of log and archive slice,3
+279bd47cd5,2026-10-17,chore,ci,"chore(ci): name failed E2E tests, merge archive",3
+7a7bd825bd,2026-10-17,docs,tests,docs(tests): note unchecked subclass error codes,1
+232adab363,2026-10-17,fix,tests,fix(tests): fix E2E races O-36 and O-37,6
+57c00b3c02,2026-10-17,docs,config,docs(config): close decision issues by their fix,6
+fbfc7d248d,2026-10-17,docs,config,docs(config): related issues in one pull request,4
+ac890cc09f,2026-10-17,docs,contracts,docs(contracts): add scenarios for #66 and #388,7
+a47221e42a,2026-10-17,docs,categories,docs(categories): glossary names the is_fuel field,1
+5a1fc1aa11,2026-10-17,docs,tests,docs(tests): note the draft rows race (O-37),1
+8084155904,2026-10-17,docs,config,docs(config): archive the #419 timeout session,4
+624f2cb2bb,2026-10-17,fix,tests,fix(tests): scenario for a KI slower than 30 s,10
+21a6515b0a,2026-10-17,fix,config,fix(config): wait longer for the KI without a GPU,8
+7dde508865,2026-10-17,none,,doc(testdata) added invoice test data,1
+2479da6c30,2026-10-17,docs,ci,"docs(ci): add timeout review, archive session",4
+8e2c8e4b0b,2026-10-17,fix,ci,fix(ci): give E2E shards on main 60 minutes,2
+be454eb6ec,2026-10-17,docs,config,docs(config): name the Ollama image update first,5
+eb0c8626db,2026-10-17,docs,config,"docs(config): archive T3, T2, T6 session",4
+7629bea397,2026-10-17,docs,contracts,docs(contracts): archive the #211 session,3
+277d8acdae,2026-10-17,docs,config,docs(config): fix closing range around a merge,3
+c9a2dabbed,2026-10-17,chore,config,chore(config): default KI model qwen3-vl:8b-instruct,10
+27ca9454dd,2026-10-17,docs,config,docs(config): merge main only before first push,6
+4f2c824df8,2026-10-17,docs,config,"docs(config): shorter reports, one merge per push",5
+6524f3ad2c,2026-10-17,fix,tests,"fix(tests): default state, French guillemets",7
+40002869d8,2026-10-17,fix,contracts,"fix(contracts): plural text, partly billed state",13
+71e2a1b122,2026-10-17,docs,tests,docs(tests): add closing review round 3 of #292,2
+2cb38d4d13,2026-10-17,chore,tests,"chore(tests): check the key row, archive W17",10
+b1ef918f1d,2026-10-17,fix,invoices,fix(invoices): fix review findings of #292,16
+63265177ff,2026-10-17,docs,tests,docs(tests): add closing review of W16 (#100),1
+ac708a4665,2026-10-17,fix,i18n,fix(i18n): French overview wording for #211,2
+a915275240,2026-10-17,fix,contracts,fix(contracts): group missing statement links,6
+e8a03d0367,2026-10-17,docs,ci,"docs(ci): add review, notes and archive session",5
+16d6bd7def,2026-10-17,fix,ci,fix(ci): run E2E and axe in five shards each,3
+8b7ededece,2026-10-17,chore,contracts,chore(contracts): point markers at #408,6
+d3678aecb9,2026-10-17,chore,tests,chore(tests): close Brennstoff reviews (#100),7
+92557f3313,2026-10-17,chore,tests,"chore(tests): guard fr space, archive #57 session",6
+ca7170e71a,2026-10-17,feat,contracts,feat(contracts): one rule for missing statements,23
+69fd94b9a4,2026-10-17,docs,config,docs(config): keep persona rules in review range,5
+c033562c36,2026-10-17,feat,categories,"feat(categories): sharpen reasons, show on invoice",21
+c66beba17b,2026-10-17,fix,categories,fix(categories): fix Brennstoff review findings,25
+5faa76929e,2026-10-17,docs,config,docs(config): fewer review rounds per task,4
+31d173ba56,2026-10-17,fix,i18n,fix(i18n): apply review of Ihre Angaben slice,10
+27a3c4b1fd,2026-10-17,docs,contracts,docs(contracts): add code review 3 of #66,1
+452ed1be84,2026-10-17,docs,statements,docs(statements): add merge review with #396,1
+06bba3a795,2026-10-17,docs,statements,docs(statements): archive QR-bill v2.4 session,5
+a8f02a8878,2026-10-17,docs,ci,docs(ci): collected review on token cost,1
+bd6d3e4ec8,2026-10-17,feat,i18n,feat(i18n): call wizard input Ihre Angaben,23
+31a6c3d953,2026-10-17,fix,statements,fix(statements): QR-bill review fixes,10
+b4e453abd9,2026-10-17,docs,statements,docs(statements): archive the #77 session,4
+06e5fa8250,2026-10-17,docs,statements,docs(statements): add merge review with #298,2
+31b0346365,2026-10-17,docs,contracts,docs(contracts): archive the #66 session,4
+71c54788d2,2026-10-17,docs,contracts,docs(contracts): add code review 2 of #66,3
+739a21f6da,2026-10-17,fix,contracts,fix(contracts): add scenario for the fee help,7
+7c34db96e6,2026-10-17,docs,contracts,docs(contracts): add persona round 2 of #66,2
+7a8195c331,2026-10-17,fix,statements,fix(statements): QR-bill per SIX IG v2.4,7
+cb6ce6e20a,2026-10-17,fix,contracts,fix(contracts): say when to enter a rent increase,7
+8421d7afce,2026-10-17,feat,categories,feat(categories): mark fuel categories (#100),36
+3d2646fad5,2026-10-17,docs,tests,docs(tests): red tests for missing statement rule,5
+5c1e00ea35,2026-10-17,docs,contracts,docs(contracts): add fach review 2 of #66,1
+1e61a4987f,2026-10-17,docs,contracts,docs(contracts): add code review of #66,2
+de5d2f1348,2026-10-17,fix,ci,"fix(ci): finish main runs, cache browsers",2
+1eb3afd654,2026-10-17,docs,tests,docs(tests): add @wip scenarios for Ihre Angaben,12
+62cd512d96,2026-10-17,chore,tests,chore(tests): add closing review of W8c-2,1
+9c512ef92e,2026-10-17,chore,tests,chore(tests): add @wip category reason scenarios,8
+a65a2c034b,2026-10-17,feat,contracts,feat(contracts): name agreed costs and Art. 269d,16
+c662362aca,2026-10-17,docs,tests,docs(tests): scenarios for partial missing periods,7
+196b27ef68,2026-10-17,fix,contracts,fix(contracts): cite Art. 269d OR fully in help,8
+b90e15276d,2026-10-17,chore,tests,"chore(tests): check the hint text, archive W8c-2",4
+cef3720c5c,2026-10-17,feat,statements,feat(statements): drop the 3-month invoice hint,13
+d5c354f3b9,2026-10-17,docs,tests,docs(tests): scenario for blank payable-by field,2
+1373aee1da,2026-10-17,docs,statements,docs(statements): check legal sources on Fedlex,2
+6003c25e14,2026-10-17,docs,tests,docs(tests): hedge Bergregion source link,3
+44914f7bfa,2026-10-17,chore,tests,chore(tests): add @wip Brennstoff scenarios (#100),10
+c5288844c4,2026-10-17,docs,contracts,docs(contracts): add Akonto hint scenarios,8
+426fcb84a1,2026-10-17,docs,tests,docs(tests): archive plan of Bergregion check,4
+0c9c2c5954,2026-10-17,chore,tests,chore(tests): add @wip scenario without 3-month hint,5
+973502b851,2026-10-17,docs,statements,docs(statements): add review round 6 report,2
+2e3df57445,2026-10-17,docs,tests,docs(tests): name source of Bergregion shares,2
+5e60256ca0,2026-10-17,fix,tests,fix(tests): find the heating part by its dates,1
+578fb4ab84,2026-10-17,docs,tests,docs(tests): add merge review of W5,2
+db446fd67b,2026-10-17,fix,statements,fix(statements): share billingStart with billsIn,3
+5827fe508f,2026-10-17,docs,statements,docs(statements): add merge review report,2
+3165a24a9e,2026-10-17,docs,statements,docs(statements): add second merge review of #132,1
+c6f5dac73a,2026-10-17,docs,categories,docs(categories): add merge review of PR #313,1
+8beb977ef8,2026-10-17,fix,privacy,fix(privacy): name Zahlungserinnerung in mail text,4
+e8eb5c4506,2026-10-17,fix,tests,fix(tests): give the new-category page its data,1
+5fe2a752b7,2026-10-17,docs,contracts,docs(contracts): add second merge review for #133,1
+f9815fd175,2026-10-17,docs,contracts,docs(contracts): add merge review for #133,1
+0450cc1bb0,2026-10-17,docs,statements,docs(statements): merge review W3f,1
+8c4f43f856,2026-10-17,docs,config,docs(config): note the config insert race,1
+a5eadfa2d2,2026-10-17,docs,ci,docs(ci): collected workflow review 2026-10-17,1
+da28655474,2026-10-17,docs,db,docs(db): name migration 0020 of agreed costs,2
+dc6407a39c,2026-10-17,fix,statements,fix(statements): ask before a corrected statement,9
+cc3c8d7f8c,2026-10-17,docs,statements,docs(statements): closing review W3f,1
+2ba6a6b240,2026-10-17,docs,config,docs(config): add closing review of #357,1
+42b9b3dffa,2026-10-17,docs,statements,docs(statements): add fourth W6d merge review,1
+a184bc2c53,2026-10-17,fix,privacy,fix(privacy): name what a reset payment keeps,10
+8a51cfb776,2026-10-17,docs,statements,docs(statements): archive session W3f,5
+24270f93a9,2026-10-17,docs,statements,docs(statements): persona report Dr. Weber W3f,1
+20214c27bd,2026-10-17,fix,tests,fix(tests): reuse the payment summary target,3
+f9d2b7695c,2026-10-17,docs,invoices,docs(invoices): archive W6e session,3
+eae06022f0,2026-10-17,fix,statements,fix(statements): decided fixed-term Akonto text,10
+4116c18084,2026-10-17,feat,statements,feat(statements): log the replaced statement,14
+cef446597f,2026-10-17,docs,invoices,docs(invoices): add W6e closing review,2
+bf4c23c6b9,2026-10-17,docs,statements,docs(statements): closing review of invoice name,1
+fbad3c660e,2026-10-17,fix,statements,"fix(statements): marker for #387, json spacing",2
+2f338c05cd,2026-10-17,docs,tests,docs(tests): add the merge review of W10c,1
+863e5eb097,2026-10-17,docs,tests,docs(tests): archive the W10c plan session,2
+8721802c31,2026-10-17,fix,tests,fix(tests): leave the settings step once loaded,2
+c08599e450,2026-10-17,feat,statements,"feat(statements): fixed-term hints, mixed presets",21
+7401768a74,2026-10-17,docs,tests,docs(tests): add W6e workflow notes,2
+b768990df9,2026-10-17,fix,invoices,fix(invoices): describe missed statements links,6
+23e7d229ab,2026-10-17,docs,invoices,docs(invoices): note W6e follow-ups in the plan,1
+e59119b1e4,2026-10-17,fix,statements,fix(statements): review findings of invoice name,5
+ac0b0269ff,2026-10-17,feat,invoices,feat(invoices): link statements missing an invoice,13
+c453a49e5c,2026-10-17,feat,statements,feat(statements): PDF invoice line names invoice,8
+996371223c,2026-10-17,fix,tests,fix(tests): wait for the saved contract,7
+7ba0b0f6d3,2026-10-17,feat,invoices,feat(invoices): open invoice missed by statements,5
+ae638755c3,2026-10-17,docs,contracts,docs(contracts): add persona re-check of P-1,1
+dc3b7cc298,2026-10-17,docs,statements,docs(statements): add third W6d merge review,1
+c46a112050,2026-10-17,docs,statements,docs(statements): wip scenarios for #76 and #119,6
+498381dcbc,2026-10-17,docs,statements,docs(statements): scenario PDF names the invoice,2
+b30e6f340c,2026-10-17,fix,contracts,fix(contracts): cover closing review findings,21
+c9f620c730,2026-10-17,fix,statements,fix(statements): cover the replaced statement page,16
+2d8cdc06e6,2026-10-17,docs,config,docs(config): archive the W7e session,4
+675e5c5987,2026-10-17,fix,contracts,"fix(contracts): keep questions, warn on no costs",27
+e7ecc72717,2026-10-17,docs,i18n,docs(i18n): add the closing review of #348,2
+153746f8c3,2026-10-17,fix,i18n,"fix(i18n): review nits of #348, archive session",9
+67fdd3f3af,2026-10-17,docs,contracts,docs(contracts): note agreed costs in requirements,1
+c543f94a00,2026-10-17,fix,statements,fix(statements): answer the correction reviews,33
+8a5a5709a7,2026-10-17,fix,i18n,fix(i18n): German wording of the native read,26
+36476b9a71,2026-10-17,docs,config,docs(config): add second merge review of W5,2
+03445e0106,2026-10-17,fix,config,fix(config): restore audit log load refusal,3
+42a38f86f7,2026-10-17,feat,contracts,feat(contracts): choose agreed Nebenkosten,51
+4bafd4a568,2026-10-17,fix,config,fix(config): word audit entries after re-reviews,11
+d83933f377,2026-10-17,docs,statements,docs(statements): add second W6d merge review,1
+0d6da4534f,2026-10-17,docs,apartments,"docs(apartments): search reviews, archive session",5
+de2effae68,2026-10-17,docs,config,docs(config): add workflow notes of #357,1
+b7f6b13740,2026-10-17,chore,tests,chore(tests): pin new wording of #348 in tests,33
+26d2a4214a,2026-10-17,chore,tests,chore(tests): pin wording rules of #348,5
+3fc40c6eed,2026-10-17,fix,apartments,fix(apartments): search help names a pattern,9
+450a417f8a,2026-10-17,fix,config,fix(config): answer audit log review findings,32
+a59f10a37c,2026-10-17,feat,apartments,feat(apartments): word-wise search incl. address,22
+1a4ef18cee,2026-10-17,docs,tests,docs(tests): note IBAN race of settings scenarios,1
+37ff0475a7,2026-10-17,docs,statements,docs(statements): archive the W9d session,7
+acb9da6cf7,2026-10-17,feat,statements,feat(statements): ask for agreed Nebenkosten,33
+2f3edefadc,2026-10-17,chore,db,chore(db): renumber the correction migration,2
+f0f8a92c93,2026-10-17,feat,statements,feat(statements): name the correction in the PDF,4
+27203ee7f4,2026-10-17,feat,config,feat(config): add audit log under Einstellungen,45
+4fded38cf3,2026-10-17,fix,statements,fix(statements): fr/it note on the Wohnungsanteil,3
+12ec34d1f6,2026-10-17,docs,statements,docs(statements): slice review W9d and its nits,3
+f9ce273f90,2026-10-17,feat,statements,feat(statements): correct a statement in the UI,48
+e7fde9a577,2026-10-17,docs,statements,docs(statements): add W6d merge review,1
+3eee2a66f3,2026-10-17,fix,statements,fix(statements): PDF says Gebäude like the app,7
+f9ea9235ba,2026-10-17,docs,statements,docs(statements): add merge review of #132,1
+1e48a49c95,2026-10-17,docs,statements,docs(statements): scenarios for #351 and #249,3
+abb82a9a90,2026-10-17,docs,statements,docs(statements): add the final review of W8d,2
+a61e817fd5,2026-10-17,docs,statements,docs(statements): archive the W8d session,5
+8b1a322d2c,2026-10-17,fix,contracts,fix(contracts): fix review findings of slice 1,8
+ef17bbfbdb,2026-10-17,docs,statements,"docs(statements): add persona reports, round 2",2
+e78add8289,2026-10-17,docs,config,docs(config): archive W3d plan session,4
+be4baa1b88,2026-10-17,docs,statements,docs(statements): add the closing review of #356,1
+0cb52059e4,2026-10-17,docs,tests,docs(tests): add title slice review report,2
+f8edd4553d,2026-10-17,docs,tests,docs(tests): add audit log scenarios as wip,8
+ac83f8a253,2026-10-17,feat,buildings,feat(buildings): title fuel panel Tankbestand,18
+570574796d,2026-10-17,docs,i18n,docs(i18n): add merge review of W4d,1
+e2668000c9,2026-10-17,feat,contracts,feat(contracts): bill only agreed Nebenkosten,14
+fdb27145b2,2026-10-17,docs,statements,docs(statements): archive the #111 session,5
+617d0435f0,2026-10-17,docs,tenants,docs(tenants): second merge review report,1
+ae722adfa7,2026-10-17,chore,contracts,chore(contracts): rename grossRent to monthlyTotal,12
+396cd265dd,2026-10-17,fix,tests,fix(tests): give each axe look of a run its own year,4
+86af8f5b49,2026-10-17,fix,statements,fix(statements): say how the Zahlungsfrist is set,9
+5f427ee485,2026-10-17,docs,tests,docs(tests): add @wip Tankbestand title scenario,5
+cff66d3a69,2026-10-17,fix,statements,fix(statements): name postal address after failure,9
+1533b175c1,2026-10-17,fix,statements,fix(statements): check the ZIP states with axe,13
+5e18a02bef,2026-10-17,chore,tests,chore(tests): add steps and tests for agreed costs,12
+b015675921,2026-10-17,chore,tests,chore(tests): send persona e-mail to mail catcher,1
+fb7b91b8b9,2026-10-17,docs,statements,docs(statements): archive plan session of #132,3
+a4a3f11787,2026-10-17,docs,statements,docs(statements): archive W6d session and notes,6
+15bc472e21,2026-10-17,feat,statements,feat(statements): e-mail statements to tenants,30
+6d5cae63da,2026-10-17,fix,statements,fix(statements): profile hint unless whole period,5
+d53f7320b6,2026-10-17,docs,statements,docs(statements): describe statement correction,2
+3b3bd68395,2026-10-17,chore,tests,chore(tests): add wip scenarios for agreed costs,4
+e6644bea3b,2026-10-17,feat,statements,feat(statements): replace and correct a statement,9
+662facce95,2026-10-17,fix,statements,fix(statements): no paid amount below CHF 5,11
+ee2fa53263,2026-10-17,feat,statements,feat(statements): download a run's PDFs as one ZIP,24
+4fca724272,2026-10-17,chore,tests,chore(tests): follow the correction fachreview,10
+5fa0a925ae,2026-10-17,docs,statements,docs(statements): add workflow notes of #132,2
+c811d34fd3,2026-10-17,chore,tests,chore(tests): add correction steps and red tests,7
+4e7bad166b,2026-10-17,fix,statements,fix(statements): no deadline or reminder below 5,12
+3edc963119,2026-10-17,fix,statements,fix(statements): apply review findings of #132,13
+08690ad01d,2026-10-17,docs,statements,docs(statements): add correction scenarios,4
+4f8466a956,2026-10-17,docs,privacy,docs(privacy): archive the W9c session,2
+573253d8ea,2026-10-17,fix,tenants,fix(tenants): tenant page loads without the notice,3
+d899b437d1,2026-10-17,chore,tests,chore(tests): add red tests for statement e-mail,11
+9725602085,2026-10-17,docs,tenants,docs(tenants): merge review round 2 report,1
+4db293094b,2026-10-17,fix,tenants,fix(tenants): a later contract ends A-6 for #178,6
+02a3e46c29,2026-10-17,chore,tests,chore(tests): add statement e-mail scenarios,8
+00ea019044,2026-10-17,feat,statements,feat(statements): waive a Saldo below CHF 5,22
+153524c5eb,2026-10-17,fix,statements,fix(statements): space draft links in preview,2
+9dc42990ce,2026-10-17,fix,tenants,fix(tenants): no former tenant while A-6 is open,5
+d2fd74c39e,2026-10-17,docs,i18n,docs(i18n): add closing review of W4d,1
+1de0da120d,2026-10-17,docs,statements,docs(statements): describe preview hints in PRD,1
+0a77753325,2026-10-17,docs,tests,docs(tests): add the last merge review,1
+9881a24e93,2026-10-17,docs,i18n,docs(i18n): archive session #83 #84,4
+0040023432,2026-10-17,docs,statements,docs(statements): add closing review round 4,2
+bbfe59cbc2,2026-10-17,fix,statements,fix(statements): count a relet apartment as left,7
+3064ca4c2d,2026-10-17,docs,i18n,docs(i18n): persona review of tenant texts,2
+1615e9e672,2026-10-17,fix,statements,fix(statements): no tank exception after shutdown,4
+6bd023fc2e,2026-10-17,feat,statements,feat(statements): outdated drafts when all billed,3
+4186d29261,2026-10-17,fix,statements,"fix(statements): pin 1er sous-sol, align en share",4
+9da12ef6d2,2026-10-17,docs,statements,docs(statements): archive the W7d session,3
+40fad43294,2026-10-17,docs,contracts,docs(contracts): name the A-6 rule in A-5,2
+041baa4e89,2026-10-17,docs,tests,docs(tests): add wip scenario for minimum Saldo,5
+7e2c7650e8,2026-10-17,fix,statements,fix(statements): zero heating position sentence,8
+0d1e8ce732,2026-10-17,docs,privacy,docs(privacy): closing review report and plan,2
+cc50901e59,2026-10-17,docs,privacy,docs(privacy): workflow notes for #82 and #178,1
+9a5ff5668f,2026-10-17,feat,statements,feat(statements): name outdated drafts in preview,27
+4d912b28d4,2026-10-17,fix,privacy,fix(privacy): clearer sentence on undeletable data,7
+aa7ff20c53,2026-10-17,fix,statements,fix(statements): native wording of tenant texts,12
+f158f6799e,2026-10-17,fix,i18n,fix(i18n): say ricevimento della disdetta,3
+099aaef84e,2026-10-17,docs,contracts,docs(contracts): archive the #133 session,4
+7b54b183df,2026-10-17,docs,tenants,docs(tenants): persona Helga report for W9c,1
+00a18e81d6,2026-10-17,fix,contracts,fix(contracts): tie covered-draft text to its date,10
+c200811fb6,2026-10-17,fix,i18n,fix(i18n): use Fedlex words for notice period,6
+ec927db265,2026-10-17,fix,privacy,fix(privacy): domain review W9c-2 wording,11
+f8ef41cc26,2026-10-17,fix,statements,fix(statements): heating share review findings,11
+d94dc9aec6,2026-10-17,docs,statements,docs(statements): add closing review of W8c,1
+9719b46356,2026-10-17,docs,statements,docs(statements): fix review nits and archive W8c,6
+9b56c86d8b,2026-10-17,fix,statements,fix(statements): old address only after a move-out,7
+de92910bab,2026-10-17,docs,statements,docs(statements): confirm check thresholds,4
+54d6570746,2026-10-17,docs,contracts,docs(contracts): add workflow notes for #133,1
+9d14368c80,2026-10-17,chore,tests,chore(tests): share rounding helper in DOM test,2
+16247b1c0f,2026-10-17,fix,privacy,fix(privacy): code review W9c-1 findings,5
+8ded4b10d1,2026-10-17,docs,i18n,docs(i18n): plan session for #83 #84,1
+1bf9585488,2026-10-17,fix,contracts,fix(contracts): answer billed-until findings,18
+5ef0f20358,2026-10-17,feat,statements,feat(statements): share heating by service period,11
+371075edf6,2026-10-17,docs,privacy,docs(privacy): tick the W9c plan items,1
+8e08408da8,2026-10-17,fix,statements,fix(statements): make a settled statement's PDF,7
+80122d4a50,2026-10-17,feat,privacy,"feat(privacy): controller, retention, providers",49
+2c03695e4e,2026-10-17,docs,statements,docs(statements): archive session W2d,3
+cbc41c1c8d,2026-10-17,docs,tests,docs(tests): add Anna's second W3c report,1
+b9660bec62,2026-10-17,docs,statements,docs(statements): add outdated draft scenarios,6
+ae523cb02f,2026-10-17,fix,db,fix(db): renumber balance migration to 0014,3
+6f78a7e06e,2026-10-17,docs,tests,docs(tests): fix a pronoun in the a11y seed,1
+b25c1660c4,2026-10-17,docs,statements,docs(statements): add second merge review,1
+1a936d2e23,2026-10-17,fix,statements,fix(statements): make the PDF as sent at sending,12
+768729792b,2026-10-16,docs,statements,docs(statements): add W4c closing review 3,1
+b1fe1f0cd1,2026-10-16,fix,tests,fix(tests): save the settings form in one scenario,3
+e130340038,2026-10-16,docs,contracts,docs(contracts): add Helga's billed-until report,1
+ef0e232875,2026-10-16,docs,statements,docs(statements): reviews of rounding change,7
+e05b62b381,2026-10-16,fix,tests,fix(tests): create the PDF again after sending,1
+fd565949c3,2026-10-16,feat,contracts,feat(contracts): add billed-until date to contract,41
+c2af5ba76f,2026-10-16,docs,contracts,docs(contracts): note the #296 merge review,2
+ba593ebebd,2026-10-16,fix,statements,fix(statements): round Saldo in tenant's favour,19
+4941bd2f51,2026-10-16,docs,statements,docs(statements): add merge review report,2
+c491eebf38,2026-10-16,docs,tests,docs(tests): add heating period scenario for #71,3
+4dbeb8a7c8,2026-10-16,docs,statements,docs(statements): archive the W4c Fristen session,3
+7499bb3f2e,2026-10-16,docs,statements,docs(statements): add W4c workflow notes,2
+50e64c285f,2026-10-16,fix,tests,fix(tests): cover the sent PDF's new address,5
+355bbe647a,2026-10-16,docs,statements,docs(statements): scenario tenant-favour rounding,2
+477a23360b,2026-10-16,fix,statements,fix(statements): clarify Fristen help texts,13
+6ee33f2e00,2026-10-16,fix,statements,fix(statements): send the PDF as of sending,12
+a12b4472ea,2026-10-16,chore,tests,chore(tests): add red tests for #82 and #178,2
+bca172effa,2026-10-16,docs,tests,docs(tests): add closing review of W6c,1
+2e4b6d58d5,2026-10-16,chore,tests,chore(tests): add steps for the #82 scenarios,9
+6de5e592d6,2026-10-16,docs,statements,docs(statements): archive the W6c reminder session,6
+418767cdc2,2026-10-16,docs,tests,docs(tests): add red billed-until tests,4
+e75a0d383b,2026-10-16,docs,statements,docs(statements): review of the merge with W4b,1
+abb842c5e5,2026-10-16,docs,privacy,docs(privacy): add wip scenarios for #82,5
+f471e42469,2026-10-16,feat,statements,feat(statements): set Zahlungsfrist and Mahnfrist,25
+a454fa42c3,2026-10-16,fix,statements,fix(statements): make a draft's PDF afresh,19
+fde5afc5c5,2026-10-16,docs,tests,docs(tests): add billed-until scenarios as wip,13
+05e9296f4c,2026-10-16,feat,statements,feat(statements): explain Art. 257d OR limits,11
+38e8b36881,2026-10-16,fix,statements,fix(statements): fit reminder on one page,12
+be45e97998,2026-10-16,docs,config,docs(config): note second main merge for A-6,2
+7680050106,2026-10-16,docs,tests,docs(tests): add persona report Dr. Weber for W6c,1
+a85fef6a01,2026-10-16,docs,tests,docs(tests): add persona report Helga for W6c,1
+d82ca5520b,2026-10-16,docs,i18n,docs(i18n): archive the W2c help texts session,4
+a7f18d239d,2026-10-16,docs,tests,docs(tests): add Fristen and Belegung scenarios,8
+a5af01fd90,2026-10-16,docs,tests,docs(tests): add W3c workflow notes,1
+7ac04a3876,2026-10-16,feat,statements,feat(statements): add QR payment part to reminders,16
+04c3b05dcd,2026-10-16,feat,statements,feat(statements): warn about a moved-out address,45
+2c77aa7be0,2026-10-16,fix,tests,fix(tests): scenarios for help text fixes,15
+b348696d86,2026-10-16,docs,statements,docs(statements): add closing review report,1
+681e68da14,2026-10-16,chore,statements,chore(statements): archive the W8b session,5
+a7ea199bb7,2026-10-16,docs,i18n,docs(i18n): add closing review of the language,2
+da8ac3df1b,2026-10-16,fix,statements,fix(statements): no comparison after negative year,5
+3d7097fa18,2026-10-16,fix,i18n,fix(i18n): help translations from domain review,4
+7ec9bc96bb,2026-10-16,docs,i18n,docs(i18n): archive the browser language session,2
+0f00a958d9,2026-10-16,docs,tests,docs(tests): add closing review of #74,1
+00d0d70b32,2026-10-16,docs,config,docs(config): archive the A-6 plan session,4
+f975884de5,2026-10-16,chore,tests,chore(tests): add red tests for #108 and #59,2
+5e45936467,2026-10-16,fix,i18n,fix(i18n): apply review of the browser language,7
+b26adbb71a,2026-10-16,fix,statements,fix(statements): check #74 invoice is accepted,5
+c035d7818b,2026-10-16,feat,i18n,"feat(i18n): help contents, terms and text fixes",14
+d96b6f1b41,2026-10-16,docs,config,docs(config): add workflow notes for #115,1
+d4d4adbe4f,2026-10-16,docs,tests,docs(tests): add workflow notes for #74,1
+7e2fb820e9,2026-10-16,chore,tests,chore(tests): add wip scenarios for #108 and #59,6
+77832b113d,2026-10-16,docs,apartments,docs(apartments): archive the W4b tenancy session,4
+9f1639aa47,2026-10-16,docs,statements,docs(statements): review of the merge with W6b,1
+435d629afd,2026-10-16,fix,tenants,fix(tenants): give address help a unique id,7
+76989a8dad,2026-10-16,fix,statements,fix(statements): answer Tankbestand review,21
+95b546fe6d,2026-10-16,fix,statements,fix(statements): pin #74 tank case with a pg test,2
+34315697de,2026-10-16,feat,i18n,feat(i18n): follow the browser language,15
+767a0888e8,2026-10-16,feat,tenants,feat(tenants): add country to Korrespondenzadresse,47
+591d614ce1,2026-10-16,docs,contracts,docs(contracts): add Weber A-6 persona re-run,1
+2e4f710601,2026-10-16,docs,contracts,docs(contracts): add Anna A-6 persona re-run,1
+7e98aaa475,2026-10-16,feat,statements,feat(statements): check Tankbestand readings,37
+8415c06081,2026-10-16,docs,config,docs(config): note A-6 feature review in plan,1
+c7c11ba8a7,2026-10-16,fix,apartments,fix(apartments): test help on never-let apartments,8
+86d7331e69,2026-10-16,fix,contracts,fix(contracts): confirm move-out with its cost,16
+a456df5b97,2026-10-16,docs,apartments,docs(apartments): add persona re-run report,1
+e39481c2a0,2026-10-16,fix,apartments,fix(apartments): name every empty apartment,32
+4234f26474,2026-10-16,chore,tests,chore(tests): add help glossary scenarios,8
+8c4362d1cb,2026-10-16,docs,i18n,docs(i18n): scenarios for the browser language,5
+6f40ed1f60,2026-10-16,fix,contracts,fix(contracts): apply A-6 code review findings,7
+e3ff639af1,2026-10-16,docs,categories,docs(categories): archive session W5b,3
+1fe6e5618b,2026-10-16,fix,config,fix(config): address IBAN review nits,5
+0f3a4ae2c0,2026-10-16,docs,statements,docs(statements): review of the merge with main,1
+854ce23ded,2026-10-16,docs,contracts,docs(contracts): archive the #296 session,4
+d2de64cc54,2026-10-16,fix,contracts,fix(contracts): take over no refused start from URL,7
+9867187ba6,2026-10-16,fix,i18n,fix(i18n): lowercase possessive in vacancy help,2
+e2ca0f2f8a,2026-10-16,feat,apartments,feat(apartments): show tenancy history and vacancy,52
+90e8393331,2026-10-16,fix,contracts,fix(contracts): suggest no start the check refuses,8
+083188b919,2026-10-16,docs,tests,docs(tests): add @wip Tankbestand check scenarios,14
+20f5617cc3,2026-10-16,chore,db,chore(db): renumber line item invoices migration,2
+a45e9b16f8,2026-10-16,docs,statements,docs(statements): archive session W1b,2
+288d437808,2026-10-16,docs,statements,docs(statements): closing review of #96 and #104,3
+0e1a5ee77c,2026-10-16,docs,contracts,docs(contracts): closing review of the fee branch,4
+c04d7debe4,2026-10-16,fix,tests,fix(tests): scenario for a run without a fee rate,11
+b3ff5d3a6e,2026-10-16,docs,tests,docs(tests): add @wip scenarios for tenancy view,24
+d80aeedbf7,2026-10-16,chore,db,chore(db): renumber tenant language migration,4
+f33779093f,2026-10-16,docs,statements,docs(statements): data check and workflow notes,3
+081db67cc9,2026-10-16,fix,categories,fix(categories): test the KI answer fallback,7
+f140a36ed2,2026-10-16,fix,tests,fix(tests): scenarios for the Zeitanteil rules,3
+34f942cfc0,2026-10-16,docs,contracts,docs(contracts): add merge review report,1
+37a941482d,2026-10-16,docs,config,docs(config): note A-6 review rounds in plan,1
+7da8157a52,2026-10-16,fix,config,fix(config): accept IBANs from Liechtenstein,11
+60727ad7ca,2026-10-16,fix,statements,fix(statements): keep the heating profile of a run,15
+a6b37733ed,2026-10-16,docs,tests,docs(tests): closing review of the map removal,2
+e4d77cbf3b,2026-10-16,chore,db,chore(db): renumber line item invoices migration,2
+ba02ed9ff8,2026-10-16,feat,contracts,feat(contracts): ask after an expired fixed term,33
+ef3cc3d96b,2026-10-16,fix,categories,fix(categories): hint follows the allocability,12
+dacc83366a,2026-10-16,fix,statements,fix(statements): answer reviews of #96 and #104,24
+56c4d47ab1,2026-10-16,chore,tests,chore(tests): review nits and session archive,9
+ebc667a802,2026-10-16,docs,config,docs(config): add merge review of W5,1
+d03ec92946,2026-10-16,docs,tests,"docs(tests): add wip scenarios for address, IBAN",8
+64c00a15d3,2026-10-16,feat,buildings,feat(buildings): remove the building map,30
+f2fd821501,2026-10-16,docs,tests,docs(tests): add red A-6 unit and a11y tests,10
+58d49f60b7,2026-10-16,feat,statements,feat(statements): link positions to their invoices,29
+7d81829057,2026-10-16,docs,contracts,docs(contracts): archive the fee session,2
+97bf68f9e7,2026-10-16,docs,tests,docs(tests): scenarios for dropping the map,7
+1a57ad7764,2026-10-16,docs,tests,docs(tests): add A-6 fixed-term scenarios,11
+8760f092b0,2026-10-16,docs,tenants,docs(tenants): archive session W6b,3
+3be3e0955f,2026-10-16,chore,db,chore(db): renumber statement numbers migration,2
+d3b2854d80,2026-10-16,docs,tenants,docs(tenants): add W6b data check,3
+48c6a70b23,2026-10-16,docs,statements,docs(statements): add closing review report,1
+b713d27763,2026-10-16,docs,tenants,docs(tenants): add W6b persona reports and notes,3
+c423a45e78,2026-10-16,fix,tests,fix(tests): name heating profile when generating,4
+2cc07495f8,2026-10-16,feat,categories,feat(categories): mark and protect predefined ones,24
+62c25c8c7a,2026-10-16,fix,tenants,fix(tenants): apply review findings of W6b,9
+8b8a2ffe5c,2026-10-16,chore,tests,chore(tests): add red tests for #96 and #104,20
+758b2202af,2026-10-16,feat,tenants,feat(tenants): reminders in the tenant's language,32
+00a419d499,2026-10-16,chore,tests,chore(tests): add wip scenarios for #96 and #104,3
+7f5e2c83ed,2026-10-16,docs,contracts,docs(contracts): closing review W7b round 3,1
+d9ce9b2707,2026-10-16,fix,tests,fix(tests): name the heating profile of UI runs,2
+f973d4a3e5,2026-10-16,docs,config,docs(config): archive the session of W4b,5
+c02c420507,2026-10-16,chore,tests,chore(tests): reuse the error message step,2
+2cbeb76720,2026-10-16,docs,contracts,docs(contracts): archive session W7b,8
+ec21309139,2026-10-16,fix,contracts,fix(contracts): say when a notice can be withdrawn,11
+c9a800ffa3,2026-10-16,feat,categories,feat(categories): add scenarios for #166,5
+806aefc324,2026-10-16,docs,contracts,docs(contracts): add closing review report,1
+bc4e49ac82,2026-10-16,docs,contracts,docs(contracts): W7b review fixes and reports,9
+8290b6e8dc,2026-10-16,docs,config,docs(config): archive session for #97 #101,4
+af72df8e23,2026-10-16,chore,tests,chore(tests): seed a Zusatzmiete for the axe state,3
+4461758237,2026-10-16,chore,tests,chore(tests): add red tests for tenant language,13
+11ca7f6005,2026-10-16,fix,i18n,fix(i18n): notice texts per OR wording,3
+44db0fd6fe,2026-10-16,docs,statements,docs(statements): add review notes for #97 #101,4
+618787e398,2026-10-16,docs,statements,docs(statements): review of the merge with W6,2
+b4682dc07c,2026-10-16,fix,statements,fix(statements): keep the PDF made before payment,12
+2f0830049f,2026-10-16,docs,statements,docs(statements): address slice review findings,3
+e5e87a5bd6,2026-10-16,chore,tests,chore(tests): add @wip tenant language scenarios,11
+4b1a50ffd8,2026-10-16,feat,contracts,feat(contracts): notice receipt and period hint,31
+366a7ce875,2026-10-16,docs,statements,docs(statements): archive the wizard session,3
+c39f359219,2026-10-16,fix,contracts,fix(contracts): address the fee review findings,27
+5bddbb3ad2,2026-10-16,feat,statements,feat(statements): never give a number twice,18
+3b6c845e64,2026-10-16,docs,contracts,docs(contracts): archive the #144 session,3
+2f21d23231,2026-10-16,fix,contracts,fix(contracts): name parking only with Zusatzmiete,7
+cf4a669019,2026-10-16,chore,tests,"chore(tests): sort imports, add review report",2
+23a7265e49,2026-10-16,docs,config,docs(config): archive the session of W5,3
+cdfdc2327b,2026-10-16,fix,statements,"fix(statements): check payment date, keep sent PDF",15
+dcf08b208b,2026-10-16,fix,categories,fix(categories): fit the description on a phone,11
+5420300b16,2026-10-16,docs,contracts,docs(contracts): wip scenarios for notice hints,10
+b38873848e,2026-10-16,feat,contracts,"feat(contracts): keep apartment, take over rent",22
+079222e27c,2026-10-16,fix,statements,fix(statements): no delete advice after Weiter,14
+2824953205,2026-10-16,docs,contracts,docs(contracts): name the fee choices of the demo,1
+b0a5b81795,2026-10-16,fix,i18n,fix(i18n): wording of the payment reset,5
+0c7a596da7,2026-10-16,feat,contracts,feat(contracts): agree the fee per contract,59
+71e65ee26a,2026-10-16,docs,config,docs(config): add workflow notes of #204,2
+68f9a3aa77,2026-10-16,docs,config,docs(config): archive the session of W6,2
+5cb6ff53eb,2026-10-16,fix,categories,fix(categories): show the whole description,5
+c3988bb86e,2026-10-16,docs,tests,docs(tests): pin statement number and PDF name,4
+bf38f642f0,2026-10-16,docs,tests,docs(tests): review of the pdf-missing CI fix,2
+7e13aaabb7,2026-10-16,feat,statements,"feat(statements): bound, record and reset payment",42
+2be4f7fe5a,2026-10-16,fix,tests,fix(tests): scope pdf-missing state to a building,1
+4e738389b9,2026-10-16,fix,statements,fix(statements): no delete advice with open days,11
+d0d4dce862,2026-10-16,docs,tests,docs(tests): add scenarios for statement numbers,5
+3b5a67ece0,2026-10-16,chore,tests,chore(tests): add red tests for #144,4
+686932b593,2026-10-16,chore,tests,chore(tests): pin every kept category description,3
+9f0f08de37,2026-10-16,chore,tests,chore(tests): add wip scenarios for #144,7
+fb016e3f17,2026-10-16,docs,config,docs(config): tick #221 in the plan,1
+7f838eac0d,2026-10-16,feat,categories,feat(categories): name exclusions in descriptions,8
+57a6914a00,2026-10-16,docs,contracts,docs(contracts): closing review of W7,1
+a9fae5234b,2026-10-16,fix,i18n,fix(i18n): glossary terms in the step 2 note,8
+6d87b7481b,2026-10-16,docs,statements,docs(statements): add workflow notes of #107,3
+f32392309d,2026-10-16,fix,statements,fix(statements): review findings in the wizard,17
+9fabf88e01,2026-10-16,docs,config,docs(config): archive the session of W7,5
+d3fb1e95dd,2026-10-16,docs,contracts,docs(contracts): persona re-run and workflow notes,3
+0a98e3bcba,2026-10-16,docs,statements,docs(statements): closing review of #248 #253,2
+0ebf1aae91,2026-10-16,docs,statements,docs(statements): add reminder review reports,3
+ca3f3baa18,2026-10-16,fix,contracts,fix(contracts): name status of blocking statements,20
+9d49d61417,2026-10-16,fix,statements,fix(statements): announce the marked letter,10
+b5ecd9d9d4,2026-10-16,chore,tests,chore(tests): add wip payment scenarios,13
+5f89a8b5b9,2026-10-16,docs,config,docs(config): archive session for #250 #254,4
+ca4a9d739a,2026-10-16,fix,statements,fix(statements): keep detail dates for #104,7
+af747b6d00,2026-10-16,docs,config,docs(config): archive session of invoice hints,4
+1a0cd60d29,2026-10-16,fix,statements,fix(statements): offer the remade reminder PDF,19
+b466c6998a,2026-10-16,feat,contracts,"feat(contracts): delete drafts, contracts safely",45
+78ee24c5e7,2026-10-16,docs,invoices,docs(invoices): apply domain review round 2,5
+90441e00dc,2026-10-16,fix,tests,fix(tests): scenario for fuel left out of hints,8
+a6694f28b1,2026-10-16,fix,i18n,fix(i18n): wording of step 2 in fr and it,3
+b2c9f002ff,2026-10-16,docs,contracts,docs(contracts): add review round 4 report,1
+4a279fc471,2026-10-16,fix,i18n,fix(i18n): protect spaces in French guillemets,1
+58a6d9034d,2026-10-16,docs,config,docs(config): archive the session of W4,5
+e8144476a2,2026-10-16,fix,statements,fix(statements): skip fuel in invoice hints,22
+2c15a3a716,2026-10-16,docs,contracts,docs(contracts): add closing review report,1
+b881ac08d7,2026-10-16,feat,statements,feat(statements): wizard confirmation and drafts,27
+c450b43fb5,2026-10-16,fix,statements,fix(statements): no next reminder date once paid,8
+ee65a3a727,2026-10-16,docs,contracts,docs(contracts): archive the W10 session,4
+6b4206a4fb,2026-10-16,docs,contracts,docs(contracts): add W10 review reports,3
+6d844dc05a,2026-10-16,docs,tests,docs(tests): scenarios for the management fee,15
+73cd845770,2026-10-16,docs,statements,docs(statements): cite source of the 3 % guideline,1
+c359371784,2026-10-16,fix,statements,fix(statements): use stored tenancy dates in list,19
+552536c458,2026-10-16,fix,contracts,"fix(contracts): heirs give notice, name the fields",18
+5fd7b5566b,2026-10-16,feat,statements,feat(statements): enforce reminder deadlines,35
+83b00fe6dc,2026-10-16,docs,config,docs(config): update plan for #250 #254,1
+c42b1fba5c,2026-10-16,fix,invoices,fix(invoices): clarify boiler example and glossary,7
+5e61fe4b96,2026-10-16,fix,statements,fix(statements): explain profile share before #209,10
+14200eaf16,2026-10-16,docs,tests,docs(tests): red tests for missing statements,8
+c47906276c,2026-10-16,fix,invoices,fix(invoices): address slice review findings,6
+501d28edda,2026-10-16,docs,statements,docs(statements): domain review of #199 #211,3
+b63827227c,2026-10-16,feat,statements,feat(statements): hint invoices lacking a period,22
+20c36f0cd4,2026-10-16,fix,statements,fix(statements): round Heizprofil months half up,12
+2e135d9a46,2026-10-16,feat,contracts,feat(contracts): new contract for a moving tenant,27
+ae75ecc61c,2026-10-16,feat,statements,feat(statements): Heizprofil effect and rounding,22
+543b7ccfe3,2026-10-16,feat,statements,feat(statements): show tenancy and missing PDF,24
+d51f85ea2c,2026-10-16,feat,invoices,feat(invoices): explain costs over several years,13
+da2dcefc2d,2026-10-16,docs,tests,docs(tests): scenarios for missing statements,17
+28a4c898e3,2026-10-16,docs,tests,docs(tests): add unit and DOM tests for hints,4
+4d5e72f205,2026-10-16,docs,tests,docs(tests): red tests for wizard issues,6
+07b5a94564,2026-10-16,docs,tests,docs(tests): add database tests for invoice hints,1
+158816b653,2026-10-16,docs,config,docs(config): archive the session of O-34,2
+a2cab5849c,2026-10-16,docs,tests,docs(tests): review and workflow notes of O-34,3
+63fab3580a,2026-10-16,docs,tests,docs(tests): add red reminder deadline tests,2
+a7088d074e,2026-10-16,docs,statements,docs(statements): wizard scenarios for #251 #201,8
+095bc39aba,2026-10-16,chore,tests,chore(tests): add red tests for #156 and #155,4
+89d87f28f3,2026-10-16,docs,tests,docs(tests): add scenarios for invoice check hints,6
+47babc0135,2026-10-16,docs,tests,docs(tests): pin service period years and shares,3
+b9640a79c7,2026-10-16,fix,tests,fix(tests): upload axe states use own building,3
+b1b4025ca3,2026-10-16,docs,tests,docs(tests): add reminder deadline scenarios,6
+4abcd046a8,2026-10-16,chore,tests,chore(tests): add wip scenarios for #156 and #155,9
+a75a8a2a04,2026-10-16,docs,contracts,docs(contracts): wip scenarios for #141 and #116,6
+b06e4d4eb6,2026-10-16,chore,tests,chore(tests): pin category descriptions,4
+b9509aa811,2026-10-16,docs,tests,docs(tests): add scenarios for multi-year invoices,7
+9583d04785,2026-10-16,chore,tests,chore(tests): add wip heating profile scenarios,7
+3990bce2e6,2026-10-16,docs,tests,docs(tests): name the E2E stack's secrets,5
+2a4eff3acc,2026-10-16,docs,config,docs(config): load bdd-acceptance in step 1,6
+cc1cbcb267,2026-10-16,docs,config,docs(config): archive the session of G-9,4
+6911662def,2026-10-16,docs,config,docs(config): refactor only touched code,3
+6b535fcaa4,2026-10-16,docs,config,docs(config): keep only project rules,6
+e0ad81d8a2,2026-10-16,docs,config,docs(config): archive the session of S-1 to S-6,4
+450789e61f,2026-10-16,docs,config,docs(config): restore the navigation-scenario rule,5
+3c9ce0348d,2026-10-16,docs,config,docs(config): cut bdd-acceptance to Dwello,10
+e8dfe9a9eb,2026-10-16,docs,config,docs(config): add third review against the guide,1
+bc85c7f0ce,2026-10-16,docs,config,docs(config): archive the session of G-11,2
+ba87de5366,2026-10-16,docs,config,"docs(config): plain words for what, not how",4
+ab74c6cb71,2026-10-16,docs,config,docs(config): plain words in the tdd skill,2
+dd452b774c,2026-10-16,docs,tests,docs(tests): answer review of the E2E rule source,7
+9822a514f8,2026-10-16,docs,tests,docs(tests): one source for the E2E rules,5
+f03809376b,2026-10-16,docs,config,docs(config): name per-task reviews by pattern,1
+744d552514,2026-10-16,docs,config,docs(config): answer review of R-1 to R-8,6
+6198743ddb,2026-10-16,docs,config,"docs(config): one source per rule, fewer words",5
+2e0cc191ba,2026-10-16,docs,invoices,docs(invoices): plan names issue 268,1
+271c95df2b,2026-10-16,feat,invoices,feat(invoices): scenarios for persona fixes 222,7
+0344415ea7,2026-10-16,docs,config,docs(config): add second review against the guide,1
+cc96351091,2026-10-16,docs,config,"docs(config): answer review of G-3, G-4, G-6",8
+571ebde1d1,2026-10-16,docs,config,"docs(config): less bookkeeping, lighter checks",7
+b08b3f382d,2026-10-16,docs,config,docs(config): ask where a loaded skill says to,4
+c0785c2468,2026-10-16,docs,config,docs(config): restore two rules lost in the move,5
+fbfa24c92a,2026-10-16,docs,config,docs(config): archive CI shards session,2
+2c37a21353,2026-10-16,fix,ci,fix(ci): fail shard gate when no shard ran,4
+b68dac7360,2026-10-16,chore,ci,chore(ci): run e2e and axe checks in shards,3
+5d38eb7e81,2026-10-16,docs,config,docs(config): shorten CLAUDE.md with skills,8
+cfe542e952,2026-10-16,docs,invoices,docs(invoices): workflow review of #222,2
+8d2392d158,2026-10-16,docs,config,docs(config): own KI stand-in port for personas,9
+d32ca39b93,2026-10-16,docs,config,docs(config): apply the other guardrail proposals,17
+a611dc9c73,2026-10-16,chore,ci,chore(ci): widen axe filter after review,6
+017fd97de5,2026-10-16,docs,invoices,docs(invoices): triage code review 222 round 1,3
+40ba767f0b,2026-10-16,docs,config,"docs(config): name per-task reviews, archive plan",4
+0489f9abdb,2026-10-16,docs,invoices,docs(invoices): plan names issues of review 222,1
+4eff7e61b0,2026-10-16,feat,invoices,feat(invoices): Akonto hints name one way only,7
+35c743fcbe,2026-10-16,chore,ci,chore(ci): run axe check only on UI changes,3
+d6094622a7,2026-10-16,docs,config,docs(config): end the closing review round,5
+ae2d19f3c7,2026-10-16,docs,i18n,"docs(i18n): Akontorechnung, Mahnung, Auslesen rows",1
+074789032d,2026-10-16,feat,invoices,feat(invoices): scenarios for Akonto hints round 2,5
+ef3c937856,2026-10-16,docs,config,docs(config): fewer review rounds and plan notes,3
+832c7b1a06,2026-10-16,docs,tests,docs(tests): archive e2e speed session,2
+744e22999b,2026-10-16,docs,tests,docs(tests): name playwright config as build input,3
+1ac138f93a,2026-10-16,fix,tests,fix(tests): rebuild e2e frontend on missed inputs,6
+8be686ccd1,2026-10-16,docs,invoices,docs(invoices): one way in the Akonto scenario,3
+94082bd7a7,2026-10-16,chore,config,chore(config): pin subagent models by benchmark,15
+447c2676d9,2026-10-16,docs,tests,docs(tests): plan and workflow review of e2e speed,2
+b50c148044,2026-10-16,chore,tests,"chore(tests): skip unchanged e2e builds, servers",5
+ba3079ec4e,2026-10-16,docs,invoices,docs(invoices): scenario for the Akonto hint,2
+5e5e7e06f2,2026-10-16,docs,tests,docs(tests): archive the session of issue 241,2
+2ad68f4dd1,2026-10-16,docs,statements,docs(statements): record domain review round 3,4
+423a902e32,2026-10-16,docs,statements,docs(statements): record code review round 2,2
+90f4f5200e,2026-10-16,docs,statements,docs(statements): add workflow review of #241,2
+032de45200,2026-10-16,docs,config,docs(config): plan subagent model benchmark,1
+9cade5b627,2026-10-16,fix,statements,fix(statements): name the Tankbestand change line,13
+784befd47b,2026-10-16,docs,i18n,"docs(i18n): fix #243 nits, archive session",4
+3ae2b1d6a6,2026-10-16,fix,statements,fix(statements): label invoice lines in the PDF,12
+a500396e01,2026-10-16,docs,i18n,docs(i18n): fix #243 terms after domain review,3
+6d88a31501,2026-10-16,docs,i18n,docs(i18n): record code review of #243,2
+047d704dba,2026-10-16,docs,i18n,docs(i18n): add glossary terms from #243,4
+696cdeea66,2026-10-16,docs,tests,docs(tests): record decision issues in plan,1
+16d6c2e993,2026-10-16,docs,tests,docs(tests): update wip scenario for #241,2
+c390a0a2f1,2026-10-16,docs,invoices,docs(invoices): close reviews of issue 233,3
+8f562ea17f,2026-10-16,fix,invoices,fix(invoices): answer code review round 4,8
+16ef713f44,2026-10-16,fix,invoices,fix(invoices): wrong values stay named in upload,4
+4384b13da4,2026-10-16,docs,invoices,docs(invoices): workflow review of issue 233,2
+11168a4fac,2026-10-16,fix,invoices,fix(invoices): answer the persona round of #233,12
+70fbc67660,2026-10-16,fix,invoices,fix(invoices): answer reviews of slice 3,10
+a09ae7f66f,2026-10-16,feat,invoices,"feat(invoices): upload hints, number, help texts",50
+f65a635f81,2026-10-16,docs,tests,docs(tests): record review of the Beleg step fix,3
+53712686b7,2026-10-16,fix,tests,fix(tests): wait for saved Beleg before opening it,3
+1d9d301949,2026-10-16,feat,invoices,"feat(invoices): screen reader, preview in upload",21
+e30b191330,2026-10-16,feat,invoices,feat(invoices): clearer notes in the upload dialog,21
+16df77fb8c,2026-10-16,docs,invoices,docs(invoices): scenarios for upload follow-ups,21
+b8a6fc707f,2026-10-16,docs,i18n,docs(i18n): fix glossary after review round 2,4
+3f74ca898f,2026-10-16,docs,i18n,docs(i18n): note follow-up issue in plan,1
+c825422db9,2026-10-16,docs,i18n,docs(i18n): fix glossary terms after domain review,3
+846f8b5951,2026-10-16,docs,i18n,docs(i18n): add glossary terms from decisions,2
+dda043d467,2026-10-16,docs,tests,docs(tests): record flaky Beleg scenario as O-31,2
+2fb4ff231b,2026-10-16,docs,tests,docs(tests): record merge review of #226,2
+23cd2f35b9,2026-10-16,fix,db,fix(db): renumber invoice parts migration to 0006,2
+8ad4b41f03,2026-10-16,docs,tests,docs(tests): archive the session of issue 226,2
+209439d22c,2026-10-16,docs,statements,docs(statements): record code review round 3,2
+7c34a31cb1,2026-10-16,docs,statements,docs(statements): add second persona review,2
+3067d30b0b,2026-10-16,fix,statements,fix(statements): use glossary terms in PDF note,4
+d9d71b9b8b,2026-10-16,docs,statements,docs(statements): add workflow review of #226,2
+53b3db9937,2026-10-16,fix,statements,fix(statements): explain invoice lines in PDF note,11
+4e18ec6ef7,2026-10-16,chore,tests,chore(tests): add red test for parts note,2
+cf49fa5871,2026-10-16,fix,statements,fix(statements): list mixed-day invoices in PDF,14
+c5b9451e87,2026-10-16,docs,tests,docs(tests): archive the session of issue 217,3
+f3e73c0074,2026-10-16,chore,tests,chore(tests): add red test for invoice days,2
+b170c5cca0,2026-10-16,docs,tests,docs(tests): add wip scenario for invoice days,2
+01dda352b8,2026-10-16,docs,tests,"docs(tests): drop O-29, fixed on main",2
+57a6f19c03,2026-10-16,docs,invoices,docs(invoices): code review round 5,2
+e029963a66,2026-10-16,docs,invoices,docs(invoices): domain review 4 and rules review,3
+3b17d9feeb,2026-10-16,fix,invoices,fix(invoices): answer review round 4,26
+73a9212d52,2026-10-16,docs,tests,docs(tests): archive the session of issue 229,4
+fada35984c,2026-10-16,docs,config,docs(config): record persona kit review round 1,2
+cf7825e6d6,2026-10-16,fix,config,fix(config): resolve persona kit from its own path,4
+6fcd58376f,2026-10-16,fix,statements,fix(statements): end the sums clause with a stop,7
+eb10fcc358,2026-10-16,fix,tests,fix(tests): render the English sums clause,3
+23a94250ba,2026-10-16,fix,statements,fix(statements): share of the line for #209 PDFs,8
+fc20902b56,2026-10-16,fix,statements,fix(statements): scenarios and older short periods,7
+be436c1d57,2026-10-16,fix,invoices,fix(invoices): answer reviews of the upload dialog,62
+7afac56b60,2026-10-16,fix,statements,fix(statements): heating share sums and old PDFs,12
+9dbc481688,2026-10-16,docs,statements,docs(statements): scenario for a short period,2
+b860893ded,2026-10-16,docs,tests,docs(tests): archive the session of issue 209,3
+637ad2b658,2026-10-16,fix,statements,fix(statements): store the heating share rounded,8
+6e569c2653,2026-10-16,fix,statements,fix(statements): read profile names in the run,6
+67053378dc,2026-10-16,fix,statements,fix(statements): keep the heating share as created,10
+25dcc58378,2026-10-16,docs,statements,docs(statements): scenario for the stored share,4
+be90c10d2f,2026-10-15,docs,tests,docs(tests): archive the session of issue 208,3
+5d31deb327,2026-10-15,fix,statements,fix(statements): semicolons in the shares note,7
+e0daf28b6e,2026-10-15,fix,statements,fix(statements): same punctuation in shares note,9
+0d49b6760a,2026-10-15,fix,statements,fix(statements): test profile share and mixed days,5
+0fb8145e86,2026-10-15,fix,statements,fix(statements): print the Zeitanteil as days,14
+7349adfb1a,2026-10-15,docs,tests,docs(tests): describe the stand-in reading files,2
+3e3f99c18e,2026-10-15,feat,invoices,feat(invoices): upload invoices with the KI dialog,51
+2fcb254342,2026-10-15,docs,statements,docs(statements): scenarios for days in the PDF,2
+86248be29c,2026-10-15,docs,tests,docs(tests): review of the #223 fix,3
+a7f0dcab89,2026-10-15,fix,tests,fix(tests): clean up statements at any hour,2
+e81dca6390,2026-10-16,fix,permissions,fix(permissions): expand allowed Bash commands in settings,1
+2063783b8c,2026-10-15,docs,tests,docs(tests): archive the session of issue 159,3
+56a2b3dd38,2026-10-15,fix,invoices,fix(invoices): answer backend review round 2,7
+0ab1543aea,2026-10-15,fix,invoices,fix(invoices): answer backend review round 1,16
+387949f160,2026-10-15,fix,tests,fix(tests): one wording for the apartment search,9
+f63afb6f60,2026-10-15,fix,invoices,fix(invoices): share the KI suggestion mapping,2
+c7e1852660,2026-10-15,feat,invoices,"feat(invoices): store Belege, read files with KI",30
+0bc972f551,2026-10-15,docs,config,docs(config): archive the session of #186,5
+07fd48fd63,2026-10-15,fix,components,fix(components): list filters follow the URL,11
+7947dad742,2026-10-15,chore,tests,chore(tests): share predefined category lookup,2
+90631a25be,2026-10-15,feat,invoices,feat(invoices): revise scenarios after review,9
+7125844e37,2026-10-15,fix,i18n,fix(i18n): test reviewed fr/it/en wording,7
+07d4ad22c1,2026-10-15,docs,config,docs(config): workflow review of #186,2
+a02b029441,2026-10-15,fix,i18n,fix(i18n): unambiguous Italian KI hint,4
+393d126ff1,2026-10-15,fix,config,fix(config): domain review round 2 wording,10
+b5860489bf,2026-10-15,fix,config,fix(config): reason follows the form choice,7
+ec7ebeb4da,2026-10-15,feat,invoices,feat(invoices): add @wip scenarios for Belege,8
+80c804a7b2,2026-10-15,feat,config,feat(config): say why a category is allocable,21
+4805b2a56f,2026-10-15,docs,tests,docs(tests): archive the session of issue 147,4
+6adf5a64ff,2026-10-15,docs,invoices,docs(invoices): add glossary term Beleg,1
+d9667ae050,2026-10-15,fix,contracts,fix(contracts): log the network error of the form load,3
+6c3d8cd8a7,2026-10-15,docs,tests,docs(tests): add workflow review of issue 147,1
+50c6658482,2026-10-15,fix,contracts,fix(contracts): report a failed tenant or apartment load,7
+f50d112389,2026-10-15,fix,config,fix(config): no KI processing when it is off,16
+cc56c43c5f,2026-10-15,fix,invoices,"fix(invoices): name Gebäudeversicherung, not all",17
+b98b5bab26,2026-10-15,feat,config,feat(config): say whether the KI is unsure or down,26
+543ba1e4cb,2026-10-15,docs,config,docs(config): drop law rows from the glossary,2
+d1cf3a0f26,2026-10-15,chore,tests,chore(tests): add @wip scenarios for #186,7
+2cc56ddbc2,2026-10-15,docs,config,docs(config): fix slice-review skill review,6
+45af1a33e7,2026-10-15,docs,config,docs(config): add slice-review skill,3
+aba7193966,2026-10-15,docs,config,docs(config): fix round 2 nits of #212 slice,3
+41bdfd3bc2,2026-10-15,docs,config,docs(config): settle merge rule for unmeasured KI,5
+32c8bbc07f,2026-10-15,docs,config,docs(config): apply workflow review of #212,4
+6148886b32,2026-10-15,docs,config,docs(config): archive workflow rules session,4
+100b8c3e20,2026-10-15,fix,config,fix(config): fix round 2 workflow review findings,8
+3d41a3a55c,2026-10-15,fix,config,fix(config): fix workflow rules review findings,12
+a650def167,2026-10-15,docs,contracts,docs(contracts): restore the plan archive,1
+a397f7cb21,2026-10-15,fix,contracts,fix(contracts): finish #142 reviews,6
+ba953e4f78,2026-10-15,docs,services,docs(services): record #212 reviews and eval,3
+5259dfdc34,2026-10-15,fix,services,"fix(services): narrow KI repair rule, fuel",8
+eee15f160a,2026-10-15,docs,config,docs(config): apply workflow rules reviews,21
+45f3e87a90,2026-10-15,fix,contracts,fix(contracts): apply #142 review round 2,13
+af32a7340d,2026-10-15,fix,services,fix(services): clearer KI rules for small models,6
+7a3e65a0d7,2026-10-15,chore,tests,chore(tests): stub small model for #212,2
+e9c6d53f47,2026-10-15,fix,contracts,fix(contracts): apply #142 review round 1,19
+600eddaa39,2026-10-15,fix,tests,fix(tests): give contract page tests the new list,3
+503d57ff14,2026-10-15,fix,contracts,fix(contracts): list every missing statement,17
+680072bc6d,2026-10-15,fix,statements,fix(statements): finish #137 reviews,9
+f6bd25a582,2026-10-15,fix,statements,fix(statements): apply #137 review round 2,10
+3976b253e9,2026-10-15,fix,statements,fix(statements): apply #137 review round 1,9
+cbbaafa2f5,2026-10-15,fix,statements,fix(statements): no profile note for days share,10
+6fda8bc91c,2026-10-15,docs,statements,docs(statements): add #137 scenario,4
+0241dd8210,2026-10-15,docs,services,docs(services): record #202 reviews and eval,6
+22b436b0cf,2026-10-15,fix,i18n,fix(i18n): apply #135 final review rounds,10
+8bc56740c2,2026-10-15,fix,services,fix(services): show KI the predefined categories,8
+93f6877585,2026-10-15,fix,statements,fix(statements): apply #135 review round 3,11
+1d1f0dff9f,2026-10-15,chore,tests,chore(tests): add @wip KI category scenario,4
+4931f6548a,2026-10-15,fix,statements,fix(statements): apply #135 review round 2,18
+1dcc988ad7,2026-10-15,fix,statements,fix(statements): apply #135 review round 1,18
+9952d965e0,2026-10-15,fix,statements,fix(statements): show dropped draft and billed,24
+43c63adf6a,2026-10-15,docs,statements,docs(statements): add #135 scenarios,7
+d891627727,2026-10-15,docs,i18n,docs(i18n): close #128 reviews and archive plan,6
+b0b308af3e,2026-10-15,fix,i18n,fix(i18n): apply #128 review round 1,12
+88b9d66d1e,2026-10-15,docs,i18n,docs(i18n): add workflow review for #128,1
+98516f6606,2026-10-15,fix,i18n,fix(i18n): drop engine text from formula error,9
+b8f957aafd,2026-10-15,fix,invoices,fix(invoices): apply #127 review round 1,7
+7c9550ac12,2026-10-15,docs,invoices,docs(invoices): add workflow review for #127,1
+0644c7d584,2026-10-15,fix,invoices,"fix(invoices): code schema refusals, hide raw text",7
+5b7e85f87e,2026-10-15,fix,statements,fix(statements): apply #126 review round 2,10
+adbbd31574,2026-10-15,docs,db,docs(db): archive session of frozen migrations,4
+eae5631f45,2026-10-15,docs,db,docs(db): add code review round 2,2
+c93bdac43e,2026-10-15,fix,db,fix(db): close code review findings,5
+6222333094,2026-10-15,fix,tests,fix(tests): cover reminder delivery codes alone,2
+a14ced97c0,2026-10-15,docs,db,docs(db): close article review findings,6
+21828c2613,2026-10-15,fix,statements,fix(statements): place undelivered reminder text,10
+8600563629,2026-10-15,docs,db,docs(db): add workflow review on migrations,1
+dd10ec0279,2026-10-15,fix,db,fix(db): keep applied migrations unchanged,7
+9698846d53,2026-10-15,fix,statements,fix(statements): apply #126 review round 1,10
+a880f764a5,2026-10-15,docs,statements,docs(statements): add workflow review for #126,1
+c94cb6100f,2026-10-15,fix,statements,fix(statements): code failed reminder e-mails,12
+6f83a7d629,2026-10-15,docs,config,docs(config): archive session 38,2
+a6a43d3b75,2026-10-15,docs,config,docs(config): fix glossary fachreview nits,5
+94fa1c0f1b,2026-10-15,docs,config,docs(config): fix glossary fachreview findings,8
+b3275466da,2026-10-15,docs,config,docs(config): fix glossary review findings,5
+2562751278,2026-10-15,docs,config,docs(config): move glossary rules to requirements,5
+3517443594,2026-10-15,docs,tests,docs(tests): archive session 36 (#176),5
+be50dc0c6b,2026-10-15,docs,config,docs(config): plan glossary definitions task,1
+8b0f71342a,2026-10-15,docs,statements,docs(statements): close #125 review round 3,3
+83406261db,2026-10-15,fix,statements,fix(statements): apply #125 review round 2,20
+37b4f68ab2,2026-10-15,fix,config,fix(config): screen check while the KI checks,11
+0f47e808e3,2026-10-15,docs,statements,docs(statements): add workflow review for #125,1
+bebfb8786c,2026-10-15,fix,statements,fix(statements): apply #125 review round 1,23
+24746753bf,2026-10-15,fix,config,fix(config): keep the KI answer through a refusal,14
+97fb68a7e7,2026-10-15,docs,tests,docs(tests): Sven round 2 report for #176,2
+52d9123800,2026-10-15,docs,tests,docs(tests): workflow review of #176,2
+f5f4436fb2,2026-10-15,docs,statements,docs(statements): add persona reports for #125,2
+969f233b09,2026-10-15,fix,config,fix(config): KI proposal follows the checked name,19
+939f7a8c51,2026-10-15,fix,statements,fix(statements): code PDF and calculation errors,32
+dca92f65fa,2026-10-15,docs,tests,docs(tests): round 3 review reports for #176,2
+9115dca916,2026-10-15,chore,tests,chore(tests): KI stand-in for the persona stack,1
+228177b370,2026-10-15,docs,tenants,docs(tenants): note glossary scope in session,1
+fbc11e572a,2026-10-15,docs,tenants,docs(tenants): keep glossary to definitions,1
+4f1e81af05,2026-10-15,docs,tenants,docs(tenants): add uploaded documents to glossary,2
+194a28a08a,2026-10-15,fix,config,fix(config): privacy text names all category data,18
+3f9e780b3a,2026-10-15,fix,config,fix(config): one busy state per request,6
+3275718811,2026-10-15,docs,tenants,docs(tenants): record merge of main in session,2
+679089a23d,2026-10-15,fix,config,fix(config): review fixes for the KI proposal,16
+c589bbb571,2026-10-15,docs,tenants,docs(tenants): archive upload session,2
+8101bf2329,2026-10-15,fix,services,fix(services): apply Swiss today review round 1,6
+a26e05db4a,2026-10-15,fix,tenants,fix(tenants): apply upload review round 2,18
+925307295c,2026-10-15,feat,tests,feat(tests): privacy scenario and KI check script,5
+dcfcfd7ce1,2026-10-15,fix,config,fix(config): split the KI proposal display,3
+87a4f05194,2026-10-14,feat,config,feat(config): KI proposes whether allocable,31
+4ec71f0f28,2026-10-14,docs,services,docs(services): add workflow review for #123,1
+3081abe392,2026-10-14,fix,services,fix(services): count today from the Swiss day,14
+de59248c91,2026-10-14,docs,tenants,docs(tenants): add workflow review of issue 174,2
+80445d4d0d,2026-10-14,fix,tenants,fix(tenants): apply upload review round 1,34
+487401b6bb,2026-10-14,fix,invoices,fix(invoices): ask the KI anew on a new category,8
+b821f4dd12,2026-10-14,fix,tests,fix(tests): review fixes for the seed slice,8
+49d395e7cb,2026-10-14,feat,invoices,feat(invoices): legal basis and own categories,6
+a2d2dcf8d1,2026-10-14,docs,styles,docs(styles): close favicon review and archive it,6
+92c84d441a,2026-10-14,fix,tests,fix(tests): check the favicon shows the House icon,3
+210e394fc3,2026-10-14,fix,db,fix(db): pest control and fire extinguishers,12
+c75c9ff696,2026-10-14,fix,styles,fix(styles): serve an SVG favicon,9
+7ead2f8a6e,2026-10-14,docs,tenants,docs(tenants): note retention issue in plan,1
+0ffdd30a81,2026-10-14,feat,tenants,feat(tenants): upload documents to a tenant,47
+4556b71c11,2026-10-14,feat,tests,feat(tests): scenarios for KI category proposal,9
+c3e5a91c14,2026-10-14,docs,config,docs(config): close version review and archive it,5
+61dbb431bd,2026-10-14,feat,tenants,feat(tenants): apply domain review to scenarios,12
+7eec3a82d2,2026-10-14,fix,config,fix(config): apply version review round 2,10
+55bfcbff3a,2026-10-14,feat,tenants,feat(tenants): add wip scenarios for uploads,8
+760915466f,2026-10-14,fix,config,fix(config): apply version review round 1,13
+a071ad72f8,2026-10-14,docs,ci,docs(ci): archive issue triage session,2
+ddd3a17d28,2026-10-14,fix,ci,fix(ci): set triage labels before the comment,4
+f7e065033b,2026-10-14,fix,ci,fix(ci): apply review findings to issue triage,4
+a1043b7ef9,2026-10-14,chore,ci,chore(ci): add nightly issue triage skill,2
+1dca4e726b,2026-10-14,feat,config,feat(config): show app version and tag releases,26
+b3e32dc53c,2026-10-14,docs,config,docs(config): fix round 2 review nits,4
+42ec6848db,2026-10-14,docs,config,docs(config): fix workflow review findings,4
+7bae4dc4f8,2026-10-14,docs,config,docs(config): number archived session,1
+1b2eb6282a,2026-10-14,docs,config,docs(config): add workflow review after features,2
+f685c5a989,2026-10-14,fix,docker,fix(docker): record demo build before image prune,5
+3a515c0871,2026-10-14,fix,docker,fix(docker): retry a failed demo update,5
+1ea702352b,2026-10-14,chore,docker,chore(docker): update the demo on every merge,3
+0d56a9daab,2026-10-14,docs,docker,docs(docker): use a hex password for the demo db,1
+7c9a858bc6,2026-10-14,docs,docker,docs(docker): clone demo repo with a deploy key,1
+d72e031963,2026-10-14,docs,config,docs(config): merge duplicate open points,2
+9da48b6c30,2026-10-14,chore,config,chore(config): point #70 markers to #120,3
+8e755144e4,2026-10-14,docs,config,docs(config): archive session 31,3
+7784accc6a,2026-10-14,docs,config,docs(config): keep user texts out of text-only rule,5
+2f8b7ba90a,2026-10-14,docs,config,docs(config): confirm text-only fixes by review,2
+3b4db73bfb,2026-10-14,docs,config,docs(config): apply workflow review findings,12
+6bf2b8e6f7,2026-10-14,docs,config,"docs(config): archive session, review workflow",3
+183ab759e8,2026-10-14,fix,statements,fix(statements): test tab counts in scenario,12
+0049589600,2026-10-14,fix,tests,fix(tests): give period screen a default state,3
+5fa0d7b44a,2026-10-14,fix,statements,fix(statements): count tabs over list filters,17
+f3e6c68651,2026-10-14,fix,statements,fix(statements): show the drafts of a run's period,24
+cb6d4e5eab,2026-10-14,fix,i18n,fix(i18n): non-breaking spaces in demo section,6
+bd2e94fb3a,2026-10-14,fix,statements,fix(statements): filter the list by rental contract,20
+69e999a395,2026-10-14,fix,components,fix(components): apply demo notice review round 2,13
+c539568e55,2026-10-14,docs,tests,docs(tests): add statement filter scenarios,3
+47aca1a259,2026-10-14,docs,config,docs(config): record #99 persona and workflow review,3
+8815e93866,2026-10-14,fix,db,fix(db): check category type values,7
+6a944f9e85,2026-10-14,fix,db,fix(db): store whether a category is predefined,18
+14c97905ba,2026-10-14,fix,components,fix(components): apply demo notice review round 1,23
+be0b235d5f,2026-10-14,feat,components,feat(components): show demo notice on every page,23
+f2de270fce,2026-10-14,docs,config,docs(config): review workflow rules after #81 run,2
+bf66a370d5,2026-10-14,fix,i18n,fix(i18n): name IP for Google Maps on privacy page,11
+87428b0a46,2026-10-14,fix,i18n,fix(i18n): apply review findings on privacy page,12
+0b550a58fe,2026-10-14,fix,i18n,fix(i18n): correct facts on the privacy page,14
+299cf693cf,2026-10-14,docs,docker,docs(docker): archive demo deployment session,3
+ec3a82291d,2026-10-14,chore,docker,chore(docker): apply demo review round 1,7
+f25f635c3c,2026-10-14,chore,docker,chore(docker): add demo deployment on Oracle VM,9
+7d0011f06d,2026-10-14,docs,config,docs(config): review workflow rules after #53 run,1
+22201f0e6a,2026-10-14,docs,apartments,docs(apartments): record persona findings of #53,4
+a2663f7ee7,2026-10-14,fix,apartments,"fix(apartments): document search, test with status",4
+a740ed69ce,2026-10-14,fix,apartments,fix(apartments): search list by number or building,10
+0f8bad0c72,2026-10-14,docs,config,docs(config): apply Opus 5.5 guide review,6
+6fc980637a,2026-10-14,docs,config,docs(config): archive B-15 improvements session,2
+dcf2dd3b64,2026-10-14,docs,config,docs(config): record B-15 slice 3 round 3,3
+ced248f323,2026-10-14,fix,config,fix(config): B-15 slice 3 round 2 findings,4
+fab88f6675,2026-10-14,fix,contracts,fix(contracts): keep tenant and apartment fixed (B-15) (#157),42
+87632ba5cb,2026-10-14,fix,config,fix(config): B-15 slice 2 round 2 findings,4
+375d58827f,2026-10-14,fix,config,fix(config): B-15 slice 3 review findings,6
+955bc2cfd1,2026-10-14,docs,config,docs(config): B-15 slice 2 review findings,7
+2f60bc1fb2,2026-10-14,fix,config,fix(config): B-15 slice 1 review findings,8
+49105a6ca5,2026-10-14,docs,config,docs(config): open and auto-merge finished PRs,2
+aa2758a41b,2026-10-14,docs,config,docs(config): B-15 instruction improvements,8
+a1b1d10362,2026-10-14,chore,config,chore(config): B-15 tool improvements,14
+2efcd5676a,2026-10-14,chore,config,chore(config): workflow improvements from B-13,24
+db714ecfbc,2026-10-13,docs,config,docs(config): update B-13 instruction check,1
+6747153f1c,2026-10-13,docs,contracts,docs(contracts): close B-13 and #151 session,6
+f6c086d607,2026-10-13,chore,tests,chore(tests): enable contract retry scenarios,3
+3c1125ff1e,2026-10-13,fix,contracts,"fix(contracts): guard contract retries, add tests",15
+e125573cbf,2026-10-13,fix,contracts,fix(contracts): mark unchecked apartments in choice,12
+76136116ec,2026-10-13,fix,contracts,fix(contracts): say the result of a contract retry,18
+a36d87871b,2026-10-13,fix,contracts,fix(contracts): retry unloaded apartment contracts,18
+1f819293d1,2026-10-13,chore,tests,chore(tests): add wip scenario for contract retry,7
+b3fd0101d2,2026-10-13,chore,tests,chore(tests): check the review hint with axe,8
+5c81853fd7,2026-10-13,fix,contracts,fix(contracts): name unknown contracts at review,12
+a008052bbf,2026-10-13,docs,contracts,docs(contracts): add persona Helga report for B-13,1
+d96227d18a,2026-10-13,chore,tests,chore(tests): reuse hint target in a11y state,4
+2062c4b983,2026-10-13,fix,contracts,fix(contracts): address review of B-13 slice,9
+11bf89f02a,2026-10-13,fix,contracts,fix(contracts): unloaded apartment is not free,20
+5d46a53914,2026-10-13,fix,config,"fix(config): ask for push -d forms, archive plan",4
+49467b6697,2026-10-13,fix,config,fix(config): ask for docker-compose and git forms,3
+6d6ca9acc3,2026-10-13,fix,config,fix(config): cover project's destructive commands,6
+07a3b2c1c8,2026-10-13,docs,config,docs(config): align skills with keep-going rule,8
+28218d92ce,2026-10-13,docs,config,docs(config): add rules from screenplay run,8
+535c12e84e,2026-10-13,docs,config,docs(config): apply B-13 workflow improvements,13
+30ebbaacf3,2026-10-13,docs,tests,docs(tests): code review checks Screenplay design,1
+fc98912a04,2026-10-13,docs,tests,docs(tests): record v2 final checks,1
+8528772792,2026-10-13,fix,tests,fix(tests): fixtures only set the session cookie,6
+6f3b0827f5,2026-10-13,fix,tests,"fix(tests): sync SvelteKit for e2e, close lint gaps",12
+62bac4139a,2026-10-13,fix,tests,"fix(tests): questions answer amounts, API uses BFF",9
+114b1a9122,2026-10-13,docs,tests,docs(tests): add Screenplay expert review,1
+0f554507f0,2026-10-13,docs,tests,docs(tests): record Screenplay session results,1
+294aebf324,2026-10-13,fix,tests,fix(tests): fixtures only hand Playwright on,12
+3151cad97c,2026-10-13,fix,tests,fix(tests): close remaining Screenplay lint bypasses,8
+95bfd7f305,2026-10-13,fix,tests,fix(tests): close Screenplay lint gaps from review,17
+84ec031078,2026-10-13,chore,tests,chore(tests): move statement-generate to Screenplay,8
+0985161942,2026-10-13,chore,tests,chore(tests): move invoices and config to Screenplay,42
+d76c942033,2026-10-13,chore,tests,"chore(tests): move buildings, apartments, tenants",45
+21ab1135bc,2026-10-13,chore,tests,chore(tests): move statements e2e to Screenplay,18
+e85f36ce58,2026-10-13,chore,tests,"chore(tests): move a11y, language, frame to Screenplay",38
+10750aba34,2026-10-13,chore,tests,chore(tests): add Screenplay core for e2e tests,36
+1e95cfd9fa,2026-10-12,docs,config,docs(config): archive finished session 18,2
+eefdcf0f42,2026-10-12,docs,config,docs(config): move functional open work to issues,56
+6076faf369,2026-10-12,fix,tests,fix(tests): check the empty hint region takes no gap,1
+d68a2c7dc8,2026-10-12,fix,contracts,fix(contracts): fix Haiku review of K2 fixes,6
+4939fac454,2026-10-12,fix,components,fix(components): fix persona K2 findings,16
+e54c460481,2026-10-12,docs,config,docs(config): align target users with personas,4
+1140e19904,2026-10-12,docs,contracts,docs(contracts): add persona report Sven K2,1
+fb9d8aa153,2026-10-12,docs,config,"docs(config): one persona list, PRD points to it",6
+7eadb78242,2026-10-12,docs,contracts,docs(contracts): add persona report Anna K2,1
+f4e9b77008,2026-10-12,docs,contracts,docs(contracts): add persona report Helga K2,1
+343ac1ce7c,2026-10-12,docs,config,docs(config): keep one list of open points,8
+e609a87b4c,2026-10-12,docs,config,"docs(config): archive finished docs, split open points",39
+939d977eb0,2026-10-12,docs,config,docs(config): update glossary to product decisions,1
+0e3db29728,2026-10-12,fix,contracts,fix(contracts): drop unreachable notice guard,2
+4e4c878045,2026-10-12,fix,contracts,fix(contracts): fix Haiku review of K fixes,7
+056edb4e08,2026-10-12,fix,contracts,"fix(contracts): fix review K-4, K-6, K-8, K-9",24
+d038c595bf,2026-10-12,docs,config,docs(config): apply workflow review findings,5
+7457835134,2026-10-12,fix,contracts,fix(contracts): an answer without a list is not loaded,2
+324f37d097,2026-10-12,docs,config,docs(config): add review agents to workflow,7
+fb46177532,2026-10-12,fix,contracts,fix(contracts): test the latest contracts answer,2
+c93c53be87,2026-10-12,fix,contracts,fix(contracts): only the latest contracts answer counts,3
+dd9700d005,2026-10-12,fix,contracts,fix(contracts): load an apartment's contracts once,6
+ea06b913d8,2026-10-12,fix,contracts,fix(contracts): Haiku re-review N1-N3,8
+fe1d411067,2026-10-12,fix,contracts,fix(contracts): Haiku review of the K fixes,14
+a31a9c6623,2026-10-12,fix,contracts,"fix(contracts): explain the wizard link, limit next steps",16
+7ae234e12f,2026-10-12,fix,contracts,fix(contracts): offer the draft delete only as refused,13
+8cda412e21,2026-10-12,docs,contracts,docs(contracts): add persona report Helga K1,1
+2a6477763f,2026-10-12,docs,contracts,docs(contracts): add persona report Sven K1,1
+e3069a3ca1,2026-10-12,docs,contracts,docs(contracts): add persona report Anna K1,1
+ba8faa3722,2026-10-12,docs,config,docs(config): fix mmx setup notes for cloud,1
+f02fda55b1,2026-10-12,docs,contracts,docs(contracts): add review K-1 of A-4 and A-10,1
+7cb9e981a1,2026-10-12,chore,config,chore(config): allow mmx search without prompt,1
+cf4efa6a38,2026-10-12,docs,config,docs(config): document mmx search for web search,1
+fc88fcf0cf,2026-10-12,feat,contracts,feat(contracts): recreate a statement after an end,48
+9c46bbf85a,2026-10-12,feat,contracts,feat(contracts): show an upcoming contract end,34
+868c3316ce,2026-10-12,fix,contracts,fix(contracts): review J-2,10
+6e971b3ff4,2026-10-12,fix,i18n,fix(i18n): review of the main merge,4
+9ec58735ab,2026-10-12,fix,contracts,fix(contracts): review J-1 and personas J1,27
+7806061086,2026-10-12,docs,contracts,docs(contracts): add review J-1 of A-1 and A-9,1
+cb6f4f600c,2026-10-12,docs,contracts,docs(contracts): add persona report Sven J1,1
+ed94a2d479,2026-10-12,docs,contracts,docs(contracts): add persona report Helga J1,1
+136cf358d2,2026-10-12,docs,contracts,docs(contracts): add persona report Anna J1,1
+3192451245,2026-10-12,docs,i18n,docs(i18n): keep new texts in four languages,3
+8b47903871,2026-10-12,docs,i18n,docs(i18n): persona Sven extra run,3
+7eb82f2ce6,2026-10-12,docs,i18n,docs(i18n): persona Dr. Weber extra run,1
+ef96ba76fb,2026-10-12,chore,auth,chore(auth): drop redundant sign-out invalidation,5
+db1f604d5d,2026-10-12,fix,auth,fix(auth): reload user on every navigation,9
+d2ead632b6,2026-10-12,fix,auth,fix(auth): fresh layout data after sign-out,12
+87ac838cfe,2026-10-12,feat,contracts,feat(contracts): tell a notice from a fixed term,38
+cd0f319671,2026-10-12,chore,tests,chore(tests): guard finds whole German messages,2
+bc7e6bbb2a,2026-10-12,docs,i18n,docs(i18n): record closing decision,1
+32313b3845,2026-10-12,docs,i18n,docs(i18n): close guard review,1
+0a80ce3b65,2026-10-12,docs,i18n,docs(i18n): record guard reviews in the plan,2
+e92665e3ff,2026-10-12,fix,tests,fix(tests): guard pairs strings after ${}/,2
+d6144cdfe2,2026-10-12,fix,tests,fix(tests): guard skips regex literals,3
+d91ad132a2,2026-10-12,chore,tests,chore(tests): guard checks every quoted string,3
+39895f28d6,2026-10-12,chore,tests,chore(tests): guard against German texts in code,2
+46f4edee83,2026-10-12,docs,i18n,docs(i18n): record way-back review 2,2
+a7253238f0,2026-10-12,fix,i18n,fix(i18n): footer on all pages without header,9
+52322c3bb2,2026-10-12,feat,statements,feat(statements): remind of every contract of the period,4
+45ed5bff19,2026-10-12,fix,i18n,fix(i18n): way back from signed-out legal pages,8
+d8c23e95ed,2026-10-12,fix,i18n,fix(i18n): margins for signed-out legal pages,9
+ba234290d0,2026-10-12,fix,contracts,fix(contracts): hide the empty notice visually,4
+3bea241730,2026-10-12,feat,i18n,"feat(i18n): open help and legal pages, arrow keys",19
+49dee4b746,2026-10-12,docs,i18n,docs(i18n): record native reads and personas,1
+9d15c43da0,2026-10-12,docs,i18n,docs(i18n): persona Sven run,2
+93f26af897,2026-10-12,docs,i18n,docs(i18n): persona Dr. Weber run,2
+0085ac819e,2026-10-12,docs,i18n,docs(i18n): persona Marco run,2
+6eca90a4f8,2026-10-12,docs,i18n,docs(i18n): persona Helga run,2
+f4356638c4,2026-10-12,fix,i18n,fix(i18n): persona Anna run and step label,3
+6794558548,2026-10-12,fix,i18n,fix(i18n): close step 7 review round 2,4
+1bad456541,2026-10-12,fix,i18n,fix(i18n): apply step 7 review and native reads,9
+6534a46abf,2026-10-12,docs,i18n,docs(i18n): record German native read,2
+7b373720cf,2026-10-12,fix,contracts,fix(contracts): review I-6 and personas I5,29
+609f599d4d,2026-10-12,feat,i18n,feat(i18n): translate configuration and the rest,49
+0e9e5dabe6,2026-10-12,docs,contracts,docs(contracts): add review I round 6,2
+5b4305bb18,2026-10-12,docs,contracts,docs(contracts): add Sven persona run I5,1
+65c35dc0d6,2026-10-12,docs,contracts,docs(contracts): add Anna persona run I4,1
+6000fc0688,2026-10-12,docs,contracts,docs(contracts): add Helga persona run I5,1
+c665b24d81,2026-10-12,docs,i18n,docs(i18n): close step 6 review round 2,1
+9b6ea54d24,2026-10-12,fix,i18n,fix(i18n): address step 6 review,8
+ab5db0cc87,2026-10-12,feat,i18n,feat(i18n): translate utility cost statements,49
+fa6f5df227,2026-10-12,fix,contracts,fix(contracts): review I-5 and personas I4,19
+d502b4a330,2026-10-12,docs,contracts,docs(contracts): add review I round 5,1
+c0d5280e6c,2026-10-12,docs,contracts,docs(contracts): add Sven persona run I4,1
+9e35277f80,2026-10-12,docs,contracts,docs(contracts): add Anna persona run I3,1
+25dbdad797,2026-10-12,docs,contracts,docs(contracts): add Helga persona run I4,1
+d96a1f1b4c,2026-10-12,chore,i18n,chore(i18n): close step 5 review round 2,4
+23413e66fa,2026-10-12,fix,i18n,fix(i18n): address step 5 review,4
+c6e200ce10,2026-10-12,feat,i18n,feat(i18n): translate invoices and documents,36
+d4667dcc38,2026-10-12,fix,contracts,fix(contracts): review I-4 and personas I3,33
+04b9b83d40,2026-10-12,docs,i18n,docs(i18n): close step 4 review round 2,1
+bbf5d52b3a,2026-10-12,fix,i18n,fix(i18n): address step 4 review,5
+77de0335b4,2026-10-12,feat,i18n,feat(i18n): translate rental contracts,30
+29c6be7de5,2026-10-12,docs,i18n,docs(i18n): close step 3 review round 2,1
+ef8efb9381,2026-10-12,fix,i18n,fix(i18n): address step 3 review,10
+eb52bce0c8,2026-10-12,docs,contracts,docs(contracts): add review I round 4,1
+32c984ee4e,2026-10-12,docs,contracts,docs(contracts): add Anna persona run I2,1
+7607e27f4e,2026-10-12,docs,contracts,docs(contracts): add Helga persona run I3,1
+a27e29a4e8,2026-10-12,docs,contracts,docs(contracts): add Sven persona run I3,1
+b63e6acb0c,2026-10-12,feat,i18n,feat(i18n): translate apartments and tenants,41
+b8ba33b737,2026-10-12,docs,contracts,docs(contracts): requirements for contract ends,1
+7324c57b60,2026-10-12,feat,contracts,"feat(contracts): end in the past, keep started ones",13
+ad46d2c52d,2026-10-12,chore,api,chore(api): close step B review round 2,4
+9daeff4652,2026-10-12,fix,api,fix(api): name every formula error by its code,13
+e94f4e3091,2026-10-12,feat,api,feat(api): add codes to backend error responses,60
+63d01f64fe,2026-10-12,chore,i18n,chore(i18n): close step 2 review round 2,3
+74f449af99,2026-10-12,fix,i18n,fix(i18n): address step 2 review,9
+3c5c9816c4,2026-10-12,feat,i18n,feat(i18n): translate dashboard and buildings,37
+d9d9ae8785,2026-10-11,chore,i18n,chore(i18n): close step 1 review round 2,9
+49f992ac85,2026-10-11,fix,i18n,fix(i18n): address step 1 review,19
+cf310c02d4,2026-10-11,feat,i18n,feat(i18n): add Paraglide and language switcher,58
+571fa00ec3,2026-10-11,fix,statements,fix(statements): ask for a missing deadline,7
+2c04d314f0,2026-10-11,fix,api,fix(api): reject a deadline that is not a date,3
+c7613c7f7e,2026-10-11,fix,contracts,fix(contracts): Fachreview I of the end dialog,10
+a22bbe4268,2026-10-11,chore,tests,chore(tests): add missing deadline scenario,4
+8f8524cb05,2026-10-11,fix,contracts,"fix(contracts): keep delete as before, review I-3",14
+e20f1813bc,2026-10-11,fix,tests,fix(tests): count E2E days across DST in calendar,1
+233996d5ea,2026-10-11,docs,config,docs(config): align agent files with the repo,7
+13fbeb17be,2026-10-11,fix,invoices,fix(invoices): mark administration non-allocable,4
+822ddfb48d,2026-10-11,docs,contracts,docs(contracts): add Helga persona rerun I2,1
+8286701296,2026-10-11,fix,contracts,fix(contracts): review I-2 and personas run I,14
+a839d139d5,2026-10-11,docs,contracts,docs(contracts): add Sven persona run I,1
+c229a9563d,2026-10-11,docs,contracts,docs(contracts): add Anna persona run I,1
+7b9971a22b,2026-10-11,fix,contracts,fix(contracts): review I of the chosen end date,15
+fc2bb0cc31,2026-10-11,fix,ci,fix(ci): name unchanged PDF pages in the comment,2
+9be27ec5a5,2026-10-11,feat,contracts,feat(contracts): end a contract on a chosen day,18
+94a6d9a161,2026-10-11,chore,services,chore(services): split invoice grouping,1
+fe07d79e74,2026-10-11,fix,ci,fix(ci): sync SvelteKit before the Fallow audit,1
+f49d3726ea,2026-10-11,docs,statements,docs(statements): record session 12 decisions,2
+5937d8fea1,2026-10-11,fix,tests,fix(tests): read PDF streams ending in a CR byte,2
+70f99771b2,2026-10-11,fix,statements,fix(statements): final review round of PR 43,26
+b0ecf5e591,2026-10-11,fix,statements,fix(statements): review G of the 5 Rappen Saldo,12
+937df22900,2026-10-11,feat,statements,feat(statements): round the Saldo to 5 Rappen,15
+80db93df11,2026-10-11,chore,db,"chore(db): merge migrations, drop fee key column",44
+f2ca6a87ea,2026-10-11,docs,statements,docs(statements): add Sven persona rerun F2,1
+bebb4cd29d,2026-10-11,fix,statements,"fix(statements): keep older fee basis, fix fee input",37
+1625225582,2026-10-11,feat,statements,feat(statements): fee always of tenant's own costs,41
+53afc5107f,2026-10-11,docs,statements,docs(statements): correct stale sent-PDF point,2
+277bac5c3a,2026-10-11,feat,ci,feat(ci): leave unchanged pages out of screenshots,5
+b608b6873b,2026-10-11,docs,build,docs(build): use bun in the deepcheck README section,2
+a0cb9347a6,2026-10-11,docs,build,docs(build): log the deeper modules in the plan,1
+eaf0eab6c0,2026-10-11,fix,tests,fix(tests): cover vacancy after a move-out,2
+3f944e3b22,2026-10-11,docs,build,docs(build): explain deepcheck usage in the README,2
+a6141fb63d,2026-10-11,chore,build,chore(build): discover deepcheck modules at once,2
+dcd29edb7e,2026-10-11,chore,services,chore(services): hide the prorating steps,3
+6c0ef0c6d8,2026-10-11,chore,services,chore(services): narrow utility validation,3
+dbb342946a,2026-10-11,chore,auth,chore(auth): remove unused error classes,1
+8bb8e0621a,2026-10-11,chore,stores,chore(stores): drop the user store,3
+ee94b75eff,2026-10-11,chore,config,chore(config): list distribution keys in one call,6
+b1ba0d37c4,2026-10-11,chore,tenants,chore(tenants): load a tenant in one call,3
+6131268d89,2026-10-11,chore,buildings,chore(buildings): deepen OpenPLZ address lookup,3
+a4fa946033,2026-10-11,chore,statements,chore(statements): deepen statement actions,6
+9b972af888,2026-10-11,fix,docker,fix(docker): ship frontend without dev deps,2
+b713296874,2026-10-11,docs,build,docs(build): record fixed-argument forwarder decision,2
+8530b375d7,2026-10-11,fix,build,fix(build): stop flagging data-only classes alone,5
+e6e85aa1a2,2026-10-11,chore,config,chore(config): skip Claude worktrees in ESLint,1
+afe6cd2d39,2026-10-11,feat,ci,feat(ci): screenshots of the statement PDF,8
+4fe002ed22,2026-10-11,fix,docker,fix(docker): run backend image as bun user,5
+9235adb026,2026-10-11,docs,build,docs(build): log final Phase 3 gate review,1
+31d71205f2,2026-10-11,docs,build,docs(build): log cross-cutting gates for follow-ups,1
+2df3333c30,2026-10-11,docs,build,docs(build): log green CI for classitis change,1
+d480122295,2026-10-11,fix,build,fix(build): block split modules as classitis,10
+763ba50de9,2026-10-11,fix,build,fix(build): catch pass-through variants in deepcheck,5
+d9a4bff92c,2026-10-11,chore,tests,chore(tests): remove deepcheck CI probe,2
+027d331044,2026-10-11,chore,tests,chore(tests): add temporary deepcheck CI probe,1
+366495be0e,2026-10-11,docs,build,docs(build): record green CI run for deepcheck,1
+4c225c7aa1,2026-10-11,docs,build,docs(build): log deepcheck CI run on GitHub,1
+bde202c1f5,2026-10-11,docs,statements,docs(statements): final report of session 11,3
+3d12d6767f,2026-10-11,fix,components,fix(components): calendar takes the date on input,7
+f6d570259f,2026-10-11,fix,components,fix(components): keep a date error after Enter,6
+2ce4e5f7bb,2026-10-11,fix,tests,fix(tests): review round 6,4
+3cbd65edde,2026-10-11,fix,statements,fix(statements): review round 5,22
+9f1949218b,2026-10-11,fix,statements,fix(statements): review round 4 and persona reruns,24
+c1dd4a4a7c,2026-10-11,fix,statements,fix(statements): review round 8 and personas,64
+cdb2ed7603,2026-10-11,fix,statements,"fix(statements): review B round 7, C round 2",19
+fb288e96c3,2026-10-11,fix,tests,fix(tests): send before setting a past deadline,2
+393e6b8c19,2026-10-11,fix,statements,fix(statements): review D2 round 2,20
+aaa6544c29,2026-10-11,fix,statements,fix(statements): review D2 round 1,15
+df553b9ea7,2026-10-10,fix,contracts,fix(contracts): keep a start date being typed,5
+6a00491bb5,2026-10-10,fix,components,fix(components): review C date field,11
+751c180f82,2026-10-10,fix,statements,fix(statements): review B round 6,29
+6888bf2973,2026-10-10,feat,statements,feat(statements): statement PDF to Swiss standard,16
+a002d24664,2026-10-10,chore,build,chore(build): untrack backend node_modules link,1
+c95fd552bf,2026-10-10,fix,statements,fix(statements): review B round 5,41
+c661180def,2026-10-10,fix,build,fix(build): treat one-constant files as data,6
+a629a2445a,2026-10-10,chore,build,chore(build): use Bun as the only package manager,15
+d94b21b7e9,2026-10-10,fix,tests,fix(tests): cover G2 at calibrated defaults,2
+aecac06f06,2026-10-10,fix,build,fix(build): judge first pushes against origin/main,4
+c1fc7ba5f8,2026-10-10,fix,build,fix(build): harden deepcheck commit and push hook,5
+af22a6b9c3,2026-10-10,fix,tests,fix(tests): pad dates in scenarios to TT.MM.JJJJ,6
+dc4354a6e2,2026-10-10,feat,build,feat(build): wire deepcheck into hooks and CI,11
+b5754e9f99,2026-10-10,docs,build,docs(build): log deepcheck phase 4 in brief,1
+8c341eda97,2026-10-10,fix,build,fix(build): keep facades visible to deepcheck gate,8
+a2c4ce7087,2026-10-10,fix,statements,fix(statements): review B round 4,32
+ddec3c0252,2026-10-10,fix,build,fix(build): require a structural sign to flag,6
+f3ad329da8,2026-10-10,feat,components,feat(components): Swiss date field TT.MM.JJJJ,45
+df8e20f796,2026-10-10,docs,build,docs(build): add deepcheck validation report,1
+e7ca4fb8db,2026-10-10,feat,build,feat(build): set calibrated deepcheck threshold,6
+d5cb149955,2026-10-10,fix,build,fix(build): ignore dead internals in deepcheck,2
+904e1e1dcb,2026-10-10,fix,build,fix(build): stop counting re-exports in deepcheck,3
+73f8ea23f5,2026-10-10,feat,build,feat(build): calibrate deepcheck depth scoring,11
+d2431ead66,2026-10-10,fix,db,fix(db): remove heating profile Nur Warmwasser,8
+8d05b55bae,2026-10-10,docs,build,docs(build): log deepcheck phase 2 in brief,1
+75673498b5,2026-10-10,fix,build,fix(build): read deepcheck config at the base,6
+f678a25464,2026-10-10,fix,build,fix(build): harden deepcheck gate after review,14
+476a7ae93c,2026-10-10,docs,build,docs(build): add deepcheck baseline and gate docs,2
+ef5ea72ac1,2026-10-10,feat,build,feat(build): add deepcheck gate and baseline,14
+fc6171d5d8,2026-10-10,fix,statements,fix(statements): review B round 3,39
+63575f3247,2026-10-10,docs,build,docs(build): log deepcheck phase 1 in brief,1
+bfb0cb0955,2026-10-10,fix,build,fix(build): address final deepcheck phase 1 review,6
+e7f49152d8,2026-10-10,docs,build,docs(build): add deepcheck README,2
+9638094bf8,2026-10-10,fix,build,fix(build): exclude framework entry modules,7
+da57e1d518,2026-10-10,fix,build,fix(build): address deepcheck review findings,18
+72c6f49b81,2026-10-10,feat,build,feat(build): add deepcheck CLI with scan and formats,7
+dc446650bf,2026-10-10,fix,statements,fix(statements): fuel stock and review B round 2,49
+668248cc19,2026-10-10,feat,build,feat(build): add deepcheck Fallow adapter,3
+1646bfbfcd,2026-10-10,feat,build,feat(build): add deepcheck inline suppressions,4
+a6938b8ae0,2026-10-10,feat,build,feat(build): load and validate deepcheck config,7
+d56b08ed10,2026-10-10,feat,build,feat(build): add deepcheck module metrics and score,14
+9dafc39044,2026-10-10,docs,build,docs(build): add TDD and review rules to brief,1
+8a38c7be0e,2026-10-10,docs,build,docs(build): add deepcheck module brief,1
+0a10dca2ef,2026-10-10,feat,statements,feat(statements): service period and fuel stock,46
+acdcc9ab4f,2026-10-10,feat,statements,feat(statements): heating flag and fee of own costs,21
+8c288a0fdb,2026-10-10,fix,invoices,fix(invoices): fewer false alarms in invoice check,24
+794b14197c,2026-10-10,feat,invoices,feat(invoices): check missing invoices per category,34
+3440fac6d9,2026-10-10,docs,tests,docs(tests): close review of step A,1
+f1e14a270d,2026-10-10,fix,statements,fix(statements): prorate fee wording in the PDF,7
+771622f1bd,2026-10-10,fix,statements,"fix(statements): name addresses, fee base, heating",16
+884eed3fef,2026-10-10,fix,db,"fix(db): correct demo data, heating shares, 70/30",24
+1b872b397d,2026-10-10,feat,buildings,feat(buildings): pass CARTO key to map tiles,7
+3feae2fe8f,2026-10-10,chore,ci,chore(ci): run the axe check as its own job,3
+53d2716559,2026-10-10,docs,tests,docs(tests): correct the open TODO count,1
+0050eb9224,2026-10-10,docs,tests,docs(tests): add final persona re-runs,4
+8118d9e2fb,2026-10-10,fix,statements,"fix(statements): one invoice request, clear return",6
+05f59bd543,2026-10-10,docs,tests,docs(tests): record final persona fixes,3
+089ecfe574,2026-10-10,feat,invoices,feat(invoices): year filter and earlier invoice hints,21
+aa06550f68,2026-10-10,fix,tests,fix(tests): run empty states in the axe check,10
+dede974701,2026-10-10,docs,tests,docs(tests): record final axe coverage,3
+0c237df006,2026-10-10,fix,tests,fix(tests): cover all states in the axe check,8
+d7816074a4,2026-10-10,docs,tests,docs(tests): add stage 9 review and final personas,9
+7c88a89c62,2026-10-10,fix,contracts,fix(contracts): final persona round fixes,17
+832d9a7c3f,2026-10-10,fix,buildings,fix(buildings): skip map after leaving the page,2
+c4bb7d4570,2026-10-10,docs,config,docs(config): add design decisions and rules,4
+38d3505ae0,2026-10-10,fix,styles,"fix(styles): token map, borders and placeholders",16
+247f8d6825,2026-10-10,fix,api,fix(api): show German error texts,4
+c3b1da6f89,2026-10-10,docs,tests,docs(tests): log stage 8,1
+531a70c825,2026-10-10,chore,styles,chore(styles): remove the old design system,47
+05def109a3,2026-10-10,docs,tests,docs(tests): add stage 7 review round 2,4
+d7ced5a186,2026-10-10,fix,apartments,fix(apartments): show list counts only once,4
+40710d9fb3,2026-10-10,fix,components,fix(components): focus list results after a search,16
+06c801b475,2026-10-10,fix,components,fix(components): drop field errors once corrected,4
+1f65858bef,2026-10-10,fix,tenants,fix(tenants): confirm deletes with a toast,11
+ee1a6b5925,2026-10-10,fix,invoices,fix(invoices): show recategorize result at button,3
+c0cc636c95,2026-10-10,fix,statements,fix(statements): stack cost lines on phones,3
+39ad852270,2026-10-10,fix,components,fix(components): show step names in wizards from xl,3
+b0ba91fbfb,2026-10-10,fix,components,fix(components): wrap header actions below the title,7
+b62138b6d0,2026-10-10,feat,buildings,feat(buildings): name relet apartments in overview,4
+5763efa2f5,2026-10-10,fix,api,fix(api): keep lists when their counts fail to load,4
+b4c306d5cb,2026-10-10,fix,components,fix(components): keep toasts reachable and readable,5
+79bc10ac73,2026-10-10,fix,config,fix(config): recognize all predefined categories,4
+a29e2eee10,2026-10-10,docs,tests,docs(tests): add stage 7 persona re-runs,3
+8eb513ed93,2026-10-10,docs,tests,docs(tests): add stage 7 review report,3
+254eeb90ad,2026-10-10,docs,tests,docs(tests): list stage 7 fix open points,1
+422dd91c46,2026-10-10,fix,tenants,fix(tenants): name future contracts and contract links,7
+e758360bc3,2026-10-10,fix,apartments,fix(apartments): show Leer with an open door icon,7
+af4adafc6c,2026-10-10,fix,components,fix(components): tell if the mobile menu is open,2
+9d04b7108a,2026-10-10,fix,components,fix(components): make page behind dialog inert,2
+db1a3fb53b,2026-10-10,fix,components,fix(components): make success toasts audible,3
+5f220162f5,2026-10-10,fix,config,fix(config): show taken category name at the field,3
+169b5ef1c2,2026-10-10,fix,components,fix(components): focus first error after failed save,13
+f791528dc1,2026-10-10,fix,contracts,"fix(contracts): one today, future filter, delete text",10
+248ba24158,2026-10-10,fix,invoices,fix(invoices): fit rows and explain open choices,24
+64c2944fce,2026-10-10,fix,config,fix(config): hide English category descriptions,5
+5e68fb45be,2026-10-10,fix,buildings,fix(buildings): explain blocked delete up front,5
+3ab93f185d,2026-10-10,fix,buildings,fix(buildings): count relet and reserved apartments,8
+ad72e5685b,2026-10-10,fix,statements,fix(statements): fit rows and confirm payments,12
+4051d76341,2026-10-10,fix,apartments,fix(apartments): show relet apartments consistently,14
+a3921b7221,2026-10-10,docs,tests,docs(tests): log stage 7 review and personas,1
+b41881ed14,2026-10-10,docs,tests,docs(tests): add stage 7 persona reports,5
+2d20713fe9,2026-10-10,fix,statements,fix(statements): keep early building choice,11
+c7447832cc,2026-10-10,fix,statements,fix(statements): show the deadline in words,2
+eeb665c227,2026-10-10,feat,statements,feat(statements): migrate documents page,4
+bdda37d1de,2026-10-10,fix,components,fix(components): wrap long names on phones,3
+6555fd419a,2026-10-10,feat,invoices,feat(invoices): migrate invoice pages,34
+6ded812bcf,2026-10-10,feat,apartments,feat(apartments): migrate apartment detail page,9
+149696b9b2,2026-10-10,fix,statements,fix(statements): show German heating profile name,2
+b2a04ef1c9,2026-10-10,chore,tests,chore(tests): check contract edit toast and amounts,1
+3fb6d2612a,2026-10-10,feat,tenants,feat(tenants): migrate the tenant form,9
+7e1b6ee531,2026-10-10,feat,config,feat(config): migrate settings page,8
+0677a0c17d,2026-10-10,feat,apartments,feat(apartments): migrate apartment forms,8
+586a3483dc,2026-10-10,feat,config,feat(config): migrate distribution key screens,15
+a935063b0a,2026-10-10,feat,buildings,feat(buildings): migrate building detail and form,18
+9955e84f9a,2026-10-10,feat,tenants,feat(tenants): migrate the tenant detail,7
+702ded1b09,2026-10-10,feat,tenants,feat(tenants): migrate the tenant list,8
+ed77c958a4,2026-10-10,feat,config,feat(config): migrate category screens,10
+9278feae78,2026-10-10,feat,contracts,feat(contracts): migrate the contract edit form,12
+efc7ef511e,2026-10-10,feat,contracts,feat(contracts): migrate the contract detail,11
+cb599464a1,2026-10-10,feat,contracts,feat(contracts): migrate the contract list,12
+0a5db66b54,2026-10-10,feat,components,feat(components): add pager and blocked confirm,4
+872ea48bf5,2026-10-10,feat,statements,feat(statements): migrate statement pages,24
+dde61382e5,2026-10-10,feat,apartments,feat(apartments): migrate building and apartment lists,18
+9ed7911462,2026-10-10,feat,config,feat(config): migrate heating profile screens,17
+7664084795,2026-10-10,feat,components,feat(components): friendly coming-soon texts,8
+f1b2da8355,2026-10-10,feat,components,feat(components): migrate help page,5
+7d31616f7e,2026-10-10,feat,components,feat(components): migrate privacy and terms pages,8
+6485ad790e,2026-10-10,feat,components,feat(components): migrate coming-soon pages,5
+dcc5eeefbf,2026-10-10,docs,config,docs(config): add stage 7 migration guide,4
+fb8afbcbd6,2026-10-10,fix,statements,fix(statements): address stage 6 review round 2,18
+39eac9f623,2026-10-10,fix,statements,fix(statements): address stage 6 review findings,34
+15c0ec5d7a,2026-10-10,feat,statements,feat(statements): rebuild statement wizard,57
+9878022a12,2026-10-10,fix,contracts,fix(contracts): address stage 5 review round 2,14
+ca340419c3,2026-10-10,fix,contracts,fix(contracts): address stage 5 review findings,25
+9a7233c040,2026-10-10,docs,tests,docs(tests): add stage 5 persona reports,4
+bfd9a1212d,2026-10-10,docs,tests,docs(tests): add persona report Anna stage 5,1
+bd2ea7ca02,2026-10-10,feat,contracts,feat(contracts): add rental contract wizard,42
+edf1dc407a,2026-10-10,fix,components,fix(components): address stage 4 review findings,30
+955733a4d9,2026-10-10,feat,components,"feat(components): add shell, navigation and overview",42
+c4c6a69fff,2026-10-10,fix,components,fix(components): apply stage 3 review,17
+9886b289b6,2026-10-10,feat,components,feat(components): add icon set and illustrations,28
+4d38797bf9,2026-10-10,fix,styles,fix(styles): apply stage 2 follow-up review,13
+e62b6cf82f,2026-10-09,fix,styles,fix(styles): apply stage 2 review,33
+afcda10b65,2026-10-09,feat,styles,"feat(styles): add tokens, components and axe check",157
+4fc78a16df,2026-10-09,docs,styles,docs(styles): apply stage 1 review,5
+7f28dbbd20,2026-10-09,docs,styles,docs(styles): plan the redesign,2
+7693fdfb65,2026-10-09,docs,styles,docs(styles): apply stage 0 review,4
+d869896001,2026-10-09,docs,styles,docs(styles): analyse current UI for redesign,5
+b3371806d0,2026-10-09,feat,docs,feat(docs): add UI redesign brief outlining new design system and guidelines,1
+b7112aa82c,2026-10-08,fix,config,fix(config): apply review of the operator notice,7
+5406c04bf0,2026-10-08,feat,config,feat(config): name the operator in the terms,12
+a9c5db8dbb,2026-10-08,docs,,docs: allow editing the baseline before install,2
+104c9af6f7,2026-10-08,fix,db,fix(db): fold overdue check into the schema,4
+399bb0a4ef,2026-10-08,docs,,docs: clarify dev restart after .env change,1
+f6188a2f7e,2026-10-08,fix,tests,fix(tests): always drop the config test trigger,1
+8a2b824f54,2026-10-08,fix,tests,fix(tests): ignore shell BACKEND_URL in vite test,2
+e4843fc15a,2026-10-08,fix,tests,fix(tests): load vite config like the dev server,1
+83f569d81e,2026-10-08,docs,,docs: log per-fix reviews in plan,1
+f5e0bde755,2026-10-08,fix,build,fix(build): load .env for BACKEND_URL in dev,4
+e82b8f42dd,2026-10-08,fix,config,fix(config): write settings in one transaction,3
+80abbfa7f2,2026-10-08,docs,,docs: mark overdue as computed in PRD,1
+8749acf15c,2026-10-08,fix,tests,fix(tests): keep recategorize test off LLM cache,1
+713ef714cc,2026-10-08,docs,,docs: fix JWT and lock notes after review,2
+9c730e03d7,2026-10-08,fix,invoices,fix(invoices): apply review of bug fixes,9
+51c49c568d,2026-10-08,docs,,docs: update API spec for bug fixes,1
+93599a0784,2026-10-08,fix,api,fix(api): read backend from BACKEND_URL only,9
+1cbca10855,2026-10-08,fix,auth,fix(auth): check JWT issuer and audience,3
+b718de0476,2026-10-08,fix,config,fix(config): save settings all or nothing,2
+b75d14f4e9,2026-10-08,fix,invoices,fix(invoices): apply sure category on recategorize,2
+a94beff369,2026-10-08,fix,statements,"fix(statements): compute overdue, lock fee rate",7
+c35220638f,2026-10-08,docs,,docs: log docs alignment in plan,1
+e594edab94,2026-10-08,docs,,docs: apply consistency review,4
+7fe5385f78,2026-10-08,docs,,docs: rewrite API spec from routes,1
+4e95720ef6,2026-10-08,docs,,docs: align tech stack and design system,2
+783f09df76,2026-10-08,docs,,docs: align PRD with implemented behavior,1
+ac69ed3f81,2026-10-08,docs,,docs: rewrite data model from migrations,1
+6033bbecce,2026-10-08,docs,,docs: align README and glossary with code,5
+3bacf179c0,2026-10-08,docs,,docs: translate MVA and test pyramid to English,2
+c258365090,2026-10-08,fix,invoices,fix(invoices): apply review of privacy notice,7
+c318e7cdb9,2026-10-08,feat,invoices,feat(invoices): name LLM provider in privacy page,18
+d7024cfea6,2026-10-08,fix,invoices,"fix(invoices): support reasoning LLMs, apply review",13
+1e7c849b52,2026-10-08,feat,invoices,feat(invoices): configure any OpenAI-compatible LLM,12
+6782d2351c,2026-10-08,fix,statements,fix(statements): lock every statement but drafts,4
+f715a8a3b1,2026-10-08,docs,,docs: apply review of MVA scenarios,2
+27a6190b6d,2026-10-08,docs,,docs: rebuild MVA plan around quality scenarios,3
+5ad848612c,2026-10-08,docs,,docs: management fee 3 % is a guideline in PRD,2
+bda838bff9,2026-10-08,docs,,docs: apply second review of Claude instructions,4
+01cbdd891a,2026-10-08,docs,,docs: fix facts in Claude instructions,3
+eb186cc783,2026-10-08,docs,,docs: restructure Claude instructions,5
+5d9f8c43ac,2026-10-08,docs,tests,"docs(tests): define target coverage, drop counts",3
+c73f414f56,2026-10-08,docs,services,docs(services): describe period share precisely,1
+5dfc870b56,2026-10-08,chore,services,chore(services): rename period share in calculation,5
+0b96c5d5f8,2026-10-08,fix,statements,"fix(statements): pin cost share, show two decimals",4
+3dcb2aed11,2026-10-08,fix,services,"fix(services): statement year in UTC, test new year",2
+28fe5f50ef,2026-10-08,fix,statements,fix(statements): share column is the cost share,3
+b566b12e29,2026-10-08,fix,services,fix(services): count statement numbers up,3
+68b56687ee,2026-10-08,fix,db,fix(db): paid demo statement like the app marks it,6
+7f8fcb3875,2026-10-08,docs,db,docs(db): note demo statements in plan,1
+f97a9ddcff,2026-10-08,feat,db,feat(db): demo statements generated by the app,4
+07b947bfeb,2026-10-08,docs,tests,docs(tests): counts after migration reset,1
+8737cf60e1,2026-10-08,fix,db,fix(db): reset the development database only,8
+8f50f1704c,2026-10-08,chore,db,chore(db): reset migrations to a baseline,27
+d16bff16d2,2026-10-08,fix,tests,fix(tests): guard type import match with fixture,1
+517d9c55e7,2026-10-08,fix,ci,fix(ci): no screenshots for type-only changes,3
+e58bacf56d,2026-10-08,docs,tests,"docs(tests): final counts, open follow-ups",3
+ea26fd0149,2026-10-08,chore,types,chore(types): type check tests and config files,6
+67a0fdd01e,2026-10-08,fix,tests,fix(tests): pin migration expectations,2
+a51515d99a,2026-10-08,feat,tests,"feat(tests): API contracts for building, tenant lists",8
+6b4af813dd,2026-10-08,fix,db,fix(db): correct invoices of non-allocable kinds,7
+58c3ce4a13,2026-10-08,fix,invoices,fix(invoices): lock allocable for such categories,9
+8ae5beab1e,2026-10-08,fix,services,fix(services): non-allocable category stays so,6
+54a6f142da,2026-10-08,docs,tests,docs(tests): counts after deleting endpoints,3
+ef17c9a0ba,2026-10-08,chore,api,chore(api): delete endpoints no page calls,6
+9824fed6df,2026-10-08,docs,tests,"docs(tests): close stale open items, name doubles",3
+9885b36a9b,2026-10-08,docs,tests,"docs(tests): update test pyramid, raise floors",4
+4761314aa8,2026-10-08,fix,tests,fix(tests): contract test checks optional fields,7
+ac2679ffa9,2026-10-08,feat,tests,"feat(tests): API contracts for invoices, buildings, tenants",14
+84142874a7,2026-10-08,chore,tests,chore(tests): drop env mock from API proxy test,2
+1b8f0aff62,2026-10-08,fix,tests,fix(tests): test API proxy through real cookies,2
+8e53250863,2026-10-08,fix,config,fix(config): check IBAN check digits in the form,5
+e36aba739a,2026-10-08,fix,services,fix(services): category decides passing on costs,7
+16a48dff6c,2026-10-08,chore,ci,chore(ci): fail lint on warnings,2
+15ef38dda4,2026-10-08,chore,ci,"chore(ci): lint and types, contracts run backend",3
+9000dcb58a,2026-10-08,fix,services,fix(services): store QR reference only for QR-IBAN,4
+ae4a56c0e6,2026-10-08,fix,services,"fix(services): unique QR reference, valid debtor",3
+7b1a57bb1e,2026-10-07,chore,api,chore(api): move statement use cases out of route,5
+1c9b07256e,2026-10-07,fix,services,fix(services): store statement and items atomically,2
+54329a99dc,2026-10-06,docs,tests,docs(tests): update test pyramid and plan,4
+27473b4fd6,2026-10-06,fix,statements,"fix(statements): show stored fee rate, add API contracts",9
+9ad147bc83,2026-10-06,feat,tests,feat(tests): run statement scenarios via API driver,5
+3081f4a9ea,2026-10-05,feat,tenants,feat(tenants): write statements in tenant language,20
+9981a96baa,2026-10-05,chore,ci,chore(ci): enforce coverage floors in CI,7
+906721767d,2026-10-05,feat,tests,feat(tests): add API protocol driver for @api scenarios,9
+d8965e7f48,2026-10-05,chore,tests,chore(tests): separate breadcrumb and hydration features,20
+3b76cb762e,2026-10-05,docs,tests,docs(tests): add test pyramid and ATDD workflow,2
+20a4a4b787,2026-10-05,docs,config,docs(config): align glossary with code and data,2
+1adb134156,2026-10-05,feat,statements,feat(statements): choose key for management fee,15
+3130fb7939,2026-10-05,feat,services,feat(services): distribute management fee by key,7
+29bd3852e5,2026-10-05,fix,tests,fix(tests): close E2E false positives with anchors,30
+5cbd7087f1,2026-10-05,fix,tests,"fix(tests): test real frontend code, drop mirror tests",4
+587d3a4d0e,2026-10-05,fix,tests,fix(tests): make backend tests check what they claim,5
+a6bc57be9b,2026-10-05,docs,config,docs(config): log ATDD test pyramid session,1
+4c7b01bc84,2026-10-05,chore,tests,chore(tests): run E2E against production build,3
+6140f9c724,2026-10-05,chore,tests,chore(tests): replace mirror and DB-mock tests,10
+ea95713ec4,2026-10-05,chore,tests,chore(tests): run pg tests on own test database,4
+05a8a1fe74,2026-10-05,docs,config,docs(config): make acceptance tests come first (ATDD),1
+3232703c6d,2026-10-05,feat,components,feat(components): simplify UI after UX review,34
+202443bdba,2026-10-05,chore,components,chore(components): remove unused code and deps,28
+14d4c32191,2026-10-05,chore,tests,chore(tests): replace any in test fakes with types,6
+b0e110b434,2026-10-05,chore,tests,chore(tests): clear backend type errors in tests,5
+e5014c9c46,2026-10-05,chore,tests,chore(tests): clear ESLint errors,6
+c2fe97586b,2026-10-05,fix,components,fix(components): remove mini map on destroy,3
+97bece58c1,2026-10-05,fix,api,fix(api): require fields the database requires,3
+4fa6722e73,2026-10-05,chore,tests,chore(tests): set up statement tests via the API,2
+92c83a0270,2026-10-05,chore,tests,chore(tests): simplify statement generation setup,1
+09a7ccd51a,2026-10-05,feat,tests,feat(tests): pin statement generation results,2
+fc4c86a50e,2026-10-05,feat,ci,feat(ci): run only affected tests on pull requests,2
+df9da2d7c8,2026-10-05,feat,ci,feat(ci): frame UI changes on PR screenshots,7
+15dbb53f24,2026-10-05,fix,ci,fix(ci): skip screenshots when no page changed,1
+3b44a8a3cd,2026-10-05,chore,ci,chore(ci): write the screenshot comment in English,1
+31e0936579,2026-10-05,docs,config,docs(config): require /tdd and /ponytail for changes,1
+c2bf402a50,2026-10-05,fix,ci,fix(ci): add the screenshot spec ignored by mistake,3
+f7b761ab86,2026-10-05,feat,ci,feat(ci): screenshot changed pages on pull requests,6
+fc9d0b4d9b,2026-10-05,chore,tests,chore(tests): check categorization through the API,2
+8c84e6612e,2026-10-05,fix,invoices,fix(invoices): report KI failure and store override reason,22
+5c19363b66,2026-10-03,fix,tests,fix(tests): wait for hydration in visitWhileLoading,1
+0d86b5d0f6,2026-10-03,fix,components,fix(components): keep form choices made pre-hydration,14
+e061a7deef,2026-10-03,fix,components,fix(components): keep pre-hydration filter input,13
+c3f8e60845,2026-10-03,fix,tests,fix(tests): wait for hydration before input,3
+3fa670552e,2026-10-03,fix,services,fix(services): omit pdf blob from statement data,3
+ad2583f1c4,2026-10-03,chore,tests,chore(tests): tighten assertions and isolate mocks,5
+989d67d881,2026-10-03,docs,,docs: record page unit-test coverage in plan,1
+fe3fa5405d,2026-10-03,chore,tests,chore(tests): unit-test statement pages,4
+52987b9258,2026-10-03,chore,tests,chore(tests): unit-test invoice pages,2
+b0f8521aa2,2026-10-03,chore,tests,chore(tests): unit-test dashboard and config pages,9
+ff72e3c2a3,2026-10-03,docs,,docs: record measured test coverage in plan,1
+da64d0ce1e,2026-10-03,chore,tests,chore(tests): add Vitest coverage provider,2
+0bb97341db,2026-10-03,docs,,docs: recount implementation plan against code,1
+3d93c354d7,2026-10-03,fix,services,fix(services): discard PDF when deadline changes,3
+231c9bce31,2026-10-03,docs,,docs: record BDD coverage audit,1
+195031f12c,2026-10-03,chore,tests,chore(tests): cover every page exit with scenarios,45
+1d83d91b4e,2026-10-03,feat,components,"feat(components): add help, privacy and terms pages",14
+ac11c07257,2026-10-03,fix,tenants,fix(tenants): hide e-mail link without address,3
+f984eb149c,2026-10-03,fix,statements,fix(statements): restart wizard on Weitere erstellen,3
+45c8d28ae1,2026-10-03,fix,db,fix(db): store when a statement PDF was generated,6
+d0d653a06c,2026-10-03,fix,api,fix(api): send body when generating statement PDF,2
+580501e5f9,2026-10-03,fix,build,fix(build): address ponytail skill review notes,2
+c47b0a3d5b,2026-10-03,chore,build,chore(build): vendor ponytail skills for cloud,7
+00341b1e3d,2026-10-03,fix,components,fix(components): always format francs with ’,2
+54ce6ae7fe,2026-10-03,fix,ci,"fix(ci): migrate before tests, accept both apostrophes",2
+ddd977b87b,2026-10-03,docs,,docs: rewrite MVA plan as modular monolith,2
+eb52063fc2,2026-10-03,fix,tests,fix(tests): expect German error and Swiss apostrophe,4
+b302f390c1,2026-10-03,chore,ci,"chore(ci): add build, test and fallow workflow",2
+045630b59f,2026-10-03,chore,components,chore(components): remove duplicated page code,30
+c696878b3e,2026-10-02,fix,invoices,fix(invoices): keep the KI's category apart,12
+11f55ca95d,2026-10-02,fix,build,fix(build): load the shared .env in backend scripts,3
+eeb036d920,2026-10-02,feat,invoices,feat(invoices): rebuild invoices with German BDD,44
+04675a43bc,2026-10-02,chore,tests,chore(tests): isolate backend unit test files,2
+058bbf33de,2026-10-02,fix,services,fix(services): return category names in cost rules,2
+2100d9a20f,2026-10-02,fix,db,fix(db): remove Per Person and By Consumption keys,5
+f8c102c2ba,2026-10-02,fix,buildings,"fix(buildings): show API errors, clear building type",5
+26366fb399,2026-10-02,docs,,docs: update implementation plan for session 3,1
+bb7721bcef,2026-10-02,chore,build,chore(build): upgrade dependencies and fix vulnerabilities,3
+59640d364b,2026-10-02,feat,auth,feat(auth): enforce sign-in on the server and rebuild login,26
+85f925cb59,2026-10-02,chore,db,chore(db): apply missing migrations automatically,8
+1e4cdd1937,2026-10-02,feat,dashboard,feat(dashboard): rebuild dashboard with correct figures,15
+ddeb381c03,2026-10-02,feat,config,feat(config): rebuild distribution keys,40
+18255feeef,2026-10-02,feat,config,feat(config): rebuild cost categories,30
+2c04a8db54,2026-10-02,feat,config,feat(config): rebuild heating profiles,38
+cc686264b6,2026-10-02,feat,config,feat(config): save settings and use their defaults,20
+e02f678dc5,2026-10-02,feat,tenants,feat(tenants): rebuild tenant detail and list status,34
+8a603cd60b,2026-10-02,feat,apartments,feat(apartments): compute status from rental contracts,31
+38f2225094,2026-10-02,feat,apartments,"feat(apartments): rebuild new, detail and edit pages",38
+9a077ae8cd,2026-10-02,chore,tests,chore(tests): run E2E against own dwello_e2e database,7
+12a697db93,2026-10-02,test,apartments,test(apartments): rebuild apartment list feature in German,10
+8cf4cdbb1f,2026-10-02,feat,statements,feat(statements): send payment reminders by e-mail or letter,74
+36cb48855e,2026-10-02,feat,services,feat(services): add mail module with SMTP and Resend,7
+41c96a7bd2,2026-10-02,fix,statements,fix(statements): save deadline and notes on edit page,14
+d35bebc9cc,2026-10-02,feat,statements,feat(statements): choose management fee per generation run,20
+39b58070e3,2026-10-01,fix,statements,"fix(statements): send, pay and delete on detail page",13
+5deb3ff801,2026-10-01,fix,statements,fix(statements): generate statements via the backend,23
+dcbb15a174,2026-10-01,fix,auth,fix(auth): send session JWT on server-side API calls,5
+1d7ea326b6,2026-10-01,fix,middleware,fix(middleware): require a valid JWT on every API route,9
+d5fc2720c6,2026-10-01,fix,contracts,fix(contracts): show active contract warning on edit,2
+041438afa3,2026-10-01,fix,db,fix(db): make predefined heating profiles sum to 100%,3
+925faf583e,2026-09-26,fix,tests,fix(tests): scope statement list scenarios to building,3
+1dabfe9fe6,2026-09-26,chore,tests,chore(tests): run database tests in their own process,1
+8fcb22b472,2026-09-26,fix,services,fix(services): share building costs among all units,2
+fd326c39a0,2026-09-26,feat,tests,feat(tests): rebuild statement list E2E in German,6
+734172f669,2026-09-26,fix,statements,fix(statements): filter and page statements on server,3
+86cec4d93f,2026-09-26,fix,api,fix(api): find statements by full tenant name,4
+5ac436eb08,2026-09-26,fix,services,fix(services): count advance payments per month,3
+b8ee68dede,2026-09-26,feat,tests,feat(tests): add German E2E for contract edit,4
+2c9ef2f685,2026-09-26,feat,tests,feat(tests): add German E2E for contract detail,6
+ad6c5cc98e,2026-09-26,fix,contracts,fix(contracts): end and delete contracts for real,3
+9501f08756,2026-09-26,chore,buildings,chore(buildings): extract shared BuildingForm,5
+0acc470145,2026-09-26,chore,tests,chore(tests): drop unused imports in building steps,1
+7136d96b34,2026-09-26,feat,tests,feat(tests): add German E2E for new contracts,20
+70adcd178f,2026-09-26,feat,tests,feat(tests): rebuild contract list E2E in German,10
+bcf69242ea,2026-09-26,fix,contracts,fix(contracts): make contract edit page load,3
+64d2b16fa8,2026-09-26,fix,api,"fix(api): support contract search, return relations",3
+61e2dd7b4c,2026-09-26,fix,buildings,fix(buildings): require building name and canton,8
+b16cbb3bb1,2026-09-26,feat,tests,feat(tests): rebuild building E2E tests in German,24
+41574d6f45,2026-09-26,fix,buildings,"fix(buildings): show backend errors, add delete action",4
+0d5082a44c,2026-09-26,chore,config,chore(config): add fallow gate and plugins,3
+5ab5cec6ce,2026-09-26,chore,config,chore(config): add tdd skill to project,4
+47ff0bec5c,2026-09-26,chore,config,chore(config): fix bdd-acceptance skill for Dwello,1
+7889fa39b1,2026-09-26,chore,config,chore(config): add bdd-acceptance skill to project,1

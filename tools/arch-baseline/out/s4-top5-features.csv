@@ -1,0 +1,6 @@
+id,sha,date,title,commits,files_prod,files_test,files_other,layers_prod_list,i18n_files,n_FE,n_BFF,n_Backend,n_DB,n_Shared/Contracts,n_Tests-Unit,n_Tests-Acceptance,n_Process
+PR#32,8c7a0e972f,2026-10-10,feat: new design system and guided UI (redesign),96,294,161,63,FE|BFF|Shared/Contracts,0,269,24,0,0,1,82,79,33
+PR#48,e6c38be977,2026-10-12,"feat(i18n): UI in German, French, Italian, English",51,251,38,58,Backend|FE|BFF|Shared/Contracts,4,185,42,23,0,1,28,10,20
+PR#39,0f4b3f675a,2026-10-11,"feat(statements): Swiss statement PDF, invoice check, date field",32,101,114,30,DB|Backend|FE|BFF|Shared/Contracts,0,54,13,22,11,7,66,42,20
+PR#238,0d970be030,2026-10-16,feat(invoices): create invoices from uploaded files,15,48,32,38,DB|Backend|FE|BFF|Shared/Contracts,4,27,9,9,2,4,14,15,23
+PR#539,1110abb8d0,2026-10-20,feat(categories): categories and required Verteilschlüssel (#452),27,38,64,20,DB|Backend|FE|BFF|Shared/Contracts,4,23,6,7,1,2,34,29,14
