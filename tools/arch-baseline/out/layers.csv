@@ -1,0 +1,14 @@
+layer,kind,files,loc,modules
+Process,other,1551,73713,9
+Tests-Unit,test,295,48676,12
+FE,prod,297,30175,50
+Tests-Acceptance,test,237,22112,12
+Backend,prod,69,13077,66
+Marketing,other,30,7118,12
+BFF,prod,122,6877,64
+Docs,other,30,5507,9
+Tooling,other,83,5176,15
+DB,prod,41,1574,5
+Shared/Contracts,test,76,891,1
+Shared/Contracts,prod,1,398,1
+Other,other,1,124,1

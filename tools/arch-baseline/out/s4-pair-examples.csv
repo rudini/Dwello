@@ -1,0 +1,21 @@
+rank,a,b,shared,degree,cross_layer,import,commits_with_both,example_sha,example_subject,example_files
+1,tests/e2e/features/accessibility.feature,tests/e2e/features/sprachen-bildschirme.feature,43,0.977,same,no,84,0049589600,fix(tests): give period screen a default state,3
+2,tests/a11y/screens.json,tests/e2e/features/accessibility.feature,43,0.827,same,no,98,0049589600,fix(tests): give period screen a default state,3
+3,tests/a11y/screens.json,tests/e2e/features/sprachen-bildschirme.feature,42,0.808,same,no,83,0049589600,fix(tests): give period screen a default state,3
+4,tests/a11y/screens.json,tests/e2e/tasks/accessibility.ts,40,0.656,same,no,72,4d5e72f205,docs(tests): red tests for wizard issues,6
+5,tests/e2e/features/sprachen-bildschirme.feature,tests/e2e/tasks/accessibility.ts,37,0.661,same,no,67,4d5e72f205,docs(tests): red tests for wizard issues,6
+6,tests/e2e/features/accessibility.feature,tests/e2e/tasks/accessibility.ts,37,0.649,same,no,67,4d5e72f205,docs(tests): red tests for wizard issues,6
+7,"messages/{de,fr,it,en}.json",tests/a11y/screens.json,44,0.44,cross,no,77,6524f3ad2c,"fix(tests): default state, French guillemets",7
+8,"messages/{de,fr,it,en}.json",tests/e2e/features/sprachen-bildschirme.feature,40,0.417,cross,no,70,6524f3ad2c,"fix(tests): default state, French guillemets",7
+9,"messages/{de,fr,it,en}.json",tests/e2e/features/accessibility.feature,40,0.412,cross,no,69,6524f3ad2c,"fix(tests): default state, French guillemets",7
+10,"messages/{de,fr,it,en}.json",tests/e2e/tasks/accessibility.ts,39,0.375,cross,no,68,6524f3ad2c,"fix(tests): default state, French guillemets",7
+11,backend/src/__tests__/api-contracts.pg.test.ts,tests/contracts/README.md,22,0.595,cross,no,34,9945733f9f,chore(tests): add contract of the creditor refusal,4
+12,src/__tests__/contract-edit.dom.test.ts,src/routes/contracts/ContractForm.svelte,16,0.727,cross,no,38,0e3db29728,fix(contracts): drop unreachable notice guard,2
+13,backend/src/__tests__/statement-pdf-render.test.ts,backend/src/services/pdf.service.ts,19,0.594,cross,yes,49,e214aa7a7e,fix(statements): print a flat's floor only once,4
+14,tests/e2e/questions/contract-form.ts,tests/e2e/steps/contract-form.steps.ts,16,0.696,same,yes,25,ac890cc09f,docs(contracts): add scenarios for #66 and #388,7
+15,tests/e2e/features/statement-detail.feature,tests/e2e/steps/statement-detail.steps.ts,19,0.559,same,no,52,c02c420507,chore(tests): reuse the error message step,2
+16,tests/e2e/features/contract-edit.feature,tests/e2e/steps/contract-form.steps.ts,16,0.593,same,no,36,80df615e9f,chore(tests): wip scenarios for #499,3
+17,tests/e2e/features/statement-generate.feature,tests/e2e/steps/statement-generate.steps.ts,16,0.593,same,no,41,0e382240de,docs(tests): add wip scenario for #130,4
+18,tests/e2e/questions/contract-form.ts,tests/e2e/targets/contract-form.ts,13,0.722,same,yes,18,ac890cc09f,docs(contracts): add scenarios for #66 and #388,7
+19,backend/src/routes/contracts.ts,backend/src/services/contract.service.ts,12,0.75,same,yes,18,64d2b16fa8,"fix(api): support contract search, return relations",3
+20,src/__tests__/contract-form.test.ts,src/lib/contract-form.ts,11,0.786,cross,yes,20,d2de64cc54,fix(contracts): take over no refused start from URL,7

@@ -1,0 +1,16 @@
+entity,type_declarations,distinct_names,files,names_in_FE,names_in_BFF,names_in_Backend,names_in_DB,names_in_Shared,names
+Contract,30,17,19,6,5,5,2,4,RentalContract NewRentalContract ContractFilters ContractWithDetails ContractPeriodOverlap ContractForAvailability ContractFormValues ListedContract Contract BackendContract SkippedContract ContractHistory ContractsListData CurrentContract ContractDetailsData ContractEditData Contracts
+Statement,29,20,16,2,3,10,2,8,UtilityStatement NewUtilityStatement StatementCalculation StatementForQRBill StatementPDFData StatementMailInput Statement StatementFilters StatementWithDetails StatementInput RefusedStatement Statements BackendStatement ChangedStatement StatementStatus BilledStatement StatementLineItem StatementLineInvoice StatementsListData StatementDocument
+Invoice,18,14,8,2,0,8,4,4,InvoicePart BilledInvoice Invoice NewInvoice InvoiceGroup CategoryInvoice InvoiceFilters InvoiceWithDetails PeriodInvoice InvoiceValidationResult HintedInvoice InvoiceCheck InvoicesListData StatementLineInvoice
+Building,13,10,8,2,3,2,2,4,Building NewBuilding BuildingFilters BuildingWithStats RegisterBuilding BuildingsListData ApartmentWithBuilding BuildingValues BuildingDetailsData BuildingEditData
+Apartment,13,8,5,0,2,5,2,4,Apartment NewApartment ApartmentStatus ApartmentFilters ApartmentWithDetails RegisterApartment ApartmentWithBuilding ApartmentsListData
+Tenant,13,8,7,0,4,4,2,3,Tenant NewTenant TenantFilters TenantWithOccupancy TenantFields BackendTenant TenantsListData TenantExport
+Category,11,7,8,2,1,5,2,1,PromptCategory Category NewCategory CategoryFilters CategoryWithUsage CategoryInvoice CategoryFinding
+DistributionKey,7,5,5,1,0,2,2,1,DistributionKey NewDistributionKey DistributionKeyFilters DistributionKeyWithUsage DistributionKeyRow
+LineItem,7,5,5,0,0,4,2,1,UtilityStatementLineItem NewUtilityStatementLineItem CalculatedLineItem LineItem StatementLineItem
+Document,6,4,5,1,0,2,2,1,Document NewDocument DocumentFilters StatementDocument
+HeatingProfile,5,4,3,0,0,1,3,1,HeatingProfileNames HeatingProfile NewHeatingProfile HeatingProfileFilters
+Ki,4,4,3,0,2,2,0,0,Ki KiInput KiSettings KiModel
+Reminder,3,3,3,0,1,2,0,0,ReminderLetterInput ReminderError Reminder
+FuelStock,1,1,1,0,1,0,0,0,FuelStock
+AdvancePayment,0,0,0,0,0,0,0,0,

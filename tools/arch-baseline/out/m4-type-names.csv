@@ -1,0 +1,66 @@
+name,files,layers,where
+Period,5,BFF|Backend,backend/src/services/invoice-completeness.service.ts backend/src/services/prorating.service.ts backend/src/services/statement-invoices.service.ts src/lib/server/invoice.ts src/lib/server/statement-generation.ts
+Apartment,4,BFF|Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/apartment.service.ts src/lib/types.ts src/routes/contracts/new/+page.server.ts
+Tenant,4,BFF|Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/tenant.service.ts src/lib/types.ts src/routes/contracts/new/+page.server.ts
+RefusedStatement,4,BFF|FE,src/lib/contract-status.ts src/routes/contracts/ContractForm.svelte src/routes/contracts/[id]/+page.server.ts src/routes/contracts/[id]/+page.svelte
+Contract,4,BFF|FE,src/lib/former-tenant-documents.ts src/lib/server/statement-generation.ts src/routes/statements/generate/AgreedCosts.svelte src/routes/statements/generate/FeeNotAgreed.svelte
+Row,4,BFF,src/lib/server/missing-statements.ts src/routes/contracts/[id]/+page.server.ts src/routes/dashboard/+page.server.ts src/routes/statements/generate/+page.server.ts
+Fetch,4,BFF,src/lib/server/password-login.ts src/lib/server/statement-actions.ts src/lib/server/statement-generation.ts src/routes/buildings/[id]/+page.server.ts
+Building,3,DB|FE|Shared/Contracts,backend/src/db/schema.ts src/lib/types.ts src/routes/apartments/new/BuildingField.svelte
+RentalContract,3,Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/contract.service.ts src/lib/types.ts
+Category,3,DB|FE|Shared/Contracts,backend/src/db/schema.ts src/lib/types.ts src/routes/statements/generate/AgreedCosts.svelte
+Invoice,3,Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/invoice.service.ts src/lib/types.ts
+Document,3,Backend|DB|FE,backend/src/db/schema.ts backend/src/services/reminder.service.ts src/lib/former-tenant-documents.ts
+Statement,3,Backend|Shared/Contracts,backend/src/services/reminder.service.ts backend/src/services/statement-invoices.service.ts src/lib/types.ts
+Range,3,BFF|FE,src/lib/accounting-period.ts src/lib/server/missing-statements.ts src/lib/statement-wizard.ts
+ContractForAvailability,3,FE,src/lib/contract-form.ts src/lib/utils/contract-availability.ts src/routes/contracts/new/ContractWizard.svelte
+ContractFormValues,3,FE,src/lib/contract-form.ts src/lib/contract-wizard.ts src/routes/contracts/new/ContractWizard.svelte
+Proposal,3,BFF|FE,src/lib/invoice-upload.ts src/lib/server/category.ts src/routes/invoices/InvoiceUploadDialog.svelte
+Option,3,FE,src/lib/ui/RadioGroup.svelte src/lib/ui/Select.svelte src/routes/config/DefaultsSection.svelte
+LLMCategorizationResult,2,Backend,backend/src/config/llm.ts backend/src/services/llm.service.ts
+Extraction,2,Backend,backend/src/config/llm.ts backend/src/services/llm.service.ts
+Run,2,BFF|DB,backend/src/db/demo-data.ts src/lib/server/statement-generation.ts
+KeyValues,2,Backend|DB,backend/src/db/schema.ts backend/src/services/statement.service.ts
+NewApartment,2,Backend|DB,backend/src/db/schema.ts backend/src/services/apartment.service.ts
+NewTenant,2,Backend|DB,backend/src/db/schema.ts backend/src/services/tenant.service.ts
+NewRentalContract,2,Backend|DB,backend/src/db/schema.ts backend/src/services/contract.service.ts
+DistributionKey,2,DB|Shared/Contracts,backend/src/db/schema.ts src/lib/types.ts
+HeatingProfile,2,DB|Shared/Contracts,backend/src/db/schema.ts src/lib/types.ts
+NewInvoice,2,Backend|DB,backend/src/db/schema.ts backend/src/services/invoice.service.ts
+UtilityStatement,2,Backend|DB,backend/src/db/schema.ts backend/src/services/statement.service.ts
+NewUtilityStatement,2,Backend|DB,backend/src/db/schema.ts backend/src/services/statement.service.ts
+UtilityStatementLineItem,2,Backend|DB,backend/src/db/schema.ts backend/src/services/statement.service.ts
+NewUtilityStatementLineItem,2,Backend|DB,backend/src/db/schema.ts backend/src/services/statement.service.ts
+JwtPayload,2,BFF|Backend,backend/src/middleware/auth.ts src/lib/server/auth.ts
+ConfigKey,2,Backend,backend/src/routes/config.ts backend/src/services/config.service.ts
+Query,2,Backend,backend/src/services/agreed-category.service.ts backend/src/services/contract.service.ts
+ApartmentStatus,2,Backend|Shared/Contracts,backend/src/services/apartment.service.ts src/lib/types.ts
+BuildingWithStats,2,Backend|Shared/Contracts,backend/src/services/building.service.ts src/lib/types.ts
+CategoryWithUsage,2,BFF|Backend,backend/src/services/category.service.ts src/lib/server/category.ts
+Refusal,2,BFF|Backend,backend/src/services/coded-error.ts src/lib/server/statement-actions.ts
+ContractWithDetails,2,Backend|Shared/Contracts,backend/src/services/contract.service.ts src/lib/types.ts
+FormulaVariables,2,Backend,backend/src/services/distribution-key.service.ts backend/src/services/formula.service.ts
+CategoryFinding,2,Backend|FE,backend/src/services/invoice-completeness.service.ts src/lib/statement-wizard.ts
+InvoiceWithDetails,2,Backend|Shared/Contracts,backend/src/services/invoice.service.ts src/lib/types.ts
+QRBillConfig,2,Backend,backend/src/services/pdf.service.ts backend/src/services/qr-bill.service.ts
+StatementForQRBill,2,Backend,backend/src/services/pdf.service.ts backend/src/services/qr-bill.service.ts
+Billing,2,BFF|Backend,backend/src/services/statement-invoices.service.ts src/lib/server/statement-generation.ts
+StatementWithDetails,2,Backend|Shared/Contracts,backend/src/services/statement.service.ts src/lib/types.ts
+TenantWithOccupancy,2,Backend|Shared/Contracts,backend/src/services/tenant.service.ts src/lib/types.ts
+Dated,2,BFF|FE,src/lib/accounting-period.ts src/routes/contracts/[id]/+page.server.ts
+AvailabilityInfo,2,FE,src/lib/contract-form.ts src/lib/utils/contract-availability.ts
+Field,2,BFF|FE,src/lib/contract-wizard.ts src/lib/server/building-register.ts
+ListedContract,2,FE,src/lib/contract-wizard.ts src/routes/contracts/new/ContractWizard.svelte
+DistributionKeyRow,2,FE,src/lib/distribution-key.ts src/routes/config/distribution-keys/DistributionKeyForm.svelte
+FormulaTest,2,FE,src/lib/distribution-key.ts src/routes/config/distribution-keys/DistributionKeyForm.svelte
+UploadRow,2,FE,src/lib/invoice-upload.ts src/routes/invoices/InvoiceUploadDialog.svelte
+Suggestion,2,FE,src/lib/invoice.ts src/routes/invoices/new/+page.svelte
+LatestKey,2,FE,src/lib/invoice.ts src/routes/invoices/new/+page.svelte
+Named,2,BFF|FE,src/lib/names.ts src/lib/server/invoice.ts
+Missing,2,FE,src/lib/overview.ts src/routes/contracts/[id]/MissingStatement.svelte
+BackendContract,2,BFF,src/lib/server/contract-history.ts src/routes/tenants/[id]/+page.server.ts
+GenerationRequest,2,BFF,src/lib/server/statement-generation.ts src/routes/statements/generate/+page.server.ts
+WizardSelection,2,FE,src/lib/statement-wizard.ts src/routes/statements/generate/StatementWizard.svelte
+Item,2,FE,src/lib/ui/NavList.svelte src/routes/statements/[id]/CostTable.svelte
+Props,2,FE,src/routes/buildings/AddressSearch.svelte src/routes/buildings/BuildingForm.svelte
+PageData,2,FE,src/routes/contracts/[id]/edit/+page.svelte src/routes/contracts/new/+page.svelte
