@@ -106,4 +106,4 @@ Local prerequisite: PostgreSQL on port 5432 with user `dwello`; how the test dat
 
 ## Open
 
-Raising frontend coverage to the target: `docs/design/offene-punkte.md` H-10.
+Raising frontend coverage to the target: #700.

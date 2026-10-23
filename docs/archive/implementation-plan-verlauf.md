@@ -2950,6 +2950,18 @@ H-28 (`docs/design/offene-punkte.md`), baseline pair #16: whether a kept stateme
 - [x] Closing round `code-reviewer`: `docs/reviews/h28b-review-2.md`
 - [x] Before complete; PR pushed after this archive
 
+## Session 2026-10-23: #648 non-functional points as nfr issues, English labels
+
+No scenario: rules, templates and tooling only, no app change.
+
+- [x] Check all 107 rows of `offene-punkte.md` against the code (four checkers): 105 hold, 2 done (O-11, O-13)
+- [x] Open an issue per row that holds (`nfr` + `nfr:<category>`); archive the file with the issue per row: #650–#754; #51 relabelled from `betrieb`
+- [x] Template `.github/ISSUE_TEMPLATE/nfr.md`
+- [x] Rules: `CLAUDE.md`, skills, `fach-reviewer`, templates, `docs/test-pyramid.md` name `domain`, `product`, `needs-decision`, `nfr` instead of the German labels and `offene-punkte.md`
+- [x] Tooling: `check-issues.mjs` checks `needs-decision`; `open-work.test.ts` without `offene-punkte.md`
+- [x] Label rename on GitHub (product owner, `gh label edit`), `betrieb` dropped
+- [x] code-reviewer round 1: `docs/reviews/648-review-1.md`
+- [x] PR: pushed after this archive
 ## Session H-28: heating hints of a run in the backend
 
 H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a run shows (#339 heating invoices without Leistungszeitraum only at a move-in or move-out with a Heizprofil; #335 a sent statement under the old rule only when the run bills another contract of its apartment) is decided in the backend, not in `src/lib/server/statement-generation.ts` (`heatingHints`, `runContracts`, `movesIn`, `rebills`). Stacked on #646. No scenario: behaviour unchanged, the hints keep their scenarios.

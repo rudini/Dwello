@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 
-/** Keeps open work in one place (CLAUDE.md, "Open work"): GitHub issues, non-functional rows in offene-punkte.md */
+/** Keeps open work in one place (CLAUDE.md, "Open work"): GitHub issues, non-functional ones with an nfr: category label */
 const skippedNames = [
 	'node_modules',
 	'.git',
@@ -64,17 +64,7 @@ describe('Offene Arbeit an einem Ort', () => {
 		expect(withoutIssue).toEqual([]);
 	});
 
-	it('führt in offene-punkte.md nur nicht-funktionale Punkte', () => {
-		const ids =
-			readFileSync('docs/design/offene-punkte.md', 'utf8').match(/^\|\s*\**[A-Z]+-\d+[a-z]?/gm) ??
-			[];
-		expect(ids.filter((id) => !/^\|\s*\**(U|H|O)-/.test(id))).toEqual([]);
-	});
-
-	it('vergibt jede Zeilennummer in offene-punkte.md nur einmal', () => {
-		const ids = (
-			readFileSync('docs/design/offene-punkte.md', 'utf8').match(/^\|\s*\**[A-Z]+-\d+[a-z]?/gm) ?? []
-		).map((id) => id.replace(/^\|\s*\**/, ''));
-		expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+	it('führt nicht-funktionale Punkte als Issues, nicht mehr in offene-punkte.md (#648)', () => {
+		expect(existsSync('docs/design/offene-punkte.md')).toBe(false);
 	});
 });

@@ -47,16 +47,16 @@ async function check(
 	);
 }
 
-describe('Issues mit Vorschlag brauchen das Label entscheiden (CLAUDE.md, Open work)', () => {
-	it('meldet ein offenes Issue mit Vorschlag ohne entscheiden', async () => {
+describe('Issues mit Vorschlag brauchen das Label needs-decision (CLAUDE.md, Open work)', () => {
+	it('meldet ein offenes Issue mit Vorschlag ohne needs-decision', async () => {
 		const result = await check([{ number: 7, body: proposed, labels: [{ name: 'bug' }] }]);
 		expect(result.code).toBe(1);
-		expect(result.out).toContain('#7 has "Proposed (confirm before starting)" but not the label entscheiden');
+		expect(result.out).toContain('#7 has "Proposed (confirm before starting)" but not the label needs-decision');
 	});
 
-	it('lässt Issues mit entscheiden, ohne Vorschlag und Pull Requests durch', async () => {
+	it('lässt Issues mit needs-decision, ohne Vorschlag und Pull Requests durch', async () => {
 		const result = await check([
-			{ number: 7, body: proposed, labels: [{ name: 'entscheiden' }] },
+			{ number: 7, body: proposed, labels: [{ name: 'needs-decision' }] },
 			{ number: 8, body: 'Decided (product owner)', labels: [] },
 			{ number: 9, body: proposed, labels: [], pull_request: {} },
 			{ number: 10, body: null, labels: [] },
