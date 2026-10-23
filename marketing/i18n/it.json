@@ -229,7 +229,6 @@
 	"Sie ziehen eine Rechnung hinein, etwa die der Wasserversorgung.": "Trascini una fattura, ad esempio quella dell’acqua.",
 	"Die KI liest Betrag, Datum und Kategorie.": "L’IA legge importo, data e categoria.",
 	"Sie prüfen die Angaben und bestätigen.": "Verifichi i dati e confermi.",
-	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa Lift und Allgemeinstrom, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio ascensore ed elettricità delle parti comuni, i costi dell’immobile e la quota del suo appartamento.",
 	"Ein Beispiel aus den Demodaten: Der Lift im Musterhaus Zentrum kostet CHF 1'690.00 im Jahr. Pro Einheit verteilt, trägt jede der sechs Wohnungen CHF 281.67, auch die Wohnung 1.01 von Hans Müller.": "Un esempio dai dati demo: l’ascensore del Musterhaus Zentrum costa CHF 1'690.00 all’anno. Ripartito per unità, ognuno dei sei appartamenti ne sostiene CHF 281.67, anche l’appartamento 1.01 di Hans Müller.",
 	"Rechnungssteller": "Emittente della fattura",
 	"Betrag": "Importo",
@@ -258,6 +257,6 @@
 	"Die Einrichtung macht einmal jemand, der sich mit Computern auskennt: jemand aus der Familie, eine Bekannte oder Ihr IT-Dienst. Geben Sie dieser Person die Anleitung; sie braucht rund eine Stunde. Danach arbeiten Sie im Browser, ohne technische Kenntnisse. Updates und regelmässige Datensicherungen macht diese Person; die Anleitung beschreibt sie. Auf Ihrem eigenen PC läuft Dwello nur, solange er an ist; auf einem Homeserver oder einem Server in der Cloud ist es immer erreichbar, auch vom Handy.": "L’installazione la fa una volta qualcuno che se ne intende di computer: un familiare, una conoscente o il Suo servizio informatico. Dia a questa persona la guida; serve circa un’ora. Poi Lei lavora nel browser, senza conoscenze tecniche. Aggiornamenti e backup regolari li fa questa persona; la guida li descrive. Sul Suo PC Dwello gira solo finché è acceso; su un server domestico o un server nel cloud è sempre raggiungibile, anche dal telefono.",
 	"Für die Person, die einrichtet: PC, Homeserver oder Cloud, und die Befehle": "Per chi installa: PC, server domestico o cloud, e i comandi",
 	"Die Bildschirmfotos und Beispiele auf dieser Seite stammen aus der echten App mit den Demodaten: drei Gebäude in Zürich, Luzern und Interlaken.": "Le schermate e gli esempi di questa pagina provengono dall’applicazione vera con i dati dimostrativi: tre immobili a Zurigo, Lucerna e Interlaken.",
-	"Abrechnung vergrössert anzeigen": "Mostrare il conteggio ingrandito",
-	"Geplant": "Previsto"
+	"Geplant": "Previsto",
+	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa den Lift, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio l’ascensore, i costi dell’immobile e la quota del suo appartamento."
 }

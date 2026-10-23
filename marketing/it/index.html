@@ -137,12 +137,12 @@ section { padding-block: 96px; }
 
 /* Hero */
 .hero { padding-block: 72px 64px; border-bottom: 1px solid var(--line); }
-.hero-grid { display: grid; gap: 48px; align-items: center; }
-@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-/* In one column the letter follows the sentence that points at it, before the buttons */
-@media (max-width: 979px) { .hero .hero-copy { display: contents; } .hero-grid { gap: 24px; } .hero .pdfs { order: 3; margin-block: 8px; } .hero .actions, .hero-note { order: 4; } }
+/* The letter stands in the DOM right after the sentence that points at it (tab and reading order); two columns on desktop */
+.hero-copy { display: grid; gap: 24px; }
+@media (min-width: 980px) { .hero-copy { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 48px; align-items: center; } .hero-copy > * { grid-column: 1; } .hero .pdfs { grid-column: 2; grid-row: 1 / 6; } }
+@media (max-width: 979px) { .hero .pdfs { margin-block: 8px; } }
 .hero .paper a { display: block; }
-.hero-copy { display: grid; gap: 24px; max-width: 820px; }
+.hero .paper a:focus-visible { outline-offset: -3px; }
 .hero h1 { font-size: clamp(2.5rem, 5vw, 3.75rem); letter-spacing: -0.035em; line-height: 1.04; font-weight: 750; }
 .hero h1 span { color: var(--accent); }
 .hero .lede { font-size: clamp(1.125rem, 1.7vw, 1.3125rem); color: var(--ink-muted); max-width: 36em; }
@@ -390,20 +390,20 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 
 <!-- HERO -->
 <section class="hero">
-	<div class="wrap hero-grid">
+	<div class="wrap">
 		<div class="hero-copy">
 			<span class="badge info"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Open source · Gratuito · Per la Svizzera</span>
 			<h1>Il Suo conteggio spese accessorie, <span>più semplice.</span></h1>
 			<p class="lede">Dwello allestisce il conteggio spese accessorie per locatrici e locatori privati: trascinare le fatture, verificare il conteggio, inviarlo con la QR-fattura. I Suoi inquilini ricevono una lettera come questa.</p>
+			<div class="pdfs">
+				<figure class="paper"><a href="../shots/it/pdf-page-1.webp"><img src="../shots/it/pdf-page-1.webp" width="1100" height="1555" alt="Pagina 1 del conteggio spese accessorie di Maria Rossi: importo dovuto CHF 238.10, riepilogo dei costi per categoria."></a></figure>
+				<figure class="paper qr"><img src="../shots/it/pdf-qr-part.webp" width="1240" height="666" alt="Sezione pagamento QR con croce svizzera, conto, riferimento e importo CHF 238.10."></figure>
+			</div>
 			<div class="actions">
 				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">Vedere la demo <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
 				<a class="btn btn-secondary" href="#installieren">Come avere Dwello</a>
 			</div>
 			<p class="hero-note">Gratuito e senza abbonamento. Installazione, aggiornamenti e backup li fa qualcuno che se ne intende di computer; per lavorare con Dwello non Le servono conoscenze tecniche.</p>
-		</div>
-		<div class="pdfs">
-			<figure class="paper"><a href="../shots/it/pdf-page-1.webp" aria-label="Mostrare il conteggio ingrandito"><img src="../shots/it/pdf-page-1.webp" width="1100" height="1555" alt="Pagina 1 del conteggio spese accessorie di Maria Rossi: importo dovuto CHF 238.10, riepilogo dei costi per categoria."></a></figure>
-			<figure class="paper qr"><img src="../shots/it/pdf-qr-part.webp" width="1240" height="666" alt="Sezione pagamento QR con croce svizzera, conto, riferimento e importo CHF 238.10."></figure>
 		</div>
 	</div>
 </section>
@@ -507,7 +507,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				</ul>
 			</div>
 			<figure class="shot">
-				<img class="l" src="../shots/it/statement-light.webp" width="2080" height="1104" loading="lazy" alt="Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio ascensore ed elettricità delle parti comuni, i costi dell’immobile e la quota del suo appartamento.">
+				<img class="l" src="../shots/it/statement-light.webp" width="2080" height="1104" loading="lazy" alt="Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio l’ascensore, i costi dell’immobile e la quota del suo appartamento.">
 				<img class="d" src="../shots/it/statement-dark.webp" width="2080" height="1104" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>

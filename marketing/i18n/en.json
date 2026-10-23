@@ -226,7 +226,6 @@
 	"Sie ziehen eine Rechnung hinein, etwa die der Wasserversorgung.": "You drop in an invoice, say the one from the water utility.",
 	"Die KI liest Betrag, Datum und Kategorie.": "The AI reads the amount, date and category.",
 	"Sie prüfen die Angaben und bestätigen.": "You check the details and confirm.",
-	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa Lift und Allgemeinstrom, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "The 2025 statement of Nina Brunner, apartment A2 in Seepark Residenz: for each category, such as TV/cable and caretaker, the building’s costs and her apartment’s share.",
 	"Ein Beispiel aus den Demodaten: Der Lift im Musterhaus Zentrum kostet CHF 1'690.00 im Jahr. Pro Einheit verteilt, trägt jede der sechs Wohnungen CHF 281.67, auch die Wohnung 1.01 von Hans Müller.": "An example from the demo data: the elevator in Musterhaus Zentrum costs CHF 1'690.00 a year. Split per unit, each of the six apartments bears CHF 281.67, Hans Müller’s apartment 1.01 included.",
 	"Rechnungssteller": "Invoice issuer",
 	"Betrag": "Amount",
@@ -255,6 +254,6 @@
 	"Die Einrichtung macht einmal jemand, der sich mit Computern auskennt: jemand aus der Familie, eine Bekannte oder Ihr IT-Dienst. Geben Sie dieser Person die Anleitung; sie braucht rund eine Stunde. Danach arbeiten Sie im Browser, ohne technische Kenntnisse. Updates und regelmässige Datensicherungen macht diese Person; die Anleitung beschreibt sie. Auf Ihrem eigenen PC läuft Dwello nur, solange er an ist; auf einem Homeserver oder einem Server in der Cloud ist es immer erreichbar, auch vom Handy.": "Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. That person does updates and regular backups; the guide describes them. On your own PC Dwello runs only while it is switched on; on a home server or a server in the cloud it is always reachable, from your phone too.",
 	"Für die Person, die einrichtet: PC, Homeserver oder Cloud, und die Befehle": "For the person who sets it up: PC, home server or cloud, and the commands",
 	"Die Bildschirmfotos und Beispiele auf dieser Seite stammen aus der echten App mit den Demodaten: drei Gebäude in Zürich, Luzern und Interlaken.": "The screenshots and examples on this page come from the real app with its demo data: three buildings in Zurich, Lucerne and Interlaken.",
-	"Abrechnung vergrössert anzeigen": "Show the statement enlarged",
-	"Geplant": "Planned"
+	"Geplant": "Planned",
+	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa den Lift, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "The 2025 statement of Nina Brunner, apartment A2 in Seepark Residenz: for each category, such as TV/cable, the building’s costs and her apartment’s share."
 }
