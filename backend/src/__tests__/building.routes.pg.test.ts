@@ -111,4 +111,45 @@ describe('POST /api/v1/buildings mit Wohnungen', () => {
 		expect(response.status).toBe(400);
 		expect(await buildingsNamed(body.name)).toEqual([]);
 	});
+
+	// H-28 (#717): the checks of the form are the backend's; every failed one with its field, nothing created
+	it('nennt jedes ungültige Feld mit seinem Code und legt nichts an', async () => {
+		const body = { ...building([{ number: '101', floor: '', area: '72,555', rooms: '3' }]), postalCode: '84', city: '' };
+
+		const response = await sendJson('POST', '/api/v1/buildings', body);
+
+		expect(response.status).toBe(400);
+		const { causes } = (await response.json()) as { causes: { code: string; params: { field: string } }[] };
+		expect(causes.map(({ code, params }) => [params.field, code])).toEqual([
+			['postalCode', 'POSTAL_CODE_DIGITS'],
+			['city', 'BUILDING_CITY_REQUIRED'],
+			['apartments.0.floor', 'APARTMENT_FLOOR_REQUIRED'],
+			['apartments.0.area', 'APARTMENT_AREA_INVALID']
+		]);
+		expect(await buildingsNamed(body.name)).toEqual([]);
+	});
+
+	// the form sends what was entered: the Stockwerk as text, Fläche and Zimmer with a comma
+	it('nimmt Stockwerk als Text und Fläche und Zimmeranzahl mit Komma an', async () => {
+		const response = await sendJson('POST', '/api/v1/buildings', building([{ number: '101', floor: '2', area: '72,5', rooms: '3,5' }]));
+
+		expect(response.status).toBe(201);
+		const { id } = (await response.json()) as { id: string };
+		expect((await apartmentsOf(id)).map((a) => [a.floor, Number(a.area), Number(a.rooms)])).toEqual([[2, 72.5, 3.5]]);
+	});
+});
+
+describe('PUT /api/v1/buildings/:id prüft das Formular', () => {
+	it.each(['84', '84000000001'])('nennt die PLZ «%s» ohne 4 Ziffern und ändert nichts', async (entered) => {
+		const { id, postalCode } = await createBuilding({ name: `PLZtest ${crypto.randomUUID()}`, address: 'Testweg 1', postalCode: '8400', city: 'Winterthur', canton: 'ZH' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/buildings/${id}`, { postalCode: entered });
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'POSTAL_CODE_DIGITS', causes: [{ code: 'POSTAL_CODE_DIGITS', params: { field: 'postalCode' } }] });
+			expect(((await (await sendJson('GET', `/api/v1/buildings/${id}`)).json()) as { postalCode: string }).postalCode).toBe(postalCode);
+		} finally {
+			await deleteBuilding(id);
+		}
+	});
 });
