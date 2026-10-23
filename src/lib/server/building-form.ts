@@ -1,10 +1,11 @@
-import { m } from '$lib/paraglide/messages';
+import { backendMessage, type BackendError } from '$lib/backend-error';
 
 export const formError = (form: string) => ({
 	success: false,
 	errors: { form } as Record<string, string>
 });
 
+/** The building as entered; the backend checks it (H-28, #717) */
 export function parseBuildingForm(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();
 	const yearBuilt = field('yearBuilt');
@@ -18,62 +19,40 @@ export function parseBuildingForm(formData: FormData) {
 		yearBuilt: yearBuilt ? Number(yearBuilt) : null,
 		noTank: formData.has('noTank')
 	};
-
-	const errors: Record<string, string> = {};
-	if (!building.name) errors.name = m.buildings_error_name();
-	if (!building.address) errors.address = m.buildings_error_address();
-	if (!building.postalCode) errors.postalCode = m.buildings_error_postal_code();
-	else if (!/^\d{4}$/.test(building.postalCode))
-		errors.postalCode = m.buildings_error_postal_code_digits();
-	if (!building.city) errors.city = m.buildings_error_city();
-	if (!building.canton) errors.canton = m.buildings_error_canton();
-	const year = building.yearBuilt;
-	if (year !== null && !(year >= 1800 && year <= new Date().getFullYear())) {
-		errors.yearBuilt = m.buildings_error_year_built();
-	}
-
-	return { building, errors };
+	return { building };
 }
 
 /**
  * The Wohnungen taken from the Gebäuderegister (#479), as `apartments.<row>.<field>`: rows the landlord left out are
- * disabled in the form and not sent. Every field is required, its error keyed like the field; Fläche (m², up to two
- * decimals, above 0) and Zimmeranzahl (half rooms, 0.5 to 99.5) also as numbers, with a comma or a point.
+ * disabled in the form and not sent. As entered; `rows` names the form row of each one sent, for the backend's refusals.
  */
-export function parseRegisterApartments(formData: FormData, errors: Record<string, string>) {
-	const rows = new Set(
-		[...formData.keys()].flatMap((key) => key.match(/^apartments\.(\d+)\./)?.[1] ?? [])
+export function parseRegisterApartments(formData: FormData) {
+	const rows = [
+		...new Set([...formData.keys()].flatMap((key) => key.match(/^apartments\.(\d+)\./)?.[1] ?? []))
+	];
+	const field = (row: string, key: string) =>
+		String(formData.get(`apartments.${row}.${key}`) ?? '').trim();
+	const apartments = rows.map((row) => ({
+		number: field(row, 'number'),
+		floor: field(row, 'floor'),
+		area: field(row, 'area'),
+		rooms: field(row, 'rooms')
+	}));
+	return { apartments, rows };
+}
+
+/**
+ * The backend's refusal of the form, each message at the field it names (H-28, #717); an apartment's field
+ * (`apartments.<index>.<field>`) at the form row it came from
+ */
+export function refusedFields(refused: BackendError, rows: string[] = []): Record<string, string> {
+	return Object.fromEntries(
+		(refused.causes ?? []).map((cause) => {
+			const field = String(cause.params?.field ?? 'form').replace(
+				/^apartments\.(\d+)\./,
+				(_, index) => `apartments.${rows[Number(index)]}.`
+			);
+			return [field, backendMessage(cause, '')];
+		})
 	);
-	const required = {
-		number: m.apartments_error_number,
-		floor: m.apartments_error_floor,
-		area: m.apartments_error_area,
-		rooms: m.apartments_error_rooms
-	};
-	// the columns: decimal(8,2) and decimal(3,1)
-	const numbers = { area: /^\d{1,6}(\.\d{1,2})?$/, rooms: /^\d{1,2}(\.[05])?$/ };
-	const notNumbers = {
-		area: m.buildings_register_error_area,
-		rooms: m.buildings_register_error_rooms
-	};
-	return [...rows].map((row) => {
-		const field = (key: keyof typeof required) => {
-			const value = String(formData.get(`apartments.${row}.${key}`) ?? '').trim();
-			if (!value) errors[`apartments.${row}.${key}`] = required[key]();
-			return value;
-		};
-		const decimal = (key: 'area' | 'rooms') => {
-			const value = field(key).replace(',', '.');
-			if (value && !(numbers[key].test(value) && Number(value) > 0)) {
-				errors[`apartments.${row}.${key}`] = notNumbers[key]();
-			}
-			return value;
-		};
-		return {
-			number: field('number'),
-			floor: Number(field('floor')),
-			area: decimal('area'),
-			rooms: decimal('rooms')
-		};
-	});
 }

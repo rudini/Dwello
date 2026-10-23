@@ -10,6 +10,7 @@ import backendBuilding from '../../tests/contracts/building.json';
 import buildingList from '../../tests/contracts/buildings.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
+import fieldsRefused from '../../tests/contracts/building-fields-refused.json';
 import { load as listLoad } from '../routes/buildings/+page.server';
 
 type Action = (event: never) => Promise<unknown>;
@@ -93,9 +94,10 @@ describe('Neues Gebäude', () => {
 			withApartments
 		).catch(() => {});
 
+		// as entered: the backend checks and converts them (H-28, #717)
 		expect(body.apartments).toEqual([
-			{ number: '101', floor: 1, area: '75', rooms: '3' },
-			{ number: '201', floor: 2, area: '98', rooms: '4.5' }
+			{ number: '101', floor: '1', area: '75', rooms: '3' },
+			{ number: '201', floor: '2', area: '98', rooms: '4.5' }
 		]);
 	});
 
@@ -113,63 +115,22 @@ describe('Neues Gebäude', () => {
 		});
 	});
 
-	it('nimmt Fläche und Zimmeranzahl auch mit Komma an', async () => {
-		let body: Record<string, unknown> = {};
-		await run(
-			newActions.default as Action,
-			(_url, init) => {
-				body = JSON.parse(String(init?.body));
-				return Response.json({ id: 'b1' });
-			},
-			{},
-			{ ...withApartments, 'apartments.0.area': '72,5', 'apartments.0.rooms': '3,5' }
-		).catch(() => {});
-
-		expect(body.apartments).toContainEqual({ number: '101', floor: 1, area: '72.5', rooms: '3.5' });
-	});
-
-	it.each([
-		['area', 'abc', 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'],
-		['area', '0', 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'],
-		['area', '72.555', 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'],
-		['rooms', '3.25', 'Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.'],
-		['rooms', '0', 'Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.'],
-		['rooms', '100', 'Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.']
-	])('lehnt %s «%s» ab und sagt, was einzugeben ist', async (field, value, error) => {
+	// H-28 (#717): the backend checks the form; each refusal shows at its field, an apartment at the row it came from
+	it('zeigt jede Ablehnung des Backends an ihrem Feld, auch in der Zeile einer Wohnung', async () => {
 		const result = await run(
 			newActions.default as Action,
-			() => Response.json({ id: 'b1' }),
+			() => Response.json(fieldsRefused, { status: 400 }),
 			{},
-			{
-				...withApartments,
-				[`apartments.0.${field}`]: value
-			}
+			withApartments
 		);
 
-		expect(result).toMatchObject({ success: false, errors: { [`apartments.0.${field}`]: error } });
-	});
-
-	it('verlangt Fläche, Stockwerk und Zimmeranzahl jeder übernommenen Wohnung', async () => {
-		const result = await run(
-			newActions.default as Action,
-			() => Response.json({ id: 'b1' }),
-			{},
-			{
-				...withApartments,
-				'apartments.2.floor': '',
-				'apartments.2.area': '',
-				'apartments.2.rooms': '',
-				'apartments.0.number': ''
-			}
-		);
-
-		expect(result).toMatchObject({
+		expect(result).toEqual({
 			success: false,
 			errors: {
-				'apartments.0.number': 'Wohnungsnummer ist erforderlich.',
+				postalCode: 'PLZ muss 4 Ziffern haben.',
+				city: 'Ort ist erforderlich.',
 				'apartments.2.floor': 'Stockwerk ist erforderlich.',
-				'apartments.2.area': 'Fläche ist erforderlich.',
-				'apartments.2.rooms': 'Zimmeranzahl ist erforderlich.'
+				'apartments.2.area': 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'
 			}
 		});
 	});
@@ -230,28 +191,25 @@ describe.each([
 	['Neues Gebäude', newActions.default],
 	['Gebäude bearbeiten', editActions.default]
 ])('%s', (_page, action) => {
-	it('verlangt Gebäudename und Kanton', async () => {
-		const result = await run(
+	it('sendet auch leere Felder, damit das Backend jedes nennt', async () => {
+		let body: Record<string, unknown> = {};
+		await run(
 			action as Action,
-			rejected,
+			(_url, init) => {
+				body = JSON.parse(String(init?.body));
+				return Response.json(fieldsRefused, { status: 400 });
+			},
 			{ id: 'b1' },
-			{ ...validBuilding, name: '', canton: '' }
+			{ ...validBuilding, name: '', city: '' }
 		);
 
-		expect(result).toMatchObject({
-			errors: { name: 'Gebäudename ist erforderlich.', canton: 'Kanton ist erforderlich.' }
-		});
+		expect(body).toMatchObject({ name: '', city: '' });
 	});
 
-	it('nennt den fehlenden Ort wie das Glossar', async () => {
-		const result = await run(
-			action as Action,
-			rejected,
-			{ id: 'b1' },
-			{ ...validBuilding, city: '' }
-		);
+	it('zeigt die Ablehnung des Backends an ihrem Feld', async () => {
+		const result = await run(action as Action, () => Response.json(fieldsRefused, { status: 400 }), { id: 'b1' });
 
-		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich.' } });
+		expect(result).toMatchObject({ errors: { postalCode: 'PLZ muss 4 Ziffern haben.', city: 'Ort ist erforderlich.' } });
 	});
 });
 

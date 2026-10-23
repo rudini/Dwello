@@ -1,0 +1,11 @@
+{
+	"error": "Some fields are not valid",
+	"code": "POSTAL_CODE_DIGITS",
+	"params": { "field": "postalCode" },
+	"causes": [
+		{ "code": "POSTAL_CODE_DIGITS", "params": { "field": "postalCode" } },
+		{ "code": "BUILDING_CITY_REQUIRED", "params": { "field": "city" } },
+		{ "code": "APARTMENT_FLOOR_REQUIRED", "params": { "field": "apartments.1.floor" } },
+		{ "code": "APARTMENT_AREA_INVALID", "params": { "field": "apartments.1.area" } }
+	]
+}

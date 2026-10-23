@@ -2974,6 +2974,14 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Workflow note: commit-msg gate misses `-F` (`docs/reviews/workflow-notes-h28-heating-hints.md`)
 - [x] Merge `main` after #646 (clean), before complete; PR pushed after this archive
 
+## Session H-28 step 2: building form checks in the backend
+
+#717 (H-28): every check of the building form (required fields, PLZ 4 digits, Baujahr, the Wohnungen from the Gebäuderegister) is the backend's (`backend/src/services/building-fields.ts`); POST/PUT `/buildings` refuse with `causes` per field, the BFF shows each at its field. No scenario: behaviour unchanged (same texts, all at once). Parallel session (checklist in the pull request).
+
+- [x] Backend checks with unit and route tests, red first; contract `building-fields-refused.json`
+- [x] BFF sends what was entered, maps refusals to fields and apartment rows; texts as `backend_<code>` in four languages, 8 unused keys removed
+- [x] `code-reviewer` round 1 (`docs/reviews/h28e-review-1.md`: J-1..J-3 Minor; J-2, J-3 fixed, J-1 stays) and closing round (`h28e-review-2.md`: nothing new)
+- [x] Before complete; PR pushed after this archive
 ## Session #647: heating hints for a berichtigte Abrechnung
 
 #647 (decided 23.10.2026, option 1): the contracts that count for the heating hints of a run (#339, #335) are the ones the run bills (`planRun`), a contract whose statement of the period is replaced included. Scenario «Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum beim Lauf einer berichtigten Abrechnung» (`statement-generate.feature`).
