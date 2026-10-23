@@ -51,7 +51,7 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 | `upgrade` | Migration `ADD COLUMN … NOT NULL` ohne Default | rot: «the migrations of this checkout fail on the data of v0.89.11» |
 | `ci-duration` | Shell-Logik mit Startzeit vor 20 bzw. 10 min | Warnung bei 20 min, keine bei 10 min; grüne Quote aus Beispiel-JSON «1 of 2» |
 
-Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in den Demo-Daten leer. Leer sind auch `invoice_documents`, `ki_settings` und `local_accounts`; dort kann der Upgrade-Check keinen Verlust sehen (Grenze unten).
+Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in den Demo-Daten leer. Leer sind auch `invoice_documents`, `ki_settings` und `local_accounts`; dort kann der Upgrade-Check keinen Verlust sehen (#782).
 
 ## 4. Nicht oder nur teilweise automatisiert
 
@@ -59,9 +59,9 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 |---|---|---|
 | R1 (H/H) Verschlüsseltes, kompatibles Backup | Es gibt keinen Backup-Mechanismus; ihn zu bauen ist eine funktionale Änderung und in Phase 2 verboten (#718). | Bis #718: vor jedem wöchentlichen Release `pg_dump` und Restore nach `docs/installation.md` §5 auf der Demo-VM durchspielen und die Dauer notieren. Der Release-Job aus R1 wird mit #718 gebaut. |
 | O1 (H/M) Fehlgeschlagenes Backup sichtbar | Hängt an R1; ohne Backup nichts zu prüfen. | Mit #718: E2E «altes Backup → Hinweis» und Backend-Test `/health`. |
-| U1, zweiter Teil: fehlgeschlagene Migration macht den Container «unhealthy» mit lesbarer Ursache | Heute nicht garantiert; prüfen hiesse Verhalten ändern, falls es fehlt. Der Upgrade-Check prüft nur, dass Migrationen auf Daten durchlaufen und keine Zeilen verlieren. | Review-Checkliste für PRs mit Migration: «läuft auf bestehenden Zeilen (Default, Backfill)?» Der Negativtest kommt mit der Umsetzung von U1 (Backup vor Migration, AP3). |
-| U1, Summen der Abrechnungen gleich | Zeilenzahlen fangen Löschungen, keine geänderten Beträge. | `daten-pruefer` bei PRs, die Beträge oder Migrationen an Abrechnungstabellen ändern (`CLAUDE.md` Workflow 5). |
-| P2 (H/M) API < 500 ms p95 | Automatisierbar, aber zurückgestellt: Annahme A4 (sagt der GitHub-Runner etwas über die Demo-VM?) ist offen, und ein Benchmark braucht Sitzung und Datenmenge von 50 Wohnungen über Jahre. | Entscheid des Product Owners nötig (siehe Bericht). |
+| U1, zweiter Teil: fehlgeschlagene Migration macht den Container «unhealthy» mit lesbarer Ursache | Heute nicht garantiert; prüfen hiesse Verhalten ändern, falls es fehlt. Der Upgrade-Check prüft nur, dass Migrationen auf Daten durchlaufen und keine Zeilen verlieren. | Review-Checkliste für PRs mit Migration: «läuft auf bestehenden Zeilen (Default, Backfill)?» Der Negativtest kommt mit der Umsetzung von U1 (Backup vor Migration, AP3), #782. |
+| U1, Summen der Abrechnungen gleich | Zeilenzahlen fangen Löschungen, keine geänderten Beträge. | `daten-pruefer` bei PRs, die Beträge oder Migrationen an Abrechnungstabellen ändern (`CLAUDE.md` Workflow 5); Summenvergleich im Check: #782. |
+| P2 (H/M) API < 500 ms p95 | Automatisierbar, aber zurückgestellt: Annahme A4 (sagt der GitHub-Runner etwas über die Demo-VM?) ist offen, und ein Benchmark braucht Sitzung und Datenmenge von 50 Wohnungen über Jahre. | Entscheid des Product Owners nötig: #781. |
 | AP5, dritter Punkt: Examples-Zeilen, die nur Backend-Regeln variieren | Maschinell schwer (Annahme in `principles.md`). | Review-Checkliste `code-reviewer`. |
 
 ## 5. Grenzen der Checks
