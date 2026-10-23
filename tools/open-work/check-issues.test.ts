@@ -116,14 +116,14 @@ Funktionalität: Liegenschaften
       | Seeblick |
 `;
 
-/** A git repository whose `origin/main` holds `feature` and whose HEAD holds `head` in its place */
-function specRepo(head: string) {
+/** A git repository whose `origin/main` holds `base` and whose HEAD holds `head` in its place */
+function specRepo(head: string, base = feature) {
 	const cwd = mkdtempSync(`${tmpdir()}/check-specs-`);
 	const git = (...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd });
 	const write = (text: string) => writeFileSync(join(cwd, 'tests/e2e/features/buildings.feature'), text);
 	git('init', '-q');
 	mkdirSync(join(cwd, 'tests/e2e/features'), { recursive: true });
-	write(feature);
+	write(base);
 	git('add', '-A');
 	git('commit', '-qm', 'base');
 	git('update-ref', 'refs/remotes/origin/main', 'HEAD');
@@ -190,5 +190,10 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 		expect(await changeSpec(`${feature}      | Lindenhof |\n`)).toMatchObject({ code: 0 });
 		const block = `${feature}\n    # #643: ein zweiter Block\n    Beispiele:\n      | name      |\n      | Lindenhof |\n`;
 		expect(await changeSpec(block)).toMatchObject({ code: 0 });
+		// review spec643-review-2 C-3: a tagged block stays free, also before a scenario without @wip
+		const outlineFirst = `Funktionalität: Suche\n\n${feature.slice(feature.indexOf('  Szenariogrundriss'))}\n  Szenario: Danach\n    Dann sieht er alles\n`;
+		const tagged = outlineFirst.replace('| Seeblick |\n', '| Seeblick |\n\n    @wip\n    Beispiele:\n      | name |\n      | Hof  |\n');
+		const cwd = specRepo(tagged, outlineFirst);
+		expect(await check([], 200, { number: 5, body: '', cwd, base: 'main' })).toMatchObject({ code: 0 });
 	});
 });

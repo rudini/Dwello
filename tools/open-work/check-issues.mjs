@@ -145,7 +145,7 @@ function insertedInto(spec, text, after, inserted) {
 	const first = inserted.findIndex((line) => scenarioLine.test(line));
 	const lead = first < 0 ? inserted : inserted.slice(0, first);
 	const body = lead.filter((line) => !/^\s*(?:#.*|@.*)?$/.test(line));
-	if (body.length && !examplesOnly(['', ...text.split('\n')], after, body)) return spec[after];
+	if (body.length) return examplesOnly(['', ...text.split('\n')], after, body) ? undefined : spec[after];
 	if (first < 0 && lead.some((line) => /^\s*@/.test(line))) return spec[after + 1];
 }
 
