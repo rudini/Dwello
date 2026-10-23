@@ -55,6 +55,7 @@ type Invoice = {
 	servicePeriodStart?: string;
 	servicePeriodEnd?: string;
 	invoiceNumber?: string;
+	createdAt?: Date;
 };
 
 /** The predefined key «Pro Fläche (m²)», which every invoice the tests record through the API needs (#379) */

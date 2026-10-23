@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { invoices } from '../db/schema';
+import { getInvoicesForStatement } from '../services/invoice.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -79,5 +80,17 @@ describe('Rechnungen einer Abrechnungsperiode', () => {
 			await callApi(`/api/v1/invoices?buildingId=${rental.building}&periodStart=2025-10-01&periodEnd=2025-12-31`)
 		).json()) as { total: number };
 		expect(response.total).toBe(4);
+	});
+});
+
+// #768: invoices of one Rechnungsdatum in the order they were entered, so a statement lists its positions (and the PDF
+// its agreed categories) the same way each time; entered second here but first by its time of entry
+describe('Rechnungen mit gleichem Rechnungsdatum', () => {
+	it('nimmt die Abrechnung in der Reihenfolge ihrer Erfassung', async () => {
+		await insertInvoice(rental.building, { description: 'entered second', invoiceDate: '2024-06-30', createdAt: new Date('2024-07-02T08:00:00Z') });
+		await insertInvoice(rental.building, { description: 'entered first', invoiceDate: '2024-06-30', createdAt: new Date('2024-07-01T08:00:00Z') });
+
+		const taken = await getInvoicesForStatement(rental.building, '2024-01-01', '2024-12-31');
+		expect(taken.map((invoice) => invoice.description)).toEqual(['entered first', 'entered second']);
 	});
 });

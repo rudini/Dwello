@@ -607,7 +607,7 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 	const tank = await periodReadings(buildingId, periodStart, periodEnd);
 	const results = await selectWithDetails()
 		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
-		.orderBy(invoices.invoiceDate);
+		.orderBy(invoices.invoiceDate, invoices.createdAt, invoices.id); // one date: as entered, the same each time (#768)
 	const delivery = (invoice: (typeof results)[number]['invoice']) => !!tank?.covered && invoice.categoryId === tank.categoryId;
 
 	return results
