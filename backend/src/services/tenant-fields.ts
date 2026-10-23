@@ -40,6 +40,10 @@ export function tenantFieldErrors(t: Entered): ErrorCode[] {
 	return [...errors].map(([field, code]) => ({ code, params: { field } }));
 }
 
-/** A new tenant: what it does not send is stored empty, in Switzerland (code review K-3) */
+/**
+ * A new tenant: what it does not send is stored empty, in Switzerland (code review K-3). Its channel is checked only
+ * when sent: without one the tenant is stored for letters unchecked, as the API's other callers send names only
+ * (code review K-5); the form always sends one
+ */
 export const newTenantFieldErrors = (t: Entered) =>
 	tenantFieldErrors({ email: null, address: null, postalCode: null, city: null, country: 'CH', ...t });
