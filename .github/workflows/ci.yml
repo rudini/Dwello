@@ -152,6 +152,8 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the upgrade check starts from the previous release tag
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -166,6 +168,10 @@ jobs:
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun run test
         working-directory: backend
+      # U1 (docs/architecture/fitness-functions.md): demo data of the previous release, migrated by this checkout, keeps every row
+      - name: Upgrade from the previous release
+        if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
+        run: tools/fitness/upgrade-check.sh
 
   # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
   # Each runs in shards (Playwright --shard) on parallel runners; the job "e2e-results" reports each under its own name
@@ -302,6 +308,51 @@ jobs:
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
         run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+
+  # Architecture fitness functions (docs/architecture/fitness-functions.md): pull requests and main may not make a
+  # measured value worse than tools/fitness/ratchet.json; the nightly run reports the co-change coupling of 6 months
+  fitness:
+    name: Architecture fitness
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+      - name: Fitness functions
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request) bun tools/fitness/fitness.ts --base "origin/${{ github.base_ref }}" --format github ;;
+            push) bun tools/fitness/fitness.ts --base "${{ github.event.before }}" --format github ;;
+            *) bun tools/fitness/fitness.ts --format github && bun tools/fitness/fitness.ts --cochange --format github ;;
+          esac
+
+  # T1: wall clock of this run from its start to its last result (target 15 min on pull requests and main), and on the
+  # nightly run the share of green push runs on main over 7 days; a report, never a failure (one run's time is noisy)
+  ci-duration:
+    name: CI duration
+    needs: [changes, build, static-checks, unit-tests, e2e-results, fallow, fitness]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - continue-on-error: true # a report: an API or clock error must not turn the check red
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUNS: repos/${{ github.repository }}/actions
+        run: |
+          started=$(gh api "$RUNS/runs/${{ github.run_id }}" --jq .run_started_at)
+          minutes=$(( ($(date +%s) - $(date -d "$started" +%s)) / 60 ))
+          echo "Fitness: CI wall clock ${minutes} min (${{ github.event_name }}, target 15 min)" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$minutes" -gt 15 ]; then echo "::warning title=Fitness ci-duration::T1/AP5: this run took ${minutes} min, the target is 15 min. Fix: move rule variants from E2E to unit or *.pg.test.ts tests, or shorten the slowest job (critical path in the run's timing)."; fi
+          if [ "${{ github.event_name }}" = schedule ]; then
+            gh api "$RUNS/workflows/ci.yml/runs?branch=main&event=push&created=>=$(date -d '7 days ago' +%F)&per_page=100" \
+              --jq '[.workflow_runs[] | select(.status == "completed" and .conclusion != "cancelled")] | "Fitness: green push runs on main in 7 days: \([.[] | select(.conclusion == "success")] | length) of \(length)"' \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
 
   # A pull request that adds a dependency with a known high or critical vulnerability fails. It needs the dependency
   # graph, which a private repository only has with GitHub Advanced Security, so it runs once the repository is public
@@ -464,7 +515,7 @@ jobs:
   # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").
   main-status:
     name: Main status
-    needs: [changes, build, static-checks, unit-tests, e2e-tests, e2e-results, fallow]
+    needs: [changes, build, static-checks, unit-tests, e2e-tests, e2e-results, fallow, fitness]
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:

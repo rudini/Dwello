@@ -3,7 +3,8 @@
 		"playwright.screenshots.config.ts",
 		"docs/design/tools/persona-kit.mjs",
 		"tools/open-work/check-issues.mjs",
-		"tools/arch-baseline/0*.ts"
+		"tools/arch-baseline/0*.ts",
+		"tools/fitness/fitness.ts"
 	],
 	"ignorePatterns": [
 		"src/lib/paraglide/**"

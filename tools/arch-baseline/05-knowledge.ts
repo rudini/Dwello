@@ -9,7 +9,7 @@
 // Out: m4-*.csv
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { OUT, ROOT, classify, csv, excludedBecause, git } from './lib';
+import { ANCHORED_RE, OUT, ROOT, STATUS, STATUS_CMP, classify, csv, excludedBecause, git, tablesOf } from './lib';
 
 const CODE_LAYERS = new Set(['FE', 'BFF', 'Backend', 'DB', 'Shared/Contracts']);
 const all = git(['ls-files', '-z']).split('\0').filter((p) => p && !excludedBecause(p));
@@ -22,20 +22,7 @@ const layersOf = (ps: string[]) => [...new Set(ps.map(layer))].sort().join('|');
 // ---------------------------------------------------------------- A entity mirrors
 const schema = text.get('backend/src/db/schema.ts')!;
 const GENERIC = new Set(['id', 'createdAt', 'updatedAt', 'name', 'notes', 'description', 'status', 'type', 'email', 'phone', 'amount', 'date', 'year', 'label']);
-const tables: { table: string; fields: string[] }[] = [];
-for (const m of schema.matchAll(/export const (\w+) = pgTable\(\s*'(\w+)',\s*\{/g)) {
-	let depth = 1;
-	let i = m.index! + m[0].length;
-	const start = i;
-	while (depth && i < schema.length) {
-		if (schema[i] === '{') depth++;
-		else if (schema[i] === '}') depth--;
-		i++;
-	}
-	const body = schema.slice(start, i - 1);
-	const fields = [...body.matchAll(/^\t{1,3}(\w+):\s*\w+\(/gm)].map((f) => f[1]);
-	tables.push({ table: m[1], fields });
-}
+const tables = tablesOf(schema);
 const keysOf = (p: string) => {
 	const t = text.get(p)!;
 	const re = p.endsWith('.json') ? /"(\w+)"\s*:/g : /(?<![\w.$'"`])(\w+)\??:(?!:)/g;
@@ -192,7 +179,6 @@ csv(
 
 // G3: status values of statements and contracts: production files per layer that name the quoted value
 // (a comparison, a filter or a label), i.e. places that decide something by that status.
-const STATUS = ['draft', 'sent', 'paid', 'replaced', 'overdue', 'settled', 'active', 'ended', 'future'];
 csv(
 	'm4-status-literals.csv',
 	STATUS.map((value) => {
@@ -206,9 +192,6 @@ csv(
 // G4: signs of domain decisions outside the backend (product owner, 23.10.2026: the BFF makes no domain
 // decisions). Per FE/BFF production file: comparisons against a status value (`status !== 'replaced'`) and
 // anchored regex literals (`/^\d{4}$/`, validation rules), plus fallow's cyclomatic sum.
-const statusAlt = STATUS.join('|');
-const STATUS_CMP = new RegExp(`[!=]==\\s*['"\`](${statusAlt})['"\`]|['"\`](${statusAlt})['"\`]\\s*[!=]==`, 'g');
-const ANCHORED_RE = /\/\^[^/\n]+\$\/[a-z]*/g;
 const health = JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8'));
 const cyclo = new Map<string, number>(health.file_scores.map((f: { path: string; total_cyclomatic: number }) => [f.path, f.total_cyclomatic]));
 const decisionRows = prod
