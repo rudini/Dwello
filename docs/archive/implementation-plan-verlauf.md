@@ -3075,3 +3075,8 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] Texts as `backend_<code>` in four languages, 9 unused keys removed
 - [x] `code-reviewer`: `h28g-review-1.md` (5 Minor, fixed), `h28h-review-1.md` (5 Minor, fixed; the 404 text of C-1 stays), closing round `h28i-review-1.md`
 - [x] Before complete; PR pushed after this archive
+
+## Session: grill-me without an issue (workflow note of #643)
+
+- [x] `.claude/skills/grill-me/SKILL.md`: description, intro, steps 1 and 5 cover a request without an issue (product owner decision 2026-10-23, `docs/reviews/workflow-notes-issue-643.md`)
+- [x] Archive, PR: pushed after this archive
