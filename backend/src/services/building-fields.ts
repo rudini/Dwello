@@ -13,17 +13,18 @@ const blank = (value: unknown) => String(value ?? '').trim() === '';
 /** The building's fields; a field not sent (a change in part) is not checked */
 export function buildingFieldErrors(b: Entered, today = swissToday()): ErrorCode[] {
 	const errors: ErrorCode[] = [];
-	const required = (field: keyof Entered, code: string) => {
+	// written as `code: '…'`, so src/__tests__/backend-codes.test.ts finds each one's message (code review J-2)
+	const required = (field: keyof Entered, { code }: { code: string }) => {
 		if (field in b && blank(b[field])) errors.push({ code, params: { field } });
 	};
-	required('name', 'BUILDING_NAME_REQUIRED');
-	required('address', 'BUILDING_ADDRESS_REQUIRED');
+	required('name', { code: 'BUILDING_NAME_REQUIRED' });
+	required('address', { code: 'BUILDING_ADDRESS_REQUIRED' });
 	if ('postalCode' in b) {
 		if (blank(b.postalCode)) errors.push({ code: 'POSTAL_CODE_REQUIRED', params: { field: 'postalCode' } });
 		else if (!/^\d{4}$/.test(b.postalCode!.trim())) errors.push({ code: 'POSTAL_CODE_DIGITS', params: { field: 'postalCode' } });
 	}
-	required('city', 'BUILDING_CITY_REQUIRED');
-	required('canton', 'BUILDING_CANTON_REQUIRED');
+	required('city', { code: 'BUILDING_CITY_REQUIRED' });
+	required('canton', { code: 'BUILDING_CANTON_REQUIRED' });
 	const year = b.yearBuilt;
 	if (year != null && !(year >= 1800 && year <= Number(today.slice(0, 4))))
 		errors.push({ code: 'BUILDING_YEAR_BUILT_INVALID', params: { field: 'yearBuilt' } });
@@ -45,12 +46,12 @@ export function apartmentFieldErrors(apartments: EnteredApartment[]): ErrorCode[
 		const at = (key: string) => `apartments.${i}.${key}`;
 		const missing = (
 			[
-				['number', 'APARTMENT_NUMBER_REQUIRED'],
-				['floor', 'APARTMENT_FLOOR_REQUIRED'],
-				['area', 'APARTMENT_AREA_REQUIRED'],
-				['rooms', 'APARTMENT_ROOMS_REQUIRED']
+				{ key: 'number', code: 'APARTMENT_NUMBER_REQUIRED' },
+				{ key: 'floor', code: 'APARTMENT_FLOOR_REQUIRED' },
+				{ key: 'area', code: 'APARTMENT_AREA_REQUIRED' },
+				{ key: 'rooms', code: 'APARTMENT_ROOMS_REQUIRED' }
 			] as const
-		).flatMap(([key, code]) => (blank(a[key]) ? [{ code, params: { field: at(key) } }] : []));
+		).flatMap(({ key, code }) => (blank(a[key]) ? [{ code, params: { field: at(key) } }] : []));
 		const invalid = (['area', 'rooms'] as const).flatMap((key) => {
 			const value = decimalOf(a[key]);
 			const { pattern, code } = decimals[key];
