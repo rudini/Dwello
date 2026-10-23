@@ -2,15 +2,16 @@
 
 Stand: 23.10.2026, Basis `origin/main` d4d508cc2, Fenster ab 23.04.2026. Alle Zahlen stammen aus `tools/arch-baseline/run.sh` (Rohdaten: `tools/arch-baseline/out/*.csv`, alle Tabellen dieses Reports generiert in `out/report-tables.md`). Markierung jeder Aussage: **[gemessen]** (Skriptausgabe), **[abgeleitet]** (Schluss aus Messwerten oder gelesenem Diff), **[Vermutung]** (nicht belegt).
 
+**Entscheid Product Owner (23.10.2026): Änderbarkeit zählt nur Produktivdateien** (Schichten FE inkl. i18n, BFF, Backend, DB, `src/lib/types.ts`). Test-, Doku- und Prozessdateien bleiben als Kontext im Report, sind aber nicht Teil der Messgrössen, der Kopplungsanalyse (M2 primär) und der Szenarien.
+
 ## 1. Zusammenfassung
 
-1. Ein Feature (`feat`, 113 Einheiten) ändert im Median **38 Dateien** (P90 86): **12 Produktiv-, 16 Test-, 12 sonstige** (Docs/Prozess) in **7 Produktivmodulen** und **3 Produktivschichten** (P90 5). Ein Fix (150): Median 9 Dateien, 2 davon Produktivcode. [gemessen]
-2. Von allen Dateiänderungen in Features sind nur **36,9 % Produktivcode**; 38,1 % sind Tests, 25,0 % Docs/Prozess. 92,9 % der Features ändern Prozessdateien (Median 9, z. B. `docs/reviews`, `implementation_plan.md`). [gemessen]
-3. Die **Top-10 der gekoppelten Dateipaare** gehören alle zu einem Bildschirm-Register, das in 3 Dateien von Hand gepflegt wird (`screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`; Kopplungsgrad bis 0,98). Alle 87 Bildschirme stehen in allen drei. [gemessen]
-4. Von 281 Kopplungspaaren über Schwelle sind nur **27 rein produktiv**; 167 sind schichtübergreifend **ohne Import-Beziehung**. [gemessen]
-5. FE/BFF importieren **0** Backend-Dateien; `src/lib/types.ts` (398 LOC) spiegelt das DB-Schema von Hand. Ein DB-Feld wird im Median in **6 Produktivdateien** ausserhalb der DB deklariert (P90 19); 13 Status-/Wertelisten stehen identisch in mehreren Schichten. [gemessen]
-6. Textuelle Duplikation ist niedrig (0,87 %, keine schichtübergreifende Klon-Gruppe), Import-Zyklen zur Laufzeit 0, Deepcheck 0 flache Module: Die Guardrails wirken. Die Amplifikation entsteht durch **semantisch dupliziertes Wissen**, nicht durch kopierten Code. [gemessen/abgeleitet]
-7. Die Hotspots (Änderungen × Komplexität) liegen alle in der Abrechnungs-Kette über 3 Schichten (`pdf.service`, `statement.service`, `statement-pdf.service`, BFF `statement-generation`, FE `statement-wizard`). [gemessen]
+1. Ein Feature (`feat`, 113 Einheiten) ändert im Median **12 Produktivdateien** (P90 31) in **7 Produktivmodulen** (P90 20) und **3 Produktivschichten** (P90 5); 54 % der Features berühren ≥ 3 Schichten. Features mit genau einem feat-Commit: Median 9,5, P90 25. Ein Fix (150): Median 2, P90 9. [gemessen]
+2. Nur Produktivcode betrachtet: 68 Dateipaare ändern sich überdurchschnittlich oft gemeinsam (≥ 5-mal, Kopplungsgrad ≥ 30 %), **28 davon schichtübergreifend ohne Import-Beziehung**. Die zwei stärksten Paare hängen an `src/lib/types.ts`: mit den i18n-Texten (36 gemeinsame Änderungen) und mit `schema.ts` (26). [gemessen]
+3. FE/BFF importieren **0** Backend-Dateien; `types.ts` spiegelt das DB-Schema von Hand. Ein DB-Feld wird im Median in **6 Produktivdateien** ausserhalb der DB deklariert (P90 19). [gemessen]
+4. Fachregeln über Status werden in mehreren Schichten entschieden: der Statuswert `'replaced'` steht in 19 Produktivdateien (FE 8, BFF 2, Backend 8); die Regel „eine ersetzte Abrechnung zählt nicht“ wurde in Backend und BFF getrennt eingebaut (e6644bea3, 5d6888eb2). [gemessen/abgeleitet]
+5. Die Hotspots (Änderungen × Komplexität) liegen alle in Abrechnung und Mietvertrag, verteilt über Backend, BFF und FE; zwei BFF-Dateien sind komplexer als die meisten Backend-Services. [gemessen]
+6. Textuelle Duplikation 0,87 %, keine Laufzeit-Zyklen, 0 flache Module (Deepcheck): Die Guardrails wirken. Die Amplifikation entsteht durch **semantisch dupliziertes Wissen**, nicht durch kopierten Code. [gemessen/abgeleitet]
 
 ## 2. Methode und Ausschlüsse
 
@@ -22,7 +23,7 @@ Ergebnis: 408 Einheiten (feat 113, fix 150, docs 80, chore 65). 29 der 113 feat-
 
 **Schichten.** `tools/arch-baseline/layers.json` (Regex → Schicht, Art `prod`/`test`/`other`, Modul; erste Regel gewinnt). Zuordnungsentscheide, die du prüfen solltest:
 - BFF = `src/routes/{api,auth}/**`, `src/lib/server/**`, `hooks.server.ts`, alle `+page.server.ts`/`+layout.server.ts`/`+server.ts`.
-- Shared/Contracts = `src/lib/types.ts` (prod) und `tests/contracts/*.json` (API-Vertrags-Fixtures, Art test).
+- Shared/Contracts = `src/lib/types.ts` (Art prod) und `tests/contracts/*.json` (API-Vertrags-Fixtures, Art test, also nicht Teil der Messgrösse).
 - `messages/*.json` = FE (Modul `fe:i18n`); `backend/src/db/**` und `backend/migrations/**` = DB.
 - Zusätzliche Schichten neben den vorgegebenen: Tests-Unit, Tests-Acceptance (`tests/e2e`, `tests/a11y`), Docs, **Process** (`docs/reviews`, `docs/archive`, `docs/design/personas`, `implementation_plan.md`, `CLAUDE.md`, `.claude/`), Marketing.
 - Modul = Route-Bereich (`fe:routes/contracts`, `bff:load/contracts`, `bff:api/…`), sonst Datei (`be:services/contract`, `bff:server/tenant`, `fe:lib/contract-form`) oder Ordner (`e2e:steps`, `fe:ui`).
@@ -41,7 +42,7 @@ Ergebnis: 408 Einheiten (feat 113, fix 150, docs 80, chore 65). 29 der 113 feat-
 | Formatierungs-Commits (Betreff `…: format …`, „with Prettier“) | 1 PR (#19), 5 Commits |
 | Sync-Merges auf `main` ohne PR (würden andere Einheiten doppelt zählen) | 2 |
 
-Für M2 zusätzlich: nur Dateien der Art prod/test; die vier `messages/*.json` als **eine** logische Datei (sie ändern sich per Regel immer gemeinsam; unzusammengefasst: `m2-file-pairs-units-raw.csv`); Transaktionen mit > 50 Dateien ausgelassen (23 von 311).
+Für M2 (primär): nur Produktivdateien; die vier `messages/*.json` als **eine** logische Datei (sie ändern sich per Regel immer gemeinsam); Transaktionen mit > 50 Produktivdateien ausgelassen (3 von 244).
 
 ## 3. Metriken
 
@@ -60,7 +61,7 @@ Für M2 zusätzlich: nur Dateien der Art prod/test; die vier `messages/*.json` a
 | DB | prod | 41 | 1 574 | 5 |
 | Shared/Contracts | test / prod | 76 / 1 | 891 / 398 | 1 / 1 |
 
-Prozessartefakte sind grösser als der gesamte Produktivcode (73 713 vs. 52 101 LOC inkl. i18n-JSON). [gemessen]
+Produktivcode: 52 101 LOC in 530 Dateien (inkl. i18n-JSON). [gemessen]
 
 **Import-Graph** (1007 Dateien, 3247 Kanten; `imports-file.csv`, `imports-module.csv`, `imports-layer.csv`): Keine Kante FE/BFF → Backend/DB; die Schichtgrenze BFF↔Backend ist HTTP, die zwischen `+page.server.ts` und `+page.svelte` läuft über generierte `./$types` (vom Graphen nicht erfasst). Kanten FE → Shared 85, BFF → Shared 23, BFF → FE 60, FE → BFF 17. [gemessen]
 
@@ -68,19 +69,16 @@ Prozessartefakte sind grösser als der gesamte Produktivcode (73 713 vs. 52 101 
 
 ### M1 Änderungsumfang pro Feature [gemessen, `m1-*.csv`]
 
+Messgrösse (Produktivcode):
+
 | Metrik | feat Median | feat P90 | feat Max | feat (1 feat-Commit) Median | P90 | fix Median | fix P90 |
 |---|---|---|---|---|---|---|---|
-| Dateien gesamt | 38 | 86 | 518 | 34 | 71 | 9 | 27 |
 | Produktivdateien | 12 | 31 | 294 | 9,5 | 25 | 2 | 9 |
-| Testdateien | 16 | 38 | 161 | 11,5 | 32 | 3 | 13 |
-| sonstige (Docs/Prozess/Tooling) | 12 | 24 | 63 | 9 | 16 | 3 | 11 |
 | Produktivmodule | 7 | 20 | 88 | 5 | 17 | 2 | 6 |
-| Testmodule | 7 | 11 | 12 | 7 | 10 | 2 | 7 |
 | Produktivschichten (FE, BFF, Backend, DB, Shared) | 3 | 5 | 5 | 2 | 5 | 1 | 3 |
 | geänderte Zeilen prod | 182 | 797 | 20 298 | 106,5 | 485 | 14,5 | 105 |
-| geänderte Zeilen test | 265 | 1190 | 8 904 | 203 | 735 | 40,5 | 188 |
 
-Dateien pro Schicht und Einheit:
+Produktivdateien pro Schicht und Einheit:
 
 | Schicht | feat Median | feat P90 | fix Median | fix P90 |
 |---|---|---|---|---|
@@ -88,75 +86,72 @@ Dateien pro Schicht und Einheit:
 | BFF | 1 | 7 | 0 | 2 |
 | Backend | 2 | 7 | 0 | 2 |
 | DB | 0 | 2 | 0 | 1 |
-| Shared/Contracts | 1 | 4 | 0 | 1 |
-| Tests-Unit | 5 | 17 | 1 | 4 |
-| Tests-Acceptance | 9 | 19 | 1 | 8 |
-| Process | 9 | 17 | 3 | 8 |
-| Docs | 2 | 6 | 0 | 2 |
+| Shared (`types.ts`) | 1 | 4 | 0 | 1 |
 
-Anteile der Einheiten: feat mit ≥ 3 Produktivschichten 54 %, mit i18n 67,3 %, mit Acceptance-Tests 88,5 %, mit Prozessdateien 92,9 % (fix: 11,3 / 22 / 50,7 / 82 %).
+Anteile: feat mit ≥ 3 Produktivschichten 54 %, mit i18n 67,3 % (fix: 11,3 % / 22 %). Häufigste Produktivmodule in Features (`m1-modules-feat.csv`): `fe:i18n` 67,3 %, `fe:routes/statements` 34,5 %, `shared:types` 32,7 %, `db:migrations` und `db:schema` je 31 %, `fe:routes/contracts` 27,4 %, `fe:ui` 23 %, `be:services/statement` 21,2 %, `bff:load/statements` 20,4 %, `be:services/pdf` 19,5 %.
 
-Module, die die meisten Features ändern (Auszug `m1-modules-feat.csv`): `e2e:features` 85 %, `fe-test:unit` 84,1 %, `e2e:steps` 82,3 %, `docs/design` und `docs/reviews` je 77,9 %, `fe:i18n` 67,3 %, `e2e:tasks` 67,3 %, `be-test:unit` 64,6 %, `e2e:questions` 64,6 %, `e2e:targets` 58,4 %, `contracts` (Fixtures) 46,9 %, `tests:a11y` 45,1 %; erstes Produktivmodul ausser i18n: `fe:routes/statements` 34,5 %, `shared:types` 32,7 %, `db:schema` 31 %.
+Produktivdateien pro Scope (feat+fix, Scopes mit ≥ 5 Einheiten, `m1-scope-prod.csv`): `statements` 55 Einheiten, Median 7 / P90 27; `contracts` 35, 10 / 26; `invoices` 24, 4 / 25; `tenants` 6, 11,5 / 21; `categories` 5, 9 / 38; ohne Scope 25, 18 / 29.
 
-**Top 10 Features** (Dateien prod/test/sonst., Prod-Module, Prod-Schichten):
+**Top 10 Features nach Produktivdateien:**
 
-| PR | Datum | Titel | Commits | prod | test | sonst. | Module | Schichten |
-|---|---|---|---|---|---|---|---|---|
-| #32 | 10.10. | new design system and guided UI (redesign) | 105 | 294 | 161 | 63 | 56 | 3 |
-| #48 | 12.10. | UI in German, French, Italian, English | 52 | 251 | 38 | 58 | 88 | 4 |
-| #39 | 11.10. | Swiss statement PDF, invoice check, date field | 37 | 101 | 114 | 30 | 55 | 5 |
-| #539 | 20.10. | categories and required Verteilschlüssel | 35 | 38 | 64 | 20 | 22 | 5 |
-| #361 | 17.10. | Korrespondenzadresse with country, old-address warning, LI IBAN | 25 | 37 | 55 | 27 | 29 | 5 |
-| #527 | 20.10. | carry over Saldo below CHF 5.00 | 19 | 33 | 47 | 24 | 20 | 5 |
-| #238 | 16.10. | create invoices from uploaded files | 19 | 48 | 32 | 38 | 23 | 5 |
-| #392 | 17.10. | agreed Nebenkosten per Mietvertrag | 21 | 38 | 39 | 22 | 22 | 5 |
-| #559 | 20.10. | outdated statements, period filter, Tankbestand | 17 | 31 | 44 | 13 | 23 | 5 |
-| #54 | 12.10. | upcoming end, statements after an end change | 23 | 34 | 39 | 11 | 21 | 4 |
+| PR | Datum | Titel | Commits | feat-Commits | prod | Prod-Module | Schichten |
+|---|---|---|---|---|---|---|---|
+| #32 | 10.10. | new design system and guided UI (redesign) | 96 | 29 | 294 | 56 | 3 |
+| #48 | 12.10. | UI in German, French, Italian, English | 51 | 9 | 251 | 88 | 4 |
+| #39 | 11.10. | Swiss statement PDF, invoice check, date field | 32 | 6 | 101 | 55 | 5 |
+| #238 | 16.10. | create invoices from uploaded files | 15 | 4 | 48 | 23 | 5 |
+| #539 | 20.10. | categories and required Verteilschlüssel | 27 | 1 | 38 | 22 | 5 |
+| #392 | 17.10. | agreed Nebenkosten per Mietvertrag | 16 | 3 | 38 | 22 | 5 |
+| #361 | 17.10. | Korrespondenzadresse with country, old-address warning, LI IBAN | 20 | 2 | 37 | 29 | 5 |
+| #43 | 11.10. | fee of own costs, Saldo to 5 Rappen | 10 | 2 | 37 | 20 | 5 |
+| #54 | 12.10. | upcoming end, statements after an end change | 23 | 2 | 34 | 21 | 4 |
+| #527 | 20.10. | carry over Saldo below CHF 5.00 | 13 | 1 | 33 | 20 | 5 |
+
+(Commits = Nicht-Merge-Commits im PR.)
+
+**Kontext, nicht Teil der Messgrösse:** Pro Feature kommen im Median 16 Test- und 12 Doku-/Prozessdateien dazu (Gesamt 38, P90 86); nur 36,9 % aller Dateiänderungen in Features sind Produktivcode. 92,9 % der Features ändern Prozessdateien, 88,5 % Acceptance-Tests. Die Prozessartefakte (73 713 LOC) sind grösser als der Produktivcode.
 
 ### M2 Change Coupling [gemessen, `m2-*.csv`]
 
-Kopplungsgrad = gemeinsame Änderungen / Änderungen an A oder B (= n_AB / (n_A + n_B − n_AB)); zusätzlich gerichtete Konfidenz n_AB/n_A in den CSVs. Schwellen wie vorgegeben **≥ 5 gemeinsam und ≥ 30 %**, nicht angepasst: Sie liefern 281 Dateipaare, genug für eine Auswahl ohne Rauschen.
+Kopplungsgrad = gemeinsame Änderungen / Änderungen an A oder B (= n_AB / (n_A + n_B − n_AB)); gerichtete Konfidenz n_AB/n_A zusätzlich in den CSVs. Schwellen wie vorgegeben **≥ 5 gemeinsam und ≥ 30 %**, nicht angepasst: Sie liefern 68 Produktiv-Dateipaare, genug für eine Auswahl ohne Rauschen.
 
 | Sicht | Transaktionen | ausgelassen (> 50 Dateien) | Paare über Schwelle |
 |---|---|---|---|
-| Datei / PR-Einheit (primär) | 311 | 23 | 281 |
-| Datei / Commit | 1223 | 7 | 243 |
-| Modul / PR-Einheit | 311 | 3 | 101 |
+| **Datei / PR-Einheit, nur prod (primär)** | 244 | 3 | 68 |
+| Modul / PR-Einheit, nur prod | 244 | 3 | 38 |
+| Kontext: Datei / PR-Einheit, prod + test | 311 | 23 | 281 |
+| Kontext: Datei / Commit, prod + test | 1223 | 7 | 243 |
 
-Primärsicht: gleiche Schicht ohne Import 59, gleiche Schicht mit Import 30, schichtübergreifend ohne Import 167, schichtübergreifend mit Import 25. Nach Art: test–test 132, prod–test 122, **prod–prod 27**.
+Primärsicht: schichtübergreifend ohne Import **28** (11 davon Mietvertrag), gleiche Schicht mit Import 22, schichtübergreifend mit Import 9, gleiche Schicht ohne Import 9.
 
-**Top 20 Dateipaare** (Primärsicht; Beispiel-Commit = kleinster Commit, der beide ändert):
+**Top 20 Produktiv-Dateipaare** (Beispiel-Commit = kleinster Commit, der beide ändert; Ausnahme #9, siehe Abschnitt 4):
 
 | # | A | B | gem. | Grad | Schicht | Import | Beispiel |
 |---|---|---|---|---|---|---|---|
-| 1 | e2e/features/accessibility.feature | e2e/features/sprachen-bildschirme.feature | 43 | 0,977 | gleich | nein | 0049589600 |
-| 2 | tests/a11y/screens.json | e2e/features/accessibility.feature | 43 | 0,827 | gleich | nein | 0049589600 |
-| 3 | tests/a11y/screens.json | e2e/features/sprachen-bildschirme.feature | 42 | 0,808 | gleich | nein | 0049589600 |
-| 4 | tests/a11y/screens.json | e2e/tasks/accessibility.ts | 40 | 0,656 | gleich | nein | 4d5e72f205 |
-| 5 | e2e/features/sprachen-bildschirme.feature | e2e/tasks/accessibility.ts | 37 | 0,661 | gleich | nein | 4d5e72f205 |
-| 6 | e2e/features/accessibility.feature | e2e/tasks/accessibility.ts | 37 | 0,649 | gleich | nein | 4d5e72f205 |
-| 7 | messages/{de,fr,it,en}.json | tests/a11y/screens.json | 44 | 0,44 | über | nein | 6524f3ad2c |
-| 8 | messages/{de,fr,it,en}.json | e2e/features/sprachen-bildschirme.feature | 40 | 0,417 | über | nein | 6524f3ad2c |
-| 9 | messages/{de,fr,it,en}.json | e2e/features/accessibility.feature | 40 | 0,412 | über | nein | 6524f3ad2c |
-| 10 | messages/{de,fr,it,en}.json | e2e/tasks/accessibility.ts | 39 | 0,375 | über | nein | 6524f3ad2c |
-| 11 | backend/…/api-contracts.pg.test.ts | tests/contracts/README.md | 22 | 0,595 | über | nein | 9945733f9f |
-| 12 | src/__tests__/contract-edit.dom.test.ts | routes/contracts/ContractForm.svelte | 16 | 0,727 | über | nein | 0e3db29728 |
-| 13 | backend/…/statement-pdf-render.test.ts | backend/services/pdf.service.ts | 19 | 0,594 | über | ja | e214aa7a7e |
-| 14 | e2e/questions/contract-form.ts | e2e/steps/contract-form.steps.ts | 16 | 0,696 | gleich | ja | ac890cc09f |
-| 15 | e2e/features/statement-detail.feature | e2e/steps/statement-detail.steps.ts | 19 | 0,559 | gleich | nein | c02c420507 |
-| 16 | e2e/features/contract-edit.feature | e2e/steps/contract-form.steps.ts | 16 | 0,593 | gleich | nein | 80df615e9f |
-| 17 | e2e/features/statement-generate.feature | e2e/steps/statement-generate.steps.ts | 16 | 0,593 | gleich | nein | 0e382240de |
-| 18 | e2e/questions/contract-form.ts | e2e/targets/contract-form.ts | 13 | 0,722 | gleich | ja | ac890cc09f |
-| 19 | backend/routes/contracts.ts | backend/services/contract.service.ts | 12 | 0,75 | gleich | ja | 64d2b16fa8 |
-| 20 | src/__tests__/contract-form.test.ts | src/lib/contract-form.ts | 11 | 0,786 | über | ja | d2de64cc54 |
+| 1 | messages/{de,fr,it,en}.json | src/lib/types.ts | 36 | 0,316 | über | nein | 8d6984e33 |
+| 2 | backend/src/db/schema.ts | src/lib/types.ts | 26 | 0,426 | über | nein | acdcc9ab4 |
+| 3 | be/services/pdf.service.ts | be/services/statement-pdf.service.ts | 22 | 0,478 | gleich | ja | f0f8a92c9 |
+| 4 | be/routes/contracts.ts | be/services/contract.service.ts | 15 | 0,652 | gleich | ja | 64d2b16fa |
+| 5 | be/services/contract.service.ts | routes/contracts/[id]/+page.server.ts | 15 | 0,6 | über | nein | e6644bea3 |
+| 6 | backend/src/db/schema.ts | be/services/statement.service.ts | 21 | 0,35 | über | ja | a94beff36 |
+| 7 | backend/src/db/schema.ts | be/services/calculation.service.ts | 19 | 0,358 | über | ja | 3130fb793 |
+| 8 | backend/src/db/schema.ts | be/services/statement-pdf.service.ts | 19 | 0,333 | über | ja | 67053378d |
+| 9 | backend/src/db/schema.ts | be/services/pdf.service.ts | 20 | 0,303 | über | ja | 3ae2b1d6a |
+| 10 | routes/contracts/[id]/+page.server.ts | routes/contracts/[id]/+page.svelte | 12 | 0,5 | über | nein | ad6c5cc98 |
+| 11 | src/lib/contract-form.ts | routes/contracts/ContractForm.svelte | 13 | 0,448 | gleich | ja | 2062c4b98 |
+| 12 | be/services/calculation.service.ts | be/services/statement-pdf.service.ts | 15 | 0,385 | gleich | nein | 67053378d |
+| 13 | src/lib/overview.ts | routes/dashboard/+page.server.ts | 11 | 0,524 | über | ja | 618786772 |
+| 14 | routes/contracts/ContractForm.svelte | routes/contracts/new/ContractWizard.svelte | 12 | 0,444 | gleich | nein | 427f89303 |
+| 15 | src/lib/invoice-upload.ts | routes/invoices/InvoiceUploadDialog.svelte | 6 | 0,857 | gleich | ja | 87fee8a8b |
+| 16 | src/lib/server/statement-generation.ts | src/lib/statement-wizard.ts | 12 | 0,414 | über | ja | 3edc96311 |
+| 17 | be/routes/contracts.ts | routes/contracts/[id]/+page.server.ts | 11 | 0,44 | über | nein | fa6f5df22 |
+| 18 | src/lib/server/statement-generation.ts | routes/statements/generate/+page.server.ts | 10 | 0,455 | gleich | ja | 5d6888eb2 |
+| 19 | src/lib/server/statement-actions.ts | routes/statements/[id]/+page.server.ts | 7 | 0,636 | gleich | ja | a4fa94603 |
+| 20 | be/services/contract.service.ts | routes/contracts/ContractForm.svelte | 12 | 0,364 | über | nein | b39a53d53 |
 
-(Testdateien zählen hier als eigene Schicht, darum ist z. B. Test ↔ Komponente „über“.)
+**Produktive Modulpaare** (Auszug `m2-module-pairs-units-prod.csv`): `db:migrations`↔`db:schema` 40/0,714; `fe:i18n`↔`shared:types` 36/0,316; `db:schema`↔`shared:types` 26/0,426 (kein Import); `be:services/pdf`↔`be:services/statement-pdf` 22/0,478; `be:routes/contracts`↔`be:services/contract` 15/0,652; `be:services/contract`↔`bff:load/contracts` 16/0,571 (kein Import); `bff:load/contracts`↔`fe:routes/contracts` 20/0,392; `bff:load/statements`↔`fe:routes/statements` 24/0,387.
 
-**Rein produktive Paare** (alle 27 in `s4-prod-pairs.csv`, Auszug): `be/routes/contracts` ↔ `contract.service` 12/0,75 (Import ja); `pdf.service` ↔ `statement-pdf.service` 15/0,405 (ja); `db/schema.ts` ↔ `calculation.service` 14/0,35 (ja); **`db/schema.ts` ↔ `src/lib/types.ts` 14/0,311 (Import nein)**; `ContractForm.svelte` ↔ `ContractWizard.svelte` 10/0,435 (nein); `be/routes/contracts` ↔ `routes/contracts/[id]/+page.server.ts` 8/0,471 (nein); `contract.service` ↔ `src/lib/contract-form.ts` 7/0,333 (nein). 11 der 27 Paare sind schichtübergreifend ohne Import, 9 davon im Bereich Mietvertrag.
-
-**Produktive Modulpaare** (Auszug `s4-prod-module-pairs.csv`): `db:migrations`↔`db:schema` 40/0,714; `fe:i18n`↔`shared:types` 36/0,316; `db:schema`↔`shared:types` 26/0,426 (kein Import); `be:routes/contracts`↔`be:services/contract` 15/0,652; `be:services/contract`↔`bff:load/contracts` 16/0,571 (kein Import); `bff:load/contracts`↔`fe:routes/contracts` 20/0,392; `bff:load/statements`↔`fe:routes/statements` 24/0,387.
-
-Die Commit-Sicht bestätigt das Bild: Platz 1–6 sind dieselben Register-Paare (bis 95 gemeinsame Commits).
+**Kontext, nicht Teil der Messgrösse:** Mit Testdateien gerechnet, belegen die 10 stärksten Paare ein Bildschirm-Register, das in 3 Testdateien von Hand gepflegt wird (`screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`; Grad bis 0,98; alle 87 Bildschirme stehen in allen dreien). Von den 281 Paaren dieser Sicht sind 132 test–test und 122 prod–test.
 
 ### M3 Hotspots [gemessen, `m3-hotspots.csv`]
 
@@ -180,7 +175,7 @@ Die Commit-Sicht bestätigt das Bild: Platz 1–6 sind dieselben Register-Paare 
 | 14 | 42 | src/routes/dashboard/+page.server.ts | BFF | 33 | 21 | 75 | 13,8 | 246 | 5 |
 | 15 | 38 | backend/src/services/invoice-completeness.service.ts | Backend | 18 | 7 | 130 | 26,5 | 363 | 3 |
 
-(Die Ränge in der Datei zählen Testdateien mit; diese Tabelle zeigt nur Produktivcode.) Die heissesten Testdateien sind heisser als jeder Produktivcode: `tests/e2e/tasks/accessibility.ts` 104 Commits, zykl. Σ 268; `statement-pages.dom.test.ts` 97/251; `statement-wizard.dom.test.ts` 82/206; `tests/e2e/fixtures/backend.ts` 92/154.
+(Die Ränge in der CSV zählen Testdateien mit; diese Tabelle zeigt nur Produktivcode.)
 
 Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteilen sich auf Backend, BFF und FE. Zwei BFF-Dateien (`statement-generation.ts` zykl. Σ 152, `contracts/[id]/+page.server.ts` 115) sind komplexer als die meisten Backend-Services, obwohl laut `CLAUDE.md` die Fachlogik im Backend liegen soll. [abgeleitet]
 
@@ -190,7 +185,7 @@ Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteil
 
 **Entitäts-Spiegel:** Dateien ausserhalb der DB-Schicht, die mindestens die Hälfte (min. 3) der spezifischen Felder einer Tabelle als Schlüssel deklarieren (Typ-Property, Objektliteral, Validierungsschema, Mapper, Drizzle-Projektion):
 
-| Tabelle | spez. Felder | Dateien | FE | BFF | Backend | types.ts | Vertrags-Fixtures |
+| Tabelle | spez. Felder | Dateien | FE | BFF | Backend | types.ts | Vertrags-Fixtures (Kontext) |
 |---|---|---|---|---|---|---|---|
 | apartments | 5 | 21 | 2 | 8 | 9 | 1 | 1 |
 | distributionKeys | 5 | 21 | 3 | 4 | 7 | 1 | 6 |
@@ -204,6 +199,20 @@ Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteil
 **Deklarationsorte pro DB-Feld:** 125 Felder (nur einer Tabelle eigen, nicht generisch): Median **6** Produktivdateien ausserhalb der DB, P90 19, Max 59 (`apartments.number`). Beispiel `buildings.noTank`: 6 Dateien (`be/routes/buildings.ts`, `invoice-completeness.service.ts`, `lib/server/building-form.ts`, `lib/server/building.ts`, `lib/types.ts`, `BuildingForm.svelte`).
 
 **Typen pro Entität:** Contract 30 Typdeklarationen (17 Namen, 19 Dateien, in allen 5 Produktivschichten), Statement 29 (20 Namen, 16 Dateien), Invoice 18, Building/Apartment/Tenant je 13. Gleicher Name in mehreren Dateien: `Apartment`, `Tenant` je 4 Dateien in DB, Backend, Shared und BFF (`routes/contracts/new/+page.server.ts`); `Period` 5 Dateien in BFF und Backend; `RefusedStatement` 4 Dateien in FE und BFF.
+
+**Statuswerte:** Produktivdateien, die einen Statuswert als String nennen (Vergleich, Filter, Beschriftung):
+
+| Wert | Dateien | FE | BFF | Backend | DB | types.ts |
+|---|---|---|---|---|---|---|
+| draft | 29 | 15 | 2 | 9 | 2 | 1 |
+| paid | 21 | 8 | 1 | 10 | 1 | 1 |
+| sent | 19 | 5 | 0 | 12 | 1 | 1 |
+| replaced | 19 | 8 | 2 | 8 | 0 | 1 |
+| overdue | 12 | 6 | 0 | 5 | 0 | 1 |
+| future | 12 | 4 | 3 | 4 | 0 | 1 |
+| settled | 11 | 4 | 0 | 6 | 0 | 1 |
+| active | 11 | 4 | 2 | 4 | 0 | 1 |
+| ended | 9 | 5 | 1 | 2 | 0 | 1 |
 
 **Identische Wertelisten in mehreren Dateien** (21 Sets, 13 schichtübergreifend), u. a.:
 
@@ -224,74 +233,91 @@ Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteil
 
 ## 4. Klassifizierte Kandidaten (Vorschlag für das Review)
 
-Grundlage: gelesene Diffs der Beispiel-Commits (alles **[abgeleitet]**; die Einordnung ist ein Vorschlag, keine Entscheidung).
+Grundlage: gelesene Diffs der Beispiel-Commits (alles **[abgeleitet]**; Vorschlag, keine Entscheidung). Für #9 war der kleinste Commit (047d704db) nur eine Kommentaränderung; gelesen habe ich stattdessen 3ae2b1d6a.
 
 | Kandidat | Vorschlag | Begründung mit Beispiel |
 |---|---|---|
-| Paare 1–6: Bildschirm-Register `screens.json` / `accessibility.feature` / `sprachen-bildschirme.feature` / `tasks/accessibility.ts` | **akzidentell** | 0049589600 benennt den Zustand `list-scoped` → `default` mit identischer Änderung in allen 3 Dateien. Dasselbe Wissen („welche Bildschirme und Zustände gibt es“) steht 3- bis 4-mal; alle 87 Bildschirme stehen in allen drei. |
-| Paare 7–10: `messages/*` ↔ Register | **gemischt**: Texte essenziell (4 Sprachen sind Anforderung), Kopplung an das Register akzidentell | 6524f3ad2c: französische Guillemets in `fr.json` und zugleich Zustand in den 3 Registerdateien nachgezogen. |
-| Paar 11: `api-contracts.pg.test.ts` ↔ `tests/contracts/README.md` | **akzidentell** | 9945733f9f: neuer Vertragstest plus eine README-Zeile, die dieselbe Fixture noch einmal beschreibt (README = handgepflegter Index, eine Tabellenzeile je Fixture). |
-| Paar 12: `contract-edit.dom.test` ↔ `ContractForm.svelte` | **überwiegend essenziell** | 0e3db29728 entfernt Bedingung und Test gemeinsam; der Kommentar zeigt aber, dass das FE eine Backend-Invariante kennt („a saved notice always has an end (backend `checkNotice`)“) → akzidenteller Anteil. |
-| Paar 13: `statement-pdf-render.test` ↔ `pdf.service` | **essenziell** | e214aa7a7e: Regel „Stockwerk nur einmal drucken“ plus ihr Test. |
-| Paare 14, 18: E2E `questions` ↔ `steps`/`targets` | **akzidentell** (Test-Zeremonie) | ac890cc09f: ein neuer Hinweis braucht ein Target (`advance-payment-notice`), eine Question (`noAdvanceNoticeText`) und einen Step, in 3 Dateien. |
-| Paare 15–17: `.feature` ↔ `.steps.ts` | **essenziell** (ATDD by design) | c02c420507, 80df615e9f, 0e382240de: Szenario und Glue-Code. |
-| Paar 19: `be/routes/contracts` ↔ `contract.service` | **Grenzfall, eher akzidentell** | 64d2b16fa8: der neue Filter `search` wird im Routen-Schema deklariert und 1:1 durchgereicht (`search: query.search`). Validierung an der Grenze ist legitim; die Eingabeform steht aber zweimal. |
-| Paar 20: `contract-form.test` ↔ `contract-form.ts` | **essenziell** | d2de64cc54: Verhalten und Unit-Test gemeinsam. |
-| Feature PR#32 (Redesign) | **essenziell, einmalig** | Querschnitts-Umbau auf Tokens/Komponenten (269 FE-Dateien). Von 7497 geänderten Testzeilen betreffen nur 805 Selektoren/Texte; der Rest sind umgeschriebene Tests. Nicht repräsentativ. |
-| Feature PR#48 (i18n) | **essenziell, einmalig** | Einführung von vier Sprachen, 251 Produktivdateien. Nicht repräsentativ; begründet aber die dauerhaften 4 i18n-Dateien pro Text. |
-| Feature PR#39 | **Messartefakt** | Bündelt 6 `feat`-Commits (PDF nach Schweizer Norm, Datumsfeld, Rechnungsprüfung, Heizkosten …); die Grösse kommt aus dem PR-Schnitt, nicht aus einem Feature. |
-| Feature PR#539 (Kategorien) | **gemischt** | Essenziell: Migration, UI, Regeln. Akzidentell: das neue Feld `allocableInvoiceCount` wird von Hand im Backend-Typ, im SQL, im BFF-Typ `CategoryWithUsage`, im BFF-Mapper (`Number(c.allocableInvoiceCount) \|\| 0`) und in `tests/contracts/category.json` deklariert. 64 Test- vs. 38 Produktivdateien. |
-| Feature PR#361 (Korrespondenzadresse) | **gemischt** | `country` in 6 Orten von Hand: `schema.ts`, Routen-Validierung `t.String({ pattern: '^[A-Z]{2}$' })`, Service-Projektion, BFF-Formular (`countryCodes`), BFF-Mapper, `types.ts`; dazu `oldAddress` in 4 Vertrags-Fixtures, weil jede Antwort, die einen Mieter einbettet, eine eigene Fixture hat. Essenziell: Migration, Formularfeld, PDF-Adresse. |
+| #1 `messages/*` ↔ `types.ts` | **akzidentell** (Sammeldatei) | 8d6984e33: neuer UI-Zustand „Keine KI“ = Text in `messages/*` plus Flag `kiOff` in `types.ts`. Kein dupliziertes Wissen im Diff; die Kopplung entsteht, weil `types.ts` (398 LOC) die Typen aller Bereiche sammelt und in 37 von 113 Features geändert wird. |
+| #2 `schema.ts` ↔ `types.ts` | **akzidentell** | acdcc9ab4: `isHeatingCost` in `schema.ts` und in `types.ts` von Hand, mit identischem Kommentar „Art. 5 VMWG“. Gleiches Muster in PR#361 (`country`, 6 Orte) und PR#539 (`allocableInvoiceCount`, 5 Orte). |
+| #3 `pdf.service` ↔ `statement-pdf.service` | **essenziell** | f0f8a92c9: Hinweis „ersetzt die Abrechnung …“: Text (in `pdf.service`, eigene Übersetzungstabelle für das PDF in 4 Sprachen) und Daten (`statement-pdf.service`). Darstellung und Daten getrennt ist gewollt. Am Rand: das PDF hat eine zweite i18n-Quelle neben `messages/*`. |
+| #4 `be/routes/contracts` ↔ `contract.service` | **Grenzfall, eher akzidentell** | 64d2b16fa: neuer Filter `search` wird im Routen-Schema deklariert und 1:1 durchgereicht (`search: query.search`). Validierung an der Grenze ist legitim; die Eingabeform steht aber zweimal. |
+| #5 `contract.service` ↔ `contracts/[id]/+page.server.ts` | **akzidentell** | e6644bea3: die Regel „eine ersetzte Abrechnung zählt nicht“ wird im Backend (`ne(status, 'replaced')`) und im BFF (`s.status !== 'replaced'`) getrennt eingebaut. |
+| #6 `schema.ts` ↔ `statement.service` | **essenziell** | a94beff36: „überfällig“ wird berechnet statt gespeichert: Speicherung und Statusübergänge ändern sich zusammen. |
+| #7 `schema.ts` ↔ `calculation.service` | **essenziell** | 3130fb793: neue Spalte `managementFeePercent` und ihre Verwendung in der Berechnung. |
+| #8 `schema.ts` ↔ `statement-pdf.service` | **essenziell** | 67053378d: Heizkostenanteil wird gespeichert (`heatingShare`, jsonb) und im PDF so gedruckt. |
+| #9 `schema.ts` ↔ `pdf.service` | **essenziell**, mit Anmerkung | 3ae2b1d6a: gespeicherte Form `InvoicePart` (in `schema.ts`) und ihre Darstellung. `schema.ts` trägt die Fachtypen der JSON-Spalten (Fan-in 81). |
+| #10 `+page.server.ts` ↔ `+page.svelte` (Mietvertrag) | **essenziell** | ad6c5cc98: neue Formular-Actions „beenden/löschen“ und ihre Knöpfe; SvelteKit-Seitenpaar. |
+| #11 `contract-form.ts` ↔ `ContractForm.svelte` | **essenziell** | 2062c4b98: Logik bewusst aus der Komponente ausgelagert; beide ändern sich gemeinsam. |
+| #12 `calculation.service` ↔ `statement-pdf.service` | **gemischt** | 67053378d: der Heizkostenanteil wird in der Berechnung bestimmt und gespeichert; `statement-pdf.service` rechnet ihn für ältere Abrechnungen selbst nach („recomputed only for one created before“) → zweiter Ort für dieselbe Regel. |
+| #13 `overview.ts` ↔ `dashboard/+page.server.ts` | **akzidentell** | 618786772: die Zahl der zu sendenden Entwürfe wird im FE aus zwei Backend-Antworten zusammengesetzt (`Math.max(count − outdated, listed)`). Eine fachliche Zählung im FE. |
+| #14 `ContractForm.svelte` ↔ `ContractWizard.svelte` | **akzidentell** | 427f89303: „Folgevertrag übernimmt vereinbarte Nebenkosten“ muss in beiden Formularen (Bearbeiten, Neu) eingebaut werden; dazu `ContractFormValues` in 3 Dateien und `/overlap/i` in beiden. |
+| #15 `invoice-upload.ts` ↔ `InvoiceUploadDialog.svelte` | **essenziell** | 87fee8a8b: neuer Grund `'off'` und seine Verwendung im Dialog. |
+| #16 BFF `statement-generation` ↔ FE `statement-wizard` | **akzidentell** | 3edc96311: die Regel, wann ein Heizprofil als „seit der Abrechnung geändert“ gilt (`editedSince`, `byDays`), steht im BFF; das FE zeigt sie. Fachregel im BFF. |
+| #17 `be/routes/contracts` ↔ BFF `contracts/[id]/+page.server.ts` | **akzidentell** | fa6f5df22: Umbenennung `StatementsAfterEndError` → `BilledDaysError` im Backend zieht die BFF-Auswertung der 409-Antwort nach; der Fehlervertrag ist nur durch Konvention geteilt. |
+| #18 BFF `statement-generation` ↔ `generate/+page.server.ts` | **akzidentell** | 5d6888eb2: „eine ersetzte Abrechnung zählt nicht zur Periode“ ein weiteres Mal im BFF (`filter((s) => s.status !== 'replaced')`), dazu `unbilledContracts` im BFF. |
+| #19 BFF `statement-actions` ↔ `statements/[id]/+page.server.ts` | **essenziell** | a4fa94603: Modul vertieft (Prüfung und Ablehnung in `statement-actions`), Aufrufer angepasst; ein Refactoring. |
+| #20 `contract.service` ↔ `ContractForm.svelte` | **essenziell** | b39a53d53: neue Prüfung im Backend (`checkBilledByDwello`), das FE zeigt den Fehlercode am Feld (`backendMessage`). Regel nur im Backend, so gewollt. |
+| Feature PR#32 (Redesign, 294 prod) | **essenziell, einmalig** | Umbau auf Tokens/Komponenten (269 FE-Dateien). Nicht repräsentativ. |
+| Feature PR#48 (i18n, 251 prod) | **essenziell, einmalig** | Einführung von vier Sprachen. Nicht repräsentativ; begründet aber die dauerhaften 4 i18n-Dateien pro Text. |
+| Feature PR#39 (101 prod) | **Messartefakt** | Bündelt 6 `feat`-Commits (PDF nach Schweizer Norm, Datumsfeld, Rechnungsprüfung, Heizkosten …); die Grösse kommt aus dem PR-Schnitt. |
+| Feature PR#238 (48 prod) | **überwiegend essenziell** | Neue durchgehende Fähigkeit: Belege speichern (Migration, `document.service`, `file-response`), KI-Extraktion (`llm.ts` +118, `llm.service`), Upload-Route und -Dialog. Akzidenteller Anteil: Rechnungsform zusätzlich in `types.ts` und BFF `invoice.ts`. |
+| Feature PR#539 (38 prod) | **gemischt** | Essenziell: Migration, UI, Regeln. Akzidentell: `allocableInvoiceCount` von Hand im Backend-Typ, im SQL, im BFF-Typ `CategoryWithUsage`, im BFF-Mapper (`Number(c.allocableInvoiceCount) \|\| 0`) und in der Fixture. |
+
+Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall), 1 gemischt.
 
 ## 5. Hypothesen
 
 **H1 – Kein gemeinsamer Vertrag zwischen den Schichten: Entitätsformen werden von Hand gespiegelt.**
-- Belege: 0 Importe FE/BFF → Backend; `types.ts` „Match backend schema“; `schema.ts` ↔ `types.ts` 14 gemeinsame Änderungen, Grad 0,311, ohne Import; DB-Feld im Median in 6 Produktivdateien deklariert (P90 19); 13 schichtübergreifende identische Wertelisten; 37 von 113 Features ändern `types.ts`, 53 ändern Vertrags-Fixtures (139 Fixture-Änderungen); PR#361 und PR#539 (Abschnitt 4). [gemessen/abgeleitet]
+- Belege: 0 Importe FE/BFF → Backend; `types.ts` „Match backend schema“; Paar #2 `schema.ts` ↔ `types.ts` 26 gemeinsame Änderungen ohne Import; DB-Feld im Median in 6 Produktivdateien deklariert (P90 19); 13 schichtübergreifende identische Wertelisten; Paar #17 (Fehlervertrag nur per Konvention); PR#361 (`country` an 6 Orten), PR#539. [gemessen/abgeleitet]
 - Widerlegt, wenn: die Deklarationsorte überwiegend eigene Logik oder bewusst abweichende Formen enthalten (BFF als Anti-Corruption-Layer) und ein generierter Vertrag die Dateizahl pro Feld nicht senken würde.
 - Frage ans Team: Soll der BFF ein eigenes Modell haben, das bewusst vom Backend abweicht, oder soll er die Backend-Antworten nur durchreichen und aufbereiten?
 
-**H2 – Die Amplifikation stammt zu zwei Dritteln aus Test- und Prozessarchitektur, nicht aus dem Produktivcode.**
-- Belege: 36,9 % der Dateiänderungen in Features sind Produktivcode; Median 16 Test- vs. 12 Produktivdateien; Screenplay-Kette `features`/`steps`/`tasks`/`questions`/`targets` in 58–85 % der Features; Prozessdateien in 92,9 % (Median 9); `docs/reviews` + Prozess = 1551 Dateien, mehr LOC als der Produktivcode; heisseste Datei im Repo ist ein Test-Task (`accessibility.ts`, 104 Commits). [gemessen]
-- Widerlegt, wenn: das Team die Test- und Prozessdateien bewusst als Nebenprodukt akzeptiert (Kosten tragen Agenten) und nur Produktivdateien als „Änderbarkeit“ zählt; dann bleibt Median 12/P90 31 als eigentliche Baseline.
-- Frage: Welche E2E-Ebenen (Target, Question, Task) verhindern nachweislich Fehler oder werden wiederverwendet, und welche sind 1:1-Zeremonie pro UI-Element?
+**H2 – Fachregeln werden in mehreren Schichten entschieden (Logik im BFF/FE statt nur im Backend).**
+- Belege: `'replaced'` in 19 Produktivdateien (FE 8, BFF 2, Backend 8); Paare #5, #18 (dieselbe Regel in Backend und zweimal im BFF), #13 (Zählung im FE), #16 (Heizprofil-Regel im BFF), #12 (Nachrechnen im PDF); BFF-Dateien unter den Hotspots (zykl. Σ 152 und 115); Validierungs-Regex in BFF und Backend doppelt. [gemessen/abgeleitet]
+- Widerlegt, wenn: die BFF-/FE-Stellen beim Lesen überwiegend Darstellung sind (Beschriftung je Status), nicht Entscheidungen, und eine Statusregel sich heute in einer Datei ändern lässt.
+- Frage: Darf der BFF fachliche Entscheidungen treffen (z. B. welche Abrechnungen eine Periode belegen), oder soll er dafür einen Backend-Endpunkt fragen?
 
-**H3 – Duplizierte Register erzeugen die stärkste Kopplung des Repos.**
-- Belege: M2-Paare 1–10; 87/87 Bildschirme in allen drei Registern; 45 von 113 Features ändern ≥ 3 Registerdateien (225 Änderungen); Commit 0049589600 (dieselbe Änderung dreimal). Ähnlich `tests/contracts/README.md` (Paar 11). [gemessen/abgeleitet]
-- Widerlegt, wenn: die drei Dateien bewusst verschiedene Listen führen müssen (z. B. Sprach-Check nur für eine Teilmenge) oder bereits aus einer Quelle erzeugt werden.
-- Frage: Können die Examples-Tabellen von `accessibility.feature` und `sprachen-bildschirme.feature` aus `screens.json` erzeugt werden, ohne die Gherkin-Lesbarkeit für den Product Owner zu verlieren?
+**H3 – Zentrale Sammeldateien koppeln unabhängige Features.**
+- Belege: die zwei stärksten Produktivpaare hängen an `types.ts` (#1: 36, #2: 26 gemeinsame Änderungen); `types.ts` in 37 von 113 Features; `schema.ts` 61 Commits in 48 PRs, Fan-in 81, trägt auch die Fachtypen der JSON-Spalten (#9); 5 der Top-10-Paare hängen an `schema.ts`. [gemessen]
+- Widerlegt, wenn: die gemeinsamen Änderungen an `types.ts` jeweils dieselbe Entität betreffen wie das Feature (dann wäre es H1, nicht die Datei), oder ein Aufteilen pro Bereich die Kopplung zu `messages/*` nicht senkt.
+- Frage: Ist `types.ts` als zentraler Ort gewollt, oder sollen Typen bei ihrem Bereich (Mietvertrag, Abrechnung …) liegen?
 
 **H4 – Module sind nach technischer Schicht geschnitten; die Entscheidungen einer Fachfrage (Abrechnung, Mietvertrag) liegen verteilt in Backend, BFF und FE.**
-- Belege: Top-5-Hotspots alle Abrechnung, verteilt auf 3 Schichten; Modulkette Mietvertrag `be:routes/contracts`↔`be:services/contract` 0,652, ↔`bff:load/contracts` 0,571, `bff:load/contracts`↔`fe:routes/contracts` 0,392; 9 der 11 schichtübergreifenden Prod-Paare ohne Import liegen im Mietvertrag; Contract 30 und Statement 29 Typdeklarationen in 19 bzw. 16 Dateien. [gemessen]
+- Belege: alle Top-10-Hotspots in Abrechnung/Mietvertrag, verteilt auf 3 Schichten; Modulkette Mietvertrag `be:routes/contracts`↔`be:services/contract` 0,652, ↔`bff:load/contracts` 0,571, `bff:load/contracts`↔`fe:routes/contracts` 0,392; 11 der 28 schichtübergreifenden Paare ohne Import betreffen den Mietvertrag; Contract 30 und Statement 29 Typdeklarationen in 19 bzw. 16 Dateien; Scope `contracts` Median 10 Produktivdateien pro Einheit. [gemessen]
 - Widerlegt, wenn: die Diffs dieser Ketten überwiegend „neues Feld muss durch alle Schichten“ zeigen (essenziell) und kaum Regeln, die an zwei Orten entschieden werden.
 - Frage: Welche Regeln zu Abrechnung und Mietvertrag entscheidet heute nur das Backend, und welche entscheidet das FE/BFF selbst noch einmal (z. B. für Vorschau oder Hinweise)?
 
-**H5 – Fachlogik und Validierung sickern in den BFF (Logik und Orchestrierung vermischt).**
-- Belege: BFF-Dateien unter den Hotspots (`statement-generation.ts` zykl. Σ 152, `contracts/[id]/+page.server.ts` 115, `dashboard/+page.server.ts` 75); Validierungs-Regex in BFF (PLZ 3×, Datum 7× BFF/FE, Betrag, E-Mail, UUID doppelt zu Backend); PR#361 entscheidet die PLZ-Regel für CH/LI im BFF-Formular. [gemessen/abgeleitet]
-- Widerlegt, wenn: die BFF-Komplexität beim Lesen überwiegend Darstellungs-Mapping und Fehlerbehandlung ist, nicht fachliche Entscheidungen.
-- Frage: Darf der BFF fachliche Entscheidungen treffen (z. B. Vorschau-Prüfungen der Abrechnung), oder soll er dafür einen Backend-Endpunkt fragen?
+**H5 – Parallele UI-Flüsse für denselben Vorgang verdoppeln Änderungen.**
+- Belege: Paar #14 `ContractForm` ↔ `ContractWizard` 12 gemeinsame Änderungen ohne Import; `ContractFormValues` und `ContractForAvailability` je in 3 Dateien; `/overlap/i` in beiden; `RefusedStatement` in 4 FE/BFF-Dateien; `ContractForm.svelte` ist Hotspot Nr. 10 (51 Commits). [gemessen]
+- Widerlegt, wenn: Bearbeiten und Neuerfassen fachlich verschiedene Regeln haben und die gemeinsamen Änderungen nur Darstellung sind.
+- Frage: Sollen „Mietvertrag erfassen“ und „Mietvertrag bearbeiten“ dieselbe Formular-Logik teilen?
+
+**Kontext ausserhalb der Messgrösse** (Entscheid 23.10.2026): Test- und Prozessdateien tragen mehr Dateiänderungen bei als der Produktivcode (63,1 % aller Dateiänderungen in Features), und das von Hand dreifach gepflegte Bildschirm-Register ist die stärkste Kopplung im Repo. Das betrifft den Aufwand pro Feature, nicht die Änderbarkeit des Produkts; es fliesst nicht in H1–H5 ein.
 
 ## 6. Grenzen der Analyse
 
 - **Kurze Historie:** 96 % der Commits liegen in 23 Tagen (Oktober 2026), fast ausschliesslich agentische Entwicklung. Die Werte beschreiben diese Phase; Trends über Monate sind nicht messbar.
-- **PR ≠ Feature:** 29 von 113 feat-PRs bündeln mehrere Features; die Gruppe „1 feat-Commit“ zeigt, dass die Mediane dadurch um 4 Dateien (38 → 34) sinken. Der Netto-Diff verbirgt, was innerhalb eines PRs geändert und wieder zurückgenommen wurde.
+- **PR ≠ Feature:** 29 von 113 feat-PRs bündeln mehrere Features; ohne sie sinkt der Median von 12 auf 9,5 Produktivdateien. Der Netto-Diff verbirgt, was innerhalb eines PRs geändert und wieder zurückgenommen wurde.
 - **Typ-Zuordnung:** 30 Einheiten ohne Typ habe ich aus dem Titel eingeordnet (`unit-types.json`); 148 direkte Commits auf `main` zählen als eigene Einheiten.
-- **Schichtzuordnung** ist mein Vorschlag (`layers.json`), z. B. `types.ts` als Shared, `+page.server.ts` als BFF, Vertrags-Fixtures als Shared/Test.
+- **Schichtzuordnung** ist mein Vorschlag (`layers.json`), z. B. `types.ts` als Shared (prod), `+page.server.ts` als BFF, i18n-JSON als FE-Produktivcode.
 - **Import-Graph** per Regex: dynamische Pfade, `./$types` (SvelteKit) und HTTP-Aufrufe sind unsichtbar. „Import: nein“ zwischen BFF und Backend oder zwischen `+page.server.ts` und `+page.svelte` heisst „keine statische Abhängigkeit“, nicht „unabhängig“. 14 Test-/Tool-Dateien enthalten Import-Strings als Testdaten (nicht auflösbar, ignoriert).
 - **CRAP** ist geschätzt (`static_estimated`), nicht gemessen; echte Werte bräuchten Istanbul-Coverage (FE nutzt v8, Backend lcov). Darum Rangfolge nach zyklomatischer Komplexität.
-- **M4 ist heuristisch:** Ein Schlüssel `field:` kann Nutzung statt Definition sein (Drizzle-Projektionen zählen als „kennt die Feldliste“); Felder, die in zwei Tabellen vorkommen (z. B. `country`), sind aus der Feld-Statistik ausgenommen; Validierungsregeln in Svelte-Markup (`maxlength=`) sind nur grob erfasst.
-- **Selektor-Anteil** der Test-Churn (PR#32) basiert auf einer Schlüsselwortliste und ist eine Untergrenze.
-- fallow und Deepcheck lesen das Arbeitsverzeichnis und haben die neuen Skripte unter `tools/arch-baseline/` mitgezählt (+1 Modul, ohne Historie, ohne Einfluss auf M3).
+- **M4 ist heuristisch:** Ein Schlüssel `field:` kann Nutzung statt Definition sein (Drizzle-Projektionen zählen als „kennt die Feldliste“); Felder, die in zwei Tabellen vorkommen (z. B. `country`), sind aus der Feld-Statistik ausgenommen; Statuswerte wie `'draft'` kommen auch in anderer Bedeutung vor (Entwurf eines Formulars); Validierungsregeln in Svelte-Markup (`maxlength=`) sind nur grob erfasst.
+- **Beispiel-Commits** sind der kleinste Commit mit beiden Dateien; ein einzelner Diff belegt das Muster, nicht seine Häufigkeit.
+- fallow und Deepcheck lesen das Arbeitsverzeichnis und zählen die Skripte unter `tools/arch-baseline/` mit (ohne Historie, ohne Einfluss auf M3).
 - Die Basis `origin/main` hat sich während der Analyse um 6 Commits bewegt; alle Zahlen stammen aus dem letzten Lauf auf d4d508cc2.
 
 ## 7. Vorschlag: messbare Szenarien für Änderbarkeit
 
-| | Ä1 Neues Feld an bestehender Entität | Ä2 Neuer Bildschirm oder Zustand | Ä3 Fachliche Erweiterung |
+Alle drei messen nur Produktivdateien (Entscheid 23.10.2026).
+
+| | Ä1 Neues Feld an bestehender Entität | Ä2 Statusregel ändern | Ä3 Fachliche Erweiterung |
 |---|---|---|---|
-| Auslöser | Product Owner verlangt ein neues Attribut (z. B. Land der Korrespondenzadresse) | Neuer Bildschirm oder neuer Zustand eines Bildschirms | Ein Issue mit einer neuen Fachregel, umgesetzt als ein feat-PR |
-| Umgebung | Entwicklung, bestehende Entität mit Liste, Detail, Formular | Entwicklung, E2E- und a11y-Prüfung wie heute | Entwicklung nach ATDD-Workflow |
-| Reaktion | Feld ist in DB, API, BFF und UI verfügbar und validiert | Bildschirm wird in a11y- und Sprach-Prüfung erfasst | Regel umgesetzt, Szenario grün, Reviews erledigt |
-| Messgrösse | Anzahl Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren (`m4-field-spread.csv`) | Anzahl Dateien, in die die Bildschirm-ID von Hand eingetragen wird (`m4-screen-registry.csv`) | geänderte Produktiv- und Testdateien pro feat-PR mit 1 feat-Commit (`m1-summary.csv`, Gruppe `feat-single`) |
-| Ausgangswert | Median **6**, P90 **19** (125 Felder) | Minimum = Median **3** (87/87 Bildschirme); 45/113 Features ändern ≥ 3 Registerdateien | prod Median **9,5** / P90 **25**; test Median **11,5** / P90 **32**; Schichten Median 2 / P90 5 |
+| Auslöser | Product Owner verlangt ein neues Attribut (z. B. Land der Korrespondenzadresse) | Product Owner ändert, was ein Status bedeutet (z. B. wann eine ersetzte Abrechnung noch zählt) | Ein Issue mit einer neuen Fachregel, umgesetzt als ein feat-PR |
+| Umgebung | Entwicklung, bestehende Entität mit Liste, Detail, Formular | Entwicklung, Status mit Wirkung auf Liste, Übersicht, Erstellung, PDF | Entwicklung nach ATDD-Workflow |
+| Reaktion | Feld ist in DB, API, BFF und UI verfügbar und validiert | Alle Stellen, die nach dem Status entscheiden, folgen der neuen Regel | Regel umgesetzt, Szenario grün |
+| Messgrösse | Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren (`m4-field-spread.csv`) | Produktivdateien, die den Statuswert nennen (`m4-status-literals.csv`) | geänderte Produktivdateien pro feat-PR mit 1 feat-Commit (`m1-summary.csv`, Gruppe `feat-single`) |
+| Ausgangswert | Median **6**, P90 **19** (125 Felder) | `replaced` **19** Dateien in 4 Schichten (FE 8, BFF 2, Backend 8, Shared 1); `draft` 29, `paid` 21 | Median **9,5**, P90 **25**; Schichten Median 2 / P90 5 |
 | Zielwert | vom Team festzulegen | vom Team festzulegen | vom Team festzulegen |
 
 Alle drei Werte lassen sich nach jedem Refactoring mit `tools/arch-baseline/run.sh` neu messen.
@@ -303,4 +329,4 @@ tools/arch-baseline/run.sh          # holt bei flachem Clone die volle Historie,
 ARCH_SINCE=2026-04-23 ARCH_MIN_SHARED=5 ARCH_MIN_DEGREE=0.3 ARCH_MAX_TX=50 tools/arch-baseline/run.sh
 ```
 
-Skripte: `01-map` (Landkarte), `02-imports` (Graph, Zyklen), `03-history` (Einheiten, Commits), `04-metrics` (M1–M3), `05-knowledge` (M4, Szenario-Baselines), `06-examples` (Schritt 4), `07-tables` (Tabellen dieses Reports). Konfiguration: `layers.json` (Schichten), `unit-types.json` (Typ-Vorschläge).
+Skripte: `01-map` (Landkarte), `02-imports` (Graph, Zyklen), `03-history` (Einheiten, Commits), `04-metrics` (M1–M3; M2 primär nur Produktivdateien), `05-knowledge` (M4, Szenario-Baselines), `06-examples` (Schritt 4), `07-tables` (Tabellen dieses Reports). Konfiguration: `layers.json` (Schichten), `unit-types.json` (Typ-Vorschläge).

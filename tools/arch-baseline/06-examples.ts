@@ -1,10 +1,10 @@
-// Step 4 helper: for the top-20 coupled file pairs (primary view) pick example
+// Step 4 helper: for the top-20 coupled production file pairs (primary view) pick example
 // commits that change both files, so a human can read the diff. Also lists the
-// 5 largest feat units with their per-layer file split.
+// 5 feat units with the most production files, with their per-layer file split.
 // Out: out/s4-pair-examples.csv, out/s4-top5-features.csv
 import { csv, git, readCsv } from './lib';
 
-const pairs = readCsv('m2-file-pairs-units.csv').slice(0, 20);
+const pairs = readCsv('m2-file-pairs-units-prod.csv').slice(0, 20);
 const cf = readCsv('commit-files.csv');
 const commits = new Map(readCsv('commits.csv').map((c) => [c.sha, c]));
 const bySha = new Map<string, Set<string>>();
@@ -35,7 +35,7 @@ csv('s4-pair-examples.csv', rows);
 
 const units = readCsv('units.csv')
 	.filter((u) => u.type === 'feat')
-	.sort((a, b) => +b.files_prod + +b.files_test - (+a.files_prod + +a.files_test))
+	.sort((a, b) => +b.files_prod - +a.files_prod)
 	.slice(0, 5);
 csv('s4-top5-features.csv', units, ['id', 'sha', 'date', 'title', 'commits', 'files_prod', 'files_test', 'files_other', 'layers_prod_list', 'i18n_files', 'n_FE', 'n_BFF', 'n_Backend', 'n_DB', 'n_Shared/Contracts', 'n_Tests-Unit', 'n_Tests-Acceptance', 'n_Process']);
 
@@ -73,10 +73,3 @@ csv(
 		};
 	})
 );
-
-// Production-only coupled pairs (both files production code), from the primary view.
-const kind = new Map(readCsv('files.csv').map((f) => [f.path, f.kind]));
-kind.set('messages/{de,fr,it,en}.json', 'prod');
-csv('s4-prod-pairs.csv', readCsv('m2-file-pairs-units.csv').filter((p) => kind.get(p.a) === 'prod' && kind.get(p.b) === 'prod'));
-const prodMod = (m: string) => /^(fe|bff|be|db|shared):/.test(m);
-csv('s4-prod-module-pairs.csv', readCsv('m2-module-pairs-units.csv').filter((p) => prodMod(p.a) && prodMod(p.b)));

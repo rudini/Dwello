@@ -2,10 +2,10 @@ id,date,type,title,commits,files_total,files_prod,files_test,files_other,modules
 PR#32,2026-10-10,feat,feat: new design system and guided UI (redesign),96,518,294,161,63,56,12,3,FE|BFF|Shared/Contracts,0,269,24,0,0,1,82,79,33
 PR#48,2026-10-12,feat,"feat(i18n): UI in German, French, Italian, English",51,347,251,38,58,88,10,4,Backend|FE|BFF|Shared/Contracts,4,185,42,23,0,1,28,10,20
 PR#39,2026-10-11,feat,"feat(statements): Swiss statement PDF, invoice check, date field",32,245,101,114,30,55,12,5,DB|Backend|FE|BFF|Shared/Contracts,0,54,13,22,11,7,66,42,20
-PR#539,2026-10-20,feat,feat(categories): categories and required Verteilschlüssel (#452),27,122,38,64,20,22,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,23,6,7,1,2,34,29,14
-PR#361,2026-10-17,feat,"Korrespondenzadresse with country, old-address warning, LI IBAN",20,119,37,55,27,29,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,14,8,12,2,6,18,32,22
-PR#527,2026-10-20,feat,feat(statements): carry over Saldo below CHF 5.00,13,104,33,47,24,20,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,17,6,7,2,3,22,23,17
 PR#238,2026-10-16,feat,feat(invoices): create invoices from uploaded files,15,118,48,32,38,23,12,5,DB|Backend|FE|BFF|Shared/Contracts,4,27,9,9,2,4,14,15,23
+PR#539,2026-10-20,feat,feat(categories): categories and required Verteilschlüssel (#452),27,122,38,64,20,22,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,23,6,7,1,2,34,29,14
 PR#392,2026-10-17,feat,feat(contracts): agreed Nebenkosten per Mietvertrag,16,99,38,39,22,22,11,5,DB|Backend|FE|BFF|Shared/Contracts,4,19,8,8,2,4,16,20,19
-PR#559,2026-10-20,feat,"feat(statements): outdated statements, period filter, Tankbestand (#454)",15,88,31,44,13,23,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,14,8,6,2,7,12,26,11
-PR#6,2026-10-03,fix,"BDD coverage: a scenario for every page exit, plus bug fixes",8,75,23,51,1,17,8,4,DB|Backend|FE|BFF,0,17,1,2,3,0,5,46,1
+PR#361,2026-10-17,feat,"Korrespondenzadresse with country, old-address warning, LI IBAN",20,119,37,55,27,29,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,14,8,12,2,6,18,32,22
+PR#43,2026-10-11,feat,"feat(statements): fee of own costs, Saldo to 5 Rappen",10,88,37,30,21,20,10,5,DB|Backend|BFF|FE|Shared/Contracts,0,13,4,7,12,3,19,9,13
+PR#54,2026-10-12,feat,"feat(contracts): upcoming end, statements after an end change",23,84,34,39,11,21,8,4,Backend|FE|BFF|Shared/Contracts,4,22,8,3,0,4,17,19,8
+PR#527,2026-10-20,feat,feat(statements): carry over Saldo below CHF 5.00,13,104,33,47,24,20,10,5,DB|Backend|FE|BFF|Shared/Contracts,4,17,6,7,2,3,22,23,17

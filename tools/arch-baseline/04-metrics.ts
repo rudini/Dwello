@@ -39,10 +39,9 @@ for (const [g, pick] of Object.entries(groups)) {
 }
 csv('m1-summary.csv', m1, ['group', 'units', 'metric', 'median', 'p90', 'max', 'mean']);
 
-const code = (u: Record<string, string>) => num(u, 'files_prod') + num(u, 'files_test');
 const topCols = ['id', 'date', 'type', 'title', 'commits', 'files_total', 'files_prod', 'files_test', 'files_other', 'modules_prod', 'modules_test', 'layers_prod', 'layers_prod_list', 'i18n_files', 'n_FE', 'n_BFF', 'n_Backend', 'n_DB', 'n_Shared/Contracts', 'n_Tests-Unit', 'n_Tests-Acceptance', 'n_Process'];
 for (const g of ['feat', 'feat+fix']) {
-	csv(`m1-top10-${g.replace('+', '-')}.csv`, units.filter(groups[g]).sort((a, b) => code(b) - code(a)).slice(0, 10), topCols);
+	csv(`m1-top10-${g.replace('+', '-')}.csv`, units.filter(groups[g]).sort((a, b) => num(b, 'files_prod') - num(a, 'files_prod')).slice(0, 10), topCols);
 }
 
 // Where feature changes land: share of feat units that touch each module / layer.
@@ -66,13 +65,15 @@ csv('m1-modules-featfix.csv', touch('module', behIds));
 // ---------------------------------------------------------------- M2
 const importFile = new Set(readCsv('imports-file.csv').flatMap((e) => [`${e.from}\t${e.to}`, `${e.to}\t${e.from}`]));
 const importMod = new Set(readCsv('imports-module.csv').flatMap((e) => [`${e.from}\t${e.to}`, `${e.to}\t${e.from}`]));
-const codeKind = (k: string) => k === 'prod' || k === 'test';
+// Modifiability counts production files only (product owner, 23.10.2026); prod+test views stay as context.
+const PROD = new Set(['prod']);
+const CODE = new Set(['prod', 'test']);
 
 type Tx = Map<string, Set<string>>;
-function transactions(rows: Record<string, string>[], key: string, item: (r: Record<string, string>) => string): Tx {
+function transactions(rows: Record<string, string>[], key: string, item: (r: Record<string, string>) => string, kinds = CODE): Tx {
 	const tx: Tx = new Map();
 	for (const r of rows) {
-		if (!codeKind(r.kind)) continue;
+		if (!kinds.has(r.kind)) continue;
 		const s = tx.get(r[key]) ?? new Set<string>();
 		s.add(item(r));
 		tx.set(r[key], s);
@@ -132,11 +133,23 @@ const modLayer = (m: string) => {
 	return r?.layer ?? '?';
 };
 const stats = [
-	{ view: 'file/unit (primary)', ...coupling(transactions(unitFiles, 'id', (r) => logicalName(r.path)), 'm2-file-pairs-units.csv', fileRelated, fileLayer) },
+	{ view: 'file/unit prod (primary)', ...coupling(transactions(unitFiles, 'id', (r) => logicalName(r.path), PROD), 'm2-file-pairs-units-prod.csv', fileRelated, fileLayer) },
+	{ view: 'module/unit prod', ...coupling(transactions(unitFiles, 'id', (r) => r.module, PROD), 'm2-module-pairs-units-prod.csv', (a, b) => importMod.has(`${a}\t${b}`), modLayer) },
+	{ view: 'file/unit prod+test', ...coupling(transactions(unitFiles, 'id', (r) => logicalName(r.path)), 'm2-file-pairs-units.csv', fileRelated, fileLayer) },
 	{ view: 'file/commit', ...coupling(transactions(commitFiles, 'sha', (r) => logicalName(r.path)), 'm2-file-pairs-commits.csv', fileRelated, fileLayer) },
 	{ view: 'module/unit', ...coupling(transactions(unitFiles, 'id', (r) => r.module), 'm2-module-pairs-units.csv', (a, b) => importMod.has(`${a}\t${b}`), modLayer) },
 	{ view: 'file/unit raw i18n (quartet not collapsed)', ...coupling(transactions(unitFiles, 'id', (r) => r.path), 'm2-file-pairs-units-raw.csv', fileRelated, fileLayer) }
 ];
+// M1 by scope: production files of feat and fix units per Conventional-Commit scope.
+const scopes = new Map<string, number[]>();
+for (const u of units.filter(groups['feat+fix'])) scopes.set(u.scope, [...(scopes.get(u.scope) ?? []), num(u, 'files_prod')]);
+csv(
+	'm1-scope-prod.csv',
+	[...scopes]
+		.filter(([, v]) => v.length >= 5)
+		.map(([scope, v]) => ({ scope, units: v.length, files_prod_median: median(v), files_prod_p90: quantile([...v].sort((a, b) => a - b), 0.9) }))
+		.sort((a, b) => b.units - a.units)
+);
 csv('m2-stats.csv', stats.map((s) => ({ ...s, min_shared: MIN_SHARED, min_degree: MIN_DEGREE, max_tx_files: MAX_TX })));
 
 // ---------------------------------------------------------------- M3

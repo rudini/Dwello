@@ -189,3 +189,16 @@ csv(
 		return { screen: s, files: files.length, where: files.join(' ') };
 	})
 );
+
+// G3: status values of statements and contracts: production files per layer that name the quoted value
+// (a comparison, a filter or a label), i.e. places that decide something by that status.
+const STATUS = ['draft', 'sent', 'paid', 'replaced', 'overdue', 'settled', 'active', 'ended', 'future'];
+csv(
+	'm4-status-literals.csv',
+	STATUS.map((value) => {
+		const re = new RegExp(`['"\`]${value}['"\`]`);
+		const files = prod.filter((p) => re.test(text.get(p)!));
+		const per = (l: string) => files.filter((p) => layer(p) === l).length;
+		return { value, files: files.length, FE: per('FE'), BFF: per('BFF'), Backend: per('Backend'), DB: per('DB'), Shared: per('Shared/Contracts'), layers: layersOf(files) };
+	})
+);

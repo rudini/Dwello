@@ -1,21 +1,21 @@
 rank,a,b,shared,degree,cross_layer,import,commits_with_both,example_sha,example_subject,example_files
-1,tests/e2e/features/accessibility.feature,tests/e2e/features/sprachen-bildschirme.feature,43,0.977,same,no,84,0049589600,fix(tests): give period screen a default state,3
-2,tests/a11y/screens.json,tests/e2e/features/accessibility.feature,43,0.827,same,no,98,0049589600,fix(tests): give period screen a default state,3
-3,tests/a11y/screens.json,tests/e2e/features/sprachen-bildschirme.feature,42,0.808,same,no,83,0049589600,fix(tests): give period screen a default state,3
-4,tests/a11y/screens.json,tests/e2e/tasks/accessibility.ts,40,0.656,same,no,72,4d5e72f205,docs(tests): red tests for wizard issues,6
-5,tests/e2e/features/sprachen-bildschirme.feature,tests/e2e/tasks/accessibility.ts,37,0.661,same,no,67,4d5e72f205,docs(tests): red tests for wizard issues,6
-6,tests/e2e/features/accessibility.feature,tests/e2e/tasks/accessibility.ts,37,0.649,same,no,67,4d5e72f205,docs(tests): red tests for wizard issues,6
-7,"messages/{de,fr,it,en}.json",tests/a11y/screens.json,44,0.44,cross,no,77,6524f3ad2c,"fix(tests): default state, French guillemets",7
-8,"messages/{de,fr,it,en}.json",tests/e2e/features/sprachen-bildschirme.feature,40,0.417,cross,no,70,6524f3ad2c,"fix(tests): default state, French guillemets",7
-9,"messages/{de,fr,it,en}.json",tests/e2e/features/accessibility.feature,40,0.412,cross,no,69,6524f3ad2c,"fix(tests): default state, French guillemets",7
-10,"messages/{de,fr,it,en}.json",tests/e2e/tasks/accessibility.ts,39,0.375,cross,no,68,6524f3ad2c,"fix(tests): default state, French guillemets",7
-11,backend/src/__tests__/api-contracts.pg.test.ts,tests/contracts/README.md,22,0.595,cross,no,34,9945733f9f,chore(tests): add contract of the creditor refusal,4
-12,src/__tests__/contract-edit.dom.test.ts,src/routes/contracts/ContractForm.svelte,16,0.727,cross,no,38,0e3db29728,fix(contracts): drop unreachable notice guard,2
-13,backend/src/__tests__/statement-pdf-render.test.ts,backend/src/services/pdf.service.ts,19,0.594,cross,yes,49,e214aa7a7e,fix(statements): print a flat's floor only once,4
-14,tests/e2e/questions/contract-form.ts,tests/e2e/steps/contract-form.steps.ts,16,0.696,same,yes,25,ac890cc09f,docs(contracts): add scenarios for #66 and #388,7
-15,tests/e2e/features/statement-detail.feature,tests/e2e/steps/statement-detail.steps.ts,19,0.559,same,no,52,c02c420507,chore(tests): reuse the error message step,2
-16,tests/e2e/features/contract-edit.feature,tests/e2e/steps/contract-form.steps.ts,16,0.593,same,no,36,80df615e9f,chore(tests): wip scenarios for #499,3
-17,tests/e2e/features/statement-generate.feature,tests/e2e/steps/statement-generate.steps.ts,16,0.593,same,no,41,0e382240de,docs(tests): add wip scenario for #130,4
-18,tests/e2e/questions/contract-form.ts,tests/e2e/targets/contract-form.ts,13,0.722,same,yes,18,ac890cc09f,docs(contracts): add scenarios for #66 and #388,7
-19,backend/src/routes/contracts.ts,backend/src/services/contract.service.ts,12,0.75,same,yes,18,64d2b16fa8,"fix(api): support contract search, return relations",3
-20,src/__tests__/contract-form.test.ts,src/lib/contract-form.ts,11,0.786,cross,yes,20,d2de64cc54,fix(contracts): take over no refused start from URL,7
+1,"messages/{de,fr,it,en}.json",src/lib/types.ts,36,0.316,cross,no,41,8d6984e33c,fix(invoices): say «Keine KI» when uploading,16
+2,backend/src/db/schema.ts,src/lib/types.ts,26,0.426,cross,no,28,acdcc9ab4f,feat(statements): heating flag and fee of own costs,21
+3,backend/src/services/pdf.service.ts,backend/src/services/statement-pdf.service.ts,22,0.478,same,yes,37,f0f8a92c93,feat(statements): name the correction in the PDF,4
+4,backend/src/routes/contracts.ts,backend/src/services/contract.service.ts,15,0.652,same,yes,18,64d2b16fa8,"fix(api): support contract search, return relations",3
+5,backend/src/services/contract.service.ts,src/routes/contracts/[id]/+page.server.ts,15,0.6,cross,no,15,e6644bea3b,feat(statements): replace and correct a statement,9
+6,backend/src/db/schema.ts,backend/src/services/statement.service.ts,21,0.35,cross,yes,27,a94beff369,"fix(statements): compute overdue, lock fee rate",7
+7,backend/src/db/schema.ts,backend/src/services/calculation.service.ts,19,0.358,cross,yes,23,3130fb7939,feat(services): distribute management fee by key,7
+8,backend/src/db/schema.ts,backend/src/services/statement-pdf.service.ts,19,0.333,cross,yes,24,67053378dc,fix(statements): keep the heating share as created,10
+9,backend/src/db/schema.ts,backend/src/services/pdf.service.ts,20,0.303,cross,yes,27,047d704dba,docs(i18n): add glossary terms from #243,4
+10,src/routes/contracts/[id]/+page.server.ts,src/routes/contracts/[id]/+page.svelte,12,0.5,cross,no,24,ad6c5cc98e,fix(contracts): end and delete contracts for real,3
+11,src/lib/contract-form.ts,src/routes/contracts/ContractForm.svelte,13,0.448,same,yes,16,2062c4b983,fix(contracts): address review of B-13 slice,9
+12,backend/src/services/calculation.service.ts,backend/src/services/statement-pdf.service.ts,15,0.385,same,no,15,67053378dc,fix(statements): keep the heating share as created,10
+13,src/lib/overview.ts,src/routes/dashboard/+page.server.ts,11,0.524,cross,yes,15,618786772d,fix(statements): count listed drafts on overview,6
+14,src/routes/contracts/ContractForm.svelte,src/routes/contracts/new/ContractWizard.svelte,12,0.444,same,no,16,427f893036,fix(contracts): follow-up keeps agreed Nebenkosten,12
+15,src/lib/invoice-upload.ts,src/routes/invoices/InvoiceUploadDialog.svelte,6,0.857,same,yes,11,87fee8a8bb,fix(invoices): send no file to read without KI,5
+16,src/lib/server/statement-generation.ts,src/lib/statement-wizard.ts,12,0.414,cross,yes,21,3edc963119,fix(statements): apply review findings of #132,13
+17,backend/src/routes/contracts.ts,src/routes/contracts/[id]/+page.server.ts,11,0.44,cross,no,9,fa6f5df227,fix(contracts): review I-5 and personas I4,19
+18,src/lib/server/statement-generation.ts,src/routes/statements/generate/+page.server.ts,10,0.455,same,yes,13,5d6888eb28,fix(statements): Heizprofil of the same apartment,11
+19,src/lib/server/statement-actions.ts,src/routes/statements/[id]/+page.server.ts,7,0.636,same,yes,11,a4fa946033,chore(statements): deepen statement actions,6
+20,backend/src/services/contract.service.ts,src/routes/contracts/ContractForm.svelte,12,0.364,cross,no,15,b39a53d535,fix(contracts): no «Abgerechnet bis» over billing,11

@@ -70,7 +70,7 @@ const uf = readCsv('unit-files.csv');
 const featFiles = uf.filter((f) => f.type === 'feat');
 const share = (k: string) => ((100 * featFiles.filter((f) => f.kind === k).length) / featFiles.length).toFixed(1);
 md.push(`file changes in feat units: ${featFiles.length}; prod ${share('prod')} %, test ${share('test')} %, other ${share('other')} %`, '');
-h('M1 top 10 feat');
+h('M1 top 10 feat (by production files)');
 table(readCsv('m1-top10-feat.csv').map((r) => ({ ...r, title: r.title.slice(0, 70) })), ['id', 'date', 'title', 'commits', 'files_prod', 'files_test', 'files_other', 'modules_prod', 'layers_prod', 'n_FE', 'n_BFF', 'n_Backend', 'n_DB', 'n_Tests-Unit', 'n_Tests-Acceptance', 'n_Process']);
 h('M1 modules touched by most feat units (top 25)');
 table(readCsv('m1-modules-feat.csv').slice(0, 25), ['name', 'layer', 'kind', 'units', 'pct_of_units', 'file_changes']);
@@ -78,26 +78,21 @@ table(readCsv('m1-modules-feat.csv').slice(0, 25), ['name', 'layer', 'kind', 'un
 // M2
 h('M2 views');
 table(readCsv('m2-stats.csv'), ['view', 'tx', 'big', 'pairs', 'min_shared', 'min_degree', 'max_tx_files'], ['Sicht', 'Transaktionen', '> max_tx (ausgelassen)', 'Paare über Schwelle', 'min. gemeinsam', 'min. Grad', 'max_tx']);
-const pairs = readCsv('m2-file-pairs-units.csv');
+const prodPairs = readCsv('m2-file-pairs-units-prod.csv');
 const cross = new Map<string, number>();
-for (const p of pairs) cross.set(`${p.cross_layer}/${p.import}`, (cross.get(`${p.cross_layer}/${p.import}`) ?? 0) + 1);
-table([...cross].map(([k, n]) => ({ k, n })), ['k', 'n'], ['Schicht/Import', 'Paare']);
-const kind = new Map(readCsv('files.csv').map((f) => [f.path, f.kind]));
-kind.set('messages/{de,fr,it,en}.json', 'prod');
-const kk = (p: Record<string, string>) => [kind.get(p.a), kind.get(p.b)].sort().join('-');
-const kinds = new Map<string, number>();
-for (const p of pairs) kinds.set(kk(p), (kinds.get(kk(p)) ?? 0) + 1);
-table([...kinds].map(([k, n]) => ({ k, n })), ['k', 'n'], ['Art (prod/test)', 'Paare']);
-h('M2 top 20 file pairs (primary view: unit)');
+for (const p of prodPairs) cross.set(`${p.cross_layer}/${p.import}`, (cross.get(`${p.cross_layer}/${p.import}`) ?? 0) + 1);
+table([...cross].map(([k, n]) => ({ k, n })), ['k', 'n'], ['Schicht/Import (prod)', 'Paare']);
+const crossNo = prodPairs.filter((r) => r.cross_layer === 'cross' && r.import === 'no');
+md.push(`production pairs: ${prodPairs.length}; cross-layer without import: ${crossNo.length}, of which naming contract files: ${crossNo.filter((r) => /contract/i.test(r.a + r.b)).length}`, '');
+h('M2 top 20 production file pairs (primary view: unit, production files only)');
 const ex = readCsv('s4-pair-examples.csv');
-table(ex.map((r) => ({ ...r, a: short(r.a), b: short(r.b) })), ['rank', 'a', 'b', 'shared', 'degree', 'cross_layer', 'import', 'example_sha']);
-h('M2 production-only file pairs');
-table(readCsv('s4-prod-pairs.csv').map((r) => ({ ...r, a: short(r.a), b: short(r.b) })), ['a', 'b', 'shared', 'degree', 'cross_layer', 'import']);
-const pp = readCsv('s4-prod-pairs.csv');
-const crossNo = pp.filter((r) => r.cross_layer === 'cross' && r.import === 'no');
-md.push(`production pairs: ${pp.length}; cross-layer without import: ${crossNo.length}, of which naming contract files: ${crossNo.filter((r) => /contract/i.test(r.a + r.b)).length}`, '');
+table(ex.map((r) => ({ ...r, a: short(r.a), b: short(r.b) })), ['rank', 'a', 'b', 'shared', 'degree', 'cross_layer', 'import', 'commits_with_both', 'example_sha']);
 h('M2 production module pairs (top 20)');
-table(readCsv('s4-prod-module-pairs.csv').slice(0, 20), ['a', 'b', 'shared', 'degree', 'cross_layer', 'import']);
+table(readCsv('m2-module-pairs-units-prod.csv').slice(0, 20), ['a', 'b', 'shared', 'degree', 'cross_layer', 'import']);
+h('M2 context: top 10 file pairs incl. tests (prod+test view)');
+table(readCsv('m2-file-pairs-units.csv').slice(0, 10).map((r) => ({ ...r, a: short(r.a), b: short(r.b) })), ['a', 'b', 'shared', 'degree', 'cross_layer', 'import']);
+h('M1 production files per scope (feat+fix, scopes with >= 5 units)');
+table(readCsv('m1-scope-prod.csv'), ['scope', 'units', 'files_prod_median', 'files_prod_p90']);
 h('M2 commit-level file pairs (top 10, for comparison)');
 table(readCsv('m2-file-pairs-commits.csv').slice(0, 10).map((r) => ({ ...r, a: short(r.a), b: short(r.b) })), ['a', 'b', 'shared', 'degree', 'cross_layer', 'import']);
 
@@ -131,7 +126,7 @@ const clones = readCsv('m4-clones.csv');
 md.push(`clone groups spanning layers: ${clones.filter((c) => c.cross_layer === 'yes').length} of ${clones.length}; FE/BFF files importing backend code: ${readCsv('m4-shared-code.csv')[0].fe_or_bff_files_importing_backend}`, '');
 
 // Step 4
-h('S4 top 5 features');
+h('S4 top 5 features (by production files)');
 const churn = new Map(readCsv('s4-top5-test-churn.csv').map((r) => [r.id, r]));
 table(
 	readCsv('s4-top5-features.csv').map((r) => ({ ...r, title: r.title.slice(0, 60), tl: churn.get(r.id)?.test_lines_changed, sl: churn.get(r.id)?.selector_or_text_lines })),
@@ -141,6 +136,8 @@ table(
 h('S4 registry files and contract fixtures');
 table(readCsv('s4-ritual-files.csv'), ['type', 'units', 'units_touching_any_ritual_file', 'units_touching_3plus_ritual_files', 'ritual_file_changes', 'units_touching_contract_fixtures', 'contract_fixture_changes', 'units_touching_types_ts']);
 
+h('M4 status values: production files naming them, per layer');
+table(readCsv('m4-status-literals.csv'), ['value', 'files', 'FE', 'BFF', 'Backend', 'DB', 'Shared']);
 h('Baselines for the modifiability scenarios');
 const fs = readCsv('m4-field-spread.csv');
 const fv = fs.map((r) => +r.prod_files).sort((a, b) => a - b);

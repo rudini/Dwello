@@ -149,20 +149,20 @@ fallow circular_dependencies: 0; deepcheck scan: analyzed 180, shallow 0, exclud
 
 file changes in feat units: 5868; prod 36.9 %, test 38.1 %, other 25.0 %
 
-### M1 top 10 feat
+### M1 top 10 feat (by production files)
 
 | id | date | title | commits | files_prod | files_test | files_other | modules_prod | layers_prod | n_FE | n_BFF | n_Backend | n_DB | n_Tests-Unit | n_Tests-Acceptance | n_Process |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | PR#32 | 2026-10-10 | feat: new design system and guided UI (redesign) | 96 | 294 | 161 | 63 | 56 | 3 | 269 | 24 | 0 | 0 | 82 | 79 | 33 |
 | PR#48 | 2026-10-12 | feat(i18n): UI in German, French, Italian, English | 51 | 251 | 38 | 58 | 88 | 4 | 185 | 42 | 23 | 0 | 28 | 10 | 20 |
 | PR#39 | 2026-10-11 | feat(statements): Swiss statement PDF, invoice check, date field | 32 | 101 | 114 | 30 | 55 | 5 | 54 | 13 | 22 | 11 | 66 | 42 | 20 |
-| PR#539 | 2026-10-20 | feat(categories): categories and required Verteilschlüssel (#452) | 27 | 38 | 64 | 20 | 22 | 5 | 23 | 6 | 7 | 1 | 34 | 29 | 14 |
-| PR#361 | 2026-10-17 | Korrespondenzadresse with country, old-address warning, LI IBAN | 20 | 37 | 55 | 27 | 29 | 5 | 14 | 8 | 12 | 2 | 18 | 32 | 22 |
-| PR#527 | 2026-10-20 | feat(statements): carry over Saldo below CHF 5.00 | 13 | 33 | 47 | 24 | 20 | 5 | 17 | 6 | 7 | 2 | 22 | 23 | 17 |
 | PR#238 | 2026-10-16 | feat(invoices): create invoices from uploaded files | 15 | 48 | 32 | 38 | 23 | 5 | 27 | 9 | 9 | 2 | 14 | 15 | 23 |
+| PR#539 | 2026-10-20 | feat(categories): categories and required Verteilschlüssel (#452) | 27 | 38 | 64 | 20 | 22 | 5 | 23 | 6 | 7 | 1 | 34 | 29 | 14 |
 | PR#392 | 2026-10-17 | feat(contracts): agreed Nebenkosten per Mietvertrag | 16 | 38 | 39 | 22 | 22 | 5 | 19 | 8 | 8 | 2 | 16 | 20 | 19 |
-| PR#559 | 2026-10-20 | feat(statements): outdated statements, period filter, Tankbestand (#45 | 15 | 31 | 44 | 13 | 23 | 5 | 14 | 8 | 6 | 2 | 12 | 26 | 11 |
+| PR#361 | 2026-10-17 | Korrespondenzadresse with country, old-address warning, LI IBAN | 20 | 37 | 55 | 27 | 29 | 5 | 14 | 8 | 12 | 2 | 18 | 32 | 22 |
+| PR#43 | 2026-10-11 | feat(statements): fee of own costs, Saldo to 5 Rappen | 10 | 37 | 30 | 21 | 20 | 5 | 13 | 4 | 7 | 12 | 19 | 9 | 13 |
 | PR#54 | 2026-10-12 | feat(contracts): upcoming end, statements after an end change | 23 | 34 | 39 | 11 | 21 | 4 | 22 | 8 | 3 | 0 | 17 | 19 | 8 |
+| PR#527 | 2026-10-20 | feat(statements): carry over Saldo below CHF 5.00 | 13 | 33 | 47 | 24 | 20 | 5 | 17 | 6 | 7 | 2 | 22 | 23 | 17 |
 
 ### M1 modules touched by most feat units (top 25)
 
@@ -198,82 +198,46 @@ file changes in feat units: 5868; prod 36.9 %, test 38.1 %, other 25.0 %
 
 | Sicht | Transaktionen | > max_tx (ausgelassen) | Paare über Schwelle | min. gemeinsam | min. Grad | max_tx |
 |---|---|---|---|---|---|---|
-| file/unit (primary) | 311 | 23 | 281 | 5 | 0.3 | 50 |
+| file/unit prod (primary) | 244 | 3 | 68 | 5 | 0.3 | 50 |
+| module/unit prod | 244 | 3 | 38 | 5 | 0.3 | 50 |
+| file/unit prod+test | 311 | 23 | 281 | 5 | 0.3 | 50 |
 | file/commit | 1223 | 7 | 243 | 5 | 0.3 | 50 |
 | module/unit | 311 | 3 | 101 | 5 | 0.3 | 50 |
 | file/unit raw i18n (quartet not collapsed) | 311 | 27 | 265 | 5 | 0.3 | 50 |
 
-| Schicht/Import | Paare |
+| Schicht/Import (prod) | Paare |
 |---|---|
-| same/no | 59 |
-| cross/no | 167 |
-| cross/yes | 25 |
-| same/yes | 30 |
+| cross/no | 28 |
+| same/yes | 22 |
+| cross/yes | 9 |
+| same/no | 9 |
 
-| Art (prod/test) | Paare |
-|---|---|
-| test-test | 132 |
-| prod-test | 122 |
-| prod-prod | 27 |
+production pairs: 68; cross-layer without import: 28, of which naming contract files: 11
 
-### M2 top 20 file pairs (primary view: unit)
+### M2 top 20 production file pairs (primary view: unit, production files only)
 
-| rank | a | b | shared | degree | cross_layer | import | example_sha |
-|---|---|---|---|---|---|---|---|
-| 1 | e2e/features/accessibility.feature | e2e/features/sprachen-bildschirme.feature | 43 | 0.977 | same | no | 0049589600 |
-| 2 | tests/a11y/screens.json | e2e/features/accessibility.feature | 43 | 0.827 | same | no | 0049589600 |
-| 3 | tests/a11y/screens.json | e2e/features/sprachen-bildschirme.feature | 42 | 0.808 | same | no | 0049589600 |
-| 4 | tests/a11y/screens.json | e2e/tasks/accessibility.ts | 40 | 0.656 | same | no | 4d5e72f205 |
-| 5 | e2e/features/sprachen-bildschirme.feature | e2e/tasks/accessibility.ts | 37 | 0.661 | same | no | 4d5e72f205 |
-| 6 | e2e/features/accessibility.feature | e2e/tasks/accessibility.ts | 37 | 0.649 | same | no | 4d5e72f205 |
-| 7 | messages/{de,fr,it,en}.json | tests/a11y/screens.json | 44 | 0.44 | cross | no | 6524f3ad2c |
-| 8 | messages/{de,fr,it,en}.json | e2e/features/sprachen-bildschirme.feature | 40 | 0.417 | cross | no | 6524f3ad2c |
-| 9 | messages/{de,fr,it,en}.json | e2e/features/accessibility.feature | 40 | 0.412 | cross | no | 6524f3ad2c |
-| 10 | messages/{de,fr,it,en}.json | e2e/tasks/accessibility.ts | 39 | 0.375 | cross | no | 6524f3ad2c |
-| 11 | be/__tests__/api-contracts.pg.test.ts | tests/contracts/README.md | 22 | 0.595 | cross | no | 9945733f9f |
-| 12 | src/__tests__/contract-edit.dom.test.ts | routes/contracts/ContractForm.svelte | 16 | 0.727 | cross | no | 0e3db29728 |
-| 13 | be/__tests__/statement-pdf-render.test.ts | be/services/pdf.service.ts | 19 | 0.594 | cross | yes | e214aa7a7e |
-| 14 | e2e/questions/contract-form.ts | e2e/steps/contract-form.steps.ts | 16 | 0.696 | same | yes | ac890cc09f |
-| 15 | e2e/features/statement-detail.feature | e2e/steps/statement-detail.steps.ts | 19 | 0.559 | same | no | c02c420507 |
-| 16 | e2e/features/contract-edit.feature | e2e/steps/contract-form.steps.ts | 16 | 0.593 | same | no | 80df615e9f |
-| 17 | e2e/features/statement-generate.feature | e2e/steps/statement-generate.steps.ts | 16 | 0.593 | same | no | 0e382240de |
-| 18 | e2e/questions/contract-form.ts | e2e/targets/contract-form.ts | 13 | 0.722 | same | yes | ac890cc09f |
-| 19 | be/routes/contracts.ts | be/services/contract.service.ts | 12 | 0.75 | same | yes | 64d2b16fa8 |
-| 20 | src/__tests__/contract-form.test.ts | src/lib/contract-form.ts | 11 | 0.786 | cross | yes | d2de64cc54 |
-
-### M2 production-only file pairs
-
-| a | b | shared | degree | cross_layer | import |
-|---|---|---|---|---|---|
-| be/routes/contracts.ts | be/services/contract.service.ts | 12 | 0.75 | same | yes |
-| be/services/pdf.service.ts | be/services/statement-pdf.service.ts | 15 | 0.405 | same | yes |
-| be/db/schema.ts | be/services/calculation.service.ts | 14 | 0.35 | cross | yes |
-| be/db/schema.ts | src/lib/types.ts | 14 | 0.311 | cross | no |
-| routes/contracts/ContractForm.svelte | routes/contracts/new/ContractWizard.svelte | 10 | 0.435 | same | no |
-| src/lib/contract-form.ts | routes/contracts/ContractForm.svelte | 10 | 0.417 | same | yes |
-| be/services/calculation.service.ts | be/services/statement-pdf.service.ts | 11 | 0.367 | same | no |
-| routes/invoices/[id]/+page.svelte | routes/invoices/[id]/edit/+page.svelte | 6 | 0.667 | same | no |
-| be/routes/contracts.ts | routes/contracts/[id]/+page.server.ts | 8 | 0.471 | cross | no |
-| be/services/contract.service.ts | routes/contracts/[id]/+page.server.ts | 8 | 0.471 | cross | no |
-| src/lib/server/statement-generation.ts | routes/statements/generate/+page.server.ts | 7 | 0.538 | same | yes |
-| routes/contracts/[id]/+page.server.ts | routes/contracts/[id]/+page.svelte | 7 | 0.467 | cross | no |
-| src/lib/contract-form.ts | src/lib/contract-wizard.ts | 7 | 0.438 | same | yes |
-| src/lib/overview.ts | routes/dashboard/+page.server.ts | 6 | 0.5 | cross | yes |
-| src/lib/contract-status.ts | routes/contracts/[id]/+page.svelte | 6 | 0.462 | same | yes |
-| src/lib/statement-wizard.ts | routes/statements/generate/PreviewChecks.svelte | 6 | 0.429 | same | yes |
-| src/lib/server/category.ts | routes/config/categories/CategoryForm.svelte | 5 | 0.5 | cross | yes |
-| be/services/contract.service.ts | routes/contracts/ContractForm.svelte | 8 | 0.308 | cross | no |
-| be/routes/contracts.ts | src/lib/contract-form.ts | 7 | 0.333 | cross | no |
-| be/services/contract.service.ts | src/lib/contract-form.ts | 7 | 0.333 | cross | no |
-| routes/privacy/+page.server.ts | routes/privacy/+page.svelte | 5 | 0.417 | cross | no |
-| be/config/llm.ts | be/services/llm.service.ts | 5 | 0.385 | same | yes |
-| src/lib/server/statement-generation.ts | src/lib/statement-wizard.ts | 6 | 0.316 | cross | yes |
-| be/routes/contracts.ts | routes/contracts/[id]/+page.svelte | 6 | 0.316 | cross | no |
-| be/services/contract.service.ts | routes/contracts/[id]/+page.svelte | 6 | 0.316 | cross | no |
-| src/lib/contract-status.ts | routes/contracts/[id]/+page.server.ts | 5 | 0.357 | cross | yes |
-| be/routes/contracts.ts | routes/contracts/[id]/ContractTerms.svelte | 5 | 0.333 | cross | no |
-
-production pairs: 27; cross-layer without import: 11, of which naming contract files: 9
+| rank | a | b | shared | degree | cross_layer | import | commits_with_both | example_sha |
+|---|---|---|---|---|---|---|---|---|
+| 1 | messages/{de,fr,it,en}.json | src/lib/types.ts | 36 | 0.316 | cross | no | 41 | 8d6984e33c |
+| 2 | be/db/schema.ts | src/lib/types.ts | 26 | 0.426 | cross | no | 28 | acdcc9ab4f |
+| 3 | be/services/pdf.service.ts | be/services/statement-pdf.service.ts | 22 | 0.478 | same | yes | 37 | f0f8a92c93 |
+| 4 | be/routes/contracts.ts | be/services/contract.service.ts | 15 | 0.652 | same | yes | 18 | 64d2b16fa8 |
+| 5 | be/services/contract.service.ts | routes/contracts/[id]/+page.server.ts | 15 | 0.6 | cross | no | 15 | e6644bea3b |
+| 6 | be/db/schema.ts | be/services/statement.service.ts | 21 | 0.35 | cross | yes | 27 | a94beff369 |
+| 7 | be/db/schema.ts | be/services/calculation.service.ts | 19 | 0.358 | cross | yes | 23 | 3130fb7939 |
+| 8 | be/db/schema.ts | be/services/statement-pdf.service.ts | 19 | 0.333 | cross | yes | 24 | 67053378dc |
+| 9 | be/db/schema.ts | be/services/pdf.service.ts | 20 | 0.303 | cross | yes | 27 | 047d704dba |
+| 10 | routes/contracts/[id]/+page.server.ts | routes/contracts/[id]/+page.svelte | 12 | 0.5 | cross | no | 24 | ad6c5cc98e |
+| 11 | src/lib/contract-form.ts | routes/contracts/ContractForm.svelte | 13 | 0.448 | same | yes | 16 | 2062c4b983 |
+| 12 | be/services/calculation.service.ts | be/services/statement-pdf.service.ts | 15 | 0.385 | same | no | 15 | 67053378dc |
+| 13 | src/lib/overview.ts | routes/dashboard/+page.server.ts | 11 | 0.524 | cross | yes | 15 | 618786772d |
+| 14 | routes/contracts/ContractForm.svelte | routes/contracts/new/ContractWizard.svelte | 12 | 0.444 | same | no | 16 | 427f893036 |
+| 15 | src/lib/invoice-upload.ts | routes/invoices/InvoiceUploadDialog.svelte | 6 | 0.857 | same | yes | 11 | 87fee8a8bb |
+| 16 | src/lib/server/statement-generation.ts | src/lib/statement-wizard.ts | 12 | 0.414 | cross | yes | 21 | 3edc963119 |
+| 17 | be/routes/contracts.ts | routes/contracts/[id]/+page.server.ts | 11 | 0.44 | cross | no | 9 | fa6f5df227 |
+| 18 | src/lib/server/statement-generation.ts | routes/statements/generate/+page.server.ts | 10 | 0.455 | same | yes | 13 | 5d6888eb28 |
+| 19 | src/lib/server/statement-actions.ts | routes/statements/[id]/+page.server.ts | 7 | 0.636 | same | yes | 11 | a4fa946033 |
+| 20 | be/services/contract.service.ts | routes/contracts/ContractForm.svelte | 12 | 0.364 | cross | no | 15 | b39a53d535 |
 
 ### M2 production module pairs (top 20)
 
@@ -299,6 +263,41 @@ production pairs: 27; cross-layer without import: 11, of which naming contract f
 | bff:load/dashboard | fe:lib/overview | 11 | 0.524 | cross | yes |
 | be:routes/contracts | bff:load/contracts | 12 | 0.429 | cross | no |
 | bff:load/statements | bff:server/statement-generation | 13 | 0.394 | same | yes |
+
+### M2 context: top 10 file pairs incl. tests (prod+test view)
+
+| a | b | shared | degree | cross_layer | import |
+|---|---|---|---|---|---|
+| e2e/features/accessibility.feature | e2e/features/sprachen-bildschirme.feature | 43 | 0.977 | same | no |
+| tests/a11y/screens.json | e2e/features/accessibility.feature | 43 | 0.827 | same | no |
+| tests/a11y/screens.json | e2e/features/sprachen-bildschirme.feature | 42 | 0.808 | same | no |
+| tests/a11y/screens.json | e2e/tasks/accessibility.ts | 40 | 0.656 | same | no |
+| e2e/features/sprachen-bildschirme.feature | e2e/tasks/accessibility.ts | 37 | 0.661 | same | no |
+| e2e/features/accessibility.feature | e2e/tasks/accessibility.ts | 37 | 0.649 | same | no |
+| messages/{de,fr,it,en}.json | tests/a11y/screens.json | 44 | 0.44 | cross | no |
+| messages/{de,fr,it,en}.json | e2e/features/sprachen-bildschirme.feature | 40 | 0.417 | cross | no |
+| messages/{de,fr,it,en}.json | e2e/features/accessibility.feature | 40 | 0.412 | cross | no |
+| messages/{de,fr,it,en}.json | e2e/tasks/accessibility.ts | 39 | 0.375 | cross | no |
+
+### M1 production files per scope (feat+fix, scopes with >= 5 units)
+
+| scope | units | files_prod_median | files_prod_p90 |
+|---|---|---|---|
+| statements | 55 | 7 | 27 |
+| contracts | 35 | 10 | 26 |
+|  | 25 | 18 | 29 |
+| invoices | 24 | 4 | 25 |
+| tests | 24 | 0 | 5 |
+| config | 14 | 1 | 7 |
+| services | 14 | 1 | 5 |
+| ci | 10 | 0 | 0 |
+| i18n | 8 | 5 | 251 |
+| db | 8 | 2 | 5 |
+| components | 7 | 3 | 31 |
+| buildings | 7 | 3 | 22 |
+| tenants | 6 | 11.5 | 21 |
+| auth | 5 | 11 | 24 |
+| categories | 5 | 9 | 38 |
 
 ### M2 commit-level file pairs (top 10, for comparison)
 
@@ -461,19 +460,19 @@ fallow coverage_model: static_estimated; files scored 951; functions above thres
 
 | total_files | files_with_clones | clone_groups | duplicated_lines | duplication_percentage |
 |---|---|---|---|---|
-| 679 | 34 | 22 | 585 | 0.8719110501684205 |
+| 679 | 34 | 22 | 585 | 0.8717031738936075 |
 
 clone groups spanning layers: 0 of 22; FE/BFF files importing backend code: 0
 
-### S4 top 5 features
+### S4 top 5 features (by production files)
 
 | id | merge | title | commits | prod | test | other | prod layers | test lines | selector/text lines |
 |---|---|---|---|---|---|---|---|---|---|
 | PR#32 | 8c7a0e972f | feat: new design system and guided UI (redesign) | 96 | 294 | 161 | 63 | FE\|BFF\|Shared/Contracts | 7497 | 805 |
 | PR#48 | e6c38be977 | feat(i18n): UI in German, French, Italian, English | 51 | 251 | 38 | 58 | Backend\|FE\|BFF\|Shared/Contracts | 1860 | 58 |
 | PR#39 | 0f4b3f675a | feat(statements): Swiss statement PDF, invoice check, date f | 32 | 101 | 114 | 30 | DB\|Backend\|FE\|BFF\|Shared/Contracts | 3913 | 180 |
+| PR#238 | 0d970be030 | feat(invoices): create invoices from uploaded files | 15 | 48 | 32 | 38 | DB\|Backend\|FE\|BFF\|Shared/Contracts | 1501 | 87 |
 | PR#539 | 1110abb8d0 | feat(categories): categories and required Verteilschlüssel ( | 27 | 38 | 64 | 20 | DB\|Backend\|FE\|BFF\|Shared/Contracts | 1114 | 38 |
-| PR#361 | f900e5b70c | Korrespondenzadresse with country, old-address warning, LI I | 20 | 37 | 55 | 27 | DB\|Backend\|FE\|BFF\|Shared/Contracts | 657 | 24 |
 
 ### S4 registry files and contract fixtures
 
@@ -481,6 +480,20 @@ clone groups spanning layers: 0 of 22; FE/BFF files importing backend code: 0
 |---|---|---|---|---|---|---|---|
 | feat | 113 | 55 | 45 | 225 | 53 | 139 | 37 |
 | fix | 150 | 20 | 10 | 58 | 17 | 30 | 6 |
+
+### M4 status values: production files naming them, per layer
+
+| value | files | FE | BFF | Backend | DB | Shared |
+|---|---|---|---|---|---|---|
+| draft | 29 | 15 | 2 | 9 | 2 | 1 |
+| sent | 19 | 5 | 0 | 12 | 1 | 1 |
+| paid | 21 | 8 | 1 | 10 | 1 | 1 |
+| replaced | 19 | 8 | 2 | 8 | 0 | 1 |
+| overdue | 12 | 6 | 0 | 5 | 0 | 1 |
+| settled | 11 | 4 | 0 | 6 | 0 | 1 |
+| active | 11 | 4 | 2 | 4 | 0 | 1 |
+| ended | 9 | 5 | 1 | 2 | 0 | 1 |
+| future | 12 | 4 | 3 | 4 | 0 | 1 |
 
 ### Baselines for the modifiability scenarios
 
