@@ -1,5 +1,4 @@
 import type { ContractHistory } from '$lib/types';
-import { contractStatusOn, localToday } from '$lib/contract-status';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 type BackendContract = Record<string, any>;
@@ -13,16 +12,12 @@ export const monthlyTotal = (c: BackendContract) =>
 	amount(c.monthlyAdvancePayment) +
 	amount(c.flatRateUtilityCharge);
 
-/** Running today, ended, or signed for later */
-export const contractStatus = (c: BackendContract): ContractHistory['status'] =>
-	contractStatusOn(c.startDate, c.endDate, localToday());
-
 /** One row of a contract history (apartment or tenant page) */
 export const toContractHistory = (c: BackendContract, tenantName: string): ContractHistory => ({
 	id: c.id,
 	tenantName,
 	monthlyTotal: monthlyTotal(c),
-	status: contractStatus(c),
+	status: c.status, // running today, ended or signed for later, by the Swiss day (H-28, #717)
 	startDate: c.startDate,
 	endDate: c.endDate ?? null,
 	terminated: !!c.terminated

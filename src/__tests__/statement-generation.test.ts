@@ -14,7 +14,6 @@ import statement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
 import calculationRefused from '../../tests/contracts/statement-calculation-refused.json';
 import statements from '../../tests/contracts/statements.json';
-import statementChangedInvoices from '../../tests/contracts/statement-changed-invoices.json';
 import runDifferences from '../../tests/contracts/statement-run-differences.json';
 import runHeating from '../../tests/contracts/statement-run-heating.json';
 import contractAgreements from '../../tests/contracts/contract-agreements.json';
@@ -484,14 +483,17 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		fuelStock: string[] = []
 	) =>
 		(async (url: string) => {
-			const id = url.match(/statements\/([^/]+)\/changed-invoices/)?.[1];
-			if (id) {
-				asked.push(id);
-				return Response.json({ ...statementChangedInvoices, invoiceIds: changed[id] ?? [], fuelStockChanged: fuelStock.includes(id) });
+			asked.push(url);
+			// H-28 (#717): the backend names the drafts invoices or the Tankbestand changed since
+			if (url.includes('/statements/run-differences?')) {
+				const ids = [...new Set([...Object.keys(changed), ...fuelStock])];
+				const none = { profile: null, profileEdited: null, fee: null };
+				return Response.json({
+					statements: ids.map((id) => ({ ...runDifferences.statements[0], ...none, id, outdated: !!changed[id]?.length, fuelStock: fuelStock.includes(id) }))
+				});
 			}
 			if (url.includes('/statements?')) return Response.json({ ...statements, data });
 			if (url.includes('/contracts?')) return Response.json(buildingContracts);
-			if (url.includes('/statements/run-differences?')) return Response.json({ statements: [] });
 			if (url.includes('/invoices/completeness/')) return Response.json(invoiceCompleteness);
 			return Response.json([]);
 		}) as typeof globalThis.fetch;
@@ -522,12 +524,14 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		expect(await changedOf(fetch)).toEqual([named('1', { fuelStock: true })]);
 	});
 
-	// sent and paid statements are corrected by a berichtigte Abrechnung (#120), not by a new run
-	it('fragt nur bei Entwürfen nach geänderten Rechnungen', async () => {
+	// H-28 (#717): only a draft is outdated, sent and paid ones are corrected (#120): the backend decides
+	it('nimmt die veralteten Entwürfe aus der Antwort des Backends, ohne je Abrechnung nachzufragen', async () => {
 		const asked: string[] = [];
 
-		expect(await changedOf(fetchWith([statement('1', c1, 'sent', 'hp1', '4.50')], { '1': ['i2'] }, asked))).toEqual([]);
-		expect(asked).toEqual([]);
+		expect(await changedOf(fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')], { '1': ['i2'] }, asked))).toEqual([
+			named('1', { outdated: true })
+		]);
+		expect(asked.filter((url) => url.includes('/changed-invoices'))).toEqual([]);
 	});
 
 	// H-28 (#16): the backend decides what a kept statement does differently from the run; here only the names
@@ -566,14 +570,14 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		expect(await changedOf(fetch)).toEqual([named('1', { profileEdited: 'Heizung Mittelland' })]);
 	});
 
-	// code review C-1: the settings are only a hint
+	// code review C-1: the settings and later changes are only a hint
 	it('zeigt die Vorschau auch, wenn die abweichenden Einstellungen nicht laden', async () => {
 		const fetch = (async (url: string) =>
 			url.includes('/statements/run-differences?')
 				? Response.json({ error: 'kaputt' }, { status: 500 })
 				: fetchWith([statement('1', c1, 'draft', 'hp2', '1.00')], { '1': ['i2'] })(url)) as typeof globalThis.fetch;
 
-		expect(await changedOf(fetch)).toEqual([named('1', { outdated: true })]);
+		expect(await changedOf(fetch)).toEqual([]);
 	});
 
 	it('übergeht Abrechnungen ausserhalb der Abrechnungsperiode', async () => {
@@ -594,15 +598,6 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		expect(await changedOf(fetch)).toEqual([named('1', { oldRule: true })]);
 	});
 
-	// only a hint: without the answer the draft is not named outdated, and the preview still shows
-	it('zeigt die Vorschau auch, wenn die geänderten Rechnungen nicht laden', async () => {
-		const fetch = (async (url: string) =>
-			url.includes('/changed-invoices')
-				? Response.json({ error: 'kaputt' }, { status: 500 })
-				: fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
-
-		expect(await changedOf(fetch)).toEqual([]);
-	});
 });
 
 // #91, step «Einstellungen»: what the run's contracts have not answered, and what they do not agree

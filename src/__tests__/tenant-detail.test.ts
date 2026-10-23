@@ -13,13 +13,16 @@ const day = (offset: number) =>
 		timeZone: 'Europe/Zurich'
 	});
 
+// as the backend lists it, with the status it gives by the Swiss day (H-28, #717)
 const contract = (
 	id: string,
 	startDate: string,
 	endDate: string | null,
-	apartmentNumber: string
+	apartmentNumber: string,
+	status = endDate && endDate < day(0) ? 'ended' : startDate > day(0) ? 'future' : 'active'
 ) => ({
 	id,
+	status,
 	apartmentId: `a-${id}`,
 	apartmentNumber,
 	buildingName: 'Ahornhof',
@@ -30,19 +33,20 @@ const contract = (
 	monthlyAdvancePayment: '150.00'
 });
 
-function backend(contracts: unknown[]) {
+// the tenant as the backend answers, with the contract it pays rent with (H-28, #717)
+function backend(contracts: unknown[], rental: Partial<typeof tenant> = {}) {
 	const urls: string[] = [];
 	const fetch = async (url: string) => {
 		urls.push(url);
-		if (url === `${API}/tenants/t1`) return Response.json(tenant);
+		if (url === `${API}/tenants/t1`) return Response.json({ ...tenant, ...rental });
 		if (url.startsWith(`${API}/contracts`)) return Response.json({ contracts });
 		return Response.json({ data: [] });
 	};
 	return { urls, fetch: fetch as typeof globalThis.fetch };
 }
 
-const loadTenant = async (contracts: unknown[]) =>
-	(await load({ params: { id: 't1' }, fetch: backend(contracts).fetch } as never)) as Record<
+const loadTenant = async (contracts: unknown[], rental: Partial<typeof tenant> = {}) =>
+	(await load({ params: { id: 't1' }, fetch: backend(contracts, rental).fetch } as never)) as Record<
 		string,
 		unknown
 	>;
@@ -119,13 +123,31 @@ describe('Mieterdetail', () => {
 	});
 
 	it('zeigt einen künftigen Vertrag als bevorstehenden Einzug', async () => {
-		const data = await loadTenant([contract('c2', day(30), null, '3.01')]);
+		const data = await loadTenant([contract('c2', day(30), null, '3.01')], {
+			rentalContractId: 'c2',
+			isFuture: true
+		});
 
 		expect(data.rental).toMatchObject({ contractId: 'c2', startDate: day(30), upcoming: true });
 	});
 
+	it('nimmt den Mietvertrag und den Status, die das Backend nennt', async () => {
+		const data = await loadTenant(
+			[contract('c2', day(-10), null, '3.01'), contract('c1', day(-400), null, '2.01', 'future')],
+			{ rentalContractId: 'c1', isFuture: true }
+		);
+
+		expect(data.rental).toMatchObject({ contractId: 'c1', upcoming: true });
+		expect(data.contractHistory).toEqual([
+			expect.objectContaining({ id: 'c2', status: 'active' }),
+			expect.objectContaining({ id: 'c1', status: 'future' })
+		]);
+	});
+
 	it('zeigt ohne laufenden oder künftigen Vertrag keine Miete', async () => {
-		const data = await loadTenant([contract('c1', day(-400), day(-1), '2.01')]);
+		const data = await loadTenant([contract('c1', day(-400), day(-1), '2.01')], {
+			rentalContractId: undefined
+		});
 
 		expect(data.rental).toBeNull();
 	});
@@ -151,13 +173,8 @@ describe('Mieterdetail', () => {
 });
 
 describe('Vertragsstatus in der Historie', () => {
-	it.each([
-		[day(-10), null, 'active'],
-		[day(-10), day(10), 'active'],
-		[day(-10), day(-1), 'ended'],
-		[day(1), null, 'future']
-	])('Vertrag von %s bis %s ist %s', (startDate, endDate, status) => {
-		expect(toContractHistory({ id: 'c', startDate, endDate }, 'Anna').status).toBe(status);
+	it.each(['active', 'ended', 'future'])('gibt den Status %s des Backends weiter', (status) => {
+		expect(toContractHistory({ id: 'c', startDate: day(-10), endDate: null, status }, 'Anna').status).toBe(status);
 	});
 	// A-1: Wohnungs- und Mieterseite nennen eine Kündigung wie die Detailseite
 	it('gibt weiter, ob der Mietvertrag gekündigt ist', () => {

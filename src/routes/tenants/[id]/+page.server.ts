@@ -2,10 +2,11 @@ import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { deleteDocument, loadDocuments, uploadDocument } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
-import { contractStatus, monthlyTotal, toContractHistory } from '$lib/server/contract-history';
+import { monthlyTotal, toContractHistory } from '$lib/server/contract-history';
 import { localToday } from '$lib/contract-status';
 import { formerTenantDocuments } from '$lib/former-tenant-documents';
 import { backendMessage } from '$lib/backend-error';
+import type { Tenant } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -16,13 +17,9 @@ type BackendContract = Record<string, any>;
 const apartmentOf = (c: BackendContract) =>
 	m.buildings_apartment_number({ number: c.apartmentNumber });
 
-// The running contract, otherwise the next one the tenant moves in with
-function currentRental(contracts: BackendContract[]) {
-	const contract =
-		contracts.find((c) => contractStatus(c) === 'active') ??
-		contracts
-			.filter((c) => contractStatus(c) === 'future')
-			.sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0];
+// The running contract, otherwise the next one the tenant moves in with: the backend names it (H-28, #717)
+function currentRental(contracts: BackendContract[], tenant: Tenant) {
+	const contract = contracts.find((c) => c.id === tenant.rentalContractId);
 	if (!contract) return null;
 	return {
 		contractId: contract.id as string,
@@ -31,7 +28,7 @@ function currentRental(contracts: BackendContract[]) {
 		building: contract.buildingName as string,
 		monthlyTotal: monthlyTotal(contract),
 		startDate: contract.startDate as string,
-		upcoming: contractStatus(contract) === 'future'
+		upcoming: !!tenant.isFuture
 	};
 }
 
@@ -54,7 +51,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	return {
 		tenant,
-		rental: currentRental(contracts),
+		rental: currentRental(contracts, tenant),
 		contractHistory: contracts.map((c: BackendContract) => ({
 			...toContractHistory(c, name),
 			apartment: apartmentOf(c)

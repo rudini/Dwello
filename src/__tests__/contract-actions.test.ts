@@ -4,6 +4,7 @@ import { actions, load } from '../routes/contracts/[id]/+page.server';
 import { load as listLoad } from '../routes/contracts/+page.server';
 import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
+import draftNotAffected from '../../tests/contracts/contract-draft-not-affected.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
 import endAdvanceRefused from '../../tests/contracts/contract-end-advance-refused.json';
@@ -399,7 +400,12 @@ describe('Mietvertrag beenden', () => {
 // A-10: der einzige Entwurf wird gelöscht, der Mietvertrag beendet, danach geht es in den Assistenten
 describe('Entwurf löschen und Mietvertrag beenden', () => {
 	type Call = { method?: string; url: string; body?: unknown };
-	function run(fields: Record<string, string>, statement: Record<string, unknown>, put = 200) {
+	function run(
+		fields: Record<string, string>,
+		statement: Record<string, unknown>,
+		put = 200,
+		answer: unknown = {}
+	) {
 		const calls: Call[] = [];
 		const fetch = (async (url: string, init?: RequestInit) => {
 			calls.push({ method: init?.method, url, body: init?.body && JSON.parse(String(init.body)) });
@@ -408,7 +414,7 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 					? new Response(null, { status: 204 })
 					: Response.json(statement);
 			}
-			if (init?.method === 'PUT') return Response.json({}, { status: put });
+			if (init?.method === 'PUT') return Response.json(answer, { status: put });
 			return Response.json({ startDate: '2024-04-01', endDate: null });
 		}) as typeof globalThis.fetch;
 		const form = new FormData();
@@ -458,16 +464,16 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 		});
 	});
 
-	// aus einem alten Fenster oder einem fremden Formular: nur ein Entwurf dieses Mietvertrags
-	it('löscht keine Abrechnung eines anderen Mietvertrags und keine versendete', async () => {
-		for (const statement of [
-			{ ...draft, contractId: 'c2' },
-			{ ...draft, status: 'sent' }
-		]) {
-			const { calls, result } = run(fields, statement);
-			expect(await result).toMatchObject({ status: 409 });
-			expect(calls.filter((call) => call.method)).toEqual([]);
-		}
+	// aus einem alten Fenster oder einem fremden Formular: ob der Entwurf zu diesem Mietvertrag gehört und noch ein
+	// Entwurf ist, entscheidet das Backend (H-28, #717); seine Ablehnung bleibt im Dialog, kein Assistent
+	it('lässt das Backend entscheiden, ob es den genannten Entwurf löscht', async () => {
+		const { calls, result } = run(fields, { ...draft, contractId: 'c2' }, 400, draftNotAffected);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { endError: 'Mietvertrag konnte nicht beendet werden.' }
+		});
+		expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1);
 	});
 
 	it('verlangt auch hier die Bestätigung eines vergangenen Vertragsendes', async () => {
@@ -724,11 +730,12 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 
 describe('Entwurf löschen und Mietvertrag unbefristet weiterführen', () => {
 	type Call = { method?: string; url: string; body?: unknown };
-	function run(statement: Record<string, unknown>) {
+	function run(statement: Record<string, unknown>, put = 200, answer: unknown = {}) {
 		const calls: Call[] = [];
 		const fetch = (async (url: string, init?: RequestInit) => {
 			calls.push({ method: init?.method, url, body: init?.body && JSON.parse(String(init.body)) });
-			return url.includes('/statements/') ? Response.json(statement) : Response.json({});
+			if (url.includes('/statements/')) return Response.json(statement);
+			return Response.json(answer, { status: init?.method === 'PUT' ? put : 200 });
 		}) as typeof globalThis.fetch;
 		const form = new FormData();
 		form.append('statementId', 's1');
@@ -762,15 +769,14 @@ describe('Entwurf löschen und Mietvertrag unbefristet weiterführen', () => {
 		]);
 	});
 
-	it('löscht keine Abrechnung eines anderen Mietvertrags und keine versendete', async () => {
-		for (const statement of [
-			{ ...draft, contractId: 'c2' },
-			{ ...draft, status: 'sent' }
-		]) {
-			const { calls, result } = run(statement);
-			expect(await result).toMatchObject({ status: 409 });
-			expect(calls.filter((call) => call.method)).toEqual([]);
-		}
+	it('lässt das Backend entscheiden, ob es den genannten Entwurf löscht', async () => {
+		const { calls, result } = run({ ...draft, contractId: 'c2' }, 400, draftNotAffected);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { fixedTermError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.' }
+		});
+		expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1);
 	});
 });
 

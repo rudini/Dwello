@@ -110,6 +110,33 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 		expect(((await (await callApi(`/api/v1/contracts/${own.contract}`)).json()) as { endDate: string | null }).endDate).toBeNull();
 	});
 
+	// H-28 (#717): a draft named from a stale page or another form, which this change does not touch, is refused here
+	it('lehnt einen genannten Entwurf ab, den die Änderung nicht betrifft, und ändert nichts', async () => {
+		const other = await createRental(crypto.randomUUID(), { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${other.contract}`, { endDate: '2026-12-31', terminated: true, deleteDraft: draft2024 });
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'CONTRACT_DRAFT_NOT_AFFECTED' });
+			expect(await exists(draft2024)).toBe(true);
+			expect(((await (await callApi(`/api/v1/contracts/${other.contract}`)).json()) as { endDate: string | null }).endDate).toBeNull();
+		} finally {
+			await other.remove();
+		}
+	});
+
+	// code review h28j C-2: a draft deleted meanwhile (another tab) does not block the change, as before
+	it('speichert die Änderung, wenn der genannte Entwurf inzwischen gelöscht ist', async () => {
+		const other = await createRental(crypto.randomUUID(), { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${other.contract}`, { endDate: '2026-12-31', terminated: true, deleteDraft: crypto.randomUUID() });
+
+			expect(response.status).toBe(200);
+		} finally {
+			await other.remove();
+		}
+	});
+
 	it('löscht den Entwurf und beendet den Mietvertrag, wenn nur er das Vertragsende ablehnt', async () => {
 		await callApi(`/api/v1/statements/${draft2025}`, { method: 'DELETE' });
 
