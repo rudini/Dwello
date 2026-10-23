@@ -98,5 +98,21 @@ describe('Status eines Mietvertrags', () => {
 			await deleteApartment(parking.id);
 		}
 	});
+
+	// code review h28k C-1: two running contracts from the same day: the larger id, as the contract list orders them
+	it('nennt dem Mieter bei zwei laufenden Mietverträgen vom selben Tag den mit der grösseren id', async () => {
+		const tenant = await createRental(`${token}-tie`, { startDate: '2024-04-01', monthlyAdvancePayment: '0' });
+		const parking = await createApartment({ buildingId: tenant.building, number: 'P2', floor: 0, area: '12', rooms: '0' });
+		const second = await createContract({ apartmentId: parking.id, tenantId: tenant.tenant, baseRent: '100', startDate: '2024-04-01', monthlyAdvancePayment: '0' });
+		try {
+			const named = (await (await callApi(`/api/v1/tenants/${tenant.tenant}`)).json()) as { rentalContractId?: string };
+
+			expect(named.rentalContractId).toBe([tenant.contract, second.id].sort().at(-1));
+		} finally {
+			await deleteContract(second.id, true);
+			await deleteApartment(parking.id);
+			await tenant.remove();
+		}
+	});
 });
 
