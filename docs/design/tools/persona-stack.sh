@@ -7,6 +7,8 @@ cd "$(dirname "$0")/../../.."
 export JWT_SECRET=persona-secret-key-at-least-32-characters-long
 case " $* " in *" --fresh "*) FRESH=1 ;; esac
 case " $* " in *" --second "*) [ -n "$FRESH" ] || { echo "--second needs --fresh"; exit 1; }; SECOND=1 ;; esac
+# the second shares the first's KI stand-in, which answers like an Ollama only when started with --fresh (code review 774 C-2)
+[ -z "$SECOND" ] || curl -sf -o /dev/null http://127.0.0.1:2528/api/tags || { echo "--second needs a running --fresh instance"; exit 1; }
 NAME=dwello_persona${SECOND:+_2}
 APP=${SECOND:+3310}; APP=${APP:-3300}; API=$((APP + 1))
 DB=postgresql://dwello:dwello@localhost:5432/$NAME
@@ -39,5 +41,8 @@ fuser 2525/tcp > /dev/null 2>&1 || (cd backend && setsid nohup bun run mail-catc
 OAUTH="ALLOWED_EMAILS=verwalter@example.com OAUTH_GOOGLE_CLIENT_ID=x OAUTH_GOOGLE_CLIENT_SECRET=x OAUTH_GOOGLE_REDIRECT_URI=http://localhost:$APP/auth/callback"
 [ -z "$FRESH" ] || OAUTH=
 env NODE_USE_ENV_PROXY=1 $OAUTH PORT=$APP ORIGIN=http://localhost:$APP BODY_SIZE_LIMIT=11M BACKEND_URL=http://localhost:$API setsid nohup node /tmp/persona-app < /dev/null > /tmp/persona-frontend$SECOND.log 2>&1 &
-for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:$APP/login && curl -s -o /dev/null http://localhost:$API/health && echo ready && exit 0; sleep 1; done
-echo "not ready"; tail -5 /tmp/persona-backend$SECOND.log /tmp/persona-frontend$SECOND.log
+for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:$APP/login && curl -s -o /dev/null http://localhost:$API/health && break; sleep 1; done
+{ curl -s -o /dev/null http://localhost:$APP/login && curl -s -o /dev/null http://localhost:$API/health; } || { echo "not ready"; tail -n 5 /tmp/persona-backend$SECOND.log /tmp/persona-frontend$SECOND.log; exit 1; }
+# the download at 40 %, as the README says (code review 774 C-1)
+[ -z "$FRESH" ] || curl -s -o /dev/null -X POST http://127.0.0.1:2528/stub/pull -H 'content-type: application/json' -d '{"percent":40}'
+echo ready
