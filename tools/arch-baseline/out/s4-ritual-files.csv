@@ -1,0 +1,3 @@
+type,units,units_touching_any_ritual_file,units_touching_3plus_ritual_files,ritual_file_changes,units_touching_contract_fixtures,contract_fixture_changes,units_touching_types_ts
+feat,113,55,45,225,53,139,37
+fix,150,20,10,58,17,30,6

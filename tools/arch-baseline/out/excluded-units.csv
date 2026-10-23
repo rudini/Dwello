@@ -1,0 +1,9 @@
+sha,pr,title,reason
+8e0ef17fa2,,Merge remote-tracking branch 'origin/main',sync merge on main (not a PR): diff would repeat other units
+75193cb938,19,chore(build): format src with Prettier (#19),formatting-only title
+e6debb78a7,,Merge remote-tracking branch 'origin/claude/ecstatic-hawking-2urqri' into claude/nice-bun-b6a451,sync merge on main (not a PR): diff would repeat other units
+4037e44ebf,,fix(config): format the KI settings BFF,commit: formatting-only subject
+e2f236d081,,chore(tests): format the password sign-in files,commit: formatting-only subject
+242e4ff642,,chore(build): format the merged overview load,commit: formatting-only subject
+9d83882e6b,,chore(tests): format wizard draft test,commit: formatting-only subject
+75193cb938,,chore(build): format src with Prettier (#19),commit: formatting-only subject

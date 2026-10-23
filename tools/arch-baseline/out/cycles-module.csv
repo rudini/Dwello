@@ -1,0 +1,4 @@
+cycle,size,modules
+1,2,be:services/pdf be:services/reminder-letter
+2,2,fe:lib/navigation fe:ui
+3,2,e2e:questions e2e:tasks
