@@ -125,3 +125,43 @@ describe('Vorgaben des Abrechnungs-Assistenten', () => {
 	});
 });
 
+
+// H-28 (#16): what a kept statement of the period does differently from the run, from the building's real records
+describe('Abweichende Einstellungen bestehender Abrechnungen', () => {
+	it('nennt die Abrechnung der Periode mit einem anderen Heizprofil und Satz als der Lauf', async () => {
+		const [used, other] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(2);
+		const contractId = await rent('9.01', 'Frei', '2023-01-01');
+		const { id } = await generateStatement({ contractId, buildingId, periodStart: '2023-01-01', periodEnd: '2023-12-31', heatingProfileId: used.id, managementFeePercent: 3 });
+		const differences = async (heatingProfileId: string, fee: number) =>
+			(await sendJson('GET', `/api/v1/statements/run-differences?buildingId=${buildingId}&periodStart=2023-01-01&periodEnd=2023-12-31&heatingProfileId=${heatingProfileId}&managementFeePercent=${fee}`)).json();
+
+		const found = (await differences(other.id, 4.5)) as { statements: { id: string; profile: unknown; fee: unknown }[] };
+		expect(found.statements.map(({ id, fee }) => ({ id, fee }))).toEqual([{ id, fee: { used: 3, now: 4.5, source: 'run' } }]);
+		expect(found.statements[0].profile).not.toBeNull();
+		expect(await differences(used.id, 3)).toEqual({ statements: [] });
+	});
+
+	// #588: the run's Heizprofil after the 100th by name is named too
+	it('nennt auch ein Heizprofil nach dem hundertsten beim Namen', async () => {
+		const [{ id: _id, name: _name, createdAt: _created, updatedAt: _updated, ...shares }] = await db.select().from(heatingProfiles).limit(1);
+		const many = await db
+			.insert(heatingProfiles)
+			.values([
+				...Array.from({ length: 100 }, (_, i) => ({ ...shares, type: 'custom', name: `AAA ${i} ${token}`, nameDE: null })),
+				{ ...shares, type: 'predefined', name: `ZZZ ${token}`, nameDE: `ZZZ ${token}` }
+			])
+			.returning({ id: heatingProfiles.id });
+		try {
+			const [used] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
+			const contractId = await rent('9.02', 'Graf', '2022-01-01');
+			await generateStatement({ contractId, buildingId, periodStart: '2022-01-01', periodEnd: '2022-12-31', heatingProfileId: used.id, managementFeePercent: 0 });
+			const response = await sendJson('GET', `/api/v1/statements/run-differences?buildingId=${buildingId}&periodStart=2022-01-01&periodEnd=2022-12-31&heatingProfileId=${many.at(-1)!.id}&managementFeePercent=0`);
+			const { statements } = (await response.json()) as { statements: { profile: { run: { name: string } | null } }[] };
+
+			expect(statements.map((s) => s.profile.run?.name)).toEqual([`ZZZ ${token}`]);
+		} finally {
+			await db.delete(utilityStatements).where(inArray(utilityStatements.contractId, rentals.map((r) => r.contract)));
+			await db.delete(heatingProfiles).where(inArray(heatingProfiles.id, many.map((p) => p.id)));
+		}
+	});
+});

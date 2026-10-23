@@ -215,74 +215,50 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 }
 
 type Period = { periodStart: string; periodEnd: string };
-type Profile = Parameters<typeof localName>[0] & { id: string; updatedAt: string };
+type Names = Parameters<typeof localName>[0];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON, mapped by toStatement
 type Listed = Record<string, any>;
 
-const nameOf = (profiles: Profile[], id: string | null) => {
-	const profile = profiles.find((p) => p.id === id);
-	return profile ? localName(profile) : m.common_unknown();
+const nameOf = (names: Names | null) => (names ? localName(names) : m.common_unknown());
+
+/** What the backend finds a kept statement doing differently from the run (#132, H-28 pair #16) */
+type Difference = {
+	id: string;
+	profile: { used: Names | null; run: Names | null } | null;
+	profileEdited: Names | null;
+	fee: ChangedStatement['fee'];
 };
-
-// The statement's own profile edited since it was made: it keeps the Monatsanteile of its time (Fachreview V-1)
-const editedSince = (listed: Listed, profiles: Profile[]) => {
-	const edited = profiles.find((p) => p.id === listed.heatingProfileId)?.updatedAt;
-	return !!edited && Date.parse(edited) > Date.parse(listed.createdAt);
-};
-
-// Another Heizprofil, named as the statement stored it (#209), or its own one edited since; neither counts for a
-// contract over the whole period, shared by days whatever the profile (Dr. Weber P-2, Fachreview V-8, code review C-13)
-function profileDifference(listed: Listed, run: GenerationRequest, profiles: Profile[]) {
-	const share = listed.heatingShare;
-	const id: string | null = listed.heatingProfileId;
-	if (share?.reason === 'wholePeriod') return { profile: null, profileEdited: null };
-	if (id !== run.heatingProfileId) {
-		const used = share?.names ? localName(share.names) : nameOf(profiles, id);
-		return { profile: { used, run: nameOf(profiles, run.heatingProfileId) }, profileEdited: null };
-	}
-	const since = share?.byDays === false && editedSince(listed, profiles);
-	return { profile: null, profileEdited: since ? nameOf(profiles, id) : null };
-}
-
-// The rate the run stores for the contract: 0 without an agreed fee, its own rate before the run's (#89, Fachreview M-1)
-function feeDifference(listed: Listed, contract: Contract, run: GenerationRequest) {
-	const used = Number(listed.managementFeePercent ?? 0);
-	const now = !contract.managementFeeAgreed
-		? { now: 0, source: 'none' as const }
-		: contract.managementFeePercent != null
-			? { now: Number(contract.managementFeePercent), source: 'contract' as const }
-			: { now: run.managementFeePercent, source: 'run' as const };
-	return Math.abs(now.now - used) > 0.001 ? { used, ...now } : null;
-}
 
 /**
  * The building's statements of the run's period that a new run keeps although they differ from it (#132): a draft that
- * misses invoices of the period as they are now (#96's stored link), and, in the same Abrechnungsperiode only
- * (Fachreview V-4), another Heizprofil, one edited since the statement was made, or another rate
+ * misses invoices of the period as they are now (#96's stored link), and what the backend finds it doing differently
+ * from the run's settings (Heizprofil, Verwaltungspauschale), named in the UI language
  */
 async function changedStatements(
 	fetch: Fetch,
 	buildingId: string,
 	run: GenerationRequest,
 	overlapping: Listed[],
-	profiles: () => Promise<Profile[]>,
 	oldRule: (listed: Listed) => boolean
 ): Promise<ChangedStatement[]> {
-	const same = overlapping.filter(
-		(s) => s.periodStart === run.periodStart && s.periodEnd === run.periodEnd
-	);
-	// only a hint (code review C-1): without contracts or Heizprofile no settings are compared
-	const [{ contracts = [] }, known]: [{ contracts?: Contract[] }, Profile[]] = same.length
-		? await Promise.all([
-				call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`),
-				profiles()
-			]).catch(() => [{}, []])
-		: [{}, []];
+	const query = new URLSearchParams({
+		buildingId,
+		periodStart: run.periodStart,
+		periodEnd: run.periodEnd,
+		...(run.heatingProfileId ? { heatingProfileId: run.heatingProfileId } : {}),
+		managementFeePercent: String(run.managementFeePercent)
+	});
+	// only a hint (code review C-1): without the answer no settings are compared
+	const { statements: differences = [] }: { statements?: Difference[] } = overlapping.length
+		? await call(fetch, `statements/run-differences?${query}`).catch(() => ({}))
+		: {};
 	const settings = (listed: Listed) => {
-		const contract = contracts.find((c) => c.id === listed.contractId);
-		return same.includes(listed) && contract && known.length
-			? { ...profileDifference(listed, run, known), fee: feeDifference(listed, contract, run) }
-			: { profile: null, profileEdited: null, fee: null };
+		const found = differences.find((d) => d.id === listed.id);
+		return {
+			profile: found?.profile ? { used: nameOf(found.profile.used), run: nameOf(found.profile.run) } : null,
+			profileEdited: found?.profileEdited ? localName(found.profileEdited) : null,
+			fee: found?.fee ?? null
+		};
 	};
 	const changed = await Promise.all(
 		overlapping.map(async (listed) => {
@@ -328,10 +304,6 @@ const rebills = (sent: string[], billed: Contract[]) => (listed: Listed) =>
 export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 	const { buildingIds, periodStart, periodEnd } = run;
 	const overlaps = (s: Period) => s.periodStart <= periodEnd && s.periodEnd >= periodStart;
-	// loaded once, only when a building has statements of the period to compare (#132)
-	let profiles: Promise<Profile[]> | undefined;
-	const loadProfiles = () =>
-		(profiles ??= call(fetch, 'heating-profiles?limit=1000').then((body) => body.data ?? []));
 	const [rows, categories] = await Promise.all([
 		Promise.all(
 			buildingIds.map(async (buildingId) => {
@@ -369,7 +341,7 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 					last: dates.at(-1) ?? null,
 					statements: (statements as Period[]).filter(overlaps).length,
 					check: found,
-					changed: await changedStatements(fetch, buildingId, run, overlapping, loadProfiles, oldRule),
+					changed: await changedStatements(fetch, buildingId, run, overlapping, oldRule),
 					// #382: the agreement is checked through the category, so the run waits for one on each
 					uncategorized: (invoices as Bill[])
 						.filter((i) => !i.categoryId)

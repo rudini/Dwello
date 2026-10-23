@@ -15,7 +15,7 @@ import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json
 import calculationRefused from '../../tests/contracts/statement-calculation-refused.json';
 import statements from '../../tests/contracts/statements.json';
 import statementChangedInvoices from '../../tests/contracts/statement-changed-invoices.json';
-import heatingProfiles from '../../tests/contracts/heating-profiles.json';
+import runDifferences from '../../tests/contracts/statement-run-differences.json';
 import contractAgreements from '../../tests/contracts/contract-agreements.json';
 import category from '../../tests/contracts/category.json';
 import building from '../../tests/contracts/building.json';
@@ -488,15 +488,10 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		periodEnd: '2024-12-31'
 	});
 	const c1 = buildingContracts.contracts[0].id;
-	const ownRate = { ...buildingContracts.contracts[0], id: 'eigen', managementFeePercent: '2.50' };
-	const notAgreed = { ...buildingContracts.contracts[0], id: 'ohne', managementFeeAgreed: false };
-	const profile = (id: string, nameDE: string, updatedAt = '2024-01-01T00:00:00.000Z') => ({ ...heatingProfiles.data[0], id, nameDE, updatedAt });
-	const profiles = [profile('hp1', 'Heizung Mittelland'), profile('hp2', 'Winter')];
 	const fetchWith = (
 		data: object[],
 		changed: Record<string, string[]> = {},
 		asked: string[] = [],
-		known = profiles,
 		fuelStock: string[] = []
 	) =>
 		(async (url: string) => {
@@ -506,10 +501,8 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 				return Response.json({ ...statementChangedInvoices, invoiceIds: changed[id] ?? [], fuelStockChanged: fuelStock.includes(id) });
 			}
 			if (url.includes('/statements?')) return Response.json({ ...statements, data });
-			if (url.includes('/contracts?')) return Response.json({ contracts: [...buildingContracts.contracts, ownRate, notAgreed] });
-			// as the backend: at most as many as asked for (#588)
-			if (url.includes('/heating-profiles?'))
-				return Response.json({ ...heatingProfiles, data: known.slice(0, Number(new URL(url).searchParams.get('limit') ?? 100)) });
+			if (url.includes('/contracts?')) return Response.json(buildingContracts);
+			if (url.includes('/statements/run-differences?')) return Response.json({ statements: [] });
 			if (url.includes('/invoices/completeness/')) return Response.json(invoiceCompleteness);
 			return Response.json([]);
 		}) as typeof globalThis.fetch;
@@ -535,7 +528,7 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 
 	// #454 (#408 point 8), Fachreview 454-2 V-19
 	it('nennt einen Entwurf, dessen Tankbestand sich seither geändert hat', async () => {
-		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')], {}, [], profiles, ['1']);
+		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')], {}, [], ['1']);
 
 		expect(await changedOf(fetch)).toEqual([named('1', { fuelStock: true })]);
 	});
@@ -548,81 +541,50 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		expect(asked).toEqual([]);
 	});
 
-	it('nennt Abrechnungen mit einem anderen Heizprofil, auch versendete, mit beiden Namen', async () => {
-		const fetch = fetchWith([statement('1', c1, 'paid', 'hp2', '4.50')]);
+	// H-28 (#16): the backend decides what a kept statement does differently from the run; here only the names
+	const differing = runDifferences.statements[0];
+	const differs = (more: object) => ({ ...differing, id: '1', profile: null, profileEdited: null, fee: null, ...more });
+	const withDifferences = (found: object[], asked: string[] = []) =>
+		(async (url: string) => {
+			if (url.includes('/statements/run-differences?')) {
+				asked.push(url);
+				return Response.json({ statements: found });
+			}
+			return fetchWith([statement('1', c1, 'paid', 'hp2', '3.00')])(url);
+		}) as typeof globalThis.fetch;
 
-		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Winter', run: 'Heizung Mittelland' } })]);
-	});
-
-	// #588: a Heizprofil after the 100th is named too
-	it('nennt auch ein Heizprofil nach dem hundertsten beim Namen', async () => {
-		const many = [...profiles, ...Array.from({ length: 148 }, (_, i) => profile(`hp${i + 3}`, `Eintrag ${i + 3}`))];
-		const fetch = fetchWith([statement('1', c1, 'paid', 'hp120', '4.50')], {}, [], many);
-
-		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Eintrag 120', run: 'Heizung Mittelland' } })]);
-	});
-
-	// a deleted Heizprofil is stored as none; the statement keeps its name since #209
-	it('nennt ein gelöschtes Heizprofil mit dem Namen, den die Abrechnung gespeichert hat', async () => {
-		const names = { name: 'Alt', nameDE: 'Alt', nameFR: null, nameIT: null, nameEN: null };
-		const fetch = fetchWith([{ ...statement('1', c1, 'sent', null, '4.50'), heatingShare: { byDays: false, percent: 43, months: [], names } }]);
-
-		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Alt', run: 'Heizung Mittelland' } })]);
-	});
-
-	// persona Dr. Weber P-2, Fachreview V-8: by days (a contract over the whole period) the Heizprofil changes nothing
-	it('nennt kein anderes Heizprofil, wenn die Abrechnung die Heizkosten nach Tagen verteilt hat', async () => {
-		const fetch = fetchWith([{ ...statement('1', c1, 'sent', 'hp2', '4.50'), heatingShare: { byDays: true, reason: 'wholePeriod' } }]);
-
-		expect(await changedOf(fetch)).toEqual([]);
-	});
-
-	// code review C-13: without heating months in the rented months, or without a profile, another one may share differently
-	it('nennt ein anderes Heizprofil, wenn die Abrechnung nach Tagen verteilt hat, weil ihr Heizprofil keine Heizmonate hatte', async () => {
-		const fetch = fetchWith([{ ...statement('1', c1, 'sent', 'hp2', '4.50'), heatingShare: { byDays: true, reason: 'noHeatingMonths' } }]);
-
-		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Winter', run: 'Heizung Mittelland' } })]);
-	});
-
-	// Fachreview V-1: the statement keeps the Monatsanteile of its time, the run takes the profile as it is now
-	it('nennt eine Abrechnung, deren Heizprofil nach dem Erstellen bearbeitet wurde', async () => {
-		const share = { byDays: false, percent: 43, months: [], names: { name: 'Heizung Mittelland', nameDE: 'Heizung Mittelland', nameFR: null, nameIT: null, nameEN: null } };
-		const made = { ...statement('1', c1, 'sent', 'hp1', '4.50'), heatingShare: share, createdAt: '2025-01-10T08:00:00.000Z' };
-		const later = [profile('hp1', 'Heizung Mittelland', '2025-02-01T08:00:00.000Z')];
-
-		expect(await changedOf(fetchWith([made], {}, [], later))).toEqual([named('1', { profileEdited: 'Heizung Mittelland' })]);
-		expect(await changedOf(fetchWith([made]))).toEqual([]); // edited before
-		// by days, the profile's shares do not count
-		expect(await changedOf(fetchWith([{ ...made, heatingShare: { byDays: true } }], {}, [], later))).toEqual([]);
-	});
-
-	// Fachreview M-1: the rate the run would store for the contract: its own rate before the run's, 0 without an agreed
-	// fee (#89); each case says where the rate comes from
-	it('vergleicht die Verwaltungspauschale mit dem Satz, den der Lauf für den Mietvertrag speichern würde', async () => {
-		const fetch = fetchWith([
-			statement('1', c1, 'sent', 'hp1', '3.00'),
-			statement('2', 'eigen', 'sent', 'hp1', '2.50'),
-			statement('3', 'eigen', 'sent', 'hp1', '3.00'),
-			statement('4', 'ohne', 'sent', 'hp1', '0.00'),
-			statement('5', 'ohne', 'sent', 'hp1', '3.00'),
-			statement('6', c1, 'sent', 'hp1', null)
-		]);
+	it('nennt, was das Backend an Heizprofil und Verwaltungspauschale abweichend findet, in der Sprache der Oberfläche', async () => {
+		const asked: string[] = [];
+		const fetch = withDifferences([differs({ profile: differing.profile, fee: differing.fee })], asked);
 
 		expect(await changedOf(fetch)).toEqual([
-			named('1', { fee: { used: 3, now: 4.5, source: 'run' } }),
-			named('3', { fee: { used: 3, now: 2.5, source: 'contract' } }),
-			named('5', { fee: { used: 3, now: 0, source: 'none' } }),
-			named('6', { fee: { used: 0, now: 4.5, source: 'run' } })
+			named('1', { profile: { used: 'Winter', run: 'Heizung Mittelland' }, fee: { used: 3, now: 4.5, source: 'run' } })
+		]);
+		expect(asked).toEqual([
+			`${API}/statements/run-differences?buildingId=b1&periodStart=2024-01-01&periodEnd=2024-12-31&heatingProfileId=hp1&managementFeePercent=4.5`
 		]);
 	});
 
-	// Fachreview V-4: settings only compare within the same Abrechnungsperiode; a draft of an overlapping one still
-	// misses invoices
-	it('vergleicht die Einstellungen nur mit Abrechnungen derselben Abrechnungsperiode', async () => {
-		const other = { ...statement('1', c1, 'draft', 'hp2', '1.00'), periodStart: '2023-07-01', periodEnd: '2024-06-30' };
+	it('nennt ein Heizprofil, das das Backend nicht mehr kennt, unbekannt', async () => {
+		const fetch = withDifferences([differs({ profile: { used: null, run: differing.profile.run } })]);
 
-		expect(await changedOf(fetchWith([other]))).toEqual([]);
-		expect(await changedOf(fetchWith([other], { '1': ['i2'] }))).toEqual([named('1', { outdated: true })]);
+		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Unbekannt', run: 'Heizung Mittelland' } })]);
+	});
+
+	it('nennt das seither bearbeitete Heizprofil einer Abrechnung beim Namen', async () => {
+		const fetch = withDifferences([differs({ profileEdited: differing.profile.run })]);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { profileEdited: 'Heizung Mittelland' })]);
+	});
+
+	// code review C-1: the settings are only a hint
+	it('zeigt die Vorschau auch, wenn die abweichenden Einstellungen nicht laden', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/statements/run-differences?')
+				? Response.json({ error: 'kaputt' }, { status: 500 })
+				: fetchWith([statement('1', c1, 'draft', 'hp2', '1.00')], { '1': ['i2'] })(url)) as typeof globalThis.fetch;
+
+		expect(await changedOf(fetch)).toEqual([named('1', { outdated: true })]);
 	});
 
 	it('übergeht Abrechnungen ausserhalb der Abrechnungsperiode', async () => {
@@ -649,16 +611,6 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 					: fetchWith([sent, ...others])(url)) as typeof globalThis.fetch;
 
 		expect((await changedOf(fetch)).filter((one) => one.id === '1')).toEqual(oldRule ? [named('1', { oldRule: true })] : []);
-	});
-
-	// code review C-1: the settings are only a hint; without contracts or Heizprofile the preview still shows
-	it('zeigt die Vorschau auch, wenn Mietverträge oder Heizprofile nicht laden', async () => {
-		const fetch = (async (url: string) =>
-			url.includes('/heating-profiles?') || url.includes('/contracts?')
-				? Response.json({ error: 'kaputt' }, { status: 500 })
-				: fetchWith([statement('1', c1, 'draft', 'hp2', '1.00')], { '1': ['i2'] })(url)) as typeof globalThis.fetch;
-
-		expect(await changedOf(fetch)).toEqual([named('1', { outdated: true })]);
 	});
 
 	// only a hint: without the answer the draft is not named outdated, and the preview still shows

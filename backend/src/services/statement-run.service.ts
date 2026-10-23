@@ -6,6 +6,7 @@
 import { billsIn, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
 import { getTypedConfig } from './config.service';
 import { getContract, listContracts, type ContractWithDetails } from './contract.service';
+import { listHeatingProfiles } from './heating-profile.service';
 import { isRealDate } from './real-date';
 import { listStatements } from './statement.service';
 import { swissToday } from './today';
@@ -165,3 +166,71 @@ export async function runDefaultsOf(query: { buildingId?: string; periodStart?: 
 	return runDefaults(settings, { buildingId, period: { start: periodStart!, end: periodEnd! } }, contracts, statements);
 }
 
+
+type Names = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+type Profile = Names & { id: string; updatedAt: Date };
+type Share = { byDays: boolean; reason?: string; names?: Names } | null;
+type Kept = Omit<Settled, 'status'> & { id: string; heatingShare: Share; createdAt: Date };
+type RunSettings = { period: Range; heatingProfileId: string | null; managementFeePercent: number };
+
+const namesOf = ({ name, nameDE, nameFR, nameIT, nameEN }: Names) => ({ name, nameDE, nameFR, nameIT, nameEN });
+
+const namedIn = (profiles: Profile[], id: string | null) => {
+	const profile = profiles.find((p) => p.id === id);
+	return profile ? namesOf(profile) : null;
+};
+
+// Its own profile edited since the statement was made: the statement keeps the Monatsanteile of its time (Fachreview V-1)
+const editedSince = (statement: Kept, profiles: Profile[]) => {
+	const edited = profiles.find((p) => p.id === statement.heatingProfileId)?.updatedAt;
+	return statement.heatingShare?.byDays === false && !!edited && edited > statement.createdAt;
+};
+
+// Another Heizprofil, named as the statement stored it (#209), or its own one edited since; neither counts for a
+// contract over the whole period, shared by days whatever the profile (Dr. Weber P-2, Fachreview V-8, code review C-13)
+function profileDifference(statement: Kept, run: RunSettings, profiles: Profile[]) {
+	const { heatingShare: share, heatingProfileId: id } = statement;
+	if (share?.reason === 'wholePeriod') return { profile: null, profileEdited: null };
+	if (id !== run.heatingProfileId)
+		return { profile: { used: share?.names ? namesOf(share.names) : namedIn(profiles, id), run: namedIn(profiles, run.heatingProfileId) }, profileEdited: null };
+	return { profile: null, profileEdited: editedSince(statement, profiles) ? namedIn(profiles, id) : null };
+}
+
+// The rate the run stores for the contract: 0 without an agreed fee, its own rate before the run's (#89, Fachreview M-1)
+function feeDifference(statement: Kept, contract: Pick<Tenancy, 'managementFeeAgreed' | 'managementFeePercent'>, run: RunSettings) {
+	const used = Number(statement.managementFeePercent ?? 0);
+	const now = !contract.managementFeeAgreed
+		? { now: 0, source: 'none' as const }
+		: contract.managementFeePercent != null
+			? { now: Number(contract.managementFeePercent), source: 'contract' as const }
+			: { now: run.managementFeePercent, source: 'run' as const };
+	return Math.abs(now.now - used) > 0.001 ? { used, ...now } : null;
+}
+
+/**
+ * #132, H-28 pair #16: the statements of the run's very Abrechnungsperiode (Fachreview V-4) that a new run keeps
+ * although they used another Heizprofil, one edited since they were made, or another Verwaltungspauschale
+ */
+export function runDifferences(
+	run: RunSettings,
+	statements: Kept[],
+	contracts: Pick<Tenancy, 'id' | 'managementFeeAgreed' | 'managementFeePercent'>[],
+	profiles: Profile[]
+) {
+	return statements.flatMap((statement) => {
+		const contract = contracts.find((c) => c.id === statement.contractId);
+		if (!contract || !same({ start: statement.periodStart, end: statement.periodEnd }, run.period)) return [];
+		const differs = { id: statement.id, ...profileDifference(statement, run, profiles), fee: feeDifference(statement, contract, run) };
+		return differs.profile || differs.profileEdited || differs.fee ? [differs] : [];
+	});
+}
+
+/** The building's statements of the run's period that differ from the run's settings (#132, H-28) */
+export async function runDifferencesOf(buildingId: string, run: RunSettings) {
+	const [{ contracts }, { statements }, { heatingProfiles }] = await Promise.all([
+		listContracts({ buildingId, limit: 1000 }),
+		listStatements({ buildingId, periodStart: run.period.start, periodEnd: run.period.end, limit: 1000 }),
+		listHeatingProfiles({ limit: 1000 })
+	]);
+	return { statements: runDifferences(run, statements, contracts, heatingProfiles) };
+}

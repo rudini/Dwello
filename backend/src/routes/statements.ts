@@ -23,7 +23,7 @@ import {
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
 import { sendStatement } from '../services/statement-send.service';
-import { runDefaultsOf, runPlan } from '../services/statement-run.service';
+import { runDefaultsOf, runDifferencesOf, runPlan } from '../services/statement-run.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
@@ -63,6 +63,25 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			periodEnd: t.String({ format: 'date' })
 		})
 	})
+	// The statements of the run's period a new run keeps although they differ from its settings (#132, H-28)
+	.get(
+		'/run-differences',
+		({ query }) =>
+			runDifferencesOf(query.buildingId, {
+				period: { start: query.periodStart, end: query.periodEnd },
+				heatingProfileId: query.heatingProfileId ?? null,
+				managementFeePercent: query.managementFeePercent
+			}),
+		{
+			query: t.Object({
+				buildingId: t.String({ format: 'uuid' }),
+				periodStart: t.String({ format: 'date' }),
+				periodEnd: t.String({ format: 'date' }),
+				heatingProfileId: t.Optional(t.String()),
+				managementFeePercent: t.Numeric({ minimum: 0, maximum: 10 })
+			})
+		}
+	)
 	// List all statements
 	.get(
 		'/',
