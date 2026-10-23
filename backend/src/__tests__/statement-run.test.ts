@@ -453,18 +453,27 @@ describe('Hinweise zu den Heizkosten eines Laufs', () => {
 		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', billed).heatingWithoutServicePeriod).toEqual([]);
 	});
 
-	// code review E-1: as before H-28, a contract with a statement in the period counts as billed, also one replaced there
-	it('nennt sie nicht, wenn die Abrechnung des Mietvertrags mit dem Einzug in der Periode ersetzt ist', () => {
+	// #647: the run bills a contract whose statement of the period is replaced again, its berichtigte Abrechnung (#120)
+	it('nennt sie auch, wenn die Abrechnung des Mietvertrags mit dem Einzug in der Periode ersetzt ist', () => {
 		const replaced = [{ ...statement('einzug', '2024-01-01', '2024-12-31', 'replaced'), id: 's1', apartmentId: 'w1' }];
 
-		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', replaced).heatingWithoutServicePeriod).toEqual([]);
+		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', replaced).heatingWithoutServicePeriod).toEqual(hinted);
+	});
+
+	// Fachreview 647-1 F-1: a statement replaced in another, overlapping period still bills the contract there (#199)
+	it('nennt sie nicht, wenn die ersetzte Abrechnung des Mietvertrags mit dem Einzug eine andere Periode hat', () => {
+		const other = [{ ...statement('einzug', '2023-07-01', '2024-06-30', 'replaced'), id: 's1', apartmentId: 'w1' }];
+
+		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', other).heatingWithoutServicePeriod).toEqual([]);
 	});
 
 	// #335 (#451, point 5): the sent statement of the previous tenant still shares the heating costs without the months in
 	// the Leistungszeitraum (by the check); the preview names it when the run bills the next tenant of the same apartment
 	it.each([
 		['erstellt der Lauf eine Abrechnung derselben Wohnung', [], ['alt']],
-		['hat der Nachmieter schon eine Abrechnung', [{ ...statement('einzug', '2024-01-01', '2024-12-31'), id: 'neu', apartmentId: 'w1' }], []]
+		['hat der Nachmieter schon eine Abrechnung', [{ ...statement('einzug', '2024-01-01', '2024-12-31'), id: 'neu', apartmentId: 'w1' }], []],
+		// #647: the run creates the berichtigte Abrechnung of the next tenant
+		['ist die Abrechnung des Nachmieters ersetzt', [{ ...statement('einzug', '2024-01-01', '2024-12-31', 'replaced'), id: 'neu', apartmentId: 'w1' }], ['alt']]
 	] as const)('nennt eine versendete Abrechnung nach der alten Regel: %s', (_, more, expected) => {
 		const moved = [tenancy('auszug', 'w1', '2020-01-01', '2024-03-31'), tenancy('einzug', 'w1', '2024-05-01', null), tenancy('andere', 'w2', '2024-05-01', null)];
 		const sent = { ...statement('auszug', '2024-01-01', '2024-12-31', 'sent'), id: 'alt', apartmentId: 'w1' };
