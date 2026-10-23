@@ -45,7 +45,10 @@
 	};
 	const status = $derived(statuses[row.status]);
 	const editable = $derived(row.status === 'check' || row.status === 'failed');
-	const toggleLabel = $derived(open ? m.invoices_upload_details_hide() : m.invoices_upload_details_show());
+	// a file nobody read (also one whose reading failed) has empty fields to enter, not proposals to check (#760)
+	const unread = $derived(row.byHand || row.status === 'failed');
+	const openLabel = () => (unread ? m.invoices_upload_details_enter() : m.invoices_upload_details_show());
+	const toggleLabel = $derived(open ? m.invoices_upload_details_hide() : openLabel());
 	// a field the property manager is told to fill in opens the invoice
 	$effect(() => {
 		if (Object.keys(errors).length) open = true;

@@ -175,6 +175,24 @@ describe('Rechnungen hochladen', () => {
 		expect(document.body.textContent).not.toContain('liest die KI');
 	});
 
+	// #760: the fields of a file the KI read are checked
+	it('lässt die Angaben einer gelesenen Datei prüfen', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		expect(byTestId('invoice-upload-row-toggle')!.textContent?.trim()).toBe('Angaben prüfen');
+	});
+
+	// code review 760 C-1: a file whose reading failed has empty fields too
+	it('lässt die Angaben einer Datei eingeben, deren Auslesen scheiterte', async () => {
+		open(() => [500, {}]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		expect(byTestId('invoice-upload-row-toggle')!.textContent?.trim()).toBe('Angaben eingeben');
+	});
+
 	// persona Anna 626 P-1, P-2: with «Keine KI» the file is not sent to be read, and no note says a KI did not read it
 	it('schickt bei «Keine KI» keine Datei zum Auslesen und nennt keine KI', async () => {
 		const calls = fakeBff(() => [503, { code: 'EXTRACTION_UNAVAILABLE' }]);
@@ -195,6 +213,8 @@ describe('Rechnungen hochladen', () => {
 		expect(rowText()[0]).toContain('rechnung.pdf');
 		expect(rowText()[0]).not.toContain('KI');
 		expect(rowText()[0]).not.toContain('nicht öffnen');
+		// #760: the empty fields are entered, not checked
+		expect(byTestId('invoice-upload-row-toggle')!.textContent?.trim()).toBe('Angaben eingeben');
 		// code review 626 C-3: the pages are made in the browser, so the preview stays
 		click('invoice-upload-row-toggle');
 		await settle();

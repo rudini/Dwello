@@ -275,6 +275,17 @@ export function testData(api: CallTheApi) {
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
 
+		// No postal address: the tenant gets documents by e-mail, the only way the backend allows it (H-28, #717)
+		async noAddress(tenantTitle: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, {
+				email: `${ids.get(tenantTitle)}@dwello.test`,
+				address: null,
+				postalCode: null,
+				city: null,
+				correspondenceChannel: 'email'
+			});
+		},
+
 		// A Korrespondenzadresse by letter, abroad when a country code is given (#102)
 		async address(tenantTitle: string, address: string, postalCode: string, city: string, country: string) {
 			await put(`tenants/${ids.get(tenantTitle)}`, { address, postalCode, city, country, correspondenceChannel: 'letter' });

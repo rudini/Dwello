@@ -4,6 +4,8 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { fieldsRefused } from '../services/coded-error';
+import { newTenantFieldErrors, tenantFieldErrors } from '../services/tenant-fields';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listTenants,
@@ -28,9 +30,10 @@ const tenantQuerySchema = t.Object({
 });
 
 const tenantBodySchema = t.Object({
-	firstName: t.String({ minLength: 1 }),
-	lastName: t.String({ minLength: 1 }),
-	email: t.Optional(t.Nullable(t.String({ format: 'email' }))),
+	// H-28 (#717): what the form checks is checked in `tenant-fields.ts`, so every field shows its own message
+	firstName: t.String(),
+	lastName: t.String(),
+	email: t.Optional(t.Nullable(t.String())),
 	phone: t.Optional(t.Nullable(t.String())),
 	language: t.Optional(t.Union(['de', 'fr', 'it', 'en'].map((l) => t.Literal(l)))),
 	address: t.Optional(t.Nullable(t.String())),
@@ -110,6 +113,11 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 	.post(
 		'/',
 		async ({ body, set }) => {
+			const invalid = newTenantFieldErrors(body);
+			if (invalid.length) {
+				set.status = 400;
+				return fieldsRefused(invalid);
+			}
 			try {
 				const tenant = await createTenant(body);
 				set.status = 201;
@@ -127,6 +135,11 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 	.put(
 		'/:id',
 		async ({ params, body, set }) => {
+			const invalid = tenantFieldErrors(body);
+			if (invalid.length) {
+				set.status = 400;
+				return fieldsRefused(invalid);
+			}
 			const tenant = await updateTenant(params.id, body);
 			if (!tenant) {
 				set.status = 404;

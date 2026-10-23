@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { backendMessage } from '$lib/backend-error';
+import { backendMessage, refusedFields } from '$lib/backend-error';
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
 import { toBuilding } from '$lib/server/building';
@@ -41,10 +41,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingE
 
 export const actions: Actions = {
 	default: async ({ request, params, fetch }) => {
-		const { building, errors } = parseBuildingForm(await request.formData());
-		if (Object.keys(errors).length > 0) {
-			return { success: false, errors };
-		}
+		const { building } = parseBuildingForm(await request.formData());
 
 		try {
 			const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`, {
@@ -56,6 +53,8 @@ export const actions: Actions = {
 
 			if (!response.ok) {
 				const error = await response.json();
+				// the form's checks are the backend's (H-28, #717): each at its field
+				if (error.causes) return { success: false, errors: refusedFields(error) };
 				return formError(backendMessage(error, m.buildings_save_failed()));
 			}
 		} catch (err) {

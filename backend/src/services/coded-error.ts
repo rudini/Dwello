@@ -13,6 +13,9 @@ export type Refusal = ErrorCode & { error: string; causes?: ErrorCode[] };
 
 export const refusal = (code: string, error: string, params: ErrorParams = {}): Refusal => ({ error, code, params });
 
+/** A refused form: its first error as the code, every error with its field as `causes` (H-28, #717) */
+export const fieldsRefused = (causes: ErrorCode[]): Refusal => ({ ...refusal(causes[0].code, 'Some fields are not valid', causes[0].params), causes });
+
 export class CodedError extends Error {
 	constructor(
 		readonly code: string,

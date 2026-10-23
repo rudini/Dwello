@@ -12,7 +12,8 @@ import { isRealDate } from './real-date';
 import { listStatements } from './statement.service';
 import { swissToday } from './today';
 
-type Contract = Pick<ContractWithDetails, 'id' | 'startDate' | 'endDate' | 'billedUntil' | 'tenantName'>;
+type Contract = Pick<ContractWithDetails, 'id' | 'startDate' | 'endDate' | 'billedUntil' | 'tenantName'> &
+	Partial<Pick<ContractWithDetails, 'terminated' | 'managementFeeAgreed' | 'apartmentNumber'>>;
 type Statement = { contractId: string; periodStart: string; periodEnd: string; status: string };
 
 const within = (s: Statement, p: Range) => overlaps({ start: s.periodStart, end: s.periodEnd }, p);
@@ -45,16 +46,32 @@ function overlapOf(run: Range, contracts: Contract[], statements: Statement[], t
 	};
 }
 
+/**
+ * What the preview says about a contract (H-28, #717): moved out by the period's end or by today, whichever is later
+ * (a statement made later than the period); befristet with its end not reached, so no Kündigungstermin before it (#76);
+ * «Abgerechnet bis» where it shortens the Mietstage in the period (#453, #327)
+ */
+function flagsOf(c: Contract, period: Range, today: string) {
+	const movedOut = !!c.endDate && c.endDate <= [period.end, today].sort()[1];
+	const shortens = billingStart(c) > [c.startDate.slice(0, 10), period.start].sort()[1];
+	return { movedOut, fixedTerm: !!c.endDate && !c.terminated && !movedOut, shortenedTo: shortens ? c.billedUntil : null };
+}
+
 /** The plan of a run over the building's contracts and statements */
 export function planRun<C extends Contract>(period: Range, contracts: C[], statements: Statement[], today = swissToday()) {
 	// a statement replaced in this very period does not count: the run creates its berichtigte Abrechnung (#120)
 	const replacedHere = (s: Statement) => s.status === 'replaced' && s.periodStart === period.start && s.periodEnd === period.end;
 	// a statement overlapping the period bills the contract there (#199, #211)
 	const overlapping = statements.filter((s) => s.periodStart <= period.end && s.periodEnd >= period.start && !replacedHere(s));
+	const inPeriod = contracts
+		.filter((c) => billsIn(c, period))
+		.map((c) => ({ ...c, billed: overlapping.some((s) => s.contractId === c.id), ...flagsOf(c, period, today) }));
 	return {
-		contracts: contracts
-			.filter((c) => billsIn(c, period))
-			.map((c) => ({ ...c, billed: overlapping.some((s) => s.contractId === c.id) })),
+		contracts: inPeriod,
+		// #89: the contracts this run bills without an agreed Verwaltungspauschale (step «Einstellungen»)
+		withoutFee: inPeriod
+			.filter((c) => !c.billed && !c.managementFeeAgreed)
+			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber })),
 		overlap: overlapOf(period, contracts, statements, today),
 		// #453 (#327): in the period by its dates, but «Abgerechnet bis» leaves it no Mietstage there
 		skipped: contracts
@@ -255,9 +272,9 @@ export function runHeatingHints<I>(
 	statements: Placed[],
 	check: HeatingCheck<I>
 ): HeatingCheck<I> {
-	// the contracts with Mietstage in the period and no statement overlapping it, a replaced one included (code review
-	// E-1; whether a berichtigte Abrechnung should get the hints is open in #647)
-	const billed = contracts.filter((c) => billsIn(c, run.period) && !statements.some((s) => s.contractId === c.id && within(s, run.period)));
+	// the contracts the run bills, one whose statement of this very period is replaced included: the run creates its
+	// berichtigte Abrechnung (#647, #120)
+	const billed = planRun(run.period, contracts, statements).contracts.filter((c) => !c.billed);
 	const change = !!run.heatingProfileId && billed.some((c) => movesIn(c, run.period));
 	// the sent statement's own contract has a statement in the period, so it is never among them
 	const rebilled = (id: string) => {

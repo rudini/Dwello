@@ -4,7 +4,8 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { refusal } from '../services/coded-error';
+import { fieldsRefused, refusal } from '../services/coded-error';
+import { apartmentFieldErrors, buildingFieldErrors, decimalOf } from '../services/building-fields';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listBuildings,
@@ -36,12 +37,13 @@ const buildingQuerySchema = t.Object({
 	offset: t.Optional(t.String())
 });
 
+// H-28 (#717): what the form checks is checked in `building-fields.ts`, so every field shows its own message
 const buildingBodySchema = t.Object({
-	name: t.String({ minLength: 1 }),
-	address: t.String({ minLength: 1 }),
-	postalCode: t.String({ minLength: 4, maxLength: 10 }),
-	city: t.String({ minLength: 1 }),
-	canton: t.String({ minLength: 2, maxLength: 2 }),
+	name: t.String(),
+	address: t.String(),
+	postalCode: t.String(),
+	city: t.String(),
+	canton: t.String({ maxLength: 2 }),
 	country: t.Optional(t.String()),
 	latitude: t.Optional(t.Nullable(t.String())),
 	longitude: t.Optional(t.Nullable(t.String())),
@@ -54,10 +56,10 @@ const buildingUpdateSchema = t.Partial(buildingBodySchema);
 
 // A new building may bring its Wohnungen along (taken from the Gebäuderegister, #479), all created or none
 const newApartmentSchema = t.Object({
-	number: t.String({ minLength: 1, maxLength: 20 }),
-	floor: t.Number(),
-	area: t.String({ minLength: 1 }),
-	rooms: t.String({ minLength: 1 })
+	number: t.String({ maxLength: 20 }),
+	floor: t.Union([t.Number(), t.String()]), // as entered in the form
+	area: t.String(),
+	rooms: t.String()
 });
 const buildingCreateSchema = t.Composite([
 	buildingBodySchema,
@@ -105,13 +107,19 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 	.post(
 		'/',
 		async ({ body: { apartments = [], ...body }, set }) => {
+			const invalid = [...buildingFieldErrors(body), ...apartmentFieldErrors(apartments)];
+			if (invalid.length) {
+				set.status = 400;
+				return fieldsRefused(invalid);
+			}
 			const twice = apartments.find((a, i) => apartments.findIndex((b) => b.number === a.number) !== i);
 			if (twice) {
 				set.status = 409;
 				return numberTakenError(twice.number);
 			}
 			try {
-				const building = await createBuilding(body, apartments);
+				const entered = apartments.map((a) => ({ ...a, floor: Number(a.floor), area: decimalOf(a.area), rooms: decimalOf(a.rooms) }));
+				const building = await createBuilding(body, entered);
 				set.status = 201;
 				return building;
 			} catch (error) {
@@ -127,6 +135,11 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 	.put(
 		'/:id',
 		async ({ params, body, set }) => {
+			const invalid = buildingFieldErrors(body);
+			if (invalid.length) {
+				set.status = 400;
+				return fieldsRefused(invalid);
+			}
 			const building = await updateBuilding(params.id, body);
 			if (!building) {
 				set.status = 404;

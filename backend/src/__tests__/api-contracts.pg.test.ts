@@ -174,6 +174,27 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('invoice-statements'), actual)).toEqual([]);
 	});
 
+	// H-28 (#717): the building form refused, every failed check with its field; nothing is created
+	it('POST /buildings liefert bei ungültigen Feldern die Felder von building-fields-refused.json', async () => {
+		const response = await sendJson('POST', '/api/v1/buildings', {
+			name: `Feldtest ${token}`,
+			address: 'Lindenweg 1',
+			postalCode: '84',
+			city: '',
+			canton: 'ZH',
+			apartments: [{ number: '101', floor: '', area: '0', rooms: '3' }]
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('building-fields-refused'), await response.json())).toEqual([]);
+	});
+
+	// H-28 (#717): the tenant form refused, every failed check with its field; nothing is created
+	it('POST /tenants liefert bei ungültigen Feldern die Felder von tenant-fields-refused.json', async () => {
+		const response = await sendJson('POST', '/api/v1/tenants', { firstName: '', lastName: `Feldtest ${token}`, email: 'anna@', postalCode: '84' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('tenant-fields-refused'), await response.json())).toEqual([]);
+	});
+
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts?buildingId=${rental.building}&limit=1000`)).json();
 		expect(drift(await sample('building-contracts'), actual)).toEqual([]);
@@ -233,14 +254,19 @@ describe('API-Verträge des Frontends', () => {
 		const apartment = await createApartment({ buildingId: rental.building, number: '2.02', floor: 2, area: '50', rooms: '2' });
 		const tenant = await createTenant({ firstName: 'Marc', lastName: `Huber ${token}` });
 		const covered = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate: '2020-01-01', billedUntil: '2024-12-31', baseRent: '800', monthlyAdvancePayment: '100' });
+		// H-28 (#717): a contract the run bills without an agreed Verwaltungspauschale (#89)
+		const other = await createApartment({ buildingId: rental.building, number: '2.04', floor: 2, area: '50', rooms: '2' });
+		const unagreed = await createContract({ apartmentId: other.id, tenantId: tenant.id, startDate: '2024-05-01', baseRent: '800', monthlyAdvancePayment: '100', managementFeeAgreed: false });
 		try {
 			const actual = await (
 				await callApi(`/api/v1/statements/run?buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`)
 			).json();
 			expect(drift(await sample('statement-run'), actual)).toEqual([]);
 		} finally {
+			await deleteContract(unagreed.id, true);
 			await deleteContract(covered.id, true);
 			await deleteTenant(tenant.id);
+			await deleteApartment(other.id);
 			await deleteApartment(apartment.id);
 		}
 	});

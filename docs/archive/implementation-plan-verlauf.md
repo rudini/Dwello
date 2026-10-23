@@ -2987,3 +2987,71 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Closing round: `docs/reviews/spec643-review-3.md`, `docs/reviews/spec643-review-4.md` (C-4 fixed)
 - [x] Workflow note: `grill-me` assumes an issue; `docs/reviews/workflow-notes-issue-643.md`
 - [x] Archive, PR: pushed after this archive
+## Session H-28 step 1: preview flags from the run plan
+
+#717 (H-28): `movedOut`, `fixedTerm` (#76), `shortenedTo` (#453) and `withoutFee` (#89) come from the backend's run plan; the BFF passes them on. No scenario: behaviour unchanged. Parallel session (checklist in the pull request).
+
+- [x] Backend `planRun` flags and `withoutFee`, contract `statement-run.json`, tests red first
+- [x] BFF passes them on; tests show it passes flags the dates would not give
+- [x] `code-reviewer` round 1 (`docs/reviews/h28d-review-1.md`: H-1 Major, H-2, H-3) and round 2 (`h28d-review-2.md`: fixed)
+## Session 2026-10-23: link to Discussions
+
+No scenario: repository documents only, no app change.
+
+- [x] `.github/ISSUE_TEMPLATE/config.yml` and `CONTRIBUTING.md` point questions and ideas to Discussions
+- [x] PR: pushed after this archive
+## Session H-28 step 2: building form checks in the backend
+
+#717 (H-28): every check of the building form (required fields, PLZ 4 digits, Baujahr, the Wohnungen from the Gebäuderegister) is the backend's (`backend/src/services/building-fields.ts`); POST/PUT `/buildings` refuse with `causes` per field, the BFF shows each at its field. No scenario: behaviour unchanged (same texts, all at once). Parallel session (checklist in the pull request).
+
+- [x] Backend checks with unit and route tests, red first; contract `building-fields-refused.json`
+- [x] BFF sends what was entered, maps refusals to fields and apartment rows; texts as `backend_<code>` in four languages, 8 unused keys removed
+- [x] `code-reviewer` round 1 (`docs/reviews/h28e-review-1.md`: J-1..J-3 Minor; J-2, J-3 fixed, J-1 stays) and closing round (`h28e-review-2.md`: nothing new)
+- [x] Before complete; PR pushed after this archive
+## Session #647: heating hints for a berichtigte Abrechnung
+
+#647 (decided 23.10.2026, option 1): the contracts that count for the heating hints of a run (#339, #335) are the ones the run bills (`planRun`), a contract whose statement of the period is replaced included. Scenario «Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum beim Lauf einer berichtigten Abrechnung» (`statement-generate.feature`).
+
+- [x] `@wip` scenario, seen failing at the missing hint; `fach-reviewer` on it before implementing: `docs/reviews/647-fachreview-1.md` (F-1, F-2 fixed)
+- [x] Unit tests in `statement-run.test.ts`: the replaced case flipped (#339), and #335 with a replaced statement; red first
+- [x] `runHeatingHints` counts by `planRun`
+- [x] Slice review `code-reviewer`: `docs/reviews/647-review-1.md` (no findings)
+- [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-647.md`): task done, Minors P-1..P-4 stay in the report
+- [x] Before complete; PR `Fixes #647` pushed after this archive
+
+## Session 2026-10-23: #760 «Angaben eingeben» bei einer ungelesenen Datei
+
+- [x] Wording decided in #760 under the standing instruction («Angaben eingeben», fr/it/en)
+- [x] Scenario «Rechnungen hochladen, wenn keine KI gewählt ist» extended (`ki-einstellungen.feature`), red as @wip at «Angaben prüfen»; no step-1 fach-reviewer (a button text)
+- [x] Row label by `byHand`, texts in four languages; DOM test red first (the test for «Angaben prüfen» pins kept behaviour)
+- [x] code-reviewer round 1: `docs/reviews/760-review-1.md`; Minor C-1 (a row whose reading failed) fixed, DOM test red first; Minor C-2 (commit message) corrected in the next commit
+- [x] persona Helga on a fresh installation (`docs/design/personas/helga-760.md`): no Blocker/Major; the label fits; P-1 to P-4 (badge «Bitte prüfen», summary, key help, order of hints) lie outside #760 and stay in the report
+- [x] closing round: `docs/reviews/760-review-2.md`; C-1, C-2 closed; Minor C-3 (the scenario of a failed read checks «Angaben eingeben», `invoices.feature`) done, pinning the fix whose DOM test was seen red
+- [x] Workflow note: none new (fresh installation for personas as in `docs/reviews/workflow-notes-issue-620.md`); archive; PR pushed after this archive
+## Session: landing page warmer, not larger (marketing)
+
+Request: implement the seven points of the landing review (animations back with HTML text, terminals collapsed, hero with the statement, no technical numbers, the example carried through, roadmap and open source after the FAQ, stale upload shot gone), page weight and length at most as today (66 KB HTML, 870 KB total, 13/21 screens).
+
+- [x] `marketing/index.html`: hero (lede, note, statement PDFs instead of the dashboard), facts bar removed
+- [x] Vermieterjahr: timeline labels, example (Wasserversorgung, Hans Müller, Maria Rossi), drawing from the app's motifs
+- [x] Features: upload animation with HTML fields, statement screenshot restored, split animation; upload and keys shots removed
+- [x] Install: commands under «Für die Person, die einrichtet»
+- [x] «Einfach zu bedienen» without 48 px / 7 : 1 / 390 px
+- [x] Open Source and roadmap after the FAQ, roadmap one line per item
+- [x] `marketing/i18n/{fr,it,en}.json` and rebuilt pages; `marketing/README.md`
+- [x] Measure: bytes, heights, weight; axe light/dark 1440/768/390 in four languages (commit eaa6240: desktop 10 647 px, mobile 15 922 px, first load 358 KB, HTML 70 KB; axe 0)
+- [x] Reviews round 1 on eaa6240: `docs/reviews/landing-warm-review-1.md` (C-1 Major, 8 Minor), `landing-warm-fachreview-1.md` (V-1 Major, 4 Minor), personas `helga-`, `marco-`, `anna-landing-warm.md` (no Blocker/Major; Wirkung 3 → 4)
+- [x] Fach re-review on a2ef734: `landing-warm-fachreview-2.md` (all fixed)
+- [x] Fix slices 2b5a76d (reviews round 1) and 29cc002 (statement screenshots from the persona stack)
+- [x] Closing code review on 29cc002: `landing-warm-review-2.md` (C-10 Major, 3 Minor; fixed in bcf2d78)
+- [x] Closing round 3 on bcf2d78: `landing-warm-review-3.md` (all fixed, no new finding)
+- [x] Archive; PR pushed after this archive
+
+## Session H-28 step 2: tenant form checks in the backend
+
+#717 (H-28): every check of the tenant form (names, e-mail form, PLZ in CH and LI, the address the channel needs) is the backend's (`backend/src/services/tenant-fields.ts`); POST/PUT `/tenants` refuse with `causes` per field, the BFF shows each at its field. `fieldsRefused` and `refusedFields` are shared with the building form. No scenario: behaviour unchanged. Parallel session (checklist in the pull request).
+
+- [x] Backend checks with unit and route tests, red first; contract `tenant-fields-refused.json`
+- [x] BFF sends what was entered and maps refusals to fields; texts as `backend_<code>` in four languages, 6 unused keys removed
+- [x] `code-reviewer` round 1 (`docs/reviews/h28f-review-1.md`: K-1 Major, the E2E seed «keine Korrespondenzadresse»; K-2..K-4 Minor), round 2 (`h28f-review-2.md`: K-1..K-3 fixed, K-5 Minor), closing round (`h28f-review-3.md`: K-5 fixed; K-4 stays)
+- [x] Before complete; PR pushed after this archive
