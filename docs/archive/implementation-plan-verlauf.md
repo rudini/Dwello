@@ -2973,3 +2973,10 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Review round 2: `docs/reviews/h28c-review-2.md` (E-1..E-3 fixed)
 - [x] Workflow note: commit-msg gate misses `-F` (`docs/reviews/workflow-notes-h28-heating-hints.md`)
 - [x] Merge `main` after #646 (clean), before complete; PR pushed after this archive
+
+## Session 2026-10-23: link to Discussions
+
+No scenario: repository documents only, no app change.
+
+- [x] `.github/ISSUE_TEMPLATE/config.yml` and `CONTRIBUTING.md` point questions and ideas to Discussions
+- [x] PR: pushed after this archive
