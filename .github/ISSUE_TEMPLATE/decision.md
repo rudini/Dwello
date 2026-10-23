@@ -1,6 +1,6 @@
 ---
 name: Decision
-about: A functional point that needs a product-owner or domain decision before it can be implemented
+about: A point that needs a product-owner or domain decision before it can be implemented
 labels: [needs-decision]
 ---
 

@@ -20,5 +20,5 @@ No scenario: rules, templates and tooling only, no app change.
 - [x] Rules: `CLAUDE.md`, skills, `fach-reviewer`, templates, `docs/test-pyramid.md` name `domain`, `product`, `needs-decision`, `nfr` instead of the German labels and `offene-punkte.md`
 - [x] Tooling: `check-issues.mjs` checks `needs-decision`; `open-work.test.ts` without `offene-punkte.md`
 - [ ] Label rename on GitHub (product owner, `gh label edit`), `betrieb` dropped
-- [ ] code-reviewer round
+- [x] code-reviewer round 1: `docs/reviews/648-review-1.md`
 - [ ] PR
