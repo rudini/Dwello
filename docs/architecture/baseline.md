@@ -4,7 +4,7 @@ Stand: 23.10.2026, Basis `origin/main` d4d508cc2, Fenster ab 23.04.2026. Alle Za
 
 **Entscheid Product Owner (23.10.2026): Änderbarkeit zählt nur Produktivdateien** (Schichten FE inkl. i18n, BFF, Backend, DB, `src/lib/types.ts`). Test-, Doku- und Prozessdateien bleiben als Kontext im Report, sind aber nicht Teil der Messgrössen, der Kopplungsanalyse (M2 primär) und der Szenarien.
 
-**Entscheid Product Owner (23.10.2026): Der BFF trifft keine fachlichen Entscheidungen.** Jede Fachregel im BFF ist damit eine Abweichung vom Zielbild (Abschnitt 4, H2, Szenario Ä4).
+**Entscheid Product Owner (23.10.2026): Der BFF trifft keine fachlichen Entscheidungen, und Formularprüfungen gehören ins Backend.** Jede Fachregel und jede fachliche Eingabeprüfung im BFF ist damit eine Abweichung vom Zielbild (Abschnitt 4, H2, Szenario Ä4); offen als H-28 in `docs/design/offene-punkte.md`.
 
 ## 1. Zusammenfassung
 
@@ -287,7 +287,8 @@ Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall,
 **H2 – Fachregeln werden in mehreren Schichten entschieden; der BFF entscheidet entgegen dem Zielbild mit.**
 - Belege: 9 fachliche Status-Vergleiche in 5 BFF-Dateien und 10 fachliche Prüfregeln in 4 BFF-Dateien (M4); `'replaced'` in 19 Produktivdateien (FE 8, BFF 2, Backend 8); Paare #5, #18 (dieselbe Regel in Backend und zweimal im BFF), #13 (Zählung im BFF), #16 (Heizprofil-Regel im BFF), #12 (Nachrechnen im PDF); BFF-Dateien unter den Hotspots (zykl. Σ 152 und 115). Der Entscheid vom 23.10.2026 bestätigt, dass das eine Abweichung ist; offen ist nur, wie viel der Kopplung sie erklärt. [gemessen/abgeleitet]
 - Widerlegt (als Ursache der Amplifikation), wenn: Änderungen an diesen Regeln selten den BFF mitziehen, d. h. die BFF-Stellen in der Historie kaum gemeinsam mit den Backend-Regeln geändert werden. Messbar über Ä4 und die Paare #5, #16, #18.
-- Frage: Zählt eine Eingabeprüfung im Formular (PLZ hat 4 Ziffern, Zimmer in halben Schritten) als fachliche Entscheidung, die ins Backend gehört (BFF zeigt dann die Fehlercodes des Backends, wie bei #20), oder darf der BFF sie für schnelle Rückmeldung zusätzlich prüfen?
+- Entschieden (23.10.2026): auch Formularprüfungen gehören ins Backend; der BFF zeigt dessen Fehlercodes am Feld (wie bei #20).
+- Frage: In welcher Reihenfolge werden die 19 Stellen verschoben: nach Hotspot (`statement-generation.ts`, zykl. Σ 152) oder nach den Paaren, die am häufigsten gemeinsam mit dem Backend geändert werden (#5, #16, #18)?
 
 **H3 – Zentrale Sammeldateien koppeln unabhängige Features.**
 - Belege: die zwei stärksten Produktivpaare hängen an `types.ts` (#1: 36, #2: 26 gemeinsame Änderungen); `types.ts` in 37 von 113 Features; `schema.ts` 61 Commits in 48 PRs, Fan-in 81, trägt auch die Fachtypen der JSON-Spalten (#9); 5 der Top-10-Paare hängen an `schema.ts`. [gemessen]
@@ -331,7 +332,7 @@ Alle vier messen nur Produktivdateien (Entscheid 23.10.2026).
 | Reaktion | Feld ist in DB, API, BFF und UI verfügbar und validiert | Alle Stellen, die nach dem Status entscheiden, folgen der neuen Regel | Regel umgesetzt, Szenario grün | Die Änderung erfolgt nur im Backend; der BFF übernimmt Ergebnis oder Fehlercode |
 | Messgrösse | Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren (`m4-field-spread.csv`) | Produktivdateien, die den Statuswert nennen (`m4-status-literals.csv`) | geänderte Produktivdateien pro feat-PR mit 1 feat-Commit (`m1-summary.csv`, Gruppe `feat-single`) | fachliche Status-Vergleiche und Prüfregeln im BFF (`m4-decisions-outside-backend.csv`, gelesen wie in M4) |
 | Ausgangswert | Median **6**, P90 **19** (125 Felder) | `replaced` **19** Dateien in 4 Schichten (FE 8, BFF 2, Backend 8, Shared 1); `draft` 29, `paid` 21 | Median **9,5**, P90 **25**; Schichten Median 2 / P90 5 | **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien |
-| Zielwert | vom Team festzulegen | vom Team festzulegen | vom Team festzulegen | **0** (aus dem Entscheid; Prüfregeln abhängig von der Frage zu H2) |
+| Zielwert | vom Team festzulegen | vom Team festzulegen | vom Team festzulegen | **0** (aus den Entscheiden vom 23.10.2026; H-28) |
 
 Alle vier Werte lassen sich nach jedem Refactoring mit `tools/arch-baseline/run.sh` neu messen.
 
