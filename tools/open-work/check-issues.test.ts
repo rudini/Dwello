@@ -1,4 +1,6 @@
-import { execFile } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { fileURLToPath } from 'node:url';
@@ -11,12 +13,18 @@ let close = () => {};
 afterEach(() => close());
 
 /** Runs the script against a stand-in GitHub API that lists `open` and answers every single issue as open */
-async function check(open: object[], listStatus = 200) {
+async function check(open: object[], listStatus = 200, pull?: { number: number; body: string; cwd: string }) {
 	const server = createServer((request, response) => {
 		const url = new URL(request.url ?? '/', 'http://localhost');
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const list = url.pathname.endsWith('/issues');
-		const body = list ? (page === 1 ? open : []) : { state: 'open' };
+		const body = url.pathname.endsWith(`/pulls/${pull?.number}`)
+			? { body: pull?.body }
+			: list
+				? page === 1
+					? open
+					: []
+				: { state: 'open' };
 		response.statusCode = list ? listStatus : 200;
 		response.setHeader('content-type', 'application/json');
 		response.end(JSON.stringify(body));
@@ -28,9 +36,10 @@ async function check(open: object[], listStatus = 200) {
 		GITHUB_TOKEN: 'test',
 		GITHUB_API_URL: `http://127.0.0.1:${(server.address() as AddressInfo).port}`,
 		PR_BODY: '',
+		PR_NUMBER: pull ? String(pull.number) : '',
 		BASE_REF: ''
 	};
-	return promisify(execFile)('node', [SCRIPT], { env }).then(
+	return promisify(execFile)('node', [SCRIPT], { env, cwd: pull?.cwd }).then(
 		({ stdout }) => ({ code: 0, out: stdout }),
 		(error) => ({ code: error.code as number, out: `${error.stdout}${error.stderr}` })
 	);
@@ -58,5 +67,19 @@ describe('Issues mit Vorschlag brauchen das Label entscheiden (CLAUDE.md, Open w
 		const result = await check([], 500);
 		expect(result.code).toBe(1);
 		expect(result.out).toContain('Cannot list open issues (HTTP 500)');
+	});
+});
+
+// workflow review 2026-10-23, L6: the event carries the text from when the run started; an edited text counts at once
+describe('Der Text des Pull Requests', () => {
+	it('kommt aus der API, nicht aus dem Ereignis', async () => {
+		const cwd = mkdtempSync(`${tmpdir()}/check-issues-`);
+		mkdirSync(`${cwd}/src`);
+		writeFileSync(`${cwd}/src/a.ts`, '// TODO(fachlich prüfen, #3): term\n');
+		execFileSync('git', ['init', '-q', cwd]);
+		execFileSync('git', ['-C', cwd, 'add', '-A']);
+		const result = await check([], 200, { number: 5, body: 'Fixes #3', cwd });
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('This pull request closes #3, but markers still name it');
 	});
 });

@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { git, writeProject, writeRepo } from '../deepcheck/test/helpers.ts';
+import { commitAll, git, writeProject, writeRepo } from '../deepcheck/test/helpers.ts';
 
 const HOOK = fileURLToPath(new URL('../../.claude/hooks/commit-msg-gate.mjs', import.meta.url));
 const ROOT = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '');
@@ -85,6 +85,28 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(blocked.status).toBe(2);
 		expect(blocked.stderr).toContain('51 characters');
 		expect(blocked.stderr).not.toContain('nothing in this command ran');
+	});
+
+	// a subject given with -F or a heredoc file passes the commit unchecked; the push checks the commits themselves,
+	// as CI «Commit subjects» does (workflow review 2026-10-23, L1)
+	it('blocks a push while a commit since origin/main breaks the rules, whatever gave its subject', () => {
+		const project = writeRepo({
+			'.claude/hooks/commit-msg-gate.mjs': readFileSync(HOOK, 'utf8'),
+			'CLAUDE.md': readFileSync(`${ROOT}/CLAUDE.md`, 'utf8')
+		});
+		git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD');
+		const push = () =>
+			spawnSync('node', [`${project}/.claude/hooks/commit-msg-gate.mjs`], {
+				input: JSON.stringify({ tool_input: { command: 'git push -u origin feature' }, cwd: project }),
+				encoding: 'utf8'
+			});
+		commitAll(project, 'fix(contracts): guard contract retries');
+		expect(push()).toMatchObject({ status: 0, stderr: '' });
+
+		commitAll(project, 'fix(contracts): mark unchecked apartments in choice');
+		const blocked = push();
+		expect(blocked.status).toBe(2);
+		expect(blocked.stderr).toContain('51 characters');
 	});
 
 	it('takes types and scopes from CLAUDE.md, so the list exists once', () => {

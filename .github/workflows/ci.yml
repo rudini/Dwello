@@ -127,6 +127,7 @@ jobs:
       - run: node tools/open-work/check-issues.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BODY: ${{ github.event.pull_request.body }}
           BASE_REF: ${{ github.base_ref }}
 

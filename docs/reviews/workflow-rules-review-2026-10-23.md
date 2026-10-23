@@ -31,7 +31,7 @@ Already applied since 2026-10-20, so no proposal: migration number at the last m
 ### L1 Commit subject gate misses `-F` and heredocs (3)
 
 - Files: contributor-files (six subjects of 51–53 characters on `main`), 576 (52 characters on #591), session-2026-10-21 (three subjects, two caught by CI after the push).
-- Cost: two force-pushes, each needing the product owner's approval; one subject over 50 with `-m` also passed.
+- Cost: two force-pushes, each needing the product owner's approval; the `-m` case of session-2026-10-21 was a miscount (`awk` counts bytes).
 - Caught: subjects given with plain `-m`; CI «Commit subjects» catches the rest, but only after the push.
 - Proposal: check the commit's own subject (a git `commit-msg` hook, or `git log -1 --format=%s` after the commit) instead of parsing the command; until then, `pull-request` «Before each push» runs CI's subject loop over `origin/main..HEAD`.
 
@@ -88,3 +88,21 @@ Already applied since 2026-10-20, so no proposal: migration number at the last m
 ### L11 Harness-only (1)
 
 - File: 454 (worktree guard refused loops, variables and heredocs; edits via Python scripts). As in K13: no repo change.
+
+## Decided (product owner, 2026-10-23)
+
+Asked in the session; answers: L1 «check the real subject»; L4 «same Minor → issue», «no persona for a text», «stack outlives the shell»; L6 and L7 all four. The rest: «Entscheide selbst was sinn macht umzusetzen».
+
+| Group | Applied | Where |
+|---|---|---|
+| L1 | A `git push` checks every subject since `origin/main` (merges left out), whatever gave it | `.claude/hooks/commit-msg-gate.mjs`, skill `commit-gates` |
+| L2 | Partly: translation tables are an expected clone warning. Left out: complexity of touched code (it would weaken the gate), a merge-time base (no such switch in fallow's audit) | skill `commit-gates` |
+| L3 | Partly: (a) lock and `finally` restore for global records; (b) one persona saves a global setting. Left out: `--fresh` stack (much work for two cases) | `tests/e2e/CLAUDE.md`, personas README |
+| L4 | Minor met by two or more personas becomes an issue; no persona for a decided text read by `fach-reviewer` in four languages; servers started with `setsid nohup`. Left out: marking SQL-seeded states (not chosen) | skill `slice-review`, `CLAUDE.md` Workflow 5, `persona-stack.sh` |
+| L5 | One row per variant with its own controls; `default` first | `CLAUDE.md` Design-Regeln «Process» |
+| L6 | Latest run of `main` read before merging; Prettier on added files before «complete»; PR text read through the API (`PR_NUMBER`). Left out: the shared-workflow check (one case) | skill `pull-request`, `CLAUDE.md`, `check-issues.mjs`, `ci.yml` |
+| L7 | «No scenario» reason for a red-`main` fix | `tests/e2e/CLAUDE.md` |
+| L8 | Step-1 and step-5 domain reviews count as separate slices; tests for a finding waiting on a decision come after it | `CLAUDE.md` Workflow 1, 7 |
+| L9 | Runes need `*.svelte.dom.test.ts`; E2E drops backend stdout; `llm:eval` on `dwello_test` counts as a backend test run | `CLAUDE.md` Commands, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md` |
+| L10 | Not applied: the bypass list is a GitHub setting outside the repository | — |
+| L11 | Nothing to apply | — |
