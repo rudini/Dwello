@@ -74,10 +74,10 @@ export function judge(m: Measured, r: Ratchet): Finding[] {
 	return findings;
 }
 
-/** Warnings, never failures: metrics that vary with the task or the time window. */
 /** Ä1 target (utility-tree.md): a new field is declared by hand in at most 4 production files outside the DB */
 const NEW_FIELD_MAX = 4;
 
+/** Warnings, never failures: metrics that vary with the task or the time window. */
 export function advise(
 	a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; technicalAdded?: number; newFields?: { field: string; files: number }[] },
 	r: Ratchet
@@ -223,10 +223,14 @@ function prSize(base: string) {
 }
 
 /** Fields of schema.ts that the base does not have, with their spread from the measurement in `out`. */
-function newFields(out: string, base: string) {
-	const known = new Set(tablesOf(git(['show', `${base}:backend/src/db/schema.ts`])).flatMap((t) => t.fields.map((f) => `${t.table}.${f}`)));
-	const spread: Record<string, string>[] = JSON.parse(readFileSync(join(out, 'm4-field-spread.csv.json'), 'utf8'));
+export function newFields(spread: Record<string, string>[], baseSchema: string) {
+	const known = new Set(tablesOf(baseSchema).flatMap((t) => t.fields.map((f) => `${t.table}.${f}`)));
 	return spread.map((r) => ({ field: `${r.table}.${r.field}`, files: +r.prod_files })).filter((f) => !known.has(f.field));
+}
+
+/** Technical checks the working ratchet lists and the base does not, a replaced entry included. */
+export function addedTechnical(working: Ratchet, base: Ratchet): number {
+	return unlisted(working.technical, base.technical, (t) => `${t.path}\t${t.line}`).length;
 }
 
 function coChange(out: string) {
@@ -255,8 +259,8 @@ if (import.meta.main) {
 	}
 	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet) : [])];
 	const pairs = cochange ? coChange(out) : undefined;
-	const technicalAdded = baseRatchet ? unlisted(ratchet.technical, baseRatchet.technical, (t) => `${t.path}\t${t.line}`).length : 0;
-	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded, newFields: base && m ? newFields(out, base) : undefined }, ratchet);
+	const technicalAdded = baseRatchet ? addedTechnical(ratchet, baseRatchet) : 0;
+	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded, newFields: base && m ? newFields(JSON.parse(readFileSync(join(out, 'm4-field-spread.csv.json'), 'utf8')), git(['show', `${base}:backend/src/db/schema.ts`])) : undefined }, ratchet);
 	if (pairs !== undefined) console.log(`Fitness: ${pairs} production file pairs across layers change together without an import (6 months)`);
 	const say = (level: 'error' | 'warning', f: Finding) => console.log(github ? `::${level} title=Fitness ${f.check}::${f.message}` : `${level} [${f.check}] ${f.message}`);
 	errors.forEach((f) => say('error', f));

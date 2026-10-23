@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advise, judge, loosened, tighten, type Measured, type Ratchet } from './fitness';
+import { addedTechnical, advise, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -202,6 +202,26 @@ describe('advise', () => {
 		expect(w.map((f) => f.check)).toEqual(['new-field']);
 		expect(w[0].message).toContain('tenants.mailCountry');
 		expect(w[0].message).not.toContain('mailZip');
+	});
+});
+
+describe('addedTechnical', () => {
+	it('counts technical entries the base does not list, also when one replaces another', () => {
+		const entry = (line: string) => ({ path: 'a.ts', line, reason: 'r' });
+		const base: Ratchet = { ...ratchet, technical: [entry('x'), entry('y')] };
+		expect(addedTechnical({ ...ratchet, technical: [entry('x')] }, base)).toBe(0);
+		expect(addedTechnical({ ...ratchet, technical: [entry('x'), entry('z')] }, base)).toBe(1);
+	});
+});
+
+describe('newFields', () => {
+	it('lists the fields of the spread that the base schema does not have', () => {
+		const baseSchema = "export const tenants = pgTable('tenants', {\n\tfirstName: varchar('first_name'),\n});\n";
+		const spread = [
+			{ table: 'tenants', field: 'firstName', prod_files: '18' },
+			{ table: 'tenants', field: 'mailCountry', prod_files: '5' }
+		];
+		expect(newFields(spread, baseSchema)).toEqual([{ field: 'tenants.mailCountry', files: 5 }]);
 	});
 });
 

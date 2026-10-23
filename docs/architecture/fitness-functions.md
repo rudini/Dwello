@@ -70,7 +70,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 
 ## 5. Grenzen der Checks
 
-- Die Messungen sind textbasierte Heuristiken aus Phase 0 (Schlüssel `feld:`, Regex-Literale).
+- Die Messungen sind textbasierte Heuristiken aus Phase 0 (Schlüssel `feld:`, Regex-Literale). Feldstreuung und `new-field` kennen nur Felder, deren Name eindeutig, nicht generisch (`id`, `name`, `status` …) und mindestens 5 Zeichen lang ist (`05-knowledge.ts`, G1); für andere Felder warnt `new-field` nie.
 - «Darf nur schrumpfen» zählt Einträge (bei Wertelisten die Summe der Dateien), nicht ihren Inhalt: Ein PR, der eine Altlast behebt und zugleich eine neue einbaut, kann den alten Eintrag auf die neue umschreiben, und eine Werteliste kann um eine Datei wachsen, wenn eine andere schrumpft. Das ist der Preis dafür, dass Umbenennungen nicht rot werden; der Diff von `ratchet.json` zeigt es im Review.
 - `technical` darf wachsen. Ein neuer Eintrag erzeugt die Warnung `technical`, damit das Review prüft, dass er ein Format und keine Fachregel prüft (Befund C-1, `docs/reviews/fitness-review-1.md`).
 - Ausnahmen hängen am Zeilentext bzw. Dateipfad, nicht an der Zeilennummer. Wird eine Altlast-Zeile umformatiert oder ihre Datei umbenannt, meldet der Check sie als neu; dann wird der Eintrag in `ratchet.json` angepasst (die Liste wird nicht länger, `ratchet` bleibt grün).
