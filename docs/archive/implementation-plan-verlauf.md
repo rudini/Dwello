@@ -2984,3 +2984,22 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Slice review `code-reviewer`: `docs/reviews/647-review-1.md` (no findings)
 - [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-647.md`): task done, Minors P-1..P-4 stay in the report
 - [x] Before complete; PR `Fixes #647` pushed after this archive
+
+## Session: landing page warmer, not larger (marketing)
+
+Request: implement the seven points of the landing review (animations back with HTML text, terminals collapsed, hero with the statement, no technical numbers, the example carried through, roadmap and open source after the FAQ, stale upload shot gone), page weight and length at most as today (66 KB HTML, 870 KB total, 13/21 screens).
+
+- [x] `marketing/index.html`: hero (lede, note, statement PDFs instead of the dashboard), facts bar removed
+- [x] Vermieterjahr: timeline labels, example (Wasserversorgung, Hans Müller, Maria Rossi), drawing from the app's motifs
+- [x] Features: upload animation with HTML fields, statement screenshot restored, split animation; upload and keys shots removed
+- [x] Install: commands under «Für die Person, die einrichtet»
+- [x] «Einfach zu bedienen» without 48 px / 7 : 1 / 390 px
+- [x] Open Source and roadmap after the FAQ, roadmap one line per item
+- [x] `marketing/i18n/{fr,it,en}.json` and rebuilt pages; `marketing/README.md`
+- [x] Measure: bytes, heights, weight; axe light/dark 1440/768/390 in four languages (commit eaa6240: desktop 10 647 px, mobile 15 922 px, first load 358 KB, HTML 70 KB; axe 0)
+- [x] Reviews round 1 on eaa6240: `docs/reviews/landing-warm-review-1.md` (C-1 Major, 8 Minor), `landing-warm-fachreview-1.md` (V-1 Major, 4 Minor), personas `helga-`, `marco-`, `anna-landing-warm.md` (no Blocker/Major; Wirkung 3 → 4)
+- [x] Fach re-review on a2ef734: `landing-warm-fachreview-2.md` (all fixed)
+- [x] Fix slices 2b5a76d (reviews round 1) and 29cc002 (statement screenshots from the persona stack)
+- [x] Closing code review on 29cc002: `landing-warm-review-2.md` (C-10 Major, 3 Minor; fixed in bcf2d78)
+- [x] Closing round 3 on bcf2d78: `landing-warm-review-3.md` (all fixed, no new finding)
+- [x] Archive; PR pushed after this archive
