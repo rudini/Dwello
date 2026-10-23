@@ -68,3 +68,31 @@ describe('Korrespondenzkanal des Mieters', () => {
 		expect(response.status).toBe(422);
 	});
 });
+
+// H-28 (#717): the checks of the form are the backend's; every failed one with its field, nothing saved
+describe('Prüfung des Mieterformulars', () => {
+	it('nennt jedes ungültige Feld mit seinem Code und legt nichts an', async () => {
+		const lastName = crypto.randomUUID();
+		const response = await send('POST', '', { firstName: '', lastName, email: 'anna@', postalCode: '84', correspondenceChannel: 'email' });
+
+		expect(response.status).toBe(400);
+		const { causes } = (await response.json()) as { causes: { code: string; params: { field: string } }[] };
+		expect(causes.map(({ code, params }) => [params.field, code])).toEqual([
+			['firstName', 'TENANT_FIRST_NAME_REQUIRED'],
+			['email', 'TENANT_EMAIL_INVALID'],
+			['postalCode', 'POSTAL_CODE_DIGITS']
+		]);
+		const listed = (await (await callApi(`/api/v1/tenants?search=${lastName}`)).json()) as { tenants: unknown[] };
+		expect(listed.tenants).toEqual([]);
+	});
+
+	it('verlangt beim Ändern auf Briefe die Adresse und ändert nichts', async () => {
+		const tenant = (await (await send('POST', '', { firstName: 'Clara', lastName: crypto.randomUUID() })).json()) as { id: string };
+		created.push(tenant.id);
+
+		const response = await send('PUT', `/${tenant.id}`, { address: null, postalCode: null, city: null, correspondenceChannel: 'letter' });
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'TENANT_ADDRESS_LETTER', causes: [{ params: { field: 'address' } }, { params: { field: 'postalCode' } }, { params: { field: 'city' } }] });
+	});
+});

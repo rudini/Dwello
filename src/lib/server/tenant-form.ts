@@ -1,10 +1,9 @@
 import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { countryCodes, languageLabels } from '$lib/tenant';
+import { refusedFields } from '$lib/backend-error';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
-
-type TenantFields = ReturnType<typeof readFields>;
 
 function readFields(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();
@@ -22,36 +21,9 @@ function readFields(formData: FormData) {
 	};
 }
 
-function contactErrors(t: TenantFields) {
-	const errors: Record<string, string> = {};
-	if (!t.firstName) errors.firstName = m.tenants_error_first_name();
-	if (!t.lastName) errors.lastName = m.tenants_error_last_name();
-	if (t.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) {
-		errors.email = m.tenants_error_email_invalid();
-	}
-	// Liechtenstein has Swiss postal codes; abroad each country has its own form (#102)
-	if (['CH', 'LI'].includes(t.country) && t.postalCode && !/^\d{4}$/.test(t.postalCode))
-		errors.postalCode = m.buildings_error_postal_code_digits();
-	return errors;
-}
-
-// Reminders and other documents go out by e-mail or letter, so the chosen channel needs its address
-function channelErrors(t: TenantFields) {
-	const errors: Record<string, string> = {};
-	if (t.correspondenceChannel === 'email' && !t.email) {
-		errors.email = m.tenants_error_email_required();
-	}
-	if (t.correspondenceChannel === 'letter' && !t.address)
-		errors.address = m.tenants_error_address_letter();
-	if (t.correspondenceChannel === 'letter' && !t.postalCode)
-		errors.postalCode = m.tenants_error_postal_code_letter();
-	if (t.correspondenceChannel === 'letter' && !t.city) errors.city = m.tenants_error_city_letter();
-	return errors;
-}
-
+/** The tenant as entered; the backend checks it (H-28, #717) */
 export function parseTenantForm(formData: FormData) {
 	const fields = readFields(formData);
-	const errors = { ...channelErrors(fields), ...contactErrors(fields) };
 	const tenant = {
 		...fields,
 		email: fields.email || null,
@@ -60,14 +32,13 @@ export function parseTenantForm(formData: FormData) {
 		postalCode: fields.postalCode || null,
 		city: fields.city || null
 	};
-	return { tenant, errors };
+	return { tenant };
 }
 
 /** Form action body shared by "Neuer Mieter" (POST) and "Mieter bearbeiten" (PUT) */
 export async function saveTenant(fetch: typeof globalThis.fetch, request: Request, id?: string) {
 	const formData = await request.formData();
-	const { tenant, errors } = parseTenantForm(formData);
-	if (Object.keys(errors).length > 0) return fail(400, { errors });
+	const { tenant } = parseTenantForm(formData);
 
 	const response = await fetch(`${BACKEND_URL}/api/v1/tenants${id ? `/${id}` : ''}`, {
 		method: id ? 'PUT' : 'POST',
@@ -75,7 +46,10 @@ export async function saveTenant(fetch: typeof globalThis.fetch, request: Reques
 		body: JSON.stringify(tenant)
 	});
 	if (!response.ok) {
-		return fail(response.status, { errors: { form: m.tenants_save_failed() } });
+		const refused = await response.json().catch(() => ({}));
+		// the form's checks are the backend's (H-28, #717): each at its field
+		const errors = refused.causes ? refusedFields(refused) : { form: m.tenants_save_failed() };
+		return fail(response.status, { errors });
 	}
 	const saved = await response.json();
 	// Created from the rental contract wizard: back there, with the new tenant chosen

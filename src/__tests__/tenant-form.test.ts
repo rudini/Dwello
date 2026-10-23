@@ -3,6 +3,7 @@ import { parseTenantForm } from '../lib/server/tenant-form';
 import { runAction } from './helpers/action';
 import { actions as newActions } from '../routes/tenants/new/+page.server';
 import { actions as editActions } from '../routes/tenants/[id]/edit/+page.server';
+import fieldsRefused from '../../tests/contracts/tenant-fields-refused.json';
 
 const form = (fields: Record<string, string>) => {
 	const data = new FormData();
@@ -24,9 +25,8 @@ const anna = {
 
 describe('Mieterformular', () => {
 	it('übernimmt Kontaktdaten, Korrespondenzkanal und Sprache', () => {
-		const { tenant, errors } = parseTenantForm(form(anna));
+		const { tenant } = parseTenantForm(form(anna));
 
-		expect(errors).toEqual({});
 		expect(tenant).toEqual({
 			firstName: 'Anna',
 			lastName: 'Keller',
@@ -47,57 +47,16 @@ describe('Mieterformular', () => {
 		expect(parseTenantForm(form({ ...anna, country: 'XX' })).tenant.country).toBe('CH');
 	});
 
-	// Eine Postleitzahl im Ausland hat ihre eigene Form; Liechtenstein hat Schweizer Postleitzahlen
-	it('prüft die vier Ziffern der PLZ nur in der Schweiz und in Liechtenstein', () => {
-		expect(parseTenantForm(form({ ...anna, country: 'DE', postalCode: '78462' })).errors).toEqual({});
-		expect(parseTenantForm(form({ ...anna, country: 'LI', postalCode: '949' })).errors).toEqual({
-			postalCode: 'PLZ muss 4 Ziffern haben.'
-		});
-	});
-
 	it('schreibt Deutsch, wenn keine bekannte Sprache gewählt ist', () => {
 		expect(parseTenantForm(form({ ...anna, language: 'xx' })).tenant.language).toBe('de');
 	});
 
-	it('verlangt eine E-Mail-Adresse, wenn per E-Mail korrespondiert wird', () => {
-		const { errors } = parseTenantForm(form({ ...anna, email: '' }));
+	// H-28 (#717): the checks are the backend's (backend/src/__tests__/tenant-fields.test.ts); the form sends the fields
+	it('sendet auch leere Felder, damit das Backend jedes nennt', async () => {
+		const { calls, result } = runAction(newActions.default, '', 400, { ...anna, firstName: '', email: '' }, fieldsRefused);
+		await result;
 
-		expect(errors.email).toBe(
-			'Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich.'
-		);
-	});
-
-	it('verlangt eine vollständige Adresse, wenn per Brief korrespondiert wird', () => {
-		const { errors } = parseTenantForm(
-			form({
-				...anna,
-				email: '',
-				address: '',
-				postalCode: '',
-				city: '',
-				correspondenceChannel: 'letter'
-			})
-		);
-
-		// ohne PLZ kommt ein Brief kaum an, und die QR-Rechnung nennt den Mieter nur mit PLZ und Ort
-		expect(errors).toEqual({
-			address: 'Für Briefe ist eine Adresse erforderlich.',
-			postalCode: 'Für Briefe ist eine PLZ erforderlich.',
-			city: 'Für Briefe ist ein Ort erforderlich.'
-		});
-	});
-
-	it('prüft Namen, E-Mail-Format und PLZ', () => {
-		const { errors } = parseTenantForm(
-			form({ ...anna, firstName: ' ', lastName: '', email: 'anna@', postalCode: '84' })
-		);
-
-		expect(errors).toEqual({
-			firstName: 'Vorname ist erforderlich.',
-			lastName: 'Nachname ist erforderlich.',
-			email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
-			postalCode: 'PLZ muss 4 Ziffern haben.'
-		});
+		expect(calls[0].body).toMatchObject({ firstName: '', email: null });
 	});
 });
 
@@ -153,13 +112,19 @@ describe('Mieter speichern', () => {
 		});
 	});
 
-	it('speichert nichts, solange das Formular Fehler enthält', async () => {
-		const { calls, result } = runAction(editActions.default, 't1', 200, { ...anna, lastName: '' });
+	it('zeigt jede Ablehnung des Backends an ihrem Feld', async () => {
+		const { result } = runAction(editActions.default, 't1', 400, anna, fieldsRefused);
 
 		expect(await result).toMatchObject({
-			data: { errors: { lastName: 'Nachname ist erforderlich.' } }
+			status: 400,
+			data: {
+				errors: {
+					firstName: 'Vorname ist erforderlich.',
+					email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+					postalCode: 'PLZ muss 4 Ziffern haben.'
+				}
+			}
 		});
-		expect(calls).toEqual([]);
 	});
 
 	it('meldet einen Fehler, wenn das Backend das Speichern ablehnt', async () => {

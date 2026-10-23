@@ -1,0 +1,10 @@
+{
+	"error": "Some fields are not valid",
+	"code": "TENANT_FIRST_NAME_REQUIRED",
+	"params": { "field": "firstName" },
+	"causes": [
+		{ "code": "TENANT_FIRST_NAME_REQUIRED", "params": { "field": "firstName" } },
+		{ "code": "TENANT_EMAIL_INVALID", "params": { "field": "email" } },
+		{ "code": "POSTAL_CODE_DIGITS", "params": { "field": "postalCode" } }
+	]
+}

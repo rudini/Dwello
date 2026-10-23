@@ -60,3 +60,19 @@ export const deliveryErrorText = (document: {
 	document.deliveryError === null
 		? ''
 		: backendMessage({ code: document.deliveryErrorCode ?? 'MAIL_DELIVERY_FAILED' }, '');
+
+/**
+ * The backend's refusal of the form, each message at the field it names (H-28, #717); an apartment's field
+ * (`apartments.<index>.<field>`, building form) at the form row it came from
+ */
+export function refusedFields(refused: BackendError, rows: string[] = []): Record<string, string> {
+	return Object.fromEntries(
+		(refused.causes ?? []).map((cause) => {
+			const field = String(cause.params?.field ?? 'form').replace(
+				/^apartments\.(\d+)\./,
+				(_, index) => `apartments.${rows[Number(index)]}.`
+			);
+			return [field, backendMessage(cause, '')];
+		})
+	);
+}

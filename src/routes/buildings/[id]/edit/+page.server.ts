@@ -1,9 +1,9 @@
 import { m } from '$lib/paraglide/messages';
-import { backendMessage } from '$lib/backend-error';
+import { backendMessage, refusedFields } from '$lib/backend-error';
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
 import { toBuilding } from '$lib/server/building';
-import { formError, parseBuildingForm, refusedFields } from '$lib/server/building-form';
+import { formError, parseBuildingForm } from '$lib/server/building-form';
 import type { Actions } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';

@@ -4,7 +4,8 @@ import { floorLabel, occupancyParts, statusLabels, statusText } from '$lib/apart
 import { contractPeriod, statusBadges } from '$lib/contract-status';
 import { localName } from '$lib/names';
 import { overviewDeadlines, overviewTasks } from '$lib/overview';
-import { parseBuildingForm, refusedFields } from '$lib/server/building-form';
+import { parseBuildingForm } from '$lib/server/building-form';
+import { refusedFields } from '$lib/backend-error';
 import { buildingTypeLabel } from '$lib/building-type';
 import {
 	load as detailLoad,

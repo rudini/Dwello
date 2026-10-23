@@ -1,5 +1,3 @@
-import { backendMessage, type BackendError } from '$lib/backend-error';
-
 export const formError = (form: string) => ({
 	success: false,
 	errors: { form } as Record<string, string>
@@ -39,20 +37,4 @@ export function parseRegisterApartments(formData: FormData) {
 		rooms: field(row, 'rooms')
 	}));
 	return { apartments, rows };
-}
-
-/**
- * The backend's refusal of the form, each message at the field it names (H-28, #717); an apartment's field
- * (`apartments.<index>.<field>`) at the form row it came from
- */
-export function refusedFields(refused: BackendError, rows: string[] = []): Record<string, string> {
-	return Object.fromEntries(
-		(refused.causes ?? []).map((cause) => {
-			const field = String(cause.params?.field ?? 'form').replace(
-				/^apartments\.(\d+)\./,
-				(_, index) => `apartments.${rows[Number(index)]}.`
-			);
-			return [field, backendMessage(cause, '')];
-		})
-	);
 }

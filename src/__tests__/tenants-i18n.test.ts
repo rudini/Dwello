@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { languageLabels } from '$lib/tenant';
 import { parseTenantForm } from '$lib/server/tenant-form';
+import { refusedFields } from '$lib/backend-error';
 import { checkDateRangeOverlap, computeAvailability } from '$lib/utils/contract-availability';
 import { load as tenantsLoad } from '../routes/tenants/+page.server';
 
@@ -18,7 +19,12 @@ describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 
 	it('meldet fehlende Angaben im Mieterformular auf Italienisch', () => {
 		overwriteGetLocale(() => 'it');
-		const { errors } = parseTenantForm(new FormData());
+		const errors = refusedFields({
+			causes: [
+				{ code: 'TENANT_FIRST_NAME_REQUIRED', params: { field: 'firstName' } },
+				{ code: 'TENANT_ADDRESS_LETTER', params: { field: 'address' } }
+			]
+		});
 		expect(errors.firstName).toBe('Il nome è obbligatorio.');
 		expect(errors.address).toBe('Per le lettere è obbligatorio un indirizzo.');
 	});
