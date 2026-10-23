@@ -93,6 +93,7 @@ export interface ApartmentWithDetails extends Apartment {
 	};
 	currentTenantName?: string;
 	currentContractId?: string;
+	nextContractId?: string;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null;
 	lastContractEnd?: string | null;
@@ -186,6 +187,13 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 			)
 		)
 		.limit(1);
+	// the contract the next tenant moves in with (H-28, #717)
+	const [next] = await db
+		.select({ id: rentalContracts.id })
+		.from(rentalContracts)
+		.where(and(eq(rentalContracts.apartmentId, id), sql`${rentalContracts.startDate} > ${sqlToday}`))
+		.orderBy(rentalContracts.startDate)
+		.limit(1);
 
 	return {
 		...apartment,
@@ -197,7 +205,8 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 			city: apartment.buildingCity
 		},
 		currentTenantName: currentContract?.tenantName,
-		currentContractId: currentContract?.contractId
+		currentContractId: currentContract?.contractId,
+		nextContractId: next?.id
 	} as ApartmentWithDetails;
 }
 

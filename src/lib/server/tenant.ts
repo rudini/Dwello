@@ -27,5 +27,7 @@ const toTenant = (data: BackendTenant): Tenant => ({
 	city: data.city,
 	country: data.country,
 	correspondenceChannel: data.correspondenceChannel,
-	anonymisableFrom: data.anonymisableFrom ?? null
+	anonymisableFrom: data.anonymisableFrom ?? null,
+	rentalContractId: data.rentalContractId,
+	isFuture: !!data.isFuture
 });

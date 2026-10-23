@@ -4,6 +4,7 @@
 			"id": "c1",
 			"apartmentId": "a1",
 			"startDate": "2020-01-01",
+			"status": "active",
 			"endDate": null,
 			"billedUntil": null,
 			"terminated": false,

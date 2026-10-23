@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
 import type { ApartmentStatus } from '$lib/types';
-import { contractStatus, monthlyTotal, toContractHistory } from './contract-history';
+import { monthlyTotal, toContractHistory } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -20,6 +20,7 @@ export async function fetchApartment(fetch: typeof globalThis.fetch, id: string)
 		rooms: a.rooms as string,
 		status: a.status as ApartmentStatus,
 		currentContractId: (a.currentContractId ?? null) as string | null,
+		nextContractId: (a.nextContractId ?? null) as string | null,
 		nextContractStart: (a.nextContractStart ?? null) as string | null,
 		currentContractEnd: (a.currentContractEnd ?? null) as string | null,
 		lastContractEnd: (a.lastContractEnd ?? null) as string | null,
@@ -39,9 +40,9 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 	const { contracts } = await (await fetch(`${API}/contracts?apartmentId=${id}&limit=100`)).json();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 	const current = contracts.find((c: Record<string, any>) => c.id === apartment.currentContractId);
-	// the contract the next tenant moves in with: the backend lists the latest start first
+	// the contract the next tenant moves in with, as the backend names it (H-28, #717)
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
-	const next = contracts.filter((c: Record<string, any>) => contractStatus(c) === 'future').at(-1);
+	const next = contracts.find((c: Record<string, any>) => c.id === apartment.nextContractId);
 
 	return {
 		apartment,

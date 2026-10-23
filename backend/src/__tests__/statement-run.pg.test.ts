@@ -4,15 +4,16 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { heatingProfiles, utilityStatements } from '../db/schema';
+import { heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { sendJson } from './helpers/auth';
+import { insertInvoice } from './helpers/records';
 
 const token = crypto.randomUUID();
 let buildingId = '';
@@ -164,4 +165,23 @@ describe('Abweichende Einstellungen bestehender Abrechnungen', () => {
 			await db.delete(heatingProfiles).where(inArray(heatingProfiles.id, many.map((p) => p.id)));
 		}
 	});
+
+	// H-28 (#717): only a draft is outdated by invoices recorded since (#454); a sent one is corrected instead
+	it('nennt einen Entwurf, zu dem seither Rechnungen erfasst wurden, und keine versendete Abrechnung', async () => {
+		const [used] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
+		const run = { buildingId, periodStart: '2021-01-01', periodEnd: '2021-12-31', heatingProfileId: used.id, managementFeePercent: 3 };
+		const draft = await generateStatement({ ...run, contractId: await rent('9.03', 'Kurz', '2021-01-01') });
+		const sent = await generateStatement({ ...run, contractId: await rent('9.04', 'Lang', '2021-01-01') });
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, sent.id));
+		await insertInvoice(buildingId, { invoiceDate: '2021-06-30' });
+		try {
+			const response = await sendJson('GET', `/api/v1/statements/run-differences?buildingId=${buildingId}&periodStart=2021-01-01&periodEnd=2021-12-31&heatingProfileId=${used.id}&managementFeePercent=3`);
+			const { statements } = (await response.json()) as { statements: { id: string; outdated: boolean; fuelStock: boolean }[] };
+
+			expect(statements.map(({ id, outdated, fuelStock }) => ({ id, outdated, fuelStock }))).toEqual([{ id: draft.id, outdated: true, fuelStock: false }]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.buildingId, buildingId));
+		}
+	});
 });
+

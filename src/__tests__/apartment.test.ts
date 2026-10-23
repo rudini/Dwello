@@ -35,6 +35,7 @@ const contracts = [
 		tenantEmail: 'beat.huber@example.com',
 		startDate: '2022-04-01',
 		endDate: null,
+		status: 'active',
 		baseRent: '1200.00',
 		additionalRent: '50.00',
 		monthlyAdvancePayment: '180.00'
@@ -46,6 +47,7 @@ const contracts = [
 		tenantEmail: null,
 		startDate: '2018-01-01',
 		endDate: '2022-03-31',
+		status: 'ended',
 		baseRent: '1100.00',
 		additionalRent: null,
 		monthlyAdvancePayment: '150.00'
@@ -112,9 +114,16 @@ describe('Wohnungsdetail', () => {
 			...apartment,
 			status: 'relet',
 			currentContractId: undefined,
+			nextContractId: 'c3',
 			nextContractStart: '2099-11-01'
 		};
-		const next = { ...contracts[0], id: 'c3', startDate: '2099-11-01', tenantName: 'Ruth Meier' };
+		const next = {
+			...contracts[0],
+			id: 'c3',
+			startDate: '2099-11-01',
+			tenantName: 'Ruth Meier',
+			status: 'future'
+		};
 		const data = await loadApartment({
 			'apartments/a1': relet,
 			contracts: { contracts: [next, contracts[1]] }
@@ -130,6 +139,19 @@ describe('Wohnungsdetail', () => {
 			expect.objectContaining({ id: 'c3', status: 'future' }),
 			expect.objectContaining({ id: 'c1', status: 'ended' })
 		]);
+	});
+
+	// H-28 (#717): the backend names the contract the next tenant moves in with
+	it('nennt den künftigen Mieter des Vertrags, den das Backend nennt', async () => {
+		const relet = { ...apartment, status: 'relet', currentContractId: undefined, nextContractId: 'c4' };
+		const after = { ...contracts[0], id: 'c4', startDate: '2101-01-01', tenantName: 'Ruth Meier', status: 'future' };
+		const next = { ...contracts[0], id: 'c3', startDate: '2099-11-01', tenantName: 'Paul Frei', status: 'future' };
+		const data = await loadApartment({
+			'apartments/a1': relet,
+			contracts: { contracts: [after, next, contracts[1]] }
+		});
+
+		expect(data.nextContract).toMatchObject({ tenantName: 'Ruth Meier', startDate: '2101-01-01' });
 	});
 
 	it('zeigt bei einer leeren Wohnung keinen Mieter und keine Kosten', async () => {

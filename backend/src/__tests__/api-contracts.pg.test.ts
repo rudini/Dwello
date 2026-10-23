@@ -353,6 +353,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract'), actual)).toEqual([]);
 	});
 
+	// H-28 (#717): a draft named that the change does not touch
+	it('PUT /contracts/:id liefert für einen fremden Entwurf die Felder von contract-draft-not-affected.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: null, deleteDraft: crypto.randomUUID() });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-draft-not-affected'), await response.json())).toEqual([]);
+	});
+
 	it('GET /contracts/:id/agreements liefert die Felder von contract-agreements.json', async () => {
 		const actual = (await (
 			await callApi(`/api/v1/contracts/${rental.contract}/agreements?periodStart=2020-01-01&periodEnd=2030-12-31`)
