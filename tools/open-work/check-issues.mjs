@@ -9,6 +9,7 @@ import { execFileSync } from 'node:child_process';
 
 const repo = process.env.GITHUB_REPOSITORY ?? 'rudini/Dwello';
 const api = process.env.GITHUB_API_URL ?? 'https://api.github.com';
+const scenarioLine = /^\s*(?:Szenario|Szenariogrundriss|Beispiel):\s*(.*)/;
 const dirs = ['src', 'backend/src', 'backend/migrations', 'backend/demo', 'tests'];
 
 const grep = () => {
@@ -77,10 +78,14 @@ if (base) {
 	const show = (rev, file) => (git('ls-tree', '--name-only', rev, file).trim() ? git('show', `${rev}:${file}`) : '');
 	for (const file of git('diff', '--name-only', '--no-renames', from, 'HEAD', '--', 'tests/e2e/features/').split('\n')) {
 		if (!file.endsWith('.feature')) continue;
-		const spec = scenarios(show(from, file));
+		const [before, after] = [show(from, file), show('HEAD', file)];
+		const spec = scenarios(before);
 		const changed = new Set();
-		for (const [, start, count] of git('diff', '-U0', from, 'HEAD', '--', file).matchAll(/^@@ -(\d+)(?:,(\d+))? /gm))
-			for (let line = +start; line < +start + +(count ?? 1); line++) changed.add(spec[line]);
+		const hunks = git('diff', '-U0', from, 'HEAD', '--', file).matchAll(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? /gm);
+		for (const [, start, count = '1', at, added = '1'] of hunks) {
+			for (let line = +start; line < +start + +count; line++) changed.add(spec[line]);
+			if (count === '0') changed.add(insertedInto(spec, before, +start, after.split('\n').slice(+at - 1, +at - 1 + +added)));
+		}
 		for (const { name, wip } of scenarios(show('HEAD', file)).filter(Boolean))
 			if (wip) changed.add(spec.find((scenario) => scenario?.name === name));
 		for (const scenario of changed) if (scenario && !scenario.wip) specChanges.push(`${file}:${scenario.line} «${scenario.name}»`);
@@ -132,6 +137,26 @@ if (!process.env.GITHUB_TOKEN) {
 	}
 }
 
+/**
+ * The scenario that lines inserted after line `after` of the base text change: the lines before a new scenario belong
+ * to the one above (rows under «Beispiele:» and a new «Beispiele:» block are free), tag lines at the end to the one below
+ */
+function insertedInto(spec, text, after, inserted) {
+	const first = inserted.findIndex((line) => scenarioLine.test(line));
+	const lead = first < 0 ? inserted : inserted.slice(0, first);
+	const body = lead.filter((line) => !/^\s*(?:#.*|@.*)?$/.test(line));
+	if (body.length && !examplesOnly(['', ...text.split('\n')], after, body)) return spec[after];
+	if (first < 0 && lead.some((line) => /^\s*@/.test(line))) return spec[after + 1];
+}
+
+/** Whether `body`, inserted after line `after`, is only rows of a «Beispiele:» table, or a new such table */
+function examplesOnly(lines, after, body) {
+	let row = after;
+	while (/^\s*\|/.test(lines[row])) row--;
+	const [heading, ...rows] = /^\s*Beispiele:/.test(body[0]) ? body : [lines[row], ...body];
+	return /^\s*Beispiele:/.test(heading) && rows.every((line) => /^\s*\|/.test(line));
+}
+
 /** The scenario each line of a feature file belongs to (index = line number); the header and Background count for all */
 function scenarios(text) {
 	const lines = ['', ...text.split('\n')];
@@ -140,7 +165,7 @@ function scenarios(text) {
 	const owner = [];
 	let current = header;
 	lines.forEach((line, i) => {
-		const keyword = /^\s*(?:Szenario|Szenariogrundriss|Beispiel):\s*(.*)/.exec(line);
+		const keyword = scenarioLine.exec(line);
 		if (keyword) {
 			let first = i;
 			while (/^\s*@/.test(lines[first - 1] ?? '')) first--;

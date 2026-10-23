@@ -17,5 +17,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] Additions (new scenario, new Examples row) and `@wip` scenarios pass
 - [x] Adding `@wip` to a protected scenario fails
 - [x] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `entscheiden`, not closed as not planned)
-- [ ] Slice review round 1: `docs/reviews/spec643-review-1.md`
+- [x] Slice review round 1: `docs/reviews/spec643-review-1.md`
+- [ ] Slice review round 2 (C-1, C-2): `docs/reviews/spec643-review-2.md`
 - [ ] Closing round, archive, PR

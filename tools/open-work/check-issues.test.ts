@@ -97,13 +97,23 @@ describe('Der Text des Pull Requests', () => {
 const feature = `# language: de
 Funktionalität: Liegenschaften
 
-  Szenario: Liste zeigt Liegenschaften
+  Grundlage:
     Angenommen eine Liegenschaft «Seeblick»
+
+  Szenario: Liste zeigt Liegenschaften
     Dann sieht der Liegenschaftsverwalter «Seeblick»
 
   @wip
   Szenario: Neue Anforderung
     Dann sieht der Liegenschaftsverwalter nichts
+
+  Szenariogrundriss: Suche findet <name>
+    Wenn der Liegenschaftsverwalter nach "<name>" sucht
+    Dann sieht der Liegenschaftsverwalter "<name>"
+
+    Beispiele:
+      | name     |
+      | Seeblick |
 `;
 
 /** A git repository whose `origin/main` holds `feature` and whose HEAD holds `head` in its place */
@@ -130,7 +140,7 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 		const result = await changeSpec(feature.replace('sieht der Liegenschaftsverwalter «Seeblick»', 'sieht «Seeblick»'));
 		expect(result.code).toBe(1);
 		expect(result.out).toContain(
-			'tests/e2e/features/buildings.feature:4 «Liste zeigt Liegenschaften» changes the specification'
+			'tests/e2e/features/buildings.feature:7 «Liste zeigt Liegenschaften» changes the specification'
 		);
 	});
 
@@ -144,9 +154,9 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 
 	it('meldet ein gelöschtes Szenario und ein nachträglich mit @wip markiertes', async () => {
 		const deleted = await changeSpec(feature.replace(/ {2}Szenario: Liste[^@]*/, ''));
-		expect(deleted.out).toContain('buildings.feature:4 «Liste zeigt Liegenschaften» changes the specification');
+		expect(deleted.out).toContain('buildings.feature:7 «Liste zeigt Liegenschaften» changes the specification');
 		const tagged = await changeSpec(feature.replace('  Szenario: Liste', '  @wip\n  Szenario: Liste'));
-		expect(tagged.out).toContain('buildings.feature:4 «Liste zeigt Liegenschaften» changes the specification');
+		expect(tagged.out).toContain('buildings.feature:7 «Liste zeigt Liegenschaften» changes the specification');
 	});
 
 	it('lässt eine Änderung mit Freigabe durch', async () => {
@@ -164,5 +174,21 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 		expect((await changeSpec(changed, 'Spec change approved: #643', declined)).out).toContain(
 			'#643 does not approve a specification change: it is closed as not planned'
 		);
+	});
+
+	// review spec643-review-1 C-1: an inserted step changes the scenario or the Background it lands in
+	it('meldet einen eingefügten Schritt in der Grundlage und in einem Szenario ohne @wip', async () => {
+		const background = await changeSpec(feature.replace('«Seeblick»\n', '«Seeblick»\n    Und eine Liegenschaft «Lindenhof»\n'));
+		expect(background.out).toContain('buildings.feature:1 «Funktionalität und Grundlage» changes the specification');
+		const outline = await changeSpec(feature.replace('"<name>"\n', '"<name>"\n    Und sieht keine Fehlermeldung\n'));
+		expect(outline.out).toContain('buildings.feature:14 «Suche findet <name>» changes the specification');
+		const table = await changeSpec(feature.replace('sucht\n', 'sucht\n      | Ort |\n'));
+		expect(table.out).toContain('buildings.feature:14 «Suche findet <name>» changes the specification');
+	});
+
+	it('lässt neue Zeilen und Blöcke unter Beispiele durch', async () => {
+		expect(await changeSpec(`${feature}      | Lindenhof |\n`)).toMatchObject({ code: 0 });
+		const block = `${feature}\n    # #643: ein zweiter Block\n    Beispiele:\n      | name      |\n      | Lindenhof |\n`;
+		expect(await changeSpec(block)).toMatchObject({ code: 0 });
 	});
 });
