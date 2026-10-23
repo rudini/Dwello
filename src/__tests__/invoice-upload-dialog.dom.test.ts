@@ -184,6 +184,15 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-row-toggle')!.textContent?.trim()).toBe('Angaben prüfen');
 	});
 
+	// code review 760 C-1: a file whose reading failed has empty fields too
+	it('lässt die Angaben einer Datei eingeben, deren Auslesen scheiterte', async () => {
+		open(() => [500, {}]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		expect(byTestId('invoice-upload-row-toggle')!.textContent?.trim()).toBe('Angaben eingeben');
+	});
+
 	// persona Anna 626 P-1, P-2: with «Keine KI» the file is not sent to be read, and no note says a KI did not read it
 	it('schickt bei «Keine KI» keine Datei zum Auslesen und nennt keine KI', async () => {
 		const calls = fakeBff(() => [503, { code: 'EXTRACTION_UNAVAILABLE' }]);
