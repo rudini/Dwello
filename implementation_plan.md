@@ -17,5 +17,5 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Backend: pure `runHeatingHints` in `statement-run.service.ts`, tests red first
 - [x] Backend: route `GET /statements/run-heating`, contract, api-contracts test
 - [x] BFF: `heatingHints` takes the backend's answer; `runContracts`, `movesIn`, `rebills` gone
-- [ ] Slice review `code-reviewer`
+- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28c-review-1.md` (E-1 open question: #647)
 - [ ] Merge `main` after #646, before complete, closing round, PR

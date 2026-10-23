@@ -453,6 +453,13 @@ describe('Hinweise zu den Heizkosten eines Laufs', () => {
 		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', billed).heatingWithoutServicePeriod).toEqual([]);
 	});
 
+	// code review E-1: as before H-28, a contract with a statement in the period counts as billed, also one replaced there
+	it('nennt sie nicht, wenn die Abrechnung des Mietvertrags mit dem Einzug in der Periode ersetzt ist', () => {
+		const replaced = [{ ...statement('einzug', '2024-01-01', '2024-12-31', 'replaced'), id: 's1', apartmentId: 'w1' }];
+
+		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', replaced).heatingWithoutServicePeriod).toEqual([]);
+	});
+
 	// #335 (#451, point 5): the sent statement of the previous tenant still shares the heating costs without the months in
 	// the Leistungszeitraum (by the check); the preview names it when the run bills the next tenant of the same apartment
 	it.each([

@@ -255,11 +255,14 @@ export function runHeatingHints<I>(
 	statements: Placed[],
 	check: HeatingCheck<I>
 ): HeatingCheck<I> {
-	const billed = planRun(run.period, contracts, statements).contracts.filter((c) => !c.billed);
+	// the contracts with Mietstage in the period and no statement overlapping it, a replaced one included (code review
+	// E-1; whether a berichtigte Abrechnung should get the hints is open in #647)
+	const billed = contracts.filter((c) => billsIn(c, run.period) && !statements.some((s) => s.contractId === c.id && within(s, run.period)));
 	const change = !!run.heatingProfileId && billed.some((c) => movesIn(c, run.period));
+	// the sent statement's own contract has a statement in the period, so it is never among them
 	const rebilled = (id: string) => {
 		const sent = statements.find((s) => s.id === id);
-		return !!sent && billed.some((c) => c.id !== sent.contractId && c.apartmentId === sent.apartmentId);
+		return !!sent && billed.some((c) => c.apartmentId === sent.apartmentId);
 	};
 	return { heatingWithoutServicePeriod: change ? check.heatingWithoutServicePeriod : [], oldHeatingRule: check.oldHeatingRule.filter(rebilled) };
 }
