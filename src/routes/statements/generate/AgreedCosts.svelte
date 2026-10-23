@@ -20,7 +20,7 @@
 		period: { start: string; end: string };
 		blocking?: boolean; // «Weiter» waits: questions loading, not loaded or not answered (code review W10c C-1)
 		loading?: boolean; // the questions are not loaded yet (#468)
-		noted?: boolean; // it asks or names contracts (#470)
+		noted?: boolean; // it asks, names contracts or could not check (#470)
 		error?: string; // «Weiter» with questions not answered
 	} = $props();
 
@@ -56,7 +56,7 @@
 	const asked = $derived(contracts.filter((contract) => contract.open.length));
 	const notAgreed = $derived(contracts.filter((contract) => contract.notAgreed.length));
 	$effect(() => {
-		noted = asked.length > 0 || notAgreed.length > 0;
+		noted = status === 'failed' || asked.length > 0 || notAgreed.length > 0;
 	});
 	$effect(() => {
 		loading = status === 'loading';

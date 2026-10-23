@@ -74,6 +74,10 @@ export const tankQuestion = target('Frage nach dem Heizmaterial', (page) => page
 export const noTankLink = (buildingId: string) =>
 	target(`Kein Tank festhalten für ${buildingId}`, (page) => page.getByTestId(`tank-question-no-tank-${buildingId}`));
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
+// #470: the line above «Weiter» that sends the landlord to the notes below it; held hidden while there are none
+export const lateChecksNote = target('Hinweis auf die Hinweise unter «Weiter»', (page) =>
+	page.getByTestId('late-checks-note').filter({ visible: true })
+);
 // The contracts of the run without an agreed Verwaltungspauschale, each a link to it (#89, step «Einstellungen»)
 export const feeNotAgreed = target('Mietverträge ohne vereinbarte Verwaltungspauschale', (page) =>
 	page.getByTestId('management-fee-not-agreed')
