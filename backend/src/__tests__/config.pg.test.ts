@@ -244,6 +244,7 @@ describe('Einstellungen prüfen', () => {
 		['payment_deadline_days', '91', 400],
 		['reminder_after_days', '7', 200],
 		['reminder_after_days', '60', 200],
+		['reminder_after_days', '6', 400],
 		['reminder_after_days', '61', 400],
 		['iban', 'LI22 0881 0000 2324 013A A', 400],
 		['iban', 'CH56 0483 5012 3456 7800 9', 200],

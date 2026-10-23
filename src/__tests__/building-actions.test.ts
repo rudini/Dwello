@@ -337,10 +337,15 @@ describe('Tankbestand', () => {
 		]);
 	});
 
+	// the backend checks them (code review h28h C-2: asked, not answered by the BFF itself)
 	it('zeigt die Ablehnung von Stichtag und Betrag am Feld', async () => {
+		const asked: string[] = [];
 		const result = await run(
 			detailActions.addFuelStock as Action,
-			() => Response.json(fuelStockRefused, { status: 400 }),
+			(url: string) => {
+				asked.push(url);
+				return Response.json(fuelStockRefused, { status: 400 });
+			},
 			{ id: 'b1' },
 			{ readingDate: '', amount: 'viel', categoryId: 'c1' }
 		);
@@ -354,6 +359,7 @@ describe('Tankbestand', () => {
 				}
 			}
 		});
+		expect(asked).toEqual(['http://localhost:3001/api/v1/buildings/b1/fuel-stocks']);
 	});
 
 	it.each([

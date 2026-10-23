@@ -196,7 +196,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 			body: t.Object({
 				readingDate: t.String(),
 				amount: t.String(),
-				categoryId: t.String({ format: 'uuid' })
+				categoryId: t.String()
 			})
 		}
 	)

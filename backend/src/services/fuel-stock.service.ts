@@ -13,7 +13,6 @@ import { isRealDate } from './real-date';
 export const listFuelStocks = (buildingId: string) =>
 	db.select().from(fuelStocks).where(eq(fuelStocks.buildingId, buildingId)).orderBy(asc(fuelStocks.readingDate));
 
-/** The new reading; none if the building already has one on that day */
 // The value as typed: «2'650.50», «2650,5» or whole francs «1'450.-» (H-28, #717)
 const typedAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.').replace(/\.[-–—]+$/, '');
 
@@ -27,6 +26,7 @@ export function fuelStockFields({ readingDate, amount }: { readingDate: string; 
 	return { errors, amount: value };
 }
 
+/** The new reading; none if the building already has one on that day */
 export async function createFuelStock(buildingId: string, stock: { readingDate: string; amount: string; categoryId: string }) {
 	const [created] = await db.insert(fuelStocks).values({ buildingId, ...stock }).onConflictDoNothing().returning();
 	return created;
@@ -120,6 +120,7 @@ export async function fuelStockChange(buildingId: string, periodStart: string, p
 
 /** An allocable category marked Brennstoff may hold a Tankbestand (#100); the chimney sweep is shared like heating but is no fuel */
 export async function isFuelCategory(categoryId: string) {
+	if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoryId)) return false; // none chosen (h28h C-1)
 	const [category] = await db
 		.select({ fuel: categories.isFuel, allowed: categories.isAllowedUtilityCost })
 		.from(categories)

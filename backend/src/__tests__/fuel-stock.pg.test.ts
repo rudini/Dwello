@@ -279,6 +279,7 @@ describe('Tankbestand über die API', () => {
 		expect((await record('2027-12-31', '-1')).status).toBe(400);
 		expect((await record('2027-02-30', '10.00')).status).toBe(400);
 		expect((await record('2027-12-31', '10.00', rental.building, caretaker)).status).toBe(400);
+		expect((await record('2027-12-31', '10.00', rental.building, '')).status).toBe(400);
 		expect((await record('2024-12-31', '700.00')).status).toBe(409);
 		expect((await callApi(stocks(crypto.randomUUID()))).status).toBe(404);
 		expect((await sendJson('DELETE', `${stocks()}/not-a-uuid`)).status).toBe(404); // no UUID: no record
@@ -408,8 +409,9 @@ describe('Tankbestand über die API', () => {
 
 // H-28 (#717): the checks of the Tankbestand form are the backend's, the value as typed
 describe('Tankbestand erfassen', () => {
-	it('lehnt Stichtag und Betrag am Feld ab', async () => {
-		const response = await record('', 'viel');
+	// code review h28h C-1: also without a category to choose (none set up, or not loaded), the fields first
+	it.each([['Kategorie gewählt'], ['ohne Kategorie']])('lehnt Stichtag und Betrag am Feld ab (%s)', async (chosen) => {
+		const response = await record('', 'viel', rental.building, chosen === 'ohne Kategorie' ? '' : heating);
 
 		expect(response.status).toBe(400);
 		expect(((await response.json()) as { causes: unknown }).causes).toEqual([
@@ -422,9 +424,13 @@ describe('Tankbestand erfassen', () => {
 		const response = await record('2029-12-31', "2'650,5");
 		const saved = (await response.json()) as { id: string; amount: string };
 		await sendJson('DELETE', `${stocks()}/${saved.id}`);
+		const whole = await record('2029-12-31', "1'450.-");
+		const francs = (await whole.json()) as { id: string; amount: string };
+		await sendJson('DELETE', `${stocks()}/${francs.id}`);
 
 		expect(response.status).toBe(201);
 		expect(saved.amount).toBe('2650.50');
+		expect(francs.amount).toBe('1450.00');
 	});
 
 	it('nennt den Grund, wenn der Stichtag schon erfasst ist', async () => {
