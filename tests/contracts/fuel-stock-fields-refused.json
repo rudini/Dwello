@@ -1,0 +1,9 @@
+{
+	"error": "Some fields are not valid",
+	"code": "FUEL_STOCK_DATE_REQUIRED",
+	"params": { "field": "readingDate" },
+	"causes": [
+		{ "code": "FUEL_STOCK_DATE_REQUIRED", "params": { "field": "readingDate" } },
+		{ "code": "FUEL_STOCK_AMOUNT_INVALID", "params": { "field": "amount" } }
+	]
+}

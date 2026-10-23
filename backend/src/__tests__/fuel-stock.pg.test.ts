@@ -276,7 +276,7 @@ describe('Tankbestand über die API', () => {
 	});
 
 	it('lehnt ungültige Angaben ab', async () => {
-		expect((await record('2027-12-31', '-1')).status).toBe(422);
+		expect((await record('2027-12-31', '-1')).status).toBe(400);
 		expect((await record('2027-02-30', '10.00')).status).toBe(400);
 		expect((await record('2027-12-31', '10.00', rental.building, caretaker)).status).toBe(400);
 		expect((await record('2024-12-31', '700.00')).status).toBe(409);
@@ -378,8 +378,11 @@ describe('Tankbestand über die API', () => {
 	it('lehnt einen Stand in einer anderen Kategorie als die übrigen Stände des Gebäudes ab', async () => {
 		const [pellets] = await db.insert(categories).values({ name: `Pellets B ${token}`, isHeatingCost: true, isFuel: true }).returning();
 
-		expect((await record('2028-12-31', '10.00', rental.building, pellets.id)).status).toBe(409);
+		const refused = await record('2028-12-31', '10.00', rental.building, pellets.id);
 		await db.delete(categories).where(eq(categories.id, pellets.id));
+
+		expect(refused.status).toBe(409);
+		expect(await refused.json()).toMatchObject({ code: 'FUEL_STOCK_OTHER_CATEGORY' });
 	});
 
 	it('lehnt eine Kategorie ab, die nicht umlagefähig ist', async () => {
@@ -400,5 +403,34 @@ describe('Tankbestand über die API', () => {
 		await record('2027-12-31', '10.00', noTank.building, own.id);
 
 		expect((await sendJson('DELETE', `/api/v1/categories/${own.id}`)).status).toBe(409);
+	});
+});
+
+// H-28 (#717): the checks of the Tankbestand form are the backend's, the value as typed
+describe('Tankbestand erfassen', () => {
+	it('lehnt Stichtag und Betrag am Feld ab', async () => {
+		const response = await record('', 'viel');
+
+		expect(response.status).toBe(400);
+		expect(((await response.json()) as { causes: unknown }).causes).toEqual([
+			{ code: 'FUEL_STOCK_DATE_REQUIRED', params: { field: 'readingDate' } },
+			{ code: 'FUEL_STOCK_AMOUNT_INVALID', params: { field: 'amount' } }
+		]);
+	});
+
+	it('nimmt den Betrag, wie er getippt wird', async () => {
+		const response = await record('2029-12-31', "2'650,5");
+		const saved = (await response.json()) as { id: string; amount: string };
+		await sendJson('DELETE', `${stocks()}/${saved.id}`);
+
+		expect(response.status).toBe(201);
+		expect(saved.amount).toBe('2650.50');
+	});
+
+	it('nennt den Grund, wenn der Stichtag schon erfasst ist', async () => {
+		const response = await record('2024-12-31', '700.00');
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'FUEL_STOCK_DATE_TAKEN' });
 	});
 });

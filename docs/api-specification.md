@@ -61,7 +61,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 | PUT | `/:id` | Body: any subset of the POST fields; the sent ones are checked as on POST (400 with `causes`). → building. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the building still has apartments |
 | GET | `/:id/fuel-stocks` | → array of `{ id, buildingId, readingDate, amount, categoryId, createdAt }` by date (Tankbestand, see `tests/contracts/fuel-stocks.json`). 404 building |
-| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals), `categoryId` (uuid of an allocable category marked `isFuel`, #100). → 201 reading. 400 date that does not exist or category not allowed; 404 building; 409 a reading on that day exists, or the building's readings are in another category; 422 invalid body |
+| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (CHF ≥ 0 with at most two decimals, as typed: «2'650.50», «2650,5», «1'450.-»), `categoryId` (uuid of an allocable category marked `isFuel`, #100). → 201 reading. 400 with the form checks (H-28, #717): `FUEL_STOCK_DATE_REQUIRED` (missing or not a real day), `FUEL_STOCK_AMOUNT_INVALID`; 400 category not allowed; 404 building; 409 `FUEL_STOCK_DATE_TAKEN` (a reading on that day exists) or `FUEL_STOCK_OTHER_CATEGORY` (the building's readings are in another category); 422 invalid body |
 | DELETE | `/:id/fuel-stocks/:stockId` | 204. 404; 422 ids not uuids |
 
 ## 4. Apartments `/api/v1/apartments`

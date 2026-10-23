@@ -18,12 +18,12 @@ import {
 } from '../services/building.service';
 import {
 	createFuelStock,
+	fuelStockFields,
 	deleteFuelStock,
 	isFuelCategory,
 	listFuelStocks,
 	otherTankCategory
 } from '../services/fuel-stock.service';
-import { isRealDate } from '../services/real-date';
 import { numberTakenError } from './apartments';
 
 const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
@@ -170,18 +170,23 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 				set.status = 404;
 				return refusal('BUILDING_NOT_FOUND', 'Building not found');
 			}
-			if (!isRealDate(body.readingDate) || !(await isFuelCategory(body.categoryId))) {
+			const { errors, amount } = fuelStockFields(body);
+			if (errors.length) {
 				set.status = 400;
-				return { error: 'readingDate must exist and categoryId must be an allocable fuel category' };
+				return fieldsRefused(errors);
+			}
+			if (!(await isFuelCategory(body.categoryId))) {
+				set.status = 400;
+				return { error: 'categoryId must be an allocable fuel category' };
 			}
 			if (await otherTankCategory(params.id, body.categoryId)) {
 				set.status = 409;
-				return { error: 'The building records its fuel stock in another category' };
+				return refusal('FUEL_STOCK_OTHER_CATEGORY', 'The building records its fuel stock in another category');
 			}
-			const stock = await createFuelStock(params.id, body);
+			const stock = await createFuelStock(params.id, { ...body, amount });
 			if (!stock) {
 				set.status = 409;
-				return { error: 'Fuel stock for this day already recorded' };
+				return refusal('FUEL_STOCK_DATE_TAKEN', 'Fuel stock for this day already recorded');
 			}
 			set.status = 201;
 			return stock;
@@ -189,8 +194,8 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 		{
 			params: fuelStockParams,
 			body: t.Object({
-				readingDate: t.String({ format: 'date' }),
-				amount: t.String({ pattern: '^\\d+(\\.\\d{1,2})?$' }),
+				readingDate: t.String(),
+				amount: t.String(),
 				categoryId: t.String({ format: 'uuid' })
 			})
 		}

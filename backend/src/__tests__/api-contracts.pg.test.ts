@@ -209,6 +209,20 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('config-iban-address-missing'), await response.json())).toEqual([]);
 	});
 
+	// H-28 (#717): the Tankbestand form refused, each check with its field; a day already taken with its code
+	it('POST /buildings/:id/fuel-stocks liefert die Felder von fuel-stock-fields-refused.json und fuel-stock-date-taken.json', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		const record = (readingDate: string, amount: string) =>
+			sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate, amount, categoryId: heating.id });
+		const refused = await record('', 'viel');
+		const first = (await (await record('2030-12-31', '10.00')).json()) as { id: string };
+		const taken = await record('2030-12-31', '20.00');
+		await sendJson('DELETE', `/api/v1/buildings/${rental.building}/fuel-stocks/${first.id}`);
+
+		expect(drift(await sample('fuel-stock-fields-refused'), await refused.json())).toEqual([]);
+		expect(drift(await sample('fuel-stock-date-taken'), await taken.json())).toEqual([]);
+	});
+
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts?buildingId=${rental.building}&limit=1000`)).json();
 		expect(drift(await sample('building-contracts'), actual)).toEqual([]);
