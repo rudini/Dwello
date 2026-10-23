@@ -41,7 +41,8 @@ Dwello-Nutzen
 ├─ Testbarkeit
 │  └─ Schnelle, verlässliche Rückmeldung ..... T1 CI auf PR und main ≤ 15 min, main grün (H/H)
 ├─ Performance
-│  └─ Abrechnungslauf ........................ P1 50 Wohnungen samt PDFs ≤ 30 s         (M/M)
+│  ├─ Abrechnungslauf ........................ P1 50 Wohnungen samt PDFs ≤ 30 s         (M/M)
+│  └─ Wartezeit nach einem Klick ............. P2 Liste oder Übersicht < 500 ms p95      (M/M)
 └─ Security
    └─ Sitzung und Mieterdaten geschützt ...... S1 Kein Token lesbar, 401 ohne Sitzung    (H/L)
 ```
@@ -52,7 +53,6 @@ Dwello-Nutzen
 |---|---|
 | Verfügbarkeit 99,5 % (PRD §7.4) | Dafür ist der Betreiber zuständig (vom Nutzer bestätigt). |
 | Skalierbarkeit, Last, Mandantenfähigkeit | Ein Benutzer und höchstens 50 Wohnungen pro Installation, kein gehostetes Angebot in 12 Monaten (vom Nutzer bestätigt). |
-| P2 API-Antwortzeit < 500 ms p95 (`docs/tech-stack.md`) | Es gibt kein Indiz für ein Problem. Der Wert lässt sich im Lauf für P1 mitmessen (Annahme A5). |
 | Usability, Barrierefreiheit | CI sichert sie ab (axe mit 0 Verstössen, Personas; `CLAUDE.md` «Design-Regeln»). Sie treiben die Architektur nicht. |
 | Ä2 Statusregel, Ä3 Dateien pro Feature (Baseline §7) | Ä2 geht in Ä4 auf. Ä3 bleibt als Leitplanke in der Baseline, Ä1 und Ä4 erklären sie. |
 | Q1–Q5, D1, D2 (`migration-mva.md`) | Erfüllt und mit Tests belegt (✅). Sie bleiben dort und treiben keine Änderung. |
@@ -147,6 +147,15 @@ Dwello-Nutzen
 - **Heute:** **unbekannt**. Die Schleife über die Mietverträge läuft im BFF (`src/lib/server/statement-generation.ts`, aus Repo/Config).
 - **Fitness Function:** Benchmark-Skript, das 50 Mietverträge anlegt und den Lauf über die BFF-Route misst, wöchentlich auf der Demo-VM. Dazu ein grober Wächter in CI (z. B. ≤ 15 s auf dem Runner, Annahme A4).
 
+### P2 Wartezeit nach einem Klick
+
+- **Auslöser:** Der Vermieter öffnet eine Liste (z. B. Mieter, Rechnungen) oder die Übersicht.
+- **Umgebung:** VM wie die Demo, Daten von 50 Wohnungen über mehrere Jahre.
+- **Reaktion:** Die Seite ist ohne spürbare Wartezeit da.
+- **Messgrösse und Ziel:** Antwortzeit der API **< 500 ms (p95)** (aus Repo/Config: `docs/tech-stack.md`; eigenes Ziel: vom Nutzer bestätigt). Für die Datenbank nennt `docs/tech-stack.md` zusätzlich Abfragen < 100 ms (p95).
+- **Heute:** **unbekannt**, nicht gemessen (aus Repo/Config: `migration-mva.md` P2 ❓).
+- **Fitness Function:** Im Benchmark von P1 zusätzlich jede Listen- und Übersichtsroute 100-mal abrufen und p95 bilden, wöchentlich auf der Demo-VM. In CI ein grober Wächter mit derselben Annahme wie A4.
+
 ### S1 Sitzung und Mieterdaten geschützt
 
 - **Auslöser:** Ein Skript im Browser versucht, die Sitzung zu lesen, oder ein Request ohne gültige Sitzung erreicht BFF oder Backend.
@@ -163,7 +172,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | | Schwierigkeit **H** | **M** | **L** |
 |---|---|---|---|
 | **Wichtigkeit H** | **Ä1, U1, T1, R1** | Ä4, O1 | S1 |
-| **M** | | P1 | |
+| **M** | | P1, P2 | |
 | **L** | | | |
 
 | ID | Wichtigkeit | Begründung | Schwierigkeit | Begründung |
@@ -175,6 +184,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
+| P2 | M (Vorschlag) | Als eigenes Ziel gewollt (vom Nutzer bestätigt). Einen Ausfall bedeutet eine Verfehlung nicht. | M (Vorschlag) | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`migration-mva.md`). |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
 **Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
@@ -187,7 +197,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | A2 | Eine Installation enthält nach 10 Jahren Belege für höchstens 50 Wohnungen. Der Restore schafft das in ≤ 5 min. Grösse unbekannt. | R1 | Messung mit synthetischer DB |
 | A3 | ~~Schwelle «Backup zu alt» = 26 h~~ **Entschieden:** Gelingt mehr als einen Tag kein Backup, ist das sichtbar. Ausserdem muss jedes Backup nach einem Update einspielbar sein (vom Nutzer bestätigt). | O1, R1 | erledigt |
 | A4 | Ein CI-Wächter für P1 auf dem GitHub-Runner sagt etwas über die Demo-VM aus. | P1 | Einmal auf beiden messen |
-| A5 | P2 (< 500 ms p95) ist erfüllt und braucht kein eigenes Szenario. Die Rückfrage vom 23.10. blieb unklar. | P2 | Product Owner; im Lauf für P1 mitmessen |
+| A5 | ~~P2 braucht kein eigenes Szenario.~~ **Entschieden:** P2 ist ein eigenes Szenario (vom Nutzer bestätigt). Der Baum hat damit 9 statt höchstens 8 Szenarien. Wichtigkeit und Schwierigkeit M/M sind ein Vorschlag. | P2 | erledigt; Einstufung offen |
 | A6 | Die rote Quote auf `main` (4/7) kommt von Rennen zwischen parallelen Merges und Browser-Unterschieden, nicht von echten Fehlern. Ursachen nicht untersucht. | T1 | Auswertung der roten Läufe 861, 876, 886, 916 |
 | A7 | ~~Datenschutz der Backup-Dateien ist Sache des Betreibers.~~ **Entschieden:** Dwello verschlüsselt das Backup, der Schlüssel kommt aus einem generierten Wiederherstellungscode (vom Nutzer bestätigt). Das betrifft nur das Backup. Für die laufende DB bleibt die Verschlüsselung at rest «Vision, nicht geplant» (PRD, #111, #719, #722). | R1, S1 | erledigt |
 | A8 | Der Vermieter verwahrt den Wiederherstellungscode getrennt vom Server. Geht der Code verloren, ist jedes Backup wertlos. Wie Dwello das verhindert (Bestätigung bei der Einrichtung, neuer Code, Hinweis), ist offen. | R1 | Product Owner |
