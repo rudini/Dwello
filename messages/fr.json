@@ -1086,6 +1086,7 @@
 	"invoices_upload_unticked_mixed": "La case « Créer cette facture » n’est pas cochée, car vous devez d’abord répartir le montant. Cochez-la ensuite.",
 	"invoices_upload_unticked_credit": "La case « Créer cette facture » n’est pas cochée, car on ne crée pas de facture à partir d’une note de crédit. Si le fichier est quand même une facture, cochez-la.",
 	"invoices_upload_details_show": "Vérifier les indications",
+	"invoices_upload_details_enter": "Saisir les indications",
 	"invoices_upload_details_hide": "Masquer les indications",
 	"invoices_upload_remove": "Retirer le fichier",
 	"invoices_upload_preview": "Aperçu de {name}",

@@ -1086,6 +1086,7 @@
 	"invoices_upload_unticked_mixed": "Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil Sie zuerst den Betrag aufteilen müssen. Setzen Sie es danach.",
 	"invoices_upload_unticked_credit": "Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil aus einer Gutschrift keine Rechnung entsteht. Ist die Datei doch eine Rechnung, setzen Sie es.",
 	"invoices_upload_details_show": "Angaben prüfen",
+	"invoices_upload_details_enter": "Angaben eingeben",
 	"invoices_upload_details_hide": "Angaben ausblenden",
 	"invoices_upload_remove": "Datei entfernen",
 	"invoices_upload_preview": "Vorschau von {name}",
