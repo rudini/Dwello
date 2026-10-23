@@ -713,13 +713,7 @@
 	"tenants_new_title": "Neuer Mieter",
 	"tenants_new_purpose": "Erfassen Sie Name, Kontaktdaten und Korrespondenzkanal des Mieters.",
 	"tenants_new_purpose_contract": "Danach geht es mit dem Mietvertrag weiter.",
-	"tenants_error_first_name": "Vorname ist erforderlich.",
-	"tenants_error_last_name": "Nachname ist erforderlich.",
 	"tenants_error_email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-	"tenants_error_email_required": "Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich.",
-	"tenants_error_address_letter": "Für Briefe ist eine Adresse erforderlich.",
-	"tenants_error_postal_code_letter": "Für Briefe ist eine PLZ erforderlich.",
-	"tenants_error_city_letter": "Für Briefe ist ein Ort erforderlich.",
 	"tenants_save_failed": "Mieter konnte nicht gespeichert werden.",
 	"tenants_not_found": "Mieter nicht gefunden",
 	"tenants_load_failed": "Fehler beim Laden des Mieters",
@@ -2077,5 +2071,12 @@
 	"backend_apartment_area_required": "Fläche ist erforderlich.",
 	"backend_apartment_rooms_required": "Zimmeranzahl ist erforderlich.",
 	"backend_apartment_area_invalid": "Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.",
-	"backend_apartment_rooms_invalid": "Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5."
+	"backend_apartment_rooms_invalid": "Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.",
+	"backend_tenant_first_name_required": "Vorname ist erforderlich.",
+	"backend_tenant_last_name_required": "Nachname ist erforderlich.",
+	"backend_tenant_email_invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+	"backend_tenant_email_required": "Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich.",
+	"backend_tenant_address_letter": "Für Briefe ist eine Adresse erforderlich.",
+	"backend_tenant_postal_code_letter": "Für Briefe ist eine PLZ erforderlich.",
+	"backend_tenant_city_letter": "Für Briefe ist ein Ort erforderlich."
 }

@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { refusal, type ErrorCode } from '../services/coded-error';
+import { fieldsRefused, refusal } from '../services/coded-error';
 import { apartmentFieldErrors, buildingFieldErrors, decimalOf } from '../services/building-fields';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -61,9 +61,6 @@ const newApartmentSchema = t.Object({
 	area: t.String(),
 	rooms: t.String()
 });
-
-/** A refused form: its first error as the code, every error with its field as `causes` (H-28, #717) */
-const fieldsRefused = (causes: ErrorCode[]) => ({ ...refusal(causes[0].code, 'Some fields are not valid', causes[0].params), causes });
 const buildingCreateSchema = t.Composite([
 	buildingBodySchema,
 	t.Object({ apartments: t.Optional(t.Array(newApartmentSchema)) })

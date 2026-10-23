@@ -713,13 +713,7 @@
 	"tenants_new_title": "Nuovo inquilino",
 	"tenants_new_purpose": "Registri nome, dati di contatto e canale di corrispondenza dell’inquilino.",
 	"tenants_new_purpose_contract": "In seguito si prosegue con il contratto di locazione.",
-	"tenants_error_first_name": "Il nome è obbligatorio.",
-	"tenants_error_last_name": "Il cognome è obbligatorio.",
 	"tenants_error_email_invalid": "Inserisca un indirizzo e-mail valido.",
-	"tenants_error_email_required": "Per la corrispondenza per e-mail è obbligatorio un indirizzo e-mail.",
-	"tenants_error_address_letter": "Per le lettere è obbligatorio un indirizzo.",
-	"tenants_error_postal_code_letter": "Per le lettere è obbligatorio un NPA.",
-	"tenants_error_city_letter": "Per le lettere è obbligatoria una località.",
 	"tenants_save_failed": "Non è stato possibile salvare l’inquilino.",
 	"tenants_not_found": "Inquilino non trovato",
 	"tenants_load_failed": "Errore durante il caricamento dell’inquilino",
@@ -2077,5 +2071,12 @@
 	"backend_apartment_area_required": "La superficie è obbligatoria.",
 	"backend_apartment_rooms_required": "Il numero di locali è obbligatorio.",
 	"backend_apartment_area_invalid": "Inserisca la superficie in m² come numero, ad es. 72.5.",
-	"backend_apartment_rooms_invalid": "Inserisca il numero di locali a mezzi locali, ad es. 3.5."
+	"backend_apartment_rooms_invalid": "Inserisca il numero di locali a mezzi locali, ad es. 3.5.",
+	"backend_tenant_first_name_required": "Il nome è obbligatorio.",
+	"backend_tenant_last_name_required": "Il cognome è obbligatorio.",
+	"backend_tenant_email_invalid": "Inserisca un indirizzo e-mail valido.",
+	"backend_tenant_email_required": "Per la corrispondenza per e-mail è obbligatorio un indirizzo e-mail.",
+	"backend_tenant_address_letter": "Per le lettere è obbligatorio un indirizzo.",
+	"backend_tenant_postal_code_letter": "Per le lettere è obbligatorio un NPA.",
+	"backend_tenant_city_letter": "Per le lettere è obbligatoria una località."
 }

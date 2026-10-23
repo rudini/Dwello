@@ -713,13 +713,7 @@
 	"tenants_new_title": "Nouveau locataire",
 	"tenants_new_purpose": "Saisissez le nom, les coordonnées et le canal de correspondance du locataire.",
 	"tenants_new_purpose_contract": "Vous continuerez ensuite avec le contrat de bail.",
-	"tenants_error_first_name": "Le prénom est obligatoire.",
-	"tenants_error_last_name": "Le nom est obligatoire.",
 	"tenants_error_email_invalid": "Veuillez saisir une adresse e-mail valide.",
-	"tenants_error_email_required": "Une adresse e-mail est obligatoire pour la correspondance par e-mail.",
-	"tenants_error_address_letter": "Une adresse est obligatoire pour les lettres.",
-	"tenants_error_postal_code_letter": "Un NPA est obligatoire pour les lettres.",
-	"tenants_error_city_letter": "Une localité est obligatoire pour les lettres.",
 	"tenants_save_failed": "Le locataire n’a pas pu être enregistré.",
 	"tenants_not_found": "Locataire introuvable",
 	"tenants_load_failed": "Erreur lors du chargement du locataire",
@@ -2077,5 +2071,12 @@
 	"backend_apartment_area_required": "La surface est obligatoire.",
 	"backend_apartment_rooms_required": "Le nombre de pièces est obligatoire.",
 	"backend_apartment_area_invalid": "Saisissez la surface en m² sous forme de nombre, p. ex. 72.5.",
-	"backend_apartment_rooms_invalid": "Saisissez le nombre de pièces par demi-pièces, p. ex. 3.5."
+	"backend_apartment_rooms_invalid": "Saisissez le nombre de pièces par demi-pièces, p. ex. 3.5.",
+	"backend_tenant_first_name_required": "Le prénom est obligatoire.",
+	"backend_tenant_last_name_required": "Le nom est obligatoire.",
+	"backend_tenant_email_invalid": "Veuillez saisir une adresse e-mail valide.",
+	"backend_tenant_email_required": "Une adresse e-mail est obligatoire pour la correspondance par e-mail.",
+	"backend_tenant_address_letter": "Une adresse est obligatoire pour les lettres.",
+	"backend_tenant_postal_code_letter": "Un NPA est obligatoire pour les lettres.",
+	"backend_tenant_city_letter": "Une localité est obligatoire pour les lettres."
 }

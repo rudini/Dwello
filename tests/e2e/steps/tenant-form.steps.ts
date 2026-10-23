@@ -80,7 +80,7 @@ Given(
 );
 
 Given('für {string} ist keine Korrespondenzadresse erfasst', async ({ seed }, tenant: string) => {
-	await seed.address(tenant, '', '', '', 'CH');
+	await seed.noAddress(tenant);
 });
 
 Given(

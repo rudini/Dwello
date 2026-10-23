@@ -188,6 +188,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('building-fields-refused'), await response.json())).toEqual([]);
 	});
 
+	// H-28 (#717): the tenant form refused, every failed check with its field; nothing is created
+	it('POST /tenants liefert bei ungültigen Feldern die Felder von tenant-fields-refused.json', async () => {
+		const response = await sendJson('POST', '/api/v1/tenants', { firstName: '', lastName: `Feldtest ${token}`, email: 'anna@', postalCode: '84' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('tenant-fields-refused'), await response.json())).toEqual([]);
+	});
+
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts?buildingId=${rental.building}&limit=1000`)).json();
 		expect(drift(await sample('building-contracts'), actual)).toEqual([]);
