@@ -48,16 +48,16 @@ async function check(
 	);
 }
 
-describe('Issues mit Vorschlag brauchen das Label entscheiden (CLAUDE.md, Open work)', () => {
-	it('meldet ein offenes Issue mit Vorschlag ohne entscheiden', async () => {
+describe('Issues mit Vorschlag brauchen das Label needs-decision (CLAUDE.md, Open work)', () => {
+	it('meldet ein offenes Issue mit Vorschlag ohne needs-decision', async () => {
 		const result = await check([{ number: 7, body: proposed, labels: [{ name: 'bug' }] }]);
 		expect(result.code).toBe(1);
-		expect(result.out).toContain('#7 has "Proposed (confirm before starting)" but not the label entscheiden');
+		expect(result.out).toContain('#7 has "Proposed (confirm before starting)" but not the label needs-decision');
 	});
 
-	it('lässt Issues mit entscheiden, ohne Vorschlag und Pull Requests durch', async () => {
+	it('lässt Issues mit needs-decision, ohne Vorschlag und Pull Requests durch', async () => {
 		const result = await check([
-			{ number: 7, body: proposed, labels: [{ name: 'entscheiden' }] },
+			{ number: 7, body: proposed, labels: [{ name: 'needs-decision' }] },
 			{ number: 8, body: 'Decided (product owner)', labels: [] },
 			{ number: 9, body: proposed, labels: [], pull_request: {} },
 			{ number: 10, body: null, labels: [] },
@@ -166,10 +166,10 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 
 	it('meldet eine Freigabe durch ein Issue, das noch entschieden werden muss', async () => {
 		const changed = feature.replace('«Seeblick»\n', '«Seeblick» und «Lindenhof»\n');
-		const deciding = { state: 'open', labels: [{ name: 'entscheiden' }] };
+		const deciding = { state: 'open', labels: [{ name: 'needs-decision' }] };
 		const result = await changeSpec(changed, 'Spec change approved: #643', deciding);
 		expect(result.code).toBe(1);
-		expect(result.out).toContain('#643 does not approve a specification change: it is still labelled entscheiden');
+		expect(result.out).toContain('#643 does not approve a specification change: it is still labelled needs-decision');
 		const declined = { state: 'closed', state_reason: 'not_planned', labels: [] };
 		expect((await changeSpec(changed, 'Spec change approved: #643', declined)).out).toContain(
 			'#643 does not approve a specification change: it is closed as not planned'

@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { missingByContract, missingOfContract } from '../services/statement-run.service';
 import { errorBody, refusal } from '../services/coded-error';
 import { advancesOf, deleteAdvance } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
@@ -119,6 +120,14 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			query: contractQuerySchema
 		}
 	)
+	// Per contract, the days of ended periods without a statement, for the list and the Übersicht (H-28, #211)
+	.get('/missing-statements', () => missingByContract())
+	// The missing statements of the contract and their way into the wizard (H-28, #5)
+	.get('/:id/missing-statements', async ({ params, set }) => {
+		const missing = await missingOfContract(params.id);
+		if (!missing) set.status = 404;
+		return missing ?? { error: 'Contract not found' };
+	})
 	// Get single contract
 	.get('/:id', async ({ params, set }) => {
 		const contract = await getContract(params.id);

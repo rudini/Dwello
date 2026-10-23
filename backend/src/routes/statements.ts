@@ -23,6 +23,7 @@ import {
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
 import { sendStatement } from '../services/statement-send.service';
+import { runDefaultsOf, runDifferencesOf, runHeatingHintsOf, runPlan } from '../services/statement-run.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
@@ -43,9 +44,43 @@ const calculationBody = t.Object({
 	managementFeePercent: t.Optional(t.Number({ minimum: 0, maximum: 10 })) // #124: also catches a typo such as 30 for 3
 });
 
+// A run of a building's period with a Heizprofil, as the run's routes take it (H-28)
+const runQuery = {
+	buildingId: t.String({ format: 'uuid' }),
+	periodStart: t.String({ format: 'date' }),
+	periodEnd: t.String({ format: 'date' }),
+	heatingProfileId: t.Optional(t.String())
+};
+const runOf = (query: { periodStart: string; periodEnd: string; heatingProfileId?: string }) => ({
+	period: { start: query.periodStart, end: query.periodEnd },
+	heatingProfileId: query.heatingProfileId ?? null
+});
+
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// The drafts with a change since and the statements due for correcting, for the Übersicht (#454)
 	.get('/outdated', async () => ({ statements: await outdatedStatements() }))
+	// What the wizard starts with, from a link to a building and period or from the settings (A-10, H-28)
+	.get('/run-defaults', ({ query }) => runDefaultsOf(query), {
+		query: t.Object({
+			buildingId: t.Optional(t.String({ format: 'uuid' })),
+			periodStart: t.Optional(t.String()),
+			periodEnd: t.Optional(t.String())
+		})
+	})
+	// The run of a period for a building: its contracts to bill and why it is refused (H-28)
+	.get('/run', ({ query }) => runPlan(query.buildingId, { start: query.periodStart, end: query.periodEnd }), {
+		query: t.Object({
+			buildingId: t.String({ format: 'uuid' }),
+			periodStart: t.String({ format: 'date' }),
+			periodEnd: t.String({ format: 'date' })
+		})
+	})
+	// The statements of the run's period a new run keeps although they differ from its settings (#132, H-28)
+	.get('/run-differences', ({ query }) => runDifferencesOf(query.buildingId, { ...runOf(query), managementFeePercent: query.managementFeePercent }), {
+		query: t.Object({ ...runQuery, managementFeePercent: t.Numeric({ minimum: 0, maximum: 10 }) })
+	})
+	// The heating hints of the period's check that concern the run (#335, #339, H-28)
+	.get('/run-heating', ({ query }) => runHeatingHintsOf(query.buildingId, runOf(query)), { query: t.Object(runQuery) })
 	// List all statements
 	.get(
 		'/',

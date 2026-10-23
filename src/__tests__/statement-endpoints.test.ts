@@ -5,9 +5,9 @@ import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
 import { GET as getListPdf } from '../routes/api/statements/[id]/pdf/+server';
 import { GET as getBilled } from '../routes/api/statements/billed/+server';
+import statementRun from '../../tests/contracts/statement-run.json';
 import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
-import buildingContracts from '../../tests/contracts/building-contracts.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import { localToday } from '$lib/contract-status';
@@ -309,11 +309,12 @@ describe('GET /api/statements/billed', () => {
 		const urls: string[] = [];
 		const fetch = async (url: string) => {
 			urls.push(url);
-			return url.includes('/contracts?')
-				? Response.json(buildingContracts)
-				: Response.json({
-						data: [{ contractId: 'c1', periodStart: '2024-01-01', periodEnd: '2024-12-31' }]
-					});
+			return Response.json({
+				...statementRun,
+				contracts: [{ ...statementRun.contracts[0], billed: true }],
+				overlap: null,
+				skipped: []
+			});
 		};
 		const response = await getBilled({
 			url: new URL(
@@ -327,8 +328,7 @@ describe('GET /api/statements/billed', () => {
 		]);
 		// an id goes into the backend address encoded, as in the preview (code review C-4)
 		expect(urls).toEqual([
-			'http://localhost:3001/api/v1/contracts?buildingId=b%2F1&limit=1000',
-			'http://localhost:3001/api/v1/statements?buildingId=b%2F1&limit=1000'
+			'http://localhost:3001/api/v1/statements/run?buildingId=b%2F1&periodStart=2024-01-01&periodEnd=2024-12-31'
 		]);
 	});
 });

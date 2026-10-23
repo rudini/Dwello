@@ -6,8 +6,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, fuelStocks, invoices, utilityStatements } from '../db/schema';
+import { createContract, deleteContract } from '../services/contract.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { deleteStatement, generateStatement } from '../services/statement.service';
+import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -228,5 +230,34 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		await may.remove();
 
 		expect(listed).toEqual(named ? [id] : []);
+	});
+
+	// H-28: which of these hints concern a run is decided here, by the contracts it bills (statement-run.service.ts)
+	it('nennt für einen Lauf, der den Vormieter derselben Wohnung abrechnet, die Abrechnung und die Heizrechnung ohne Leistungszeitraum', async () => {
+		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(may.building, { billingEntityName: 'Fernwärme AG', categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
+		const id = await sentStatement(may, 'sent');
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-04-10', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' });
+		const tenant = await createTenant({ firstName: 'Ruth', lastName: `Vormieterin ${crypto.randomUUID()}` });
+		const before = await createContract({ apartmentId: may.apartment, tenantId: tenant.id, startDate: '2025-01-01', endDate: '2025-04-30', baseRent: '900', monthlyAdvancePayment: '0' });
+		const heatingProfileId = (await getHeatingProfileByName('Heating Mittelland'))!.id;
+		const hintsFor = async (profile: string) =>
+			(await callApi(`/api/v1/statements/run-heating?buildingId=${may.building}&periodStart=2025-01-01&periodEnd=2025-12-31${profile}`)).json() as Promise<{
+				heatingWithoutServicePeriod: { billingEntityName: string }[];
+				oldHeatingRule: string[];
+			}>;
+
+		const withProfile = await hintsFor(`&heatingProfileId=${heatingProfileId}`);
+		const withoutProfile = await hintsFor('');
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+		await deleteContract(before.id, true);
+		await deleteTenant(tenant.id);
+		await may.remove();
+
+		expect(withProfile.heatingWithoutServicePeriod.map((i) => i.billingEntityName)).toEqual(['Fernwärme AG']);
+		expect(withProfile.oldHeatingRule).toEqual([id]);
+		expect(withoutProfile.heatingWithoutServicePeriod).toEqual([]);
 	});
 });

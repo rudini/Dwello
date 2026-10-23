@@ -1,7 +1,7 @@
 // Fails when a `TODO(fachlich prüfen, #n)` marker names an issue that is closed, missing or a pull request, when a
 // pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
 // issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
-// waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (skill `issue-work`), and when
+// waits for a decision («Proposed (confirm before starting)») without the label `needs-decision` (skill `issue-work`), and when
 // it changes a scenario that is not @wip on the base branch without `Spec change approved: #n` (CLAUDE.md, Workflow 1).
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 // With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
@@ -116,8 +116,8 @@ if (!process.env.GITHUB_TOKEN) {
 				? 'it is a pull request'
 				: issue.state_reason === 'not_planned'
 					? 'it is closed as not planned'
-					: issue.labels?.some((label) => label.name === 'entscheiden')
-						? 'it is still labelled entscheiden'
+					: issue.labels?.some((label) => label.name === 'needs-decision')
+						? 'it is still labelled needs-decision'
 						: '';
 		if (why) failures.push(`#${n} does not approve a specification change: ${why}`);
 	}
@@ -130,9 +130,9 @@ if (!process.env.GITHUB_TOKEN) {
 		const issues = await response.json();
 		if (!issues.length) break;
 		for (const issue of issues) {
-			const deciding = issue.labels.some((label) => label.name === 'entscheiden');
+			const deciding = issue.labels.some((label) => label.name === 'needs-decision');
 			if (!issue.pull_request && !deciding && /^#+ *Proposed \(confirm before starting\)/m.test(issue.body ?? ''))
-				failures.push(`#${issue.number} has "Proposed (confirm before starting)" but not the label entscheiden`);
+				failures.push(`#${issue.number} has "Proposed (confirm before starting)" but not the label needs-decision`);
 		}
 	}
 }

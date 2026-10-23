@@ -7,7 +7,7 @@ description: Notes on the rules that guided a Dwello task, and the collected rev
 
 The rules: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, the skills in `.claude/skills`, the agents in `.claude/agents`, the hooks in `.claude/hooks` and the documents these make binding (`docs/test-pyramid.md`, `docs/design/personas/README.md`, `.github/ISSUE_TEMPLATE/`).
 
-Both steps only write: change no rule, skill, agent or hook because of them, and open no issue or `offene-punkte.md` row for their findings (an exception to "Open work"). The product owner decides which to apply. Neither holds up the pull request.
+Both steps only write: change no rule, skill, agent or hook because of them, and open no issue for their findings (an exception to "Open work"). The product owner decides which to apply. Neither holds up the pull request.
 
 ## Notes per task
 

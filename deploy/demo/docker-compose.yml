@@ -26,8 +26,10 @@ services:
   postgres:
     ports: !reset []
     logging: *logging
+
+  secrets:
     environment:
-      # docker-compose.prod.yml falls back to the password dwello; the demo refuses to start without one
+      # the demo refuses to start without its own database password; init-secrets.sh hands it to Postgres (#577)
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/demo/.env}
 
   ollama:

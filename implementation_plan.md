@@ -7,6 +7,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - End: archive the session before the final commit, its "PR" item ticked as «pushed after this archive»; CI results after that go into the pull request, not the plan.
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
+<<<<<<< HEAD
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
 ## Session: spec scenarios need approval (#643)
@@ -16,7 +17,10 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] CI check (`tools/open-work/check-issues.mjs`): a changed or removed line of a scenario that is non-`@wip` on the base branch fails without `Spec change approved: #n`
 - [x] Additions (new scenario, new Examples row) and `@wip` scenarios pass
 - [x] Adding `@wip` to a protected scenario fails
-- [x] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `entscheiden`, not closed as not planned)
+- [x] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `needs-decision`, not closed as not planned)
 - [x] Slice review round 1: `docs/reviews/spec643-review-1.md`
 - [x] Slice review round 2 (C-1, C-2): `docs/reviews/spec643-review-2.md`
 - [ ] Closing round, archive, PR
+=======
+Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+>>>>>>> origin/main

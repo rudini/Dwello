@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/config/+page.server';
-import { load as loadWizard } from '../routes/statements/generate/+page.server';
-import { endedPeriodsSince, lastCompletedPeriod } from '../lib/accounting-period';
 import { runAction } from './helpers/action';
 import config from '../../tests/contracts/config.json';
 
@@ -271,41 +269,6 @@ describe('Einstellungen speichern', () => {
 	});
 });
 
-describe('Standardwerte im Abrechnungs-Assistenten', () => {
-	it.each([
-		['calendar', '2026-10-02', { start: '2025-01-01', end: '2025-12-31' }],
-		['july-june', '2026-10-02', { start: '2025-07-01', end: '2026-06-30' }],
-		['july-june', '2026-03-15', { start: '2024-07-01', end: '2025-06-30' }],
-		['november-october', '2026-11-05', { start: '2025-11-01', end: '2026-10-31' }],
-		['november-october', '2026-10-02', { start: '2024-11-01', end: '2025-10-31' }]
-	] as const)(
-		'schlägt bei %s am %s die letzte abgeschlossene Periode vor',
-		(type, today, period) => {
-			expect(lastCompletedPeriod(type, new Date(`${today}T12:00:00`))).toEqual(period);
-		}
-	);
-
-	it('wählt Periode und Heizprofil aus den Einstellungen vor', async () => {
-		const fetch = (async (url: string) =>
-			Response.json(
-				url === `${API}/config`
-					? {
-							data: { ...stored, accounting_period: 'july-june', default_heating_profile_id: 'hp1' }
-						}
-					: { data: [], buildings: [] }
-			)) as typeof globalThis.fetch;
-
-		const data = await loadWizard({
-			fetch,
-			url: new URL('http://localhost/statements/generate')
-		} as never);
-
-		expect(data.defaultPeriod).toEqual(lastCompletedPeriod('july-june'));
-		expect(data.defaultHeatingProfileId).toBe('hp1');
-		expect(data.defaultManagementFeePercent).toBe(2.5);
-	});
-});
-
 describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 	it('schlägt den Verteilschlüssel aus den Einstellungen vor', async () => {
 		const { load: loadInvoiceForm } = await import('../routes/invoices/new/+page.server');
@@ -320,22 +283,5 @@ describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 		} as never)) as Record<string, unknown>;
 
 		expect(data.defaultDistributionKeyId).toBe('dk1');
-	});
-});
-
-// #142: every ended period with days from a day on, the newest first
-describe('Abgelaufene Abrechnungsperioden', () => {
-	it('nennt alle abgelaufenen Perioden ab einem Tag, die neueste zuerst', () => {
-		const today = new Date('2026-10-15T12:00:00');
-		expect(endedPeriodsSince('calendar', '2024-04-01', today)).toEqual([
-			{ start: '2025-01-01', end: '2025-12-31' },
-			{ start: '2024-01-01', end: '2024-12-31' }
-		]);
-		expect(endedPeriodsSince('july-june', '2025-06-30', today)).toEqual([
-			{ start: '2025-07-01', end: '2026-06-30' },
-			{ start: '2024-07-01', end: '2025-06-30' }
-		]);
-		// from a day in the running period on: none has ended
-		expect(endedPeriodsSince('calendar', '2026-02-01', today)).toEqual([]);
 	});
 });

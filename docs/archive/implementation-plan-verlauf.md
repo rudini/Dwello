@@ -2922,3 +2922,54 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] Code review round 1 (`docs/reviews/rules-2026-10-23-review-1.md`): C-1 Blocker (`pull-requests: read`), C-2 Major (`CLAUDE.md` «Open work»), C-3 Minor (test red first), C-4, C-5 fixed
 - [x] Code review round 2 (`docs/reviews/rules-2026-10-23-review-2.md`): all closed
 - [x] Pull request: pushed after this archive
+
+## Session 2026-10-23: demo.dwello.ch does not start since #577
+
+No scenario: the E2E stack does not run the demo's compose files (`deploy/demo`).
+
+- [x] Postgres of the demo gets no `POSTGRES_PASSWORD` beside `POSTGRES_PASSWORD_FILE` (the image refuses both); the demo's check for the password moves to `secrets` (decided by the product owner in this session) — `deploy/demo/docker-compose.yml`, test in `backend/src/__tests__/compose-prod.test.ts`, seen red
+- [x] `reset-demo.sh` sets `DATABASE_URL` from `/run/dwello/db_password` (`compose run … sh -c` replaces the backend's command) — seen red
+- [x] Slice review (`code-reviewer`), `docs/reviews/demo-postgres-review-1.md`: no findings
+- [x] Archive, PR: pushed after this archive
+
+## Session 2026-10-23: contact address for contributors
+
+No scenario: repository documents only, no app change.
+
+- [x] `info@dwello.ch` as the contact in `CODE_OF_CONDUCT.md` and `SECURITY.md` (product owner's answer)
+- [x] PR: pushed after this archive
+
+## Session H-28 #16: settings of kept statements in the backend
+
+H-28 (`docs/design/offene-punkte.md`), baseline pair #16: whether a kept statement of the run's period used another Heizprofil, one edited since it was made, or another Verwaltungspauschale is decided in the backend, not in `src/lib/server/statement-generation.ts`. No scenario: behaviour unchanged, the preview hints keep their scenarios.
+
+- [x] Backend: pure comparison `runDifferences` in `statement-run.service.ts` (other Heizprofil, edited since, other rate), tests red first
+- [x] Backend: route `GET /statements/run-differences`, contract `tests/contracts/statement-run-differences.json`, api-contracts test
+- [x] BFF: `changedStatements` takes the backend's answer, names in the UI language; `editedSince`, `profileDifference`, `feeDifference` and the profile and contract loads gone
+- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28b-review-1.md`
+- [x] Closing round `code-reviewer`: `docs/reviews/h28b-review-2.md`
+- [x] Before complete; PR pushed after this archive
+
+## Session 2026-10-23: #648 non-functional points as nfr issues, English labels
+
+No scenario: rules, templates and tooling only, no app change.
+
+- [x] Check all 107 rows of `offene-punkte.md` against the code (four checkers): 105 hold, 2 done (O-11, O-13)
+- [x] Open an issue per row that holds (`nfr` + `nfr:<category>`); archive the file with the issue per row: #650–#754; #51 relabelled from `betrieb`
+- [x] Template `.github/ISSUE_TEMPLATE/nfr.md`
+- [x] Rules: `CLAUDE.md`, skills, `fach-reviewer`, templates, `docs/test-pyramid.md` name `domain`, `product`, `needs-decision`, `nfr` instead of the German labels and `offene-punkte.md`
+- [x] Tooling: `check-issues.mjs` checks `needs-decision`; `open-work.test.ts` without `offene-punkte.md`
+- [x] Label rename on GitHub (product owner, `gh label edit`), `betrieb` dropped
+- [x] code-reviewer round 1: `docs/reviews/648-review-1.md`
+- [x] PR: pushed after this archive
+## Session H-28: heating hints of a run in the backend
+
+H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a run shows (#339 heating invoices without Leistungszeitraum only at a move-in or move-out with a Heizprofil; #335 a sent statement under the old rule only when the run bills another contract of its apartment) is decided in the backend, not in `src/lib/server/statement-generation.ts` (`heatingHints`, `runContracts`, `movesIn`, `rebills`). Stacked on #646. No scenario: behaviour unchanged, the hints keep their scenarios.
+
+- [x] Backend: pure `runHeatingHints` in `statement-run.service.ts`, tests red first
+- [x] Backend: route `GET /statements/run-heating`, contract, api-contracts test
+- [x] BFF: `heatingHints` takes the backend's answer; `runContracts`, `movesIn`, `rebills` gone
+- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28c-review-1.md` (E-1 open question: #647)
+- [x] Review round 2: `docs/reviews/h28c-review-2.md` (E-1..E-3 fixed)
+- [x] Workflow note: commit-msg gate misses `-F` (`docs/reviews/workflow-notes-h28-heating-hints.md`)
+- [x] Merge `main` after #646 (clean), before complete; PR pushed after this archive
