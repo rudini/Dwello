@@ -2938,3 +2938,14 @@ No scenario: repository documents only, no app change.
 
 - [x] `info@dwello.ch` as the contact in `CODE_OF_CONDUCT.md` and `SECURITY.md` (product owner's answer)
 - [x] PR: pushed after this archive
+
+## Session H-28 #16: settings of kept statements in the backend
+
+H-28 (`docs/design/offene-punkte.md`), baseline pair #16: whether a kept statement of the run's period used another Heizprofil, one edited since it was made, or another Verwaltungspauschale is decided in the backend, not in `src/lib/server/statement-generation.ts`. No scenario: behaviour unchanged, the preview hints keep their scenarios.
+
+- [x] Backend: pure comparison `runDifferences` in `statement-run.service.ts` (other Heizprofil, edited since, other rate), tests red first
+- [x] Backend: route `GET /statements/run-differences`, contract `tests/contracts/statement-run-differences.json`, api-contracts test
+- [x] BFF: `changedStatements` takes the backend's answer, names in the UI language; `editedSince`, `profileDifference`, `feeDifference` and the profile and contract loads gone
+- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28b-review-1.md`
+- [x] Closing round `code-reviewer`: `docs/reviews/h28b-review-2.md`
+- [x] Before complete; PR pushed after this archive

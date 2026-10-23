@@ -9,12 +9,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
-## Session H-28 #16: settings of kept statements in the backend
-
-H-28 (`docs/design/offene-punkte.md`), baseline pair #16: whether a kept statement of the run's period used another Heizprofil, one edited since it was made, or another Verwaltungspauschale is decided in the backend, not in `src/lib/server/statement-generation.ts`. No scenario: behaviour unchanged, the preview hints keep their scenarios.
-
-- [x] Backend: pure comparison `runDifferences` in `statement-run.service.ts` (other Heizprofil, edited since, other rate), tests red first
-- [x] Backend: route `GET /statements/run-differences`, contract `tests/contracts/statement-run-differences.json`, api-contracts test
-- [x] BFF: `changedStatements` takes the backend's answer, names in the UI language; `editedSince`, `profileDifference`, `feeDifference` and the profile and contract loads gone
-- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28b-review-1.md`
-- [ ] Before complete, closing round, PR
