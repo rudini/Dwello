@@ -10,12 +10,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
 
-## Session H-28: heating hints of a run in the backend
-
-H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a run shows (#339 heating invoices without Leistungszeitraum only at a move-in or move-out with a Heizprofil; #335 a sent statement under the old rule only when the run bills another contract of its apartment) is decided in the backend, not in `src/lib/server/statement-generation.ts` (`heatingHints`, `runContracts`, `movesIn`, `rebills`). Stacked on #646. No scenario: behaviour unchanged, the hints keep their scenarios.
-
-- [x] Backend: pure `runHeatingHints` in `statement-run.service.ts`, tests red first
-- [x] Backend: route `GET /statements/run-heating`, contract, api-contracts test
-- [x] BFF: `heatingHints` takes the backend's answer; `runContracts`, `movesIn`, `rebills` gone
-- [x] Slice review `code-reviewer` round 1: `docs/reviews/h28c-review-1.md` (E-1 open question: #647)
-- [ ] Merge `main` after #646, before complete, closing round, PR
