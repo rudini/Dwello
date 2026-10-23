@@ -2984,3 +2984,13 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Slice review `code-reviewer`: `docs/reviews/647-review-1.md` (no findings)
 - [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-647.md`): task done, Minors P-1..P-4 stay in the report
 - [x] Before complete; PR `Fixes #647` pushed after this archive
+
+## Session 2026-10-23: #760 «Angaben eingeben» bei einer ungelesenen Datei
+
+- [x] Wording decided in #760 under the standing instruction («Angaben eingeben», fr/it/en)
+- [x] Scenario «Rechnungen hochladen, wenn keine KI gewählt ist» extended (`ki-einstellungen.feature`), red as @wip at «Angaben prüfen»; no step-1 fach-reviewer (a button text)
+- [x] Row label by `byHand`, texts in four languages; DOM test red first (the test for «Angaben prüfen» pins kept behaviour)
+- [x] code-reviewer round 1: `docs/reviews/760-review-1.md`; Minor C-1 (a row whose reading failed) fixed, DOM test red first; Minor C-2 (commit message) corrected in the next commit
+- [x] persona Helga on a fresh installation (`docs/design/personas/helga-760.md`): no Blocker/Major; the label fits; P-1 to P-4 (badge «Bitte prüfen», summary, key help, order of hints) lie outside #760 and stay in the report
+- [x] closing round: `docs/reviews/760-review-2.md`; C-1, C-2 closed; Minor C-3 (the scenario of a failed read checks «Angaben eingeben», `invoices.feature`) done, pinning the fix whose DOM test was seen red
+- [x] Workflow note: none new (fresh installation for personas as in `docs/reviews/workflow-notes-issue-620.md`); archive; PR pushed after this archive

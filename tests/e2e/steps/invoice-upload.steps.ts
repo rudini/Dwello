@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	belegChosenForCreating,
+	belegToggleText,
 	discardButtonLabel,
 	whyBelegSelectedOrNot,
 	deductedRuleOnBeleg,
@@ -199,6 +200,11 @@ Then('sagt die Datei {string} {string}', async ({ verwalter }, fileName: string,
 
 Then('sagt die Datei von {string} {string}', async ({ verwalter, names }, supplier: string, text: string) => {
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).toContain(text);
+});
+
+// #760: a file nobody read opens its empty fields to enter (code review 760 C-3)
+Then('bietet die Datei von {string} {string} an', async ({ verwalter, names }, supplier: string, label: string) => {
+	await verwalter.sees(belegToggleText(names.get(supplier)!)).toBe(label);
 });
 
 // the row's note is there (its first check), it only lacks this sentence
