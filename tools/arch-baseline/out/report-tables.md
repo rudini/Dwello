@@ -15,9 +15,11 @@
 | docs | 80 | 37 | 43 | 3 |
 | chore | 65 | 35 | 30 | 4 |
 
-window: since 2026-04-23 on origin/main; units 408; commits (non-merge) 1937
+window: since 2026-04-23 on d4d508cc2; units 408; commits (non-merge) 1937
 
 feat units by number of feat commits inside: 0: 2, 1: 82, 2-3: 21, >=4: 8
+
+unit titles naming an issue (#n): 34 of 408
 
 ### Excluded units and commits
 
@@ -40,7 +42,6 @@ feat units by number of feat commits inside: 0: 2, 1: 82, 2-3: 21, >=4: 8
 | binary (screenshot, font, PDF) | 145 |
 | lockfile | 2 |
 | data dump (demo data SQL) | 1 |
-| this analysis itself | 60 |
 
 ### Layers (HEAD)
 
@@ -92,11 +93,17 @@ feat units by number of feat commits inside: 0: 2, 1: 82, 2-3: 21, >=4: 8
 | Tests-Acceptance | BFF | 1 |
 | Tooling | FE | 1 |
 
+### Import graph
+
+| files | edges | type_only_edges | file_cycles | runtime_cycles | module_cycles | files_with_unresolved_paths |
+|---|---|---|---|---|---|---|
+| 1007 | 3247 | 260 | 1 | 0 | 3 | 14 |
+
 ### Cycles
 
 | cycle | size | runtime | files |
 |---|---|---|---|
-| 1 | 2 | no (type-only edge) | backend/src/services/pdf.service.ts backend/src/services/reminder-letter.ts |
+| 1 | 2 | no (type-only edges) | backend/src/services/pdf.service.ts backend/src/services/reminder-letter.ts |
 
 | cycle | size | modules |
 |---|---|---|
@@ -316,23 +323,23 @@ production pairs: 68; cross-layer without import: 28, of which naming contract f
 
 ### M3 hotspots, production (top 15, ranked by commits x total cyclomatic)
 
-| rank_cyclo | rank_crap | path | layer | commits | units | total_cyclomatic | crap_max | lines | fan_in |
+| Rang (prod) | CRAP-Rang (prod) | path | layer | commits | units | total_cyclomatic | crap_max | lines | fan_in |
 |---|---|---|---|---|---|---|---|---|---|
-| 2 | 1 | backend/src/services/pdf.service.ts | Backend | 82 | 40 | 304 | 26.5 | 1460 | 7 |
-| 6 | 3 | backend/src/services/statement.service.ts | Backend | 69 | 36 | 191 | 26.5 | 1031 | 23 |
-| 10 | 5 | backend/src/services/statement-pdf.service.ts | Backend | 52 | 30 | 164 | 26.5 | 385 | 9 |
-| 16 | 11 | src/lib/server/statement-generation.ts | BFF | 44 | 23 | 152 | 26.5 | 459 | 6 |
-| 20 | 10 | src/lib/statement-wizard.ts | FE | 45 | 24 | 128 | 26.5 | 402 | 19 |
-| 23 | 19 | backend/src/services/calculation.service.ts | Backend | 43 | 27 | 104 | 17.6 | 512 | 4 |
-| 24 | 22 | src/routes/contracts/[id]/+page.server.ts | BFF | 38 | 21 | 115 | 17.6 | 389 | 1 |
-| 27 | 16 | backend/src/services/contract.service.ts | Backend | 37 | 23 | 88 | 21.8 | 529 | 17 |
-| 28 | 15 | src/lib/server/statement.ts | BFF | 40 | 24 | 81 | 21.8 | 232 | 10 |
-| 29 | 6 | src/routes/contracts/ContractForm.svelte | FE | 51 | 26 | 63 | 26.5 | 395 | 1 |
-| 30 | 55 | src/lib/contract-form.ts | FE | 27 | 20 | 112 | 12.5 | 292 | 13 |
-| 33 | 219 | backend/src/db/schema.ts | DB | 61 | 48 | 45 | 1.2 | 688 | 81 |
-| 35 | 46 | backend/src/services/invoice.service.ts | Backend | 24 | 17 | 110 | 17.6 | 634 | 8 |
-| 38 | 42 | src/routes/dashboard/+page.server.ts | BFF | 33 | 21 | 75 | 13.8 | 246 | 5 |
-| 41 | 38 | backend/src/services/invoice-completeness.service.ts | Backend | 18 | 7 | 130 | 26.5 | 363 | 3 |
+| 1 | 1 | backend/src/services/pdf.service.ts | Backend | 82 | 40 | 304 | 26.5 | 1460 | 7 |
+| 2 | 2 | backend/src/services/statement.service.ts | Backend | 69 | 36 | 191 | 26.5 | 1031 | 23 |
+| 3 | 3 | backend/src/services/statement-pdf.service.ts | Backend | 52 | 30 | 164 | 26.5 | 385 | 9 |
+| 4 | 6 | src/lib/server/statement-generation.ts | BFF | 44 | 23 | 152 | 26.5 | 459 | 6 |
+| 5 | 5 | src/lib/statement-wizard.ts | FE | 45 | 24 | 128 | 26.5 | 402 | 19 |
+| 6 | 12 | backend/src/services/calculation.service.ts | Backend | 43 | 27 | 104 | 17.6 | 512 | 4 |
+| 7 | 14 | src/routes/contracts/[id]/+page.server.ts | BFF | 38 | 21 | 115 | 17.6 | 389 | 1 |
+| 8 | 10 | backend/src/services/contract.service.ts | Backend | 37 | 23 | 88 | 21.8 | 529 | 17 |
+| 9 | 9 | src/lib/server/statement.ts | BFF | 40 | 24 | 81 | 21.8 | 232 | 10 |
+| 10 | 4 | src/routes/contracts/ContractForm.svelte | FE | 51 | 26 | 63 | 26.5 | 395 | 1 |
+| 11 | 41 | src/lib/contract-form.ts | FE | 27 | 20 | 112 | 12.5 | 292 | 13 |
+| 12 | 151 | backend/src/db/schema.ts | DB | 61 | 48 | 45 | 1.2 | 688 | 81 |
+| 13 | 35 | backend/src/services/invoice.service.ts | Backend | 24 | 17 | 110 | 17.6 | 634 | 8 |
+| 14 | 31 | src/routes/dashboard/+page.server.ts | BFF | 33 | 21 | 75 | 13.8 | 246 | 5 |
+| 15 | 27 | backend/src/services/invoice-completeness.service.ts | Backend | 18 | 7 | 130 | 26.5 | 363 | 3 |
 
 ### M3 hotspots, tests (top 5)
 
@@ -460,7 +467,7 @@ fallow coverage_model: static_estimated; files scored 951; functions above thres
 
 | total_files | files_with_clones | clone_groups | duplicated_lines | duplication_percentage |
 |---|---|---|---|---|
-| 679 | 34 | 22 | 585 | 0.8712747419686341 |
+| 679 | 34 | 22 | 585 | 0.871106081362797 |
 
 clone groups spanning layers: 0 of 22; FE/BFF files importing backend code: 0
 

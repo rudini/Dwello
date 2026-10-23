@@ -2,7 +2,7 @@
 // Out: out/report-tables.md
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { BASE, OUT, SINCE, git, readCsv } from './lib';
+import { BASE, OUT, SINCE, git, quantile as q, readCsv } from './lib';
 
 const md: string[] = [];
 const table = (rows: Record<string, unknown>[], cols: string[], head?: string[]) => {
@@ -30,6 +30,7 @@ md.push(`window: since ${SINCE} on ${BASE}; units ${units.length}; commits (non-
 const featUnits = units.filter((u) => u.type === 'feat');
 const fc = (f: (n: number) => boolean) => featUnits.filter((u) => f(+u.feat_commits)).length;
 md.push(`feat units by number of feat commits inside: 0: ${fc((n) => n === 0)}, 1: ${fc((n) => n === 1)}, 2-3: ${fc((n) => n >= 2 && n <= 3)}, >=4: ${fc((n) => n >= 4)}`, '');
+md.push(`unit titles naming an issue (#n): ${units.filter((u) => /#\d+/.test(u.title)).length} of ${units.length}`, '');
 h('Excluded units and commits');
 table(readCsv('excluded-units.csv'), ['sha', 'pr', 'title', 'reason']);
 h('Excluded files (HEAD)');
@@ -40,6 +41,8 @@ h('Layers (HEAD)');
 table(readCsv('layers.csv'), ['layer', 'kind', 'files', 'loc', 'modules']);
 h('Import edges between layers (file level)');
 table(readCsv('imports-layer.csv').sort((a, b) => +b.file_edges - +a.file_edges), ['from_layer', 'to_layer', 'file_edges']);
+h('Import graph');
+table(readCsv('imports-stats.csv'), ['files', 'edges', 'type_only_edges', 'file_cycles', 'runtime_cycles', 'module_cycles', 'files_with_unresolved_paths']);
 h('Cycles');
 table(readCsv('cycles-file.csv'), ['cycle', 'size', 'runtime', 'files']);
 table(readCsv('cycles-module.csv'), ['cycle', 'size', 'modules']);
@@ -99,7 +102,13 @@ table(readCsv('m2-file-pairs-commits.csv').slice(0, 10).map((r) => ({ ...r, a: s
 // M3
 h('M3 hotspots, production (top 15, ranked by commits x total cyclomatic)');
 const hot = readCsv('m3-hotspots.csv');
-table(hot.filter((r) => r.kind === 'prod').slice(0, 15), ['rank_cyclo', 'rank_crap', 'path', 'layer', 'commits', 'units', 'total_cyclomatic', 'crap_max', 'lines', 'fan_in']);
+const prodHot = hot.filter((r) => r.kind === 'prod');
+const prodCrap = [...prodHot].sort((a, b) => +b.score_crap - +a.score_crap).map((r) => r.path);
+table(
+	prodHot.slice(0, 15).map((r, i) => ({ ...r, rank: i + 1, crap_rank: prodCrap.indexOf(r.path) + 1 })),
+	['rank', 'crap_rank', 'path', 'layer', 'commits', 'units', 'total_cyclomatic', 'crap_max', 'lines', 'fan_in'],
+	['Rang (prod)', 'CRAP-Rang (prod)', 'path', 'layer', 'commits', 'units', 'total_cyclomatic', 'crap_max', 'lines', 'fan_in']
+);
 h('M3 hotspots, tests (top 5)');
 table(hot.filter((r) => r.kind === 'test').slice(0, 5), ['path', 'commits', 'units', 'total_cyclomatic', 'crap_max', 'lines']);
 const health = JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8'));
@@ -144,7 +153,6 @@ table(readCsv('m4-decisions-outside-backend.csv').filter((r) => r.layer === 'BFF
 h('Baselines for the modifiability scenarios');
 const fs = readCsv('m4-field-spread.csv');
 const fv = fs.map((r) => +r.prod_files).sort((a, b) => a - b);
-const q = (v: number[], p: number) => v[Math.max(0, Math.ceil(p * v.length) - 1)];
 md.push(`DB fields checked: ${fs.length} (unique to one table, not generic); production files outside DB declaring the field: median ${q(fv, 0.5)}, P90 ${q(fv, 0.9)}, max ${fv.at(-1)}`, '');
 table(fs.slice(0, 10), ['table', 'field', 'prod_files', 'FE', 'BFF', 'Backend', 'Shared', 'contract_fixtures']);
 const sr = readCsv('m4-screen-registry.csv');

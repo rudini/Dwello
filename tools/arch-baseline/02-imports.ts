@@ -3,7 +3,7 @@
 // Resolves relative paths and the SvelteKit alias $lib; packages, $app, $env and
 // generated ./$types are external and dropped.
 // Out: out/imports-file.csv, out/imports-module.csv, out/cycles-file.csv, out/cycles-module.csv
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { dirname, join, normalize } from 'node:path';
 import { ROOT, classify, csv, excludedBecause, git } from './lib';
 
@@ -12,9 +12,21 @@ const files = git(['ls-files', '-z'])
 	.split('\0')
 	.filter((p) => SRC.test(p) && !excludedBecause(p) && !p.endsWith('.d.ts'));
 const known = new Set(files);
+// every tracked file: an import of JSON or CSS resolves, though it is no module of the graph
+const tracked = new Set(git(['ls-files', '-z']).split('\0'));
 
 const IMPORT_RE =
-	/(?:import|export)\s+(type\s+)?(?:[\w*{}\s,$]+?\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
+	/(?:import|export)\s+(type\s+)?(?:([\w*{}\s,$]+?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
+
+/** `import type …`, or `import { type A, type B }`: every name of the clause is a type */
+const typeOnlyImport = (keyword?: string, clause?: string) =>
+	!!keyword ||
+	(!!clause &&
+		/^\{[^}]*\}$/.test(clause.trim()) &&
+		clause
+			.replace(/[{}]/g, '')
+			.split(',')
+			.every((n) => !n.trim() || n.trim().startsWith('type ')));
 
 /** Path a specifier points to before extensions are tried: $lib alias or relative; null for packages. */
 function basePath(from: string, spec: string): string | null {
@@ -26,7 +38,15 @@ function resolve(from: string, spec: string): string | null {
 	const base = basePath(from, spec);
 	if (base === null) return null;
 	const stem = base.replace(/\.js$/, '');
-	const candidates = [base, stem + '.ts', base + '.ts', base + '.js', base + '.svelte', base + '/index.ts', base + '/index.js'];
+	const candidates = [
+		base,
+		stem + '.ts',
+		base + '.ts',
+		base + '.js',
+		base + '.svelte',
+		base + '/index.ts',
+		base + '/index.js'
+	];
 	return candidates.find((c) => known.has(c)) ?? null;
 }
 
@@ -34,21 +54,18 @@ const edges: { from: string; to: string; typeOnly: boolean }[] = [];
 const unresolved = new Map<string, number>();
 for (const f of files) {
 	const text = readFileSync(join(ROOT, f), 'utf8');
-	const seen = new Set<string>();
 	for (const m of text.matchAll(IMPORT_RE)) {
-		const spec = m[2] ?? m[3];
+		const spec = m[3] ?? m[4];
 		if (spec.endsWith('/$types') || spec.includes('paraglide')) continue;
 		const to = resolve(f, spec);
 		if (to) {
-			const typeOnly = !!m[1];
+			const typeOnly = typeOnlyImport(m[1], m[2]);
 			const prev = edges.find((e) => e.from === f && e.to === to);
 			if (prev) prev.typeOnly &&= typeOnly;
-			else if (to !== f && !seen.has(to)) {
-				edges.push({ from: f, to, typeOnly });
-				seen.add(to);
-			}
-		} else if (spec.startsWith('.') || spec.startsWith('$lib')) {
-			if (!existsSync(join(ROOT, dirname(f), spec))) unresolved.set(f, (unresolved.get(f) ?? 0) + 1);
+			else if (to !== f) edges.push({ from: f, to, typeOnly });
+		} else if (basePath(f, spec) !== null && !tracked.has(basePath(f, spec)!)) {
+			// a relative or $lib path that names no tracked file (in tests and tools often a string, not an import)
+			unresolved.set(f, (unresolved.get(f) ?? 0) + 1);
 		}
 	}
 }
@@ -112,11 +129,21 @@ const fileAdj = new Map<string, string[]>();
 for (const e of edges) fileAdj.set(e.from, [...(fileAdj.get(e.from) ?? []), e.to]);
 const fileCycles = tarjan(files, fileAdj);
 const runtimeAdj = new Map<string, string[]>();
-for (const e of edges) if (!e.typeOnly) runtimeAdj.set(e.from, [...(runtimeAdj.get(e.from) ?? []), e.to]);
+for (const e of edges)
+	if (!e.typeOnly) runtimeAdj.set(e.from, [...(runtimeAdj.get(e.from) ?? []), e.to]);
 const runtimeCycles = tarjan(files, runtimeAdj);
 csv(
 	'cycles-file.csv',
-	fileCycles.map((c, i) => ({ cycle: i + 1, size: c.length, runtime: runtimeCycles.some((r) => r.join() === c.join()) ? 'yes' : 'no (type-only edge)', layers: [...new Set(c.map((f) => classify(f).layer))].join('|'), files: c.join(' ') }))
+	// a cycle holds a runtime cycle when one of the runtime graph's cycles lies within it
+	fileCycles.map((c, i) => ({
+		cycle: i + 1,
+		size: c.length,
+		runtime: runtimeCycles.some((r) => r.every((f) => c.includes(f)))
+			? 'yes'
+			: 'no (type-only edges)',
+		layers: [...new Set(c.map((f) => classify(f).layer))].join('|'),
+		files: c.join(' ')
+	}))
 );
 
 const modAdj = new Map<string, string[]>();
@@ -130,7 +157,7 @@ csv(
 	modCycles.map((c, i) => ({ cycle: i + 1, size: c.length, modules: c.join(' ') }))
 );
 
-// Layer-to-layer edge matrix (production files only), for the report.
+// Layer-to-layer edge matrix (every file, tests and tools included), for the report.
 const layerEdges = new Map<string, number>();
 for (const e of edges) {
 	const a = classify(e.from);
@@ -140,7 +167,28 @@ for (const e of edges) {
 }
 csv(
 	'imports-layer.csv',
-	[...layerEdges].map(([k, n]) => ({ from_layer: k.split('\t')[0], to_layer: k.split('\t')[1], file_edges: n }))
+	[...layerEdges].map(([k, n]) => ({
+		from_layer: k.split('\t')[0],
+		to_layer: k.split('\t')[1],
+		file_edges: n
+	}))
 );
-console.log(`files ${files.length}, edges ${edges.length}, file cycles ${fileCycles.length} (runtime ${runtimeCycles.length}), module cycles ${modCycles.length}, files with unresolved relative specs ${unresolved.size}`);
+csv('imports-stats.csv', [
+	{
+		files: files.length,
+		edges: edges.length,
+		type_only_edges: edges.filter((e) => e.typeOnly).length,
+		file_cycles: fileCycles.length,
+		runtime_cycles: runtimeCycles.length,
+		module_cycles: modCycles.length,
+		files_with_unresolved_paths: unresolved.size
+	}
+]);
+csv(
+	'imports-unresolved.csv',
+	[...unresolved].map(([path, specs]) => ({ path, specs }))
+);
+console.log(
+	`files ${files.length}, edges ${edges.length}, file cycles ${fileCycles.length} (runtime ${runtimeCycles.length}), module cycles ${modCycles.length}, files with unresolved relative specs ${unresolved.size}`
+);
 if (unresolved.size) console.log('files with unresolved relative specs:', [...unresolved]);

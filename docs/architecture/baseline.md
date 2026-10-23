@@ -12,14 +12,14 @@ Stand: 23.10.2026, Basis `origin/main` d4d508cc2, Fenster ab 23.04.2026. Alle Za
 2. Nur Produktivcode betrachtet: 68 Dateipaare ändern sich überdurchschnittlich oft gemeinsam (≥ 5-mal, Kopplungsgrad ≥ 30 %), **28 davon schichtübergreifend ohne Import-Beziehung**. Die zwei stärksten Paare hängen an `src/lib/types.ts`: mit den i18n-Texten (36 gemeinsame Änderungen) und mit `schema.ts` (26). [gemessen]
 3. FE/BFF importieren **0** Backend-Dateien; `types.ts` spiegelt das DB-Schema von Hand. Ein DB-Feld wird im Median in **6 Produktivdateien** ausserhalb der DB deklariert (P90 19). [gemessen]
 4. Der BFF trifft entgegen dem Entscheid fachliche Entscheidungen: **9 Status-Vergleiche in 5 BFF-Dateien** und **10 fachliche Prüfregeln in 4 BFF-Dateien** (PLZ, IBAN, E-Mail, Zimmer in halben Schritten …). Die Regel „eine ersetzte Abrechnung zählt nicht“ steht in Backend und BFF getrennt (e6644bea3, 5d6888eb2). [gemessen/abgeleitet]
-5. Die Hotspots (Änderungen × Komplexität) liegen alle in Abrechnung und Mietvertrag, verteilt über Backend, BFF und FE; zwei BFF-Dateien sind komplexer als die meisten Backend-Services. [gemessen]
+5. Die Hotspots (Änderungen × Komplexität) liegen alle in Abrechnung und Mietvertrag, verteilt über Backend, BFF und FE; zwei BFF-Dateien sind komplexer als die meisten Backend-Services. [abgeleitet aus M3]
 6. Textuelle Duplikation 0,87 %, keine Laufzeit-Zyklen, 0 flache Module (Deepcheck): Die Guardrails wirken. Die Amplifikation entsteht durch **semantisch dupliziertes Wissen**, nicht durch kopierten Code. [gemessen/abgeleitet]
 
 ## 2. Methode und Ausschlüsse
 
-**Datenbasis.** Der Clone war flach (312 Commits, 3 Tage); die Analyse hat die volle Historie nachgeladen (`git fetch --unshallow`, 2723 Commits ab 23.01.2026). 96 % davon fallen in den Oktober 2026 (Jan 54, Feb 39, Apr 4, Sep 23, Okt 2603 Commits). Das 6-Monats-Fenster umfasst 1937 Nicht-Merge-Commits. [gemessen]
+**Datenbasis.** Der Clone war flach (nur die jüngsten Tage); die Analyse hat die volle Historie nachgeladen (`git fetch --unshallow`, 2729 Commits ab 23.01.2026; `run.sh` hält den Stand eines flachen Clones künftig in `out/clone.csv` fest). 96 % davon fallen in den Oktober 2026 (Jan 54, Feb 39, Apr 4, Sep 23, Okt 2609 Commits). Das 6-Monats-Fenster umfasst 1937 Nicht-Merge-Commits. [gemessen]
 
-**Feature-Einheit (Schritt 2).** Gewählt: **ein PR, wie er auf `main` landet** = Merge-Commit auf der First-Parent-Linie von `main`; Diff = `first-parent..merge` (Nettoänderung). Titel = PR-Titel aus dem Merge-Body, Typ aus dem Conventional-Commit-Präfix. Direkte Commits auf `main` (148) zählen je als eigene Einheit. Grund: PR-Titel tragen fast immer einen Conventional-Commit-Typ, Issue-Nummern stehen nur in 27 PR-Titeln, Branch-Namen (`ccr-…`) werden über mehrere PRs wiederverwendet. 30 Einheiten ohne (oder mit nicht standardisiertem) Typ habe ich anhand des Titels eingeordnet: Vorschlag in `tools/arch-baseline/unit-types.json`, korrigierbar. Alternative: Issue-Nummer (zu selten) oder `@wip`-Szenario-Namen (nicht maschinell an Commits gebunden). Für M2 gibt es zusätzlich die Commit-Sicht. [gemessen/abgeleitet]
+**Feature-Einheit (Schritt 2).** Gewählt: **ein PR, wie er auf `main` landet** = Merge-Commit auf der First-Parent-Linie von `main`; Diff = `first-parent..merge` (Nettoänderung). Titel = PR-Titel aus dem Merge-Body, Typ aus dem Conventional-Commit-Präfix. Direkte Commits auf `main` (148) zählen je als eigene Einheit. Grund: PR-Titel tragen fast immer einen Conventional-Commit-Typ, Issue-Nummern stehen nur in 34 von 408 Einheiten-Titeln, Branch-Namen (`ccr-…`) werden über mehrere PRs wiederverwendet. 30 Einheiten ohne (oder mit nicht standardisiertem) Typ habe ich anhand des Titels eingeordnet: Vorschlag in `tools/arch-baseline/unit-types.json`, korrigierbar. Alternative: Issue-Nummer (zu selten) oder `@wip`-Szenario-Namen (nicht maschinell an Commits gebunden). Für M2 gibt es zusätzlich die Commit-Sicht. [gemessen/abgeleitet]
 
 Ergebnis: 408 Einheiten (feat 113, fix 150, docs 80, chore 65). 29 der 113 feat-PRs enthalten ≥ 2 `feat`-Commits (Verteilung: 0: 2, 1: 82, 2–3: 21, ≥ 4: 8); darum zeigt M1 zusätzlich die Gruppe „feat mit höchstens 1 feat-Commit“. [gemessen]
 
@@ -38,7 +38,7 @@ Ergebnis: 408 Einheiten (feat 113, fix 150, docs 80, chore 65). 29 der 113 feat-
 | Lockfiles (`bun.lock`, `backend/bun.lock`) | 2 |
 | Generierte Tool-Baselines/Fixtures (`.deepcheck-baseline.json`, fallow-Testfixtures) | 4 |
 | Daten-Dump `backend/demo/demo-data.sql` | 1 |
-| Diese Analyse selbst (`tools/arch-baseline/`, dieser Report) | 58 |
+| Diese Analyse selbst (`tools/arch-baseline/`, dieser Report) | Muster (beim Lauf auf `d4d508cc2` noch nicht im Repo) |
 | Generiert, nicht eingecheckt: `src/lib/paraglide/`, `.svelte-kit/`, `dist/`, `build/`, Snapshots, Drizzle-`meta/` | Muster (0 Treffer) |
 | Whitespace-only-Änderungen (`git diff -w --ignore-blank-lines`) | pro Datei |
 | Formatierungs-Commits (Betreff `…: format …`, „with Prettier“) | 1 PR (#19), 5 Commits |
@@ -62,10 +62,12 @@ Für M2 (primär): nur Produktivdateien; die vier `messages/*.json` als **eine**
 | Tooling | other | 83 | 5 176 | 15 |
 | DB | prod | 41 | 1 574 | 5 |
 | Shared/Contracts | test / prod | 76 / 1 | 891 / 398 | 1 / 1 |
+| Marketing | other | 30 | 7 118 | 12 |
+| Other (`LICENSE`) | other | 1 | 124 | 1 |
 
 Produktivcode: 52 101 LOC in 530 Dateien (inkl. i18n-JSON). [gemessen]
 
-**Import-Graph** (1007 Dateien, 3247 Kanten; `imports-file.csv`, `imports-module.csv`, `imports-layer.csv`): Keine Kante FE/BFF → Backend/DB; die Schichtgrenze BFF↔Backend ist HTTP, die zwischen `+page.server.ts` und `+page.svelte` läuft über generierte `./$types` (vom Graphen nicht erfasst). Kanten FE → Shared 85, BFF → Shared 23, BFF → FE 60, FE → BFF 17. [gemessen]
+**Import-Graph** (1007 Dateien, 3247 Kanten, davon 260 nur für Typen; `imports-stats.csv`, `imports-file.csv`, `imports-module.csv`, `imports-layer.csv`): Keine Kante FE/BFF → Backend/DB; die Schichtgrenze BFF↔Backend ist HTTP, die zwischen `+page.server.ts` und `+page.svelte` läuft über generierte `./$types` (vom Graphen nicht erfasst). Kanten FE → Shared 85, BFF → Shared 23, BFF → FE 60, FE → BFF 17. [gemessen]
 
 **Zyklen:** 1 Dateizyklus (`pdf.service.ts` ↔ `reminder-letter.ts`), nur über einen `import type`, also kein Laufzeitzyklus; fallow meldet 0. Auf Modulebene 3 Zyklen, davon 2 nur durch Ordner-Granularität (`fe:lib/navigation`↔`fe:ui`, `e2e:questions`↔`e2e:tasks`). [gemessen]
 
@@ -157,27 +159,27 @@ Primärsicht: schichtübergreifend ohne Import **28** (11 davon Mietvertrag), gl
 
 ### M3 Hotspots [gemessen, `m3-hotspots.csv`]
 
-Änderungshäufigkeit = Nicht-Merge-Commits im Fenster; Komplexität aus `fallow health` (Summe zyklomatische Komplexität je Datei, `crap_max` = höchster CRAP-Wert einer Funktion). **Rangfolge nach Commits × zyklomatischer Summe**, weil die CRAP-Werte nur geschätzt sind: fallow rechnet mit `coverage_model: static_estimated`, und 46 Dateien haben exakt `crap_max` 26,5 (Sättigung). Der CRAP-Rang steht daneben.
+Änderungshäufigkeit = Nicht-Merge-Commits im Fenster; Komplexität aus `fallow health` (Summe zyklomatische Komplexität je Datei, `crap_max` = höchster CRAP-Wert einer Funktion). **Rangfolge nach Commits × zyklomatischer Summe**, weil die CRAP-Werte nur geschätzt sind: fallow rechnet mit `coverage_model: static_estimated`, und 46 Dateien haben exakt `crap_max` 26,5 (Sättigung). Der Rang nach Commits × `crap_max` steht daneben.
 
-| Rang | CRAP-Rang | Datei | Schicht | Commits | PRs | zykl. Σ | crap_max | Zeilen | Fan-in |
+| Rang (prod) | CRAP-Rang (prod) | Datei | Schicht | Commits | PRs | zykl. Σ | crap_max | Zeilen | Fan-in |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | 1 | backend/src/services/pdf.service.ts | Backend | 82 | 40 | 304 | 26,5 | 1460 | 7 |
-| 2 | 3 | backend/src/services/statement.service.ts | Backend | 69 | 36 | 191 | 26,5 | 1031 | 23 |
-| 3 | 5 | backend/src/services/statement-pdf.service.ts | Backend | 52 | 30 | 164 | 26,5 | 385 | 9 |
-| 4 | 11 | src/lib/server/statement-generation.ts | BFF | 44 | 23 | 152 | 26,5 | 459 | 6 |
-| 5 | 10 | src/lib/statement-wizard.ts | FE | 45 | 24 | 128 | 26,5 | 402 | 19 |
-| 6 | 19 | backend/src/services/calculation.service.ts | Backend | 43 | 27 | 104 | 17,6 | 512 | 4 |
-| 7 | 22 | src/routes/contracts/[id]/+page.server.ts | BFF | 38 | 21 | 115 | 17,6 | 389 | 1 |
-| 8 | 16 | backend/src/services/contract.service.ts | Backend | 37 | 23 | 88 | 21,8 | 529 | 17 |
-| 9 | 15 | src/lib/server/statement.ts | BFF | 40 | 24 | 81 | 21,8 | 232 | 10 |
-| 10 | 6 | src/routes/contracts/ContractForm.svelte | FE | 51 | 26 | 63 | 26,5 | 395 | 1 |
-| 11 | 55 | src/lib/contract-form.ts | FE | 27 | 20 | 112 | 12,5 | 292 | 13 |
-| 12 | 219 | backend/src/db/schema.ts | DB | 61 | 48 | 45 | 1,2 | 688 | 81 |
-| 13 | 46 | backend/src/services/invoice.service.ts | Backend | 24 | 17 | 110 | 17,6 | 634 | 8 |
-| 14 | 42 | src/routes/dashboard/+page.server.ts | BFF | 33 | 21 | 75 | 13,8 | 246 | 5 |
-| 15 | 38 | backend/src/services/invoice-completeness.service.ts | Backend | 18 | 7 | 130 | 26,5 | 363 | 3 |
+| 2 | 2 | backend/src/services/statement.service.ts | Backend | 69 | 36 | 191 | 26,5 | 1031 | 23 |
+| 3 | 3 | backend/src/services/statement-pdf.service.ts | Backend | 52 | 30 | 164 | 26,5 | 385 | 9 |
+| 4 | 6 | src/lib/server/statement-generation.ts | BFF | 44 | 23 | 152 | 26,5 | 459 | 6 |
+| 5 | 5 | src/lib/statement-wizard.ts | FE | 45 | 24 | 128 | 26,5 | 402 | 19 |
+| 6 | 12 | backend/src/services/calculation.service.ts | Backend | 43 | 27 | 104 | 17,6 | 512 | 4 |
+| 7 | 14 | src/routes/contracts/[id]/+page.server.ts | BFF | 38 | 21 | 115 | 17,6 | 389 | 1 |
+| 8 | 10 | backend/src/services/contract.service.ts | Backend | 37 | 23 | 88 | 21,8 | 529 | 17 |
+| 9 | 9 | src/lib/server/statement.ts | BFF | 40 | 24 | 81 | 21,8 | 232 | 10 |
+| 10 | 4 | src/routes/contracts/ContractForm.svelte | FE | 51 | 26 | 63 | 26,5 | 395 | 1 |
+| 11 | 41 | src/lib/contract-form.ts | FE | 27 | 20 | 112 | 12,5 | 292 | 13 |
+| 12 | 151 | backend/src/db/schema.ts | DB | 61 | 48 | 45 | 1,2 | 688 | 81 |
+| 13 | 35 | backend/src/services/invoice.service.ts | Backend | 24 | 17 | 110 | 17,6 | 634 | 8 |
+| 14 | 31 | src/routes/dashboard/+page.server.ts | BFF | 33 | 21 | 75 | 13,8 | 246 | 5 |
+| 15 | 27 | backend/src/services/invoice-completeness.service.ts | Backend | 18 | 7 | 130 | 26,5 | 363 | 3 |
 
-(Die Ränge in der CSV zählen Testdateien mit; diese Tabelle zeigt nur Produktivcode.)
+(Beide Ränge zählen nur Produktivdateien; die Ränge in `m3-hotspots.csv` zählen Testdateien mit.)
 
 Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteilen sich auf Backend, BFF und FE. Zwei BFF-Dateien (`statement-generation.ts` zykl. Σ 152, `contracts/[id]/+page.server.ts` 115) sind komplexer als die meisten Backend-Services, obwohl laut `CLAUDE.md` die Fachlogik im Backend liegen soll. [abgeleitet]
 
@@ -216,7 +218,7 @@ Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteil
 | active | 11 | 4 | 2 | 4 | 0 | 1 |
 | ended | 9 | 5 | 1 | 2 | 0 | 1 |
 
-**Identische Wertelisten in mehreren Dateien** (21 Sets, 13 schichtübergreifend), u. a.:
+**Identische Wertelisten in mehreren Dateien** (21 Sets, 14 schichtübergreifend), u. a.:
 
 | Werte | Dateien | Schichten |
 |---|---|---|
@@ -229,7 +231,7 @@ Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteil
 | consumption \| deviation \| gap \| missing \| new \| stock \| tank (Rechnungsprüfung) | 2 | Backend, FE |
 | draft \| overdue \| paid \| sent und overdue \| paid \| sent \| settled | je 2 | Backend (zwei Varianten des Abrechnungsstatus) |
 
-**Validierungsregeln:** identische Regex in mehreren Dateien: ISO-Datum `^\d{4}-\d{2}-\d{2}$` in 7 BFF/FE-Dateien; Betrag `^\d+(\.\d{1,2})?$` in Backend, BFF und FE; PLZ `^\d{4}$` in 3 BFF-Dateien; UUID und E-Mail je in BFF und Backend. Validierungs-Schlüsselwörter (`t.String`, `maxLength`, `required` …): Backend 412 in 26 Dateien, FE 23 in 14, BFF 8 in 5.
+**Validierungsregeln:** identische Regex in mehreren Dateien: ISO-Datum `^\d{4}-\d{2}-\d{2}$` in 7 BFF/FE-Dateien; Betrag `^\d+(\.\d{1,2})?$` in Backend, BFF und FE; `^\d{4}$` in 3 BFF-Dateien (zweimal PLZ, einmal ein Jahr als Query-Parameter); UUID und E-Mail je in BFF und Backend. Validierungs-Schlüsselwörter (`t.String`, `maxLength`, `required` …): Backend 412 in 26 Dateien, FE 23 in 14, BFF 8 in 5.
 
 **Textuelle Klone** (fallow dupes): 22 Gruppen, 585 Zeilen, 0,87 %, keine über Schichten.
 
@@ -280,7 +282,7 @@ Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall,
 ## 5. Hypothesen
 
 **H1 – Kein gemeinsamer Vertrag zwischen den Schichten: Entitätsformen werden von Hand gespiegelt.**
-- Belege: 0 Importe FE/BFF → Backend; `types.ts` „Match backend schema“; Paar #2 `schema.ts` ↔ `types.ts` 26 gemeinsame Änderungen ohne Import; DB-Feld im Median in 6 Produktivdateien deklariert (P90 19); 13 schichtübergreifende identische Wertelisten; Paar #17 (Fehlervertrag nur per Konvention); PR#361 (`country` an 6 Orten), PR#539. [gemessen/abgeleitet]
+- Belege: 0 Importe FE/BFF → Backend; `types.ts` „Match backend schema“; Paar #2 `schema.ts` ↔ `types.ts` 26 gemeinsame Änderungen ohne Import; DB-Feld im Median in 6 Produktivdateien deklariert (P90 19); 14 schichtübergreifende identische Wertelisten; Paar #17 (Fehlervertrag nur per Konvention); PR#361 (`country` an 6 Orten), PR#539. [gemessen/abgeleitet]
 - Widerlegt, wenn: die Deklarationsorte überwiegend eigene Logik oder bewusst abweichende Formen enthalten (BFF als Anti-Corruption-Layer) und ein generierter Vertrag die Dateizahl pro Feld nicht senken würde.
 - Frage ans Team: Da der BFF nicht fachlich entscheidet, bleibt ihm Aufbereiten und Durchreichen. Soll er die Antworten für die Seite umbauen (Mapping im BFF), oder soll das Backend seitengerechte Antworten liefern, die der BFF unverändert weitergibt?
 
@@ -314,13 +316,13 @@ Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall,
 - **PR ≠ Feature:** 29 von 113 feat-PRs bündeln mehrere Features; ohne sie sinkt der Median von 12 auf 9,5 Produktivdateien. Der Netto-Diff verbirgt, was innerhalb eines PRs geändert und wieder zurückgenommen wurde.
 - **Typ-Zuordnung:** 30 Einheiten ohne Typ habe ich aus dem Titel eingeordnet (`unit-types.json`); 148 direkte Commits auf `main` zählen als eigene Einheiten.
 - **Schichtzuordnung** ist mein Vorschlag (`layers.json`), z. B. `types.ts` als Shared (prod), `+page.server.ts` als BFF, i18n-JSON als FE-Produktivcode.
-- **Import-Graph** per Regex: dynamische Pfade, `./$types` (SvelteKit) und HTTP-Aufrufe sind unsichtbar. „Import: nein“ zwischen BFF und Backend oder zwischen `+page.server.ts` und `+page.svelte` heisst „keine statische Abhängigkeit“, nicht „unabhängig“. 14 Test-/Tool-Dateien enthalten Import-Strings als Testdaten (nicht auflösbar, ignoriert).
+- **Import-Graph** per Regex: dynamische Pfade, `./$types` (SvelteKit) und HTTP-Aufrufe sind unsichtbar. „Import: nein“ zwischen BFF und Backend oder zwischen `+page.server.ts` und `+page.svelte` heisst „keine statische Abhängigkeit“, nicht „unabhängig“. 14 Test-/Tool-Dateien enthalten Pfade, die keine Datei des Repos nennen, meist Import-Strings als Testdaten (`imports-unresolved.csv`, ignoriert); `import { type X }` zählt nur als Typ-Kante, wenn jeder Name `type` trägt.
 - **CRAP** ist geschätzt (`static_estimated`), nicht gemessen; echte Werte bräuchten Istanbul-Coverage (FE nutzt v8, Backend lcov). Darum Rangfolge nach zyklomatischer Komplexität.
 - **M4 ist heuristisch:** Ein Schlüssel `field:` kann Nutzung statt Definition sein (Drizzle-Projektionen zählen als „kennt die Feldliste“); Felder, die in zwei Tabellen vorkommen (z. B. `country`), sind aus der Feld-Statistik ausgenommen; Statuswerte wie `'draft'` kommen auch in anderer Bedeutung vor (Entwurf eines Formulars); Validierungsregeln in Svelte-Markup (`maxlength=`) sind nur grob erfasst.
 - **Fachliche Entscheidungen im BFF** werden über zwei Muster gefunden (Vergleich gegen einen Statuswert, verankerte Regex); Entscheidungen in anderer Form (z. B. Datumsvergleiche, Rundungen, Zählungen wie #13) erfasst das Skript nicht. Die Einordnung fachlich/technisch der 28 Treffer ist gelesen, nicht gemessen.
 - **Beispiel-Commits** sind der kleinste Commit mit beiden Dateien; ein einzelner Diff belegt das Muster, nicht seine Häufigkeit.
 - fallow und Deepcheck lesen das Arbeitsverzeichnis und zählen die Skripte unter `tools/arch-baseline/` mit (ohne Historie, ohne Einfluss auf M3).
-- Die Basis `origin/main` hat sich während der Analyse um 6 Commits bewegt; alle Zahlen stammen aus dem letzten Lauf auf d4d508cc2.
+- `origin/main` hat sich während der Analyse bewegt; alle Zahlen stammen aus einem Lauf auf dem Stand `d4d508cc2` mit `ARCH_BASE=d4d508cc2` (`run.sh` mit diesem Wert gibt dieselben Zahlen).
 
 ## 7. Vorschlag: messbare Szenarien für Änderbarkeit
 

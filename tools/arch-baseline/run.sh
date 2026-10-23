@@ -9,6 +9,9 @@ OUT=tools/arch-baseline/out
 mkdir -p "$OUT"
 
 if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+	# what the clone had before (reported as a limit of the data)
+	echo "commits,first_day,last_day" >"$OUT/clone.csv"
+	echo "$(git rev-list --count HEAD),$(git log --format=%ad --date=short | tail -1),$(git log -1 --format=%ad --date=short)" >>"$OUT/clone.csv"
 	echo "shallow clone: fetching full history" >&2
 	git fetch --unshallow origin
 fi

@@ -126,7 +126,7 @@ function coupling(tx: Tx, name: string, related: Related, layerOf: (x: string) =
 	return { tx: tx.size, big: [...tx.values()].filter((s) => s.size > MAX_TX).length, pairs: rows.length };
 }
 
-const fileLayer = (p: string) => (p.startsWith('messages/') ? 'FE' : classify(p).layer);
+const fileLayer = (p: string) => classify(p).layer;
 const fileRelated = (a: string, b: string) => importFile.has(`${a}\t${b}`);
 const modLayer = (m: string) => {
 	const r = unitFiles.find((f) => f.module === m) ?? commitFiles.find((f) => f.module === m);

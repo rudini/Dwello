@@ -2,14 +2,14 @@
 // commits that change both files, so a human can read the diff. Also lists the
 // 5 feat units with the most production files, with their per-layer file split.
 // Out: out/s4-pair-examples.csv, out/s4-top5-features.csv
-import { csv, git, readCsv } from './lib';
+import { csv, git, logicalName, readCsv } from './lib';
 
 const pairs = readCsv('m2-file-pairs-units-prod.csv').slice(0, 20);
 const cf = readCsv('commit-files.csv');
 const commits = new Map(readCsv('commits.csv').map((c) => [c.sha, c]));
 const bySha = new Map<string, Set<string>>();
 for (const r of cf) {
-	const p = r.path.startsWith('messages/') ? 'messages/{de,fr,it,en}.json' : r.path;
+	const p = logicalName(r.path);
 	(bySha.get(r.sha) ?? bySha.set(r.sha, new Set()).get(r.sha)!).add(p);
 }
 const rows = pairs.map((p, i) => {

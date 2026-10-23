@@ -1,2 +1,2 @@
 cycle,size,runtime,layers,files
-1,2,no (type-only edge),Backend,backend/src/services/pdf.service.ts backend/src/services/reminder-letter.ts
+1,2,no (type-only edges),Backend,backend/src/services/pdf.service.ts backend/src/services/reminder-letter.ts

@@ -103,7 +103,6 @@ for (const rec of log.split('\x1e')) {
 }
 csv('units.csv', units);
 csv('unit-files.csv', unitFiles);
-csv('excluded-units.csv', excludedUnits, ['sha', 'pr', 'title', 'reason']);
 
 // Commit level: every non-merge commit reachable from main in the window.
 const clog = git(['log', BASE, `--since=${SINCE}`, '--no-merges', '-w', '--ignore-blank-lines', '-M', '--numstat', '--format=\x1e%H\x1f%ad\x1f%s', '--date=short']);
