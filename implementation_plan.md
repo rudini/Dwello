@@ -196,4 +196,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #470 code review round 1 (`docs/reviews/470-review-1.md`), persona Marco round 1 (`docs/design/personas/marco-470.md`)
 - [x] #470 code review round 2 (`docs/reviews/470-review-2.md`); fixes: the line above «Weiter» also for a failed check, the scenario «Der Assistent nennt die Mietverträge ohne vereinbarte Verwaltungspauschale» checks it
 - [x] #470 code review round 3 (`docs/reviews/470-review-3.md`)
-- [ ] #470 persona Marco round 2 (step 3 only), closing review, pull request `Fixes #470`, merged on green CI
+- [x] #470 persona Marco round 2 (`docs/design/personas/marco-470-2.md`)
+- [x] #470 closing review: none needed, no code since round 3
+- [ ] #470 pull request `Fixes #470`, merged on green CI
