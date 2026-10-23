@@ -1,6 +1,6 @@
 # Open points (archived)
 
-Archived on 2026-10-23 (#648): every row that still held became a GitHub issue with the label `nfr` and an ISO 25010 category (column «Issue»); «done» rows were already fixed in the code (O-13: 20 s timeout for `tools/**/*.test.ts`); O-11 was done in part, its rest is #755. New non-functional points are issues, not rows here.
+Archived on 2026-10-23 (#648): every row that still held became a GitHub issue with an ISO 25010 category label `nfr:<category>` (column «Issue»); «done» rows were already fixed in the code (O-13: 20 s timeout for `tools/**/*.test.ts`); O-11 was done in part, its rest is #755. New non-functional points are issues, not rows here.
 
 Non-functional open points (security, operations, reliability, performance, usability and accessibility, maintainability) until the quality requirements are set up. Functional points (domain, features, bugs) are GitHub issues in `rudini/Dwello` (labels `fachlich`, `produkt`, `bug`, `entscheiden`); the functional rows that stood here until October 2026 became issues whose titles start with their old ID. The sign-in restriction (former O-1) is issue #51; it was written as an issue before this split. History: `docs/archive/offene-punkte-verlauf.md`. Rules: `CLAUDE.md`, "Open work".
 

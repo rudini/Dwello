@@ -1,10 +1,10 @@
 ---
 name: Non-functional point
 about: Security, reliability, performance, usability, maintainability or portability (ISO 25010)
-labels: [nfr]
+labels: []
 ---
 
-<!-- Add one category label: nfr:security, nfr:reliability, nfr:performance, nfr:usability (accessibility included), nfr:maintainability (tests, docs, refactoring), nfr:portability (installation, platforms) or nfr:compatibility. English; German for UI texts and domain terms. -->
+<!-- Add exactly one category label: nfr:security, nfr:reliability, nfr:performance, nfr:usability (accessibility included), nfr:maintainability (tests, docs, refactoring), nfr:portability (installation, platforms) or nfr:compatibility. English; German for UI texts and domain terms. -->
 
 ## Problem
 What is wrong or missing today, with evidence (files, behaviour, a review or persona report), and how one reaches it.

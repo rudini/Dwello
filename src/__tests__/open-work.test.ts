@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 
-/** Keeps open work in one place (CLAUDE.md, "Open work"): GitHub issues, non-functional ones with the label nfr */
+/** Keeps open work in one place (CLAUDE.md, "Open work"): GitHub issues, non-functional ones with an nfr: category label */
 const skippedNames = [
 	'node_modules',
 	'.git',

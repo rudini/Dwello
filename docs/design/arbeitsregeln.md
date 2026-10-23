@@ -7,7 +7,7 @@ Everything a new session needs to continue the redesign without the original pro
 ## Where things are
 
 - Status and next step: `docs/archive/redesign/progress.md` (update before each stage and after each commit).
-- Analysis and plan in `docs/archive/redesign/`, decisions `design-decisions.md`, tokens `token-referenz.md`, open work in GitHub issues (non-functional ones with the label `nfr`).
+- Analysis and plan in `docs/archive/redesign/`, decisions `design-decisions.md`, tokens `token-referenz.md`, open work in GitHub issues (non-functional ones with an `nfr:` category label).
 - Reviews: `docs/archive/redesign/reviews/<stage>-review-<n>.md`. Personas: `docs/design/personas/<persona>-<stage>.md`.
 - Axe screen list: `tests/a11y/screens.json`; axe test: `tests/a11y/` (from stage 2).
 
@@ -17,7 +17,7 @@ Everything a new session needs to continue the redesign without the original pro
 - Commits: Conventional Commits, ≤ 50 characters, English, scope from CLAUDE.md (e.g. `docs(styles): …`, `feat(components): …`).
 - A fallow hook audits every `git commit`/`git push`: run git commands alone, fix findings (unused exports/files, duplication, complexity) instead of working around them.
 - Draft PR `feature/new-design` → `main` (open since stage 0). GitHub access goes through the GitHub MCP tools (`mcp__github__*`), not `gh` (not available in the cloud session).
-- CI workflow is `.github/workflows/ci.yml` (the brief says `cy.yml`); job `ui-screenshots` runs on every PR push including drafts and comments screenshots of changed routes. Never edit the workflow; suggestions become an issue with the label `nfr`. After each push: wait for the run, read the PR comment, judge content (missing/truncated/overlapping/empty), not the intended visual change.
+- CI workflow is `.github/workflows/ci.yml` (the brief says `cy.yml`); job `ui-screenshots` runs on every PR push including drafts and comments screenshots of changed routes. Never edit the workflow; suggestions become an issue with an `nfr:` category label. After each push: wait for the run, read the PR comment, judge content (missing/truncated/overlapping/empty), not the intended visual change.
 
 ## Language and terms
 
@@ -50,7 +50,7 @@ bun run test:e2e -- --project=chromium --project=api   # E2E incl. the axe check
 
 Environment notes for a cloud session: `service postgresql start`, create role/db `dwello`/`dwello` if missing; `bun install --frozen-lockfile`; `cd backend && bun install`. The pre-installed Chromium (build 1194) is older than the project's Playwright; symlink `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell` to `/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` (plus marker files `INSTALLATION_COMPLETE`, `DEPENDENCIES_VALIDATED`). Free ports 3100/3101/3102/3103/2525/2526 before E2E.
 
-Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`; all screens/states of `tests/a11y/screens.json`, desktop and mobile, light and dark. Violations are blockers. No `disableRules`; a single-element exception only for a proven false positive, with a comment and an issue with the labels `nfr` and `nfr:usability`.
+Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`; all screens/states of `tests/a11y/screens.json`, desktop and mobile, light and dark. Violations are blockers. No `disableRules`; a single-element exception only for a proven false positive, with a comment and an issue with the label `nfr:usability`.
 
 ## Review cycle (after every stage)
 

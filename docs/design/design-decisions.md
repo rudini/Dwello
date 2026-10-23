@@ -1,6 +1,6 @@
 # Design decisions
 
-The decisions behind the redesign as built. The plan (`docs/archive/redesign/01-plan.md`) gives the original reasoning; `docs/archive/redesign/progress.md` has the log per stage; open questions are GitHub issues (non-functional ones with the label `nfr`); values are in `token-referenz.md`.
+The decisions behind the redesign as built. The plan (`docs/archive/redesign/01-plan.md`) gives the original reasoning; `docs/archive/redesign/progress.md` has the log per stage; open questions are GitHub issues (non-functional ones with an `nfr:` category label); values are in `token-referenz.md`.
 
 Target users: private landlords with little experience who use Dwello a few times a year. Every decision favours being understood and not making mistakes over speed for experts.
 
