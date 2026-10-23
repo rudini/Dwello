@@ -4,7 +4,7 @@ Stand: 23.10.2026, Basis `origin/main` d4d508cc2, Fenster ab 23.04.2026. Alle Za
 
 **Entscheid Product Owner (23.10.2026): Änderbarkeit zählt nur Produktivdateien** (Schichten FE inkl. i18n, BFF, Backend, DB, `src/lib/types.ts`). Test-, Doku- und Prozessdateien bleiben als Kontext im Report, sind aber nicht Teil der Messgrössen, der Kopplungsanalyse (M2 primär) und der Szenarien.
 
-**Entscheid Product Owner (23.10.2026): Der BFF trifft keine fachlichen Entscheidungen, und Formularprüfungen gehören ins Backend.** Jede Fachregel und jede fachliche Eingabeprüfung im BFF ist damit eine Abweichung vom Zielbild (Abschnitt 4, H2, Szenario Ä4); offen als H-28 in `docs/design/offene-punkte.md`.
+**Entscheid Product Owner (23.10.2026): Der BFF trifft keine fachlichen Entscheidungen, und Formularprüfungen gehören ins Backend.** Jede Fachregel und jede fachliche Eingabeprüfung im BFF ist damit eine Abweichung vom Zielbild (Abschnitt 4, H2, Szenario Ä4); offen als Issue #717 (früher H-28).
 
 ## 1. Zusammenfassung
 

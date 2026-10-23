@@ -350,4 +350,4 @@ Szenario: Unter «Bearbeiten» einen Vertragsbeginn nach dem Beginn eines Entwur
 
 ## Ebenfalls offen
 
-Kleinere offene Punkte: Issue #123 (B-4) und `docs/design/offene-punkte.md` (U-3). Die Anforderungen A-3 bis A-11 sind als Issues erfasst (Titel beginnen mit ihrer ID).
+Kleinere offene Punkte: Issue #123 (B-4) und Issue #653 (früher U-3). Die Anforderungen A-3 bis A-11 sind als Issues erfasst (Titel beginnen mit ihrer ID).
