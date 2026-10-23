@@ -1,16 +1,15 @@
 import type { SkippedContract } from '$lib/statement-wizard';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import {
 	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
-	unbilledContracts,
 	previewStatements,
 	type GenerationRequest
 } from '$lib/server/statement-generation';
-import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
+import { m } from '$lib/paraglide/messages';
 import type { Actions } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -22,104 +21,59 @@ async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> 
 	return response.ok ? response.json() : {};
 }
 
-// a real day: not 2025-02-30, not 2025-13-01 (an invalid date has no ISO string)
-function isDay(value: string | null) {
-	if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-	const day = new Date(`${value}T00:00:00Z`);
-	return !isNaN(day.getTime()) && day.toISOString().startsWith(value);
-}
+type Defaults = {
+	period: { start: string; end: string };
+	buildingId: string | null;
+	heatingProfileId: string | null;
+	managementFeePercent: number;
+	preset: {
+		fromStatements: boolean;
+		feeFromSettings: boolean;
+		differing: boolean;
+		profileFromApartment: boolean;
+	} | null;
+};
 
-// A link from a contract or a refusal names one building and one period (A-10): its other statements of that
-// period tell which heating profile and management fee to use again. A link to an unknown building or with an
-// impossible period is ignored: the wizard starts at the beginning (review K-5)
-async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]) {
-	const [id, start, end] = ['building', 'start', 'end'].map((key) => url.searchParams.get(key));
-	const building = buildings.find((b) => b.id === id);
-	if (!building || !isDay(start) || !isDay(end) || start! > end!) return null;
-	const [statements, contracts] = await Promise.all([
-		json(fetch, `statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1000`),
-		json(fetch, `contracts?buildingId=${id}&limit=1000`)
-	]);
-	// a replaced statement does not count as one of the period (Fachreview 387-1 V-1, glossary «Ersetzt»)
-	const others = ((statements.data ?? []) as Row[]).filter((s) => s.status !== 'replaced');
-	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
-	// the heating profile comes from any of them, as before #89 (closing review C-1)
-	const ofBuilding = (contracts.contracts ?? []) as Row[];
-	const runRates = others.filter((s) =>
-		ofBuilding.some(
-			(c) => c.id === s.contractId && c.managementFeeAgreed && c.managementFeePercent == null
-		)
-	);
-	// set differently, they tell nothing: both from the settings (#119); a deleted profile is no setting (fach-review V-5)
-	const profiles = others.filter((s) => s.heatingProfileId);
-	const differing =
-		new Set(profiles.map((s) => s.heatingProfileId)).size > 1 ||
-		new Set(runRates.map((s) => Number(s.managementFeePercent))).size > 1;
-	const period = { start: start!, end: end! };
-	if (!differing) return { building, period, other: profiles[0], runRate: runRates[0], differing };
-	const other = await apartmentProfile(fetch, String(id), period, profiles, ofBuilding);
-	return { building, period, other, differing, profileFromApartment: !!other };
-}
-
-// At a tenant change the Heizprofil of the same apartment's statement, when the apartments of the contracts the run
-// bills name one: so the tenants of an apartment carry 100 % of its heating costs (#387, #406 point 7)
-async function apartmentProfile(
+// A link from a contract or a refusal names one building and one period (A-10); a link to an unknown building is
+// ignored (review K-5). The backend checks the period and takes Heizprofil and Verwaltungspauschale from the other
+// statements of that building and period, otherwise from the settings (H-28)
+async function defaults(
 	fetch: typeof globalThis.fetch,
-	buildingId: string,
-	{ start, end }: { start: string; end: string },
-	profiles: Row[],
-	contracts: Row[]
-) {
-	// not loaded: no same apartment's statement, as the rest of the link falls back to the settings (code review 387-1 C-3)
-	const missing = await unbilledContracts(fetch, {
-		buildingIds: [buildingId],
-		periodStart: start,
-		periodEnd: end
-	}).catch(() => []);
-	const apartments = new Set(missing.map((c) => c.apartmentId));
-	const apartmentOf = (contractId: unknown) =>
-		contracts.find((c) => c.id === contractId)?.apartmentId;
-	const named = new Set(
-		profiles
-			.filter((s) => apartments.has(apartmentOf(s.contractId) as string))
-			.map((s) => s.heatingProfileId)
+	url: URL,
+	buildings: Row[]
+): Promise<Defaults> {
+	const [id, start, end] = ['building', 'start', 'end'].map(
+		(key) => url.searchParams.get(key) ?? ''
 	);
-	return named.size === 1 ? { heatingProfileId: [...named][0] } : undefined;
+	const link = buildings.some((b) => b.id === id)
+		? `?${new URLSearchParams({ buildingId: id, periodStart: start, periodEnd: end })}`
+		: '';
+	const response = await fetch(`${BACKEND_URL}/api/v1/statements/run-defaults${link}`);
+	if (!response.ok) throw error(response.status, m.error_unexpected());
+	return response.json();
 }
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
-	const [buildings, heatingProfiles, config] = await Promise.all([
+	const [buildings, heatingProfiles] = await Promise.all([
 		json(fetch, 'buildings?limit=1000'),
-		json(fetch, 'heating-profiles?limit=1000'), // all of them (#588)
-		json(fetch, 'config')
+		json(fetch, 'heating-profiles?limit=1000') // all of them (#588)
 	]);
 	const buildingList = (buildings.buildings ?? []) as (Building & { apartmentCount: number })[];
-	const pick = await chosen(fetch, url, buildingList as unknown as Row[]);
-	const settings = (config.data ?? {}) as Record<string, string | null>;
+	const chosen = await defaults(fetch, url, buildingList as unknown as Row[]);
+	const building = buildingList.find((b) => b.id === chosen.buildingId);
 
-	// Defaults from the settings, adjustable per generation run
 	return {
 		buildings: buildingList,
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
-		defaultManagementFeePercent: Number(
-			pick?.runRate?.managementFeePercent ?? settings.management_fee_pct ?? 3
-		),
-		defaultPeriod:
-			pick?.period ??
-			lastCompletedPeriod((settings.accounting_period ?? 'calendar') as AccountingPeriodType),
-		defaultHeatingProfileId: String(
-			pick?.other?.heatingProfileId ?? settings.default_heating_profile_id ?? ''
-		),
-		defaultBuildingIds: pick ? [String(pick.building.id)] : [],
+		defaultManagementFeePercent: chosen.managementFeePercent,
+		defaultPeriod: chosen.period,
+		defaultHeatingProfileId: chosen.heatingProfileId ?? '',
+		defaultBuildingIds: building ? [building.id] : [],
 		// what the link chose, said on the settings step (personas K1)
-		preset: pick && {
-			building: String(pick.building.name),
-			...pick.period,
-			fromStatements: !!pick.other,
-			feeFromSettings: !pick.runRate,
-			differing: pick.differing,
-			profileFromApartment: !!pick.profileFromApartment
-		}
+		preset:
+			building && chosen.preset
+				? { building: building.name, ...chosen.period, ...chosen.preset }
+				: null
 	};
 };
 

@@ -2,6 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/statements/generate/+page.server';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
+import statementRun from '../../tests/contracts/statement-run.json';
+import runDefaults from '../../tests/contracts/statement-run-defaults.json';
+
+// The backend's plan of the run (H-28): these contracts with Mietstage in the period, billed or not
+const plan = (contracts: object[], more: object = {}) =>
+	Response.json({
+		contracts: contracts.map((c) => ({ billed: false, ...c })),
+		overlap: null,
+		skipped: [],
+		...more
+	});
 
 const run = {
 	buildingIds: 'b1',
@@ -18,7 +29,11 @@ describe('Vorschau der Abrechnungen', () => {
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
 		const fetch = async (url: string) =>
-			Response.json(url.includes('/for-statement/') ? [] : { contracts: [], data: [], total: 0 });
+			url.includes('/statements/run?')
+				? plan([])
+				: Response.json(
+						url.includes('/for-statement/') ? [] : { contracts: [], data: [], total: 0 }
+					);
 		const result = (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request });
 		expect(await result).toEqual({
 			preview: [],
@@ -38,7 +53,8 @@ describe('Vorschau der Abrechnungen', () => {
 		});
 	});
 
-	// #199, #408 point 2: a period that overlaps a statement period of the building without being equal is refused
+	// #199, #408 point 2: a period that overlaps a statement period of the building without being equal is refused; the
+	// backend finds the overlap (statement-run.test.ts)
 	it('lehnt die Vorschau ab, wenn die Periode eine bestehende des Gebäudes schneidet', async () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries({
@@ -56,11 +72,13 @@ describe('Vorschau der Abrechnungen', () => {
 		};
 		const statement = periodStatements.data[0];
 		const fetch = async (url: string) =>
-			Response.json(
-				url.includes('/for-statement/')
-					? []
-					: { ...periodStatements, contracts: [contract], data: [statement] }
-			);
+			url.includes('/statements/run?')
+				? plan([{ ...contract, billed: true }], { overlap: statementRun.overlap })
+				: Response.json(
+						url.includes('/for-statement/')
+							? []
+							: { ...periodStatements, contracts: [contract], data: [statement] }
+					);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
@@ -75,13 +93,21 @@ describe('Vorschau der Abrechnungen', () => {
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
 		const covered = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: null, billedUntil: '2024-12-31' };
+		const skipped = [{ id: covered.id, tenantName: covered.tenantName, billedUntil: '2024-12-31' }];
 		const fetch = async (url: string) =>
-			Response.json(url.includes('/for-statement/') ? [] : { contracts: [covered], data: [], total: 0 });
-		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request })) as {
+			url.includes('/statements/run?')
+				? plan([], { skipped })
+				: Response.json(
+						url.includes('/for-statement/') ? [] : { contracts: [covered], data: [], total: 0 }
+					);
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
+			fetch,
+			request
+		})) as {
 			invoices: { skipped?: unknown[]; allSkipped?: boolean }[];
 		};
 		expect(result.invoices[0]).toMatchObject({
-			skipped: [{ id: covered.id, tenantName: covered.tenantName, billedUntil: '2024-12-31' }],
+			skipped,
 			allSkipped: true
 		});
 	});
@@ -95,8 +121,19 @@ describe('Vorschau der Abrechnungen', () => {
 		const billed = { ...buildingContracts.contracts[0], id: 'marc', startDate: '2024-05-01', endDate: null };
 		const statement = { ...periodStatements.data[0], contractId: 'marc', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 		const fetch = async (url: string) =>
-			Response.json(url.includes('/for-statement/') ? [] : { contracts: [covered, billed], data: [statement], total: 1 });
-		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request })) as {
+			url.includes('/statements/run?')
+				? plan([{ ...billed, billed: true }], {
+						skipped: [{ id: 'eva', tenantName: covered.tenantName, billedUntil: '2024-12-31' }]
+					})
+				: Response.json(
+						url.includes('/for-statement/')
+							? []
+							: { contracts: [covered, billed], data: [statement], total: 1 }
+					);
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
+			fetch,
+			request
+		})) as {
 			invoices: { skipped?: { id: string }[]; allSkipped?: boolean }[];
 		};
 		expect(result.invoices[0].skipped!.map((c) => c.id)).toEqual(['eva']);
@@ -110,7 +147,11 @@ describe('Vorschau der Abrechnungen', () => {
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
 		const befristet = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: '2099-12-31' };
 		const fetch = async (url: string) =>
-			Response.json(url.includes('/for-statement/') ? [] : { contracts: [befristet], data: [], total: 0 });
+			url.includes('/statements/run?')
+				? plan([befristet])
+				: Response.json(
+						url.includes('/for-statement/') ? [] : { contracts: [befristet], data: [], total: 0 }
+					);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
@@ -137,255 +178,77 @@ describe('Vorschau bei einem Fehler des Backends ohne JSON', () => {
 	});
 });
 
-describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
-	const urls: string[] = [];
-	const fetch = async (url: string) => {
-		urls.push(url);
-		// the statement's contract has the fee agreed at the run's rate (#89)
-		if (url.includes('/contracts?'))
-			return Response.json({ contracts: [{ ...buildingContracts.contracts[0], id: 'c1' }] });
-		if (url.includes('/config'))
-			return Response.json({
-				data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
-			});
-		if (url.includes('/statements?'))
-			return Response.json({
-				data: [
-					{ ...periodStatements.data[0], heatingProfileId: 'hp9', managementFeePercent: '2.50' }
-				]
-			});
-		return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
-	};
-	const open = (query: string) =>
-		load({ fetch, url: new URL(`http://localhost/statements/generate${query}`) } as never);
+// H-28: the backend decides the defaults (backend/src/__tests__/statement-run.test.ts); without them the page is not
+// shown with invented ones
+describe('Vorgaben des Assistenten aus dem Backend', () => {
+	const opened = (defaults: Response, query = '') =>
+		load({
+			fetch: async (url: string) =>
+				url.includes('/statements/run-defaults')
+					? defaults
+					: Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] }),
+			url: new URL(`http://localhost/statements/generate${query}`)
+		} as never);
 
-	it('übernimmt Gebäude, Periode, Heizprofil und Verwaltungspauschale', async () => {
-		expect(await open('?building=b1&start=2025-01-01&end=2025-12-31')).toMatchObject({
-			defaultPeriod: { start: '2025-01-01', end: '2025-12-31' },
-			defaultBuildingIds: ['b1'],
-			defaultHeatingProfileId: 'hp9',
-			defaultManagementFeePercent: 2.5,
-			// personas K1: der Assistent sagt, was gewählt ist und woher Heizprofil und Pauschale kommen
-			preset: {
-				building: 'Lindenhof',
-				start: '2025-01-01',
-				end: '2025-12-31',
-				fromStatements: true
-			}
+	it('meldet einen Fehler, wenn das Backend die Vorgaben nicht liefert', async () => {
+		await expect(opened(new Response(null, { status: 503 }))).rejects.toMatchObject({
+			status: 503
 		});
-		expect(urls).toContainEqual(
-			expect.stringContaining(
-				'/statements?buildingId=b1&periodStart=2025-01-01&periodEnd=2025-12-31'
+	});
+
+	// A-10, personas K1: the wizard says what the link chose and where Heizprofil and Pauschale come from
+	it('übernimmt Gebäude, Periode, Heizprofil und Verwaltungspauschale eines Links vom Backend', async () => {
+		const urls: string[] = [];
+		const data = await load({
+			fetch: async (url: string) => {
+				urls.push(url);
+				return url.includes('/statements/run-defaults')
+					? Response.json(runDefaults)
+					: Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+			},
+			url: new URL(
+				'http://localhost/statements/generate?building=b1&start=2024-01-01&end=2024-12-31'
 			)
+		} as never);
+
+		expect(urls).toContain(
+			'http://localhost:3001/api/v1/statements/run-defaults?buildingId=b1&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
-	});
-
-	const contract = (id: string, managementFeeAgreed: boolean, managementFeePercent: string | null) => ({
-		...buildingContracts.contracts[0],
-		id,
-		apartmentId: id,
-		managementFeeAgreed,
-		managementFeePercent
-	});
-	const statement = (
-		contractId: string,
-		managementFeePercent: string,
-		heatingProfileId: string | null = 'hp9'
-	) => ({
-		...periodStatements.data[0],
-		contractId,
-		heatingProfileId,
-		managementFeePercent,
-		periodStart: '2025-01-01',
-		periodEnd: '2025-12-31'
-	});
-	const openWith = (statements: unknown[]) =>
-		load({
-			fetch: async (url: string) => {
-				if (url.includes('/config'))
-					return Response.json({
-						data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
-					});
-				if (url.includes('/contracts?'))
-					return Response.json({
-						contracts: [
-							contract('nein', false, null),
-							contract('eigen', true, '2.00'),
-							contract('lauf', true, null),
-							contract('lauf2', true, null)
-						]
-					});
-				if (url.includes('/statements?')) return Response.json({ data: statements });
-				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
-			},
-			url: new URL('http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31')
-		} as never);
-
-	// #119: verschieden eingestellte übrige Abrechnungen geben keine Vorlage; beides kommt aus den Einstellungen
-	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen verschiedene Heizprofile haben', async () => {
-		expect(
-			await openWith([statement('lauf', '4.50', 'hp8'), statement('lauf2', '4.50', 'hp9')])
-		).toMatchObject({
-			defaultHeatingProfileId: 'hp1',
-			defaultManagementFeePercent: 3,
-			preset: { differing: true }
+		expect(data).toMatchObject({
+			defaultPeriod: runDefaults.period,
+			defaultBuildingIds: ['b1'],
+			defaultHeatingProfileId: runDefaults.heatingProfileId,
+			defaultManagementFeePercent: runDefaults.managementFeePercent,
+			preset: { building: 'Lindenhof', ...runDefaults.period, ...runDefaults.preset }
 		});
 	});
 
-	// #387 (#406 point 7): at a tenant change the Heizprofil of the same apartment's statement, so both tenants carry
-	// 100 % of the heating costs; the Verwaltungspauschale still from the settings
-	const rental = (
-		id: string,
-		apartmentId: string,
-		startDate: string,
-		endDate: string | null = null
-	) => ({
-		...contract(id, true, null),
-		apartmentId,
-		startDate,
-		endDate
-	});
-	const of2025 = (contractId: string, heatingProfileId: string, status = 'sent') => ({
-		...statement(contractId, '4.50', heatingProfileId),
-		status
-	});
-	const atChange = (contracts: unknown[], statements: unknown[]) =>
-		load({
+	// Review K-5: a cut link or a deleted building leads to the beginning, not to an error
+	it('fragt ohne Link nach den Vorgaben, wenn das Gebäude des Links unbekannt ist', async () => {
+		const urls: string[] = [];
+		const data = await load({
 			fetch: async (url: string) => {
-				if (url.includes('/config'))
-					return Response.json({
-						data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
-					});
-				if (url.includes('/contracts?')) return Response.json({ contracts });
-				if (url.includes('/statements?')) return Response.json({ data: statements });
-				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+				urls.push(url);
+				return url.includes('/statements/run-defaults')
+					? Response.json({
+							...runDefaults,
+							buildingId: null,
+							heatingProfileId: null,
+							preset: null
+						})
+					: Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
 			},
 			url: new URL(
-				'http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
-			)
-		} as never);
-	const eva = rental('eva', 'a1', '2024-01-01', '2025-03-31');
-	const marc = rental('marc', 'a1', '2025-05-01');
-
-	it('nimmt beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung', async () => {
-		const lea = rental('lea', 'a2', '2020-01-01');
-
-		expect(
-			await atChange([eva, marc, lea], [of2025('eva', 'hp8'), of2025('lea', 'hp9')])
-		).toMatchObject({
-			defaultHeatingProfileId: 'hp8',
-			defaultManagementFeePercent: 3,
-			preset: { differing: true, profileFromApartment: true }
-		});
-	});
-
-	// Fachreview 387-1 V-4: the apartments of the missing statements name different profiles: none fits both
-	it('nimmt die Einstellungen, wenn die Wohnungen verschiedene Heizprofile haben', async () => {
-		const lea = rental('lea', 'a2', '2020-01-01', '2025-06-30');
-		const tim = rental('tim', 'a2', '2025-07-01');
-
-		expect(
-			await atChange([eva, marc, lea, tim], [of2025('eva', 'hp8'), of2025('lea', 'hp9')])
-		).toMatchObject({
-			defaultHeatingProfileId: 'hp1',
-			preset: { differing: true, profileFromApartment: false }
-		});
-	});
-
-	// code review 387-1 C-3: the building's statements cannot be loaded: as without a same apartment's statement
-	it('nimmt die Einstellungen, wenn die Abrechnungen des Gebäudes nicht laden', async () => {
-		const lea = rental('lea', 'a2', '2020-01-01');
-		const loaded = await load({
-			fetch: async (url: string) => {
-				if (url.includes('/config'))
-					return Response.json({
-						data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
-					});
-				if (url.includes('/contracts?')) return Response.json({ contracts: [eva, marc, lea] });
-				if (url.includes('/statements?') && url.includes('periodStart'))
-					return Response.json({ data: [of2025('eva', 'hp8'), of2025('lea', 'hp9')] });
-				if (url.includes('/statements?')) return new Response(null, { status: 500 });
-				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
-			},
-			url: new URL(
-				'http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+				'http://localhost/statements/generate?building=b9&start=2024-01-01&end=2024-12-31'
 			)
 		} as never);
 
-		expect(loaded).toMatchObject({
-			defaultHeatingProfileId: 'hp1',
-			preset: { differing: true, profileFromApartment: false }
-		});
-	});
-
-	// Fachreview 387-1 V-1: a replaced statement does not count as a statement of the period (glossary «Ersetzt»)
-	it('übergeht eine ersetzte Abrechnung', async () => {
-		expect(
-			await atChange([eva, marc], [of2025('eva', 'hp8', 'replaced'), of2025('marc', 'hp9')])
-		).toMatchObject({
-			defaultHeatingProfileId: 'hp9',
-			preset: { differing: false, fromStatements: true }
-		});
-	});
-
-	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen zum Satz des Laufs verschiedene Sätze haben', async () => {
-		expect(await openWith([statement('lauf', '4.50'), statement('lauf2', '2.50')])).toMatchObject({
-			defaultHeatingProfileId: 'hp1',
-			defaultManagementFeePercent: 3,
-			preset: { differing: true }
-		});
-	});
-
-	// fach-review V-5: a statement whose Heizprofil was deleted has none; it differs from no other
-	it('übergeht eine übrige Abrechnung ohne Heizprofil', async () => {
-		expect(
-			await openWith([statement('lauf', '4.50', null), statement('lauf2', '4.50')])
-		).toMatchObject({ defaultHeatingProfileId: 'hp9', preset: { differing: false } });
-	});
-
-	it('übernimmt gleich eingestellte übrige Abrechnungen', async () => {
-		expect(await openWith([statement('lauf', '4.50'), statement('lauf2', '4.50')])).toMatchObject({
-			defaultHeatingProfileId: 'hp9',
-			defaultManagementFeePercent: 4.5,
-			preset: { differing: false, fromStatements: true, feeFromSettings: false }
-		});
-	});
-
-	// #89, fach-review V-1: a statement stores its contract's rate; only one at the run's rate tells the run's rate
-	it('übernimmt den Satz nur von einer Abrechnung zum Satz des Abrechnungslaufs', async () => {
-		const mixed = [
-			statement('nein', '0.00'),
-			statement('eigen', '2.00'),
-			statement('lauf', '4.50')
-		];
-		expect(await openWith(mixed)).toMatchObject({
-			defaultManagementFeePercent: 4.5,
-			preset: { fromStatements: true, feeFromSettings: false }
-		});
-		// none at the run's rate: the settings' rate; the heating profile still comes from the other statements, so
-		// a recreated statement shares it (A-10, closing review C-1), and the notice says where each comes from
-		expect(await openWith(mixed.slice(0, 2))).toMatchObject({
-			defaultManagementFeePercent: 3,
-			defaultHeatingProfileId: 'hp9',
-			preset: { fromStatements: true, feeFromSettings: true }
-		});
-	});
-
-	// Review K-5: ein abgeschnittener Link oder ein gelöschtes Gebäude führt zum Anfang, nicht zu einem Fehler
-	it.each([
-		['?building=b9&start=2025-01-01&end=2025-12-31'],
-		['?building=b1&start=2025-02-30&end=2025-12-31'],
-		['?building=b1&start=2025-13-01&end=2025-12-31'],
-		['?building=b1&start=2025-12-31&end=2025-01-01']
-	])('übernimmt keinen ungültigen Link %s', async (query) => {
-		expect(await open(query)).toMatchObject({ defaultBuildingIds: [], preset: null });
-	});
-
-	it('nimmt ohne Auswahl die Einstellungen', async () => {
-		expect(await open('')).toMatchObject({
+		expect(urls).toContain('http://localhost:3001/api/v1/statements/run-defaults');
+		expect(data).toMatchObject({
 			defaultBuildingIds: [],
-			defaultHeatingProfileId: 'hp1',
-			defaultManagementFeePercent: 3
+			defaultHeatingProfileId: '',
+			preset: null
 		});
 	});
 });
+
