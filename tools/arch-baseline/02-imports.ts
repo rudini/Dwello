@@ -23,14 +23,15 @@ const IMPORT_RE =
  * compiles with `verbatimModuleSyntax`, which keeps such an import at runtime
  */
 const typeOnlyImport = (file: string, keyword?: string, clause?: string) =>
-	!!keyword ||
-	(file.startsWith('backend/') &&
-	(!!clause &&
-		/^\{[^}]*\}$/.test(clause.trim()) &&
-		clause
-			.replace(/[{}]/g, '')
-			.split(',')
-			.every((n) => !n.trim() || n.trim().startsWith('type '))));
+	!!keyword || (file.startsWith('backend/') && !!clause && onlyTypeNames(clause));
+
+/** `{ type A, type B }`: a braced clause whose names all carry `type` */
+const onlyTypeNames = (clause: string) =>
+	/^\{[^}]*\}$/.test(clause.trim()) &&
+	clause
+		.replace(/[{}]/g, '')
+		.split(',')
+		.every((n) => !n.trim() || n.trim().startsWith('type '));
 
 /** Path a specifier points to before extensions are tried: $lib alias or relative; null for packages. */
 function basePath(from: string, spec: string): string | null {
