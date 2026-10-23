@@ -7,6 +7,9 @@ short version for people.
 By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Security problems are not reported as issues:
 see [`SECURITY.md`](SECURITY.md).
 
+Questions and ideas go to [Discussions](https://github.com/rudini/Dwello/discussions); issues are for work that
+someone can finish.
+
 ## Before you start
 
 - **Open or pick an issue first**, for anything beyond a typo. Use a template; a change to domain rules (amounts,

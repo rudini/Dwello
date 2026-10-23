@@ -2981,6 +2981,12 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Backend `planRun` flags and `withoutFee`, contract `statement-run.json`, tests red first
 - [x] BFF passes them on; tests show it passes flags the dates would not give
 - [x] `code-reviewer` round 1 (`docs/reviews/h28d-review-1.md`: H-1 Major, H-2, H-3) and round 2 (`h28d-review-2.md`: fixed)
+## Session 2026-10-23: link to Discussions
+
+No scenario: repository documents only, no app change.
+
+- [x] `.github/ISSUE_TEMPLATE/config.yml` and `CONTRIBUTING.md` point questions and ideas to Discussions
+- [x] PR: pushed after this archive
 ## Session H-28 step 2: building form checks in the backend
 
 #717 (H-28): every check of the building form (required fields, PLZ 4 digits, Baujahr, the Wohnungen from the Gebäuderegister) is the backend's (`backend/src/services/building-fields.ts`); POST/PUT `/buildings` refuse with `causes` per field, the BFF shows each at its field. No scenario: behaviour unchanged (same texts, all at once). Parallel session (checklist in the pull request).
