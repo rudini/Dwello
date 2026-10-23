@@ -4,7 +4,7 @@ about: A functional point ready to implement ("Setze #n um")
 labels: []
 ---
 
-<!-- Topic label: fachlich, produkt or bug. English; German for UI texts and domain terms (UBIQUITOUS_LANGUAGE.md). -->
+<!-- Topic label: domain, product or bug (non-functional points: template nfr.md). English; German for UI texts and domain terms (UBIQUITOUS_LANGUAGE.md). -->
 
 ## Problem
 What is wrong or missing today, with evidence (files, behaviour), and how a landlord reaches the state (the screen or data that produces it), or that only the API does.
@@ -13,7 +13,7 @@ What is wrong or missing today, with evidence (files, behaviour), and how a land
 Decisions this task rests on.
 
 ## Proposed (confirm before starting)
-Values or rules the author suggests but the product owner has not confirmed (optional). While this section exists, the issue carries the label `entscheiden`. If the whole task depends on an open question, use the "Decision" template instead.
+Values or rules the author suggests but the product owner has not confirmed (optional). While this section exists, the issue carries the label `needs-decision`. If the whole task depends on an open question, use the "Decision" template instead.
 
 ## Done means
 - The outcome the landlord sees or the data shows (e.g. «before saving, the Liegenschaftsverwalter knows the overlap was not checked»), not where it shows; the UI placement only where the product owner decided it.

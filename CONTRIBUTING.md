@@ -11,7 +11,7 @@ see [`SECURITY.md`](SECURITY.md).
 
 - **Open or pick an issue first**, for anything beyond a typo. Use a template; a change to domain rules (amounts,
   Nebenkostenabrechnungen, legal texts, domain terms) needs the product owner's decision in the issue before code is
-  written. Issues with `entscheiden` are waiting for that decision; `good first issue` and `help wanted` are open for you.
+  written. Issues with `needs-decision` are waiting for that decision; `good first issue` and `help wanted` are open for you.
 - Comment on the issue that you take it, so nobody else works on it in parallel.
 
 ## Set up
