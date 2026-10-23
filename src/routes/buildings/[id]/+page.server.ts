@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { countStatus, reletStarts } from '$lib/apartment';
-import { plainAmount } from '$lib/invoice';
+import { backendMessage, refusedFields, type BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
 import { toBuilding } from '$lib/server/building';
@@ -27,13 +27,11 @@ export interface FuelStock {
 
 type Fetch = typeof globalThis.fetch;
 
-// Why the backend refused a reading, in words: the day is taken, or the tank's category differs
+// Why the backend refused a reading (H-28, #717): each check at its field, a taken day or another category on the form
 async function notSaved(response: Response) {
-	if (response.status !== 409) return m.buildings_fuel_not_saved();
-	const { error = '' } = await response.json().catch(() => ({}));
-	return String(error).includes('category')
-		? m.buildings_fuel_other_category()
-		: m.buildings_fuel_date_taken();
+	const refused = (await response.json().catch(() => ({}))) as BackendError;
+	if (refused.causes) return refusedFields(refused);
+	return { form: refused.code ? backendMessage(refused, '') : m.buildings_fuel_not_saved() };
 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -137,13 +135,8 @@ export const actions: Actions = {
 	addFuelStock: async ({ request, params, fetch }) => {
 		const form = await request.formData();
 		const readingDate = String(form.get('readingDate') ?? '');
-		const amount = plainAmount(String(form.get('amount') ?? ''));
+		const amount = String(form.get('amount') ?? '');
 		const categoryId = String(form.get('categoryId') ?? '');
-		const fuelStockErrors: Record<string, string> = {};
-		if (!readingDate) fuelStockErrors.readingDate = m.buildings_fuel_date_missing();
-		if (!/^\d+(\.\d{1,2})?$/.test(amount))
-			fuelStockErrors.amount = m.buildings_fuel_amount_invalid();
-		if (Object.keys(fuelStockErrors).length) return fail(400, { fuelStockErrors });
 
 		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks`, {
 			method: 'POST',
@@ -151,7 +144,7 @@ export const actions: Actions = {
 			body: JSON.stringify({ readingDate, amount, categoryId })
 		});
 		if (!response.ok)
-			return fail(response.status, { fuelStockErrors: { form: await notSaved(response) } });
+			return fail(response.status, { fuelStockErrors: await notSaved(response) });
 		return { fuelStockSaved: true };
 	},
 

@@ -76,6 +76,15 @@ describe('Protokoll der Verwaltungspauschale', () => {
 		const [entry] = await entriesOf('management_fee_changed');
 		expect(entry.details).toEqual({ from: '4.25', to: '3' });
 	});
+
+	// H-28 (#717, code review h28g C-4): the settings form empties the rate in its one save
+	it('hält das Zurücksetzen fest, wenn das Formular den Satz leert', async () => {
+		await sendJson('PUT', '/api/v1/config', { management_fee_pct: '4.5' });
+		await sendJson('PUT', '/api/v1/config', { management_fee_pct: '' });
+
+		const [entry] = await entriesOf('management_fee_changed');
+		expect(entry.details).toEqual({ from: '4.5', to: '3' });
+	});
 });
 
 describe('Protokoll der Umlagefähigkeit einer Kategorie', () => {

@@ -7,9 +7,24 @@ import { and, asc, desc, eq, isNotNull, lte } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, fuelStocks, invoices } from '../db/schema';
 import { getTypedConfig } from './config.service';
+import type { ErrorCode } from './coded-error';
+import { isRealDate } from './real-date';
 
 export const listFuelStocks = (buildingId: string) =>
 	db.select().from(fuelStocks).where(eq(fuelStocks.buildingId, buildingId)).orderBy(asc(fuelStocks.readingDate));
+
+// The value as typed: «2'650.50», «2650,5» or whole francs «1'450.-» (H-28, #717)
+const typedAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.').replace(/\.[-–—]+$/, '');
+
+/** The Tankbestand form's errors, each with its field (H-28, #717); with none, the value as stored */
+export function fuelStockFields({ readingDate, amount }: { readingDate: string; amount: string }) {
+	const value = typedAmount(amount);
+	const errors: ErrorCode[] = [
+		...(isRealDate(readingDate) ? [] : [{ code: 'FUEL_STOCK_DATE_REQUIRED', params: { field: 'readingDate' } }]),
+		...(/^\d+(\.\d{1,2})?$/.test(value) ? [] : [{ code: 'FUEL_STOCK_AMOUNT_INVALID', params: { field: 'amount' } }])
+	];
+	return { errors, amount: value };
+}
 
 /** The new reading; none if the building already has one on that day */
 export async function createFuelStock(buildingId: string, stock: { readingDate: string; amount: string; categoryId: string }) {
@@ -105,6 +120,7 @@ export async function fuelStockChange(buildingId: string, periodStart: string, p
 
 /** An allocable category marked Brennstoff may hold a Tankbestand (#100); the chimney sweep is shared like heating but is no fuel */
 export async function isFuelCategory(categoryId: string) {
+	if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoryId)) return false; // none chosen (h28h C-1)
 	const [category] = await db
 		.select({ fuel: categories.isFuel, allowed: categories.isAllowedUtilityCost })
 		.from(categories)

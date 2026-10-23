@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import fuelStockRefused from '../../tests/contracts/fuel-stock-fields-refused.json';
+import fuelStockDateTaken from '../../tests/contracts/fuel-stock-date-taken.json';
 import { actions as newActions } from '../routes/buildings/new/+page.server';
 import { actions as editActions } from '../routes/buildings/[id]/edit/+page.server';
 import {
@@ -319,7 +321,8 @@ describe('Tankbestand', () => {
 	const stockId = '7d0f2c1e-6b9a-4c8e-9f3a-2b1c0d9e8f7a';
 	const stock = { readingDate: '2024-12-31', amount: "2'650.00", categoryId: 'c1' };
 
-	it('erfasst den Wert des Heizöls im Tank an einem Stichtag, mit seiner Kategorie', async () => {
+	// H-28 (#717): the value as typed; the backend reads and checks it
+	it('erfasst den Wert des Heizöls im Tank an einem Stichtag, mit seiner Kategorie, wie getippt', async () => {
 		const calls: string[] = [];
 		const backend = (url: string, init?: RequestInit) => {
 			calls.push(`${init?.method} ${url} ${init?.body}`);
@@ -330,20 +333,21 @@ describe('Tankbestand', () => {
 			fuelStockSaved: true
 		});
 		expect(calls).toEqual([
-			'POST http://localhost:3001/api/v1/buildings/b1/fuel-stocks {"readingDate":"2024-12-31","amount":"2650.00","categoryId":"c1"}'
+			`POST http://localhost:3001/api/v1/buildings/b1/fuel-stocks {"readingDate":"2024-12-31","amount":"2'650.00","categoryId":"c1"}`
 		]);
 	});
 
-	it('verlangt Stichtag und Betrag, bevor es speichert', async () => {
+	// the backend checks them (code review h28h C-2: asked, not answered by the BFF itself)
+	it('zeigt die Ablehnung von Stichtag und Betrag am Feld', async () => {
+		const asked: string[] = [];
 		const result = await run(
 			detailActions.addFuelStock as Action,
-			refused,
+			(url: string) => {
+				asked.push(url);
+				return Response.json(fuelStockRefused, { status: 400 });
+			},
 			{ id: 'b1' },
-			{
-				readingDate: '',
-				amount: 'viel',
-				categoryId: 'c1'
-			}
+			{ readingDate: '', amount: 'viel', categoryId: 'c1' }
 		);
 
 		expect(result).toMatchObject({
@@ -355,13 +359,14 @@ describe('Tankbestand', () => {
 				}
 			}
 		});
+		expect(asked).toEqual(['http://localhost:3001/api/v1/buildings/b1/fuel-stocks']);
 	});
 
 	it.each([
-		[409, {}, 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.'],
+		[409, fuelStockDateTaken, 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.'],
 		[
 			409,
-			{ error: 'The building records its fuel stock in another category' },
+			{ ...fuelStockDateTaken, code: 'FUEL_STOCK_OTHER_CATEGORY' },
 			'Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.'
 		],
 		[500, {}, 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.']

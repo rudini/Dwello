@@ -11,6 +11,7 @@ import {
 } from '$lib/server/distribution-key';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import { saveSettings } from '$lib/server/settings';
+import fieldsRefused from '../../tests/contracts/config-fields-refused.json';
 
 afterEach(() => {
 	overwriteGetLocale(() => baseLocale);
@@ -60,7 +61,9 @@ describe('Einstellungen und Stammdaten in der gewählten Sprache', () => {
 
 	it('meldet eine falsche PLZ auf Französisch', async () => {
 		french();
-		const result = await saveSettings(fetch, form({ companyPostalCode: '80' }));
+		// the backend refuses it (H-28, #717), the BFF names it in the user's language
+		const backend = (async () => Response.json(fieldsRefused, { status: 400 })) as unknown as typeof fetch;
+		const result = await saveSettings(backend, form({ companyPostalCode: '80' }));
 		expect(result).toMatchObject({
 			data: { errors: { companyPostalCode: 'Le NPA doit comporter 4 chiffres.' } }
 		});

@@ -1,0 +1,10 @@
+{
+	"error": "Some fields are not valid",
+	"code": "POSTAL_CODE_DIGITS",
+	"params": { "field": "company_postal_code" },
+	"causes": [
+		{ "code": "POSTAL_CODE_DIGITS", "params": { "field": "company_postal_code" } },
+		{ "code": "IBAN_ENTERED_INVALID", "params": { "field": "iban" } },
+		{ "code": "MANAGEMENT_FEE_INVALID", "params": { "field": "management_fee_pct" } }
+	]
+}

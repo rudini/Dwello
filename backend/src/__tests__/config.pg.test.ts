@@ -11,6 +11,7 @@ import { callApi, sendJson } from './helpers/auth';
 const iban = await getConfig('iban');
 const companyName = await getConfig('company_name');
 const companyCity = await getConfig('company_city');
+const companyPostalCode = await getConfig('company_postal_code');
 
 afterAll(async () => {
 	if (iban) await setConfig('iban', iban);
@@ -19,6 +20,8 @@ afterAll(async () => {
 	else await deleteConfig('company_name');
 	if (companyCity) await setConfig('company_city', companyCity);
 	else await deleteConfig('company_city');
+	if (companyPostalCode) await setConfig('company_postal_code', companyPostalCode);
+	else await deleteConfig('company_postal_code');
 });
 
 describe('Einstellungen speichern', () => {
@@ -104,7 +107,7 @@ describe('Einstellungen speichern', () => {
 		});
 
 		expect(response.status).toBe(200);
-		expect(await getConfig('iban')).toBe('CH93 0076 2011 6238 5295 7');
+		expect(await getConfig('iban')).toBe('CH9300762011623852957');
 	});
 
 	// #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger
@@ -149,5 +152,111 @@ describe('Einstellungen speichern', () => {
 		} finally {
 			if (name) await setConfig('company_name', name);
 		}
+	});
+});
+
+// H-28 (#717): the settings form's checks are the backend's; each refused field with its code, all at once, as typed
+describe('Einstellungen prüfen', () => {
+	it('lehnt jedes ungültige Feld mit seinem Code ab und speichert nichts', async () => {
+		const response = await sendJson('PUT', '/api/v1/config', {
+			company_name: `Verwaltung ${crypto.randomUUID()}`,
+			company_postal_code: '80',
+			company_email: 'info@muster',
+			iban: 'DE89 3704 0044 0532 0130 00',
+			management_fee_pct: '10,01',
+			payment_deadline_days: '30,5',
+			reminder_after_days: '1e1'
+		});
+
+		expect(response.status).toBe(400);
+		const { causes } = (await response.json()) as { causes: { code: string; params: { field: string } }[] };
+		expect(causes.sort((a, b) => a.params.field.localeCompare(b.params.field))).toEqual([
+			{ code: 'COMPANY_EMAIL_INVALID', params: { field: 'company_email' } },
+			{ code: 'POSTAL_CODE_DIGITS', params: { field: 'company_postal_code' } },
+			{ code: 'IBAN_ENTERED_INVALID', params: { field: 'iban' } },
+			{ code: 'MANAGEMENT_FEE_INVALID', params: { field: 'management_fee_pct' } },
+			{ code: 'PAYMENT_DEADLINE_DAYS', params: { field: 'payment_deadline_days' } },
+			{ code: 'REMINDER_AFTER_DAYS', params: { field: 'reminder_after_days' } }
+		]);
+		expect(await getConfig('company_name')).toBe(companyName);
+	});
+
+	// as the landlord types them: «2,5» or «4 %» stored as a number with a point, the IBAN in groups stored without spaces
+	it('nimmt Verwaltungspauschale und IBAN an, wie sie getippt werden', async () => {
+		const [fee, name] = [await getConfig('management_fee_pct'), await getConfig('company_name')];
+		const typed = async (management_fee_pct: string) => (await sendJson('PUT', '/api/v1/config', { management_fee_pct })).status;
+		try {
+			const statuses = [await typed('2,5'), await typed('4 %'), await typed('2,555')];
+			const stored = await getConfig('management_fee_pct');
+			await sendJson('PUT', '/api/v1/config', { company_name: 'Muster Immobilien AG', iban: 'ch93 0076 2011 6238 5295 7' });
+
+			expect(statuses).toEqual([200, 200, 400]);
+			expect(stored).toBe('4');
+			expect(await getConfig('iban')).toBe('CH9300762011623852957');
+		} finally {
+			await (fee ? setConfig('management_fee_pct', fee) : deleteConfig('management_fee_pct'));
+			await (name ? setConfig('company_name', name) : deleteConfig('company_name'));
+		}
+	});
+
+	// the form sends every field; an emptied one is reset to its default in the same save, and with an IBAN the
+	// Firmenadresse it empties is missing (#450), named so the page marks those fields
+	it('setzt geleerte Felder beim selben Speichern zurück und verlangt mit der IBAN die Firmenadresse', async () => {
+		const [fee, name, city] = [await getConfig('management_fee_pct'), await getConfig('company_name'), await getConfig('company_city')];
+		await setConfig('company_name', 'Muster Immobilien AG');
+		await setConfig('company_city', 'Winterthur');
+		await setConfig('management_fee_pct', '4');
+		try {
+			const refused = await sendJson('PUT', '/api/v1/config', { company_name: '', company_city: ' ', management_fee_pct: '', iban: 'CH93 0076 2011 6238 5295 7' });
+			const refusal = await refused.json();
+			const kept = [await getConfig('company_name'), await getConfig('management_fee_pct')];
+			const saved = await sendJson('PUT', '/api/v1/config', { company_name: '', management_fee_pct: '', iban: '' });
+
+			expect(refused.status).toBe(400);
+			expect(refusal).toMatchObject({
+				code: 'IBAN_COMPANY_ADDRESS_MISSING',
+				causes: [{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: 'company_name,company_city' } }]
+			});
+			expect(kept).toEqual(['Muster Immobilien AG', '4']);
+			expect(saved.status).toBe(200);
+			expect([await getConfig('company_name'), await getConfig('management_fee_pct'), await getConfig('iban')]).toEqual(['', '3', '']);
+		} finally {
+			await (fee ? setConfig('management_fee_pct', fee) : deleteConfig('management_fee_pct'));
+			await (name ? setConfig('company_name', name) : deleteConfig('company_name'));
+			await (city ? setConfig('company_city', city) : deleteConfig('company_city'));
+		}
+	});
+
+	// code review h28g C-1: the Firmenadresse an IBAN needs is named with the form's other errors, as before
+	it('nennt die fehlende Firmenadresse zusammen mit den anderen abgelehnten Feldern', async () => {
+		const response = await sendJson('PUT', '/api/v1/config', { company_email: 'info@muster', company_name: '', iban: 'CH93 0076 2011 6238 5295 7' });
+		const { causes } = (await response.json()) as { causes: { code: string }[] };
+
+		expect(causes.map((cause) => cause.code).sort()).toEqual(['COMPANY_EMAIL_INVALID', 'IBAN_COMPANY_ADDRESS_MISSING']);
+	});
+
+	// code review h28g C-2, C-5: the limits of the days, and an IBAN as the QR-bill takes it (#191): CH or LI, the
+	// institution's number in digits, the check digits right (pinned as before, now in the backend)
+	it.each([
+		['payment_deadline_days', '7', 200],
+		['payment_deadline_days', '90', 200],
+		['payment_deadline_days', '6', 400],
+		['payment_deadline_days', '91', 400],
+		['reminder_after_days', '7', 200],
+		['reminder_after_days', '60', 200],
+		['reminder_after_days', '6', 400],
+		['reminder_after_days', '61', 400],
+		['iban', 'LI22 0881 0000 2324 013A A', 400],
+		['iban', 'CH56 0483 5012 3456 7800 9', 200],
+		['iban', 'CH97 A483 5012 3456 7800 9', 400]
+	])('nimmt %s «%s» mit Status %i', async (key, value, status) => {
+		const before = await getConfig(key as 'iban');
+		await setConfig('company_name', 'Muster Immobilien AG');
+		await setConfig('company_city', 'Winterthur');
+		await setConfig('company_postal_code', '8400');
+		const response = await sendJson('PUT', '/api/v1/config', { [key]: value });
+		await (before ? setConfig(key as 'iban', before) : deleteConfig(key as 'iban'));
+
+		expect(response.status).toBe(status);
 	});
 });
