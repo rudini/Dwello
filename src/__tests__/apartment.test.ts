@@ -6,26 +6,12 @@ import { actions as editActions } from '../routes/apartments/[id]/edit/+page.ser
 import { monthlyTotal } from '../lib/server/contract-history';
 import { floorLabel, floorOptions, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
+import apartmentResponse from '../../tests/contracts/apartment.json';
 
 const API = 'http://localhost:3001/api/v1';
 
-const apartment = {
-	id: 'a1',
-	buildingId: 'b1',
-	number: '3.01',
-	floor: 3,
-	area: '82.50',
-	rooms: '3.5',
-	status: 'occupied',
-	building: {
-		id: 'b1',
-		name: 'Lindenhof',
-		address: 'Lindenweg 4',
-		postalCode: '8400',
-		city: 'Winterthur'
-	},
-	currentContractId: 'c2'
-};
+// as the backend answers (tests/contracts/apartment.json)
+const apartment = apartmentResponse;
 
 const contracts = [
 	{

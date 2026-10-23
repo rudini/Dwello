@@ -125,6 +125,18 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 		}
 	});
 
+	// code review h28j C-2: a draft deleted meanwhile (another tab) does not block the change, as before
+	it('speichert die Änderung, wenn der genannte Entwurf inzwischen gelöscht ist', async () => {
+		const other = await createRental(crypto.randomUUID(), { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${other.contract}`, { endDate: '2026-12-31', terminated: true, deleteDraft: crypto.randomUUID() });
+
+			expect(response.status).toBe(200);
+		} finally {
+			await other.remove();
+		}
+	});
+
 	it('löscht den Entwurf und beendet den Mietvertrag, wenn nur er das Vertragsende ablehnt', async () => {
 		await callApi(`/api/v1/statements/${draft2025}`, { method: 'DELETE' });
 

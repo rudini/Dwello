@@ -185,7 +185,8 @@ export async function getTenant(id: string): Promise<TenantWithOccupancy | null>
 		.orderBy(
 			sql`${rentalContracts.startDate} > ${sqlToday}`,
 			desc(sql`case when ${rentalContracts.startDate} <= ${sqlToday} then ${rentalContracts.startDate} end`),
-			rentalContracts.startDate
+			rentalContracts.startDate,
+			desc(rentalContracts.id) // one day: as the list orders them (code review h28j C-1)
 		)
 		.limit(1);
 

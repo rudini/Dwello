@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -181,6 +181,26 @@ describe('Abweichende Einstellungen bestehender Abrechnungen', () => {
 			expect(statements.map(({ id, outdated, fuelStock }) => ({ id, outdated, fuelStock }))).toEqual([{ id: draft.id, outdated: true, fuelStock: false }]);
 		} finally {
 			await db.delete(invoices).where(eq(invoices.buildingId, buildingId));
+		}
+	});
+
+	// code review h28j C-4: a Tankbestand recorded since outdates a draft too (#408 point 8)
+	it('nennt einen Entwurf, dessen Tankbestand sich seither geändert hat', async () => {
+		const [used] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
+		const [heating] = await db.select({ id: categories.id }).from(categories).where(eq(categories.name, 'Heating'));
+		const run = { buildingId, periodStart: '2020-01-01', periodEnd: '2020-12-31', heatingProfileId: used.id, managementFeePercent: 3 };
+		const draft = await generateStatement({ ...run, contractId: await rent('9.05', 'Tank', '2020-01-01') });
+		await db.insert(fuelStocks).values([
+			{ buildingId, categoryId: heating.id, readingDate: '2019-12-31', amount: '900.00' },
+			{ buildingId, categoryId: heating.id, readingDate: '2020-12-31', amount: '300.00' }
+		]);
+		try {
+			const response = await sendJson('GET', `/api/v1/statements/run-differences?buildingId=${buildingId}&periodStart=2020-01-01&periodEnd=2020-12-31&heatingProfileId=${used.id}&managementFeePercent=3`);
+			const { statements } = (await response.json()) as { statements: { id: string; outdated: boolean; fuelStock: boolean }[] };
+
+			expect(statements.map(({ id, outdated, fuelStock }) => ({ id, outdated, fuelStock }))).toEqual([{ id: draft.id, outdated: false, fuelStock: true }]);
+		} finally {
+			await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, buildingId));
 		}
 	});
 });

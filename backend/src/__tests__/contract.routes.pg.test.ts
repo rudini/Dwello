@@ -3,6 +3,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -81,6 +82,20 @@ describe('Status eines Mietvertrags', () => {
 		} finally {
 			await deleteContract(after.id, true);
 			await later.remove();
+		}
+	});
+
+	// code review h28j C-1: of two running contracts (apartment and parking space) the latest started, as the page chose
+	it('nennt dem Mieter von zwei laufenden Mietverträgen den zuletzt begonnenen', async () => {
+		const parking = await createApartment({ buildingId: rental.building, number: 'P1', floor: 0, area: '12', rooms: '0' });
+		const second = await createContract({ apartmentId: parking.id, tenantId: rental.tenant, baseRent: '100', startDate: '2025-01-01', monthlyAdvancePayment: '0' });
+		try {
+			const tenant = (await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json()) as { rentalContractId?: string };
+
+			expect(tenant.rentalContractId).toBe(second.id);
+		} finally {
+			await deleteContract(second.id, true);
+			await deleteApartment(parking.id);
 		}
 	});
 });

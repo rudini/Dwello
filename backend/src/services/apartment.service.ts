@@ -93,7 +93,7 @@ export interface ApartmentWithDetails extends Apartment {
 	};
 	currentTenantName?: string;
 	currentContractId?: string;
-	nextContractId?: string;
+	nextContractId?: string | null;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null;
 	lastContractEnd?: string | null;
@@ -206,7 +206,7 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 		},
 		currentTenantName: currentContract?.tenantName,
 		currentContractId: currentContract?.contractId,
-		nextContractId: next?.id
+		nextContractId: next?.id ?? null
 	} as ApartmentWithDetails;
 }
 

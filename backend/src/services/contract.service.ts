@@ -402,8 +402,10 @@ async function checkNewDates(current: RentalContract, data: Partial<NewRentalCon
 	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
 	else if (statements.length) throw new BilledDaysError(statements);
-	// a draft named from a stale page or another form that this change does not touch (H-28, #717)
-	else if (draft) throw new CodedError('CONTRACT_DRAFT_NOT_AFFECTED', 'The named draft is not one this change would delete');
+	// a statement named from a stale page or another form that this change does not touch (H-28, #717); one deleted
+	// meanwhile does not hold the change up (code review h28j C-2)
+	else if (draft && (await q.select({ id: utilityStatements.id }).from(utilityStatements).where(eq(utilityStatements.id, draft))).length)
+		throw new CodedError('CONTRACT_DRAFT_NOT_AFFECTED', 'The named draft is not one this change would delete');
 }
 
 /**

@@ -1,0 +1,22 @@
+{
+	"id": "a1",
+	"buildingId": "b1",
+	"number": "3.01",
+	"floor": 3,
+	"area": "82.50",
+	"rooms": "3.5",
+	"status": "occupied",
+	"building": {
+		"id": "b1",
+		"name": "Lindenhof",
+		"address": "Lindenweg 4",
+		"postalCode": "8400",
+		"city": "Winterthur"
+	},
+	"currentTenantName": "Beat Huber",
+	"currentContractId": "c2",
+	"nextContractId": null,
+	"nextContractStart": null,
+	"currentContractEnd": null,
+	"lastContractEnd": null
+}
