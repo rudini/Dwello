@@ -2929,5 +2929,5 @@ No scenario: the E2E stack does not run the demo's compose files (`deploy/demo`)
 
 - [x] Postgres of the demo gets no `POSTGRES_PASSWORD` beside `POSTGRES_PASSWORD_FILE` (the image refuses both); the demo's check for the password moves to `secrets` (decided by the product owner in this session) — `deploy/demo/docker-compose.yml`, test in `backend/src/__tests__/compose-prod.test.ts`, seen red
 - [x] `reset-demo.sh` sets `DATABASE_URL` from `/run/dwello/db_password` (`compose run … sh -c` replaces the backend's command) — seen red
-- [x] Slice review (`code-reviewer`), `docs/reviews/demo-review-1.md`: no findings
+- [x] Slice review (`code-reviewer`), `docs/reviews/demo-postgres-review-1.md`: no findings
 - [x] Archive, PR: pushed after this archive
