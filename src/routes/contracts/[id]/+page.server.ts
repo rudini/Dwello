@@ -359,9 +359,10 @@ export const actions: Actions = {
 			method: 'DELETE'
 		});
 		if (!response.ok) {
+			// a refusal with a code has its message; any other answer (a contract deleted meanwhile) the own text
 			const body = await response.json().catch(() => null);
 			return fail(response.status, {
-				deleteError: backendMessage(body, m.contracts_delete_failed())
+				deleteError: backendMessage(body?.code ? body : null, m.contracts_delete_failed())
 			});
 		}
 		throw redirect(303, '/contracts');

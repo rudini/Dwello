@@ -500,7 +500,7 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 describe('Mietvertrag löschen', () => {
 	// noch nicht begonnen: er hat keine Mietstage
 	it('löscht einen künftigen Mietvertrag und kehrt zur Mietvertragsliste zurück', async () => {
-		const { calls, result } = runAction(actions.delete, 'c1', 200, {}, { startDate: '2099-11-01' });
+		const { calls, result } = runAction(actions.delete, 'c1', 204);
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/contracts' });
 		expect(calls.filter((call) => call.method === 'DELETE')).toEqual([
@@ -525,14 +525,18 @@ describe('Mietvertrag löschen', () => {
 		]);
 	});
 
+	// in einem anderen Fenster gelöscht: der eigene Text, nicht die englische Meldung des Backends ohne Code
+	it('meldet einen Mietvertrag, den es nicht mehr gibt, als nicht gelöscht', async () => {
+		const { result } = runAction(actions.delete, 'c1', 404, {}, { error: 'Contract not found' });
+
+		expect(await result).toMatchObject({
+			status: 404,
+			data: { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' }
+		});
+	});
+
 	it('löscht einen begonnenen Mietvertrag mit Bestätigung des Irrtums', async () => {
-		const { calls, result } = runAction(
-			actions.delete,
-			'c1',
-			200,
-			{ mistakeConfirmed: 'on' },
-			{ startDate: '2024-01-01' }
-		);
+		const { calls, result } = runAction(actions.delete, 'c1', 204, { mistakeConfirmed: 'on' });
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/contracts' });
 		expect(calls.filter((call) => call.method === 'DELETE').map((call) => call.url)).toEqual([
@@ -542,18 +546,7 @@ describe('Mietvertrag löschen', () => {
 
 	// eine Abrechnung kam nach dem Laden der Seite dazu: die Meldung zum Code des Backends
 	it('nennt den Grund, wenn das Backend einen Mietvertrag mit Abrechnung ablehnt', async () => {
-		const fetch = (async (_url: string, init?: RequestInit) =>
-			init?.method === 'DELETE'
-				? Response.json(contractHasStatements, { status: 409 })
-				: Response.json({ startDate: '2024-01-01' })) as typeof globalThis.fetch;
-		const form = new FormData();
-		form.set('mistakeConfirmed', 'on');
-		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const result = (actions.delete as (event: never) => Promise<unknown>)({
-			params: { id: 'c1' },
-			fetch,
-			request
-		} as never);
+		const { result } = runAction(actions.delete, 'c1', 409, { mistakeConfirmed: 'on' }, contractHasStatements);
 
 		expect(await result).toMatchObject({
 			status: 409,
