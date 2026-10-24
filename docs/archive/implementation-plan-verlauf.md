@@ -3194,3 +3194,15 @@ No scenario: type-only refactoring, no behaviour change (product owner, 24.10.20
 - [x] Closing round 2 (`docs/reviews/c3-review-3.md`, no finding)
 - [x] PR pushed after this archive
 - [x] Next: #788 for Ä4 (asked by the product owner): planned in the following session
+
+## Session: #788 part 0, fitness check for date comparisons in the BFF
+
+No scenario: tooling only (fitness functions), no app behaviour changes. Product owner, 24.10.2026: #788 in the order 0, 1, 2, point 5, 3, 4.
+
+- [x] Line matcher as a tested function; date comparisons against today (`localToday()`, `today`) count as BFF decisions
+- [x] Ratchet: today's findings as legacy exceptions (#788), shrink-only
+- [x] Proof: a new date comparison fails
+- [x] `fitness-functions.md`
+- [x] Review round 1 (`docs/reviews/p0-review-1.md`, 4 Minor: C-1 wrapped `localToday(),` caught; C-2 limits documented; C-3 a list may not be removed; C-4 doc counts)
+- [x] Closing review (`docs/reviews/p0-review-2.md`, no finding)
+- [x] PR pushed after this archive

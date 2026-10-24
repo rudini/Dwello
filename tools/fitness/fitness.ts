@@ -24,6 +24,8 @@ export type Ratchet = {
 	technical: { path: string; line: string; reason: string }[];
 	exceptions: {
 		bffDecisions: ({ path: string; line: string } & Exception)[];
+		/** Date derivations in the BFF found by the check of #788 part 0; shrink with #788 */
+		bffDates?: ({ path: string; line: string } & Exception)[];
 		literalSets: ({ values: string; files: number } & Exception)[];
 		entityMirrors: ({ table: string; paths: string[] } & Exception)[];
 		moduleCycles: ({ modules: string } & Exception)[];
@@ -42,10 +44,11 @@ export function judge(m: Measured, r: Ratchet): Finding[] {
 				check: 'field-spread',
 				message: `Ä1/AP1 «Eine Form hat eine Quelle»: field spread ${k} ${m.fieldSpread[k]} > ratchet ${r.fieldSpread[k]} (files outside the DB that declare a schema field by hand). Fix: derive the shape from the backend's API type or reuse the area's mapper in src/lib/server instead of declaring the field again.`
 			});
-	for (const d of unlisted(m.bffDecisions, [...r.technical, ...r.exceptions.bffDecisions], (d) => `${d.path}\t${d.line}`))
+	const allowed = [...r.technical, ...r.exceptions.bffDecisions, ...(r.exceptions.bffDates ?? [])];
+	for (const d of unlisted(m.bffDecisions, allowed, (d) => `${d.path}\t${d.line}`))
 		findings.push({
 			check: 'bff-decision',
-			message: `Ä4/AP2 «Fachregeln entscheidet nur das Backend»: ${d.path}: \`${d.line}\` compares a status value or checks input with an anchored regex in the BFF. Fix: let the backend decide (a field or a coded error, shown with backendMessage()); a purely technical check (UUID, ISO date of a query parameter) goes into \`technical\` of tools/fitness/ratchet.json with its reason.`
+			message: `Ä4/AP2 «Fachregeln entscheidet nur das Backend»: ${d.path}: \`${d.line}\` compares a status value, checks input with an anchored regex or derives something from today's date in the BFF. Fix: let the backend decide (a field or a coded error, shown with backendMessage()); a purely technical check (UUID, ISO date of a query parameter) goes into \`technical\` of tools/fitness/ratchet.json with its reason.`
 		});
 	for (const s of m.literalSets) {
 		const listed = r.exceptions.literalSets.find((l) => l.values === s.values);
@@ -112,6 +115,7 @@ export function advise(
 /** Size of each exception list: entries, and for value lists the files each may span. */
 const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
 	bffDecisions: x.bffDecisions.length,
+	bffDates: x.bffDates?.length,
 	literalSets: x.literalSets.reduce((n, e) => n + e.files, 0),
 	entityMirrors: x.entityMirrors.reduce((n, e) => n + e.paths.length, 0),
 	moduleCycles: x.moduleCycles.length
@@ -128,8 +132,10 @@ export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 	for (const k of ['median', 'p90', 'max'] as const)
 		if (working.fieldSpread[k] > base.fieldSpread[k]) loose(`fieldSpread.${k} rose from ${base.fieldSpread[k]} to ${working.fieldSpread[k]}.`);
 	const [now, before] = [exceptionSizes(working), exceptionSizes(base)];
+	// a list the base does not have yet comes with the check that needs it (visible in the diff)
 	for (const k of Object.keys(now) as (keyof typeof now)[])
-		if (now[k] > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
+		if (before[k] !== undefined && now[k] === undefined) loose(`exceptions.${k} was removed; keep it, empty, so it cannot come back with entries unseen.`);
+		else if (before[k] !== undefined && (now[k] ?? 0) > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
 	return findings;
 }
 
@@ -139,7 +145,9 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 	const fieldSpread = { median: 0, p90: 0, max: 0 };
 	for (const k of ['median', 'p90', 'max'] as const) fieldSpread[k] = Math.min(m.fieldSpread[k], r.fieldSpread[k]);
 	const decisionKey = (d: { path: string; line: string }) => `${d.path}\t${d.line}`;
-	const stale = unlisted(x.bffDecisions, unlisted(m.bffDecisions, r.technical, decisionKey), decisionKey);
+	const found = unlisted(m.bffDecisions, r.technical, decisionKey);
+	const stale = unlisted(x.bffDecisions, found, decisionKey);
+	const staleDates = unlisted(x.bffDates ?? [], unlisted(found, x.bffDecisions, decisionKey), decisionKey);
 	const files = (values: string) => m.literalSets.find((s) => s.values === values)?.files ?? 0;
 	const mirrors = new Set(m.entityMirrors.map((e) => `${e.table}\t${e.path}`));
 	return {
@@ -151,7 +159,8 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 			entityMirrors: x.entityMirrors
 				.map((e) => ({ ...e, paths: e.paths.filter((p) => mirrors.has(`${e.table}\t${p}`)) }))
 				.filter((e) => e.paths.length > 0),
-			moduleCycles: x.moduleCycles.filter((c) => m.moduleCycles.includes(c.modules))
+			moduleCycles: x.moduleCycles.filter((c) => m.moduleCycles.includes(c.modules)),
+			...(x.bffDates && { bffDates: x.bffDates.filter((d) => !staleDates.includes(d)) })
 		}
 	};
 }
@@ -183,6 +192,14 @@ const scripts = (out: string, names: string[], env: Record<string, string> = {})
 	return (name: string): Record<string, string>[] => JSON.parse(readFileSync(join(out, name + '.json'), 'utf8'));
 };
 
+// A date compared with today, or today handed to a function that decides by it (#788); not `today: localToday()`
+const DATE_CMP = /(?<![=])[<>]=?\s*(?:localToday\(\)|\btoday\b)|(?:localToday\(\)|\btoday\b)\s*[<>]/;
+const TODAY_ARG = /[(,]\s*(?:localToday\(\)|today)\s*[,)]|^\s*localToday\(\)\s*[,)]/; // the last: a wrapped argument line
+
+/** A line of BFF code that makes a domain decision: a status comparison, an anchored regex, a date against today */
+export const decides = (line: string) =>
+	[...line.matchAll(STATUS_CMP), ...line.matchAll(ANCHORED_RE)].length > 0 || DATE_CMP.test(line) || TODAY_ARG.test(line);
+
 const BFF_FILE = /^src\/lib\/server\/|\+(page|layout)\.server\.ts$|\+server\.ts$|^src\/hooks\.server\.ts$/;
 
 function measure(out: string): Measured {
@@ -197,7 +214,7 @@ function measure(out: string): Measured {
 		bffDecisions: bff.flatMap((path) =>
 			readFileSync(join(ROOT, path), 'utf8')
 				.split('\n')
-				.filter((l) => [...l.matchAll(STATUS_CMP), ...l.matchAll(ANCHORED_RE)].length)
+				.filter(decides)
 				.map((l) => ({ path, line: l.trim() }))
 		),
 		literalSets: read('m4-literal-sets.csv')

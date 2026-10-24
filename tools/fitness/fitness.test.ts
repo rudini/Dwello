@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedTechnical, advise, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
+import { addedTechnical, advise, decides, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -130,6 +130,19 @@ describe('loosened', () => {
 		};
 		expect(loosened(renamed, base)).toEqual([]);
 	});
+
+	it('lets a change bring a new exception list with the check that needs it, then holds it like the others', () => {
+		const entry = { path: 'a.ts', line: 'x < today', reason: '#788', scenario: 'Ä4' };
+		const withDates: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, bffDates: [entry] } };
+		expect(loosened(withDates, ratchet)).toEqual([]);
+		const more: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, bffDates: [entry, entry] } };
+		expect(loosened(more, withDates).map((f) => f.message)).toEqual([expect.stringContaining('bffDates')]);
+	});
+
+	it('does not let a list go away, so it cannot come back later with entries unseen', () => {
+		const withDates: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, bffDates: [] } };
+		expect(loosened(ratchet, withDates).map((f) => f.message)).toEqual([expect.stringContaining('bffDates')]);
+	});
 });
 
 describe('tighten', () => {
@@ -222,6 +235,48 @@ describe('newFields', () => {
 			{ table: 'tenants', field: 'mailCountry', prod_files: '5' }
 		];
 		expect(newFields(spread, baseSchema)).toEqual([{ field: 'tenants.mailCountry', files: 5 }]);
+	});
+});
+
+describe('decides', () => {
+	it('finds a domain decision in a BFF line: a status, an anchored regex, a date against today', () => {
+		expect(decides("if (s.status === 'paid') return;")).toBe(true);
+		expect(decides('const day = /^\\d{4}-\\d{2}-\\d{2}$/;')).toBe(true);
+		expect(decides('if (String(startDate).slice(0, 10) <= localToday() && !confirmed)')).toBe(true);
+		expect(decides('String(c.endDate) < today &&')).toBe(true);
+		expect(decides("contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??")).toBe(true);
+		expect(decides('expiredContracts: expired(allContracts, today),')).toBe(true);
+		expect(decides('\t\t\tlocalToday(),')).toBe(true); // an argument Prettier put on its own line
+	});
+
+	it('leaves lines that only pass today on or use arrows alone', () => {
+		expect(decides('today: localToday(), // the server\'s day, for the Vertragsstatus')).toBe(false);
+		expect(decides('const today = localToday();')).toBe(false);
+		expect(decides('rows.map((r) => today)')).toBe(false);
+		expect(decides("return { name: 'x' };")).toBe(false);
+	});
+});
+
+describe('judge with date exceptions', () => {
+	it('accepts a listed date derivation and refuses an unlisted one', () => {
+		const line = 'String(c.endDate) < today &&';
+		const r: Ratchet = {
+			...ratchet,
+			exceptions: { ...ratchet.exceptions, bffDates: [{ path: 'src/a.ts', line, reason: '#788', scenario: 'Ä4' }] }
+		};
+		const found = [
+			{ path: 'src/a.ts', line },
+			{ path: 'src/b.ts', line }
+		];
+		expect(judge({ ...clean, bffDecisions: found }, r).map((f) => f.message)).toEqual([expect.stringContaining('src/b.ts')]);
+	});
+
+	it('drops a date exception once the code no longer has it', () => {
+		const kept = { path: 'src/a.ts', line: 'x < today', reason: '#788', scenario: 'Ä4' };
+		const gone = { path: 'src/b.ts', line: 'y < today', reason: '#788', scenario: 'Ä4' };
+		const r: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, bffDates: [kept, gone] } };
+		const t = tighten({ ...clean, bffDecisions: [{ path: 'src/a.ts', line: 'x < today' }] }, r);
+		expect(t.exceptions.bffDates).toEqual([kept]);
 	});
 });
 
