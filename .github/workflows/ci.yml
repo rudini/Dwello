@@ -16,6 +16,10 @@ concurrency:
   # so quick merges are tested together instead of cancelling each other
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Jobs read the repository only, unless they ask for more themselves (CodeQL actions/missing-workflow-permissions)
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: 22
 

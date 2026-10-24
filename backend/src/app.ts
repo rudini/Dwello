@@ -4,7 +4,8 @@
 
 import { Elysia, NotFoundError } from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { swagger } from '@elysiajs/swagger';
+import { restoreElysiaFormats } from './elysia-formats';
+import { openapi } from '@elysiajs/openapi';
 import { dashboardRoutes } from './routes/dashboard';
 import { buildingRoutes } from './routes/buildings';
 import { apartmentRoutes } from './routes/apartments';
@@ -25,6 +26,8 @@ import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
 
+restoreElysiaFormats();
+
 export const app = new Elysia()
 	.use(
 		cors({
@@ -33,7 +36,7 @@ export const app = new Elysia()
 		})
 	)
 	.use(
-		swagger({
+		openapi({
 			documentation: {
 				info: {
 					title: 'Dwello API',
@@ -54,7 +57,7 @@ export const app = new Elysia()
 				]
 			},
 			path: '/swagger',
-			exclude: ['/swagger', '/swagger/json']
+			exclude: { paths: ['/swagger', '/swagger/json'] }
 		})
 	)
 	// Every schema refusal (body, query, params) with a code the UI translates, instead of Elysia's own text
