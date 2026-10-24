@@ -1,10 +1,10 @@
 entity,type_declarations,distinct_names,files,names_in_FE,names_in_BFF,names_in_Backend,names_in_DB,names_in_Shared,names
-Contract,30,17,19,6,5,5,2,4,RentalContract NewRentalContract ContractFilters ContractWithDetails ContractPeriodOverlap ContractForAvailability ContractFormValues ListedContract Contract BackendContract SkippedContract ContractHistory ContractsListData CurrentContract ContractDetailsData ContractEditData Contracts
-Statement,29,20,16,2,3,10,2,8,UtilityStatement NewUtilityStatement StatementCalculation StatementForQRBill StatementPDFData StatementMailInput Statement StatementFilters StatementWithDetails StatementInput RefusedStatement Statements BackendStatement ChangedStatement StatementStatus BilledStatement StatementLineItem StatementLineInvoice StatementsListData StatementDocument
+Contract,31,17,20,6,5,6,2,4,RentalContract NewRentalContract ContractFilters ContractWithDetails ContractPeriodOverlap Contract ContractForAvailability ContractFormValues ListedContract BackendContract SkippedContract ContractHistory ContractsListData CurrentContract ContractDetailsData ContractEditData Contracts
+Statement,29,19,16,2,2,10,2,8,UtilityStatement NewUtilityStatement StatementCalculation StatementForQRBill StatementPDFData StatementMailInput Statement StatementFilters StatementWithDetails StatementInput RefusedStatement BackendStatement ChangedStatement StatementStatus BilledStatement StatementLineItem StatementLineInvoice StatementsListData StatementDocument
 Invoice,18,14,8,2,0,8,4,4,InvoicePart BilledInvoice Invoice NewInvoice InvoiceGroup CategoryInvoice InvoiceFilters InvoiceWithDetails PeriodInvoice InvoiceValidationResult HintedInvoice InvoiceCheck InvoicesListData StatementLineInvoice
+Apartment,14,9,6,0,2,6,2,4,Apartment NewApartment ApartmentStatus ApartmentFilters ApartmentWithDetails EnteredApartment RegisterApartment ApartmentWithBuilding ApartmentsListData
 Building,13,10,8,2,3,2,2,4,Building NewBuilding BuildingFilters BuildingWithStats RegisterBuilding BuildingsListData ApartmentWithBuilding BuildingValues BuildingDetailsData BuildingEditData
-Apartment,13,8,5,0,2,5,2,4,Apartment NewApartment ApartmentStatus ApartmentFilters ApartmentWithDetails RegisterApartment ApartmentWithBuilding ApartmentsListData
-Tenant,13,8,7,0,4,4,2,3,Tenant NewTenant TenantFilters TenantWithOccupancy TenantFields BackendTenant TenantsListData TenantExport
+Tenant,12,7,6,0,3,4,2,3,Tenant NewTenant TenantFilters TenantWithOccupancy BackendTenant TenantsListData TenantExport
 Category,11,7,8,2,1,5,2,1,PromptCategory Category NewCategory CategoryFilters CategoryWithUsage CategoryInvoice CategoryFinding
 DistributionKey,7,5,5,1,0,2,2,1,DistributionKey NewDistributionKey DistributionKeyFilters DistributionKeyWithUsage DistributionKeyRow
 LineItem,7,5,5,0,0,4,2,1,UtilityStatementLineItem NewUtilityStatementLineItem CalculatedLineItem LineItem StatementLineItem

@@ -3104,3 +3104,11 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] Overview takes `toSend`; `draftIds` removed
 - [x] `code-reviewer`: `h28l-review-1.md` (3 Minor, fixed), closing round `h28m-review-1.md`
 - [x] Before complete; PR pushed after this archive
+
+## Session H-28 step 5: baseline re-measured
+
+#717 (H-28): `tools/arch-baseline/run.sh` after steps 1–4; the values go into `docs/architecture/baseline.md` §7a beside the targets of §7, and Ä4's current value into `docs/architecture/utility-tree.md`. Ä4: 0 status comparisons and 1 domain validation rule left in the BFF (`validFrom` of a later Akonto); Ä2: `replaced` no longer in the BFF; Ä1 and Ä3 unchanged. No scenario: documentation and measurement data only. Parallel session (checklist in the pull request).
+
+- [x] Measurement run, `tools/arch-baseline/out/` refreshed
+- [x] §7a written, utility tree Ä4 updated; `bun run fitness` green
+- [x] PR pushed after this archive

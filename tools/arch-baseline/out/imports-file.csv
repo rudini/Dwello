@@ -9,6 +9,7 @@ backend/scripts/e2e-purge-statements.ts,backend/scripts/e2e-client.ts,no,Tooling
 backend/scripts/llm-eval.ts,backend/src/services/llm.service.ts,no,Tooling,Backend,backend/scripts,be:services/llm
 backend/scripts/migrate.ts,backend/src/db/migrate.ts,no,Tooling,DB,backend/scripts,db:migrate
 backend/scripts/test-db.ts,backend/scripts/e2e-db.ts,no,Tooling,Tooling,backend/scripts,backend/scripts
+backend/src/__tests__/accounting-period.test.ts,backend/src/services/accounting-period.ts,no,Tests-Unit,Backend,be-test:unit,be:services/accounting-period
 backend/src/__tests__/advance-payments.test.ts,backend/src/services/advance-payment.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/advance-payment
 backend/src/__tests__/advance-payments.test.ts,backend/src/services/pdf-format.ts,no,Tests-Unit,Backend,be-test:unit,be:services/pdf-format
 backend/src/__tests__/agreed-categories.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
@@ -47,9 +48,12 @@ backend/src/__tests__/apartment-status.pg.test.ts,backend/src/__tests__/helpers/
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/config/llm.ts,no,Tests-Unit,Backend,be-test:unit,be:config
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/db/schema.ts,no,Tests-Unit,DB,be-test:unit,db:schema
+backend/src/__tests__/api-contracts.pg.test.ts,backend/src/services/apartment.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/apartment
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/services/config.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/config
+backend/src/__tests__/api-contracts.pg.test.ts,backend/src/services/contract.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/contract
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/services/ki-model.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/ki-model
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/services/setup.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/setup
+backend/src/__tests__/api-contracts.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/app.ts,no,Tests-Unit,Backend,be-test:unit,be:app
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/api-contracts.pg.test.ts,backend/src/__tests__/helpers/llm.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
@@ -75,6 +79,7 @@ backend/src/__tests__/billed-until.pg.test.ts,backend/src/__tests__/helpers/auth
 backend/src/__tests__/billed-until.pg.test.ts,backend/src/__tests__/helpers/pdf-text.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/billed-until.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/billed-until.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/building-fields.test.ts,backend/src/services/building-fields.ts,no,Tests-Unit,Backend,be-test:unit,be:services/building-fields
 backend/src/__tests__/building-search.pg.test.ts,backend/src/services/building.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/building
 backend/src/__tests__/building-search.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/building.routes.pg.test.ts,backend/src/services/building.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/building
@@ -123,6 +128,8 @@ backend/src/__tests__/contract-overlap.pg.test.ts,backend/src/__tests__/helpers/
 backend/src/__tests__/contract-parties.pg.test.ts,backend/src/services/contract.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/contract
 backend/src/__tests__/contract-parties.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/contract-parties.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/contract.routes.pg.test.ts,backend/src/services/apartment.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/apartment
+backend/src/__tests__/contract.routes.pg.test.ts,backend/src/services/contract.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/contract
 backend/src/__tests__/contract.routes.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/contract.routes.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/dashboard-activity.test.ts,backend/src/routes/dashboard.ts,no,Tests-Unit,Backend,be-test:unit,be:routes/dashboard
@@ -133,6 +140,7 @@ backend/src/__tests__/dashboard.pg.test.ts,backend/src/services/contract.service
 backend/src/__tests__/dashboard.pg.test.ts,backend/src/services/statement.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/statement
 backend/src/__tests__/dashboard.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
 backend/src/__tests__/dashboard.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/dashboard.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/dashboard.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/distribution-key-admin.pg.test.ts,backend/src/services/config.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/config
 backend/src/__tests__/distribution-key-admin.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
@@ -203,8 +211,10 @@ backend/src/__tests__/invoice-categorization.pg.test.ts,backend/src/__tests__/he
 backend/src/__tests__/invoice-categorization.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/db/schema.ts,no,Tests-Unit,DB,be-test:unit,db:schema
+backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/services/contract.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/contract
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/services/heating-profile.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/heating-profile
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/services/statement.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/statement
+backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/invoice-completeness.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
@@ -325,6 +335,11 @@ backend/src/__tests__/statement-creation.pg.test.ts,backend/src/__tests__/helper
 backend/src/__tests__/statement-generation.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
 backend/src/__tests__/statement-generation.pg.test.ts,backend/src/db/schema.ts,no,Tests-Unit,DB,be-test:unit,db:schema
 backend/src/__tests__/statement-generation.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/statement-invoice-order.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
+backend/src/__tests__/statement-invoice-order.pg.test.ts,backend/src/db/schema.ts,no,Tests-Unit,DB,be-test:unit,db:schema
+backend/src/__tests__/statement-invoice-order.pg.test.ts,backend/src/services/invoice.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/invoice
+backend/src/__tests__/statement-invoice-order.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/statement-invoice-order.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/statement-invoices.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
 backend/src/__tests__/statement-invoices.pg.test.ts,backend/src/db/schema.ts,no,Tests-Unit,DB,be-test:unit,db:schema
 backend/src/__tests__/statement-invoices.pg.test.ts,backend/src/services/statement.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/statement
@@ -386,6 +401,16 @@ backend/src/__tests__/statement-recalculation.pg.test.ts,backend/src/services/pd
 backend/src/__tests__/statement-recalculation.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/statement-recalculation.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/statement-recalculation.pg.test.ts,backend/src/__tests__/helpers/rental.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/db/connection.ts,no,Tests-Unit,DB,be-test:unit,db:connection
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/db/schema.ts,no,Tests-Unit,DB,be-test:unit,db:schema
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/services/apartment.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/apartment
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/services/building.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/building
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/services/contract.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/contract
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/services/statement.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/statement
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/statement-run.pg.test.ts,backend/src/__tests__/helpers/records.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
+backend/src/__tests__/statement-run.test.ts,backend/src/services/statement-run.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/statement-run
 backend/src/__tests__/statement.routes.pg.test.ts,backend/src/services/config.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/config
 backend/src/__tests__/statement.routes.pg.test.ts,backend/src/services/statement.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/statement
 backend/src/__tests__/statement.routes.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
@@ -422,6 +447,7 @@ backend/src/__tests__/tenant-export.pg.test.ts,backend/src/__tests__/helpers/ren
 backend/src/__tests__/tenant-export.pg.test.ts,backend/src/services/contract.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/contract
 backend/src/__tests__/tenant-export.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
 backend/src/__tests__/tenant-export.pg.test.ts,backend/src/services/today.ts,no,Tests-Unit,Backend,be-test:unit,be:services/today
+backend/src/__tests__/tenant-fields.test.ts,backend/src/services/tenant-fields.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant-fields
 backend/src/__tests__/tenant-search.pg.test.ts,backend/src/services/tenant.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/tenant
 backend/src/__tests__/tenant-search.pg.test.ts,backend/src/__tests__/helpers/auth.ts,no,Tests-Unit,Tests-Unit,be-test:unit,be-test:unit
 backend/src/__tests__/tenant-status.pg.test.ts,backend/src/services/apartment.service.ts,no,Tests-Unit,Backend,be-test:unit,be:services/apartment
@@ -480,10 +506,10 @@ backend/src/routes/apartments.ts,backend/src/services/apartment.service.ts,no,Ba
 backend/src/routes/apartments.ts,backend/src/services/building.service.ts,no,Backend,Backend,be:routes/apartments,be:services/building
 backend/src/routes/audit-log.ts,backend/src/services/audit-log.service.ts,no,Backend,Backend,be:routes/audit-log,be:services/audit-log
 backend/src/routes/buildings.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:routes/buildings,be:services/coded-error
+backend/src/routes/buildings.ts,backend/src/services/building-fields.ts,no,Backend,Backend,be:routes/buildings,be:services/building-fields
 backend/src/routes/buildings.ts,backend/src/middleware/auth.ts,no,Backend,Backend,be:routes/buildings,be:middleware
 backend/src/routes/buildings.ts,backend/src/services/building.service.ts,no,Backend,Backend,be:routes/buildings,be:services/building
 backend/src/routes/buildings.ts,backend/src/services/fuel-stock.service.ts,no,Backend,Backend,be:routes/buildings,be:services/fuel-stock
-backend/src/routes/buildings.ts,backend/src/services/real-date.ts,no,Backend,Backend,be:routes/buildings,be:services/real-date
 backend/src/routes/buildings.ts,backend/src/routes/apartments.ts,no,Backend,Backend,be:routes/buildings,be:routes/apartments
 backend/src/routes/categories.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:routes/categories,be:services/coded-error
 backend/src/routes/categories.ts,backend/src/middleware/auth.ts,no,Backend,Backend,be:routes/categories,be:middleware
@@ -493,6 +519,7 @@ backend/src/routes/categories.ts,backend/src/services/llm.service.ts,no,Backend,
 backend/src/routes/categories.ts,backend/src/routes/delete-response.ts,no,Backend,Backend,be:routes/categories,be:routes/delete-response
 backend/src/routes/config.ts,backend/src/services/config.service.ts,no,Backend,Backend,be:routes/config,be:services/config
 backend/src/routes/config.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:routes/config,be:services/coded-error
+backend/src/routes/contracts.ts,backend/src/services/statement-run.service.ts,no,Backend,Backend,be:routes/contracts,be:services/statement-run
 backend/src/routes/contracts.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:routes/contracts,be:services/coded-error
 backend/src/routes/contracts.ts,backend/src/services/advance-payment.service.ts,no,Backend,Backend,be:routes/contracts,be:services/advance-payment
 backend/src/routes/contracts.ts,backend/src/services/agreed-category.service.ts,no,Backend,Backend,be:routes/contracts,be:services/agreed-category
@@ -504,6 +531,7 @@ backend/src/routes/contracts.ts,backend/src/services/today.ts,no,Backend,Backend
 backend/src/routes/dashboard.ts,backend/src/db/connection.ts,no,Backend,DB,be:routes/dashboard,db:connection
 backend/src/routes/dashboard.ts,backend/src/db/schema.ts,no,Backend,DB,be:routes/dashboard,db:schema
 backend/src/routes/dashboard.ts,backend/src/services/apartment.service.ts,no,Backend,Backend,be:routes/dashboard,be:services/apartment
+backend/src/routes/dashboard.ts,backend/src/services/statement-invoices.service.ts,no,Backend,Backend,be:routes/dashboard,be:services/statement-invoices
 backend/src/routes/dashboard.ts,backend/src/services/statement.service.ts,no,Backend,Backend,be:routes/dashboard,be:services/statement
 backend/src/routes/dashboard.ts,backend/src/services/today.ts,no,Backend,Backend,be:routes/dashboard,be:services/today
 backend/src/routes/delete-response.ts,backend/src/services/coded-error.ts,yes,Backend,Backend,be:routes/delete-response,be:services/coded-error
@@ -545,11 +573,15 @@ backend/src/routes/statements.ts,backend/src/services/statement.service.ts,no,Ba
 backend/src/routes/statements.ts,backend/src/services/statement-pdf.service.ts,no,Backend,Backend,be:routes/statements,be:services/statement-pdf
 backend/src/routes/statements.ts,backend/src/services/statement-invoices.service.ts,no,Backend,Backend,be:routes/statements,be:services/statement-invoices
 backend/src/routes/statements.ts,backend/src/services/statement-send.service.ts,no,Backend,Backend,be:routes/statements,be:services/statement-send
+backend/src/routes/statements.ts,backend/src/services/statement-run.service.ts,no,Backend,Backend,be:routes/statements,be:services/statement-run
+backend/src/routes/tenants.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:routes/tenants,be:services/coded-error
+backend/src/routes/tenants.ts,backend/src/services/tenant-fields.ts,no,Backend,Backend,be:routes/tenants,be:services/tenant-fields
 backend/src/routes/tenants.ts,backend/src/middleware/auth.ts,no,Backend,Backend,be:routes/tenants,be:middleware
 backend/src/routes/tenants.ts,backend/src/services/tenant.service.ts,no,Backend,Backend,be:routes/tenants,be:services/tenant
 backend/src/routes/tenants.ts,backend/src/services/tenant-export.service.ts,no,Backend,Backend,be:routes/tenants,be:services/tenant-export
 backend/src/routes/tenants.ts,backend/src/services/tenant-anonymise.service.ts,no,Backend,Backend,be:routes/tenants,be:services/tenant-anonymise
-backend/src/routes/tenants.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:routes/tenants,be:services/coded-error
+backend/src/services/accounting-period.ts,backend/src/services/contract.service.ts,no,Backend,Backend,be:services/accounting-period,be:services/contract
+backend/src/services/accounting-period.ts,backend/src/services/today.ts,no,Backend,Backend,be:services/accounting-period,be:services/today
 backend/src/services/advance-payment.service.ts,backend/src/db/connection.ts,no,Backend,DB,be:services/advance-payment,db:connection
 backend/src/services/advance-payment.service.ts,backend/src/db/schema.ts,no,Backend,DB,be:services/advance-payment,db:schema
 backend/src/services/advance-payment.service.ts,backend/src/services/pdf-format.ts,no,Backend,Backend,be:services/advance-payment,be:services/pdf-format
@@ -566,6 +598,8 @@ backend/src/services/apartment.service.ts,backend/src/services/word-search.ts,no
 backend/src/services/apartment.service.ts,backend/src/services/today.ts,no,Backend,Backend,be:services/apartment,be:services/today
 backend/src/services/audit-log.service.ts,backend/src/db/connection.ts,no,Backend,DB,be:services/audit-log,db:connection
 backend/src/services/audit-log.service.ts,backend/src/db/schema.ts,no,Backend,DB,be:services/audit-log,db:schema
+backend/src/services/building-fields.ts,backend/src/services/coded-error.ts,yes,Backend,Backend,be:services/building-fields,be:services/coded-error
+backend/src/services/building-fields.ts,backend/src/services/today.ts,no,Backend,Backend,be:services/building-fields,be:services/today
 backend/src/services/building.service.ts,backend/src/db/connection.ts,no,Backend,DB,be:services/building,db:connection
 backend/src/services/building.service.ts,backend/src/db/schema.ts,no,Backend,DB,be:services/building,db:schema
 backend/src/services/building.service.ts,backend/src/services/apartment.service.ts,no,Backend,Backend,be:services/building,be:services/apartment
@@ -622,6 +656,8 @@ backend/src/services/formula.service.ts,backend/src/services/coded-error.ts,yes,
 backend/src/services/fuel-stock.service.ts,backend/src/db/connection.ts,no,Backend,DB,be:services/fuel-stock,db:connection
 backend/src/services/fuel-stock.service.ts,backend/src/db/schema.ts,no,Backend,DB,be:services/fuel-stock,db:schema
 backend/src/services/fuel-stock.service.ts,backend/src/services/config.service.ts,no,Backend,Backend,be:services/fuel-stock,be:services/config
+backend/src/services/fuel-stock.service.ts,backend/src/services/coded-error.ts,yes,Backend,Backend,be:services/fuel-stock,be:services/coded-error
+backend/src/services/fuel-stock.service.ts,backend/src/services/real-date.ts,no,Backend,Backend,be:services/fuel-stock,be:services/real-date
 backend/src/services/heating-profile.service.ts,backend/src/db/connection.ts,no,Backend,DB,be:services/heating-profile,db:connection
 backend/src/services/heating-profile.service.ts,backend/src/db/schema.ts,no,Backend,DB,be:services/heating-profile,db:schema
 backend/src/services/heating-profile.service.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:services/heating-profile,be:services/coded-error
@@ -709,6 +745,15 @@ backend/src/services/statement-pdf.service.ts,backend/src/services/statement.ser
 backend/src/services/statement-pdf.service.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:services/statement-pdf,be:services/coded-error
 backend/src/services/statement-pdf.service.ts,backend/src/services/contract.service.ts,no,Backend,Backend,be:services/statement-pdf,be:services/contract
 backend/src/services/statement-pdf.service.ts,backend/src/services/heating-profile.service.ts,no,Backend,Backend,be:services/statement-pdf,be:services/heating-profile
+backend/src/services/statement-run.service.ts,backend/src/services/accounting-period.ts,no,Backend,Backend,be:services/statement-run,be:services/accounting-period
+backend/src/services/statement-run.service.ts,backend/src/services/statement-invoices.service.ts,no,Backend,Backend,be:services/statement-run,be:services/statement-invoices
+backend/src/services/statement-run.service.ts,backend/src/services/config.service.ts,no,Backend,Backend,be:services/statement-run,be:services/config
+backend/src/services/statement-run.service.ts,backend/src/services/contract.service.ts,no,Backend,Backend,be:services/statement-run,be:services/contract
+backend/src/services/statement-run.service.ts,backend/src/services/heating-profile.service.ts,no,Backend,Backend,be:services/statement-run,be:services/heating-profile
+backend/src/services/statement-run.service.ts,backend/src/services/invoice-completeness.service.ts,no,Backend,Backend,be:services/statement-run,be:services/invoice-completeness
+backend/src/services/statement-run.service.ts,backend/src/services/real-date.ts,no,Backend,Backend,be:services/statement-run,be:services/real-date
+backend/src/services/statement-run.service.ts,backend/src/services/statement.service.ts,no,Backend,Backend,be:services/statement-run,be:services/statement
+backend/src/services/statement-run.service.ts,backend/src/services/today.ts,no,Backend,Backend,be:services/statement-run,be:services/today
 backend/src/services/statement-send.service.ts,backend/src/mail/index.ts,no,Backend,Backend,be:services/statement-send,be:mail
 backend/src/services/statement-send.service.ts,backend/src/services/coded-error.ts,no,Backend,Backend,be:services/statement-send,be:services/coded-error
 backend/src/services/statement-send.service.ts,backend/src/services/config.service.ts,no,Backend,Backend,be:services/statement-send,be:services/config
@@ -745,6 +790,7 @@ backend/src/services/tenant-export.service.ts,backend/src/services/advance-payme
 backend/src/services/tenant-export.service.ts,backend/src/services/agreed-category.service.ts,no,Backend,Backend,be:services/tenant-export,be:services/agreed-category
 backend/src/services/tenant-export.service.ts,backend/src/services/statement.service.ts,no,Backend,Backend,be:services/tenant-export,be:services/statement
 backend/src/services/tenant-export.service.ts,backend/src/services/today.ts,no,Backend,Backend,be:services/tenant-export,be:services/today
+backend/src/services/tenant-fields.ts,backend/src/services/coded-error.ts,yes,Backend,Backend,be:services/tenant-fields,be:services/coded-error
 backend/src/services/tenant.service.ts,backend/src/db/connection.ts,no,Backend,DB,be:services/tenant,db:connection
 backend/src/services/tenant.service.ts,backend/src/db/schema.ts,no,Backend,DB,be:services/tenant,db:schema
 backend/src/services/tenant.service.ts,backend/src/services/today.ts,no,Backend,Backend,be:services/tenant,be:services/today
@@ -809,6 +855,7 @@ src/__tests__/buildings-i18n.test.ts,src/lib/contract-status.ts,no,Tests-Unit,FE
 src/__tests__/buildings-i18n.test.ts,src/lib/names.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/names
 src/__tests__/buildings-i18n.test.ts,src/lib/overview.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/overview
 src/__tests__/buildings-i18n.test.ts,src/lib/server/building-form.ts,no,Tests-Unit,BFF,fe-test:unit,bff:server/building-form
+src/__tests__/buildings-i18n.test.ts,src/lib/backend-error.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/backend-error
 src/__tests__/buildings-i18n.test.ts,src/lib/building-type.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/building-type
 src/__tests__/buildings-i18n.test.ts,src/routes/buildings/[id]/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/buildings
 src/__tests__/buildings-i18n.test.ts,src/lib/statement.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/statement
@@ -1001,7 +1048,6 @@ src/__tests__/master-data-lists.test.ts,src/routes/config/heating-profiles/+page
 src/__tests__/master-data-lists.test.ts,src/routes/config/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/config
 src/__tests__/master-data-lists.test.ts,src/routes/invoices/new/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/invoices
 src/__tests__/master-data-lists.test.ts,src/routes/statements/generate/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/statements
-src/__tests__/missing-statements.test.ts,src/lib/accounting-period.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/accounting-period
 src/__tests__/names.test.ts,src/lib/names.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/names
 src/__tests__/overview.test.ts,src/lib/overview.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/overview
 src/__tests__/password-login.test.ts,src/routes/login/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/login
@@ -1018,8 +1064,6 @@ src/__tests__/public-pages-layout.dom.test.ts,src/__tests__/helpers/dom.ts,no,Te
 src/__tests__/public-pages-layout.dom.test.ts,src/routes/+layout.svelte,no,Tests-Unit,FE,fe-test:unit,fe:routes/(root)
 src/__tests__/public-pages.test.ts,src/hooks.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:hooks
 src/__tests__/settings.test.ts,src/routes/config/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/config
-src/__tests__/settings.test.ts,src/routes/statements/generate/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/statements
-src/__tests__/settings.test.ts,src/lib/accounting-period.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/accounting-period
 src/__tests__/settings.test.ts,src/__tests__/helpers/action.ts,no,Tests-Unit,Tests-Unit,fe-test:unit,fe-test:unit
 src/__tests__/settings.test.ts,src/routes/invoices/new/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/invoices
 src/__tests__/setup-ki.dom.test.ts,src/routes/setup/+page.svelte,no,Tests-Unit,FE,fe-test:unit,fe:routes/setup
@@ -1103,6 +1147,7 @@ src/__tests__/tenant-new-page.test.ts,src/lib/tenant.ts,no,Tests-Unit,FE,fe-test
 src/__tests__/tenant-new-page.test.ts,src/lib/stores.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/stores
 src/__tests__/tenants-i18n.test.ts,src/lib/tenant.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/tenant
 src/__tests__/tenants-i18n.test.ts,src/lib/server/tenant-form.ts,no,Tests-Unit,BFF,fe-test:unit,bff:server/tenant-form
+src/__tests__/tenants-i18n.test.ts,src/lib/backend-error.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/backend-error
 src/__tests__/tenants-i18n.test.ts,src/lib/utils/contract-availability.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/utils
 src/__tests__/tenants-i18n.test.ts,src/routes/tenants/+page.server.ts,no,Tests-Unit,BFF,fe-test:unit,bff:load/tenants
 src/__tests__/tenants-i18n.test.ts,src/lib/apartment.ts,no,Tests-Unit,FE,fe-test:unit,fe:lib/apartment
@@ -1168,7 +1213,6 @@ src/hooks.server.ts,src/lib/server/jwt-config.ts,no,BFF,BFF,bff:hooks,bff:server
 src/hooks.server.ts,src/lib/server/allowed-emails.ts,no,BFF,BFF,bff:hooks,bff:server/allowed-emails
 src/hooks.server.ts,src/lib/server/login-flow.ts,no,BFF,BFF,bff:hooks,bff:server/login-flow
 src/hooks.server.ts,src/lib/server/oauth.ts,no,BFF,BFF,bff:hooks,bff:server/oauth
-src/lib/accounting-period.ts,src/lib/contract-status.ts,no,FE,FE,fe:lib/accounting-period,fe:lib/contract-status
 src/lib/accounting-period.ts,src/lib/utils/format.ts,no,FE,FE,fe:lib/accounting-period,fe:lib/utils
 src/lib/apartment.ts,src/lib/types.ts,yes,FE,Shared/Contracts,fe:lib/apartment,shared:types
 src/lib/apartment.ts,src/lib/ui/icons.ts,yes,FE,FE,fe:lib/apartment,fe:ui
@@ -1214,7 +1258,6 @@ src/lib/server/category.ts,src/lib/names.ts,no,BFF,FE,bff:server/category,fe:lib
 src/lib/server/category.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:server/category,shared:types
 src/lib/server/category.ts,src/lib/server/save-form.ts,no,BFF,BFF,bff:server/category,bff:server/save-form
 src/lib/server/contract-history.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:server/contract-history,shared:types
-src/lib/server/contract-history.ts,src/lib/contract-status.ts,no,BFF,FE,bff:server/contract-history,fe:lib/contract-status
 src/lib/server/distribution-key.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/distribution-key,fe:lib/backend-error
 src/lib/server/distribution-key.ts,src/lib/distribution-key.ts,yes,BFF,FE,bff:server/distribution-key,fe:lib/distribution-key
 src/lib/server/distribution-key.ts,src/lib/server/save-form.ts,no,BFF,BFF,bff:server/distribution-key,bff:server/save-form
@@ -1234,7 +1277,6 @@ src/lib/server/ki-settings.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/ki-s
 src/lib/server/login-flow.ts,src/lib/server/jwt-config.ts,no,BFF,BFF,bff:server/login-flow,bff:server/jwt-config
 src/lib/server/login-flow.ts,src/lib/server/error-handler.ts,no,BFF,BFF,bff:server/login-flow,bff:server/error-handler
 src/lib/server/login-flow.ts,src/lib/server/oauth.ts,no,BFF,BFF,bff:server/login-flow,bff:server/oauth
-src/lib/server/missing-statements.ts,src/lib/accounting-period.ts,no,BFF,FE,bff:server/missing-statements,fe:lib/accounting-period
 src/lib/server/oauth.ts,src/lib/server/auth.ts,yes,BFF,BFF,bff:server/oauth,bff:server/auth
 src/lib/server/password-login.ts,src/lib/server/auth.ts,no,BFF,BFF,bff:server/password-login,bff:server/auth
 src/lib/server/password-login.ts,src/lib/server/error-handler.ts,no,BFF,BFF,bff:server/password-login,bff:server/error-handler
@@ -1242,7 +1284,7 @@ src/lib/server/password-login.ts,src/lib/server/login-flow.ts,no,BFF,BFF,bff:ser
 src/lib/server/password-login.ts,src/lib/server/oauth.ts,no,BFF,BFF,bff:server/password-login,bff:server/oauth
 src/lib/server/password-login.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/password-login,fe:lib/backend-error
 src/lib/server/save-form.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/save-form,fe:lib/backend-error
-src/lib/server/settings.ts,src/lib/utils/format.ts,no,BFF,FE,bff:server/settings,fe:lib/utils
+src/lib/server/settings.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/settings,fe:lib/backend-error
 src/lib/server/statement-actions.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/statement-actions,fe:lib/backend-error
 src/lib/server/statement-actions.ts,src/lib/contract-form.ts,no,BFF,FE,bff:server/statement-actions,fe:lib/contract-form
 src/lib/server/statement-actions.ts,src/lib/contract-status.ts,no,BFF,FE,bff:server/statement-actions,fe:lib/contract-status
@@ -1250,7 +1292,6 @@ src/lib/server/statement-actions.ts,src/lib/server/documents.ts,no,BFF,BFF,bff:s
 src/lib/server/statement-actions.ts,src/lib/statement.ts,no,BFF,FE,bff:server/statement-actions,fe:lib/statement
 src/lib/server/statement-actions.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:server/statement-actions,shared:types
 src/lib/server/statement-generation.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/statement-generation,fe:lib/backend-error
-src/lib/server/statement-generation.ts,src/lib/contract-status.ts,no,BFF,FE,bff:server/statement-generation,fe:lib/contract-status
 src/lib/server/statement-generation.ts,src/lib/accounting-period.ts,no,BFF,FE,bff:server/statement-generation,fe:lib/accounting-period
 src/lib/server/statement-generation.ts,src/lib/names.ts,no,BFF,FE,bff:server/statement-generation,fe:lib/names
 src/lib/server/statement-generation.ts,src/lib/server/statement.ts,no,BFF,BFF,bff:server/statement-generation,bff:server/statement
@@ -1259,6 +1300,7 @@ src/lib/server/statement.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/statem
 src/lib/server/statement.ts,src/lib/names.ts,no,BFF,FE,bff:server/statement,fe:lib/names
 src/lib/server/statement.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:server/statement,shared:types
 src/lib/server/tenant-form.ts,src/lib/tenant.ts,no,BFF,FE,bff:server/tenant-form,fe:lib/tenant
+src/lib/server/tenant-form.ts,src/lib/backend-error.ts,no,BFF,FE,bff:server/tenant-form,fe:lib/backend-error
 src/lib/server/tenant.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:server/tenant,shared:types
 src/lib/statement-wizard.ts,src/lib/contract-form.ts,no,FE,FE,fe:lib/statement-wizard,fe:lib/contract-form
 src/lib/statement-wizard.ts,src/lib/utils/format.ts,no,FE,FE,fe:lib/statement-wizard,fe:lib/utils
@@ -1539,7 +1581,7 @@ src/routes/buildings/RegisterApartments.svelte,src/lib/ui/TextInput.svelte,no,FE
 src/routes/buildings/RegisterNotices.svelte,src/lib/ui/Alert.svelte,no,FE,FE,fe:routes/buildings,fe:ui
 src/routes/buildings/RegisterNotices.svelte,src/lib/ui/Button.svelte,no,FE,FE,fe:routes/buildings,fe:ui
 src/routes/buildings/[id]/+page.server.ts,src/lib/apartment.ts,no,BFF,FE,bff:load/buildings,fe:lib/apartment
-src/routes/buildings/[id]/+page.server.ts,src/lib/invoice.ts,no,BFF,FE,bff:load/buildings,fe:lib/invoice
+src/routes/buildings/[id]/+page.server.ts,src/lib/backend-error.ts,no,BFF,FE,bff:load/buildings,fe:lib/backend-error
 src/routes/buildings/[id]/+page.server.ts,src/lib/names.ts,no,BFF,FE,bff:load/buildings,fe:lib/names
 src/routes/buildings/[id]/+page.server.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:load/buildings,shared:types
 src/routes/buildings/[id]/+page.server.ts,src/lib/server/building.ts,no,BFF,BFF,bff:load/buildings,bff:server/building
@@ -1805,8 +1847,6 @@ src/routes/contracts/RefusedStatements.svelte,src/lib/contract-status.ts,yes,FE,
 src/routes/contracts/[id]/+page.server.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:load/contracts,shared:types
 src/routes/contracts/[id]/+page.server.ts,src/lib/server/category.ts,no,BFF,BFF,bff:load/contracts,bff:server/category
 src/routes/contracts/[id]/+page.server.ts,src/lib/contract-form.ts,no,BFF,FE,bff:load/contracts,fe:lib/contract-form
-src/routes/contracts/[id]/+page.server.ts,src/lib/accounting-period.ts,no,BFF,FE,bff:load/contracts,fe:lib/accounting-period
-src/routes/contracts/[id]/+page.server.ts,src/lib/server/missing-statements.ts,no,BFF,BFF,bff:load/contracts,bff:server/missing-statements
 src/routes/contracts/[id]/+page.server.ts,src/lib/overview.ts,no,BFF,FE,bff:load/contracts,fe:lib/overview
 src/routes/contracts/[id]/+page.server.ts,src/lib/statement-wizard.ts,no,BFF,FE,bff:load/contracts,fe:lib/statement-wizard
 src/routes/contracts/[id]/+page.server.ts,src/lib/backend-error.ts,no,BFF,FE,bff:load/contracts,fe:lib/backend-error
@@ -2366,7 +2406,6 @@ src/routes/statements/generate/+page.server.ts,src/lib/statement-wizard.ts,yes,B
 src/routes/statements/generate/+page.server.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:load/statements,shared:types
 src/routes/statements/generate/+page.server.ts,src/lib/server/heating-profile.ts,no,BFF,BFF,bff:load/statements,bff:server/heating-profile
 src/routes/statements/generate/+page.server.ts,src/lib/server/statement-generation.ts,no,BFF,BFF,bff:load/statements,bff:server/statement-generation
-src/routes/statements/generate/+page.server.ts,src/lib/accounting-period.ts,no,BFF,FE,bff:load/statements,fe:lib/accounting-period
 src/routes/statements/generate/+page.svelte,src/lib/ui/PageHeader.svelte,no,FE,FE,fe:routes/statements,fe:ui
 src/routes/statements/generate/+page.svelte,src/lib/types.ts,yes,FE,Shared/Contracts,fe:routes/statements,shared:types
 src/routes/statements/generate/+page.svelte,src/routes/statements/generate/StatementWizard.svelte,no,FE,FE,fe:routes/statements,fe:routes/statements
@@ -2501,6 +2540,7 @@ src/routes/tenants/[id]/+page.server.ts,src/lib/server/contract-history.ts,no,BF
 src/routes/tenants/[id]/+page.server.ts,src/lib/contract-status.ts,no,BFF,FE,bff:load/tenants,fe:lib/contract-status
 src/routes/tenants/[id]/+page.server.ts,src/lib/former-tenant-documents.ts,no,BFF,FE,bff:load/tenants,fe:lib/former-tenant-documents
 src/routes/tenants/[id]/+page.server.ts,src/lib/backend-error.ts,no,BFF,FE,bff:load/tenants,fe:lib/backend-error
+src/routes/tenants/[id]/+page.server.ts,src/lib/types.ts,yes,BFF,Shared/Contracts,bff:load/tenants,shared:types
 src/routes/tenants/[id]/+page.svelte,src/lib/stores.ts,no,FE,FE,fe:routes/tenants,fe:lib/stores
 src/routes/tenants/[id]/+page.svelte,src/lib/ui/ActionDialog.svelte,no,FE,FE,fe:routes/tenants,fe:ui
 src/routes/tenants/[id]/+page.svelte,src/lib/ui/Button.svelte,no,FE,FE,fe:routes/tenants,fe:ui
@@ -3245,4 +3285,5 @@ tools/deepcheck/test/suppress.test.ts,tools/deepcheck/src/analyze.ts,no,Tests-Un
 tools/deepcheck/test/suppress.test.ts,tools/deepcheck/test/helpers.ts,no,Tests-Unit,Tooling,tools/deepcheck,tools/deepcheck
 tools/deepcheck/test/variants.test.ts,tools/deepcheck/src/analyze.ts,no,Tests-Unit,Tooling,tools/deepcheck,tools/deepcheck
 tools/deepcheck/test/variants.test.ts,tools/deepcheck/test/helpers.ts,no,Tests-Unit,Tooling,tools/deepcheck,tools/deepcheck
+tools/fitness/fitness.test.ts,tools/fitness/fitness.ts,no,Tests-Unit,Tooling,tools/fitness,tools/fitness
 vite.config.ts,src/lib/version.ts,no,Tooling,FE,(root),fe:lib/version

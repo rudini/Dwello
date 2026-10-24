@@ -1,4 +1,110 @@
 sha,date,type,scope,subject,files
+93d8c5adad,2026-10-24,docs,statements,docs(statements): closing review of step 4,1
+12c0ab5e79,2026-10-24,fix,statements,fix(statements): draft count review findings,6
+3e9c228f4c,2026-10-24,fix,statements,fix(statements): count drafts to send in backend,12
+e0095cba12,2026-10-23,docs,ci,docs(ci): add fitness review round 5,2
+b8738569f7,2026-10-23,chore,ci,chore(ci): tighten ratchet after #784,3
+147d303ea3,2026-10-23,fix,contracts,"fix(contracts): pin same-day tie, archive step 3",3
+89d2fe2ed0,2026-10-23,fix,contracts,fix(contracts): status review findings C-1 to C-4,11
+73495701e8,2026-10-23,docs,ci,docs(ci): add fitness review round 4,2
+dc5da13bd7,2026-10-23,fix,ci,fix(ci): test technical and new-field helpers,5
+f510c841fb,2026-10-23,feat,ci,feat(ci): warn on new fields in over 4 files,3
+c0536fd865,2026-10-23,fix,contracts,fix(contracts): status comparisons in backend,30
+a3481c5e14,2026-10-23,fix,ci,fix(ci): warn on swapped technical entries,5
+57d4dbf650,2026-10-23,fix,ci,"fix(ci): harden fitness wiring, warn on technical",5
+5a293d2a85,2026-10-23,docs,ci,docs(ci): link open fitness work to its issues,1
+a3a1167cdc,2026-10-23,docs,ci,docs(ci): document fitness functions and renames,4
+643f84efa8,2026-10-23,feat,ci,feat(ci): add architecture fitness functions,8
+9d4bc98357,2026-10-23,docs,build,docs(build): record causes of red main runs,2
+958fa08ce0,2026-10-23,docs,build,docs(build): archive migration-mva.md,7
+2e2e61dbeb,2026-10-23,docs,build,"docs(build): record approval, A8 and P2 rating",3
+5de46eb017,2026-10-23,chore,tests,"chore(tests): set the fresh download, check second",3
+09e86f7839,2026-10-23,chore,tests,chore(tests): start a fresh persona installation,2
+8f81b398e7,2026-10-23,docs,config,docs(config): let grill-me start without an issue,2
+2d429a58f4,2026-10-23,docs,build,docs(build): clarify P2 importance rationale,1
+492f43ba2a,2026-10-23,docs,build,docs(build): add response time scenario P2,1
+0db58c781d,2026-10-23,docs,build,docs(build): apply owner answers to utility tree,3
+76f18c87e2,2026-10-23,docs,build,docs(build): add quality attribute utility tree,3
+6e518c6510,2026-10-23,docs,config,docs(config): archive H-28 step 2 session,2
+e72119574e,2026-10-23,fix,buildings,fix(buildings): fuel review findings C-1 to C-5,6
+eee932dccf,2026-10-23,fix,config,fix(config): settings review findings C-1 to C-5,5
+95714a96ca,2026-10-23,fix,buildings,fix(buildings): check fuel stock form in backend,13
+917d453c27,2026-10-23,fix,config,fix(config): check settings form in backend,14
+6d81168cfe,2026-10-23,docs,invoices,docs(invoices): archive the invoice order session,3
+f36b38270d,2026-10-23,fix,invoices,fix(invoices): keep same-day invoice order,3
+f14bd6ca4b,2026-10-23,docs,tenants,docs(tenants): archive H-28 tenant form step,2
+57921034cd,2026-10-23,docs,tenants,docs(tenants): name new tenant without channel,3
+ac3027f4ce,2026-10-23,fix,tenants,fix(tenants): review K-1 to K-3 of tenant checks,8
+ea853e00a3,2026-10-23,fix,tenants,fix(tenants): check tenant form in backend,21
+d8c5326aad,2026-10-23,docs,ci,docs(ci): archive the session of #643,3
+2ec78219fd,2026-10-23,fix,ci,fix(ci): blame trailing tags on the scenario below,4
+771894f6b7,2026-10-23,chore,tests,chore(tests): check the label after a failed read,4
+6f0a1c7c47,2026-10-23,docs,styles,docs(styles): archive the landing session,3
+bcf2d78731,2026-10-23,fix,styles,fix(styles): follow landing closing review 2,8
+97012c0725,2026-10-23,docs,invoices,docs(invoices): add the persona report of #760,1
+5a07ced528,2026-10-23,docs,buildings,docs(buildings): archive H-28 building form step,2
+178ea39687,2026-10-23,docs,buildings,"docs(buildings): name form codes, review J-2/J-3",3
+29cc00219f,2026-10-23,fix,styles,fix(styles): retake the statement screenshots,4
+3b09c03613,2026-10-23,fix,invoices,fix(invoices): enter details after a failed read,3
+1c361e7f3f,2026-10-23,fix,buildings,fix(buildings): check building form in backend,16
+2b5a76d0e8,2026-10-23,fix,styles,fix(styles): follow landing reviews round 1,10
+abd6172020,2026-10-23,fix,invoices,fix(invoices): «Angaben eingeben» for unread files,7
+6057462e52,2026-10-23,docs,ci,docs(ci): workflow notes of #643,1
+2df5afb4d0,2026-10-23,fix,ci,fix(ci): keep tagged Examples blocks free,4
+a55534da7f,2026-10-23,docs,statements,docs(statements): archive H-28 step 1 session,2
+bda46e5ed3,2026-10-23,docs,styles,docs(styles): add Marco's landing report,1
+b700a086c0,2026-10-23,docs,styles,docs(styles): add Anna's landing report,1
+cf3d0acdb2,2026-10-23,chore,tests,chore(tests): add «Angaben eingeben» as wip,3
+ecf72e780a,2026-10-23,fix,tests,fix(tests): run plan flags in BFF tests,6
+a2ef734fe0,2026-10-23,fix,styles,fix(styles): follow landing fach review 1,8
+cc5bb59992,2026-10-23,docs,config,docs(config): send questions to Discussions,3
+9532e73dac,2026-10-23,fix,ci,fix(ci): count inserted steps as spec changes,4
+1e981b4985,2026-10-23,docs,styles,docs(styles): tick landing plan items,1
+e9ac0eabce,2026-10-23,fix,statements,fix(statements): preview flags from run plan,6
+eaa624001e,2026-10-23,feat,styles,feat(styles): warm up the landing page,9
+e3c83a26f3,2026-10-23,docs,statements,docs(statements): persona review of #647,3
+6f508381f3,2026-10-23,docs,statements,docs(statements): code review of #647,2
+eeaa1c10dd,2026-10-23,fix,statements,fix(statements): heat hints for corrected run,5
+0d28b46da3,2026-10-23,docs,config,docs(config): one nfr category label per issue,8
+75d7ab4377,2026-10-23,fix,tests,"fix(tests): heat hints for corrected run, red",1
+3e2826d8c7,2026-10-23,fix,statements,fix(statements): scenario heat hints corrected run,2
+005f8ec49d,2026-10-23,chore,config,chore(config): ask the UI language in bug reports,1
+d975fab90a,2026-10-23,docs,config,docs(config): archive the #648 session,2
+4a430b9ce5,2026-10-23,docs,config,docs(config): fix review findings of #648,6
+ae45042753,2026-10-23,docs,config,docs(config): point open points to nfr issues,6
+a2417c9c32,2026-10-23,docs,build,docs(build): archive H-28 heating hints session,4
+218e4ac790,2026-10-23,chore,config,chore(config): nfr issues and English labels,16
+302e6bc059,2026-10-23,fix,statements,fix(statements): keep billed count of heat hints,4
+0669cb270d,2026-10-23,fix,statements,fix(statements): run heating hints in backend,10
+c164189843,2026-10-23,docs,build,docs(build): archive H-28 #16 session,3
+41aa697fc1,2026-10-23,fix,tests,fix(tests): pin profile limit of run differences,4
+ae881e3e9c,2026-10-23,fix,statements,fix(statements): compare kept settings in backend,9
+ccef139919,2026-10-23,docs,config,docs(config): name info@dwello.ch as contact,3
+cffeeab39b,2026-10-23,docs,tests,docs(tests): keep the earlier demo review,3
+961c1c9d4e,2026-10-23,docs,tests,docs(tests): review and archive of the demo fix,3
+894e710dc1,2026-10-23,fix,docker,fix(docker): start the demo with the key volume,4
+192d7176a1,2026-10-23,docs,ci,docs(ci): tick the plan of #643,1
+d58bbf7d41,2026-10-23,chore,ci,chore(ci): require approval to change a spec,7
+faf5040bea,2026-10-23,docs,statements,docs(statements): add review h28-2 report,1
+84184ffacf,2026-10-23,docs,build,docs(build): add review baseline-4 report,1
+6f378d052f,2026-10-23,docs,build,docs(build): add review baseline-3 report,1
+8616140353,2026-10-23,docs,build,docs(build): answer review baseline-2 findings,1
+d999373d07,2026-10-23,docs,ci,docs(ci): archive session 2026-10-23,3
+9ec63cadc2,2026-10-23,chore,ci,chore(ci): review fixes for workflow rules,8
+47afd4ff6a,2026-10-23,docs,build,docs(build): answer review baseline-1 findings,1
+7041cbb5f6,2026-10-23,fix,statements,fix(statements): answer review h28-1 findings,5
+596539d1c9,2026-10-23,chore,statements,chore(statements): decide periods in the backend,28
+6e433b8d1f,2026-10-23,chore,ci,chore(ci): apply workflow review 2026-10-23,15
+ba53f028f6,2026-10-23,docs,tests,docs(tests): collected workflow review 2026-10-23,1
+f2cc1aa7d2,2026-10-23,docs,tests,docs(tests): archive session 2026-10-21,3
+609db35cf2,2026-10-23,docs,statements,"docs(statements): plan of #637, pull request",1
+d0158b576b,2026-10-23,docs,build,docs(build): order H-28 with statement rules first,1
+19841748a2,2026-10-23,docs,build,docs(build): record BFF domain rules as H-28,1
+c25efa9e50,2026-10-23,docs,statements,docs(statements): closing review of #637,2
+f6f78ae812,2026-10-23,fix,tests,fix(tests): restored draft waits for its step,2
+43f259c0e1,2026-10-23,docs,statements,docs(statements): plan of #637,1
+6629429041,2026-10-23,fix,statements,fix(statements): no jump while «Weiter» unseen,2
+247bf7ed4b,2026-10-23,docs,build,docs(build): add architecture baseline analysis,1
 444c1e4f16,2026-10-23,docs,statements,docs(statements): persona Dr. Weber on #477,2
 1e7b036914,2026-10-23,docs,statements,docs(statements): code review of #477,2
 0e283c6147,2026-10-23,fix,i18n,fix(i18n): agreed Akonto in the help glossary,10
