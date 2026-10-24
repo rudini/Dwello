@@ -3218,3 +3218,17 @@ Scenario: «Mietvertrag löschen, der inzwischen begonnen hat» (`contract-detai
 - [x] Fitness `--update` (bffDates 9 → 8), `fitness-functions.md`
 - [x] Review round 1 (`docs/reviews/p1-review-1.md`: C-1 Major 404 showed the backend's English text, fixed with a test; C-2 Major scenario added; C-3 Minor dead test setup removed)
 - [x] Closing review (`docs/reviews/p1-review-2.md`: C-1 to C-3 fixed, no new findings), PR pushed after this archive
+
+## Session: index dwello.ch in search engines
+
+- [x] `marketing/robots.txt`, `marketing/sitemap.xml` (landing pages, hreflang alternates), IndexNow key file
+- [x] `deploy-site.yml`: IndexNow ping after the upload; `marketing/README.md` rows
+- [x] Slice review round 1 (`docs/reviews/seo-review-1.md`)
+- [x] Closing review round (`docs/reviews/seo-review-2.md`)
+- [x] PR: pushed after this archive
+
+## Session: keep the app out of search engines
+
+- [x] `X-Robots-Tag: noindex, nofollow` on every page the app answers (sign-in page included); test in `hooks.server.test.ts`, seen red
+- [x] Slice review (`docs/reviews/noindex-review-1.md`)
+- [x] PR #799: pushed after this archive
