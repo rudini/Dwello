@@ -124,6 +124,10 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 			paidDate
 		})),
 		correctionDeclined: data.correctionDeclined ? { on: data.correctionDeclined.on } : null,
+		// what it allows, the backend decides it (#788)
+		editable: data.editable === true,
+		correctable: data.correctable === true,
+		asksPayment: data.asksPayment === true,
 		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		)

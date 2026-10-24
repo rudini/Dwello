@@ -377,6 +377,10 @@ export interface StatementWithDetails extends Statement {
 	// #448: a Schlussabrechnung, the Übertrag from the previous statement, a replaced Saldo the next one counted
 	final?: boolean;
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
+	// what it allows, decided by the backend (#788): the page shows buttons and hints by it, the status only as label
+	editable: boolean;
+	correctable: boolean;
+	asksPayment: boolean;
 	offsetWith?: { statementNumber: string; amount: number }[];
 }
 

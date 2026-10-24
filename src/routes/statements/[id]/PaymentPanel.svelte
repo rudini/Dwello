@@ -11,8 +11,8 @@
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
 	const nextReminder = $derived(nextReminderLater(statement));
-	// a replaced statement asks for nothing: its berichtigte Abrechnung says what is still due (#120)
-	const replaced = $derived(statement.status === 'replaced');
+	// a replaced statement asks for nothing: its berichtigte Abrechnung says what is still due (#120); the backend says so (#788)
+	const replaced = $derived(!statement.asksPayment);
 	// below CHF 5 nothing is paid: no Zahlungsfrist and no «Bezahlt am»; the Saldo is carried over (#448), on a
 	// Schlussabrechnung claimed or paid out; settled under #94 (paid with 0.00) a Nachzahlung was waived, a refund is
 	// carried over now (product owner 2026-10-19, Fachreview 448-2 V-18)

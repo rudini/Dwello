@@ -3278,3 +3278,15 @@ Product owner, 24.10.2026: on every save (`PUT /contracts/:id`) the backend refu
 - [x] `tests/e2e/CLAUDE.md`: check the warning and the links, one feature file before a long run
 - [x] Review 792: `docs/reviews/792-review-1.md` (no findings)
 - [x] PR: pushed after this archive
+
+## Session: #788 part 3a, what a statement allows (capability fields)
+
+Product owner, 24.10.2026: the backend sends per statement what it allows; the frontend shows buttons and hints by these fields and keeps only the status label. Part 3 in two pull requests: 3a the frontend decisions (`MoreActions`, `PaymentPanel`, `LaterChanges`), 3b one place for «a replaced statement does not count» in the backend. Behaviour unchanged (`No scenario: behaviour unchanged; the statement-detail and correction scenarios pin the buttons and hints`). Refs #788.
+
+- [x] Backend `GET /statements/:id`: `editable`, `correctable`, `asksPayment` (`statement-capabilities.pg.test.ts`, red first)
+- [x] API contract `tests/contracts/statement.json`; type `StatementWithDetails`; BFF mapper `toStatement`; `docs/api-specification.md`
+- [x] `MoreActions`, `PaymentPanel`, `LaterChanges` read the fields (`statement-pages.dom.test.ts`, 4 tests red first: fields against the status); the test helper fills the fields for a status as the backend does
+- [x] Measured `replaced`: 18 → 15 files (frontend 7 → 4, shared 1, backend 10); `fitness-functions.md`
+- [x] E2E `statement-detail`, `-edit`, `-send`, `-reminder`, `statements` (Chromium and API, 142) green
+- [x] Slice review round 1 (`docs/reviews/p3a-review-1.md`: no Blocker/Major; C-1 Minor the hint's «Berichtigen» by `correctable`, DOM test red first; C-2 Minor mapper test, red with the mapper broken)
+- [x] Closing round (`docs/reviews/p3a-review-2.md`: C-1, C-2 fixed, no new findings), PR pushed after this archive
