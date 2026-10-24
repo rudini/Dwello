@@ -665,6 +665,13 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// H-28 (#717): a day that does not exist, refused with its code
+	it('DELETE /contracts/:id/advance-payments/:validFrom mit einem Tag, den es nicht gibt, liefert die Felder von contract-advance-day-invalid.json', async () => {
+		const response = await callApi(`/api/v1/contracts/${rental.contract}/advance-payments/2024-02-30`, { method: 'DELETE' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-advance-day-invalid'), await response.json())).toEqual([]);
+	});
+
 	// #464: a later Akonto the 2024 draft counts, entered before the draft (as the demo data could)
 	it('DELETE /contracts/:id/advance-payments/:validFrom eines gezählten Akontos liefert die Felder von contract-advance-delete-refused.json', async () => {
 		await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2024-07-01', amount: '200' });

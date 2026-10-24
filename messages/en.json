@@ -2066,6 +2066,7 @@
 	"backend_fuel_stock_other_category": "All stocks of a building belong to the same category. Choose the category of the earlier stocks.",
 	"backend_fuel_stock_date_taken": "A stock has already been added for this reading date. Delete it first.",
 	"backend_contract_draft_not_affected": "The rental contract could not be ended.",
+	"backend_advance_day_invalid": "An error occurred while saving. Try again later.",
 	"backend_building_city_required": "Town is required.",
 	"backend_building_canton_required": "Canton is required.",
 	"backend_building_year_built_invalid": "Year built must be between 1800 and today.",
