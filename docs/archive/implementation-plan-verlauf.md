@@ -3226,3 +3226,9 @@ Scenario: «Mietvertrag löschen, der inzwischen begonnen hat» (`contract-detai
 - [x] Slice review round 1 (`docs/reviews/seo-review-1.md`)
 - [x] Closing review round (`docs/reviews/seo-review-2.md`)
 - [x] PR: pushed after this archive
+
+## Session: keep the app out of search engines
+
+- [x] `X-Robots-Tag: noindex, nofollow` on every page the app answers (sign-in page included); test in `hooks.server.test.ts`, seen red
+- [x] Slice review (`docs/reviews/noindex-review-1.md`)
+- [x] PR #799: pushed after this archive
