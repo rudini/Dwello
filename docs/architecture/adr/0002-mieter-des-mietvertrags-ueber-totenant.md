@@ -57,7 +57,7 @@ Die Vorhersage traf in allen Punkten zu, ohne unerwartete Verbesserung oder Vers
 ## Tradeoffs und verbleibende Risiken
 
 - **Kein Rückfall mehr:** Liefert das Backend je einen Vertrag ohne Mieter, scheitert die Ladefunktion mit einem Fehler statt einen leeren Namen zu zeigen. Ein solcher Vertrag widerspräche dem Schema; der Fehler würde ihn sichtbar machen statt ihn zu verdecken.
-- **Drei Seiten an einem Mapper:** Mieterliste, Mieterdetail und Vertragsdetail hängen jetzt an `toTenant`. Ändert er sich, ändern sich alle drei; ihre Tests decken das ab.
+- **Vier Seiten an einem Mapper:** Mieterliste, Mieterdetail, Mieter bearbeiten (über `loadTenant`) und Vertragsdetail hängen jetzt an `toTenant`. Ändert er sich, ändern sich alle vier; ihre Tests decken das ab.
 - **Rest im BFF:** Die drei verbleibenden Mieter-Spiegel sind der Mapper selbst (`tenant.ts`), das Formular (`tenant-form.ts`) und der gemeinsame Typ (`types.ts`). Weiter senkt sie nur ein aus dem Backend abgeleiteter Typ (Kandidat B, Paar #2 `schema.ts` ↔ `types.ts`).
 
 ## Neue Ratchet-Schwellen
