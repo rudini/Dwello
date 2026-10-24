@@ -8,3 +8,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: keep the app out of search engines
+
+- [x] `X-Robots-Tag: noindex, nofollow` on every page the app answers (sign-in page included); test in `hooks.server.test.ts`, seen red
+- [ ] Slice review (`code-reviewer`)
+- [ ] PR #799

@@ -68,6 +68,18 @@ describe('Sitzung eines Kontos ohne Zugang (#51)', () => {
 	});
 });
 
+describe('Suchmaschinen', () => {
+	it('nehmen die Anmeldeseite nicht in ihren Index auf', async () => {
+		const url = new URL('http://localhost/login');
+		const response = await handle({
+			event: { url, request: new Request(url), cookies: { get: () => undefined }, locals: {} },
+			resolve: async () => new Response('page')
+		} as never);
+
+		expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+	});
+});
+
 describe('Start in Produktion (#51)', () => {
 	afterEach(() => vi.unstubAllEnvs());
 
