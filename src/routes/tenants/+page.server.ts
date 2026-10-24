@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import { toTenant } from '$lib/server/tenant';
 import type { TenantsListData, TenantWithOccupancy } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -35,15 +36,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 
 		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map(
 			(t: Record<string, unknown>) => ({
-				id: t.id as string,
-				firstName: (t.firstName as string) || '',
-				lastName: (t.lastName as string) || '',
-				email: (t.email as string) || null,
-				phone: (t.phone as string) || null,
-				language: (t.language as 'de' | 'fr' | 'it' | 'en') || 'de',
-				address: (t.address as string) || null,
-				postalCode: (t.postalCode as string) || null,
-				city: (t.city as string) || null,
+				...toTenant(t),
 				currentApartment: t.currentApartment
 					? m.buildings_apartment_number({ number: String(t.currentApartment) })
 					: null,
