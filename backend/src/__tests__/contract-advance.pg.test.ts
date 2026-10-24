@@ -112,6 +112,17 @@ describe('Akonto mit Gültig ab', () => {
 		expect((await contract()).advancePayments.map((entry) => entry.validFrom)).toEqual(['2024-05-01', '2024-07-01']);
 	});
 
+	// H-28 (#717): whether «Gültig ab» names a real day is checked here, not in the BFF; nothing of the database's own text
+	it('lehnt das Löschen mit einem Tag ab, den es nicht gibt', async () => {
+		const remove = (validFrom: string) => callApi(`/api/v1/contracts/${rental.contract}/advance-payments/${encodeURIComponent(validFrom)}`, { method: 'DELETE' });
+
+		for (const day of ['kein-datum', '2024-02-30']) {
+			const refused = await remove(day);
+			expect(refused.status).toBe(400);
+			expect(await refused.json()).toEqual({ error: 'validFrom must be a real day' });
+		}
+	});
+
 	it('nennt bei einer berichtigten Abrechnung das Akonto der ersetzten (Entscheid zu F-4, Option A)', async () => {
 		const sent = await idOf(
 			await sendJson('POST', '/api/v1/statements/generate', {
