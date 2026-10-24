@@ -354,18 +354,15 @@ export const actions: Actions = {
 	delete: async ({ params, fetch, request }) => {
 		const confirmed = (await request.formData()).get('mistakeConfirmed') === 'on';
 		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
-		const stored = await fetch(url);
-		if (!stored.ok) return fail(stored.status, { deleteError: m.contracts_delete_failed() });
-		const { startDate } = await stored.json();
-		if (String(startDate).slice(0, 10) <= localToday() && !confirmed)
-			return fail(400, { deleteError: m.contracts_delete_mistake_unconfirmed() });
+		// whether it has started, and so needs the confirmation, the backend decides (CONTRACT_STARTED, #788)
 		const response = await fetch(confirmed ? `${url}?confirmMistake=true` : url, {
 			method: 'DELETE'
 		});
 		if (!response.ok) {
+			// a refusal with a code has its message; any other answer (a contract deleted meanwhile) the own text
 			const body = await response.json().catch(() => null);
 			return fail(response.status, {
-				deleteError: backendMessage(body, m.contracts_delete_failed())
+				deleteError: backendMessage(body?.code ? body : null, m.contracts_delete_failed())
 			});
 		}
 		throw redirect(303, '/contracts');

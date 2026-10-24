@@ -101,6 +101,16 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
     Und der Mietvertrag von "Bruno Meier" ist nicht mehr auffindbar
 
+  # #788: der Mietvertrag hat nach dem Laden der Seite begonnen; ob er begonnen hat, entscheidet das Backend
+  Szenario: Mietvertrag löschen, der inzwischen begonnen hat
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.02" seit "2099-11-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Und der Mietvertrag von "Bruno Meier" beginnt danach am "2024-04-01"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löscht
+    Dann meldet der Dialog "Der Mietvertrag hat inzwischen begonnen. Laden Sie die Seite neu und bestätigen Sie beim Löschen, dass er irrtümlich erfasst wurde."
+
   Szenario: Zur Bearbeitung des Mietvertrags wechseln
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
