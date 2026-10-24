@@ -55,7 +55,7 @@
 		{#if later.correctionLowers}<p>
 				{m.statements_later_lowers({ tenant: statement.tenantName })}
 			</p>{/if}
-		{#if statement.status !== 'draft' && later.correctionDue}
+		{#if statement.correctable && later.correctionDue}
 			<div class="flex flex-wrap gap-4">
 				<Button icon="edit" onclick={oncorrect} testid="statement-later-correct-button"
 					>{m.statements_correct()}</Button

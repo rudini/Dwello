@@ -697,6 +697,13 @@ describe('Abrechnungsdetail', () => {
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('berichtigte Abrechnung ersetzt');
 	});
 
+	// review p3a C-1: the hint's button follows what the backend allows, as «Weitere Aktionen» does (#788)
+	it('bietet im Hinweis kein Berichtigen an, wenn das Backend es nicht erlaubt', () => {
+		later(1, 'sent', { correctionDue: true }, { correctable: false });
+		expect(byTestId('statement-later-invoices')).not.toBeNull();
+		expect(byTestId('statement-later-correct-button')).toBeNull();
+	});
+
 	it('bietet im Hinweis kein Berichtigen an, wenn es nichts ändert', () => {
 		later(1, 'sent');
 		expect(byTestId('statement-later-correct-button')).toBeNull();

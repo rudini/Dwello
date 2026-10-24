@@ -18,4 +18,5 @@ Product owner, 24.10.2026: the backend sends per statement what it allows; the f
 - [x] `MoreActions`, `PaymentPanel`, `LaterChanges` read the fields (`statement-pages.dom.test.ts`, 4 tests red first: fields against the status); the test helper fills the fields for a status as the backend does
 - [x] Measured `replaced`: 18 → 15 files (frontend 7 → 4, shared 1, backend 10); `fitness-functions.md`
 - [x] E2E `statement-detail`, `-edit`, `-send`, `-reminder`, `statements` (Chromium and API, 142) green
-- [ ] Review, PR
+- [x] Slice review round 1 (`docs/reviews/p3a-review-1.md`: no Blocker/Major; C-1 Minor the hint's «Berichtigen» by `correctable`, DOM test red first; C-2 Minor mapper test, red with the mapper broken)
+- [ ] Closing round, PR
