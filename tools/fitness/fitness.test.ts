@@ -138,6 +138,11 @@ describe('loosened', () => {
 		const more: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, bffDates: [entry, entry] } };
 		expect(loosened(more, withDates).map((f) => f.message)).toEqual([expect.stringContaining('bffDates')]);
 	});
+
+	it('does not let a list go away, so it cannot come back later with entries unseen', () => {
+		const withDates: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, bffDates: [] } };
+		expect(loosened(ratchet, withDates).map((f) => f.message)).toEqual([expect.stringContaining('bffDates')]);
+	});
 });
 
 describe('tighten', () => {
@@ -241,6 +246,7 @@ describe('decides', () => {
 		expect(decides('String(c.endDate) < today &&')).toBe(true);
 		expect(decides("contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??")).toBe(true);
 		expect(decides('expiredContracts: expired(allContracts, today),')).toBe(true);
+		expect(decides('\t\t\tlocalToday(),')).toBe(true); // an argument Prettier put on its own line
 	});
 
 	it('leaves lines that only pass today on or use arrows alone', () => {

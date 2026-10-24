@@ -16,4 +16,6 @@ No scenario: tooling only (fitness functions), no app behaviour changes. Product
 - [x] Line matcher as a tested function; date comparisons against today (`localToday()`, `today`) count as BFF decisions
 - [x] Ratchet: today's findings as legacy exceptions (#788), shrink-only
 - [x] Proof: a new date comparison fails
-- [ ] `fitness-functions.md`, review, PR
+- [x] `fitness-functions.md`
+- [x] Review round 1 (`docs/reviews/p0-review-1.md`, 4 Minor: C-1 wrapped `localToday(),` caught; C-2 limits documented; C-3 a list may not be removed; C-4 doc counts)
+- [ ] Closing review, PR

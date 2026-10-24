@@ -134,7 +134,8 @@ export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 	const [now, before] = [exceptionSizes(working), exceptionSizes(base)];
 	// a list the base does not have yet comes with the check that needs it (visible in the diff)
 	for (const k of Object.keys(now) as (keyof typeof now)[])
-		if (before[k] !== undefined && (now[k] ?? 0) > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
+		if (before[k] !== undefined && now[k] === undefined) loose(`exceptions.${k} was removed; keep it, empty, so it cannot come back with entries unseen.`);
+		else if (before[k] !== undefined && (now[k] ?? 0) > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
 	return findings;
 }
 
@@ -193,7 +194,7 @@ const scripts = (out: string, names: string[], env: Record<string, string> = {})
 
 // A date compared with today, or today handed to a function that decides by it (#788); not `today: localToday()`
 const DATE_CMP = /(?<![=])[<>]=?\s*(?:localToday\(\)|\btoday\b)|(?:localToday\(\)|\btoday\b)\s*[<>]/;
-const TODAY_ARG = /[(,]\s*(?:localToday\(\)|today)\s*[,)]/;
+const TODAY_ARG = /[(,]\s*(?:localToday\(\)|today)\s*[,)]|^\s*localToday\(\)\s*[,)]/; // the last: a wrapped argument line
 
 /** A line of BFF code that makes a domain decision: a status comparison, an anchored regex, a date against today */
 export const decides = (line: string) =>
