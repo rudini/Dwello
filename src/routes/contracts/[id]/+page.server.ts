@@ -57,35 +57,6 @@ async function rows(fetch: typeof globalThis.fetch, path: string): Promise<Row[]
 	return response?.ok ? ((await response.json()).data ?? []) : null;
 }
 
-// Whether the apartment has a contract starting after the end; null when its contracts cannot be read
-async function successorAfter(fetch: typeof globalThis.fetch, contract: Row, end: string) {
-	const response = await fetch(
-		`${BACKEND_URL}/api/v1/contracts?apartmentId=${contract.apartmentId}`
-	).catch(() => null);
-	if (!response?.ok) return null;
-	const others: Row[] = (await response.json()).contracts ?? [];
-	return others.some((o) => String(o.startDate).slice(0, 10) > end);
-}
-
-// A notice still running: the new address is due, the next tenant until a later contract is recorded (A-4,
-// review K-1); null without one, or when the apartment's contracts cannot be read: no hint rather than a wrong one
-async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
-	const end = contract.endDate ? String(contract.endDate).slice(0, 10) : null;
-	if (!contract.terminated || !end) return null;
-	// after the end only the new address, while the moved-out tenant still has the building's (A-5, #114)
-	if (end < localToday()) return contract.oldAddress ? { successor: false, ended: true } : null;
-	const successor = await successorAfter(fetch, contract, end);
-	return successor === null ? null : { successor, ended: false };
-}
-
-// An agreed end passed without a later contract or «Mieter ist ausgezogen»: the tenant may have stayed, and then
-// the contract continues open-ended (Art. 266 Abs. 2 OR, A-6); not asked when the apartment's contracts cannot be read
-async function fixedTermCheckDue(fetch: typeof globalThis.fetch, contract: Row) {
-	const end = contract.endDate ? String(contract.endDate).slice(0, 10) : null;
-	if (contract.terminated || contract.movedOut || !end || end >= localToday()) return false;
-	return (await successorAfter(fetch, contract, end)) === false;
-}
-
 type Range = { start: string; end: string };
 type MissingPart = Range & { way: Range & { kind: string }; open: boolean };
 
@@ -171,8 +142,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 					statementNumber: String(s.statementNumber),
 					status: String(s.status)
 				})) ?? null,
-			nextSteps: await nextStepsDue(fetch, data),
-			fixedTermCheck: await fixedTermCheckDue(fetch, data),
+			// what a notice or an agreed end still asks of the landlord, the backend decides (A-4 to A-6, #788)
+			nextSteps: data.nextSteps ?? null,
+			fixedTermCheck: data.fixedTermCheck === true,
 			contract,
 			// the agreed Nebenkosten (#91); without the categories the page still shows the rest
 			agreedCosts: await agreeableCategories(fetch).then(

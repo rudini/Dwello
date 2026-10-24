@@ -310,18 +310,6 @@
 		"bffDates": [
 			{
 				"path": "src/routes/contracts/[id]/+page.server.ts",
-				"line": "if (end < localToday()) return contract.oldAddress ? { successor: false, ended: true } : null;",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 points 2 and 5 (contract page)",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.server.ts",
-				"line": "if (contract.terminated || contract.movedOut || !end || end >= localToday()) return false;",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 points 2 and 5 (contract page)",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.server.ts",
 				"line": "contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??",
 				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 points 2 and 5 (contract page)",
 				"scenario": "Ä4"
