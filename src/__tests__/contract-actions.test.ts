@@ -4,6 +4,7 @@ import { actions, load } from '../routes/contracts/[id]/+page.server';
 import { load as listLoad } from '../routes/contracts/+page.server';
 import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
+import advanceDayInvalid from '../../tests/contracts/contract-advance-day-invalid.json';
 import draftNotAffected from '../../tests/contracts/contract-draft-not-affected.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
@@ -580,6 +581,17 @@ describe('Akonto löschen', () => {
 
 		expect(await result).toMatchObject({ status: 400 });
 		expect(calls).toEqual([]);
+	});
+
+	// H-28 (#717, review h28o C-1): a day that does not exist is the backend's to refuse, shown with its code
+	it('zeigt die Ablehnung eines Tages, den es nicht gibt, in eigenen Worten', async () => {
+		const { calls, result } = runAction(actions.deleteAdvance, 'c1', 400, { validFrom: '2024-02-30' }, advanceDayInvalid);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { advanceDeleteError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.' }
+		});
+		expect(calls).toHaveLength(1);
 	});
 
 	it('nennt im Dialog, warum das Backend das Löschen ablehnt', async () => {

@@ -2066,6 +2066,7 @@
 	"backend_fuel_stock_other_category": "Tous les stocks d’un immeuble appartiennent à la même catégorie. Choisissez la catégorie des stocks précédents.",
 	"backend_fuel_stock_date_taken": "Un stock est déjà saisi pour cette date de référence. Supprimez-le d’abord.",
 	"backend_contract_draft_not_affected": "Le contrat de bail n’a pas pu être terminé.",
+	"backend_advance_day_invalid": "Une erreur s’est produite lors de l’enregistrement. Réessayez plus tard.",
 	"backend_building_city_required": "La localité est obligatoire.",
 	"backend_building_canton_required": "Le canton est obligatoire.",
 	"backend_building_year_built_invalid": "L’année de construction doit se situer entre 1800 et aujourd’hui.",

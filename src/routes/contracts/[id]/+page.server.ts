@@ -348,6 +348,7 @@ export const actions: Actions = {
 	// #464 (product owner on F-13): a later Akonto; the backend refuses one that would change a statement
 	deleteAdvance: async ({ params, fetch, request }) => {
 		const validFrom = String((await request.formData()).get('validFrom'));
+		// only a day's shape goes into the backend path (review 464-1 C-9); whether it is a real day is the backend's (H-28)
 		if (!/^\d{4}-\d{2}-\d{2}$/.test(validFrom)) return fail(400, { validFrom, advanceDeleteError: m.contracts_save_failed() });
 		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}/advance-payments/${validFrom}`, {
 			method: 'DELETE'

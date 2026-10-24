@@ -21,6 +21,7 @@ import {
 } from '../services/contract.service';
 import { apartmentExists, getApartment } from '../services/apartment.service';
 import { tenantExists } from '../services/tenant.service';
+import { isRealDate } from '../services/real-date';
 import { swissToday } from '../services/today';
 
 // Validation schemas
@@ -264,6 +265,11 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 	)
 	// #464: delete a later Akonto amount
 	.delete('/:id/advance-payments/:validFrom', async ({ params, set }) => {
+		// a real day, checked here, not in the BFF (H-28, #717)
+		if (!isRealDate(params.validFrom)) {
+			set.status = 400;
+			return refusal('ADVANCE_DAY_INVALID', 'validFrom must be a real day');
+		}
 		try {
 			await deleteAdvance(params.id, params.validFrom);
 			return { success: true };
