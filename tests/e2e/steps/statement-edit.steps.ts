@@ -12,6 +12,7 @@ import {
 } from '../questions/statement-edit';
 import { statementPath } from '../questions/statements';
 import { clearPaymentDeadline, extendPaymentDeadline, keepNote, openStatementEdit } from '../tasks/statement-edit';
+import { escapeRegExp } from '../questions/pattern';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -35,7 +36,7 @@ When('der Liegenschaftsverwalter die Zahlungsfrist leert und speichert', async (
 
 Then('meldet das Feld «Zahlungsfrist» {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(paymentDeadlineInvalid).toBe('true');
-	await verwalter.sees(paymentDeadlineProblem).toMatch(new RegExp(message.replace(/\./g, '\\.')));
+	await verwalter.sees(paymentDeadlineProblem).toMatch(new RegExp(escapeRegExp(message)));
 });
 
 When('der Liegenschaftsverwalter nur die Bemerkung {string} festhält', async ({ verwalter }, note: string) => {

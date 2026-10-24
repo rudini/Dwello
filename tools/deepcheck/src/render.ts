@@ -22,7 +22,7 @@ export function renderHuman(out: ScanOutput): string {
 	return `deepcheck: ${counted(out)} of ${analyzed} analyzed (${threshold})${topNote(out)}\n\n${body}${groups}`;
 }
 
-const cell = (s: string) => `\`${s.replace(/\|/g, '\\|')}\``;
+const cell = (s: string) => `\`${s.replace(/[\\|]/g, '\\$&')}\``;
 const html = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 function markdownGroups(out: ScanOutput): string {

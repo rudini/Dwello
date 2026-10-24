@@ -24,9 +24,10 @@ high or critical cannot be merged, nor one that adds a dependency with a known h
   fix the maintainer turns into an `nfr:security` issue.
 - **Deadlines**, from the day the alert opens: critical within 2 days, high within 7 days, medium and low with the next
   release.
-- **Tests and tooling** (`tests/`, `tools/`, test files, development dependencies): each finding is checked; without a
-  real attack path it is dismissed on GitHub ("Used in tests" or "Won't fix", with a comment why), without a deadline.
-  A real one counts like a finding in the app.
+- **Tests and tooling** (`tests/`, `tools/`, test files, development dependencies): a finding is fixed like one in the
+  app, so the scan closes it; without a real attack path it has no deadline (#803).
+- **False positives** are dismissed on GitHub ("False positive", with a comment why) only when the code cannot be
+  written so that the scan no longer reports it.
 
 ## Supported versions
 

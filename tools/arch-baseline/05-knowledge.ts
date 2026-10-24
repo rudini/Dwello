@@ -86,7 +86,7 @@ const addSet = (vals: string[], p: string) => {
 for (const [p, t] of text) {
 	if (p.endsWith('.json')) continue;
 	for (const m of t.matchAll(/(?:'[\w-]+'\s*\|\s*)+'[\w-]+'/g)) addSet([...m[0].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
-	for (const m of t.matchAll(/t\.Union\(\s*\[((?:\s*t\.Literal\('[\w-]+'\)\s*,?)+)\]/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
+	for (const m of t.matchAll(/t\.Union\(\s*\[((?:\s*t\.Literal\('[\w-]+'\)(?:\s*,)?)+)\s*\]/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
 	for (const m of t.matchAll(/pgEnum\(\s*'\w+',\s*\[([^\]]+)\]/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
 	for (const m of t.matchAll(/\[((?:\s*'[\w-]+'\s*,){1,}\s*'[\w-]+'\s*,?\s*)\](?:\s*as\s+const)?/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
 }
@@ -100,7 +100,7 @@ csv('m4-literal-sets.csv', litRows);
 const regexes = new Map<string, Set<string>>();
 for (const [p, t] of text) {
 	if (p.endsWith('.json')) continue;
-	for (const m of t.matchAll(/(?:[=(:,!&|?]|return)\s*(\/(?![*/\s])(?:\\.|\[(?:\\.|[^\]\n])*\]|[^/\n\\[])+\/[dgimsuy]*)/g)) {
+	for (const m of t.matchAll(/(?:[=(:,!&|?]|return)\s*(\/(?![*/\s])(?:\\.|\[(?:\\.|[^\]\n\\])*\]|[^/\n\\[])+\/[dgimsuy]*)/g)) {
 		const r = m[1];
 		if (r.length < 6) continue;
 		const s = regexes.get(r) ?? new Set();

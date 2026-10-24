@@ -12,12 +12,14 @@ import NewTenantPage from '../routes/tenants/new/+page.svelte';
 import EditTenantPage from '../routes/tenants/[id]/edit/+page.svelte';
 import { confirmSaved } from '$lib/tenant';
 import { toasts } from '$lib/stores';
+import { withoutComments } from './helpers/markup';
 
 const page = (url = 'http://localhost/tenants/new') => {
 	location.url = new URL(url);
-	return render(NewTenantPage, { props: { form: null } as never })
-		.body.replace(/<!--[^>]*-->/g, '')
-		.replace(/\s+/g, ' ');
+	return withoutComments(render(NewTenantPage, { props: { form: null } as never }).body).replace(
+		/\s+/g,
+		' '
+	);
 };
 
 describe('Neuer Mieter', () => {
@@ -68,9 +70,9 @@ describe('Mieter bearbeiten', () => {
 			language: 'fr',
 			correspondenceChannel: 'email'
 		};
-		const body = render(EditTenantPage, { props: { data: { tenant }, form: null } as never })
-			.body.replace(/<!--[^>]*-->/g, '')
-			.replace(/\s+/g, ' ');
+		const body = withoutComments(
+			render(EditTenantPage, { props: { data: { tenant }, form: null } as never }).body
+		).replace(/\s+/g, ' ');
 		expect(body).toMatch(/<input[^>]*name="lastName"[^>]*value="Keller"/);
 		expect(body).toMatch(/<option value="email" selected/);
 		expect(body).toMatch(/<option value="fr" selected/);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'fs';
+import { strip, withoutComments } from './helpers/markup';
 import de from '../../messages/de.json';
 import en from '../../messages/en.json';
 
@@ -29,13 +30,14 @@ const quoted = (code: string) =>
 
 /** Texts a reader could see: markup text and the quoted strings of code, attributes, props and {…} expressions */
 function texts(source: string, svelte: boolean) {
-	const plain = source
-		.replace(/<!--[\s\S]*?-->/g, '')
-		.replace(/\/\*[\s\S]*?\*\//g, '')
-		.replace(/(^|\s)\/\/.*$/gm, '$1')
-		.replace(/<style[\s\S]*?<\/style>/g, '');
-	const code = svelte ? (plain.match(/<script[\s\S]*?<\/script>/g) ?? []).join('\n') : plain;
-	const markup = svelte ? plain.replace(/<script[\s\S]*?<\/script>/g, '') : '';
+	const plain = strip(
+		withoutComments(source)
+			.replace(/\/\*[\s\S]*?\*\//g, '')
+			.replace(/(^|\s)\/\/.*$/gm, '$1'),
+		/<style[\s\S]*?<\/style[^>]*>/gi
+	);
+	const code = svelte ? (plain.match(/<script[\s\S]*?<\/script[^>]*>/gi) ?? []).join('\n') : plain;
+	const markup = svelte ? strip(plain, /<script[\s\S]*?<\/script[^>]*>/gi) : '';
 	// plain text between tags is read as text, so an apostrophe in it cannot pair with a later quote
 	const textNode = />([^<>{}]+)</g;
 	return [

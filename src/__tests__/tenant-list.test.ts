@@ -7,6 +7,7 @@ vi.mock('$app/stores', () => ({
 }));
 
 import TenantsPage from '../routes/tenants/+page.svelte';
+import { withoutComments } from './helpers/markup';
 
 const tenant = (id: string, isActive: boolean, currentApartment: string | null = null) => ({
 	id,
@@ -28,9 +29,10 @@ const tenant = (id: string, isActive: boolean, currentApartment: string | null =
 const list = (tenants: ReturnType<typeof tenant>[], url = 'http://localhost/tenants') => {
 	location.url = new URL(url);
 	const data = { tenants, total: tenants.length, page: 1, pageSize: 12 };
-	return render(TenantsPage, { props: { data } as never })
-		.body.replace(/<!--[^>]*-->/g, '')
-		.replace(/\s+/g, ' ');
+	return withoutComments(render(TenantsPage, { props: { data } as never }).body).replace(
+		/\s+/g,
+		' '
+	);
 };
 
 const row = (body: string, id: string) =>

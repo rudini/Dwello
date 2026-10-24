@@ -7,6 +7,7 @@ vi.mock('$app/stores', () => ({
 }));
 
 import ContractsPage from '../routes/contracts/+page.svelte';
+import { withoutComments } from './helpers/markup';
 
 const contract = (id: string, tenantName: string, startDate: string, endDate: string | null) => ({
 	id,
@@ -46,7 +47,7 @@ const list = (
 
 // The empty state with its one next step
 const empty = (body: string) =>
-	body.match(/data-testid="contracts-empty"[\s\S]*?<\/a>/)![0].replace(/<!--[^>]*-->/g, '');
+	withoutComments(body.match(/data-testid="contracts-empty"[\s\S]*?<\/a>/)![0]);
 
 describe('Treffer der Suche', () => {
 	// After a search the focus moves to the count, so it is read out

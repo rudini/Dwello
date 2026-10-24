@@ -12,7 +12,7 @@ export interface Coupling {
 /** TS5083 "Cannot read file '...'", e.g. an `extends` target that is generated later. */
 const CANNOT_READ_FILE = 5083;
 
-const SVELTE_SCRIPT = /<script[^>]*>([\s\S]*?)<\/script>/g;
+const SVELTE_SCRIPT = /<script[^>]*>([\s\S]*?)<\/script[^>]*>/gi;
 
 function importSpecifiers(text: string, path: string): string[] {
 	const code = path.endsWith('.svelte') ? [...text.matchAll(SVELTE_SCRIPT)].map((m) => m[1]).join('\n') : text;
