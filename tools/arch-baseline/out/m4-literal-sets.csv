@@ -3,10 +3,10 @@ de|en|fr|it,4,6,BFF|Backend|Shared/Contracts,yes,backend/src/routes/categories.t
 custom|predefined,2,6,Backend|FE|Shared/Contracts,yes,backend/src/routes/distribution-keys.ts backend/src/routes/heating-profiles.ts backend/src/services/distribution-key.service.ts backend/src/services/heating-profile.service.ts src/lib/distribution-key.ts src/lib/types.ts
 local|none|provider,3,4,BFF|Backend|DB,yes,backend/src/db/schema.ts backend/src/routes/ki-settings.ts backend/src/services/ki-settings.service.ts src/lib/server/ki-settings.ts
 active|ended|future,3,4,BFF|Backend|Shared/Contracts,yes,backend/src/routes/contracts.ts backend/src/services/contract.service.ts src/lib/types.ts src/routes/contracts/+page.server.ts
+email|letter,2,4,Backend|FE|Shared/Contracts,yes,backend/src/routes/tenants.ts backend/src/services/tenant-fields.ts src/lib/types.ts src/routes/statements/[id]/MetadataCard.svelte
 occupied|relet|reserved|vacant,4,3,Backend|Shared/Contracts,yes,backend/src/routes/apartments.ts backend/src/services/apartment.service.ts src/lib/types.ts
 hits|none|unreachable,3,3,FE,no,src/routes/buildings/AddressSearch.svelte src/routes/buildings/BuildingForm.svelte src/routes/buildings/RegisterNotices.svelte
 failed|loaded|loading,3,3,FE,no,src/routes/contracts/ContractForm.svelte src/routes/statements/generate/AgreedCosts.svelte src/routes/statements/generate/AgreementsCheck.svelte
-email|letter,2,3,Backend|FE|Shared/Contracts,yes,backend/src/routes/tenants.ts src/lib/types.ts src/routes/statements/[id]/MetadataCard.svelte
 consumption|deviation|gap|missing|new|stock|tank,7,2,Backend|FE,yes,backend/src/services/invoice-completeness.service.ts src/lib/statement-wizard.ts
 draft|overdue|paid|sent,4,2,Backend,no,backend/src/routes/statements.ts backend/src/services/statement.service.ts
 overdue|paid|sent|settled,4,2,Backend,no,backend/src/services/statement-invoices.service.ts backend/src/services/statement.service.ts

@@ -5,6 +5,7 @@ backend/assets/fonts/LiberationSans-Regular.ttf,"binary (screenshot, font, PDF)"
 backend/bun.lock,lockfile
 backend/demo/demo-data.sql,data dump (demo data SQL)
 bun.lock,lockfile
+docs/architecture/baseline.md,this analysis itself
 docs/beispiele/decompte-musterhaus-dubois-2025.pdf,"binary (screenshot, font, PDF)"
 docs/beispiele/nebenkostenabrechnung-musterhaus-mueller-2025.pdf,"binary (screenshot, font, PDF)"
 docs/beispiele/nebenkostenabrechnung-seepark-meier-2025.pdf,"binary (screenshot, font, PDF)"
@@ -102,52 +103,91 @@ docs/design/personas/screens/weber-i18n-4/05-terms-fr.png,"binary (screenshot, f
 docs/design/personas/screens/weber-i18n-4/06-mobile-login.png,"binary (screenshot, font, PDF)"
 docs/design/personas/screens/weber-i18n-4/09-mobile-privacy.png,"binary (screenshot, font, PDF)"
 marketing/fonts/inter-latin.woff2,"binary (screenshot, font, PDF)"
-marketing/shots/dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/dashboard-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/dashboard-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/keys-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/keys-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/mobile-dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/mobile-dashboard-light.webp,"binary (screenshot, font, PDF)"
 marketing/shots/en/pdf-page-1.webp,"binary (screenshot, font, PDF)"
 marketing/shots/en/pdf-qr-part.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/upload-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/en/upload-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/dashboard-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/keys-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/keys-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/mobile-dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/mobile-dashboard-light.webp,"binary (screenshot, font, PDF)"
+marketing/shots/en/statement-dark.webp,"binary (screenshot, font, PDF)"
+marketing/shots/en/statement-light.webp,"binary (screenshot, font, PDF)"
 marketing/shots/fr/pdf-page-1.webp,"binary (screenshot, font, PDF)"
 marketing/shots/fr/pdf-qr-part.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/upload-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/fr/upload-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/dashboard-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/keys-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/keys-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/mobile-dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/mobile-dashboard-light.webp,"binary (screenshot, font, PDF)"
+marketing/shots/fr/statement-dark.webp,"binary (screenshot, font, PDF)"
+marketing/shots/fr/statement-light.webp,"binary (screenshot, font, PDF)"
 marketing/shots/it/pdf-page-1.webp,"binary (screenshot, font, PDF)"
 marketing/shots/it/pdf-qr-part.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/upload-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/it/upload-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/keys-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/keys-light.webp,"binary (screenshot, font, PDF)"
-marketing/shots/mobile-dashboard-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/mobile-dashboard-light.webp,"binary (screenshot, font, PDF)"
+marketing/shots/it/statement-dark.webp,"binary (screenshot, font, PDF)"
+marketing/shots/it/statement-light.webp,"binary (screenshot, font, PDF)"
 marketing/shots/pdf-page-1.webp,"binary (screenshot, font, PDF)"
 marketing/shots/pdf-qr-part.webp,"binary (screenshot, font, PDF)"
-marketing/shots/upload-dark.webp,"binary (screenshot, font, PDF)"
-marketing/shots/upload-light.webp,"binary (screenshot, font, PDF)"
+marketing/shots/statement-dark.webp,"binary (screenshot, font, PDF)"
+marketing/shots/statement-light.webp,"binary (screenshot, font, PDF)"
 screens/immobilienverwaltung/screen.png,"binary (screenshot, font, PDF)"
 screens/nebenkostenabrechnung_erstellen/screen.png,"binary (screenshot, font, PDF)"
 screens/nebenkostenabrechnung_konfiguration/screen.png,"binary (screenshot, font, PDF)"
 screens/rechnungsverwaltung/screen.png,"binary (screenshot, font, PDF)"
 screens/wohnungsdetails_&_mieterübersicht/screen.png,"binary (screenshot, font, PDF)"
 screens/übersichts-dashboard/screen.png,"binary (screenshot, font, PDF)"
+tools/arch-baseline/01-map.ts,this analysis itself
+tools/arch-baseline/02-imports.ts,this analysis itself
+tools/arch-baseline/03-history.ts,this analysis itself
+tools/arch-baseline/04-metrics.ts,this analysis itself
+tools/arch-baseline/05-knowledge.ts,this analysis itself
+tools/arch-baseline/06-examples.ts,this analysis itself
+tools/arch-baseline/07-tables.ts,this analysis itself
+tools/arch-baseline/layers.json,this analysis itself
+tools/arch-baseline/lib.ts,this analysis itself
+tools/arch-baseline/out/.gitignore,this analysis itself
+tools/arch-baseline/out/commit-files.csv,this analysis itself
+tools/arch-baseline/out/commits.csv,this analysis itself
+tools/arch-baseline/out/cycles-file.csv,this analysis itself
+tools/arch-baseline/out/cycles-module.csv,this analysis itself
+tools/arch-baseline/out/excluded-summary.csv,this analysis itself
+tools/arch-baseline/out/excluded-units.csv,this analysis itself
+tools/arch-baseline/out/excluded.csv,this analysis itself
+tools/arch-baseline/out/files.csv,this analysis itself
+tools/arch-baseline/out/imports-file.csv,this analysis itself
+tools/arch-baseline/out/imports-layer.csv,this analysis itself
+tools/arch-baseline/out/imports-module.csv,this analysis itself
+tools/arch-baseline/out/imports-stats.csv,this analysis itself
+tools/arch-baseline/out/imports-unresolved.csv,this analysis itself
+tools/arch-baseline/out/layers.csv,this analysis itself
+tools/arch-baseline/out/m1-layers-feat.csv,this analysis itself
+tools/arch-baseline/out/m1-modules-feat.csv,this analysis itself
+tools/arch-baseline/out/m1-modules-featfix.csv,this analysis itself
+tools/arch-baseline/out/m1-scope-prod.csv,this analysis itself
+tools/arch-baseline/out/m1-summary.csv,this analysis itself
+tools/arch-baseline/out/m1-top10-feat-fix.csv,this analysis itself
+tools/arch-baseline/out/m1-top10-feat.csv,this analysis itself
+tools/arch-baseline/out/m2-file-pairs-commits.csv,this analysis itself
+tools/arch-baseline/out/m2-file-pairs-units-prod.csv,this analysis itself
+tools/arch-baseline/out/m2-file-pairs-units-raw.csv,this analysis itself
+tools/arch-baseline/out/m2-file-pairs-units.csv,this analysis itself
+tools/arch-baseline/out/m2-module-pairs-units-prod.csv,this analysis itself
+tools/arch-baseline/out/m2-module-pairs-units.csv,this analysis itself
+tools/arch-baseline/out/m2-stats.csv,this analysis itself
+tools/arch-baseline/out/m3-hotspots.csv,this analysis itself
+tools/arch-baseline/out/m4-clone-stats.csv,this analysis itself
+tools/arch-baseline/out/m4-clones.csv,this analysis itself
+tools/arch-baseline/out/m4-decisions-outside-backend.csv,this analysis itself
+tools/arch-baseline/out/m4-decisions-per-layer.csv,this analysis itself
+tools/arch-baseline/out/m4-entity-mirror-files.csv,this analysis itself
+tools/arch-baseline/out/m4-entity-mirrors.csv,this analysis itself
+tools/arch-baseline/out/m4-entity-types.csv,this analysis itself
+tools/arch-baseline/out/m4-field-spread.csv,this analysis itself
+tools/arch-baseline/out/m4-literal-sets.csv,this analysis itself
+tools/arch-baseline/out/m4-regex.csv,this analysis itself
+tools/arch-baseline/out/m4-screen-registry.csv,this analysis itself
+tools/arch-baseline/out/m4-shared-code.csv,this analysis itself
+tools/arch-baseline/out/m4-status-literals.csv,this analysis itself
+tools/arch-baseline/out/m4-type-names.csv,this analysis itself
+tools/arch-baseline/out/m4-validation-per-layer.csv,this analysis itself
+tools/arch-baseline/out/report-tables.md,this analysis itself
+tools/arch-baseline/out/s4-pair-examples.csv,this analysis itself
+tools/arch-baseline/out/s4-ritual-files.csv,this analysis itself
+tools/arch-baseline/out/s4-top5-features.csv,this analysis itself
+tools/arch-baseline/out/s4-top5-test-churn.csv,this analysis itself
+tools/arch-baseline/out/unit-files.csv,this analysis itself
+tools/arch-baseline/out/units.csv,this analysis itself
+tools/arch-baseline/run.sh,this analysis itself
+tools/arch-baseline/unit-types.json,this analysis itself
 tools/deepcheck/test/fallow/dead-code.json,generated tool baseline / fixture
 tools/deepcheck/test/fallow/error.json,generated tool baseline / fixture
 tools/deepcheck/test/fallow/health-file-scores.json,generated tool baseline / fixture

@@ -1,5 +1,6 @@
 table,path,layer,fields_matched,fields_distinctive
 buildings,backend/src/routes/buildings.ts,Backend,10,10
+buildings,backend/src/services/building-fields.ts,Backend,5,10
 buildings,src/lib/server/building-form.ts,BFF,7,10
 buildings,src/lib/server/building-register.ts,BFF,5,10
 buildings,src/lib/server/building.ts,BFF,8,10
@@ -11,6 +12,7 @@ buildings,tests/contracts/buildings.json,Shared/Contracts,9,10
 apartments,backend/src/routes/apartments.ts,Backend,5,5
 apartments,backend/src/routes/buildings.ts,Backend,4,5
 apartments,backend/src/services/apartment.service.ts,Backend,5,5
+apartments,backend/src/services/building-fields.ts,Backend,4,5
 apartments,backend/src/services/calculation.service.ts,Backend,3,5
 apartments,backend/src/services/contract.service.ts,Backend,5,5
 apartments,backend/src/services/pdf.service.ts,Backend,3,5
@@ -28,6 +30,7 @@ apartments,src/routes/apartments/[id]/ApartmentFacts.svelte,FE,3,5
 apartments,src/routes/buildings/[id]/+page.server.ts,BFF,5,5
 apartments,src/routes/contracts/[id]/+page.server.ts,BFF,5,5
 apartments,src/routes/contracts/new/+page.server.ts,BFF,5,5
+apartments,tests/contracts/apartment.json,Shared/Contracts,5,5
 apartments,tests/contracts/apartments.json,Shared/Contracts,5,5
 tenants,backend/src/routes/tenants.ts,Backend,8,9
 tenants,backend/src/services/contract.service.ts,Backend,6,9
@@ -38,6 +41,7 @@ tenants,backend/src/services/statement-pdf.service.ts,Backend,6,9
 tenants,backend/src/services/statement.service.ts,Backend,8,9
 tenants,backend/src/services/tenant-anonymise.service.ts,Backend,6,9
 tenants,backend/src/services/tenant-export.service.ts,Backend,8,9
+tenants,backend/src/services/tenant-fields.ts,Backend,7,9
 tenants,backend/src/services/tenant.service.ts,Backend,9,9
 tenants,src/lib/server/tenant-form.ts,BFF,8,9
 tenants,src/lib/server/tenant.ts,BFF,8,9
@@ -69,6 +73,7 @@ categories,backend/src/routes/heating-profiles.ts,Backend,4,7
 categories,backend/src/services/category.service.ts,Backend,7,7
 categories,backend/src/services/distribution-key.service.ts,Backend,4,7
 categories,backend/src/services/statement-pdf.service.ts,Backend,5,7
+categories,backend/src/services/statement-run.service.ts,Backend,4,7
 categories,backend/src/services/statement.service.ts,Backend,4,7
 categories,src/lib/names.ts,FE,4,7
 categories,src/lib/server/category.ts,BFF,7,7
@@ -81,12 +86,14 @@ categories,tests/contracts/categories.json,Shared/Contracts,7,7
 categories,tests/contracts/category.json,Shared/Contracts,7,7
 categories,tests/contracts/distribution-keys.json,Shared/Contracts,4,7
 categories,tests/contracts/heating-profiles.json,Shared/Contracts,4,7
+categories,tests/contracts/statement-run-differences.json,Shared/Contracts,4,7
 distributionKeys,backend/src/routes/categories.ts,Backend,4,5
 distributionKeys,backend/src/routes/distribution-keys.ts,Backend,5,5
 distributionKeys,backend/src/routes/heating-profiles.ts,Backend,4,5
 distributionKeys,backend/src/services/category.service.ts,Backend,4,5
 distributionKeys,backend/src/services/distribution-key.service.ts,Backend,5,5
 distributionKeys,backend/src/services/statement-pdf.service.ts,Backend,5,5
+distributionKeys,backend/src/services/statement-run.service.ts,Backend,4,5
 distributionKeys,backend/src/services/statement.service.ts,Backend,4,5
 distributionKeys,src/lib/distribution-key.ts,FE,4,5
 distributionKeys,src/lib/names.ts,FE,4,5
@@ -102,6 +109,7 @@ distributionKeys,tests/contracts/categories.json,Shared/Contracts,4,5
 distributionKeys,tests/contracts/category.json,Shared/Contracts,4,5
 distributionKeys,tests/contracts/distribution-keys.json,Shared/Contracts,5,5
 distributionKeys,tests/contracts/heating-profiles.json,Shared/Contracts,4,5
+distributionKeys,tests/contracts/statement-run-differences.json,Shared/Contracts,4,5
 heatingProfiles,backend/src/routes/heating-profiles.ts,Backend,16,20
 invoices,backend/src/routes/invoices.ts,Backend,16,16
 invoices,backend/src/services/invoice.service.ts,Backend,11,16

@@ -1,10 +1,14 @@
 regex,files,layers,where
-/^\d{4}-\d{2}-\d{2}$/,7,BFF|FE,src/lib/backend-error.ts src/lib/contract-status.ts src/routes/contracts/[id]/+page.server.ts src/routes/invoices/+page.server.ts src/routes/invoices/new/+page.server.ts src/routes/statements/+page.server.ts src/routes/statements/generate/+page.server.ts
+/^\d{4}-\d{2}-\d{2}$/,6,BFF|FE,src/lib/backend-error.ts src/lib/contract-status.ts src/routes/contracts/[id]/+page.server.ts src/routes/invoices/+page.server.ts src/routes/invoices/new/+page.server.ts src/routes/statements/+page.server.ts
+/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,3,BFF|Backend,backend/src/app.ts backend/src/services/fuel-stock.service.ts src/routes/buildings/[id]/+page.server.ts
+/^\d{4}$/,3,BFF|Backend,backend/src/services/building-fields.ts backend/src/services/tenant-fields.ts src/routes/invoices/+page.server.ts
+"/^\d+(\.\d{1,2})?$/",3,Backend|FE,backend/src/services/fuel-stock.service.ts backend/src/services/statement.service.ts src/lib/contract-form.ts
 "/[\\/:*?""<>|]/g",3,Backend,backend/src/services/reminder.service.ts backend/src/services/statement-send.service.ts backend/src/services/tenant-export.service.ts
-"/^\d+(\.\d{1,2})?$/",3,BFF|Backend|FE,backend/src/services/statement.service.ts src/lib/contract-form.ts src/routes/buildings/[id]/+page.server.ts
-/^\d{4}$/,3,BFF,src/lib/server/building-form.ts src/lib/server/tenant-form.ts src/routes/invoices/+page.server.ts
-/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,2,BFF|Backend,backend/src/app.ts src/routes/buildings/[id]/+page.server.ts
-/^[^\s@]+@[^\s@]+\.[^\s@]+$/,2,BFF|Backend,backend/src/services/config.service.ts src/lib/server/tenant-form.ts
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/,2,Backend,backend/src/services/config.service.ts backend/src/services/tenant-fields.ts
+/\s*%$/,2,Backend|FE,backend/src/services/config.service.ts src/lib/utils/format.ts
+/['’\s]/g,2,Backend|FE,backend/src/services/fuel-stock.service.ts src/lib/invoice.ts
+/\.[-–—]+$/,2,Backend|FE,backend/src/services/fuel-stock.service.ts src/lib/invoice.ts
+/^apartments\.(\d+)\./,2,BFF|FE,src/lib/backend-error.ts src/lib/server/building-form.ts
 /^\/(?![/\\])/,2,BFF|FE,src/lib/invoice.ts src/lib/server/login-flow.ts
 /auth/,2,BFF,src/routes/auth/me/+server.ts src/routes/auth/refresh/+server.ts
 /overlap/i,2,FE,src/routes/contracts/ContractForm.svelte src/routes/contracts/new/ContractWizard.svelte

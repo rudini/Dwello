@@ -1,4 +1,5 @@
 sha,pr,title,reason
+2c6c7e6562,757,docs(build): set baseline target values,only excluded files
 8e0ef17fa2,,Merge remote-tracking branch 'origin/main',sync merge on main (not a PR): diff would repeat other units
 75193cb938,19,chore(build): format src with Prettier (#19),formatting-only title
 e6debb78a7,,Merge remote-tracking branch 'origin/claude/ecstatic-hawking-2urqri' into claude/nice-bun-b6a451,sync merge on main (not a PR): diff would repeat other units

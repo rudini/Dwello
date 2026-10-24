@@ -1,4 +1,29 @@
 id,sha,date,kind,type,type_source,scope,title,branch,commits,feat_commits,files_total,files_prod,files_test,files_other,modules_prod,modules_test,layers_prod,layers_prod_list,layers_all,i18n_files,loc_prod,loc_test,n_FE,n_BFF,n_Backend,n_DB,n_Shared/Contracts,n_Tests-Unit,n_Tests-Acceptance,n_Tooling,n_Docs,n_Process,n_Marketing
+PR#785,23d9a14bf0,2026-10-24,pr-merge,fix,title,statements,fix(statements): count drafts to send in backend,ccr-97d9782c-h28-overview,3,0,15,5,6,4,5,3,3,Backend|FE|BFF,7,0,35,101,1,1,3,0,1,5,0,0,1,3,0
+PR#783,043950a1fa,2026-10-24,pr-merge,feat,title,ci,feat(ci): architecture fitness functions (phase 2a),ccr-b1954048-xmjmse,10,2,14,0,1,13,0,1,0,,4,0,0,227,0,0,0,0,0,1,0,6,1,6,0
+PR#784,6f4ff6d6b7,2026-10-24,pr-merge,fix,title,contracts,fix(contracts): status comparisons in backend,ccr-97d9782c-h28-status,3,0,34,15,15,4,12,3,4,Backend|FE|BFF|Shared/Contracts,7,4,136,375,4,6,4,0,8,8,0,0,1,3,0
+PR#779,868aef918a,2026-10-24,pr-merge,docs,title,build,docs(build): add quality attribute utility tree,ccr-d960197b-3x1xv4,7,0,9,0,0,9,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,7,2,0
+PR#776,59b7b3c303,2026-10-24,pr-merge,chore,title,tests,chore(tests): start a fresh persona installation,ccr-8b7da2b0-52xa3f,2,0,4,0,0,4,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,1,3,0
+PR#775,a81afe552e,2026-10-24,pr-merge,docs,title,config,docs(config): let grill-me start without an issue,ccr-69d4f56c-28rngb,1,0,2,0,0,2,0,0,0,,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0
+PR#772,ae8faf862e,2026-10-24,pr-merge,fix,title,config,fix(config): settings and fuel stock checks in backend,ccr-97d9782c-h28-settings,5,0,26,10,11,5,7,3,3,Backend|FE|BFF,7,4,385,410,4,2,4,0,4,7,0,0,1,4,0
+PR#769,78880d5245,2026-10-23,pr-merge,fix,title,invoices,fix(invoices): keep same-day invoice order,claude/determined-hamilton-rn52ac,2,0,4,1,1,2,1,1,1,Backend,3,0,3,34,0,0,1,0,0,1,0,0,0,2,0
+PR#766,2ebcd9ac29,2026-10-23,pr-merge,chore,title,ci,chore(ci): require approval to change a spec scenario,ccr-69d4f56c-28rngb,7,0,12,0,2,10,0,2,0,,4,0,0,115,0,0,0,0,0,1,1,2,0,8,0
+PR#765,f1f6db3d9f,2026-10-23,pr-merge,fix,title,invoices,fix(invoices): «Angaben eingeben» for unread files,ccr-8b7da2b0-52xa3f,5,0,15,5,6,4,2,4,1,FE,4,4,9,41,5,0,0,0,0,1,5,0,0,4,0
+PR#767,5cd0ddf41a,2026-10-23,pr-merge,fix,title,tenants,fix(tenants): check tenant form in backend,ccr-97d9782c-h28-tenant-form,4,0,27,13,9,5,9,5,3,Backend|FE|BFF,8,4,225,221,5,4,4,0,1,6,2,0,1,4,0
+PR#762,cf4ce42abe,2026-10-23,pr-merge,fix,title,statements,fix(statements): preview flags from run plan,ccr-97d9782c-h28-preview-flags,3,0,13,3,6,4,3,3,3,Backend|FE|BFF,7,0,57,153,1,1,1,0,1,5,0,0,1,3,0
+PR#761,f4aae28c74,2026-10-23,pr-merge,docs,title,config,docs(config): send questions to Discussions,ccr-8f93386d-k0348h,1,0,3,0,0,3,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,1,0
+PR#763,4cf42a24e1,2026-10-23,pr-merge,fix,title,buildings,fix(buildings): check building form in backend,ccr-97d9782c-h28-building-form,3,0,19,9,6,4,5,3,3,Backend|FE|BFF,7,4,300,239,4,3,2,0,1,5,0,0,1,3,0
+PR#764,bcc40e0e54,2026-10-23,pr-merge,feat,title,styles,feat(styles): warm up the landing page,claude/determined-hamilton-rn52ac,9,1,17,0,0,17,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,0,1,9,7
+PR#758,0fa75523da,2026-10-23,pr-merge,fix,title,statements,fix(statements): heat hints for corrected run,ccr-97d9782c-issue-647,5,0,7,1,2,4,1,2,1,Backend,4,0,6,31,0,0,1,0,0,1,1,0,0,4,0
+PR#756,924a4b6dbc,2026-10-23,pr-merge,chore,title,config,chore(config): nfr issues and English labels,ccr-8f93386d-k0348h,6,0,25,0,2,23,0,2,0,,4,0,0,28,0,0,0,0,0,2,0,2,10,11,0
+PR#649,29accf3d63,2026-10-23,pr-merge,fix,title,statements,fix(statements): run heating hints in backend,ccr-97d9782c-h28-heating-hint-rules,3,0,13,4,5,4,4,3,2,Backend|BFF,5,0,143,181,0,1,3,0,1,4,0,0,0,4,0
+PR#646,f6e63121e2,2026-10-23,pr-merge,fix,title,statements,fix(statements): compare kept settings in backend,ccr-97d9782c-h28-run-differences,3,0,11,3,5,3,3,3,2,Backend|BFF,5,0,174,290,0,1,2,0,1,4,0,0,0,3,0
+PR#645,205e2faac6,2026-10-23,pr-merge,docs,title,config,docs(config): name info@dwello.ch as contact,ccr-8f93386d-k0348h,1,0,3,0,0,3,0,0,0,,2,0,0,0,0,0,0,0,0,0,0,0,2,1,0
+PR#644,0f1327a820,2026-10-23,pr-merge,fix,title,docker,fix(docker): start the demo with the key volume,ccr-fde2f667-mvpbxk,3,0,5,0,1,4,0,1,0,,3,0,0,17,0,0,0,0,0,1,0,2,0,2,0
+PR#641,cbc8015066,2026-10-23,pr-merge,chore,title,statements,chore(statements): decide periods in the backend,ccr-97d9782c-h28-statement-rules,3,0,30,10,17,3,10,4,3,Backend|FE|BFF,8,0,772,1943,2,4,4,0,5,11,1,0,1,2,0
+PR#639,fa8504ad30,2026-10-23,pr-merge,chore,title,ci,chore(ci): apply workflow review 2026-10-23,ccr-dcf8f8ae-crm0zt,3,0,18,0,3,15,0,3,0,,5,0,0,75,0,0,0,0,0,2,1,2,1,12,0
+PR#640,658c9f662a,2026-10-23,pr-merge,docs,title,build,docs(build): add architecture baseline analysis,ccr-97d9782c-wk45ge,10,0,6,0,0,6,0,0,0,,3,0,0,0,0,0,0,0,0,0,0,1,1,4,0
+PR#638,9b5db11bc0,2026-10-23,pr-merge,fix,title,statements,fix(statements): no jump while «Weiter» unseen,ccr-dcf8f8ae-crm0zt,7,0,9,1,2,6,1,2,1,FE,4,0,8,20,1,0,0,0,0,1,1,0,0,6,0
 PR#636,d4d508cc20,2026-10-23,pr-merge,fix,title,i18n,fix(i18n): agreed Akonto in the help glossary,ccr-dcf8f8ae-crm0zt,5,0,12,5,1,6,2,1,1,FE,4,4,9,5,5,0,0,0,0,0,1,0,2,4,0
 PR#635,50dce02445,2026-10-23,pr-merge,fix,title,statements,fix(statements): late notices never move «Weiter»,ccr-dcf8f8ae-crm0zt,6,0,22,10,6,6,2,5,1,FE,4,4,164,145,10,0,0,0,0,2,4,0,0,6,0
 PR#634,6eb2b4a66f,2026-10-23,pr-merge,feat,title,statements,"feat(statements): statement PDF as a letter, contact, Heizprofil source, embedded font (#465)",ccr-dcf8f8ae-crm0zt,9,2,47,20,16,11,16,6,4,DB|Backend|FE|BFF,10,4,308,339,7,1,10,2,1,10,5,1,3,7,0

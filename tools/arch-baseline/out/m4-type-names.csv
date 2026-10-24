@@ -1,9 +1,11 @@
 name,files,layers,where
+Range,6,BFF|Backend|FE,backend/src/services/accounting-period.ts src/lib/accounting-period.ts src/lib/server/missing-statements.ts src/lib/server/statement-generation.ts src/lib/statement-wizard.ts src/routes/contracts/[id]/+page.server.ts
 Period,5,BFF|Backend,backend/src/services/invoice-completeness.service.ts backend/src/services/prorating.service.ts backend/src/services/statement-invoices.service.ts src/lib/server/invoice.ts src/lib/server/statement-generation.ts
+Contract,5,BFF|Backend|FE,backend/src/services/statement-run.service.ts src/lib/former-tenant-documents.ts src/lib/server/statement-generation.ts src/routes/statements/generate/AgreedCosts.svelte src/routes/statements/generate/FeeNotAgreed.svelte
 Apartment,4,BFF|Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/apartment.service.ts src/lib/types.ts src/routes/contracts/new/+page.server.ts
 Tenant,4,BFF|Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/tenant.service.ts src/lib/types.ts src/routes/contracts/new/+page.server.ts
+Statement,4,Backend|Shared/Contracts,backend/src/services/reminder.service.ts backend/src/services/statement-invoices.service.ts backend/src/services/statement-run.service.ts src/lib/types.ts
 RefusedStatement,4,BFF|FE,src/lib/contract-status.ts src/routes/contracts/ContractForm.svelte src/routes/contracts/[id]/+page.server.ts src/routes/contracts/[id]/+page.svelte
-Contract,4,BFF|FE,src/lib/former-tenant-documents.ts src/lib/server/statement-generation.ts src/routes/statements/generate/AgreedCosts.svelte src/routes/statements/generate/FeeNotAgreed.svelte
 Row,4,BFF,src/lib/server/missing-statements.ts src/routes/contracts/[id]/+page.server.ts src/routes/dashboard/+page.server.ts src/routes/statements/generate/+page.server.ts
 Fetch,4,BFF,src/lib/server/password-login.ts src/lib/server/statement-actions.ts src/lib/server/statement-generation.ts src/routes/buildings/[id]/+page.server.ts
 Building,3,DB|FE|Shared/Contracts,backend/src/db/schema.ts src/lib/types.ts src/routes/apartments/new/BuildingField.svelte
@@ -11,8 +13,7 @@ RentalContract,3,Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/sr
 Category,3,DB|FE|Shared/Contracts,backend/src/db/schema.ts src/lib/types.ts src/routes/statements/generate/AgreedCosts.svelte
 Invoice,3,Backend|DB|Shared/Contracts,backend/src/db/schema.ts backend/src/services/invoice.service.ts src/lib/types.ts
 Document,3,Backend|DB|FE,backend/src/db/schema.ts backend/src/services/reminder.service.ts src/lib/former-tenant-documents.ts
-Statement,3,Backend|Shared/Contracts,backend/src/services/reminder.service.ts backend/src/services/statement-invoices.service.ts src/lib/types.ts
-Range,3,BFF|FE,src/lib/accounting-period.ts src/lib/server/missing-statements.ts src/lib/statement-wizard.ts
+Names,3,BFF|Backend,backend/src/services/statement-pdf.service.ts backend/src/services/statement-run.service.ts src/lib/server/statement-generation.ts
 ContractForAvailability,3,FE,src/lib/contract-form.ts src/lib/utils/contract-availability.ts src/routes/contracts/new/ContractWizard.svelte
 ContractFormValues,3,FE,src/lib/contract-form.ts src/lib/contract-wizard.ts src/routes/contracts/new/ContractWizard.svelte
 Proposal,3,BFF|FE,src/lib/invoice-upload.ts src/lib/server/category.ts src/routes/invoices/InvoiceUploadDialog.svelte
@@ -35,6 +36,7 @@ JwtPayload,2,BFF|Backend,backend/src/middleware/auth.ts src/lib/server/auth.ts
 ConfigKey,2,Backend,backend/src/routes/config.ts backend/src/services/config.service.ts
 Query,2,Backend,backend/src/services/agreed-category.service.ts backend/src/services/contract.service.ts
 ApartmentStatus,2,Backend|Shared/Contracts,backend/src/services/apartment.service.ts src/lib/types.ts
+Entered,2,Backend,backend/src/services/building-fields.ts backend/src/services/tenant-fields.ts
 BuildingWithStats,2,Backend|Shared/Contracts,backend/src/services/building.service.ts src/lib/types.ts
 CategoryWithUsage,2,BFF|Backend,backend/src/services/category.service.ts src/lib/server/category.ts
 Refusal,2,BFF|Backend,backend/src/services/coded-error.ts src/lib/server/statement-actions.ts
@@ -44,10 +46,11 @@ CategoryFinding,2,Backend|FE,backend/src/services/invoice-completeness.service.t
 InvoiceWithDetails,2,Backend|Shared/Contracts,backend/src/services/invoice.service.ts src/lib/types.ts
 QRBillConfig,2,Backend,backend/src/services/pdf.service.ts backend/src/services/qr-bill.service.ts
 StatementForQRBill,2,Backend,backend/src/services/pdf.service.ts backend/src/services/qr-bill.service.ts
-Billing,2,BFF|Backend,backend/src/services/statement-invoices.service.ts src/lib/server/statement-generation.ts
+Settings,2,BFF|Backend,backend/src/services/statement-run.service.ts src/lib/server/settings.ts
+Link,2,Backend|FE,backend/src/services/statement-run.service.ts src/routes/config/ConfigLinks.svelte
+Billed,2,Backend|FE,backend/src/services/statement-run.service.ts src/lib/statement-wizard.ts
 StatementWithDetails,2,Backend|Shared/Contracts,backend/src/services/statement.service.ts src/lib/types.ts
 TenantWithOccupancy,2,Backend|Shared/Contracts,backend/src/services/tenant.service.ts src/lib/types.ts
-Dated,2,BFF|FE,src/lib/accounting-period.ts src/routes/contracts/[id]/+page.server.ts
 AvailabilityInfo,2,FE,src/lib/contract-form.ts src/lib/utils/contract-availability.ts
 Field,2,BFF|FE,src/lib/contract-wizard.ts src/lib/server/building-register.ts
 ListedContract,2,FE,src/lib/contract-wizard.ts src/routes/contracts/new/ContractWizard.svelte
