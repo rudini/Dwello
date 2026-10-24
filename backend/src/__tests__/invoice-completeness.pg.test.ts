@@ -69,7 +69,8 @@ describe('Prüfung auf fehlende Rechnungen pro Kategorie', () => {
 	it('verlangt eine gültige Abrechnungsperiode', async () => {
 		expect((await check('periodStart=2025-01-01')).status).toBe(422);
 		expect((await check('periodStart=2025-12-31&periodEnd=2025-01-01')).status).toBe(400);
-		expect((await check('periodStart=2025-02-30&periodEnd=2025-12-31')).status).toBe(400);
+		// a day the calendar has not: the schema's date format refuses it since @elysiajs/openapi (#790)
+		expect((await check('periodStart=2025-02-30&periodEnd=2025-12-31')).status).toBe(422);
 	});
 
 	// Die Rechnung für das 2. Halbjahr kommt im Januar: mit Leistungszeitraum fehlt sie dem Jahr nicht
