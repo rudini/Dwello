@@ -3272,3 +3272,9 @@ Product owner, 24.10.2026: on every save (`PUT /contracts/:id`) the backend refu
 - [x] E2E `contract-detail`, `contract-edit`, `contract-new` (Chromium and API, 136) green
 - [x] Slice review round 1 (`docs/reviews/p5b-review-1.md`: no Blocker/Major; C-1 Minor comment order, fixed; C-2 Minor a later start behind the stored end, refused now, pg test red first; C-3 Minor test of the «no real day» hint, added (pins kept behaviour); C-4 Minor a page left open past midnight, stays in the report)
 - [x] Closing round (`docs/reviews/p5b-review-2.md`: C-1 to C-3 fixed, C-4 stays as a Minor, no new findings), PR pushed after this archive
+## Session: #792 Chromium shim of the session hook
+
+- [x] Shim block into `.claude/hooks/pw-shim.sh`: find the executables in any layout, warn and link nothing when none is found (test first)
+- [x] `tests/e2e/CLAUDE.md`: check the warning and the links, one feature file before a long run
+- [x] Review 792: `docs/reviews/792-review-1.md` (no findings)
+- [x] PR: pushed after this archive
