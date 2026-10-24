@@ -11,6 +11,8 @@ A proposal for the public website of Dwello as an open-source project, plus the 
 | `shots/` | Screenshots of the app with the demo data, light and dark (WebP), and a statement PDF; `shots/{fr,it,en}/` the same in that language (PDF of a tenant who speaks it) |
 | `assets/` | Logo (light, dark, inverse), app icon, wordmark; outlined SVG |
 | `fonts/` | Inter, latin subset (SIL OFL 1.1) |
+| `robots.txt`, `sitemap.xml` | Search engines: everything may be indexed; the sitemap lists the four landing pages with their language versions. A new page goes into `sitemap.xml` |
+| `<32 hex>.txt` | IndexNow key: after each upload `deploy-site.yml` tells Bing, Yandex, Seznam, Naver and Yep the sitemap's pages. Google takes no IndexNow: register the site once in Google Search Console (and Bing Webmaster Tools, which can import it from there) and submit `https://dwello.ch/sitemap.xml` |
 
 After changing German texts in `index.html`, add them to `i18n/{fr,it,en}.json` and run `python3 marketing/i18n/build.py`; it stops on a text it cannot find and lists German left in a translation.
 
