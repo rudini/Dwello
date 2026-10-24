@@ -12,7 +12,7 @@ Stand: 23.10.2026, Basis `origin/main` 868aef9. Die Checks prüfen die Szenarien
 | Ä1 (H/H) | `field-spread` | Pro eindeutigem DB-Feld die Produktivdateien ausserhalb der DB, die es als Schlüssel deklarieren (`m4-field-spread.csv`); Median, P90, Max | < 1 s | Job «Architecture fitness», jeder PR und `main` | Ratchet: Median ≤ 6, P90 ≤ 19, Max ≤ 60 (Ziel Ä1: Median ≤ 4, P90 ≤ 8) | 6 / 19 / 60 |
 | Ä1, AP1 | `entity-mirror` | Dateien unter `src/`, die ≥ 50 % der eigenen Felder einer Tabelle deklarieren (`m4-entity-mirror-files.csv`) | (gleicher Lauf) | wie oben | keine neue Datei pro Tabelle; Ausnahmeliste | 54 Datei-Tabelle-Paare in 15 Tabellen (57 vor ADR 0001, 56 vor ADR 0002, 55 vor ADR 0003) |
 | Ä1, AP1 | `literal-set` | Wertelisten (Unions, `t.Literal`, `pgEnum`, Arrays), die in mehreren Schichten stehen (`m4-literal-sets.csv`) | (gleicher Lauf) | wie oben | keine neue Liste, keine Liste in mehr Dateien; Ausnahmeliste | 14 Listen |
-| Ä4 (H/M), AP2 | `bff-decision` | Pro Zeile in `src/lib/server/**`, `+page.server.ts`, `+layout.server.ts`, `+server.ts`, `hooks.server.ts`: Vergleich gegen einen Statuswert oder verankerte Regex (Regex aus `05-knowledge`, jetzt in `lib.ts`) | (gleicher Lauf) | wie oben | jede Fundstelle steht in `technical` (mit Grund) oder in der Ausnahmeliste; Ziel 0 | 8 Fundstellen: 7 technisch, 1 Altlast (#717; nach #784 von 14 mit `--update` nachgezogen) |
+| Ä4 (H/M), AP2 | `bff-decision` | Pro Zeile in `src/lib/server/**`, `+page.server.ts`, `+layout.server.ts`, `+server.ts`, `hooks.server.ts`: Vergleich gegen einen Statuswert oder verankerte Regex (Regex aus `05-knowledge`, jetzt in `lib.ts`); seit #788 Teil 0 auch ein Datum gegen heute (`localToday()`, `today`) oder heute als Argument einer Funktion (`decides` in `fitness.ts`) | (gleicher Lauf) | wie oben | jede Fundstelle steht in `technical` (mit Grund) oder in einer Ausnahmeliste (`bffDecisions`, `bffDates`); Ziel 0 | 17 Fundstellen: 7 technisch, 1 Altlast (#717), 9 Datums-Ableitungen (#788) |
 | Ä1 | `module-cycle` | Zyklen auf Modulebene, nur Produktivmodule (`cycles-module.csv`, Tarjan aus `02-imports`) | (gleicher Lauf) | wie oben | kein neuer Zyklus; Ausnahmeliste | 2 |
 | AP1, Architektur BFF | `boundary-import` | Laufzeit-Import zwischen `src/` und `backend/` in eine der beiden Richtungen (`imports-file.csv`, `type_only = no`) | (gleicher Lauf) | wie oben | 0, ohne Ausnahme (`import type` bleibt erlaubt, damit AP1 Typen aus dem Backend ableiten kann) | 0 |
 | alle | `ratchet` | `ratchet.json` gegen die Datei der Merge-Base: keine Schwelle höher, keine Ausnahmeliste länger | < 1 s | wie oben | Ausnahmen schrumpfen nur | – |
@@ -30,7 +30,7 @@ Fehler (`::error`) machen den Lauf rot; Warnungen (`::warning`) erscheinen als A
 - **Start:** Alle Schwellen sind die Messwerte vom 23.10.2026 (kein Rot am ersten Tag). Der erste Lauf auf 868aef9 ist grün.
 - **Nicht schlechter:** `judge` vergleicht die Messung mit `ratchet.json` des Arbeitsstands. `loosened` vergleicht diese Datei mit der der Merge-Base: Eine höhere Schwelle oder eine längere Ausnahmeliste macht den PR rot (Check `ratchet`; bei Wertelisten zählt die Summe der erlaubten Dateien). Ein Eintrag darf sich ändern, solange seine Liste nicht wächst (umbenannte Datei, umformatierte Zeile); die Änderung steht im Diff.
 - **Verbesserung festschreiben:** `bun run fitness -- --update` senkt die Schwellen auf bessere Messwerte und entfernt Ausnahmen, die der Code nicht mehr braucht; `--cochange --update` senkt `coChangeWarn`. Das Ergebnis wird mit der Verbesserung committet.
-- **Ausnahmeliste:** `ratchet.json` → `exceptions` (`bffDecisions`, `literalSets`, `entityMirrors`, `moduleCycles`), jeder Eintrag mit `reason` und `scenario`. Sie darf nur schrumpfen.
+- **Ausnahmeliste:** `ratchet.json` → `exceptions` (`bffDecisions`, `bffDates`, `literalSets`, `entityMirrors`, `moduleCycles`). Eine neue Liste darf mit der Prüfung kommen, die sie braucht (sie fehlt auf der Basis); danach schrumpft sie nur, jeder Eintrag mit `reason` und `scenario`. Sie darf nur schrumpfen.
 - **Technische Prüfungen:** `technical` in `ratchet.json` (UUID, ISO-Datum eines Query-Parameters, Jahr eines Filters, EGID, JWT-Dauer) ist eine Allowlist, keine Altlast: Sie darf wachsen, jeder Eintrag nennt den Grund. Die Einträge gelten pro Zeile, nicht pro Muster: Dieselbe ISO-Datums-Regex prüft in `contracts/[id]/+page.server.ts` ein Formularfeld (`validFrom`) und steht deshalb als Altlast unter #717.
 - **Warnungen** (`prSizeWarn`, `coChangeWarn`) sind keine Gates: PR-Grösse hängt von der Aufgabe ab, Ko-Kopplung vom Zeitfenster. `coChangeWarn` folgt trotzdem dem Ratchet.
 
@@ -42,6 +42,7 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 |---|---|---|
 | `field-spread` | neue Datei `src/lib/fit-proof.ts` mit `{ number: 1 }` (Feld `apartments.number`, Max 60) | rot: «field spread max 61 > ratchet 60» |
 | `bff-decision` | `s.status === 'paid'` in `src/lib/server/tenant.ts` | rot, nennt Datei und Zeile, AP2 |
+| `bff-decision` (Datum) | `c.startDate <= today` in einer neuen Funktion in `src/lib/server/tenant.ts` | rot, nennt Datei und Zeile, AP2 |
 | `literal-set` | `'local' \| 'provider' \| 'none'` in einer neuen Datei | rot: «local\|none\|provider … in 5 files (allowed: 4)» |
 | `entity-mirror` | Typ mit 5 Feldern von `kiSettings` in einer neuen Datei | rot, nennt Datei und Tabelle |
 | `module-cycle` | `src/lib/utils/format.ts` importiert `$lib/accounting-period` | rot: «fe:lib/accounting-period fe:lib/utils import each other» |
@@ -86,6 +87,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 24.10.2026 | ADR 0001: ein Mapper für den Mieter | Entity-Spiegel 57 → 56; `tenants.firstName`/`lastName` 18 → 16, `tenants.language` 23 → 22; Werteliste `de\|en\|fr\|it` 6 → 5 Dateien; Median und P90 unverändert 6 / 19 |
 | 24.10.2026 | ADR 0002: Mieter des Mietvertrags über `toTenant` | Entity-Spiegel 56 → 55; `tenants.firstName`/`lastName` 16 → 15, `tenants.language` 22 → 21; Median und P90 unverändert 6 / 19 |
 | 24.10.2026 | ADR 0003: `Tenant` aus dem Backend abgeleitet (Pilot B) | Entity-Spiegel 55 → 54; `tenants.firstName`/`lastName` 15 → 14, `language` 21 → 20, `correspondenceChannel` 8 → 7; Sprachliste 5 → 4 Dateien; Frontend-Dateien mit Backend-Import 0 → 1; Median und P90 unverändert 6 / 19 |
+| 24.10.2026 | #788 Teil 0: Datumsvergleiche im BFF werden erkannt | BFF-Fundstellen 8 → 17 (9 Datums-Ableitungen neu sichtbar, als Altlast `bffDates` mit Verweis auf #788) |
 
 ## 7. Werkzeugwahl
 

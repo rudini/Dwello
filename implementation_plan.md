@@ -8,3 +8,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #788 part 0, fitness check for date comparisons in the BFF
+
+No scenario: tooling only (fitness functions), no app behaviour changes. Product owner, 24.10.2026: #788 in the order 0, 1, 2, point 5, 3, 4.
+
+- [x] Line matcher as a tested function; date comparisons against today (`localToday()`, `today`) count as BFF decisions
+- [x] Ratchet: today's findings as legacy exceptions (#788), shrink-only
+- [x] Proof: a new date comparison fails
+- [ ] `fitness-functions.md`, review, PR
