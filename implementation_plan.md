@@ -8,17 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: #790 code scanning and security alerts
-
-- [x] Read the 33 CodeQL alerts (local CodeQL 2.27.3 run, the alert API answers 403) and the dependency alerts (`bun audit`)
-- [x] Dependencies: zod, nodemailer (backend); vite, fallow, postcss-selector-parser (frontend) to fixed versions
-- [x] `actions/missing-workflow-permissions` (7): least `permissions` in `ci.yml` and `deepcheck-scan.yml`
-- [x] Nightly workflow: new CodeQL alerts become `nfr:security` issues
-- [x] `SECURITY.md`: deadlines, who, dismiss rule for tests and tooling
-- [ ] Remaining CodeQL alerts (tests, tools, one false positive): reasons for dismissal, dismissed by the product owner
-- [x] Review 790a (dependencies): `docs/reviews/790a-review-1.md`
-- [x] Review 790b (workflows, SECURITY.md): `docs/reviews/790b-review-1.md`
-- [x] Re-review 790a and 790b: `docs/reviews/790a-review-2.md`, `docs/reviews/790b-review-2.md`
-- [ ] SvelteKit < 3.0 advisories (2 low): not reachable (no prerendering, no catch-all route, no setHeaders); the fix needs SvelteKit 3
-- [ ] Reviews, checks, PR

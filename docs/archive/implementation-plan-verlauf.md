@@ -3164,3 +3164,19 @@ No scenario: refactoring, no behaviour change (product owner, 24.10.2026; the fa
 - [x] Step 2: measure after, ratchet `--update`, ADR 0002, `fitness-functions.md`
 - [x] Review round 1 (`docs/reviews/c2-review-1.md`, one Minor in ADR 0002, fixed)
 - [x] PR pushed after this archive
+
+## Session: #790 code scanning and security alerts
+
+- [x] Read the 33 CodeQL alerts (local CodeQL 2.27.3 run, the alert API answers 403) and the dependency alerts (`bun audit`)
+- [x] Dependencies: zod, nodemailer (backend); vite, fallow, postcss-selector-parser (frontend) to fixed versions
+- [x] `actions/missing-workflow-permissions` (7): least `permissions` in `ci.yml` and `deepcheck-scan.yml`
+- [x] Nightly workflow: new CodeQL alerts become `nfr:security` issues
+- [x] `SECURITY.md`: deadlines, who, dismiss rule for tests and tooling
+- [ ] Remaining CodeQL alerts (tests, tools, one false positive): reasons in the pull request, dismissed by the product owner (Blocked on me)
+- [x] Review 790a (dependencies): `docs/reviews/790a-review-1.md`
+- [x] Review 790b (workflows, SECURITY.md): `docs/reviews/790b-review-1.md`
+- [x] Re-review 790a and 790b: `docs/reviews/790a-review-2.md`, `docs/reviews/790b-review-2.md`
+- [x] SvelteKit < 3.0 advisories (2 low): not reachable (no prerendering, no catch-all route, no setHeaders); the fix needs SvelteKit 3
+- [x] E2E (chromium, api): 1533 passed, after repairing the browser shim of the session hook (#792)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-790.md`
+- [x] PR: pushed after this archive
