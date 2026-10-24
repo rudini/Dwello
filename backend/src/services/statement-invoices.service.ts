@@ -109,10 +109,6 @@ export async function declineCorrection(statementId: string) {
 	return (await getStatement(statementId))!;
 }
 
-/**
- * #454 (#408 point 7): for the Übersicht, the drafts with a change since and the statements due for correcting, with
- * building, period and what changed
- */
 /** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
 export const draftOutdated = (changes: Awaited<ReturnType<typeof statementChanges>>) =>
 	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged);
@@ -124,6 +120,10 @@ export async function draftsToSend() {
 	return outdated.filter((one) => !one).length;
 }
 
+/**
+ * #454 (#408 point 7): for the Übersicht, the drafts with a change since and the statements due for correcting, with
+ * building, period and what changed
+ */
 export async function outdatedStatements() {
 	const { statements } = await listStatements({ limit: 1000 });
 	const listed = await Promise.all(

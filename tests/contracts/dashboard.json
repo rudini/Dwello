@@ -11,5 +11,7 @@
 	"financial": { "outstandingStatements": 2, "totalPending": 350, "overdueAmount": 150, "paidThisMonth": 0 },
 	"statements": { "draft": 1, "toSend": 1, "sent": 1, "paid": 0, "settled": 0, "overdue": 1 },
 	"recentActivity": [],
-	"buildingOccupancy": []
+	"buildingOccupancy": [
+		{ "buildingId": "b1", "buildingName": "Seeblick", "totalApartments": 2, "occupiedApartments": 1, "occupancyRate": 50 }
+	]
 }

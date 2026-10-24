@@ -3095,3 +3095,12 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] BFF tenant page, apartment loader, contract history, contract page and run preview take the backend's answer
 - [x] `code-reviewer`: `h28j-review-1.md` (4 Minor, fixed), closing round `h28k-review-1.md` (1 Minor, the tie test, added)
 - [x] Before complete; PR pushed after this archive
+
+## Session H-28 step 4: the drafts to send counted in the backend
+
+#717 (H-28, baseline pair #13): `GET /dashboard` counts the drafts to send (`statements.toSend`, the drafts not outdated by invoices or a Tankbestand changed since, #454); the overview takes the number instead of joining the draft count, the outdated list and the listed drafts (#602). One rule `draftOutdated` serves the outdated list, `run-differences` and the count. No scenario: behaviour unchanged (`dashboard.feature`, 50 passed). Parallel session (checklist in the pull request).
+
+- [x] Backend count, red first; contract `dashboard.json` (new)
+- [x] Overview takes `toSend`; `draftIds` removed
+- [x] `code-reviewer`: `h28l-review-1.md` (3 Minor, fixed), closing round `h28m-review-1.md`
+- [x] Before complete; PR pushed after this archive
