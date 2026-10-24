@@ -12,6 +12,8 @@ import { authMiddleware } from '../middleware/auth';
 import {
 	listContracts,
 	getContract,
+	nextSteps,
+	fixedTermCheck,
 	createContract,
 	updateContract,
 	deleteContract,
@@ -140,7 +142,9 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			...contract,
 			agreedCategoryIds: await agreedCategoryIds(params.id),
 			agreedFrom: await agreedFromDays(params.id), // «Vereinbart ab» (#368)
-			advancePayments: await advancesOf(params.id)
+			advancePayments: await advancesOf(params.id),
+			nextSteps: await nextSteps(contract),
+			fixedTermCheck: await fixedTermCheck(contract)
 		};
 	})
 	// The categories with costs for the contract in the period and whether it agrees each (#91)

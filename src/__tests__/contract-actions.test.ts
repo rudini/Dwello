@@ -58,59 +58,32 @@ describe('Vertragsstatus', () => {
 	});
 });
 
-// Review K-1: «Nächste Schritte» nur, solange die Kündigung läuft und kein Nachmieter erfasst ist
-describe('Nächste Schritte nach einer Kündigung', () => {
-	const backend = (contract: Record<string, unknown>, others: unknown[] | null = []) =>
+// Review K-1, A-5, A-6: what the page asks after an end the backend decides by the Swiss day (#788); the page shows it
+describe('Nächste Schritte und abgelaufener befristeter Mietvertrag', () => {
+	const backend = (contract: Record<string, unknown>) =>
 		(async (url: string) => {
-			if (url.includes('/contracts?apartmentId='))
-				return others
-					? Response.json({ contracts: others })
-					: new Response('down', { status: 500 });
 			if (url.includes('/config') || url.includes('/statements?'))
 				return Response.json({ data: [] });
 			if (url.endsWith('/missing-statements')) return Response.json([]);
-			return Response.json({
-				id: 'c1',
-				apartmentId: 'a1',
-				startDate: '2024-04-01',
-				tenant: contractDetail.tenant,
-				...contract
-			});
+			return Response.json({ ...contractDetail, ...contract });
 		}) as typeof globalThis.fetch;
-	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
-		(
-			(await load({ params: { id: 'c1' }, fetch: backend(contract, others) } as never)) as {
-				nextSteps: { successor: boolean; ended: boolean } | null;
-			}
-		).nextSteps;
-	const notice = { endDate: '2099-03-31', terminated: true };
+	const page = async (contract: Record<string, unknown>) =>
+		(await load({ params: { id: 'c1' }, fetch: backend(contract) } as never)) as {
+			nextSteps: { successor: boolean; ended: boolean } | null;
+			fixedTermCheck: boolean;
+		};
 
-	it('nennt sie bei einer laufenden Kündigung ohne Nachmieter', async () => {
-		expect(await nextSteps(notice)).toEqual({ successor: false, ended: false });
+	it('zeigt die nächsten Schritte, die das Backend nennt', async () => {
+		const { nextSteps } = await page({ nextSteps: { successor: true, ended: false } });
+		expect(nextSteps).toEqual({ successor: true, ended: false });
+		expect((await page({ nextSteps: null })).nextSteps).toBeNull();
 	});
 
-	// Haiku-Review R2: die neue Adresse braucht es auch, wenn der Nachmieter schon erfasst ist
-	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', async () => {
-		const successor = { id: 'c2', startDate: '2099-04-01', endDate: null };
-		expect(await nextSteps(notice, [successor])).toEqual({ successor: true, ended: false });
-	});
-
-	it('nennt sie nicht nach dem Auszug und nicht ohne Kündigung', async () => {
-		expect(await nextSteps({ endDate: '2021-02-28', terminated: true })).toBeNull();
-		expect(await nextSteps({ endDate: '2099-03-31', terminated: false })).toBeNull();
-	});
-
-	// A-5 (#114): nach dem Auszug geht die Abrechnung sonst an die verlassene Wohnung
-	it('nennt nach dem Vertragsende nur noch die neue Adresse, solange es die Adresse der Wohnung ist', async () => {
-		expect(await nextSteps({ endDate: '2021-02-28', terminated: true, oldAddress: true })).toEqual({
-			successor: false,
-			ended: true
-		});
-	});
-
-	// Haiku-Review R6: lieber kein Hinweis als ein falscher
-	it('nennt sie nicht, wenn die Mietverträge der Wohnung nicht geladen werden können', async () => {
-		expect(await nextSteps(notice, null)).toBeNull();
+	it('fragt nach dem Auszug, wenn das Backend es verlangt', async () => {
+		// the page derives nothing from the dates: only the backend's answer counts
+		expect((await page({ fixedTermCheck: true })).fixedTermCheck).toBe(true);
+		const expired = { endDate: '2025-12-31', terminated: false, movedOut: false };
+		expect((await page({ ...expired, fixedTermCheck: false })).fixedTermCheck).toBe(false);
 	});
 });
 
@@ -613,45 +586,6 @@ describe('Akonto löschen', () => {
 
 // A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag fragt die Seite, ob der Mieter noch in der Wohnung wohnt
 describe('Abgelaufener befristeter Mietvertrag', () => {
-	const backend = (contract: Record<string, unknown>, others: unknown[] | null = []) =>
-		(async (url: string) => {
-			if (url.includes('/contracts?apartmentId='))
-				return others
-					? Response.json({ contracts: others })
-					: new Response('down', { status: 500 });
-			if (url.includes('/config') || url.includes('/statements?'))
-				return Response.json({ data: [] });
-			if (url.endsWith('/missing-statements')) return Response.json([]);
-			return Response.json({ ...contractDetail, ...contract });
-		}) as typeof globalThis.fetch;
-	const asked = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
-		(
-			(await load({ params: { id: 'c1' }, fetch: backend(contract, others) } as never)) as {
-				fixedTermCheck: boolean;
-			}
-		).fixedTermCheck;
-	const expired = { endDate: '2025-12-31', terminated: false, movedOut: false };
-
-	it('fragt nach einem vereinbarten Vertragsende vor heute ohne späteren Mietvertrag', async () => {
-		expect(await asked(expired)).toBe(true);
-	});
-
-	it('fragt nicht nach einer Kündigung, einem bestätigten Auszug, einem späteren Mietvertrag oder vor dem Ende', async () => {
-		expect(await asked({ ...expired, terminated: true })).toBe(false);
-		expect(await asked({ ...expired, movedOut: true })).toBe(false);
-		expect(await asked(expired, [{ id: 'c2', startDate: '2026-01-01', endDate: null }])).toBe(
-			false
-		);
-		expect(await asked({ ...expired, endDate: '2099-12-31' })).toBe(false);
-		// Fachreview A-6 V-6: am letzten Tag läuft der Mietvertrag noch
-		expect(await asked({ ...expired, endDate: localToday() })).toBe(false);
-		expect(await asked({ ...expired, endDate: null })).toBe(false);
-	});
-
-	it('fragt nicht, wenn die Mietverträge der Wohnung nicht geladen werden können', async () => {
-		expect(await asked(expired, null)).toBe(false);
-	});
-
 	it('führt den Mietvertrag unbefristet weiter, indem es das Vertragsende entfernt', async () => {
 		const { calls, result } = runAction(actions.continueOpenEnded, 'c1');
 		await result;

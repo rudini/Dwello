@@ -3,10 +3,11 @@
  * Stored letters (payment reminders) per tenant, sent by e-mail or kept for printing
  */
 
-import { and, count, desc, eq, gt, ne, sql, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, rentalContracts, tenants, utilityStatements, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
+import { laterContract } from './later-contract';
 import { tenantExists } from './tenant.service';
 import { swissToday } from './today';
 
@@ -98,12 +99,7 @@ export async function formerTenantDocuments(tenantId: string) {
 	const endDate = last.endDate!;
 	// after an agreed end without notice the tenant may have stayed, until «Mieter ist ausgezogen» or a later contract
 	// for the apartment (A-6)
-	const [later] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(and(eq(rentalContracts.apartmentId, last.apartmentId), gt(rentalContracts.startDate, endDate)))
-		.limit(1);
-	if (!last.terminated && !last.movedOut && !later) return null;
+	if (!last.terminated && !last.movedOut && !(await laterContract(last.apartmentId, endDate))) return null;
 	const uploads = await db
 		.select({ id: documents.id, createdAt: documents.createdAt })
 		.from(documents)

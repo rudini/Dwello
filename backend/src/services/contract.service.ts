@@ -20,6 +20,7 @@ import { checkAgreedFrom, setAgreedCategories, setAgreedFrom } from './agreed-ca
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
+import { laterContract } from './later-contract';
 import { daysAfter, sqlToday, swissToday } from './today';
 
 /** The database, or a transaction of it */
@@ -271,6 +272,31 @@ export async function getActiveContract(
 		.limit(1);
 
 	return (contract as ContractWithDetails) || null;
+}
+
+/** What a running notice still asks of the landlord (A-4, review K-1); null without one */
+export async function nextSteps(contract: {
+	terminated: boolean;
+	endDate: string | null;
+	apartmentId: string;
+	oldAddress: boolean;
+}) {
+	if (!contract.terminated || !contract.endDate) return null;
+	// after the end only the new address, while the moved-out tenant still has the building's (A-5, #114)
+	if (contract.endDate < swissToday()) return contract.oldAddress ? { successor: false, ended: true } : null;
+	return { successor: await laterContract(contract.apartmentId, contract.endDate), ended: false };
+}
+
+/** An agreed end passed with no sign the tenant left: ask whether he stayed (Art. 266 Abs. 2 OR, A-6) */
+export async function fixedTermCheck(contract: {
+	terminated: boolean;
+	movedOut: boolean;
+	endDate: string | null;
+	apartmentId: string;
+}) {
+	const end = contract.endDate;
+	if (contract.terminated || contract.movedOut || !end || end >= swissToday()) return false;
+	return !(await laterContract(contract.apartmentId, end));
 }
 
 /**
