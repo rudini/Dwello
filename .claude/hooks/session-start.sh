@@ -32,16 +32,7 @@ fi
 # a shim directory maps that revision to the installed build
 installed=/opt/pw-browsers
 want=$(node -p "require('./node_modules/playwright-core/browsers.json').browsers.find(b => b.name === 'chromium').revision")
-have=$(ls -d "$installed"/chromium_headless_shell-* 2>/dev/null | sed 's/.*-//' | sort -n | tail -1 || true)
-if [ -n "$have" ] && [ ! -d "$installed/chromium_headless_shell-$want" ]; then
-	shim="$HOME/.cache/pw-shim"
-	mkdir -p "$shim/chromium_headless_shell-$want/chrome-headless-shell-linux64" "$shim/chromium-$want/chrome-linux64"
-	ln -sfn "$installed/chromium_headless_shell-$have/chrome-linux/headless_shell" \
-		"$shim/chromium_headless_shell-$want/chrome-headless-shell-linux64/chrome-headless-shell"
-	ln -sfn "$installed/chromium-$have/chrome-linux/chrome" "$shim/chromium-$want/chrome-linux64/chrome"
-	for dir in "chromium_headless_shell-$want" "chromium-$want"; do
-		touch "$shim/$dir/INSTALLATION_COMPLETE" "$shim/$dir/DEPENDENCIES_VALIDATED"
-	done
-	for ffmpeg in "$installed"/ffmpeg-*; do ln -sfn "$ffmpeg" "$shim/$(basename "$ffmpeg")"; done
+shim="$HOME/.cache/pw-shim"
+if [ ! -d "$installed/chromium_headless_shell-$want" ] && bash .claude/hooks/pw-shim.sh "$installed" "$want" "$shim"; then
 	echo "export PLAYWRIGHT_BROWSERS_PATH=$shim" >> "$CLAUDE_ENV_FILE"
 fi
