@@ -4,7 +4,7 @@
  * leaves without Mietstage there, and whether the period overlaps one of the building's
  */
 import { billsIn, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
-import { statementChanges } from './statement-invoices.service';
+import { draftOutdated, statementChanges } from './statement-invoices.service';
 import { getTypedConfig } from './config.service';
 import { billingStart, getContract, listContracts, type ContractWithDetails } from './contract.service';
 import { listHeatingProfiles } from './heating-profile.service';
@@ -256,7 +256,7 @@ export async function runDifferencesOf(buildingId: string, run: RunSettings) {
 	const later = await Promise.all(
 		statements.filter((s) => s.status === 'draft').map(async (s) => ({ id: s.id, changes: await statementChanges(s.id) }))
 	);
-	const outdated = later.filter(({ changes }) => changes && (changes.invoiceIds.length || changes.fuelStockChanged));
+	const outdated = later.filter(({ changes }) => draftOutdated(changes));
 	const ids = [...new Set([...differing.map((d) => d.id), ...outdated.map((o) => o.id)])];
 	return {
 		statements: ids.map((id) => {

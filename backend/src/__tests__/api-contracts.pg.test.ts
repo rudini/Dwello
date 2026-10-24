@@ -354,6 +354,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('apartment'), actual)).toEqual([]);
 	});
 
+	// H-28 (#717): the overview's figures, the drafts to send counted here
+	it('GET /dashboard liefert die Felder von dashboard.json', async () => {
+		const actual = await (await callApi('/api/v1/dashboard')).json();
+		expect(drift(await sample('dashboard'), actual)).toEqual([]);
+	});
+
 	it('GET /contracts/:id liefert die Felder von contract.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
 		expect(drift(await sample('contract'), actual)).toEqual([]);

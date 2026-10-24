@@ -8,6 +8,7 @@ import { count, eq, and, sum, desc, gt, gte, or, sql, type SQL } from 'drizzle-o
 import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
 import { apartmentStatus } from '../services/apartment.service';
+import { draftsToSend } from '../services/statement-invoices.service';
 import { statusCondition } from '../services/statement.service';
 import { swissToday } from '../services/today';
 
@@ -115,6 +116,7 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 
 	const statements = {
 		draft: await countStatements(statusCondition('draft')),
+		toSend: await draftsToSend(), // the current drafts (#454, H-28 #717)
 		sent: await countStatements(statusCondition('sent')),
 		paid: await countStatements(statusCondition('paid')),
 		settled: await countStatements(statusCondition('settled')), // «Erledigt» (#448)

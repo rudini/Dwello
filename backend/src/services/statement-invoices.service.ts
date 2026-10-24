@@ -109,6 +109,17 @@ export async function declineCorrection(statementId: string) {
 	return (await getStatement(statementId))!;
 }
 
+/** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
+export const draftOutdated = (changes: Awaited<ReturnType<typeof statementChanges>>) =>
+	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged);
+
+/** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
+export async function draftsToSend() {
+	const { statements } = await listStatements({ status: 'draft', limit: 1000 });
+	const outdated = await Promise.all(statements.map(async (s) => draftOutdated(await statementChanges(s.id))));
+	return outdated.filter((one) => !one).length;
+}
+
 /**
  * #454 (#408 point 7): for the Übersicht, the drafts with a change since and the statements due for correcting, with
  * building, period and what changed
@@ -120,7 +131,7 @@ export async function outdatedStatements() {
 			.filter((s) => s.status !== 'replaced')
 			.map(async (s) => {
 				const changes = await statementChanges(s.id);
-				const outdated = s.status === 'draft' ? changes && (changes.invoiceIds.length || changes.fuelStockChanged) : changes?.correctionDue;
+				const outdated = s.status === 'draft' ? draftOutdated(changes) : changes?.correctionDue;
 				return outdated
 					? {
 							id: s.id,
