@@ -8,6 +8,7 @@ import { invoicesOf } from '$lib/overview';
 import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
 import { monthlyTotal } from '$lib/server/contract-history';
+import { toTenant } from '$lib/server/tenant';
 import {
 	contractEndError,
 	localToday,
@@ -127,14 +128,7 @@ function toContract(
 		advancePayments: data.advancePayments,
 		managementFeeAgreed: !!data.managementFeeAgreed,
 		managementFeePercent: data.managementFeePercent ?? null,
-		tenant: filled(data.tenant, {
-			id: data.tenantId as string,
-			firstName: '',
-			lastName: '',
-			email: none,
-			phone: none,
-			language: 'de' as Tenant['language']
-		}),
+		tenant: toTenant(data.tenant),
 		apartment: filled(data.apartment, {
 			id: data.apartmentId as string,
 			buildingId: '',
