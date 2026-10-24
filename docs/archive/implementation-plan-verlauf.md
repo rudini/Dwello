@@ -3153,3 +3153,14 @@ No scenario: tooling and CI only, no app behaviour changes. Request: Phase 2a of
 - [x] Backend check and code, red first; contract `contract-advance-day-invalid.json`
 - [x] `code-reviewer`: `h28o-review-1.md` (reclassification honest; C-1 Minor, the refusal had no code: fixed), closing round `h28p-review-1.md` (1 Minor, a misplaced comment: fixed)
 - [x] PR pushed after this archive
+
+## Session: Phase 2b refactoring cycle 2 (tenant of the contract page)
+
+No scenario: refactoring, no behaviour change (product owner, 24.10.2026; the fallback for a missing tenant record is unreachable and may go). ADR 0002.
+
+- [x] Step 0: measure before (fitness, 02-imports/05-knowledge, unit tests 3638, E2E contract-detail/contract-edit 96)
+- [x] Step 0b: six stubs in `contract-actions.test.ts` answered a contract without tenant; first try of step 1 red and reverted, the stubs now take the tenant from `tests/contracts/contract.json` (PO, 24.10.2026)
+- [x] Step 1: `toContract` takes the tenant from `toTenant`
+- [x] Step 2: measure after, ratchet `--update`, ADR 0002, `fitness-functions.md`
+- [x] Review round 1 (`docs/reviews/c2-review-1.md`, one Minor in ADR 0002, fixed)
+- [x] PR pushed after this archive

@@ -62,7 +62,7 @@ Die History-Werte M1 (Änderungsumfang) und M2 (Co-Change) bewegen sich erst, we
 
 - **Mehr Daten in der Liste:** Jede Mieterzeile trägt drei Felder mehr in die Seitendaten. Bei unter 50 Wohnungen ist das vernachlässigbar.
 - **Gekoppelte Ladefunktionen:** Die Mieterliste hängt jetzt am Mapper der Detailseite. Ändert sich `toTenant`, ändern sich beide Seiten. Das ist gewollt (eine Quelle), braucht aber Tests auf beiden Seiten; sie bestehen (`tenant-detail.test.ts`, `tenant-list.test.ts`, `tenants.feature`).
-- **Noch offen:** `src/routes/contracts/[id]/+page.server.ts` kopiert die Mieter-Felder weiterhin. Das ist der nächste Schritt, sobald #717 dort fertig ist.
+- **Erledigt mit ADR 0002:** `src/routes/contracts/[id]/+page.server.ts` übernimmt den Mieter jetzt ebenfalls aus `toTenant`.
 - **Der grosse Hebel bleibt:** `src/lib/types.ts` deklariert die Felder aller Entitäten von Hand (Paar #2 `schema.ts` ↔ `types.ts`). Ein abgeleiteter API-Typ würde laut Messung Median 6 → 5 und P90 19 → 18 bringen (Kandidat B).
 
 ## Neue Ratchet-Schwellen
