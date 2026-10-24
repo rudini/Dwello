@@ -10,7 +10,7 @@ Stand: 23.10.2026, Basis `origin/main` 868aef9. Die Checks prüfen die Szenarien
 | Szenario | Check | Was gemessen wird, wie | Laufzeit | Ort in der CI | Schwelle | Aktueller Wert |
 |---|---|---|---|---|---|---|
 | Ä1 (H/H) | `field-spread` | Pro eindeutigem DB-Feld die Produktivdateien ausserhalb der DB, die es als Schlüssel deklarieren (`m4-field-spread.csv`); Median, P90, Max | < 1 s | Job «Architecture fitness», jeder PR und `main` | Ratchet: Median ≤ 6, P90 ≤ 19, Max ≤ 60 (Ziel Ä1: Median ≤ 4, P90 ≤ 8) | 6 / 19 / 60 |
-| Ä1, AP1 | `entity-mirror` | Dateien unter `src/`, die ≥ 50 % der eigenen Felder einer Tabelle deklarieren (`m4-entity-mirror-files.csv`) | (gleicher Lauf) | wie oben | keine neue Datei pro Tabelle; Ausnahmeliste | 57 Datei-Tabelle-Paare in 15 Tabellen |
+| Ä1, AP1 | `entity-mirror` | Dateien unter `src/`, die ≥ 50 % der eigenen Felder einer Tabelle deklarieren (`m4-entity-mirror-files.csv`) | (gleicher Lauf) | wie oben | keine neue Datei pro Tabelle; Ausnahmeliste | 56 Datei-Tabelle-Paare in 15 Tabellen (57 vor ADR 0001) |
 | Ä1, AP1 | `literal-set` | Wertelisten (Unions, `t.Literal`, `pgEnum`, Arrays), die in mehreren Schichten stehen (`m4-literal-sets.csv`) | (gleicher Lauf) | wie oben | keine neue Liste, keine Liste in mehr Dateien; Ausnahmeliste | 14 Listen |
 | Ä4 (H/M), AP2 | `bff-decision` | Pro Zeile in `src/lib/server/**`, `+page.server.ts`, `+layout.server.ts`, `+server.ts`, `hooks.server.ts`: Vergleich gegen einen Statuswert oder verankerte Regex (Regex aus `05-knowledge`, jetzt in `lib.ts`) | (gleicher Lauf) | wie oben | jede Fundstelle steht in `technical` (mit Grund) oder in der Ausnahmeliste; Ziel 0 | 8 Fundstellen: 7 technisch, 1 Altlast (#717; nach #784 von 14 mit `--update` nachgezogen) |
 | Ä1 | `module-cycle` | Zyklen auf Modulebene, nur Produktivmodule (`cycles-module.csv`, Tarjan aus `02-imports`) | (gleicher Lauf) | wie oben | kein neuer Zyklus; Ausnahmeliste | 2 |
@@ -77,7 +77,15 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 - `upgrade-check.sh` prüft gegen den letzten Tag. Wird künftig nur wöchentlich getaggt, prüft jeder PR gegen das letzte wöchentliche Release, also genau den Weg der Vermieter.
 - Die CI-Dauer misst bis zum Ende der langsamsten Ergebnis-Jobs; Warteschlangen-Zeit vor dem Start zählt nicht.
 
-## 6. Werkzeugwahl
+## 6. Verlauf der Messwerte
+
+| Datum | Änderung | Messung (Phase-0-Skripte und `fitness.ts`) |
+|---|---|---|
+| 23.10.2026 | Start (Phase 2a, #783) | Feldstreuung 6 / 19 / 60; BFF-Fundstellen 14; Wertelisten 14; Entity-Spiegel 57; Zyklen 2 |
+| 24.10.2026 | #784 (#717): Status-Vergleiche ins Backend | BFF-Fundstellen 14 → 8 |
+| 24.10.2026 | ADR 0001: ein Mapper für den Mieter | Entity-Spiegel 57 → 56; `tenants.firstName`/`lastName` 18 → 16, `tenants.language` 23 → 22; Werteliste `de\|en\|fr\|it` 6 → 5 Dateien; Median und P90 unverändert 6 / 19 |
+
+## 7. Werkzeugwahl
 
 - **Abhängigkeitsregeln und Zyklen:** Wiederverwendung des Import-Graphen aus `02-imports.ts` (löst `$lib` und `.svelte` auf, unterscheidet `import type`). Alternativen: `dependency-cruiser` (reichere Regel-Sprache, aber neue Abhängigkeit und `.svelte` nur mit Zusatz-Konfiguration), `eslint-plugin-boundaries` (Meldung direkt im Editor, aber zweite Definition der Schichten neben `layers.json`). Bei mehr als einer Handvoll Regeln lohnt sich `dependency-cruiser`.
 - **Duplizierte Formen:** Entity-Spiegel, Wertelisten und Feldstreuung aus `05-knowledge.ts`. Eine Alternative ist ein gemeinsamer, aus dem Backend generierter API-Typ (z. B. Elysia/Eden oder OpenAPI-Codegen); er wäre die Lösung für AP1, kein Check.

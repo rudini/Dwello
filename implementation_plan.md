@@ -32,9 +32,11 @@ No scenario: tooling and CI only, no app behaviour changes. Request: Phase 2a of
 - [x] Closing review round 5 after merging #784 (`docs/reviews/fitness-review-5.md`)
 - [x] PR for 2a: open, CI green, merge (#783; run 936 on main green)
 - [x] 2b: propose one Ä1 candidate with prediction, wait for confirmation (tenant mapper without `contracts/[id]`, approved 24.10.2026)
-- [ ] 2b step 0: measure before (fitness, run.sh, unit tests, E2E tenants/contract-new)
-- [ ] 2b step 1: export `toTenant`
-- [ ] 2b step 2: tenant list uses `toTenant`
-- [ ] 2b step 3: new-contract load uses the shared `Tenant` type
-- [ ] 2b step 4: measure after, ratchet `--update`, ADR 0001, `fitness-functions.md`
+- [x] 2b step 0: measure before (fitness, run.sh, unit tests, E2E tenants/contract-new)
+- [x] 2b step 1: export `toTenant` (one commit with step 2: fallow refuses an unused export)
+- [x] 2b step 2: tenant list uses `toTenant`
+- [x] 2b step 3: new-contract load uses the shared `Tenant` type
+- [x] 2b step 4: measure after, ratchet `--update`, ADR 0001, `fitness-functions.md`
+- [ ] Workflow note: the fallow gate refuses the preparing step of a parallel change (a new export not yet used), so «make the change easy» and its first use share one commit
+- [ ] Workflow note: the session hook's Chromium shim links `chrome-linux/headless_shell`, the image has `chrome-headless-shell-linux64/chrome-headless-shell`; E2E fails to launch after a worker restart
 - [ ] 2b review, PR

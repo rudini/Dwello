@@ -53,7 +53,7 @@
 		"literalSets": [
 			{
 				"values": "de|en|fr|it",
-				"files": 6,
+				"files": 5,
 				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
 				"scenario": "Ä1"
 			},
@@ -174,8 +174,7 @@
 					"src/lib/server/tenant-form.ts",
 					"src/lib/server/tenant.ts",
 					"src/lib/types.ts",
-					"src/routes/contracts/[id]/+page.server.ts",
-					"src/routes/tenants/+page.server.ts"
+					"src/routes/contracts/[id]/+page.server.ts"
 				],
 				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
 				"scenario": "Ä1"
