@@ -65,10 +65,7 @@ export interface Apartment {
 type ApiTenant = Json<TenantResponse>;
 export type Tenant = Pick<ApiTenant, 'id' | 'firstName' | 'lastName' | 'language'> &
 	Partial<
-		Omit<
-			ApiTenant,
-			'contractCount' | 'isActive' | 'anonymisedOn' | 'currentApartment' | 'currentBuilding'
-		>
+		Omit<ApiTenant, 'contractCount' | 'anonymisedOn' | 'currentApartment' | 'currentBuilding'>
 	>;
 
 // Rental Contract types (camelCase to match backend)
