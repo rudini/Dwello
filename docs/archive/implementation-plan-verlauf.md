@@ -3218,3 +3218,15 @@ Scenario: «Mietvertrag löschen, der inzwischen begonnen hat» (`contract-detai
 - [x] Fitness `--update` (bffDates 9 → 8), `fitness-functions.md`
 - [x] Review round 1 (`docs/reviews/p1-review-1.md`: C-1 Major 404 showed the backend's English text, fixed with a test; C-2 Major scenario added; C-3 Minor dead test setup removed)
 - [x] Closing review (`docs/reviews/p1-review-2.md`: C-1 to C-3 fixed, no new findings), PR pushed after this archive
+
+## Session: #788 part 2, documents of a former tenant (the backend decides)
+
+Product owner, 24.10.2026: a separate endpoint `GET /tenants/:id/former-documents`; the dashboard keeps its own derivation until part 4. Behaviour unchanged (`No scenario: behaviour unchanged, the scenarios of «Dokumente eines ehemaligen Mieters» pin it`). Refs #788.
+
+- [x] Backend `formerTenantDocuments` + `GET /tenants/:id/former-documents` → `{ formerDocuments }` (`tenant-former-documents.pg.test.ts`, 9 tests, each seen red; the end-day, Swiss-day and last-contract tests by taking the code out). An unknown tenant answers `null` (no 404: YAGNI, the page loads the tenant first)
+- [x] API contract `tests/contracts/tenant-former-documents.json`, checked in `api-contracts.pg.test.ts`; `docs/api-specification.md`
+- [x] Tenant detail load uses the endpoint (`tenant-detail.test.ts`, red first); no apartment contracts fetched any more; the BFF tests of the A-6 rule moved to the backend; a failing request still loads the page without the notice
+- [x] Fitness `--update` (bffDates 8 → 7, BFF decisions 16 → 15), `fitness-functions.md`
+- [x] E2E `tenant-detail`, `tenant-documents`, `tenants` (Chromium and API, 28) green. No scenario shows the notice: the E2E stack cannot backdate an upload
+- [x] Slice review round 1 (`docs/reviews/p2-review-1.md`: no Blocker/Major; C-1 Minor tie of end dates, ordered as the contract list, pg test red first; C-2 Minor notice without documents, BFF test red first)
+- [x] Closing round (`docs/reviews/p2-review-2.md`: C-1, C-2 fixed, no new findings), PR pushed after this archive
