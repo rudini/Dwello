@@ -13,8 +13,8 @@ export interface OverviewInput {
 		occupiedApartments: number;
 		reletApartments: number;
 	};
-	statementCounts: { draft: number; sent: number; paid: number; overdue: number };
-	draftIds: string[]; // the listed drafts, to count the current ones by id (#602)
+	// toSend: the current drafts, as the backend counts them (#454, H-28 #717)
+	statementCounts: { draft: number; toSend: number; sent: number; paid: number; overdue: number };
 	// with the day from which the next Mahnung is possible, after the last reminder's Zahlungsfrist (#107)
 	dueStatements: {
 		id: string;
@@ -208,7 +208,6 @@ const correctTasks = (statements: Outdated, today: string): Task[] =>
 function workTasks({
 	today,
 	statementCounts,
-	draftIds,
 	dueStatements,
 	lettersToSend,
 	missingStatements = [],
@@ -216,10 +215,6 @@ function workTasks({
 	reminderAfterDays
 }: OverviewInput): Task[] {
 	const outdatedDrafts = outdatedStatements.filter((s) => s.status === 'draft');
-	// only current drafts are to send (#454): by the count, or the listed drafts not outdated where the two reads differ
-	// (#602); the list alone would lose them when it cannot be loaded
-	const listed = draftIds.filter((id) => !outdatedDrafts.some((s) => s.id === id)).length;
-	const currentDrafts = Math.max(statementCounts.draft - outdatedDrafts.length, listed);
 	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
 	// next one after the Zahlungsfrist of the last Mahnung (#107); a Rückerstattung is due at once (Fachreview V-1)
 	const waiting = (s: OverviewInput['dueStatements'][number]) =>
@@ -267,11 +262,11 @@ function workTasks({
 			link: newestInvoices(missingStatements)
 		},
 		outdatedDraftsTask(outdatedDrafts),
-		currentDrafts > 0 && {
+		statementCounts.toSend > 0 && {
 			id: 'drafts',
 			title: m.dashboard_task_drafts(),
 			text: count(
-				currentDrafts,
+				statementCounts.toSend,
 				m.dashboard_task_drafts_text_one,
 				m.dashboard_task_drafts_text_many
 			),

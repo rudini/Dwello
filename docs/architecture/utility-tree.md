@@ -74,7 +74,7 @@ Dwello-Nutzen
 - **Umgebung:** Entwicklung. Die Regel steht heute in Backend und BFF.
 - **Reaktion:** Die Änderung erfolgt nur im Backend. Der BFF reicht Ergebnis oder Fehlercode weiter (`backendMessage`).
 - **Messgrösse und Ziel:** fachliche Status-Vergleiche und Prüfregeln im BFF: **0** (vom Nutzer bestätigt, Entscheid 23.10.2026, #717).
-- **Heute:** **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien (gemessen, Phase 0). Seither sind mehrere #717-PRs gemergt (#641, #646, #649, #762, #763, #767). Ein neuer Wert ist **unbekannt**, bis `run.sh` erneut läuft.
+- **Heute:** **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien (gemessen, Phase 0). Nach H-28 Schritt 1–4 (bis #785) gemessen am 24.10.2026: **0** Status-Vergleiche, **1** fachliche Prüfregel (`validFrom` beim Löschen eines Akontos) neben 7 technischen; Zählung #13 im Backend (gemessen, `baseline.md` §7a).
 - **Fitness Function:** CI-Check auf `src/lib/server/**`, `src/routes/**/+page.server.ts` und `+server.ts`: Ein Vergleich gegen einen Statuswert oder eine verankerte Regex schlägt fehl, ausser er steht auf einer Allowlist für technische Prüfungen (UUID, ISO-Datum als Query-Parameter, JWT-Dauer).
 
 ### R1 Verschlüsseltes, kompatibles Backup

@@ -27,6 +27,7 @@ export interface TenantFilters {
 export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string;
 	currentBuilding?: string;
+	rentalContractId?: string;
 	contractCount: number;
 	isActive: boolean;
 	isFuture: boolean;
@@ -169,12 +170,25 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
  */
 export async function getTenant(id: string): Promise<TenantWithOccupancy | null> {
 	const [tenant] = await db
-		.select(tenantFields)
+		.select({ ...tenantFields, isFuture })
 		.from(tenants)
 		.where(eq(tenants.id, id))
 		.limit(1);
 
 	if (!tenant) return null;
+	// the contract the tenant pays rent with: the running one, otherwise the next (H-28, #717)
+	const [rental] = await db
+		.select({ id: rentalContracts.id })
+		.from(rentalContracts)
+		.where(and(eq(rentalContracts.tenantId, id), sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${sqlToday})`))
+		// a running one first, the latest started (as the page chose before); else the next to start
+		.orderBy(
+			sql`${rentalContracts.startDate} > ${sqlToday}`,
+			desc(sql`case when ${rentalContracts.startDate} <= ${sqlToday} then ${rentalContracts.startDate} end`),
+			rentalContracts.startDate,
+			desc(rentalContracts.id) // one day: as the list orders them (code review h28j C-1)
+		)
+		.limit(1);
 
 	// Get current occupancy
 	const today = swissToday();
@@ -198,7 +212,8 @@ export async function getTenant(id: string): Promise<TenantWithOccupancy | null>
 	return {
 		...tenant,
 		currentApartment: currentContract?.apartmentNumber,
-		currentBuilding: currentContract?.buildingName
+		currentBuilding: currentContract?.buildingName,
+		rentalContractId: rental?.id
 	} as TenantWithOccupancy;
 }
 

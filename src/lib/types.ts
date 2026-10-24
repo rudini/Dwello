@@ -70,6 +70,8 @@ export interface Tenant {
 	country?: string; // ISO 3166 code of the Korrespondenzadresse, CH by default
 	correspondenceChannel?: 'email' | 'letter';
 	anonymisableFrom?: string | null; // the first day «Mieter anonymisieren» is allowed; null while it is not (#459)
+	rentalContractId?: string; // the running contract, otherwise the next one, as the backend chooses it (H-28, #717)
+	isFuture?: boolean; // no contract runs today, one is signed for later
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }

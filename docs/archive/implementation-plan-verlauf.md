@@ -3086,3 +3086,29 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 
 - [x] `.claude/skills/grill-me/SKILL.md`: description, intro, steps 1 and 5 cover a request without an issue (product owner decision 2026-10-23, `docs/reviews/workflow-notes-issue-643.md`)
 - [x] Archive, PR: pushed after this archive
+
+## Session H-28 step 3: status comparisons in the backend
+
+#717 (H-28): the BFF no longer decides by a status. Contracts carry their status by the Swiss day; `GET /tenants/:id` names the rental contract (running, the latest started; else the next) with `isFuture`, `GET /apartments/:id` the next contract; a named draft that a contract change does not touch is refused by the backend (`CONTRACT_DRAFT_NOT_AFFECTED`, the old text); `run-differences` names drafts outdated by invoices or a Tankbestand changed since. No scenario: behaviour unchanged (`tenant-detail`, `apartment-detail`, `contract-detail`, `statement-generate` features, 183 passed). Parallel session (checklist in the pull request).
+
+- [x] Backend fields and refusal, red first; contracts `apartment.json` (new), `contract-draft-not-affected.json` (new), `contract(s).json`, `building-contracts.json`, `tenant.json`, `statement-run-differences.json`
+- [x] BFF tenant page, apartment loader, contract history, contract page and run preview take the backend's answer
+- [x] `code-reviewer`: `h28j-review-1.md` (4 Minor, fixed), closing round `h28k-review-1.md` (1 Minor, the tie test, added)
+- [x] Before complete; PR pushed after this archive
+
+## Session H-28 step 4: the drafts to send counted in the backend
+
+#717 (H-28, baseline pair #13): `GET /dashboard` counts the drafts to send (`statements.toSend`, the drafts not outdated by invoices or a Tankbestand changed since, #454); the overview takes the number instead of joining the draft count, the outdated list and the listed drafts (#602). One rule `draftOutdated` serves the outdated list, `run-differences` and the count. No scenario: behaviour unchanged (`dashboard.feature`, 50 passed). Parallel session (checklist in the pull request).
+
+- [x] Backend count, red first; contract `dashboard.json` (new)
+- [x] Overview takes `toSend`; `draftIds` removed
+- [x] `code-reviewer`: `h28l-review-1.md` (3 Minor, fixed), closing round `h28m-review-1.md`
+- [x] Before complete; PR pushed after this archive
+
+## Session H-28 step 5: baseline re-measured
+
+#717 (H-28): `tools/arch-baseline/run.sh` after steps 1–4; the values go into `docs/architecture/baseline.md` §7a beside the targets of §7, and Ä4's current value into `docs/architecture/utility-tree.md`. Ä4: 0 status comparisons and 1 domain validation rule left in the BFF (`validFrom` of a later Akonto); Ä2: `replaced` no longer in the BFF; Ä1 and Ä3 unchanged. No scenario: documentation and measurement data only. Parallel session (checklist in the pull request).
+
+- [x] Measurement run, `tools/arch-baseline/out/` refreshed
+- [x] §7a written, utility tree Ä4 updated; `bun run fitness` green
+- [x] PR pushed after this archive

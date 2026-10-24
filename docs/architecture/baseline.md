@@ -348,6 +348,23 @@ Alle vier messen nur Produktivdateien (Entscheid 23.10.2026).
 
 Alle vier Werte lassen sich nach jedem Refactoring mit `tools/arch-baseline/run.sh` neu messen.
 
+## 7a. Zwischenstand nach H-28 (Messung 24.10.2026)
+
+`tools/arch-baseline/run.sh` auf `origin/main` nach den Schritten 1–4 von H-28 (#717; zuletzt #785), gleiches Fenster wie Phase 0. Die Dateien in `tools/arch-baseline/out/` sind diese Messung. [gemessen]
+
+| | Ausgangswert (Phase 0) | Zielwert | Messung 24.10.2026 | Stand |
+|---|---|---|---|---|
+| Ä1 Neues Feld | Median 6, P90 19 (125 Felder) | Median ≤ 4, P90 ≤ 8 | Median **6**, P90 **19**, Max 60 (125 Felder) | offen; H-28 hat keine Felder bewegt |
+| Ä2 Statusregel | `replaced` 19 Dateien, 4 Schichten (FE 8, BFF 2, Backend 8, Shared 1) | BFF 0; ≤ 2 Schichten; ≤ 6 Dateien | `replaced` **18** Dateien, **3** Schichten (FE 7, BFF **0**, Backend 10, Shared 1); `draft` 28 (BFF 0), `paid` 21 (BFF 1: setzt den Status beim Bezahlen, kein Vergleich) | BFF erreicht; Schichten und Dateien offen (nächster Hebel: FE) |
+| Ä3 Feature-Grösse | Median 9,5, P90 25; Schichten P90 5 | Median ≤ 9, P90 ≤ 18; Schichten P90 ≤ 4 | Median **9**, P90 **25**; Schichten Median 2, P90 **5** (85 feat-PRs) | Median hält; P90 und Schichten offen (die H-28-PRs sind `fix` und zählen hier nicht) |
+| Ä4 Fachregel im BFF | 9 Status-Vergleiche in 5 Dateien, 10 Prüfregeln in 4 Dateien, Zählung #13 | 0 | **0** Status-Vergleiche; 8 verankerte Regex in 7 Dateien, davon **1 fachlich** (`contracts/[id]/+page.server.ts`: `validFrom` beim Löschen eines späteren Akontos) und 7 technisch (UUID, ISO-Datum und Jahr als Query-Parameter, EGID, JWT-Dauer; wie `tools/fitness/ratchet.json`); Zählung #13 im Backend (`statements.toSend`, #785) | **1**; Ziel nicht erreicht |
+
+Gelesen [abgeleitet]:
+
+- **Ä4** zählt nur die zwei Muster von M4. Die Code-Review von Schritt 4 nennt weitere fachliche Ableitungen in der Ladefunktion der Übersicht (Mahnungen fällig, Hinweis auf die Verjährung, abgelaufene und gekündigte Mietverträge, alte Adressen, fehlende Abrechnungen) und in `src/lib/former-tenant-documents.ts` (Vertragsstatus aus den Daten). Sie stehen auf #717; ob sie zu H-28 gehören, entscheidet der Product Owner.
+- **Ä2:** Mit dem Status am Mietvertrag (#784) kommen `active`, `ended` und `future` im BFF nur noch je einmal vor, als erlaubte Werte eines Filter-Parameters der Vertragsliste (technisch).
+- Ein Ziel gilt erst als erreicht, wenn es in zwei Messungen hintereinander hält (Messrhythmus oben). Nächste Messung: vierteljährlich, spätestens Ende Januar 2027.
+
 ## Wiederholen
 
 ```bash

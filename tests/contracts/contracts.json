@@ -5,6 +5,7 @@
 			"apartmentId": "a1",
 			"tenantId": "t1",
 			"startDate": "2024-04-01",
+			"status": "active",
 			"endDate": "2099-03-31",
 			"terminated": true,
 			"movedOut": false,

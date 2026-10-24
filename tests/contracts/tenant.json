@@ -11,5 +11,7 @@
 	"country": "CH",
 	"correspondenceChannel": "email",
 	"anonymisedOn": null,
-	"anonymisableFrom": null
+	"anonymisableFrom": null,
+	"isFuture": false,
+	"rentalContractId": "c1"
 }

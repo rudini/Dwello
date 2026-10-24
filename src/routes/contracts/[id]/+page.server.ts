@@ -272,11 +272,11 @@ async function endOn(
 	return fail(response.status, { endError: backendMessage({ code, params }, m.contracts_end_failed()) });
 }
 
-// Only a draft of this contract: a stale page or another form must not delete a sent statement
-async function ownDraft(fetch: typeof globalThis.fetch, contractId: string, statementId: string) {
+// The draft named, for the wizard afterwards; whether it may be deleted is the backend's (H-28, #717): only a draft
+// of this contract that the change touches, never a sent statement
+async function namedDraft(fetch: typeof globalThis.fetch, statementId: string) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${statementId}`);
-	const statement: Row = response.ok ? await response.json() : {};
-	return statement.contractId === contractId && statement.status === 'draft' ? statement : null;
+	return response.ok ? ((await response.json()) as Row) : null;
 }
 
 // The agreed end removed: the tenant stayed and the contract continues open-ended (A-6); a stored statement that
@@ -319,7 +319,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const day = await endDay(fetch, params.id, form);
 		if (typeof day !== 'string') return day;
-		const draft = await ownDraft(fetch, params.id, String(form.get('statementId') ?? ''));
+		const draft = await namedDraft(fetch, String(form.get('statementId') ?? ''));
 		if (!draft) return fail(409, { endError: m.contracts_end_failed() });
 		const refused = await endOn(fetch, params.id, day, form, String(draft.id));
 		if (refused) return refused;
@@ -332,7 +332,7 @@ export const actions: Actions = {
 	// The one draft the continuation would change is deleted with it; the wizard then creates the statement anew
 	continueDeletingDraft: async ({ params, fetch, request }) => {
 		const form = await request.formData();
-		const draft = await ownDraft(fetch, params.id, String(form.get('statementId') ?? ''));
+		const draft = await namedDraft(fetch, String(form.get('statementId') ?? ''));
 		if (!draft) return fail(409, { fixedTermError: m.contracts_save_failed() });
 		const refused = await continueOpenEnded(fetch, params.id, String(draft.id));
 		if (refused) return refused;

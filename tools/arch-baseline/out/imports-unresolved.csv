@@ -13,3 +13,4 @@ tools/deepcheck/test/metrics.test.ts,4
 tools/deepcheck/test/realistic.test.ts,3
 tools/deepcheck/test/reference.test.ts,2
 tools/deepcheck/test/variants.test.ts,9
+tools/fitness/fitness.ts,1

@@ -20,7 +20,7 @@ import { checkAgreedFrom, setAgreedCategories, setAgreedFrom } from './agreed-ca
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
-import { daysAfter, swissToday } from './today';
+import { daysAfter, sqlToday, swissToday } from './today';
 
 /** The database, or a transaction of it */
 type Query = Pick<typeof db, 'select' | 'delete'>;
@@ -50,6 +50,8 @@ const contractFields = {
 	notes: rentalContracts.notes,
 	createdAt: rentalContracts.createdAt,
 	updatedAt: rentalContracts.updatedAt,
+	// whether it runs on the Swiss day (H-28, #717): the pages take it from here
+	status: sql<'active' | 'ended' | 'future'>`case when ${rentalContracts.startDate} > ${sqlToday} then 'future' when ${rentalContracts.endDate} < ${sqlToday} then 'ended' else 'active' end`,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
@@ -400,6 +402,10 @@ async function checkNewDates(current: RentalContract, data: Partial<NewRentalCon
 	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
 	else if (statements.length) throw new BilledDaysError(statements);
+	// a statement named from a stale page or another form that this change does not touch (H-28, #717); one deleted
+	// meanwhile does not hold the change up (code review h28j C-2)
+	else if (draft && (await q.select({ id: utilityStatements.id }).from(utilityStatements).where(eq(utilityStatements.id, draft))).length)
+		throw new CodedError('CONTRACT_DRAFT_NOT_AFFECTED', 'The named draft is not one this change would delete');
 }
 
 /**

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { load } from '../routes/dashboard/+page.server';
+import dashboardResponse from '../../tests/contracts/dashboard.json';
 import contractList from '../../tests/contracts/contracts.json';
 import apartmentList from '../../tests/contracts/apartments.json';
 import config from '../../tests/contracts/config.json';
@@ -21,13 +22,15 @@ const apartment = (buildingId: string, status: string, fields: Record<string, st
 	status,
 	...fields
 });
+const [occupancy] = dashboardResponse.buildingOccupancy;
+// as the backend answers (tests/contracts/dashboard.json), the drafts to send counted there (H-28, #717)
 const figures = {
+	...dashboardResponse,
 	portfolio: { totalBuildings: 1, totalApartments: 2, occupiedApartments: 1, reletApartments: 0 },
-	statements: { draft: 1, sent: 1, paid: 0, settled: 0, overdue: 1 },
 	buildingOccupancy: [
-		{ buildingId: 'b1', buildingName: 'Seeblick', occupiedApartments: 1 },
-		{ buildingId: 'b2', buildingName: 'Lindenhof', occupiedApartments: 2 },
-		{ buildingId: 'b3', buildingName: 'Leerbau', occupiedApartments: 0 }
+		{ ...occupancy, buildingId: 'b1', buildingName: 'Seeblick', occupiedApartments: 1 },
+		{ ...occupancy, buildingId: 'b2', buildingName: 'Lindenhof', occupiedApartments: 2 },
+		{ ...occupancy, buildingId: 'b3', buildingName: 'Leerbau', occupiedApartments: 0 }
 	]
 };
 // Contracts of all times, shaped as the backend answers; the period is 01.07.2025 – 30.06.2026

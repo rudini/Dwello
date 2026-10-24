@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 export const HERE = dirname(fileURLToPath(import.meta.url));
 
 export const ROOT = join(HERE, '..', '..');
-export const OUT = join(HERE, 'out');
+// ARCH_OUT: another output directory, e.g. for tools/fitness, so the kept raw data stays untouched
+export const OUT = process.env.ARCH_OUT ?? join(HERE, 'out');
 mkdirSync(OUT, { recursive: true });
 
 type Rule = { re: RegExp; layer?: string; kind?: string; module?: string; reason?: string; name?: string };
@@ -120,4 +121,27 @@ export function median(values: number[]): number {
 	if (!s.length) return 0;
 	const mid = Math.floor(s.length / 2);
 	return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+// Signs of a domain decision (05-knowledge G4, tools/fitness): a comparison against a status value of statements or
+// contracts (`status !== 'replaced'`) and an anchored regex literal (`/^\d{4}$/`, a validation rule)
+export const STATUS = ['draft', 'sent', 'paid', 'replaced', 'overdue', 'settled', 'active', 'ended', 'future'];
+const statusAlt = STATUS.join('|');
+export const STATUS_CMP = new RegExp(`[!=]==\\s*['"\`](${statusAlt})['"\`]|['"\`](${statusAlt})['"\`]\\s*[!=]==`, 'g');
+export const ANCHORED_RE = /\/\^[^/\n]+\$\/[a-z]*/g;
+
+/** Drizzle tables of a schema.ts text and their fields (05-knowledge, tools/fitness). */
+export function tablesOf(schema: string): { table: string; fields: string[] }[] {
+	return [...schema.matchAll(/export const (\w+) = pgTable\(\s*'(\w+)',\s*\{/g)].map((m) => {
+		let depth = 1;
+		let i = m.index! + m[0].length;
+		const start = i;
+		while (depth && i < schema.length) {
+			if (schema[i] === '{') depth++;
+			else if (schema[i] === '}') depth--;
+			i++;
+		}
+		const body = schema.slice(start, i - 1);
+		return { table: m[1], fields: [...body.matchAll(/^\t{1,3}(\w+):\s*\w+\(/gm)].map((f) => f[1]) };
+	});
 }

@@ -10,10 +10,14 @@ const portfolio = {
 	reservedApartments: 0,
 	occupancyRate: 50
 };
-const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
+type Counts = OverviewInput['statementCounts'];
+const input = (
+	overrides: Partial<Omit<OverviewInput, 'statementCounts'>> & {
+		statementCounts?: Omit<Counts, 'toSend'> & Partial<Counts>;
+	} = {}
+): OverviewInput => ({
 	today: '2026-10-10',
 	portfolio,
-	statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 0 },
 	dueStatements: [],
 	lettersToSend: 0,
 	endingContracts: [],
@@ -22,9 +26,16 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	paymentDeadlineDays: 30,
 	reminderAfterDays: 14,
 	expiredContracts: [],
-	// the drafts the counts name, unless a test lists them (#602)
-	draftIds: Array.from({ length: overrides.statementCounts?.draft ?? 0 }, (_, i) => `s${i + 1}`),
-	...overrides
+	...overrides,
+	// as the backend counts them (H-28, #717): without outdated drafts every draft is to send, unless a test says
+	statementCounts: {
+		draft: 0,
+		sent: 0,
+		paid: 0,
+		overdue: 0,
+		toSend: overrides.statementCounts?.draft ?? 0,
+		...overrides.statementCounts
+	}
 });
 
 describe('Aufgaben der Übersicht', () => {
@@ -280,27 +291,31 @@ describe('Aufgaben der Übersicht', () => {
 
 		it('zählt bei den Entwürfen zum Zustellen nur die aktuellen', () => {
 			const tasks = overviewTasks(
-				input({ statementCounts: { draft: 4, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
-			);
-			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('1 Nebenkostenabrechnung ist');
-		});
-
-		// #602: Zählung und Liste der nicht aktuellen Entwürfe kommen aus zwei Abfragen; ändern sich die Entwürfe
-		// dazwischen, zählt die Aufgabe trotzdem jeden gelisteten aktuellen Entwurf
-		it('zählt die gelisteten Entwürfe, die nicht unter den nicht aktuellen sind', () => {
-			const tasks = overviewTasks(
 				input({
-					statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 },
-					draftIds: ['s1', 's2', 's3', 's5'],
+					statementCounts: { draft: 4, toSend: 1, sent: 1, paid: 0, overdue: 0 },
 					outdatedStatements
 				})
 			);
 			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('1 Nebenkostenabrechnung ist');
 		});
 
+		// H-28 (#717): the backend counts the current drafts in one place (#602 had two reads to reconcile)
+		it('nimmt die Zahl der zu versendenden Entwürfe vom Backend', () => {
+			const tasks = overviewTasks(
+				input({
+					statementCounts: { draft: 4, toSend: 2, sent: 1, paid: 0, overdue: 0 },
+					outdatedStatements
+				})
+			);
+			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('2 Nebenkostenabrechnungen sind');
+		});
+
 		it('nennt keine Entwürfe zum Zustellen, wenn keiner aktuell ist', () => {
 			const tasks = overviewTasks(
-				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+				input({
+					statementCounts: { draft: 3, toSend: 0, sent: 1, paid: 0, overdue: 0 },
+					outdatedStatements
+				})
 			);
 			expect(tasks.map((one) => one.id)).not.toContain('drafts');
 		});

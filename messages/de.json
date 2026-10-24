@@ -2065,6 +2065,7 @@
 	"backend_fuel_stock_amount_invalid": "Bitte geben Sie den Wert in Franken ein, zum Beispiel 2650.00.",
 	"backend_fuel_stock_other_category": "Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.",
 	"backend_fuel_stock_date_taken": "Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.",
+	"backend_contract_draft_not_affected": "Mietvertrag konnte nicht beendet werden.",
 	"backend_building_city_required": "Ort ist erforderlich.",
 	"backend_building_canton_required": "Kanton ist erforderlich.",
 	"backend_building_year_built_invalid": "Baujahr muss zwischen 1800 und heute liegen.",
