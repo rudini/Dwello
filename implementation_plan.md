@@ -21,4 +21,6 @@ Product owner, 24.10.2026: on every save (`PUT /contracts/:id`) the backend refu
 - [x] Callers that set a past end: 14 backend tests in 5 files and the E2E seeds (`fixtures/backend.ts`) send the confirmation
 - [x] API contracts `contract-end-past.json`, `contract-end-before-start.json` (checked in `api-contracts.pg.test.ts`); `docs/api-specification.md`; fitness `--update` (bffDates 5 → 3, BFF decisions 13 → 11)
 - [x] Workflow note: no `fach-reviewer` round before the code; the rule and its texts are unchanged (same wording, new keys), only the layer that enforces it moves; the `POST` of a new contract does not check a past end (the wizard asks in the browser), named in the pull request
-- [ ] E2E `contract-detail.feature`, `contract-edit.feature` green, review, PR
+- [x] E2E `contract-detail`, `contract-edit`, `contract-new` (Chromium and API, 136) green
+- [x] Slice review round 1 (`docs/reviews/p5b-review-1.md`: no Blocker/Major; C-1 Minor comment order, fixed; C-2 Minor a later start behind the stored end, refused now, pg test red first; C-3 Minor test of the «no real day» hint, added (pins kept behaviour); C-4 Minor a page left open past midnight, stays in the report)
+- [ ] Closing round, PR

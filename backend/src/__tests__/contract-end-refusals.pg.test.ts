@@ -33,6 +33,16 @@ describe('Vertragsende', () => {
 		});
 	});
 
+	// review p5b C-2: a later start behind the stored end is refused as well
+	it('lehnt einen Vertragsbeginn nach dem gespeicherten Vertragsende ab', async () => {
+		const contract = await rental('2025-03-31');
+
+		expect(await save(contract, { startDate: '2025-04-01' })).toMatchObject({
+			status: 400,
+			body: { code: 'CONTRACT_END_BEFORE_START', params: { date: '2025-04-01' } }
+		});
+	});
+
 	// a notice recorded late: the landlord confirms the consequence, the contract has ended (A-1)
 	it('speichert ein Vertragsende vor heute nur, wenn es bestätigt ist', async () => {
 		const contract = await rental();

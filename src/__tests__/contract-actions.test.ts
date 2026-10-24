@@ -371,6 +371,17 @@ describe('Mietvertrag beenden', () => {
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
 	});
 
+	// review p5b C-3: a form sent without a real day (without JavaScript) gets the dialog's own hint, nothing is sent
+	it('verlangt ein Vertragsende, ohne den Mietvertrag zu ändern', async () => {
+		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '' }, { startDate: '2024-04-01' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { endError: expect.stringContaining('Bitte geben Sie das Vertragsende ein') }
+		});
+		expect(calls).toEqual([]);
+	});
+
 	it('zeigt die Ablehnung eines Vertragsendes vor dem Vertragsbeginn', async () => {
 		const { calls, result } = runAction(
 			actions.end,
