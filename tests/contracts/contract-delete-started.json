@@ -1,0 +1,5 @@
+{
+	"error": "A started contract is deleted only when confirmed as entered by mistake",
+	"code": "CONTRACT_STARTED",
+	"params": {}
+}

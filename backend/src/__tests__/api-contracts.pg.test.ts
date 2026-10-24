@@ -377,6 +377,18 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #788 part 1: the backend alone decides that a started contract needs the confirmation (#116)
+	it('DELETE /contracts/:id eines begonnenen Mietvertrags ohne Bestätigung liefert die Felder von contract-delete-started.json', async () => {
+		const started = await createRental(`${token}-delete`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		try {
+			const response = await callApi(`/api/v1/contracts/${started.contract}`, { method: 'DELETE' });
+			expect(response.status).toBe(409);
+			expect(drift(await sample('contract-delete-started'), await response.json())).toEqual([]);
+		} finally {
+			await started.remove();
+		}
+	});
+
 	it('GET /contracts/:id/agreements liefert die Felder von contract-agreements.json', async () => {
 		const actual = (await (
 			await callApi(`/api/v1/contracts/${rental.contract}/agreements?periodStart=2020-01-01&periodEnd=2030-12-31`)

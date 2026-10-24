@@ -8,6 +8,7 @@ import advanceDayInvalid from '../../tests/contracts/contract-advance-day-invali
 import draftNotAffected from '../../tests/contracts/contract-draft-not-affected.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
+import deleteStarted from '../../tests/contracts/contract-delete-started.json';
 import endAdvanceRefused from '../../tests/contracts/contract-end-advance-refused.json';
 import advanceDeleteRefused from '../../tests/contracts/contract-advance-delete-refused.json';
 import category from '../../tests/contracts/category.json';
@@ -507,24 +508,21 @@ describe('Mietvertrag löschen', () => {
 		]);
 	});
 
-	// A-7 (#116): auch ohne JavaScript nur mit Bestätigung, dass er irrtümlich erfasst wurde
+	// A-7 (#116): auch ohne JavaScript nur mit Bestätigung, dass er irrtümlich erfasst wurde; ob er begonnen hat,
+	// entscheidet das Backend, und sein Text gilt auch hier (#788, Entscheid PO 24.10.2026)
 	it('löscht keinen begonnenen Mietvertrag ohne Bestätigung des Irrtums', async () => {
-		const { calls, result } = runAction(
-			actions.delete,
-			'c1',
-			200,
-			{},
-			{ startDate: '2024-01-01', endDate: '2024-12-31' }
-		);
+		const { calls, result } = runAction(actions.delete, 'c1', 409, {}, deleteStarted);
 
 		expect(await result).toMatchObject({
-			status: 400,
+			status: 409,
 			data: {
 				deleteError:
-					'Bitte bestätigen Sie, dass dieser Mietvertrag irrtümlich erfasst wurde, oder brechen Sie ab.'
+					'Der Mietvertrag hat inzwischen begonnen. Laden Sie die Seite neu und bestätigen Sie beim Löschen, dass er irrtümlich erfasst wurde.'
 			}
 		});
-		expect(calls.filter((call) => call.method === 'DELETE')).toEqual([]);
+		expect(calls.filter((call) => call.method === 'DELETE')).toEqual([
+			{ method: 'DELETE', url: 'http://localhost:3001/api/v1/contracts/c1', body: undefined }
+		]);
 	});
 
 	it('löscht einen begonnenen Mietvertrag mit Bestätigung des Irrtums', async () => {
