@@ -4,7 +4,7 @@
 // else 1. CI then skips the tests that green run already passed.
 import { execFileSync, spawnSync } from 'node:child_process';
 
-const DOCS = /^(docs\/|screens\/|\.claude\/)|\.md$/;
+const DOCS = /^(docs\/|\.claude\/)|\.md$/;
 const [head, ...green] = process.argv.slice(2);
 
 const docsOnlySince = (commit) => {

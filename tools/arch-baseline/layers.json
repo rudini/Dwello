@@ -28,7 +28,7 @@
 		{ "pattern": "^docs/reviews/|^docs/archive/|^docs/design/personas/|^implementation_plan\\.md$|CLAUDE\\.md$|^\\.claude/", "layer": "Process", "kind": "other" },
 		{ "pattern": "^docs/|\\.md$", "layer": "Docs", "kind": "other" },
 		{ "pattern": "^tools/|^\\.github/|^docker|^deploy/|Dockerfile|^[^/]+\\.(json|js|ts|cjs|mjs|yml|yaml|toml)$|^\\.|^project\\.inlang", "layer": "Tooling", "kind": "other" },
-		{ "pattern": "^marketing/|^screens/", "layer": "Marketing", "kind": "other" },
+		{ "pattern": "^marketing/", "layer": "Marketing", "kind": "other" },
 		{ "pattern": ".*", "layer": "Other", "kind": "other" }
 	],
 	"modules": [

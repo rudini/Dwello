@@ -1,7 +1,0 @@
-# Workflow notes: #449 (with #491)
-
-| Rule | What happened | Proposed change |
-|---|---|---|
-| `backend/CLAUDE.md`, `migrations/` (new numbered file) | Workers in parallel took the same number twice: 0028 (#448) and 0029 (#452) were merged while this branch carried them, so the migration was renamed twice before the push. | Say that a branch takes its number only when it merges `main` right before the first push, and checks `git ls-tree origin/main backend/migrations/` then. |
-| `CLAUDE.md`, "Process" (a new screen or state goes into `screens.json`) | No new screen, but the change made the only e-mail tenant of the screen fixture (Carla, no address) show the letter variant of the send dialog, so the e-mail variant and its new controls fell out of axe and the language check (code review C-1, Major). The rule only names new states. | Add: a change that makes an existing state show another variant checks that every variant with its own controls still has a row (`tests/e2e/fixtures/screens.ts`). |
-| Skill `commit-gates`, fallow duplication | The gate reported the four language blocks of `reminder-letter.ts` (a translation table) as a clone group because the change edited one string in each; only `warn`, it did not block. Two step definitions with the same body did block and were merged into one helper. | Name translation tables as an expected clone the gate may warn about, so nobody restructures them to please it. |
