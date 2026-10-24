@@ -3278,3 +3278,13 @@ Product owner, 24.10.2026: on every save (`PUT /contracts/:id`) the backend refu
 - [x] `tests/e2e/CLAUDE.md`: check the warning and the links, one feature file before a long run
 - [x] Review 792: `docs/reviews/792-review-1.md` (no findings)
 - [x] PR: pushed after this archive
+
+## Session: #803 fix the CodeQL alerts in tests and tooling
+
+- [x] Helpers `src/__tests__/helpers/markup.ts` (strip until stable, escapeRegExp) and `tests/e2e/questions/pattern.ts`; tests and steps use them
+- [x] Tools: end tags of any form, backslash escaped in Markdown cells, two ReDoS regexes (same matches over the repo); `setup.service.ts` with a bit mask
+- [x] Local CodeQL: none of the 26 left (only ignored `build/`, `cucumber-report/`)
+- [x] `SECURITY.md` and the issue text of `security-alerts.yml`: fix, don't dismiss
+- [x] E2E of the changed steps (statement-detail, statement-edit, statement-send): 117 passed
+- [x] Review 803: `docs/reviews/803-review-1.md` (C-1, C-2 Minor fixed), closing round `docs/reviews/803-review-2.md`
+- [x] PR: pushed after this archive
