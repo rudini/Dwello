@@ -34,6 +34,9 @@ export interface TenantWithOccupancy extends Tenant {
 	isFuture: boolean;
 }
 
+/** The answer of GET /tenants/:id; the frontend derives its `Tenant` from it (AP1, ADR 0003) */
+export type TenantResponse = TenantWithOccupancy & { anonymisableFrom: string | null };
+
 // Correlated subqueries name the outer column explicitly: drizzle leaves it unqualified in single-table selects
 /** Active: a rental contract runs today (F-4, #58) */
 const isActive = sql<boolean>`exists (
