@@ -97,6 +97,9 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	priorPaidOn?: string[];
 	offsetWith?: { statementNumber: string; amount: string }[]; // «Bereits verrechnet mit NK-…» (#448)
 	carriedFrom?: { id: string; statementNumber: string; balance: string } | null; // the Übertrag (#448); only in the detail
+	editable?: boolean; // what it allows (#788); only in the detail
+	correctable?: boolean;
+	asksPayment?: boolean;
 	heatingProfile?: {
 		id: string;
 		name: string;
@@ -342,8 +345,19 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		heatingProfile: (await billsHeating(lineItems)) ? result.heatingProfile : null,
 		lineItems,
 		...(await correctionsOf(result.statement)),
-		carriedFrom: await carriedFromOf(result.statement.carriedFromId)
+		carriedFrom: await carriedFromOf(result.statement.carriedFromId),
+		...allowed(result.statement.status)
 	};
+}
+
+/**
+ * What the statement allows (#788): the frontend shows buttons and hints by it and only labels the status. A replaced
+ * one stays as sent and asks for nothing, its berichtigte Abrechnung does (#120); a draft is calculated again or
+ * deleted, a sent one corrected (#358)
+ */
+function allowed(status: string) {
+	const current = status !== 'replaced';
+	return { editable: current, correctable: current && status !== 'draft', asksPayment: current };
 }
 
 async function carriedFromOf(id: string | null) {

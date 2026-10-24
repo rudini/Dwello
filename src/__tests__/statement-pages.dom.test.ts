@@ -909,6 +909,30 @@ describe('Abrechnungsdetail', () => {
 		expect(correctDialog()).toContain('Die berichtigte Abrechnung rechnet die CHF 40.00 an, die Sie am 01.02.2025 zurückerstattet haben.');
 	});
 
+	// #788: buttons and hints follow what the backend allows, not the status (here against it, to show which counts)
+	it('zeigt keine weiteren Aktionen, wenn das Backend nichts mehr erlaubt', () => {
+		detail({ status: 'sent', editable: false, correctable: false });
+		expect(byTestId('statement-payment-summary')).not.toBeNull();
+		expect(text()).not.toContain('Weitere Aktionen');
+	});
+
+	it('bietet das Berichtigen nur an, wenn das Backend es erlaubt', () => {
+		detail({ status: 'sent', correctable: false });
+		expect(byTestId('statement-correct-button')).toBeNull();
+		expect(byTestId('statement-recalculate-button')).not.toBeNull();
+	});
+
+	it('verlangt keine Zahlung, wenn das Backend keine verlangt', () => {
+		detail({ status: 'sent', asksPayment: false });
+		expect(text()).toContain('Diese Abrechnung ist ersetzt und gilt nicht mehr.');
+		expect(byTestId('statement-payment-deadline')).toBeNull();
+	});
+
+	it('weist nur auf später erfasste Rechnungen hin, wenn die Abrechnung noch bearbeitet werden kann', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'sent', editable: false }), reminders: [], later: { invoices: 1, fuelStock: true, correctionDue: false } }, form: null } as never);
+		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
 	it('bietet beim Entwurf kein Berichtigen an', () => {
 		detail();
 		expect(byTestId('statement-send-button')).not.toBeNull();

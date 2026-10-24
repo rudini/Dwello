@@ -94,6 +94,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 24.10.2026 | #788 Teil 2: Dokumente eines ehemaligen Mieters entscheidet das Backend (`GET /tenants/:id/former-documents`) | BFF-Fundstellen 16 → 15 (`bffDates` 8 → 7) |
 | 24.10.2026 | #788 Punkt 5a: «Nächste Schritte» und die Frage nach dem befristeten Mietvertrag entscheidet das Backend (`nextSteps`, `fixedTermCheck` in `GET /contracts/:id`) | BFF-Fundstellen 15 → 13 (`bffDates` 7 → 5) |
 | 24.10.2026 | #788 Punkt 5b: Vertragsende vor Beginn und unbestätigtes Ende vor heute lehnt das Backend bei jedem Speichern ab (`CONTRACT_END_BEFORE_START`, `CONTRACT_END_PAST`) | BFF-Fundstellen 13 → 11 (`bffDates` 5 → 3) |
+| 24.10.2026 | #788 Teil 3a: was eine Abrechnung erlaubt, sagt das Backend (`editable`, `correctable`, `asksPayment` in `GET /statements/:id`) | `replaced` 18 → 15 Dateien (Frontend 7 → 4, Shared 1, Backend 10), gezählt wie Ä2 in `baseline.md` §7 |
 
 ## 7. Werkzeugwahl
 

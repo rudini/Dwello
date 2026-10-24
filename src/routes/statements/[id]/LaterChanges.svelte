@@ -49,7 +49,7 @@
 	);
 </script>
 
-{#if statement.status !== 'replaced' && (later.invoices || later.fuelStock)}
+{#if statement.editable && (later.invoices || later.fuelStock)}
 	<Alert {tone} {title} testid="statement-later-invoices">
 		<p>{text}</p>
 		{#if later.correctionLowers}<p>
