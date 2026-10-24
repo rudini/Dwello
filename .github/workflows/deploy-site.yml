@@ -85,10 +85,12 @@ jobs:
       # Tells Bing, Yandex, Seznam, Naver and Yep (IndexNow) that the pages changed; Google reads sitemap.xml via robots.txt
       - name: Notify search engines (IndexNow)
         if: steps.settings.outputs.ready == 'yes'
+        env:
+          KEY: 1f373c571ac81444c9ecb4893b5fca7d # = marketing/<KEY>.txt
         run: |
-          key=$(basename marketing/[0-9a-f]*.txt .txt)
           urls=$(grep -o '<loc>[^<]*' marketing/sitemap.xml | sed 's/<loc>/"/; s/$/"/' | paste -sd,)
-          curl -sS -o /dev/null -w 'IndexNow: HTTP %{http_code}\n' -X POST https://api.indexnow.org/indexnow \
+          code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X POST https://api.indexnow.org/indexnow \
             -H 'Content-Type: application/json; charset=utf-8' \
-            -d "{\"host\":\"dwello.ch\",\"key\":\"$key\",\"keyLocation\":\"https://dwello.ch/$key.txt\",\"urlList\":[$urls]}" \
-            || echo "::warning::IndexNow not reachable; the search engines find the pages through sitemap.xml"
+            -d "{\"host\":\"dwello.ch\",\"key\":\"$KEY\",\"keyLocation\":\"https://dwello.ch/$KEY.txt\",\"urlList\":[$urls]}") || code=000
+          echo "IndexNow: HTTP $code"
+          case "$code" in 200|202) ;; *) echo "::warning::IndexNow answered $code; the search engines still find the pages through sitemap.xml" ;; esac

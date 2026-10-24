@@ -13,5 +13,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] `marketing/robots.txt`, `marketing/sitemap.xml` (landing pages, hreflang alternates), IndexNow key file
 - [x] `deploy-site.yml`: IndexNow ping after the upload; `marketing/README.md` rows
-- [ ] Slice review (`code-reviewer`)
+- [x] Slice review round 1 (`docs/reviews/seo-review-1.md`)
+- [ ] Closing review round
 - [ ] PR
