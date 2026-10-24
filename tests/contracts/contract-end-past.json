@@ -1,0 +1,5 @@
+{
+	"error": "An end before today needs the confirmation",
+	"code": "CONTRACT_END_PAST",
+	"params": { "date": "2025-03-31" }
+}

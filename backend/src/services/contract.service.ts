@@ -327,6 +327,17 @@ function checkNotice(terminated: boolean | undefined, endDate: string | null | u
  * «Abgerechnet bis» (#453, #337): a statement exists only after its period ended, so never after today; before the
  * Vertragsbeginn it has no effect. Checked when the date or the Vertragsbeginn is sent; a stored value stays till then
  */
+/**
+ * A contract never ends before its start; a new end before today, e.g. a notice recorded late, only once the landlord
+ * confirmed its consequence (#788, A-1); `unconfirmed`: the end is new and not confirmed
+ */
+function checkEnd(startDate: string, endDate: string, unconfirmed: boolean) {
+	if (endDate < startDate)
+		throw new CodedError('CONTRACT_END_BEFORE_START', 'A contract cannot end before it starts', { date: startDate });
+	if (unconfirmed && endDate < swissToday())
+		throw new CodedError('CONTRACT_END_PAST', 'An end before today needs the confirmation', { date: endDate });
+}
+
 function checkBilledUntil(startDate: string, billedUntil: string | null | undefined, sent: boolean) {
 	if (!billedUntil || !sent) return;
 	if (billedUntil > swissToday()) throw new CodedError('BILLED_UNTIL_FUTURE', '«Abgerechnet bis» lies in the future');
@@ -495,8 +506,10 @@ export async function updateContract(
 		agreedFrom,
 		advancePaymentFrom,
 		documentsChecked,
+		confirmPastEnd,
 		...data
-	}: Partial<NewRentalContract> & AgreedList & { advancePaymentFrom?: string; documentsChecked?: boolean },
+	}: Partial<NewRentalContract> &
+		AgreedList & { advancePaymentFrom?: string; documentsChecked?: boolean; confirmPastEnd?: boolean },
 	deleteDraft?: string
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
@@ -508,6 +521,7 @@ export async function updateContract(
 	// removing the end withdraws the notice (below), whatever flag comes with it
 	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
 	const { startDate, billedUntil } = { ...current, ...newDates(data) };
+	if (data.endDate) checkEnd(startDate, data.endDate, data.endDate !== current.endDate && !confirmPastEnd);
 	checkAgreedFrom({ startDate, endDate: data.endDate === undefined ? current.endDate : data.endDate }, Object.values(agreedFrom ?? {}));
 	checkBilledUntil(startDate, billedUntil, data.billedUntil !== undefined || !!data.startDate);
 	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)

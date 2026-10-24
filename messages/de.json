@@ -460,6 +460,8 @@
 	"backend_advance_delete_changes_statement": "Das Akonto ab {from} zählt in der Abrechnung {number}, die schon erstellt ist. Berichtigen Sie zuerst diese Abrechnung.",
 	"backend_advance_delete_changes_draft": "Das Akonto ab {from} zählt im Entwurf {number}. Löschen Sie zuerst den Entwurf.",
 	"backend_contract_start_after_advance": "Ab {date} gilt ein anderes Akonto. Löschen Sie zuerst dieses Akonto, oder wählen Sie einen früheren Vertragsbeginn.",
+	"backend_contract_end_before_start": "Das Vertragsende kann nicht vor dem Vertragsbeginn am {date} liegen.",
+	"backend_contract_end_past": "Bitte bestätigen Sie, dass der Mietvertrag am {date} endete, oder korrigieren Sie das Vertragsende.",
 	"backend_contract_end_before_advance": "Ab {date} gilt ein anderes Akonto. Löschen Sie zuerst dieses Akonto, oder wählen Sie ein späteres Vertragsende.",
 	"backend_building_not_found": "Das Gebäude wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_category_not_found": "Die Kategorie wurde nicht gefunden. Laden Sie die Seite neu.",

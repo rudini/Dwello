@@ -279,7 +279,7 @@ describe('Akonto mit Gültig ab: Korrektur und Vertragsdaten', () => {
 		const start = await put(contract, { startDate: '2024-07-01' });
 		expect(start.status).toBe(400);
 		expect(await start.json()).toMatchObject({ code: 'CONTRACT_START_AFTER_ADVANCE', params: { date: '01.07.2024' } });
-		const end = await put(contract, { endDate: '2024-06-30' });
+		const end = await put(contract, { endDate: '2024-06-30', confirmPastEnd: true });
 		expect(end.status).toBe(400);
 		expect(await end.json()).toMatchObject({ code: 'CONTRACT_END_BEFORE_ADVANCE', params: { date: '01.07.2024' } });
 		expect(await advancesOf(contract)).toHaveLength(2);

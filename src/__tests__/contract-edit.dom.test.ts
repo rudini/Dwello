@@ -610,7 +610,8 @@ describe('Mietvertrag bearbeiten', () => {
 			await settle();
 			await save();
 
-			expect(puts()[0].body).toMatchObject({ endDate: '2025-03-31' });
+			// the backend saves an end before today only once it is confirmed (#788)
+			expect(puts()[0].body).toMatchObject({ endDate: '2025-03-31', confirmPastEnd: true });
 		});
 
 		// beim Ändern des Mietzinses eines beendeten Mietvertrags wird das Ende nicht nochmals bestätigt

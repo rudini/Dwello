@@ -81,6 +81,7 @@ const contractUpdateSchema = t.Partial(
 		billedUntil: t.Nullable(t.String({ format: 'date' })), // «Abgerechnet bis» (#133)
 		movedOut: t.Boolean(), // «Mieter ist ausgezogen» after an agreed end (A-6, #115)
 		documentsChecked: t.Literal(true), // «Als geprüft markieren»: a former tenant's documents, today (#459)
+		confirmPastEnd: t.Boolean(), // the landlord confirmed a new end before today (#788)
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),

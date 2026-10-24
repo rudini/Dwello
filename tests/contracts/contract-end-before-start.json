@@ -1,0 +1,5 @@
+{
+	"error": "A contract cannot end before it starts",
+	"code": "CONTRACT_END_BEFORE_START",
+	"params": { "date": "2099-11-01" }
+}

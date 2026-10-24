@@ -205,7 +205,9 @@
 	// backend deletes with the change, or keeps when it refuses it (#141)
 	async function put(next: string, deleteDraft?: string) {
 		saving = true;
-		const body = { ...contractBody(values, categories), deleteDraft };
+		// a changed end before today goes with its confirmation: the backend refuses it without (#788)
+		const confirmPastEnd = (endChanged && confirmedDay === values.endDate) || undefined;
+		const body = { ...contractBody(values, categories), confirmPastEnd, deleteDraft };
 		const response = await apiCall(back, { method: 'PUT', body });
 		saving = false;
 		if (response.error) {

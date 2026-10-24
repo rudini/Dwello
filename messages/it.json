@@ -460,6 +460,8 @@
 	"backend_advance_delete_changes_statement": "L’acconto dal {from} conta nel conteggio {number}, già allestito. Rettifichi prima questo conteggio.",
 	"backend_advance_delete_changes_draft": "L’acconto dal {from} conta nella bozza {number}. Elimini prima la bozza.",
 	"backend_contract_start_after_advance": "Dal {date} vale un altro acconto. Elimini prima questo acconto, oppure anticipi l’inizio del contratto.",
+	"backend_contract_end_before_start": "La fine del contratto non può precedere l’inizio del contratto, il {date}.",
+	"backend_contract_end_past": "Confermi che il contratto di locazione è terminato il {date}, oppure corregga la fine del contratto.",
 	"backend_contract_end_before_advance": "Dal {date} vale un altro acconto. Elimini prima questo acconto, oppure posticipi la fine del contratto.",
 	"backend_building_not_found": "L’immobile non è stato trovato. Ricarichi la pagina.",
 	"backend_category_not_found": "La categoria non è stata trovata. Ricarichi la pagina.",
