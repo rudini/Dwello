@@ -2,17 +2,10 @@ import { m } from '$lib/paraglide/messages';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { roomsLabel, statusLabels } from '$lib/apartment';
-import type { ApartmentStatus } from '$lib/types';
+import type { ApartmentStatus, Tenant } from '$lib/types';
 import { agreeableCategories } from '$lib/server/category';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
-
-interface Tenant {
-	id: string;
-	firstName: string;
-	lastName: string;
-	city?: string | null;
-}
 
 interface Apartment {
 	id: string;
