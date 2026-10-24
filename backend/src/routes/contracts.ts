@@ -268,7 +268,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 		// a real day, checked here, not in the BFF (H-28, #717)
 		if (!isRealDate(params.validFrom)) {
 			set.status = 400;
-			return { error: 'validFrom must be a real day' };
+			return refusal('ADVANCE_DAY_INVALID', 'validFrom must be a real day');
 		}
 		try {
 			await deleteAdvance(params.id, params.validFrom);

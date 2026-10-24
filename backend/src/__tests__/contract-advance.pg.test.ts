@@ -119,7 +119,7 @@ describe('Akonto mit Gültig ab', () => {
 		for (const day of ['kein-datum', '2024-02-30']) {
 			const refused = await remove(day);
 			expect(refused.status).toBe(400);
-			expect(await refused.json()).toEqual({ error: 'validFrom must be a real day' });
+			expect(await refused.json()).toEqual({ error: 'validFrom must be a real day', code: 'ADVANCE_DAY_INVALID', params: {} });
 		}
 	});
 

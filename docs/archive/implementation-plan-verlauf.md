@@ -3112,3 +3112,11 @@ Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request.
 - [x] Measurement run, `tools/arch-baseline/out/` refreshed
 - [x] §7a written, utility tree Ä4 updated; `bun run fitness` green
 - [x] PR pushed after this archive
+
+## Session H-28: the Akonto day in the backend
+
+#717 (H-28), the last domain rule the fitness functions list in the BFF: `DELETE /contracts/:id/advance-payments/:validFrom` checks that «Gültig ab» is a real day (`ADVANCE_DAY_INVALID`, the old text). The BFF keeps the day's shape as a guard of the backend path (review 464-1 C-9), reclassified as technical in `tools/fitness/ratchet.json`; Ä4 reads 0 (`baseline.md` §7a). No scenario: the UI only posts stored days.
+
+- [x] Backend check and code, red first; contract `contract-advance-day-invalid.json`
+- [x] `code-reviewer`: `h28o-review-1.md` (reclassification honest; C-1 Minor, the refusal had no code: fixed), closing round `h28p-review-1.md`
+- [x] PR pushed after this archive

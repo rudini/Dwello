@@ -2066,6 +2066,7 @@
 	"backend_fuel_stock_other_category": "Tutte le scorte di un immobile appartengono alla stessa categoria. Scelga la categoria delle scorte precedenti.",
 	"backend_fuel_stock_date_taken": "Per questo giorno di riferimento è già registrata una scorta. La elimini prima.",
 	"backend_contract_draft_not_affected": "Non è stato possibile terminare il contratto di locazione.",
+	"backend_advance_day_invalid": "Durante il salvataggio si è verificato un errore. Riprovi più tardi.",
 	"backend_building_city_required": "La località è obbligatoria.",
 	"backend_building_canton_required": "Il cantone è obbligatorio.",
 	"backend_building_year_built_invalid": "L’anno di costruzione deve essere compreso tra il 1800 e oggi.",
