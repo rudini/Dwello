@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gt, gte, lte, isNull, ilike, ne, inArray } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gte, lte, isNull, ilike, ne, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
 import {
@@ -20,6 +20,7 @@ import { checkAgreedFrom, setAgreedCategories, setAgreedFrom } from './agreed-ca
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
+import { laterContract } from './later-contract';
 import { daysAfter, sqlToday, swissToday } from './today';
 
 /** The database, or a transaction of it */
@@ -273,20 +274,6 @@ export async function getActiveContract(
 	return (contract as ContractWithDetails) || null;
 }
 
-/**
- * Get all contracts for an apartment within a period
- * Used for utility statement generation with prorating
- */
-/** Whether the apartment has a contract starting after the day (YYYY-MM-DD): the tenant moved out by then (A-4, A-6) */
-async function laterContract(apartmentId: string, day: string) {
-	const [later] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(and(eq(rentalContracts.apartmentId, apartmentId), gt(rentalContracts.startDate, day)))
-		.limit(1);
-	return Boolean(later);
-}
-
 /** What a running notice still asks of the landlord (A-4, review K-1); null without one */
 export async function nextSteps(contract: {
 	terminated: boolean;
@@ -312,6 +299,10 @@ export async function fixedTermCheck(contract: {
 	return !(await laterContract(contract.apartmentId, end));
 }
 
+/**
+ * Get all contracts for an apartment within a period
+ * Used for utility statement generation with prorating
+ */
 export async function getContractsByPeriod(
 	apartmentId: string,
 	periodStart: string,

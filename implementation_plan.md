@@ -15,7 +15,9 @@ Product owner, 24.10.2026: point 5 in two pull requests; (a) the contract page's
 
 - [x] Backend `nextSteps` (`contract-next-steps.pg.test.ts`, red first): during a running notice without and with a later contract; after the end only while the tenant has the apartment's address; none without notice
 - [x] Backend `fixedTermCheck` (same file, red first): an agreed end before today without a later contract; not after notice, «ausgezogen», a later contract, before or on the last day, without an end
-- [x] One query for «a later contract of the apartment» (`laterContract`); sharing it with the former-tenant documents closed a module cycle (document → contract), so that copy stays
+- [x] One query for «a later contract of the apartment»: `laterContract` in its own module `later-contract.ts` (as `old-address.ts`), used by the contract and the former-tenant documents (review p5a C-2; importing it from `contract.service` had closed a module cycle)
 - [x] API contract `tests/contracts/contract.json`; BFF reads both fields (`contract-actions.test.ts`, red first: the page derives nothing from the dates); no apartment contracts fetched any more
 - [x] Fitness `--update` (bffDates 7 → 5, BFF decisions 15 → 13), `fitness-functions.md`, `docs/api-specification.md`
-- [ ] E2E `contract-detail.feature` green, review, PR
+- [x] E2E `contract-detail.feature`, `contract-edit.feature` (Chromium and API, 97) green
+- [x] Slice review round 1 (`docs/reviews/p5a-review-1.md`: no Blocker/Major; C-1 Minor misplaced doc comment, moved; C-2 Minor duplicate query, shared module)
+- [ ] Closing round, PR
