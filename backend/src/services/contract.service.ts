@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gte, lte, isNull, ilike, ne, inArray } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gt, gte, lte, isNull, ilike, ne, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
 import {
@@ -277,6 +277,41 @@ export async function getActiveContract(
  * Get all contracts for an apartment within a period
  * Used for utility statement generation with prorating
  */
+/** Whether the apartment has a contract starting after the day (YYYY-MM-DD): the tenant moved out by then (A-4, A-6) */
+async function laterContract(apartmentId: string, day: string) {
+	const [later] = await db
+		.select({ id: rentalContracts.id })
+		.from(rentalContracts)
+		.where(and(eq(rentalContracts.apartmentId, apartmentId), gt(rentalContracts.startDate, day)))
+		.limit(1);
+	return Boolean(later);
+}
+
+/** What a running notice still asks of the landlord (A-4, review K-1); null without one */
+export async function nextSteps(contract: {
+	terminated: boolean;
+	endDate: string | null;
+	apartmentId: string;
+	oldAddress: boolean;
+}) {
+	if (!contract.terminated || !contract.endDate) return null;
+	// after the end only the new address, while the moved-out tenant still has the building's (A-5, #114)
+	if (contract.endDate < swissToday()) return contract.oldAddress ? { successor: false, ended: true } : null;
+	return { successor: await laterContract(contract.apartmentId, contract.endDate), ended: false };
+}
+
+/** An agreed end passed with no sign the tenant left: ask whether he stayed (Art. 266 Abs. 2 OR, A-6) */
+export async function fixedTermCheck(contract: {
+	terminated: boolean;
+	movedOut: boolean;
+	endDate: string | null;
+	apartmentId: string;
+}) {
+	const end = contract.endDate;
+	if (contract.terminated || contract.movedOut || !end || end >= swissToday()) return false;
+	return !(await laterContract(contract.apartmentId, end));
+}
+
 export async function getContractsByPeriod(
 	apartmentId: string,
 	periodStart: string,
