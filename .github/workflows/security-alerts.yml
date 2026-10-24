@@ -1,0 +1,51 @@
+name: Security alerts
+
+# Each open CodeQL alert without an issue gets one, labelled nfr:security, with the deadline of its severity (#790,
+# SECURITY.md). Claude sessions cannot read alerts, but can read issues. Dependabot alerts come as its fix pull requests.
+on:
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  security-events: read
+  issues: write
+
+jobs:
+  alerts-to-issues:
+    name: CodeQL alerts to issues
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Open an issue per new alert
+        run: |
+          # "(CodeQL #<n>)" at the end of the title marks the alert's issue; a closed one counts too
+          known=$(gh api --paginate "repos/$GH_REPO/issues?labels=nfr:security&state=all&per_page=100" --jq '.[].title')
+          gh api --paginate "repos/$GH_REPO/code-scanning/alerts?state=open&per_page=100" --jq '.[] | @base64' |
+            while read -r row; do
+              alert() { echo "$row" | base64 -d | jq -r "$1"; }
+              number=$(alert .number)
+              grep -qF "(CodeQL #$number)" <<< "$known" && continue
+              severity=$(alert '.rule.security_severity_level // .rule.severity')
+              case "$severity" in
+                critical) deadline='within 2 days' ;;
+                high) deadline='within 7 days' ;;
+                *) deadline='with the next release' ;;
+              esac
+              body=$(cat <<BODY
+          ## Problem
+          CodeQL alert [#$number]($(alert .html_url)), severity **$severity**: $(alert .rule.description).
+
+          $(alert .most_recent_instance.message.text)
+
+          ## Where
+          \`$(alert .most_recent_instance.location.path):$(alert .most_recent_instance.location.start_line)\` (rule \`$(alert .rule.id)\`)
+
+          ## Done means
+          - Fixed $deadline (SECURITY.md), or, in tests or tooling without a real attack path, dismissed on GitHub with a reason.
+          BODY
+              )
+              gh issue create --title "Security: $(alert .rule.description) (CodeQL #$number)" --label nfr:security --body "$body"
+            done
