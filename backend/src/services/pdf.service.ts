@@ -22,12 +22,12 @@ import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
 import { greetingWords } from './reminder-letter';
-import type { AdvanceLine, InvoicePart, MonthShare } from '../db/schema';
+import type { AdvanceLine, InvoicePart, Language, MonthShare } from '../db/schema';
 
 /**
  * Supported languages
  */
-export type Language = 'de' | 'fr' | 'it' | 'en';
+export type { Language } from '../db/schema';
 
 
 /**

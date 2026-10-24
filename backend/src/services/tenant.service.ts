@@ -12,7 +12,8 @@ import {
 	buildings,
 	documents,
 	type Tenant,
-	type NewTenant
+	type NewTenant,
+	type Language
 } from '../db/schema';
 import { sqlToday, swissToday } from './today';
 
@@ -95,7 +96,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 	}
 
 	if (language) {
-		conditions.push(eq(tenants.language, language));
+		conditions.push(eq(tenants.language, language as Language)); // an unknown language matches no tenant, as before
 	}
 
 	if (status) {
