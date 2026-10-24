@@ -22,7 +22,8 @@ export function renderHuman(out: ScanOutput): string {
 	return `deepcheck: ${counted(out)} of ${analyzed} analyzed (${threshold})${topNote(out)}\n\n${body}${groups}`;
 }
 
-const cell = (s: string) => `\`${s.replace(/[\\|]/g, '\\$&')}\``;
+// a code span keeps backslashes as they are; only the table's pipe needs one (code review 803 C-1)
+const cell = (s: string) => `\`${s.split('|').join('\\|')}\``;
 const html = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 function markdownGroups(out: ScanOutput): string {

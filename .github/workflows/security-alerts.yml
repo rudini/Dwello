@@ -46,6 +46,7 @@ jobs:
 
           ## Done means
           - Fixed $deadline (SECURITY.md); in tests or tooling without a real attack path fixed too, without a deadline.
+          - Dismissed on GitHub only as a false positive the code cannot be written to avoid, with a comment why.
           BODY
               )
               gh issue create --title "Security: $(alert .rule.description) (CodeQL #$number)" --label nfr:security --body "$body"
