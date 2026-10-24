@@ -3230,3 +3230,16 @@ Product owner, 24.10.2026: a separate endpoint `GET /tenants/:id/former-document
 - [x] E2E `tenant-detail`, `tenant-documents`, `tenants` (Chromium and API, 28) green. No scenario shows the notice: the E2E stack cannot backdate an upload
 - [x] Slice review round 1 (`docs/reviews/p2-review-1.md`: no Blocker/Major; C-1 Minor tie of end dates, ordered as the contract list, pg test red first; C-2 Minor notice without documents, BFF test red first)
 - [x] Closing round (`docs/reviews/p2-review-2.md`: C-1, C-2 fixed, no new findings), PR pushed after this archive
+## Session: index dwello.ch in search engines
+
+- [x] `marketing/robots.txt`, `marketing/sitemap.xml` (landing pages, hreflang alternates), IndexNow key file
+- [x] `deploy-site.yml`: IndexNow ping after the upload; `marketing/README.md` rows
+- [x] Slice review round 1 (`docs/reviews/seo-review-1.md`)
+- [x] Closing review round (`docs/reviews/seo-review-2.md`)
+- [x] PR: pushed after this archive
+
+## Session: keep the app out of search engines
+
+- [x] `X-Robots-Tag: noindex, nofollow` on every page the app answers (sign-in page included); test in `hooks.server.test.ts`, seen red
+- [x] Slice review (`docs/reviews/noindex-review-1.md`)
+- [x] PR #799: pushed after this archive

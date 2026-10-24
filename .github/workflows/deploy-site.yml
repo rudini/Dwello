@@ -81,3 +81,16 @@ jobs:
           # Upload new and changed files; files removed from the repository stay on the server
           lftp -c "set net:max-retries 2; $opts open --user \"$SFTP_USER\" --env-password $url; \
             mirror --reverse --verbose --exclude-glob i18n/ --exclude-glob .fallow/ --exclude-glob README.md$skip marketing/ \"$SFTP_PATH\""
+
+      # Tells Bing, Yandex, Seznam, Naver and Yep (IndexNow) that the pages changed; Google reads sitemap.xml via robots.txt
+      - name: Notify search engines (IndexNow)
+        if: steps.settings.outputs.ready == 'yes'
+        env:
+          KEY: 1f373c571ac81444c9ecb4893b5fca7d # = marketing/<KEY>.txt
+        run: |
+          urls=$(grep -o '<loc>[^<]*' marketing/sitemap.xml | sed 's/<loc>/"/; s/$/"/' | paste -sd,)
+          code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' -X POST https://api.indexnow.org/indexnow \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -d "{\"host\":\"dwello.ch\",\"key\":\"$KEY\",\"keyLocation\":\"https://dwello.ch/$KEY.txt\",\"urlList\":[$urls]}") || code=000
+          echo "IndexNow: HTTP $code"
+          case "$code" in 200|202) ;; *) echo "::warning::IndexNow answered $code; the search engines still find the pages through sitemap.xml" ;; esac

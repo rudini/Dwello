@@ -62,6 +62,8 @@ export const handle: Handle = ({ event, resolve }) =>
 				});
 				// Without a cookie the answer depends on the browser language: no cache may hand it to another
 				response.headers.append('Vary', 'Accept-Language');
+				// A landlord's own app: no page of it (the sign-in page included) belongs in a search engine
+				response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 				return response;
 			}
 		});

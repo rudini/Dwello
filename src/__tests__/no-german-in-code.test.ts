@@ -59,6 +59,7 @@ const identifiers: Record<string, string[]> = {
 	'src/lib/statement-wizard.ts': ['akonto'], // a message's name
 	'src/routes/statements/generate/PreviewStep.svelte': ['akonto'], // test id
 	'src/lib/wizard-draft.ts': ['null'], // JSON
+	'src/hooks.server.ts': ['tag'], // HTTP header X-Robots-Tag
 	// the stored Gebäudetyp the register's building class maps to (src/lib/building-type.ts)
 	'src/lib/server/building-register.ts': ['Einfamilienhaus', 'Mehrfamilienhaus', 'Geschäftshaus', 'Gewerbegebäude', 'Mischnutzung'],
 	'src/lib/ui/LanguageSwitcher.svelte': ['Deutsch'] // each language in its own words
