@@ -88,6 +88,22 @@ describe('Mieterdetail', () => {
 		expect(data.formerDocuments).toBeNull();
 	});
 
+	// review p2 C-2: without the documents the notice would name none
+	it('zeigt keinen Hinweis, wenn die Dokumente des Mieters nicht laden', async () => {
+		const fetch = (async (url: string) =>
+			url === `${API}/tenants/t1`
+				? Response.json(tenant)
+				: url === `${API}/tenants/t1/former-documents`
+					? Response.json(formerDocuments)
+					: url.startsWith(`${API}/contracts`)
+						? Response.json({ contracts: [] })
+						: new Response(null, { status: 500 })) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
+
+		expect(data.formerDocuments).toBeNull();
+	});
+
 	it('lädt die Mietverträge des Mieters', async () => {
 		const { urls, fetch } = backend([]);
 

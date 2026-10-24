@@ -43,12 +43,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			.then(async (response) => (await response.json()).formerDocuments)
 			.catch(() => null)
 	]);
-	const formerDocuments = former && {
-		endDate: former.endDate as string,
-		contractId: former.contractId as string,
-		checkedOn: former.checkedOn as string | null,
-		documents: documents.filter((d) => former.documentIds.includes(d.id))
-	};
+	// without the documents (they did not load) there is nothing to name
+	const before = documents.filter((d) => former?.documentIds.includes(d.id));
+	const formerDocuments = before.length
+		? {
+				endDate: former.endDate as string,
+				contractId: former.contractId as string,
+				checkedOn: former.checkedOn as string | null,
+				documents: before
+			}
+		: null;
 
 	return {
 		tenant,

@@ -7,6 +7,7 @@ import { afterAll, describe, expect, it } from 'bun:test';
 import { and, eq, ne } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, rentalContracts } from '../db/schema';
+import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract } from '../services/contract.service';
 import { createDocument } from '../services/document.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
@@ -108,6 +109,22 @@ describe('Dokumente eines ehemaligen Mieters', () => {
 		expect(await former(tenant)).toEqual({ endDate: '2025-03-31', documentIds: [id], contractId: last.id, checkedOn: null });
 		await db.update(rentalContracts).set({ documentsCheckedOn: '2025-05-01' }).where(eq(rentalContracts.id, last.id));
 		expect(await former(tenant)).toMatchObject({ contractId: last.id, checkedOn: '2025-05-01' });
+	});
+
+	// review p2 C-1: two contracts end on the same day; as in the contract list (start desc), the earlier start counts
+	it('nimmt bei gleichem Vertragsende den früher begonnenen Mietvertrag', async () => {
+		const { tenant, building, contract } = await tenantWith('2023-01-01', '2025-03-31');
+		const parking = await createApartment({ buildingId: building, number: 'P1', floor: 0, area: '12', rooms: '1' });
+		const later = await createContract({ apartmentId: parking.id, tenantId: tenant, baseRent: '100', monthlyAdvancePayment: '0', startDate: '2024-01-01', endDate: '2025-03-31' });
+		try {
+			await db.update(rentalContracts).set({ terminated: true }).where(eq(rentalContracts.id, later.id));
+			await uploadedAt(tenant, '2023-05-01T09:00:00.000Z');
+
+			expect(await former(tenant)).toMatchObject({ contractId: contract });
+		} finally {
+			await db.delete(rentalContracts).where(eq(rentalContracts.id, later.id));
+			await deleteApartment(parking.id);
+		}
 	});
 
 	// A-6: after the agreed end of a fixed-term contract the tenant may have stayed; deleting cannot be undone

@@ -18,4 +18,5 @@ Product owner, 24.10.2026: a separate endpoint `GET /tenants/:id/former-document
 - [x] Tenant detail load uses the endpoint (`tenant-detail.test.ts`, red first); no apartment contracts fetched any more; the BFF tests of the A-6 rule moved to the backend; a failing request still loads the page without the notice
 - [x] Fitness `--update` (bffDates 8 → 7, BFF decisions 16 → 15), `fitness-functions.md`
 - [x] E2E `tenant-detail`, `tenant-documents`, `tenants` (Chromium and API, 28) green. No scenario shows the notice: the E2E stack cannot backdate an upload
-- [ ] Slice review, closing round, PR
+- [x] Slice review round 1 (`docs/reviews/p2-review-1.md`: no Blocker/Major; C-1 Minor tie of end dates, ordered as the contract list, pg test red first; C-2 Minor notice without documents, BFF test red first)
+- [ ] Closing round, PR

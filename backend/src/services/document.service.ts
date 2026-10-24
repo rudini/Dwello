@@ -86,7 +86,12 @@ const swissDay = (timestamp: Date) => timestamp.toLocaleDateString('sv-SE', { ti
  * contractId, checkedOn: the last contract, where «Als geprüft markieren» is stored, and the day (#459)
  */
 export async function formerTenantDocuments(tenantId: string) {
-	const contracts = await db.select().from(rentalContracts).where(eq(rentalContracts.tenantId, tenantId));
+	// in the order of the contract list, so of two ending the same day the earlier start counts, as on the overview
+	const contracts = await db
+		.select()
+		.from(rentalContracts)
+		.where(eq(rentalContracts.tenantId, tenantId))
+		.orderBy(desc(rentalContracts.startDate), desc(rentalContracts.id));
 	const today = swissToday();
 	if (!contracts.length || contracts.some((c) => !c.endDate || c.endDate >= today)) return null;
 	const last = contracts.reduce((a, b) => (a.endDate! > b.endDate! ? a : b));
