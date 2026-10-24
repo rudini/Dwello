@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: Phase 2b refactoring cycle 2 (tenant of the contract page)
+
+No scenario: refactoring, no behaviour change (product owner, 24.10.2026; the fallback for a missing tenant record is unreachable and may go). ADR 0002.
+
+- [x] Step 0: measure before (fitness, 02-imports/05-knowledge, unit tests 3638, E2E contract-detail/contract-edit 96)
+- [x] Step 0b: six stubs in `contract-actions.test.ts` answered a contract without tenant; first try of step 1 red and reverted, the stubs now take the tenant from `tests/contracts/contract.json` (PO, 24.10.2026)
+- [ ] Step 1: `toContract` takes the tenant from `toTenant`
+- [ ] Step 2: measure after, ratchet `--update`, ADR 0002, `fitness-functions.md`
+- [ ] Review, PR

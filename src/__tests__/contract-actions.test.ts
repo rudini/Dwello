@@ -22,7 +22,13 @@ describe('Vertragsstatus', () => {
 		const fetch = (async (url: string) => {
 			urls.push(url);
 			if (url.endsWith('/missing-statements')) return Response.json([]);
-			return Response.json({ id: 'c1', contracts: [], buildings: [], apartments: [] });
+			return Response.json({
+				id: 'c1',
+				tenant: contractDetail.tenant,
+				contracts: [],
+				buildings: [],
+				apartments: []
+			});
 		}) as typeof globalThis.fetch;
 
 		const list = (await listLoad({
@@ -62,7 +68,13 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 			if (url.includes('/config') || url.includes('/statements?'))
 				return Response.json({ data: [] });
 			if (url.endsWith('/missing-statements')) return Response.json([]);
-			return Response.json({ id: 'c1', apartmentId: 'a1', startDate: '2024-04-01', ...contract });
+			return Response.json({
+				id: 'c1',
+				apartmentId: 'a1',
+				startDate: '2024-04-01',
+				tenant: contractDetail.tenant,
+				...contract
+			});
 		}) as typeof globalThis.fetch;
 	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
 		(
