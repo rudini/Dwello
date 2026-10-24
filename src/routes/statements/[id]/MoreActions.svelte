@@ -19,13 +19,14 @@
 	} = $props();
 </script>
 
-{#if statement.status !== 'replaced'}
+<!-- what the statement allows the backend decides (#788) -->
+{#if statement.editable}
 	<Panel title={m.statements_more_actions()}>
 		<div class="flex flex-col gap-4">
 			<Button href="/statements/{statement.id}/edit" icon="edit" testid="statement-edit-button"
 				>{m.statements_edit_button()}</Button
 			>
-			{#if statement.status !== 'draft'}
+			{#if statement.correctable}
 				<Button icon="edit" onclick={oncorrect} testid="statement-correct-button"
 					>{m.statements_correct()}</Button
 				>

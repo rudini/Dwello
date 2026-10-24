@@ -5,6 +5,7 @@
  */
 import { billingStart } from './contract.service';
 import { daysAfter, swissToday } from './today';
+import { counting } from './counting-statements';
 
 // First month (1-12) of each accounting period type
 const FIRST_MONTH = { calendar: 1, 'july-june': 7, 'november-october': 11 } as const;
@@ -73,7 +74,7 @@ export function uncovered(period: Range, statements: Omit<Dated, 'status'>[]) {
  * longer covers its days (#120)
  */
 export function missingPeriods(type: AccountingPeriodType, contract: Rental, statements: Dated[], today = swissToday()) {
-	const billing = statements.filter((s) => s.status !== 'replaced');
+	const billing = counting(statements);
 	return endedPeriodsSince(type, contract.startDate, today)
 		.flatMap((period) => uncovered(period, billing))
 		.filter((gap) => billsIn(contract, gap));
@@ -88,7 +89,7 @@ export function missingPeriods(type: AccountingPeriodType, contract: Rental, sta
 export function missingWays(type: AccountingPeriodType, contract: Rental, statements: Dated[], building: Dated[], today = swissToday()) {
 	const periods = periodsOf(building);
 	// a replaced statement of the contract: the run of its period bills it again (#120)
-	const own = periodsOf(statements.filter((s) => s.status !== 'replaced'));
+	const own = periodsOf(counting(statements));
 	const ways = (period: Range) => [
 		...periods.filter((p) => overlaps(p, period)).map((p) => ({ ...p, kind: 'existing' })),
 		...uncovered(period, building).map((u) => ({ ...u, kind: 'short' }))

@@ -1,8 +1,17 @@
 import type { StatementWithDetails } from '$lib/types';
 
+// what the backend allows for a status (#788, `allowed` in backend/src/services/statement.service.ts); a test about
+// the fields themselves overrides them
+const allowedFor = (status = 'draft') => ({
+	editable: status !== 'replaced',
+	correctable: status !== 'replaced' && status !== 'draft',
+	asksPayment: status !== 'replaced'
+});
+
 /** A statement as the pages receive it; override what a test is about */
 export const statement = (overrides: Partial<StatementWithDetails> = {}): StatementWithDetails =>
 	({
+		...allowedFor(overrides.status),
 		id: 's1',
 		statementNumber: 'NK-2024-0001',
 		tenantId: 't1',
