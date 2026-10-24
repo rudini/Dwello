@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { TenantWithOccupancy } from '$lib/types';
+	import type { TenantListItem } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import { formatDate } from '$lib/utils/format';
 
 	// One tenant in the list: the name opens it, the whole row is its link
-	let { tenant }: { tenant: TenantWithOccupancy } = $props();
+	let { tenant }: { tenant: TenantListItem } = $props();
 
 	const contact = $derived([tenant.email, tenant.phone].filter(Boolean).join(' · '));
 </script>

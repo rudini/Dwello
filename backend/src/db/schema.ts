@@ -86,18 +86,26 @@ export const apartmentsRelations = relations(apartments, ({ one, many }) => ({
 // ============================================================================
 // Tenants Table
 // ============================================================================
+/** A tenant's language: letters, PDFs and e-mails go out in it */
+export type Language = 'de' | 'fr' | 'it' | 'en';
+/** How a tenant receives statements and letters */
+export type CorrespondenceChannel = 'email' | 'letter';
+
 export const tenants = pgTable('tenants', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	firstName: varchar('first_name', { length: 100 }).notNull(),
 	lastName: varchar('last_name', { length: 100 }).notNull(),
 	email: varchar('email', { length: 255 }),
 	phone: varchar('phone', { length: 30 }),
-	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, en
+	language: varchar('language', { length: 5 }).$type<Language>().notNull().default('de'),
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
 	country: varchar('country', { length: 2 }).notNull().default('CH'), // ISO 3166 code of the Korrespondenzadresse
-	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
+	correspondenceChannel: varchar('correspondence_channel', { length: 10 })
+		.$type<CorrespondenceChannel>()
+		.notNull()
+		.default('letter'),
 	anonymisedOn: date('anonymised_on'), // «Mieter anonymisieren» after the retention (#459)
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()

@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { toTenant } from '$lib/server/tenant';
-import type { TenantsListData, TenantWithOccupancy } from '$lib/types';
+import type { TenantsListData, TenantListItem } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 				.map((c) => c.startDate)
 				.sort()[0] ?? null;
 
-		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map(
+		const tenants: TenantListItem[] = (data.tenants || data.data || []).map(
 			(t: Record<string, unknown>) => ({
 				...toTenant(t),
 				currentApartment: t.currentApartment
