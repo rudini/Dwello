@@ -15,6 +15,6 @@ No scenario: refactoring, no behaviour change (product owner, 24.10.2026; the fa
 
 - [x] Step 0: measure before (fitness, 02-imports/05-knowledge, unit tests 3638, E2E contract-detail/contract-edit 96)
 - [x] Step 0b: six stubs in `contract-actions.test.ts` answered a contract without tenant; first try of step 1 red and reverted, the stubs now take the tenant from `tests/contracts/contract.json` (PO, 24.10.2026)
-- [ ] Step 1: `toContract` takes the tenant from `toTenant`
-- [ ] Step 2: measure after, ratchet `--update`, ADR 0002, `fitness-functions.md`
+- [x] Step 1: `toContract` takes the tenant from `toTenant`
+- [x] Step 2: measure after, ratchet `--update`, ADR 0002, `fitness-functions.md`
 - [ ] Review, PR

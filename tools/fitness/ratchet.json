@@ -171,8 +171,7 @@
 				"paths": [
 					"src/lib/server/tenant-form.ts",
 					"src/lib/server/tenant.ts",
-					"src/lib/types.ts",
-					"src/routes/contracts/[id]/+page.server.ts"
+					"src/lib/types.ts"
 				],
 				"reason": "Hand-written mirror of the API shape (SP-Ä1-1, baseline m4-entity-mirrors.csv)",
 				"scenario": "Ä1"
