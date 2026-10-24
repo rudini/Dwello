@@ -16,7 +16,7 @@ No scenario: type-only refactoring, no behaviour change (product owner, 24.10.20
 - [x] Step 0: measure before (fitness, 02-imports/05-knowledge, 3638 unit tests, backend type-check, 51 tenant backend tests; E2E before: green CI on main)
 - [x] Step 1: `Language` and `CorrespondenceChannel` move to `schema.ts`; the tenant columns carry them (`.$type`)
 - [x] Step 2: the backend names the answer of `GET /tenants/:id` (`TenantResponse`), the route checks it with `satisfies`
-- [ ] Step 3: `Tenant` in `src/lib/types.ts` is derived from `TenantResponse`
+- [x] Step 3: `Tenant` in `src/lib/types.ts` is derived from `TenantResponse`
 - [ ] Step 4: measure after, ratchet `--update`, ADR 0003, `fitness-functions.md`
 - [ ] Review, PR
 - [ ] Next: #788 for Ä4 (asked by the product owner)
