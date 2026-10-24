@@ -12,6 +12,7 @@ import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
 import { listStatements } from './statement.service';
 import { swissToday } from './today';
+import { counting } from './counting-statements';
 
 type Contract = Pick<ContractWithDetails, 'id' | 'startDate' | 'endDate' | 'billedUntil' | 'tenantName'> &
 	Partial<Pick<ContractWithDetails, 'terminated' | 'managementFeeAgreed' | 'apartmentNumber'>>;
@@ -33,7 +34,7 @@ function overlapOf(run: Range, contracts: Contract[], statements: Statement[], t
 	const overlapped = periods.some((p) => same(p, run)) ? [] : periods.filter((p) => overlaps(p, run));
 	if (!overlapped.length) return null;
 	// a contract with a statement that overlaps the period is billed there (#199), a replaced one bills there no more (#120)
-	const billing = statements.filter((s) => s.status !== 'replaced');
+	const billing = counting(statements);
 	const unbilled = (p: Range) => contracts.some((c) => billsIn(c, p) && !billing.some((s) => s.contractId === c.id && within(s, p)));
 	const rest = uncovered(run, statements).filter((days) => days.end < today).reverse();
 	const short = rest.filter((days) => contracts.some((c) => billsIn(c, days)));
@@ -148,7 +149,7 @@ export function runDefaults(settings: Settings, link: Link | null, contracts: Te
 	if (!link) return fromSettings;
 	const { start, end } = link.period;
 	// a replaced statement does not count as one of the period (Fachreview 387-1 V-1, glossary «Ersetzt»)
-	const others = statements.filter((s) => s.periodStart >= start && s.periodEnd <= end && s.status !== 'replaced');
+	const others = counting(statements).filter((s) => s.periodStart >= start && s.periodEnd <= end);
 	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
 	// the heating profile comes from any of them, as before #89 (closing review C-1)
 	const runRates = others.filter((s) => contracts.some((c) => c.id === s.contractId && c.managementFeeAgreed && c.managementFeePercent == null));

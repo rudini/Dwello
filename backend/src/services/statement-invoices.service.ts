@@ -11,6 +11,7 @@ import { CodedError } from './coded-error';
 import { getInvoicesForStatement } from './invoice.service';
 import { agreedStock, getStatement, listStatements, recalculation, type StatementWithDetails } from './statement.service';
 import { swissToday } from './today';
+import { counting } from './counting-statements';
 
 type PeriodInvoice = Awaited<ReturnType<typeof getInvoicesForStatement>>[number];
 type Positions = Pick<UtilityStatementLineItem, 'categoryId' | 'distributionKeyId' | 'invoices'>[];
@@ -127,8 +128,7 @@ export async function draftsToSend() {
 export async function outdatedStatements() {
 	const { statements } = await listStatements({ limit: 1000 });
 	const listed = await Promise.all(
-		statements
-			.filter((s) => s.status !== 'replaced')
+		counting(statements)
 			.map(async (s) => {
 				const changes = await statementChanges(s.id);
 				const outdated = s.status === 'draft' ? draftOutdated(changes) : changes?.correctionDue;

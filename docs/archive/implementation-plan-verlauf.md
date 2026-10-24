@@ -3290,3 +3290,12 @@ Product owner, 24.10.2026: the backend sends per statement what it allows; the f
 - [x] E2E `statement-detail`, `-edit`, `-send`, `-reminder`, `statements` (Chromium and API, 142) green
 - [x] Slice review round 1 (`docs/reviews/p3a-review-1.md`: no Blocker/Major; C-1 Minor the hint's «Berichtigen» by `correctable`, DOM test red first; C-2 Minor mapper test, red with the mapper broken)
 - [x] Closing round (`docs/reviews/p3a-review-2.md`: C-1, C-2 fixed, no new findings), PR pushed after this archive
+
+## Session: #788 part 3b, «a replaced statement does not count» in one place
+
+Product owner, 24.10.2026 (part 3: frontend decisions, then the backend). Refactoring, behaviour unchanged: the rule is written once (`backend/src/services/counting-statements.ts`) and used by every service that skipped replaced statements on its own. `No scenario: refactoring, behaviour unchanged; the backend suite (1592 before) pins it`. Refs #788.
+
+- [x] Module `counting-statements.ts`: `counting(statements)` and `countingInSql`
+- [x] `statement-run`, `accounting-period`, `statement-invoices`, `advance-payment`, `contract.service` (billed days) use it; full backend suite 1592 before and after
+- [x] Measured `replaced`: backend 10 → 8, total 15 → 13 (predicted 7 and 12: `statement-run` keeps a different rule, a replaced statement of the period is billed again by the run). The literal stays where the status is set (`statement.service`), labelled (`document.service`, `dashboard`), listed as sent (`tenant-anonymise`), or a refusal names it (`reminder`, `contract.service` successor)
+- [x] Review round 1 (`docs/reviews/p3b-review-1.md`: no Blocker/Major; C-1 Minor the fitness history named too few reasons for the remaining literals, fixed; docs only, no closing round), PR pushed after this archive

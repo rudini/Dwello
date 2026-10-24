@@ -1,9 +1,10 @@
-import { and, asc, eq, ne, sql } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { contractAdvancePayments, rentalContracts, utilityStatements, type AdvanceLine } from '../db/schema';
 import { formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { sqlToday } from './today';
+import { countingInSql } from './counting-statements';
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -135,7 +136,7 @@ async function refuseChangedStatements(contractId: string, validFrom: string, be
 			rentalEnd: utilityStatements.rentalEnd
 		})
 		.from(utilityStatements)
-		.where(and(eq(utilityStatements.contractId, contractId), ne(utilityStatements.status, 'replaced')));
+		.where(and(eq(utilityStatements.contractId, contractId), countingInSql));
 	for (const statement of statements) {
 		// only what this change alters: a statement that counted another Akonto already stays editable (F-4)
 		const total = (amounts: Amounts) =>
