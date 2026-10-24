@@ -21,7 +21,7 @@ Der Spike vom 24.10.2026 (Wegwerf-Worktree, nicht committet) zeigte zweierlei:
 Der Frontend-Typ `Tenant` wird aus dem Backend abgeleitet und nicht mehr von Hand deklariert. Die Ableitung geht von der API-Form aus, nicht von der Tabelle (AP1).
 
 1. `Language` (bisher in `pdf.service.ts`) und `CorrespondenceChannel` (bisher in `tenant-fields.ts`) ziehen nach `backend/src/db/schema.ts`. Die Mieter-Spalten tragen sie mit `$type`. Das ist ein reiner Typ ohne Migration. Der Sprachfilter der Liste bleibt `string`, damit eine unbekannte Sprache wie bisher niemanden findet.
-2. `TenantResponse` in `tenant.service.ts` benennt die Antwort von `GET /tenants/:id`. Die Route prüft ihre Rückgabe mit `satisfies`, damit der Typ nicht vom Gesendeten abweichen kann.
+2. `TenantResponse` in `tenant.service.ts` benennt die Antwort von `GET /tenants/:id`. Er ist aus dem Rückgabetyp von `getTenant` abgeleitet (`ReturnType`), und `getTenant` gibt seinen Typ nicht mehr per Cast vor: Der Typ folgt der Abfrage und nennt kein Feld, das sie nicht auswählt. Die Route prüft ihre Rückgabe mit `satisfies`. (Befund C-1 der Review: Vorher versprach ein Cast `as TenantWithOccupancy` ein `isActive`, das die Abfrage nie lieferte; `tsc` fand danach dieselbe falsche Zusicherung in `getTenantWithHistory`.)
 3. `Tenant` in `src/lib/types.ts` ist `Json<TenantResponse>`:
    - Pflicht sind `id`, Namen und Sprache, alles andere ist optional.
    - Ohne die Felder, die nur das Backend braucht.

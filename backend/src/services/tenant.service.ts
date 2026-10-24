@@ -34,8 +34,11 @@ export interface TenantWithOccupancy extends Tenant {
 	isFuture: boolean;
 }
 
+/** One tenant as getTenant selects it: the type follows the query, so it claims no field the query leaves out */
+type TenantDetail = NonNullable<Awaited<ReturnType<typeof getTenant>>>;
+
 /** The answer of GET /tenants/:id; the frontend derives its `Tenant` from it (AP1, ADR 0003) */
-export type TenantResponse = TenantWithOccupancy & { anonymisableFrom: string | null };
+export type TenantResponse = TenantDetail & { anonymisableFrom: string | null };
 
 // Correlated subqueries name the outer column explicitly: drizzle leaves it unqualified in single-table selects
 /** Active: a rental contract runs today (F-4, #58) */
@@ -172,7 +175,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 /**
  * Get a single tenant by ID
  */
-export async function getTenant(id: string): Promise<TenantWithOccupancy | null> {
+export async function getTenant(id: string) {
 	const [tenant] = await db
 		.select({ ...tenantFields, isFuture })
 		.from(tenants)
@@ -218,14 +221,14 @@ export async function getTenant(id: string): Promise<TenantWithOccupancy | null>
 		currentApartment: currentContract?.apartmentNumber,
 		currentBuilding: currentContract?.buildingName,
 		rentalContractId: rental?.id
-	} as TenantWithOccupancy;
+	};
 }
 
 /**
  * Get tenant with contract history
  */
 export async function getTenantWithHistory(id: string): Promise<{
-	tenant: TenantWithOccupancy;
+	tenant: TenantDetail;
 	contracts: Array<{
 		id: string;
 		apartmentNumber: string;
