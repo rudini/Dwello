@@ -349,12 +349,6 @@
 				"line": "formerTenants: formerTenants(allContracts, documents, today),",
 				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 point 1 (overview)",
 				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/tenants/[id]/+page.server.ts",
-				"line": "formerDocuments: formerTenantDocuments(contracts, documents, localToday(), apartmentContracts)",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 point 3 (former-tenant documents)",
-				"scenario": "Ä4"
 			}
 		]
 	},

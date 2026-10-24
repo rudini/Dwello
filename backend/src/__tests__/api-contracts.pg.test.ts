@@ -389,6 +389,27 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #788 part 2: the uploads of a former tenant, decided in the backend (#178)
+	it('GET /tenants/:id/former-documents liefert die Felder von tenant-former-documents.json', async () => {
+		const ended = await createRental(`${token}-former`, { startDate: '2024-04-01', endDate: '2025-03-31', monthlyAdvancePayment: '0' });
+		try {
+			await db.update(rentalContracts).set({ terminated: true }).where(eq(rentalContracts.id, ended.contract));
+			await db.insert(documents).values({
+				tenantId: ended.tenant,
+				type: 'upload',
+				title: 'Betreibungsauszug',
+				fileName: 'betreibung.pdf',
+				content: 'JVBERi0=',
+				createdAt: new Date('2024-06-10T09:00:00.000Z')
+			});
+			const response = await callApi(`/api/v1/tenants/${ended.tenant}/former-documents`);
+			expect(drift(await sample('tenant-former-documents'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(documents).where(eq(documents.tenantId, ended.tenant));
+			await ended.remove();
+		}
+	});
+
 	it('GET /contracts/:id/agreements liefert die Felder von contract-agreements.json', async () => {
 		const actual = (await (
 			await callApi(`/api/v1/contracts/${rental.contract}/agreements?periodStart=2020-01-01&periodEnd=2030-12-31`)

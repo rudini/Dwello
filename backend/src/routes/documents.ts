@@ -6,6 +6,7 @@ import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../middleware/auth';
 import {
 	deleteDocument,
+	formerTenantDocuments,
 	getDocumentPdf,
 	listDocuments,
 	uploadDocument
@@ -44,6 +45,10 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 		},
 		{ body: t.Object({ title: t.String(), fileName: t.String(), content: t.String() }) }
 	)
+	// The uploads of a former tenant from before the last Vertragsende, or null (#178, #788)
+	.get('/tenants/:id/former-documents', async ({ params }) => ({
+		formerDocuments: await formerTenantDocuments(params.id)
+	}))
 	.get('/documents', async ({ query }) => ({ data: await listDocuments(query) }), {
 		query: t.Object({
 			tenantId: t.Optional(t.String()),

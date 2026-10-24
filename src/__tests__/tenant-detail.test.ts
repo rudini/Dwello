@@ -6,6 +6,7 @@ import tenant from '../../tests/contracts/tenant.json';
 import tenantList from '../../tests/contracts/tenants.json';
 import documentList from '../../tests/contracts/documents.json';
 import contractResponse from '../../tests/contracts/contract.json';
+import formerDocuments from '../../tests/contracts/tenant-former-documents.json';
 
 const API = 'http://localhost:3001/api/v1';
 const day = (offset: number) =>
@@ -52,44 +53,31 @@ const loadTenant = async (contracts: unknown[], rental: Partial<typeof tenant> =
 	>;
 
 describe('Mieterdetail', () => {
-	// #178: a former tenant's documents uploaded before the last Vertragsende
-	it('nennt die Dokumente, die vor dem Ende des letzten Mietvertrags hochgeladen wurden', async () => {
-		const [upload] = documentList.data;
+	// #178, #788: the backend names a former tenant's documents from before the last Vertragsende; the page shows them
+	it('nennt die Dokumente, die das Backend als die eines ehemaligen Mieters nennt', async () => {
+		const [upload, other] = [documentList.data[0], { ...documentList.data[0], id: 'd-later' }];
 		const fetch = (async (url: string) =>
 			url === `${API}/tenants/t1`
 				? Response.json(tenant)
-				: url.startsWith(`${API}/contracts`)
-					? Response.json({ contracts: [{ ...contract('c1', '2020-01-01', day(-1), '2.01'), terminated: true }] })
-					: Response.json({ data: [{ ...upload, createdAt: '2024-05-01T09:00:00.000Z' }] })) as typeof globalThis.fetch;
-
-		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
-
-		expect(data.formerDocuments).toMatchObject({ endDate: day(-1), documents: [{ id: upload.id }] });
-	});
-
-	// A-6: after a fixed term without notice, the next tenant's contract shows that she moved out
-	it('nennt die Dokumente nach einem befristeten Mietvertrag, wenn ein anderer Mieter eingezogen ist', async () => {
-		const [upload] = documentList.data;
-		const ended = contract('c1', '2020-01-01', day(-2), '2.01');
-		const fetch = (async (url: string) =>
-			url === `${API}/tenants/t1`
-				? Response.json(tenant)
-				: url === `${API}/contracts?apartmentId=a-c1&limit=100`
-					? Response.json({ contracts: [ended, { ...contract('c2', day(-1), null, '2.01'), apartmentId: 'a-c1' }] })
+				: url === `${API}/tenants/t1/former-documents`
+					? Response.json({
+							formerDocuments: { ...formerDocuments.formerDocuments, documentIds: [upload.id] }
+						})
 					: url.startsWith(`${API}/contracts`)
-						? Response.json({ contracts: [ended] })
-						: Response.json({ data: [{ ...upload, createdAt: '2024-05-01T09:00:00.000Z' }] })) as typeof globalThis.fetch;
+						? Response.json({ contracts: [contract('c1', '2020-01-01', day(-1), '2.01')] })
+						: Response.json({ data: [upload, other] })) as typeof globalThis.fetch;
 
 		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
 
-		expect(data.formerDocuments).toMatchObject({ endDate: day(-2) });
+		const { endDate, contractId, checkedOn } = formerDocuments.formerDocuments;
+		expect(data.formerDocuments).toEqual({ endDate, contractId, checkedOn, documents: [upload] });
 	});
 
-	// the apartment's contracts only feed the notice: without them the page still loads, without a notice
-	it('zeigt die Seite ohne Hinweis, wenn die Mietverträge der Wohnung nicht laden', async () => {
+	// the notice is extra: without it the page still loads, without a notice
+	it('zeigt die Seite ohne Hinweis, wenn die Dokumente eines ehemaligen Mieters nicht laden', async () => {
 		const fetch = (async (url: string) => {
 			if (url === `${API}/tenants/t1`) return Response.json(tenant);
-			if (url.includes('apartmentId=')) throw new TypeError('fetch failed');
+			if (url.includes('former-documents')) throw new TypeError('fetch failed');
 			if (url.startsWith(`${API}/contracts`))
 				return Response.json({ contracts: [contract('c1', '2020-01-01', day(-2), '2.01')] });
 			return Response.json({ data: [] });

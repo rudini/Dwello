@@ -3,11 +3,12 @@
  * Stored letters (payment reminders) per tenant, sent by e-mail or kept for printing
  */
 
-import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, gt, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, tenants, utilityStatements, type NewDocument } from '../db/schema';
+import { documents, rentalContracts, tenants, utilityStatements, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
 import { tenantExists } from './tenant.service';
+import { swissToday } from './today';
 
 export interface DocumentFilters {
 	tenantId?: string;
@@ -74,6 +75,37 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 		filters.status === 'to_send' && sql`${notToSend} is null`
 	].filter((condition): condition is SQL => Boolean(condition));
 	return selectSummaries(and(...conditions));
+}
+
+// The day in Switzerland a document was uploaded; the database stores UTC
+const swissDay = (timestamp: Date) => timestamp.toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+
+/**
+ * Once all Mietverträge of a tenant have ended (ehemaliger Mieter), the documents the landlord uploaded before the last
+ * Vertragsende, to look at and delete what is no longer needed (#178, DSG Art. 6 Abs. 4); null when there are none.
+ * contractId, checkedOn: the last contract, where «Als geprüft markieren» is stored, and the day (#459)
+ */
+export async function formerTenantDocuments(tenantId: string) {
+	const contracts = await db.select().from(rentalContracts).where(eq(rentalContracts.tenantId, tenantId));
+	const today = swissToday();
+	if (!contracts.length || contracts.some((c) => !c.endDate || c.endDate >= today)) return null;
+	const last = contracts.reduce((a, b) => (a.endDate! > b.endDate! ? a : b));
+	const endDate = last.endDate!;
+	// after an agreed end without notice the tenant may have stayed, until «Mieter ist ausgezogen» or a later contract
+	// for the apartment (A-6)
+	const [later] = await db
+		.select({ id: rentalContracts.id })
+		.from(rentalContracts)
+		.where(and(eq(rentalContracts.apartmentId, last.apartmentId), gt(rentalContracts.startDate, endDate)))
+		.limit(1);
+	if (!last.terminated && !last.movedOut && !later) return null;
+	const uploads = await db
+		.select({ id: documents.id, createdAt: documents.createdAt })
+		.from(documents)
+		.where(and(eq(documents.tenantId, tenantId), eq(documents.type, 'upload')));
+	const before = uploads.filter((d) => swissDay(d.createdAt) < endDate);
+	if (!before.length) return null;
+	return { endDate, documentIds: before.map((d) => d.id), contractId: last.id, checkedOn: last.documentsCheckedOn };
 }
 
 export async function getDocument(id: string) {
