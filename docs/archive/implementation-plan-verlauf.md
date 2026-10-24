@@ -3206,3 +3206,15 @@ No scenario: tooling only (fitness functions), no app behaviour changes. Product
 - [x] Review round 1 (`docs/reviews/p0-review-1.md`, 4 Minor: C-1 wrapped `localToday(),` caught; C-2 limits documented; C-3 a list may not be removed; C-4 doc counts)
 - [x] Closing review (`docs/reviews/p0-review-2.md`, no finding)
 - [x] PR pushed after this archive
+
+## Session: #788 part 1, deleting a contract (the backend decides «started»)
+
+Scenario: «Mietvertrag löschen, der inzwischen begonnen hat» (`contract-detail.feature`, new; red against the old BFF check). A form sent past the dialog's own check now shows the backend's existing `backend_contract_started` text (product owner, 24.10.2026). Refs #788.
+
+- [x] API contract `tests/contracts/contract-delete-started.json`, checked in `api-contracts.pg.test.ts` (pins kept backend behaviour)
+- [x] BFF test: a started contract refused by the backend shows its refusal text (red first)
+- [x] Text: `backend_contract_started` already exists (since b466c699); no new message (planned duplicate dropped)
+- [x] The delete action deletes directly and shows the backend's refusal; no date compare in the BFF
+- [x] Fitness `--update` (bffDates 9 → 8), `fitness-functions.md`
+- [x] Review round 1 (`docs/reviews/p1-review-1.md`: C-1 Major 404 showed the backend's English text, fixed with a test; C-2 Major scenario added; C-3 Minor dead test setup removed)
+- [x] Closing review (`docs/reviews/p1-review-2.md`: C-1 to C-3 fixed, no new findings), PR pushed after this archive
