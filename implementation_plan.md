@@ -39,4 +39,5 @@ No scenario: tooling and CI only, no app behaviour changes. Request: Phase 2a of
 - [x] 2b step 4: measure after, ratchet `--update`, ADR 0001, `fitness-functions.md`
 - [ ] Workflow note: the fallow gate refuses the preparing step of a parallel change (a new export not yet used), so «make the change easy» and its first use share one commit
 - [ ] Workflow note: the session hook's Chromium shim links `chrome-linux/headless_shell`, the image has `chrome-headless-shell-linux64/chrome-headless-shell`; E2E fails to launch after a worker restart
-- [ ] 2b review, PR
+- [x] 2b review round 1 (`docs/reviews/mapper-review-1.md`)
+- [ ] 2b closing review, PR

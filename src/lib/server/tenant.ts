@@ -15,7 +15,7 @@ export async function loadTenant(fetch: typeof globalThis.fetch, id: string): Pr
 	return toTenant(await response.json());
 }
 
-/** The backend's tenant in the shape of `Tenant`: the one place that maps its fields (CLAUDE.md, one mapper per response) */
+/** The backend's tenant in the shape of `Tenant`; loads reuse it instead of copying its fields (one mapper per response) */
 export const toTenant = (data: BackendTenant): Tenant => ({
 	id: data.id,
 	firstName: data.firstName,
