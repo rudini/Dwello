@@ -14,7 +14,8 @@ import {
 	createTenant,
 	updateTenant,
 	deleteTenant,
-	tenantExists
+	tenantExists,
+	type TenantResponse
 } from '../services/tenant.service';
 import { exportTenant } from '../services/tenant-export.service';
 import { anonymisableFrom, anonymiseTenant } from '../services/tenant-anonymise.service';
@@ -71,7 +72,10 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 			set.status = 404;
 			return { error: 'Tenant not found' };
 		}
-		return { ...tenant, anonymisableFrom: await anonymisableFrom(params.id) };
+		return {
+			...tenant,
+			anonymisableFrom: await anonymisableFrom(params.id)
+		} satisfies TenantResponse;
 	})
 	// «Mieter anonymisieren» after the retention (#459); the body: the replacement name in the landlord's language
 	.post(

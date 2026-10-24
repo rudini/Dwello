@@ -507,7 +507,7 @@ describe('Zahlteil der Mahnung', () => {
 
 	// Review W6c C-1/V-6/C-13: Brief und Zahlteil auf einem Blatt, jede Mahnstufe in jeder Sprache
 	it('druckt jede Mahnstufe mit dem Zahlteil auf eine Seite', async () => {
-		for (const language of ['de', 'fr', 'it', 'en']) {
+		for (const language of ['de', 'fr', 'it', 'en'] as const) {
 			await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language });
 			const statementId = await statement('sent');
 			for (let level = 1; level <= 3; level++) {

@@ -2,6 +2,7 @@
  * H-28 (#717): the checks of the tenant form (product owner 23.10.2026: form validation belongs in the backend). Each
  * failed check is a code with the field it is about, one per field, all of them at once.
  */
+import type { CorrespondenceChannel } from '../db/schema';
 import type { ErrorCode } from './coded-error';
 
 type Entered = {
@@ -12,7 +13,7 @@ type Entered = {
 	postalCode?: string | null;
 	city?: string | null;
 	country?: string;
-	correspondenceChannel?: 'email' | 'letter';
+	correspondenceChannel?: CorrespondenceChannel;
 };
 
 const blank = (value: unknown) => String(value ?? '').trim() === '';

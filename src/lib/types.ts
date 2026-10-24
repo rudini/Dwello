@@ -1,4 +1,8 @@
+import type { TenantResponse } from '../../backend/src/services/tenant.service';
 import type { LatestKey } from './invoice';
+
+/** A backend type as its JSON arrives: dates as ISO strings */
+type Json<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] };
 // ============================================================================
 // Core Entity Types - Match backend schema (camelCase)
 // ============================================================================
@@ -56,25 +60,13 @@ export interface Apartment {
 	updatedAt?: Date | string;
 }
 
-// Tenant types (camelCase to match backend)
-export interface Tenant {
-	id: string;
-	firstName: string;
-	lastName: string;
-	email?: string | null;
-	phone?: string | null;
-	language: 'de' | 'fr' | 'it' | 'en';
-	address?: string | null;
-	postalCode?: string | null;
-	city?: string | null;
-	country?: string; // ISO 3166 code of the Korrespondenzadresse, CH by default
-	correspondenceChannel?: 'email' | 'letter';
-	anonymisableFrom?: string | null; // the first day «Mieter anonymisieren» is allowed; null while it is not (#459)
-	rentalContractId?: string; // the running contract, otherwise the next one, as the backend chooses it (H-28, #717)
-	isFuture?: boolean; // no contract runs today, one is signed for later
-	createdAt?: Date | string;
-	updatedAt?: Date | string;
-}
+// The tenant as GET /tenants/:id answers it, derived from the backend instead of declared again (AP1, ADR 0003):
+// a field the backend adds arrives here without a change; a page may hold only part of it
+type ApiTenant = Json<TenantResponse>;
+export type Tenant = Pick<ApiTenant, 'id' | 'firstName' | 'lastName' | 'language'> &
+	Partial<
+		Omit<ApiTenant, 'contractCount' | 'anonymisedOn' | 'currentApartment' | 'currentBuilding'>
+	>;
 
 // Rental Contract types (camelCase to match backend)
 export interface RentalContract {
@@ -141,7 +133,7 @@ export interface ApartmentsListData {
 }
 
 // Tenant with current occupancy info for list view
-export interface TenantWithOccupancy extends Tenant {
+export interface TenantListItem extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
 	nextContractStart?: string | null; // Vertragsbeginn of a future contract
@@ -151,7 +143,7 @@ export interface TenantWithOccupancy extends Tenant {
 
 // Tenants list response
 export interface TenantsListData {
-	tenants: TenantWithOccupancy[];
+	tenants: TenantListItem[];
 	total: number;
 	page: number;
 	pageSize: number;

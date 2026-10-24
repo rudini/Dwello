@@ -10,7 +10,7 @@ Stand: 23.10.2026, Basis `origin/main` 868aef9. Die Checks prüfen die Szenarien
 | Szenario | Check | Was gemessen wird, wie | Laufzeit | Ort in der CI | Schwelle | Aktueller Wert |
 |---|---|---|---|---|---|---|
 | Ä1 (H/H) | `field-spread` | Pro eindeutigem DB-Feld die Produktivdateien ausserhalb der DB, die es als Schlüssel deklarieren (`m4-field-spread.csv`); Median, P90, Max | < 1 s | Job «Architecture fitness», jeder PR und `main` | Ratchet: Median ≤ 6, P90 ≤ 19, Max ≤ 60 (Ziel Ä1: Median ≤ 4, P90 ≤ 8) | 6 / 19 / 60 |
-| Ä1, AP1 | `entity-mirror` | Dateien unter `src/`, die ≥ 50 % der eigenen Felder einer Tabelle deklarieren (`m4-entity-mirror-files.csv`) | (gleicher Lauf) | wie oben | keine neue Datei pro Tabelle; Ausnahmeliste | 55 Datei-Tabelle-Paare in 15 Tabellen (57 vor ADR 0001, 56 vor ADR 0002) |
+| Ä1, AP1 | `entity-mirror` | Dateien unter `src/`, die ≥ 50 % der eigenen Felder einer Tabelle deklarieren (`m4-entity-mirror-files.csv`) | (gleicher Lauf) | wie oben | keine neue Datei pro Tabelle; Ausnahmeliste | 54 Datei-Tabelle-Paare in 15 Tabellen (57 vor ADR 0001, 56 vor ADR 0002, 55 vor ADR 0003) |
 | Ä1, AP1 | `literal-set` | Wertelisten (Unions, `t.Literal`, `pgEnum`, Arrays), die in mehreren Schichten stehen (`m4-literal-sets.csv`) | (gleicher Lauf) | wie oben | keine neue Liste, keine Liste in mehr Dateien; Ausnahmeliste | 14 Listen |
 | Ä4 (H/M), AP2 | `bff-decision` | Pro Zeile in `src/lib/server/**`, `+page.server.ts`, `+layout.server.ts`, `+server.ts`, `hooks.server.ts`: Vergleich gegen einen Statuswert oder verankerte Regex (Regex aus `05-knowledge`, jetzt in `lib.ts`) | (gleicher Lauf) | wie oben | jede Fundstelle steht in `technical` (mit Grund) oder in der Ausnahmeliste; Ziel 0 | 8 Fundstellen: 7 technisch, 1 Altlast (#717; nach #784 von 14 mit `--update` nachgezogen) |
 | Ä1 | `module-cycle` | Zyklen auf Modulebene, nur Produktivmodule (`cycles-module.csv`, Tarjan aus `02-imports`) | (gleicher Lauf) | wie oben | kein neuer Zyklus; Ausnahmeliste | 2 |
@@ -85,6 +85,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 24.10.2026 | #784 (#717): Status-Vergleiche ins Backend | BFF-Fundstellen 14 → 8 |
 | 24.10.2026 | ADR 0001: ein Mapper für den Mieter | Entity-Spiegel 57 → 56; `tenants.firstName`/`lastName` 18 → 16, `tenants.language` 23 → 22; Werteliste `de\|en\|fr\|it` 6 → 5 Dateien; Median und P90 unverändert 6 / 19 |
 | 24.10.2026 | ADR 0002: Mieter des Mietvertrags über `toTenant` | Entity-Spiegel 56 → 55; `tenants.firstName`/`lastName` 16 → 15, `tenants.language` 22 → 21; Median und P90 unverändert 6 / 19 |
+| 24.10.2026 | ADR 0003: `Tenant` aus dem Backend abgeleitet (Pilot B) | Entity-Spiegel 55 → 54; `tenants.firstName`/`lastName` 15 → 14, `language` 21 → 20, `correspondenceChannel` 8 → 7; Sprachliste 5 → 4 Dateien; Frontend-Dateien mit Backend-Import 0 → 1; Median und P90 unverändert 6 / 19 |
 
 ## 7. Werkzeugwahl
 
