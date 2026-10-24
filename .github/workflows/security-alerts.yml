@@ -20,6 +20,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
     steps:
       - name: Open an issue per new alert
+        shell: bash # -o pipefail: a refused alert request fails the run instead of an empty loop (code review 790b C-1)
         run: |
           # "(CodeQL #<n>)" at the end of the title marks the alert's issue; a closed one counts too
           known=$(gh api --paginate "repos/$GH_REPO/issues?labels=nfr:security&state=all&per_page=100" --jq '.[].title')
