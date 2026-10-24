@@ -3256,3 +3256,10 @@ Product owner, 24.10.2026: point 5 in two pull requests; (a) the contract page's
 - [x] E2E `contract-detail.feature`, `contract-edit.feature` (Chromium and API, 97) green
 - [x] Slice review round 1 (`docs/reviews/p5a-review-1.md`: no Blocker/Major; C-1 Minor misplaced doc comment, moved; C-2 Minor duplicate query, shared module)
 - [x] Closing round (`docs/reviews/p5a-review-2.md`: C-1, C-2 fixed, no new findings), PR pushed after this archive
+
+## Session: #792 Chromium shim of the session hook
+
+- [x] Shim block into `.claude/hooks/pw-shim.sh`: find the executables in any layout, warn and link nothing when none is found (test first)
+- [x] `tests/e2e/CLAUDE.md`: check the warning and the links, one feature file before a long run
+- [x] Review 792: `docs/reviews/792-review-1.md` (no findings)
+- [x] PR: pushed after this archive
