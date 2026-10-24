@@ -22,7 +22,7 @@ export interface DashboardData {
 		overdueAmount: number;
 		paidThisMonth: number;
 	};
-	statements: { draft: number; sent: number; paid: number; settled: number; overdue: number };
+	statements: { draft: number; toSend: number; sent: number; paid: number; settled: number; overdue: number };
 	recentActivity: {
 		id: string;
 		type: 'statement_created' | 'invoice_added' | 'payment_received';
@@ -213,7 +213,6 @@ export const load = async ({
 		today,
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
-		draftIds: drafts.map((s) => String(s.id)),
 		dueStatements: open.map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),

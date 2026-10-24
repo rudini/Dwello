@@ -311,13 +311,13 @@ Document fields: `id, tenantId, statementId, type ("reminder" | "statement" | "u
 {
   portfolio: { totalBuildings, totalApartments, occupiedApartments, vacantApartments, reletApartments, reservedApartments, occupancyRate },
   financial: { outstandingStatements, totalPending, overdueAmount, paidThisMonth },
-  statements: { draft, sent, paid, overdue },
+  statements: { draft, toSend, sent, paid, settled, overdue },
   recentActivity: [{ id, type: "statement_created"|"invoice_added"|"payment_received", title, description, timestamp }],  // max 5
   buildingOccupancy: [{ buildingId, buildingName, totalApartments, occupiedApartments, occupancyRate }]
 }
 ```
 
-`occupancyRate` is a percentage with one decimal. `totalPending`/`overdueAmount` sum positive balances of open/overdue statements; `paidThisMonth` sums `paidAmount` of statements paid since the 1st of the month.
+`occupancyRate` is a percentage with one decimal. `totalPending`/`overdueAmount` sum positive balances of open/overdue statements; `paidThisMonth` sums `paidAmount` of statements paid since the 1st of the month. `toSend` counts the drafts to send: the current ones, without those outdated by invoices or a Tankbestand changed since (#454; H-28 #717: the overview takes it, see `tests/contracts/dashboard.json`).
 
 ---
 

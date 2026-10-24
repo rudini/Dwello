@@ -133,7 +133,7 @@ describe('Übersicht in der gewählten Sprache', () => {
 	const input = {
 		today: '2026-10-10',
 		portfolio,
-		statementCounts: { draft: 1, sent: 0, paid: 0, settled: 0, overdue: 0 },
+		statementCounts: { draft: 1, toSend: 1, sent: 0, paid: 0, settled: 0, overdue: 0 },
 		draftIds: ['s2'],
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,

@@ -4,14 +4,15 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
+import { invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { updateStatementStatus } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
+import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 type Dashboard = {
@@ -110,7 +111,23 @@ describe('Dashboard', () => {
 	});
 
 	it('zählt Abrechnungen nach Status, überfällige getrennt von versendeten', () => {
-		expect(added('statements')).toEqual({ draft: 1, sent: 2, overdue: 1, paid: 3, settled: 0 });
+		expect(added('statements')).toEqual({ draft: 1, toSend: 1, sent: 2, overdue: 1, paid: 3, settled: 0 });
+	});
+
+	// H-28 (#717), #454: a draft is to send only while it is current; the backend counts them, the overview takes the number
+	it('zählt nur die aktuellen Entwürfe als zu versenden', async () => {
+		const start = await dashboard();
+		await statement(9, { status: 'draft' });
+		await statement(10, { status: 'draft' });
+		await insertInvoice(rental.building, { invoiceDate: '2019-06-30' }); // recorded after the draft of 2019
+		try {
+			const end = await dashboard();
+
+			expect(end.statements.draft - start.statements.draft).toBe(2);
+			expect(end.statements.toSend - start.statements.toSend).toBe(1);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+		}
 	});
 
 	it('zählt versendete und überfällige Abrechnungen als offen', () => {
