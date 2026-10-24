@@ -3,8 +3,6 @@ import { fail, redirect } from '@sveltejs/kit';
 import { deleteDocument, loadDocuments, uploadDocument } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
 import { monthlyTotal, toContractHistory } from '$lib/server/contract-history';
-import { localToday } from '$lib/contract-status';
-import { formerTenantDocuments } from '$lib/former-tenant-documents';
 import { backendMessage } from '$lib/backend-error';
 import type { Tenant } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
@@ -38,16 +36,23 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await fetch(`${API}/contracts?tenantId=${params.id}&limit=100`)
 	).json();
 	const name = `${tenant.firstName} ${tenant.lastName}`;
-	const documents = await loadDocuments(fetch, `tenantId=${tenant.id}`);
-	// A-6: whether another tenant moved into the apartment of the last contract after it ended
-	const last = contracts.length
-		? contracts.reduce((a: BackendContract, b: BackendContract) => (a.endDate > b.endDate ? a : b))
+	const [documents, former] = await Promise.all([
+		loadDocuments(fetch, `tenantId=${tenant.id}`),
+		// whether the tenant is a former one and which uploads predate the last end, the backend decides (#788)
+		fetch(`${API}/tenants/${tenant.id}/former-documents`)
+			.then(async (response) => (await response.json()).formerDocuments)
+			.catch(() => null)
+	]);
+	// without the documents (they did not load) there is nothing to name
+	const before = documents.filter((d) => former?.documentIds.includes(d.id));
+	const formerDocuments = before.length
+		? {
+				endDate: former.endDate as string,
+				contractId: former.contractId as string,
+				checkedOn: former.checkedOn as string | null,
+				documents: before
+			}
 		: null;
-	const apartmentContracts = last?.endDate
-		? await fetch(`${API}/contracts?apartmentId=${last.apartmentId}&limit=100`)
-				.then(async (response) => (await response.json()).contracts)
-				.catch(() => [])
-		: [];
 
 	return {
 		tenant,
@@ -57,7 +62,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			apartment: apartmentOf(c)
 		})),
 		documents,
-		formerDocuments: formerTenantDocuments(contracts, documents, localToday(), apartmentContracts)
+		formerDocuments
 	};
 };
 
