@@ -30,5 +30,11 @@ No scenario: tooling and CI only, no app behaviour changes. Request: Phase 2a of
 - [x] Closing review round 3 (`docs/reviews/fitness-review-3.md`)
 - [x] Closing review round 4 (`docs/reviews/fitness-review-4.md`)
 - [x] Closing review round 5 after merging #784 (`docs/reviews/fitness-review-5.md`)
-- [ ] PR for 2a: open, CI green, merge
-- [ ] 2b: propose one Ä1 candidate with prediction, wait for confirmation
+- [x] PR for 2a: open, CI green, merge (#783; run 936 on main green)
+- [x] 2b: propose one Ä1 candidate with prediction, wait for confirmation (tenant mapper without `contracts/[id]`, approved 24.10.2026)
+- [ ] 2b step 0: measure before (fitness, run.sh, unit tests, E2E tenants/contract-new)
+- [ ] 2b step 1: export `toTenant`
+- [ ] 2b step 2: tenant list uses `toTenant`
+- [ ] 2b step 3: new-contract load uses the shared `Tenant` type
+- [ ] 2b step 4: measure after, ratchet `--update`, ADR 0001, `fitness-functions.md`
+- [ ] 2b review, PR
