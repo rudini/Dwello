@@ -8,7 +8,8 @@ import { createRental } from './helpers/rental';
 
 let rental: Awaited<ReturnType<typeof createRental>>;
 
-const put = (body: Record<string, unknown>) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, body);
+// an end before today is set as the landlord confirmed it (#788)
+const put = (body: Record<string, unknown>) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { ...body, confirmPastEnd: true });
 const stored = async () => (await (await callApi(`/api/v1/contracts/${rental.contract}`)).json()) as Record<string, unknown>;
 
 beforeAll(async () => {

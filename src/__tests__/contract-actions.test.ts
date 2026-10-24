@@ -8,6 +8,8 @@ import advanceDayInvalid from '../../tests/contracts/contract-advance-day-invali
 import draftNotAffected from '../../tests/contracts/contract-draft-not-affected.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
+import endPast from '../../tests/contracts/contract-end-past.json';
+import endBeforeStart from '../../tests/contracts/contract-end-before-start.json';
 import deleteStarted from '../../tests/contracts/contract-delete-started.json';
 import endAdvanceRefused from '../../tests/contracts/contract-end-advance-refused.json';
 import advanceDeleteRefused from '../../tests/contracts/contract-advance-delete-refused.json';
@@ -259,14 +261,16 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
-	// die Aktion prüft selbst (ein Formular ohne JavaScript): ein nachträglich erfasster Kündigungstermin braucht die Bestätigung seiner Folge
-	it('lehnt ein Vertragsende vor heute ohne Bestätigung ab, ohne den Mietvertrag zu ändern', async () => {
+	// ein nachträglich erfasster Kündigungstermin braucht die Bestätigung seiner Folge; ob er vor heute liegt, entscheidet
+	// das Backend (#788), die Aktion zeigt seine Ablehnung (ein Formular ohne JavaScript)
+	it('zeigt die Ablehnung eines unbestätigten Vertragsendes vor heute', async () => {
 		const { calls, result } = runAction(
 			actions.end,
 			'c1',
 			200,
 			{ endDate: '2025-03-31' },
-			{ startDate: '2024-04-01' }
+			{ startDate: '2024-04-01' },
+			{ status: 400, answer: endPast }
 		);
 
 		expect(await result).toMatchObject({
@@ -276,7 +280,7 @@ describe('Mietvertrag beenden', () => {
 					'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
 			}
 		});
-		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
+		expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1);
 	});
 
 	it('setzt ein bestätigtes Vertragsende vor heute', async () => {
@@ -293,7 +297,7 @@ describe('Mietvertrag beenden', () => {
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
-				body: { endDate: '2025-03-31', terminated: true }
+				body: { endDate: '2025-03-31', terminated: true, confirmPastEnd: true }
 			}
 		]);
 	});
@@ -367,20 +371,33 @@ describe('Mietvertrag beenden', () => {
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
 	});
 
-	it('lehnt ein Vertragsende vor dem Vertragsbeginn eines künftigen Mietvertrags ab', async () => {
+	// review p5b C-3: a form sent without a real day (without JavaScript) gets the dialog's own hint, nothing is sent
+	it('verlangt ein Vertragsende, ohne den Mietvertrag zu ändern', async () => {
+		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '' }, { startDate: '2024-04-01' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { endError: expect.stringContaining('Bitte geben Sie das Vertragsende ein') }
+		});
+		expect(calls).toEqual([]);
+	});
+
+	it('zeigt die Ablehnung eines Vertragsendes vor dem Vertragsbeginn', async () => {
 		const { calls, result } = runAction(
 			actions.end,
 			'c1',
 			200,
 			{ endDate: '2099-10-31' },
-			{ startDate: '2099-11-01' }
+			{ startDate: '2099-11-01' },
+			{ status: 400, answer: endBeforeStart }
 		);
 
 		expect(await result).toMatchObject({
 			status: 400,
 			data: { endError: 'Das Vertragsende kann nicht vor dem Vertragsbeginn am 01.11.2099 liegen.' }
 		});
-		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
+		// the backend decides it, the action does not compare the dates itself
+		expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1);
 	});
 });
 
@@ -436,7 +453,7 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 			[
 				'PUT',
 				'http://localhost:3001/api/v1/contracts/c1',
-				{ endDate: '2025-03-31', terminated: true, deleteDraft: 's1' }
+				{ endDate: '2025-03-31', terminated: true, confirmPastEnd: true, deleteDraft: 's1' }
 			]
 		]);
 	});
@@ -463,10 +480,16 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 		expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1);
 	});
 
+	// the backend asks for the confirmation (#788) and keeps the draft when it refuses
 	it('verlangt auch hier die Bestätigung eines vergangenen Vertragsendes', async () => {
-		const { calls, result } = run({ endDate: '2025-03-31', statementId: 's1' }, draft);
-		expect(await result).toMatchObject({ status: 400 });
-		expect(calls.filter((call) => call.method)).toEqual([]);
+		const { result } = run({ endDate: '2025-03-31', statementId: 's1' }, draft, 400, endPast);
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				endError:
+					'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
+			}
+		});
 	});
 });
 

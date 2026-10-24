@@ -309,18 +309,6 @@
 		],
 		"bffDates": [
 			{
-				"path": "src/routes/contracts/[id]/+page.server.ts",
-				"line": "contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 points 2 and 5 (contract page)",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.server.ts",
-				"line": "(pastConfirmed ? null : pastEndConfirmation(endDate, localToday()));",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 points 2 and 5 (contract page)",
-				"scenario": "Ä4"
-			},
-			{
 				"path": "src/routes/dashboard/+page.server.ts",
 				"line": "String(c.endDate) < today &&",
 				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 point 1 (overview)",

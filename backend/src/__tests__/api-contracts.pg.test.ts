@@ -669,9 +669,22 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-billed-until-refused'), await response.json())).toEqual([]);
 	});
 
+	// #788 point 5b: the backend refuses an end before the start, and a new end before today unconfirmed
+	it('PUT /contracts/:id mit einem Vertragsende vor heute ohne Bestätigung liefert die Felder von contract-end-past.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2025-03-31' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-end-past'), await response.json())).toEqual([]);
+	});
+
+	it('PUT /contracts/:id mit einem Vertragsende vor dem Vertragsbeginn liefert die Felder von contract-end-before-start.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2001-01-01', confirmPastEnd: true });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-end-before-start'), await response.json())).toEqual([]);
+	});
+
 	// the 2024 statement already bills the days after 31.03.2024
 	it('PUT /contracts/:id mit einem Vertragsende vor einer Abrechnung liefert die Felder von contract-end-refused.json', async () => {
-		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-03-31' });
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-03-31', confirmPastEnd: true });
 		expect(response.status).toBe(409);
 		expect(drift(await sample('contract-end-refused'), await response.json())).toEqual([]);
 	});

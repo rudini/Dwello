@@ -10,9 +10,8 @@ import { backendMessage } from '$lib/backend-error';
 import { monthlyTotal } from '$lib/server/contract-history';
 import { toTenant } from '$lib/server/tenant';
 import {
-	contractEndError,
+	isDay,
 	localToday,
-	pastEndConfirmation,
 	billedDaysError,
 	type RefusedStatement
 } from '$lib/contract-status';
@@ -168,29 +167,18 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 	}
 };
 
-/** Why the contract cannot end on that day, or null */
-function endRefusal(
-	contract: { startDate?: string; endDate?: string | null },
-	endDate: string,
-	pastConfirmed: boolean
-) {
-	// a stale page: an end already set is changed under «Bearbeiten», not overwritten
-	if (contract.endDate)
-		return fail(409, {
-			endError: m.contracts_end_already_set()
-		});
-	const endError =
-		contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??
-		(pastConfirmed ? null : pastEndConfirmation(endDate, localToday()));
-	return endError ? fail(400, { endError }) : null;
-}
-
-// The day asked for, once the stored contract may end on it; a refusal to show in the dialog otherwise
+// The day asked for, once the stored contract may end on it; a refusal to show in the dialog otherwise. Whether it is
+// before the start or before today (and so needs the confirmation) the backend decides (#788)
 async function endDay(fetch: typeof globalThis.fetch, id: string, form: FormData) {
 	const endDate = String(form.get('endDate') ?? '');
+	// a form sent without a real day (without JavaScript): the dialog's own hint
+	if (!isDay(endDate))
+		return fail(400, { endError: m.contracts_end_missing({ example: `31.12.${localToday().slice(0, 4)}` }) });
 	const stored = await fetch(`${BACKEND_URL}/api/v1/contracts/${id}`);
 	if (!stored.ok) return fail(stored.status, { endError: m.contracts_end_failed() });
-	return endRefusal(await stored.json(), endDate, form.get('pastConfirmed') === 'on') ?? endDate;
+	// a stale page: an end already set is changed under «Bearbeiten», not overwritten
+	if ((await stored.json()).endDate) return fail(409, { endError: m.contracts_end_already_set() });
+	return endDate;
 }
 
 // The contract's new data; `refused` names the stored statements whose rent days it would change (409, A-10)
@@ -223,6 +211,7 @@ async function endOn(
 		endDate,
 		terminated: true,
 		noticeReceivedOn,
+		confirmPastEnd: form.get('pastConfirmed') === 'on' || undefined,
 		deleteDraft: draft
 	});
 	if (refused)

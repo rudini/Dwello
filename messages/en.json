@@ -460,6 +460,8 @@
 	"backend_advance_delete_changes_statement": "The advance payment from {from} counts in statement {number}, which has already been created. Correct this statement first.",
 	"backend_advance_delete_changes_draft": "The advance payment from {from} counts in draft {number}. Delete the draft first.",
 	"backend_contract_start_after_advance": "From {date}, another advance payment applies. Delete that advance payment first, or choose an earlier contract start.",
+	"backend_contract_end_before_start": "The contract end cannot be before the contract start on {date}.",
+	"backend_contract_end_past": "Please confirm that the rental contract ended on {date}, or correct the contract end.",
 	"backend_contract_end_before_advance": "From {date}, another advance payment applies. Delete that advance payment first, or choose a later contract end.",
 	"backend_building_not_found": "The building was not found. Reload the page.",
 	"backend_category_not_found": "The category was not found. Reload the page.",

@@ -460,6 +460,8 @@
 	"backend_advance_delete_changes_statement": "L’acompte dès le {from} compte dans le décompte {number}, déjà établi. Rectifiez d’abord ce décompte.",
 	"backend_advance_delete_changes_draft": "L’acompte dès le {from} compte dans le brouillon {number}. Supprimez d’abord le brouillon.",
 	"backend_contract_start_after_advance": "Dès le {date}, un autre acompte s’applique. Supprimez d’abord cet acompte, ou choisissez un début du bail antérieur.",
+	"backend_contract_end_before_start": "La fin du contrat ne peut pas précéder le début du contrat, le {date}.",
+	"backend_contract_end_past": "Veuillez confirmer que le contrat de bail a pris fin le {date}, ou corrigez la fin du contrat.",
 	"backend_contract_end_before_advance": "Dès le {date}, un autre acompte s’applique. Supprimez d’abord cet acompte, ou choisissez une fin du bail plus tardive.",
 	"backend_building_not_found": "L’immeuble est introuvable. Rechargez la page.",
 	"backend_category_not_found": "La catégorie est introuvable. Rechargez la page.",

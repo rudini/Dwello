@@ -25,7 +25,8 @@ async function statement(year: number) {
 	);
 }
 
-const end = (endDate: string | null) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate });
+// an end before today is set as the landlord confirmed it (#788)
+const end = (endDate: string | null) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate, confirmPastEnd: true });
 
 beforeAll(async () => {
 	rental = await createRental(crypto.randomUUID(), { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
@@ -86,7 +87,7 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 			})
 		);
 	const endDeleting = (statement: string) =>
-		sendJson('PUT', `/api/v1/contracts/${own.contract}`, { endDate: '2024-03-31', terminated: true, deleteDraft: statement });
+		sendJson('PUT', `/api/v1/contracts/${own.contract}`, { endDate: '2024-03-31', terminated: true, confirmPastEnd: true, deleteDraft: statement });
 	const exists = async (statement: string) => (await callApi(`/api/v1/statements/${statement}`)).status === 200;
 
 	beforeAll(async () => {
@@ -152,7 +153,7 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 describe('Beendeter Mietvertrag mit Schlussabrechnung', () => {
 	let ended: Awaited<ReturnType<typeof createRental>>;
 	let final: string;
-	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${ended.contract}`, body);
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${ended.contract}`, { ...body, confirmPastEnd: true });
 
 	beforeAll(async () => {
 		ended = await createRental(crypto.randomUUID(), {
@@ -206,7 +207,7 @@ describe('Beendeter Mietvertrag mit Schlussabrechnung', () => {
 // der Vertragsbeginn lag in der Periode: auch ein früherer Beginn änderte die abgerechneten Tage
 describe('Mietvertrag, der in der Periode begann', () => {
 	let rental: Awaited<ReturnType<typeof createRental>>;
-	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, body);
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { ...body, confirmPastEnd: true });
 
 	beforeAll(async () => {
 		rental = await createRental(crypto.randomUUID(), { startDate: '2025-03-01', monthlyAdvancePayment: '100' });
@@ -238,7 +239,7 @@ describe('Mietvertrag, der in der Periode begann', () => {
 // A-1: an end agreed in a fixed-term contract and a notice to an open-ended one are different things
 describe('Gekündigter Mietvertrag', () => {
 	let rental: Awaited<ReturnType<typeof createRental>>;
-	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, body);
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { ...body, confirmPastEnd: true });
 	const stored = async () => (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
 
 	beforeAll(async () => {

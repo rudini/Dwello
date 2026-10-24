@@ -358,12 +358,17 @@ export function testData(api: CallTheApi) {
 		},
 
 		async contractEnd(tenantTitle: string, endDate: string) {
-			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate });
+			// a precondition, as the landlord confirmed it: an end before today needs the confirmation (#788)
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate, confirmPastEnd: true });
 		},
 
 		// an open-ended contract ended by notice, as «Mietvertrag beenden» stores it
 		async notice(tenantTitle: string, endDate: string) {
-			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate, terminated: true });
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, {
+				endDate,
+				terminated: true,
+				confirmPastEnd: true
+			});
 		},
 
 		// the tenant left after an agreed end, as «Mieter ist ausgezogen» stores it (A-6, #115)

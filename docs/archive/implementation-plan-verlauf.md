@@ -3257,6 +3257,21 @@ Product owner, 24.10.2026: point 5 in two pull requests; (a) the contract page's
 - [x] Slice review round 1 (`docs/reviews/p5a-review-1.md`: no Blocker/Major; C-1 Minor misplaced doc comment, moved; C-2 Minor duplicate query, shared module)
 - [x] Closing round (`docs/reviews/p5a-review-2.md`: C-1, C-2 fixed, no new findings), PR pushed after this archive
 
+## Session: #788 point 5b, the end refusals (the backend decides)
+
+Product owner, 24.10.2026: on every save (`PUT /contracts/:id`) the backend refuses an end before the start (`CONTRACT_END_BEFORE_START`) and a newly set end before today without `confirmPastEnd: true` (`CONTRACT_END_PAST`); a stored end sent again needs no confirmation (Fachreview #459 V-3). The texts keep today's wording (`backend_<code>` = `contracts_end_before_start_on`, `contracts_end_past_confirm` in all four languages). No scenario: the refusal is only reached past the dialog's and the form's own check, which the E2E stack cannot bypass; «Vergangenes Vertragsende ohne Bestätigung» and the past-end scenarios of `contract-edit.feature` pin what the user sees. Refs #788.
+
+- [x] Backend `CONTRACT_END_BEFORE_START` (`contract-end-refusals.pg.test.ts`, red first)
+- [x] Backend `CONTRACT_END_PAST` with `confirmPastEnd` (same file, red first; the stored-end test by taking the exception out)
+- [x] Messages `backend_contract_end_before_start`, `backend_contract_end_past` (four languages, copied from `contracts_end_before_start_on`, `contracts_end_past_confirm`)
+- [x] BFF end action: sends `confirmPastEnd`, shows the backend refusal; no date compare; keeps the «no real day» hint (input check, no decision) and «already set» (`contract-actions.test.ts`, red first)
+- [x] «Bearbeiten» (`ContractForm`) sends `confirmPastEnd` once confirmed (`contract-edit.dom.test.ts`, red first)
+- [x] Callers that set a past end: 14 backend tests in 5 files and the E2E seeds (`fixtures/backend.ts`) send the confirmation
+- [x] API contracts `contract-end-past.json`, `contract-end-before-start.json` (checked in `api-contracts.pg.test.ts`); `docs/api-specification.md`; fitness `--update` (bffDates 5 → 3, BFF decisions 13 → 11)
+- [x] Workflow note: no `fach-reviewer` round before the code; the rule and its texts are unchanged (same wording, new keys), only the layer that enforces it moves; the `POST` of a new contract does not check a past end (the wizard asks in the browser), named in the pull request
+- [x] E2E `contract-detail`, `contract-edit`, `contract-new` (Chromium and API, 136) green
+- [x] Slice review round 1 (`docs/reviews/p5b-review-1.md`: no Blocker/Major; C-1 Minor comment order, fixed; C-2 Minor a later start behind the stored end, refused now, pg test red first; C-3 Minor test of the «no real day» hint, added (pins kept behaviour); C-4 Minor a page left open past midnight, stays in the report)
+- [x] Closing round (`docs/reviews/p5b-review-2.md`: C-1 to C-3 fixed, C-4 stays as a Minor, no new findings), PR pushed after this archive
 ## Session: #792 Chromium shim of the session hook
 
 - [x] Shim block into `.claude/hooks/pw-shim.sh`: find the executables in any layout, warn and link nothing when none is found (test first)
