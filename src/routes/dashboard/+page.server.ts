@@ -129,12 +129,9 @@ export const load = async ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),
-			nextReminderFrom: s.nextReminderFrom as string | null,
-			reminderToSend: Boolean(s.reminderToSend),
-			refund: Number(s.balance) < 0
+			reminderDue: s.reminderDue as boolean | null // #788: whether a Mahnung is due now, the backend decides
 		})),
 		paymentDeadlineDays: Number(stored.payment_deadline_days ?? 30),
-		reminderAfterDays: Number(stored.reminder_after_days ?? 14),
 		lettersToSend: letters.length,
 		missingStatements,
 		outdatedStatements: outdated as OverviewInput['outdatedStatements'],

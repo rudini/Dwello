@@ -10,7 +10,7 @@ import { invoices, utilityStatements, type UtilityStatementLineItem } from '../d
 import { CodedError } from './coded-error';
 import { getInvoicesForStatement } from './invoice.service';
 import { agreedStock, getStatement, listStatements, recalculation, type StatementWithDetails } from './statement.service';
-import { swissToday } from './today';
+import { olderThanFiveYears, swissToday } from './today';
 import { counting } from './counting-statements';
 
 type PeriodInvoice = Awaited<ReturnType<typeof getInvoicesForStatement>>[number];
@@ -143,7 +143,9 @@ export async function outdatedStatements() {
 							periodStart: s.periodStart,
 							periodEnd: s.periodEnd,
 							invoices: changes!.invoiceIds.length,
-							fuelStock: changes!.fuelStockChanged
+							fuelStock: changes!.fuelStockChanged,
+							// PO 2026-10-20 (Fachreview 454-1 E-5): the overview adds the sentence on the Verjährung
+							olderThanFiveYears: olderThanFiveYears(s.periodEnd, swissToday())
 						}
 					: null;
 			})

@@ -9,3 +9,11 @@ export const daysAfter = (isoDate: string, days: number) =>
 
 /** Today's Swiss date in SQL instead of current_date, read each time a query is built */
 export const sqlToday = { getSQL: () => sql`${swissToday()}::date` };
+
+/** Whether a period ended more than five calendar years before the given day; the 29th of February counts as the 28th */
+export function olderThanFiveYears(periodEnd: string, today: string) {
+	const [year, month, day] = today.split('-').map(Number);
+	const back = new Date(Date.UTC(year - 5, month - 1, day));
+	if (back.getUTCMonth() !== month - 1) back.setUTCDate(0); // Fachreview 454-2 V-27
+	return periodEnd < back.toISOString().slice(0, 10);
+}

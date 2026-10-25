@@ -10,7 +10,8 @@
 			"periodStart": "2025-01-01",
 			"periodEnd": "2025-12-31",
 			"invoices": 1,
-			"fuelStock": false
+			"fuelStock": false,
+			"olderThanFiveYears": false
 		}
 	]
 }
