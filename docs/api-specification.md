@@ -2,7 +2,7 @@
 
 Describes the API as implemented. Source of truth: `backend/src/app.ts`, `backend/src/routes/*.ts`, the services in `backend/src/services/`, and the response examples in `tests/contracts/*.json`. When this file and the code disagree, the code wins; fix this file.
 
-Interactive documentation of the backend (generated from the Elysia schemas) is served at **`/swagger`** (OpenAPI JSON at `/swagger/json`) on the backend, without authentication.
+Interactive documentation of the backend (generated from the Elysia schemas) is served at **`/swagger`** (OpenAPI JSON at `/swagger/json`) on the backend, without authentication, only outside production: with `NODE_ENV=production` (the Docker image and `docker-compose.prod.yml`) both answer 404 (#720).
 
 ---
 
@@ -20,7 +20,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ## 2. Conventions (backend)
 
-- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice), `GET /api/v1/mail-transport` (`{ transport: "smtp" | "resend" | null }`, the configured mail provider for the same notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
+- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice), `GET /api/v1/mail-transport` (`{ transport: "smtp" | "resend" | null }`, the configured mail provider for the same notice) and `/swagger` (outside production only) require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
 - **No envelope:** successful responses are the bare resource or a plain object, with **camelCase** field names (e.g. `{ "buildings": [...], "total": 1 }`). The list key differs per router (see each section).
 - **Errors:** `{ "error": "<message>", "code"?: "<CODE>", "params"?: { … }, "causes"?: [{ "code", "params" }] }`. `error` is free text (some English, some German). A refusal that can reach the UI also carries a stable `code` and the values in its text as `params` (`backend/src/services/coded-error.ts`); the BFF shows the message `backend_<code in lower case>` from `messages/*.json` in the UI language (`src/lib/backend-error.ts`), otherwise the `error` text. Unexpected errors have no code. Codes:
   - Form checks (H-28, #717; 400 with the first error as `code` and every error in `causes`, each with `params.field`, the form field it is about): building `BUILDING_NAME_REQUIRED`, `BUILDING_ADDRESS_REQUIRED`, `POSTAL_CODE_REQUIRED`, `POSTAL_CODE_DIGITS`, `BUILDING_CITY_REQUIRED`, `BUILDING_CANTON_REQUIRED`, `BUILDING_YEAR_BUILT_INVALID`; its apartments from the Gebäuderegister (`field` `apartments.<index>.<field>`) `APARTMENT_NUMBER_REQUIRED`, `APARTMENT_FLOOR_REQUIRED`, `APARTMENT_AREA_REQUIRED`, `APARTMENT_ROOMS_REQUIRED`, `APARTMENT_AREA_INVALID`, `APARTMENT_ROOMS_INVALID`

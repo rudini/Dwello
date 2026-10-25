@@ -4,8 +4,24 @@ import { callApi } from './helpers/auth';
 
 const get = (path: string) => app.handle(new Request(`http://localhost${path}`));
 
+/** The status of each path in a backend started as in production, in its own process (the app is built at import) */
+function statusesInProduction(paths: string[]): number[] {
+	const script = `const { app } = await import('./src/app.ts');
+for (const path of ${JSON.stringify(paths)}) console.log((await app.handle(new Request('http://localhost' + path))).status);`;
+	const run = Bun.spawnSync(['bun', '-e', script], {
+		cwd: `${import.meta.dir}/../..`,
+		env: { ...process.env, NODE_ENV: 'production' }
+	});
+	return run.stdout.toString().trim().split('\n').map(Number);
+}
+
 // docs/api-specification.md: the interactive documentation and its OpenAPI JSON, without authentication (#790 swaps the plugin)
 describe('API-Dokumentation', () => {
+	// #720: an installation does not show its API to everyone
+	it('gibt es in der Produktion nicht', () => {
+		expect(statusesInProduction(['/swagger', '/swagger/json', '/health'])).toEqual([404, 404, 200]);
+	});
+
 	it('zeigt die Seite unter /swagger ohne Anmeldung', async () => {
 		const response = await get('/swagger');
 		expect(response.status).toBe(200);

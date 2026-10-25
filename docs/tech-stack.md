@@ -177,7 +177,7 @@ bun run dev     # http://localhost:3000 (vite.config.ts); needs the backend on 3
 - **Performance:** Bun is fast to start and run
 - **TypeScript Native:** First-class TypeScript support, no build step in development
 - **DX:** ElysiaJS is lightweight; route schemas with `t` give validation and types
-- **API docs:** `@elysiajs/openapi` at `/swagger`
+- **API docs:** `@elysiajs/openapi` at `/swagger`, not in production (#720)
 
 Business logic lives in `backend/src/services`; routes in `backend/src/routes` under `/api/v1`.
 
