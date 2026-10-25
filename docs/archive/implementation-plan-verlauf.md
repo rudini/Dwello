@@ -3321,3 +3321,14 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] E2E `dashboard`, `tenant-detail` (Chromium and API, 62) green
 - [x] Slice review round 1 (`docs/reviews/p4a-review-1.md`: C-1 Major, two cases of «notice without a next tenant» no layer tested after the move: a notice after its end, a later contract in another apartment; a pg test added, it pins kept behaviour and fails with each of the two mutations the review named)
 - [x] Closing round (`docs/reviews/p4a-review-2.md`: C-1 closed, no new findings), PR pushed after this archive
+
+## Session: #788 part 4b, old addresses and missing statements in the backend
+
+- [x] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
+- [x] API contract `tests/contracts/dashboard.json` and `api-contracts.pg.test.ts`
+- [x] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
+- [x] Docs: `docs/api-specification.md` §14; fitness ratchet unchanged (BFF decisions stay 8)
+- [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
+- [x] Slice review round 1 (`docs/reviews/p4b-review-1.md`)
+- [x] Closing round (`docs/reviews/p4b-review-2.md`)
+- [x] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it», pushed after this archive

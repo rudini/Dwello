@@ -9,13 +9,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
-## Session: #788 part 4b, old addresses and missing statements in the backend
-
-- [x] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
-- [x] API contract `tests/contracts/dashboard.json` and `api-contracts.pg.test.ts`
-- [x] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
-- [x] Docs: `docs/api-specification.md` §14; fitness ratchet unchanged (BFF decisions stay 8)
-- [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
-- [x] Slice review round 1 (`docs/reviews/p4b-review-1.md`)
-- [ ] Closing round
-- [ ] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it»
