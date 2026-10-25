@@ -5,7 +5,6 @@ import contractList from '../../tests/contracts/contracts.json';
 import apartmentList from '../../tests/contracts/apartments.json';
 import config from '../../tests/contracts/config.json';
 import statementList from '../../tests/contracts/statements.json';
-import documentList from '../../tests/contracts/documents.json';
 import outdatedStatements from '../../tests/contracts/statements-outdated.json';
 import kiModelLoading from '../../tests/contracts/ki-model-loading.json';
 import kiSettings from '../../tests/contracts/ki-settings.json';
@@ -72,6 +71,20 @@ const contracts = [
 	].map((c) => contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01' })),
 	contract({ id: 'f4', apartmentId: 'f3', startDate: '2026-08-01', endDate: null })
 ];
+// what the backend decides from these contracts (#788): the notices without a next tenant, the expired agreed end
+const pick = (...ids: string[]) => contracts.filter((c) => ids.includes(String(c.id)));
+const contractTasks = {
+	noticedContracts: pick('n1', 'n2', 'n5').map(({ id, tenantName, apartmentId, apartmentNumber, endDate }) => ({
+		...dashboardResponse.contractTasks.noticedContracts[0],
+		id,
+		tenantName,
+		apartmentId,
+		apartmentNumber,
+		endDate
+	})),
+	expiredContracts: pick('f1').map(({ id, tenantName, endDate }) => ({ id, tenantName, endDate })),
+	formerTenants: [] as typeof dashboardResponse.contractTasks.formerTenants
+};
 type Range = { start: string; end: string };
 // each missing part as the backend answers (tests/contracts/contracts-missing-statements.json)
 const period = (start: string, end: string) => ({ ...contractsMissing.c1[0], start, end });
@@ -146,7 +159,7 @@ function backend(
 	};
 	return (async (url: string) => {
 		const path = url.replace(API, '');
-		if (path === '/dashboard') return Response.json(figures, { status: dashboardStatus });
+		if (path === '/dashboard') return Response.json({ ...figures, contractTasks }, { status: dashboardStatus });
 		if (path in answers) return Response.json(answers[path]);
 		throw new Error(`unexpected ${url}`);
 	}) as typeof globalThis.fetch;
@@ -155,47 +168,39 @@ function backend(
 describe('Übersicht laden', () => {
 	afterEach(() => vi.useRealTimers());
 
-	// #178: an ehemaliger Mieter whose uploads date from before the last Vertragsende
-	it('nennt ehemalige Mieter mit Dokumenten von vor dem Ende ihres letzten Mietvertrags', async () => {
+	// #178, #788: the former tenants with uploads to check come from the backend; the overview names each
+	it('nennt die ehemaligen Mieter, deren Dokumente das Backend zum Prüfen nennt', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const [upload] = documentList.data;
-		// a fixed term without notice, then the next tenant: she has left, no question whether she stayed (A-6)
-		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', apartmentId: 'a9', startDate: '2020-01-01', endDate: '2026-03-31', terminated: false, movedOut: false };
-		const next = { ...former, id: 'k10', tenantId: 't10', tenantName: 'Ugo Nuovo', startDate: '2026-04-01', endDate: null };
+		const [former] = dashboardResponse.contractTasks.formerTenants;
 		const base = backend();
-		const fetch = (async (url: string) => {
-			const path = url.replace(API, '');
-			if (path === '/documents')
-				return Response.json({ data: [{ ...upload, tenantId: 't9', createdAt: '2024-05-01T09:00:00.000Z' }] });
-			if (path === '/contracts?limit=1000') return Response.json({ contracts: [...contracts, former, next] });
-			return base(url);
-		}) as typeof globalThis.fetch;
+		const fetch = (async (url: string) =>
+			url === `${API}/dashboard`
+				? Response.json({ ...figures, contractTasks: { ...contractTasks, formerTenants: [former] } })
+				: base(url)) as typeof globalThis.fetch;
 
 		const data = await load({ fetch } as never);
 
 		expect(data.tasks).toContainEqual(
-			expect.objectContaining({ id: 'former-documents-t9', title: 'Dokumente von Ida Alt prüfen', href: '/tenants/t9' })
+			expect.objectContaining({
+				id: `former-documents-${former.tenantId}`,
+				title: `Dokumente von ${former.tenantName} prüfen`,
+				href: `/tenants/${former.tenantId}`
+			})
 		);
-		expect(data.tasks.map((task) => task.id)).not.toContain('fixed-term-k9');
 	});
 
-	// #459 (#331): documents marked as checked for the last contract end the task
-	it('nennt einen ehemaligen Mieter nicht mehr, dessen Dokumente geprüft sind', async () => {
+	// #788: which contracts need a next tenant or a question whether the tenant stayed, the backend decides
+	it('nennt keine Aufgabe zu einem Mietvertrag, die das Backend nicht nennt', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const [upload] = documentList.data;
-		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', apartmentId: 'a9', startDate: '2020-01-01', endDate: '2026-03-31', terminated: true, movedOut: false, documentsCheckedOn: '2026-10-01' };
 		const base = backend();
-		const fetch = (async (url: string) => {
-			const path = url.replace(API, '');
-			if (path === '/documents')
-				return Response.json({ data: [{ ...upload, tenantId: 't9', createdAt: '2024-05-01T09:00:00.000Z' }] });
-			if (path === '/contracts?limit=1000') return Response.json({ contracts: [...contracts, former] });
-			return base(url);
-		}) as typeof globalThis.fetch;
+		const none = { noticedContracts: [], expiredContracts: [], formerTenants: [] };
+		const fetch = (async (url: string) =>
+			url === `${API}/dashboard` ? Response.json({ ...figures, contractTasks: none }) : base(url)) as typeof globalThis.fetch;
 
-		const data = await load({ fetch } as never);
+		const ids = (await load({ fetch } as never)).tasks.map((task) => task.id);
 
-		expect(data.tasks.map((task) => task.id)).not.toContain('former-documents-t9');
+		expect(ids).toContain('overdue');
+		expect(ids.filter((id) => id.startsWith('successor-') || id.startsWith('fixed-term-'))).toEqual([]);
 	});
 
 	it('liefert die Kennzahlen und daraus die Aufgaben und Fristen von heute', async () => {
@@ -435,7 +440,15 @@ describe('Übersicht laden', () => {
 		const data = await load({ fetch } as never);
 
 		expect(data.portfolio).toEqual(figures.portfolio);
-		expect(data.tasks.map((task) => task.id)).toEqual(['overdue', 'drafts']);
+		// the contract tasks come with the figures (#788), so they stay when the other lists fail
+		expect(data.tasks.map((task) => task.id)).toEqual([
+			'overdue',
+			'drafts',
+			'successor-n2',
+			'successor-n5',
+			'successor-n1',
+			'fixed-term-f1'
+		]);
 		expect(data.deadlines).toEqual([]);
 	});
 
