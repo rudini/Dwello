@@ -1,15 +1,30 @@
 import { describe, expect, it } from 'bun:test';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { app } from '../app';
 import { callApi } from './helpers/auth';
 
 const get = (path: string) => app.handle(new Request(`http://localhost${path}`));
 
-/** The status of each path in a backend started as in production, in its own process (the app is built at import) */
-function statusesInProduction(paths: string[]): number[] {
-	const script = `const { app } = await import('./src/app.ts');
+/**
+ * The status of each path in a backend started as in production, in its own process (the app is built at import):
+ * from the sources, or from a bundle as `bun run build` makes it, which fixes what it can read at build time
+ */
+function statusesInProduction(paths: string[], bundled = false): number[] {
+	const backend = `${import.meta.dir}/../..`;
+	let entry = './src/app.ts';
+	if (bundled) {
+		const outdir = mkdtempSync(join(tmpdir(), 'dwello-bundle-'));
+		Bun.spawnSync(['bun', 'build', 'src/app.ts', '--outdir', outdir, '--target', 'bun'], {
+			cwd: backend
+		});
+		entry = join(outdir, 'app.js');
+	}
+	const script = `const { app } = await import(${JSON.stringify(entry)});
 for (const path of ${JSON.stringify(paths)}) console.log((await app.handle(new Request('http://localhost' + path))).status);`;
 	const run = Bun.spawnSync(['bun', '-e', script], {
-		cwd: `${import.meta.dir}/../..`,
+		cwd: backend,
 		env: { ...process.env, NODE_ENV: 'production' }
 	});
 	return run.stdout.toString().trim().split('\n').map(Number);
@@ -20,6 +35,11 @@ describe('API-Dokumentation', () => {
 	// #720: an installation does not show its API to everyone
 	it('gibt es in der Produktion nicht', () => {
 		expect(statusesInProduction(['/swagger', '/swagger/json', '/health'])).toEqual([404, 404, 200]);
+	});
+
+	// code review 720 C-1: a bundle built without NODE_ENV must still read it when it starts
+	it('gibt es auch im gebündelten Backend in der Produktion nicht', () => {
+		expect(statusesInProduction(['/swagger', '/health'], true)).toEqual([404, 200]);
 	});
 
 	it('zeigt die Seite unter /swagger ohne Anmeldung', async () => {

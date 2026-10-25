@@ -35,9 +35,10 @@ export const app = new Elysia()
 			credentials: true
 		})
 	)
-	// the API documentation only outside production, so an installation does not show its API to everyone (#720)
+	// the API documentation only outside production, so an installation does not show its API to everyone (#720);
+	// Bun.env, since bun build fixes process.env.NODE_ENV at build time (code review 720 C-1)
 	.use(
-		process.env.NODE_ENV === 'production'
+		Bun.env.NODE_ENV === 'production'
 			? new Elysia()
 			: openapi({
 					documentation: {

@@ -2,7 +2,7 @@
 
 Describes the API as implemented. Source of truth: `backend/src/app.ts`, `backend/src/routes/*.ts`, the services in `backend/src/services/`, and the response examples in `tests/contracts/*.json`. When this file and the code disagree, the code wins; fix this file.
 
-Interactive documentation of the backend (generated from the Elysia schemas) is served at **`/swagger`** (OpenAPI JSON at `/swagger/json`) on the backend, without authentication, only outside production: with `NODE_ENV=production` (the Docker image and `docker-compose.prod.yml`) both answer 404 (#720).
+Interactive documentation of the backend (generated from the Elysia schemas) is served at **`/swagger`** (OpenAPI JSON at `/swagger/json`) on the backend, without authentication, only outside production: a backend started with `NODE_ENV=production` (the Docker image, `docker-compose.prod.yml`, also a bundle from `bun run build`) answers 404 to both (#720).
 
 ---
 
