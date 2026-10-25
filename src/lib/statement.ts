@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { isDay, localToday } from '$lib/contract-status';
 import { formatDate } from '$lib/utils/format';
+import { apiCall } from './api';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
 import type { IconName } from './ui/icons';
@@ -65,3 +66,11 @@ export const paidDateError = (paidDate: string, periodEnd: string) =>
 export const earlyPaidDate = (paidDate: string, statementDate: string) =>
 	paidDate < statementDate ? m.statements_paid_date_early({ date: formatDate(statementDate) }) : null;
 
+/** Whether the Abrechnungsperiode is still running, as the backend says it by the Swiss day (#815) */
+export async function periodRunning(periodEnd: string): Promise<boolean> {
+	if (!isDay(periodEnd)) return false;
+	const response = await apiCall<{ running: boolean }>(
+		`/statements/check-period?periodEnd=${encodeURIComponent(periodEnd)}`
+	);
+	return response.data?.running === true;
+}
