@@ -261,6 +261,21 @@
 			"path": "src/routes/contracts/ContractForm.svelte",
 			"line": "statements.length === 1 && statements[0].status === 'draft' && !!statements[0].covered;",
 			"reason": "status display: the status value alone and the backend's field `covered` (#815)"
+		},
+		{
+			"path": "src/routes/statements/[id]/Correction.svelte",
+			"line": ": statement.status === 'settled' // a Saldo of 0.00: nothing open, nothing carried (448-review-3 C-18)",
+			"reason": "status display: the status value alone, after the backend's field `carried` (#815)"
+		},
+		{
+			"path": "src/routes/statements/[id]/Correction.svelte",
+			"line": "if (carried || statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);",
+			"reason": "status display: the status value alone, the backend's field `carried` and whether a payment date is recorded (#815)"
+		},
+		{
+			"path": "src/routes/statements/[id]/StatusActions.svelte",
+			"line": "{#if status === 'overdue' && owes && !waiting}",
+			"reason": "status display: the status value alone and the backend's fields `claimed` and `reminderWaitsUntil` (#815)"
 		}
 	],
 	"preChecks": [
@@ -603,19 +618,7 @@
 			},
 			{
 				"path": "src/lib/statement.ts",
-				"line": "statement.status === 'settled' || // also when the contract's end moves into the period afterwards (448-2 V-17)",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/statement.ts",
 				"line": ": paidDate > localToday()",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/statement.ts",
-				"line": "statement.nextReminderFrom && statement.nextReminderFrom > localToday()",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
 				"scenario": "Ä4"
 			},
@@ -628,36 +631,6 @@
 			{
 				"path": "src/routes/statements/[id]/+page.svelte",
 				"line": "let paidDate = $state(localToday());",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/Correction.svelte",
-				"line": "(statement.status === 'settled' && statement.balance !== 0) || // a Saldo of 0.00 is never carried over (448-4 V-32)",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/Correction.svelte",
-				"line": "(statement.status === 'paid' && statement.paidAmount === 0 && statement.balance < 0 && statement.balance > -5)",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/Correction.svelte",
-				"line": "statement.status === 'draft' &&",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/PaymentPanel.svelte",
-				"line": "belowMinimum(statement.balance) && statement.status === 'paid' && statement.paidAmount === 0",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/ResetPaymentDialog.svelte",
-				"line": "statement.paymentDeadline < localToday() ? statusLabels.overdue : statusLabels.sent",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
 				"scenario": "Ä4"
 			},
@@ -677,24 +650,6 @@
 				"path": "src/routes/tenants/[id]/TenantAnonymiseCard.svelte",
 				"line": "const allowed = $derived(from <= localToday());",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/Correction.svelte",
-				"line": ": statement.status === 'settled' // a Saldo of 0.00: nothing open, nothing carried (448-review-3 C-18)",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/Correction.svelte",
-				"line": "if (carried || statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/StatusActions.svelte",
-				"line": "{#if status === 'overdue' && owes && !waiting}",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
 				"scenario": "Ä4"
 			}
 		]

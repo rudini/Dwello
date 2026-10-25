@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { localToday } from '$lib/contract-status';
 	import { statusLabels } from '$lib/statement';
 	import type { StatementWithDetails } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
@@ -11,7 +10,7 @@
 		$props();
 
 	const status = $derived(
-		statement.paymentDeadline < localToday() ? statusLabels.overdue : statusLabels.sent
+		statement.deadlinePassed ? statusLabels.overdue : statusLabels.sent
 	);
 </script>
 

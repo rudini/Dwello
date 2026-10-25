@@ -146,6 +146,18 @@ describe('Berichtigte Abrechnung', () => {
 		expect((await statement(id)).replacedBy).toEqual({ id: corrected.id, statementNumber: corrected.statementNumber });
 	});
 
+	// #464 (domain review F-4, #815): the backend says when the draft counts another Akonto than the replaced one
+	it('sagt, ob der Entwurf ein anderes Akonto zählt als die ersetzte Abrechnung', async () => {
+		const id = await sentStatement();
+		await replace(id);
+		const corrected = (await (await correct(id)).json()) as Statement & { advanceChanged: boolean };
+		expect(corrected.advanceChanged).toBe(false);
+
+		await db.update(utilityStatements).set({ totalAdvancePayments: '999.00' }).where(eq(utilityStatements.id, id));
+
+		expect(((await statement(corrected.id)) as Statement & { advanceChanged: boolean }).advanceChanged).toBe(true);
+	});
+
 	it('rechnet an, was auf die ersetzte Abrechnung bezahlt wurde, und rundet den Saldo auf 5 Rappen', async () => {
 		const id = await sentStatement();
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount: '100.03' });

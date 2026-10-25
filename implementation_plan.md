@@ -8,3 +8,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #815 part C, statements: the frontend derives nothing from amounts and dates
+
+Measured before (25.10.2026, main f430a98): frontend decision exceptions 19, of which 15 in statements.
+
+- [x] C1 payment rules from the backend: `paymentOf` and `advanceChanged` (`backend/src/services/statement-payment.ts`) on list and detail; backend unit and pg tests, API contracts, mapping test first; the DOM test fixture takes them from `paymentOf`; frontend `unpaid`, `claimed`, `belowMinimum`, `nextReminderLater` removed; exceptions 19 → 9 (3 lines now status display)
+- [ ] C2 pre-check «Bezahlt am» not in the future (`PAID_DATE_IN_FUTURE`) into `preChecks`; the two «Bezahlt am» defaults (today) into `display` as a field default
+- [ ] C3 «Abrechnungsperiode läuft noch» in the run from the backend (`GET /statements/check-period?periodEnd=` → `{ running }`), as `check-start` of part B
+- [ ] Review C1–C3
+- [ ] Checks: lint, check, vitest, backend tests, E2E statement features, fitness (exceptions before and after)
+- [ ] Closing round, workflow notes, archive
+- [ ] PR: «No scenario: behaviour unchanged», Refs #815

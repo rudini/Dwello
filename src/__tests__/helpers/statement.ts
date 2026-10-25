@@ -1,4 +1,6 @@
 import type { StatementWithDetails } from '$lib/types';
+import { localToday } from '$lib/contract-status';
+import { advanceChanged, paymentOf } from '../../../backend/src/services/statement-payment';
 
 // what the backend allows for a status (#788, `allowed` in backend/src/services/statement.service.ts); a test about
 // the fields themselves overrides them
@@ -9,10 +11,29 @@ const allowedFor = (status = 'draft') => ({
 	superseded: status === 'replaced'
 });
 
+// what the backend says the Saldo asks of whom, by its own rule (#815); a test about the fields overrides them
+const paymentFor = (fields: Partial<StatementWithDetails>) =>
+	paymentOf(
+		{
+			balance: String(fields.balance ?? 363),
+			status: fields.status ?? 'draft',
+			final: !!fields.final,
+			paidAmount: fields.paidAmount == null ? null : String(fields.paidAmount),
+			paymentDeadline: fields.paymentDeadline ?? '2025-02-28',
+			nextReminderFrom: fields.nextReminderFrom ?? null
+		},
+		localToday()
+	);
+
 /** A statement as the pages receive it; override what a test is about */
 export const statement = (overrides: Partial<StatementWithDetails> = {}): StatementWithDetails =>
 	({
 		...allowedFor(overrides.status),
+		...paymentFor(overrides),
+		advanceChanged: advanceChanged(
+			{ status: overrides.status ?? 'draft', totalAdvancePayments: String(overrides.totalAdvancePayments ?? 1800) },
+			overrides.replaces ? { totalAdvancePayments: String(overrides.replaces.totalAdvancePayments) } : null
+		),
 		id: 's1',
 		statementNumber: 'NK-2024-0001',
 		tenantId: 't1',
