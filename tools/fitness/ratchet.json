@@ -276,6 +276,16 @@
 			"path": "src/routes/statements/[id]/StatusActions.svelte",
 			"line": "{#if status === 'overdue' && owes && !waiting}",
 			"reason": "status display: the status value alone and the backend's fields `claimed` and `reminderWaitsUntil` (#815)"
+		},
+		{
+			"path": "src/routes/statements/+page.svelte",
+			"line": "let paidDate = $state(localToday());",
+			"reason": "field default: prefills «Bezahlt am» with today, no decision; the backend refuses a future day (PAID_DATE_IN_FUTURE)"
+		},
+		{
+			"path": "src/routes/statements/[id]/+page.svelte",
+			"line": "let paidDate = $state(localToday());",
+			"reason": "field default: prefills «Bezahlt am» with today, no decision; the backend refuses a future day (PAID_DATE_IN_FUTURE)"
 		}
 	],
 	"preChecks": [
@@ -338,6 +348,12 @@
 			"line": "errors = stepErrors(values, step, today, startPast);",
 			"code": "BILLED_UNTIL_FUTURE",
 			"test": "backend/src/__tests__/billed-until.pg.test.ts"
+		},
+		{
+			"path": "src/lib/statement.ts",
+			"line": ": paidDate > localToday()",
+			"code": "PAID_DATE_IN_FUTURE",
+			"test": "backend/src/__tests__/statement-lock.pg.test.ts"
 		}
 	],
 	"exceptions": {
@@ -613,24 +629,6 @@
 			{
 				"path": "src/lib/overview.ts",
 				"line": "days: daysFrom(today, c.endDate),",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/statement.ts",
-				"line": ": paidDate > localToday()",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/+page.svelte",
-				"line": "let paidDate = $state(localToday());",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/statements/[id]/+page.svelte",
-				"line": "let paidDate = $state(localToday());",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
 				"scenario": "Ä4"
 			},
