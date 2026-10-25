@@ -20,6 +20,8 @@ services:
       - dwello_secrets:/run/dwello
       - postgres_data:/pgdata:ro
 
+  # Only the frontend publishes a port: backend, database and KI stay on dwello-network, since Docker's published ports
+  # bypass the host firewall and the web app is the one place that checks who may sign in (#719, #753, #747)
   # ============================================
   # Frontend - SvelteKit Application
   # ============================================
@@ -88,8 +90,6 @@ services:
         && bun scripts/migrate.ts && exec bun run src/index.ts
     volumes:
       - dwello_secrets:/run/dwello:ro
-    ports:
-      - "3001:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
@@ -136,8 +136,6 @@ services:
       POSTGRES_USER: dwello
       POSTGRES_PASSWORD_FILE: /run/dwello/db_password
       POSTGRES_DB: dwello
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - dwello_secrets:/run/dwello:ro
@@ -156,11 +154,9 @@ services:
   # Ollama - LLM for Invoice Categorization
   # ============================================
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.40.11
     container_name: dwello-ollama
     restart: unless-stopped
-    ports:
-      - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     networks:
