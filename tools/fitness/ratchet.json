@@ -605,13 +605,7 @@
 				"scenario": "Ä1"
 			}
 		],
-		"moduleCycles": [
-			{
-				"modules": "fe:lib/navigation fe:ui",
-				"reason": "Cycle from before phase 2 (baseline cycles-module.csv)",
-				"scenario": "Ä1"
-			}
-		],
+		"moduleCycles": [],
 		"bffDates": [],
 		"frontendDecisions": [
 			{

@@ -1,4 +1,4 @@
-import type { IconName } from './ui/icons';
+import type { IconName } from './icons';
 import { m } from '$lib/paraglide/messages';
 
 /** Main menu, one level, grouped by the landlord's work; shared by the sidebar and the mobile menu.

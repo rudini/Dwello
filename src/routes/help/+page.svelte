@@ -7,7 +7,7 @@
 	// the year the date fields use in their examples, as at the Leistungszeitraum of an invoice
 	const year = new Date().getFullYear();
 
-	// Area names as in the main navigation (src/lib/navigation.ts), so the help leads to the right place
+	// Area names as in the main navigation (src/lib/ui/navigation.ts), so the help leads to the right place
 	const sections = [
 		{
 			id: 'buildings',

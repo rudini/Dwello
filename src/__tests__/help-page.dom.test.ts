@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import HelpPage from '../routes/help/+page.svelte';
-import { navGroups } from '$lib/navigation';
+import { navGroups } from '$lib/ui/navigation';
 import { allByTestId, byTestId, show } from './helpers/dom';
 
 const section = (title: string) =>

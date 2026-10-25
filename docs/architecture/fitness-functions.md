@@ -119,6 +119,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil C1: was der Saldo einer Abrechnung verlangt (`unpaid`, `claimed`, `noPayment`, `waived`, `carried`, `reminderWaitsUntil`, `deadlinePassed`, `advanceChanged`), sagt das Backend (`statement-payment.ts`); Correction, PaymentPanel, ResetPaymentDialog und StatusActions zeigen es nur | Ausnahmen 19 → 9; Anzeige 43 → 46 |
 | 25.10.2026 | #815 Teil C2: «Bezahlt am» nicht in der Zukunft ist eine Vorprüfung mit `PAID_DATE_IN_FUTURE`; die zwei Vorgaben «Bezahlt am» = heute sind Feldvorgaben (Anzeige) | Ausnahmen 9 → 6; Vorprüfungen 10 → 11; Anzeige 46 → 48 |
 | 25.10.2026 | #815 Teil C3: ob die Abrechnungsperiode noch läuft, sagt das Backend (`GET /statements/check-period`); der Lauf fragt es für jedes Periodenende | Ausnahmen 6 → 4 (nur noch Teil D) |
+| 25.10.2026 | #812: die Daten des Hauptmenüs liegen bei den Komponenten, die sie zeigen (`src/lib/navigation.ts` → `src/lib/ui/navigation.ts`) | Zyklen 1 → 0 (Ausnahme `fe:lib/navigation fe:ui` entfernt, `exceptions.moduleCycles` ist leer); die übrigen Werte unverändert |
 
 ## 7. Werkzeugwahl
 

@@ -3410,6 +3410,14 @@ No scenario: measurement tooling only, no app change.
 - [x] Re-review of C-1 (Major) and closing round (`docs/reviews/i815a-review-2.md`)
 - [x] PR: «No scenario: tooling and docs», Refs #815, pushed after this archive
 
+## Session: #812, the module cycle fe:lib/navigation ↔ fe:ui
+
+- [x] `src/lib/navigation.ts` → `src/lib/ui/navigation.ts`, next to `MobileNav`, `NavList`, `Navigation`; imports in the components, `app-frame.dom` and `help-page.dom` tests, comment in `src/routes/help/+page.svelte`
+- [x] `tools/fitness/ratchet.json`: `exceptions.moduleCycles` empty; fitness seen red without the move, green with it (module cycles 0)
+- [x] `docs/architecture/fitness-functions.md` §6: Zyklen 1 → 0
+- [x] Checks: lint, check, backend type-check, fitness, vitest (app-frame, help-page, shell, design-guard, tokens, tools/fitness, tools/arch-baseline: 554), prettier
+- [x] Slice review round 1 (`docs/reviews/i812-review-1.md`)
+- [x] PR: «No scenario: file move only», Fixes #812, pushed after this archive
 ## Session: #815 part B, contracts: the frontend derives nothing from dates
 
 - [x] B1 Vertragsstatus: list, page, form and wizard show the backend's `status` (#784); `contractStatusOn` and the list's `today` removed; tests first (list, page, form, `lastRent`, loaders); the check also reads `data.today` (3 lines of the contract page, now exceptions for B2)
