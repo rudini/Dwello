@@ -13,8 +13,8 @@ import { createRental } from './helpers/rental';
 
 let rental: Awaited<ReturnType<typeof createRental>>;
 const allows = async (id: string) => {
-	const { editable, correctable, asksPayment } = (await (await callApi(`/api/v1/statements/${id}`)).json()) as Record<string, unknown>;
-	return { editable, correctable, asksPayment };
+	const { editable, correctable, asksPayment, superseded } = (await (await callApi(`/api/v1/statements/${id}`)).json()) as Record<string, unknown>;
+	return { editable, correctable, asksPayment, superseded };
 };
 
 beforeAll(async () => {
@@ -39,7 +39,7 @@ describe('Was eine Nebenkostenabrechnung erlaubt', () => {
 			})
 		);
 
-		expect(await allows(draft)).toEqual({ editable: true, correctable: false, asksPayment: true });
+		expect(await allows(draft)).toEqual({ editable: true, correctable: false, asksPayment: true, superseded: false });
 	});
 
 	it('erlaubt einer versandten Abrechnung das Berichtigen, einer ersetzten nichts mehr', async () => {
@@ -52,9 +52,9 @@ describe('Was eine Nebenkostenabrechnung erlaubt', () => {
 			})
 		);
 		await sendJson('PUT', `/api/v1/statements/${sent}/status`, { status: 'sent' });
-		expect(await allows(sent)).toEqual({ editable: true, correctable: true, asksPayment: true });
+		expect(await allows(sent)).toEqual({ editable: true, correctable: true, asksPayment: true, superseded: false });
 
 		await db.update(utilityStatements).set({ status: 'replaced' }).where(eq(utilityStatements.id, sent));
-		expect(await allows(sent)).toEqual({ editable: false, correctable: false, asksPayment: false });
+		expect(await allows(sent)).toEqual({ editable: false, correctable: false, asksPayment: false, superseded: true });
 	});
 });

@@ -381,6 +381,7 @@ export interface StatementWithDetails extends Statement {
 	editable: boolean;
 	correctable: boolean;
 	asksPayment: boolean;
+	superseded: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
 	offsetWith?: { statementNumber: string; amount: number }[];
 }
 

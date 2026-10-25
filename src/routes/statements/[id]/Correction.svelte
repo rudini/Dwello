@@ -74,7 +74,7 @@
 	);
 </script>
 
-{#if statement.status === 'replaced'}
+{#if statement.superseded}
 	<!-- the statement stays as sent; its berichtigte Abrechnung, or what to do before creating it -->
 	<Alert tone="info" title={m.statements_replaced_title()} testid="statement-replaced">
 		{#if statement.replacedBy}

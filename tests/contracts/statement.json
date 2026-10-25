@@ -23,6 +23,7 @@
 	"carriedFrom": { "id": "s0", "statementNumber": "NK-2023-1", "balance": "-3.00" },
 	"editable": true,
 	"correctable": false,
+	"superseded": false,
 	"asksPayment": true,
 	"offsetWith": [{ "statementNumber": "NK-2025-1", "amount": "3.00" }],
 	"final": false,
