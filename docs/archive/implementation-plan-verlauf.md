@@ -3379,3 +3379,14 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] Slice review round 1 (`docs/reviews/p5ae2-review-1.md`)
 - [x] Closing round (`docs/reviews/p5ae2-review-2.md`)
 - [x] PR: «No scenario: behaviour unchanged», Refs #788, pushed after this archive
+
+## Session: #788 part 5b, the backend names `replaced` at fewer places (Ä2)
+
+- [x] `counting-statements.ts`: `isReplaced` and `replacedInSql` next to `counting` and `countingInSql`
+- [x] Dashboard (paid this month), reminder (posting a replaced one), statement run (replaced in this period), «Abgerechnet bis» (replaced without counting successor) use them; the anonymisation counts every statement but drafts (`status <> 'draft'`, the same five statuses the database allows); kept behaviour, pinned by `dashboard.pg`, `reminders.pg`, `statement-run`, `billed-until.pg`, `tenant-anonymise.pg`
+- [x] Measured with `tools/arch-baseline/run.sh`: `replaced` 4 files in 2 layers (Backend 3, Shared 1), Ä2 within its target; `docs/architecture/fitness-functions.md`
+- [x] Checks: backend `bun run test` (1610, coverage 96.5 %), type-check, lint, fitness
+- [x] Slice review round 1 (`docs/reviews/p5be2-review-1.md`)
+- [x] Closing round (`docs/reviews/p5be2-review-2.md`)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-788.md`
+- [x] PR: «No scenario: behaviour unchanged», Fixes #788, pushed after this archive

@@ -12,7 +12,7 @@ import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
 import { listStatements } from './statement.service';
 import { swissToday } from './today';
-import { counting } from './counting-statements';
+import { counting, isReplaced } from './counting-statements';
 
 type Contract = Pick<ContractWithDetails, 'id' | 'startDate' | 'endDate' | 'billedUntil' | 'tenantName'> &
 	Partial<Pick<ContractWithDetails, 'terminated' | 'managementFeeAgreed' | 'apartmentNumber'>>;
@@ -62,7 +62,7 @@ function flagsOf(c: Contract, period: Range, today: string) {
 /** The plan of a run over the building's contracts and statements */
 export function planRun<C extends Contract>(period: Range, contracts: C[], statements: Statement[], today = swissToday()) {
 	// a statement replaced in this very period does not count: the run creates its berichtigte Abrechnung (#120)
-	const replacedHere = (s: Statement) => s.status === 'replaced' && s.periodStart === period.start && s.periodEnd === period.end;
+	const replacedHere = (s: Statement) => isReplaced(s) && s.periodStart === period.start && s.periodEnd === period.end;
 	// a statement overlapping the period bills the contract there (#199, #211)
 	const overlapping = statements.filter((s) => s.periodStart <= period.end && s.periodEnd >= period.start && !replacedHere(s));
 	const inPeriod = contracts

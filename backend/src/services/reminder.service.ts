@@ -25,6 +25,7 @@ import { getStatement, updateStatement } from './statement.service';
 import { getTenant } from './tenant.service';
 import { belowMinimum, formatSwissDate } from './pdf-format';
 import { daysAfter, swissToday } from './today';
+import { isReplaced } from './counting-statements';
 
 const MAX_REMINDER_LEVEL = 3;
 const PAYMENT_DAYS = 10; // new payment deadline in each reminder
@@ -163,7 +164,7 @@ export async function markDocumentPosted(id: string) {
 	const today = swissToday();
 	const statement = (await getStatement(document.statementId!))!;
 	// nothing left to claim: the letter stays under «Dokumente» (#449, decided in #404: point 3, V-4)
-	if (statement.status === 'replaced')
+	if (isReplaced(statement))
 		throw new ReminderError('REMINDER_STATEMENT_REPLACED', 'The statement is replaced; do not send this reminder any more');
 	if (statement.status === 'paid')
 		throw new ReminderError('REMINDER_STATEMENT_PAID', 'The statement is paid; do not send this reminder any more');
