@@ -9,7 +9,6 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
-	import { unpaid } from '$lib/statement';
 	import CostTable from '../CostTable.svelte';
 	import type { ActionData } from './$types';
 
@@ -70,7 +69,7 @@
 
 	<Panel title={m.statements_deadline_notes()}>
 		<!-- no payment, no Frist: a Saldo of 0 or one carried over; a Schlussabrechnung claims every Saldo (#448) -->
-		{#if !unpaid(statement)}
+		{#if !statement.unpaid}
 			<DateInput
 				id="paymentDeadline"
 				name="paymentDeadline"

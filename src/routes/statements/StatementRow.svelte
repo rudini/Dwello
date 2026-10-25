@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel, nextReminderLater, statementIcons, statusLabels, statusTones } from '$lib/statement';
+	import { balanceLabel, statementIcons, statusLabels, statusTones } from '$lib/statement';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
@@ -17,7 +17,7 @@
 		m.statements_row_name({ number: statement.statementNumber, tenant: statement.tenantName })
 	);
 	const open = $derived(statement.status === 'sent' || statement.status === 'overdue');
-	const nextReminder = $derived(nextReminderLater(statement));
+	const nextReminder = $derived(statement.reminderWaitsUntil);
 </script>
 
 <!-- Stacked up to xl; side by side only where all columns fit, the actions never shrink -->

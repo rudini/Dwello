@@ -375,6 +375,12 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #815: the statement run asks whether the Abrechnungsperiode is still running
+	it('GET /statements/check-period liefert die Felder von statement-check-period.json', async () => {
+		const actual = await (await callApi('/api/v1/statements/check-period?periodEnd=2099-12-31')).json();
+		expect(drift(await sample('statement-check-period'), actual)).toEqual([]);
+	});
+
 	// #815: the wizard asks whether a Vertragsbeginn lies in the past
 	it('GET /contracts/check-start liefert die Felder von contract-check-start.json', async () => {
 		const actual = await (await callApi('/api/v1/contracts/check-start?startDate=2020-01-01')).json();

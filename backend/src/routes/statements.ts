@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { swissToday } from '../services/today';
 import { CodedError, codedBody, errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
 import {
@@ -59,6 +60,10 @@ const runOf = (query: { periodStart: string; periodEnd: string; heatingProfileId
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// The drafts with a change since and the statements due for correcting, for the Übersicht (#454)
 	.get('/outdated', async () => ({ statements: await outdatedStatements() }))
+	// whether the period is still running, by the Swiss day: the run says costs may still come (#815)
+	.get('/check-period', ({ query }) => ({ running: query.periodEnd >= swissToday() }), {
+		query: t.Object({ periodEnd: t.String({ format: 'date' }) })
+	})
 	// What the wizard starts with, from a link to a building and period or from the settings (A-10, H-28)
 	.get('/run-defaults', ({ query }) => runDefaultsOf(query), {
 		query: t.Object({

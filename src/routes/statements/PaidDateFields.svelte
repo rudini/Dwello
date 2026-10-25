@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { claimed, paidHelp } from '$lib/statement';
+	import { paidHelp } from '$lib/statement';
 	import Alert from '$lib/ui/Alert.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 
@@ -22,7 +22,7 @@
 	} = $props();
 </script>
 
-{#if claimed(statement)}<p>{m.statements_no_reminder_after()}</p>{/if}
+{#if statement.claimed}<p>{m.statements_no_reminder_after()}</p>{/if}
 <DateInput
 	id="paidDate"
 	label={m.statements_paid_on()}

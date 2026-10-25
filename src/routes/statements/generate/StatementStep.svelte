@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { localName } from '$lib/names';
+	import { periodRunning } from '$lib/statement';
 	import { draftsLink, invoiceRows, zipLink, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import BuildingStep from './BuildingStep.svelte';
@@ -40,6 +41,15 @@
 	const heatingProfile = $derived(
 		data.heatingProfiles.find((p) => p.id === selection.heatingProfileId)
 	);
+	// whether the period is still running, asked of the backend for each end; an answer counts only for its day (#815)
+	let checked = $state({ end: '', running: false });
+	const running = $derived(checked.end === selection.periodEnd && checked.running);
+	$effect(() => {
+		const end = selection.periodEnd;
+		periodRunning(end).then((answer) => {
+			if (selection.periodEnd === end) checked = { end, running: answer };
+		});
+	});
 </script>
 
 {#if step === 1}
@@ -47,6 +57,7 @@
 		bind:periodStart={selection.periodStart}
 		bind:periodEnd={selection.periodEnd}
 		{errors}
+		{running}
 	/>
 {:else if step === 2}
 	<BuildingStep
@@ -73,6 +84,7 @@
 		heatingProfile={heatingProfile && localName(heatingProfile)}
 		feePercent={selection.managementFeePercent}
 		bind:confirmed
+		{running}
 		{errors}
 	/>
 {:else}

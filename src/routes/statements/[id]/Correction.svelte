@@ -23,10 +23,8 @@
 	// what the berichtigte Abrechnung will offset: the payment recorded and what this one offset itself, or nothing
 	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
 	// a settled one, or a refund settled under #94, whose Saldo may be carried over already (#448, Fachreview 448-3 V-25)
-	const carried = $derived(
-		(statement.status === 'settled' && statement.balance !== 0) || // a Saldo of 0.00 is never carried over (448-4 V-32)
-			(statement.status === 'paid' && statement.paidAmount === 0 && statement.balance < 0 && statement.balance > -5)
-	);
+	// a Saldo of 0.00 is never carried over (448-4 V-32); the backend says it (#815)
+	const carried = $derived(statement.carried);
 	// not paid: a sent or overdue one, or one whose Saldo is carried over
 	const unpaidConsequence = (number: string) =>
 		carried
@@ -60,11 +58,7 @@
 	let creating = $state(false); // a second click would create a second berichtigte Abrechnung
 	// #464 (domain review F-4, decision A): the Akonto comes from the contract; a different one is checked before sending
 	const advanceBefore = $derived(Number(statement.replaces?.totalAdvancePayments));
-	const advanceDiffers = $derived(
-		statement.status === 'draft' &&
-			!!statement.replaces &&
-			Math.abs(advanceBefore - statement.totalAdvancePayments) >= 0.005
-	);
+	const advanceDiffers = $derived(statement.advanceChanged);
 	const replaces = $derived(
 		statement.replaces &&
 			m.statements_replaces({
