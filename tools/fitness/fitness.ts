@@ -251,9 +251,12 @@ export const decides = (line: string) =>
 	[...line.matchAll(STATUS_CMP), ...line.matchAll(ANCHORED_RE)].length > 0 || DATE_CMP.test(line) || TODAY_ARG.test(line);
 
 const BFF_FILE = /^src\/lib\/server\/|\+(page|layout)\.server\.ts$|\+server\.ts$|^src\/hooks\.server\.ts$/;
-// #815: the frontend's own code: src/lib outside server/ and every component; tests and generated Paraglide not
-const FRONTEND_FILE = (p: string) =>
-	(p.endsWith('.svelte') || (p.startsWith('src/lib/') && p.endsWith('.ts'))) && !BFF_FILE.test(p) && !/__tests__|\/paraglide\//.test(p);
+/** #815: the frontend's own code: every component and non-server `.ts` under src/; tests, types and Paraglide not */
+export const isFrontendFile = (p: string) =>
+	p.startsWith('src/') &&
+	(p.endsWith('.svelte') || (p.endsWith('.ts') && !p.endsWith('.d.ts'))) &&
+	!BFF_FILE.test(p) &&
+	!/__tests__|\/paraglide\//.test(p);
 const decisionsIn = (paths: string[]) =>
 	paths.flatMap((path) =>
 		readFileSync(join(ROOT, path), 'utf8')
@@ -273,7 +276,7 @@ function measure(out: string): Measured {
 	return {
 		fieldSpread: { median: median(spread), p90: quantile(spread, 0.9), max: spread.at(-1) ?? 0 },
 		bffDecisions: decisionsIn(bff),
-		frontendDecisions: decisionsIn(src.filter(FRONTEND_FILE)),
+		frontendDecisions: decisionsIn(src.filter(isFrontendFile)),
 		literalSets: read('m4-literal-sets.csv')
 			.filter((r) => r.cross_layer === 'yes')
 			.map((r) => ({ values: r.values, files: +r.files })),

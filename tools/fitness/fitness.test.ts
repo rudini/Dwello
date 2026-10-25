@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedAllowed, addedTechnical, advise, decides, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, decides, isFrontendFile, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -332,5 +332,18 @@ describe('judge in the frontend', () => {
 		const working: Ratchet = { ...ratchet, display: [{ path: 'a.svelte', line: 'x', reason: 'format' }] };
 		expect(addedAllowed(working, base)).toBe(1);
 		expect(advise({ allowedAdded: 1 }, ratchet).map((f) => f.check)).toEqual(['frontend-allowed']);
+	});
+});
+
+// review i815a C-3: the frontend is every non-server file under src/, not only src/lib and components
+describe('isFrontendFile', () => {
+	it('takes components, src/lib outside server/, universal loads and client hooks', () => {
+		for (const p of ['src/lib/a.ts', 'src/routes/x/Y.svelte', 'src/routes/x/+page.ts', 'src/routes/config/help.ts', 'src/hooks.client.ts'])
+			expect(isFrontendFile(p)).toBe(true);
+	});
+
+	it('leaves BFF files, tests and Paraglide', () => {
+		for (const p of ['src/lib/server/a.ts', 'src/routes/x/+page.server.ts', 'src/routes/x/+server.ts', 'src/hooks.server.ts', 'src/__tests__/a.test.ts', 'src/lib/paraglide/messages.js', 'src/app.d.ts'])
+			expect(isFrontendFile(p)).toBe(false);
 	});
 });
