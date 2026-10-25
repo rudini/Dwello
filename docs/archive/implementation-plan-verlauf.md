@@ -3332,3 +3332,15 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] Slice review round 1 (`docs/reviews/p4b-review-1.md`)
 - [x] Closing round (`docs/reviews/p4b-review-2.md`)
 - [x] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it», pushed after this archive
+
+## Session: #788 part 4c, reminders and the five-year hint in the backend
+
+- [x] Backend: `reminderDue` on each row of `GET /statements` (null unless overdue; true when a Mahnung is to propose now: after the Mahnfrist, the next after the last Mahnung's Zahlungsfrist, none while one waits to be posted; a Rückerstattung at once), tests first
+- [x] Backend: `olderThanFiveYears` on each row of `GET /statements/outdated` (Swiss day, the 29th of February to the 28th), tests first
+- [x] API contracts `tests/contracts/statements.json`, `statements-outdated.json`
+- [x] BFF: the overview counts `reminderDue` and reads `olderThanFiveYears`; no Mahnfrist, `nextReminderFrom` or `FIVE_YEARS_AGO` left in `src/lib/overview.ts`; `overview.test.ts`, `dashboard.test.ts`
+- [x] Docs: `docs/api-specification.md`; fitness ratchet unchanged (BFF decisions stay 8)
+- [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`, `mahnwesen` scenarios
+- [x] Slice review round 1 (`docs/reviews/p4c-review-1.md`)
+- [x] Closing round (`docs/reviews/p4c-review-2.md`)
+- [x] PR: «No scenario: behaviour unchanged», Refs #788 (Ä2 still above its target), pushed after this archive
