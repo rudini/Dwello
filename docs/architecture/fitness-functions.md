@@ -116,6 +116,9 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil B3b: ob eine Wohnung einen neuen Mietvertrag nehmen kann, sagt das Backend (`blocked`, `availableFrom` in `GET /apartments`); der Assistent zeigt es | Ausnahmen 29 → 27 in 15 Dateien |
 | 25.10.2026 | #815 Teil B3c: ob «Abgerechnet bis» einen abgelehnten Entwurf ganz abdeckt, sagt das Backend in der Ablehnung (`covered`); `billsIn` liegt dafür in `contract.service.ts`. Review i815b2: der Assistent nimmt für «Abgerechnet bis» den Schweizer Tag (`localToday()`) | Ausnahmen 27 → 26 in 14 Dateien; Anzeige 42 → 43 |
 | 25.10.2026 | #815 Teil B3: ob ein Vertragsbeginn in der Vergangenheit liegt, sagt das Backend (`GET /contracts/check-start`); Assistent und Bearbeiten-Formular fragen es | Ausnahmen 26 → 19; Vorprüfungen 9 → 10 (`stepErrors` mit BILLED_UNTIL_FUTURE); Anzeige 43 |
+| 25.10.2026 | #815 Teil C1: was der Saldo einer Abrechnung verlangt (`unpaid`, `claimed`, `noPayment`, `waived`, `carried`, `reminderWaitsUntil`, `deadlinePassed`, `advanceChanged`), sagt das Backend (`statement-payment.ts`); Correction, PaymentPanel, ResetPaymentDialog und StatusActions zeigen es nur | Ausnahmen 19 → 9; Anzeige 43 → 46 |
+| 25.10.2026 | #815 Teil C2: «Bezahlt am» nicht in der Zukunft ist eine Vorprüfung mit `PAID_DATE_IN_FUTURE`; die zwei Vorgaben «Bezahlt am» = heute sind Feldvorgaben (Anzeige) | Ausnahmen 9 → 6; Vorprüfungen 10 → 11; Anzeige 46 → 48 |
+| 25.10.2026 | #815 Teil C3: ob die Abrechnungsperiode noch läuft, sagt das Backend (`GET /statements/check-period`); der Lauf fragt es für jedes Periodenende | Ausnahmen 6 → 4 (nur noch Teil D) |
 | 25.10.2026 | #812: die Daten des Hauptmenüs liegen bei den Komponenten, die sie zeigen (`src/lib/navigation.ts` → `src/lib/ui/navigation.ts`) | Zyklen 1 → 0 (Ausnahme `fe:lib/navigation fe:ui` entfernt, `exceptions.moduleCycles` ist leer); die übrigen Werte unverändert |
 
 ## 7. Werkzeugwahl

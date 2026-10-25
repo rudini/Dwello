@@ -383,6 +383,16 @@ export interface StatementWithDetails extends Statement {
 	correctable: boolean;
 	asksPayment: boolean;
 	superseded: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
+	// what the Saldo asks of whom, decided by the backend by the Swiss day (#815): a Saldo below CHF 5 is carried over
+	// unless it is a Schlussabrechnung's (#448); settled under #94 a Nachzahlung was waived (448-2 V-18)
+	unpaid: boolean; // no payment: a Saldo of 0, a settled one, or one carried over
+	claimed: boolean; // a Nachzahlung the landlord claims and may remind of
+	noPayment: boolean; // as unpaid, also when settled under #94
+	waived: boolean; // a Nachzahlung waived under #94
+	carried: boolean; // its Saldo is carried over already
+	reminderWaitsUntil: string | null; // the day the next Mahnung becomes possible, while it is still to come (#107)
+	deadlinePassed: boolean; // its Zahlungsfrist is over: after a payment taken back it is overdue (#92)
+	advanceChanged: boolean; // a draft counting another Akonto than the statement it replaces (#464)
 	offsetWith?: { statementNumber: string; amount: number }[];
 }
 

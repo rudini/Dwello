@@ -2,7 +2,6 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { belowMinimum, nextReminderLater, unpaid } from '$lib/statement';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Who pays whom by when; a refund has no Zahlungsfrist for the tenant
@@ -10,17 +9,14 @@
 
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
-	const nextReminder = $derived(nextReminderLater(statement));
+	const nextReminder = $derived(statement.reminderWaitsUntil);
 	// a replaced statement asks for nothing: its berichtigte Abrechnung says what is still due (#120); the backend says so (#788)
 	const replaced = $derived(!statement.asksPayment);
 	// below CHF 5 nothing is paid: no Zahlungsfrist and no «Bezahlt am»; the Saldo is carried over (#448), on a
 	// Schlussabrechnung claimed or paid out; settled under #94 (paid with 0.00) a Nachzahlung was waived, a refund is
-	// carried over now (product owner 2026-10-19, Fachreview 448-2 V-18)
-	const settled94 = $derived(
-		belowMinimum(statement.balance) && statement.status === 'paid' && statement.paidAmount === 0
-	);
-	const waived = $derived(settled94 && !refund);
-	const noPayment = $derived(settled94 || unpaid(statement));
+	// carried over now (product owner 2026-10-19, Fachreview 448-2 V-18); the backend says which (#815)
+	const waived = $derived(statement.waived);
+	const noPayment = $derived(statement.noPayment);
 	const summary = $derived(
 		replaced
 			? m.statements_summary_replaced()

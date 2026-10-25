@@ -129,6 +129,15 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		correctable: data.correctable === true,
 		asksPayment: data.asksPayment === true,
 		superseded: data.superseded === true,
+		// what the Saldo asks of whom, by the Swiss day (#815)
+		unpaid: data.unpaid === true,
+		claimed: data.claimed === true,
+		noPayment: data.noPayment === true,
+		waived: data.waived === true,
+		carried: data.carried === true,
+		reminderWaitsUntil: data.reminderWaitsUntil ?? null,
+		deadlinePassed: data.deadlinePassed === true,
+		advanceChanged: data.advanceChanged === true,
 		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		)

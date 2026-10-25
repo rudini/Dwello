@@ -5,7 +5,6 @@
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
 	import InvoiceHint from './InvoiceHint.svelte';
-	import { localToday } from '$lib/contract-status';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -18,17 +17,17 @@
 		period,
 		confirmed = $bindable(),
 		error,
-		uncategorizedError
+		uncategorizedError,
+		running
 	}: {
 		rows: ReturnType<typeof invoiceRows>;
 		period: { periodStart: string; periodEnd: string };
 		confirmed: boolean;
 		error?: string;
 		uncategorizedError?: string; // «Weiter» while an invoice without category holds the run (#382)
+		running: boolean; // the backend says the period is not over; repeated from step 1, where it may have been overlooked (#815)
 	} = $props();
 
-	// ISO dates compare as text; repeated from step 1, where it may have been overlooked
-	const notOver = $derived(period.periodEnd >= localToday());
 	const missing = $derived(rows.filter((row) => row.missing));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
 	// where to choose the existing statements' settings, when they differ in one the run chooses (#132)
@@ -75,7 +74,7 @@
 	);
 </script>
 
-{#if notOver}
+{#if running}
 	<Alert tone="caution" title={m.statements_period_running()} testid="preview-period-warning">
 		<p>{m.statements_preview_running_text()}</p>
 	</Alert>

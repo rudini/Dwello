@@ -7,9 +7,7 @@
 	import { laterText } from '$lib/overview';
 	import {
 		balanceLabel,
-		claimed,
 		earlyPaidDate,
-		nextReminderLater,
 		paidDateError,
 		statementIcons,
 		statusLabels,
@@ -159,8 +157,8 @@
 			<StatusActions
 				status={statement.status}
 				{byEmail}
-				owes={claimed(statement)}
-				waiting={!!nextReminderLater(statement)}
+				owes={statement.claimed}
+				waiting={!!statement.reminderWaitsUntil}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => (
 					(paidDate = localToday()), (paidError = ''), (earlyFor = ''), (showMarkPaid = true)

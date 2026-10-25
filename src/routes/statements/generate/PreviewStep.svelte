@@ -19,7 +19,8 @@
 		heatingProfile,
 		feePercent,
 		confirmed = $bindable(),
-		errors
+		errors,
+		running
 	}: {
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
@@ -30,6 +31,7 @@
 		feePercent: number;
 		confirmed: boolean;
 		errors: Record<string, string>;
+		running: boolean; // the backend says the period is not over (#815)
 	} = $props();
 
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
@@ -110,6 +112,7 @@
 	<PreviewChecks
 		{rows}
 		{period}
+		{running}
 		bind:confirmed
 		error={errors.confirm}
 		uncategorizedError={errors.uncategorized}
