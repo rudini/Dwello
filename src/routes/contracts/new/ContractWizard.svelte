@@ -26,7 +26,8 @@
 		startDateNotice,
 		startValues,
 		stepErrors,
-		offeredBilledUntil
+		offeredBilledUntil,
+		startInPast
 	} from '$lib/contract-wizard';
 	import { contractPeriod, localToday } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
@@ -89,6 +90,7 @@
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
 	let touched = $state(false); // a draft is kept only once the user has entered something
 	let confirmedPastStart = ''; // a start in the past the user confirmed by pressing "Weiter" again
+	let startPast = $state(false); // the start lies before today, as the backend says (#815)
 	let startEdited = false; // the suggestion never overwrites a start date being typed
 	let section = $state<HTMLElement>();
 	// per apartment; null for an apartment whose contracts could not be loaded: it is not shown as free (#143)
@@ -184,6 +186,15 @@
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
 	});
 
+	// whether the start lies in the past, asked of the backend for each complete date; a later answer for an older
+	// date does not count
+	$effect(() => {
+		const start = values.startDate;
+		startInPast(start).then((past) => {
+			if (values.startDate === start) startPast = past;
+		});
+	});
+
 	// Once an apartment is chosen, the contract starts by default on the day it becomes free
 	$effect(() => {
 		const info = availability.get(values.apartmentId);
@@ -250,7 +261,7 @@
 		saving = true;
 		const response = await apiCall('/contracts', {
 			method: 'POST',
-			body: contractBody(offeredBilledUntil(values, today), categories)
+			body: contractBody(offeredBilledUntil(values, startPast), categories)
 		});
 		saving = false;
 		if (response.error) {
@@ -274,7 +285,7 @@
 	// The overlap blocks; a start in the past only asks once, so it is read out and can be confirmed
 	function periodWarnings(): Record<string, string> {
 		if (overlap) return { startDate: OVERLAP };
-		const past = startDateNotice(values.startDate, today);
+		const past = startDateNotice(values.startDate, startPast);
 		if (!past || confirmedPastStart === values.startDate) return {};
 		confirmedPastStart = values.startDate;
 		return { startDate: m.contracts_confirm_past({ notice: past }) };
@@ -284,7 +295,7 @@
 		event.preventDefault();
 		Object.assign(values, normalizeAmounts(values)); // in place: a new object would rerun the effects
 		if (step === contractSteps.length) return save();
-		errors = stepErrors(values, step, today);
+		errors = stepErrors(values, step, today, startPast);
 		if (step === 3 && !errors.startDate && !errors.billedUntil)
 			errors = { ...errors, ...periodWarnings() };
 		if (Object.keys(errors).length > 0) return showErrors(step);
@@ -352,7 +363,7 @@
 				min={startLimit.min}
 				{unknown}
 				onretry={retry}
-				{today}
+				{startPast}
 				{overlap}
 				{errors}
 			/>
@@ -366,7 +377,7 @@
 			/>
 		{:else}
 			<ReviewStep
-				values={offeredBilledUntil(values, today)}
+				values={offeredBilledUntil(values, startPast)}
 				{tenants}
 				{apartments}
 				{categories}

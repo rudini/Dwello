@@ -12,7 +12,9 @@ import { get } from 'svelte/store';
 import NewContractPage from '../routes/contracts/new/+page.svelte';
 import { toasts } from '$lib/stores';
 import { writeDraft } from '$lib/wizard-draft';
-import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import { byTestId, click, fakeBff as fakeBackend, fireEvent, settle, show, submit } from './helpers/dom';
+import { localToday } from '$lib/contract-status';
+import checkStart from '../../tests/contracts/contract-check-start.json';
 import listed from '../../tests/contracts/contracts.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
@@ -30,6 +32,15 @@ const data = {
 	],
 	categories: [] // the boxes of the agreed Nebenkosten (#91)
 };
+// #815: whether a Vertragsbeginn lies in the past, the backend answers by the Swiss day; a test may answer otherwise
+let startPast = (startDate: string) => startDate < localToday();
+const fakeBff: typeof fakeBackend = (answer) =>
+	fakeBackend((call) =>
+		call.path.startsWith('/contracts/check-start?')
+			? [200, { ...checkStart, past: startPast(new URLSearchParams(call.path.split('?')[1]).get('startDate')!) }]
+			: (answer ?? (() => [200, {}]))(call)
+	);
+
 // As the contract list answers: a2 is rented without end, a1's last contract ended long ago
 const contractsOf: Record<string, unknown[]> = {
 	a1: [{ id: 'c8', startDate: '2015-01-01', endDate: '2019-12-31', tenantName: 'Ueli Graf' }],
@@ -84,6 +95,7 @@ async function untilReview() {
 
 // a set day, so 2027 stays in the future and 2020 in the past (code review 453-1 C-6); only the date, timers run
 beforeEach(() => {
+	startPast = (startDate) => startDate < localToday();
 	vi.useFakeTimers({ toFake: ['Date'] });
 	vi.setSystemTime(new Date('2026-06-15T10:00:00Z'));
 	localStorage.clear();
@@ -483,6 +495,7 @@ describe('Prüfungen im Mietvertrag', () => {
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
 		await toPeriod();
 		type('start-date-input', '11.01.2020');
+		await settle(); // the backend says the start lies in the past (#815)
 		expect(byTestId('start-date-notice')!.getAttribute('role')).toBe('status'); // read out while typing
 		next();
 		await settle();
@@ -564,6 +577,16 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(document.activeElement).toBe(byTestId('billed-until-input'));
 		expect(document.body.textContent).not.toContain('nochmals auf «Weiter»');
+	});
+
+	// #815: the backend says whether the start lies in the past; the wizard asks back and offers «Abgerechnet bis» by it
+	it('fragt nur nach einem Vertragsbeginn in der Vergangenheit, wenn das Backend ihn vergangen nennt', async () => {
+		startPast = () => false;
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		expect(document.body.textContent).not.toContain('liegt in der Vergangenheit');
+		expect(byTestId('billed-until-input')).toBeNull();
 	});
 
 	// review i815b2 C-1: the pre-check takes the Swiss day, as the backend refuses (BILLED_UNTIL_FUTURE); just after

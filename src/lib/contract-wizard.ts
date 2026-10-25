@@ -15,6 +15,8 @@ import {
 import type { AvailabilityInfo } from './utils/contract-availability';
 import type { RentalContract } from './types';
 import { formatCurrency, formatDateLong } from './utils/format';
+import { apiCall } from './api';
+import { isDay } from './contract-status';
 
 type Field = keyof ContractFormValues;
 
@@ -59,14 +61,18 @@ export const contractSteps: { label: string; fields: Field[] }[] = [
 	}
 ];
 
-/** Errors of one step (counted from 1), checked when the user goes on; with `today` also «Abgerechnet bis» (#453) */
+/**
+ * Errors of one step (counted from 1), checked when the user goes on; with `today` also «Abgerechnet bis» (#453), as
+ * far as the wizard offers it (`startPast`)
+ */
 export function stepErrors(
 	values: ContractFormValues,
 	step: number,
-	today = ''
+	today = '',
+	startPast = false
 ): Record<string, string> {
 	const fields: string[] = contractSteps[step - 1].fields;
-	const billed = today && billedUntilError(offeredBilledUntil(values, today), today);
+	const billed = today && billedUntilError(offeredBilledUntil(values, startPast), today);
 	return Object.fromEntries(
 		Object.entries({
 			...validateContract(values),
@@ -76,14 +82,13 @@ export function stepErrors(
 	);
 }
 
-/** #453 (#328): the wizard offers «Abgerechnet bis» for a Vertragsbeginn before today; otherwise it is not sent */
-export const offeredBilledUntil = (
-	values: ContractFormValues,
-	today: string
-): ContractFormValues => ({
+/**
+ * #453 (#328): the wizard offers «Abgerechnet bis» for a Vertragsbeginn before today, as the backend says
+ * (`startPast`, #815); otherwise it is not sent
+ */
+export const offeredBilledUntil = (values: ContractFormValues, startPast: boolean): ContractFormValues => ({
 	...values,
-	billedUntil:
-		startDateNotice(values.startDate, today) && values.billedUntil ? values.billedUntil : undefined
+	billedUntil: startDateNotice(values.startDate, startPast) && values.billedUntil ? values.billedUntil : undefined
 });
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
@@ -128,11 +133,23 @@ export const normalizeAmounts = (values: ContractFormValues): ContractFormValues
 	additionalRent: plainAmount(values.additionalRent)
 });
 
-/** Plausibility hint: a start in the past is allowed (recording an old contract) but often a mistyped date */
-export function startDateNotice(startDate: string, today: string): string | null {
-	return startDate && !impossible(startDate) && startDate < today
+/**
+ * Plausibility hint: a start in the past is allowed (recording an old contract) but often a mistyped date; whether it
+ * lies in the past, the backend says (`past`, #815)
+ */
+export function startDateNotice(startDate: string, past: boolean): string | null {
+	return past && startDate && !impossible(startDate)
 		? m.contracts_start_in_past({ date: formatDateLong(startDate) })
 		: null;
+}
+
+/** Whether the Vertragsbeginn lies before today, by the Swiss day, as the backend answers (#815); false when unknown */
+export async function startInPast(startDate: string): Promise<boolean> {
+	if (!isDay(startDate) || impossible(startDate)) return false;
+	const response = await apiCall<{ past: boolean }>(
+		`/contracts/check-start?startDate=${encodeURIComponent(startDate)}`
+	);
+	return response.data?.past === true;
 }
 
 /** The contract in words, one line per fact, each with the step and the field (id or name) that change it */

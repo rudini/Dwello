@@ -375,6 +375,12 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #815: the wizard asks whether a Vertragsbeginn lies in the past
+	it('GET /contracts/check-start liefert die Felder von contract-check-start.json', async () => {
+		const actual = await (await callApi('/api/v1/contracts/check-start?startDate=2020-01-01')).json();
+		expect(drift(await sample('contract-check-start'), actual)).toEqual([]);
+	});
+
 	it('GET /contracts/:id liefert die Felder von contract.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
 		expect(drift(await sample('contract'), actual)).toEqual([]);

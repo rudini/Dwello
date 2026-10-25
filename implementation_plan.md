@@ -19,7 +19,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] B3b apartment availability in the wizard from the backend (`blocked`, `availableFrom` on apartments), backend test, API contracts and loader/DOM tests first; exceptions 29 → 27
 - [x] Review B2–B3b (`docs/reviews/i815b2-review-1.md`): C-1 (Major, the wizard's browser day) fixed with a test; C-2 (POST refusal test), C-3 (end yesterday, also a fix: the old frontend said «ab heute»), C-4 (comment) fixed
 - [x] B3c the refusal says whether «Abgerechnet bis» covers the draft (`covered`), backend and DOM tests first; exceptions 27 → 26
-- [ ] B3 the remaining derivations: proposed «Gültig ab» of an Akonto, apartment availability in the wizard, drafts covered by «Abgerechnet bis», «Vertragsbeginn in der Vergangenheit»
+- [x] B3 «Vertragsbeginn in der Vergangenheit» from the backend (`GET /contracts/check-start`), backend test, API contract and DOM test first; exceptions 26 → 19, `stepErrors` a pre-check (BILLED_UNTIL_FUTURE)
+- [ ] Review B3c and B3 (check-start)
 - [ ] Checks: lint, check, vitest, backend tests, E2E contract features, fitness (`frontendDecisions` measured before and after)
 - [ ] Closing round
 - [ ] PR: «No scenario: behaviour unchanged», Refs #815

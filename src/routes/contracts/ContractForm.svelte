@@ -22,7 +22,7 @@
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
 	import { formatDate } from '$lib/utils/format';
-	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
+	import { normalizeAmounts, startInPast, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -64,8 +64,15 @@
 	let form = $state<HTMLFormElement>();
 
 	const today = localToday();
-	// Only a start moved before the saved one and into the past is questioned
-	const pastBefore = untrack(() => [today, values.startDate].sort()[0]);
+	// Only a start moved before the saved one and into the past is questioned; the past, the backend says (#815)
+	const savedStart = untrack(() => values.startDate);
+	let startPast = $state(false);
+	$effect(() => {
+		const start = values.startDate;
+		startInPast(start).then((past) => {
+			if (values.startDate === start) startPast = past && start < savedStart;
+		});
+	});
 	const running = $derived(contract.status === 'active');
 	const fixedTerm = $derived(!!contract.endDate && !contract.terminated);
 	const runningText = $derived(
@@ -305,7 +312,7 @@
 			bind:terminated={values.terminated}
 			noticed={contract.terminated}
 			{unknown}
-			today={pastBefore}
+			{startPast}
 			{overlap}
 			{errors}
 		/>

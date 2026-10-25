@@ -278,7 +278,7 @@
 		},
 		{
 			"path": "src/lib/contract-wizard.ts",
-			"line": "const billed = today && billedUntilError(offeredBilledUntil(values, today), today);",
+			"line": "const billed = today && billedUntilError(offeredBilledUntil(values, startPast), today);",
 			"code": "BILLED_UNTIL_FUTURE",
 			"test": "backend/src/__tests__/billed-until.pg.test.ts"
 		},
@@ -317,6 +317,12 @@
 			"line": "if (!endError && !pastConfirmed) pastError = pastEndConfirmation(endDate, data.today) ?? '';",
 			"code": "CONTRACT_END_PAST",
 			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/new/ContractWizard.svelte",
+			"line": "errors = stepErrors(values, step, today, startPast);",
+			"code": "BILLED_UNTIL_FUTURE",
+			"test": "backend/src/__tests__/billed-until.pg.test.ts"
 		}
 	],
 	"exceptions": {
@@ -578,18 +584,6 @@
 		"bffDates": [],
 		"frontendDecisions": [
 			{
-				"path": "src/lib/contract-wizard.ts",
-				"line": "startDateNotice(values.startDate, today) && values.billedUntil ? values.billedUntil : undefined",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/contract-wizard.ts",
-				"line": "return startDate && !impossible(startDate) && startDate < today",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
 				"path": "src/lib/overview.ts",
 				"line": "Math.round((Date.parse(date.slice(0, 10)) - Date.parse(today)) / 86_400_000);",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
@@ -622,36 +616,6 @@
 			{
 				"path": "src/lib/statement.ts",
 				"line": "statement.nextReminderFrom && statement.nextReminderFrom > localToday()",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/new/ContractWizard.svelte",
-				"line": "body: contractBody(offeredBilledUntil(values, today), categories)",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/new/ContractWizard.svelte",
-				"line": "const past = startDateNotice(values.startDate, today);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/new/ContractWizard.svelte",
-				"line": "errors = stepErrors(values, step, today);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/new/ContractWizard.svelte",
-				"line": "values={offeredBilledUntil(values, today)}",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/new/PeriodStep.svelte",
-				"line": "const pastStart = $derived(startDateNotice(startDate, today));",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
 				"scenario": "Ä4"
 			},

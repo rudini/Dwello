@@ -269,14 +269,15 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 		expect([values.baseRent, values.advancePayment]).toEqual(['1450', '180']);
 	});
 
-	it('weist auf einen Vertragsbeginn in der Vergangenheit hin', () => {
-		expect(startDateNotice('2026-01-11', '2026-10-10')).toBe(
+	// #815: whether the start lies in the past, the backend says (`GET /contracts/check-start`); the wizard names it
+	it('weist auf einen Vertragsbeginn in der Vergangenheit hin, wenn das Backend ihn vergangen nennt', () => {
+		expect(startDateNotice('2026-01-11', true)).toBe(
 			'Der Vertragsbeginn Sonntag, 11. Januar 2026 liegt in der Vergangenheit. Stimmt das Datum?'
 		);
-		expect(startDateNotice('2026-11-01', '2026-10-10')).toBeNull();
-		expect(startDateNotice('', '2026-10-10')).toBeNull();
+		expect(startDateNotice('2026-01-11', false)).toBeNull();
+		expect(startDateNotice('', true)).toBeNull();
 		// an impossible year gets its own error, not a misleading "in the past"
-		expect(startDateNotice('12025-01-01', '2026-10-10')).toBeNull();
+		expect(startDateNotice('12025-01-01', true)).toBeNull();
 	});
 });
 

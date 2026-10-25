@@ -124,6 +124,11 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			query: contractQuerySchema
 		}
 	)
+	// Whether a Vertragsbeginn lies in the past, by the Swiss day: the wizard asks back and offers «Abgerechnet bis»
+	// (#453, #815)
+	.get('/check-start', ({ query }) => ({ past: query.startDate < swissToday() }), {
+		query: t.Object({ startDate: t.String({ format: 'date' }) })
+	})
 	// Per contract, the days of ended periods without a statement, for the list and the Übersicht (H-28, #211)
 	.get('/missing-statements', () => missingByContract())
 	// The missing statements of the contract and their way into the wizard (H-28, #5)
