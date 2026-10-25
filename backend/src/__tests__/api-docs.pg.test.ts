@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { app } from '../app';
@@ -14,8 +14,8 @@ const get = (path: string) => app.handle(new Request(`http://localhost${path}`))
 function statusesInProduction(paths: string[], bundled = false): number[] {
 	const backend = `${import.meta.dir}/../..`;
 	let entry = './src/app.ts';
-	if (bundled) {
-		const outdir = mkdtempSync(join(tmpdir(), 'dwello-bundle-'));
+	const outdir = bundled ? mkdtempSync(join(tmpdir(), 'dwello-bundle-')) : undefined;
+	if (outdir) {
 		Bun.spawnSync(['bun', 'build', 'src/app.ts', '--outdir', outdir, '--target', 'bun'], {
 			cwd: backend
 		});
@@ -27,6 +27,7 @@ for (const path of ${JSON.stringify(paths)}) console.log((await app.handle(new R
 		cwd: backend,
 		env: { ...process.env, NODE_ENV: 'production' }
 	});
+	if (outdir) rmSync(outdir, { recursive: true, force: true }); // code review 720 C-2
 	return run.stdout.toString().trim().split('\n').map(Number);
 }
 
