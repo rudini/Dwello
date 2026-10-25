@@ -83,6 +83,7 @@ export interface RentalContract {
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto that applies today, or on the start of a future contract
 	advancePayments?: { validFrom: string; amount: string }[]; // each Akonto with its «Gültig ab» (#464)
+	proposedAdvanceFrom?: string | null; // «Gültig ab» the form proposes for a new Akonto, by the backend (#815)
 	flatRateUtilityCharge?: string | number; // «Nebenkostenpauschale» (#429): in «Monatlich total», never billed
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's

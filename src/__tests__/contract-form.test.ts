@@ -11,7 +11,6 @@ import {
 	type ContractFormValues
 } from '../lib/contract-form';
 import type { AvailabilityInfo } from '../lib/utils/contract-availability';
-import { localToday } from '../lib/contract-status';
 
 const filled: ContractFormValues = {
 	tenantId: 't1',
@@ -207,19 +206,20 @@ describe('contractBody', () => {
 	];
 	const edited = (startDate: string, endDate: string | null) =>
 		initialContractValues(
-			{ ...filled, id: 'c1', startDate, endDate, monthlyAdvancePayment: '80.00', advancePayments: advances } as never,
+			{
+				...filled,
+				id: 'c1',
+				startDate,
+				endDate,
+				monthlyAdvancePayment: '80.00',
+				advancePayments: advances,
+				proposedAdvanceFrom: '2031-05-01'
+			} as never,
 			new URLSearchParams()
 		);
-	it('schlägt im laufenden Mietvertrag den nächsten Ersten als «Gültig ab» vor', () => {
-		const [year, month] = localToday().split('-').map(Number);
-		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
-
-		expect(edited('2024-04-01', null).advancePaymentFrom).toBe(next);
-	});
-
-	it('schlägt beim künftigen Mietvertrag den Vertragsbeginn, beim beendeten den Tag des letzten Betrags vor', () => {
-		expect(edited('2099-01-01', null).advancePaymentFrom).toBe('2099-01-01');
-		expect(edited('2024-04-01', '2025-03-31').advancePaymentFrom).toBe('2024-07-01');
+	// #815: the backend proposes «Gültig ab» by the Swiss day (backend advance-proposal.test.ts); the form takes it
+	it('schlägt das «Gültig ab» des Backends vor', () => {
+		expect(edited('2024-04-01', null).advancePaymentFrom).toBe('2031-05-01');
 	});
 
 	it('sendet Akonto und «Gültig ab» nur, wenn sich der Betrag geändert hat', () => {

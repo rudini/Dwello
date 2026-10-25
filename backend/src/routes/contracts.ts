@@ -6,7 +6,7 @@
 import { Elysia, t } from 'elysia';
 import { missingByContract, missingOfContract } from '../services/statement-run.service';
 import { errorBody, refusal } from '../services/coded-error';
-import { advancesOf, deleteAdvance } from '../services/advance-payment.service';
+import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -139,11 +139,13 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			set.status = 404;
 			return { error: 'Contract not found' };
 		}
+		const advancePayments = await advancesOf(params.id);
 		return {
 			...contract,
 			agreedCategoryIds: await agreedCategoryIds(params.id),
 			agreedFrom: await agreedFromDays(params.id), // «Vereinbart ab» (#368)
-			advancePayments: await advancesOf(params.id),
+			advancePayments,
+			proposedAdvanceFrom: proposedAdvanceFrom(contract, advancePayments) ?? null, // #464, #815
 			nextSteps: await nextSteps(contract),
 			fixedTermCheck: await fixedTermCheck(contract)
 		};

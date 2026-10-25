@@ -573,12 +573,6 @@
 		"bffDates": [],
 		"frontendDecisions": [
 			{
-				"path": "src/lib/contract-form.ts",
-				"line": "if (contract.startDate > today) return dateForInput(contract.startDate);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
 				"path": "src/lib/contract-wizard.ts",
 				"line": "startDateNotice(values.startDate, today) && values.billedUntil ? values.billedUntil : undefined",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",

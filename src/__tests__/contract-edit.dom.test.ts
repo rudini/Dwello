@@ -14,8 +14,6 @@ import { goto } from '$app/navigation';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
-import { localToday } from '$lib/contract-status';
-import { formatDate } from '$lib/utils/format';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
@@ -35,6 +33,7 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 	additionalRent: null,
 	monthlyAdvancePayment: '150.00',
 	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }],
+	proposedAdvanceFrom: '2026-11-01', // «Gültig ab» the backend proposes (#815)
 	status: 'active' as 'active' | 'ended' | 'future' // as the backend decides it (#784, #815)
 });
 const data = (
@@ -108,15 +107,13 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
 	});
 
-	// #464: ein neues Akonto gilt ab «Gültig ab»; vorgeschlagen ist der Tag des heutigen Betrags
+	// #464: ein neues Akonto gilt ab «Gültig ab»; vorgeschlagen ist der Tag, den das Backend nennt (#815)
 	it('speichert ein neues Akonto mit seinem «Gültig ab»', async () => {
 		await open();
 		expect(document.querySelector('label[for="advancePaymentFrom"]')!.textContent).toContain('Gültig ab');
 		// fach review 464-2 V-4: how to correct an amount entered by mistake
 		expect(byTestId('contract-advance-from-input-help')!.textContent).toContain('tragen Sie seinen Tag aus «Akonto nach Zeitraum» ein');
-		const [year, month] = localToday().split('-').map(Number);
-		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
-		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe(formatDate(next));
+		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe('01.11.2026');
 		type('contract-advance-payment-input', '200');
 		type('contract-advance-from-input', '01.07.2025');
 		await save();

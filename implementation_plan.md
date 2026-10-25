@@ -13,8 +13,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #815 part B, contracts: the frontend derives nothing from dates
 
 - [x] B1 Vertragsstatus: list, page, form and wizard show the backend's `status` (#784); `contractStatusOn` and the list's `today` removed; tests first (list, page, form, `lastRent`, loaders); the check also reads `data.today` (3 lines of the contract page, now exceptions for B2)
-- [ ] B1 review (`code-reviewer`)
+- [x] B1 review (`docs/reviews/i815b1-review-1.md`): no Blocker/Major; C-1 (Minor) rejected: an open-ended taken contract blocks the apartment, so the text never shows it; `lastRent` pins the status
 - [x] B2 pre-checks with a backend code and test (`BILLED_UNTIL_FUTURE`, `CONTRACT_END_PAST`, `CONTRACT_END_BEFORE_START`) into `preChecks`: 9 lines, exceptions 39 → 30
+- [x] B3a proposed «Gültig ab» of an Akonto from the backend (`proposedAdvanceFrom`), backend unit test and API contract first; exceptions 30 → 29
 - [ ] B3 the remaining derivations: proposed «Gültig ab» of an Akonto, apartment availability in the wizard, drafts covered by «Abgerechnet bis», «Vertragsbeginn in der Vergangenheit»
 - [ ] Checks: lint, check, vitest, backend tests, E2E contract features, fitness (`frontendDecisions` measured before and after)
 - [ ] Closing round

@@ -112,6 +112,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil A: derselbe Check läuft über das Frontend (`frontend-decision`, `pre-check`, `frontend-allowed`); Allowlists `display` und `preChecks`, Altlast in `exceptions.frontendDecisions`; Ä4 H/M → H/H | Frontend-Fundstellen 82 in 35 Dateien: 41 Anzeige oder Format, 0 Vorprüfungen, **41** Ausnahmen in 20 Dateien (Review i815a: drei Zeilen prüfen zum Status auch Betrag oder Frist); die übrigen Werte unverändert |
 | 25.10.2026 | #815 Teil B1: Liste, Seite, Formular und Assistent zeigen den Vertragsstatus des Backends (`status`, #784); `contractStatusOn` entfällt. `decides` erkennt auch `data.today` als Argument | Frontend-Fundstellen 82 → 81: Ausnahmen 41 → 36 (5 Ableitungen des Status weg), +3 auf der Vertragsseite, die erst der schärfere Check findet → 39; Anzeige 41 → 42 (`contract.status === 'active'`) |
 | 25.10.2026 | #815 Teil B2: die Vorprüfungen der Vertragsformulare stehen in `preChecks` mit Fehlercode und Backend-Test: «Abgerechnet bis» nach heute (`BILLED_UNTIL_FUTURE`, `billed-until.pg.test.ts`), Vertragsende vor heute ohne Bestätigung (`CONTRACT_END_PAST`) und vor dem Vertragsbeginn (`CONTRACT_END_BEFORE_START`, beide `contract-end-refusals.pg.test.ts`) | Vorprüfungen 0 → 9; Ausnahmen 39 → 30 in 17 Dateien |
+| 25.10.2026 | #815 Teil B3a: das «Gültig ab» eines neuen Akontos schlägt das Backend vor (`proposedAdvanceFrom` in `GET /contracts/:id`) | Ausnahmen 30 → 29 |
 
 ## 7. Werkzeugwahl
 
