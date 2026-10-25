@@ -26,9 +26,10 @@
 		startDateNotice,
 		startValues,
 		stepErrors,
-		offeredBilledUntil
+		offeredBilledUntil,
+		startInPast
 	} from '$lib/contract-wizard';
-	import { contractPeriod, contractStatusOn } from '$lib/contract-status';
+	import { contractPeriod, localToday } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -57,7 +58,14 @@
 		agreed = null
 	}: {
 		tenants: { id: string; name: string; place?: string }[];
-		apartments: { id: string; unit: string; building: string; size?: string }[];
+		apartments: {
+			id: string;
+			unit: string;
+			building: string;
+			size?: string;
+			blocked?: boolean; // whether a new contract can be recorded, as the backend decides (#815)
+			availableFrom?: string | null;
+		}[];
 		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 		agreed?: string[] | null; // a contract from the old one: its agreed Nebenkosten (#368)
 	} = $props();
@@ -67,7 +75,7 @@
 	// Error keys of the fields whose id differs from the value's name
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	const params = untrack(() => $page.url.searchParams);
-	const today = new Date().toLocaleDateString('sv-SE'); // local YYYY-MM-DD
+	const today = localToday(); // the Swiss day, as the backend decides (review i815b2 C-1)
 	let values = $state(
 		untrack(() => ({
 			...initialContractValues(undefined, params),
@@ -82,6 +90,9 @@
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
 	let touched = $state(false); // a draft is kept only once the user has entered something
 	let confirmedPastStart = ''; // a start in the past the user confirmed by pressing "Weiter" again
+	// the start lies before today, as the backend says (#815); an answer counts only for the date it was asked for
+	let checked = $state({ start: '', past: false });
+	const startPast = $derived(checked.start === values.startDate && checked.past);
 	let startEdited = false; // the suggestion never overwrites a start date being typed
 	let section = $state<HTMLElement>();
 	// per apartment; null for an apartment whose contracts could not be loaded: it is not shown as free (#143)
@@ -90,7 +101,12 @@
 	let preset: ReturnType<typeof lastRent> = null; // the amounts filled in last
 
 	const availability = $derived(
-		new Map([...(contracts ?? [])].map(([id, list]) => [id, list && computeAvailability(list)]))
+		new Map(
+			[...(contracts ?? [])].map(([id, list]) => [
+				id,
+				list && computeAvailability(apartments.find((a) => a.id === id) ?? {})
+			])
+		)
 	);
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const loading = $derived(step === 2 && !contracts); // «Weiter» waits for the apartments' contracts (#468)
@@ -116,12 +132,7 @@
 	const taken = $derived(lastRent(listed.get(values.apartmentId) ?? {}, values.startDate));
 	const takenFrom = $derived(
 		taken && rentTakenOver(values, taken)
-			? contractPeriod(
-					taken.startDate,
-					taken.endDate,
-					contractStatusOn(taken.startDate, taken.endDate, today),
-					taken.terminated
-				)
+			? contractPeriod(taken.startDate, taken.endDate, taken.status, taken.terminated)
 			: null
 	);
 
@@ -175,6 +186,18 @@
 	$effect(() => {
 		const snapshot = $state.snapshot(values);
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
+	});
+
+	// whether the start lies in the past, asked of the backend for each date; «Weiter» and saving wait for the answer
+	async function checkStart() {
+		const start = values.startDate;
+		if (checked.start !== start) {
+			const past = await startInPast(start);
+			if (values.startDate === start) checked = { start, past };
+		}
+	}
+	$effect(() => {
+		checkStart();
 	});
 
 	// Once an apartment is chosen, the contract starts by default on the day it becomes free
@@ -241,9 +264,10 @@
 		const wrong = firstStepWithError(errors);
 		if (wrong) return showErrors(wrong);
 		saving = true;
+		await checkStart();
 		const response = await apiCall('/contracts', {
 			method: 'POST',
-			body: contractBody(offeredBilledUntil(values, today), categories)
+			body: contractBody(offeredBilledUntil(values, startPast), categories)
 		});
 		saving = false;
 		if (response.error) {
@@ -267,17 +291,18 @@
 	// The overlap blocks; a start in the past only asks once, so it is read out and can be confirmed
 	function periodWarnings(): Record<string, string> {
 		if (overlap) return { startDate: OVERLAP };
-		const past = startDateNotice(values.startDate, today);
+		const past = startDateNotice(values.startDate, startPast);
 		if (!past || confirmedPastStart === values.startDate) return {};
 		confirmedPastStart = values.startDate;
 		return { startDate: m.contracts_confirm_past({ notice: past }) };
 	}
 
-	function submitStep(event: SubmitEvent) {
+	async function submitStep(event: SubmitEvent) {
 		event.preventDefault();
 		Object.assign(values, normalizeAmounts(values)); // in place: a new object would rerun the effects
 		if (step === contractSteps.length) return save();
-		errors = stepErrors(values, step, today);
+		if (step === 3) await checkStart();
+		errors = stepErrors(values, step, today, startPast);
 		if (step === 3 && !errors.startDate && !errors.billedUntil)
 			errors = { ...errors, ...periodWarnings() };
 		if (Object.keys(errors).length > 0) return showErrors(step);
@@ -345,7 +370,7 @@
 				min={startLimit.min}
 				{unknown}
 				onretry={retry}
-				{today}
+				{startPast}
 				{overlap}
 				{errors}
 			/>
@@ -359,7 +384,7 @@
 			/>
 		{:else}
 			<ReviewStep
-				values={offeredBilledUntil(values, today)}
+				values={offeredBilledUntil(values, startPast)}
 				{tenants}
 				{apartments}
 				{categories}

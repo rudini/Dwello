@@ -41,22 +41,6 @@ function parseDate(date: Date | string): Date {
 }
 
 /**
- * Formats a Date to YYYY-MM-DD string
- */
-function formatDate(date: Date): string {
-	return date.toISOString().split('T')[0];
-}
-
-/**
- * Adds one day to a date
- */
-function addDays(date: Date, days: number): Date {
-	const result = new Date(date);
-	result.setDate(result.getDate() + days);
-	return result;
-}
-
-/**
  * Formats a date as DD.MM.YYYY for user display
  */
 function formatDateDE(date: Date): string {
@@ -67,38 +51,14 @@ function formatDateDE(date: Date): string {
 }
 
 /**
- * Computes the availability of an apartment based on existing contracts
- *
- * @param contracts - Array of contracts for the apartment
- * @returns AvailabilityInfo object with availability status and details
+ * The availability of an apartment for a new contract, as the backend decides it by the Swiss day (#815): an
+ * open-ended contract blocks it; otherwise it is free from the day after its latest Vertragsende, or now
  */
-export function computeAvailability(contracts: ContractForAvailability[]): AvailabilityInfo {
-	// No contracts means fully available
-	if (contracts.length === 0) {
-		return {
-			isAvailable: true,
-			availableFrom: null,
-			hasOngoingContract: false,
-			message: m.contracts_availability_available(),
-			statusType: 'available'
-		};
-	}
-
-	// Check for ongoing contracts (no end date or active status)
-	const ongoingContracts = contracts.filter((c) => {
-		// No end date means ongoing
-		if (!c.end_date) return true;
-
-		// If there's an end date, check if it's in the future
-		const endDate = parseDate(c.end_date);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		return endDate >= today;
-	});
-
-	// If there's an ongoing contract without end date, apartment is blocked
-	const unlimitedContract = ongoingContracts.find((c) => !c.end_date);
-	if (unlimitedContract) {
+export function computeAvailability(apartment: {
+	blocked?: boolean;
+	availableFrom?: string | null;
+}): AvailabilityInfo {
+	if (apartment.blocked)
 		return {
 			isAvailable: false,
 			availableFrom: null,
@@ -106,47 +66,16 @@ export function computeAvailability(contracts: ContractForAvailability[]): Avail
 			message: m.contracts_availability_blocked(),
 			statusType: 'blocked'
 		};
-	}
-
-	// Find the latest end date among all contracts
-	let latestEndDate: Date | null = null;
-	for (const contract of contracts) {
-		if (contract.end_date) {
-			const endDate = parseDate(contract.end_date);
-			if (!latestEndDate || endDate > latestEndDate) {
-				latestEndDate = endDate;
-			}
-		}
-	}
-
-	// If there's a latest end date, apartment is available from the day after
-	if (latestEndDate) {
-		const availableFromDate = addDays(latestEndDate, 1);
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-
-		// If available date is in the past or today, apartment is fully available
-		if (availableFromDate <= today) {
-			return {
-				isAvailable: true,
-				availableFrom: null,
-				hasOngoingContract: false,
-				message: m.contracts_availability_available(),
-				statusType: 'available'
-			};
-		}
-
-		// Available from a future date
+	if (apartment.availableFrom)
 		return {
 			isAvailable: true,
-			availableFrom: formatDate(availableFromDate),
+			availableFrom: apartment.availableFrom,
 			hasOngoingContract: false,
-			message: m.contracts_availability_from({ date: formatDateDE(availableFromDate) }),
+			message: m.contracts_availability_from({
+				date: formatDateDE(parseDate(apartment.availableFrom))
+			}),
 			statusType: 'available-from'
 		};
-	}
-
-	// Fallback: fully available
 	return {
 		isAvailable: true,
 		availableFrom: null,

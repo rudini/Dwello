@@ -9,8 +9,16 @@ vi.mock('$app/stores', () => ({
 import ContractsPage from '../routes/contracts/+page.svelte';
 import { withoutComments } from './helpers/markup';
 
-const contract = (id: string, tenantName: string, startDate: string, endDate: string | null) => ({
+// the status as the backend decides it by the Swiss day (#784, #815)
+const contract = (
+	id: string,
+	tenantName: string,
+	startDate: string,
+	endDate: string | null,
+	status: 'active' | 'ended' | 'future' = startDate > '2026-10-10' ? 'future' : 'active'
+) => ({
 	id,
+	status,
 	apartmentId: `a-${id}`,
 	tenantId: `t-${id}`,
 	startDate,
@@ -69,11 +77,9 @@ describe('Mietvertragsliste', () => {
 		expect(body).not.toMatch(/heute|AKTIV|Laufend/);
 	});
 
-	it('bestimmt den Vertragsstatus mit dem Tag des Servers', () => {
-		const body = row(
-			list([contract('c1', 'Anna Keller', '2099-11-01', null)], undefined, '2099-11-01'),
-			'c1'
-		);
+	// #815: the status comes from the backend, the list does not compare dates
+	it('nimmt den Vertragsstatus vom Backend', () => {
+		const body = row(list([contract('c1', 'Anna Keller', '2099-11-01', null, 'active')]), 'c1');
 
 		expect(body).toContain('Laufend');
 	});

@@ -244,7 +244,7 @@ const scripts = (out: string, names: string[], env: Record<string, string> = {})
 
 // A date compared with today, or today handed to a function that decides by it (#788); not `today: localToday()`
 const DATE_CMP = /(?<![=])[<>]=?\s*(?:localToday\(\)|\btoday\b)|(?:localToday\(\)|\btoday\b)\s*[<>]/;
-const TODAY_ARG = /[(,]\s*(?:localToday\(\)|today)\s*[,)]|^\s*localToday\(\)\s*[,)]/; // the last: a wrapped argument line
+const TODAY_ARG = /[(,]\s*(?:localToday\(\)|(?:\w+\.)?today)\s*[,)]|^\s*localToday\(\)\s*[,)]/; // the last: a wrapped argument line
 
 /** A line of BFF code that makes a domain decision: a status comparison, an anchored regex, a date against today */
 export const decides = (line: string) =>

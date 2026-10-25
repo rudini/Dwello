@@ -1,4 +1,3 @@
-import { localToday } from '$lib/contract-status';
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
 import type { PageServerLoad } from './$types';
 import { missingByContract } from '$lib/server/missing-statements';
@@ -41,6 +40,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 			startDate: c.startDate as string,
 			endDate: (c.endDate as string) || null,
 			terminated: !!c.terminated,
+			status: c.status as ContractWithDetails['status'], // the backend decides it (#784, #815)
 			baseRent: (c.baseRent as string) || '0',
 			additionalRent: (c.additionalRent as string) || null,
 			monthlyAdvancePayment: (c.monthlyAdvancePayment as string) || '0',
@@ -71,7 +71,6 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		);
 
 		return {
-			today: localToday(),
 			contracts,
 			total: contractsData.total || 0,
 			page,
@@ -82,7 +81,6 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 	} catch (err) {
 		console.error('Failed to fetch contracts:', err);
 		return {
-			today: localToday(),
 			contracts: [],
 			total: 0,
 			page,

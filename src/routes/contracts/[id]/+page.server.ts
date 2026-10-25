@@ -93,6 +93,7 @@ function toContract(
 		startDate: data.startDate,
 		...filled(data, { endDate: none, baseRent: '0', additionalRent: none, monthlyAdvancePayment: '0', flatRateUtilityCharge: '0' }),
 		terminated: !!data.terminated,
+		status: data.status, // the backend decides it (#784, #815)
 		noticeReceivedOn: data.noticeReceivedOn ?? null,
 		billedUntil: data.billedUntil ?? null,
 		advancePayments: data.advancePayments,

@@ -3,7 +3,6 @@
 	import { flushSync, tick, untrack } from 'svelte';
 	import {
 		contractEndError,
-		contractStatusOn,
 		pastEndConfirmation,
 		shortNoticePeriod,
 		type RefusedStatement
@@ -33,7 +32,7 @@
 
 	const contract = $derived(data.contract);
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
-	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, data.today));
+	const status = $derived(contract.status);
 	let ending = $state(false);
 	// the last day of the tenancy, the Kündigungstermin; typed on purpose, no day proposed (a quick confirm must not
 	// end the contract today); a past day, e.g. a notice recorded late, is confirmed with its consequence

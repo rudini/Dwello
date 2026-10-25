@@ -6,7 +6,7 @@
 import { Elysia, t } from 'elysia';
 import { missingByContract, missingOfContract } from '../services/statement-run.service';
 import { errorBody, refusal } from '../services/coded-error';
-import { advancesOf, deleteAdvance } from '../services/advance-payment.service';
+import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -124,6 +124,11 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			query: contractQuerySchema
 		}
 	)
+	// Whether a Vertragsbeginn lies in the past, by the Swiss day: the wizard asks back and offers «Abgerechnet bis»
+	// (#453, #815)
+	.get('/check-start', ({ query }) => ({ past: query.startDate < swissToday() }), {
+		query: t.Object({ startDate: t.String({ format: 'date' }) })
+	})
 	// Per contract, the days of ended periods without a statement, for the list and the Übersicht (H-28, #211)
 	.get('/missing-statements', () => missingByContract())
 	// The missing statements of the contract and their way into the wizard (H-28, #5)
@@ -139,11 +144,13 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			set.status = 404;
 			return { error: 'Contract not found' };
 		}
+		const advancePayments = await advancesOf(params.id);
 		return {
 			...contract,
 			agreedCategoryIds: await agreedCategoryIds(params.id),
 			agreedFrom: await agreedFromDays(params.id), // «Vereinbart ab» (#368)
-			advancePayments: await advancesOf(params.id),
+			advancePayments,
+			proposedAdvanceFrom: proposedAdvanceFrom(contract, advancePayments) ?? null, // #464, #815
 			nextSteps: await nextSteps(contract),
 			fixedTermCheck: await fixedTermCheck(contract)
 		};

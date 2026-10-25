@@ -14,8 +14,6 @@ import { goto } from '$app/navigation';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
-import { localToday } from '$lib/contract-status';
-import { formatDate } from '$lib/utils/format';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
@@ -23,6 +21,7 @@ import billedByStatement from '../../tests/contracts/contract-billed-until-bille
 import billedFromStart from '../../tests/contracts/contract-billed-until-billed-start.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
+import checkStart from '../../tests/contracts/contract-check-start.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -34,10 +33,16 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 	baseRent: '950.00',
 	additionalRent: null,
 	monthlyAdvancePayment: '150.00',
-	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }]
+	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }],
+	proposedAdvanceFrom: '2026-11-01', // «Gültig ab» the backend proposes (#815)
+	status: 'active' as 'active' | 'ended' | 'future' // as the backend decides it (#784, #815)
 });
-const data = (endDate: string | null = null, terminated = false) => ({
-	contract: contract(endDate, terminated),
+const data = (
+	endDate: string | null = null,
+	terminated = false,
+	status?: 'active' | 'ended' | 'future'
+) => ({
+	contract: { ...contract(endDate, terminated), ...(status && { status }) },
 	tenant: 'Anna Keller',
 	apartment: 'Wohnung 2.01 · Ahornhof',
 	categories: [] // the boxes of the agreed Nebenkosten (#91)
@@ -86,6 +91,20 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
 	});
 
+	// review i815b3 C-2: the past, the backend says (#815); only a start moved before the saved one is questioned
+	it('fragt bei einem früheren Vertragsbeginn nach, den das Backend vergangen nennt', async () => {
+		calls = fakeBff(({ path }) =>
+			path.startsWith('/contracts/check-start?') ? [200, checkStart] : [200, { contracts: [] }]
+		);
+		await open();
+		type('start-date-input', '01.05.2024');
+		await settle();
+		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
+		type('start-date-input', '01.01.2024');
+		await settle();
+		expect(byTestId('start-date-notice')!.textContent).toContain('1. Januar 2024');
+	});
+
 	it('nimmt Beträge in Schweizer Schreibweise an und nennt den Mieter beim Speichern', async () => {
 		await open();
 		type('contract-base-rent-input', "1'450");
@@ -103,15 +122,13 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
 	});
 
-	// #464: ein neues Akonto gilt ab «Gültig ab»; vorgeschlagen ist der Tag des heutigen Betrags
+	// #464: ein neues Akonto gilt ab «Gültig ab»; vorgeschlagen ist der Tag, den das Backend nennt (#815)
 	it('speichert ein neues Akonto mit seinem «Gültig ab»', async () => {
 		await open();
 		expect(document.querySelector('label[for="advancePaymentFrom"]')!.textContent).toContain('Gültig ab');
 		// fach review 464-2 V-4: how to correct an amount entered by mistake
 		expect(byTestId('contract-advance-from-input-help')!.textContent).toContain('tragen Sie seinen Tag aus «Akonto nach Zeitraum» ein');
-		const [year, month] = localToday().split('-').map(Number);
-		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
-		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe(formatDate(next));
+		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe('01.11.2026');
 		type('contract-advance-payment-input', '200');
 		type('contract-advance-from-input', '01.07.2025');
 		await save();
@@ -120,7 +137,8 @@ describe('Mietvertrag bearbeiten', () => {
 
 	// fach review 464-2 V-5: before the start a change corrects the entry; the rules of an increase do not apply
 	it('nennt bei einem künftigen Mietvertrag keine Regel einer Erhöhung des Akontos', async () => {
-		show(EditPage, { data: { ...data(), contract: { ...contract(), startDate: '2099-01-01' } } } as never);
+		const future = { ...contract(), startDate: '2099-01-01', status: 'future' };
+		show(EditPage, { data: { ...data(), contract: future } } as never);
 		await settle();
 		const help = byTestId('contract-advance-payment-input-help')!.textContent!;
 		expect(help).toContain('Fehlende Zahlungen regeln Sie ausserhalb von Dwello.');
@@ -198,10 +216,12 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// fach review V-10: «Abgerechnet bis» covers the draft's whole period: Dwello creates no statement for it again
+	// #815: whether «Abgerechnet bis» covers it, the backend says in the refusal
+	const coveredRefusal = { ...refused, statements: [{ ...refused.statements[0], covered: true }] };
 	it('löscht einen Entwurf, den «Abgerechnet bis» ganz abdeckt, und sagt, dass keiner neu entsteht', async () => {
 		calls = fakeBff(({ method, body }) => {
 			if (method === 'PUT')
-				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
+				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, coveredRefusal];
 			return [200, { contracts: [] }];
 		});
 		await open();
@@ -218,6 +238,17 @@ describe('Mietvertrag bearbeiten', () => {
 		click('delete-draft-and-save');
 		await settle();
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	it('sagt nicht, dass kein Entwurf neu entsteht, wenn das Backend ihn nicht abgedeckt nennt', async () => {
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [409, refused] : [200, { contracts: [] }]));
+		await open();
+		type('billed-until-input', '31.12.2025');
+		await save();
+		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).not.toContain(
+			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.'
+		);
 	});
 
 	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect
@@ -317,6 +348,13 @@ describe('Mietvertrag bearbeiten', () => {
 	// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
 	const onTermination = 'frühestens auf den nächsten Kündigungstermin';
 	const afterEnd = 'erst nach dem Vertragsende möglich';
+	// #815: whether the contract runs, the backend says; the form does not compare dates
+	it('nennt die Regeln eines laufenden Mietvertrags nur, wenn das Backend ihn laufend nennt', async () => {
+		show(EditPage, { data: data(null, false, 'ended') } as never);
+		await settle();
+		expect(byTestId('contract-running-hint')).toBeNull();
+	});
+
 	// #388: the befristet hint names the form rule too
 	const afterEndWithForm = `${afterEnd}, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.`;
 	it.each([

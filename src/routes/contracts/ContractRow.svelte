@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { contractPeriod, contractStatusOn, statusBadges } from '$lib/contract-status';
+	import { contractPeriod, statusBadges } from '$lib/contract-status';
 	import type { ContractWithDetails } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 
-	// One contract in the list: the tenant's name opens it, the whole row is its link; today comes from the server
-	let { contract, today }: { contract: ContractWithDetails; today: string } = $props();
+	// One contract in the list: the tenant's name opens it, the whole row is its link; its status from the backend
+	let { contract }: { contract: ContractWithDetails } = $props();
 
-	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, today));
+	const status = $derived(contract.status);
 	const badge = $derived(statusBadges[status]);
 </script>
 

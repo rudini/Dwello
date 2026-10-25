@@ -15,8 +15,6 @@
 		billedUntilError
 	} from '$lib/contract-form';
 	import {
-		billsIn,
-		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
 		billedDaysError,
@@ -24,7 +22,7 @@
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
 	import { formatDate } from '$lib/utils/format';
-	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
+	import { normalizeAmounts, startInPast, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -66,11 +64,17 @@
 	let form = $state<HTMLFormElement>();
 
 	const today = localToday();
-	// Only a start moved before the saved one and into the past is questioned
-	const pastBefore = untrack(() => [today, values.startDate].sort()[0]);
-	const running = $derived(
-		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
-	);
+	// Only a start moved before the saved one and into the past is questioned; the past, the backend says (#815)
+	const savedStart = untrack(() => values.startDate);
+	let checked = $state({ start: '', past: false }); // an answer counts only for the date it was asked for
+	const startPast = $derived(checked.start === values.startDate && checked.past && values.startDate < savedStart);
+	$effect(() => {
+		const start = values.startDate;
+		startInPast(start).then((past) => {
+			if (values.startDate === start) checked = { start, past };
+		});
+	});
+	const running = $derived(contract.status === 'active');
 	const fixedTerm = $derived(!!contract.endDate && !contract.terminated);
 	const runningText = $derived(
 		fixedTerm ? m.contracts_running_text_fixed_term() : m.contracts_running_text()
@@ -136,19 +140,9 @@
 	}
 
 	// a draft whose whole period «Abgerechnet bis» now covers, not the contract dates: no statement is created for it
-	// again (fach review V-10, V-15)
-	function covered(draft: RefusedStatement) {
-		const dates = {
-			startDate: values.startDate,
-			endDate: values.isUnlimited ? null : values.endDate
-		};
-		const period = { start: draft.periodStart, end: draft.periodEnd };
-		return (
-			billsIn(dates, period) && !billsIn({ ...dates, billedUntil: values.billedUntil }, period)
-		);
-	}
+	// again (fach review V-10, V-15); the backend says so in its refusal (#815)
 	const onlyCovered = (statements: RefusedStatement[]) =>
-		statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);
+		statements.length === 1 && statements[0].status === 'draft' && !!statements[0].covered;
 
 	const coveredConsequence = $derived(
 		onlyCovered(refused)
@@ -248,7 +242,7 @@
 			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
-		const next = covered(draft)
+		const next = draft.covered
 			? back
 			: wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd);
 		await put(next, draft.id);
@@ -319,7 +313,7 @@
 			bind:terminated={values.terminated}
 			noticed={contract.terminated}
 			{unknown}
-			today={pastBefore}
+			{startPast}
 			{overlap}
 			{errors}
 		/>

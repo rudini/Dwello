@@ -39,6 +39,18 @@ const lastContractEnd = sql<string | null>`(
 	where c.apartment_id = "apartments"."id" and c.end_date < ${sqlToday}
 )`;
 
+/** An open-ended rental contract: no new contract can be recorded for the apartment (#815, the contract wizard) */
+const blocked = sql<boolean>`exists (
+	select 1 from rental_contracts c where c.apartment_id = "apartments"."id" and c.end_date is null
+)`;
+
+/** The day after the apartment's latest Vertragsende while that day is still to come; null when free now (#815) */
+const availableFrom = sql<string | null>`(
+	select (max(c.end_date) + 1)::text from rental_contracts c
+	where c.apartment_id = "apartments"."id"
+	having max(c.end_date) + 1 > ${sqlToday} and bool_and(c.end_date is not null)
+)`;
+
 /**
  * Occupied while a rental contract runs today; relet when only a future contract is signed;
  * otherwise as the property manager set it (vacant or reserved).
@@ -68,6 +80,8 @@ const apartmentFields = {
 	nextContractStart,
 	currentContractEnd,
 	lastContractEnd,
+	blocked,
+	availableFrom,
 	createdAt: apartments.createdAt,
 	updatedAt: apartments.updatedAt,
 	buildingName: buildings.name
@@ -97,6 +111,8 @@ export interface ApartmentWithDetails extends Apartment {
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null;
 	lastContractEnd?: string | null;
+	blocked?: boolean; // an open-ended contract: no new one can be recorded (#815)
+	availableFrom?: string | null; // the day after the latest Vertragsende while it is still to come (#815)
 }
 
 /**
