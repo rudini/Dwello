@@ -88,7 +88,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
-	// overdue: whether a Mahnung is to propose now, else null while the Zahlungsfrist runs; only in the list (#788)
+	// an overdue one: whether a Mahnung is to propose now; null for any other; only in the list (#788)
 	reminderDue?: boolean | null;
 	tenant: {
 		id: string;

@@ -18,5 +18,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] BFF: the overview counts `reminderDue` and reads `olderThanFiveYears`; no Mahnfrist, `nextReminderFrom` or `FIVE_YEARS_AGO` left in `src/lib/overview.ts`; `overview.test.ts`, `dashboard.test.ts`
 - [x] Docs: `docs/api-specification.md`; fitness ratchet unchanged (BFF decisions stay 8)
 - [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`, `mahnwesen` scenarios
-- [ ] Slice review (`code-reviewer`) and closing round
+- [x] Slice review round 1 (`docs/reviews/p4c-review-1.md`)
+- [ ] Closing round
 - [ ] PR: «No scenario: behaviour unchanged», Fixes or Refs #788 per its remaining points
