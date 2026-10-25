@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { navGroups } from '$lib/navigation';
+	import { navGroups } from './navigation';
 	import NavList from '$lib/ui/NavList.svelte';
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { activeHref } from '$lib/navigation';
+	import { activeHref } from './navigation';
 	import Icon from './Icon.svelte';
 	import type { IconName } from './icons';
 

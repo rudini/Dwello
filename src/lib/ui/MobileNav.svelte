@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
-	import { navGroups } from '$lib/navigation';
+	import { navGroups } from './navigation';
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import NavList from '$lib/ui/NavList.svelte';
 
