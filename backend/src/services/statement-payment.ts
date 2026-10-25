@@ -3,6 +3,8 @@
  * CHF 5 is neither claimed nor paid out but carried over, unless it is a Schlussabrechnung's (#448)
  */
 
+import { belowMinimum } from './pdf-format';
+
 interface Payment {
 	balance: string;
 	status: string;
@@ -12,7 +14,6 @@ interface Payment {
 	nextReminderFrom: string | null;
 }
 
-const belowMinimum = (balance: number) => Math.abs(balance) < 5;
 
 export function paymentOf(statement: Payment, today: string) {
 	const balance = Number(statement.balance);
