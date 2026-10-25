@@ -17,7 +17,7 @@ export async function anonymisableFrom(id: string): Promise<string | null> {
 		select greatest(
 			(select max(end_date) from rental_contracts where tenant_id = ${id}),
 			(select max(statement_date) from utility_statements
-				where tenant_id = ${id} and status in ('sent', 'paid', 'settled', 'replaced')),
+				where tenant_id = ${id} and status <> 'draft'), -- every statement that went out
 			(select max((sent_at at time zone 'UTC' at time zone 'Europe/Zurich')::date) from documents
 				where tenant_id = ${id} and type = 'reminder' and sent_at is not null)
 		)::text as latest,

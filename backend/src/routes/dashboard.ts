@@ -12,6 +12,7 @@ import { draftsToSend } from '../services/statement-invoices.service';
 import { statusCondition } from '../services/statement.service';
 import { swissToday } from '../services/today';
 import { contractTasks } from '../services/contract-tasks.service';
+import { replacedInSql } from '../services/counting-statements';
 
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
@@ -134,7 +135,7 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 				utilityStatements.paidAmount,
 				// only Nachzahlungen, not refunds (#93); also on a statement replaced since (#120)
 				and(
-					or(statusCondition('paid'), eq(utilityStatements.status, 'replaced')),
+					or(statusCondition('paid'), replacedInSql),
 					gt(utilityStatements.balance, '0'),
 					gte(utilityStatements.paidDate, monthStart)
 				)
