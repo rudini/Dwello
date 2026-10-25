@@ -8,17 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: #815 part C, statements: the frontend derives nothing from amounts and dates
-
-Measured before (25.10.2026, main f430a98): frontend decision exceptions 19, of which 15 in statements.
-
-- [x] C1 payment rules from the backend: `paymentOf` and `advanceChanged` (`backend/src/services/statement-payment.ts`) on list and detail; backend unit and pg tests, API contracts, mapping test first; the DOM test fixture takes them from `paymentOf`; frontend `unpaid`, `claimed`, `belowMinimum`, `nextReminderLater` removed; exceptions 19 → 9 (3 lines now status display)
-- [x] C2 pre-check «Bezahlt am» not in the future (`PAID_DATE_IN_FUTURE`, statement-lock.pg.test.ts) into `preChecks`; the two «Bezahlt am» defaults into `display` as a field default; exceptions 9 → 6
-- [x] C1 fix: the test fixture imported backend code across the boundary (fitness `boundary-import`); it now states the backend's answer
-- [x] Review C1 (`docs/reviews/i815c1-review-1.md`): C-1 (Blocker, the fixture's boundary import) fixed in the C1 fix above, re-review with C3; C-2 (Minor, a copy of `belowMinimum`) fixed
-- [x] C3 «Abrechnungsperiode läuft noch» from the backend (`GET /statements/check-period`), backend test, API contract and DOM test first; an answer counts only for its day; exceptions 6 → 4
-- [ ] Review C1–C3
-- [ ] Checks: lint, check, vitest, backend tests, E2E statement features, fitness (exceptions before and after)
-- [ ] Closing round, workflow notes, archive
-- [ ] PR: «No scenario: behaviour unchanged», Refs #815

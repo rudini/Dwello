@@ -14,7 +14,8 @@ export const statement = (overrides: Partial<StatementWithDetails> = {}): Statem
 	({
 		...allowedFor(overrides.status),
 		// what the backend says the Saldo of this Nachzahlung after its Zahlungsfrist asks (#815, `paymentOf` in
-		// backend/src/services/statement-payment.ts); a test about another Saldo states the backend's answer
+		// backend/src/services/statement-payment.ts); a test whose result depends on these fields states the backend's
+		// answer for its Saldo
 		unpaid: false,
 		claimed: true,
 		noPayment: false,
