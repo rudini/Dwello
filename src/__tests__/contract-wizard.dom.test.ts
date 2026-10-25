@@ -566,6 +566,19 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(document.body.textContent).not.toContain('nochmals auf «Weiter»');
 	});
 
+	// review i815b2 C-1: the pre-check takes the Swiss day, as the backend refuses (BILLED_UNTIL_FUTURE); just after
+	// midnight in Zurich the browser's UTC day is still the day before
+	it('nimmt für «Abgerechnet bis» den Schweizer Tag', async () => {
+		vi.setSystemTime(new Date('2026-06-14T22:30:00Z')); // 15.06.2026 00:30 in Zurich
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('billed-until-input', '15.06.2026');
+		next();
+		await settle();
+		expect(document.body.textContent).not.toContain('Abgerechnet bis kann nicht in der Zukunft liegen.');
+	});
+
 	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect
 	it.each([
 		['31.12.2099', 'Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde.'],

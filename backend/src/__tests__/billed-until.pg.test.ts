@@ -84,6 +84,20 @@ describe('Abgerechnet bis', () => {
 		expect((await billedUntil(swissToday())).status).toBe(200);
 	});
 
+	// review i815b2 C-2: the wizard pre-checks it too (#815), so creating a contract refuses it the same way
+	it('lehnt «Abgerechnet bis» nach heute auch beim Erfassen ab', async () => {
+		const response = await sendJson('POST', '/api/v1/contracts', {
+			apartmentId: rental.apartment,
+			tenantId: rental.tenant,
+			baseRent: '950',
+			monthlyAdvancePayment: '100',
+			startDate: '2099-01-01',
+			billedUntil: daysAfter(swissToday(), 1)
+		});
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'BILLED_UNTIL_FUTURE' });
+	});
+
 	it('lehnt «Abgerechnet bis» vor dem Vertragsbeginn ab und nennt ihn', async () => {
 		const response = await billedUntil('2019-12-31');
 		expect(response.status).toBe(400);

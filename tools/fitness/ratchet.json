@@ -256,6 +256,11 @@
 			"path": "src/routes/contracts/ContractForm.svelte",
 			"line": "const running = $derived(contract.status === 'active');",
 			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/contracts/ContractForm.svelte",
+			"line": "statements.length === 1 && statements[0].status === 'draft' && !!statements[0].covered;",
+			"reason": "status display: the status value alone and the backend's field `covered` (#815)"
 		}
 	],
 	"preChecks": [
@@ -617,12 +622,6 @@
 			{
 				"path": "src/lib/statement.ts",
 				"line": "statement.nextReminderFrom && statement.nextReminderFrom > localToday()",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/ContractForm.svelte",
-				"line": "statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
 				"scenario": "Ä4"
 			},

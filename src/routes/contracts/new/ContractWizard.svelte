@@ -28,7 +28,7 @@
 		stepErrors,
 		offeredBilledUntil
 	} from '$lib/contract-wizard';
-	import { contractPeriod } from '$lib/contract-status';
+	import { contractPeriod, localToday } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -74,7 +74,7 @@
 	// Error keys of the fields whose id differs from the value's name
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	const params = untrack(() => $page.url.searchParams);
-	const today = new Date().toLocaleDateString('sv-SE'); // local YYYY-MM-DD
+	const today = localToday(); // the Swiss day, as the backend decides (review i815b2 C-1)
 	let values = $state(
 		untrack(() => ({
 			...initialContractValues(undefined, params),

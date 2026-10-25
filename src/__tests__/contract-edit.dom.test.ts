@@ -201,10 +201,12 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// fach review V-10: «Abgerechnet bis» covers the draft's whole period: Dwello creates no statement for it again
+	// #815: whether «Abgerechnet bis» covers it, the backend says in the refusal
+	const coveredRefusal = { ...refused, statements: [{ ...refused.statements[0], covered: true }] };
 	it('löscht einen Entwurf, den «Abgerechnet bis» ganz abdeckt, und sagt, dass keiner neu entsteht', async () => {
 		calls = fakeBff(({ method, body }) => {
 			if (method === 'PUT')
-				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
+				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, coveredRefusal];
 			return [200, { contracts: [] }];
 		});
 		await open();
@@ -221,6 +223,17 @@ describe('Mietvertrag bearbeiten', () => {
 		click('delete-draft-and-save');
 		await settle();
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	it('sagt nicht, dass kein Entwurf neu entsteht, wenn das Backend ihn nicht abgedeckt nennt', async () => {
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [409, refused] : [200, { contracts: [] }]));
+		await open();
+		type('billed-until-input', '31.12.2025');
+		await save();
+		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).not.toContain(
+			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.'
+		);
 	});
 
 	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect

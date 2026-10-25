@@ -114,6 +114,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil B2: die Vorprüfungen der Vertragsformulare stehen in `preChecks` mit Fehlercode und Backend-Test: «Abgerechnet bis» nach heute (`BILLED_UNTIL_FUTURE`, `billed-until.pg.test.ts`), Vertragsende vor heute ohne Bestätigung (`CONTRACT_END_PAST`) und vor dem Vertragsbeginn (`CONTRACT_END_BEFORE_START`, beide `contract-end-refusals.pg.test.ts`) | Vorprüfungen 0 → 9; Ausnahmen 39 → 30 in 17 Dateien |
 | 25.10.2026 | #815 Teil B3a: das «Gültig ab» eines neuen Akontos schlägt das Backend vor (`proposedAdvanceFrom` in `GET /contracts/:id`) | Ausnahmen 30 → 29 |
 | 25.10.2026 | #815 Teil B3b: ob eine Wohnung einen neuen Mietvertrag nehmen kann, sagt das Backend (`blocked`, `availableFrom` in `GET /apartments`); der Assistent zeigt es | Ausnahmen 29 → 27 in 15 Dateien |
+| 25.10.2026 | #815 Teil B3c: ob «Abgerechnet bis» einen abgelehnten Entwurf ganz abdeckt, sagt das Backend in der Ablehnung (`covered`); `billsIn` liegt dafür in `contract.service.ts`. Review i815b2: der Assistent nimmt für «Abgerechnet bis» den Schweizer Tag (`localToday()`) | Ausnahmen 27 → 26 in 14 Dateien; Anzeige 42 → 43 |
 
 ## 7. Werkzeugwahl
 

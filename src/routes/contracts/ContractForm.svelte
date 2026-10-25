@@ -15,7 +15,6 @@
 		billedUntilError
 	} from '$lib/contract-form';
 	import {
-		billsIn,
 		localToday,
 		pastEndConfirmation,
 		billedDaysError,
@@ -133,19 +132,9 @@
 	}
 
 	// a draft whose whole period «Abgerechnet bis» now covers, not the contract dates: no statement is created for it
-	// again (fach review V-10, V-15)
-	function covered(draft: RefusedStatement) {
-		const dates = {
-			startDate: values.startDate,
-			endDate: values.isUnlimited ? null : values.endDate
-		};
-		const period = { start: draft.periodStart, end: draft.periodEnd };
-		return (
-			billsIn(dates, period) && !billsIn({ ...dates, billedUntil: values.billedUntil }, period)
-		);
-	}
+	// again (fach review V-10, V-15); the backend says so in its refusal (#815)
 	const onlyCovered = (statements: RefusedStatement[]) =>
-		statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);
+		statements.length === 1 && statements[0].status === 'draft' && !!statements[0].covered;
 
 	const coveredConsequence = $derived(
 		onlyCovered(refused)
@@ -245,7 +234,7 @@
 			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
-		const next = covered(draft)
+		const next = draft.covered
 			? back
 			: wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd);
 		await put(next, draft.id);

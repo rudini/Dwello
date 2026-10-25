@@ -46,6 +46,13 @@ describe('Verfügbarkeit einer Wohnung für einen neuen Mietvertrag', () => {
 		expect(await availability(ended.apartment)).toEqual({ blocked: false, availableFrom: null });
 	});
 
+	// review i815b2 C-3: the day after a Vertragsende of yesterday is today: free now, not «ab heute»
+	it('ist nach einem Vertragsende gestern ab sofort frei', async () => {
+		const yesterday = await rental(daysAfter(swissToday(), -1));
+
+		expect(await availability(yesterday.apartment)).toEqual({ blocked: false, availableFrom: null });
+	});
+
 	it('ist ab dem Tag nach dem letzten Vertragsende frei, solange dieser Tag noch kommt', async () => {
 		const later = await rental('2099-03-31');
 		const endsToday = await rental(swissToday());

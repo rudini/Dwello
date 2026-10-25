@@ -71,7 +71,6 @@ describe('Neuer Mietvertrag laden', () => {
 		expect(data.apartments[0].size).toBe('2.5 Zimmer, 65 m²');
 	});
 
-	// B-14 (#147): an empty choice would look like "no tenants yet"; the landlord sees a load error instead
 	// #815: whether a new contract can be recorded, the backend decides by the Swiss day; the wizard shows it
 	it('gibt weiter, ab wann eine Wohnung frei ist, wie es das Backend nennt', async () => {
 		const [listed] = apartmentList.apartments;
@@ -89,6 +88,7 @@ describe('Neuer Mietvertrag laden', () => {
 		expect(data.apartments[0]).toMatchObject({ blocked: true, availableFrom: '2030-05-01' });
 	});
 
+	// B-14 (#147): an empty choice would look like "no tenants yet"; the landlord sees a load error instead
 	it.each(['tenants', 'apartments'])('meldet einen Ladefehler, wenn %s fehlen', async (failing) => {
 		const fetch = (async (url: string) =>
 			url.includes(failing)

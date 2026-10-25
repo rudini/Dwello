@@ -387,6 +387,15 @@ export async function createContract({ agreedCategoryIds, agreedFrom, ...data }:
 export const billingStart = ({ startDate, billedUntil }: { startDate: string; billedUntil: string | null }) =>
 	billedUntil && billedUntil >= startDate ? daysAfter(billedUntil, 1) : startDate;
 
+/**
+ * Whether Dwello bills Mietstage of the contract in the period: from its Vertragsbeginn, or from the day after
+ * «Abgerechnet bis» when that is later (#133), to its Vertragsende
+ */
+export const billsIn = (
+	contract: { startDate: string; endDate: string | null; billedUntil: string | null },
+	{ start, end }: { start: string; end: string }
+) => [billingStart(contract), start].sort()[1] <= [contract.endDate ?? end, end].sort()[0];
+
 /** The contract's statements whose billed rent days the new dates would change (fewer or more) */
 async function statementsChanged(contractId: string, startDate: string, endDate: string | null, q: Query) {
 	const from = sql`greatest(${utilityStatements.periodStart}, ${startDate}::date)`;
@@ -413,7 +422,7 @@ async function statementsChanged(contractId: string, startDate: string, endDate:
 
 /** New contract dates that would change the rent days billed by a stored statement of the contract */
 export class BilledDaysError extends Error {
-	constructor(readonly statements: Awaited<ReturnType<typeof statementsChanged>>) {
+	constructor(readonly statements: (Awaited<ReturnType<typeof statementsChanged>>[number] & { covered: boolean })[]) {
 		super('Contract dates change the rent days billed by its utility statements');
 	}
 }
@@ -439,7 +448,14 @@ async function checkNewDates(current: RentalContract, data: Partial<NewRentalCon
 	await checkBilledByDwello(current, data.billedUntil, startDate, q);
 	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
-	else if (statements.length) throw new BilledDaysError(statements);
+	// #815: whether «Abgerechnet bis» now covers a statement's whole period, so its draft is no longer needed
+	else if (statements.length)
+		throw new BilledDaysError(
+			statements.map((s) => {
+				const period = { start: s.periodStart, end: s.periodEnd };
+				return { ...s, covered: billsIn({ startDate, endDate, billedUntil: null }, period) && !billsIn({ startDate, endDate, billedUntil }, period) };
+			})
+		);
 	// a statement named from a stale page or another form that this change does not touch (H-28, #717); one deleted
 	// meanwhile does not hold the change up (code review h28j C-2)
 	else if (draft && (await q.select({ id: utilityStatements.id }).from(utilityStatements).where(eq(utilityStatements.id, draft))).length)

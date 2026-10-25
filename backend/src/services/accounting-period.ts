@@ -3,7 +3,7 @@
  * ended periods since a day, which days the statements cover, and the parts of ended periods a contract has no
  * statement for. Days are YYYY-MM-DD; today is the Swiss day
  */
-import { billingStart } from './contract.service';
+import { billingStart, billsIn } from './contract.service';
 import { daysAfter, swissToday } from './today';
 import { counting } from './counting-statements';
 
@@ -38,13 +38,6 @@ export function endedPeriodsSince(type: AccountingPeriodType, since: string, tod
 
 export const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
 export const same = (a: Range, b: Range) => a.start === b.start && a.end === b.end;
-
-/**
- * Whether Dwello bills Mietstage of the contract in the period: from its Vertragsbeginn, or from the day after
- * «Abgerechnet bis» when that is later (#133), to its Vertragsende
- */
-export const billsIn = (contract: Rental, { start, end }: Range) =>
-	[billingStart(contract), start].sort()[1] <= [contract.endDate ?? end, end].sort()[0];
 
 /**
  * The Abrechnungsperioden of the statements, each once, the earliest first; a replaced one's too: its period stays the
