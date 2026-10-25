@@ -3398,3 +3398,14 @@ No scenario: measurement tooling only, no app change.
 - [x] Closing round (`docs/reviews/p5be2-review-2.md`)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-788.md`
 - [x] PR: «No scenario: behaviour unchanged», Fixes #788, pushed after this archive
+
+## Session: #815 part A, the fitness check over the frontend
+
+- [x] Decisions recorded in #815 (25.10.2026): a branch on the status value alone is display; parts A check, B contracts, C statements, D the rest
+- [x] `tools/fitness/fitness.ts`: `frontendDecisions` measured with `decides` over `src/lib` outside `server/` and every component; checks `frontend-decision`, `pre-check` (code in the named backend test), warning `frontend-allowed`; shrink-only `exceptions.frontendDecisions`; tests first (`fitness.test.ts`, 5 new, seen red)
+- [x] `tools/fitness/ratchet.json`: 41 hits in `display` (format or status value alone, each with its reason), 41 in `exceptions.frontendDecisions` (20 files; review i815a C-1, C-2 moved three), `preChecks` empty
+- [x] Docs: `utility-tree.md` (Ä4 H/H, BFF and frontend), `principles.md` (AP2), `fitness-functions.md` (§1 rows, §2 lists, §3 proofs, §6 row)
+- [x] Checks: fitness, `fitness.test.ts` (28), lint, check
+- [x] Slice review round 1 (`docs/reviews/i815a-review-1.md`)
+- [x] Re-review of C-1 (Major) and closing round (`docs/reviews/i815a-review-2.md`)
+- [x] PR: «No scenario: tooling and docs», Refs #815, pushed after this archive
