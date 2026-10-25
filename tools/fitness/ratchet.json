@@ -258,7 +258,62 @@
 			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
 		}
 	],
-	"preChecks": [],
+	"preChecks": [
+		{
+			"path": "src/lib/contract-form.ts",
+			"line": "if (billedUntil > today) return m.backend_billed_until_future();",
+			"code": "BILLED_UNTIL_FUTURE",
+			"test": "backend/src/__tests__/billed-until.pg.test.ts"
+		},
+		{
+			"path": "src/lib/contract-status.ts",
+			"line": "if (!endDate || endDate >= today) return null;",
+			"code": "CONTRACT_END_PAST",
+			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		},
+		{
+			"path": "src/lib/contract-wizard.ts",
+			"line": "const billed = today && billedUntilError(offeredBilledUntil(values, today), today);",
+			"code": "BILLED_UNTIL_FUTURE",
+			"test": "backend/src/__tests__/billed-until.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/ContractForm.svelte",
+			"line": "const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);",
+			"code": "CONTRACT_END_PAST",
+			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/ContractForm.svelte",
+			"line": "const billed = billedUntilError(values, today); // #453 (#337)",
+			"code": "BILLED_UNTIL_FUTURE",
+			"test": "backend/src/__tests__/billed-until.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/PastEndConfirm.svelte",
+			"line": "pastEndConfirmation(endDate, today) !== null && endDate >= startDate.slice(0, 10)",
+			"code": "CONTRACT_END_PAST",
+			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/[id]/+page.svelte",
+			"line": "const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);",
+			"code": "CONTRACT_END_PAST",
+			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/[id]/+page.svelte",
+			"line": "endError = contractEndError(endDate, contract.startDate, data.today) ?? '';",
+			"code": "CONTRACT_END_BEFORE_START",
+			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		},
+		{
+			"path": "src/routes/contracts/[id]/+page.svelte",
+			"line": "if (!endError && !pastConfirmed) pastError = pastEndConfirmation(endDate, data.today) ?? '';",
+			"code": "CONTRACT_END_PAST",
+			"test": "backend/src/__tests__/contract-end-refusals.pg.test.ts"
+		}
+	],
 	"exceptions": {
 		"bffDecisions": [],
 		"literalSets": [
@@ -524,24 +579,6 @@
 				"scenario": "Ä4"
 			},
 			{
-				"path": "src/lib/contract-form.ts",
-				"line": "if (billedUntil > today) return m.backend_billed_until_future();",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/contract-status.ts",
-				"line": "if (!endDate || endDate >= today) return null;",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/contract-wizard.ts",
-				"line": "const billed = today && billedUntilError(offeredBilledUntil(values, today), today);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
 				"path": "src/lib/contract-wizard.ts",
 				"line": "startDateNotice(values.startDate, today) && values.billedUntil ? values.billedUntil : undefined",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
@@ -604,24 +641,6 @@
 			{
 				"path": "src/routes/contracts/ContractForm.svelte",
 				"line": "statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/ContractForm.svelte",
-				"line": "const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/ContractForm.svelte",
-				"line": "const billed = billedUntilError(values, today); // #453 (#337)",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/PastEndConfirm.svelte",
-				"line": "pastEndConfirmation(endDate, today) !== null && endDate >= startDate.slice(0, 10)",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
 				"scenario": "Ä4"
 			},
@@ -731,24 +750,6 @@
 				"path": "src/routes/statements/[id]/StatusActions.svelte",
 				"line": "{#if status === 'overdue' && owes && !waiting}",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.svelte",
-				"line": "const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);",
-				"reason": "Frontend derivation from before #815, found once the check also reads data.today (#815 B); moves to the backend in #815 B",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.svelte",
-				"line": "endError = contractEndError(endDate, contract.startDate, data.today) ?? '';",
-				"reason": "Frontend derivation from before #815, found once the check also reads data.today (#815 B); moves to the backend in #815 B",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/contracts/[id]/+page.svelte",
-				"line": "if (!endError && !pastConfirmed) pastError = pastEndConfirmation(endDate, data.today) ?? '';",
-				"reason": "Frontend derivation from before #815, found once the check also reads data.today (#815 B); moves to the backend in #815 B",
 				"scenario": "Ä4"
 			}
 		]
