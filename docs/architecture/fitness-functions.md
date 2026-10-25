@@ -51,6 +51,7 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 | `entity-mirror` | Typ mit 5 Feldern von `kiSettings` in einer neuen Datei | rot, nennt Datei und Tabelle |
 | `frontend-decision` | `export const late = (d: string, today: string) => d < today;` in `src/lib/statement.ts` (#815, lokal auf d75331fc) | rot, nennt Datei und Zeile, AP2 |
 | `pre-check` | ein Eintrag in `preChecks` mit dem Code `BILLED_UNTIL_NOT_A_CODE` und `billed-until.pg.test.ts` (#815) | rot: «names BILLED_UNTIL_NOT_A_CODE and backend/src/__tests__/billed-until.pg.test.ts, but that test does not show the backend refusing» |
+| `ratchet` (Frontend) | ein Eintrag mehr in `exceptions.frontendDecisions`, `--base` auf 834a80d4 (#815) | rot: «exceptions.frontendDecisions grew from 38 to 39» |
 | `frontend-allowed` | `--base` auf einen Stand ohne `display` (#815) | Warnung: «has 44 display or pre-check entr(ies) in the frontend that the base does not list» |
 | `module-cycle` | `src/lib/utils/format.ts` importiert `$lib/accounting-period` | rot: «fe:lib/accounting-period fe:lib/utils import each other» |
 | `boundary-import` | `import { kiSettings } from '../../backend/src/db/schema'` unter `src/lib` | rot, nennt beide Dateien |
