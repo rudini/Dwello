@@ -26,4 +26,12 @@ describe('dot', () => {
 		expect(out).toMatch(/"be:services\/pdf" -> "be:services\/reminder-letter" \[[^\]]*color=red/);
 		expect(out).not.toMatch(/"be:services\/pdf" -> "db:schema" \[[^\]]*color=red/);
 	});
+
+	it('lässt eine Kante zwischen zwei verschiedenen Zyklen schwarz', () => {
+		const out = dot(
+			[{ from: 'fe:ui', to: 'be:services/pdf', file_edges: '1' }],
+			[{ modules: 'fe:ui fe:lib/navigation' }, { modules: 'be:services/pdf be:services/reminder-letter' }]
+		);
+		expect(out).not.toContain('color=red');
+	});
 });

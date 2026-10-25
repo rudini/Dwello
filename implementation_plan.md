@@ -15,6 +15,6 @@ Request: a dependency graph of the whole project; the product owner chose the ex
 
 - [x] `tools/arch-baseline/graph.ts`: production modules as DOT, edge weight = file imports, cycle edges red (test first)
 - [x] `deps:graph` script in `package.json`, output under `build/deps/` (not committed), usage in `docs/architecture/fitness-functions.md`
-- [ ] Slice review (`code-reviewer`)
+- [x] Slice review (`code-reviewer`): `docs/reviews/depsgraph-review-1.md`
 - [x] Checks: lint, check, backend type-check, affected tests, Prettier on added files
 - [ ] PR
