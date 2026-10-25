@@ -3309,6 +3309,24 @@ Product owner, 24.10.2026 (part 3: frontend decisions, then the backend). Refact
 - [x] Measured `replaced`: backend 10 → 8, total 15 → 13 (predicted 7 and 12: `statement-run` keeps a different rule, a replaced statement of the period is billed again by the run). The literal stays where the status is set (`statement.service`), labelled (`document.service`, `dashboard`), listed as sent (`tenant-anonymise`), or a refusal names it (`reminder`, `contract.service` successor)
 - [x] Review round 1 (`docs/reviews/p3b-review-1.md`: no Blocker/Major; C-1 Minor the fitness history named too few reasons for the remaining literals, fixed; docs only, no closing round), PR pushed after this archive
 
+## Session: module dependency graph (`bun run deps:graph`)
+
+Request: a dependency graph of the whole project; the product owner chose the existing import graph of `tools/arch-baseline/02-imports.ts` over madge, and no second cycle check in CI (the fitness check `module-cycle` covers it). The pdf ↔ reminder-letter cycle went to #808. No scenario: tooling only, no app change.
+
+- [x] `tools/arch-baseline/graph.ts`: production modules as DOT, edge weight = file imports, cycle edges red (test first)
+- [x] `deps:graph` script in `package.json`, output under `build/deps/` (not committed), usage in `docs/architecture/fitness-functions.md`
+- [x] Slice review (`code-reviewer`): `docs/reviews/depsgraph-review-1.md`
+- [x] Checks: lint, check, backend type-check, affected tests, Prettier on added files
+- [x] Closing round (`docs/reviews/depsgraph-close-review-1.md`: no findings); workflow note `docs/reviews/workflow-notes-deps-graph.md`; PR pushed after this archive
+
+## Session: #808 import cycle pdf.service ↔ reminder-letter
+
+No scenario: type-only import change, no behaviour change. Rides PR #810 (it refs #808). Finishes ADR 0003 step 1 (`Language` moved to `schema.ts`).
+
+- [x] Ratchet: drop `be:services/pdf be:services/reminder-letter` from `exceptions.moduleCycles`; fitness red (module-cycle)
+- [x] `reminder-letter.ts` takes `Language` from `../db/schema`; fitness green
+- [x] madge `--circular` (type imports included) reports no cycle over `src/` and `backend/src`
+- [x] Checks; review round 1 (`docs/reviews/808-review-1.md`: no findings, so no closing round); PR #810 `Fixes #808`, pushed after this archive
 ## Session: #788 part 4a, the overview's contract tasks (the backend decides)
 
 Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three date derivations of the overview to `GET /api/v1/dashboard` (`tasks.noticedContracts`, `tasks.expiredContracts`, `tasks.formerTenants`), reusing the backend rules of parts 2 and 5a. 4b `oldAddresses` and `missingStatements`, 4c reminders and the five-year hint follow. Behaviour unchanged (`No scenario: behaviour unchanged; dashboard.feature pins the tasks`). Refs #788.

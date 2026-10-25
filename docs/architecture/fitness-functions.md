@@ -32,6 +32,7 @@ Fehler (`::error`) machen den Lauf rot; Warnungen (`::warning`) erscheinen als A
 - **Verbesserung festschreiben:** `bun run fitness -- --update` senkt die Schwellen auf bessere Messwerte und entfernt Ausnahmen, die der Code nicht mehr braucht; `--cochange --update` senkt `coChangeWarn`. Das Ergebnis wird mit der Verbesserung committet.
 - **Ausnahmeliste:** `ratchet.json` → `exceptions` (`bffDecisions`, `bffDates`, `literalSets`, `entityMirrors`, `moduleCycles`). Eine neue Liste darf mit der Prüfung kommen, die sie braucht (sie fehlt auf der Basis); danach schrumpft sie nur, jeder Eintrag mit `reason` und `scenario`. Sie darf nur schrumpfen.
 - **Technische Prüfungen:** `technical` in `ratchet.json` (UUID, ISO-Datum eines Query-Parameters, Jahr eines Filters, EGID, JWT-Dauer) ist eine Allowlist, keine Altlast: Sie darf wachsen, jeder Eintrag nennt den Grund. Die Einträge gelten pro Zeile, nicht pro Muster: Dieselbe ISO-Datums-Regex prüfte in `contracts/[id]/+page.server.ts` ein Formularfeld (`validFrom`) und stand deshalb bis #787 als Altlast unter #717; seit das Backend das Akonto-Datum selbst prüft, ist sie dort nur noch die technische Prüfung vor der Backend-URL.
+- **Abhängigkeitsgraph:** `bun run deps:graph` zeichnet die Produktivmodule und ihre Imports aus demselben Lauf von `02-imports` nach `build/deps/modules.svg` (braucht Graphviz `dot`); Kanten eines Modulzyklus sind rot.
 - **Warnungen** (`prSizeWarn`, `coChangeWarn`) sind keine Gates: PR-Grösse hängt von der Aufgabe ab, Ko-Kopplung vom Zeitfenster. `coChangeWarn` folgt trotzdem dem Ratchet.
 
 ## 3. Nachweis: jede Prüfung schlägt bei einer Verletzung an
@@ -97,6 +98,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 24.10.2026 | #788 Teil 3a: was eine Abrechnung erlaubt, sagt das Backend (`editable`, `correctable`, `asksPayment` in `GET /statements/:id`) | `replaced` 18 → 15 Dateien (Frontend 7 → 4, Shared 1, Backend 10), gezählt wie Ä2 in `baseline.md` §7 |
 | 24.10.2026 | #788 Teil 3b: «eine ersetzte Abrechnung zählt nicht» an einer Stelle (`backend/src/services/counting-statements.ts`) | `replaced` 15 → 13 Dateien (Backend 10 → 8: die Regel steht noch einmal, sieben Abfragen und Filter nutzen sie); Ziel ≤ 6 Dateien nicht erreicht: die übrigen sind andere Regeln. Sie setzen den Status (`statement.service`), lehnen mit ihm ab (`reminder`, `contract.service` beim Nachfolger, `statement.service`), beschriften ihn (`document.service`, `dashboard`), zählen ihn zu den versandten (`tenant-anonymise`), entscheiden, was eine Abrechnung erlaubt (`statement.service`), oder lassen eine ersetzte Abrechnung der Periode neu abrechnen (`statement-run`) |
 | 25.10.2026 | #788 Teil 4a: die Aufgaben der Übersicht zu Mietverträgen entscheidet das Backend (`contractTasks` in `GET /api/v1/dashboard`) | BFF-Fundstellen 11 → 8 (`bffDates` 3 → 0); `src/lib/former-tenant-documents.ts` entfällt |
+| 25.10.2026 | #808: `reminder-letter.ts` nimmt `Language` aus `schema.ts` (Rest von ADR 0003) | Zyklen 2 → 1 (Ausnahme `be:services/pdf be:services/reminder-letter` entfernt) |
 
 ## 7. Werkzeugwahl
 
