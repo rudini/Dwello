@@ -356,8 +356,19 @@ describe('API-Verträge des Frontends', () => {
 
 	// H-28 (#717): the overview's figures, the drafts to send counted here
 	it('GET /dashboard liefert die Felder von dashboard.json', async () => {
-		const actual = await (await callApi('/api/v1/dashboard')).json();
-		expect(drift(await sample('dashboard'), actual)).toEqual([]);
+		// #788: one record of each contract task, so its fields are compared too
+		const noticed = await createRental(`${token}-noticed`, { startDate: '2020-04-01', endDate: '2099-03-31', monthlyAdvancePayment: '0' });
+		const expired = await createRental(`${token}-expired`, { startDate: '2020-04-01', endDate: '2025-12-31', monthlyAdvancePayment: '0' });
+		const former = await createRental(`${token}-former-tenant`, { startDate: '2020-04-01', endDate: '2025-03-31', monthlyAdvancePayment: '0' });
+		try {
+			await db.update(rentalContracts).set({ terminated: true }).where(inArray(rentalContracts.id, [noticed.contract, former.contract]));
+			await db.insert(documents).values({ tenantId: former.tenant, type: 'upload', title: 'Ausweis', fileName: 'a.pdf', content: 'JVBERi0=', createdAt: new Date('2024-06-10T09:00:00.000Z') });
+			const actual = await (await callApi('/api/v1/dashboard')).json();
+			expect(drift(await sample('dashboard'), actual)).toEqual([]);
+		} finally {
+			await db.delete(documents).where(eq(documents.tenantId, former.tenant));
+			for (const created of [noticed, expired, former]) await created.remove();
+		}
 	});
 
 	it('GET /contracts/:id liefert die Felder von contract.json', async () => {

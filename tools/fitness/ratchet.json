@@ -307,26 +307,7 @@
 				"scenario": "Ä1"
 			}
 		],
-		"bffDates": [
-			{
-				"path": "src/routes/dashboard/+page.server.ts",
-				"line": "String(c.endDate) < today &&",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 point 1 (overview)",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/dashboard/+page.server.ts",
-				"line": "expiredContracts: expired(allContracts, today),",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 point 1 (overview)",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/dashboard/+page.server.ts",
-				"line": "formerTenants: formerTenants(allContracts, documents, today),",
-				"reason": "Date derivation in the BFF from before the check of #788 part 0; moves to the backend with #788 point 1 (overview)",
-				"scenario": "Ä4"
-			}
-		]
+		"bffDates": []
 	},
 	"prSizeWarn": {
 		"files": 31,

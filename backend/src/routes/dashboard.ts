@@ -11,6 +11,7 @@ import { apartmentStatus } from '../services/apartment.service';
 import { draftsToSend } from '../services/statement-invoices.service';
 import { statusCondition } from '../services/statement.service';
 import { swissToday } from '../services/today';
+import { contractTasks } from '../services/contract-tasks.service';
 
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
@@ -141,6 +142,7 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 		},
 		statements,
 		recentActivity: await recentActivity(),
-		buildingOccupancy: await buildingOccupancy()
+		buildingOccupancy: await buildingOccupancy(),
+		contractTasks: await contractTasks() // the overview's tasks about contracts (#788)
 	};
 });
