@@ -35,6 +35,7 @@ import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
+import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 
 export interface StatementFilters {
@@ -372,7 +373,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
  * deleted, a sent one corrected (#358)
  */
 function allowed(status: string) {
-	const current = status !== 'replaced';
+	const current = !isReplaced({ status });
 	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current };
 }
 
@@ -492,7 +493,7 @@ async function openReplaced({ contractId, periodStart, periodEnd }: StatementInp
 		.where(
 			and(
 				eq(utilityStatements.contractId, contractId),
-				eq(utilityStatements.status, 'replaced'),
+				replacedInSql,
 				eq(utilityStatements.periodStart, periodStart),
 				eq(utilityStatements.periodEnd, periodEnd),
 				isNull(successor.id)
@@ -713,7 +714,7 @@ export async function updateStatement(
 	if (!existing) return null;
 
 	// A replaced statement stays as it was (#120)
-	if (existing.status === 'replaced') throw new CodedError('STATEMENT_REPLACED', 'A replaced statement cannot be changed');
+	if (isReplaced(existing)) throw new CodedError('STATEMENT_REPLACED', 'A replaced statement cannot be changed');
 	// Once sent, the amounts stay as the tenant received them
 	if (existing.status !== 'draft') {
 		const protectedFields = ['totalCosts', 'totalAdvancePayments', 'managementFeePercent', 'managementFee', 'balance'];
@@ -932,7 +933,7 @@ async function refuseUncategorized(buildingId: string, periodStart: string, peri
 export async function correctStatement(id: string): Promise<StatementWithDetails> {
 	const replaced = await getStatement(id);
 	if (!replaced) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
-	if (replaced.status !== 'replaced') throw new CodedError('STATEMENT_NOT_REPLACED', 'Statement is not replaced');
+	if (!isReplaced(replaced)) throw new CodedError('STATEMENT_NOT_REPLACED', 'Statement is not replaced');
 	if (replaced.replacedBy)
 		throw new CodedError('STATEMENT_ALREADY_CORRECTED', 'Statement already has a berichtigte Abrechnung', {
 			number: replaced.replacedBy.statementNumber
