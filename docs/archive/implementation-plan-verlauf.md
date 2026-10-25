@@ -3369,6 +3369,14 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] Closing round (`docs/reviews/p4c-review-2.md`)
 - [x] PR: «No scenario: behaviour unchanged», Refs #788 (Ä2 still above its target), pushed after this archive
 
+## Session: #813 layers.json: +server.ts and demo-data.ts in the right module
+
+No scenario: measurement tooling only, no app change.
+
+- [x] Test `classify` (`tools/arch-baseline/lib.test.ts`): `+server.ts` under `src/routes` → `bff:endpoint/<area>`, `backend/src/db/demo-data.ts` → tooling (red first)
+- [x] `layers.json`: module rule for `+server.ts`, layer and module rule for `demo-data.ts`
+- [x] Fitness green; changed values written down (`--update` where better, row in `fitness-functions.md` §6); `deps:graph` shows no `fe → bff` from `+server.ts` and no `db → be`
+- [x] Checks; review round 1 (`docs/reviews/813-review-1.md`: C-1 Major, C-2 Minor, both fixed), round 2 (`docs/reviews/813-review-2.md`: fixed, no new findings); PR `Fixes #813`, pushed after this archive
 ## Session: #788 part 5a, the frontend no longer names `replaced` (Ä2)
 
 - [x] Backend: `superseded` in what a statement allows (`GET /statements/:id`), test first
