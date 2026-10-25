@@ -3425,3 +3425,11 @@ No scenario: measurement tooling only, no app change.
 - [x] Checks: lint, check, vitest, backend tests, E2E contract features, fitness (`frontendDecisions` exceptions 39 → 19)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-815.md`
 - [x] PR: «No scenario: behaviour unchanged», Refs #815, pushed after this archive
+
+## Session: #747, #753, #719 published ports of the production compose
+
+- [x] Tests in `compose-prod.test.ts`: only the frontend publishes a host port; `ollama/ollama` pinned (red first)
+- [x] `docker-compose.prod.yml`: no ports for backend, postgres, ollama; `ollama/ollama:0.40.11`
+- [x] `docs/installation.md`: port warnings dropped; section 8 (end every session, old default database password); README and RI-U1-4 updated
+- [x] Review 747: `docs/reviews/747-review-1.md` (C-1, C-2 Minor fixed in docs, C-3 rejected)
+- [x] PR: pushed after this archive
