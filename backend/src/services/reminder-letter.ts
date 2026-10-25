@@ -3,7 +3,7 @@
  * e-mail that sends a statement (#86), in the tenant's Sprache (#106); terms as in docs/design/i18n-begriffe.md
  */
 
-import type { Language } from './pdf.service';
+import type { Language } from '../db/schema';
 
 export interface ReminderLetterInput {
 	level: number;
