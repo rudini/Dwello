@@ -8,13 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: module dependency graph (`bun run deps:graph`)
-
-Request: a dependency graph of the whole project; the product owner chose the existing import graph of `tools/arch-baseline/02-imports.ts` over madge, and no second cycle check in CI (the fitness check `module-cycle` covers it). The pdf ↔ reminder-letter cycle went to #808. No scenario: tooling only, no app change.
-
-- [x] `tools/arch-baseline/graph.ts`: production modules as DOT, edge weight = file imports, cycle edges red (test first)
-- [x] `deps:graph` script in `package.json`, output under `build/deps/` (not committed), usage in `docs/architecture/fitness-functions.md`
-- [x] Slice review (`code-reviewer`): `docs/reviews/depsgraph-review-1.md`
-- [x] Checks: lint, check, backend type-check, affected tests, Prettier on added files
-- [ ] PR
