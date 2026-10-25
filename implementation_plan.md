@@ -16,5 +16,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
 - [x] Docs: `docs/api-specification.md` §14; fitness ratchet unchanged (BFF decisions stay 8)
 - [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
-- [ ] Slice review (`code-reviewer`) and closing round
+- [x] Slice review round 1 (`docs/reviews/p4b-review-1.md`)
+- [ ] Closing round
 - [ ] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it»

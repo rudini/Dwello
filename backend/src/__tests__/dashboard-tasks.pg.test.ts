@@ -131,6 +131,8 @@ describe('Aufgaben der Übersicht zu Mietverträgen', () => {
 		const first = await contractWith('2099-03-31', { terminated: false, movedOut: false });
 		const parking = await createApartment({ buildingId: first.building, number: 'P1', floor: 0, area: '12', rooms: '1' });
 		const second = await createContract({ apartmentId: parking.id, tenantId: first.tenant, baseRent: '100', monthlyAdvancePayment: '0', startDate: '2024-01-01' });
+		// review p4b C-1: the later contract, read first, has its newest period billed, so the earlier adds a newer one last
+		await draft({ ...first, apartment: parking.id, contract: second.id }, '2025-01-01');
 		try {
 			const building = (await tasks()).missingStatements.find((b) => b.buildingId === first.building)!;
 			const starts = building.periods!.map((p) => p.start);
@@ -139,6 +141,7 @@ describe('Aufgaben der Übersicht zu Mietverträgen', () => {
 			expect(starts).toEqual([...starts].sort().reverse());
 			expect(starts.at(-1)!.slice(0, 4)).toBe('2020');
 		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.contractId, second.id));
 			await db.delete(rentalContracts).where(eq(rentalContracts.id, second.id));
 			await deleteApartment(parking.id);
 		}
