@@ -13,5 +13,16 @@
 	"recentActivity": [],
 	"buildingOccupancy": [
 		{ "buildingId": "b1", "buildingName": "Seeblick", "totalApartments": 2, "occupiedApartments": 1, "occupancyRate": 50 }
-	]
+	],
+	"contractTasks": {
+		"noticedContracts": [
+			{ "id": "c1", "tenantName": "Anna Keller", "apartmentId": "a1", "apartmentNumber": "2.01", "endDate": "2099-03-31" }
+		],
+		"expiredContracts": [{ "id": "c2", "tenantName": "Bruno Meier", "endDate": "2025-12-31" }],
+		"formerTenants": [{ "tenantId": "t3", "tenantName": "Carla Frei", "endDate": "2025-03-31", "count": 1 }],
+		"oldAddresses": [{ "tenantId": "t3", "tenantName": "Carla Frei" }],
+		"missingStatements": [
+			{ "building": "Ahornhof", "buildingId": "b1", "periods": [{ "start": "2025-01-01", "end": "2025-12-31" }] }
+		]
+	}
 }

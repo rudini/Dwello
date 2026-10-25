@@ -3327,3 +3327,26 @@ No scenario: type-only import change, no behaviour change. Rides PR #810 (it ref
 - [x] `reminder-letter.ts` takes `Language` from `../db/schema`; fitness green
 - [x] madge `--circular` (type imports included) reports no cycle over `src/` and `backend/src`
 - [x] Checks; review round 1 (`docs/reviews/808-review-1.md`: no findings, so no closing round); PR #810 `Fixes #808`, pushed after this archive
+## Session: #788 part 4a, the overview's contract tasks (the backend decides)
+
+Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three date derivations of the overview to `GET /api/v1/dashboard` (`tasks.noticedContracts`, `tasks.expiredContracts`, `tasks.formerTenants`), reusing the backend rules of parts 2 and 5a. 4b `oldAddresses` and `missingStatements`, 4c reminders and the five-year hint follow. Behaviour unchanged (`No scenario: behaviour unchanged; dashboard.feature pins the tasks`). Refs #788.
+
+- [x] Backend `contractTasks.noticedContracts` (`dashboard-tasks.pg.test.ts`, red first; the successor case by taking the check out). The field is `contractTasks`: the page already returns its own `tasks`
+- [x] Backend `contractTasks.expiredContracts` by `fixedTermCheck` (red first)
+- [x] Backend `contractTasks.formerTenants` by `formerTenantDocuments`, only unchecked (red first)
+- [x] API contract `dashboard.json` (checked with one record of each); BFF reads the three lists (`dashboard.test.ts`, 2 tests red first); the documents list is no longer loaded; `src/lib/former-tenant-documents.ts` and its test go (the backend tests cover each case). One test changes on purpose: when the other lists fail, the contract tasks now stay (they come with the figures)
+- [x] Fitness `--update` (bffDates 3 → 0, BFF decisions 11 → 8), `fitness-functions.md`, `docs/api-specification.md`; coverage floors hold
+- [x] E2E `dashboard`, `tenant-detail` (Chromium and API, 62) green
+- [x] Slice review round 1 (`docs/reviews/p4a-review-1.md`: C-1 Major, two cases of «notice without a next tenant» no layer tested after the move: a notice after its end, a later contract in another apartment; a pg test added, it pins kept behaviour and fails with each of the two mutations the review named)
+- [x] Closing round (`docs/reviews/p4a-review-2.md`: C-1 closed, no new findings), PR pushed after this archive
+
+## Session: #788 part 4b, old addresses and missing statements in the backend
+
+- [x] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
+- [x] API contract `tests/contracts/dashboard.json` and `api-contracts.pg.test.ts`
+- [x] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
+- [x] Docs: `docs/api-specification.md` §14; fitness ratchet unchanged (BFF decisions stay 8)
+- [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
+- [x] Slice review round 1 (`docs/reviews/p4b-review-1.md`)
+- [x] Closing round (`docs/reviews/p4b-review-2.md`)
+- [x] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it», pushed after this archive
