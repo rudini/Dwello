@@ -56,6 +56,18 @@ describe('Aufgaben der Übersicht zu Mietverträgen', () => {
 		}
 	});
 
+	// review p4a C-1, K-6: the notice stays a task after its end; only a later contract of the same apartment counts
+	it('nennt eine Kündigung auch nach dem Vertragsende und trotz eines späteren Mietvertrags in einer anderen Wohnung', async () => {
+		const ended = await contractWith('2025-03-31');
+		const elsewhere = await contractWith('2099-03-31');
+		const other = await createRental(crypto.randomUUID(), { startDate: '2099-04-01', monthlyAdvancePayment: '0' });
+		rentals.push(other);
+
+		const listed = ids((await tasks()).noticedContracts);
+		expect(listed).toContain(ended.contract);
+		expect(listed).toContain(elsewhere.contract);
+	});
+
 	// A-6: an agreed end passed, the tenant may have stayed; as the contract page asks it
 	it('nennt einen abgelaufenen befristeten Mietvertrag ohne Auszug', async () => {
 		const expired = await contractWith('2025-12-31', { terminated: false, movedOut: false });

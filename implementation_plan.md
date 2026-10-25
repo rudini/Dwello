@@ -19,4 +19,5 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] API contract `dashboard.json` (checked with one record of each); BFF reads the three lists (`dashboard.test.ts`, 2 tests red first); the documents list is no longer loaded; `src/lib/former-tenant-documents.ts` and its test go (the backend tests cover each case). One test changes on purpose: when the other lists fail, the contract tasks now stay (they come with the figures)
 - [x] Fitness `--update` (bffDates 3 → 0, BFF decisions 11 → 8), `fitness-functions.md`, `docs/api-specification.md`; coverage floors hold
 - [x] E2E `dashboard`, `tenant-detail` (Chromium and API, 62) green
-- [ ] Review, PR
+- [x] Slice review round 1 (`docs/reviews/p4a-review-1.md`: C-1 Major, two cases of «notice without a next tenant» no layer tested after the move: a notice after its end, a later contract in another apartment; a pg test added, it pins kept behaviour and fails with each of the two mutations the review named)
+- [ ] Closing round, PR
