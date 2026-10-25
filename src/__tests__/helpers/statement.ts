@@ -5,7 +5,8 @@ import type { StatementWithDetails } from '$lib/types';
 const allowedFor = (status = 'draft') => ({
 	editable: status !== 'replaced',
 	correctable: status !== 'replaced' && status !== 'draft',
-	asksPayment: status !== 'replaced'
+	asksPayment: status !== 'replaced',
+	superseded: status === 'replaced'
 });
 
 /** A statement as the pages receive it; override what a test is about */

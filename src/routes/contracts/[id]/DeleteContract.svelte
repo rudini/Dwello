@@ -31,15 +31,13 @@
 	} = $props();
 
 	const billed = $derived(!!billedBy?.length);
-	// each with its status: a draft can be deleted, a sent or paid one stays (Fachreview V-3)
-	const statusOf = (status: string) =>
-		status === 'draft'
-			? m.statements_status_draft()
-			: status === 'paid'
-				? m.contracts_billed_paid()
-				: status === 'replaced'
-					? m.contracts_billed_replaced()
-					: m.contracts_billed_sent();
+	// each with its status label: a draft can be deleted, a sent or paid one stays (Fachreview V-3)
+	const labels: Record<string, () => string> = {
+		draft: m.statements_status_draft,
+		paid: m.contracts_billed_paid,
+		replaced: m.contracts_billed_replaced
+	};
+	const statusOf = (status: string) => (labels[status] ?? m.contracts_billed_sent)();
 	const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));
 	// what a started contract's deletion means: with an end there is no «Beenden» (Fachreview V-11); an ended one says
 	// when it has no statement, unknown is not none (A-8, review C-1)

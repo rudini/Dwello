@@ -113,6 +113,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	editable?: boolean; // what it allows (#788); only in the detail
 	correctable?: boolean;
 	asksPayment?: boolean;
+	superseded?: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
 	heatingProfile?: {
 		id: string;
 		name: string;
@@ -372,7 +373,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
  */
 function allowed(status: string) {
 	const current = status !== 'replaced';
-	return { editable: current, correctable: current && status !== 'draft', asksPayment: current };
+	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current };
 }
 
 async function carriedFromOf(id: string | null) {

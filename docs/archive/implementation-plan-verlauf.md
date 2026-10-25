@@ -3368,3 +3368,14 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] Slice review round 1 (`docs/reviews/p4c-review-1.md`)
 - [x] Closing round (`docs/reviews/p4c-review-2.md`)
 - [x] PR: «No scenario: behaviour unchanged», Refs #788 (Ä2 still above its target), pushed after this archive
+
+## Session: #788 part 5a, the frontend no longer names `replaced` (Ä2)
+
+- [x] Backend: `superseded` in what a statement allows (`GET /statements/:id`), test first
+- [x] BFF mapper and type; `Correction.svelte` shows the hint by `superseded`; DOM and mapping tests first
+- [x] `DeleteContract.svelte`, `document-status.ts`: status labels by a mapping; `StatusFilter.svelte` without the type exclusion (kept behaviour, pinned by `contract-detail-page.dom`, `documents.dom`)
+- [x] API contract `tests/contracts/statement.json`; `docs/api-specification.md`; `docs/architecture/fitness-functions.md` (`replaced` 13 → 9 files, 2 layers)
+- [x] Checks: lint, check, type-check, vitest (3636), backend capabilities and api-contracts (84), E2E statement-detail, contract-detail, documents, statement-reminder (188), fitness
+- [x] Slice review round 1 (`docs/reviews/p5ae2-review-1.md`)
+- [x] Closing round (`docs/reviews/p5ae2-review-2.md`)
+- [x] PR: «No scenario: behaviour unchanged», Refs #788, pushed after this archive
