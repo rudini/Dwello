@@ -6,7 +6,8 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, rentalContracts, tenants } from '../db/schema';
+import { documents, rentalContracts, tenants, utilityStatements } from '../db/schema';
+import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDocument } from '../services/document.service';
 import { createContract } from '../services/contract.service';
 import { createTenant } from '../services/tenant.service';
@@ -21,14 +22,32 @@ async function contractWith(endDate: string, flags = { terminated: true, movedOu
 	rentals.push(rental);
 	return rental;
 }
-type Task = { id?: string; tenantId?: string };
+type Task = { id?: string; tenantId?: string; tenantName?: string; buildingId?: string; building?: string; periods?: { start: string }[] };
 const tasks = async () =>
 	((await (await callApi('/api/v1/dashboard')).json()) as { contractTasks: Record<string, Task[]> }).contractTasks;
 const ids = (list: Task[]) => list.map((t) => t.id ?? t.tenantId);
+let number = 0;
+const draft = (of: Awaited<ReturnType<typeof createRental>>, periodStart: string) =>
+	db.insert(utilityStatements).values({
+		tenantId: of.tenant,
+		apartmentId: of.apartment,
+		contractId: of.contract,
+		statementNumber: `NK-${crypto.randomUUID()}-${++number}`,
+		periodStart,
+		periodEnd: `${periodStart.slice(0, 4)}-12-31`,
+		statementDate: '2021-03-01',
+		rentalDays: 365,
+		rentalStart: periodStart,
+		rentalEnd: `${periodStart.slice(0, 4)}-12-31`,
+		totalCosts: '1200.00',
+		totalAdvancePayments: '1000.00',
+		balance: '200.00'
+	});
 
 afterAll(async () => {
 	for (const rental of rentals) {
 		await db.delete(documents).where(eq(documents.tenantId, rental.tenant));
+		await db.delete(utilityStatements).where(eq(utilityStatements.tenantId, rental.tenant));
 		await rental.remove();
 	}
 });
@@ -89,5 +108,52 @@ describe('Aufgaben der Übersicht zu Mietverträgen', () => {
 		const { formerTenants } = await tasks();
 		expect(formerTenants).toContainEqual(expect.objectContaining({ tenantId: unchecked.tenant, endDate: '2025-03-31', count: 1 }));
 		expect(ids(formerTenants)).not.toContain(checked.tenant);
+	});
+
+	// A-5 (#114): a draft would go to the apartment the moved-out tenant left; once per tenant, whatever its periods
+	it('nennt Mieter, deren Entwürfe an die Adresse der verlassenen Wohnung gingen, einmal', async () => {
+		const movedOut = await contractWith('2021-02-28');
+		const elsewhere = await contractWith('2021-02-28');
+		await db.update(tenants).set({ address: 'Testweg 1', postalCode: '8400' }).where(eq(tenants.id, movedOut.tenant));
+		await db.update(tenants).set({ address: 'Neuweg 5', postalCode: '8000' }).where(eq(tenants.id, elsewhere.tenant));
+		await draft(movedOut, '2019-01-01');
+		await draft(movedOut, '2020-01-01');
+		await draft(elsewhere, '2020-01-01');
+
+		const listed = (await tasks()).oldAddresses.filter((t) => [movedOut.tenant, elsewhere.tenant].includes(t.tenantId!));
+		const [{ tenantName }] = await db.select({ tenantName: tenants.lastName }).from(tenants).where(eq(tenants.id, movedOut.tenant));
+		expect(listed).toEqual([{ tenantId: movedOut.tenant, tenantName: `Anna ${tenantName}` }]);
+	});
+
+	// #211: per building the ended Abrechnungsperioden without a statement, each once, the latest first, with the
+	// building's id for the link to its invoices (#454)
+	it('nennt je Gebäude die fehlenden Abrechnungsperioden einmal, die neueste zuerst', async () => {
+		const first = await contractWith('2099-03-31', { terminated: false, movedOut: false });
+		const parking = await createApartment({ buildingId: first.building, number: 'P1', floor: 0, area: '12', rooms: '1' });
+		const second = await createContract({ apartmentId: parking.id, tenantId: first.tenant, baseRent: '100', monthlyAdvancePayment: '0', startDate: '2024-01-01' });
+		// review p4b C-1: the later contract, read first, has its newest period billed, so the earlier adds a newer one last
+		await draft({ ...first, apartment: parking.id, contract: second.id }, '2025-01-01');
+		try {
+			const building = (await tasks()).missingStatements.find((b) => b.buildingId === first.building)!;
+			const starts = building.periods!.map((p) => p.start);
+			expect(building.building).toStartWith('Ahornhof ');
+			expect(new Set(starts).size).toBe(starts.length);
+			expect(starts).toEqual([...starts].sort().reverse());
+			expect(starts.at(-1)!.slice(0, 4)).toBe('2020');
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.contractId, second.id));
+			await db.delete(rentalContracts).where(eq(rentalContracts.id, second.id));
+			await deleteApartment(parking.id);
+		}
+	});
+
+	it('nennt die Gebäude mit fehlenden Abrechnungen nach ihrem Namen', async () => {
+		const token = crypto.randomUUID();
+		const later = await createRental(`${token} Birke`, { startDate: '2020-04-01', monthlyAdvancePayment: '0' });
+		const earlier = await createRental(`${token} Ahorn`, { startDate: '2020-04-01', monthlyAdvancePayment: '0' });
+		rentals.push(later, earlier);
+
+		const named = (await tasks()).missingStatements.map((b) => b.buildingId).filter((id) => [later.building, earlier.building].includes(id!));
+		expect(named).toEqual([earlier.building, later.building]);
 	});
 });
