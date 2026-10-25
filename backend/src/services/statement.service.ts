@@ -70,6 +70,17 @@ const final = sql<boolean>`exists (
 	where ${rentalContracts.id} = ${utilityStatements.contractId}
 		and ${rentalContracts.endDate} between ${utilityStatements.periodStart} and ${utilityStatements.periodEnd}
 )`;
+/**
+ * An overdue statement whose Mahnung waits: one still «Zu versenden» holds the next (#449), the next one comes after the
+ * last one's Zahlungsfrist (#107), the first after the Mahnfrist (#64); a Rückerstattung is due at once (Fachreview V-1)
+ */
+const reminderWaits = (
+	s: { reminderToSend: boolean; nextReminderFrom: string | null; balance: string; paymentDeadline: string | null },
+	today: string,
+	mahnfrist: number
+) =>
+	s.reminderToSend ||
+	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
 const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
@@ -77,6 +88,8 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
+	// overdue: whether a Mahnung is to propose now, else null while the Zahlungsfrist runs; only in the list (#788)
+	reminderDue?: boolean | null;
 	tenant: {
 		id: string;
 		firstName: string;
@@ -221,6 +234,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 
 	// Build results with line items and compute effective status
 	const today = swissToday();
+	const mahnfrist = await getTypedConfig('reminder_after_days');
 	const statementsWithLineItems: StatementWithDetails[] = results.map((row) => {
 		// Compute effective status: if sent and past deadline, show as overdue
 		const effectiveStatus =
@@ -233,6 +247,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		return {
 			...row.statement,
 			status: effectiveStatus,
+			reminderDue: effectiveStatus === 'overdue' ? !reminderWaits(row.statement, today, mahnfrist) : null,
 			tenant: row.tenant,
 			apartment: row.apartment,
 			building: row.building,

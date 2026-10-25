@@ -9,3 +9,14 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: #788 part 4c, reminders and the five-year hint in the backend
+
+- [x] Backend: `reminderDue` on each row of `GET /statements` (null unless overdue; true when a Mahnung is to propose now: after the Mahnfrist, the next after the last Mahnung's Zahlungsfrist, none while one waits to be posted; a Rückerstattung at once), tests first
+- [x] Backend: `olderThanFiveYears` on each row of `GET /statements/outdated` (Swiss day, the 29th of February to the 28th), tests first
+- [x] API contracts `tests/contracts/statements.json`, `statements-outdated.json`
+- [x] BFF: the overview counts `reminderDue` and reads `olderThanFiveYears`; no Mahnfrist, `nextReminderFrom` or `FIVE_YEARS_AGO` left in `src/lib/overview.ts`; `overview.test.ts`, `dashboard.test.ts`
+- [x] Docs: `docs/api-specification.md`; fitness ratchet unchanged (BFF decisions stay 8)
+- [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`, `mahnwesen` scenarios
+- [ ] Slice review (`code-reviewer`) and closing round
+- [ ] PR: «No scenario: behaviour unchanged», Fixes or Refs #788 per its remaining points

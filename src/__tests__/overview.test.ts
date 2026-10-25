@@ -24,7 +24,6 @@ const input = (
 	noticedContracts: [],
 	oldAddresses: [],
 	paymentDeadlineDays: 30,
-	reminderAfterDays: 14,
 	expiredContracts: [],
 	...overrides,
 	// as the backend counts them (H-28, #717): without outdated drafts every draft is to send, unless a test says
@@ -239,6 +238,7 @@ describe('Aufgaben der Übersicht', () => {
 
 	// #454 (#408 point 7, #386): drafts that miss what changed since are no drafts to send
 	describe('Abrechnungen, die nicht aktuell sind', () => {
+		type Changed = { invoices: number; fuelStock: boolean; olderThanFiveYears?: boolean };
 		// what changed since: the count of invoices, and whether the Tankbestand did (#307)
 		const outdated = (
 			id: string,
@@ -247,7 +247,7 @@ describe('Aufgaben der Übersicht', () => {
 			building: string,
 			start: string,
 			end: string,
-			changed = { invoices: 1, fuelStock: false }
+			changed: Changed = { invoices: 1, fuelStock: false }
 		) => ({
 			id,
 			statementNumber: `NK-${id}`,
@@ -257,6 +257,7 @@ describe('Aufgaben der Übersicht', () => {
 			building,
 			periodStart: start,
 			periodEnd: end,
+			olderThanFiveYears: false,
 			...changed
 		});
 		const outdatedStatements = [
@@ -342,11 +343,13 @@ describe('Aufgaben der Übersicht', () => {
 			);
 		});
 
-		const correctText = (changed: { invoices: number; fuelStock: boolean }, end = '2024-12-31') =>
+		const correctText = (changed: Changed) =>
 			overviewTasks(
 				input({
 					statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 0 },
-					outdatedStatements: [outdated('s5', 'paid', 'b1', 'Seeblick', `${end.slice(0, 4)}-01-01`, end, changed)]
+					outdatedStatements: [
+						outdated('s5', 'paid', 'b1', 'Seeblick', '2024-01-01', '2024-12-31', changed)
+					]
 				})
 			).find((one) => one.id === 'correct-s5')!.text;
 
@@ -363,25 +366,14 @@ describe('Aufgaben der Übersicht', () => {
 			);
 		});
 
-		// PO 2026-10-20 (Fachreview 454-1 E-5): also after five years, with the sentence on the Verjährung
+		// PO 2026-10-20 (Fachreview 454-1 E-5): also after five years, with the sentence on the Verjährung; which period is
+		// older than five years, the backend decides (backend five-years.test.ts)
 		it('weist bei einer Abrechnungsperiode, die vor mehr als fünf Jahren endete, auf die Verjährung hin', () => {
 			const old = 'Diese Abrechnungsperiode endete vor mehr als fünf Jahren. Lassen Sie sich beraten, ob die Forderung verjährt ist.';
-			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-09')).toMatch(new RegExp(`${old}$`));
-			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-10')).not.toContain(old);
-		});
-
-		// Fachreview 454-2 V-27: five calendar years back from the Swiss day, the 29th of February to the 28th
-		it('rechnet die fünf Jahre nach dem Kalender', () => {
-			const text = (end: string) =>
-				overviewTasks({
-					...input({
-						statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 0 },
-						outdatedStatements: [outdated('s6', 'sent', 'b1', 'Seeblick', '2022-03-01', end)]
-					}),
-					today: '2028-02-29'
-				}).find((one) => one.id === 'correct-s6')!.text;
-			expect(text('2023-02-27')).toContain('vor mehr als fünf Jahren');
-			expect(text('2023-02-28')).not.toContain('vor mehr als fünf Jahren');
+			expect(correctText({ invoices: 1, fuelStock: false, olderThanFiveYears: true })).toMatch(
+				new RegExp(`${old}$`)
+			);
+			expect(correctText({ invoices: 1, fuelStock: false })).not.toContain(old);
 		});
 
 		// Fachreview 454-2 V-23: also an erledigte Abrechnung (#448) is corrected
@@ -411,71 +403,24 @@ describe('Aufgaben der Übersicht', () => {
 		expect(drafts.text).toContain('1 Nebenkostenabrechnung ist');
 	});
 
-	// #107: solange die Zahlungsfrist der letzten Mahnung läuft, ist keine Mahnung zu senden
-	it('zählt keine Abrechnung, deren nächste Mahnung erst später möglich ist', () => {
-		const overdue = (nextReminderFrom: string | null) => ({
-			id: 's1',
-			tenantName: 'Anna Keller',
-			paymentDeadline: '2026-09-20',
-			nextReminderFrom
-		});
-		const titles = (nextReminderFrom: string | null) =>
+	const overdueOne = {
+		id: 's1',
+		tenantName: 'Anna Keller',
+		paymentDeadline: '2026-09-20'
+	};
+	// #64, #107, #449, Fachreview V-1: which overdue statement needs a Mahnung now, the backend decides
+	// (backend statement-reminder-due.pg.test.ts); the overview counts only those
+	it('zählt keine überfällige Abrechnung, deren Mahnung das Backend nicht fällig nennt', () => {
+		const titles = (reminderDue: boolean) =>
 			overviewTasks(
 				input({
 					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
-					dueStatements: [overdue(nextReminderFrom)]
+					dueStatements: [{ ...overdueOne, reminderDue }]
 				})
 			).map((task) => task.title);
 
-		expect(titles('2026-10-11')).not.toContain('Überfällige Abrechnungen prüfen');
-		expect(titles('2026-10-10')).toContain('Überfällige Abrechnungen prüfen');
-		expect(titles(null)).toContain('Überfällige Abrechnungen prüfen');
-	});
-
-	// #449 (Fachreview V-1): die vorige Mahnung liegt noch «Zu versenden»; die nächste Mahnstufe ist dann nicht möglich,
-	// auch wenn die Zahlungsfrist dieser Mahnung abgelaufen ist
-	it('zählt keine Abrechnung, deren letzte Mahnung noch zu versenden ist', () => {
-		const titles = (reminderToSend: boolean) =>
-			overviewTasks(
-				input({
-					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
-					dueStatements: [
-						{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-09-20', nextReminderFrom: '2026-10-01', reminderToSend }
-					]
-				})
-			).map((task) => task.title);
-
-		expect(titles(true)).not.toContain('Überfällige Abrechnungen prüfen');
-		expect(titles(false)).toContain('Überfällige Abrechnungen prüfen');
-	});
-
-	// #64: «Überfällig» ab dem Tag nach der Zahlungsfrist, eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor
-	it('schlägt eine Mahnung erst nach der Mahnfrist vor', () => {
-		const titles = (paymentDeadline: string, reminderAfterDays: number) =>
-			overviewTasks(
-				input({
-					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
-					dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline }],
-					reminderAfterDays
-				})
-			).map((task) => task.title);
-
-		expect(titles('2026-09-26', 14)).not.toContain('Überfällige Abrechnungen prüfen');
-		expect(titles('2026-09-25', 14)).toContain('Überfällige Abrechnungen prüfen');
-		expect(titles('2026-09-26', 7)).toContain('Überfällige Abrechnungen prüfen');
-	});
-
-	// #64, Fachreview V-1: eine Rückerstattung wird nie gemahnt, der Vermieter schuldet sie ab dem Tag nach der Zahlungsfrist
-	it('nennt eine überfällige Rückerstattung ohne Mahnfrist', () => {
-		const tasks = overviewTasks(
-			input({
-				statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
-				dueStatements: [
-					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-09', refund: true }
-				]
-			})
-		);
-		expect(tasks.map((task) => task.title)).toContain('Überfällige Abrechnungen prüfen');
+		expect(titles(false)).not.toContain('Überfällige Abrechnungen prüfen');
+		expect(titles(true)).toContain('Überfällige Abrechnungen prüfen');
 	});
 
 	// a statement still within its Zahlungsfrist is not among the overdue ones it counts
@@ -484,17 +429,12 @@ describe('Aufgaben der Übersicht', () => {
 			input({
 				statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 1 },
 				dueStatements: [
+					{ ...overdueOne, reminderDue: true },
 					{
-						id: 's1',
-						tenantName: 'Anna Keller',
-						paymentDeadline: '2026-09-20',
-						nextReminderFrom: null
-					},
-					{
+						...overdueOne,
 						id: 's2',
-						tenantName: 'Eva Frei',
 						paymentDeadline: '2026-10-20',
-						nextReminderFrom: '2026-10-25'
+						reminderDue: null
 					}
 				]
 			})

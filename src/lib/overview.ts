@@ -15,18 +15,15 @@ export interface OverviewInput {
 	};
 	// toSend: the current drafts, as the backend counts them (#454, H-28 #717)
 	statementCounts: { draft: number; toSend: number; sent: number; paid: number; overdue: number };
-	// with the day from which the next Mahnung is possible, after the last reminder's Zahlungsfrist (#107)
+	// the sent ones; once the Zahlungsfrist passed, whether a Mahnung is due now, else null, as the backend decides (#788)
 	dueStatements: {
 		id: string;
 		tenantName: string;
 		paymentDeadline: string;
-		nextReminderFrom?: string | null;
-		reminderToSend?: boolean; // the last reminder still waits to be posted: no next one yet (#449)
-		refund?: boolean; // never gemahnt: the landlord pays it
+		reminderDue?: boolean | null;
 	}[];
-	// the settings: Zahlungsfrist and Mahnfrist in days (#87)
+	// the setting: Zahlungsfrist in days (#87)
 	paymentDeadlineDays: number;
-	reminderAfterDays: number;
 	lettersToSend: number;
 	// per building the parts of ended Abrechnungsperioden without a statement, the latest first (#211)
 	missingStatements?: { building: string; buildingId: string; periods: { start: string; end: string }[] }[];
@@ -42,6 +39,7 @@ export interface OverviewInput {
 		periodEnd: string;
 		invoices: number; // recorded, changed or deleted since
 		fuelStock: boolean; // the Tankbestand changed since
+		olderThanFiveYears: boolean; // the period ended more than five years ago, by the Swiss day (#788)
 	}[];
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
 	// moved out with a draft statement, still at the building's address (A-5, #114)
@@ -154,12 +152,6 @@ function newestInvoices(missing: Missing) {
 }
 
 type Outdated = NonNullable<OverviewInput['outdatedStatements']>;
-const FIVE_YEARS_AGO = (today: string) => {
-	const [year, month, day] = today.split('-').map(Number);
-	const back = new Date(Date.UTC(year - 5, month - 1, day));
-	if (back.getUTCMonth() !== month - 1) back.setUTCDate(0); // the 29th of February to the 28th (Fachreview 454-2 V-27)
-	return back.toISOString().slice(0, 10);
-};
 
 // #454 (#408 point 7): the drafts no longer current, one way per building and period (Fachreview 454-1 V-14)
 function outdatedDraftsTask(drafts: Outdated): Task | false {
@@ -189,13 +181,13 @@ export function laterText(invoices: number, fuelStock: boolean) {
 }
 
 // #454 (#408 point 7, PO 2026-10-20 E-4, E-5): a sent, paid or settled statement to correct
-const correctTasks = (statements: Outdated, today: string): Task[] =>
+const correctTasks = (statements: Outdated): Task[] =>
 	statements.map((s) => ({
 		id: `correct-${s.id}`,
 		title: m.statements_correct(),
 		text: [
 			m.dashboard_task_correct_text({ number: s.statementNumber, tenant: s.tenantName, later: laterText(s.invoices, s.fuelStock) }),
-			s.periodEnd < FIVE_YEARS_AGO(today) && m.dashboard_task_correct_old()
+			s.olderThanFiveYears && m.dashboard_task_correct_old()
 		]
 			.filter(Boolean)
 			.join(' '),
@@ -206,31 +198,20 @@ const correctTasks = (statements: Outdated, today: string): Task[] =>
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
 function workTasks({
-	today,
 	statementCounts,
 	dueStatements,
 	lettersToSend,
 	missingStatements = [],
-	outdatedStatements = [],
-	reminderAfterDays
+	outdatedStatements = []
 }: OverviewInput): Task[] {
 	const outdatedDrafts = outdatedStatements.filter((s) => s.status === 'draft');
-	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
-	// next one after the Zahlungsfrist of the last Mahnung (#107); a Rückerstattung is due at once (Fachreview V-1)
-	const waiting = (s: OverviewInput['dueStatements'][number]) =>
-		s.reminderToSend ||
-		(s.nextReminderFrom
-			? s.nextReminderFrom > today
-			: !s.refund && daysFrom(today, s.paymentDeadline) >= -reminderAfterDays);
+	// «Überfällig» from the day after the Zahlungsfrist, a Mahnung only when the backend names it due (#64, #107, #788);
+	// an overdue statement whose list failed to load still counts
 	const overdue =
-		statementCounts.overdue -
-		dueStatements.filter((s) => s.paymentDeadline < today && waiting(s)).length;
+		statementCounts.overdue - dueStatements.filter((s) => s.reminderDue === false).length;
 	const tasks: (Task | false)[] = [
 		// before a Mahnung of the same statement (Fachreview 454-1 V-12)
-		...correctTasks(
-			outdatedStatements.filter((s) => s.status !== 'draft'),
-			today
-		),
+		...correctTasks(outdatedStatements.filter((s) => s.status !== 'draft')),
 		overdue > 0 && {
 			id: 'overdue',
 			title: m.dashboard_task_overdue(),

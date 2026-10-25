@@ -243,21 +243,29 @@ describe('Übersicht laden', () => {
 		]);
 	});
 
-	// #64, Fachreview V-1: die Mahnfrist gilt nur, wo gemahnt wird; eine Rückerstattung ist ab dem Tag danach zu überweisen
-	it('nennt eine überfällige Rückerstattung gleich nach der Zahlungsfrist, eine Nachzahlung erst nach der Mahnfrist', async () => {
+	// #64, #107, #449, Fachreview V-1: whether an overdue statement needs a Mahnung now, the backend decides
+	// (backend statement-reminder-due.pg.test.ts); the overview reads it from the list
+	it('nennt eine überfällige Abrechnung erst, wenn das Backend ihre Mahnung fällig nennt', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const overdue = (balance: string) =>
+		const overdue = (reminderDue: boolean) =>
 			backend(200, [], {
 				'/statements?status=open&limit=1000': {
-					data: [{ ...statementList.data[0], paymentDeadline: '2026-10-05', balance }]
+					data: [
+						{
+							...statementList.data[0],
+							status: 'overdue',
+							paymentDeadline: '2026-10-05',
+							reminderDue
+						}
+					]
 				}
 			});
 
-		const refund = await load({ fetch: overdue('-40.00') } as never);
-		const payment = await load({ fetch: overdue('40.00') } as never);
+		const due = await load({ fetch: overdue(true) } as never);
+		const waiting = await load({ fetch: overdue(false) } as never);
 
-		expect(refund.tasks.map((task) => task.id)).toContain('overdue');
-		expect(payment.tasks.map((task) => task.id)).not.toContain('overdue');
+		expect(due.tasks.map((task) => task.id)).toContain('overdue');
+		expect(waiting.tasks.map((task) => task.id)).not.toContain('overdue');
 	});
 
 	// #605: überfällig und versendet aus zwei Abfragen: änderte sich die Zahlungsfrist dazwischen, stand dieselbe
