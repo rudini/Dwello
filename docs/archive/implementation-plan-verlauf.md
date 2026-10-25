@@ -3279,6 +3279,15 @@ Product owner, 24.10.2026: on every save (`PUT /contracts/:id`) the backend refu
 - [x] Review 792: `docs/reviews/792-review-1.md` (no findings)
 - [x] PR: pushed after this archive
 
+## Session: #803 fix the CodeQL alerts in tests and tooling
+
+- [x] Helpers `src/__tests__/helpers/markup.ts` (strip until stable, escapeRegExp) and `tests/e2e/questions/pattern.ts`; tests and steps use them
+- [x] Tools: end tags of any form, backslash escaped in Markdown cells, two ReDoS regexes (same matches over the repo); `setup.service.ts` with a bit mask
+- [x] Local CodeQL: none of the 26 left (only ignored `build/`, `cucumber-report/`)
+- [x] `SECURITY.md` and the issue text of `security-alerts.yml`: fix, don't dismiss
+- [x] E2E of the changed steps (statement-detail, statement-edit, statement-send): 117 passed
+- [x] Review 803: `docs/reviews/803-review-1.md` (C-1, C-2 Minor fixed), closing round `docs/reviews/803-review-2.md`
+- [x] PR: pushed after this archive
 ## Session: #788 part 3a, what a statement allows (capability fields)
 
 Product owner, 24.10.2026: the backend sends per statement what it allows; the frontend shows buttons and hints by these fields and keeps only the status label. Part 3 in two pull requests: 3a the frontend decisions (`MoreActions`, `PaymentPanel`, `LaterChanges`), 3b one place for «a replaced statement does not count» in the backend. Behaviour unchanged (`No scenario: behaviour unchanged; the statement-detail and correction scenarios pin the buttons and hints`). Refs #788.

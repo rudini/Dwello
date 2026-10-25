@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from 'svelte/server';
 import BuildingForm from '../routes/buildings/BuildingForm.svelte';
+import { textOf } from './helpers/markup';
 
 describe('BuildingForm', () => {
 	it('renders the create form with address search and create button', () => {
@@ -19,10 +20,7 @@ describe('BuildingForm', () => {
 			props: { mode: 'create', errors: {}, cancelHref: '/buildings' }
 		});
 		const labels = [...body.matchAll(/<label[^>]*>([\s\S]*?)<\/label>/g)].map(([, label]) =>
-			label
-				.replace(/<[^>]+>/g, '')
-				.replace(/\s+/g, ' ')
-				.trim()
+			textOf(label).replace(/\s+/g, ' ').trim()
 		);
 		expect(labels).toEqual([
 			'Gebäudename',

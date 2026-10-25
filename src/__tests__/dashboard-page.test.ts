@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from 'svelte/server';
 import DashboardPage from '../routes/dashboard/+page.svelte';
 import type { Deadline, Task } from '$lib/overview';
+import { escapeRegExp, textOf } from './helpers/markup';
 
 const task = (id: string, title: string, href: string): Task => ({
 	id,
@@ -182,7 +183,7 @@ describe('Übersicht', () => {
 		const row = page({ buildingOccupancy: [building] }).match(
 			/data-testid="occupancy-row"[\s\S]*?<\/li>/
 		)![0];
-		expect(row.replace(/<[^>]*>/g, '')).toContain(
+		expect(textOf(row)).toContain(
 			'3/4 vermietet, 2 vermietet ab 01.11.2026, 1 vermietet ab 01.12.2026'
 		);
 	});
@@ -198,7 +199,7 @@ describe('Übersicht', () => {
 		};
 		const body = page({ buildingOccupancy: [building] });
 		const row = body.match(/data-testid="occupancy-row"[\s\S]*?<\/li>/)![0];
-		expect(row.replace(/<[^>]*>/g, '')).toContain(
+		expect(textOf(row)).toContain(
 			'3/4 vermietet, Wohnung 1.01 leer, Wohnung 1.02 leer seit 01.04.2024'
 		);
 		expect(body).toMatch(
@@ -229,7 +230,7 @@ describe('Übersicht', () => {
 			'/statements/generate'
 		]) {
 			expect(body).toMatch(
-				new RegExp(`href="${href.replace(/[/?]/g, '\\$&')}"[^>]*data-testid="quick-action"`)
+				new RegExp(`href="${escapeRegExp(href)}"[^>]*data-testid="quick-action"`)
 			);
 		}
 	});

@@ -14,12 +14,12 @@ import { saveKiSettings } from './ki-settings.service';
 
 const MAX_WRONG_CODES = 5;
 const LOCK_MS = 15 * 60_000;
-// without 0/O and 1/I, which read alike; 32 signs, so a random byte maps to each equally often
+// without 0/O and 1/I, which read alike; 32 signs, so the low 5 bits of a random byte pick each equally often
 const SIGNS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 /** 8 signs, 40 bits: with 5 tries per 15 minutes beyond guessing */
 export function newSetupCode(): string {
-	const signs = [...crypto.getRandomValues(new Uint8Array(8))].map((byte) => SIGNS[byte % SIGNS.length]).join('');
+	const signs = [...crypto.getRandomValues(new Uint8Array(8))].map((byte) => SIGNS[byte & 31]).join('');
 	return `${signs.slice(0, 4)}-${signs.slice(4)}`;
 }
 

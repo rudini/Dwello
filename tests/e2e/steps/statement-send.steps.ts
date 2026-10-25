@@ -6,6 +6,7 @@ import { correspondence } from '../questions/tenant-form';
 import { openTenantDetail } from '../tasks/tenant-detail';
 import { paymentDeadline } from '../questions/statement-edit';
 import { deliverByLetter, deliverByLetterInstead, openSendConfirmation, sendStatement } from '../tasks/statement-detail';
+import { escapeRegExp } from '../questions/pattern';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -68,7 +69,7 @@ Then(
 	'nennt der Verlauf den Versand per E-Mail an {string} am Tag des Versands',
 	async ({ verwalter, seed }, tenant: string) => {
 		const email = `${seed.idOf(tenant)}@dwello.test`;
-		await verwalter.sees(history).toMatch(new RegExp(`Versendet per E-Mail an ${email.replace(/\./g, '\\.')}\\s*${swissDate(inDays(0)).replace(/\./g, '\\.')}`));
+		await verwalter.sees(history).toMatch(new RegExp(`Versendet per E-Mail an ${escapeRegExp(email)}\\s*${escapeRegExp(swissDate(inDays(0)))}`));
 	}
 );
 

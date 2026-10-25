@@ -84,6 +84,7 @@ import {
 	confirmSending
 } from '../tasks/statement-detail';
 import { inDays } from '../fixtures/dates';
+import { escapeRegExp } from '../questions/pattern';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -191,7 +192,7 @@ When('der Liegenschaftsverwalter die Abrechnung als am {string} bezahlt markiert
 
 Then('meldet das Feld «Bezahlt am» {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(paidDateInvalid).toBe('true');
-	await verwalter.sees(paidDateProblem).toMatch(new RegExp(message.replace(/\./g, '\\.')));
+	await verwalter.sees(paidDateProblem).toMatch(new RegExp(escapeRegExp(message)));
 });
 
 When('der Liegenschaftsverwalter die Abrechnung löscht', async ({ verwalter }) => {
@@ -402,7 +403,7 @@ When('der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt 
 });
 
 Then(/^nennt der Verlauf "([^"]+)" am (?:Tag des Versands|heutigen Tag)$/, async ({ verwalter }, label: string) => {
-	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
+	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${escapeRegExp(sendingDay())}`));
 });
 
 // #403 (4): a day before the Abrechnungsdatum is saved only after the confirmation
@@ -424,7 +425,7 @@ Then('nennt der Verlauf nicht {string}', async ({ verwalter }, label: string) =>
 });
 
 Then('nennt der Verlauf {string} am {string}', async ({ verwalter }, label: string, date: string) => {
-	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${date.replace(/\./g, '\\.')}`));
+	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${escapeRegExp(date)}`));
 });
 
 When('der Liegenschaftsverwalter die Zahlung zurücksetzt', async ({ verwalter }) => {

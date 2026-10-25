@@ -7,7 +7,7 @@ import { BASE, OUT, SINCE, git, quantile as q, readCsv } from './lib';
 const md: string[] = [];
 const table = (rows: Record<string, unknown>[], cols: string[], head?: string[]) => {
 	md.push(`| ${(head ?? cols).join(' | ')} |`, `|${cols.map(() => '---').join('|')}|`);
-	for (const r of rows) md.push(`| ${cols.map((c) => String(r[c] ?? '').replace(/\|/g, '\\|')).join(' | ')} |`);
+	for (const r of rows) md.push(`| ${cols.map((c) => String(r[c] ?? '').replace(/[\\|]/g, '\\$&')).join(' | ')} |`);
 	md.push('');
 };
 const h = (t: string) => md.push(`### ${t}`, '');

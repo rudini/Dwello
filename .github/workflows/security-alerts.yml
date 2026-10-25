@@ -45,7 +45,8 @@ jobs:
           \`$(alert .most_recent_instance.location.path):$(alert .most_recent_instance.location.start_line)\` (rule \`$(alert .rule.id)\`)
 
           ## Done means
-          - Fixed $deadline (SECURITY.md), or, in tests or tooling without a real attack path, dismissed on GitHub with a reason.
+          - Fixed $deadline (SECURITY.md); in tests or tooling without a real attack path fixed too, without a deadline.
+          - Dismissed on GitHub only as a false positive the code cannot be written to avoid, with a comment why.
           BODY
               )
               gh issue create --title "Security: $(alert .rule.description) (CodeQL #$number)" --label nfr:security --body "$body"
