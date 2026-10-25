@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #788 part 4b, old addresses and missing statements in the backend
+
+- [ ] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
+- [ ] API contract `tests/contracts/dashboard.json` and `api-contracts.pg.test.ts`
+- [ ] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
+- [ ] Docs: `docs/api-specification.md` §14, fitness ratchet
+- [ ] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
+- [ ] Slice review (`code-reviewer`) and closing round
+- [ ] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it»

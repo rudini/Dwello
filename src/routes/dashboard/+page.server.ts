@@ -1,6 +1,5 @@
 import { m } from '$lib/paraglide/messages';
 import { fetchRecord } from '$lib/server/save-form';
-import { missingByContract } from '$lib/server/missing-statements';
 import { overviewDeadlines, overviewTasks, type Deadline, type OverviewInput, type Task } from '$lib/overview';
 import { localToday } from '$lib/contract-status';
 import { reletStarts } from '$lib/apartment';
@@ -38,7 +37,16 @@ export interface DashboardData {
 		vacant?: { number: string; lastContractEnd: string | null }[]; // empty apartments, with their last Vertragsende (#145)
 	}[];
 	// the overview's tasks about contracts, decided by the backend (#788)
-	contractTasks: Required<Pick<OverviewInput, 'noticedContracts' | 'expiredContracts' | 'formerTenants'>>;
+	contractTasks: Required<
+		Pick<
+			OverviewInput,
+			| 'noticedContracts'
+			| 'expiredContracts'
+			| 'formerTenants'
+			| 'oldAddresses'
+			| 'missingStatements'
+		>
+	>;
 }
 
 /** How far the local KI's model is (#577); unknown with a KI outside the server or when the backend cannot say */
@@ -64,39 +72,6 @@ async function settings(fetch: typeof globalThis.fetch): Promise<Record<string, 
 	return response?.ok ? ((await response.json()).data ?? {}) : {};
 }
 
-// Per building the parts of ended Abrechnungsperioden since a Vertragsbeginn without a statement, as on the contract
-// page (#211); each once, the latest first, also of a contract that has ended since
-async function missingStatements(fetch: typeof globalThis.fetch, contracts: Row[]) {
-	const missing = await missingByContract(fetch, contracts);
-	if (!missing) return []; // unknown: better no task than every building
-	const byBuilding = new Map<string, Map<string, { start: string; end: string }>>();
-	const ids = new Map<string, string>(); // the building's id by its name, for the link to its invoices (#454)
-	for (const c of contracts)
-		for (const range of missing.get(String(c.id)) ?? []) {
-			const building = String(c.buildingName);
-			ids.set(building, String(c.buildingId));
-			if (!byBuilding.has(building)) byBuilding.set(building, new Map());
-			byBuilding.get(building)!.set(`${range.start}/${range.end}`, range);
-		}
-	return [...byBuilding]
-		.sort(([a], [b]) => a.localeCompare(b, 'de-CH'))
-		.map(([building, ranges]) => ({
-			building,
-			buildingId: ids.get(building)!,
-			periods: [...ranges.values()].sort(
-				(a, b) => b.start.localeCompare(a.start) || b.end.localeCompare(a.end)
-			)
-		}));
-}
-
-// Drafts that would go to the apartment a moved-out tenant left, once per tenant (A-5, #114)
-const oldAddresses = (drafts: Row[]) => [
-	...new Map(
-		drafts
-			.filter((s) => s.oldAddress)
-			.map((s) => [String(s.tenantId), { tenantId: String(s.tenantId), tenantName: tenantOf(s) }])
-	).values()
-];
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
 	return tenant ? `${tenant.firstName} ${tenant.lastName}` : '';
@@ -115,17 +90,7 @@ export const load = async ({
 	const kiModel: Promise<KiModel> = Promise.all([answer('ki-settings'), answer('ki/model')]).then(([ki, model]) =>
 		ki?.mode === 'none' && !ki.byOperator ? { state: 'none' } : (model ?? { state: 'unknown' })
 	);
-	const [
-		figures,
-		open,
-		letters,
-		contracts,
-		apartments,
-		allContracts,
-		stored,
-		drafts,
-		outdated
-	] = await Promise.all([
+	const [figures, open, letters, contracts, apartments, stored, outdated] = await Promise.all([
 		fetchRecord(
 			fetch,
 			`${BACKEND_URL}/api/v1/dashboard`,
@@ -137,9 +102,7 @@ export const load = async ({
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
 		list(fetch, 'apartments?limit=1000', 'apartments'),
-		list(fetch, 'contracts?limit=1000', 'contracts'),
 		config,
-		list(fetch, 'statements?status=draft&limit=1000', 'data'),
 		list(fetch, 'statements/outdated', 'statements') // #454
 	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
@@ -153,9 +116,10 @@ export const load = async ({
 				lastContractEnd: (a.lastContractEnd as string | null) ?? null
 			}))
 	}));
-	// which contracts need a next tenant, a question whether the tenant stayed, or their former tenant's documents
-	// checked, the backend decides (#788)
-	const { noticedContracts, expiredContracts, formerTenants } = figures.contractTasks;
+	// which contracts need a next tenant, a question whether the tenant stayed, their former tenant's documents checked,
+	// a new address or a statement, the backend decides (#788)
+	const { noticedContracts, expiredContracts, formerTenants, oldAddresses, missingStatements } =
+		figures.contractTasks;
 	const today = localToday(); // the day in Switzerland
 	const input = {
 		today,
@@ -172,10 +136,10 @@ export const load = async ({
 		paymentDeadlineDays: Number(stored.payment_deadline_days ?? 30),
 		reminderAfterDays: Number(stored.reminder_after_days ?? 14),
 		lettersToSend: letters.length,
-		missingStatements: await missingStatements(fetch, allContracts).catch(() => []),
+		missingStatements,
 		outdatedStatements: outdated as OverviewInput['outdatedStatements'],
 		noticedContracts,
-		oldAddresses: oldAddresses(drafts),
+		oldAddresses,
 		expiredContracts,
 		formerTenants,
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
