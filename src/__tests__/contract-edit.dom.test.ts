@@ -34,10 +34,15 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 	baseRent: '950.00',
 	additionalRent: null,
 	monthlyAdvancePayment: '150.00',
-	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }]
+	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }],
+	status: 'active' as 'active' | 'ended' | 'future' // as the backend decides it (#784, #815)
 });
-const data = (endDate: string | null = null, terminated = false) => ({
-	contract: contract(endDate, terminated),
+const data = (
+	endDate: string | null = null,
+	terminated = false,
+	status?: 'active' | 'ended' | 'future'
+) => ({
+	contract: { ...contract(endDate, terminated), ...(status && { status }) },
 	tenant: 'Anna Keller',
 	apartment: 'Wohnung 2.01 · Ahornhof',
 	categories: [] // the boxes of the agreed Nebenkosten (#91)
@@ -120,7 +125,8 @@ describe('Mietvertrag bearbeiten', () => {
 
 	// fach review 464-2 V-5: before the start a change corrects the entry; the rules of an increase do not apply
 	it('nennt bei einem künftigen Mietvertrag keine Regel einer Erhöhung des Akontos', async () => {
-		show(EditPage, { data: { ...data(), contract: { ...contract(), startDate: '2099-01-01' } } } as never);
+		const future = { ...contract(), startDate: '2099-01-01', status: 'future' };
+		show(EditPage, { data: { ...data(), contract: future } } as never);
 		await settle();
 		const help = byTestId('contract-advance-payment-input-help')!.textContent!;
 		expect(help).toContain('Fehlende Zahlungen regeln Sie ausserhalb von Dwello.');
@@ -317,6 +323,13 @@ describe('Mietvertrag bearbeiten', () => {
 	// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
 	const onTermination = 'frühestens auf den nächsten Kündigungstermin';
 	const afterEnd = 'erst nach dem Vertragsende möglich';
+	// #815: whether the contract runs, the backend says; the form does not compare dates
+	it('nennt die Regeln eines laufenden Mietvertrags nur, wenn das Backend ihn laufend nennt', async () => {
+		show(EditPage, { data: data(null, false, 'ended') } as never);
+		await settle();
+		expect(byTestId('contract-running-hint')).toBeNull();
+	});
+
 	// #388: the befristet hint names the form rule too
 	const afterEndWithForm = `${afterEnd}, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.`;
 	it.each([

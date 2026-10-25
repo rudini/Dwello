@@ -16,7 +16,6 @@
 	} from '$lib/contract-form';
 	import {
 		billsIn,
-		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
 		billedDaysError,
@@ -68,9 +67,7 @@
 	const today = localToday();
 	// Only a start moved before the saved one and into the past is questioned
 	const pastBefore = untrack(() => [today, values.startDate].sort()[0]);
-	const running = $derived(
-		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
-	);
+	const running = $derived(contract.status === 'active');
 	const fixedTerm = $derived(!!contract.endDate && !contract.terminated);
 	const runningText = $derived(
 		fixedTerm ? m.contracts_running_text_fixed_term() : m.contracts_running_text()

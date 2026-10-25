@@ -3,7 +3,6 @@ import {
 	contractEndError,
 	contractEnd,
 	contractPeriod,
-	contractStatusOn,
 	endedSince,
 	localToday,
 	pastEndConfirmation,
@@ -15,17 +14,6 @@ import {
 const today = '2026-10-10';
 
 describe('Vertragsstatus', () => {
-	it.each([
-		['2024-04-01', null, 'active'],
-		['2024-04-01', '2026-10-10', 'active'], // the last day still counts, as in the backend's filter
-		['2024-04-01', '2026-10-09', 'ended'],
-		['2026-10-10', null, 'active'],
-		['2026-10-11', null, 'future'],
-		['2099-11-01', '2100-10-31', 'future']
-	])('ein Mietvertrag von %s bis %s ist %s', (start, end, status) => {
-		expect(contractStatusOn(start, end, today)).toBe(status);
-	});
-
 	it('nennt den Status mit den Worten des Glossars', () => {
 		expect(Object.values(statusBadges).map((b) => b.label)).toEqual([
 			'Laufend',

@@ -20,7 +20,7 @@ import contractMissing from '../../tests/contracts/contract-missing-statements.j
 import contractsMissing from '../../tests/contracts/contracts-missing-statements.json';
 
 describe('Vertragsstatus', () => {
-	it('gibt Liste und Detail den Tag des Servers mit', async () => {
+	it('gibt dem Detail den Tag des Servers mit', async () => {
 		const urls: string[] = [];
 		const fetch = (async (url: string) => {
 			urls.push(url);
@@ -34,15 +34,35 @@ describe('Vertragsstatus', () => {
 			});
 		}) as typeof globalThis.fetch;
 
-		const list = (await listLoad({
-			url: new URL('http://localhost/contracts?status=future'),
-			fetch
-		} as never)) as { today: string };
+		await listLoad({ url: new URL('http://localhost/contracts?status=future'), fetch } as never);
 		const detail = (await load({ params: { id: 'c1' }, fetch } as never)) as { today: string };
 
-		expect(list.today).toBe(localToday());
 		expect(detail.today).toBe(localToday());
 		expect(urls[0]).toContain('status=future');
+	});
+
+	// #815: the backend decides the Vertragsstatus by the Swiss day; list and page pass it on
+	it('gibt Liste und Detail den Vertragsstatus des Backends weiter', async () => {
+		const [listed] = contractList.contracts;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/missing-statements')) return Response.json([]);
+			if (url.includes('/contracts?'))
+				return Response.json({ ...contractList, contracts: [{ ...listed, status: 'future' }] });
+			if (url.includes('/contracts/c1'))
+				return Response.json({ ...contractDetail, status: 'ended' });
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const list = (await listLoad({
+			url: new URL('http://localhost/contracts'),
+			fetch
+		} as never)) as { contracts: { status: string }[] };
+		const detail = (await load({ params: { id: 'c1' }, fetch } as never)) as {
+			contract: { status: string };
+		};
+
+		expect(list.contracts[0].status).toBe('future');
+		expect(detail.contract.status).toBe('ended');
 	});
 
 	// J-1: die Liste nennt eine Kündigung wie die Detailseite, nicht «befristet»

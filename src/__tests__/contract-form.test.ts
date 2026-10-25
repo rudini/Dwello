@@ -65,6 +65,7 @@ describe('initialContractValues', () => {
 			apartmentId: 'a1',
 			startDate: '2024-04-01',
 			endDate: '2026-03-31',
+			status: 'ended' as const,
 			baseRent: '950.00',
 			additionalRent: null,
 			monthlyAdvancePayment: '120.00',

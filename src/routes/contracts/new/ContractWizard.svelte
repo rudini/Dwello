@@ -28,7 +28,7 @@
 		stepErrors,
 		offeredBilledUntil
 	} from '$lib/contract-wizard';
-	import { contractPeriod, contractStatusOn } from '$lib/contract-status';
+	import { contractPeriod } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -116,12 +116,7 @@
 	const taken = $derived(lastRent(listed.get(values.apartmentId) ?? {}, values.startDate));
 	const takenFrom = $derived(
 		taken && rentTakenOver(values, taken)
-			? contractPeriod(
-					taken.startDate,
-					taken.endDate,
-					contractStatusOn(taken.startDate, taken.endDate, today),
-					taken.terminated
-				)
+			? contractPeriod(taken.startDate, taken.endDate, taken.status, taken.terminated)
 			: null
 	);
 

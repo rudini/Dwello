@@ -13,6 +13,7 @@ import {
 	type ContractFormValues
 } from './contract-form';
 import type { AvailabilityInfo } from './utils/contract-availability';
+import type { RentalContract } from './types';
 import { formatCurrency, formatDateLong } from './utils/format';
 
 type Field = keyof ContractFormValues;
@@ -275,6 +276,7 @@ export type ListedContract = {
 	startDate: string;
 	endDate: string | null;
 	terminated?: boolean;
+	status: RentalContract['status'];
 	baseRent: string;
 	additionalRent?: string | null;
 	monthlyAdvancePayment?: string | null;
@@ -305,7 +307,8 @@ export function lastRent(
 		flatRateUtilityCharge: kept(last.flatRateUtilityCharge),
 		startDate: last.startDate,
 		endDate: last.endDate,
-		terminated: !!last.terminated
+		terminated: !!last.terminated,
+		status: last.status
 	};
 }
 

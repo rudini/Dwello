@@ -5,16 +5,6 @@ import { m } from '$lib/paraglide/messages';
 
 type Status = ContractHistory['status'];
 
-/** Vertragsstatus on a day (YYYY-MM-DD): running up to and including its last day, as the backend filters */
-export function contractStatusOn(
-	startDate: string,
-	endDate: string | null | undefined,
-	today: string
-): Status {
-	if (startDate.slice(0, 10) > today) return 'future';
-	return endDate && endDate.slice(0, 10) < today ? 'ended' : 'active';
-}
-
 /** Its first day to bill: the day after «Abgerechnet bis» (#133), otherwise the Vertragsbeginn */
 function billingStart(contract: { startDate: string; billedUntil?: string | null }) {
 	const begin = contract.startDate.slice(0, 10);

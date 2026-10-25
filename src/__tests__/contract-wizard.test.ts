@@ -282,7 +282,7 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 
 // P-17 (#144): Nettomiete, Zusatzmiete und Akonto aus dem letzten Mietvertrag der Wohnung
 describe('Beträge des letzten Mietvertrags', () => {
-	const contract = listed.contracts[0]; // 950.00 Nettomiete, 0.00 Zusatzmiete, 150.00 Akonto
+	const contract = { ...listed.contracts[0], status: 'active' as const }; // 950.00 Nettomiete, 0.00 Zusatzmiete, 150.00 Akonto
 	const earlier = {
 		...contract,
 		id: 'c0',
@@ -297,7 +297,8 @@ describe('Beträge des letzten Mietvertrags', () => {
 			...taken,
 			startDate: '2024-04-01',
 			endDate: '2099-03-31',
-			terminated: true
+			terminated: true,
+			status: 'active' // as the backend decides it (#815): the wizard names its period with it
 		});
 	});
 

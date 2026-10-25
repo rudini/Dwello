@@ -76,6 +76,7 @@ export interface RentalContract {
 	startDate: string;
 	endDate?: string | null;
 	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
+	status: 'active' | 'ended' | 'future'; // the Vertragsstatus, decided by the backend by the Swiss day (#784, #815)
 	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
 	billedUntil?: string | null; // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 	baseRent: string | number; // decimal from DB
@@ -163,7 +164,6 @@ export interface ContractWithDetails extends RentalContract {
 
 // Contracts list response
 export interface ContractsListData {
-	today: string; // the server's day, so that every Vertragsstatus is computed from the same one
 	contracts: ContractWithDetails[];
 	total: number;
 	page: number;
