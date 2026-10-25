@@ -188,8 +188,11 @@ describe('Fristen der Übersicht aus dem Backend', () => {
 	it('nennt das Vertragsende einer Kündigung mit späterem Mietvertrag der Wohnung', async () => {
 		const end = daysAfter(swissToday(), 20);
 		const noticed = await contractWith(end);
-		await createContract({ apartmentId: noticed.apartment, tenantId: noticed.tenant, baseRent: '900', monthlyAdvancePayment: '100', startDate: daysAfter(end, 1) });
-
-		expect((await deadlines()).find((d) => d.id === noticed.contract)).toMatchObject({ kind: 'Vertragsende', days: 20 });
+		const successor = await createContract({ apartmentId: noticed.apartment, tenantId: noticed.tenant, baseRent: '900', monthlyAdvancePayment: '100', startDate: daysAfter(end, 1) });
+		try {
+			expect((await deadlines()).find((d) => d.id === noticed.contract)).toMatchObject({ kind: 'Vertragsende', days: 20 });
+		} finally {
+			await db.delete(rentalContracts).where(eq(rentalContracts.id, successor.id)); // review i815d C-2
+		}
 	});
 });

@@ -3,7 +3,6 @@ import { load } from '../routes/dashboard/+page.server';
 import dashboardResponse from '../../tests/contracts/dashboard.json';
 import contractList from '../../tests/contracts/contracts.json';
 import apartmentList from '../../tests/contracts/apartments.json';
-import config from '../../tests/contracts/config.json';
 import statementList from '../../tests/contracts/statements.json';
 import outdatedStatements from '../../tests/contracts/statements-outdated.json';
 import kiModelLoading from '../../tests/contracts/ki-model-loading.json';
@@ -109,8 +108,6 @@ function backend(
 	overrides: Record<string, unknown> = {}
 ) {
 	const answers: Record<string, unknown> = {
-		// Zahlungsfrist 45 and Mahnfrist 10 days (#87)
-		'/config': config,
 		// overdue and sent in one read (#605)
 		'/statements?status=open&limit=1000': {
 			data: [
@@ -125,7 +122,6 @@ function backend(
 					paymentDeadline: '2026-10-20',
 					tenant: { firstName: 'Bruno', lastName: 'Meier' }
 				},
-				// within the Zahlungsfrist of 45 days, so still shown (#87)
 				{
 					id: 's3',
 					paymentDeadline: '2026-11-20',
@@ -135,16 +131,6 @@ function backend(
 		},
 		'/documents?status=to_send': { data: [{ id: 'd1' }, { id: 'd2' }] },
 		'/statements/outdated': { statements: [] },
-		'/contracts?status=active&limit=100': {
-			contracts: [
-				{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-11-01' },
-				// given notice: a task names it, not the deadline (A-4)
-				{ id: 'n5', tenantName: 'Mieter n5', endDate: '2026-10-10', terminated: true },
-				// given notice with a next tenant: no task, so the deadline (review K-6)
-				{ id: 'n6', tenantName: 'Mieter n6', endDate: '2026-11-20', terminated: true },
-				{ id: 'c2', tenantName: 'Ueli Graf', endDate: null }
-			]
-		},
 		'/apartments?limit=1000': {
 			apartments: [
 				apartment('b1', 'relet', { nextContractStart: '2026-12-01' }),
