@@ -621,18 +621,6 @@
 				"scenario": "Ä4"
 			},
 			{
-				"path": "src/lib/utils/contract-availability.ts",
-				"line": "return endDate >= today;",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/utils/contract-availability.ts",
-				"line": "if (availableFromDate <= today) {",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
 				"path": "src/routes/contracts/ContractForm.svelte",
 				"line": "statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);",
 				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",

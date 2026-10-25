@@ -18,5 +18,7 @@
 	"nextContractId": null,
 	"nextContractStart": null,
 	"currentContractEnd": null,
-	"lastContractEnd": null
+	"lastContractEnd": null,
+	"blocked": false,
+	"availableFrom": "2099-04-01"
 }

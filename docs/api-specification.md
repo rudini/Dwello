@@ -70,8 +70,8 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | Query: `search` (Wohnungsnummer or building name, ignoring case), `buildingId`, `status` (`occupied`\|`relet`\|`vacant`\|`reserved`), `floor`, `limit` (default 50), `offset`. → `{ apartments, total }`; items include `status`, `nextContractStart`, `currentContractEnd` (last day of the contract running today, A-4), `buildingName` |
-| GET | `/:id` | → apartment with `building { id, name, address, postalCode, city }`, `currentTenantName`, `currentContractId`, `nextContractId` (the contract the next tenant moves in with, H-28 #717), `nextContractStart`, `currentContractEnd` (as in the list). 404 |
+| GET | `/` | Query: `search` (Wohnungsnummer or building name, ignoring case), `buildingId`, `status` (`occupied`\|`relet`\|`vacant`\|`reserved`), `floor`, `limit` (default 50), `offset`. → `{ apartments, total }`; items include `status`, `nextContractStart`, `currentContractEnd` (last day of the contract running today, A-4), `blocked` (an open-ended contract: no new contract can be recorded, #815), `availableFrom` (the day after the latest Vertragsende while it is still to come, else null; by the Swiss day, #815), `buildingName` |
+| GET | `/:id` | → apartment with `building { id, name, address, postalCode, city }`, `currentTenantName`, `currentContractId`, `nextContractId` (the contract the next tenant moves in with, H-28 #717), `nextContractStart`, `currentContractEnd`, `blocked`, `availableFrom` (as in the list). 404 |
 | GET | `/:id/history` | → `{ apartment, contracts: [{ id, tenantName, startDate, endDate, baseRent }] }`. 404 |
 | POST | `/` | Body: `buildingId` (uuid), `number`, `floor` (number), `area` (string), `rooms` (string), optional `status` (`vacant`\|`reserved`). → 201 apartment. 400 building not found; **409** number already exists in the building |
 | PUT | `/:id` | Body: any subset of `number`, `floor`, `area`, `rooms`, `status`. → apartment. 404; 409 duplicate number |

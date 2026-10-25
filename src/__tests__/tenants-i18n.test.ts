@@ -35,7 +35,7 @@ describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 		expect(checkDateRangeOverlap('2025-01-01', null, contracts).message).toBe(
 			'Overlap with an existing contract: from 01.01.2024 (open-ended)'
 		);
-		expect(computeAvailability([]).message).toBe('Apartment available');
+		expect(computeAvailability({}).message).toBe('Apartment available');
 	});
 
 	it('nennt die Wohnung eines Mieters in der Liste auf Französisch', async () => {

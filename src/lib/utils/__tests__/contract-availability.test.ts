@@ -1,25 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
 	computeAvailability,
 	checkDateRangeOverlap,
 	type ContractForAvailability
 } from '../contract-availability';
 
+// #815: the backend decides availability by the Swiss day (backend apartment-availability.pg.test.ts); this names it
 describe('computeAvailability', () => {
-	beforeEach(() => {
-		// Mock current date to 2026-01-15
-		vi.useFakeTimers();
-		vi.setSystemTime(new Date('2026-01-15'));
-	});
-
-	afterEach(() => {
-		vi.useRealTimers();
-	});
-
-	it('returns fully available when no contracts exist', () => {
-		const result = computeAvailability([]);
-
-		expect(result).toEqual({
+	it('returns fully available when the backend names neither a block nor a later day', () => {
+		expect(computeAvailability({ blocked: false, availableFrom: null })).toEqual({
 			isAvailable: true,
 			availableFrom: null,
 			hasOngoingContract: false,
@@ -28,17 +17,8 @@ describe('computeAvailability', () => {
 		});
 	});
 
-	it('returns blocked when there is an ongoing unlimited contract', () => {
-		const contracts: ContractForAvailability[] = [
-			{
-				id: 'contract-1',
-				start_date: '2025-06-01',
-				end_date: null,
-				status: 'Aktiv'
-			}
-		];
-
-		const result = computeAvailability(contracts);
+	it('returns blocked when the backend names an open-ended contract', () => {
+		const result = computeAvailability({ blocked: true, availableFrom: null });
 
 		expect(result.isAvailable).toBe(false);
 		expect(result.hasOngoingContract).toBe(true);
@@ -46,80 +26,13 @@ describe('computeAvailability', () => {
 		expect(result.message).toContain('unbefristeter Mietvertrag, nicht gekündigt');
 	});
 
-	it('returns available now when the last contract has ended', () => {
-		const contracts: ContractForAvailability[] = [
-			{
-				id: 'contract-1',
-				start_date: '2025-01-01',
-				end_date: '2025-12-31',
-				status: 'Beendet'
-			}
-		];
-
-		const result = computeAvailability(contracts);
-
-		expect(result.isAvailable).toBe(true);
-		expect(result.availableFrom).toBe(null); // Already in the past
-		expect(result.hasOngoingContract).toBe(false);
-		expect(result.statusType).toBe('available');
-	});
-
-	it('returns available from future date when contract ends in future', () => {
-		const contracts: ContractForAvailability[] = [
-			{
-				id: 'contract-1',
-				start_date: '2025-01-01',
-				end_date: '2026-03-31',
-				status: 'Aktiv'
-			}
-		];
-
-		const result = computeAvailability(contracts);
+	it('returns available from the day the backend names', () => {
+		const result = computeAvailability({ blocked: false, availableFrom: '2026-04-01' });
 
 		expect(result.isAvailable).toBe(true);
 		expect(result.availableFrom).toBe('2026-04-01');
-		expect(result.hasOngoingContract).toBe(false);
 		expect(result.statusType).toBe('available-from');
 		expect(result.message).toContain('01.04.2026');
-	});
-
-	it('handles multiple contracts and returns latest end date', () => {
-		const contracts: ContractForAvailability[] = [
-			{
-				id: 'contract-1',
-				start_date: '2024-01-01',
-				end_date: '2024-12-31',
-				status: 'Beendet'
-			},
-			{
-				id: 'contract-2',
-				start_date: '2025-01-01',
-				end_date: '2026-06-30',
-				status: 'Aktiv'
-			}
-		];
-
-		const result = computeAvailability(contracts);
-
-		expect(result.isAvailable).toBe(true);
-		expect(result.availableFrom).toBe('2026-07-01');
-		expect(result.statusType).toBe('available-from');
-	});
-
-	it('handles Date objects as well as strings', () => {
-		const contracts: ContractForAvailability[] = [
-			{
-				id: 'contract-1',
-				start_date: new Date('2025-01-01'),
-				end_date: new Date('2026-02-28'),
-				status: 'Aktiv'
-			}
-		];
-
-		const result = computeAvailability(contracts);
-
-		expect(result.isAvailable).toBe(true);
-		expect(result.availableFrom).toBe('2026-03-01');
 	});
 });
 

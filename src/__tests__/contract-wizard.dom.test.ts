@@ -22,10 +22,11 @@ const data = {
 		{ id: 't1', name: 'Anna Keller' },
 		{ id: 't2', name: 'Bruno Meier', place: 'Winterthur' }
 	],
+	// whether each can take a new contract, as the backend decides it by the Swiss day (#815)
 	apartments: [
-		{ id: 'a1', unit: '2.01', building: 'Ahornhof' },
-		{ id: 'a2', unit: '2.02', building: 'Ahornhof' },
-		{ id: 'a3', unit: '2.03', building: 'Ahornhof' }
+		{ id: 'a1', unit: '2.01', building: 'Ahornhof', blocked: false, availableFrom: null },
+		{ id: 'a2', unit: '2.02', building: 'Ahornhof', blocked: true, availableFrom: null },
+		{ id: 'a3', unit: '2.03', building: 'Ahornhof', blocked: false, availableFrom: '2099-01-01' }
 	],
 	categories: [] // the boxes of the agreed Nebenkosten (#91)
 };
@@ -367,6 +368,21 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 	}
+
+	// #815: when an apartment is free, the backend says; the wizard does not compare dates
+	it('nennt den Tag, ab dem die Wohnung frei ist, wie ihn das Backend nennt', async () => {
+		backend();
+		show(NewContractPage, {
+			data: { ...data, apartments: [{ ...data.apartments[0], availableFrom: '2030-05-01' }] }
+		} as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(document.querySelector('option[value="a1"]')!.textContent).toContain(
+			'verfügbar ab 01.05.2030'
+		);
+	});
 
 	// Fehler behoben (#143): ohne ihre Mietverträge galt die Wohnung als frei, der Vertragsbeginn ohne Untergrenze
 	it('zeigt eine Wohnung, deren Mietverträge nicht geladen werden konnten, nicht als frei', async () => {

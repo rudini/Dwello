@@ -57,7 +57,14 @@
 		agreed = null
 	}: {
 		tenants: { id: string; name: string; place?: string }[];
-		apartments: { id: string; unit: string; building: string; size?: string }[];
+		apartments: {
+			id: string;
+			unit: string;
+			building: string;
+			size?: string;
+			blocked?: boolean; // whether a new contract can be recorded, as the backend decides (#815)
+			availableFrom?: string | null;
+		}[];
 		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 		agreed?: string[] | null; // a contract from the old one: its agreed Nebenkosten (#368)
 	} = $props();
@@ -90,7 +97,12 @@
 	let preset: ReturnType<typeof lastRent> = null; // the amounts filled in last
 
 	const availability = $derived(
-		new Map([...(contracts ?? [])].map(([id, list]) => [id, list && computeAvailability(list)]))
+		new Map(
+			[...(contracts ?? [])].map(([id, list]) => [
+				id,
+				list && computeAvailability(apartments.find((a) => a.id === id) ?? {})
+			])
+		)
 	);
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const loading = $derived(step === 2 && !contracts); // «Weiter» waits for the apartments' contracts (#468)

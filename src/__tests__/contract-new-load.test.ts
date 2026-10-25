@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { load } from '../routes/contracts/new/+page.server';
 import allowed from '../../tests/contracts/categories-allowed.json';
 import contract from '../../tests/contracts/contract.json';
+import apartmentList from '../../tests/contracts/apartments.json';
 
 describe('Neuer Mietvertrag laden', () => {
 	// A tenant just created must be in the list, however many tenants exist (the backend sends 50 by default)
@@ -71,6 +72,23 @@ describe('Neuer Mietvertrag laden', () => {
 	});
 
 	// B-14 (#147): an empty choice would look like "no tenants yet"; the landlord sees a load error instead
+	// #815: whether a new contract can be recorded, the backend decides by the Swiss day; the wizard shows it
+	it('gibt weiter, ab wann eine Wohnung frei ist, wie es das Backend nennt', async () => {
+		const [listed] = apartmentList.apartments;
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('tenants')
+					? { tenants: [] }
+					: url.includes('categories')
+						? []
+						: { apartments: [{ ...listed, blocked: true, availableFrom: '2030-05-01' }] }
+			)) as typeof globalThis.fetch;
+		const data = (await load({ fetch } as never)) as {
+			apartments: { blocked: boolean; availableFrom: string | null }[];
+		};
+		expect(data.apartments[0]).toMatchObject({ blocked: true, availableFrom: '2030-05-01' });
+	});
+
 	it.each(['tenants', 'apartments'])('meldet einen Ladefehler, wenn %s fehlen', async (failing) => {
 		const fetch = (async (url: string) =>
 			url.includes(failing)

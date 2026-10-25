@@ -113,6 +113,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil B1: Liste, Seite, Formular und Assistent zeigen den Vertragsstatus des Backends (`status`, #784); `contractStatusOn` entfällt. `decides` erkennt auch `data.today` als Argument | Frontend-Fundstellen 82 → 81: Ausnahmen 41 → 36 (5 Ableitungen des Status weg), +3 auf der Vertragsseite, die erst der schärfere Check findet → 39; Anzeige 41 → 42 (`contract.status === 'active'`) |
 | 25.10.2026 | #815 Teil B2: die Vorprüfungen der Vertragsformulare stehen in `preChecks` mit Fehlercode und Backend-Test: «Abgerechnet bis» nach heute (`BILLED_UNTIL_FUTURE`, `billed-until.pg.test.ts`), Vertragsende vor heute ohne Bestätigung (`CONTRACT_END_PAST`) und vor dem Vertragsbeginn (`CONTRACT_END_BEFORE_START`, beide `contract-end-refusals.pg.test.ts`) | Vorprüfungen 0 → 9; Ausnahmen 39 → 30 in 17 Dateien |
 | 25.10.2026 | #815 Teil B3a: das «Gültig ab» eines neuen Akontos schlägt das Backend vor (`proposedAdvanceFrom` in `GET /contracts/:id`) | Ausnahmen 30 → 29 |
+| 25.10.2026 | #815 Teil B3b: ob eine Wohnung einen neuen Mietvertrag nehmen kann, sagt das Backend (`blocked`, `availableFrom` in `GET /apartments`); der Assistent zeigt es | Ausnahmen 29 → 27 in 15 Dateien |
 
 ## 7. Werkzeugwahl
 
