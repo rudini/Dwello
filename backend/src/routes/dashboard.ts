@@ -12,6 +12,10 @@ import { draftsToSend } from '../services/statement-invoices.service';
 import { statusCondition } from '../services/statement.service';
 import { swissToday } from '../services/today';
 import { contractTasks } from '../services/contract-tasks.service';
+import { deadlinesOf } from '../services/overview-deadlines';
+import { getTypedConfig } from '../services/config.service';
+import { listContracts } from '../services/contract.service';
+import { listStatements } from '../services/statement.service';
 import { replacedInSql } from '../services/counting-statements';
 
 const countApartments = async (where?: SQL) =>
@@ -124,6 +128,7 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 		settled: await countStatements(statusCondition('settled')), // «Erledigt» (#448)
 		overdue: await countStatements(statusCondition('overdue'))
 	};
+	const tasks = await contractTasks();
 
 	return {
 		portfolio: await portfolio(),
@@ -144,6 +149,25 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 		statements,
 		recentActivity: await recentActivity(),
 		buildingOccupancy: await buildingOccupancy(),
-		contractTasks: await contractTasks() // the overview's tasks about contracts (#788)
+		contractTasks: tasks, // the overview's tasks about contracts (#788)
+		deadlines: await deadlines(tasks.noticedContracts) // #815
 	};
 });
+
+// The overview's Zahlungsfristen and Vertragsenden (#815): a contract with a task is named by it, not twice (A-4.4)
+async function deadlines(noticed: { id: string }[]) {
+	const { statements } = await listStatements({ status: 'open', limit: 1000 });
+	const { contracts } = await listContracts({ status: 'active', limit: 1000 });
+	return deadlinesOf({
+		today: swissToday(),
+		dueStatements: statements.map((s) => ({
+			id: s.id,
+			tenantName: s.tenant ? `${s.tenant.firstName} ${s.tenant.lastName}` : '',
+			paymentDeadline: String(s.paymentDeadline)
+		})),
+		endingContracts: contracts
+			.filter((c) => c.endDate && !noticed.some((n) => n.id === c.id))
+			.map((c) => ({ id: c.id, tenantName: c.tenantName, endDate: c.endDate! })),
+		paymentDeadlineDays: await getTypedConfig('payment_deadline_days')
+	});
+}

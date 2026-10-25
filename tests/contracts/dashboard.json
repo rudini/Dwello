@@ -24,5 +24,6 @@
 		"missingStatements": [
 			{ "building": "Ahornhof", "buildingId": "b1", "periods": [{ "start": "2025-01-01", "end": "2025-12-31" }] }
 		]
-	}
+	},
+	"deadlines": [{ "id": "c1", "kind": "Vertragsende", "name": "Anna Keller", "date": "2026-11-30", "days": 36 }]
 }

@@ -234,12 +234,9 @@ describe('Übersicht laden', () => {
 			'fixed-term-f1'
 		]);
 		expect(data.tasks[1].text).toContain('2 Briefe sind');
-		expect(data.deadlines.map((d) => [d.kind, d.name, d.when])).toEqual([
-			['Zahlungsfrist', 'Anna Keller', 'seit 12 Tagen abgelaufen'],
-			['Zahlungsfrist', 'Bruno Meier', 'in 10 Tagen'],
-			['Vertragsende', 'Eva Frei', 'in 22 Tagen'],
-			['Zahlungsfrist', 'Hans Müller', 'in 41 Tagen'],
-			['Vertragsende', 'Mieter n6', 'in 41 Tagen']
+		// which deadlines and how far away, the backend says (#815, backend overview-deadlines.test.ts)
+		expect(data.deadlines.map((d) => [d.kind, d.name, d.when, d.href])).toEqual([
+			['Vertragsende', 'Anna Keller', 'in 36 Tagen', '/contracts/c1']
 		]);
 	});
 
@@ -266,32 +263,6 @@ describe('Übersicht laden', () => {
 
 		expect(due.tasks.map((task) => task.id)).toContain('overdue');
 		expect(waiting.tasks.map((task) => task.id)).not.toContain('overdue');
-	});
-
-	// #605: überfällig und versendet aus zwei Abfragen: änderte sich die Zahlungsfrist dazwischen, stand dieselbe
-	// Abrechnung in beiden Listen (die Seite brach beim Laden ab) oder in keiner. Eine Abfrage liest beide zusammen
-	it('liest überfällige und versendete Abrechnungen in einer Abfrage', async () => {
-		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const bruno = { ...statementList.data[0], id: 's9', tenant: { firstName: 'Bruno', lastName: 'Meier' } };
-		const data = await load({
-			fetch: backend(
-				200,
-				[],
-				{
-					'/statements?status=overdue&limit=100': {
-						data: [{ ...bruno, paymentDeadline: '2026-09-28' }]
-					},
-					'/statements?status=sent&limit=100': {
-						data: [{ ...bruno, paymentDeadline: '2026-11-09' }]
-					},
-					'/statements?status=open&limit=1000': {
-						data: [{ ...bruno, paymentDeadline: '2026-09-28' }]
-					}
-				}
-			)
-		} as never);
-
-		expect(data.deadlines.filter((d) => d.id === 's9').map((d) => d.date)).toEqual(['2026-09-28']);
 	});
 
 	// #454 (#408 point 7): the statements no longer current, from the backend; a sent one to correct (Fachreview 454-1 E-3)
@@ -460,18 +431,8 @@ describe('Übersicht laden', () => {
 			'successor-n1',
 			'fixed-term-f1'
 		]);
-		expect(data.deadlines).toEqual([]);
-	});
-
-	// code review C-6: a broken answer of the settings leaves their defaults, not an error page
-	it('zeigt die Übersicht auch, wenn die Einstellungen kein JSON liefern', async () => {
-		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const answer = backend();
-		const fetch = (async (url: string) =>
-			url.endsWith('/config') ? new Response('<html>') : answer(url)) as typeof globalThis.fetch;
-		const data = await load({ fetch } as never);
-
-		expect(data.deadlines.map((d) => d.name)).toContain('Bruno Meier');
+		// the deadlines too (#815)
+		expect(data.deadlines.map((d) => d.name)).toEqual(['Anna Keller']);
 	});
 
 	// Zeros would look like an empty portfolio
