@@ -15,11 +15,12 @@ Jede Form, die über die Grenze Backend ↔ BFF geht (Antwort, Eingabe, Fehlerco
 
 ## AP2 Fachregeln und fachliche Prüfungen entscheidet nur das Backend
 
-Der BFF macht OAuth, Cookies, XSRF, setzt Seiten zusammen und reicht weiter. Was ein Status bedeutet, welche Abrechnung zählt und ob eine Eingabe gültig ist, entscheidet das Backend. Der BFF zeigt dessen Ergebnis oder Fehlercode (Entscheid des PO vom 23.10.2026, #717).
+Der BFF macht OAuth, Cookies, XSRF, setzt Seiten zusammen und reicht weiter. Was ein Status bedeutet, welche Abrechnung zählt und ob eine Eingabe gültig ist, entscheidet das Backend. BFF und Frontend zeigen dessen Ergebnis oder Fehlercode (Entscheid des PO vom 23.10.2026, #717; Frontend seit 25.10.2026, #815). Das Frontend darf eine Regel vorprüfen, damit der Vermieter den Fehler sofort sieht, aber nur, wenn das Backend dieselbe Eingabe mit demselben Code ablehnt.
 
 - **Unterstützt:** Ä4 (primär), Ä1 (weniger Deklarationsorte), T1 (Regeln im schnellen `*.pg.test.ts` statt E2E, TP-T1/Ä4)
 - **Verstoss erkennbar an:**
   - einem Vergleich gegen einen Statuswert oder einer verankerten fachlichen Regex in `src/lib/server/**`, `+page.server.ts` oder `+server.ts`, die nicht auf der Allowlist für technische Prüfungen steht (`m4-decisions-outside-backend.csv`);
+  - einem Datum gegen heute oder einem Vergleich gegen einen Statuswert zusammen mit Betrag oder Datum im Frontend (`src/lib` ausser `server/`, Komponenten), der weder Anzeige oder Format ist noch eine Vorprüfung mit Fehlercode und Backend-Test (`display`, `preChecks` in `tools/fitness/ratchet.json`, #815);
   - Zählungen oder Berechnungen über mehrere Backend-Antworten im BFF (Muster von Paar #13, `overview.ts`).
 
 ## AP3 Kein Update ohne Rückweg
