@@ -120,6 +120,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil C2: «Bezahlt am» nicht in der Zukunft ist eine Vorprüfung mit `PAID_DATE_IN_FUTURE`; die zwei Vorgaben «Bezahlt am» = heute sind Feldvorgaben (Anzeige) | Ausnahmen 9 → 6; Vorprüfungen 10 → 11; Anzeige 46 → 48 |
 | 25.10.2026 | #815 Teil C3: ob die Abrechnungsperiode noch läuft, sagt das Backend (`GET /statements/check-period`); der Lauf fragt es für jedes Periodenende | Ausnahmen 6 → 4 (nur noch Teil D) |
 | 25.10.2026 | #815 Teil D1: welche Fristen die Übersicht nennt und in wie vielen Tagen, sagt das Backend (`deadlines` von `GET /dashboard`); die Übersicht fasst sie nur in Worte | Ausnahmen 4 → 1 |
+| 25.10.2026 | #815 Teil D2: ob ein Mieter anonymisiert werden kann, sagt das Backend (`anonymisable` von `GET /tenants/:id`) | Ausnahmen 1 → 0 |
 
 ## 7. Werkzeugwahl
 

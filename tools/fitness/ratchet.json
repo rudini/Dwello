@@ -613,14 +613,7 @@
 			}
 		],
 		"bffDates": [],
-		"frontendDecisions": [
-			{
-				"path": "src/routes/tenants/[id]/TenantAnonymiseCard.svelte",
-				"line": "const allowed = $derived(from <= localToday());",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			}
-		]
+		"frontendDecisions": []
 	},
 	"prSizeWarn": {
 		"files": 31,

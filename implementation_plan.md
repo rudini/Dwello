@@ -14,7 +14,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 Measured before (25.10.2026, main 5580d2a): frontend decision exceptions 4 (overview `daysFrom` and its two uses, TenantAnonymiseCard).
 
 - [x] D1 overview deadlines from the backend (`deadlines` on `GET /dashboard`, `backend/src/services/overview-deadlines.ts`); backend unit test, pg test (incl. K-6 and #605 moved from the loader tests) and API contract first; the loader no longer reads contracts and settings for it; exceptions 4 → 1
-- [ ] D2 anonymisation allowed from the backend: `anonymisable` on `GET /tenants/:id` beside `anonymisableFrom`
+- [x] D2 anonymisation allowed from the backend (`anonymisable` on `GET /tenants/:id`); pg test, API contract and DOM test first; exceptions 1 → 0
 - [ ] D3 the check also catches `===`/`!==` against today (`DATE_CMP`); the contract page toast «endet heute» (`endDate === data.today`) and any other hit move to the backend or are classified
 - [ ] Review D1–D3
 - [ ] Checks: lint, check, vitest, backend tests, E2E dashboard, tenant and contract features, fitness (exceptions 0)

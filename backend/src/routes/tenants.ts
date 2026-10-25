@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { swissToday } from '../services/today';
 import { fieldsRefused } from '../services/coded-error';
 import { newTenantFieldErrors, tenantFieldErrors } from '../services/tenant-fields';
 import { authMiddleware } from '../middleware/auth';
@@ -72,10 +73,9 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 			set.status = 404;
 			return { error: 'Tenant not found' };
 		}
-		return {
-			...tenant,
-			anonymisableFrom: await anonymisableFrom(params.id)
-		} satisfies TenantResponse;
+		const from = await anonymisableFrom(params.id);
+		// whether that day has come, by the Swiss day (#815)
+		return { ...tenant, anonymisableFrom: from, anonymisable: !!from && from <= swissToday() } satisfies TenantResponse;
 	})
 	// «Mieter anonymisieren» after the retention (#459); the body: the replacement name in the landlord's language
 	.post(

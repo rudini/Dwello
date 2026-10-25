@@ -12,6 +12,7 @@
 	"correspondenceChannel": "email",
 	"anonymisedOn": null,
 	"anonymisableFrom": null,
+	"anonymisable": false,
 	"isFuture": false,
 	"rentalContractId": "c1"
 }

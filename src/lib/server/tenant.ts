@@ -29,6 +29,7 @@ export const toTenant = (data: BackendTenant): Tenant => ({
 	country: data.country,
 	correspondenceChannel: data.correspondenceChannel,
 	anonymisableFrom: data.anonymisableFrom ?? null,
+	anonymisable: data.anonymisable === true, // that day has come, the backend says by the Swiss day (#815)
 	rentalContractId: data.rentalContractId,
 	isFuture: !!data.isFuture
 });

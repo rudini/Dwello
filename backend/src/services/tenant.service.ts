@@ -38,7 +38,7 @@ export interface TenantWithOccupancy extends Tenant {
 type TenantDetail = NonNullable<Awaited<ReturnType<typeof getTenant>>>;
 
 /** The answer of GET /tenants/:id; the frontend derives its `Tenant` from it (AP1, ADR 0003) */
-export type TenantResponse = TenantDetail & { anonymisableFrom: string | null };
+export type TenantResponse = TenantDetail & { anonymisableFrom: string | null; anonymisable: boolean };
 
 // Correlated subqueries name the outer column explicitly: drizzle leaves it unqualified in single-table selects
 /** Active: a rental contract runs today (F-4, #58) */

@@ -67,11 +67,12 @@ function open(
 	documents: unknown[] = [document_],
 	demo = false,
 	formerDocuments: unknown = null,
-	anonymisableFrom: string | null = null
+	anonymisableFrom: string | null = null,
+	anonymisable = false // whether that day has come, the backend says (#815)
 ) {
 	show(TenantPage, {
 		data: {
-			tenant: { ...tenant, anonymisableFrom },
+			tenant: { ...tenant, anonymisableFrom, anonymisable },
 			rental: {
 				contractId: 'c2',
 				apartmentId: 'a2',
@@ -288,7 +289,7 @@ describe('Mieterdetail', () => {
 
 	// #459 (#332): «Mieter anonymisieren» 10 years after the end of the year of the last event
 	it('bietet nach Ablauf der Aufbewahrung an, den Mieter zu anonymisieren, und nennt die Folge', () => {
-		open([], null, [], false, null, '2025-01-01');
+		open([], null, [], false, null, '2025-01-01', true);
 
 		expect(text('tenant-anonymise-help')).toBe(
 			'Seit dem Ende des Jahres 2014 sind 10 Jahre vergangen: Damals endete der letzte Mietvertrag oder ging die letzte Abrechnung oder Mahnung an Lea Frei. Läuft noch eine Betreibung oder ein Verfahren, warten Sie damit.'
@@ -312,6 +313,13 @@ describe('Mieterdetail', () => {
 		expect(byTestId('tenant-anonymise-button')).toBeNull();
 	});
 
+	it('nennt den Tag, solange das Backend das Anonymisieren noch nicht erlaubt', () => {
+		open([], null, [], false, null, '2025-01-01', false);
+
+		expect(text('tenant-anonymise-from')).toBe('Anonymisieren können Sie Lea Frei ab dem 01.01.2025.');
+		expect(byTestId('tenant-anonymise-button')).toBeNull();
+	});
+
 	it('bietet das Anonymisieren nicht an, solange ein Mietvertrag läuft', () => {
 		open([], null, [], false, null, null);
 
@@ -322,7 +330,7 @@ describe('Mieterdetail', () => {
 	// No scenario: only a change between loading the page and confirming (another tab, as for #522) or the server's
 	// clock reaches a refusal (code review #459 C-3)
 	it('nennt im Dialog, warum der Mieter nicht anonymisiert wurde', () => {
-		open([], { anonymiseError: 'Diesen Mieter können Sie erst ab dem 01.01.2036 anonymisieren.' }, [], false, null, '2025-01-01');
+		open([], { anonymiseError: 'Diesen Mieter können Sie erst ab dem 01.01.2036 anonymisieren.' }, [], false, null, '2025-01-01', true);
 		click('tenant-anonymise-button');
 		flushSync();
 
@@ -332,7 +340,7 @@ describe('Mieterdetail', () => {
 	});
 
 	it('meldet das Anonymisieren mit dem bisherigen Namen', async () => {
-		open([], null, [], false, null, '2025-01-01');
+		open([], null, [], false, null, '2025-01-01', true);
 		click('tenant-anonymise-button');
 
 		const after = actions.get('?/anonymise')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
