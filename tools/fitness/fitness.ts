@@ -243,7 +243,8 @@ const scripts = (out: string, names: string[], env: Record<string, string> = {})
 };
 
 // A date compared with today, or today handed to a function that decides by it (#788); not `today: localToday()`
-const DATE_CMP = /(?<![=])[<>]=?\s*(?:localToday\(\)|\btoday\b)|(?:localToday\(\)|\btoday\b)\s*[<>]/;
+// before, after or on today (#815 part D: also equal or not)
+const DATE_CMP = /(?<![=])(?:[<>]=?|[!=]==)\s*(?:localToday\(\)|(?:\w+\.)?\btoday\b)|(?:localToday\(\)|\btoday\b)\s*(?:[<>]|[!=]==)/;
 const TODAY_ARG = /[(,]\s*(?:localToday\(\)|(?:\w+\.)?today)\s*[,)]|^\s*localToday\(\)\s*[,)]/; // the last: a wrapped argument line
 
 /** A line of BFF code that makes a domain decision: a status comparison, an anchored regex, a date against today */

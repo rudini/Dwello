@@ -249,6 +249,9 @@ describe('decides', () => {
 		expect(decides('\t\t\tlocalToday(),')).toBe(true); // an argument Prettier put on its own line
 		// #815: today read from the page data is still today
 		expect(decides('const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);')).toBe(true);
+		// #815 part D: equal to today is a date against today too
+		expect(decides('endDate === data.today')).toBe(true);
+		expect(decides('if (localToday() !== day) return;')).toBe(true);
 	});
 
 	it('leaves lines that only pass today on or use arrows alone', () => {

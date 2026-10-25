@@ -93,11 +93,11 @@
 
 	function endedMessage() {
 		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
-		// the notice runs: the page now shows what to do next, above (personas K1)
-		const ends =
-			endDate === data.today
-				? m.contracts_ends_today_toast({ name })
-				: m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
+		// the notice runs: the page now shows what to do next, above (personas K1); whether it ends today, the reloaded
+		// contract says (#815)
+		const ends = data.endsToday
+			? m.contracts_ends_today_toast({ name })
+			: m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
 		// only when the reloaded page shows them (Haiku review N1)
 		return data.nextSteps ? `${ends}. ${m.contracts_next_steps_hint()}` : ends;
 	}

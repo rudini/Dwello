@@ -121,6 +121,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil C3: ob die Abrechnungsperiode noch läuft, sagt das Backend (`GET /statements/check-period`); der Lauf fragt es für jedes Periodenende | Ausnahmen 6 → 4 (nur noch Teil D) |
 | 25.10.2026 | #815 Teil D1: welche Fristen die Übersicht nennt und in wie vielen Tagen, sagt das Backend (`deadlines` von `GET /dashboard`); die Übersicht fasst sie nur in Worte | Ausnahmen 4 → 1 |
 | 25.10.2026 | #815 Teil D2: ob ein Mieter anonymisiert werden kann, sagt das Backend (`anonymisable` von `GET /tenants/:id`) | Ausnahmen 1 → 0 |
+| 25.10.2026 | #815 Teil D3: der Check sieht auch `===`/`!==` gegen heute; der einzige neue Treffer, die Meldung «endet heute» der Mietvertragsseite, kommt vom Backend (`endsToday` von `GET /contracts/:id`). Damit ist die Ausnahmeliste des Frontends leer (#815 erledigt) | Ausnahmen 0; BFF-Entscheide 8 (keine neuen) |
 
 ## 7. Werkzeugwahl
 

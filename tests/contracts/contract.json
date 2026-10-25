@@ -23,6 +23,7 @@
 	"nextSteps": { "successor": false, "ended": false },
 	"fixedTermCheck": false,
 	"proposedAdvanceFrom": "2025-01-01",
+	"endsToday": false,
 	"tenant": { "id": "t1", "firstName": "Anna", "lastName": "Keller" },
 	"apartment": { "id": "a1", "number": "2.01" },
 	"building": { "id": "b1", "name": "Ahornhof", "address": "Ahornweg 1" }
