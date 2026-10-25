@@ -37,6 +37,7 @@ import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
+import { advanceChanged, paymentOf } from './statement-payment';
 
 export interface StatementFilters {
 	search?: string;
@@ -115,6 +116,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	correctable?: boolean;
 	asksPayment?: boolean;
 	superseded?: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
+	advanceChanged?: boolean; // a draft counting another Akonto than the replaced one (#464); only in the detail
 	heatingProfile?: {
 		id: string;
 		name: string;
@@ -249,6 +251,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		return {
 			...row.statement,
 			status: effectiveStatus,
+			...paymentOf({ ...row.statement, status: effectiveStatus }, today),
 			reminderDue: effectiveStatus === 'overdue' ? !reminderWaits(row.statement, today, mahnfrist) : null,
 			tenant: row.tenant,
 			apartment: row.apartment,
@@ -355,6 +358,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 	return {
 		...result.statement,
 		status: effectiveStatus,
+		...paymentOf({ ...result.statement, status: effectiveStatus }, today),
 		tenant: result.tenant,
 		apartment: result.apartment,
 		building: result.building,
@@ -387,7 +391,7 @@ async function carriedFromOf(id: string | null) {
 }
 
 /** The statement a berichtigte Abrechnung replaces, the replaced ones of its chain paid on, and its own replacement */
-async function correctionsOf(statement: { id: string; replacesId: string | null }) {
+async function correctionsOf(statement: { id: string; replacesId: string | null; status: string; totalAdvancePayments: string }) {
 	const columns = { id: utilityStatements.id, statementNumber: utilityStatements.statementNumber };
 	const chain = [];
 	for (let next = statement.replacesId; next; ) {
@@ -408,7 +412,7 @@ async function correctionsOf(statement: { id: string; replacesId: string | null 
 	const priorPaidOn = paidOn.filter((s) => !s.countedBy).map((s) => s.statementNumber).reverse();
 	// #448 (Fachreview 448-1 V-2): its Saldo is in the next statement as the Übertrag
 	const offsetWith = paidOn.filter((s) => s.countedBy).map((s) => ({ statementNumber: s.countedBy!, amount: s.paidAmount! }));
-	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn, offsetWith };
+	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn, offsetWith, advanceChanged: advanceChanged(statement, replaces) };
 }
 
 /** Parameters of a statement calculation; the management fee overrides the configured default */

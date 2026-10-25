@@ -2,17 +2,19 @@
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
-	import { localToday } from '$lib/contract-status';
 
 	// Step 1: the Abrechnungsperiode, proposed from the settings; both dates repeated in words
 	let {
 		periodStart = $bindable(),
 		periodEnd = $bindable(),
-		errors
-	}: { periodStart: string; periodEnd: string; errors: Record<string, string> } = $props();
-
-	// ISO dates compare as text
-	const notOver = $derived(!!periodEnd && periodEnd >= localToday());
+		errors,
+		running
+	}: {
+		periodStart: string;
+		periodEnd: string;
+		errors: Record<string, string>;
+		running: boolean; // the backend says the period is not over (#815)
+	} = $props();
 </script>
 
 <p class="text-ink-muted">{m.statements_period_proposed()}</p>
@@ -35,7 +37,7 @@
 	/>
 </div>
 
-{#if notOver}
+{#if running}
 	<Alert tone="caution" title={m.statements_period_running()} testid="period-future-warning">
 		<p>{m.statements_period_running_text()}</p>
 	</Alert>

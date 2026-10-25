@@ -26,6 +26,10 @@ import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
+import type { StatementWithDetails } from '$lib/types';
+
+// the backend's answer for a Saldo that asks no payment (#815, `paymentOf`): its tests are statement-payment.test.ts
+const noPayment = { unpaid: true, claimed: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
 
@@ -345,7 +349,7 @@ describe('Abrechnungsliste', () => {
 
 	// Bei einer Rückerstattung zahlt der Vermieter: keine Mahnung, und der Tag der eigenen Überweisung
 	it('spricht bei einer Rückerstattung von der Überweisung, nicht von einer Mahnung', () => {
-		list([statement({ status: 'sent', balance: -45 })]);
+		list([statement({ status: 'sent', balance: -45, claimed: false })]);
 		click('statement-row-mark-paid');
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
 
@@ -510,21 +514,21 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// #403: ein Saldo unter CHF 5 wird mit der nächsten Abrechnung verrechnet, auf der Schlussabrechnung eingefordert
-	// oder ausbezahlt; ab CHF 5.00 wie bisher
+	// oder ausbezahlt; ab CHF 5.00 wie bisher. Was der Saldo verlangt, sagt das Backend (#815, statement-payment.test.ts)
 	const carried = 'Der Betrag ist kleiner als CHF 5.00. Er wird mit der nächsten Abrechnung verrechnet.';
 	it.each([
-		[{ balance: 4.95 }, carried],
-		[{ balance: -0.05, status: 'settled' }, carried],
-		[{ balance: 0, status: 'settled' }, 'Es ist nichts zu bezahlen.'],
+		[{ balance: 4.95, ...noPayment }, carried],
+		[{ balance: -0.05, status: 'settled', ...noPayment, carried: true }, carried],
+		[{ balance: 0, status: 'settled', ...noPayment }, 'Es ist nichts zu bezahlen.'],
 		[{ balance: 3, final: true }, 'Der Mieter bezahlt die Nachzahlung von CHF 3.00.'],
-		[{ balance: -3, final: true }, 'Sie erstatten dem Mieter CHF 3.00 zurück.'],
+		[{ balance: -3, final: true, claimed: false }, 'Sie erstatten dem Mieter CHF 3.00 zurück.'],
 		// Fachreview 448-2 V-17: erledigt bleibt erledigt, auch mit einem späteren Vertragsende in der Periode
-		[{ balance: 3, status: 'settled', final: true }, carried],
+		[{ balance: 3, status: 'settled', final: true, ...noPayment, carried: true }, carried],
 		// Fachreview 448-2 V-18: eine nach #94 einbehaltene Rückerstattung wird jetzt übertragen
-		[{ balance: -0.05, status: 'paid', paidDate: '2026-02-01', paidAmount: 0 }, carried],
+		[{ balance: -0.05, status: 'paid', paidDate: '2026-02-01', paidAmount: 0, ...noPayment, carried: true }, carried],
 		[{ balance: 5 }, 'Der Mieter bezahlt die Nachzahlung von CHF 5.00.'],
-		[{ balance: -5 }, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
-	])('sagt bei %o, was mit dem Betrag geschieht', (overrides, summary) => {
+		[{ balance: -5, claimed: false }, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
+	] as [Partial<StatementWithDetails>, string][])('sagt bei %o, was mit dem Betrag geschieht', (overrides, summary) => {
 		detail(overrides);
 		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
 	});
@@ -533,14 +537,14 @@ describe('Abrechnungsdetail', () => {
 	it.each([[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.']])(
 		'sagt bei einer nach #94 erledigten Nachzahlung mit %s weiter, was damals galt',
 		(balance, summary) => {
-		detail({ balance, status: 'paid', paidDate: '2026-02-01', paidAmount: 0 });
+		detail({ balance, status: 'paid', paidDate: '2026-02-01', paidAmount: 0, ...noPayment, waived: true });
 		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
 		}
 	);
 
 	// Fachprüfung V-4: ohne Zahlung keine Zahlungsfrist und kein «Bezahlt am»
 	it('nennt bei einer erledigten Abrechnung weder Zahlungsfrist noch Zahlungsdatum', () => {
-		detail({ balance: 4.95, status: 'settled' });
+		detail({ balance: 4.95, status: 'settled', ...noPayment, carried: true });
 		expect(byTestId('statement-payment-summary')).not.toBeNull();
 		expect(byTestId('statement-payment-deadline')).toBeNull();
 		expect(text()).not.toContain('Bezahlt am');
@@ -819,7 +823,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Code-Review 448-1 C-3: ein übertragener Saldo wird angerechnet
 	it('nennt beim Berichtigen einer erledigten Abrechnung, was mit einem übertragenen Saldo geschieht', () => {
-		detail({ status: 'settled', balance: 3 });
+		detail({ status: 'settled', balance: 3, ...noPayment, carried: true });
 		click('statement-correct-button');
 		expect(correctDialog()).toContain(
 			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Enthält eine versendete nächste Abrechnung ihren Saldo schon als Übertrag, rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an: Der Mieter bezahlt oder erhält ihn nicht doppelt. Enthält ein Entwurf ihn als Übertrag, entfernt Dwello den Übertrag sofort aus dem Entwurf; die berichtigte Abrechnung rechnet dann den ganzen Saldo ab. Ist der Saldo der berichtigten Abrechnung wieder kleiner als CHF 5.00, berechnen Sie den Entwurf neu, nachdem Sie die berichtigte Abrechnung versendet haben.'
@@ -828,7 +832,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Fachreview 448-3 V-25, Code-Review 448-2 C-13: eine nach #94 einbehaltene Rückerstattung wird auch übertragen
 	it('nennt beim Berichtigen einer nach #94 erledigten Rückerstattung, was mit dem übertragenen Saldo geschieht', () => {
-		detail({ status: 'paid', balance: -3, paidDate: '2025-02-01', paidAmount: 0 });
+		detail({ status: 'paid', balance: -3, paidDate: '2025-02-01', paidAmount: 0, ...noPayment, carried: true });
 		click('statement-correct-button');
 		expect(correctDialog()).toContain('rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an');
 	});
@@ -1025,7 +1029,7 @@ describe('Abrechnungsdetail', () => {
 	// der ersetzten ab, sagt sie es vor dem Versenden
 	it('warnt, wenn die berichtigte Abrechnung ein anderes Akonto abzieht als die ersetzte', () => {
 		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
-		detail({ replaces: { ...replaces, totalAdvancePayments: '1200.00' } });
+		detail({ replaces: { ...replaces, totalAdvancePayments: '1200.00' }, advanceChanged: true });
 
 		expect(byTestId('statement-advance-differs')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Die Akontobeiträge dieser Abrechnung (CHF 1’800.00) sind anders als in der ersetzten Abrechnung NK-2024-0001 (CHF 1’200.00). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.'
@@ -1683,7 +1687,7 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'sent' });
 		expect(byTestId('statement-reminder-button')).toBeNull();
 		document.body.innerHTML = '';
-		detail({ status: 'overdue', balance: -45 });
+		detail({ status: 'overdue', balance: -45, claimed: false });
 		expect(byTestId('statement-reminder-button')).toBeNull();
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
 	});
@@ -1691,14 +1695,14 @@ describe('Abrechnungsdetail', () => {
 	// #94: ein Saldo unter CHF 5, nach #94 erledigt, wird nicht eingefordert, auch überfällig nach dem Zurücksetzen der
 	// Zahlung nicht
 	it('bietet bei einem Saldo unter CHF 5 keine Mahnung an', () => {
-		detail({ status: 'overdue', balance: 4.95 });
+		detail({ status: 'overdue', balance: 4.95, ...noPayment });
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
 		expect(byTestId('statement-reminder-button')).toBeNull();
 	});
 
 	// Code-Review C-3: das Bezahlt-Markieren verspricht nicht, dass danach keine Mahnung mehr möglich ist
 	it('sagt beim Bezahlt-Markieren eines Saldos unter CHF 5 nichts über Mahnungen', () => {
-		detail({ status: 'overdue', balance: 4.95 });
+		detail({ status: 'overdue', balance: 4.95, ...noPayment });
 		click('statement-mark-paid-button');
 		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain('Mahnung');
 	});
@@ -1817,7 +1821,7 @@ describe('Abrechnungsdetail', () => {
 	// die Folge mit dem Status, der dann gilt: vor Ablauf der Zahlungsfrist «Versendet», danach «Überfällig» (Fachprüfung V-4)
 	it('nennt vor dem Zurücksetzen die Folge mit dem Status, der dann gilt', () => {
 		const dialogText = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
-		detail({ status: 'paid', paidDate: '2025-02-05', paymentDeadline: '2999-12-31' });
+		detail({ status: 'paid', paidDate: '2025-02-05', paymentDeadline: '2999-12-31', deadlinePassed: false });
 		click('statement-reset-payment-button');
 
 		expect(dialogText()).toContain('Die Abrechnung NK-2024-0001 gilt dann wieder als nicht bezahlt und hat den Status «Versendet».');
@@ -1974,7 +1978,7 @@ describe('Abrechnung bearbeiten', () => {
 
 	// #94 (Persona Marco P-1): ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, also keine Frist
 	it('fragt bei einem Saldo unter CHF 5 nach keiner Frist', () => {
-		edit({ balance: -2.5 });
+		edit({ balance: -2.5, ...noPayment });
 
 		expect(byTestId('statement-notes-input')).not.toBeNull();
 		expect(byTestId('payment-deadline-input')).toBeNull();

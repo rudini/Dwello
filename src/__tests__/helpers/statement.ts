@@ -13,6 +13,17 @@ const allowedFor = (status = 'draft') => ({
 export const statement = (overrides: Partial<StatementWithDetails> = {}): StatementWithDetails =>
 	({
 		...allowedFor(overrides.status),
+		// what the backend says the Saldo of this Nachzahlung after its Zahlungsfrist asks (#815, `paymentOf` in
+		// backend/src/services/statement-payment.ts); a test whose result depends on these fields states the backend's
+		// answer for its Saldo
+		unpaid: false,
+		claimed: true,
+		noPayment: false,
+		waived: false,
+		carried: false,
+		reminderWaitsUntil: null,
+		deadlinePassed: true,
+		advanceChanged: false,
 		id: 's1',
 		statementNumber: 'NK-2024-0001',
 		tenantId: 't1',

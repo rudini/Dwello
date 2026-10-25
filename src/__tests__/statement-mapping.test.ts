@@ -30,6 +30,24 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement({ ...backendStatement, superseded: true }).superseded).toBe(true);
 	});
 
+	// #815: what the Saldo asks of whom, the backend decides it by the Swiss day; an answer without it asks nothing
+	it('übernimmt, was der Saldo verlangt', () => {
+		const { unpaid, claimed, noPayment, waived, carried, reminderWaitsUntil, deadlinePassed, advanceChanged } =
+			toStatement({ ...backendStatement, reminderWaitsUntil: '2026-10-27' });
+		expect({ unpaid, claimed, noPayment, waived, carried, reminderWaitsUntil, deadlinePassed, advanceChanged }).toEqual({
+			unpaid: false,
+			claimed: true,
+			noPayment: false,
+			waived: false,
+			carried: false,
+			reminderWaitsUntil: '2026-10-27',
+			deadlinePassed: true,
+			advanceChanged: false
+		});
+		const bare = toStatement({ ...backendStatement, claimed: undefined, reminderWaitsUntil: undefined });
+		expect([bare.claimed, bare.reminderWaitsUntil]).toEqual([false, null]);
+	});
+
 	it('zeigt den Satz der Verwaltungspauschale, mit dem die Abrechnung erstellt wurde', () => {
 		expect(toStatement(backendStatement).managementFeePercent).toBe(3);
 	});

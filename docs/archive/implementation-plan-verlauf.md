@@ -3433,3 +3433,16 @@ No scenario: measurement tooling only, no app change.
 - [x] `docs/installation.md`: port warnings dropped; section 8 (end every session, old default database password); README and RI-U1-4 updated
 - [x] Review 747: `docs/reviews/747-review-1.md` (C-1, C-2 Minor fixed in docs, C-3 rejected)
 - [x] PR: pushed after this archive
+## Session: #815 part C, statements: the frontend derives nothing from amounts and dates
+
+Measured before (25.10.2026, main f430a98): frontend decision exceptions 19, of which 15 in statements.
+
+- [x] C1 payment rules from the backend: `paymentOf` and `advanceChanged` (`backend/src/services/statement-payment.ts`) on list and detail; backend unit and pg tests, API contracts, mapping test first; the DOM test fixture takes them from `paymentOf`; frontend `unpaid`, `claimed`, `belowMinimum`, `nextReminderLater` removed; exceptions 19 → 9 (3 lines now status display)
+- [x] C2 pre-check «Bezahlt am» not in the future (`PAID_DATE_IN_FUTURE`, statement-lock.pg.test.ts) into `preChecks`; the two «Bezahlt am» defaults into `display` as a field default; exceptions 9 → 6
+- [x] C1 fix: the test fixture imported backend code across the boundary (fitness `boundary-import`); it now states the backend's answer
+- [x] Review C1 (`docs/reviews/i815c1-review-1.md`): C-1 (Blocker, the fixture's boundary import) fixed in the C1 fix above, re-review with C3; C-2 (Minor, a copy of `belowMinimum`) fixed
+- [x] C3 «Abrechnungsperiode läuft noch» from the backend (`GET /statements/check-period`), backend test, API contract and DOM test first; an answer counts only for its day; exceptions 6 → 4
+- [x] Review C1 fix, C2, C3 and closing round (`docs/reviews/i815c2-review-1.md`): no Blocker/Major; C-1 (comment) and C-2 (test order) fixed, C-3 (no test for the stale-answer guard) stays in the report
+- [x] Checks: lint, check, vitest, backend tests (1635), E2E statement features, fitness (exceptions 19 → 4)
+- [x] Workflow notes: a row in `docs/reviews/workflow-notes-issue-815.md`
+- [x] PR: «No scenario: behaviour unchanged», Refs #815, pushed after this archive

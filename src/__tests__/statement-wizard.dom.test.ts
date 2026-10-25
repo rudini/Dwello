@@ -1,6 +1,7 @@
 import PreviewChecks from '../routes/statements/generate/PreviewChecks.svelte';
 import CategoryFindingItem from '../routes/statements/generate/CategoryFindingItem.svelte';
 import completeness from '../../tests/contracts/invoice-completeness.json';
+import checkPeriod from '../../tests/contracts/statement-check-period.json';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // enhance as SvelteKit wires it: the test can play the server's answer to the last submit
@@ -219,15 +220,28 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	// Akonto zählt für alle Monate der Periode, auch die noch nicht bezahlten
-	it('warnt, wenn die Abrechnungsperiode noch nicht zu Ende ist', () => {
+	// whether it is over, the backend says by the Swiss day (#815)
+	it('warnt, wenn die Abrechnungsperiode noch nicht zu Ende ist', async () => {
+		fakeBff(({ path }) => (path.startsWith('/statements/check-period?periodEnd=2099-12-31') ? [200, checkPeriod] : [500, {}]));
 		open();
 		expect(byTestId('period-future-warning')).toBeNull();
 
 		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '31.12.2099');
+		await settle();
 
 		expect(byTestId('period-future-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Die Abrechnungsperiode ist noch nicht zu Ende.'
 		);
+	});
+
+	it('warnt nicht, wenn das Backend die Abrechnungsperiode vorbei nennt', async () => {
+		fakeBff(() => [200, { ...checkPeriod, running: false }]);
+		open();
+
+		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '31.12.2099');
+		await settle();
+
+		expect(byTestId('period-future-warning')).toBeNull();
 	});
 
 	// In der Vorschau steht der eigentliche Grund für Kosten weit unter dem Akonto
@@ -235,6 +249,7 @@ describe('Abrechnungen erstellen', () => {
 		show(PreviewChecks, {
 			rows: [],
 			period: { periodStart: '2099-01-01', periodEnd: '2099-12-31' },
+			running: true, // the backend says it (#815)
 			confirmed: false
 		});
 
