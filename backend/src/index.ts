@@ -30,7 +30,8 @@ currentKi()
 	.catch((error) => console.warn('⚠️ KI-Modell nicht geprüft', error));
 
 console.log(`🚀 Dwello Backend running at http://${app.server?.hostname}:${app.server?.port}`);
-console.log(`📚 Swagger API docs at http://${app.server?.hostname}:${app.server?.port}/swagger`);
+if (Bun.env.NODE_ENV !== 'production')
+	console.log(`📚 Swagger API docs at http://${app.server?.hostname}:${app.server?.port}/swagger`);
 console.log('📝 Available routes:');
 console.log('   - GET  /health');
 console.log('   - GET  /api/v1/dashboard');

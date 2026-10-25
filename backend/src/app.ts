@@ -35,30 +35,34 @@ export const app = new Elysia()
 			credentials: true
 		})
 	)
+	// the API documentation only outside production, so an installation does not show its API to everyone (#720);
+	// Bun.env, since bun build fixes process.env.NODE_ENV at build time (code review 720 C-1)
 	.use(
-		openapi({
-			documentation: {
-				info: {
-					title: 'Dwello API',
-					version: '1.0.0',
-					description: 'Swiss Property Management System API'
-				},
-				tags: [
-					{ name: 'Buildings', description: 'Building management' },
-					{ name: 'Apartments', description: 'Apartment management' },
-					{ name: 'Tenants', description: 'Tenant management' },
-					{ name: 'Contracts', description: 'Rental contract management' },
-					{ name: 'Invoices', description: 'Invoice management with LLM categorization' },
-					{ name: 'Categories', description: 'Cost category management' },
-					{ name: 'Distribution Keys', description: 'Cost distribution keys' },
-					{ name: 'Heating Profiles', description: 'Heating distribution profiles' },
-					{ name: 'Statements', description: 'Utility cost statements' },
-					{ name: 'Config', description: 'System configuration' }
-				]
-			},
-			path: '/swagger',
-			exclude: { paths: ['/swagger', '/swagger/json'] }
-		})
+		Bun.env.NODE_ENV === 'production'
+			? new Elysia()
+			: openapi({
+					documentation: {
+						info: {
+							title: 'Dwello API',
+							version: '1.0.0',
+							description: 'Swiss Property Management System API'
+						},
+						tags: [
+							{ name: 'Buildings', description: 'Building management' },
+							{ name: 'Apartments', description: 'Apartment management' },
+							{ name: 'Tenants', description: 'Tenant management' },
+							{ name: 'Contracts', description: 'Rental contract management' },
+							{ name: 'Invoices', description: 'Invoice management with LLM categorization' },
+							{ name: 'Categories', description: 'Cost category management' },
+							{ name: 'Distribution Keys', description: 'Cost distribution keys' },
+							{ name: 'Heating Profiles', description: 'Heating distribution profiles' },
+							{ name: 'Statements', description: 'Utility cost statements' },
+							{ name: 'Config', description: 'System configuration' }
+						]
+					},
+					path: '/swagger',
+					exclude: { paths: ['/swagger', '/swagger/json'] }
+				})
 	)
 	// Every schema refusal (body, query, params) with a code the UI translates, instead of Elysia's own text
 	.onError({ as: 'global' }, ({ code, set }) => {

@@ -3340,6 +3340,12 @@ Product owner, 25.10.2026: part 4 in three pull requests; 4a moves the three dat
 - [x] Slice review round 1 (`docs/reviews/p4a-review-1.md`: C-1 Major, two cases of «notice without a next tenant» no layer tested after the move: a notice after its end, a later contract in another apartment; a pg test added, it pins kept behaviour and fails with each of the two mutations the review named)
 - [x] Closing round (`docs/reviews/p4a-review-2.md`: C-1 closed, no new findings), PR pushed after this archive
 
+## Session: #720 Swagger UI only in development
+
+- [x] Test: with `NODE_ENV=production` the backend does not answer `/swagger` and `/swagger/json` (red first)
+- [x] `backend/src/app.ts`: the openapi plugin only outside production; `index.ts` log line; `docs/api-specification.md`, `docs/tech-stack.md`
+- [x] Review 720: `docs/reviews/720-review-1.md` (C-1 Major: bundle fixed NODE_ENV, fixed with Bun.env), `720-review-2.md` (C-2 Minor fixed), closing round `720-review-3.md`
+- [x] PR: pushed after this archive
 ## Session: #788 part 4b, old addresses and missing statements in the backend
 
 - [x] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
