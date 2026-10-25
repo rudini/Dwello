@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readable } from 'svelte/store';
 import Navigation from '$lib/ui/Navigation.svelte';
-import { activeHref, navGroups } from '$lib/navigation';
+import { activeHref, navGroups } from '$lib/ui/navigation';
 import { show } from './helpers/dom';
 
 vi.mock('$app/stores', () => ({
