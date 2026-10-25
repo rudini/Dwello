@@ -76,12 +76,14 @@ export interface RentalContract {
 	startDate: string;
 	endDate?: string | null;
 	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
+	status: 'active' | 'ended' | 'future'; // the Vertragsstatus, decided by the backend by the Swiss day (#784, #815)
 	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
 	billedUntil?: string | null; // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto that applies today, or on the start of a future contract
 	advancePayments?: { validFrom: string; amount: string }[]; // each Akonto with its «Gültig ab» (#464)
+	proposedAdvanceFrom?: string | null; // «Gültig ab» the form proposes for a new Akonto, by the backend (#815)
 	flatRateUtilityCharge?: string | number; // «Nebenkostenpauschale» (#429): in «Monatlich total», never billed
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's
@@ -163,7 +165,6 @@ export interface ContractWithDetails extends RentalContract {
 
 // Contracts list response
 export interface ContractsListData {
-	today: string; // the server's day, so that every Vertragsstatus is computed from the same one
 	contracts: ContractWithDetails[];
 	total: number;
 	page: number;

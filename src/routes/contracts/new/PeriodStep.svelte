@@ -19,7 +19,7 @@
 		min,
 		unknown = false,
 		onretry,
-		today,
+		startPast,
 		overlap,
 		errors
 	}: {
@@ -33,12 +33,12 @@
 		min?: string;
 		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
 		onretry?: () => void; // loads them again; without it the hint points to the apartment's
-		today: string;
+		startPast: boolean; // the start lies before today, as the backend says (#815); the edit form: also before the saved one
 		overlap: string | null;
 		errors: Record<string, string>;
 	} = $props();
 
-	const pastStart = $derived(startDateNotice(startDate, today));
+	const pastStart = $derived(startDateNotice(startDate, startPast));
 
 	const limited = {
 		value: 'limited',

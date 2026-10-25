@@ -1,5 +1,4 @@
 import { m } from '$lib/paraglide/messages';
-import { localToday } from './contract-status';
 import type { RentalContract } from './types';
 import { formatDate, isFeeRate, parsePercent } from './utils/format';
 import {
@@ -51,20 +50,6 @@ const dateForInput = (date: string | null | undefined) =>
 export const impossibleYear = () => m.common_error_impossible_year();
 export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
-/**
- * «Gültig ab» of a new Akonto (#464, fach review 464-2 V-2): in a running contract the next first of a month, as an
- * increase applies from a Kündigungstermin at the earliest; a future contract corrects it from its Vertragsbeginn, an
- * ended one its last amount
- */
-function proposedAdvanceFrom(contract: RentalContract) {
-	const today = localToday();
-	if (contract.startDate > today) return dateForInput(contract.startDate);
-	const [year, month] = today.split('-').map(Number);
-	const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
-	if (!contract.endDate || next <= dateForInput(contract.endDate)) return next;
-	return contract.advancePayments?.at(-1)?.validFrom;
-}
-
 // a changed Akonto goes with its «Gültig ab»; on a new contract it always goes
 const advanceChanged = (values: ContractFormValues) =>
 	values.savedAdvance === undefined || Number(values.advancePayment || 0) !== Number(values.savedAdvance || 0);
@@ -102,7 +87,8 @@ export function initialContractValues(
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || ''),
-		advancePaymentFrom: contract.advancePayments && proposedAdvanceFrom(contract),
+		// «Gültig ab» of a new Akonto, proposed by the backend by the Swiss day (#464, #815)
+		advancePaymentFrom: contract.advancePayments && (contract.proposedAdvanceFrom ?? undefined),
 		savedAdvance: String(contract.monthlyAdvancePayment || ''),
 		flatRateUtilityCharge: String(contract.flatRateUtilityCharge || ''),
 		managementFee: feeChoice(contract),

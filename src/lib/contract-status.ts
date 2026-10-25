@@ -5,39 +5,6 @@ import { m } from '$lib/paraglide/messages';
 
 type Status = ContractHistory['status'];
 
-/** Vertragsstatus on a day (YYYY-MM-DD): running up to and including its last day, as the backend filters */
-export function contractStatusOn(
-	startDate: string,
-	endDate: string | null | undefined,
-	today: string
-): Status {
-	if (startDate.slice(0, 10) > today) return 'future';
-	return endDate && endDate.slice(0, 10) < today ? 'ended' : 'active';
-}
-
-/** Its first day to bill: the day after «Abgerechnet bis» (#133), otherwise the Vertragsbeginn */
-function billingStart(contract: { startDate: string; billedUntil?: string | null }) {
-	const begin = contract.startDate.slice(0, 10);
-	const until = contract.billedUntil;
-	return until && until >= begin
-		? new Date(Date.parse(until) + 86_400_000).toISOString().slice(0, 10)
-		: begin;
-}
-
-/**
- * Whether Dwello bills Mietstage of the contract in the period (dates YYYY-MM-DD): from its Vertragsbeginn, or from the
- * day after «Abgerechnet bis» when that is later (#133), to its Vertragsende. The contract form and the heating hints of
- * a run's preview ask it; runs and missing statements are decided by the backend (`billsIn`, H-28)
- */
-export function billsIn(
-	contract: { startDate: string; endDate?: string | null; billedUntil?: string | null },
-	{ start, end }: { start: string; end: string }
-): boolean {
-	const from = billingStart(contract);
-	const to = contract.endDate ? contract.endDate.slice(0, 10) : end;
-	return [from, start].sort()[1] <= [to, end].sort()[0];
-}
-
 /** Today in Switzerland, as YYYY-MM-DD: the server runs in UTC, two hours behind in summer */
 export const localToday = () =>
 	new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
@@ -148,6 +115,7 @@ export type RefusedStatement = {
 	periodStart: string;
 	periodEnd: string;
 	buildingId: string;
+	covered?: boolean; // «Abgerechnet bis» now covers its whole period, as the backend says (#815)
 };
 
 /**

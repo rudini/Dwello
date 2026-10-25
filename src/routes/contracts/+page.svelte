@@ -68,7 +68,7 @@
 			total={data.total}
 		>
 			{#each data.contracts as contract (contract.id)}
-				<ContractRow {contract} today={data.today} />
+				<ContractRow {contract} />
 			{/each}
 		</ResultList>
 	{/if}

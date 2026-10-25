@@ -7,7 +7,8 @@
 			"status": "draft",
 			"periodStart": "2025-01-01",
 			"periodEnd": "2025-12-31",
-			"buildingId": "b1"
+			"buildingId": "b1",
+			"covered": false
 		}
 	]
 }

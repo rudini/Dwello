@@ -12,7 +12,9 @@ import { get } from 'svelte/store';
 import NewContractPage from '../routes/contracts/new/+page.svelte';
 import { toasts } from '$lib/stores';
 import { writeDraft } from '$lib/wizard-draft';
-import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import { byTestId, click, fakeBff as fakeBackend, fireEvent, settle, show, submit } from './helpers/dom';
+import { localToday } from '$lib/contract-status';
+import checkStart from '../../tests/contracts/contract-check-start.json';
 import listed from '../../tests/contracts/contracts.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
@@ -22,13 +24,23 @@ const data = {
 		{ id: 't1', name: 'Anna Keller' },
 		{ id: 't2', name: 'Bruno Meier', place: 'Winterthur' }
 	],
+	// whether each can take a new contract, as the backend decides it by the Swiss day (#815)
 	apartments: [
-		{ id: 'a1', unit: '2.01', building: 'Ahornhof' },
-		{ id: 'a2', unit: '2.02', building: 'Ahornhof' },
-		{ id: 'a3', unit: '2.03', building: 'Ahornhof' }
+		{ id: 'a1', unit: '2.01', building: 'Ahornhof', blocked: false, availableFrom: null },
+		{ id: 'a2', unit: '2.02', building: 'Ahornhof', blocked: true, availableFrom: null },
+		{ id: 'a3', unit: '2.03', building: 'Ahornhof', blocked: false, availableFrom: '2099-01-01' }
 	],
 	categories: [] // the boxes of the agreed Nebenkosten (#91)
 };
+// #815: whether a Vertragsbeginn lies in the past, the backend answers by the Swiss day; a test may answer otherwise
+let startPast = (startDate: string) => startDate < localToday();
+const fakeBff: typeof fakeBackend = (answer) =>
+	fakeBackend((call) =>
+		call.path.startsWith('/contracts/check-start?')
+			? [200, { ...checkStart, past: startPast(new URLSearchParams(call.path.split('?')[1]).get('startDate')!) }]
+			: (answer ?? (() => [200, {}]))(call)
+	);
+
 // As the contract list answers: a2 is rented without end, a1's last contract ended long ago
 const contractsOf: Record<string, unknown[]> = {
 	a1: [{ id: 'c8', startDate: '2015-01-01', endDate: '2019-12-31', tenantName: 'Ueli Graf' }],
@@ -75,6 +87,7 @@ async function untilReview() {
 	next();
 	type('start-date-input', '01.01.2027');
 	next();
+	await settle(); // step 3 waits for the backend's check of the start (#815)
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
 	chooseFee('run');
@@ -83,6 +96,7 @@ async function untilReview() {
 
 // a set day, so 2027 stays in the future and 2020 in the past (code review 453-1 C-6); only the date, timers run
 beforeEach(() => {
+	startPast = (startDate) => startDate < localToday();
 	vi.useFakeTimers({ toFake: ['Date'] });
 	vi.setSystemTime(new Date('2026-06-15T10:00:00Z'));
 	localStorage.clear();
@@ -131,6 +145,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 
 		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
 		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
@@ -155,6 +170,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 
 		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
 		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
@@ -200,6 +216,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(document.body.textContent).toContain(
 			'Monatlicher Vorschuss des Mieters für die im Mietvertrag vereinbarten Nebenkosten'
 		);
@@ -219,6 +236,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		type('contract-base-rent-input', '950');
 		next();
 		await settle();
@@ -241,6 +259,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(byTestId('contract-fee-rate-input')).toBeNull();
 		// a new fee: form, reasons, ten days before the notice period, next possible Kündigungstermin (Art. 269d Abs. 1 OR, #77)
 		expect(document.body.textContent).toContain(
@@ -348,6 +367,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		type('contract-base-rent-input', "1'450");
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
 		chooseFee('run');
@@ -367,6 +387,21 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 	}
+
+	// #815: when an apartment is free, the backend says; the wizard does not compare dates
+	it('nennt den Tag, ab dem die Wohnung frei ist, wie ihn das Backend nennt', async () => {
+		backend();
+		show(NewContractPage, {
+			data: { ...data, apartments: [{ ...data.apartments[0], availableFrom: '2030-05-01' }] }
+		} as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(document.querySelector('option[value="a1"]')!.textContent).toContain(
+			'verfügbar ab 01.05.2030'
+		);
+	});
 
 	// Fehler behoben (#143): ohne ihre Mietverträge galt die Wohnung als frei, der Vertragsbeginn ohne Untergrenze
 	it('zeigt eine Wohnung, deren Mietverträge nicht geladen werden konnten, nicht als frei', async () => {
@@ -467,12 +502,34 @@ describe('Prüfungen im Mietvertrag', () => {
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
 		await toPeriod();
 		type('start-date-input', '11.01.2020');
+		await settle(); // the backend says the start lies in the past (#815)
 		expect(byTestId('start-date-notice')!.getAttribute('role')).toBe('status'); // read out while typing
 		next();
 		await settle();
 		expect(heading()).toBe('Vertragsdauer');
 		expect(byTestId('form-error')!.textContent).toContain('nochmals auf «Weiter»');
 		expect(document.activeElement).toBe(byTestId('start-date-input'));
+		next();
+		await settle();
+		expect(heading()).toBe('Miete');
+	});
+
+	// review i815b3 C-1: the backend's answer comes later than the typing; until it does, the old date's answer counts not
+	it('fragt bei «Weiter» vor der Antwort des Backends nach einem Vertragsbeginn in der Vergangenheit', async () => {
+		await toPeriod();
+		type('start-date-input', '11.01.2020');
+		next();
+		await settle();
+		expect(heading()).toBe('Vertragsdauer');
+		expect(byTestId('form-error')!.textContent).toContain('nochmals auf «Weiter»');
+	});
+
+	it('nennt einen künftigen Vertragsbeginn nicht vergangen, bevor das Backend ihn geprüft hat', async () => {
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('start-date-input', '01.01.2031');
+		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
 		next();
 		await settle();
 		expect(heading()).toBe('Miete');
@@ -548,6 +605,29 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(document.activeElement).toBe(byTestId('billed-until-input'));
 		expect(document.body.textContent).not.toContain('nochmals auf «Weiter»');
+	});
+
+	// #815: the backend says whether the start lies in the past; the wizard asks back and offers «Abgerechnet bis» by it
+	it('fragt nur nach einem Vertragsbeginn in der Vergangenheit, wenn das Backend ihn vergangen nennt', async () => {
+		startPast = () => false;
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		expect(document.body.textContent).not.toContain('liegt in der Vergangenheit');
+		expect(byTestId('billed-until-input')).toBeNull();
+	});
+
+	// review i815b2 C-1: the pre-check takes the Swiss day, as the backend refuses (BILLED_UNTIL_FUTURE); just after
+	// midnight in Zurich the browser's UTC day is still the day before
+	it('nimmt für «Abgerechnet bis» den Schweizer Tag', async () => {
+		vi.setSystemTime(new Date('2026-06-14T22:30:00Z')); // 15.06.2026 00:30 in Zurich
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('billed-until-input', '15.06.2026');
+		next();
+		await settle();
+		expect(document.body.textContent).not.toContain('Abgerechnet bis kann nicht in der Zukunft liegen.');
 	});
 
 	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect
@@ -632,6 +712,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		type('start-date-input', '01.01.2016');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(byTestId('overlap-warning')).not.toBeNull();
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
@@ -721,6 +802,7 @@ describe('Vorgewählte Wohnung', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(heading()).toBe('Miete');
 		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('950.00');
 		expect(byTestId<HTMLInputElement>('contract-advance-payment-input')!.value).toBe('150.00');
@@ -751,6 +833,7 @@ describe('Vorgewählte Wohnung', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('120.00');
 		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
 			'Mietet der neue Mieter zum Beispiel den Parkplatz nicht, leeren Sie die Zusatzmiete.'

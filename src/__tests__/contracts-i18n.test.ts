@@ -70,7 +70,7 @@ describe('Mietverträge in der gewählten Sprache', () => {
 		expect(advancePaymentNotice(empty)).toMatch(
 			/^Without an advance payment, the tenant usually pays a flat-rate/
 		);
-		expect(startDateNotice('2020-01-01', '2026-01-01')).toBe(
+		expect(startDateNotice('2020-01-01', true)).toBe(
 			'The contract start Wednesday, 1 January 2020 is in the past. Is the date correct?'
 		);
 	});

@@ -11,6 +11,8 @@
 			"nextContractStart": "2099-11-01",
 			"currentContractEnd": "2099-03-31",
 			"lastContractEnd": "2024-03-31",
+			"blocked": false,
+			"availableFrom": null,
 			"buildingName": "Seeblick"
 		}
 	],

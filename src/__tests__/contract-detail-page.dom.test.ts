@@ -64,7 +64,9 @@ function open(
 		way?: { kind: string; start: string; end: string };
 		invoices?: { href: string; label: string };
 	}[] = [],
-	billedBy: { id?: string; statementNumber: string; status: string }[] | null = []
+	billedBy: { id?: string; statementNumber: string; status: string }[] | null = [],
+	// as the backend decides it by the Swiss day (#784); the page only shows it (#815)
+	status = startDate > today ? 'future' : endDate && endDate < today ? 'ended' : 'active'
 ) {
 	show(ContractPage, {
 		data: {
@@ -77,7 +79,7 @@ function open(
 			})),
 			billedBy,
 			nextSteps: terminated ? { successor: false, ended: false } : null, // the loader decides (review K-1)
-			contract: contract(startDate, endDate, terminated),
+			contract: { ...contract(startDate, endDate, terminated), status },
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
 		form
@@ -438,8 +440,9 @@ describe('Mietvertragsdetail', () => {
 		expect(document.body.textContent).not.toMatch(/AKTIV|heute/);
 	});
 
-	it('bestimmt den Vertragsstatus mit dem Tag des Servers', () => {
-		open('2099-11-01', null, null, '2099-11-01');
+	// #815: the status comes from the backend, the page does not compare dates
+	it('nimmt den Vertragsstatus vom Backend', () => {
+		open('2099-11-01', null, null, '2026-10-10', false, [], [], 'active');
 		expect(text('contract-status')).toBe('Laufend');
 	});
 

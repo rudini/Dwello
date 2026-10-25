@@ -3,7 +3,7 @@ import { db } from '../db/connection';
 import { contractAdvancePayments, rentalContracts, utilityStatements, type AdvanceLine } from '../db/schema';
 import { formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
-import { sqlToday } from './today';
+import { sqlToday, swissToday } from './today';
 import { countingInSql } from './counting-statements';
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -15,6 +15,23 @@ export const advancesOf = (contractId: string, tx: Tx | typeof db = db) =>
 		.from(contractAdvancePayments)
 		.where(eq(contractAdvancePayments.contractId, contractId))
 		.orderBy(asc(contractAdvancePayments.validFrom));
+
+/**
+ * «Gültig ab» the form proposes for a new Akonto (#464, fach review 464-2 V-2; #815): in a running contract the next
+ * first of a month, as an increase applies from a Kündigungstermin at the earliest; a future contract corrects it from
+ * its Vertragsbeginn, an ended one (or one ending before that first) its last amount
+ */
+export function proposedAdvanceFrom(
+	contract: { startDate: string; endDate: string | null },
+	advances: { validFrom: string }[],
+	today = swissToday()
+) {
+	if (contract.startDate > today) return contract.startDate;
+	const [year, month] = today.split('-').map(Number);
+	const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+	if (!contract.endDate || next <= contract.endDate) return next;
+	return advances.at(-1)?.validFrom;
+}
 
 /**
  * The Akonto that applies on the contract's reference day (domain review F-5): today, the Vertragsbeginn of a future

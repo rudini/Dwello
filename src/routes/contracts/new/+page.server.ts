@@ -16,6 +16,8 @@ interface Apartment {
 	area: string | number;
 	buildingName: string;
 	status: ApartmentStatus;
+	blocked?: boolean; // whether a new contract can be recorded, as the backend decides (#815)
+	availableFrom?: string | null;
 }
 
 // #368 (#407 point 3): a new contract from the old one of the same tenant starts with its agreed Nebenkosten
@@ -59,7 +61,10 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		unit: a.number,
 		building: a.buildingName || m.contracts_unknown_building(),
 		size: `${roomsLabel(String(Number(a.rooms)))}, ${Number(a.area)} m²`, // to judge the rent in the wizard
-		status: statusLabels[a.status]
+		status: statusLabels[a.status],
+		// whether a new contract can be recorded, decided by the backend by the Swiss day (#815)
+		blocked: !!a.blocked,
+		availableFrom: a.availableFrom ?? null
 	}));
 
 	return {

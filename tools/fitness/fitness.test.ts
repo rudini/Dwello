@@ -247,6 +247,8 @@ describe('decides', () => {
 		expect(decides("contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??")).toBe(true);
 		expect(decides('expiredContracts: expired(allContracts, today),')).toBe(true);
 		expect(decides('\t\t\tlocalToday(),')).toBe(true); // an argument Prettier put on its own line
+		// #815: today read from the page data is still today
+		expect(decides('const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);')).toBe(true);
 	});
 
 	it('leaves lines that only pass today on or use arrows alone', () => {
