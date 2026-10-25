@@ -128,6 +128,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		editable: data.editable === true,
 		correctable: data.correctable === true,
 		asksPayment: data.asksPayment === true,
+		superseded: data.superseded === true,
 		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		)

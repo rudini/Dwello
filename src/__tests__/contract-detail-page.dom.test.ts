@@ -889,7 +889,8 @@ describe('Mietvertrag löschen', () => {
 		const billed = [
 			{ id: 's1', statementNumber: 'NK-2024-0001', status: 'paid' },
 			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' },
-			{ id: 's3', statementNumber: 'NK-2023-0003', status: 'replaced' }
+			{ id: 's3', statementNumber: 'NK-2023-0003', status: 'replaced' },
+			{ id: 's4', statementNumber: 'NK-2022-0004', status: 'overdue' }
 		];
 		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
 		click('contract-delete-button');
@@ -899,7 +900,10 @@ describe('Mietvertrag löschen', () => {
 		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
 		expect(text('contract-delete-statement-s1')).toBe('NK-2024-0001 (bezahlt)');
 		expect(byTestId('contract-delete-statement-s2')!.getAttribute('href')).toBe('/statements/s2');
+		expect(text('contract-delete-statement-s2')).toBe('NK-2025-0002 (Entwurf)');
 		expect(text('contract-delete-statement-s3')).toBe('NK-2023-0003 (ersetzt)');
+		// review p5a C-1: any other status is a sent one
+		expect(text('contract-delete-statement-s4')).toBe('NK-2022-0004 (versendet)');
 		// #120: eine Abrechnung, die nicht stimmt, wird berichtigt, nicht ausserhalb von Dwello
 		expect(dialog).toContain('Stimmt eine Abrechnung nicht, öffnen Sie sie und wählen Sie «Abrechnung berichtigen».');
 		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();

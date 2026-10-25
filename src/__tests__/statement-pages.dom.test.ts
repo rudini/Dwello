@@ -989,6 +989,16 @@ describe('Abrechnungsdetail', () => {
 		expect((byTestId('statement-create-correction-button') as HTMLButtonElement).disabled).toBe(true);
 	});
 
+	// #788: whether the statement is replaced, the backend says (`superseded`); the page does not read the status for it
+	it('zeigt den Hinweis auf die berichtigte Abrechnung, wenn das Backend die Abrechnung ersetzt nennt', () => {
+		detail({
+			status: 'sent',
+			superseded: true,
+			replacedBy: { id: 's2', statementNumber: 'NK-2024-0007' }
+		});
+		expect(byTestId('statement-replaced-by-link')!.getAttribute('href')).toBe('/statements/s2');
+	});
+
 	it('nennt bei einer ersetzten Abrechnung die berichtigte', () => {
 		detail({ status: 'replaced', replacedBy: { id: 's2', statementNumber: 'NK-2024-0007' } });
 

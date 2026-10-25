@@ -7,10 +7,27 @@ import resetStatement from '../../tests/contracts/statement-payment-reset.json';
 describe('Abrechnung aus dem Backend', () => {
 	// #788, review p3a C-2: what the statement allows comes from the backend; an answer without it allows nothing
 	it('übernimmt, was die Abrechnung erlaubt', () => {
-		const { editable, correctable, asksPayment } = toStatement(backendStatement);
-		expect({ editable, correctable, asksPayment }).toEqual({ editable: true, correctable: false, asksPayment: true });
-		const bare = toStatement({ ...backendStatement, editable: undefined, correctable: undefined, asksPayment: undefined });
-		expect([bare.editable, bare.correctable, bare.asksPayment]).toEqual([false, false, false]);
+		const { editable, correctable, asksPayment, superseded } = toStatement(backendStatement);
+		expect({ editable, correctable, asksPayment, superseded }).toEqual({
+			editable: true,
+			correctable: false,
+			asksPayment: true,
+			superseded: false
+		});
+		const bare = toStatement({
+			...backendStatement,
+			editable: undefined,
+			correctable: undefined,
+			asksPayment: undefined,
+			superseded: undefined
+		});
+		expect([bare.editable, bare.correctable, bare.asksPayment, bare.superseded]).toEqual([
+			false,
+			false,
+			false,
+			false
+		]);
+		expect(toStatement({ ...backendStatement, superseded: true }).superseded).toBe(true);
 	});
 
 	it('zeigt den Satz der Verwaltungspauschale, mit dem die Abrechnung erstellt wurde', () => {

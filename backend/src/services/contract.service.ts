@@ -22,7 +22,7 @@ import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
 import { laterContract } from './later-contract';
 import { daysAfter, sqlToday, swissToday } from './today';
-import { countingInSql } from './counting-statements';
+import { countingInSql, replacedInSql } from './counting-statements';
 
 /** The database, or a transaction of it */
 type Query = Pick<typeof db, 'select' | 'delete'>;
@@ -470,7 +470,7 @@ async function checkBilledByDwello(current: RentalContract, billedUntil: string 
 				lte(utilityStatements.rentalStart, billedUntil),
 				or(
 					inArray(utilityStatements.status, ['sent', 'paid', 'settled']), // settled: sent, its small Saldo carried over (#448)
-					and(eq(utilityStatements.status, 'replaced'), or(isNull(successor.id), eq(successor.status, 'draft')))
+					and(replacedInSql, or(isNull(successor.id), eq(successor.status, 'draft')))
 				)
 			)
 		)

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { StatementStatus, StatementsListData } from '$lib/types';
+	import type { StatementsListData } from '$lib/types';
 	import { statusLabels } from '$lib/statement';
 
 	// How many statements are in each status; a status is a filter that a second click switches off
@@ -15,7 +15,13 @@
 	} = $props();
 
 	// a replaced statement has no tab of its own: «Alle» lists it (#120)
-	const statuses: Exclude<StatementStatus, 'replaced'>[] = ['draft', 'sent', 'paid', 'settled', 'overdue'];
+	const statuses: (keyof StatementsListData['statusCounts'])[] = [
+		'draft',
+		'sent',
+		'paid',
+		'settled',
+		'overdue'
+	];
 </script>
 
 <nav aria-label={m.statements_filter_status()}>

@@ -3377,3 +3377,24 @@ No scenario: measurement tooling only, no app change.
 - [x] `layers.json`: module rule for `+server.ts`, layer and module rule for `demo-data.ts`
 - [x] Fitness green; changed values written down (`--update` where better, row in `fitness-functions.md` §6); `deps:graph` shows no `fe → bff` from `+server.ts` and no `db → be`
 - [x] Checks; review round 1 (`docs/reviews/813-review-1.md`: C-1 Major, C-2 Minor, both fixed), round 2 (`docs/reviews/813-review-2.md`: fixed, no new findings); PR `Fixes #813`, pushed after this archive
+## Session: #788 part 5a, the frontend no longer names `replaced` (Ä2)
+
+- [x] Backend: `superseded` in what a statement allows (`GET /statements/:id`), test first
+- [x] BFF mapper and type; `Correction.svelte` shows the hint by `superseded`; DOM and mapping tests first
+- [x] `DeleteContract.svelte`, `document-status.ts`: status labels by a mapping; `StatusFilter.svelte` without the type exclusion (kept behaviour, pinned by `contract-detail-page.dom`, `documents.dom`)
+- [x] API contract `tests/contracts/statement.json`; `docs/api-specification.md`; `docs/architecture/fitness-functions.md` (`replaced` 13 → 9 files, 2 layers)
+- [x] Checks: lint, check, type-check, vitest (3636), backend capabilities and api-contracts (84), E2E statement-detail, contract-detail, documents, statement-reminder (188), fitness
+- [x] Slice review round 1 (`docs/reviews/p5ae2-review-1.md`)
+- [x] Closing round (`docs/reviews/p5ae2-review-2.md`)
+- [x] PR: «No scenario: behaviour unchanged», Refs #788, pushed after this archive
+
+## Session: #788 part 5b, the backend names `replaced` at fewer places (Ä2)
+
+- [x] `counting-statements.ts`: `isReplaced` and `replacedInSql` next to `counting` and `countingInSql`
+- [x] Dashboard (paid this month), reminder (posting a replaced one), statement run (replaced in this period), «Abgerechnet bis» (replaced without counting successor) use them; the anonymisation counts every statement but drafts (`status <> 'draft'`, the same five statuses the database allows); kept behaviour, pinned by `dashboard.pg`, `reminders.pg`, `statement-run`, `billed-until.pg`, `tenant-anonymise.pg`
+- [x] Measured with `tools/arch-baseline/run.sh`: `replaced` 4 files in 2 layers (Backend 3, Shared 1), Ä2 within its target; `docs/architecture/fitness-functions.md`
+- [x] Checks: backend `bun run test` (1610, coverage 96.5 %), type-check, lint, fitness
+- [x] Slice review round 1 (`docs/reviews/p5be2-review-1.md`)
+- [x] Closing round (`docs/reviews/p5be2-review-2.md`)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-788.md`
+- [x] PR: «No scenario: behaviour unchanged», Fixes #788, pushed after this archive

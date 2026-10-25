@@ -70,6 +70,15 @@ describe('Ab wann ein Mieter anonymisiert werden kann', () => {
 		expect(await tenant(ended.tenant)).toMatchObject({ anonymisableFrom: '2029-01-01' });
 	});
 
+	// review p5be2 C-2: every statement that went out counts, also a paid or replaced one, only a draft not
+	it('zählt auch eine bezahlte oder ersetzte Abrechnung', async () => {
+		const ended = await rental('2014-12-31');
+		await statement(ended, { status: 'paid', statementDate: '2016-03-10' });
+		await statement(ended, { status: 'replaced', statementDate: '2018-03-10', periodStart: '2015-01-01', periodEnd: '2015-12-31' });
+
+		expect(await tenant(ended.tenant)).toMatchObject({ anonymisableFrom: '2029-01-01' });
+	});
+
 	it('nennt keinen Tag, solange ein Mietvertrag läuft', async () => {
 		const running = await rental();
 
