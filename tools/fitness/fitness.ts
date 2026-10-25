@@ -12,6 +12,8 @@ type Exception = { reason: string; scenario: string };
 export type Measured = {
 	fieldSpread: Spread;
 	bffDecisions: { path: string; line: string }[];
+	/** The same heuristic over the frontend (#815): `src/lib` outside `server/`, and components */
+	frontendDecisions?: { path: string; line: string }[];
 	literalSets: { values: string; files: number }[];
 	entityMirrors: { table: string; path: string }[];
 	moduleCycles: string[];
@@ -22,10 +24,16 @@ export type Ratchet = {
 	fieldSpread: Spread;
 	/** Technical checks the BFF may make (UUID, ISO date of a query parameter, JWT duration); not shrink-only */
 	technical: { path: string; line: string; reason: string }[];
+	/** #815: display and format checks the frontend may make (a branch on the status value alone, a date format); not shrink-only */
+	display?: { path: string; line: string; reason: string }[];
+	/** #815: frontend pre-checks; each names the code the backend refuses the same input with and the test that shows it */
+	preChecks?: { path: string; line: string; code: string; test: string }[];
 	exceptions: {
 		bffDecisions: ({ path: string; line: string } & Exception)[];
 		/** Date derivations in the BFF found by the check of #788 part 0; shrink with #788 */
 		bffDates?: ({ path: string; line: string } & Exception)[];
+		/** Frontend derivations found when #815 extended the check; shrink with #815 */
+		frontendDecisions?: ({ path: string; line: string } & Exception)[];
 		literalSets: ({ values: string; files: number } & Exception)[];
 		entityMirrors: ({ table: string; paths: string[] } & Exception)[];
 		moduleCycles: ({ modules: string } & Exception)[];
@@ -36,7 +44,33 @@ export type Ratchet = {
 
 export type Finding = { check: string; message: string };
 
-export function judge(m: Measured, r: Ratchet): Finding[] {
+const readRepoFile = (path: string) => {
+	try {
+		return readFileSync(join(ROOT, path), 'utf8');
+	} catch {
+		return undefined;
+	}
+};
+
+/** #815: the frontend's derivations no list covers, and pre-checks whose backend test does not show their code */
+function frontendFindings(m: Measured, r: Ratchet, read: (path: string) => string | undefined): Finding[] {
+	const findings: Finding[] = [];
+	const frontendAllowed = [...(r.display ?? []), ...(r.preChecks ?? []), ...(r.exceptions.frontendDecisions ?? [])];
+	for (const d of unlisted(m.frontendDecisions ?? [], frontendAllowed, (d) => `${d.path}\t${d.line}`))
+		findings.push({
+			check: 'frontend-decision',
+			message: `Ä4/AP2 «Fachregeln entscheidet nur das Backend»: ${d.path}: \`${d.line}\` compares a status value, checks input with an anchored regex or derives something from today's date in the frontend. Fix: let the backend decide (a response field, or a refusal with a code shown with backendMessage()). A branch on the status value alone or a format check goes into \`display\` of tools/fitness/ratchet.json with its reason; a pre-check into \`preChecks\` with the code the backend refuses the same input with and the backend test that shows it (#815).`
+		});
+	for (const p of r.preChecks ?? [])
+		if (!read(p.test)?.includes(p.code))
+			findings.push({
+				check: 'pre-check',
+				message: `Ä4/AP2: the pre-check ${p.path}: \`${p.line}\` names ${p.code} and ${p.test}, but that test does not show the backend refusing with ${p.code}. Fix: name the backend test that refuses the same input with this code, or add one; without it the check belongs to the backend alone (#815).`
+			});
+	return findings;
+}
+
+export function judge(m: Measured, r: Ratchet, read: (path: string) => string | undefined = readRepoFile): Finding[] {
 	const findings: Finding[] = [];
 	for (const k of ['median', 'p90', 'max'] as const)
 		if (m.fieldSpread[k] > r.fieldSpread[k])
@@ -50,6 +84,7 @@ export function judge(m: Measured, r: Ratchet): Finding[] {
 			check: 'bff-decision',
 			message: `Ä4/AP2 «Fachregeln entscheidet nur das Backend»: ${d.path}: \`${d.line}\` compares a status value, checks input with an anchored regex or derives something from today's date in the BFF. Fix: let the backend decide (a field or a coded error, shown with backendMessage()); a purely technical check (UUID, ISO date of a query parameter) goes into \`technical\` of tools/fitness/ratchet.json with its reason.`
 		});
+	findings.push(...frontendFindings(m, r, read));
 	for (const s of m.literalSets) {
 		const listed = r.exceptions.literalSets.find((l) => l.values === s.values);
 		if (!listed || s.files > listed.files)
@@ -82,7 +117,13 @@ const NEW_FIELD_MAX = 4;
 
 /** Warnings, never failures: metrics that vary with the task or the time window. */
 export function advise(
-	a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; technicalAdded?: number; newFields?: { field: string; files: number }[] },
+	a: {
+		prSize?: Ratchet['prSizeWarn'];
+		coChange?: number;
+		technicalAdded?: number;
+		allowedAdded?: number;
+		newFields?: { field: string; files: number }[];
+	},
 	r: Ratchet
 ): Finding[] {
 	const w = r.prSizeWarn;
@@ -103,6 +144,11 @@ export function advise(
 			check: 'technical',
 			message: `Ä4/AP2: tools/fitness/ratchet.json has ${a.technicalAdded} technical check(s) in the BFF that the base does not list. Confirm in the review that each new entry checks a format (UUID, ISO date of a query parameter), not a domain rule or form input; those belong to the backend.`
 		});
+	if ((a.allowedAdded ?? 0) > 0)
+		findings.push({
+			check: 'frontend-allowed',
+			message: `Ä4/AP2: tools/fitness/ratchet.json has ${a.allowedAdded} display or pre-check entr(ies) in the frontend that the base does not list. Confirm in the review that each display entry branches on a status value alone or checks a format, and that each pre-check's backend test refuses the same input with its code (#815).`
+		});
 	for (const f of a.newFields ?? [])
 		if (f.files > NEW_FIELD_MAX)
 			findings.push({
@@ -116,6 +162,7 @@ export function advise(
 const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
 	bffDecisions: x.bffDecisions.length,
 	bffDates: x.bffDates?.length,
+	frontendDecisions: x.frontendDecisions?.length,
 	literalSets: x.literalSets.reduce((n, e) => n + e.files, 0),
 	entityMirrors: x.entityMirrors.reduce((n, e) => n + e.paths.length, 0),
 	moduleCycles: x.moduleCycles.length
@@ -148,6 +195,8 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 	const found = unlisted(m.bffDecisions, r.technical, decisionKey);
 	const stale = unlisted(x.bffDecisions, found, decisionKey);
 	const staleDates = unlisted(x.bffDates ?? [], unlisted(found, x.bffDecisions, decisionKey), decisionKey);
+	const frontendFound = unlisted(m.frontendDecisions ?? [], [...(r.display ?? []), ...(r.preChecks ?? [])], decisionKey);
+	const staleFrontend = unlisted(x.frontendDecisions ?? [], frontendFound, decisionKey);
 	const files = (values: string) => m.literalSets.find((s) => s.values === values)?.files ?? 0;
 	const mirrors = new Set(m.entityMirrors.map((e) => `${e.table}\t${e.path}`));
 	return {
@@ -160,7 +209,8 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 				.map((e) => ({ ...e, paths: e.paths.filter((p) => mirrors.has(`${e.table}\t${p}`)) }))
 				.filter((e) => e.paths.length > 0),
 			moduleCycles: x.moduleCycles.filter((c) => m.moduleCycles.includes(c.modules)),
-			...(x.bffDates && { bffDates: x.bffDates.filter((d) => !staleDates.includes(d)) })
+			...(x.bffDates && { bffDates: x.bffDates.filter((d) => !staleDates.includes(d)) }),
+			...(x.frontendDecisions && { frontendDecisions: x.frontendDecisions.filter((d) => !staleFrontend.includes(d)) })
 		}
 	};
 }
@@ -201,22 +251,32 @@ export const decides = (line: string) =>
 	[...line.matchAll(STATUS_CMP), ...line.matchAll(ANCHORED_RE)].length > 0 || DATE_CMP.test(line) || TODAY_ARG.test(line);
 
 const BFF_FILE = /^src\/lib\/server\/|\+(page|layout)\.server\.ts$|\+server\.ts$|^src\/hooks\.server\.ts$/;
+/** #815: the frontend's own code: every component and non-server `.ts` under src/; tests, types and Paraglide not */
+export const isFrontendFile = (p: string) =>
+	p.startsWith('src/') &&
+	(p.endsWith('.svelte') || (p.endsWith('.ts') && !p.endsWith('.d.ts'))) &&
+	!BFF_FILE.test(p) &&
+	!/__tests__|\/paraglide\//.test(p);
+const decisionsIn = (paths: string[]) =>
+	paths.flatMap((path) =>
+		readFileSync(join(ROOT, path), 'utf8')
+			.split('\n')
+			.filter(decides)
+			.map((l) => ({ path, line: l.trim() }))
+	);
 
 function measure(out: string): Measured {
 	const read = scripts(out, ['02-imports.ts', '05-knowledge.ts']);
 	const spread = read('m4-field-spread.csv')
 		.map((r) => +r.prod_files)
 		.sort((a, b) => a - b);
-	const bff = git(['ls-files', 'src']).split('\n').filter((p) => BFF_FILE.test(p) && p.endsWith('.ts'));
+	const src = git(['ls-files', 'src']).split('\n');
+	const bff = src.filter((p) => BFF_FILE.test(p) && p.endsWith('.ts'));
 	const isProdModule = (m: string) => /^(fe|bff|be|db|shared):/.test(m);
 	return {
 		fieldSpread: { median: median(spread), p90: quantile(spread, 0.9), max: spread.at(-1) ?? 0 },
-		bffDecisions: bff.flatMap((path) =>
-			readFileSync(join(ROOT, path), 'utf8')
-				.split('\n')
-				.filter(decides)
-				.map((l) => ({ path, line: l.trim() }))
-		),
+		bffDecisions: decisionsIn(bff),
+		frontendDecisions: decisionsIn(src.filter(isFrontendFile)),
 		literalSets: read('m4-literal-sets.csv')
 			.filter((r) => r.cross_layer === 'yes')
 			.map((r) => ({ values: r.values, files: +r.files })),
@@ -250,6 +310,12 @@ export function addedTechnical(working: Ratchet, base: Ratchet): number {
 	return unlisted(working.technical, base.technical, (t) => `${t.path}\t${t.line}`).length;
 }
 
+/** #815: display and pre-check entries the base does not list */
+export function addedAllowed(working: Ratchet, base: Ratchet): number {
+	const all = (r: Ratchet) => [...(r.display ?? []), ...(r.preChecks ?? [])];
+	return unlisted(all(working), all(base), (t) => `${t.path}\t${t.line}`).length;
+}
+
 function coChange(out: string) {
 	const since = new Date(Date.now() - 183 * 864e5).toISOString().slice(0, 10);
 	const read = scripts(out, ['02-imports.ts', '03-history.ts', '04-metrics.ts'], { ARCH_SINCE: since, ARCH_BASE: 'HEAD' });
@@ -277,13 +343,14 @@ if (import.meta.main) {
 	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet) : [])];
 	const pairs = cochange ? coChange(out) : undefined;
 	const technicalAdded = baseRatchet ? addedTechnical(ratchet, baseRatchet) : 0;
-	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded, newFields: base && m ? newFields(JSON.parse(readFileSync(join(out, 'm4-field-spread.csv.json'), 'utf8')), git(['show', `${base}:backend/src/db/schema.ts`])) : undefined }, ratchet);
+	const allowedAdded = baseRatchet ? addedAllowed(ratchet, baseRatchet) : 0;
+	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded, allowedAdded, newFields: base && m ? newFields(JSON.parse(readFileSync(join(out, 'm4-field-spread.csv.json'), 'utf8')), git(['show', `${base}:backend/src/db/schema.ts`])) : undefined }, ratchet);
 	if (pairs !== undefined) console.log(`Fitness: ${pairs} production file pairs across layers change together without an import (6 months)`);
 	const say = (level: 'error' | 'warning', f: Finding) => console.log(github ? `::${level} title=Fitness ${f.check}::${f.message}` : `${level} [${f.check}] ${f.message}`);
 	errors.forEach((f) => say('error', f));
 	warnings.forEach((f) => say('warning', f));
 	if (m) {
-		const values = `field spread median ${m.fieldSpread.median}, P90 ${m.fieldSpread.p90}, max ${m.fieldSpread.max}; BFF decisions ${m.bffDecisions.length}; cross-layer value lists ${m.literalSets.length}; entity mirrors ${m.entityMirrors.length}; module cycles ${m.moduleCycles.length}; boundary imports ${m.boundaryImports.length}`;
+		const values = `field spread median ${m.fieldSpread.median}, P90 ${m.fieldSpread.p90}, max ${m.fieldSpread.max}; BFF decisions ${m.bffDecisions.length}; frontend decisions ${m.frontendDecisions?.length ?? 0} (exceptions ${ratchet.exceptions.frontendDecisions?.length ?? 0}); cross-layer value lists ${m.literalSets.length}; entity mirrors ${m.entityMirrors.length}; module cycles ${m.moduleCycles.length}; boundary imports ${m.boundaryImports.length}`;
 		console.log(`Fitness: ${values}`);
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Architecture fitness\n\n${values}\n`);
 	}

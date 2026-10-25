@@ -32,7 +32,7 @@ Bestehende Szenarien aus `docs/archive/migration-mva.md` (Q1–Q5, D1–D2, S1�
 Dwello-Nutzen
 ├─ Änderbarkeit
 │  ├─ Form eines Felds an einem Ort .......... Ä1 Neues Feld an einer Entität            (H/H)
-│  └─ Fachregel an einem Ort ................. Ä4 Fachregel nur im Backend              (H/M)
+│  └─ Fachregel an einem Ort ................. Ä4 Fachregel nur im Backend              (H/H)
 ├─ Verfügbarkeit / Resilienz
 │  ├─ Kein Datenverlust ...................... R1 Verschlüsseltes, kompatibles Backup   (H/H)
 │  └─ Sicheres Update ........................ U1 Wöchentliches Update mit Migration    (H/H)
@@ -71,11 +71,11 @@ Dwello-Nutzen
 ### Ä4 Fachregel nur im Backend
 
 - **Auslöser:** Eine Fachregel oder eine fachliche Formularprüfung ändert sich.
-- **Umgebung:** Entwicklung. Die Regel steht heute in Backend und BFF.
-- **Reaktion:** Die Änderung erfolgt nur im Backend. Der BFF reicht Ergebnis oder Fehlercode weiter (`backendMessage`).
-- **Messgrösse und Ziel:** fachliche Status-Vergleiche und Prüfregeln im BFF: **0** (vom Nutzer bestätigt, Entscheid 23.10.2026, #717).
-- **Heute:** **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien (gemessen, Phase 0). Nach H-28 Schritt 1–4 (bis #785) gemessen am 24.10.2026: **0** Status-Vergleiche, **1** fachliche Prüfregel (`validFrom` beim Löschen eines Akontos) neben 7 technischen; Zählung #13 im Backend (gemessen, `baseline.md` §7a). Danach prüft das Backend den Tag des Akontos; im BFF bleibt nur dessen Form als Pfadschutz (technisch): **0** fachliche Regeln (gelesen).
-- **Fitness Function:** CI-Check auf `src/lib/server/**`, `src/routes/**/+page.server.ts` und `+server.ts`: Ein Vergleich gegen einen Statuswert oder eine verankerte Regex schlägt fehl, ausser er steht auf einer Allowlist für technische Prüfungen (UUID, ISO-Datum als Query-Parameter, JWT-Dauer).
+- **Umgebung:** Entwicklung. Die Regel steht heute in Backend, BFF und Frontend.
+- **Reaktion:** Die Änderung erfolgt nur im Backend. BFF und Frontend zeigen Ergebnis oder Fehlercode (`backendMessage`). Eine Vorprüfung im Frontend ist erlaubt, wenn das Backend dieselbe Eingabe mit demselben Code ablehnt (#815).
+- **Messgrösse und Ziel:** fachliche Status-Vergleiche, Prüfregeln und Datums-Ableitungen in BFF und Frontend: **0** (vom Nutzer bestätigt, Entscheid 23.10.2026, #717; Frontend seit 25.10.2026, #815). Eine Verzweigung nur nach dem Statuswert ist Anzeige, kein Verstoss (#815).
+- **Heute:** **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien (gemessen, Phase 0). Nach H-28 Schritt 1–4 (bis #785) gemessen am 24.10.2026: **0** Status-Vergleiche, **1** fachliche Prüfregel (`validFrom` beim Löschen eines Akontos) neben 7 technischen; Zählung #13 im Backend (gemessen, `baseline.md` §7a). Danach prüft das Backend den Tag des Akontos; im BFF bleibt nur dessen Form als Pfadschutz (technisch): **0** fachliche Regeln (gelesen). Frontend am 25.10.2026 (#815, gemessen mit `decides`): 82 Zeilen in 35 Dateien, davon 41 Anzeige oder Format und **41** Ableitungen in 20 Dateien.
+- **Fitness Function:** CI-Check auf `src/lib/server/**`, `src/routes/**/+page.server.ts` und `+server.ts`: Ein Vergleich gegen einen Statuswert oder eine verankerte Regex schlägt fehl, ausser er steht auf einer Allowlist für technische Prüfungen (UUID, ISO-Datum als Query-Parameter, JWT-Dauer). Seit #815 derselbe Check über das Frontend (Komponenten und jede `.ts`-Datei unter `src/` ausser den BFF-Dateien), mit einer Allowlist für Anzeige und Format und einer für Vorprüfungen (Fehlercode und Backend-Test).
 
 ### R1 Verschlüsseltes, kompatibles Backup
 
@@ -172,14 +172,14 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 
 | | Schwierigkeit **H** | **M** | **L** |
 |---|---|---|---|
-| **Wichtigkeit H** | **Ä1, U1, T1, R1** | Ä4, O1, P2 | S1 |
+| **Wichtigkeit H** | **Ä1, Ä4, U1, T1, R1** | O1, P2 | S1 |
 | **M** | | P1 | |
 | **L** | | | |
 
 | ID | Wichtigkeit | Begründung | Schwierigkeit | Begründung |
 |---|---|---|---|---|
 | Ä1 | H | Der PO hat die Zielwerte am 23.10. festgelegt. Ein neues Feld ist die häufigste Änderung (`db:schema` in 31 % der Features). | H | Median 6 → 4, P90 19 → 8. Ohne gemeinsamen Vertrag zwischen den Schichten sinkt der Wert nicht (0 Importe FE/BFF → Backend). |
-| Ä4 | H | Entscheid des PO, #717 | M | #717 ist mit mehreren PRs schon weit gekommen. Der Rest ist nicht neu gemessen. |
+| Ä4 | H | Entscheid des PO, #717; das MCP über die API allein hängt daran (#815, #817) | H | Der BFF liest 0 (#717, #788). Seit #815 zählt auch das Frontend: 41 Ableitungen in 20 Dateien (25.10.2026). Entscheid PO 25.10.2026: H/M → H/H. |
 | R1 | H | Datenverlust ist der teuerste Fehler. | H | Mehrere Anforderungen zugleich: Automatik, Verschlüsselung mit Wiederherstellungscode, Kompatibilität über Releases und Restore ≤ 5 min. Heute gibt es nur ein manuelles, unverschlüsseltes, ungetestetes Verfahren. Ob 5 min reichen, ist unbekannt (A2). |
 | U1 | H | Wöchentliches Update; Datenverlust und fehlgeschlagene Migration müssen erkennbar sein. | H | Kein Backup vor der Migration, kein Upgrade-Test mit Daten. Migrationen gehen nur vorwärts, ein Zurück gibt es nur per Restore. |
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |

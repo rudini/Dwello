@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedTechnical, advise, decides, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, decides, isFrontendFile, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -280,3 +280,70 @@ describe('judge with date exceptions', () => {
 	});
 });
 
+
+// #815: the same check over the frontend; a display or format check and a proven pre-check are allowed, the rest is an
+// exception that only shrinks
+describe('judge in the frontend', () => {
+	const line = 'if (billedUntil > today) return m.backend_billed_until_future();';
+	const test = 'backend/src/__tests__/billed-until.pg.test.ts';
+	const read = (path: string) => (path === test ? "expect(body).toMatchObject({ code: 'BILLED_UNTIL_FUTURE' })" : undefined);
+
+	it('fails on a frontend derivation that no list covers, and names AP2 and the way out', () => {
+		const findings = judge({ ...clean, frontendDecisions: [{ path: 'src/lib/a.ts', line }] }, ratchet, read);
+		expect(findings.map((f) => f.check)).toEqual(['frontend-decision']);
+		expect(findings[0].message).toContain('src/lib/a.ts');
+		expect(findings[0].message).toContain('AP2');
+	});
+
+	it('accepts a listed display check, a listed exception and a pre-check its backend test proves', () => {
+		const r: Ratchet = {
+			...ratchet,
+			display: [{ path: 'src/lib/b.svelte', line: "{#if status === 'draft'}", reason: 'status label' }],
+			preChecks: [{ path: 'src/lib/a.ts', line, code: 'BILLED_UNTIL_FUTURE', test }],
+			exceptions: { ...ratchet.exceptions, frontendDecisions: [{ path: 'src/lib/c.ts', line: 'x < today', reason: '#815', scenario: 'Ä4' }] }
+		};
+		const found = [
+			{ path: 'src/lib/a.ts', line },
+			{ path: 'src/lib/b.svelte', line: "{#if status === 'draft'}" },
+			{ path: 'src/lib/c.ts', line: 'x < today' }
+		];
+		expect(judge({ ...clean, frontendDecisions: found }, r, read)).toEqual([]);
+	});
+
+	it('fails on a pre-check whose backend test does not refuse with its code', () => {
+		const r: Ratchet = { ...ratchet, preChecks: [{ path: 'src/lib/a.ts', line, code: 'BILLED_UNTIL_PAST', test }] };
+		const findings = judge({ ...clean, frontendDecisions: [{ path: 'src/lib/a.ts', line }] }, r, read);
+		expect(findings.map((f) => f.check)).toEqual(['pre-check']);
+		expect(findings[0].message).toContain('BILLED_UNTIL_PAST');
+	});
+
+	it('holds the frontend exceptions like the others and drops them once the code no longer has them', () => {
+		const kept = { path: 'src/lib/c.ts', line: 'x < today', reason: '#815', scenario: 'Ä4' };
+		const gone = { path: 'src/lib/d.ts', line: 'y < today', reason: '#815', scenario: 'Ä4' };
+		const base: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, frontendDecisions: [kept] } };
+		const more: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, frontendDecisions: [kept, gone] } };
+		expect(loosened(more, base).map((f) => f.message)).toEqual([expect.stringContaining('frontendDecisions')]);
+		const t = tighten({ ...clean, frontendDecisions: [{ path: 'src/lib/c.ts', line: 'x < today' }] }, more);
+		expect(t.exceptions.frontendDecisions).toEqual([kept]);
+	});
+
+	it('warns when the display or pre-check list grows, so a review confirms the entry', () => {
+		const base: Ratchet = { ...ratchet, display: [] };
+		const working: Ratchet = { ...ratchet, display: [{ path: 'a.svelte', line: 'x', reason: 'format' }] };
+		expect(addedAllowed(working, base)).toBe(1);
+		expect(advise({ allowedAdded: 1 }, ratchet).map((f) => f.check)).toEqual(['frontend-allowed']);
+	});
+});
+
+// review i815a C-3: the frontend is every non-server file under src/, not only src/lib and components
+describe('isFrontendFile', () => {
+	it('takes components, src/lib outside server/, universal loads and client hooks', () => {
+		for (const p of ['src/lib/a.ts', 'src/routes/x/Y.svelte', 'src/routes/x/+page.ts', 'src/routes/config/help.ts', 'src/hooks.client.ts'])
+			expect(isFrontendFile(p)).toBe(true);
+	});
+
+	it('leaves BFF files, tests and Paraglide', () => {
+		for (const p of ['src/lib/server/a.ts', 'src/routes/x/+page.server.ts', 'src/routes/x/+server.ts', 'src/hooks.server.ts', 'src/__tests__/a.test.ts', 'src/lib/paraglide/messages.js', 'src/app.d.ts'])
+			expect(isFrontendFile(p)).toBe(false);
+	});
+});

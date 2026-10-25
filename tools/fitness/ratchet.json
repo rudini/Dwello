@@ -46,6 +46,214 @@
 			"reason": "ISO date of the Akonto a form posts, checked before it goes into a backend URL path (technical, review 464-1 C-9); the backend checks the real day (H-28, #717)"
 		}
 	],
+	"display": [
+		{
+			"path": "src/lib/backend-error.ts",
+			"line": "typeof code === 'string' && /^[A-Z][A-Z0-9_]+$/.test(code)",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/backend-error.ts",
+			"line": "if (/^\\d{4}-\\d{2}-\\d{2}$/.test(String(value))) return [key, formatDate(String(value))]; // and a day as YYYY-MM-DD",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/contract-form.ts",
+			"line": "export const FRANCS = /^\\d+(\\.\\d{1,2})?$/;",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/contract-status.ts",
+			"line": "return status === 'future'",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/lib/contract-status.ts",
+			"line": "/^\\d{4}-\\d{2}-\\d{2}$/.test(date) && !isNaN(day.getTime()) && day.toISOString().startsWith(date)",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/contract-status.ts",
+			"line": ".filter((statement) => statement.status === 'draft')",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/lib/contract-status.ts",
+			"line": ".filter((statement) => statement.status !== 'draft')",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/lib/contract-status.ts",
+			"line": "`${s.statementNumber} (${s.status === 'paid' ? m.contracts_billed_paid() : m.contracts_billed_sent()})`",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/lib/overview.ts",
+			"line": "const outdatedDrafts = outdatedStatements.filter((s) => s.status === 'draft');",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/lib/overview.ts",
+			"line": "...correctTasks(outdatedStatements.filter((s) => s.status !== 'draft')),",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/lib/swiss-date.ts",
+			"line": "const iso = trimmed.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/swiss-date.ts",
+			"line": "trimmed.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4}|\\d{2})$/) ??",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/swiss-date.ts",
+			"line": "trimmed.match(/^(\\d{2})(\\d{2})(\\d{4})$/)",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/ui/DateInput.svelte",
+			"line": "/^\\d{1,2}\\.\\d{1,2}\\.?$/.test(text.trim())",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/ui/DateInput.svelte",
+			"line": ": /^(\\d{1,2}\\.\\d{1,2}\\.\\d{2,4}|\\d{8})$/.test(text.trim())",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/ui/DateInput.svelte",
+			"line": "text = /^\\d{2}$|^\\d{1,2}\\.\\d{2}$/.test(at) && event.inputType !== 'deleteContentBackward' ? `${at}.` : at;",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/utils/format.ts",
+			"line": "return /^\\d+([.,]\\d{1,2})?$/.test(rate) ? Number(rate.replace(',', '.')) : NaN;",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/lib/version.ts",
+			"line": "const [, version, since] = describe.trim().match(/^v(\\d+\\.\\d+\\.\\d+)(?:-(\\d+-g[0-9a-f]+))?$/) ?? [];",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/routes/+error.svelte",
+			"line": "const ownWords = /^(Internal Error|Unknown Error|Error: \\d+)$/;",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/routes/apartments/[id]/ContractHistory.svelte",
+			"line": "const current = $derived(contracts.filter((c) => c.status !== 'ended'));",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/apartments/[id]/ContractHistory.svelte",
+			"line": "const earlier = $derived(contracts.filter((c) => c.status === 'ended'));",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/apartments/[id]/ContractHistory.svelte",
+			"line": "{#if contract.status === 'ended'}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/contracts/RefusedStatements.svelte",
+			"line": "statements.length === 1 && statements[0].status === 'draft' ? statements[0] : null",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/contracts/[id]/+page.svelte",
+			"line": "future={status === 'future'}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/contracts/[id]/+page.svelte",
+			"line": "ended={status === 'ended'}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/contracts/[id]/DeleteContract.svelte",
+			"line": "const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/contracts/[id]/FixedTermCheck.svelte",
+			"line": "busy={busy === 'draft'}",
+			"reason": "not a status: which button of the form is busy (a UI state)"
+		},
+		{
+			"path": "src/routes/invoices/+page.svelte",
+			"line": "if (![start, end].every((day) => /^\\d{4}-\\d{2}-\\d{2}$/.test(day))) return null; // as the loader sends them",
+			"reason": "format: checks how a value is written (date, number, code), not a domain rule"
+		},
+		{
+			"path": "src/routes/statements/StatementRow.svelte",
+			"line": "const open = $derived(statement.status === 'sent' || statement.status === 'overdue');",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/StatementRow.svelte",
+			"line": "{#if statement.status === 'overdue' && statement.lastReminderDate}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/StatementRow.svelte",
+			"line": "{#if statement.status === 'overdue' && nextReminder}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/+page.svelte",
+			"line": "statement.status === 'draft' && later && (later.invoices || later.fuelStock)",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/+page.svelte",
+			"line": "pdfGeneratedAt={statement.status === 'draft' ? null : pdfGeneratedAt}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/+page.svelte",
+			"line": "sentOn={statement.status === 'draft' ? null : statement.statementDate}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/Correction.svelte",
+			"line": "const askPaid = $derived(statement.status === 'sent' || statement.status === 'overdue');",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/LaterChanges.svelte",
+			"line": "const tone = $derived(statement.status === 'draft' || later.correctionDue ? 'caution' : 'info');",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/LaterChanges.svelte",
+			"line": "statement.status === 'draft'",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/OldAddressWarning.svelte",
+			"line": "{#if statement.status === 'draft' && statement.oldAddress}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/StatusActions.svelte",
+			"line": "{#if status === 'sent' || status === 'overdue'}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/StatusActions.svelte",
+			"line": "{:else if status === 'paid'}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
+			"path": "src/routes/statements/[id]/StatusActions.svelte",
+			"line": "{:else if status === 'draft'}",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		}
+	],
+	"preChecks": [],
 	"exceptions": {
 		"bffDecisions": [],
 		"literalSets": [
@@ -302,7 +510,255 @@
 				"scenario": "Ä1"
 			}
 		],
-		"bffDates": []
+		"bffDates": [],
+		"frontendDecisions": [
+			{
+				"path": "src/lib/contract-form.ts",
+				"line": "if (contract.startDate > today) return dateForInput(contract.startDate);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-form.ts",
+				"line": "if (billedUntil > today) return m.backend_billed_until_future();",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-status.ts",
+				"line": "if (startDate.slice(0, 10) > today) return 'future';",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-status.ts",
+				"line": "return endDate && endDate.slice(0, 10) < today ? 'ended' : 'active';",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-status.ts",
+				"line": "if (!endDate || endDate >= today) return null;",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-wizard.ts",
+				"line": "const billed = today && billedUntilError(offeredBilledUntil(values, today), today);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-wizard.ts",
+				"line": "startDateNotice(values.startDate, today) && values.billedUntil ? values.billedUntil : undefined",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/contract-wizard.ts",
+				"line": "return startDate && !impossible(startDate) && startDate < today",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/overview.ts",
+				"line": "Math.round((Date.parse(date.slice(0, 10)) - Date.parse(today)) / 86_400_000);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/overview.ts",
+				"line": "days: daysFrom(today, s.paymentDeadline),",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/overview.ts",
+				"line": "days: daysFrom(today, c.endDate),",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/statement.ts",
+				"line": "statement.status === 'settled' || // also when the contract's end moves into the period afterwards (448-2 V-17)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/statement.ts",
+				"line": ": paidDate > localToday()",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/statement.ts",
+				"line": "statement.nextReminderFrom && statement.nextReminderFrom > localToday()",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/utils/contract-availability.ts",
+				"line": "return endDate >= today;",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/lib/utils/contract-availability.ts",
+				"line": "if (availableFromDate <= today) {",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/ContractForm.svelte",
+				"line": "contractStatusOn(contract.startDate, contract.endDate, today) === 'active'",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/ContractForm.svelte",
+				"line": "statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/ContractForm.svelte",
+				"line": "const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/ContractForm.svelte",
+				"line": "const billed = billedUntilError(values, today); // #453 (#337)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/ContractRow.svelte",
+				"line": "const status = $derived(contractStatusOn(contract.startDate, contract.endDate, today));",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/PastEndConfirm.svelte",
+				"line": "pastEndConfirmation(endDate, today) !== null && endDate >= startDate.slice(0, 10)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/new/ContractWizard.svelte",
+				"line": "contractStatusOn(taken.startDate, taken.endDate, today),",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/new/ContractWizard.svelte",
+				"line": "body: contractBody(offeredBilledUntil(values, today), categories)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/new/ContractWizard.svelte",
+				"line": "const past = startDateNotice(values.startDate, today);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/new/ContractWizard.svelte",
+				"line": "errors = stepErrors(values, step, today);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/new/ContractWizard.svelte",
+				"line": "values={offeredBilledUntil(values, today)}",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/contracts/new/PeriodStep.svelte",
+				"line": "const pastStart = $derived(startDateNotice(startDate, today));",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/+page.svelte",
+				"line": "let paidDate = $state(localToday());",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/+page.svelte",
+				"line": "let paidDate = $state(localToday());",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/Correction.svelte",
+				"line": "(statement.status === 'settled' && statement.balance !== 0) || // a Saldo of 0.00 is never carried over (448-4 V-32)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/Correction.svelte",
+				"line": "(statement.status === 'paid' && statement.paidAmount === 0 && statement.balance < 0 && statement.balance > -5)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/Correction.svelte",
+				"line": "statement.status === 'draft' &&",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/PaymentPanel.svelte",
+				"line": "belowMinimum(statement.balance) && statement.status === 'paid' && statement.paidAmount === 0",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/ResetPaymentDialog.svelte",
+				"line": "statement.paymentDeadline < localToday() ? statusLabels.overdue : statusLabels.sent",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/generate/PeriodStep.svelte",
+				"line": "const notOver = $derived(!!periodEnd && periodEnd >= localToday());",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/generate/PreviewChecks.svelte",
+				"line": "const notOver = $derived(period.periodEnd >= localToday());",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/tenants/[id]/TenantAnonymiseCard.svelte",
+				"line": "const allowed = $derived(from <= localToday());",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/Correction.svelte",
+				"line": ": statement.status === 'settled' // a Saldo of 0.00: nothing open, nothing carried (448-review-3 C-18)",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/Correction.svelte",
+				"line": "if (carried || statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
+				"scenario": "Ä4"
+			},
+			{
+				"path": "src/routes/statements/[id]/StatusActions.svelte",
+				"line": "{#if status === 'overdue' && owes && !waiting}",
+				"reason": "Frontend derivation from before #815 (measured 25.10.2026): the status together with an amount or a deadline (review i815a C-1, C-2); moves to the backend in #815 C",
+				"scenario": "Ä4"
+			}
+		]
 	},
 	"prSizeWarn": {
 		"files": 31,
