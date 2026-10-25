@@ -18,5 +18,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `DeleteContract.svelte`, `document-status.ts`: status labels by a mapping; `StatusFilter.svelte` without the type exclusion (kept behaviour, pinned by `contract-detail-page.dom`, `documents.dom`)
 - [x] API contract `tests/contracts/statement.json`; `docs/api-specification.md`; `docs/architecture/fitness-functions.md` (`replaced` 13 → 9 files, 2 layers)
 - [x] Checks: lint, check, type-check, vitest (3636), backend capabilities and api-contracts (84), E2E statement-detail, contract-detail, documents, statement-reminder (188), fitness
-- [ ] Slice review (`code-reviewer`) and closing round
+- [x] Slice review round 1 (`docs/reviews/p5ae2-review-1.md`)
+- [ ] Closing round
 - [ ] PR: «No scenario: behaviour unchanged», Refs #788
