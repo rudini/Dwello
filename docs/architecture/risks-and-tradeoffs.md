@@ -63,7 +63,7 @@
 | RI-U1-1 | **Datenverlust bei einem Update:** Vor der Migration gibt es kein Backup. Ein Update mit fachlich falscher, aber technisch erfolgreicher Migration lässt sich nur mit dem letzten manuellen Backup zurücknehmen, falls es eines gibt. | Startbefehl in `docker-compose.prod.yml`; Backup nur manuell (`docs/installation.md` §5) (aus Repo/Config) |
 | RI-U1-2 | Migrationen werden nie gegen Daten einer Vorversion getestet, nur gegen eine leere DB. | `docs/test-pyramid.md` («migrated fresh before each run») (aus Repo/Config) |
 | RI-U1-3 | Ein fehlgeschlagener Start ist nur über `docker logs` erkennbar. Der Vermieter hat keine technischen Kenntnisse (`docs/installation.md`, Einleitung). | Healthchecks in Compose; Ursache nur im Log (aus Repo/Config) |
-| RI-U1-4 | `ollama/ollama:latest` ist nicht gepinnt. Ein Update kann das KI-Verhalten ändern, ohne dass Dwello sich ändert. | `docker-compose.prod.yml` (aus Repo/Config) |
+| RI-U1-4 | `ollama/ollama:latest` ist nicht gepinnt. Ein Update kann das KI-Verhalten ändern, ohne dass Dwello sich ändert. Behoben mit #719: `ollama/ollama:0.40.11`. | `docker-compose.prod.yml` (aus Repo/Config) |
 | RI-U1-5 | Ein Restore ohne das Schlüssel-Volume macht verschlüsselte Geheimnisse still unlesbar. | `ki-settings.service.ts` Z. 60 («cannot be read … after a restore without the keys») (aus Repo/Config) |
 
 **Nicht-Risiken (helfen heute):**

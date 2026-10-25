@@ -154,7 +154,12 @@ For a home server that should stay out of the internet, Caddy can get the certif
 After a lost or stolen device, or when someone should no longer use Dwello, end every sign-in at once: give the installation a new session key. Everyone, the landlord included, then signs in again.
 
 ```bash
-echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env   # or replace an existing JWT_SECRET line
+openssl rand -hex 32   # a new key
+```
+
+In `.env`, set `JWT_SECRET=` to that key (replace the line if there is one), then:
+
+```bash
 docker compose -f docker-compose.prod.yml up -d --force-recreate
 ```
 
@@ -171,8 +176,12 @@ docker compose -f docker-compose.prod.yml exec backend cat /run/dwello/db_passwo
 If it prints `dwello`, give the database a new password and keep it in `.env`:
 
 ```bash
-new=$(openssl rand -hex 24)
+new=$(openssl rand -hex 24); echo "$new"   # the new password
 docker compose -f docker-compose.prod.yml exec postgres psql -U dwello -d dwello -c "ALTER USER dwello PASSWORD '$new'"
-echo "POSTGRES_PASSWORD=$new" >> .env   # or replace an existing POSTGRES_PASSWORD line
+```
+
+In `.env`, set `POSTGRES_PASSWORD=` to that password (replace the line if there is one), then:
+
+```bash
 docker compose -f docker-compose.prod.yml up -d --force-recreate
 ```
