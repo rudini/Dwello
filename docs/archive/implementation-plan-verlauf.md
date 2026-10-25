@@ -3409,3 +3409,19 @@ No scenario: measurement tooling only, no app change.
 - [x] Slice review round 1 (`docs/reviews/i815a-review-1.md`)
 - [x] Re-review of C-1 (Major) and closing round (`docs/reviews/i815a-review-2.md`)
 - [x] PR: «No scenario: tooling and docs», Refs #815, pushed after this archive
+
+## Session: #815 part B, contracts: the frontend derives nothing from dates
+
+- [x] B1 Vertragsstatus: list, page, form and wizard show the backend's `status` (#784); `contractStatusOn` and the list's `today` removed; tests first (list, page, form, `lastRent`, loaders); the check also reads `data.today` (3 lines of the contract page, now exceptions for B2)
+- [x] B1 review (`docs/reviews/i815b1-review-1.md`): no Blocker/Major; C-1 (Minor) rejected: an open-ended taken contract blocks the apartment, so the text never shows it; `lastRent` pins the status
+- [x] B2 pre-checks with a backend code and test (`BILLED_UNTIL_FUTURE`, `CONTRACT_END_PAST`, `CONTRACT_END_BEFORE_START`) into `preChecks`: 9 lines, exceptions 39 → 30
+- [x] B3a proposed «Gültig ab» of an Akonto from the backend (`proposedAdvanceFrom`), backend unit test and API contract first; exceptions 30 → 29
+- [x] B3b apartment availability in the wizard from the backend (`blocked`, `availableFrom` on apartments), backend test, API contracts and loader/DOM tests first; exceptions 29 → 27
+- [x] Review B2–B3b (`docs/reviews/i815b2-review-1.md`): C-1 (Major, the wizard's browser day) fixed with a test; C-2 (POST refusal test), C-3 (end yesterday, also a fix: the old frontend said «ab heute»), C-4 (comment) fixed
+- [x] B3c the refusal says whether «Abgerechnet bis» covers the draft (`covered`), backend and DOM tests first; exceptions 27 → 26
+- [x] B3 «Vertragsbeginn in der Vergangenheit» from the backend (`GET /contracts/check-start`), backend test, API contract and DOM test first; exceptions 26 → 19, `stepErrors` a pre-check (BILLED_UNTIL_FUTURE)
+- [x] Review B3c and B3 (`docs/reviews/i815b3-review-1.md`)
+- [x] Re-review of the C-1 fix and closing round (`docs/reviews/i815b3-review-2.md`): C-1, C-2 fixed; C-5 rejected (in the edit form only an earlier start is questioned, always past), C-6 (Minor, E2E step) stays in the report
+- [x] Checks: lint, check, vitest, backend tests, E2E contract features, fitness (`frontendDecisions` exceptions 39 → 19)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-815.md`
+- [x] PR: «No scenario: behaviour unchanged», Refs #815, pushed after this archive

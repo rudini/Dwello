@@ -8,20 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-
-## Session: #815 part B, contracts: the frontend derives nothing from dates
-
-- [x] B1 Vertragsstatus: list, page, form and wizard show the backend's `status` (#784); `contractStatusOn` and the list's `today` removed; tests first (list, page, form, `lastRent`, loaders); the check also reads `data.today` (3 lines of the contract page, now exceptions for B2)
-- [x] B1 review (`docs/reviews/i815b1-review-1.md`): no Blocker/Major; C-1 (Minor) rejected: an open-ended taken contract blocks the apartment, so the text never shows it; `lastRent` pins the status
-- [x] B2 pre-checks with a backend code and test (`BILLED_UNTIL_FUTURE`, `CONTRACT_END_PAST`, `CONTRACT_END_BEFORE_START`) into `preChecks`: 9 lines, exceptions 39 → 30
-- [x] B3a proposed «Gültig ab» of an Akonto from the backend (`proposedAdvanceFrom`), backend unit test and API contract first; exceptions 30 → 29
-- [x] B3b apartment availability in the wizard from the backend (`blocked`, `availableFrom` on apartments), backend test, API contracts and loader/DOM tests first; exceptions 29 → 27
-- [x] Review B2–B3b (`docs/reviews/i815b2-review-1.md`): C-1 (Major, the wizard's browser day) fixed with a test; C-2 (POST refusal test), C-3 (end yesterday, also a fix: the old frontend said «ab heute»), C-4 (comment) fixed
-- [x] B3c the refusal says whether «Abgerechnet bis» covers the draft (`covered`), backend and DOM tests first; exceptions 27 → 26
-- [x] B3 «Vertragsbeginn in der Vergangenheit» from the backend (`GET /contracts/check-start`), backend test, API contract and DOM test first; exceptions 26 → 19, `stepErrors` a pre-check (BILLED_UNTIL_FUTURE)
-- [x] Review B3c and B3 (`docs/reviews/i815b3-review-1.md`)
-- [ ] Re-review of the C-1 fix (the check's answer counts only for its date; «Weiter» and saving wait for it)
-- [ ] Checks: lint, check, vitest, backend tests, E2E contract features, fitness (`frontendDecisions` measured before and after)
-- [ ] Closing round
-- [ ] PR: «No scenario: behaviour unchanged», Refs #815
