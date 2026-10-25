@@ -3318,3 +3318,12 @@ Request: a dependency graph of the whole project; the product owner chose the ex
 - [x] Slice review (`code-reviewer`): `docs/reviews/depsgraph-review-1.md`
 - [x] Checks: lint, check, backend type-check, affected tests, Prettier on added files
 - [x] Closing round (`docs/reviews/depsgraph-close-review-1.md`: no findings); workflow note `docs/reviews/workflow-notes-deps-graph.md`; PR pushed after this archive
+
+## Session: #808 import cycle pdf.service ↔ reminder-letter
+
+No scenario: type-only import change, no behaviour change. Rides PR #810 (it refs #808). Finishes ADR 0003 step 1 (`Language` moved to `schema.ts`).
+
+- [x] Ratchet: drop `be:services/pdf be:services/reminder-letter` from `exceptions.moduleCycles`; fitness red (module-cycle)
+- [x] `reminder-letter.ts` takes `Language` from `../db/schema`; fitness green
+- [x] madge `--circular` (type imports included) reports no cycle over `src/` and `backend/src`
+- [x] Checks; review round 1 (`docs/reviews/808-review-1.md`: no findings, so no closing round); PR #810 `Fixes #808`, pushed after this archive
