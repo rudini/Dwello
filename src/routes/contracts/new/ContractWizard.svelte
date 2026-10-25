@@ -90,7 +90,9 @@
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
 	let touched = $state(false); // a draft is kept only once the user has entered something
 	let confirmedPastStart = ''; // a start in the past the user confirmed by pressing "Weiter" again
-	let startPast = $state(false); // the start lies before today, as the backend says (#815)
+	// the start lies before today, as the backend says (#815); an answer counts only for the date it was asked for
+	let checked = $state({ start: '', past: false });
+	const startPast = $derived(checked.start === values.startDate && checked.past);
 	let startEdited = false; // the suggestion never overwrites a start date being typed
 	let section = $state<HTMLElement>();
 	// per apartment; null for an apartment whose contracts could not be loaded: it is not shown as free (#143)
@@ -186,13 +188,16 @@
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
 	});
 
-	// whether the start lies in the past, asked of the backend for each complete date; a later answer for an older
-	// date does not count
-	$effect(() => {
+	// whether the start lies in the past, asked of the backend for each date; «Weiter» and saving wait for the answer
+	async function checkStart() {
 		const start = values.startDate;
-		startInPast(start).then((past) => {
-			if (values.startDate === start) startPast = past;
-		});
+		if (checked.start !== start) {
+			const past = await startInPast(start);
+			if (values.startDate === start) checked = { start, past };
+		}
+	}
+	$effect(() => {
+		checkStart();
 	});
 
 	// Once an apartment is chosen, the contract starts by default on the day it becomes free
@@ -259,6 +264,7 @@
 		const wrong = firstStepWithError(errors);
 		if (wrong) return showErrors(wrong);
 		saving = true;
+		await checkStart();
 		const response = await apiCall('/contracts', {
 			method: 'POST',
 			body: contractBody(offeredBilledUntil(values, startPast), categories)
@@ -291,10 +297,11 @@
 		return { startDate: m.contracts_confirm_past({ notice: past }) };
 	}
 
-	function submitStep(event: SubmitEvent) {
+	async function submitStep(event: SubmitEvent) {
 		event.preventDefault();
 		Object.assign(values, normalizeAmounts(values)); // in place: a new object would rerun the effects
 		if (step === contractSteps.length) return save();
+		if (step === 3) await checkStart();
 		errors = stepErrors(values, step, today, startPast);
 		if (step === 3 && !errors.startDate && !errors.billedUntil)
 			errors = { ...errors, ...periodWarnings() };

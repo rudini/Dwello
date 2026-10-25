@@ -21,6 +21,7 @@ import billedByStatement from '../../tests/contracts/contract-billed-until-bille
 import billedFromStart from '../../tests/contracts/contract-billed-until-billed-start.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
+import checkStart from '../../tests/contracts/contract-check-start.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -88,6 +89,20 @@ describe('Mietvertrag bearbeiten', () => {
 		await open();
 		expect(byTestId('start-date-input-words')!.textContent).toContain('Montag, 1. April 2024');
 		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
+	});
+
+	// review i815b3 C-2: the past, the backend says (#815); only a start moved before the saved one is questioned
+	it('fragt bei einem früheren Vertragsbeginn nach, den das Backend vergangen nennt', async () => {
+		calls = fakeBff(({ path }) =>
+			path.startsWith('/contracts/check-start?') ? [200, checkStart] : [200, { contracts: [] }]
+		);
+		await open();
+		type('start-date-input', '01.05.2024');
+		await settle();
+		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
+		type('start-date-input', '01.01.2024');
+		await settle();
+		expect(byTestId('start-date-notice')!.textContent).toContain('1. Januar 2024');
 	});
 
 	it('nimmt Beträge in Schweizer Schreibweise an und nennt den Mieter beim Speichern', async () => {

@@ -66,11 +66,12 @@
 	const today = localToday();
 	// Only a start moved before the saved one and into the past is questioned; the past, the backend says (#815)
 	const savedStart = untrack(() => values.startDate);
-	let startPast = $state(false);
+	let checked = $state({ start: '', past: false }); // an answer counts only for the date it was asked for
+	const startPast = $derived(checked.start === values.startDate && checked.past && values.startDate < savedStart);
 	$effect(() => {
 		const start = values.startDate;
 		startInPast(start).then((past) => {
-			if (values.startDate === start) startPast = past && start < savedStart;
+			if (values.startDate === start) checked = { start, past };
 		});
 	});
 	const running = $derived(contract.status === 'active');

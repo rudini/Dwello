@@ -87,6 +87,7 @@ async function untilReview() {
 	next();
 	type('start-date-input', '01.01.2027');
 	next();
+	await settle(); // step 3 waits for the backend's check of the start (#815)
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
 	chooseFee('run');
@@ -144,6 +145,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 
 		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
 		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
@@ -168,6 +170,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 
 		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
 		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
@@ -213,6 +216,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(document.body.textContent).toContain(
 			'Monatlicher Vorschuss des Mieters für die im Mietvertrag vereinbarten Nebenkosten'
 		);
@@ -232,6 +236,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		type('contract-base-rent-input', '950');
 		next();
 		await settle();
@@ -254,6 +259,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(byTestId('contract-fee-rate-input')).toBeNull();
 		// a new fee: form, reasons, ten days before the notice period, next possible Kündigungstermin (Art. 269d Abs. 1 OR, #77)
 		expect(document.body.textContent).toContain(
@@ -361,6 +367,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		type('contract-base-rent-input', "1'450");
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
 		chooseFee('run');
@@ -502,6 +509,27 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(heading()).toBe('Vertragsdauer');
 		expect(byTestId('form-error')!.textContent).toContain('nochmals auf «Weiter»');
 		expect(document.activeElement).toBe(byTestId('start-date-input'));
+		next();
+		await settle();
+		expect(heading()).toBe('Miete');
+	});
+
+	// review i815b3 C-1: the backend's answer comes later than the typing; until it does, the old date's answer counts not
+	it('fragt bei «Weiter» vor der Antwort des Backends nach einem Vertragsbeginn in der Vergangenheit', async () => {
+		await toPeriod();
+		type('start-date-input', '11.01.2020');
+		next();
+		await settle();
+		expect(heading()).toBe('Vertragsdauer');
+		expect(byTestId('form-error')!.textContent).toContain('nochmals auf «Weiter»');
+	});
+
+	it('nennt einen künftigen Vertragsbeginn nicht vergangen, bevor das Backend ihn geprüft hat', async () => {
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('start-date-input', '01.01.2031');
+		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
 		next();
 		await settle();
 		expect(heading()).toBe('Miete');
@@ -684,6 +712,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		type('start-date-input', '01.01.2016');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(byTestId('overlap-warning')).not.toBeNull();
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
@@ -773,6 +802,7 @@ describe('Vorgewählte Wohnung', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(heading()).toBe('Miete');
 		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('950.00');
 		expect(byTestId<HTMLInputElement>('contract-advance-payment-input')!.value).toBe('150.00');
@@ -803,6 +833,7 @@ describe('Vorgewählte Wohnung', () => {
 		next();
 		type('start-date-input', '01.01.2027');
 		next();
+		await settle(); // step 3 waits for the backend's check of the start (#815)
 		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('120.00');
 		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
 			'Mietet der neue Mieter zum Beispiel den Parkplatz nicht, leeren Sie die Zusatzmiete.'
