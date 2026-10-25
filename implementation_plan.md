@@ -11,10 +11,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: #788 part 4b, old addresses and missing statements in the backend
 
-- [ ] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
-- [ ] API contract `tests/contracts/dashboard.json` and `api-contracts.pg.test.ts`
-- [ ] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
-- [ ] Docs: `docs/api-specification.md` §14, fitness ratchet
-- [ ] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
+- [x] Backend: `contractTasks.oldAddresses` (drafts to a moved-out tenant's old address, once per tenant) and `contractTasks.missingStatements` (per building and period, grouped as the overview showed them), tests first
+- [x] API contract `tests/contracts/dashboard.json` and `api-contracts.pg.test.ts`
+- [x] BFF: dashboard load reads both, no longer loads drafts or the per-contract missing statements; `src/__tests__/dashboard.test.ts`
+- [x] Docs: `docs/api-specification.md` §14; fitness ratchet unchanged (BFF decisions stay 8)
+- [x] Checks: lint, check, type-check, vitest, backend tests, E2E `dashboard`
 - [ ] Slice review (`code-reviewer`) and closing round
 - [ ] PR: «No scenario: behaviour unchanged, `dashboard.feature` pins it»
