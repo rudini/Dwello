@@ -1,11 +1,11 @@
 ---
 name: commit-gates
-description: What the three Dwello commit hooks (fallow, deepcheck, commit subject) check and how to fix what they report. Load when one of them blocks a git commit or git push, before committing one slice while the next is in progress, or to check a commit subject first.
+description: What the four Dwello commit hooks (fallow, deepcheck, testcheck, commit subject) check and how to fix what they report. Load when one of them blocks a git commit or git push, before committing one slice while the next is in progress, or to check a commit subject first.
 ---
 
 # Commit gates
 
-Three `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate.
+Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate.
 
 ## Fallow (`.claude/hooks/fallow-gate.sh`)
 
@@ -19,6 +19,10 @@ Three `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit`
 ## Deepcheck (`.claude/hooks/deepcheck-gate.sh`)
 
 Runs the changed-scope deepcheck (`bun run deepcheck:audit` shows it by hand) and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (job "Deep modules"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
+
+## Testcheck (`.claude/hooks/testcheck-gate.sh`)
+
+Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by hand) and blocks a test that can pass without checking what it claims (an empty test, `expect` without a called matcher, an unawaited `resolves`/`rejects`, a tautology, assertions only in a `catch`, a swallowing `try` or an unawaited callback) and two tests of one block with the same title or the same body; CI runs the same check (job "Test checks"). Fix the test as the finding says (`tools/testcheck/README.md`, "Rules"); a test that is right as it is gets `// testcheck-ignore <rule> -- <reason>` on the line above it, visible in the review.
 
 ## Commit subject (`.claude/hooks/commit-msg-gate.mjs`)
 
