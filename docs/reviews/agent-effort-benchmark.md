@@ -2,7 +2,7 @@
 
 Question: «Getting the most out of Opus 5.5» says that at its lowest effort Opus 5.5 caught more bugs than Opus 5 at high effort. Can the reviewer subagents run at `effort: low` without losing findings? Without an `effort` field a subagent takes the caller's session effort (frontmatter reference: «Overrides the session effort level»), so until now a session on low effort ran its reviewers on low too.
 
-Method as in `agent-models-benchmark.md` (git history, 94082bd7): each agent ran once with `effort: low` and once with `effort: high` on an old commit whose findings are known, with the same prompt and the agent texts of `main` after #853. Code and domain reviewers got their own worktree of the old commit (node_modules linked from `main`); the persona ran against the persona stack of `70fbc67` with its own `bun install`, the database recreated between the two runs. Reports: `docs/reviews/agent-effort/`.
+Method as in `agent-models-benchmark.md` (git history, 94082bd7): each agent ran once with `effort: low` and once with `effort: high` on an old commit whose findings are known, with the same prompt and the agent texts of `main` after #853. Code and domain reviewers got their own worktree of the old commit (node_modules linked from `main`); the persona ran against the persona stack of `70fbc67` with its own `bun install`, the database recreated between the two runs. Reports: `docs/reviews/agent-effort/` in the git history (`git show 294f77f6:docs/reviews/agent-effort/<run>.md`).
 
 ## A: `code-reviewer` on #233 round 3 (`1d9d3019..a09ae7f6`)
 
