@@ -12,27 +12,14 @@ import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error
 import { Conflict } from './conflict';
 import { isDefaultSetting } from './default-setting';
 import { roundToRappen } from './pdf-format';
+import type { MasterDataType } from '../api/distribution-key';
+import type { MonthlyPercentages } from '../api/heating-profile';
 
 export interface HeatingProfileFilters {
 	search?: string;
-	type?: 'predefined' | 'custom';
+	type?: MasterDataType;
 	limit?: number;
 	offset?: number;
-}
-
-export interface MonthlyPercentages {
-	january: number;
-	february: number;
-	march: number;
-	april: number;
-	may: number;
-	june: number;
-	july: number;
-	august: number;
-	september: number;
-	october: number;
-	november: number;
-	december: number;
 }
 
 /** Columns holding a profile's monthly shares, January to December */

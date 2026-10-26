@@ -3,34 +3,33 @@ import { backendMessage, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import { localName } from '$lib/names';
-import type { Category } from '$lib/types';
+import type { CategoryWithUsage, Json, Proposal } from '$lib/types';
+import type { CategoryWithUsage as CategoryResponse } from '../../../backend/src/api/category';
+import type { InvoiceWithDetails } from '../../../backend/src/api/invoice';
 import { deleteRecord, fetchRecord, nameTranslations, saveRecord } from './save-form';
 
 const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 const API = `${BACKEND}/categories`;
 const LIST = '/config/categories';
 
-export type CategoryWithUsage = Category & {
-	key: string;
-	usageCount: number;
-	allocableInvoiceCount: number;
-	predefined: boolean;
-};
+/** A row of `GET /categories` or the category an invoice names, which has only some of the fields */
+export type CategoryRow = NonNullable<InvoiceWithDetails['llmCategory']> &
+	Partial<Json<CategoryResponse>>;
 
 /** Backend category as shown in the German interface: `name` stays the English key for invoice recognition */
-export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
+export function toCategory(c: CategoryRow): CategoryWithUsage {
 	return {
-		id: c.id as string,
+		id: c.id,
 		// The stored name: the English key of a predefined category, which names its reason (#186)
-		key: (c.name || '') as string,
-		name: (c.nameDE || c.name || '') as string,
-		nameFR: (c.nameFR || '') as string,
-		nameIT: (c.nameIT || '') as string,
-		nameEN: (c.nameEN || '') as string,
-		isAllowedUtilityCost: (c.isAllowedUtilityCost ?? true) as boolean,
-		isHeatingCost: (c.isHeatingCost ?? false) as boolean,
-		isFuel: (c.isFuel ?? false) as boolean,
-		description: (c.description || '') as string,
+		key: c.name,
+		name: c.nameDE || c.name,
+		nameFR: c.nameFR || '',
+		nameIT: c.nameIT || '',
+		nameEN: c.nameEN || '',
+		isAllowedUtilityCost: c.isAllowedUtilityCost ?? true,
+		isHeatingCost: c.isHeatingCost ?? false,
+		isFuel: c.isFuel ?? false,
+		description: c.description || '',
 		sortOrder: Number(c.sortOrder) || 0,
 		usageCount: Number(c.invoiceCount) || 0,
 		// the invoices a save as «nicht umlagefähig» takes out (#309); only the single category has it
@@ -104,11 +103,6 @@ export async function createCategory(fetch: typeof globalThis.fetch, request: Re
 		options
 	);
 }
-
-/** The KI's proposal whether a new category is umlagefähig, or why there is none, for what it checked */
-export type Proposal = { name: string; description: string } & (
-	{ isAllowedUtilityCost: boolean; reasoning: string } | { error: string }
-);
 
 /** "Von der KI prüfen lassen": asks the KI with the name and description the form holds */
 export async function proposeAllocability(fetch: typeof globalThis.fetch, request: Request) {

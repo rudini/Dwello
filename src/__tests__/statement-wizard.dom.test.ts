@@ -51,7 +51,6 @@ const profile = (id: string, name: string, pct: number) => ({
 	id,
 	name,
 	type: 'predefined',
-	isActive: true,
 	description: `${name} Verteilung`,
 	monthlyPercentages: Object.fromEntries(MONTHS.map((m) => [m, pct]))
 });

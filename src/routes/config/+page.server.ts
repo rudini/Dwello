@@ -1,7 +1,7 @@
 import { localName } from '$lib/names';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import { saveSettings, toSettings } from '$lib/server/settings';
-import type { DistributionKey } from '$lib/types';
+import type { DistributionKeyRow } from '$lib/server/distribution-key';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	return {
 		settings: toSettings(config.data),
 		heatingProfiles: heatingProfiles.data.map(toHeatingProfile),
-		distributionKeys: distributionKeys.data.map((key: DistributionKey) => ({
+		distributionKeys: distributionKeys.data.map((key: DistributionKeyRow) => ({
 			id: key.id,
 			name: localName(key)
 		}))

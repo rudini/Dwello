@@ -36,9 +36,19 @@ import { invoiceRow } from './helpers/invoice';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 
 const buildings = [{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1, 8400 Winterthur' }];
+// the fields toCategory fills when the backend has none
+const unset = {
+	nameFR: '',
+	nameIT: '',
+	nameEN: '',
+	description: '',
+	sortOrder: 0,
+	isHeatingCost: false,
+	isFuel: false
+};
 const categories = [
-	{ id: 'c1', name: 'Hauswartung', isAllowedUtilityCost: true },
-	{ id: 'c2', name: 'Reparaturen', isAllowedUtilityCost: false }
+	{ ...unset, id: 'c1', name: 'Hauswartung', isAllowedUtilityCost: true },
+	{ ...unset, id: 'c2', name: 'Reparaturen', isAllowedUtilityCost: false }
 ];
 const distributionKeys = [
 	{ id: 'k1', name: 'Nach Fläche', type: 'predefined', formula: '{area}', usageCount: 0 }

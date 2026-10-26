@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { Proposal } from '$lib/server/category';
+	import type { Proposal } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// The KI's answer to «Von der KI prüfen lassen»: its choice with the reasoning, or why there is none

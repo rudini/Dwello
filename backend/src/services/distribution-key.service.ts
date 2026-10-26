@@ -14,16 +14,13 @@ import {
 import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
 import { isDefaultSetting } from './default-setting';
+import type { DistributionKeyWithUsage, MasterDataType } from '../api/distribution-key';
 
 export interface DistributionKeyFilters {
 	search?: string;
-	type?: 'predefined' | 'custom';
+	type?: MasterDataType;
 	limit?: number;
 	offset?: number;
-}
-
-export interface DistributionKeyWithUsage extends DistributionKey {
-	invoiceCount: number;
 }
 
 /**
@@ -61,7 +58,7 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
+			invoiceCount: sql<string>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -107,7 +104,7 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
+			invoiceCount: sql<string>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
 				'invoice_count'
 			)
 		})

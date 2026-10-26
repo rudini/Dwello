@@ -8,9 +8,9 @@ import {
 	validatePercentages,
 	getMonthlyPercentage,
 	getMonthlyPercentages,
-	calculateHeatingShare,
-	type MonthlyPercentages
+	calculateHeatingShare
 } from '../services/heating-profile.service';
+import type { MonthlyPercentages } from '../api/heating-profile';
 import type { HeatingProfile } from '../db/schema';
 
 // Mock heating profile for testing

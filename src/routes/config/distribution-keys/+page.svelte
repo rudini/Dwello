@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DistributionKeyRow as Key } from '$lib/distribution-key';
+	import type { DistributionKey as Key } from '$lib/types';
 	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';

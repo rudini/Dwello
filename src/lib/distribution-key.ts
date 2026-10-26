@@ -16,16 +16,4 @@ export const BUILDING_TOTALS = [
 	{ name: 'units_total', description: m.keys_total_units }
 ];
 
-export type DistributionKeyRow = {
-	id: string;
-	name: string;
-	nameFR?: string | null;
-	nameIT?: string | null;
-	nameEN?: string | null;
-	type: 'predefined' | 'custom';
-	formula: string;
-	description: string;
-	usageCount: number;
-};
-
 export type FormulaTest = { errors: string[]; results: { apartment: string; share: string }[] };

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { toHeatingProfile } from '../lib/server/heating-profile';
+import { profileRow } from './helpers/heating-profile';
 
 describe('Heizprofil aus dem Backend', () => {
 	it('übernimmt die Monatsanteile als Zahlen', () => {
@@ -19,7 +20,9 @@ describe('Heizprofil aus dem Backend', () => {
 		];
 		const row = Object.fromEntries(months.map((month, i) => [`${month}Pct`, `${i + 1}.50`]));
 
-		const profile = toHeatingProfile({ id: 'hp1', name: 'Mittelland', type: 'predefined', ...row });
+		const profile = toHeatingProfile(
+			profileRow({ id: 'hp1', name: 'Mittelland', type: 'predefined', ...row })
+		);
 
 		expect(profile.monthlyPercentages.january).toBe(1.5);
 		expect(profile.monthlyPercentages.december).toBe(12.5);
@@ -27,17 +30,14 @@ describe('Heizprofil aus dem Backend', () => {
 			id: 'hp1',
 			name: 'Mittelland',
 			nameDE: '',
-			description: '',
-			isActive: true
+			description: ''
 		});
 	});
 
 	it('übernimmt den deutschen Namen', () => {
-		const profile = toHeatingProfile({
-			id: 'hp1',
-			name: 'Heating Mountain',
-			nameDE: 'Heizung Bergregion'
-		});
+		const profile = toHeatingProfile(
+			profileRow({ id: 'hp1', name: 'Heating Mountain', nameDE: 'Heizung Bergregion' })
+		);
 
 		expect(profile.nameDE).toBe('Heizung Bergregion');
 	});

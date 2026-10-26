@@ -16,6 +16,7 @@ import {
 	testFormulaWithSamples
 } from '../services/distribution-key.service';
 import { parseFormula, validateFormulaForDistribution } from '../services/formula.service';
+import type { MasterDataType } from '../api/distribution-key';
 
 export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-keys' })
 	// List all distribution keys
@@ -24,7 +25,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 		async ({ query }) => {
 			const { distributionKeys, total } = await listDistributionKeys({
 				search: query.search,
-				type: query.type as 'predefined' | 'custom' | undefined,
+				type: query.type as MasterDataType | undefined,
 				limit: query.limit ? parseInt(query.limit) : undefined,
 				offset: query.offset ? parseInt(query.offset) : undefined
 			});

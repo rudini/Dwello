@@ -2,19 +2,18 @@ import { localName } from '$lib/names';
 import { ValidationError } from './error-handler';
 import type { BilledStatement, InvoiceWithDetails, Json } from '$lib/types';
 import type { InvoiceWithDetails as InvoiceResponse } from '../../../backend/src/api/invoice';
-import { toCategory } from './category';
-import { toDistributionKey } from './distribution-key';
+import { toCategory, type CategoryRow } from './category';
+import { toDistributionKey, type DistributionKeyRow } from './distribution-key';
 import type { LatestKey } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 type Named = { id: string; name: string };
-type MasterData = Parameters<typeof localName>[0];
 
 /** A category as offered for invoices: named in the UI language */
-const localCategory = (c: Record<string, unknown>) => ({
+const localCategory = (c: CategoryRow) => ({
 	...toCategory(c),
-	name: localName(c as MasterData)
+	name: localName(c)
 });
 
 /**
@@ -36,7 +35,7 @@ export async function tankCategories(fetch: typeof globalThis.fetch, buildingIds
  * preselect; a failing call offers none
  */
 export async function invoiceChoices(fetch: typeof globalThis.fetch) {
-	type List = { categories?: Record<string, unknown>[]; data?: Record<string, unknown>[]; value?: string };
+	type List = { categories?: CategoryRow[]; data?: DistributionKeyRow[]; value?: string };
 	const get = (path: string): Promise<List> =>
 		fetch(`${BACKEND_URL}/api/v1/${path}`)
 			.then((response) => (response.ok ? response.json() : {}))
@@ -54,7 +53,7 @@ export async function invoiceChoices(fetch: typeof globalThis.fetch) {
 		categories: (categories.categories || categories.data || []).map(localCategory),
 		distributionKeys: (keys.data || []).map((d) => ({
 			...toDistributionKey(d),
-			name: localName(d as MasterData)
+			name: localName(d)
 		})),
 		defaultDistributionKeyId: defaultKey.value ?? '',
 		latestKeys

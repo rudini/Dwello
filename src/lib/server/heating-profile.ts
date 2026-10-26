@@ -1,27 +1,33 @@
 import { backendMessage } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
-import type { HeatingProfile } from '$lib/types';
+import type { HeatingProfile, Json } from '$lib/types';
+import type { HeatingProfileDetails } from '../../../backend/src/api/heating-profile';
 import { MONTHS, profileTotal } from '$lib/heating-profile';
 import { deleteRecord, fetchRecord, nameTranslations, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/heating-profiles`;
 
+/** A row of the list, or the single profile with its shares as numbers */
+export type HeatingProfileRow = Omit<Json<HeatingProfileDetails>, 'monthlyPercentages'> &
+	Partial<Pick<HeatingProfileDetails, 'monthlyPercentages'>>;
+
 /** Backend heating profile row (januaryPct … decemberPct) as frontend HeatingProfile */
-export function toHeatingProfile(hp: Record<string, unknown>): HeatingProfile {
+export function toHeatingProfile(hp: HeatingProfileRow): HeatingProfile {
 	return {
 		id: hp.id,
-		name: hp.name || '',
+		name: hp.name,
 		nameDE: hp.nameDE || '',
 		nameFR: hp.nameFR,
 		nameIT: hp.nameIT,
 		nameEN: hp.nameEN,
-		type: hp.type || 'predefined',
+		type: hp.type === 'custom' ? 'custom' : 'predefined',
 		description: hp.description || '',
-		isActive: hp.isActive ?? true,
 		monthlyPercentages:
-			hp.monthlyPercentages ||
-			Object.fromEntries(MONTHS.map(({ key }) => [key, parseFloat(hp[`${key}Pct`] as string) || 0]))
-	} as HeatingProfile;
+			hp.monthlyPercentages ??
+			(Object.fromEntries(
+				MONTHS.map(({ key }) => [key, parseFloat(hp[`${key}Pct`]) || 0])
+			) as HeatingProfile['monthlyPercentages'])
+	};
 }
 
 export const fetchHeatingProfile = async (fetch: typeof globalThis.fetch, id: string) =>

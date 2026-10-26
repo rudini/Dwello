@@ -9,6 +9,15 @@ import type {
 	ContractWithDetails as ContractRow
 } from '../../backend/src/api/contract';
 import type { ApartmentStatus } from '../../backend/src/api/apartment';
+import type {
+	AllocabilityProposal,
+	CategoryWithUsage as CategoryResponse
+} from '../../backend/src/api/category';
+import type {
+	DistributionKeyWithUsage,
+	MasterDataType
+} from '../../backend/src/api/distribution-key';
+import type { HeatingProfileDetails } from '../../backend/src/api/heating-profile';
 import type { TenantResponse } from '../../backend/src/services/tenant.service';
 
 /** A backend type as its JSON arrives: dates as ISO strings */
@@ -179,36 +188,42 @@ export interface ContractsListData {
 	apartments: { id: string; number: string; buildingId: string }[];
 }
 
-// Invoice Category types
-export interface Category {
-	id: string;
+// The master data as the German interface shows it, derived from the backend rows (#837, ADR 0005): `name` is the
+// German name, a missing text is empty
+type ApiCategory = Json<CategoryResponse>;
+export type Category = Pick<
+	ApiCategory,
+	'id' | 'isAllowedUtilityCost' | 'isHeatingCost' | 'isFuel'
+> & {
 	name: string;
-	nameDE?: string;
-	nameFR?: string;
-	nameIT?: string;
-	nameEN?: string;
-	isAllowedUtilityCost: boolean;
-	// Shared by the heating profile at a tenant change (heating, chimney sweep), not by days
-	isHeatingCost?: boolean;
-	// Brennstoff (#100): deliveries of Heizmaterial, the only categories with a Tankbestand
-	isFuel?: boolean;
-	description?: string;
-	sortOrder?: number;
-}
+	nameFR: string;
+	nameIT: string;
+	nameEN: string;
+	description: string;
+	sortOrder: number;
+};
 
-// Distribution Key types
-export interface DistributionKey {
-	id: string;
-	name: string;
-	nameDE?: string;
-	nameFR?: string;
-	nameIT?: string;
-	nameEN?: string;
-	type: 'predefined' | 'custom';
-	formula?: string;
-	description?: string;
-	isActive: boolean;
-}
+export type CategoryWithUsage = Category & {
+	key: string; // the stored name: the English key of a predefined category, which names its reason (#186)
+	usageCount: number;
+	allocableInvoiceCount: number; // the invoices a save as «nicht umlagefähig» takes out (#309)
+	predefined: boolean;
+};
+
+/** The KI's proposal whether a new category is umlagefähig, or why there is none, for what it checked */
+export type Proposal = { name: string; description: string } & (
+	AllocabilityProposal | { error: string }
+);
+
+type ApiDistributionKey = Json<DistributionKeyWithUsage>;
+export type DistributionKey = Pick<ApiDistributionKey, 'id'> &
+	Partial<Pick<ApiDistributionKey, 'nameFR' | 'nameIT' | 'nameEN'>> & {
+		name: string;
+		type: MasterDataType;
+		formula: string;
+		description: string;
+		usageCount: number;
+	};
 
 // The invoice as the pages show it, derived from GET /invoices/:id (AP1, ADR 0005); dates and ids pass unchanged
 type ApiInvoice = Json<InvoiceResponse>;
@@ -259,32 +274,15 @@ export interface InvoicesListData {
 	kiOff: boolean; // «Keine KI»: the dialog says that nobody reads the files (#626)
 }
 
-// Heating Profile types
-export interface HeatingProfile {
-	id: string;
-	name: string;
-	nameDE?: string;
-	nameFR?: string | null;
-	nameIT?: string | null;
-	nameEN?: string | null;
-	type: 'predefined' | 'custom';
-	description?: string;
-	isActive: boolean;
-	monthlyPercentages: {
-		january: number;
-		february: number;
-		march: number;
-		april: number;
-		may: number;
-		june: number;
-		july: number;
-		august: number;
-		september: number;
-		october: number;
-		november: number;
-		december: number;
-	};
-}
+type ApiHeatingProfile = Json<HeatingProfileDetails>;
+export type HeatingProfile = Pick<
+	ApiHeatingProfile,
+	'id' | 'name' | 'nameFR' | 'nameIT' | 'nameEN' | 'monthlyPercentages'
+> & {
+	nameDE: string;
+	type: MasterDataType;
+	description: string;
+};
 
 // Statement types
 export type { StatementStatus };

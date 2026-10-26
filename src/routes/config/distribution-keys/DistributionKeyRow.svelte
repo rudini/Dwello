@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { DistributionKeyRow } from '$lib/distribution-key';
+	import type { DistributionKey } from '$lib/types';
 	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 
-	let { key, ondelete }: { key: DistributionKeyRow; ondelete: () => void } = $props();
+	let { key, ondelete }: { key: DistributionKey; ondelete: () => void } = $props();
 
 	// Predefined keys follow Swiss practice: not editable, and their descriptions are English
 	const custom = $derived(key.type === 'custom');
