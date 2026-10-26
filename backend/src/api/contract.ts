@@ -3,8 +3,9 @@
  * maps them and the frontend takes its types from them (#837, ADR 0005). Only types of `schema.ts` and `api/` here
  */
 
-import type { Apartment, Building, RentalContract, Tenant } from '../db/schema';
+import type { Apartment, RentalContract, Tenant } from '../db/schema';
 import type { ApartmentStatus } from './apartment';
+import type { BuildingAddress } from './building';
 
 /** The Vertragsstatus, by the Swiss day (#784, #815) */
 export type ContractStatus = 'active' | 'ended' | 'future';
@@ -25,7 +26,7 @@ export interface ContractWithDetails extends RentalContract {
 export interface ContractDetails extends ContractWithDetails {
 	tenant: Pick<Tenant, 'id' | 'firstName' | 'lastName' | 'email' | 'phone' | 'language'>;
 	apartment: Pick<Apartment, 'id' | 'buildingId' | 'number' | 'floor' | 'area' | 'rooms'> & { status: ApartmentStatus };
-	building: Pick<Building, 'id' | 'name' | 'address' | 'postalCode' | 'city' | 'canton'>;
+	building: BuildingAddress;
 }
 
 /** The answer of `GET /contracts/:id` */

@@ -1,16 +1,17 @@
-import type { BuildingWithStats } from '$lib/types';
+import type { BuildingWithStats, Json } from '$lib/types';
+import type { BuildingWithStats as BuildingResponse } from '../../../backend/src/api/building';
 
 /** A building of the backend (`GET /buildings/:id`, `tests/contracts/building.json`) with its apartment counts */
-export const toBuilding = (data: Record<string, unknown>): BuildingWithStats => ({
-	id: data.id as string,
-	name: (data.name as string) || '',
-	address: data.address as string,
-	postalCode: data.postalCode as string,
-	city: data.city as string,
-	canton: data.canton as string,
-	country: (data.country as string) || 'CH',
+export const toBuilding = (data: Json<BuildingResponse>): BuildingWithStats => ({
+	id: data.id,
+	name: data.name || '',
+	address: data.address,
+	postalCode: data.postalCode,
+	city: data.city,
+	canton: data.canton,
+	country: data.country || 'CH',
 	yearBuilt: data.yearBuilt ? Number(data.yearBuilt) : undefined,
-	buildingType: data.buildingType as string | null | undefined,
+	buildingType: data.buildingType,
 	noTank: !!data.noTank,
 	apartmentCount: Number(data.apartmentCount) || 0,
 	occupiedCount: Number(data.occupiedCount) || 0,

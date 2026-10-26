@@ -8,7 +8,11 @@ import type {
 	ContractResponse,
 	ContractWithDetails as ContractRow
 } from '../../backend/src/api/contract';
-import type { ApartmentStatus } from '../../backend/src/api/apartment';
+import type { ApartmentStatus, ApartmentWithDetails } from '../../backend/src/api/apartment';
+import type {
+	BuildingAddress,
+	BuildingWithStats as BuildingResponse
+} from '../../backend/src/api/building';
 import type {
 	AllocabilityProposal,
 	CategoryWithUsage as CategoryResponse
@@ -26,27 +30,19 @@ export type Json<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] extend
 // Core Entity Types - Match backend schema (camelCase)
 // ============================================================================
 
-// Building types
-export interface Building {
-	id: string;
-	name: string;
-	address: string;
-	postalCode: string;
-	city: string;
-	canton: string;
-	country?: string;
-	buildingType?: string | null;
-	yearBuilt?: number | null;
-	noTank?: boolean; // no tank or decommissioned (#72)
-	createdAt?: Date | string;
-	updatedAt?: Date | string;
-}
+// The building as the pages show it, derived from GET /buildings/:id (#837, ADR 0005)
+type ApiBuilding = Json<BuildingResponse>;
+export type Building = BuildingAddress &
+	Partial<
+		Pick<
+			ApiBuilding,
+			'country' | 'buildingType' | 'yearBuilt' | 'noTank' | 'createdAt' | 'updatedAt'
+		>
+	>;
 
 // Building with apartment statistics
-export interface BuildingWithStats extends Building {
-	apartmentCount: number;
-	occupiedCount: number;
-	vacantCount: number;
+export interface BuildingWithStats
+	extends Building, Pick<ApiBuilding, 'apartmentCount' | 'occupiedCount' | 'vacantCount'> {
 	reletStarts?: string[]; // Vertragsbeginn of each relet apartment, from the BFF: the backend counts only occupied and vacant
 	reservedCount?: number;
 }
@@ -87,21 +83,18 @@ export interface BuildingsListData {
 // occupied and relet follow from the rental contracts; vacant and reserved are set by hand
 export type { ApartmentStatus, LatestKey };
 
-// Apartment types (camelCase to match backend)
-export interface Apartment {
-	id: string;
-	buildingId: string;
-	number: string;
-	floor: number;
-	area: string | number; // decimal from DB
-	rooms: string | number; // decimal from DB (e.g., 3.5)
-	status: ApartmentStatus;
-	nextContractStart?: string | null;
-	currentContractEnd?: string | null; // last day of the contract running today (A-4)
-	lastContractEnd?: string | null; // last day of the latest ended contract: «Leer seit» the day after (#145)
-	createdAt?: Date | string;
-	updatedAt?: Date | string;
-}
+// The apartment as the pages show it, derived from GET /apartments/:id (#837, ADR 0005)
+type ApiApartment = Json<ApartmentWithDetails>;
+export type Apartment = Pick<ApiApartment, 'id' | 'buildingId' | 'number' | 'floor' | 'status'> &
+	Partial<
+		Pick<
+			ApiApartment,
+			'nextContractStart' | 'currentContractEnd' | 'lastContractEnd' | 'createdAt' | 'updatedAt'
+		>
+	> & {
+		area: string | number; // decimal from DB
+		rooms: string | number; // decimal from DB (e.g., 3.5)
+	};
 
 // The tenant as GET /tenants/:id answers it, derived from the backend instead of declared again (AP1, ADR 0003):
 // a field the backend adds arrives here without a change; a page may hold only part of it

@@ -8,6 +8,7 @@ import { db } from '../db/connection';
 import { buildings, apartments, type Building, type NewApartment, type NewBuilding } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { everyWordIn } from './word-search';
+import type { BuildingWithStats } from '../api/building';
 
 export interface BuildingFilters {
 	search?: string;
@@ -15,12 +16,6 @@ export interface BuildingFilters {
 	canton?: string;
 	limit?: number;
 	offset?: number;
-}
-
-export interface BuildingWithStats extends Building {
-	apartmentCount: number;
-	occupiedCount: number;
-	vacantCount: number;
 }
 
 /**

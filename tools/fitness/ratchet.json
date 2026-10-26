@@ -425,7 +425,6 @@
 				"table": "buildings",
 				"paths": [
 					"src/lib/server/building-form.ts",
-					"src/lib/server/building-register.ts",
 					"src/lib/server/building.ts",
 					"src/lib/types.ts",
 					"src/routes/buildings/+page.server.ts",
