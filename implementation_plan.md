@@ -8,12 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session 2026-10-26 #837 cycle 4d: list types
-
-- [x] Measure before (`fitness` 4 / 12 / 36, entity mirrors 45, value lists 10)
-- [x] `ApartmentWithBuilding`, `TenantListItem` and the statement flags from the backend types; the list loads typed against the responses; the never-filled `buildingAddress`/`buildingCity` of the apartment list removed
-- [x] ADR 0005 «Zyklus 4d», measure after (entity mirrors 45 → 43), #837 Done means checked
-- [x] Code review round 1 (`docs/reviews/i837c4d-review-1.md`; C-1 to C-4 fixed)
-- [ ] Closing round
-- [ ] Archive, PR

@@ -3675,3 +3675,13 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Closing round (`docs/reviews/i837c4c-close-review-1.md`)
 - [x] Archive, PR (Fixes #857, Refs #837): pushed after this archive
 - Files: `src/lib/types.ts`, `src/lib/server/audit-log.ts`, `src/routes/dashboard/{+page.server.ts,+page.svelte,BuildingFigures.svelte,KiModelNotice.svelte}`, `src/routes/config/{DefaultsSection.svelte,ki/KiModelState.svelte,audit-log/+page.svelte}`, `tools/fitness/fitness{,.test}.ts`, ADR 0005, `fitness-functions.md`
+
+## Session 2026-10-26 #837 cycle 4d: list types
+
+- [x] Measure before (`fitness` 4 / 12 / 36, entity mirrors 45, value lists 10)
+- [x] `ApartmentWithBuilding`, `TenantListItem` and the statement flags from the backend types; the list loads typed against the responses; the never-filled `buildingAddress`/`buildingCity` of the apartment list removed
+- [x] ADR 0005 «Zyklus 4d», measure after (entity mirrors 45 → 43), #837 Done means checked
+- [x] Code review round 1 (`docs/reviews/i837c4d-review-1.md`; C-1 to C-4 fixed)
+- [x] Round 2, also the closing round (`docs/reviews/i837c4d-review-2.md`): C-1 to C-4 closed, nothing new
+- [x] Archive, PR (Fixes #837): pushed after this archive
+- Files: `backend/src/api/tenant.ts` (new), `backend/src/services/tenant.service.ts`, `backend/src/routes/tenants.ts`, `src/lib/types.ts`, `src/lib/server/apartment.ts`, `src/routes/{apartments,tenants,buildings/[id]}/+page.server.ts`, `src/routes/apartments/ApartmentCard.svelte`, `src/__tests__/apartments-pages.dom.test.ts`, `tools/fitness/ratchet.json`, ADR 0005
