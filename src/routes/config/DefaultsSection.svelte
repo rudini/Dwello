@@ -2,7 +2,7 @@
 	import { profileLabel } from '$lib/heating-profile';
 	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
-	import type { Settings } from '$lib/server/settings';
+	import type { PageData } from './$types';
 	import type { HeatingProfile } from '$lib/types';
 	import Field from '$lib/ui/Field.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -14,7 +14,7 @@
 		heatingProfiles,
 		distributionKeys
 	}: {
-		settings: Settings;
+		settings: PageData['settings'];
 		heatingProfiles: HeatingProfile[];
 		distributionKeys: { id: string; name: string }[];
 	} = $props();
@@ -49,7 +49,7 @@
 </script>
 
 <!-- The stored value as a selected option, not bind:value: a choice made before the page is live survives hydration -->
-{#snippet choice(name: keyof Settings, label: string, text: string, options: Option[])}
+{#snippet choice(name: keyof PageData['settings'], label: string, text: string, options: Option[])}
 	<Field id={name} {label} help={text}>
 		{#snippet children(control)}
 			<select

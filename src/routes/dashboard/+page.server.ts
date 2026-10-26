@@ -9,8 +9,9 @@ import {
 	type Task
 } from '$lib/overview';
 import { reletStarts } from '$lib/apartment';
+import type { KiModel } from '$lib/types';
 
-export interface DashboardData {
+interface DashboardData {
 	portfolio: {
 		totalBuildings: number;
 		totalApartments: number;
@@ -56,12 +57,12 @@ export interface DashboardData {
 	deadlines: BackendDeadline[]; // which and how far away, decided by the backend by the Swiss day (#815)
 }
 
-/** How far the local KI's model is (#577); unknown with a KI outside the server or when the backend cannot say */
-// 'none': no KI chosen yet (#620, «Später entscheiden» at the setup), as long as the operator did not set it
-export type KiModel = { state: 'ready' | 'failed' | 'unknown' | 'none' } | { state: 'loading'; percent: number };
-
 /** What the overview page shows: the dashboard figures plus today's tasks and deadlines */
-export type OverviewData = Omit<DashboardData, 'deadlines'> & { tasks: Task[]; deadlines: Deadline[]; kiModel: KiModel };
+type OverviewData = Omit<DashboardData, 'deadlines'> & {
+	tasks: Task[];
+	deadlines: Deadline[];
+	kiModel: KiModel;
+};
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 

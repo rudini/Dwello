@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { AuditEntry } from '$lib/server/audit-log';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -9,7 +8,7 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let toDelete = $state<AuditEntry | null>(null);
+	let toDelete = $state<PageData['entries'][number] | null>(null);
 	// what the dialog names; empty while it is closed
 	const shown = $derived(toDelete ?? { id: '', when: '', text: '' });
 </script>

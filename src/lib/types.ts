@@ -301,6 +301,11 @@ export type HeatingProfile = Pick<
 	description: string;
 };
 
+/** How far the local KI's model is (#577); unknown with a KI outside the server or when the backend cannot say */
+// 'none': no KI chosen yet (#620, «Später entscheiden» at the setup), as long as the operator did not set it
+export type KiModel =
+	{ state: 'ready' | 'failed' | 'unknown' | 'none' } | { state: 'loading'; percent: number };
+
 // Statement types
 export type { StatementStatus };
 
