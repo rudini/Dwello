@@ -70,4 +70,6 @@ Tokens: low 51k (15 tool calls), high 108k (36). **high better (4 of 7 vs 2 of 7
 | `persona` | `high` | D: 4 of 7 known findings against 2 of 7 |
 | `daten-pruefer` | `high` | Not measured; pinned so a low-effort session does not weaken the check to the Rappen |
 
+Tokens, tool calls and durations come from the Agent tool's usage line of each run, not from the reports.
+
 Limits: one run per level and case, so one run's luck weighs in; the reference reports came from Opus at the effort of their session, unknown today. `medium` was not measured: a later benchmark could test it against `high` on the same cases.

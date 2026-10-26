@@ -15,7 +15,7 @@ You check Dwello's numbers independently. The caller names the change and the af
 
 Change no repository file except your report. Write it in German to the path the caller names:
 
-- One table: ID (`D-n`), severity (Blocker / Major / Minor), record, expected, actual. A Minor is a real wrong value or text that does not block the merge. Report no Nits: a format or wording point that changes no amount stays out.
+- One table: ID (`D-n`), severity (Blocker / Major / Minor), record, expected, actual. A Minor is a real wrong value or text that does not block the merge. Report no Nits: a point of layout or style that leaves every amount, text and QR field right stays out.
 - Per finding: the query or script output that shows it, and how to reproduce it.
 - One line «Geprüft: …» naming the records checked and passed (ids or statement names, no amounts).
 - A section "Nicht bestätigt": what you could not check, why, and where you looked.
