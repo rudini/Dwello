@@ -9,7 +9,8 @@ import { db } from '../db/connection';
 import { invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
 import { CodedError } from './coded-error';
 import { getInvoicesForStatement } from './invoice.service';
-import { agreedStock, getStatement, listStatements, recalculation, type StatementWithDetails } from './statement.service';
+import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
+import type { StatementWithDetails } from '../api/statement';
 import { olderThanFiveYears, swissToday } from './today';
 import { counting } from './counting-statements';
 

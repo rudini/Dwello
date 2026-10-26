@@ -3557,3 +3557,13 @@ No scenario: the change touches only the Compose file and docs; the app behaves 
 - [x] ADR 0005: global `BODY_SIZE_LIMIT=11M`, 413 page without JavaScript as known limit
 - [x] Slice review round 1: `docs/reviews/732-review-1.md`; English 413 heading → #847
 - [x] Archive the session, PR (`Fixes #732`): pushed after this archive
+## Session: #837 cycle 1, statements (Ä1)
+
+- [x] Measure before: `fitness` (field spread), `svelte-check` time
+- [x] S1 Backend: `StatementWithDetails` moves to `backend/src/api/statement.ts` (imports only types of `schema.ts`), complete for what `getStatement` returns, which checks it as its return type (the annotation it had; the decision says `satisfies`); status typed (`StatementStatus`)
+- [x] S2 BFF: `toStatement` takes `Json<StatementWithDetails>`; drift fixed in types, no value the app shows changes
+- [x] S3 Frontend: `Statement`/`StatementWithDetails` in `src/lib/types.ts` take the fields that pass through unchanged from the backend type (`Pick`), declare only what the mapper converts or adds
+- [x] ADR 0005 (0004 was taken meanwhile) on the changed step 2 of ADR 0003; measured after, `fitness --update` (max 37 → 36, entity mirrors 54 → 52)
+- [x] Slice review round 1: `docs/reviews/i837c1-review-1.md`. Fixed: C-1 (Major, edit page `?? ''`, DOM test seen red), C-3 (`replaces` from the backend type), C-5 (ADR refs); C-2 (Major) answered by splitting the cycle: line items, line invoices and documents follow as cycle 1b in the next PR (ADR 0005, #837); C-4 named in ADR 0005
+- [x] Review round 2 on the fixes: `docs/reviews/i837c1-review-2.md`, C-1 to C-5 closed, nothing new
+- [x] PR, Refs #837 (cycle 1b follows), pushed after this archive; No scenario: types only

@@ -3,7 +3,8 @@ import { backendMessage, type BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
-import type { StatementLineItem, StatementWithDetails } from '$lib/types';
+import type { StatementWithDetails as StatementResponse } from '../../../backend/src/api/statement';
+import type { Json, StatementLineItem, StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -74,19 +75,28 @@ const carryOf = (data: BackendStatement) => ({
 	carriedFrom: data.carriedFrom ? { ...data.carriedFrom, balance: Number(data.carriedFrom.balance) } : null
 });
 
+// The tenant, apartment and building of a statement as the pages name them; each is null when its record is gone
+const tenantOf = ({ tenant }: Json<StatementResponse>) => ({
+	tenantName: tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
+	tenantEmail: tenant?.email || '',
+	tenantCorrespondenceChannel: tenant?.correspondenceChannel,
+	tenantLanguage: tenant?.language
+});
+const placeOf = ({ apartment, building }: Json<StatementResponse>) => ({
+	buildingId: building?.id || '',
+	apartmentUnit: apartment?.number || '',
+	apartmentFloor: apartment?.floor || '',
+	buildingName: building?.name || '',
+	buildingAddress: building?.address || ''
+});
+
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
-export function toStatement(data: BackendStatement): StatementWithDetails {
-	const [tenant, apartment, building] = [
-		data.tenant ?? {},
-		data.apartment ?? {},
-		data.building ?? {}
-	];
+export function toStatement(data: Json<StatementResponse>): StatementWithDetails {
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
 		tenantId: data.tenantId,
 		apartmentId: data.apartmentId,
-		buildingId: building.id || '',
 		periodStart: data.periodStart,
 		periodEnd: data.periodEnd,
 		statementDate: data.statementDate,
@@ -106,14 +116,8 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		oldAddress: !!data.oldAddress, // A-5: the moved-out tenant still has the building's address
 		notes: data.notes,
 		createdAt: data.createdAt,
-		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
-		tenantEmail: tenant.email || '',
-		tenantCorrespondenceChannel: tenant.correspondenceChannel,
-		tenantLanguage: tenant.language,
-		apartmentUnit: apartment.number || '',
-		apartmentFloor: apartment.floor || '',
-		buildingName: building.name || '',
-		buildingAddress: building.address || '',
+		...tenantOf(data),
+		...placeOf(data),
 		rentalStart: data.rentalStart,
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),

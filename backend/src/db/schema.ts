@@ -90,6 +90,8 @@ export const apartmentsRelations = relations(apartments, ({ one, many }) => ({
 export type Language = 'de' | 'fr' | 'it' | 'en';
 /** How a tenant receives statements and letters */
 export type CorrespondenceChannel = 'email' | 'letter';
+/** A statement's stored status; `overdue` is not stored but computed from the payment deadline (#837) */
+export type StoredStatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'replaced';
 
 export const tenants = pgTable('tenants', {
 	id: uuid('id').defaultRandom().primaryKey(),
@@ -487,7 +489,7 @@ export const utilityStatements = pgTable(
 		// the Übertrag: the statement of the same Mietvertrag whose Saldo below CHF 5 this one counts in (#448)
 		carriedFromId: uuid('carried_from_id').references((): AnyPgColumn => utilityStatements.id),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
-		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, settled (#448), replaced; overdue is computed from the payment deadline
+		status: varchar('status', { length: 20 }).$type<StoredStatementStatus>().notNull().default('draft'), // draft, sent, paid, settled (#448), replaced; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
 		paidDate: date('paid_date'),
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),

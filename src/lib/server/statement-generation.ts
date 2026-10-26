@@ -259,7 +259,8 @@ async function changedStatements(
 		};
 	};
 	return overlapping.flatMap((listed) => {
-		const { id, statementNumber, tenantName } = toStatement(listed);
+		// a row of GET /statements has the statement's form (backend/src/api/statement.ts)
+		const { id, statementNumber, tenantName } = toStatement(listed as Parameters<typeof toStatement>[0]);
 		// the invoices and the Tankbestand changed since (#454, #408 point 8), and what it does differently
 		const notes = { ...settings(listed), oldRule: oldRule(listed) };
 		return Object.values(notes).some(Boolean) ? [{ id, statementNumber, tenantName, ...notes }] : [];

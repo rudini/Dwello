@@ -4,6 +4,7 @@
  */
 
 import { belowMinimum } from './pdf-format';
+import type { StatementPayment } from '../api/statement';
 
 interface Payment {
 	balance: string;
@@ -15,7 +16,7 @@ interface Payment {
 }
 
 
-export function paymentOf(statement: Payment, today: string) {
+export function paymentOf(statement: Payment, today: string): StatementPayment {
 	const balance = Number(statement.balance);
 	// no payment: a Saldo of 0, a settled one (also when the contract's end moves into the period afterwards, 448-2
 	// V-17) or one below CHF 5 that is no Schlussabrechnung's
