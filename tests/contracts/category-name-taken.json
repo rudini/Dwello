@@ -1,0 +1,5 @@
+{
+	"error": "Eine Kategorie mit dem Namen «Treppenhausreinigung» existiert bereits.",
+	"code": "CATEGORY_NAME_TAKEN",
+	"params": { "name": "Treppenhausreinigung" }
+}

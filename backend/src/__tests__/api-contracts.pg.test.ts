@@ -19,7 +19,7 @@ import { app } from '../app';
 import { daysAfter, swissToday } from '../services/today';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
-import { insertInvoice } from './helpers/records';
+import { apiRecords, idOf, insertInvoice, invoicedBuilding } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 const contracts = join(import.meta.dir, '..', '..', '..', 'tests', 'contracts');
@@ -999,5 +999,89 @@ describe('API-Verträge der Berichtigung', () => {
 		} finally {
 			ollama.stop(true);
 		}
+	});
+});
+
+// #852: the UI shows a refusal only by its code, so its tests read these bodies with their codes
+describe('API-Verträge der Ablehnungen mit Code', () => {
+	const token = crypto.randomUUID();
+	const categoryRecords = apiRecords('categories');
+	const profiles = apiRecords('heating-profiles');
+	const keys = apiRecords('distribution-keys');
+	const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+	const shares = Object.fromEntries(months.map((month, i) => [`${month}Pct`, i === 0 ? 12 : 8]));
+	const category = (name: string) =>
+		categoryRecords.create({ name, nameDE: name, nameFR: name, nameIT: name, nameEN: name, isAllowedUtilityCost: true, sortOrder: 40 });
+	let previous: { profile: string | null; key: string | null };
+	let removeBuilding = async () => {};
+
+	beforeAll(async () => {
+		previous = { profile: await getConfig('default_heating_profile_id'), key: await getConfig('default_distribution_key_id') };
+	});
+
+	afterAll(async () => {
+		for (const [key, value] of [['default_heating_profile_id', previous.profile], ['default_distribution_key_id', previous.key]] as const)
+			if (value) await setConfig(key, value);
+			else await deleteConfig(key);
+		await removeBuilding();
+		await categoryRecords.removeAll();
+		await profiles.removeAll();
+		await keys.removeAll();
+	});
+
+	it('POST /categories mit einem vergebenen Namen liefert die Felder von category-name-taken.json', async () => {
+		await category(`Treppenhaus ${token}`);
+		const response = await category(`Treppenhaus ${token}`);
+		expect(response.status).toBe(409);
+		expect(drift(await sample('category-name-taken'), await response.json())).toEqual([]);
+	});
+
+	it('DELETE /categories/:id einer verwendeten Kategorie liefert die Felder von category-in-use.json', async () => {
+		const id = await idOf(await category(`Verwendet ${token}`));
+		removeBuilding = await invoicedBuilding(`Kategorienhaus ${token}`, { categoryId: id });
+		const response = await callApi(`/api/v1/categories/${id}`, { method: 'DELETE' });
+		expect(response.status).toBe(409);
+		expect(drift(await sample('category-in-use'), await response.json())).toEqual([]);
+	});
+
+	it('POST /heating-profiles mit einem vergebenen Namen liefert die Felder von heating-profile-name-taken.json', async () => {
+		await profiles.create({ name: `Bergtal ${token}`, ...shares });
+		const response = await profiles.create({ name: `Bergtal ${token}`, ...shares });
+		expect(response.status).toBe(409);
+		expect(drift(await sample('heating-profile-name-taken'), await response.json())).toEqual([]);
+	});
+
+	it('DELETE /heating-profiles/:id des Standards liefert die Felder von heating-profile-default-refused.json', async () => {
+		const id = await idOf(await profiles.create({ name: `Standard ${token}`, ...shares }));
+		await setConfig('default_heating_profile_id', id);
+		const response = await profiles.send('DELETE', `/${id}`);
+		expect(response.status).toBe(409);
+		expect(drift(await sample('heating-profile-default-refused'), await response.json())).toEqual([]);
+	});
+
+	it('DELETE /distribution-keys/:id des Standards liefert die Felder von distribution-key-default-refused.json', async () => {
+		const id = await idOf(await keys.create({ name: `Standard ${token}`, nameDE: `Standard ${token}`, formula: '{area}' }));
+		await setConfig('default_distribution_key_id', id);
+		const response = await keys.send('DELETE', `/${id}`);
+		expect(response.status).toBe(409);
+		expect(drift(await sample('distribution-key-default-refused'), await response.json())).toEqual([]);
+	});
+
+	it('DELETE /documents/:id eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {
+		const response = await callApi(`/api/v1/documents/${crypto.randomUUID()}`, { method: 'DELETE' });
+		expect(response.status).toBe(404);
+		expect(drift(await sample('document-not-found'), await response.json())).toEqual([]);
+	});
+
+	it('PUT /documents/:id/sent eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/documents/${crypto.randomUUID()}/sent`, {});
+		expect(response.status).toBe(404);
+		expect(drift(await sample('document-not-found'), await response.json())).toEqual([]);
+	});
+
+	it('POST /distribution-keys mit einer ungültigen Formel liefert die Felder von formula-refused.json', async () => {
+		const response = await keys.create({ name: `Personen ${token}`, nameDE: `Personen ${token}`, formula: '{persons}' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('formula-refused'), await response.json())).toEqual([]);
 	});
 });

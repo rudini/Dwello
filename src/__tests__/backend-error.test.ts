@@ -72,11 +72,12 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		expect(backendMessage(body, 'Ersatz')).toBe(body.error);
 	});
 
-	it('zeigt den Text des Backends, wenn ein Teil keinen bekannten Code hat', () => {
+	// #852: nie der eigene Text des Backends, er ist englisch oder deutsch, nicht in der gewählten Sprache
+	it('zeigt den Ersatz, wenn ein Teil keinen bekannten Code hat', () => {
 		overwriteGetLocale(() => 'fr');
 		const body = { error: 'Die Formel ist ungültig: Neu.', code: 'FORMULA_INVALID', params: {}, causes: [{ code: 'FORMULA_NEW_THING' }] };
 
-		expect(backendMessage(body, 'Repli')).toBe(body.error);
+		expect(backendMessage(body, 'Repli')).toBe('Repli');
 	});
 
 	it('setzt Benutzerdaten nie als Code ein', () => {
@@ -89,16 +90,14 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		expect(backendMessage(body, 'Ersatz')).toBe(body.error);
 	});
 
-	it('zeigt einen Fehler ohne Code mit seinem Text', () => {
+	it('zeigt bei einem Fehler ohne Code den Ersatz', () => {
 		french();
 
-		expect(backendMessage({ error: 'Failed to create invoice' }, 'Repli')).toBe(
-			'Failed to create invoice'
-		);
+		expect(backendMessage({ error: 'Failed to create invoice' }, 'Repli')).toBe('Repli');
 	});
 
-	it('zeigt einen unbekannten Code mit seinem Text', () => {
-		expect(backendMessage({ error: 'Neu', code: 'SOMETHING_NEW' }, 'Ersatz')).toBe('Neu');
+	it('zeigt bei einem unbekannten Code den Ersatz', () => {
+		expect(backendMessage({ error: 'Neu', code: 'SOMETHING_NEW' }, 'Ersatz')).toBe('Ersatz');
 	});
 
 	it('zeigt ohne Text den Ersatz', () => {

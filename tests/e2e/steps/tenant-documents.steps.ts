@@ -30,6 +30,10 @@ Given('{string} hat das hochgeladene Dokument {string}', async ({ seed }, tenant
 	await seed.upload(tenant, title);
 });
 
+Given('das Dokument {string} von {string} wurde inzwischen gelöscht', async ({ seed }, title: string, tenant: string) => {
+	await seed.removeDocument(tenant, title);
+});
+
 Given('das Hochladen von Dokumenten zu {string} ist gestört', async ({ verwalter, seed }, tenant: string) => {
 	await verwalter.attemptsTo(uploadsFail(seed.idOf(tenant)!));
 });

@@ -1,0 +1,5 @@
+{
+	"error": "Das Heizprofil ist in den Einstellungen als Standard hinterlegt.",
+	"code": "HEATING_PROFILE_IS_DEFAULT",
+	"params": {}
+}

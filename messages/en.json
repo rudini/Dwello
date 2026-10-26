@@ -475,6 +475,7 @@
 	"backend_heating_profile_not_found": "The heating profile was not found. Reload the page.",
 	"backend_invoice_not_found": "The invoice was not found. Reload the page.",
 	"backend_statement_period_overlaps": "The chosen billing period overlaps existing statements of {building} ({periods}). Choose one of these billing periods or one that overlaps none of them.",
+	"backend_document_not_found": "The document no longer exists. Reload the page.",
 	"backend_statement_not_found": "Statement not found.",
 	"backend_paid_date_invalid": "Please enter the payment date as DD.MM.YYYY.",
 	"backend_paid_date_in_future": "The payment date is in the future. Enter the day the money arrived.",

@@ -10,6 +10,7 @@ import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
+import reminderPaid from '../../tests/contracts/reminder-paid-refused.json';
 import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
@@ -88,13 +89,13 @@ describe('POST /statements/[id]/send-reminder', () => {
 	});
 
 	it('gibt die Ablehnung des Backends weiter', async () => {
-		const { result } = call(sendReminder, 400, {
-			error: 'Es wurden bereits 3 Mahnungen versendet.'
-		});
+		const { result } = call(sendReminder, 409, reminderPaid);
 
 		const response = await result;
-		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({ error: 'Es wurden bereits 3 Mahnungen versendet.' });
+		expect(response.status).toBe(409);
+		expect(await response.json()).toEqual({
+			error: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.'
+		});
 	});
 });
 

@@ -1,0 +1,5 @@
+{
+	"error": "Ein Heizprofil mit dem Namen «Bergtal» existiert bereits.",
+	"code": "HEATING_PROFILE_NAME_TAKEN",
+	"params": { "name": "Bergtal" }
+}

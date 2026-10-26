@@ -10,6 +10,8 @@ import {
 	load as loadEdit
 } from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import nameTaken from '../../tests/contracts/category-name-taken.json';
+import inUse from '../../tests/contracts/category-in-use.json';
 import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import allowed from '../../tests/contracts/categories-allowed.json';
@@ -193,11 +195,15 @@ describe('Neue Kategorie', () => {
 	});
 
 	it('zeigt die Meldung des Backends beim Namen, wenn der Name vergeben ist', async () => {
-		const message = 'Eine Kategorie mit dem Namen "Treppenhausreinigung" existiert bereits.';
-		const { result } = runAction(newActions.save, '', 409, form, { error: message });
+		const { result } = runAction(newActions.save, '', 409, form, nameTaken);
 
 		expect(await result).toEqual(
-			expect.objectContaining({ status: 409, data: { errors: { name: message } } })
+			expect.objectContaining({
+				status: 409,
+				data: {
+					errors: { name: 'Eine Kategorie mit dem Namen «Treppenhausreinigung» existiert bereits.' }
+				}
+			})
 		);
 	});
 
@@ -338,10 +344,12 @@ describe('Kategorie löschen', () => {
 	});
 
 	it('erklärt, warum eine verwendete Kategorie bleibt', async () => {
-		const message = 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.';
-		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, { error: message });
+		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, inUse);
 
-		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { error: 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.' }
+		});
 	});
 });
 

@@ -5,6 +5,7 @@ import { runAction } from './helpers/action';
 import documentList from '../../tests/contracts/documents.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import paidRefused from '../../tests/contracts/reminder-paid-refused.json';
+import notFound from '../../tests/contracts/document-not-found.json';
 
 const API = 'http://localhost:3001/api/v1/documents';
 
@@ -74,6 +75,15 @@ describe('Dokumente', () => {
 
 		expect(await result).toMatchObject({
 			data: { actionError: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.' }
+		});
+	});
+
+	// #852: a document deleted meanwhile, e.g. in a second tab
+	it('sagt beim Markieren eines inzwischen gelöschten Dokuments, dass es das Dokument nicht mehr gibt', async () => {
+		const { result } = runAction(actions.markSent, '', 404, { id: 'd1' }, notFound);
+
+		expect(await result).toMatchObject({
+			data: { actionError: 'Das Dokument gibt es nicht mehr. Laden Sie die Seite neu.' }
 		});
 	});
 
