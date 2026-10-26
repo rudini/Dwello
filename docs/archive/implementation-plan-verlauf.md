@@ -3503,3 +3503,10 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] `.env.example` without `SENTRY_DSN`; `docs/installation.md` section 8: throttling through the reverse proxy, errors in `docker logs`
 - [x] Checks; no code changed, so no code review (docs and .env.example only)
 - [x] PR: pushed after this archive
+## Session: #834 E2E on main in more shards (T1)
+
+- [x] Issue #834 opened from the measured main run (shards 12–26 min, run 27 min)
+- [x] `ci.yml`: the job Changes builds the shard matrix, 5 E2E shards on pull requests and 12 elsewhere, axe in 3; «E2E tests» and «Accessibility (axe)» count the shards from its output
+- [x] Docs: `test-pyramid.md`, T1 measurement in `utility-tree.md`, RI-T1-3 and RI-T1-5 in `risks-and-tradeoffs.md`
+- [x] Slice review round 1: `docs/reviews/i834-review-1.md`
+- [x] PR (pushed after this archive); No scenario: CI configuration only. After the merge: «CI duration» of the push run on main ≤ 15 min
