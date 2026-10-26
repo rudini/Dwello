@@ -9,3 +9,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: testcheck, a static check of unit tests (request without issue)
+
+Tooling only, no app change: `No scenario: tooling, nothing a user of the app sees`.
+
+- [ ] `tools/testcheck`: finds tests that cannot fail (false positives) and test names their body does not back
+- [ ] Measure precision (labelled findings) and recall (seeded defects) on Dwello and external TypeScript/Vitest repos; targets and results in `tools/testcheck/testcheck-validation.md`
+- [ ] Gate on changed test files with a baseline, like deepcheck: `bun run testcheck:*`, hook `.claude/hooks/testcheck-gate.sh`, CI job, CLAUDE.md
+- [ ] Slice review (`code-reviewer`), closing round
+- [ ] PR

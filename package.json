@@ -24,6 +24,7 @@
 		"deepcheck:audit": "node tools/deepcheck/src/cli.ts check --agent",
 		"deepcheck:ci": "node tools/deepcheck/src/cli.ts check --format github --changed-since",
 		"deepcheck:baseline": "node tools/deepcheck/src/cli.ts baseline",
+		"testcheck:scan": "node tools/testcheck/src/cli.ts scan",
 		"fitness": "bun tools/fitness/fitness.ts",
 		"deps:graph": "ARCH_OUT=build/deps bun tools/arch-baseline/02-imports.ts >/dev/null && ARCH_OUT=build/deps bun tools/arch-baseline/graph.ts | dot -Tsvg -o build/deps/modules.svg && echo build/deps/modules.svg"
 	},
