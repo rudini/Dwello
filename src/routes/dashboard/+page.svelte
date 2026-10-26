@@ -7,10 +7,10 @@
 	import DeadlineList from './DeadlineList.svelte';
 	import KiModelNotice from './KiModelNotice.svelte';
 	import TaskList from './TaskList.svelte';
-	import type { OverviewData } from './+page.server';
+	import type { PageData } from './$types';
 
 	// What to do now first, then the dates ahead, then the state of the buildings
-	let { data }: { data: OverviewData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	const quickActions: { label: string; href: string; icon: IconName }[] = [
 		{ label: m.dashboard_add_tenant(), href: '/tenants/new', icon: 'user-add' },

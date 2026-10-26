@@ -11,7 +11,7 @@ type BackendEntry = {
 };
 type Details = Record<string, string | number | boolean | null | undefined>;
 
-export type AuditEntry = { id: string; when: string; text: string };
+type AuditEntry = { id: string; when: string; text: string };
 
 const PROVIDERS: Record<string, string> = { google: 'Google', microsoft: 'Microsoft' };
 

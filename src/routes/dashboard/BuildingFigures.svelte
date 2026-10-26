@@ -4,10 +4,10 @@
 	import { reletParts, statusLabels } from '$lib/apartment';
 	import { endedSince } from '$lib/contract-status';
 	import { formatCurrency } from '$lib/utils/format';
-	import type { DashboardData } from './+page.server';
+	import type { PageData } from './$types';
 
 	// Counts that lead to the filtered lists, and the rented share per building
-	let { data }: { data: DashboardData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	const figures = $derived([
 		{
@@ -48,7 +48,7 @@
 		}
 	]);
 	// The relet apartments as the building cards count them, and each empty one, since when if it had a contract (#145)
-	const occupancyNotes = (building: DashboardData['buildingOccupancy'][number]) =>
+	const occupancyNotes = (building: PageData['buildingOccupancy'][number]) =>
 		[
 			...reletParts(building.reletStarts),
 			...(building.vacant ?? []).map(({ number, lastContractEnd }) =>
