@@ -3557,3 +3557,12 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Slice review round 1: `docs/reviews/i837c1-review-1.md`. Fixed: C-1 (Major, edit page `?? ''`, DOM test seen red), C-3 (`replaces` from the backend type), C-5 (ADR refs); C-2 (Major) answered by splitting the cycle: line items, line invoices and documents follow as cycle 1b in the next PR (ADR 0005, #837); C-4 named in ADR 0005
 - [x] Review round 2 on the fixes: `docs/reviews/i837c1-review-2.md`, C-1 to C-5 closed, nothing new
 - [x] PR, Refs #837 (cycle 1b follows), pushed after this archive; No scenario: types only
+
+## Session: #837 cycle 1b, line items and documents (Ä1)
+
+- [x] Main run of #849: one Firefox scenario lost its browser at the first navigation; failed jobs re-run once, green
+- [x] A Line items: `StatementLineItem`, `StatementLineInvoice` derive from the line items of `backend/src/api/statement.ts`; `toLineItem` takes them typed
+- [x] B Documents: `backend/src/api/document.ts` (value lists typed in `schema.ts`), `selectSummaries` returns it, `StatementDocument` derives from it
+- [x] Measured (median 5 → 4, mirrors 52 → 50, value lists 14 → 13, types.ts fields 51 → 40), ADR 0005 «Zyklus 1b», `fitness --update`; fitness first refused `sent|to_send` in 3 files, fixed with `DocumentStatus`
+- [x] Slice review round 1: `docs/reviews/i837c1b-review-1.md`, no Blocker/Major; C-1 (`DocumentFilters.status` typed, cast gone) and C-2 (current values in `fitness-functions.md`) fixed
+- [x] PR, Refs #837, pushed after this archive; No scenario: types only

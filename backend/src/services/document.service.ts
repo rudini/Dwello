@@ -15,7 +15,7 @@ import type { DocumentSummary } from '../api/document';
 export interface DocumentFilters {
 	tenantId?: string;
 	statementId?: string;
-	status?: string;
+	status?: DocumentStatus;
 }
 
 // A reminder still to send whose statement is replaced or paid since: it no longer goes out, without a status of its
@@ -73,8 +73,7 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 	const conditions = [
 		filters.tenantId && eq(documents.tenantId, filters.tenantId),
 		filters.statementId && eq(documents.statementId, filters.statementId),
-		// a status the list does not know finds nothing
-		filters.status && eq(documents.status, filters.status as DocumentStatus),
+		filters.status && eq(documents.status, filters.status),
 		filters.status === 'to_send' && sql`${notToSend} is null`
 	].filter((condition): condition is SQL => Boolean(condition));
 	return selectSummaries(and(...conditions));
