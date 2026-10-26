@@ -3685,3 +3685,12 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Round 2, also the closing round (`docs/reviews/i837c4d-review-2.md`): C-1 to C-4 closed, nothing new
 - [x] Archive, PR (Fixes #837): pushed after this archive
 - Files: `backend/src/api/tenant.ts` (new), `backend/src/services/tenant.service.ts`, `backend/src/routes/tenants.ts`, `src/lib/types.ts`, `src/lib/server/apartment.ts`, `src/routes/{apartments,tenants,buildings/[id]}/+page.server.ts`, `src/routes/apartments/ApartmentCard.svelte`, `src/__tests__/apartments-pages.dom.test.ts`, `tools/fitness/ratchet.json`, ADR 0005
+
+## Session: #869 flaky «Suche ohne Treffer» in Firefox
+
+- [x] Cause from the trace of run 40400795129 (shard 3): the search was typed and «Suchen» clicked, but no request followed; the page had `data-hydrated`, which the root layout set in `onMount`, before SvelteKit's router listens for submits (probe: a click at the marker loads the document natively instead of through the router)
+- [x] Layout sets `data-hydrated` one task after mounting, once the router listens (DOM test, red first; `src/routes/+layout.svelte`, `src/__tests__/layout-hydrated.dom.test.ts`)
+- [x] Probe on the E2E stack: a click at the marker goes through the router (5 of 5; before: native document load)
+- [x] Affected E2E scenarios green: full Chromium suite, 1505 passed
+- [x] Slice review round 1: `docs/reviews/i869-review-1.md`
+- [x] PR `Fixes #869`: pushed after this archive
