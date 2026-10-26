@@ -11,9 +11,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session 2026-10-26 #837 cycle 4c: layer direction (#857)
 
-- [ ] Measure before (`fitness`, layer edges FE→BFF 6, Shared→FE 0)
-- [ ] `KiModel` to `src/lib/types.ts`; dashboard, audit log and settings components take `PageData` from `./$types`
-- [ ] Fitness `boundary-import` refuses type-only imports FE→BFF and Shared→FE; proof table in `fitness-functions.md` §3, deps:graph row in §6
-- [ ] ADR 0005 «Zyklus 4c», measure after
+- [x] Measure before (`fitness`, layer edges FE→BFF 6, Shared→FE 0)
+- [x] `KiModel` to `src/lib/types.ts`; dashboard, audit log and settings components take `PageData` from `./$types`
+- [x] Fitness `boundary-import` refuses type-only imports FE→BFF and Shared→FE; proof table in `fitness-functions.md` §3, deps:graph row in §6
+- [x] ADR 0005 «Zyklus 4c», measure after (FE → BFF 6 → 0; other values unchanged)
 - [ ] Code review round 1, closing round
 - [ ] Archive, PR (Fixes #857)

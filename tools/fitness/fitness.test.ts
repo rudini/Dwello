@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedAllowed, addedTechnical, advise, decides, isFrontendFile, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -74,6 +74,21 @@ describe('judge', () => {
 		const findings = judge({ ...clean, entityMirrors: mirrors }, r);
 		expect(findings.map((f) => f.check)).toEqual(['entity-mirror']);
 		expect(findings[0].message).toContain('src/lib/server/tenant-copy.ts');
+	});
+
+	it('refuses a type import from a component into the BFF and from the shared types into the frontend (#857)', () => {
+		const edge = (from: string, to: string, type_only: string, from_layer: string, to_layer: string) => ({ from, to, type_only, from_layer, to_layer });
+		expect(crossesBoundary(edge('src/routes/a/X.svelte', 'src/lib/server/y.ts', 'yes', 'FE', 'BFF'))).toBe(true);
+		expect(crossesBoundary(edge('src/lib/types.ts', 'src/lib/z.ts', 'yes', 'Shared/Contracts', 'FE'))).toBe(true);
+		expect(crossesBoundary(edge('src/lib/x.ts', 'backend/src/api/y.ts', 'yes', 'FE', 'Backend'))).toBe(false);
+		expect(crossesBoundary(edge('src/lib/x.ts', 'backend/src/services/y.ts', 'no', 'FE', 'Backend'))).toBe(true);
+		expect(crossesBoundary(edge('src/lib/server/y.ts', 'src/lib/types.ts', 'yes', 'BFF', 'Shared/Contracts'))).toBe(false);
+	});
+
+	it('names the layer direction and its fix for an import against it (#857)', () => {
+		const findings = judge({ ...clean, boundaryImports: ['src/routes/a/X.svelte -> src/lib/server/y.ts'] }, ratchet);
+		expect(findings[0].message).toContain('against the layer direction');
+		expect(findings[0].message).toContain('./$types');
 	});
 
 	it('fails on a new module cycle and on a runtime import across the HTTP boundary', () => {
