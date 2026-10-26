@@ -9,6 +9,11 @@
 	"ignorePatterns": [
 		"src/lib/paraglide/**"
 	],
+	"health": {
+		"ignore": [
+			"tools/*/eval/**"
+		]
+	},
 	"ignoreDependencies": [
 		"@inlang/plugin-message-format"
 	],
