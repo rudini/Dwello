@@ -25,6 +25,7 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		[heredoc('chore(tests): enable contract retry scenarios\n\nBody line that is long, longer than fifty characters.')],
 		['git commit --amend --no-edit'],
 		['git commit -F message.txt'],
+		["git commit -q -F - <<'EOF'\nfix(contracts): guard contract retries\n\nA body line longer than fifty characters, as usual.\nEOF"],
 		['git status && git log -m'],
 		['echo "git commit -m nope"'],
 		['git commit -am "fix(contracts): guard retries" -m "a body line that is longer than fifty characters"']
@@ -42,7 +43,9 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		[`cd ${ROOT}/backend && git commit -m "fix: guard retries"`, 'type(scope)'],
 		['cd /tmp && git commit -m "fix: guard retries"', 'type(scope)'],
 		['(cd /tmp && git commit -m a) && git commit -m "fix: guard retries"', 'type(scope)'],
-		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)']
+		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)'],
+		// a commit and a push in one command: the push check runs before the commit exists
+		["git commit -q -F - <<'EOF'\nfix(contracts): mark unchecked apartments in choice\n\nBody.\nEOF\ngit push", '51 characters']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);
