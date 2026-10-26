@@ -5,7 +5,8 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice, type LatestKey } from '$lib/invoice';
+	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import type { LatestKey } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import type { BilledStatement, Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';

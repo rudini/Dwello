@@ -1,13 +1,15 @@
 import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
 import type { DocumentSummary } from '../../backend/src/api/document';
-import type { InvoiceWithDetails as InvoiceResponse } from '../../backend/src/api/invoice';
+import type {
+	InvoiceWithDetails as InvoiceResponse,
+	LatestKey
+} from '../../backend/src/api/invoice';
 import type {
 	ContractResponse,
 	ContractWithDetails as ContractRow
 } from '../../backend/src/api/contract';
 import type { ApartmentStatus } from '../../backend/src/api/apartment';
 import type { TenantResponse } from '../../backend/src/services/tenant.service';
-import type { LatestKey } from './invoice';
 
 /** A backend type as its JSON arrives: dates as ISO strings */
 export type Json<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] extends Date | null ? string | null : T[K] };
@@ -50,7 +52,7 @@ export interface BuildingsListData {
 
 // Apartment status values (match backend)
 // occupied and relet follow from the rental contracts; vacant and reserved are set by hand
-export type { ApartmentStatus };
+export type { ApartmentStatus, LatestKey };
 
 // Apartment types (camelCase to match backend)
 export interface Apartment {

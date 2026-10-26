@@ -15,7 +15,8 @@
 		type Proposal,
 		type UploadRow
 	} from '$lib/invoice-upload';
-	import { proposedKey, type LatestKey } from '$lib/invoice';
+	import { proposedKey } from '$lib/invoice';
+	import type { LatestKey } from '$lib/types';
 	import type { Category } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 	import { focusFirstError } from '$lib/ui/focus-error';

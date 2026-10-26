@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import type { LatestKey } from './types';
 
 /** The KI's category for an invoice, with its confidence (0 to 1) and reasoning */
 export type Suggestion = {
@@ -58,9 +59,6 @@ export function validateInvoice(invoice: {
 	if (!invoice.distributionKeyId) errors.distributionKeyId = m.invoices_error_key_required();
 	return { ...errors, ...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd) };
 }
-
-/** Per building and category the Verteilschlüssel of the latest invoice with one (backend `/invoices/latest-keys`) */
-export type LatestKey = { buildingId: string; categoryId: string; distributionKeyId: string };
 
 /** What the proposal needs where the building is chosen elsewhere, as in «Rechnungen hochladen» */
 export type KeyProposal = { buildingId: string; latestKeys: LatestKey[]; defaultKeyId: string };

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { untrack, type Snippet } from 'svelte';
-	import { proposedKey, type LatestKey } from '$lib/invoice';
-	import type { Category } from '$lib/types';
+	import { proposedKey } from '$lib/invoice';
+	import type { Category, LatestKey } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import Field from '$lib/ui/Field.svelte';

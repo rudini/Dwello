@@ -22,7 +22,7 @@ import { getCategory } from './category.service';
 import { roundToRappen } from './pdf-format';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
-import type { InPeriod, InvoiceWithDetails } from '../api/invoice';
+import type { InPeriod, InvoiceWithDetails, LatestKey } from '../api/invoice';
 
 /** An uploaded file for an invoice, Base64 encoded */
 /** A file for an invoice; read by the KI in «Rechnungen hochladen», with what it saw on it (#233) */
@@ -241,8 +241,8 @@ function requireKey(distributionKeyId: string | null | undefined) {
  * Per building and category the Verteilschlüssel of the latest invoice that has one (#379): the invoice form proposes
  * it, as one category of a building keeps one key
  */
-export async function latestKeys() {
-	return db
+export async function latestKeys(): Promise<LatestKey[]> {
+	const rows = await db
 		.selectDistinctOn([invoices.buildingId, invoices.categoryId], {
 			buildingId: invoices.buildingId,
 			categoryId: invoices.categoryId,
@@ -251,6 +251,7 @@ export async function latestKeys() {
 		.from(invoices)
 		.where(and(isNotNull(invoices.categoryId), isNotNull(invoices.distributionKeyId)))
 		.orderBy(invoices.buildingId, invoices.categoryId, desc(invoices.invoiceDate), desc(invoices.createdAt));
+	return rows as LatestKey[]; // the where clause leaves out the invoices without a category or a key
 }
 
 /** Checks the invoice's category; costs of a non-allocable one stay with the owners (OR 257a), whatever the form sends */

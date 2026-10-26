@@ -4,7 +4,7 @@ import type { BilledStatement, InvoiceWithDetails, Json } from '$lib/types';
 import type { InvoiceWithDetails as InvoiceResponse } from '../../../backend/src/api/invoice';
 import { toCategory } from './category';
 import { toDistributionKey } from './distribution-key';
-import type { LatestKey } from '$lib/invoice';
+import type { LatestKey } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
