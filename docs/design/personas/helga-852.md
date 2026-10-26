@@ -57,3 +57,57 @@ Was helfen würde:
 - Welche Fassung der App läuft, kann ich nicht sicher sagen: In der Fusszeile steht «Version unbekannt». Ich habe nur die Zeit des Builds (22:04) mit dem letzten Commit (22:03, «fix(api): never show the backend's own text») verglichen.
 - Andere Stellen, an denen ein schon gelöschtes Dokument gelöscht werden könnte: Auf der Seite «Dokumente» gibt es keinen Löschknopf. Weitere Stellen habe ich nicht gesucht.
 - Fehler wegen eines Serverausfalls (500) habe ich nicht nachgestellt, weil der Auftrag nur das schon gelöschte Dokument nannte.
+
+## Runde 2
+
+App: Persona-Stack auf :3300, nach der Korrektur neu gebaut (Fusszeile weiterhin «Version unbekannt»). Desktop 1440 × 900 bei 150 %, die Meldung zusätzlich bei 200 %, Maus.
+Gespeichert habe ich nur beim Mieter «Hans Müller»: zwei Mal die «Ausweiskopie» hochgeladen und jedes Mal wieder gelöscht. Am Schluss steht bei Hans Müller wieder «Noch keine Dokumente.».
+
+**Status P-1: behoben.** Im zweiten Tab sagt Dwello jetzt «Das hat nicht geklappt. Das Dokument gibt es nicht mehr. Laden Sie die Seite neu.» Das stimmt. Ich habe getan, was dort steht, und die Seite neu geladen. Danach stand bei Hans Müller «Noch keine Dokumente.», und auch auf der Seite «Dokumente» war keine Ausweiskopie mehr. Die irreführende Aufforderung «Versuchen Sie es erneut» kommt nicht mehr.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-2 | Minor | Mieter «Hans Müller», Dialog «Dokument löschen?» im zweiten Tab | Die Meldung verlangt «Laden Sie die Seite neu.», der Dialog bietet dafür aber nichts an. Er bleibt offen, mit dem roten Knopf «Dokument löschen», und dahinter steht die «Ausweiskopie» weiter in der Liste. Ich muss selbst wissen, wie man im Browser eine Seite neu lädt. Das weiss ich nicht immer, und ich hätte vielleicht nochmals auf «Dokument löschen» gedrückt. Dann kommt dieselbe Meldung wieder. Die rote Überschrift «Das hat nicht geklappt» lässt mich zuerst glauben, die Ausweiskopie sei noch gespeichert, obwohl sie schon weg ist. |
+
+### Beobachtungen (Runde 2)
+
+- Der Satz «Das Dokument gibt es nicht mehr.» ist kurz und verständlich. Dass es in einem anderen Fenster gelöscht wurde, steht nicht da, aber das brauche ich nicht zu wissen.
+- Nach der Meldung springt der Fokus auf den roten Meldungskasten. Der Kasten hat ein Ausrufezeichen und eine Überschrift, man erkennt ihn also nicht nur an der Farbe.
+- Bei 200 % ist der Dialog gut lesbar. Meldung und beide Knöpfe passen ohne Scrollen auf den Bildschirm (Screenshot r2-z200-05-B-meldung-viewport.png).
+- Nach dem Neuladen ist der Dialog zu, und die Liste zeigt «Noch keine Dokumente.» (r2-z150-06-B-nach-F5.png). Auf der Seite «Dokumente» steht nur noch das «Übergabeprotokoll Wohnung B2» zu Marco Bernasconi, das nicht von mir ist.
+- Im ersten Tab stehen nach dem Hochladen und Löschen weiterhin zwei Meldungen übereinander: «Dokument «Ausweiskopie» hochgeladen» und «Dokument «Ausweiskopie» gelöscht». Das ist wie in Runde 1.
+
+### Aufgabe geschafft (Runde 2): ja
+
+Die Meldung sagt, was ist, und was sie rät, hat geholfen: Nach dem Neuladen war das Dokument nachweislich weg.
+
+### Aufwand (Runde 2)
+
+Etwa 7 Sekunden Skriptzeit und 11 Schritte bis zur Meldung (2 Tabs öffnen, Datei wählen, Titel, hochladen, zweiten Tab neu laden, 2 × Löschen im ersten Tab, 2 × Löschen im zweiten Tab). Danach 1 Schritt Neuladen und 2 Schritte zur Seite «Dokumente». Zum Zurechtfinden brauchte ich diesmal keine Zeit, den Weg kannte ich aus Runde 1.
+
+### Ablauf (Runde 2)
+
+1. Erneut auf «Dokument löschen» geklickt, bevor ich neu lade: Ich erwartete, dass Dwello den Dialog schliesst oder die Liste auffrischt, weil es ja jetzt weiss, dass das Dokument fehlt. Ich bekam dieselbe Meldung noch einmal. Der Dialog blieb offen, und die Ausweiskopie stand weiter in der Liste.
+2. Neu laden mit der Taste F5 bei offenem Dialog: Ich erwartete, dass die Seite neu lädt. Im Skript geschah nichts, der Dialog blieb offen. Das liegt am Testbrowser ohne Bedienleiste, nicht an Dwello. Mit dem Neuladen des Browsers selbst ging es sofort.
+
+### Vorschläge (Runde 2)
+
+**P-2**
+Nachstellen:
+1. Mieter «Hans Müller» in zwei Tabs öffnen.
+2. Im ersten Tab ein PDF mit dem Titel «Ausweiskopie» hochladen, dann den zweiten Tab neu laden.
+3. Im ersten Tab «Löschen: Ausweiskopie» und «Dokument löschen» wählen.
+4. Im zweiten Tab, ohne neu zu laden, «Löschen: Ausweiskopie» und «Dokument löschen» wählen.
+
+Ergebnis: Die Meldung «Das Dokument gibt es nicht mehr. Laden Sie die Seite neu.» erscheint im offenen Dialog. «Dokument löschen» bleibt aktiv, und die Ausweiskopie steht weiter in der Liste, bis man selbst neu lädt.
+
+Was helfen würde:
+- Dwello lädt die Liste selbst neu: Dialog schliessen, die Ausweiskopie verschwindet, und unten steht etwa «Dieses Dokument war schon gelöscht. Sie müssen nichts mehr tun.»
+- Wenn das nicht geht: im Dialog statt «Dokument löschen» einen Knopf wie «Liste aktualisieren» zeigen, damit ich nicht wissen muss, wie man im Browser neu lädt.
+- Keine Überschrift «Das hat nicht geklappt», wenn das Ziel (Dokument weg) schon erreicht ist.
+
+### Nicht geprüft (Runde 2)
+
+- Das Herunterladen der schon gelöschten Datei im zweiten Tab (Beobachtung aus Runde 1) habe ich nicht wiederholt: Der Auftrag nannte nur das Löschen.
+- Andere Sprachen als Deutsch habe ich nicht angeschaut, die Sprache gilt für das ganze Konto.
+- Ein Serverausfall (500) beim Löschen war nicht Teil des Auftrags.
