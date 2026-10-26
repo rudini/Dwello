@@ -3511,15 +3511,6 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Slice review round 1: `docs/reviews/i834-review-1.md`
 - [x] PR (pushed after this archive); No scenario: CI configuration only. After the merge: «CI duration» of the push run on main ≤ 15 min
 
-## Session`.
-
-- Start: move a finished earlier session to `docs/archive/implementation-plan-verlauf.md` (append, do not read the archive), then add the task's items as a checklist under a new `## Session` (a request that covers several issues is one session). A session counts as finished when every item is ticked, or when its pull request is merged: then tick its last item with the pull request number.
-- During: tick each item when done, add anything new you find, note the files changed. A «Workflow note: …» item is ticked when its point is in the workflow notes or, without notes, under "Found" (skill `workflow-review`).
-- End: archive the session before the final commit, its "PR" item ticked as «pushed after this archive»; CI results after that go into the pull request, not the plan.
-- Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
-
-Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
 ## Session: #838 screen checks in their own shards on main (T1)
 
 - [x] Issue #838 from run 40293821912 (shards 3, 7, 11 held the screen checks of one browser each: 11–18 min against 3.5–7)
@@ -3528,3 +3519,12 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Docs: `test-pyramid.md`, T1 measurement in `utility-tree.md`
 - [x] Slice review round 1: `docs/reviews/i838-review-1.md`
 - [x] PR (pushed after this archive); No scenario: CI configuration only. After the merge: slowest shard and «CI duration» of the push run on main
+
+## Session: #840 axe check in four shards (T1)
+
+- [x] Issue #840 from run 40303722784 (axe 2/3 about 14 min, the critical path; E2E shards 5.5–9.1 min)
+- [x] `ci.yml`: axe in 4 shards (matrix and count); checked: the Changes script for both events, `--list --shard=n/4` 68/68/68/67 = 271
+- [x] Docs: `test-pyramid.md`, T1 measurement in `utility-tree.md`
+- [x] Slice review round 1: `docs/reviews/i840-review-1.md` (C-1 Minor fixed: the plan header, cut by the #838 archive commit 809ff3de, restored and the header text it moved into the archive removed)
+- [x] Workflow note: `open-work.test.ts` passes with no `## Session` heading, so the cut header went unnoticed (under Found)
+- [x] PR (pushed after this archive); No scenario: CI configuration only. After the merge: slowest axe shard and the run on main

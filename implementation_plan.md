@@ -1,9 +1,11 @@
 # Dwello implementation plan
 
-Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts` allows one `## Session: #840 axe check in four shards (T1)
+Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts` allows one `## Session`.
 
-- [x] Issue #840 from run 40303722784 (axe 2/3 about 14 min, the critical path; E2E shards 5.5–9.1 min)
-- [x] `ci.yml`: axe in 4 shards (matrix and count); checked: the Changes script for both events, `--list --shard=n/4` 68/68/68/67 = 271
-- [x] Docs: `test-pyramid.md`, T1 measurement in `utility-tree.md`
-- [ ] Slice review (`code-reviewer`)
-- [ ] PR; No scenario: CI configuration only. After the merge: slowest axe shard and the run on main
+- Start: move a finished earlier session to `docs/archive/implementation-plan-verlauf.md` (append, do not read the archive), then add the task's items as a checklist under a new `## Session` (a request that covers several issues is one session). A session counts as finished when every item is ticked, or when its pull request is merged: then tick its last item with the pull request number.
+- During: tick each item when done, add anything new you find, note the files changed. A «Workflow note: …» item is ticked when its point is in the workflow notes or, without notes, under "Found" (skill `workflow-review`).
+- End: archive the session before the final commit, its "PR" item ticked as «pushed after this archive»; CI results after that go into the pull request, not the plan.
+- Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
+
+Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
