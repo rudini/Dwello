@@ -7,7 +7,9 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
-	import type { FuelStock } from './+page.server';
+	import type { PageData } from './$types';
+
+	type FuelStock = NonNullable<PageData['fuelStocks']>[number];
 	import FuelStockList from './FuelStockList.svelte';
 
 	// Heating oil or pellets in the tank (Tankbestand): statements take the consumption, not the purchases

@@ -15,7 +15,7 @@ import {
 } from '../db/schema';
 import { everyWordIn, withoutApartmentWord } from './word-search';
 import { sqlToday, swissToday } from './today';
-import type { ApartmentStatus } from '../api/apartment';
+import type { ApartmentStatus, ApartmentWithDetails } from '../api/apartment';
 
 /** First day of the next rental contract that has not started yet */
 const nextContractStart = sql<string | null>`(
@@ -95,25 +95,6 @@ export interface ApartmentFilters {
 	offset?: number;
 }
 
-export interface ApartmentWithDetails extends Apartment {
-	buildingName?: string;
-	building?: {
-		id: string;
-		name: string | null;
-		address: string | null;
-		postalCode: string | null;
-		city: string | null;
-	};
-	currentTenantName?: string;
-	currentContractId?: string;
-	nextContractId?: string | null;
-	nextContractStart?: string | null;
-	currentContractEnd?: string | null;
-	lastContractEnd?: string | null;
-	blocked?: boolean; // an open-ended contract: no new one can be recorded (#815)
-	availableFrom?: string | null; // the day after the latest Vertragsende while it is still to come (#815)
-}
-
 /**
  * List apartments with optional filters
  */
@@ -148,7 +129,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	const results = await db
 		.select(apartmentFields)
 		.from(apartments)
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause)
 		.orderBy(buildings.name, apartments.floor, apartments.number)
 		.limit(limit)
@@ -158,11 +139,11 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	const [{ count: total }] = await db
 		.select({ count: sql<number>`count(*)` })
 		.from(apartments)
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause);
 
 	return {
-		apartments: results as ApartmentWithDetails[],
+		apartments: results,
 		total: Number(total)
 	};
 }
@@ -179,7 +160,7 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 			buildingCity: buildings.city
 		})
 		.from(apartments)
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(eq(apartments.id, id))
 		.limit(1);
 
@@ -222,7 +203,7 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 		currentTenantName: currentContract?.tenantName,
 		currentContractId: currentContract?.contractId,
 		nextContractId: next?.id ?? null
-	} as ApartmentWithDetails;
+	};
 }
 
 /**

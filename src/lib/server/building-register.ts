@@ -1,4 +1,5 @@
 import { floorLabel } from '$lib/apartment';
+import type { AddressHit, RegisterBuilding } from '$lib/types';
 
 /**
  * The eidgenössische Gebäude- und Wohnungsregister (GWR) through api3.geo.admin.ch (swisstopo): addresses with house
@@ -6,29 +7,6 @@ import { floorLabel } from '$lib/apartment';
  * GEO_ADMIN_URL at a stand-in (backend/scripts/gwr-stub.ts).
  */
 const baseUrl = () => process.env.GEO_ADMIN_URL || 'https://api3.geo.admin.ch';
-
-export interface AddressHit {
-	egid: string;
-	street: string;
-	postalCode: string;
-	city: string;
-	canton: string;
-}
-
-type Field = 'number' | 'floor' | 'area' | 'rooms';
-export interface RegisterApartment {
-	number: string;
-	floor: number | null;
-	area: string;
-	rooms: string;
-	missing: Field[]; // what the register lacks, for the landlord to enter
-}
-
-export interface RegisterBuilding {
-	buildingType: string | null;
-	yearBuilt: number | null;
-	apartments: RegisterApartment[];
-}
 
 type SearchAnswer = { results: { attrs: Record<string, unknown> }[] };
 type FindAnswer = { results: { attributes: Record<string, unknown> }[] };

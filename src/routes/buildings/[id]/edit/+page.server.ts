@@ -8,7 +8,7 @@ import type { Actions } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export interface BuildingEditData {
+interface BuildingEditData {
 	building: BuildingWithStats;
 }
 

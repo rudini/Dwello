@@ -8,7 +8,7 @@
 	import AddressSearch from './AddressSearch.svelte';
 	import RegisterApartments, { toRows, type RegisterRow } from './RegisterApartments.svelte';
 	import RegisterNotices from './RegisterNotices.svelte';
-	import type { AddressHit, RegisterBuilding } from '$lib/server/building-register';
+	import type { AddressHit, RegisterBuilding } from '$lib/types';
 	import { buildingTypeLabel, buildingTypes } from '$lib/building-type';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';

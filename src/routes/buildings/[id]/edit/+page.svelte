@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { BuildingEditData } from './+page.server';
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import BuildingForm from '../../BuildingForm.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
-	let { data, form }: { data: BuildingEditData; form: ActionData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const building = $derived(data.building);
 	const name = $derived(building.name || building.address);

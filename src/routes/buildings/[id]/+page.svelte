@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { BuildingDetailsData } from './+page.server';
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -11,7 +10,7 @@
 	import DeleteBuildingDialog from './DeleteBuildingDialog.svelte';
 	import FuelStocks from './FuelStocks.svelte';
 
-	let { data, form }: { data: BuildingDetailsData; form: ActionData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const building = $derived(data.building);
 	const name = $derived(building.name || building.address);

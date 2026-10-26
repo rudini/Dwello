@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import { m } from '$lib/paraglide/messages';
-	import type { RegisterApartment } from '$lib/server/building-register';
+	import type { RegisterApartment } from '$lib/types';
 
 	// The Wohnungen the Gebäuderegister knows, to check and complete before saving (#479). A row left out is disabled,
 	// so the form does not send it; what the register lacks is marked at its field and required

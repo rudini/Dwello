@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
-import type { ApartmentStatus } from '$lib/types';
+import type { Json } from '$lib/types';
+import type { ApartmentWithDetails } from '../../../backend/src/api/apartment';
 import { monthlyTotal, toContractHistory, type ContractRow } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -10,27 +11,21 @@ export async function fetchApartment(fetch: typeof globalThis.fetch, id: string)
 	const response = await fetch(`${API}/apartments/${id}`);
 	if (response.status === 404) throw error(404, m.apartments_not_found());
 	if (!response.ok) throw error(response.status, m.apartments_load_failed());
-	const a = await response.json();
+	const a: Json<ApartmentWithDetails> = await response.json();
 	return {
-		id: a.id as string,
-		buildingId: a.buildingId as string,
-		number: a.number as string,
-		floor: a.floor as number,
-		area: a.area as string,
-		rooms: a.rooms as string,
-		status: a.status as ApartmentStatus,
-		currentContractId: (a.currentContractId ?? null) as string | null,
-		nextContractId: (a.nextContractId ?? null) as string | null,
-		nextContractStart: (a.nextContractStart ?? null) as string | null,
-		currentContractEnd: (a.currentContractEnd ?? null) as string | null,
-		lastContractEnd: (a.lastContractEnd ?? null) as string | null,
-		building: a.building as {
-			id: string;
-			name: string;
-			address: string;
-			postalCode: string;
-			city: string;
-		}
+		id: a.id,
+		buildingId: a.buildingId,
+		number: a.number,
+		floor: a.floor,
+		area: a.area,
+		rooms: a.rooms,
+		status: a.status,
+		currentContractId: a.currentContractId ?? null,
+		nextContractId: a.nextContractId ?? null,
+		nextContractStart: a.nextContractStart ?? null,
+		currentContractEnd: a.currentContractEnd ?? null,
+		lastContractEnd: a.lastContractEnd ?? null,
+		building: a.building! // GET /apartments/:id always names it
 	};
 }
 
