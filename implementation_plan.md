@@ -16,7 +16,7 @@ Request: review the agents against «Getting the most out of Opus 5.5» and appl
 
 - [x] G-2 `persona`: «Ablauf» only for steps that differed; «Verwirrung» and «Fehlerrisiken» go into the table or «Beobachtungen»
 - [x] G-3 `daten-pruefer`: no Nits, «Geprüft» in one line, «where you looked»; `slice-review` names no Nit any more
-- [ ] G-1 effort benchmark low vs high: code-reviewer (#233 round 3, 790a), fach-reviewer (#459 B), persona Marco (#233); report `docs/reviews/agent-effort-benchmark.md`
-- [ ] Pin `effort` per agent from the benchmark
+- [x] G-1 effort benchmark low vs high: code-reviewer (#233 round 3, 790a), fach-reviewer (#459 B), persona Marco (#233); report `docs/reviews/agent-effort-benchmark.md`
+- [x] Pin `effort: high` for all four agents (daten-pruefer not measured)
 - [ ] code-reviewer round 1
 - [ ] PR
