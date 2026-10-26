@@ -22,7 +22,7 @@ Sources, in this order:
    ?e jolux:language <http://publications.europa.eu/resource/authority/language/DEU>; jolux:isEmbodiedBy ?m.
    ?m jolux:userFormat <https://fedlex.data.admin.ch/vocabulary/user-format/html>; jolux:isExemplifiedBy ?file. FILTER(?date <= NOW()) } ORDER BY DESC(?date) LIMIT 1'
    ```
-   `eli/cc/27/317_321_377` is the OR; VMWG `eli/cc/1990/835_835_835`, DSG `eli/cc/2022/491`, DSV `eli/cc/2022/568`; `FRA` or `ITA` for French or Italian (there is no English VMWG). In the file an article starts at `id="art_257_b"`; save it in your scratchpad, not in the repository.
+   `eli/cc/27/317_321_377` is the OR; VMWG `eli/cc/1990/835_835_835`, DSG `eli/cc/2022/491`, DSV `eli/cc/2022/568`, FMG `eli/cc/1997/2187_2187_2187`, UWG `eli/cc/1988/223_223_223`; `FRA` or `ITA` for French or Italian (there is no English VMWG). In the file an article starts at `id="art_257_b"`; save it in your scratchpad, not in the repository.
 3. For formulas: recompute them with at least two sample values, including an edge case (zero, a tenant change mid-period, a refund).
 
 Change no file except your report. Write it in German to the path the caller names:
