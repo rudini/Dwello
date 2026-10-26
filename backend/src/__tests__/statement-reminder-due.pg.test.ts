@@ -7,7 +7,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, utilityStatements } from '../db/schema';
+import { documents, utilityStatements, type StoredStatementStatus } from '../db/schema';
 import { deleteConfig, setConfig } from '../services/config.service';
 import { daysAfter, swissToday } from '../services/today';
 import { callApi } from './helpers/auth';
@@ -18,7 +18,7 @@ const today = swissToday();
 const ago = (days: number) => daysAfter(today, -days);
 let number = 0;
 
-async function sent(paymentDeadline: string, balance = '120.00', status = 'sent') {
+async function sent(paymentDeadline: string, balance = '120.00', status: StoredStatementStatus = 'sent') {
 	const [created] = await db
 		.insert(utilityStatements)
 		.values({

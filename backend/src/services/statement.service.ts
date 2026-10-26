@@ -15,9 +15,9 @@ import {
 	buildings,
 	documents,
 	heatingProfiles,
-	type UtilityStatement,
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
+	type StoredStatementStatus,
 	type NewUtilityStatementLineItem,
 	type KeyValues,
 	categories,
@@ -38,6 +38,7 @@ import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
+import type { StatementWithDetails } from '../api/statement';
 
 export interface StatementFilters {
 	search?: string;
@@ -85,53 +86,6 @@ const reminderWaits = (
 	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
 const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId) };
 
-export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
-	nextReminderFrom: string | null;
-	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
-	final: boolean; // a Schlussabrechnung (#448)
-	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
-	// an overdue one: whether a Mahnung is to propose now; null for any other; only in the list (#788)
-	reminderDue?: boolean | null;
-	tenant: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		email: string | null;
-		language?: string;
-		address?: string | null;
-		postalCode?: string | null;
-		city?: string | null;
-	} | null;
-	apartment: { id: string; number: string; floor: number; area: string } | null;
-	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
-	lineItems: UtilityStatementLineItem[];
-	// a berichtigte Abrechnung and the statement it replaces, and the replaced ones of its chain paid on (#120); only
-	// in the detail
-	replaces?: { id: string; statementNumber: string; statementDate: string; totalAdvancePayments: string } | null;
-	replacedBy?: { id: string; statementNumber: string } | null;
-	priorPaidOn?: string[];
-	offsetWith?: { statementNumber: string; amount: string }[]; // «Bereits verrechnet mit NK-…» (#448)
-	carriedFrom?: { id: string; statementNumber: string; balance: string } | null; // the Übertrag (#448); only in the detail
-	editable?: boolean; // what it allows (#788); only in the detail
-	correctable?: boolean;
-	asksPayment?: boolean;
-	superseded?: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
-	advanceChanged?: boolean; // a draft counting another Akonto than the replaced one (#464); only in the detail
-	heatingProfile?: {
-		id: string;
-		name: string;
-		nameDE: string | null;
-		nameFR: string | null;
-		nameIT: string | null;
-		nameEN: string | null;
-		type: string; // with its sources: the PDF of a statement created before #465
-		sourceDE: string | null;
-		sourceFR: string | null;
-		sourceIT: string | null;
-		sourceEN: string | null;
-	} | null;
-}
-
 /**
  * Status filter; 'overdue' is computed as sent with a past payment deadline,
  * 'open' covers all sent statements that are not paid yet (overdue included)
@@ -149,7 +103,8 @@ export function statusCondition(status: string) {
 			or(gte(utilityStatements.paymentDeadline, today), sql`${utilityStatements.paymentDeadline} IS NULL`)
 		);
 	}
-	return eq(utilityStatements.status, status);
+	// a status the list does not know finds nothing
+	return eq(utilityStatements.status, status as StoredStatementStatus);
 }
 
 /**
@@ -771,7 +726,7 @@ export async function datedToday(paymentDeadline: string | null) {
  */
 export async function updateStatementStatus(
 	id: string,
-	status: 'draft' | 'sent' | 'paid' | 'overdue',
+	status: 'draft' | 'sent' | 'paid',
 	additionalData?: {
 		paidDate?: string;
 		paidAmount?: string;
@@ -800,7 +755,7 @@ export async function updateStatementStatus(
 	// claims or pays out every other Saldo
 	const balance = parseFloat(existing.balance);
 	const waived = belowMinimum(balance) && !existing.final;
-	const settled = sentToday && (balance === 0 || waived) && { status: 'settled' };
+	const settled = sentToday && (balance === 0 || waived) && { status: 'settled' as const };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
