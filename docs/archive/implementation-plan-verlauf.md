@@ -3537,3 +3537,12 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Slice review round 1: `docs/reviews/i842-review-1.md` (C-1 Minor fixed: only job starts from the attempt's start, checked on runs 40303722784 and 40239565626)
 - [x] Ä1 measurement: proposal with numbers in #843 (`needs-decision`)
 - [x] PR (pushed after this archive); No scenario: CI report only
+
+## Session: #843 field spread counts a field only with its entity (Ä1)
+
+- [x] Decision recorded in #843 (k = 2, targets kept)
+- [x] `entityFiles` in `tools/arch-baseline/lib.ts` (test in `lib.test.ts`, seen red), used by G1 in `05-knowledge.ts`; the `new-field` warning reads the same CSV
+- [x] Ratchet tightened: field spread 6 / 19 / 60 → 5 / 13 / 37 (`fitness --update`)
+- [x] Docs: Ä1 «Heute» in `utility-tree.md`, `field-spread` row and history in `fitness-functions.md`, Ä1 row in `baseline.md`
+- [x] Slice review round 1: `docs/reviews/i843-review-1.md` (C-1 Minor: a table's only counted field counts 0; named in the `new-field` row of `fitness-functions.md`)
+- [x] PR (pushed after this archive); No scenario: measurement tooling only
