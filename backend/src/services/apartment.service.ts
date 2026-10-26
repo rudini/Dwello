@@ -143,7 +143,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 		.where(whereClause);
 
 	return {
-		apartments: results as ApartmentWithDetails[],
+		apartments: results,
 		total: Number(total)
 	};
 }

@@ -15,5 +15,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] #857: building pages take `PageData` from `./$types`; `FuelStock` from the page data; `AddressHit`, `RegisterApartment`, `RegisterBuilding` out of `src/lib/server/building-register.ts`
 - [x] `backend/src/api/building.ts` (and apartment); services typed against them; BFF mappers with `Json<…>`; `Building`, `BuildingWithStats`, `Apartment` derived
 - [x] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
-- [ ] Slice review (`code-reviewer`), report `docs/reviews/i837c4b-review-1.md`
+- [x] Slice review (`code-reviewer`), report `docs/reviews/i837c4b-review-1.md` (1 Minor, fixed)
+- [ ] Closing round (`code-reviewer`), report `docs/reviews/i837c4b-close-review-1.md`
 - [ ] ADR 0005 section «Zyklus 4b»; archive; PR «Refs #837, #857»
