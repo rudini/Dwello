@@ -111,7 +111,7 @@ export async function testFormula(
 		.catch(() => ({}));
 	return {
 		test: {
-			errors: errors.map((error, i) => backendMessage({ ...errorCodes[i], error }, error)),
+			errors: errors.map((_, i) => backendMessage(errorCodes[i], m.keys_test_failed())),
 			results: results.map(({ apartment, share }) => ({
 				apartment: m.keys_sample_apartment(apartment),
 				share

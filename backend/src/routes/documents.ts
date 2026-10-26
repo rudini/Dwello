@@ -11,8 +11,11 @@ import {
 	listDocuments,
 	uploadDocument
 } from '../services/document.service';
-import { CodedError, errorBody } from '../services/coded-error';
+import { CodedError, errorBody, refusal } from '../services/coded-error';
 import { markDocumentPosted, ReminderError, sendReminder } from '../services/reminder.service';
+
+// a document deleted meanwhile, e.g. in a second tab (#852)
+const notFound = () => refusal('DOCUMENT_NOT_FOUND', 'Document not found');
 import { fileResponse } from './file-response';
 
 export const documentRoutes = new Elysia({ prefix: '/api/v1' })
@@ -60,7 +63,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 		const pdf = await getDocumentPdf(params.id);
 		if (!pdf) {
 			set.status = 404;
-			return { error: 'Document not found' };
+			return notFound();
 		}
 		return fileResponse(set, pdf);
 	})
@@ -68,7 +71,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 		try {
 			if (await deleteDocument(params.id)) return { success: true };
 			set.status = 404;
-			return { error: 'Document not found' };
+			return notFound();
 		} catch (error) {
 			if (!(error instanceof CodedError)) throw error;
 			set.status = 409;
@@ -81,7 +84,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 			const sent = await markDocumentPosted(params.id);
 			if (sent) return sent;
 			set.status = 404;
-			return { error: 'Document not found' };
+			return notFound();
 		} catch (error) {
 			// a reminder remade without the Firmenadresse its payment part needs (#450)
 			if (!(error instanceof CodedError)) throw error;

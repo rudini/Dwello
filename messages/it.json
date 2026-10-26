@@ -475,6 +475,7 @@
 	"backend_heating_profile_not_found": "Il profilo di riscaldamento non è stato trovato. Ricarichi la pagina.",
 	"backend_invoice_not_found": "La fattura non è stata trovata. Ricarichi la pagina.",
 	"backend_statement_period_overlaps": "Il periodo di conteggio scelto si sovrappone a conteggi esistenti di {building} ({periods}). Scelga uno di questi periodi di conteggio o uno che non si sovrapponga a nessuno di essi.",
+	"backend_document_not_found": "Il documento non esiste più. Ricarichi la pagina.",
 	"backend_statement_not_found": "Conteggio non trovato.",
 	"backend_paid_date_invalid": "Inserisca la data di pagamento nel formato GG.MM.AAAA.",
 	"backend_paid_date_in_future": "La data di pagamento è nel futuro. Inserisca il giorno in cui è arrivato il denaro.",

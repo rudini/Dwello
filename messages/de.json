@@ -475,6 +475,7 @@
 	"backend_heating_profile_not_found": "Das Heizprofil wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_invoice_not_found": "Die Rechnung wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_statement_period_overlaps": "Die gewählte Abrechnungsperiode überschneidet sich mit bestehenden Abrechnungen von {building} ({periods}). Wählen Sie eine dieser Abrechnungsperioden oder eine, die keine davon schneidet.",
+	"backend_document_not_found": "Das Dokument gibt es nicht mehr. Laden Sie die Seite neu.",
 	"backend_statement_not_found": "Abrechnung nicht gefunden.",
 	"backend_paid_date_invalid": "Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.",
 	"backend_paid_date_in_future": "Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.",

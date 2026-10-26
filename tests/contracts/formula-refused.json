@@ -1,0 +1,6 @@
+{
+	"error": "Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.",
+	"code": "FORMULA_INVALID",
+	"params": {},
+	"causes": [{ "code": "FORMULA_UNKNOWN_VARIABLE", "params": { "variable": "persons" } }]
+}

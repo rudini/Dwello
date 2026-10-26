@@ -1,0 +1,5 @@
+{
+	"error": "Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.",
+	"code": "CATEGORY_IN_USE_ONE",
+	"params": { "count": 1 }
+}

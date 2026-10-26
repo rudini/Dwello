@@ -55,6 +55,15 @@ Funktionalität: Dokumente eines Mieters
     Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann liegen beim Mieter noch keine Dokumente
 
+  # #852: eine Ablehnung ohne Code zeigt den Satz der Seite, nie den englischen Text des Backends
+  Szenario: Ein inzwischen gelöschtes Dokument löschen
+    Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und das Dokument "Ausweiskopie" von "Lea Frei" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
+    Und der Liegenschaftsverwalter das Löschen bestätigt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument gibt es nicht mehr. Laden Sie die Seite neu."
+
   Szenario: Mieter mit hochgeladenen Dokumenten löschen
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

@@ -32,7 +32,7 @@ type Fetch = typeof globalThis.fetch;
 async function notSaved(response: Response) {
 	const refused = (await response.json().catch(() => ({}))) as BackendError;
 	if (refused.causes) return refusedFields(refused);
-	return { form: refused.code ? backendMessage(refused, '') : m.buildings_fuel_not_saved() };
+	return { form: backendMessage(refused, m.buildings_fuel_not_saved()) };
 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

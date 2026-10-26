@@ -6,6 +6,7 @@ import { actions as editActions } from '../routes/apartments/[id]/edit/+page.ser
 import { monthlyTotal } from '../lib/server/contract-history';
 import { floorLabel, floorOptions, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
+import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import apartmentResponse from '../../tests/contracts/apartment.json';
 
 const API = 'http://localhost:3001/api/v1';
@@ -343,10 +344,12 @@ describe('Neue Wohnung', () => {
 	});
 
 	it('zeigt die Meldung des Backends, wenn die Nummer vergeben ist', async () => {
-		const message = 'Die Wohnungsnummer 4.01 existiert bereits in diesem Gebäude.';
-		const { result } = runAction(newActions.default, '', 409, fields, { error: message });
+		const { result } = runAction(newActions.default, '', 409, fields, numberTaken);
 
-		expect(await result).toMatchObject({ status: 409, data: { errors: { form: message } } });
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { errors: { form: 'Die Wohnungsnummer 101 existiert bereits in diesem Gebäude.' } }
+		});
 	});
 });
 
