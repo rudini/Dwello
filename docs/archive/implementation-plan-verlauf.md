@@ -3547,6 +3547,16 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Slice review round 1: `docs/reviews/i843-review-1.md` (C-1 Minor: a table's only counted field counts 0; named in the `new-field` row of `fitness-functions.md`)
 - [x] PR (pushed after this archive); No scenario: measurement tooling only
 
+## Session: upload limit and reverse proxy (#732)
+
+No scenario: the change touches only the Compose file and docs; the app behaves as before.
+
+- [x] Test first: no commented nginx service in `docker-compose.prod.yml`; `docs/installation.md` names the limit of the `Dockerfile` for another proxy
+- [x] Remove the nginx block from `docker-compose.prod.yml`; `docs/tech-stack.md` names Caddy instead
+- [x] `docs/installation.md`: another proxy lets at least 11 MB through (nginx `client_max_body_size 11m`)
+- [x] ADR 0006 (renumbered after #837 took 0005): global `BODY_SIZE_LIMIT=11M`, 413 page without JavaScript as known limit
+- [x] Slice review round 1: `docs/reviews/732-review-1.md`; English 413 heading → #847
+- [x] Archive the session, PR (`Fixes #732`): pushed after this archive
 ## Session: #837 cycle 1, statements (Ä1)
 
 - [x] Measure before: `fitness` (field spread), `svelte-check` time
@@ -3557,3 +3567,23 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Slice review round 1: `docs/reviews/i837c1-review-1.md`. Fixed: C-1 (Major, edit page `?? ''`, DOM test seen red), C-3 (`replaces` from the backend type), C-5 (ADR refs); C-2 (Major) answered by splitting the cycle: line items, line invoices and documents follow as cycle 1b in the next PR (ADR 0005, #837); C-4 named in ADR 0005
 - [x] Review round 2 on the fixes: `docs/reviews/i837c1-review-2.md`, C-1 to C-5 closed, nothing new
 - [x] PR, Refs #837 (cycle 1b follows), pushed after this archive; No scenario: types only
+
+## Session: #837 cycle 1b, line items and documents (Ä1)
+
+- [x] Main run of #849: one Firefox scenario lost its browser at the first navigation; failed jobs re-run once, green
+- [x] A Line items: `StatementLineItem`, `StatementLineInvoice` derive from the line items of `backend/src/api/statement.ts`; `toLineItem` takes them typed
+- [x] B Documents: `backend/src/api/document.ts` (value lists typed in `schema.ts`), `selectSummaries` returns it, `StatementDocument` derives from it
+- [x] Measured (median 5 → 4, mirrors 52 → 50, value lists 14 → 13, types.ts fields 51 → 40), ADR 0005 «Zyklus 1b», `fitness --update`; fitness first refused `sent|to_send` in 3 files, fixed with `DocumentStatus`
+- [x] Slice review round 1: `docs/reviews/i837c1b-review-1.md`, no Blocker/Major; C-1 (`DocumentFilters.status` typed, cast gone) and C-2 (current values in `fitness-functions.md`) fixed
+- [x] PR, Refs #837, pushed after this archive; No scenario: types only
+
+## Session 2026-10-26: shorter and surer agent reviews
+
+Request: analyse the agent reviews and apply what the product owner chose (1 Fedlex access, 2 shorter domain reviews, 3 no persona Nits, 5 re-review format; 4 as an issue). No scenario: changes only agent instructions, no app behaviour.
+
+- [x] `fach-reviewer`: fetch the law in force through the Fedlex SPARQL endpoint; wording as a `key | de | fr | it | en` table; plan points in «Geprüft»
+- [x] `persona`: no Nits in the table, they go under «Beobachtungen»
+- [x] `code-reviewer`, `fach-reviewer`: a re-review lists fixed IDs in one line «Geschlossen: …»
+- [x] Issue #852 for the mechanical Majors (point 4)
+- [x] code-reviewer round 1 (`docs/reviews/agents-review-1.md`): no Blocker/Major; C-1 (Minor, FMG and UWG ids) fixed
+- [x] PR: pushed after this archive

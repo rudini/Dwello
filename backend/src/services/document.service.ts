@@ -5,16 +5,17 @@
 
 import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, rentalContracts, tenants, utilityStatements, type NewDocument } from '../db/schema';
+import { documents, rentalContracts, tenants, utilityStatements, type DocumentStatus, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
 import { laterContract } from './later-contract';
 import { tenantExists } from './tenant.service';
 import { swissToday } from './today';
+import type { DocumentSummary } from '../api/document';
 
 export interface DocumentFilters {
 	tenantId?: string;
 	statementId?: string;
-	status?: string;
+	status?: DocumentStatus;
 }
 
 // A reminder still to send whose statement is replaced or paid since: it no longer goes out, without a status of its
@@ -57,7 +58,7 @@ const deliveryErrorCode = (deliveryError: string | null) =>
 		? null
 		: (Object.entries(DELIVERY_ERRORS).find(([, text]) => text === deliveryError)?.[0] ?? 'MAIL_DELIVERY_FAILED');
 
-async function selectSummaries(where?: SQL) {
+async function selectSummaries(where?: SQL): Promise<DocumentSummary[]> {
 	const rows = await db
 		.select(summary)
 		.from(documents)
@@ -132,7 +133,7 @@ const KINDS = [
 	{ mimeType: 'application/pdf', start: '%PDF-' },
 	{ mimeType: 'image/jpeg', start: '\xff\xd8\xff' },
 	{ mimeType: 'image/png', start: '\x89PNG\r\n\x1a\n' }
-];
+] as const;
 
 const MAX_NAME = 255; // the columns title and file_name
 const MAX_MEGABYTES = 10; // 10 × 1024 × 1024 bytes, as Windows counts a megabyte

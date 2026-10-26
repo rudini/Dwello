@@ -1,0 +1,15 @@
+# Review #732 (Upload-Grenze, Reverse Proxy), Runde 1
+
+Bereich: `git diff 390046f e09ffa3` (Worktree `review-732-cr`, detached auf e09ffa3)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | docs/architecture/adr/0005-eine-grenze-fuer-alle-anfragen.md:10, :29 | Die ADR sagt, ohne JavaScript antworte «der Server mit seiner eigenen Seite «413», bevor Dwello sie sieht», und der Vermieter sehe «eine technische Seite statt einer Meldung von Dwello». adapter-node prüft die Grenze aber nicht vor SvelteKit. Es gibt sie an `getRequest` weiter (`node_modules/@sveltejs/adapter-node/files/handler.js:103` `bodySizeLimit: body_size_limit`), und `@sveltejs/kit/src/exports/node/index.js:41-49` erzeugt daraus einen `SvelteKitError(413, 'Payload Too Large', …)` im Datenstrom des Bodys. Die Anfrage durchläuft also `hooks.server.ts`, und die Action `upload` (`src/routes/tenants/[id]/+page.server.ts:70`) scheitert erst bei `await request.formData()`. Angezeigt wird dann Dwellos `+error.svelte` mit Status 413. Ihre Überschrift ist SvelteKits englisches «Payload Too Large», denn `ownWords` (`src/routes/+error.svelte:11`) erfasst diesen Text nicht und `hooks.server.ts` hat kein `handleError`. Die Entscheidung bleibt gültig, nur ihre Beschreibung stimmt nicht: richtig wäre «Dwellos Fehlerseite mit dem englischen Text ‹Payload Too Large›». Ob dieser englische Text ein eigenes Issue braucht (vgl. #519), ist offen; er bestand schon vor dieser Änderung. |
+
+Geprüft: Testfall in `compose-prod.test.ts` (auf 390046f rot wegen des nginx-Blocks; liest die Grenze aus dem `Dockerfile`), Entfernen des Blocks, `installation.md` §7 (Caddy bleibt, 11 MB, `client_max_body_size 11m;`), `tech-stack.md` (keine nginx-Verweise mehr ausserhalb von `docs/archive`/`docs/reviews`), Aussagen der ADR zur Grössenprüfung im Browser (`src/lib/invoice-upload.ts:87`, auch über `fileRefusal` in `InvoiceBeleg.svelte`; `TenantDocumentUpload.svelte:58`; Meldung `backend_document_too_large`), `BODY_SIZE_LIMIT=11M` in `Dockerfile:52`, `playwright.config.ts:44`, `persona-stack.sh:43`, Format wie ADR 0004, Ponytail (kein überflüssiger Code), `No scenario` passt (App-Verhalten unverändert).
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `cd backend && bun test src/__tests__/compose-prod.test.ts` (Rotlauf vor der Änderung nur durch Lesen bestätigt), `bun run lint`, `cd backend && bun run type-check`, `bunx vitest run src/__tests__/open-work.test.ts`, Prettier auf neuen Dateien und eigenen Zeilen.
+- C-1: Den Ablauf von adapter-node/SvelteKit habe ich nur aus Zeilen erschlossen, die ein grep im `node_modules` von `/home/user/Dwello` fand (`handler.js:103`, `exports/node/index.js:41-86`; installierte Version dort, nicht im Worktree). Der Lesezugriff auf `node_modules` des Worktrees war gesperrt; die genaue Darstellung im Browser habe ich nicht gesehen.
+- Ob eine Rechnung ohne JavaScript überhaupt hochgeladen werden kann (der Satz der ADR zum Titel betrifft nur das Mieterdokument), nicht geprüft.

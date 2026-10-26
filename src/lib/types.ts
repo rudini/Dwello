@@ -1,4 +1,5 @@
 import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
+import type { DocumentSummary } from '../../backend/src/api/document';
 import type { TenantResponse } from '../../backend/src/services/tenant.service';
 import type { LatestKey } from './invoice';
 
@@ -287,43 +288,30 @@ export type { StatementStatus };
 /** A statement an invoice is in: its number and status, to link it (#455) */
 export type BilledStatement = { id: string; statementNumber: string; status: StatementStatus };
 
-export interface StatementLineItem {
-	id: string;
-	categoryId: string;
+/** A statement as the backend answers it (#837, ADR 0005): the frontend types below take the fields it passes on */
+type ApiStatement = Json<StatementResponse>;
+/** Amounts the backend sends as decimal strings, as the BFF hands them on: numbers */
+type Amounts<T> = { [K in keyof T]: T[K] extends string ? number : T[K] extends string | null ? number | null : T[K] };
+
+/** A position as the backend stores it; the BFF hands on its amounts as numbers */
+type ApiLineItem = ApiStatement['lineItems'][number];
+
+export interface StatementLineItem
+	extends Pick<ApiLineItem, 'id' | 'categoryId' | 'distributionKeyId'>,
+		// Wohnungsanteil: the apartment's part of the total by the key; Zeitanteil 0–1
+		Amounts<Pick<ApiLineItem, 'totalAmount' | 'tenantShare' | 'apartmentShare' | 'periodShare'>> {
 	categoryName: string;
-	distributionKeyId?: string;
 	distributionKeyName?: string;
-	totalAmount: number;
-	tenantShare: number;
 	percentage: number;
-	apartmentShare: number | null; // Wohnungsanteil: the apartment's part of the total by the key
-	periodShare: number | null; // Zeitanteil, 0–1
 	shareDays: { days: number; total: number } | null; // the Zeitanteil as days, where it is one (#208)
 	byProfile?: boolean; // the Zeitanteil is the heating profile's share
 	invoices: StatementLineInvoice[]; // what the position billed (#96); none before
 }
 
 /** An invoice a position billed, or the change of the Tankbestand; with its days where its invoices bill different days (#226) */
-export interface StatementLineInvoice {
-	id: string;
-	description: string;
-	amount: number;
-	start: string;
-	end: string;
-	fuelStock?: true;
-	part: {
-		days: number;
-		total: number;
-		noPeriod?: true;
-		whole?: { start: string; end: string; amount: number };
-		profile?: { percent: number }; // a heating invoice by the Heizprofil's months in its days (#71)
-	} | null;
-}
-
-/** A statement as the backend answers it (#837, ADR 0005): the frontend types below take the fields it passes on */
-type ApiStatement = Json<StatementResponse>;
-/** Amounts the backend sends as decimal strings, as the BFF hands them on: numbers */
-type Amounts<T> = { [K in keyof T]: T[K] extends string ? number : T[K] extends string | null ? number | null : T[K] };
+export type StatementLineInvoice = NonNullable<ApiLineItem['invoices']>[number] & {
+	part: NonNullable<ApiLineItem['invoiceParts']>[number] | null;
+};
 
 export interface Statement
 	extends Pick<ApiStatement, 'id' | 'statementNumber' | 'tenantId' | 'apartmentId' | 'periodStart' | 'periodEnd' | 'statementDate' | 'rentalDays' | 'status' | 'paymentDeadline'>,
@@ -385,25 +373,9 @@ export interface StatementsListData {
 	};
 }
 
-// Stored letters such as payment reminders (PDF lives in the backend)
-export interface StatementDocument {
-	id: string;
-	tenantId: string;
-	statementId: string | null;
-	type: 'reminder' | 'statement' | 'upload'; // an upload has no channel and no Versandstatus
-	reminderLevel: number | null;
-	title: string;
-	fileName: string;
-	mimeType: 'application/pdf' | 'image/jpeg' | 'image/png';
-	channel: 'email' | 'letter' | null;
-	status: 'sent' | 'to_send' | null;
-	sentAt: string | null;
-	deliveryError: string | null;
-	deliveryErrorCode?: string | null;
-	paymentDeadline?: string | null; // the Zahlungsfrist a reminder prints
-	recipient?: string | null; // the e-mail address it went to (#449)
-	notToSend?: 'paid' | 'replaced' | null; // a reminder to send whose statement is paid or replaced since (#449)
-	createdAt: string;
-	tenantName: string;
-	statementNumber: string | null;
-}
+// Stored letters such as payment reminders and uploaded files, as GET /documents lists them (#837, ADR 0005); an upload
+// has no channel and no Versandstatus
+type ApiDocument = Json<DocumentSummary>;
+// optional where tests build a document; the backend always sends them
+type OptionalDocumentFields = 'deliveryErrorCode' | 'paymentDeadline' | 'recipient' | 'notToSend';
+export type StatementDocument = Omit<ApiDocument, OptionalDocumentFields> & Partial<Pick<ApiDocument, OptionalDocumentFields>>;

@@ -11,12 +11,16 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 type BackendStatement = Record<string, any>;
 
-const toLineItem = (item: BackendStatement, profilePercent?: number): StatementLineItem => ({
+// a position as the backend stores it (backend/src/api/statement.ts)
+type LineItem = Json<StatementResponse>['lineItems'][number];
+
+const toLineItem = (item: LineItem, profilePercent?: number): StatementLineItem => ({
 	id: item.id,
 	categoryId: item.categoryId,
-	categoryName: item.categoryName || item.description || m.common_unknown(),
+	// the backend sends no names; loadStatement names category and key in the UI language
+	categoryName: item.description || m.common_unknown(),
 	distributionKeyId: item.distributionKeyId,
-	distributionKeyName: item.distributionKeyName || '',
+	distributionKeyName: '',
 	totalAmount: Number(item.totalAmount),
 	tenantShare: Number(item.tenantShare),
 	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0,
@@ -25,18 +29,18 @@ const toLineItem = (item: BackendStatement, profilePercent?: number): StatementL
 });
 
 // Shared by the heating profile: its Zeitanteil is the profile's percent the statement stored (#209), not days
-const byProfile = (item: BackendStatement, percent?: number) =>
+const byProfile = (item: LineItem, percent?: number) =>
 	percent != null && !item.billedDays && Math.abs(Number(item.periodShare) * 100 - percent) < 0.005;
 
 const amountOrNull = (value: unknown) => (value == null ? null : Number(value));
 
 // Wohnungsanteil, Zeitanteil (as days where it is one) and the invoices the position billed, in the order of
 // invoiceParts, which hold each one's days where they differ (#96, #104)
-const sharesOf = (item: BackendStatement) => ({
+const sharesOf = (item: LineItem) => ({
 	apartmentShare: amountOrNull(item.apartmentShare),
 	periodShare: amountOrNull(item.periodShare),
 	shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : null,
-	invoices: (item.invoices ?? []).map((invoice: BackendStatement, index: number) => ({
+	invoices: (item.invoices ?? []).map((invoice, index) => ({
 		...invoice,
 		part: item.invoiceParts?.[index] ?? null
 	}))
@@ -142,7 +146,7 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		reminderWaitsUntil: data.reminderWaitsUntil ?? null,
 		deadlinePassed: data.deadlinePassed === true,
 		advanceChanged: data.advanceChanged === true,
-		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
+		lineItems: (data.lineItems || []).map((item) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		)
 	};

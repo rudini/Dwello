@@ -56,6 +56,27 @@ Gemessen mit `bun run fitness` und `tools/arch-baseline/05-knowledge.ts`, vorher
 
 Median und P90 bewegen sich nicht. Die meisten Abrechnungsfelder stehen in mehr Dateien als `types.ts`, vor allem in Backend-Services (`periodEnd` in 36 Dateien).
 
+## Zyklus 1b: Positionen und Dokumente
+
+| Schritt | Commit | Absicherung |
+|---|---|---|
+| 1 `StatementLineItem` und `StatementLineInvoice` aus den Positionen von `backend/src/api/statement.ts` | 8aeaa9f5 | `svelte-check` 0 Fehler; 209 Tests der Abrechnungsseiten und des Mappers; Lint |
+| 2 `backend/src/api/document.ts`, Wertelisten der Dokumente typisiert, `StatementDocument` daraus | 8fa3a5fd | Backend-Typprüfung; 173 Backend-Tests (Dokumente, Mahnungen, Datenexport, API-Verträge); 101 Frontend-Tests zu Dokumenten |
+| 3 `DocumentStatus` einmal im Schema, `fitness --update` | 6a46352a | `fitness` ohne Fehler (vorher: Werteliste `sent\|to_send` in 3 Dateien) |
+
+- **Namen, die nie ankamen:** Der Mapper der Positionen las `categoryName` und `distributionKeyName`, die das Backend nie sendet (`tests/contracts/statement.json`). Er nimmt jetzt direkt die Beschreibung und einen leeren Schlüsselnamen, wie es der Rückfall vorher ergab; `loadStatement` benennt beide wie bisher in der Sprache der Oberfläche.
+- **Typisierte Wertelisten der Dokumente** im Schema: `DocumentType`, `DocumentMimeType`, `DocumentStatus`; der Kanal nimmt `CorrespondenceChannel`.
+
+| Messwert | Nach 1a | Nach 1b |
+|---|---|---|
+| Feldstreuung Median / P90 / Max | 5 / 13 / 36 | **4** / 13 / 36 |
+| Entity-Spiegel | 52 | **50** |
+| Wertelisten über Schichten | 14 | **13** |
+| Felder, die `src/lib/types.ts` deklariert | 51 | **40** |
+| `svelte-check` | 4290 Dateien, 36 s | 4291 Dateien, 35 s |
+
+Der Median erreicht damit das Ziel von Ä1 (≤ 4); P90 liegt mit 13 weiter über 8.
+
 ## Tradeoffs und verbleibende Risiken
 
 - **Zwei Stellen im Backend:** Die Form steht im Typmodul und in der Abfrage des Service. Der Rückgabetyp verbindet beide nur zum Teil: Ein Feld, das die Abfrage zusätzlich liefert, bleibt dem Typ unbekannt, bis jemand es dort ergänzt (so fehlten bisher `tenant.correspondenceChannel` und `tenant.country`).
@@ -65,4 +86,4 @@ Median und P90 bewegen sich nicht. Die meisten Abrechnungsfelder stehen in mehr 
 
 ## Nächste Zyklen
 
-Zyklus 1b (Positionen, Rechnungen einer Position, Dokumente), dann Mietverträge, Rechnungen und der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
+Mietverträge, dann Rechnungen und der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.

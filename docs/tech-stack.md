@@ -325,7 +325,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 2. **backend** (ElysiaJS on Bun, port 3001, `backend/Dockerfile`)
 3. **postgres** (`postgres:16-alpine`)
 4. **ollama** (LLM service; not needed with an external provider)
-5. **nginx** (reverse proxy, TLS termination): commented out, optional
+
+A reverse proxy for HTTPS (Caddy) runs outside the Compose file (`docs/installation.md`, section 7).
 
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
@@ -499,7 +500,7 @@ None of these targets is measured yet (see `docs/architecture/utility-tree.md`).
 - **CORS:** backend allows `CORS_ORIGIN` only
 - **SQL Injection:** parameterized queries via Drizzle ORM
 - **XSS:** Svelte output encoding, HTTPOnly cookies
-- **TLS:** to be terminated by a reverse proxy (nginx in `docker-compose.prod.yml` is commented out)
+- **TLS:** terminated by a reverse proxy in front of the web app (Caddy, `docs/installation.md`, section 7)
 
 ---
 

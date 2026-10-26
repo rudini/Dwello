@@ -98,6 +98,14 @@ describe('Erreichbarkeit einer Installation', () => {
 	it('nutzt eine feste Version der lokalen KI', () => {
 		expect(compose).toMatch(/image: ollama\/ollama:\d+\.\d+\.\d+\n/);
 	});
+
+	// #732: the proxy in front must let the upload limit of the web app through; nginx refuses more than 1 MB by default
+	it('nennt für einen anderen Reverse Proxy die Grenze der Web-App, statt einen auskommentierten nginx anzubieten', () => {
+		const limit = readFileSync(join(root, 'Dockerfile'), 'utf8').match(/BODY_SIZE_LIMIT=(\d+)M/)?.[1];
+		const installation = readFileSync(join(root, 'docs/installation.md'), 'utf8');
+		expect(compose).not.toMatch(/nginx/i);
+		expect(installation).toContain(`client_max_body_size ${limit}m`);
+	});
 });
 
 // The demo (deploy/demo) adds to docker-compose.prod.yml; since #577 Postgres reads its password from the key volume
