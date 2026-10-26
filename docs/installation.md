@@ -56,7 +56,7 @@ docker compose -f docker-compose.prod.yml up -d
 docker logs dwello-backend
 ```
 
-The first start builds Dwello, which takes several minutes. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router.
+The first start builds Dwello, which takes several minutes. Only the web app (port 3000) is reachable from outside the containers; the backend, the database and the AI stay inside Docker (#719).
 
 The log of the backend shows the **Einrichtungscode** (setup code), e.g. `[setup] Einrichtungscode: K7QF-2MXD`. Open `http://localhost:3000`: Dwello shows «Dwello einrichten». The landlord enters the code, their e-mail address and a password twice (at least 8 characters, best a long one used nowhere else), chooses «Lokale KI auf diesem Server» or «Später entscheiden» (then no KI reads invoices and no model is downloaded until a KI is chosen under «Einstellungen» › «KI», section 6), and is then signed in. Only who knows the code can set Dwello up; a new code is made on each start until the account exists, and 5 wrong codes lock the setup for 15 minutes.
 
@@ -133,7 +133,7 @@ Over plain `http` the password and every page cross the network unencrypted, and
 
    and remove `COOKIE_SECURE=false`.
 4. With Google (section 3): add `https://dwello.example.ch/auth/callback` as redirect URI.
-5. `docker-compose.prod.yml` also publishes the backend (3001), the database (5432) and the AI (11434). Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
+5. `docker-compose.prod.yml` publishes only the web app (3000), for Caddy. Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
 
 Without HTTPS, only inside your home network (not recommended: the password and every page cross the network unencrypted, and the sign-in page says so), skip Caddy and set in `.env` the address the other devices open, e.g. `homeserver.local`:
 
@@ -146,3 +146,42 @@ CORS_ORIGIN=http://homeserver.local:3000
 and keep `COOKIE_SECURE=false`. Dwello accepts the sign-in only at the address in `PUBLIC_APP_URL`.
 
 For a home server that should stay out of the internet, Caddy can get the certificate through the DNS of the domain instead (see the Caddy documentation, «DNS challenge»); access from outside then goes through a VPN such as Tailscale.
+
+## 8. Security
+
+### End every session at once
+
+After a lost or stolen device, or when someone should no longer use Dwello, end every sign-in at once: give the installation a new session key. Everyone, the landlord included, then signs in again.
+
+```bash
+openssl rand -hex 32   # a new key
+```
+
+In `.env`, set `JWT_SECRET=` to that key (replace the line if there is one), then:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --force-recreate
+```
+
+Removing an address from `ALLOWED_EMAILS` (then `docker compose -f docker-compose.prod.yml up -d`, so the web app reads the new list) ends its access without this: only the web app reaches the backend, and it checks the list on every request (#747).
+
+### Installations from before #577: the database password
+
+A database first started before #577 may still use the old default password `dwello`. Check it:
+
+```bash
+docker compose -f docker-compose.prod.yml exec backend cat /run/dwello/db_password; echo
+```
+
+If it prints `dwello`, give the database a new password and keep it in `.env`:
+
+```bash
+new=$(openssl rand -hex 24); echo "$new"   # the new password
+docker compose -f docker-compose.prod.yml exec postgres psql -U dwello -d dwello -c "ALTER USER dwello PASSWORD '$new'"
+```
+
+In `.env`, set `POSTGRES_PASSWORD=` to that password (replace the line if there is one), then:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --force-recreate
+```

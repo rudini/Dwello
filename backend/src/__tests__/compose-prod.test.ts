@@ -83,6 +83,23 @@ describe('KI einer Installation mit docker-compose.prod.yml', () => {
 	});
 });
 
+// #719, #753, #747: only the web app is reachable from outside; Docker's published ports bypass the host firewall
+describe('Erreichbarkeit einer Installation', () => {
+	const services = [...compose.matchAll(/^ {2}(\w[\w-]*):\n((?: {4}.*\n|\s*\n)*)/gm)].map(([, name, body]) => ({
+		name,
+		ports: /^ {4}ports:/m.test(body)
+	}));
+
+	it('veröffentlicht nur den Port der Web-App', () => {
+		expect(services.map(({ name }) => name)).toEqual(expect.arrayContaining(['frontend', 'backend', 'postgres', 'ollama']));
+		expect(services.filter(({ ports }) => ports).map(({ name }) => name)).toEqual(['frontend']);
+	});
+
+	it('nutzt eine feste Version der lokalen KI', () => {
+		expect(compose).toMatch(/image: ollama\/ollama:\d+\.\d+\.\d+\n/);
+	});
+});
+
 // The demo (deploy/demo) adds to docker-compose.prod.yml; since #577 Postgres reads its password from the key volume
 describe('Demo mit deploy/demo/docker-compose.yml', () => {
 	const demo = readFileSync(join(root, 'deploy/demo/docker-compose.yml'), 'utf8');
