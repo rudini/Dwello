@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
-	import { localToday } from '$lib/contract-status';
 	import { formatDate } from '$lib/utils/format';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -9,9 +8,13 @@
 
 	// #459 (#332): a former tenant 10 years after the end of the year of his last event (Art. 958f Abs. 1, Art. 127 OR);
 	// before that day the page names it. TODO(fachlich prüfen, #623): «Mieter anonymisieren» has no glossary row yet
-	let { from, name, error }: { from: string; name: string; error?: string } = $props();
-
-	const allowed = $derived(from <= localToday());
+	// allowed: that day has come, the backend says by the Swiss day (#815)
+	let {
+		from,
+		allowed,
+		name,
+		error
+	}: { from: string; allowed: boolean; name: string; error?: string } = $props();
 	// the year of the last event: the first day is 1 January 11 years later
 	const year = $derived(Number(from.slice(0, 4)) - 11);
 	let confirming = $state(false);

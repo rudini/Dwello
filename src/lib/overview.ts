@@ -6,7 +6,6 @@ import { m } from '$lib/paraglide/messages';
 
 /** What the overview knows: the dashboard counts plus the statements, letters and contracts with a date ahead */
 export interface OverviewInput {
-	today: string;
 	portfolio: {
 		totalBuildings: number;
 		totalApartments: number;
@@ -22,8 +21,6 @@ export interface OverviewInput {
 		paymentDeadline: string;
 		reminderDue?: boolean | null;
 	}[];
-	// the setting: Zahlungsfrist in days (#87)
-	paymentDeadlineDays: number;
 	lettersToSend: number;
 	// per building the parts of ended Abrechnungsperioden without a statement, the latest first (#211)
 	missingStatements?: { building: string; buildingId: string; periods: { start: string; end: string }[] }[];
@@ -41,7 +38,6 @@ export interface OverviewInput {
 		fuelStock: boolean; // the Tankbestand changed since
 		olderThanFiveYears: boolean; // the period ended more than five years ago, by the Swiss day (#788)
 	}[];
-	endingContracts: { id: string; tenantName: string; endDate: string }[];
 	// moved out with a draft statement, still at the building's address (A-5, #114)
 	oldAddresses?: { tenantId: string; tenantName: string }[];
 	// ended by notice, still running and without a following contract (A-4)
@@ -335,12 +331,6 @@ export interface Deadline {
 	href: string;
 }
 
-// How far ahead the overview looks at contract ends: a UX choice (#64); payments within the Zahlungsfrist (#87)
-const CONTRACT_END_WINDOW_DAYS = 60;
-
-const daysFrom = (today: string, date: string) =>
-	Math.round((Date.parse(date.slice(0, 10)) - Date.parse(today)) / 86_400_000);
-
 function when(days: number) {
 	if (days < 0)
 		return (-days === 1 ? m.dashboard_passed_one : m.dashboard_passed_many)({ days: -days });
@@ -351,33 +341,13 @@ function when(days: number) {
 			: m.dashboard_in_days({ days });
 }
 
-/** Payment deadlines due soon or passed, and contracts ending soon, earliest first */
-export function overviewDeadlines({
-	today,
-	dueStatements,
-	endingContracts,
-	paymentDeadlineDays
-}: OverviewInput): Deadline[] {
-	const payments = dueStatements.map((s) => ({
-		id: s.id,
-		kind: 'Zahlungsfrist' as const,
-		name: s.tenantName,
-		date: s.paymentDeadline,
-		days: daysFrom(today, s.paymentDeadline),
-		href: `/statements/${s.id}`
+/** A deadline the backend lists for the overview, with its days from today (#815) */
+export type BackendDeadline = Omit<Deadline, 'when' | 'href'>;
+
+/** The backend's payment deadlines due soon or passed and contracts ending soon, in its order, worded and linked */
+export const overviewDeadlines = (deadlines: BackendDeadline[]): Deadline[] =>
+	deadlines.map((d) => ({
+		...d,
+		when: when(d.days),
+		href: d.kind === 'Zahlungsfrist' ? `/statements/${d.id}` : `/contracts/${d.id}`
 	}));
-	const ends = endingContracts.map((c) => ({
-		id: c.id,
-		kind: 'Vertragsende' as const,
-		name: c.tenantName,
-		date: c.endDate,
-		days: daysFrom(today, c.endDate),
-		href: `/contracts/${c.id}`
-	}));
-	return [
-		...payments.filter((d) => d.days <= paymentDeadlineDays),
-		...ends.filter((d) => d.days >= 0 && d.days <= CONTRACT_END_WINDOW_DAYS)
-	]
-		.sort((a, b) => a.days - b.days)
-		.map((d) => ({ ...d, when: when(d.days) }));
-}

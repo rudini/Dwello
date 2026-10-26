@@ -119,6 +119,9 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil C1: was der Saldo einer Abrechnung verlangt (`unpaid`, `claimed`, `noPayment`, `waived`, `carried`, `reminderWaitsUntil`, `deadlinePassed`, `advanceChanged`), sagt das Backend (`statement-payment.ts`); Correction, PaymentPanel, ResetPaymentDialog und StatusActions zeigen es nur | Ausnahmen 19 → 9; Anzeige 43 → 46 |
 | 25.10.2026 | #815 Teil C2: «Bezahlt am» nicht in der Zukunft ist eine Vorprüfung mit `PAID_DATE_IN_FUTURE`; die zwei Vorgaben «Bezahlt am» = heute sind Feldvorgaben (Anzeige) | Ausnahmen 9 → 6; Vorprüfungen 10 → 11; Anzeige 46 → 48 |
 | 25.10.2026 | #815 Teil C3: ob die Abrechnungsperiode noch läuft, sagt das Backend (`GET /statements/check-period`); der Lauf fragt es für jedes Periodenende | Ausnahmen 6 → 4 (nur noch Teil D) |
+| 25.10.2026 | #815 Teil D1: welche Fristen die Übersicht nennt und in wie vielen Tagen, sagt das Backend (`deadlines` von `GET /dashboard`); die Übersicht fasst sie nur in Worte | Ausnahmen 4 → 1 |
+| 25.10.2026 | #815 Teil D2: ob ein Mieter anonymisiert werden kann, sagt das Backend (`anonymisable` von `GET /tenants/:id`) | Ausnahmen 1 → 0 |
+| 25.10.2026 | #815 Teil D3: der Check sieht auch `===`/`!==` gegen heute; der einzige neue Treffer, die Meldung «endet heute» der Mietvertragsseite, kommt vom Backend (`endsToday` von `GET /contracts/:id`). Damit ist die Ausnahmeliste des Frontends leer (#815 erledigt) | Ausnahmen 0; BFF-Entscheide 8 (keine neuen) |
 | 25.10.2026 | #812: die Daten des Hauptmenüs liegen bei den Komponenten, die sie zeigen (`src/lib/navigation.ts` → `src/lib/ui/navigation.ts`) | Zyklen 1 → 0 (Ausnahme `fe:lib/navigation fe:ui` entfernt, `exceptions.moduleCycles` ist leer); die übrigen Werte unverändert |
 
 ## 7. Werkzeugwahl

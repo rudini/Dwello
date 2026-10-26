@@ -16,6 +16,7 @@ import { loadModel } from '../services/ki-model.service';
 import { resetSetupAttempts } from '../services/setup.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { app } from '../app';
+import { daysAfter, swissToday } from '../services/today';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
@@ -360,6 +361,8 @@ describe('API-Verträge des Frontends', () => {
 		const noticed = await createRental(`${token}-noticed`, { startDate: '2020-04-01', endDate: '2099-03-31', monthlyAdvancePayment: '0' });
 		const expired = await createRental(`${token}-expired`, { startDate: '2020-04-01', endDate: '2025-12-31', monthlyAdvancePayment: '0' });
 		const former = await createRental(`${token}-former-tenant`, { startDate: '2020-04-01', endDate: '2025-03-31', monthlyAdvancePayment: '0' });
+		// #815: a contract ending soon, so a deadline is compared too
+		const ending = await createRental(`${token}-ending`, { startDate: '2020-04-01', endDate: daysAfter(swissToday(), 10), monthlyAdvancePayment: '0' });
 		try {
 			await db.update(rentalContracts).set({ terminated: true }).where(inArray(rentalContracts.id, [noticed.contract, former.contract]));
 			await db.insert(documents).values({ tenantId: former.tenant, type: 'upload', title: 'Ausweis', fileName: 'a.pdf', content: 'JVBERi0=', createdAt: new Date('2024-06-10T09:00:00.000Z') });
@@ -371,7 +374,7 @@ describe('API-Verträge des Frontends', () => {
 		} finally {
 			await db.delete(documents).where(eq(documents.tenantId, former.tenant));
 			await db.delete(utilityStatements).where(eq(utilityStatements.tenantId, former.tenant));
-			for (const created of [noticed, expired, former]) await created.remove();
+			for (const created of [noticed, expired, former, ending]) await created.remove();
 		}
 	});
 

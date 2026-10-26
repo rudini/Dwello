@@ -11,6 +11,7 @@ import { createApartment, deleteApartment } from '../services/apartment.service'
 import { createDocument } from '../services/document.service';
 import { createContract } from '../services/contract.service';
 import { createTenant } from '../services/tenant.service';
+import { daysAfter, swissToday } from '../services/today';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
@@ -155,5 +156,43 @@ describe('Aufgaben der Übersicht zu Mietverträgen', () => {
 
 		const named = (await tasks()).missingStatements.map((b) => b.buildingId).filter((id) => [later.building, earlier.building].includes(id!));
 		expect(named).toEqual([earlier.building, later.building]);
+	});
+});
+
+// #815: the overview's deadlines, decided in the backend by the Swiss day
+describe('Fristen der Übersicht aus dem Backend', () => {
+	type Deadline = { id: string; kind: string; name: string; date: string; days: number };
+	const deadlines = async () =>
+		((await (await callApi('/api/v1/dashboard')).json()) as { deadlines: Deadline[] }).deadlines;
+
+	it('nennt ein nahes Vertragsende und eine abgelaufene Zahlungsfrist mit den Tagen ab heute, eine Kündigung nicht', async () => {
+		const ending = await contractWith(daysAfter(swissToday(), 10), { terminated: false, movedOut: false });
+		const noticed = await contractWith(daysAfter(swissToday(), 10));
+		const owing = await contractWith('2099-03-31', { terminated: false, movedOut: false });
+		await draft(owing, '2024-01-01');
+		await db
+			.update(utilityStatements)
+			.set({ status: 'sent', paymentDeadline: daysAfter(swissToday(), -3) })
+			.where(eq(utilityStatements.contractId, owing.contract));
+
+		const all = await deadlines();
+		expect(all.find((d) => d.id === ending.contract)).toMatchObject({ kind: 'Vertragsende', days: 10 });
+		expect(all.find((d) => d.id === noticed.contract)).toBeUndefined();
+		// #605: an open statement is read once, overdue and sent together
+		expect(all.filter((d) => d.kind === 'Zahlungsfrist' && d.date === daysAfter(swissToday(), -3))).toEqual([
+			expect.objectContaining({ days: -3 })
+		]);
+	});
+
+	// review K-6: a contract given notice with a next tenant has no task, so it keeps its deadline
+	it('nennt das Vertragsende einer Kündigung mit späterem Mietvertrag der Wohnung', async () => {
+		const end = daysAfter(swissToday(), 20);
+		const noticed = await contractWith(end);
+		const successor = await createContract({ apartmentId: noticed.apartment, tenantId: noticed.tenant, baseRent: '900', monthlyAdvancePayment: '100', startDate: daysAfter(end, 1) });
+		try {
+			expect((await deadlines()).find((d) => d.id === noticed.contract)).toMatchObject({ kind: 'Vertragsende', days: 20 });
+		} finally {
+			await db.delete(rentalContracts).where(eq(rentalContracts.id, successor.id)); // review i815d C-2
+		}
 	});
 });

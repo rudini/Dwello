@@ -3,7 +3,8 @@ import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { floorLabel, occupancyParts, statusLabels, statusText } from '$lib/apartment';
 import { contractPeriod, statusBadges } from '$lib/contract-status';
 import { localName } from '$lib/names';
-import { overviewDeadlines, overviewTasks } from '$lib/overview';
+import { overviewDeadlines, overviewTasks, type BackendDeadline } from '$lib/overview';
+import dashboard from '../../tests/contracts/dashboard.json';
 import { parseBuildingForm } from '$lib/server/building-form';
 import { refusedFields } from '$lib/backend-error';
 import { buildingTypeLabel } from '$lib/building-type';
@@ -132,14 +133,11 @@ describe('Übersicht in der gewählten Sprache', () => {
 		reletApartments: 0
 	};
 	const input = {
-		today: '2026-10-10',
 		portfolio,
 		statementCounts: { draft: 1, toSend: 1, sent: 0, paid: 0, settled: 0, overdue: 0 },
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,
-		endingContracts: [],
 		noticedContracts: [],
-		paymentDeadlineDays: 30,
 		expiredContracts: []
 	};
 
@@ -157,7 +155,9 @@ describe('Übersicht in der gewählten Sprache', () => {
 
 	it('nennt den Abstand einer Frist auf Englisch', () => {
 		overwriteGetLocale(() => 'en');
-		expect(overviewDeadlines(input)[0].when).toBe('passed 5 days ago');
+		expect(overviewDeadlines([{ ...dashboard.deadlines[0], days: -5 } as BackendDeadline])[0].when).toBe(
+			'passed 5 days ago'
+		);
 	});
 });
 

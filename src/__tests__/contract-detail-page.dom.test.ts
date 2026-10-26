@@ -66,7 +66,8 @@ function open(
 	}[] = [],
 	billedBy: { id?: string; statementNumber: string; status: string }[] | null = [],
 	// as the backend decides it by the Swiss day (#784); the page only shows it (#815)
-	status = startDate > today ? 'future' : endDate && endDate < today ? 'ended' : 'active'
+	status = startDate > today ? 'future' : endDate && endDate < today ? 'ended' : 'active',
+	endsToday = false // the reloaded contract ends today, the backend says (#815)
 ) {
 	show(ContractPage, {
 		data: {
@@ -79,6 +80,7 @@ function open(
 			})),
 			billedBy,
 			nextSteps: terminated ? { successor: false, ended: false } : null, // the loader decides (review K-1)
+			endsToday,
 			contract: { ...contract(startDate, endDate, terminated), status },
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
@@ -795,6 +797,18 @@ describe('Mietvertragsdetail', () => {
 		expect(get(toasts).map((toast) => toast.message)).toEqual([
 			'Der Mietvertrag von Anna Keller endet am 31.03.2027. Die nächsten Schritte sehen Sie oben auf der Seite.'
 		]);
+	});
+
+	// #815: ob der Mietvertrag heute endet, sagt das Backend mit dem neu geladenen Mietvertrag
+	it('meldet «endet heute», wenn das Backend den Mietvertrag heute enden nennt', async () => {
+		toasts.set([]);
+		open('2024-04-01', null, null, '2026-10-09', false, [], [], undefined, true);
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '10.10.2026');
+		await settle();
+		const after = actions.get('?/end')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Der Mietvertrag von Anna Keller endet heute']);
 	});
 
 	// Haiku-Review N1: ohne Abschnitt «Nächste Schritte» verweist die Meldung nicht darauf

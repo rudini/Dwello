@@ -56,7 +56,8 @@ describe('Ab wann ein Mieter anonymisiert werden kann', () => {
 	it('nennt den 1. Januar nach 10 vollen Jahren seit dem Jahr, in dem der letzte Mietvertrag endete', async () => {
 		const ended = await rental('2014-12-31');
 
-		expect(await tenant(ended.tenant)).toMatchObject({ anonymisableFrom: '2025-01-01', anonymisedOn: null });
+		// #815: the backend also says whether that day has come, by the Swiss day
+		expect(await tenant(ended.tenant)).toMatchObject({ anonymisableFrom: '2025-01-01', anonymisable: true, anonymisedOn: null });
 	});
 
 	it('zählt die letzte versendete Abrechnung und die letzte Mahnung, nicht einen Entwurf', async () => {
@@ -76,13 +77,13 @@ describe('Ab wann ein Mieter anonymisiert werden kann', () => {
 		await statement(ended, { status: 'paid', statementDate: '2016-03-10' });
 		await statement(ended, { status: 'replaced', statementDate: '2018-03-10', periodStart: '2015-01-01', periodEnd: '2015-12-31' });
 
-		expect(await tenant(ended.tenant)).toMatchObject({ anonymisableFrom: '2029-01-01' });
+		expect(await tenant(ended.tenant)).toMatchObject({ anonymisableFrom: '2029-01-01', anonymisable: false });
 	});
 
 	it('nennt keinen Tag, solange ein Mietvertrag läuft', async () => {
 		const running = await rental();
 
-		expect(await tenant(running.tenant)).toMatchObject({ anonymisableFrom: null });
+		expect(await tenant(running.tenant)).toMatchObject({ anonymisableFrom: null, anonymisable: false });
 	});
 });
 

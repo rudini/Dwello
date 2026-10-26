@@ -61,7 +61,12 @@
 			<TenantRentalCard rental={data.rental} />
 			<TenantExportCard id={tenant.id} />
 			{#if tenant.anonymisableFrom}
-				<TenantAnonymiseCard from={tenant.anonymisableFrom} {name} error={form?.anonymiseError} />
+				<TenantAnonymiseCard
+					from={tenant.anonymisableFrom}
+					allowed={!!tenant.anonymisable}
+					{name}
+					error={form?.anonymiseError}
+				/>
 			{/if}
 		</div>
 		<div class="flex flex-col gap-6 lg:col-span-2">

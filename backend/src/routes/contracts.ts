@@ -152,7 +152,8 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			advancePayments,
 			proposedAdvanceFrom: proposedAdvanceFrom(contract, advancePayments) ?? null, // #464, #815
 			nextSteps: await nextSteps(contract),
-			fixedTermCheck: await fixedTermCheck(contract)
+			fixedTermCheck: await fixedTermCheck(contract),
+			endsToday: contract.endDate === swissToday() // the page says «endet heute» (#815)
 		};
 	})
 	// The categories with costs for the contract in the period and whether it agrees each (#91)

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { overviewDeadlines, overviewTasks, type OverviewInput } from '$lib/overview';
+import { overviewDeadlines, overviewTasks, type BackendDeadline, type OverviewInput } from '$lib/overview';
+// What GET /api/v1/dashboard answers, checked against the real API (backend api-contracts.pg.test.ts)
+import dashboard from '../../tests/contracts/dashboard.json';
 
 const portfolio = {
 	totalBuildings: 1,
@@ -16,14 +18,11 @@ const input = (
 		statementCounts?: Omit<Counts, 'toSend'> & Partial<Counts>;
 	} = {}
 ): OverviewInput => ({
-	today: '2026-10-10',
 	portfolio,
 	dueStatements: [],
 	lettersToSend: 0,
-	endingContracts: [],
 	noticedContracts: [],
 	oldAddresses: [],
-	paymentDeadlineDays: 30,
 	expiredContracts: [],
 	...overrides,
 	// as the backend counts them (H-28, #717): without outdated drafts every draft is to send, unless a test says
@@ -443,17 +442,17 @@ describe('Aufgaben der Übersicht', () => {
 	});
 });
 
+// #815: which deadlines and how many days away, the backend says (backend overview-deadlines.test.ts); the page words them
 describe('Fristen der Übersicht', () => {
-	it('nennt Zahlungsfristen und Vertragsenden nach Datum, mit Abstand in Worten', () => {
-		const deadlines = overviewDeadlines(
-			input({
-				dueStatements: [
-					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-20' },
-					{ id: 's2', tenantName: 'Bruno Meier', paymentDeadline: '2026-10-05' }
-				],
-				endingContracts: [{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-10-11' }]
-			})
-		);
+	const [backendDeadline] = dashboard.deadlines;
+	const deadline = (fields: Partial<BackendDeadline>) => ({ ...backendDeadline, ...fields }) as BackendDeadline;
+
+	it('nennt die Fristen des Backends in seiner Reihenfolge, mit Abstand in Worten und Link', () => {
+		const deadlines = overviewDeadlines([
+			deadline({ id: 's2', kind: 'Zahlungsfrist', name: 'Bruno Meier', days: -5 }),
+			deadline({ id: 'c1', kind: 'Vertragsende', name: 'Eva Frei', days: 1 }),
+			deadline({ id: 's1', kind: 'Zahlungsfrist', name: 'Anna Keller', days: 10 })
+		]);
 		expect(deadlines.map((d) => [d.kind, d.name, d.when, d.href])).toEqual([
 			['Zahlungsfrist', 'Bruno Meier', 'seit 5 Tagen abgelaufen', '/statements/s2'],
 			['Vertragsende', 'Eva Frei', 'morgen', '/contracts/c1'],
@@ -461,47 +460,8 @@ describe('Fristen der Übersicht', () => {
 		]);
 	});
 
-	// Die Zahlungsfrist beträgt hier 30 Tage: eine eben versendete Abrechnung steht gleich in den Fristen
-	it('lässt ferne Termine weg: Zahlungsfrist nach den eingestellten 30, Vertragsende nach 60 Tagen', () => {
-		const deadlines = overviewDeadlines(
-			input({
-				dueStatements: [
-					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-11-10' },
-					{ id: 's2', tenantName: 'Hans Müller', paymentDeadline: '2026-11-09' }
-				],
-				endingContracts: [
-					{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-12-10' },
-					{ id: 'c2', tenantName: 'Ueli Graf', endDate: '2026-12-09' },
-					{ id: 'c3', tenantName: 'Lea Roth', endDate: '2026-10-01' }
-				]
-			})
-		);
-		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller', 'Ueli Graf']);
-	});
-
-	// #87: eine eben versendete Abrechnung steht mit jeder eingestellten Zahlungsfrist gleich in den Fristen
-	it('zeigt jede offene Zahlungsfrist innerhalb der eingestellten Tage', () => {
-		const deadlines = overviewDeadlines(
-			input({
-				paymentDeadlineDays: 60,
-				dueStatements: [
-					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-12-10' },
-					{ id: 's2', tenantName: 'Hans Müller', paymentDeadline: '2026-12-09' }
-				]
-			})
-		);
-		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller']);
-	});
-
 	it('sagt heute und ein Tag in der Einzahl', () => {
-		const deadlines = overviewDeadlines(
-			input({
-				dueStatements: [
-					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-10' },
-					{ id: 's2', tenantName: 'Bruno Meier', paymentDeadline: '2026-10-09' }
-				]
-			})
-		);
+		const deadlines = overviewDeadlines([deadline({ days: -1 }), deadline({ days: 0 })]);
 		expect(deadlines.map((d) => d.when)).toEqual(['seit 1 Tag abgelaufen', 'heute']);
 	});
 });

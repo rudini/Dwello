@@ -607,32 +607,7 @@
 		],
 		"moduleCycles": [],
 		"bffDates": [],
-		"frontendDecisions": [
-			{
-				"path": "src/lib/overview.ts",
-				"line": "Math.round((Date.parse(date.slice(0, 10)) - Date.parse(today)) / 86_400_000);",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/overview.ts",
-				"line": "days: daysFrom(today, s.paymentDeadline),",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/lib/overview.ts",
-				"line": "days: daysFrom(today, c.endDate),",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			},
-			{
-				"path": "src/routes/tenants/[id]/TenantAnonymiseCard.svelte",
-				"line": "const allowed = $derived(from <= localToday());",
-				"reason": "Frontend derivation from before #815 (measured 25.10.2026); moves to the backend in #815 B to D",
-				"scenario": "Ä4"
-			}
-		]
+		"frontendDecisions": []
 	},
 	"prSizeWarn": {
 		"files": 31,

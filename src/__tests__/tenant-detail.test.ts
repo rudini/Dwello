@@ -148,6 +148,13 @@ describe('Mieterdetail', () => {
 		]);
 	});
 
+	// #815 (review i815d C-3): whether «Mieter anonymisieren» is allowed, the backend says by the Swiss day
+	it('übernimmt, ob das Backend das Anonymisieren erlaubt', async () => {
+		const data = await loadTenant([], { anonymisableFrom: '2025-01-01', anonymisable: true } as never);
+
+		expect(data.tenant).toMatchObject({ anonymisableFrom: '2025-01-01', anonymisable: true });
+	});
+
 	it('zeigt ohne laufenden oder künftigen Vertrag keine Miete', async () => {
 		const data = await loadTenant([contract('c1', day(-400), day(-1), '2.01')], {
 			rentalContractId: undefined
