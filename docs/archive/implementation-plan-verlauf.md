@@ -3576,3 +3576,14 @@ No scenario: the change touches only the Compose file and docs; the app behaves 
 - [x] Measured (median 5 → 4, mirrors 52 → 50, value lists 14 → 13, types.ts fields 51 → 40), ADR 0005 «Zyklus 1b», `fitness --update`; fitness first refused `sent|to_send` in 3 files, fixed with `DocumentStatus`
 - [x] Slice review round 1: `docs/reviews/i837c1b-review-1.md`, no Blocker/Major; C-1 (`DocumentFilters.status` typed, cast gone) and C-2 (current values in `fitness-functions.md`) fixed
 - [x] PR, Refs #837, pushed after this archive; No scenario: types only
+
+## Session 2026-10-26: shorter and surer agent reviews
+
+Request: analyse the agent reviews and apply what the product owner chose (1 Fedlex access, 2 shorter domain reviews, 3 no persona Nits, 5 re-review format; 4 as an issue). No scenario: changes only agent instructions, no app behaviour.
+
+- [x] `fach-reviewer`: fetch the law in force through the Fedlex SPARQL endpoint; wording as a `key | de | fr | it | en` table; plan points in «Geprüft»
+- [x] `persona`: no Nits in the table, they go under «Beobachtungen»
+- [x] `code-reviewer`, `fach-reviewer`: a re-review lists fixed IDs in one line «Geschlossen: …»
+- [x] Issue #852 for the mechanical Majors (point 4)
+- [x] code-reviewer round 1 (`docs/reviews/agents-review-1.md`): no Blocker/Major; C-1 (Minor, FMG and UWG ids) fixed
+- [x] PR: pushed after this archive
