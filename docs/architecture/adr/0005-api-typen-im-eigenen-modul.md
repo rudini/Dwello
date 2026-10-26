@@ -88,12 +88,13 @@ Der Median erreicht damit das Ziel von Ä1 (≤ 4); P90 liegt mit 13 weiter übe
 - **`status` fehlte im Typ:** Die Abfrage lieferte den Vertragsstatus, der alte `ContractWithDetails` nannte ihn nicht.
 - **Felder, die nie ankamen:** `tenantFirstName` und `tenantLastName` der Liste waren immer leer, `advancePayment` sendet das Backend nicht. Alle drei sind weg.
 - **`ApartmentStatus`** steht einmal in `backend/src/api/apartment.ts`; Backend und Frontend nehmen ihn von dort.
+- **Statusfilter der Liste:** Das BFF schrieb `active`, `ended` und `future` von Hand. Ein `Record<ContractStatus, true>` hält ihn jetzt gleich mit dem Typ des Backends (4fc4caa1, CI «Architecture fitness»). Ein Laufzeit-Import der Liste aus dem Backend wäre über die HTTP-Grenze gegangen. `t.UnionEnum` in der Route liess die Liste ohne Filter nur laufende Verträge zeigen.
 
 | Messwert | Nach 1b | Nach 2 |
 |---|---|---|
 | Feldstreuung Median / P90 / Max | 4 / 13 / 36 | 4 / 13 / 36 |
 | Entity-Spiegel | 50 | **49** |
-| Wertelisten über Schichten | 13 | **12** |
+| Wertelisten über Schichten | 13 | **11** |
 | Felder, die `src/lib/types.ts` deklariert | 40 | **30** |
 | `svelte-check` | 4291 Dateien | 4293 Dateien |
 
