@@ -3,7 +3,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { BuildingsListData } from '$lib/types';
-	import { listSearchUrl } from '$lib/list-url';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -20,11 +19,6 @@
 	let searchTerm = $derived(param('search'));
 	let cityFilter = $derived(param('city'));
 	const filtered = $derived(['search', 'city'].some((key) => param(key)));
-
-	function handleSearch(event: SubmitEvent) {
-		event.preventDefault();
-		goto(listSearchUrl('/buildings', { search: searchTerm, city: cityFilter }));
-	}
 
 	function clearFilters() {
 		searchTerm = '';
@@ -46,14 +40,17 @@
 		{/snippet}
 	</PageHeader>
 
+	<!-- a plain GET form: the browser sends a search made before the app reacts, the router one made after (#754) -->
 	<form
+		method="GET"
+		action="/buildings"
 		role="search"
-		onsubmit={handleSearch}
 		class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
 	>
 		<div class="grid gap-4 md:grid-cols-2">
 			<TextInput
 				id="search"
+				name="search"
 				label={m.buildings_search()}
 				bind:value={searchTerm}
 				placeholder={m.buildings_search_placeholder()}
@@ -62,6 +59,7 @@
 			/>
 			<TextInput
 				id="city"
+				name="city"
 				label={m.buildings_city()}
 				bind:value={cityFilter}
 				placeholder={m.buildings_city_placeholder()}
