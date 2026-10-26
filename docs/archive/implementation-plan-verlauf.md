@@ -3546,3 +3546,14 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Docs: Ä1 «Heute» in `utility-tree.md`, `field-spread` row and history in `fitness-functions.md`, Ä1 row in `baseline.md`
 - [x] Slice review round 1: `docs/reviews/i843-review-1.md` (C-1 Minor: a table's only counted field counts 0; named in the `new-field` row of `fitness-functions.md`)
 - [x] PR (pushed after this archive); No scenario: measurement tooling only
+
+## Session: upload limit and reverse proxy (#732)
+
+No scenario: the change touches only the Compose file and docs; the app behaves as before.
+
+- [x] Test first: no commented nginx service in `docker-compose.prod.yml`; `docs/installation.md` names the limit of the `Dockerfile` for another proxy
+- [x] Remove the nginx block from `docker-compose.prod.yml`; `docs/tech-stack.md` names Caddy instead
+- [x] `docs/installation.md`: another proxy lets at least 11 MB through (nginx `client_max_body_size 11m`)
+- [x] ADR 0005: global `BODY_SIZE_LIMIT=11M`, 413 page without JavaScript as known limit
+- [x] Slice review round 1: `docs/reviews/732-review-1.md`; English 413 heading → #847
+- [x] Archive the session, PR (`Fixes #732`): pushed after this archive
