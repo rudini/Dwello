@@ -3622,3 +3622,14 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-837-c2.md`
 - [x] Archive the session; PR «Refs #837» pushed after this archive
 - [x] Closing `code-reviewer` round on the CI fix 4fc4caa1: `docs/reviews/i837c2-close-review-1.md`
+
+## Session: #837 cycle 3, invoices (ADR 0005)
+
+- [x] Measure before: field spread 4 / 13 / 36, entity mirrors 49, value lists 11
+- [x] `backend/src/api/invoice.ts` (`InvoiceWithDetails`, `InPeriod`); `invoice.service.ts` typed against it; `InvoiceDocument` in the schema
+- [x] BFF `toInvoice` takes `Json<…>`; `Invoice` in `src/lib/types.ts` picked from the response; dead fallbacks for fields the backend never sends dropped (`billingEntity`, empty supplier)
+- [x] Measure after, `fitness --update`: 4 / **12** / 36, entity mirrors 47
+- [x] `code-reviewer` round 1: `docs/reviews/i837c3-review-1.md`
+- [x] ADR 0005 table for cycle 3; utility tree P90 12
+- [x] Workflow notes: nothing new beyond `workflow-notes-issue-837-c2.md`
+- [x] Archive the session; PR «Refs #837» pushed after this archive
