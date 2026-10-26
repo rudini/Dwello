@@ -136,7 +136,7 @@ Dwello-Nutzen
   - Kritischer Pfad in Run 868 ist E2E-Shard 5 mit 41 min Testschritt. Die Shards brauchen 20–41 min, axe 11–16 min, Unit-Tests 4 min, Lint und Typen 1,5 min.
   - Von den letzten 20 abgeschlossenen Push-Läufen auf `main` waren 3 grün, 4 rot und 13 abgebrochen, weil ein neuerer Merge sie ersetzte.
   - Ursachen der 4 roten Läufe (gemessen, CI-Logs): keine kam von einem Fehler im gemergten Change. 3 instabile Tests (axe `target-size` nur mobil dunkel in Run 861; Firefox «Suche ohne Treffer» ohne Retry in Run 876; Reihenfolge der Kategorien im PDF in Run 916), 2 Shards am 60-min-Limit, weil `playwright install --with-deps` wegen eines langsamen apt-Spiegels 42–51 min brauchte (Runs 876, 886), 1 repoweiter Check auf Issue-Labels (`check-issues.mjs`, Run 886). Siehe A6.
-  - Nach #777 (26.10., Run 40286548319, Merge von #831): PR etwa 13 min. `main` 27 min, die fünf E2E-Shards brauchten im Testschritt 12–26 min (92 min zusammen), axe 9–10 min. Seit #834 läuft E2E auf `main` in 12 Shards.
+  - Nach #777 (26.10., Run 40286548319, Merge von #831): PR etwa 13 min. `main` 27 min, die fünf E2E-Shards brauchten im Testschritt 12–26 min (92 min zusammen), axe 9–10 min. Seit #834 läuft E2E auf `main` in 12 Shards: Run 40293821912 brauchte nach dem Start der Jobs 19,6 min, der Testschritt 3,5–18 min, weil je ein Shard die Sprach-Bildschirmprüfungen eines Browsers trug. Seit #838 haben diese sechs eigene Shards.
   - Umfang: 851 Szenarien in 53 Feature-Dateien, 2 Worker pro Shard (aus Repo/Config).
 - **Fitness Function:** Ein Job am Ende von `ci.yml` schreibt die Laufdauer als Annotation und schlägt bei mehr als 15 min auf `main` Alarm. Dazu eine wöchentliche Auswertung der Quote grüner Läufe auf `main` über die Actions-API.
 

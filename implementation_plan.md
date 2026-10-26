@@ -9,3 +9,11 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+## Session: #838 screen checks in their own shards on main (T1)
+
+- [x] Issue #838 from run 40293821912 (shards 3, 7, 11 held the screen checks of one browser each: 11–18 min against 3.5–7)
+- [x] `shardingSeed` tried: no change in `--list --shard`; reverted
+- [x] `ci.yml`: on main six shards `--grep sprachen-bildschirme` and six `--grep-invert '@a11y|sprachen-bildschirme'`, names «E2E tests (n/12)» kept; pull requests unchanged; entries carry their Playwright args. Checked: the Changes script run for both events, `--list` 813 + 6×486 = 3731 tests
+- [x] Docs: `test-pyramid.md`, T1 measurement in `utility-tree.md`
+- [ ] Slice review (`code-reviewer`)
+- [ ] PR; No scenario: CI configuration only. After the merge: slowest shard and «CI duration» of the push run on main
