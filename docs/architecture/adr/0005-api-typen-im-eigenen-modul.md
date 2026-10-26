@@ -77,6 +77,29 @@ Median und P90 bewegen sich nicht. Die meisten Abrechnungsfelder stehen in mehr 
 
 Der Median erreicht damit das Ziel von Ä1 (≤ 4); P90 liegt mit 13 weiter über 8.
 
+## Zyklus 2: Mietverträge
+
+| Schritt | Commit | Absicherung |
+|---|---|---|
+| 0 Messung vorher | – | `fitness` 4 / 13 / 36, Entity-Spiegel 50, Wertelisten 13 |
+| 1–3 `backend/src/api/contract.ts` und `api/apartment.ts`, Services und Route dagegen typisiert; Mapper mit `Json<…>`; `RentalContract`, `ContractHistory`, `ContractWithDetails` und `ApartmentStatus` aus dem Backend-Typ; `fitness --update` | 15ce21e2 | Backend-Typprüfung; 382 Backend-Tests (Mietverträge, Wohnungen, Mieter, Anteile, Abrechnungslauf, API-Verträge); `svelte-check` 0 Fehler; 584 Frontend-Tests; Lint; fallow |
+
+- **Ohne Umwandlung:** `listContracts`, `getContract`, `getActiveContract` und `getContractsByPeriod` geben ihr Ergebnis ohne `as` zurück. Mieter, Wohnung und Gebäude sind dafür mit `innerJoin` verbunden: Ihre Fremdschlüssel sind `NOT NULL`, es fällt also kein Vertrag weg. Die Route prüft ihre Antwort mit `satisfies ContractResponse`.
+- **`status` fehlte im Typ:** Die Abfrage lieferte den Vertragsstatus, der alte `ContractWithDetails` nannte ihn nicht.
+- **Felder, die nie ankamen:** `tenantFirstName` und `tenantLastName` der Liste waren immer leer, `advancePayment` sendet das Backend nicht. Alle drei sind weg.
+- **`ApartmentStatus`** steht einmal in `backend/src/api/apartment.ts`; Backend und Frontend nehmen ihn von dort.
+- **Statusfilter der Liste:** Das BFF schrieb `active`, `ended` und `future` von Hand. Ein `Record<ContractStatus, true>` hält ihn jetzt gleich mit dem Typ des Backends (4fc4caa1, CI «Architecture fitness»). Ein Laufzeit-Import der Liste aus dem Backend wäre über die HTTP-Grenze gegangen. `t.UnionEnum` in der Route liess die Liste ohne Filter nur laufende Verträge zeigen.
+
+| Messwert | Nach 1b | Nach 2 |
+|---|---|---|
+| Feldstreuung Median / P90 / Max | 4 / 13 / 36 | 4 / 13 / 36 |
+| Entity-Spiegel | 50 | **49** |
+| Wertelisten über Schichten | 13 | **11** |
+| Felder, die `src/lib/types.ts` deklariert | 40 | **30** |
+| `svelte-check` | 4291 Dateien | 4293 Dateien |
+
+P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services und Svelte-Komponenten (`startDate` in 26 Dateien), nicht in den Typen.
+
 ## Tradeoffs und verbleibende Risiken
 
 - **Zwei Stellen im Backend:** Die Form steht im Typmodul und in der Abfrage des Service. Der Rückgabetyp verbindet beide nur zum Teil: Ein Feld, das die Abfrage zusätzlich liefert, bleibt dem Typ unbekannt, bis jemand es dort ergänzt (so fehlten bisher `tenant.correspondenceChannel` und `tenant.country`).
@@ -86,4 +109,4 @@ Der Median erreicht damit das Ziel von Ä1 (≤ 4); P90 liegt mit 13 weiter übe
 
 ## Nächste Zyklen
 
-Mietverträge, dann Rechnungen und der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
+Rechnungen, dann der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.

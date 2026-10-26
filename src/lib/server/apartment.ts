@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
 import type { ApartmentStatus } from '$lib/types';
-import { monthlyTotal, toContractHistory } from './contract-history';
+import { monthlyTotal, toContractHistory, type ContractRow } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -37,29 +37,29 @@ export async function fetchApartment(fetch: typeof globalThis.fetch, id: string)
 /** Apartment with its current tenant, monthly costs and all its contracts */
 export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: string) {
 	const apartment = await fetchApartment(fetch, id);
-	const { contracts } = await (await fetch(`${API}/contracts?apartmentId=${id}&limit=100`)).json();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
-	const current = contracts.find((c: Record<string, any>) => c.id === apartment.currentContractId);
+	const { contracts }: { contracts: ContractRow[] } = await (
+		await fetch(`${API}/contracts?apartmentId=${id}&limit=100`)
+	).json();
+	const current = contracts.find((c) => c.id === apartment.currentContractId);
 	// the contract the next tenant moves in with, as the backend names it (H-28, #717)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
-	const next = contracts.find((c: Record<string, any>) => c.id === apartment.nextContractId);
+	const next = contracts.find((c) => c.id === apartment.nextContractId);
 
 	return {
 		apartment,
 		currentContract: current
 			? {
-					id: current.id as string,
-					tenantId: current.tenantId as string,
-					tenantName: current.tenantName as string,
-					tenantEmail: current.tenantEmail as string | null,
-					startDate: current.startDate as string
+					id: current.id,
+					tenantId: current.tenantId,
+					tenantName: current.tenantName,
+					tenantEmail: current.tenantEmail,
+					startDate: current.startDate
 				}
 			: null,
 		nextContract: next
 			? {
-					tenantId: next.tenantId as string,
-					tenantName: next.tenantName as string,
-					startDate: next.startDate as string
+					tenantId: next.tenantId,
+					tenantName: next.tenantName,
+					startDate: next.startDate
 				}
 			: null,
 		monthlyCosts: {
@@ -69,7 +69,6 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 			flatRateUtilityCharge: Number(current?.flatRateUtilityCharge ?? 0),
 			monthlyTotal: current ? monthlyTotal(current) : 0
 		},
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
-		contractHistory: contracts.map((c: Record<string, any>) => toContractHistory(c, c.tenantName))
+		contractHistory: contracts.map((c) => toContractHistory(c, c.tenantName))
 	};
 }

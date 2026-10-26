@@ -1,5 +1,13 @@
 import { m } from '$lib/paraglide/messages';
-import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
+import type {
+	RentalContract,
+	Tenant,
+	Apartment,
+	Building,
+	ApartmentStatus,
+	Json
+} from '$lib/types';
+import type { ContractResponse } from '../../../../backend/src/api/contract';
 import type { Actions, PageServerLoad } from './$types';
 import { agreeableCategories } from '$lib/server/category';
 import { agreedNames } from '$lib/contract-form';
@@ -84,7 +92,7 @@ const filled = <T extends Record<string, unknown>>(values: Record<string, unknow
 
 // The contract as the page shows it, with tenant, apartment and building
 function toContract(
-	data: ReturnType<typeof JSON.parse> // the backend's answer
+	data: Json<ContractResponse>
 ): RentalContract & { tenant: Tenant; apartment: Apartment; building: Building } {
 	const none = null as string | null;
 	return {
@@ -125,11 +133,11 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			throw error(response.status, m.contracts_load_failed());
 		}
 
-		const data = await response.json();
+		const data: Json<ContractResponse> = await response.json();
 
 		const baseRent = Number(data.baseRent) || 0;
 		const additionalRent = Number(data.additionalRent) || 0;
-		const advancePayment = Number(data.monthlyAdvancePayment || data.advancePayment) || 0;
+		const advancePayment = Number(data.monthlyAdvancePayment) || 0;
 
 		const contract = toContract(data);
 

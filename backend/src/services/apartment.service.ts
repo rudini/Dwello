@@ -15,8 +15,7 @@ import {
 } from '../db/schema';
 import { everyWordIn, withoutApartmentWord } from './word-search';
 import { sqlToday, swissToday } from './today';
-
-export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
+import type { ApartmentStatus } from '../api/apartment';
 
 /** First day of the next rental contract that has not started yet */
 const nextContractStart = sql<string | null>`(

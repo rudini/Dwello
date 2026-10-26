@@ -1,19 +1,23 @@
-import type { ContractHistory } from '$lib/types';
+import type { ContractHistory, Json } from '$lib/types';
+import type { ContractWithDetails } from '../../../backend/src/api/contract';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
-type BackendContract = Record<string, any>;
+/** A row of `GET /contracts` as its JSON arrives */
+export type ContractRow = Json<ContractWithDetails>;
 
 const amount = (value: unknown) => Number(value ?? 0);
 
 /** Monatlich total of a contract: base rent, additional rent, Akonto and Nebenkostenpauschale (#429) */
-export const monthlyTotal = (c: BackendContract) =>
+export const monthlyTotal = (c: Partial<ContractRow>) =>
 	amount(c.baseRent) +
 	amount(c.additionalRent) +
 	amount(c.monthlyAdvancePayment) +
 	amount(c.flatRateUtilityCharge);
 
 /** One row of a contract history (apartment or tenant page) */
-export const toContractHistory = (c: BackendContract, tenantName: string): ContractHistory => ({
+export const toContractHistory = (
+	c: Pick<ContractRow, 'id' | 'startDate' | 'status'> & Partial<ContractRow>,
+	tenantName: string
+): ContractHistory => ({
 	id: c.id,
 	tenantName,
 	monthlyTotal: monthlyTotal(c),
