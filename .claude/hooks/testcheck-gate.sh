@@ -51,9 +51,9 @@ else
 fi
 
 # Only a gate verdict blocks; a crash also exits 1 but has no verdict
-if [ "$STATUS" -eq 1 ] && grep -q 'can pass without checking' "$TMP_OUT"; then
+if [ "$STATUS" -eq 1 ] && grep -Eq '^testcheck: [0-9]+ findings? fails? the test gate' "$TMP_OUT"; then
   {
-    echo "testcheck-gate: blocked: changed tests can pass without checking what they claim (details: bun run testcheck:audit)."
+    echo "testcheck-gate: blocked: changed tests fail the test gate (details: bun run testcheck:audit)."
     echo "testcheck-gate: nothing in this command ran, edits and git add before the git call included."
     cat "$TMP_OUT"
   } >&2

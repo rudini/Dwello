@@ -6,23 +6,23 @@ A finding says "this test can pass although the code is wrong" or "this title do
 
 ## Rules
 
-Gate rules fail `check`; each was right in at least 92 % of its findings on every corpus it was measured on (`testcheck-validation.md`).
+Gate rules fail `check`; each was right in at least 90 % of its findings on every corpus it was measured on (`testcheck-validation.md`).
 
 | Rule | Finds | Fix |
 |---|---|---|
 | `empty-test` | a test that neither runs code nor asserts (an empty body, only declarations) | write the test or delete it |
-| `dangling-expect` | `expect(x)` without a called matcher, also `expect(x).toBeNull` without `()` | call the matcher |
+| `dangling-expect` | `expect(x)` without a called matcher, also `expect(x).toBeNull` without `()` (Chai's `expect(x).to.be.true` is fine) | call the matcher |
 | `unawaited-assertion` | `expect(p).resolves/rejects…` or `expect.poll(…)` neither awaited nor returned: it settles after the test passed | `await` it |
-| `tautology` | an assertion that holds whatever the code does: a built-in matcher on literals that is always true (`expect(true).toBe(true)`), a variable compared with itself (`expect(x).toEqual(x)`), `not.toThrow` on an async function | assert on the result of the code under test |
+| `tautology` | an assertion that holds whatever the code does: a built-in matcher on literals that is always true (`expect(true).toBe(true)`), a variable compared with itself (`expect(x).toEqual(x)`; two calls compared with each other check determinism and pass), `not.toThrow` on an async function | assert on the result of the code under test |
 | `catch-only-assertion` | every assertion sits in a `catch`: when the code stops throwing, the test passes | `expect(() => …).toThrow(…)`, `await expect(…).rejects…`, or `expect.assertions(n)` |
 | `swallowed-assertion` | an assertion in a `try` whose `catch` drops the error, so a failing assertion is caught | rethrow, or remove the `try` |
-| `callback-only-assertion` | every assertion sits in a callback the test does not wait for (`then`, `setTimeout`, `on`, `subscribe`, …) | await the promise or event (tests with a `done` parameter are left out) |
+| `callback-only-assertion` | every assertion sits in a callback the test does not wait for (`then`, `setTimeout`, `on`, `subscribe`, …) | await the promise or event; a callback in a `new Promise` or `Promise.all` the test awaits or returns counts as waited for (tests with a `done` parameter are left out) |
 | `duplicate-title` | two tests of the same block with the same title | name what each one checks |
 | `duplicate-body` | two tests of the same block with the same code (comments and layout aside) under different titles: one title claims something its test does not check, or one test is a copy | make the body check what the title says, or delete the copy |
 
 Hint rule, shown but never failing: `loop-only-assertion`, every assertion sits in a loop (`for…of`, `forEach`, `map`, `every`, …) over data that may be empty, so an empty result passes. Loops over data the test fixes itself are left out: literals, module constants, imports, `each` rows, `split` results, literal ranges, functions declared in the test file. Assert the length first.
 
-What counts as an assertion: calls named `expect…`, `assert…`, `should…`, `verify…` or `check…` (methods: `expect…`, `assert…`, `should…`), `fail`, a `throw`, a function of the same file that asserts (also through another one), Testing Library `getBy*`/`findBy*` queries (they throw when nothing matches), and type assertions tsc checks (`expectTypeOf`, `assertType`, `Expect<Equal<…>>`, `@ts-expect-error`, a typed declaration or `satisfies` in a test that asserts nothing else).
+What counts as an assertion: calls named `expect`, `assert`, `should`, `verify` or `check`, alone or starting a camelCase name (`checkTotals`, not `checkout`; methods: `expect`, `assert`, `should`), `fail`, a `throw`, a function of the same file that asserts (also through another one), Testing Library `getBy*`/`findBy*` queries (they throw when nothing matches), and type assertions tsc checks (`expectTypeOf`, `assertType`, `Expect<Equal<…>>`, `@ts-expect-error`, a typed declaration or `satisfies` in a test that asserts nothing else).
 
 Skipped and todo tests (`it.skip`, `describe.skip`, `it.todo`) are left out. `it.each`/`test.for` tests are checked, but not by the title rules (their title is a template). Tests declared in a loop are not compared by the title rules either; tests in different functions (`describe` blocks, helpers like `describeMatrix`) never are.
 
@@ -46,7 +46,7 @@ Exit codes: 0 ok, 1 a gate rule fails, 2 tool error.
 - it is in `.testcheck-baseline.json` **as committed at the base** (`git show <base>:.testcheck-baseline.json`), so a change cannot baseline its own findings; the baseline holds `<file>#<full test title>#<rule>` per finding and is empty today;
 - a comment on the line above the test or above the finding suppresses it: `// testcheck-ignore <rule> -- <why the test is right>`. A suppression without a known rule or without a reason is a finding of its own (`invalid-suppression`).
 
-Formats: human (default; failures, then `hint:` lines), `--format github` (`::error` for gate rules, `::warning` for hints), `--agent` (nothing when the gate passes, else the first five failures with the fix).
+Formats: human (default; failures, then `hint:` lines), `--format github` (`::error` for gate rules, `::warning` for hints), `--agent` (nothing when the gate passes, else `testcheck: <n> finding(s) fail the test gate` and the first five failures with the fix).
 
 ## Wiring
 

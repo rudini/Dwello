@@ -2329,6 +2329,10 @@
 			"label": "tp",
 			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
 		},
+		"zod/packages/zod/src/v3/tests/tuple.test.ts#failed validation#catch-only-assertion": {
+			"label": "tp",
+			"why": "All assertions are in the catch (under an instanceof check); if parse stopped throwing, the test would pass unchecked."
+		},
 		"zod/packages/zod/src/v3/tests/unions.test.ts#options getter#no-assertion": {
 			"label": "tp",
 			"why": "Options getter used only to parse; values never checked."

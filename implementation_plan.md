@@ -18,5 +18,6 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] Measure precision (labelled findings) and recall (seeded defects) on Dwello and external TypeScript/Vitest repos; targets and results in `tools/testcheck/testcheck-validation.md` (`tools/testcheck/eval`)
 - [x] Found: Dwello hint `statement-pages.dom.test.ts` loops over `querySelectorAll('dl')` without asserting one exists: #854
 - [x] Gate on changed test files with a baseline, like deepcheck: `bun run testcheck:*`, hook `.claude/hooks/testcheck-gate.sh`, CI job, CLAUDE.md, skill `commit-gates`
-- [ ] Slice review (`code-reviewer`), closing round
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/testcheck-review-1.md`
+- [ ] Re-review of the C-1 fix and closing round
 - [ ] PR

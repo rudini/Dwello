@@ -51,7 +51,7 @@ const annotation = (f: Finding) => `::${HINT_RULES.has(f.rule) ? 'warning' : 'er
 /** Agent mode: nothing on success, else the first failures; GitHub: annotations; else failures, then hints. */
 function report(argv: string[], findings: Finding[], failures: Finding[]): string {
 	if (argv.includes('--agent'))
-		return failures.length === 0 ? '' : `testcheck: ${failures.length} test(s) can pass without checking what they claim; fix them or add "// testcheck-ignore <rule> -- <reason>" above the test:\n${failures.slice(0, 5).map(line).join('')}`;
+		return failures.length === 0 ? '' : `testcheck: ${failures.length === 1 ? '1 finding fails' : `${failures.length} findings fail`} the test gate; fix each as its message says or add "// testcheck-ignore <rule> -- <reason>" above the test:\n${failures.slice(0, 5).map(line).join('')}`;
 	if (option(argv, '--format') === 'github') return findings.map(annotation).join('');
 	return [...failures.map(line), ...findings.filter((f) => HINT_RULES.has(f.rule)).map((f) => `hint: ${line(f)}`)].join('');
 }

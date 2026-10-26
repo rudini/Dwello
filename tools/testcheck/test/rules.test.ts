@@ -50,6 +50,10 @@ describe('dangling-expect', () => {
 		]);
 	});
 
+	it('accepts a Chai assertion ending in a property', () => {
+		expect(rules(`it('a', () => { expect(f()).to.be.true; expect(g()).to.exist; });`)).toEqual([]);
+	});
+
 	it('accepts a matcher behind not, resolves or soft', () => {
 		expect(rules(`it('a', async () => { expect(f()).not.toBe(1); await expect(g()).resolves.toBe(2); expect.soft(h()).toBe(3); });`)).toEqual([]);
 	});
@@ -89,6 +93,10 @@ describe('tautology', () => {
 		expect(rules(code)).toEqual(['tautology a']);
 	});
 
+	it('accepts two calls compared with each other, which checks that the result is the same each time', () => {
+		expect(rules(`it('ok', () => { expect(colors(0.125)).toEqual(colors(0.125)); });`)).toEqual([]);
+	});
+
 	it('accepts toBe of an expression with itself, which checks that a getter returns the same object', () => {
 		expect(rules(`it('ok', () => { expect(s['~standard']).toBe(s['~standard']); });\nit('a', () => { expect(o.a).toEqual(o.a); });`)).toEqual(['tautology a']);
 	});
@@ -114,6 +122,7 @@ describe('guarded assertions', () => {
 			`it('a', () => { try { expect(f()).toBe(1); } catch { /* ignore */ } });`,
 			`it('ok', () => { try { expect(f()).toBe(1); } catch (e) { cleanup(); throw e; } });`,
 			`it('ok2', () => { try { expect(f()).toBe(1); } finally { cleanup(); } });`,
+			`it('ok4', async () => { try { await checkout(); checkbox.click(); } catch { /* offline */ } expect(state()).toBe(1); });`,
 			`it('ok3', () => { const failures = []; try { expect(f()).toBe(1); } catch (e) { failures.push(e); } expect(failures).toEqual([]); });`
 		].join('\n');
 		expect(rules(code)).toEqual(['swallowed-assertion a']);
@@ -151,6 +160,9 @@ describe('guarded assertions', () => {
 			`it('ok', async () => { await f().then((r) => { expect(r).toBe(1); }); });`,
 			`it('ok2', () => f().then((r) => expect(r).toBe(1)));`,
 			`it('ok4', () => { app.on('GET', (c) => { expectTypeOf(c.var).toEqualTypeOf<V>(); }); });`,
+			`it('ok5', async () => { await new Promise<void>((resolve) => { emitter.on('x', (v) => { expect(v).toBe(1); resolve(); }); }); });`,
+			`it('ok6', () => { return new Promise((resolve) => { setTimeout(() => { expect(g()).toBe(1); resolve(); }, 1); }); });`,
+			`it('ok7', async () => { await Promise.all([a().then((r) => expect(r).toBe(1))]); });`,
 			`it('ok3', (done) => { setTimeout(() => { expect(g()).toBe(1); done(); }); });`
 		].join('\n');
 		expect(rules(code)).toEqual(['callback-only-assertion a', 'callback-only-assertion b']);

@@ -82,8 +82,9 @@ function collectTests(sf: ts.SourceFile): TestCase[] {
 	return tests;
 }
 
-const ASSERT_CALL = /^(expect|assert|should|verify|check)/i;
-const ASSERT_METHOD = /^(expect|assert|should)/i;
+// a whole word or the start of a camelCase name: checkTotals, not checkout
+const ASSERT_CALL = /^(expect|assert|should|verify|check)(?![a-z])/;
+const ASSERT_METHOD = /^(expect|assert|should)(?![a-z])/;
 const TYPE_ASSERT = /^(Expect|Equal|IsExact|IsEqual|Assert|AssertTrue|AssertFalse|IsTrue)$/;
 const IMPLICIT_ASSERT = /^(get|find)(All)?By[A-Z]/;
 
@@ -229,16 +230,32 @@ function declarationOf(id: ts.Identifier): ts.VariableDeclaration | ts.ImportSpe
 const isLiteralRange = (p: ts.ForStatement) =>
 	!!p.condition && ts.isBinaryExpression(p.condition) && ts.isNumericLiteral(p.condition.right) && !!p.initializer && /=\s*-?\d+\s*$/.test(p.initializer.getText());
 
-const isChainLink = (p: ts.Node) => ts.isPropertyAccessExpression(p) || ts.isCallExpression(p) || ts.isParenthesizedExpression(p);
+const isChainLink = (p: ts.Node) => ts.isPropertyAccessExpression(p) || ts.isCallExpression(p) || ts.isParenthesizedExpression(p) || isPromise(p);
 const returns = (p: ts.Node, n: ts.Node) => ts.isAwaitExpression(p) || ts.isReturnStatement(p) || (ts.isArrowFunction(p) && p.body === n);
 
-/** Whether a call's promise is awaited, returned or the body of a concise arrow before reaching the test body. */
+const COMBINATORS = new Set(['all', 'allSettled', 'race', 'any']);
+const isPromise = (n: ts.Node): n is ts.NewExpression => ts.isNewExpression(n) && n.expression.getText() === 'Promise';
+/** An element of `Promise.all([...])` and its kin: the combined promise waits for it. */
+const inCombinator = (n: ts.Node) => ts.isArrayLiteralExpression(n) && ts.isCallExpression(n.parent) && COMBINATORS.has(calleeName(n.parent) ?? '');
+
+/** The `new Promise(...)` whose executor holds the node, below the test body. */
+function enclosingPromise(n: ts.Node, root: ts.Node): ts.NewExpression | undefined {
+	for (let p = n.parent; p && p !== root; p = p.parent) if (isFn(p) && isPromise(p.parent)) return p.parent;
+	return undefined;
+}
+
+/**
+ * Whether a call's promise is awaited, returned or the body of a concise arrow before reaching the test body, also
+ * through `Promise.all([...])` or as a callback in the executor of a `new Promise` the test waits for.
+ */
 function isWaitedFor(call: ts.Node, root: ts.Node): boolean {
 	for (let n = call; ; n = n.parent) {
 		if (n === root) return ts.isArrowFunction(n.parent) && n.parent.body === n;
 		if (returns(n.parent, n)) return true;
-		if (!isChainLink(n.parent)) return false;
+		if (!isChainLink(n.parent) && !inCombinator(n.parent)) break;
 	}
+	const promise = enclosingPromise(call, root);
+	return !!promise && isWaitedFor(promise, root);
 }
 
 type Guard = 'swallowed-assertion' | 'catch-only-assertion' | 'loop-only-assertion' | 'callback-only-assertion';
@@ -402,11 +419,16 @@ function holdsOnLiterals(c: Matched): boolean {
 
 type Matched = ExpectChain & { matcher: ts.CallExpression };
 
+function hasCall(n: ts.Node): boolean {
+	return ts.isCallExpression(n) || ts.isNewExpression(n) || !!ts.forEachChild(n, (c) => hasCall(c) || undefined);
+}
+
 /** The value compared with itself; toBe of a non-variable checks identity, e.g. a getter returning the same object. */
 function comparesWithItself(c: Matched, actual: ts.Expression): boolean {
 	const [expected, ...more] = c.matcher.arguments;
 	if (!expected || more.length > 0 || c.mods.includes('not') || expected.getText() !== actual.getText()) return false;
-	return ts.isIdentifier(actual) || calleeName(c.matcher) !== 'toBe';
+	// two calls are two results: equal ones show the code is deterministic
+	return ts.isIdentifier(actual) || (calleeName(c.matcher) !== 'toBe' && !hasCall(actual));
 }
 
 /** `not.toThrow` on an async function: it returns a promise and never throws synchronously. */
@@ -445,7 +467,8 @@ function testFindings(t: TestCase, sf: ts.SourceFile, helpers: Set<string>): Fin
 	const asserts = countAssertions(t.body, helpers) > 0;
 	if (!asserts && !runsCode(t.body)) add('empty-test', 'the test neither runs code nor asserts: it always passes');
 	const chains = expectChains(t.body);
-	const dangling = chains.find((c) => !c.matcher);
+	// Chai ends in a property: expect(x).to.be.true
+	const dangling = chains.find((c) => !c.matcher && !c.mods.includes('to'));
 	if (dangling) add('dangling-expect', 'expect(...) without a called matcher checks nothing: add the matcher call, e.g. .toBe(...)', dangling.outer);
 	const unawaited = chains.find(isUnawaited);
 	if (unawaited) add('unawaited-assertion', 'a resolves/rejects/poll assertion that is not awaited or returned settles after the test passed: await it', unawaited.outer);

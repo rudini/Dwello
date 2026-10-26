@@ -81,6 +81,25 @@ describe('check: baseline, suppressions, hints and formats', () => {
 		expect(result.stdout).toContain('src/b.test.ts:1 invalid-suppression');
 	});
 
+	it('skips a finding suppressed on the line above it, and reports a suppression of an unknown rule', () => {
+		const root = repo({});
+		write(root, {
+			'src/a.test.ts': `it('adds', () => {\n\t// testcheck-ignore dangling-expect -- documents the old API\n\texpect(add(1, 2));\n});\n`,
+			'src/b.test.ts': `// testcheck-ignore no-such-rule -- why\nit('adds', () => { expect(add(1, 2)).toBe(3); });\n`
+		});
+		const result = run(root, 'check');
+		expect(result.stdout).not.toContain('src/a.test.ts');
+		expect(result.stdout).toContain('src/b.test.ts:1 invalid-suppression');
+	});
+
+	it('names in agent mode what failed, also for a title rule', () => {
+		const root = repo({});
+		write(root, { 'src/a.test.ts': `it('adds', () => { expect(add(1, 2)).toBe(3); });\nit('adds', () => { expect(add(2, 2)).toBe(4); });\n` });
+		const result = run(root, 'check', '--agent');
+		expect(result.stdout).toMatch(/^testcheck: 1 finding fails the test gate/);
+		expect(result.stdout).toContain('src/a.test.ts:2 duplicate-title adds');
+	});
+
 	it('shows hints of the less precise rules without failing', () => {
 		const root = repo({});
 		write(root, { 'src/a.test.ts': `it('rows', () => { for (const r of rows()) expect(r).toBe(1); });\n` });

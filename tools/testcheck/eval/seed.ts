@@ -61,7 +61,8 @@ const PLANTS: Plant[] = [
 		apply: (text, t) => {
 			const e = firstExpect(text, t);
 			const expected = e?.matcher.arguments[0];
-			return e && expected && !ts.isFunctionLike(expected) ? replace(text, [e.actual.getStart(), e.actual.end], expected.getText()) : undefined;
+			// an expected value with a call would compare two results, which the rule accepts on purpose
+			return e && expected && !ts.isFunctionLike(expected) && !expected.getText().includes('(') ? replace(text, [e.actual.getStart(), e.actual.end], expected.getText()) : undefined;
 		}
 	},
 	{

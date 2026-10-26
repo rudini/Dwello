@@ -35,6 +35,22 @@ describe('testcheck Claude Code hook', () => {
 		expect(result.stderr).toContain('src/a.test.ts:1 dangling-expect adds');
 	});
 
+	it('judges a push against the upstream, so committed findings count', () => {
+		const root = repoWith(`it('adds', () => { expect(add(1, 2)); });\n`);
+		execFileSync('git', ['update-ref', 'refs/remotes/origin/main', 'HEAD'], { cwd: root });
+		execFileSync('git', ['add', '-A'], { cwd: root });
+		execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'y'], { cwd: root });
+		const result = hook(root, ['git', 'push'].join(' '));
+		expect(result.status).toBe(2);
+		expect(result.stderr).toContain('src/a.test.ts:1 dangling-expect adds');
+	});
+
+	it('lets the command through with a notice when testcheck fails as a tool', () => {
+		const result = hook(mkdtempSync(join(tmpdir(), 'testcheck-no-git-')), COMMIT);
+		expect(result.status).toBe(0);
+		expect(result.stderr).toContain('testcheck-gate: testcheck error');
+	});
+
 	it('lets other commands and passing tests through', () => {
 		expect(hook(repoWith(`it('adds', () => { expect(add(1, 2)).toBe(3); });\n`), COMMIT).status).toBe(0);
 		expect(hook(repoWith(`it('a', () => {});\n`), 'ls src').status).toBe(0);
