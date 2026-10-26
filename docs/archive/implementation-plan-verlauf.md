@@ -3476,3 +3476,13 @@ No scenario: CI only, no app behaviour changes.
 - [x] Review i777 round 1 (`docs/reviews/i777-review-1.md`): C-1 (Blocker, setup-bun needs unzip, which the image lacks) fixed by installing Bun with npm; C-2 (risk row RI-T1-4) updated
 - [x] Re-review (`docs/reviews/i777-review-2.md`): C-1, C-2 fixed, nothing new
 - [x] PR: Fixes #777, pushed after this archive; the PR and `main` runs are the proof (install step gone)
+
+## Session: #754, «Suche ohne Treffer» lost in Firefox (T1)
+
+No scenario: the failing scenario `buildings.feature` «Suche ohne Treffer» covers it unchanged.
+
+- [x] Read the trace of the failure on main (run 40239565626, artifact e2e-reports-2): the click on «Suchen» came 125 ms after `data-hydrated`, and no request to `/buildings?search=…` followed: the submit handler's `goto` did not navigate
+- [x] The building search is a plain GET form (as the tenant and contract lists): before the router is ready the browser sends it, after it the router; DOM test first (red), the old goto test checks the sent fields
+- [x] Checks: unit tests of the lists, lint, check, `buildings.feature` in Chromium (also 5× the search scenarios); Firefox only on CI
+- [x] Review and closing round (`docs/reviews/i754-review-1.md`): no findings; apartments and invoices use the same goto (out of scope, an issue if CI confirms the cause)
+- [x] PR: Fixes #754, pushed after this archive
