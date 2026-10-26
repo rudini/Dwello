@@ -37,6 +37,7 @@ jobs:
       backend: ${{ steps.diff.outputs.backend }}
       app: ${{ steps.diff.outputs.app }}
       ui: ${{ steps.diff.outputs.ui }}
+      playwright: ${{ steps.diff.outputs.playwright }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -46,6 +47,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           HEAD_REF: ${{ github.head_ref }}
         run: |
+          # the Playwright version the lockfile pins, so the E2E jobs run in its image (#777)
+          echo "playwright=$(sed -n 's/.*"playwright": \["playwright@\([0-9.]*\)".*/\1/p' bun.lock | head -1)" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
@@ -187,6 +190,11 @@ jobs:
     # Pull requests: Chromium and the API driver only; every browser on each push to main and nightly, so a race only
     # Firefox or WebKit loses shows on main right after the merge
     timeout-minutes: 60
+    # The Playwright image of the locked version brings the browsers and their system packages, so no apt install runs
+    # at run time and a slow mirror cannot hold a shard up (#777); user 1001 owns the runner's workspace
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.changes.outputs.playwright }}-noble
+      options: --user 1001
     strategy:
       fail-fast: false
       matrix:
@@ -203,9 +211,10 @@ jobs:
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
-      # The axe check and pull requests: Chromium only; else the E2E tests in every browser (with the API driver)
-      BROWSERS: ${{ (matrix.reports == 'a11y-reports' || github.event_name == 'pull_request') && 'chromium' || 'chromium firefox webkit' }}
+      # Pull requests: Chromium and the API driver; else the E2E tests in every browser (the axe check picks Chromium)
       PROJECTS: ${{ matrix.reports == 'e2e-reports' && github.event_name == 'pull_request' && '--project=api --project=chromium' || '' }}
+      # inside the container the database is the service, not localhost
+      E2E_DATABASE_URL: postgresql://dwello:dwello@postgres:5432/dwello_e2e
     services:
       postgres:
         image: postgres:16-alpine
@@ -237,15 +246,6 @@ jobs:
       - run: bun install --frozen-lockfile
         if: env.SKIP != 'true'
         working-directory: backend
-      # The browsers of this Playwright version from the cache; their system packages are installed each time
-      - uses: actions/cache@v6
-        if: env.SKIP != 'true'
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ env.BROWSERS }}
-      - name: Install Playwright browsers
-        if: env.SKIP != 'true'
-        run: bunx playwright install --with-deps ${{ env.BROWSERS }}
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
         run: bun run test:e2e -- ${{ matrix.filter }} ${{ env.PROJECTS }} --shard=${{ matrix.shard }}/${{ matrix.shards }}

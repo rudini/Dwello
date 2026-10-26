@@ -8,3 +8,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #777, CI: E2E and axe shards without apt at run time (T1)
+
+No scenario: CI only, no app behaviour changes.
+
+- [x] The E2E and axe jobs run in the Playwright image of the version in `bun.lock` (`mcr.microsoft.com/playwright:v<version>-noble`, browsers and system packages included); the `changes` job reads the version; no browser cache, no `playwright install --with-deps`
+- [x] Postgres reached by its service name inside the container (`E2E_DATABASE_URL`)
+- [ ] Review; PR run shows the shards green and no install step; a run on `main` likewise (issue «Done means»)
+- [ ] PR: Fixes #777
