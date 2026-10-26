@@ -3554,7 +3554,7 @@ No scenario: the change touches only the Compose file and docs; the app behaves 
 - [x] Test first: no commented nginx service in `docker-compose.prod.yml`; `docs/installation.md` names the limit of the `Dockerfile` for another proxy
 - [x] Remove the nginx block from `docker-compose.prod.yml`; `docs/tech-stack.md` names Caddy instead
 - [x] `docs/installation.md`: another proxy lets at least 11 MB through (nginx `client_max_body_size 11m`)
-- [x] ADR 0005: global `BODY_SIZE_LIMIT=11M`, 413 page without JavaScript as known limit
+- [x] ADR 0006 (renumbered after #837 took 0005): global `BODY_SIZE_LIMIT=11M`, 413 page without JavaScript as known limit
 - [x] Slice review round 1: `docs/reviews/732-review-1.md`; English 413 heading → #847
 - [x] Archive the session, PR (`Fixes #732`): pushed after this archive
 ## Session: #837 cycle 1, statements (Ä1)

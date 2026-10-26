@@ -1,4 +1,4 @@
-# ADR 0005: Eine Grösse für alle Anfragen an die Web-App
+# ADR 0006: Eine Grösse für alle Anfragen an die Web-App
 
 - **Status:** angenommen (Product Owner, 26.10.2026, #732)
 - **Szenario:** Hochladen von Dokumenten und Rechnungen bis 10 MB in einer selbst betriebenen Installation
