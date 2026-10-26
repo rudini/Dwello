@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classify } from './lib';
+import { classify, entityFiles } from './lib';
 
 describe('classify', () => {
 	it('ordnet einen Endpunkt +server.ts unter src/routes einem BFF-Modul zu', () => {
@@ -19,5 +19,21 @@ describe('classify', () => {
 			kind: 'other',
 			module: 'backend/demo'
 		});
+	});
+});
+
+// Ä1 (#843, product owner 26.10.2026): a file copies an entity's field only where it declares another field of it too
+describe('entityFiles', () => {
+	it('zählt eine Datei nur für die Felder einer Tabelle, von der sie mindestens zwei deklariert', () => {
+		const files = new Map([
+			['value', ['settings.ts', 'chart.ts']],
+			['key', ['settings.ts']]
+		]);
+		expect(entityFiles(files)).toEqual(
+			new Map([
+				['value', ['settings.ts']],
+				['key', ['settings.ts']]
+			])
+		);
 	});
 });
