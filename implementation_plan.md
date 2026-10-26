@@ -9,3 +9,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: #837 cycle 2, rental contracts (ADR 0005)
+
+- [x] Measure before on `origin/main`: field spread 4 / 13 / 36, entity mirrors 50, value lists 13, `types.ts` fields 40
+- [x] `backend/src/api/contract.ts` (`ContractWithDetails`, `ContractDetails`, `ContractResponse`, `ContractStatus`) and `api/apartment.ts` (`ApartmentStatus`); services typed against them, casts gone (inner joins: the foreign keys guarantee tenant, apartment and building); route `satisfies ContractResponse`
+- [x] BFF mappers take `Json<…>` (contract list, detail, edit, history on apartment and tenant pages); `RentalContract`, `ContractHistory`, `ContractWithDetails`, `ApartmentStatus` in `src/lib/types.ts` derived
+- [x] Measure after, `fitness --update`: 4 / 13 / 36, entity mirrors 49, value lists 12, `types.ts` fields 30
+- [ ] `code-reviewer` round
+- [ ] ADR 0005 table for cycle 2
+- [ ] Archive the session; PR «Refs #837»

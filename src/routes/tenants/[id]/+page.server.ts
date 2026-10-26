@@ -2,37 +2,34 @@ import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { deleteDocument, loadDocuments, uploadDocument } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
-import { monthlyTotal, toContractHistory } from '$lib/server/contract-history';
+import { monthlyTotal, toContractHistory, type ContractRow } from '$lib/server/contract-history';
 import { backendMessage } from '$lib/backend-error';
 import type { Tenant } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
-type BackendContract = Record<string, any>;
-
-const apartmentOf = (c: BackendContract) =>
+const apartmentOf = (c: ContractRow) =>
 	m.buildings_apartment_number({ number: c.apartmentNumber });
 
 // The running contract, otherwise the next one the tenant moves in with: the backend names it (H-28, #717)
-function currentRental(contracts: BackendContract[], tenant: Tenant) {
+function currentRental(contracts: ContractRow[], tenant: Tenant) {
 	const contract = contracts.find((c) => c.id === tenant.rentalContractId);
 	if (!contract) return null;
 	return {
-		contractId: contract.id as string,
-		apartmentId: contract.apartmentId as string,
+		contractId: contract.id,
+		apartmentId: contract.apartmentId,
 		apartment: apartmentOf(contract),
-		building: contract.buildingName as string,
+		building: contract.buildingName,
 		monthlyTotal: monthlyTotal(contract),
-		startDate: contract.startDate as string,
+		startDate: contract.startDate,
 		upcoming: !!tenant.isFuture
 	};
 }
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const tenant = await loadTenant(fetch, params.id);
-	const { contracts } = await (
+	const { contracts }: { contracts: ContractRow[] } = await (
 		await fetch(`${API}/contracts?tenantId=${params.id}&limit=100`)
 	).json();
 	const name = `${tenant.firstName} ${tenant.lastName}`;
@@ -57,7 +54,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	return {
 		tenant,
 		rental: currentRental(contracts, tenant),
-		contractHistory: contracts.map((c: BackendContract) => ({
+		contractHistory: contracts.map((c) => ({
 			...toContractHistory(c, name),
 			apartment: apartmentOf(c)
 		})),

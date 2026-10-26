@@ -184,20 +184,21 @@ describe('Mieterdetail', () => {
 });
 
 describe('Vertragsstatus in der Historie', () => {
-	it.each(['active', 'ended', 'future'])('gibt den Status %s des Backends weiter', (status) => {
+	it.each(['active', 'ended', 'future'] as const)('gibt den Status %s des Backends weiter', (status) => {
 		expect(toContractHistory({ id: 'c', startDate: day(-10), endDate: null, status }, 'Anna').status).toBe(status);
 	});
 	// A-1: Wohnungs- und Mieterseite nennen eine Kündigung wie die Detailseite
 	it('gibt weiter, ob der Mietvertrag gekündigt ist', () => {
-		const contract = { id: 'c', startDate: day(-10), endDate: day(10) };
+		const contract = { id: 'c', startDate: day(-10), endDate: day(10), status: 'active' as const };
 		expect(toContractHistory({ ...contract, terminated: true }, 'Anna').terminated).toBe(true);
 		expect(toContractHistory(contract, 'Anna').terminated).toBe(false);
 	});
 	// #429: die Nebenkostenpauschale zählt im Monatlich total
 	it('zählt die Nebenkostenpauschale im Monatlich total', () => {
-		const withFlatRate = { ...contractResponse, flatRateUtilityCharge: '120.00' };
+		const contract = { ...contractResponse, status: 'active' as const };
+		const withFlatRate = { ...contract, flatRateUtilityCharge: '120.00' };
 		expect(toContractHistory(withFlatRate, 'Anna').monthlyTotal).toBe(
-			toContractHistory(contractResponse, 'Anna').monthlyTotal + 120
+			toContractHistory(contract, 'Anna').monthlyTotal + 120
 		);
 	});
 });

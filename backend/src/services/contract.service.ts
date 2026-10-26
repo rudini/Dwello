@@ -23,6 +23,9 @@ import { oldAddress } from './old-address';
 import { laterContract } from './later-contract';
 import { daysAfter, sqlToday, swissToday } from './today';
 import { countingInSql, replacedInSql } from './counting-statements';
+import type { ContractDetails, ContractStatus, ContractWithDetails } from '../api/contract';
+
+export type { ContractWithDetails };
 
 /** The database, or a transaction of it */
 type Query = Pick<typeof db, 'select' | 'delete'>;
@@ -53,7 +56,7 @@ const contractFields = {
 	createdAt: rentalContracts.createdAt,
 	updatedAt: rentalContracts.updatedAt,
 	// whether it runs on the Swiss day (H-28, #717): the pages take it from here
-	status: sql<'active' | 'ended' | 'future'>`case when ${rentalContracts.startDate} > ${sqlToday} then 'future' when ${rentalContracts.endDate} < ${sqlToday} then 'ended' else 'active' end`,
+	status: sql<ContractStatus>`case when ${rentalContracts.startDate} > ${sqlToday} then 'future' when ${rentalContracts.endDate} < ${sqlToday} then 'ended' else 'active' end`,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
@@ -63,14 +66,14 @@ const contractFields = {
 	oldAddress: oldAddress(rentalContracts.id) // A-5: a moved-out tenant still has the building's address
 };
 
-/** Contracts with their tenant, apartment and building, as contractFields */
+/** Contracts with their tenant, apartment and building, as contractFields; inner joins: foreign keys guarantee all three */
 function selectContracts() {
 	return db
 		.select(contractFields)
 		.from(rentalContracts)
-		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
-		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id));
+		.innerJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
+		.innerJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
+		.innerJoin(buildings, eq(apartments.buildingId, buildings.id));
 }
 
 /** Contracts of an apartment running at some point between two dates (open-ended ones included) */
@@ -86,20 +89,10 @@ export interface ContractFilters {
 	apartmentId?: string;
 	tenantId?: string;
 	buildingId?: string;
-	status?: 'active' | 'ended' | 'future';
+	status?: ContractStatus;
 	search?: string;
 	limit?: number;
 	offset?: number;
-}
-
-export interface ContractWithDetails extends RentalContract {
-	tenantName: string;
-	tenantEmail: string | null;
-	apartmentNumber: string;
-	buildingId: string;
-	buildingName: string;
-	buildingAddress: string;
-	oldAddress: boolean;
 }
 
 /**
@@ -173,7 +166,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	const [{ count: total }] = await countQuery.where(whereClause);
 
 	return {
-		contracts: results as ContractWithDetails[],
+		contracts: results,
 		total: Number(total)
 	};
 }
@@ -181,7 +174,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 /**
  * Get a single contract by ID
  */
-export async function getContract(id: string): Promise<ContractWithDetails | null> {
+export async function getContract(id: string): Promise<ContractDetails | null> {
 	const [contract] = await db
 		.select({
 			...contractFields,
@@ -212,13 +205,13 @@ export async function getContract(id: string): Promise<ContractWithDetails | nul
 			}
 		})
 		.from(rentalContracts)
-		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
-		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.innerJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
+		.innerJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
+		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(eq(rentalContracts.id, id))
 		.limit(1);
 
-	return (contract as ContractWithDetails) || null;
+	return contract ?? null;
 }
 
 /**
@@ -272,7 +265,7 @@ export async function getActiveContract(
 		.where(apartmentContractsBetween(apartmentId, date, date))
 		.limit(1);
 
-	return (contract as ContractWithDetails) || null;
+	return contract ?? null;
 }
 
 /** What a running notice still asks of the landlord (A-4, review K-1); null without one */
@@ -316,7 +309,7 @@ export async function getContractsByPeriod(
 		.where(apartmentContractsBetween(apartmentId, periodStart, periodEnd))
 		.orderBy(rentalContracts.startDate);
 
-	return contracts as ContractWithDetails[];
+	return contracts;
 }
 
 /** A notice is given for a Kündigungstermin: without an end there is nothing to give notice for */
