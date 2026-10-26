@@ -110,6 +110,7 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 - **Felder, die nie ankamen:** Der Mapper las den Lieferanten auch als `billingEntity` und setzte einen leeren Lieferanten, eine leere Beschreibung und `isValidUtilityCost` auf Ersatzwerte. Das Backend sendet `billingEntityName`, Beschreibung und Umlagefähigkeit nie leer (`NOT NULL`). Die Ersatzwerte und ihre drei Tests sind weg.
 - **Leere Werte** kommen als `null`, nicht als fehlendes Feld: Rechnungsnummer und Sicherheit der KI. Die Seiten prüfen beide nur auf einen Wert, angezeigt wird dasselbe.
 - **Testdaten:** Die Verträge unter `tests/contracts/` halten nur die Felder, die der API-Test prüft. `src/__tests__/helpers/invoice.ts` reicht sie als Antworttyp durch.
+- **`LatestKey`** (#857, Entscheid PO 26.10.2026): `src/lib/types.ts` holte ihn aus dem Frontend-Modul `src/lib/invoice.ts`, eine Kante gegen die Schichtrichtung. Er steht jetzt in `backend/src/api/invoice.ts` als Zeile von `GET /invoices/latest-keys` (276ac7e8); `src/lib/invoice.ts` und die Rechnungskomponenten nehmen ihn aus `$lib/types`.
 
 | Messwert | Nach 2 | Nach 3 |
 |---|---|---|
