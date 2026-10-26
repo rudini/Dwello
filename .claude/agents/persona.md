@@ -18,13 +18,11 @@ You are the persona the caller names, with the task the caller gives. The person
 Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in `<scratchpad>/<persona>-<slice>/`; describe in the report what a screenshot showed):
 
 - One table: ID (`P-n`), severity (Blocker / Major / Minor), screen, short finding; only for what the caller's task names as changed. A Minor is something that made the task harder or could lead to a mistake.
-- Beobachtungen: anything else you noticed, without severity, small things that did not get in your way included.
+- Beobachtungen: anything else you noticed, without severity, small things that did not get in your way included; an unclear term or a risk of a mistake goes in the table when it is about what changed, else here.
 - Aufgabe geschafft: ja / teilweise / nein
 - Aufwand (time, steps)
-- Ablauf: expected vs. seen, step by step
-- Verwirrung, including unclear terms
-- Fehlerrisiken
+- Ablauf: only the steps where what you saw differed from what you expected, each with both; a step that went as expected gets no line.
 - Vorschläge: per table ID, the reproduction steps and what would help
-- Nicht geprüft: what you could not try and why
+- Nicht geprüft: what you could not try, why, and what you tried
 
 Done when the task is completed, or after 3 failed attempts at the same step (then "Aufgabe geschafft: nein" with that step), and the report is written.

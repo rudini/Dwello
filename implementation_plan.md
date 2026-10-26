@@ -9,3 +9,14 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session 2026-10-26 b: agents against the Opus 5.5 guide
+
+Request: review the agents against «Getting the most out of Opus 5.5» and apply G-1 (measure the effort), G-2 (shorter persona report), G-3 (daten-pruefer like the other reviewers). No scenario: changes only agent instructions, no app behaviour.
+
+- [x] G-2 `persona`: «Ablauf» only for steps that differed; «Verwirrung» and «Fehlerrisiken» go into the table or «Beobachtungen»
+- [x] G-3 `daten-pruefer`: no Nits, «Geprüft» in one line, «where you looked»; `slice-review` names no Nit any more
+- [ ] G-1 effort benchmark low vs high: code-reviewer (#233 round 3, 790a), fach-reviewer (#459 B), persona Marco (#233); report `docs/reviews/agent-effort-benchmark.md`
+- [ ] Pin `effort` per agent from the benchmark
+- [ ] code-reviewer round 1
+- [ ] PR
