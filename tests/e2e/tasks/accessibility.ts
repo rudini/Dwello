@@ -143,11 +143,20 @@ const startDraft: Record<string, (example: Example) => Activity> = {
 		actor.attemptsTo(Click.on(nextButton), tickBuilding(example.building))
 };
 
+// what the restored step still loads after the reload: the statement wizard's building step shows each building's
+// invoices once its answers are in; «nothing loading» alone holds before the loading starts, and the rows grew under
+// axe's look (#778, target-size of a building's checkbox)
+const draftSettled: Record<string, (example: Example) => Activity> = {
+	'/statements/generate': (example) => Wait.until(buildingInvoiceCount(example.building))
+};
+
 // a draft starts with an input; reloaded, the wizard restores it
 const restoreDraft = (example: Example): Activity => async (actor) => {
-	const start = startDraft[new URL(await actor.answer(pageAddress)).pathname];
+	const path = new URL(await actor.answer(pageAddress)).pathname;
+	const [start, settled] = [startDraft[path], draftSettled[path]];
 	await actor.attemptsTo(start(example));
 	await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Noch nicht gespeichert'))), Navigate.reload, Wait.until(draftRestored));
+	if (settled) await actor.attemptsTo(settled(example));
 	// the statement wizard's step settles first: rows arriving later scroll the page while axe looks (#637)
 	await actor.attemptsTo(Wait.forCount(agreementsLoading, 0));
 };
