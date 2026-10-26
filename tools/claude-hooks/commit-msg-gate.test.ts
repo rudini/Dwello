@@ -46,7 +46,8 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		['(cd /tmp && git commit -m a) && git commit -m "fix: guard retries"', 'type(scope)'],
 		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)'],
 		// a commit and a push in one command: the push check runs before the commit exists
-		["git commit -q -F - <<'EOF'\nfix(contracts): mark unchecked apartments in choice\n\nBody.\nEOF\ngit push", '51 characters']
+		["git commit -q -F - <<'EOF'\nfix(contracts): mark unchecked apartments in choice\n\nBody.\nEOF\ngit push", '51 characters'],
+		["git commit -F - 2>&1 <<'EOF' && git push\nfix(contracts): mark unchecked apartments in choice\nEOF", '51 characters']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);

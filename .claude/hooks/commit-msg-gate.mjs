@@ -61,7 +61,7 @@ function messageOf(args, rest) {
 		// `-F -` with a heredoc: the message is in the command (a push in the same command runs before this commit)
 		if (/^(-[a-zA-Z]*F|--file)$/.test(args[i]) && args[i + 1] === '-') {
 			// only a heredoc this git call opens, not one of a later command
-			const marker = /<<-?\s*['"]?(\w+)['"]?/.exec(rest.split(/[\n;&|]/)[0])?.[1];
+			const marker = /<<-?\s*['"]?(\w+)['"]?/.exec(rest.split(/\n|;|&&|\|/)[0])?.[1];
 			return marker && new RegExp(`\\n([\\s\\S]*?)\\n\\s*${marker}\\s*(\\n|$)`).exec(rest)?.[1];
 		}
 		const joined = /^(?:-m|--message=)([\s\S]+)$/.exec(args[i]);
