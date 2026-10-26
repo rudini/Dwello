@@ -12,7 +12,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #869 flaky «Suche ohne Treffer» in Firefox
 
 - [x] Cause from the trace of run 40400795129 (shard 3): the search was typed and «Suchen» clicked, but no request followed; the page had `data-hydrated`, which the root layout set in `onMount`, before SvelteKit's router listens for submits (probe: a click at the marker loads the document natively instead of through the router)
-- [ ] Layout sets `data-hydrated` one task after mounting, once the router listens (DOM test, red first)
-- [ ] Probe on the E2E stack: a click at the marker goes through the router
+- [x] Layout sets `data-hydrated` one task after mounting, once the router listens (DOM test, red first; `src/routes/+layout.svelte`, `src/__tests__/layout-hydrated.dom.test.ts`)
+- [x] Probe on the E2E stack: a click at the marker goes through the router (5 of 5; before: native document load)
 - [ ] Affected E2E scenarios (buildings, chromium) green
-- [ ] Slice review, closing round, PR `Fixes #869`
+- [x] Slice review round 1: `docs/reviews/i869-review-1.md`
+- [ ] PR `Fixes #869`
