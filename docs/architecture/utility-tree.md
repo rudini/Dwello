@@ -65,7 +65,7 @@ Dwello-Nutzen
 - **Umgebung:** Entwicklung. Die Entität hat eine Liste, ein Detail und ein Formular.
 - **Reaktion:** Das Feld ist in DB, API, BFF und UI verfügbar und wird im Backend geprüft.
 - **Messgrösse und Ziel:** Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren: **Median ≤ 4, P90 ≤ 8** (vom Nutzer bestätigt, Baseline §7).
-- **Heute:** Median **4**, P90 **13**, Max 36 (`utilityStatements.periodEnd`) über 125 Felder (gemessen 26.10.2026 nach #837 Zyklus 2, unverändert seit Zyklus 1b, `m4-field-spread.csv`; der Median erreicht das Ziel). Seit #843 zählt eine Datei für ein Feld nur, wenn sie ein weiteres Feld derselben Tabelle deklariert (Entscheid PO 26.10.2026; vorher Median 6, P90 19, Max 59 in Phase 0, darunter Worttreffer wie jedes `value:` für `configuration.value`). `schema.ts` ↔ `types.ts`: 26 gemeinsame Änderungen ohne Import (gemessen, Phase 0).
+- **Heute:** Median **4**, P90 **12**, Max 36 (`utilityStatements.periodEnd`) über 125 Felder (gemessen 26.10.2026 nach #837 Zyklus 3, `m4-field-spread.csv`; der Median erreicht das Ziel). Seit #843 zählt eine Datei für ein Feld nur, wenn sie ein weiteres Feld derselben Tabelle deklariert (Entscheid PO 26.10.2026; vorher Median 6, P90 19, Max 59 in Phase 0, darunter Worttreffer wie jedes `value:` für `configuration.value`). `schema.ts` ↔ `types.ts`: 26 gemeinsame Änderungen ohne Import (gemessen, Phase 0).
 - **Fitness Function:** `tools/arch-baseline/run.sh` → `m4-field-spread.csv` vierteljährlich (Baseline §7, «Messrhythmus»). Schneller wirkt ein CI-Check pro PR: Ein neues Feld in `schema.ts` darf in höchstens 4 weiteren Produktivdateien als Schlüssel auftauchen (Heuristik aus `05-knowledge`).
 
 ### Ä4 Fachregel nur im Backend

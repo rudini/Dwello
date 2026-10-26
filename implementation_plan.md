@@ -16,5 +16,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] BFF `toInvoice` takes `Json<…>`; `Invoice` in `src/lib/types.ts` picked from the response; dead fallbacks for fields the backend never sends dropped (`billingEntity`, empty supplier)
 - [x] Measure after, `fitness --update`: 4 / **12** / 36, entity mirrors 47
 - [ ] `code-reviewer` round
-- [ ] ADR 0005 table for cycle 3
+- [x] ADR 0005 table for cycle 3; utility tree P90 12
 - [ ] Workflow notes; archive; PR «Refs #837»
