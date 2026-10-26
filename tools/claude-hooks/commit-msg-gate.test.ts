@@ -26,6 +26,7 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		['git commit --amend --no-edit'],
 		['git commit -F message.txt'],
 		["git commit -q -F - <<'EOF'\nfix(contracts): guard contract retries\n\nA body line longer than fifty characters, as usual.\nEOF"],
+		["git log -1 --format=%B | git commit --amend -F - && cat > notes.txt <<'EOF'\nsome notes here\nEOF"],
 		['git status && git log -m'],
 		['echo "git commit -m nope"'],
 		['git commit -am "fix(contracts): guard retries" -m "a body line that is longer than fifty characters"']
@@ -90,7 +91,7 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(blocked.stderr).not.toContain('nothing in this command ran');
 	});
 
-	// a subject given with -F or a heredoc file passes the commit unchecked; the push checks the commits themselves,
+	// a subject given with -F <file> passes the commit unchecked; the push checks the commits themselves,
 	// as CI «Commit subjects» does (workflow review 2026-10-23, L1)
 	it('blocks a push while a commit since origin/main breaks the rules, whatever gave its subject', () => {
 		const project = writeRepo({
