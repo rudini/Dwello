@@ -3640,3 +3640,4 @@ Request: delete the review and persona reports of finished tasks (product owner,
 
 - [x] 608 files removed; they stay readable at 294f77f6
 - [x] PR: pushed after this archive
+- [x] `LatestKey` to `backend/src/api/invoice.ts` (#857, 276ac7e8); `code-reviewer` round: `docs/reviews/i837c3-latest-review-1.md`
