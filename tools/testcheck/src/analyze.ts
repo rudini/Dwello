@@ -248,24 +248,31 @@ function enclosingPromise(n: ts.Node, root: ts.Node): ts.NewExpression | undefin
  * Whether a call's promise is awaited, returned or the body of a concise arrow before reaching the test body, also
  * through `Promise.all([...])` or as a callback in the executor of a `new Promise` the test waits for.
  */
-function isWaitedFor(call: ts.Node, root: ts.Node): boolean {
+function isWaitedFor(call: ts.Node, root: ts.Node, seen = new Set<ts.Node>()): boolean {
 	for (let n = call; ; n = n.parent) {
 		if (n === root) return ts.isArrowFunction(n.parent) && n.parent.body === n;
 		if (returns(n.parent, n)) return true;
 		if (!isChainLink(n.parent) && !inCombinator(n.parent)) break;
 	}
 	const promise = enclosingPromise(call, root);
-	return !!promise && (isWaitedFor(promise, root) || storedAndWaitedFor(promise, root));
+	if (!promise || seen.has(promise)) return false;
+	seen.add(promise);
+	return isWaitedFor(promise, root, seen) || storedAndWaitedFor(promise, root, seen);
 }
 
-/** `const p = new Promise(...)`, later `await p` (or returned, or in `Promise.all`, or `expect(p).resolves`). */
-function storedAndWaitedFor(promise: ts.NewExpression, root: ts.Node): boolean {
+/**
+ * `const p = new Promise(...)`, later `await p` (or returned, or in `Promise.all`, or `expect(p).resolves`). Uses of
+ * the name inside the promise itself and property names (`msg.p`) do not count.
+ */
+function storedAndWaitedFor(promise: ts.NewExpression, root: ts.Node, seen: Set<ts.Node>): boolean {
 	const decl = promise.parent;
 	if (!ts.isVariableDeclaration(decl) || !ts.isIdentifier(decl.name)) return false;
 	const name = decl.name.text;
+	const isUse = (n: ts.Node): n is ts.Identifier =>
+		ts.isIdentifier(n) && n.text === name && n !== decl.name && !(ts.isPropertyAccessExpression(n.parent) && n.parent.name === n) && (n.pos >= promise.end || n.end <= promise.pos);
 	let waited = false;
 	const visit = (n: ts.Node): void => {
-		if (ts.isIdentifier(n) && n.text === name && n !== decl.name && isWaitedFor(n, root)) waited = true;
+		if (isUse(n) && isWaitedFor(n, root, seen)) waited = true;
 		else if (!waited) ts.forEachChild(n, visit);
 	};
 	visit(root);
@@ -430,7 +437,7 @@ function comparesWithItself(c: Matched, actual: ts.Expression): boolean {
 	const [expected, ...more] = c.matcher.arguments;
 	if (!expected || more.length > 0 || c.mods.includes('not') || expected.getText() !== actual.getText()) return false;
 	// two calls are two results: equal ones show the code is deterministic
-	return ts.isIdentifier(actual) || (calleeName(c.matcher) !== 'toBe' && !runsCode(actual));
+	return ts.isIdentifier(actual) || (calleeName(c.matcher) !== 'toBe' && !contains(actual, isCall));
 }
 
 /** `not.toThrow` on an async function: it returns a promise and never throws synchronously. */
@@ -449,15 +456,14 @@ function isTautology(c: ExpectChain): boolean {
 
 const parse = (file: string, text: string) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
 
-function runsCode(node: ts.Node): boolean {
-	let found = false;
-	const visit = (x: ts.Node): void => {
-		if (ts.isCallExpression(x) || ts.isNewExpression(x) || ts.isAwaitExpression(x) || ts.isTaggedTemplateExpression(x)) found = true;
-		else if (!found) ts.forEachChild(x, visit);
-	};
-	visit(node);
-	return found;
+const isCall = (x: ts.Node) => ts.isCallExpression(x) || ts.isNewExpression(x) || ts.isTaggedTemplateExpression(x);
+
+/** Whether a node holds a node of a kind: a call, or with `await` any code that runs. */
+function contains(node: ts.Node, kind: (x: ts.Node) => boolean): boolean {
+	return kind(node) || !!ts.forEachChild(node, (c) => contains(c, kind) || undefined);
 }
+
+const runsCode = (node: ts.Node) => contains(node, (x) => isCall(x) || ts.isAwaitExpression(x));
 
 function testFindings(t: TestCase, sf: ts.SourceFile, helpers: Set<string>): Finding[] {
 	const findings: Finding[] = [];

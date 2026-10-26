@@ -93,6 +93,10 @@ describe('tautology', () => {
 		expect(rules(code)).toEqual(['tautology a']);
 	});
 
+	it('flags an awaited value compared with itself', () => {
+		expect(rules(`it('a', async () => { expect(await p).toEqual(await p); });`)).toEqual(['tautology a']);
+	});
+
 	it('accepts two calls compared with each other, which checks that the result is the same each time', () => {
 		expect(rules(`it('ok', () => { expect(colors(0.125)).toEqual(colors(0.125)); });`)).toEqual([]);
 	});
@@ -165,10 +169,12 @@ describe('guarded assertions', () => {
 			`it('ok6', () => { return new Promise((resolve) => { setTimeout(() => { expect(g()).toBe(1); resolve(); }, 1); }); });`,
 			`it('ok7', async () => { await Promise.all([a().then((r) => expect(r).toBe(1))]); });`,
 			`it('ok8', async () => { const p = new Promise<void>((resolve) => { em.on('d', (v) => { expect(v).toBe(1); resolve(); }); }); em.emit('d', 1); await p; });`,
+			`it('ok9', async () => { const data = new Promise<void>((resolve) => { ws.on('message', (msg) => { expect(msg.data).toBe('x'); expect(data).toBeDefined(); resolve(); }); }); ws.send('x'); await data; });`,
+			`it('ok10', async () => { const a = new Promise((r) => { b.then(() => { expect(1 + f()).toBe(2); r(); }); }); const b = new Promise((r) => { a.then(() => r()); }); });`,
 			`it('c', async () => { const p = new Promise<void>((resolve) => { em.on('d', (v) => { expect(v).toBe(1); resolve(); }); }); em.emit('d', 1); });`,
 			`it('ok3', (done) => { setTimeout(() => { expect(g()).toBe(1); done(); }); });`
 		].join('\n');
-		expect(rules(code)).toEqual(['callback-only-assertion a', 'callback-only-assertion b', 'callback-only-assertion c']);
+		expect(rules(code)).toEqual(['callback-only-assertion a', 'callback-only-assertion b', 'callback-only-assertion ok10', 'callback-only-assertion c']);
 	});
 });
 

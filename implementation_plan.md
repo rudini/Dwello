@@ -20,5 +20,6 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] Gate on changed test files with a baseline, like deepcheck: `bun run testcheck:*`, hook `.claude/hooks/testcheck-gate.sh`, CI job, CLAUDE.md, skill `commit-gates`
 - [x] Slice review round 1 (`code-reviewer`): `docs/reviews/testcheck-review-1.md`
 - [x] Re-review of the C-1 fix and closing round (round 2): `docs/reviews/testcheck-review-2.md`
-- [ ] Re-review of the C-1 fix of round 2 (round 3)
+- [x] Re-review of the C-1 fix of round 2 (round 3): `docs/reviews/testcheck-review-3.md`
+- [ ] Closing round on the fix of C-11 and C-12 (a slice of its own, Workflow 7)
 - [ ] PR

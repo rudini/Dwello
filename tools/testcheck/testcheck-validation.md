@@ -57,7 +57,7 @@ The one wrong `tautology` of the first tuning run: excalidraw `expect(getSeriesL
 | `callback-only-assertion` | 5,731 | 5,728 | 99.9 % | 3 reported as `loop-only-assertion` |
 | `loop-only-assertion` | 5,731 | 5,731 | 100.0 % | |
 | `dangling-expect` | 6,049 | 6,049 | 100.0 % | |
-| `tautology` | 4,993 | 4,857 | 97.3 % | 136 by design: `expect(a.b).toBe(a.b)` checks identity (a getter returning the same object) and is not reported |
+| `tautology` | 4,993 | 4,859 | 97.3 % | 134 by design: `expect(a.b).toBe(a.b)` checks identity (a getter returning the same object) and is not reported |
 | `unawaited-assertion` | 77 | 77 | 100.0 % | |
 | `duplicate-body` | 4,956 | 4,926 | 99.4 % | by design: 28 tests in a loop, which are not compared (one of them reported as `loop-only-assertion`); 2 reported as `duplicate-title`, since the two tests also share their title |
 | `duplicate-title` | 4,956 | 4,929 | 99.5 % | by design: 27 tests in a loop (one reported as `loop-only-assertion`) |
