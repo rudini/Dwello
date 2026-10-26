@@ -38,6 +38,8 @@ jobs:
       app: ${{ steps.diff.outputs.app }}
       ui: ${{ steps.diff.outputs.ui }}
       playwright: ${{ steps.diff.outputs.playwright }}
+      shards: ${{ steps.diff.outputs.shards }}
+      matrix: ${{ steps.diff.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -49,6 +51,13 @@ jobs:
         run: |
           # the Playwright version the lockfile pins, so the E2E jobs run in its image (#777)
           echo "playwright=$(sed -n 's/.*"playwright": \["playwright@\([0-9.]*\)".*/\1/p' bun.lock | head -1)" >> "$GITHUB_OUTPUT"
+          # E2E shards: main runs every browser, about three times the tests of a pull request, so in more shards to stay
+          # near 15 min (#834); the axe check runs Chromium only, in three
+          e2e=$([ "${{ github.event_name }}" = pull_request ] && echo 5 || echo 12)
+          echo "shards=$(jq -nc --argjson e2e "$e2e" '{"E2E tests": $e2e, "Accessibility (axe)": 3}')" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(jq -nc --argjson e2e "$e2e" '
+            [range(1; $e2e + 1) | {name: "E2E tests", filter: "--grep-invert @a11y", reports: "e2e-reports", shard: ., shards: $e2e}]
+            + [range(1; 4) | {name: "Accessibility (axe)", filter: "--project=chromium --grep @a11y", reports: "a11y-reports", shard: ., shards: 3}]')" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
@@ -198,16 +207,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # E2E in five shards: Playwright splits by test count, and the slow screen checks (sprachen-bildschirme.feature)
-        # would otherwise fill one shard that runs twice as long as the others; the axe check in three (5 to 8 minutes each in five)
-        suite: [e2e, a11y]
-        shard: [1, 2, 3, 4, 5]
-        exclude:
-          - { suite: a11y, shard: 4 }
-          - { suite: a11y, shard: 5 }
-        include:
-          - { suite: e2e, name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shards: 5 }
-          - { suite: a11y, name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shards: 3 }
+        # From the job Changes: E2E in five shards on a pull request and twelve on main, the axe check in three. Playwright
+        # splits by test count, so with fewer shards the slow screen checks (sprachen-bildschirme.feature) fill one that
+        # runs twice as long as the others
+        include: ${{ fromJSON(needs.changes.outputs.matrix) }}
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
@@ -276,12 +279,11 @@ jobs:
       # one check failing must not cancel the other (run 634)
       fail-fast: false
       matrix:
-        include:
-          - { name: E2E tests, shards: 5 }
-          - { name: Accessibility (axe), shards: 3 }
+        name: [E2E tests, Accessibility (axe)]
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}
+          SHARDS: ${{ fromJSON(needs.changes.outputs.shards || '{}')[matrix.name] }}
         run: |
           if [ "${{ needs.changes.result }}" != success ]; then echo "::error::The job Changes failed, so no shard ran."; exit 1; fi
           if [ "${{ needs.changes.outputs.app }}" != true ]; then exit 0; fi
@@ -292,10 +294,10 @@ jobs:
           for attempt in 1 2 3; do
             passed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" \
               --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length') \
-              && [ "$passed" = "${{ matrix.shards }}" ] && break
+              && [ "$passed" = "$SHARDS" ] && break
             sleep 15
           done
-          if [ "$passed" != "${{ matrix.shards }}" ]; then echo "::error::$passed of ${{ matrix.shards }} shards passed."; exit 1; fi
+          if [ "$passed" != "$SHARDS" ]; then echo "::error::$passed of $SHARDS shards passed."; exit 1; fi
 
   fallow:
     name: Fallow audit

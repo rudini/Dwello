@@ -101,9 +101,9 @@
 |---|---|---|
 | RI-T1-1 | **`main` ist oft rot oder ungeprüft:** von 20 abgeschlossenen Läufen 4 rot und 13 abgebrochen. Merges landen auf einer Basis, deren Zustand niemand kennt. | Actions-API, Push-Läufe auf `main` am 23.10. (gemessen, CI); Ursachen offen (A6) |
 | RI-T1-2 | Die E2E-Laufzeit wächst linear mit den Features, denn jedes Feature bringt Szenarien. Ohne Gegenmassnahme entfernt sich T1 weiter vom Ziel. | SP-T1-1; 16 Testdateien pro Feature im Median (gemessen, Phase 0, Kontext) |
-| RI-T1-3 | Die ungleichen Shards verschenken Parallelität: 41 gegen 20 min. | Run 868 (gemessen, CI) |
+| RI-T1-3 | Die ungleichen Shards verschenken Parallelität: 41 gegen 20 min. | Run 868 (gemessen, CI). Nach #777: 12 gegen 26 min in Run 40286548319; seit #834 läuft `main` in 12 Shards |
 | RI-T1-4 | Die Systempakete für Playwright werden bei jedem Lauf per apt installiert; nur die Browser kommen aus dem Cache. Ein langsamer Spiegel brauchte 42–51 min und brach Shards am 60-min-Limit ab, obwohl die Tests grün waren. | Runs 876, 886 (gemessen, CI). Seit #777 laufen die E2E- und axe-Shards im Playwright-Image der gesperrten Version, ohne apt zur Laufzeit; der Job «UI screenshots» installiert noch selbst |
-| RI-T1-5 | Instabile Tests ohne Retry machen `main` rot, ohne dass der Change schuld ist: axe `target-size` nur mobil dunkel, Firefox-Suche mit 5 s Timeout, PDF-Test abhängig von der Reihenfolge der Positionen (`statement-pdf.service.ts`: Kategorien in der Reihenfolge von `lineItems`). | Runs 861, 876, 916 (gemessen, CI); `playwright.config.ts` ohne Retries (aus Repo/Config); PDF-Reihenfolge behoben in #768, die übrigen offen als #778 |
+| RI-T1-5 | Instabile Tests ohne Retry machen `main` rot, ohne dass der Change schuld ist: axe `target-size` nur mobil dunkel, Firefox-Suche mit 5 s Timeout, PDF-Test abhängig von der Reihenfolge der Positionen (`statement-pdf.service.ts`: Kategorien in der Reihenfolge von `lineItems`). | Runs 861, 876, 916 (gemessen, CI); `playwright.config.ts` ohne Retries (aus Repo/Config); PDF-Reihenfolge behoben in #768, die Firefox-Suche in #754, axe nach dem Wiederherstellen eines Entwurfs in #778 |
 | RI-T1-6 | Ein repoweiter Check (`check-issues.mjs`) hängt an Labels fremder Issues und macht jeden Lauf rot, bis jemand die Labels setzt. | Run 886 (gemessen, CI) |
 
 **Nicht-Risiken (helfen heute):**
