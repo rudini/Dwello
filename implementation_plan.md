@@ -12,9 +12,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #837 cycle 4a (categories, distribution keys, heating profiles; #857 categories edge)
 
 - [x] Measure before: `fitness` 4 / 12 / 36, entity mirrors 47, value lists 11
-- [ ] `backend/src/api/{category,distribution-key,heating-profile}.ts`; services typed against them
-- [ ] BFF mappers `toCategory`, `toDistributionKey`, `toHeatingProfile` with `Json<…>`; `Category`, `HeatingProfile`, `DistributionKeyRow` derived
-- [ ] `CategoryWithUsage` and `Proposal` out of `src/lib/server/category.ts` (#857)
-- [ ] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
-- [ ] Slice review (`code-reviewer`)
+- [x] `backend/src/api/{category,distribution-key,heating-profile}.ts`; services typed against them
+- [x] BFF mappers `toCategory`, `toDistributionKey`, `toHeatingProfile` with `Json<…>`; `Category`, `HeatingProfile`, `DistributionKeyRow` derived
+- [x] `CategoryWithUsage` and `Proposal` out of `src/lib/server/category.ts` (#857)
+- [x] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
+- [ ] Slice review (`code-reviewer`), report `docs/reviews/i837c4a-review-1.md`
 - [ ] ADR 0005 section «Zyklus 4a»; archive; PR «Refs #837, #857»
+- Files: `backend/src/api/{category,distribution-key,heating-profile}.ts` (new), the three services and two routes, `llm.service.ts`, `src/lib/types.ts`, `src/lib/server/{category,distribution-key,heating-profile,invoice}.ts`, `src/lib/distribution-key.ts`, config and invoice components, three tests and one helper, `tools/fitness/ratchet.json`, ADR 0005

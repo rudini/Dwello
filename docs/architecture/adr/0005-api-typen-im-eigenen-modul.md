@@ -118,6 +118,25 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 | Entity-Spiegel | 49 | **47** |
 | Wertelisten über Schichten | 11 | 11 |
 
+## Zyklus 4a: Kategorien, Verteilschlüssel, Heizprofile
+
+| Schritt | Commit | Absicherung |
+|---|---|---|
+| 0 Messung vorher | – | `fitness` 4 / 12 / 36, Entity-Spiegel 47, Wertelisten 11 |
+| 1–3 `backend/src/api/{category,distribution-key,heating-profile}.ts`, Services und Routen dagegen typisiert; `toCategory`, `toDistributionKey`, `toHeatingProfile` mit `Json<…>`; `Category`, `DistributionKey`, `HeatingProfile` aus dem Backend-Typ; `fitness --update` | 43f8274d | Backend-Typprüfung; 1644 Backend-Tests; `svelte-check` 0 Fehler; 3694 Frontend-Tests; Lint; fallow |
+
+- **Felder, die nie ankamen:** `isActive` stand im Frontend-Typ von Verteilschlüssel und Heizprofil, der Mapper setzte ihn auf `true`. Die Tabellen haben keine solche Spalte; Feld und Testerwartung sind weg.
+- **Falscher Typ im Backend:** `invoiceCount` war als Zahl typisiert, `COUNT(*)` liefert in PostgreSQL aber `bigint`, das als Text ankommt (`tests/contracts/category.json`: `"2"`). Der Typ sagt jetzt `string`; die Mapper wandeln wie bisher mit `Number`.
+- **Eine Werteliste weniger:** `'predefined' | 'custom'` steht einmal, als `MasterDataType` in `backend/src/api/distribution-key.ts`.
+- **#857 (Kategorien):** `CategoryWithUsage` und `Proposal` stehen in `src/lib/types.ts`; die Kategorie-Komponenten importieren nichts mehr aus `src/lib/server/category.ts`. Der Verteilschlüssel der Seiten heisst `DistributionKey` (vorher `DistributionKeyRow` im Frontend-Modul).
+- **Eingang der Mapper:** Eine Rechnung bettet Kategorie und Verteilschlüssel nur mit einigen Feldern ein. `CategoryRow` und `DistributionKeyRow` nehmen diese eingebettete Form als Pflicht und den Rest als optional, statt die Feldliste ein drittes Mal zu schreiben.
+
+| Messwert | Nach 3 | Nach 4a |
+|---|---|---|
+| Feldstreuung Median / P90 / Max | 4 / 12 / 36 | 4 / 12 / 36 |
+| Entity-Spiegel | 47 | **46** |
+| Wertelisten über Schichten | 11 | **10** |
+
 ## Tradeoffs und verbleibende Risiken
 
 - **Zwei Stellen im Backend:** Die Form steht im Typmodul und in der Abfrage des Service. Der Rückgabetyp verbindet beide nur zum Teil: Ein Feld, das die Abfrage zusätzlich liefert, bleibt dem Typ unbekannt, bis jemand es dort ergänzt (so fehlten bisher `tenant.correspondenceChannel` und `tenant.country`).
