@@ -3622,3 +3622,10 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-837-c2.md`
 - [x] Archive the session; PR «Refs #837» pushed after this archive
 - [x] Closing `code-reviewer` round on the CI fix 4fc4caa1: `docs/reviews/i837c2-close-review-1.md`
+
+## Session 2026-10-26 c: delete analysed review reports
+
+Request: delete the review and persona reports of finished tasks (product owner, in the session). Kept: personas README, workflow notes and workflow rules reviews, `agent-effort-benchmark.md`, the three domain reviews cited in code or scenarios (186, 292, 435). No open pull request held reports. No scenario: docs only.
+
+- [x] 608 files removed; they stay readable at 294f77f6
+- [x] PR: pushed after this archive
