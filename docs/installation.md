@@ -122,6 +122,8 @@ Over plain `http` the password and every page cross the network unencrypted, and
    }
    ```
 
+   Another reverse proxy must let requests of at least 11 MB through, or uploads of documents fail (nginx refuses more than 1 MB by default: `client_max_body_size 11m;`). Caddy sets no limit.
+
 3. In `.env`, instead of the PC values:
 
    ```bash

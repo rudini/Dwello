@@ -163,24 +163,6 @@ services:
       - dwello-network
     # The backend downloads the model on its first start (#577); not needed when the KI is an external provider (#580)
 
-  # ============================================
-  # Nginx Reverse Proxy (Optional)
-  # ============================================
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: dwello-nginx
-  #   restart: unless-stopped
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./certs:/etc/nginx/certs:ro
-  #   depends_on:
-  #     - frontend
-  #   networks:
-  #     - dwello-network
-
 networks:
   dwello-network:
     driver: bridge
