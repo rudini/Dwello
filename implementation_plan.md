@@ -16,7 +16,8 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (1) test red: `-F -` heredoc commit plus push in one command is let through; hook reads the heredoc message
 - [x] (1) code-reviewer round 1 (`docs/reviews/hook-review-1.md`): no Blocker/Major; C-1 (heredoc of a later command), C-2 (comment) fixed; C-3 (pass case pins kept behaviour) noted in the commit
 - [x] (1) closing round (`docs/reviews/hook-review-2.md`): no Blocker/Major; C-4 (redirect before the heredoc) fixed, test red first
-- [ ] (1) PR
+- [x] (1) closing round 3 (`docs/reviews/hook-review-3.md`): no findings
+- [x] (1) PR: pushed
 - [ ] (2) medium runs: code-reviewer #233, 790a; fach-reviewer #459 B; persona Marco #233
 - [ ] (2) decide effort per agent, PR
 - [ ] (3) #852
