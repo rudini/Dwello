@@ -10,6 +10,7 @@ import { CodedError } from './coded-error';
 import { laterContract } from './later-contract';
 import { tenantExists } from './tenant.service';
 import { swissToday } from './today';
+import type { DocumentSummary } from '../api/document';
 
 export interface DocumentFilters {
 	tenantId?: string;
@@ -57,7 +58,7 @@ const deliveryErrorCode = (deliveryError: string | null) =>
 		? null
 		: (Object.entries(DELIVERY_ERRORS).find(([, text]) => text === deliveryError)?.[0] ?? 'MAIL_DELIVERY_FAILED');
 
-async function selectSummaries(where?: SQL) {
+async function selectSummaries(where?: SQL): Promise<DocumentSummary[]> {
 	const rows = await db
 		.select(summary)
 		.from(documents)
@@ -72,7 +73,8 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 	const conditions = [
 		filters.tenantId && eq(documents.tenantId, filters.tenantId),
 		filters.statementId && eq(documents.statementId, filters.statementId),
-		filters.status && eq(documents.status, filters.status),
+		// a status the list does not know finds nothing
+		filters.status && eq(documents.status, filters.status as 'sent' | 'to_send'),
 		filters.status === 'to_send' && sql`${notToSend} is null`
 	].filter((condition): condition is SQL => Boolean(condition));
 	return selectSummaries(and(...conditions));
@@ -132,7 +134,7 @@ const KINDS = [
 	{ mimeType: 'application/pdf', start: '%PDF-' },
 	{ mimeType: 'image/jpeg', start: '\xff\xd8\xff' },
 	{ mimeType: 'image/png', start: '\x89PNG\r\n\x1a\n' }
-];
+] as const;
 
 const MAX_NAME = 255; // the columns title and file_name
 const MAX_MEGABYTES = 10; // 10 × 1024 × 1024 bytes, as Windows counts a megabyte

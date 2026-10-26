@@ -41,7 +41,7 @@ async function sent(paymentDeadline: string, balance = '120.00', status: StoredS
 		.returning({ id: utilityStatements.id });
 	return created.id;
 }
-const reminder = (statementId: string, paymentDeadline: string, status = 'sent') =>
+const reminder = (statementId: string, paymentDeadline: string, status: 'sent' | 'to_send' = 'sent') =>
 	db.insert(documents).values({ tenantId: rental.tenant, statementId, type: 'reminder', reminderLevel: 1, title: 'Zahlungserinnerung', fileName: 'z.pdf', content: 'JVBERi0=', channel: 'letter', status, paymentDeadline });
 const due = async (id: string) => {
 	const { data } = (await (await callApi('/api/v1/statements?status=open&limit=1000')).json()) as {

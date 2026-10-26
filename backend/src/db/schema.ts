@@ -92,6 +92,9 @@ export type Language = 'de' | 'fr' | 'it' | 'en';
 export type CorrespondenceChannel = 'email' | 'letter';
 /** A statement's stored status; `overdue` is not stored but computed from the payment deadline (#837) */
 export type StoredStatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'replaced';
+/** A stored document: a reminder, an e-mailed statement (#86) or a file the landlord uploaded; its file type (#837) */
+export type DocumentType = 'reminder' | 'statement' | 'upload';
+export type DocumentMimeType = 'application/pdf' | 'image/jpeg' | 'image/png';
 
 export const tenants = pgTable('tenants', {
 	id: uuid('id').defaultRandom().primaryKey(),
@@ -588,14 +591,14 @@ export const documents = pgTable(
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
 		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
-		type: varchar('type', { length: 30 }).notNull(), // reminder, statement (e-mailed, #86), upload
+		type: varchar('type', { length: 30 }).$type<DocumentType>().notNull(), // reminder, statement (e-mailed, #86), upload
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),
 		fileName: varchar('file_name', { length: 255 }).notNull(),
 		content: text('content').notNull(), // Base64 encoded file
-		mimeType: varchar('mime_type', { length: 50 }).notNull().default('application/pdf'),
-		channel: varchar('channel', { length: 10 }), // email, letter; null for an upload
-		status: varchar('status', { length: 20 }), // sent, to_send; null for an upload
+		mimeType: varchar('mime_type', { length: 50 }).$type<DocumentMimeType>().notNull().default('application/pdf'),
+		channel: varchar('channel', { length: 10 }).$type<CorrespondenceChannel>(), // email, letter; null for an upload
+		status: varchar('status', { length: 20 }).$type<'sent' | 'to_send'>(), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
 		recipient: varchar('recipient', { length: 255 }), // the e-mail address it went to (#449); null for a letter or an upload

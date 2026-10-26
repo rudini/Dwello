@@ -1,4 +1,5 @@
 import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
+import type { DocumentSummary } from '../../backend/src/api/document';
 import type { TenantResponse } from '../../backend/src/services/tenant.service';
 import type { LatestKey } from './invoice';
 
@@ -372,25 +373,9 @@ export interface StatementsListData {
 	};
 }
 
-// Stored letters such as payment reminders (PDF lives in the backend)
-export interface StatementDocument {
-	id: string;
-	tenantId: string;
-	statementId: string | null;
-	type: 'reminder' | 'statement' | 'upload'; // an upload has no channel and no Versandstatus
-	reminderLevel: number | null;
-	title: string;
-	fileName: string;
-	mimeType: 'application/pdf' | 'image/jpeg' | 'image/png';
-	channel: 'email' | 'letter' | null;
-	status: 'sent' | 'to_send' | null;
-	sentAt: string | null;
-	deliveryError: string | null;
-	deliveryErrorCode?: string | null;
-	paymentDeadline?: string | null; // the Zahlungsfrist a reminder prints
-	recipient?: string | null; // the e-mail address it went to (#449)
-	notToSend?: 'paid' | 'replaced' | null; // a reminder to send whose statement is paid or replaced since (#449)
-	createdAt: string;
-	tenantName: string;
-	statementNumber: string | null;
-}
+// Stored letters such as payment reminders and uploaded files, as GET /documents lists them (#837, ADR 0005); an upload
+// has no channel and no Versandstatus
+type ApiDocument = Json<DocumentSummary>;
+// optional where tests build a document; the backend always sends them
+type OptionalDocumentFields = 'deliveryErrorCode' | 'paymentDeadline' | 'recipient' | 'notToSend';
+export type StatementDocument = Omit<ApiDocument, OptionalDocumentFields> & Partial<Pick<ApiDocument, OptionalDocumentFields>>;
