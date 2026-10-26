@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, onTestFinished } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { actions as listActions, load } from '../routes/config/distribution-keys/+page.server';
 import { actions as newActions } from '../routes/config/distribution-keys/new/+page.server';
 import { actions as editActions } from '../routes/config/distribution-keys/[id]/edit/+page.server';
@@ -96,7 +97,10 @@ describe('Neuer Verteilschlüssel', () => {
 		expect(calls).toEqual([]);
 	});
 
-	it('zeigt, warum das Backend die Formel ablehnt', async () => {
+	// in French, so the message can only come from the codes, not from the backend's German text (#852)
+	it('zeigt, warum das Backend die Formel ablehnt, in der gewählten Sprache', async () => {
+		overwriteGetLocale(() => 'fr');
+		onTestFinished(() => overwriteGetLocale(() => baseLocale));
 		const { result } = runAction(
 			newActions.save,
 			'',
@@ -107,7 +111,11 @@ describe('Neuer Verteilschlüssel', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { form: formulaRefused.error } }
+			data: {
+				errors: {
+					form: 'La formule n’est pas valable\u00a0: Variable inconnue {persons}. Sont autorisées {area}, {rooms}, {volume}, {units} et leurs sommes comme {area_total}.'
+				}
+			}
 		});
 	});
 
@@ -138,6 +146,20 @@ describe('Neuer Verteilschlüssel', () => {
 				body: { formula: '{area} * 0.7 + {rooms} * 0.3' }
 			}
 		]);
+	});
+
+	// #852: a code the UI does not know yet shows the page's sentence, never the backend's text
+	it('nennt beim Testen einen Fehler mit unbekanntem Code mit dem Satz der Seite', async () => {
+		const answer = {
+			isValid: false,
+			errors: ['Neue Prüfung'],
+			errorCodes: [{ code: 'FORMULA_SOMETHING_NEW', params: {} }]
+		};
+		const { result } = runAction(newActions.test, '', 200, form, answer);
+
+		expect(await result).toMatchObject({
+			test: { errors: ['Die Formel lässt sich nicht rechnen'] }
+		});
 	});
 });
 

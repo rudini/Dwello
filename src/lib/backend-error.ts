@@ -4,7 +4,7 @@ import { formatDate } from '$lib/utils/format';
 
 type Params = Record<string, string | number>;
 
-/** A refusal as the backend sends it (`error`), or as apiCall passes it on (`message`) */
+/** A refusal as the backend sends it, or as apiCall passes it on; only its code and values are shown, never `error` or `message` (#852) */
 export type BackendError = {
 	error?: unknown;
 	message?: string;

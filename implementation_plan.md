@@ -21,5 +21,6 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [ ] (2) medium runs: code-reviewer #233, 790a; fach-reviewer #459 B; persona Marco #233
 - [ ] (2) decide effort per agent, PR
 - [x] (3) #852: scenario «Ein inzwischen gelöschtes Dokument löschen» red (page showed «Document not found»), then green; `backendMessage` never shows the backend's own text, three unit tests changed to the decision and seen red; 12 frontend tests read six new contracts (`tests/contracts/*`, checked in `api-contracts.pg.test.ts`, pin kept behaviour); fuel stock with an unknown code shows the page's sentence (test red first); `slice-review` names the three checks
-- [ ] (3) code-reviewer round 1, persona on the failure state
+- [x] (3) code-reviewer round 1 (`docs/reviews/852-review-1.md`) and persona Helga (`docs/design/personas/helga-852.md`): C-1 = Helga P-1 (Major, a deleted document read «nicht gelöscht, erneut»): code `DOCUMENT_NOT_FOUND` with a message in four languages, scenario line red first, contract test red with the route reverted; C-2 (formula test fallback), C-3 (test in French), C-4 (comment) fixed
+- [ ] (3) code-reviewer round 2, Helga again on the new sentence
 - [ ] (3) PR

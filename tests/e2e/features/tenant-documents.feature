@@ -62,7 +62,7 @@ Funktionalität: Dokumente eines Mieters
     Und das Dokument "Ausweiskopie" von "Lea Frei" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
     Und der Liegenschaftsverwalter das Löschen bestätigt
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument wurde nicht gelöscht. Versuchen Sie es erneut."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument gibt es nicht mehr. Laden Sie die Seite neu."
 
   Szenario: Mieter mit hochgeladenen Dokumenten löschen
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
