@@ -129,7 +129,7 @@ Dwello-Nutzen
 - **Auslöser:** Ein PR wird gepusht bzw. auf `main` gemergt.
 - **Umgebung:** GitHub Actions. Auf PRs laufen Chromium und API, auf `main` alle drei Browser (`ci.yml`, `docs/test-pyramid.md`).
 - **Reaktion:** Volle Rückmeldung, ob grün oder rot. `main` bleibt nach dem Merge grün.
-- **Messgrösse und Ziel:** Wanduhrzeit vom Push bis zum Ergebnis **≤ 15 min** auf PR **und** auf `main`, und `main` grün (vom Nutzer bestätigt).
+- **Messgrösse und Ziel:** Wanduhrzeit vom Start des ersten Jobs bis zum Ergebnis **≤ 15 min** auf PR **und** auf `main`, und `main` grün (vom Nutzer bestätigt). Die Wartezeit davor, auf `main` meist das Warten auf den vorherigen Lauf derselben Concurrency-Gruppe, zählt nicht zum Ziel und wird getrennt ausgewiesen (Entscheid PO 26.10.2026, #842).
 - **Heute** (gemessen, CI):
   - PR: 11 grüne Läufe (Runs 900–918), 9,5–23,6 min, Median etwa 18 min. Läufe von etwa 10 min sind PRs, deren letzter Push nur Doku änderte.
   - `main`: grüne Läufe 43 min (Run 864), 43 min (Run 868), 79 min (Run 880).

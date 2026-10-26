@@ -3528,3 +3528,12 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Slice review round 1: `docs/reviews/i840-review-1.md` (C-1 Minor fixed: the plan header, cut by the #838 archive commit 809ff3de, restored and the header text it moved into the archive removed)
 - [x] Workflow note: `open-work.test.ts` passes with no `## Session` heading, so the cut header went unnoticed (under Found)
 - [x] PR (pushed after this archive); No scenario: CI configuration only. After the merge: slowest axe shard and the run on main
+
+## Session: #842 T1 measured from the first job (and decisions of 26.10.)
+
+- [x] Decisions recorded: #837 «Decided (product owner)» (response types in their own backend module), #842 (T1 from the run's start), Ä1 measurement to be refined (next issue)
+- [x] `ci.yml` «CI duration»: from the earliest job `started_at`, the wait before it apart; checked against run 40303722784 (17 min wait)
+- [x] Docs: T1 in `utility-tree.md`, `ci-duration` in `fitness-functions.md`
+- [x] Slice review round 1: `docs/reviews/i842-review-1.md` (C-1 Minor fixed: only job starts from the attempt's start, checked on runs 40303722784 and 40239565626)
+- [x] Ä1 measurement: proposal with numbers in #843 (`needs-decision`)
+- [x] PR (pushed after this archive); No scenario: CI report only
