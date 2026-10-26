@@ -9,10 +9,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
-## Session: #834 E2E on main in more shards (T1)
-
-- [x] Issue #834 opened from the measured main run (shards 12–26 min, run 27 min)
-- [x] `ci.yml`: the job Changes builds the shard matrix, 5 E2E shards on pull requests and 12 elsewhere, axe in 3; «E2E tests» and «Accessibility (axe)» count the shards from its output
-- [x] Docs: `test-pyramid.md`, T1 measurement in `utility-tree.md`, RI-T1-3 and RI-T1-5 in `risks-and-tradeoffs.md`
-- [ ] Slice review (`code-reviewer`)
-- [ ] PR; No scenario: CI configuration only. After the merge: «CI duration» of the push run on main ≤ 15 min
