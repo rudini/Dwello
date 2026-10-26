@@ -1,0 +1,2717 @@
+{
+	"$comment": "One label per finding of measure.ts, keyed <repo>/<file>#<test>#<rule>: tp = the finding is right, fp = it is not. Labelled by reviewers who saw the code and the rule, not the tool's rationale (testcheck-validation.md).",
+	"labels": {
+		"dwello/src/__tests__/categories-page.dom.test.ts#Grund der Umlagefähigkeit > schreibt auf %s Gesetz und Verordnung in jedem Grund aus#conditional-assertion": {
+			"label": "fp",
+			"why": "Asserts only where the reason uses the abbreviation, which is the property itself; a reason without it needs no spelled-out name."
+		},
+		"dwello/src/__tests__/statement-pages.dom.test.ts#Abrechnungsdetail > gliedert die Summen mit Rundung als gültige Beschreibungsliste#loop-only-assertion": {
+			"label": "tp",
+			"why": "Iterates dl elements rendered by the page; if none render, nothing is checked."
+		},
+		"excalidraw/packages/element/src/__tests__/transform.test.ts#Test Transform > creation timestamps > defaults missing timestamps when retaining IDs, as every type goes through a constructor#loop-only-assertion": {
+			"label": "tp",
+			"why": "forEach over converted elements from the code under test; an empty result passes."
+		},
+		"excalidraw/packages/element/src/__tests__/transform.test.ts#Test Transform > creation timestamps > preserves an explicit timestamp of %s when retaining IDs#loop-only-assertion": {
+			"label": "tp",
+			"why": "forEach over converted elements from the code under test; an empty result passes."
+		},
+		"excalidraw/packages/element/src/__tests__/transform.test.ts#Test Transform > should transform regular shapes#loop-only-assertion": {
+			"label": "tp",
+			"why": "forEach over converter output; an empty result skips all snapshots."
+		},
+		"excalidraw/packages/element/src/__tests__/transform.test.ts#Test Transform > should transform text element#loop-only-assertion": {
+			"label": "tp",
+			"why": "forEach over converter output; an empty result skips all snapshots."
+		},
+		"excalidraw/packages/element/tests/duplicate.test.tsx#duplication z-order > duplication z order with alt+drag for the lowest z-ordered element should be +1 for the clone#duplicate-title": {
+			"label": "tp",
+			"why": "Exact redundant copy of the test at line 615 (same title, same code)."
+		},
+		"excalidraw/packages/element/tests/flowchart.test.tsx#flow chart navigation > single node at each level#dangling-expect": {
+			"label": "tp",
+			"why": "expect(rightMostNode) has no matcher."
+		},
+		"excalidraw/packages/element/tests/linearElementEditor.test.tsx#Test Linear Elements > Inside editor > When edges are round > should allow dragging lines from midpoints in between segments#duplicate-title": {
+			"label": "tp",
+			"why": "Two sibling describes are both titled 'When edges are round' (the first actually tests sharp edges), so full titles collide while checking different setups."
+		},
+		"excalidraw/packages/element/tests/linearElementEditor.test.tsx#Test Linear Elements > Inside editor > When edges are round > should hide midpoints in the segment when points moved close#duplicate-title": {
+			"label": "tp",
+			"why": "Two sibling describes are both titled 'When edges are round' (the first actually tests sharp edges), so full titles collide while checking different setups."
+		},
+		"excalidraw/packages/element/tests/textWrapping.test.ts#Test wrapText > should keep some preceding whitespaces, trim trailing whitespaces, but kep those that fit in the trailing line#duplicate-body": {
+			"label": "fp",
+			"why": "Bodies differ only in whitespace inside string literals (different inputs/expected outputs); tool normalised string contents."
+		},
+		"excalidraw/packages/excalidraw/charts.test.ts#charts > renderSpreadsheet > uses colorSeed to deterministically pick chart colors#tautology": {
+			"label": "fp",
+			"why": "Compares two separate calls with the same seed; fails if colour choice is non-deterministic."
+		},
+		"excalidraw/packages/excalidraw/charts.test.ts#charts > tryParseCells > Uses the second column as the label if it is not a number#duplicate-body": {
+			"label": "tp",
+			"why": "Same data as the parse test; nothing checks a non-numeric second column used as label."
+		},
+		"excalidraw/packages/excalidraw/components/DefaultSidebar.test.tsx#DefaultSidebar > when `docked={true}` & `onDock`, should allow docking#duplicate-body": {
+			"label": "tp",
+			"why": "Title says docked={true} but the body never passes docked; copy of the docked={undefined} test."
+		},
+		"excalidraw/packages/excalidraw/tests/arrowBinding.test.tsx#Arrow binding – non-default case (bindingPreference: disabled) > Ctrl key toggle when binding preference is disabled > full round-trip: off → Ctrl down → on → Ctrl up → off#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant copy of the Ctrl keyup test."
+		},
+		"excalidraw/packages/excalidraw/tests/clipboard.test.tsx#paste text as single lines > should space items correctly#loop-only-assertion": {
+			"label": "tp",
+			"why": "Loop starts at index 1 over h.elements; if paste creates fewer than two elements nothing is checked."
+		},
+		"excalidraw/packages/excalidraw/tests/colorInput.test.tsx#normalizeInputColor > whitespace handling > trims both leading and trailing whitespace#duplicate-body": {
+			"label": "fp",
+			"why": "Inputs differ ('  #ff0000  ' vs '#ff0000  '); identical only after collapsing whitespace inside string literals."
+		},
+		"excalidraw/packages/excalidraw/tests/colorInput.test.tsx#normalizeInputColor > whitespace handling > trims trailing whitespace#duplicate-body": {
+			"label": "fp",
+			"why": "Inputs differ ('#ff0000  ' vs '  #ff0000'); identical only after collapsing whitespace inside string literals."
+		},
+		"excalidraw/packages/excalidraw/tests/contextmenu.test.tsx#contextMenu element > shows context menu for element#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks selection on right-click across z-index, not the menu items; same title hides that."
+		},
+		"excalidraw/packages/excalidraw/tests/data/restore.test.ts#restoreAppState > should return local app state when imported data state is null#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant copy of the null-appState test at line 1034."
+		},
+		"excalidraw/packages/excalidraw/tests/history.test.tsx#history > multiplayer undo/redo > conflicts in arrows and their bindable elements > should unbind remotely deleted bindable elements from arrow when the arrow is added through the history#empty-test": {
+			"label": "tp",
+			"why": "Empty test body whose title claims unbinding behaviour."
+		},
+		"excalidraw/packages/excalidraw/tests/history.test.tsx#history > multiplayer undo/redo > conflicts in arrows and their bindable elements > should unbind remotely deleted bindable elements from arrow when the arrow is added through the history#no-assertion": {
+			"label": "tp",
+			"why": "Empty test body whose title claims unbinding behaviour."
+		},
+		"excalidraw/packages/excalidraw/tests/history.test.tsx#history > multiplayer undo/redo > should redistribute deltas when element gets removed locally but is restored remotely#dangling-expect": {
+			"label": "tp",
+			"why": "expect(...) wraps a call but no matcher is invoked."
+		},
+		"excalidraw/packages/excalidraw/tests/history.test.tsx#history > singleplayer undo/redo > should support linear element creation and points manipulation through the editor#dangling-expect": {
+			"label": "tp",
+			"why": "expect(...) wraps a call but no matcher is invoked."
+		},
+		"excalidraw/packages/excalidraw/tests/regressionTests.test.tsx#regression tests > shift-click to multiselect, then drag#loop-only-assertion": {
+			"label": "tp",
+			"why": "Filtered rectangles come from the app; if drawing fails the list is empty and the test passes."
+		},
+		"excalidraw/packages/excalidraw/tests/regressionTests.test.tsx#regression tests > should group elements and ungroup them#loop-only-assertion": {
+			"label": "tp",
+			"why": "All loops iterate h.elements from the app, whose size is never asserted."
+		},
+		"h3/test/body.test.ts#handles empty object as body#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant copy of the empty-object body test at line 84."
+		},
+		"h3/test/cookies.test.ts#deleteChunkedCookie > preserves options when deleting chunks#loop-only-assertion": {
+			"label": "tp",
+			"why": "Iterates Set-Cookie headers produced by the code; no headers means no checks."
+		},
+		"h3/test/happydom.test.ts#happydom > import h3#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the import succeeds; the point is that it does not throw."
+		},
+		"h3/test/middleware.test.ts#guards every path routed by ${route}#loop-only-assertion": {
+			"label": "fp",
+			"why": "paths is fixed test data."
+		},
+		"h3/test/rules/encoding.test.ts#decodeRoutePattern > a broad constraint key cannot undo a narrower reset under a lowercase baseURL#loop-only-assertion": {
+			"label": "fp",
+			"why": "Iterates fixed modes and literal path lists."
+		},
+		"h3/test/rules/encoding.test.ts#decodeRoutePattern > a canonical reading never resurrects a permission a partial-segment param reset#loop-only-assertion": {
+			"label": "fp",
+			"why": "Iterates the fixed modes from allModes."
+		},
+		"h3/test/rules/encoding.test.ts#decodeRoutePattern > a constraint key's reset under a lowercase baseURL agrees across modes#loop-only-assertion": {
+			"label": "fp",
+			"why": "Iterates fixed modes and literal paths."
+		},
+		"h3/test/rules/encoding.test.ts#decodeRoutePattern > a narrower reset protects its key's own written spelling (all modes)#loop-only-assertion": {
+			"label": "fp",
+			"why": "allModes always returns three fixed matchers."
+		},
+		"h3/test/rules/merge.test.ts#resets across readings are route-aware > a broader or partially-overlapping pattern never reinstates a narrower reset#loop-only-assertion": {
+			"label": "fp",
+			"why": "flavors returns a fixed two-entry list."
+		},
+		"h3/test/rules/merge.test.ts#resets across readings are route-aware > a narrower permission is reinstated on the reading a decoding downstream sees#loop-only-assertion": {
+			"label": "fp",
+			"why": "flavors returns a fixed non-empty list of matchers."
+		},
+		"h3/test/rules/merge.test.ts#resets across readings are route-aware > a re-add that won a reading only by layer order does not reinstate a reset#loop-only-assertion": {
+			"label": "fp",
+			"why": "flavors returns a fixed two-entry list."
+		},
+		"h3/test/rules/merge.test.ts#resets across readings are route-aware > an encoded separator cannot strip a header a narrower pattern sets#loop-only-assertion": {
+			"label": "fp",
+			"why": "flavors returns a fixed non-empty list of matchers."
+		},
+		"h3/test/rules/rules.test.ts#redirect rule > fails closed when the key prefix has no fixed segment count#loop-only-assertion": {
+			"label": "fp",
+			"why": "cases and paths are literal test data."
+		},
+		"h3/test/security.test.ts#blocks ${encoded} behind a ${guarded}/** guard#duplicate-title": {
+			"label": "fp",
+			"why": "Templated titles inside loops in two different describeMatrix blocks with different data; titles never collide at runtime."
+		},
+		"h3/test/security.test.ts#blocks /api/admin/users without auth#duplicate-body": {
+			"label": "fp",
+			"why": "The two tests are in different describeMatrix blocks with different beforeEach route setups (plain vs wildcard routes)."
+		},
+		"h3/test/sse.test.ts#streams events#duplicate-title": {
+			"label": "tp",
+			"why": "Second test uses includeMeta=true; shared title does not say so."
+		},
+		"h3/test/static.test.ts#Can serve asset (GET)#duplicate-title": {
+			"label": "fp",
+			"why": "Tests live in different describeMatrix blocks ('serve static' vs 'serve static with fallthrough') with different setup."
+		},
+		"h3/test/static.test.ts#Can serve asset (HEAD)#duplicate-title": {
+			"label": "fp",
+			"why": "Tests live in different describeMatrix blocks ('serve static' vs 'serve static with fallthrough') with different setup."
+		},
+		"h3/test/static.test.ts#Handles cache (if-modified-since)#duplicate-title": {
+			"label": "fp",
+			"why": "Tests live in different describeMatrix blocks ('serve static' vs 'serve static with fallthrough') with different setup."
+		},
+		"h3/test/static.test.ts#Handles cache (if-none-match)#duplicate-title": {
+			"label": "fp",
+			"why": "Tests live in different describeMatrix blocks ('serve static' vs 'serve static with fallthrough') with different setup."
+		},
+		"h3/test/static.test.ts#Returns 404 if not found#duplicate-title": {
+			"label": "fp",
+			"why": "Tests live in different describeMatrix blocks ('serve static' vs 'serve static with fallthrough') with different setup."
+		},
+		"h3/test/unit/request.test.ts#getRequestProtocol > returns first entry of comma-list x-forwarded-proto with spaces (https, http) when enabled#duplicate-body": {
+			"label": "fp",
+			"why": "Header values differ ('https,http' vs 'https, http'); identical only after collapsing whitespace in strings."
+		},
+		"h3/test/unit/sse.test.ts#sse (unit) > EventStream > push stops retrying after write failure#no-assertion": {
+			"label": "tp",
+			"why": "Only awaits pushes; nothing checks that retries stop, as the title claims."
+		},
+		"h3/test/unit/sse.test.ts#sse (unit) > EventStream > pushComment stops retrying after write failure#no-assertion": {
+			"label": "tp",
+			"why": "Only awaits pushComment calls; nothing checks that retries stop."
+		},
+		"h3/test/unit/sse.test.ts#sse (unit) > EventStream > settles overlapping flushes when the reader cancels#no-assertion": {
+			"label": "fp",
+			"why": "Awaiting the two flushes is the check: if they never settle the test times out."
+		},
+		"h3/test/utils.test.ts#getRequestFingerprint > uses the request ip when no x-forwarded-for header set#conditional-assertion": {
+			"label": "fp",
+			"why": "Condition is the test target fixture, not something a defect can change."
+		},
+		"h3/test/utils.test.ts#getRequestURL > x-forwarded-proto comma list with spaces uses first entry trimmed#duplicate-body": {
+			"label": "fp",
+			"why": "Header values differ ('https,http' vs 'https, http'); identical only after collapsing whitespace in strings."
+		},
+		"hono/adapters/lambda-edge/test/index.test.ts#Lambda@Edge Adapter for Hono > Should handle a request and return a 401 response with Basic auth#duplicate-title": {
+			"label": "tp",
+			"why": "Exact redundant copy of the test at line 650."
+		},
+		"hono/src/client/client.test.ts#Basic - JSON > Should get a `{}` content#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks the safe-bigint endpoint, not `{}` content."
+		},
+		"hono/src/compose.test.ts#Compose > should create next functions that return a Promise#loop-only-assertion": {
+			"label": "tp",
+			"why": "arr is filled only when compose calls the middleware; if it does not, nothing is checked."
+		},
+		"hono/src/compose.test.ts#Compose > should not affect the original middleware array#loop-only-assertion": {
+			"label": "tp",
+			"why": "A defect in compose that empties the passed array would make the second loop check nothing, which is exactly what the test guards."
+		},
+		"hono/src/compose.test.ts#Compose > should work with 0 middleware#no-assertion": {
+			"label": "tp",
+			"why": "Result of compose([]) is never checked; 'should work' claims more than no throw."
+		},
+		"hono/src/compose.test.ts#compose with Context - next > Should throw multiple call error#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if compose stops throwing the catch never runs and the test passes."
+		},
+		"hono/src/hono.test.ts#GET Request > with middleware > GET /async-proxy-object is ok#duplicate-body": {
+			"label": "tp",
+			"why": "Title says /async-proxy-object but the body requests /proxy-object; copy of the previous test."
+		},
+		"hono/src/hono.test.ts#GET Request > without middleware > GET /async-proxy-object is ok#duplicate-body": {
+			"label": "tp",
+			"why": "Title says /async-proxy-object but the body requests /proxy-object; copy of the previous test."
+		},
+		"hono/src/hono.test.ts#Hono with `app.route` > Basic > Should return not found response#duplicate-title": {
+			"label": "tp",
+			"why": "Tests request different paths ('/' vs '/posts'); shared title does not distinguish."
+		},
+		"hono/src/jsx/dom/index.test.tsx#DOM > attribute > update style#duplicate-body": {
+			"label": "tp",
+			"why": "'update style' renders once and never updates; identical to the 'style' test."
+		},
+		"hono/src/jsx/dom/index.test.tsx#DOM > useCallback > deferent callbacks#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks a stable callback (set size 1), opposite of 'deferent callbacks'."
+		},
+		"hono/src/jsx/hooks/dom.test.tsx#Hooks > useTransition() > pending#duplicate-title": {
+			"label": "tp",
+			"why": "Second test covers an async transition; same title hides the difference."
+		},
+		"hono/src/middleware/bearer-auth/index.test.ts#Bearer Auth by Middleware > Should authorize#duplicate-title": {
+			"label": "tp",
+			"why": "Several 'Should authorize' tests check different routes (Bearer, Bot prefix, X-Api-Key header) under one title."
+		},
+		"hono/src/middleware/bearer-auth/index.test.ts#Bearer Auth by Middleware > Should not authorize - invalid request#duplicate-title": {
+			"label": "tp",
+			"why": "Several 'Should not authorize - invalid request' tests check different routes/prefixes and status codes under one title."
+		},
+		"hono/src/middleware/csrf/index.test.ts#CSRF by Middleware > simple usage > should be 403 for \"text/plain\" cross origin#duplicate-body": {
+			"label": "tp",
+			"why": "Body never sets content-type text/plain; identical to the multipart test."
+		},
+		"hono/src/middleware/jwt/index.test.ts#JWT > Credentials in cookie > Should not authorize#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks an invalid cookie token, first checks missing cookie."
+		},
+		"hono/src/middleware/jwt/index.test.ts#JWT > Credentials in custom header > Should not authorize#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks an invalid token in the custom header, first checks missing header."
+		},
+		"hono/src/middleware/jwt/index.test.ts#JWT > Credentials in header > Should not authorize#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks an invalid token with www-authenticate header, first checks missing header."
+		},
+		"hono/src/request.test.ts#Body methods with caching > req.formData()#tautology": {
+			"label": "tp",
+			"why": "not.toThrow on an async function cannot fail; the rejection is never observed."
+		},
+		"hono/src/request.test.ts#Body methods with caching > req.parseBody() > should parse form data#tautology": {
+			"label": "tp",
+			"why": "not.toThrow on an async function cannot fail."
+		},
+		"hono/src/utils/jwt/jwt.test.ts#JWT > ${tc.alg} sign & verify w/ CryptoKey#duplicate-title": {
+			"label": "fp",
+			"why": "Template title ${tc.alg} in separate loops over RS vs PS algorithms; runtime titles differ."
+		},
+		"hono/src/utils/jwt/jwt.test.ts#JWT > ${tc.alg} sign & verify#duplicate-title": {
+			"label": "fp",
+			"why": "Template title ${tc.alg} in separate loops over RS vs PS algorithms; runtime titles differ."
+		},
+		"hono/src/utils/url.test.ts#url > getQueryParam > Parse URL query strings#dangling-expect": {
+			"label": "tp",
+			"why": "expect(getQueryParam(...)) has no matcher."
+		},
+		"hono/src/utils/url.test.ts#url > mergePath > Should be `/book`#duplicate-title": {
+			"label": "tp",
+			"why": "Inputs differ ('book' vs '/book'); shared title does not say what distinguishes them."
+		},
+		"hono/src/validator/validator.test.ts#`app.on`#no-assertion": {
+			"label": "tp",
+			"why": "Only declares a type alias; the Expect<Equal> line is commented out, so nothing is checked."
+		},
+		"query/packages/preact-query/src/__tests__/QueryResetErrorBoundary.test.tsx#QueryErrorResetBoundary > useQuery > should show error boundary when using tracked queries even though we do not track the error field#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant copy of the reset-boundary retry test; nothing specific to tracked queries."
+		},
+		"query/packages/preact-query/src/__tests__/useQuery.test.tsx#useQuery > should be able to select a part of the data with select in object syntax#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to the plain select test; no object syntax difference remains."
+		},
+		"query/packages/query-core/src/__tests__/mutation.test.tsx#mutation > should update the mutation state with mutate even without an active subscription 2#duplicate-body": {
+			"label": "tp",
+			"why": "Tests '1' and '2' are identical copies."
+		},
+		"query/packages/query-core/src/__tests__/queryCache.test.tsx#queryCache > subscribe > should include the queryCache and query when notifying listeners#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to the 'new query is added' test; nothing checks the queryCache in the event."
+		},
+		"query/packages/query-core/src/__tests__/queryClient.test.tsx#queryClient > query > should propagate errors#duplicate-body": {
+			"label": "tp",
+			"why": "Same code as 'should propagate errors'; 'should not retry by default' checks no retry count."
+		},
+		"query/packages/query-core/src/__tests__/queryObserver.test.tsx#queryObserver > should be able to fetch with a selector and object syntax#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to the selector test; no object syntax difference."
+		},
+		"query/packages/query-core/src/__tests__/utils.test.tsx#core/utils > addToStart > should not remove any items if max is undefined#duplicate-body": {
+			"label": "tp",
+			"why": "Title says max is undefined but the body passes max = 0."
+		},
+		"query/packages/react-query/src/__tests__/QueryResetErrorBoundary.test.tsx#QueryErrorResetBoundary > useQuery > should show error boundary when using tracked queries even though we do not track the error field#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant copy of the reset-boundary retry test; nothing specific to tracked queries."
+		},
+		"query/packages/react-query/src/__tests__/useQuery.test.tsx#useQuery > should be able to select a part of the data with select in object syntax#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to the plain select test; no object syntax difference remains."
+		},
+		"query/packages/solid-query/src/__tests__/useQuery.test.tsx#useQuery > should be able to select a part of the data with select in object syntax 1#duplicate-body": {
+			"label": "tp",
+			"why": "'object syntax 1' and '2' are identical copies."
+		},
+		"query/packages/solid-query/src/__tests__/useQuery.test.tsx#useQuery > should be able to select a part of the data with select in object syntax 2#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to the plain select test; no object syntax difference."
+		},
+		"query/packages/vue-query/src/__tests__/queryClient.test.ts#QueryCache > getQueriesData > should properly unwrap filters param#duplicate-body": {
+			"label": "tp",
+			"why": "Title says filters param but body is the queryKey test copy."
+		},
+		"query/packages/vue-query/src/__tests__/queryClient.test.ts#QueryCache > setQueriesData > should properly unwrap params with filters#duplicate-body": {
+			"label": "tp",
+			"why": "Title says filters but body is the queryKey test copy."
+		},
+		"remeda/packages/remeda/src/dropWhile.test.ts#data last > should return an empty array when an empty array is passed#duplicate-body": {
+			"label": "tp",
+			"why": "Body passes a non-empty array, so the empty-array claim is not tested; copy of the previous test."
+		},
+		"remeda/packages/remeda/src/isDeepEqual.test.ts#objects > not equal objects (different properties) #2#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant identical copy of #1."
+		},
+		"remeda/packages/remeda/src/mergeDeep.test.ts#runtime (dataFirst) > doesn't spread arrays#duplicate-body": {
+			"label": "tp",
+			"why": "Redundant copy of \"should not merge arrays\"."
+		},
+		"remeda/packages/remeda/src/sample.test.ts#mathy stuff > doesn't make items up (returns a subset of the input array)#loop-only-assertion": {
+			"label": "tp",
+			"why": "Loops over sample() output; an empty result passes (length not asserted in this test)."
+		},
+		"remeda/packages/remeda/src/sample.test.ts#mathy stuff > doesn't reorder items#loop-only-assertion": {
+			"label": "tp",
+			"why": "Loops over sample() output; an empty result passes this test."
+		},
+		"trpc/examples/minimal-content-types/test/smoke.test.ts#go to /#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/examples/minimal-per-procedure-errors/test/smoke.test.ts#go to /#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/examples/minimal-react/test/smoke.test.ts#go to /#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/examples/next-prisma-starter/playwright/smoke.test.ts#add a post#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/examples/next-prisma-starter/playwright/smoke.test.ts#go to /#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/examples/next-prisma-todomvc/test/playwright.test.ts#add todo#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/examples/next-prisma-websockets-starter/test/playwright.test.ts#send message#no-assertion": {
+			"label": "fp",
+			"why": "Playwright waitForSelector throws when the text never appears, so it acts as an assertion."
+		},
+		"trpc/packages/client/src/internals/types.test.ts#fetch > NativeFetchEsque#no-assertion": {
+			"label": "fp",
+			"why": "Type-compatibility test that various fetch implementations are accepted."
+		},
+		"trpc/packages/client/src/internals/types.test.ts#fetch > parameters#no-assertion": {
+			"label": "fp",
+			"why": "Type-check test that a custom fetch signature compiles."
+		},
+		"trpc/packages/openapi/test/cyclicTypes.test.ts#cyclic types > structural guarantees > all $ref targets exist in components/schemas#conditional-assertion": {
+			"label": "tp",
+			"why": "Assertions only run on regex matches; refs emitted under a different path or none at all pass vacuously."
+		},
+		"trpc/packages/openapi/test/cyclicTypes.test.ts#cyclic types > structural guarantees > all $ref targets exist in components/schemas#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions run only for regex matches in the output; with no refs emitted the test checks nothing."
+		},
+		"trpc/packages/openapi/test/cyclicTypes.test.ts#cyclic types > structural guarantees > does not produce any empty {} schemas for recursive types#loop-only-assertion": {
+			"label": "tp",
+			"why": "Loops over generated schemas; an empty schema map passes."
+		},
+		"trpc/packages/react-query/test/getQueryKey.test.tsx#getQueryKeys > undefined input but type#duplicate-title": {
+			"label": "tp",
+			"why": "Same title; the second adds another @ts-expect-error check."
+		},
+		"trpc/packages/react-query/test/regression/issue-3461-reserved-properties.test.tsx#utils client#duplicate-title": {
+			"label": "tp",
+			"why": "Same title but checks different reserved names (Provider vs client/useContext)."
+		},
+		"trpc/packages/react-query/test/regression/issue-4360-useInfiniteQuery-placeHolderData.test.tsx#good placeholderData#no-assertion": {
+			"label": "fp",
+			"why": "Type-level test that a valid placeholderData compiles."
+		},
+		"trpc/packages/react-query/test/regression/issue-4486-initialData-types.test.tsx#initialData > good initialData does not typeerror#no-assertion": {
+			"label": "fp",
+			"why": "Title says the point is no type error."
+		},
+		"trpc/packages/react-query/test/regression/issue-4486-initialData-types.test.tsx#placeholderData > good placeholderData does not typeerror#no-assertion": {
+			"label": "fp",
+			"why": "Title says the point is no type error."
+		},
+		"trpc/packages/react-query/test/regression/issue-5357-input-always-required.test.tsx#with input#no-assertion": {
+			"label": "fp",
+			"why": "Type test that calling without input compiles (input not required)."
+		},
+		"trpc/packages/react-query/test/ssgExternal.test.ts#prefetch and dehydrate#duplicate-title": {
+			"label": "tp",
+			"why": "Same title, but one uses opts.client and the other a created client; title does not say which."
+		},
+		"trpc/packages/server/src/unstable-core-do-not-import/router.test.ts#router > because it creates async fns that returns proxy objects#no-assertion": {
+			"label": "fp",
+			"why": "Regression test whose point is that awaiting an async fn returning the caller proxy does not hang/throw."
+		},
+		"trpc/packages/server/src/unstable-core-do-not-import/stream/jsonl.test.ts#decode - bad data#tautology": {
+			"label": "fp",
+			"why": "expect(true).toBe(false) always fails (marks unreachable code); it cannot pass by itself."
+		},
+		"trpc/packages/tests/server/adapters/express.test.tsx#error query#catch-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only in catch; no expect.assertions, passes if query stops throwing."
+		},
+		"trpc/packages/tests/server/adapters/next.test.ts#middleware passes the request#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to \"ok request\"; no middleware is involved, so the title claim is unchecked."
+		},
+		"trpc/packages/tests/server/adapters/standalone.test.ts#error query#catch-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only in catch; no expect.assertions, passes if query stops throwing."
+		},
+		"trpc/packages/tests/server/middlewares.test.ts#pipe middlewares - failure#duplicate-title": {
+			"label": "tp",
+			"why": "Same title, different tests (ts-expect-error on invalid pipe vs runtime override)."
+		},
+		"trpc/packages/tests/server/regression/issue-3085-bad-responses.test.ts#badly formatted superjson response#duplicate-title": {
+			"label": "tp",
+			"why": "Redundant identical copy of the test on line 54."
+		},
+		"trpc/packages/tests/server/regression/issue-3453-meta-interface.test.ts#context as interface#no-assertion": {
+			"label": "fp",
+			"why": "Type test that an interface is accepted as context."
+		},
+		"trpc/packages/tests/server/regression/issue-3453-meta-interface.test.ts#meta as interface#no-assertion": {
+			"label": "fp",
+			"why": "Type test that an interface is accepted as meta."
+		},
+		"trpc/packages/tests/server/regression/issue-6057-node-http-handler-opts-types.test.ts#createContext is optional when the router context is empty#no-assertion": {
+			"label": "fp",
+			"why": "Type test that omitting createContext compiles."
+		},
+		"trpc/packages/tests/server/transformer.test.ts#required transformers > works with transformer#no-assertion": {
+			"label": "fp",
+			"why": "Type test that client creation compiles with transformer."
+		},
+		"trpc/packages/tests/server/transformer.test.ts#required transformers > works without transformer#no-assertion": {
+			"label": "fp",
+			"why": "Type test that client creation compiles without transformer."
+		},
+		"trpc/packages/tests/server/validators.test.ts#zod v4 transform mixed input/output#duplicate-title": {
+			"label": "tp",
+			"why": "Redundant identical copy of the test on line 103."
+		},
+		"unhead/packages/unhead/test/unit/define.test.ts#defineScript > works from a helper function without defineScript#no-assertion": {
+			"label": "fp",
+			"why": "Type-acceptance test: helper output is accepted by useHead without defineScript."
+		},
+		"unhead/packages/unhead/test/unit/define.test.ts#useHead — as const link patterns > needs defineLink only for non-standard rels#no-assertion": {
+			"label": "fp",
+			"why": "Type-acceptance test that defineLink compiles for non-standard rels."
+		},
+		"unhead/packages/unhead/test/unit/fuzz.test.ts#useHead > breaks#no-assertion": {
+			"label": "fp",
+			"why": "Property-based fuzz test whose point is only that it does not throw."
+		},
+		"unhead/packages/unhead/test/unit/fuzz.test.ts#useHead > test#no-assertion": {
+			"label": "fp",
+			"why": "Fuzz test whose point is that rendering odd input does not throw."
+		},
+		"unstorage/test/drivers/cloudflare-kv-http.test.ts#drivers: cloudflare-kv-http (key encoding) > does not escape /values/ with key ${JSON.stringify(key)}#loop-only-assertion": {
+			"label": "tp",
+			"why": "requests are recorded from the driver; if it sends none, nothing is checked."
+		},
+		"unstorage/test/drivers/fs-lite.test.ts#drivers: fs-lite (atomic) > reads concurrent with a write never observe a truncated value#loop-only-assertion": {
+			"label": "fp",
+			"why": "reads always has three entries from fixed Promise.all destructuring."
+		},
+		"unstorage/test/drivers/fs.test.ts#drivers: fs (atomic) > reads concurrent with a write never observe a truncated value#loop-only-assertion": {
+			"label": "fp",
+			"why": "reads always has three entries from fixed Promise.all destructuring."
+		},
+		"unstorage/test/drivers/http.test.ts#drivers: http > custom headers#no-assertion": {
+			"label": "fp",
+			"why": "The test server's authorize hook throws when the header is missing, so the request fails; that is the check."
+		},
+		"unstorage/test/drivers/null.test.ts#drivers: null > setItem#no-assertion": {
+			"label": "tp",
+			"why": "setItem result is never checked (e.g. getItem afterwards); title names behaviour, not only no-throw."
+		},
+		"unstorage/test/storage.test.ts#utils > stringify#tautology": {
+			"label": "tp",
+			"why": "not.toThrow on an async function cannot fail."
+		},
+		"valibot/library/src/actions/args/args.test.ts#args > should not throw error for valid args#conditional-assertion": {
+			"label": "fp",
+			"why": "dataset.typed is a type guard on a value asserted true in the neighbouring test."
+		},
+		"valibot/library/src/actions/args/argsAsync.test.ts#argsAsync > should not throw error for valid args#conditional-assertion": {
+			"label": "fp",
+			"why": "dataset.typed is a type guard on a value asserted true in the neighbouring test."
+		},
+		"valibot/library/src/actions/returns/returns.test.ts#returns > should not throw error for valid returns#conditional-assertion": {
+			"label": "fp",
+			"why": "dataset.typed is a type guard on a value asserted true in the neighbouring test."
+		},
+		"valibot/library/src/actions/returns/returns.test.ts#returns > should throw error for invalid returns#conditional-assertion": {
+			"label": "fp",
+			"why": "dataset.typed is a type guard on a value asserted true in the neighbouring test."
+		},
+		"valibot/library/src/actions/returns/returnsAsync.test.ts#returnsAsync > should not throw error for valid returnsAsync#conditional-assertion": {
+			"label": "fp",
+			"why": "dataset.typed is a type guard on a value asserted true in the neighbouring test."
+		},
+		"valibot/library/src/actions/returns/returnsAsync.test.ts#returnsAsync > should throw error for invalid returnsAsync#conditional-assertion": {
+			"label": "fp",
+			"why": "dataset.typed is a type guard on a value asserted true in the neighbouring test."
+		},
+		"valibot/library/src/actions/trim/trim.test.ts#trim > should trim string > with blanks at end#duplicate-body": {
+			"label": "fp",
+			"why": "Inputs differ ('foo  ' vs '  foo'); identical only after collapsing whitespace inside string literals."
+		},
+		"valibot/library/src/actions/trim/trim.test.ts#trim > should trim string > with blanks at start and end#duplicate-body": {
+			"label": "fp",
+			"why": "Inputs differ ('  foo  ' vs 'foo  '); identical only after collapsing whitespace inside string literals."
+		},
+		"valibot/library/src/methods/getDefault/getDefault.test.ts#getDefault > should return nullable default > for value getter#duplicate-title": {
+			"label": "tp",
+			"why": "Second test covers an async value getter; shared title hides that."
+		},
+		"valibot/library/src/methods/getDefault/getDefault.test.ts#getDefault > should return nullish default > for value getter#duplicate-title": {
+			"label": "tp",
+			"why": "Second test covers an async value getter; shared title hides that."
+		},
+		"valibot/library/src/schemas/union/union.test.ts#union > should return dataset with issues > with multiple typed issues#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks untyped issues (typed: false), so the title is wrong and collides."
+		},
+		"valibot/library/src/schemas/union/unionAsync.test.ts#unionAsync > should return dataset with issues > with multiple typed issues#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks untyped issues (typed: false), so the title is wrong and collides."
+		},
+		"valibot/library/src/schemas/variant/variant.test.ts#variant > should return dataset with issues > for first nested invalid discriminator#duplicate-title": {
+			"label": "tp",
+			"why": "Tests use different nested variant schemas; shared title does not distinguish them."
+		},
+		"valibot/library/src/schemas/variant/variantAsync.test.ts#variantAsync > should return dataset with issues > for first nested invalid discriminator#duplicate-title": {
+			"label": "tp",
+			"why": "Tests use different nested variant schemas; shared title does not distinguish them."
+		},
+		"valibot/packages/to-json-schema/src/converters/convertAction/convertAction.test.ts#convertAction > should ignore invalid length and entry requirements#loop-only-assertion": {
+			"label": "fp",
+			"why": "Loops over literal types, requirements and fixed action lists."
+		},
+		"valibot/packages/to-json-schema/src/converters/convertAction/convertAction.test.ts#convertAction > should throw error for invalid length and entry requirements#loop-only-assertion": {
+			"label": "fp",
+			"why": "Loops over literal types, requirements and fixed action lists."
+		},
+		"valibot/packages/to-json-schema/src/converters/convertAction/convertAction.test.ts#convertAction > should warn error for invalid length and entry requirements#loop-only-assertion": {
+			"label": "fp",
+			"why": "Loops over literal types, requirements and fixed action lists."
+		},
+		"vue-core/packages/compiler-core/__tests__/parse.spec.ts#compiler: parse > decodeEntities option > should warn in non-browser build#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/compiler-core/__tests__/transforms/vSlot.spec.ts#compiler: transform component slots > with whitespace: 'preserve' > implicit default slot#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/compiler-core/__tests__/transforms/vSlot.spec.ts#compiler: transform component slots > with whitespace: 'preserve' > named default slot + implicit whitespace content#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/compiler-core/__tests__/utils.spec.ts#advancePositionWithClone > same line#duplicate-title": {
+			"label": "tp",
+			"why": "Same title, different inputs and expected results (second crosses a newline)."
+		},
+		"vue-core/packages/compiler-sfc/__tests__/compileScript.spec.ts#SFC genDefaultAs > <script> + <script setup>#duplicate-title": {
+			"label": "tp",
+			"why": "Redundant identical copy of the test on line 1558."
+		},
+		"vue-core/packages/compiler-sfc/__tests__/compileScript/definePropsDestructure.spec.ts#sfc reactive props destructure > errors > should warn when used with withDefaults#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/compiler-sfc/__tests__/compileScript/importUsageCheck.spec.ts#v-on inline statement#no-assertion": {
+			"label": "fp",
+			"why": "Comment states the point is only that compile does not error (vue#12591 regression)."
+		},
+		"vue-core/packages/compiler-sfc/__tests__/compileStyle.spec.ts#SFC scoped CSS > deprecated syntax > /deep/ (deprecated syntax)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/compiler-sfc/__tests__/compileStyle.spec.ts#SFC scoped CSS > deprecated syntax > ::v-deep as combinator#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/compiler-sfc/__tests__/compileStyle.spec.ts#SFC scoped CSS > deprecated syntax > >>> (deprecated syntax)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/Map.spec.ts#reactivity/collections > Map > should warn when both raw and reactive versions of the same object is used as key#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/Set.spec.ts#reactivity/collections > Set > should warn when set contains both raw and reactive versions of the same object#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Map > should make the map/weak-map readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Map > should not make nested values readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Map > should not make the value generated by the forEach method readonly#loop-only-assertion": {
+			"label": "tp",
+			"why": "Iterates the proxy forEach under test; a defect that skips callbacks passes silently."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Map > should not make the value generated by the forEach method readonly#tautology": {
+			"label": "tp",
+			"why": "expect(val).toBe(val) compares a variable with itself; it always holds."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Map > should not make the value generated by the iterable method readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Set > should make the set/weak-set readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Set > should not make nested values readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Set > should not make the value generated by the forEach method readonly#loop-only-assertion": {
+			"label": "tp",
+			"why": "Iterates the proxy forEach under test; a defect that skips callbacks passes silently."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Set > should not make the value generated by the forEach method readonly#tautology": {
+			"label": "tp",
+			"why": "expect(val).toBe(val) compares a variable with itself; it always holds."
+		},
+		"vue-core/packages/reactivity/__tests__/collections/shallowReadonly.spec.ts#reactivity/collections > shallowReadonly/Set > should not make the value generated by the iterable method readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/computed.spec.ts#reactivity/computed > should chained computeds dirtyLevel update with first computed effect#no-assertion": {
+			"label": "tp",
+			"why": "Only reads c3.value; the expectation is commented out, so the claimed dirtyLevel update is unchecked."
+		},
+		"vue-core/packages/reactivity/__tests__/computed.spec.ts#reactivity/computed > should warn if trying to set a readonly computed#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/effect.spec.ts#reactivity/effect > onEffectCleanup > should not warn without active effect when failSilently argument is passed#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/effect.spec.ts#reactivity/effect > onEffectCleanup > should warn if called without active effect#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/effectScope.spec.ts#reactivity/effect/scope > can not run an inactive scope#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/effectScope.spec.ts#reactivity/effect/scope > should warn onScopeDispose() is called when there is no active effect scope#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/reactive.spec.ts#reactivity/reactive > The results of the shallow and readonly assignments are the same (Set)#loop-only-assertion": {
+			"label": "tp",
+			"why": "Iterates the reactive Set under test; an empty iteration would pass."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > Array > should not allow mutation#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > Array > should not trigger effects#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > Object > should not allow mutation#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > Object > should not trigger effects#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > attempting to write plain value to a readonly ref nested in a reactive object should fail#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > calling readonly on computed should allow computed to set its private properties#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > should make ref readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > should return undefined from Map.clear() call#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#reactivity/readonly > should return undefined from Set.clear() call#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/readonly.spec.ts#readonly(reactive(array)) element access > %s preserves readonly and reactivity#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/ref.spec.ts#reactivity/ref > toRef for readonly around shallowReactive#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/ref.spec.ts#reactivity/ref > toRef for shallowReadonly around reactive#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/ref.spec.ts#reactivity/ref > toRefs should warn on plain array#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/ref.spec.ts#reactivity/ref > toRefs should warn on plain object#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReactive.spec.ts#shallowReactive > collections > Setting a reactive object on a shallowReactive set#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertion only inside forEach of the shallowReactive set under test."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReactive.spec.ts#shallowReactive > collections > should not get reactive on foreach#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertion only inside forEach of the shallowReactive set under test."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Map > should make the map/weak-map readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Map > should not make nested values readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Map > should not make the value generated by the forEach method readonly#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertion only inside forEach of the shallowReadonly map under test."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Map > should not make the value generated by the forEach method readonly#tautology": {
+			"label": "tp",
+			"why": "expect(val).toBe(val) compares a variable with itself; it always holds."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Map > should not make the value generated by the iterable method readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Map > should return undefined from Map.clear() call#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Set > should make the set/weak-set readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Set > should not make nested values readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Set > should not make the value generated by the forEach method readonly#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertion only inside forEach of the shallowReadonly set under test."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Set > should not make the value generated by the forEach method readonly#tautology": {
+			"label": "tp",
+			"why": "expect(val).toBe(val) compares a variable with itself; it always holds."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Set > should not make the value generated by the iterable method readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > collection/Set > should return undefined from Set.clear() call#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > should NOT make nested properties readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/reactivity/__tests__/shallowReadonly.spec.ts#reactivity/shallowReadonly > should make root level properties readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiAsyncComponent.spec.ts#api: defineAsyncComponent > error with error component, without global handler#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > component#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > config.isNativeTag > Component.components#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > config.isNativeTag > Component.directives#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > config.isNativeTag > Component.name#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > config.isNativeTag > register using app.component#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > directive#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > mixin#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > mount#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > provide#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > return property \"_\" should not overwrite \"ctx._\", __isScriptSetup: false#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > return property \"_\" should not overwrite \"ctx._\", __isScriptSetup: true#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > runWithContext#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > unmount#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiCreateApp.spec.ts#api: createApp > use#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiExpose.spec.ts#api: expose > warning for array#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiExpose.spec.ts#api: expose > warning for function#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiExpose.spec.ts#api: expose > warning for ref#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > reactivity with readonly objects#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > reactivity with readonly refs#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > should not warn when default value is undefined#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > should warn unfound#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > warnings for incorrect usage > should warn when inject() is called outside setup#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > warnings for incorrect usage > should warn when provide() is called from a render function#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > warnings for incorrect usage > should warn when provide() is called from onMounted#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiInject.spec.ts#api: provide/inject > warnings for incorrect usage > should warn when provide() is called outside setup#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > unlikely mixin usage#no-assertion": {
+			"label": "fp",
+			"why": "Type-level test that defineComponent accepts the mixin form."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > Expected a function as watch handler#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > Invalid watch option#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > assigning to computed with no setter#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > computed property is already declared in data#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > computed property is already declared in inject#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > computed property is already declared in methods#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > computed property is already declared in props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > computed with setter and no getter#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > data property is already declared in inject#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > data property is already declared in methods#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > data property is already declared in props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > inject property is already declared in props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > methods property is already declared in inject#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiOptions.spec.ts#api: options > warnings > methods property is already declared in props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiSetupHelpers.spec.ts#SFC <script setup> helpers > mergeDefaults > should warn missing#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiSetupHelpers.spec.ts#SFC <script setup> helpers > should warn runtime usage#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiSetupHelpers.spec.ts#SFC <script setup> helpers > withAsyncContext > should not leak currentInstance to sibling slot render#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiWatch.spec.ts#api: watch > this.$watch should pass `this.proxy` to watch source as the first argument #dangling-expect": {
+			"label": "tp",
+			"why": "expect(source.mock.calls.some(...)) has no matcher."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiWatch.spec.ts#api: watch > warn and not respect deep option when using effect#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiWatch.spec.ts#api: watch > warn immediate option when using effect#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiWatch.spec.ts#api: watch > warn invalid watch source#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/apiWatch.spec.ts#api: watch > warn invalid watch source: multiple sources#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > merging from mixins#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > should not attach normalized object when mixins do not contain emits#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > should not warn if has equivalent onXXX prop with kebab-cased event#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > should not warn if has equivalent onXXX prop#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > validator warning#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > warning for undeclared event (array)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentEmits.spec.ts#component: emit > warning for undeclared event (object)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > boolean casting#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > replace camelize with hyphenate to handle props key#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > should not warn required props using kebab-case#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > should warn against reserved prop names#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > validator > validator should not be able to mutate other props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > warn absent required props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > warn on type mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentProps.spec.ts#component props > warn props mutation#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentPublicInstance.spec.ts#component: proxy > $el should preserve the unresolved async root value without a dev root fragment#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentPublicInstance.spec.ts#component: proxy > public properties#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentPublicInstance.spec.ts#component: proxy > should not warn declared but absent props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentPublicInstance.spec.ts#component: proxy > should prevent mutating script setup bindings#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > basic warn when mounting another app in setup#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > basic warn when render in setup#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > basic warn#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > initSlots: instance.slots should be set correctly (when vnode.shapeFlag is not SLOTS_CHILDREN)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > initSlots: should normalize object slots (when value is null, string, array)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > should not warn when mounting another app in setup#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > should not warn when render in setup#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > updateSlots: instance.slots should be update correctly (when vnode.shapeFlag is not SLOTS_CHILDREN)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/componentSlots.spec.ts#component: slots > updateSlots: instance.slots should be updated correctly (when slotType is null)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"in-out\" > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"in-out\" > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"in-out\" > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"in-out\" toggle before finish > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"in-out\" toggle before finish > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"in-out\" toggle before finish > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" double quick toggle > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" double quick toggle > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" double quick toggle > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" toggle again after unmounted > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" toggle again after unmounted > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" toggle again after unmounted > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" toggle before finish > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" toggle before finish > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > mode: \"out-in\" toggle before finish > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > should not animate a fragment with multiple element roots#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > should not error on component with empty Teleport root#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > toggle between branches > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > toggle between branches > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > toggle between branches > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > toggle between branches before finish > w/ KeepAlive#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > toggle between branches before finish > w/ components#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/BaseTransition.spec.ts#BaseTransition > toggle between branches before finish > w/ elements#no-assertion": {
+			"label": "fp",
+			"why": "Delegates to a shared tester function full of expects via runTestWith*."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/Suspense.spec.ts#Suspense > warn if using async setup when not in a Suspense boundary#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/Teleport.spec.ts#renderer: teleport > skip unmount children if teleport not disabled & target missing#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/components/Teleport.spec.ts#renderer: teleport > unmount mounted children after target becomes missing#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/errorHandling.spec.ts#error handling > should warn unhandled#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/renderList.spec.ts#renderList > should not allow mutation#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/renderList.spec.ts#renderList > should not warn when given 0#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/renderList.spec.ts#renderList > should warn when given a negative N#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/renderList.spec.ts#renderList > should warn when given a non-integer N#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/renderSlot.spec.ts#renderSlot > should warn render ssr slot#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/resolveAssets.spec.ts#resolveAssets > warning > not exist#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/resolveAssets.spec.ts#resolveAssets > warning > used outside render() or setup()#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/toHandlers.spec.ts#toHandlers > should not accept non-objects#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should be readonly#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should not attempt to set when variable name is same as key#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should warn on duplicate useTemplateRef#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used as direct ref value (compiled in prod mode)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used as direct ref value with ref_for but without ref_key (compiled in prod mode)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used as direct ref value with ref_key and ref_for (compiled in prod mode)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used with direct ref value with ref_key and dynamic value#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used with direct ref value with ref_key and ref_for#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used with direct ref value with ref_key#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/helpers/useTemplateRef.spec.ts#useTemplateRef > should work when used with dynamic direct refs and ref_keys#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > SVG as a mount container#dangling-expect": {
+			"label": "tp",
+			"why": "expect(... instanceof SVGElement) has no matcher."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > Teleport (disabled + as component root)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > Teleport target change (mismatch + full integration)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > Teleport unmount (disabled + full integration)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > Teleport unmount (full integration)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > Teleport unmount (mismatch + full integration)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > attr mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > class mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > comment mismatch (element)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > comment mismatch (text)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > comment mismatch (v-if branch removed)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > comment mismatch (v-if) only allows children mismatches#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > comment mismatch (v-if)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > complete mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > element text content#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > fragment mismatch removal#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > fragment not enough children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > fragment too many children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > node mismatch (v-else branches)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > not enough children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > style mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > data-allow-mismatch > too many children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > elements with camel-case in svg #tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > empty text#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > <pre> with newlines at the beginning#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > <textarea> with newlines at the beginning#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > Teleport target has empty children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > attr mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > attr special case: textarea value#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > boolean attr handling#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > children mismatch is checked once when mounting missing nodes#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > children mismatch is checked once when removing excess nodes#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > class mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > client value is null or undefined#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > comment mismatch (element)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > comment mismatch (text)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > complete mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > css vars should only be added to expected on component root dom#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > css vars support fallthrough#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > element text content#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > escape css var name#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > fragment mismatch removal#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > fragment not enough children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > fragment too many children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > hidden enumerated attribute#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > hidden numeric values#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > hidden state mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > not enough children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > should not warn against object values#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > should not warn css v-bind#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > should not warn for directives that mutate DOM in created#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > should not warn on falsy bindings of non-property keys#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > should not warn on non-renderable option values#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > style mismatch w/ v-show#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > style mismatch when no style attribute is present#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > style mismatch#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > text node#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > mismatch handling > too many children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > static (with text node as starting node)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > static with content adoption#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > stringified root fragment#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > text w/ newlines#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > transition appear with v-if#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > transition appear with v-show#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > transition appear work with empty content#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > transition appear work with pre-existing class#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > transition appear#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > update async component after parent mount before async component resolve#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > update async wrapper before resolve#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/hydration.spec.ts#SSR hydration > update component stable slot (prod + optimized mode)#tautology": {
+			"label": "tp",
+			"why": "not.toThrow on an async function never sees a rejection, so it always holds."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should not warn when $attrs is used during render#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should not warn when context.attrs is used during render (functional)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should not warn when context.attrs is used during render#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should not warn when functional component has optional props#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should warn when fallthrough fails on non-single-root#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should warn when fallthrough fails on teleport root node#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererAttrsFallthrough.spec.ts#attribute fallthrough > should warn when functional component has props and does not use attrs#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererChildren.spec.ts#plain object child#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererChildren.spec.ts#renderer: keyed children > random shuffle#loop-only-assertion": {
+			"label": "fp",
+			"why": "Loops run over fixed counts (samples, elms), not data from the code under test."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererChildren.spec.ts#renderer: keyed children > should warn with duplicate keys#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererComponent.spec.ts#renderer: component > should warn accessing `this` in a <script setup> template#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/rendererTemplateRef.spec.ts#api: template refs > should work with direct reactive property#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/scheduler.spec.ts#scheduler > jobs can be re-queued after an error#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/scheduler.spec.ts#scheduler > nextTick should capture scheduler flush errors#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > children overridden by innerHTML / textContent > no warning for component vnodes#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > children overridden by innerHTML / textContent > no warning when the prop is nullish#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > children overridden by innerHTML / textContent > no warning without renderable children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > children overridden by innerHTML / textContent > warn on array children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > children overridden by innerHTML / textContent > warn on text children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > children overridden by innerHTML / textContent > warn on textContent#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > show warn when create with invalid type#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-core/__tests__/vnode.spec.ts#vnode > vnode keys#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/customElement.spec.ts#defineCustomElement > expose > warning when exposing an existing property#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/customElement.spec.ts#defineCustomElement > native method conflict when rendered by Vue#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/customElement.spec.ts#defineCustomElement > prop name conflicts with native property#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/customElement.spec.ts#defineCustomElement > prop name conflicts with reflected native property#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/customElement.spec.ts#defineCustomElement > provide/inject > inherited from app context within nested elements#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssModule.spec.ts#useCssModule > basic usage#duplicate-title": {
+			"label": "tp",
+			"why": "Two tests share a title but check $style vs a named module."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssModule.spec.ts#useCssModule > warn missing injection#duplicate-title": {
+			"label": "tp",
+			"why": "Same title, but one checks missing modules and the other a missing named module."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssModule.spec.ts#useCssModule > warn missing injection#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssModule.spec.ts#useCssModule > warn out of setup usage#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > on suspense root#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with createStaticVNode#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with string style#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with subTree change inside HOC#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with subTree changed#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with teleport in child slot#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with teleport#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/helpers/useCssVars.spec.ts#useCssVars > with v-if & async component & suspense#loop-only-assertion": {
+			"label": "tp",
+			"why": "Assertions only loop over rendered root/target children; rendering nothing would pass."
+		},
+		"vue-core/packages/runtime-dom/__tests__/patchProps.spec.ts#runtime-dom: props patching > catch and warn prop set TypeError#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/patchProps.spec.ts#runtime-dom: props patching > input with size (number property)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/patchProps.spec.ts#runtime-dom: props patching > select with type (string property)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/patchProps.spec.ts#runtime-dom: props patching > select with willValidate (boolean property)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/runtime-dom/__tests__/patchStyle.spec.ts#runtime-dom: style patching > should warn for trailing semicolons#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > async setup throwing error#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > integration w/ compiled template > handle compiler errors#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > integration w/ compiled template > reset current instance after rendering error#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > reset current instance after error in errorCaptured#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > should handle async setup rejection while awaiting an earlier sibling#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > should handle render error while awaiting an earlier sibling#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > should propagate unhandled async setup errors#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > should recover from synchronous onServerPrefetch errors#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > should stop sync watchers registered after a failed render#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > should stop sync watchers when async setup errors#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > vnode element > falsy content overrides: %j#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > vnode element > innerHTML#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > vnode element > textContent#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > warnings should be suppressed by app.config.warnHandler#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > watcher cleanup errors > after a successful render#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > watcher cleanup errors > for watchers registered after a failed render#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/render.spec.ts#ssr: ${type} > watcher cleanup errors > should not mask the render error#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrRender.spec.ts#ssr: render error leak > should GC apps created after a render error in a forwarded slot#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrRender.spec.ts#ssr: render error leak > should GC apps created after a render error in an inline block (`v-if`)#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrRenderAttrs.spec.ts#ssr: renderAttrs > ignore attr names containing carriage returns#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrRenderList.spec.ts#ssr: renderList > should not warn when given 0#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrRenderList.spec.ts#ssr: renderList > should warn when given a negative N#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrRenderList.spec.ts#ssr: renderList > should warn when given a non-integer N#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrSuspense.spec.ts#SSR Suspense > failing suspense in passing suspense#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrSuspense.spec.ts#SSR Suspense > passing suspense in failing suspense#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrSuspense.spec.ts#SSR Suspense > propagates sync errors from compiled ssrRenderSuspense default slot#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrSuspense.spec.ts#SSR Suspense > reject#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/server-renderer/__tests__/ssrSuspense.spec.ts#SSR Suspense > resolving component + rejecting component#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/shared/__tests__/escapeHtml.spec.ts#escapeHtml > ssr: escapeHTMLComment#duplicate-title": {
+			"label": "tp",
+			"why": "Same title, different inputs checked (plain vs ! comments)."
+		},
+		"vue-core/packages/vue-compat/__tests__/global.spec.ts#local app-level mixin registration should not affect other local apps#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue-compat/__tests__/global.spec.ts#local asset registration should not affect other local apps#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue-compat/__tests__/instance.spec.ts#_setupProxy#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/e2e/Transition.spec.ts#e2e: Transition > transition with Suspense > Suspense fallback should work with transition#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/e2e/Transition.spec.ts#e2e: Transition > warn when invalid transition mode#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/e2e/Transition.spec.ts#e2e: Transition > warn when used on multiple elements#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/e2e/TransitionGroup.spec.ts#e2e: TransitionGroup > not warn unkeyed text children w/ whitespace preserve#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/e2e/TransitionGroup.spec.ts#e2e: TransitionGroup > warn unkeyed children#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/index.spec.ts#compiler + runtime integration > should warn template compilation errors with codeframe#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/index.spec.ts#compiler + runtime integration > should warn when container is not found#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/index.spec.ts#compiler + runtime integration > should warn when template is not available#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vue-core/packages/vue/__tests__/index.spec.ts#compiler + runtime integration > should warn when template is not found#tautology": {
+			"label": "fp",
+			"why": "Custom matcher toHaveBeenWarned checks the warnings logged, not the literal itself."
+		},
+		"vueuse/packages/core/useLiveAnnouncer/index.browser.test.ts#useLiveAnnouncer > should handle missing DOM elements#no-assertion": {
+			"label": "fp",
+			"why": "Title says the point is handling missing DOM elements without crashing, i.e. no throw."
+		},
+		"vueuse/packages/core/useScroll/directive.browser.test.ts#vScroll > given no options > should clear directive when component is unmounted#conditional-assertion": {
+			"label": "fp",
+			"why": "element comes from the test fixture template; the null check is a type guard."
+		},
+		"vueuse/packages/core/useScroll/directive.browser.test.ts#vScroll > given options > should clear directive when component is unmounted#conditional-assertion": {
+			"label": "fp",
+			"why": "element comes from the test fixture template; the null check is a type guard."
+		},
+		"vueuse/packages/integrations/useAsyncValidator/index.test.ts#useAsyncValidator > should pass#callback-only-assertion": {
+			"label": "tp",
+			"why": "then callback is not awaited by the synchronous test, so assertions may run after it ends or never."
+		},
+		"vueuse/packages/shared/useArrayMap/index.test.ts#useArrayMap > should match the return type of mapper function#loop-only-assertion": {
+			"label": "tp",
+			"why": "forEach over useArrayMap output whose length is never asserted; an empty result passes."
+		},
+		"vueuse/packages/shared/utils/index.test.ts#promise > should promiseTimeout throw timeout#catch-only-assertion": {
+			"label": "tp",
+			"why": "vi.waitFor is not awaited and the assertion only runs if promiseTimeout rejects."
+		},
+		"zod/packages/zod/src/v3/tests/all-errors.test.ts#all errors#catch-only-assertion": {
+			"label": "tp",
+			"why": "All assertions are in the catch; if parse stopped throwing, the test would pass unchecked."
+		},
+		"zod/packages/zod/src/v3/tests/all-errors.test.ts#all errors#conditional-assertion": {
+			"label": "tp",
+			"why": "Every check is in a catch; if parse stops throwing the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/array.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': the point is that parse accepts these inputs (parse throws otherwise)."
+		},
+		"zod/packages/zod/src/v3/tests/async-parsing.test.ts#async validation multiple errors 1#conditional-assertion": {
+			"label": "tp",
+			"why": "If either parse succeeds through a defect, the comparison is skipped."
+		},
+		"zod/packages/zod/src/v3/tests/async-parsing.test.ts#async validation multiple errors 2#conditional-assertion": {
+			"label": "tp",
+			"why": "If either parse succeeds through a defect, the comparison is skipped."
+		},
+		"zod/packages/zod/src/v3/tests/async-parsing.test.ts#async validation non-empty strings#conditional-assertion": {
+			"label": "tp",
+			"why": "If either parse succeeds through a defect, the comparison is skipped."
+		},
+		"zod/packages/zod/src/v3/tests/async-parsing.test.ts#ensure early async failure prevents follow-up refinement checks#conditional-assertion": {
+			"label": "tp",
+			"why": "The input is valid, so success is true and the checks never run."
+		},
+		"zod/packages/zod/src/v3/tests/async-refinements.test.ts#parseAsync async test#duplicate-title": {
+			"label": "tp",
+			"why": "Second test uses Promise-returning (non-async) refinements and checks value; title does not distinguish."
+		},
+		"zod/packages/zod/src/v3/tests/base.test.ts#type guard#conditional-assertion": {
+			"label": "fp",
+			"why": "assertEqual is a compile-time check that holds regardless of the runtime branch."
+		},
+		"zod/packages/zod/src/v3/tests/bigint.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection, which is what the test checks."
+		},
+		"zod/packages/zod/src/v3/tests/catch.test.ts#factory#no-assertion": {
+			"label": "tp",
+			"why": "Never checks that the catch value 'asdf' is returned."
+		},
+		"zod/packages/zod/src/v3/tests/catch.test.ts#reported issues with nested usage#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/date.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': acceptance is checked by parse throwing on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/deepmasking.test.ts#test#empty-test": {
+			"label": "tp",
+			"why": "Body is just `z;`; checks nothing."
+		},
+		"zod/packages/zod/src/v3/tests/deepmasking.test.ts#test#no-assertion": {
+			"label": "tp",
+			"why": "Body is just `z;`; checks nothing."
+		},
+		"zod/packages/zod/src/v3/tests/discriminated-unions.test.ts#enum and nativeEnum#no-assertion": {
+			"label": "tp",
+			"why": "Only parses; title names a feature, not merely no-throw, and output is not checked."
+		},
+		"zod/packages/zod/src/v3/tests/enum.test.ts#error map in extract/exclude#conditional-assertion": {
+			"label": "tp",
+			"why": "If either enum accepts the input through a defect, the check is skipped."
+		},
+		"zod/packages/zod/src/v3/tests/enum.test.ts#readonly in ZodEnumDef#no-assertion": {
+			"label": "fp",
+			"why": "Typed declaration z.ZodEnumDef<readonly [...]> is a compile-time check that tsc verifies."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#array minimum#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#custom error with custom errormap#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#custom path#duplicate-title": {
+			"label": "tp",
+			"why": "Second 'custom path' test has no custom path; it checks issue count of min checks."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#default error message#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#enum error message, invalid enum elementstring#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#enum error message, invalid type#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#error creation#no-assertion": {
+			"label": "tp",
+			"why": "Reads isEmpty/message without checking any value."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#literal bigint default error message#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#literal default error message#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#nativeEnum default error message#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#override error in refine#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#override error in refinement#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#refinement fail with params#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/error.test.ts#type error with custom error map#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/firstparty.test.ts#first party switch#conditional-assertion": {
+			"label": "fp",
+			"why": "Exhaustive switch is a compile-time type check; the default branch is never meant to run."
+		},
+		"zod/packages/zod/src/v3/tests/language-server.test.ts##empty-test": {
+			"label": "tp",
+			"why": "Empty test; checks nothing."
+		},
+		"zod/packages/zod/src/v3/tests/language-server.test.ts##no-assertion": {
+			"label": "tp",
+			"why": "Empty test; checks nothing."
+		},
+		"zod/packages/zod/src/v3/tests/literal.test.ts#invalid_literal should have `received` field with data#conditional-assertion": {
+			"label": "tp",
+			"why": "If the literal accepts the value or reports another code, the check is skipped."
+		},
+		"zod/packages/zod/src/v3/tests/literal.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/masking.test.ts#masking test#empty-test": {
+			"label": "tp",
+			"why": "Empty test body."
+		},
+		"zod/packages/zod/src/v3/tests/masking.test.ts#masking test#no-assertion": {
+			"label": "tp",
+			"why": "Empty test body."
+		},
+		"zod/packages/zod/src/v3/tests/mocker.test.ts#mocker#no-assertion": {
+			"label": "tp",
+			"why": "Reads mocker getters without checking any value."
+		},
+		"zod/packages/zod/src/v3/tests/number.test.ts#min max getters#dangling-expect": {
+			"label": "tp",
+			"why": "toBeNull without parentheses is never invoked."
+		},
+		"zod/packages/zod/src/v3/tests/number.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/object.test.ts#catchall overrides strict#duplicate-title": {
+			"label": "tp",
+			"why": "Second test is a near-subset with a required field; same title, nothing distinguishes it."
+		},
+		"zod/packages/zod/src/v3/tests/object.test.ts#catchall overrides strict#no-assertion": {
+			"label": "fp",
+			"why": "Point is that parse accepts the input; parse throws otherwise."
+		},
+		"zod/packages/zod/src/v3/tests/object.test.ts#constructor key#duplicate-title": {
+			"label": "tp",
+			"why": "Second 'constructor key' test is a type inference check unrelated to constructor."
+		},
+		"zod/packages/zod/src/v3/tests/object.test.ts#correct parsing#no-assertion": {
+			"label": "tp",
+			"why": "'correct parsing' claims a correct result but the parse output is not checked."
+		},
+		"zod/packages/zod/src/v3/tests/object.test.ts#nonstrict by default#no-assertion": {
+			"label": "fp",
+			"why": "Point is that unknown keys are not rejected; parse would throw otherwise."
+		},
+		"zod/packages/zod/src/v3/tests/object.test.ts#xor#no-assertion": {
+			"label": "fp",
+			"why": "Assignment to annotated z.ZodType<Outer> is a compile-time assertion."
+		},
+		"zod/packages/zod/src/v3/tests/parser.test.ts#parse nonstrict object with unknown keys#no-assertion": {
+			"label": "fp",
+			"why": "Title is that the nonstrict parse succeeds; parse throws otherwise."
+		},
+		"zod/packages/zod/src/v3/tests/parser.test.ts#parsing unknown#no-assertion": {
+			"label": "fp",
+			"why": "Point is that parse accepts an unknown-typed input (type check plus no throw)."
+		},
+		"zod/packages/zod/src/v3/tests/partials.test.ts#deep partial inference#duplicate-title": {
+			"label": "tp",
+			"why": "Tests check different schemas (nested vs array/tuple); shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v3/tests/partials.test.ts#deep partial runtime tests#no-assertion": {
+			"label": "fp",
+			"why": "Deep partial acceptance checked by parse throwing on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/partials.test.ts#shallow partial parse#no-assertion": {
+			"label": "fp",
+			"why": "Partial schema acceptance checked by parse throwing on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/pickomit.test.ts#nonstrict parsing - pass#no-assertion": {
+			"label": "fp",
+			"why": "'- pass': point is that parse accepts; it throws otherwise."
+		},
+		"zod/packages/zod/src/v3/tests/preprocess.test.ts#preprocess ctx.addIssue fatal true#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/preprocess.test.ts#preprocess ctx.addIssue non-fatal by default#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#literal number object#duplicate-body": {
+			"label": "tp",
+			"why": "'literal number object' parses literalStringSchema, identical to the string test."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#literal string boolean#duplicate-title": {
+			"label": "tp",
+			"why": "Exact redundant copy."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#optional convenience method#no-assertion": {
+			"label": "tp",
+			"why": "Parses undefined but never checks the result; title names a method, not no-throw."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse bigintSchema bigint#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse booleanSchema boolean#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse dateSchema date#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse dateSchema invalid date#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse nullSchema null#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse numberSchema number#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse stringSchema string#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse symbolSchema symbol#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/primitive.test.ts#parse undefinedSchema undefined#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the parse succeeds."
+		},
+		"zod/packages/zod/src/v3/tests/promise.test.ts#promise parsing fail#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks a non-promise thenable synchronously; title does not distinguish."
+		},
+		"zod/packages/zod/src/v3/tests/promise.test.ts#promise parsing success 2#no-assertion": {
+			"label": "fp",
+			"why": "'parsing success': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/record.test.ts#key and value getters#no-assertion": {
+			"label": "tp",
+			"why": "Getters are only used to parse; their identity/result is never checked."
+		},
+		"zod/packages/zod/src/v3/tests/record.test.ts#methods#no-assertion": {
+			"label": "tp",
+			"why": "Calls optional()/nullable() and checks nothing."
+		},
+		"zod/packages/zod/src/v3/tests/record.test.ts#string record parse - fail#duplicate-title": {
+			"label": "tp",
+			"why": "Tests check different bad values ({} vs [] vs number); shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v3/tests/record.test.ts#string record parse - pass#no-assertion": {
+			"label": "fp",
+			"why": "'- pass': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/recursive.test.ts#recursion with z.late.object#no-assertion": {
+			"label": "fp",
+			"why": "Assignment to annotated z.ZodType<Category> is a compile-time assertion; parse also checks acceptance."
+		},
+		"zod/packages/zod/src/v3/tests/recursive.test.ts#recursion with z.lazy#no-assertion": {
+			"label": "fp",
+			"why": "Assignment to annotated z.ZodType<Category> is a compile-time assertion."
+		},
+		"zod/packages/zod/src/v3/tests/recursive.test.ts#schema getter#no-assertion": {
+			"label": "tp",
+			"why": "Only parses through the getter; nothing checks the getter's value."
+		},
+		"zod/packages/zod/src/v3/tests/refine.test.ts#refinement Promise#no-assertion": {
+			"label": "tp",
+			"why": "Only checks the async refine accepts matching data; a refine that ignores the Promise would pass too."
+		},
+		"zod/packages/zod/src/v3/tests/standard-schema.test.ts#assignability#no-assertion": {
+			"label": "fp",
+			"why": "Assignments to annotated StandardSchemaV1 types are compile-time assertions."
+		},
+		"zod/packages/zod/src/v3/tests/string.test.ts#datetime parsing#dangling-expect": {
+			"label": "tp",
+			"why": "expect(() => ...) with no matcher."
+		},
+		"zod/packages/zod/src/v3/tests/string.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v3/tests/string.test.ts#url error overrides#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/unions.test.ts#options getter#no-assertion": {
+			"label": "tp",
+			"why": "Options getter used only to parse; values never checked."
+		},
+		"zod/packages/zod/src/v3/tests/unions.test.ts#readonly union#no-assertion": {
+			"label": "fp",
+			"why": "Point is that a readonly tuple compiles as union options and parses."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#array length#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#array max#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#array min#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#instantiation#no-assertion": {
+			"label": "fp",
+			"why": "'instantiation': point is only that constructing the schemas works."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#number max#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#number min#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#number negative#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#number nonnegative#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#number nonpositive#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#number positive#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#string length#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#string max#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v3/tests/validations.test.ts#string min#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/assignability.test.ts#assignability with narrowing#no-assertion": {
+			"label": "fp",
+			"why": "Type-only test: the point is that the types compile (no excessive depth)."
+		},
+		"zod/packages/zod/src/v4/classic/tests/assignability.test.ts#assignability#no-assertion": {
+			"label": "fp",
+			"why": "`satisfies` clauses are compile-time assertions."
+		},
+		"zod/packages/zod/src/v4/classic/tests/assignability.test.ts#checks#no-assertion": {
+			"label": "fp",
+			"why": "Annotated assignments and satisfies are compile-time assertions."
+		},
+		"zod/packages/zod/src/v4/classic/tests/assignability.test.ts#generic assignability in objects#no-assertion": {
+			"label": "fp",
+			"why": "Type-only test: the point is that the generic default compiles."
+		},
+		"zod/packages/zod/src/v4/classic/tests/async-parsing.test.ts#ensure early async failure prevents follow-up refinement checks#conditional-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/bigint.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v4/classic/tests/catch.test.ts#reported issues with nested usage#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/coalesce.test.ts#coalesce#tautology": {
+			"label": "tp",
+			"why": "expect(true).toBe(true) holds always."
+		},
+		"zod/packages/zod/src/v4/classic/tests/custom.test.ts#instanceof#no-assertion": {
+			"label": "fp",
+			"why": "Point is that the pipe type-checks (comment cites the former tsc error)."
+		},
+		"zod/packages/zod/src/v4/classic/tests/date.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v4/classic/tests/discriminated-unions.test.ts#valid - include discriminator key (deprecated)#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to 'valid parse - object'; nothing deprecated or discriminator-specific checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/enum.test.ts#readonly in ZodEnumDef#no-assertion": {
+			"label": "fp",
+			"why": "Type aliases instantiate ZodEnum with constraints that tsc checks."
+		},
+		"zod/packages/zod/src/v4/classic/tests/error.test.ts#custom path#duplicate-title": {
+			"label": "tp",
+			"why": "Second 'custom path' test has no custom path."
+		},
+		"zod/packages/zod/src/v4/classic/tests/error.test.ts#error creation#no-assertion": {
+			"label": "tp",
+			"why": "Reads isEmpty/message without checking any value."
+		},
+		"zod/packages/zod/src/v4/classic/tests/error.test.ts#error serialization#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/function.test.ts#array inputs#no-assertion": {
+			"label": "fp",
+			"why": "Point is that implement() type-checks args for array inputs (compile-time)."
+		},
+		"zod/packages/zod/src/v4/classic/tests/function.test.ts#output validation error#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/function.test.ts#valid function run#duplicate-title": {
+			"label": "tp",
+			"why": "Tests run func2 vs func3; shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/classic/tests/function.test.ts#valid function run#no-assertion": {
+			"label": "fp",
+			"why": "'valid function run': point is that it runs without validation error."
+		},
+		"zod/packages/zod/src/v4/classic/tests/index.test.ts#z.transform#duplicate-title": {
+			"label": "tp",
+			"why": "Tests check pipe+transform vs standalone transform; shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/classic/tests/json.test.ts#placeholder test#tautology": {
+			"label": "tp",
+			"why": "expect(2).toBe(2) holds always."
+		},
+		"zod/packages/zod/src/v4/classic/tests/lazy.test.ts#complicated self-recursion#no-assertion": {
+			"label": "fp",
+			"why": "Type-only: the point is that the self-recursive getters compile."
+		},
+		"zod/packages/zod/src/v4/classic/tests/lazy.test.ts#lazy initialization#no-assertion": {
+			"label": "fp",
+			"why": "Annotated z.ZodType<Category> assignment is compile-time; lazy init not throwing is the point."
+		},
+		"zod/packages/zod/src/v4/classic/tests/lazy.test.ts#mutual recursion with cyclical data#no-assertion": {
+			"label": "tp",
+			"why": "Builds cyclic data and never touches zod or checks anything."
+		},
+		"zod/packages/zod/src/v4/classic/tests/lazy.test.ts#recursion with z.lazy#no-assertion": {
+			"label": "fp",
+			"why": "Assignment to annotated z.ZodType<Category> is a compile-time assertion."
+		},
+		"zod/packages/zod/src/v4/classic/tests/lazy.test.ts#recursive union wit z.lazy#no-assertion": {
+			"label": "fp",
+			"why": "Assignment to annotated z.ZodType<LinkedList> is a compile-time assertion."
+		},
+		"zod/packages/zod/src/v4/classic/tests/lazy.test.ts#schema getter#no-assertion": {
+			"label": "tp",
+			"why": "Title 'schema getter' but the getter is not even used or checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/literal.test.ts#passing validations#no-assertion": {
+			"label": "fp",
+			"why": "'passing validations': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v4/classic/tests/literal.test.ts#readonly#no-assertion": {
+			"label": "fp",
+			"why": "Point is that z.literal accepts a readonly array (compile-time)."
+		},
+		"zod/packages/zod/src/v4/classic/tests/number.test.ts#error customization#no-assertion": {
+			"label": "tp",
+			"why": "Error customization is never exercised or checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/number.test.ts#max value getters#dangling-expect": {
+			"label": "tp",
+			"why": "toBeNull without parentheses is never invoked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/number.test.ts#min value getters#dangling-expect": {
+			"label": "tp",
+			"why": "toBeNull without parentheses is never invoked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/object.test.ts#assignability#no-assertion": {
+			"label": "fp",
+			"why": "`satisfies` clauses are compile-time assertions."
+		},
+		"zod/packages/zod/src/v4/classic/tests/object.test.ts#catchall overrides strict#duplicate-title": {
+			"label": "tp",
+			"why": "Second test is a near-subset with required field; same title."
+		},
+		"zod/packages/zod/src/v4/classic/tests/object.test.ts#catchall overrides strict#no-assertion": {
+			"label": "fp",
+			"why": "Point is that parse accepts ('should run fine')."
+		},
+		"zod/packages/zod/src/v4/classic/tests/object.test.ts#constructor key#duplicate-title": {
+			"label": "tp",
+			"why": "Second 'constructor key' test is an unrelated type inference check."
+		},
+		"zod/packages/zod/src/v4/classic/tests/object.test.ts#correct parsing#no-assertion": {
+			"label": "tp",
+			"why": "'correct parsing' but the parse output is not checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/object.test.ts#nonstrict by default#no-assertion": {
+			"label": "fp",
+			"why": "Point is that unknown keys are not rejected; parse throws otherwise."
+		},
+		"zod/packages/zod/src/v4/classic/tests/optional.test.ts#optional prop with pipe#no-assertion": {
+			"label": "tp",
+			"why": "Parses but never checks the output; title names a feature."
+		},
+		"zod/packages/zod/src/v4/classic/tests/partial.test.ts#shallow partial parse#no-assertion": {
+			"label": "fp",
+			"why": "Partial schema acceptance checked by parse throwing on rejection."
+		},
+		"zod/packages/zod/src/v4/classic/tests/pickomit.test.ts#nonstrict parsing - pass#no-assertion": {
+			"label": "fp",
+			"why": "'- pass': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v4/classic/tests/pipe.test.ts#reverse parsing with pipe#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks encode throwing on a transform; shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/classic/tests/promise.test.ts#promise parsing fail#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks a non-promise thenable synchronously; title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/classic/tests/readonly.test.ts#readonly parse with tuples#no-assertion": {
+			"label": "fp",
+			"why": "Title only claims the readonly tuple parses."
+		},
+		"zod/packages/zod/src/v4/classic/tests/record.test.ts#async parsing#duplicate-title": {
+			"label": "tp",
+			"why": "Second test checks a failing async refinement; shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/classic/tests/record.test.ts#key and value getters#no-assertion": {
+			"label": "tp",
+			"why": "Getters used only to parse; their values never checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/recursive-types.test.ts#recursion compatibility#no-assertion": {
+			"label": "fp",
+			"why": "Type-level test: the point is that the recursive getters compile."
+		},
+		"zod/packages/zod/src/v4/classic/tests/registries.test.ts#loose examples#no-assertion": {
+			"label": "fp",
+			"why": "Point is that loose examples type-check when registering."
+		},
+		"zod/packages/zod/src/v4/classic/tests/standard-schema.test.ts#length checks#duplicate-title": {
+			"label": "tp",
+			"why": "None check length; tests check invalid type vs valid value, sync vs async refine."
+		},
+		"zod/packages/zod/src/v4/classic/tests/string.test.ts#url error overrides#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/template-literal.test.ts#template literal parsing - success - complex cases#no-assertion": {
+			"label": "fp",
+			"why": "'parsing - success': parse throws on rejection."
+		},
+		"zod/packages/zod/src/v4/classic/tests/to-json-schema.test.ts#toJSONSchema > catchall interface#duplicate-body": {
+			"label": "tp",
+			"why": "Identical to 'catchall objects'; nothing interface-specific is checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/tuple.test.ts#async validation#tautology": {
+			"label": "tp",
+			"why": "expect(val).toEqual(val) compares a value with itself."
+		},
+		"zod/packages/zod/src/v4/classic/tests/tuple.test.ts#successful validation#tautology": {
+			"label": "tp",
+			"why": "expect(val).toEqual(val) compares a value with itself."
+		},
+		"zod/packages/zod/src/v4/classic/tests/union.test.ts#options getter#no-assertion": {
+			"label": "tp",
+			"why": "Options getter used only to parse; values never checked."
+		},
+		"zod/packages/zod/src/v4/classic/tests/union.test.ts#readonly union#no-assertion": {
+			"label": "fp",
+			"why": "Point is that a readonly tuple compiles as union options and parses."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number gt#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number gte#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number lt#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number lte#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number max#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number min#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number negative#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number nonnegative#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number nonpositive#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#number positive#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#string length#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#string max#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/classic/tests/validations.test.ts#string min/max#catch-only-assertion": {
+			"label": "tp",
+			"why": "No expect.assertions; if parse stops throwing the catch never runs and the test passes."
+		},
+		"zod/packages/zod/src/v4/core/tests/compile-generative.test.ts#random schemas parse identically through the interpreter and the compiler#swallowed-assertion": {
+			"label": "fp",
+			"why": "Caught errors are collected and asserted empty after the loop."
+		},
+		"zod/packages/zod/src/v4/core/tests/compile.test.ts#a refused compile leaves the schema parsing identically#loop-only-assertion": {
+			"label": "fp",
+			"why": "refusedCases returns a fixed list with non-async entries."
+		},
+		"zod/packages/zod/src/v4/core/tests/compile.test.ts#compile hands back the original schema instead of throwing#loop-only-assertion": {
+			"label": "fp",
+			"why": "refusedCases returns a fixed non-empty list."
+		},
+		"zod/packages/zod/src/v4/core/tests/extend.test.ts#safeExtend chaining preserves and overrides properties#no-assertion": {
+			"label": "tp",
+			"why": "Claims preserving/overriding properties but checks no shape or rejection."
+		},
+		"zod/packages/zod/src/v4/core/tests/index.test.ts#async validation#tautology": {
+			"label": "tp",
+			"why": "expect(val).toEqual(val) compares a value with itself."
+		},
+		"zod/packages/zod/src/v4/core/tests/index.test.ts#test#tautology": {
+			"label": "tp",
+			"why": "expect(true).toBe(true) holds always."
+		},
+		"zod/packages/zod/src/v4/mini/tests/assignability.test.ts#assignability#no-assertion": {
+			"label": "fp",
+			"why": "`satisfies` clauses are compile-time assertions."
+		},
+		"zod/packages/zod/src/v4/mini/tests/functions.test.ts#z.function#tautology": {
+			"label": "tp",
+			"why": "expect(true).toEqual(true) holds always."
+		},
+		"zod/packages/zod/src/v4/mini/tests/index.test.ts#z.transform#duplicate-title": {
+			"label": "tp",
+			"why": "Tests check pipe+transform vs standalone transform; shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/mini/tests/prototypes.test.ts#prototype extension#duplicate-title": {
+			"label": "tp",
+			"why": "Tests extend different prototypes ($ZodType vs ZodMiniType); shared title does not distinguish."
+		},
+		"zod/packages/zod/src/v4/mini/tests/recursive-types.test.ts#recursion compatibility#no-assertion": {
+			"label": "fp",
+			"why": "Type-level test: the point is that the recursive getters compile."
+		},
+		"zustand/tests/types.test.tsx#can use exposed types#tautology": {
+			"label": "tp",
+			"why": "expect(true).toBeTruthy() holds always."
+		}
+	}
+}

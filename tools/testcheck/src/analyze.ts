@@ -1,10 +1,13 @@
 import ts from 'typescript';
+import { titleFindings } from './title.ts';
 
 export interface Finding {
 	file: string;
 	line: number;
 	/** Full title, describe titles joined with " > ". */
 	test: string;
+	/** Where the test starts; a suppression comment goes on the line above. */
+	testLine: number;
 	rule: string;
 	message: string;
 	/** The offending code, first line, at most 80 characters. */
@@ -13,7 +16,13 @@ export interface Finding {
 
 interface TestCase {
 	title: string;
+	/** The test's own title, without the describe titles. */
+	name: string;
+	/** The describe titles, " > " between them. */
+	path: string;
 	line: number;
+	/** The whole `it(...)` call, title included. */
+	call: ts.CallExpression;
 	fn: Fn;
 	body: ts.ConciseBody;
 	/** `it.each`/`test.for`: the title is a template, the body runs once per row. */
@@ -62,7 +71,7 @@ function collectTests(sf: ts.SourceFile): TestCase[] {
 				if (SUITE_NAMES.has(c.base)) return ts.forEachChild(fn.body, (n) => visit(n, [...path, title]));
 				if (TEST_NAMES.has(c.base)) {
 					const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
-					tests.push({ title: [...path, title].join(' > '), line, fn, body: fn.body, each });
+					tests.push({ title: [...path, title].join(' > '), name: title, path: path.join(' > '), line, call: node, fn, body: fn.body, each });
 					return;
 				}
 			}
@@ -131,18 +140,23 @@ function assertionNodes(node: ts.Node, helpers: Set<string>): ts.Node[] {
 	return found;
 }
 
-/** Assertions tsc checks: type-level `Expect<Equal<…>>` and an expected type error. */
-function typeAssertions(node: ts.Node): number {
+/**
+ * Assertions tsc checks: type-level `Expect<Equal<…>>` and an expected type error; with `declarations`, also a value
+ * that must fit a declared type, which only shows that a test without other assertions checks types.
+ */
+function typeAssertions(node: ts.Node, declarations = false): number {
 	let n = 0;
 	const visit = (x: ts.Node): void => {
 		if (ts.isTypeReferenceNode(x) && ts.isIdentifier(x.typeName) && TYPE_ASSERT.test(x.typeName.text)) n++;
+		// tsc checks that the value fits the declared type
+		else if (declarations && (ts.isSatisfiesExpression(x) || ts.isTypeAliasDeclaration(x) || (ts.isVariableDeclaration(x) && x.type))) n++;
 		ts.forEachChild(x, visit);
 	};
 	visit(node);
 	return n + (node.getFullText().match(/@ts-expect-error/g)?.length ?? 0);
 }
 
-const countAssertions = (node: ts.Node, helpers: Set<string>): number => assertionNodes(node, helpers).length + typeAssertions(node);
+const countAssertions = (node: ts.Node, helpers: Set<string>): number => assertionNodes(node, helpers).length + typeAssertions(node, true);
 
 const ITERATORS = new Set(['forEach', 'map', 'flatMap', 'filter', 'every', 'some', 'find', 'findIndex', 'reduce']);
 const SCHEDULERS = new Set(['then', 'catch', 'finally', 'setTimeout', 'setInterval', 'setImmediate', 'nextTick', 'queueMicrotask', 'on', 'once', 'addEventListener', 'subscribe']);
@@ -161,17 +175,22 @@ function isFixedData(expr: ts.Expression, eachParams: Set<string>): boolean {
 	if (ts.isArrayLiteralExpression(n)) return n.elements.length > 0;
 	if (ts.isObjectLiteralExpression(n)) return n.properties.length > 0;
 	if (ts.isPropertyAccessExpression(n) || ts.isElementAccessExpression(n)) return isFixedData(n.expression, eachParams);
+	if (ts.isAwaitExpression(n)) return isFixedData(n.expression, eachParams);
 	if (ts.isCallExpression(n)) return isFixedCall(n, eachParams);
 	return ts.isIdentifier(n) && isFixedName(n, eachParams);
 }
 
+/** Test data the test file builds itself: a call of a function declared in it, or `Promise.all` of a literal list. */
+const ARGUMENT_VIEWS = new Set(['Promise', 'Object', 'Array']);
+
 function isFixedCall(n: ts.CallExpression, eachParams: Set<string>): boolean {
-	const name = calleeName(n) ?? '';
-	const receiver = ts.isPropertyAccessExpression(n.expression) ? n.expression.expression : undefined;
-	if (name === 'split') return true;
-	if (!receiver) return false;
-	if (ts.isIdentifier(receiver) && (receiver.text === 'Object' || receiver.text === 'Array')) return !!n.arguments[0] && isFixedData(n.arguments[0], eachParams);
-	return PASS_THROUGH_METHODS.has(name) && isFixedData(receiver, eachParams);
+	if (calleeName(n) === 'split') return true;
+	if (ts.isIdentifier(n.expression)) return isLocalFunction(n.expression);
+	if (!ts.isPropertyAccessExpression(n.expression)) return false;
+	const receiver = n.expression.expression;
+	// Promise.all([...]), Object.entries({...}), Array.from([...]): a view of their argument
+	if (ts.isIdentifier(receiver) && ARGUMENT_VIEWS.has(receiver.text)) return !!n.arguments[0] && isFixedData(n.arguments[0], eachParams);
+	return PASS_THROUGH_METHODS.has(n.expression.name.text) && isFixedData(receiver, eachParams);
 }
 
 // ponytail: a name resolves to the first declaration in the file, not by scope; scope analysis if shadowing misleads it
@@ -181,6 +200,17 @@ function isFixedName(n: ts.Identifier, eachParams: Set<string>): boolean {
 	if (!decl) return false;
 	if (!ts.isVariableDeclaration(decl) || ts.isSourceFile(decl.parent.parent.parent)) return true;
 	return !!decl.initializer && isFixedData(decl.initializer, eachParams);
+}
+
+function isLocalFunction(id: ts.Identifier): boolean {
+	let found = false;
+	const visit = (x: ts.Node): void => {
+		if (ts.isFunctionDeclaration(x) && x.name?.text === id.text) found = true;
+		else if (!found) ts.forEachChild(x, visit);
+	};
+	visit(id.getSourceFile());
+	const decl = declarationOf(id);
+	return found || (!!decl && ts.isVariableDeclaration(decl) && isFn(decl.initializer));
 }
 
 /** The variable or import that declares a name, the first one in the file. */
@@ -211,7 +241,7 @@ function isWaitedFor(call: ts.Node, root: ts.Node): boolean {
 	}
 }
 
-type Guard = 'swallowed-assertion' | 'catch-only-assertion' | 'conditional-assertion' | 'loop-only-assertion' | 'callback-only-assertion';
+type Guard = 'swallowed-assertion' | 'catch-only-assertion' | 'loop-only-assertion' | 'callback-only-assertion';
 
 interface Scope {
 	root: ts.Node;
@@ -220,20 +250,16 @@ interface Scope {
 }
 
 const asserts = (n: ts.Node | undefined, scope: Scope) => !!n && assertionNodes(n, scope.helpers).length > 0;
-const SHORT_CIRCUIT = [ts.SyntaxKind.AmpersandAmpersandToken, ts.SyntaxKind.BarBarToken, ts.SyntaxKind.QuestionQuestionToken];
+
+/** A catch that keeps the error, e.g. to assert on a list of failures later, does not swallow it. */
+function usesError(c: ts.CatchClause): boolean {
+	const name = c.variableDeclaration?.name;
+	return !!name && ts.isIdentifier(name) && new RegExp(`\\b${name.text}\\b`).test(c.block.getText());
+}
 
 function tryGuard(n: ts.Node, p: ts.Node, scope: Scope): Guard | undefined {
 	if (ts.isCatchClause(p)) return 'catch-only-assertion';
-	if (ts.isTryStatement(p) && n === p.tryBlock && p.catchClause && !asserts(p.catchClause.block, scope)) return 'swallowed-assertion';
-	return undefined;
-}
-
-/** A branch counts as guarded unless every other branch asserts too. */
-function branchGuard(n: ts.Node, p: ts.Node, scope: Scope): Guard | undefined {
-	if (ts.isIfStatement(p) && n !== p.expression && !asserts(n === p.thenStatement ? p.elseStatement : p.thenStatement, scope)) return 'conditional-assertion';
-	if (ts.isConditionalExpression(p) && n !== p.condition) return 'conditional-assertion';
-	if (ts.isBinaryExpression(p) && n === p.right && SHORT_CIRCUIT.includes(p.operatorToken.kind)) return 'conditional-assertion';
-	if ((ts.isCaseClause(p) || ts.isDefaultClause(p)) && p.parent.clauses.some((c) => c.statements.length > 0 && !asserts(c, scope))) return 'conditional-assertion';
+	if (ts.isTryStatement(p) && n === p.tryBlock && p.catchClause && !asserts(p.catchClause.block, scope) && !usesError(p.catchClause)) return 'swallowed-assertion';
 	return undefined;
 }
 
@@ -255,7 +281,7 @@ function callbackGuard(n: ts.Node, p: ts.Node, scope: Scope): Guard | undefined 
 /** The innermost construct that may keep an assertion from running, or undefined when it always runs. */
 function guardOf(node: ts.Node, scope: Scope): Guard | undefined {
 	for (let n = node; n !== scope.root && n.parent; n = n.parent) {
-		const guard = tryGuard(n, n.parent, scope) ?? branchGuard(n, n.parent, scope) ?? loopGuard(n, n.parent, scope) ?? callbackGuard(n, n.parent, scope);
+		const guard = tryGuard(n, n.parent, scope) ?? loopGuard(n, n.parent, scope) ?? callbackGuard(n, n.parent, scope);
 		if (guard) return guard;
 	}
 	return undefined;
@@ -270,7 +296,6 @@ const isUnguarded = (n: ts.Node) =>
 const GUARD_MESSAGES: Record<Guard, string> = {
 	'swallowed-assertion': 'the assertion is in a try block whose catch drops its error, so it can never fail the test: rethrow or remove the try',
 	'catch-only-assertion': 'every assertion is in a catch block: when the code stops throwing, the test still passes; add expect.assertions(n) or use .toThrow/.rejects',
-	'conditional-assertion': 'every assertion runs only under a condition: when it is false, the test passes without checking; assert the condition itself',
 	'loop-only-assertion': 'every assertion is in a loop over data that may be empty: assert the length first',
 	'callback-only-assertion': 'every assertion is in a callback the test does not wait for: await the promise or event'
 };
@@ -342,52 +367,130 @@ function isUnawaited(c: ExpectChain): boolean {
 	return ts.isExpressionStatement(parent) || ts.isVoidExpression(parent);
 }
 
-const isLiteral = (n: ts.Node): boolean =>
-	ts.isStringLiteralLike(n) ||
-	ts.isNumericLiteral(n) ||
-	n.kind === ts.SyntaxKind.TrueKeyword ||
-	n.kind === ts.SyntaxKind.FalseKeyword ||
-	n.kind === ts.SyntaxKind.NullKeyword ||
-	(ts.isIdentifier(n) && n.text === 'undefined') ||
-	(ts.isPrefixUnaryExpression(n) && ts.isNumericLiteral(n.operand));
+const NOT_LITERAL = Symbol('not a literal');
+
+/** The value of a literal, or NOT_LITERAL. */
+function literalValue(n: ts.Node): unknown {
+	if (ts.isStringLiteralLike(n)) return n.text;
+	if (ts.isNumericLiteral(n)) return Number(n.text);
+	if (ts.isPrefixUnaryExpression(n) && n.operator === ts.SyntaxKind.MinusToken && ts.isNumericLiteral(n.operand)) return -Number(n.operand.text);
+	if (n.kind === ts.SyntaxKind.TrueKeyword) return true;
+	if (n.kind === ts.SyntaxKind.FalseKeyword) return false;
+	if (n.kind === ts.SyntaxKind.NullKeyword) return null;
+	if (ts.isIdentifier(n) && n.text === 'undefined') return undefined;
+	return NOT_LITERAL;
+}
+
+/** Built-in matchers on literals, so the outcome is known without running: a custom matcher may check other state. */
+const LITERAL_MATCHERS: Record<string, (actual: unknown, expected: unknown) => boolean> = {
+	toBe: Object.is,
+	toEqual: Object.is,
+	toStrictEqual: Object.is,
+	toBeTruthy: (a) => !!a,
+	toBeFalsy: (a) => !a,
+	toBeDefined: (a) => a !== undefined,
+	toBeUndefined: (a) => a === undefined,
+	toBeNull: (a) => a === null
+};
+
+/** `expect(<literal>).<matcher>(<literal>)` that always holds; one that always fails marks unreachable code. */
+function holdsOnLiterals(c: Matched): boolean {
+	const matcher = LITERAL_MATCHERS[calleeName(c.matcher) ?? ''];
+	const values = [c.expect.arguments[0], ...c.matcher.arguments].map(literalValue);
+	return !!matcher && !values.includes(NOT_LITERAL) && matcher(values[0], values[1]) !== c.mods.includes('not');
+}
+
+type Matched = ExpectChain & { matcher: ts.CallExpression };
+
+/** The value compared with itself; toBe of a non-variable checks identity, e.g. a getter returning the same object. */
+function comparesWithItself(c: Matched, actual: ts.Expression): boolean {
+	const [expected, ...more] = c.matcher.arguments;
+	if (!expected || more.length > 0 || c.mods.includes('not') || expected.getText() !== actual.getText()) return false;
+	return ts.isIdentifier(actual) || calleeName(c.matcher) !== 'toBe';
+}
+
+/** `not.toThrow` on an async function: it returns a promise and never throws synchronously. */
+function asyncNeverThrows(c: Matched, actual: ts.Expression): boolean {
+	const isAsync = (ts.isArrowFunction(actual) || ts.isFunctionExpression(actual)) && !!actual.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword);
+	return isAsync && c.mods.includes('not') && /^toThrow(Error)?$/.test(calleeName(c.matcher) ?? '');
+}
 
 /** An assertion that holds whatever the code under test does. */
 function isTautology(c: ExpectChain): boolean {
 	const actual = c.expect.arguments[0];
 	if (!actual || !c.matcher) return false;
-	const expected = c.matcher.arguments;
-	const name = calleeName(c.matcher);
-	if (isLiteral(actual) && expected.every(isLiteral)) return true;
-	// toBe(x) of an expression with itself checks identity, e.g. that a getter returns the same object each time
-	const same = expected.length === 1 && expected[0].getText() === actual.getText() && (ts.isIdentifier(actual) || name !== 'toBe');
-	if (!c.mods.includes('not') && same) return true;
-	const asyncFn = (ts.isArrowFunction(actual) || ts.isFunctionExpression(actual)) && actual.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword);
-	return !!asyncFn && c.mods.includes('not') && (name === 'toThrow' || name === 'toThrowError');
+	const m = { ...c, matcher: c.matcher };
+	return holdsOnLiterals(m) || comparesWithItself(m, actual) || asyncNeverThrows(m, actual);
 }
 
-/** Titles that claim only that nothing throws or that the types check, which a test without assertion shows. */
-const NO_THROW_TITLE = /\b(not?|n't|never|without)\b.*\b(throw|crash|error|fail)|\btyp(e|es|ed|ing)\b|\binfer|wirft nicht|ohne Fehler|kein(en)? Fehler/i;
+const parse = (file: string, text: string) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+
+function runsCode(node: ts.Node): boolean {
+	let found = false;
+	const visit = (x: ts.Node): void => {
+		if (ts.isCallExpression(x) || ts.isNewExpression(x) || ts.isAwaitExpression(x) || ts.isTaggedTemplateExpression(x)) found = true;
+		else if (!found) ts.forEachChild(x, visit);
+	};
+	visit(node);
+	return found;
+}
+
+function testFindings(t: TestCase, sf: ts.SourceFile, helpers: Set<string>): Finding[] {
+	const findings: Finding[] = [];
+	const add = (rule: string, message: string, node?: ts.Node) => {
+		const line = node ? sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1 : t.line;
+		const code = (node ? node.getText(sf) : '').replace(/\s+/g, ' ').slice(0, 80);
+		findings.push({ file: sf.fileName, line, test: t.title, testLine: t.line, rule, message, code });
+	};
+	const asserts = countAssertions(t.body, helpers) > 0;
+	if (!asserts && !runsCode(t.body)) add('empty-test', 'the test neither runs code nor asserts: it always passes');
+	const chains = expectChains(t.body);
+	const dangling = chains.find((c) => !c.matcher);
+	if (dangling) add('dangling-expect', 'expect(...) without a called matcher checks nothing: add the matcher call, e.g. .toBe(...)', dangling.outer);
+	const unawaited = chains.find(isUnawaited);
+	if (unawaited) add('unawaited-assertion', 'a resolves/rejects/poll assertion that is not awaited or returned settles after the test passed: await it', unawaited.outer);
+	const guard = guardFinding(t, helpers);
+	if (guard) add(guard.guard, GUARD_MESSAGES[guard.guard], guard.node);
+	const tautology = chains.find(isTautology);
+	if (tautology) add('tautology', 'the assertion holds whatever the code does (a literal, the value compared with itself, or not.toThrow on an async function)', tautology.outer);
+	return findings;
+}
+
+/** Where each test's title and body are in the text, for eval/seed.ts to plant defects into real tests. */
+export const testSpans = (file: string, text: string) =>
+	collectTests(parse(file, text)).map((t) => ({
+		title: t.title,
+		path: t.path,
+		each: t.each,
+		titleSpan: [t.call.arguments[0].getStart(), t.call.arguments[0].end] as const,
+		bodySpan: [t.body.getStart(), t.body.end] as const,
+		block: ts.isBlock(t.body),
+		/** The test takes a parameter, e.g. `done`. */
+		param: t.fn.parameters.length > 0
+	}));
+
+/** Where the function a test is declared in starts: tests of one function share their setup. */
+function enclosingFunction(n: ts.Node): number {
+	for (let p = n.parent; p; p = p.parent) if (isFn(p)) return p.pos;
+	return 0;
+}
+
+/** A test declared in a loop runs once per item, so its title and body stand for several tests. */
+function inLoop(n: ts.Node): boolean {
+	for (let p = n.parent; p && !isFn(p); p = p.parent) if (ts.isIterationStatement(p, false)) return true;
+	return false;
+}
+
+const printer = ts.createPrinter({ removeComments: true });
 
 export function analyzeSource(file: string, text: string): Finding[] {
-	const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+	const sf = parse(file, text);
 	const helpers = assertingHelpers(sf);
-	const findings: Finding[] = [];
-	for (const t of collectTests(sf)) {
-		const add = (rule: string, message: string, node?: ts.Node) => {
-			const line = node ? sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1 : t.line;
-			const code = (node ? node.getText(sf) : '').replace(/\s+/g, ' ').slice(0, 80);
-			findings.push({ file, line, test: t.title, rule, message, code });
-		};
-		if (countAssertions(t.body, helpers) === 0 && !NO_THROW_TITLE.test(t.title)) add('no-assertion', 'the test asserts nothing, so it passes whatever the code does');
-		const chains = expectChains(t.body);
-		const dangling = chains.find((c) => !c.matcher);
-		if (dangling) add('dangling-expect', 'expect(...) without a called matcher checks nothing: add the matcher call, e.g. .toBe(...)', dangling.outer);
-		const unawaited = chains.find(isUnawaited);
-		if (unawaited) add('unawaited-assertion', 'a resolves/rejects/poll assertion that is not awaited or returned settles after the test passed: await it', unawaited.outer);
-		const guard = guardFinding(t, helpers);
-		if (guard) add(guard.guard, GUARD_MESSAGES[guard.guard], guard.node);
-		const tautology = chains.find(isTautology);
-		if (tautology) add('tautology', 'the assertion holds whatever the code does (a literal, the value compared with itself, or not.toThrow on an async function)', tautology.outer);
-	}
-	return findings;
+	const tests = collectTests(sf);
+	// the printer gives one layout for the same code, comments left out, strings untouched
+	const titled = tests
+		.filter((t) => !t.each && !inLoop(t.call))
+		.map((t) => ({ ...t, path: `${t.path}@${enclosingFunction(t.call)}`, code: printer.printNode(ts.EmitHint.Unspecified, t.body, sf) }));
+	const byTitle = titleFindings(titled).map(({ test, rule, message }) => ({ file, line: test.line, test: test.title, testLine: test.line, rule, message, code: '' }));
+	return [...tests.flatMap((t) => testFindings(t, sf, helpers)), ...byTitle].sort((a, b) => a.line - b.line);
 }

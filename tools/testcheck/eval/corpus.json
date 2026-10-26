@@ -1,0 +1,20 @@
+{
+	"$comment": "Repositories testcheck is measured on (tools/testcheck/testcheck-validation.md), pinned to a commit; holdout repositories were added after the rules were tuned on the others",
+	"repos": [
+		{ "name": "excalidraw", "url": "https://github.com/excalidraw/excalidraw", "sha": "b7de45e88111f5680ae4bb3c3f3541c7d3b279fe" },
+		{ "name": "h3", "url": "https://github.com/unjs/h3", "sha": "f0e17808ac2439b6434bb10609a961067f4d555b" },
+		{ "name": "hono", "url": "https://github.com/honojs/hono", "sha": "bac5c4a8bcd76b165428ce757e1185753c7935bd" },
+		{ "name": "query", "url": "https://github.com/TanStack/query", "sha": "a075333e4c038e16e40ac383e366f05dd9dd2dfa" },
+		{ "name": "ufo", "url": "https://github.com/unjs/ufo", "sha": "f06c800d0c59f2a4a1b9ba65eb6cb61a84419be6" },
+		{ "name": "unstorage", "url": "https://github.com/unjs/unstorage", "sha": "5781aae96f7f34820a99e447df29ceead97e9210" },
+		{ "name": "valibot", "url": "https://github.com/fabian-hiller/valibot", "sha": "2d29dbf04d272341a1e617070bd0b03eda8c4404" },
+		{ "name": "vueuse", "url": "https://github.com/vueuse/vueuse", "sha": "0f170513de8d670c7a27fd713703fddaeceb8e9d" },
+		{ "name": "zod", "url": "https://github.com/colinhacks/zod", "sha": "afdac65e0f80c0ccf9e8909da97c411567908b57" },
+		{ "name": "zustand", "url": "https://github.com/pmndrs/zustand", "sha": "382d29c485e67018c06e75ec7235130d0968522c" },
+		{ "name": "vue-core", "url": "https://github.com/vuejs/core", "sha": "ca034820b8288ab6da3a033626a7857401ee64a5", "holdout": true },
+		{ "name": "sveltekit", "url": "https://github.com/sveltejs/kit", "sha": "d955d1b604a051c0b21f59c6f9709b36756090b5", "holdout": true },
+		{ "name": "remeda", "url": "https://github.com/remeda/remeda", "sha": "d02c3bdb5e18cfa53e76f33f4ae525adce515379", "holdout": true },
+		{ "name": "trpc", "url": "https://github.com/trpc/trpc", "sha": "8d09833c76791b2ea7270af174fdab9f1408aeb8", "holdout": true },
+		{ "name": "unhead", "url": "https://github.com/unjs/unhead", "sha": "348d075327ab4e6b5e8e2c496b021481ce453660", "holdout": true }
+	]
+}

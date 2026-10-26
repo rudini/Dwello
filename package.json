@@ -25,6 +25,11 @@
 		"deepcheck:ci": "node tools/deepcheck/src/cli.ts check --format github --changed-since",
 		"deepcheck:baseline": "node tools/deepcheck/src/cli.ts baseline",
 		"testcheck:scan": "node tools/testcheck/src/cli.ts scan",
+		"testcheck:audit": "node tools/testcheck/src/cli.ts check --agent",
+		"testcheck:ci": "node tools/testcheck/src/cli.ts check --format github --changed-since",
+		"testcheck:baseline": "node tools/testcheck/src/cli.ts baseline",
+		"testcheck:measure": "node tools/testcheck/eval/measure.ts",
+		"testcheck:seed": "node tools/testcheck/eval/seed.ts",
 		"fitness": "bun tools/fitness/fitness.ts",
 		"deps:graph": "ARCH_OUT=build/deps bun tools/arch-baseline/02-imports.ts >/dev/null && ARCH_OUT=build/deps bun tools/arch-baseline/graph.ts | dot -Tsvg -o build/deps/modules.svg && echo build/deps/modules.svg"
 	},
