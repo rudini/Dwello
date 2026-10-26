@@ -442,9 +442,7 @@
 					"src/lib/server/building-register.ts",
 					"src/lib/types.ts",
 					"src/lib/ui/icons.ts",
-					"src/routes/apartments/+page.server.ts",
 					"src/routes/apartments/[id]/ApartmentFacts.svelte",
-					"src/routes/buildings/[id]/+page.server.ts",
 					"src/routes/contracts/[id]/+page.server.ts",
 					"src/routes/contracts/new/+page.server.ts"
 				],

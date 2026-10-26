@@ -16,6 +16,7 @@ import {
 	type Language
 } from '../db/schema';
 import { sqlToday, swissToday } from './today';
+import type { TenantResponse, TenantWithOccupancy } from '../api/tenant';
 
 export interface TenantFilters {
 	search?: string;
@@ -25,20 +26,9 @@ export interface TenantFilters {
 	offset?: number;
 }
 
-export interface TenantWithOccupancy extends Tenant {
-	currentApartment?: string;
-	currentBuilding?: string;
-	rentalContractId?: string;
-	contractCount: number;
-	isActive: boolean;
-	isFuture: boolean;
-}
 
-/** One tenant as getTenant selects it: the type follows the query, so it claims no field the query leaves out */
-type TenantDetail = NonNullable<Awaited<ReturnType<typeof getTenant>>>;
-
-/** The answer of GET /tenants/:id; the frontend derives its `Tenant` from it (AP1, ADR 0003) */
-export type TenantResponse = TenantDetail & { anonymisableFrom: string | null; anonymisable: boolean };
+/** One tenant as getTenant selects it; the route adds whether it can be anonymised */
+type TenantDetail = Omit<TenantResponse, 'anonymisableFrom' | 'anonymisable'>;
 
 // Correlated subqueries name the outer column explicitly: drizzle leaves it unqualified in single-table selects
 /** Active: a rental contract runs today (F-4, #58) */
@@ -163,7 +153,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 			...tenant,
 			currentApartment: occupancy?.apartmentNumber,
 			currentBuilding: occupancy?.buildingName
-		} as TenantWithOccupancy;
+		};
 	});
 
 	return {
@@ -175,7 +165,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 /**
  * Get a single tenant by ID
  */
-export async function getTenant(id: string) {
+export async function getTenant(id: string): Promise<TenantDetail | null> {
 	const [tenant] = await db
 		.select({ ...tenantFields, isFuture })
 		.from(tenants)

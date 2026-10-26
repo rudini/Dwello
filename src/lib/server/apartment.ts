@@ -1,10 +1,25 @@
 import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
-import type { Json } from '$lib/types';
+import type { ApartmentListItem, Json } from '$lib/types';
 import type { ApartmentWithDetails } from '../../../backend/src/api/apartment';
 import { monthlyTotal, toContractHistory, type ContractRow } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
+
+/** A row of GET /apartments, as the apartment list and a building's page show it */
+export const toApartmentRow = (a: Json<ApartmentWithDetails>): ApartmentListItem => ({
+	id: a.id,
+	buildingId: a.buildingId,
+	number: a.number || '',
+	floor: a.floor || 0,
+	area: a.area || '0',
+	rooms: a.rooms || '0',
+	status: a.status || 'vacant',
+	buildingName: a.buildingName || '',
+	nextContractStart: a.nextContractStart ?? null,
+	currentContractEnd: a.currentContractEnd ?? null,
+	lastContractEnd: a.lastContractEnd ?? null
+});
 
 /** Apartment with its building, as the detail and edit pages show it */
 export async function fetchApartment(fetch: typeof globalThis.fetch, id: string) {
