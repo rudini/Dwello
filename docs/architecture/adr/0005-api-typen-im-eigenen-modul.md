@@ -183,4 +183,4 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 
 ## Nächste Zyklen
 
-Der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
+Zyklus 4d (#837): die Listen. `ApartmentWithBuilding` und `TenantListItem` in `src/lib/types.ts` deklarieren Felder von Hand, die die Antworten von `GET /apartments` und `GET /tenants` schon haben (`buildingName`, `nextContractStart`, `isActive`, `isFuture` …); `apartments/+page.server.ts` und `tenants/+page.server.ts` lesen die Antwort als `Record<string, unknown>`. Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
