@@ -54,6 +54,7 @@
       "Bash(bun run test:coverage*)",
       "Bash(bun run test:e2e*)",
       "Bash(bun run deepcheck:audit*)",
+      "Bash(bun run testcheck:audit*)",
       "Bash(bun run type-check*)",
       "Bash(bun run test)",
       "Bash(bun test src/__tests__/*)",
@@ -159,6 +160,11 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/deepcheck-gate.sh",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/testcheck-gate.sh",
             "timeout": 60
           },
           {
