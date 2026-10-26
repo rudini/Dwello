@@ -12,8 +12,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #837 cycle 1b, line items and documents (Ä1)
 
 - [x] Main run of #849: one Firefox scenario lost its browser at the first navigation; failed jobs re-run once, green
-- [ ] A Line items: `StatementLineItem`, `StatementLineInvoice` derive from the line items of `backend/src/api/statement.ts`; `toLineItem` takes them typed
-- [ ] B Documents: `backend/src/api/document.ts` (value lists typed in `schema.ts`), `selectSummaries` returns it, `StatementDocument` derives from it
-- [ ] Measure, ADR 0005 table row 1b, `fitness --update`
+- [x] A Line items: `StatementLineItem`, `StatementLineInvoice` derive from the line items of `backend/src/api/statement.ts`; `toLineItem` takes them typed
+- [x] B Documents: `backend/src/api/document.ts` (value lists typed in `schema.ts`), `selectSummaries` returns it, `StatementDocument` derives from it
+- [x] Measured (median 5 → 4, mirrors 52 → 50, value lists 14 → 13, types.ts fields 51 → 40), ADR 0005 «Zyklus 1b», `fitness --update`; fitness first refused `sent|to_send` in 3 files, fixed with `DocumentStatus`
 - [ ] Slice review (`code-reviewer`)
 - [ ] PR, Refs #837; No scenario: types only
