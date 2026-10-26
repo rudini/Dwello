@@ -5,7 +5,7 @@
 
 import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, rentalContracts, tenants, utilityStatements, type NewDocument } from '../db/schema';
+import { documents, rentalContracts, tenants, utilityStatements, type DocumentStatus, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
 import { laterContract } from './later-contract';
 import { tenantExists } from './tenant.service';
@@ -74,7 +74,7 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 		filters.tenantId && eq(documents.tenantId, filters.tenantId),
 		filters.statementId && eq(documents.statementId, filters.statementId),
 		// a status the list does not know finds nothing
-		filters.status && eq(documents.status, filters.status as 'sent' | 'to_send'),
+		filters.status && eq(documents.status, filters.status as DocumentStatus),
 		filters.status === 'to_send' && sql`${notToSend} is null`
 	].filter((condition): condition is SQL => Boolean(condition));
 	return selectSummaries(and(...conditions));

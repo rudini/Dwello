@@ -95,6 +95,8 @@ export type StoredStatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'rep
 /** A stored document: a reminder, an e-mailed statement (#86) or a file the landlord uploaded; its file type (#837) */
 export type DocumentType = 'reminder' | 'statement' | 'upload';
 export type DocumentMimeType = 'application/pdf' | 'image/jpeg' | 'image/png';
+/** A letter's Versandstatus; an upload has none */
+export type DocumentStatus = 'sent' | 'to_send';
 
 export const tenants = pgTable('tenants', {
 	id: uuid('id').defaultRandom().primaryKey(),
@@ -598,7 +600,7 @@ export const documents = pgTable(
 		content: text('content').notNull(), // Base64 encoded file
 		mimeType: varchar('mime_type', { length: 50 }).$type<DocumentMimeType>().notNull().default('application/pdf'),
 		channel: varchar('channel', { length: 10 }).$type<CorrespondenceChannel>(), // email, letter; null for an upload
-		status: varchar('status', { length: 20 }).$type<'sent' | 'to_send'>(), // sent, to_send; null for an upload
+		status: varchar('status', { length: 20 }).$type<DocumentStatus>(), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
 		recipient: varchar('recipient', { length: 255 }), // the e-mail address it went to (#449); null for a letter or an upload
