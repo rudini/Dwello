@@ -52,12 +52,17 @@ jobs:
           # the Playwright version the lockfile pins, so the E2E jobs run in its image (#777)
           echo "playwright=$(sed -n 's/.*"playwright": \["playwright@\([0-9.]*\)".*/\1/p' bun.lock | head -1)" >> "$GITHUB_OUTPUT"
           # E2E shards: main runs every browser, about three times the tests of a pull request, so in more shards to stay
-          # near 15 min (#834); the axe check runs Chromium only, in three
+          # near 15 min (#834). Playwright cuts the test list into consecutive slices, so the slow screen checks
+          # (sprachen-bildschirme.feature, one block per browser) filled three of twelve shards (16-18 min against 4-7):
+          # on main they get six shards of their own and the other tests six (#838). The axe check runs Chromium only, in three
           e2e=$([ "${{ github.event_name }}" = pull_request ] && echo 5 || echo 12)
           echo "shards=$(jq -nc --argjson e2e "$e2e" '{"E2E tests": $e2e, "Accessibility (axe)": 3}')" >> "$GITHUB_OUTPUT"
           echo "matrix=$(jq -nc --argjson e2e "$e2e" '
-            [range(1; $e2e + 1) | {name: "E2E tests", filter: "--grep-invert @a11y", reports: "e2e-reports", shard: ., shards: $e2e}]
-            + [range(1; 4) | {name: "Accessibility (axe)", filter: "--project=chromium --grep @a11y", reports: "a11y-reports", shard: ., shards: 3}]')" >> "$GITHUB_OUTPUT"
+            def e2e(n; grep): [range(1; n + 1) | {name: "E2E tests", args: "\(grep) --shard=\(.)/\(n)", reports: "e2e-reports"}];
+            (if $e2e == 5 then e2e(5; "--grep-invert @a11y")
+             else e2e(6; "--grep-invert '\''@a11y|sprachen-bildschirme'\''") + e2e(6; "--grep sprachen-bildschirme") end
+             | to_entries | map(.value + {shard: (.key + 1), shards: $e2e}))
+            + [range(1; 4) | {name: "Accessibility (axe)", args: "--project=chromium --grep @a11y --shard=\(.)/3", reports: "a11y-reports", shard: ., shards: 3}]')" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
@@ -207,9 +212,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # From the job Changes: E2E in five shards on a pull request and twelve on main, the axe check in three. Playwright
-        # splits by test count, so with fewer shards the slow screen checks (sprachen-bildschirme.feature) fill one that
-        # runs twice as long as the others
+        # From the job Changes: E2E in five shards on a pull request and twelve on main, the axe check in three; each
+        # entry names its Playwright filter and shard in args
         include: ${{ fromJSON(needs.changes.outputs.matrix) }}
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
@@ -255,7 +259,7 @@ jobs:
         working-directory: backend
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
-        run: bun run test:e2e -- ${{ matrix.filter }} ${{ env.PROJECTS }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
+        run: bun run test:e2e -- ${{ matrix.args }} ${{ env.PROJECTS }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v7
