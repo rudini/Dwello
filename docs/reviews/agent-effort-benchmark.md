@@ -1,4 +1,4 @@
-# Subagent effort: benchmark low vs high
+# Subagent effort: benchmark low, medium and high
 
 Question: «Getting the most out of Opus 5.5» says that at its lowest effort Opus 5.5 caught more bugs than Opus 5 at high effort. Can the reviewer subagents run at `effort: low` without losing findings? Without an `effort` field a subagent takes the caller's session effort (frontmatter reference: «Overrides the session effort level»), so until now a session on low effort ran its reviewers on low too.
 
@@ -61,15 +61,28 @@ Reference as in `agent-models-benchmark.md` C (7 known findings; Opus at the ses
 
 Tokens: low 51k (15 tool calls), high 108k (36). **high better (4 of 7 vs 2 of 7).** Both ran one task path; the empty test PDFs kept both from comparing the file.
 
+## E: `medium` against `high` (2026-10-26, same cases and prompts)
+
+Run reports: `docs/reviews/agent-effort/*-medium.md`.
+
+| Case | high | medium |
+|---|---|---|
+| A `code-reviewer` #233 | C-11 partly, C-12, C-13, C-14, C-16; two new Majors | C-11 and C-12 partly (C-2, C-3), C-13, C-16; C-14 not found; C-15 named outside the table |
+| B `code-reviewer` 790a | C-2; Blocker not found | C-2; Blocker not found |
+| C `fach-reviewer` #459 B | R-1 (Blocker), R-2 (in V-3), law fetched | R-1 (as Major), R-2 (in R-1), law fetched |
+| D `persona` Marco #233 | P-2, P-3, P-6, P-7 (observation) | P-2, P-3, P-6 (observation), P-7 (observation) |
+
+Tokens high → medium: A 115k → 108k, B 91k → 70k, C 118k → 91k, D 108k → 76k (6 to 30 % fewer). **medium found what high found in B, C and D and nearly so in A.** C's medium run read issue #459 on GitHub, which by now holds the product owner's answers to the original round; it says it judged by the decisions as of the commit, but the issue may have helped it. C rated the Blocker a Major; both block the merge.
+
 ## Decision
 
 | Agent | Effort | Why |
 |---|---|---|
-| `code-reviewer` | `high` | A, B: more known findings at about twice the tokens; the main quality gate |
-| `fach-reviewer` | `high` | C: low missed the Blocker and fetched no law |
-| `persona` | `high` | D: 4 of 7 known findings against 2 of 7 |
+| `code-reviewer` | `medium` | A, B: low missed known findings; medium found about what high found at 6 to 23 % fewer tokens |
+| `fach-reviewer` | `medium` | C: low missed the Blocker and fetched no law; medium found the Blocker and the Major and fetched the law |
+| `persona` | `medium` | D: low 2 of 7 known findings, medium and high 4 of 7; medium 30 % fewer tokens |
 | `daten-pruefer` | `high` | Not measured; pinned so a low-effort session does not weaken the check to the Rappen |
 
 Tokens, tool calls and durations come from the Agent tool's usage line of each run, not from the reports.
 
-Limits: one run per level and case, so one run's luck weighs in; the reference reports came from Opus at the effort of their session, unknown today. `medium` was not measured: a later benchmark could test it against `high` on the same cases.
+Limits: one run per level and case, so one run's luck weighs in; the reference reports came from Opus at the effort of their session, unknown today. A finding a later review shows that a `medium` reviewer missed is a reason to move that agent back to `high`.

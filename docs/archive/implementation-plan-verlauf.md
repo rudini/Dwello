@@ -3685,3 +3685,22 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Round 2, also the closing round (`docs/reviews/i837c4d-review-2.md`): C-1 to C-4 closed, nothing new
 - [x] Archive, PR (Fixes #837): pushed after this archive
 - Files: `backend/src/api/tenant.ts` (new), `backend/src/services/tenant.service.ts`, `backend/src/routes/tenants.ts`, `src/lib/types.ts`, `src/lib/server/apartment.ts`, `src/routes/{apartments,tenants,buildings/[id]}/+page.server.ts`, `src/routes/apartments/ApartmentCard.svelte`, `src/__tests__/apartments-pages.dom.test.ts`, `tools/fitness/ratchet.json`, ADR 0005
+
+## Session 2026-10-26 d: commit hook gap, effort medium, #852
+
+Request: (1) fix the commit subject gate that let a 51-character subject through (`git commit -F -` with a heredoc and `git push` in one command); (2) measure `effort: medium` against high on the four benchmark cases; (3) implement #852. One pull request each. No scenario: (1) and (2) change tooling and agent settings only.
+
+- [x] (1) test red: `-F -` heredoc commit plus push in one command is let through; hook reads the heredoc message
+- [x] (1) code-reviewer round 1 (`docs/reviews/hook-review-1.md`): no Blocker/Major; C-1 (heredoc of a later command), C-2 (comment) fixed; C-3 (pass case pins kept behaviour) noted in the commit
+- [x] (1) closing round (`docs/reviews/hook-review-2.md`): no Blocker/Major; C-4 (redirect before the heredoc) fixed, test red first
+- [x] (1) closing round 3 (`docs/reviews/hook-review-3.md`): no findings
+- [x] (1) PR #870 merged
+- [x] (2) medium runs: code-reviewer #233, 790a; fach-reviewer #459 B; persona Marco #233 (`docs/reviews/agent-effort-benchmark.md`, section E)
+- [x] (2) `effort: medium` for code-reviewer, fach-reviewer and persona; daten-pruefer stays high
+- [x] (2) PR: pushed after this archive
+- [x] (3) #852: scenario «Ein inzwischen gelöschtes Dokument löschen» red (page showed «Document not found»), then green; `backendMessage` never shows the backend's own text, three unit tests changed to the decision and seen red; 12 frontend tests read six new contracts (`tests/contracts/*`, checked in `api-contracts.pg.test.ts`, pin kept behaviour); fuel stock with an unknown code shows the page's sentence (test red first); `slice-review` names the three checks
+- [x] (3) code-reviewer round 1 (`docs/reviews/852-review-1.md`) and persona Helga (`docs/design/personas/helga-852.md`): C-1 = Helga P-1 (Major, a deleted document read «nicht gelöscht, erneut»): code `DOCUMENT_NOT_FOUND` with a message in four languages, scenario line red first, contract test red with the route reverted; C-2 (formula test fallback), C-3 (test in French), C-4 (comment) fixed
+- [x] (3) code-reviewer round 2 (`docs/reviews/852-review-2.md`): C-1..C-4 closed; C-5 (PUT sent 404 untested) fixed with a contract test (red with the route reverted) and a BFF test
+- [x] (3) Helga round 2 (same report): P-1 fixed; P-2 (Minor: the dialog offers no reload) stays in the report
+- [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
+- [x] (3) PR #871 merged
