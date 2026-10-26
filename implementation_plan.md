@@ -24,5 +24,6 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) code-reviewer round 1 (`docs/reviews/852-review-1.md`) and persona Helga (`docs/design/personas/helga-852.md`): C-1 = Helga P-1 (Major, a deleted document read «nicht gelöscht, erneut»): code `DOCUMENT_NOT_FOUND` with a message in four languages, scenario line red first, contract test red with the route reverted; C-2 (formula test fallback), C-3 (test in French), C-4 (comment) fixed
 - [x] (3) code-reviewer round 2 (`docs/reviews/852-review-2.md`): C-1..C-4 closed; C-5 (PUT sent 404 untested) fixed with a contract test (red with the route reverted) and a BFF test
 - [x] (3) Helga round 2 (same report): P-1 fixed; P-2 (Minor: the dialog offers no reload) stays in the report
-- [ ] (3) closing round
+- [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
+- [x] (3) PR: pushed
 - [ ] (3) PR
