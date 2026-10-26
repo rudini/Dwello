@@ -5,7 +5,9 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
-	import type { FuelStock } from './+page.server';
+	import type { PageData } from './$types';
+
+	type FuelStock = NonNullable<PageData['fuelStocks']>[number];
 
 	// The Tankbestand readings of a building; deleting one asks first, it changes how heating costs are billed
 	let { stocks, deleteError }: { stocks: FuelStock[]; deleteError?: string } = $props();

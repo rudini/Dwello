@@ -51,6 +51,30 @@ export interface BuildingWithStats extends Building {
 	reservedCount?: number;
 }
 
+// What the Gebäude- und Wohnungsregister (GWR) knows of an address, read by the BFF (#479)
+export interface AddressHit {
+	egid: string;
+	street: string;
+	postalCode: string;
+	city: string;
+	canton: string;
+}
+
+type RegisterField = 'number' | 'floor' | 'area' | 'rooms';
+export interface RegisterApartment {
+	number: string;
+	floor: number | null;
+	area: string;
+	rooms: string;
+	missing: RegisterField[]; // what the register lacks, for the landlord to enter
+}
+
+export interface RegisterBuilding {
+	buildingType: string | null;
+	yearBuilt: number | null;
+	apartments: RegisterApartment[];
+}
+
 // Buildings list response
 export interface BuildingsListData {
 	buildings: BuildingWithStats[];

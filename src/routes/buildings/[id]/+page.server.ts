@@ -17,7 +17,7 @@ export interface BuildingDetailsData {
 }
 
 /** Heating oil or pellets in the tank at the end of a reading day, in CHF, billed in its category */
-export interface FuelStock {
+interface FuelStock {
 	id: string;
 	readingDate: string;
 	amount: number;

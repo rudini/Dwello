@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { apiCall } from '$lib/api';
-	import type { AddressHit } from '$lib/server/building-register';
+	import type { AddressHit } from '$lib/types';
 	import Field from '$lib/ui/Field.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { controlClass } from '$lib/ui/field';
