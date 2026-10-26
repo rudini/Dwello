@@ -52,9 +52,10 @@
 		return () => clearInterval(refreshInterval);
 	});
 
-	// Runs after every component below is mounted: the page now reacts to input (E2E tests wait for it)
+	// Runs after every component below is mounted; SvelteKit starts its router later in the same task, and a submit
+	// before that is lost in Firefox (#869). One task later the page reacts to input (E2E tests wait for it)
 	onMount(() => {
-		document.body.dataset.hydrated = 'true';
+		setTimeout(() => (document.body.dataset.hydrated = 'true'));
 	});
 
 	// After a search on a list the focus goes to its results, so their number is read out
