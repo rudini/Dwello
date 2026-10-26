@@ -1,9 +1,13 @@
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
+import type { ContractStatus } from '../../../backend/src/api/contract';
 import type { PageServerLoad } from './$types';
 import { missingByContract } from '$lib/server/missing-statements';
-import { monthlyTotal } from '$lib/server/contract-history';
+import { monthlyTotal, type ContractRow } from '$lib/server/contract-history';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+// the status filters the backend knows; the type keeps them equal to its list
+const filters: Record<ContractStatus, true> = { active: true, ended: true, future: true };
 
 export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -18,7 +22,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		params.set('offset', String((page - 1) * pageSize));
 		if (search) params.set('search', search);
 		if (buildingId) params.set('buildingId', buildingId);
-		if (['active', 'ended', 'future'].includes(status)) params.set('status', status);
+		if (Object.hasOwn(filters, status)) params.set('status', status);
 
 		const [contractsRes, buildingsRes, apartmentsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/contracts?${params}`),
@@ -27,31 +31,29 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		]);
 
 		const contractsData = await contractsRes.json();
-		const rows: Record<string, unknown>[] = contractsData.contracts || contractsData.data || [];
+		const rows: ContractRow[] = contractsData.contracts || contractsData.data || [];
 		// #211: the same rule as the contract page; no mark when it cannot be checked
 		const missing = await missingByContract(fetch, rows);
 		const buildingsData = await buildingsRes.json();
 		const apartmentsData = await apartmentsRes.json();
 
 		const contracts: ContractWithDetails[] = rows.map((c) => ({
-			id: c.id as string,
-			apartmentId: c.apartmentId as string,
-			tenantId: c.tenantId as string,
-			startDate: c.startDate as string,
-			endDate: (c.endDate as string) || null,
-			terminated: !!c.terminated,
-			status: c.status as ContractWithDetails['status'], // the backend decides it (#784, #815)
-			baseRent: (c.baseRent as string) || '0',
-			additionalRent: (c.additionalRent as string) || null,
-			monthlyAdvancePayment: (c.monthlyAdvancePayment as string) || '0',
-			tenantName: (c.tenantName as string) || '',
-			tenantFirstName: '',
-			tenantLastName: '',
-			apartmentNumber: (c.apartmentNumber as string) || '',
-			buildingName: (c.buildingName as string) || '',
-			buildingAddress: (c.buildingAddress as string) || '',
+			id: c.id,
+			apartmentId: c.apartmentId,
+			tenantId: c.tenantId,
+			startDate: c.startDate,
+			endDate: c.endDate,
+			terminated: c.terminated,
+			status: c.status, // the backend decides it (#784, #815)
+			baseRent: c.baseRent,
+			additionalRent: c.additionalRent,
+			monthlyAdvancePayment: c.monthlyAdvancePayment,
+			tenantName: c.tenantName,
+			apartmentNumber: c.apartmentNumber,
+			buildingName: c.buildingName,
+			buildingAddress: c.buildingAddress,
 			totalRent: monthlyTotal(c),
-			missingStatement: !!missing?.get(String(c.id))?.length
+			missingStatement: !!missing?.get(c.id)?.length
 		}));
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(

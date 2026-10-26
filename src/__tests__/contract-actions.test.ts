@@ -41,6 +41,29 @@ describe('Vertragsstatus', () => {
 		expect(urls[0]).toContain('status=future');
 	});
 
+	// the backend refuses a status it does not know: the list leaves such a filter out
+	it.each(['offen', 'toString'])(
+		'gibt den unbekannten Status %s nicht ans Backend weiter',
+		async (status) => {
+			const urls: string[] = [];
+			const fetch = (async (url: string) => {
+				urls.push(url);
+				return Response.json(
+					url.endsWith('/missing-statements')
+						? []
+						: { contracts: [], buildings: [], apartments: [] }
+				);
+			}) as typeof globalThis.fetch;
+
+			await listLoad({
+				url: new URL(`http://localhost/contracts?status=${status}`),
+				fetch
+			} as never);
+
+			expect(urls[0]).not.toContain('status=');
+		}
+	);
+
 	// #815: the backend decides the Vertragsstatus by the Swiss day; list and page pass it on
 	it('gibt Liste und Detail den Vertragsstatus des Backends weiter', async () => {
 		const [listed] = contractList.contracts;

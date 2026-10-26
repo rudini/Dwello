@@ -1,5 +1,10 @@
 import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
 import type { DocumentSummary } from '../../backend/src/api/document';
+import type {
+	ContractResponse,
+	ContractWithDetails as ContractRow
+} from '../../backend/src/api/contract';
+import type { ApartmentStatus } from '../../backend/src/api/apartment';
 import type { TenantResponse } from '../../backend/src/services/tenant.service';
 import type { LatestKey } from './invoice';
 
@@ -44,7 +49,7 @@ export interface BuildingsListData {
 
 // Apartment status values (match backend)
 // occupied and relet follow from the rental contracts; vacant and reserved are set by hand
-export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
+export type { ApartmentStatus };
 
 // Apartment types (camelCase to match backend)
 export interface Apartment {
@@ -70,45 +75,44 @@ export type Tenant = Pick<ApiTenant, 'id' | 'firstName' | 'lastName' | 'language
 		Omit<ApiTenant, 'contractCount' | 'anonymisedOn' | 'currentApartment' | 'currentBuilding'>
 	>;
 
-// Rental Contract types (camelCase to match backend)
-export interface RentalContract {
-	id: string;
-	apartmentId: string;
-	tenantId: string;
-	startDate: string;
-	endDate?: string | null;
-	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
-	status: 'active' | 'ended' | 'future'; // the Vertragsstatus, decided by the backend by the Swiss day (#784, #815)
-	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
-	billedUntil?: string | null; // «Abgerechnet bis» (#133): billed outside Dwello up to this day
-	baseRent: string | number; // decimal from DB
-	additionalRent?: string | number | null;
-	monthlyAdvancePayment: string | number; // Akonto that applies today, or on the start of a future contract
-	advancePayments?: { validFrom: string; amount: string }[]; // each Akonto with its «Gültig ab» (#464)
-	proposedAdvanceFrom?: string | null; // «Gültig ab» the form proposes for a new Akonto, by the backend (#815)
-	flatRateUtilityCharge?: string | number; // «Nebenkostenpauschale» (#429): in «Monatlich total», never billed
-	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
-	managementFeePercent?: string | null; // own rate, before the run's
-	agreedCategoryIds?: string[]; // #91: the umlagefähige categories it agrees
-	agreedFrom?: Record<string, string>; // #368: «Vereinbart ab» per category
-	referenceIndex?: string | number | null;
-	contractPdf?: string | null;
-	notes?: string | null;
-	createdAt?: Date | string;
-	updatedAt?: Date | string;
-}
+// The contract as GET /contracts/:id answers it, derived from the backend (AP1, ADR 0005); a page may hold only part of it
+type ApiContract = Json<ContractResponse>;
+export type RentalContract = Pick<
+	ApiContract,
+	'id' | 'apartmentId' | 'tenantId' | 'startDate' | 'status' | 'baseRent' | 'monthlyAdvancePayment'
+> &
+	Partial<
+		Pick<
+			ApiContract,
+			| 'endDate'
+			| 'terminated' // endDate is a Kündigungstermin of an open-ended contract, not agreed
+			| 'noticeReceivedOn' // A-3
+			| 'billedUntil' // «Abgerechnet bis» (#133)
+			| 'additionalRent'
+			| 'advancePayments' // each Akonto with its «Gültig ab» (#464)
+			| 'proposedAdvanceFrom' // «Gültig ab» the form proposes for a new Akonto (#815)
+			| 'flatRateUtilityCharge' // «Nebenkostenpauschale» (#429): in «Monatlich total», never billed
+			| 'managementFeeAgreed' // #89
+			| 'managementFeePercent'
+			| 'agreedCategoryIds' // #91
+			| 'agreedFrom' // #368
+			| 'referenceIndex'
+			| 'contractPdf'
+			| 'notes'
+			| 'createdAt'
+			| 'updatedAt'
+		>
+	>;
 
-// Contract History item (derived from RentalContract + Tenant)
-export interface ContractHistory {
-	id: string;
+// One row of a contract history (apartment or tenant page)
+export type ContractHistory = Pick<
+	ApiContract,
+	'id' | 'status' | 'startDate' | 'endDate' | 'terminated'
+> & {
 	tenantName: string;
 	monthlyTotal: number; // in CHF
-	status: 'active' | 'ended' | 'future';
 	apartment?: string;
-	startDate: string;
-	endDate?: string | null;
-	terminated?: boolean;
-}
+};
 
 // Monthly costs breakdown
 export interface MonthlyCosts {
@@ -154,13 +158,10 @@ export interface TenantsListData {
 }
 
 // Contract with full details for list view
-export interface ContractWithDetails extends RentalContract {
-	tenantName: string;
-	tenantFirstName: string;
-	tenantLastName: string;
-	apartmentNumber: string;
-	buildingName?: string;
-	buildingAddress: string;
+export interface ContractWithDetails
+	extends
+		RentalContract,
+		Pick<Json<ContractRow>, 'tenantName' | 'apartmentNumber' | 'buildingName' | 'buildingAddress'> {
 	totalRent: number;
 	missingStatement?: boolean; // #211: an ended period with rent days but no statement
 }
