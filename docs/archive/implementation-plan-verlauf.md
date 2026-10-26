@@ -3466,3 +3466,13 @@ Measured before (25.10.2026, main 5580d2a): frontend decision exceptions 4 (over
 - [x] Checks: lint, check, vitest (3651), backend tests (1641), E2E dashboard, contract-detail, tenant-detail, privacy and the anonymise/dashboard a11y and language screens, fitness (exceptions 0); Ä4 «Heute» in `utility-tree.md` updated
 - [x] Closing round (`docs/reviews/i815d-review-2.md`): C-1 to C-3 fixed, nothing new; no workflow note for part D
 - [x] PR: «No scenario: behaviour unchanged», Fixes #815, pushed after this archive
+
+## Session: #777, CI: E2E and axe shards without apt at run time (T1)
+
+No scenario: CI only, no app behaviour changes.
+
+- [x] The E2E and axe jobs run in the Playwright image of the version in `bun.lock` (`mcr.microsoft.com/playwright:v<version>-noble`, browsers and system packages included); the `changes` job reads the version; no browser cache, no `playwright install --with-deps`
+- [x] Postgres reached by its service name inside the container (`E2E_DATABASE_URL`)
+- [x] Review i777 round 1 (`docs/reviews/i777-review-1.md`): C-1 (Blocker, setup-bun needs unzip, which the image lacks) fixed by installing Bun with npm; C-2 (risk row RI-T1-4) updated
+- [x] Re-review (`docs/reviews/i777-review-2.md`): C-1, C-2 fixed, nothing new
+- [x] PR: Fixes #777, pushed after this archive; the PR and `main` runs are the proof (install step gone)
