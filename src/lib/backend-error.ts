@@ -37,18 +37,17 @@ function render(message: (params: Params) => string, params: Params): string {
 	return message(Object.fromEntries(shown));
 }
 
-/** The backend's refusal in the UI language: the message of its code, else its own text, else `fallback` */
+/** The backend's refusal in the UI language: the message of its code, else `fallback`, never its own text (#852) */
 export function backendMessage(body: BackendError | null | undefined, fallback: string): string {
 	const message = messageOf(body?.code);
 	const causes = body?.causes?.map(({ code, params = {} }) => {
 		const cause = messageOf(code);
 		return cause && render(cause, params);
 	});
-	// a part without a known code: the backend's own text says it all
+	// a part without a known code: the caller's sentence, since the backend's own text is not in the UI language
 	if (message && !causes?.some((cause) => !cause))
 		return render(message, { ...body?.params, ...(causes && { cause: causes.join(' ') }) });
-	const text = typeof body?.error === 'string' ? body.error : body?.message;
-	return text || fallback;
+	return fallback;
 }
 
 /** Why a document's e-mail was not delivered, in the UI language */

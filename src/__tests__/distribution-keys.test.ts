@@ -3,6 +3,8 @@ import { actions as listActions, load } from '../routes/config/distribution-keys
 import { actions as newActions } from '../routes/config/distribution-keys/new/+page.server';
 import { actions as editActions } from '../routes/config/distribution-keys/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import formulaRefused from '../../tests/contracts/formula-refused.json';
+import keyDefault from '../../tests/contracts/distribution-key-default-refused.json';
 
 const API = 'http://localhost:3001/api/v1/distribution-keys';
 
@@ -95,16 +97,18 @@ describe('Neuer Verteilschlüssel', () => {
 	});
 
 	it('zeigt, warum das Backend die Formel ablehnt', async () => {
-		const message = 'Die Formel ist ungültig: Unbekannte Variable {persons}.';
 		const { result } = runAction(
 			newActions.save,
 			'',
 			400,
 			{ ...form, formula: '{persons}' },
-			{ error: message }
+			formulaRefused
 		);
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { form: message } } });
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { form: formulaRefused.error } }
+		});
 	});
 
 	it('testet die Formel mit Beispielwohnungen', async () => {
@@ -172,9 +176,11 @@ describe('Verteilschlüssel löschen', () => {
 	});
 
 	it('erklärt, warum der Standard-Verteilschlüssel bleibt', async () => {
-		const message = 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.';
-		const { result } = runAction(listActions.delete, '', 409, { id: 'k1' }, { error: message });
+		const { result } = runAction(listActions.delete, '', 409, { id: 'k1' }, keyDefault);
 
-		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { error: 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.' }
+		});
 	});
 });

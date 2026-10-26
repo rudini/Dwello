@@ -56,16 +56,17 @@ const rejected = () => Response.json({ message: 'Kanton fehlt' }, { status: 422 
 const refused = () => Response.json({ error: 'Gebäude existiert bereits' }, { status: 400 });
 
 describe('Neues Gebäude', () => {
-	it('zeigt die Fehlermeldung des Backends im Formular', async () => {
+	// #852: eine Ablehnung ohne Code zeigt den Satz der Seite, nie den Text des Backends
+	it('zeigt bei einer Ablehnung des Backends ohne Code den Satz der Seite', async () => {
 		const result = await run(newActions.default as Action, rejected);
 
-		expect(result).toEqual({ success: false, errors: { form: 'Kanton fehlt' } });
+		expect(result).toEqual({ success: false, errors: { form: 'Fehler beim Erstellen' } });
 	});
 
-	it('zeigt die Fehlermeldung der Gebäude-Route im Formular', async () => {
+	it('zeigt bei einer Ablehnung der Gebäude-Route ohne Code den Satz der Seite', async () => {
 		const result = await run(newActions.default as Action, refused);
 
-		expect(result).toEqual({ success: false, errors: { form: 'Gebäude existiert bereits' } });
+		expect(result).toEqual({ success: false, errors: { form: 'Fehler beim Erstellen' } });
 	});
 
 	it('lässt den optionalen Gebäudetyp weg, statt null zu senden', async () => {
@@ -139,16 +140,16 @@ describe('Neues Gebäude', () => {
 });
 
 describe('Gebäude bearbeiten', () => {
-	it('zeigt die Fehlermeldung des Backends im Formular', async () => {
+	it('zeigt bei einer Ablehnung des Backends ohne Code den Satz der Seite', async () => {
 		const result = await run(editActions.default as Action, rejected, { id: 'b1' });
 
-		expect(result).toEqual({ success: false, errors: { form: 'Kanton fehlt' } });
+		expect(result).toEqual({ success: false, errors: { form: 'Fehler beim Speichern' } });
 	});
 
-	it('zeigt die Fehlermeldung der Gebäude-Route im Formular', async () => {
+	it('zeigt bei einer Ablehnung der Gebäude-Route ohne Code den Satz der Seite', async () => {
 		const result = await run(editActions.default as Action, refused, { id: 'b1' });
 
-		expect(result).toEqual({ success: false, errors: { form: 'Gebäude existiert bereits' } });
+		expect(result).toEqual({ success: false, errors: { form: 'Fehler beim Speichern' } });
 	});
 
 	it('sendet null, damit ein leerer Gebäudetyp den gespeicherten Wert löscht', async () => {
@@ -369,7 +370,13 @@ describe('Tankbestand', () => {
 			{ ...fuelStockDateTaken, code: 'FUEL_STOCK_OTHER_CATEGORY' },
 			'Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.'
 		],
-		[500, {}, 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.']
+		[500, {}, 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.'],
+		// #852: a code the UI does not know yet shows the page's sentence, not an empty message
+		[
+			409,
+			{ ...fuelStockDateTaken, code: 'FUEL_STOCK_SOMETHING_NEW' },
+			'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.'
+		]
 	])('meldet eine Ablehnung des Backends (%i) verständlich', async (status, body, message) => {
 		const result = await run(
 			detailActions.addFuelStock as Action,

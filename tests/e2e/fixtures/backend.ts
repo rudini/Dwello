@@ -309,7 +309,12 @@ export function testData(api: CallTheApi) {
 		// A PDF the Liegenschaftsverwalter uploaded to the tenant
 		async upload(tenantTitle: string, title: string) {
 			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
-			await post(`tenants/${ids.get(tenantTitle)}/documents`, { title, fileName: `${title}.pdf`, content });
+			const { id } = await post(`tenants/${ids.get(tenantTitle)}/documents`, { title, fileName: `${title}.pdf`, content });
+			ids.set(`Dokument ${tenantTitle} ${title}`, id);
+		},
+
+		async removeDocument(tenantTitle: string, title: string) {
+			await remove(`documents/${ids.get(`Dokument ${tenantTitle} ${title}`)}`);
 		},
 
 		async remind(tenantTitle: string, year: number) {

@@ -8,6 +8,8 @@ import { load as listLoad } from '../routes/config/heating-profiles/+page.server
 import { actions as detailActions } from '../routes/config/heating-profiles/[id]/+page.server';
 import { profileTotal } from '../lib/heating-profile';
 import { runAction } from './helpers/action';
+import profileDefault from '../../tests/contracts/heating-profile-default-refused.json';
+import nameTaken from '../../tests/contracts/heating-profile-name-taken.json';
 
 const API = 'http://localhost:3001/api/v1/heating-profiles';
 const months = [
@@ -79,10 +81,12 @@ describe('Neues Heizprofil', () => {
 	});
 
 	it('zeigt die Meldung des Backends, wenn der Name vergeben ist', async () => {
-		const message = 'Ein Heizprofil mit dem Namen "Bergtal" existiert bereits.';
-		const { result } = runAction(newActions.default, '', 409, form(), { error: message });
+		const { result } = runAction(newActions.default, '', 409, form(), nameTaken);
 
-		expect(await result).toMatchObject({ status: 409, data: { errors: { form: message } } });
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { errors: { form: 'Ein Heizprofil mit dem Namen «Bergtal» existiert bereits.' } }
+		});
 	});
 });
 
@@ -114,10 +118,12 @@ describe('Heizprofil löschen', () => {
 	});
 
 	it('erklärt, warum das Standard-Heizprofil bleibt', async () => {
-		const message = 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.';
-		const { result } = runAction(detailActions.delete, 'hp1', 409, {}, { error: message });
+		const { result } = runAction(detailActions.delete, 'hp1', 409, {}, profileDefault);
 
-		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.' }
+		});
 	});
 });
 

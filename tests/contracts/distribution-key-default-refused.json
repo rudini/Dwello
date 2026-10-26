@@ -1,0 +1,5 @@
+{
+	"error": "Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.",
+	"code": "DISTRIBUTION_KEY_IS_DEFAULT",
+	"params": {}
+}
