@@ -3654,3 +3654,13 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-837-c4a.md`
 - [x] ADR 0005 section «Zyklus 4a»; archive; PR «Refs #837, #857» pushed after this archive
 - Files: `backend/src/api/{category,distribution-key,heating-profile}.ts` (new), the three services and two routes, `llm.service.ts`, `src/lib/types.ts`, `src/lib/server/{category,distribution-key,heating-profile,invoice}.ts`, `src/lib/distribution-key.ts`, config and invoice components, three tests and one helper, `tools/fitness/ratchet.json`, ADR 0005
+
+## Session: #837 cycle 4b (buildings, apartments; #857 buildings edge)
+
+- [x] Measure before: `fitness` 4 / 12 / 36, entity mirrors 46, value lists 10
+- [x] #857: building pages take `PageData` from `./$types`; `FuelStock` from the page data; `AddressHit`, `RegisterApartment`, `RegisterBuilding` out of `src/lib/server/building-register.ts`
+- [x] `backend/src/api/building.ts` (and apartment); services typed against them; BFF mappers with `Json<…>`; `Building`, `BuildingWithStats`, `Apartment` derived
+- [x] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
+- [x] Slice review (`code-reviewer`), report `docs/reviews/i837c4b-review-1.md` (1 Minor, fixed)
+- [x] Closing round (`code-reviewer`), report `docs/reviews/i837c4b-close-review-1.md` (C-1 closed; Minor C-2 on the ADR text, fixed)
+- [x] ADR 0005 section «Zyklus 4b»; archive; PR «Refs #837, #857» pushed after this archive

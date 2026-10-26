@@ -144,8 +144,9 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 | 0 Messung vorher | – | `fitness` 4 / 12 / 36, Entity-Spiegel 46, Wertelisten 10 |
 | #857 Liegenschaftsseiten nehmen `PageData` aus `./$types`; Registertypen nach `src/lib/types.ts` | 415f1028 | `svelte-check` 0 Fehler; 120 betroffene Frontend-Tests; Lint |
 | 1–3 `backend/src/api/building.ts` (`BuildingWithStats`, `BuildingAddress`), `ApartmentWithDetails` in `backend/src/api/apartment.ts`, Services dagegen typisiert; `toBuilding` und `fetchApartment` mit `Json<…>`; `Building`, `BuildingWithStats`, `Apartment` aus dem Backend-Typ; `fitness --update` | d14464c7 | Backend-Typprüfung; 1644 Backend-Tests; `svelte-check` 0 Fehler; 3694 Frontend-Tests; Lint |
+| Cast von `listApartments` entfernt (Review i837c4b C-1) | a411b92c | Backend-Typprüfung; 24 Wohnungs-Tests |
 
-- **Cast im Service:** `getApartment` gab seine Antwort mit `as ApartmentWithDetails` zurück. Die Liegenschaft kam über einen `leftJoin`, obwohl `apartments.building_id` `NOT NULL` ist. Mit `innerJoin` stimmt die Antwort ohne Cast.
+- **Casts im Service:** `getApartment` und `listApartments` gaben ihre Antwort mit `as ApartmentWithDetails` zurück. Die Liegenschaft kam über einen `leftJoin`, obwohl `apartments.building_id` `NOT NULL` ist. Mit `innerJoin` stimmen beide Antworten ohne Cast.
 - **#857 (Liegenschaften):** Die Seiten `buildings/[id]` und `buildings/[id]/edit` und die Tankbestand-Komponenten importieren `+page.server.ts` nicht mehr. `AddressHit`, `RegisterApartment` und `RegisterBuilding` stehen in `src/lib/types.ts`; der Abruf des Registers bleibt in `src/lib/server/building-register.ts`.
 - **Eine Werteliste nicht doppelt:** Name und Adresse einer Liegenschaft stehen einmal als `BuildingAddress`; `ContractDetails` nimmt sie von dort.
 
