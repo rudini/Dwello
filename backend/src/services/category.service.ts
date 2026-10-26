@@ -10,17 +10,13 @@ import { CodedError, refusal, type Refusal } from './coded-error';
 import { recordAudit } from './audit-log.service';
 import { Conflict } from './conflict';
 import { categoryHasFuelStocks } from './fuel-stock.service';
+import type { CategoryWithUsage } from '../api/category';
 
 export interface CategoryFilters {
 	search?: string;
 	isAllowedUtilityCost?: boolean;
 	limit?: number;
 	offset?: number;
-}
-
-export interface CategoryWithUsage extends Category {
-	invoiceCount: number;
-	allocableInvoiceCount?: number;
 }
 
 /**
@@ -60,7 +56,7 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
 			updatedAt: categories.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
+			invoiceCount: sql<string>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -108,7 +104,7 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
 			updatedAt: categories.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
+			invoiceCount: sql<string>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
 				'invoice_count'
 			),
 			// the invoices a save as «nicht umlagefähig» would take out (#309)

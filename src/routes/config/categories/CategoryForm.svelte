@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
-	import type { Proposal } from '$lib/server/category';
-	import type { Category } from '$lib/types';
+	import type { Category, Proposal } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';

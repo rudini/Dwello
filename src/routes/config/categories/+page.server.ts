@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { deleteCategory, toCategory } from '$lib/server/category';
+import { deleteCategory, toCategory, type CategoryRow } from '$lib/server/category';
 import { m } from '$lib/paraglide/messages';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const response = await fetch(`${BACKEND_URL}/api/v1/categories?limit=1000`); // all of them (#585)
 	if (!response.ok) throw error(response.status, m.categories_load_failed());
 	const { categories } = await response.json();
-	return { categories: (categories as Record<string, unknown>[]).map(toCategory) };
+	return { categories: (categories as CategoryRow[]).map(toCategory) };
 };
 
 export const actions: Actions = {

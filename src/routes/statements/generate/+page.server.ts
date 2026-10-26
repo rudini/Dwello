@@ -1,7 +1,7 @@
 import type { SkippedContract } from '$lib/statement-wizard';
 import { error, fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
-import { toHeatingProfile } from '$lib/server/heating-profile';
+import { toHeatingProfile, type HeatingProfileRow } from '$lib/server/heating-profile';
 import {
 	billedContracts,
 	generateStatements,
@@ -64,7 +64,7 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 
 	return {
 		buildings: buildingList,
-		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
+		heatingProfiles: ((heatingProfiles.data ?? []) as HeatingProfileRow[]).map(toHeatingProfile),
 		defaultManagementFeePercent: chosen.managementFeePercent,
 		defaultPeriod: chosen.period,
 		defaultHeatingProfileId: chosen.heatingProfileId ?? '',

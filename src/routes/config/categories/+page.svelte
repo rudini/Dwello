@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
-	import type { CategoryWithUsage } from '$lib/server/category';
+	import type { CategoryWithUsage } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';

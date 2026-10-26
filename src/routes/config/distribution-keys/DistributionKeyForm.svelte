@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import {
-		FORMULA_VARIABLES,
-		type DistributionKeyRow,
-		type FormulaTest
-	} from '$lib/distribution-key';
+	import { FORMULA_VARIABLES, type FormulaTest } from '$lib/distribution-key';
+	import type { DistributionKey } from '$lib/types';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
@@ -21,7 +18,7 @@
 		test,
 		submitLabel
 	}: {
-		key?: DistributionKeyRow;
+		key?: DistributionKey;
 		errors?: Record<string, string>;
 		test?: FormulaTest;
 		submitLabel: string;

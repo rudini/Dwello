@@ -18,6 +18,7 @@ import { getCategoryByName, listCategories } from './category.service';
 import { currentKi } from './ki-settings.service';
 import { CodedError } from './coded-error';
 import type { Category } from '../db/schema';
+import type { AllocabilityProposal } from '../api/category';
 
 // Simple in-memory cache for categorization results
 const categorizationCache = new Map<string, { result: LLMCategorizationResult; timestamp: number }>();
@@ -223,7 +224,7 @@ const unavailable = () => new CodedError('KI_PROPOSAL_UNAVAILABLE', 'Die KI ist 
  */
 export async function proposeAllocability(
 	category: Parameters<typeof buildAllocabilityPrompt>[0]
-): Promise<{ isAllowedUtilityCost: boolean; reasoning: string }> {
+): Promise<AllocabilityProposal> {
 	if (await kiOff()) throw unavailable();
 	const { categories } = await listCategories({ limit: 1000 });
 	const predefined = categories.filter((c) => c.type === 'predefined');

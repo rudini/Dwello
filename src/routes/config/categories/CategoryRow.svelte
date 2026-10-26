@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
-	import type { CategoryWithUsage } from '$lib/server/category';
+	import type { CategoryWithUsage } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import CategoryReason from './CategoryReason.svelte';

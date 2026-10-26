@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #837 cycle 4a (categories, distribution keys, heating profiles; #857 categories edge)
+
+- [x] Measure before: `fitness` 4 / 12 / 36, entity mirrors 47, value lists 11
+- [ ] `backend/src/api/{category,distribution-key,heating-profile}.ts`; services typed against them
+- [ ] BFF mappers `toCategory`, `toDistributionKey`, `toHeatingProfile` with `Json<…>`; `Category`, `HeatingProfile`, `DistributionKeyRow` derived
+- [ ] `CategoryWithUsage` and `Proposal` out of `src/lib/server/category.ts` (#857)
+- [ ] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
+- [ ] Slice review (`code-reviewer`)
+- [ ] ADR 0005 section «Zyklus 4a»; archive; PR «Refs #837, #857»

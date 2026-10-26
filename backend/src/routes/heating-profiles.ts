@@ -15,6 +15,8 @@ import {
 	getMonthlyPercentages
 } from '../services/heating-profile.service';
 import { Conflict } from '../services/conflict';
+import type { MasterDataType } from '../api/distribution-key';
+import type { HeatingProfileDetails } from '../api/heating-profile';
 
 export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profiles' })
 	// List all heating profiles
@@ -23,7 +25,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 		async ({ query }) => {
 			const { heatingProfiles, total } = await listHeatingProfiles({
 				search: query.search,
-				type: query.type as 'predefined' | 'custom' | undefined,
+				type: query.type as MasterDataType | undefined,
 				limit: query.limit ? parseInt(query.limit) : undefined,
 				offset: query.offset ? parseInt(query.offset) : undefined
 			});
@@ -59,7 +61,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 			return {
 				...profile,
 				monthlyPercentages: getMonthlyPercentages(profile)
-			};
+			} satisfies HeatingProfileDetails;
 		},
 		{
 			params: t.Object({

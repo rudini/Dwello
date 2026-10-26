@@ -1,23 +1,30 @@
 import { backendMessage, type BackendError } from '$lib/backend-error';
 import { error } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
-import type { DistributionKeyRow, FormulaTest } from '$lib/distribution-key';
+import type { FormulaTest } from '$lib/distribution-key';
+import type { DistributionKey, Json } from '$lib/types';
+import type { DistributionKeyWithUsage } from '../../../backend/src/api/distribution-key';
+import type { InvoiceWithDetails } from '../../../backend/src/api/invoice';
 import { deleteRecord, fetchRecord, nameTranslations, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/distribution-keys`;
 const LIST = '/config/distribution-keys';
 
+/** A row of `GET /distribution-keys` or the key an invoice names, which has only some of the fields */
+export type DistributionKeyRow = NonNullable<InvoiceWithDetails['distributionKey']> &
+	Partial<Json<DistributionKeyWithUsage>>;
+
 /** Backend key as shown in the German interface: `name` stays the English key */
-export function toDistributionKey(d: Record<string, unknown>): DistributionKeyRow {
+export function toDistributionKey(d: DistributionKeyRow): DistributionKey {
 	return {
-		id: d.id as string,
-		name: (d.nameDE || d.name || '') as string,
-		nameFR: d.nameFR as string | null,
-		nameIT: d.nameIT as string | null,
-		nameEN: d.nameEN as string | null,
+		id: d.id,
+		name: d.nameDE || d.name,
+		nameFR: d.nameFR,
+		nameIT: d.nameIT,
+		nameEN: d.nameEN,
 		type: d.type === 'custom' ? 'custom' : 'predefined',
-		formula: (d.formula || '') as string,
-		description: (d.description || '') as string,
+		formula: d.formula || '',
+		description: d.description || '',
 		usageCount: Number(d.invoiceCount) || 0
 	};
 }
@@ -25,10 +32,10 @@ export function toDistributionKey(d: Record<string, unknown>): DistributionKeyRo
 /** All keys, predefined and custom, or an error page when the backend does not answer */
 export async function listDistributionKeys(
 	fetch: typeof globalThis.fetch
-): Promise<DistributionKeyRow[]> {
+): Promise<DistributionKey[]> {
 	const response = await fetch(`${API}?limit=1000`); // all of them (#588)
 	if (!response.ok) throw error(response.status, m.keys_load_failed());
-	const { data = [] }: { data?: Record<string, unknown>[] } = await response.json();
+	const { data = [] }: { data?: DistributionKeyRow[] } = await response.json();
 	return data.map(toDistributionKey);
 }
 

@@ -4,11 +4,10 @@
 	import { untrack } from 'svelte';
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
-	import type { DistributionKeyRow } from '$lib/distribution-key';
 	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import type { LatestKey } from '$lib/types';
 	import { addToast } from '$lib/stores';
-	import type { BilledStatement, Category, InvoiceWithDetails } from '$lib/types';
+	import type { BilledStatement, Category, DistributionKey, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import BilledWarning from '../../BilledWarning.svelte';
 	import MissedWarning from '../../MissedWarning.svelte';
@@ -29,7 +28,7 @@
 			invoice: InvoiceWithDetails;
 			buildings: { id: string; name: string; address: string }[];
 			categories: Category[];
-			distributionKeys: DistributionKeyRow[];
+			distributionKeys: DistributionKey[];
 			latestKeys: LatestKey[];
 			defaultDistributionKeyId: string;
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice

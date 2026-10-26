@@ -10,6 +10,7 @@ import {
 	toDistributionKey
 } from '$lib/server/distribution-key';
 import { toHeatingProfile } from '$lib/server/heating-profile';
+import { profileRow } from './helpers/heating-profile';
 import { saveSettings } from '$lib/server/settings';
 import fieldsRefused from '../../tests/contracts/config-fields-refused.json';
 
@@ -55,7 +56,9 @@ describe('Einstellungen und Stammdaten in der gewählten Sprache', () => {
 			nameIT: 'Uniforme',
 			nameEN: 'Even'
 		};
-		expect(localName(toHeatingProfile({ id: 'hp1', name: 'Even', ...names }))).toBe('Uniforme');
+		expect(localName(toHeatingProfile(profileRow({ id: 'hp1', name: 'Even', ...names })))).toBe(
+			'Uniforme'
+		);
 		expect(localName(toDistributionKey({ id: 'k1', name: 'Even', ...names }))).toBe('Uniforme');
 	});
 
