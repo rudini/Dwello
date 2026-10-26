@@ -15,5 +15,6 @@ No scenario: CI only, no app behaviour changes.
 
 - [x] The E2E and axe jobs run in the Playwright image of the version in `bun.lock` (`mcr.microsoft.com/playwright:v<version>-noble`, browsers and system packages included); the `changes` job reads the version; no browser cache, no `playwright install --with-deps`
 - [x] Postgres reached by its service name inside the container (`E2E_DATABASE_URL`)
-- [ ] Review; PR run shows the shards green and no install step; a run on `main` likewise (issue «Done means»)
+- [x] Review i777 round 1 (`docs/reviews/i777-review-1.md`): C-1 (Blocker, setup-bun needs unzip, which the image lacks) fixed by installing Bun with npm; C-2 (risk row RI-T1-4) updated
+- [ ] Re-review; PR run shows the shards green and no install step; a run on `main` likewise (issue «Done means»)
 - [ ] PR: Fixes #777

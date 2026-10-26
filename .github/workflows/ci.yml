@@ -239,8 +239,12 @@ jobs:
         if: env.SKIP != 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: oven-sh/setup-bun@v2
+      # setup-bun unpacks with unzip, which the Playwright image lacks; npm brings Bun without apt (review i777 C-1)
+      - name: Install Bun
         if: env.SKIP != 'true'
+        run: |
+          npm install --global --prefix "$HOME/.local" bun
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - run: bun install --frozen-lockfile
         if: env.SKIP != 'true'
       - run: bun install --frozen-lockfile
