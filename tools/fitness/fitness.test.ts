@@ -107,6 +107,7 @@ describe('judge', () => {
 		expect(findings.map((f) => f.check)).toEqual(['module-cycle', 'boundary-import']);
 		expect(findings[0].message).toContain('bff:lib/server fe:lib');
 		expect(findings[1].message).toContain('backend/src/services/y.ts');
+		expect(findings[1].message).toContain('across the HTTP boundary');
 	});
 });
 

@@ -15,5 +15,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `KiModel` to `src/lib/types.ts`; dashboard, audit log and settings components take `PageData` from `./$types`
 - [x] Fitness `boundary-import` refuses type-only imports FE→BFF and Shared→FE; proof table in `fitness-functions.md` §3, deps:graph row in §6
 - [x] ADR 0005 «Zyklus 4c», measure after (FE → BFF 6 → 0; other values unchanged)
-- [ ] Code review round 1, closing round
+- [x] Code review round 1 (`docs/reviews/i837c4c-review-1.md`)
+- [ ] Closing round
 - [ ] Archive, PR (Fixes #857)

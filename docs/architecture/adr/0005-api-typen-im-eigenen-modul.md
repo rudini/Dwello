@@ -162,7 +162,7 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 |---|---|---|
 | 0 Messung vorher | – | `fitness` 4 / 12 / 36, Entity-Spiegel 45, Wertelisten 10; Dateikanten FE → BFF 6, Shared → FE 0 |
 | Übersicht, KI-Seite, Einstellungen und Protokoll nehmen `PageData` aus `./$types`; `KiModel` nach `src/lib/types.ts` | 92d9a028 | `svelte-check` 0 Fehler; 3694 Frontend-Tests; Lint |
-| `boundary-import` lehnt Importe gegen die Schichtrichtung ab, auch `import type` | (dieser PR) | 30 Fitness-Tests; Nachweis in `fitness-functions.md` §3 |
+| `boundary-import` lehnt Importe gegen die Schichtrichtung ab, auch `import type` | 1a0193a0 | 30 Fitness-Tests; Nachweis in `fitness-functions.md` §3 |
 
 - **#857 erledigt:** Keine Komponente importiert mehr `+page.server.ts` oder `src/lib/server`, `src/lib/types.ts` nichts aus dem Frontend. `KiModelState.svelte` nimmt `KiModel` aus `src/lib/types.ts` statt aus der Übersicht. `DashboardData`, `OverviewData` und `AuditEntry` sind nicht mehr exportiert.
 - **Der Check hält es:** `boundary-import` meldet jeden neuen Import Komponente → BFF und gemeinsame Typen → Frontend. `import type` aus `backend/src/api/` bleibt erlaubt.

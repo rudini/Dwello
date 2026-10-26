@@ -127,7 +127,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 26.10.2026 | #843 (Entscheid PO): ein Feld zählt nur in Dateien, die ein weiteres Feld seiner Tabelle deklarieren (`entityFiles` in `tools/arch-baseline/lib.ts`); die Ziele bleiben | Feldstreuung 6 / 19 / 60 → 5 / 13 / 37 (`configuration.value` fällt weg, `apartments.number` 60 → 19) |
 | 26.10.2026 | #837 Zyklus 1a (ADR 0005): die Abrechnungstypen des Frontends kommen aus `backend/src/api/statement.ts` | Feldstreuung Max 37 → 36; Entity-Spiegel 54 → 52 |
 | 26.10.2026 | #837 Zyklus 1b (ADR 0005): Positionen und Dokumente aus `backend/src/api/`, `DocumentStatus` einmal im Schema | Feldstreuung Median 5 → 4; Entity-Spiegel 52 → 50; Wertelisten 14 → 13 |
-| 26.10.2026 | #857 (#837 Zyklen 4a–4c): Komponenten nehmen Seitendaten aus `./$types`, gemeinsame Typen stehen in `src/lib/types.ts` oder `backend/src/api/`; `boundary-import` lehnt Importe gegen die Schichtrichtung ab, auch `import type` | Modulgraph (`deps:graph`): keine `fe → bff`- und keine `shared → fe`-Kante mehr (Dateikanten FE → BFF 17 → 0, Shared → FE 1 → 0); die übrigen Werte unverändert |
+| 26.10.2026 | #857 (#837 Zyklen 4a–4c): Komponenten nehmen Seitendaten aus `./$types`, gemeinsame Typen stehen in `src/lib/types.ts` oder `backend/src/api/`; `boundary-import` lehnt Importe gegen die Schichtrichtung ab, auch `import type` | Modulgraph (`deps:graph`): keine `fe → bff`- und keine `shared → fe`-Kante mehr (Dateikanten FE → BFF 17 → 0; Shared → FE 1 → 0, schon mit #862); die übrigen Werte unverändert |
 
 ## 7. Werkzeugwahl
 
