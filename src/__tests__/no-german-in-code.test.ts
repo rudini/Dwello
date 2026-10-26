@@ -50,6 +50,7 @@ function texts(source: string, svelte: boolean) {
 // German words in the code that are identifiers, not texts: each is mapped to a message where it is shown
 const identifiers: Record<string, string[]> = {
 	'src/lib/overview.ts': ['Zahlungsfrist', 'Vertragsende'], // deadline kinds (DeadlineList.svelte)
+	'src/lib/types.ts': ['beleg'], // the invoice field of the API, picked by name (#233)
 	'src/lib/utils/contract-availability.ts': ['Aktiv', 'Beendet'], // contract status of the API
 	'src/routes/gallery/+page.svelte': ['laufend', 'beendet', 'unbefristet', 'befristet'], // tab and option values
 	// query parameter; the download's file name stays German in every language (issue #101)

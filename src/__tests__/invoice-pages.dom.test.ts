@@ -30,7 +30,9 @@ import {
 	submit
 } from './helpers/dom';
 import validationRefused from '../../tests/contracts/validation-refused.json';
+import type { InvoiceWithDetails } from '$lib/types';
 import invoiceContract from '../../tests/contracts/invoice.json';
+import { invoiceRow } from './helpers/invoice';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 
 const buildings = [{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1, 8400 Winterthur' }];
@@ -55,8 +57,13 @@ const invoice = (overrides = {}) => ({
 	distributionKeyId: 'k1',
 	distributionKey: { id: 'k1', name: 'Nach Fläche' },
 	isValidUtilityCost: true,
+	invoiceNumber: null,
+	servicePeriodStart: null,
+	servicePeriodEnd: null,
+	manualOverrideReason: null,
+	llmConfidence: null,
 	categorizationStatus: 'manual' as const,
-	beleg: null as { fileName: string; mimeType: string } | null,
+	beleg: null as InvoiceWithDetails['beleg'],
 	createdAt: '2024-03-16T10:00:00Z',
 	updatedAt: '2024-03-16T10:00:00Z',
 	...overrides
@@ -324,13 +331,13 @@ describe('Rechnungsdetail', () => {
 		const reason = () => byTestId('category-reason')?.textContent?.trim();
 
 		it('nennt bei einer umlagefähigen Rechnung den Grund ihrer Kategorie', () => {
-			show(InvoicePage, { data: { invoice: toInvoice(invoiceContract) } });
+			show(InvoicePage, { data: { invoice: toInvoice(invoiceRow(invoiceContract)) } });
 
 			expect(reason()).toBe(m.categories_reason_caretaker());
 		});
 
 		it('nennt bei einer nicht umlagefähigen Rechnung den Grund statt der Warnung', () => {
-			show(InvoicePage, { data: { invoice: toInvoice(repairs) } });
+			show(InvoicePage, { data: { invoice: toInvoice(invoiceRow(repairs)) } });
 
 			expect(reason()).toBe(m.categories_reason_repairs());
 			expect(byTestId('invoice-legal-note')).toBeNull();
@@ -338,14 +345,22 @@ describe('Rechnungsdetail', () => {
 
 		// «Keiner – … pro Wohnung verteilt» neben «also nicht umlagefähig» widerspräche dem Grund (Personas Helga P-1, Weber P-5)
 		it('sagt bei einer nicht umlagefähigen Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde', () => {
-			show(InvoicePage, { data: { invoice: toInvoice({ ...repairs, distributionKey: null, distributionKeyId: null }) } });
+			show(InvoicePage, {
+				data: {
+					invoice: toInvoice(
+						invoiceRow({ ...repairs, distributionKey: null, distributionKeyId: null })
+					)
+				}
+			});
 
 			expect(text()).not.toContain(m.invoices_no_key());
 			expect(text()).not.toContain(m.glossary_key_term());
 		});
 
 		it('nennt keinen Grund, wenn der Liegenschaftsverwalter die Rechnung ausgeschlossen hat', () => {
-			show(InvoicePage, { data: { invoice: toInvoice({ ...invoiceContract, isValidUtilityCost: false }) } });
+			show(InvoicePage, {
+				data: { invoice: toInvoice(invoiceRow({ ...invoiceContract, isValidUtilityCost: false })) }
+			});
 
 			expect(reason()).toBeUndefined();
 			expect(byTestId('invoice-legal-note')!.textContent).toContain(m.invoices_legal_text());
@@ -354,7 +369,14 @@ describe('Rechnungsdetail', () => {
 		it('nennt keinen Grund, wenn die vordefinierte Kategorie umgestellt ist', () => {
 			const changed = { ...repairs, isValidUtilityCost: true };
 			show(InvoicePage, {
-				data: { invoice: toInvoice({ ...changed, category: { ...changed.category, isAllowedUtilityCost: true } }) }
+				data: {
+					invoice: toInvoice(
+						invoiceRow({
+							...changed,
+							category: { ...changed.category, isAllowedUtilityCost: true }
+						})
+					)
+				}
 			});
 
 			expect(reason()).toBeUndefined();

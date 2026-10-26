@@ -10,11 +10,10 @@
 		servicePeriodOf,
 		suggestionProvenance,
 		validateInvoice,
-		type LatestKey,
 		type Suggestion
 	} from '$lib/invoice';
 	import { addToast } from '$lib/stores';
-	import type { Category } from '$lib/types';
+	import type { Category, LatestKey } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';

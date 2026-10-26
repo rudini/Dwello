@@ -688,6 +688,7 @@ export type NewHeatingProfile = typeof heatingProfiles.$inferInsert;
 
 export type Invoice = typeof invoices.$inferSelect;
 export type NewInvoice = typeof invoices.$inferInsert;
+export type InvoiceDocument = typeof invoiceDocuments.$inferSelect;
 
 export type UtilityStatement = typeof utilityStatements.$inferSelect;
 export type NewUtilityStatement = typeof utilityStatements.$inferInsert;

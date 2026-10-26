@@ -3623,9 +3623,21 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] Archive the session; PR «Refs #837» pushed after this archive
 - [x] Closing `code-reviewer` round on the CI fix 4fc4caa1: `docs/reviews/i837c2-close-review-1.md`
 
+## Session: #837 cycle 3, invoices (ADR 0005)
+
+- [x] Measure before: field spread 4 / 13 / 36, entity mirrors 49, value lists 11
+- [x] `backend/src/api/invoice.ts` (`InvoiceWithDetails`, `InPeriod`); `invoice.service.ts` typed against it; `InvoiceDocument` in the schema
+- [x] BFF `toInvoice` takes `Json<…>`; `Invoice` in `src/lib/types.ts` picked from the response; dead fallbacks for fields the backend never sends dropped (`billingEntity`, empty supplier)
+- [x] Measure after, `fitness --update`: 4 / **12** / 36, entity mirrors 47
+- [x] `code-reviewer` round 1: `docs/reviews/i837c3-review-1.md`
+- [x] ADR 0005 table for cycle 3; utility tree P90 12
+- [x] Workflow notes: nothing new beyond `workflow-notes-issue-837-c2.md`
+- [x] Archive the session; PR «Refs #837» pushed after this archive
+- [x] CI fix e51996a9 (German-text check read the field name `beleg`); closing `code-reviewer` round: `docs/reviews/i837c3-close-review-1.md`
 ## Session 2026-10-26 c: delete analysed review reports
 
 Request: delete the review and persona reports of finished tasks (product owner, in the session). Kept: personas README, workflow notes and workflow rules reviews, `agent-effort-benchmark.md`, the three domain reviews cited in code or scenarios (186, 292, 435). No open pull request held reports. No scenario: docs only.
 
 - [x] 608 files removed; they stay readable at 294f77f6
 - [x] PR: pushed after this archive
+- [x] `LatestKey` to `backend/src/api/invoice.ts` (#857, 276ac7e8); `code-reviewer` round: `docs/reviews/i837c3-latest-review-1.md`

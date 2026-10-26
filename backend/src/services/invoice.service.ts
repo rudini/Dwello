@@ -12,7 +12,6 @@ import {
 	categories,
 	distributionKeys,
 	invoiceDocuments,
-	type Invoice,
 	type NewInvoice
 } from '../db/schema';
 import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
@@ -23,6 +22,7 @@ import { getCategory } from './category.service';
 import { roundToRappen } from './pdf-format';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
+import type { InPeriod, InvoiceWithDetails, LatestKey } from '../api/invoice';
 
 /** An uploaded file for an invoice, Base64 encoded */
 /** A file for an invoice; read by the KI in «Rechnungen hochladen», with what it saw on it (#233) */
@@ -41,21 +41,6 @@ export interface InvoiceFilters {
 	periodEnd?: string;
 	limit?: number;
 	offset?: number;
-}
-
-export interface InvoiceWithDetails extends Invoice {
-	building: { id: string; name: string; address: string } | null;
-	category: {
-		id: string;
-		name: string;
-		nameDE: string | null;
-		isAllowedUtilityCost: boolean;
-		isHeatingCost: boolean;
-		type: string;
-	} | null;
-	distributionKey: { id: string; name: string; nameDE: string | null } | null;
-	llmCategory: { id: string; name: string; nameDE: string | null } | null;
-	beleg: { fileName: string; mimeType: string; deductedAmount: string | null; nonAllocableItems: boolean } | null;
 }
 
 /**
@@ -256,8 +241,8 @@ function requireKey(distributionKeyId: string | null | undefined) {
  * Per building and category the Verteilschlüssel of the latest invoice that has one (#379): the invoice form proposes
  * it, as one category of a building keeps one key
  */
-export async function latestKeys() {
-	return db
+export async function latestKeys(): Promise<LatestKey[]> {
+	const rows = await db
 		.selectDistinctOn([invoices.buildingId, invoices.categoryId], {
 			buildingId: invoices.buildingId,
 			categoryId: invoices.categoryId,
@@ -266,6 +251,7 @@ export async function latestKeys() {
 		.from(invoices)
 		.where(and(isNotNull(invoices.categoryId), isNotNull(invoices.distributionKeyId)))
 		.orderBy(invoices.buildingId, invoices.categoryId, desc(invoices.invoiceDate), desc(invoices.createdAt));
+	return rows as LatestKey[]; // the where clause leaves out the invoices without a category or a key
 }
 
 /** Checks the invoice's category; costs of a non-allocable one stay with the owners (OR 257a), whatever the form sends */
@@ -580,7 +566,7 @@ function inPeriod(
 	invoice: { amount: string; servicePeriodStart: string | null; servicePeriodEnd: string | null },
 	periodStart: string,
 	periodEnd: string
-) {
+): InPeriod {
 	const amount = parseFloat(invoice.amount);
 	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount, noPeriod: true as const };
 	const start = invoice.servicePeriodStart > periodStart ? invoice.servicePeriodStart : periodStart;

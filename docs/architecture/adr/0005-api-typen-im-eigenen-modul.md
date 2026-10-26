@@ -100,6 +100,24 @@ Der Median erreicht damit das Ziel von Ä1 (≤ 4); P90 liegt mit 13 weiter übe
 
 P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services und Svelte-Komponenten (`startDate` in 26 Dateien), nicht in den Typen.
 
+## Zyklus 3: Rechnungen
+
+| Schritt | Commit | Absicherung |
+|---|---|---|
+| 0 Messung vorher | – | `fitness` 4 / 13 / 36, Entity-Spiegel 49, Wertelisten 11 |
+| 1–3 `backend/src/api/invoice.ts` (`InvoiceWithDetails`, `InPeriod`), Service dagegen typisiert; `toInvoice` mit `Json<…>`; `Invoice` aus dem Backend-Typ; `fitness --update` | 4957f253 | Backend-Typprüfung; 269 Backend-Tests (Rechnungen, Kategorien, Rechnungen einer Abrechnung, API-Verträge); `svelte-check` 0 Fehler; 1195 Frontend-Tests; Lint; fallow |
+
+- **Felder, die nie ankamen:** Der Mapper las den Lieferanten auch als `billingEntity` und setzte einen leeren Lieferanten, eine leere Beschreibung und `isValidUtilityCost` auf Ersatzwerte. Das Backend sendet `billingEntityName`, Beschreibung und Umlagefähigkeit nie leer (`NOT NULL`). Die Ersatzwerte und ihre drei Tests sind weg.
+- **Leere Werte** kommen als `null`, nicht als fehlendes Feld: Rechnungsnummer und Sicherheit der KI. Die Seiten prüfen beide nur auf einen Wert, angezeigt wird dasselbe.
+- **Testdaten:** Die Verträge unter `tests/contracts/` halten nur die Felder, die der API-Test prüft. `src/__tests__/helpers/invoice.ts` reicht sie als Antworttyp durch.
+- **`LatestKey`** (#857, Entscheid PO 26.10.2026): `src/lib/types.ts` holte ihn aus dem Frontend-Modul `src/lib/invoice.ts`, eine Kante gegen die Schichtrichtung. Er steht jetzt in `backend/src/api/invoice.ts` als Zeile von `GET /invoices/latest-keys` (276ac7e8); `src/lib/invoice.ts` und die Rechnungskomponenten nehmen ihn aus `$lib/types`.
+
+| Messwert | Nach 2 | Nach 3 |
+|---|---|---|
+| Feldstreuung Median / P90 / Max | 4 / 13 / 36 | 4 / **12** / 36 |
+| Entity-Spiegel | 49 | **47** |
+| Wertelisten über Schichten | 11 | 11 |
+
 ## Tradeoffs und verbleibende Risiken
 
 - **Zwei Stellen im Backend:** Die Form steht im Typmodul und in der Abfrage des Service. Der Rückgabetyp verbindet beide nur zum Teil: Ein Feld, das die Abfrage zusätzlich liefert, bleibt dem Typ unbekannt, bis jemand es dort ergänzt (so fehlten bisher `tenant.correspondenceChannel` und `tenant.country`).
@@ -109,4 +127,4 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 
 ## Nächste Zyklen
 
-Rechnungen, dann der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
+Der Rest (#837, «Plan»). Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
