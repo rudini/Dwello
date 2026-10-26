@@ -287,43 +287,30 @@ export type { StatementStatus };
 /** A statement an invoice is in: its number and status, to link it (#455) */
 export type BilledStatement = { id: string; statementNumber: string; status: StatementStatus };
 
-export interface StatementLineItem {
-	id: string;
-	categoryId: string;
+/** A statement as the backend answers it (#837, ADR 0005): the frontend types below take the fields it passes on */
+type ApiStatement = Json<StatementResponse>;
+/** Amounts the backend sends as decimal strings, as the BFF hands them on: numbers */
+type Amounts<T> = { [K in keyof T]: T[K] extends string ? number : T[K] extends string | null ? number | null : T[K] };
+
+/** A position as the backend stores it; the BFF hands on its amounts as numbers */
+type ApiLineItem = ApiStatement['lineItems'][number];
+
+export interface StatementLineItem
+	extends Pick<ApiLineItem, 'id' | 'categoryId' | 'distributionKeyId'>,
+		// Wohnungsanteil: the apartment's part of the total by the key; Zeitanteil 0–1
+		Amounts<Pick<ApiLineItem, 'totalAmount' | 'tenantShare' | 'apartmentShare' | 'periodShare'>> {
 	categoryName: string;
-	distributionKeyId?: string;
 	distributionKeyName?: string;
-	totalAmount: number;
-	tenantShare: number;
 	percentage: number;
-	apartmentShare: number | null; // Wohnungsanteil: the apartment's part of the total by the key
-	periodShare: number | null; // Zeitanteil, 0–1
 	shareDays: { days: number; total: number } | null; // the Zeitanteil as days, where it is one (#208)
 	byProfile?: boolean; // the Zeitanteil is the heating profile's share
 	invoices: StatementLineInvoice[]; // what the position billed (#96); none before
 }
 
 /** An invoice a position billed, or the change of the Tankbestand; with its days where its invoices bill different days (#226) */
-export interface StatementLineInvoice {
-	id: string;
-	description: string;
-	amount: number;
-	start: string;
-	end: string;
-	fuelStock?: true;
-	part: {
-		days: number;
-		total: number;
-		noPeriod?: true;
-		whole?: { start: string; end: string; amount: number };
-		profile?: { percent: number }; // a heating invoice by the Heizprofil's months in its days (#71)
-	} | null;
-}
-
-/** A statement as the backend answers it (#837, ADR 0005): the frontend types below take the fields it passes on */
-type ApiStatement = Json<StatementResponse>;
-/** Amounts the backend sends as decimal strings, as the BFF hands them on: numbers */
-type Amounts<T> = { [K in keyof T]: T[K] extends string ? number : T[K] extends string | null ? number | null : T[K] };
+export type StatementLineInvoice = NonNullable<ApiLineItem['invoices']>[number] & {
+	part: NonNullable<ApiLineItem['invoiceParts']>[number] | null;
+};
 
 export interface Statement
 	extends Pick<ApiStatement, 'id' | 'statementNumber' | 'tenantId' | 'apartmentId' | 'periodStart' | 'periodEnd' | 'statementDate' | 'rentalDays' | 'status' | 'paymentDeadline'>,

@@ -9,3 +9,11 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+## Session: #837 cycle 1b, line items and documents (Ä1)
+
+- [x] Main run of #849: one Firefox scenario lost its browser at the first navigation; failed jobs re-run once, green
+- [ ] A Line items: `StatementLineItem`, `StatementLineInvoice` derive from the line items of `backend/src/api/statement.ts`; `toLineItem` takes them typed
+- [ ] B Documents: `backend/src/api/document.ts` (value lists typed in `schema.ts`), `selectSummaries` returns it, `StatementDocument` derives from it
+- [ ] Measure, ADR 0005 table row 1b, `fitness --update`
+- [ ] Slice review (`code-reviewer`)
+- [ ] PR, Refs #837; No scenario: types only
