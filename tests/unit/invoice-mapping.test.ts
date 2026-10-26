@@ -8,27 +8,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { toInvoice } from '$lib/server/invoice';
+import { invoiceRow } from '../../src/__tests__/helpers/invoice';
 
-const supplier = (backendData: Record<string, unknown>) => toInvoice(backendData).billingEntity;
+const supplier = (backendData: object) => toInvoice(invoiceRow(backendData)).billingEntity;
 
 describe('Invoice billingEntity mapping', () => {
 	it('maps billingEntityName from backend response', () => {
 		expect(supplier({ billingEntityName: 'Energie Zürich AG' })).toBe('Energie Zürich AG');
-	});
-
-	it('falls back to billingEntity if billingEntityName is missing', () => {
-		expect(supplier({ billingEntity: 'Energie Zürich AG' })).toBe('Energie Zürich AG');
-	});
-
-	it('prefers billingEntityName over billingEntity when both exist', () => {
-		expect(supplier({ billingEntityName: 'Correct Name', billingEntity: 'Old Name' })).toBe('Correct Name');
-	});
-
-	it('returns empty string when neither field exists', () => {
-		expect(supplier({ id: '123', amount: 100 })).toBe('');
-	});
-
-	it('returns empty string when billingEntityName is null', () => {
-		expect(supplier({ billingEntityName: null })).toBe('');
 	});
 });

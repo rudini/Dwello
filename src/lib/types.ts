@@ -1,5 +1,6 @@
 import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
 import type { DocumentSummary } from '../../backend/src/api/document';
+import type { InvoiceWithDetails as InvoiceResponse } from '../../backend/src/api/invoice';
 import type {
 	ContractResponse,
 	ContractWithDetails as ContractRow
@@ -207,38 +208,38 @@ export interface DistributionKey {
 	isActive: boolean;
 }
 
-// Invoice types
-export interface Invoice {
-	id: string;
-	buildingId: string;
-	invoiceDate: string;
-	/** Leistungszeitraum: the time the invoice bills, if not its date */
-	servicePeriodStart?: string | null;
-	servicePeriodEnd?: string | null;
-	billingEntity: string;
-	description: string;
-	amount: number;
-	categoryId?: string;
-	distributionKeyId?: string;
-	isValidUtilityCost: boolean;
-	llmConfidence?: number;
-	manualOverrideReason?: string;
-	createdAt?: string;
-	updatedAt?: string;
-}
+// The invoice as the pages show it, derived from GET /invoices/:id (AP1, ADR 0005); dates and ids pass unchanged
+type ApiInvoice = Json<InvoiceResponse>;
+export type Invoice = Pick<
+	ApiInvoice,
+	| 'id'
+	| 'buildingId'
+	| 'invoiceDate'
+	| 'invoiceNumber'
+	| 'servicePeriodStart' // Leistungszeitraum: the time the invoice bills, if not its date
+	| 'servicePeriodEnd'
+	| 'description'
+	| 'categoryId'
+	| 'distributionKeyId'
+	| 'isValidUtilityCost'
+	| 'manualOverrideReason'
+	| 'createdAt'
+	| 'updatedAt'
+	| 'beleg' // the uploaded file, with what the KI saw on it when it was uploaded (#233)
+> &
+	Amounts<Pick<ApiInvoice, 'amount' | 'llmConfidence'>> & {
+		billingEntity: string;
+	};
 
 // Invoice with related data for list view
 export interface InvoiceWithDetails extends Invoice {
-	buildingName?: string;
+	buildingName: string;
 	buildingAddress: string;
 	category?: Category & { key?: string; predefined?: boolean }; // key and predefined name its reason (#292)
 	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
 	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
 	inPeriodAmount?: number; // with the filter «Abrechnungsperiode»: its part in the period (#454)
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
-	// the uploaded file of the invoice, with what the KI saw on it when it was uploaded (#233)
-	beleg: { fileName: string; mimeType: string; deductedAmount?: string | null; nonAllocableItems?: boolean } | null;
-	invoiceNumber?: string;
 }
 
 // Invoices list response

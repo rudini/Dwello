@@ -1,5 +1,5 @@
 import type { InvoicesListData } from '$lib/types';
-import { invoiceChoices, tankCategories, toInvoice } from '$lib/server/invoice';
+import { invoiceChoices, tankCategories, toInvoice, type InvoiceRow } from '$lib/server/invoice';
 import { kiOff } from '$lib/server/ki-settings';
 import type { PageServerLoad } from './$types';
 
@@ -66,8 +66,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 		const buildings = listed.map((b: { id: unknown }) => ({ ...b, tank: tanks[String(b.id)] }));
 
 		const { categories } = choices;
-		const invoices = (invoicesData.invoices || invoicesData.data || []).map(
-			(r: Record<string, unknown>) => toInvoice(r, categories)
+		const invoices = (invoicesData.invoices || invoicesData.data || []).map((r: InvoiceRow) =>
+			toInvoice(r, categories)
 		);
 
 		return {

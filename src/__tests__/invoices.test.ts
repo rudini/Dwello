@@ -5,6 +5,7 @@ import { load as editLoad } from '../routes/invoices/[id]/edit/+page.server';
 import { load as newLoad } from '../routes/invoices/new/+page.server';
 import { localPath, suggestionProvenance, validateInvoice } from '../lib/invoice';
 import { toInvoice } from '../lib/server/invoice';
+import { invoiceRow } from './helpers/invoice';
 import backendInvoice from '../../tests/contracts/invoice.json';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 import periodList from '../../tests/contracts/invoice-list-period.json';
@@ -100,8 +101,8 @@ describe('Rechnungsliste', () => {
 
 	// Fachreview 454-1 V-11: the part of each invoice in the period, as the backend names it
 	it('übernimmt den Teil jeder Rechnung in der Abrechnungsperiode', () => {
-		expect(toInvoice(periodList.invoices[0]).inPeriodAmount).toBe(413.33);
-		expect(toInvoice(backendInvoice).inPeriodAmount).toBeUndefined();
+		expect(toInvoice(invoiceRow(periodList.invoices[0])).inPeriodAmount).toBe(413.33);
+		expect(toInvoice(invoiceRow(backendInvoice)).inPeriodAmount).toBeUndefined();
 	});
 
 	// Wie in den anderen Listen: ?building= kommt z. B. vom Mietvertrag

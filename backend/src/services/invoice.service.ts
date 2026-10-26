@@ -12,7 +12,6 @@ import {
 	categories,
 	distributionKeys,
 	invoiceDocuments,
-	type Invoice,
 	type NewInvoice
 } from '../db/schema';
 import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
@@ -23,6 +22,7 @@ import { getCategory } from './category.service';
 import { roundToRappen } from './pdf-format';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
+import type { InPeriod, InvoiceWithDetails } from '../api/invoice';
 
 /** An uploaded file for an invoice, Base64 encoded */
 /** A file for an invoice; read by the KI in «Rechnungen hochladen», with what it saw on it (#233) */
@@ -41,21 +41,6 @@ export interface InvoiceFilters {
 	periodEnd?: string;
 	limit?: number;
 	offset?: number;
-}
-
-export interface InvoiceWithDetails extends Invoice {
-	building: { id: string; name: string; address: string } | null;
-	category: {
-		id: string;
-		name: string;
-		nameDE: string | null;
-		isAllowedUtilityCost: boolean;
-		isHeatingCost: boolean;
-		type: string;
-	} | null;
-	distributionKey: { id: string; name: string; nameDE: string | null } | null;
-	llmCategory: { id: string; name: string; nameDE: string | null } | null;
-	beleg: { fileName: string; mimeType: string; deductedAmount: string | null; nonAllocableItems: boolean } | null;
 }
 
 /**
@@ -580,7 +565,7 @@ function inPeriod(
 	invoice: { amount: string; servicePeriodStart: string | null; servicePeriodEnd: string | null },
 	periodStart: string,
 	periodEnd: string
-) {
+): InPeriod {
 	const amount = parseFloat(invoice.amount);
 	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount, noPeriod: true as const };
 	const start = invoice.servicePeriodStart > periodStart ? invoice.servicePeriodStart : periodStart;

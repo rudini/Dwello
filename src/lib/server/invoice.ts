@@ -1,13 +1,13 @@
 import { localName } from '$lib/names';
 import { ValidationError } from './error-handler';
-import type { BilledStatement, InvoiceWithDetails } from '$lib/types';
+import type { BilledStatement, InvoiceWithDetails, Json } from '$lib/types';
+import type { InvoiceWithDetails as InvoiceResponse } from '../../../backend/src/api/invoice';
 import { toCategory } from './category';
 import { toDistributionKey } from './distribution-key';
 import type { LatestKey } from '$lib/invoice';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-type Related = Record<string, unknown> | null | undefined;
 type Named = { id: string; name: string };
 type MasterData = Parameters<typeof localName>[0];
 
@@ -61,9 +61,12 @@ export async function invoiceChoices(fetch: typeof globalThis.fetch) {
 	};
 }
 
+/** An invoice as `GET /invoices` and `GET /invoices/:id` send it */
+export type InvoiceRow = Json<InvoiceResponse>;
+
 // Who chose the category: nobody yet, the KI (its suggestion kept), or the Liegenschaftsverwalter
 function categorizationStatus(
-	r: Record<string, unknown>
+	r: Pick<InvoiceRow, 'categoryId' | 'llmCategoryId' | 'wasManuallyOverridden'>
 ): InvoiceWithDetails['categorizationStatus'] {
 	if (!r.categoryId) return 'pending';
 	return r.categoryId === r.llmCategoryId && !r.wasManuallyOverridden
@@ -75,44 +78,40 @@ function categorizationStatus(
  * Backend invoice as shown in the interface: its category and distribution key carry only their German name,
  * so `names` (categories and keys in the UI language) name them where it has them
  */
-export function toInvoice(r: Record<string, unknown>, names: Named[] = []): InvoiceWithDetails {
-	const building = r.building as Record<string, string> | null;
-	const category = r.category as Related;
-	const key = r.distributionKey as Related;
-	const suggested = r.llmCategory as Related;
+export function toInvoice(r: InvoiceRow, names: Named[] = []): InvoiceWithDetails {
 	const named = <T extends Named>(row: T) => ({
 		...row,
 		name: names.find((n) => n.id === row.id)?.name ?? row.name
 	});
 	return {
-		id: r.id as string,
-		buildingId: r.buildingId as string,
-		invoiceDate: r.invoiceDate as string,
-		invoiceNumber: (r.invoiceNumber as string | null) ?? undefined,
-		servicePeriodStart: r.servicePeriodStart as string | undefined,
-		servicePeriodEnd: r.servicePeriodEnd as string | undefined,
-		billingEntity: (r.billingEntityName || r.billingEntity || '') as string,
-		description: (r.description || '') as string,
-		amount: Number(r.amount) || 0,
-		categoryId: r.categoryId as string | undefined,
-		distributionKeyId: r.distributionKeyId as string | undefined,
-		isValidUtilityCost: (r.isValidUtilityCost ?? true) as boolean,
-		llmConfidence: r.llmConfidence ? Number(r.llmConfidence) : undefined,
-		manualOverrideReason: r.manualOverrideReason as string | undefined,
-		createdAt: r.createdAt as string | undefined,
-		updatedAt: r.updatedAt as string | undefined,
-		buildingName: building?.name || '',
-		buildingAddress: building?.address || '',
-		category: category ? named(toCategory(category)) : undefined,
-		distributionKey: key
-			? named({ id: key.id as string, name: toDistributionKey(key).name })
+		id: r.id,
+		buildingId: r.buildingId,
+		invoiceDate: r.invoiceDate,
+		invoiceNumber: r.invoiceNumber,
+		servicePeriodStart: r.servicePeriodStart,
+		servicePeriodEnd: r.servicePeriodEnd,
+		billingEntity: r.billingEntityName,
+		description: r.description,
+		amount: Number(r.amount),
+		categoryId: r.categoryId,
+		distributionKeyId: r.distributionKeyId,
+		isValidUtilityCost: r.isValidUtilityCost,
+		llmConfidence: r.llmConfidence ? Number(r.llmConfidence) : null,
+		manualOverrideReason: r.manualOverrideReason,
+		createdAt: r.createdAt,
+		updatedAt: r.updatedAt,
+		buildingName: r.building?.name ?? '',
+		buildingAddress: r.building?.address ?? '',
+		category: r.category ? named(toCategory(r.category)) : undefined,
+		distributionKey: r.distributionKey
+			? named({ id: r.distributionKey.id, name: toDistributionKey(r.distributionKey).name })
 			: undefined,
-		llmCategory: suggested
-			? named({ id: suggested.id as string, name: toCategory(suggested).name })
+		llmCategory: r.llmCategory
+			? named({ id: r.llmCategory.id, name: toCategory(r.llmCategory).name })
 			: undefined,
 		categorizationStatus: categorizationStatus(r),
-		beleg: (r.beleg as { fileName: string; mimeType: string } | null) ?? null,
-		inPeriodAmount: (r.inPeriod as { amount: number } | undefined)?.amount
+		beleg: r.beleg,
+		inPeriodAmount: r.inPeriod?.amount
 	};
 }
 
