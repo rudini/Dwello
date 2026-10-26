@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Blocks a Claude Code `git commit -m` whose subject breaks CLAUDE.md, "Conventions" (Commits): `type(scope): subject`
 // with a listed type and scope, at most 50 characters, no period. Types and scopes are read from CLAUDE.md.
-// Exit 2 blocks the Bash call and shows stderr to Claude. Commits without -m (-F, --no-edit) pass unchecked here; a
-// `git push` checks every commit since origin/main, as CI «Commit subjects» does, so those are caught before the push.
+// Exit 2 blocks the Bash call and shows stderr to Claude. `-F -` with a heredoc is checked like -m; other commits without
+// -m (-F <file>, --no-edit) pass unchecked here; a `git push` checks every commit since origin/main, as CI «Commit
+// subjects» does, so those are caught before a push in a later command.
 // Commits and pushes in another repository (a scratch repository), found by `git -C` or the cwd, pass; a `cd` in the
 // command is not followed, so such a call is checked (use `git -C`). A worktree of this repository is checked wherever
 // it lies.
@@ -54,9 +55,15 @@ function* words(s) {
 	}
 }
 
-function messageOf(args) {
+function messageOf(args, rest) {
 	for (let i = 0; i < args.length; i++) {
 		if (/^(-[a-zA-Z]*m|--message)$/.test(args[i])) return args[i + 1];
+		// `-F -` with a heredoc: the message is in the command (a push in the same command runs before this commit)
+		if (/^(-[a-zA-Z]*F|--file)$/.test(args[i]) && args[i + 1] === '-') {
+			// only a heredoc this git call opens, not one of a later command
+			const marker = /<<-?\s*['"]?(\w+)['"]?/.exec(rest.split(/\n|;|&&|\|/)[0])?.[1];
+			return marker && new RegExp(`\\n([\\s\\S]*?)\\n\\s*${marker}\\s*(\\n|$)`).exec(rest)?.[1];
+		}
 		const joined = /^(?:-m|--message=)([\s\S]+)$/.exec(args[i]);
 		if (joined) return joined[1];
 	}
@@ -65,7 +72,10 @@ function messageOf(args) {
 const messages = checking
 	? [subject ?? '']
 	: [
-			...calls.map((call) => messageOf([...words(command.slice(call.index + call[0].length))])),
+			...calls.map((call) => {
+			const rest = command.slice(call.index + call[0].length);
+			return messageOf([...words(rest)], rest);
+		}),
 			...gitCalls('push').flatMap(pushed)
 		];
 if (messages.every((message) => message === undefined)) process.exit(0);
