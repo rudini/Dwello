@@ -22,10 +22,7 @@ import type {
 	MasterDataType
 } from '../../backend/src/api/distribution-key';
 import type { HeatingProfileDetails } from '../../backend/src/api/heating-profile';
-import type {
-	TenantResponse,
-	TenantWithOccupancy
-} from '../../backend/src/services/tenant.service';
+import type { TenantResponse, TenantWithOccupancy } from '../../backend/src/api/tenant';
 
 /** A backend type as its JSON arrives: dates as ISO strings */
 export type Json<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] extends Date | null ? string | null : T[K] };
@@ -156,11 +153,11 @@ export interface MonthlyCosts {
 }
 
 // A row of GET /apartments as the list shows it (#837, ADR 0005)
-export type ApartmentWithBuilding = Apartment & Pick<ApiApartment, 'buildingName'>;
+export type ApartmentListItem = Apartment & Pick<ApiApartment, 'buildingName'>;
 
 // Apartments list response
 export interface ApartmentsListData {
-	apartments: ApartmentWithBuilding[];
+	apartments: ApartmentListItem[];
 	total: number;
 	page: number;
 	pageSize: number;
@@ -356,7 +353,8 @@ export interface StatementWithDetails
 		Pick<ApiStatement, keyof StatementPayment | 'rentalStart' | 'rentalEnd'>,
 		// a berichtigte Abrechnung: the statement it replaces with its Akonto (#464), and what replaced it (#120)
 		Partial<Pick<ApiStatement, 'replaces' | 'replacedBy' | 'priorPaidOn' | 'final'>>,
-		// what it allows (#788); the BFF answers false where the backend leaves one out
+		// what it allows, decided by the backend (#788): the page shows buttons and hints by it, the status only as
+		// label; the BFF answers false where the backend leaves one out
 		Required<
 			Pick<
 				ApiStatement,
@@ -377,7 +375,6 @@ export interface StatementWithDetails
 	priorPayments?: number; // what was paid on the replaced ones (#120)
 	// #448: the Übertrag from the previous statement, a replaced Saldo the next one counted
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
-	// what it allows, decided by the backend (#788): the page shows buttons and hints by it, the status only as label
 	offsetWith?: { statementNumber: string; amount: number }[];
 }
 

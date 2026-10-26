@@ -1,5 +1,5 @@
-import type { ApartmentWithDetails as ApiApartment } from '../../../backend/src/api/apartment';
-import type { ApartmentsListData, ApartmentWithBuilding, Json } from '$lib/types';
+import { toApartmentRow } from '$lib/server/apartment';
+import type { ApartmentsListData, ApartmentListItem } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -27,23 +27,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 		const apartmentsData = await apartmentsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const apartments: ApartmentWithBuilding[] = (
+		const apartments: ApartmentListItem[] = (
 			apartmentsData.apartments ||
 			apartmentsData.data ||
 			[]
-		).map((a: Json<ApiApartment>) => ({
-			id: a.id,
-			buildingId: a.buildingId,
-			number: a.number || '',
-			floor: a.floor || 0,
-			area: a.area || '0',
-			rooms: a.rooms || '0',
-			status: a.status || 'vacant',
-			buildingName: a.buildingName || '',
-			nextContractStart: a.nextContractStart ?? null,
-			currentContractEnd: a.currentContractEnd ?? null,
-			lastContractEnd: a.lastContractEnd ?? null
-		}));
+		).map(toApartmentRow);
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({

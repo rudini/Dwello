@@ -179,17 +179,19 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 | Schritt | Commit | Absicherung |
 |---|---|---|
 | 0 Messung vorher | – | `fitness` 4 / 12 / 36, Entity-Spiegel 45, Wertelisten 10 |
-| `ApartmentWithBuilding`, `TenantListItem` und die Erlaubnisse von `StatementWithDetails` aus dem Backend-Typ; die Listen von `apartments/+page.server.ts` und `tenants/+page.server.ts` lesen die Antwort als `Json<…>` statt `Record<string, unknown>` | (dieser PR) | `svelte-check` 0 Fehler, 4312 Dateien, 29 s; 3696 Frontend-Tests; Lint |
+| `ApartmentListItem` (vorher `ApartmentWithBuilding`), `TenantListItem` und die Erlaubnisse von `StatementWithDetails` aus dem Backend-Typ; die Listen von `apartments/+page.server.ts` und `tenants/+page.server.ts` lesen die Antwort als `Json<…>` statt `Record<string, unknown>` | d60e160a | `svelte-check` 0 Fehler, 4312 Dateien, 29 s; 3696 Frontend-Tests; Lint |
+| Review i837c4d: `backend/src/api/tenant.ts` (`TenantResponse`, `TenantWithOccupancy`), der Service dagegen typisiert; ein Mapper `toApartmentRow` für die Zeilen von `GET /apartments` (Liste und Liegenschaftsseite) | (dieser PR) | Backend-Typprüfung; 146 Mieter- und Vertrags-Tests des Backends; `fitness --update`; `svelte-check` 0 Fehler, 4299 Dateien; 3696 Frontend-Tests; Lint |
 
 - **Zwei Felder, die nie kamen:** Die Wohnungsliste las `buildingAddress` und `buildingCity`, aber `GET /apartments` liefert sie nur für eine einzelne Wohnung. Sie waren in der Liste immer leer, und keine Komponente zeigte sie. Der typisierte Mapper lässt sie weg.
-- **Der Mieter der Liste kommt aus dem Service:** `TenantWithOccupancy` steht wie `TenantResponse` (ADR 0003) in `tenant.service.ts`, nicht in einem Typmodul unter `backend/src/api/`. `svelte-check` liest den Service ohne Fehler, weil er keinen Bun-Code erreicht. Zieht er später Bun-Code nach, gehören beide Typen nach `backend/src/api/tenant.ts`.
+- **Der Mieter verlässt den Service:** `TenantResponse` war seit ADR 0003 der Rückgabetyp von `getTenant`, und das Frontend importierte dafür `tenant.service.ts`. Jetzt stehen `TenantResponse` und `TenantWithOccupancy` in `backend/src/api/tenant.ts`; `getTenant` gibt den Typ zurück, und `listTenants` braucht keinen Cast mehr. Ohne den Cast zeigte sich, dass Wohnung und Liegenschaft einer Listenzeile `null` sein können; der Typ sagt es jetzt. `svelte-check` liest 13 Dateien weniger. Kein Frontend-Import zeigt mehr auf `backend/src/services/`.
+- **Ein Mapper für die Wohnungszeilen:** Die Wohnungsliste und die Seite einer Liegenschaft lasen dieselben Zeilen von `GET /apartments` je mit einer eigenen Feldliste. Beide nehmen jetzt `toApartmentRow` aus `src/lib/server/apartment.ts`.
 - **Was eine Abrechnung erlaubt:** `editable`, `correctable`, `asksPayment`, `superseded` und `advanceChanged` standen in `StatementWithDetails` von Hand. Sie kommen jetzt als `Required<Pick<…>>` aus `backend/src/api/statement.ts`; der Mapper setzt `false`, wo das Backend eines weglässt.
 - **#837, «Done means»:** Kein Entity-Typ in `src/lib/types.ts` deklariert mehr ein Feld der Backend-Antwort unverändert von Hand. Was bleibt, gibt der Mapper in anderer Form weiter: `name` als deutschen Namen, einen fehlenden Text als `''` (Zyklus 4a), `currentApartment` als «Wohnung 2.01», Beträge als Zahlen. Oder es setzt sich aus mehreren Feldern zusammen (`tenantName`, `buildingAddress` einer Rechnung) oder ist eine eigene Form (`MonthlyCosts`, `Proposal`). Die Feldstreuung steht bei 4 / 12, unter dem erwarteten Endstand 5 / 18 (ADR 0003).
 
 | Messwert | Nach 4c | Nach 4d |
 |---|---|---|
 | Feldstreuung Median / P90 / Max | 4 / 12 / 36 | 4 / 12 / 36 |
-| Entity-Spiegel | 45 | 45 |
+| Entity-Spiegel | 45 | **43** |
 | Wertelisten über Schichten | 10 | 10 |
 
 ## Tradeoffs und verbleibende Risiken
@@ -201,4 +203,4 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 
 ## Nächste Zyklen
 
-Keine: Zyklus 4d schliesst #837. Eine neue Antwort bekommt ihren Typ in `backend/src/api/` nach dieser Entscheidung.
+Keine: Zyklus 4d schliesst #837. Kein Entity-Typ deklariert mehr ein Backend-Feld unverändert von Hand, die Listenformen heissen nach ihrer Verwendung (`ApartmentListItem`, `TenantListItem`), und das Frontend importiert nur Typmodule unter `backend/src/api/`. Eine neue Antwort bekommt ihren Typ in `backend/src/api/` nach dieser Entscheidung.

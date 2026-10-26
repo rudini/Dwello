@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { floorLabel, roomsLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
-	import type { ApartmentWithBuilding } from '$lib/types';
+	import type { ApartmentListItem } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 
 	// The whole card opens the apartment; its number is the link text
-	let { apartment }: { apartment: ApartmentWithBuilding } = $props();
+	let { apartment }: { apartment: ApartmentListItem } = $props();
 
 	const facts = $derived([
 		{ icon: 'floor', text: floorLabel(apartment.floor) },

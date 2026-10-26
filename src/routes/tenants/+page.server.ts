@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { toTenant } from '$lib/server/tenant';
-import type { TenantWithOccupancy } from '../../../backend/src/services/tenant.service';
+import type { TenantWithOccupancy } from '../../../backend/src/api/tenant';
 import type { Json, TenantsListData, TenantListItem } from '$lib/types';
 import type { PageServerLoad } from './$types';
 

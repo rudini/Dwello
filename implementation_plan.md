@@ -13,6 +13,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] Measure before (`fitness` 4 / 12 / 36, entity mirrors 45, value lists 10)
 - [x] `ApartmentWithBuilding`, `TenantListItem` and the statement flags from the backend types; the list loads typed against the responses; the never-filled `buildingAddress`/`buildingCity` of the apartment list removed
-- [ ] ADR 0005 «Zyklus 4d», measure after, #837 Done means checked
-- [ ] Code review round 1, closing round
+- [x] ADR 0005 «Zyklus 4d», measure after (entity mirrors 45 → 43), #837 Done means checked
+- [x] Code review round 1 (`docs/reviews/i837c4d-review-1.md`; C-1 to C-4 fixed)
+- [ ] Closing round
 - [ ] Archive, PR
