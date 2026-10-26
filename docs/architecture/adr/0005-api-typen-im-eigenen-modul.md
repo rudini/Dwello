@@ -174,6 +174,24 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 | Wertelisten über Schichten | 10 | 10 |
 | Dateikanten FE → BFF / Shared → FE | 6 / 0 | **0 / 0** |
 
+## Zyklus 4d: die Listen
+
+| Schritt | Commit | Absicherung |
+|---|---|---|
+| 0 Messung vorher | – | `fitness` 4 / 12 / 36, Entity-Spiegel 45, Wertelisten 10 |
+| `ApartmentWithBuilding`, `TenantListItem` und die Erlaubnisse von `StatementWithDetails` aus dem Backend-Typ; die Listen von `apartments/+page.server.ts` und `tenants/+page.server.ts` lesen die Antwort als `Json<…>` statt `Record<string, unknown>` | (dieser PR) | `svelte-check` 0 Fehler, 4312 Dateien, 29 s; 3696 Frontend-Tests; Lint |
+
+- **Zwei Felder, die nie kamen:** Die Wohnungsliste las `buildingAddress` und `buildingCity`, aber `GET /apartments` liefert sie nur für eine einzelne Wohnung. Sie waren in der Liste immer leer, und keine Komponente zeigte sie. Der typisierte Mapper lässt sie weg.
+- **Der Mieter der Liste kommt aus dem Service:** `TenantWithOccupancy` steht wie `TenantResponse` (ADR 0003) in `tenant.service.ts`, nicht in einem Typmodul unter `backend/src/api/`. `svelte-check` liest den Service ohne Fehler, weil er keinen Bun-Code erreicht. Zieht er später Bun-Code nach, gehören beide Typen nach `backend/src/api/tenant.ts`.
+- **Was eine Abrechnung erlaubt:** `editable`, `correctable`, `asksPayment`, `superseded` und `advanceChanged` standen in `StatementWithDetails` von Hand. Sie kommen jetzt als `Required<Pick<…>>` aus `backend/src/api/statement.ts`; der Mapper setzt `false`, wo das Backend eines weglässt.
+- **#837, «Done means»:** Kein Entity-Typ in `src/lib/types.ts` deklariert mehr ein Feld der Backend-Antwort unverändert von Hand. Was bleibt, gibt der Mapper in anderer Form weiter: `name` als deutschen Namen, einen fehlenden Text als `''` (Zyklus 4a), `currentApartment` als «Wohnung 2.01», Beträge als Zahlen. Oder es setzt sich aus mehreren Feldern zusammen (`tenantName`, `buildingAddress` einer Rechnung) oder ist eine eigene Form (`MonthlyCosts`, `Proposal`). Die Feldstreuung steht bei 4 / 12, unter dem erwarteten Endstand 5 / 18 (ADR 0003).
+
+| Messwert | Nach 4c | Nach 4d |
+|---|---|---|
+| Feldstreuung Median / P90 / Max | 4 / 12 / 36 | 4 / 12 / 36 |
+| Entity-Spiegel | 45 | 45 |
+| Wertelisten über Schichten | 10 | 10 |
+
 ## Tradeoffs und verbleibende Risiken
 
 - **Zwei Stellen im Backend:** Die Form steht im Typmodul und in der Abfrage des Service. Der Rückgabetyp verbindet beide nur zum Teil: Ein Feld, das die Abfrage zusätzlich liefert, bleibt dem Typ unbekannt, bis jemand es dort ergänzt (so fehlten bisher `tenant.correspondenceChannel` und `tenant.country`).
@@ -183,4 +201,4 @@ P90 bewegt sich nicht: Die Vertragsfelder stehen vor allem in Backend-Services u
 
 ## Nächste Zyklen
 
-Zyklus 4d (#837): die Listen. `ApartmentWithBuilding` und `TenantListItem` in `src/lib/types.ts` deklarieren Felder von Hand, die die Antworten von `GET /apartments` und `GET /tenants` schon haben (`buildingName`, `nextContractStart`, `isActive`, `isFuture` …); `apartments/+page.server.ts` und `tenants/+page.server.ts` lesen die Antwort als `Record<string, unknown>`. Jeder Zyklus folgt dieser Entscheidung, bekommt eine Zeile in einer Tabelle wie oben und misst vorher und nachher.
+Keine: Zyklus 4d schliesst #837. Eine neue Antwort bekommt ihren Typ in `backend/src/api/` nach dieser Entscheidung.
