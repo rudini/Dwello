@@ -176,7 +176,7 @@ describe('Daten eines Mieters exportieren', () => {
 	});
 
 	it('benennt Dateien sicher und eindeutig, mit ihrer Endung (Fachreview F-11)', async () => {
-		const photo = { tenantId: rental.tenant, type: 'upload', fileName: 'IMG.JPG', mimeType: 'image/jpeg', content: pdf('photo') };
+		const photo = { tenantId: rental.tenant, type: 'upload' as const, fileName: 'IMG.JPG', mimeType: 'image/jpeg' as const, content: pdf('photo') };
 		const added = await db
 			.insert(documents)
 			.values([

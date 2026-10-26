@@ -6,7 +6,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { and, eq, ne } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, rentalContracts } from '../db/schema';
+import { documents, rentalContracts, type DocumentType } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract } from '../services/contract.service';
 import { createDocument } from '../services/document.service';
@@ -27,7 +27,7 @@ async function tenantWith(startDate: string, endDate?: string, flags = { termina
 const former = async (tenant: string) =>
 	((await (await callApi(`/api/v1/tenants/${tenant}/former-documents`)).json()) as { formerDocuments: unknown })
 		.formerDocuments;
-const uploadedAt = async (tenantId: string, createdAt: string, type = 'upload') =>
+const uploadedAt = async (tenantId: string, createdAt: string, type: DocumentType = 'upload') =>
 	(
 		await createDocument({
 			tenantId,
