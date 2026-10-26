@@ -17,6 +17,9 @@ export function changedFiles(root: string, base: string): string[] {
 	return [...new Set(files)].filter((f) => existsSync(join(root, f)));
 }
 
+/** Every rule, for suppressions and the README. */
+export const RULES = new Set(['empty-test', 'dangling-expect', 'unawaited-assertion', 'tautology', 'swallowed-assertion', 'catch-only-assertion', 'loop-only-assertion', 'callback-only-assertion', 'duplicate-title', 'duplicate-body']);
+
 /** Rules whose measured precision is too low to fail a change: shown as hints (testcheck-validation.md). */
 export const HINT_RULES = new Set(['loop-only-assertion']);
 export const BASELINE = '.testcheck-baseline.json';

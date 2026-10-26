@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { analyzeSource, type Finding } from './analyze.ts';
-import { BASELINE, HINT_RULES, baselineAt, baseOf, changedFiles, fingerprint, repoRoot, suppressions, trackedFiles } from './gate.ts';
+import { BASELINE, HINT_RULES, RULES, baselineAt, baseOf, changedFiles, fingerprint, repoRoot, suppressions, trackedFiles } from './gate.ts';
 
 const TEST_FILE = /\.(test|spec)\.[cm]?tsx?$/;
 const SKIP_DIR = new Set(['node_modules', '.git', '.svelte-kit', 'dist', 'build', 'coverage']);
@@ -21,8 +21,6 @@ interface Io {
 	stdout: (text: string) => void;
 	stderr: (text: string) => void;
 }
-
-const RULES = new Set(['empty-test', 'dangling-expect', 'unawaited-assertion', 'tautology', 'swallowed-assertion', 'catch-only-assertion', 'loop-only-assertion', 'callback-only-assertion', 'duplicate-title', 'duplicate-body']);
 
 const line = (f: Finding) => `${f.file}:${f.line} ${f.rule} ${f.test}: ${f.message}${f.code ? ` [${f.code}]` : ''}\n`;
 const isTest = (f: string) => TEST_FILE.test(f) && !f.split('/').some((d) => SKIP_DIR.has(d));
