@@ -17,5 +17,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] BFF mappers take `Json<…>` (contract list, detail, edit, history on apartment and tenant pages); `RentalContract`, `ContractHistory`, `ContractWithDetails`, `ApartmentStatus` in `src/lib/types.ts` derived
 - [x] Measure after, `fitness --update`: 4 / 13 / 36, entity mirrors 49, value lists 12, `types.ts` fields 30
 - [ ] `code-reviewer` round
-- [ ] ADR 0005 table for cycle 2
+- [x] ADR 0005 table for cycle 2; utility tree note
 - [ ] Archive the session; PR «Refs #837»
