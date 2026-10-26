@@ -378,12 +378,6 @@
 				"scenario": "Ä1"
 			},
 			{
-				"values": "active|ended|future",
-				"files": 2,
-				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
-				"scenario": "Ä1"
-			},
-			{
 				"values": "email|letter",
 				"files": 4,
 				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",

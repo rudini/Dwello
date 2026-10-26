@@ -1,9 +1,13 @@
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
+import type { ContractStatus } from '../../../backend/src/api/contract';
 import type { PageServerLoad } from './$types';
 import { missingByContract } from '$lib/server/missing-statements';
 import { monthlyTotal, type ContractRow } from '$lib/server/contract-history';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+// the status filters the backend knows; the type keeps them equal to its list
+const filters: Record<ContractStatus, true> = { active: true, ended: true, future: true };
 
 export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -18,7 +22,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		params.set('offset', String((page - 1) * pageSize));
 		if (search) params.set('search', search);
 		if (buildingId) params.set('buildingId', buildingId);
-		if (['active', 'ended', 'future'].includes(status)) params.set('status', status);
+		if (Object.hasOwn(filters, status)) params.set('status', status);
 
 		const [contractsRes, buildingsRes, apartmentsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/contracts?${params}`),
