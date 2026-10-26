@@ -7,14 +7,14 @@
 
 Dokumente und Rechnungen dürfen bis 10 MB gross sein (#174). Damit der Node-Server der Web-App sie annimmt, steht `BODY_SIZE_LIMIT=11M` im `Dockerfile` (ebenso in `playwright.config.ts` und `docs/design/tools/persona-stack.sh`). Die Grenze gilt für jede Anfrage, die die Web-App liest, auch für `/auth` und Anfragen ohne Sitzung.
 
-Ist eine Datei grösser, prüft Dwello sie mit JavaScript im Browser und zeigt die Meldung «grösser als 10 MB». Ohne JavaScript erreicht die Anfrage den Server, und der antwortet mit seiner eigenen Seite «413», bevor Dwello sie sieht; der eingegebene Titel geht verloren.
+Ist eine Datei grösser, prüft Dwello sie mit JavaScript im Browser und zeigt die Meldung «grösser als 10 MB». Ohne JavaScript erreicht die Anfrage den Server. SvelteKit bricht das Lesen der Formulardaten mit dem Status 413 ab, und Dwello zeigt seine Fehlerseite statt einer Meldung im Formular; der eingegebene Titel geht verloren. Die Überschrift ist dort SvelteKits englisches «Payload Too Large» (#847).
 
 Ein Reverse Proxy vor der Web-App hat eigene Grenzen: nginx nimmt ohne Einstellung höchstens 1 MB an, Caddy hat keine Grenze.
 
 ## Entscheidung
 
 1. **Eine Grenze für alle Anfragen:** `BODY_SIZE_LIMIT=11M` bleibt. Uploads werden nicht an der Web-App vorbei geleitet.
-2. **Ohne JavaScript bleibt die Seite «413»** des Servers bei einer zu grossen Datei. Das ist eine bekannte Grenze.
+2. **Ohne JavaScript bleibt die Fehlerseite** mit Status 413 bei einer zu grossen Datei, statt einer Meldung im Formular. Das ist eine bekannte Grenze.
 3. **Reverse Proxy:** Die Anleitung bleibt bei Caddy (`docs/installation.md`, Abschnitt 7) und nennt für einen anderen Proxy mindestens 11 MB (nginx: `client_max_body_size 11m;`). Der auskommentierte nginx-Dienst ist aus `docker-compose.prod.yml` entfernt; eine `nginx.conf` dazu gab es nie.
 
 ## Verworfene Optionen
@@ -26,5 +26,5 @@ Ein Reverse Proxy vor der Web-App hat eigene Grenzen: nginx nimmt ohne Einstellu
 ## Tradeoffs und verbleibende Risiken
 
 - Jede Anfrage, auch ohne Sitzung, darf bis 11 MB gross sein. Bei einem Vermieter pro Installation (ADR 0004) ist die Last daraus klein; wer mehr will, begrenzt im Reverse Proxy.
-- Wer ohne JavaScript eine zu grosse Datei hochlädt, sieht eine technische Seite statt einer Meldung von Dwello und muss den Titel neu eingeben.
+- Wer ohne JavaScript eine zu grosse Datei hochlädt, sieht die Fehlerseite statt einer Meldung im Formular und muss den Titel neu eingeben.
 - Wird die Grösse der Dokumente erhöht, sind das `Dockerfile`, die Testkonfigurationen und der Hinweis in `docs/installation.md` gemeinsam anzupassen; `backend/src/__tests__/compose-prod.test.ts` prüft, dass die Anleitung die Grenze des `Dockerfile` nennt.
