@@ -360,7 +360,8 @@ jobs:
         run: |
           # T1 counts from the first job's start; a run on main waits for the previous one first, reported apart (#842)
           created=$(gh api "$RUNS/runs/${{ github.run_id }}" --jq .run_started_at)
-          started=$(gh api "$RUNS/runs/${{ github.run_id }}/jobs?per_page=100" --jq '[.jobs[].started_at | select(.)] | min')
+          # a re-run lists the jobs it kept from the earlier attempt with their old start (review i842 C-1)
+          started=$(gh api "$RUNS/runs/${{ github.run_id }}/jobs?per_page=100" --jq "[.jobs[].started_at | select(. != null and . >= \"$created\")] | min")
           minutes=$(( ($(date +%s) - $(date -d "$started" +%s)) / 60 ))
           waited=$(( ($(date -d "$started" +%s) - $(date -d "$created" +%s)) / 60 ))
           echo "Fitness: CI wall clock ${minutes} min from the first job (${{ github.event_name }}, target 15 min), ${waited} min waiting before it" | tee -a "$GITHUB_STEP_SUMMARY"

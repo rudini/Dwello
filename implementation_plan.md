@@ -10,10 +10,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
 
-## Session: #842 T1 measured from the first job (and decisions of 26.10.)
-
-- [x] Decisions recorded: #837 «Decided (product owner)» (response types in their own backend module), #842 (T1 from the run's start), Ä1 measurement to be refined (next issue)
-- [x] `ci.yml` «CI duration»: from the earliest job `started_at`, the wait before it apart; checked against run 40303722784 (17 min wait)
-- [x] Docs: T1 in `utility-tree.md`, `ci-duration` in `fitness-functions.md`
-- [ ] Slice review (`code-reviewer`)
-- [ ] PR; No scenario: CI report only
