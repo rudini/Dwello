@@ -1,6 +1,6 @@
 /**
  * The answer of `GET /statements/:id` and the rows of `GET /statements`: the services check theirs against it, the BFF
- * maps it and the frontend takes its types from it (#837, ADR 0004). Only types of `schema.ts` here: the frontend's
+ * maps it and the frontend takes its types from it (#837, ADR 0005). Only types of `schema.ts` here: the frontend's
  * type check reads this file and cannot read the services, which reach Bun-only code
  */
 

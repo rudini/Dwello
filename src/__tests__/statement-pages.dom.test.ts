@@ -1961,6 +1961,13 @@ describe('Abrechnung bearbeiten', () => {
 		expect(byTestId('statement-recalculate-hint')).not.toBeNull();
 	});
 
+	// review i837c1 C-1: a statement without a Frist (the column allows none) shows the field empty
+	it('zeigt eine fehlende Frist als leeres Feld', () => {
+		edit({ paymentDeadline: null });
+
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('');
+	});
+
 	// the page names a missing Frist; the browser's own check stopped the form in WebKit at the hidden calendar field
 	it('überlässt die Prüfung der Seite, nicht dem Browser', () => {
 		edit();

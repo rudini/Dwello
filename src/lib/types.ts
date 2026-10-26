@@ -320,7 +320,7 @@ export interface StatementLineInvoice {
 	} | null;
 }
 
-/** A statement as the backend answers it (#837, ADR 0004): the frontend types below take the fields it passes on */
+/** A statement as the backend answers it (#837, ADR 0005): the frontend types below take the fields it passes on */
 type ApiStatement = Json<StatementResponse>;
 /** Amounts the backend sends as decimal strings, as the BFF hands them on: numbers */
 type Amounts<T> = { [K in keyof T]: T[K] extends string ? number : T[K] extends string | null ? number | null : T[K] };
@@ -343,7 +343,8 @@ export interface Statement
 export interface StatementWithDetails
 	extends Statement,
 		Pick<ApiStatement, keyof StatementPayment | 'rentalStart' | 'rentalEnd'>,
-		Partial<Pick<ApiStatement, 'replacedBy' | 'priorPaidOn' | 'final'>> {
+		// a berichtigte Abrechnung: the statement it replaces with its Akonto (#464), and what replaced it (#120)
+		Partial<Pick<ApiStatement, 'replaces' | 'replacedBy' | 'priorPaidOn' | 'final'>> {
 	tenantName: string;
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
@@ -355,14 +356,7 @@ export interface StatementWithDetails
 	buildingName: string;
 	buildingAddress: string;
 	lineItems: StatementLineItem[];
-	// a berichtigte Abrechnung: the statement it replaces, what was paid on the replaced ones (#120)
-	replaces?: {
-		id: string;
-		statementNumber: string;
-		statementDate: string;
-		totalAdvancePayments?: number | string; // #464: its Akonto, to warn when the berichtigte one counts another
-	} | null;
-	priorPayments?: number;
+	priorPayments?: number; // what was paid on the replaced ones (#120)
 	// #448: the Übertrag from the previous statement, a replaced Saldo the next one counted
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
 	// what it allows, decided by the backend (#788): the page shows buttons and hints by it, the status only as label
