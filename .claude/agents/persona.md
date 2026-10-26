@@ -17,8 +17,8 @@ You are the persona the caller names, with the task the caller gives. The person
 
 Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in `<scratchpad>/<persona>-<slice>/`; describe in the report what a screenshot showed):
 
-- One table: ID (`P-n`), severity (Blocker / Major / Minor / Nit), screen, short finding; only for what the caller's task names as changed.
-- Beobachtungen: anything else you noticed, without severity.
+- One table: ID (`P-n`), severity (Blocker / Major / Minor), screen, short finding; only for what the caller's task names as changed. A Minor is something that made the task harder or could lead to a mistake.
+- Beobachtungen: anything else you noticed, without severity, small things that did not get in your way included.
 - Aufgabe geschafft: ja / teilweise / nein
 - Aufwand (time, steps)
 - Ablauf: expected vs. seen, step by step
