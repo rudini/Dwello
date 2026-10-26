@@ -12,8 +12,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #837 cycle 4b (buildings, apartments; #857 buildings edge)
 
 - [x] Measure before: `fitness` 4 / 12 / 36, entity mirrors 46, value lists 10
-- [ ] #857: building pages take `PageData` from `./$types`; `FuelStock` from the page data; `AddressHit`, `RegisterApartment`, `RegisterBuilding` out of `src/lib/server/building-register.ts`
-- [ ] `backend/src/api/building.ts` (and apartment); services typed against them; BFF mappers with `Json<…>`; `Building`, `BuildingWithStats`, `Apartment` derived
-- [ ] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
-- [ ] Slice review (`code-reviewer`)
+- [x] #857: building pages take `PageData` from `./$types`; `FuelStock` from the page data; `AddressHit`, `RegisterApartment`, `RegisterBuilding` out of `src/lib/server/building-register.ts`
+- [x] `backend/src/api/building.ts` (and apartment); services typed against them; BFF mappers with `Json<…>`; `Building`, `BuildingWithStats`, `Apartment` derived
+- [x] Checks: lint, check, backend type-check, `test:coverage`, backend tests, fitness `--base origin/main`; `fitness --update`
+- [ ] Slice review (`code-reviewer`), report `docs/reviews/i837c4b-review-1.md`
 - [ ] ADR 0005 section «Zyklus 4b»; archive; PR «Refs #837, #857»
