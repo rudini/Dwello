@@ -3486,3 +3486,13 @@ No scenario: the failing scenario `buildings.feature` «Suche ohne Treffer» cov
 - [x] Checks: unit tests of the lists, lint, check, `buildings.feature` in Chromium (also 5× the search scenarios); Firefox only on CI
 - [x] Review and closing round (`docs/reviews/i754-review-1.md`): no findings; apartments and invoices use the same goto (out of scope, an issue if CI confirms the cause)
 - [x] PR: Fixes #754, pushed after this archive
+
+## Session: #778, flaky acceptance checks (T1)
+
+No scenario: test-only; the failing axe row «statement-generate draft-restored» covers it unchanged. The Firefox building search of #778 is #754, fixed by #832.
+
+- [x] Cause of the axe `target-size` finding (`label:nth-child(10) > .size-6…` in step «Gebäude»): after the reload, `restoreDraft` waited for «nothing loading», which also holds before the step starts loading; the invoice counts of each building arrived during axe's look and grew the rows
+- [x] `restoreDraft` waits for what the restored step shows once loaded: in the statement wizard the ticked building's invoice line (`buildingInvoiceCount`, as #424)
+- [x] Checks: lint, check; the axe and language rows `draft-restored` 2–3× each in Chromium
+- [x] Review and closing round (`docs/reviews/i778-review-1.md`): no findings
+- [x] PR: Fixes #778, pushed after this archive
