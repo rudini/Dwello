@@ -8,7 +8,7 @@ import { formatCHF, formatSwissDate, roundTo5Rappen, roundToRappen } from '../se
 import { calculateBalance } from '../services/calculation.service';
 import { formatQRReferenceForDisplay } from '../services/qr-bill.service';
 import { keyShareOf, toPdfData } from '../services/statement-pdf.service';
-import type { StatementWithDetails } from '../services/statement.service';
+import type { StatementWithDetails } from '../api/statement';
 
 describe('Schweizer Formate im PDF', () => {
 	it('schreibt ein Datum immer als TT.MM.JJJJ', () => {

@@ -124,6 +124,7 @@ Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in 
 | 25.10.2026 | #815 Teil D3: der Check sieht auch `===`/`!==` gegen heute; der einzige neue Treffer, die Meldung «endet heute» der Mietvertragsseite, kommt vom Backend (`endsToday` von `GET /contracts/:id`). Damit ist die Ausnahmeliste des Frontends leer (#815 erledigt) | Ausnahmen 0; BFF-Entscheide 8 (keine neuen) |
 | 25.10.2026 | #812: die Daten des Hauptmenüs liegen bei den Komponenten, die sie zeigen (`src/lib/navigation.ts` → `src/lib/ui/navigation.ts`) | Zyklen 1 → 0 (Ausnahme `fe:lib/navigation fe:ui` entfernt, `exceptions.moduleCycles` ist leer); die übrigen Werte unverändert |
 | 26.10.2026 | #843 (Entscheid PO): ein Feld zählt nur in Dateien, die ein weiteres Feld seiner Tabelle deklarieren (`entityFiles` in `tools/arch-baseline/lib.ts`); die Ziele bleiben | Feldstreuung 6 / 19 / 60 → 5 / 13 / 37 (`configuration.value` fällt weg, `apartments.number` 60 → 19) |
+| 26.10.2026 | #837 Zyklus 1a (ADR 0005): die Abrechnungstypen des Frontends kommen aus `backend/src/api/statement.ts` | Feldstreuung Max 37 → 36; Entity-Spiegel 54 → 52 |
 
 ## 7. Werkzeugwahl
 

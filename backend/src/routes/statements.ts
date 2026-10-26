@@ -339,7 +339,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			try {
 				const statement = await changeStatementStatus(
 					params.id,
-					body.status as 'draft' | 'sent' | 'paid' | 'overdue',
+					body.status as 'draft' | 'sent' | 'paid', // the service refuses any other
 					{
 						paidDate: body.paidDate,
 						paidAmount: body.paidAmount,

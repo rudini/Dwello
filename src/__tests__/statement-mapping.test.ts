@@ -1,8 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { loadStatement, toStatement } from '../lib/server/statement';
+import { loadStatement, toStatement as mapped } from '../lib/server/statement';
 // What GET /api/v1/statements/:id answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import backendStatement from '../../tests/contracts/statement.json';
 import resetStatement from '../../tests/contracts/statement-payment-reset.json';
+
+// The contracts and the variants built from them, some on purpose without a field the backend always sends
+const toStatement = (answer: object) => mapped(answer as Parameters<typeof mapped>[0]);
 
 describe('Abrechnung aus dem Backend', () => {
 	// #788, review p3a C-2: what the statement allows comes from the backend; an answer without it allows nothing
