@@ -29,7 +29,6 @@ const profile = (id: string, name: string, share: number) => ({
 	id,
 	name,
 	type: 'custom',
-	isActive: true,
 	monthlyPercentages: months(share)
 });
 const heatingProfiles = [

@@ -48,7 +48,6 @@ const profile = (type: 'predefined' | 'custom') => ({
 	name: 'Winter',
 	type,
 	description: 'Starke Heizmonate',
-	isActive: true,
 	monthlyPercentages: winter
 });
 const text = () => document.body.textContent!.replace(/\s+/g, ' ');

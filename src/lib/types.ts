@@ -190,7 +190,6 @@ export interface ContractsListData {
 
 // The master data as the German interface shows it, derived from the backend rows (#837, ADR 0005): `name` is the
 // German name, a missing text is empty
-export type { MasterDataType };
 type ApiCategory = Json<CategoryResponse>;
 export type Category = Pick<
 	ApiCategory,
