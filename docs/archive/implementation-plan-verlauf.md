@@ -3598,3 +3598,4 @@ Request: analyse the agent reviews and apply what the product owner chose (1 Fed
 - [x] ADR 0005 table for cycle 2; utility tree note
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-837-c2.md`
 - [x] Archive the session; PR «Refs #837» pushed after this archive
+- [x] Closing `code-reviewer` round on the CI fix 4fc4caa1: `docs/reviews/i837c2-close-review-1.md`
