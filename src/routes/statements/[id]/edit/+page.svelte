@@ -24,7 +24,7 @@
 	);
 	let saving = $state(false);
 	// Shown in words below the field: the browser may show the date in a foreign format
-	let deadline = $derived(statement.paymentDeadline);
+	let deadline = $derived(statement.paymentDeadline ?? undefined); // a draft can have none yet
 </script>
 
 <svelte:head>

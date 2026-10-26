@@ -1,8 +1,9 @@
+import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
 import type { TenantResponse } from '../../backend/src/services/tenant.service';
 import type { LatestKey } from './invoice';
 
 /** A backend type as its JSON arrives: dates as ISO strings */
-type Json<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] };
+export type Json<T> = { [K in keyof T]: T[K] extends Date ? string : T[K] extends Date | null ? string | null : T[K] };
 // ============================================================================
 // Core Entity Types - Match backend schema (camelCase)
 // ============================================================================
@@ -281,7 +282,7 @@ export interface HeatingProfile {
 }
 
 // Statement types
-export type StatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'overdue' | 'replaced';
+export type { StatementStatus };
 
 /** A statement an invoice is in: its number and status, to link it (#455) */
 export type BilledStatement = { id: string; statementNumber: string; status: StatementStatus };
@@ -319,39 +320,30 @@ export interface StatementLineInvoice {
 	} | null;
 }
 
-export interface Statement {
-	id: string;
-	statementNumber: string;
-	tenantId: string;
-	apartmentId: string;
+/** A statement as the backend answers it (#837, ADR 0004): the frontend types below take the fields it passes on */
+type ApiStatement = Json<StatementResponse>;
+/** Amounts the backend sends as decimal strings, as the BFF hands them on: numbers */
+type Amounts<T> = { [K in keyof T]: T[K] extends string ? number : T[K] extends string | null ? number | null : T[K] };
+
+export interface Statement
+	extends Pick<ApiStatement, 'id' | 'statementNumber' | 'tenantId' | 'apartmentId' | 'periodStart' | 'periodEnd' | 'statementDate' | 'rentalDays' | 'status' | 'paymentDeadline'>,
+		Partial<Pick<ApiStatement, 'contractId' | 'paidDate' | 'nextReminderFrom' | 'reminderToSend' | 'oldAddress' | 'pdfGeneratedAt' | 'notes' | 'createdAt' | 'updatedAt'>>,
+		// the balance positive when the tenant owes, negative a refund
+		Amounts<Pick<StatementResponse, 'totalCosts' | 'totalAdvancePayments' | 'balance'>>,
+		// what was paid; a refund paid to the tenant negative (#93)
+		Partial<Amounts<Pick<StatementResponse, 'paidAmount'>>> {
 	buildingId: string;
-	periodStart: string;
-	periodEnd: string;
-	statementDate: string;
-	rentalDays: number;
-	totalCosts: number;
-	totalAdvancePayments: number;
-	managementFee: number;
-	managementFeePercent: number; // rate used when the statement was generated
-	balance: number; // positive = tenant owes, negative = refund
-	status: StatementStatus;
-	paymentDeadline: string;
-	paidDate?: string;
-	paidAmount?: number | null; // what was paid; a refund paid to the tenant negative (#93)
-	contractId?: string;
+	managementFee: number; // 0 when it has none
+	managementFeePercent: number; // rate used when the statement was generated; 0 when it has none
 	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	correctionDeclined?: { on: string } | null; // «Nicht berichtigt» (#454)
-	lastReminderDate?: string;
-	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
-	reminderToSend?: boolean; // a reminder still to send holds the next Mahnstufe (#449)
-	oldAddress?: boolean; // A-5 (#114): the moved-out tenant still has the building's address
-	pdfGeneratedAt?: string;
-	notes?: string | null;
-	createdAt?: string;
-	updatedAt?: string;
+	lastReminderDate?: string | null;
 }
 
-export interface StatementWithDetails extends Statement {
+export interface StatementWithDetails
+	extends Statement,
+		Pick<ApiStatement, keyof StatementPayment | 'rentalStart' | 'rentalEnd'>,
+		Partial<Pick<ApiStatement, 'replacedBy' | 'priorPaidOn' | 'final'>> {
 	tenantName: string;
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
@@ -359,39 +351,25 @@ export interface StatementWithDetails extends Statement {
 	tenantLanguage?: Tenant['language'];
 	tenantAddress?: string;
 	apartmentUnit: string;
-	apartmentFloor: string;
+	apartmentFloor: number | string;
 	buildingName: string;
 	buildingAddress: string;
-	rentalStart: string; // the Mietvertrag's days within the period, YYYY-MM-DD (#248)
-	rentalEnd: string;
 	lineItems: StatementLineItem[];
-	// a berichtigte Abrechnung: the statement it replaces, what was paid on the replaced ones and where (#120)
+	// a berichtigte Abrechnung: the statement it replaces, what was paid on the replaced ones (#120)
 	replaces?: {
 		id: string;
 		statementNumber: string;
 		statementDate: string;
 		totalAdvancePayments?: number | string; // #464: its Akonto, to warn when the berichtigte one counts another
 	} | null;
-	replacedBy?: { id: string; statementNumber: string } | null;
 	priorPayments?: number;
-	priorPaidOn?: string[];
-	// #448: a Schlussabrechnung, the Übertrag from the previous statement, a replaced Saldo the next one counted
-	final?: boolean;
+	// #448: the Übertrag from the previous statement, a replaced Saldo the next one counted
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
 	// what it allows, decided by the backend (#788): the page shows buttons and hints by it, the status only as label
 	editable: boolean;
 	correctable: boolean;
 	asksPayment: boolean;
 	superseded: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
-	// what the Saldo asks of whom, decided by the backend by the Swiss day (#815): a Saldo below CHF 5 is carried over
-	// unless it is a Schlussabrechnung's (#448); settled under #94 a Nachzahlung was waived (448-2 V-18)
-	unpaid: boolean; // no payment: a Saldo of 0, a settled one, or one carried over
-	claimed: boolean; // a Nachzahlung the landlord claims and may remind of
-	noPayment: boolean; // as unpaid, also when settled under #94
-	waived: boolean; // a Nachzahlung waived under #94
-	carried: boolean; // its Saldo is carried over already
-	reminderWaitsUntil: string | null; // the day the next Mahnung becomes possible, while it is still to come (#107)
-	deadlinePassed: boolean; // its Zahlungsfrist is over: after a payment taken back it is overdue (#92)
 	advanceChanged: boolean; // a draft counting another Akonto than the statement it replaces (#464)
 	offsetWith?: { statementNumber: string; amount: number }[];
 }
