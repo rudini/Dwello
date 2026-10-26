@@ -11,10 +11,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: #837 cycle 1, statements (Ä1)
 
-- [ ] Measure before: `fitness` (field spread), `svelte-check` time
-- [ ] S1 Backend: `StatementWithDetails` moves to `backend/src/api/statement.ts` (imports only types of `schema.ts`), complete for what `getStatement` returns, which checks it with `satisfies`; status typed (`StatementStatus`)
-- [ ] S2 BFF: `toStatement` takes `Json<StatementWithDetails>`; drift fixed in types, no value the app shows changes
-- [ ] S3 Frontend: `Statement`/`StatementWithDetails` in `src/lib/types.ts` take the fields that pass through unchanged from the backend type (`Pick`), declare only what the mapper converts or adds
-- [ ] New ADR (0004) on the changed step 2 of ADR 0003; measure after, `fitness --update`
+- [x] Measure before: `fitness` (field spread), `svelte-check` time
+- [x] S1 Backend: `StatementWithDetails` moves to `backend/src/api/statement.ts` (imports only types of `schema.ts`), complete for what `getStatement` returns, which checks it with `satisfies`; status typed (`StatementStatus`)
+- [x] S2 BFF: `toStatement` takes `Json<StatementWithDetails>`; drift fixed in types, no value the app shows changes
+- [x] S3 Frontend: `Statement`/`StatementWithDetails` in `src/lib/types.ts` take the fields that pass through unchanged from the backend type (`Pick`), declare only what the mapper converts or adds
+- [x] ADR 0005 (0004 was taken meanwhile) on the changed step 2 of ADR 0003; measured after, `fitness --update` (max 37 → 36, entity mirrors 54 → 52)
 - [ ] Slice reviews (`code-reviewer`)
 - [ ] PR; No scenario: types only
