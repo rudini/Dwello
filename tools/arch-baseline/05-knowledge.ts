@@ -9,7 +9,7 @@
 // Out: m4-*.csv
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ANCHORED_RE, OUT, ROOT, STATUS, STATUS_CMP, classify, csv, excludedBecause, git, tablesOf } from './lib';
+import { ANCHORED_RE, OUT, ROOT, STATUS, STATUS_CMP, classify, csv, entityFiles, excludedBecause, git, tablesOf } from './lib';
 
 const CODE_LAYERS = new Set(['FE', 'BFF', 'Backend', 'DB', 'Shared/Contracts']);
 const all = git(['ls-files', '-z']).split('\0').filter((p) => p && !excludedBecause(p));
@@ -152,17 +152,22 @@ console.log(`tables ${tables.length}, dup type names ${dupTypes.length}, dup lit
 
 // ---------------------------------------------------------------- G baselines for the modifiability scenarios
 // G1: per DB field (names unique to one table, not generic): production files outside the DB layer that
-// declare it as a key (type property, object literal, validation schema, mapper), and API contract fixtures.
+// declare it as a key (type property, object literal, validation schema, mapper) together with another such field of
+// its table (#843: a lone `value:` is a word, not the entity), and API contract fixtures.
 const owner = new Map<string, string[]>();
 for (const { table, fields } of tables) for (const f of fields) owner.set(f, [...(owner.get(f) ?? []), table]);
 const fieldRows: Record<string, unknown>[] = [];
-for (const { table, fields } of tables)
-	for (const f of fields) {
-		if (GENERIC.has(f) || owner.get(f)!.length > 1 || f.length < 5) continue;
-		const files = [...keyCache].filter(([p, k]) => k.has(f) && layer(p) !== 'DB' && !p.startsWith('tests/')).map(([p]) => p);
+for (const { table, fields } of tables) {
+	const counted = fields.filter((f) => !GENERIC.has(f) && owner.get(f)!.length === 1 && f.length >= 5);
+	const declaring = entityFiles(
+		new Map(counted.map((f) => [f, [...keyCache].filter(([p, k]) => k.has(f) && layer(p) !== 'DB' && !p.startsWith('tests/')).map(([p]) => p)]))
+	);
+	for (const f of counted) {
+		const files = declaring.get(f)!;
 		const fixtures = [...keyCache].filter(([p, k]) => k.has(f) && p.startsWith('tests/contracts/')).length;
 		fieldRows.push({ table, field: f, prod_files: files.length, FE: files.filter((p) => layer(p) === 'FE').length, BFF: files.filter((p) => layer(p) === 'BFF').length, Backend: files.filter((p) => layer(p) === 'Backend').length, Shared: files.filter((p) => layer(p) === 'Shared/Contracts').length, contract_fixtures: fixtures, where: files.join(' ') });
 	}
+}
 csv('m4-field-spread.csv', fieldRows.sort((a, b) => (b.prod_files as number) - (a.prod_files as number)));
 
 // G2: per screen id of tests/a11y/screens.json: files under tests/ that name it.

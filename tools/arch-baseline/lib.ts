@@ -130,6 +130,14 @@ const statusAlt = STATUS.join('|');
 export const STATUS_CMP = new RegExp(`[!=]==\\s*['"\`](${statusAlt})['"\`]|['"\`](${statusAlt})['"\`]\\s*[!=]==`, 'g');
 export const ANCHORED_RE = /\/\^[^/\n]+\$\/[a-z]*/g;
 
+/** Per field of one table the files that declare it, kept only where a file declares two of its fields or more: a
+ *  lone key such as `value:` names a word, not the entity (Ä1, #843). */
+export function entityFiles(files: Map<string, string[]>): Map<string, string[]> {
+	const count = new Map<string, number>();
+	for (const paths of files.values()) for (const p of paths) count.set(p, (count.get(p) ?? 0) + 1);
+	return new Map([...files].map(([field, paths]) => [field, paths.filter((p) => count.get(p)! > 1)]));
+}
+
 /** Drizzle tables of a schema.ts text and their fields (05-knowledge, tools/fitness). */
 export function tablesOf(schema: string): { table: string; fields: string[] }[] {
 	return [...schema.matchAll(/export const (\w+) = pgTable\(\s*'(\w+)',\s*\{/g)].map((m) => {
