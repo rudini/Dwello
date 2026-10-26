@@ -3497,6 +3497,12 @@ No scenario: test-only; the failing axe row «statement-generate draft-restored�
 - [x] Review and closing round (`docs/reviews/i778-review-1.md`): no findings
 - [x] PR: Fixes #778, pushed after this archive
 
+## Session: #725 rate limiting and monitoring (decision record)
+
+- [x] ADR 0004: no rate limiting beyond the existing locks, logs only
+- [x] `.env.example` without `SENTRY_DSN`; `docs/installation.md` section 8: throttling through the reverse proxy, errors in `docker logs`
+- [x] Checks; no code changed, so no code review (docs and .env.example only)
+- [x] PR: pushed after this archive
 ## Session: #834 E2E on main in more shards (T1)
 
 - [x] Issue #834 opened from the measured main run (shards 12–26 min, run 27 min)

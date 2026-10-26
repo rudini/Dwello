@@ -165,6 +165,15 @@ docker compose -f docker-compose.prod.yml up -d --force-recreate
 
 Removing an address from `ALLOWED_EMAILS` (then `docker compose -f docker-compose.prod.yml up -d`, so the web app reads the new list) ends its access without this: only the web app reaches the backend, and it checks the list on every request (#747).
 
+### Failed sign-ins and errors
+
+Dwello locks an account for 15 minutes after 5 wrong passwords, and the setup after 5 wrong codes; it limits nothing else (ADR 0004). An operator who wants more can let the reverse proxy throttle requests (Caddy: the `rate_limit` plugin, which needs a custom Caddy build). Errors are written only to the log of each container, nowhere else:
+
+```bash
+docker logs dwello-backend
+docker logs dwello-frontend
+```
+
 ### Installations from before #577: the database password
 
 A database first started before #577 may still use the old default password `dwello`. Check it:
