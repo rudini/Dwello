@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import type { RentalContract } from '$lib/types';
+import type { Json, RentalContract } from '$lib/types';
+import type { ContractResponse } from '../../../../../backend/src/api/contract';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { agreeableCategories } from '$lib/server/category';
@@ -24,7 +25,8 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 			throw error(contractRes.status, m.contracts_load_failed());
 		}
 
-		const { tenant, apartment, building, ...contract } = await contractRes.json();
+		const { tenant, apartment, building, ...contract }: Json<ContractResponse> =
+			await contractRes.json();
 
 		return {
 			contract,

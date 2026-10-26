@@ -27,8 +27,6 @@ const contract = (
 	additionalRent: null,
 	monthlyAdvancePayment: '150.00',
 	tenantName,
-	tenantFirstName: '',
-	tenantLastName: '',
 	apartmentNumber: '2.01',
 	buildingName: 'Ahornhof',
 	buildingAddress: 'Ahornweg 1',

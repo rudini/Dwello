@@ -3598,3 +3598,14 @@ Request: review the agents against «Getting the most out of Opus 5.5» and appl
 - [x] Pin `effort: high` for all four agents (daten-pruefer not measured)
 - [x] code-reviewer round 1 (`docs/reviews/agents-guide-review-1.md`): no Blocker/Major; C-1 (Nit left in two skills; `CLAUDE.md` unchanged), C-2 (daten-pruefer Nit rule) fixed
 - [x] PR: pushed after this archive
+## Session: #837 cycle 2, rental contracts (ADR 0005)
+
+- [x] Measure before on `origin/main`: field spread 4 / 13 / 36, entity mirrors 50, value lists 13, `types.ts` fields 40
+- [x] `backend/src/api/contract.ts` (`ContractWithDetails`, `ContractDetails`, `ContractResponse`, `ContractStatus`) and `api/apartment.ts` (`ApartmentStatus`); services typed against them, casts gone (inner joins: the foreign keys guarantee tenant, apartment and building); route `satisfies ContractResponse`
+- [x] BFF mappers take `Json<…>` (contract list, detail, edit, history on apartment and tenant pages); `RentalContract`, `ContractHistory`, `ContractWithDetails`, `ApartmentStatus` in `src/lib/types.ts` derived
+- [x] Measure after, `fitness --update`: 4 / 13 / 36, entity mirrors 49, value lists 12, `types.ts` fields 30
+- [x] `code-reviewer` round 1: `docs/reviews/i837c2-review-1.md`
+- [x] ADR 0005 table for cycle 2; utility tree note
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-837-c2.md`
+- [x] Archive the session; PR «Refs #837» pushed after this archive
+- [x] Closing `code-reviewer` round on the CI fix 4fc4caa1: `docs/reviews/i837c2-close-review-1.md`

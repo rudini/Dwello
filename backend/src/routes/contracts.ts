@@ -6,6 +6,7 @@
 import { Elysia, t } from 'elysia';
 import { missingByContract, missingOfContract } from '../services/statement-run.service';
 import { errorBody, refusal } from '../services/coded-error';
+import type { ContractResponse } from '../api/contract';
 import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
@@ -154,7 +155,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			nextSteps: await nextSteps(contract),
 			fixedTermCheck: await fixedTermCheck(contract),
 			endsToday: contract.endDate === swissToday() // the page says «endet heute» (#815)
-		};
+		} satisfies ContractResponse;
 	})
 	// The categories with costs for the contract in the period and whether it agrees each (#91)
 	.get(
