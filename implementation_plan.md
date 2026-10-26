@@ -19,5 +19,6 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] Found: Dwello hint `statement-pages.dom.test.ts` loops over `querySelectorAll('dl')` without asserting one exists: #854
 - [x] Gate on changed test files with a baseline, like deepcheck: `bun run testcheck:*`, hook `.claude/hooks/testcheck-gate.sh`, CI job, CLAUDE.md, skill `commit-gates`
 - [x] Slice review round 1 (`code-reviewer`): `docs/reviews/testcheck-review-1.md`
-- [ ] Re-review of the C-1 fix and closing round
+- [x] Re-review of the C-1 fix and closing round (round 2): `docs/reviews/testcheck-review-2.md`
+- [ ] Re-review of the C-1 fix of round 2 (round 3)
 - [ ] PR

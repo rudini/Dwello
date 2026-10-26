@@ -255,28 +255,34 @@ function isWaitedFor(call: ts.Node, root: ts.Node): boolean {
 		if (!isChainLink(n.parent) && !inCombinator(n.parent)) break;
 	}
 	const promise = enclosingPromise(call, root);
-	return !!promise && isWaitedFor(promise, root);
+	return !!promise && (isWaitedFor(promise, root) || storedAndWaitedFor(promise, root));
+}
+
+/** `const p = new Promise(...)`, later `await p` (or returned, or in `Promise.all`, or `expect(p).resolves`). */
+function storedAndWaitedFor(promise: ts.NewExpression, root: ts.Node): boolean {
+	const decl = promise.parent;
+	if (!ts.isVariableDeclaration(decl) || !ts.isIdentifier(decl.name)) return false;
+	const name = decl.name.text;
+	let waited = false;
+	const visit = (n: ts.Node): void => {
+		if (ts.isIdentifier(n) && n.text === name && n !== decl.name && isWaitedFor(n, root)) waited = true;
+		else if (!waited) ts.forEachChild(n, visit);
+	};
+	visit(root);
+	return waited;
 }
 
 type Guard = 'swallowed-assertion' | 'catch-only-assertion' | 'loop-only-assertion' | 'callback-only-assertion';
 
 interface Scope {
 	root: ts.Node;
-	helpers: Set<string>;
 	eachParams: Set<string>;
 }
 
-const asserts = (n: ts.Node | undefined, scope: Scope) => !!n && assertionNodes(n, scope.helpers).length > 0;
-
-/** A catch that keeps the error, e.g. to assert on a list of failures later, does not swallow it. */
-function usesError(c: ts.CatchClause): boolean {
-	const name = c.variableDeclaration?.name;
-	return !!name && ts.isIdentifier(name) && new RegExp(`\\b${name.text}\\b`).test(c.block.getText());
-}
-
-function tryGuard(n: ts.Node, p: ts.Node, scope: Scope): Guard | undefined {
+function tryGuard(n: ts.Node, p: ts.Node): Guard | undefined {
 	if (ts.isCatchClause(p)) return 'catch-only-assertion';
-	if (ts.isTryStatement(p) && n === p.tryBlock && p.catchClause && !asserts(p.catchClause.block, scope) && !usesError(p.catchClause)) return 'swallowed-assertion';
+	// a catch with statements handles the error (keeps it, sets a flag for a later assertion); an empty one drops it
+	if (ts.isTryStatement(p) && n === p.tryBlock && p.catchClause?.block.statements.length === 0) return 'swallowed-assertion';
 	return undefined;
 }
 
@@ -298,7 +304,7 @@ function callbackGuard(n: ts.Node, p: ts.Node, scope: Scope): Guard | undefined 
 /** The innermost construct that may keep an assertion from running, or undefined when it always runs. */
 function guardOf(node: ts.Node, scope: Scope): Guard | undefined {
 	for (let n = node; n !== scope.root && n.parent; n = n.parent) {
-		const guard = tryGuard(n, n.parent, scope) ?? loopGuard(n, n.parent, scope) ?? callbackGuard(n, n.parent, scope);
+		const guard = tryGuard(n, n.parent) ?? loopGuard(n, n.parent, scope) ?? callbackGuard(n, n.parent, scope);
 		if (guard) return guard;
 	}
 	return undefined;
@@ -311,7 +317,7 @@ const isUnguarded = (n: ts.Node) =>
 	ts.isThrowStatement(n) || (ts.isCallExpression(n) && (FAILS.has(calleeName(n) ?? '') || TYPE_CHECKS.has(calleeName(n) ?? '')));
 
 const GUARD_MESSAGES: Record<Guard, string> = {
-	'swallowed-assertion': 'the assertion is in a try block whose catch drops its error, so it can never fail the test: rethrow or remove the try',
+	'swallowed-assertion': 'the assertion is in a try block with an empty catch, so it can never fail the test: rethrow or remove the try',
 	'catch-only-assertion': 'every assertion is in a catch block: when the code stops throwing, the test still passes; add expect.assertions(n) or use .toThrow/.rejects',
 	'loop-only-assertion': 'every assertion is in a loop over data that may be empty: assert the length first',
 	'callback-only-assertion': 'every assertion is in a callback the test does not wait for: await the promise or event'
@@ -321,7 +327,7 @@ function guardFinding(t: TestCase, helpers: Set<string>): { guard: Guard; node: 
 	const nodes = assertionNodes(t.body, helpers);
 	if (nodes.length === 0 || typeAssertions(t.body) > 0 || nodes.some(isUnguarded)) return undefined;
 	const eachParams = new Set(t.each ? t.fn.parameters.flatMap((p) => (ts.isIdentifier(p.name) ? [p.name.text] : [])) : []);
-	const guards = nodes.map((n) => guardOf(n, { root: t.body, helpers, eachParams }));
+	const guards = nodes.map((n) => guardOf(n, { root: t.body, eachParams }));
 	const swallowed = guards.indexOf('swallowed-assertion');
 	if (swallowed >= 0) return { guard: 'swallowed-assertion', node: nodes[swallowed] };
 	if (guards.some((g) => g === undefined)) return undefined;
@@ -419,16 +425,12 @@ function holdsOnLiterals(c: Matched): boolean {
 
 type Matched = ExpectChain & { matcher: ts.CallExpression };
 
-function hasCall(n: ts.Node): boolean {
-	return ts.isCallExpression(n) || ts.isNewExpression(n) || !!ts.forEachChild(n, (c) => hasCall(c) || undefined);
-}
-
 /** The value compared with itself; toBe of a non-variable checks identity, e.g. a getter returning the same object. */
 function comparesWithItself(c: Matched, actual: ts.Expression): boolean {
 	const [expected, ...more] = c.matcher.arguments;
 	if (!expected || more.length > 0 || c.mods.includes('not') || expected.getText() !== actual.getText()) return false;
 	// two calls are two results: equal ones show the code is deterministic
-	return ts.isIdentifier(actual) || (calleeName(c.matcher) !== 'toBe' && !hasCall(actual));
+	return ts.isIdentifier(actual) || (calleeName(c.matcher) !== 'toBe' && !runsCode(actual));
 }
 
 /** `not.toThrow` on an async function: it returns a promise and never throws synchronously. */

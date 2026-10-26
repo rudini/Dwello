@@ -122,6 +122,7 @@ describe('guarded assertions', () => {
 			`it('a', () => { try { expect(f()).toBe(1); } catch { /* ignore */ } });`,
 			`it('ok', () => { try { expect(f()).toBe(1); } catch (e) { cleanup(); throw e; } });`,
 			`it('ok2', () => { try { expect(f()).toBe(1); } finally { cleanup(); } });`,
+			`it('ok5', () => { let found = true; try { screen.getByText('x'); } catch { found = false; } expect(found).toBe(false); });`,
 			`it('ok4', async () => { try { await checkout(); checkbox.click(); } catch { /* offline */ } expect(state()).toBe(1); });`,
 			`it('ok3', () => { const failures = []; try { expect(f()).toBe(1); } catch (e) { failures.push(e); } expect(failures).toEqual([]); });`
 		].join('\n');
@@ -163,9 +164,11 @@ describe('guarded assertions', () => {
 			`it('ok5', async () => { await new Promise<void>((resolve) => { emitter.on('x', (v) => { expect(v).toBe(1); resolve(); }); }); });`,
 			`it('ok6', () => { return new Promise((resolve) => { setTimeout(() => { expect(g()).toBe(1); resolve(); }, 1); }); });`,
 			`it('ok7', async () => { await Promise.all([a().then((r) => expect(r).toBe(1))]); });`,
+			`it('ok8', async () => { const p = new Promise<void>((resolve) => { em.on('d', (v) => { expect(v).toBe(1); resolve(); }); }); em.emit('d', 1); await p; });`,
+			`it('c', async () => { const p = new Promise<void>((resolve) => { em.on('d', (v) => { expect(v).toBe(1); resolve(); }); }); em.emit('d', 1); });`,
 			`it('ok3', (done) => { setTimeout(() => { expect(g()).toBe(1); done(); }); });`
 		].join('\n');
-		expect(rules(code)).toEqual(['callback-only-assertion a', 'callback-only-assertion b']);
+		expect(rules(code)).toEqual(['callback-only-assertion a', 'callback-only-assertion b', 'callback-only-assertion c']);
 	});
 });
 
