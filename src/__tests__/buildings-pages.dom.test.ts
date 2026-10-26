@@ -104,8 +104,9 @@ describe('Gebäudeliste', () => {
 		const city = byTestId<HTMLInputElement>('building-city-filter')!;
 		expect(document.querySelector(`label[for="${city.id}"]`)!.textContent).toContain('Ort');
 		fireEvent(city, 'input', 'Winterthur');
-		click('building-search-submit');
-		expect(goto).toHaveBeenCalledWith('/buildings?search=Linden&city=Winterthur&page=1');
+		// a GET form to the list (#754): the browser or the router sends what it holds
+		const form = city.closest('form')!;
+		expect(Object.fromEntries(new FormData(form))).toEqual({ search: 'Linden', city: 'Winterthur' });
 	});
 
 	it('bietet ohne Gebäude das erste Gebäude an', () => {

@@ -82,6 +82,19 @@ describe.each(lists)('Filter der Liste $path', (list) => {
 	});
 });
 
+// #754: a search sent before the router is ready (Firefox on CI) was lost; as a plain GET form the browser sends it itself
+describe('Suche der Gebäudeliste', () => {
+	it('schickt Suche und Ort als Adresse der Liste, auch ohne die Navigation der App', () => {
+		goTo('/buildings');
+		show(BuildingsPage, { data: { ...empty, buildings: [] } } as never);
+		const form = byTestId('building-search-input')!.closest('form')!;
+
+		expect([form.method, new URL(form.action).pathname]).toEqual(['get', '/buildings']);
+		expect(byTestId<HTMLInputElement>('building-search-input')!.name).toBe('search');
+		expect(byTestId<HTMLInputElement>('building-city-filter')!.name).toBe('city');
+	});
+});
+
 describe('Filter der Wohnungsliste', () => {
 	it('zeigt nach «Filter zurücksetzen» wieder alle Status', () => {
 		goTo('/apartments?status=reserved');
