@@ -15,9 +15,9 @@ import {
 	createTenant,
 	updateTenant,
 	deleteTenant,
-	tenantExists,
-	type TenantResponse
+	tenantExists
 } from '../services/tenant.service';
+import type { TenantResponse } from '../api/tenant';
 import { exportTenant } from '../services/tenant-export.service';
 import { anonymisableFrom, anonymiseTenant } from '../services/tenant-anonymise.service';
 import { errorBody } from '../services/coded-error';

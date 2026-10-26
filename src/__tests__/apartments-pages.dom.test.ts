@@ -23,8 +23,6 @@ const apartment = (overrides: Record<string, unknown> = {}) => ({
 	rooms: '3.5',
 	status: 'vacant',
 	buildingName: 'Ahornhof',
-	buildingAddress: 'Ahornweg 1',
-	buildingCity: 'Winterthur',
 	nextContractStart: null,
 	...overrides
 });

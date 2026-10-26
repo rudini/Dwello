@@ -1,4 +1,5 @@
-import type { ApartmentsListData, ApartmentWithBuilding, ApartmentStatus } from '$lib/types';
+import { toApartmentRow } from '$lib/server/apartment';
+import type { ApartmentsListData, ApartmentListItem } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -26,28 +27,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 		const apartmentsData = await apartmentsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const apartments: ApartmentWithBuilding[] = (
+		const apartments: ApartmentListItem[] = (
 			apartmentsData.apartments ||
 			apartmentsData.data ||
 			[]
-		).map((a: Record<string, unknown>) => {
-			const aptStatus: ApartmentStatus = (a.status as ApartmentStatus) || 'vacant';
-			return {
-				id: a.id as string,
-				buildingId: a.buildingId as string,
-				number: (a.number as string) || '',
-				floor: (a.floor as number) || 0,
-				area: a.area || '0',
-				rooms: a.rooms || '0',
-				status: aptStatus,
-				buildingName: (a.buildingName as string) || '',
-				buildingAddress: (a.buildingAddress as string) || '',
-				buildingCity: (a.buildingCity as string) || '',
-				nextContractStart: (a.nextContractStart as string) ?? null,
-				currentContractEnd: (a.currentContractEnd as string) ?? null,
-				lastContractEnd: (a.lastContractEnd as string) ?? null
-			};
-		});
+		).map(toApartmentRow);
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({

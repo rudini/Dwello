@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import ProgressBar from '$lib/ui/ProgressBar.svelte';
-	import type { KiModel } from './+page.server';
+	import type { KiModel } from '$lib/types';
 
 	// #577: the local KI's model downloads in the background after the first start; until then invoices by hand
 	let { model }: { model: KiModel } = $props();

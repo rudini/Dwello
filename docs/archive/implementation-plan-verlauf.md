@@ -3664,3 +3664,24 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Slice review (`code-reviewer`), report `docs/reviews/i837c4b-review-1.md` (1 Minor, fixed)
 - [x] Closing round (`code-reviewer`), report `docs/reviews/i837c4b-close-review-1.md` (C-1 closed; Minor C-2 on the ADR text, fixed)
 - [x] ADR 0005 section «Zyklus 4b»; archive; PR «Refs #837, #857» pushed after this archive
+
+## Session 2026-10-26 #837 cycle 4c: layer direction (#857)
+
+- [x] Measure before (`fitness`, layer edges FE→BFF 6, Shared→FE 0)
+- [x] `KiModel` to `src/lib/types.ts`; dashboard, audit log and settings components take `PageData` from `./$types`
+- [x] Fitness `boundary-import` refuses type-only imports FE→BFF and Shared→FE; proof table in `fitness-functions.md` §3, deps:graph row in §6
+- [x] ADR 0005 «Zyklus 4c», measure after (FE → BFF 6 → 0; other values unchanged)
+- [x] Code review round 1 (`docs/reviews/i837c4c-review-1.md`)
+- [x] Closing round (`docs/reviews/i837c4c-close-review-1.md`)
+- [x] Archive, PR (Fixes #857, Refs #837): pushed after this archive
+- Files: `src/lib/types.ts`, `src/lib/server/audit-log.ts`, `src/routes/dashboard/{+page.server.ts,+page.svelte,BuildingFigures.svelte,KiModelNotice.svelte}`, `src/routes/config/{DefaultsSection.svelte,ki/KiModelState.svelte,audit-log/+page.svelte}`, `tools/fitness/fitness{,.test}.ts`, ADR 0005, `fitness-functions.md`
+
+## Session 2026-10-26 #837 cycle 4d: list types
+
+- [x] Measure before (`fitness` 4 / 12 / 36, entity mirrors 45, value lists 10)
+- [x] `ApartmentWithBuilding`, `TenantListItem` and the statement flags from the backend types; the list loads typed against the responses; the never-filled `buildingAddress`/`buildingCity` of the apartment list removed
+- [x] ADR 0005 «Zyklus 4d», measure after (entity mirrors 45 → 43), #837 Done means checked
+- [x] Code review round 1 (`docs/reviews/i837c4d-review-1.md`; C-1 to C-4 fixed)
+- [x] Round 2, also the closing round (`docs/reviews/i837c4d-review-2.md`): C-1 to C-4 closed, nothing new
+- [x] Archive, PR (Fixes #837): pushed after this archive
+- Files: `backend/src/api/tenant.ts` (new), `backend/src/services/tenant.service.ts`, `backend/src/routes/tenants.ts`, `src/lib/types.ts`, `src/lib/server/apartment.ts`, `src/routes/{apartments,tenants,buildings/[id]}/+page.server.ts`, `src/routes/apartments/ApartmentCard.svelte`, `src/__tests__/apartments-pages.dom.test.ts`, `tools/fitness/ratchet.json`, ADR 0005

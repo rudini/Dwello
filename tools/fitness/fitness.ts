@@ -107,7 +107,9 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 	for (const b of m.boundaryImports)
 		findings.push({
 			check: 'boundary-import',
-			message: `AP1/Architecture (BFF): ${b} imports code across the HTTP boundary between src/ and backend/ at runtime. Fix: call the backend over HTTP (the BFF via fetch and src/lib/server/api-proxy.ts); only \`import type\` of the backend's API types may cross.`
+			message: b.includes('backend/')
+				? `AP1/Architecture (BFF): ${b} imports code across the HTTP boundary between src/ and backend/ at runtime. Fix: call the backend over HTTP (the BFF via fetch and src/lib/server/api-proxy.ts); only \`import type\` of the backend's API types may cross.`
+				: `AP1/Architecture (BFF): ${b} imports against the layer direction (components may not import the BFF, the shared types not the frontend; #857), \`import type\` included. Fix: take page data from \`./$types\` (PageData) and move a shared type to src/lib/types.ts or the backend's API module.`
 		});
 	return findings;
 }
@@ -266,6 +268,13 @@ const decisionsIn = (paths: string[]) =>
 			.map((l) => ({ path, line: l.trim() }))
 	);
 
+/** A runtime import between src/ and backend/, or any import against the layer direction: a component into the BFF,
+ * the shared types into the frontend (#857) */
+export const crossesBoundary = (e: Record<string, string>) =>
+	(e.type_only === 'no' && e.from.split('/')[0] !== e.to.split('/')[0] && [e.from, e.to].every((p) => /^(src|backend)\//.test(p))) ||
+	(e.from_layer === 'FE' && e.to_layer === 'BFF') ||
+	(e.from_layer === 'Shared/Contracts' && e.to_layer === 'FE');
+
 function measure(out: string): Measured {
 	const read = scripts(out, ['02-imports.ts', '05-knowledge.ts']);
 	const spread = read('m4-field-spread.csv')
@@ -288,7 +297,7 @@ function measure(out: string): Measured {
 			.map((r) => r.modules)
 			.filter((c) => c.split(' ').every(isProdModule)),
 		boundaryImports: read('imports-file.csv')
-			.filter((e) => e.type_only === 'no' && e.from.split('/')[0] !== e.to.split('/')[0] && [e.from, e.to].every((p) => /^(src|backend)\//.test(p)))
+			.filter(crossesBoundary)
 			.map((e) => `${e.from} -> ${e.to}`)
 	};
 }

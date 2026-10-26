@@ -3,7 +3,8 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { countStatus, reletStarts } from '$lib/apartment';
 import { backendMessage, refusedFields, type BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
-import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
+import type { BuildingWithStats, Apartment } from '$lib/types';
+import { toApartmentRow } from '$lib/server/apartment';
 import { toBuilding } from '$lib/server/building';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -91,21 +92,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 		const building = toBuilding(buildingData);
 
 		const apartments: Apartment[] = (apartmentsData.apartments || apartmentsData.data || []).map(
-			(a: Record<string, unknown>) => {
-				const status: ApartmentStatus = (a.status as ApartmentStatus) || 'vacant';
-				return {
-					id: a.id as string,
-					buildingId: a.buildingId as string,
-					number: (a.number as string) || '',
-					floor: (a.floor as number) || 0,
-					rooms: a.rooms || '0',
-					area: a.area || '0',
-					status,
-					nextContractStart: (a.nextContractStart as string | null) ?? null,
-					currentContractEnd: (a.currentContractEnd as string | null) ?? null,
-					lastContractEnd: (a.lastContractEnd as string | null) ?? null
-				};
-			}
+			toApartmentRow
 		);
 		building.reletStarts = reletStarts(apartments);
 		building.reservedCount = countStatus(apartments, 'reserved');

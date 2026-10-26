@@ -4,7 +4,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import KiModelNotice from '../../dashboard/KiModelNotice.svelte';
-	import type { KiModel } from '../../dashboard/+page.server';
+	import type { KiModel } from '$lib/types';
 
 	// #580: the local KI's model on the page «KI»: its progress as on the overview, else whether it is there, and a new
 	// download when it failed (domain review 580 F-5); a local KI that does not answer gets no download (persona Anna
