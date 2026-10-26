@@ -3633,3 +3633,4 @@ Tooling only, no app change: `No scenario: tooling, nothing a user of the app se
 - [x] ADR 0005 table for cycle 3; utility tree P90 12
 - [x] Workflow notes: nothing new beyond `workflow-notes-issue-837-c2.md`
 - [x] Archive the session; PR «Refs #837» pushed after this archive
+- [x] CI fix e51996a9 (German-text check read the field name `beleg`); closing `code-reviewer` round: `docs/reviews/i837c3-close-review-1.md`
