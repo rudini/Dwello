@@ -27,7 +27,7 @@
 	const compared = $derived(
 		!!comparedWith &&
 			checked.some((row) =>
-				row.findings.some((f) => f.kind !== 'stock' && f.kind !== 'consumption')
+				row.findings.some((f) => !['stock', 'consumption', 'keys'].includes(f.kind))
 			)
 	);
 	const title = $derived(
