@@ -13,6 +13,7 @@ import {
 	categoryFinding,
 	existingStatementNotes,
 	hintedInvoice,
+	hintedInvoices,
 	invoicesWithoutServicePeriod,
 	heatingWithoutServicePeriod,
 	lateInvoices,
@@ -145,6 +146,11 @@ export const uncategorizedInvoiceOn = (date: string) => Text.of(hintedInvoice(un
 export const uncategorizedInvoicesText = Text.of(uncategorizedInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
+// the hint's invoices in order, each as the amount expected at its place when it names it, else as its whole text
+export const lateInvoicesInOrder = (amounts: string[]) =>
+	question('the invoices in the hint on late invoices, in order', async (actor) =>
+		(await actor.answer(Text.ofAll(hintedInvoices(lateInvoices)))).map((row, i) => (row.includes(amounts[i]) ? amounts[i] : row))
+	);
 export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));
 export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(invoicesWithoutServicePeriod, date));
 export const heatingHintText = Text.of(heatingWithoutServicePeriod);
