@@ -30,11 +30,17 @@ export async function createRental(token: string, contract: {
 		apartment: apartment.id,
 		tenant: tenant.id,
 		contract: rental.id,
+		// a refused delete leaves records in dwello_test, so it fails the test (#684); one the test removed itself is fine
 		async remove() {
-			await deleteContract(rental.id, true);
-			await deleteTenant(tenant.id);
-			await deleteApartment(apartment.id);
-			await deleteBuilding(building.id);
+			for (const [what, removed] of [
+				['contract', () => deleteContract(rental.id, true)],
+				['tenant', () => deleteTenant(tenant.id)],
+				['apartment', () => deleteApartment(apartment.id)],
+				['building', () => deleteBuilding(building.id)]
+			] as const) {
+				const { success, error } = await removed();
+				if (!success && !/not found/.test(error ?? '')) throw new Error(`createRental: ${what} not deleted: ${error}`);
+			}
 		}
 	};
 }

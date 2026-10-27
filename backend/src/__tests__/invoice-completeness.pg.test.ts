@@ -8,7 +8,7 @@ import { db } from '../db/connection';
 import { categories, fuelStocks, invoices, utilityStatements } from '../db/schema';
 import { createContract, deleteContract } from '../services/contract.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
-import { deleteStatement, generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -260,7 +260,7 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		if (!before) await insertInvoice(may.building, quarter);
 
 		const listed = await oldRuleOf(may.building);
-		await deleteStatement(id).catch(() => db.delete(utilityStatements).where(eq(utilityStatements.id, id)));
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id)); // sent: deleteStatement refuses it
 		await db.delete(invoices).where(eq(invoices.buildingId, may.building));
 		await may.remove();
 

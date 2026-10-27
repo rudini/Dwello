@@ -5,9 +5,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
-import { deleteStatement, generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { callApi } from './helpers/auth';
@@ -36,7 +36,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	for (const id of generated) await deleteStatement(id);
+	await db.delete(utilityStatements).where(inArray(utilityStatements.id, generated)); // a test sets one to sent
 	await deleteContract(other.contract, true);
 	await deleteTenant(other.tenant);
 	await deleteApartment(other.apartment);
