@@ -3701,3 +3701,11 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] `bun run testcheck:scan src` reports no finding for it
 - [x] Slice review round 1: `docs/reviews/i854-review-1.md`, no findings
 - [x] PR `Fixes #854`: pushed after this archive
+
+## Session: #726 API contract for GET /statements/counts
+
+- [x] `tests/contracts/statement-counts.json` with a distinct value per status (README row)
+- [x] `api-contracts.pg.test.ts` checks it against the real API (seen red with `draft` as a string)
+- [x] `statement-list-load.test.ts` answers from the contract
+- [x] Slice review round 1: `docs/reviews/i726-review-1.md`, no findings
+- [x] PR `Fixes #726`: pushed after this archive
