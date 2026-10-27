@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { load } from '../routes/contracts/new/+page.server';
 import allowed from '../../tests/contracts/categories-allowed.json';
 import contract from '../../tests/contracts/contract.json';
@@ -105,5 +105,16 @@ describe('Neuer Mietvertrag laden', () => {
 			throw new TypeError('fetch failed');
 		}) as typeof globalThis.fetch;
 		await expect(load({ fetch } as never)).rejects.toMatchObject({ status: 500 });
+	});
+
+	// without a response there are no statuses to log, only the network error (#715)
+	it('protokolliert einen Netzwerkfehler einmal, ohne leere Status', async () => {
+		const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const fetch = (async () => {
+			throw new TypeError('fetch failed');
+		}) as typeof globalThis.fetch;
+		await expect(load({ fetch } as never)).rejects.toMatchObject({ status: 500 });
+		expect(logged).toHaveBeenCalledTimes(1);
+		logged.mockRestore();
 	});
 });
