@@ -3849,3 +3849,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] `prorateCosts`, its type `ProratedCost` and `prorating.service.test.ts` (it tested only that function) deleted; backend coverage 96.5 % lines, 95.5 % functions (floors 82 %, 85 %) (No scenario: dead code removed)
 - [x] Slice review round 1: `docs/reviews/i696-review-1.md`, no findings
 - [x] PR `Fixes #696`: pushed after this archive
+
+## Session: #695 one definition of the Paraglide options
+
+- [x] `paraglide.config.ts` exports the options for `vite.config.ts` and `vitest.config.ts` and compiles with them when run; `bun run i18n` runs it; generated runtime and messages identical to the old CLI flags (No scenario: build tooling)
+- [x] Slice review round 1: `docs/reviews/i695-review-1.md`, no findings
+- [x] PR `Fixes #695`: pushed after this archive
