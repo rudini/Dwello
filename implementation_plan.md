@@ -8,9 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: #676 development version on one line
-
-- [x] The footer version does not wrap (`whitespace-nowrap`; `src/__tests__/shell.dom.test.ts`). No scenario: the E2E build bakes in one version, `v1.4.0`, which navigation.feature pins exactly, so a long development version cannot be produced there
-- [ ] Slice review
-- [ ] PR
