@@ -9,7 +9,8 @@ import {
 	restoredSelection,
 	restoredStep,
 	selectionErrors,
-	statementSteps
+	statementSteps,
+	type CategoryFinding
 } from '../lib/statement-wizard';
 
 const selection = {
@@ -133,10 +134,7 @@ describe('Rechnungen pro Gebäude', () => {
 	});
 });
 
-const finding = (
-	kind: 'stock' | 'tank' | 'consumption' | 'keys' | 'missing' | 'gap' | 'new' | 'deviation',
-	extra = {}
-) => ({
+const finding = (kind: CategoryFinding['kind'], extra = {}) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,

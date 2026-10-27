@@ -31,3 +31,6 @@ export interface InvoiceWithDetails extends Invoice {
 	beleg: Pick<InvoiceDocument, 'fileName' | 'mimeType' | 'deductedAmount' | 'nonAllocableItems'> | null;
 	inPeriod?: InPeriod; // only in a list filtered by an Abrechnungsperiode (#454)
 }
+
+/** The kinds of finding of the check for missing invoices per category (`GET /invoices/completeness`); the UI names each */
+export type CategoryFindingKind = 'stock' | 'tank' | 'consumption' | 'keys' | 'missing' | 'gap' | 'new' | 'deviation';

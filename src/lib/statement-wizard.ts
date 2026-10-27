@@ -3,6 +3,7 @@ import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-form';
 import { dayAfter } from './swiss-date';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
+import type { CategoryFindingKind } from '../../backend/src/api/invoice';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
 export interface WizardSelection {
@@ -69,7 +70,7 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	kind: 'stock' | 'tank' | 'consumption' | 'keys' | 'missing' | 'gap' | 'new' | 'deviation';
+	kind: CategoryFindingKind;
 	current: { count: number; total: number };
 	previous: { count: number; total: number };
 	missingParts: { start: string; end: string }[];

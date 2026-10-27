@@ -10,6 +10,7 @@ import { apartments, buildings, categories, fuelStocks, invoices, utilityStateme
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange, periodReadings } from './fuel-stock.service';
 import { swissToday } from './today';
+import type { CategoryFindingKind } from '../api/invoice';
 
 export interface Period {
 	start: string;
@@ -38,7 +39,7 @@ export interface CategoryFinding {
 	// consumption is negative or differs a lot from the year before (changePercent);
 	// tank: heating costs without any Tankbestand (heated with oil or pellets? then the purchases are billed);
 	// keys: the deliveries for the tank have different keys, the Veränderung Tankbestand follows keyId (#890)
-	kind: 'stock' | 'tank' | 'consumption' | 'keys' | 'missing' | 'gap' | 'new' | 'deviation';
+	kind: CategoryFindingKind;
 	current: Sum;
 	previous: Sum;
 	missingParts: Period[]; // the slices of the rhythm without invoice (gap), the missing readings (stock), otherwise empty
