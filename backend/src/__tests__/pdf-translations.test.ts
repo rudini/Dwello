@@ -27,11 +27,11 @@ describe('Texte des Abrechnungs-PDF', () => {
 	});
 });
 
-// #674: the same rule as for messages/fr.json (src/__tests__/i18n.test.ts); the block writes U+00A0 as  
+// #674: the same rule as for messages/fr.json (src/__tests__/i18n.test.ts); the block writes U+00A0 as \u00a0
 describe('Französische Texte des Abrechnungs-PDF', () => {
 	it('setzen Guillemets mit geschütztem Leerzeichen innen', () => {
-		const fr = block.split(/\n\tfr: \{/)[1].split(/\n\t\}/)[0].replaceAll('\\u00a0', ' ');
-		const wrong = fr.split('\n').filter((line) => /«(?! )|(?<! )»/.test(line));
+		const fr = block.split(/\n\tfr: \{/)[1].split(/\n\t\}/)[0].replaceAll('\\u00a0', '\u00a0');
+		const wrong = fr.split('\n').filter((line) => /«(?!\u00a0)|(?<!\u00a0)»/.test(line));
 
 		expect(fr).toContain('«');
 		expect(wrong).toEqual([]);
