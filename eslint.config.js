@@ -36,7 +36,7 @@ const noPlaywright = [
 	{ selector: 'TSImportType', message: outsideScreenplay },
 	{
 		selector:
-			"Identifier[name='fetch']:not(MemberExpression > Identifier.property, Property > Identifier.key), MemberExpression[object.name=/^(globalThis|window|self)$/] > Identifier[name='fetch'].property",
+			"Identifier[name='fetch']:not(MemberExpression > Identifier.property, ObjectExpression > Property > Identifier.key), MemberExpression[object.name=/^(globalThis|window|self)$/] > Identifier[name='fetch'].property",
 		message: 'Reach the backend through CallTheApi and other services through screenplay/, not with fetch (tests/e2e/CLAUDE.md)'
 	},
 	{

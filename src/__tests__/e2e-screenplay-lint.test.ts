@@ -114,6 +114,7 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/tasks/example.ts', "await globalThis.fetch('http://localhost:3101/api/v1/buildings');"],
 		['tests/e2e/questions/example.ts', "export const q = question('x', async () => (await fetch('http://localhost:2526/messages')).json());"],
 		['tests/e2e/fixtures/example.ts', 'const get = fetch;'],
+		['tests/e2e/tasks/example.ts', "const { fetch: get } = globalThis; await get('/');"],
 		['tests/e2e/targets/example.ts', "export const x = target('X', (page) => { void fetch('/'); return page.getByTestId('x'); });"]
 	])('lehnt fetch am Screenplay-Kern vorbei in %s ab: %s', async (filePath, code) => {
 		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
