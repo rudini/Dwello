@@ -9,3 +9,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: #655 name conflicts at the Name field
+
+- [x] `@wip` scenarios «Name ist schon vergeben» in `heating-profiles.feature` and `distribution-keys.feature`, seen red (message not at the Name field)
+- [x] Heating profile: a 409 refusal shows at the Name field (`src/__tests__/heating-profiles.test.ts`)
+- [x] Distribution key: a 409 refusal shows at the Name field (`src/__tests__/distribution-keys.test.ts`, contract `distribution-key-name-taken.json`)
+- [x] Scenarios green without `@wip`
+- [ ] Slice review, closing round
+- [ ] PR

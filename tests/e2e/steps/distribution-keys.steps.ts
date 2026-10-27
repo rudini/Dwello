@@ -7,6 +7,7 @@ import {
 	keyDeletable,
 	keyListed,
 	listedKeysNamed,
+	nameProblem,
 	shareOfSample
 } from '../questions/distribution-keys';
 import { pageTitle } from '../questions/navigation';
@@ -129,5 +130,21 @@ Then(
 	async ({ verwalter }, name: string) => {
 		await verwalter.sees(keyListed(name)).toBe(true);
 		await verwalter.sees(keyActionCount(name)).toBe(0);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Verteilschlüssel {string} noch einmal erfasst',
+	async ({ verwalter, names }, key: string) => {
+		await verwalter.attemptsTo(createDistributionKey(names.get(key)!, '{area}'));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter beim Namen, dass es den Verteilschlüssel {string} schon gibt',
+	async ({ verwalter, names }, key: string) => {
+		await verwalter.sees(nameProblem).toContain(
+			`Ein Verteilschlüssel mit dem Namen «${names.get(key)}» existiert bereits.`
+		);
 	}
 );

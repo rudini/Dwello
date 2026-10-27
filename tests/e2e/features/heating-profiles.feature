@@ -37,6 +37,12 @@ Funktionalität: Heizprofile
     Wenn der Liegenschaftsverwalter das Heizprofil "Seeufer" mit "6.4" % im Januar und je "7.6" % in den übrigen Monaten erfasst
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %)."
 
+  # #655: die Ablehnung steht am Feld Name, wie bei den Kategorien
+  Szenario: Name ist schon vergeben
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neues Heizprofil"
+    Wenn der Liegenschaftsverwalter das Heizprofil "Bergtal" noch einmal erfasst
+    Dann erfährt der Liegenschaftsverwalter beim Namen, dass es das Heizprofil "Bergtal" schon gibt
+
   Szenario: Heizprofil anpassen
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Heizprofils "Bergtal"
     Wenn der Liegenschaftsverwalter den Januar auf "18" % und den Dezember auf "22" % ändert

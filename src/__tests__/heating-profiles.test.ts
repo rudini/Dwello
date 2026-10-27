@@ -80,12 +80,12 @@ describe('Neues Heizprofil', () => {
 		expect(calls).toEqual([]);
 	});
 
-	it('zeigt die Meldung des Backends, wenn der Name vergeben ist', async () => {
+	it('zeigt am Feld Name, dass der Name vergeben ist', async () => {
 		const { result } = runAction(newActions.default, '', 409, form(), nameTaken);
 
 		expect(await result).toMatchObject({
 			status: 409,
-			data: { errors: { form: 'Ein Heizprofil mit dem Namen «Bergtal» existiert bereits.' } }
+			data: { errors: { name: 'Ein Heizprofil mit dem Namen «Bergtal» existiert bereits.' } }
 		});
 	});
 });

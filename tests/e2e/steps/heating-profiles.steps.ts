@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { listedProfilesNamed, profileActionCount, shareOf, sharesHelpText, totalShare } from '../questions/heating-profiles';
+import { listedProfilesNamed, nameProblem, profileActionCount, shareOf, sharesHelpText, totalShare } from '../questions/heating-profiles';
 import { pageTitle } from '../questions/navigation';
 import {
 	changeShares,
@@ -80,3 +80,17 @@ Then('kann der Liegenschaftsverwalter das Heizprofil weder bearbeiten noch lösc
 Then('erklärt die Bearbeitungsseite bei den Monatsanteilen {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(sharesHelpText).toContain(text);
 });
+
+When(
+	'der Liegenschaftsverwalter das Heizprofil {string} noch einmal erfasst',
+	async ({ verwalter, names }, profile: string) => {
+		await verwalter.attemptsTo(createHeatingProfile(names.get(profile)!, '16.4', '7.6'));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter beim Namen, dass es das Heizprofil {string} schon gibt',
+	async ({ verwalter, names }, profile: string) => {
+		await verwalter.sees(nameProblem).toContain(`Ein Heizprofil mit dem Namen «${names.get(profile)}» existiert bereits.`);
+	}
+);

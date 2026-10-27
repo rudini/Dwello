@@ -1,0 +1,5 @@
+{
+	"error": "Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits.",
+	"code": "DISTRIBUTION_KEY_NAME_TAKEN",
+	"params": { "name": "Fläche und Zimmer" }
+}

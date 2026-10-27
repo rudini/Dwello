@@ -27,6 +27,12 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter die Sprache "Français" wählt
     Dann zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Selon le volume"
 
+  # #655: die Ablehnung steht am Feld Name, wie bei den Kategorien
+  Szenario: Name ist schon vergeben
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" noch einmal erfasst
+    Dann erfährt der Liegenschaftsverwalter beim Namen, dass es den Verteilschlüssel "Fläche und Zimmer" schon gibt
+
   Szenario: Formel mit unbekannter Variable
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Personen" mit der Formel "{persons}" erfasst

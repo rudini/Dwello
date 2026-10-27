@@ -61,7 +61,8 @@ export async function saveHeatingProfile(
 ) {
 	return saveRecord(fetch, API, parseHeatingProfile(await request.formData()), id, {
 		failure: (_status, saved) => backendMessage(saved, m.profiles_save_failed()),
-		location: (saved) => `/config/heating-profiles/${saved}`
+		location: (saved) => `/config/heating-profiles/${saved}`,
+		conflict: 'name' // the backend refuses only a name another heating profile has
 	});
 }
 
