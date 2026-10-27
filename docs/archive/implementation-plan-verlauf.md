@@ -3829,3 +3829,10 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Round 2: `docs/reviews/i650-review-2.md`, C-1 closed, C-2 (Minor: fixed `ENV X=…` counted) fixed, `${X}` in a TS template left (lets nothing through today)
 - [x] Closing round: `docs/reviews/i650-review-3.md`, no findings
 - [x] PR `Fixes #650`: pushed after this archive
+
+## Session: #674 French guillemet guard for the statement PDF texts
+
+- [x] `pdf-translations.test.ts` checks the fr block of `translations` in `pdf.service.ts` with the rule of `i18n.test.ts` (U+00A0 inside « »); pins kept behaviour, red shown by a plain space in one guillemet (No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i674-review-1.md`, C-1 (Minor: invisible U+00A0 where the escape was meant) fixed
+- [x] Closing round: `docs/reviews/i674-review-2.md`, no findings
+- [x] PR `Fixes #674`: pushed after this archive
