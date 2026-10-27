@@ -3806,3 +3806,10 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] CI job «Docker images» builds the frontend and the backend image as `docker-compose.prod.yml` does, build only; gated like the other app jobs (skipped for docs-only pull requests), always on main; `main-status` and `ci-duration` wait for it (No scenario: CI only; no local Docker daemon, the first CI run is its test)
 - [x] Slice review round 1: `docs/reviews/i727-review-1.md`, C-1 (Minor: `docs/tech-stack.md` said CI builds no image) fixed
 - [x] PR `Fixes #727`: pushed after this archive
+
+## Session: #709 no plain fetch in E2E outside screenplay/
+
+- [x] ESLint bans `fetch` (also `globalThis.fetch` and destructured) in E2E steps, tasks, questions, fixtures and targets; `CallTheApi.fetch` stays allowed; the mail catcher is read by the web question `MailsTo` in `screenplay/questions.ts`, so no exception; `tests/e2e/CLAUDE.md` names it (No scenario: lint rule over test code)
+- [x] Slice review round 1: `docs/reviews/i709-review-1.md`, C-1 (destructured `fetch` passed) fixed, alias through a variable left (selectors cannot follow data flow), C-2 (docs) fixed
+- [x] Closing round: `docs/reviews/i709-review-2.md`, no findings
+- [x] PR `Fixes #709`: pushed after this archive
