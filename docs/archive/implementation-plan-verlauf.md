@@ -3813,3 +3813,11 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Slice review round 1: `docs/reviews/i709-review-1.md`, C-1 (destructured `fetch` passed) fixed, alias through a variable left (selectors cannot follow data flow), C-2 (docs) fixed
 - [x] Closing round: `docs/reviews/i709-review-2.md`, no findings
 - [x] PR `Fixes #709`: pushed after this archive
+
+## Session: #712 frontend tests take backend responses from tests/contracts
+
+- [x] Today's hits: two test files contain `'/api/v1/` strings; only `contract-edit-load.test.ts` keys responses by path (values from `tests/contracts`), `password-login.test.ts:99` is a URL in a `find()`
+- [x] ESLint in `src/**/__tests__` and `tests/unit` rejects an object literal (or an array of them) as the value of a key containing `/api/v1/` (string or template key, property or assignment); a direct spread of a contract stays allowed; `backend-response-lint.test.ts`, each case red first (No scenario: lint rule over test code)
+- [x] Slice review round 1: `docs/reviews/i712-review-1.md`, C-1 (template keys passed) fixed
+- [x] Closing round: `docs/reviews/i712-review-2.md`, no findings
+- [x] PR `Fixes #712`: pushed after this archive
