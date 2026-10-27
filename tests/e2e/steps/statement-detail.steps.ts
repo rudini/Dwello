@@ -125,14 +125,7 @@ Given(
 );
 
 Given(
-	'im Gebäude {string} gibt es eine Rechnung der Kategorie {string} über {string} Franken vom {string} nach dem Verteilschlüssel {string}',
-	async ({ seed }, building: string, category: string, amount: string, date: string, key: string) => {
-		await seed.invoiceOnByKey(building, category, amount, date, key);
-	}
-);
-
-Given(
-	'im Gebäude {string} gibt es danach eine Rechnung der Kategorie {string} über {string} Franken vom {string} nach dem Verteilschlüssel {string}',
+	'im Gebäude {string} gibt es (danach )eine Rechnung der Kategorie {string} über {string} Franken vom {string} nach dem Verteilschlüssel {string}',
 	async ({ seed }, building: string, category: string, amount: string, date: string, key: string) => {
 		await seed.invoiceOnByKey(building, category, amount, date, key);
 	}
