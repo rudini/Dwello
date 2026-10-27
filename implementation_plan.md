@@ -27,3 +27,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
 - [x] (3) PR: pushed
 - [ ] (3) PR
+
+## Session: #854 statement detail test without a description list
+
+- [ ] The test asserts that the sums are a `<dl>` (the list holding «Total Kosten»), seen red with the list taken out
+- [ ] `bun run testcheck:scan src` reports no finding for it
+- [ ] Slice review, PR `Fixes #854`
