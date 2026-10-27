@@ -34,6 +34,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `contract-missing-statements.json` | `GET /api/v1/contracts/:id/missing-statements` (fehlende Abrechnungen am Mietvertrag mit ihrem Weg in den Assistenten, H-28) |
 | `contracts-missing-statements.json` | `GET /api/v1/contracts/missing-statements` (je Mietvertrag die Tage abgelaufener Perioden ohne Abrechnung, Mietvertragsliste und Übersicht, H-28; im Beispiel steht `c1` für eine Mietvertrags-ID) |
 | `statement-run-defaults.json` | `GET /api/v1/statements/run-defaults?buildingId=…&periodStart=…&periodEnd=…` (Vorgaben des Abrechnungs-Assistenten aus einem Link oder den Einstellungen, A-10, H-28) |
+| `statement-counts.json` | `GET /api/v1/statements/counts` (Anzahl Abrechnungen je Status für die Filter der Abrechnungsliste) |
 | `statement-run.json` | `GET /api/v1/statements/run?buildingId=…&periodStart=…&periodEnd=…` (Lauf einer Abrechnungsperiode: die Mietverträge mit Mietstagen darin und ob sie schon abgerechnet sind, die Überschneidung mit einer Periode des Gebäudes, die «Abgerechnet bis» abdeckt; H-28) |
 | `contract-agreements.json` | `GET /api/v1/contracts/:id/agreements?periodStart=…&periodEnd=…` (Kategorien mit Kosten in der Periode und ob der Mietvertrag sie vereinbart, #91) |
 | `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
