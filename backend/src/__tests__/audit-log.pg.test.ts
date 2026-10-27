@@ -185,7 +185,7 @@ describe('Protokoll einer zurückgesetzten Zahlung', () => {
 				periodEnd: '2023-12-31'
 			})
 		);
-		cleanUps.unshift(() => callApi(`/api/v1/statements/${id}`, { method: 'DELETE' }));
+		cleanUps.unshift(() => db.delete(utilityStatements).where(eq(utilityStatements.id, id)));
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today() });
 
