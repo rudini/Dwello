@@ -3821,3 +3821,11 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Slice review round 1: `docs/reviews/i712-review-1.md`, C-1 (template keys passed) fixed
 - [x] Closing round: `docs/reviews/i712-review-2.md`, no findings
 - [x] PR `Fixes #712`: pushed after this archive
+
+## Session: #650 no unread variables in .env.example
+
+- [x] `.env.example` drops the variables nothing reads: the seven of the issue still there (`SENTRY_DSN` was gone already), `DATABASE_POOL_MAX` (the backend reads `DB_POOL_SIZE`, compose does not pass it), and after review `IBAN` (from the configuration in the database) and `PUBLIC_APP_NAME` (fixed in `docker-compose.prod.yml`); `env-example.test.ts` checks a real read (`env.X`, `env['X']`, `${X}`/`$X`, `ARG X`) of each variable it sets, red first with eight and then with two names (No scenario: configuration template)
+- [x] Slice review round 1: `docs/reviews/i650-review-1.md`, C-1 (Major: a mention counted as a read) fixed
+- [x] Round 2: `docs/reviews/i650-review-2.md`, C-1 closed, C-2 (Minor: fixed `ENV X=…` counted) fixed, `${X}` in a TS template left (lets nothing through today)
+- [x] Closing round: `docs/reviews/i650-review-3.md`, no findings
+- [x] PR `Fixes #650`: pushed after this archive
