@@ -3794,3 +3794,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] `backend-codes.test.ts` finds a code in any `new <Name>('…')`; pattern test red first; twelve more codes found, all with a message (No scenario: test only)
 - [x] Slice review round 1: `docs/reviews/i716-review-1.md`, no findings
 - [x] PR `Fixes #716`: pushed after this archive
+
+## Session: #729 demo update test without flock
+
+- [x] `demo-update.test.ts` puts a `flock` stand-in next to the `docker` one; red with a `flock` that is not found (exit 127) first on PATH (No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i729-review-1.md`, no findings
+- [x] PR `Fixes #729`: pushed after this archive
