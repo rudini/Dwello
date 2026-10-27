@@ -3787,3 +3787,4 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Slice review round 1: `docs/reviews/i890-review-1.md`, C-1 (Major) = V-5, fixed; C-2, C-5 fixed; C-3, C-4 stay Minors
 - [x] Slice review round 2 (closing): `docs/reviews/i890-review-2.md`
 - [x] PR `Fixes #890`: pushed after this archive
+- [x] CI «Architecture fitness»: the finding kinds are declared once (`backend/src/api/invoice.ts`); review round 3 `docs/reviews/i890-review-3.md`, C-1 (Minor: stale ratchet entry) fixed with `bun run fitness -- --update`

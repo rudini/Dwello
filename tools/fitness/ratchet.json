@@ -378,12 +378,6 @@
 				"scenario": "Ä1"
 			},
 			{
-				"values": "consumption|deviation|gap|missing|new|stock|tank",
-				"files": 2,
-				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
-				"scenario": "Ä1"
-			},
-			{
 				"values": "DELETE|PATCH|POST|PUT",
 				"files": 2,
 				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
