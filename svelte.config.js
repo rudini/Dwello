@@ -14,9 +14,6 @@ const config = {
 		// BUILD_DIR: persona-stack.sh builds into its own directory, so an E2E run can build and serve build/ meanwhile
 		adapter: adapter({ out: process.env.BUILD_DIR ?? 'build' }),
 		outDir: process.env.BUILD_DIR ? '.svelte-kit/persona' : '.svelte-kit',
-		csrf: {
-			checkOrigin: true
-		},
 		alias: {
 			$lib: 'src/lib'
 		}
