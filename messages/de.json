@@ -1199,6 +1199,7 @@
 	"statements_finding_stock_missing_many": "Die Tankbestände am {dates} fehlen.",
 	"statements_finding_stock_tail": "Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.",
 	"statements_finding_stock_negative": "Der Endbestand ist {amount} höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände und ob eine Lieferung fehlt oder ihre Rechnung erst nach dem Ende der Periode datiert ist.",
+	"statements_finding_stock_keys": "Die Lieferungen der Kategorie {category} haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «{key}» verteilt. Prüfen Sie die Verteilschlüssel der Rechnungen.",
 	"statements_finding_consumption_more": "Verbrauch {amount}, {percent} % mehr als im Vorjahr ({previous}). Prüfen Sie die Tankbestände.",
 	"statements_finding_consumption_less": "Verbrauch {amount}, {percent} % weniger als im Vorjahr ({previous}). Prüfen Sie die Tankbestände.",
 	"statements_finding_missing": "Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von {amount}.",

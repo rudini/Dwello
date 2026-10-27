@@ -148,6 +148,32 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		expect(row.check?.findings[0].categoryName).toBe('Conciergerie');
 	});
 
+	// #890: der Schlüssel, nach dem die Veränderung Tankbestand verteilt wird, in der gewählten Sprache
+	it('nennt den Verteilschlüssel der Veränderung Tankbestand in der gewählten Sprache', async () => {
+		overwriteGetLocale(() => 'fr');
+		const keys = { ...invoiceCompleteness.findings[0], kind: 'keys', keyId: perArea.id };
+		const fetch = (async (url: string) => {
+			if (url.includes('/categories')) return Response.json({ categories: [caretaker] });
+			if (url.includes('/distribution-keys')) return Response.json({ data: [perArea] });
+			if (url.includes('/statements?')) return Response.json({ data: [] });
+			if (url.includes('/completeness/'))
+				return Response.json({ ...invoiceCompleteness, findings: [keys] });
+			return Response.json([]);
+		}) as typeof globalThis.fetch;
+
+		const [row] = await invoicesInPeriod(fetch, {
+			buildingIds: ['b1'],
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: 'hp1',
+			managementFeePercent: 3
+		});
+
+		expect(findingText(row.check!.findings[0])).toContain(
+			'répartie selon «\u00a0Par surface (m²)\u00a0»'
+		);
+	});
+
 	it('nennt die eben gesendete Mahnung in der gewählten Sprache', async () => {
 		overwriteGetLocale(() => 'fr');
 		const document = { type: 'reminder', reminderLevel: 1, title: 'Zahlungserinnerung' };

@@ -281,7 +281,7 @@ async function heatingHints(fetch: Fetch, buildingId: string, run: GenerationReq
 export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 	const { buildingIds, periodStart, periodEnd } = run;
 	const overlaps = (s: Period) => s.periodStart <= periodEnd && s.periodEnd >= periodStart;
-	const [rows, categories] = await Promise.all([
+	const [rows, categories, keys] = await Promise.all([
 		Promise.all(
 			buildingIds.map(async (buildingId) => {
 				const building = encodeURIComponent(buildingId);
@@ -332,13 +332,21 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 				};
 			})
 		),
-		namesById(fetch, 'categories')
+		namesById(fetch, 'categories'),
+		namesById(fetch, 'distribution-keys')
 	]);
-	return rows.map((row) => ({ ...row, check: row.check && localCheck(row.check, categories) }));
+	return rows.map((row) => ({
+		...row,
+		check: row.check && localCheck(row.check, categories, keys)
+	}));
 }
 
-// The check names each category in German: here in the UI language
-const localCheck = (check: InvoiceCheck, names: Map<string, string>): InvoiceCheck => ({
+// The check names each category and key in German: here in the UI language
+const localCheck = (
+	check: InvoiceCheck,
+	names: Map<string, string>,
+	keys: Map<string, string>
+): InvoiceCheck => ({
 	...check,
 	heatingWithoutServicePeriod: check.heatingWithoutServicePeriod?.map((invoice) => ({
 		...invoice,
@@ -348,6 +356,7 @@ const localCheck = (check: InvoiceCheck, names: Map<string, string>): InvoiceChe
 		...finding,
 		categoryName: finding.categoryId
 			? (names.get(finding.categoryId) ?? finding.categoryName)
-			: m.invoices_not_categorised()
+			: m.invoices_not_categorised(),
+		...(finding.keyId && { keyName: keys.get(finding.keyId) ?? '' })
 	}))
 });

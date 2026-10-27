@@ -1199,6 +1199,7 @@
 	"statements_finding_stock_missing_many": "Les stocks de combustible au {dates} manquent.",
 	"statements_finding_stock_tail": "Sans stock initial et stock final, Dwello décompte les achats et non la consommation. Or vous ne pouvez décompter que la consommation : saisissez le stock sur la page de l’immeuble. Ne confirmez que si la citerne était aussi pleine au début qu’à la fin.",
 	"statements_finding_stock_negative": "Le stock final est supérieur de {amount} au stock initial et aux achats réunis, la consommation serait négative. Vérifiez les stocks de combustible et si une livraison manque ou si sa facture est datée après la fin de la période.",
+	"statements_finding_stock_keys": "Les livraisons de la catégorie {category} ont des clés de répartition différentes. La variation du stock de combustible est répartie selon « {key} ». Vérifiez les clés de répartition des factures.",
 	"statements_finding_consumption_more": "Consommation {amount}, {percent} % de plus que l’année précédente ({previous}). Vérifiez les stocks de combustible.",
 	"statements_finding_consumption_less": "Consommation {amount}, {percent} % de moins que l’année précédente ({previous}). Vérifiez les stocks de combustible.",
 	"statements_finding_missing": "Aucune facture saisie dans cette catégorie. L’année précédente : coûts de {amount}.",
