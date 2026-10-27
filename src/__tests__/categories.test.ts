@@ -20,6 +20,7 @@ import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
 import fuelRefused from '../../tests/contracts/category-fuel-refused.json';
 import recipient from '../../tests/contracts/llm-recipient.json';
+import categoryList from '../../tests/contracts/categories.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -46,25 +47,18 @@ const saved = {
 
 describe('Kategorien anzeigen', () => {
 	it('zeigt den deutschen Namen der Kategorie', async () => {
+		const [listed] = categoryList.categories;
 		const fetch = (async () =>
 			Response.json({
-				categories: [
-					{
-						id: 'c1',
-						name: 'Heating',
-						nameDE: 'Heizung',
-						isAllowedUtilityCost: true,
-						invoiceCount: '3'
-					}
-				],
-				total: 1
+				...categoryList,
+				categories: [{ ...listed, name: 'Heating', nameDE: 'Heizung' }]
 			})) as typeof globalThis.fetch;
 
 		const data = (await load({ fetch } as never)) as { categories: unknown[] };
 
 		expect(data.categories).toEqual([
 			expect.objectContaining({
-				id: 'c1',
+				id: listed.id,
 				name: 'Heizung',
 				isAllowedUtilityCost: true,
 				usageCount: 3

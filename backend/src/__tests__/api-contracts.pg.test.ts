@@ -169,6 +169,11 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /statements/counts liefert die Felder von statement-counts.json', async () => {
+		const actual = await (await callApi('/api/v1/statements/counts')).json();
+		expect(drift(await sample('statement-counts'), actual)).toEqual([]);
+	});
+
 	it('GET /invoices/:id/statements liefert die Felder von invoice-statements.json', async () => {
 		const [billed] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.invoiceDate, '2024-03-31')));
 		const actual = await (await callApi(`/api/v1/invoices/${billed.id}/statements`)).json();

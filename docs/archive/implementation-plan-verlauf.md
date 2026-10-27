@@ -3686,6 +3686,24 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Archive, PR (Fixes #837): pushed after this archive
 - Files: `backend/src/api/tenant.ts` (new), `backend/src/services/tenant.service.ts`, `backend/src/routes/tenants.ts`, `src/lib/types.ts`, `src/lib/server/apartment.ts`, `src/routes/{apartments,tenants,buildings/[id]}/+page.server.ts`, `src/routes/apartments/ApartmentCard.svelte`, `src/__tests__/apartments-pages.dom.test.ts`, `tools/fitness/ratchet.json`, ADR 0005
 
+## Session 2026-10-26 d: commit hook gap, effort medium, #852
+
+Request: (1) fix the commit subject gate that let a 51-character subject through (`git commit -F -` with a heredoc and `git push` in one command); (2) measure `effort: medium` against high on the four benchmark cases; (3) implement #852. One pull request each. No scenario: (1) and (2) change tooling and agent settings only.
+
+- [x] (1) test red: `-F -` heredoc commit plus push in one command is let through; hook reads the heredoc message
+- [x] (1) code-reviewer round 1 (`docs/reviews/hook-review-1.md`): no Blocker/Major; C-1 (heredoc of a later command), C-2 (comment) fixed; C-3 (pass case pins kept behaviour) noted in the commit
+- [x] (1) closing round (`docs/reviews/hook-review-2.md`): no Blocker/Major; C-4 (redirect before the heredoc) fixed, test red first
+- [x] (1) closing round 3 (`docs/reviews/hook-review-3.md`): no findings
+- [x] (1) PR #870 merged
+- [x] (2) medium runs: code-reviewer #233, 790a; fach-reviewer #459 B; persona Marco #233 (`docs/reviews/agent-effort-benchmark.md`, section E)
+- [x] (2) `effort: medium` for code-reviewer, fach-reviewer and persona; daten-pruefer stays high
+- [x] (2) PR: pushed after this archive
+- [x] (3) #852: scenario «Ein inzwischen gelöschtes Dokument löschen» red (page showed «Document not found»), then green; `backendMessage` never shows the backend's own text, three unit tests changed to the decision and seen red; 12 frontend tests read six new contracts (`tests/contracts/*`, checked in `api-contracts.pg.test.ts`, pin kept behaviour); fuel stock with an unknown code shows the page's sentence (test red first); `slice-review` names the three checks
+- [x] (3) code-reviewer round 1 (`docs/reviews/852-review-1.md`) and persona Helga (`docs/design/personas/helga-852.md`): C-1 = Helga P-1 (Major, a deleted document read «nicht gelöscht, erneut»): code `DOCUMENT_NOT_FOUND` with a message in four languages, scenario line red first, contract test red with the route reverted; C-2 (formula test fallback), C-3 (test in French), C-4 (comment) fixed
+- [x] (3) code-reviewer round 2 (`docs/reviews/852-review-2.md`): C-1..C-4 closed; C-5 (PUT sent 404 untested) fixed with a contract test (red with the route reverted) and a BFF test
+- [x] (3) Helga round 2 (same report): P-1 fixed; P-2 (Minor: the dialog offers no reload) stays in the report
+- [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
+- [x] (3) PR #871 merged
 ## Session: #869 flaky «Suche ohne Treffer» in Firefox
 
 - [x] Cause from the trace of run 40400795129 (shard 3): the search was typed and «Suchen» clicked, but no request followed; the page had `data-hydrated`, which the root layout set in `onMount`, before SvelteKit's router listens for submits (probe: a click at the marker loads the document natively instead of through the router)
@@ -3701,3 +3719,43 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] `bun run testcheck:scan src` reports no finding for it
 - [x] Slice review round 1: `docs/reviews/i854-review-1.md`, no findings
 - [x] PR `Fixes #854`: pushed after this archive
+
+## Session: #726 API contract for GET /statements/counts
+
+- [x] `tests/contracts/statement-counts.json` with a distinct value per status (README row)
+- [x] `api-contracts.pg.test.ts` checks it against the real API (seen red with `draft` as a string)
+- [x] `statement-list-load.test.ts` answers from the contract
+- [x] Slice review round 1: `docs/reviews/i726-review-1.md`, no findings
+- [x] PR `Fixes #726`: pushed after this archive
+
+## Session: #755 categories.test.ts answers from the categories contract
+
+- [x] `categories.json` gets `invoiceCount`, which the list page reads (contract test red with a number, green with the string the API sends)
+- [x] «zeigt den deutschen Namen der Kategorie» answers from `categories.json` (fails without `invoiceCount` in the contract)
+- [x] Slice review round 1: `docs/reviews/i755-review-1.md`, no findings
+- [x] PR `Fixes #755`: pushed after this archive
+
+## Session: #744 toDoOf calls checkRow
+
+- [x] `toDoOf` in `src/lib/invoice-upload.ts` calls `checkRow` instead of repeating its `validateInvoice` call; the tests importing the file stay green (213)
+- [x] Slice review round 1: `docs/reviews/i744-review-1.md`, no findings
+- [x] PR `Fixes #744`: pushed after this archive
+
+## Session: #715 log the new-contract load error once
+
+- [x] The new-contract load logs the statuses only when a response came back; a network error is logged once (test red first: logged twice)
+- [x] Slice review round 1: `docs/reviews/i715-review-1.md`, no findings
+- [x] PR `Fixes #715`: pushed after this archive
+
+## Session: #711 one helper for the day after a date
+
+- [x] `dayAfter` in `src/lib/swiss-date.ts` (test red first), used by `ContractForm.svelte` and `calendarName` in `statement-wizard.ts`; the private `addDays` of `contract-availability.ts` the issue names no longer exists
+- [x] Slice review round 1: `docs/reviews/i711-review-1.md`, C-1 (Major: `endedSince`, `followedOn` computed the day after too) fixed, they call `dayAfter`
+- [x] Slice review round 2: `docs/reviews/i711-review-2.md`, C-1 closed, no new findings
+- [x] PR `Fixes #711`: pushed after this archive
+
+## Session: #745 PDF line of a Leistungszeitraum begun before the period
+
+- [x] pg test in `statement-pdf.pg.test.ts`: Leistungszeitraum 01.12.2024 – 28.02.2025 in a 2025 statement prints the whole invoice and its part (pins existing behaviour, no red run; No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i745-review-1.md`, no findings
+- [x] PR `Fixes #745`: pushed after this archive

@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-form';
+import { dayAfter } from './swiss-date';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
@@ -153,7 +154,7 @@ const invoices = (count: number) =>
 // A whole calendar month, quarter or half-year by its name; null for other slices
 function calendarName({ start, end }: { start: string; end: string }) {
 	const from = new Date(`${start}T00:00:00Z`);
-	const after = new Date(new Date(`${end}T00:00:00Z`).getTime() + 86_400_000);
+	const after = new Date(`${dayAfter(end)}T00:00:00Z`);
 	const months =
 		(after.getUTCFullYear() - from.getUTCFullYear()) * 12 +
 		after.getUTCMonth() -
