@@ -35,6 +35,7 @@
 
 	// Filters and paging live in the URL so the server filters across all statements
 	function linkWith(changes: Record<string, string>): string {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- a local copy, read once
 		const next = new URLSearchParams(params);
 		for (const [key, value] of Object.entries(changes)) {
 			if (value) next.set(key, value);

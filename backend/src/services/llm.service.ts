@@ -107,7 +107,7 @@ async function callLlm(prompt: Content): Promise<string> {
 		clearTimeout(timeoutId);
 
 		if (error instanceof Error && error.name === 'AbortError') {
-			throw new Error('LLM request timed out');
+			throw new Error('LLM request timed out', { cause: error });
 		}
 
 		throw error;
