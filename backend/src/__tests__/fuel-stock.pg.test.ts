@@ -254,6 +254,30 @@ describe('Tankbestand', () => {
 		}
 	});
 
+	// Zwei Rechnungen vom selben Tag mit verschiedenen Schlüsseln: es gilt der Schlüssel der zuletzt erfassten (#770)
+	it('nimmt bei Rechnungen vom selben Tag den Schlüssel der zuletzt erfassten', async () => {
+		const [perUnit] = await db
+			.select()
+			.from(distributionKeys)
+			.where(eq(distributionKeys.name, 'Per Unit'));
+		const sameDay = {
+			categoryId: heating,
+			description: 'Gleicher Tag',
+			amount: '0.00',
+			invoiceDate: '2025-12-01'
+		};
+		await insertInvoice(rental.building, sameDay);
+		await insertInvoice(rental.building, { ...sameDay, distributionKeyId: perUnit.id });
+		try {
+			const stock = (await linesOf(rental.contract, 2025)).filter(
+				(line) => line.categoryId === heating && line.totalBuildingAmount !== 0
+			);
+			expect(stock).toMatchObject([{ distributionKeyName: 'Per Unit', totalBuildingAmount: 400 }]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Gleicher Tag'));
+		}
+	});
+
 	// ein Hinweis auf die Tankbestände, keine Bestätigung (#73); nur einer für die Kategorie
 	it('meldet einen negativen Verbrauch', async () => {
 		await record('2026-12-31', '5000.00');

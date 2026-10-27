@@ -283,7 +283,7 @@ const withoutServicePeriod = (buildingId: string, from: string, to: string) =>
 				lte(invoices.invoiceDate, to)
 			)
 		)
-		.orderBy(asc(invoices.invoiceDate));
+		.orderBy(asc(invoices.invoiceDate), asc(invoices.createdAt), asc(invoices.id)); // of one day in the order entered (#770)
 
 // The period's heating invoices outside the category of the building's tank, whose deliveries count by consumption;
 // a tank decommissioned before the period shares its category by #71 again (#72)

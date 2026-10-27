@@ -1,4 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
@@ -24,6 +25,7 @@ export default defineConfig(({ mode }) => {
 	return {
 		define: { __APP_VERSION__: JSON.stringify(versionFrom(describeVersion()) ?? null) },
 		plugins: [
+			tailwindcss(),
 			sveltekit(),
 			// UI language from the cookie, else the browser's (de, fr, it, en), else German; no URL prefix
 			paraglideVitePlugin({

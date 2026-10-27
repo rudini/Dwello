@@ -3759,3 +3759,20 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] pg test in `statement-pdf.pg.test.ts`: Leistungszeitraum 01.12.2024 – 28.02.2025 in a 2025 statement prints the whole invoice and its part (pins existing behaviour, no red run; No scenario: test only)
 - [x] Slice review round 1: `docs/reviews/i745-review-1.md`, no findings
 - [x] PR `Fixes #745`: pushed after this archive
+
+## Session: #735 refusal of a contract changed into an overlap
+
+- [x] pg test in `contract-overlap.pg.test.ts`: changing a contract's end so it overlaps the running contract is refused with `CONTRACT_OVERLAP` (pins existing behaviour; fails with the update path's overlap check taken out; No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i735-review-1.md`, no findings
+- [x] PR `Fixes #735`: pushed after this archive
+
+## Session: #770 invoices of one date ordered by entry
+
+- [x] `keyFor` (fuel stock) takes of one day the last entered invoice's key; `withoutServicePeriod` (completeness check) lists invoices of one day in order of entry (`createdAt`, then `id`); pg tests red first
+- [x] Slice review round 1: `docs/reviews/i770-review-1.md`, C-1 (Major: no scenario) fixed with two scenarios
+- [x] Scenarios: the PDF names the key of the Veränderung Tankbestand (red on the base); the hint on late invoices in order of entry (green on the base, PostgreSQL's plan returns the entered order; the pg test carries the red)
+- [x] Slice review round 2: `docs/reviews/i770-review-2.md`, C-1 closed
+- [x] fach-reviewer round 1: `docs/reviews/i770-fachreview-1.md`, V-1 (Major, existed before, product decision) is #890; M-1 fixed
+- [x] Closing review: `docs/reviews/i770-review-3.md`
+- [x] PR `Fixes #770`: pushed after this archive; merge waits for the product owner because of V-1 (#890)
+- [x] Workflow note: the code went in before the fach-reviewer looked at the rule; for a tie-break in an amount rule, step 1 applies (fach-reviewer before the first green test)

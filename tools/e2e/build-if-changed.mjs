@@ -17,7 +17,6 @@ const INPUTS = [
 	'svelte.config.js',
 	'vite.config.ts',
 	'tailwind.config.js',
-	'postcss.config.js',
 	'tsconfig.json',
 	'package.json',
 	'bun.lock',
