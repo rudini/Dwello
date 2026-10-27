@@ -45,6 +45,13 @@ const noPlaywright = [
 	},
 	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 ];
+// A backend response keyed by its path in a stand-in fetch: { '/api/v1/contracts/c1': … }, { [`${API}/api/v1/…`]: … } or backend['/api/v1/…'] = …
+const apiPath = '/\\/api\\/v1\\//';
+const apiKey = `:matches(${[
+	`Property[key.value=${apiPath}]`,
+	`Property[key.type='TemplateLiteral']:has(TemplateElement[value.raw=${apiPath}])`,
+	`AssignmentExpression[left.property.value=${apiPath}]`
+].join(', ')})`;
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
 	{
@@ -141,6 +148,21 @@ export default [
 				beforeAll: 'readonly',
 				afterAll: 'readonly'
 			}
+		}
+	},
+	{
+		// Frontend tests take backend responses from tests/contracts, never invent them (CLAUDE.md, Gotchas: API contracts)
+		files: ['src/**/__tests__/**/*.ts', 'tests/unit/**/*.ts'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: [`${apiKey} > ObjectExpression`, `${apiKey} > ArrayExpression > ObjectExpression`]
+						.map((invented) => `${invented}:not(:has(> SpreadElement))`)
+						.join(', '),
+					message: 'Take the backend response from tests/contracts/*.json (CLAUDE.md, Gotchas: API contracts)'
+				}
+			]
 		}
 	},
 	{
