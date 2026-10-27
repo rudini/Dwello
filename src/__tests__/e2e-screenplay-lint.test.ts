@@ -110,6 +110,21 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 	});
 
 	it.each([
+		['tests/e2e/steps/example.steps.ts', "await fetch('http://localhost:3101/api/v1/buildings');"],
+		['tests/e2e/tasks/example.ts', "await globalThis.fetch('http://localhost:3101/api/v1/buildings');"],
+		['tests/e2e/questions/example.ts', "export const q = question('x', async () => (await fetch('http://localhost:2526/messages')).json());"],
+		['tests/e2e/fixtures/example.ts', 'const get = fetch;'],
+		['tests/e2e/targets/example.ts', "export const x = target('X', (page) => { void fetch('/'); return page.getByTestId('x'); });"]
+	])('lehnt fetch am Screenplay-Kern vorbei in %s ab: %s', async (filePath, code) => {
+		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
+	});
+
+	it('lässt Tasks das Backend über die Ability CallTheApi aufrufen', async () => {
+		const code = 'export const a = (actor) => previewStatements(actor.abilityTo(CallTheApi).fetch, run);';
+		expect(await problems('tests/e2e/tasks/example.ts', code)).toEqual([]);
+	});
+
+	it.each([
 		"import { saveButton } from '../targets/form';",
 		"import { openStatementDetail } from '../tasks/statement-detail';",
 		"import { Navigate } from '../screenplay/interactions';"
