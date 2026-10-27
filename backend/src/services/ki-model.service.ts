@@ -65,7 +65,7 @@ type Line = { status?: string; digest?: string; total?: number; completed?: numb
 
 // Ollama's pull stream: one JSON object per line, with the bytes done of the layer (digest) being loaded; the notice
 // counts the whole model (fach review 577 V-8)
-async function follow(stream: ReadableStream<Uint8Array>, known: () => void) {
+async function follow(stream: ReadableStream<ArrayBuffer | ArrayBufferView>, known: () => void) {
 	current = { state: 'loading', percent: 0 };
 	const layers = new Map<string, { total: number; completed: number }>();
 	let rest = '';
