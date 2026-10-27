@@ -15,6 +15,7 @@
 		billedUntilError
 	} from '$lib/contract-form';
 	import {
+		endedSince,
 		localToday,
 		pastEndConfirmation,
 		billedDaysError,
@@ -22,7 +23,6 @@
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
 	import { dayAfter } from '$lib/swiss-date';
-	import { formatDate } from '$lib/utils/format';
 	import { normalizeAmounts, startInPast, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
@@ -282,7 +282,7 @@
 		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
 			<p>
 				{contract.endDate
-					? m.contracts_parties_fixed_ended({ date: formatDate(dayAfter(contract.endDate)) })
+					? m.contracts_parties_fixed_ended({ date: endedSince(contract.endDate) })
 					: m.contracts_parties_fixed_open()}
 			</p>
 			<p>{m.contracts_parties_fixed_mistake()}</p>
