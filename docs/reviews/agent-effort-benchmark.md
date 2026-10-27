@@ -67,7 +67,7 @@ Run reports: `docs/reviews/agent-effort/*-medium.md`.
 
 | Case | high | medium |
 |---|---|---|
-| A `code-reviewer` #233 | C-11 partly, C-12, C-13, C-14, C-16; two new Majors | C-11 and C-12 partly (C-2, C-3), C-13, C-16; C-14 not found; C-15 named outside the table |
+| A `code-reviewer` #233 | C-11 partly, C-12, C-13, C-14, C-16; two new Majors | C-11 partly (C-2), C-12 (C-2, C-3), C-13, C-16; C-14 not found; C-15 named outside the table |
 | B `code-reviewer` 790a | C-2; Blocker not found | C-2; Blocker not found |
 | C `fach-reviewer` #459 B | R-1 (Blocker), R-2 (in V-3), law fetched | R-1 (as Major), R-2 (in R-1), law fetched |
 | D `persona` Marco #233 | P-2, P-3, P-6, P-7 (observation) | P-2, P-3, P-6 (observation), P-7 (observation) |
