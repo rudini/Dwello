@@ -15,7 +15,11 @@ describe('Backend-Antworten in Frontend-Tests', () => {
 			'src/__tests__/example.dom.test.ts',
 			"const backend = { 'http://localhost:3001/api/v1/contracts': [{ id: 'c1' }] };"
 		],
-		['tests/unit/example.test.ts', "backend['/api/v1/contracts/c1'] = { id: 'c1' };"]
+		['tests/unit/example.test.ts', "backend['/api/v1/contracts/c1'] = { id: 'c1' };"],
+		[
+			'src/__tests__/example.test.ts',
+			'const backend = { [`${HOST}/api/v1/contracts/c1`]: { id: "c1" } };'
+		]
 	])('lehnt eine erfundene Antwort in %s ab: %s', async (filePath, code) => {
 		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
 	});

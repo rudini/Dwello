@@ -45,8 +45,13 @@ const noPlaywright = [
 	},
 	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 ];
-// A backend response keyed by its path in a stand-in fetch: { '/api/v1/contracts/c1': … } or backend['/api/v1/…'] = …
-const apiKey = ':matches(Property[key.value=/\\/api\\/v1\\//], AssignmentExpression[left.property.value=/\\/api\\/v1\\//])';
+// A backend response keyed by its path in a stand-in fetch: { '/api/v1/contracts/c1': … }, { [`${API}/api/v1/…`]: … } or backend['/api/v1/…'] = …
+const apiPath = '/\\/api\\/v1\\//';
+const apiKey = `:matches(${[
+	`Property[key.value=${apiPath}]`,
+	`Property[key.type='TemplateLiteral']:has(TemplateElement[value.raw=${apiPath}])`,
+	`AssignmentExpression[left.property.value=${apiPath}]`
+].join(', ')})`;
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
 	{
