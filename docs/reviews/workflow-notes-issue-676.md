@@ -1,0 +1,6 @@
+# Workflow notes: issue-676
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `docs/design/personas/README.md`, "Build-time values" (example `APP_VERSION=0.4.0 docs/design/tools/persona-stack.sh`) | `APP_VERSION` is read as `git describe` output (`versionFrom`, `src/lib/version.ts`), so a value without the leading `v` and in the shown form makes the footer say «Version unbekannt». The first Marco run checked a build with `0.12.0+123-gabcdef1` and reported a Blocker that was only the wrong form; a second build and run followed. | Write the example as `APP_VERSION=v0.4.0` and say that a development version takes the `git describe` form (`v0.12.0-123-gabcdef1`). |
+| `CLAUDE.md`, Workflow 1 and "No scenario" (`tests/e2e/CLAUDE.md`) | The issue asked for a test at 390 px with a long version; the E2E build bakes in one version that a scenario pins exactly, so neither a scenario nor a layout test was possible. The list of "No scenario" cases names the server's clock but not a build-time value. | Add "a build-time value other than the one the E2E build bakes in (`APP_VERSION`)" to the "No scenario" list, with a persona build (`APP_VERSION=… persona-stack.sh`) as the check of the real layout. |
