@@ -28,7 +28,7 @@ beforeAll(async () => {
 afterAll(async () => {
 	if (previousDefault) await setConfig('default_heating_profile_id', previousDefault);
 	else await deleteConfig('default_heating_profile_id');
-	for (const name of ['Bergtal', 'Hochtal', 'Standard', 'Winterhalbjahr']) {
+	for (const name of ['Bergtal', 'Hochtal', 'Standard', 'Winterhalbjahr', 'Talboden']) {
 		const profile = await getHeatingProfileByName(`${name} ${token}`);
 		if (profile) await deleteHeatingProfile(profile.id);
 	}
@@ -103,6 +103,15 @@ describe('Heizprofil bearbeiten', () => {
 		await expectRejection(response, 400, 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).', 'HEATING_PROFILE_SHARES_SUM', {
 			sum: 90
 		});
+	});
+
+	// #655: also when an own profile is renamed to a predefined profile's German name
+	it('lehnt beim Umbenennen den deutschen Namen eines vordefinierten Heizprofils ab', async () => {
+		const id = await idOf(await create('Talboden'));
+		const response = await send('PUT', `/${id}`, { name: 'Heizung + Warmwasser' });
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'HEATING_PROFILE_NAME_TAKEN' });
 	});
 
 	// #461: das Formular schickt einen leeren Namen in einer anderen Sprache als null; dann gilt der deutsche Name

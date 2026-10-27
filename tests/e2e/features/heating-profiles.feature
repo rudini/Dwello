@@ -43,6 +43,11 @@ Funktionalität: Heizprofile
     Wenn der Liegenschaftsverwalter das Heizprofil "Bergtal" noch einmal erfasst
     Dann erfährt der Liegenschaftsverwalter beim Namen, dass es das Heizprofil "Bergtal" schon gibt
 
+  Szenario: Name eines vordefinierten Heizprofils ist schon vergeben
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neues Heizprofil"
+    Wenn der Liegenschaftsverwalter ein Heizprofil unter dem Namen "Heizung + Warmwasser" erfasst
+    Dann erfährt der Liegenschaftsverwalter beim Namen, dass es das Heizprofil "Heizung + Warmwasser" schon gibt
+
   Szenario: Heizprofil anpassen
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Heizprofils "Bergtal"
     Wenn der Liegenschaftsverwalter den Januar auf "18" % und den Dezember auf "22" % ändert

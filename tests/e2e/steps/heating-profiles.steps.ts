@@ -88,9 +88,15 @@ When(
 	}
 );
 
+// a predefined profile's name, without a token: the scenario must not save it
+When('der Liegenschaftsverwalter ein Heizprofil unter dem Namen {string} erfasst', async ({ verwalter }, name: string) => {
+	await verwalter.attemptsTo(createHeatingProfile(name, '16.4', '7.6'));
+});
+
 Then(
 	'erfährt der Liegenschaftsverwalter beim Namen, dass es das Heizprofil {string} schon gibt',
 	async ({ verwalter, names }, profile: string) => {
-		await verwalter.sees(nameProblem).toContain(`Ein Heizprofil mit dem Namen «${names.get(profile)}» existiert bereits.`);
+		const name = names.get(profile) ?? profile; // a predefined profile has no token
+		await verwalter.sees(nameProblem).toContain(`Ein Heizprofil mit dem Namen «${name}» existiert bereits.`);
 	}
 );
