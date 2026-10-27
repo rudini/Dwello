@@ -3716,3 +3716,9 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] «zeigt den deutschen Namen der Kategorie» answers from `categories.json` (fails without `invoiceCount` in the contract)
 - [x] Slice review round 1: `docs/reviews/i755-review-1.md`, no findings
 - [x] PR `Fixes #755`: pushed after this archive
+
+## Session: #744 toDoOf calls checkRow
+
+- [x] `toDoOf` in `src/lib/invoice-upload.ts` calls `checkRow` instead of repeating its `validateInvoice` call; the tests importing the file stay green (213)
+- [x] Slice review round 1: `docs/reviews/i744-review-1.md`, no findings
+- [x] PR `Fixes #744`: pushed after this archive
