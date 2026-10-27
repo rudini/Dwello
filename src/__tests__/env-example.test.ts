@@ -16,7 +16,9 @@ const readers = [
 ];
 const isRead = (name: string) => {
 	try {
-		execFileSync('git', ['grep', '-qw', name, '--', ...readers, ':!**/__tests__/**']);
+		// a read, not a mention: env.X, env['X'], ${X} or $X (compose, shell), ARG or ENV X (Dockerfile)
+		const read = `(env\\.|env\\[['"]|\\$\\{?|(ARG|ENV) )${name}\\b`;
+		execFileSync('git', ['grep', '-qE', read, '--', ...readers, ':!**/__tests__/**']);
 		return true;
 	} catch {
 		return false;
