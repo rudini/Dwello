@@ -3,6 +3,7 @@ import type { ApartmentStatus } from './types';
 import type { IconName } from './ui/icons';
 import type { Tone } from './ui/tone';
 import { endedSince } from './contract-status';
+import { dayAfter } from './swiss-date';
 import { formatDate } from './utils/format';
 import { m } from '$lib/paraglide/messages';
 
@@ -141,9 +142,7 @@ function followedOn({
 	nextContractStart?: string | null;
 }) {
 	if (!currentContractEnd || !nextContractStart) return false;
-	const next = new Date(`${currentContractEnd.slice(0, 10)}T00:00:00Z`);
-	next.setUTCDate(next.getUTCDate() + 1);
-	return next.toISOString().slice(0, 10) === nextContractStart.slice(0, 10);
+	return dayAfter(currentContractEnd) === nextContractStart.slice(0, 10);
 }
 
 /** Status with the day a relet apartment's next tenant moves in, the last day of the running contract (A-4), or the

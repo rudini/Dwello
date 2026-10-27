@@ -22,3 +22,7 @@ export function parseSwissDate(text: string): string | null {
 	if (date.getUTCDate() !== day || date.getUTCMonth() !== month - 1) return null;
 	return date.toISOString().slice(0, 10);
 }
+
+/** The day after a YYYY-MM-DD date (or a timestamp starting with one), as YYYY-MM-DD; YYYY-MM-DD is midnight UTC */
+export const dayAfter = (date: string) =>
+	new Date(Date.parse(date.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10);
