@@ -3800,3 +3800,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] `demo-update.test.ts` puts a `flock` stand-in next to the `docker` one; red with a `flock` that is not found (exit 127) first on PATH (No scenario: test only)
 - [x] Slice review round 1: `docs/reviews/i729-review-1.md`, no findings
 - [x] PR `Fixes #729`: pushed after this archive
+
+## Session: #727 Docker images in CI
+
+- [x] CI job «Docker images» builds the frontend and the backend image as `docker-compose.prod.yml` does, build only; gated like the other app jobs (skipped for docs-only pull requests), always on main; `main-status` and `ci-duration` wait for it (No scenario: CI only; no local Docker daemon, the first CI run is its test)
+- [x] Slice review round 1: `docs/reviews/i727-review-1.md`, C-1 (Minor: `docs/tech-stack.md` said CI builds no image) fixed
+- [x] PR `Fixes #727`: pushed after this archive
