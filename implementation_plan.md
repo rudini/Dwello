@@ -27,9 +27,3 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
 - [x] (3) PR: pushed
 - [ ] (3) PR
-
-## Session: #755 categories.test.ts answers from the categories contract
-
-- [x] `categories.json` gets `invoiceCount`, which the list page reads (contract test red with a number, green with the string the API sends)
-- [x] «zeigt den deutschen Namen der Kategorie» answers from `categories.json` (fails without `invoiceCount` in the contract)
-- [ ] Slice review, PR `Fixes #755`
