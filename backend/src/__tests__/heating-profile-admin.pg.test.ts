@@ -47,6 +47,14 @@ describe('Eigene Heizprofile', () => {
 		});
 	});
 
+	// #655: the form sends the German name as `name`, a predefined profile has it as `nameDE`
+	it('lehnt den deutschen Namen eines vordefinierten Heizprofils ab', async () => {
+		const response = await send('POST', '', { name: 'Heizung + Warmwasser', ...shares() });
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'HEATING_PROFILE_NAME_TAKEN' });
+	});
+
 	it('verlangt, dass die Monatsanteile 100 % ergeben', async () => {
 		const response = await create('Halbjahr', 90);
 

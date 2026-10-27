@@ -5,7 +5,7 @@
  * The predefined profiles (Heizung + Warmwasser, Mittelland, Bergregion, Tessin) come from migrations/0002_stammdaten.sql
  */
 
-import { eq, sql, asc, ilike, and } from 'drizzle-orm';
+import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type MonthShare, type NewHeatingProfile } from '../db/schema';
 import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
@@ -91,13 +91,13 @@ export async function getHeatingProfile(id: string): Promise<HeatingProfile | nu
 }
 
 /**
- * Get heating profile by name (for lookups)
+ * Get heating profile by English or German name (for lookups)
  */
 export async function getHeatingProfileByName(name: string): Promise<HeatingProfile | null> {
 	const [profile] = await db
 		.select()
 		.from(heatingProfiles)
-		.where(ilike(heatingProfiles.name, name))
+		.where(or(ilike(heatingProfiles.name, name), ilike(heatingProfiles.nameDE, name)))
 		.limit(1);
 
 	return profile || null;

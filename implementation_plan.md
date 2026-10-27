@@ -16,5 +16,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Heating profile: a 409 refusal shows at the Name field (`src/__tests__/heating-profiles.test.ts`)
 - [x] Distribution key: a 409 refusal shows at the Name field (`src/__tests__/distribution-keys.test.ts`, contract `distribution-key-name-taken.json`)
 - [x] Scenarios green without `@wip`
-- [ ] Slice review, closing round
+- [x] Slice review round 1: `docs/reviews/i655-review-1.md`; personas `sven-i655.md`, `helga-i655.md`
+- [x] Sven P-1 (Major): a predefined profile's German name was not refused; `getHeatingProfileByName` matches `nameDE` too, as distribution keys do (`heating-profile-admin.pg.test.ts`)
+- [ ] Re-review of the P-1 fix, closing round
 - [ ] PR
