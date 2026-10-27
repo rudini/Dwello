@@ -241,3 +241,11 @@ export const RequestedUrl = (key: string) =>
 		const url = actor.recall<string | undefined>(key);
 		return url ? new URL(url) : null;
 	});
+
+/** The mails to the address, as the mail catcher the backend sends to in E2E runs received them (playwright.config.ts) */
+export const MailsTo = (address: string) =>
+	question(`the mails to ${address}`, async () =>
+		((await (await fetch('http://localhost:2526/messages')).json()) as { to: string; subject: string; attachments: string[] }[]).filter(
+			(mail) => mail.to === address
+		)
+	);

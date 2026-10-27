@@ -35,6 +35,11 @@ const noPlaywright = [
 	{ selector: "ImportExpression, CallExpression[callee.name='require']", message: `${outsideScreenplay}: static imports only` },
 	{ selector: 'TSImportType', message: outsideScreenplay },
 	{
+		selector:
+			"Identifier[name='fetch']:not(MemberExpression > Identifier.property, ObjectExpression > Property > Identifier.key), MemberExpression[object.name=/^(globalThis|window|self)$/] > Identifier[name='fetch'].property",
+		message: 'Reach the backend through CallTheApi and other services through screenplay/, not with fetch (tests/e2e/CLAUDE.md)'
+	},
+	{
 		selector: "CallExpression[callee.property.name='can']",
 		message: 'Pick the protocol driver with throughUiOrApi (screenplay/abilities.ts), not by asking the actor (tests/e2e/CLAUDE.md)'
 	},
