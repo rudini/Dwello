@@ -3694,3 +3694,10 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] Affected E2E scenarios green: full Chromium suite, 1505 passed
 - [x] Slice review round 1: `docs/reviews/i869-review-1.md`
 - [x] PR `Fixes #869`: pushed after this archive
+
+## Session: #854 statement detail test without a description list
+
+- [x] The test asserts that the sums are a `<dl>` (the list holding «Total Kosten»), seen red with the list taken out
+- [x] `bun run testcheck:scan src` reports no finding for it
+- [x] Slice review round 1: `docs/reviews/i854-review-1.md`, no findings
+- [x] PR `Fixes #854`: pushed after this archive

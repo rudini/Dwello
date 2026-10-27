@@ -1360,6 +1360,7 @@ describe('Abrechnungsdetail', () => {
 	// axe (definition-list, dlitem): eine Beschreibungsliste enthält nur Gruppen aus <dt> und <dd>, auch mit der Rundung
 	it('gliedert die Summen mit Rundung als gültige Beschreibungsliste', () => {
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		expect(byTestId('statement-total-costs-label')!.closest('dl')).not.toBeNull();
 		for (const list of document.querySelectorAll('dl'))
 			for (const child of list.children) {
 				expect(['DT', 'DD', 'DIV']).toContain(child.tagName);
