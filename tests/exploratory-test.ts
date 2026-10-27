@@ -371,7 +371,7 @@ async function testHeatingProfileEdit(page: Page, baseUrl: string) {
 		await page.waitForTimeout(300);
 
 		// Check if sum updated
-		const sumElement = page.locator('text=/Summe:.*\\d+%/').first();
+		const sumElement = page.getByTestId('heating-profile-form-total');
 		const sumText = await sumElement.textContent();
 
 		await logResult({
@@ -382,8 +382,7 @@ async function testHeatingProfileEdit(page: Page, baseUrl: string) {
 		});
 
 		// Check sum color (should be red if not 100%)
-		const sumSpan = page.locator('.font-semibold').filter({ hasText: '%' }).first();
-		const sumClasses = await sumSpan.getAttribute('class');
+		const sumClasses = await sumElement.getAttribute('class');
 
 		const isRed = sumClasses?.includes('text-critical');
 		const isGreen = sumClasses?.includes('text-positive');
