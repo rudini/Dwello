@@ -1199,6 +1199,7 @@
 	"statements_finding_stock_missing_many": "The fuel stocks on {dates} are missing.",
 	"statements_finding_stock_tail": "Without opening and closing stock, Dwello bills the purchases, not the consumption. But you may only bill the consumption: add the stock on the building’s page. Only confirm if the tank was equally full at the start and at the end.",
 	"statements_finding_stock_negative": "The closing stock is {amount} higher than the opening stock and purchases together; the consumption would be negative. Check the fuel stocks and whether a delivery is missing or its invoice is dated after the end of the period.",
+	"statements_finding_stock_keys": "The deliveries in the category {category} have different distribution keys. The change in fuel stock is distributed by «{key}». Check the distribution keys of the invoices.",
 	"statements_finding_consumption_more": "Consumption {amount}, {percent} % more than in the previous year ({previous}). Check the fuel stocks.",
 	"statements_finding_consumption_less": "Consumption {amount}, {percent} % less than in the previous year ({previous}). Check the fuel stocks.",
 	"statements_finding_missing": "No invoice added in this category. Previous year: costs of {amount}.",

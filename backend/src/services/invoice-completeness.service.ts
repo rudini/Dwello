@@ -10,6 +10,7 @@ import { apartments, buildings, categories, fuelStocks, invoices, utilityStateme
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange, periodReadings } from './fuel-stock.service';
 import { swissToday } from './today';
+import type { CategoryFindingKind } from '../api/invoice';
 
 export interface Period {
 	start: string;
@@ -24,6 +25,7 @@ export interface CategoryInvoice {
 	isFuelStock?: boolean; // the change of the Tankbestand: consumption, no part of the rhythm
 	isHeatingCost?: boolean;
 	partial?: boolean; // its Leistungszeitraum reaches beyond the period: only its days in the period count
+	distributionKeyId?: string | null;
 }
 
 type Sum = { count: number; total: number };
@@ -35,13 +37,15 @@ export interface CategoryFinding {
 	// new: costs the year before did not have (agreed in the lease?); deviation: costs differ a lot;
 	// stock: a Tankbestand reading is missing (missingParts: its days); consumption: a hint on the readings, the
 	// consumption is negative or differs a lot from the year before (changePercent);
-	// tank: heating costs without any Tankbestand (heated with oil or pellets? then the purchases are billed)
-	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation';
+	// tank: heating costs without any Tankbestand (heated with oil or pellets? then the purchases are billed);
+	// keys: the deliveries for the tank have different keys, the Veränderung Tankbestand follows keyId (#890)
+	kind: CategoryFindingKind;
 	current: Sum;
 	previous: Sum;
 	missingParts: Period[]; // the slices of the rhythm without invoice (gap), the missing readings (stock), otherwise empty
 	changePercent: number | null; // change of the costs against the year before (deviation), otherwise null
 	partialCount: number; // the period's invoices whose Leistungszeitraum reaches beyond it: lower costs without a gap
+	keyId?: string; // keys: the key the Veränderung Tankbestand is distributed by
 }
 
 // A change of more than 25 % and at least CHF 100 against the year before is worth a look: a UX choice (#65)
@@ -166,7 +170,7 @@ function changeFinding(base: Omit<CategoryFinding, 'kind'>, stockNow: boolean, s
 	return { ...base, kind: stockNow && stockBefore ? 'consumption' : 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };
 }
 
-const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, consumption: 4, deviation: 5, tank: 6 };
+const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, consumption: 4, deviation: 5, tank: 6, keys: 7 };
 
 /**
  * Findings per category of the period against the same dates one year earlier; most serious first.
@@ -202,16 +206,38 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 		amount: invoice.inPeriod.amount,
 		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate,
 		isHeatingCost: !!invoice.category?.isHeatingCost,
-		partial: 'whole' in invoice.inPeriod
+		partial: 'whole' in invoice.inPeriod,
+		distributionKeyId: invoice.distributionKeyId
 	}));
 	const stock = (await fuelStockChange(buildingId, start, end)).map((change) => ({
 		categoryId: change.categoryId,
 		categoryName: nameOf(change.category),
 		amount: change.inPeriod.amount,
 		invoiceDate: end,
-		isFuelStock: true
+		isFuelStock: true,
+		distributionKeyId: change.distributionKeyId
 	}));
 	return [...bills, ...stock];
+}
+
+// #890: the deliveries for the tank (an invoice without key counts as one, #379) and the Veränderung Tankbestand,
+// which follows the key of the latest invoice, have more than one key: a hint, the amounts stay
+function keysFinding(current: CategoryInvoice[]): CategoryFinding | null {
+	const stock = current.find((invoice) => invoice.isFuelStock);
+	const keys = new Set(current.filter((invoice) => invoice.categoryId === stock?.categoryId).map((invoice) => invoice.distributionKeyId ?? null));
+	if (!stock?.distributionKeyId || keys.size < 2) return null;
+	const deliveries = current.filter((invoice) => invoice.categoryId === stock.categoryId && !invoice.isFuelStock);
+	return {
+		categoryId: stock.categoryId,
+		categoryName: stock.categoryName,
+		kind: 'keys',
+		current: sum(deliveries),
+		previous: { count: 0, total: 0 },
+		missingParts: [],
+		changePercent: null,
+		partialCount: 0,
+		keyId: stock.distributionKeyId
+	};
 }
 
 // Heating costs and never a Tankbestand: if the building heats with oil or pellets, the purchases are billed
@@ -358,7 +384,7 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		buildingId,
 		comparedWith,
 		hasComparison,
-		findings: stock ? [stock, ...findings] : findings,
+		findings: [stock, keysFinding(current), ...findings].filter((finding) => finding !== null),
 		lateInvoices,
 		invoicesWithoutServicePeriod,
 		...(await heatingHintsOf(buildingId, period))

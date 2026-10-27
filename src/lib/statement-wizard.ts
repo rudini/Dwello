@@ -3,6 +3,7 @@ import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-form';
 import { dayAfter } from './swiss-date';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
+import type { CategoryFindingKind } from '../../backend/src/api/invoice';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
 export interface WizardSelection {
@@ -69,12 +70,14 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation';
+	kind: CategoryFindingKind;
 	current: { count: number; total: number };
 	previous: { count: number; total: number };
 	missingParts: { start: string; end: string }[];
 	changePercent: number | null;
 	partialCount?: number; // invoices whose Leistungszeitraum reaches beyond the period
+	keyId?: string; // keys: the key the Veränderung Tankbestand is distributed by (#890)
+	keyName?: string; // its name in the UI language, added by the BFF
 }
 
 /** An invoice without Leistungszeitraum the preview names: dated shortly after the period, or counted in full */
@@ -197,10 +200,13 @@ export const findingText = (finding: CategoryFinding, fixedTerm = false) =>
 	`${findingBody(finding, fixedTerm)}${finding.kind === 'gap' || finding.kind === 'deviation' ? partialNote(finding.partialCount) : ''}`;
 
 function findingBody(
-	{ kind, current, previous, missingParts, changePercent }: CategoryFinding,
+	{ kind, categoryName, keyName, current, previous, missingParts, changePercent }: CategoryFinding,
 	fixedTerm: boolean
 ): string {
 	if (kind === 'stock') return stockText(missingParts);
+	// deliveries for the tank with different keys: the one the Veränderung Tankbestand follows (#890)
+	if (kind === 'keys')
+		return m.statements_finding_stock_keys({ category: categoryName, key: keyName ?? '' });
 	// a hint on the readings: a negative consumption, or one far from the year before (#73)
 	if (kind === 'consumption' && changePercent === null)
 		return m.statements_finding_stock_negative({ amount: formatCurrency(-current.total) });

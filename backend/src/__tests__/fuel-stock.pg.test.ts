@@ -278,6 +278,50 @@ describe('Tankbestand', () => {
 		}
 	});
 
+	// Lieferungen mit verschiedenen Schlüsseln: die Prüfung nennt den Schlüssel der Veränderung Tankbestand (#890, Option 1)
+	it('meldet in der Prüfung, dass die Lieferungen für den Tank verschiedene Verteilschlüssel haben', async () => {
+		const [perUnit] = await db
+			.select()
+			.from(distributionKeys)
+			.where(eq(distributionKeys.name, 'Per Unit'));
+		await insertInvoice(rental.building, {
+			categoryId: heating,
+			distributionKeyId: perUnit.id,
+			description: 'Anderer Schlüssel',
+			amount: '500.00',
+			invoiceDate: '2024-10-15'
+		});
+		// the Veränderung Tankbestand follows the latest invoice's key, here «Pro Einheit»
+		try {
+			expect(await findings(rental.building, 2024)).toContainEqual(
+				expect.objectContaining({ categoryId: heating, kind: 'keys', keyId: perUnit.id })
+			);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Anderer Schlüssel'));
+		}
+	});
+
+	// eine Lieferung ohne Schlüssel (vor #379 erfasst) wird pro Wohnung verteilt: ein Schlüssel für sich (#890, V-2)
+	it('zählt eine Lieferung ohne Verteilschlüssel als eigenen Schlüssel', async () => {
+		await insertInvoice(rental.building, {
+			categoryId: heating,
+			description: 'Ohne Schlüssel 2024',
+			amount: '500.00',
+			invoiceDate: '2024-03-15'
+		});
+		await db.update(invoices).set({ distributionKeyId: null }).where(eq(invoices.description, 'Ohne Schlüssel 2024'));
+		try {
+			expect((await findings(rental.building, 2024)).map((f) => f.kind)).toContain('keys');
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Ohne Schlüssel 2024'));
+		}
+	});
+
+	// eine Lieferung, ein Schlüssel: kein Hinweis
+	it('meldet keine verschiedenen Verteilschlüssel, wenn die Lieferungen einen haben', async () => {
+		expect((await findings(rental.building, 2024)).map((f) => f.kind)).not.toContain('keys');
+	});
+
 	// ein Hinweis auf die Tankbestände, keine Bestätigung (#73); nur einer für die Kategorie
 	it('meldet einen negativen Verbrauch', async () => {
 		await record('2026-12-31', '5000.00');

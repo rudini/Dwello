@@ -9,7 +9,8 @@ import {
 	restoredSelection,
 	restoredStep,
 	selectionErrors,
-	statementSteps
+	statementSteps,
+	type CategoryFinding
 } from '../lib/statement-wizard';
 
 const selection = {
@@ -133,10 +134,7 @@ describe('Rechnungen pro Gebäude', () => {
 	});
 });
 
-const finding = (
-	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation',
-	extra = {}
-) => ({
+const finding = (kind: CategoryFinding['kind'], extra = {}) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,
@@ -160,6 +158,13 @@ describe('Rechnungen pro Kategorie', () => {
 				finding('missing', { current: { count: 0, total: 0 }, previous: { count: 1, total: 290 } })
 			)
 		).toBe('Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF\u00a0290.00.');
+	});
+
+	// #890, Option 1: Lieferungen für den Tank mit verschiedenen Verteilschlüsseln
+	it('nennt bei verschiedenen Verteilschlüsseln der Lieferungen den Schlüssel der Veränderung Tankbestand', () => {
+		expect(findingText(finding('keys', { categoryName: 'Heizung', keyName: 'Pro Einheit' }))).toBe(
+			'Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Einheit» verteilt. Prüfen Sie die Verteilschlüssel der Rechnungen.'
+		);
 	});
 
 	// Nur eine Lücke oder Abweichung lässt sich durch einen Teil der Kosten erklären (#130)

@@ -303,6 +303,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom "20.01.2025" über "290.00"
     Und verlangt die Vorschau keine Bestätigung
 
+  # #890: die Lieferungen für den Tank haben verschiedene Verteilschlüssel; die Veränderung Tankbestand folgt dem Schlüssel
+  # der letzten Rechnung, hier «Pro Einheit», und die Prüfung sagt es (Entscheid des Product Owners, Option 1)
+  Szenario: Die Prüfung nennt verschiedene Verteilschlüssel der Lieferungen für den Tank
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15" nach dem Verteilschlüssel "Pro Fläche (m²)"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "500" Franken vom "2024-10-15" nach dem Verteilschlüssel "Pro Einheit"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Einheit» verteilt. Prüfen Sie die Verteilschlüssel der Rechnungen."
+    Und verlangt die Vorschau keine Bestätigung
+
   # #770: Rechnungen vom selben Tag stehen in der Reihenfolge ihrer Erfassung, auch wenn eine danach geändert wurde
   Szenario: Der Hinweis auf Rechnungen nach der Abrechnungsperiode nennt Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"

@@ -1199,6 +1199,7 @@
 	"statements_finding_stock_missing_many": "Mancano le scorte di combustibile al {dates}.",
 	"statements_finding_stock_tail": "Senza scorta iniziale e scorta finale Dwello conteggia l’acquisto, non il consumo. Lei può però conteggiare solo il consumo: registri la scorta nella pagina dell’immobile. Confermi solo se il serbatoio aveva lo stesso livello all’inizio e alla fine.",
 	"statements_finding_stock_negative": "La scorta finale supera di {amount} la scorta iniziale e l’acquisto insieme, il consumo sarebbe negativo. Verifichi le scorte di combustibile e se manca una fornitura o se la sua fattura è datata dopo la fine del periodo.",
+	"statements_finding_stock_keys": "Le forniture della categoria {category} hanno chiavi di riparto diverse. La variazione della scorta di combustibile è ripartita secondo «{key}». Verifichi le chiavi di riparto delle fatture.",
 	"statements_finding_consumption_more": "Consumo {amount}, {percent} % in più rispetto all’anno precedente ({previous}). Verifichi le scorte di combustibile.",
 	"statements_finding_consumption_less": "Consumo {amount}, {percent} % in meno rispetto all’anno precedente ({previous}). Verifichi le scorte di combustibile.",
 	"statements_finding_missing": "Nessuna fattura registrata in questa categoria. Anno precedente: costi di {amount}.",

@@ -802,6 +802,40 @@ describe('Abrechnungen erstellen', () => {
 		expect(frame.textContent).not.toContain('heisst nicht, dass etwas falsch ist');
 	});
 
+	// #890, fach review V-5: the hint on the keys of the tank deliveries is no comparison with the year before either
+	it('nennt verschiedene Verteilschlüssel der Lieferungen auch mit Vorjahr unter «Tankbestände prüfen»', () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'keys',
+								current: { count: 2, total: 1500 },
+								previous: { count: 0, total: 0 },
+								missingParts: [],
+								changePercent: null,
+								keyId: 'k2',
+								keyName: 'Pro Einheit'
+							}
+						]
+					}
+				}
+			]
+		});
+
+		const frame = byTestId('category-check')!;
+		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.textContent).not.toContain('heisst nicht, dass etwas falsch ist');
+	});
+
 	it('bietet bei Heizkosten ohne Tankbestand an, ihn zu erfassen', () => {
 		const sums = (count: number, total: number) => ({ count, total });
 		open({
