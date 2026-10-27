@@ -33,17 +33,6 @@ interface ContractPeriodOverlap {
 }
 
 /**
- * Prorated cost result
- */
-interface ProratedCost {
-	totalAmount: number;
-	proratedAmount: number;
-	prorationDays: number;
-	totalDays: number;
-	periodShare: number;
-}
-
-/**
  * Calculate the number of days between two dates (inclusive)
  */
 function calculateDaysBetween(start: Date, end: Date): number {
@@ -104,36 +93,6 @@ function calculateProrationDays(
 		days: overlap.days,
 		overlapStart: overlap.start,
 		overlapEnd: overlap.end
-	};
-}
-
-/**
- * Calculate prorated amount based on days
- */
-export function prorateCosts(
-	totalAmount: number,
-	prorationDays: number,
-	totalDays: number
-): ProratedCost {
-	if (totalDays <= 0) {
-		return {
-			totalAmount,
-			proratedAmount: 0,
-			prorationDays,
-			totalDays,
-			periodShare: 0
-		};
-	}
-
-	const periodShare = prorationDays / totalDays;
-	const proratedAmount = totalAmount * periodShare;
-
-	return {
-		totalAmount,
-		proratedAmount: roundToRappen(proratedAmount),
-		prorationDays,
-		totalDays,
-		periodShare: Math.round(periodShare * 10000) / 10000 // 4 decimal precision
 	};
 }
 

@@ -3843,3 +3843,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Tests that left records fixed: audit-log, invoice-completeness (its `.catch` never ran: `deleteStatement` returns its refusal), statement-list-contract; each kept a sent or paid statement and so its contract; all 52 pg files with `createRental`: 718 pass
 - [x] Slice review round 1: `docs/reviews/i684-review-1.md`, no findings
 - [x] PR `Fixes #684`: pushed after this archive
+
+## Session: #696 unused prorateCosts
+
+- [x] `prorateCosts`, its type `ProratedCost` and `prorating.service.test.ts` (it tested only that function) deleted; backend coverage 96.5 % lines, 95.5 % functions (floors 82 %, 85 %) (No scenario: dead code removed)
+- [x] Slice review round 1: `docs/reviews/i696-review-1.md`, no findings
+- [x] PR `Fixes #696`: pushed after this archive
