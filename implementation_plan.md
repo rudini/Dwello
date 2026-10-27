@@ -27,8 +27,3 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
 - [x] (3) PR: pushed
 - [ ] (3) PR
-
-## Session: #715 log the new-contract load error once
-
-- [x] The new-contract load logs the statuses only when a response came back; a network error is logged once (test red first: logged twice)
-- [ ] Slice review, PR `Fixes #715`
