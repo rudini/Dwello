@@ -156,7 +156,7 @@ export function toDoOf(row: UploadRow): string[] {
 	// without the KI the required fields are named at once, not only after creating (persona Helga); a required one
 	// counts as done as the create button counts it, an optional one once anything is in it
 	const formField = (field: string) => FORM_FIELD[field as keyof Proposal['fields']];
-	const wrong = validateInvoice({ buildingId: 'chosen in the dialog', ...row.values });
+	const wrong = checkRow(row);
 	const required = REQUIRED.filter((field) => (byHand || row.missing.includes(field)) && wrong[formField(field)]);
 	const optional = row.missing.filter((field) => !REQUIRED.includes(field) && !row.values[formField(field)]);
 	return [

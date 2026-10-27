@@ -1,5 +1,6 @@
 import type { ContractHistory } from './types';
 import type { Tone } from './ui/tone';
+import { dayAfter } from './swiss-date';
 import { formatDate } from './utils/format';
 import { m } from '$lib/paraglide/messages';
 
@@ -91,9 +92,7 @@ export function shortNoticePeriod(receivedOn: string, endDate: string) {
 
 /** The day a contract counts as ended: the day after its last day */
 export function endedSince(endDate: string) {
-	const day = new Date(`${endDate}T00:00:00Z`);
-	day.setUTCDate(day.getUTCDate() + 1);
-	return formatDate(day.toISOString().slice(0, 10));
+	return formatDate(dayAfter(endDate));
 }
 
 /** An end before today, e.g. a notice recorded late, is confirmed with its consequence; null when none is needed */
