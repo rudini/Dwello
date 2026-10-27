@@ -3776,3 +3776,14 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Closing review: `docs/reviews/i770-review-3.md`
 - [x] PR `Fixes #770`: pushed after this archive; merge waits for the product owner because of V-1 (#890)
 - [x] Workflow note: the code went in before the fach-reviewer looked at the rule; for a tie-break in an amount rule, step 1 applies (fach-reviewer before the first green test)
+
+## Session: #890 hint on different keys of the tank deliveries
+
+- [x] Decision recorded in #890 (option 1, product owner 27.10.2026), `needs-decision` removed
+- [x] `@wip` scenario «Die Prüfung nennt verschiedene Verteilschlüssel der Lieferungen für den Tank», red at the missing finding
+- [x] fach-reviewer round 1 (step 1): `docs/reviews/i890-fachreview-1.md`, V-1 (Major) fixed, V-2 and V-4 fixed, V-3 left (narrows the decided rule)
+- [x] Finding kind `keys` (backend), text in four languages, key name in the UI language (BFF); pg, wording, i18n tests red first
+- [x] fach-reviewer round 2: `docs/reviews/i890-fachreview-2.md`, V-1, V-2, V-4 closed; V-5 fixed (DOM test red first)
+- [x] Slice review round 1: `docs/reviews/i890-review-1.md`, C-1 (Major) = V-5, fixed; C-2, C-5 fixed; C-3, C-4 stay Minors
+- [x] Slice review round 2 (closing): `docs/reviews/i890-review-2.md`
+- [x] PR `Fixes #890`: pushed after this archive
