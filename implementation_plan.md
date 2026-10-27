@@ -27,8 +27,3 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
 - [x] (3) PR: pushed
 - [ ] (3) PR
-
-## Session: #744 toDoOf calls checkRow
-
-- [x] `toDoOf` in `src/lib/invoice-upload.ts` calls `checkRow` instead of repeating its `validateInvoice` call; the tests importing the file stay green (213)
-- [ ] Slice review, PR `Fixes #744`
