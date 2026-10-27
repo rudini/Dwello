@@ -3836,3 +3836,10 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Slice review round 1: `docs/reviews/i674-review-1.md`, C-1 (Minor: invisible U+00A0 where the escape was meant) fixed
 - [x] Closing round: `docs/reviews/i674-review-2.md`, no findings
 - [x] PR `Fixes #674`: pushed after this archive
+
+## Session: #684 createRental().remove() fails on a refused delete
+
+- [x] `remove()` throws when a delete is refused (a record the test removed itself, "not found", is fine); `rental-helper.pg.test.ts` red first (No scenario: test helper)
+- [x] Tests that left records fixed: audit-log, invoice-completeness (its `.catch` never ran: `deleteStatement` returns its refusal), statement-list-contract; each kept a sent or paid statement and so its contract; all 52 pg files with `createRental`: 718 pass
+- [x] Slice review round 1: `docs/reviews/i684-review-1.md`, no findings
+- [x] PR `Fixes #684`: pushed after this archive
