@@ -6,6 +6,7 @@ import { actions as editActions } from '../routes/config/distribution-keys/[id]/
 import { runAction } from './helpers/action';
 import formulaRefused from '../../tests/contracts/formula-refused.json';
 import keyDefault from '../../tests/contracts/distribution-key-default-refused.json';
+import nameTaken from '../../tests/contracts/distribution-key-name-taken.json';
 
 const API = 'http://localhost:3001/api/v1/distribution-keys';
 
@@ -95,6 +96,19 @@ describe('Neuer Verteilschlüssel', () => {
 			}
 		});
 		expect(calls).toEqual([]);
+	});
+
+	it('zeigt am Feld Name, dass der Name vergeben ist', async () => {
+		const { result } = runAction(newActions.save, '', 409, form, nameTaken);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				errors: {
+					name: 'Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits.'
+				}
+			}
+		});
 	});
 
 	// in French, so the message can only come from the codes, not from the backend's German text (#852)

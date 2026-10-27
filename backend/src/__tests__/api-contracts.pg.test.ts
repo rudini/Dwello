@@ -1072,6 +1072,14 @@ describe('API-Verträge der Ablehnungen mit Code', () => {
 		expect(drift(await sample('distribution-key-default-refused'), await response.json())).toEqual([]);
 	});
 
+	it('POST /distribution-keys mit einem vergebenen Namen liefert die Felder von distribution-key-name-taken.json', async () => {
+		const key = { name: `Zimmer ${token}`, nameDE: `Zimmer ${token}`, formula: '{rooms}' };
+		await keys.create(key);
+		const response = await keys.create(key);
+		expect(response.status).toBe(409);
+		expect(drift(await sample('distribution-key-name-taken'), await response.json())).toEqual([]);
+	});
+
 	it('DELETE /documents/:id eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {
 		const response = await callApi(`/api/v1/documents/${crypto.randomUUID()}`, { method: 'DELETE' });
 		expect(response.status).toBe(404);

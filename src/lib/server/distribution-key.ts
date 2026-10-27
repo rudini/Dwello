@@ -61,7 +61,8 @@ async function parseKey(request: Request) {
 
 const options = {
 	failure: (_status: number, saved: BackendError) => backendMessage(saved, m.keys_save_failed()),
-	location: () => LIST
+	location: () => LIST,
+	conflict: 'name' // the backend refuses only a name another distribution key has
 };
 
 /** "Neuer Verteilschlüssel": the German name also becomes the key's name */

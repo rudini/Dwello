@@ -3866,3 +3866,16 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 
 - [x] `docs/PRD-Dwello.md` (Internationalization) and the same wrong line in `docs/tech-stack.md` (Language) name Paraglide JS, `messages/{de,fr,it,en}.json` and `paraglide.config.ts`, and that the UI is in four languages (No scenario: documentation only; no review round: no code changed)
 - [x] PR `Fixes #693`: pushed after this archive
+
+## Session: #655 name conflicts at the Name field
+
+- [x] `@wip` scenarios «Name ist schon vergeben» in `heating-profiles.feature` and `distribution-keys.feature`, seen red (message not at the Name field)
+- [x] Heating profile: a 409 refusal shows at the Name field (`src/__tests__/heating-profiles.test.ts`)
+- [x] Distribution key: a 409 refusal shows at the Name field (`src/__tests__/distribution-keys.test.ts`, contract `distribution-key-name-taken.json`)
+- [x] Scenarios green without `@wip`
+- [x] Slice review round 1: `docs/reviews/i655-review-1.md`; personas `sven-i655.md`, `helga-i655.md`
+- [x] Sven P-1 (Major): a predefined profile's German name was not refused; `getHeatingProfileByName` matches `nameDE` too, as distribution keys do (`heating-profile-admin.pg.test.ts`)
+- [x] Review round 2 (P-1 fix): `docs/reviews/i655-review-2.md`; scenario «Name eines vordefinierten Heizprofils ist schon vergeben» and a PUT test added
+- [x] Review round 3 (closing): `docs/reviews/i655-review-3.md`, C-1 and C-2 closed, nothing open
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-655.md`
+- [x] PR `Fixes #655`: pushed after this archive
