@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest';
 
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), '../../deploy/demo/update.sh');
 
-/** The demo's clone of a remote main, with update.sh in place and `docker` as a stand-in that logs the version it builds;
- * `dev` changes the remote (commits, tags) as merges and release runs do */
+/** The demo's clone of a remote main, with update.sh in place, `docker` as a stand-in that logs the version it builds
+ * and `flock` as one that always locks; `dev` changes the remote (commits, tags) as merges and release runs do */
 function demo() {
 	const dir = mkdtempSync(join(tmpdir(), 'demo-update-'));
 	const at = (name: string) => (...args: string[]) =>
@@ -27,6 +27,9 @@ function demo() {
 	copyFileSync(SCRIPT, join(dir, 'demo/deploy/demo/update.sh'));
 	writeFileSync(join(dir, 'docker'), `#!/bin/sh\n[ "$1" = compose ] && echo "$APP_VERSION" >> ${join(dir, 'builds.log')}\nexit 0\n`);
 	chmodSync(join(dir, 'docker'), 0o755);
+	// macOS has no flock (util-linux): a stand-in that always gets the lock (#729)
+	writeFileSync(join(dir, 'flock'), '#!/bin/sh\nexit 0\n');
+	chmodSync(join(dir, 'flock'), 0o755);
 	const update = () =>
 		spawnSync('sh', [join(dir, 'demo/deploy/demo/update.sh')], {
 			encoding: 'utf8',
