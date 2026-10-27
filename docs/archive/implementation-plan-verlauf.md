@@ -3753,3 +3753,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Slice review round 1: `docs/reviews/i711-review-1.md`, C-1 (Major: `endedSince`, `followedOn` computed the day after too) fixed, they call `dayAfter`
 - [x] Slice review round 2: `docs/reviews/i711-review-2.md`, C-1 closed, no new findings
 - [x] PR `Fixes #711`: pushed after this archive
+
+## Session: #745 PDF line of a Leistungszeitraum begun before the period
+
+- [x] pg test in `statement-pdf.pg.test.ts`: Leistungszeitraum 01.12.2024 – 28.02.2025 in a 2025 statement prints the whole invoice and its part (pins existing behaviour, no red run; No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i745-review-1.md`, no findings
+- [x] PR `Fixes #745`: pushed after this archive
