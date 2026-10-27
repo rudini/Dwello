@@ -38,11 +38,13 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	});
 	// an empty choice would read as "no tenants yet" (#147): the landlord sees a load error instead
 	if (!tenantsRes?.ok || !apartmentsRes?.ok) {
-		console.error(
-			'Failed to load data for contract form:',
-			tenantsRes?.status,
-			apartmentsRes?.status
-		);
+		// without a response the .catch above has logged the network error already (#715)
+		if (tenantsRes)
+			console.error(
+				'Failed to load data for contract form:',
+				tenantsRes.status,
+				apartmentsRes.status
+			);
 		throw error(500, m.contracts_choices_load_failed());
 	}
 	const tenantsData = await tenantsRes.json();

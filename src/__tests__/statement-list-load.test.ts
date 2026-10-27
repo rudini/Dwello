@@ -7,6 +7,8 @@ import periodStatements from '../../tests/contracts/period-statements.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 // What GET /api/v1/statements answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import listedStatements from '../../tests/contracts/statements.json';
+// What GET /api/v1/statements/counts answers, checked against the real API as well
+import statusCounts from '../../tests/contracts/statement-counts.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -15,7 +17,7 @@ describe('Abrechnungsliste laden', () => {
 		const urls: string[] = [];
 		const fetch = (async (url: string) => {
 			urls.push(url);
-			if (url.includes('/statements/counts')) return Response.json({ draft: 2, overdue: 1 });
+			if (url.includes('/statements/counts')) return Response.json(statusCounts);
 			if (url.includes('/buildings'))
 				return Response.json({ data: [{ id: 'b1', name: 'Ahornhof' }] });
 			return Response.json({
@@ -50,7 +52,7 @@ describe('Abrechnungsliste laden', () => {
 			pageSize: 10,
 			buildings: [{ id: 'b1', name: 'Ahornhof' }]
 		});
-		expect(data.statusCounts).toEqual({ draft: 2, sent: 0, paid: 0, settled: 0, overdue: 1 });
+		expect(data.statusCounts).toEqual({ draft: 2, sent: 3, paid: 4, settled: 5, overdue: 1 });
 		expect(data.statements[0]).toMatchObject({
 			tenantName: 'Anna Keller',
 			apartmentUnit: '2.01',

@@ -3704,3 +3704,45 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) Helga round 2 (same report): P-1 fixed; P-2 (Minor: the dialog offers no reload) stays in the report
 - [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
 - [x] (3) PR #871 merged
+## Session: #869 flaky «Suche ohne Treffer» in Firefox
+
+- [x] Cause from the trace of run 40400795129 (shard 3): the search was typed and «Suchen» clicked, but no request followed; the page had `data-hydrated`, which the root layout set in `onMount`, before SvelteKit's router listens for submits (probe: a click at the marker loads the document natively instead of through the router)
+- [x] Layout sets `data-hydrated` one task after mounting, once the router listens (DOM test, red first; `src/routes/+layout.svelte`, `src/__tests__/layout-hydrated.dom.test.ts`)
+- [x] Probe on the E2E stack: a click at the marker goes through the router (5 of 5; before: native document load)
+- [x] Affected E2E scenarios green: full Chromium suite, 1505 passed
+- [x] Slice review round 1: `docs/reviews/i869-review-1.md`
+- [x] PR `Fixes #869`: pushed after this archive
+
+## Session: #854 statement detail test without a description list
+
+- [x] The test asserts that the sums are a `<dl>` (the list holding «Total Kosten»), seen red with the list taken out
+- [x] `bun run testcheck:scan src` reports no finding for it
+- [x] Slice review round 1: `docs/reviews/i854-review-1.md`, no findings
+- [x] PR `Fixes #854`: pushed after this archive
+
+## Session: #726 API contract for GET /statements/counts
+
+- [x] `tests/contracts/statement-counts.json` with a distinct value per status (README row)
+- [x] `api-contracts.pg.test.ts` checks it against the real API (seen red with `draft` as a string)
+- [x] `statement-list-load.test.ts` answers from the contract
+- [x] Slice review round 1: `docs/reviews/i726-review-1.md`, no findings
+- [x] PR `Fixes #726`: pushed after this archive
+
+## Session: #755 categories.test.ts answers from the categories contract
+
+- [x] `categories.json` gets `invoiceCount`, which the list page reads (contract test red with a number, green with the string the API sends)
+- [x] «zeigt den deutschen Namen der Kategorie» answers from `categories.json` (fails without `invoiceCount` in the contract)
+- [x] Slice review round 1: `docs/reviews/i755-review-1.md`, no findings
+- [x] PR `Fixes #755`: pushed after this archive
+
+## Session: #744 toDoOf calls checkRow
+
+- [x] `toDoOf` in `src/lib/invoice-upload.ts` calls `checkRow` instead of repeating its `validateInvoice` call; the tests importing the file stay green (213)
+- [x] Slice review round 1: `docs/reviews/i744-review-1.md`, no findings
+- [x] PR `Fixes #744`: pushed after this archive
+
+## Session: #715 log the new-contract load error once
+
+- [x] The new-contract load logs the statuses only when a response came back; a network error is logged once (test red first: logged twice)
+- [x] Slice review round 1: `docs/reviews/i715-review-1.md`, no findings
+- [x] PR `Fixes #715`: pushed after this archive
