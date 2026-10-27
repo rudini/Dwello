@@ -3709,3 +3709,10 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] `statement-list-load.test.ts` answers from the contract
 - [x] Slice review round 1: `docs/reviews/i726-review-1.md`, no findings
 - [x] PR `Fixes #726`: pushed after this archive
+
+## Session: #755 categories.test.ts answers from the categories contract
+
+- [x] `categories.json` gets `invoiceCount`, which the list page reads (contract test red with a number, green with the string the API sends)
+- [x] «zeigt den deutschen Namen der Kategorie» answers from `categories.json` (fails without `invoiceCount` in the contract)
+- [x] Slice review round 1: `docs/reviews/i755-review-1.md`, no findings
+- [x] PR `Fixes #755`: pushed after this archive
