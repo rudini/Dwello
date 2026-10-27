@@ -133,6 +133,41 @@ describe('Rechnungen ohne Leistungszeitraum', () => {
 	it('nennt in einer Abrechnungsperiode von einem Jahr keine Rechnungen ohne Leistungszeitraum', async () => {
 		expect((await listed('2024-01-01', '2024-12-31')).whole).toEqual([]);
 	});
+
+	// Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung, nicht in der, in der die Datenbank sie gespeichert hat (#770)
+	it('nennt Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung', async () => {
+		const sameDay = await createRental(crypto.randomUUID(), {
+			startDate: '2020-01-01',
+			monthlyAdvancePayment: '0'
+		});
+		await insertInvoice(sameDay.building, {
+			billingEntityName: 'Später erfasst',
+			invoiceDate: '2025-02-10'
+		});
+		await insertInvoice(sameDay.building, {
+			billingEntityName: 'Früher erfasst',
+			invoiceDate: '2025-02-10'
+		});
+		// the update writes the row anew behind the other one
+		await db
+			.update(invoices)
+			.set({ createdAt: new Date('2025-02-10T08:00:00Z') })
+			.where(eq(invoices.billingEntityName, 'Früher erfasst'));
+		try {
+			const response = await callApi(
+				`/api/v1/invoices/completeness/${sameDay.building}?periodStart=2024-01-01&periodEnd=2024-12-31`
+			);
+			const { lateInvoices } = (await response.json()) as {
+				lateInvoices: { billingEntityName: string }[];
+			};
+			expect(lateInvoices.map((i) => i.billingEntityName)).toEqual([
+				'Früher erfasst',
+				'Später erfasst'
+			]);
+		} finally {
+			await sameDay.remove();
+		}
+	});
 });
 
 describe('Hinweise mit eigenem Gebäude', () => {

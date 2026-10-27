@@ -22,6 +22,7 @@ import {
 	heatingWithoutServicePeriodOn,
 	countOfHeatingWithoutServicePeriodOn,
 	lateInvoiceOn,
+	lateInvoicesInOrder,
 	uncategorizedInvoiceOn,
 	uncategorizedInvoicesText,
 	countOfLateInvoicesOn,
@@ -538,6 +539,13 @@ Then(
 	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom {string} über {string}',
 	async ({ verwalter }, date: string, amount: string) => {
 		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then(
+	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode zuerst die Rechnung über {string}, dann die über {string}',
+	async ({ verwalter }, first: string, second: string) => {
+		await verwalter.sees(lateInvoicesInOrder([first, second])).toEqual([first, second]);
 	}
 );
 

@@ -481,6 +481,13 @@ export function testData(api: CallTheApi) {
 			return id;
 		},
 
+		// Invoice in a predefined category distributed by another predefined key, given by its German name (#770)
+		async invoiceOnByKey(buildingTitle: string, categoryName: string, amount: string, date: string, keyName: string) {
+			const category = await predefinedCategory(categoryName);
+			const key = (await get('distribution-keys?limit=100')).data.find((k: { nameDE: string }) => k.nameDE === keyName);
+			await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: key.id }, `${categoryName} ${date}`, amount, date);
+		},
+
 		// A recorded invoice deleted afterwards, e.g. one recorded twice (#454)
 		async deleteInvoice(key: string) {
 			await remove(`invoices/${ids.get(key)}`);

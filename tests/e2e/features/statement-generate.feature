@@ -303,6 +303,14 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom "20.01.2025" über "290.00"
     Und verlangt die Vorschau keine Bestätigung
 
+  # #770: Rechnungen vom selben Tag stehen in der Reihenfolge ihrer Erfassung, auch wenn eine danach geändert wurde
+  Szenario: Der Hinweis auf Rechnungen nach der Abrechnungsperiode nennt Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2025-01-20"
+    Und die Rechnung "Kaminfeger 2025-01-20" kostet danach "295" Franken
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode zuerst die Rechnung über "295.00", dann die über "470.00"
+
   # Heizöl zählt über den Tankbestand, nicht über einen Leistungszeitraum
   Szenario: Heizöl für den Tank steht nicht im Hinweis auf Rechnungen nach der Abrechnungsperiode
     Angenommen im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "800" Franken im Tank

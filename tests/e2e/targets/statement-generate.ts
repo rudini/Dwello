@@ -103,6 +103,8 @@ export const heatingWithoutServicePeriod = target('Hinweis auf Rechnungen der He
 );
 export const hintedInvoice = (hint: Target, date: string) =>
 	target(`Rechnung vom ${date} in «${hint}»`, (page) => hint.locate(page).getByTestId('hinted-invoice').filter({ hasText: date }));
+export const hintedInvoices = (hint: Target) =>
+	target(`Rechnungen in «${hint}»`, (page) => hint.locate(page).getByTestId('hinted-invoice'));
 // the date names the invoice in either hint
 export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>

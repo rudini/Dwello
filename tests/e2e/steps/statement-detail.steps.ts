@@ -125,6 +125,13 @@ Given(
 );
 
 Given(
+	'im Gebäude {string} gibt es danach eine Rechnung der Kategorie {string} über {string} Franken vom {string} nach dem Verteilschlüssel {string}',
+	async ({ seed }, building: string, category: string, amount: string, date: string, key: string) => {
+		await seed.invoiceOnByKey(building, category, amount, date, key);
+	}
+);
+
+Given(
 	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit dem Heizprofil {string}',
 	async ({ seed }, tenant: string, building: string, year: number, profile: string) => {
 		await seed.statement(tenant, building, year, profile);
