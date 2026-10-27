@@ -258,6 +258,21 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		expect(text).not.toMatch(/Hauswart .* 139\/365 Tage/);
 	});
 
+	// Der Leistungszeitraum beginnt vor der Periode: Dezember 2024 bis Februar 2025 (90 Tage), davon 59 in 2025;
+	// eine zweite Rechnung über andere Tage, damit die Zeilen je Rechnung gedruckt werden (#745)
+	it('nennt bei einem Leistungszeitraum vor der Periode die ganze Rechnung und ihren Teil darin', async () => {
+		const winter = await createRental(crypto.randomUUID(), { startDate: '2025-02-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(winter.building, { amount: '900.00', invoiceDate: '2025-03-05', servicePeriodStart: '2024-12-01', servicePeriodEnd: '2025-02-28' });
+		await insertInvoice(winter.building, { amount: '600.00', invoiceDate: '2025-12-20', servicePeriodStart: '2025-03-01', servicePeriodEnd: '2025-12-31' });
+		const statement = await generateStatement({ contractId: winter.contract, buildingId: winter.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await winter.remove();
+
+		expect(text).toContain('Leistungszeitraum 01.12.2024 – 28.02.2025 (Rechnung CHF 900.00 für 90 Tage), davon 01.01.2025 – 28.02.2025 (59 Tage): CHF 590.00, Ihre Mietstage 28 von 59 Tagen');
+	});
+
 	// Eine Rechnung ohne Leistungszeitraum rechnet die ganze Periode ab, ihre Zeile nennt deren Tage (#226, V-12)
 	it('nennt eine Rechnung ohne Leistungszeitraum unter der Position mit den Tagen der Periode', async () => {
 		const mixed = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
