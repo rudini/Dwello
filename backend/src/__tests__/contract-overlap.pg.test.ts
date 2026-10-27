@@ -1,5 +1,5 @@
 /**
- * A flat is let to one tenant at a time: new contracts that overlap an existing one are refused
+ * A flat is let to one tenant at a time: new contracts and changed dates that overlap another contract are refused
  * (real PostgreSQL database)
  */
 
@@ -51,5 +51,19 @@ describe('POST /api/v1/contracts', () => {
 
 	it('nimmt einen früheren Vertrag an, der vor dem laufenden Vertrag endet', async () => {
 		expect((await letTo('2023-01-01', '2024-03-31')).status).toBe(201);
+	});
+});
+
+describe('PUT /api/v1/contracts/:id', () => {
+	it('lehnt neue Daten ab, mit denen der Vertrag den laufenden Vertrag überschneidet', async () => {
+		const earlier = (await (await letTo('2021-01-01', '2021-12-31')).json()) as { id: string };
+
+		const response = await contracts.send('PUT', `/${earlier.id}`, {
+			endDate: '2024-06-30',
+			confirmPastEnd: true
+		});
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'CONTRACT_OVERLAP' });
 	});
 });

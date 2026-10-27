@@ -3759,3 +3759,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] pg test in `statement-pdf.pg.test.ts`: Leistungszeitraum 01.12.2024 – 28.02.2025 in a 2025 statement prints the whole invoice and its part (pins existing behaviour, no red run; No scenario: test only)
 - [x] Slice review round 1: `docs/reviews/i745-review-1.md`, no findings
 - [x] PR `Fixes #745`: pushed after this archive
+
+## Session: #735 refusal of a contract changed into an overlap
+
+- [x] pg test in `contract-overlap.pg.test.ts`: changing a contract's end so it overlaps the running contract is refused with `CONTRACT_OVERLAP` (pins existing behaviour; fails with the update path's overlap check taken out; No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i735-review-1.md`, no findings
+- [x] PR `Fixes #735`: pushed after this archive
