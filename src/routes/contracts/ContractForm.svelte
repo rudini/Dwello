@@ -21,6 +21,7 @@
 		type RefusedStatement
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
+	import { dayAfter } from '$lib/swiss-date';
 	import { formatDate } from '$lib/utils/format';
 	import { normalizeAmounts, startInPast, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
@@ -99,10 +100,6 @@
 	const back = $derived(`/contracts/${contract.id}`);
 	const link =
 		'inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong';
-	// the earliest start of a new contract after this one (YYYY-MM-DD is midnight UTC)
-	const nextDay = (end: string) =>
-		new Date(Date.parse(end.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10);
-	const dayAfter = (end: string) => formatDate(nextDay(end));
 	// «Befristet» for a contract saved open-ended: a notice is entered with «Beenden» (Sven K1 M1); a saved notice
 	// always has an end (backend `checkNotice`)
 	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
@@ -285,7 +282,7 @@
 		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
 			<p>
 				{contract.endDate
-					? m.contracts_parties_fixed_ended({ date: dayAfter(contract.endDate) })
+					? m.contracts_parties_fixed_ended({ date: formatDate(dayAfter(contract.endDate)) })
 					: m.contracts_parties_fixed_open()}
 			</p>
 			<p>{m.contracts_parties_fixed_mistake()}</p>
@@ -297,7 +294,7 @@
 			{#if contract.endDate}
 				<!-- for the same tenant, e.g. a move within the house (#156); the name keeps it from the Nachmieter -->
 				<a
-					href="/contracts/new?tenant={contract.tenantId}&start={nextDay(contract.endDate)}&from={contract.id}"
+					href="/contracts/new?tenant={contract.tenantId}&start={dayAfter(contract.endDate)}&from={contract.id}"
 					class={link}
 					data-testid="contract-parties-new">{m.contracts_new_for_tenant({ name: tenant })}</a
 				>
