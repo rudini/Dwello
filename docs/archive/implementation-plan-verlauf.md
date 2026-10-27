@@ -3855,3 +3855,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] `paraglide.config.ts` exports the options for `vite.config.ts` and `vitest.config.ts` and compiles with them when run; `bun run i18n` runs it; generated runtime and messages identical to the old CLI flags (No scenario: build tooling)
 - [x] Slice review round 1: `docs/reviews/i695-review-1.md`, no findings
 - [x] PR `Fixes #695`: pushed after this archive
+
+## Session: #694 heating profile sum by test ID in the exploratory script
+
+- [x] `tests/exploratory-test.ts` finds the sum by the existing `heating-profile-form-total` (no component change; the issue's name was an example) instead of a CSS class and a text pattern (No scenario: manual script, not run: needs a running app)
+- [x] Slice review round 1: `docs/reviews/i694-review-1.md`, no findings
+- [x] PR `Fixes #694`: pushed after this archive
