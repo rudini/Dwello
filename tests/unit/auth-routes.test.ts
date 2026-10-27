@@ -295,6 +295,7 @@ describe('Auth Routes Integration Tests', () => {
 			);
 			try {
 				const redirect = callback('code=auth-code-123&state=mock-state-abc123');
+				await vi.waitUntil(() => mockFetch.mock.calls.length > 0); // jose signs the JWT with WebCrypto first, off the fake clock
 				await vi.advanceTimersByTimeAsync(5000);
 
 				expect(await redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
