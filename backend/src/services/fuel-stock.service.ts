@@ -74,7 +74,7 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 					upTo ? lte(invoices.invoiceDate, upTo) : undefined
 				)
 			)
-			.orderBy(desc(invoices.invoiceDate))
+			.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt), desc(invoices.id)) // of one day the last entered (#770)
 			.limit(1);
 	const [bill] = [...(await latest(periodEnd)), ...(await latest())];
 	const id = bill?.id ?? (await getTypedConfig('default_distribution_key_id'));
