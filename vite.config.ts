@@ -1,11 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
-import { paraglideOptions } from './paraglide.config';
+import { paraglideOptions } from './paraglide.config.ts';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { execSync } from 'node:child_process';
-import { versionFrom } from './src/lib/version';
+import { versionFrom } from './src/lib/version.ts';
 
 // APP_VERSION from the Docker build or the E2E run, else the checkout's own tags; none without git
 function describeVersion(): string {
