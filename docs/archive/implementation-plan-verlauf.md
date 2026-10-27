@@ -3722,3 +3722,9 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] `toDoOf` in `src/lib/invoice-upload.ts` calls `checkRow` instead of repeating its `validateInvoice` call; the tests importing the file stay green (213)
 - [x] Slice review round 1: `docs/reviews/i744-review-1.md`, no findings
 - [x] PR `Fixes #744`: pushed after this archive
+
+## Session: #715 log the new-contract load error once
+
+- [x] The new-contract load logs the statuses only when a response came back; a network error is logged once (test red first: logged twice)
+- [x] Slice review round 1: `docs/reviews/i715-review-1.md`, no findings
+- [x] PR `Fixes #715`: pushed after this archive
