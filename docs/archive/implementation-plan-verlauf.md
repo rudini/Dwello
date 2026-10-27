@@ -3861,3 +3861,8 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] `tests/exploratory-test.ts` finds the sum by the existing `heating-profile-form-total` (no component change; the issue's name was an example) instead of a CSS class and a text pattern (No scenario: manual script, not run: needs a running app)
 - [x] Slice review round 1: `docs/reviews/i694-review-1.md`, no findings
 - [x] PR `Fixes #694`: pushed after this archive
+
+## Session: #693 PRD names Paraglide JS, not svelte-i18n
+
+- [x] `docs/PRD-Dwello.md` (Internationalization) and the same wrong line in `docs/tech-stack.md` (Language) name Paraglide JS, `messages/{de,fr,it,en}.json` and `paraglide.config.ts`, and that the UI is in four languages (No scenario: documentation only; no review round: no code changed)
+- [x] PR `Fixes #693`: pushed after this archive

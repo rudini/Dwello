@@ -1524,10 +1524,10 @@ BALANCE (refund): CHF 30
 
 **Internationalization (i18n)**
 
-**Library:** `svelte-i18n`
-- **Purpose:** UI texts (German) and tenant-facing statement PDFs
-- **Languages:** UI in German; statement PDFs and reminders in German, French, Italian, English
-- **Format:** JSON translation files per language
+**Library:** Paraglide JS (`@inlang/paraglide-js`, options in `paraglide.config.ts`) for the UI; the backend's own texts for the statement PDFs (`backend/src/services/pdf.service.ts`)
+- **Purpose:** UI texts and tenant-facing statement PDFs
+- **Languages:** UI, statement PDFs and reminders in German, French, Italian, English
+- **Format:** one JSON file per language, `messages/{de,fr,it,en}.json` (German the base)
 - **Cost:** Free
 
 **Date/Time Handling**
