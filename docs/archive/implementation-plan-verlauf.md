@@ -3788,3 +3788,9 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] Slice review round 2 (closing): `docs/reviews/i890-review-2.md`
 - [x] PR `Fixes #890`: pushed after this archive
 - [x] CI «Architecture fitness»: the finding kinds are declared once (`backend/src/api/invoice.ts`); review round 3 `docs/reviews/i890-review-3.md`, C-1 (Minor: stale ratchet entry) fixed with `bun run fitness -- --update`
+
+## Session: #716 codes of CodedError subclasses
+
+- [x] `backend-codes.test.ts` finds a code in any `new <Name>('…')`; pattern test red first; twelve more codes found, all with a message (No scenario: test only)
+- [x] Slice review round 1: `docs/reviews/i716-review-1.md`, no findings
+- [x] PR `Fixes #716`: pushed after this archive
