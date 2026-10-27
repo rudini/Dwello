@@ -1105,9 +1105,9 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Pro Einheit 1 / 1 Wohnungen 400.00 400.00"
 
-  # #770: zwei Rechnungen für den Tank vom selben Tag mit verschiedenen Verteilschlüsseln; der Verbrauch aus dem Tank
-  # (500 Franken: Anfangsbestand − Endbestand) wird nach dem Schlüssel der zuletzt erfassten verteilt
-  Szenario: Das PDF nennt für den Tankbestand den Verteilschlüssel der zuletzt erfassten Rechnung vom selben Tag
+  # #770: zwei Lieferungen für den Tank vom selben Tag mit verschiedenen Verteilschlüsseln; die Veränderung Tankbestand
+  # (500 Franken: Anfangsbestand − Endbestand) wird nach dem Schlüssel der zuletzt erfassten verteilt (#890)
+  Szenario: Das PDF nennt für die Veränderung Tankbestand den Verteilschlüssel der zuletzt erfassten Rechnung vom selben Tag
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
