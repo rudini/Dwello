@@ -1,6 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
+import { paraglideOptions } from './paraglide.config';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { execSync } from 'node:child_process';
@@ -28,11 +29,7 @@ export default defineConfig(({ mode }) => {
 			tailwindcss(),
 			sveltekit(),
 			// UI language from the cookie, else the browser's (de, fr, it, en), else German; no URL prefix
-			paraglideVitePlugin({
-				project: './project.inlang',
-				outdir: './src/lib/paraglide',
-				strategy: ['cookie', 'preferredLanguage', 'baseLocale']
-			})
+			paraglideVitePlugin(paraglideOptions)
 		],
 		test: {
 			include: ['src/**/*.{test,spec}.{js,ts}'],

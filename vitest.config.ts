@@ -1,16 +1,13 @@
 import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
+import { paraglideOptions } from './paraglide.config';
 import { resolve } from 'path';
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		paraglideVitePlugin({
-			project: './project.inlang',
-			outdir: './src/lib/paraglide',
-			strategy: ['cookie', 'preferredLanguage', 'baseLocale']
-		})
+		paraglideVitePlugin(paraglideOptions)
 	],
 	// The version the build bakes in (vite.config.ts); tests see a fixed one
 	define: { __APP_VERSION__: JSON.stringify('1.4.0') },
