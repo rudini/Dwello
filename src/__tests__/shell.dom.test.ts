@@ -128,6 +128,12 @@ describe('Fusszeile', () => {
 		expect(byTestId('footer-version')!.textContent).toBe('Version 1.4.0');
 	});
 
+	// #676: a long development version (0.12.0+123-gabcdef1) wrapped inside the number on a 390 px phone
+	it('bricht die Version nicht um', () => {
+		show(Footer, {});
+		expect(byTestId('footer-version')!.classList).toContain('whitespace-nowrap');
+	});
+
 	it('lässt den Trennpunkt vor der Version nicht vorlesen', () => {
 		show(Footer, {});
 		expect(document.querySelector('footer p [aria-hidden="true"]')?.textContent).toBe('·');

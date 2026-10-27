@@ -8,7 +8,7 @@
 	>
 		<p>
 			© {new Date().getFullYear()} Dwello <span aria-hidden="true">·</span>
-			<span data-testid="footer-version"
+			<span data-testid="footer-version" class="whitespace-nowrap"
 				>{__APP_VERSION__
 					? m.footer_version({ version: __APP_VERSION__ })
 					: m.footer_version_unknown()}</span
