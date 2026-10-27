@@ -99,6 +99,20 @@ jobs:
         run: bun run build
         working-directory: backend
 
+  # Both images as the deployment builds them (docker-compose.prod.yml): a broken Dockerfile went unnoticed until the
+  # demo deployment (#727); build only, nothing is pushed
+  docker:
+    name: Docker images
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build frontend image
+        run: docker build --file Dockerfile .
+      - name: Build backend image
+        run: docker build backend
+
   static-checks:
     name: Lint and types
     runs-on: ubuntu-latest
@@ -347,7 +361,7 @@ jobs:
   # nightly run the share of green push runs on main over 7 days; a report, never a failure (one run's time is noisy)
   ci-duration:
     name: CI duration
-    needs: [changes, build, static-checks, unit-tests, e2e-results, fallow, fitness]
+    needs: [changes, build, docker, static-checks, unit-tests, e2e-results, fallow, fitness]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
@@ -550,7 +564,7 @@ jobs:
   # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").
   main-status:
     name: Main status
-    needs: [changes, build, static-checks, unit-tests, e2e-tests, e2e-results, fallow, fitness]
+    needs: [changes, build, docker, static-checks, unit-tests, e2e-tests, e2e-results, fallow, fitness]
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
