@@ -28,7 +28,7 @@ for (const rec of log.split('\x1e')) {
 	if (!sha) continue;
 	const ps = parents.split(' ');
 	const merge = ps.length > 1;
-	let pr = '';
+	let pr: string;
 	let branch = '';
 	let title = subject;
 	if (merge) {

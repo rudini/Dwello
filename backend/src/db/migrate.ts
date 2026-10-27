@@ -43,7 +43,7 @@ export async function migrate(connectionString: string, directory: string) {
 				await client.query('COMMIT');
 			} catch (error) {
 				await client.query('ROLLBACK');
-				throw new Error(`Migration ${file} fehlgeschlagen: ${error instanceof Error ? error.message : error}`);
+				throw new Error(`Migration ${file} fehlgeschlagen: ${error instanceof Error ? error.message : error}`, { cause: error });
 			}
 		}
 		return pending;

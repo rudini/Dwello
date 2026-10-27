@@ -140,6 +140,7 @@
 		const draft = readDraft<ContractFormValues>(browserStorage(), DRAFT);
 		if (!draft) return;
 		// a tenant chosen before the page was live counts like one in the address
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- a local copy, read once
 		const given = new URLSearchParams(params);
 		if (values.tenantId) given.set('tenant', values.tenantId);
 		const known = {

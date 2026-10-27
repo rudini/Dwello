@@ -109,7 +109,11 @@ export default [
 			'@typescript-eslint': ts
 		},
 		rules: {
-			...svelte.configs.recommended.rules,
+			...Object.assign({}, ...svelte.configs.recommended.map((c) => c.rules)),
+			// no paths.base in svelte.config.js, so links need no resolve()
+			'svelte/no-navigation-without-resolve': 'off',
+			// a $bindable() default is read by the parent, which the core rule cannot see
+			'no-useless-assignment': 'off',
 			// Ignore underscore-prefixed variables (used for callback type parameters)
 			'no-unused-vars': 'off',
 			'@typescript-eslint/no-unused-vars': [
