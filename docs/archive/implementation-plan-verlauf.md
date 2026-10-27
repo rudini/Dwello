@@ -3728,3 +3728,10 @@ Request: delete the review and persona reports of finished tasks (product owner,
 - [x] The new-contract load logs the statuses only when a response came back; a network error is logged once (test red first: logged twice)
 - [x] Slice review round 1: `docs/reviews/i715-review-1.md`, no findings
 - [x] PR `Fixes #715`: pushed after this archive
+
+## Session: #711 one helper for the day after a date
+
+- [x] `dayAfter` in `src/lib/swiss-date.ts` (test red first), used by `ContractForm.svelte` and `calendarName` in `statement-wizard.ts`; the private `addDays` of `contract-availability.ts` the issue names no longer exists
+- [x] Slice review round 1: `docs/reviews/i711-review-1.md`, C-1 (Major: `endedSince`, `followedOn` computed the day after too) fixed, they call `dayAfter`
+- [x] Slice review round 2: `docs/reviews/i711-review-2.md`, C-1 closed, no new findings
+- [x] PR `Fixes #711`: pushed after this archive

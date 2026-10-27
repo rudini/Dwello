@@ -27,8 +27,3 @@ Request: (1) fix the commit subject gate that let a 51-character subject through
 - [x] (3) closing round (`docs/reviews/852-review-3.md`): C-5 closed, nothing new
 - [x] (3) PR: pushed
 - [ ] (3) PR
-
-## Session: #711 one helper for the day after a date
-
-- [x] `dayAfter` in `src/lib/swiss-date.ts` (test red first), used by `ContractForm.svelte` and `calendarName` in `statement-wizard.ts`; the private `addDays` of `contract-availability.ts` the issue names no longer exists
-- [ ] Slice review, PR `Fixes #711`
