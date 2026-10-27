@@ -1105,6 +1105,20 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Pro Einheit 1 / 1 Wohnungen 400.00 400.00"
 
+  # #770: zwei Rechnungen für den Tank vom selben Tag mit verschiedenen Verteilschlüsseln; der Verbrauch aus dem Tank
+  # (500 Franken: Anfangsbestand − Endbestand) wird nach dem Schlüssel der zuletzt erfassten verteilt
+  Szenario: Das PDF nennt für den Tankbestand den Verteilschlüssel der zuletzt erfassten Rechnung vom selben Tag
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "500" Franken vom "2024-10-15"
+    Und im Gebäude "Lindenhof" gibt es danach eine Rechnung der Kategorie "Heizung" über "500" Franken vom "2024-10-15" nach dem Verteilschlüssel "Pro Einheit"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Heizung Pro Einheit 1 / 1 Wohnungen 1'000.00"
+
   # #403 (5): die Teilzahlung auf die ersetzte Abrechnung steht im PDF der berichtigten als «Bereits bezahlt auf NK-…»
   Szenario: PDF der berichtigten Abrechnung nennt die Teilzahlung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
