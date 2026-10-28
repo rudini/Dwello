@@ -19,4 +19,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Persona Helga: `docs/design/personas/helga-773.md` (run 1 with a reading KI stand-in did not reach the state, not kept)
 - [x] Helga P-1 (Major, «Gelesen: 1 von 1» next to «nicht gelesen»): product owner decided 2026-10-28, counts only once all are read; DOM tests seen red
 - [x] Closing review: `docs/reviews/773-review-2.md`
+- [x] PR merged: #929
+
+### #484 Glossary row «Erledigt»
+- [x] Row «Erledigt» in `UBIQUITOUS_LANGUAGE.md` as decided on 2026-10-28 (proposal of domain review 448-4 V-28, `settled`)
+- [x] Help texts checked: `glossary_balance_text`, `glossary_settled_text` and the help at «Bezahlt am» already follow #448; no marker names #484
+- [x] No scenario: glossary text only, no app change
 - [ ] PR merged

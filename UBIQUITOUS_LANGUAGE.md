@@ -199,7 +199,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Entwurf** | Abrechnung erstellt, noch nicht versendet. (`draft`) |
 | **Versendet** | Abrechnung dem Mieter zugestellt. (`sent`) |
 | **Bezahlt** | Nachzahlung/Rückerstattung mit einer Zahlung abgeschlossen. Lässt sich mit «Zahlung zurücksetzen» zurücknehmen. (`paid`) |
-| **Erledigt** | Status einer versendeten Abrechnung ohne Zahlung, weil der Saldo 0.00 ist oder übertragen wird. Sie hat kein Zahlungsdatum und wird nicht gemahnt. (geplant #403) |
+| **Erledigt** | Status einer versendeten Abrechnung, auf die keine Zahlung folgt: Saldo 0.00, oder ein Saldo unter dem Mindestbetrag, der übertragen wird (nicht auf der Schlussabrechnung). Ein übertragener Betrag ist damit nicht bezahlt; er wird mit der nächsten Abrechnung eingefordert oder zurückerstattet. Kein Zahlungsdatum, keine Mahnung, kein «Zahlung zurücksetzen». (`settled`) |
 | **Überfällig** | Versendet und Zahlungsfrist überschritten. (`overdue`) |
 | **Ersetzt** | Durch eine berichtigte Abrechnung ersetzt; wird nicht gemahnt und zählt nicht als Abrechnung der Periode; Zahlungsdatum und Saldo der ersetzten Abrechnung bleiben erhalten. (`replaced`) |
 
