@@ -1,3 +1,11 @@
+## Session: #932 E2E purge after a berichtigte Abrechnung
+
+- [x] Cause: `createCorrection` only clicked «Berichtigte Abrechnung erstellen»; the next step could pass on the replaced statement (same Akonto) and the clean-up deleted it while the new one was still saved (FK `replaces_id`, CI run 40708772660)
+- [x] Fix: the task waits for the new statement or the refusal (`correctionAnswer`); `statement-detail.feature` and `statement-agreed-costs.feature` green (124, chromium)
+- [x] No scenario: a fix of the test harness; the failing scenario covers it unchanged («Berichtigte Abrechnung rechnet mit dem damaligen Akonto»)
+- [x] Slice review round 1 (closing): `docs/reviews/i932-review-1.md`, no findings
+- [x] PR `Fixes #932`: pushed after this archive
+
 ## Session: Phase 2 leftovers (fitness values, #815 note)
 
 - [x] `docs/architecture/fitness-functions.md`: column «Aktueller Wert» updated from `bun run fitness` and `ratchet.json` on e9950ebb (literal sets 8, entity mirrors 43, frontend findings 59, module cycles 0, technical 8)
