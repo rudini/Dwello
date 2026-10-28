@@ -155,7 +155,7 @@ Dwello-Nutzen
 - **Umgebung:** VM wie die Demo, Daten von 50 Wohnungen über mehrere Jahre.
 - **Reaktion:** Die Seite ist ohne spürbare Wartezeit da.
 - **Messgrösse und Ziel:** Antwortzeit der API **< 500 ms (p95)** (aus Repo/Config: `docs/tech-stack.md`; eigenes Ziel: vom Nutzer bestätigt). Für die Datenbank nennt `docs/tech-stack.md` zusätzlich Abfragen < 100 ms (p95).
-- **Heute:** **unbekannt**, nicht gemessen (aus Repo/Config: `docs/archive/migration-mva.md` P2 ❓).
+- **Heute:** einmal gemessen am 28.10.2026 (#781, `bun tools/fitness/p2-benchmark.ts`: 50 Wohnungen, 75 Mietverträge, 300 Rechnungen, 225 Abrechnungen 2021–2025; 4 vCPU Xeon 2.8 GHz, im Prozess ohne Netz, je 100 Aufrufe): alle Listen unter 20 ms p95, `contracts/missing-statements` 61 ms, Übersicht `dashboard` 227 ms, aber **`statements/outdated` 1110 ms** (die Übersicht lädt sie mit, #919). Ob der Wert auf der Demo-VM (2 OCPU ARM) gleich ist, bleibt offen (A4). Entscheid PO 28.10.2026: einmal messen, kein CI-Gate.
 - **Fitness Function:** Im Benchmark von P1 zusätzlich jede Listen- und Übersichtsroute 100-mal abrufen und p95 bilden, wöchentlich auf der Demo-VM. In CI ein grober Wächter mit derselben Annahme wie A4.
 
 ### S1 Sitzung und Mieterdaten geschützt
