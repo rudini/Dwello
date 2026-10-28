@@ -25,4 +25,11 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Row «Erledigt» in `UBIQUITOUS_LANGUAGE.md` as decided on 2026-10-28 (proposal of domain review 448-4 V-28, `settled`)
 - [x] Help texts checked: `glossary_balance_text`, `glossary_settled_text` and the help at «Bezahlt am» already follow #448; no marker names #484
 - [x] No scenario: glossary text only, no app change
-- [ ] PR merged
+- [x] PR merged: #930
+
+### #512 Missing statements before a change of the period setting
+- [x] `@wip` scenarios (contract page, wizard link, Übersicht), seen red at the missing behaviour; the setting stays «Kalenderjahr», the building's statements follow «Juli – Juni» (no global setting changed)
+- [ ] `fach-reviewer` on the scenarios (step 1)
+- [ ] Unit tests of the rule in `backend/src/__tests__/accounting-period.test.ts`, seen red
+- [ ] Code: `backend/src/services/accounting-period.ts`, `statement-run.service.ts`
+- [ ] Slice review, persona, PR merged
