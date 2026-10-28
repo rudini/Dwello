@@ -1,0 +1,15 @@
+# Code-Review wrr-tools, Runde 1 (Abschlussrunde), `origin/main..db1da5ee`
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Minor | tools/arch-baseline/lib.ts:132 | Der Lookbehind `(?<!\b(?:Pick\|Omit)<[^<>,]+,[^<>]*)` überspringt Pick/Omit-Schlüssel nur, wenn das erste Typargument keine spitzen Klammern enthält. Bei einem generischen ersten Argument zählt die Schlüssel-Union weiter als Werteliste, z. B. `src/lib/types.ts:189` `Pick<Json<ContractRow>, 'tenantName' \| 'apartmentNumber' \| …>`, `src/lib/server/heating-profile.ts:11` `Omit<Json<HeatingProfileDetails>, 'monthlyPercentages'>` (einzeln, hier ohne Wirkung), `backend/src/services/calculation.service.ts:102` `Pick<Awaited<ReturnType<…>>[number], 'invoiceDate' \| 'invoiceNumber'>`. Heute steht keine dieser Listen in mehreren Schichten, deshalb ändert sich die Messung nicht. Die Anforderung «überspringt Schlüssel von Pick/Omit» gilt aber nur teilweise, und kein Test deckt den Fall ab. Nachweis: `[..."type A = Pick<Json<Row>, 'a' \| 'b'>;".matchAll(LITERAL_UNION)]` liefert `'a' \| 'b'`. |
+
+Keine Blocker, kein Major.
+
+Geprüft: `run.sh` übernimmt `ARCH_OUT` (Default `tools/arch-baseline/out`). Weil die Variable als Umgebungsvariable gesetzt wird, ist sie auch für die `bun`-Skripte über `lib.ts` exportiert. `run.sh` macht vorher `cd` ins Repo-Root, deshalb gilt ein relativer Pfad in beiden gleich. Kein weiterer fest codierter Pfad auf `out/`. `baseline.md` beschreibt den Aufruf. `05-knowledge.ts` nutzt die neue Konstante. Die Tests in `lib.test.ts` decken die einfache Union, die Union nach einem Typnamen und Pick/Omit mit einfachem ersten Argument ab. Die einfache Union und die Union nach einem Typnamen hielt schon die alte Regex. Laut Aufrufer waren sie rot, weil die Konstante beim Test fehlte bzw. ein erster Lookbehind sie brach. Der Pick/Omit-Test fällt ohne Lookbehind rot. Die Ratchet-Ausnahme `billedUntil|endDate|startDate` (`contract.service.ts`, `contract-wizard.ts`, beides Pick-Schlüssel) wurde zu Recht entfernt. Die geänderte Spalte in `fitness-functions.md` stimmt. Kein Code, Text oder E2E ist von der Änderung betroffen, also braucht es kein Szenario. Der Diff enthält nichts Fremdes.
+
+## Nicht bestätigt
+
+- `bun run lint`, `bun run check`, `bunx vitest run tools/` (343 Tests, inkl. rot vor dem Fix), Prettier, `bun run fitness` und `bun tools/fitness/fitness.ts --update`: vom Aufrufer gemeldet. Ich habe sie nicht erneut ausgeführt, weil der Worktree keine node_modules hat.
+- Der Handlauf `ARCH_OUT=$(mktemp -d) tools/arch-baseline/run.sh` (105 Dateien, `out/` unverändert) und der Vergleich alte/neue Regex in 05-knowledge (Unterschied nur `periodEnd|periodStart`, `billedUntil|endDate|startDate`): vom Aufrufer gemeldet. Den Code von `run.sh` und `lib.ts` habe ich gelesen und darin nichts gefunden, was dem widerspricht.
+- Die «Stand»-Spalte von `fitness-functions.md:14` («13 Listen») passt schon auf der Basis nicht zu den Ausnahmen in `ratchet.json` (vorher 9, jetzt 8). Das stammt nicht aus diesem Diff, und ich habe es nicht weiter verfolgt.

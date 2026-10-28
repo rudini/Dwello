@@ -52,4 +52,8 @@ describe('LITERAL_UNION', () => {
 	it('überspringt die Schlüssel von Pick und Omit, weil sie Feldnamen und keine Werte sind', () => {
 		expect(unions("type A = Pick<ContractRow, 'id' | 'startDate'>; type B = Omit<Row, 'id' | 'name' | 'area'>;")).toEqual([]);
 	});
+
+	it('überspringt die Schlüssel von Pick auch bei einem generischen ersten Typargument', () => {
+		expect(unions("type A = Pick<Json<Row>, 'a' | 'b'>; type B = Pick<Awaited<ReturnType<typeof f>>[number], 'c' | 'd'>;")).toEqual([]);
+	});
 });
