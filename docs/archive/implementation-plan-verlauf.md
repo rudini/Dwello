@@ -1,3 +1,9 @@
+## Session: collected workflow review (end of Phase 2)
+
+- [x] `docs/reviews/workflow-rules-review-2026-10-28.md`: the 15 workflow notes since review 6, each point checked against `main` (0efe4eb1); 14 open proposals, 11 applied since
+- [x] No scenario: documentation only; no review round: no code changed
+- [x] PR: pushed after this archive
+
 
 
 ## Session: #916 and #917 pin R1 and S2 (Phase 2, from #723)
