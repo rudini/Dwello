@@ -551,6 +551,11 @@ Then(
 	}
 );
 
+// #506 (Fachreview 506-1 V-2): what the Bestätigung says about an Übertrag
+Then('sagt die Bestätigung des Berichtigens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(correctConfirmation).toContain(text);
+});
+
 Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt', async ({ verwalter }) => {
 	await verwalter.sees(correctConfirmation).toContain('durch eine berichtigte Abrechnung ersetzt');
 	await verwalter.sees(correctConfirmation).toContain('bleibt unverändert erhalten');

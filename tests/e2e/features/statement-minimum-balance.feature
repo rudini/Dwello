@@ -221,3 +221,15 @@ Funktionalität: Saldo unter CHF 5
     Dann sagt die Abrechnung, dass der Übertrag heute von Hand ausgeglichen wurde
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht keine Aufgabe "Übertrag ausgleichen" für "Anna Keller"
+
+  # #506 (Fachreview 506-1 V-2): eine berichtigte Abrechnung rechnet einen von Hand ausgeglichenen Übertrag als bezahlt an
+  Szenario: Vor dem Berichtigen nennt die Bestätigung den von Hand ausgeglichenen Übertrag
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und der Mietvertrag von "Anna Keller" endet am "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und der Liegenschaftsverwalter den Übertrag als ausgeglichen markiert
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
+    Dann sagt die Bestätigung des Berichtigens "Ihren Übertrag von CHF 3.00 haben Sie am"
+    Und sagt die Bestätigung des Berichtigens "von Hand ausgeglichen: Die berichtigte Abrechnung rechnet ihn als bezahlt an, der Mieter bezahlt oder erhält ihn nicht doppelt."

@@ -55,4 +55,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Closing review: `docs/reviews/506-review-3.md` (no findings; C-6 rejection holds)
 - [x] CI fix: Architecture fitness Ä4, a changed status branch in the statement page; the allowed line stays as it was, the Übertrag part beside it (fitness reproduced locally first)
 - [x] Copilot review of #941: Akonto from the day after the period (pg test red first), settling checked in its update (no sequential test can show a race), the correction dialog names a hand-settled Übertrag (DOM test red first, four languages); the reset-dialog point answered on its thread, not built
+- [x] Closing review of the Copilot fixes: `docs/reviews/506-review-5.md` (C-1 Major: a scenario for the correction dialog, its DOM test was red first; C-2 comment; C-3 refusal test red by taking the conditions out)
 - [ ] PR merged

@@ -592,6 +592,17 @@ describe('Offener Übertrag', () => {
 		expect(await read(previous)).toMatchObject({ carrySettledOn: null });
 	});
 
+	// code review 506-5 C-3: once settled, or once a statement counts it, there is nothing to settle
+	it('lehnt einen zweiten Ausgleich und den Ausgleich eines schon verrechneten Übertrags ab', async () => {
+		const rental = await rentalOf();
+		const settled = await sentWith(rental, 2023, '3.00');
+		await settle(settled.id);
+		const counted = await sentWith(rental, 2024, '3.00');
+		await send(await generate(rental, 2025)); // counts 2024
+
+		expect([(await settle(settled.id)).status, (await settle(counted.id)).status]).toEqual([400, 400]);
+	});
+
 	it('lehnt den Ausgleich einer Abrechnung ohne Übertrag ab', async () => {
 		const rental = await rentalOf();
 		const statement = await sentWith(rental, 2024, '30.00');

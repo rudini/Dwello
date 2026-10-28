@@ -827,7 +827,8 @@ const dropFromDrafts = (statement: { id: string; balance: string }, tx: Tx) =>
 export async function settleCarryOver(id: string): Promise<StatementWithDetails> {
 	const existing = await getStatement(id);
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
-	// checked in the update itself: a replacement or a draft sent meanwhile leaves nothing to settle (PR #941 review)
+	// checked in the update itself, so a replacement or a send that committed before it leaves nothing to settle; one
+	// that commits while it runs is not locked out (no row lock: a single landlord, PR #941 review, code review 506-5 C-2)
 	await db.transaction(async (tx) => {
 		const settled = await tx
 			.update(utilityStatements)
