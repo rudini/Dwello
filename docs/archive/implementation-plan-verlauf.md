@@ -12,3 +12,12 @@
 
 - [x] Product owner decision 28.10.2026 (comment in #782): «Restarting» with the cause in the log is enough; recorded in `docs/architecture/utility-tree.md` (U1) and `fitness-functions.md` §4 (No scenario: documentation only; no review round: no code changed)
 - [x] PR `Fixes #782`: pushed after this archive
+
+## Session: #781 P2 measured once
+
+- [x] Product owner decision 28.10.2026 recorded in #781: measure once, no CI gate while A4 is open
+- [x] `tools/fitness/p2-benchmark.ts`: 50 apartments, 75 contracts, 300 invoices, 225 statements over 2021–2025, every list and overview route 100 times in-process; result in `docs/architecture/utility-tree.md` (P2) and `fitness-functions.md` §4
+- [x] `GET /statements/outdated` 1110 ms p95, above 500 ms: issue #919
+- [x] No scenario: measurement tooling only
+- [x] Slice review round 1 (closing): `docs/reviews/i781-review-1.md`; C-1 to C-3 (Minor, docs) fixed
+- [x] PR `Fixes #781`: pushed after this archive
