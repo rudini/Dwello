@@ -36,7 +36,7 @@ A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these ho
 - **No persona:** a change visible only in a state the persona stack cannot produce (the server's clock, a real KI model instead of the stand-in) needs no persona when a lower-layer test shows it and no persona can reach a new text of it (through a failing request, that SQL or the stand-in's answers); say so in the plan.
 - **Outside services:** a change that calls one (an address register, a mail provider) first gets one call through the persona stack (`/api/...` with the persona-kit cookie); only when it answers do the personas start.
 - **More visible:** a finding on the base commit that a persona meets in its task on this change counts as made more visible by it (`CLAUDE.md`, "Done means").
-- **Build-time values:** a change that depends on one names it in the task and the start (`APP_VERSION=0.4.0 docs/design/tools/persona-stack.sh`).
+- **Build-time values:** a change that depends on one names it in the task and the start (`APP_VERSION=v0.4.0 docs/design/tools/persona-stack.sh`); a development version takes the `git describe` form (`v0.12.0-123-gabcdef1`).
 - **PDFs:** a change to what a PDF prints gets Dr. Weber when its texts change; its amounts are `daten-pruefer`'s, which starts after the persona that creates the statement.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term.

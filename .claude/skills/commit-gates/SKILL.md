@@ -13,6 +13,7 @@ Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` 
 - A CRAP finding on a Svelte template is estimated, not measured: move expressions into `$derived` or a function, or a loop into a child component.
 - Only findings the change introduces block (`fallow audit` default gate `new-only`; a clone group on the base commit stays `"introduced": false` when a touched file's lines move around it). A duplication finding in code the change only touches: check `introduced` in `bunx fallow audit --format json` first; never reshape the code only to get past an inherited one. One the change introduces: fix it when it is small and changes no behavior (note it in the plan), else ask the product owner.
 - The gate audits the working tree: to commit one slice while the next is in progress, `git stash push --keep-index -u` first and `git stash pop` after.
+- A preparing export (a Parallel Change step) and its first user form one commit. A script run by hand gets a `package.json` script, which makes it an entry point.
 - A clone group across translation tables (the same keys, one table per language) is an expected warning, not a finding to fix.
 - When it finds no base branch (a single-branch clone) it blocks: `git fetch origin main:refs/remotes/origin/main` fixes it.
 
