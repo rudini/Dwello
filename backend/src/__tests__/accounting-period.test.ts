@@ -64,6 +64,22 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 			{ start: '2025-01-01', end: '2025-12-31' }
 		]);
 	});
+
+	// #512: before the building's last statement over a period of another type than the setting, its type cuts the periods
+	it('folgt bis zur letzten Abrechnung nach einer anderen Abrechnungsperiode deren Perioden, danach der Einstellung', () => {
+		expect(missingPeriods('calendar', contract('2022-07-01', null), [statement('2023-07-01', '2024-06-30')], today)).toEqual([
+			{ start: '2025-01-01', end: '2025-12-31' },
+			{ start: '2024-07-01', end: '2024-12-31' },
+			{ start: '2022-07-01', end: '2023-06-30' }
+		]);
+	});
+
+	it('folgt den Abrechnungen des Gebäudes, auch wenn der Mietvertrag selbst keine hat', () => {
+		const building = [statement('2023-07-01', '2024-06-30')];
+		expect(missingPeriods('calendar', contract('2023-07-01', '2024-06-30'), [], today, building)).toEqual([
+			{ start: '2023-07-01', end: '2024-06-30' }
+		]);
+	});
 });
 
 describe('Abrechnungsperioden der Einstellung', () => {
@@ -169,6 +185,16 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 		const mine = own('2025-01-01', '2025-06-30');
 		const parts = missingWays('calendar', contract('2025-01-01'), [mine], [mine, own('2025-01-01', '2025-12-31')], today);
 		expect(parts.map(({ start, open }) => [start, open])).toEqual([['2025-07-01', false]]);
+	});
+
+	// #512: an ended period of the earlier type without a statement is offered whole; the days after the switch are a
+	// short period of the setting, where the hint of #486 belongs
+	it('bietet vor dem Wechsel der Abrechnungsperiode die ganze frühere Periode an, danach eine kurze Abrechnungsperiode', () => {
+		const mine = own('2024-07-01', '2025-06-30');
+		expect(missingWays('calendar', contract('2024-04-01'), [mine], [mine], today)).toEqual([
+			part('2025-07-01', '2025-12-31', 'short'),
+			part('2023-07-01', '2024-06-30', 'whole')
+		]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', () => {
