@@ -13,6 +13,8 @@ import { createContract, deleteContract } from '../services/contract.service';
 import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { sendJson } from './helpers/auth';
+import { daysAfter, swissToday } from '../services/today';
+import { lastCompletedPeriod } from '../services/accounting-period';
 import { insertInvoice } from './helpers/records';
 
 const token = crypto.randomUUID();
@@ -133,6 +135,21 @@ describe('Wechsel der Einstellung «Abrechnungsperiode»', () => {
 		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
 
 		expect((await setPeriod('july-june')).status).toBe(200);
+
+		const missing = await missingOf(contract);
+		expect(missing).toContainEqual(expect.objectContaining({ start: '2025-01-01', end: '2025-12-31' }));
+		expect(missing.map((part) => part.start)).not.toContain('2025-07-01');
+	});
+
+	// code review 512-2 C-4: a setting that ended no period of its own before it was changed back is no earlier type
+	it('nimmt einen Wechsel an einem späteren Tag zurück, wenn in der Zwischenzeit keine Periode endete', async () => {
+		const building = await newBuilding();
+		const contract = await rent('1.01', 'Später', '2024-01-01', undefined, building);
+		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
+		await setPeriod('july-june');
+		const [, from] = (await db.select().from(configuration).where(eq(configuration.key, 'accounting_period_changed')))[0].value.split(':');
+		await db.update(configuration).set({ value: `${daysAfter(lastCompletedPeriod('july-june', swissToday()).end, 1)}:${from}` }).where(eq(configuration.key, 'accounting_period_changed'));
+		await setPeriod('calendar');
 
 		const missing = await missingOf(contract);
 		expect(missing).toContainEqual(expect.objectContaining({ start: '2025-01-01', end: '2025-12-31' }));

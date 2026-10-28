@@ -23,7 +23,7 @@ import { distributionKeyExists } from './distribution-key.service';
 import { recordAudit } from './audit-log.service';
 import { CodedError, type ErrorCode } from './coded-error';
 import { swissToday } from './today';
-import type { PeriodChange } from './accounting-period';
+import { changeOnSave, type AccountingPeriodType, type PeriodChange } from './period-types';
 
 /**
  * Configuration keys with their types and validators
@@ -240,15 +240,15 @@ async function saveConfig(
 		if (Number(before) !== Number(value)) await recordAudit('management_fee_changed', { from: before, to: value }, tx);
 	}
 
-	// #512: the day the Abrechnungsperiode changes and the type before; a second change that day keeps the first's
-	if (key === 'accounting_period') {
-		const stored = await tx.select().from(configuration).where(inArray(configuration.key, [key, PERIOD_CHANGE]));
-		const before = stored.find((row) => row.key === key)?.value ?? CONFIG_KEYS.accounting_period.default;
-		const [on, from] = (stored.find((row) => row.key === PERIOD_CHANGE)?.value ?? '').split(':');
-		const change = `${swissToday()}:${on === swissToday() ? from : before}`;
-		if (before !== value) await upsert(tx, PERIOD_CHANGE, change);
-	}
+	if (key === 'accounting_period') await storePeriodChange(tx, value);
 	return upsert(tx, key, value);
+}
+
+/** #512: the day the Abrechnungsperiode changes to `value` and the type before */
+async function storePeriodChange(tx: Pick<typeof db, 'select' | 'insert'>, value: string) {
+	const stored = await tx.select().from(configuration).where(inArray(configuration.key, ['accounting_period', PERIOD_CHANGE]));
+	const before = (stored.find((row) => row.key === 'accounting_period')?.value ?? CONFIG_KEYS.accounting_period.default) as AccountingPeriodType;
+	if (before !== value) await upsert(tx, PERIOD_CHANGE, changeOnSave(before, stored.find((row) => row.key === PERIOD_CHANGE)?.value, swissToday()));
 }
 
 // Not a setting of the form: getAllConfig leaves it out

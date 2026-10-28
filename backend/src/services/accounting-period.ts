@@ -6,26 +6,13 @@
 import { billingStart, billsIn } from './contract.service';
 import { daysAfter, swissToday } from './today';
 import { counting } from './counting-statements';
+import { FIRST_MONTH, lastCompletedPeriod, type AccountingPeriodType, type PeriodChange, type Range } from './period-types';
 
-// First month (1-12) of each accounting period type
-const FIRST_MONTH = { calendar: 1, 'july-june': 7, 'november-october': 11 } as const;
-
-export type AccountingPeriodType = keyof typeof FIRST_MONTH;
-export type Range = { start: string; end: string };
+export { lastCompletedPeriod, type AccountingPeriodType, type PeriodChange, type Range };
 type Dated = { periodStart: string; periodEnd: string; status: string };
 type Rental = { startDate: string; endDate: string | null; billedUntil: string | null };
-/** #512: the day the setting changed and the type it had before, as stored when it was saved */
-export type PeriodChange = { on: string; from: AccountingPeriodType } | null;
 
 const month = (n: number) => String(n).padStart(2, '0');
-
-/** The last accounting period that has ended, e.g. 2025-07-01 – 2026-06-30 for july-june in October 2026 */
-export function lastCompletedPeriod(type: AccountingPeriodType, today = swissToday()): Range {
-	const [year, now] = today.split('-').map(Number);
-	const first = FIRST_MONTH[type];
-	const runningSince = now >= first ? year : year - 1;
-	return { start: `${runningSince - 1}-${month(first)}-01`, end: daysAfter(`${runningSince}-${month(first)}-01`, -1) };
-}
 
 /** Every ended period that has days on or after `since`, the newest first (#142) */
 export function endedPeriodsSince(type: AccountingPeriodType, since: string, today = swissToday()): Range[] {
