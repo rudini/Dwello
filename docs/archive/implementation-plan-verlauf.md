@@ -1,11 +1,9 @@
 
 
-## Session: #910 Ä1 field spread in frontend and BFF only
+## Session: #912 one place for the period's query names (Ä1 cycle)
 
-- [x] Product owner decision recorded in #910 (count frontend and BFF only; targets unchanged)
-- [x] `field-spread` and `new-field` count frontend and BFF files (`tools/fitness/fitness.test.ts`)
-- [x] Ratchet and docs (utility-tree Ä1, fitness-functions, baseline) with the new values: 4 / 12 / 36 → 1 / 6 / 18
-- [x] Slice review round 1: `docs/reviews/i910-review-1.md`; C-1 (Major: `src/lib/types.ts`, layer Shared/Contracts, was not counted) fixed, ratchet P90 6; C-2 (test) and C-3 (utility-tree «Fitness Function») fixed
-- [x] Review round 2 (C-1 fix, closing): `docs/reviews/i910-review-2.md`, C-1 to C-3 closed, nothing open
-- [x] No scenario: measurement tooling only, no app behaviour
-- [x] PR `Fixes #910`: pushed after this archive (the refactoring cycle on period and contract-date fields follows in its own session and pull request)
+- [x] Issue #912 (follow-up of #910); No scenario: refactoring without behaviour change, existing tests pin it
+- [x] `periodQuery` / `periodOf` in `src/lib/accounting-period.ts`; wizard steps, overview, BFF routes and preview types use them
+- [x] `bun run fitness`: ratchet and history (`periodEnd` 18 → 12, `periodStart` 17 → 11, max 18 → 14)
+- [x] Slice review round 1 (closing): `docs/reviews/i912-review-1.md`, no findings
+- [x] PR `Fixes #912`: pushed after this archive
