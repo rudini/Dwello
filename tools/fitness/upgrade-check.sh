@@ -18,6 +18,15 @@ git worktree add --detach --force "$OLD" "$TAG" >/dev/null
 (cd "$OLD/backend" && bun install --frozen-lockfile >/dev/null)
 psql -d postgres -qc "DROP DATABASE IF EXISTS $DB WITH (FORCE)" -c "CREATE DATABASE $DB"
 bun "$OLD/backend/scripts/demo-data.ts" >/dev/null
+# The demo data leaves these tables empty, where the check could not see a loss (#782): one row each, written with the
+# previous release's columns, so a release that renames one of them needs this fixture changed
+psql -d "$DB" -qv ON_ERROR_STOP=1 <<'SQL'
+INSERT INTO audit_log (action, details) VALUES ('upgrade-check', '{}');
+INSERT INTO invoice_documents (invoice_id, file_name, mime_type, content)
+	SELECT id, 'upgrade-check.pdf', 'application/pdf', '' FROM invoices ORDER BY id LIMIT 1;
+INSERT INTO ki_settings (mode) VALUES ('none') ON CONFLICT (id) DO NOTHING;
+INSERT INTO local_accounts (email, password_hash) VALUES ('upgrade-check@example.invalid', 'not-a-hash');
+SQL
 
 # rows per table of the schema public, as "table count" lines
 counts() {
@@ -30,6 +39,8 @@ sums() {
 		FROM information_schema.columns WHERE table_schema = 'public' AND data_type = 'numeric' AND table_name LIKE 'utility_statement%'" | psql -d "$DB" -At
 }
 counts >"$OLD/before.txt"
+empty=$(awk '$2 == 0 { print $1 }' "$OLD/before.txt" | paste -sd ' ' -)
+[ -z "$empty" ] || echo "::warning title=Fitness upgrade::U1: the tables $empty are empty before the upgrade, so the check cannot see a loss there. Fill them in the demo data or in the fixture of tools/fitness/upgrade-check.sh (#782)."
 sums >"$OLD/sums-before.txt"
 if ! bun backend/scripts/migrate.ts; then
 	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: the migrations of this checkout fail on the data of $TAG. Fix: make the migration work on existing rows (defaults, backfill before NOT NULL), never only on an empty database."
