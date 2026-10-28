@@ -3,9 +3,10 @@
 # Usage: tools/arch-baseline/run.sh   (from anywhere; needs bun, node, git with full history)
 # Window and base: ARCH_SINCE=2026-04-23 ARCH_BASE=origin/main (see lib.ts).
 # Coupling thresholds: ARCH_MIN_SHARED=5 ARCH_MIN_DEGREE=0.3 ARCH_MAX_TX=50.
+# Output: ARCH_OUT=$(mktemp -d) for a later measurement; only a new baseline writes the committed out/.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-OUT=tools/arch-baseline/out
+OUT=${ARCH_OUT:-tools/arch-baseline/out}
 mkdir -p "$OUT"
 
 if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then

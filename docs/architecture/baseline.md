@@ -369,6 +369,7 @@ Gelesen [abgeleitet]:
 
 ```bash
 tools/arch-baseline/run.sh          # holt bei flachem Clone die volle Historie, schreibt tools/arch-baseline/out/
+ARCH_OUT=$(mktemp -d) tools/arch-baseline/run.sh   # spätere Messung: Zahlen ohne das eingecheckte out/ zu ändern
 ARCH_SINCE=2026-04-23 ARCH_MIN_SHARED=5 ARCH_MIN_DEGREE=0.3 ARCH_MAX_TX=50 tools/arch-baseline/run.sh
 ```
 
