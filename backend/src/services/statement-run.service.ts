@@ -114,7 +114,11 @@ export async function missingByContract() {
 		listStatements({ limit: 1000 })
 	]);
 	return Object.fromEntries(
-		contracts.map((c) => [c.id, missingPeriods(type as AccountingPeriodType, c, statements.filter((s) => s.contractId === c.id))])
+		contracts.map((c) => [
+			c.id,
+			// #512: the building's statements tell the earlier Abrechnungsperiode, as on the contract page
+			missingPeriods(type as AccountingPeriodType, c, statements.filter((s) => s.contractId === c.id), undefined, statements.filter((s) => s.building?.id === c.buildingId))
+		])
 	);
 }
 

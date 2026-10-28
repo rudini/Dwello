@@ -197,6 +197,17 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 		]);
 	});
 
+	// Fachreview 512-1 V-1: a contract billed by its own period (#486) after the first statement under the setting is no
+	// change of the setting; the other contracts keep the setting's periods (kept behaviour)
+	it('folgt der Einstellung, wenn die andere Abrechnungsperiode erst nach der ersten Abrechnung nach der Einstellung beginnt', () => {
+		const building = [own('2023-01-01', '2023-12-31'), own('2024-01-01', '2024-12-31'), own('2023-07-01', '2024-06-30'), own('2024-07-01', '2025-06-30')];
+		expect(missingWays('calendar', contract('2024-04-01'), [], building, today)).toEqual([
+			part('2025-07-01', '2025-12-31', 'short'),
+			part('2025-01-01', '2025-06-30', 'existing', { start: '2024-07-01', end: '2025-06-30' }),
+			whole(2024)
+		]);
+	});
+
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', () => {
 		const statement = own('2025-01-01', '2025-12-31');
 		expect(missingWays('calendar', contract('2025-03-01'), [statement], [statement], today)).toEqual([]);

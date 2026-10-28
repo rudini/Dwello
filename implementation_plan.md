@@ -29,7 +29,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ### #512 Missing statements before a change of the period setting
 - [x] `@wip` scenarios (contract page, wizard link, Übersicht), seen red at the missing behaviour; the setting stays «Kalenderjahr», the building's statements follow «Juli – Juni» (no global setting changed)
-- [ ] `fach-reviewer` on the scenarios (step 1)
-- [ ] Unit tests of the rule in `backend/src/__tests__/accounting-period.test.ts`, seen red
-- [ ] Code: `backend/src/services/accounting-period.ts`, `statement-run.service.ts`
-- [ ] Slice review, persona, PR merged
+- [x] `fach-reviewer` round 1: `docs/reviews/512-fachreview-1.md`; V-1 (switch point by the first statement under the setting), V-2 (hint #486 in the row of the short period, new scenario), V-3 (Übersicht reads the building's statements) fixed before green; V-4 (two changes of the setting) stays in the report
+- [x] Unit tests of the rule in `backend/src/__tests__/accounting-period.test.ts`, seen red; case a of V-1 pins kept behaviour
+- [x] Code: `backend/src/services/accounting-period.ts`, `statement-run.service.ts`, `src/routes/contracts/[id]/MissingStatement.svelte`
+- [ ] Slice review (`code-reviewer`)
+- [ ] Persona Dr. Weber, Helga
+- [ ] PR merged
