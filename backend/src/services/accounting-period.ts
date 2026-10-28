@@ -6,13 +6,11 @@
 import { billingStart, billsIn } from './contract.service';
 import { daysAfter, swissToday } from './today';
 import { counting } from './counting-statements';
-import { FIRST_MONTH, lastCompletedPeriod, type AccountingPeriodType, type PeriodChange, type Range } from './period-types';
+import { FIRST_MONTH, lastCompletedPeriod, month, type AccountingPeriodType, type PeriodChange, type Range } from './period-types';
 
 export { lastCompletedPeriod, type AccountingPeriodType, type PeriodChange, type Range };
 type Dated = { periodStart: string; periodEnd: string; status: string };
 type Rental = { startDate: string; endDate: string | null; billedUntil: string | null };
-
-const month = (n: number) => String(n).padStart(2, '0');
 
 /** Every ended period that has days on or after `since`, the newest first (#142) */
 export function endedPeriodsSince(type: AccountingPeriodType, since: string, today = swissToday()): Range[] {
