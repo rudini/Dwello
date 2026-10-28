@@ -53,3 +53,10 @@
 - [x] `utility-tree.md`, `fitness-functions.md`: T1 and S1 «Heute», P1/U1/S1 issue references; matrix Ä1, Ä4 H/H → H/L and T1 H/H → H/M (decided by the product owner 28.10.2026)
 - [x] No scenario: docs only, no app change
 - [x] PR: pushed after this archive
+
+## Session: #860 glossary rows for the backup (2026-10-28)
+
+- [x] Rows Sicherung, Wiederherstellungscode, Notfallblatt, Wiederherstellung and the addition to «Betreiber» in `UBIQUITOUS_LANGUAGE.md`, translations in `docs/design/i18n-begriffe.md`, as decided in #860
+- [x] Fach review round 1: `docs/reviews/860-fachreview-1.md` (V-1, V-2 Minor, fixed)
+- [x] No scenario: glossary text only, no app change
+- [x] PR `Fixes #860`: pushed after this archive
