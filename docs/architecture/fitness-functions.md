@@ -64,9 +64,10 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 | `upgrade` | Migration `DELETE FROM fuel_stocks;` | rot: «fuel_stocks 6 -> 0» |
 | `upgrade` | Migration `ADD COLUMN … NOT NULL` ohne Default | rot: «the migrations of this checkout fail on the data of v0.89.11» |
 | `upgrade` | Migration `UPDATE utility_statements SET balance = balance + 1 WHERE status = 'draft'` (#782) | rot: «utility_statements.balance 612.85 -> 619.85» |
+| `upgrade` | Migration `DELETE FROM local_accounts;` (#782; vorher leer in den Demo-Daten) | rot: «local_accounts 1 -> 0» |
 | `ci-duration` | Shell-Logik mit Startzeit vor 20 bzw. 10 min | Warnung bei 20 min, keine bei 10 min; grüne Quote aus Beispiel-JSON «1 of 2» |
 
-Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in den Demo-Daten leer. Leer sind auch `invoice_documents`, `ki_settings` und `local_accounts`; dort kann der Upgrade-Check keinen Verlust sehen (#782).
+Ein erster Versuch mit `DELETE FROM audit_log;` blieb grün: Die Tabelle ist in den Demo-Daten leer, ebenso `invoice_documents`, `ki_settings` und `local_accounts`. Seit #782 schreibt der Check vor der Migration je eine Zeile in diese vier Tabellen (mit den Spalten des letzten Release) und warnt, wenn eine Tabelle danach noch leer ist; `DELETE FROM local_accounts;` macht ihn rot («local_accounts 1 -> 0»).
 
 ## 4. Nicht oder nur teilweise automatisiert
 
