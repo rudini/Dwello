@@ -1,11 +1,9 @@
 
 
-## Session: #782 upgrade check (U1), part 1
+## Session: #782 upgrade check (U1), part 2: tables empty in the demo data
 
-- [x] Ä1 cycles end after #912 (P90 6 ≤ 8); the contract dates are props and parameters, not copied shapes (named in the pull request)
-- [x] A failing migration leaves its data unchanged, is not recorded and names file and cause (`migrations.pg.test.ts`, pins kept behaviour)
-- [x] The upgrade check compares the amount sums of the statement tables before and after (red shown with a probe migration on `balance`)
-- [x] What the container does on a failed migration, recorded in #782 and `fitness-functions.md` §4: exit 1, cause in the first log line, restart loop, not «unhealthy» (decision of the product owner)
-- [x] Slice review round 1 (closing): `docs/reviews/i782-review-1.md`; C-1 and C-2 (Minor, docs) fixed; question to the product owner posted in #782
-- [x] No scenario: tooling and a pinning test, no app behaviour
-- [x] PR `Refs #782` (the empty demo tables and the «unhealthy» decision stay open): pushed after this archive
+- [x] The upgrade check fills `audit_log`, `invoice_documents`, `ki_settings` and `local_accounts` with one row each before migrating, and warns about any table still empty
+- [x] Red run: a probe migration that empties `local_accounts` fails the check («local_accounts 1 -> 0»)
+- [x] Slice review round 1 (closing): `docs/reviews/i782b-review-1.md`; C-1 (Minor: tags before v0.92.0 lack two of the tables, the fixture fails there with a raw psql error; CI uses the latest tag) stays in the report
+- [x] No scenario: tooling only
+- [x] PR `Refs #782` (the «unhealthy» decision stays with the product owner): pushed after this archive

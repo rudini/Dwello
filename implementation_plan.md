@@ -8,10 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: #782 upgrade check (U1), part 2: tables empty in the demo data
-
-- [x] The upgrade check fills `audit_log`, `invoice_documents`, `ki_settings` and `local_accounts` with one row each before migrating, and warns about any table still empty
-- [x] Red run: a probe migration that empties `local_accounts` fails the check («local_accounts 1 -> 0»)
-- [ ] Slice review
-- [ ] PR (`Refs #782`: the «unhealthy» decision stays with the product owner)
