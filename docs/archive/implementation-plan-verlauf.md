@@ -1,9 +1,11 @@
 
 
-## Session: #912 one place for the period's query names (Ä1 cycle)
+## Session: #782 upgrade check (U1), part 1
 
-- [x] Issue #912 (follow-up of #910); No scenario: refactoring without behaviour change, existing tests pin it
-- [x] `periodQuery` / `periodOf` in `src/lib/accounting-period.ts`; wizard steps, overview, BFF routes and preview types use them
-- [x] `bun run fitness`: ratchet and history (`periodEnd` 18 → 12, `periodStart` 17 → 11, max 18 → 14)
-- [x] Slice review round 1 (closing): `docs/reviews/i912-review-1.md`, no findings
-- [x] PR `Fixes #912`: pushed after this archive
+- [x] Ä1 cycles end after #912 (P90 6 ≤ 8); the contract dates are props and parameters, not copied shapes (named in the pull request)
+- [x] A failing migration leaves its data unchanged, is not recorded and names file and cause (`migrations.pg.test.ts`, pins kept behaviour)
+- [x] The upgrade check compares the amount sums of the statement tables before and after (red shown with a probe migration on `balance`)
+- [x] What the container does on a failed migration, recorded in #782 and `fitness-functions.md` §4: exit 1, cause in the first log line, restart loop, not «unhealthy» (decision of the product owner)
+- [x] Slice review round 1 (closing): `docs/reviews/i782-review-1.md`; C-1 and C-2 (Minor, docs) fixed; question to the product owner posted in #782
+- [x] No scenario: tooling and a pinning test, no app behaviour
+- [x] PR `Refs #782` (the empty demo tables and the «unhealthy» decision stay open): pushed after this archive
