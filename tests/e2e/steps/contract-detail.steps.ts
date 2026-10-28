@@ -184,13 +184,13 @@ Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 	await verwalter.sees(endOfContract).toBe(`Unbefristet, gekündigt auf den ${today}`);
 });
 
-// the field's error and a refusal of the server use the same frame: the one with the message counts
 // the confirmation ticked is the anchor: the dialog is still open and took the choice (#654)
 Then('meldet der Dialog keinen Fehler mehr', async ({ verwalter }) => {
 	await verwalter.sees(mistakeConfirmed).toBe(true);
 	await verwalter.sees(dialogErrorCount).toBe(0);
 });
 
+// the field's error and a refusal of the server use the same frame: the one with the message counts
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(endDateProblemShown(message)).toBe(true);
 });

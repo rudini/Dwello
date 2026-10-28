@@ -36,7 +36,8 @@ describe('Fehler am Kontrollkästchen', () => {
 		expect(box.getAttribute('aria-invalid')).toBeNull();
 	});
 
-	// the dialog checks again on submit and sets the same text: unticked again, the error must not stay hidden
+	// a form checks again on submit and may set the same text: unticked again, the error must not stay hidden
+	// (a check outside a form clears the error itself, e.g. DeleteContract)
 	it('erscheint beim nächsten Abschicken wieder', async () => {
 		const form = document.body.appendChild(document.createElement('form'));
 		onTestFinished(() => form.remove());
