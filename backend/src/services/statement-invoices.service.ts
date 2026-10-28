@@ -37,10 +37,42 @@ const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCa
 const known = (positions: Positions) => positions.every((position) => position.invoices);
 const recordedAfter = (invoice: { createdAt: Date }, statement: { createdAt: Date }) => invoice.createdAt > statement.createdAt;
 
+type Located = StatementWithDetails & { building: { id: string } };
+
+/**
+ * How the changes of a statement get its period's invoices and Tankbestand and, for a correctable one, the statement
+ * to recalculate: straight from the database, or once per building and period for a list (#919: the overview checks
+ * every statement, one query each took a second for 50 apartments)
+ */
+type Loaders = {
+	invoices: (s: Located) => Promise<PeriodInvoice[]>;
+	stock: (s: Located) => Promise<Stock>;
+	full: (s: Located) => Promise<StatementWithDetails | null>;
+};
+const periodOf = (s: Located) => ({ buildingId: s.building.id, periodStart: s.periodStart, periodEnd: s.periodEnd });
+const direct: Loaders = {
+	invoices: (s) => getInvoicesForStatement(s.building.id, s.periodStart, s.periodEnd),
+	stock: (s) => agreedStock(periodOf(s), s.agreedCategoryIds),
+	full: async (s) => s
+};
+function perPeriod(): Loaders {
+	const memo = new Map<string, Promise<unknown>>();
+	const once = <T>(key: string, load: () => Promise<T>) => {
+		if (!memo.has(key)) memo.set(key, load());
+		return memo.get(key) as Promise<T>;
+	};
+	const key = (s: Located) => `${s.building.id} ${s.periodStart} ${s.periodEnd}`;
+	return {
+		invoices: (s) => once(`invoices ${key(s)}`, () => direct.invoices(s)),
+		stock: (s) => once(`stock ${key(s)} ${JSON.stringify(s.agreedCategoryIds)}`, () => direct.stock(s)),
+		full: (s) => getStatement(s.id) // a listed statement lacks what the recalculation reads
+	};
+}
+
 // The invoices of a statement's period recorded, changed or deleted since it was created
-async function changedInvoices(statement: StatementWithDetails & { building: { id: string } }): Promise<string[]> {
+async function changedInvoices(statement: Located, load: Loaders): Promise<string[]> {
 	const positions = statement.lineItems;
-	const now = agreedIn(statement, await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd));
+	const now = agreedIn(statement, await load.invoices(statement));
 	if (!known(positions)) return now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id);
 	const changed = now.filter((invoice) => !billedAsIs(positions, invoice)).map((invoice) => invoice.id);
 	const gone = positions
@@ -63,8 +95,7 @@ const sameStock = (a: Stock, b: Stock) =>
 
 // #454 (#408 point 8, Fachreview 454-1 E-2, V-3): the readings the statement was created with against those it would
 // take now, also for a statement before migration 0014
-const fuelStockChanged = async (statement: StatementWithDetails & { building: { id: string } }) =>
-	!sameStock(statement.fuelStock, await agreedStock({ buildingId: statement.building.id, periodStart: statement.periodStart, periodEnd: statement.periodEnd }, statement.agreedCategoryIds));
+const fuelStockChanged = async (statement: Located, load: Loaders) => !sameStock(statement.fuelStock, await load.stock(statement));
 
 const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte Abrechnung replaces (Fachreview 454-2 V-23); overdue: sent, past its Zahlungsfrist
 
@@ -77,13 +108,17 @@ const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte 
  * Null without the statement
  */
 export async function statementChanges(statementId: string) {
-	const statement = await getStatement(statementId);
+	return changesOf(await getStatement(statementId), direct);
+}
+
+async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
 	if (!statement?.building) return null;
-	const building = statement as typeof statement & { building: { id: string } };
-	const invoiceIds = await changedInvoices(building);
-	const fuelStock = await fuelStockChanged(building);
+	const located = statement as Located;
+	const invoiceIds = await changedInvoices(located, load);
+	const fuelStock = await fuelStockChanged(located, load);
 	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock);
-	const check = correctable ? await recalculation(statement) : null;
+	const full = correctable ? await load.full(located) : null;
+	const check = full ? await recalculation(full) : null;
 	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
 	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
 	return {
@@ -118,7 +153,8 @@ export const draftOutdated = (changes: Awaited<ReturnType<typeof statementChange
 /** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
 export async function draftsToSend() {
 	const { statements } = await listStatements({ status: 'draft', limit: 1000 });
-	const outdated = await Promise.all(statements.map(async (s) => draftOutdated(await statementChanges(s.id))));
+	const load = perPeriod();
+	const outdated = await Promise.all(statements.map(async (s) => draftOutdated(await changesOf(s, load))));
 	return outdated.filter((one) => !one).length;
 }
 
@@ -128,10 +164,11 @@ export async function draftsToSend() {
  */
 export async function outdatedStatements() {
 	const { statements } = await listStatements({ limit: 1000 });
+	const load = perPeriod();
 	const listed = await Promise.all(
 		counting(statements)
 			.map(async (s) => {
-				const changes = await statementChanges(s.id);
+				const changes = await changesOf(s, load);
 				const outdated = s.status === 'draft' ? draftOutdated(changes) : changes?.correctionDue;
 				return outdated
 					? {
