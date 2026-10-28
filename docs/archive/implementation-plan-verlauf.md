@@ -43,3 +43,13 @@
 - [x] Slice review round 1 (closing): `docs/reviews/i916-review-1.md`, no findings
 - [x] No scenario: tests that pin kept behaviour
 - [x] PR `Fixes #916`, `Fixes #917`: pushed after this archive
+
+## Session: architecture process status, #860 decided (2026-10-28)
+
+- [x] Read `docs/architecture/` and the open issues for what is still open
+- [x] Issues for open points without one: #934 (P1 benchmark), #935 (weekly release tag), #936 (S1: 401 on every route)
+- [x] #860 decided with the product owner (grill-me): definitions as proposed, Italian «copia di sicurezza», «die Person, die Dwello betreut» with a sentence for self-operated installations; label `needs-decision` removed
+- [x] CI re-measured (Actions API, 28.10.2026): `main` median 13 min over 29 runs, PR median 10 min over 30 runs
+- [x] `utility-tree.md`, `fitness-functions.md`: T1 and S1 «Heute», P1/U1/S1 issue references; matrix Ä1, Ä4 H/H → H/L and T1 H/H → H/M (decided by the product owner 28.10.2026)
+- [x] No scenario: docs only, no app change
+- [x] PR: pushed after this archive
