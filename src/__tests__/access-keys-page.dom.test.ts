@@ -1,0 +1,85 @@
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+
+import AccessKeysPage from '../routes/config/access-keys/+page.svelte';
+import { allByTestId, byTestId, click, show } from './helpers/dom';
+import accessKeys from '../../tests/contracts/access-keys.json';
+
+// What GET /api/v1/access-keys answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
+const [key] = accessKeys.data;
+
+// #817: Zugangsschlüssel für KI-Programme unter den Einstellungen
+describe('Zugangsschlüssel für KI-Programme', () => {
+	it('zeigt einen neuen Schlüssel einmal, mit Hinweis und Warnung, bis er geschlossen wird', async () => {
+		show(AccessKeysPage, {
+			data: { keys: [key] },
+			form: { created: { name: key.name, key: 'dwello_geheim' } }
+		} as never);
+
+		expect(byTestId('access-key-new-value')?.textContent).toBe('dwello_geheim');
+		expect(byTestId('access-key-new-hint')?.textContent).toBe(
+			'Kopieren Sie den Schlüssel jetzt. Dwello zeigt ihn nur dieses eine Mal.'
+		);
+		// Fachprüfung 817-1 R-3: wie ein Passwort, nicht in eine Nachricht
+		expect(byTestId('access-key-new-secret')?.textContent).toContain(
+			'nicht in eine Nachricht an das Programm'
+		);
+
+		click('access-key-new-close');
+		await Promise.resolve();
+
+		expect(byTestId('access-key-new')).toBeNull();
+	});
+
+	it('nennt bei jedem Schlüssel Erstellt, zuletzt benutzt und den Ablauf', () => {
+		show(AccessKeysPage, {
+			data: {
+				keys: [key, { ...key, id: 'k2', name: 'Alt', lastUsedAt: '2026-11-02T10:00:00.000Z' }]
+			},
+			form: null
+		} as never);
+
+		const [first, second] = allByTestId('access-key-row').map((row) => row.textContent);
+		expect(first).toContain('Erstellt am 28.10.2026');
+		expect(first).toContain('Noch nie benutzt');
+		expect(first).toContain('Läuft ab am 26.01.2027');
+		expect(second).toContain('Zuletzt benutzt am 02.11.2026');
+	});
+
+	// Fachprüfung 817-1 V-2: ein abgelaufener Schlüssel erhält schon keine Daten mehr
+	it('nennt einen abgelaufenen Schlüssel so und sagt vor dem Widerrufen, dass er aus der Liste verschwindet', () => {
+		show(AccessKeysPage, {
+			data: { keys: [{ ...key, expiresOn: '2026-10-27', expired: true }] },
+			form: null
+		} as never);
+
+		expect(byTestId('access-key-row')?.textContent).toContain('Abgelaufen am 27.10.2026');
+		click('access-key-revoke-button');
+		expect(byTestId('access-key-revoke-message')?.textContent).toBe(
+			'Der abgelaufene Zugangsschlüssel «Claude Desktop Büro» verschwindet aus der Liste. Das lässt sich nicht rückgängig machen.'
+		);
+	});
+
+	it('sagt vor dem Widerrufen eines gültigen Schlüssels, dass das KI-Programm keine Daten mehr erhält', () => {
+		show(AccessKeysPage, { data: { keys: [key] }, form: null } as never);
+
+		click('access-key-revoke-button');
+		expect(byTestId('access-key-revoke-message')?.textContent).toBe(
+			'Ein KI-Programm mit dem Zugangsschlüssel «Claude Desktop Büro» erhält danach keine Daten mehr. Das lässt sich nicht rückgängig machen.'
+		);
+	});
+
+	// the address the AI program needs next to the key: /mcp of this installation
+	it('nennt die Adresse für das KI-Programm', () => {
+		show(AccessKeysPage, { data: { keys: [], mcpUrl: 'https://dwello.example/mcp' }, form: null } as never);
+
+		expect(byTestId('access-key-address')?.textContent).toBe('Adresse für das KI-Programm: https://dwello.example/mcp');
+	});
+
+	it('sagt, was zu tun ist, solange es keinen Schlüssel gibt', () => {
+		show(AccessKeysPage, { data: { keys: [] }, form: null } as never);
+
+		expect(byTestId('access-keys-empty')?.textContent).toContain('Noch kein Zugangsschlüssel');
+	});
+});

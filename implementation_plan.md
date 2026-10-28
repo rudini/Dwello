@@ -56,4 +56,17 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] CI fix: Architecture fitness Ä4, a changed status branch in the statement page; the allowed line stays as it was, the Übertrag part beside it (fitness reproduced locally first)
 - [x] Copilot review of #941: Akonto from the day after the period (pg test red first), settling checked in its update (no sequential test can show a race), the correction dialog names a hand-settled Übertrag (DOM test red first, four languages); the reset-dialog point answered on its thread, not built
 - [x] Closing review of the Copilot fixes: `docs/reviews/506-review-5.md` (C-1 Major: a scenario for the correction dialog, its DOM test was red first; C-2 comment; C-3 refusal test red by taking the conditions out)
+- [x] Re-review: `docs/reviews/506-review-6.md` (C-1 to C-3 closed)
+- [x] PR merged: #941
+
+### #817 MCP server with access keys («Zugangsschlüssel für KI-Programme»)
+- [x] «Done means» written in #817 from the decisions (product owner 2026-10-28)
+- [x] `@wip` scenarios: `zugangsschluessel.feature` (open, create once, an AI program reads the buildings, revoke); `privacy.feature` (new section, Protokoll text)
+- [ ] `fach-reviewer` round 1 (privacy text nDSG, terms, four languages)
+- [ ] Steps, pg tests (keys, check on `/mcp`, expiry, same refusals), DOM tests; seen red
+- [ ] Code: migration and service for access keys, routes, key check on `/mcp`, MCP tools, settings page, privacy texts, Protokoll entries; four languages
+- [ ] Docs: ADR, S1 in `docs/architecture/utility-tree.md`, glossary row, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `docs/data-model.md`
+- [ ] a11y and language screens of the new page
+- [ ] Slice review, persona, closing review
+- [ ] Archive the session, workflow review
 - [ ] PR merged

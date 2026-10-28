@@ -647,8 +647,17 @@ export function testData(api: CallTheApi) {
 			extras.push(`local-accounts/${encodeURIComponent(email)}`);
 		},
 
+		// A Zugangsschlüssel für KI-Programme (#817); the key itself is shown once, so the seed keeps it
+		async accessKey(title: string) {
+			const created = await post('access-keys', { name: unique(title) });
+			names.set(`Zugangsschlüssel ${title}`, created.key);
+		},
+
 		async cleanUp() {
 			for (const restore of restores) await restore();
+			// keys created through the UI carry a scenario name as well
+			for (const key of tokens.length ? (await get('access-keys')).data : [])
+				if (tokens.some((token) => key.name.includes(token))) await remove(`access-keys/${key.id}`);
 			purgeStatements(tokens);
 			for (const token of tokens) await removeTenants(token);
 			for (const path of extras) await remove(path);

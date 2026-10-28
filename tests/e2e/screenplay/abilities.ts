@@ -50,6 +50,24 @@ export class CallTheApi {
 	}
 }
 
+/** An AI program at the backend's MCP server (#817), signed in with an access key instead of a session */
+export class CallTheMcp {
+	constructor(
+		private readonly request: APIRequestContext,
+		private readonly url = BACKEND_API.replace(/\/api\/v1$/, '/mcp')
+	) {}
+
+	/** One JSON-RPC call; answers the HTTP status and the parsed body (null when there is none) */
+	async call(key: string, method: string, params: object = {}) {
+		const response = await this.request.post(this.url, {
+			data: { jsonrpc: '2.0', id: 1, method, params },
+			headers: { Authorization: `Bearer ${key}`, Accept: 'application/json, text/event-stream' }
+		});
+		const text = await response.text();
+		return { status: response.status(), body: text ? JSON.parse(text) : null };
+	}
+}
+
 /** One activity or question with an implementation per protocol driver; the actor's ability picks it */
 export const throughUiOrApi = <T extends Activity | Question<unknown>>(ui: T, api: T): T => {
 	const pick = (actor: Actor) => (actor.can(CallTheApi) ? api : ui);

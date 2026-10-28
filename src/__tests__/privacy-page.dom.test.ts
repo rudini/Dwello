@@ -228,7 +228,8 @@ describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
 		);
 		expect(text()).not.toContain('Darüber hinaus gibt Dwello keine Daten an Dritte weiter.');
 		expect(text()).toContain(
-			'Ausser den hier und unter «Anmeldung» genannten Diensten erhält niemand Daten von Dwello.'
+			// #817: and the AI programs the landlord gives a Zugangsschlüssel (Fachprüfung 817-1 R-6)
+			'Ausser den hier und unter «Anmeldung» genannten Diensten und den KI-Programmen, denen Sie einen Zugangsschlüssel geben (siehe «KI-Programme mit Zugangsschlüssel»), erhält niemand Daten von Dwello.'
 		);
 	});
 

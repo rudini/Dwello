@@ -1,6 +1,6 @@
 import { test as base } from 'playwright-bdd';
 import { Actor } from '../screenplay/actor';
-import { BrowseTheWeb, CallTheApi } from '../screenplay/abilities';
+import { BrowseTheWeb, CallTheApi, CallTheMcp } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
 import { FRESH_API, FRESH_KI_STUB, freshInstallation, type FreshInstallation } from './fresh-installation';
@@ -16,6 +16,7 @@ export const test = base.extend<{
 	driver: Driver;
 	verwalter: Actor;
 	besucher: Actor;
+	kiProgramm: Actor;
 	seed: TestData;
 	names: Map<string, string>;
 	frisch: FreshInstallation;
@@ -43,6 +44,9 @@ export const test = base.extend<{
 		await besucher.attemptsTo(Cookies.clear);
 		await use(besucher);
 	},
+
+	// An AI program the Liegenschaftsverwalter gave an access key (#817): it reaches only the MCP server
+	kiProgramm: async ({ request }, use) => use(new Actor('KI-Programm').whoCan(new CallTheMcp(request))),
 
 	seed: async ({ request }, use) => {
 		const data = testData(new CallTheApi(request, await sessionToken()));

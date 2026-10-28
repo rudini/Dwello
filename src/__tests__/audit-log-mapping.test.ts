@@ -97,3 +97,21 @@ describe('Wechsel der KI im Protokoll', () => {
 		expect(kiText({ mode: 'none' })).toBe('KI gewählt: Keine KI');
 	});
 });
+
+// #817: Zugangsschlüssel für KI-Programme; ein Abruf nennt die Art der Daten, nie Inhalte (Fachprüfung 817-1 V-4)
+describe('Zugangsschlüssel im Protokoll', () => {
+	const keyText = (action: string, details: object) => textOf({ ...login, action }, details as never);
+
+	it('nennt Erstellen, Widerrufen und Ablauf mit dem Namen des Schlüssels', () => {
+		expect(keyText('access_key_created', { name: 'Claude Desktop Büro' })).toBe('Zugangsschlüssel «Claude Desktop Büro» erstellt');
+		expect(keyText('access_key_revoked', { name: 'Claude Desktop Büro' })).toBe('Zugangsschlüssel «Claude Desktop Büro» widerrufen');
+		expect(keyText('access_key_expired', { name: 'Claude Desktop Büro' })).toBe('Zugangsschlüssel «Claude Desktop Büro» abgelaufen');
+	});
+
+	it('nennt einen Abruf mit der Art der Daten und dem Namen des Schlüssels', () => {
+		expect(keyText('mcp_call', { tool: 'tenants', name: 'Claude Desktop Büro' })).toBe(
+			'KI-Programm mit Zugangsschlüssel «Claude Desktop Büro»: Mieter abgefragt'
+		);
+		expect(keyText('mcp_call', { tool: 'overview', name: 'Büro' })).toBe('KI-Programm mit Zugangsschlüssel «Büro»: Übersicht abgefragt');
+	});
+});

@@ -222,12 +222,28 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 | `invoice_allocability_changed` | `PUT /invoices/:id`, `POST /invoices/:id/recategorize` | `invoiceId`, `description`, `supplier`, `invoiceDate`, `amount`, `building`, `allocable` |
 | `payment_reset` | `POST /statements/:id/payment-reset` | `statementId`, `number`, `paidDate` |
 | `statement_corrected` | `POST /statements/:id/replace` («Abrechnung berichtigen», #358) | `statementId`, `number` |
+| `access_key_created`, `access_key_revoked` | `POST`, `DELETE /access-keys` (#817) | `name` |
+| `access_key_expired` | the first time Dwello sees a key that ran out (key list, Protokoll, `/mcp`), dated at the start of the day after its last valid one | `name` |
+| `mcp_call` | each `tools/call` at `/mcp` (#817), without contents | `tool`, `name` (of the key) |
 
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/` | → `{ data: [entry] }`, newest first |
 | POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
 | DELETE | `/:id` | 204. 404 |
+
+## 11c. Zugangsschlüssel für KI-Programme `/api/v1/access-keys` and `/mcp` (#817, ADR 0007)
+
+A key is `{ id, name, createdAt, lastUsedAt, expiresOn, expired }` (contracts `tests/contracts/access-keys.json`, `access-key-created.json`); the key itself (`dwello_…`) only in the answer of `POST`. It is valid through the Swiss day `expiresOn`, 90 calendar days after it was created.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/v1/access-keys` | → `{ data: [key] }`, newest first |
+| POST | `/api/v1/access-keys` | Body: `{ name }` (at most 100 characters). 201 → key with `key`; 422 `ACCESS_KEY_NAME_MISSING` |
+| DELETE | `/api/v1/access-keys/:id` | Revokes (deletes) it. 200; 404 when already revoked |
+| POST | `/mcp` | MCP over Streamable HTTP (JSON answers only), `Authorization: Bearer <key>`, no session JWT. Methods `initialize`, `ping`, `tools/list`, `tools/call`; a notification gets 202. 401 `ACCESS_KEY_INVALID` (missing, unknown or revoked) or `ACCESS_KEY_EXPIRED` |
+
+The tools (`backend/src/routes/mcp.ts`) are read only and call `GET` routes of this API in-process, with their checks and refusals: `overview` (`/dashboard`), `buildings`, `apartments`, `tenants`, `contracts`, `invoices`, `statements` (with `id`: the statement and its reminders from `/documents`). A result is `{ data, link }`, `link` the page in Dwello (`CORS_ORIGIN`); a refusal is the API's body with `isError: true`. No tool returns a file. The web app passes `POST /mcp` on unchanged (`src/routes/mcp/+server.ts`).
 
 ## 11b. Konto mit Passwort `/api/v1/auth/password`, `/api/v1/local-accounts` (#576)
 

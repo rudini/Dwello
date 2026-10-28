@@ -4,15 +4,15 @@
  * deleted; the UI words them in its language. Entries stay until the landlord deletes one.
  */
 
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { auditLog } from '../db/schema';
 
 type Writer = Pick<typeof db, 'insert'>;
 
-/** Writes one entry, inside the transaction of the change when one is given */
-export async function recordAudit(action: string, details: Record<string, unknown>, tx: Writer = db) {
-	await tx.insert(auditLog).values({ action, details });
+/** Writes one entry, inside the transaction of the change when one is given; now, unless it happened earlier */
+export async function recordAudit(action: string, details: Record<string, unknown>, tx: Writer = db, occurredAt?: SQL) {
+	await tx.insert(auditLog).values({ action, details, occurredAt });
 }
 
 /** All entries, newest first */

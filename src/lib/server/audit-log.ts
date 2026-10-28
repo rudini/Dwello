@@ -15,6 +15,17 @@ type AuditEntry = { id: string; when: string; text: string };
 
 const PROVIDERS: Record<string, string> = { google: 'Google', microsoft: 'Microsoft' };
 
+// #817: the kind of data an AI program queried, named by the MCP tool (Fachprüfung 817-1 V-4)
+const KINDS: Record<string, () => string> = {
+	overview: m.audit_ai_key_kind_overview,
+	buildings: m.audit_ai_key_kind_buildings,
+	apartments: m.audit_ai_key_kind_apartments,
+	tenants: m.audit_ai_key_kind_tenants,
+	contracts: m.audit_ai_key_kind_contracts,
+	invoices: m.audit_ai_key_kind_invoices,
+	statements: m.audit_ai_key_kind_statements
+};
+
 // The entry in the UI language, built when it is shown (fach review V-9)
 const TEXTS: Record<string, (d: Details) => string> = {
 	login: (d) => (d.provider === 'local' ? m.audit_login_password() : m.audit_login({ provider: PROVIDERS[String(d.provider)] })),
@@ -49,7 +60,12 @@ const TEXTS: Record<string, (d: Details) => string> = {
 			? m.audit_ki_provider({ provider: String(d.provider), country: String(d.country) })
 			: d.mode === 'none'
 				? m.audit_ki_none()
-				: m.audit_ki_local()
+				: m.audit_ki_local(),
+	// #817: Zugangsschlüssel für KI-Programme, each call of the MCP server without contents
+	access_key_created: (d) => m.audit_ai_key_created({ name: String(d.name) }),
+	access_key_revoked: (d) => m.audit_ai_key_revoked({ name: String(d.name) }),
+	access_key_expired: (d) => m.audit_ai_key_expired({ name: String(d.name) }),
+	mcp_call: (d) => m.audit_ai_key_query({ name: String(d.name), kind: KINDS[String(d.tool)]() })
 };
 
 export const toAuditEntries = (entries: BackendEntry[]): AuditEntry[] =>

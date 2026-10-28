@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
-	import { formatDateLong } from '$lib/utils/format';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import LegalHeader from '../LegalHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
 
@@ -139,6 +138,14 @@
 				{ text: m.privacy_third_5() }
 			]
 		},
+		// #817: read access for an AI program the landlord gives a Zugangsschlüssel (Fachprüfung 817-1)
+		{
+			id: 'ai-keys',
+			title: m.privacy_ai_keys_title(),
+			paragraphs: [m.privacy_ai_keys_1(), m.privacy_ai_keys_2(), m.privacy_ai_keys_3(), m.privacy_ai_keys_4()].map(
+				(text) => ({ text })
+			)
+		},
 		{
 			id: 'cookies',
 			title: m.privacy_cookies_title(),
@@ -159,11 +166,7 @@
 </svelte:head>
 
 <div class="flex max-w-3xl flex-col gap-8">
-	<PageHeader title={m.privacy_title()} purpose={m.privacy_purpose()} />
-	<!-- The day these texts last changed (#458) -->
-	<p class="text-ink-muted" data-testid="legal-as-of">
-		{m.legal_as_of({ date: formatDateLong('2026-10-20', { weekday: false }) })}
-	</p>
+	<LegalHeader title={m.privacy_title()} purpose={m.privacy_purpose()} />
 
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">

@@ -23,6 +23,7 @@ export const notAllowedOption = byTestId('Nicht umlagefähig', 'category-allowan
 export const allowedOption = byTestId('Umlagefähig', 'category-allowance-true');
 export const proposalChecking = byTestId('Die KI prüft', 'category-proposal-checking');
 export const firstDeleteButton = bySelector('Erstes Löschen', '[data-testid$="-delete-button"]');
+export const firstRevokeButton = bySelector('Ersten Zugangsschlüssel widerrufen', '[data-testid="access-key-revoke-button"]');
 export const firstFuelStockDelete = bySelector('Ersten Tankbestand löschen', '[data-testid^="fuel-stock-delete-"]');
 // Confirmation dialogs end with a button whose test id ends in -confirm
 export const dialogConfirm = bySelector('Bestätigen im Dialog', '[data-testid$="-confirm"]');

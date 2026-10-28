@@ -129,6 +129,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | KI-Modell (#577) | modèle d’IA | modello di IA | AI model |
 | KI-Einstellung / Lokale KI / Anbieter der KI (#580) | réglage de l’IA / IA locale / fournisseur de l’IA | impostazione dell’IA / IA locale / fornitore dell’IA | AI setting / local AI / AI provider |
 | Adresse der KI / API-Schlüssel / Verbindung prüfen (#580) | adresse de l’IA / clé API / vérifier la connexion | indirizzo dell’IA / chiave API / verificare la connessione | AI address / API key / check connection |
+| Zugangsschlüssel für KI-Programme / widerrufen / abgelaufen (#817) | clé d’accès pour programmes d’IA / révoquer / expirée | chiave di accesso per programmi di IA / disattivare (nicht «revocare», das ist der Disdetta vorbehalten) / scaduta | access key for AI programs / revoke / expired |
 | Mietzinsdepot / Freigabe des Mietzinsdepots | garantie de loyer / libération de la garantie de loyer | deposito di garanzia / svincolo del deposito di garanzia | rent deposit / release of the rent deposit |
 | Übersicht | vue d’ensemble | panoramica | overview |
 

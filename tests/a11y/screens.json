@@ -12,6 +12,8 @@
 		"register-no-hit": "«Neues Gebäude» with an address search the register finds nothing for (#479).",
 		"register-unreachable": "«Neues Gebäude» with an address search while the register cannot be reached (#479).",
 		"delete-dialog": "The delete confirmation dialog open.",
+		"key-created": "«Zugangsschlüssel für KI-Programme» right after creating a key: the key shown once with its hint and warning (#817).",
+		"key-revoke-dialog": "«Zugangsschlüssel für KI-Programme» with the dialog that confirms revoking a key open (#817).",
 		"advance-delete-dialog": "Contract page of a contract with a later Akonto: the dialog confirming its deletion, with the Akonto that applies again (#464).",
 		"advance-delete-refused": "The delete dialog of a later Akonto refused because a draft statement counts it: the refusal in the dialog (#464).",
 		"end-dialog-advance-refused": "The end dialog refused because a later Akonto applies after the Vertragsende: the refusal names its day (#464).",
@@ -789,6 +791,16 @@
 				"ki-provider-submit-empty",
 				"ki-check-result",
 				"ki-saved"
+			]
+		},
+		{
+			"name": "access-keys",
+			"path": "/config/access-keys",
+			"states": [
+				"default",
+				"empty",
+				"key-created",
+				"key-revoke-dialog"
 			]
 		},
 		{

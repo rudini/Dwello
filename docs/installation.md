@@ -165,6 +165,8 @@ In `.env`, set `JWT_SECRET=` to that key (replace the line if there is one), the
 docker compose -f docker-compose.prod.yml up -d --force-recreate
 ```
 
+A new session key does not end the access of AI programs: revoke their keys under «Einstellungen» › «Zugangsschlüssel für KI-Programme» (#817).
+
 Removing an address from `ALLOWED_EMAILS` (then `docker compose -f docker-compose.prod.yml up -d`, so the web app reads the new list) ends its access without this: only the web app reaches the backend, and it checks the list on every request (#747).
 
 ### Failed sign-ins and errors

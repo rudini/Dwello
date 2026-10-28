@@ -30,7 +30,7 @@ utility_statements ──> tenants, apartments, rental_contracts (contract_id)
 utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
 documents ──> tenants, utility_statements (optional)
 
-heating_profiles, configuration, audit_log, ki_settings: no foreign keys
+heating_profiles, configuration, audit_log, ki_settings, access_keys: no foreign keys
 ```
 
 | Foreign key | On delete |
@@ -472,12 +472,27 @@ id          UUID PRIMARY KEY
 occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
 action      VARCHAR(50) NOT NULL   -- login, management_fee_changed, category_allocability_changed,
                                    -- invoice_allocability_changed, payment_reset, statement_corrected,
-                                   -- ki_setting_changed (#580: mode, provider, country)
+                                   -- ki_setting_changed (#580: mode, provider, country),
+                                   -- access_key_created, access_key_revoked, access_key_expired, mcp_call (#817)
 details     JSONB NOT NULL         -- snapshot of what the entry names (API: docs/api-specification.md, 11a)
 ```
 
 No foreign keys: an entry stays readable after its record changed or was deleted, and stays until the landlord
 deletes it under «Einstellungen» › «Protokoll». A login stores only the provider. Migration `0019_audit_log.sql`.
+
+### access_keys (Zugangsschlüssel für KI-Programme, #817)
+
+```sql
+id              UUID PRIMARY KEY DEFAULT gen_random_uuid()
+name            VARCHAR(100) NOT NULL
+key_hash        CHAR(64) NOT NULL UNIQUE   -- SHA-256 of the key; the key itself is shown once and never stored
+created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+last_used_at    TIMESTAMPTZ                -- «zuletzt benutzt», set by each accepted call at /mcp
+expires_on      DATE NOT NULL              -- last valid Swiss day: 90 calendar days after created_at
+expiry_recorded BOOLEAN NOT NULL DEFAULT false  -- its expiry is in audit_log
+```
+
+Revoking deletes the row; the Protokoll keeps the entries. Migration `0039_access_keys.sql`, ADR 0007.
 
 ### local_accounts (Konto mit Passwort, #576)
 
