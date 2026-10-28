@@ -72,6 +72,13 @@ Funktionalität: Mietvertragsdetail
     Dann meldet der Dialog "Bitte bestätigen Sie, dass dieser Mietvertrag irrtümlich erfasst wurde, oder brechen Sie ab."
     Und ist der Mietvertrag unbefristet
 
+  # #654: die Meldung gehört zur Wahl, die abgeschickt wurde; wer den Irrtum danach bestätigt, sieht sie nicht mehr
+  Szenario: Die Meldung verschwindet, sobald der Irrtum bestätigt ist
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will, ohne den Irrtum zu bestätigen
+    Und der Liegenschaftsverwalter den Irrtum danach bestätigt
+    Dann meldet der Dialog keinen Fehler mehr
+
   Szenario: Irrtümlich erfassten Mietvertrag löschen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert

@@ -27,7 +27,9 @@ import {
 	fixedTermCheckText,
 	fixedTermErrorText,
 	flatRateUtilityCharge,
-	advancePeriodOf
+	advancePeriodOf,
+	dialogErrorCount,
+	mistakeConfirmed
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -35,6 +37,7 @@ import { chosenInvoiceBuilding, chosenInvoiceYear } from '../questions/invoices'
 import { pageAddress } from '../questions/navigation';
 import {
 	chooseNextStep,
+	confirmMistake,
 	createMissingStatement,
 	deleteAdvance,
 	deleteContract,
@@ -132,6 +135,10 @@ When('der Liegenschaftsverwalter den Mietvertrag löschen will, ohne den Irrtum 
 	await verwalter.attemptsTo(deleteContract);
 });
 
+When('der Liegenschaftsverwalter den Irrtum danach bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmMistake);
+});
+
 When(
 	'der Liegenschaftsverwalter den Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde',
 	async ({ verwalter }) => {
@@ -178,6 +185,12 @@ Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 });
 
 // the field's error and a refusal of the server use the same frame: the one with the message counts
+// the confirmation ticked is the anchor: the dialog is still open and took the choice (#654)
+Then('meldet der Dialog keinen Fehler mehr', async ({ verwalter }) => {
+	await verwalter.sees(mistakeConfirmed).toBe(true);
+	await verwalter.sees(dialogErrorCount).toBe(0);
+});
+
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(endDateProblemShown(message)).toBe(true);
 });

@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { Attribute, ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Attribute, Checked, Count, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
 	advancePeriod,
 	nextSteps,
@@ -24,7 +24,9 @@ import {
 	missingStatementInvoicesLink,
 	fixedTermCheck,
 	fixedTermError,
-	contractFlatRate
+	contractFlatRate,
+	deleteMistakeConfirmation,
+	dialogErrors
 } from '../targets/contract-detail';
 
 export const apartmentOfContract = Text.of(contractApartment);
@@ -64,3 +66,5 @@ export const fixedTermErrorText = Text.of(fixedTermError);
 export const agreedCostsOfContract = Text.of(contractAgreedCosts);
 // #464: the row of one Akonto amount with the time it applies
 export const advancePeriodOf = (amount: string) => Text.of(advancePeriod(amount));
+export const mistakeConfirmed = Checked.of(deleteMistakeConfirmation);
+export const dialogErrorCount = Count.of(dialogErrors);

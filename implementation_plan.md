@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #654 Checkbox and RadioGroup errors, date picker
+
+- [x] `@wip` scenario «Die Meldung verschwindet, sobald der Irrtum bestätigt ist» (`contract-detail.feature`), seen red (the dialog still showed 1 error)
+- [x] Each radio option's explanation is read once (`ui-choices.dom.test.ts`)
+- [x] A Checkbox error disappears once the box is changed, and shows again on the next submit
+- [x] A RadioGroup error disappears once the choice is changed (`sent-error.svelte.ts` notes the change in the capture phase, before a caller whose error follows from the choice, `AgreementQuestion`, sees the new value); category radio target in `tests/e2e/targets/categories.ts` now finds the option by its exact name
+- [ ] Native date picker checked with a screen reader (persona Sven); findings fixed or recorded
+- [ ] Slice review
+- [ ] PR
