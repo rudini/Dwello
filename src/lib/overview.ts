@@ -1,7 +1,7 @@
 import type { IconName } from './ui/icons';
 import type { IllustrationName } from './ui/illustrations';
 import { formatDate } from './utils/format';
-import { periodName } from './accounting-period';
+import { periodName, periodQuery } from './accounting-period';
 import { m } from '$lib/paraglide/messages';
 
 /** What the overview knows: the dashboard counts plus the statements, letters and contracts with a date ahead */
@@ -118,7 +118,7 @@ const count = (n: number, one: CountMessage, many: CountMessage) =>
  */
 export function invoicesOf(period: { start: string; end: string }, building: string, named?: string) {
 	const name = periodName(period);
-	const filter = new URLSearchParams({ building, periodStart: period.start, periodEnd: period.end });
+	const filter = new URLSearchParams({ building, ...periodQuery(period) });
 	return {
 		href: `/invoices?${filter}`,
 		label: named
@@ -154,7 +154,11 @@ function outdatedDraftsTask(drafts: Outdated): Task | false {
 	if (!drafts.length) return false;
 	const ways = new Map<string, { href: string; label: string }>();
 	for (const d of drafts) {
-		const filter = new URLSearchParams({ building: d.buildingId, periodStart: d.periodStart, periodEnd: d.periodEnd, status: 'draft' });
+		const filter = new URLSearchParams({
+			building: d.buildingId,
+			...periodQuery({ start: d.periodStart, end: d.periodEnd }),
+			status: 'draft'
+		});
 		const label = `${d.building}, ${periodName({ start: d.periodStart, end: d.periodEnd })}`;
 		ways.set(String(filter), { href: `/statements?${filter}`, label });
 	}

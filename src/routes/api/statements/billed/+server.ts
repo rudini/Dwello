@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { periodOf } from '$lib/accounting-period';
 import { billedContracts } from '$lib/server/statement-generation';
 import type { RequestHandler } from './$types';
 
@@ -7,7 +8,6 @@ export const GET: RequestHandler = async ({ url, fetch }) =>
 	json(
 		await billedContracts(fetch, {
 			buildingIds: (url.searchParams.get('buildingIds') ?? '').split(',').filter(Boolean),
-			periodStart: url.searchParams.get('periodStart') ?? '',
-			periodEnd: url.searchParams.get('periodEnd') ?? ''
+			...periodOf(url.searchParams)
 		})
 	);

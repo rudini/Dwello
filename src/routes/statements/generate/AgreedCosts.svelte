@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { periodQuery } from '$lib/accounting-period';
 	import { m } from '$lib/paraglide/messages';
 	import { api } from '$lib/api';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -44,8 +45,7 @@
 		api
 			.get<Contract[]>('/statements/agreements', {
 				buildingIds: buildingIds.join(','),
-				periodStart: period.start,
-				periodEnd: period.end
+				...periodQuery(period)
 			})
 			.then(({ data }) => {
 				contracts = Array.isArray(data) ? data : [];

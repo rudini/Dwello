@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { periodQuery } from '$lib/accounting-period';
 	import { m } from '$lib/paraglide/messages';
 	import { api } from '$lib/api';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -41,8 +42,7 @@
 			// Contracts with a statement in the period already get none from this run
 			api.get<(Billed & { buildingId: string })[]>('/statements/billed', {
 				buildingIds: ids.join(','),
-				periodStart: period.start,
-				periodEnd: period.end
+				...periodQuery(period)
 			})
 		]).then(([invoices, statements]) => {
 			if (left) return;

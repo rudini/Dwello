@@ -1,4 +1,5 @@
 import type { SkippedContract } from '$lib/statement-wizard';
+import { periodQuery } from '$lib/accounting-period';
 import { error, fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile, type HeatingProfileRow } from '$lib/server/heating-profile';
@@ -46,7 +47,7 @@ async function defaults(
 		(key) => url.searchParams.get(key) ?? ''
 	);
 	const link = buildings.some((b) => b.id === id)
-		? `?${new URLSearchParams({ buildingId: id, periodStart: start, periodEnd: end })}`
+		? `?${new URLSearchParams({ buildingId: id, ...periodQuery({ start, end }) })}`
 		: '';
 	const response = await fetch(`${BACKEND_URL}/api/v1/statements/run-defaults${link}`);
 	if (!response.ok) throw error(response.status, m.error_unexpected());
