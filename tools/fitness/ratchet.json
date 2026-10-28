@@ -566,5 +566,21 @@
 		"modules": 20,
 		"layers": 5
 	},
-	"coChangeWarn": 26
+	"coChangeWarn": 26,
+	"routeQueries": {
+		"/api/v1/dashboard": 68,
+		"/api/v1/buildings": 3,
+		"/api/v1/apartments": 2,
+		"/api/v1/tenants": 3,
+		"/api/v1/contracts": 2,
+		"/api/v1/contracts/missing-statements": 7,
+		"/api/v1/invoices": 2,
+		"/api/v1/statements": 4,
+		"/api/v1/statements/outdated": 28,
+		"/api/v1/documents": 1,
+		"/api/v1/categories": 2,
+		"/api/v1/distribution-keys": 2,
+		"/api/v1/heating-profiles": 2,
+		"/api/v1/audit-log": 1
+	}
 }
