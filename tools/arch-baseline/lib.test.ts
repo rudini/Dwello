@@ -56,4 +56,8 @@ describe('LITERAL_UNION', () => {
 	it('überspringt die Schlüssel von Pick auch bei einem generischen ersten Typargument', () => {
 		expect(unions("type A = Pick<Json<Row>, 'a' | 'b'>; type B = Pick<Awaited<ReturnType<typeof f>>[number], 'c' | 'd'>;")).toEqual([]);
 	});
+
+	it('findet eine Werteliste nach einem Pick, dessen Schlüssel kein Literal sind', () => {
+		expect(unions("function f(row: Pick<Row, Keys>, s: 'a' | 'b') {} type T = Pick<A, K> | Record<string, 'x' | 'y'>;")).toEqual(["'a' | 'b'", "'x' | 'y'"]);
+	});
 });
