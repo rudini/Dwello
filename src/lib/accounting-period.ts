@@ -10,3 +10,10 @@ export function periodName({ start, end }: Range) {
 	const year = start.slice(0, 4);
 	return start === `${year}-01-01` && end === `${year}-12-31` ? year : periodDays({ start, end });
 }
+
+/** The period in the query names of the backend's routes: the one place the frontend spells them (Ä1, #912) */
+export const periodQuery = ({ start, end }: Range) => ({ periodStart: start, periodEnd: end });
+
+/** The period of a query in those names; a missing day stays empty */
+export const periodOf = (query: URLSearchParams) =>
+	periodQuery({ start: query.get('periodStart') ?? '', end: query.get('periodEnd') ?? '' });

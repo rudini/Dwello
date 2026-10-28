@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { periodQuery } from '$lib/accounting-period';
 	import { m } from '$lib/paraglide/messages';
 	import { api } from '$lib/api';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -25,8 +26,7 @@
 		api
 			.get<{ withoutFee: Contract[] }[]>('/statements/billed', {
 				buildingIds: buildingIds.join(','),
-				periodStart: period.start,
-				periodEnd: period.end
+				...periodQuery(period)
 			})
 			.then(({ data }) => {
 				if (left) return;

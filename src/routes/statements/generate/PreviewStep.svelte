@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { balanceLabel } from '$lib/statement';
-	import { akontoHint, invoiceRows } from '$lib/statement-wizard';
+	import { akontoHint, invoiceRows, type WizardSelection } from '$lib/statement-wizard';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import PreviewChecks from './PreviewChecks.svelte';
@@ -26,7 +26,7 @@
 		invoices: Parameters<typeof invoiceRows>[0];
 		buildings: { id: string; name: string }[];
 		periodLabel: string;
-		period: { periodStart: string; periodEnd: string };
+		period: Pick<WizardSelection, 'periodStart' | 'periodEnd'>;
 		heatingProfile?: string; // what step 3 chose, to check before creating
 		feePercent: number;
 		confirmed: boolean;

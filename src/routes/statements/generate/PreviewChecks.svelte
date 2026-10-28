@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { heatingWholeText, sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
+	import {
+		heatingWholeText,
+		sameSettingsNote,
+		type invoiceRows,
+		type WizardSelection
+	} from '$lib/statement-wizard';
 	import ChangedStatements from './ChangedStatements.svelte';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
@@ -21,7 +26,7 @@
 		running
 	}: {
 		rows: ReturnType<typeof invoiceRows>;
-		period: { periodStart: string; periodEnd: string };
+		period: Pick<WizardSelection, 'periodStart' | 'periodEnd'>;
 		confirmed: boolean;
 		error?: string;
 		uncategorizedError?: string; // «Weiter» while an invoice without category holds the run (#382)
