@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { flushSync } from 'svelte';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
@@ -194,7 +195,7 @@ describe('Rechnungen hochladen', () => {
 	});
 
 	// persona Anna 626 P-1, P-2: with «Keine KI» the file is not sent to be read, and no note says a KI did not read it
-	it('schickt bei «Keine KI» keine Datei zum Auslesen und nennt keine KI', async () => {
+	it('schickt bei «Keine KI» keine Datei zum Auslesen und nennt weder eine KI noch ein Lesen', async () => {
 		const calls = fakeBff(() => [503, { code: 'EXTRACTION_UNAVAILABLE' }]);
 		show(InvoiceUploadDialog, {
 			open: true,
@@ -215,6 +216,8 @@ describe('Rechnungen hochladen', () => {
 		expect(rowText()[0]).not.toContain('nicht öffnen');
 		// #760: the empty fields are entered, not checked
 		expect(byTestId('invoice-upload-row-toggle')!.textContent?.trim()).toBe('Angaben eingeben');
+		// #773: nobody reads with «Keine KI», so the status line counts only what is to do
+		expect(byTestId('invoice-upload-progress')!.textContent?.trim()).toBe('Bitte ausfüllen: 1.');
 		// code review 626 C-3: the pages are made in the browser, so the preview stays
 		click('invoice-upload-row-toggle');
 		await settle();
@@ -317,7 +320,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'), word);
 		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
-		expect(status()).toBe('Fertig: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1.');
+		expect(status()).toBe('Bitte prüfen: 1. Nicht möglich: 1.');
 		allByTestId('invoice-upload-row-remove')[1].click();
 		await settle();
 		expect(status()).toBe('notizen.docx entfernt.');
@@ -534,7 +537,7 @@ describe('Rechnungen hochladen', () => {
 		open(() => [500, {}]);
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
-		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Fertig: 1 von 1. Nicht gelesen: 1.');
+		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Nicht gelesen: 1.');
 	});
 
 	// #245 (Weber P-5 of #217 round 2, Marco P-3): an unticked row says why, at its checkbox
@@ -565,6 +568,16 @@ describe('Rechnungen hochladen', () => {
 		await settle();
 		expect(rowText()[0]).toContain('Wählen Sie eine Kategorie.');
 		expect(calls.filter((call) => call.path === '/invoices')).toEqual([]);
+	});
+
+	// #773 (persona Helga 760 P-1): a file nobody read has nothing to check
+	it('zeigt bei einer Datei, die die KI nicht gelesen hat, «Bitte ausfüllen» an der Datei und in der Statuszeile', async () => {
+		open(() => [503, { error: 'x', code: 'EXTRACTION_UNAVAILABLE', params: {} }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		expect(byTestId('invoice-upload-row-status')!.textContent?.trim()).toBe('Bitte ausfüllen');
+		expect(byTestId('invoice-upload-progress')!.textContent?.trim()).toBe('Bitte ausfüllen: 1.');
 	});
 
 	it('bietet erneutes Auslesen an, wenn Dwello nicht geantwortet hat', async () => {
@@ -686,13 +699,20 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-result')!.textContent).toContain('1 Rechnung erstellt');
 	});
 
-	it('sagt an, wie viele Dateien gelesen sind', async () => {
+	// #773 (persona Helga 773 P-1): once all are read, only what is to do; «Gelesen» would contradict an unread file
+	it('sagt an, wie viele Dateien gelesen sind, und danach nur noch, was zu tun ist', async () => {
 		open(() => [200, read]);
 		chooseBuilding();
-		await upload(pdf('a.pdf'), pdf('b.pdf'));
+		const input = byTestId<HTMLInputElement>('invoice-upload-file-input')!;
+		Object.defineProperty(input, 'files', { value: [pdf('a.pdf'), pdf('b.pdf')], configurable: true });
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
 		const status = byTestId('invoice-upload-progress')!;
 		expect(status.getAttribute('role')).toBe('status');
-		expect(status.textContent).toContain('Fertig: 2 von 2');
+		expect(status.textContent).toBe('Gelesen: 0 von 2');
+		await settle();
+		await settle();
+		expect(status.textContent).toBe('Bitte prüfen: 2.');
 	});
 
 	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {

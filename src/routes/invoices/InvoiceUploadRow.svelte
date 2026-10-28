@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { selectionHelp, type UploadRow } from '$lib/invoice-upload';
+	import { selectionHelp, stateOf, type UploadRow } from '$lib/invoice-upload';
 	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -37,13 +37,14 @@
 	// every control of the row names its file and its status to a screen reader
 	const about = $derived(`upload-${row.key}`);
 	const describedby = $derived(`${about}-name ${about}-status`);
-	const statuses: Record<UploadRow['status'], { tone: Tone; label: string }> = {
+	const statuses: Record<ReturnType<typeof stateOf>, { tone: Tone; label: string }> = {
 		reading: { tone: 'info', label: m.invoices_upload_status_reading() },
 		check: { tone: 'caution', label: m.invoices_upload_status_check() },
+		fill: { tone: 'caution', label: m.invoices_upload_status_fill() },
 		failed: { tone: 'critical', label: m.invoices_upload_status_error() },
 		refused: { tone: 'critical', label: m.invoices_upload_status_refused() }
 	};
-	const status = $derived(statuses[row.status]);
+	const status = $derived(statuses[stateOf(row)]);
 	const editable = $derived(row.status === 'check' || row.status === 'failed');
 	// a file nobody read (also one whose reading failed) has empty fields to enter, not proposals to check (#760)
 	const unread = $derived(row.byHand || row.status === 'failed');
@@ -58,7 +59,7 @@
 <li class="flex flex-col gap-4 py-4" data-testid="invoice-upload-row">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<p id="{about}-name" class="min-w-0 break-all font-semibold text-ink">{row.file.name}</p>
-		<span id="{about}-status"><Badge tone={status.tone} label={status.label} /></span>
+		<span id="{about}-status"><Badge tone={status.tone} label={status.label} testid="invoice-upload-row-status" /></span>
 	</div>
 
 	<UploadRowNotes {row} {errors} />

@@ -54,6 +54,9 @@ Funktionalität: KI in den Einstellungen wählen
     Dann zeigt der Dialog "Rechnungen hochladen" die Datei "Hauswartung.pdf" ohne Hinweis auf eine KI
     # #760: die leeren Angaben gibt der Liegenschaftsverwalter ein, er prüft sie nicht
     Und bietet der Dialog "Rechnungen hochladen" zur Datei "Hauswartung.pdf" "Angaben eingeben" an
+    # #773: nichts zu prüfen und noch nichts fertig; ohne KI nennt die Statuszeile kein Lesen
+    Und zeigt der Dialog "Rechnungen hochladen" zur Datei "Hauswartung.pdf" den Stand "Bitte ausfüllen"
+    Und meldet Dwello "Bitte ausfüllen: 1."
 
   Szenario: Zur lokalen KI zurückkehren
     Angenommen Dwello ist eingerichtet
