@@ -155,7 +155,7 @@ Dwello-Nutzen
 - **Umgebung:** VM wie die Demo, Daten von 50 Wohnungen über mehrere Jahre.
 - **Reaktion:** Die Seite ist ohne spürbare Wartezeit da.
 - **Messgrösse und Ziel:** Antwortzeit der API **< 500 ms (p95)** (aus Repo/Config: `docs/tech-stack.md`; eigenes Ziel: vom Nutzer bestätigt). Für die Datenbank nennt `docs/tech-stack.md` zusätzlich Abfragen < 100 ms (p95).
-- **Heute:** einmal gemessen am 28.10.2026 (#781, `bun tools/fitness/p2-benchmark.ts`: 50 Wohnungen, 75 Mietverträge, 300 Rechnungen, 225 Abrechnungen 2021–2025; 4 vCPU Xeon 2.8 GHz, im Prozess ohne Netz, je 100 Aufrufe): alle Listen unter 20 ms p95, `contracts/missing-statements` 61 ms, Übersicht `dashboard` 227 ms, aber **`statements/outdated` 1110 ms** (die Übersicht lädt sie mit, #919). Ob der Wert auf der Demo-VM (2 OCPU ARM) gleich ist, bleibt offen (A4). Entscheid PO 28.10.2026: einmal messen, kein CI-Gate.
+- **Heute:** einmal gemessen am 28.10.2026 (#781, `bun tools/fitness/p2-benchmark.ts`: 50 Wohnungen, 75 Mietverträge, 300 Rechnungen, 225 Abrechnungen 2021–2025; 4 vCPU Xeon 2.8 GHz, im Prozess ohne Netz, je 100 Aufrufe): alle Listen unter 20 ms p95, `contracts/missing-statements` 61 ms, Übersicht `dashboard` 227 ms, `statements/outdated` 1110 ms (die Übersicht lädt sie mit). Nach #919 (Rechnungen und Tankbestand einmal pro Gebäude und Periode, keine volle Abrechnung pro Eintrag): `statements/outdated` **80 ms**, `dashboard` 214 ms; damit hält jede gemessene Route das Ziel. Ob der Wert auf der Demo-VM (2 OCPU ARM) gleich ist, bleibt offen (A4). Entscheid PO 28.10.2026: einmal messen, kein CI-Gate.
 - **Fitness Function:** `bun run fitness:p2` (`tools/fitness/p2-benchmark.ts`) ruft jede Listen- und Übersichtsroute 100-mal ab und bildet p95; von Hand gestartet. Entscheid PO 28.10.2026 (#781): einmal messen, kein wöchentlicher Lauf und kein CI-Wächter, solange A4 offen ist.
 
 ### S1 Sitzung und Mieterdaten geschützt
@@ -186,7 +186,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
-| P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Einmal gemessen (28.10.2026, #781): die Listen weit unter dem Ziel, aber `statements/outdated` 1110 ms p95 (#919), das die Übersicht mitlädt. |
+| P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Einmal gemessen (28.10.2026, #781): alle Listen- und Übersichtsrouten unter dem Ziel, `statements/outdated` nach #919 80 ms statt 1110 ms p95. |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
 **Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
