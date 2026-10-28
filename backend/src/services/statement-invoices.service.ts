@@ -108,7 +108,9 @@ const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte 
  * Null without the statement
  */
 export async function statementChanges(statementId: string) {
-	return changesOf(await getStatement(statementId), direct);
+	const statement = await getStatement(statementId);
+	const changes = await changesOf(statement, direct);
+	return changes && { ...changes, carryOverChanged: !!statement!.carryChanged }; // #506 C
 }
 
 async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
@@ -147,14 +149,15 @@ export async function declineCorrection(statementId: string) {
 }
 
 /** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
-export const draftOutdated = (changes: Awaited<ReturnType<typeof statementChanges>>) =>
+export const draftOutdated = (changes: Awaited<ReturnType<typeof changesOf>>) =>
 	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged);
 
 /** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
 export async function draftsToSend() {
 	const { statements } = await listStatements({ status: 'draft', limit: 1000 });
 	const load = perPeriod();
-	const outdated = await Promise.all(statements.map(async (s) => draftOutdated(await changesOf(s, load))));
+	// a draft that would count another Übertrag now is not to send either (Fachreview 506-1 V-8)
+	const outdated = await Promise.all(statements.map(async (s) => s.carryChanged || draftOutdated(await changesOf(s, load))));
 	return outdated.filter((one) => !one).length;
 }
 

@@ -52,6 +52,8 @@ export interface OverviewInput {
 	expiredContracts: { id: string; tenantName: string; endDate: string }[];
 	// ehemalige Mieter with uploads from before their last Vertragsende (#178)
 	formerTenants?: { tenantId: string; tenantName: string; endDate: string; count: number }[];
+	// #506: an Übertrag no statement counts any more, settled by hand; the Saldo as the backend sends it
+	openCarryOvers?: { id: string; statementNumber: string; tenantName: string; balance: string }[];
 }
 
 /** One thing the landlord should do now, with the page where it is done */
@@ -311,6 +313,20 @@ const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
 		icon: 'document'
 	}));
 
+// #506: the landlord claims, waives or pays out the Übertrag himself, then marks it on the statement
+const carryTasks = ({ openCarryOvers = [] }: OverviewInput): Task[] =>
+	openCarryOvers.map((c) => {
+		const values = { number: c.statementNumber, tenant: c.tenantName, amount: Math.abs(Number(c.balance)).toFixed(2) }; // below CHF 5: no thousands
+		return {
+			id: `open-carry-${c.id}`,
+			title: m.dashboard_task_open_carry_title(),
+			text: Number(c.balance) < 0 ? m.dashboard_task_open_carry_refund(values) : m.dashboard_task_open_carry_due(values),
+			href: `/statements/${c.id}`,
+			action: m.dashboard_task_correct_action(),
+			icon: 'statement'
+		};
+	});
+
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
@@ -320,7 +336,8 @@ export function overviewTasks(input: OverviewInput): Task[] {
 		...addressTasks(input),
 		...successorTasks(input),
 		...fixedTermTasks(input),
-		...formerDocumentTasks(input)
+		...formerDocumentTasks(input),
+		...carryTasks(input)
 	];
 }
 

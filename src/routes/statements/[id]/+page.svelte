@@ -31,6 +31,7 @@
 	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
+	import CarrySettleDialog from './CarrySettleDialog.svelte';
 	import PdfAction from './PdfAction.svelte';
 	import ReminderFeedback from './ReminderFeedback.svelte';
 	import ReminderHistory from './ReminderHistory.svelte';
@@ -60,18 +61,26 @@
 	let showDelete = $state(false);
 	let showSend = $state(false);
 	let showRecalculate = $state(false);
-	// a draft whose invoices or Tankbestand changed since it was created is not current (#454, #547)
+	// a draft whose invoices or Tankbestand changed since it was created is not current (#454, #547), nor one that
+	// would count another Übertrag now (#506 C)
 	const later = $derived(data.later);
-	const outdated = $derived(
+	const invoicesOutdated = $derived(
 		statement.status === 'draft' && later && (later.invoices || later.fuelStock)
-			? laterText(later.invoices, later.fuelStock)
-			: undefined
+			? m.statements_send_outdated({ later: laterText(later.invoices, later.fuelStock) })
+			: ''
+	);
+	// the backend says it of a draft only
+	const outdated = $derived(
+		[invoicesOutdated, later?.carryOver && m.statements_send_outdated_carry()]
+			.filter(Boolean)
+			.join(' ') || undefined
 	);
 	let sendByLetter = $state(false); // after a failed e-mail (#86)
 	// without an e-mail address the letter is the only way, from the button on (#449, persona Helga P-2)
 	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !!statement.tenantEmail);
 	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
+	let showCarrySettle = $state(false);
 	let showCorrect = $state(false);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
@@ -206,7 +215,7 @@
 	</div>
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex min-w-0 flex-col gap-8 lg:col-span-2">
-			<PaymentPanel {statement} />
+			<PaymentPanel {statement} onsettle={() => (showCarrySettle = true)} />
 			<ReminderHistory reminders={data.reminders} />
 		</div>
 		<div class="flex min-w-0 flex-col gap-8">
@@ -265,6 +274,7 @@
 </FormDialog>
 
 <ResetPaymentDialog bind:open={showResetPayment} {statement} />
+<CarrySettleDialog bind:open={showCarrySettle} {statement} />
 
 <SendDialog
 	bind:open={showSend}

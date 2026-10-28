@@ -620,6 +620,34 @@ describe('Abrechnungsdetail', () => {
 		} as never);
 	const laterText = () => byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ');
 
+	// #506 C (Fachreview 506-1 V-4): a draft that would count another Übertrag now
+	it('rät beim Versand eines Entwurfs, der jetzt einen anderen Übertrag verrechnen würde, zum Neu berechnen', () => {
+		later(0, 'draft', { carryOver: true } as never);
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog).toContain('Dieser Entwurf ist nicht aktuell');
+		expect(dialog).toContain(
+			'Seit dem Erstellen dieses Entwurfs hat sich geändert, welchen Übertrag aus einer früheren Abrechnung er verrechnet. Berechnen Sie den Entwurf neu, bevor Sie ihn zustellen.'
+		);
+	});
+
+	// #506 B (Fachreview 506-1 V-6): an open Übertrag is not «mit der nächsten Abrechnung verrechnet»
+	it('nennt einen offenen Übertrag und bietet den Ausgleich von Hand an', () => {
+		detail({ status: 'settled', balance: 3, noPayment: true, openCarry: true });
+		expect(byTestId('statement-payment-summary')!.textContent).toBe('Der Übertrag ist noch offen. Keine Abrechnung verrechnet ihn mehr.');
+		click('statement-carry-settle');
+		flushSync();
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Haben Sie die Nachzahlung erhalten, oder verzichten Sie darauf? Der Übertrag gilt dann als ausgeglichen, und keine Abrechnung verrechnet ihn. Das lässt sich nicht rückgängig machen.'
+		);
+	});
+
+	it('nennt den Tag, an dem ein Übertrag von Hand ausgeglichen wurde, ohne den Ausgleich noch einmal anzubieten', () => {
+		detail({ status: 'settled', balance: -3, noPayment: true, carrySettledOn: '2026-10-28' });
+		expect(byTestId('statement-payment-summary')!.textContent).toBe('Übertrag von Hand ausgeglichen am 28.10.2026.');
+		expect(byTestId('statement-carry-settle')).toBeNull();
+	});
+
 	// #547: the send dialog of a draft that is not current says so first and offers «Neu berechnen»; sending stays possible
 	it('rät beim Versand eines nicht aktuellen Entwurfs zum Neu berechnen', () => {
 		later(1, 'draft');
@@ -827,6 +855,15 @@ describe('Abrechnungsdetail', () => {
 		click('statement-correct-button');
 		expect(correctDialog()).toContain(
 			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Enthält eine versendete nächste Abrechnung ihren Saldo schon als Übertrag, rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an: Der Mieter bezahlt oder erhält ihn nicht doppelt. Enthält ein Entwurf ihn als Übertrag, entfernt Dwello den Übertrag sofort aus dem Entwurf; die berichtigte Abrechnung rechnet dann den ganzen Saldo ab. Ist der Saldo der berichtigten Abrechnung wieder kleiner als CHF 5.00, berechnen Sie den Entwurf neu, nachdem Sie die berichtigte Abrechnung versendet haben.'
+		);
+	});
+
+	// PR #941 review (Fachreview 506-1 V-2): ein von Hand ausgeglichener Übertrag wird als bezahlt angerechnet
+	it('nennt beim Berichtigen, dass ein von Hand ausgeglichener Übertrag als bezahlt angerechnet wird', () => {
+		detail({ status: 'settled', balance: 3, ...noPayment, carried: true, carrySettledOn: '2026-10-28' });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain(
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Ihren Übertrag von CHF 3.00 haben Sie am 28.10.2026 von Hand ausgeglichen: Die berichtigte Abrechnung rechnet ihn als bezahlt an, der Mieter bezahlt oder erhält ihn nicht doppelt.'
 		);
 	});
 

@@ -38,6 +38,7 @@ import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
+import { carriable, carriedOverId, carryChanged, countedBy, openCarry } from './carry-over';
 import type { StatementWithDetails } from '../api/statement';
 
 export interface StatementFilters {
@@ -84,7 +85,7 @@ const reminderWaits = (
 ) =>
 	s.reminderToSend ||
 	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
-const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId) };
+const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
 
 /**
  * Status filter; 'overdue' is computed as sent with a past payment deadline,
@@ -399,43 +400,15 @@ export async function calculateStatement(input: StatementInput) {
 	return { ...calculation, balance, priorPayments, carryOver, carriedFromId: carried?.id ?? null, replacesId: replaced?.id ?? null };
 }
 
-// The number of the sent statement of another period that counts this statement's Saldo as its Übertrag (#448); a
-// berichtigte Abrechnung of the same period counts it again; a draft may still change (Fachreview 448-2 V-14)
-const countedBy = sql<string | null>`(
-	select counting.statement_number from utility_statements counting
-	where counting.carried_from_id = utility_statements.id and counting.status <> 'draft'
-		and (counting.period_start <> utility_statements.period_start or counting.period_end <> utility_statements.period_end)
-	limit 1
-)`; // the outer table by its name: drizzle writes a column of a single-table select without it
-// A Saldo carried over: settled with a Saldo other than 0.00, or a refund below CHF 5 settled under #94, which the
-// tenant is still owed (PO 2026-10-19); a Nachzahlung waived under #94 stays waived
-const carriable = or(
-	and(eq(utilityStatements.status, 'settled'), sql`${utilityStatements.balance} <> 0`),
-	and(eq(utilityStatements.status, 'paid'), sql`${utilityStatements.paidAmount} = 0 and ${utilityStatements.balance} < 0 and ${utilityStatements.balance} > -5`)
-);
-
 /**
  * The Übertrag (#448): the latest earlier statement of the Mietvertrag with a Saldo carried over that no statement of
- * another period counts yet
+ * another period counts yet; not an open one (#506, Fachreview 506-1 V-1) or one settled by hand
  */
-async function carriedOver({ contractId, periodStart, periodEnd }: StatementInput) {
+async function carriedOver({ contractId, periodStart, periodEnd }: Pick<StatementInput, 'contractId' | 'periodStart' | 'periodEnd'>) {
 	const [carried] = await db
 		.select({ id: utilityStatements.id, balance: utilityStatements.balance })
 		.from(utilityStatements)
-		.where(
-			and(
-				eq(utilityStatements.contractId, contractId),
-				carriable,
-				lt(utilityStatements.periodEnd, periodStart),
-				sql`not exists (
-					select 1 from utility_statements counting
-					where counting.carried_from_id = utility_statements.id
-						and (counting.period_start <> ${periodStart} or counting.period_end <> ${periodEnd})
-				)`
-			)
-		)
-		.orderBy(desc(utilityStatements.periodEnd))
-		.limit(1);
+		.where(sql`${utilityStatements.id} = ${carriedOverId(contractId, periodStart, periodEnd)}`);
 	return carried;
 }
 
@@ -798,6 +771,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paidDate: null,
 		paidAmount: null,
 		paymentRecordedAt: null,
+		carrySettledOn: null, // a refund settled under #94 is carried over again (Fachreview 506-1 V-9)
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
@@ -834,11 +808,37 @@ async function offsetOf(statement: StatementWithDetails, tx: Tx) {
 		.from(utilityStatements)
 		.where(and(eq(utilityStatements.id, statement.id), carriable));
 	if (!row) return {};
-	await tx
+	await dropFromDrafts(statement, tx);
+	// settled by hand: paid, as a counted one (#506, Fachreview 506-1 V-2)
+	return row.countedBy || statement.carrySettledOn ? { paidAmount: statement.balance } : {};
+}
+
+// A draft that counts the statement's Saldo as its Übertrag loses it
+const dropFromDrafts = (statement: { id: string; balance: string }, tx: Tx) =>
+	tx
 		.update(utilityStatements)
 		.set({ carriedFromId: null, balance: sql`${utilityStatements.balance} - ${statement.balance}` })
 		.where(and(eq(utilityStatements.carriedFromId, statement.id), eq(utilityStatements.status, 'draft')));
-	return row.countedBy ? { paidAmount: statement.balance } : {};
+
+/**
+ * #506: «Als ausgeglichen markieren»: the landlord paid out, claimed or waived an Übertrag himself; no statement counts it
+ * after, and a draft that counts it loses it (Fachreview 506-1 V-1)
+ */
+export async function settleCarryOver(id: string): Promise<StatementWithDetails> {
+	const existing = await getStatement(id);
+	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	// checked in the update itself, so a replacement or a send that committed before it leaves nothing to settle; one
+	// that commits while it runs is not locked out (no row lock: a single landlord, PR #941 review, code review 506-5 C-2)
+	await db.transaction(async (tx) => {
+		const settled = await tx
+			.update(utilityStatements)
+			.set({ carrySettledOn: swissToday(), updatedAt: new Date() })
+			.where(and(eq(utilityStatements.id, id), carriable, isNull(utilityStatements.carrySettledOn), sql`${countedBy} is null`))
+			.returning({ id: utilityStatements.id, balance: utilityStatements.balance });
+		if (!settled.length) throw new CodedError('STATEMENT_NO_CARRY_OVER', 'The statement has no open Übertrag');
+		await dropFromDrafts(settled[0], tx);
+	});
+	return (await getStatement(id))!;
 }
 
 // «Bereits bezahlt» of a sent or overdue statement, in francs and Rappen

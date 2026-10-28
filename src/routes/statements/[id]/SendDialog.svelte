@@ -21,7 +21,7 @@
 		open: boolean;
 		statement: StatementWithDetails;
 		byLetter?: boolean;
-		outdated?: string; // what changed since a draft was created: it is not current (#547)
+		outdated?: string; // what changed since a draft was created, as sentences: it is not current (#547, #506)
 		onrecalculate?: () => void;
 	} = $props();
 
@@ -91,7 +91,7 @@
 	<!-- #547: a draft that is not current is said first, with «Neu berechnen»; sending stays possible -->
 	{#if outdated}
 		<Alert tone="caution" title={m.statements_send_outdated_title()} testid="send-outdated">
-			<p>{m.statements_send_outdated({ later: outdated })}</p>
+			<p>{outdated}</p>
 			<div>
 				<Button icon="refresh" onclick={onrecalculate} testid="send-recalculate"
 					>{m.statements_recalculate()}</Button

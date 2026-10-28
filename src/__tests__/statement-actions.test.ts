@@ -136,6 +136,25 @@ describe('Zahlungsdatum und Ende der Abrechnungsperiode', () => {
 	});
 });
 
+// #506 (code review 506-1 C-4): einen offenen Übertrag von Hand ausgleichen
+describe('Übertrag als ausgeglichen markieren', () => {
+	it('lässt das Backend den Übertrag als ausgeglichen markieren', async () => {
+		const { calls, result } = runAction(actions.settleCarry, 's1');
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/carry-settled`, body: undefined }]);
+	});
+
+	it('meldet einen Fehler mit dem nächsten Schritt, wenn das Backend scheitert', async () => {
+		const { result } = runAction(actions.settleCarry, 's1', 500);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'Der Übertrag wurde nicht als ausgeglichen markiert. Versuchen Sie es noch einmal.' }
+		});
+	});
+});
+
 // #92: eine erfasste Zahlung zurücksetzen
 describe('Zahlung zurücksetzen', () => {
 	it('lässt das Backend die Zahlung zurücksetzen', async () => {
@@ -281,7 +300,7 @@ describe('Abrechnung laden', () => {
 
 		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
 		// #454: and whether the Tankbestand changed, and whether a correction is due (Fachreview 454-1 E-3)
-		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false });
+		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
 		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
 	});
 
@@ -295,7 +314,7 @@ describe('Abrechnung laden', () => {
 		}) as typeof globalThis.fetch;
 
 		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
-		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false });
+		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
 	});
 });
 

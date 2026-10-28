@@ -23,6 +23,7 @@
 			correctionDue: boolean;
 			correctionDeclinable: boolean;
 			correctionLowers: boolean;
+			carryOver?: boolean; // #506 C: said in the send dialog, not here
 		};
 	} = $props();
 

@@ -10,6 +10,7 @@ import {
 	recalculateStatement,
 	replaceStatement,
 	resetStatementPayment,
+	settleCarryOver,
 	sendStatement,
 	sendStatementReminder
 } from '$lib/server/statement-actions';
@@ -69,6 +70,10 @@ export const actions: Actions = {
 	},
 	resetPayment: async ({ params, fetch }) => {
 		const refused = await resetStatementPayment(fetch, params.id);
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	settleCarry: async ({ params, fetch }) => {
+		const refused = await settleCarryOver(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	replace: async ({ params, fetch, request }) => {

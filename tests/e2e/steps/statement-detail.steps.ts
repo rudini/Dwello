@@ -81,9 +81,10 @@ import {
 	openStatementTenant,
 	resetPayment,
 	sendStatement,
-	confirmSending
+	confirmSending,
+	settleCarryOver
 } from '../tasks/statement-detail';
-import { inDays } from '../fixtures/dates';
+import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
 
 const { Given, When, Then } = createBdd(test);
@@ -525,6 +526,16 @@ Then('sagt die Abrechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(paymentText).toContain(text);
 });
 
+// Fachreview 506-1 V-6: an open or settled Übertrag is not «mit der nächsten Abrechnung verrechnet»
+Then('sagt die Abrechnung nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentText).toContain('Übertrag');
+	await verwalter.sees(paymentText).not.toContain(text);
+});
+
+Then('sagt die Abrechnung, dass der Übertrag heute von Hand ausgeglichen wurde', async ({ verwalter }) => {
+	await verwalter.sees(paymentText).toContain(`Übertrag von Hand ausgeglichen am ${swissDate(inDays(0))}`);
+});
+
 Then('nennt die Abrechnung keine Zahlungsfrist', async ({ verwalter }) => {
 	await verwalter.sees(deadlineShown).toBe(0);
 });
@@ -539,6 +550,11 @@ Then(
 		await verwalter.sees(replacedStatementLink).toBe(statementPath(seed, tenant, year));
 	}
 );
+
+// #506 (Fachreview 506-1 V-2): what the Bestätigung says about an Übertrag
+Then('sagt die Bestätigung des Berichtigens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(correctConfirmation).toContain(text);
+});
 
 Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt', async ({ verwalter }) => {
 	await verwalter.sees(correctConfirmation).toContain('durch eine berichtigte Abrechnung ersetzt');
@@ -686,3 +702,7 @@ Given(
 		await seed.changeFuelStock(building, date, amount);
 	}
 );
+
+When('der Liegenschaftsverwalter den Übertrag als ausgeglichen markiert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(settleCarryOver);
+});

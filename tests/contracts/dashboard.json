@@ -23,7 +23,8 @@
 		"oldAddresses": [{ "tenantId": "t3", "tenantName": "Carla Frei" }],
 		"missingStatements": [
 			{ "building": "Ahornhof", "buildingId": "b1", "periods": [{ "start": "2025-01-01", "end": "2025-12-31" }] }
-		]
+		],
+		"openCarryOvers": [{ "id": "s9", "statementNumber": "NK-2024-7", "tenantName": "Bruno Meier", "balance": "3.00" }]
 	},
 	"deadlines": [{ "id": "c1", "kind": "Vertragsende", "name": "Anna Keller", "date": "2026-11-30", "days": 36 }]
 }

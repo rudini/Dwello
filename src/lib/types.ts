@@ -375,6 +375,8 @@ export interface StatementWithDetails
 	priorPayments?: number; // what was paid on the replaced ones (#120)
 	// #448: the Übertrag from the previous statement, a replaced Saldo the next one counted
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
+	openCarry?: boolean; // #506: no statement counts the Übertrag any more; the landlord settles it by hand
+	carrySettledOn?: string | null; // #506: the day he did
 	offsetWith?: { statementNumber: string; amount: number }[];
 }
 

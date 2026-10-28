@@ -215,6 +215,8 @@ Funktionalität: Barrierefreiheit
       | statement-carried-detail | default           |
       | statement-carried-detail | correct-dialog    |
       | statement-carry-detail | default             |
+      | statement-open-carry-detail | default             |
+      | statement-open-carry-detail | carry-settle-dialog |
       | statement-offset-detail | default            |
       | statement-replaced-detail | default          |
       | statement-corrected-detail | default         |
