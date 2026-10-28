@@ -537,6 +537,18 @@ describe('Offener Übertrag', () => {
 		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous.id }));
 	});
 
+	// PR #941 review: an Akonto of 0 from the day after the period ends the Akonto of before
+	it('nennt einen Übertrag, wenn das Akonto ab dem Tag nach der Periode 0 ist und danach nur die Pauschale gilt', async () => {
+		const rental = await rentalOf();
+		await db.update(contractAdvancePayments).set({ amount: '100.00' }).where(eq(contractAdvancePayments.contractId, rental.contract));
+		await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2025-01-01', amount: '0.00' });
+		const previous = await sentWith(rental, 2024, '3.00');
+		await db.update(rentalContracts).set({ flatRateUtilityCharge: '80.00' }).where(eq(rentalContracts.id, rental.contract));
+		await db.update(contractCategories).set({ agreed: false }).where(eq(contractCategories.contractId, rental.contract));
+
+		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous.id }));
+	});
+
 	// code review 506-1 C-2: a Pauschale with an Akonto above 0 after the period, or with agreed costs, is still billed
 	it.each([
 		['einem Akonto über 0', 'advance'],

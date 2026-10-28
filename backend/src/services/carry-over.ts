@@ -45,9 +45,10 @@ const unreachableOf = (t: string) =>
 					c.flat_rate_utility_charge > 0
 					and not exists (
 						select 1 from contract_advance_payments a
-						where a.contract_id = c.id and a.amount > 0 and (a.valid_from > ${t}.period_end or a.valid_from = (
+						where a.contract_id = c.id and a.amount > 0 and (a.valid_from > ${t}.period_end + 1 or a.valid_from = (
+							-- the Akonto that applies on the day after the period (PR #941 review)
 							select max(b.valid_from) from contract_advance_payments b
-							where b.contract_id = c.id and b.valid_from <= ${t}.period_end
+							where b.contract_id = c.id and b.valid_from <= ${t}.period_end + 1
 						))
 					)
 					and not exists (select 1 from contract_categories k where k.contract_id = c.id and k.agreed)

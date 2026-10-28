@@ -54,4 +54,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Re-review round 2: `docs/reviews/506-review-2.md` (C-1 closed; C-6 Major rejected: the «zu versenden» count is global over every draft of `dwello_e2e`, which parallel scenarios change at any time, so no scenario can assert it (`tests/e2e/CLAUDE.md`, Isolation); `statement-carry-over.pg.test.ts` asserts it; C-7 Minor fixed: one SQL rule `carriedNow` for the calculation and the draft check)
 - [x] Closing review: `docs/reviews/506-review-3.md` (no findings; C-6 rejection holds)
 - [x] CI fix: Architecture fitness Ä4, a changed status branch in the statement page; the allowed line stays as it was, the Übertrag part beside it (fitness reproduced locally first)
+- [x] Copilot review of #941: Akonto from the day after the period (pg test red first), settling checked in its update (no sequential test can show a race), the correction dialog names a hand-settled Übertrag (DOM test red first, four languages); the reset-dialog point answered on its thread, not built
 - [ ] PR merged

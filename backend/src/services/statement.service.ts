@@ -827,14 +827,15 @@ const dropFromDrafts = (statement: { id: string; balance: string }, tx: Tx) =>
 export async function settleCarryOver(id: string): Promise<StatementWithDetails> {
 	const existing = await getStatement(id);
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
-	const [row] = await db
-		.select({ countedBy })
-		.from(utilityStatements)
-		.where(and(eq(utilityStatements.id, id), carriable, isNull(utilityStatements.carrySettledOn)));
-	if (!row || row.countedBy) throw new CodedError('STATEMENT_NO_CARRY_OVER', 'The statement has no open Übertrag');
+	// checked in the update itself: a replacement or a draft sent meanwhile leaves nothing to settle (PR #941 review)
 	await db.transaction(async (tx) => {
-		await dropFromDrafts(existing, tx);
-		await tx.update(utilityStatements).set({ carrySettledOn: swissToday(), updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+		const settled = await tx
+			.update(utilityStatements)
+			.set({ carrySettledOn: swissToday(), updatedAt: new Date() })
+			.where(and(eq(utilityStatements.id, id), carriable, isNull(utilityStatements.carrySettledOn), sql`${countedBy} is null`))
+			.returning({ id: utilityStatements.id, balance: utilityStatements.balance });
+		if (!settled.length) throw new CodedError('STATEMENT_NO_CARRY_OVER', 'The statement has no open Übertrag');
+		await dropFromDrafts(settled[0], tx);
 	});
 	return (await getStatement(id))!;
 }

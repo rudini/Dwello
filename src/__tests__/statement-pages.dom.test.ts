@@ -858,6 +858,15 @@ describe('Abrechnungsdetail', () => {
 		);
 	});
 
+	// PR #941 review (Fachreview 506-1 V-2): ein von Hand ausgeglichener Übertrag wird als bezahlt angerechnet
+	it('nennt beim Berichtigen, dass ein von Hand ausgeglichener Übertrag als bezahlt angerechnet wird', () => {
+		detail({ status: 'settled', balance: 3, ...noPayment, carried: true, carrySettledOn: '2026-10-28' });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain(
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Ihren Übertrag von CHF 3.00 haben Sie am 28.10.2026 von Hand ausgeglichen: Die berichtigte Abrechnung rechnet ihn als bezahlt an, der Mieter bezahlt oder erhält ihn nicht doppelt.'
+		);
+	});
+
 	// Fachreview 448-3 V-25, Code-Review 448-2 C-13: eine nach #94 einbehaltene Rückerstattung wird auch übertragen
 	it('nennt beim Berichtigen einer nach #94 erledigten Rückerstattung, was mit dem übertragenen Saldo geschieht', () => {
 		detail({ status: 'paid', balance: -3, paidDate: '2025-02-01', paidAmount: 0, ...noPayment, carried: true });
