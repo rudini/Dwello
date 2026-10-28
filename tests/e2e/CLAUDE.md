@@ -71,7 +71,8 @@ A state the E2E stack cannot produce gets a lower-layer test and `No scenario: <
 - the backend start or a CLI script;
 - how the UI shows a refusal its own checks never send to the backend (a DOM test with the body from a contract);
 - the quality of a KI answer;
-- a state of a global setting (`configuration`, one record for every scenario running in parallel) that would break the other scenarios.
+- a state of a global setting (`configuration`, one record for every scenario running in parallel) that would break the other scenarios;
+- a build-time value other than the one the E2E build bakes in (`APP_VERSION`): a persona build checks the real layout.
 
 The fix of a red `main` whose failing scenario covers it unchanged says `No scenario:` and names that scenario.
 

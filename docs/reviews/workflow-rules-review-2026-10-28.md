@@ -23,6 +23,12 @@ Covered files: `workflow-notes-issue-94.md`, `-issue-620.md`, `-h28-heating-hint
 | 13 | `CLAUDE.md`, Workflow 2 («the commit that adds it says so») with slice-review's «do not amend» | `issue-815` | A pinning test's commit could not be reworded while under review. | Allow the statement in the pull request text, or in the next commit's message, for a commit already under review. |
 | 14 | No rule (security alerts) | `issue-790` | The alert APIs answer 403; a local CodeQL run (1.4 GB) was found by trial. | Name the way in skill `issue-work`: CodeQL alerts arrive as `nfr:security` issues; the current state comes from a local `codeql database analyze` with the `*-code-scanning.qls` suites and `bun audit` in the root and `backend/`. |
 
+## Decided (product owner, 28.10.2026)
+
+- Applied: 2 (link dropped, reviewers run no tests), 5, 6 (only generated ratchet limits; a comment-only delta keeps its round), 7, 8, 10, 11, 12, 13; 3 and 4 in their own pull request (code in `tools/`).
+- Not applied: 9 and 14 (one case each, resolved; a rule costs more than it saves).
+- 1 is the product owner's setting outside the repository.
+
 ## Applied since the note
 
 | Rule | Note | Now |

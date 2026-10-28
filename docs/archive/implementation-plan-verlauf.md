@@ -1,3 +1,9 @@
+## Session: workflow review proposals (rules)
+
+- [x] Proposals 2, 5, 6 (ratchet only), 7, 8, 10, 11, 12, 13 of `workflow-rules-review-2026-10-28.md` in the skills, `CLAUDE.md`, `tests/e2e/CLAUDE.md`, the persona README and `code-reviewer`; 9 and 14 not applied
+- [x] No scenario: rules only; no review round: no code changed
+- [x] PR: pushed after this archive
+
 ## Session: collected workflow review (end of Phase 2)
 
 - [x] `docs/reviews/workflow-rules-review-2026-10-28.md`: the 15 workflow notes since review 6, each point checked against `main` (0efe4eb1); 14 open proposals, 11 applied since
