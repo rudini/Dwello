@@ -460,6 +460,8 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `reminder_after_days` | `14` | 7–60 |
 | `default_language` | `de` | `de` \| `fr` \| `it` \| `en` |
 
+One more key is written by the service, not by the settings form (it is not in `CONFIG_KEYS` and `GET /config` leaves it out): `accounting_period_changed`, `YYYY-MM-DD:<type>`, the Swiss day `accounting_period` last changed and the type it had before; a second change on the same day keeps the first's type (#512).
+
 The IBAN is stored in plain text.
 
 ### audit_log (Protokoll, #357)

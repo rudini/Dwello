@@ -14,7 +14,7 @@
  * - reminder_after_days: Days after deadline to send reminder (default 14)
  */
 
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { validateIBAN } from './qr-bill.service';
 import { configuration, type Configuration } from '../db/schema';
@@ -22,6 +22,8 @@ import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
 import { recordAudit } from './audit-log.service';
 import { CodedError, type ErrorCode } from './coded-error';
+import { swissToday } from './today';
+import { changeOnSave, type AccountingPeriodType, type PeriodChange } from './period-types';
 
 /**
  * Configuration keys with their types and validators
@@ -238,6 +240,29 @@ async function saveConfig(
 		if (Number(before) !== Number(value)) await recordAudit('management_fee_changed', { from: before, to: value }, tx);
 	}
 
+	if (key === 'accounting_period') await storePeriodChange(tx, value);
+	return upsert(tx, key, value);
+}
+
+/** #512: the day the Abrechnungsperiode changes to `value` and the type before */
+async function storePeriodChange(tx: Pick<typeof db, 'select' | 'insert'>, value: string) {
+	const stored = await tx.select().from(configuration).where(inArray(configuration.key, ['accounting_period', PERIOD_CHANGE]));
+	const before = (stored.find((row) => row.key === 'accounting_period')?.value ?? CONFIG_KEYS.accounting_period.default) as AccountingPeriodType;
+	if (before !== value) await upsert(tx, PERIOD_CHANGE, changeOnSave(before, stored.find((row) => row.key === PERIOD_CHANGE)?.value, swissToday()));
+}
+
+// Not a setting of the form: getAllConfig leaves it out
+const PERIOD_CHANGE = 'accounting_period_changed';
+
+/** #512: the setting «Abrechnungsperiode» and its stored change (null before the first), in one query */
+export async function periodSetting(): Promise<{ type: AccountingPeriodType; change: PeriodChange }> {
+	const rows = await db.select().from(configuration).where(inArray(configuration.key, ['accounting_period', PERIOD_CHANGE]));
+	const type = (rows.find((row) => row.key === 'accounting_period')?.value ?? CONFIG_KEYS.accounting_period.default) as AccountingPeriodType;
+	const [on, from] = (rows.find((row) => row.key === PERIOD_CHANGE)?.value ?? '').split(':');
+	return { type, change: on ? { on, from: from as AccountingPeriodType } : null };
+}
+
+async function upsert(tx: Pick<typeof db, 'insert'>, key: string, value: string) {
 	// An upsert: two first writes of one key at once would both insert (O-36)
 	const [saved] = await tx
 		.insert(configuration)

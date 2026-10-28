@@ -5,7 +5,7 @@
  */
 import { lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
-import { getTypedConfig } from './config.service';
+import { getTypedConfig, periodSetting } from './config.service';
 import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
 import { listHeatingProfiles } from './heating-profile.service';
 import { heatingHintsOf } from './invoice-completeness.service';
@@ -97,24 +97,35 @@ export async function runPlan(buildingId: string, period: Range) {
 export async function missingOfContract(id: string) {
 	const contract = await getContract(id);
 	if (!contract) return null;
-	const [type, { statements }, { statements: ofBuilding }] = await Promise.all([
-		getTypedConfig('accounting_period'),
+	const [{ type, change }, { statements }, { statements: ofBuilding }] = await Promise.all([
+		periodSetting(),
 		listStatements({ contractId: id, limit: 1000 }),
 		listStatements({ buildingId: contract.buildingId, limit: 1000 })
 	]);
-	return missingWays(type as AccountingPeriodType, contract, statements, ofBuilding);
+	return missingWays(type, contract, statements, ofBuilding, undefined, change);
 }
 
 /** #211: per contract id, the parts of ended Abrechnungsperioden without a statement, as on the contract page */
 export async function missingByContract() {
 	// ponytail: every contract and statement in one list; under 50 apartments that stays far below the limit
-	const [type, { contracts }, { statements }] = await Promise.all([
-		getTypedConfig('accounting_period'),
+	const [{ type, change }, { contracts }, { statements }] = await Promise.all([
+		periodSetting(),
 		listContracts({ limit: 1000 }),
 		listStatements({ limit: 1000 })
 	]);
 	return Object.fromEntries(
-		contracts.map((c) => [c.id, missingPeriods(type as AccountingPeriodType, c, statements.filter((s) => s.contractId === c.id))])
+		contracts.map((c) => [
+			c.id,
+			// #512: the building's statements tell the earlier Abrechnungsperiode, as on the contract page
+			missingPeriods(
+				type,
+				c,
+				statements.filter((s) => s.contractId === c.id),
+				undefined,
+				statements.filter((s) => s.building?.id === c.buildingId),
+				change
+			)
+		])
 	);
 }
 

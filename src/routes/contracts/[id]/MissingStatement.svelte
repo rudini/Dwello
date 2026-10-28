@@ -37,6 +37,7 @@
 				? m.contracts_statement_missing_billed_elsewhere()
 				: m.contracts_statements_missing_billed_elsewhere()
 	);
+	const firstShort = $derived(missing.find((period) => period.href && period.way.kind === 'short'));
 	// several: short labels side by side, each with its verb (#142 personas, code review C-8)
 	const createLabel = ({ way, ...period }: Missing) =>
 		way.kind === 'existing'
@@ -73,12 +74,15 @@
 						testid="contract-missing-statement-invoices-{period.start}"
 						>{period.invoices.label}</Button
 					>
+					<!-- #486: the Abrechnungsperiode may be part of the Mietvertrag; said at the short period, not at an
+					     earlier one (#512, Fachreview 512-1 V-2) -->
+					{#if period === firstShort}
+						<p class="w-full" data-testid="contract-missing-statement-short-help">
+							{m.statements_short_period_help()}
+						</p>
+					{/if}
 				</div>
 			{/each}
 		</div>
-		<!-- #486: the Abrechnungsperiode may be part of the Mietvertrag -->
-		{#if missing.some((period) => period.href && period.way.kind === 'short')}
-			<p data-testid="contract-missing-statement-short-help">{m.statements_short_period_help()}</p>
-		{/if}
 	</Alert>
 {/if}

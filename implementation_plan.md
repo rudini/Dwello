@@ -25,4 +25,19 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Row «Erledigt» in `UBIQUITOUS_LANGUAGE.md` as decided on 2026-10-28 (proposal of domain review 448-4 V-28, `settled`)
 - [x] Help texts checked: `glossary_balance_text`, `glossary_settled_text` and the help at «Bezahlt am» already follow #448; no marker names #484
 - [x] No scenario: glossary text only, no app change
+- [x] PR merged: #930
+
+### #512 Missing statements before a change of the period setting
+- [x] `@wip` scenarios (contract page, wizard link, Übersicht), seen red at the missing behaviour; the setting stays «Kalenderjahr», the building's statements follow «Juli – Juni» (no global setting changed)
+- [x] `fach-reviewer` round 1: `docs/reviews/512-fachreview-1.md`; V-1 (switch point by the first statement under the setting), V-2 (hint #486 in the row of the short period, new scenario), V-3 (Übersicht reads the building's statements) fixed before green; V-4 (two changes of the setting) stays in the report
+- [x] Unit tests of the rule in `backend/src/__tests__/accounting-period.test.ts`, seen red; case a of V-1 pins kept behaviour
+- [x] Code: `backend/src/services/accounting-period.ts`, `statement-run.service.ts`, `src/routes/contracts/[id]/MissingStatement.svelte`
+- [x] Slice review round 1: `docs/reviews/512-review-1.md` (C-1 DOM test of the hint's row, C-2 pg test of the Übersicht wiring, C-3 API docs; all three fixed, both tests seen red by taking the code out)
+- [x] Persona Dr. Weber: `docs/design/personas/weber-512.md`; P-1 (Major, a year ended before the change cut by the new setting): product owner decided 2026-10-28 to store the day of the change and the type before (`accounting_period_changed`, no migration: key-value table); unit and pg tests seen red. P-2 to P-5 Minor stay in the report
+- [x] No scenario for the stored change: a state of the global setting `accounting_period` that would break the parallel scenarios (`tests/e2e/CLAUDE.md`, "No scenario"); `statement-run.pg.test.ts` shows it
+- [x] Re-review round 2: `docs/reviews/512-review-2.md` (C-1 to C-3 closed; C-4 Major, a setting changed back on a later day became the earlier type: fixed, pg test seen red); persona Weber again: `docs/design/personas/weber-512-2.md` (P-1 fixed; two Minors stay)
+- [x] Re-review round 3: `docs/reviews/512-review-3.md` (C-4 closed; C-5 Minor, the day of a brief change kept, fixed with a unit test seen red; C-6 Minor, one `month` helper, fixed)
+- [x] Closing review: `docs/reviews/512-review-4.md` (C-5, C-6 closed; C-7 Minor: the PR text names the two tests that pin kept behaviour)
+- [x] CI fix: fitness P2 counted one more query on `/dashboard` and `/contracts/missing-statements`; `periodSetting()` reads the setting and its change in one query
+- [x] Glossary «Hinweis auf fehlende Abrechnungen»: sentence on how periods are cut, decided by the product owner on 2026-10-28 in chat (proposal of Fachreview 512-1)
 - [ ] PR merged

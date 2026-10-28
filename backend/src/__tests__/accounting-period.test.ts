@@ -64,6 +64,22 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 			{ start: '2025-01-01', end: '2025-12-31' }
 		]);
 	});
+
+	// #512: before the building's last statement over a period of another type than the setting, its type cuts the periods
+	it('folgt bis zur letzten Abrechnung nach einer anderen Abrechnungsperiode deren Perioden, danach der Einstellung', () => {
+		expect(missingPeriods('calendar', contract('2022-07-01', null), [statement('2023-07-01', '2024-06-30')], today)).toEqual([
+			{ start: '2025-01-01', end: '2025-12-31' },
+			{ start: '2024-07-01', end: '2024-12-31' },
+			{ start: '2022-07-01', end: '2023-06-30' }
+		]);
+	});
+
+	it('folgt den Abrechnungen des Gebäudes, auch wenn der Mietvertrag selbst keine hat', () => {
+		const building = [statement('2023-07-01', '2024-06-30')];
+		expect(missingPeriods('calendar', contract('2023-07-01', '2024-06-30'), [], today, building)).toEqual([
+			{ start: '2023-07-01', end: '2024-06-30' }
+		]);
+	});
 });
 
 describe('Abrechnungsperioden der Einstellung', () => {
@@ -169,6 +185,37 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 		const mine = own('2025-01-01', '2025-06-30');
 		const parts = missingWays('calendar', contract('2025-01-01'), [mine], [mine, own('2025-01-01', '2025-12-31')], today);
 		expect(parts.map(({ start, open }) => [start, open])).toEqual([['2025-07-01', false]]);
+	});
+
+	// #512: an ended period of the earlier type without a statement is offered whole; the days after the switch are a
+	// short period of the setting, where the hint of #486 belongs
+	it('bietet vor dem Wechsel der Abrechnungsperiode die ganze frühere Periode an, danach eine kurze Abrechnungsperiode', () => {
+		const mine = own('2024-07-01', '2025-06-30');
+		expect(missingWays('calendar', contract('2024-04-01'), [mine], [mine], today)).toEqual([
+			part('2025-07-01', '2025-12-31', 'short'),
+			part('2023-07-01', '2024-06-30', 'whole')
+		]);
+	});
+
+	// Fachreview 512-1 V-1: a contract billed by its own period (#486) after the first statement under the setting is no
+	// change of the setting; the other contracts keep the setting's periods (kept behaviour)
+	it('folgt der Einstellung, wenn die andere Abrechnungsperiode erst nach der ersten Abrechnung nach der Einstellung beginnt', () => {
+		const building = [own('2023-01-01', '2023-12-31'), own('2024-01-01', '2024-12-31'), own('2023-07-01', '2024-06-30'), own('2024-07-01', '2025-06-30')];
+		expect(missingWays('calendar', contract('2024-04-01'), [], building, today)).toEqual([
+			part('2025-07-01', '2025-12-31', 'short'),
+			part('2025-01-01', '2025-06-30', 'existing', { start: '2024-07-01', end: '2025-06-30' }),
+			whole(2024)
+		]);
+	});
+
+	// #512 (product owner 2026-10-28, persona Weber 512 P-1): the stored day of the change ends the earlier type, also
+	// for a year after the building's last statement that ended before that day
+	it('folgt bis zum Tag des Wechsels der Einstellung der früheren Abrechnungsperiode, danach der Einstellung', () => {
+		const building = [own('2024-01-01', '2024-12-31')];
+		expect(missingWays('july-june', contract('2024-01-01'), building, building, today, { on: '2026-10-01', from: 'calendar' })).toEqual([
+			part('2026-01-01', '2026-06-30', 'short'),
+			whole(2025)
+		]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', () => {

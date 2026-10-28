@@ -16,6 +16,7 @@ import {
 	missingStatementsText,
 	missingStatementsShown,
 	shortPeriodHelpText,
+	shortPeriodHelpShownAt,
 	missingStatementInvoicesLabel,
 	missingStatementOffer,
 	billedUntilOfContract,
@@ -270,6 +271,16 @@ Then(
 // #408 point 2: the way the warning offers for the days from that day, by its label
 Then('bietet der Mietvertrag für die Tage ab {string} {string} an', async ({ verwalter }, periodStart: string, label: string) => {
 	await verwalter.sees(missingStatementOffer(periodStart)).toBe(label);
+});
+
+// #512 (Fachreview 512-1 V-2): the help of #486 belongs to the days of a short period, not to an earlier period
+Then('rät der Mietvertrag bei den Tagen ab {string} zur Abrechnungsperiode im Mietvertrag', async ({ verwalter }, periodStart: string) => {
+	await verwalter.sees(shortPeriodHelpShownAt(periodStart)).toBe(true);
+});
+
+Then('rät der Mietvertrag bei den Tagen ab {string} nichts zur Abrechnungsperiode im Mietvertrag', async ({ verwalter }, periodStart: string) => {
+	await verwalter.sees(missingStatementOffer(periodStart)).toBeTruthy();
+	await verwalter.sees(shortPeriodHelpShownAt(periodStart)).toBe(false);
 });
 
 Then('rät der Mietvertrag {string}', async ({ verwalter }, help: string) => {
