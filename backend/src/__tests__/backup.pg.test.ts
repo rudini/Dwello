@@ -3,7 +3,7 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
-import { cp, mkdtemp, readdir, readFile, rm, writeFile } from 'fs/promises';
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
@@ -167,6 +167,36 @@ describe('Sicherung', () => {
 		expect(await query(name, 'SELECT error FROM backup_runs')).toEqual([
 			{ error: 'pg_dump: pg_dump: error: connection refused' }
 		]);
+	}, 60_000);
+
+	// PR #940, Copilot: a half file blocks the disk also when the next run fails
+	it('löscht eine halbe Datei schon vor dem nächsten Lauf, auch wenn dieser scheitert', async () => {
+		const { name } = await secured();
+		const dir = await folder();
+		await writeFile(join(dir, 'dwello-2026-10-27T02-00-00Z.backup.part'), 'halb');
+		const bin = await folder();
+		await writeFile(join(bin, 'pg_dump'), '#!/bin/sh\nexit 1\n', { mode: 0o755 });
+		const path = process.env.PATH;
+		process.env.PATH = `${bin}:${path}`;
+		try {
+			await expect(createBackup(`${server}/${name}`, dir, secrets)).rejects.toThrow('pg_dump');
+		} finally {
+			process.env.PATH = path;
+		}
+		expect(await readdir(dir)).toEqual([]);
+	}, 60_000);
+
+	// PR #940, Copilot: the restore runs as root; a forged Sicherung must not write outside the two keys
+	it('schreibt bei der Wiederherstellung nur die beiden Schlüssel, keine anderen Namen aus der Sicherung', async () => {
+		const { name, code } = await secured();
+		const forged = { ...secrets, '../ausserhalb': 'x', db_password: 'fremd' } as typeof secrets;
+		const file = await createBackup(`${server}/${name}`, await folder(), forged);
+		const parent = await folder();
+		const keys = join(parent, 'keys');
+		await mkdir(keys);
+		await restoreBackup(file, code, `${server}/${name}`, keys, migrations);
+		expect((await readdir(keys)).sort()).toEqual(['encryption_key', 'jwt_secret']);
+		expect(await readdir(parent)).toEqual(['keys']);
 	}, 60_000);
 
 	it('löscht eine halbe Datei, die ein abgebrochener Lauf hinterliess', async () => {

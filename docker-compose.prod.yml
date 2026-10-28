@@ -80,6 +80,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    # the same image as the service restore, so an update (up -d --build) brings both up to date (#718)
+    image: dwello-backend:local
     container_name: dwello-backend
     restart: unless-stopped
     command:
@@ -134,9 +136,7 @@ services:
   # docker compose -f docker-compose.prod.yml run --rm restore /backups/<Datei>
   # ============================================
   restore:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: dwello-backend:local
     profiles: ["restore"]
     user: root
     entrypoint:

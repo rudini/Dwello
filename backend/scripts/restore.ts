@@ -14,6 +14,11 @@ if (!file) {
 	);
 	process.exit(1);
 }
+// without the keys the restored data's encrypted settings stay unreadable: refuse before anything is replaced (PR #940)
+if (!process.env.SECRETS_DIR) {
+	console.error('SECRETS_DIR fehlt: Geben Sie den Ordner der Schlüssel an (im Container /run/dwello, docs/installation.md).');
+	process.exit(1);
+}
 const code = prompt('Wiederherstellungscode (vom Notfallblatt):') ?? '';
 const url = process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello';
 console.log('Dwello stellt die Sicherung wieder her. Die Daten der Installation werden ersetzt.');

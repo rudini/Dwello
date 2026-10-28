@@ -88,6 +88,8 @@ export async function createBackup(
 		).rows[0].id;
 		const file = join(dir, `dwello-${stamp(now)}.backup`);
 		try {
+			// a run that was cut off (a restart, a full disk) leaves its half file; gone before it fills the disk again
+			for (const half of await readdir(dir)) if (half.endsWith('.backup.part')) await unlink(join(dir, half));
 			const dump = spawn('pg_dump', [
 				'--format=custom',
 				'--no-owner',
@@ -119,8 +121,6 @@ export async function createBackup(
 			const files = (await readdir(dir)).filter(isBackup);
 			const keep = kept(files, now);
 			for (const old of files) if (!keep.has(old)) await unlink(join(dir, old));
-			// a run that was cut off (a restart, a full disk) leaves its half file
-			for (const half of await readdir(dir)) if (half.endsWith('.backup.part')) await unlink(join(dir, half));
 			await client.query('UPDATE backup_runs SET finished_at = now(), file = $2 WHERE id = $1', [
 				run,
 				file
@@ -176,8 +176,10 @@ export async function restoreBackup(
 			throw new Error(`pg_restore: ${stderr.trim()}`);
 		// the keys belong to the restored data, also when a later migration fails
 		if (secretsDir)
-			for (const [name, value] of Object.entries(secrets)) {
-				if (!value) continue;
+			// only these two names: the restore runs as root, and a forged Sicherung must write nothing else (PR #940)
+			for (const name of ['encryption_key', 'jwt_secret'] as const) {
+				const value = secrets[name];
+				if (typeof value !== 'string' || !value) continue;
 				await rm(join(secretsDir, name), { force: true });
 				await writeFile(join(secretsDir, name), value);
 				await chmod(join(secretsDir, name), 0o444);
