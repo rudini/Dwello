@@ -19,5 +19,5 @@
 - [x] `tools/fitness/p2-benchmark.ts`: 50 apartments, 75 contracts, 300 invoices, 225 statements over 2021–2025, every list and overview route 100 times in-process; result in `docs/architecture/utility-tree.md` (P2) and `fitness-functions.md` §4
 - [x] `GET /statements/outdated` 1110 ms p95, above 500 ms: issue #919
 - [x] No scenario: measurement tooling only
-- [ ] Slice review
-- [ ] PR `Fixes #781`: pushed after this archive
+- [x] Slice review round 1 (closing): `docs/reviews/i781-review-1.md`; C-1 to C-3 (Minor, docs) fixed
+- [x] PR `Fixes #781`: pushed after this archive
