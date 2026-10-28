@@ -1,3 +1,10 @@
+## Session: Phase 2 leftovers (fitness values, #815 note)
+
+- [x] `docs/architecture/fitness-functions.md`: column «Aktueller Wert» updated from `bun run fitness` and `ratchet.json` on e9950ebb (literal sets 8, entity mirrors 43, frontend findings 59, module cycles 0, technical 8)
+- [x] Review point «Not checked» (#815, staged file in the import scan) checked: a staged probe file importing backend code is reported; moved to «Applied since the note»
+- [x] No scenario: documentation only; no review round: no code changed
+- [x] PR: pushed after this archive
+
 ## Session: workflow review proposals (tools)
 
 - [x] Proposal 3: `tools/arch-baseline/run.sh` takes `ARCH_OUT` (checked by hand: a run into a temporary directory left `out/` unchanged)

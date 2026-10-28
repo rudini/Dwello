@@ -43,8 +43,5 @@ Covered files: `workflow-notes-issue-94.md`, `-issue-620.md`, `-h28-heating-hint
 | `grill-me` without an issue | `issue-643` | The skill covers a request that has none yet. |
 | `DATE_CMP` and `===` against today | `issue-815` | #815 part D3. |
 | New untracked files and `bun run fitness` | `architecture-phase-2` | Named in `docs/architecture/fitness-functions.md` (`git add -N`). |
+| Import scan and a staged file | `issue-815` | `02-imports.ts` reads the files of the index from the working tree; checked on 28.10.2026: a staged new file in `src/` importing backend code makes `bun run fitness` report «boundary imports 1». |
 | Hand-run evaluation scripts; heredocs naming `git commit` | `testcheck` | Decided by the product owner on 26.10.2026 and applied. |
-
-## Not checked
-
-- `issue-815`, third row: whether the import scan of `bun run fitness` still misses a staged file. `02-imports.ts` reads the working tree today, but the note's case (a staged fixture) was not reproduced.
