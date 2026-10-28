@@ -76,7 +76,7 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 		if (m.fieldSpread[k] > r.fieldSpread[k])
 			findings.push({
 				check: 'field-spread',
-				message: `Ä1/AP1 «Eine Form hat eine Quelle»: field spread ${k} ${m.fieldSpread[k]} > ratchet ${r.fieldSpread[k]} (files outside the DB that declare a schema field by hand). Fix: derive the shape from the backend's API type or reuse the area's mapper in src/lib/server instead of declaring the field again.`
+				message: `Ä1/AP1 «Eine Form hat eine Quelle»: field spread ${k} ${m.fieldSpread[k]} > ratchet ${r.fieldSpread[k]} (frontend and BFF files that declare a schema field by hand, #910). Fix: derive the shape from the backend's API type or reuse the area's mapper in src/lib/server instead of declaring the field again.`
 			});
 	const allowed = [...r.technical, ...r.exceptions.bffDecisions, ...(r.exceptions.bffDates ?? [])];
 	for (const d of unlisted(m.bffDecisions, allowed, (d) => `${d.path}\t${d.line}`))
@@ -155,7 +155,7 @@ export function advise(
 		if (f.files > NEW_FIELD_MAX)
 			findings.push({
 				check: 'new-field',
-				message: `Ä1/AP1 «Eine Form hat eine Quelle»: the new field ${f.field} is declared by hand in ${f.files} production files outside the DB (target ${NEW_FIELD_MAX}). Fix: take it from the area's mapper or the backend's API type instead of declaring it again in each layer.`
+				message: `Ä1/AP1 «Eine Form hat eine Quelle»: the new field ${f.field} is declared by hand in ${f.files} frontend and BFF files (target ${NEW_FIELD_MAX}). Fix: take it from the area's mapper or the backend's API type instead of declaring it again in each layer.`
 			});
 	return findings;
 }
@@ -278,7 +278,7 @@ export const crossesBoundary = (e: Record<string, string>) =>
 function measure(out: string): Measured {
 	const read = scripts(out, ['02-imports.ts', '05-knowledge.ts']);
 	const spread = read('m4-field-spread.csv')
-		.map((r) => +r.prod_files)
+		.map(handDeclared)
 		.sort((a, b) => a - b);
 	const src = git(['ls-files', 'src']).split('\n');
 	const bff = src.filter((p) => BFF_FILE.test(p) && p.endsWith('.ts'));
@@ -309,10 +309,13 @@ function prSize(base: string) {
 	return { files: prod.length, modules: new Set(prod.map((c) => c.module)).size, layers: new Set(prod.map((c) => c.layer)).size };
 }
 
+/** Ä1 counts a field in frontend and BFF files only: the backend is its source, `backend/src/api` the contract (#910) */
+const handDeclared = (row: Record<string, string>) => +row.FE + +row.BFF;
+
 /** Fields of schema.ts that the base does not have, with their spread from the measurement in `out`. */
 export function newFields(spread: Record<string, string>[], baseSchema: string) {
 	const known = new Set(tablesOf(baseSchema).flatMap((t) => t.fields.map((f) => `${t.table}.${f}`)));
-	return spread.map((r) => ({ field: `${r.table}.${r.field}`, files: +r.prod_files })).filter((f) => !known.has(f.field));
+	return spread.map((r) => ({ field: `${r.table}.${r.field}`, files: handDeclared(r) })).filter((f) => !known.has(f.field));
 }
 
 /** Technical checks the working ratchet lists and the base does not, a replaced entry included. */

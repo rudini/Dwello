@@ -153,7 +153,8 @@ console.log(`tables ${tables.length}, dup type names ${dupTypes.length}, dup lit
 // ---------------------------------------------------------------- G baselines for the modifiability scenarios
 // G1: per DB field (names unique to one table, not generic): production files outside the DB layer that
 // declare it as a key (type property, object literal, validation schema, mapper) together with another such field of
-// its table (#843: a lone `value:` is a word, not the entity), and API contract fixtures.
+// its table (#843: a lone `value:` is a word, not the entity), and API contract fixtures. The fitness check counts the
+// FE and BFF columns only (#910: the backend is the field's source); `prod_files` keeps all layers for the baseline.
 const owner = new Map<string, string[]>();
 for (const { table, fields } of tables) for (const f of fields) owner.set(f, [...(owner.get(f) ?? []), table]);
 const fieldRows: Record<string, unknown>[] = [];
