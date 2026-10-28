@@ -271,8 +271,10 @@ describe('Zeitplan der Sicherung', () => {
 });
 
 describe('Zustand der Sicherung', () => {
-	it('ist aus, solange kein Code bestätigt ist', async () => {
-		expect((await backupState(`${server}/${await database()}`, await folder())).backup).toBe('off');
+	it('wartet auf die Einrichtung, solange kein Code bestätigt ist', async () => {
+		expect((await backupState(`${server}/${await database()}`, await folder())).backup).toBe(
+			'setup'
+		);
 	});
 
 	it('ist veraltet, wenn seit mehr als einem Tag keine Sicherung gelungen ist, und nennt den Tag der letzten', async () => {

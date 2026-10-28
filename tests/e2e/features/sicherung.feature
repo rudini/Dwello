@@ -1,5 +1,5 @@
 # language: de
-@einrichtung @wip
+@einrichtung
 Funktionalität: Sicherung einrichten
   Als Liegenschaftsverwalter
   möchte ich, dass Dwello meine Daten jeden Tag verschlüsselt sichert

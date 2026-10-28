@@ -3,7 +3,7 @@ import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi, CallTheMcp } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
-import { FRESH_API, FRESH_KI_STUB, freshInstallation, type FreshInstallation } from './fresh-installation';
+import { FRESH_API, FRESH_KI_STUB, freshInstallation, resetFreshBackup, type FreshInstallation } from './fresh-installation';
 import { withLock, withSettingsLock } from './settings-lock';
 import { sessionCookies, sessionToken } from './session';
 
@@ -68,6 +68,7 @@ export const test = base.extend<{
 		testInfo.setTimeout(0);
 		await withLock('installation', async () => {
 			testInfo.setTimeout(timeout + Date.now() - waiting);
+			resetFreshBackup(); // a look of the axe check may have left a confirmed code (tasks/accessibility.ts)
 			await use(installation);
 			await installation.cleanUp();
 		});

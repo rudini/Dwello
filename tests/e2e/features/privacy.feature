@@ -139,7 +139,6 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jeden Abruf eines KI-Programms mit der Art der abgefragten Daten (etwa «Mieter») und dem Namen des Zugangsschlüssels, ohne Inhalte"
 
   # #718, Fachreview 718b R-4: ohne Ordner für die Sicherung (wie in diesem Stack) sichert Dwello nichts
-  @wip
   Szenario: Ohne Sicherung nennt die Datenschutzerklärung keine
     Dann nennt die Datenschutzerklärung unter "Aufbewahrung" "löscht Dwello keine gespeicherten Daten von selbst"
     Und nennt die Datenschutzerklärung unter "Aufbewahrung" nicht "Sicherung"

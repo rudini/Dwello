@@ -9,7 +9,8 @@ import {
 	type Task
 } from '$lib/overview';
 import { reletStarts } from '$lib/apartment';
-import type { KiModel } from '$lib/types';
+import type { BackupState, KiModel } from '$lib/types';
+import { backupState } from '$lib/server/backup';
 
 interface DashboardData {
 	portfolio: {
@@ -63,6 +64,8 @@ type OverviewData = Omit<DashboardData, 'deadlines'> & {
 	tasks: Task[];
 	deadlines: Deadline[];
 	kiModel: KiModel;
+	backup: BackupState;
+	backupConfirmed: boolean; // just after «Sicherung einrichten» (#718)
 };
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -81,14 +84,17 @@ const tenantOf = (statement: Row) => {
 };
 
 export const load = async ({
-	fetch
+	fetch,
+	url
 }: {
 	fetch: typeof globalThis.fetch;
+	url?: URL;
 }): Promise<OverviewData> => {
 	const answer = (path: string) =>
 		fetch(`${BACKEND_URL}/api/v1/${path}`)
 			.then((response) => (response.ok ? response.json() : null))
 			.catch(() => null);
+	const backup = backupState(fetch);
 	const kiModel: Promise<KiModel> = Promise.all([answer('ki-settings'), answer('ki/model')]).then(([ki, model]) =>
 		ki?.mode === 'none' && !ki.byOperator ? { state: 'none' } : (model ?? { state: 'unknown' })
 	);
@@ -148,6 +154,8 @@ export const load = async ({
 		...figures,
 		tasks: overviewTasks(input),
 		deadlines: overviewDeadlines(figures.deadlines ?? []),
-		kiModel: await kiModel
+		kiModel: await kiModel,
+		backup: await backup,
+		backupConfirmed: url?.searchParams.get('backup') === 'confirmed'
 	};
 };

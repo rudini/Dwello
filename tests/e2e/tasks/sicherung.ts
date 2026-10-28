@@ -26,8 +26,17 @@ export const confirmBackupCode =
 		actor.attemptsTo(Enter.theValue(code).into(backupCodeInput), Click.on(backupSubmitButton));
 
 /** Types the shown code again, as the landlord does after the setup */
-export const confirmShownBackupCode: Activity = async (actor) =>
-	actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''));
+export const confirmShownBackupCode: Activity = async (actor) => {
+	await actor.attemptsTo(Wait.until(backupCode));
+	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''));
+};
 
 export const downloadEmergencySheet = DownloadFrom(backupSheetLink);
 export const openBackupPrivacy = Click.on(backupPrivacyLink);
+
+/** The fresh installation with its code confirmed, as its other screens expect; nothing to do when it already is */
+export const freshBackupSetUp: Activity = async (actor) => {
+	await actor.attemptsTo(goToFreshBackup);
+	const code = await actor.answer(shownBackupCode);
+	if (code) await actor.attemptsTo(confirmBackupCode(code));
+};

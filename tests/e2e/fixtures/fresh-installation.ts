@@ -18,6 +18,10 @@ const FRESH_DATABASE_URL = (() => {
 	return url.href;
 })();
 
+/** No Wiederherstellungscode on the fresh installation (#718): the API cannot undo a confirmed one */
+export const resetFreshBackup = () =>
+	execFileSync('bun', ['run', 'e2e-backup-reset'], { cwd: 'backend', env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL } });
+
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];
 	const buildings: string[] = [];
@@ -84,8 +88,7 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 				await api.remove(`audit-log/${entry.id}`);
 			for (const id of buildings) await api.remove(`buildings/${id}`);
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
-			// the API cannot undo a confirmed Wiederherstellungscode (#718)
-			execFileSync('bun', ['run', 'e2e-backup-reset'], { cwd: 'backend', env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL } });
+			resetFreshBackup();
 		}
 	};
 }

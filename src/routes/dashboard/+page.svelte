@@ -5,6 +5,7 @@
 	import type { IconName } from '$lib/ui/icons';
 	import BuildingFigures from './BuildingFigures.svelte';
 	import DeadlineList from './DeadlineList.svelte';
+	import BackupNotice from './BackupNotice.svelte';
 	import KiModelNotice from './KiModelNotice.svelte';
 	import TaskList from './TaskList.svelte';
 	import type { PageData } from './$types';
@@ -28,6 +29,7 @@
 
 <div class="flex flex-col gap-10">
 	<PageHeader title={m.nav_overview()} purpose={m.dashboard_purpose()} />
+	<BackupNotice state={data.backup} confirmed={data.backupConfirmed} />
 	<KiModelNotice model={data.kiModel} />
 	<TaskList tasks={data.tasks} />
 	<DeadlineList deadlines={data.deadlines} />

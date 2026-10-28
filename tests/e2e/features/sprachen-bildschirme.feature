@@ -26,12 +26,15 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | login                  | login-locked        |
       | login                  | other-language      |
       | login                  | demo                |
+      | backup                 | default             |
+      | backup                 | backup-error        |
       | setup                  | default             |
       | setup                  | setup-error         |
       | error-404              | default             |
       | error-server           | default             |
       | error-server           | server-error        |
       | dashboard              | default             |
+      | dashboard              | backup-confirmed    |
       | dashboard              | old-address-task    |
       | dashboard              | first-use           |
       | dashboard              | ki-model-loading    |

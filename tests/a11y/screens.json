@@ -119,6 +119,8 @@
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
 		"language-menu-open": "The language menu in the header open.",
 		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo.",
+		"backup-error": "«Sicherung einrichten» (#718) with a code typed that is not the one shown: the refusal above the field. The screen runs on the fresh installation of the E2E stack, the only one with a folder for the Sicherung; its look first removes any confirmed code.",
+		"backup-confirmed": "The overview right after «Sicherung einrichten» (?backup=confirmed): the confirmation that Dwello backs up every day (#718).",
 		"setup-error": "The setup refused: the two passwords differ. The setup screen («Dwello einrichten», #577) runs in every state on the empty instance of the E2E stack, which has no account and no provider.",
 		"ki-model-loading": "Overview while the local KI downloads its model, on the fresh installation of the E2E stack (#577).",
 		"ki-model-failed": "Overview after the local KI could not download its model, on the empty instance of the E2E stack (#577).",
@@ -155,6 +157,14 @@
 			]
 		},
 		{
+			"name": "backup",
+			"path": "/backup",
+			"states": [
+				"default",
+				"backup-error"
+			]
+		},
+		{
 			"name": "setup",
 			"path": "/setup",
 			"public": true,
@@ -181,8 +191,12 @@
 		{
 			"name": "dashboard",
 			"path": "/dashboard",
+			"queries": {
+				"backup-confirmed": "?backup=confirmed"
+			},
 			"states": [
 				"default",
+				"backup-confirmed",
 				"old-address-task",
 				"first-use",
 				"ki-model-loading",

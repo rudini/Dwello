@@ -681,6 +681,7 @@ export const backupCodes = pgTable('backup_codes', {
 	publicKey: text('public_key').notNull(),
 	salt: text('salt').notNull(),
 	confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+	pendingCode: text('pending_code'), // only until the confirmation
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 });
 

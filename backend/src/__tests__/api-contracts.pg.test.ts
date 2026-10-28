@@ -5,10 +5,12 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { and, eq, inArray, ne, sql } from 'drizzle-orm';
+import { tmpdir } from 'os';
 import { join } from 'path';
+import { generateCode, recipientOf } from '../services/backup-crypto';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
+import { backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -103,6 +105,23 @@ afterAll(async () => {
 });
 
 describe('API-Verträge des Frontends', () => {
+	// #718: the Sicherung as /health and «Sicherung einrichten» report it
+	it('GET /health und /backup liefern die Felder von health-backup-setup.json, health-backup-stale.json, backup-setup.json und backup-code-mismatch.json', async () => {
+		process.env.BACKUP_DIR = tmpdir();
+		try {
+			const health = async () => (await app.handle(new Request('http://localhost/health'))).json();
+			expect(drift(await sample('health-backup-setup'), await health())).toEqual([]);
+			expect(drift(await sample('backup-setup'), await (await callApi('/api/v1/backup')).json())).toEqual([]);
+			expect(drift(await sample('backup-code-mismatch'), await (await sendJson('POST', '/api/v1/backup/confirm', { code: 'falsch' })).json())).toEqual([]);
+			const { publicKey, salt } = await recipientOf(generateCode());
+			await db.insert(backupCodes).values({ publicKey: publicKey.toString('base64'), salt: salt.toString('base64'), confirmedAt: new Date(Date.now() - 2 * 24 * 3600_000) });
+			expect(drift(await sample('health-backup-stale'), await health())).toEqual([]);
+		} finally {
+			delete process.env.BACKUP_DIR;
+			await db.delete(backupCodes);
+		}
+	});
+
 	it('GET /statements/:id liefert die Felder von statement.json', async () => {
 		const actual = await (await callApi(`/api/v1/statements/${statementId}`)).json();
 		expect(drift(await statementSample(), actual)).toEqual([]);

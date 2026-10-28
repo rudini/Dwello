@@ -14,7 +14,17 @@ import pg from 'pg';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { migrate } from '../db/migrate';
-import { decryptFile, encryptStream } from './backup-crypto';
+import { DATABASE_URL, pool } from '../db/connection';
+import {
+	decryptFile,
+	encryptStream,
+	generateCode,
+	normalizedCode,
+	recipientOf
+} from './backup-crypto';
+import { CodedError } from './coded-error';
+import { renderEmergencySheet } from './emergency-sheet';
+import type { Language } from './pdf.service';
 
 const DAY = 24 * 3600_000;
 type Secrets = { encryption_key?: string; jwt_secret?: string };
@@ -24,7 +34,11 @@ const envSecrets = (): Secrets => ({
 	jwt_secret: process.env.JWT_SECRET
 });
 
-async function withClient<T>(url: string, work: (client: pg.Client) => Promise<T>) {
+type Queryable = Pick<pg.Pool, 'query'>;
+
+// the app's own database through its pool (the API, /health); another one (a test, a script) through a client of its own
+async function withClient<T>(url: string, work: (client: Queryable) => Promise<T>) {
+	if (url === DATABASE_URL) return work(pool);
 	const client = new pg.Client({ connectionString: url });
 	await client.connect();
 	try {
@@ -35,7 +49,7 @@ async function withClient<T>(url: string, work: (client: pg.Client) => Promise<T
 }
 
 /** The newest confirmed code; none before 0038 or before the landlord confirmed one */
-const confirmedCode = (client: pg.Client) =>
+const confirmedCode = (client: Queryable) =>
 	client
 		.query(`SELECT to_regclass('backup_codes') AS t`)
 		.then(async ({ rows }) =>
@@ -190,19 +204,20 @@ export async function restoreBackup(
 	}
 }
 
-const lastSuccess = async (client: pg.Client) =>
+const lastSuccess = async (client: Queryable) =>
 	((
 		await client.query(
 			'SELECT max(started_at) AS at FROM backup_runs WHERE finished_at IS NOT NULL AND error IS NULL'
 		)
 	).rows[0].at as Date | null) ?? undefined;
 
-/** off: no BACKUP_DIR or no confirmed code; stale: no Sicherung succeeded for more than a day (since: the last one, else the confirmation) */
+/** off: no BACKUP_DIR; setup: no code confirmed yet; stale: no Sicherung succeeded for more than a day (since: the last
+ * one, else the confirmation) */
 export async function backupState(url: string, dir = process.env.BACKUP_DIR, now = new Date()) {
 	if (!dir) return { backup: 'off' as const };
 	return withClient(url, async (client) => {
 		const code = await confirmedCode(client);
-		if (!code) return { backup: 'off' as const };
+		if (!code) return { backup: 'setup' as const };
 		const since = (await lastSuccess(client)) ?? code.confirmed_at;
 		return {
 			backup: now.getTime() - since.getTime() > DAY ? ('stale' as const) : ('ok' as const),
@@ -269,4 +284,57 @@ export async function backupBeforeMigration(
 			{ cause: error }
 		);
 	}
+}
+
+const pendingCode = async () =>
+	(
+		await pool.query(
+			'SELECT id, pending_code, created_at FROM backup_codes WHERE confirmed_at IS NULL AND pending_code IS NOT NULL ORDER BY created_at DESC LIMIT 1'
+		)
+	).rows[0] as { id: string; pending_code: string; created_at: Date } | undefined;
+
+/** «Sicherung einrichten» (#718, A8): the state, and while no code is confirmed the one to show, made on the first call */
+export async function backupSetup() {
+	const state = await backupState(DATABASE_URL);
+	if (state.backup !== 'setup') return state;
+	let pending = await pendingCode();
+	if (!pending) {
+		const code = generateCode();
+		const { publicKey, salt } = await recipientOf(code);
+		await pool.query(
+			'INSERT INTO backup_codes (public_key, salt, pending_code) VALUES ($1, $2, $3)',
+			[publicKey.toString('base64'), salt.toString('base64'), code]
+		);
+		pending = (await pendingCode())!;
+	}
+	return {
+		backup: 'setup' as const,
+		code: pending.pending_code,
+		createdAt: pending.created_at.toISOString()
+	};
+}
+
+/** The landlord typed the shown code again: from now on Dwello backs up, and it forgets every code it showed (718b R-3) */
+export async function confirmBackupCode(typed: string) {
+	const pending = await pendingCode();
+	if (!pending || normalizedCode(typed) !== normalizedCode(pending.pending_code))
+		throw new CodedError('BACKUP_CODE_MISMATCH', 'The code does not match the one shown');
+	await pool.query(
+		'UPDATE backup_codes SET confirmed_at = now(), pending_code = NULL WHERE id = $1',
+		[pending.id]
+	);
+	await pool.query('DELETE FROM backup_codes WHERE confirmed_at IS NULL');
+	// the first Sicherung right away, not at the next tick of the schedule
+	if (process.env.BACKUP_DIR)
+		void backupIfDue(DATABASE_URL, process.env.BACKUP_DIR).catch((error) =>
+			console.error(`Sicherung fehlgeschlagen: ${error instanceof Error ? error.message : error}`)
+		);
+	return backupState(DATABASE_URL);
+}
+
+/** The Notfallblatt of the code still to confirm; after the confirmation Dwello no longer knows it */
+export async function emergencySheet(language: Language, address: string) {
+	const pending = await pendingCode();
+	if (!pending) throw new CodedError('BACKUP_NO_CODE', 'No code to confirm');
+	return renderEmergencySheet(pending.pending_code, pending.created_at, address, language);
 }
