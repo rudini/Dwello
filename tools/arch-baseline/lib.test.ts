@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classify, entityFiles } from './lib';
+import { LITERAL_UNION, classify, entityFiles } from './lib';
 
 describe('classify', () => {
 	it('ordnet einen Endpunkt +server.ts unter src/routes einem BFF-Modul zu', () => {
@@ -35,5 +35,29 @@ describe('entityFiles', () => {
 				['key', ['settings.ts']]
 			])
 		);
+	});
+});
+
+describe('LITERAL_UNION', () => {
+	const unions = (text: string) => [...text.matchAll(LITERAL_UNION)].map((m) => m[0]);
+
+	it('findet eine Werteliste als Union von Literalen', () => {
+		expect(unions("type Status = 'draft' | 'sent' | 'paid';")).toEqual(["'draft' | 'sent' | 'paid'"]);
+	});
+
+	it('findet die Literale einer Union, die mit einem Typnamen beginnt', () => {
+		expect(unions("type Shown = StatementStatus | 'overdue' | 'replaced';")).toEqual(["'overdue' | 'replaced'"]);
+	});
+
+	it('überspringt die Schlüssel von Pick und Omit, weil sie Feldnamen und keine Werte sind', () => {
+		expect(unions("type A = Pick<ContractRow, 'id' | 'startDate'>; type B = Omit<Row, 'id' | 'name' | 'area'>;")).toEqual([]);
+	});
+
+	it('überspringt die Schlüssel von Pick auch bei einem generischen ersten Typargument', () => {
+		expect(unions("type A = Pick<Json<Row>, 'a' | 'b'>; type B = Pick<Awaited<ReturnType<typeof f>>[number], 'c' | 'd'>;")).toEqual([]);
+	});
+
+	it('findet eine Werteliste nach einem Pick, dessen Schlüssel kein Literal sind', () => {
+		expect(unions("function f(row: Pick<Row, Keys>, s: 'a' | 'b') {} type T = Pick<A, K> | Record<string, 'x' | 'y'>;")).toEqual(["'a' | 'b'", "'x' | 'y'"]);
 	});
 });
