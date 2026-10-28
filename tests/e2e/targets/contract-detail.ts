@@ -15,6 +15,7 @@ export const contractEndPastConfirm = target('Bestätigung Vertragsende in der V
 	page.getByTestId('contract-end-past-confirm')
 );
 // the field's error and a refusal of the server use the same frame: the one with the message counts
+export const dialogErrors = target('Meldungen im Dialog', (page) => page.getByRole('dialog').getByTestId('form-error'));
 export const contractEndError = (message: string) =>
 	target(`Meldung im Dialog «${message}»`, (page) =>
 		page.getByRole('dialog').getByTestId('form-error').filter({ hasText: message })

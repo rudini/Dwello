@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFinished } from 'vitest';
 import Checkbox from '$lib/ui/Checkbox.svelte';
 import RadioGroup from '$lib/ui/RadioGroup.svelte';
-import { click, show } from './helpers/dom';
+import { click, settle, show } from './helpers/dom';
 
 describe('Kontrollkästchen', () => {
 	it('lässt sich über seine Beschriftung umschalten und erklärt sich', () => {
@@ -22,6 +22,31 @@ describe('Kontrollkästchen', () => {
 		expect(checked).toBe(true);
 		const help = document.getElementById(box.getAttribute('aria-describedby')!)!;
 		expect(help.textContent).toContain('fliesst in die Nebenkostenabrechnung');
+	});
+});
+
+// #654: the error belongs to the choice that was sent; changing it takes the error away until the next check
+describe('Fehler am Kontrollkästchen', () => {
+	it('verschwindet, sobald das Kästchen umgeschaltet wird', async () => {
+		show(Checkbox, { id: 'mistake', label: 'Irrtümlich erfasst', error: 'Bitte bestätigen Sie den Irrtum.' });
+		const box = document.querySelector<HTMLInputElement>('input[type=checkbox]')!;
+		click(box);
+		await settle();
+		expect(document.querySelector('[data-testid="form-error"]')).toBeNull();
+		expect(box.getAttribute('aria-invalid')).toBeNull();
+	});
+
+	// a form checks again on submit and may set the same text: unticked again, the error must not stay hidden
+	// (a check outside a form clears the error itself, e.g. DeleteContract)
+	it('erscheint beim nächsten Abschicken wieder', async () => {
+		const form = document.body.appendChild(document.createElement('form'));
+		onTestFinished(() => form.remove());
+		show(Checkbox, { id: 'mistake', label: 'Irrtümlich erfasst', error: 'Bitte bestätigen Sie den Irrtum.' }, form);
+		click(document.querySelector<HTMLInputElement>('input[type=checkbox]')!);
+		await settle();
+		form.dispatchEvent(new Event('submit', { cancelable: true }));
+		await settle();
+		expect(document.querySelector('[data-testid="form-error"]')?.textContent).toContain('Bitte bestätigen Sie den Irrtum.');
 	});
 });
 
@@ -76,6 +101,19 @@ describe('Auswahlgruppe', () => {
 		expect(value).toBe('limited');
 	});
 
+	// #654: the label wraps the explanation, so a name taken from the whole label read it a second time
+	it('liest die Erklärung einer Option nur als Beschreibung, nicht im Namen', () => {
+		show(RadioGroup, { name: 'duration', legend: 'Dauer', options, value: '' });
+		const limited = document.querySelectorAll<HTMLInputElement>('input[type=radio]')[1];
+		const names = (attribute: string) =>
+			(limited.getAttribute(attribute) ?? '')
+				.split(' ')
+				.map((id) => document.getElementById(id)?.textContent?.trim())
+				.join(' ');
+		expect(names('aria-labelledby')).toBe('Befristet');
+		expect(names('aria-describedby')).toBe('Der Mietvertrag endet an einem festen Datum.');
+	});
+
 	it('meldet einen Fehler an der Gruppe', () => {
 		show(RadioGroup, {
 			name: 'duration',
@@ -90,6 +128,15 @@ describe('Auswahlgruppe', () => {
 		expect(
 			document.getElementById(fieldset.getAttribute('aria-describedby')!)!.textContent
 		).toContain('Bitte wählen Sie die Dauer.');
+	});
+
+	// #654: the error belongs to the choice that was sent
+	it('nimmt den Fehler weg, sobald eine Option gewählt wird', async () => {
+		show(RadioGroup, { name: 'duration', legend: 'Dauer', options, value: '', error: 'Bitte wählen Sie die Dauer.' });
+		click(document.querySelectorAll<HTMLInputElement>('input[type=radio]')[1]);
+		await settle();
+		expect(document.querySelector('[data-testid="form-error"]')).toBeNull();
+		expect(document.querySelector('fieldset')!.getAttribute('aria-invalid')).toBeNull();
 	});
 
 	// Ein Screenreader liest die Fehlermeldung vor der Hilfe (G-6, Sven P-6 auf #176)

@@ -55,6 +55,8 @@ export const startDeletingContract = Click.on(deleteContractButton);
 export const deleteContract: Activity = (actor) =>
 	actor.attemptsTo(Click.on(deleteContractButton), Click.on(confirmDeleteContractButton));
 
+export const confirmMistake: Activity = Check.the(deleteMistakeConfirmation);
+
 // a started contract: the mistake confirmed in the dialog first (A-7, #116)
 export const deleteContractEnteredByMistake: Activity = (actor) =>
 	actor.attemptsTo(

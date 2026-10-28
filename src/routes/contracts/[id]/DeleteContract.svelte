@@ -101,7 +101,14 @@
 			label={m.contracts_delete_mistake_label()}
 			help={m.contracts_delete_mistake_help()}
 			error={mistakeError}
-			bind:checked={mistakeConfirmed}
+			bind:checked={
+				() => mistakeConfirmed,
+				(checked) => {
+					// the check runs outside a form: a ticked box ends the error, so the next check shows it again (#654)
+					mistakeConfirmed = checked;
+					if (checked) mistakeError = '';
+				}
+			}
 			testid="contract-delete-mistake-confirm"
 		/>
 	{/if}

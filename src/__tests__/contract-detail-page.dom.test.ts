@@ -863,6 +863,22 @@ describe('Mietvertragsdetail', () => {
 		}
 	);
 
+	// #654: the dialog checks outside a form, so the error a ticked box took away must come back on the next try
+	it('meldet den fehlenden Irrtum wieder, wenn die Bestätigung zurückgenommen wurde', async () => {
+		open('2024-01-01');
+		click('contract-delete-button');
+		click('contract-delete-confirm');
+		await settle();
+		click('contract-delete-mistake-confirm');
+		click('contract-delete-mistake-confirm');
+		await settle();
+		click('contract-delete-confirm');
+		await settle();
+		expect(text('form-error')).toBe(
+			'Bitte bestätigen Sie, dass dieser Mietvertrag irrtümlich erfasst wurde, oder brechen Sie ab.'
+		);
+	});
+
 	it('bestätigt das Löschen mit dem Namen des Mieters', async () => {
 		toasts.set([]);
 		open('2099-11-01');

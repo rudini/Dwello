@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import { sentError } from './sent-error.svelte';
 
 	type Option = { value: string; label: string; description?: string };
 
@@ -22,13 +23,16 @@
 		testid?: string;
 	} = $props();
 
-	// An option names its description and, on a refusal, the error, so the focus on it reads both
+	const sent = sentError(() => error);
+
+	// An option is named by its label only and described by its explanation (read once, #654) and, on a refusal,
+	// the error, so the focus on it reads both
 	const describedByOption = (option: Option, id: string) =>
-		[error && `${name}-error`, option.description && `${id}-description`]
+		[sent.shown && `${name}-error`, option.description && `${id}-description`]
 			.filter(Boolean)
 			.join(' ') || undefined;
 	const describedBy = $derived(
-		[error && `${name}-error`, help && `${name}-help`].filter(Boolean).join(' ') || undefined
+		[sent.shown && `${name}-error`, help && `${name}-help`].filter(Boolean).join(' ') || undefined
 	);
 </script>
 
@@ -37,8 +41,9 @@
 	role="radiogroup"
 	aria-labelledby="{name}-legend"
 	aria-describedby={describedBy}
-	aria-invalid={error ? true : undefined}
+	aria-invalid={sent.shown ? true : undefined}
 	data-testid={testid}
+	{@attach sent.attach}
 >
 	<legend id="{name}-legend" class="mb-2 font-semibold text-ink">{legend}</legend>
 	{#if help}<p id="{name}-help" class="text-ink-muted" data-testid={testid && `${testid}-help`}>
@@ -59,26 +64,27 @@
 				type="radio"
 				value={option.value}
 				bind:group={value}
+				aria-labelledby="{id}-label"
 				aria-describedby={describedByOption(option, id)}
 				data-testid={testid && `${testid}-${option.value}`}
 				class="mt-1 size-6 shrink-0 cursor-pointer accent-accent"
 			/>
 			<span class="flex flex-col gap-1">
-				<span class="font-semibold text-ink">{option.label}</span>
+				<span id="{id}-label" class="font-semibold text-ink">{option.label}</span>
 				{#if option.description}
 					<span id="{id}-description" class="text-ink-muted">{option.description}</span>
 				{/if}
 			</span>
 		</label>
 	{/each}
-	{#if error}
+	{#if sent.shown}
 		<p
 			id="{name}-error"
 			class="flex items-start gap-2 font-semibold text-critical"
 			data-testid="form-error"
 		>
 			<Icon name="error" />
-			{error}
+			{sent.shown}
 		</p>
 	{/if}
 </fieldset>

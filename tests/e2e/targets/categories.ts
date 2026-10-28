@@ -7,9 +7,9 @@ export const categoryRow = (name: string) =>
 );
 export const allowedFilter = target('Filter umlagefähig', (page) => page.getByTestId('category-filter-allowed'));
 export const nameInput = target('Name', (page) => page.getByTestId('category-name-input'));
-// The radio's name starts with its label and goes on with its description
+// The radio is named by its label alone; its description is read as a description (#654)
 export const allowanceOption = (label: 'Umlagefähig' | 'Nicht umlagefähig') =>
-	target(`Wahl ${label}`, (page) => page.getByTestId('category-allowance').getByRole('radio', { name: new RegExp(`^${label} `) }));
+	target(`Wahl ${label}`, (page) => page.getByTestId('category-allowance').getByRole('radio', { name: label, exact: true }));
 export const heatingCheckbox = target('Heizkosten nach dem Heizprofil verteilen', (page) =>
 	page.getByTestId('category-heating-checkbox')
 );
