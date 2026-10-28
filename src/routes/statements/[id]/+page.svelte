@@ -64,16 +64,16 @@
 	// a draft whose invoices or Tankbestand changed since it was created is not current (#454, #547), nor one that
 	// would count another Übertrag now (#506 C)
 	const later = $derived(data.later);
+	const invoicesOutdated = $derived(
+		statement.status === 'draft' && later && (later.invoices || later.fuelStock)
+			? m.statements_send_outdated({ later: laterText(later.invoices, later.fuelStock) })
+			: ''
+	);
+	// the backend says it of a draft only
 	const outdated = $derived(
-		statement.status === 'draft' && later
-			? [
-					(later.invoices || later.fuelStock) &&
-						m.statements_send_outdated({ later: laterText(later.invoices, later.fuelStock) }),
-					later.carryOver && m.statements_send_outdated_carry()
-				]
-					.filter(Boolean)
-					.join(' ') || undefined
-			: undefined
+		[invoicesOutdated, later?.carryOver && m.statements_send_outdated_carry()]
+			.filter(Boolean)
+			.join(' ') || undefined
 	);
 	let sendByLetter = $state(false); // after a failed e-mail (#86)
 	// without an e-mail address the letter is the only way, from the button on (#449, persona Helga P-2)
