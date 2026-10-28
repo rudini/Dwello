@@ -207,6 +207,10 @@ jobs:
       - name: Upgrade from the previous release
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: tools/fitness/upgrade-check.sh
+      # P2 (docs/architecture/fitness-functions.md, #922): the database queries per list and overview route may not rise
+      - name: Queries per route
+        if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
+        run: bun tools/fitness/p2-benchmark.ts --queries --format github
 
   # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
   # Each runs in shards (Playwright --shard) on parallel runners; the job "e2e-results" reports each under its own name

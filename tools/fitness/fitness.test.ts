@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, judge, loosened, newFields, tighten, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -367,5 +367,31 @@ describe('isFrontendFile', () => {
 	it('leaves BFF files, tests and Paraglide', () => {
 		for (const p of ['src/lib/server/a.ts', 'src/routes/x/+page.server.ts', 'src/routes/x/+server.ts', 'src/hooks.server.ts', 'src/__tests__/a.test.ts', 'src/lib/paraglide/messages.js', 'src/app.d.ts'])
 			expect(isFrontendFile(p)).toBe(false);
+	});
+});
+
+// #922 (P2): the database queries one call of a list or overview route sends, on a fixed dataset
+describe('queries per route', () => {
+	const withQueries: Ratchet = { ...ratchet, routeQueries: { '/api/v1/statements/outdated': 12, '/api/v1/buildings': 3 } };
+
+	it('fails a route that needs more queries than the ratchet allows, not one that needs fewer', () => {
+		const findings = queryFindings({ '/api/v1/statements/outdated': 40, '/api/v1/buildings': 2 }, withQueries);
+		expect(findings.map((f) => f.message)).toEqual([expect.stringContaining('/api/v1/statements/outdated needs 40 queries (ratchet 12)')]);
+	});
+
+	it('tightens to fewer queries and records a route the ratchet does not list yet', () => {
+		expect(tightenQueries({ '/api/v1/statements/outdated': 9, '/api/v1/buildings': 3, '/api/v1/tenants': 4 }, withQueries)).toEqual({
+			'/api/v1/statements/outdated': 9,
+			'/api/v1/buildings': 3,
+			'/api/v1/tenants': 4
+		});
+	});
+
+	it('counts a raised or removed route limit as loosening the ratchet', () => {
+		const raised: Ratchet = { ...ratchet, routeQueries: { '/api/v1/statements/outdated': 13 } };
+		expect(loosened(raised, withQueries).map((f) => f.message)).toEqual([
+			expect.stringContaining('routeQueries./api/v1/statements/outdated rose from 12 to 13'),
+			expect.stringContaining('routeQueries./api/v1/buildings was removed')
+		]);
 	});
 });

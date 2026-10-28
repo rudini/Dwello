@@ -22,6 +22,8 @@ export type Measured = {
 
 export type Ratchet = {
 	fieldSpread: Spread;
+	/** #922 (P2): database queries of one call per list and overview route on the dataset of p2-benchmark.ts */
+	routeQueries?: Record<string, number>;
 	/** Technical checks the BFF may make (UUID, ISO date of a query parameter, JWT duration); not shrink-only */
 	technical: { path: string; line: string; reason: string }[];
 	/** #815: display and format checks the frontend may make (a branch on the status value alone, a date format); not shrink-only */
@@ -160,6 +162,20 @@ export function advise(
 	return findings;
 }
 
+/** #922 (P2): a route that needs more database queries than the ratchet allows, e.g. one query per statement (#919) */
+export function queryFindings(counts: Record<string, number>, r: Ratchet): Finding[] {
+	return Object.entries(counts)
+		.filter(([route, n]) => n > (r.routeQueries?.[route] ?? Infinity))
+		.map(([route, n]) => ({
+			check: 'route-queries',
+			message: `P2 «Wartezeit nach einem Klick»: ${route} needs ${n} queries (ratchet ${r.routeQueries![route]}) on the dataset of tools/fitness/p2-benchmark.ts. Fix: load per list, not per row (one query for all rows, or once per building and period as in #919), instead of raising the ratchet.`
+		}));
+}
+
+/** The query limits after a run: fewer stay fewer, a route the ratchet does not list yet gets its count */
+export const tightenQueries = (counts: Record<string, number>, r: Ratchet) =>
+	Object.fromEntries(Object.entries(counts).map(([route, n]) => [route, Math.min(n, r.routeQueries?.[route] ?? n)]));
+
 /** Size of each exception list: entries, and for value lists the files each may span. */
 const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
 	bffDecisions: x.bffDecisions.length,
@@ -180,6 +196,11 @@ export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 		findings.push({ check: 'ratchet', message: `tools/fitness/ratchet.json: ${message} The ratchet only tightens; fix the code instead.` });
 	for (const k of ['median', 'p90', 'max'] as const)
 		if (working.fieldSpread[k] > base.fieldSpread[k]) loose(`fieldSpread.${k} rose from ${base.fieldSpread[k]} to ${working.fieldSpread[k]}.`);
+	for (const [route, limit] of Object.entries(base.routeQueries ?? {})) {
+		const now = working.routeQueries?.[route];
+		if (now === undefined) loose(`routeQueries.${route} was removed; keep its limit.`);
+		else if (now > limit) loose(`routeQueries.${route} rose from ${limit} to ${now}.`);
+	}
 	const [now, before] = [exceptionSizes(working), exceptionSizes(base)];
 	// a list the base does not have yet comes with the check that needs it (visible in the diff)
 	for (const k of Object.keys(now) as (keyof typeof now)[])
