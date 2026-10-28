@@ -31,15 +31,15 @@ Bestehende Szenarien aus `docs/archive/migration-mva.md` (Q1–Q5, D1–D2, S1�
 ```
 Dwello-Nutzen
 ├─ Änderbarkeit
-│  ├─ Form eines Felds an einem Ort .......... Ä1 Neues Feld an einer Entität            (H/H)
-│  └─ Fachregel an einem Ort ................. Ä4 Fachregel nur im Backend              (H/H)
+│  ├─ Form eines Felds an einem Ort .......... Ä1 Neues Feld an einer Entität            (H/L)
+│  └─ Fachregel an einem Ort ................. Ä4 Fachregel nur im Backend              (H/L)
 ├─ Verfügbarkeit / Resilienz
 │  ├─ Kein Datenverlust ...................... R1 Verschlüsseltes, kompatibles Backup   (H/H)
 │  └─ Sicheres Update ........................ U1 Wöchentliches Update mit Migration    (H/H)
 ├─ Betreibbarkeit / Beobachtbarkeit
 │  └─ Fehler sofort erkennen ................. O1 Fehlgeschlagenes Backup sichtbar      (H/M)
 ├─ Testbarkeit
-│  └─ Schnelle, verlässliche Rückmeldung ..... T1 CI auf PR und main ≤ 15 min, main grün (H/H)
+│  └─ Schnelle, verlässliche Rückmeldung ..... T1 CI auf PR und main ≤ 15 min, main grün (H/M)
 ├─ Performance
 │  ├─ Abrechnungslauf ........................ P1 50 Wohnungen samt PDFs ≤ 30 s         (M/M)
 │  └─ Wartezeit nach einem Klick ............. P2 Liste oder Übersicht < 500 ms p95      (H/M)
@@ -112,7 +112,7 @@ Dwello-Nutzen
 - **Heute:**
   - Migrationen laufen beim Start des Backends (`bun scripts/migrate.ts && exec bun run src/index.ts`), je eine Transaktion pro Migration (`backend/src/db/migrate.ts`). Ein Backup vor der Migration gibt es nicht (aus Repo/Config).
   - E2E testet nur Migrationen auf leere DB («migrated fresh before each run», `docs/test-pyramid.md`). Seit Phase 2a prüft `tools/fitness/upgrade-check.sh` jeden PR mit Backend-Änderung als Upgrade vom letzten Release mit Demo-Daten: Zeilenzahlen, Summen der Abrechnungsbeträge und die in den Demo-Daten leeren Tabellen (#783, #782). Eine scheiternde Migration lässt ihre Daten unverändert, der Start bricht mit Exit-Code 1 ab und das Log nennt Datei und Ursache (`migrations.pg.test.ts`, #782).
-  - Jeder Merge erzeugt ein Release (aus Repo/Config: `release.yml`). Künftig wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). Umgesetzt ist das noch nicht.
+  - Jeder Merge erzeugt ein Release (aus Repo/Config: `release.yml`). Künftig wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). Umgesetzt ist das noch nicht (#935).
 - **Fitness Function:** CI-Job pro Release: Compose mit dem letzten Tag und Demo-Daten starten → auf HEAD aktualisieren → Healthcheck grün, Zeilenzahlen und Summen gleich. Dazu ein Negativtest: Eine absichtlich fehlschlagende Migration lässt die Daten unverändert und macht den Container «unhealthy» mit lesbarer Ursache.
 
 ### O1 Fehlgeschlagenes Backup ist sichtbar
@@ -137,6 +137,7 @@ Dwello-Nutzen
   - Von den letzten 20 abgeschlossenen Push-Läufen auf `main` waren 3 grün, 4 rot und 13 abgebrochen, weil ein neuerer Merge sie ersetzte.
   - Ursachen der 4 roten Läufe (gemessen, CI-Logs): keine kam von einem Fehler im gemergten Change. 3 instabile Tests (axe `target-size` nur mobil dunkel in Run 861; Firefox «Suche ohne Treffer» ohne Retry in Run 876; Reihenfolge der Kategorien im PDF in Run 916), 2 Shards am 60-min-Limit, weil `playwright install --with-deps` wegen eines langsamen apt-Spiegels 42–51 min brauchte (Runs 876, 886), 1 repoweiter Check auf Issue-Labels (`check-issues.mjs`, Run 886). Siehe A6.
   - Nach #777 (26.10., Run 40286548319, Merge von #831): PR etwa 13 min. `main` 27 min, die fünf E2E-Shards brauchten im Testschritt 12–26 min (92 min zusammen), axe 9–10 min. Seit #834 läuft E2E auf `main` in 12 Shards: Run 40293821912 brauchte nach dem Start der Jobs 19,6 min, der Testschritt 3,5–18 min, weil je ein Shard die Sprach-Bildschirmprüfungen eines Browsers trug. Seit #838 haben diese sechs eigene Shards. Run 40303722784 (Merge von #839): E2E-Shards 5,5–9,1 min, der Lauf 14,7 min ab dem Start der Jobs (davor 18 min Warten auf den Lauf von #836); kritischer Pfad war axe-Shard 2/3 mit etwa 14 min, seit #840 läuft axe in 4 Shards.
+  - Stichprobe 28.10.2026 (gemessen, CI, Actions-API; Dauer ab dem Start des ersten Jobs): `main` die letzten 29 abgeschlossenen Push-Läufe (Runs 1129–1186, 27.–28.10.) 11–17 min, Median **13 min**; 2 über 15 min (17 min, Run 40682977297; 15 min im roten Run 40708772660). PR die letzten 30 Läufe 2–16 min, Median **10 min**, einer über 15 min (Run 40687603886). In den 7 Tagen bis 28.10. waren von 99 abgeschlossenen Push-Läufen auf `main` 91 grün, 3 rot und 5 abgebrochen. Damit hält T1 bis auf Ausreisser (Entscheid PO 28.10.2026: H/H → H/M).
   - Umfang: 851 Szenarien in 53 Feature-Dateien, 2 Worker pro Shard (aus Repo/Config).
 - **Fitness Function:** Ein Job am Ende von `ci.yml` schreibt die Laufdauer als Annotation und schlägt bei mehr als 15 min auf `main` Alarm. Dazu eine wöchentliche Auswertung der Quote grüner Läufe auf `main` über die Actions-API.
 
@@ -146,7 +147,7 @@ Dwello-Nutzen
 - **Umgebung:** VM wie die Demo (2 OCPU ARM, 12 GB, ohne GPU) (vom Nutzer bestätigt).
 - **Reaktion:** Der Assistent zeigt den Fortschritt, und alle Abrechnungen entstehen.
 - **Messgrösse und Ziel:** **≤ 30 s** vom Start bis zur letzten Abrechnung (vom Nutzer bestätigt). Damit sind die 10 s und 60 s im PRD ersetzt.
-- **Heute:** **unbekannt**. Die Schleife über die Mietverträge läuft im BFF (`src/lib/server/statement-generation.ts`, aus Repo/Config).
+- **Heute:** **unbekannt**. Die Schleife über die Mietverträge läuft im BFF (`src/lib/server/statement-generation.ts`, aus Repo/Config). Messung offen in #934.
 - **Fitness Function:** Benchmark-Skript, das 50 Mietverträge anlegt und den Lauf über die BFF-Route misst, wöchentlich auf der Demo-VM. Dazu ein grober Wächter in CI (z. B. ≤ 15 s auf dem Runner, Annahme A4).
 
 ### P2 Wartezeit nach einem Klick
@@ -164,32 +165,32 @@ Dwello-Nutzen
 - **Umgebung:** Produktion.
 - **Reaktion:** Das Skript findet kein Token. Der Request bekommt 401 oder eine Weiterleitung zum Login.
 - **Messgrösse und Ziel:** **0** lesbare Tokens im Browser. **100 %** der Endpunkte antworten ohne Sitzung mit 401 (mit der Freigabe vom Nutzer bestätigt).
-- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`). HttpOnly ist so gebaut, aber nicht getestet (aus Repo/Config: `docs/archive/migration-mva.md` S1 ✅, S2 ❓).
+- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`), im Backend aber nur für eine feste Liste von 11 Listen-Endpunkten, nicht für jede registrierte Route (#936). Seit #917 ist getestet, dass das Sitzungs-Cookie HttpOnly und SameSite ist, mit `COOKIE_SECURE` auch Secure (`session-cookie.test.ts`).
 - **Fitness Function:** E2E: Nach dem Login enthält `document.cookie` kein JWT. Ein API-Test läuft über alle registrierten Routen ohne Sitzung und erwartet 401.
 
 ## 4. Priorisierungsmatrix
 
-Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die Matrix ist vom Nutzer bestätigt (23.10.2026), mit drei Änderungen: S1 Wichtigkeit H; T1 gilt für PR und `main`; R1 wird mit Verschlüsselung und Kompatibilität H/H.
+Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die Matrix ist vom Nutzer bestätigt (23.10.2026), mit drei Änderungen: S1 Wichtigkeit H; T1 gilt für PR und `main`; R1 wird mit Verschlüsselung und Kompatibilität H/H. Entscheid PO 28.10.2026: Ä1 und Ä4 haben ihr Ziel erreicht und gehen auf H/L (sie bleiben im Baum, weil die Checks sich auf sie berufen); T1 geht nach der Neumessung auf H/M.
 
 | | Schwierigkeit **H** | **M** | **L** |
 |---|---|---|---|
-| **Wichtigkeit H** | **Ä1, Ä4, U1, T1, R1** | O1, P2 | S1 |
+| **Wichtigkeit H** | **U1, R1** | O1, P2, T1 | Ä1, Ä4, S1 |
 | **M** | | P1 | |
 | **L** | | | |
 
 | ID | Wichtigkeit | Begründung | Schwierigkeit | Begründung |
 |---|---|---|---|---|
-| Ä1 | H | Der PO hat die Zielwerte am 23.10. festgelegt. Ein neues Feld ist die häufigste Änderung (`db:schema` in 31 % der Features). | H | Median 6 → 4, P90 19 → 8. Ohne gemeinsamen Vertrag zwischen den Schichten sinkt der Wert nicht (0 Importe FE/BFF → Backend). |
-| Ä4 | H | Entscheid des PO, #717; das MCP über die API allein hängt daran (#815, #817) | H | Der BFF liest 0 (#717, #788). Seit #815 zählt auch das Frontend: 41 Ableitungen in 20 Dateien (25.10.2026). Entscheid PO 25.10.2026: H/M → H/H. |
+| Ä1 | H | Der PO hat die Zielwerte am 23.10. festgelegt. Ein neues Feld ist die häufigste Änderung (`db:schema` in 31 % der Features). | L | Bis 28.10.2026 H: Median 6 → 4, P90 19 → 8, ohne gemeinsamen Vertrag zwischen den Schichten (0 Importe FE/BFF → Backend). Nach #910 und #912 Median 1, P90 6: Ziel erreicht, `field-spread` hält es (Entscheid PO 28.10.2026: H/H → H/L). |
+| Ä4 | H | Entscheid des PO, #717; das MCP über die API allein hängt daran (#815, #817) | H | Der BFF liest 0 (#717, #788). Seit #815 zählt auch das Frontend: 41 Ableitungen in 20 Dateien (25.10.2026). Entscheid PO 25.10.2026: H/M → H/H. Nach #815 Teil B bis D 0 Ableitungen: Ziel erreicht, `bff-decision` und `frontend-decision` halten es (Entscheid PO 28.10.2026: H/H → H/L). |
 | R1 | H | Datenverlust ist der teuerste Fehler. | H | Mehrere Anforderungen zugleich: Automatik, Verschlüsselung mit Wiederherstellungscode, Kompatibilität über Releases und Restore ≤ 5 min. Heute gibt es nur ein manuelles, unverschlüsseltes, ungetestetes Verfahren. Ob 5 min reichen, ist unbekannt (A2). |
 | U1 | H | Wöchentliches Update; Datenverlust und fehlgeschlagene Migration müssen erkennbar sein. | H | Kein Backup vor der Migration, kein Upgrade-Test mit Daten. Migrationen gehen nur vorwärts, ein Zurück gibt es nur per Restore. |
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
-| T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
+| T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | M | Am 23.10.2026 H: `main` 43–79 min, das Drei- bis Fünffache des Ziels, 4 von 7 abgeschlossenen Läufen rot. Am 28.10.2026 `main` Median 13 min, 2 von 29 Läufen über 15 min, 91 von 99 Läufen in 7 Tagen grün (Entscheid PO 28.10.2026: H/H → H/M). |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
 | P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Einmal gemessen (28.10.2026, #781): alle Listen- und Übersichtsrouten unter dem Ziel, `statements/outdated` nach #919 80 ms statt 1110 ms p95. |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
-**Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
+**Kandidaten für die ersten Refactorings (H/H):** U1, R1 (bis 28.10.2026 auch Ä1 und T1). **Quick Win (H/L):** S1; Ä1 und Ä4 halten ihr Ziel, der Ratchet sichert es.
 
 ## 5. Offene Annahmen
 
