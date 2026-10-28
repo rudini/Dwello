@@ -52,6 +52,7 @@ interface DashboardData {
 			| 'formerTenants'
 			| 'oldAddresses'
 			| 'missingStatements'
+			| 'openCarryOvers'
 		>
 	>;
 	deadlines: BackendDeadline[]; // which and how far away, decided by the backend by the Swiss day (#815)
@@ -117,8 +118,14 @@ export const load = async ({
 	}));
 	// which contracts need a next tenant, a question whether the tenant stayed, their former tenant's documents checked,
 	// a new address or a statement, the backend decides (#788)
-	const { noticedContracts, expiredContracts, formerTenants, oldAddresses, missingStatements } =
-		figures.contractTasks;
+	const {
+		noticedContracts,
+		expiredContracts,
+		formerTenants,
+		oldAddresses,
+		missingStatements,
+		openCarryOvers
+	} = figures.contractTasks;
 	const input = {
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
@@ -134,7 +141,8 @@ export const load = async ({
 		noticedContracts,
 		oldAddresses,
 		expiredContracts,
-		formerTenants
+		formerTenants,
+		openCarryOvers
 	};
 	return {
 		...figures,

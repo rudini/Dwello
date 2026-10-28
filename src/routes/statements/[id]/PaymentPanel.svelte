@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
+	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Who pays whom by when; a refund has no Zahlungsfrist for the tenant
-	let { statement }: { statement: StatementWithDetails } = $props();
+	let { statement, onsettle }: { statement: StatementWithDetails; onsettle?: () => void } = $props();
 
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
@@ -17,6 +18,13 @@
 	// carried over now (product owner 2026-10-19, Fachreview 448-2 V-18); the backend says which (#815)
 	const waived = $derived(statement.waived);
 	const noPayment = $derived(statement.noPayment);
+	// #506: an Übertrag no statement counts any more, or one the landlord settled by hand (Fachreview 506-1 V-6)
+	const carryText = () =>
+		statement.carrySettledOn
+			? m.statements_carry_settled_on({ date: formatDate(statement.carrySettledOn) })
+			: statement.openCarry
+				? m.statements_carry_open()
+				: m.statements_summary_carried();
 	const summary = $derived(
 		replaced
 			? m.statements_summary_replaced()
@@ -25,7 +33,7 @@
 				: waived
 					? m.statements_summary_waived_due()
 					: noPayment
-						? m.statements_summary_carried()
+						? carryText()
 						: refund
 							? m.statements_summary_refund({ amount })
 							: m.statements_summary_due({ amount })
@@ -47,6 +55,13 @@
 
 <Panel title={m.statements_payment()}>
 	<p class="text-ink" data-testid="statement-payment-summary">{summary}</p>
+	{#if statement.openCarry && !replaced && onsettle}
+		<div>
+			<Button variant="secondary" icon="check" onclick={onsettle} testid="statement-carry-settle"
+				>{m.statements_carry_settle()}</Button
+			>
+		</div>
+	{/if}
 	<dl class="grid gap-4 sm:grid-cols-2">
 		{#each rows as row (row.label)}
 			<div class="flex flex-col gap-1">

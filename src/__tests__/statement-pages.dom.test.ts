@@ -620,6 +620,34 @@ describe('Abrechnungsdetail', () => {
 		} as never);
 	const laterText = () => byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ');
 
+	// #506 C (Fachreview 506-1 V-4): a draft that would count another Übertrag now
+	it('rät beim Versand eines Entwurfs, der jetzt einen anderen Übertrag verrechnen würde, zum Neu berechnen', () => {
+		later(0, 'draft', { carryOver: true } as never);
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog).toContain('Dieser Entwurf ist nicht aktuell');
+		expect(dialog).toContain(
+			'Seit dem Erstellen dieses Entwurfs hat sich geändert, welchen Übertrag aus einer früheren Abrechnung er verrechnet. Berechnen Sie den Entwurf neu, bevor Sie ihn zustellen.'
+		);
+	});
+
+	// #506 B (Fachreview 506-1 V-6): an open Übertrag is not «mit der nächsten Abrechnung verrechnet»
+	it('nennt einen offenen Übertrag und bietet den Ausgleich von Hand an', () => {
+		detail({ status: 'settled', balance: 3, noPayment: true, openCarry: true });
+		expect(byTestId('statement-payment-summary')!.textContent).toBe('Der Übertrag ist noch offen. Keine Abrechnung verrechnet ihn mehr.');
+		click('statement-carry-settle');
+		flushSync();
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Haben Sie die Nachzahlung erhalten, oder verzichten Sie darauf? Der Übertrag gilt dann als ausgeglichen, und keine Abrechnung verrechnet ihn. Das lässt sich nicht rückgängig machen.'
+		);
+	});
+
+	it('nennt den Tag, an dem ein Übertrag von Hand ausgeglichen wurde, ohne den Ausgleich noch einmal anzubieten', () => {
+		detail({ status: 'settled', balance: -3, noPayment: true, carrySettledOn: '2026-10-28' });
+		expect(byTestId('statement-payment-summary')!.textContent).toBe('Übertrag von Hand ausgeglichen am 28.10.2026.');
+		expect(byTestId('statement-carry-settle')).toBeNull();
+	});
+
 	// #547: the send dialog of a draft that is not current says so first and offers «Neu berechnen»; sending stays possible
 	it('rät beim Versand eines nicht aktuellen Entwurfs zum Neu berechnen', () => {
 		later(1, 'draft');

@@ -505,6 +505,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.earlyPaidWarning)
 		),
 	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
+	'carry-settle-dialog': () => openDialog(on.carrySettleButton), // #506
 	'correct-dialog': () => openDialog(on.correctButton),
 	// #454: the late invoice of the seed raises Bruno's Saldo of 2025
 	'decline-dialog': () => openDialog(on.declineCorrectionButton),

@@ -7,7 +7,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, invoices, utilityStatements } from '../db/schema';
+import { contractCategories, documents, invoices, rentalContracts, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -446,11 +446,15 @@ describe('Offener Übertrag', () => {
 	const openCarryOvers = async () =>
 		((await (await callApi('/api/v1/dashboard')).json()) as { contractTasks: { openCarryOvers: Open[] } }).contractTasks.openCarryOvers;
 	const settle = (id: string) => sendJson('POST', `/api/v1/statements/${id}/carry-settled`, {});
+	const replaceAndCorrect = async (id: string) => {
+		await callApi(`/api/v1/statements/${id}/replace`, { method: 'POST' });
+		return (await (await callApi(`/api/v1/statements/${id}/correction`, { method: 'POST' })).json()) as Statement & { priorPayments: string };
+	};
 
 	it('nennt einen Übertrag, wenn der Mietvertrag in seiner Periode endet', async () => {
 		const rental = await rentalOf();
 		const previous = await sentWith(rental, 2024, '3.00');
-		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-12-31' });
+		expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-12-31', confirmPastEnd: true })).status).toBe(200);
 
 		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous.id, balance: '3.00' }));
 	});
@@ -483,6 +487,66 @@ describe('Offener Übertrag', () => {
 		expect(await response.json()).toMatchObject({ carrySettledOn: today() });
 		expect((await openCarryOvers()).map((open) => open.id)).not.toContain(previous.id);
 		expect((await read(await generate(rental, 2025))).carriedFrom).toBeNull();
+	});
+
+	// Fachreview 506-1 V-1: an open Übertrag is not counted by a later statement after all
+	it('verrechnet einen offenen Übertrag in keiner späteren Abrechnung', async () => {
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2023);
+		await db.update(utilityStatements).set({ balance: '-3.00' }).where(eq(utilityStatements.id, previous));
+		const later = await generate(rental, 2024);
+		await send(previous);
+		await db.update(utilityStatements).set({ balance: '30.00' }).where(eq(utilityStatements.id, later));
+		await send(later);
+
+		expect((await read(await generate(rental, 2025))).carriedFrom).toBeNull();
+	});
+
+	it('nimmt den Übertrag beim Ausgleich von Hand einem Entwurf, der ihn verrechnet', async () => {
+		const rental = await rentalOf();
+		const previous = await sentWith(rental, 2024, '3.00');
+		const draft = await generate(rental, 2025);
+
+		await settle(previous.id);
+
+		expect(await read(draft)).toMatchObject({ balance: '0.00', carriedFrom: null });
+	});
+
+	// Fachreview 506-1 V-3: after the period the tenant pays a Nebenkostenpauschale only
+	it('nennt einen Übertrag, wenn der Mietvertrag danach nur eine Nebenkostenpauschale hat', async () => {
+		const rental = await rentalOf();
+		const previous = await sentWith(rental, 2024, '3.00');
+		await db.update(rentalContracts).set({ flatRateUtilityCharge: '80.00' }).where(eq(rentalContracts.id, rental.contract));
+		await db.update(contractCategories).set({ agreed: false }).where(eq(contractCategories.contractId, rental.contract));
+
+		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous.id }));
+	});
+
+	// Fachreview 506-1 V-2: a berichtigte Abrechnung counts an Übertrag settled by hand as paid
+	it('rechnet einen von Hand ausgeglichenen Übertrag in der berichtigten Abrechnung als bezahlt an', async () => {
+		const rental = await rentalOf({ startDate: '2020-01-01', endDate: '2024-12-31' });
+		const previous = await generate(rental, 2024);
+		await db.update(utilityStatements).set({ balance: '3.00', status: 'settled', statementDate: today() }).where(eq(utilityStatements.id, previous));
+		await settle(previous);
+
+		const corrected = await replaceAndCorrect(previous);
+
+		expect(corrected).toMatchObject({ priorPayments: '3.00', balance: '-3.00' });
+	});
+
+	// Fachreview 506-1 V-9: «Zahlung zurücksetzen» of a refund settled under #94 carries it over again
+	it('nimmt den Ausgleich von Hand zurück, wenn die Zahlung zurückgesetzt wird', async () => {
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2024);
+		await db
+			.update(utilityStatements)
+			.set({ status: 'paid', balance: '-3.00', paidDate: '2025-02-01', paidAmount: '0.00' })
+			.where(eq(utilityStatements.id, previous));
+		await settle(previous);
+
+		await callApi(`/api/v1/statements/${previous}/payment-reset`, { method: 'POST' });
+
+		expect(await read(previous)).toMatchObject({ carrySettledOn: null });
 	});
 
 	it('lehnt den Ausgleich einer Abrechnung ohne Übertrag ab', async () => {

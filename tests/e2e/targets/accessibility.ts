@@ -41,6 +41,7 @@ export const sendButton = byTestId('Abrechnung versenden', 'statement-send-butto
 export const recalculateButton = byTestId('Neu berechnen', 'statement-recalculate-button');
 export const reminderButton = byTestId('Mahnung senden', 'statement-reminder-button');
 export const resetPaymentButton = byTestId('Zahlung zurücksetzen', 'statement-reset-payment-button');
+export const carrySettleButton = byTestId('Übertrag als ausgeglichen markieren', 'statement-carry-settle'); // #506
 export const correctButton = byTestId('Abrechnung berichtigen', 'statement-correct-button');
 export const declineCorrectionButton = byTestId('Nicht berichtigen', 'statement-decline-correction-button');
 export const paidDateInput = byTestId('Bezahlt am', 'paid-date-input');

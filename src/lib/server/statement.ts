@@ -76,6 +76,8 @@ const correctionOf = (data: BackendStatement) => ({
 // #448: a Schlussabrechnung has no Mindestbetrag; the Übertrag from the previous statement of the Mietvertrag
 const carryOf = (data: BackendStatement) => ({
 	final: !!data.final,
+	openCarry: !!data.openCarry,
+	carrySettledOn: data.carrySettledOn ?? null,
 	carriedFrom: data.carriedFrom ? { ...data.carriedFrom, balance: Number(data.carriedFrom.balance) } : null
 });
 
@@ -165,13 +167,15 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
+		carryOverChanged?: boolean;
 	} = response?.ok ? await response.json() : {};
 	return {
 		invoices: changed.invoiceIds?.length ?? 0,
 		fuelStock: !!changed.fuelStockChanged,
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
-		correctionLowers: !!changed.correctionLowers
+		correctionLowers: !!changed.correctionLowers,
+		carryOver: !!changed.carryOverChanged // #506 C: the draft would count another Übertrag now
 	};
 }
 

@@ -84,7 +84,7 @@ import {
 	confirmSending,
 	settleCarryOver
 } from '../tasks/statement-detail';
-import { inDays } from '../fixtures/dates';
+import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
 
 const { Given, When, Then } = createBdd(test);
@@ -524,6 +524,16 @@ Then('bestätigt Dwello {string}', async ({ verwalter }, text: string) => {
 
 Then('sagt die Abrechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(paymentText).toContain(text);
+});
+
+// Fachreview 506-1 V-6: an open or settled Übertrag is not «mit der nächsten Abrechnung verrechnet»
+Then('sagt die Abrechnung nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentText).toContain('Übertrag');
+	await verwalter.sees(paymentText).not.toContain(text);
+});
+
+Then('sagt die Abrechnung, dass der Übertrag heute von Hand ausgeglichen wurde', async ({ verwalter }) => {
+	await verwalter.sees(paymentText).toContain(`Übertrag von Hand ausgeglichen am ${swissDate(inDays(0))}`);
 });
 
 Then('nennt die Abrechnung keine Zahlungsfrist', async ({ verwalter }) => {

@@ -374,11 +374,13 @@ describe('API-Verträge des Frontends', () => {
 			// a draft to the apartment the former tenant left (A-5); the contracts' periods without a statement are missing
 			await db.update(tenants).set({ address: 'Testweg 1', postalCode: '8400' }).where(eq(tenants.id, former.tenant));
 			await db.insert(utilityStatements).values({ tenantId: former.tenant, apartmentId: former.apartment, contractId: former.contract, statementNumber: `NK-old-address-${Date.now()}`, periodStart: '2024-01-01', periodEnd: '2024-12-31', statementDate: '2025-03-01', rentalDays: 366, rentalStart: '2024-01-01', rentalEnd: '2024-12-31', totalCosts: '0', totalAdvancePayments: '0', balance: '0' });
+			// #506: an Übertrag of the last period of a contract that has ended is open
+			await db.insert(utilityStatements).values({ tenantId: expired.tenant, apartmentId: expired.apartment, contractId: expired.contract, statementNumber: `NK-open-carry-${Date.now()}`, status: 'settled', periodStart: '2025-01-01', periodEnd: '2025-12-31', statementDate: '2026-03-01', rentalDays: 365, rentalStart: '2025-01-01', rentalEnd: '2025-12-31', totalCosts: '3', totalAdvancePayments: '0', balance: '3' });
 			const actual = await (await callApi('/api/v1/dashboard')).json();
 			expect(drift(await sample('dashboard'), actual)).toEqual([]);
 		} finally {
 			await db.delete(documents).where(eq(documents.tenantId, former.tenant));
-			await db.delete(utilityStatements).where(eq(utilityStatements.tenantId, former.tenant));
+			await db.delete(utilityStatements).where(inArray(utilityStatements.tenantId, [former.tenant, expired.tenant]));
 			for (const created of [noticed, expired, former, ending]) await created.remove();
 		}
 	});

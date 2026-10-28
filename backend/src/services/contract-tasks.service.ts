@@ -4,6 +4,7 @@ import type { Range } from './accounting-period';
 import { laterContract } from './later-contract';
 import { listStatements } from './statement.service';
 import { missingByContract } from './statement-run.service';
+import { openCarryOvers } from './carry-over';
 
 /**
  * The overview's tasks about contracts (#788), decided here by the Swiss day: a notice with no later contract for the
@@ -41,7 +42,8 @@ export async function contractTasks() {
 		expiredContracts,
 		formerTenants,
 		oldAddresses: await oldAddresses(),
-		missingStatements: await missingStatements(contracts)
+		missingStatements: await missingStatements(contracts),
+		openCarryOvers: await openCarryOvers() // #506: an Übertrag no statement counts any more
 	};
 }
 
@@ -56,8 +58,8 @@ async function oldAddresses() {
 
 // Per building the parts of ended Abrechnungsperioden since a Vertragsbeginn without a statement, as on the contract
 // page (#211); each once, the latest first, also of a contract that has ended since
-async function missingStatements(contracts: { id: string; buildingId: string; buildingName: string }[]) {
-	const missing: Record<string, Range[]> = await missingByContract();
+async function missingStatements(contracts: Awaited<ReturnType<typeof listContracts>>['contracts']) {
+	const missing: Record<string, Range[]> = await missingByContract(contracts);
 	const byBuilding = new Map<string, { building: string; buildingId: string; periods: Map<string, Range> }>();
 	for (const c of contracts)
 		for (const { start, end } of missing[c.id] ?? []) {

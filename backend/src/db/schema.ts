@@ -493,6 +493,7 @@ export const utilityStatements = pgTable(
 		priorPayments: decimal('prior_payments', { precision: 12, scale: 2 }).notNull().default('0'),
 		// the Übertrag: the statement of the same Mietvertrag whose Saldo below CHF 5 this one counts in (#448)
 		carriedFromId: uuid('carried_from_id').references((): AnyPgColumn => utilityStatements.id),
+		carrySettledOn: date('carry_settled_on'), // #506: an open Übertrag settled by hand on that day
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).$type<StoredStatementStatus>().notNull().default('draft'), // draft, sent, paid, settled (#448), replaced; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

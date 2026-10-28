@@ -106,11 +106,12 @@ export async function missingOfContract(id: string) {
 }
 
 /** #211: per contract id, the parts of ended Abrechnungsperioden without a statement, as on the contract page */
-export async function missingByContract() {
-	// ponytail: every contract and statement in one list; under 50 apartments that stays far below the limit
-	const [{ type, change }, { contracts }, { statements }] = await Promise.all([
+export async function missingByContract(listed?: Awaited<ReturnType<typeof listContracts>>['contracts']) {
+	// ponytail: every contract and statement in one list; under 50 apartments that stays far below the limit; the
+	// Übersicht hands in the contracts it listed (#506: one query less for its open Überträge)
+	const [{ type, change }, contracts, { statements }] = await Promise.all([
 		periodSetting(),
-		listContracts({ limit: 1000 }),
+		listed ?? listContracts({ limit: 1000 }).then((list) => list.contracts),
 		listStatements({ limit: 1000 })
 	]);
 	return Object.fromEntries(

@@ -20,6 +20,7 @@
 			"balance": "-40.00",
 			"status": "draft",
 			"oldAddress": false,
+			"openCarry": false,
 			"paymentDeadline": "2026-02-14",
 			"paidDate": null,
 			"pdfGeneratedAt": null,

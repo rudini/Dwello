@@ -37,6 +37,8 @@
 	"final": false,
 	"status": "draft",
 	"oldAddress": false,
+	"openCarry": false,
+	"carrySettledOn": null,
 	"paymentDeadline": "2025-02-14",
 	"paidDate": null,
 	"paidAmount": "1045.00",

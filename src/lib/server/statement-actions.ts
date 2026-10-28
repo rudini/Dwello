@@ -74,6 +74,13 @@ export async function resetStatementPayment(fetch: Fetch, id: string): Promise<R
 	return { status: response.status, message: await refusalOf(response, m.statements_reset_payment_failed()) };
 }
 
+/** #506: an open Übertrag settled by hand; null when done, otherwise what to tell the user */
+export async function settleCarryOver(fetch: Fetch, id: string): Promise<Refusal | null> {
+	const response = await fetch(`${API}/${id}/carry-settled`, { method: 'POST' });
+	if (response.ok) return null;
+	return { status: response.status, message: await refusalOf(response, m.statements_carry_settle_failed()) };
+}
+
 /** The statement replaced by a berichtigte Abrechnung to come (#120); null when done, otherwise what to tell the user */
 export async function replaceStatement(fetch: Fetch, id: string, paidAmount?: string): Promise<Refusal | null> {
 	// «Bereits bezahlt» of a sent or overdue statement, in francs (#448)

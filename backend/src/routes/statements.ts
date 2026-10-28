@@ -17,6 +17,7 @@ import {
 	calculateStatement,
 	generateStatement,
 	resetPayment,
+	settleCarryOver,
 	replaceStatement,
 	correctStatement,
 	recalculateStatement
@@ -313,6 +314,20 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			} catch (error) {
 				set.status = !(error instanceof CodedError) ? 500 : error.code === 'STATEMENT_NOT_FOUND' ? 404 : 400;
 				return errorBody(error, 'Failed to reset the payment');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
+	)
+
+	// #506: an open Übertrag settled by hand
+	.post(
+		'/:id/carry-settled',
+		async ({ params, set }) => {
+			try {
+				return await settleCarryOver(params.id);
+			} catch (error) {
+				set.status = !(error instanceof CodedError) ? 500 : error.code === 'STATEMENT_NOT_FOUND' ? 404 : 400;
+				return errorBody(error, 'Failed to settle the Übertrag');
 			}
 		},
 		{ params: t.Object({ id: t.String() }) }

@@ -158,6 +158,16 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	}
 	await seed.sendStatement('Kai', 2024);
 	await seed.replaceStatement('Kai', 2023, true);
+	// #506: a Saldo of 3.00 carried over, then the contract ends in that period: no statement counts it, it is open
+	await seed.building('Lindenweg', 'Winterthur');
+	await seed.apartment('Lindenweg', 'L1', 'vacant');
+	await seed.tenant('Lea');
+	await seed.contract('Lea', 'L1', { startDate: '2023-01-01', baseRent: '1200.00' });
+	await seed.managementFee('Lea', false);
+	await seed.invoiceOn('Lindenweg', 'Hauswart', '3.00', '2023-06-30');
+	await seed.statement('Lea', 'Lindenweg', 2023);
+	await seed.sendStatement('Lea', 2023);
+	await seed.contractEnd('Lea', '2023-12-31');
 	// January to May 2026 without a statement of Seeblick (a shorter period of 2025 overlaps its statements, #199): an
 	// invoice without Leistungszeitraum in it and one shortly after it
 	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2026-01-31');
@@ -275,6 +285,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		loweredStatement: seed.idOf('Abrechnung Olga 2025'),
 		carriedStatement: seed.idOf('Abrechnung Jana 2023'),
 		carryStatement: seed.idOf('Abrechnung Jana 2024'),
+		openCarryStatement: seed.idOf('Abrechnung Lea 2023'),
 		offsetStatement: seed.idOf('Berichtigte Abrechnung Kai 2023'),
 		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
 		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),

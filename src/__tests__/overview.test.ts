@@ -37,6 +37,27 @@ const input = (
 });
 
 describe('Aufgaben der Übersicht', () => {
+	// #506 (Fachreview 506-1 V-5): an Übertrag no statement counts any more, a Nachzahlung and a Rückerstattung
+	it('nennt jeden offenen Übertrag mit dem, was der Liegenschaftsverwalter tun soll, und führt zur Abrechnung', () => {
+		const tasks = overviewTasks(
+			input({
+				openCarryOvers: [
+					{ id: 's1', statementNumber: 'NK-2024-1', tenantName: 'Anna Keller', balance: '3.00' },
+					{ id: 's2', statementNumber: 'NK-2024-2', tenantName: 'Ben Meier', balance: '-4.95' }
+				]
+			})
+		);
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'open-carry-s1',
+				title: 'Übertrag ausgleichen',
+				text: 'Der Übertrag aus NK-2024-1 von Anna Keller ist noch offen: Nachzahlung CHF 3.00. Keine Abrechnung verrechnet ihn mehr. Fordern Sie den Betrag beim Mieter ein oder verzichten Sie darauf, und markieren Sie den Übertrag dann auf der Abrechnung als ausgeglichen.',
+				href: '/statements/s1'
+			})
+		);
+		expect(tasks.find((task) => task.id === 'open-carry-s2')?.text).toContain('Rückerstattung CHF 4.95');
+	});
+
 	// #178: a former tenant's uploads from before the last Vertragsende, to look at and delete; the end-day
 	// sentence (#459, Fachreview V-1)
 	it('nennt für jeden ehemaligen Mieter die Dokumente von vor dem Vertragsende', () => {

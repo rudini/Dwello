@@ -45,5 +45,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ### #506 Übertrag that reaches no statement
 - [x] `@wip` scenarios in `statement-minimum-balance.feature` (C: send dialog of a draft whose Übertrag changed; B: task on the Übersicht and «als ausgeglichen markieren»), seen red at the missing behaviour
 - [x] Decided by recommendation (product owner 2026-10-28: decide by my recommendations): C stays in the send dialog (the overview text of outdated drafts is pinned by a scenario and stays); B «settled by hand» is a date on the statement (`carry_settled_on`, migration) set from the statement page after a confirmation
-- [ ] `fach-reviewer` on the scenarios and the rule (step 1)
-- [ ] Tests and code, slice review, persona, `daten-pruefer`, PR merged
+- [x] `fach-reviewer` round 1: `docs/reviews/506-fachreview-1.md`; V-1 to V-3 (Major) and V-4 to V-7, V-9 fixed before green, decided by recommendation and recorded in #506; V-8 (Minor) not fixed: counting such drafts on the Übersicht would cost a query per draft (fitness P2)
+- [x] pg tests (`statement-carry-over.pg.test.ts`), DOM and unit tests, seen red (those written after the code by taking it out)
+- [x] Code: migration `0038_carry_settled_on.sql`, `carry-over.ts`, `statement.service.ts`, `statement-invoices.service.ts`, `contract-tasks.service.ts`, route `POST /statements/:id/carry-settled`; frontend `PaymentPanel`, `CarrySettleDialog`, send dialog, Übersicht; texts in four languages; glossary; contracts; a11y screen `statement-open-carry-detail`
+- [ ] Slice review, persona, `daten-pruefer`
+- [ ] PR merged

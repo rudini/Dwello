@@ -9,7 +9,7 @@ import { db } from '../db/connection';
 import { invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
 import { CodedError } from './coded-error';
 import { getInvoicesForStatement } from './invoice.service';
-import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
+import { agreedStock, carriedOver, getStatement, listStatements, recalculation } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { olderThanFiveYears, swissToday } from './today';
 import { counting } from './counting-statements';
@@ -108,7 +108,10 @@ const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte 
  * Null without the statement
  */
 export async function statementChanges(statementId: string) {
-	return changesOf(await getStatement(statementId), direct);
+	const statement = await getStatement(statementId);
+	const changes = await changesOf(statement, direct);
+	// #506 C, only for the one draft: the lists would pay a query per draft
+	return changes && { ...changes, carryOverChanged: statement!.status === 'draft' && (await carryOverChanged(statement!)) };
 }
 
 async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
@@ -146,8 +149,11 @@ export async function declineCorrection(statementId: string) {
 	return (await getStatement(statementId))!;
 }
 
+// #506 C: the Übertrag a draft counts is no longer the one it would count now (Fachreview 448-3 V-23)
+const carryOverChanged = async (draft: StatementWithDetails) => ((await carriedOver(draft))?.id ?? null) !== draft.carriedFromId;
+
 /** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
-export const draftOutdated = (changes: Awaited<ReturnType<typeof statementChanges>>) =>
+export const draftOutdated = (changes: Awaited<ReturnType<typeof changesOf>>) =>
 	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged);
 
 /** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
