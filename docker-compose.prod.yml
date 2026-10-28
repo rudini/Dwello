@@ -11,7 +11,7 @@ services:
   secrets:
     image: alpine:3.20
     container_name: dwello-secrets
-    command: ["sh", "/init-secrets.sh", "/run/dwello", "/pgdata"]
+    command: ["sh", "/init-secrets.sh", "/run/dwello", "/pgdata", "/backups"]
     environment:
       - JWT_SECRET=${JWT_SECRET:-}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
@@ -19,6 +19,7 @@ services:
       - ./docker/init-secrets.sh:/init-secrets.sh:ro
       - dwello_secrets:/run/dwello
       - postgres_data:/pgdata:ro
+      - ./backups:/backups
 
   # Only the frontend publishes a port: backend, database and KI stay on dwello-network, since Docker's published ports
   # bypass the host firewall and the web app is the one place that checks who may sign in (#719, #753, #747)
@@ -90,9 +91,12 @@ services:
         && bun scripts/migrate.ts && exec bun run src/index.ts
     volumes:
       - dwello_secrets:/run/dwello:ro
+      # the Sicherung (#718): daily, encrypted with the Wiederherstellungscode; copy the folder to another device
+      - ./backups:/backups
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - BACKUP_DIR=/backups
       # The KI (#580): the landlord sets it under «Einstellungen» › «KI»; any LLM_* set in .env takes precedence and
       # locks that page. LLM_LOCAL_URL only says where the local KI runs
       - LLM_LOCAL_URL=http://ollama:11434/v1
@@ -124,6 +128,32 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # ============================================
+  # Wiederherstellung (#718): only on request, docs/installation.md «Wiederherstellung»
+  # docker compose -f docker-compose.prod.yml run --rm restore /backups/<Datei>
+  # ============================================
+  restore:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    profiles: ["restore"]
+    user: root
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        export DATABASE_URL=postgresql://dwello:$$(cat /run/dwello/db_password)@postgres:5432/dwello SECRETS_DIR=/run/dwello
+        && exec bun scripts/restore.ts "$$@"
+      - restore
+    volumes:
+      - dwello_secrets:/run/dwello
+      - ./backups:/backups:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dwello-network
 
   # ============================================
   # PostgreSQL Database

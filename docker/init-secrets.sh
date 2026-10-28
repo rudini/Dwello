@@ -26,3 +26,7 @@ fi
 
 # stored secrets such as the KI's API key (#580) are encrypted with it; it belongs in the backup
 if [ ! -s "$dir/encryption_key" ]; then keep encryption_key "$(random)"; fi
+
+# The folder of the Sicherung (#718), next to docker-compose.prod.yml: the backend writes it as the image's user bun (1000);
+# only root may hand it over, so outside the container (the tests) the folder stays the caller's
+if [ -n "${3:-}" ]; then mkdir -p "$3" && { chown 1000:1000 "$3" 2>/dev/null || true; } && chmod 755 "$3"; fi

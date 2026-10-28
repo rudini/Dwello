@@ -25,6 +25,8 @@ import { localAccountRoutes, passwordSignInRoutes, setupRoutes } from './routes/
 import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
+import { backupState } from './services/backup.service';
+import { DATABASE_URL } from './db/connection';
 
 restoreElysiaFormats();
 
@@ -79,12 +81,12 @@ export const app = new Elysia()
 		const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 		if (Object.entries(params ?? {}).some(([name, id]) => /id$/i.test(name) && !uuid.test(id ?? ''))) throw new NotFoundError();
 	})
-	// Health check endpoint
-	.get('/health', () => ({
-		status: 'ok',
-		timestamp: new Date().toISOString(),
-		service: 'dwello-backend'
-	}))
+	// Health check endpoint; unhealthy while no Sicherung succeeded for more than a day (#718, O1)
+	.get('/health', async ({ set }) => {
+		const state = await backupState(DATABASE_URL);
+		if (state.backup === 'stale') set.status = 503;
+		return { status: state.backup === 'stale' ? 'backup_stale' : 'ok', timestamp: new Date().toISOString(), service: 'dwello-backend', ...state };
+	})
 	// Who receives invoice data for the KI categorisation: the privacy notice is public, so this is too
 	.get('/api/v1/invoices/llm-recipient', async () => ({
 		recipient: await kiRecipient(),

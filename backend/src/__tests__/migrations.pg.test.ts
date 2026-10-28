@@ -103,6 +103,21 @@ describe('Migrationen anwenden', () => {
 		expect(await query(name, `SELECT name FROM schema_migrations WHERE name = '9999_broken.sql'`)).toEqual([]);
 	});
 
+	// #718: vor einer Migration die Sicherung; scheitert sie, läuft keine Migration
+	it('ruft vor einer Migration die Sicherung auf, nicht aber, wenn nichts zu migrieren ist', async () => {
+		const name = await withoutDescriptions();
+		const calls: string[][] = [];
+		await migrate(`${server}/${name}`, migrations, async (pending) => void calls.push(pending));
+		await migrate(`${server}/${name}`, migrations, async (pending) => void calls.push(pending));
+		expect(calls).toEqual([['0021_category_descriptions.sql']]);
+	});
+
+	it('wendet keine Migration an, wenn die Sicherung davor scheitert', async () => {
+		const name = await withoutDescriptions();
+		await expect(migrate(`${server}/${name}`, migrations, async () => { throw new Error('Sicherung fehlgeschlagen'); })).rejects.toThrow('Sicherung fehlgeschlagen');
+		expect(await query(name, `SELECT name FROM schema_migrations WHERE name = '0021_category_descriptions.sql'`)).toEqual([]);
+	});
+
 	it('ergänzt die Beschreibungen vordefinierter Kategorien um das, was nicht dazugehört', async () => {
 		const name = await withoutDescriptions();
 

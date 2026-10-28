@@ -507,6 +507,28 @@ The KI the landlord chooses under «Einstellungen» › «KI». Without a row, o
 the variables apply (`backend/src/config/llm.ts`). Every change is also an `audit_log` entry `ki_setting_changed`.
 Migration `0034_ki_settings.sql`.
 
+### backup_codes, backup_runs (Sicherung, #718)
+
+```sql
+-- backup_codes: one row per Wiederherstellungscode, never the code itself
+id           UUID PRIMARY KEY
+public_key   TEXT NOT NULL      -- X25519 public key derived from the code (base64); a Sicherung is encrypted to it
+salt         TEXT NOT NULL      -- salt of the derivation (base64)
+confirmed_at TIMESTAMPTZ        -- the landlord typed the code again; Sicherungen use the newest confirmed row
+created_at   TIMESTAMPTZ NOT NULL
+
+-- backup_runs: one row per run
+id           UUID PRIMARY KEY
+started_at   TIMESTAMPTZ NOT NULL
+finished_at  TIMESTAMPTZ
+file         TEXT               -- the file in BACKUP_DIR, when it succeeded
+error        TEXT               -- why it failed
+```
+
+`backend/src/services/backup.service.ts` makes the Sicherung (a `pg_dump` and the keys, encrypted) daily, at start when
+the last one is older than a day, and before a migration; `/health` reports it stale after a day without one. Migration
+`0038_backups.sql`.
+
 ---
 
 ## Seed data (`0002_stammdaten.sql`)
@@ -578,7 +600,7 @@ Commands (in `backend/`):
 | `bun run db:reset` | recreates the local dev database from the migrations (refuses non-local hosts) |
 | `bun run db:demo` | loads the demo data; running it twice adds nothing |
 
-The Docker image also applies missing migrations on start; the test databases `dwello_test` and
+The Docker image also applies missing migrations on start, after a Sicherung once a Wiederherstellungscode is confirmed (#718); the test databases `dwello_test` and
 `dwello_e2e` are recreated from the migrations before each run.
 
 A schema change goes into a new numbered SQL file written by hand; also update `src/db/schema.ts` and this

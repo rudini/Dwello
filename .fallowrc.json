@@ -4,7 +4,8 @@
 		"docs/design/tools/persona-kit.mjs",
 		"tools/open-work/check-issues.mjs",
 		"tools/arch-baseline/0*.ts",
-		"tools/fitness/fitness.ts"
+		"tools/fitness/fitness.ts",
+		"tools/fitness/restore-check.ts"
 	],
 	"ignorePatterns": [
 		"src/lib/paraglide/**"
