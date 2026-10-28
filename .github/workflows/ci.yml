@@ -73,8 +73,9 @@ jobs:
             echo "backend=false" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
           fi
           git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
-          # The API contracts are checked against the backend (api-contracts.pg.test.ts)
-          echo "backend=$(grep -qE '^(backend|tests/contracts)/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # The API contracts are checked against the backend (api-contracts.pg.test.ts); the upgrade check and the queries
+          # per route run with the backend steps, so a change to them or to their ratchet runs them too (#922)
+          echo "backend=$(grep -qE '^(backend|tests/contracts)/|^tools/fitness/(upgrade-check\.sh|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
