@@ -309,8 +309,11 @@ function prSize(base: string) {
 	return { files: prod.length, modules: new Set(prod.map((c) => c.module)).size, layers: new Set(prod.map((c) => c.layer)).size };
 }
 
-/** Ä1 counts a field in frontend and BFF files only: the backend is its source, `backend/src/api` the contract (#910) */
-const handDeclared = (row: Record<string, string>) => +row.FE + +row.BFF;
+/**
+ * Ä1 counts a field in frontend and BFF files only, `src/lib/types.ts` (layer Shared/Contracts) among them: the backend,
+ * `backend/src/api` included, is its source (#910)
+ */
+const handDeclared = (row: Record<string, string>) => +row.FE + +row.BFF + +row.Shared;
 
 /** Fields of schema.ts that the base does not have, with their spread from the measurement in `out`. */
 export function newFields(spread: Record<string, string>[], baseSchema: string) {

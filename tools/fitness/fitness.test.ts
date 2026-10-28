@@ -244,14 +244,14 @@ describe('addedTechnical', () => {
 });
 
 describe('newFields', () => {
-	// #910: only frontend and BFF files count; the backend is the field's source
+	// #910: only frontend and BFF files count, src/lib/types.ts (layer Shared/Contracts) among them; the backend is the source
 	it('lists the fields of the spread that the base schema does not have, counted in frontend and BFF', () => {
 		const baseSchema = "export const tenants = pgTable('tenants', {\n\tfirstName: varchar('first_name'),\n});\n";
 		const spread = [
 			{ table: 'tenants', field: 'firstName', prod_files: '18', FE: '4', BFF: '2', Backend: '12', Shared: '0' },
 			{ table: 'tenants', field: 'mailCountry', prod_files: '9', FE: '3', BFF: '2', Backend: '3', Shared: '1' }
 		];
-		expect(newFields(spread, baseSchema)).toEqual([{ field: 'tenants.mailCountry', files: 5 }]);
+		expect(newFields(spread, baseSchema)).toEqual([{ field: 'tenants.mailCountry', files: 6 }]);
 	});
 });
 
