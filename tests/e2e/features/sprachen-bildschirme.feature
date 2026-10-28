@@ -245,6 +245,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | access-keys            | default             |
       | access-keys            | empty               |
       | access-keys            | key-created         |
+      | access-keys            | key-create-refused  |
       | access-keys            | key-revoke-dialog   |
       | audit-log              | default             |
       | audit-log              | empty               |

@@ -23,6 +23,12 @@ Funktionalität: Zugangsschlüssel für KI-Programme
     Wenn der Liegenschaftsverwalter im Protokoll nachsieht
     Dann nennt das Protokoll mit heutigem Datum "Zugangsschlüssel «Claude Desktop Büro» erstellt"
 
+  # Code-Review 817-1 C-2: die Ablehnung des Backends steht im Dialog
+  Szenario: Zugangsschlüssel ohne Namen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Zugangsschlüssel für KI-Programme"
+    Wenn der Liegenschaftsverwalter einen Zugangsschlüssel ohne Namen erstellen will
+    Dann sagt der Dialog zum Erstellen "Geben Sie dem Zugangsschlüssel einen Namen."
+
   Szenario: Ein KI-Programm liest die Gebäude
     Angenommen das Gebäude "Lindenhof" in "Bern" existiert
     Und der Liegenschaftsverwalter hat den Zugangsschlüssel "Claude Desktop Büro" erstellt
@@ -37,7 +43,8 @@ Funktionalität: Zugangsschlüssel für KI-Programme
     Wenn der Liegenschaftsverwalter den Zugangsschlüssel "Claude Desktop Büro" widerrufen will
     Dann warnt Dwello vor dem Widerrufen "Ein KI-Programm mit dem Zugangsschlüssel «Claude Desktop Büro» erhält danach keine Daten mehr. Das lässt sich nicht rückgängig machen."
     Wenn der Liegenschaftsverwalter das Widerrufen bestätigt
-    Dann nennt die Liste der Zugangsschlüssel "Claude Desktop Büro" nicht mehr
+    Dann bestätigt Dwello das Widerrufen mit "Zugangsschlüssel «Claude Desktop Büro» widerrufen"
+    Und nennt die Liste der Zugangsschlüssel "Claude Desktop Büro" nicht mehr
     Und erhält ein KI-Programm mit dem Zugangsschlüssel "Claude Desktop Büro" keine Daten mehr
     Wenn der Liegenschaftsverwalter im Protokoll nachsieht
     Dann nennt das Protokoll mit heutigem Datum "Zugangsschlüssel «Claude Desktop Büro» widerrufen"

@@ -17,11 +17,17 @@ type Tool = {
 	/** The GET paths of the API, the answers of several together under their keys */
 	paths: (args: Args) => Record<string, string> | string;
 	page: (args: Args) => string;
+	/** Fields of the answer that do not go out: a file the API holds (no files over the MCP, #817) */
+	omit?: string[];
 };
 
 const APP = process.env.CORS_ORIGIN || 'http://localhost:3000'; // the web app, where the landlord opens and confirms
 const VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 const IRREVERSIBLE = 'Versenden, Anonymisieren und Löschen gehen nur in Dwello, über den Link.';
+// a list comes in pages, as the API gives it; «total» in the answer says how many there are (code review 817-1 C-1)
+const PAGES = 'Eine Liste kommt seitenweise: «limit» Einträge ab «offset», «total» nennt alle.';
+const PAGE = { limit: 'Wie viele Einträge diese Seite hat', offset: 'Ab welchem Eintrag, 0 für den ersten' };
+const PAGED = ['limit', 'offset'];
 
 const query = (args: Args, names: string[]) => {
 	const set = names.filter((name) => args[name]).map((name): [string, string] => [name, args[name]!]);
@@ -40,51 +46,55 @@ const TOOLS: Record<string, Tool> = {
 		page: () => '/dashboard'
 	},
 	buildings: {
-		description: `Gebäude: die Liste aller Gebäude, oder mit «id» ein Gebäude mit seinen Angaben. ${IRREVERSIBLE}`,
-		properties: { id: 'ID eines Gebäudes', search: 'Suchbegriff im Namen oder in der Adresse' },
-		paths: (args) => one('buildings', args, ['search']),
+		description: `Gebäude: die Liste der Gebäude, oder mit «id» ein Gebäude mit seinen Angaben. ${PAGES} ${IRREVERSIBLE}`,
+		properties: { id: 'ID eines Gebäudes', search: 'Suchbegriff im Namen oder in der Adresse', ...PAGE },
+		paths: (args) => one('buildings', args, ['search', ...PAGED]),
 		page: pageOf('buildings')
 	},
 	apartments: {
-		description: `Wohnungen: alle Wohnungen oder die eines Gebäudes («buildingId»), oder mit «id» eine Wohnung. ${IRREVERSIBLE}`,
-		properties: { id: 'ID einer Wohnung', buildingId: 'ID des Gebäudes' },
-		paths: (args) => one('apartments', args, ['buildingId']),
+		description: `Wohnungen: die Liste der Wohnungen, auch die eines Gebäudes («buildingId»), oder mit «id» eine Wohnung. ${PAGES} ${IRREVERSIBLE}`,
+		properties: { id: 'ID einer Wohnung', buildingId: 'ID des Gebäudes', ...PAGE },
+		paths: (args) => one('apartments', args, ['buildingId', ...PAGED]),
 		page: pageOf('apartments')
 	},
 	tenants: {
-		description: `Mieter: die Liste der Mieter, oder mit «id» ein Mieter mit Kontaktdaten. Dokumente öffnen Sie in Dwello über den Link. ${IRREVERSIBLE}`,
-		properties: { id: 'ID eines Mieters', search: 'Suchbegriff im Namen' },
-		paths: (args) => one('tenants', args, ['search']),
+		description: `Mieter: die Liste der Mieter, oder mit «id» ein Mieter mit Kontaktdaten. Dokumente öffnen Sie in Dwello über den Link. ${PAGES} ${IRREVERSIBLE}`,
+		properties: { id: 'ID eines Mieters', search: 'Suchbegriff im Namen', ...PAGE },
+		paths: (args) => one('tenants', args, ['search', ...PAGED]),
 		page: pageOf('tenants')
 	},
 	contracts: {
-		description: `Mietverträge: die Liste der Mietverträge, oder mit «id» ein Mietvertrag mit Miete, Akonto und Pauschale. ${IRREVERSIBLE}`,
-		properties: { id: 'ID eines Mietvertrags', buildingId: 'ID des Gebäudes', tenantId: 'ID des Mieters' },
-		paths: (args) => one('contracts', args, ['buildingId', 'tenantId']),
-		page: pageOf('contracts')
+		description: `Mietverträge: die Liste der Mietverträge, oder mit «id» ein Mietvertrag mit Nettomiete, Akonto und Nebenkostenpauschale. ${PAGES} ${IRREVERSIBLE}`,
+		properties: { id: 'ID eines Mietvertrags', buildingId: 'ID des Gebäudes', tenantId: 'ID des Mieters', ...PAGE },
+		paths: (args) => one('contracts', args, ['buildingId', 'tenantId', ...PAGED]),
+		page: pageOf('contracts'),
+		// the API still holds a contract PDF and notes the UI never writes (Fachprüfung 817-2 R-11)
+		omit: ['contractPdf', 'notes']
 	},
 	invoices: {
-		description: `Rechnungen nach Gebäude und Abrechnungsperiode, mit Kategorie und Umlagefähigkeit, oder mit «id» eine Rechnung. Belege öffnen Sie in Dwello über den Link. ${IRREVERSIBLE}`,
+		description: `Rechnungen nach Gebäude und Abrechnungsperiode, mit Kategorie und Umlagefähigkeit, oder mit «id» eine Rechnung. Belege öffnen Sie in Dwello über den Link. ${PAGES} ${IRREVERSIBLE}`,
 		properties: {
 			id: 'ID einer Rechnung',
 			buildingId: 'ID des Gebäudes',
 			periodStart: 'Beginn der Abrechnungsperiode, JJJJ-MM-TT',
-			periodEnd: 'Ende der Abrechnungsperiode, JJJJ-MM-TT'
+			periodEnd: 'Ende der Abrechnungsperiode, JJJJ-MM-TT',
+			...PAGE
 		},
-		paths: (args) => one('invoices', args, ['buildingId', 'periodStart', 'periodEnd']),
+		paths: (args) => one('invoices', args, ['buildingId', 'periodStart', 'periodEnd', ...PAGED]),
 		page: pageOf('invoices')
 	},
 	statements: {
-		description: `Nebenkostenabrechnungen mit Saldo, Status und Zahlungsfrist, oder mit «id» eine Abrechnung mit ihren Mahnungen und deren Mahnstufe. PDFs öffnen und Abrechnungen versenden Sie in Dwello über den Link. ${IRREVERSIBLE}`,
+		description: `Nebenkostenabrechnungen mit Saldo, Status und Zahlungsfrist, oder mit «id» eine Abrechnung mit ihrem Versand und ihren Mahnungen mit Mahnstufe («documents»). PDFs öffnen und Abrechnungen versenden Sie in Dwello über den Link. ${PAGES} ${IRREVERSIBLE}`,
 		properties: {
 			id: 'ID einer Abrechnung',
 			buildingId: 'ID des Gebäudes',
-			status: 'Status: draft, sent, paid oder overdue'
+			status: 'Status: draft (Entwurf), sent (Versendet), paid (Bezahlt), settled (Erledigt), overdue (Überfällig) oder replaced (Ersetzt)',
+			...PAGE
 		},
 		paths: (args) =>
 			args.id
-				? { statement: one('statements', args), reminders: `/api/v1/documents${query({ statementId: args.id }, ['statementId'])}` }
-				: one('statements', args, ['buildingId', 'status']),
+				? { statement: one('statements', args), documents: `/api/v1/documents${query({ statementId: args.id }, ['statementId'])}` }
+				: one('statements', args, ['buildingId', 'status', ...PAGED]),
 		page: pageOf('statements')
 	}
 };
@@ -115,7 +125,8 @@ async function callTool(keyId: string, tool: Tool, args: Args) {
 	const bodies = await Promise.all(answers.map((answer) => answer.json()));
 	const refused = answers.findIndex((answer) => !answer.ok);
 	if (refused >= 0) return { content: [{ type: 'text', text: JSON.stringify(bodies[refused]) }], isError: true };
-	const data = typeof paths === 'string' ? bodies[0] : Object.fromEntries(entries.map(([key], i) => [key, bodies[i]]));
+	const answer = typeof paths === 'string' ? bodies[0] : Object.fromEntries(entries.map(([key], i) => [key, bodies[i]]));
+	const data = tool.omit ? JSON.parse(JSON.stringify(answer), (key, value) => (tool.omit!.includes(key) ? undefined : value)) : answer;
 	const result = { data, link: `${APP}${tool.page(args)}` };
 	return { content: [{ type: 'text', text: JSON.stringify(result) }], structuredContent: result, isError: false };
 }
@@ -129,7 +140,7 @@ export const mcpRoutes = new Elysia().post('/mcp', async ({ headers, body, set }
 			// read in the AI program, not in Dwello: it says where to get a new key (Fachprüfung 817-1 V-3)
 			return refusal(
 				key,
-				'Dieser Zugangsschlüssel ist widerrufen oder abgelaufen. Erstellen Sie in Dwello unter «Einstellungen» › «Zugangsschlüssel für KI-Programme» einen neuen.'
+				'Dieser Zugangsschlüssel ist ungültig, widerrufen oder abgelaufen. Erstellen Sie in Dwello unter «Einstellungen» › «Zugangsschlüssel für KI-Programme» einen neuen.'
 			);
 		}
 		const { id, method, params = {} } = (body ?? {}) as Call;

@@ -1,8 +1,10 @@
 import { question } from '../screenplay/actor';
 import { Count, Text, Visibility } from '../screenplay/questions';
 import { MCP_ANSWER } from '../tasks/access-keys';
+import { successToast } from '../targets/form';
 import {
 	accessKeyRows,
+	createAccessKeyRefusal,
 	newAccessKey,
 	newAccessKeyHint,
 	newAccessKeySecret,
@@ -25,3 +27,5 @@ export const mcpText = question('the text of the MCP answer', (actor) =>
 	(actor.recall<McpAnswer>(MCP_ANSWER).body?.result?.content ?? []).map((part) => part.text).join('\n')
 );
 export const newAccessKeyWarning = Text.of(newAccessKeySecret);
+export const createRefusal = Text.of(createAccessKeyRefusal);
+export const doneMessage = Text.of(successToast);

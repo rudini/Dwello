@@ -18,3 +18,6 @@ export const revokeAccessKeyButton = (name: string) =>
 export const revokeAccessKeyMessage = target('Bestätigung Widerrufen', (page) => page.getByTestId('access-key-revoke-message'));
 export const confirmRevokeAccessKey = target('Widerrufen bestätigen', (page) => page.getByTestId('access-key-revoke-confirm'));
 export const newAccessKeySecret = target('Warnung zum neuen Zugangsschlüssel', (page) => page.getByTestId('access-key-new-secret'));
+export const createAccessKeyRefusal = target('Ablehnung im Dialog zum Erstellen', (page) =>
+	page.getByRole('dialog').getByTestId('form-error')
+);

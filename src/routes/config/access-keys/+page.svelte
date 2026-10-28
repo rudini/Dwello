@@ -7,6 +7,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import AccessKeyRow from './AccessKeyRow.svelte';
+	import CopyButton from './CopyButton.svelte';
 	import NewAccessKey from './NewAccessKey.svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -16,6 +17,8 @@
 	let creating = $state(false);
 	let name = $state('');
 	let toRevoke = $state<Key | null>(null);
+	// the dialog closes before it reports success: the toast names the key kept here (code review 817-1 C-3)
+	let revokedName = $state('');
 	const revoking = $derived(toRevoke ?? { id: '', name: '', expired: false });
 	// #817: the new key comes once, from the create action; closing it leaves only its name in the list
 	let closed = $state<string | null>(null);
@@ -44,9 +47,16 @@
 		{/snippet}
 	</PageHeader>
 
-	<p class="break-all text-ink" data-testid="access-key-address">
-		{m.ai_keys_address({ url: data.mcpUrl })}
-	</p>
+	<div class="flex flex-col items-start gap-4">
+		<p class="break-all text-ink" data-testid="access-key-address">
+			{m.ai_keys_address({ url: data.mcpUrl })}
+		</p>
+		<CopyButton
+			text={data.mcpUrl}
+			label={m.ai_keys_copy_address()}
+			testid="access-key-address-copy"
+		/>
+	</div>
 	<p class="text-ink">
 		{m.ai_keys_before()}
 		<a href="/privacy#ai-keys" class="text-accent underline underline-offset-4"
@@ -55,7 +65,7 @@
 	</p>
 
 	{#if created}
-		<NewAccessKey key={created.key} onclose={() => (closed = created.key)} />
+		<NewAccessKey key={created.key} url={data.mcpUrl} onclose={() => (closed = created.key)} />
 	{/if}
 
 	{#if data.keys.length === 0}
@@ -68,7 +78,7 @@
 	{:else}
 		<ul class="flex flex-col gap-4" data-testid="access-key-list">
 			{#each data.keys as key (key.id)}
-				<AccessKeyRow {key} onrevoke={() => (toRevoke = key)} />
+				<AccessKeyRow {key} onrevoke={() => ((toRevoke = key), (revokedName = key.name))} />
 			{/each}
 		</ul>
 	{/if}
@@ -106,7 +116,7 @@
 	confirmTestid="access-key-revoke-confirm"
 	error={form && 'revokeError' in form ? form.revokeError : undefined}
 	fields={{ id: revoking.id }}
-	onsuccess={() => addToast('success', m.audit_ai_key_revoked({ name: revoking.name }))}
+	onsuccess={() => addToast('success', m.audit_ai_key_revoked({ name: revokedName }))}
 >
 	<p data-testid="access-key-revoke-message">
 		{revoking.expired

@@ -13,6 +13,7 @@
 		"register-unreachable": "«Neues Gebäude» with an address search while the register cannot be reached (#479).",
 		"delete-dialog": "The delete confirmation dialog open.",
 		"key-created": "«Zugangsschlüssel für KI-Programme» right after creating a key: the key shown once with its hint and warning (#817).",
+		"key-create-refused": "«Zugangsschlüssel für KI-Programme» with the create dialog after submitting it without a name: the backend's refusal in the dialog (#817).",
 		"key-revoke-dialog": "«Zugangsschlüssel für KI-Programme» with the dialog that confirms revoking a key open (#817).",
 		"advance-delete-dialog": "Contract page of a contract with a later Akonto: the dialog confirming its deletion, with the Akonto that applies again (#464).",
 		"advance-delete-refused": "The delete dialog of a later Akonto refused because a draft statement counts it: the refusal in the dialog (#464).",
@@ -800,6 +801,7 @@
 				"default",
 				"empty",
 				"key-created",
+				"key-create-refused",
 				"key-revoke-dialog"
 			]
 		},

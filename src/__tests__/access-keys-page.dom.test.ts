@@ -32,6 +32,22 @@ describe('Zugangsschlüssel für KI-Programme', () => {
 		expect(byTestId('access-key-new')).toBeNull();
 	});
 
+	// personas Helga P-1, Marco P-1: a long key is not marked by hand; Helga P-3, Weber P-3: both go into the program
+	it('kopiert den neuen Schlüssel mit einem Knopf und nennt dabei die Adresse für das KI-Programm', async () => {
+		const writeText = vi.fn(async () => {});
+		Object.assign(navigator, { clipboard: { writeText } });
+		show(AccessKeysPage, {
+			data: { keys: [key], mcpUrl: 'https://dwello.example/mcp' },
+			form: { created: { name: key.name, key: 'dwello_geheim' } }
+		} as never);
+
+		expect(byTestId('access-key-new')?.textContent).toContain('Adresse für das KI-Programm: https://dwello.example/mcp');
+		click('access-key-new-copy');
+		click('access-key-address-copy');
+
+		expect(writeText.mock.calls).toEqual([['dwello_geheim'], ['https://dwello.example/mcp']]);
+	});
+
 	it('nennt bei jedem Schlüssel Erstellt, zuletzt benutzt und den Ablauf', () => {
 		show(AccessKeysPage, {
 			data: {
@@ -54,7 +70,8 @@ describe('Zugangsschlüssel für KI-Programme', () => {
 			form: null
 		} as never);
 
-		expect(byTestId('access-key-row')?.textContent).toContain('Abgelaufen am 27.10.2026');
+		// Fachprüfung 817-2 V-10: the day it was last valid, not the day it ran out
+		expect(byTestId('access-key-row')?.textContent).toContain('Abgelaufen, galt bis 27.10.2026');
 		click('access-key-revoke-button');
 		expect(byTestId('access-key-revoke-message')?.textContent).toBe(
 			'Der abgelaufene Zugangsschlüssel «Claude Desktop Büro» verschwindet aus der Liste. Das lässt sich nicht rückgängig machen.'

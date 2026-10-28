@@ -62,11 +62,14 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ### #817 MCP server with access keys («Zugangsschlüssel für KI-Programme»)
 - [x] «Done means» written in #817 from the decisions (product owner 2026-10-28)
 - [x] `@wip` scenarios: `zugangsschluessel.feature` (open, create once, an AI program reads the buildings, revoke); `privacy.feature` (new section, Protokoll text)
-- [ ] `fach-reviewer` round 1 (privacy text nDSG, terms, four languages)
-- [ ] Steps, pg tests (keys, check on `/mcp`, expiry, same refusals), DOM tests; seen red
-- [ ] Code: migration and service for access keys, routes, key check on `/mcp`, MCP tools, settings page, privacy texts, Protokoll entries; four languages
-- [ ] Docs: ADR, S1 in `docs/architecture/utility-tree.md`, glossary row, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `docs/data-model.md`
-- [ ] a11y and language screens of the new page
-- [ ] Slice review, persona, closing review
-- [ ] Archive the session, workflow review
+- [x] `fach-reviewer` round 1: `docs/reviews/817-fachreview-1.md` (R-1 to R-3, V-1 Major; decided by recommendation and recorded in #817: texts only, no confirmation step; glossary terms in #942)
+- [x] Steps, pg tests (keys, check on `/mcp`, expiry, same refusals), DOM, mapping and proxy tests; seen red
+- [x] Code: migration `0039_access_keys.sql`, `access-key.service.ts`, routes `access-keys.ts` and `mcp.ts`, web app pass-through `src/routes/mcp/+server.ts`, settings page `config/access-keys`, privacy section, Protokoll texts; four languages (it «disattivare», `revoca` is the Disdetta's)
+- [x] Docs: ADR 0007, S1 in `docs/architecture/utility-tree.md`, glossary row, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `docs/data-model.md`, `docs/installation.md`
+- [x] a11y and language screen `access-keys` (`default`, `empty`, `key-created`, `key-create-refused`, `key-revoke-dialog`)
+- [x] Workflow note: two scenarios not `@wip` pin old legal sentences and the «Stand» date; the additions are sentences of their own, the date waits for the product owner
+- [x] Slice review round 1: `docs/reviews/817-review-1.md`; `fach-reviewer` round 2: `docs/reviews/817-fachreview-2.md`; personas `helga-817.md`, `marco-817.md`, `weber-817.md`
+- [x] Fixes: lists page with `limit`/`offset` (C-1, V-6), action tests, scenario and a11y state for the refused name (C-2), revoke toast names the key (C-3, personas; scenario red first), copy buttons and the address in the new key's panel (Helga P-1, Marco P-1, Helga P-3, Weber P-3), no contract PDF or notes (C-7, R-11), documents of a statement (C-5, V-9), wording V-7, V-8, V-10, V-11, R-8, R-10, name length C-8, MCP scenarios through the web app (C-4), C-9, C-10, terms link (Weber P-4); tests red first
+- [ ] Re-reviews: code-reviewer, fach-reviewer V-6, personas Helga and Marco
+- [ ] Closing review, archive the session, workflow review
 - [ ] PR merged

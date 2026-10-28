@@ -1949,7 +1949,7 @@
 	"audit_deleted": "Der Eintrag ist gelöscht.",
 	"audit_delete_failed": "Der Eintrag konnte nicht gelöscht werden. Versuchen Sie es erneut.",
 	"audit_privacy": "Damit Sie später nachvollziehen können, was sich geändert hat, hält Dwello im Protokoll unter «Einstellungen» mit Datum und Uhrzeit fest: jede Anmeldung mit dem gewählten Anbieter oder mit Passwort (ohne Namen und E-Mail-Adresse), Änderungen der Verwaltungspauschale und der Umlagefähigkeit von Kategorien, Rechnungen, die nicht mehr oder wieder umlagefähig sind (mit Rechnungssteller, Beschreibung, Datum, Betrag und Gebäude), sowie zurückgesetzte Zahlungen (mit Abrechnungsnummer und Zahlungsdatum) und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer), ausserdem jeden Wechsel der KI mit Anbieter und Land, jedes Erstellen, Widerrufen und Ablaufen eines Zugangsschlüssels für KI-Programme mit seinem Namen und jeden Abruf eines KI-Programms mit der Art der abgefragten Daten (etwa «Mieter») und dem Namen des Zugangsschlüssels, ohne Inhalte. Die Einträge bleiben, auch wenn Sie die Rechnung löschen, bis Sie sie im Protokoll löschen. Das gilt auch für die Einträge eines widerrufenen Zugangsschlüssels. Das Protokoll des Servers (siehe «Anmeldung») ist davon getrennt.",
-	"audit_privacy_demo": "In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Namen und E-Mail-Adresse, und können Einträge löschen.",
+	"audit_privacy_demo": "In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Namen und E-Mail-Adresse, und können Einträge löschen. Auch die Zugangsschlüssel für KI-Programme der anderen sehen alle Besucher mit ihrem Namen, und alle können sie widerrufen. Geben Sie einem Schlüssel deshalb keinen Personennamen.",
 	"audit_not_deleted": "Eintrag nicht gelöscht",
 	"legal_as_of": "Stand: {date}",
 	"privacy_stored_country": "Der Server steht in folgendem Land: {country}.",
@@ -2123,7 +2123,7 @@
 	"ai_keys_last_used": "Zuletzt benutzt am {date}",
 	"ai_keys_never_used": "Noch nie benutzt",
 	"ai_keys_expires": "Läuft ab am {date}",
-	"ai_keys_expired": "Abgelaufen am {date}",
+	"ai_keys_expired": "Abgelaufen, galt bis {date}",
 	"ai_keys_revoke": "Widerrufen",
 	"ai_keys_revoke_title": "Zugangsschlüssel widerrufen",
 	"ai_keys_revoke_text": "Ein KI-Programm mit dem Zugangsschlüssel «{name}» erhält danach keine Daten mehr. Das lässt sich nicht rückgängig machen.",
@@ -2132,7 +2132,7 @@
 	"audit_ai_key_revoked": "Zugangsschlüssel «{name}» widerrufen",
 	"audit_ai_key_expired": "Zugangsschlüssel «{name}» abgelaufen",
 	"audit_ai_key_query": "KI-Programm mit Zugangsschlüssel «{name}»: {kind} abgefragt",
-	"backend_access_key_invalid": "Dieser Zugangsschlüssel ist widerrufen oder abgelaufen. Erstellen Sie in Dwello unter «Einstellungen» › «Zugangsschlüssel für KI-Programme» einen neuen.",
+	"backend_access_key_invalid": "Dieser Zugangsschlüssel ist ungültig, widerrufen oder abgelaufen. Erstellen Sie in Dwello unter «Einstellungen» › «Zugangsschlüssel für KI-Programme» einen neuen.",
 	"backend_access_key_expired": "Dieser Zugangsschlüssel ist widerrufen oder abgelaufen. Erstellen Sie in Dwello unter «Einstellungen» › «Zugangsschlüssel für KI-Programme» einen neuen.",
 	"audit_ai_key_kind_overview": "Übersicht",
 	"audit_ai_key_kind_buildings": "Gebäude",
@@ -2146,5 +2146,10 @@
 	"ai_keys_revoke_label": "Zugangsschlüssel «{name}» widerrufen",
 	"ai_keys_not_created": "Der Zugangsschlüssel wurde nicht erstellt. Versuchen Sie es erneut.",
 	"ai_keys_not_revoked": "Der Zugangsschlüssel wurde nicht widerrufen. Versuchen Sie es erneut.",
-	"ai_keys_address": "Adresse für das KI-Programm: {url}"
+	"ai_keys_address": "Adresse für das KI-Programm: {url}",
+	"backend_access_key_name_too_long": "Der Name darf höchstens 100 Zeichen haben.",
+	"ai_keys_copy": "Schlüssel kopieren",
+	"ai_keys_copy_address": "Adresse kopieren",
+	"ai_keys_copied": "Kopiert.",
+	"ai_keys_copy_failed": "Kopieren hat nicht geklappt. Markieren Sie den Text und kopieren Sie ihn von Hand."
 }

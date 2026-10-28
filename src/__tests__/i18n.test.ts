@@ -109,7 +109,7 @@ describe('Sprachdateien', () => {
 		['fr', '«répercutable», nicht «imputable»', /imputab/i],
 		['fr', '«frais d’administration», nicht «frais de gestion»', /frais de gestion/i],
 		['it', '«spese amministrative», nicht «spese di gestione»', /spes[ae] di gestione/i],
-		['it', '«annullare la disdetta», nicht «revocare»', /\brevoca/i],
+		['it', '«annullare la disdetta», nicht «revocare»', /\brevoc/i], // also «revochi» (Fachprüfung 817-2 R-8)
 		['fr', '«degré de confiance» für die Konfidenz', /fiabilité de l’IA/i],
 		['it', '«grado di certezza» für die Konfidenz', /affidabilità dell’IA/i],
 		// the categories renamed in migration 0027 (#345)

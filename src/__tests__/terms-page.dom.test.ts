@@ -97,8 +97,8 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 		);
 	});
 
-	// Persona Helga 458 P-1: each section to pass on is one link away
-	it('verlinkt die vier Abschnitte der Datenschutzerklärung, die der Vermieter weitergibt', () => {
+	// Persona Helga 458 P-1: each section to pass on is one link away; persona Weber 817 P-4: the one on AI programs too
+	it('verlinkt die Abschnitte der Datenschutzerklärung, die der Vermieter weitergibt', () => {
 		show(TermsPage, { data: { operator: null } } as never);
 
 		const links = [...(section('Verantwortung für Abrechnungen')?.querySelectorAll('a') ?? [])].map((link) => [
@@ -109,7 +109,8 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 			['Verantwortlich', '/privacy#controller'],
 			['Welche Daten Dwello speichert', '/privacy#stored'],
 			['Aufbewahrung', '/privacy#retention'],
-			['Weitergabe an Dritte', '/privacy#third']
+			['Weitergabe an Dritte', '/privacy#third'],
+			['KI-Programme mit Zugangsschlüssel', '/privacy#ai-keys']
 		]);
 	});
 

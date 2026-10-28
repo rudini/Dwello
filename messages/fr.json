@@ -1949,7 +1949,7 @@
 	"audit_deleted": "L’entrée est supprimée.",
 	"audit_delete_failed": "L’entrée n’a pas pu être supprimée. Veuillez réessayer.",
 	"audit_privacy": "Pour que vous puissiez retracer plus tard ce qui a changé, Dwello consigne dans le journal sous « Paramètres », avec date et heure : chaque connexion avec le fournisseur choisi ou avec mot de passe (sans nom ni adresse e-mail), les modifications des frais d’administration et du caractère répercutable des catégories, les factures qui ne sont plus ou de nouveau répercutables (avec émetteur, description, date, montant et immeuble), ainsi que les paiements retirés (avec numéro du décompte et date de paiement) et les décomptes remplacés par un décompte rectificatif (avec leur numéro), ainsi que chaque changement d’IA avec le fournisseur et le pays, chaque création, révocation et expiration d’une clé d’accès pour programmes d’IA avec son nom et chaque consultation par un programme d’IA avec le type de données consultées (par exemple « Locataires ») et le nom de la clé d’accès, sans leur contenu. Les entrées restent, même si vous supprimez la facture, jusqu’à ce que vous les supprimiez dans le journal. Cela vaut aussi pour les entrées d’une clé d’accès révoquée. Le journal du serveur (voir « Connexion ») en est distinct.",
-	"audit_privacy_demo": "Dans la démo, tous les visiteurs voient le journal avec les connexions des autres, sans nom ni adresse e-mail, et peuvent en supprimer des entrées.",
+	"audit_privacy_demo": "Dans la démo, tous les visiteurs voient le journal avec les connexions des autres, sans nom ni adresse e-mail, et peuvent en supprimer des entrées. Tous les visiteurs voient aussi les clés d’accès pour programmes d’IA des autres avec leur nom, et tous peuvent les révoquer. Ne donnez donc pas de nom de personne à une clé.",
 	"audit_not_deleted": "Entrée non supprimée",
 	"legal_as_of": "Version du {date}",
 	"privacy_stored_country": "Le serveur se trouve dans le pays suivant : {country}.",
@@ -2123,7 +2123,7 @@
 	"ai_keys_last_used": "Dernière utilisation le {date}",
 	"ai_keys_never_used": "Jamais utilisée",
 	"ai_keys_expires": "Expire le {date}",
-	"ai_keys_expired": "Expirée le {date}",
+	"ai_keys_expired": "Expirée, valable jusqu’au {date}",
 	"ai_keys_revoke": "Révoquer",
 	"ai_keys_revoke_title": "Révoquer la clé d’accès",
 	"ai_keys_revoke_text": "Un programme d’IA utilisant la clé d’accès « {name} » ne recevra ensuite plus aucune donnée. Cette action est irréversible.",
@@ -2132,7 +2132,7 @@
 	"audit_ai_key_revoked": "Clé d’accès « {name} » révoquée",
 	"audit_ai_key_expired": "Clé d’accès « {name} » expirée",
 	"audit_ai_key_query": "Consultation par un programme d’IA avec la clé d’accès « {name} » : {kind}",
-	"backend_access_key_invalid": "Cette clé d’accès a été révoquée ou a expiré. Créez-en une nouvelle dans Dwello sous « Paramètres » › « Clés d’accès pour programmes d’IA ».",
+	"backend_access_key_invalid": "Cette clé d’accès n’est pas valable, a été révoquée ou a expiré. Créez-en une nouvelle dans Dwello sous « Paramètres » › « Clés d’accès pour programmes d’IA ».",
 	"backend_access_key_expired": "Cette clé d’accès a été révoquée ou a expiré. Créez-en une nouvelle dans Dwello sous « Paramètres » › « Clés d’accès pour programmes d’IA ».",
 	"audit_ai_key_kind_overview": "Vue d’ensemble",
 	"audit_ai_key_kind_buildings": "Immeubles",
@@ -2146,5 +2146,10 @@
 	"ai_keys_revoke_label": "Révoquer la clé d’accès « {name} »",
 	"ai_keys_not_created": "La clé d’accès n’a pas été créée. Veuillez réessayer.",
 	"ai_keys_not_revoked": "La clé d’accès n’a pas été révoquée. Veuillez réessayer.",
-	"ai_keys_address": "Adresse pour le programme d’IA : {url}"
+	"ai_keys_address": "Adresse pour le programme d’IA : {url}",
+	"backend_access_key_name_too_long": "Le nom peut comporter au plus 100 caractères.",
+	"ai_keys_copy": "Copier la clé",
+	"ai_keys_copy_address": "Copier l’adresse",
+	"ai_keys_copied": "Copié.",
+	"ai_keys_copy_failed": "La copie n’a pas fonctionné. Sélectionnez le texte et copiez-le à la main."
 }

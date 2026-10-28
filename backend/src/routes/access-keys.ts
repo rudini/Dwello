@@ -17,10 +17,14 @@ export const accessKeyRoutes = new Elysia({ prefix: '/api/v1/access-keys' })
 				set.status = 422;
 				return refusal('ACCESS_KEY_NAME_MISSING', 'A name is required');
 			}
+			if (name.length > 100) {
+				set.status = 422;
+				return refusal('ACCESS_KEY_NAME_TOO_LONG', 'The name has more than 100 characters');
+			}
 			set.status = 201;
 			return createAccessKey(name);
 		},
-		{ body: t.Object({ name: t.String({ maxLength: 100 }) }) }
+		{ body: t.Object({ name: t.String() }) }
 	)
 
 	.delete('/:id', async ({ params, set }) => {

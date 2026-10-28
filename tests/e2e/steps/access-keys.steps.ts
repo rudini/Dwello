@@ -4,6 +4,8 @@ import { test } from '../fixtures/test';
 import {
 	accessKeyCount,
 	accessKeyRow,
+	createRefusal,
+	doneMessage,
 	mcpStatus,
 	mcpText,
 	newAccessKeyNote,
@@ -45,6 +47,10 @@ When('der Liegenschaftsverwalter die Zugangsschlüssel für KI-Programme öffnet
 
 When('der Liegenschaftsverwalter den Zugangsschlüssel {string} erstellt', async ({ verwalter, seed }, title: string) => {
 	await verwalter.attemptsTo(createAccessKey(seed.unique(title)));
+});
+
+When('der Liegenschaftsverwalter einen Zugangsschlüssel ohne Namen erstellen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(createAccessKey(''));
 });
 
 When('der Liegenschaftsverwalter den neuen Zugangsschlüssel schliesst', async ({ verwalter }) => {
@@ -103,6 +109,14 @@ Then('nennt die Liste der Zugangsschlüssel {string} heute zuletzt benutzt', asy
 Then('nennt die Liste der Zugangsschlüssel {string} nicht mehr', async ({ verwalter, names }, title: string) => {
 	await verwalter.sees(pageTitle).toBe('Zugangsschlüssel für KI-Programme - Dwello');
 	await verwalter.sees(accessKeyCount(names.get(title)!)).toBe(0);
+});
+
+Then('sagt der Dialog zum Erstellen {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(createRefusal).toContain(text); // below the dialog's «Das hat nicht geklappt»
+});
+
+Then('bestätigt Dwello das Widerrufen mit {string}', async ({ verwalter, names }, text: string) => {
+	await verwalter.sees(doneMessage).toBe(named(names, text));
 });
 
 Then('warnt Dwello vor dem Widerrufen {string}', async ({ verwalter, names }, text: string) => {

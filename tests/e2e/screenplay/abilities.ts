@@ -54,7 +54,7 @@ export class CallTheApi {
 export class CallTheMcp {
 	constructor(
 		private readonly request: APIRequestContext,
-		private readonly url = BACKEND_API.replace(/\/api\/v1$/, '/mcp')
+		private readonly url = 'http://localhost:3100/mcp' // through the web app, as an AI program reaches it (ADR 0007)
 	) {}
 
 	/** One JSON-RPC call; answers the HTTP status and the parsed body (null when there is none) */

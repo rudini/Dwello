@@ -4,18 +4,21 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { app } from '../app';
 import { db } from '../db/connection';
-import { accessKeys } from '../db/schema';
+import { accessKeys, documents, rentalContracts, utilityStatements } from '../db/schema';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { callApi, sendJson, signToken } from './helpers/auth';
+import { idOf } from './helpers/records';
+import { createRental } from './helpers/rental';
 
 type Entry = { id: string; occurredAt: string; action: string; details: Record<string, unknown> };
 type Key = { id: string; name: string; key?: string; createdAt: string; lastUsedAt: string | null; expiresOn: string; expired: boolean };
 
 const token = crypto.randomUUID().slice(0, 8);
 const buildingIds: string[] = [];
+const rentals: Awaited<ReturnType<typeof createRental>>[] = [];
 const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 const zurichDay = (iso: string) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 /** The calendar day `days` after a day, as YYYY-MM-DD */
@@ -50,6 +53,12 @@ const dataOf = (result: { content: { text: string }[] }) => JSON.parse(result.co
 afterAll(async () => {
 	for (const key of await listKeys()) if (key.name.includes(token)) await callApi(`/api/v1/access-keys/${key.id}`, { method: 'DELETE' });
 	for (const id of buildingIds) await deleteBuilding(id);
+	for (const rental of rentals) {
+		const ids = db.select({ id: utilityStatements.id }).from(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
+		await db.delete(documents).where(inArray(documents.statementId, ids));
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
+		await rental.remove();
+	}
 	for (const entry of ((await (await callApi('/api/v1/audit-log')).json()) as { data: Entry[] }).data)
 		if (JSON.stringify(entry.details).includes(token)) await callApi(`/api/v1/audit-log/${entry.id}`, { method: 'DELETE' });
 });
@@ -88,6 +97,13 @@ describe('Zugangsschlüssel erstellen', () => {
 		const response = await sendJson('POST', '/api/v1/access-keys', { name: '  ' });
 		expect(response.status).toBe(422);
 		expect(((await response.json()) as { code: string }).code).toBe('ACCESS_KEY_NAME_MISSING');
+	});
+
+	// code review 817-1 C-8: the field's limit, said as such
+	it('lehnt einen Namen über 100 Zeichen mit einem eigenen Code ab', async () => {
+		const response = await sendJson('POST', '/api/v1/access-keys', { name: 'x'.repeat(101) });
+		expect(response.status).toBe(422);
+		expect(((await response.json()) as { code: string }).code).toBe('ACCESS_KEY_NAME_TOO_LONG');
 	});
 
 	it('hält das Erstellen im Protokoll fest', async () => {
@@ -226,6 +242,56 @@ describe('MCP-Server', () => {
 		const apiInvalid = (await (await callApi('/api/v1/invoices?periodStart=31.12.2026&periodEnd=2026-12-31')).json()) as { code: string };
 		expect(invalid.isError).toBe(true);
 		expect(dataOf(invalid).code).toBe(apiInvalid.code);
+	});
+
+	// code review 817-1 C-1, Fachprüfung 817-2 V-6: a list comes in pages, and the AI program turns them
+	it('blättert in einer Liste mit «limit» und «offset» weiter', async () => {
+		const { key } = await createKey('Blättern');
+		for (const name of ['A', 'B', 'C']) buildingIds.push((await createBuilding({ name: `Blatt ${name} ${token}`, address: 'Weg 1', city: 'Bern', postalCode: '3000', canton: 'BE' })).id);
+
+		const names = async (args: object) =>
+			(dataOf(await callTool(key, 'buildings', { search: `Blatt`, ...args })).data.buildings as { name: string }[])
+				.map((building) => building.name)
+				.filter((name) => name.includes(token));
+		const first = await names({ limit: '2' });
+		const rest = await names({ limit: '2', offset: '2' });
+		expect(first).toHaveLength(2);
+		expect([...first, ...rest].sort()).toEqual(['A', 'B', 'C'].map((name) => `Blatt ${name} ${token}`));
+		expect(dataOf(await callTool(key, 'buildings', { search: 'Blatt', limit: '2' })).data.total).toBeGreaterThanOrEqual(3);
+	});
+
+	// Fachprüfung 817-2 R-11, code review 817-1 C-7: no file goes out, also not a contract PDF the API holds
+	it('gibt bei Mietverträgen kein Vertrags-PDF und keine Notizen weiter', async () => {
+		const { key } = await createKey('Vertrag');
+		const rental = await createRental(token, { startDate: '2025-01-01', monthlyAdvancePayment: '100' });
+		rentals.push(rental);
+		await db.update(rentalContracts).set({ contractPdf: 'JVBERi0xLjQK', notes: 'Notiz' }).where(eq(rentalContracts.id, rental.contract));
+
+		const detail = dataOf(await callTool(key, 'contracts', { id: rental.contract }));
+		const list = dataOf(await callTool(key, 'contracts', { tenantId: rental.tenant }));
+		expect(detail.data.id).toBe(rental.contract);
+		expect(JSON.stringify([detail, list])).not.toContain('JVBERi0xLjQK');
+		expect(JSON.stringify([detail, list])).not.toContain('Notiz');
+	});
+
+	// code review 817-1 C-5, Fachprüfung 817-2 V-9: the statement with its documents, the sending and the reminders
+	it('liest eine Abrechnung mit ihren Dokumenten wie die API', async () => {
+		const { key } = await createKey('Abrechnung');
+		const rental = await createRental(`${token}-a`, { startDate: '2024-01-01', monthlyAdvancePayment: '0', managementFeeAgreed: false });
+		rentals.push(rental);
+		const id = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31'
+			})
+		);
+
+		const { data, link } = dataOf(await callTool(key, 'statements', { id }));
+		expect(data.statement).toEqual(await (await callApi(`/api/v1/statements/${id}`)).json());
+		expect(data.documents).toEqual(await (await callApi(`/api/v1/documents?statementId=${id}`)).json());
+		expect(link).toEndWith(`/statements/${id}`);
 	});
 
 	it('kennt kein Werkzeug zum Ändern oder Löschen', async () => {

@@ -1949,7 +1949,7 @@
 	"audit_deleted": "The entry is deleted.",
 	"audit_delete_failed": "The entry could not be deleted. Please try again.",
 	"audit_privacy": "So that you can later trace what changed, Dwello records in the log under «Settings», with date and time: each sign-in with the chosen provider or with a password (without name or email address), changes to the management fee and to the allocability of categories, invoices that are no longer or again allocable (with invoice issuer, description, date, amount and building), reset payments (with statement number and payment date), and statements replaced by a corrected statement (with their number), and each change of the AI with its provider and country, each creation, revocation and expiry of an access key for AI programs with its name, and each query by an AI program with the kind of data queried (such as «Tenants») and the name of the access key, without contents. The entries stay, even if you delete the invoice, until you delete them in the log. This also holds for the entries of a revoked access key. The server log (see «Sign-in») is separate from it.",
-	"audit_privacy_demo": "In the demo, all visitors see the log with the others’ sign-ins, without name or email address, and can delete entries.",
+	"audit_privacy_demo": "In the demo, all visitors see the log with the others’ sign-ins, without name or email address, and can delete entries. All visitors also see the others’ access keys for AI programs with their names, and anyone can revoke them. So do not give a key a person’s name.",
 	"audit_not_deleted": "Entry not deleted",
 	"legal_as_of": "Last updated: {date}",
 	"privacy_stored_country": "The server is located in the following country: {country}.",
@@ -2123,7 +2123,7 @@
 	"ai_keys_last_used": "Last used on {date}",
 	"ai_keys_never_used": "Never used",
 	"ai_keys_expires": "Expires on {date}",
-	"ai_keys_expired": "Expired on {date}",
+	"ai_keys_expired": "Expired, valid until {date}",
 	"ai_keys_revoke": "Revoke",
 	"ai_keys_revoke_title": "Revoke access key",
 	"ai_keys_revoke_text": "An AI program with the access key «{name}» will then receive no more data. This cannot be undone.",
@@ -2132,7 +2132,7 @@
 	"audit_ai_key_revoked": "Access key «{name}» revoked",
 	"audit_ai_key_expired": "Access key «{name}» expired",
 	"audit_ai_key_query": "Query by an AI program with access key «{name}»: {kind}",
-	"backend_access_key_invalid": "This access key has been revoked or has expired. Create a new one in Dwello under «Settings» › «Access keys for AI programs».",
+	"backend_access_key_invalid": "This access key is invalid, has been revoked or has expired. Create a new one in Dwello under «Settings» › «Access keys for AI programs».",
 	"backend_access_key_expired": "This access key has been revoked or has expired. Create a new one in Dwello under «Settings» › «Access keys for AI programs».",
 	"audit_ai_key_kind_overview": "Overview",
 	"audit_ai_key_kind_buildings": "Buildings",
@@ -2146,5 +2146,10 @@
 	"ai_keys_revoke_label": "Revoke access key «{name}»",
 	"ai_keys_not_created": "The access key was not created. Please try again.",
 	"ai_keys_not_revoked": "The access key was not revoked. Please try again.",
-	"ai_keys_address": "Address for the AI program: {url}"
+	"ai_keys_address": "Address for the AI program: {url}",
+	"backend_access_key_name_too_long": "The name can be at most 100 characters long.",
+	"ai_keys_copy": "Copy key",
+	"ai_keys_copy_address": "Copy address",
+	"ai_keys_copied": "Copied.",
+	"ai_keys_copy_failed": "Copying did not work. Select the text and copy it by hand."
 }
