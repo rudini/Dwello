@@ -421,3 +421,77 @@ describe('Bemerkung', () => {
 		expect(row.pdfBlob).toBeNull();
 	});
 });
+
+// #506 C: a draft created before the Übertrag it would count now is not current (Fachreview 448-3 V-23)
+describe('Übertrag eines Entwurfs', () => {
+	const changes = async (id: string) =>
+		(await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { carryOverChanged: boolean };
+
+	it('meldet einem Entwurf, dass er jetzt einen anderen Übertrag verrechnen würde', async () => {
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2024);
+		await db.update(utilityStatements).set({ balance: '3.00' }).where(eq(utilityStatements.id, previous));
+		const draft = await generate(rental, 2025);
+		expect((await changes(draft)).carryOverChanged).toBe(false);
+
+		await send(previous);
+
+		expect((await changes(draft)).carryOverChanged).toBe(true);
+	});
+});
+
+// #506 B: an Übertrag no statement counts any more is a task, settled by hand
+describe('Offener Übertrag', () => {
+	type Open = { id: string; statementNumber: string; tenantName: string; balance: string };
+	const openCarryOvers = async () =>
+		((await (await callApi('/api/v1/dashboard')).json()) as { contractTasks: { openCarryOvers: Open[] } }).contractTasks.openCarryOvers;
+	const settle = (id: string) => sendJson('POST', `/api/v1/statements/${id}/carry-settled`, {});
+
+	it('nennt einen Übertrag, wenn der Mietvertrag in seiner Periode endet', async () => {
+		const rental = await rentalOf();
+		const previous = await sentWith(rental, 2024, '3.00');
+		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-12-31' });
+
+		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous.id, balance: '3.00' }));
+	});
+
+	it('nennt einen Übertrag, den eine spätere versendete Abrechnung nicht verrechnet', async () => {
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2023);
+		await db.update(utilityStatements).set({ balance: '-3.00' }).where(eq(utilityStatements.id, previous));
+		const later = await generate(rental, 2024);
+		await send(previous);
+		await send(later);
+
+		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous, balance: '-3.00' }));
+	});
+
+	it('nennt einen Übertrag nicht, den die nächste Abrechnung noch verrechnen kann', async () => {
+		const rental = await rentalOf();
+		const previous = await sentWith(rental, 2024, '3.00');
+
+		expect((await openCarryOvers()).map((open) => open.id)).not.toContain(previous.id);
+	});
+
+	it('gleicht einen Übertrag von Hand aus: keine Aufgabe mehr, und keine spätere Abrechnung verrechnet ihn', async () => {
+		const rental = await rentalOf();
+		const previous = await sentWith(rental, 2024, '3.00');
+
+		const response = await settle(previous.id);
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ carrySettledOn: today() });
+		expect((await openCarryOvers()).map((open) => open.id)).not.toContain(previous.id);
+		expect((await read(await generate(rental, 2025))).carriedFrom).toBeNull();
+	});
+
+	it('lehnt den Ausgleich einer Abrechnung ohne Übertrag ab', async () => {
+		const rental = await rentalOf();
+		const statement = await sentWith(rental, 2024, '30.00');
+
+		const response = await settle(statement.id);
+
+		expect(response.status).toBe(400);
+		expect(((await response.json()) as { code: string }).code).toBe('STATEMENT_NO_CARRY_OVER');
+	});
+});
