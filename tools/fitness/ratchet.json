@@ -396,12 +396,6 @@
 				"scenario": "Ä1"
 			},
 			{
-				"values": "billedUntil|endDate|startDate",
-				"files": 2,
-				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",
-				"scenario": "Ä1"
-			},
-			{
 				"values": "noHeatingMonths|wholePeriod",
 				"files": 2,
 				"reason": "Value list declared by hand in several layers before phase 2 (baseline §4, m4-literal-sets.csv)",

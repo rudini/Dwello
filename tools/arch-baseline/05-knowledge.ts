@@ -9,7 +9,7 @@
 // Out: m4-*.csv
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ANCHORED_RE, OUT, ROOT, STATUS, STATUS_CMP, classify, csv, entityFiles, excludedBecause, git, tablesOf } from './lib';
+import { ANCHORED_RE, LITERAL_UNION, OUT, ROOT, STATUS, STATUS_CMP, classify, csv, entityFiles, excludedBecause, git, tablesOf } from './lib';
 
 const CODE_LAYERS = new Set(['FE', 'BFF', 'Backend', 'DB', 'Shared/Contracts']);
 const all = git(['ls-files', '-z']).split('\0').filter((p) => p && !excludedBecause(p));
@@ -85,7 +85,7 @@ const addSet = (vals: string[], p: string) => {
 };
 for (const [p, t] of text) {
 	if (p.endsWith('.json')) continue;
-	for (const m of t.matchAll(/(?:'[\w-]+'\s*\|\s*)+'[\w-]+'/g)) addSet([...m[0].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
+	for (const m of t.matchAll(LITERAL_UNION)) addSet([...m[0].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
 	for (const m of t.matchAll(/t\.Union\(\s*\[((?:\s*t\.Literal\('[\w-]+'\)(?:\s*,)?)+)\s*\]/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
 	for (const m of t.matchAll(/pgEnum\(\s*'\w+',\s*\[([^\]]+)\]/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);
 	for (const m of t.matchAll(/\[((?:\s*'[\w-]+'\s*,){1,}\s*'[\w-]+'\s*,?\s*)\](?:\s*as\s+const)?/g)) addSet([...m[1].matchAll(/'([\w-]+)'/g)].map((x) => x[1]), p);

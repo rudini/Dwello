@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classify, entityFiles } from './lib';
+import { LITERAL_UNION, classify, entityFiles } from './lib';
 
 describe('classify', () => {
 	it('ordnet einen Endpunkt +server.ts unter src/routes einem BFF-Modul zu', () => {
@@ -35,5 +35,21 @@ describe('entityFiles', () => {
 				['key', ['settings.ts']]
 			])
 		);
+	});
+});
+
+describe('LITERAL_UNION', () => {
+	const unions = (text: string) => [...text.matchAll(LITERAL_UNION)].map((m) => m[0]);
+
+	it('findet eine Werteliste als Union von Literalen', () => {
+		expect(unions("type Status = 'draft' | 'sent' | 'paid';")).toEqual(["'draft' | 'sent' | 'paid'"]);
+	});
+
+	it('findet die Literale einer Union, die mit einem Typnamen beginnt', () => {
+		expect(unions("type Shown = StatementStatus | 'overdue' | 'replaced';")).toEqual(["'overdue' | 'replaced'"]);
+	});
+
+	it('überspringt die Schlüssel von Pick und Omit, weil sie Feldnamen und keine Werte sind', () => {
+		expect(unions("type A = Pick<ContractRow, 'id' | 'startDate'>; type B = Omit<Row, 'id' | 'name' | 'area'>;")).toEqual([]);
 	});
 });

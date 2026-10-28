@@ -128,6 +128,8 @@ export function median(values: number[]): number {
 export const STATUS = ['draft', 'sent', 'paid', 'replaced', 'overdue', 'settled', 'active', 'ended', 'future'];
 const statusAlt = STATUS.join('|');
 export const STATUS_CMP = new RegExp(`[!=]==\\s*['"\`](${statusAlt})['"\`]|['"\`](${statusAlt})['"\`]\\s*[!=]==`, 'g');
+/** A union of string literals: a value list ('draft' | 'sent'), not the keys of Pick or Omit (field names) */
+export const LITERAL_UNION = /(?<!\b(?:Pick|Omit)<[^<>,]+,[^<>]*)(?:'[\w-]+'\s*\|\s*)+'[\w-]+'/g;
 export const ANCHORED_RE = /\/\^[^/\n]+\$\/[a-z]*/g;
 
 /** Per field of one table the files that declare it, kept only where a file declares two of its fields or more: a
