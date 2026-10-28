@@ -27,6 +27,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob' |
 	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	openCarry: boolean; // #506: an Übertrag no statement counts or will; the landlord settles it by hand
+	carryChanged: boolean; // #506 C: a draft that would count another Übertrag now
 	// an overdue one: whether a Mahnung is to propose now; null for any other; only in the list (#788)
 	reminderDue?: boolean | null;
 	tenant: {

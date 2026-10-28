@@ -7,7 +7,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { contractCategories, documents, invoices, rentalContracts, utilityStatements } from '../db/schema';
+import { contractAdvancePayments, contractCategories, documents, invoices, rentalContracts, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -438,6 +438,21 @@ describe('Übertrag eines Entwurfs', () => {
 
 		expect((await changes(draft)).carryOverChanged).toBe(true);
 	});
+
+	// Fachreview 506-1 V-8, code review 506-1 C-1: such a draft is not «zu versenden» on the Übersicht either
+	it('zählt einen Entwurf, der jetzt einen anderen Übertrag verrechnen würde, nicht als zu versenden', async () => {
+		const toSend = async () => ((await (await callApi('/api/v1/dashboard')).json()) as { statements: { toSend: number } }).statements.toSend;
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2024);
+		await db.update(utilityStatements).set({ balance: '3.00' }).where(eq(utilityStatements.id, previous));
+		await generate(rental, 2025);
+		const before = await toSend();
+
+		await send(previous);
+
+		// the sent one is no draft any more, and the other is not current
+		expect(await toSend()).toBe(before - 2);
+	});
 });
 
 // #506 B: an Übertrag no statement counts any more is a task, settled by hand
@@ -520,6 +535,22 @@ describe('Offener Übertrag', () => {
 		await db.update(contractCategories).set({ agreed: false }).where(eq(contractCategories.contractId, rental.contract));
 
 		expect(await openCarryOvers()).toContainEqual(expect.objectContaining({ id: previous.id }));
+	});
+
+	// code review 506-1 C-2: a Pauschale with an Akonto above 0 after the period, or with agreed costs, is still billed
+	it.each([
+		['einem Akonto über 0', 'advance'],
+		['vereinbarten Nebenkosten', 'agreed']
+	])('nennt einen Übertrag bei einer Nebenkostenpauschale mit %s nicht', async (_what, kept) => {
+		const rental = await rentalOf();
+		const previous = await sentWith(rental, 2024, '3.00');
+		await db.update(rentalContracts).set({ flatRateUtilityCharge: '80.00' }).where(eq(rentalContracts.id, rental.contract));
+		if (kept === 'advance') {
+			await db.update(contractCategories).set({ agreed: false }).where(eq(contractCategories.contractId, rental.contract));
+			await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2025-01-01', amount: '100.00' });
+		}
+
+		expect((await openCarryOvers()).map((open) => open.id)).not.toContain(previous.id);
 	});
 
 	// Fachreview 506-1 V-2: a berichtigte Abrechnung counts an Übertrag settled by hand as paid

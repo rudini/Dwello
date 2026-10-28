@@ -136,6 +136,25 @@ describe('Zahlungsdatum und Ende der Abrechnungsperiode', () => {
 	});
 });
 
+// #506 (code review 506-1 C-4): einen offenen Übertrag von Hand ausgleichen
+describe('Übertrag als ausgeglichen markieren', () => {
+	it('lässt das Backend den Übertrag als ausgeglichen markieren', async () => {
+		const { calls, result } = runAction(actions.settleCarry, 's1');
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/carry-settled`, body: undefined }]);
+	});
+
+	it('meldet einen Fehler mit dem nächsten Schritt, wenn das Backend scheitert', async () => {
+		const { result } = runAction(actions.settleCarry, 's1', 500);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'Der Übertrag wurde nicht als ausgeglichen markiert. Versuchen Sie es noch einmal.' }
+		});
+	});
+});
+
 // #92: eine erfasste Zahlung zurücksetzen
 describe('Zahlung zurücksetzen', () => {
 	it('lässt das Backend die Zahlung zurücksetzen', async () => {

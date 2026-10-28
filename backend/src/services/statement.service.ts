@@ -38,7 +38,7 @@ import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
-import { carriable, countedBy, openCarry } from './carry-over';
+import { carriable, carryChanged, countedBy, openCarry } from './carry-over';
 import type { StatementWithDetails } from '../api/statement';
 
 export interface StatementFilters {
@@ -85,7 +85,7 @@ const reminderWaits = (
 ) =>
 	s.reminderToSend ||
 	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
-const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry };
+const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
 
 /**
  * Status filter; 'overdue' is computed as sent with a past payment deadline,
@@ -404,7 +404,7 @@ export async function calculateStatement(input: StatementInput) {
  * The Übertrag (#448): the latest earlier statement of the Mietvertrag with a Saldo carried over that no statement of
  * another period counts yet; not an open one (#506, Fachreview 506-1 V-1) or one settled by hand
  */
-export async function carriedOver({ contractId, periodStart, periodEnd }: Pick<StatementInput, 'contractId' | 'periodStart' | 'periodEnd'>) {
+async function carriedOver({ contractId, periodStart, periodEnd }: Pick<StatementInput, 'contractId' | 'periodStart' | 'periodEnd'>) {
 	const [carried] = await db
 		.select({ id: utilityStatements.id, balance: utilityStatements.balance })
 		.from(utilityStatements)
