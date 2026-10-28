@@ -22,6 +22,14 @@ function run(env: Record<string, string> = {}) {
 const read = (key: string) => readFileSync(join(dir, key), 'utf8');
 
 describe('Schlüssel der Installation', () => {
+	// #718: the folder of the Sicherung next to docker-compose.prod.yml, written by the backend's user bun (1000)
+	it('legt den Ordner der Sicherung an, lesbar für den Betreiber', () => {
+		dir = mkdtempSync(join(tmpdir(), 'dwello-secrets-'));
+		const result = Bun.spawnSync(['sh', SCRIPT, dir, join(dir, 'pgdata'), join(dir, 'backups')], { env: { PATH: process.env.PATH! } });
+		expect(result.exitCode).toBe(0);
+		expect(statSync(join(dir, 'backups')).mode & 0o777).toBe(0o755);
+	});
+
 	// the frontend and backend run as their own users (Dockerfile, backend/Dockerfile): they read the keys, only the
 	// script writes them; the volume is mounted into Dwello's containers only
 	it('erzeugt jeden Schlüssel lang und zufällig, änderbar nur vom Skript', () => {

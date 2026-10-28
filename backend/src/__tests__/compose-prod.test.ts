@@ -25,6 +25,14 @@ const mailKeys = [
 ].filter((key) => new RegExp(`^#? ?${key}=`, 'm').test(envExample));
 
 describe('Installation mit docker-compose.prod.yml', () => {
+	// #718, PR #940 (Copilot): `up -d --build` rebuilds the backend; the restore must run that same image, not an older one
+	it('lässt die Wiederherstellung mit dem Image des Backends laufen', () => {
+		const restoreService = compose.slice(compose.indexOf('\n  restore:'), compose.indexOf('\n  postgres:'));
+		const image = (service: string) => service.match(/\n {4}image: (\S+)/)?.[1];
+		expect(image(backendService)).toBeDefined();
+		expect(image(restoreService)).toBe(image(backendService));
+	});
+
 	it('kennt die Mail-Einstellungen aus .env.example', () => {
 		expect(mailKeys).toEqual(expect.arrayContaining(['MAIL_TRANSPORT', 'MAIL_FROM', 'SMTP_HOST', 'RESEND_API_KEY']));
 	});

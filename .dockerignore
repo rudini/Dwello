@@ -68,3 +68,6 @@ temp
 
 # Backend (handled separately)
 backend
+
+# the Sicherung (#718)
+backups

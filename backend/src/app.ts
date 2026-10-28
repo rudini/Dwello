@@ -25,6 +25,8 @@ import { localAccountRoutes, passwordSignInRoutes, setupRoutes } from './routes/
 import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
+import { backupState } from './services/backup.service';
+import { DATABASE_URL } from './db/connection';
 
 restoreElysiaFormats();
 
@@ -79,11 +81,13 @@ export const app = new Elysia()
 		const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 		if (Object.entries(params ?? {}).some(([name, id]) => /id$/i.test(name) && !uuid.test(id ?? ''))) throw new NotFoundError();
 	})
-	// Health check endpoint
-	.get('/health', () => ({
+	// Health check endpoint; it names the state of the Sicherung (#718, O1), but stays 200 when it is stale, since the
+	// frontend starts only with a healthy backend and shows the landlord the hint
+	.get('/health', async () => ({
 		status: 'ok',
 		timestamp: new Date().toISOString(),
-		service: 'dwello-backend'
+		service: 'dwello-backend',
+		...(await backupState(DATABASE_URL))
 	}))
 	// Who receives invoice data for the KI categorisation: the privacy notice is public, so this is too
 	.get('/api/v1/invoices/llm-recipient', async () => ({

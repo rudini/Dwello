@@ -11,8 +11,8 @@ import pg from 'pg';
 const RESET_HINT =
 	'Eine lokale Datenbank neu aufsetzen: bun run db:reset. Eine Installation nicht zurücksetzen (alle Daten gingen verloren), sondern mit der Version starten, mit der sie zuletzt lief.';
 
-/** Returns the files applied by this run, in order */
-export async function migrate(connectionString: string, directory: string) {
+/** Returns the files applied by this run, in order; before runs first when there is one to apply (the Sicherung, #718) */
+export async function migrate(connectionString: string, directory: string, before?: (pending: string[]) => Promise<void>) {
 	const client = new pg.Client({ connectionString });
 	await client.connect();
 	try {
@@ -35,6 +35,7 @@ export async function migrate(connectionString: string, directory: string) {
 		}
 
 		const pending = files.filter((file) => !done.has(file));
+		if (pending.length && before) await before(pending);
 		for (const file of pending) {
 			await client.query('BEGIN');
 			try {
