@@ -18,5 +18,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Slice review round 1: `docs/reviews/773-review-1.md`
 - [x] Persona Helga: `docs/design/personas/helga-773.md` (run 1 with a reading KI stand-in did not reach the state, not kept)
 - [x] Helga P-1 (Major, «Gelesen: 1 von 1» next to «nicht gelesen»): product owner decided 2026-10-28, counts only once all are read; DOM tests seen red
-- [ ] Closing review (`code-reviewer`)
+- [x] Closing review: `docs/reviews/773-review-2.md`
 - [ ] PR merged
