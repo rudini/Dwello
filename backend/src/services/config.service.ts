@@ -254,12 +254,12 @@ async function storePeriodChange(tx: Pick<typeof db, 'select' | 'insert'>, value
 // Not a setting of the form: getAllConfig leaves it out
 const PERIOD_CHANGE = 'accounting_period_changed';
 
-/** #512: the stored change of the setting «Abrechnungsperiode», null before the first */
-export async function periodChange(): Promise<PeriodChange> {
-	const [row] = await db.select().from(configuration).where(eq(configuration.key, PERIOD_CHANGE)).limit(1);
-	if (!row) return null;
-	const [on, from] = row.value.split(':');
-	return { on, from: from as NonNullable<PeriodChange>['from'] };
+/** #512: the setting «Abrechnungsperiode» and its stored change (null before the first), in one query */
+export async function periodSetting(): Promise<{ type: AccountingPeriodType; change: PeriodChange }> {
+	const rows = await db.select().from(configuration).where(inArray(configuration.key, ['accounting_period', PERIOD_CHANGE]));
+	const type = (rows.find((row) => row.key === 'accounting_period')?.value ?? CONFIG_KEYS.accounting_period.default) as AccountingPeriodType;
+	const [on, from] = (rows.find((row) => row.key === PERIOD_CHANGE)?.value ?? '').split(':');
+	return { type, change: on ? { on, from: from as AccountingPeriodType } : null };
 }
 
 async function upsert(tx: Pick<typeof db, 'insert'>, key: string, value: string) {
