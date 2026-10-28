@@ -82,6 +82,27 @@ describe('Migrationen anwenden', () => {
 		);
 	});
 
+	// U1 (#782): an update whose migration fails keeps the landlord's data as it was and says which file failed and why;
+	// pins behaviour the migration runner already has
+	it('lässt die Daten unverändert, wenn eine Migration scheitert, und nennt Datei und Ursache', async () => {
+		const name = await database();
+		await migrate(`${server}/${name}`, migrations);
+		await query(name, `INSERT INTO buildings (name, address, postal_code, city, canton) VALUES ('Ahornhof', 'Testweg 1', '8400', 'Winterthur', 'ZH')`);
+		const broken = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		try {
+			await cp(migrations, broken, { recursive: true });
+			await Bun.write(join(broken, '9999_broken.sql'), `DELETE FROM buildings;\nALTER TABLE buildings ADD COLUMN missing_default text NOT NULL;\nSELECT no_such_column FROM buildings;`);
+
+			await expect(migrate(`${server}/${name}`, broken)).rejects.toThrow(
+				'Migration 9999_broken.sql fehlgeschlagen: column "no_such_column" does not exist'
+			);
+		} finally {
+			await rm(broken, { recursive: true });
+		}
+		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Ahornhof' }]);
+		expect(await query(name, `SELECT name FROM schema_migrations WHERE name = '9999_broken.sql'`)).toEqual([]);
+	});
+
 	it('ergänzt die Beschreibungen vordefinierter Kategorien um das, was nicht dazugehört', async () => {
 		const name = await withoutDescriptions();
 

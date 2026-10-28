@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # U1 fitness function (docs/architecture/fitness-functions.md): an update keeps the landlord's data. Loads the demo
-# data with the previous release's backend, migrates with this checkout's backend and fails when a migration fails or
-# a table lost rows.
+# data with the previous release's backend, migrates with this checkout's backend and fails when a migration fails,
+# a table lost rows or an amount of the statements changed (#782: row counts do not see changed amounts).
 # Usage: tools/fitness/upgrade-check.sh [tag]   (default: the newest v* tag before HEAD; needs the tags and psql)
 # PostgreSQL: PGHOST/PGUSER/PGPASSWORD (default localhost, dwello, dwello); the database dwello_upgrade is recreated.
 set -euo pipefail
@@ -24,16 +24,28 @@ counts() {
 	psql -d "$DB" -Atc "SELECT table_name || ' ' || (xpath('/row/c/text()', query_to_xml(format('SELECT count(*) AS c FROM public.%I', table_name), false, true, '')))[1]::text
 		FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY 1"
 }
+# sum per amount column of the statement tables, as "table.column sum" lines
+sums() {
+	psql -d "$DB" -Atc "SELECT string_agg(format('SELECT %L || '' '' || coalesce(sum(%I), 0) FROM %I', table_name || '.' || column_name, column_name, table_name), ' UNION ALL ' ORDER BY table_name, column_name)
+		FROM information_schema.columns WHERE table_schema = 'public' AND data_type = 'numeric' AND table_name LIKE 'utility_statement%'" | psql -d "$DB" -At
+}
 counts >"$OLD/before.txt"
+sums >"$OLD/sums-before.txt"
 if ! bun backend/scripts/migrate.ts; then
 	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: the migrations of this checkout fail on the data of $TAG. Fix: make the migration work on existing rows (defaults, backfill before NOT NULL), never only on an empty database."
 	exit 1
 fi
 counts >"$OLD/after.txt"
+sums >"$OLD/sums-after.txt"
 
 lost=$(awk 'NR == FNR { after[$1] = $2; next } !($1 in after) || after[$1] < $2 { print $1 " " $2 " -> " ($1 in after ? after[$1] : "dropped") }' "$OLD/after.txt" "$OLD/before.txt")
 if [ -n "$lost" ]; then
 	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: upgrading from $TAG loses data (table rows before -> after): $(echo "$lost" | paste -sd ';' -). Fix: carry the rows over in the migration; an intended removal is the product owner's decision."
 	exit 1
 fi
-echo "Fitness: upgrade $TAG -> HEAD with demo data: migrations pass, no table lost rows ($(wc -l <"$OLD/before.txt") tables, $(($(date +%s) - start)) s)"
+changed=$(awk 'NR == FNR { after[$1] = $2; next } !($1 in after) || after[$1] + 0 != $2 + 0 { print $1 " " $2 " -> " ($1 in after ? after[$1] : "dropped") }' "$OLD/sums-after.txt" "$OLD/sums-before.txt")
+if [ -n "$changed" ]; then
+	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: upgrading from $TAG changes amounts of the statements (sum before -> after): $(echo "$changed" | paste -sd ';' -). Fix: leave the amounts of existing statements as they are; an intended change is the product owner's decision."
+	exit 1
+fi
+echo "Fitness: upgrade $TAG -> HEAD with demo data: migrations pass, no table lost rows, statement amounts unchanged ($(wc -l <"$OLD/sums-before.txt") sums, $(wc -l <"$OLD/before.txt") tables, $(($(date +%s) - start)) s)"
