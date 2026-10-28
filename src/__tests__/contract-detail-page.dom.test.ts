@@ -360,6 +360,17 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('contract-missing-statement-short-help')).not.toBeNull();
 	});
 
+	// #512 (Fachreview 512-1 V-2): the help of #486 stands in the row of the short period, not under an earlier period
+	it('rät nur bei der kurzen Abrechnungsperiode zur Abrechnungsperiode im Mietvertrag', () => {
+		open('2024-04-01', null, null, '2026-10-10', false, [
+			{ start: '2025-07-01', end: '2025-12-31', href: '/statements/generate?short', way: { kind: 'short', start: '2025-07-01', end: '2025-12-31' } },
+			{ start: '2023-07-01', end: '2024-06-30', href: '/statements/generate?whole' }
+		]);
+		const row = (start: string) => byTestId(`contract-missing-statement-period-${start}`)!;
+		expect(row('2025-07-01').querySelector('[data-testid="contract-missing-statement-short-help"]')).not.toBeNull();
+		expect(row('2023-07-01').querySelector('[data-testid="contract-missing-statement-short-help"]')).toBeNull();
+	});
+
 	// Fachreview 199-1 V-1: statements made before #408 point 2; a statement of the contract overlaps the period, so a
 	// run there would not bill it: the days without a way into the wizard
 	it('nennt Tage ohne Weg in den Assistenten, wenn ein Lauf den Mietvertrag nicht abrechnen würde', () => {

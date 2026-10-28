@@ -14,7 +14,7 @@
  * - reminder_after_days: Days after deadline to send reminder (default 14)
  */
 
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { validateIBAN } from './qr-bill.service';
 import { configuration, type Configuration } from '../db/schema';
@@ -22,6 +22,8 @@ import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
 import { recordAudit } from './audit-log.service';
 import { CodedError, type ErrorCode } from './coded-error';
+import { swissToday } from './today';
+import type { PeriodChange } from './accounting-period';
 
 /**
  * Configuration keys with their types and validators
@@ -238,6 +240,29 @@ async function saveConfig(
 		if (Number(before) !== Number(value)) await recordAudit('management_fee_changed', { from: before, to: value }, tx);
 	}
 
+	// #512: the day the Abrechnungsperiode changes and the type before; a second change that day keeps the first's
+	if (key === 'accounting_period') {
+		const stored = await tx.select().from(configuration).where(inArray(configuration.key, [key, PERIOD_CHANGE]));
+		const before = stored.find((row) => row.key === key)?.value ?? CONFIG_KEYS.accounting_period.default;
+		const [on, from] = (stored.find((row) => row.key === PERIOD_CHANGE)?.value ?? '').split(':');
+		const change = `${swissToday()}:${on === swissToday() ? from : before}`;
+		if (before !== value) await upsert(tx, PERIOD_CHANGE, change);
+	}
+	return upsert(tx, key, value);
+}
+
+// Not a setting of the form: getAllConfig leaves it out
+const PERIOD_CHANGE = 'accounting_period_changed';
+
+/** #512: the stored change of the setting «Abrechnungsperiode», null before the first */
+export async function periodChange(): Promise<PeriodChange> {
+	const [row] = await db.select().from(configuration).where(eq(configuration.key, PERIOD_CHANGE)).limit(1);
+	if (!row) return null;
+	const [on, from] = row.value.split(':');
+	return { on, from: from as NonNullable<PeriodChange>['from'] };
+}
+
+async function upsert(tx: Pick<typeof db, 'insert'>, key: string, value: string) {
 	// An upsert: two first writes of one key at once would both insert (O-36)
 	const [saved] = await tx
 		.insert(configuration)

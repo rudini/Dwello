@@ -14,6 +14,8 @@ export type AccountingPeriodType = keyof typeof FIRST_MONTH;
 export type Range = { start: string; end: string };
 type Dated = { periodStart: string; periodEnd: string; status: string };
 type Rental = { startDate: string; endDate: string | null; billedUntil: string | null };
+/** #512: the day the setting changed and the type it had before, as stored when it was saved */
+export type PeriodChange = { on: string; from: AccountingPeriodType } | null;
 
 const month = (n: number) => String(n).padStart(2, '0');
 
@@ -66,9 +68,16 @@ export function uncovered(period: Range, statements: Omit<Dated, 'status'>[]) {
  * bills rent days (from the day after «Abgerechnet bis», #133), the latest first (#199, #211); a replaced statement no
  * longer covers its days (#120)
  */
-export function missingPeriods(type: AccountingPeriodType, contract: Rental, statements: Dated[], today = swissToday(), building = statements) {
+export function missingPeriods(
+	type: AccountingPeriodType,
+	contract: Rental,
+	statements: Dated[],
+	today = swissToday(),
+	building = statements,
+	change: PeriodChange = null
+) {
 	const billing = counting(statements);
-	return cutPeriods(type, contract.startDate, building, today)
+	return cutPeriods(type, contract.startDate, building, today, change)
 		.flatMap(({ period }) => uncovered(period, billing))
 		.filter((gap) => billsIn(contract, gap));
 }
@@ -77,10 +86,13 @@ const typeOf = (period: Range) =>
 	(Object.keys(FIRST_MONTH) as AccountingPeriodType[]).find((type) => same(lastCompletedPeriod(type, daysAfter(period.end, 1)), period));
 
 /**
- * #512: before the building's first whole statement under the setting, its last whole statement of another type tells
- * the type the landlord billed by until its end (no history of the setting is stored); null when there is none
+ * #512: the stored change of the setting: the earlier type until the end of its last period ended before that day.
+ * Without one, before the building's first whole statement under the setting, its last whole statement of another
+ * type tells the type the landlord billed by until its end; null when there is none
  */
-function earlierType(type: AccountingPeriodType, building: Omit<Dated, 'status'>[]) {
+function earlierType(type: AccountingPeriodType, building: Omit<Dated, 'status'>[], change: PeriodChange) {
+	// a change back to the type before that day is none
+	if (change && change.from !== type) return { type: change.from, switched: daysAfter(lastCompletedPeriod(change.from, change.on).end, 1) };
 	const whole = periodsOf(building).filter((p) => typeOf(p));
 	const first = whole.find((p) => typeOf(p) === type);
 	const last = whole.filter((p) => typeOf(p) !== type && (!first || p.start < first.start)).at(-1);
@@ -92,8 +104,8 @@ function earlierType(type: AccountingPeriodType, building: Omit<Dated, 'status'>
  * The ended periods since a day, the newest first, each with the whole period of its type: until the end of the
  * building's earlier type (#512) cut by that type, after it by the setting, the first of these from the day after
  */
-function cutPeriods(type: AccountingPeriodType, since: string, building: Omit<Dated, 'status'>[], today: string) {
-	const earlier = earlierType(type, building);
+function cutPeriods(type: AccountingPeriodType, since: string, building: Omit<Dated, 'status'>[], today: string, change: PeriodChange) {
+	const earlier = earlierType(type, building, change);
 	const switched = earlier?.switched ?? '';
 	const current = endedPeriodsSince(type, since, today)
 		.filter((full) => full.end >= switched)
@@ -112,7 +124,14 @@ function cutPeriods(type: AccountingPeriodType, since: string, building: Omit<Da
  * period of their own, the whole one or a short one for all its contracts. `open` is false when a statement of the
  * contract overlaps that period: the run would not bill it there (periods made before this rule, Fachreview 199-1 V-1)
  */
-export function missingWays(type: AccountingPeriodType, contract: Rental, statements: Dated[], building: Dated[], today = swissToday()) {
+export function missingWays(
+	type: AccountingPeriodType,
+	contract: Rental,
+	statements: Dated[],
+	building: Dated[],
+	today = swissToday(),
+	change: PeriodChange = null
+) {
 	const periods = periodsOf(building);
 	// a replaced statement of the contract: the run of its period bills it again (#120)
 	const own = periodsOf(counting(statements));
@@ -120,9 +139,9 @@ export function missingWays(type: AccountingPeriodType, contract: Rental, statem
 		...periods.filter((p) => overlaps(p, period)).map((p) => ({ ...p, kind: 'existing' })),
 		...uncovered(period, building).map((u) => ({ ...u, kind: 'short' }))
 	];
-	const cut = cutPeriods(type, contract.startDate, building, today);
+	const cut = cutPeriods(type, contract.startDate, building, today, change);
 	return (
-		missingPeriods(type, contract, statements, today, building)
+		missingPeriods(type, contract, statements, today, building, change)
 			.flatMap((gap) => {
 				const { period, full, earlier } = cut.find((p) => p.period.start <= gap.start)!;
 				// days in a period equal to the building's go there only, not again to an overlapping older one (code

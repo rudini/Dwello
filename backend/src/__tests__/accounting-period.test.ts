@@ -208,6 +208,16 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 		]);
 	});
 
+	// #512 (product owner 2026-10-28, persona Weber 512 P-1): the stored day of the change ends the earlier type, also
+	// for a year after the building's last statement that ended before that day
+	it('folgt bis zum Tag des Wechsels der Einstellung der früheren Abrechnungsperiode, danach der Einstellung', () => {
+		const building = [own('2024-01-01', '2024-12-31')];
+		expect(missingWays('july-june', contract('2024-01-01'), building, building, today, { on: '2026-10-01', from: 'calendar' })).toEqual([
+			part('2026-01-01', '2026-06-30', 'short'),
+			whole(2025)
+		]);
+	});
+
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', () => {
 		const statement = own('2025-01-01', '2025-12-31');
 		expect(missingWays('calendar', contract('2025-03-01'), [statement], [statement], today)).toEqual([]);
