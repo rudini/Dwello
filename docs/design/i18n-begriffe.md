@@ -123,6 +123,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Konto mit Passwort (#576) | compte avec mot de passe | account con password | password account |
 | Sperre (Anmeldung, #576) | blocage (de la connexion) | blocco (dell’accesso) | lock (sign-in) |
 | Einrichtung / Einrichtungscode / Dwello einrichten (#577) | configuration initiale / code de configuration / Configurer Dwello | configurazione iniziale / codice di configurazione / Configurare Dwello | setup / setup code / Set up Dwello |
+| Sicherung / Wiederherstellungscode / Notfallblatt / Wiederherstellung (#860) | sauvegarde / code de restauration / fiche d’urgence / restauration | copia di sicurezza (Mehrzahl copie di sicurezza) / codice di ripristino / scheda di emergenza / ripristino | backup / recovery code / emergency sheet / restore |
+| die Person, die Dwello betreut (Betreiber in Texten an den Liegenschaftsverwalter, #860) | la personne qui s’occupe de Dwello | la persona che si occupa di Dwello | the person who looks after Dwello |
 | KI-Modell (#577) | modèle d’IA | modello di IA | AI model |
 | KI-Einstellung / Lokale KI / Anbieter der KI (#580) | réglage de l’IA / IA locale / fournisseur de l’IA | impostazione dell’IA / IA locale / fornitore dell’IA | AI setting / local AI / AI provider |
 | Adresse der KI / API-Schlüssel / Verbindung prüfen (#580) | adresse de l’IA / clé API / vérifier la connexion | indirizzo dell’IA / chiave API / verificare la connessione | AI address / API key / check connection |
