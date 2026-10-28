@@ -103,7 +103,7 @@ Funktionalität: Rechnungsliste
   # #245: eine abgelehnte Datei zählt nicht als gelesen (Fachreview 233-2 V-10)
   Szenario: Dwello sagt, was nach dem Lesen zu tun ist, und meldet eine entfernte Datei
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und die Word-Datei "notizen.docx" hochlädt
-    Dann meldet Dwello "Gelesen: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1."
+    Dann meldet Dwello "Bitte prüfen: 1. Nicht möglich: 1."
     Wenn der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
     Dann meldet Dwello "notizen.docx entfernt."
 
@@ -213,7 +213,7 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Dann sagt die Datei von "Elektro Blitz" "Die Datei wurde nicht gelesen, weil Dwello nicht geantwortet hat. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
     Und sagt die Datei von "Elektro Blitz" "Füllen Sie aus: Rechnungsdatum, Betrag, Rechnungssteller, Beschreibung."
-    Und meldet Dwello "Gelesen: 1 von 1. Nicht gelesen: 1."
+    Und meldet Dwello "Nicht gelesen: 1."
     Und bietet die Datei von "Elektro Blitz" "Angaben eingeben" an
 
   Szenario: Das Erstellen scheitert

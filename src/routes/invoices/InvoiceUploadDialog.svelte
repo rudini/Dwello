@@ -105,16 +105,15 @@
 			.filter(({ count }) => count > 0)
 			.map((part) => m.invoices_upload_summary(part))
 	);
-	// with «Keine KI» nobody reads: no progress, only what is to do (#773)
-	const progress = $derived(!kiOff && counted.length > 0 && m.invoices_upload_progress({ done, count: counted.length }));
+	// the progress while files are read (with «Keine KI» nobody reads), then only what is to do (#773)
 	const status = $derived(
 		removed
 			? m.invoices_upload_removed({ name: removed })
-			: !rows.length
-				? ''
-				: done < counted.length
-					? progress || ''
-					: [progress && `${progress}.`, ...outcome].filter(Boolean).join(' ')
+			: done < counted.length
+				? kiOff
+					? ''
+					: m.invoices_upload_progress({ done, count: counted.length })
+				: outcome.join(' ')
 	);
 	// the button counts what it creates: a chosen row that still lacks something is named apart (#233)
 	const complete = $derived(chosen.filter((row) => !Object.keys(checkRow(row)).length).length);

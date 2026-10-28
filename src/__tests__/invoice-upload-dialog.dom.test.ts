@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { flushSync } from 'svelte';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
@@ -319,7 +320,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'), word);
 		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
-		expect(status()).toBe('Gelesen: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1.');
+		expect(status()).toBe('Bitte prüfen: 1. Nicht möglich: 1.');
 		allByTestId('invoice-upload-row-remove')[1].click();
 		await settle();
 		expect(status()).toBe('notizen.docx entfernt.');
@@ -536,7 +537,7 @@ describe('Rechnungen hochladen', () => {
 		open(() => [500, {}]);
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
-		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Gelesen: 1 von 1. Nicht gelesen: 1.');
+		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Nicht gelesen: 1.');
 	});
 
 	// #245 (Weber P-5 of #217 round 2, Marco P-3): an unticked row says why, at its checkbox
@@ -576,7 +577,7 @@ describe('Rechnungen hochladen', () => {
 		await upload(pdf('blitz.pdf'));
 
 		expect(byTestId('invoice-upload-row-status')!.textContent?.trim()).toBe('Bitte ausfüllen');
-		expect(byTestId('invoice-upload-progress')!.textContent?.trim()).toBe('Gelesen: 1 von 1. Bitte ausfüllen: 1.');
+		expect(byTestId('invoice-upload-progress')!.textContent?.trim()).toBe('Bitte ausfüllen: 1.');
 	});
 
 	it('bietet erneutes Auslesen an, wenn Dwello nicht geantwortet hat', async () => {
@@ -698,13 +699,20 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-result')!.textContent).toContain('1 Rechnung erstellt');
 	});
 
-	it('sagt an, wie viele Dateien gelesen sind', async () => {
+	// #773 (persona Helga 773 P-1): once all are read, only what is to do; «Gelesen» would contradict an unread file
+	it('sagt an, wie viele Dateien gelesen sind, und danach nur noch, was zu tun ist', async () => {
 		open(() => [200, read]);
 		chooseBuilding();
-		await upload(pdf('a.pdf'), pdf('b.pdf'));
+		const input = byTestId<HTMLInputElement>('invoice-upload-file-input')!;
+		Object.defineProperty(input, 'files', { value: [pdf('a.pdf'), pdf('b.pdf')], configurable: true });
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
 		const status = byTestId('invoice-upload-progress')!;
 		expect(status.getAttribute('role')).toBe('status');
-		expect(status.textContent).toContain('Gelesen: 2 von 2');
+		expect(status.textContent).toBe('Gelesen: 0 von 2');
+		await settle();
+		await settle();
+		expect(status.textContent).toBe('Bitte prüfen: 2.');
 	});
 
 	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {
