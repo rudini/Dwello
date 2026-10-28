@@ -3,7 +3,7 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
-import { mkdtemp, readdir, readFile, rm, writeFile } from 'fs/promises';
+import { cp, mkdtemp, readdir, readFile, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
@@ -94,25 +94,87 @@ describe('Sicherung', () => {
 	}, 60_000);
 
 	it('ersetzt bei der Wiederherstellung den neueren Stand und zieht spätere Migrationen nach', async () => {
-		const { name, code } = await secured();
-		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
-		dirs.push(before);
+		// a Sicherung of the release before 0037, restored by this one
+		const older = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		dirs.push(older);
+		await cp(migrations, older, {
+			recursive: true,
+			filter: (file) => !file.endsWith('0037_heating_profile_source.sql')
+		});
+		const name = `dwello_backup_${crypto.randomUUID().replace(/-/g, '')}`;
+		await query('postgres', `CREATE DATABASE "${name}"`);
+		databases.push(name);
+		await migrate(`${server}/${name}`, older);
+		const code = generateCode();
+		const { publicKey, salt } = await recipientOf(code);
+		await query(
+			name,
+			'INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ($1, $2, now())',
+			[publicKey.toString('base64'), salt.toString('base64')]
+		);
 		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
 		await query(
 			name,
 			`INSERT INTO buildings (name, address, postal_code, city, canton) VALUES ('Ahornhof', 'Testweg 1', '8400', 'Winterthur', 'ZH')`
 		);
-		await query(
-			name,
-			`DELETE FROM schema_migrations WHERE name = (SELECT max(name) FROM schema_migrations)`
-		);
 
 		await restoreBackup(file, code, `${server}/${name}`, await folder(), migrations);
 
-		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
-		expect((await query(name, 'SELECT count(*)::int AS n FROM schema_migrations'))[0].n).toBe(
-			(await readdir(migrations)).filter((f) => f.endsWith('.sql')).length
+		expect(await query(name, 'SELECT name FROM buildings')).toEqual([]);
+		expect(
+			await query(
+				name,
+				`SELECT name FROM schema_migrations WHERE name = '0037_heating_profile_source.sql'`
+			)
+		).toEqual([{ name: '0037_heating_profile_source.sql' }]);
+	}, 60_000);
+
+	it('schreibt die Schlüssel zurück, auch wenn danach eine Migration scheitert', async () => {
+		const { name, code } = await secured();
+		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
+		const broken = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		dirs.push(broken);
+		await cp(migrations, broken, { recursive: true });
+		await writeFile(join(broken, '9999_broken.sql'), 'SELECT no_such_column FROM buildings;');
+		const keys = await folder();
+
+		await expect(restoreBackup(file, code, `${server}/${name}`, keys, broken)).rejects.toThrow(
+			'9999_broken.sql'
 		);
+		expect(await readFile(join(keys, 'encryption_key'), 'utf8')).toBe(secrets.encryption_key);
+		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
+	}, 60_000);
+
+	it('lässt keine Datei liegen und vermerkt die Ursache, wenn pg_dump scheitert', async () => {
+		const { name } = await secured();
+		const dir = await folder();
+		const bin = await folder();
+		await writeFile(
+			join(bin, 'pg_dump'),
+			'#!/bin/sh\necho "pg_dump: error: connection refused" >&2\nexit 1\n',
+			{ mode: 0o755 }
+		);
+		const path = process.env.PATH;
+		process.env.PATH = `${bin}:${path}`;
+		try {
+			await expect(createBackup(`${server}/${name}`, dir, secrets)).rejects.toThrow(
+				'pg_dump: error: connection refused'
+			);
+		} finally {
+			process.env.PATH = path;
+		}
+		expect(await readdir(dir)).toEqual([]);
+		expect(await query(name, 'SELECT error FROM backup_runs')).toEqual([
+			{ error: 'pg_dump: pg_dump: error: connection refused' }
+		]);
+	}, 60_000);
+
+	it('löscht eine halbe Datei, die ein abgebrochener Lauf hinterliess', async () => {
+		const { name } = await secured();
+		const dir = await folder();
+		await writeFile(join(dir, 'dwello-2026-10-27T02-00-00Z.backup.part'), 'halb');
+		const file = await createBackup(`${server}/${name}`, dir, secrets);
+		expect(await readdir(dir)).toEqual([file.split('/').pop()!]);
 	}, 60_000);
 
 	it('lehnt die Wiederherstellung mit einem anderen Code ab und lässt die Datenbank, wie sie ist', async () => {
@@ -241,7 +303,7 @@ describe('Sicherung vor einer Migration', () => {
 });
 
 describe('Health-Check und Sicherung', () => {
-	it('meldet 503 mit dem Tag der letzten Sicherung, wenn seit mehr als einem Tag keine gelungen ist', async () => {
+	it('meldet mit dem Tag der letzten, wenn seit mehr als einem Tag keine Sicherung gelungen ist, und bleibt gesund', async () => {
 		const { app } = await import('../app');
 		const { db } = await import('../db/connection');
 		const { backupCodes } = await import('../db/schema');
@@ -259,7 +321,8 @@ describe('Health-Check und Sicherung', () => {
 		process.env.BACKUP_DIR = await folder();
 		try {
 			const response = await app.handle(new Request('http://localhost/health'));
-			expect(response.status).toBe(503);
+			// 200, so the frontend still starts (it waits for a healthy backend) and shows the hint
+			expect(response.status).toBe(200);
 			expect(await response.json()).toMatchObject({
 				backup: 'stale',
 				since: confirmedAt.toISOString()
@@ -268,6 +331,8 @@ describe('Health-Check und Sicherung', () => {
 			delete process.env.BACKUP_DIR;
 			await db.delete(backupCodes).where(eq(backupCodes.id, row.id));
 		}
-		expect((await app.handle(new Request('http://localhost/health'))).status).toBe(200);
+		expect(await (await app.handle(new Request('http://localhost/health'))).json()).toMatchObject({
+			backup: 'off'
+		});
 	});
 });

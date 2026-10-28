@@ -12,6 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
 import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { migrate } from '../db/migrate';
 import { decryptFile, encryptStream } from './backup-crypto';
 
@@ -118,6 +119,8 @@ export async function createBackup(
 			const files = (await readdir(dir)).filter(isBackup);
 			const keep = kept(files, now);
 			for (const old of files) if (!keep.has(old)) await unlink(join(dir, old));
+			// a run that was cut off (a restart, a full disk) leaves its half file
+			for (const half of await readdir(dir)) if (half.endsWith('.backup.part')) await unlink(join(dir, half));
 			await client.query('UPDATE backup_runs SET finished_at = now(), file = $2 WHERE id = $1', [
 				run,
 				file
@@ -163,14 +166,15 @@ export async function restoreBackup(
 		]);
 		let stderr = '';
 		restore.stderr.on('data', (chunk) => (stderr += chunk));
-		createReadStream(join(work, 'plain'), { start: 4 + head.length }).pipe(restore.stdin);
+		// an early exit of pg_restore closes its stdin: its exit code and stderr name the cause, not the EPIPE
+		void pipeline(createReadStream(join(work, 'plain'), { start: 4 + head.length }), restore.stdin).catch(() => {});
 		if (
 			(await new Promise<number>((resolve, reject) =>
 				restore.on('close', resolve).on('error', reject)
 			)) !== 0
 		)
 			throw new Error(`pg_restore: ${stderr.trim()}`);
-		await migrate(url, migrations);
+		// the keys belong to the restored data, also when a later migration fails
 		if (secretsDir)
 			for (const [name, value] of Object.entries(secrets)) {
 				if (!value) continue;
@@ -178,6 +182,7 @@ export async function restoreBackup(
 				await writeFile(join(secretsDir, name), value);
 				await chmod(join(secretsDir, name), 0o444);
 			}
+		await migrate(url, migrations);
 	} finally {
 		await rm(work, { recursive: true, force: true });
 	}

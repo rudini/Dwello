@@ -65,16 +65,26 @@ The AI model (about 6 GB) then downloads by itself; the overview shows how far i
 - **Forgotten password or Sperre:** `docker exec -it dwello-backend bun run account` sets a new password; it also lifts the Sperre after 5 failed attempts and ends the sessions that were open.
 
 - **Update:** `git pull`, then `docker compose -f docker-compose.prod.yml up -d --build`.
-- **Sicherung (backup):** once the landlord has confirmed the Wiederherstellungscode (recovery code), Dwello backs up the whole database (uploaded invoices and PDFs included) and the keys every day at 03:00 Swiss time, at start when the last backup is older than a day, and before every update that changes the database. The files go to the folder `backups` next to `docker-compose.prod.yml`, encrypted with the code: without it nobody can read them, so a cloud folder is fine. Dwello keeps the last 7 daily backups and one per month for 12 months and deletes older ones. **Copy the folder to another device regularly**; a backup on the same disk does not survive a broken disk. When no backup succeeded for more than a day, the backend is `unhealthy` and its log (`docker logs dwello-backend`) names the cause; when the backup before an update fails, the update stops without changing the database (the backend restarts, and the log names the cause).
-- **Wiederherstellung (restore):** it replaces all data and the keys of the installation with a backup, and then applies the updates the backup does not have yet. Stop Dwello, restore with the code from the Notfallblatt, start it again:
+- **Back up** the database and the keys regularly and keep the copy on another device; uploaded invoices and PDFs are stored in the database too. Without the key for stored secrets, secrets Dwello stores encrypted (such as the key of an external AI) cannot be read after a restore. These commands work in every terminal, Windows PowerShell included:
 
   ```bash
-  docker compose -f docker-compose.prod.yml stop frontend backend
-  docker compose -f docker-compose.prod.yml run --rm restore /backups/dwello-2026-10-28T02-00-00Z.backup
-  docker compose -f docker-compose.prod.yml up -d
+  docker exec dwello-postgres pg_dump -U dwello --clean --if-exists -f /tmp/dwello-backup.sql dwello
+  docker cp dwello-postgres:/tmp/dwello-backup.sql dwello-backup.sql
+  docker cp dwello-postgres:/run/dwello dwello-keys
   ```
 
-  On a new machine, copy the backup into its folder `backups` first and run `docker compose -f docker-compose.prod.yml up -d` once, then restore as above. The database password stays the one of the new machine.
+  To restore a copy (it replaces the data in the database):
+
+  ```bash
+  docker cp dwello-backup.sql dwello-postgres:/tmp/dwello-backup.sql
+  docker exec dwello-postgres psql -U dwello -f /tmp/dwello-backup.sql dwello
+  ```
+
+  On a new machine, put the keys back **before its first start**, so the new database gets the saved password; then start it (`up -d`) and restore the database as above:
+
+  ```bash
+  docker compose -f docker-compose.prod.yml run --rm --no-deps -v "$PWD/dwello-keys:/keys:ro" secrets sh -c 'cp /keys/* /run/dwello/'
+  ```
 - **E-mail to tenants:** `.env.example` sets `MAIL_TRANSPORT=smtp` with placeholder values. Fill in `MAIL_FROM` and `SMTP_*` from the landlord's mail provider (or set `MAIL_TRANSPORT=resend` and `RESEND_API_KEY`), and for SMTP also `MAIL_PROVIDER_NAME` and `MAIL_PROVIDER_COUNTRY`, which the privacy statement names (required when the mail server is outside Switzerland). Or remove the `MAIL_TRANSPORT` line: Dwello then sends no e-mail, and the landlord sends the PDFs or prints the letters.
 
 If the page «KI» says that the local KI does not answer, start it again (Docker Desktop shows the container `dwello-ollama`, or in a terminal):

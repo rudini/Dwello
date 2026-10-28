@@ -46,7 +46,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ### Health
 
-`GET /health` (public) → `{ status: "ok", timestamp, service: "dwello-backend", backup: "off" | "ok", since? }`; **503** with `status: "backup_stale"`, `backup: "stale"` and `since` (the last Sicherung, else the confirmation of the code) when no Sicherung succeeded for more than a day (#718, O1)
+`GET /health` (public) → `{ status: "ok", timestamp, service: "dwello-backend", backup: "off" | "ok", since? }`; `backup: "stale"` and `since` (the last Sicherung, else the confirmation of the code) when no Sicherung succeeded for more than a day (#718, O1); always **200**, since the frontend starts only with a healthy backend
 
 ---
 

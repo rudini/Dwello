@@ -10,7 +10,7 @@
 import { mkdtemp, readdir, readFile, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { createRequire } from 'module';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const repo = fileURLToPath(new URL('../..', import.meta.url));
@@ -67,10 +67,10 @@ const fail = (message: string) => {
 
 if (phase === 'backup') {
 	const { generateCode, recipientOf } = await import(
-		join(process.cwd(), backend, 'src/services/backup-crypto.ts')
+		resolve(backend, 'src/services/backup-crypto.ts')
 	);
 	const { createBackup } = await import(
-		join(process.cwd(), backend, 'src/services/backup.service.ts')
+		resolve(backend, 'src/services/backup.service.ts')
 	);
 	const code = generateCode();
 	const { publicKey, salt } = await recipientOf(code);

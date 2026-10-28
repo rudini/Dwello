@@ -63,6 +63,6 @@ if [ -n "$changed" ]; then
 	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: upgrading from $TAG changes amounts of the statements (sum before -> after): $(echo "$changed" | paste -sd ';' -). Fix: leave the amounts of existing statements as they are; an intended change is the product owner's decision."
 	exit 1
 fi
-[ -f "$OLD/backend/src/services/backup.service.ts" ] || bun tools/fitness/restore-check.ts backup backend
+[ -f "$OLD/backend/src/services/backup.service.ts" ] || bun tools/fitness/restore-check.ts backup "$PWD/backend"
 bun tools/fitness/restore-check.ts restore
 echo "Fitness: upgrade $TAG -> HEAD with demo data: migrations pass, no table lost rows, statement amounts unchanged ($(wc -l <"$OLD/sums-before.txt") sums, $(wc -l <"$OLD/before.txt") tables, $(($(date +%s) - start)) s)"

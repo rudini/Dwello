@@ -526,7 +526,7 @@ error        TEXT               -- why it failed
 ```
 
 `backend/src/services/backup.service.ts` makes the Sicherung (a `pg_dump` and the keys, encrypted) daily, at start when
-the last one is older than a day, and before a migration; `/health` reports it stale after a day without one. Migration
+the last one is older than a day, and before a migration; `/health` names it stale after a day without one. Migration
 `0038_backups.sql`.
 
 ---
