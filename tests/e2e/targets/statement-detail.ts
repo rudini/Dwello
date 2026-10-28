@@ -81,6 +81,10 @@ export const createCorrectionButton = target('Berichtigte Abrechnung erstellen',
 	page.getByTestId('statement-create-correction-button')
 );
 export const replacesLink = target('Ersetzte Abrechnung', (page) => page.getByTestId('statement-replaces-link'));
+// #932: what creating the berichtigte Abrechnung answers with: the new statement or the refusal
+export const correctionAnswer = target('Berichtigte Abrechnung oder Fehlermeldung', (page) =>
+	page.getByTestId('statement-replaces-link').or(page.getByTestId('form-error'))
+);
 export const replacedByLink = target('Berichtigte Abrechnung', (page) => page.getByTestId('statement-replaced-by-link'));
 export const priorPayments = target('Bereits bezahlt', (page) => page.getByTestId('statement-prior-payments'));
 export const statementBalance = target('Saldo der Abrechnung', (page) => page.getByTestId('statement-balance'));
