@@ -1,8 +1,8 @@
 {
 	"fieldSpread": {
-		"median": 4,
-		"p90": 12,
-		"max": 36
+		"median": 1,
+		"p90": 6,
+		"max": 18
 	},
 	"technical": [
 		{
