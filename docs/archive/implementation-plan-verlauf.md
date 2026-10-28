@@ -60,3 +60,15 @@
 - [x] Fach review round 1: `docs/reviews/860-fachreview-1.md` (V-1, V-2 Minor, fixed)
 - [x] No scenario: glossary text only, no app change
 - [x] PR `Fixes #860`: pushed after this archive
+
+## Session: #718 part 1, the Sicherung in the backend (2026-10-28)
+
+- [x] Product owner decided 2026-10-28 (in #718): split into three pull requests; spec change of `einrichtung.feature` for part 2
+- [x] Unit tests `backup-crypto.test.ts` (code, encryption, wrong code, changed file), `backup-due.test.ts` (schedule); seen red
+- [x] pg tests `backup.pg.test.ts` (Sicherung, Wiederherstellung with later migrations, retention, state, schedule tick, before a migration, `/health`), `migrations.pg.test.ts` (hook before a migration), `init-secrets.test.ts` (folder `backups`); seen red
+- [x] Code: `backup-crypto.ts`, `backup.service.ts`, `0038_backups.sql`, `scripts/restore.ts`, `migrate.ts`, `/health`, `index.ts`; Docker: pg_dump 16, folder `backups`, service `restore`
+- [x] R1 fitness: `tools/fitness/restore-check.ts` in `upgrade-check.sh`, red with a table left out
+- [x] No scenario: the backend start, the schedule, the migration step and the restore command (CLI) cannot be reached from the E2E stack; the setup in the UI comes with part 2
+- [x] Slice review round 1: `docs/reviews/718a-review-1.md` (C-1 to C-3 Major, C-4 to C-8 Minor, all fixed)
+- [x] Re-review round 2: `docs/reviews/718a-review-2.md` (all closed, no new findings)
+- [x] PR `Refs #718`: pushed after this archive
