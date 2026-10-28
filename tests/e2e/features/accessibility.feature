@@ -34,6 +34,7 @@ Funktionalität: Barrierefreiheit
       | error-server           | server-error        |
       | dashboard              | default             |
       | dashboard              | backup-confirmed    |
+      | dashboard              | backup-stale        |
       | dashboard              | old-address-task    |
       | dashboard              | first-use           |
       | dashboard              | ki-model-loading    |

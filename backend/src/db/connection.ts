@@ -16,7 +16,9 @@ const pool = new Pool({
 	connectionString: DATABASE_URL,
 	max: POOL_SIZE,
 	idleTimeoutMillis: 30000,
-	connectionTimeoutMillis: 10000
+	connectionTimeoutMillis: 10000,
+	// a script (db:migrate, restore) ends when its work is done, not 30 s later; the server stays up through its port
+	allowExitOnIdle: true
 });
 
 // Create Drizzle ORM instance

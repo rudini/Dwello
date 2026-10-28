@@ -43,7 +43,7 @@ import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
 import { FRESH_APP, FRESH_KI_STUB, resetFreshBackup } from '../fixtures/fresh-installation';
-import { backupConfirmation, backupError } from '../targets/sicherung';
+import { backupConfirmation, backupError, backupWarning } from '../targets/sicherung';
 import { confirmBackupCode, freshBackupSetUp } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
@@ -228,6 +228,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'backup-error': () => (actor) =>
 		actor.attemptsTo(confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'), Wait.until(backupError)),
 	'backup-confirmed': () => Wait.until(backupConfirmation),
+	'backup-stale': () => Wait.until(backupWarning),
 	'ki-model-loading': () => Wait.until(kiModelLoading),
 	'ki-model-failed': () => Wait.until(kiModelLoading),
 	// #580: the page «KI» with a provider chosen (fields and checklist), and that choice saved without input
@@ -731,7 +732,7 @@ const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: path === '/backup' || ['ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
+			: path === '/backup' || ['backup-stale', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
 				? FRESH_APP
 				: '';
 
@@ -746,9 +747,12 @@ const inTurn =
 						// #718: only the fresh installation has a folder for the Sicherung; «Sicherung einrichten» is seen
 						// before a code is confirmed, every other screen after (else it leads there)
 						if (example.path === '/backup') resetFreshBackup();
+						else if (example.state === 'backup-stale') resetFreshBackup('stale');
 						else await actor.attemptsTo(freshBackupSetUp);
 						await actor.attemptsTo(look);
 					} finally {
+						// the others expect a code they can confirm, not one that cannot encrypt
+						if (example.state === 'backup-stale') resetFreshBackup();
 						if (['ki-model-offline', 'ki-none', 'upload-ki-none'].includes(example.state)) await actor.attemptsTo(localKiAnswersAgain);
 					}
 				})

@@ -18,9 +18,13 @@ const FRESH_DATABASE_URL = (() => {
 	return url.href;
 })();
 
-/** No Wiederherstellungscode on the fresh installation (#718): the API cannot undo a confirmed one */
-export const resetFreshBackup = () =>
-	execFileSync('bun', ['run', 'e2e-backup-reset'], { cwd: 'backend', env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL } });
+/** No Wiederherstellungscode on the fresh installation (#718): the API cannot undo a confirmed one; `stale`: no
+ * Sicherung for two days (backend/scripts/e2e-backup-reset.ts) */
+export const resetFreshBackup = (state?: 'stale') =>
+	execFileSync('bun', ['run', 'e2e-backup-reset', ...(state ? [state] : [])], {
+		cwd: 'backend',
+		env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL }
+	});
 
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];
@@ -45,6 +49,11 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			await this.setUpWithoutBackup();
 			const { code } = (await api.get('backup')) as { code: string };
 			await api.post('backup/confirm', { code });
+		},
+		/** Dwello after its setup, with no Sicherung for two days (#718, O1) */
+		async setUpWithoutBackupForTwoDays() {
+			await this.setUpWithoutBackup();
+			resetFreshBackup('stale');
 		},
 		/** How far the KI stand-in reports the model download */
 		modelLoaded: (percent: number) => kiStub.post('stub/pull', { percent }),

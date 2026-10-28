@@ -10,3 +10,4 @@ export const backupSheetLink = target('Notfallblatt herunterladen', (page) => pa
 export const backupPrivacyLink = target('Datenschutzerklärung der Sicherung', (page) => page.getByTestId('backup-privacy-link'));
 export const backupGuideLink = target('Link zur Installationsanleitung', (page) => page.getByTestId('backup-guide-link'));
 export const backupConfirmation = target('Bestätigung der Sicherung in der Übersicht', (page) => page.getByTestId('backup-confirmed'));
+export const backupWarning = target('Warnung der Übersicht ohne Sicherung', (page) => page.getByTestId('backup-stale'));

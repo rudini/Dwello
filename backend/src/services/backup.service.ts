@@ -101,6 +101,7 @@ export async function createBackup(
 			await client.query('INSERT INTO backup_runs (started_at) VALUES ($1) RETURNING id', [now])
 		).rows[0].id;
 		const file = join(dir, `dwello-${stamp(now)}.backup`);
+		let stopDump = () => {};
 		try {
 			// a run that was cut off (a restart, a full disk) leaves its half file; gone before it fills the disk again
 			for (const half of await readdir(dir)) if (half.endsWith('.backup.part')) await unlink(join(dir, half));
@@ -110,6 +111,7 @@ export async function createBackup(
 				'--no-acl',
 				`--dbname=${url}`
 			]);
+			stopDump = () => dump.kill();
 			let stderr = '';
 			dump.stderr.on('data', (chunk) => (stderr += chunk));
 			const exited = new Promise<number>((resolve, reject) =>
@@ -141,6 +143,8 @@ export async function createBackup(
 			]);
 			return file;
 		} catch (error) {
+			// a failure while encrypting stops reading its output: pg_dump would wait on it for good
+			stopDump();
 			await rm(`${file}.part`, { force: true });
 			await client.query('UPDATE backup_runs SET finished_at = now(), error = $2 WHERE id = $1', [
 				run,
@@ -156,7 +160,7 @@ export async function restoreBackup(
 	file: string,
 	code: string,
 	url: string,
-	secretsDir: string | undefined,
+	secretsDir: string,
 	migrations: string
 ) {
 	const work = await mkdtemp(join(tmpdir(), 'dwello-restore-'));
@@ -189,15 +193,14 @@ export async function restoreBackup(
 		)
 			throw new Error(`pg_restore: ${stderr.trim()}`);
 		// the keys belong to the restored data, also when a later migration fails
-		if (secretsDir)
-			// only these two names: the restore runs as root, and a forged Sicherung must write nothing else (PR #940)
-			for (const name of ['encryption_key', 'jwt_secret'] as const) {
-				const value = secrets[name];
-				if (typeof value !== 'string' || !value) continue;
-				await rm(join(secretsDir, name), { force: true });
-				await writeFile(join(secretsDir, name), value);
-				await chmod(join(secretsDir, name), 0o444);
-			}
+		// only these two names: the restore runs as root, and a forged Sicherung must write nothing else (PR #940)
+		for (const name of ['encryption_key', 'jwt_secret'] as const) {
+			const value = secrets[name];
+			if (typeof value !== 'string' || !value) continue;
+			await rm(join(secretsDir, name), { force: true });
+			await writeFile(join(secretsDir, name), value);
+			await chmod(join(secretsDir, name), 0o444);
+		}
 		await migrate(url, migrations);
 	} finally {
 		await rm(work, { recursive: true, force: true });

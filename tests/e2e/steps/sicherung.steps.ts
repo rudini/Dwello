@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { downloadedPdfText } from '../questions/download';
-import { backupConfirmed, backupGuide, backupHint, backupPageText, shownBackupCode } from '../questions/sicherung';
+import { backupConfirmed, backupGuide, backupHint, backupPageText, backupWarningText, shownBackupCode } from '../questions/sicherung';
 import { inDays, swissDate } from '../fixtures/dates';
 import { FRESH_APP } from '../fixtures/fresh-installation';
 import {
@@ -24,6 +24,10 @@ Given('Dwello ist eingerichtet, die Sicherung aber noch nicht', async ({ frisch 
 
 Given('Dwello ist eingerichtet und die Sicherung auch', async ({ frisch }) => {
 	await frisch.setUp();
+});
+
+Given('Dwello ist eingerichtet, konnte aber seit 2 Tagen keine Sicherung erstellen', async ({ frisch }) => {
+	await frisch.setUpWithoutBackupForTwoDays();
 });
 
 When('der Liegenschaftsverwalter die Sicherung einrichtet', async ({ verwalter }) => {
@@ -104,4 +108,9 @@ Then('sieht der Liegenschaftsverwalter bei der Sicherung den Hinweis {string}', 
 
 When('der Liegenschaftsverwalter bei der Sicherung die Datenschutzerklärung öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openBackupPrivacy);
+});
+
+// «{vor 2 Tagen}»: the Swiss date two days ago
+Then('warnt die Übersicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(backupWarningText).toContain(text.replace('{vor 2 Tagen}', swissDate(inDays(-2))));
 });

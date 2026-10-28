@@ -59,6 +59,13 @@ Funktionalität: Sicherung einrichten
     Wenn der Liegenschaftsverwalter der frischen Installation die Übersicht öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"
 
+  # O1: gelingt einen Tag lang keine Sicherung, erfährt es der Liegenschaftsverwalter beim nächsten Besuch
+  Szenario: Ohne Sicherung seit mehr als einem Tag warnt die Übersicht
+    Angenommen Dwello ist eingerichtet, konnte aber seit 2 Tagen keine Sicherung erstellen
+    Wenn der Liegenschaftsverwalter der frischen Installation die Übersicht öffnet
+    Dann warnt die Übersicht "Dwello konnte seit {vor 2 Tagen} keine Sicherung erstellen. Ihre Daten sind nicht gesichert. Melden Sie sich bei der Person, die Dwello betreut."
+    Und warnt die Übersicht "Betreuen Sie Dwello selbst, finden Sie das Vorgehen in der Installationsanleitung."
+
   # Fachreview 718b R-3: nach der Bestätigung kennt Dwello den Code nicht mehr, darum zeigt es ihn auch nicht mehr
   Szenario: Nach der Bestätigung zeigt Dwello den Wiederherstellungscode nicht mehr
     Angenommen Dwello ist eingerichtet und die Sicherung auch

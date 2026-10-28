@@ -3,7 +3,14 @@ import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
 import { Click, Cookies, DownloadFrom, Enter, Navigate, Wait } from '../screenplay/interactions';
 import { shownBackupCode } from '../questions/sicherung';
-import { backupCode, backupCodeInput, backupPrivacyLink, backupSheetLink, backupSubmitButton } from '../targets/sicherung';
+import {
+	backupCode,
+	backupCodeInput,
+	backupConfirmation,
+	backupPrivacyLink,
+	backupSheetLink,
+	backupSubmitButton
+} from '../targets/sicherung';
 
 export const SHOWN_CODE = 'backup-code';
 
@@ -25,10 +32,10 @@ export const confirmBackupCode =
 	(actor) =>
 		actor.attemptsTo(Enter.theValue(code).into(backupCodeInput), Click.on(backupSubmitButton));
 
-/** Types the shown code again, as the landlord does after the setup */
+/** Types the shown code again, as the landlord does after the setup, and waits for the overview that confirms it */
 export const confirmShownBackupCode: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(backupCode));
-	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''));
+	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''), Wait.until(backupConfirmation));
 };
 
 export const downloadEmergencySheet = DownloadFrom(backupSheetLink);
@@ -38,5 +45,5 @@ export const openBackupPrivacy = Click.on(backupPrivacyLink);
 export const freshBackupSetUp: Activity = async (actor) => {
 	await actor.attemptsTo(goToFreshBackup);
 	const code = await actor.answer(shownBackupCode);
-	if (code) await actor.attemptsTo(confirmBackupCode(code));
+	if (code) await actor.attemptsTo(confirmBackupCode(code), Wait.until(backupConfirmation));
 };
