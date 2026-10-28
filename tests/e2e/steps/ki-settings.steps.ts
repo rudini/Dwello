@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { belegRowText, belegToggleText, uploadPurposeText } from '../questions/invoice-upload';
+import { belegRowText, belegToggleText, belegStatusText, uploadPurposeText } from '../questions/invoice-upload';
 import { addBelegOnceRead } from '../tasks/invoice-upload';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
@@ -176,5 +176,13 @@ Then(
 	'bietet der Dialog "Rechnungen hochladen" zur Datei {string} {string} an',
 	async ({ verwalter }, fileName: string, label: string) => {
 		await verwalter.sees(belegToggleText(fileName)).toBe(label);
+	}
+);
+
+// #773: a file nobody read has fields to fill in, not proposals to check
+Then(
+	'zeigt der Dialog "Rechnungen hochladen" zur Datei {string} den Stand {string}',
+	async ({ verwalter }, fileName: string, label: string) => {
+		await verwalter.sees(belegStatusText(fileName)).toBe(label);
 	}
 );

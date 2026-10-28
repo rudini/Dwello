@@ -21,6 +21,7 @@ const inRow = (fileName: string, what: string, testid: string) =>
 export const belegMessage = (fileName: string) => inRow(fileName, 'Hinweis', 'invoice-upload-row-message');
 export const belegSelected = (fileName: string) => inRow(fileName, 'Auswahl', 'invoice-upload-row-select');
 export const belegDetailsToggle = (fileName: string) => inRow(fileName, 'Angaben', 'invoice-upload-row-toggle');
+export const belegStatus = (fileName: string) => inRow(fileName, 'Stand', 'invoice-upload-row-status');
 export const belegAmount = (fileName: string) => inRow(fileName, 'Betrag', 'invoice-amount-input');
 export const belegInvoiceNumber = (fileName: string) =>
 	inRow(fileName, 'Rechnungsnummer', 'invoice-upload-invoice-number-input');

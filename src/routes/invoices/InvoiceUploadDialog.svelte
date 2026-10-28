@@ -10,6 +10,7 @@
 		invoiceOf,
 		newRow,
 		openReason,
+		stateOf,
 		withoutKi,
 		withProposal,
 		type Proposal,
@@ -95,24 +96,25 @@
 		(
 			[
 				[m.invoices_upload_status_check(), 'check'],
+				[m.invoices_upload_status_fill(), 'fill'],
 				[m.invoices_upload_status_refused(), 'refused'],
 				[m.invoices_upload_summary_failed(), 'failed']
 			] as const
 		)
-			.map(([label, status]) => ({ label, count: rows.filter((row) => row.status === status).length }))
+			.map(([label, status]) => ({ label, count: rows.filter((row) => stateOf(row) === status).length }))
 			.filter(({ count }) => count > 0)
 			.map((part) => m.invoices_upload_summary(part))
 	);
+	// with «Keine KI» nobody reads: no progress, only what is to do (#773)
+	const progress = $derived(!kiOff && counted.length > 0 && m.invoices_upload_progress({ done, count: counted.length }));
 	const status = $derived(
 		removed
 			? m.invoices_upload_removed({ name: removed })
 			: !rows.length
 				? ''
 				: done < counted.length
-					? m.invoices_upload_progress({ done, count: counted.length })
-					: [counted.length > 0 && `${m.invoices_upload_progress({ done, count: counted.length })}.`, ...outcome]
-							.filter(Boolean)
-							.join(' ')
+					? progress || ''
+					: [progress && `${progress}.`, ...outcome].filter(Boolean).join(' ')
 	);
 	// the button counts what it creates: a chosen row that still lacks something is named apart (#233)
 	const complete = $derived(chosen.filter((row) => !Object.keys(checkRow(row)).length).length);

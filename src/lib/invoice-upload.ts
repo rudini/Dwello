@@ -290,6 +290,9 @@ export const withoutKi = (row: UploadRow, reason: 'unavailable' | 'unreadable' |
 	byHand: true
 });
 
+/** The state a row's badge names: a file nobody read is filled in, not checked (#773) */
+export const stateOf = (row: UploadRow) => (row.status === 'check' && row.byHand ? 'fill' : row.status);
+
 /** Why a file is still open after creating: the first thing that keeps its invoice from being created (#245) */
 export const openReason = (row: UploadRow) => Object.values(checkRow(row))[0] ?? row.createError ?? '';
 
