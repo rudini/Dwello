@@ -1,4 +1,6 @@
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
 import { SETUP_CODE } from './tests/e2e/fixtures/fresh-installation';
@@ -28,7 +30,7 @@ const usesExtraInstances =
 // the overview's state 'ki-model-loading'
 const usesFreshInstallation =
 	!existsSync('.features-gen') ||
-	['einrichtung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme'].some((feature) =>
+	['einrichtung', 'sicherung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme'].some((feature) =>
 		existsSync(generated(feature))
 	);
 const freshDatabaseUrl = (() => {
@@ -36,6 +38,10 @@ const freshDatabaseUrl = (() => {
 	url.pathname = `${url.pathname}_fresh`;
 	return url.href;
 })();
+
+// The folder of the fresh installation's Sicherung (#718)
+const freshBackups = join(tmpdir(), 'dwello-e2e-fresh-backups');
+mkdirSync(freshBackups, { recursive: true });
 
 // The frontend's environment (sessions, sign-in test credentials, operator, gallery)
 const frontendEnv = {
@@ -219,7 +225,9 @@ export default defineConfig<{ driver: Driver }>({
 						SETUP_CODE,
 						// no LLM_* variable: the landlord sets the KI in the browser (#580); the local KI is the stand-in
 						LLM_LOCAL_URL: 'http://127.0.0.1:2530/v1',
-						ENCRYPTION_KEY: 'e2e-encryption-key-of-the-fresh-installation'
+						ENCRYPTION_KEY: 'e2e-encryption-key-of-the-fresh-installation',
+						// a folder for the Sicherung (#718), so the fresh installation asks to set it up
+						BACKUP_DIR: freshBackups
 					}
 				},
 				{

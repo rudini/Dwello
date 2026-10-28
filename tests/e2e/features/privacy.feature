@@ -137,3 +137,9 @@ Funktionalität: Datenschutz
     Dann nennt die Datenschutzerklärung unter "KI-Programme mit Zugangsschlüssel" "Dieses Programm bearbeitet die Daten nach seinen eigenen Regeln. Dwello hat darauf keinen Einfluss."
     Und nennt die Datenschutzerklärung unter "KI-Programme mit Zugangsschlüssel" "nennen Sie Ihren Mietern das Programm, seinen Anbieter und das Land, in dem er die Daten bearbeitet"
     Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jeden Abruf eines KI-Programms mit der Art der abgefragten Daten (etwa «Mieter») und dem Namen des Zugangsschlüssels, ohne Inhalte"
+
+  # #718, Fachreview 718b R-4: ohne Ordner für die Sicherung (wie in diesem Stack) sichert Dwello nichts
+  @wip
+  Szenario: Ohne Sicherung nennt die Datenschutzerklärung keine
+    Dann nennt die Datenschutzerklärung unter "Aufbewahrung" "löscht Dwello keine gespeicherten Daten von selbst"
+    Und nennt die Datenschutzerklärung unter "Aufbewahrung" nicht "Sicherung"

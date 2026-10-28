@@ -1,3 +1,4 @@
+import { execFileSync } from 'child_process';
 import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
 
@@ -10,6 +11,12 @@ export const FRESH_KI_STUB = 'http://127.0.0.1:2530';
 // the empty instance (playwright.config.ts): its KI stand-in fails the model download
 export const EMPTY_APP = 'http://localhost:3102';
 export const SETUP_CODE = 'E2E7-K4QX';
+// its database (playwright.config.ts)
+const FRESH_DATABASE_URL = (() => {
+	const url = new URL(process.env.E2E_DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e');
+	url.pathname = `${url.pathname}_fresh`;
+	return url.href;
+})();
 
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];
@@ -24,10 +31,16 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			accounts.push(account.email);
 			return account;
 		},
-		/** Dwello after its setup: the account exists */
-		async setUp() {
+		/** Dwello after its setup: the account exists, the Sicherung is not set up yet (#718) */
+		async setUpWithoutBackup() {
 			const { email, password } = this.newAccount();
 			await api.put('local-accounts', { email, password });
+		},
+		/** Dwello after its setup: the account exists and the landlord confirmed the Wiederherstellungscode (#718) */
+		async setUp() {
+			await this.setUpWithoutBackup();
+			const { code } = (await api.get('backup')) as { code: string };
+			await api.post('backup/confirm', { code });
 		},
 		/** How far the KI stand-in reports the model download */
 		modelLoaded: (percent: number) => kiStub.post('stub/pull', { percent }),
@@ -71,6 +84,8 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 				await api.remove(`audit-log/${entry.id}`);
 			for (const id of buildings) await api.remove(`buildings/${id}`);
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
+			// the API cannot undo a confirmed Wiederherstellungscode (#718)
+			execFileSync('bun', ['run', 'e2e-backup-reset'], { cwd: 'backend', env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL } });
 		}
 	};
 }
