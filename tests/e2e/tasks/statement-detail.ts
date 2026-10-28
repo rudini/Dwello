@@ -1,6 +1,6 @@
 import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, Enter, EnterDate, Navigate } from '../screenplay/interactions';
+import { Click, DownloadFrom, Enter, EnterDate, Navigate, Wait } from '../screenplay/interactions';
 import {
 	confirmCorrectButton,
 	confirmEarlyPaidDateButton,
@@ -15,6 +15,7 @@ import {
 	createCorrectionButton,
 	replacedByLink,
 	replacedContractLink,
+	correctionAnswer,
 	replacesLink,
 	confirmDeleteStatementButton,
 	confirmMarkPaidButton,
@@ -98,7 +99,8 @@ export const openCorrectConfirmation = Click.on(correctStatementButton);
 export const openCorrectionFromHint = Click.on(laterCorrectButton);
 export const correctStatement: Activity = (actor) =>
 	actor.attemptsTo(Click.on(correctStatementButton), Click.on(confirmCorrectButton));
-export const createCorrection = Click.on(createCorrectionButton);
+// #932: done once the berichtigte Abrechnung or the refusal shows, so no later step or the clean-up runs while it is saved
+export const createCorrection: Activity = (actor) => actor.attemptsTo(Click.on(createCorrectionButton), Wait.until(correctionAnswer));
 export const openReplacedStatement = Click.on(replacesLink);
 export const openCorrection = Click.on(replacedByLink);
 export const openReplacedContract = Click.on(replacedContractLink);
