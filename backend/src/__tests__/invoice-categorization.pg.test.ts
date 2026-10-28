@@ -155,6 +155,26 @@ describe('Kategorie der KI überschreiben', () => {
 	});
 });
 
+// R1 (#916, migration-mva.md): fällt die KI aus, erfasst der Vermieter Rechnungen trotzdem und kategorisiert von Hand
+describe('Rechnung erfassen ohne KI', () => {
+	it('speichert eine Rechnung ohne Kategorie, wenn die KI nicht erreichbar ist, ohne Vorschlag der KI', async () => {
+		const { buildingId } = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as { buildingId: string };
+		const response = await sendJson('POST', '/api/v1/invoices', {
+			buildingId,
+			billingEntityName: `Ohne KI ${token}`,
+			description: 'Leck Steigleitung',
+			amount: '800.00',
+			invoiceDate: '2025-05-12',
+			distributionKeyId: await perAreaKey()
+		});
+		const saved = (await response.json()) as Invoice;
+		await deleteInvoice(saved.id);
+
+		expect(response.status).toBe(201);
+		expect(saved).toMatchObject({ categoryId: null, llmCategoryId: null });
+	});
+});
+
 describe('Kategorie der KI für eine neue Rechnung', () => {
 	// Ob Kosten umlagefähig sind, entscheidet die Kategorie (OR 257a), nicht die Einschätzung der KI
 	it('legt eine Reparatur nicht auf die Mieter um, auch wenn die KI sie für umlagefähig hält', async () => {
