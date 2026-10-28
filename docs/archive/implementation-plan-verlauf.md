@@ -1,23 +1,9 @@
 
 
-## Session: #782 upgrade check (U1), part 2: tables empty in the demo data
+## Session: #919 statements/outdated without N+1
 
-- [x] The upgrade check fills `audit_log`, `invoice_documents`, `ki_settings` and `local_accounts` with one row each before migrating, and warns about any table still empty
-- [x] Red run: a probe migration that empties `local_accounts` fails the check («local_accounts 1 -> 0»)
-- [x] Slice review round 1 (closing): `docs/reviews/i782b-review-1.md`; C-1 (Minor: tags before v0.92.0 lack two of the tables, the fixture fails there with a raw psql error; CI uses the latest tag) stays in the report
-- [x] No scenario: tooling only
-- [x] PR `Refs #782` (the «unhealthy» decision stays with the product owner): pushed after this archive
-
-## Session: #782 decision recorded (U1, failed migration)
-
-- [x] Product owner decision 28.10.2026 (comment in #782): «Restarting» with the cause in the log is enough; recorded in `docs/architecture/utility-tree.md` (U1) and `fitness-functions.md` §4 (No scenario: documentation only; no review round: no code changed)
-- [x] PR `Fixes #782`: pushed after this archive
-
-## Session: #781 P2 measured once
-
-- [x] Product owner decision 28.10.2026 recorded in #781: measure once, no CI gate while A4 is open
-- [x] `tools/fitness/p2-benchmark.ts`: 50 apartments, 75 contracts, 300 invoices, 225 statements over 2021–2025, every list and overview route 100 times in-process; result in `docs/architecture/utility-tree.md` (P2) and `fitness-functions.md` §4
-- [x] `GET /statements/outdated` 1110 ms p95, above 500 ms: issue #919
-- [x] No scenario: measurement tooling only
-- [x] Slice review round 1 (closing): `docs/reviews/i781-review-1.md`; C-1 to C-3 (Minor, docs) fixed
-- [x] PR `Fixes #781`: pushed after this archive
+- [x] Measured with `bun run fitness:p2`: 1012–1139 ms p95; `getStatement` per statement is ~70 % of the time, the invoices of the period ~25 %
+- [x] `outdatedStatements` and `draftsToSend` take the listed statements and load invoices and Tankbestand once per building and period; the full statement only for a correctable one (No scenario: same answer, pinned by `statement-invoices.pg.test.ts`, `dashboard.pg.test.ts`)
+- [x] `bun run fitness:p2`: outdated 1100 → 80 ms p95, dashboard 227 → 214 ms; docs (P2)
+- [x] Slice review round 1 (closing): `docs/reviews/i919-review-1.md`, no findings
+- [x] PR `Fixes #919`: pushed after this archive
