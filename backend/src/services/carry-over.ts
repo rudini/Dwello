@@ -3,7 +3,7 @@
  * will (#506, Fachreview 506-1) and which one a draft would count now. Each rule takes the name of the row it is about,
  * the table or an alias, so a subquery can ask it of another row (code review 506-1 C-1)
  */
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { tenants, utilityStatements } from '../db/schema';
 
@@ -65,21 +65,28 @@ export const countedBy = sql<string | null>`${countedByOf(T)}`;
 export const openCarry = sql<boolean>`${openOf(T)}`;
 
 /**
- * #506 C: a draft that would count another Übertrag now than the one it counts (Fachreview 448-3 V-23): the latest
- * earlier statement of the contract with a Saldo carried over, not open or settled by hand, that no statement of
- * another period counts yet, as `carriedOver` finds it
+ * The Übertrag (#448) a statement of the contract and period counts: the latest earlier statement of the contract with
+ * a Saldo carried over, not open or settled by hand (#506, Fachreview 506-1 V-1), that no statement of another period
+ * counts yet; one rule for the calculation and for a draft's check (code review 506-2 C-7)
  */
-export const carryChanged = sql<boolean>`(${sql.raw(T)}.status = 'draft' and (
+const carriedNow = (contract: SQL, start: SQL, end: SQL) => sql`(
 	select prev.id from utility_statements prev
-	where prev.contract_id = ${sql.raw(T)}.contract_id and ${carriableOf('prev')} and prev.carry_settled_on is null
-		and not ${openOf('prev')} and prev.period_end < ${sql.raw(T)}.period_start
+	where prev.contract_id = ${contract} and ${carriableOf('prev')} and prev.carry_settled_on is null
+		and not ${openOf('prev')} and prev.period_end < ${start}
 		and not exists (
 			select 1 from utility_statements counting
-			where counting.carried_from_id = prev.id
-				and (counting.period_start <> ${sql.raw(T)}.period_start or counting.period_end <> ${sql.raw(T)}.period_end)
+			where counting.carried_from_id = prev.id and (counting.period_start <> ${start} or counting.period_end <> ${end})
 		)
 	order by prev.period_end desc limit 1
-) is distinct from ${sql.raw(T)}.carried_from_id)`;
+)`;
+
+/** The id of the Übertrag a new statement of the contract and period counts */
+export const carriedOverId = (contractId: string, periodStart: string, periodEnd: string) =>
+	carriedNow(sql`${contractId}::uuid`, sql`${periodStart}::date`, sql`${periodEnd}::date`);
+
+// #506 C: a draft that would count another Übertrag now than the one it counts (Fachreview 448-3 V-23)
+const row = (column: string) => sql.raw(`${T}.${column}`);
+export const carryChanged = sql<boolean>`(${row('status')} = 'draft' and ${carriedNow(row('contract_id'), row('period_start'), row('period_end'))} is distinct from ${row('carried_from_id')})`;
 
 /** The open Überträge for the Übersicht (#506), the oldest first */
 export const openCarryOvers = () =>

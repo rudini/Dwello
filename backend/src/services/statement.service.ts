@@ -38,7 +38,7 @@ import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
-import { carriable, carryChanged, countedBy, openCarry } from './carry-over';
+import { carriable, carriedOverId, carryChanged, countedBy, openCarry } from './carry-over';
 import type { StatementWithDetails } from '../api/statement';
 
 export interface StatementFilters {
@@ -408,22 +408,7 @@ async function carriedOver({ contractId, periodStart, periodEnd }: Pick<Statemen
 	const [carried] = await db
 		.select({ id: utilityStatements.id, balance: utilityStatements.balance })
 		.from(utilityStatements)
-		.where(
-			and(
-				eq(utilityStatements.contractId, contractId),
-				carriable,
-				isNull(utilityStatements.carrySettledOn),
-				sql`not ${openCarry}`,
-				lt(utilityStatements.periodEnd, periodStart),
-				sql`not exists (
-					select 1 from utility_statements counting
-					where counting.carried_from_id = utility_statements.id
-						and (counting.period_start <> ${periodStart} or counting.period_end <> ${periodEnd})
-				)`
-			)
-		)
-		.orderBy(desc(utilityStatements.periodEnd))
-		.limit(1);
+		.where(sql`${utilityStatements.id} = ${carriedOverId(contractId, periodStart, periodEnd)}`);
 	return carried;
 }
 

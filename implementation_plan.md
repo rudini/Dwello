@@ -51,5 +51,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Slice review round 1: `docs/reviews/506-review-1.md`; C-1 (Major, V-8 decided but not built): fixed without an extra query (the draft list computes `carryChanged` in SQL), pg test seen red; C-2, C-4, C-5 fixed (C-2 tests red by taking each condition out); C-3 rejected: the decision in #506 names a Nebenkostenpauschale only
 - [x] Persona Helga: `docs/design/personas/helga-506.md` (no Blocker/Major; P-1 to P-3 Minor stay)
 - [x] `daten-pruefer`: `docs/reviews/506-datenpruefung-1.md` (to the Rappen; D-1 Minor, an off-grid legacy Saldo is not rounded again when a draft loses its Übertrag, «Neu berechnen» heals it, stays)
-- [ ] Re-review round 2 of the C-1 fix
+- [x] Re-review round 2: `docs/reviews/506-review-2.md` (C-1 closed; C-6 Major rejected: the «zu versenden» count is global over every draft of `dwello_e2e`, which parallel scenarios change at any time, so no scenario can assert it (`tests/e2e/CLAUDE.md`, Isolation); `statement-carry-over.pg.test.ts` asserts it; C-7 Minor fixed: one SQL rule `carriedNow` for the calculation and the draft check)
+- [ ] Closing review before the push
 - [ ] PR merged
