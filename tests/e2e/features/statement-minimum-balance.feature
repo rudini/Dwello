@@ -170,3 +170,43 @@ Funktionalität: Saldo unter CHF 5
       | 1195.05  | Erledigt  |
       | 1195     | Versendet |
       | 1195.02  | Versendet |
+
+  # #506 C: ein Entwurf, der jetzt einen anderen Übertrag verrechnen würde, ist vor dem Versand nicht aktuell
+  # (Fachreview 448-3 V-23); 2025 entstand, bevor die Abrechnung 2024 mit ihrer Nachzahlung 3.00 versendet war
+  @wip
+  Szenario: Der Versand eines Entwurfs mit geändertem Übertrag rät zum Neu berechnen
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1250" Franken für 2025
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2025
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
+    Dann sagt die Bestätigung vor dem Versand "Dieser Entwurf ist nicht aktuell"
+    Und sagt die Bestätigung vor dem Versand "Seit dem Erstellen dieses Entwurfs hat sich der Übertrag aus einer früheren Abrechnung geändert. Berechnen Sie ihn neu, bevor Sie ihn zustellen."
+
+  # #506 B: ein Übertrag, den keine Abrechnung mehr verrechnet, wird eine Aufgabe; hier endet der Mietvertrag nachträglich
+  # in der übertragenen Periode (Fachreview 448-1 M-3), der Liegenschaftsverwalter gleicht ihn von Hand aus
+  @wip
+  Szenario: Ein Übertrag ohne nächste Abrechnung wird zur Aufgabe
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und der Mietvertrag von "Anna Keller" endet am "2024-12-31"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann sagt die Aufgabe "Übertrag ausgleichen" für "Anna Keller" "ist noch offen: Nachzahlung CHF 3.00. Keine Abrechnung verrechnet ihn mehr. Fordern Sie den Betrag beim Mieter ein und markieren Sie den Übertrag dann auf der Abrechnung als ausgeglichen."
+    Wenn der Liegenschaftsverwalter die Aufgabe "Übertrag ausgleichen" für "Anna Keller" beginnt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+
+  @wip
+  Szenario: Ein von Hand ausgeglichener Übertrag ist keine Aufgabe mehr
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und der Mietvertrag von "Anna Keller" endet am "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Dann sagt die Abrechnung "Der Übertrag ist noch offen. Keine Abrechnung verrechnet ihn mehr."
+    Wenn der Liegenschaftsverwalter den Übertrag als ausgeglichen markiert
+    Dann sagt die Abrechnung "Übertrag von Hand ausgeglichen am"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht keine Aufgabe "Übertrag ausgleichen" für "Anna Keller"

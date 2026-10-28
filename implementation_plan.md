@@ -40,4 +40,10 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Closing review: `docs/reviews/512-review-4.md` (C-5, C-6 closed; C-7 Minor: the PR text names the two tests that pin kept behaviour)
 - [x] CI fix: fitness P2 counted one more query on `/dashboard` and `/contracts/missing-statements`; `periodSetting()` reads the setting and its change in one query
 - [x] Glossary «Hinweis auf fehlende Abrechnungen»: sentence on how periods are cut, decided by the product owner on 2026-10-28 in chat (proposal of Fachreview 512-1)
-- [ ] PR merged
+- [x] PR merged: #938
+
+### #506 Übertrag that reaches no statement
+- [x] `@wip` scenarios in `statement-minimum-balance.feature` (C: send dialog of a draft whose Übertrag changed; B: task on the Übersicht and «als ausgeglichen markieren»), seen red at the missing behaviour
+- [x] Decided by recommendation (product owner 2026-10-28: decide by my recommendations): C stays in the send dialog (the overview text of outdated drafts is pinned by a scenario and stays); B «settled by hand» is a date on the statement (`carry_settled_on`, migration) set from the statement page after a confirmation
+- [ ] `fach-reviewer` on the scenarios and the rule (step 1)
+- [ ] Tests and code, slice review, persona, `daten-pruefer`, PR merged

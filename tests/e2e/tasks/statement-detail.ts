@@ -2,6 +2,8 @@ import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
 import { Click, DownloadFrom, Enter, EnterDate, Navigate, Wait } from '../screenplay/interactions';
 import {
+	carrySettleButton,
+	confirmCarrySettleButton,
 	confirmCorrectButton,
 	confirmEarlyPaidDateButton,
 	correctPaidAmountInput,
@@ -113,3 +115,6 @@ export const deliverByLetterInstead: Activity = (actor) =>
 export const confirmEarlyPaidDate = Click.on(confirmEarlyPaidDateButton);
 export const correctStatementPaid = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(correctStatementButton), Enter.theValue(amount).into(correctPaidAmountInput), Click.on(confirmCorrectButton));
+
+// #506 B: the landlord paid out or claimed the Übertrag himself
+export const settleCarryOver: Activity = (actor) => actor.attemptsTo(Click.on(carrySettleButton), Click.on(confirmCarrySettleButton));

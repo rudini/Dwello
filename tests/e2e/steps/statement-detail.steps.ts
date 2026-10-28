@@ -81,7 +81,8 @@ import {
 	openStatementTenant,
 	resetPayment,
 	sendStatement,
-	confirmSending
+	confirmSending,
+	settleCarryOver
 } from '../tasks/statement-detail';
 import { inDays } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
@@ -686,3 +687,7 @@ Given(
 		await seed.changeFuelStock(building, date, amount);
 	}
 );
+
+When('der Liegenschaftsverwalter den Übertrag als ausgeglichen markiert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(settleCarryOver);
+});

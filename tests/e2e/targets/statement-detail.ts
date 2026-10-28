@@ -121,3 +121,8 @@ export const correctPaidAmountInput = target('Bereits bezahlt', (page) => page.g
 export const statementAdvancePaid = target('Akontobeiträge', (page) => page.getByTestId('statement-advance-paid'));
 // #464 (F-4): the berichtigte Abrechnung deducts another Akonto than the statement it replaces
 export const advanceDiffers = target('Hinweis zum anderen Akonto', (page) => page.getByTestId('statement-advance-differs'));
+// #506 B: an Übertrag no statement counts any more, settled by hand
+export const carrySettleButton = target('Übertrag als ausgeglichen markieren', (page) => page.getByTestId('statement-carry-settle'));
+export const confirmCarrySettleButton = target('Ausgleich des Übertrags bestätigen', (page) =>
+	page.getByTestId('statement-carry-settle-confirm')
+);
