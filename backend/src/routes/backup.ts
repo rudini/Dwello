@@ -3,6 +3,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { LANGUAGES } from '../db/schema';
 import { backupSetup, confirmBackupCode, emergencySheet } from '../services/backup.service';
 import { refusedWith } from '../services/coded-error';
 import { fileResponse } from './file-response';
@@ -38,7 +39,7 @@ export const backupRoutes = new Elysia({ prefix: '/api/v1/backup' })
 		},
 		{
 			query: t.Object({
-				language: t.Union([t.Literal('de'), t.Literal('fr'), t.Literal('it'), t.Literal('en')]),
+				language: t.UnionEnum(LANGUAGES),
 				address: t.String({ maxLength: 512 })
 			})
 		}

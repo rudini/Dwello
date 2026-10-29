@@ -86,7 +86,15 @@ describe('Notfallblatt', () => {
 		expect(response.headers.get('content-type')).toBe('application/pdf');
 		const text = readPdf(Buffer.from(await response.arrayBuffer())).flowing;
 		expect(text).toContain(code!);
-		expect(text).toContain(createdAt!.slice(0, 10).split('-').reverse().join('.'));
+		// the Swiss day of the code, not its UTC day: after midnight in Zurich they differ
+		expect(text).toContain(
+			new Date(createdAt!).toLocaleDateString('de-CH', {
+				timeZone: 'Europe/Zurich',
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			})
+		);
 		expect(text).toContain('https://dwello.example.ch');
 		expect(text).toContain('im Ordner «backups»');
 		expect(text).toContain('Im Notfall: Geben Sie dieses Blatt der Person, die Dwello betreut.');
