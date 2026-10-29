@@ -1,7 +1,7 @@
 name: Release
 
 # Every merge to main gets the next version as a tag and a GitHub Release (issue #173); the app shows it in the
-# footer (vite.config.ts). A manual run on main sets a version by hand, e.g. 1.0.0, in place of the one main's last
+# footer (vite.config.ts). Its images go to ghcr.io for compose.yaml (#578). A manual run on main sets a version by hand, e.g. 1.0.0, in place of the one main's last
 # merge got.
 on:
   push:
@@ -26,11 +26,54 @@ jobs:
     # A manual run on another branch would tag a commit outside main
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - env:
+      - id: tag
+        env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
         run: tools/release/release.sh
+
+  # The images compose.yaml starts (#578), for PCs and Macs (amd64) and small ARM servers such as a Raspberry Pi (arm64),
+  # tagged with the version and «latest»; public with the repository, so no sign-in is needed to pull them
+  images:
+    name: Images
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - part: frontend
+            context: .
+            file: Dockerfile
+          - part: backend
+            context: backend
+            file: backend/Dockerfile
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          # the footer shows the version (vite.config.ts); .git is not in the build context
+          build-args: APP_VERSION=v${{ needs.release.outputs.version }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          tags: |
+            ghcr.io/rudini/dwello-${{ matrix.part }}:${{ needs.release.outputs.version }}
+            ghcr.io/rudini/dwello-${{ matrix.part }}:latest

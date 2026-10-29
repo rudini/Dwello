@@ -13,9 +13,14 @@ if [ -n "${VERSION:-}" ]; then
   done
   next=$VERSION
 else
-  # A merge already tagged (a re-run) keeps its version
-  git describe --tags --exact-match --match 'v*' HEAD 2>/dev/null && exit 0
+  # A merge already tagged (a re-run) keeps its version, and its images get that one (#578)
+  if tag=$(git describe --tags --exact-match --match 'v*' HEAD 2>/dev/null); then
+    echo "version=${tag#v}" >> "${GITHUB_OUTPUT:-/dev/null}"
+    exit 0
+  fi
   last=$(git describe --tags --abbrev=0 --match 'v*')
   next=$(git log --format=%B%x00 "$last"..HEAD | node "$(dirname "$0")/next-version.mjs" "$last")
 fi
 gh release create "v$next" --target "$GITHUB_SHA" --title "v$next" --generate-notes
+# the version the images of this release are tagged with (#578)
+echo "version=$next" >> "${GITHUB_OUTPUT:-/dev/null}"

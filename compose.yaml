@@ -1,0 +1,243 @@
+# Dwello from the published images (#578): download this one file into an empty folder, then
+#   docker compose up -d
+# An update: docker compose pull && docker compose up -d (the data stays in the volumes). A fixed version instead of
+# the newest: DWELLO_VERSION=1.4.0 in .env. Installation and settings: docs/installation.md.
+# docker-compose.prod.yml builds the same from a clone (backend/src/__tests__/compose-images.test.ts keeps both alike).
+
+# the volumes of an installation from a clone of «Dwello» carry this name too: moving to this file keeps the data
+name: dwello
+
+services:
+  # ============================================
+  # Keys of the installation (#577): made once on the first start, kept in the volume dwello_secrets; a value set in
+  # .env wins (older installations)
+  # ============================================
+  secrets:
+    image: alpine:3.20
+    container_name: dwello-secrets
+    command: ["sh", "/init-secrets.sh", "/run/dwello", "/pgdata", "/backups"]
+    configs:
+      - source: init-secrets
+        target: /init-secrets.sh
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+    volumes:
+      - dwello_secrets:/run/dwello
+      - postgres_data:/pgdata:ro
+      - ./backups:/backups
+
+  # Only the frontend publishes a port: backend, database and KI stay on dwello-network, since Docker's published ports
+  # bypass the host firewall and the web app is the one place that checks who may sign in (#719, #753, #747)
+  # ============================================
+  # Frontend - SvelteKit Application
+  # ============================================
+  frontend:
+    image: ghcr.io/rudini/dwello-frontend:${DWELLO_VERSION:-latest}
+    container_name: dwello-frontend
+    restart: unless-stopped
+    command: ["sh", "-c", "export JWT_SECRET=$$(cat /run/dwello/jwt_secret) && exec node build"]
+    volumes:
+      - dwello_secrets:/run/dwello:ro
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BACKEND_URL=http://backend:3001
+      - OPERATOR_NAME=${OPERATOR_NAME:-}
+      - OPERATOR_ADDRESS=${OPERATOR_ADDRESS:-}
+      - OPERATOR_CONTACT=${OPERATOR_CONTACT:-}
+      - OPERATOR_SERVER_COUNTRY=${OPERATOR_SERVER_COUNTRY:-}
+      - MAIL_PROVIDER_NAME=${MAIL_PROVIDER_NAME:-}
+      - MAIL_PROVIDER_COUNTRY=${MAIL_PROVIDER_COUNTRY:-}
+      - PUBLIC_APP_NAME=Dwello
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      # the address Dwello is opened at: without it the Node server takes every request for https and refuses forms sent over http
+      - ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}
+      # Who may sign in with a provider like Google (#51): comma-separated e-mail addresses, «*» for every account;
+      # with a provider and without it the frontend does not start
+      - ALLOWED_EMAILS=${ALLOWED_EMAILS:-}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID:-}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET:-}
+      - OAUTH_GOOGLE_REDIRECT_URI=${OAUTH_GOOGLE_REDIRECT_URI:-}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-localhost}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
+    depends_on:
+      secrets:
+        condition: service_completed_successfully
+      backend:
+        condition: service_healthy
+    networks:
+      - dwello-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # Backend - ElysiaJS API
+  # ============================================
+  backend:
+    # the same image as the service restore, so an update brings both up to date (#718)
+    image: ghcr.io/rudini/dwello-backend:${DWELLO_VERSION:-latest}
+    container_name: dwello-backend
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - >-
+        export DATABASE_URL=postgresql://dwello:$$(cat /run/dwello/db_password)@postgres:5432/dwello
+        JWT_SECRET=$$(cat /run/dwello/jwt_secret) ENCRYPTION_KEY=$$(cat /run/dwello/encryption_key)
+        && bun scripts/migrate.ts && exec bun run src/index.ts
+    volumes:
+      - dwello_secrets:/run/dwello:ro
+      # the Sicherung (#718): daily, encrypted with the Wiederherstellungscode; copy the folder to another device
+      - ./backups:/backups
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - BACKUP_DIR=/backups
+      # The KI (#580): the landlord sets it under «Einstellungen» › «KI»; any LLM_* set in .env takes precedence and
+      # locks that page. LLM_LOCAL_URL only says where the local KI runs
+      - LLM_LOCAL_URL=http://ollama:11434/v1
+      - LLM_BASE_URL=${LLM_BASE_URL:-}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-}
+      - LLM_PROVIDER_COUNTRY=${LLM_PROVIDER_COUNTRY:-}
+      - LLM_MODEL=${LLM_MODEL:-}
+      - LLM_ENABLED=${LLM_ENABLED:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+      # E-mail to tenants (#568); without MAIL_TRANSPORT reminders are filed as «zu versenden» and statements are not sent
+      - MAIL_TRANSPORT=${MAIL_TRANSPORT:-}
+      - MAIL_FROM=${MAIL_FROM:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+    depends_on:
+      secrets:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    networks:
+      - dwello-network
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3001/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # Wiederherstellung (#718): only on request, docs/installation.md «Wiederherstellung»
+  # docker compose run --rm restore /backups/<Datei>
+  # ============================================
+  restore:
+    image: ghcr.io/rudini/dwello-backend:${DWELLO_VERSION:-latest}
+    profiles: ["restore"]
+    user: root
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        export DATABASE_URL=postgresql://dwello:$$(cat /run/dwello/db_password)@postgres:5432/dwello SECRETS_DIR=/run/dwello
+        && exec bun scripts/restore.ts "$$@"
+      - restore
+    volumes:
+      - dwello_secrets:/run/dwello
+      - ./backups:/backups:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dwello-network
+
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: dwello-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dwello
+      POSTGRES_PASSWORD_FILE: /run/dwello/db_password
+      POSTGRES_DB: dwello
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - dwello_secrets:/run/dwello:ro
+    depends_on:
+      secrets:
+        condition: service_completed_successfully
+    networks:
+      - dwello-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dwello -d dwello"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Ollama - LLM for Invoice Categorization
+  # ============================================
+  ollama:
+    image: ollama/ollama:0.40.11
+    container_name: dwello-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - dwello-network
+    # The backend downloads the model on its first start (#577); not needed when the KI is an external provider (#580)
+
+networks:
+  dwello-network:
+    driver: bridge
+
+volumes:
+  # the keys of the installation (#577): back it up with the database
+  dwello_secrets:
+    driver: local
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+# docker/init-secrets.sh, here so this file is all an installation needs ($ written as $$ for Compose)
+configs:
+  init-secrets:
+    content: |
+      #!/bin/sh
+      # The keys of an installation (#577), before Dwello starts: made once into the volume, kept on every later start.
+      # A value the operator set in .env wins (older installations), and a database made with the old default password
+      # «dwello» keeps it. Usage: init-secrets.sh <key directory> <the database's data directory>
+      set -eu
+      dir=$$1
+      pgdata=$$2
+      mkdir -p "$$dir"
+
+      random() { tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 48; }
+
+      # the frontend and backend run as their own users and read the keys; only this script writes them
+      keep() {
+      	rm -f "$$dir/$$1"
+      	printf '%s' "$$2" > "$$dir/$$1"
+      	chmod 444 "$$dir/$$1"
+      }
+
+      if [ -n "$${JWT_SECRET:-}" ]; then keep jwt_secret "$$JWT_SECRET"
+      elif [ ! -s "$$dir/jwt_secret" ]; then keep jwt_secret "$$(random)"; fi
+
+      if [ -n "$${POSTGRES_PASSWORD:-}" ]; then keep db_password "$$POSTGRES_PASSWORD"
+      elif [ ! -s "$$dir/db_password" ]; then
+      	if [ -f "$$pgdata/PG_VERSION" ]; then keep db_password dwello; else keep db_password "$$(random)"; fi
+      fi
+
+      # stored secrets such as the KI's API key (#580) are encrypted with it; it belongs in the backup
+      if [ ! -s "$$dir/encryption_key" ]; then keep encryption_key "$$(random)"; fi
+
+      # The folder of the Sicherung (#718), next to docker-compose.prod.yml: the backend writes it as the image's user bun (1000);
+      # only root may hand it over, so outside the container (the tests) the folder stays the caller's
+      if [ -n "$${3:-}" ]; then mkdir -p "$$3" && { chown 1000:1000 "$$3" 2>/dev/null || true; } && chmod 755 "$$3"; fi

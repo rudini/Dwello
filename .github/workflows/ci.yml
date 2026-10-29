@@ -101,7 +101,7 @@ jobs:
         working-directory: backend
 
   # Both images as the deployment builds them (docker-compose.prod.yml): a broken Dockerfile went unnoticed until the
-  # demo deployment (#727); build only, nothing is pushed
+  # demo deployment (#727); nothing is pushed, the release publishes them (#578)
   docker:
     name: Docker images
     needs: changes
@@ -109,13 +109,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # tagged as compose.yaml names the published images, so the step below starts these
       - name: Build frontend image
-        run: docker build --file Dockerfile .
+        run: docker build --file Dockerfile --tag ghcr.io/rudini/dwello-frontend:latest .
       # The Sicherung (#718) needs pg_dump of the database's major version (postgres:16) in the image
       - name: Build backend image
         run: |
-          docker build --tag dwello-backend backend
-          docker run --rm dwello-backend pg_dump --version | grep -E ' 16\.'
+          docker build --tag ghcr.io/rudini/dwello-backend:latest backend
+          docker run --rm ghcr.io/rudini/dwello-backend:latest pg_dump --version | grep -E ' 16\.'
+      # compose.yaml alone in an empty folder, as a landlord downloads it (#578), with the images built above; the web
+      # app with what it needs (the local KI is not one of it, so its download stays out of CI)
+      - name: Start compose.yaml
+        run: |
+          mkdir "$RUNNER_TEMP/dwello" && cp compose.yaml "$RUNNER_TEMP/dwello/" && cd "$RUNNER_TEMP/dwello"
+          docker compose up --detach --wait --wait-timeout 300 --pull never frontend || { docker compose logs; exit 1; }
+          curl --fail --silent --show-error http://localhost:3000/health
+          docker compose down --volumes
 
   static-checks:
     name: Lint and types
