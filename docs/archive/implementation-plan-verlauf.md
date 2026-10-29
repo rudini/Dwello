@@ -174,3 +174,12 @@
 - [x] Fach review step 5: `docs/reviews/718b-fachreview-3.md` (V-1, R-1 Major, fixed), `718b-fachreview-4.md` (closed; V-5, R-3 adopted)
 - [x] Personas: `helga-718b.md` (P-1 Major, fixed; re-run `helga-718b-2.md`), `sven-718b.md`, `marco-718b.md`, `weber-718b.md` (P-1 Major, fixed), `anna-718b.md`; Minors met by two personas: #947
 - [x] PR `Refs #718`, `Spec change approved: #718`: pushed after this archive
+
+## Session: rule changes from the collected review (2026-10-29)
+
+### #948 Workflow: three rule changes
+- [x] Product owner 2026-10-29: apply proposals 1 to 3 of `docs/reviews/workflow-rules-review-2026-10-29.md`
+- [x] `CLAUDE.md` Workflow 1 («Stand» date with the legal text), `tests/e2e/CLAUDE.md` «Failure states» (`FailRequests` never reaches `fail()`), `no-german-in-code.test.ts` (code words such as `lang`)
+- [x] No scenario: rules and a test helper; nothing in the app changes
+- [x] Review: `docs/reviews/948-review-1.md` (C-1 Minor fixed: the rule names the `Spec change approved` line)
+- [x] PR: pushed after this archive

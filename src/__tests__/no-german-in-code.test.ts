@@ -17,8 +17,13 @@ const german = vocabulary(de);
 const germanOnlyMessages = new Set(
 	Object.values(de).filter((text) => !Object.values(en).includes(text))
 );
+// Code words that are German words too: a UI text using one must not make unrelated code fail (#817: «lang» in %lang%)
+const codeWords = new Set(['lang']);
 const germanWords = (text: string) => [
-	...words(text).filter((word) => /[äöüß]/.test(word) || (german.has(word) && !english.has(word))),
+	...words(text).filter(
+		(word) =>
+			/[äöüß]/.test(word) || (german.has(word) && !english.has(word) && !codeWords.has(word))
+	),
 	...(germanOnlyMessages.has(text.trim()) ? [text.trim().toLowerCase()] : [])
 ];
 
