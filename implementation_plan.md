@@ -76,6 +76,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Closing review: `docs/reviews/817-review-3.md` (C-2 rejection holds, closed; C-13 Major: a scenario for copying, red without the buttons, Chromium gets `clipboard-write`; C-14 Minor: tests of the address toast and the refused revoke, red by taking the lines out)
 - [x] Closing review of the C-13 fix: `docs/reviews/817-review-4.md` (C-13, C-14 closed; Firefox and WebKit checked by a full CI run on the branch)
 - [x] PR pushed after this review
-- [x] CI fix: fitness P2, the Protokoll list needed 4 queries for recording expiries; one statement now (reproduced locally first)
+- [x] CI fix: fitness P2, the Protokoll list needed 4 queries for recording expiries; one statement now (reproduced locally first); review `docs/reviews/817-review-5.md` (no findings)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-817.md` (the session is archived before the last pull request of this request, #578)
 - [ ] PR merged
