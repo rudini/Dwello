@@ -5,7 +5,8 @@
 
 import { app } from './app';
 import { checkLocalKi, llmConfig, llmRecipient } from './config/llm';
-import { testConnection } from './db/connection';
+import { DATABASE_URL, testConnection } from './db/connection';
+import { startBackups } from './services/backup.service';
 import { loadModel } from './services/ki-model.service';
 import { currentKi } from './services/ki-settings.service';
 import { announceSetupCode } from './services/setup.service';
@@ -25,6 +26,8 @@ app.listen(Number(process.env.PORT) || 3001);
 
 // #577: the Einrichtungscode while Dwello has no account yet, and the local KI's model when it is missing
 announceSetupCode().catch((error) => console.warn('⚠️ Einrichtungscode nicht erzeugt', error));
+// #718: the daily Sicherung once a Wiederherstellungscode is confirmed
+startBackups(DATABASE_URL);
 currentKi()
 	.then(({ mode, baseUrl, model }) => loadModel({ baseUrl, model, local: mode === 'local' }))
 	.catch((error) => console.warn('⚠️ KI-Modell nicht geprüft', error));

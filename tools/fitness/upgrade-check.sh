@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # U1 fitness function (docs/architecture/fitness-functions.md): an update keeps the landlord's data. Loads the demo
 # data with the previous release's backend, migrates with this checkout's backend and fails when a migration fails,
-# a table lost rows or an amount of the statements changed (#782: row counts do not see changed amounts).
+# a table lost rows or an amount of the statements changed (#782: row counts do not see changed amounts); then R1 (#718):
+# a Sicherung of that data restores with this checkout (tools/fitness/restore-check.ts).
 # Usage: tools/fitness/upgrade-check.sh [tag]   (default: the newest v* tag before HEAD; needs the tags and psql)
 # PostgreSQL: PGHOST/PGUSER/PGPASSWORD (default localhost, dwello, dwello); the database dwello_upgrade is recreated.
 set -euo pipefail
@@ -11,7 +12,8 @@ TAG=${1:-$(git describe --tags --abbrev=0 --match 'v*' HEAD^)}
 DB=dwello_upgrade
 export DATABASE_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:5432/$DB"
 OLD=$(mktemp -d)
-trap 'git worktree remove --force "$OLD"' EXIT
+export RESTORE_CHECK_DIR=$(mktemp -d)
+trap 'git worktree remove --force "$OLD"; rm -rf "$RESTORE_CHECK_DIR"' EXIT
 start=$(date +%s)
 
 git worktree add --detach --force "$OLD" "$TAG" >/dev/null
@@ -42,6 +44,8 @@ counts >"$OLD/before.txt"
 empty=$(awk '$2 == 0 { print $1 }' "$OLD/before.txt" | paste -sd ' ' -)
 [ -z "$empty" ] || echo "::warning title=Fitness upgrade::U1: the tables $empty are empty before the upgrade, so the check cannot see a loss there. Fill them in the demo data or in the fixture of tools/fitness/upgrade-check.sh (#782)."
 sums >"$OLD/sums-before.txt"
+# R1 (#718): the Sicherung of the previous release's data, before the migration; a release without one is backed up after it
+if [ -f "$OLD/backend/src/services/backup.service.ts" ]; then bun tools/fitness/restore-check.ts backup "$OLD/backend"; fi
 if ! bun backend/scripts/migrate.ts; then
 	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: the migrations of this checkout fail on the data of $TAG. Fix: make the migration work on existing rows (defaults, backfill before NOT NULL), never only on an empty database."
 	exit 1
@@ -59,4 +63,6 @@ if [ -n "$changed" ]; then
 	echo "::error title=Fitness upgrade::U1/AP3 «Kein Update ohne Rückweg»: upgrading from $TAG changes amounts of the statements (sum before -> after): $(echo "$changed" | paste -sd ';' -). Fix: leave the amounts of existing statements as they are; an intended change is the product owner's decision."
 	exit 1
 fi
+[ -f "$OLD/backend/src/services/backup.service.ts" ] || bun tools/fitness/restore-check.ts backup "$PWD/backend"
+bun tools/fitness/restore-check.ts restore
 echo "Fitness: upgrade $TAG -> HEAD with demo data: migrations pass, no table lost rows, statement amounts unchanged ($(wc -l <"$OLD/sums-before.txt") sums, $(wc -l <"$OLD/before.txt") tables, $(($(date +%s) - start)) s)"

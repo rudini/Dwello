@@ -75,7 +75,7 @@ jobs:
           git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts); the upgrade check and the queries
           # per route run with the backend steps, so a change to them or to their ratchet runs them too (#922)
-          echo "backend=$(grep -qE '^(backend|tests/contracts)/|^tools/fitness/(upgrade-check\.sh|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "backend=$(grep -qE '^(backend|tests/contracts)/|^tools/fitness/(upgrade-check\.sh|restore-check\.ts|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
@@ -111,8 +111,11 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build frontend image
         run: docker build --file Dockerfile .
+      # The Sicherung (#718) needs pg_dump of the database's major version (postgres:16) in the image
       - name: Build backend image
-        run: docker build backend
+        run: |
+          docker build --tag dwello-backend backend
+          docker run --rm dwello-backend pg_dump --version | grep -E ' 16\.'
 
   static-checks:
     name: Lint and types
