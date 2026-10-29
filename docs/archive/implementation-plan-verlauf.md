@@ -153,4 +153,5 @@
 - [x] Collected workflow review: `docs/reviews/workflow-rules-review-2026-10-29.md`
 - [x] Session archived before the last pull request
 - [x] Slice review round 1: `docs/reviews/578-review-1.md` (C-1 Major `--pull never` kept postgres and alpine out; C-2 Major fr/it/en site still showed the clone: rebuilt with `marketing/i18n/build.py`, two stale keys of `main` removed so the build runs; C-3 to C-7 fixed: `docker compose -f docker-compose.yml` for development, Compose 2.23.1, Apple silicon is arm64, CI runs the backend tests when a compose file changes, `APP_VERSION` only for the frontend)
-- [ ] Re-review, PR merged
+- [x] Re-review: `docs/reviews/578-review-2.md` (C-1 to C-7 closed, no new findings)
+- [x] PR: pushed after this archive
