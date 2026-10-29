@@ -12,8 +12,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #951 Protokoll names access keys and AI program queries
 
 - [x] @wip scenario «Das Protokoll nennt die Zugangsschlüssel und die Abrufe von KI-Programmen» (`settings.feature`), seen red at the old description
-- [ ] `fach-reviewer` round 1 on the scenario and the wording in four languages (`docs/reviews/951-fachreview-1.md`)
-- [ ] `audit_link`, `audit_purpose`, `audit_empty_text` in `messages/{de,fr,it,en}.json`; DOM test of the empty state follows
-- [ ] Scenario green without `@wip`
+- [x] `fach-reviewer` round 1 on the scenario and the wording in four languages (`docs/reviews/951-fachreview-1.md`)
+- [x] `audit_link`, `audit_purpose`, `audit_empty_text` in `messages/{de,fr,it,en}.json`; DOM test of the empty state follows
+- [x] Scenario green without `@wip`
 - [ ] Closing `code-reviewer` round
 - [ ] PR (Fixes #951)
