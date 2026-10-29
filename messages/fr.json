@@ -2156,7 +2156,7 @@
 	"backup_title": "Configurer la sauvegarde",
 	"backup_intro": "Dwello sauvegarde vos données chaque jour sous forme chiffrée. Seule une personne qui connaît ce code de restauration peut lire une sauvegarde. Sans lui, rien ne peut être restauré après une panne, pas même par la personne qui s’occupe de Dwello.",
 	"backup_code_label": "Votre code de restauration",
-	"backup_keep_sheet": "Après la confirmation, Dwello n’affiche plus le code. Imprimez la fiche d’urgence et conservez-la en lieu sûr, à l’écart de cet ordinateur, par exemple avec vos baux.",
+	"backup_keep_sheet": "Dès que vous démarrez la sauvegarde, Dwello n’affiche plus le code et la fiche d’urgence ne peut plus être téléchargée. Imprimez la fiche d’urgence et conservez-la en lieu sûr, à l’écart de cet ordinateur, par exemple avec vos baux.",
 	"backup_sheet_download": "Télécharger la fiche d’urgence (PDF)",
 	"backup_location": "Les sauvegardes se trouvent sur le serveur de cette installation Dwello, dans le dossier « backups ». Dwello conserve les 7 dernières sauvegardes quotidiennes et une par mois pendant 12 mois. Pour qu’elles survivent à une panne du serveur, la personne qui s’occupe de Dwello doit copier régulièrement ce dossier sur un autre appareil. Demandez-lui si elle le fait.",
 	"backup_self": "Si vous vous occupez vous-même de Dwello, la marche à suivre figure dans le guide d’installation.",

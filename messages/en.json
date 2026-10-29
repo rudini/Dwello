@@ -2156,7 +2156,7 @@
 	"backup_title": "Set up the backup",
 	"backup_intro": "Dwello backs up your data every day in encrypted form. Only someone who knows this recovery code can read a backup. Without it nothing can be restored after a failure, not even by the person who looks after Dwello.",
 	"backup_code_label": "Your recovery code",
-	"backup_keep_sheet": "Once you have confirmed it, Dwello no longer shows the code. Print the emergency sheet and keep it in a safe place away from this computer, for example with your tenancy agreements.",
+	"backup_keep_sheet": "Once you start the backup, Dwello no longer shows the code and the emergency sheet can no longer be downloaded. Print the emergency sheet and keep it in a safe place away from this computer, for example with your tenancy agreements.",
 	"backup_sheet_download": "Download the emergency sheet (PDF)",
 	"backup_location": "The backups are kept on the server of this Dwello installation in the folder «backups». Dwello keeps the last 7 daily backups and one per month for 12 months. So that they survive a server failure, the person who looks after Dwello must copy the folder to another device regularly. Ask them whether they do.",
 	"backup_self": "If you look after Dwello yourself, the steps are in the installation guide.",

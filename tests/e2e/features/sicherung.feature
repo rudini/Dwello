@@ -28,7 +28,7 @@ Funktionalität: Sicherung einrichten
     # Fachreview 718b V-2: das Blatt nicht in den Downloads desselben Computers lassen
     Und erklärt die Sicherung "Drucken Sie das Notfallblatt aus und bewahren Sie es getrennt von diesem Computer an einem sicheren Ort auf, etwa bei Ihren Mietverträgen."
     # Persona helga-718b P-1: wer den Code nur abtippt, muss wissen, dass Dwello ihn danach nicht mehr zeigt
-    Und erklärt die Sicherung "Nach der Bestätigung zeigt Dwello den Code nicht mehr an."
+    Und erklärt die Sicherung "Sobald Sie die Sicherung starten, zeigt Dwello den Code nicht mehr an, und das Notfallblatt lässt sich nicht mehr herunterladen."
 
   Szenario: Der Wiederherstellungscode bleibt beim erneuten Öffnen derselbe
     Angenommen Dwello ist eingerichtet, die Sicherung aber noch nicht
@@ -104,3 +104,5 @@ Funktionalität: Sicherung einrichten
     Und der Liegenschaftsverwalter hat die Sicherung geöffnet
     Wenn der Liegenschaftsverwalter bei der Sicherung die Datenschutzerklärung öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Datenschutz"
+    # Persona weber-718b P-1: wer vor der Bestätigung nachliest, findet die Sicherung schon dort
+    Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Dazu legt Dwello jeden Tag eine verschlüsselte Sicherung"

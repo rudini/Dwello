@@ -44,6 +44,7 @@ export const load: PageServerLoad = async ({
 		operator: loadOperator(),
 		...loadHosting(),
 		sessionSeconds: jwtConfig.expirySeconds,
-		backup: backup.backup === 'ok' || backup.backup === 'stale'
+		// also before the code is confirmed: «Sicherung einrichten» sends the landlord here to read about it (persona weber-718b P-1)
+		backup: backup.backup !== 'off'
 	};
 };

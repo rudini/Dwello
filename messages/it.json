@@ -2156,7 +2156,7 @@
 	"backup_title": "Configurare la copia di sicurezza",
 	"backup_intro": "Dwello crea ogni giorno una copia di sicurezza cifrata dei Suoi dati. Può leggere una copia di sicurezza solo chi conosce questo codice di ripristino. Senza di esso, dopo un guasto nessuno può ripristinare nulla, nemmeno la persona che si occupa di Dwello.",
 	"backup_code_label": "Il Suo codice di ripristino",
-	"backup_keep_sheet": "Dopo la conferma Dwello non mostra più il codice. Stampi la scheda di emergenza e la conservi in un luogo sicuro, lontano da questo computer, ad esempio insieme ai Suoi contratti di locazione.",
+	"backup_keep_sheet": "Appena avvia la copia di sicurezza, Dwello non mostra più il codice e la scheda di emergenza non si può più scaricare. Stampi la scheda di emergenza e la conservi in un luogo sicuro, lontano da questo computer, ad esempio insieme ai Suoi contratti di locazione.",
 	"backup_sheet_download": "Scaricare la scheda di emergenza (PDF)",
 	"backup_location": "Le copie di sicurezza si trovano sul server di questa installazione di Dwello, nella cartella «backups». Dwello conserva le ultime 7 giornaliere e una al mese per 12 mesi. Perché resistano a un guasto del server, la persona che si occupa di Dwello deve copiare regolarmente la cartella su un altro dispositivo. Le chieda se lo fa.",
 	"backup_self": "Se si occupa Lei stesso di Dwello, trova la procedura nella guida all’installazione.",
