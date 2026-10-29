@@ -173,3 +173,12 @@
 - [x] No scenario: rules and a test helper; nothing in the app changes
 - [x] Review: `docs/reviews/948-review-1.md` (C-1 Minor fixed: the rule names the `Spec change approved` line)
 - [x] PR: pushed after this archive
+
+## Session: #951 Protokoll names access keys and AI program queries
+
+- [x] @wip scenario «Das Protokoll nennt die Zugangsschlüssel und die Abrufe von KI-Programmen» (`settings.feature`), seen red at the old description
+- [x] `fach-reviewer` round 1 on the scenario and the wording in four languages (`docs/reviews/951-fachreview-1.md`)
+- [x] `audit_link`, `audit_purpose`, `audit_empty_text` in `messages/{de,fr,it,en}.json`; DOM test of the empty state follows
+- [x] Scenario green without `@wip`
+- [x] Closing `code-reviewer` round (`docs/reviews/951-review-1.md`)
+- [x] PR (Fixes #951), pushed after this archive
