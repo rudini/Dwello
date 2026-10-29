@@ -110,6 +110,15 @@ Funktionalität: Einstellungen
     Wenn der Liegenschaftsverwalter das Protokoll öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Protokoll"
 
+  # #951 (Persona Dr. Weber 817 P-6): die Beschreibung nennt auch den Wechsel der KI, die Zugangsschlüssel für
+  # KI-Programme und deren Abrufe; den Text des leeren Protokolls prüft audit-log-page.dom.test.ts, denn parallel
+  # laufende Szenarien füllen das Protokoll
+  @wip
+  Szenario: Das Protokoll nennt die Zugangsschlüssel und die Abrufe von KI-Programmen
+    Dann erklären die Einstellungen beim Protokoll "Anmeldungen, Änderungen, die Ihre Abrechnungen beeinflussen, Wechsel der KI und Abrufe von KI-Programmen, mit Datum"
+    Wenn der Liegenschaftsverwalter das Protokoll öffnet
+    Dann erklärt die Seite "Protokoll" "Anmeldungen und Änderungen, die Ihre Abrechnungen beeinflussen, mit Datum und Uhrzeit. Dazu jeder Wechsel der KI, das Erstellen, Widerrufen und Ablaufen eines Zugangsschlüssels für KI-Programme und jeder Abruf eines KI-Programms. Die Einträge bleiben, bis Sie sie löschen."
+
   Szenario: Änderungen im Protokoll sehen
     Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Nord"
     Und die Kategorie "Gartenpflege Nord" ist inzwischen nicht umlagefähig

@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { swissDate, inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { auditEntryCount, auditEntryDay, deleteAuditEntryConsequence } from '../questions/audit-log';
+import { auditEntryCount, auditEntryDay, auditLogDescription, deleteAuditEntryConsequence } from '../questions/audit-log';
 import { pageTitle } from '../questions/navigation';
 import { goToAuditLog, openAuditLog, startDeletingAuditEntry } from '../tasks/audit-log';
 
@@ -29,6 +29,10 @@ Given('der Eintrag zur Kategorie {string} ist inzwischen anderswo gelöscht', as
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Protokoll"', async ({ verwalter }) => {
 	await verwalter.attemptsTo(goToAuditLog);
+});
+
+Then('erklären die Einstellungen beim Protokoll {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(auditLogDescription).toContain(text);
 });
 
 When('der Liegenschaftsverwalter das Protokoll öffnet', async ({ verwalter }) => {
