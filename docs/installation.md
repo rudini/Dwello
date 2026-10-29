@@ -9,7 +9,7 @@ Two ways:
 
 ## 1. What you need
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (on a Linux server: Docker Engine with Compose v2). Dwello comes as ready-made images for PCs and Macs (amd64) and ARM devices such as a Raspberry Pi (arm64); no Git and no build (#578).
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (on a Linux server: Docker Engine with Compose 2.23.1 or newer, which reads the keys script inside `compose.yaml`). Dwello comes as ready-made images for Intel and AMD processors (amd64) and ARM processors such as Apple silicon or a Raspberry Pi (arm64); no Git and no build (#578).
 - 16 GB of memory for the local AI, which reads invoices on this machine. With less, use an external AI (section 6).
 - Nothing to invent: Dwello makes its keys itself, and the landlord creates their Konto mit Passwort in the browser (section 5). Google sign-in is optional (section 3).
 - About 10 GB of disk space (images, AI model, database).

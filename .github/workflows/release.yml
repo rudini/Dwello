@@ -38,7 +38,7 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: tools/release/release.sh
 
-  # The images compose.yaml starts (#578), for PCs and Macs (amd64) and small ARM servers such as a Raspberry Pi (arm64),
+  # The images compose.yaml starts (#578), for Intel and AMD (amd64) and ARM such as Apple silicon or a Raspberry Pi (arm64),
   # tagged with the version and «latest»; public with the repository, so no sign-in is needed to pull them
   images:
     name: Images
@@ -50,12 +50,15 @@ jobs:
     strategy:
       matrix:
         include:
+          # the footer shows the version (vite.config.ts); .git is not in the build context; the backend takes no argument
           - part: frontend
             context: .
             file: Dockerfile
+            args: APP_VERSION=v${{ needs.release.outputs.version }}
           - part: backend
             context: backend
             file: backend/Dockerfile
+            args: ''
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-qemu-action@v3
@@ -71,8 +74,7 @@ jobs:
           file: ${{ matrix.file }}
           platforms: linux/amd64,linux/arm64
           push: true
-          # the footer shows the version (vite.config.ts); .git is not in the build context
-          build-args: APP_VERSION=v${{ needs.release.outputs.version }}
+          build-args: ${{ matrix.args }}
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
             ghcr.io/rudini/dwello-${{ matrix.part }}:${{ needs.release.outputs.version }}

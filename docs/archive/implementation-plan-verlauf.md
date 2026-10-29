@@ -152,4 +152,5 @@
 - [x] `docs/installation.md` (download, update, moving from a clone), `README.md` «Deployment», `marketing/index.html` «Einrichten»; O-46 of the former `offene-punkte.md` is archived, the test «veröffentlicht nur den Port der Web-App» covers it
 - [x] Collected workflow review: `docs/reviews/workflow-rules-review-2026-10-29.md`
 - [x] Session archived before the last pull request
-- [ ] Slice review, PR merged
+- [x] Slice review round 1: `docs/reviews/578-review-1.md` (C-1 Major `--pull never` kept postgres and alpine out; C-2 Major fr/it/en site still showed the clone: rebuilt with `marketing/i18n/build.py`, two stale keys of `main` removed so the build runs; C-3 to C-7 fixed: `docker compose -f docker-compose.yml` for development, Compose 2.23.1, Apple silicon is arm64, CI runs the backend tests when a compose file changes, `APP_VERSION` only for the frontend)
+- [ ] Re-review, PR merged

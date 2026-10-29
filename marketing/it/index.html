@@ -568,9 +568,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="term">
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copiare</button></div>
 <pre id="code-pc" tabindex="0"><span class="c"># 1. Scaricare Dwello</span>
-<span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
+<span class="c"># Un file in una cartella vuota; su Windows curl.exe</span>
+<span class="p">$ </span>mkdir dwello
+<span class="p">$ </span>cd dwello
+<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
 <span class="c"># 2. Avviare: app, banca dati e IA locale, che scarica da sé il suo modello</span>
-<span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="p">$ </span>docker compose up -d
 <span class="c"># 3. Mostrare il codice di configurazione, poi «Configurare Dwello» nel browser</span>
 <span class="p">$ </span>docker logs dwello-backend
 <span class="ok">✓ Dwello funziona su http://localhost:3000</span></pre>
@@ -589,11 +592,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="term">
 				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><button type="button" data-copy="code-home">Copiare</button></div>
 <pre id="code-home" tabindex="0"><span class="c"># Sul server domestico, tramite SSH</span>
-<span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="p">$ </span>cp .env.example .env
+<span class="p">$ </span>mkdir dwello &amp;&amp; cd dwello
+<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
+<span class="p">$ </span>curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
 <span class="c"># Senza hardware potente: indicare un’IA esterna</span>
 <span class="c"># LLM_BASE_URL=https://suo-fornitore-ia.example/v1</span>
-<span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="p">$ </span>docker compose up -d
 <span class="c"># Mostrare il codice di configurazione, poi «Configurare Dwello» nel browser</span>
 <span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS con il Suo dominio: vedi guida</span>
@@ -613,9 +617,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="term">
 				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><button type="button" data-copy="code-cloud">Copiare</button></div>
 <pre id="code-cloud" tabindex="0"><span class="c"># Su un server Linux nuovo con Docker</span>
-<span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="p">$ </span>cp .env.example .env
-<span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="p">$ </span>mkdir dwello &amp;&amp; cd dwello
+<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
+<span class="p">$ </span>curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
+<span class="p">$ </span>docker compose up -d
 <span class="c"># Mostrare il codice di configurazione, poi «Configurare Dwello» nel browser</span>
 <span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS con Caddy: vedi guida</span>
