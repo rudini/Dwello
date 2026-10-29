@@ -123,7 +123,12 @@ jobs:
       - name: Start compose.yaml
         run: |
           mkdir "$RUNNER_TEMP/dwello" && cp compose.yaml "$RUNNER_TEMP/dwello/" && cd "$RUNNER_TEMP/dwello"
-          docker compose up --detach --wait --wait-timeout 300 frontend || { docker compose logs; exit 1; }
+          docker compose up --detach --wait --wait-timeout 300 frontend || {
+            docker compose logs
+            # what the health checks answered, which the logs do not show
+            for c in dwello-frontend dwello-backend; do docker inspect --format "$c {{json .State.Health}}" "$c"; done
+            exit 1
+          }
           curl --fail --silent --show-error http://localhost:3000/health
           docker compose down --volumes
 
