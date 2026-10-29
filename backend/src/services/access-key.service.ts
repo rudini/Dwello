@@ -5,9 +5,9 @@
  */
 
 import { createHash, randomBytes } from 'node:crypto';
-import { and, desc, eq, lt, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { accessKeys } from '../db/schema';
+import { accessKeys, auditLog } from '../db/schema';
 import { recordAudit } from './audit-log.service';
 import { daysAfter, sqlToday, swissToday } from './today';
 
@@ -37,20 +37,32 @@ export async function createAccessKey(name: string) {
 	});
 }
 
+const EXPIRE = sql`update ${accessKeys} set expiry_recorded = true
+	where not expiry_recorded and expires_on < ${sqlToday}
+	returning name, expires_on`;
+const RECORD = sql`insert into ${auditLog} (action, details, occurred_at)
+	select 'access_key_expired', jsonb_build_object('name', name), (expires_on + 1)::timestamp at time zone 'Europe/Zurich'
+	from expired
+	returning id, occurred_at, action, details`;
+
 /**
  * Puts the expiry of every key that ran out into the Protokoll, once, at the start of the day after its last valid
  * one: called wherever Dwello shows keys or entries, so a key never used again is recorded too (Fachprüfung 817-1 V-1)
  */
-export function recordExpiries() {
-	return db.transaction(async (tx) => {
-		const expired = await tx
-			.update(accessKeys)
-			.set({ expiryRecorded: true })
-			.where(and(eq(accessKeys.expiryRecorded, false), lt(accessKeys.expiresOn, sqlToday)))
-			.returning();
-		for (const { name, expiresOn } of expired)
-			await recordAudit('access_key_expired', { name }, tx, sql`(${expiresOn}::date + 1)::timestamp AT TIME ZONE 'Europe/Zurich'`);
-	});
+function recordExpiries() {
+	return db.execute(sql`with expired as (${EXPIRE}) ${RECORD}`);
+}
+
+/**
+ * The Protokoll, newest first, with the expiries recorded now: one statement, so the list stays one query (P2); the
+ * entries it adds are not in its own snapshot of audit_log, hence the union
+ */
+export async function auditLogWithExpiries() {
+	const { rows } = await db.execute<{ id: string; occurred_at: Date; action: string; details: Record<string, unknown> }>(
+		sql`with expired as (${EXPIRE}), added as (${RECORD})
+		select id, occurred_at, action, details from ${auditLog} union all select * from added order by occurred_at desc`
+	);
+	return rows.map(({ occurred_at, ...entry }) => ({ ...entry, occurredAt: occurred_at }));
 }
 
 /** Every key, newest first, without its hash */

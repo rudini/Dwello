@@ -3,15 +3,12 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { recordExpiries } from '../services/access-key.service';
-import { deleteAuditEntry, listAuditLog, recordAudit } from '../services/audit-log.service';
+import { auditLogWithExpiries } from '../services/access-key.service';
+import { deleteAuditEntry, recordAudit } from '../services/audit-log.service';
 
 export const auditLogRoutes = new Elysia({ prefix: '/api/v1/audit-log' })
 	// a Zugangsschlüssel that ran out shows up here even when nobody used it again (#817)
-	.get('/', async () => {
-		await recordExpiries();
-		return { data: await listAuditLog() };
-	})
+	.get('/', async () => ({ data: await auditLogWithExpiries() }))
 
 	// Only the provider: no name, e-mail address or IP (data minimisation, fach review of #357)
 	.post(
