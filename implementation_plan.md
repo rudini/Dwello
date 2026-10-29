@@ -8,10 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: red main after #944 (2026-10-29)
-
-### #945 CI auf main ist rot
-- [x] Release job «Images (frontend)»: Paraglide fails under QEMU for arm64 («Invalid Lix schema definition»); the frontend's deps and build stages now run on `$BUILDPLATFORM` (output is JavaScript, no native runtime dependencies), only `runner` per target platform; test in `compose-images.test.ts` red first
-- [x] CI «Docker images» on main: `curl` exit 56 while the backend image fetched the PostgreSQL apt key (network, not this change); failed job re-run once
-- [ ] Slice review, PR merged, next release publishes both images

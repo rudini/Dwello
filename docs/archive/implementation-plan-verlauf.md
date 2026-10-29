@@ -156,3 +156,11 @@
 - [x] Slice review round 1: `docs/reviews/578-review-1.md` (C-1 Major `--pull never` kept postgres and alpine out; C-2 Major fr/it/en site still showed the clone: rebuilt with `marketing/i18n/build.py`, two stale keys of `main` removed so the build runs; C-3 to C-7 fixed: `docker compose -f docker-compose.yml` for development, Compose 2.23.1, Apple silicon is arm64, CI runs the backend tests when a compose file changes, `APP_VERSION` only for the frontend)
 - [x] Re-review: `docs/reviews/578-review-2.md` (C-1 to C-7 closed, no new findings)
 - [x] PR: pushed after this archive
+
+## Session: red main after #944 (2026-10-29)
+
+### #945 CI auf main ist rot
+- [x] Release job «Images (frontend)»: Paraglide fails under QEMU for arm64 («Invalid Lix schema definition»); the frontend's deps and build stages now run on `$BUILDPLATFORM` (output is JavaScript, no native runtime dependencies), only `runner` per target platform; test in `compose-images.test.ts` red first
+- [x] CI «Docker images» on main: `curl` exit 56 while the backend image fetched the PostgreSQL apt key (network, not this change); failed job re-run once
+- [x] Slice review: `docs/reviews/945-review-1.md` (C-1 Minor: the comment now names the optional canvas binary of pdfjs-dist, unused on the server)
+- [x] PR: pushed after this archive (the next release publishes both images)

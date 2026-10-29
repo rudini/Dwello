@@ -4,8 +4,9 @@
 # ============================================
 # Stage 1: Dependencies
 # ============================================
-# The build runs on the runner's own platform: its output is JavaScript and the runtime dependencies have no native
-# code; under QEMU for arm64 Paraglide failed (#945). Only the stage «runner» is made for each target platform
+# The build runs on the runner's own platform: its output is JavaScript, and the server loads no native code (the
+# optional @napi-rs/canvas of pdfjs-dist comes for the runner's platform, but pdf.js runs only in the browser,
+# src/lib/file-pages.ts); under QEMU for arm64 Paraglide failed (#945). Only the stage «runner» is made per platform
 FROM --platform=$BUILDPLATFORM oven/bun:1-alpine AS bun
 
 FROM --platform=$BUILDPLATFORM node:26-alpine AS deps
