@@ -4,10 +4,14 @@
 # ============================================
 # Stage 1: Dependencies
 # ============================================
-FROM node:26-alpine AS deps
+# The build runs on the runner's own platform: its output is JavaScript and the runtime dependencies have no native
+# code; under QEMU for arm64 Paraglide failed (#945). Only the stage «runner» is made for each target platform
+FROM --platform=$BUILDPLATFORM oven/bun:1-alpine AS bun
+
+FROM --platform=$BUILDPLATFORM node:26-alpine AS deps
 
 # Bun is the package manager; Node stays the runtime
-COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
@@ -24,9 +28,9 @@ RUN rm -rf node_modules && bun install --frozen-lockfile --production --ignore-s
 # ============================================
 # Stage 2: Build
 # ============================================
-FROM node:26-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:26-alpine AS builder
 
-COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 

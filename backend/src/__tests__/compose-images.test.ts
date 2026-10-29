@@ -54,6 +54,20 @@ describe('Installation mit compose.yaml', () => {
 		for (const check of checks) expect(check).toContain('http://127.0.0.1:3000/health');
 	});
 
+	// #945: Paraglide fails when the frontend is built under QEMU for arm64; its build is JavaScript and its runtime
+	// dependencies have no native code, so only the last stage is made per target platform
+	it('baut das Frontend auf der Plattform des Runners und nur die Laufzeit für jede Zielplattform', () => {
+		const stages = [...read('Dockerfile').matchAll(/^FROM (.+) AS (\S+)$/gm)].map(([, from, name]) => [name, from]);
+		expect(stages).toEqual([
+			['bun', '--platform=$BUILDPLATFORM oven/bun:1-alpine'],
+			['deps', '--platform=$BUILDPLATFORM node:26-alpine'],
+			['prod-deps', 'deps'],
+			['builder', '--platform=$BUILDPLATFORM node:26-alpine'],
+			['runner', 'node:26-alpine']
+		]);
+		expect(read('Dockerfile')).not.toContain('COPY --from=oven/bun');
+	});
+
 	// docker-compose.prod.yml stays for installations from a clone: both start the same Dwello
 	it('startet dieselben Dienste mit denselben Einstellungen wie docker-compose.prod.yml', () => {
 		const same = ({ services }: Compose) =>
