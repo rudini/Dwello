@@ -12,6 +12,7 @@
 - [x] Review point «Not checked» (#815, staged file in the import scan) checked: a staged probe file importing backend code is reported; moved to «Applied since the note»
 - [x] No scenario: documentation only; no review round: no code changed
 - [x] PR: pushed after this archive
+- [x] CI fix: the frontend's health check asked `localhost`, which busybox wget took as ::1 on the runner while the app listens on 0.0.0.0; 127.0.0.1 in both compose files and the Dockerfile (seen in the CI health log, test red first)
 
 ## Session: workflow review proposals (tools)
 

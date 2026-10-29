@@ -44,6 +44,16 @@ describe('Installation mit compose.yaml', () => {
 		expect(withPorts.map(([name, service]) => [name, service.ports])).toEqual([['frontend', ['3000:3000']]]);
 	});
 
+	// #578 CI: busybox wget took «localhost» as ::1 and the web app listens on 0.0.0.0 only, so the frontend stayed unhealthy
+	it('prüft die Web-App über 127.0.0.1, wo sie lauscht', () => {
+		const checks = [
+			(published.services.frontend as { healthcheck: { test: string[] } }).healthcheck.test.join(' '),
+			(built.services.frontend as { healthcheck: { test: string[] } }).healthcheck.test.join(' '),
+			read('Dockerfile').match(/HEALTHCHECK[^\n]*\n[^\n]*/)![0]
+		];
+		for (const check of checks) expect(check).toContain('http://127.0.0.1:3000/health');
+	});
+
 	// docker-compose.prod.yml stays for installations from a clone: both start the same Dwello
 	it('startet dieselben Dienste mit denselben Einstellungen wie docker-compose.prod.yml', () => {
 		const same = ({ services }: Compose) =>
