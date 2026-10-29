@@ -1,0 +1,17 @@
+# Fachreview #817 (Runde 3, Re-Review): Zugangsschlüssel für KI-Programme
+
+Gegenstand: Delta `ea476e3..8a3e898` (Worktree review-817-code2): `backend/src/routes/mcp.ts`, `backend/src/routes/access-keys.ts`, `messages/{de,fr,it,en}.json`, `src/routes/terms/+page.svelte`, `src/routes/config/access-keys/` (neu `CopyButton.svelte`). Vorbericht: `docs/reviews/817-fachreview-2.md`. Keine neue Gesetzesaussage in diesem Delta, deshalb kein neuer Fedlex-Abruf (DSG weiter Stand 7. Juli 2025 wie in Runde 2).
+
+Geschlossen: V-6, V-7, V-8, V-9, V-10, V-11, R-8, R-10, R-11
+
+| ID | Rolle | Schwere | Befund |
+|---|---|---|---|
+| R-9 | Rechtstexte | Minor | Unverändert offen, wartet auf den Product Owner: «Stand» bleibt 20.10.2026 (`src/routes/LegalHeader.svelte:12`), obwohl Datenschutzerklärung und Nutzungsbedingungen neue Abschnitte bzw. Sätze haben (Begründung und Fix im Vorbericht) |
+| V-12 | Verwalter | Minor | Zu V-6 wurde die schwächere Variante gewählt (blättern statt alle Einträge holen). Das ist vertretbar, weil jede Liste `total` mitliefert (`building.service.ts:103`, `invoice.service.ts:177`, `statement.service.ts:229` usw.) und das KI-Programm daran sieht, dass Einträge fehlen. Die Beschreibung `PAGES` (`mcp.ts:28`) sagt aber nicht, dass ohne «limit» nur die ersten 20 (Gebäude, Rechnungen, Abrechnungen) bzw. 50 Einträge kommen und dass das Programm vor einer Summe alle Seiten holen muss. Beispiel: 35 Rechnungen einer Periode, Aufruf ohne «limit» → 20 Einträge, `total` 35. Ein Programm, das die Beschreibung wörtlich nimmt, summiert die 20. Fix: `PAGES` = «Eine Liste kommt seitenweise: ohne «limit» höchstens 20 Einträge (Wohnungen, Mieter, Mietverträge: 50) ab «offset». «total» nennt, wie viele es gibt; ist «total» grösser, holen Sie die nächsten mit «offset», bevor Sie zählen oder summieren.» |
+
+## Nicht bestätigt
+
+- **Vertrags-PDFs in bestehenden Installationen (R-11):** Das Werkzeug `contracts` lässt `contractPdf` und `notes` jetzt weg (`mcp.ts:72`, Test `access-key.pg.test.ts:268`). Die übrigen Werkzeuge lesen aus `rental_contracts` nur einzelne Spalten, `contractPdf` ist nicht dabei (`tenant.service.ts`, `apartment.service.ts`, `statement.service.ts:864`). Damit ist der Blocker-Fall aus Runde 2 ausgeschlossen. Die Datenbanken der Betreiber kann ich weiterhin nicht prüfen, das ist jetzt aber ohne Folge für das MCP.
+- **Protokoll des Servers / Proxy und `Authorization`** sowie **Mieter neu informieren:** unverändert wie im Vorbericht (**unsicher**, kein Fedlex-Wortlaut zu einem späteren neuen Empfänger gefunden).
+
+Geprüft: V-7 und V-8 im Wortlaut übernommen, der Statusfilter kennt settled/replaced (`statement.service.ts:108`); V-9 Schlüssel `documents` mit Beschreibung «mit ihrem Versand und ihren Mahnungen mit Mahnstufe»; V-10 «Abgelaufen, galt bis {date}» in allen vier Sprachen, `expiresOn` ist der letzte gültige Tag (Test `access-keys-page.dom.test.ts:74`); V-11 in `mcp.ts` und `backend_access_key_invalid` (de/fr/it/en); R-8 «la disattivi» und Regel `/\brevoc/i` (`i18n.test.ts:112`); R-10 Satz in `audit_privacy_demo` in allen vier Sprachen; Abschnitt «KI-Programme mit Zugangsschlüssel» in der Liste der Nutzungsbedingungen passt zu `terms_responsibility_3`; neue Texte `ai_keys_copy`, `ai_keys_copy_address`, `ai_keys_copied`, `ai_keys_copy_failed`, `backend_access_key_name_too_long` in allen vier Sprachen richtig (it-Infinitiv auf Schaltflächen wie «Disattivare»); Adresse im Kasten des neuen Schlüssels gleich wie oben auf der Seite (`data.mcpUrl`).

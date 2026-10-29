@@ -4,7 +4,7 @@
  * deleted; the UI words them in its language. Entries stay until the landlord deletes one.
  */
 
-import { desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { auditLog } from '../db/schema';
 
@@ -14,9 +14,6 @@ type Writer = Pick<typeof db, 'insert'>;
 export async function recordAudit(action: string, details: Record<string, unknown>, tx: Writer = db) {
 	await tx.insert(auditLog).values({ action, details });
 }
-
-/** All entries, newest first */
-export const listAuditLog = () => db.select().from(auditLog).orderBy(desc(auditLog.occurredAt));
 
 /** False when there is no such entry */
 export async function deleteAuditEntry(id: string) {

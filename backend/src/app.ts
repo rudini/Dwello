@@ -21,6 +21,8 @@ import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
 import { auditLogRoutes } from './routes/audit-log';
+import { accessKeyRoutes } from './routes/access-keys';
+import { callApiWith, mcpRoutes } from './routes/mcp';
 import { localAccountRoutes, passwordSignInRoutes, setupRoutes } from './routes/local-accounts';
 import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
@@ -99,6 +101,8 @@ export const app = new Elysia()
 	// Sign-in with a Konto mit Passwort (#576): the BFF asks before there is a session
 	.use(passwordSignInRoutes)
 	.use(setupRoutes)
+	// AI programs with a Zugangsschlüssel (#817): /mcp checks the key itself and calls the routes below in-process
+	.use(mcpRoutes)
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
 	.use(localAccountRoutes)
@@ -117,4 +121,8 @@ export const app = new Elysia()
 	.use(configRoutes)
 	.use(statementRoutes)
 	.use(documentRoutes)
-	.use(auditLogRoutes);
+	.use(auditLogRoutes)
+	.use(accessKeyRoutes);
+
+// the MCP tools call the routes above in-process (#817)
+callApiWith((request) => app.handle(request));

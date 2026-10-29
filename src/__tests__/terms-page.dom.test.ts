@@ -87,14 +87,18 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
 			'Sie können Ihren Mietern dazu die Abschnitte «Verantwortlich», «Welche Daten Dwello speichert», «Aufbewahrung» und «Weitergabe an Dritte» der Datenschutzerklärung weitergeben.'
 		);
+		// #817 (Fachprüfung 817-1 R-2): with a Zugangsschlüssel also the section on AI programs
+		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
+			'Geben Sie einem KI-Programm einen Zugangsschlüssel, gehört auch «KI-Programme mit Zugangsschlüssel» dazu.'
+		);
 		// PO on Fachreview 458-1 R-2: the sections do not name the landlord (Art. 19 Abs. 2 Bst. a DSG)
 		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
 			'Nennen Sie dabei Ihren Namen und wie Ihre Mieter Sie erreichen, und sagen Sie dazu, dass mit «Sie» dort der Vermieter gemeint ist (Art. 19 Abs. 2 DSG).'
 		);
 	});
 
-	// Persona Helga 458 P-1: each section to pass on is one link away
-	it('verlinkt die vier Abschnitte der Datenschutzerklärung, die der Vermieter weitergibt', () => {
+	// Persona Helga 458 P-1: each section to pass on is one link away; persona Weber 817 P-4: the one on AI programs too
+	it('verlinkt die Abschnitte der Datenschutzerklärung, die der Vermieter weitergibt', () => {
 		show(TermsPage, { data: { operator: null } } as never);
 
 		const links = [...(section('Verantwortung für Abrechnungen')?.querySelectorAll('a') ?? [])].map((link) => [
@@ -105,7 +109,8 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 			['Verantwortlich', '/privacy#controller'],
 			['Welche Daten Dwello speichert', '/privacy#stored'],
 			['Aufbewahrung', '/privacy#retention'],
-			['Weitergabe an Dritte', '/privacy#third']
+			['Weitergabe an Dritte', '/privacy#third'],
+			['KI-Programme mit Zugangsschlüssel', '/privacy#ai-keys']
 		]);
 	});
 
@@ -151,6 +156,6 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 	it('nennt den Stand', () => {
 		show(TermsPage, { data: { operator: null } } as never);
 
-		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 20. Oktober 2026');
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 29. Oktober 2026');
 	});
 });

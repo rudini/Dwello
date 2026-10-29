@@ -165,7 +165,7 @@ Dwello-Nutzen
 - **Umgebung:** Produktion.
 - **Reaktion:** Das Skript findet kein Token. Der Request bekommt 401 oder eine Weiterleitung zum Login.
 - **Messgrösse und Ziel:** **0** lesbare Tokens im Browser. **100 %** der Endpunkte antworten ohne Sitzung mit 401 (mit der Freigabe vom Nutzer bestätigt).
-- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`), im Backend aber nur für eine feste Liste von 11 Listen-Endpunkten, nicht für jede registrierte Route (#936). Seit #917 ist getestet, dass das Sitzungs-Cookie HttpOnly und SameSite ist, mit `COOKIE_SECURE` auch Secure (`session-cookie.test.ts`).
+- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`), im Backend aber nur für eine feste Liste von 11 Listen-Endpunkten, nicht für jede registrierte Route (#936). Seit #817 nimmt `/mcp` statt einer Sitzung einen Zugangsschlüssel für KI-Programme an, nur lesend und nur dort; ein fehlender, widerrufener oder abgelaufener Schlüssel bekommt 401, an jeder anderen Route gilt ein Schlüssel nicht (`access-key.pg.test.ts`, ADR 0007). Seit #917 ist getestet, dass das Sitzungs-Cookie HttpOnly und SameSite ist, mit `COOKIE_SECURE` auch Secure (`session-cookie.test.ts`).
 - **Fitness Function:** E2E: Nach dem Login enthält `document.cookie` kein JWT. Ein API-Test läuft über alle registrierten Routen ohne Sitzung und erwartet 401.
 
 ## 4. Priorisierungsmatrix

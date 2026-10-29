@@ -58,6 +58,7 @@ export type Example = {
 	building: string;
 	tankBuilding: string;
 	heatingProfile: string;
+	accessKey?: string; // the name of a Zugangsschlüssel the key states create or revoke (#817)
 	account?: { email: string; password: string }; // a Konto mit Passwort for the login states (#576)
 };
 
@@ -65,6 +66,9 @@ export type Example = {
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
 	const screen = screenList.screens.find((candidate) => candidate.name === name)!;
 	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
+	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
+	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');
+	if (state.startsWith('key-')) return { ...example, accessKey: seed.unique('Claude Desktop') };
 	if (!state.startsWith('login-password') && state !== 'login-locked') return example;
 	await seed.localAccount();
 	return { ...example, account: { email: seed.names.get('E-Mail Konto')!, password: seed.names.get('Passwort Konto')! } };

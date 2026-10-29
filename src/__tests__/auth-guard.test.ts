@@ -71,7 +71,8 @@ describe('Zugang nur mit Anmeldung', () => {
 		expect(response.status).toBe(401);
 	});
 
-	it.each(['/login', '/auth/login?provider=google', '/auth/callback?code=x', '/health'])(
+	// /mcp: the backend checks the Zugangsschlüssel (#817)
+	it.each(['/login', '/auth/login?provider=google', '/auth/callback?code=x', '/health', '/mcp'])(
 		'lässt %s ohne Anmeldung zu',
 		async (path) => {
 			const { response } = await request(path);

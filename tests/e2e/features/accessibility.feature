@@ -241,6 +241,11 @@ Funktionalität: Barrierefreiheit
       | ki-settings            | ki-model-offline    |
       | ki-settings            | ki-check-result     |
       | ki-settings            | ki-saved            |
+      | access-keys            | default             |
+      | access-keys            | empty               |
+      | access-keys            | key-created         |
+      | access-keys            | key-create-refused  |
+      | access-keys            | key-revoke-dialog   |
       | audit-log              | default             |
       | audit-log              | empty               |
       | audit-log              | delete-dialog       |

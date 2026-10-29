@@ -839,6 +839,14 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('config'), actual)).toEqual([]);
 	});
 
+	// #817: the key itself only in the answer that creates it
+	it('POST und GET /access-keys liefern die Felder von access-key-created.json und access-keys.json', async () => {
+		const created = (await (await sendJson('POST', '/api/v1/access-keys', { name: `Vertrag ${crypto.randomUUID()}` })).json()) as { id: string };
+		expect(drift(await sample('access-key-created'), created)).toEqual([]);
+		expect(drift(await sample('access-keys'), await (await callApi('/api/v1/access-keys')).json())).toEqual([]);
+		await callApi(`/api/v1/access-keys/${created.id}`, { method: 'DELETE' });
+	});
+
 	it('GET /audit-log liefert die Felder von audit-log.json', async () => {
 		await sendJson('POST', '/api/v1/audit-log/logins', { provider: 'google' });
 		const actual = (await (await callApi('/api/v1/audit-log')).json()) as { data: { id: string }[] };

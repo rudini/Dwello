@@ -56,4 +56,26 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] CI fix: Architecture fitness Ä4, a changed status branch in the statement page; the allowed line stays as it was, the Übertrag part beside it (fitness reproduced locally first)
 - [x] Copilot review of #941: Akonto from the day after the period (pg test red first), settling checked in its update (no sequential test can show a race), the correction dialog names a hand-settled Übertrag (DOM test red first, four languages); the reset-dialog point answered on its thread, not built
 - [x] Closing review of the Copilot fixes: `docs/reviews/506-review-5.md` (C-1 Major: a scenario for the correction dialog, its DOM test was red first; C-2 comment; C-3 refusal test red by taking the conditions out)
+- [x] Re-review: `docs/reviews/506-review-6.md` (C-1 to C-3 closed)
+- [x] PR merged: #941
+
+### #817 MCP server with access keys («Zugangsschlüssel für KI-Programme»)
+- [x] «Done means» written in #817 from the decisions (product owner 2026-10-28)
+- [x] `@wip` scenarios: `zugangsschluessel.feature` (open, create once, an AI program reads the buildings, revoke); `privacy.feature` (new section, Protokoll text)
+- [x] `fach-reviewer` round 1: `docs/reviews/817-fachreview-1.md` (R-1 to R-3, V-1 Major; decided by recommendation and recorded in #817: texts only, no confirmation step; glossary terms in #942)
+- [x] Steps, pg tests (keys, check on `/mcp`, expiry, same refusals), DOM, mapping and proxy tests; seen red
+- [x] Code: migration `0039_access_keys.sql`, `access-key.service.ts`, routes `access-keys.ts` and `mcp.ts`, web app pass-through `src/routes/mcp/+server.ts`, settings page `config/access-keys`, privacy section, Protokoll texts; four languages (it «disattivare», `revoca` is the Disdetta's)
+- [x] Docs: ADR 0007, S1 in `docs/architecture/utility-tree.md`, glossary row, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `docs/data-model.md`, `docs/installation.md`
+- [x] a11y and language screen `access-keys` (`default`, `empty`, `key-created`, `key-create-refused`, `key-revoke-dialog`)
+- [x] Workflow note: two scenarios not `@wip` pin old legal sentences and the «Stand» date; the additions are sentences of their own, the date waits for the product owner
+- [x] Slice review round 1: `docs/reviews/817-review-1.md`; `fach-reviewer` round 2: `docs/reviews/817-fachreview-2.md`; personas `helga-817.md`, `marco-817.md`, `weber-817.md`
+- [x] Fixes: lists page with `limit`/`offset` (C-1, V-6), action tests, scenario and a11y state for the refused name (C-2), revoke toast names the key (C-3, personas; scenario red first), copy buttons and the address in the new key's panel (Helga P-1, Marco P-1, Helga P-3, Weber P-3), no contract PDF or notes (C-7, R-11), documents of a statement (C-5, V-9), wording V-7, V-8, V-10, V-11, R-8, R-10, name length C-8, MCP scenarios through the web app (C-4), C-9, C-10, terms link (Weber P-4); tests red first
+- [x] Re-reviews: `docs/reviews/817-review-2.md` (C-1, C-3 closed; C-2 rest rejected: «nicht erstellt» and «nicht widerrufen» come only from a failing call between web app and backend, `tests/e2e/CLAUDE.md` «No scenario»; the action tests show them), `docs/reviews/817-fachreview-3.md` (V-6 closed), personas `helga-817-2.md`, `marco-817-2.md` (no Blocker/Major)
+- [x] Product owner 2026-10-29: «Stand» becomes the day of the merge (`Spec change approved: #817`, scenarios «Stand der Datenschutzerklärung», «Stand der Nutzungsbedingungen»; DOM tests red first); glossary rows of #942 in this pull request
+- [x] Minor fixes: paging wording V-12, the address with its own copy button in the panel and one confirmation per button (Helga 817-2 P-1, P-3, Marco 817-2 P-1), tests of a failed copy (C-11) and the demo sentence (C-12)
+- [x] Closing review: `docs/reviews/817-review-3.md` (C-2 rejection holds, closed; C-13 Major: a scenario for copying, red without the buttons, Chromium gets `clipboard-write`; C-14 Minor: tests of the address toast and the refused revoke, red by taking the lines out)
+- [x] Closing review of the C-13 fix: `docs/reviews/817-review-4.md` (C-13, C-14 closed; Firefox and WebKit checked by a full CI run on the branch)
+- [x] PR pushed after this review
+- [x] CI fix: fitness P2, the Protokoll list needed 4 queries for recording expiries; one statement now (reproduced locally first); review `docs/reviews/817-review-5.md` (no findings)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-817.md` (the session is archived before the last pull request of this request, #578)
 - [ ] PR merged

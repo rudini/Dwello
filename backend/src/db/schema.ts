@@ -7,6 +7,7 @@ import {
 	pgTable,
 	uuid,
 	varchar,
+	char,
 	text,
 	integer,
 	decimal,
@@ -637,6 +638,17 @@ export const auditLog = pgTable('audit_log', {
 	occurredAt: timestamp('occurred_at', { withTimezone: true }).defaultNow().notNull(),
 	action: varchar('action', { length: 50 }).notNull(),
 	details: jsonb('details').$type<Record<string, unknown>>().notNull()
+});
+
+// Zugangsschlüssel für KI-Programme (#817, ADR 0007): the key only as SHA-256 hash, valid through expires_on
+export const accessKeys = pgTable('access_keys', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 100 }).notNull(),
+	keyHash: char('key_hash', { length: 64 }).notNull().unique(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+	expiresOn: date('expires_on').notNull(),
+	expiryRecorded: boolean('expiry_recorded').default(false).notNull()
 });
 
 // Konto mit Passwort (#576): the sign-in without a provider; the password only as Argon2id hash

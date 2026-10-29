@@ -23,12 +23,12 @@ const JwtPayloadSchema = z.object({
 	exp: z.number()
 });
 
-export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
+type JwtPayload = z.infer<typeof JwtPayloadSchema>;
 
 /**
  * Verify and decode a JWT token with proper validation
  */
-export async function verifyJwt(token: string): Promise<JwtPayload | null> {
+async function verifyJwt(token: string): Promise<JwtPayload | null> {
 	try {
 		const secret = new TextEncoder().encode(JWT_SECRET);
 		// Issued by the BFF for this app (src/lib/server/jwt-config.ts)
@@ -46,6 +46,17 @@ export async function verifyJwt(token: string): Promise<JwtPayload | null> {
 		return null;
 	}
 }
+
+/** A JWT for one in-process call of the API on behalf of an AI program with a Zugangsschlüssel (#817, ADR 0007) */
+export const accessKeyToken = (keyId: string) =>
+	new jose.SignJWT({ email: 'ki-programm@dwello.invalid', name: 'KI-Programm', provider: 'access-key' })
+		.setProtectedHeader({ alg: 'HS256' })
+		.setSubject(keyId)
+		.setIssuer('dwello')
+		.setAudience('dwello-app')
+		.setIssuedAt()
+		.setExpirationTime('1m')
+		.sign(new TextEncoder().encode(JWT_SECRET));
 
 /**
  * Authentication middleware plugin for Elysia
@@ -91,32 +102,3 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 			return error;
 		}
 	});
-
-/**
- * Optional auth middleware - allows unauthenticated requests but still parses token if present
- */
-export const optionalAuthMiddleware = new Elysia({ name: 'optional-auth' }).derive(
-	async ({ headers }) => {
-		const authHeader = headers.authorization;
-
-		if (!authHeader || !authHeader.startsWith('Bearer ')) {
-			return { user: null };
-		}
-
-		const token = authHeader.substring(7);
-		const payload = await verifyJwt(token);
-
-		if (!payload) {
-			return { user: null };
-		}
-
-		return {
-			user: {
-				id: payload.sub,
-				email: payload.email,
-				name: payload.name,
-				provider: payload.provider
-			}
-		};
-	}
-);

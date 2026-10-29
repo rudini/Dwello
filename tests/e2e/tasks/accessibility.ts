@@ -32,6 +32,8 @@ import {
 	uploadResult
 } from '../targets/invoice-upload';
 import { setUpDwello } from './einrichtung';
+import { createAccessKey } from './access-keys';
+import { createAccessKeyRefusal, newAccessKey } from '../targets/access-keys';
 import { invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
 import { agreementsLoading, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
@@ -272,6 +274,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Wait.until(on.frenchPage));
 	},
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
+	// #817: the new key, shown once; the revoke dialog of the first key in the list
+	'key-created': (example) => (actor) => actor.attemptsTo(createAccessKey(example.accessKey!), Wait.until(newAccessKey)),
+	'key-create-refused': () => (actor) => actor.attemptsTo(createAccessKey(''), Wait.until(createAccessKeyRefusal)),
+	'key-revoke-dialog': () => openDialog(on.firstRevokeButton),
 	// the later Akonto of Anna's contract (fixtures/screens.ts)
 	'advance-delete-dialog': () => openDialog(advanceDeleteButton('220.00')),
 	'advance-delete-refused': () => (actor) =>

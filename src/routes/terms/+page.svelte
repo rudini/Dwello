@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { formatDateLong } from '$lib/utils/format';
-	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import LegalHeader from '../LegalHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
 
@@ -19,7 +18,8 @@
 		{ id: 'controller', title: m.privacy_controller_title() },
 		{ id: 'stored', title: m.privacy_stored_title() },
 		{ id: 'retention', title: m.privacy_retention_title() },
-		{ id: 'third', title: m.privacy_third_title() }
+		{ id: 'third', title: m.privacy_third_title() },
+		{ id: 'ai-keys', title: m.privacy_ai_keys_title() } // with a Zugangsschlüssel (#817, persona Weber P-4)
 	];
 
 	const sections: { id: string; title: string; paragraphs: string[]; after?: string[] }[] = [
@@ -51,11 +51,7 @@
 </svelte:head>
 
 <div class="flex max-w-3xl flex-col gap-8">
-	<PageHeader title={m.terms_title()} purpose={m.terms_purpose()} />
-	<!-- The day these texts last changed (#458) -->
-	<p class="text-ink-muted" data-testid="legal-as-of">
-		{m.legal_as_of({ date: formatDateLong('2026-10-20', { weekday: false }) })}
-	</p>
+	<LegalHeader title={m.terms_title()} purpose={m.terms_purpose()} />
 
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">

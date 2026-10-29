@@ -19,6 +19,7 @@ Funktionalität: Datenschutz
       | Anmeldung                   |
       | Weitergabe an Dritte        |
       | Cookies                     |
+      | KI-Programme mit Zugangsschlüssel |
 
   Szenario: KI auf dem Server des Betreibers
     Dann erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass Rechnungen und neue Kategorien für die KI den Server nicht verlassen
@@ -118,7 +119,7 @@ Funktionalität: Datenschutz
 
   # #458 (#347)
   Szenario: Stand der Datenschutzerklärung
-    Dann nennt die Seite den Stand "20. Oktober 2026"
+    Dann nennt die Seite den Stand "29. Oktober 2026"
 
   # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes
@@ -130,3 +131,9 @@ Funktionalität: Datenschutz
     # #580 (Fachreview 580 F-6, F-17): auch wenn der Liegenschaftsverwalter die lokale KI wählt oder das Modell erneut herunterlädt
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "lädt Dwello es bei Ollama (Ollama Inc., USA) herunter, rund 6 GB: beim Start, wenn Sie die lokale KI wählen, und wenn Sie es unter «Einstellungen» › «KI» erneut herunterladen."
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Ollama erhält dabei die IP-Adresse des Servers und den Namen des Modells, keine Daten, die Sie in Dwello erfassen"
+
+  # #817: Lesezugriff für ein KI-Programm mit einem Zugangsschlüssel; Wortlaut nach Fachprüfung 817-1 (R-1, R-2, R-5)
+  Szenario: KI-Programme mit Zugangsschlüssel in der Datenschutzerklärung
+    Dann nennt die Datenschutzerklärung unter "KI-Programme mit Zugangsschlüssel" "Dieses Programm bearbeitet die Daten nach seinen eigenen Regeln. Dwello hat darauf keinen Einfluss."
+    Und nennt die Datenschutzerklärung unter "KI-Programme mit Zugangsschlüssel" "nennen Sie Ihren Mietern das Programm, seinen Anbieter und das Land, in dem er die Daten bearbeitet"
+    Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jeden Abruf eines KI-Programms mit der Art der abgefragten Daten (etwa «Mieter») und dem Namen des Zugangsschlüssels, ohne Inhalte"

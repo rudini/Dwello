@@ -8,9 +8,10 @@ import { getConfiguredProviders } from '$lib/server/oauth';
 
 const BACKEND_ORIGIN = new URL(process.env.BACKEND_URL || 'http://localhost:3001').origin;
 
-// Reachable without signing in: the login page, the OAuth round trip, the health check, help and the legal pages
+// Reachable without signing in: the login page, the OAuth round trip, the health check, help, the legal pages and
+// /mcp, where the backend checks the Zugangsschlüssel (#817)
 const isPublic = (path: string) =>
-	['/login', '/setup', '/health', '/help', '/privacy', '/terms'].includes(path) || path.startsWith('/auth/');
+	['/login', '/setup', '/health', '/help', '/privacy', '/terms', '/mcp'].includes(path) || path.startsWith('/auth/');
 
 async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	const jwt = getJwtFromCookie(cookies);

@@ -48,6 +48,21 @@
 		]}
 	/>
 
+	<!-- #817: read access for an AI program of the landlord's choice -->
+	<ConfigLinks
+		title={m.ai_keys_title()}
+		testid="access-key-links"
+		links={[
+			{
+				key: 'access-keys',
+				href: '/config/access-keys',
+				label: m.ai_keys_title(),
+				text: m.ai_keys_link(),
+				icon: 'settings'
+			}
+		]}
+	/>
+
 	<ConfigLinks
 		title={m.audit_title()}
 		testid="audit-log-links"
