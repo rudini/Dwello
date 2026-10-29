@@ -70,6 +70,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Workflow note: two scenarios not `@wip` pin old legal sentences and the «Stand» date; the additions are sentences of their own, the date waits for the product owner
 - [x] Slice review round 1: `docs/reviews/817-review-1.md`; `fach-reviewer` round 2: `docs/reviews/817-fachreview-2.md`; personas `helga-817.md`, `marco-817.md`, `weber-817.md`
 - [x] Fixes: lists page with `limit`/`offset` (C-1, V-6), action tests, scenario and a11y state for the refused name (C-2), revoke toast names the key (C-3, personas; scenario red first), copy buttons and the address in the new key's panel (Helga P-1, Marco P-1, Helga P-3, Weber P-3), no contract PDF or notes (C-7, R-11), documents of a statement (C-5, V-9), wording V-7, V-8, V-10, V-11, R-8, R-10, name length C-8, MCP scenarios through the web app (C-4), C-9, C-10, terms link (Weber P-4); tests red first
-- [ ] Re-reviews: code-reviewer, fach-reviewer V-6, personas Helga and Marco
+- [x] Re-reviews: `docs/reviews/817-review-2.md` (C-1, C-3 closed; C-2 rest rejected: «nicht erstellt» and «nicht widerrufen» come only from a failing call between web app and backend, `tests/e2e/CLAUDE.md` «No scenario»; the action tests show them), `docs/reviews/817-fachreview-3.md` (V-6 closed), personas `helga-817-2.md`, `marco-817-2.md` (no Blocker/Major)
+- [x] Product owner 2026-10-29: «Stand» becomes the day of the merge (`Spec change approved: #817`, scenarios «Stand der Datenschutzerklärung», «Stand der Nutzungsbedingungen»; DOM tests red first); glossary rows of #942 in this pull request
+- [x] Minor fixes: paging wording V-12, the address with its own copy button in the panel and one confirmation per button (Helga 817-2 P-1, P-3, Marco 817-2 P-1), tests of a failed copy (C-11) and the demo sentence (C-12)
 - [ ] Closing review, archive the session, workflow review
 - [ ] PR merged

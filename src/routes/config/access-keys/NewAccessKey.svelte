@@ -18,7 +18,19 @@
 	<p class="text-ink" data-testid="access-key-new-secret">{m.ai_keys_created_secret()}</p>
 	<p class="break-all text-ink">{m.ai_keys_address({ url })}</p>
 	<div class="flex flex-wrap gap-4">
-		<CopyButton text={key} label={m.ai_keys_copy()} testid="access-key-new-copy" />
+		<CopyButton
+			text={key}
+			label={m.ai_keys_copy()}
+			done={m.ai_keys_key_copied()}
+			testid="access-key-new-copy"
+		/>
+		<!-- the address next to the key it goes with (personas Helga 817-2 P-1, Marco 817-2 P-1) -->
+		<CopyButton
+			text={url}
+			label={m.ai_keys_copy_address()}
+			done={m.ai_keys_address_copied()}
+			testid="access-key-new-address-copy"
+		/>
 		<Button onclick={onclose} testid="access-key-new-close">{m.ai_keys_close()}</Button>
 	</div>
 </Panel>

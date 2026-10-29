@@ -25,7 +25,9 @@ const APP = process.env.CORS_ORIGIN || 'http://localhost:3000'; // the web app, 
 const VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 const IRREVERSIBLE = 'Versenden, Anonymisieren und Löschen gehen nur in Dwello, über den Link.';
 // a list comes in pages, as the API gives it; «total» in the answer says how many there are (code review 817-1 C-1)
-const PAGES = 'Eine Liste kommt seitenweise: «limit» Einträge ab «offset», «total» nennt alle.';
+// Fachprüfung 817-3 V-12: wording of the review, so a sum is taken over every page
+const PAGES =
+	'Eine Liste kommt seitenweise: ohne «limit» höchstens 20 Einträge (Wohnungen, Mieter, Mietverträge: 50) ab «offset». «total» nennt, wie viele es gibt; ist «total» grösser, holen Sie die nächsten mit «offset», bevor Sie zählen oder summieren.';
 const PAGE = { limit: 'Wie viele Einträge diese Seite hat', offset: 'Ab welchem Eintrag, 0 für den ersten' };
 const PAGED = ['limit', 'offset'];
 

@@ -156,6 +156,6 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 	it('nennt den Stand', () => {
 		show(TermsPage, { data: { operator: null } } as never);
 
-		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 20. Oktober 2026');
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 29. Oktober 2026');
 	});
 });

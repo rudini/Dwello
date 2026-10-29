@@ -54,6 +54,7 @@
 		<CopyButton
 			text={data.mcpUrl}
 			label={m.ai_keys_copy_address()}
+			done={m.ai_keys_address_copied()}
 			testid="access-key-address-copy"
 		/>
 	</div>

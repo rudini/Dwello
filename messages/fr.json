@@ -2150,6 +2150,7 @@
 	"backend_access_key_name_too_long": "Le nom peut comporter au plus 100 caractères.",
 	"ai_keys_copy": "Copier la clé",
 	"ai_keys_copy_address": "Copier l’adresse",
-	"ai_keys_copied": "Copié.",
-	"ai_keys_copy_failed": "La copie n’a pas fonctionné. Sélectionnez le texte et copiez-le à la main."
+	"ai_keys_copy_failed": "La copie n’a pas fonctionné. Sélectionnez le texte et copiez-le à la main.",
+	"ai_keys_key_copied": "La clé est copiée.",
+	"ai_keys_address_copied": "L’adresse est copiée."
 }

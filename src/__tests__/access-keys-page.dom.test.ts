@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+const { addToast } = vi.hoisted(() => ({ addToast: vi.fn() }));
+vi.mock('$lib/stores', () => ({ addToast }));
 
 import AccessKeysPage from '../routes/config/access-keys/+page.svelte';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
@@ -32,20 +34,49 @@ describe('Zugangsschlüssel für KI-Programme', () => {
 		expect(byTestId('access-key-new')).toBeNull();
 	});
 
-	// personas Helga P-1, Marco P-1: a long key is not marked by hand; Helga P-3, Weber P-3: both go into the program
-	it('kopiert den neuen Schlüssel mit einem Knopf und nennt dabei die Adresse für das KI-Programm', async () => {
+	// personas Helga P-1, Marco P-1: a long key is not marked by hand; Helga P-3, Weber P-3: both go into the program;
+	// Helga 817-2 P-1, Marco 817-2 P-1: the address with its own button in the panel; Helga 817-2 P-3: which was copied
+	it('kopiert Schlüssel und Adresse im Kasten des neuen Schlüssels mit je einem Knopf und sagt, was kopiert ist', async () => {
 		const writeText = vi.fn(async () => {});
 		Object.assign(navigator, { clipboard: { writeText } });
+		addToast.mockClear();
 		show(AccessKeysPage, {
 			data: { keys: [key], mcpUrl: 'https://dwello.example/mcp' },
 			form: { created: { name: key.name, key: 'dwello_geheim' } }
 		} as never);
 
-		expect(byTestId('access-key-new')?.textContent).toContain('Adresse für das KI-Programm: https://dwello.example/mcp');
+		expect(byTestId('access-key-new')?.textContent).toContain(
+			'Adresse für das KI-Programm: https://dwello.example/mcp'
+		);
 		click('access-key-new-copy');
-		click('access-key-address-copy');
+		click('access-key-new-address-copy');
+		await new Promise((resolve) => setTimeout(resolve));
 
 		expect(writeText.mock.calls).toEqual([['dwello_geheim'], ['https://dwello.example/mcp']]);
+		expect(addToast.mock.calls).toEqual([
+			['success', 'Der Schlüssel ist kopiert.'],
+			['success', 'Die Adresse ist kopiert.']
+		]);
+	});
+
+	// code review 817-2 C-11
+	it('sagt, wenn das Kopieren nicht geht, wie es von Hand geht', async () => {
+		Object.assign(navigator, {
+			clipboard: { writeText: vi.fn(async () => Promise.reject(new Error('verweigert'))) }
+		});
+		addToast.mockClear();
+		show(AccessKeysPage, {
+			data: { keys: [], mcpUrl: 'https://dwello.example/mcp' },
+			form: null
+		} as never);
+
+		click('access-key-address-copy');
+		await new Promise((resolve) => setTimeout(resolve));
+
+		expect(addToast).toHaveBeenCalledWith(
+			'error',
+			'Kopieren hat nicht geklappt. Markieren Sie den Text und kopieren Sie ihn von Hand.'
+		);
 	});
 
 	it('nennt bei jedem Schlüssel Erstellt, zuletzt benutzt und den Ablauf', () => {
@@ -89,9 +120,14 @@ describe('Zugangsschlüssel für KI-Programme', () => {
 
 	// the address the AI program needs next to the key: /mcp of this installation
 	it('nennt die Adresse für das KI-Programm', () => {
-		show(AccessKeysPage, { data: { keys: [], mcpUrl: 'https://dwello.example/mcp' }, form: null } as never);
+		show(AccessKeysPage, {
+			data: { keys: [], mcpUrl: 'https://dwello.example/mcp' },
+			form: null
+		} as never);
 
-		expect(byTestId('access-key-address')?.textContent).toBe('Adresse für das KI-Programm: https://dwello.example/mcp');
+		expect(byTestId('access-key-address')?.textContent).toBe(
+			'Adresse für das KI-Programm: https://dwello.example/mcp'
+		);
 	});
 
 	it('sagt, was zu tun ist, solange es keinen Schlüssel gibt', () => {

@@ -119,7 +119,7 @@ Funktionalität: Datenschutz
 
   # #458 (#347)
   Szenario: Stand der Datenschutzerklärung
-    Dann nennt die Seite den Stand "20. Oktober 2026"
+    Dann nennt die Seite den Stand "29. Oktober 2026"
 
   # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes

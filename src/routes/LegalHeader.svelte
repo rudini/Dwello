@@ -9,5 +9,5 @@
 
 <PageHeader {title} {purpose} />
 <p class="text-ink-muted" data-testid="legal-as-of">
-	{m.legal_as_of({ date: formatDateLong('2026-10-20', { weekday: false }) })}
+	{m.legal_as_of({ date: formatDateLong('2026-10-29', { weekday: false }) })}
 </p>

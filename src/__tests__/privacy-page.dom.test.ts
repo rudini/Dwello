@@ -152,6 +152,15 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		);
 	});
 
+	// Fachprüfung 817-2 R-10, code review 817-2 C-12: the Zugangsschlüssel of the demo are shared as well
+	it('sagt, dass alle Besucher der Demo die Zugangsschlüssel der anderen sehen und widerrufen können', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
+
+		expect(demoSection()?.textContent).toContain(
+			'Auch die Zugangsschlüssel für KI-Programme der anderen sehen alle Besucher mit ihrem Namen, und alle können sie widerrufen. Geben Sie einem Schlüssel deshalb keinen Personennamen.'
+		);
+	});
+
 	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
 		show(PrivacyPage, { data: { recipient: null, demo: false, providers: ['Google'] } } as never);
 
@@ -460,7 +469,7 @@ describe('Stand der Datenschutzerklärung', () => {
 	it('nennt den Stand in der Sprache der Oberfläche', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
-		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 20. Oktober 2026');
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 29. Oktober 2026');
 	});
 });
 
