@@ -8,11 +8,17 @@ afterEach(() => vi.unstubAllGlobals());
 // #817: the web app only passes /mcp on; the backend checks the Zugangsschlüssel and answers (ADR 0007)
 describe('/mcp in der Web-App', () => {
 	it('reicht Aufruf und Schlüssel unverändert ans Backend weiter und gibt dessen Antwort zurück', async () => {
-		const backend = vi.fn(async (_url: string, _init: RequestInit) => Response.json({ code: 'ACCESS_KEY_EXPIRED' }, { status: 401 }));
+		const backend = vi.fn(async (_url: string, _init: RequestInit) =>
+			Response.json({ code: 'ACCESS_KEY_EXPIRED' }, { status: 401 })
+		);
 		vi.stubGlobal('fetch', backend);
 		const request = new Request('http://localhost/mcp', {
 			method: 'POST',
-			headers: { authorization: 'Bearer dwello_abc', 'content-type': 'application/json', cookie: 'dwello_session=jwt' },
+			headers: {
+				authorization: 'Bearer dwello_abc',
+				'content-type': 'application/json',
+				cookie: 'dwello_session=jwt'
+			},
 			body: JSON.stringify(call)
 		});
 
