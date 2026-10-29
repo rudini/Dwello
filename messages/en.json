@@ -2156,7 +2156,7 @@
 	"backup_title": "Set up the backup",
 	"backup_intro": "Dwello backs up your data every day in encrypted form. Only someone who knows this recovery code can read a backup. Without it nothing can be restored after a failure, not even by the person who looks after Dwello.",
 	"backup_code_label": "Your recovery code",
-	"backup_keep_sheet": "Print the emergency sheet and keep it in a safe place away from this computer, for example with your tenancy agreements.",
+	"backup_keep_sheet": "Once you have confirmed it, Dwello no longer shows the code. Print the emergency sheet and keep it in a safe place away from this computer, for example with your tenancy agreements.",
 	"backup_sheet_download": "Download the emergency sheet (PDF)",
 	"backup_location": "The backups are kept on the server of this Dwello installation in the folder «backups». Dwello keeps the last 7 daily backups and one per month for 12 months. So that they survive a server failure, the person who looks after Dwello must copy the folder to another device regularly. Ask them whether they do.",
 	"backup_self": "If you look after Dwello yourself, the steps are in the installation guide.",
@@ -2171,5 +2171,5 @@
 	"backend_backup_code_mismatch": "The code does not match the one shown. Enter it as it appears above and on the emergency sheet; hyphens, spaces and upper or lower case do not matter.",
 	"backend_backup_no_code": "The recovery code is already confirmed. An emergency sheet is only available before you confirm it.",
 	"privacy_stored_backup": "In addition, Dwello stores an encrypted backup in the folder «backups» on this server every day. The operator copies it to another device, for example to cloud storage; the operator can tell you where and in which country this copy is kept. Whoever keeps the copy cannot read it without the recovery code.",
-	"privacy_retention_backup": "So that your data survives a failure or a failed update, Dwello backs it up every day in encrypted form, including receipts and documents, and keeps the backups for up to 12 months; Dwello deletes older ones itself. What you delete or anonymise stays in the earlier backups until they are deleted, at most 12 months; only someone who knows the recovery code can read them. If the operator restores a backup, data you deleted or anonymised after it is back: delete or anonymise it again then."
+	"privacy_retention_backup": "So that your data survives a failure or a failed update, Dwello backs it up every day in encrypted form, including receipts and documents, and keeps the backups on this server for up to 12 months; Dwello deletes older ones itself. What you delete or anonymise stays in the earlier backups until Dwello deletes them, at most 12 months; the operator can tell you how long the copy on the other device keeps older backups. Only someone who knows the recovery code can read the backups. If the operator restores a backup, data you deleted or anonymised after it is back: delete or anonymise it again then."
 }

@@ -101,7 +101,7 @@ export async function createBackup(
 			await client.query('INSERT INTO backup_runs (started_at) VALUES ($1) RETURNING id', [now])
 		).rows[0].id;
 		const file = join(dir, `dwello-${stamp(now)}.backup`);
-		let stopDump = () => {};
+		let stopDump = async () => {};
 		try {
 			// a run that was cut off (a restart, a full disk) leaves its half file; gone before it fills the disk again
 			for (const half of await readdir(dir)) if (half.endsWith('.backup.part')) await unlink(join(dir, half));
@@ -111,12 +111,13 @@ export async function createBackup(
 				'--no-acl',
 				`--dbname=${url}`
 			]);
-			stopDump = () => dump.kill();
 			let stderr = '';
 			dump.stderr.on('data', (chunk) => (stderr += chunk));
 			const exited = new Promise<number>((resolve, reject) =>
 				dump.on('close', resolve).on('error', reject)
 			);
+			// its end, also a missing pg_dump, is then no longer the cause (718b review 2, C-14)
+			stopDump = () => (dump.kill(), exited.then(() => {}, () => {}));
 			const head = Buffer.from(
 				JSON.stringify({ version: 1, createdAt: now.toISOString(), secrets })
 			);
@@ -144,7 +145,7 @@ export async function createBackup(
 			return file;
 		} catch (error) {
 			// a failure while encrypting stops reading its output: pg_dump would wait on it for good
-			stopDump();
+			await stopDump();
 			await rm(`${file}.part`, { force: true });
 			await client.query('UPDATE backup_runs SET finished_at = now(), error = $2 WHERE id = $1', [
 				run,

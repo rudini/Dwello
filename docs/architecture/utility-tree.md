@@ -121,7 +121,7 @@ Dwello-Nutzen
 - **Umgebung:** Betrieb, selbst betrieben.
 - **Reaktion:** Die App zeigt einen Hinweis. Der Healthcheck meldet den Zustand, und das Log nennt die Ursache (vom Nutzer bestätigt).
 - **Messgrösse und Ziel:** Ist seit mehr als **einem Tag** kein Backup gelungen, sieht der Betreiber das spätestens beim nächsten Öffnen der App und sofort im Healthcheck (vom Nutzer bestätigt). Das Alter dient nur als Signal, dass die Sicherung steht. Ob ein Backup taugt, prüft R1.
-- **Heute:** Seit #718 Teil 1 meldet `/health` `backup: "stale"` (mit Status 200, damit das Frontend startet und den Hinweis zeigt), wenn seit mehr als einem Tag keine Sicherung gelang; das Log nennt bei jedem Versuch die Ursache (`backup.pg.test.ts`). Seit Teil 2 nennt die Übersicht dem Liegenschaftsverwalter den Tag der letzten Sicherung (`backup-notice.dom.test.ts`; kein Szenario, weil es an der Uhr des Servers hängt).
+- **Heute:** Seit #718 Teil 1 meldet `/health` `backup: "stale"` (mit Status 200, damit das Frontend startet und den Hinweis zeigt), wenn seit mehr als einem Tag keine Sicherung gelang; das Log nennt bei jedem Versuch die Ursache (`backup.pg.test.ts`). Seit Teil 2 nennt die Übersicht dem Liegenschaftsverwalter den Tag der letzten Sicherung (Szenario «Ohne Sicherung seit mehr als einem Tag warnt die Übersicht», `backup-notice.dom.test.ts`).
 - **Fitness Function:** E2E-Szenario «altes Backup → Hinweis sichtbar» und ein Backend-Test: `/health` meldet einen Fehler, wenn das letzte Backup älter als die Schwelle ist.
 
 ### T1 Schnelle und verlässliche CI

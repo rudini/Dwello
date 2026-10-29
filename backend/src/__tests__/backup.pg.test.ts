@@ -199,8 +199,11 @@ describe('Sicherung', () => {
 		} finally {
 			process.env.PATH = path;
 		}
-		// no pid: stopped before the shell got to write it
-		const pid = Number(await readFile(join(bin, 'pid'), 'utf8').catch(() => '0'));
+		// the shell writes its pid as it starts, which can be after the refusal: wait for it (718b review 2, C-13); none
+		// after 2 s means it was stopped before it got there
+		let pid = 0;
+		for (let i = 0; i < 20 && !pid; i++)
+			pid = Number(await readFile(join(bin, 'pid'), 'utf8').catch(() => '0')) || (await Bun.sleep(100), 0);
 		const alive = () => {
 			if (!pid) return false;
 			try {
@@ -213,6 +216,25 @@ describe('Sicherung', () => {
 		const running = alive();
 		if (running) process.kill(pid);
 		expect(running).toBe(false);
+	}, 60_000);
+
+	// 718b review 2, C-14: without pg_dump its exit fails after the encryption did; nothing may stay unhandled
+	it('lässt ohne pg_dump keine unbehandelte Ablehnung zurück, wenn das Verschlüsseln scheitert', async () => {
+		const name = await database();
+		await query(name, `INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ('', '', now())`);
+		const unhandled: unknown[] = [];
+		const note = (reason: unknown) => unhandled.push(reason);
+		process.on('unhandledRejection', note);
+		const path = process.env.PATH;
+		process.env.PATH = await folder();
+		try {
+			await expect(createBackup(`${server}/${name}`, await folder(), secrets)).rejects.toThrow();
+			await Bun.sleep(500);
+		} finally {
+			process.env.PATH = path;
+			process.off('unhandledRejection', note);
+		}
+		expect(unhandled).toEqual([]);
 	}, 60_000);
 
 	// PR #940, Copilot: the restore runs as root; a forged Sicherung must not write outside the two keys

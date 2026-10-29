@@ -19,7 +19,7 @@ const WORDING: Record<
 		address: 'Ihre Dwello-Installation: {address}',
 		date: 'Code erstellt am {date}. Er gilt für die Sicherungen ab dem Tag, an dem Sie ihn in Dwello bestätigt haben.',
 		location:
-			'Die Sicherungen liegen auf dem Server dieser Dwello-Installation im Ordner «backups» und in der Kopie, die die Person, die Dwello betreut, auf einem anderen Gerät ablegt.',
+			'Die Sicherungen liegen auf dem Server dieser Dwello-Installation im Ordner «backups» und in der Kopie, die die Person, die Dwello betreut, regelmässig auf einem anderen Gerät ablegen soll.',
 		emergency:
 			'Im Notfall: Geben Sie dieses Blatt der Person, die Dwello betreut. Mit dem Code stellt sie den Stand der letzten Sicherung wieder her; was Sie danach erfasst haben, fehlt.',
 		self: 'Betreuen Sie Dwello selbst, finden Sie das Vorgehen in der Installationsanleitung:',
@@ -31,7 +31,7 @@ const WORDING: Record<
 		address: 'Votre installation Dwello : {address}',
 		date: 'Code créé le {date}. Il vaut pour les sauvegardes à partir du jour où vous l’avez confirmé dans Dwello.',
 		location:
-			'Les sauvegardes se trouvent sur le serveur de cette installation Dwello, dans le dossier « backups », et dans la copie que la personne qui s’occupe de Dwello dépose sur un autre appareil.',
+			'Les sauvegardes se trouvent sur le serveur de cette installation Dwello, dans le dossier « backups », et dans la copie que la personne qui s’occupe de Dwello doit déposer régulièrement sur un autre appareil.',
 		emergency:
 			'En cas d’urgence : remettez cette fiche à la personne qui s’occupe de Dwello. Avec le code, elle restaure l’état de la dernière sauvegarde ; ce que vous avez saisi ensuite manquera.',
 		self: 'Si vous vous occupez vous-même de Dwello, la marche à suivre figure dans le guide d’installation :',
@@ -43,9 +43,9 @@ const WORDING: Record<
 		address: 'La Sua installazione di Dwello: {address}',
 		date: 'Codice creato il {date}. Vale per le copie di sicurezza a partire dal giorno in cui lo ha confermato in Dwello.',
 		location:
-			'Le copie di sicurezza si trovano sul server di questa installazione di Dwello, nella cartella «backups», e nella copia che la persona che si occupa di Dwello deposita su un altro dispositivo.',
+			'Le copie di sicurezza si trovano sul server di questa installazione di Dwello, nella cartella «backups», e nella copia che la persona che si occupa di Dwello deve depositare regolarmente su un altro dispositivo.',
 		emergency:
-			'In caso di emergenza: consegni questa scheda alla persona che si occupa di Dwello. Con il codice ripristina lo stato dell’ultima copia di sicurezza; ciò che ha registrato dopo mancherà.',
+			'In caso di emergenza: consegni questa scheda alla persona che si occupa di Dwello. Con il codice, questa persona ripristina lo stato dell’ultima copia di sicurezza; ciò che Lei ha registrato dopo mancherà.',
 		self: 'Se si occupa Lei stesso di Dwello, trova la procedura nella guida all’installazione:',
 		keep: 'Conservi questa scheda in un luogo sicuro, lontano dal Suo computer.'
 	},
@@ -55,7 +55,7 @@ const WORDING: Record<
 		address: 'Your Dwello installation: {address}',
 		date: 'Code created on {date}. It applies to backups from the day you confirmed it in Dwello.',
 		location:
-			'The backups are kept on the server of this Dwello installation in the folder «backups» and in the copy that the person who looks after Dwello keeps on another device.',
+			'The backups are kept on the server of this Dwello installation in the folder «backups» and in the copy that the person who looks after Dwello should keep regularly on another device.',
 		emergency:
 			'In an emergency: give this sheet to the person who looks after Dwello. With the code they restore the state of the last backup; anything you entered after it will be missing.',
 		self: 'If you look after Dwello yourself, the steps are in the installation guide:',
