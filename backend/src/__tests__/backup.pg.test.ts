@@ -389,7 +389,7 @@ describe('Sicherung vor einer Migration', () => {
 it('beendet db:migrate gleich nach der Migration, auch mit Ordner für die Sicherung', async () => {
 	const older = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
 	dirs.push(older);
-	await cp(migrations, older, { recursive: true, filter: (file) => !file.endsWith('0038_backups.sql') && !file.includes('0039') });
+	await cp(migrations, older, { recursive: true, filter: (file) => !file.endsWith('0038_backups.sql') && !file.endsWith('0040_backup_pending_code.sql') });
 	const name = `dwello_backup_${crypto.randomUUID().replace(/-/g, '')}`;
 	await query('postgres', `CREATE DATABASE "${name}"`);
 	databases.push(name);

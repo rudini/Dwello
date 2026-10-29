@@ -168,7 +168,7 @@
 
 - [x] Spec change of `einrichtung.feature` approved by the product owner in #718 (the setup now leads to the Sicherung)
 - [x] `@wip` scenarios `sicherung.feature` and the privacy scenario first; fach review of step 1: `docs/reviews/718b-fachreview-1.md`, `718b-fachreview-2.md` (all fixed)
-- [x] Backend: `0039_backup_pending_code.sql`, `/api/v1/backup` (setup, confirm, Notfallblatt), state `setup` in `/health`; frontend: `/backup`, redirect while not set up, notice in the overview, privacy lines; seen red
+- [x] Backend: `0040_backup_pending_code.sql`, `/api/v1/backup` (setup, confirm, Notfallblatt), state `setup` in `/health`; frontend: `/backup`, redirect while not set up, notice in the overview, privacy lines; seen red
 - [x] a11y and language rows: `backup` (default, backup-error), `dashboard` (backup-confirmed, backup-stale)
 - [x] Slice review round 1: `docs/reviews/718b-review-1.md` (C-1 to C-3 Major, fixed); round 2: `718b-review-2.md` (C-12 to C-14 Minor, fixed)
 - [x] Fach review step 5: `docs/reviews/718b-fachreview-3.md` (V-1, R-1 Major, fixed), `718b-fachreview-4.md` (closed; V-5, R-3 adopted)

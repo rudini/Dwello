@@ -65,6 +65,8 @@ const sameEverywhere = [
 const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-)?[0-9a-f]{12}\b/gu;
 // Invoice descriptions the seeds write (fixtures/backend.ts): «Heizöl 2025», «<category> 2025-01-31»
 const seededDescription = /\b(?:Heizöl \d{4}|\p{L}+ \d{4}-\d{2}-\d{2})\b/gu;
+// A Wiederherstellungscode (#718): 6 random groups of 4 characters, which can spell a German word («6ZUR»)
+const recoveryCode = /\b(?:[A-HJ-NP-Z2-9]{4}-){5}[A-HJ-NP-Z2-9]{4}\b/g;
 // Fixed values that are user data: seeds (fixtures/backend.ts, the axe seeds) and the operator (playwright.config.ts)
 const seedValues = [
 	'Testweg 1',
@@ -92,7 +94,8 @@ const germanIn = (texts: string[], language: string, userData: string[]) => {
 		[...userData, ...seedValues, ...sameEverywhere]
 			.reduce((rest, value) => rest.split(value).join(' '), text)
 			.replace(scenarioRecord, ' ')
-			.replace(seededDescription, ' ');
+			.replace(seededDescription, ' ')
+			.replace(recoveryCode, ' ');
 	const countries = countryNames(language);
 	return texts.flatMap((text) => {
 		if (countries.has(text.trim())) return [];
