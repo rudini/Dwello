@@ -21,3 +21,9 @@ export const newAccessKeySecret = target('Warnung zum neuen Zugangsschlüssel', 
 export const createAccessKeyRefusal = target('Ablehnung im Dialog zum Erstellen', (page) =>
 	page.getByRole('dialog').getByTestId('form-error')
 );
+export const copyNewAccessKey = target('Neuen Zugangsschlüssel kopieren', (page) => page.getByTestId('access-key-new-copy'));
+export const copyNewAccessKeyAddress = target('Adresse beim neuen Zugangsschlüssel kopieren', (page) =>
+	page.getByTestId('access-key-new-address-copy')
+);
+// each copy adds a toast: the newest says what was copied last
+export const lastSuccessToast = target('Letzte Erfolgsmeldung', (page) => page.getByTestId('toast-success').last());

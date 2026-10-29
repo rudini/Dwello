@@ -5,6 +5,8 @@ import {
 	accessKeyNameInput,
 	accessKeysLink,
 	closeNewAccessKey,
+	copyNewAccessKey,
+	copyNewAccessKeyAddress,
 	confirmCreateAccessKey,
 	confirmRevokeAccessKey,
 	createAccessKeyButton,
@@ -18,6 +20,8 @@ export const goToAccessKeys = Navigate.to('/config/access-keys');
 export const createAccessKey = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(createAccessKeyButton), Enter.theValue(name).into(accessKeyNameInput), Click.on(confirmCreateAccessKey));
 export const closeTheNewAccessKey = Click.on(closeNewAccessKey);
+export const copyTheNewAccessKey = Click.on(copyNewAccessKey);
+export const copyTheAddress = Click.on(copyNewAccessKeyAddress);
 export const startRevokingAccessKey = (name: string): Activity => (actor) =>
 	actor.attemptsTo(goToAccessKeys, Click.on(revokeAccessKeyButton(name)));
 export const confirmRevoking = Click.on(confirmRevokeAccessKey);

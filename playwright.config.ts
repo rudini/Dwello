@@ -261,7 +261,10 @@ export default defineConfig<{ driver: Driver }>({
 		{
 			name: 'chromium',
 			use: {
-				browserName: 'chromium'
+				browserName: 'chromium',
+				// copying a Zugangsschlüssel (#817): headless Chromium refuses the clipboard without it; Firefox and WebKit
+				// let a click write to it
+				permissions: ['clipboard-write']
 			}
 		},
 		{

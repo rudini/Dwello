@@ -73,5 +73,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Re-reviews: `docs/reviews/817-review-2.md` (C-1, C-3 closed; C-2 rest rejected: «nicht erstellt» and «nicht widerrufen» come only from a failing call between web app and backend, `tests/e2e/CLAUDE.md` «No scenario»; the action tests show them), `docs/reviews/817-fachreview-3.md` (V-6 closed), personas `helga-817-2.md`, `marco-817-2.md` (no Blocker/Major)
 - [x] Product owner 2026-10-29: «Stand» becomes the day of the merge (`Spec change approved: #817`, scenarios «Stand der Datenschutzerklärung», «Stand der Nutzungsbedingungen»; DOM tests red first); glossary rows of #942 in this pull request
 - [x] Minor fixes: paging wording V-12, the address with its own copy button in the panel and one confirmation per button (Helga 817-2 P-1, P-3, Marco 817-2 P-1), tests of a failed copy (C-11) and the demo sentence (C-12)
-- [ ] Closing review, archive the session, workflow review
+- [x] Closing review: `docs/reviews/817-review-3.md` (C-2 rejection holds, closed; C-13 Major: a scenario for copying, red without the buttons, Chromium gets `clipboard-write`; C-14 Minor: tests of the address toast and the refused revoke, red by taking the lines out)
+- [ ] Closing review of the C-13 fix
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-817.md` (the session is archived before the last pull request of this request, #578)
 - [ ] PR merged

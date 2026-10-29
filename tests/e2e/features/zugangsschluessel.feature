@@ -23,6 +23,16 @@ Funktionalität: Zugangsschlüssel für KI-Programme
     Wenn der Liegenschaftsverwalter im Protokoll nachsieht
     Dann nennt das Protokoll mit heutigem Datum "Zugangsschlüssel «Claude Desktop Büro» erstellt"
 
+  # Personas Helga und Marco 817 P-1, Code-Review 817-3 C-13: ein langer Schlüssel wird nicht von Hand markiert; was in der
+  # Zwischenablage steht, prüft access-keys-page.dom.test.ts
+  Szenario: Den neuen Zugangsschlüssel und die Adresse kopieren
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Zugangsschlüssel für KI-Programme"
+    Und der Liegenschaftsverwalter den Zugangsschlüssel "Claude Desktop Büro" erstellt
+    Wenn der Liegenschaftsverwalter den neuen Zugangsschlüssel kopiert
+    Dann bestätigt Dwello das Kopieren mit "Der Schlüssel ist kopiert."
+    Wenn der Liegenschaftsverwalter die Adresse für das KI-Programm beim neuen Zugangsschlüssel kopiert
+    Dann bestätigt Dwello das Kopieren mit "Die Adresse ist kopiert."
+
   # Code-Review 817-1 C-2: die Ablehnung des Backends steht im Dialog
   Szenario: Zugangsschlüssel ohne Namen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Zugangsschlüssel für KI-Programme"

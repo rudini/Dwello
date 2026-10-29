@@ -6,6 +6,7 @@ import {
 	accessKeyRow,
 	createRefusal,
 	doneMessage,
+	lastConfirmation,
 	mcpStatus,
 	mcpText,
 	newAccessKeyNote,
@@ -19,6 +20,8 @@ import { goToAuditLog } from '../tasks/audit-log';
 import {
 	callTool,
 	closeTheNewAccessKey,
+	copyTheAddress,
+	copyTheNewAccessKey,
 	confirmRevoking,
 	createAccessKey,
 	goToAccessKeys,
@@ -51,6 +54,18 @@ When('der Liegenschaftsverwalter den Zugangsschlüssel {string} erstellt', async
 
 When('der Liegenschaftsverwalter einen Zugangsschlüssel ohne Namen erstellen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(createAccessKey(''));
+});
+
+When('der Liegenschaftsverwalter den neuen Zugangsschlüssel kopiert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(copyTheNewAccessKey);
+});
+
+When('der Liegenschaftsverwalter die Adresse für das KI-Programm beim neuen Zugangsschlüssel kopiert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(copyTheAddress);
+});
+
+Then('bestätigt Dwello das Kopieren mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(lastConfirmation).toBe(text);
 });
 
 When('der Liegenschaftsverwalter den neuen Zugangsschlüssel schliesst', async ({ verwalter }) => {

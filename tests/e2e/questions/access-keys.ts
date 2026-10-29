@@ -5,6 +5,7 @@ import { successToast } from '../targets/form';
 import {
 	accessKeyRows,
 	createAccessKeyRefusal,
+	lastSuccessToast,
 	newAccessKey,
 	newAccessKeyHint,
 	newAccessKeySecret,
@@ -29,3 +30,4 @@ export const mcpText = question('the text of the MCP answer', (actor) =>
 export const newAccessKeyWarning = Text.of(newAccessKeySecret);
 export const createRefusal = Text.of(createAccessKeyRefusal);
 export const doneMessage = Text.of(successToast);
+export const lastConfirmation = Text.of(lastSuccessToast);

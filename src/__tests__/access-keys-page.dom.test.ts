@@ -59,6 +59,37 @@ describe('Zugangsschlüssel für KI-Programme', () => {
 		]);
 	});
 
+	// code review 817-3 C-14: the address on the page says the same
+	it('kopiert auch die Adresse oben auf der Seite und sagt es', async () => {
+		const writeText = vi.fn(async () => {});
+		Object.assign(navigator, { clipboard: { writeText } });
+		addToast.mockClear();
+		show(AccessKeysPage, {
+			data: { keys: [], mcpUrl: 'https://dwello.example/mcp' },
+			form: null
+		} as never);
+
+		click('access-key-address-copy');
+		await new Promise((resolve) => setTimeout(resolve));
+
+		expect(writeText).toHaveBeenCalledWith('https://dwello.example/mcp');
+		expect(addToast).toHaveBeenCalledWith('success', 'Die Adresse ist kopiert.');
+	});
+
+	// code review 817-3 C-14: a refused revoke stays in its dialog
+	it('zeigt im Dialog zum Widerrufen, dass nichts widerrufen wurde', () => {
+		show(AccessKeysPage, {
+			data: { keys: [key] },
+			form: { revokeError: 'Der Zugangsschlüssel wurde nicht widerrufen. Versuchen Sie es erneut.' }
+		} as never);
+
+		click('access-key-revoke-button');
+
+		expect(byTestId('form-error')?.textContent).toContain(
+			'Der Zugangsschlüssel wurde nicht widerrufen.'
+		);
+	});
+
 	// code review 817-2 C-11
 	it('sagt, wenn das Kopieren nicht geht, wie es von Hand geht', async () => {
 		Object.assign(navigator, {
