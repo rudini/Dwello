@@ -9,17 +9,22 @@ Two ways:
 
 ## 1. What you need
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (on a Linux server: Docker Engine with Compose v2) and [Git](https://git-scm.com/downloads).
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (on a Linux server: Docker Engine with Compose 2.23.1 or newer, which reads the keys script inside `compose.yaml`). Dwello comes as ready-made images for Intel and AMD processors (amd64) and ARM processors such as Apple silicon or a Raspberry Pi (arm64); no Git and no build (#578).
 - 16 GB of memory for the local AI, which reads invoices on this machine. With less, use an external AI (section 6).
 - Nothing to invent: Dwello makes its keys itself, and the landlord creates their Konto mit Passwort in the browser (section 5). Google sign-in is optional (section 3).
 - About 10 GB of disk space (images, AI model, database).
 
 ## 2. Download
 
+Make an empty folder `dwello` and download `compose.yaml` into it, the one file Dwello needs (in Windows PowerShell write `curl.exe` instead of `curl`):
+
 ```bash
-git clone https://github.com/rudini/Dwello.git
-cd Dwello
+mkdir dwello
+cd dwello
+curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
 ```
+
+It starts the newest version. To stay on one version, write it into `.env` (section 4), e.g. `DWELLO_VERSION=1.4.0`; the versions are listed under [Releases](https://github.com/rudini/Dwello/releases).
 
 ## 3. Optional: Google sign-in
 
@@ -35,7 +40,7 @@ The landlord signs in with e-mail address and password, set up in the browser (s
 On a PC Dwello needs no settings: on the first start it makes its keys itself (the key of the sessions, the database password and the key for stored secrets) and keeps them in the Docker volume `dwello_secrets`. Only for Google, the operator details, e-mail to tenants (section 5) or an external AI (section 6), copy the example file and fill in what you need; Docker Compose reads it:
 
 ```bash
-cp .env.example .env
+curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
 ```
 
 | Setting | Value |
@@ -52,19 +57,19 @@ Optional, shown in the terms of use and the privacy statement of the app (which 
 ## 5. Start
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose up -d
 docker logs dwello-backend
 ```
 
-The first start builds Dwello, which takes several minutes. Only the web app (port 3000) is reachable from outside the containers; the backend, the database and the AI stay inside Docker (#719).
+The first start downloads the images (about 1 GB, without the AI model). Only the web app (port 3000) is reachable from outside the containers; the backend, the database and the AI stay inside Docker (#719).
 
 The log of the backend shows the **Einrichtungscode** (setup code), e.g. `[setup] Einrichtungscode: K7QF-2MXD`. Open `http://localhost:3000`: Dwello shows «Dwello einrichten». The landlord enters the code, their e-mail address and a password twice (at least 8 characters, best a long one used nowhere else), chooses «Lokale KI auf diesem Server» or «Später entscheiden» (then no KI reads invoices and no model is downloaded until a KI is chosen under «Einstellungen» › «KI», section 6), and is then signed in. Only who knows the code can set Dwello up; a new code is made on each start until the account exists, and 5 wrong codes lock the setup for 15 minutes.
 
-The AI model (about 6 GB) then downloads by itself; the overview shows how far it is, and until then invoices are entered by hand. If the download fails, Dwello tries again at the next start (`docker compose -f docker-compose.prod.yml restart backend`).
+The AI model (about 6 GB) then downloads by itself; the overview shows how far it is, and until then invoices are entered by hand. If the download fails, Dwello tries again at the next start (`docker compose restart backend`).
 
 - **Forgotten password or Sperre:** `docker exec -it dwello-backend bun run account` sets a new password; it also lifts the Sperre after 5 failed attempts and ends the sessions that were open.
 
-- **Update:** `git pull`, then `docker compose -f docker-compose.prod.yml up -d --build`.
+- **Update:** `docker compose pull`, then `docker compose up -d`. The data stays in the Docker volumes. With `DWELLO_VERSION` in `.env`, change it to the new version first.
 - **Back up** the database and the keys regularly and keep the copy on another device; uploaded invoices and PDFs are stored in the database too. Without the key for stored secrets, secrets Dwello stores encrypted (such as the key of an external AI) cannot be read after a restore. These commands work in every terminal, Windows PowerShell included:
 
   ```bash
@@ -83,15 +88,28 @@ The AI model (about 6 GB) then downloads by itself; the overview shows how far i
   On a new machine, put the keys back **before its first start**, so the new database gets the saved password; then start it (`up -d`) and restore the database as above:
 
   ```bash
-  docker compose -f docker-compose.prod.yml run --rm --no-deps -v "$PWD/dwello-keys:/keys:ro" secrets sh -c 'cp /keys/* /run/dwello/'
+  docker compose run --rm --no-deps -v "$PWD/dwello-keys:/keys:ro" secrets sh -c 'cp /keys/* /run/dwello/'
   ```
 - **E-mail to tenants:** `.env.example` sets `MAIL_TRANSPORT=smtp` with placeholder values. Fill in `MAIL_FROM` and `SMTP_*` from the landlord's mail provider (or set `MAIL_TRANSPORT=resend` and `RESEND_API_KEY`), and for SMTP also `MAIL_PROVIDER_NAME` and `MAIL_PROVIDER_COUNTRY`, which the privacy statement names (required when the mail server is outside Switzerland). Or remove the `MAIL_TRANSPORT` line: Dwello then sends no e-mail, and the landlord sends the PDFs or prints the letters.
 
 If the page «KI» says that the local KI does not answer, start it again (Docker Desktop shows the container `dwello-ollama`, or in a terminal):
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d ollama
+docker compose up -d ollama
 ```
+
+### From a clone (installations before #578)
+
+An installation from `git clone` keeps working with `git pull` and `docker compose -f docker-compose.prod.yml up -d --build`. To move to the ready-made images, in the folder of the clone (it holds `.env`, `backups` and, after `git pull`, `compose.yaml`):
+
+```bash
+git pull
+docker compose -f docker-compose.prod.yml down
+docker compose pull
+docker compose up -d
+```
+
+The data stays: `compose.yaml` uses the volumes of a clone in a folder named `Dwello` (project name `dwello`). If the folder has another name, put `COMPOSE_PROJECT_NAME=<that name in lower case>` into `.env` first, or copy `.env` and `backups` and start from section 2.
 
 ## 6. Without 16 GB of memory: an external AI
 
@@ -135,7 +153,7 @@ Over plain `http` the password and every page cross the network unencrypted, and
 
    and remove `COOKIE_SECURE=false`.
 4. With Google (section 3): add `https://dwello.example.ch/auth/callback` as redirect URI.
-5. `docker-compose.prod.yml` publishes only the web app (3000), for Caddy. Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
+5. `compose.yaml` publishes only the web app (3000), for Caddy. Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
 
 Without HTTPS, only inside your home network (not recommended: the password and every page cross the network unencrypted, and the sign-in page says so), skip Caddy and set in `.env` the address the other devices open, e.g. `homeserver.local`:
 
@@ -162,12 +180,12 @@ openssl rand -hex 32   # a new key
 In `.env`, set `JWT_SECRET=` to that key (replace the line if there is one), then:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --force-recreate
+docker compose up -d --force-recreate
 ```
 
 A new session key does not end the access of AI programs: revoke their keys under «Einstellungen» › «Zugangsschlüssel für KI-Programme» (#817).
 
-Removing an address from `ALLOWED_EMAILS` (then `docker compose -f docker-compose.prod.yml up -d`, so the web app reads the new list) ends its access without this: only the web app reaches the backend, and it checks the list on every request (#747).
+Removing an address from `ALLOWED_EMAILS` (then `docker compose up -d`, so the web app reads the new list) ends its access without this: only the web app reaches the backend, and it checks the list on every request (#747).
 
 ### Failed sign-ins and errors
 
@@ -183,18 +201,18 @@ docker logs dwello-frontend
 A database first started before #577 may still use the old default password `dwello`. Check it:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend cat /run/dwello/db_password; echo
+docker compose exec backend cat /run/dwello/db_password; echo
 ```
 
 If it prints `dwello`, give the database a new password and keep it in `.env`:
 
 ```bash
 new=$(openssl rand -hex 24); echo "$new"   # the new password
-docker compose -f docker-compose.prod.yml exec postgres psql -U dwello -d dwello -c "ALTER USER dwello PASSWORD '$new'"
+docker compose exec postgres psql -U dwello -d dwello -c "ALTER USER dwello PASSWORD '$new'"
 ```
 
 In `.env`, set `POSTGRES_PASSWORD=` to that password (replace the line if there is one), then:
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --force-recreate
+docker compose up -d --force-recreate
 ```

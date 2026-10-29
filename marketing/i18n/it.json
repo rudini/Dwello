@@ -101,8 +101,6 @@
 	"Alle Daten als CSV und JSON, jederzeit, mit einem Klick.": "Tutti i dati in CSV e JSON, in qualsiasi momento, con un clic.",
 	"Berichte und Auswertungen": "Rapporti e analisi",
 	"Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.": "Entrate, uscite e spese accessorie negli anni, per la dichiarazione d’imposta e la fiduciaria.",
-	"Link zum Quellcode in der App": "Link al codice sorgente nell’applicazione",
-	"Jede Installation zeigt, wo ihr Quellcode liegt, wie es die AGPL verlangt.": "Ogni installazione mostra dove si trova il suo codice sorgente, come richiede l’AGPL.",
 	"Häufige Fragen.": "Domande frequenti.",
 	"Kostet Dwello wirklich nichts?": "Dwello è davvero gratuito?",
 	"Brauche ich technische Kenntnisse?": "Mi servono conoscenze tecniche?",
@@ -258,5 +256,6 @@
 	"Für die Person, die einrichtet: PC, Homeserver oder Cloud, und die Befehle": "Per chi installa: PC, server domestico o cloud, e i comandi",
 	"Die Bildschirmfotos und Beispiele auf dieser Seite stammen aus der echten App mit den Demodaten: drei Gebäude in Zürich, Luzern und Interlaken.": "Le schermate e gli esempi di questa pagina provengono dall’applicazione vera con i dati dimostrativi: tre immobili a Zurigo, Lucerna e Interlaken.",
 	"Geplant": "Previsto",
-	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa den Lift, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio l’ascensore, i costi dell’immobile e la quota del suo appartamento."
+	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa den Lift, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio l’ascensore, i costi dell’immobile e la quota del suo appartamento.",
+	"code:# Eine Datei in einen leeren Ordner; unter Windows curl.exe": "# Un file in una cartella vuota; su Windows curl.exe"
 }

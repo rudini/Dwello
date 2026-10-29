@@ -269,10 +269,18 @@ cd backend && bun run test     # backend
 docker-compose -f docker-compose.dev.yml up
 ```
 
-**Production:**
+**Production, from the published images (#578):** every release publishes `ghcr.io/rudini/dwello-frontend` and `ghcr.io/rudini/dwello-backend` for amd64 and arm64, tagged with its version and `latest`. `compose.yaml` starts them, one file to download, no clone:
+```bash
+curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
+docker compose up -d                          # update: docker compose pull && docker compose up -d
+```
+`DWELLO_VERSION` in `.env` fixes a version. CI starts `compose.yaml` with the images of each pull request (job «Docker images»).
+
+**Production, built from a clone:**
 ```bash
 APP_VERSION=$(git describe --tags --match 'v*') docker-compose -f docker-compose.prod.yml up --build
 ```
+`backend/src/__tests__/compose-images.test.ts` keeps both files alike.
 
 **First start (#577):** no `.env` is needed. The service `secrets` (`docker/init-secrets.sh`) makes the session key, the database password and the key for stored secrets once into the volume `dwello_secrets` (back it up with the database; values in `.env` win, so older installations keep theirs). While no Konto mit Passwort exists and no provider is configured, every visitor gets «Dwello einrichten» (`/setup`), which needs the Einrichtungscode from `docker logs dwello-backend` (made on each start; 5 wrong codes lock the setup for 15 minutes). The setup offers «Lokale KI auf diesem Server» or «Später entscheiden» (no KI until one is chosen under «Einstellungen» › «KI», #620), unless the operator set an `LLM_*` variable. The backend downloads the local KI's model on start when Ollama lacks it; the overview shows the progress, or, after «Später entscheiden», that no KI is chosen yet.
 

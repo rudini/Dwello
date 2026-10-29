@@ -371,7 +371,7 @@ bun install
 (cd backend && bun install)
 cp .env.example .env.local
 
-docker-compose up -d          # PostgreSQL on 5432
+docker compose -f docker-compose.yml up -d   # PostgreSQL on 5432 (without -f, Compose takes compose.yaml, the whole installation, #578)
 (cd backend && bun run dev:demo)   # backend on 3001 with demo data
 bun run dev                   # frontend/BFF on 3000
 ```

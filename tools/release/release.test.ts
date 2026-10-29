@@ -30,7 +30,13 @@ function repo(commits: [message: string, tag?: string][]) {
 		spawnSync('bash', [SCRIPT], {
 			cwd: join(dir, 'work'),
 			encoding: 'utf8',
-			env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, VERSION: version, GITHUB_SHA: git('rev-parse', 'HEAD') }
+			env: {
+				...process.env,
+				PATH: `${dir}:${process.env.PATH}`,
+				VERSION: version,
+				GITHUB_SHA: git('rev-parse', 'HEAD'),
+				GITHUB_OUTPUT: join(dir, 'output')
+			}
 		});
 	const ghCalls = () => {
 		try {
@@ -45,10 +51,23 @@ function repo(commits: [message: string, tag?: string][]) {
 			.split('\n')
 			.filter(Boolean)
 			.map((line) => line.split('refs/tags/')[1]);
-	return { run, ghCalls, remoteTags };
+	// what the step hands to the next job of the workflow (#578: the version the images get)
+	const output = () => readFileSync(join(dir, 'output'), 'utf8');
+	return { run, ghCalls, remoteTags, output };
 }
 
 describe('release', () => {
+	// #578: the images of a release carry its version
+	it('nennt dem Workflow die Version des Merges, auch eines schon getaggten', () => {
+		const fresh = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number']]);
+		fresh.run();
+		expect(fresh.output()).toBe('version=0.2.0\n');
+
+		const tagged = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number', 'v0.2.0']]);
+		tagged.run();
+		expect(tagged.output()).toBe('version=0.2.0\n');
+	});
+
 	it('gibt einem Merge die nächste Version aus seinen Commits', () => {
 		const { run, ghCalls } = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number']]);
 		expect(run().status).toBe(0);
