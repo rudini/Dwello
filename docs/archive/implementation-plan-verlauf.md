@@ -164,3 +164,12 @@
 - [x] CI «Docker images» on main: `curl` exit 56 while the backend image fetched the PostgreSQL apt key (network, not this change); failed job re-run once
 - [x] Slice review: `docs/reviews/945-review-1.md` (C-1 Minor: the comment now names the optional canvas binary of pdfjs-dist, unused on the server)
 - [x] PR: pushed after this archive (the next release publishes both images)
+
+## Session: rule changes from the collected review (2026-10-29)
+
+### #948 Workflow: three rule changes
+- [x] Product owner 2026-10-29: apply proposals 1 to 3 of `docs/reviews/workflow-rules-review-2026-10-29.md`
+- [x] `CLAUDE.md` Workflow 1 («Stand» date with the legal text), `tests/e2e/CLAUDE.md` «Failure states» (`FailRequests` never reaches `fail()`), `no-german-in-code.test.ts` (code words such as `lang`)
+- [x] No scenario: rules and a test helper; nothing in the app changes
+- [x] Review: `docs/reviews/948-review-1.md` (C-1 Minor fixed: the rule names the `Spec change approved` line)
+- [x] PR: pushed after this archive
