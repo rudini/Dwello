@@ -121,7 +121,8 @@ Funktionalität: Sicherung einrichten
     Angenommen Dwello ist eingerichtet und die Sicherung auch
     Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
     Wenn der Liegenschaftsverwalter die Seite für einen neuen Wiederherstellungscode öffnet
-    Dann erklärt die Seite für einen neuen Wiederherstellungscode "Die Sicherungen von vorher lassen sich weiterhin nur mit dem alten Code lesen. Dwello löscht sie nach und nach, die letzte nach höchstens 12 Monaten. Bewahren Sie das alte Notfallblatt bis dahin auf; fragen Sie die Person, die Dwello betreut, ob ihre Kopie Sicherungen länger behält. Wer das alte Notfallblatt hat, kann diese Sicherungen bis dahin ebenfalls lesen."
+    # Persona anna-718c P-1, #957: zuerst wozu der Code dient, dann was ein verlorenes Blatt bedeutet
+    Dann erklärt die Seite für einen neuen Wiederherstellungscode "Mit dem Wiederherstellungscode lässt sich eine Sicherung Ihrer Daten lesen, etwa nach einem Defekt. Ein neuer Code gilt für die Sicherungen ab seiner Bestätigung. Die Sicherungen von vorher öffnet weiterhin nur der alte Code; Dwello löscht sie nach und nach, die letzte nach höchstens 12 Monaten. Haben Sie das alte Notfallblatt noch, bewahren Sie es bis dahin auf; fragen Sie die Person, die Dwello betreut, ob ihre Kopie Sicherungen länger behält. Haben Sie es verloren, kann bis dahin niemand diese Sicherungen für Sie öffnen, auch nicht die Person, die Dwello betreut; wer das Blatt findet und an die Sicherungen kommt, kann sie lesen."
     Und erklärt die Seite für einen neuen Wiederherstellungscode "Geben Sie Ihr Passwort erneut ein. So kann nur, wer das Passwort kennt, einen neuen Code erstellen."
     Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code
 
