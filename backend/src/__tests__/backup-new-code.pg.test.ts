@@ -7,7 +7,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import * as jose from 'jose';
-import { mkdtemp, rm } from 'fs/promises';
+import { copyFile, mkdtemp, readdir, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { app } from '../app';
@@ -88,7 +88,7 @@ describe('Neuer Wiederherstellungscode', () => {
 		const response = await call(token, '/api/v1/backup/new-code', { password: 'falsch' });
 		expect(response.status).toBe(422);
 		expect(await response.json()).toMatchObject({ code: 'BACKUP_PASSWORD_WRONG' });
-		expect((await (await call(token, '/api/v1/backup')).json()).code).toBeUndefined();
+		expect(((await (await call(token, '/api/v1/backup')).json()) as { code?: string }).code).toBeUndefined();
 		const [account] = await db.select().from(localAccounts).where(eq(localAccounts.email, email));
 		expect(account.failedAttempts).toBe(1);
 		await db.update(localAccounts).set({ failedAttempts: 0 }).where(eq(localAccounts.email, email));
@@ -103,18 +103,27 @@ describe('Neuer Wiederherstellungscode', () => {
 		expect(fresh.status).toBe(200);
 	});
 
-	it('sichert nach der Bestätigung mit dem neuen Code; die Sicherung von vorher bleibt mit dem alten lesbar', async () => {
+	// Fachreview 718c V-1: right after the confirmation, not at the next night's run, a Sicherung the new code opens
+	it('sichert gleich nach der Bestätigung mit dem neuen Code; die Sicherung von vorher bleibt mit dem alten lesbar', async () => {
 		const first = await confirmedFirstCode();
-		const before = await createBackup(DATABASE_URL, dir, {});
+		// kept apart: the retention keeps only the newest Sicherung of a day, and file names count seconds
+		const before = join(await mkdtemp(join(tmpdir(), 'dwello-before-')), 'before.backup');
+		const old = await createBackup(DATABASE_URL, dir, {});
+		await copyFile(old, before);
+		await Bun.sleep(1100);
 		const token = await localSession();
 		const { code } = (await (await call(token, '/api/v1/backup/new-code', { password })).json()) as { code: string };
 		expect((await call(token, '/api/v1/backup/confirm', { code })).status).toBe(200);
-		const after = await createBackup(DATABASE_URL, dir, {}, new Date(Date.now() + 1000));
+		let after: string | undefined;
+		for (let i = 0; i < 50 && !after; i++) {
+			after = (await readdir(dir)).map((file) => join(dir, file)).find((file) => file.endsWith('.backup') && file !== old);
+			if (!after) await Bun.sleep(100);
+		}
 
-		await decryptFile(after, code, join(dir, 'after.plain'));
+		await decryptFile(after!, code, join(dir, 'after.plain'));
 		await decryptFile(before, first, join(dir, 'before.plain'));
-		await expect(decryptFile(after, first, join(dir, 'wrong.plain'))).rejects.toThrow();
-		expect((await (await call(token, '/api/v1/backup')).json()).code).toBeUndefined();
+		await expect(decryptFile(after!, first, join(dir, 'wrong.plain'))).rejects.toThrow();
+		expect(((await (await call(token, '/api/v1/backup')).json()) as { code?: string }).code).toBeUndefined();
 	}, 60_000);
 
 	it('vergisst einen neuen Code, der nach 30 Minuten noch nicht bestätigt ist', async () => {
@@ -122,7 +131,7 @@ describe('Neuer Wiederherstellungscode', () => {
 		const token = await localSession();
 		const { code } = (await (await call(token, '/api/v1/backup/new-code', { password })).json()) as { code: string };
 		await db.update(backupCodes).set({ createdAt: new Date(Date.now() - 31 * 60_000) }).where(eq(backupCodes.pendingCode, code));
-		expect((await (await call(token, '/api/v1/backup')).json()).code).toBeUndefined();
+		expect(((await (await call(token, '/api/v1/backup')).json()) as { code?: string }).code).toBeUndefined();
 		const confirm = await call(token, '/api/v1/backup/confirm', { code });
 		expect(confirm.status).toBe(422);
 	});

@@ -4,6 +4,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import * as jose from 'jose';
 import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -106,7 +107,7 @@ afterAll(async () => {
 
 describe('API-Verträge des Frontends', () => {
 	// #718: the Sicherung as /health and «Sicherung einrichten» report it
-	it('GET /health und /backup liefern die Felder von health-backup-setup.json, health-backup-stale.json, backup-setup.json und backup-code-mismatch.json', async () => {
+	it('GET /health und /backup liefern die Felder von health-backup-setup.json, health-backup-stale.json, backup-setup.json, backup-code-mismatch.json, backup-new-code.json und backup-sign-in-again.json', async () => {
 		process.env.BACKUP_DIR = tmpdir();
 		try {
 			const health = async () => (await app.handle(new Request('http://localhost/health'))).json();
@@ -116,6 +117,25 @@ describe('API-Verträge des Frontends', () => {
 			const { publicKey, salt } = await recipientOf(generateCode());
 			await db.insert(backupCodes).values({ publicKey: publicKey.toString('base64'), salt: salt.toString('base64'), confirmedAt: new Date(Date.now() - 2 * 24 * 3600_000) });
 			expect(drift(await sample('health-backup-stale'), await health())).toEqual([]);
+			// #718, part 3: a new code (a session of the last minutes) and the refusals of its request
+			expect(drift(await sample('backup-new-code'), await (await sendJson('POST', '/api/v1/backup/new-code', {})).json())).toEqual([]);
+			expect(drift(await sample('backup-new-code'), await (await callApi('/api/v1/backup')).json())).toEqual([]);
+			const stale = await new jose.SignJWT({ email: 'verwalter@example.com', name: 'Verwalter', provider: 'google', auth_time: 0 })
+				.setProtectedHeader({ alg: 'HS256' })
+				.setSubject('verwalter')
+				.setIssuer('dwello')
+				.setAudience('dwello-app')
+				.setIssuedAt()
+				.setExpirationTime('1h')
+				.sign(new TextEncoder().encode(process.env.JWT_SECRET || 'development-secret-key-change-in-production'));
+			const again = await app.handle(
+				new Request('http://localhost/api/v1/backup/new-code', {
+					method: 'POST',
+					headers: { authorization: `Bearer ${stale}`, 'content-type': 'application/json' },
+					body: '{}'
+				})
+			);
+			expect(drift(await sample('backup-sign-in-again'), await again.json())).toEqual([]);
 		} finally {
 			delete process.env.BACKUP_DIR;
 			await db.delete(backupCodes);

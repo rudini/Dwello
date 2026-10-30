@@ -238,6 +238,14 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | documents              | empty               |
       | documents              | marked-sent         |
       | config                 | default             |
+      | config                 | backup-links        |
+      | config-backup          | default             |
+      | config-backup          | new-code-password   |
+      | config-backup          | new-code-password-error |
+      | config-backup          | new-code-again      |
+      | config-backup          | new-code-shown      |
+      | config-backup          | new-code-error      |
+      | config-backup          | new-code-confirmed  |
       | ki-settings            | default             |
       | ki-settings            | ki-model-loading    |
       | ki-settings            | ki-model-failed     |

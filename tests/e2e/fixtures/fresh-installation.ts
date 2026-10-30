@@ -26,6 +26,14 @@ export const resetFreshBackup = (state?: 'stale') =>
 		env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL }
 	});
 
+/** A Konto mit Passwort on the fresh installation for the axe and language check, and its removal (#718, part 3) */
+export const FRESH_ACCOUNT = { email: 'a11y@dwello.test', password: 'a11y-password-2026' };
+export const freshLocalAccount = (action: 'add' | 'remove') =>
+	execFileSync('bun', ['run', 'e2e-local-account', action, FRESH_ACCOUNT.email, FRESH_ACCOUNT.password], {
+		cwd: 'backend',
+		env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL }
+	});
+
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];
 	const buildings: string[] = [];

@@ -61,7 +61,7 @@ export const NEW_CODE_PAGE = `${FRESH_APP}/config/backup`;
 export const signInFreshWithPassword =
 	(email: string, password: string): Activity =>
 	(actor) =>
-		actor.attemptsTo(Cookies.clear, Navigate.to(`${FRESH_APP}/login`), signInWithPassword(email, password), Wait.until(userMenuButton));
+		actor.attemptsTo(Cookies.signOut, Navigate.to(`${FRESH_APP}/login`), signInWithPassword(email, password), Wait.until(userMenuButton));
 
 /** Signed in on the fresh installation with Google an hour ago (#718: too long ago for a new code) */
 export const signedInFreshWithGoogleAnHourAgo: Activity = async (actor) =>
@@ -72,11 +72,17 @@ export const openBackupSettings: Activity = (actor) =>
 
 export const openNewCodePage: Activity = (actor) => actor.attemptsTo(Navigate.to(NEW_CODE_PAGE));
 
-/** «Neuen Code erstellen» with the password typed again, remembering the code shown when there is one */
+/** «Neuen Code erstellen» with the password typed again */
 export const createNewCode =
 	(password: string): Activity =>
+	(actor) =>
+		actor.attemptsTo(openNewCodePage, Enter.theValue(password).into(newCodePasswordInput), Click.on(newCodeButton));
+
+/** A new code made with the right password, remembering the code the page shows */
+export const createdNewCode =
+	(password: string): Activity =>
 	async (actor) => {
-		await actor.attemptsTo(openNewCodePage, Enter.theValue(password).into(newCodePasswordInput), Click.on(newCodeButton));
+		await actor.attemptsTo(createNewCode(password), Wait.until(backupCode));
 		actor.remember(SHOWN_CODE, await actor.answer(shownBackupCode));
 	};
 

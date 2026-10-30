@@ -24,6 +24,7 @@ import {
 	reopenBackup,
 	confirmNewShownCode,
 	createNewCode,
+	createdNewCode,
 	openBackupSettings,
 	openNewCodePage,
 	signInFreshWithPassword,
@@ -161,7 +162,7 @@ When('der Liegenschaftsverwalter mit seinem Passwort einen neuen Wiederherstellu
 });
 
 Given('der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt', async ({ verwalter, frisch }) => {
-	await verwalter.attemptsTo(createNewCode(frisch.account.password));
+	await verwalter.attemptsTo(createdNewCode(frisch.account.password));
 });
 
 When('der Liegenschaftsverwalter mit einem falschen Passwort einen neuen Wiederherstellungscode erstellt', async ({ verwalter }) => {

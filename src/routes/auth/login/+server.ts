@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		});
 
 		// Generate OAuth URL and redirect
-		const authUrl = generateOAuthUrl(provider, state);
+		const authUrl = generateOAuthUrl(provider, state, { again: url.searchParams.get('reauth') === '1' });
 
 		// Redirect to OAuth provider
 		throw redirect(302, authUrl);

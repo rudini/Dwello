@@ -88,12 +88,16 @@ function kept(files: string[], now: Date) {
 }
 
 /** Makes a Sicherung in dir and deletes the ones the retention no longer keeps; returns its path */
-export async function createBackup(
-	url: string,
-	dir: string,
-	secrets: Secrets = envSecrets(),
-	now = new Date()
-) {
+// one Sicherung at a time: each removes the half files of a cut-off run, also those of one still writing
+let previous: Promise<unknown> = Promise.resolve();
+
+export function createBackup(url: string, dir: string, secrets: Secrets = envSecrets(), now = new Date()) {
+	const run = previous.then(() => backUp(url, dir, secrets, now));
+	previous = run.catch(() => {});
+	return run;
+}
+
+async function backUp(url: string, dir: string, secrets: Secrets, now: Date) {
 	return withClient(url, async (client) => {
 		const code = await confirmedCode(client);
 		if (!code) throw new Error('Keine Sicherung: Es ist kein Wiederherstellungscode bestätigt.');
@@ -290,32 +294,47 @@ export async function backupBeforeMigration(
 	}
 }
 
+// a new code (#718, part 3) waits 30 minutes for its confirmation; the first one, at the setup, until it comes
 const pendingCode = async () =>
 	(
 		await pool.query(
-			'SELECT id, pending_code, created_at FROM backup_codes WHERE confirmed_at IS NULL AND pending_code IS NOT NULL ORDER BY created_at DESC LIMIT 1'
+			`SELECT id, pending_code, created_at,
+				EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at IS NOT NULL) AS replacing
+			FROM backup_codes WHERE confirmed_at IS NULL AND pending_code IS NOT NULL
+				AND (created_at > now() - interval '30 minutes' OR NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at IS NOT NULL))
+			ORDER BY created_at DESC LIMIT 1`
 		)
-	).rows[0] as { id: string; pending_code: string; created_at: Date } | undefined;
+	).rows[0] as { id: string; pending_code: string; created_at: Date; replacing: boolean } | undefined;
+
+async function savePendingCode() {
+	const code = generateCode();
+	const { publicKey, salt } = await recipientOf(code);
+	await pool.query('INSERT INTO backup_codes (public_key, salt, pending_code) VALUES ($1, $2, $3)', [
+		publicKey.toString('base64'),
+		salt.toString('base64'),
+		code
+	]);
+	return (await pendingCode())!;
+}
+
+const shown = (pending: { pending_code: string; created_at: Date }) => ({
+	code: pending.pending_code,
+	createdAt: pending.created_at.toISOString()
+});
 
 /** «Sicherung einrichten» (#718, A8): the state, and while no code is confirmed the one to show, made on the first call */
 export async function backupSetup() {
 	const state = await backupState(DATABASE_URL);
-	if (state.backup !== 'setup') return state;
-	let pending = await pendingCode();
-	if (!pending) {
-		const code = generateCode();
-		const { publicKey, salt } = await recipientOf(code);
-		await pool.query(
-			'INSERT INTO backup_codes (public_key, salt, pending_code) VALUES ($1, $2, $3)',
-			[publicKey.toString('base64'), salt.toString('base64'), code]
-		);
-		pending = (await pendingCode())!;
-	}
-	return {
-		backup: 'setup' as const,
-		code: pending.pending_code,
-		createdAt: pending.created_at.toISOString()
-	};
+	if (state.backup === 'off') return state;
+	const pending = (await pendingCode()) ?? (state.backup === 'setup' ? await savePendingCode() : undefined);
+	return pending ? { ...state, ...shown(pending) } : state;
+}
+
+/** A new code in place of any not confirmed yet (#718, part 3), shown as GET shows it until its confirmation */
+export async function replacePendingCode() {
+	await pool.query('DELETE FROM backup_codes WHERE confirmed_at IS NULL');
+	await savePendingCode();
+	return backupSetup();
 }
 
 /** The landlord typed the shown code again: from now on Dwello backs up, and it forgets every code it showed (718b R-3) */
@@ -328,9 +347,9 @@ export async function confirmBackupCode(typed: string) {
 		[pending.id]
 	);
 	await pool.query('DELETE FROM backup_codes WHERE confirmed_at IS NULL');
-	// the first Sicherung right away, not at the next tick of the schedule
+	// the first Sicherung with this code right away, not at the next night's run (fach review 718c V-1)
 	if (process.env.BACKUP_DIR)
-		void backupIfDue(DATABASE_URL, process.env.BACKUP_DIR).catch((error) =>
+		void createBackup(DATABASE_URL, process.env.BACKUP_DIR, envSecrets()).catch((error) =>
 			console.error(`Sicherung fehlgeschlagen: ${error instanceof Error ? error.message : error}`)
 		);
 	return backupState(DATABASE_URL);
@@ -340,5 +359,5 @@ export async function confirmBackupCode(typed: string) {
 export async function emergencySheet(language: Language, address: string) {
 	const pending = await pendingCode();
 	if (!pending) throw new CodedError('BACKUP_NO_CODE', 'No code to confirm');
-	return renderEmergencySheet(pending.pending_code, pending.created_at, address, language);
+	return renderEmergencySheet(pending.pending_code, pending.created_at, address, language, pending.replacing);
 }
