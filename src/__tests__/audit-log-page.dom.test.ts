@@ -25,6 +25,10 @@ describe('Protokoll unter den Einstellungen', () => {
 		expect(byTestId('audit-log-empty')?.textContent).toContain(
 			'Änderungen der vorgeschlagenen Verwaltungspauschale und der Umlagefähigkeit von Kategorien und Rechnungen, zurückgesetzte Zahlungen und berichtigte Abrechnungen.'
 		);
+		// #951 (Fachprüfung 951-1 F-2): also the change of the KI, the Zugangsschlüssel and the queries of AI programs
+		expect(byTestId('audit-log-empty')?.textContent).toContain(
+			'Dazu jeder Wechsel der KI, jeder erstellte, widerrufene oder abgelaufene Zugangsschlüssel für KI-Programme und jeder Abruf eines KI-Programms.'
+		);
 		expect(byTestId('audit-log-list')).toBeNull();
 	});
 
