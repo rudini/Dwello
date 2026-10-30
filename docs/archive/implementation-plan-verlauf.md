@@ -192,3 +192,11 @@
 - [x] Scenario green without `@wip`
 - [x] Closing `code-reviewer` round (`docs/reviews/951-review-1.md`)
 - [x] PR (Fixes #951), pushed after this archive
+
+## Session: #954 main red in the scheduled run (2026-10-30)
+
+- [x] Run 41028478233 on b5d45ce: two Firefox failures, read from the traces of `e2e-reports-3` and `e2e-reports-4`
+- [x] «Hochladen abbrechen verwirft die Dateien»: the KI answer came 24 ms before the click; the hints pushed «Abbrechen» down and the click hit them. The step waits until no file is still read; both cancel scenarios green in Chromium, 3 times each
+- [ ] «Suche ohne Treffer» (Firefox, third time after #754, #869): no request after the click, the caret stays in the field. Cause not confirmed: this container has no Firefox; comment on #954
+- [x] No review of its own: a test-only CI fix (Workflow 7)
+- [x] PR `Refs #954`: pushed after this archive
