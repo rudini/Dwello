@@ -35,8 +35,11 @@ export const generateCode = () =>
 		Array.from({ length: 4 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('')
 	).join('-');
 
+/** The code as the landlord may type it: lower case, with spaces or without hyphens */
+export const normalizedCode = (code: string) => code.toUpperCase().replace(/[^0-9A-Z]/g, '');
+
 const privateKeyOf = (code: string, salt: Buffer) => {
-	const typed = code.toUpperCase().replace(/[^0-9A-Z]/g, '');
+	const typed = normalizedCode(code);
 	const seed = scryptSync(typed, salt, 32, { N: 2 ** 15, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
 	return createPrivateKey({
 		key: Buffer.concat([PKCS8_X25519, seed]),

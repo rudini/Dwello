@@ -90,15 +90,19 @@
 					(data.serverCountry
 						? ` ${m.privacy_stored_country({ country: data.serverCountry })}`
 						: ''),
+				...(data.backup ? [m.privacy_stored_backup()] : []),
 				m.audit_privacy()
 			].map((text) => ({ text }))
 		},
 		{
 			id: 'retention',
 			title: m.privacy_retention_title(),
-			paragraphs: [m.privacy_retention_1(), m.privacy_retention_2(), m.privacy_retention_3()].map(
-				(text) => ({ text })
-			)
+			paragraphs: [
+				m.privacy_retention_1(),
+				...(data.backup ? [m.privacy_retention_backup()] : []),
+				m.privacy_retention_2(),
+				m.privacy_retention_3()
+			].map((text) => ({ text }))
 		},
 		{
 			id: 'login',

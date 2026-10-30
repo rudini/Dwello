@@ -403,3 +403,6 @@ type ApiDocument = Json<DocumentSummary>;
 // optional where tests build a document; the backend always sends them
 type OptionalDocumentFields = 'deliveryErrorCode' | 'paymentDeadline' | 'recipient' | 'notToSend';
 export type StatementDocument = Omit<ApiDocument, OptionalDocumentFields> & Partial<Pick<ApiDocument, OptionalDocumentFields>>;
+
+/** The Sicherung as the backend reports it (#718): off without a folder, setup until the landlord confirmed a code */
+export type BackupState = { backup: 'off' | 'setup' | 'ok' | 'stale'; since?: string };

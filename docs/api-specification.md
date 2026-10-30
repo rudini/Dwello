@@ -46,7 +46,9 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ### Health
 
-`GET /health` (public) → `{ status: "ok", timestamp, service: "dwello-backend", backup: "off" | "ok", since? }`; `backup: "stale"` and `since` (the last Sicherung, else the confirmation of the code) when no Sicherung succeeded for more than a day (#718, O1); always **200**, since the frontend starts only with a healthy backend
+`GET /health` (public) → `{ status: "ok", timestamp, service: "dwello-backend", backup: "off" | "setup" | "ok", since? }` (`setup`: a folder for the Sicherung, no code confirmed yet); `backup: "stale"` and `since` (the last Sicherung, else the confirmation of the code) when no Sicherung succeeded for more than a day (#718, O1); always **200**, since the frontend starts only with a healthy backend
+
+Sicherung (#718): `GET /api/v1/backup` → the state as `/health` names it; while `backup` is `setup` also `code` (the Wiederherstellungscode to show, made on the first call and the same on every later one) and `createdAt`. `POST /api/v1/backup/confirm` `{ code }` (case, spaces and hyphens do not matter) → the state; another code **422** `BACKUP_CODE_MISMATCH`. Dwello then forgets every code it showed. `GET /api/v1/backup/emergency-sheet?language=de|fr|it|en&address=<url>` → the Notfallblatt (PDF) of the code still to confirm; once confirmed **409** `BACKUP_NO_CODE`.
 
 ---
 

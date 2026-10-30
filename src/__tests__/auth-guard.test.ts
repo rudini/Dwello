@@ -3,6 +3,8 @@ import { SignJWT } from 'jose';
 import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
 import { generateJwt } from '$lib/server/auth';
 import { handle } from '../hooks.server';
+import setupHealth from '../../tests/contracts/health-backup-setup.json';
+import staleHealth from '../../tests/contracts/health-backup-stale.json';
 
 const user = {
 	sub: 'user-1',
@@ -86,5 +88,38 @@ describe('Zugang nur mit Anmeldung', () => {
 
 		expect(response.status).toBe(303);
 		expect(response.headers.get('location')).toBe('/dashboard');
+	});
+});
+
+// #718 (A8): until the Wiederherstellungscode is confirmed, every page leads to «Sicherung einrichten»
+describe('Sicherung noch nicht eingerichtet', () => {
+	async function withBackup(path: string, health: object) {
+		const url = new URL(`http://localhost:3000${path}`);
+		const event = {
+			url,
+			request: new Request(url),
+			cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) },
+			locals: {} as App.Locals,
+			fetch: vi.fn(async () => Response.json(health))
+		};
+		const session = await token();
+		const resolve = vi.fn(async () => new Response('Seite'));
+		return { response: await handle({ event, resolve } as never), resolve };
+	}
+
+	it('führt jede Seite zur Sicherung', async () => {
+		const { response, resolve } = await withBackup('/dashboard', setupHealth);
+		expect(response.status).toBe(303);
+		expect(response.headers.get('location')).toBe('/backup');
+		expect(resolve).not.toHaveBeenCalled();
+	});
+
+	it('öffnet die Sicherung, ihr Notfallblatt, die Datenschutzerklärung und die API', async () => {
+		for (const path of ['/backup', '/backup/sheet', '/privacy', '/api/v1/buildings'])
+			expect(await (await withBackup(path, setupHealth)).response.text()).toBe('Seite');
+	});
+
+	it('öffnet jede Seite, sobald der Code bestätigt ist', async () => {
+		expect(await (await withBackup('/dashboard', staleHealth)).response.text()).toBe('Seite');
 	});
 });

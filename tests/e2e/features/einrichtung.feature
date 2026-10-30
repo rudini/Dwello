@@ -17,6 +17,7 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt
+    Und der Besucher richtet die Sicherung ein
     Dann ist der Besucher auf der Seite "Übersicht"
     Und zeigt die Kopfzeile die E-Mail-Adresse des neuen Kontos
 
@@ -88,6 +89,7 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die KI später wählt
+    Und der Besucher richtet die Sicherung ein
     Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Es ist «Keine KI» gewählt. Sie erfassen Rechnungen von Hand. Eine KI wählen Sie unter «Einstellungen» › «KI»."
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Rechnungen und Kategorien werden nicht von einer KI bearbeitet."
@@ -97,6 +99,7 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Und das KI-Modell ist zu 40 % geladen
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die lokale KI wählt
+    Und der Besucher richtet die Sicherung ein
     Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Das KI-Modell wird geladen: 40 %. Bis es geladen ist, erfassen Sie Rechnungen von Hand."
 
   Szenario: Von der Übersicht zur KI

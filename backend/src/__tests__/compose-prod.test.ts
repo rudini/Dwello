@@ -9,7 +9,7 @@ import { join } from 'path';
 
 const root = join(import.meta.dir, '../../..');
 const compose = readFileSync(join(root, 'docker-compose.prod.yml'), 'utf8');
-const backendService = compose.slice(compose.indexOf('\n  backend:'), compose.indexOf('\n  postgres:'));
+const backendService = compose.slice(compose.indexOf('\n  backend:'), compose.indexOf('\n  restore:'));
 const frontendService = compose.slice(compose.indexOf('\n  frontend:'), compose.indexOf('\n  backend:'));
 const postgresService = compose.slice(compose.indexOf('\n  postgres:'), compose.indexOf('\n  ollama:'));
 const envExample = readFileSync(join(root, '.env.example'), 'utf8');

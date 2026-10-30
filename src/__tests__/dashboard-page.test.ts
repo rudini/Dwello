@@ -52,7 +52,9 @@ const data = {
 		task('drafts', 'Abrechnungen prüfen und versenden', '/statements?status=draft')
 	],
 	deadlines: [deadline],
-	kiModel: { state: 'ready' }
+	kiModel: { state: 'ready' },
+	backup: { backup: 'off' },
+	backupConfirmed: false
 };
 
 const page = (overrides = {}) =>

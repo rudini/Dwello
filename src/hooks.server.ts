@@ -5,6 +5,7 @@ import { cookieConfig } from '$lib/server/jwt-config';
 import { isAllowed } from '$lib/server/allowed-emails';
 import { loginPage } from '$lib/server/login-flow';
 import { getConfiguredProviders } from '$lib/server/oauth';
+import { backupState } from '$lib/server/backup';
 
 const BACKEND_ORIGIN = new URL(process.env.BACKEND_URL || 'http://localhost:3001').origin;
 
@@ -43,7 +44,14 @@ const session: Handle = async ({ event, resolve }) => {
 	event.locals.user = refused ? undefined : user;
 	const { pathname, search } = event.url;
 
-	if (event.locals.user) return pathname === '/login' ? redirectTo('/dashboard') : resolve(event);
+	if (event.locals.user) {
+		if (pathname === '/login') return redirectTo('/dashboard');
+		// #718 (A8): until the landlord confirmed the Wiederherstellungscode, every page of the app leads to «Sicherung
+		// einrichten»; help, the legal pages and the API stay reachable
+		if (!isPublic(pathname) && !pathname.startsWith('/api/') && !pathname.startsWith('/backup') && (await backupState(event.fetch)).backup === 'setup')
+			return redirectTo('/backup');
+		return resolve(event);
+	}
 	if (isPublic(pathname)) return resolve(event);
 	if (pathname.startsWith('/api/'))
 		return json({ error: { code: 'JWT_ERROR', message: 'Not signed in' } }, { status: 401 });

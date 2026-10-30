@@ -186,6 +186,57 @@ describe('Sicherung', () => {
 		expect(await readdir(dir)).toEqual([]);
 	}, 60_000);
 
+	// 718b review C-2: a run that fails while encrypting (a broken key, a full disk) must not leave pg_dump waiting
+	it('beendet pg_dump, wenn das Verschlüsseln scheitert', async () => {
+		const name = await database();
+		await query(name, `INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ('', '', now())`);
+		const bin = await folder();
+		await writeFile(join(bin, 'pg_dump'), `#!/bin/sh\necho $$ > ${bin}/pid\nexec yes\n`, { mode: 0o755 });
+		const path = process.env.PATH;
+		process.env.PATH = `${bin}:${path}`;
+		try {
+			await expect(createBackup(`${server}/${name}`, await folder(), secrets)).rejects.toThrow();
+		} finally {
+			process.env.PATH = path;
+		}
+		// the shell writes its pid as it starts, which can be after the refusal: wait for it (718b review 2, C-13); none
+		// after 2 s means it was stopped before it got there
+		let pid = 0;
+		for (let i = 0; i < 20 && !pid; i++)
+			pid = Number(await readFile(join(bin, 'pid'), 'utf8').catch(() => '0')) || (await Bun.sleep(100), 0);
+		const alive = () => {
+			if (!pid) return false;
+			try {
+				return process.kill(pid, 0);
+			} catch {
+				return false;
+			}
+		};
+		for (let i = 0; i < 20 && alive(); i++) await Bun.sleep(100);
+		const running = alive();
+		if (running) process.kill(pid);
+		expect(running).toBe(false);
+	}, 60_000);
+
+	// 718b review 2, C-14: without pg_dump its exit fails after the encryption did; nothing may stay unhandled
+	it('lässt ohne pg_dump keine unbehandelte Ablehnung zurück, wenn das Verschlüsseln scheitert', async () => {
+		const name = await database();
+		await query(name, `INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ('', '', now())`);
+		const unhandled: unknown[] = [];
+		const note = (reason: unknown) => unhandled.push(reason);
+		process.on('unhandledRejection', note);
+		const path = process.env.PATH;
+		process.env.PATH = await folder();
+		try {
+			await expect(createBackup(`${server}/${name}`, await folder(), secrets)).rejects.toThrow();
+			await Bun.sleep(500);
+		} finally {
+			process.env.PATH = path;
+			process.off('unhandledRejection', note);
+		}
+		expect(unhandled).toEqual([]);
+	}, 60_000);
+
 	// PR #940, Copilot: the restore runs as root; a forged Sicherung must not write outside the two keys
 	it('schreibt bei der Wiederherstellung nur die beiden Schlüssel, keine anderen Namen aus der Sicherung', async () => {
 		const { name, code } = await secured();
@@ -271,8 +322,10 @@ describe('Zeitplan der Sicherung', () => {
 });
 
 describe('Zustand der Sicherung', () => {
-	it('ist aus, solange kein Code bestätigt ist', async () => {
-		expect((await backupState(`${server}/${await database()}`, await folder())).backup).toBe('off');
+	it('wartet auf die Einrichtung, solange kein Code bestätigt ist', async () => {
+		expect((await backupState(`${server}/${await database()}`, await folder())).backup).toBe(
+			'setup'
+		);
 	});
 
 	it('ist veraltet, wenn seit mehr als einem Tag keine Sicherung gelungen ist, und nennt den Tag der letzten', async () => {
@@ -331,6 +384,26 @@ describe('Sicherung vor einer Migration', () => {
 		);
 	});
 });
+
+// 718b review C-4: the scripts reach the app's database through its pool, which must not keep them running
+it('beendet db:migrate gleich nach der Migration, auch mit Ordner für die Sicherung', async () => {
+	const older = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+	dirs.push(older);
+	await cp(migrations, older, { recursive: true, filter: (file) => !file.endsWith('0038_backups.sql') && !file.endsWith('0040_backup_pending_code.sql') });
+	const name = `dwello_backup_${crypto.randomUUID().replace(/-/g, '')}`;
+	await query('postgres', `CREATE DATABASE "${name}"`);
+	databases.push(name);
+	await migrate(`${server}/${name}`, older);
+	const started = Date.now();
+	const run = Bun.spawn(['bun', 'scripts/migrate.ts'], {
+		cwd: join(import.meta.dir, '..', '..'),
+		env: { ...process.env, DATABASE_URL: `${server}/${name}`, BACKUP_DIR: await folder() },
+		stdout: 'pipe'
+	});
+	expect(await run.exited).toBe(0);
+	expect(await new Response(run.stdout).text()).toContain('Migrationen angewendet');
+	expect(Date.now() - started).toBeLessThan(15_000);
+}, 60_000);
 
 describe('Health-Check und Sicherung', () => {
 	it('meldet mit dem Tag der letzten, wenn seit mehr als einem Tag keine Sicherung gelungen ist, und bleibt gesund', async () => {

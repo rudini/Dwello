@@ -28,6 +28,7 @@ import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
 import { backupState } from './services/backup.service';
+import { backupRoutes } from './routes/backup';
 import { DATABASE_URL } from './db/connection';
 
 restoreElysiaFormats();
@@ -106,6 +107,7 @@ export const app = new Elysia()
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
 	.use(localAccountRoutes)
+	.use(backupRoutes)
 	// The KI set in the browser (#580) and the local KI's model (#577)
 	.use(kiSettingsRoutes)
 	.use(dashboardRoutes)

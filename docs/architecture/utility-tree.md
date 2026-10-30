@@ -91,7 +91,7 @@ Dwello-Nutzen
   - **100 %** der Releases sind getestet: Ein Backup der Vorversion lässt sich einspielen (vom Nutzer bestätigt).
   - **0** Backup-Dateien sind ohne Wiederherstellungscode lesbar (vom Nutzer bestätigt).
 - **Heute:**
-  - Seit #718 Teil 1 (28.10.2026, aus Repo/Config): Sicherung der Datenbank samt Belegen und Schlüsseln, verschlüsselt mit dem Wiederherstellungscode (X25519, nur der öffentliche Schlüssel liegt auf dem Server), täglich um 03:00, beim Start nach mehr als einem Tag und vor jeder Migration; 7 tägliche und 12 monatliche bleiben (`backup.service.ts`). Die Wiederherstellung ist ein Befehl des Betreibers (`docker compose … run --rm restore`; die Anleitung folgt mit Teil 2, bis dahin gilt die manuelle in `docs/installation.md` §5). Aktiv erst, wenn ein Code bestätigt ist: das bringt #718 Teil 2.
+  - Seit #718 Teil 1 (28.10.2026, aus Repo/Config): Sicherung der Datenbank samt Belegen und Schlüsseln, verschlüsselt mit dem Wiederherstellungscode (X25519, nur der öffentliche Schlüssel liegt auf dem Server), täglich um 03:00, beim Start nach mehr als einem Tag und vor jeder Migration; 7 tägliche und 12 monatliche bleiben (`backup.service.ts`). Die Wiederherstellung ist ein Befehl des Betreibers (`docker compose … run --rm restore`, `docs/installation.md` §5). Seit #718 Teil 2 führt Dwello nach der Anmeldung zu «Sicherung einrichten» (Code, Notfallblatt, Bestätigung); erst dann sichert es.
   - `tools/fitness/restore-check.ts` prüft bei jedem PR mit Backend-Änderung und jedem Release: Sicherung der Daten des letzten Release, ohne Code nicht lesbar, mit HEAD wiederhergestellt, Zeilen, Summen und Schlüssel gleich (gemessen 28.10.2026: 0 s mit den Demo-Daten).
   - Die Restore-Dauer ist **unbekannt**, ebenso die DB-Grösse nach einigen Jahren mit Belegen (Annahme A2).
 - **Fitness Function:** Job pro Release:
@@ -121,7 +121,7 @@ Dwello-Nutzen
 - **Umgebung:** Betrieb, selbst betrieben.
 - **Reaktion:** Die App zeigt einen Hinweis. Der Healthcheck meldet den Zustand, und das Log nennt die Ursache (vom Nutzer bestätigt).
 - **Messgrösse und Ziel:** Ist seit mehr als **einem Tag** kein Backup gelungen, sieht der Betreiber das spätestens beim nächsten Öffnen der App und sofort im Healthcheck (vom Nutzer bestätigt). Das Alter dient nur als Signal, dass die Sicherung steht. Ob ein Backup taugt, prüft R1.
-- **Heute:** Seit #718 Teil 1 meldet `/health` `backup: "stale"` (mit Status 200, damit das Frontend startet und den Hinweis zeigt), wenn seit mehr als einem Tag keine Sicherung gelang; das Log nennt bei jedem Versuch die Ursache (`backup.pg.test.ts`). Den Hinweis in der App bringt #718 Teil 2.
+- **Heute:** Seit #718 Teil 1 meldet `/health` `backup: "stale"` (mit Status 200, damit das Frontend startet und den Hinweis zeigt), wenn seit mehr als einem Tag keine Sicherung gelang; das Log nennt bei jedem Versuch die Ursache (`backup.pg.test.ts`). Seit Teil 2 nennt die Übersicht dem Liegenschaftsverwalter den Tag der letzten Sicherung (Szenario «Ohne Sicherung seit mehr als einem Tag warnt die Übersicht», `backup-notice.dom.test.ts`).
 - **Fitness Function:** E2E-Szenario «altes Backup → Hinweis sichtbar» und ein Backend-Test: `/health` meldet einen Fehler, wenn das letzte Backup älter als die Schwelle ist.
 
 ### T1 Schnelle und verlässliche CI

@@ -88,7 +88,8 @@ export const apartmentsRelations = relations(apartments, ({ one, many }) => ({
 // Tenants Table
 // ============================================================================
 /** A tenant's language: letters, PDFs and e-mails go out in it */
-export type Language = 'de' | 'fr' | 'it' | 'en';
+export const LANGUAGES = ['de', 'fr', 'it', 'en'] as const;
+export type Language = (typeof LANGUAGES)[number];
 /** How a tenant receives statements and letters */
 export type CorrespondenceChannel = 'email' | 'letter';
 /** A statement's stored status; `overdue` is not stored but computed from the payment deadline (#837) */
@@ -681,6 +682,7 @@ export const backupCodes = pgTable('backup_codes', {
 	publicKey: text('public_key').notNull(),
 	salt: text('salt').notNull(),
 	confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+	pendingCode: text('pending_code'), // only until the confirmation
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 });
 
