@@ -2,6 +2,8 @@ import { FRESH_APP } from '../fixtures/fresh-installation';
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
 import { Click, Cookies, DownloadFrom, Enter, Navigate, Wait } from '../screenplay/interactions';
+import { userMenuButton } from '../targets/app-frame';
+import { signInWithPassword } from './authentication';
 import { shownBackupCode } from '../questions/sicherung';
 import {
 	backupCode,
@@ -9,7 +11,11 @@ import {
 	backupConfirmation,
 	backupPrivacyLink,
 	backupSheetLink,
-	backupSubmitButton
+	backupSettingsLink,
+	backupSubmitButton,
+	newCodeButton,
+	newCodeConfirmation,
+	newCodePasswordInput
 } from '../targets/sicherung';
 
 export const SHOWN_CODE = 'backup-code';
@@ -46,4 +52,36 @@ export const freshBackupSetUp: Activity = async (actor) => {
 	await actor.attemptsTo(goToFreshBackup);
 	const code = await actor.answer(shownBackupCode);
 	if (code) await actor.attemptsTo(confirmBackupCode(code), Wait.until(backupConfirmation));
+};
+
+// #718, part 3: «Neuer Wiederherstellungscode» in the settings of the fresh installation
+export const NEW_CODE_PAGE = `${FRESH_APP}/config/backup`;
+
+/** Signed in on the fresh installation with its Konto mit Passwort, as the landlord does it */
+export const signInFreshWithPassword =
+	(email: string, password: string): Activity =>
+	(actor) =>
+		actor.attemptsTo(Cookies.clear, Navigate.to(`${FRESH_APP}/login`), signInWithPassword(email, password), Wait.until(userMenuButton));
+
+/** Signed in on the fresh installation with Google an hour ago (#718: too long ago for a new code) */
+export const signedInFreshWithGoogleAnHourAgo: Activity = async (actor) =>
+	actor.attemptsTo(Cookies.add(await sessionCookies(FRESH_APP, '2h', undefined, 3600)));
+
+export const openBackupSettings: Activity = (actor) =>
+	actor.attemptsTo(Navigate.to(`${FRESH_APP}/config`), Click.on(backupSettingsLink));
+
+export const openNewCodePage: Activity = (actor) => actor.attemptsTo(Navigate.to(NEW_CODE_PAGE));
+
+/** «Neuen Code erstellen» with the password typed again, remembering the code shown when there is one */
+export const createNewCode =
+	(password: string): Activity =>
+	async (actor) => {
+		await actor.attemptsTo(openNewCodePage, Enter.theValue(password).into(newCodePasswordInput), Click.on(newCodeButton));
+		actor.remember(SHOWN_CODE, await actor.answer(shownBackupCode));
+	};
+
+/** The new code shown, typed again and confirmed */
+export const confirmNewShownCode: Activity = async (actor) => {
+	await actor.attemptsTo(Wait.until(backupCode));
+	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''), Wait.until(newCodeConfirmation));
 };

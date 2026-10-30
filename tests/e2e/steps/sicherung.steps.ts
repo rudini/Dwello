@@ -1,7 +1,16 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { downloadedPdfText } from '../questions/download';
-import { backupConfirmed, backupGuide, backupHint, backupPageText, backupWarningText, shownBackupCode } from '../questions/sicherung';
+import {
+	backupConfirmed,
+	backupGuide,
+	backupHint,
+	backupPageText,
+	backupWarningText,
+	googleSignInAgain,
+	newCodeConfirmed,
+	shownBackupCode
+} from '../questions/sicherung';
 import { inDays, swissDate } from '../fixtures/dates';
 import { FRESH_APP } from '../fixtures/fresh-installation';
 import {
@@ -12,7 +21,13 @@ import {
 	goToFreshBackup,
 	openBackupPrivacy,
 	openFreshBackup,
-	reopenBackup
+	reopenBackup,
+	confirmNewShownCode,
+	createNewCode,
+	openBackupSettings,
+	openNewCodePage,
+	signInFreshWithPassword,
+	signedInFreshWithGoogleAnHourAgo
 } from '../tasks/sicherung';
 
 const { Given, When, Then } = createBdd(test);
@@ -113,4 +128,61 @@ When('der Liegenschaftsverwalter bei der Sicherung die Datenschutzerklärung öf
 // «{vor 2 Tagen}»: the Swiss date two days ago
 Then('warnt die Übersicht {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(backupWarningText).toContain(text.replace('{vor 2 Tagen}', swissDate(inDays(-2))));
+});
+
+// #718, part 3: a new Wiederherstellungscode in the settings, after signing in again
+Given('der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet', async ({ verwalter, frisch }) => {
+	await verwalter.attemptsTo(signInFreshWithPassword(frisch.account.email, frisch.account.password));
+});
+
+Given('der Liegenschaftsverwalter hat sich in der frischen Installation vor einer Stunde mit Google angemeldet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(signedInFreshWithGoogleAnHourAgo);
+});
+
+When('der Liegenschaftsverwalter in den Einstellungen die Sicherung öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openBackupSettings);
+});
+
+When('der Liegenschaftsverwalter die Seite für einen neuen Wiederherstellungscode öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openNewCodePage);
+});
+
+Then('erklärt die Seite für einen neuen Wiederherstellungscode {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(backupPageText).toContain(text);
+});
+
+Then('zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code', async ({ verwalter }) => {
+	await verwalter.sees(backupPageText).toContain('Neuer Wiederherstellungscode');
+	await verwalter.sees(shownBackupCode).toBeNull();
+});
+
+When('der Liegenschaftsverwalter mit seinem Passwort einen neuen Wiederherstellungscode erstellt', async ({ verwalter, frisch }) => {
+	await verwalter.attemptsTo(createNewCode(frisch.account.password));
+});
+
+Given('der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt', async ({ verwalter, frisch }) => {
+	await verwalter.attemptsTo(createNewCode(frisch.account.password));
+});
+
+When('der Liegenschaftsverwalter mit einem falschen Passwort einen neuen Wiederherstellungscode erstellt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(createNewCode('falsches-Passwort'));
+});
+
+When(
+	'der Liegenschaftsverwalter den angezeigten Wiederherstellungscode erneut eingibt und den neuen Code bestätigt',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(confirmNewShownCode);
+	}
+);
+
+When('der Liegenschaftsverwalter einen anderen Wiederherstellungscode eingibt und den neuen Code bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'));
+});
+
+Then('bestätigt die Seite für einen neuen Wiederherstellungscode {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(newCodeConfirmed).toBe(text);
+});
+
+Then('führt die Seite für einen neuen Wiederherstellungscode zur erneuten Anmeldung mit Google', async ({ verwalter }) => {
+	await verwalter.sees(googleSignInAgain).toBe('/auth/login?provider=google&reauth=1&redirectTo=%2Fconfig%2Fbackup');
 });
