@@ -25,7 +25,13 @@
 		}) => {
 			busy = false;
 			await update({ reset: false });
-			if (result.type !== 'redirect') await focusFirstError(formElement);
+			if (result.type !== 'redirect') return focusFirstError(formElement);
+			// the new code, or the confirmation, is read out next (persona sven-718c P-1, P-2); after SvelteKit's own
+			// focus reset, as focusFirstError waits for it
+			await new Promise((resolve) => setTimeout(resolve));
+			document
+				.querySelector<HTMLElement>('[data-testid="backup-code"], [data-testid="backup-new-confirmed"]')
+				?.focus();
 		};
 	};
 </script>
@@ -38,14 +44,18 @@
 	<PageHeader title={m.backup_new_title()} purpose={m.backup_new_intro()} />
 
 	{#if data.confirmed && !data.code}
-		<Alert tone="positive" title={m.backup_new_confirmed()} testid="backup-new-confirmed" />
+		<div tabindex="-1" data-testid="backup-new-confirmed">
+			<Alert tone="positive" title={m.backup_new_confirmed()} />
+		</div>
 	{/if}
 
 	{#if data.code}
 		<Panel>
 			<div class="flex flex-col gap-4">
 				<p class="text-ink-muted">{m.backup_code_label()}</p>
-				<p class="text-3xl font-bold break-all text-ink" data-testid="backup-code">{data.code}</p>
+				<p class="text-3xl font-bold break-all text-ink" tabindex="-1" data-testid="backup-code">
+					{data.code}
+				</p>
 				<p>{m.backup_new_keep_sheet()}</p>
 				<div>
 					<Button href="/backup/sheet" download testid="backup-sheet-link"

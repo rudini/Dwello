@@ -7,6 +7,7 @@ import {
 	backupHint,
 	backupPageText,
 	backupWarningText,
+	focusedOnBackupPage,
 	googleSignInAgain,
 	newCodeConfirmed,
 	shownBackupCode
@@ -186,4 +187,12 @@ Then('bestätigt die Seite für einen neuen Wiederherstellungscode {string}', as
 
 Then('führt die Seite für einen neuen Wiederherstellungscode zur erneuten Anmeldung mit Google', async ({ verwalter }) => {
 	await verwalter.sees(googleSignInAgain).toBe('/auth/login?provider=google&reauth=1&redirectTo=%2Fconfig%2Fbackup');
+});
+
+Then('steht der Fokus auf dem neuen Wiederherstellungscode', async ({ verwalter }) => {
+	await verwalter.sees(focusedOnBackupPage).toBe('backup-code');
+});
+
+Then('steht der Fokus auf der Bestätigung des neuen Wiederherstellungscodes', async ({ verwalter }) => {
+	await verwalter.sees(focusedOnBackupPage).toBe('backup-new-confirmed');
 });

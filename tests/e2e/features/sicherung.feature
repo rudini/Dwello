@@ -130,7 +130,10 @@ Funktionalität: Sicherung einrichten
     Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
     Wenn der Liegenschaftsverwalter mit seinem Passwort einen neuen Wiederherstellungscode erstellt
     Dann zeigt die Sicherung einen Wiederherstellungscode aus 6 Gruppen zu 4 Zeichen
-    Und erklärt die Sicherung "Sobald Sie den neuen Code bestätigen, zeigt Dwello ihn nicht mehr an, und das Notfallblatt lässt sich nicht mehr herunterladen. Drucken Sie das neue Notfallblatt aus und bewahren Sie es getrennt von diesem Computer an einem sicheren Ort auf, etwa bei Ihren Mietverträgen."
+    # Persona sven-718c P-1: der Screenreader liest den neuen Code gleich vor
+    Und steht der Fokus auf dem neuen Wiederherstellungscode
+    # Fachreview 718c-2 V-1: ein neuer Code verfällt nach 30 Minuten
+    Und erklärt die Sicherung "Bestätigen Sie den neuen Code innerhalb von 30 Minuten, sonst verfällt er und der bisherige Code gilt weiter. Sobald Sie ihn bestätigen, zeigt Dwello ihn nicht mehr an, und das Notfallblatt lässt sich nicht mehr herunterladen. Drucken Sie das neue Notfallblatt aus und bewahren Sie es getrennt von diesem Computer an einem sicheren Ort auf, etwa bei Ihren Mietverträgen."
 
   Szenario: Mit einem falschen Passwort entsteht kein neuer Wiederherstellungscode
     Angenommen Dwello ist eingerichtet und die Sicherung auch
@@ -154,6 +157,8 @@ Funktionalität: Sicherung einrichten
     Und der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt
     Wenn der Liegenschaftsverwalter den angezeigten Wiederherstellungscode erneut eingibt und den neuen Code bestätigt
     Dann bestätigt die Seite für einen neuen Wiederherstellungscode "Der neue Wiederherstellungscode gilt ab jetzt. Dwello erstellt gleich eine erste Sicherung mit ihm und sichert Ihre Daten ab jetzt jeden Tag mit ihm."
+    # Persona sven-718c P-2: die Bestätigung wird vorgelesen
+    Und steht der Fokus auf der Bestätigung des neuen Wiederherstellungscodes
     Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code
 
   Szenario: Den neuen Wiederherstellungscode falsch eingeben

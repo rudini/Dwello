@@ -12,6 +12,7 @@ import { fileResponse } from './file-response';
 
 const refused = refusedWith({
 	BACKUP_CODE_MISMATCH: 422,
+	BACKUP_CODE_EXPIRED: 422,
 	BACKUP_NO_CODE: 409,
 	BACKUP_PASSWORD_WRONG: 422,
 	BACKUP_SIGN_IN_AGAIN: 403,

@@ -94,6 +94,19 @@ describe('Neuer Wiederherstellungscode', () => {
 		await db.update(localAccounts).set({ failedAttempts: 0 }).where(eq(localAccounts.email, email));
 	});
 
+	// 718c review C-2: the Sperre of the sign-in holds here too
+	it('lehnt während der Sperre ab, auch mit dem richtigen Passwort', async () => {
+		await confirmedFirstCode();
+		await db.update(localAccounts).set({ lockedUntil: new Date(Date.now() + 60_000) }).where(eq(localAccounts.email, email));
+		try {
+			const response = await call(await localSession(), '/api/v1/backup/new-code', { password });
+			expect(response.status).toBe(423);
+			expect(await response.json()).toMatchObject({ code: 'ACCOUNT_LOCKED' });
+		} finally {
+			await db.update(localAccounts).set({ lockedUntil: null }).where(eq(localAccounts.email, email));
+		}
+	});
+
 	it('verlangt mit Google eine Anmeldung der letzten 10 Minuten', async () => {
 		await confirmedFirstCode();
 		const old = await call(await session('google-verwalter', 'google', 60), '/api/v1/backup/new-code', {});
@@ -132,7 +145,9 @@ describe('Neuer Wiederherstellungscode', () => {
 		const { code } = (await (await call(token, '/api/v1/backup/new-code', { password })).json()) as { code: string };
 		await db.update(backupCodes).set({ createdAt: new Date(Date.now() - 31 * 60_000) }).where(eq(backupCodes.pendingCode, code));
 		expect(((await (await call(token, '/api/v1/backup')).json()) as { code?: string }).code).toBeUndefined();
+		// fach review 718c-2 V-1: it says that the code expired, not that it was typed wrong
 		const confirm = await call(token, '/api/v1/backup/confirm', { code });
 		expect(confirm.status).toBe(422);
+		expect(await confirm.json()).toMatchObject({ code: 'BACKUP_CODE_EXPIRED' });
 	});
 });

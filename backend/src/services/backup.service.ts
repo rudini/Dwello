@@ -340,6 +340,9 @@ export async function replacePendingCode() {
 /** The landlord typed the shown code again: from now on Dwello backs up, and it forgets every code it showed (718b R-3) */
 export async function confirmBackupCode(typed: string) {
 	const pending = await pendingCode();
+	// a new code not confirmed within 30 minutes: the code from before applies (fach review 718c-2 V-1)
+	if (!pending && (await pool.query('SELECT 1 FROM backup_codes WHERE confirmed_at IS NULL')).rowCount)
+		throw new CodedError('BACKUP_CODE_EXPIRED', 'The new code expired before its confirmation');
 	if (!pending || normalizedCode(typed) !== normalizedCode(pending.pending_code))
 		throw new CodedError('BACKUP_CODE_MISMATCH', 'The code does not match the one shown');
 	await pool.query(

@@ -237,6 +237,19 @@ describe('Sicherung', () => {
 		expect(unhandled).toEqual([]);
 	}, 60_000);
 
+	// 718c review C-1: each run deletes the half files of a cut-off one, so two at once must not run side by side
+	it('führt zwei gleichzeitig gestartete Sicherungen nacheinander aus, und beide gelingen', async () => {
+		const { name } = await secured();
+		const dir = await folder();
+		const now = Date.now();
+		const files = await Promise.all([
+			createBackup(`${server}/${name}`, dir, secrets, new Date(now)),
+			createBackup(`${server}/${name}`, dir, secrets, new Date(now + 2000))
+		]);
+		expect(files).toHaveLength(2);
+		expect(await query(name, 'SELECT count(*)::int AS n FROM backup_runs WHERE error IS NULL AND finished_at IS NOT NULL')).toEqual([{ n: 2 }]);
+	}, 60_000);
+
 	// PR #940, Copilot: the restore runs as root; a forged Sicherung must not write outside the two keys
 	it('schreibt bei der Wiederherstellung nur die beiden Schlüssel, keine anderen Namen aus der Sicherung', async () => {
 		const { name, code } = await secured();

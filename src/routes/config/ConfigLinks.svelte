@@ -53,7 +53,8 @@
 				data-testid="quick-link-{link.key}"
 			>
 				<span class="text-accent"><Icon name={link.icon} size={24} /></span>
-				<div class="flex flex-col gap-1">
+				<!-- min-w-0 and break-words: a long word («Wiederherstellungscode») wraps at 150 % instead of leaving the card (persona helga-718c P-4) -->
+				<div class="flex min-w-0 flex-col gap-1 break-words">
 					<a
 						href={link.href}
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
