@@ -67,6 +67,8 @@ const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}(?:[0-9a-f]{8}-[0-9a-f]{4}-[
 const seededDescription = /\b(?:Heizöl \d{4}|\p{L}+ \d{4}-\d{2}-\d{2})\b/gu;
 // A Wiederherstellungscode (#718): 6 random groups of 4 characters, which can spell a German word («6ZUR»)
 const recoveryCode = /\b(?:[A-HJ-NP-Z2-9]{4}-){5}[A-HJ-NP-Z2-9]{4}\b/g;
+// A Zugangsschlüssel for KI programs: 32 random bytes in base64url, which can spell a German word («_HEr374», #954)
+const accessKey = /\bdwello_[\w-]{43}(?![\w-])/g;
 // Fixed values that are user data: seeds (fixtures/backend.ts, the axe seeds) and the operator (playwright.config.ts)
 const seedValues = [
 	'Testweg 1',
@@ -95,7 +97,8 @@ const germanIn = (texts: string[], language: string, userData: string[]) => {
 			.reduce((rest, value) => rest.split(value).join(' '), text)
 			.replace(scenarioRecord, ' ')
 			.replace(seededDescription, ' ')
-			.replace(recoveryCode, ' ');
+			.replace(recoveryCode, ' ')
+			.replace(accessKey, ' ');
 	const countries = countryNames(language);
 	return texts.flatMap((text) => {
 		if (countries.has(text.trim())) return [];
