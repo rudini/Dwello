@@ -107,6 +107,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Entwurf / Versendet / Bezahlt / Überfällig | brouillon / envoyé / payé / en retard | bozza / inviato / pagato / scaduto | draft / sent / paid / overdue |
 | Zahlungsfrist | délai de paiement | termine di pagamento | payment deadline |
 | Mahnung / Zahlungserinnerung / 2. Mahnung | rappel / rappel de paiement / 2e rappel | sollecito / promemoria di pagamento / 2° sollecito | reminder / payment reminder / 2nd reminder |
+| Nicht mehr versenden | ne plus envoyer | non più da inviare | do not send any more |
 | Mahnstufe / Mahnfrist | niveau de rappel / délai de rappel | livello di sollecito / termine di sollecito | reminder level / reminder period |
 | Dokument / Versandstatus / Zu versenden | document / statut d’envoi / à envoyer | documento / stato di invio / da inviare | document / dispatch status / to send |
 | Dokumente geprüft | documents vérifiés | documenti verificati | documents checked |

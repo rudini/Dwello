@@ -370,3 +370,11 @@
 - [x] Marker `TODO(fachlich prüfen, #538)` removed (`backend/src/db/schema.ts`, a comment only)
 - [x] No scenario, no review round: glossary and a comment only
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #532 Glossar «Zahlungsfrist einer Mahnung», «Mahnung», «Nicht mehr versenden»
+
+- [x] Glossary: new last sentence at «Zahlungsfrist einer Mahnung», the sentence at «Mahnung», the row «Nicht mehr versenden», in the wording of round 2 (N-4), as decided in #532; fr/it/en from the UI (`documents_not_to_send_paid`)
+- [x] Requirements, point 11: the same rule for the next Mahnstufe
+- [x] Marker `TODO(fachlich prüfen, #532)` removed (`src/lib/document-status.ts`, a comment only)
+- [x] No scenario, no review round: glossary, requirements and a comment only
+- [x] PR: pushed after this archive

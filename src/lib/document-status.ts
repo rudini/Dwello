@@ -4,7 +4,6 @@ import type { StatementDocument } from '$lib/types';
 /**
  * The Versandstatus of a letter as its row shows it: a reminder whose statement is paid or replaced since no longer
  * goes out, though its status stays «Zu versenden» (#449, decided in #404: V-2 A, N-1 A)
- * TODO(fachlich prüfen, #532): the term «Nicht mehr versenden»
  */
 // why the backend says a reminder no longer goes out, as its label
 const notToSend = {
