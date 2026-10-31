@@ -16,6 +16,7 @@ import { pdfBeforeChangeTitle } from './reminder-letter';
  * has its stored PDF as the only copy; before a change discards it, it stays as a Dokument «PDF vor der Änderung»,
  * dated when it was made, without channel and Versandstatus: whether the tenant got it is not known (Fachreview
  * 969-1 V-4: every copy discarded, so also the PDF made after a first change)
+ * TODO(fachlich prüfen, #994): «PDF vor der Änderung» has no glossary row yet
  */
 export async function keepPdfBeforeChange(statementId: string) {
 	const [statement] = await db
