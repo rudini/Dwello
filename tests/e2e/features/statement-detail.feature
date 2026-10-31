@@ -293,6 +293,28 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024. Ihre Nebenkosten und Akontobeiträge bis 29.02.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.03.2024 – 31.03.2024 (31 Mietstage von 366 Tagen)."
     Und steht im PDF "Akontobeiträge ab 01.03.2024"
 
+  # #511 (Persona Dr. Weber 461, P-2): neben den vereinbarten Nebenkosten nennt das PDF auch die Verwaltungspauschale
+  # als vereinbart, sonst liest der Mieter sie als nicht geschuldet; ohne Pauschale kein solcher Satz
+  @wip
+  Szenario: Das PDF nennt die Verwaltungspauschale als vereinbart
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Die Verwaltungspauschale ist im Mietvertrag vereinbart"
+
+  @wip
+  Szenario: Ohne vereinbarte Verwaltungspauschale nennt das PDF keine
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Mietvertrag von "Eva Frei" ist keine Verwaltungspauschale vereinbart
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten"
+    Und steht im PDF nicht "Verwaltungspauschale ist im Mietvertrag vereinbart"
+
   # #465 (#103, DIV-14): das PDF ist ein Brief an den Mieter: Ort und Datum, Anrede wie die Mahnung (#88, #449) und Gruss
   Szenario: Das PDF der Abrechnung ist ein Brief an den Mieter
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
