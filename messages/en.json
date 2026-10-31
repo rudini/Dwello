@@ -1267,6 +1267,8 @@
 	"statements_row_name": "Statement {number} for {tenant}",
 	"statements_reminded_on": "Reminder sent on {date}",
 	"statements_next_reminder_on": "Next reminder possible from {date}",
+	"statements_reminder_waits": "The reminder is ready to send under «Documents». Mark it as sent there on the day you post it, then print it. Only then does it carry that day’s date and its payment deadline start.",
+	"statements_reminder_to_send": "Reminder not sent yet",
 	"statements_pdf_download_of": "Download PDF: {name}",
 	"statements_pdf_missing": "PDF not created yet",
 	"statements_pdf_missing_of": "PDF not created yet: open {name}",

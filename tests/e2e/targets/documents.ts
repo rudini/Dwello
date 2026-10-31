@@ -1,9 +1,17 @@
 import { target } from '../screenplay/target';
+import { statementRow } from './statements';
 
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const confirmReminderButton = target('Mahnung bestätigen', (page) => page.getByTestId('statement-reminder-confirm'));
 export const reminderDeliveryInfo = target('Versandweg der Mahnung', (page) => page.getByTestId('reminder-delivery-info'));
 export const nextReminderDate = target('Nächste Mahnung möglich ab', (page) => page.getByTestId('statement-next-reminder'));
+export const lastReminderDate = target('Letzte Mahnung', (page) => page.getByTestId('statement-last-reminder'));
+// #545: a reminder still «Zu versenden», on the detail page and in a row of the statement list
+export const reminderWaitsHint = target('Hinweis Mahnung noch zu versenden', (page) => page.getByTestId('statement-reminder-to-send'));
+export const listedReminderWaitsHint = (tenantName: string) =>
+	target(`Hinweis Mahnung noch zu versenden bei ${tenantName}`, (page) =>
+		statementRow(tenantName).locate(page).getByTestId('statement-reminder-to-send')
+	);
 export const markedSentNotice = target('Hinweis Brief versendet', (page) => page.getByTestId('document-marked-sent'));
 export const markedSentPdf = target('PDF des versendeten Briefs', (page) => page.getByTestId('document-marked-sent-pdf'));
 export const reminderFeedback = target('Rückmeldung Mahnung oder Versand', (page) => page.getByTestId('reminder-feedback').or(page.getByTestId('send-feedback')));

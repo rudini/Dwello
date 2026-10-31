@@ -36,6 +36,7 @@
 			"waived": false,
 			"carried": false,
 			"reminderWaitsUntil": null,
+			"reminderToPost": false,
 			"deadlinePassed": true,
 			"tenant": { "firstName": "Nina", "lastName": "Brunner", "email": "nina@example.ch" },
 			"apartment": { "number": "2.01", "floor": 2 },

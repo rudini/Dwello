@@ -48,7 +48,7 @@
 			deadline,
 			{ label: m.statements_statement_date(), date: statement.statementDate },
 			{ label: m.statements_paid_on(), date: noPayment ? null : statement.paidDate },
-			{ label: m.statements_last_reminder(), date: statement.lastReminderDate }
+			{ label: m.statements_last_reminder(), date: statement.lastReminderDate, testid: 'statement-last-reminder' }
 		].filter((row) => row.date)
 	);
 </script>
@@ -80,6 +80,9 @@
 			</div>
 		{/if}
 	</dl>
+	{#if statement.reminderToPost}
+		<p class="text-ink" data-testid="statement-reminder-to-send">{m.statements_reminder_waits()}</p>
+	{/if}
 	{#if statement.notes}
 		<div class="flex flex-col gap-1">
 			<h3 class="text-ink-muted">{m.statements_notes()}</h3>

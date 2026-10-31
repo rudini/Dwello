@@ -4,7 +4,7 @@
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it, setSystemTime, spyOn } from 'bun:test';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
@@ -72,6 +72,8 @@ const nextReminderFrom = async (statementId: string) =>
 	((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { nextReminderFrom: string | null })
 		.nextReminderFrom;
 
+const remindedOn = async (statementId: string) =>
+	((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { reminderSentDate: string | null }).reminderSentDate;
 const remind = async (statementId: string) => {
 	const response = await api('POST', `/api/v1/statements/${statementId}/reminders`);
 	return { status: response.status, ...((await response.json()) as ReminderResult) };
@@ -135,6 +137,14 @@ describe('Mahnung per E-Mail', () => {
 		expect(mail.attachments[0].content.subarray(0, 4).toString()).toBe('%PDF');
 	});
 
+	it('gilt nach der zugestellten E-Mail als heute gemahnt (#545)', async () => {
+		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email' });
+		const statementId = await statement('sent');
+		await remind(statementId);
+
+		expect(await remindedOn(statementId)).toBe(swissToday());
+	});
+
 	it('legt die Mahnung zum Versand bereit, wenn die E-Mail nicht versendet werden kann', async () => {
 		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email' });
 		delete process.env.MAIL_TRANSPORT;
@@ -146,6 +156,15 @@ describe('Mahnung per E-Mail', () => {
 		expect(result.deliveryError).toBe('Der E-Mail-Versand ist nicht eingerichtet.');
 		expect(result.document.deliveryErrorCode).toBe('MAIL_NOT_CONFIGURED');
 		expect(mails.length).toBe(before);
+	});
+
+	it('gilt nicht als gemahnt, solange die E-Mail nicht versendet werden konnte (#545)', async () => {
+		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email' });
+		delete process.env.MAIL_TRANSPORT;
+		const statementId = await statement('sent');
+		await remind(statementId);
+
+		expect(await remindedOn(statementId)).toBeNull();
 	});
 });
 
@@ -328,7 +347,22 @@ describe('Zahlungsfrist der Mahnung', () => {
 		expect(pdfText(pdf)).toContain(formatSwissDate(deadline));
 	});
 
+	// #545: ein Brief zählt erst, wenn er zur Post ging
+	it('nennt keinen Tag für die nächste Mahnung und gilt nicht als gemahnt, solange der Brief zu versenden ist', async () => {
+		expect(await nextReminderFrom(statementId)).toBeNull();
+		expect(await remindedOn(statementId)).toBeNull();
+	});
+
+	// Fachreview 545 V-3: a statement reminded before #545 kept the day the letter was made
+	it('gilt auch mit einem früher gespeicherten Mahndatum nicht als gemahnt, solange der Brief zu versenden ist', async () => {
+		await db.update(utilityStatements).set({ reminderSentDate: swissToday() }).where(eq(utilityStatements.id, statementId));
+
+		expect(await remindedOn(statementId)).toBeNull();
+	});
+
 	it('nennt bei der Abrechnung den Tag, ab dem die nächste Mahnung möglich ist', async () => {
+		await db.update(documents).set({ status: 'sent' }).where(eq(documents.statementId, statementId));
+
 		expect(await nextReminderFrom(statementId)).toBe(daysAfter(swissToday(), 11));
 	});
 
@@ -378,6 +412,21 @@ describe('Zahlungsfrist der Mahnung', () => {
 			.where(eq(documents.statementId, statementId));
 
 		expect((await remind(statementId)).document).toMatchObject({ reminderLevel: 2 });
+	});
+
+	// Fachreview 545 V-5: the 1st reminder went out, the 2nd waits
+	it('nennt als gemahnt den Tag der zuletzt versendeten Mahnung, solange die nächste zu versenden ist', async () => {
+		const posted = new Date(`${daysAfter(swissToday(), -12)}T08:00:00Z`);
+		await db
+			.update(documents)
+			.set({ sentAt: posted })
+			.where(eq(documents.statementId, statementId));
+		await db
+			.update(documents)
+			.set({ status: 'to_send', sentAt: null })
+			.where(and(eq(documents.statementId, statementId), eq(documents.reminderLevel, 2)));
+
+		expect(await remindedOn(statementId)).toBe(daysAfter(swissToday(), -12));
 	});
 });
 

@@ -1267,6 +1267,8 @@
 	"statements_row_name": "Décompte {number} de {tenant}",
 	"statements_reminded_on": "Rappel envoyé le {date}",
 	"statements_next_reminder_on": "Prochain rappel possible dès le {date}",
+	"statements_reminder_waits": "Le rappel est prêt à être envoyé sous « Documents ». Marquez-le comme envoyé le jour où vous le postez, puis imprimez-le. Ce n’est qu’alors qu’il porte la date du jour et que son délai de paiement commence.",
+	"statements_reminder_to_send": "Rappel encore à envoyer",
 	"statements_pdf_download_of": "Télécharger le PDF : {name}",
 	"statements_pdf_missing": "PDF pas encore créé",
 	"statements_pdf_missing_of": "PDF pas encore créé : ouvrir {name}",

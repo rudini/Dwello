@@ -1267,6 +1267,8 @@
 	"statements_row_name": "Abrechnung {number} von {tenant}",
 	"statements_reminded_on": "Gemahnt am {date}",
 	"statements_next_reminder_on": "Nächste Mahnung möglich ab {date}",
+	"statements_reminder_waits": "Die Mahnung liegt unter «Dokumente» zum Versand bereit. Markieren Sie sie dort am Tag, an dem Sie sie zur Post bringen, als versendet, und drucken Sie sie danach aus. Erst dann trägt sie das Datum dieses Tages, und ihre Zahlungsfrist beginnt.",
+	"statements_reminder_to_send": "Mahnung noch zu versenden",
 	"statements_pdf_download_of": "PDF herunterladen: {name}",
 	"statements_pdf_missing": "PDF noch nicht erstellt",
 	"statements_pdf_missing_of": "PDF noch nicht erstellt: {name} öffnen",

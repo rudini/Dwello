@@ -236,3 +236,16 @@
 - [x] `docs/installation.md`: which Notfallblatt opens which backup
 - [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
 - [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
+
+## Session: #545 a Mahnung counts from its sending (2026-10-31)
+
+- [x] @wip scenarios in `statement-reminder.feature`; «Nächste Mahnung erst nach der Zahlungsfrist der letzten» reminds by e-mail (Spec change approved: #545)
+- [x] fach-reviewer step 1 (`docs/reviews/545-fachreview-1.md`): V-1 to V-7 taken
+- [x] pg tests in `reminders.pg.test.ts`, `swiss-today.pg.test.ts` (seen red); the date of the last reminder derived from the reminders that went out (`statement.service.ts`), no column writes (`reminder.service.ts`)
+- [x] hint on the detail page and «Mahnung noch zu versenden» in the list, only when overdue; texts in de/fr/it/en
+- [x] code-reviewer round 1 (`docs/reviews/545-review-1.md`)
+- [x] persona Dr. Weber (`docs/design/personas/weber-545.md`): P-1 fixed (Zahlungsfrist only for a sent reminder, DOM test seen red)
+- [x] code-reviewer round 2 (`docs/reviews/545-review-2.md`): C-6 fixed (scenario step, seen red)
+- [x] code-reviewer round 3 (`docs/reviews/545-review-3.md`)
+- [x] CI fix: Architecture fitness Ä4, the backend answers `reminderToPost` (`docs/reviews/545ci-review-1.md`)
+- [x] PR pushed after this archive

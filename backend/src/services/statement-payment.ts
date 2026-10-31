@@ -13,6 +13,7 @@ interface Payment {
 	paidAmount: string | null;
 	paymentDeadline: string | null;
 	nextReminderFrom: string | null;
+	reminderToSend: boolean;
 }
 
 
@@ -33,6 +34,8 @@ export function paymentOf(statement: Payment, today: string): StatementPayment {
 		carried: (statement.status === 'settled' && balance !== 0) || (paidNothing && balance < 0),
 		// the next Mahnung waits for the last one's Zahlungsfrist (#107)
 		reminderWaitsUntil: statement.nextReminderFrom && statement.nextReminderFrom > today ? statement.nextReminderFrom : null,
+		// a letter to post counts from the day it is marked sent; paid or replaced it no longer goes out (#545, V-2)
+		reminderToPost: statement.status === 'overdue' && statement.reminderToSend,
 		deadlinePassed: !!statement.paymentDeadline && statement.paymentDeadline < today
 	};
 }
