@@ -370,3 +370,12 @@
 - [x] Marker `TODO(fachlich prüfen, #538)` removed (`backend/src/db/schema.ts`, a comment only)
 - [x] No scenario, no review round: glossary and a comment only
 - [x] PR: pushed after this archive
+## Session: #721 a Content-Security-Policy (2026-10-31)
+
+- [x] `svelte.config.js` `kit.csp` (mode auto): script-src 'self' with SvelteKit's nonce, default-src 'self', style-src 'self' 'unsafe-inline', img-src 'self' data: blob:, object-src 'none', base-uri 'self', form-action 'self', frame-ancestors 'none'; `src/__tests__/csp.test.ts` (seen red)
+- [x] Checked: E2E in Chromium for hydration, authentication, invoice-new, sicherung, documents, statement-detail (186 passed); a console scan of 11 pages and an upload of two invoice PDFs on the production persona build: no CSP violation
+- [x] The PDF refusal page is HTML from a `+server.ts` route, outside `kit.csp`; it works unchanged
+- [x] Code review `docs/reviews/721-review-1.md` (C-1 Minor fixed), closing round `721c-review-1.md` (no findings)
+- [x] No scenario: a response header the landlord does not see
+- [x] Also: A2 volumes confirmed by the product owner in `utility-tree.md` (#974)
+- [x] PR `Fixes #721`: pushed after this archive
