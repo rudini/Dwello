@@ -30,7 +30,9 @@
 			// focus reset, as focusFirstError waits for it
 			await new Promise((resolve) => setTimeout(resolve));
 			document
-				.querySelector<HTMLElement>('[data-testid="backup-code"], [data-testid="backup-new-confirmed"]')
+				.querySelector<HTMLElement>(
+					'[data-testid="backup-code"], [data-testid="backup-new-confirmed"]'
+				)
 				?.focus();
 		};
 	};
