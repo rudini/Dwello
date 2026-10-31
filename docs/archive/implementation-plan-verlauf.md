@@ -284,3 +284,13 @@
 - [x] No scenario: CI release tooling, nothing a user sees in the app changes
 - [x] Workflow notes: none for #935; collected review of this request `docs/reviews/workflow-rules-review-2026-10-31.md`
 - [x] PR `Fixes #935`: pushed after this archive
+## Session: #947 and #956 a refused backup code, the end of a new code (2026-10-31)
+
+- [x] Scenarios in `sicherung.feature`: «Den Wiederherstellungscode leer lassen», «Nur einen Teil des Wiederherstellungscodes eingeben», «Nach der Bestätigung bietet die Seite keinen weiteren neuen Code an», «Von der Bestätigung des neuen Codes zurück zu den Einstellungen» (seen red as @wip)
+- [x] Backend `confirmBackupCode`: `BACKUP_CODE_EMPTY`, `BACKUP_CODE_INCOMPLETE` (typed, of), pg tests seen red; messages de/fr/it/en; `docs/api-specification.md`
+- [x] `/config/backup?confirmed`: the confirmation and «Zurück zu den Einstellungen», no form (a11y meaning `new-code-confirmed`)
+- [x] Optional «Code kopieren» of #947 not built: the message now says how many characters are missing
+- [x] Code review `docs/reviews/947-review-1.md` (C-1 Minor fixed), closing round `947c-review-1.md` (no findings)
+- [x] Personas `marco-947.md`, `sven-947.md`: no Blocker/Major; Minors Marco P-1, Sven P-1, P-2 stay in the reports (each met by one persona, the last two also on the base commit)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-947.md`
+- [x] PR `Fixes #947`, `Fixes #956`: pushed after this archive
