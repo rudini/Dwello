@@ -418,3 +418,11 @@
 - [x] code-reviewer `docs/reviews/981-review-1.md`: no findings
 - [x] No persona: the decided text was read in four languages by the fach-reviewer; no step-5 fach-reviewer: nothing changed since step 1
 - [x] PR: pushed after this archive
+## Session: #722 HTTPS with compose.yaml (2026-10-31)
+
+- [x] `compose.yaml`: service `caddy` under the profile `https` (ports 80/443, inline Caddyfile like the demo's, volume `caddy_data`), started with `COMPOSE_PROFILES=https` and `DWELLO_DOMAIN` in `.env`; `DWELLO_DOMAIN` optional, since a required variable stopped `docker compose config` without the profile
+- [x] `compose-images.test.ts`: Caddy in the profile, ports without HTTPS unchanged, parity with `docker-compose.prod.yml` without profile services (seen red)
+- [x] Docs: `docs/installation.md` §7, `.env.example`, README
+- [x] Code review `docs/reviews/722-review-1.md` (C-1 to C-3 Minor fixed), closing round `722c-review-1.md` (no findings)
+- [x] No scenario: deployment configuration, nothing in the app changes; a real certificate needs a public domain and was not fetched
+- [x] PR `Fixes #722`: pushed after this archive
