@@ -44,7 +44,7 @@
 |---|---|---|---|
 | SP-U1-1 | Die Migration läuft im Startbefehl des Backend-Containers, vor dem Server, mit `restart: unless-stopped`. | Eine fehlschlagende Migration erzeugt eine Neustart-Schleife. Der Frontend-Container wartet auf `backend: service_healthy`, der Vermieter sieht also keine App. | `docker-compose.prod.yml` (Startbefehl `migrate.ts && exec bun run src/index.ts`; `depends_on … service_healthy`) (aus Repo/Config) |
 | SP-U1-2 | Je eine Transaktion pro Migration. Angewendete Migrationen sind unveränderlich. | Eine fehlgeschlagene Migration hinterlässt keinen halben Zustand. Ein Zurück auf die alte Version gibt es aber nur per Restore. | `backend/src/db/migrate.ts` (BEGIN/COMMIT); CI-Schritt «Migrations unchanged» (aus Repo/Config) |
-| SP-U1-3 | Update = `git pull` + `up -d --build` auf der Maschine des Betreibers. Die Images werden lokal gebaut. | Das Update hängt von Netz, Build-Werkzeugen und Plattenplatz beim Betreiber ab und kann auf halbem Weg scheitern. | `docs/installation.md` §5; `build:` in `docker-compose.prod.yml` (aus Repo/Config) |
+| SP-U1-3 | **Erledigt (#578):** Das Update holt fertige Images (`docker compose pull`), gebaut wird nur noch aus dem Klon. Vorher: Update = `git pull` + `up -d --build` auf der Maschine des Betreibers. Die Images werden lokal gebaut. | Das Update hängt von Netz, Build-Werkzeugen und Plattenplatz beim Betreiber ab und kann auf halbem Weg scheitern. | `docs/installation.md` §5; `build:` in `docker-compose.prod.yml` (aus Repo/Config) |
 | SP-U1-4 | Die Schlüssel liegen in einem eigenen Volume (`dwello_secrets`) neben der DB. | Ein Backup nur der DB macht verschlüsselte Geheimnisse nach einem Restore unlesbar. | `ki-settings.service.ts` (AES-256-GCM aus `ENCRYPTION_KEY`), `docs/installation.md` §5, PR #644 (aus Repo/Config) |
 | SP-U1-5 | ~~Jeder Merge wird ein Release.~~ **Erledigt (#935):** Es wird wöchentlich getaggt, Montag 06:00. | Ein Betreiber aktualisiert auf ein wöchentliches Release; jeder PR ist als Upgrade von diesem geprüft. | `release.yml`, README «Versions» (aus Repo/Config) |
 
@@ -60,8 +60,8 @@
 
 | ID | Risiko | Beleg |
 |---|---|---|
-| RI-U1-1 | **Datenverlust bei einem Update:** Vor der Migration gibt es kein Backup. Ein Update mit fachlich falscher, aber technisch erfolgreicher Migration lässt sich nur mit dem letzten manuellen Backup zurücknehmen, falls es eines gibt. | Startbefehl in `docker-compose.prod.yml`; Backup nur manuell (`docs/installation.md` §5) (aus Repo/Config) |
-| RI-U1-2 | Migrationen werden nie gegen Daten einer Vorversion getestet, nur gegen eine leere DB. | `docs/test-pyramid.md` («migrated fresh before each run») (aus Repo/Config) |
+| RI-U1-1 | **Erledigt (#718):** Dwello sichert vor jeder Migration; scheitert die Sicherung, bricht das Update ab, ohne die Datenbank zu ändern. Vorher: **Datenverlust bei einem Update:** Vor der Migration gibt es kein Backup. Ein Update mit fachlich falscher, aber technisch erfolgreicher Migration lässt sich nur mit dem letzten manuellen Backup zurücknehmen, falls es eines gibt. | Startbefehl in `docker-compose.prod.yml`; Backup nur manuell (`docs/installation.md` §5) (aus Repo/Config) |
+| RI-U1-2 | **Erledigt (#783, #782):** `upgrade-check.sh` migriert bei jedem PR mit Backend-Änderung die Demo-Daten des letzten Release und vergleicht Zeilen und Summen. Vorher: Migrationen werden nie gegen Daten einer Vorversion getestet, nur gegen eine leere DB. | `docs/test-pyramid.md` («migrated fresh before each run») (aus Repo/Config) |
 | RI-U1-3 | Ein fehlgeschlagener Start ist nur über `docker logs` erkennbar. Der Vermieter hat keine technischen Kenntnisse (`docs/installation.md`, Einleitung). | Healthchecks in Compose; Ursache nur im Log (aus Repo/Config) |
 | RI-U1-4 | `ollama/ollama:latest` ist nicht gepinnt. Ein Update kann das KI-Verhalten ändern, ohne dass Dwello sich ändert. Behoben mit #719: `ollama/ollama:0.40.11`. | `docker-compose.prod.yml` (aus Repo/Config) |
 | RI-U1-5 | Ein Restore ohne das Schlüssel-Volume macht verschlüsselte Geheimnisse still unlesbar. | `ki-settings.service.ts` Z. 60 («cannot be read … after a restore without the keys») (aus Repo/Config) |
@@ -122,7 +122,7 @@
 | SP-R1-1 | Belege (Rechnungsdateien, PDFs) liegen in der DB. | Das Backup ist vollständig mit einem Dump. Seine Grösse wächst aber mit den Jahren, und davon hängt Restore ≤ 5 min ab. | `docs/installation.md` §5 («uploaded invoices and PDFs are stored in the database too») (aus Repo/Config); A2 |
 | SP-R1-2 | Die Schlüssel liegen in `dwello_secrets`, getrennt von der DB. | Ein Backup muss beide umfassen. Beim Restore müssen die Schlüssel vor dem ersten Start zurück. | `docs/installation.md` §5; `ki-settings.service.ts` (aus Repo/Config) |
 | SP-R1-3 | Die angewendeten Migrationen stehen in `schema_migrations` in der DB. Der Start zieht fehlende nach. | Ein Backup aus Release N lässt sich in N+1 einspielen, ohne eigenen Mechanismus. | `backend/src/db/migrate.ts` (aus Repo/Config) |
-| SP-R1-4 | Compose enthält keinen Dienst für zeitgesteuerte Aufgaben und kein Volume für Backups. | Wo das tägliche Backup läuft und wohin es schreibt, ist eine neue Entscheidung. | `docker-compose.prod.yml` (aus Repo/Config) |
+| SP-R1-4 | **Erledigt (#718):** Der Backend-Dienst sichert selbst (täglich um 03:00), in den Ordner `backups` neben `compose.yaml`. Vorher: Compose enthält keinen Dienst für zeitgesteuerte Aufgaben und kein Volume für Backups. | Wo das tägliche Backup läuft und wohin es schreibt, ist eine neue Entscheidung. | `docker-compose.prod.yml` (aus Repo/Config) |
 
 **Tradeoff Points:**
 
@@ -139,8 +139,8 @@
 |---|---|---|
 | RI-R1-1 | **Verlorener Wiederherstellungscode = Datenverlust.** Die Zielgruppe nutzt Dwello wenige Male im Jahr und hat wenig technische Erfahrung. Gemindert durch Bestätigung bei der Einrichtung, Notfallblatt (PDF) und neuen Code (vom Nutzer bestätigt, A8); ein Rest bleibt, wenn Code und Blatt verloren gehen. | `CLAUDE.md` «Design-Regeln» (aus Repo/Config) |
 | RI-R1-2 | Ein Backup auf derselben Platte wie die DB geht mit ihr verloren. Heute legt die Anleitung die Kopie «auf ein anderes Gerät», von Hand. | `docs/installation.md` §5 (aus Repo/Config) |
-| RI-R1-3 | Kompatibilität ist angelegt (SP-R1-3), aber nie mit Daten einer Vorversion getestet. Eine Migration, die auf echten Daten scheitert (z. B. ein NOT NULL ohne Default), macht das Backup unbrauchbar. | `docs/test-pyramid.md` («migrated fresh») (aus Repo/Config) |
-| RI-R1-4 | Restore-Dauer und DB-Grösse sind unbekannt. 5 min könnten bei 10 Jahren Belegen nicht reichen. | A2 |
+| RI-R1-3 | **Erledigt (#718):** `restore-check.ts` stellt bei jedem PR mit Backend-Änderung eine Sicherung der Vorversion mit HEAD wieder her. Vorher: Kompatibilität ist angelegt (SP-R1-3), aber nie mit Daten einer Vorversion getestet. Eine Migration, die auf echten Daten scheitert (z. B. ein NOT NULL ohne Default), macht das Backup unbrauchbar. | `docs/test-pyramid.md` («migrated fresh») (aus Repo/Config) |
+| RI-R1-4 | **Erledigt (#974):** Nach 10 Jahren 24–97 s gemessen (1,2–2,8 GB), Mengen vom PO bestätigt (A2). Vorher: Restore-Dauer und DB-Grösse sind unbekannt. 5 min könnten bei 10 Jahren Belegen nicht reichen. | A2 |
 
 **Nicht-Risiken (helfen heute):**
 

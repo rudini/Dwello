@@ -445,3 +445,10 @@
 - [x] code-reviewer `docs/reviews/969-review-1.md` (C-1, C-2, C-4, C-7 to C-9 done; C-3 rejected: the screens seed shows the variants; C-5 stays; C-6 noted), `969-review-2.md` (C-10 done)
 - [x] No persona: the decided texts were read in four languages by the fach-reviewer
 - [x] PR: pushed after this archive
+## Session: utility tree brought up to date after #718, #935, #974 (2026-10-31)
+
+- [x] `utility-tree.md`: context «Backup», U1 environment and «Heute» (backup before every migration), U1 fitness function (the Compose update of the images is missing)
+- [x] Difficulty re-rated (derived; importance unchanged as the PO confirmed it): R1 H/H → H/L, U1 H/H → H/M, O1 H/M → H/L; matrix and candidates: no H/H left, next U1 with the Compose update
+- [x] `risks-and-tradeoffs.md`: SP-U1-3, SP-R1-4, RI-U1-1, RI-U1-2, RI-R1-3, RI-R1-4 marked done with their issues
+- [x] Docs only: no code review, no scenario
+- [x] PR (no issue; the product owner asked for it in the conversation): pushed after this archive
