@@ -696,7 +696,9 @@ describe('API-Verträge des Frontends', () => {
 			expect(drift(await sample('statement-deadline-refused'), await response.json())).toEqual([]);
 		} finally {
 			await db.delete(documents).where(eq(documents.id, told.id));
-			await db.update(utilityStatements).set({ status: before.status, balance: before.balance }).where(eq(utilityStatements.id, statementId));
+			// all a PUT that got through would change too (closing review 966-1 C-1)
+			const { status, balance, paymentDeadline, pdfBlob, pdfGeneratedAt } = before;
+			await db.update(utilityStatements).set({ status, balance, paymentDeadline, pdfBlob, pdfGeneratedAt }).where(eq(utilityStatements.id, statementId));
 		}
 	});
 
