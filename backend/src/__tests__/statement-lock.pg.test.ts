@@ -207,3 +207,45 @@ describe('Zahlung zurücksetzen', () => {
 		await expectRejection(await reset(crypto.randomUUID()), 404, 'Statement not found', 'STATEMENT_NOT_FOUND');
 	});
 });
+
+// #959 (A): ein kleinerer Betrag ist eine Teilzahlung; die Abrechnung bleibt mit dem Rest offen (Art. 69, 85 OR)
+describe('Teilzahlung', () => {
+	let id: string;
+	const pay = (paidAmount: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount });
+
+	beforeAll(async () => {
+		id = await sentStatement(2025);
+		await db.update(utilityStatements).set({ balance: '442.90' }).where(eq(utilityStatements.id, id));
+	});
+
+	afterAll(async () => {
+		await db.delete(documents).where(eq(documents.statementId, id));
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+	});
+
+	it('lässt die Abrechnung versendet, ohne Zahlungsdatum, mit dem bezahlten Teil', async () => {
+		const response = await pay('10.00');
+
+		expect(await response.json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: '10.00', payments: [{ date: today(), amount: '10.00' }] });
+	});
+
+	it('nimmt höchstens den offenen Betrag an und keinen Betrag von 0.00', async () => {
+		await expectRejection(await pay('432.91'), 400, 'Paid amount above the open amount', 'STATEMENT_PAID_AMOUNT_TOO_HIGH', { rest: '432.90' });
+		await expectRejection(await pay('0.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
+		await expectRejection(await pay('-5.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
+	});
+
+	it('zählt die Zahlungen zusammen und ist bezahlt, sobald sie den Saldo erreichen', async () => {
+		const response = await pay('432.90');
+
+		expect(await response.json()).toMatchObject({ status: 'paid', paidDate: today(), paidAmount: '442.90', payments: [{ amount: '10.00' }, { amount: '432.90' }] });
+	});
+
+	// Fachreview 959-1, Regel 6: zurückgesetzt wird die zuletzt festgehaltene Zahlung, die Teile davor bleiben
+	it('setzt nur die zuletzt festgehaltene Zahlung zurück, auch eine Teilzahlung', async () => {
+		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: '10.00', payments: [{ amount: '10.00' }] });
+		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidAmount: null, payments: [] });
+	});
+});

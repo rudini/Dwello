@@ -25,7 +25,7 @@ import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { generateStatementPdf, qrBillConfig } from './statement-pdf.service';
 import { getStatement } from './statement.service';
 import { getTenant } from './tenant.service';
-import { belowMinimum, formatSwissDate } from './pdf-format';
+import { belowMinimum, formatSwissDate, roundToRappen } from './pdf-format';
 import { daysAfter, swissToday } from './today';
 import { isReplaced } from './counting-statements';
 
@@ -98,6 +98,7 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 		periodStart: statement.periodStart,
 		periodEnd: statement.periodEnd,
 		balance: Number(statement.balance),
+		paid: Number(statement.paidAmount ?? 0),
 		deadline: paymentDeadline,
 		tenant,
 		sender: { name: from.name, iban: from.iban },
@@ -107,7 +108,9 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
 	// a paid statement gets no reminder, and none is marked sent after paying (#449): only the IBAN decides the payment part
 	const config = await qrBillConfig();
-	const payment = config ? { statement: { ...statement, tenant }, config, language } : undefined;
+	// the payment part asks for the open amount, after a part payment the rest (#959, Art. 85 Abs. 1 OR)
+	const open = roundToRappen(Number(statement.balance) - Number(statement.paidAmount ?? 0)).toFixed(2);
+	const payment = config ? { statement: { ...statement, balance: open, tenant }, config, language } : undefined;
 	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day), payment);
 	return { tenant, letter, pdf, paymentDeadline };
 }

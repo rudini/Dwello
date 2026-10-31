@@ -459,6 +459,8 @@
 	"statements_notes_help_correction": "Indichi qui perché rettifica il conteggio. L’osservazione figura nel PDF che riceve l’inquilino.",
 	"backend_statement_paid_amount_not_open": "L’importo già pagato si può indicare solo su un conteggio inviato o scaduto. Ricarichi la pagina.",
 	"backend_statement_paid_amount_invalid": "L’importo «{amount}» non è valido. Inserisca un importo in franchi, per esempio 40.00.",
+	"backend_statement_paid_amount_too_high": "L’importo supera l’importo aperto di CHF {rest}. Inserisca al massimo questo importo.",
+	"backend_statement_paid_amount_zero": "Inserisca un importo superiore a CHF 0.00.",
 	"statements_status_paid": "Pagato",
 	"statements_status_replaced": "Sostituito",
 	"statements_status_overdue": "Scaduto",

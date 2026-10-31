@@ -145,6 +145,16 @@ describe('Dashboard', () => {
 		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 270 });
 	});
 
+	// #959: nach einer Teilzahlung ist nur der offene Betrag ausstehend (Art. 85 Abs. 1 OR, Fachreview 959-1 V-4)
+	it('summiert nach einer Teilzahlung nur den offenen Betrag', async () => {
+		const start = await dashboard();
+		await statement(11, { status: 'sent', balance: '400', paidAmount: '100', paymentDeadline: day(-1) });
+		const end = await dashboard();
+
+		expect(end.financial.totalPending - start.financial.totalPending).toBe(300);
+		expect(end.financial.overdueAmount - start.financial.overdueAmount).toBe(300);
+	});
+
 	it('zeigt die Belegung des Gebäudes', () => {
 		expect(after.buildingOccupancy.find((b) => b.buildingId === rental.building)).toMatchObject({
 			totalApartments: 3,

@@ -459,6 +459,8 @@
 	"statements_notes_help_correction": "Schreiben Sie hier, warum Sie die Abrechnung berichtigen. Die Bemerkung steht im PDF, das der Mieter erhält.",
 	"backend_statement_paid_amount_not_open": "Was schon bezahlt ist, lässt sich nur bei einer versendeten oder überfälligen Abrechnung eintragen. Laden Sie die Seite neu.",
 	"backend_statement_paid_amount_invalid": "Der Betrag «{amount}» ist ungültig. Geben Sie einen Betrag in Franken ein, zum Beispiel 40.00.",
+	"backend_statement_paid_amount_too_high": "Der Betrag ist höher als der offene Betrag von CHF {rest}. Geben Sie höchstens diesen Betrag ein.",
+	"backend_statement_paid_amount_zero": "Geben Sie einen Betrag über CHF 0.00 ein.",
 	"statements_status_paid": "Bezahlt",
 	"statements_status_replaced": "Ersetzt",
 	"statements_status_overdue": "Überfällig",

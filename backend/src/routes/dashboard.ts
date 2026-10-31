@@ -24,8 +24,11 @@ const countApartments = async (where?: SQL) =>
 const countStatements = async (where: SQL | undefined) =>
 	Number((await db.select({ count: count() }).from(utilityStatements).where(where))[0]?.count ?? 0);
 
-const sumStatements = async (column: typeof utilityStatements.balance | typeof utilityStatements.paidAmount, where: SQL | undefined) =>
+const sumStatements = async (column: SQL | typeof utilityStatements.paidAmount, where: SQL | undefined) =>
 	Number((await db.select({ total: sum(column) }).from(utilityStatements).where(where))[0]?.total ?? 0);
+
+// what is still owed: the Saldo less the part payments recorded (#959, Art. 85 Abs. 1 OR)
+const openAmount = sql`${utilityStatements.balance} - coalesce(${utilityStatements.paidAmount}, 0)`;
 
 // Percent with one decimal place
 const occupancyRate = (occupied: number, total: number) => (total > 0 ? Math.round((occupied / total) * 1000) / 10 : 0);
@@ -134,8 +137,8 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 		portfolio: await portfolio(),
 		financial: {
 			outstandingStatements: await countStatements(statusCondition('open')),
-			totalPending: await sumStatements(utilityStatements.balance, owed('open')),
-			overdueAmount: await sumStatements(utilityStatements.balance, owed('overdue')),
+			totalPending: await sumStatements(openAmount, owed('open')),
+			overdueAmount: await sumStatements(openAmount, owed('overdue')),
 			paidThisMonth: await sumStatements(
 				utilityStatements.paidAmount,
 				// only Nachzahlungen, not refunds (#93); also on a statement replaced since (#120)

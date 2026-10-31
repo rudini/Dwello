@@ -459,6 +459,8 @@
 	"statements_notes_help_correction": "Indiquez ici pourquoi vous rectifiez le décompte. La remarque figure dans le PDF que reçoit le locataire.",
 	"backend_statement_paid_amount_not_open": "Le montant déjà payé ne peut être saisi que sur un décompte envoyé ou en retard. Rechargez la page.",
 	"backend_statement_paid_amount_invalid": "Le montant « {amount} » n’est pas valable. Saisissez un montant en francs, par exemple 40.00.",
+	"backend_statement_paid_amount_too_high": "Le montant dépasse le montant ouvert de CHF {rest}. Saisissez au maximum ce montant.",
+	"backend_statement_paid_amount_zero": "Saisissez un montant supérieur à CHF 0.00.",
 	"statements_status_paid": "Payé",
 	"statements_status_replaced": "Remplacé",
 	"statements_status_overdue": "En retard",

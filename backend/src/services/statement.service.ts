@@ -791,12 +791,27 @@ export async function updateStatementStatus(
 		// the PDF as sent is made anew after sending, with the tenant and settings then, not a draft's of earlier (review C-9)
 		...(sentToday && { pdfBlob: null, pdfGeneratedAt: null })
 	};
-	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94: a
-	// statement settled under #94 whose payment was reset)
-	const moved = waived ? '0.00' : existing.balance;
-	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? moved, paymentRecordedAt: new Date() });
+	if (updateData.status === 'paid') Object.assign(updateData, recordPayment(existing, waived, additionalData));
 
 	return updateStatement(id, updateData);
+}
+
+// paid without an amount: the open amount, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94: a
+// statement settled under #94 whose payment was reset). A smaller amount is a part payment (#959, Art. 69, 85 OR): the
+// payments add up, and the statement stays open with the rest until they reach the Saldo
+function recordPayment(existing: StatementWithDetails, waived: boolean, data?: { paidDate?: string; paidAmount?: string }) {
+	if (waived) return { paidAmount: data?.paidAmount ?? '0.00', paymentRecordedAt: new Date() };
+	const balance = Number(existing.balance);
+	const before = Number(existing.paidAmount ?? 0);
+	const rest = roundToRappen(balance - before);
+	const amount = data?.paidAmount === undefined ? rest : Number(data.paidAmount);
+	if (!(amount * Math.sign(balance) > 0)) throw new CodedError('STATEMENT_PAID_AMOUNT_ZERO', 'Paid amount not above 0.00');
+	if (Math.abs(amount) > Math.abs(rest)) throw new CodedError('STATEMENT_PAID_AMOUNT_TOO_HIGH', 'Paid amount above the open amount', { rest: Math.abs(rest).toFixed(2) });
+	const payments = [...existing.payments, { date: data?.paidDate ?? swissToday(), amount: amount.toFixed(2) }];
+	const paidAmount = roundToRappen(before + amount).toFixed(2);
+	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments };
+	const paidDate = data?.paidDate && payments.map((p) => p.date).sort().at(-1);
+	return { paidAmount, payments, paidDate, paymentRecordedAt: new Date() };
 }
 
 // #138: a day that exists, up to today; from the end of the Abrechnungsperiode: a tenant may pay before the
@@ -815,15 +830,20 @@ function checkPaidDate(paidDate: string, periodEnd: string) {
 export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	const existing = await getStatement(id);
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
-	if (existing.status !== 'paid') throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
-	const reset = { resetOn: swissToday(), paidDate: existing.paidDate, paidAmount: existing.paidAmount };
+	// the last recorded payment, a part payment too; the parts before stay (#959); a statement paid before #959 has no list
+	const last = existing.payments.at(-1);
+	if (existing.status !== 'paid' && !last) throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
+	const kept = existing.payments.slice(0, -1);
+	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount };
+	const paidAmount = kept.length ? roundToRappen(kept.reduce((sum, p) => sum + Number(p.amount), 0)).toFixed(2) : null;
 	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
 	const { pdfGeneratedAt, paymentRecordedAt } = existing;
 	const paidPdf = pdfGeneratedAt && paymentRecordedAt && pdfGeneratedAt >= paymentRecordedAt;
 	const updated = (await updateStatement(id, {
 		status: 'sent',
 		paidDate: null,
-		paidAmount: null,
+		paidAmount,
+		payments: kept,
 		paymentRecordedAt: null,
 		carrySettledOn: null, // a refund settled under #94 is carried over again (Fachreview 506-1 V-9)
 		paymentResets: [...existing.paymentResets, reset],

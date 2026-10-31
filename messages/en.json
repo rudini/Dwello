@@ -459,6 +459,8 @@
 	"statements_notes_help_correction": "Write here why you are correcting the statement. The remark appears in the PDF the tenant receives.",
 	"backend_statement_paid_amount_not_open": "What was already paid can only be entered on a sent or overdue statement. Reload the page.",
 	"backend_statement_paid_amount_invalid": "The amount «{amount}» is not valid. Enter an amount in francs, for example 40.00.",
+	"backend_statement_paid_amount_too_high": "The amount is higher than the open amount of CHF {rest}. Enter at most this amount.",
+	"backend_statement_paid_amount_zero": "Enter an amount above CHF 0.00.",
 	"statements_status_paid": "Paid",
 	"statements_status_replaced": "Replaced",
 	"statements_status_overdue": "Overdue",

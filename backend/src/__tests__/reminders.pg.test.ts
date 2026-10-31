@@ -554,6 +554,18 @@ describe('Zahlteil der Mahnung', () => {
 		expect(text.split(formatQRReferenceForDisplay(statementQRReference(statementId))).length - 1).toBe(3);
 	});
 
+	// #959 (Fachreview 959-1 V-4): nach einer Teilzahlung verlangen Brief und Zahlteil den Rest, nicht den Saldo
+	it('verlangt nach einer Teilzahlung im Brief und im Zahlteil den offenen Betrag', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		await db.update(utilityStatements).set({ paidAmount: '20.00' }).where(eq(utilityStatements.id, statementId));
+		const text = await reminderPdf(statementId);
+
+		expect(text).toContain('Bereits bezahlt: CHF 20.00');
+		// in the letter, on the receipt and on the payment part
+		expect(text.split('100.00').length - 1).toBe(3);
+	});
+
 	// Review W6c C-1/V-6/C-13: Brief und Zahlteil auf einem Blatt, jede Mahnstufe in jeder Sprache
 	it('druckt jede Mahnstufe mit dem Zahlteil auf eine Seite', async () => {
 		for (const language of ['de', 'fr', 'it', 'en'] as const) {
