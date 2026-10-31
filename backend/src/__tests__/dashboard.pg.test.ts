@@ -11,6 +11,7 @@ import { createApartment, deleteApartment } from '../services/apartment.service'
 import { createContract, deleteContract } from '../services/contract.service';
 import { updateStatementStatus } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
+import { daysAfter, swissToday } from '../services/today';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -23,7 +24,8 @@ type Dashboard = {
 	buildingOccupancy: { buildingId: string; totalApartments: number; occupiedApartments: number; occupancyRate: number }[];
 };
 
-const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
+// the Swiss day, as the overview counts «this month» (backend/CLAUDE.md, «Today»): in UTC the last evening of a month is the next one's in Zurich
+const day = (offset: number) => daysAfter(swissToday(), offset);
 const token = crypto.randomUUID();
 const dashboard = async () => (await (await callApi('/api/v1/dashboard')).json()) as Dashboard;
 
