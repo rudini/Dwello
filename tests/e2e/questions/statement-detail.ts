@@ -13,6 +13,7 @@ import {
 	earlyPaidDateWarning,
 	paymentDeadline,
 	paymentSummary,
+	partialPaymentHint,
 	correctStatementButton,
 	markPaidButton,
 	priorPayments,
@@ -137,3 +138,6 @@ export const letterInsteadOffers = Count.of(letterInsteadLink);
 
 // #454 (Fachreview 454-1 E-6)
 export const declineCorrectionOffered = Count.of(declineCorrectionButton);
+
+// what «Als bezahlt markieren» says about a part paid (#523)
+export const partialPaymentAdvice = Text.of(partialPaymentHint);

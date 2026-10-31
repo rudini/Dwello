@@ -99,6 +99,14 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
+  # #523 (Option C, A): eine Teilzahlung ist noch keine Zahlung der Abrechnung (Art. 69 OR); Rückerstattung im DOM-Test
+  Szenario: Der Zahlungseingang sagt, was bei einer Teilzahlung gilt
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will
+    Dann sagt die Frage «Als bezahlt markieren» "Hat der Mieter erst einen Teil überwiesen, markieren Sie die Abrechnung noch nicht als bezahlt."
+
   # Festgehalten wird der eingegebene Tag, frühestens das Abrechnungsdatum (beim Versenden der Tag des Versands, #138)
   Szenario: Zahlungseingang mit Datum festhalten
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
