@@ -1288,7 +1288,7 @@
 	"statements_recalculate_title": "Ricalcolare la bozza",
 	"statements_recalculate_text": "Dwello ricalcola la bozza {number} con le fatture e la scorta di combustibile come sono ora. Il numero, il profilo di riscaldamento, le spese amministrative, la data del conteggio, il termine di pagamento e le osservazioni restano. Gli importi, le voci e il saldo cambiano. Un PDF già creato viene scartato.",
 	"statements_new_pdf_marked_sent": "Il nuovo PDF è registrato come inviato.",
-	"documents_print_now_new_pdf": "Il nuovo PDF resta com’è: la data del conteggio e il termine di pagamento non cambiano. Lo stampi ora e lo spedisca oggi per posta.",
+	"documents_print_now_new_pdf": "Il nuovo PDF resta com’è: Dwello non vi modifica alcuna data. Lo stampi ora e lo spedisca oggi per posta.",
 	"statements_new_pdf_mark_sent_text_refund": "Dwello registra che invia il nuovo PDF oggi. La data del conteggio e la data del rimborso restano. Lo stampi poi e lo porti oggi alla posta.",
 	"documents_mark_sent_text": "Segni la lettera solo il giorno in cui la porta alla posta. Un sollecito porta poi la data di oggi e un nuovo termine di pagamento; il nuovo PDF di un conteggio mantiene la data e il termine di pagamento del conteggio. Stampi poi la lettera e la spedisca lo stesso giorno.",
 	"documents_mark_sent_title": "Segnare «{title}» a {name} come inviato",

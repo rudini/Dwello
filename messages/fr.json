@@ -1288,7 +1288,7 @@
 	"statements_recalculate_title": "Recalculer le brouillon",
 	"statements_recalculate_text": "Dwello recalcule le brouillon {number} avec les factures et le stock de combustible tels qu’ils sont maintenant. Le numéro, le profil de chauffage, les frais d’administration, la date du décompte, le délai de paiement et la remarque restent. Les montants, les postes et le solde changent. Un PDF déjà établi est supprimé.",
 	"statements_new_pdf_marked_sent": "Le nouveau PDF est enregistré comme envoyé.",
-	"documents_print_now_new_pdf": "Le nouveau PDF reste tel quel : la date du décompte et le délai de paiement ne changent pas. Imprimez-le maintenant et envoyez-le aujourd’hui par la poste.",
+	"documents_print_now_new_pdf": "Le nouveau PDF reste tel quel : Dwello n’y modifie aucune date. Imprimez-le maintenant et envoyez-le aujourd’hui par la poste.",
 	"statements_new_pdf_mark_sent_text_refund": "Dwello enregistre que vous envoyez le nouveau PDF aujourd’hui. La date du décompte et la date du remboursement restent. Imprimez-le ensuite et postez-le aujourd’hui.",
 	"documents_mark_sent_text": "Marquez la lettre seulement le jour où vous la postez. Un rappel porte ensuite la date du jour et un nouveau délai de paiement ; le nouveau PDF d’un décompte garde la date et le délai de paiement de celui-ci. Imprimez ensuite la lettre et envoyez-la le même jour.",
 	"documents_mark_sent_title": "Marquer « {title} » à {name} comme envoyé",

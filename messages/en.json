@@ -1288,7 +1288,7 @@
 	"statements_recalculate_title": "Recalculate draft",
 	"statements_recalculate_text": "Dwello recalculates draft {number} using the invoices and the fuel stock as they are now. The number, heating profile, management fee, statement date, payment deadline and notes stay unchanged. The amounts, statement lines and balance change. Any PDF already created is discarded.",
 	"statements_new_pdf_marked_sent": "The new PDF is recorded as sent.",
-	"documents_print_now_new_pdf": "The new PDF stays as it is: the statement date and the payment deadline do not change. Print it now and post it today.",
+	"documents_print_now_new_pdf": "The new PDF stays as it is: Dwello changes no date in it. Print it now and post it today.",
 	"statements_new_pdf_mark_sent_text_refund": "Dwello records that you send the new PDF today. The statement date and the refund date stay. Then print it and post it today.",
 	"documents_mark_sent_text": "Mark the letter only on the day you post it. A reminder then carries today’s date and a new payment deadline; the new PDF of a statement keeps the statement’s date and payment deadline. Then print the letter and post it the same day.",
 	"documents_mark_sent_title": "Mark «{title}» to {name} as sent",

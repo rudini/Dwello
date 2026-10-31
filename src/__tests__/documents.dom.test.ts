@@ -164,7 +164,7 @@ describe('Dokumente', () => {
 	it('sagt nach dem Markieren eines neuen PDF, dass Datum und Zahlungsfrist bleiben', () => {
 		documents([], 'to_send', { sent: { id: 'd2', title: 'Nebenkostenabrechnung, neues PDF', tenantName: 'Anna Keller', newPdf: true } });
 		const notice = byTestId('document-marked-sent')!.textContent!;
-		expect(notice).toContain('Das neue PDF bleibt, wie es ist: Abrechnungsdatum und Zahlungsfrist ändern sich nicht.');
+		expect(notice).toContain('Das neue PDF bleibt, wie es ist: Dwello ändert kein Datum darin.');
 		expect(notice).not.toContain('heutige Datum');
 	});
 

@@ -1288,7 +1288,7 @@
 	"statements_recalculate_title": "Entwurf neu berechnen",
 	"statements_recalculate_text": "Dwello berechnet den Entwurf {number} mit den Rechnungen und dem Tankbestand, wie sie jetzt sind. Nummer, Heizprofil, Verwaltungspauschale, Abrechnungsdatum, Zahlungsfrist und Bemerkung bleiben. Beträge, Positionen und Saldo ändern sich. Ein schon erstelltes PDF wird verworfen.",
 	"statements_new_pdf_marked_sent": "Das neue PDF ist als versendet festgehalten.",
-	"documents_print_now_new_pdf": "Das neue PDF bleibt, wie es ist: Abrechnungsdatum und Zahlungsfrist ändern sich nicht. Drucken Sie es jetzt aus und schicken Sie es heute per Post.",
+	"documents_print_now_new_pdf": "Das neue PDF bleibt, wie es ist: Dwello ändert kein Datum darin. Drucken Sie es jetzt aus und schicken Sie es heute per Post.",
 	"statements_new_pdf_mark_sent_text_refund": "Dwello hält fest, dass Sie das neue PDF heute versenden. Abrechnungsdatum und Datum der Rückerstattung bleiben. Drucken Sie es danach aus und bringen Sie es heute zur Post.",
 	"documents_mark_sent_text": "Markieren Sie den Brief erst am Tag, an dem Sie ihn zur Post bringen. Eine Mahnung trägt danach das heutige Datum und eine neue Zahlungsfrist; das neue PDF einer Abrechnung behält deren Datum und Zahlungsfrist. Drucken Sie den Brief danach aus und schicken Sie ihn am selben Tag.",
 	"documents_mark_sent_title": "«{title}» an {name} als versendet markieren",
