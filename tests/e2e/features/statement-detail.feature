@@ -1256,6 +1256,19 @@ Funktionalität: Abrechnungsdetail
     Dann nennt der Verlauf "Neues PDF versendet per Brief" am heutigen Tag
     Und nennt die Abrechnung das neue PDF nicht mehr als noch zu versenden
 
+  # #968 (Persona Dr. Weber 534-2 P-1, Code-Review 534close-1 C-2): der Verlauf wächst nur; das PDF des Versands bleibt
+  # nach einer Änderung, das neue PDF kommt danach
+  Szenario: Nach einer Änderung nennt der Verlauf das PDF des Versands und das neue PDF
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und hat die Abrechnung den Status "Versendet"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Dann nennt der Verlauf zuerst das PDF des Versands, dann den Versand und dann das neue PDF
+
   # Fachreview 534-1 V-3 (Entscheid in #968): nach der Zahlung geht das neue PDF nicht mehr hinaus
   Szenario: Ein neues PDF einer inzwischen bezahlten Abrechnung geht nicht mehr hinaus
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

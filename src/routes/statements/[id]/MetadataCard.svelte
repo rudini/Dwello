@@ -66,7 +66,8 @@
 	// glossary «Versendetes PDF», «neues PDF», #965)
 	const newPdf = $derived(!newPdfMadeAt && !!pdfGeneratedAt && !!lastSent && pdfGeneratedAt > lastSent);
 	// the PDF of the first sending was made then: it stays in the Verlauf when a change discards it (534-2 P-1)
-	const firstPdfAt = $derived(delivery?.sentAt && (resent.length || !pdfGeneratedAt || newPdf) ? delivery.sentAt : pdfGeneratedAt);
+	// a PDF made after it never takes its place (Code-Review 534close-1 C-1)
+	const firstPdfAt = $derived(delivery?.sentAt && (!pdfGeneratedAt || pdfGeneratedAt > delivery.sentAt) ? delivery.sentAt : pdfGeneratedAt);
 	const pdfRow = $derived({ label: m.statements_pdf_created(), date: firstPdfAt && formatDateTime(firstPdfAt) });
 	const newPdfRow = $derived(madeRow(pdfGeneratedAt));
 	const dates = $derived(

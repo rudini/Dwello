@@ -326,5 +326,5 @@
 - [x] daten-pruefer `docs/reviews/534-datenpruefung-1.md`
 - [x] fach-reviewer step 5 `docs/reviews/534-fachreview-2.md`, `534-fachreview-3.md`
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-534.md`
-- [ ] Closing review `docs/reviews/534close-review-1.md`
+- [x] Closing review `docs/reviews/534close-review-1.md`, `534close-review-2.md`
 - [x] PR: pushed after this archive

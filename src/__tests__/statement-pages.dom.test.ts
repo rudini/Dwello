@@ -1909,7 +1909,7 @@ describe('Abrechnungsdetail', () => {
 		const history = text().replace(/\s+/g, ' ');
 		expect(history).toContain('Neues PDF versendet per Brief');
 		// the first PDF with the first sending (534-2 P-1), never with the later one's time
-		expect(history.indexOf('PDF erstellt 31.10.2026, 15:01')).toBeLessThan(history.indexOf('Versendet per Brief'));
+		expect(history).toMatch(/PDF erstellt 31\.10\.2026, 15:01\s*Versendet per Brief/);
 		expect(history).not.toContain('PDF erstellt 31.10.2026, 15:02');
 	});
 
@@ -1932,6 +1932,21 @@ describe('Abrechnungsdetail', () => {
 		const order = ['PDF erstellt 31.10.2026, 16:01', 'Versendet per Brief', 'Neues PDF erstellt 31.10.2026, 16:02', 'Neues PDF versendet per Brief', 'Neues PDF erstellt 31.10.2026, 16:10'];
 		expect(order.map((row) => history.indexOf(row))).toEqual([...order.map((row) => history.indexOf(row))].sort((a, b) => a - b));
 		expect(order.every((row) => history.includes(row))).toBe(true);
+	});
+
+	// Code-Review 534close-1 C-1: a PDF made later (the new PDF waits) never takes the place of the first one
+	it('nennt beim ersten PDF die Zeit des Versands, auch wenn danach ein PDF entstand', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({ status: 'sent', pdfGeneratedAt: '2026-10-31T15:20:00Z', newPdfMadeAt: '2026-10-31T15:10:00Z' } as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-31T15:01:00Z' }
+			},
+			form: null
+		} as never);
+		const history = text().replace(/\s+/g, ' ');
+		expect(history).toMatch(/PDF erstellt 31\.10\.2026, 16:01\s*Versendet per Brief/);
+		expect(history).toContain('Neues PDF erstellt 31.10.2026, 16:10');
 	});
 
 	// #534 (Fachreview 534-1 V-2, V-6): die Bestätigung nennt, was das erneute Zustellen setzt

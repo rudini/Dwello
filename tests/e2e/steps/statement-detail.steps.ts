@@ -828,3 +828,8 @@ Then('nennt die Abrechnung das neue PDF nicht mehr als noch zu versenden', async
 When('der Liegenschaftsverwalter das neue PDF als versendet markiert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(markNewPdfSent);
 });
+
+// #968: the Verlauf only grows (Persona Dr. Weber 534-2 P-1)
+Then('nennt der Verlauf zuerst das PDF des Versands, dann den Versand und dann das neue PDF', async ({ verwalter }) => {
+	await verwalter.sees(history).toMatch(/PDF erstellt.*Versendet per Brief.*Neues PDF erstellt/);
+});
