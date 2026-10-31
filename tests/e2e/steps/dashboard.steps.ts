@@ -272,6 +272,13 @@ Then(
 	}
 );
 
+Then(
+	'nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von {string} {int}',
+	async ({ verwalter, names }, building: string, year: number) => {
+		await verwalter.sees(outdatedDraftsOf(names.get(building)!)).toContain(String(year));
+	}
+);
+
 Then('sagt die Aufgabe zu nicht aktuellen Entwürfen {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(outdatedDraftsText).toContain(text);
 });

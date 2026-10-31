@@ -409,3 +409,12 @@
 - [x] code-reviewer `docs/reviews/980-review-1.md` (C-1 Minor fixed: docstring and API spec)
 - [x] Persona Dr. Weber `docs/design/personas/weber-980.md`: P-1 to P-3 Minor, existed before (P-3 = 529-fachreview-1 V-6); stay in the report
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #981 Entwurf mit geändertem Übertrag fehlt in der Übersicht
+
+- [x] @wip scenario «Ein Entwurf mit geändertem Übertrag ist nicht aktuell» and pg test (`statement-carry-over.pg.test.ts`), both seen red
+- [x] fach-reviewer step 1 `docs/reviews/981-fachreview-1.md`: V-1 (task text in four languages) done; V-2 Minor existed before, stays in the report
+- [x] `outdatedStatements` counts `carryChanged` drafts (#981 A); `dashboard_task_outdated_drafts_text` names the third reason; scenario «Nicht aktuelle Entwürfe als eigene Aufgabe» takes the new text (Spec change approved: #981)
+- [x] code-reviewer `docs/reviews/981-review-1.md`: no findings
+- [x] No persona: the decided text was read in four languages by the fach-reviewer; no step-5 fach-reviewer: nothing changed since step 1
+- [x] PR: pushed after this archive
