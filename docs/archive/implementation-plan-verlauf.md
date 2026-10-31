@@ -328,3 +328,14 @@
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-534.md`
 - [x] Closing review `docs/reviews/534close-review-1.md`, `534close-review-2.md`
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #511 Texte zu Verwaltungspauschale, Vertragsende, Kündigung und Kündigungstermin
+
+- [x] @wip scenarios (statement-detail, contract-detail, help), seen red at the missing texts (the PDF negative pins the base)
+- [x] fach-reviewer step 1 (`docs/reviews/511-fachreview-1.md`) with the wording in four languages; follow-up decision recorded in #511
+- [x] P-2: PDF note on the agreed Verwaltungspauschale, only when one is billed (`pdf.service.ts`, `agreed-categories.pg.test.ts`)
+- [x] P-3, P-4, P-5: `contracts_end_date_help`, `contracts_notice_received_help`, `glossary_termination_date_text` in four languages; glossary rows «Kündigungstermin», «Kündigungsfrist», «Vertragsende»
+- [x] No persona: the decided texts were read in four languages by the fach-reviewer (`CLAUDE.md`, Workflow 5)
+- [x] code-reviewer `docs/reviews/511-review-1.md`; daten-pruefer `docs/reviews/511-datenpruefung-1.md`
+- [x] Closing review `docs/reviews/511close-review-1.md`
+- [x] PR: pushed after this archive

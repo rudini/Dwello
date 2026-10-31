@@ -152,6 +152,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Heizkosten nach Verbrauch',
 		notes: 'Hinweise',
 		agreedCosts: 'Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: {categories}.',
+		managementFeeAgreed: 'Die Verwaltungspauschale ist im Mietvertrag vereinbart. Sie gilt den Aufwand für das Erstellen dieser Abrechnung ab (Art. 4 Abs. 3 VMWG).',
 		agreedFromItem: '{category} (ab {date})',
 		sharesNoteAgreedFrom:
 			' Ist eine Kategorie erst ab einem Tag vereinbart (unten bei den vereinbarten Nebenkosten mit «ab» genannt), zählen nur Ihre Mietstage ab diesem Tag; bei Heizkosten die Monate des Heizprofils ab diesem Tag.',
@@ -278,6 +279,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Frais de chauffage selon la consommation',
 		notes: 'Remarques',
 		agreedCosts: 'Seuls les frais accessoires convenus dans le contrat de bail sont décomptés : {categories}.',
+		managementFeeAgreed: 'Les frais d’administration sont convenus dans le contrat de bail. Ils couvrent le travail lié à l’établissement de ce décompte (art. 4 al. 3 OBLF).',
 		agreedFromItem: '{category} (dès le {date})',
 		sharesNoteAgreedFrom:
 			' Si une catégorie n’est convenue qu’à partir d’un jour (indiqué par «\u00a0dès le\u00a0» dans les frais accessoires convenus ci-dessous), seuls vos jours de location à partir de ce jour comptent\u00a0; pour les frais de chauffage, les mois du profil de chauffage à partir de ce jour.',
@@ -404,6 +406,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Spese di riscaldamento secondo il consumo',
 		notes: 'Osservazioni',
 		agreedCosts: 'Sono conteggiate solo le spese accessorie pattuite nel contratto di locazione: {categories}.',
+		managementFeeAgreed: 'Le spese amministrative sono pattuite nel contratto di locazione. Coprono il lavoro per la stesura di questo conteggio (art. 4 cpv. 3 OLAL).',
 		agreedFromItem: '{category} (dal {date})',
 		sharesNoteAgreedFrom:
 			' Se una categoria è pattuita solo da un giorno (indicato con «dal» nelle spese accessorie pattuite qui sotto), contano solo i suoi giorni di locazione da quel giorno; per le spese di riscaldamento i mesi del profilo di riscaldamento da quel giorno.',
@@ -530,6 +533,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Heating costs based on consumption',
 		notes: 'Notes',
 		agreedCosts: 'Only the utility costs agreed in the rental contract are billed: {categories}.',
+		managementFeeAgreed: 'The management fee is agreed in the rental contract. It covers the work of preparing this statement (Art. 4 para. 3 VMWG).',
 		agreedFromItem: '{category} (from {date})',
 		sharesNoteAgreedFrom:
 			' If a category is agreed only from a day (marked «from» in the agreed utility costs below), only your days rented from that day count; for heating costs, the months of the heating profile from that day.',
@@ -1219,6 +1223,8 @@ function notes({ doc, t, data, config, language }: Page, y: number) {
 	const contact = senderParts(config).join(', ');
 	const names = data.agreedCosts?.map(({ name, from }) => (from ? fill(t.agreedFromItem, { category: name, date: formatDate(from) }) : name));
 	const agreed = names?.length ? [fill(t.agreedCosts, { categories: names.join(', ') })] : [];
+	// #511 (Persona Dr. Weber 461 P-2, Fachreview 511-1 V-1): a fee billed is agreed, as the line on page 1 shows it
+	if (data.managementFee > 0) agreed.push(t.managementFeeAgreed);
 	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
 	const lines = [...(data.notes ? [data.notes] : []), ...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;

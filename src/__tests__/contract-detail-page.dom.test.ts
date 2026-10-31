@@ -606,7 +606,7 @@ describe('Mietvertragsdetail', () => {
 			'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.2026.'
 		);
 		const words = dialog.textContent!.replace(/\s+/g, ' ');
-		expect(words).toContain('Der letzte Tag des Mietverhältnisses, also der Kündigungstermin.');
+		expect(words).toContain('Der letzte Tag des Mietverhältnisses: in der Regel der Kündigungstermin oder der mit dem Mieter vereinbarte Tag.');
 		expect(words).toContain('auch wenn der Mieter früher auszieht.');
 		expect(words).toContain(
 			'Ist die Kündigung zu spät, gilt sie erst auf den nächsten Kündigungstermin.'
