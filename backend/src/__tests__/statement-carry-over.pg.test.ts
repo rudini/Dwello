@@ -118,6 +118,19 @@ describe('Übertrag', () => {
 		expect(next.carriedFrom).toMatchObject({ id: previous.id, balance: carried });
 	});
 
+	// #981 (A): a draft that would count another Übertrag now is a task of the Übersicht like one with a later invoice
+	it('nennt einen Entwurf, der jetzt einen anderen Übertrag verrechnen würde, als nicht aktuell', async () => {
+		const rental = await rentalOf();
+		const previous = await generate(rental, 2024);
+		const draft = await generate(rental, 2025); // before the Saldo of 2024 is carried
+		await db.update(utilityStatements).set({ balance: '3.00' }).where(eq(utilityStatements.id, previous));
+		await send(previous);
+
+		const { statements } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+
+		expect(statements.map((one) => one.id)).toContain(draft);
+	});
+
 	it('rechnet einen Saldo nur einmal ein, auch nicht in der übernächsten Abrechnung', async () => {
 		const rental = await rentalOf();
 		await sentWith(rental, 2023, '3.00');
