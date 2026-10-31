@@ -123,15 +123,14 @@ LLM_PROVIDER_COUNTRY=<country where the data is processed>
 Over plain `http` the password and every page cross the network unencrypted, and the sign-in page says so: give Dwello a domain (e.g. `dwello.example.ch`) with HTTPS, or reach it only through a VPN. Google sign-in accepts plain `http` only for `localhost`, so with Google HTTPS is required:
 
 1. Point the domain to the server (DNS record of type A) and let ports 80 and 443 reach it.
-2. Put [Caddy](https://caddyserver.com/docs/install) in front of Dwello; it gets and renews the certificate itself. The `Caddyfile`:
+2. HTTPS comes with `compose.yaml`: Caddy, which gets and renews the certificate itself (#722). Add to `.env`:
 
-   ```
-   dwello.example.ch {
-   	reverse_proxy localhost:3000
-   }
+   ```bash
+   COMPOSE_PROFILES=https
+   DWELLO_DOMAIN=dwello.example.ch
    ```
 
-   Another reverse proxy must let requests of at least 11 MB through, or uploads of documents fail (nginx refuses more than 1 MB by default: `client_max_body_size 11m;`). Caddy sets no limit.
+   `docker compose up -d` then starts Caddy as well, on ports 80 and 443. A reverse proxy of your own instead (leave out both lines and forward the domain to `localhost:3000`) must let requests of at least 11 MB through, or uploads of documents fail (nginx refuses more than 1 MB by default: `client_max_body_size 11m;`). Caddy sets no limit.
 
 3. In `.env`, instead of the PC values:
 
@@ -144,7 +143,7 @@ Over plain `http` the password and every page cross the network unencrypted, and
 
    and remove `COOKIE_SECURE=false`.
 4. With Google (section 3): add `https://dwello.example.ch/auth/callback` as redirect URI.
-5. `compose.yaml` publishes only the web app (3000), for Caddy. Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
+5. Besides Caddy, `compose.yaml` publishes only the web app (3000). Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
 
 Without HTTPS, only inside your home network (not recommended: the password and every page cross the network unencrypted, and the sign-in page says so), skip Caddy and set in `.env` the address the other devices open, e.g. `homeserver.local`:
 

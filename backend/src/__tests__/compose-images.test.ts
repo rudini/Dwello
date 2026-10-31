@@ -7,7 +7,7 @@ import { describe, expect, it } from 'bun:test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-type Service = { image?: string; build?: unknown; ports?: string[]; volumes?: string[]; configs?: unknown };
+type Service = { image?: string; build?: unknown; ports?: string[]; volumes?: string[]; configs?: unknown; profiles?: string[]; environment?: string[] };
 type Compose = { name?: string; version?: string; services: Record<string, Service>; configs?: Record<string, { content: string }> };
 
 const root = join(import.meta.dir, '../../..');
@@ -39,9 +39,22 @@ describe('Installation mit compose.yaml', () => {
 		expect(published.name).toBe('dwello');
 	});
 
-	it('veröffentlicht nur den Port der Web-App', () => {
-		const withPorts = Object.entries(published.services).filter(([, service]) => service.ports);
+	it('veröffentlicht ohne HTTPS nur den Port der Web-App', () => {
+		const withPorts = Object.entries(published.services).filter(([, service]) => service.ports && !service.profiles);
 		expect(withPorts.map(([name, service]) => [name, service.ports])).toEqual([['frontend', ['3000:3000']]]);
+	});
+
+	// #722: on a server, HTTPS comes with the file: COMPOSE_PROFILES=https and the domain in .env start Caddy, which gets
+	// and renews the certificate itself, as in deploy/demo
+	it('bringt mit dem Profil https einen Caddy mit, der das Zertifikat für die Domain holt', () => {
+		const caddy = published.services.caddy;
+		expect(caddy.profiles).toEqual(['https']);
+		expect(caddy.ports).toEqual(['80:80', '443:443']);
+		// a required variable («:?») would stop every installation without the profile: Compose reads all services
+		expect(caddy.environment).toContain('DWELLO_DOMAIN=${DWELLO_DOMAIN:-}');
+		const caddyfile = published.configs!.caddyfile.content.replaceAll('$$', '$');
+		expect(caddyfile).toContain('{$DWELLO_DOMAIN} {');
+		expect(caddyfile).toContain('reverse_proxy frontend:3000');
 	});
 
 	// #578 CI: busybox wget took «localhost» as ::1 and the web app listens on 0.0.0.0 only, so the frontend stayed unhealthy
@@ -70,9 +83,12 @@ describe('Installation mit compose.yaml', () => {
 
 	// docker-compose.prod.yml stays for installations from a clone: both start the same Dwello
 	it('startet dieselben Dienste mit denselben Einstellungen wie docker-compose.prod.yml', () => {
+		// a service of a profile (Caddy, #722) is compose.yaml's own: a clone gets HTTPS through deploy/demo/
 		const same = ({ services }: Compose) =>
 			Object.fromEntries(
-				Object.entries(services).map(([name, { image, build: _build, volumes, configs: _configs, ...rest }]) => [
+				Object.entries(services)
+					.filter(([, service]) => !service.profiles)
+					.map(([name, { image, build: _build, volumes, configs: _configs, ...rest }]) => [
 					name,
 					{
 						...rest,
