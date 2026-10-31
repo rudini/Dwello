@@ -14,6 +14,7 @@ import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
+import { daysAfter, swissToday } from '../services/today';
 
 type Dashboard = {
 	portfolio: Record<string, number>;
@@ -23,7 +24,7 @@ type Dashboard = {
 	buildingOccupancy: { buildingId: string; totalApartments: number; occupiedApartments: number; occupancyRate: number }[];
 };
 
-const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
+const day = (offset: number) => daysAfter(swissToday(), offset);
 const token = crypto.randomUUID();
 const dashboard = async () => (await (await callApi('/api/v1/dashboard')).json()) as Dashboard;
 
