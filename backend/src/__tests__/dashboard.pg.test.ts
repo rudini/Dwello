@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices, utilityStatements } from '../db/schema';
+import { documents, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { updateStatementStatus } from '../services/statement.service';
@@ -88,6 +88,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+	await db.delete(documents).where(inArray(documents.statementId, statements)); // a PDF kept before a change (#969)
 	await db.delete(utilityStatements).where(inArray(utilityStatements.id, statements));
 	await deleteContract(nextContract, true);
 	await deleteTenant(nextTenant);

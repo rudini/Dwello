@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
+import { documents, utilityStatements } from '../db/schema';
 import { updateStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf } from './helpers/records';
@@ -42,6 +42,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	// Locked statements cannot be deleted through the API
+	await db.delete(documents).where(inArray(documents.statementId, [statementId, sentId])); // a PDF kept before a change (#969)
 	await db.delete(utilityStatements).where(inArray(utilityStatements.id, [statementId, sentId]));
 	await rental.remove();
 });
