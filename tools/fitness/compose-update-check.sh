@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # U1 fitness function (docs/architecture/fitness-functions.md, #997): the update as the landlord runs it. Starts the last
-# release's compose.yaml with its images and the demo data, confirms a Wiederherstellungscode, then this checkout's
-# compose.yaml with the images under test (docker compose up -d) and fails when a service does not become healthy, no
+# release's compose.yaml with its images and the demo data, confirms a Wiederherstellungscode, then the images under test
+# with the same compose.yaml, which the landlord keeps (docker compose up -d, docs/installation.md), and fails when a service does not become healthy, no
 # Sicherung was made before the migrations, a table lost rows or an amount of the statements changed.
 # Usage: tools/fitness/compose-update-check.sh [--broken] <image tag under test> [release tag]
 #   release tag: default the newest v* tag before HEAD (the last weekly release, #935), its images pulled from ghcr.io
@@ -29,12 +29,12 @@ trap 'docker compose down --volumes >/dev/null 2>&1; docker run --rm -v "$dir:/d
 q() { docker compose exec -T postgres psql -U dwello -d dwello -At "$@"; }
 # a command in the running backend, on the installation's database
 in_backend() {
-	docker compose exec -T "${@:2}" backend sh -c "export DATABASE_URL=postgresql://dwello:\$(cat /run/dwello/db_password)@postgres:5432/dwello && $1"
+	docker compose exec -T backend sh -c "export DATABASE_URL=postgresql://dwello:\$(cat /run/dwello/db_password)@postgres:5432/dwello && $1"
 }
 # the web app with what it needs, as docs/installation.md starts it; the landlord's «docker compose pull» is part of it,
 # since up pulls the images it does not have (those under test are built, not published)
 up() {
-	if DWELLO_VERSION=$1 docker compose up --detach --wait --wait-timeout "${WAIT_TIMEOUT:-300}" frontend >up.log 2>&1; then return 0; fi
+	if DWELLO_VERSION=$1 docker compose up --detach --wait --wait-timeout 300 frontend >up.log 2>&1; then return 0; fi
 	cat up.log
 	cause=$(docker compose logs --no-log-prefix backend 2>&1 | grep -m1 'error:' || true)
 	return 1
@@ -42,6 +42,12 @@ up() {
 source "$repo/tools/fitness/data-totals.sh"
 
 git -C "$repo" show "$TAG:compose.yaml" >compose.yaml
+# the tag comes before the job «Images» of release.yml pushes its images
+image=ghcr.io/rudini/dwello-backend:${TAG#v}
+if ! docker image inspect "$image" "${image/backend/frontend}" >/dev/null 2>&1 && ! DWELLO_VERSION=${TAG#v} docker compose pull --quiet backend frontend; then
+	echo "::error title=Fitness compose update::U1: the images of the release $TAG are not on ghcr.io; the job «Images» of release.yml has not pushed them (yet). Re-run once it has."
+	exit 1
+fi
 if ! up "${TAG#v}"; then
 	docker compose logs
 	echo "::error title=Fitness compose update::U1: the release $TAG does not start from its compose.yaml. ${cause:-}"
@@ -54,7 +60,6 @@ in_backend 'bun -e "const b = await import(\"./src/services/backup.service.ts\")
 totals "$dir" before
 since=$(q -c 'SELECT now()')
 
-cp "$repo/compose.yaml" compose.yaml
 migrated=$(q -c "SELECT count(*) FROM schema_migrations")
 if up "$NEW"; then updated=1; else updated=; fi
 if [ -n "$broken" ]; then
@@ -76,7 +81,7 @@ fi
 if [ -z "$updated" ]; then
 	docker compose ps --all
 	docker compose logs backend frontend
-	echo "::error title=Fitness compose update::U1: after docker compose up -d from $TAG to this change not every service becomes healthy. ${cause:-See the logs above.}"
+	echo "::error title=Fitness compose update::U1: after docker compose up -d from $TAG to the images of this change not every service becomes healthy. ${cause:-See the logs above.}"
 	exit 1
 fi
 curl --fail --silent --show-error http://localhost:3000/health >/dev/null

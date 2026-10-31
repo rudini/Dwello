@@ -133,8 +133,8 @@ jobs:
           }
           curl --fail --silent --show-error http://localhost:3000/health
           docker compose down --volumes
-      # U1 (docs/architecture/fitness-functions.md, #997): the update a landlord runs, docker compose up -d from the last
-      # weekly release's compose.yaml and images (pulled) to these, with demo data and a confirmed Wiederherstellungscode
+      # U1 (docs/architecture/fitness-functions.md, #997): the update a landlord runs: docker compose up -d with the last
+      # weekly release's compose.yaml, from its images (pulled) to these, with demo data and a confirmed Wiederherstellungscode
       - name: Update from the previous release
         run: tools/fitness/compose-update-check.sh latest
       # the negative test: a failing migration stops the update with its cause in the log, after a Sicherung
