@@ -146,6 +146,7 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		waived: data.waived === true,
 		carried: data.carried === true,
 		reminderWaitsUntil: data.reminderWaitsUntil ?? null,
+		reminderToPost: data.reminderToPost === true,
 		deadlinePassed: data.deadlinePassed === true,
 		advanceChanged: data.advanceChanged === true,
 		lineItems: (data.lineItems || []).map((item) =>

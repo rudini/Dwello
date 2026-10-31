@@ -17,6 +17,7 @@ export interface StatementPayment {
 	waived: boolean;
 	carried: boolean;
 	reminderWaitsUntil: string | null;
+	reminderToPost: boolean; // an overdue statement's reminder waits to be marked sent (#545)
 	deadlinePassed: boolean;
 }
 

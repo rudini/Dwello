@@ -286,6 +286,11 @@
 			"path": "src/routes/statements/[id]/+page.svelte",
 			"line": "let paidDate = $state(localToday());",
 			"reason": "field default: prefills «Bezahlt am» with today, no decision; the backend refuses a future day (PAID_DATE_IN_FUTURE)"
+		},
+		{
+			"path": "src/routes/documents/DocumentItem.svelte",
+			"line": "{#if document.paymentDeadline && document.status === 'sent'}",
+			"reason": "status display: the status value alone and the backend's field `paymentDeadline`: a reminder still to send gets its Zahlungsfrist when it is marked sent (#545)"
 		}
 	],
 	"preChecks": [
