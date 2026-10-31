@@ -26,6 +26,8 @@ const config = {
 				'script-src': ['self'],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'data:', 'blob:'],
+				// a file the page holds itself (blob:, chosen for upload) may be read by its own scripts
+				'connect-src': ['self', 'blob:'],
 				'object-src': ['none'],
 				'base-uri': ['self'],
 				'form-action': ['self'],

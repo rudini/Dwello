@@ -24,4 +24,9 @@ describe('Content-Security-Policy', () => {
 		expect(directives['style-src']).toEqual(['self', 'unsafe-inline']);
 		expect(directives['img-src']).toEqual(['self', 'data:', 'blob:']);
 	});
+
+	// the page reads a file it holds itself (blob:, a file chosen for upload); nothing else from outside (CI, #721)
+	it('lässt die Seite nur eigene Adressen und eigene Dateien lesen', () => {
+		expect(directives['connect-src']).toEqual(['self', 'blob:']);
+	});
 });
