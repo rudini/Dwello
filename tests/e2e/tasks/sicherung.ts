@@ -39,13 +39,13 @@ export const confirmBackupCode =
 	(actor) =>
 		actor.attemptsTo(Enter.theValue(code).into(backupCodeInput), Click.on(backupSubmitButton));
 
-/** Types the shown code again, as the landlord does after the setup, and waits for the overview that confirms it */
 /** Only the first group of the shown code, as a long press selects on a phone (#947) */
 export const confirmFirstGroupOfShownCode: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(backupCode));
 	await actor.attemptsTo(confirmBackupCode(((await actor.answer(shownBackupCode)) ?? '').slice(0, 4)));
 };
 
+/** Types the shown code again, as the landlord does after the setup, and waits for the overview that confirms it */
 export const confirmShownBackupCode: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(backupCode));
 	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''), Wait.until(backupConfirmation));
