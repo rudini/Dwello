@@ -24,7 +24,6 @@ Funktionalität: Mietvertragsdetail
   # Der Mieter kündigt auf einen späteren Termin: der Vertrag läuft bis dahin weiter
   # #511 (Persona Dr. Weber 461, P-3, P-4): das Vertragsende ist nicht immer der Kündigungstermin; kündigt der
   # Vermieter, braucht es das amtliche Formular (Art. 266l bis 266o OR)
-  @wip
   Szenario: Der Dialog zum Beenden erklärt Vertragsende und Kündigung durch den Vermieter
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beenden will

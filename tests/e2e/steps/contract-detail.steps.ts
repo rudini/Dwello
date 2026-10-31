@@ -461,7 +461,7 @@ Then(
 
 // anchored on the field's help: an empty or broken dialog shows no hint either
 Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
-	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist.');
+	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist');
 	await verwalter.sees(endDialogText).toContain('Die Kündigung des Mieters muss schriftlich sein.');
 	await verwalter.sees(noticePeriodHintShown).toBe(false);
 });

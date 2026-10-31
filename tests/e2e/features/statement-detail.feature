@@ -295,7 +295,6 @@ Funktionalität: Abrechnungsdetail
 
   # #511 (Persona Dr. Weber 461, P-2): neben den vereinbarten Nebenkosten nennt das PDF auch die Verwaltungspauschale
   # als vereinbart, sonst liest der Mieter sie als nicht geschuldet; ohne Pauschale kein solcher Satz
-  @wip
   Szenario: Das PDF nennt die Verwaltungspauschale als vereinbart
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -304,7 +303,6 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Die Verwaltungspauschale ist im Mietvertrag vereinbart"
 
-  @wip
   Szenario: Ohne vereinbarte Verwaltungspauschale nennt das PDF keine
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Mietvertrag von "Eva Frei" ist keine Verwaltungspauschale vereinbart
