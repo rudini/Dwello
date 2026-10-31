@@ -192,6 +192,31 @@ services:
       - dwello-network
     # The backend downloads the model on its first start (#577); not needed when the KI is an external provider (#580)
 
+  # ============================================
+  # HTTPS on a server (#722): only with COMPOSE_PROFILES=https in .env; Caddy gets and renews the certificate for
+  # DWELLO_DOMAIN itself (ports 80 and 443 must reach the server), as the demo does (deploy/demo/)
+  # ============================================
+  caddy:
+    image: caddy:2-alpine
+    container_name: dwello-caddy
+    restart: unless-stopped
+    profiles: ["https"]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # not «:?»: Compose reads every service, also one whose profile is off, and would stop every installation
+      - DWELLO_DOMAIN=${DWELLO_DOMAIN:-}
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - frontend
+    networks:
+      - dwello-network
+
 networks:
   dwello-network:
     driver: bridge
@@ -204,9 +229,20 @@ volumes:
     driver: local
   ollama_data:
     driver: local
+  # the certificate Caddy got (#722), so a restart does not ask Let's Encrypt again
+  caddy_data:
+    driver: local
 
 # docker/init-secrets.sh, here so this file is all an installation needs ($ written as $$ for Compose)
 configs:
+  # Caddy's configuration (#722); the upload limit stays Caddy's own: none
+  caddyfile:
+    content: |
+      {$$DWELLO_DOMAIN} {
+      	encode gzip
+      	header Strict-Transport-Security "max-age=31536000"
+      	reverse_proxy frontend:3000
+      }
   init-secrets:
     content: |
       #!/bin/sh
