@@ -81,7 +81,9 @@ export const editStatementFromDetail = Click.on(statementEditButton);
 export const openStatementTenant = Click.on(statementTenantLink);
 export const openStatementApartment = Click.on(statementApartmentLink);
 
-export const generateStatementPdf = Click.on(generatePdfButton);
+// done once the PDF is made: the Verlauf may already name a new PDF (#968), and the page renders it again when made
+export const generateStatementPdf: Activity = (actor) =>
+	actor.attemptsTo(Click.on(generatePdfButton), Wait.until(successToast));
 export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 export const downloadSentPdf = DownloadFrom(sentPdfLink);
 /** Follows the PDF link in the tab, as a browser does when the answer is no PDF */
