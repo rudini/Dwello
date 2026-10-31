@@ -329,3 +329,65 @@ describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 		expect(await storedFor(id)).toHaveLength(1);
 	});
 });
+
+// #534 (Fachreview 534-1 M-1): reminders from before the redelivery no longer count or go out
+describe('Mahnungen nach dem erneuten Zustellen', () => {
+	it('zählt eine frühere Mahnung nicht mehr und schickt eine noch zu versendende nicht mehr ab', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await db.update(utilityStatements).set({ paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		const reminder = (await (await api('POST', `/api/v1/statements/${id}/reminders`)).json()) as { document: { id: string } };
+
+		await api('POST', `/api/v1/statements/${id}/redeliver`);
+
+		const posted = await api('PUT', `/api/v1/documents/${reminder.document.id}/sent`);
+		expect([posted.status, ((await posted.json()) as { code: string }).code]).toEqual([400, 'REMINDER_STATEMENT_REDELIVERED']);
+		const detail = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { reminderToSend: boolean };
+		expect(detail.reminderToSend).toBe(false);
+		const toSend = (await (await api('GET', `/api/v1/documents?status=to_send&tenantId=${rental.tenant}`)).json()) as { data: { id: string }[] };
+		expect(toSend.data.map((document) => document.id)).not.toContain(reminder.document.id);
+	});
+});
+
+// #968: the new PDF after a change of a statement whose PDF went out waits under «Dokumente»
+describe('Neues PDF nach einer Änderung', () => {
+	const newPdfs = async (id: string) => (await storedFor(id)).filter((document) => document.type === 'new_pdf');
+
+	it('legt das neue PDF zum Versand bereit, ersetzt es bei einer weiteren Änderung und hält den Versand ohne neues Datum fest', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		const { statement } = await send(id);
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung bis März' });
+		const [pending] = await newPdfs(id);
+		expect(await newPdfs(id)).toHaveLength(1);
+		expect(pending).toMatchObject({ status: 'to_send', channel: 'letter', title: 'Nebenkostenabrechnung, neues PDF' });
+
+		expect((await api('PUT', `/api/v1/documents/${pending.id}/sent`)).status).toBe(200);
+
+		expect(await newPdfs(id)).toMatchObject([{ status: 'sent', paymentDeadline: statement!.paymentDeadline }]);
+		const after = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { statementDate: string; paymentDeadline: string };
+		expect(after).toMatchObject({ statementDate: statement!.statementDate, paymentDeadline: statement!.paymentDeadline });
+	});
+
+	it('schickt das neue PDF einer inzwischen bezahlten Abrechnung nicht mehr ab', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'paid' });
+		const [pending] = await newPdfs(id);
+
+		const posted = await api('PUT', `/api/v1/documents/${pending.id}/sent`);
+
+		expect([posted.status, ((await posted.json()) as { code: string }).code]).toEqual([400, 'NEW_PDF_STATEMENT_PAID']);
+	});
+
+	it('legt kein neues PDF an, wenn die Abrechnung ohne Dokument versendet wurde (vor #449, #969)', async () => {
+		const id = await draft();
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		expect(await newPdfs(id)).toHaveLength(0);
+	});
+});

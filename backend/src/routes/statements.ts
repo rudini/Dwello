@@ -24,7 +24,7 @@ import {
 } from '../services/statement.service';
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
-import { sendStatement } from '../services/statement-send.service';
+import { keepNewPdf, redeliverByLetter, sendStatement } from '../services/statement-send.service';
 import { runDefaultsOf, runDifferencesOf, runHeatingHintsOf, runPlan } from '../services/statement-run.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
@@ -244,6 +244,8 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					set.status = 404;
 					return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 				}
+				// the new PDF of a sent statement waits under «Dokumente» to be sent (#968)
+				if (statement.pdfChange) await keepNewPdf(params.id);
 
 				return statement;
 			} catch (error) {
@@ -345,6 +347,21 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			}
 		},
 		{ params: t.Object({ id: t.String() }), body: t.Object({ byLetter: t.Optional(t.Boolean()) }) }
+	)
+
+	// #534: a sent statement delivered again by letter, dated today
+	.post(
+		'/:id/redeliver',
+		async ({ params, set }) => {
+			try {
+				return await redeliverByLetter(params.id);
+			} catch (error) {
+				const code = error instanceof CodedError ? error.code : null;
+				set.status = code === 'STATEMENT_NOT_FOUND' ? 404 : code === 'STATEMENT_NOT_REDELIVERABLE' ? 409 : code ? 400 : 500;
+				return errorBody(error, 'Failed to deliver the statement again');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
 	)
 
 	// Update statement status

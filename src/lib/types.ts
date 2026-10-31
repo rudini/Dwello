@@ -359,10 +359,11 @@ export interface StatementWithDetails
 		Required<
 			Pick<
 				ApiStatement,
-				'editable' | 'correctable' | 'asksPayment' | 'superseded' | 'advanceChanged'
+				'editable' | 'correctable' | 'asksPayment' | 'superseded' | 'advanceChanged' | 'redeliverable' | 'refund' | 'newPdfToSend'
 			>
 		> {
 	tenantName: string;
+	resent: { id: string; newPdf: boolean; sentAt: string | null }[]; // sendings after the first (#534, #968)
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';

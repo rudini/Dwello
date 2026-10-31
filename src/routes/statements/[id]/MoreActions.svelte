@@ -21,6 +21,7 @@
 		recalculating?: boolean;
 		splitKeys: SplitKeyHint[]; // #528: what the recalculation would bill in a line of its own
 	} = $props();
+	let redelivering = $state(false);
 </script>
 
 <!-- what the statement allows the backend decides (#788) -->
@@ -34,6 +35,12 @@
 				<Button icon="edit" onclick={oncorrect} testid="statement-correct-button"
 					>{m.statements_correct()}</Button
 				>
+				<!-- #534: a sent statement that did not reach the tenant goes again by letter, dated today -->
+				{#if statement.redeliverable}
+					<Button icon="mail" onclick={() => (redelivering = true)} testid="statement-redeliver-button"
+						>{m.statements_redeliver()}</Button
+					>
+				{/if}
 			{:else}
 				<!-- #338: a draft is calculated again from the invoices as they are now, with the same number -->
 				<Button
@@ -52,6 +59,18 @@
 		</div>
 	</Panel>
 {/if}
+
+<!-- #534 (Fachreview 534-1 V-2, V-6): the date and the Zahlungsfrist or «Rückerstattung bis» it sets -->
+<FormDialog
+	bind:open={redelivering}
+	action="?/redeliver"
+	title={m.statements_redeliver()}
+	confirmLabel={m.statements_redeliver()}
+	confirmTestid="statement-redeliver-confirm"
+	success={m.statements_redelivered()}
+>
+	<p>{statement.refund ? m.statements_redeliver_text_refund() : m.statements_redeliver_text()}</p>
+</FormDialog>
 
 <!-- Helga 338 P-1, P-2: the confirmation names what stays and what changes; the result is said at the top -->
 <FormDialog

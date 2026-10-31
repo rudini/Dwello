@@ -9,6 +9,7 @@ import { documents, rentalContracts, tenants, utilityStatements, type DocumentSt
 import { CodedError } from './coded-error';
 import { laterContract } from './later-contract';
 import { tenantExists } from './tenant.service';
+import { sinceDelivery } from './delivery';
 import { swissToday } from './today';
 import type { DocumentSummary } from '../api/document';
 
@@ -18,10 +19,12 @@ export interface DocumentFilters {
 	status?: DocumentStatus;
 }
 
-// A reminder still to send whose statement is replaced or paid since: it no longer goes out, without a status of its
-// own; «ersetzt» first, the current status (#449, decided in #404: V-2 A, N-1 A)
-const notToSend = sql<'replaced' | 'paid' | null>`case when ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
-	then case ${utilityStatements.status} when 'replaced' then 'replaced' when 'paid' then 'paid' end end`;
+// A reminder or a new PDF (#968) still to send whose statement is replaced or paid since: it no longer goes out, without
+// a status of its own; «ersetzt» first, the current status (#449, decided in #404: V-2 A, N-1 A; Fachreview 534-1 V-3);
+// a reminder from before the statement went again by letter neither (#534, M-1)
+const notToSend = sql<'replaced' | 'paid' | 'redelivered' | null>`case when ${documents.type} in ('reminder', 'new_pdf') and ${documents.status} = 'to_send'
+	then case when ${utilityStatements.status} = 'replaced' then 'replaced' when ${utilityStatements.status} = 'paid' then 'paid'
+		when ${documents.type} = 'reminder' and not ${sinceDelivery(documents.statementId)} then 'redelivered' end end`;
 
 // Everything but the PDF itself, plus whom it is for
 const summary = {
@@ -175,7 +178,7 @@ export async function countReminders(statementId: string) {
 	const [result] = await db
 		.select({ value: count() })
 		.from(documents)
-		.where(and(eq(documents.statementId, statementId), eq(documents.type, 'reminder')));
+		.where(and(eq(documents.statementId, statementId), eq(documents.type, 'reminder'), sinceDelivery(statementId)));
 	return result.value;
 }
 

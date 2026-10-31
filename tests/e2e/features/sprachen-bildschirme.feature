@@ -213,6 +213,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
       | statement-sent-detail  | decline-dialog      |
+      | statement-sent-detail  | redeliver-dialog    |
       | statement-unaffected-detail | default        |
       | statement-declined-detail | default          |
       | statement-lowered-detail | default           |

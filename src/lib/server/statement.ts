@@ -141,6 +141,10 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		correctable: data.correctable === true,
 		asksPayment: data.asksPayment === true,
 		superseded: data.superseded === true,
+		redeliverable: data.redeliverable === true, // #534
+		refund: data.refund === true,
+		resent: (data.resent ?? []).map((sending) => ({ ...sending, sentAt: sending.sentAt ? String(sending.sentAt) : null })),
+		newPdfToSend: data.newPdfToSend ?? null,
 		// what the Saldo asks of whom, by the Swiss day (#815)
 		unpaid: data.unpaid === true,
 		claimed: data.claimed === true,

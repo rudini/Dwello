@@ -27,6 +27,7 @@
 	import MetadataCard, { type Delivery } from './MetadataCard.svelte';
 	import LaterChanges from './LaterChanges.svelte';
 	import SplitKeysHint from '../SplitKeysHint.svelte';
+	import NewPdfToSend from './NewPdfToSend.svelte';
 	import type { SplitKeyHint } from '$lib/types';
 	import type { ComponentProps } from 'svelte';
 	import MoreActions from './MoreActions.svelte';
@@ -214,6 +215,9 @@
 			{#if data.delivery}<p>{m.statements_sent_pdf_in_history()}</p>{/if}
 		</Alert>
 	{/if}
+	{#if statement.newPdfToSend}
+		<NewPdfToSend documentId={statement.newPdfToSend} />
+	{/if}
 	{#if form?.actionError}
 		<Alert tone="critical" title={m.ui_action_failed()}>
 			<p data-testid="form-error">{form.actionError}</p>
@@ -260,6 +264,7 @@
 				pdfGeneratedAt={statement.status === 'draft' ? null : pdfGeneratedAt}
 				sentOn={statement.status === 'draft' ? null : statement.statementDate}
 				delivery={data.delivery}
+				resent={statement.resent}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
 				correctionDeclinedOn={statement.correctionDeclined?.on}

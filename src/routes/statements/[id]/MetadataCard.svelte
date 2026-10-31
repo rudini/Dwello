@@ -17,7 +17,8 @@
 		paidOn,
 		paymentResets = [],
 		correctionDeclinedOn,
-		delivery = null
+		delivery = null,
+		resent = []
 	}: {
 		createdAt?: string | null;
 		pdfGeneratedAt?: string | null;
@@ -26,6 +27,7 @@
 		paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 		correctionDeclinedOn?: string | null; // «Nicht berichtigen» (#454)
 		delivery?: Delivery | null; // without a Dokument (before #449, or no PDF) only «Versendet»
+		resent?: { id: string; newPdf: boolean; sentAt: string | null }[]; // again by letter (#534), a new PDF (#968)
 	} = $props();
 
 	// the way it went: by letter on the statement date, by e-mail to the address at its hour (#449, #404 point 7)
@@ -39,13 +41,23 @@
 				}
 			: {
 					label: delivery?.channel === 'letter' ? m.statements_history_sent_letter() : m.statements_status_sent(),
-					date: sentOn && formatDate(sentOn)
+					// its own day: the statement date moves with a redelivery (#534)
+					date: delivery?.sentAt ? formatDate(delivery.sentAt) : sentOn && formatDate(sentOn)
 				}
 	);
+	// each later sending on its day; the PDF the tenant got last is the one to show (#965)
+	const later = $derived(
+		resent.map((sending) => ({
+			label: sending.newPdf ? m.statements_history_new_pdf_sent_letter() : m.statements_history_redelivered_letter(),
+			date: sending.sentAt && formatDate(sending.sentAt)
+		}))
+	);
+	const lastSent = $derived(resent.at(-1)?.sentAt ?? delivery?.sentAt);
+	const sentPdfId = $derived(resent.at(-1)?.id ?? delivery?.id);
 
-	// a PDF made after the sending is a new one: the sent one stays as its Dokument (#524, Fachreview 524-1 V-3)
-	// TODO(fachlich prüfen, #965)
-	const newPdf = $derived(!!pdfGeneratedAt && !!delivery?.sentAt && pdfGeneratedAt > delivery.sentAt);
+	// a PDF made after the last sending is a new one: the sent one stays as its Dokument (#524, Fachreview 524-1 V-3;
+	// glossary «Versendetes PDF», «neues PDF», #965)
+	const newPdf = $derived(!!pdfGeneratedAt && !!lastSent && pdfGeneratedAt > lastSent);
 	const pdfRow = $derived({
 		label: newPdf ? m.statements_history_new_pdf() : m.statements_pdf_created(),
 		date: pdfGeneratedAt && formatDateTime(pdfGeneratedAt)
@@ -55,6 +67,7 @@
 			{ label: m.statements_history_created(), date: createdAt && formatDateTime(createdAt) },
 			...(newPdf ? [] : [pdfRow]),
 			{ label: sent.label, date: sentOn && sent.date },
+			...later,
 			...(newPdf ? [pdfRow] : []),
 			...paymentResets.map((reset) => ({
 				label: m.statements_history_payment_reset({
@@ -81,11 +94,11 @@
 				</div>
 			{/each}
 		</dl>
-		{#if delivery?.id}
+		{#if sentPdfId}
 			<div>
 				<Button
 					variant="secondary"
-					href="/documents/{delivery.id}/pdf"
+					href="/documents/{sentPdfId}/pdf"
 					icon="document-download"
 					testid="statement-history-sent-pdf">{m.statements_history_sent_pdf()}</Button
 				>

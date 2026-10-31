@@ -77,3 +77,13 @@ Then('wünscht {string} weiterhin Korrespondenz per E-Mail', async ({ verwalter,
 	await verwalter.attemptsTo(openTenantDetail(seed.idOf(tenant)!));
 	await verwalter.sees(correspondence).toBe('Per E-Mail');
 });
+
+// #534: the e-mail of a statement redelivered later
+Given('die Abrechnung {int} von {string} ging vor {int} Tagen hinaus', async ({ seed }, year: number, tenant: string, days: number) => {
+	await seed.sentDaysAgo(tenant, year, days);
+});
+
+Then('nennt der Verlauf den Versand per E-Mail an {string} vor {int} Tagen', async ({ verwalter, seed }, tenant: string, days: number) => {
+	const email = `${seed.idOf(tenant)}@dwello.test`;
+	await verwalter.sees(history).toMatch(new RegExp(`Versendet per E-Mail an ${escapeRegExp(email)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});

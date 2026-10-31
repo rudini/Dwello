@@ -40,6 +40,7 @@ export const wizardPreset = byTestId('Vorgaben aus dem Link', 'wizard-preset');
 export const listScope = byTestId('Auswahl der Liste', 'statements-scope');
 export const sendButton = byTestId('Abrechnung versenden', 'statement-send-button');
 export const recalculateButton = byTestId('Neu berechnen', 'statement-recalculate-button');
+export const redeliverButton = byTestId('Erneut per Brief zustellen', 'statement-redeliver-button');
 export const reminderButton = byTestId('Mahnung senden', 'statement-reminder-button');
 export const resetPaymentButton = byTestId('Zahlung zurücksetzen', 'statement-reset-payment-button');
 export const carrySettleButton = byTestId('Übertrag als ausgeglichen markieren', 'statement-carry-settle'); // #506

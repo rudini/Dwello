@@ -601,6 +601,11 @@ export function testData(api: CallTheApi) {
 		},
 
 		// An invoice recorded before the Verteilschlüssel was required (#379): the backend refuses to remove it
+		// #534: as if the statement had gone out the given days before (its dates and the Dokument of its sending)
+		async sentDaysAgo(tenantTitle: string, year: number, days: number) {
+			e2eScript('e2e-sent-days-ago', [ids.get(`Abrechnung ${tenantTitle} ${year}`)!, String(days)]);
+		},
+
 		async invoiceWithoutKey(supplier: string) {
 			e2eScript('e2e-invoice-without-key', [ids.get(`Rechnung ${supplier}`)!]);
 		},

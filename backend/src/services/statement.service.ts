@@ -31,6 +31,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { splitKeysOf } from './split-keys';
+import { sendingsOf, sinceDelivery } from './delivery';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
@@ -63,6 +64,7 @@ const nextReminderFrom = sql<string | null>`(
 	select case when count(*) < 3 and ${utilityStatements.status} = 'sent' then (max(${documents.paymentDeadline}) + 1)::text end
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'sent'
+		and ${sinceDelivery(utilityStatements.id)}
 )`;
 // The Swiss day the last reminder went out (sent_at holds UTC): a letter counts once marked sent, not when it was made (#545)
 const reminderSentDate = sql<string | null>`(
@@ -74,6 +76,7 @@ const reminderSentDate = sql<string | null>`(
 const reminderToSend = sql<boolean>`exists (
 	select 1 from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
+		and ${sinceDelivery(utilityStatements.id)}
 )`;
 // the Schlussabrechnung: the Mietvertrag ends within the period; it has no Mindestbetrag and carries nothing over (#448)
 const final = sql<boolean>`exists (
@@ -330,7 +333,9 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		...withOtherKeys(lineItems),
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId),
-		...allowed(result.statement.status)
+		...allowed(result.statement.status),
+		refund: Number(result.statement.balance) < 0,
+		...(await laterSendings(id, result.statement.status))
 	};
 }
 
@@ -343,6 +348,12 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 	return { lineItems: lineItems.map((item) => ({ ...item, otherKey: differs(item) })), splitKeys: split.filter((other) => other.categoryId) };
 }
 
+// #534, #968: the later sendings for the Verlauf; a new PDF goes out only while the statement is sent (V-3)
+async function laterSendings(id: string, status: string) {
+	const { resent, newPdfToSend } = await sendingsOf(id);
+	return { resent, newPdfToSend: status === 'sent' ? newPdfToSend : null };
+}
+
 /**
  * What the statement allows (#788): the frontend shows buttons and hints by it and only labels the status. A replaced
  * one stays as sent and asks for nothing, its berichtigte Abrechnung does (#120); a draft is calculated again or
@@ -350,7 +361,7 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
  */
 function allowed(status: string) {
 	const current = !isReplaced({ status });
-	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current };
+	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current, redeliverable: current && status === 'sent' };
 }
 
 async function carriedFromOf(id: string | null) {

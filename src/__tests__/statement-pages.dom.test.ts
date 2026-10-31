@@ -1858,6 +1858,58 @@ describe('Abrechnungsdetail', () => {
 		expect(history.indexOf('Versendet per Brief')).toBeLessThan(history.indexOf('Neues PDF erstellt 05.10.2026'));
 	});
 
+	// #534, #968: jeder spätere Versand an seinem Tag; das PDF, das der Mieter zuletzt bekam (#965)
+	it('nennt im Verlauf jeden späteren Versand und bietet das zuletzt versendete PDF an', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					statementDate: '2026-10-20',
+					resent: [
+						{ id: 'doc-2', newPdf: false, sentAt: '2026-10-20T09:00:00Z' },
+						{ id: 'doc-3', newPdf: true, sentAt: '2026-10-25T09:00:00Z' }
+					]
+				} as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'email', recipient: 'eva@example.ch', sentAt: '2026-09-10T08:15:00Z' }
+			},
+			form: null
+		} as never);
+
+		const history = text().replace(/\s+/g, ' ');
+		expect(history).toContain('Versendet per E-Mail an eva@example.ch 10.09.2026');
+		expect(history).toContain('Erneut zugestellt per Brief 20.10.2026');
+		expect(history).toContain('Neues PDF versendet per Brief 25.10.2026');
+		expect(byTestId<HTMLAnchorElement>('statement-history-sent-pdf')!.getAttribute('href')).toBe('/documents/doc-3/pdf');
+	});
+
+	// #534 (Fachreview 534-1 V-2, V-6): die Bestätigung nennt, was das erneute Zustellen setzt
+	it('bietet das erneute Zustellen an und nennt bei einer Rückerstattung deren Datum', () => {
+		const shown = (refund: boolean) => {
+			document.body.innerHTML = '';
+			show(StatementPage, { data: { statement: statement({ status: 'sent', correctable: true, redeliverable: true, refund } as never), reminders: [] }, form: null } as never);
+			click('statement-redeliver-button');
+			return text().replace(/\s+/g, ' ');
+		};
+		expect(shown(false)).toContain('Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt; eine spätere Zahlungsfrist bleibt.');
+		expect(shown(true)).toContain('Das Datum der Rückerstattung ist so viele Tage danach, wie in den Einstellungen festgelegt; ein späteres bleibt.');
+	});
+
+	it('bietet das erneute Zustellen nicht an, wenn das Backend es nicht erlaubt', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'paid', correctable: true, redeliverable: false } as never), reminders: [] }, form: null } as never);
+		expect(byTestId('statement-correct-button')).not.toBeNull();
+		expect(byTestId('statement-redeliver-button')).toBeNull();
+	});
+
+	// #968: das neue PDF nach einer Änderung liegt zum Versand bereit und lässt sich hier als versendet markieren
+	it('nennt das neue PDF als noch zu versenden und markiert es mit seinem Dokument als versendet', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'sent', newPdfToSend: 'doc-9' }), reminders: [] }, form: null } as never);
+		const hint = byTestId('statement-new-pdf-to-send')!;
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Das neue PDF ist noch nicht versendet. Es liegt unter «Dokumente» zum Versand bereit.');
+		expect(hint.querySelector<HTMLInputElement>('input[name="documentId"]')!.value).toBe('doc-9');
+		expect(hint.querySelector('form')!.getAttribute('action')).toBe('?/newPdfSent');
+	});
+
 	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
 	it('rät nach einer Änderung, das neue PDF zu senden, und nennt das versendete im Verlauf nur, wenn es eines gibt', () => {
 		const changed = (pdfChange: string, delivery: object | null) =>
@@ -1877,8 +1929,8 @@ describe('Abrechnungsdetail', () => {
 
 		expect(unknown).toBeNull();
 		expect([withDocument, byTestId('statement-pdf-changed')!.textContent!.replace(/\s+/g, ' ').trim()]).toEqual([
-			'Im versendeten PDF steht das bisherige Datum der Rückerstattung. Damit der Mieter das neue kennt, erstellen Sie das neue PDF und senden Sie es ihm. Das versendete PDF finden Sie im Verlauf.',
-			'Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, erstellen Sie das neue PDF und senden Sie es ihm.'
+			'Im versendeten PDF steht das bisherige Datum der Rückerstattung. Damit der Mieter das neue kennt, senden Sie ihm das neue PDF. Das versendete PDF finden Sie im Verlauf.',
+			'Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, senden Sie ihm das neue PDF.'
 		]);
 	});
 

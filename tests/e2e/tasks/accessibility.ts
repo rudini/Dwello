@@ -545,6 +545,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),
 	// #338: the confirmation of «Neu berechnen» names what stays and what changes
 	'recalculate-dialog': () => openDialog(on.recalculateButton),
+	'redeliver-dialog': () => openDialog(on.redeliverButton),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),

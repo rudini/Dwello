@@ -25,6 +25,7 @@ const NBSP = ' '; // French puts it before «:»
 const WORDING = {
 	de: {
 		statementTitle: 'Nebenkostenabrechnung',
+		newPdfTitle: 'Nebenkostenabrechnung, neues PDF',
 		attached: (s: string) => `im Anhang erhalten Sie die ${s}.`,
 		titles: ['Zahlungserinnerung', '2. Mahnung', '3. Mahnung'],
 		subject: (number: string) => `Nebenkostenabrechnung ${number}`,
@@ -44,6 +45,7 @@ const WORDING = {
 	},
 	fr: {
 		statementTitle: 'Décompte des charges',
+		newPdfTitle: 'Décompte des charges, nouveau PDF',
 		attached: (s: string) => `Vous trouverez ci-joint le ${s}.`,
 		titles: ['Rappel de paiement', '2e rappel', '3e rappel'],
 		subject: (number: string) => `Décompte des charges ${number}`,
@@ -63,6 +65,7 @@ const WORDING = {
 	},
 	it: {
 		statementTitle: 'Conteggio spese accessorie',
+		newPdfTitle: 'Conteggio spese accessorie, nuovo PDF',
 		attached: (s: string) => `In allegato le inviamo il ${s}.`,
 		titles: ['Promemoria di pagamento', '2° sollecito', '3° sollecito'],
 		subject: (number: string) => `Conteggio spese accessorie ${number}`,
@@ -82,6 +85,7 @@ const WORDING = {
 	},
 	en: {
 		statementTitle: 'Utility cost statement',
+		newPdfTitle: 'Utility cost statement, new PDF',
 		attached: (s: string) => `Please find attached the ${s}.`,
 		titles: ['Payment reminder', '2nd reminder', '3rd reminder'],
 		subject: (number: string) => `Utility cost statement ${number}`,
@@ -151,6 +155,8 @@ export interface StatementMailInput {
 
 /** What the statement's Dokument is called in the tenant's language, sent by e-mail or by letter */
 export const statementTitle = (language: Language) => WORDING[language].statementTitle;
+// #968: the Dokument of the PDF after a change of a sent statement (glossary «neues PDF», #965)
+export const newPdfTitle = (language: Language) => WORDING[language].newPdfTitle;
 
 // The salutation and greeting of a letter, shared with the statement PDF (#465)
 export const greetingWords = (language: Language) => ({ salutation: WORDING[language].salutation, closing: WORDING[language].closing });
