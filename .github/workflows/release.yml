@@ -1,18 +1,21 @@
 name: Release
 
-# Every merge to main gets the next version as a tag and a GitHub Release (issue #173); the app shows it in the
-# footer (vite.config.ts). Its images go to ghcr.io for compose.yaml (#578). A manual run on main sets a version by hand, e.g. 1.0.0, in place of the one main's last
-# merge got.
+# Weekly on Monday at 06:00 Swiss time, main gets the next version as a tag and a GitHub Release, unless nothing changed
+# since the last one (#935, before every merge: #173); the app shows it in the footer (vite.config.ts), between releases
+# with the commits since. Its images go to ghcr.io for compose.yaml (#578). A manual run on main releases now, with a
+# version by hand if given, e.g. 1.0.0. Images that failed: «Re-run failed jobs», as a full re-run finds main tagged.
 on:
-  push:
-    branches: [main]
+  schedule:
+    # 06:00 in Zurich is 05:00 UTC in winter and 04:00 UTC in summer; release.sh lets only the right one release
+    - cron: '0 4 * * 1'
+    - cron: '0 5 * * 1'
   workflow_dispatch:
     inputs:
       version:
-        description: Version to release instead of the computed one, e.g. 1.0.0
-        required: true
+        description: Version to release instead of the computed one, e.g. 1.0.0 (empty for the computed one)
+        required: false
 
-# One release at a time; GitHub keeps only the newest waiting run, so of three quick merges the last two share a version
+# One release at a time
 concurrency:
   group: release
   cancel-in-progress: false
@@ -36,6 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          SCHEDULE: ${{ github.event.schedule }}
         run: tools/release/release.sh
 
   # The images compose.yaml starts (#578), for Intel and AMD (amd64) and ARM such as Apple silicon or a Raspberry Pi (arm64),
@@ -43,6 +47,8 @@ jobs:
   images:
     name: Images
     needs: release
+    # no release this week (no changes, or the cron that is not 06:00 in Zurich)
+    if: needs.release.outputs.version != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read

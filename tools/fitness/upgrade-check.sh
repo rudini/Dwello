@@ -3,7 +3,8 @@
 # data with the previous release's backend, migrates with this checkout's backend and fails when a migration fails,
 # a table lost rows or an amount of the statements changed (#782: row counts do not see changed amounts); then R1 (#718):
 # a Sicherung of that data restores with this checkout (tools/fitness/restore-check.ts).
-# Usage: tools/fitness/upgrade-check.sh [tag]   (default: the newest v* tag before HEAD; needs the tags and psql)
+# Usage: tools/fitness/upgrade-check.sh [tag]   (default: the newest v* tag before HEAD, the last weekly release, #935;
+# needs the tags and psql)
 # PostgreSQL: PGHOST/PGUSER/PGPASSWORD (default localhost, dwello, dwello); the database dwello_upgrade is recreated.
 set -euo pipefail
 cd "$(dirname "$0")/../.."

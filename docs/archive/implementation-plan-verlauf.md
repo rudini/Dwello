@@ -274,3 +274,13 @@
 - [x] No scenario: a measuring script, nothing a user sees changes
 - [ ] The demo VM run and the decision on a CI guard: the product owner (#934 stays open)
 - [x] PR `Refs #934`: pushed after this archive
+## Session: #935 a release weekly, Monday 06:00 (2026-10-31)
+
+- [x] Decided (product owner, #935): weekly on Monday at 06:00 Swiss time; a week without changes gets no tag
+- [x] `release.yml`: two Monday crons (04:00 and 05:00 UTC), `release.sh` lets only the one that is 06:00 in Zurich release; no tag and no images when main is tagged already; a manual run releases at once, the version optional (tests in `release.test.ts`, seen red)
+- [x] `upgrade-check.sh` thereby tests against the last weekly release; footer unchanged (`git describe`, `0.4.0+3-gabc1234` between releases); the demo updates per release
+- [x] Docs: README «Versions», `deploy/demo/README.md`, `docs/installation.md`, `utility-tree.md` U1 and «Releases», `risks-and-tradeoffs.md` SP-U1-5, `fitness-functions.md`
+- [x] Code review: `docs/reviews/935-review-1.md` (no Blocker/Major; C-1, C-2 Minor fixed)
+- [x] No scenario: CI release tooling, nothing a user sees in the app changes
+- [x] Workflow notes: none for #935; collected review of this request `docs/reviews/workflow-rules-review-2026-10-31.md`
+- [x] PR `Fixes #935`: pushed after this archive

@@ -20,7 +20,7 @@ Bestehende Szenarien aus `docs/archive/migration-mva.md` (Q1–Q5, D1–D2, S1�
 | Nutzer | Pro Installation ein Benutzer, höchstens 50 Wohnungen, Nutzung wenige Male im Jahr. | aus Repo/Config; für die nächsten 12 Monate vom Nutzer bestätigt |
 | Betrieb | Jede Installation läuft selbst betrieben mit Docker Compose (Postgres 16, Ollama). Dazu kommt eine öffentliche Demo auf einer Oracle-VM (2 OCPU ARM, 12 GB, ohne GPU), die jede Nacht zurückgesetzt wird. Ein gehostetes Angebot ist nicht geplant. | aus Repo/Config (`docker-compose.prod.yml`, `deploy/demo/README.md`); vom Nutzer bestätigt |
 | Daten | Namen und Adressen von Mietern, IBAN, Beträge, Belege (Rechnungsdateien und PDFs liegen in der DB). Es gilt das DSG. Bei einer externen KI gehen Belege an den Anbieter. Aufbewahrung 10 Jahre. | aus Repo/Config (`README.md`, `docs/installation.md` §5, PRD §7.3) |
-| Releases | Heute wird jeder Merge auf `main` getaggt und als Release veröffentlicht. Künftig wird nur noch wöchentlich getaggt. | heute: aus Repo/Config (`release.yml`); künftig: vom Nutzer bestätigt |
+| Releases | Seit #935 wird `main` wöchentlich am Montag um 06:00 (Schweizer Zeit) getaggt und als Release veröffentlicht, eine Woche ohne Änderung bekommt kein Release. Vorher wurde jeder Merge getaggt. | aus Repo/Config (`release.yml`); vom Nutzer bestätigt (31.10.2026) |
 | Backup | Manuelles `pg_dump` und Restore sind dokumentiert (`docs/installation.md` §5). Es gibt keine Automatik, keinen Test und keine Überwachung. | aus Repo/Config |
 | Teuerster Fehler | Datenverlust | vom Nutzer bestätigt |
 | Sofort erkennbar | Fehlgeschlagenes Backup; fehlgeschlagener Start oder Migration | vom Nutzer bestätigt |
@@ -112,7 +112,7 @@ Dwello-Nutzen
 - **Heute:**
   - Migrationen laufen beim Start des Backends (`bun scripts/migrate.ts && exec bun run src/index.ts`), je eine Transaktion pro Migration (`backend/src/db/migrate.ts`). Ein Backup vor der Migration gibt es nicht (aus Repo/Config).
   - E2E testet nur Migrationen auf leere DB («migrated fresh before each run», `docs/test-pyramid.md`). Seit Phase 2a prüft `tools/fitness/upgrade-check.sh` jeden PR mit Backend-Änderung als Upgrade vom letzten Release mit Demo-Daten: Zeilenzahlen, Summen der Abrechnungsbeträge und die in den Demo-Daten leeren Tabellen (#783, #782). Eine scheiternde Migration lässt ihre Daten unverändert, der Start bricht mit Exit-Code 1 ab und das Log nennt Datei und Ursache (`migrations.pg.test.ts`, #782).
-  - Jeder Merge erzeugt ein Release (aus Repo/Config: `release.yml`). Künftig wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). Umgesetzt ist das noch nicht (#935).
+  - Seit #935 entsteht ein Release wöchentlich am Montag um 06:00 (Schweizer Zeit) und bei einem Lauf von Hand, nicht mehr bei jedem Merge; eine Woche ohne Änderung bekommt keins (`release.yml`, `tools/release/release.sh`, Entscheid PO 31.10.2026). `upgrade-check.sh` prüft damit jeden PR gegen das letzte wöchentliche Release, also den Weg der Vermieter. Die Fusszeile zeigt zwischen zwei Releases die Version mit den Commits seither (`0.4.0+3-gabc1234`).
 - **Fitness Function:** CI-Job pro Release: Compose mit dem letzten Tag und Demo-Daten starten → auf HEAD aktualisieren → Healthcheck grün, Zeilenzahlen und Summen gleich. Dazu ein Negativtest: Eine absichtlich fehlschlagende Migration lässt die Daten unverändert und macht den Container «unhealthy» mit lesbarer Ursache.
 
 ### O1 Fehlgeschlagenes Backup ist sichtbar

@@ -26,8 +26,11 @@ function repo(commits: [message: string, tag?: string][]) {
 		`#!/bin/sh\necho "$*" >> ${join(dir, 'gh.log')}\n[ "$2" = create ] && git tag "$3" "$5" && git push -q origin "$3"\nexit 0\n`
 	);
 	chmodSync(join(dir, 'gh'), 0o755);
-	const run = (version = '') =>
-		spawnSync('bash', [SCRIPT], {
+	// `schedule`: the cron of a scheduled run, `offset`: Zurich's UTC offset then (+0100 in winter, +0200 in summer)
+	const run = (version = '', schedule = '', offset = '+0100') => {
+		writeFileSync(join(dir, 'date'), `#!/bin/sh\necho ${offset}\n`);
+		chmodSync(join(dir, 'date'), 0o755);
+		return spawnSync('bash', [SCRIPT], {
 			cwd: join(dir, 'work'),
 			encoding: 'utf8',
 			env: {
@@ -35,9 +38,11 @@ function repo(commits: [message: string, tag?: string][]) {
 				PATH: `${dir}:${process.env.PATH}`,
 				VERSION: version,
 				GITHUB_SHA: git('rev-parse', 'HEAD'),
-				GITHUB_OUTPUT: join(dir, 'output')
+				GITHUB_OUTPUT: join(dir, 'output'),
+				SCHEDULE: schedule
 			}
 		});
+	};
 	const ghCalls = () => {
 		try {
 			return readFileSync(join(dir, 'gh.log'), 'utf8').trim().split('\n');
@@ -52,20 +57,45 @@ function repo(commits: [message: string, tag?: string][]) {
 			.filter(Boolean)
 			.map((line) => line.split('refs/tags/')[1]);
 	// what the step hands to the next job of the workflow (#578: the version the images get)
-	const output = () => readFileSync(join(dir, 'output'), 'utf8');
+	const output = () => {
+		try {
+			return readFileSync(join(dir, 'output'), 'utf8');
+		} catch {
+			return '';
+		}
+	};
 	return { run, ghCalls, remoteTags, output };
 }
 
 describe('release', () => {
 	// #578: the images of a release carry its version
-	it('nennt dem Workflow die Version des Merges, auch eines schon getaggten', () => {
+	it('nennt dem Workflow die Version des neuen Release', () => {
 		const fresh = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number']]);
 		fresh.run();
 		expect(fresh.output()).toBe('version=0.2.0\n');
+	});
 
-		const tagged = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number', 'v0.2.0']]);
-		tagged.run();
-		expect(tagged.output()).toBe('version=0.2.0\n');
+	// #935: a week without changes on main gets no tag, and no images
+	it('erstellt ohne Änderung seit dem letzten Release kein Release und nennt keine Version', () => {
+		const { run, ghCalls, output } = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number', 'v0.2.0']]);
+		expect(run('', '0 5 * * 1').status).toBe(0);
+		expect(ghCalls()).toEqual([]);
+		expect(output()).toBe('');
+	});
+
+	// #935: Monday 06:00 Swiss time, in winter (UTC+1) and in summer (UTC+2); GitHub schedules in UTC only
+	it('erstellt das wöchentliche Release nur mit dem Zeitplan, der in Zürich 06:00 ist', () => {
+		const winter = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number']]);
+		expect(winter.run('', '0 4 * * 1', '+0100').status).toBe(0);
+		expect(winter.ghCalls()).toEqual([]);
+		expect(winter.run('', '0 5 * * 1', '+0100').status).toBe(0);
+		expect(winter.ghCalls()).toEqual([expect.stringMatching(/^release create v0\.2\.0 /)]);
+
+		const summer = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number']]);
+		expect(summer.run('', '0 5 * * 1', '+0200').status).toBe(0);
+		expect(summer.ghCalls()).toEqual([]);
+		expect(summer.run('', '0 4 * * 1', '+0200').status).toBe(0);
+		expect(summer.ghCalls()).toEqual([expect.stringMatching(/^release create v0\.2\.0 /)]);
 	});
 
 	it('gibt einem Merge die nächste Version aus seinen Commits', () => {
@@ -74,7 +104,7 @@ describe('release', () => {
 		expect(ghCalls()).toEqual([expect.stringMatching(/^release create v0\.2\.0 --target \w+ --title v0\.2\.0 --generate-notes$/)]);
 	});
 
-	it('lässt einen schon getaggten Merge wie er ist', () => {
+	it('lässt einen schon getaggten Stand wie er ist', () => {
 		const { run, ghCalls } = repo([['chore(ci): start', 'v0.1.0'], ['feat(tenants): add a phone number', 'v0.2.0']]);
 		expect(run().status).toBe(0);
 		expect(ghCalls()).toEqual([]);
