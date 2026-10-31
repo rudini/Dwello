@@ -11,6 +11,8 @@
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
 	const nextReminder = $derived(statement.reminderWaitsUntil);
+	// a letter counts from the day it is marked sent (#545); paid or replaced it is «Nicht mehr versenden» (Fachreview V-2)
+	const reminderWaits = $derived(statement.status === 'overdue' && statement.reminderToSend);
 	// a replaced statement asks for nothing: its berichtigte Abrechnung says what is still due (#120); the backend says so (#788)
 	const replaced = $derived(!statement.asksPayment);
 	// below CHF 5 nothing is paid: no Zahlungsfrist and no «Bezahlt am»; the Saldo is carried over (#448), on a
@@ -48,7 +50,7 @@
 			deadline,
 			{ label: m.statements_statement_date(), date: statement.statementDate },
 			{ label: m.statements_paid_on(), date: noPayment ? null : statement.paidDate },
-			{ label: m.statements_last_reminder(), date: statement.lastReminderDate }
+			{ label: m.statements_last_reminder(), date: statement.lastReminderDate, testid: 'statement-last-reminder' }
 		].filter((row) => row.date)
 	);
 </script>
@@ -80,6 +82,9 @@
 			</div>
 		{/if}
 	</dl>
+	{#if reminderWaits}
+		<p class="text-ink" data-testid="statement-reminder-to-send">{m.statements_reminder_waits()}</p>
+	{/if}
 	{#if statement.notes}
 		<div class="flex flex-col gap-1">
 			<h3 class="text-ink-muted">{m.statements_notes()}</h3>

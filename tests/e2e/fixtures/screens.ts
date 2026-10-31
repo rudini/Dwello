@@ -141,7 +141,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
 	await seed.sendStatement('Carla', 2022);
 	await seed.replaceStatement('Carla', 2022);
-	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
+	// reminded today by a letter not marked sent yet: the page says to mark it on the day it is posted (#545)
 	await seed.sendStatement('Bruno', 2024);
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
 	await seed.remind('Bruno', 2024);

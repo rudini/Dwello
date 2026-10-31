@@ -16,7 +16,7 @@ import {
 	getStatement,
 	listStatements
 } from '../services/statement.service';
-import { sendReminder } from '../services/reminder.service';
+import { markDocumentPosted, sendReminder } from '../services/reminder.service';
 import { getTenant, getTenantWithHistory, listTenants } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { readPdf } from './helpers/pdf-text';
@@ -125,6 +125,8 @@ describe('Heute ist der Schweizer Tag, auch kurz nach Mitternacht', () => {
 
 		expect(pdf).toContain(swissDate(swissDay));
 		expect(pdf).toContain(`bis ${swissDate(daysAfter(11))}`);
+		// gemahnt from the Swiss day the letter is marked sent (#545)
+		await markDocumentPosted(document.id);
 		expect((await getStatement(statement.id))!.reminderSentDate).toBe(swissDay);
 	});
 

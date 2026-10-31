@@ -131,7 +131,6 @@ Funktionalität: Mahnungen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Abrechnung ist durch eine berichtigte Abrechnung ersetzt. Schicken Sie diese Mahnung nicht mehr ab."
 
   # #545: ein Mahnbrief zählt erst, wenn er zur Post ging; vorher nennt Dwello weder sein Datum noch eine Frist ab ihm
-  @wip
   Szenario: Ein Mahnbrief zählt erst ab dem Versand
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
@@ -141,20 +140,19 @@ Funktionalität: Mahnungen
     Und sagt die Liste der Abrechnungen bei "Anna Keller", dass die Mahnung noch zu versenden ist
 
   # #545: beim Markieren erstellt Dwello den Brief neu, mit der Zahlungsfrist ab diesem Tag (#193)
-  @wip
   Szenario: Ein versendeter Mahnbrief zählt ab dem Tag des Versands
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
-    Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
+    Und für die Abrechnung 2024 von "Anna Keller" liegt eine Zahlungserinnerung als Brief zum Versand bereit
     Wenn der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" in den Dokumenten als versendet markiert
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Dann nennt die Abrechnung die letzte Mahnung von heute
     Und nennt die Abrechnung die nächste Mahnung ab dem Tag in 11 Tagen
 
   # #545: bezahlt, bevor der Brief zur Post ging: er war nie eine Mahnung an den Mieter
-  @wip
   Szenario: Eine bezahlte Abrechnung nennt keinen Mahnbrief, der nie zur Post ging
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
-    Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
+    Und für die Abrechnung 2024 von "Anna Keller" liegt eine Zahlungserinnerung als Brief zum Versand bereit
     Und die Abrechnung 2024 von "Anna Keller" ist bezahlt
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Dann nennt die Abrechnung keine letzte Mahnung
+    Und sagt die Abrechnung nicht, dass die Mahnung noch zu versenden ist

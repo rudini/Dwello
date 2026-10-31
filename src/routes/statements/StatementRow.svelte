@@ -64,6 +64,11 @@
 				>{m.statements_reminded_on({ date: formatDate(statement.lastReminderDate) })}</span
 			>
 		{/if}
+		{#if statement.status === 'overdue' && statement.reminderToSend}
+			<span class="text-ink-muted" data-testid="statement-reminder-to-send"
+				>{m.statements_reminder_to_send()}</span
+			>
+		{/if}
 		{#if statement.status === 'overdue' && nextReminder}
 			<span class="text-ink-muted"
 				>{m.statements_next_reminder_on({ date: formatDate(nextReminder) })}</span

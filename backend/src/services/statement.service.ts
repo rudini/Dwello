@@ -56,12 +56,18 @@ export interface StatementFilters {
 
 // The base64 PDF is only served by the /pdf routes, never with list or detail data
 const { pdfBlob: _pdfBlob, ...tableColumns } = getTableColumns(utilityStatements);
-// The day after the last reminder's Zahlungsfrist, from which the next Mahnstufe is possible (#107); none after the 3rd
+// The day after the last sent reminder's Zahlungsfrist, from which the next Mahnstufe is possible (#107); none after the 3rd
 // and none once paid
 const nextReminderFrom = sql<string | null>`(
 	select case when count(*) < 3 and ${utilityStatements.status} = 'sent' then (max(${documents.paymentDeadline}) + 1)::text end
 	from ${documents}
-	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'sent'
+)`;
+// The Swiss day the last reminder went out (sent_at holds UTC): a letter counts once marked sent, not when it was made (#545)
+const reminderSentDate = sql<string | null>`(
+	select (max(${documents.sentAt}) at time zone 'UTC' at time zone 'Europe/Zurich')::date::text
+	from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'sent'
 )`;
 // A reminder still «Zu versenden»: the next Mahnstufe waits until it is marked sent (#449, decided in #404, point 2)
 const reminderToSend = sql<boolean>`exists (
@@ -85,7 +91,7 @@ const reminderWaits = (
 ) =>
 	s.reminderToSend ||
 	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
-const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
+const statementColumns = { ...tableColumns, reminderSentDate, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
 
 /**
  * Status filter; 'overdue' is computed as sent with a past payment deadline,
