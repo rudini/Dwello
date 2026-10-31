@@ -68,7 +68,7 @@ import {
 	deleteDraftAndContinue
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
-import { inDays } from '../fixtures/dates';
+import { inDays, swissDate } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -183,7 +183,7 @@ Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: st
 
 // The end action sets today's date in Switzerland as a notice; the page shows it as formatDate does
 Then('endet der Mietvertrag heute', async ({ verwalter }) => {
-	const today = new Date().toLocaleDateString('de-CH', { timeZone: 'Europe/Zurich' });
+	const today = swissDate(inDays(0));
 	await verwalter.sees(endOfContract).toBe(`Unbefristet, gekündigt auf den ${today}`);
 });
 
