@@ -357,8 +357,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					body.status as 'draft' | 'sent' | 'paid', // the service refuses any other
 					{
 						paidDate: body.paidDate,
-						paidAmount: body.paidAmount,
-						reminderSentDate: body.reminderSentDate
+						paidAmount: body.paidAmount
 					}
 				);
 
@@ -380,8 +379,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			body: t.Object({
 				status: t.String(),
 				paidDate: t.Optional(t.String()),
-				paidAmount: t.Optional(t.String()),
-				reminderSentDate: t.Optional(t.String())
+				paidAmount: t.Optional(t.String())
 			})
 		}
 	)

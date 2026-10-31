@@ -232,6 +232,6 @@ Then(
 	'sagt die Liste der Abrechnungen bei {string}, dass die Mahnung noch zu versenden ist',
 	async ({ verwalter, names }, tenant: string) => {
 		await verwalter.attemptsTo(openStatementList);
-		await verwalter.sees(listedReminderDates(names.get(tenant) ?? tenant)).toEqual({ last: false, next: false, toSend: 1 });
+		await verwalter.sees(listedReminderDates(names.get(tenant) ?? tenant)).toEqual({ dates: [], toSend: 1 });
 	}
 );

@@ -709,7 +709,6 @@ export async function updateStatementStatus(
 	additionalData?: {
 		paidDate?: string;
 		paidAmount?: string;
-		reminderSentDate?: string;
 	}
 ): Promise<StatementWithDetails | null> {
 	const existing = await getStatement(id);

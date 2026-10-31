@@ -33,8 +33,6 @@
 				: m.documents_created({ date, channel })
 	);
 	const status = $derived(documentStatus(document));
-	// a letter that no longer goes out has no Zahlungsfrist to name (Fachreview N-7)
-	const notToSend = $derived(!!document.notToSend);
 </script>
 
 <li
@@ -44,7 +42,9 @@
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
 		<p class="text-ink-muted">{created}</p>
-		{#if document.paymentDeadline && !notToSend}
+		<!-- only a sent reminder: one still to send gets its Zahlungsfrist the day it is marked sent, when Dwello remakes it
+		(#545, persona weber-545 P-1); one that no longer goes out has none (Fachreview N-7) -->
+		{#if document.paymentDeadline && document.status === 'sent'}
 			<p class="text-ink-muted">
 				{m.documents_payment_deadline({ date: formatDate(document.paymentDeadline) })}
 			</p>

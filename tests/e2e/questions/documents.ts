@@ -29,13 +29,12 @@ export const reminderDatesShown = question('the reminder dates of the statement'
 		toSend: await actor.answer(Count.of(reminderWaitsHint))
 	};
 });
-// the same in the row of the statement list
+// the same in the row of the statement list: its texts on «Gemahnt am» and «Nächste Mahnung», and the hint
 export const listedReminderDates = (tenantName: string) =>
 	question(`the reminder dates of the statement of ${tenantName} in the list`, async (actor) => {
 		const text = (await actor.answer(Text.of(statementRow(tenantName)))) ?? '';
 		return {
-			last: text.includes('Gemahnt am'),
-			next: text.includes('Nächste Mahnung'),
+			dates: text.match(/(?:Gemahnt am|Nächste Mahnung möglich ab) [\d.]+/g) ?? [],
 			toSend: await actor.answer(Count.of(listedReminderWaitsHint(tenantName)))
 		};
 	});
