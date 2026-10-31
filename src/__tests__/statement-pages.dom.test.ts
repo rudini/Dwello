@@ -1649,6 +1649,21 @@ describe('Abrechnungsdetail', () => {
 		]);
 	});
 
+	// #523 (Option C, A; Fachreview 448-4 Punkt 5): eine Teilzahlung ist noch keine Zahlung der Abrechnung
+	it('sagt im Dialog, dass eine Teilzahlung noch nicht als bezahlt markiert wird, auch bei einer Rückerstattung', () => {
+		detail({ status: 'sent', balance: 120 });
+		click('statement-mark-paid-button');
+		const due = byTestId('paid-partial-hint')!.textContent!.trim();
+		document.body.innerHTML = '';
+		detail({ status: 'sent', balance: -80 });
+		click('statement-mark-paid-button');
+
+		expect([due, byTestId('paid-partial-hint')!.textContent!.trim()]).toEqual([
+			'Hat der Mieter erst einen Teil überwiesen, markieren Sie die Abrechnung noch nicht als bezahlt.',
+			'Haben Sie erst einen Teil zurückerstattet, markieren Sie die Abrechnung noch nicht als bezahlt.'
+		]);
+	});
+
 	// Das Datumsfeld liegt im Dialog, ausserhalb des Formulars: der gewählte Tag muss mitgesendet werden
 	it('sendet das im Dialog gewählte Zahlungsdatum mit', () => {
 		detail({ status: 'sent' });

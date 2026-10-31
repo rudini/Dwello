@@ -1156,6 +1156,8 @@
 	"statements_balance_settled": "Solde nul",
 	"statements_paid_help_refund": "Le jour où vous avez versé le montant.",
 	"statements_paid_help": "Le jour où l’argent a été reçu.",
+	"statements_paid_partial": "Si le locataire n’a versé qu’une partie du montant, ne marquez pas encore le décompte comme payé.",
+	"statements_paid_partial_refund": "Si vous n’avez remboursé qu’une partie du montant, ne marquez pas encore le décompte comme payé.",
 	"statements_paid_date_invalid": "Veuillez saisir la date de paiement au format JJ.MM.AAAA.",
 	"statements_paid_date_future": "La date de paiement est dans le futur. Saisissez le jour où l’argent a été reçu.",
 	"statements_reset_payment": "Retirer le paiement saisi",

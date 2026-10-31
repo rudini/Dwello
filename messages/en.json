@@ -1156,6 +1156,8 @@
 	"statements_balance_settled": "Nil balance",
 	"statements_paid_help_refund": "The day you transferred the amount.",
 	"statements_paid_help": "The day the money arrived.",
+	"statements_paid_partial": "If the tenant has paid only part of the amount, do not mark the statement as paid yet.",
+	"statements_paid_partial_refund": "If you have refunded only part of the amount, do not mark the statement as paid yet.",
 	"statements_paid_date_invalid": "Please enter the payment date as DD.MM.YYYY.",
 	"statements_paid_date_future": "The payment date is in the future. Enter the day the money arrived.",
 	"statements_reset_payment": "Reset payment",

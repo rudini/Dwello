@@ -41,6 +41,7 @@ export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page
 export const sendStatementButton = target('Abrechnung versenden', (page) => page.getByTestId('statement-send-button'));
 export const markPaidButton = target('Als bezahlt markieren', (page) => page.getByTestId('statement-mark-paid-button'));
 export const confirmMarkPaidButton = target('Bezahlt bestätigen', (page) => page.getByTestId('statement-mark-paid-confirm'));
+export const partialPaymentHint = target('Hinweis Teilzahlung', (page) => page.getByTestId('paid-partial-hint'));
 export const deleteStatementButton = target('Abrechnung löschen', (page) => page.getByTestId('statement-delete-button'));
 export const confirmDeleteStatementButton = target('Löschen bestätigen', (page) =>
 	page.getByTestId('statement-delete-confirm')

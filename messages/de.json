@@ -1156,6 +1156,8 @@
 	"statements_balance_settled": "Ausgeglichen",
 	"statements_paid_help_refund": "Der Tag, an dem Sie den Betrag überwiesen haben.",
 	"statements_paid_help": "Der Tag, an dem das Geld eingegangen ist.",
+	"statements_paid_partial": "Hat der Mieter erst einen Teil überwiesen, markieren Sie die Abrechnung noch nicht als bezahlt.",
+	"statements_paid_partial_refund": "Haben Sie erst einen Teil zurückerstattet, markieren Sie die Abrechnung noch nicht als bezahlt.",
 	"statements_paid_date_invalid": "Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.",
 	"statements_paid_date_future": "Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.",
 	"statements_reset_payment": "Zahlung zurücksetzen",

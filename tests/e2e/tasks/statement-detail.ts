@@ -61,6 +61,8 @@ export const deliverByLetter: Activity = (actor) =>
 export const markStatementPaid: Activity = (actor) =>
 	actor.attemptsTo(Click.on(markPaidButton), Click.on(confirmMarkPaidButton));
 
+export const startMarkingPaid = Click.on(markPaidButton);
+
 // The day the money came in, typed into the dialog's date field
 export const markStatementPaidOn = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(markPaidButton), EnterDate.of(isoDate).into(paidDateInput), Click.on(confirmMarkPaidButton));

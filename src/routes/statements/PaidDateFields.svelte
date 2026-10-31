@@ -38,3 +38,7 @@
 	{/if}
 </div>
 <p class="rounded-panel bg-sunken p-4 font-semibold text-ink">{summary}</p>
+<!-- a part paid is no payment of the statement yet (#523; Art. 69 OR, Fachreview 448-4 point 5) -->
+<p class="text-ink" data-testid="paid-partial-hint">
+	{statement.balance < 0 ? m.statements_paid_partial_refund() : m.statements_paid_partial()}
+</p>

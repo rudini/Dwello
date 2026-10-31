@@ -41,7 +41,8 @@ import {
 	totalLabelOfStatement,
 	oldAddressWarningText,
 	advancePaidOfStatement,
-	advanceDiffersText
+	advanceDiffersText,
+	partialPaymentAdvice
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -73,6 +74,7 @@ import {
 	generateStatementPdf,
 	markStatementPaid,
 	markStatementPaidOn,
+	startMarkingPaid,
 	openResetPaymentConfirmation,
 	openSendConfirmation,
 	openStatementApartment,
@@ -192,6 +194,14 @@ Then('bietet die Bestätigung das PDF der Abrechnung zum Ansehen an', async ({ v
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(markStatementPaid);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startMarkingPaid);
+});
+
+Then('sagt die Frage «Als bezahlt markieren» {string}', async ({ verwalter }, advice: string) => {
+	await verwalter.sees(partialPaymentAdvice).toBe(advice);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung als am {string} bezahlt markiert', async ({ verwalter }, date: string) => {

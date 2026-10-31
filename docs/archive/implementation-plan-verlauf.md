@@ -237,6 +237,12 @@
 - [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
 - [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
 
+## Session: #523 partial payment hint in «Als bezahlt markieren» (2026-10-31)
+
+- [x] Scenario «Der Zahlungseingang sagt, was bei einer Teilzahlung gilt» (`statement-detail.feature`, seen red as @wip)
+- [x] DOM test for the Nachzahlung and the Rückerstattung (`statement-pages.dom.test.ts`, seen red)
+- [x] the sentence in `PaidDateFields.svelte`, texts de/fr/it/en as checked by `fach-reviewer` (#448 round 4, comment on #523); no persona: a decided text read in all four languages (CLAUDE.md, Workflow 5)
+- [x] code-reviewer round (`docs/reviews/523-review-1.md`)
 ## Session: #545 a Mahnung counts from its sending (2026-10-31)
 
 - [x] @wip scenarios in `statement-reminder.feature`; «Nächste Mahnung erst nach der Zahlungsfrist der letzten» reminds by e-mail (Spec change approved: #545)
