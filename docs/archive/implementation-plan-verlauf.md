@@ -436,3 +436,12 @@
 - [x] Code review `docs/reviews/722-review-1.md` (C-1 to C-3 Minor fixed), closing round `722c-review-1.md` (no findings)
 - [x] No scenario: deployment configuration, nothing in the app changes; a real certificate needs a public domain and was not fetched
 - [x] PR `Fixes #722`: pushed after this archive
+
+## Session 31.10.2026: #969 PDF einer vor #449 versendeten Abrechnung vor der Änderung behalten
+
+- [x] @wip scenario «Vor der Änderung einer Abrechnung ohne Dokument des Versands bleibt ihr PDF» and pg test, seen red
+- [x] fach-reviewer step 1 `docs/reviews/969-fachreview-1.md`: V-1 to V-4 (Major), V-6 to V-8 done; V-5 covered by DOM tests; glossary term: #994 (marker in `delivery.ts`)
+- [x] `keepPdfBeforeChange` before a change, a payment reset and a redelivery; Verlauf links and hint; documents without Versandstatus; export takes the first copy; texts in four languages
+- [x] code-reviewer `docs/reviews/969-review-1.md` (C-1, C-2, C-4, C-7 to C-9 done; C-3 rejected: the screens seed shows the variants; C-5 stays; C-6 noted), `969-review-2.md` (C-10 done)
+- [x] No persona: the decided texts were read in four languages by the fach-reviewer
+- [x] PR: pushed after this archive
