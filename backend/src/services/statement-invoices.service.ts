@@ -219,8 +219,8 @@ type Billing = { id: string; statementNumber: string; status: string };
 
 /**
  * The periods with statements of the invoice's building that bill it (in any state: billedIn) and that lack it as it
- * is now (missedIn: created before it was recorded or changed); a period can be in both. And each statement that bills
- * it, with its number and status (#455). Null without the invoice
+ * is now (missedIn: created before it was recorded or changed; replaced statements excluded, #980); a period can be
+ * in both. And each statement that bills it, with its number and status (#455). Null without the invoice
  */
 export async function invoiceStatements(
 	invoiceId: string
