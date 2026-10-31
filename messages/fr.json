@@ -281,7 +281,7 @@
 	"dashboard_task_drafts_action": "Voir les brouillons",
 	"dashboard_task_outdated_drafts_one": "{count} brouillon n’est pas à jour",
 	"dashboard_task_outdated_drafts_many": "{count} brouillons ne sont pas à jour",
-	"dashboard_task_outdated_drafts_text": "Depuis leur création, des factures de leur période de décompte ont été saisies, modifiées ou supprimées, ou le stock de combustible a été modifié. Recalculez ces brouillons avant de les remettre.",
+	"dashboard_task_outdated_drafts_text": "Depuis leur création, des factures de leur période de décompte ont été saisies, modifiées ou supprimées, le stock de combustible a été modifié, ou le report d’un décompte précédent qu’ils doivent compenser a changé. Recalculez ces brouillons avant de les remettre.",
 	"dashboard_task_correct_text": "Depuis l’établissement du décompte {number} de {tenant}, {later}. Rectifiez le décompte avec « Rectifier le décompte ». Le décompte rectificatif prend en compte ce qui est déjà payé.",
 	"dashboard_task_correct_old": "Cette période de décompte s’est terminée il y a plus de cinq ans. Faites-vous conseiller pour savoir si la créance est prescrite.",
 	"dashboard_task_correct_action": "Ouvrir le décompte",

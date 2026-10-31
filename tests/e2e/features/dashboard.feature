@@ -129,12 +129,11 @@ Funktionalität: Übersicht
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von "Seeblick" des letzten Jahres
-    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, oder der Tankbestand wurde geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen."
+    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, der Tankbestand wurde geändert, oder es hat sich geändert, welchen Übertrag aus einer früheren Abrechnung sie verrechnen. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen."
     Und steht die Aufgabe zu nicht aktuellen Entwürfen vor der Aufgabe "Abrechnungen prüfen und versenden"
 
   # #981 (A): ein Entwurf, der jetzt einen anderen Übertrag verrechnen würde, ist nicht aktuell und darum eine Aufgabe
   # (Fachreview 529-1 V-5); 2025 entstand, bevor die Abrechnung 2024 mit ihrer Nachzahlung 3.00 versendet war
-  @wip
   Szenario: Ein Entwurf mit geändertem Übertrag ist nicht aktuell
     Angenommen das Gebäude "Rosenhof" in "Winterthur" existiert
     Und im Gebäude "Rosenhof" gibt es die leere Wohnung "1.01"
@@ -148,6 +147,7 @@ Funktionalität: Übersicht
     Und die Abrechnung 2024 von "Bruno Meier" ist versendet
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von "Rosenhof" 2025
+    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "es hat sich geändert, welchen Übertrag aus einer früheren Abrechnung sie verrechnen"
 
   Szenario: Von den nicht aktuellen Entwürfen zu den Entwürfen des Gebäudes
     Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
