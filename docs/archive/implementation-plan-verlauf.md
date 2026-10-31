@@ -311,3 +311,13 @@
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-528.md`
 - [x] Closing review `docs/reviews/528close-review-1.md`, `528close-review-2.md`
 - [x] PR: pushed after this archive
+## Session: #974 R1, the restore of a database after 10 years (2026-10-31)
+
+- [x] Issue #974 opened (A2 / R1, product owner chose it)
+- [x] `tools/fitness/r1-benchmark.ts` (`bun run fitness:r1`): 5 buildings, 50 apartments, 75 contracts, 2016–2025, 40 Belege per building and year, one statement PDF per tenant and year, random content; options `--belege`, `--beleg-kb`, `--pdf-kb`; backup and restore through `restore-check.ts`
+- [x] `restore-check.ts` reads the Sicherung in pieces (`file-contains.ts`, test seen red without the carry-over): a 2 GB file failed with ENOMEM
+- [x] Measured: Belege of 400 KB → database 1.2 GB, Sicherung 864 MB in 50 s, restore 24 s; Belege of 1 MB → 2.8 GB, 2.0 GB in 109 s, restore 97 s; `utility-tree.md` R1 and A2, `fitness-functions.md`
+- [x] Code review `docs/reviews/974-review-1.md` (C-1 to C-3 Minor fixed), closing round `974c-review-1.md` (C-1 Minor stays: no caller searches a one-character text)
+- [x] No scenario: a measuring script, nothing a user sees changes
+- [ ] The volume assumptions (40 Belege per building and year, 400 KB to 1 MB per Beleg): the product owner confirms (A2)
+- [x] PR `Fixes #974`: pushed after this archive
