@@ -357,3 +357,9 @@
 - [x] Markers `TODO(fachlich prüfen, #623)` removed (`tenant-anonymise.service.ts`, `TenantAnonymiseCard.svelte`)
 - [x] No scenario, no review round: glossary and comments only, no behaviour change
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #619 Glossar «Dokumente geprüft»
+
+- [x] Glossary row «Dokumente geprüft» as proposed in #619 (Option 1, decided in #619), with fr/it/en in `docs/design/i18n-begriffe.md`
+- [x] No markers name #619; no scenario, no review round: glossary only
+- [x] PR: pushed after this archive
