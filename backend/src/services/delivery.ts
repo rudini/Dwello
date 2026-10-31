@@ -3,7 +3,7 @@
  * (#968), and what counts since the last one
  */
 
-import { and, asc, eq, inArray, sql, type SQLWrapper } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql, type SQLWrapper } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, tenants, utilityStatements } from '../db/schema';
 import { pdfBeforeChangeTitle } from './reminder-letter';
@@ -76,4 +76,15 @@ export async function sendingsOf(statementId: string) {
 		newPdfMadeAt: pending?.createdAt ?? null,
 		pdfBeforeChange: before.map(({ id, createdAt }) => ({ id, madeAt: createdAt }))
 	};
+}
+
+/** The Zahlungsfrist in the PDF the tenant got last: the statement or a new PDF marked sent (#966, Fachreview 966-1 V-1) */
+export async function toldDeadline(statementId: string) {
+	const [last] = await db
+		.select({ paymentDeadline: documents.paymentDeadline })
+		.from(documents)
+		.where(and(eq(documents.statementId, statementId), inArray(documents.type, ['statement', 'new_pdf']), eq(documents.status, 'sent')))
+		.orderBy(desc(documents.sentAt), desc(documents.createdAt))
+		.limit(1);
+	return last?.paymentDeadline ?? null;
 }

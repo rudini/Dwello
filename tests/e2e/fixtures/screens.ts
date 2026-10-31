@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import type { TestData } from './backend';
+import { inDays } from './dates';
 
 // The screens the axe check and the language check visit (tests/a11y/screens.json), and the records they need
 const screenList: typeof import('../../a11y/screens.json') = JSON.parse(
@@ -116,7 +117,10 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// sent by letter: its Verlauf offers the PDF as sent (#524); the IBAN every scenario sets
 	await seed.iban('CH93 0076 2011 6238 5295 7');
 	await seed.deliverByLetter('Bruno', 2025);
-	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
+	// overdue: only then a reminder can be sent. Sent 240 days ago, as its Zahlungsfrist can no longer go before the sent
+	// one (#966); then a later one, 60 days ago: its new PDF waits to be sent (#968). Dated after 2026-01-15 (mark-paid-early)
+	await seed.sentDaysAgo('Bruno', 2025, 240);
+	await seed.paymentDeadline('Bruno', 2025, inDays(-60));
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
 	// wants e-mail without an address: the send dialog offers only the letter; sending it by e-mail is refused (#86, #449)
 	await seed.correspondence('Carla', 'email');

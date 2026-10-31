@@ -30,6 +30,11 @@ When(
 	}
 );
 
+// #966: an earlier day than the one the tenant was told, without a remark
+When('der Liegenschaftsverwalter die Zahlungsfrist auf {string} vorverlegt', async ({ verwalter }, deadline: string) => {
+	await verwalter.attemptsTo(extendPaymentDeadline(deadline, ''));
+});
+
 When('der Liegenschaftsverwalter die Zahlungsfrist leert und speichert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(clearPaymentDeadline);
 });

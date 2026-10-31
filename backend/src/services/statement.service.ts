@@ -31,7 +31,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { splitKeysOf } from './split-keys';
-import { keepPdfBeforeChange, sendingsOf, sinceDelivery } from './delivery';
+import { keepPdfBeforeChange, sendingsOf, sinceDelivery, toldDeadline } from './delivery';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
@@ -690,6 +690,8 @@ export async function updateStatement(
 		}
 	}
 
+	await refuseEarlierDeadline(id, data.paymentDeadline, existing.balance);
+
 	// The PDF prints date, payment deadline and remark (#448); a change discards it, it is made again. Once paid, the PDF as sent stays
 	const pdfOutdated = changesPdf(data, existing);
 	// the only copy of a PDF sent without a Dokument stays (#969; also «Zahlung zurücksetzen», Fachreview 969-1 V-3)
@@ -705,6 +707,17 @@ export async function updateStatement(
 	if (!updated) return null;
 
 	return { ...(await getStatement(id))!, pdfChange: pdfOutdated ? pdfChangeOf(data, existing) : null };
+}
+
+/**
+ * #966 (A): a Nachzahlung's Zahlungsfrist not before the one in the PDF the tenant got; without a sent Dokument nothing
+ * to compare with (#969). A refund may come earlier: the landlord owes it (Fachreview 966-1 M-1)
+ */
+async function refuseEarlierDeadline(id: string, deadline: string | null | undefined, balance: string) {
+	if (!deadline || Number(balance) <= 0) return;
+	const told = await toldDeadline(id);
+	if (told && deadline < told)
+		throw new CodedError('STATEMENT_DEADLINE_BEFORE_SENT', 'The payment deadline cannot be before the one sent', { date: told });
 }
 
 /** After sending, what only the new PDF prints: the tenant learns it once it is sent to him (#524, Fachreview 524-1 V-1) */
