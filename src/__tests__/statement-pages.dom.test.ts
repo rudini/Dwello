@@ -1806,11 +1806,16 @@ describe('Abrechnungsdetail', () => {
 				form: null
 			} as never);
 
+		// code review 524-2 C-7: an address with another value shows no hint, also a name every object has
+		changed('toString', null);
+		const unknown = byTestId('statement-pdf-changed');
+		document.body.innerHTML = '';
 		changed('refund_by', { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-09-28T08:15:00Z' });
 		const withDocument = byTestId('statement-pdf-changed')!.textContent!.replace(/\s+/g, ' ').trim();
 		document.body.innerHTML = '';
 		changed('notes', null);
 
+		expect(unknown).toBeNull();
 		expect([withDocument, byTestId('statement-pdf-changed')!.textContent!.replace(/\s+/g, ' ').trim()]).toEqual([
 			'Im versendeten PDF steht das bisherige Datum der Rückerstattung. Damit der Mieter das neue kennt, erstellen Sie das neue PDF und senden Sie es ihm. Das versendete PDF finden Sie im Verlauf.',
 			'Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, erstellen Sie das neue PDF und senden Sie es ihm.'
