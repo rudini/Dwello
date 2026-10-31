@@ -53,6 +53,7 @@
 	"tenant": { "firstName": "Eva", "lastName": "Frei", "email": "eva@example.com", "correspondenceChannel": "letter", "language": "fr" },
 	"apartment": { "number": "3.01", "floor": 3 },
 	"building": { "id": "b1", "name": "Lindenhof", "address": "Testweg 1" },
+	"splitKeys": [],
 	"lineItems": [
 		{
 			"id": "l1",

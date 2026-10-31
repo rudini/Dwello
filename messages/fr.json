@@ -1292,7 +1292,7 @@
 	"statements_split_keys_line": "{category} figure dans plusieurs postes. Le plus grand est réparti selon « {mainKey} », cette facture selon « {key} » :",
 	"statements_split_keys_line_many": "{category} figure dans plusieurs postes. Le plus grand est réparti selon « {mainKey} », ces factures selon « {key} » :",
 	"statements_split_keys_preview_end": "Si ce n’est pas voulu, modifiez la clé de répartition de la facture avant de créer les décomptes.",
-	"statements_split_keys_recalculate_end": "Si ce n’est pas voulu, modifiez d’abord la clé de répartition de la facture. Sinon, Dwello décompte de nouveau la catégorie dans plusieurs postes.",
+	"statements_split_keys_recalculate_end": "Si ce n’est pas voulu, modifiez d’abord la clé de répartition de la facture. Sinon, Dwello décompte la catégorie dans plusieurs postes.",
 	"statements_split_keys_title": "Plusieurs clés de répartition dans une catégorie",
 	"statements_recalculated": "Le brouillon est recalculé. Il tient compte des factures et du stock de combustible tels qu’ils sont maintenant.",
 	"statements_recalculate_failed": "Le brouillon n’a pas été recalculé. Veuillez réessayer.",

@@ -372,6 +372,7 @@ export interface StatementWithDetails
 	buildingName: string;
 	buildingAddress: string;
 	lineItems: StatementLineItem[];
+	splitKeys?: import('$lib/statement-wizard').SplitKeyHint[]; // #528: the draft's lines of another key, names in the UI language
 	priorPayments?: number; // what was paid on the replaced ones (#120)
 	// #448: the Übertrag from the previous statement, a replaced Saldo the next one counted
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;

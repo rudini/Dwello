@@ -225,10 +225,10 @@
 		onletter={() => ((sendByLetter = true), (showSend = true))}
 	/>
 
-	<!-- #528: on a draft, a Kategorie its invoices bill by several Verteilschlüssel (not on one already sent) -->
-	{#if statement.editable && !statement.correctable && data.later}
+	<!-- #528: on a draft, a Kategorie its lines bill by several Verteilschlüssel, as the table shows (not on one sent) -->
+	{#if statement.editable && !statement.correctable}
 		<SplitKeysHint
-			splitKeys={data.later.splitKeys ?? []}
+			splitKeys={statement.splitKeys ?? []}
 			end={m.statements_split_keys_draft_end()}
 			testid="statement-split-keys"
 		/>

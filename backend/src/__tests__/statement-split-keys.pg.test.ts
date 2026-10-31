@@ -123,5 +123,7 @@ describe('Kategorie mit verschiedenen Verteilschlüsseln', () => {
 
 		expect(changes?.splitKeys).toEqual([]);
 		expect(statement?.lineItems.filter((item) => item.otherKey)).toHaveLength(1);
+		// Persona Dr. Weber 528 P-1: the draft's own hint follows its lines, as its cost table and PDF
+		expect(statement?.splitKeys).toMatchObject([{ invoices: [{ description: 'Hauswart Q4' }] }]);
 	});
 });

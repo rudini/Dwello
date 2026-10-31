@@ -986,8 +986,12 @@ describe('Abrechnungsdetail', () => {
 	describe('Kategorie mit verschiedenen Verteilschlüsseln', () => {
 		const split = { categoryId: 'c1', keyId: null, mainKeyId: 'k1', categoryName: 'Hauswart', keyName: 'Pro Einheit', mainKeyName: 'Pro Fläche (m²)' };
 		const later = (invoices: { id: string; description: string }[]) => ({ invoices: 0, fuelStock: false, correctionDue: false, splitKeys: [{ ...split, invoices }] });
-		const showWith = (overrides: Partial<StatementWithDetails>, invoices = [{ id: 'i4', description: 'Hauswart Q4' }]) =>
-			show(StatementPage, { data: { statement: statement(overrides), reminders: [], later: later(invoices) }, form: null } as never);
+		// the draft's hint follows its lines (Persona Dr. Weber 528 P-1), the question the invoices as they are now (V-1)
+		const showWith = (overrides: Partial<StatementWithDetails>, invoices = [{ id: 'i4', description: 'Hauswart Q4' }], now = invoices) =>
+			show(StatementPage, {
+				data: { statement: statement({ splitKeys: [{ ...split, invoices }], ...overrides } as never), reminders: [], later: later(now) },
+				form: null
+			} as never);
 
 		it('nennt auf dem Entwurf die Rechnung mit dem anderen Verteilschlüssel und führt zu ihr', () => {
 			showWith({});
@@ -1018,6 +1022,16 @@ describe('Abrechnungsdetail', () => {
 			expect(lines).toHaveLength(2);
 			expect(lines[0]).toContain('Musterhaus Zentrum');
 			expect(lines[1]).toContain('Seepark Residenz');
+		});
+
+		it('nennt auf dem Entwurf nichts, solange seine Positionen nur einen Verteilschlüssel je Kategorie haben', () => {
+			showWith({ splitKeys: [] } as never);
+			expect(byTestId('statement-status')).not.toBeNull();
+			expect(byTestId('statement-split-keys')).toBeNull();
+			click('statement-recalculate-button');
+			expect(byTestId('statement-recalculate-split-keys')!.textContent).toContain(
+				'Ist das nicht gewollt, ändern Sie zuerst den Verteilschlüssel der Rechnung. Sonst rechnet Dwello die Kategorie in mehreren Positionen ab.'
+			);
 		});
 
 		it('nennt sie nicht auf einer versendeten Abrechnung', () => {

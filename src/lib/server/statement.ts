@@ -214,7 +214,8 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 	]);
 	if (response.status === 404) throw error(404, m.statements_not_found());
 	if (!response.ok) throw error(response.status, m.statements_load_failed());
-	const statement = toStatement(await response.json());
+	const body = await response.json();
+	const statement = toStatement(body);
 	// Without a key the calculation shares the costs equally among the apartments, as «Pro Einheit» (the PDF names it so)
 	const lineItems = statement.lineItems.map((item) => ({
 		...item,
@@ -225,7 +226,7 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 			? (keys.get(item.distributionKeyId) ?? '')
 			: m.statements_key_per_unit()
 	}));
-	return { ...statement, lineItems };
+	return { ...statement, lineItems, splitKeys: localSplitKeys(body.splitKeys, categories, keys) };
 }
 
 /** The backend names a statement PDF after its number (NK-…, #101); in the header only ASCII letters, digits, underscore, dot and dash */

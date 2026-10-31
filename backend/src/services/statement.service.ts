@@ -327,7 +327,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		building: result.building,
 		// without a heating cost position the chosen profile was not applied: it names none (#280, #451 point 8)
 		heatingProfile: (await billsHeating(lineItems)) ? result.heatingProfile : null,
-		lineItems: withOtherKeys(lineItems),
+		...withOtherKeys(lineItems),
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId),
 		...allowed(result.statement.status)
@@ -339,7 +339,8 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 	const parts = lineItems.map((item) => ({ ...item, amount: Number(item.totalAmount), invoices: item.invoices ?? [] }));
 	const split = splitKeysOf(parts);
 	const differs = (item: T) => split.some((other) => other.categoryId === item.categoryId && other.keyId === item.distributionKeyId);
-	return lineItems.map((item) => ({ ...item, otherKey: differs(item) }));
+	// the draft's hint names those of a Kategorie (Persona Dr. Weber 528 P-1; without one «Neu berechnen» refuses, V-6)
+	return { lineItems: lineItems.map((item) => ({ ...item, otherKey: differs(item) })), splitKeys: split.filter((other) => other.categoryId) };
 }
 
 /**

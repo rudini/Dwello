@@ -1292,7 +1292,7 @@
 	"statements_split_keys_line": "{category} figura in più voci. La voce più grande è ripartita secondo «{mainKey}», questa fattura secondo «{key}»:",
 	"statements_split_keys_line_many": "{category} figura in più voci. La voce più grande è ripartita secondo «{mainKey}», queste fatture secondo «{key}»:",
 	"statements_split_keys_preview_end": "Se non è voluto, modifichi la chiave di riparto della fattura prima di creare i conteggi.",
-	"statements_split_keys_recalculate_end": "Se non è voluto, modifichi prima la chiave di riparto della fattura. Altrimenti Dwello conteggia di nuovo la categoria in più voci.",
+	"statements_split_keys_recalculate_end": "Se non è voluto, modifichi prima la chiave di riparto della fattura. Altrimenti Dwello conteggia la categoria in più voci.",
 	"statements_split_keys_title": "Più chiavi di riparto in una categoria",
 	"statements_recalculated": "La bozza è ricalcolata. Conteggia le fatture e la scorta di combustibile come sono ora.",
 	"statements_recalculate_failed": "La bozza non è stata ricalcolata. Riprovi.",

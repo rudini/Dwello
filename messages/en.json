@@ -1292,7 +1292,7 @@
 	"statements_split_keys_line": "{category} appears in more than one statement line. The largest is split by ‘{mainKey}’, this invoice by ‘{key}’:",
 	"statements_split_keys_line_many": "{category} appears in more than one statement line. The largest is split by ‘{mainKey}’, these invoices by ‘{key}’:",
 	"statements_split_keys_preview_end": "If this is not intended, change the invoice’s distribution key before you create the statements.",
-	"statements_split_keys_recalculate_end": "If this is not intended, change the invoice’s distribution key first. Otherwise Dwello will again bill the category in more than one statement line.",
+	"statements_split_keys_recalculate_end": "If this is not intended, change the invoice’s distribution key first. Otherwise Dwello will bill the category in more than one statement line.",
 	"statements_split_keys_title": "Different distribution keys in one category",
 	"statements_recalculated": "The draft is recalculated. It bills the invoices and the fuel stock as they are now.",
 	"statements_recalculate_failed": "The draft was not recalculated. Please try again.",
