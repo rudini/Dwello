@@ -105,7 +105,13 @@ export interface InvoiceCheck {
 }
 
 /** #528: the invoices of a Kategorie billed by another Verteilschlüssel than its largest share, names in the UI language */
-export type SplitKeyHint = SplitKey & { categoryName: string; keyName: string; mainKeyName: string };
+export type SplitKeyHint = SplitKey & {
+	categoryName: string;
+	keyName: string;
+	mainKeyName: string;
+	buildingId?: string; // the preview of several buildings names each (Code-Review 528-1 C-3)
+	buildingName?: string;
+};
 
 /** An existing statement of the run's period that misses invoices or was made with other settings (#132) */
 export interface ChangedStatement {

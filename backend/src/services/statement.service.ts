@@ -334,11 +334,6 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 	};
 }
 
-/**
- * What the statement allows (#788): the frontend shows buttons and hints by it and only labels the status. A replaced
- * one stays as sent and asks for nothing, its berichtigte Abrechnung does (#120); a draft is calculated again or
- * deleted, a sent one corrected (#358)
- */
 // #528: a line of a Kategorie with several Verteilschlüssel whose key is not the Kategorie's: the PDF names its invoices
 function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 	const parts = lineItems.map((item) => ({ ...item, amount: Number(item.totalAmount), invoices: item.invoices ?? [] }));
@@ -347,6 +342,11 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 	return lineItems.map((item) => ({ ...item, otherKey: differs(item) }));
 }
 
+/**
+ * What the statement allows (#788): the frontend shows buttons and hints by it and only labels the status. A replaced
+ * one stays as sent and asks for nothing, its berichtigte Abrechnung does (#120); a draft is calculated again or
+ * deleted, a sent one corrected (#358)
+ */
 function allowed(status: string) {
 	const current = !isReplaced({ status });
 	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current };

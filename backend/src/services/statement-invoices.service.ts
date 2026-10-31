@@ -111,7 +111,11 @@ const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte 
 export async function statementChanges(statementId: string) {
 	const statement = await getStatement(statementId);
 	const changes = await changesOf(statement, direct);
-	return changes && { ...changes, carryOverChanged: !!statement!.carryChanged }; // #506 C
+	if (!changes) return null;
+	// #528: what «Neu berechnen» would bill in a line of its own, from the invoices as they are (Fachreview 528-1 V-1);
+	// only here, not for the lists of the Übersicht (Code-Review 528-1 C-2)
+	const period = { start: statement!.periodStart, end: statement!.periodEnd };
+	return { ...changes, carryOverChanged: !!statement!.carryChanged, splitKeys: await invoiceSplitKeys(statement!.building!.id, period) }; // #506 C
 }
 
 async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
@@ -130,9 +134,7 @@ async function changesOf(statement: StatementWithDetails | null, load: Loaders) 
 		correctionDue: due,
 		correctionDeclinable: due && !!check?.raises,
 		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
-		result: check?.result,
-		// #528: what «Neu berechnen» would bill in a line of its own (Fachreview 528-1 V-1)
-		splitKeys: await invoiceSplitKeys(statement.building.id, { start: statement.periodStart, end: statement.periodEnd })
+		result: check?.result
 	};
 }
 

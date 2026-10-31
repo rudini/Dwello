@@ -25,8 +25,9 @@
 {#if splitKeys.length}
 	<Alert tone="caution" title={m.statements_split_keys_title()} {testid}>
 		<div class="flex flex-col gap-2">
-			{#each splitKeys as split (`${split.categoryId}-${split.keyId}`)}
+			{#each splitKeys as split (`${split.buildingId}-${split.categoryId}-${split.keyId}`)}
 				<div data-testid="split-keys-line">
+					{#if split.buildingName}<p class="font-semibold">{split.buildingName}</p>{/if}
 					<p>{lineText(split)}</p>
 					<ul class="flex flex-col">
 						{#each split.invoices as invoice (invoice.id)}

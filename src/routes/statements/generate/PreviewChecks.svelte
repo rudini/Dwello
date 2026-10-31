@@ -53,7 +53,11 @@
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	const heating = $derived(hinted('heatingWithoutServicePeriod'));
 	// #528: a Kategorie the statements will bill by several Verteilschlüssel; a hint, no confirmation
-	const splitKeys = $derived(rows.flatMap((row) => row.splitKeys));
+	const splitKeys = $derived(
+		rows.flatMap((row) =>
+			row.splitKeys.map((split) => ({ ...split, buildingId: row.buildingId, buildingName: row.name }))
+		)
+	);
 	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({

@@ -24,6 +24,7 @@ import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
 import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
+import SplitKeysHint from '../routes/statements/SplitKeysHint.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
 import type { StatementWithDetails } from '$lib/types';
@@ -1007,6 +1008,16 @@ describe('Abrechnungsdetail', () => {
 			showWith({});
 			click('statement-recalculate-button');
 			expect(byTestId('statement-recalculate-split-keys')!.textContent).toContain('Ist das nicht gewollt, ändern Sie zuerst den Verteilschlüssel der Rechnung.');
+		});
+
+		// Code-Review 528-1 C-3: the preview of several buildings names each one; the same Kategorie without a key in both
+		it('nennt in der Vorschau mehrerer Gebäude zu jeder Rechnung ihr Gebäude', () => {
+			const hint = (buildingId: string, buildingName: string, id: string) => ({ ...split, buildingId, buildingName, invoices: [{ id, description: `Hauswart ${buildingName}` }] });
+			show(SplitKeysHint, { splitKeys: [hint('b1', 'Musterhaus Zentrum', 'i1'), hint('b2', 'Seepark Residenz', 'i2')], end: '', testid: 'hint' } as never);
+			const lines = allByTestId('split-keys-line').map((line) => line.textContent!.replace(/\s+/g, ' '));
+			expect(lines).toHaveLength(2);
+			expect(lines[0]).toContain('Musterhaus Zentrum');
+			expect(lines[1]).toContain('Seepark Residenz');
 		});
 
 		it('nennt sie nicht auf einer versendeten Abrechnung', () => {

@@ -373,3 +373,15 @@ describe('Abrechnung berichtigen', () => {
 		});
 	});
 });
+
+// #528 (Code-Review 528-1 C-7): the hint names Kategorie and keys in the UI language; an invoice without key as its
+// line, «Pro Einheit» (Fachreview 528-1 V-8)
+describe('Verschiedene Verteilschlüssel in der Sprache der Oberfläche', () => {
+	it('nennt Kategorie und Verteilschlüssel beim Namen und eine Rechnung ohne Verteilschlüssel «Pro Einheit»', async () => {
+		const { localSplitKeys } = await import('$lib/server/statement');
+		const split = { categoryId: 'c1', keyId: null, mainKeyId: 'k1', invoices: [{ id: 'i1', description: 'Hauswart Q4' }] };
+		expect(localSplitKeys([split], new Map([['c1', 'Hauswart']]), new Map([['k1', 'Pro Fläche (m²)']]))).toEqual([
+			{ ...split, categoryName: 'Hauswart', keyName: 'Pro Einheit', mainKeyName: 'Pro Fläche (m²)' }
+		]);
+	});
+});
