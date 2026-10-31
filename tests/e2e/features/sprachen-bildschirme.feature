@@ -206,6 +206,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-split-keys-detail | default             |
       | statement-split-keys-detail | recalculate-dialog  |
       | statement-parts-detail | default             |
+      | statement-part-paid-detail | default          |
+      | statement-part-paid-detail | mark-paid-dialog |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |

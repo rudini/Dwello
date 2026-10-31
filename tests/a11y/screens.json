@@ -681,6 +681,14 @@
 			]
 		},
 		{
+			"name": "statement-part-paid-detail",
+			"path": "/statements/{partPaidStatement}",
+			"states": [
+				"default",
+				"mark-paid-dialog"
+			]
+		},
+		{
 			"name": "statement-sent-detail",
 			"path": "/statements/{sentStatement}",
 			"states": [

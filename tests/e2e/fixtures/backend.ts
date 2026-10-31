@@ -418,8 +418,9 @@ export function testData(api: CallTheApi) {
 		},
 
 		// paid today, the earliest day a statement sent today allows (#138)
-		async markPaid(tenantTitle: string, year: number, which = 'Abrechnung') {
-			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
+		// `paidAmount` below the open amount: a part payment, the statement stays open (#959)
+		async markPaid(tenantTitle: string, year: number, which = 'Abrechnung', paidAmount?: string) {
+			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0), paidAmount });
 		},
 
 		// Monthly shares January..December in percent
