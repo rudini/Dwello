@@ -286,3 +286,46 @@ describe('Abrechnung per Brief', () => {
 		expect(mails.length).toBe(before);
 	});
 });
+
+// #534: a sent statement whose e-mail did not reach the tenant goes again by letter, dated anew
+describe('Versendete Abrechnung erneut per Brief zustellen', () => {
+	const redeliver = async (id: string) => {
+		const response = await api('POST', `/api/v1/statements/${id}/redeliver`);
+		return { status: response.status, ...((await response.json()) as Omit<Sent, 'status'>) };
+	};
+
+	it('datiert die Abrechnung auf heute, rechnet die Zahlungsfrist ab heute und legt das PDF als Brief ab', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		// sent long ago, its Zahlungsfrist passed
+		await db
+			.update(utilityStatements)
+			.set({ statementDate: '2021-01-15', paymentDeadline: '2021-02-14' })
+			.where(eq(utilityStatements.id, id));
+
+		const result = await redeliver(id);
+
+		const today = swissToday();
+		expect(result.statement).toMatchObject({
+			status: 'sent',
+			statementDate: today,
+			paymentDeadline: daysAfter(today, await getTypedConfig('payment_deadline_days'))
+		});
+		const stored = await storedFor(id);
+		expect(stored.map(({ channel, status }) => [channel, status])).toEqual([
+			['letter', 'sent'],
+			['letter', 'sent']
+		]);
+		expect(stored[1].content).not.toBe(stored[0].content); // the PDF made anew, with the new date
+	});
+
+	it('verweigert einen Entwurf und eine bezahlte Abrechnung', async () => {
+		const id = await draft();
+		expect(await redeliver(id)).toMatchObject({ status: 409, code: 'STATEMENT_NOT_REDELIVERABLE' });
+		await send(id, { byLetter: true });
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'paid' });
+		expect(await redeliver(id)).toMatchObject({ status: 409, code: 'STATEMENT_NOT_REDELIVERABLE' });
+		expect(await storedFor(id)).toHaveLength(1);
+	});
+});
