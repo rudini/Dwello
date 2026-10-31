@@ -129,6 +129,25 @@ describe('Sicherung', () => {
 		).toEqual([{ name: '0037_heating_profile_source.sql' }]);
 	}, 60_000);
 
+	it('behält nach der Wiederherstellung einer älteren Sicherung den neueren Wiederherstellungscode (#953)', async () => {
+		const { name, code } = await secured();
+		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
+		const newer = generateCode();
+		const { publicKey, salt } = await recipientOf(newer);
+		await query(
+			name,
+			`INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ($1, $2, now() + interval '1 minute')`,
+			[publicKey.toString('base64'), salt.toString('base64')]
+		);
+
+		await restoreBackup(file, code, `${server}/${name}`, await folder(), migrations);
+
+		const after = await createBackup(`${server}/${name}`, await folder(), secrets);
+		const empty = await database();
+		await restoreBackup(after, newer, `${server}/${empty}`, await folder(), migrations);
+		expect(await query(empty, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
+	}, 60_000);
+
 	it('schreibt die Schlüssel zurück, auch wenn danach eine Migration scheitert', async () => {
 		const { name, code } = await secured();
 		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
@@ -235,6 +254,19 @@ describe('Sicherung', () => {
 			process.off('unhandledRejection', note);
 		}
 		expect(unhandled).toEqual([]);
+	}, 60_000);
+
+	// 718c review C-1: each run deletes the half files of a cut-off one, so two at once must not run side by side
+	it('führt zwei gleichzeitig gestartete Sicherungen nacheinander aus, und beide gelingen', async () => {
+		const { name } = await secured();
+		const dir = await folder();
+		const now = Date.now();
+		const files = await Promise.all([
+			createBackup(`${server}/${name}`, dir, secrets, new Date(now)),
+			createBackup(`${server}/${name}`, dir, secrets, new Date(now + 2000))
+		]);
+		expect(files).toHaveLength(2);
+		expect(await query(name, 'SELECT count(*)::int AS n FROM backup_runs WHERE error IS NULL AND finished_at IS NOT NULL')).toEqual([{ n: 2 }]);
 	}, 60_000);
 
 	// PR #940, Copilot: the restore runs as root; a forged Sicherung must not write outside the two keys

@@ -106,3 +106,74 @@ Funktionalität: Sicherung einrichten
     Dann ist der Liegenschaftsverwalter auf der Seite "Datenschutz"
     # Persona weber-718b P-1: wer vor der Bestätigung nachliest, findet die Sicherung schon dort
     Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Dazu legt Dwello jeden Tag eine verschlüsselte Sicherung"
+
+  # Fachreview 718c-1: V-1 (gleich nach der Bestätigung eine Sicherung mit dem neuen Code), V-3 bis V-5 (Wortlaut)
+  # #718, Teil 3: ein neuer Wiederherstellungscode in den Einstellungen, erst nach erneuter Anmeldung (mit Passwort:
+  # das Passwort erneut eingeben; mit Google: erneut mit Google anmelden). Die Sicherungen von vorher bleiben mit dem
+  # alten Code lesbar (A8).
+  Szenario: Von den Einstellungen zur Sicherung
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Wenn der Liegenschaftsverwalter in den Einstellungen die Sicherung öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Wiederherstellungscode"
+
+  Szenario: Ein neuer Wiederherstellungscode verlangt das Passwort erneut
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Wenn der Liegenschaftsverwalter die Seite für einen neuen Wiederherstellungscode öffnet
+    # Persona anna-718c P-1, #957: zuerst wozu der Code dient, dann was ein verlorenes Blatt bedeutet
+    Dann erklärt die Seite für einen neuen Wiederherstellungscode "Mit dem Wiederherstellungscode lässt sich eine Sicherung Ihrer Daten lesen, etwa nach einem Defekt. Ein neuer Code gilt für die Sicherungen ab seiner Bestätigung. Die Sicherungen von vorher öffnet weiterhin nur der alte Code; Dwello löscht sie nach und nach, die letzte nach höchstens 12 Monaten. Haben Sie das alte Notfallblatt noch, bewahren Sie es bis dahin auf; fragen Sie die Person, die Dwello betreut, ob ihre Kopie Sicherungen länger behält. Haben Sie es verloren, kann niemand diese Sicherungen für Sie öffnen, auch nicht die Person, die Dwello betreut; wer das Blatt findet und an die Sicherungen kommt, kann sie bis dahin lesen."
+    Und erklärt die Seite für einen neuen Wiederherstellungscode "Geben Sie Ihr Passwort erneut ein. So kann nur, wer das Passwort kennt, einen neuen Code erstellen."
+    Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code
+
+  Szenario: Mit dem Passwort einen neuen Wiederherstellungscode erstellen
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Wenn der Liegenschaftsverwalter mit seinem Passwort einen neuen Wiederherstellungscode erstellt
+    Dann zeigt die Sicherung einen Wiederherstellungscode aus 6 Gruppen zu 4 Zeichen
+    # Persona sven-718c P-1: der Screenreader liest den neuen Code gleich vor
+    Und steht der Fokus auf dem neuen Wiederherstellungscode
+    # Fachreview 718c-2 V-1: ein neuer Code verfällt nach 30 Minuten
+    Und erklärt die Sicherung "Bestätigen Sie den neuen Code innerhalb von 30 Minuten, sonst verfällt er und der bisherige Code gilt weiter. Sobald Sie ihn bestätigen, zeigt Dwello ihn nicht mehr an, und das Notfallblatt lässt sich nicht mehr herunterladen. Drucken Sie das neue Notfallblatt aus und bewahren Sie es getrennt von diesem Computer an einem sicheren Ort auf, etwa bei Ihren Mietverträgen."
+
+  Szenario: Mit einem falschen Passwort entsteht kein neuer Wiederherstellungscode
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Wenn der Liegenschaftsverwalter mit einem falschen Passwort einen neuen Wiederherstellungscode erstellt
+    Dann sieht der Liegenschaftsverwalter bei der Sicherung den Hinweis "Das Passwort stimmt nicht. Geben Sie das Passwort ein, mit dem Sie sich anmelden."
+    Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code
+
+  Szenario: Das Notfallblatt mit dem neuen Wiederherstellungscode herunterladen
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Und der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt
+    Wenn der Liegenschaftsverwalter das Notfallblatt herunterlädt
+    Dann enthält das Notfallblatt den angezeigten Wiederherstellungscode
+    # Fachreview 718c V-5: nach dem Wechsel gibt es zwei Blätter
+    Und enthält das Notfallblatt "Ältere Sicherungen öffnet das Notfallblatt von vorher; geben Sie im Notfall beide Blätter weiter."
+
+  Szenario: Den neuen Wiederherstellungscode bestätigen
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Und der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt
+    Wenn der Liegenschaftsverwalter den angezeigten Wiederherstellungscode erneut eingibt und den neuen Code bestätigt
+    Dann bestätigt die Seite für einen neuen Wiederherstellungscode "Der neue Wiederherstellungscode gilt ab jetzt. Dwello erstellt gleich eine erste Sicherung mit ihm und sichert Ihre Daten ab jetzt jeden Tag mit ihm."
+    # Persona sven-718c P-2: die Bestätigung wird vorgelesen
+    Und steht der Fokus auf der Bestätigung des neuen Wiederherstellungscodes
+    Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code
+
+  Szenario: Den neuen Wiederherstellungscode falsch eingeben
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Und der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt
+    Wenn der Liegenschaftsverwalter einen anderen Wiederherstellungscode eingibt und den neuen Code bestätigt
+    Dann sieht der Liegenschaftsverwalter bei der Sicherung den Hinweis "Der Code stimmt nicht mit dem angezeigten überein. Geben Sie ihn so ein, wie er oben und auf dem Notfallblatt steht; Bindestriche, Leerzeichen sowie Gross- und Kleinschreibung spielen keine Rolle."
+
+  # Mit Google angemeldet: die Anmeldung muss frisch sein (höchstens 10 Minuten); sonst führt die Seite zu Google
+  Szenario: Mit Google angemeldet verlangt ein neuer Wiederherstellungscode eine neue Anmeldung bei Google
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation vor einer Stunde mit Google angemeldet
+    Wenn der Liegenschaftsverwalter die Seite für einen neuen Wiederherstellungscode öffnet
+    Dann erklärt die Seite für einen neuen Wiederherstellungscode "Melden Sie sich erneut mit Google an. So kann nur, wer Zugang zu Ihrem Google-Konto hat, einen neuen Code erstellen."
+    Und führt die Seite für einen neuen Wiederherstellungscode zur erneuten Anmeldung mit Google
+    Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code

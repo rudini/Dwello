@@ -18,8 +18,8 @@ async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	const jwt = getJwtFromCookie(cookies);
 	if (!jwt) return undefined;
 	try {
-		const { sub, email, name, provider } = await verifyJwt(jwt);
-		return { sub, email, name, provider };
+		const { sub, email, name, provider, auth_time, iat } = await verifyJwt(jwt);
+		return { sub, email, name, provider, signedInAt: auth_time ?? iat };
 	} catch {
 		return undefined; // expired or forged
 	}

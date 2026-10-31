@@ -1,0 +1,22 @@
+# Code-Review 718c, Runde 1 (b78f58d52..0e2933501)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Minor | backend/src/services/backup.service.ts:91-98 | Die Serialisierung von `createBackup` hat keinen eigenen Test. Zwei Sicherungen überlappen nur nebenbei im V-1-Test (`backup-new-code.pg.test.ts:108-111`): `confirmedFirstCode` startet im Hintergrund eine Sicherung, und gleich danach ruft der Test `createBackup` auf. Ob der Test ohne die Serialisierung rot wird, hängt also vom Timing ab, und kein Testtitel nennt das Verhalten. Ein gezielter Test (`Promise.all` zweier `createBackup` im selben Ordner, beide erfolgreich) fehlt. |
+| C-2 | Minor | src/lib/server/backup.ts:64-76; backend/src/routes/backup.ts:18-19 | Mehrere geänderte Zeilen haben in keiner Schicht einen Test: der Zweig von `createNewCode` ohne Passwort (Google, Body `{}`, nur von der a11y-Ansicht `new-code-shown` geklickt, ohne Prüfung), die Weitergabe von 403 und 423 an die Seite sowie `ACCOUNT_LOCKED` bei `POST /backup/new-code` (kein Backend-Test mit gesperrtem Konto, obwohl die Route die Sperre ausdrücklich auf 423 abbildet). |
+| C-3 | Minor | src/routes/config/+page.svelte:52 | Laut Vorgabe zeigen die Einstellungen den Link nur, wenn die Sicherung nicht `off` ist. Das prüft kein Test: weder ein Unit-Test des Loads/der Seite noch ein Szenario, das den Link ohne Ordner für die Sicherung vermisst. Die a11y-Zeile `config default` sieht zwar die Instanz ohne Ordner, prüft den Link aber nicht. |
+| C-4 | Minor | backend/src/services/backup.service.ts:298-306; src/lib/server/backup.ts:54 | Ein neuer Code verfällt nach 30 Minuten ohne jeden Hinweis. Kein Text nennt die Frist. Wer das neue Notfallblatt ausdruckt und später zurückkommt, sieht wieder das Passwortfeld, ohne Erklärung, dass der gedruckte Code nie gilt. Wer den Code nach Ablauf eingibt (Seite noch offen), erhält «Der Code stimmt nicht mit dem angezeigten überein … wie er oben … steht», obwohl nach dem Neuladen kein Code mehr angezeigt wird. Die Frist war nicht Teil der Fachprüfung 718c-1, und `fach-reviewer` sollte sie in Schritt 5 sehen. |
+
+## Nicht bestätigt
+- Diese Prüfungen hat nur der Aufrufer gemeldet, ich habe sie nicht selbst laufen lassen: `bun run lint`, `bun run check`, `cd backend && bun run type-check`, `bunx vitest run` (3823), `cd backend && bun run test` (1762, Coverage 96.8 %), `bun run fitness`, E2E sicherung/einrichtung/privacy/authentication/settings (110), die a11y- und Sprachzeilen von `config` und `config-backup` (21), Prettier auf den neuen Dateien, und dass die 8 Szenarien, `backup-new-code.pg.test.ts`, `oauth-reauth.test.ts` und `backup-new-code-page.test.ts` vor dem Code rot waren.
+- Die echte erneute Anmeldung bei Google (`prompt=login`, `max_age=0`) und bei Microsoft, also ob der Anbieter wirklich neu anmeldet und `/auth/callback` danach zu `/config/backup` zurückführt: Ich habe nur `oauth.ts`, `auth/login/+server.ts`, `login-flow.ts` und `generateJwt` gelesen (`auth_time` wird beim Callback neu gesetzt und beim Refresh beibehalten). E2E kann Google nicht abbilden.
+- Den Wortlaut von #718 «Decided (product owner)» habe ich nicht selbst gelesen. Ich habe mich auf den Wortlaut im Auftrag und auf `docs/reviews/718c-fachreview-1.md` (mit Triage) gestützt.
+
+Geprüft: alle 39 geänderten Dateien. Dazu gehören Auth und Session (das MCP-`access-key` ruft nur GET-Pfade auf und erreicht weder den Code noch `new-code`), die Fehlercodes mit `backend_*` in allen vier `messages/*.json`, die Verträge, die Szenarien und die Screenplay-Schichten, die Einträge in screens.json, accessibility.feature und sprachen-bildschirme.feature, die Isolation (Aufräumen setzt die Codes zurück, das a11y-Konto liegt unter `withLock`, `setLocalAccount` setzt die Fehlversuche zurück) und die Rot-Begründung der Backend- und Frontend-Tests.
+
+## Triage
+
+- C-1: fixed; test «führt zwei gleichzeitig gestartete Sicherungen nacheinander aus …», red in 2 of 3 runs with the serialization taken out.
+- C-2: the Sperre fixed with a test («lehnt während der Sperre ab …»); the branch without a password (Google) is covered by the backend test «verlangt mit Google …» and the a11y look `new-code-shown`; the BFF's 403/423 pass-through stays a Minor.
+- C-3: stays a Minor (the a11y row `config backup-links` shows the link on the fresh installation; its absence without a folder has no test).
+- C-4: the same as fach review 718c-2 V-1, fixed there.

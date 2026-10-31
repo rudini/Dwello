@@ -96,7 +96,9 @@ export function validateProviderConfig(provider: OAuthProvider): boolean {
  * @param state CSRF protection state parameter
  * @returns Authorization URL to redirect user to
  */
-export function generateOAuthUrl(provider: OAuthProvider, state: string): string {
+/** `again`: a new sign-in at the provider, not the session the browser still holds there (#718: a new
+ * Wiederherstellungscode) */
+export function generateOAuthUrl(provider: OAuthProvider, state: string, { again = false } = {}): string {
 	const config = providerConfigs[provider];
 	const creds = getClientCredentials(provider);
 
@@ -119,6 +121,10 @@ export function generateOAuthUrl(provider: OAuthProvider, state: string): string
 	// Google lets the visitor pick the account, else it signs a refused account in again at once (#51); not
 	// «consent» (#82: no lasting access)
 	if (provider === 'google') params.set('prompt', 'select_account');
+	if (again) {
+		params.set('prompt', 'login');
+		params.set('max_age', '0');
+	}
 
 	return `${config.authorizeUrl}?${params.toString()}`;
 }

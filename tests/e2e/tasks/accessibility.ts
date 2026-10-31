@@ -42,9 +42,26 @@ import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } fro
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
-import { FRESH_APP, FRESH_KI_STUB, resetFreshBackup } from '../fixtures/fresh-installation';
-import { backupConfirmation, backupError, backupWarning } from '../targets/sicherung';
-import { confirmBackupCode, freshBackupSetUp } from './sicherung';
+import { FRESH_ACCOUNT, FRESH_APP, FRESH_KI_STUB, freshLocalAccount, resetFreshBackup } from '../fixtures/fresh-installation';
+import {
+	backupCode,
+	backupConfirmation,
+	backupError,
+	backupSettingsLink,
+	backupWarning,
+	newCodeButton,
+	newCodeConfirmation,
+	newCodeGoogleLink,
+	newCodePasswordInput
+} from '../targets/sicherung';
+import {
+	NEW_CODE_PAGE,
+	confirmBackupCode,
+	createNewCode,
+	freshBackupSetUp,
+	signInFreshWithPassword,
+	signedInFreshWithGoogleAnHourAgo
+} from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
 import { userMenuButton } from '../targets/app-frame';
@@ -205,6 +222,12 @@ const createPartly = (building: string): Activity => (actor) => {
 	);
 };
 
+// The new code shown: made with Google signed in just now, unless an earlier look made it and it still waits
+const newCodeShown: Activity = async (actor) => {
+	if (!(await actor.answer(Visibility.of(backupCode)))) await actor.attemptsTo(Click.on(newCodeButton));
+	await actor.attemptsTo(Wait.until(backupCode));
+};
+
 // What a user does to reach each state
 const states: Record<string, (example: Example, viewport: Viewport) => Activity> = {
 	default: () => async () => {},
@@ -229,6 +252,27 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'), Wait.until(backupError)),
 	'backup-confirmed': () => Wait.until(backupConfirmation),
 	'backup-stale': () => Wait.until(backupWarning),
+	// #718, part 3: «Neuer Wiederherstellungscode» signed in with a password (the account made by inTurn), with Google an
+	// hour ago, and with the new code shown, refused and confirmed
+	'backup-links': () => Wait.until(backupSettingsLink),
+	'new-code-password': () => (actor) =>
+		actor.attemptsTo(
+			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),
+			Navigate.to(NEW_CODE_PAGE),
+			Wait.until(newCodePasswordInput)
+		),
+	'new-code-password-error': () => (actor) =>
+		actor.attemptsTo(
+			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),
+			createNewCode('falsches-Passwort'),
+			Wait.until(backupError)
+		),
+	'new-code-again': () => (actor) =>
+		actor.attemptsTo(signedInFreshWithGoogleAnHourAgo, Navigate.reload, Wait.until(newCodeGoogleLink)),
+	'new-code-shown': () => newCodeShown,
+	'new-code-confirmed': () => Wait.until(newCodeConfirmation),
+	'new-code-error': () => (actor) =>
+		actor.attemptsTo(newCodeShown, confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'), Wait.until(backupError)),
 	'ki-model-loading': () => Wait.until(kiModelLoading),
 	'ki-model-failed': () => Wait.until(kiModelLoading),
 	// #580: the page «KI» with a provider chosen (fields and checklist), and that choice saved without input
@@ -732,7 +776,7 @@ const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: path === '/backup' || ['backup-stale', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
+			: path === '/backup' || path.startsWith('/config/backup') || ['backup-stale', 'backup-links', 'ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
 				? FRESH_APP
 				: '';
 
@@ -746,13 +790,16 @@ const inTurn =
 					try {
 						// #718: only the fresh installation has a folder for the Sicherung; «Sicherung einrichten» is seen
 						// before a code is confirmed, every other screen after (else it leads there)
-						if (example.path === '/backup') resetFreshBackup();
-						else if (example.state === 'backup-stale') resetFreshBackup('stale');
-						else await actor.attemptsTo(freshBackupSetUp);
+						if (example.state.startsWith('new-code-password')) freshLocalAccount('add');
+						// «Neuer Wiederherstellungscode» starts without a new code from an earlier look
+						if (example.path === '/backup' || example.path.startsWith('/config/backup')) resetFreshBackup();
+						if (example.state === 'backup-stale') resetFreshBackup('stale');
+						else if (example.path !== '/backup') await actor.attemptsTo(freshBackupSetUp);
 						await actor.attemptsTo(look);
 					} finally {
 						// the others expect a code they can confirm, not one that cannot encrypt
 						if (example.state === 'backup-stale') resetFreshBackup();
+						if (example.state.startsWith('new-code-password')) freshLocalAccount('remove');
 						if (['ki-model-offline', 'ki-none', 'upload-ki-none'].includes(example.state)) await actor.attemptsTo(localKiAnswersAgain);
 					}
 				})

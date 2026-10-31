@@ -184,6 +184,16 @@
 - [x] Review: `docs/reviews/948-review-1.md` (C-1 Minor fixed: the rule names the `Spec change approved` line)
 - [x] PR: pushed after this archive
 
+## Session: #718 part 3, «Neuer Wiederherstellungscode» (2026-10-30)
+
+- [x] `@wip` scenarios first; fach review of step 1: `docs/reviews/718c-fachreview-1.md` (V-1 Major fixed: a backup right after the confirmation; V-2 Major a product decision: #953)
+- [x] Backend: `POST /api/v1/backup/new-code` (the password again, or a sign-in with Google of the last 10 minutes), a new code waits 30 minutes, `BACKUP_CODE_EXPIRED`, Sicherungen one after the other; frontend: `/config/backup`, the card in «Einstellungen», `reauth=1` → `prompt=login`; seen red
+- [x] a11y and language rows: `config` (backup-links), `config-backup` (7 states)
+- [x] Code review: `docs/reviews/718c-review-1.md` (no Blocker/Major), closing round `718c-review-2.md` (C-5 fixed)
+- [x] Fach review step 5: `718c-fachreview-2.md` (V-1 Major fixed), `-3.md`, `-4.md` (closed)
+- [x] Personas: `helga-718c.md` (P-1 Major fixed; `-2`), `sven-718c.md` (P-1, P-2 Major fixed; `-2`), `marco-718c.md`, `weber-718c.md`, `anna-718c.md` (P-1 Major fixed; `-2`); Minors met by several personas: #956, #957
+- [x] No scenario for an expired code: the 30 minutes need the server clock; `backup-new-code.pg.test.ts`
+- [x] PR `Fixes #718`, `Fixes #957`: pushed after this archive
 ## Session: #951 Protokoll names access keys and AI program queries
 
 - [x] @wip scenario «Das Protokoll nennt die Zugangsschlüssel und die Abrufe von KI-Programmen» (`settings.feature`), seen red at the old description
@@ -208,3 +218,12 @@
 - [x] Firefox (loaded with the product owner's approval): «Suche ohne Treffer» not reproduced (90, 240 and 507 runs green); comment on #954
 - [x] No review of its own: a test-only CI fix (Workflow 7)
 - [x] PR `Refs #954`: pushed after this archive
+
+## Session: #953 restore keeps the newer Wiederherstellungscode (2026-10-31)
+
+- [x] Decisions of 17 needs-decision issues recorded (product owner: decide by the recommendations); #495 closed (done in #817/#943); #959 opened (#523 option B)
+- [x] pg test: a restore of an older Sicherung keeps the newer code (seen red: the new Sicherung opened only with the old code)
+- [x] `restoreBackup` reads the code in force before the restore and writes it back after the migrations (`backend/src/services/backup.service.ts`)
+- [x] `docs/installation.md`: which Notfallblatt opens which backup
+- [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
+- [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
