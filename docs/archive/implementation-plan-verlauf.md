@@ -384,3 +384,11 @@
 - [x] Root cause from the job log: the Verlauf names the new PDF before «PDF erstellen» ends (#968); the re-render takes the download click
 - [x] `generateStatementPdf` waits for the success toast; the 29 scenarios that make a PDF pass in chromium (no Firefox locally)
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #529 Glossar «Nicht aktuelle Abrechnung»
+
+- [x] fach-reviewer checks the proposed row against what the code counts, as decided in #529 (`docs/reviews/529-fachreview-1.md`)
+- [x] Glossary row «Nicht aktuelle Abrechnung» in the wording the review corrected (V-1 to V-3), with fr/it/en from the UI
+- [x] V-4 and V-5 existed before (issues #980, #981); V-6 (Minor) stays in the report
+- [x] No scenario, no further review round: glossary only
+- [x] PR: pushed after this archive
