@@ -148,7 +148,9 @@
 		deadline: m.statements_sent_pdf_changed_deadline,
 		refund_by: m.statements_sent_pdf_changed_refund_by
 	};
-	const pdfAdvice = $derived(data.pdfChange ? pdfChanged[data.pdfChange] : undefined);
+	const pdfAdvice = $derived(
+		data.pdfChange && Object.hasOwn(pdfChanged, data.pdfChange) ? pdfChanged[data.pdfChange] : undefined
+	);
 </script>
 
 <svelte:head>

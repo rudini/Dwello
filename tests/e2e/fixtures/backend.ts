@@ -382,6 +382,11 @@ export function testData(api: CallTheApi) {
 		},
 
 		// `which`: the key of the statement, «Berichtigte Abrechnung» for the one that replaced it (#447)
+		// sent as a landlord sends a letter: Dwello keeps the PDF as sent as its Dokument (#449, #524); needs the IBAN
+		async deliverByLetter(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/send`, { byLetter: true });
+		},
+
 		async sendStatement(tenantTitle: string, year: number, which = 'Abrechnung') {
 			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},

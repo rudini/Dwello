@@ -112,7 +112,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// wants e-mail with an address: her send dialog is the e-mail one, with «Stattdessen per Brief zustellen» (#449)
 	await seed.correspondence('Anna', 'email');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
-	await seed.sendStatement('Bruno', 2025);
+	// sent by letter: its Verlauf offers the PDF as sent (#524); the IBAN every scenario sets
+	await seed.iban('CH93 0076 2011 6238 5295 7');
+	await seed.deliverByLetter('Bruno', 2025);
 	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
 	// wants e-mail without an address: the send dialog offers only the letter; sending it by e-mail is refused (#86, #449)

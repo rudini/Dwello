@@ -5,6 +5,7 @@
 
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatDate, formatDateTime } from '$lib/utils/format';
 
@@ -81,9 +82,14 @@
 			{/each}
 		</dl>
 		{#if delivery?.id}
-			<a class="text-ink underline" href="/documents/{delivery.id}/pdf" data-testid="statement-history-sent-pdf"
-				>{m.statements_history_sent_pdf()}</a
-			>
+			<div>
+				<Button
+					variant="secondary"
+					href="/documents/{delivery.id}/pdf"
+					icon="document-download"
+					testid="statement-history-sent-pdf">{m.statements_history_sent_pdf()}</Button
+				>
+			</div>
 		{/if}
 	</Panel>
 {/if}
