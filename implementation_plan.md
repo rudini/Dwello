@@ -8,12 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: #953 restore keeps the newer Wiederherstellungscode (2026-10-31)
-
-- [x] Decisions of 17 needs-decision issues recorded (product owner: decide by the recommendations); #495 closed (done in #817/#943); #959 opened (#523 option B)
-- [x] pg test: a restore of an older Sicherung keeps the newer code (seen red: the new Sicherung opened only with the old code)
-- [x] `restoreBackup` reads the code in force before the restore and writes it back after the migrations (`backend/src/services/backup.service.ts`)
-- [x] `docs/installation.md`: which Notfallblatt opens which backup
-- [ ] code-reviewer round
-- [ ] PR (No scenario: the restore is a Betreiber command outside the E2E stack)
