@@ -33,6 +33,7 @@
 		"fitness": "bun tools/fitness/fitness.ts",
 		"fitness:p1": "bun tools/fitness/p1-benchmark.ts",
 		"fitness:p2": "bun tools/fitness/p2-benchmark.ts",
+		"fitness:r1": "bun tools/fitness/r1-benchmark.ts",
 		"deps:graph": "ARCH_OUT=build/deps bun tools/arch-baseline/02-imports.ts >/dev/null && ARCH_OUT=build/deps bun tools/arch-baseline/graph.ts | dot -Tsvg -o build/deps/modules.svg && echo build/deps/modules.svg"
 	},
 	"dependencies": {
