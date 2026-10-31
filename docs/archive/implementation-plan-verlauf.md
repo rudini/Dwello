@@ -392,3 +392,11 @@
 - [x] V-4 and V-5 existed before (issues #980, #981); V-6 (Minor) stays in the report
 - [x] No scenario, no further review round: glossary only
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #980 Rechnungsseite warnt nach dem Berichtigen weiter
+
+- [x] pg test (`statement-invoices.pg.test.ts`) and scenario «Nach dem Berichtigen warnt die geänderte Rechnung nicht mehr», both seen red without the fix
+- [x] `invoiceStatements`: a replaced statement misses nothing (`isReplaced`); `billedIn` and `statements` keep it
+- [x] code-reviewer `docs/reviews/980-review-1.md` (C-1 Minor fixed: docstring and API spec)
+- [x] Persona Dr. Weber `docs/design/personas/weber-980.md`: P-1 to P-3 Minor, existed before (P-3 = 529-fachreview-1 V-6); stay in the report
+- [x] PR: pushed after this archive
