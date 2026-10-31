@@ -39,7 +39,7 @@ import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
 import { carriable, carriedOverId, carryChanged, countedBy, openCarry } from './carry-over';
-import type { StatementWithDetails } from '../api/statement';
+import type { PdfChange, StatementWithDetails } from '../api/statement';
 
 export interface StatementFilters {
 	search?: string;
@@ -646,7 +646,7 @@ export async function createStatement(
 export async function updateStatement(
 	id: string,
 	data: Partial<NewUtilityStatement>
-): Promise<StatementWithDetails | null> {
+): Promise<(StatementWithDetails & { pdfChange: PdfChange | null }) | null> {
 	// Check if statement exists
 	const existing = await getStatement(id);
 	if (!existing) return null;
@@ -675,7 +675,14 @@ export async function updateStatement(
 
 	if (!updated) return null;
 
-	return await getStatement(id);
+	return { ...(await getStatement(id))!, pdfChange: pdfOutdated ? pdfChangeOf(data, existing) : null };
+}
+
+/** After sending, what only the new PDF prints: the tenant learns it once it is sent to him (#524, Fachreview 524-1 V-1) */
+function pdfChangeOf(data: Partial<NewUtilityStatement>, existing: StatementWithDetails): PdfChange | null {
+	if (existing.status === 'draft') return null;
+	if ((data.paymentDeadline ?? existing.paymentDeadline) === existing.paymentDeadline) return 'notes';
+	return Number(existing.balance) < 0 ? 'refund_by' : 'deadline';
 }
 
 // A field the PDF prints, changed; the edit page sends no remark as ''

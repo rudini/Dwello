@@ -227,6 +227,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-corrected-detail | default         |
       | statement-correction-detail | default        |
       | statement-reminded-detail | default          |
+      | statement-reminded-detail | pdf-changed      |
       | statement-empty-detail | default             |
       | statement-empty-detail | send-dialog         |
       | statement-empty-detail | send-refused        |

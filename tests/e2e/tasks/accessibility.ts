@@ -538,6 +538,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(Wait.until(on.shown('not-agreed-costs')), Click.on(nextButton), Wait.until(on.formProblem)),
 	'list-scoped': () => Wait.until(on.listScope),
 	'pdf-missing': () => Wait.until(on.shown('statement-pdf-missing')),
+	// #524: the hint after a change of the Zahlungsfrist of a sent statement, set by the edit page's redirect
+	'pdf-changed': () => Wait.until(on.shown('statement-pdf-changed')),
 	'send-dialog': () => openDialog(on.sendButton),
 	// refused, so the draft stays one and each viewport can send it again
 	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),

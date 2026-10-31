@@ -925,6 +925,14 @@ describe('API-Verträge der Zahlung', () => {
 		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
 	});
 
+	// #524: a change of a sent statement names what only the new PDF prints (after the payment reset above: sent)
+	it('PUT /statements/:id einer versendeten Abrechnung liefert die Felder von statement-updated.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/statements/${statementId}`, { notes: `Ratenzahlung ${crypto.randomUUID()}` });
+		const actual = (await response.json()) as { pdfChange: string | null };
+		expect(actual.pdfChange).toBe('notes');
+		expect(drift(await sample('statement-updated'), actual)).toEqual([]);
+	});
+
 	// #499, code review 499-1 C-1: a contract since 01.07.2023 and its sent statement 2024, so a day before it is left
 	it('PUT /contracts/:id mit «Abgerechnet bis» über eine versendete Abrechnung liefert die Felder von contract-billed-until-billed.json', async () => {
 		const earlier = await createRental(crypto.randomUUID(), { startDate: '2023-07-01', monthlyAdvancePayment: '100' });

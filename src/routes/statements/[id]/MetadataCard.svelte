@@ -1,10 +1,11 @@
 <script lang="ts" module>
 	/** How the statement went out, from its own Dokument (#449) */
-	export type Delivery = { channel: 'email' | 'letter' | null; recipient: string | null; sentAt: string | null };
+	export type Delivery = { id?: string; channel: 'email' | 'letter' | null; recipient: string | null; sentAt: string | null };
 </script>
 
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatDate, formatDateTime } from '$lib/utils/format';
 
@@ -42,14 +43,19 @@
 				}
 	);
 
+	// a PDF made after the sending is a new one: the sent one stays as its Dokument (#524, Fachreview 524-1 V-3)
+	// TODO(fachlich prüfen, #965)
+	const newPdf = $derived(!!pdfGeneratedAt && !!delivery?.sentAt && pdfGeneratedAt > delivery.sentAt);
+	const pdfRow = $derived({
+		label: newPdf ? m.statements_history_new_pdf() : m.statements_pdf_created(),
+		date: pdfGeneratedAt && formatDateTime(pdfGeneratedAt)
+	});
 	const dates = $derived(
 		[
 			{ label: m.statements_history_created(), date: createdAt && formatDateTime(createdAt) },
-			{
-				label: m.statements_pdf_created(),
-				date: pdfGeneratedAt && formatDateTime(pdfGeneratedAt)
-			},
+			...(newPdf ? [] : [pdfRow]),
 			{ label: sent.label, date: sentOn && sent.date },
+			...(newPdf ? [pdfRow] : []),
 			...paymentResets.map((reset) => ({
 				label: m.statements_history_payment_reset({
 					date: reset.paidDate ? formatDate(reset.paidDate) : '–'
@@ -75,5 +81,15 @@
 				</div>
 			{/each}
 		</dl>
+		{#if delivery?.id}
+			<div>
+				<Button
+					variant="secondary"
+					href="/documents/{delivery.id}/pdf"
+					icon="document-download"
+					testid="statement-history-sent-pdf">{m.statements_history_sent_pdf()}</Button
+				>
+			</div>
+		{/if}
 	</Panel>
 {/if}

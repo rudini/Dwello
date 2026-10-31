@@ -42,7 +42,9 @@ import {
 	oldAddressWarningText,
 	advancePaidOfStatement,
 	advanceDiffersText,
-	partialPaymentAdvice
+	partialPaymentAdvice,
+	pdfChangedAdvice,
+	sentPdfHref
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -75,6 +77,7 @@ import {
 	markStatementPaid,
 	markStatementPaidOn,
 	startMarkingPaid,
+	downloadSentPdf,
 	openResetPaymentConfirmation,
 	openSendConfirmation,
 	openStatementApartment,
@@ -715,4 +718,25 @@ Given(
 
 When('der Liegenschaftsverwalter den Übertrag als ausgeglichen markiert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(settleCarryOver);
+});
+
+// #524: what only the new PDF prints, after a change of a sent statement
+Then('rät die Abrechnung {string}', async ({ verwalter }, advice: string) => {
+	await verwalter.sees(pdfChangedAdvice).toBe(advice);
+});
+
+Then('rät die Abrechnung kein neues PDF', async ({ verwalter }) => {
+	await verwalter.sees(pdfChangedAdvice).toBeNull();
+});
+
+Then('nennt der Verlauf nach dem Versand ein neues PDF', async ({ verwalter }) => {
+	await verwalter.sees(history).toMatch(/Versendet.*Neues PDF erstellt/);
+});
+
+When('der Liegenschaftsverwalter das versendete PDF im Verlauf herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadSentPdf);
+});
+
+Then('bietet der Verlauf das versendete PDF an', async ({ verwalter }) => {
+	await verwalter.sees(sentPdfHref).toMatch(/^\/documents\/[0-9a-f-]+\/pdf$/);
 });

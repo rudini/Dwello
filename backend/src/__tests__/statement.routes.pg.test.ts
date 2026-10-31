@@ -3,6 +3,9 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { deleteStatement } from '../services/statement.service';
 import { updateTenant } from '../services/tenant.service';
@@ -230,4 +233,30 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 			expect(preview.mimeType).toBe('application/pdf');
 			expect(Buffer.from(preview.pdfBase64, 'base64').toString('latin1')).toStartWith('%PDF');
 		}));
+});
+
+// #524 (Fachreview 524-1 V-1, V-5): a change after sending names what only the new PDF prints; a draft has no PDF sent
+describe('PUT /api/v1/statements/:id nach dem Versand', () => {
+	// a sent statement is not deleted: back to a draft for afterAll
+	afterAll(() => db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId)).execute());
+
+	it('nennt, was nur im neuen PDF steht, und bei einem Entwurf nichts', async () => {
+		const draft = (await call(`/${statementId}`, json('PUT', { notes: 'Entwurf' }))) as { pdfChange: string | null };
+		await call(`/${statementId}/status`, json('PUT', { status: 'sent' }));
+		const notes = (await call(`/${statementId}`, json('PUT', { notes: 'Ratenzahlung vereinbart' }))) as { pdfChange: string | null };
+		const same = (await call(`/${statementId}`, json('PUT', { notes: 'Ratenzahlung vereinbart' }))) as { pdfChange: string | null };
+		const refundBy = (await call(`/${statementId}`, json('PUT', { paymentDeadline: '2026-12-31', notes: 'Ratenzahlung vereinbart' }))) as {
+			pdfChange: string | null;
+			balance: string;
+		};
+
+		// the rental pays an Akonto and has no costs: a Rückerstattung, whose date the tenant learns from the PDF
+		expect([Number(refundBy.balance) < 0, draft.pdfChange, notes.pdfChange, same.pdfChange, refundBy.pdfChange]).toEqual([
+			true,
+			null,
+			'notes',
+			null,
+			'refund_by'
+		]);
+	});
 });

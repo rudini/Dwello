@@ -48,6 +48,7 @@
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
+		"pdf-changed": "A sent statement right after its Zahlungsfrist was changed: the hint that the PDF sent shows the earlier one and the tenant needs the new PDF (#524).",
 		"mark-paid-early": "The dialog that marks a statement as paid, with a day before the Abrechnungsdatum entered and confirmed once: the question whether to save it anyway (#448).",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
 		"carry-settle-dialog": "The confirmation before an open Übertrag is marked as settled by hand open, with what it means and that it cannot be undone (#506).",
@@ -749,8 +750,12 @@
 		{
 			"name": "statement-reminded-detail",
 			"path": "/statements/{remindedStatement}",
+			"queries": {
+				"pdf-changed": "?pdf-change=deadline"
+			},
 			"states": [
-				"default"
+				"default",
+				"pdf-changed"
 			]
 		},
 		{

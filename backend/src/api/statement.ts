@@ -9,6 +9,9 @@ import type { CorrespondenceChannel, Language, StoredStatementStatus, UtilitySta
 /** A statement's status as the API says it: a sent one past its payment deadline is `overdue` */
 export type StatementStatus = StoredStatementStatus | 'overdue';
 
+/** After a change of a sent statement, what only the new PDF prints (#524) */
+export type PdfChange = 'notes' | 'deadline' | 'refund_by';
+
 /** What a statement's Saldo asks of whom, by the Swiss day (#815, `paymentOf`) */
 export interface StatementPayment {
 	unpaid: boolean;
