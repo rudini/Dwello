@@ -29,3 +29,14 @@ Funktionalität: Abrechnung bearbeiten
   Szenario: Zahlungsfrist fehlt
     Wenn der Liegenschaftsverwalter die Zahlungsfrist leert und speichert
     Dann meldet das Feld «Zahlungsfrist» "Die Frist fehlt. Bitte geben Sie ein Datum ein."
+
+  # #966 (A, Fachreview 524-1 M-2): der Mieter hat das PDF mit der Zahlungsfrist beim Versand; eine frühere, die ihm
+  # niemand gesagt hat, macht die Abrechnung nicht überfällig
+  @wip
+  Szenario: Die Zahlungsfrist einer versendeten Abrechnung lässt sich nicht vorverlegen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Zahlungsfrist auf "2025-01-15" vorverlegt
+    Dann meldet das Feld «Zahlungsfrist» "Die Zahlungsfrist kann nicht vor"

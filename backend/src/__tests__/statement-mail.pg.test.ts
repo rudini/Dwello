@@ -130,7 +130,8 @@ describe('Abrechnung per E-Mail versenden', () => {
 		expect(mail.text).toContain(`Bitte bezahlen Sie den Betrag bis ${formatSwissDate(result.statement!.paymentDeadline)} mit dem Zahlteil.`);
 		expect(mail.attachments[0].contentType).toBe('application/pdf');
 		expect(mail.attachments[0].content.subarray(0, 4).toString()).toBe('%PDF');
-		expect(result.document).toMatchObject({ type: 'statement', channel: 'email', status: 'sent', title: 'Nebenkostenabrechnung', paymentDeadline: null });
+		// #966 (A): with the Zahlungsfrist it went out with, so a later one is measured against it
+		expect(result.document).toMatchObject({ type: 'statement', channel: 'email', status: 'sent', title: 'Nebenkostenabrechnung', paymentDeadline: result.statement!.paymentDeadline });
 		// #449 (Punkt 7): the Verlauf names the address it went to
 		expect(result.document).toMatchObject({ recipient: 'nora.beispiel@dwello.test' });
 		const [stored] = await storedFor(id);
@@ -288,6 +289,26 @@ describe('Abrechnung per Brief', () => {
 });
 
 // #534: a sent statement whose e-mail did not reach the tenant goes again by letter, dated anew
+// #966 (A, Fachreview 524-1 M-2): the tenant keeps the PDF with the Zahlungsfrist it went out with; an earlier one he
+// was not told cannot make the statement overdue
+describe('Zahlungsfrist einer versendeten Abrechnung', () => {
+	const deadlineTo = (id: string, paymentDeadline: string) => api('PUT', `/api/v1/statements/${id}`, { paymentDeadline });
+
+	it('lässt sich nicht vor die Zahlungsfrist beim Versand legen, wohl aber danach', async () => {
+		const id = await draft();
+		const { statement } = await send(id);
+		const sent = statement!.paymentDeadline;
+
+		const earlier = await deadlineTo(id, daysAfter(sent, -1));
+		const later = await deadlineTo(id, daysAfter(sent, 10));
+
+		expect(earlier.status).toBe(400);
+		expect(await earlier.json()).toMatchObject({ code: 'STATEMENT_DEADLINE_BEFORE_SENT', params: { date: sent } });
+		expect(later.status).toBe(200);
+		expect(((await later.json()) as { paymentDeadline: string }).paymentDeadline).toBe(daysAfter(sent, 10));
+	});
+});
+
 describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 	const redeliver = async (id: string) => {
 		const response = await api('POST', `/api/v1/statements/${id}/redeliver`);
