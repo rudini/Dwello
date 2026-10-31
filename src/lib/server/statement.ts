@@ -147,6 +147,7 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		resent: (data.resent ?? []).map((sending) => ({ ...sending, sentAt: sending.sentAt ? String(sending.sentAt) : null, createdAt: String(sending.createdAt) })),
 		newPdfToSend: data.newPdfToSend ?? null,
 		newPdfMadeAt: data.newPdfMadeAt ? String(data.newPdfMadeAt) : null,
+		pdfBeforeChange: (data.pdfBeforeChange ?? []).map((kept) => ({ id: kept.id, madeAt: String(kept.madeAt) })), // #969
 		// what the Saldo asks of whom, by the Swiss day (#815)
 		unpaid: data.unpaid === true,
 		claimed: data.claimed === true,

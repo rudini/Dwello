@@ -175,6 +175,27 @@ describe('Daten eines Mieters exportieren', () => {
 		}
 	});
 
+	// #969 (Fachreview 969-1 V-7): sent without a Dokument, the PDF kept before the first change is the closest to the sent one
+	it('nimmt ohne Dokument des Versands das PDF vor der ersten Änderung', async () => {
+		const [sent] = await db.select().from(utilityStatements).where(eq(utilityStatements.statementNumber, statementNumber));
+		const own = { tenantId: rental.tenant, statementId: sent.id, fileName: 'x.pdf', type: 'pdf_before_change' as const, title: 'PDF vor der Änderung' };
+		const added = await db
+			.insert(documents)
+			.values([
+				{ ...own, content: pdf('before-first'), createdAt: new Date('2025-02-01T09:00:00Z') },
+				{ ...own, content: pdf('before-second'), createdAt: new Date('2025-03-01T09:00:00Z') }
+			])
+			.returning({ id: documents.id });
+		try {
+			const { files } = await exportOf(rental.tenant);
+			const content = (path: string) => Buffer.from(files.find((file) => file.path === path)!.content, 'base64').toString();
+
+			expect(content(`abrechnungen/${statementNumber}.pdf`)).toContain('before-first');
+		} finally {
+			for (const { id } of added) await db.delete(documents).where(eq(documents.id, id));
+		}
+	});
+
 	it('benennt Dateien sicher und eindeutig, mit ihrer Endung (Fachreview F-11)', async () => {
 		const photo = { tenantId: rental.tenant, type: 'upload' as const, fileName: 'IMG.JPG', mimeType: 'image/jpeg' as const, content: pdf('photo') };
 		const added = await db

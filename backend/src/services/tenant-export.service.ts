@@ -80,6 +80,8 @@ export async function exportTenant(id: string) {
 	const ofType = (type: string) => tenantDocuments.filter((document) => document.type === type);
 	// the copy sent by e-mail is exactly what the tenant received; the stored PDF otherwise
 	const mailed = new Map(ofType('statement').map((copy) => [copy.statementId, copy.content]));
+	// sent without a Dokument: the PDF before the first change, rather than the one made after it (#969, Fachreview 969-1 V-7)
+	const keptFirst = new Map(ofType('pdf_before_change').reverse().map((copy) => [copy.statementId, copy.content]));
 	const numbers = new Map<string, string>();
 
 	const statementRows = await db
@@ -94,7 +96,7 @@ export async function exportTenant(id: string) {
 		// a draft's PDF would carry a payment slip the tenant never received: the draft only as data, without the dates
 		// it would be sent with (persona Dr. Weber 435 P-1)
 		const draft = statement.status === 'draft';
-		const pdf = draft ? null : (mailed.get(statementId) ?? pdfBlob);
+		const pdf = draft ? null : (mailed.get(statementId) ?? keptFirst.get(statementId) ?? pdfBlob);
 		statements.push({
 			number: statement.statementNumber,
 			status: statement.status,

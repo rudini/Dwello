@@ -294,6 +294,18 @@ describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 		return { status: response.status, ...((await response.json()) as Omit<Sent, 'status'>) };
 	};
 
+	// #969 (Fachreview 969-1 V-3): marked sent without a Dokument, its stored PDF is the only copy and stays
+	it('legt das PDF einer ohne Dokument versendeten Abrechnung vor dem erneuten Zustellen ab', async () => {
+		const id = await draft();
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+		const [{ pdf }] = await db.select({ pdf: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id));
+
+		await redeliver(id);
+
+		const kept = (await storedFor(id)).filter((one) => one.type === 'pdf_before_change');
+		expect(kept.map((one) => one.content)).toEqual([pdf]);
+	});
+
 	it('datiert die Abrechnung auf heute, rechnet die Zahlungsfrist ab heute und legt das PDF als Brief ab', async () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
 		const id = await draft();

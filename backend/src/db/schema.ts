@@ -96,7 +96,7 @@ export type CorrespondenceChannel = 'email' | 'letter';
 export type StoredStatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'replaced';
 /** A stored document: a reminder, an e-mailed statement (#86) or a file the landlord uploaded; its file type (#837) */
 // statement: a sending of the statement (#86, #449; again by letter, #534); new_pdf: its PDF after a change (#968)
-export type DocumentType = 'reminder' | 'statement' | 'new_pdf' | 'upload';
+export type DocumentType = 'reminder' | 'statement' | 'new_pdf' | 'pdf_before_change' | 'upload'; // pdf_before_change: #969
 export type DocumentMimeType = 'application/pdf' | 'image/jpeg' | 'image/png';
 /** A letter's Versandstatus; an upload has none */
 export type DocumentStatus = 'sent' | 'to_send';

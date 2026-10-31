@@ -19,7 +19,8 @@
 		correctionDeclinedOn,
 		delivery = null,
 		resent = [],
-		newPdfMadeAt = null
+		newPdfMadeAt = null,
+		pdfBeforeChange = []
 	}: {
 		createdAt?: string | null;
 		pdfGeneratedAt?: string | null;
@@ -30,6 +31,7 @@
 		delivery?: Delivery | null; // without a Dokument (before #449, or no PDF) only «Versendet»
 		resent?: { id: string; newPdf: boolean; sentAt: string | null; createdAt?: string }[]; // again by letter (#534), a new PDF (#968)
 		newPdfMadeAt?: string | null; // the new PDF still to send (#968)
+		pdfBeforeChange?: { id: string; madeAt: string }[]; // sent without a Dokument: the PDFs a change discarded (#969)
 	} = $props();
 
 	// the way it went: by letter on the statement date, by e-mail to the address at its hour (#449, #404 point 7)
@@ -67,7 +69,23 @@
 	const newPdf = $derived(!newPdfMadeAt && !!pdfGeneratedAt && !!lastSent && pdfGeneratedAt > lastSent);
 	// the PDF of the first sending was made then: it stays in the Verlauf when a change discards it (534-2 P-1)
 	// a PDF made after it never takes its place (Code-Review 534close-1 C-1)
-	const firstPdfAt = $derived(delivery?.sentAt && (!pdfGeneratedAt || pdfGeneratedAt > delivery.sentAt) ? delivery.sentAt : pdfGeneratedAt);
+	// #969 (Fachreview 969-1 V-2): sent without a Dokument, the first kept copy is the PDF made before; each later
+	// one and the current PDF are new ones, after «Versendet»; the Verlauf only grows (#968)
+	const kept = $derived(delivery ? [] : pdfBeforeChange);
+	const firstPdfAt = $derived(
+		kept[0]?.madeAt ??
+			(delivery?.sentAt && (!pdfGeneratedAt || pdfGeneratedAt > delivery.sentAt)
+				? delivery.sentAt
+				: pdfGeneratedAt)
+	);
+	const afterKept = $derived(
+		kept.length
+			? [
+					...kept.slice(1).map((copy) => madeRow(copy.madeAt)),
+					...(pdfGeneratedAt ? [madeRow(pdfGeneratedAt)] : [])
+				]
+			: []
+	);
 	const pdfRow = $derived({ label: m.statements_pdf_created(), date: firstPdfAt && formatDateTime(firstPdfAt) });
 	const newPdfRow = $derived(madeRow(pdfGeneratedAt));
 	const dates = $derived(
@@ -76,6 +94,7 @@
 			pdfRow,
 			{ label: sent.label, date: sentOn && sent.date },
 			...later,
+			...afterKept,
 			...(newPdf ? [newPdfRow] : []),
 			...(newPdfMadeAt ? [madeRow(newPdfMadeAt)] : []),
 			...paymentResets.map((reset) => ({
@@ -103,6 +122,22 @@
 				</div>
 			{/each}
 		</dl>
+		{#each kept as copy (copy.id)}
+			<div>
+				<Button
+					variant="secondary"
+					href="/documents/{copy.id}/pdf"
+					icon="document-download"
+					testid="statement-history-pdf-before-change"
+					>{kept.length > 1
+						? m.statements_history_pdf_before_change_download_on({ date: formatDateTime(copy.madeAt) })
+						: m.statements_history_pdf_before_change_download()}</Button
+				>
+			</div>
+		{/each}
+		{#if kept.length}<p class="text-ink-muted">
+				{m.statements_history_pdf_before_change_hint()}
+			</p>{/if}
 		{#if sentPdfId}
 			<div>
 				<Button

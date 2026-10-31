@@ -212,7 +212,10 @@
 	<!-- after saving a change of a sent statement: what only the new PDF prints (#524, Fachreview 524-1 V-1, M-1) -->
 	{#if pdfAdvice}
 		<Alert tone="info" title={pdfAdvice()} testid="statement-pdf-changed">
-			{#if data.delivery}<p>{m.statements_sent_pdf_in_history()}</p>{/if}
+			{#if data.delivery}<p>{m.statements_sent_pdf_in_history()}</p>
+			{:else if statement.pdfBeforeChange?.length}<p>
+					{m.statements_pdf_before_change_in_history()}
+				</p>{/if}
 		</Alert>
 	{/if}
 	{#if statement.newPdfToSend}
@@ -266,6 +269,7 @@
 				delivery={data.delivery}
 				resent={statement.resent}
 				newPdfMadeAt={statement.newPdfMadeAt}
+				pdfBeforeChange={statement.pdfBeforeChange}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
 				correctionDeclinedOn={statement.correctionDeclined?.on}

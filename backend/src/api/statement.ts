@@ -67,6 +67,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob' |
 	resent?: { id: string; newPdf: boolean; sentAt: Date | null; createdAt: Date }[]; // sendings after the first (#534, #968), in the detail
 	newPdfToSend?: string | null; // the Dokument of the new PDF still to send (#968)
 	newPdfMadeAt?: Date | null; // when that new PDF was made
+	pdfBeforeChange?: { id: string; madeAt: Date }[]; // the PDFs kept before a change (#969)
 	asksPayment?: boolean;
 	superseded?: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
 	advanceChanged?: boolean; // a draft counting another Akonto than the replaced one (#464); only in the detail
