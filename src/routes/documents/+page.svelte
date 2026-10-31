@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementDocument } from '$lib/types';
-	import Alert from '$lib/ui/Alert.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import DocumentItem from './DocumentItem.svelte';
