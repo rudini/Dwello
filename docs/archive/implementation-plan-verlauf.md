@@ -363,3 +363,10 @@
 - [x] Glossary row «Dokumente geprüft» as proposed in #619 (Option 1, decided in #619), with fr/it/en in `docs/design/i18n-begriffe.md`
 - [x] No markers name #619; no scenario, no review round: glossary only
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #538 Glossar «Nicht berichtigt»
+
+- [x] Glossary row «Nicht berichtigt» as proposed in #538 (Option 1, decided in #538), with fr/it/en from the UI (`statements_history_correction_declined`)
+- [x] Marker `TODO(fachlich prüfen, #538)` removed (`backend/src/db/schema.ts`, a comment only)
+- [x] No scenario, no review round: glossary and a comment only
+- [x] PR: pushed after this archive
