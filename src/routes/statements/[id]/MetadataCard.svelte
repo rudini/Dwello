@@ -71,17 +71,19 @@
 	// a PDF made after it never takes its place (Code-Review 534close-1 C-1)
 	// #969 (Fachreview 969-1 V-2): sent without a Dokument, the first kept copy is the PDF made before; each later
 	// one and the current PDF are new ones, after «Versendet»; the Verlauf only grows (#968)
-	const kept = $derived(delivery ? [] : pdfBeforeChange);
+	// the copies stay to download also once a redelivery gave it a Dokument (Code-Review 969-1 C-2); its rows only without one
+	const kept = $derived(pdfBeforeChange);
+	const rowsOfKept = $derived(delivery ? [] : kept);
 	const firstPdfAt = $derived(
-		kept[0]?.madeAt ??
+		rowsOfKept[0]?.madeAt ??
 			(delivery?.sentAt && (!pdfGeneratedAt || pdfGeneratedAt > delivery.sentAt)
 				? delivery.sentAt
 				: pdfGeneratedAt)
 	);
 	const afterKept = $derived(
-		kept.length
+		rowsOfKept.length
 			? [
-					...kept.slice(1).map((copy) => madeRow(copy.madeAt)),
+					...rowsOfKept.slice(1).map((copy) => madeRow(copy.madeAt)),
 					...(pdfGeneratedAt ? [madeRow(pdfGeneratedAt)] : [])
 				]
 			: []

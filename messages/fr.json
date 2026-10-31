@@ -1298,6 +1298,7 @@
 	"backend_new_pdf_statement_replaced": "Le décompte est remplacé par un décompte rectifié. N’envoyez plus ce PDF.",
 	"backend_reminder_statement_redelivered": "Le décompte a entre-temps été envoyé à nouveau par lettre. N’envoyez plus ce rappel.",
 	"backend_statement_not_redeliverable": "Seul un décompte envoyé, ni payé ni remplacé, peut être remis à nouveau par lettre.",
+	"documents_pdf_before_change": "Décompte des charges, PDF avant la modification",
 	"documents_new_pdf": "Décompte des charges, nouveau PDF",
 	"documents_not_to_send_redelivered": "Ne plus envoyer : décompte envoyé à nouveau par lettre",
 	"statements_history_new_pdf_sent_letter": "Nouveau PDF envoyé par lettre",

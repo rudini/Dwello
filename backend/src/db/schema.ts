@@ -596,14 +596,14 @@ export const documents = pgTable(
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
 		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
-		type: varchar('type', { length: 30 }).$type<DocumentType>().notNull(), // reminder, statement (e-mailed, #86), upload
+		type: varchar('type', { length: 30 }).$type<DocumentType>().notNull(), // reminder, statement (e-mailed, #86), new_pdf (#968), pdf_before_change (#969), upload
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),
 		fileName: varchar('file_name', { length: 255 }).notNull(),
 		content: text('content').notNull(), // Base64 encoded file
 		mimeType: varchar('mime_type', { length: 50 }).$type<DocumentMimeType>().notNull().default('application/pdf'),
 		channel: varchar('channel', { length: 10 }).$type<CorrespondenceChannel>(), // email, letter; null for an upload
-		status: varchar('status', { length: 20 }).$type<DocumentStatus>(), // sent, to_send; null for an upload
+		status: varchar('status', { length: 20 }).$type<DocumentStatus>(), // sent, to_send; null for an upload and a PDF before the change (#969)
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
 		recipient: varchar('recipient', { length: 255 }), // the e-mail address it went to (#449); null for a letter or an upload

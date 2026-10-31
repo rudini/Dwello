@@ -1298,6 +1298,7 @@
 	"backend_new_pdf_statement_replaced": "The statement is replaced by a corrected statement. Do not send this PDF any more.",
 	"backend_reminder_statement_redelivered": "The statement has since been sent again by letter. Do not send this reminder any more.",
 	"backend_statement_not_redeliverable": "Only a sent statement that is neither paid nor replaced can be delivered again by letter.",
+	"documents_pdf_before_change": "Utility cost statement, PDF before the change",
 	"documents_new_pdf": "Utility cost statement, new PDF",
 	"documents_not_to_send_redelivered": "Do not send any more: statement sent again by letter",
 	"statements_history_new_pdf_sent_letter": "New PDF sent by letter",

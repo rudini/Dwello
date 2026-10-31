@@ -8,9 +8,6 @@ import { db } from '../db/connection';
 import { documents, tenants, utilityStatements } from '../db/schema';
 import { pdfBeforeChangeTitle } from './reminder-letter';
 
-// #534 (Fachreview 534-1 M-1): only reminders made since the statement's last sending count (both by the database's
-// clock); one before it was delivered
-// again by letter went to a tenant who had not received it
 /**
  * #969 (A): a statement sent without a Dokument of its sending (before #449, or marked sent through the status route)
  * has its stored PDF as the only copy; before a change discards it, it stays as a Dokument «PDF vor der Änderung»,
@@ -18,6 +15,9 @@ import { pdfBeforeChangeTitle } from './reminder-letter';
  * 969-1 V-4: every copy discarded, so also the PDF made after a first change)
  * TODO(fachlich prüfen, #994): «PDF vor der Änderung» has no glossary row yet
  */
+/** A Dokument's file name: title and statement number, without characters a file system refuses */
+export const fileNameOf = (title: string, statementNumber: string) => `${title} ${statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+
 export async function keepPdfBeforeChange(statementId: string) {
 	const [statement] = await db
 		.select({
@@ -44,13 +44,16 @@ export async function keepPdfBeforeChange(statementId: string) {
 		statementId,
 		type: 'pdf_before_change',
 		title,
-		fileName: `${title} ${statement.number}.pdf`.replace(/[\\/:*?"<>|]/g, '_'),
+		fileName: fileNameOf(title, statement.number),
 		content: statement.pdf,
 		...(statement.madeAt && { createdAt: statement.madeAt })
 	}).returning({ id: documents.id });
 	return kept.id;
 }
 
+// #534 (Fachreview 534-1 M-1): only reminders made since the statement's last sending count (both by the database's
+// clock); one before it was delivered
+// again by letter went to a tenant who had not received it
 export const sinceDelivery = (statementId: SQLWrapper | string) => sql`${documents.createdAt} >= coalesce((
 	select max(delivery.created_at) from documents delivery
 	where delivery.statement_id = ${statementId} and delivery.type = 'statement' and delivery.status = 'sent'

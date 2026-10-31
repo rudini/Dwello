@@ -294,6 +294,19 @@ describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 		return { status: response.status, ...((await response.json()) as Omit<Sent, 'status'>) };
 	};
 
+	// #969 (Code-Review 969-1 C-4): a copy was never sent by Dwello; marking it sent would make it a sending
+	it('lässt ein PDF vor der Änderung nicht als versendet markieren', async () => {
+		const id = await draft();
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+		await redeliver(id);
+		const [kept] = (await storedFor(id)).filter((one) => one.type === 'pdf_before_change');
+
+		const marked = await api('PUT', `/api/v1/documents/${kept.id}/sent`);
+
+		expect(marked.status).not.toBe(200);
+		expect((await storedFor(id)).find((one) => one.id === kept.id)).toMatchObject({ status: null });
+	});
+
 	// #969 (Fachreview 969-1 V-3): marked sent without a Dokument, its stored PDF is the only copy and stays
 	it('legt das PDF einer ohne Dokument versendeten Abrechnung vor dem erneuten Zustellen ab', async () => {
 		const id = await draft();
@@ -303,7 +316,7 @@ describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 		await redeliver(id);
 
 		const kept = (await storedFor(id)).filter((one) => one.type === 'pdf_before_change');
-		expect(kept.map((one) => one.content)).toEqual([pdf]);
+		expect(kept.map((one) => one.content)).toEqual([pdf!]);
 	});
 
 	it('datiert die Abrechnung auf heute, rechnet die Zahlungsfrist ab heute und legt das PDF als Brief ab', async () => {

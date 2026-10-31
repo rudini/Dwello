@@ -1298,6 +1298,7 @@
 	"backend_new_pdf_statement_replaced": "Il conteggio è sostituito da un conteggio rettificato. Non spedisca più questo PDF.",
 	"backend_reminder_statement_redelivered": "Nel frattempo il conteggio è stato inviato di nuovo per lettera. Non spedisca più questo sollecito.",
 	"backend_statement_not_redeliverable": "Solo un conteggio inviato, né pagato né sostituito, può essere recapitato di nuovo per lettera.",
+	"documents_pdf_before_change": "Conteggio spese accessorie, PDF prima della modifica",
 	"documents_new_pdf": "Conteggio spese accessorie, nuovo PDF",
 	"documents_not_to_send_redelivered": "Non più da inviare: conteggio inviato di nuovo per lettera",
 	"statements_history_new_pdf_sent_letter": "Nuovo PDF inviato per lettera",

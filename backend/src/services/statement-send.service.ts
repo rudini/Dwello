@@ -15,7 +15,7 @@ import { documents, utilityStatements, type Language } from '../db/schema';
 import { newPdfTitle, statementMail, statementTitle } from './reminder-letter';
 import { changeStatementStatus, generateStatementPdf, qrBillConfig } from './statement-pdf.service';
 import { datedToday, getStatement } from './statement.service';
-import { keepPdfBeforeChange } from './delivery';
+import { fileNameOf, keepPdfBeforeChange } from './delivery';
 import { getTenant } from './tenant.service';
 
 export async function sendStatement(id: string, byLetter = false) {
@@ -67,7 +67,6 @@ export async function sendStatement(id: string, byLetter = false) {
 	return { statement: sent, document };
 }
 
-const fileNameOf = (title: string, statementNumber: string) => `${title} ${statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
 
 /**
  * The landlord delivers the PDF: Dwello records the statement as sent and keeps the PDF as sent as a Dokument by letter

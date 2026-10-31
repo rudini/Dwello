@@ -411,7 +411,7 @@ with a tenant who has no contracts).
 ```sql
 tenant_id      UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 statement_id   UUID REFERENCES utility_statements ON DELETE RESTRICT
-type           VARCHAR(30)  NOT NULL   -- reminder | statement (sent by e-mail #86, by letter #449, again by letter #534) | new_pdf (the PDF after a change of a sent statement, #968) | upload
+type           VARCHAR(30)  NOT NULL   -- reminder | statement (sent by e-mail #86, by letter #449, again by letter #534) | new_pdf (the PDF after a change of a sent statement, #968) | pdf_before_change (the stored PDF of a statement sent without a Dokument, kept before a change, a payment reset or a redelivery discards it; no channel, no status, #969) | upload
 reminder_level INTEGER                 -- Mahnstufe: 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL

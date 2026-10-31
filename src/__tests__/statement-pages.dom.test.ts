@@ -1888,7 +1888,7 @@ describe('Abrechnungsdetail', () => {
 		} as never);
 
 		const history = text().replace(/\s+/g, ' ');
-		const links = allByTestId<HTMLAnchorElement>('statement-history-pdf-before-change');
+		const links = allByTestId('statement-history-pdf-before-change');
 		expect(links.map((link) => link.getAttribute('href'))).toEqual(['/documents/kept-1/pdf', '/documents/kept-2/pdf']);
 		expect(links[1].textContent).toContain('PDF vor der Änderung vom 05.10.2026, 11:00 herunterladen');
 		expect(history).toContain('PDF erstellt 28.09.2026, 10:00');
@@ -2009,6 +2009,20 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
+	// #969 (Code-Review 969-1 C-2): nach «Erneut per Brief zustellen» hat sie ein Dokument des Versands; die Kopie bleibt
+	it('bietet das PDF vor der Änderung auch nach dem erneuten Zustellen an', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({ status: 'sent', pdfBeforeChange: [{ id: 'kept-1', madeAt: '2026-09-28T08:00:00Z' }] } as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-20T08:15:00Z' }
+			},
+			form: null
+		} as never);
+
+		expect(byTestId<HTMLAnchorElement>('statement-history-pdf-before-change')!.getAttribute('href')).toBe('/documents/kept-1/pdf');
+	});
+
 	// #969 (Fachreview 969-1 V-6): ohne Dokument des Versands sagt der Hinweis, wo das PDF vor der Änderung liegt
 	it('nennt nach einer Änderung das PDF vor der Änderung im Verlauf', () => {
 		show(StatementPage, {
