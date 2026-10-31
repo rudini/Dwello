@@ -352,8 +352,13 @@ export async function confirmBackupCode(typed: string) {
 	// a new code not confirmed within 30 minutes: the code from before applies (fach review 718c-2 V-1)
 	if (!pending && (await pool.query('SELECT 1 FROM backup_codes WHERE confirmed_at IS NULL')).rowCount)
 		throw new CodedError('BACKUP_CODE_EXPIRED', 'The new code expired before its confirmation');
-	if (!pending || normalizedCode(typed) !== normalizedCode(pending.pending_code))
-		throw new CodedError('BACKUP_CODE_MISMATCH', 'The code does not match the one shown');
+	const shown = normalizedCode(pending?.pending_code ?? '');
+	const code = normalizedCode(typed);
+	// what is missing, not «does not match» (#947): a long press on a phone selects only the first group
+	if (!code) throw new CodedError('BACKUP_CODE_EMPTY', 'No code typed');
+	if (code.length < shown.length)
+		throw new CodedError('BACKUP_CODE_INCOMPLETE', 'The code is incomplete', { typed: code.length, of: shown.length });
+	if (!pending || code !== shown) throw new CodedError('BACKUP_CODE_MISMATCH', 'The code does not match the one shown');
 	await pool.query(
 		'UPDATE backup_codes SET confirmed_at = now(), pending_code = NULL WHERE id = $1',
 		[pending.id]

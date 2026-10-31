@@ -129,7 +129,7 @@
 		"new-code-again": "«Neuer Wiederherstellungscode» signed in with Google more than 10 minutes ago: the link to sign in with Google again.",
 		"new-code-shown": "«Neuer Wiederherstellungscode» after «Neuen Code erstellen»: the new code, the Notfallblatt and the code typed again.",
 		"new-code-error": "«Neuer Wiederherstellungscode» with a code typed that is not the one shown: the refusal above the field.",
-		"new-code-confirmed": "«Neuer Wiederherstellungscode» right after the new code was confirmed (?confirmed): the confirmation.",
+		"new-code-confirmed": "«Neuer Wiederherstellungscode» right after the new code was confirmed (?confirmed): the confirmation and the way back to «Einstellungen», no form for another code (#956).",
 		"backup-confirmed": "The overview right after «Sicherung einrichten» (?backup=confirmed): the confirmation that Dwello backs up every day (#718).",
 		"setup-error": "The setup refused: the two passwords differ. The setup screen («Dwello einrichten», #577) runs in every state on the empty instance of the E2E stack, which has no account and no provider.",
 		"ki-model-loading": "Overview while the local KI downloads its model, on the fresh installation of the E2E stack (#577).",

@@ -15,5 +15,6 @@ export const backupWarning = target('Warnung der Übersicht ohne Sicherung', (pa
 export const newCodePasswordInput = target('Passwort für einen neuen Wiederherstellungscode', (page) => page.getByTestId('backup-password-input'));
 export const newCodeButton = target('Neuen Code erstellen', (page) => page.getByTestId('backup-new-code'));
 export const newCodeGoogleLink = target('Erneut mit Google anmelden', (page) => page.getByTestId('backup-google-link'));
+export const newCodeBackLink = target('Zurück zu den Einstellungen', (page) => page.getByTestId('backup-new-back-link'));
 export const newCodeConfirmation = target('Bestätigung des neuen Wiederherstellungscodes', (page) => page.getByTestId('backup-new-confirmed'));
 export const backupSettingsLink = target('Sicherung in den Einstellungen', (page) => page.getByTestId('quick-link-backup'));
