@@ -860,6 +860,18 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter «Neu berechnen» wählt
     Dann nennt die Frage vor dem Neuberechnen keine Rechnung mit einem anderen Verteilschlüssel
 
+  # #528 (Persona Dr. Weber 528 P-1, Code-Review 528-2 C-11): der Entwurf folgt seinen Positionen, wie seine Kostenaufstellung;
+  # erst die Frage vor dem Neuberechnen nennt eine Rechnung, deren Verteilschlüssel seit dem Erstellen abweicht
+  Szenario: Der Entwurf nennt eine danach geänderte Rechnung erst in der Frage vor dem Neuberechnen
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Rechnung von "Hauswart 2024-12-31" wird nach dem Verteilschlüssel "Pro Einheit" verteilt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann sagt der Entwurf nicht, dass eine Kategorie mit verschiedenen Verteilschlüsseln abgerechnet wird
+    Wenn der Liegenschaftsverwalter «Neu berechnen» wählt
+    Dann nennt die Frage vor dem Neuberechnen die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
+
   # #528: im PDF trägt die Position mit dem abweichenden Verteilschlüssel den Namen ihrer Rechnung, damit der Mieter die
   # beiden Positionen der Kategorie auseinanderhält
   Szenario: Das PDF nennt die Rechnung der Position mit einem anderen Verteilschlüssel

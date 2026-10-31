@@ -787,3 +787,8 @@ Then('nennt die Frage vor dem Neuberechnen keine Rechnung mit einem anderen Vert
 Then('nennt die Vorschau die Rechnung {string} mit {string}', async ({ verwalter }, invoice: string, key: string) => {
 	await verwalter.sees(splitKeysLineText('preview', invoice)).toContain(`«${key}»`);
 });
+
+Then('sagt der Entwurf nicht, dass eine Kategorie mit verschiedenen Verteilschlüsseln abgerechnet wird', async ({ verwalter }) => {
+	await verwalter.sees(statusOfStatement).toContain('Entwurf');
+	await verwalter.sees(splitKeysHints('draft')).toBe(0);
+});

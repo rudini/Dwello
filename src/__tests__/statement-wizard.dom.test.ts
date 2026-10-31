@@ -1028,7 +1028,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	const withInvoices = (
-		lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod', unknown[]>>
+		lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod' | 'splitKeys', unknown[]>>
 	) =>
 		open({
 			preview,
@@ -1047,6 +1047,17 @@ describe('Abrechnungen erstellen', () => {
 				}
 			]
 		});
+
+	// #528 (Code-Review 528-2 C-12): die Vorschau nennt bei der Rechnung mit einem anderen Verteilschlüssel ihr Gebäude
+	it('nennt bei einer Rechnung mit einem anderen Verteilschlüssel ihr Gebäude und führt zu ihr zurück in die Vorschau', () => {
+		const split = { categoryId: 'c1', keyId: null, mainKeyId: 'k1', categoryName: 'Hauswart', keyName: 'Pro Einheit', mainKeyName: 'Pro Fläche (m²)' };
+		withInvoices({ splitKeys: [{ ...split, invoices: [{ id: 'i9', description: 'Hauswart Q4' }] }] });
+		const line = byTestId('split-keys-line')!;
+		expect(line.textContent!.replace(/\s+/g, ' ')).toContain('Ahornhof');
+		expect(line.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/i9/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+		);
+	});
 
 	// Eine Rechnung ohne Leistungszeitraum kurz nach dem Ende zählt zur nächsten Periode (#131)
 	it('nennt Rechnungen ohne Leistungszeitraum kurz nach der Abrechnungsperiode, ohne Bestätigung', async () => {
