@@ -155,6 +155,19 @@ Then('warnt die Rechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(missedWarningText).toContain(text);
 });
 
+// #980: shown with the amount first (positive anchor), so an error page does not pass
+Then('warnt die Rechnung nicht, dass Abrechnungen sie nicht enthalten', async ({ verwalter }) => {
+	await verwalter.sees(missedWarningText).toBeNull();
+});
+
+Given('die Abrechnung des laufenden Jahres von {string} ist versendet', async ({ seed }, tenant: string) => {
+	await seed.sendStatement(tenant, thisYear());
+});
+
+Given('die Abrechnung des laufenden Jahres von {string} ist berichtigt', async ({ seed }, tenant: string) => {
+	await seed.replaceStatement(tenant, thisYear(), true);
+});
+
 When('der Liegenschaftsverwalter die Abrechnungen ohne diese Rechnung öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openMissedStatements);
 });

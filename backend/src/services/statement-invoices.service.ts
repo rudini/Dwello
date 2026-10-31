@@ -13,7 +13,7 @@ import { getInvoicesForStatement } from './invoice.service';
 import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { olderThanFiveYears, swissToday } from './today';
-import { counting } from './counting-statements';
+import { counting, isReplaced } from './counting-statements';
 
 type PeriodInvoice = Awaited<ReturnType<typeof getInvoicesForStatement>>[number];
 type Positions = Pick<UtilityStatementLineItem, 'categoryId' | 'distributionKeyId' | 'invoices'>[];
@@ -240,7 +240,8 @@ export async function invoiceStatements(
 		const { billed, missed } = stateIn(statement, nowIn.get(key), invoiceId);
 		if (billed) billedIn.set(key, period);
 		if (billed) billing.push({ id: statement.id, statementNumber: statement.statementNumber, status: statement.status });
-		if (missed) missedIn.set(key, period);
+		// a replaced statement stays as it was and never gets the invoice: it misses nothing (#980)
+		if (missed && !isReplaced(statement)) missedIn.set(key, period);
 	}
 	return { billedIn: [...billedIn.values()], missedIn: [...missedIn.values()], statements: billing };
 }

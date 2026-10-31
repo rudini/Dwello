@@ -320,6 +320,19 @@ describe('Abrechnungen einer Rechnung', () => {
 		expect(await periodsOf(billed)).toMatchObject({ billedIn: [year], missedIn: [year] });
 	});
 
+	// #980: die ersetzte Abrechnung bleibt, wie sie war; ihr fehlt die geänderte Rechnung für immer, sie zählt nicht
+	it('nennt die Periode nach dem Berichtigen nicht mehr als verpasst', async () => {
+		await clear();
+		const billed = await invoice();
+		const { id } = await statement();
+		await sendJson('PUT', `/api/v1/invoices/${billed}`, { amount: '800.00' });
+		await db.update(utilityStatements).set({ status: 'replaced' }).where(eq(utilityStatements.id, id));
+		const corrected = await statement();
+		expect(await periodsOf(billed)).toMatchObject({ billedIn: [year], missedIn: [] });
+		await deleteStatement(corrected.id); // it names the replaced one: first
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id)); // deletable again
+	});
+
 	// M-2: abgerechnet und danach als nicht umlagefähig markiert: die Abrechnung verrechnet sie noch
 	it('nennt bei einer abgerechneten, danach nicht umlagefähigen Rechnung die Periode als abgerechnet', async () => {
 		await clear();

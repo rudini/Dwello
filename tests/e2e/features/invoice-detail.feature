@@ -98,6 +98,19 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Dann warnt die Rechnung "gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon"
 
+  # #980: die ersetzte Abrechnung bleibt, wie sie war; nach dem Berichtigen fehlt die Rechnung keiner Abrechnung mehr
+  Szenario: Nach dem Berichtigen warnt die geänderte Rechnung nicht mehr
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Und die Abrechnung des laufenden Jahres von "Anna Keller" ist versendet
+    Und die Rechnung von "Hauswart Huber" kostet danach "480.00" Franken
+    Und die Abrechnung des laufenden Jahres von "Anna Keller" ist berichtigt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Dann sieht der Liegenschaftsverwalter den Betrag "CHF 480.00"
+    Und warnt die Rechnung nicht, dass Abrechnungen sie nicht enthalten
+
   # #378: von der Warnung zu den Abrechnungen, die neu zu erstellen oder zu berichtigen sind
   Szenario: Von der Warnung zu den Abrechnungen der Periode
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
