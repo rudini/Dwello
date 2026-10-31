@@ -1150,6 +1150,28 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Ratenzahlung bis Ende März vereinbart"
 
+  # #524 (A, B): das PDF, das der Mieter erhalten hat, bleibt unter «Dokumente»; ändert eine Änderung das PDF, braucht er das neue
+  @wip
+  Szenario: Nach einer Änderung bleibt das versendete PDF, und Dwello rät, das neue zu senden
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Dann sagt die Abrechnung, dass das PDF, das der Mieter erhalten hat, nicht mehr gilt
+    Und bietet der Verlauf das PDF an, das der Mieter erhalten hat
+
+  # #524: ohne Änderung nach dem Versand gilt das PDF des Mieters
+  @wip
+  Szenario: Ohne Änderung nach dem Versand rät Dwello kein neues PDF
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung versendet
+    Dann sagt die Abrechnung nicht, dass das PDF, das der Mieter erhalten hat, nicht mehr gilt
+    Und bietet der Verlauf das PDF an, das der Mieter erhalten hat
+
   # #403 (6): der Mieter erfährt den Grund der Berichtigung aus der Bemerkung; ein eigenes Feld gibt es nicht
   Szenario: Bei einer berichtigten Abrechnung rät die Bemerkung, den Grund der Berichtigung zu nennen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
