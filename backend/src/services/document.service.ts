@@ -3,12 +3,13 @@
  * Stored letters (payment reminders) per tenant, sent by e-mail or kept for printing
  */
 
-import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, rentalContracts, tenants, utilityStatements, type DocumentStatus, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
 import { laterContract } from './later-contract';
 import { tenantExists } from './tenant.service';
+import { sinceDelivery } from './delivery';
 import { swissToday } from './today';
 import type { DocumentSummary } from '../api/document';
 
@@ -18,10 +19,12 @@ export interface DocumentFilters {
 	status?: DocumentStatus;
 }
 
-// A reminder still to send whose statement is replaced or paid since: it no longer goes out, without a status of its
-// own; «ersetzt» first, the current status (#449, decided in #404: V-2 A, N-1 A)
-const notToSend = sql<'replaced' | 'paid' | null>`case when ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
-	then case ${utilityStatements.status} when 'replaced' then 'replaced' when 'paid' then 'paid' end end`;
+// A reminder or a new PDF (#968) still to send whose statement is replaced or paid since: it no longer goes out, without
+// a status of its own; «ersetzt» first, the current status (#449, decided in #404: V-2 A, N-1 A; Fachreview 534-1 V-3);
+// a reminder from before the statement went again by letter neither (#534, M-1)
+const notToSend = sql<'replaced' | 'paid' | 'redelivered' | null>`case when ${documents.type} in ('reminder', 'new_pdf') and ${documents.status} = 'to_send'
+	then case when ${utilityStatements.status} = 'replaced' then 'replaced' when ${utilityStatements.status} = 'paid' then 'paid'
+		when ${documents.type} = 'reminder' and not ${sinceDelivery(documents.statementId)} then 'redelivered' end end`;
 
 // Everything but the PDF itself, plus whom it is for
 const summary = {
@@ -38,7 +41,8 @@ const summary = {
 	sentAt: documents.sentAt,
 	deliveryError: documents.deliveryError,
 	recipient: documents.recipient,
-	paymentDeadline: documents.paymentDeadline,
+	// the Zahlungsfrist a reminder prints; a statement's letters keep theirs for #966, not to show (Persona Dr. Weber 534 P-1)
+	paymentDeadline: sql<string | null>`case when ${documents.type} = 'reminder' then ${documents.paymentDeadline} end`,
 	notToSend,
 	createdAt: documents.createdAt,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
@@ -169,14 +173,6 @@ export async function deleteDocument(id: string) {
 	if (!deleted && (await getDocument(id)))
 		throw new CodedError('DOCUMENT_NOT_DELETABLE', 'Payment reminders cannot be deleted');
 	return deleted ?? null;
-}
-
-export async function countReminders(statementId: string) {
-	const [result] = await db
-		.select({ value: count() })
-		.from(documents)
-		.where(and(eq(documents.statementId, statementId), eq(documents.type, 'reminder')));
-	return result.value;
 }
 
 /**

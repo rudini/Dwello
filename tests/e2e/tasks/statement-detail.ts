@@ -1,5 +1,6 @@
 import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
+import { successToast } from '../targets/form';
 import { Click, DownloadFrom, Enter, EnterDate, Navigate, Wait } from '../screenplay/interactions';
 import {
 	carrySettleButton,
@@ -13,6 +14,10 @@ import {
 	confirmDeclineCorrectionButton,
 	declineCorrectionButton,
 	recalculateButton,
+	redeliverButton,
+	confirmRedeliverButton,
+	newPdfSentButton,
+	confirmNewPdfSentButton,
 	splitKeysInvoiceLink,
 	sendRecalculateButton,
 	createCorrectionButton,
@@ -96,6 +101,12 @@ export const declineCorrection: Activity = (actor) =>
 
 // #338: a draft is calculated again from the invoices as they are now, after the confirmation names the consequence
 export const askToRecalculate = Click.on(recalculateButton);
+export const askToRedeliver = Click.on(redeliverButton);
+// done once its success is said, before the next step leaves the page
+export const redeliverByLetter: Activity = (actor) =>
+	actor.attemptsTo(Click.on(redeliverButton), Click.on(confirmRedeliverButton), Wait.until(successToast));
+export const markNewPdfSent: Activity = (actor) =>
+	actor.attemptsTo(Click.on(newPdfSentButton), Click.on(confirmNewPdfSentButton));
 export const openSplitKeysInvoice = (description: string) => Click.on(splitKeysInvoiceLink(description));
 export const recalculateDraft: Activity = (actor) =>
 	actor.attemptsTo(Click.on(recalculateButton), Click.on(confirmRecalculateButton));

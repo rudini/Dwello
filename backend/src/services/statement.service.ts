@@ -31,6 +31,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { splitKeysOf } from './split-keys';
+import { sendingsOf, sinceDelivery } from './delivery';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
@@ -63,17 +64,25 @@ const nextReminderFrom = sql<string | null>`(
 	select case when count(*) < 3 and ${utilityStatements.status} = 'sent' then (max(${documents.paymentDeadline}) + 1)::text end
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'sent'
+		and ${sinceDelivery(utilityStatements.id)}
 )`;
 // The Swiss day the last reminder went out (sent_at holds UTC): a letter counts once marked sent, not when it was made (#545)
 const reminderSentDate = sql<string | null>`(
 	select (max(${documents.sentAt}) at time zone 'UTC' at time zone 'Europe/Zurich')::date::text
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'sent'
+		and ${sinceDelivery(utilityStatements.id)}
+)`;
+// The reminders that count for the next Mahnstufe: those since the last sending (#534, Code-Review 534-1 C-1)
+const remindersCounted = sql<number>`(
+	select count(*)::int from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${sinceDelivery(utilityStatements.id)}
 )`;
 // A reminder still «Zu versenden»: the next Mahnstufe waits until it is marked sent (#449, decided in #404, point 2)
 const reminderToSend = sql<boolean>`exists (
 	select 1 from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
+		and ${sinceDelivery(utilityStatements.id)}
 )`;
 // the Schlussabrechnung: the Mietvertrag ends within the period; it has no Mindestbetrag and carries nothing over (#448)
 const final = sql<boolean>`exists (
@@ -92,7 +101,7 @@ const reminderWaits = (
 ) =>
 	s.reminderToSend ||
 	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
-const statementColumns = { ...tableColumns, reminderSentDate, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
+const statementColumns = { ...tableColumns, reminderSentDate, nextReminderFrom, reminderToSend, remindersCounted, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
 
 /**
  * Status filter; 'overdue' is computed as sent with a past payment deadline,
@@ -330,7 +339,9 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		...withOtherKeys(lineItems),
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId),
-		...allowed(result.statement.status)
+		...allowed(result.statement.status),
+		refund: Number(result.statement.balance) < 0,
+		...(await laterSendings(id, result.statement.status))
 	};
 }
 
@@ -343,6 +354,12 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 	return { lineItems: lineItems.map((item) => ({ ...item, otherKey: differs(item) })), splitKeys: split.filter((other) => other.categoryId) };
 }
 
+// #534, #968: the later sendings for the Verlauf; a new PDF goes out only while the statement is sent (V-3)
+async function laterSendings(id: string, status: string) {
+	const { resent, newPdfToSend, newPdfMadeAt } = await sendingsOf(id);
+	return { resent, ...(status === 'sent' ? { newPdfToSend, newPdfMadeAt } : { newPdfToSend: null, newPdfMadeAt: null }) };
+}
+
 /**
  * What the statement allows (#788): the frontend shows buttons and hints by it and only labels the status. A replaced
  * one stays as sent and asks for nothing, its berichtigte Abrechnung does (#120); a draft is calculated again or
@@ -350,7 +367,7 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
  */
 function allowed(status: string) {
 	const current = !isReplaced({ status });
-	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current };
+	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current, redeliverable: current && status === 'sent' };
 }
 
 async function carriedFromOf(id: string | null) {

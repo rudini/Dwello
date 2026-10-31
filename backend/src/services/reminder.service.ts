@@ -8,9 +8,11 @@
 import { formatQRReferenceForDisplay, isQRIBAN, statementQRReference } from './qr-bill.service';
 import { createMailTransport, MailConfigError } from '../mail';
 import { getTypedConfig } from './config.service';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { utilityStatements } from '../db/schema';
 import { CodedError, type ErrorParams } from './coded-error';
 import {
-	countReminders,
 	createDocument,
 	DELIVERY_ERRORS,
 	getDocument,
@@ -20,7 +22,7 @@ import {
 import type { Language } from './pdf.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
-import { qrBillConfig } from './statement-pdf.service';
+import { generateStatementPdf, qrBillConfig } from './statement-pdf.service';
 import { getStatement } from './statement.service';
 import { getTenant } from './tenant.service';
 import { belowMinimum, formatSwissDate } from './pdf-format';
@@ -68,7 +70,7 @@ function assertClaimable(statement: Statement) {
 
 async function nextLevel(statement: Statement) {
 	assertClaimable(statement);
-	const level = (await countReminders(statement.id)) + 1;
+	const level = statement.remindersCounted + 1; // since the last sending (#534), as the dialog says (Code-Review 534-2 C-3)
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
 	// the previous one first goes to the post: its Zahlungsfrist runs from that day (#449, decided in #404, point 2)
 	if (statement.reminderToSend)
@@ -159,7 +161,11 @@ export async function sendReminder(statementId: string) {
  */
 export async function markDocumentPosted(id: string) {
 	const document = await getDocument(id);
+	if (document?.type === 'new_pdf' && document.status === 'to_send') return postNewPdf(document);
 	if (document?.type !== 'reminder' || document.status !== 'to_send') return markDocumentSent(id);
+	// one from before the statement went again by letter no longer goes out (#534, Fachreview 534-1 M-1)
+	if (document.notToSend === 'redelivered')
+		throw new ReminderError('REMINDER_STATEMENT_REDELIVERED', 'The statement went again by letter; do not send this reminder any more');
 	const today = swissToday();
 	const statement = (await getStatement(document.statementId!))!;
 	// nothing left to claim: the letter stays under «Dokumente» (#449, decided in #404: point 3, V-4)
@@ -169,4 +175,21 @@ export async function markDocumentPosted(id: string) {
 		throw new ReminderError('REMINDER_STATEMENT_PAID', 'The statement is paid; do not send this reminder any more');
 	const { pdf, paymentDeadline } = await reminderOn(statement, document.reminderLevel!, today);
 	return markDocumentSent(id, { content: pdf.toString('base64'), paymentDeadline });
+}
+
+/**
+ * #968: the new PDF after a change goes out with the statement's PDF as it is then, neither dated anew nor with a new
+ * Zahlungsfrist; not once the statement is paid or replaced (Fachreview 534-1 V-3)
+ */
+async function postNewPdf(document: NonNullable<Awaited<ReturnType<typeof getDocument>>>) {
+	if (document.notToSend === 'replaced')
+		throw new ReminderError('NEW_PDF_STATEMENT_REPLACED', 'The statement is replaced; do not send this PDF any more');
+	if (document.notToSend === 'paid') throw new ReminderError('NEW_PDF_STATEMENT_PAID', 'The statement is paid; do not send this PDF any more');
+	const made = await generateStatementPdf(document.statementId!);
+	if (typeof made === 'string') throw new ReminderError('NEW_PDF_NOT_MADE', 'The PDF cannot be made now');
+	const [{ pdf, paymentDeadline }] = await db
+		.select({ pdf: utilityStatements.pdfBlob, paymentDeadline: utilityStatements.paymentDeadline })
+		.from(utilityStatements)
+		.where(eq(utilityStatements.id, document.statementId!));
+	return markDocumentSent(document.id, { content: pdf ?? made.pdf, paymentDeadline: paymentDeadline! });
 }

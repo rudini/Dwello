@@ -336,7 +336,7 @@ export type StatementLineInvoice = NonNullable<ApiLineItem['invoices']>[number] 
 
 export interface Statement
 	extends Pick<ApiStatement, 'id' | 'statementNumber' | 'tenantId' | 'apartmentId' | 'periodStart' | 'periodEnd' | 'statementDate' | 'rentalDays' | 'status' | 'paymentDeadline'>,
-		Partial<Pick<ApiStatement, 'contractId' | 'paidDate' | 'nextReminderFrom' | 'reminderToSend' | 'oldAddress' | 'pdfGeneratedAt' | 'notes' | 'createdAt' | 'updatedAt'>>,
+		Partial<Pick<ApiStatement, 'contractId' | 'paidDate' | 'nextReminderFrom' | 'reminderToSend' | 'remindersCounted' | 'oldAddress' | 'pdfGeneratedAt' | 'notes' | 'createdAt' | 'updatedAt'>>,
 		// the balance positive when the tenant owes, negative a refund
 		Amounts<Pick<StatementResponse, 'totalCosts' | 'totalAdvancePayments' | 'balance'>>,
 		// what was paid; a refund paid to the tenant negative (#93)
@@ -359,10 +359,12 @@ export interface StatementWithDetails
 		Required<
 			Pick<
 				ApiStatement,
-				'editable' | 'correctable' | 'asksPayment' | 'superseded' | 'advanceChanged'
+				'editable' | 'correctable' | 'asksPayment' | 'superseded' | 'advanceChanged' | 'redeliverable' | 'refund' | 'newPdfToSend'
 			>
 		> {
 	tenantName: string;
+	resent: { id: string; newPdf: boolean; sentAt: string | null; createdAt: string }[]; // sendings after the first (#534, #968)
+	newPdfMadeAt?: string | null; // when the new PDF still to send was made (#968)
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';

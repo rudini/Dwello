@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Gap, Text, Value } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, Text, Value, Visibility } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
 	type SplitKeysPlace,
@@ -12,6 +12,9 @@ import {
 	statementAdvancePaid,
 	correctDialog,
 	recalculateDialog,
+	redeliverDialog,
+	redeliverButton,
+	newPdfToSend,
 	declineCorrectionButton,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
@@ -111,6 +114,9 @@ export const languageOfPdf = Text.of(pdfLanguage);
 // #120
 export const correctConfirmation = Text.of(correctDialog);
 export const recalculateQuestion = Text.of(recalculateDialog);
+export const redeliverConfirmation = Text.of(redeliverDialog);
+export const redeliverOffers = Count.of(redeliverButton);
+export const newPdfStillToSend = Visibility.of(newPdfToSend);
 export const replacedDone = Text.of(successToast);
 export const deadlineShown = Count.of(paymentDeadline);
 export const paymentText = Text.of(paymentSummary);

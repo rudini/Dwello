@@ -22,6 +22,7 @@ export const actions: Actions = {
 			return fail(response.status, { actionError: backendMessage({ code }, m.documents_update_failed()) });
 		}
 		const sent = await response.json();
-		return { sent: { id, title: localTitle(sent), tenantName: sent.tenantName as string } };
+		// the new PDF of a statement keeps its date and Zahlungsfrist: its notice says so (Fachreview 534-2 V-1)
+		return { sent: { id, title: localTitle(sent), tenantName: sent.tenantName as string, newPdf: sent.type === 'new_pdf' } };
 	}
 };
