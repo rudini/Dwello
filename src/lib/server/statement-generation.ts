@@ -2,7 +2,7 @@ import { backendMessage } from '$lib/backend-error';
 import { periodDays } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
-import { namesById, toStatement } from '$lib/server/statement';
+import { localSplitKeys, namesById, toStatement } from '$lib/server/statement';
 import type { ChangedStatement, HintedInvoice, InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -348,6 +348,7 @@ const localCheck = (
 	keys: Map<string, string>
 ): InvoiceCheck => ({
 	...check,
+	splitKeys: localSplitKeys(check.splitKeys, names, keys),
 	heatingWithoutServicePeriod: check.heatingWithoutServicePeriod?.map((invoice) => ({
 		...invoice,
 		categoryName: (invoice.categoryId && names.get(invoice.categoryId)) || ''

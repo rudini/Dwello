@@ -117,6 +117,14 @@ describe('Daten der Abrechnung im PDF', () => {
 		expect(toPdfData(statement, categories, 'fr').lineItems[0].category).toBe('Chauffage');
 		expect(toPdfData(statement, categories, 'de').lineItems[1].category).toBe('Nicht kategorisiert');
 	});
+
+	// #528: a Kategorie with several Verteilschlüssel has several lines; the one with the other key names its invoices
+	it('nennt bei der Position mit einem anderen Verteilschlüssel ihre Rechnungen hinter der Kategorie', () => {
+		const invoices = [{ description: 'Heizöl Q4' }, { description: 'Service Brenner' }];
+		const split = { ...statement, lineItems: [statement.lineItems[0], { ...statement.lineItems[0], otherKey: true, invoices }] };
+		const lines = toPdfData(split as StatementWithDetails, categories, 'de').lineItems;
+		expect(lines.map((line) => line.category)).toEqual(['Heizung', 'Heizung (Heizöl Q4, Service Brenner)']);
+	});
 });
 
 // #91: the PDF names the agreed categories it bills; fach-review W10c round 2 M-1: a position without a category is no

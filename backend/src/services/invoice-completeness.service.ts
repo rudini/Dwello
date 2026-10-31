@@ -9,6 +9,7 @@ import { db } from '../db/connection';
 import { apartments, buildings, categories, fuelStocks, invoices, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange, periodReadings } from './fuel-stock.service';
+import { splitKeysOf } from './split-keys';
 import { swissToday } from './today';
 import type { CategoryFindingKind } from '../api/invoice';
 
@@ -363,6 +364,16 @@ export async function heatingHintsOf(buildingId: string, period: Period) {
 }
 
 /**
+ * #528: the invoices of the period, as they are now, whose Verteilschlüssel differs from their Kategorie's: the
+ * statements bill them in a line of their own. Without a Kategorie none: «Neu berechnen» refuses those (Fachreview
+ * 528-1 V-6)
+ */
+export async function invoiceSplitKeys(buildingId: string, { start, end }: Period) {
+	const bills = (await getInvoicesForStatement(buildingId, start, end)).filter((invoice) => invoice.categoryId);
+	return splitKeysOf(bills.map((invoice) => ({ ...invoice, amount: invoice.inPeriod.amount, invoices: [invoice] })));
+}
+
+/**
  * The check for one building and period, with the period it was compared with; also the invoices without
  * Leistungszeitraum dated shortly after the period (they may belong to it) and, in a period under a year, those
  * that count in full (one for a whole year would be billed to the short period alone); the hints on heating invoices
@@ -387,6 +398,7 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		findings: [stock, keysFinding(current), ...findings].filter((finding) => finding !== null),
 		lateInvoices,
 		invoicesWithoutServicePeriod,
-		...(await heatingHintsOf(buildingId, period))
+		...(await heatingHintsOf(buildingId, period)),
+		splitKeys: await invoiceSplitKeys(buildingId, period)
 	};
 }

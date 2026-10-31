@@ -57,6 +57,7 @@ export type Example = {
 	public: boolean;
 	building: string;
 	tankBuilding: string;
+	splitBuilding: string; // #528: a Kategorie billed by two Verteilschlüssel
 	heatingProfile: string;
 	accessKey?: string; // the name of a Zugangsschlüssel the key states create or revoke (#817)
 	account?: { email: string; password: string }; // a Konto mit Passwort for the login states (#576)
@@ -79,7 +80,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -198,6 +199,16 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.fuelStock('Talblick', '2024-12-31', '600.00');
 	await seed.fuelStock('Talblick', '2025-12-31', '100.00');
 	await seed.statement('Greta', 'Talblick', 2025);
+	// #528: Hauswart billed by two Verteilschlüssel: the draft of 2023 names the invoice, the wizard's preview of 2024 too
+	await seed.building('Kreuzweg', 'Winterthur');
+	await seed.apartment('Kreuzweg', 'K1', 'vacant');
+	await seed.tenant('Pia');
+	await seed.contract('Pia', 'K1', { startDate: '2023-01-01', baseRent: '1200.00' });
+	for (const year of ['2023', '2024']) {
+		await seed.invoiceOn('Kreuzweg', 'Hauswart', '900.00', `${year}-09-30`);
+		await seed.invoiceOnByKey('Kreuzweg', 'Hauswart', '300.00', `${year}-12-31`, 'Pro Einheit');
+	}
+	await seed.statement('Pia', 'Kreuzweg', 2023);
 	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
 	await seed.apartment('Bergsicht', '2.02', 'vacant');
 	await seed.tenant('Emil');
@@ -282,6 +293,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
 		partsStatement: seed.idOf('Abrechnung Greta 2025'),
+		splitStatement: seed.idOf('Abrechnung Pia 2023'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
@@ -314,6 +326,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),
 		building: ids.building!,
 		tankBuilding: seed.idOf('Bergsicht')!,
+		splitBuilding: seed.idOf('Kreuzweg')!,
 		heatingProfile: ids.heatingProfile!
 	};
 }

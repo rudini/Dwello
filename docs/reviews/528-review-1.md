@@ -1,0 +1,47 @@
+# Code-Review #528, Runde 1 (Commit 7e22d79, `git diff origin/main 7e22d79`)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Blocker | tests/e2e/features/statement-detail.feature:1180 | Geändertes Tank-Szenario erwartet die Klammer an der Position «Pro Einheit»; die Umsetzung markiert dort die Position «Pro Fläche (m²)», das Szenario wird rot, und die Spec-Änderung ist gar nicht nötig |
+| C-2 | Major | backend/src/services/statement-invoices.service.ts:135 | `invoiceSplitKeys` steht in `changesOf` und läuft damit für jede Abrechnung in `draftsToSend` und `outdatedStatements` (Übersicht), am Cache `perPeriod()` vorbei, und das Ergebnis wird dort verworfen |
+| C-3 | Major | src/routes/statements/generate/PreviewChecks.svelte:56, src/routes/statements/SplitKeysHint.svelte:28 | Die Vorschau legt die Hinweise aller Gebäude ohne Gebäude zusammen: doppelter Schlüssel im keyed `#each`, wenn zwei Gebäude dieselbe Kategorie mit demselben Schlüssel aufteilen; kein Gebäudename; kein DOM-Test der Vorschau |
+| C-4 | Minor | backend/src/services/split-keys.ts:37-40, backend/src/services/statement.service.ts:344 | Hauptschlüssel im Hinweis (Rechnungen ohne Tankbestand, nach Rechnungsreihenfolge) und im PDF (Positionen mit Tankbestand, nach Reihenfolge der Positionen) kann verschieden sein: bei Gleichstand (V-4) und wenn die Veränderung Tankbestand die Gewichte kippt; dann nennt das PDF andere Rechnungen als der Hinweis, und «Die grösste wird nach … verteilt» stimmt nicht |
+| C-5 | Minor | backend/src/services/invoice-completeness.service.ts:371-374 | Hinweis im Entwurf und in der Frage berücksichtigt die vereinbarten Kategorien des Mietvertrags nicht (`agreedCategoryIds`, calculation.service.ts:365): bei einer Kategorie, die der Vertrag nicht vereinbart, sagt der Entwurf «… steht in mehreren Positionen», obwohl er keine hat |
+| C-6 | Minor | tests/e2e/features/statement-detail.feature:854; Commit 7e22d79 | Commit-Text nennt das Szenario «… nennt eine Rechnung nicht mehr …» als Pinnen von beibehaltenem Verhalten; die Basis zeigt gar keinen Hinweis, das Verhalten (V-1) ist neu. Es hat keinen Rotlauf und keinen Test auf tieferer Schicht (der pg-Test ändert keinen Verteilschlüssel nach dem Erstellen) |
+| C-7 | Minor | src/lib/server/statement.ts:190-198 | `localSplitKeys` ungetestet: Kategorie-/Schlüsselname in der UI-Sprache und «Pro Einheit» ohne Verteilschlüssel (Fachreview V-8: «Hinweis nennt «Pro Einheit»») zeigt kein Test; der DOM-Test reicht schon übersetzte Namen herein, die Verträge enthalten nur `splitKeys: []` |
+| C-8 | Minor | messages/fr.json:1292-1293 | Guillemets mit normalem Leerzeichen statt geschütztem (`docs/design/i18n-begriffe.md:5`; 222 andere Zeilen in fr.json nutzen U+00A0) |
+| C-9 | Minor | backend/src/services/statement.service.ts:337-343 | `withOtherKeys` steht zwischen dem JSDoc von `allowed` und `allowed`: der JSDoc («What the statement allows …») beschreibt jetzt die falsche Funktion |
+| C-10 | Minor | docs/api-specification.md:138, :294 | `splitKeys` in `/completeness/:buildingId` und `/:id/changed-invoices` sowie `lineItems[].otherKey` im Detail nicht dokumentiert; die Beschreibung der Antworten ist damit unvollständig |
+
+## C-1 (Blocker): Tank-Szenario erwartet die Klammer an der falschen Position
+
+**Beleg.** Szenario statement-detail.feature:1169-1180: Heizung 500 (Standardschlüssel der Fixture «Per Area (m²)», `tests/e2e/fixtures/backend.ts:104`), danach Heizung 500 «Pro Einheit»; die Veränderung Tankbestand (600 − 100 = 500) bekommt den Schlüssel der zuletzt erfassten Rechnung (`fuel-stock.service.ts:64-84`), also «Pro Einheit». Die Positionen: «Pro Fläche (m²)» 500, «Pro Einheit» 1000 (`totalAmount` = `totalBuildingAmount`, statement.service.ts:492). `withOtherKeys` (statement.service.ts:343-348) rechnet mit diesen Beträgen: `splitKeysOf` wählt «Pro Einheit» (1000 > 500) als Schlüssel der Kategorie und markiert die Position «Pro Fläche (m²)». Das PDF druckt also «Heizung (Heizung 2024-10-15) Pro Fläche (m²) …» und unverändert «Heizung Pro Einheit 1 / 1 Wohnungen 1'000.00».
+
+**Warum falsch.** Die neue Erwartung `Heizung (Heizung 2024-10-15) Pro Einheit 1 / 1 Wohnungen 1'000.00` ist kein Teilstring dieses Texts, das Szenario schlägt fehl (laut Aufrufer seit der Änderung nicht gelaufen). Zudem hält die alte Zeile weiter: Die Änderung eines Szenarios ohne `@wip` auf `main` ist unnötig, `Spec change approved: #528` deckt eine Änderung, die der Entscheid nicht verlangt, nicht. Der neue Kommentar (Z. 1168, «die Position mit dem anderen Verteilschlüssel als die grössere nennt ihre Rechnung») beschreibt das richtig, die Erwartung widerspricht ihm.
+
+**Zeigen.** `bun run test:e2e` mit dem Szenario «Das PDF nennt für die Veränderung Tankbestand …»; oder im pg-Test zwei Lieferungen und Tankbestand wie oben anlegen und `getStatement(...).lineItems.map(i => i.otherKey)` prüfen. Fix: Z. 1180 wieder auf den Stand von `origin/main` setzen (und die Szenario-Änderung aus dem PR-Text nehmen); wer die Klammer dort zeigen will, ergänzt eine neue Zeile `Und steht im PDF "Heizung (Heizung 2024-10-15) Pro Fläche (m²)"` (eine neue Prüfung ist frei).
+
+## C-2 (Major): Hinweis wird für jede Abrechnung der Übersicht berechnet und verworfen
+
+**Beleg.** `changesOf` (statement-invoices.service.ts:117-137) ruft jetzt `invoiceSplitKeys` → `getInvoicesForStatement` (mit `periodReadings`, invoice.service.ts:592-610) direkt auf. `changesOf` läuft nicht nur aus `statementChanges`, sondern für jede gelistete Abrechnung in `draftsToSend` (Z. 163, bis 1000) und `outdatedStatements` (Z. 177); beide geben `splitKeys` nicht weiter. Gerade für diese Schleifen gibt es `perPeriod()` (Z. 59-70), das die Rechnungen pro Gebäude und Periode einmal lädt; `invoiceSplitKeys` umgeht es. Auch in `statementChanges` lädt es die Rechnungen ein zweites Mal (`load.invoices` hat sie schon).
+
+**Warum falsch.** Jede Übersicht/Dashboard-Ladung macht pro Abrechnung zusätzliche Abfragen, deren Ergebnis niemand liest (ponytail: unbenutzte Arbeit; Leistungsziel in `docs/tech-stack.md`). Fix, kürzer als jetzt: `splitKeys` nur in `statementChanges` setzen und dort aus `await direct.invoices(located)` (bzw. `load.invoices`) mit `splitKeysOf` bilden, ohne zweite Abfrage.
+
+**Zeigen.** Abfragen zählen (oder `getInvoicesForStatement` spionieren) in einem Test von `outdatedStatements()` mit zwei Abrechnungen derselben Periode: auf 7e22d79 zwei Aufrufe mehr als auf `origin/main`.
+
+## C-3 (Major): Vorschau mit mehreren Gebäuden
+
+**Beleg.** PreviewChecks.svelte:56 `rows.flatMap((row) => row.splitKeys)` verliert das Gebäude; SplitKeysHint.svelte:28 schlüsselt `#each` mit `${split.categoryId}-${split.keyId}`. Kategorien sind gebäudeübergreifend; der Fall des Issues (alte Rechnungen ohne Verteilschlüssel, `keyId` null) tritt typischerweise in jedem Gebäude auf, das vor #452 erfasst wurde. Zwei Gebäude mit «Hauswart»/null ergeben zweimal den Schlüssel `<hauswart>-null`.
+
+**Warum falsch.** Svelte 5 verlangt eindeutige Schlüssel im keyed `#each` (im Dev-Modus Fehler `each_key_duplicate`, sonst falsches Rendern); und auch ohne das liest der Liegenschaftsverwalter zweimal «Hauswart steht in mehreren Positionen …» ohne zu wissen, welches Gebäude. Die anderen Vorschau-Hinweise gruppieren nach Gebäude mit Namen (`InvoiceHint.svelte:29-31`, `hinted()` in PreviewChecks.svelte:48). Die Vorschau hat nur das E2E-Szenario mit einem Gebäude, keinen DOM-Test.
+
+**Zeigen.** DOM-Test von `PreviewChecks` mit zwei Zeilen (Gebäuden), je `splitKeys: [{ categoryId: 'c1', keyId: null, … }]`: Mount wirft bzw. zeigt eine Zeile. Fix: pro Gebäude zeigen (Name wie `InvoiceHint`), Schlüssel mit `buildingId`.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`, `bun run check`, `cd backend && bun run type-check`, `bun run fitness`, Backend `bun test` von split-keys.test.ts, statement-pdf-data.test.ts, statement-split-keys.pg.test.ts, api-contracts.pg.test.ts; `bunx vitest run --changed origin/main`; Rotläufe der neuen Tests; E2E der neuen Szenarien (früherer Lauf).
+- Nicht gelaufen laut Aufrufer: volle `statement-*`-Features und die axe-/Sprachzeilen `statement-generate split-keys`, `statement-split-keys-detail default` und `recalculate-dialog`. Ausser C-1 sehe ich beim Lesen keinen Grund zum Scheitern; nicht geprüft habe ich, ob das neue Gebäude «Kreuzweg» mit Entwurf Pia 2023 im gemeinsamen Seed (`tests/e2e/fixtures/screens.ts:202-211`) Zählungen oder Listen anderer Bildschirmzustände verändert, und ob der Sprachcheck die deutschen Rechnungsbeschreibungen («Hauswart 2023-12-31») in fr/it/en beanstandet (bei `heating-hints` stehen ebenfalls Beschreibungen).
+- Svelte-Verhalten bei doppeltem Schlüssel in der Produktion (C-3): ohne `node_modules` nicht nachgelesen.
+- Doppelte Abfrage der Kategorien und Verteilschlüssel pro Detailseite (`loadStatement` und `laterChanges`, src/lib/server/statement.ts:164-168, 210-214): gelesen, kein Befund gemeldet.
+
+Geprüft: alle 41 Dateien des Diffs; Fachreview-Befunde V-1 bis V-8, M-1 im Code; Texte in allen vier `messages/*.json`; Tokens und 48-px-Links in `SplitKeysHint.svelte`; Screenplay-Schichten der neuen Schritte, Tasks, Questions, Targets; `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`; Verträge `statement.json`, `statement-changed-invoices.json`, `invoice-completeness.json`; Rotlauf der übrigen neuen Tests beim Lesen.

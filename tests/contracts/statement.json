@@ -53,12 +53,14 @@
 	"tenant": { "firstName": "Eva", "lastName": "Frei", "email": "eva@example.com", "correspondenceChannel": "letter", "language": "fr" },
 	"apartment": { "number": "3.01", "floor": 3 },
 	"building": { "id": "b1", "name": "Lindenhof", "address": "Testweg 1" },
+	"splitKeys": [],
 	"lineItems": [
 		{
 			"id": "l1",
 			"categoryId": "c1",
 			"distributionKeyId": "k1",
 			"description": "Heating",
+			"otherKey": false,
 			"totalAmount": "1000.00",
 			"tenantShare": "1000.00",
 			"sharePercentage": "100.0000",

@@ -26,6 +26,8 @@
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard, { type Delivery } from './MetadataCard.svelte';
 	import LaterChanges from './LaterChanges.svelte';
+	import SplitKeysHint from '../SplitKeysHint.svelte';
+	import type { SplitKeyHint } from '$lib/types';
 	import type { ComponentProps } from 'svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
@@ -51,7 +53,7 @@
 			reminders: StatementDocument[];
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
-			later?: ComponentProps<typeof LaterChanges>['later'];
+			later?: ComponentProps<typeof LaterChanges>['later'] & { splitKeys: SplitKeyHint[] };
 		};
 		form: ActionData;
 	} = $props();
@@ -223,6 +225,15 @@
 		onletter={() => ((sendByLetter = true), (showSend = true))}
 	/>
 
+	<!-- #528: on a draft, a Kategorie its lines bill by several Verteilschlüssel, as the table shows (not on one sent) -->
+	{#if statement.editable && !statement.correctable}
+		<SplitKeysHint
+			splitKeys={statement.splitKeys ?? []}
+			end={m.statements_split_keys_draft_end()}
+			testid="statement-split-keys"
+		/>
+	{/if}
+
 	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
 	<div class="min-w-0">
 		<Panel title={m.statements_cost_breakdown()} testid="statement-cost-breakdown">
@@ -238,6 +249,7 @@
 			<PartiesPanel {statement} />
 			<MoreActions
 				{statement}
+				splitKeys={data.later?.splitKeys ?? []}
 				bind:recalculating={showRecalculate}
 				oncorrect={() => (showCorrect = true)}
 				ondelete={() => (showDelete = true)}
