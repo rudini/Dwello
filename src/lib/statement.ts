@@ -48,10 +48,10 @@ export function balanceLabel(balance: number): string {
 }
 
 type Owed = {
-	status: StatementStatus;
 	balance: number;
 	paidAmount?: number | null;
 	unpaid?: boolean; // below the Mindestbetrag, no Schlussabrechnung: no money moves (#94)
+	asksPayment?: boolean;
 };
 
 /** #959: what is still owed after the part payments recorded, in francs, without the sign of the Saldo */
@@ -60,8 +60,8 @@ export const openAmount = ({ balance, paidAmount }: Owed) =>
 
 /** «Bezahlt: CHF x, offen: CHF y» on a sent or overdue statement a part was paid on (#959, Fachreview 959-1 Regel 1) */
 export function partPaid(statement: Owed): string | null {
-	if (!statement.paidAmount || (statement.status !== 'sent' && statement.status !== 'overdue'))
-		return null;
+	// a paid one has nothing open, a replaced one asks for nothing (the backend says so, #788)
+	if (!statement.paidAmount || !openAmount(statement) || statement.asksPayment === false) return null;
 	const amounts = {
 		paid: formatCurrency(Math.abs(statement.paidAmount)),
 		rest: formatCurrency(openAmount(statement))
