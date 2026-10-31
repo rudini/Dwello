@@ -997,7 +997,7 @@ describe('Abrechnungsdetail', () => {
 			showWith({});
 			const hint = byTestId('statement-split-keys')!;
 			expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
-				'Hauswart steht in mehreren Positionen. Die grösste wird nach «Pro Fläche (m²)» verteilt, diese Rechnung nach «Pro Einheit»:'
+				'Hauswart wird in mehreren Positionen abgerechnet. Die Position mit den höchsten Kosten wird nach «Pro Fläche (m²)» verteilt, diese Rechnung nach «Pro Einheit»:'
 			);
 			expect(hint.querySelector('[data-testid="split-keys-invoice-link"]')!.getAttribute('href')).toBe('/invoices/i4');
 			expect(hint.textContent).toContain('Legt der Mietvertrag einen Verteilschlüssel fest, gilt er für alle Rechnungen der Kategorie.');

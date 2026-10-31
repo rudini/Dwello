@@ -750,7 +750,7 @@ Then('bietet der Verlauf das versendete PDF an', async ({ verwalter }) => {
 
 // #528: a Kategorie billed with different Verteilschlüssel
 Then('sagt der Entwurf, dass {string} mit verschiedenen Verteilschlüsseln abgerechnet wird', async ({ verwalter }, category: string) => {
-	await verwalter.sees(splitKeysText('draft')).toContain(`${category} steht in mehreren Positionen`);
+	await verwalter.sees(splitKeysText('draft')).toContain(`${category} wird in mehreren Positionen abgerechnet`);
 });
 
 Then(
