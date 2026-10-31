@@ -64,27 +64,18 @@ export const accessKeyToken = (keyId: string) =>
  */
 export const authMiddleware = new Elysia({ name: 'auth' })
 	// 'scoped' so the hooks protect the routes of every module that uses this plugin
-	.derive({ as: 'scoped' }, async ({ headers, set }) => {
+	.derive({ as: 'scoped' }, async ({ headers, status }) => {
 		const authHeader = headers.authorization;
 
-		if (!authHeader || !authHeader.startsWith('Bearer ')) {
-			set.status = 401;
-			return {
-				user: null,
-				error: { message: 'Missing or invalid authorization header' }
-			};
-		}
+		// refused here, before the route checks its body or query: without a session every route answers 401 (S1, #936)
+		if (!authHeader || !authHeader.startsWith('Bearer '))
+			return status(401, { message: 'Missing or invalid authorization header' });
 
 		const token = authHeader.substring(7);
 		const payload = await verifyJwt(token);
 
-		if (!payload || (payload.provider === 'local' && !(await localSessionHolds(payload.sub, payload.auth_time ?? payload.iat)))) {
-			set.status = 401;
-			return {
-				user: null,
-				error: { message: 'Invalid or expired token' }
-			};
-		}
+		if (!payload || (payload.provider === 'local' && !(await localSessionHolds(payload.sub, payload.auth_time ?? payload.iat))))
+			return status(401, { message: 'Invalid or expired token' });
 
 		return {
 			user: {
@@ -94,13 +85,6 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 				provider: payload.provider,
 				// the sign-in, in seconds: a new Wiederherstellungscode needs a recent one (#718)
 				authTime: payload.auth_time ?? payload.iat
-			},
-			error: null
+			}
 		};
-	})
-	.onBeforeHandle({ as: 'scoped' }, ({ user, error, set }) => {
-		if (!user && error) {
-			set.status = 401;
-			return error;
-		}
 	});

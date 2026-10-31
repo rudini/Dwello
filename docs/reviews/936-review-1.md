@@ -1,0 +1,18 @@
+# Code-Review Runde 1, Slice 936 (b9c968063..8a30cb1a8, ohne docs/reviews)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| – | – | – | Keine Befunde |
+
+Geprüft: `backend/src/middleware/auth.ts` (das `derive` liefert `status(401, { message })` als frühe Rückgabe; es läuft als Transform vor der Prüfung von Body und Query, deshalb jetzt 401 statt 422; der 401-Body bleibt `{ message }` mit denselben Texten, der BFF wertet ohnehin nur den Status aus, `src/lib/api.ts:144`, `src/lib/server/password-login.ts:47`; keine Route liest das entfernte `error` oder `user: null` aus dem Kontext, `user` ist jetzt nicht mehr nullbar, `user!` bleibt gültig; die Module mit eigenem `.use(authMiddleware)` und die Module nach `app.ts:108` bekommen dasselbe scoped `derive`). `auth.pg.test.ts:54-88`: die Routen kommen aus `app.routes`, die Pfadparameter werden mit einer gültigen UUID gefüllt (so greift der globale `onTransform`-404 aus `app.ts:83` nicht), jede Ausnahme hat einen Grund, und ein zweiter Test prüft, dass jede Ausnahme noch registriert ist. `POST /mcp` steht zu Recht nicht in der Ausnahmeliste: Die Route antwortet ohne Schlüssel selbst mit 401 (`routes/mcp.ts:139-146`). `OPTIONS /` und `OPTIONS /*` kommen vom CORS-Plugin, `GET /swagger` und `/swagger/json` nur ausserhalb der Produktion (`app.ts:45`); in der Testumgebung sind sie registriert, deshalb hält auch der Test «kennt jede öffentliche Route». Rot ohne die Änderung: Laut Lesen schlagen die 40 Routen mit Schema für Body oder Query mit dem alten `onBeforeHandle` fehl (422). Eine Route, die vor `.use(authMiddleware)` registriert ist und nicht in `PUBLIC` steht, antwortet nicht mit 401 und macht den Test ebenfalls rot. Die Doku stimmt mit dem Code überein: S1 «Heute» und die Matrixzeile in `utility-tree.md`, die neue Zeile in `fitness-functions.md` (7 Spalten wie der Kopf). Der Commit-Betreff hat 50 Zeichen. Im Diff ist nichts, was nicht zur Anforderung gehört. Kein UI-Text, kein API-Vertrag und kein E2E-Code sind betroffen.
+
+## Nicht bestätigt
+
+- `bun run lint`, `cd backend && bun run type-check`, `cd backend && bun run test` (1895 grün, Coverage 96.8 %), E2E chromium+api `authentication.feature` und `settings.feature` (40 grün): vom Aufrufer gemeldet, nicht selbst ausgeführt (der Worktree hat kein `node_modules`).
+- «Der Test wurde rot gesehen, als der Guard einer Route entfernt war» (Done means von #936): Gemeldet ist nur das Rot der 40 Routen mit 422 vor dem Fix, kein Lauf mit dem entfernten Guard einer einzelnen Route. Nur durch Lesen bestätigt (siehe oben), nicht durch einen Lauf.
+- Dass Elysia 1.4.30 (`backend/package.json:40`) ein `status(...)` aus einem `derive` als frühe Rückgabe behandelt und aus dem abgeleiteten Typ von `user` herausnimmt: Ich habe es nicht in den Elysia-Quellen nachgesehen (kein `node_modules`). Bestätigt ist es nur indirekt durch die gemeldeten Läufe von Type-Check und Tests.
+- Kein Befund, nur zur Einordnung (bestand schon vorher, liegt ausserhalb von #936): Ohne Sitzung antwortet eine Anfrage mit fehlerhaftem JSON-Body vermutlich mit 400, weil Elysia den Body vor dem Transform parst. Eine Pfad-ID, die keine UUID ist, bekommt 404 vom globalen `onTransform` (`app.ts:83`), weil dieser vor dem `derive` registriert ist. Beides gibt keine Daten preis. Den Test betrifft es nicht, weil er `{}` und eine gültige UUID schickt.
+
+## Triage
+
+- No findings. The red run with one route unguarded, asked by «Done means»: `localAccountRoutes` moved before `.use(authMiddleware)` in `app.ts` made `PUT /api/v1/local-accounts/` and `DELETE /api/v1/local-accounts/:email` fail (2 fail, 185 pass); restored.

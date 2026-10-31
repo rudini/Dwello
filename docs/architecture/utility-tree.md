@@ -165,7 +165,7 @@ Dwello-Nutzen
 - **Umgebung:** Produktion.
 - **Reaktion:** Das Skript findet kein Token. Der Request bekommt 401 oder eine Weiterleitung zum Login.
 - **Messgrösse und Ziel:** **0** lesbare Tokens im Browser. **100 %** der Endpunkte antworten ohne Sitzung mit 401 (mit der Freigabe vom Nutzer bestätigt).
-- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`), im Backend aber nur für eine feste Liste von 11 Listen-Endpunkten, nicht für jede registrierte Route (#936). Seit #817 nimmt `/mcp` statt einer Sitzung einen Zugangsschlüssel für KI-Programme an, nur lesend und nur dort; ein fehlender, widerrufener oder abgelaufener Schlüssel bekommt 401, an jeder anderen Route gilt ein Schlüssel nicht (`access-key.pg.test.ts`, ADR 0007). Seit #917 ist getestet, dass das Sitzungs-Cookie HttpOnly und SameSite ist, mit `COOKIE_SECURE` auch Secure (`session-cookie.test.ts`).
+- **Heute:** 401 ist getestet (`auth-guard.test.ts`, `auth.pg.test.ts`). Seit #936 ruft `auth.pg.test.ts` jede Route auf, die das Backend registriert (aus `app.routes`, Pfadparameter mit einer Dummy-ID, mit leerem Body), und erwartet 401; ausgenommen ist nur eine Liste öffentlicher Routen mit je einem Grund (Health-Check, Anmeldung, Einrichtung, was die öffentliche Datenschutzerklärung braucht). Dabei fiel auf, dass 40 Routen ohne Sitzung 422 statt 401 antworteten, weil Elysia Body und Query vor dem Auth-Hook prüfte; die Middleware lehnt jetzt schon vor der Prüfung ab. Seit #817 nimmt `/mcp` statt einer Sitzung einen Zugangsschlüssel für KI-Programme an, nur lesend und nur dort; ein fehlender, widerrufener oder abgelaufener Schlüssel bekommt 401, an jeder anderen Route gilt ein Schlüssel nicht (`access-key.pg.test.ts`, ADR 0007). Seit #917 ist getestet, dass das Sitzungs-Cookie HttpOnly und SameSite ist, mit `COOKIE_SECURE` auch Secure (`session-cookie.test.ts`).
 - **Fitness Function:** E2E: Nach dem Login enthält `document.cookie` kein JWT. Ein API-Test läuft über alle registrierten Routen ohne Sitzung und erwartet 401.
 
 ## 4. Priorisierungsmatrix
@@ -188,7 +188,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | M | Am 23.10.2026 H: `main` 43–79 min, das Drei- bis Fünffache des Ziels, 4 von 7 abgeschlossenen Läufen rot. Am 28.10.2026 `main` Median 13 min, 2 von 29 Läufen über 15 min, 91 von 99 Läufen in 7 Tagen grün (Entscheid PO 28.10.2026: H/H → H/M). |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
 | P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Einmal gemessen (28.10.2026, #781): alle Listen- und Übersichtsrouten unter dem Ziel, `statements/outdated` nach #919 80 ms statt 1110 ms p95. |
-| S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
+| S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut und getestet (#917, #936). |
 
 **Kandidaten für die ersten Refactorings (H/H):** U1, R1 (bis 28.10.2026 auch Ä1 und T1). **Quick Win (H/L):** S1; Ä1 und Ä4 halten ihr Ziel, der Ratchet sichert es.
 

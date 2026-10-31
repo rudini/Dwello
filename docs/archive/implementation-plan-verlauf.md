@@ -219,6 +219,15 @@
 - [x] No review of its own: a test-only CI fix (Workflow 7)
 - [x] PR `Refs #954`: pushed after this archive
 
+## Session: #936, S1 for every registered route (2026-10-31)
+
+- [x] `auth.pg.test.ts`: every route of `app.routes` without a session → 401, except 11 public routes with a reason each, and each of them still registered
+- [x] Red before the fix: 40 guarded routes answered 422 (Elysia validated before the auth hook); red again with one route module registered before `authMiddleware` (2 routes)
+- [x] Fix: `authMiddleware` refuses in `derive` with `status(401)`, before the route's validation
+- [x] `utility-tree.md` S1 «Heute» and matrix, `fitness-functions.md` overview
+- [x] Code review: `docs/reviews/936-review-1.md` (no findings)
+- [x] No scenario: nothing a user sees changes (an unauthenticated request gets 401 instead of 422)
+- [x] PR `Fixes #936`: pushed after this archive
 ## Session: #953 restore keeps the newer Wiederherstellungscode (2026-10-31)
 
 - [x] Decisions of 17 needs-decision issues recorded (product owner: decide by the recommendations); #495 closed (done in #817/#943); #959 opened (#523 option B)
