@@ -46,7 +46,7 @@
 | SP-U1-2 | Je eine Transaktion pro Migration. Angewendete Migrationen sind unveränderlich. | Eine fehlgeschlagene Migration hinterlässt keinen halben Zustand. Ein Zurück auf die alte Version gibt es aber nur per Restore. | `backend/src/db/migrate.ts` (BEGIN/COMMIT); CI-Schritt «Migrations unchanged» (aus Repo/Config) |
 | SP-U1-3 | Update = `git pull` + `up -d --build` auf der Maschine des Betreibers. Die Images werden lokal gebaut. | Das Update hängt von Netz, Build-Werkzeugen und Plattenplatz beim Betreiber ab und kann auf halbem Weg scheitern. | `docs/installation.md` §5; `build:` in `docker-compose.prod.yml` (aus Repo/Config) |
 | SP-U1-4 | Die Schlüssel liegen in einem eigenen Volume (`dwello_secrets`) neben der DB. | Ein Backup nur der DB macht verschlüsselte Geheimnisse nach einem Restore unlesbar. | `ki-settings.service.ts` (AES-256-GCM aus `ENCRYPTION_KEY`), `docs/installation.md` §5, PR #644 (aus Repo/Config) |
-| SP-U1-5 | Jeder Merge wird ein Release. | Bis das wöchentliche Taggen umgesetzt ist (vom Nutzer bestätigt), aktualisiert ein Betreiber auf einen beliebigen Merge-Stand, der nur in CI geprüft ist. | `release.yml`, README «Versions» (aus Repo/Config) |
+| SP-U1-5 | ~~Jeder Merge wird ein Release.~~ **Erledigt (#935):** Es wird wöchentlich getaggt, Montag 06:00. | Ein Betreiber aktualisiert auf ein wöchentliches Release; jeder PR ist als Upgrade von diesem geprüft. | `release.yml`, README «Versions» (aus Repo/Config) |
 
 **Tradeoff Points:**
 

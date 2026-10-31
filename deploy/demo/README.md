@@ -79,7 +79,7 @@ deploy/demo/reset-demo.sh                       # loads the demo data the first 
 
 Then open https://demo.dwello.ch. The model runs on the VM's CPU: categorizing an invoice takes a while, and invoice data never leaves the VM.
 
-**Update** by hand: `git pull`, then the same `up -d --build` command, then `docker image prune -f` to remove the replaced images. Section 7 does this on every merge.
+**Update** by hand: `git pull`, then the same `up -d --build` command, then `docker image prune -f` to remove the replaced images. Section 7 does this for every release.
 
 ## 6. Nightly reset
 
@@ -95,7 +95,7 @@ If the reset fails halfway (the log ends with an error, the app shows no data), 
 
 ## 7. Automatic updates
 
-`update.sh` checks every 5 minutes whether `main` has a commit or version that is not built yet and already has its version tag (the release workflow tags each merge within a minute; an untagged `main` waits for the next run and says so in the log; a version set by hand on the same commit is built too; the first run after the change to `.git/demo-deployed` in #173 builds once more); only then it pulls, rebuilds and restarts the app, migrations included. Building takes 3 to 5 minutes while the old version keeps running; switching takes about a minute without the app (the new backend migrates and must report healthy before the frontend starts). A failed build is tried again on the next run; the first run after adding the cron line builds once, since no build is recorded yet (`.git/demo-deployed`). It needs the clone on `main` (`git checkout main`) and no local changes to tracked files; otherwise `git merge --ff-only` fails on every run and says so in the log. It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
+`update.sh` checks every 5 minutes whether `main` has a commit or version that is not built yet and already has its version tag (the release workflow tags `main` weekly on Monday at 06:00 Swiss time, #935, so the demo shows each weekly release; an untagged `main` waits and says so in the log; a version set by hand on the same commit is built too; the first run after the change to `.git/demo-deployed` in #173 builds once more); only then it pulls, rebuilds and restarts the app, migrations included. Building takes 3 to 5 minutes while the old version keeps running; switching takes about a minute without the app (the new backend migrates and must report healthy before the frontend starts). A failed build is tried again on the next run; the first run after adding the cron line builds once, since no build is recorded yet (`.git/demo-deployed`). It needs the clone on `main` (`git checkout main`) and no local changes to tracked files; otherwise `git merge --ff-only` fails on every run and says so in the log. It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
 
 ```cron
 */5 * * * * /home/ubuntu/Dwello/deploy/demo/update.sh >> /home/ubuntu/demo-update.log 2>&1
