@@ -5,7 +5,7 @@
 // PostgreSQL on localhost:5432, user and password dwello; the databases dwello_r1 and dwello_restore are recreated.
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdtempSync, readdirSync, statSync } from 'node:fs';
+import { mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -90,3 +90,4 @@ execFileSync('bun', [check, 'backup', backend], { env, stdio: 'inherit' });
 const backup = readdirSync(dir).find((name) => name.endsWith('.backup'))!;
 console.log(`Sicherung: ${Math.round(statSync(join(dir, backup)).size / 1024 / 1024)} MB in ${Math.round((Date.now() - backupStart) / 1000)} s`);
 execFileSync('bun', [check, 'restore'], { env, stdio: 'inherit' });
+rmSync(dir, { recursive: true, force: true });

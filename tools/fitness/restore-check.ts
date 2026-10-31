@@ -7,12 +7,12 @@
  * RESTORE_CHECK_DIR holds the Sicherung and the code between both; DATABASE_URL is the database of the upgrade check.
  */
 
-import { createReadStream } from 'fs';
 import { mkdtemp, readdir, readFile, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { createRequire } from 'module';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { fileContains } from './file-contains';
 
 const repo = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -61,17 +61,6 @@ async function snapshot(connection: string) {
 	return lines;
 }
 
-/** Whether the file holds one of the texts, read in pieces: a Sicherung of 10 years does not fit in memory (#974) */
-async function contains(path: string, texts: string[]) {
-	let tail = '';
-	for await (const chunk of createReadStream(path, { encoding: 'latin1', highWaterMark: 16 * 1024 * 1024 })) {
-		const window = tail + chunk;
-		if (texts.some((text) => window.includes(text))) return true;
-		tail = window.slice(-Math.max(...texts.map((text) => text.length)));
-	}
-	return false;
-}
-
 const fail = (message: string) => {
 	console.log(`::error title=Fitness restore::R1/AP3 «Kein Update ohne Rückweg»: ${message}`);
 	process.exit(1);
@@ -96,7 +85,7 @@ if (phase === 'backup') {
 	const tenant = (await query(url, 'SELECT last_name FROM tenants ORDER BY last_name LIMIT 1'))[0]
 		?.last_name;
 	const file = (await readdir(dir)).find((name) => name.endsWith('.backup'))!;
-	if (await contains(join(dir, file), ['CREATE TABLE', ...(tenant ? [tenant] : [])]))
+	if (await fileContains(join(dir, file), ['CREATE TABLE', ...(tenant ? [tenant] : [])]))
 		fail(
 			`the Sicherung ${file} is readable without the Wiederherstellungscode (it contains CREATE TABLE or the tenant ${tenant}). Fix: encrypt the whole file.`
 		);

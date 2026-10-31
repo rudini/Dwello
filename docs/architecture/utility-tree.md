@@ -96,7 +96,7 @@ Dwello-Nutzen
   - Gemessen am 31.10.2026 (#974, `bun run fitness:r1`: eine synthetische Datenbank nach 10 Jahren, 5 Liegenschaften mit 50 Wohnungen und 75 Mietverträgen, 2016–2025, je Liegenschaft und Jahr 40 Rechnungen mit Beleg, je Mieter und Jahr ein versendetes Abrechnungs-PDF zu 150 KB; Dateien aus Zufallsbytes, die sich nicht komprimieren lassen; 4 vCPU Xeon, 15 GB):
     - Belege zu 400 KB: Datenbank 1,2 GB, Sicherung 864 MB in 50 s, Restore **24 s**.
     - Belege zu 1 MB: Datenbank 2,8 GB, Sicherung 2,0 GB in 109 s, Restore **97 s**.
-    - Das Ziel von 5 min hält mit Abstand; die Dauer wächst etwa mit der Grösse, die Grenze läge bei rund 8 GB. Ob die Mengen stimmen (40 Belege pro Liegenschaft und Jahr, 400 KB bis 1 MB pro Beleg), bestätigt der PO (Annahme A2).
+    - Das Ziel von 5 min hält mit Abstand. Die Dauer wächst schneller als die Grösse (2,3-fache Grösse, 4-fache Dauer); so weitergerechnet läge die Grenze bei rund 5 GB. Ob die Mengen stimmen (40 Belege pro Liegenschaft und Jahr, 400 KB bis 1 MB pro Beleg), bestätigt der PO (Annahme A2).
 - **Fitness Function:** Job pro Release:
   - Demo-Daten mit dem letzten Release-Tag laden.
   - Backup mit dem mitgelieferten Mechanismus erstellen.
