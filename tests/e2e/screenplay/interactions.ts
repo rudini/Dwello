@@ -173,7 +173,9 @@ export const FailRequests = {
 export const Cookies = {
 	add: (cookies: Parameters<BrowserContext['addCookies']>[0]): Activity => (actor) =>
 		pageOf(actor).context().addCookies(cookies),
-	clear: (async (actor) => pageOf(actor).context().clearCookies()) as Activity
+	clear: (async (actor) => pageOf(actor).context().clearCookies()) as Activity,
+	/** Only the session: the language chosen stays (cookies do not tell ports apart) */
+	signOut: (async (actor) => pageOf(actor).context().clearCookies({ name: 'dwello_session' })) as Activity
 };
 
 export const Browser = {

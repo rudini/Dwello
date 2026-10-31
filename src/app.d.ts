@@ -10,6 +10,7 @@ declare global {
 				email: string;
 				name: string;
 				provider: string;
+				signedInAt: number; // seconds; a new Wiederherstellungscode needs a recent sign-in (#718)
 			};
 		}
 		// interface PageData {}

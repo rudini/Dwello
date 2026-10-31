@@ -48,6 +48,23 @@
 		]}
 	/>
 
+	<!-- #718, part 3: a new Wiederherstellungscode, only where Dwello backs up -->
+	{#if data.backup !== 'off'}
+		<ConfigLinks
+			title={m.backup_settings_title()}
+			testid="backup-links"
+			links={[
+				{
+					key: 'backup',
+					href: '/config/backup',
+					label: m.backup_new_title(),
+					text: m.backup_new_link(),
+					icon: 'settings'
+				}
+			]}
+		/>
+	{/if}
+
 	<!-- #817: read access for an AI program of the landlord's choice -->
 	<ConfigLinks
 		title={m.ai_keys_title()}

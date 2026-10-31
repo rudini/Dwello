@@ -91,7 +91,9 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 				id: payload.sub,
 				email: payload.email,
 				name: payload.name,
-				provider: payload.provider
+				provider: payload.provider,
+				// the sign-in, in seconds: a new Wiederherstellungscode needs a recent one (#718)
+				authTime: payload.auth_time ?? payload.iat
 			},
 			error: null
 		};
