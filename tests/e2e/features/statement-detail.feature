@@ -825,7 +825,6 @@ Funktionalität: Abrechnungsdetail
   # #528 (Persona Dr. Weber, 452 P-1): eine Kategorie mit zwei Verteilschlüsseln steht in zwei Positionen; der Entwurf
   # sagt es und nennt die Rechnung, deren Verteilschlüssel von dem der grösseren Position abweicht (Entscheid des Product
   # Owners: nur ein Hinweis, keine Bestätigung)
-  @wip
   Szenario: Der Entwurf nennt die Rechnung mit einem anderen Verteilschlüssel derselben Kategorie
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
@@ -835,7 +834,6 @@ Funktionalität: Abrechnungsdetail
     Und nennt der Hinweis auf verschiedene Verteilschlüssel die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
     Und nennt der Hinweis auf verschiedene Verteilschlüssel die Rechnung "Hauswart 2024-09-30" nicht
 
-  @wip
   Szenario: Rechnung mit einem anderen Verteilschlüssel öffnen
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
@@ -844,7 +842,6 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter im Hinweis auf verschiedene Verteilschlüssel die Rechnung "Hauswart 2024-12-31" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung "Hauswart 2024-12-31"
 
-  @wip
   Szenario: Die Frage vor dem Neuberechnen nennt die Rechnung mit einem anderen Verteilschlüssel
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
@@ -853,9 +850,18 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter «Neu berechnen» wählt
     Dann nennt die Frage vor dem Neuberechnen die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
 
+  # #528 (Fachreview 528-1 V-1): die Frage nennt nur Rechnungen, deren Verteilschlüssel jetzt noch abweicht
+  Szenario: Die Frage vor dem Neuberechnen nennt eine Rechnung nicht mehr, deren Verteilschlüssel geändert ist
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Rechnung von "Hauswart 2024-12-31" wird nach dem Verteilschlüssel "Pro Fläche (m²)" verteilt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter «Neu berechnen» wählt
+    Dann nennt die Frage vor dem Neuberechnen keine Rechnung mit einem anderen Verteilschlüssel
+
   # #528: im PDF trägt die Position mit dem abweichenden Verteilschlüssel den Namen ihrer Rechnung, damit der Mieter die
   # beiden Positionen der Kategorie auseinanderhält
-  @wip
   Szenario: Das PDF nennt die Rechnung der Position mit einem anderen Verteilschlüssel
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
@@ -865,6 +871,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Hauswart (Hauswart 2024-12-31) Pro Einheit"
+    Und steht im PDF nicht "Hauswart (Hauswart 2024-09-30)"
 
   # #96: die Abrechnung kennt die Rechnungen, die sie abrechnet; eine Rechnung der Periode, die danach erfasst wurde,
   # fehlt darin
@@ -1158,7 +1165,8 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Pro Einheit 1 / 1 Wohnungen 400.00 400.00"
 
   # #770: zwei Lieferungen für den Tank vom selben Tag mit verschiedenen Verteilschlüsseln; die Veränderung Tankbestand
-  # (500 Franken: Anfangsbestand − Endbestand) wird nach dem Schlüssel der zuletzt erfassten verteilt (#890)
+  # (500 Franken: Anfangsbestand − Endbestand) wird nach dem Schlüssel der zuletzt erfassten verteilt (#890); die
+  # Position mit dem anderen Verteilschlüssel als die grössere nennt ihre Rechnung (#528)
   Szenario: Das PDF nennt für die Veränderung Tankbestand den Verteilschlüssel der zuletzt erfassten Rechnung vom selben Tag
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -1169,7 +1177,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Heizung Pro Einheit 1 / 1 Wohnungen 1'000.00"
+    Dann steht im PDF "Heizung (Heizung 2024-10-15) Pro Einheit 1 / 1 Wohnungen 1'000.00"
 
   # #403 (5): die Teilzahlung auf die ersetzte Abrechnung steht im PDF der berichtigten als «Bereits bezahlt auf NK-…»
   Szenario: PDF der berichtigten Abrechnung nennt die Teilzahlung

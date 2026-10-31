@@ -30,6 +30,7 @@ import { getUncategorizedInvoices } from './invoice.service';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
+import { splitKeysOf } from './split-keys';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
@@ -326,7 +327,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		building: result.building,
 		// without a heating cost position the chosen profile was not applied: it names none (#280, #451 point 8)
 		heatingProfile: (await billsHeating(lineItems)) ? result.heatingProfile : null,
-		lineItems,
+		lineItems: withOtherKeys(lineItems),
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId),
 		...allowed(result.statement.status)
@@ -338,6 +339,14 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
  * one stays as sent and asks for nothing, its berichtigte Abrechnung does (#120); a draft is calculated again or
  * deleted, a sent one corrected (#358)
  */
+// #528: a line of a Kategorie with several Verteilschlüssel whose key is not the Kategorie's: the PDF names its invoices
+function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
+	const parts = lineItems.map((item) => ({ ...item, amount: Number(item.totalAmount), invoices: item.invoices ?? [] }));
+	const split = splitKeysOf(parts);
+	const differs = (item: T) => split.some((other) => other.categoryId === item.categoryId && other.keyId === item.distributionKeyId);
+	return lineItems.map((item) => ({ ...item, otherKey: differs(item) }));
+}
+
 function allowed(status: string) {
 	const current = !isReplaced({ status });
 	return { editable: current, correctable: current && status !== 'draft', asksPayment: current, superseded: !current };

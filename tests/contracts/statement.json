@@ -59,6 +59,7 @@
 			"categoryId": "c1",
 			"distributionKeyId": "k1",
 			"description": "Heating",
+			"otherKey": false,
 			"totalAmount": "1000.00",
 			"tenantShare": "1000.00",
 			"sharePercentage": "100.0000",

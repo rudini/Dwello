@@ -76,13 +76,20 @@ const nameIn = (map: Map<string, Names>, id: string | null, language: Language) 
 const byDaysRented = (item: StatementWithDetails['lineItems'][number], daysShare: number) =>
 	!!item.billedDays || Math.abs(parseFloat(item.periodShare ?? '1') - daysShare) < 0.00005;
 
+// #528: the line with the other key of its Kategorie names its invoices, so the tenant can tell the lines apart; not the
+// Veränderung Tankbestand (Fachreview 528-1 V-5)
+function withInvoices(category: string, item: StatementWithDetails['lineItems'][number]) {
+	const invoices = (item.otherKey && item.invoices?.filter((invoice) => !invoice.fuelStock)) || [];
+	return invoices.length ? `${category} (${invoices.map((invoice) => invoice.description).join(', ')})` : category;
+}
+
 // One position as the PDF prints it: names in the language, the key with the apartment's part, the shares
 function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: boolean, names: LineNames, language: Language) {
 	const totalAmount = parseFloat(item.totalAmount);
 	const apartmentShare = amountOf(item.apartmentShare);
 	const heating = !!(item.categoryId && names.categoryNames.get(item.categoryId)?.isHeatingCost);
 	return {
-		category: nameIn(names.categoryNames, item.categoryId, language) ?? item.description,
+		category: withInvoices(nameIn(names.categoryNames, item.categoryId, language) ?? item.description, item),
 		key: nameIn(names.keyNames, item.distributionKeyId, language),
 		keyShare: names.keyShares.get(item.distributionKeyId ?? '') ?? percentOf(apartmentShare, totalAmount),
 		totalAmount,

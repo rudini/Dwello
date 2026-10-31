@@ -981,6 +981,41 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-later-invoices')).toBeNull();
 	});
 
+	// #528: a Kategorie the draft's invoices bill by several Verteilschlüssel, on the draft and in the «Neu berechnen» question
+	describe('Kategorie mit verschiedenen Verteilschlüsseln', () => {
+		const split = { categoryId: 'c1', keyId: null, mainKeyId: 'k1', categoryName: 'Hauswart', keyName: 'Pro Einheit', mainKeyName: 'Pro Fläche (m²)' };
+		const later = (invoices: { id: string; description: string }[]) => ({ invoices: 0, fuelStock: false, correctionDue: false, splitKeys: [{ ...split, invoices }] });
+		const showWith = (overrides: Partial<StatementWithDetails>, invoices = [{ id: 'i4', description: 'Hauswart Q4' }]) =>
+			show(StatementPage, { data: { statement: statement(overrides), reminders: [], later: later(invoices) }, form: null } as never);
+
+		it('nennt auf dem Entwurf die Rechnung mit dem anderen Verteilschlüssel und führt zu ihr', () => {
+			showWith({});
+			const hint = byTestId('statement-split-keys')!;
+			expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
+				'Hauswart steht in mehreren Positionen. Die grösste wird nach «Pro Fläche (m²)» verteilt, diese Rechnung nach «Pro Einheit»:'
+			);
+			expect(hint.querySelector('[data-testid="split-keys-invoice-link"]')!.getAttribute('href')).toBe('/invoices/i4');
+			expect(hint.textContent).toContain('Legt der Mietvertrag einen Verteilschlüssel fest, gilt er für alle Rechnungen der Kategorie.');
+		});
+
+		it('spricht bei mehreren Rechnungen von diesen Rechnungen', () => {
+			showWith({}, [{ id: 'i3', description: 'Hauswart Q3' }, { id: 'i4', description: 'Hauswart Q4' }]);
+			expect(byTestId('statement-split-keys')!.textContent).toContain('diese Rechnungen nach «Pro Einheit»:');
+		});
+
+		it('nennt sie auch in der Frage vor dem Neuberechnen', () => {
+			showWith({});
+			click('statement-recalculate-button');
+			expect(byTestId('statement-recalculate-split-keys')!.textContent).toContain('Ist das nicht gewollt, ändern Sie zuerst den Verteilschlüssel der Rechnung.');
+		});
+
+		it('nennt sie nicht auf einer versendeten Abrechnung', () => {
+			showWith({ status: 'sent', correctable: true });
+			expect(byTestId('statement-status')).not.toBeNull();
+			expect(byTestId('statement-split-keys')).toBeNull();
+		});
+	});
+
 	it('bietet beim Entwurf kein Berichtigen an', () => {
 		detail();
 		expect(byTestId('statement-send-button')).not.toBeNull();

@@ -10,6 +10,7 @@
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
 	import InvoiceHint from './InvoiceHint.svelte';
+	import SplitKeysHint from '../SplitKeysHint.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -51,6 +52,8 @@
 	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	const heating = $derived(hinted('heatingWithoutServicePeriod'));
+	// #528: a Kategorie the statements will bill by several Verteilschlüssel; a hint, no confirmation
+	const splitKeys = $derived(rows.flatMap((row) => row.splitKeys));
 	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
@@ -127,6 +130,13 @@
 	title={m.statements_heating_whole_title()}
 	text={heatingWholeText(heating)}
 	testid="heating-without-service-period"
+/>
+
+<SplitKeysHint
+	{splitKeys}
+	end={m.statements_split_keys_preview_end()}
+	testid="statement-preview-split-keys"
+	returnTo="/statements/generate?schritt=3"
 />
 
 <InvoiceHint

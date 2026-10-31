@@ -300,7 +300,7 @@ describe('Abrechnung laden', () => {
 
 		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { later: unknown };
 		// #454: and whether the Tankbestand changed, and whether a correction is due (Fachreview 454-1 E-3)
-		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
+		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false, splitKeys: [] });
 		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
 	});
 
@@ -314,7 +314,7 @@ describe('Abrechnung laden', () => {
 		}) as typeof globalThis.fetch;
 
 		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { later: unknown };
-		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
+		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false, splitKeys: [] });
 	});
 });
 

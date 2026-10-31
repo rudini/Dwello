@@ -92,6 +92,7 @@
 		"draft-discard-dialog": "A wizard reopened with input kept in the browser, «Angaben verwerfen» clicked: the dialog asking before the input is deleted (#201).",
 		"draft-dropped": "Statement wizard reopened with input whose building and heating profile were deleted since: the restore notice says so (#135).",
 		"old-address-preview": "Statement wizard preview of 2024 with a tenant who moved out and still has the building's address: the warning at his row (A-5, #114).",
+		"split-keys": "Statement wizard preview of 2024 with a Kategorie billed by two Verteilschlüssel: the invoice whose key differs, with its edit link (#528).",
 		"heating-hints": "Statement wizard preview of 2024 with tenants who moved out and a Heizprofil: the heating invoices without Leistungszeitraum beside one with, each with its edit link (#339, #451).",
 		"old-address-task": "Overview with a draft statement of a tenant who moved out and still has the building's address: the task «Neue Adresse eintragen» (A-5, #114).",
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
@@ -596,6 +597,7 @@
 				"tank-question",
 				"old-address-preview",
 				"heating-hints",
+				"split-keys",
 				"preview-all-billed",
 				"preview-outdated",
 				"draft-restored",
@@ -637,6 +639,14 @@
 			"states": [
 				"default",
 				"send-dialog"
+			]
+		},
+		{
+			"name": "statement-split-keys-detail",
+			"path": "/statements/{splitStatement}",
+			"states": [
+				"default",
+				"recalculate-dialog"
 			]
 		},
 		{

@@ -5,6 +5,8 @@ import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import type { StatementWithDetails as StatementResponse } from '../../../backend/src/api/statement';
 import type { Json, StatementLineItem, StatementWithDetails } from '$lib/types';
+import type { SplitKeyHint } from '$lib/statement-wizard';
+import type { SplitKey } from '../../../backend/src/services/split-keys';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -159,9 +161,11 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
  *  (#96), whether its Tankbestand changed, and whether correcting it is due and may be declined (#454); only a hint:
  *  nothing if it cannot be loaded */
 export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(
-		() => null
-	);
+	const [response, categories, keys] = await Promise.all([
+		fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(() => null),
+		namesById(fetch, 'categories'),
+		namesById(fetch, 'distribution-keys')
+	]);
 	const changed: {
 		invoiceIds?: string[];
 		fuelStockChanged?: boolean;
@@ -169,6 +173,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
 		carryOverChanged?: boolean;
+		splitKeys?: SplitKey[];
 	} = response?.ok ? await response.json() : {};
 	return {
 		invoices: changed.invoiceIds?.length ?? 0,
@@ -176,8 +181,20 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,
-		carryOver: !!changed.carryOverChanged // #506 C: the draft would count another Übertrag now
+		carryOver: !!changed.carryOverChanged, // #506 C: the draft would count another Übertrag now
+		splitKeys: localSplitKeys(changed.splitKeys, categories, keys) // #528, as «Neu berechnen» would bill them
 	};
+}
+
+/** #528: the Kategorie and keys of each split in the UI language; without a key «Pro Einheit», as its line */
+export function localSplitKeys(splitKeys: SplitKey[] = [], categories: Map<string, string>, keys: Map<string, string>): SplitKeyHint[] {
+	const keyName = (id: string | null) => (id ? (keys.get(id) ?? '') : m.statements_key_per_unit());
+	return splitKeys.map((split) => ({
+		...split,
+		categoryName: (split.categoryId && categories.get(split.categoryId)) || '',
+		keyName: keyName(split.keyId),
+		mainKeyName: keyName(split.mainKeyId)
+	}));
 }
 
 /** Names of categories or distribution keys in the UI language by id; the backend's lists only carry ids and the English or German name */

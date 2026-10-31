@@ -109,12 +109,14 @@ export const confirmDeclineCorrectionButton = target('Nicht berichtigen bestäti
 );
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
+export const recalculateDialog = target('Frage vor dem Neuberechnen', (page) => page.getByRole('dialog'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
 
 // #528: the hint on a Kategorie billed with different Verteilschlüssel, on the draft and in the «Neu berechnen» question
 const splitKeysOn = {
 	draft: ['Entwurf', 'statement-split-keys'],
-	question: ['Frage vor dem Neuberechnen', 'statement-recalculate-split-keys']
+	question: ['Frage vor dem Neuberechnen', 'statement-recalculate-split-keys'],
+	preview: ['Vorschau', 'statement-preview-split-keys']
 } as const;
 export type SplitKeysPlace = keyof typeof splitKeysOn;
 export const splitKeysHint = (place: SplitKeysPlace) =>

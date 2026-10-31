@@ -47,6 +47,8 @@ import {
 	sentPdfHref,
 	splitKeysLineText,
 	splitKeysLines,
+	splitKeysHints,
+	recalculateQuestion,
 	splitKeysText
 } from '../questions/statement-detail';
 import {
@@ -775,4 +777,13 @@ When('der Liegenschaftsverwalter «Neu berechnen» wählt', async ({ verwalter }
 
 Then('nennt die Frage vor dem Neuberechnen die Rechnung {string} mit {string}', async ({ verwalter }, invoice: string, key: string) => {
 	await verwalter.sees(splitKeysLineText('question', invoice)).toContain(`«${key}»`);
+});
+
+Then('nennt die Frage vor dem Neuberechnen keine Rechnung mit einem anderen Verteilschlüssel', async ({ verwalter }) => {
+	await verwalter.sees(recalculateQuestion).toContain('neu berechnen');
+	await verwalter.sees(splitKeysHints('question')).toBe(0);
+});
+
+Then('nennt die Vorschau die Rechnung {string} mit {string}', async ({ verwalter }, invoice: string, key: string) => {
+	await verwalter.sees(splitKeysLineText('preview', invoice)).toContain(`«${key}»`);
 });

@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
 import { CodedError } from './coded-error';
+import { invoiceSplitKeys } from './invoice-completeness.service';
 import { getInvoicesForStatement } from './invoice.service';
 import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
@@ -129,7 +130,9 @@ async function changesOf(statement: StatementWithDetails | null, load: Loaders) 
 		correctionDue: due,
 		correctionDeclinable: due && !!check?.raises,
 		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
-		result: check?.result
+		result: check?.result,
+		// #528: what «Neu berechnen» would bill in a line of its own (Fachreview 528-1 V-1)
+		splitKeys: await invoiceSplitKeys(statement.building.id, { start: statement.periodStart, end: statement.periodEnd })
 	};
 }
 

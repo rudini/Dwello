@@ -314,6 +314,15 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann meldet die Prüfung der Kategorien für "Heizung": "Die Lieferungen der Kategorie Heizung haben verschiedene Verteilschlüssel. Die Veränderung Tankbestand wird nach «Pro Einheit» verteilt. Prüfen Sie die Verteilschlüssel der Rechnungen."
     Und verlangt die Vorschau keine Bestätigung
 
+  # #528 (Fachreview 528-1 V-2): schon vor dem Erstellen sagt die Vorschau, dass eine Kategorie mit verschiedenen
+  # Verteilschlüsseln abgerechnet wird, und nennt die Rechnung, deren Verteilschlüssel abweicht; nur ein Hinweis
+  Szenario: Die Vorschau nennt die Rechnung mit einem anderen Verteilschlüssel derselben Kategorie
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Vorschau die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
+    Und verlangt die Vorschau keine Bestätigung
+
   # #770: Rechnungen vom selben Tag stehen in der Reihenfolge ihrer Erfassung, auch wenn eine danach geändert wurde
   Szenario: Der Hinweis auf Rechnungen nach der Abrechnungsperiode nennt Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"

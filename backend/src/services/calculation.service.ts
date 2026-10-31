@@ -28,6 +28,7 @@ import { agreedCategoryIds, agreedFromDays } from './agreed-category.service';
 import { calculateHeatingShare, getHeatingProfile, sourcesOf } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
+import { groupBy } from './split-keys';
 
 /**
  * Line item for statement
@@ -126,7 +127,8 @@ function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
 		group.invoices.push({ id: invoice.id, description: invoice.description, ...(receipt.invoiceDate && receipt), ...invoice.inPeriod });
 	}
 
-	return Array.from(groups.values());
+	// the lines of one Kategorie stay together, also with several keys (#528)
+	return [...groupBy(groups.values(), (group) => group.categoryId).values()].flat();
 }
 
 const isoDay = (date: Date) => date.toISOString().split('T')[0];

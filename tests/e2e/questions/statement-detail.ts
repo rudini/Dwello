@@ -11,6 +11,7 @@ import {
 	costBreakdown,
 	statementAdvancePaid,
 	correctDialog,
+	recalculateDialog,
 	declineCorrectionButton,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
@@ -59,6 +60,7 @@ export const statusOfStatement = Text.of(statementStatus);
 export const splitKeysText = (place: SplitKeysPlace) => Text.of(splitKeysHint(place));
 export const splitKeysLineText = (place: SplitKeysPlace, description: string) => Text.of(splitKeysLine(place, description));
 export const splitKeysLines = (description: string) => Count.of(splitKeysLine('draft', description));
+export const splitKeysHints = (place: SplitKeysPlace) => Count.of(splitKeysHint(place));
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
@@ -108,6 +110,7 @@ export const languageOfPdf = Text.of(pdfLanguage);
 
 // #120
 export const correctConfirmation = Text.of(correctDialog);
+export const recalculateQuestion = Text.of(recalculateDialog);
 export const replacedDone = Text.of(successToast);
 export const deadlineShown = Count.of(paymentDeadline);
 export const paymentText = Text.of(paymentSummary);
