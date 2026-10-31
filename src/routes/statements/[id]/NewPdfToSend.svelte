@@ -27,5 +27,7 @@
 	success={m.statements_new_pdf_marked_sent()}
 	fields={{ documentId }}
 >
-	<p>{refund ? m.statements_new_pdf_mark_sent_text_refund() : m.statements_new_pdf_mark_sent_text()}</p>
+	<p>
+		{refund ? m.statements_new_pdf_mark_sent_text_refund() : m.statements_new_pdf_mark_sent_text()}
+	</p>
 </FormDialog>
