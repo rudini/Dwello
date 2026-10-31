@@ -45,12 +45,6 @@
 <div class="flex flex-col gap-6" data-testid="backup-page">
 	<PageHeader title={m.backup_new_title()} purpose={m.backup_new_intro()} />
 
-	{#if data.confirmed && !data.code}
-		<div tabindex="-1" data-testid="backup-new-confirmed">
-			<Alert tone="positive" title={m.backup_new_confirmed()} />
-		</div>
-	{/if}
-
 	{#if data.code}
 		<Panel>
 			<div class="flex flex-col gap-4">
@@ -87,6 +81,14 @@
 				</div>
 			</form>
 		</Panel>
+	{:else if data.confirmed}
+		<!-- the flow ends here, with the way back instead of a form for yet another code (#956) -->
+		<div tabindex="-1" data-testid="backup-new-confirmed">
+			<Alert tone="positive" title={m.backup_new_confirmed()} />
+		</div>
+		<div>
+			<Button href="/config" testid="backup-new-back-link">{m.backup_new_back()}</Button>
+		</div>
 	{:else if data.step === 'again'}
 		<Panel>
 			<div class="flex flex-col gap-4">

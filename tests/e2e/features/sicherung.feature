@@ -82,6 +82,19 @@ Funktionalität: Sicherung einrichten
     Dann sieht der Liegenschaftsverwalter bei der Sicherung den Hinweis "Der Code stimmt nicht mit dem angezeigten überein. Geben Sie ihn so ein, wie er oben und auf dem Notfallblatt steht; Bindestriche, Leerzeichen sowie Gross- und Kleinschreibung spielen keine Rolle."
     Und ist der Liegenschaftsverwalter auf der Seite "Sicherung einrichten"
 
+  # #947: ein leeres Feld und ein unvollständiger Code bekommen je ihren eigenen Hinweis
+  Szenario: Den Wiederherstellungscode leer lassen
+    Angenommen Dwello ist eingerichtet, die Sicherung aber noch nicht
+    Und der Liegenschaftsverwalter hat die Sicherung geöffnet
+    Wenn der Liegenschaftsverwalter ohne Wiederherstellungscode die Sicherung startet
+    Dann sieht der Liegenschaftsverwalter bei der Sicherung den Hinweis "Geben Sie den Wiederherstellungscode ein, der oben und auf dem Notfallblatt steht."
+
+  Szenario: Nur einen Teil des Wiederherstellungscodes eingeben
+    Angenommen Dwello ist eingerichtet, die Sicherung aber noch nicht
+    Und der Liegenschaftsverwalter hat die Sicherung geöffnet
+    Wenn der Liegenschaftsverwalter nur die erste Gruppe des angezeigten Wiederherstellungscodes eingibt und die Sicherung startet
+    Dann sieht der Liegenschaftsverwalter bei der Sicherung den Hinweis "Der Code ist unvollständig: Sie haben 4 von 24 Zeichen eingegeben. Geben Sie alle 6 Gruppen ein, wie sie oben und auf dem Notfallblatt stehen."
+
   # Fachbegriffe sichtbar erklärt, nicht als Tooltip (CLAUDE.md, Design-Regeln)
   Szenario: Die Sicherung erklärt, wo die Sicherungen liegen
     Angenommen Dwello ist eingerichtet, die Sicherung aber noch nicht
@@ -161,6 +174,22 @@ Funktionalität: Sicherung einrichten
     # Persona sven-718c P-2: die Bestätigung wird vorgelesen
     Und steht der Fokus auf der Bestätigung des neuen Wiederherstellungscodes
     Und zeigt die Seite für einen neuen Wiederherstellungscode noch keinen Code
+
+  # #956: nach der Bestätigung ist der Ablauf zu Ende
+  Szenario: Nach der Bestätigung bietet die Seite keinen weiteren neuen Code an
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Und der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt
+    Wenn der Liegenschaftsverwalter den angezeigten Wiederherstellungscode erneut eingibt und den neuen Code bestätigt
+    Dann bietet die Seite für einen neuen Wiederherstellungscode keinen weiteren neuen Code an
+
+  Szenario: Von der Bestätigung des neuen Codes zurück zu den Einstellungen
+    Angenommen Dwello ist eingerichtet und die Sicherung auch
+    Und der Liegenschaftsverwalter hat sich in der frischen Installation mit Passwort angemeldet
+    Und der Liegenschaftsverwalter hat mit seinem Passwort einen neuen Wiederherstellungscode erstellt
+    Und der Liegenschaftsverwalter hat den angezeigten Wiederherstellungscode erneut eingegeben und den neuen Code bestätigt
+    Wenn der Liegenschaftsverwalter von der Bestätigung zu den Einstellungen zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
 
   Szenario: Den neuen Wiederherstellungscode falsch eingeben
     Angenommen Dwello ist eingerichtet und die Sicherung auch

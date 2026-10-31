@@ -10,13 +10,16 @@ import {
 	focusedOnBackupPage,
 	googleSignInAgain,
 	newCodeConfirmed,
+	newCodeOffered,
 	shownBackupCode
 } from '../questions/sicherung';
 import { inDays, swissDate } from '../fixtures/dates';
 import { FRESH_APP } from '../fixtures/fresh-installation';
 import {
 	SHOWN_CODE,
+	backToSettings,
 	confirmBackupCode,
+	confirmFirstGroupOfShownCode,
 	confirmShownBackupCode,
 	downloadEmergencySheet,
 	goToFreshBackup,
@@ -111,6 +114,18 @@ When('der Liegenschaftsverwalter einen anderen Wiederherstellungscode eingibt un
 	await verwalter.attemptsTo(confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'));
 });
 
+// #947: an empty field, and the first group only, as a long press selects it on a phone
+When('der Liegenschaftsverwalter ohne Wiederherstellungscode die Sicherung startet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmBackupCode(''));
+});
+
+When(
+	'der Liegenschaftsverwalter nur die erste Gruppe des angezeigten Wiederherstellungscodes eingibt und die Sicherung startet',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(confirmFirstGroupOfShownCode);
+	}
+);
+
 When('der Besucher richtet die Sicherung ein', async ({ besucher }) => {
 	await besucher.attemptsTo(confirmShownBackupCode);
 });
@@ -176,6 +191,22 @@ When(
 		await verwalter.attemptsTo(confirmNewShownCode);
 	}
 );
+
+Given(
+	'der Liegenschaftsverwalter hat den angezeigten Wiederherstellungscode erneut eingegeben und den neuen Code bestätigt',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(confirmNewShownCode);
+	}
+);
+
+// #956: after the confirmation the flow ends, with the way back to «Einstellungen»
+Then('bietet die Seite für einen neuen Wiederherstellungscode keinen weiteren neuen Code an', async ({ verwalter }) => {
+	await verwalter.sees(newCodeOffered).toBe(false);
+});
+
+When('der Liegenschaftsverwalter von der Bestätigung zu den Einstellungen zurückkehrt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(backToSettings);
+});
 
 When('der Liegenschaftsverwalter einen anderen Wiederherstellungscode eingibt und den neuen Code bestätigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(confirmBackupCode('AAAA-BBBB-CCCC-DDDD-EEEE-FFFF'));

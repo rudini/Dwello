@@ -2193,6 +2193,9 @@
 	"backend_backup_sign_in_again": "You signed in too long ago. Sign in again to create a new code.",
 	"backend_backup_code_expired": "The new code has expired because you did not confirm it within 30 minutes. The previous code still applies. Destroy the emergency sheet of the expired code and create a new code.",
 	"backend_backup_code_mismatch": "The code does not match the one shown. Enter it as it appears above and on the emergency sheet; hyphens, spaces and upper or lower case do not matter.",
+	"backend_backup_code_empty": "Enter the recovery code shown above and on the emergency sheet.",
+	"backend_backup_code_incomplete": "The code is incomplete: you entered {typed} of {of} characters. Enter all 6 groups as they appear above and on the emergency sheet.",
+	"backup_new_back": "Back to settings",
 	"backend_backup_no_code": "The recovery code is already confirmed. An emergency sheet is only available before you confirm it.",
 	"privacy_stored_backup": "In addition, Dwello stores an encrypted backup in the folder «backups» on this server every day. The operator copies it to another device, for example to cloud storage; the operator can tell you where and in which country this copy is kept. Whoever keeps the copy cannot read it without the recovery code.",
 	"privacy_retention_backup": "So that your data survives a failure or a failed update, Dwello backs it up every day in encrypted form, including receipts and documents, and keeps the backups on this server for up to 12 months; Dwello deletes older ones itself. What you delete or anonymise stays in the earlier backups until Dwello deletes them, at most 12 months; the operator can tell you how long the copy on the other device keeps older backups. Only someone who knows the recovery code can read the backups. If the operator restores a backup, data you deleted or anonymised after it is back: delete or anonymise it again then."

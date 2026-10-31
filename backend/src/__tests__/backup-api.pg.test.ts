@@ -67,6 +67,21 @@ describe('Sicherung einrichten', () => {
 		expect(await state()).toMatchObject({ backup: 'setup', code });
 	});
 
+	// #947: what is missing, not «does not match»: an empty field, and a code cut short as a long press selects it on a phone
+	it('sagt bei einem leeren Feld, dass der Code fehlt', async () => {
+		const response = await sendJson('POST', '/api/v1/backup/confirm', { code: ' - ' });
+		expect(response.status).toBe(422);
+		expect(await response.json()).toMatchObject({ code: 'BACKUP_CODE_EMPTY' });
+	});
+
+	it('sagt bei einem unvollständigen Code, wie viele der 24 Zeichen eingegeben sind', async () => {
+		const { code } = await state();
+		const response = await sendJson('POST', '/api/v1/backup/confirm', { code: code!.slice(0, 9) });
+		expect(response.status).toBe(422);
+		expect(await response.json()).toMatchObject({ code: 'BACKUP_CODE_INCOMPLETE', params: { typed: 8 } });
+		expect(await state()).toMatchObject({ backup: 'setup', code });
+	});
+
 	it('ist ohne Ordner für die Sicherung aus und zeigt keinen Code', async () => {
 		delete process.env.BACKUP_DIR;
 		try {

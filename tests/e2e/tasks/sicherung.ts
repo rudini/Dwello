@@ -13,6 +13,7 @@ import {
 	backupSheetLink,
 	backupSettingsLink,
 	backupSubmitButton,
+	newCodeBackLink,
 	newCodeButton,
 	newCodeConfirmation,
 	newCodePasswordInput
@@ -39,6 +40,12 @@ export const confirmBackupCode =
 		actor.attemptsTo(Enter.theValue(code).into(backupCodeInput), Click.on(backupSubmitButton));
 
 /** Types the shown code again, as the landlord does after the setup, and waits for the overview that confirms it */
+/** Only the first group of the shown code, as a long press selects on a phone (#947) */
+export const confirmFirstGroupOfShownCode: Activity = async (actor) => {
+	await actor.attemptsTo(Wait.until(backupCode));
+	await actor.attemptsTo(confirmBackupCode(((await actor.answer(shownBackupCode)) ?? '').slice(0, 4)));
+};
+
 export const confirmShownBackupCode: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(backupCode));
 	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''), Wait.until(backupConfirmation));
@@ -91,3 +98,6 @@ export const confirmNewShownCode: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(backupCode));
 	await actor.attemptsTo(confirmBackupCode((await actor.answer(shownBackupCode)) ?? ''), Wait.until(newCodeConfirmation));
 };
+
+/** From the confirmation of the new code back to «Einstellungen» (#956) */
+export const backToSettings = Click.on(newCodeBackLink);
