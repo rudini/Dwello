@@ -29,6 +29,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob' |
 	status: StatementStatus;
 	nextReminderFrom: string | null;
 	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
+	remindersCounted: number; // the reminders since the last sending: the next Mahnstufe follows them (#534)
 	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	openCarry: boolean; // #506: an Übertrag no statement counts or will; the landlord settles it by hand
@@ -61,6 +62,11 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob' |
 	carriedFrom?: { id: string; statementNumber: string; balance: string } | null; // the Übertrag (#448); only in the detail
 	editable?: boolean; // what it allows (#788); only in the detail
 	correctable?: boolean;
+	redeliverable?: boolean; // #534: sent or overdue, not replaced: «Erneut per Brief zustellen»
+	refund?: boolean; // the Saldo is paid out: its Zahlungsfrist is «Rückerstattung bis» (Fachreview 534-1 V-6)
+	resent?: { id: string; newPdf: boolean; sentAt: Date | null; createdAt: Date }[]; // sendings after the first (#534, #968), in the detail
+	newPdfToSend?: string | null; // the Dokument of the new PDF still to send (#968)
+	newPdfMadeAt?: Date | null; // when that new PDF was made
 	asksPayment?: boolean;
 	superseded?: boolean; // replaced by a berichtigte Abrechnung (#120): the page names it instead of the status
 	advanceChanged?: boolean; // a draft counting another Akonto than the replaced one (#464); only in the detail

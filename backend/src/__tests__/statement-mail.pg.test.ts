@@ -286,3 +286,149 @@ describe('Abrechnung per Brief', () => {
 		expect(mails.length).toBe(before);
 	});
 });
+
+// #534: a sent statement whose e-mail did not reach the tenant goes again by letter, dated anew
+describe('Versendete Abrechnung erneut per Brief zustellen', () => {
+	const redeliver = async (id: string) => {
+		const response = await api('POST', `/api/v1/statements/${id}/redeliver`);
+		return { status: response.status, ...((await response.json()) as Omit<Sent, 'status'>) };
+	};
+
+	it('datiert die Abrechnung auf heute, rechnet die Zahlungsfrist ab heute und legt das PDF als Brief ab', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		// sent long ago, its Zahlungsfrist passed
+		await db
+			.update(utilityStatements)
+			.set({ statementDate: '2021-01-15', paymentDeadline: '2021-02-14' })
+			.where(eq(utilityStatements.id, id));
+
+		const result = await redeliver(id);
+
+		const today = swissToday();
+		expect(result.statement).toMatchObject({
+			status: 'sent',
+			statementDate: today,
+			paymentDeadline: daysAfter(today, await getTypedConfig('payment_deadline_days'))
+		});
+		const stored = await storedFor(id);
+		expect(stored.map(({ channel, status }) => [channel, status])).toEqual([
+			['letter', 'sent'],
+			['letter', 'sent']
+		]);
+		expect(stored[1].content).not.toBe(stored[0].content); // the PDF made anew, with the new date
+		// Persona Dr. Weber 534 P-1: «Dokumente» names a Zahlungsfrist only for a reminder, not for the statement's letters
+		const listed = (await (await api('GET', `/api/v1/documents?statementId=${id}`)).json()) as { data: { paymentDeadline: string | null }[] };
+		expect(listed.data.map((document) => document.paymentDeadline)).toEqual([null, null]);
+	});
+
+	// Code-Review 534-1 C-2: without the PDF nothing changes, the statement keeps its date and Zahlungsfrist
+	it('lässt die Abrechnung unverändert, wenn das PDF nicht entstehen kann', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await db.update(utilityStatements).set({ statementDate: '2021-01-15', paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		await deleteConfig('iban');
+
+		const result = await redeliver(id).finally(() => setConfig('iban', 'CH93 0076 2011 6238 5295 7'));
+
+		expect(result).toMatchObject({ status: 400, code: 'IBAN_MISSING' });
+		const [kept] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, id));
+		expect([kept.statementDate, kept.paymentDeadline, !!kept.pdfBlob]).toEqual(['2021-01-15', '2021-02-14', true]);
+		expect(await storedFor(id)).toHaveLength(1);
+	});
+
+	it('verweigert einen Entwurf und eine bezahlte Abrechnung', async () => {
+		const id = await draft();
+		expect(await redeliver(id)).toMatchObject({ status: 409, code: 'STATEMENT_NOT_REDELIVERABLE' });
+		await send(id, { byLetter: true });
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'paid' });
+		expect(await redeliver(id)).toMatchObject({ status: 409, code: 'STATEMENT_NOT_REDELIVERABLE' });
+		expect(await storedFor(id)).toHaveLength(1);
+	});
+});
+
+// #534 (Fachreview 534-1 M-1): reminders from before the redelivery no longer count or go out
+describe('Mahnungen nach dem erneuten Zustellen', () => {
+	it('zählt eine frühere Mahnung nicht mehr und schickt eine noch zu versendende nicht mehr ab', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await db.update(utilityStatements).set({ paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		const reminder = (await (await api('POST', `/api/v1/statements/${id}/reminders`)).json()) as { document: { id: string } };
+
+		await api('POST', `/api/v1/statements/${id}/redeliver`);
+
+		const posted = await api('PUT', `/api/v1/documents/${reminder.document.id}/sent`);
+		expect([posted.status, ((await posted.json()) as { code: string }).code]).toEqual([400, 'REMINDER_STATEMENT_REDELIVERED']);
+		const detail = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { reminderToSend: boolean };
+		expect(detail.reminderToSend).toBe(false);
+		const toSend = (await (await api('GET', `/api/v1/documents?status=to_send&tenantId=${rental.tenant}`)).json()) as { data: { id: string }[] };
+		expect(toSend.data.map((document) => document.id)).not.toContain(reminder.document.id);
+	});
+});
+
+// Code-Review 534-1 C-3, C-1: a reminder sent before the redelivery counts no more for the next Mahnstufe
+describe('Mahnstufe nach dem erneuten Zustellen', () => {
+	it('beginnt nach dem erneuten Zustellen wieder bei der Zahlungserinnerung', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await db.update(utilityStatements).set({ paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		const reminder = (await (await api('POST', `/api/v1/statements/${id}/reminders`)).json()) as { document: { id: string } };
+		await api('PUT', `/api/v1/documents/${reminder.document.id}/sent`);
+		const before = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { remindersCounted: number };
+
+		await api('POST', `/api/v1/statements/${id}/redeliver`);
+
+		const after = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { remindersCounted: number; nextReminderFrom: string | null };
+		expect([before.remindersCounted, after.remindersCounted, after.nextReminderFrom]).toEqual([1, 0, null]);
+		// Code-Review 534-2 C-3: the reminder the backend then makes is the first again, as the dialog says
+		await db.update(utilityStatements).set({ paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		const next = (await (await api('POST', `/api/v1/statements/${id}/reminders`)).json()) as { document: { reminderLevel: number } };
+		expect(next.document.reminderLevel).toBe(1);
+	});
+});
+
+// #968: the new PDF after a change of a statement whose PDF went out waits under «Dokumente»
+describe('Neues PDF nach einer Änderung', () => {
+	const newPdfs = async (id: string) => (await storedFor(id)).filter((document) => document.type === 'new_pdf');
+
+	it('legt das neue PDF zum Versand bereit, ersetzt es bei einer weiteren Änderung und hält den Versand ohne neues Datum fest', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		const { statement } = await send(id);
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung bis März' });
+		const [pending] = await newPdfs(id);
+		expect(await newPdfs(id)).toHaveLength(1);
+		expect(pending).toMatchObject({ status: 'to_send', channel: 'letter', title: 'Nebenkostenabrechnung, neues PDF' });
+
+		expect((await api('PUT', `/api/v1/documents/${pending.id}/sent`)).status).toBe(200);
+
+		expect(await newPdfs(id)).toMatchObject([{ status: 'sent', paymentDeadline: statement!.paymentDeadline }]);
+		const after = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { statementDate: string; paymentDeadline: string };
+		expect(after).toMatchObject({ statementDate: statement!.statementDate, paymentDeadline: statement!.paymentDeadline });
+	});
+
+	it('schickt das neue PDF einer inzwischen bezahlten Abrechnung nicht mehr ab', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'paid' });
+		const [pending] = await newPdfs(id);
+
+		const posted = await api('PUT', `/api/v1/documents/${pending.id}/sent`);
+
+		expect([posted.status, ((await posted.json()) as { code: string }).code]).toEqual([400, 'NEW_PDF_STATEMENT_PAID']);
+	});
+
+	it('legt kein neues PDF an, wenn die Abrechnung ohne Dokument versendet wurde (vor #449, #969)', async () => {
+		const id = await draft();
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		expect(await newPdfs(id)).toHaveLength(0);
+	});
+});

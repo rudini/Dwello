@@ -9,7 +9,8 @@ import type { StatementDocument } from '$lib/types';
 // why the backend says a reminder no longer goes out, as its label
 const notToSend = {
 	replaced: m.documents_not_to_send_replaced,
-	paid: m.documents_not_to_send_paid
+	paid: m.documents_not_to_send_paid,
+	redelivered: m.documents_not_to_send_redelivered // #534
 };
 
 export function documentStatus(document: Pick<StatementDocument, 'status' | 'notToSend'>) {

@@ -7,7 +7,9 @@ import {
 	correctStatement,
 	declineCorrection,
 	markStatementPaid,
+	markNewPdfSent,
 	recalculateStatement,
+	redeliverStatement,
 	replaceStatement,
 	resetStatementPayment,
 	settleCarryOver,
@@ -41,7 +43,8 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 		// how the statement went out: its own Dokument, by e-mail or by letter (#449, decided in #404, point 7)
 		delivery: documents
 			.filter((document) => document.type === 'statement')
-			.map(({ id, channel, recipient, sentAt }) => ({ id, channel, recipient: recipient ?? null, sentAt }))[0] ?? null,
+			.map(({ id, channel, recipient, sentAt }) => ({ id, channel, recipient: recipient ?? null, sentAt }))
+			.at(-1) ?? null, // the first: the list is newest first, later sendings are `resent` (#534)
 		// set by the edit page after a change the sent PDF does not show (#524)
 		pdfChange: url.searchParams.get('pdf-change'),
 		later
@@ -87,6 +90,14 @@ export const actions: Actions = {
 		const result = await correctStatement(fetch, params.id);
 		if ('message' in result) return fail(result.status, { actionError: result.message });
 		throw redirect(303, `/statements/${result.id}`);
+	},
+	redeliver: async ({ params, fetch }) => {
+		const refused = await redeliverStatement(fetch, params.id);
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	newPdfSent: async ({ request, fetch }) => {
+		const refused = await markNewPdfSent(fetch, String((await request.formData()).get('documentId')));
+		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	recalculate: async ({ params, fetch }) => {
 		const refused = await recalculateStatement(fetch, params.id);

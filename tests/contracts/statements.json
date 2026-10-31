@@ -29,6 +29,7 @@
 			"reminderSentDate": null,
 			"nextReminderFrom": null,
 			"reminderToSend": false,
+			"remindersCounted": 0,
 			"reminderDue": null,
 			"unpaid": false,
 			"claimed": true,

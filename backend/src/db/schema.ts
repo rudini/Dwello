@@ -95,7 +95,8 @@ export type CorrespondenceChannel = 'email' | 'letter';
 /** A statement's stored status; `overdue` is not stored but computed from the payment deadline (#837) */
 export type StoredStatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'replaced';
 /** A stored document: a reminder, an e-mailed statement (#86) or a file the landlord uploaded; its file type (#837) */
-export type DocumentType = 'reminder' | 'statement' | 'upload';
+// statement: a sending of the statement (#86, #449; again by letter, #534); new_pdf: its PDF after a change (#968)
+export type DocumentType = 'reminder' | 'statement' | 'new_pdf' | 'upload';
 export type DocumentMimeType = 'application/pdf' | 'image/jpeg' | 'image/png';
 /** A letter's Versandstatus; an upload has none */
 export type DocumentStatus = 'sent' | 'to_send';

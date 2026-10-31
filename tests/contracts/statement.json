@@ -48,12 +48,18 @@
 	"reminderSentDate": null,
 	"nextReminderFrom": "2026-10-27",
 	"reminderToSend": false,
+	"remindersCounted": 0,
 	"notes": "Hauswart neu",
 	"createdAt": "2025-01-15T08:00:00.000Z",
 	"tenant": { "firstName": "Eva", "lastName": "Frei", "email": "eva@example.com", "correspondenceChannel": "letter", "language": "fr" },
 	"apartment": { "number": "3.01", "floor": 3 },
 	"building": { "id": "b1", "name": "Lindenhof", "address": "Testweg 1" },
 	"splitKeys": [],
+	"redeliverable": false,
+	"refund": false,
+	"resent": [],
+	"newPdfToSend": null,
+	"newPdfMadeAt": null,
 	"lineItems": [
 		{
 			"id": "l1",

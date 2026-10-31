@@ -6,6 +6,7 @@ import { localTitle } from '$lib/server/documents';
 import { paidDateError } from '$lib/statement';
 import type { StatementDocument } from '$lib/types';
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/statements`;
+const DOCUMENTS = API.replace(/statements$/, 'documents');
 
 type Fetch = typeof globalThis.fetch;
 
@@ -107,6 +108,20 @@ export async function recalculateStatement(fetch: Fetch, id: string): Promise<Re
 		status: response.status,
 		message: await refusalOf(response, m.statements_recalculate_failed())
 	};
+}
+
+/** #534: «Erneut per Brief zustellen»: null, or what to tell the user */
+export async function redeliverStatement(fetch: Fetch, id: string): Promise<Refusal | null> {
+	const response = await fetch(`${API}/${id}/redeliver`, { method: 'POST' });
+	if (response.ok) return null;
+	return { status: response.status, message: await refusalOf(response, m.ui_action_failed()) };
+}
+
+/** #968: the new PDF after a change marked sent, as under «Dokumente»: null, or what to tell the user */
+export async function markNewPdfSent(fetch: Fetch, documentId: string): Promise<Refusal | null> {
+	const response = await fetch(`${DOCUMENTS}/${documentId}/sent`, { method: 'PUT' });
+	if (response.ok) return null;
+	return { status: response.status, message: await refusalOf(response, m.ui_action_failed()) };
 }
 
 /** «Nicht berichtigen» (#454): null, or what to tell the user */

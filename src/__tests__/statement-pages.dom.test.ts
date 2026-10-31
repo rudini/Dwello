@@ -580,6 +580,15 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-reminder-button')).not.toBeNull();
 	});
 
+	// Code-Review 534-1 C-1: nach dem erneuten Zustellen zählt das Backend die früheren Mahnungen nicht mehr
+	it('nennt die Mahnstufe, die das Backend zählt, nicht jede gespeicherte Mahnung', () => {
+		const earlier = { id: 'r1', tenantId: 't1', statementId: 's1', type: 'reminder', reminderLevel: 1, title: 'Zahlungserinnerung', fileName: 'z.pdf', mimeType: 'application/pdf', channel: 'letter', status: 'sent', sentAt: '2025-03-01T00:00:00Z', deliveryError: null, createdAt: '2025-03-01T00:00:00Z', tenantName: 'Anna Keller', statementNumber: 'NK-2024-0001' };
+		detail({ status: 'overdue', remindersCounted: 0 }, null, [earlier]);
+		click('statement-reminder-button');
+		expect(text()).toContain('Zahlungserinnerung');
+		expect(text()).not.toContain('2. Mahnung');
+	});
+
 	// #403: der Übertrag aus der letzten Abrechnung desselben Mietvertrags, zwischen Akonto und Saldo
 	it.each([
 		[-3, 'Übertrag aus Abrechnung NK-2023-0001 − CHF 3.00'],
@@ -1858,6 +1867,117 @@ describe('Abrechnungsdetail', () => {
 		expect(history.indexOf('Versendet per Brief')).toBeLessThan(history.indexOf('Neues PDF erstellt 05.10.2026'));
 	});
 
+	// #534, #968: jeder spätere Versand an seinem Tag; das PDF, das der Mieter zuletzt bekam (#965)
+	it('nennt im Verlauf jeden späteren Versand und bietet das zuletzt versendete PDF an', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					statementDate: '2026-10-20',
+					resent: [
+						{ id: 'doc-2', newPdf: false, sentAt: '2026-10-20T09:00:00Z' },
+						{ id: 'doc-3', newPdf: true, sentAt: '2026-10-25T09:00:00Z' }
+					]
+				} as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'email', recipient: 'eva@example.ch', sentAt: '2026-09-10T08:15:00Z' }
+			},
+			form: null
+		} as never);
+
+		const history = text().replace(/\s+/g, ' ');
+		expect(history).toContain('Versendet per E-Mail an eva@example.ch 10.09.2026');
+		expect(history).toContain('Erneut versendet per Brief 20.10.2026');
+		expect(history).toContain('Neues PDF versendet per Brief 25.10.2026');
+		expect(byTestId<HTMLAnchorElement>('statement-history-sent-pdf')!.getAttribute('href')).toBe('/documents/doc-3/pdf');
+	});
+
+	// Persona Dr. Weber 534 P-3: das PDF eines späteren Versands steht nicht als «PDF erstellt» vor dem ersten Versand
+	it('nennt das mit einem späteren Versand erstellte PDF nicht vor dem ersten Versand', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					pdfGeneratedAt: '2026-10-31T14:02:00Z',
+					resent: [{ id: 'doc-2', newPdf: true, sentAt: '2026-10-31T14:02:30Z' }]
+				} as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-31T14:01:00Z' }
+			},
+			form: null
+		} as never);
+		const history = text().replace(/\s+/g, ' ');
+		expect(history).toContain('Neues PDF versendet per Brief');
+		// the first PDF with the first sending (534-2 P-1), never with the later one's time
+		expect(history).toMatch(/PDF erstellt 31\.10\.2026, 15:01\s*Versendet per Brief/);
+		expect(history).not.toContain('PDF erstellt 31.10.2026, 15:02');
+	});
+
+	// Persona Dr. Weber 534-2 P-1: the Verlauf only grows: the first PDF with its sending, each new PDF with its own time
+	it('behält nach einer Änderung das erste PDF und nennt jedes neue PDF mit seiner Zeit', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					pdfGeneratedAt: null,
+					resent: [{ id: 'doc-2', newPdf: true, sentAt: '2026-10-31T15:05:00Z', createdAt: '2026-10-31T15:02:00Z' }],
+					newPdfMadeAt: '2026-10-31T15:10:00Z'
+				} as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-31T15:01:00Z' }
+			},
+			form: null
+		} as never);
+		const history = text().replace(/\s+/g, ' ');
+		const order = ['PDF erstellt 31.10.2026, 16:01', 'Versendet per Brief', 'Neues PDF erstellt 31.10.2026, 16:02', 'Neues PDF versendet per Brief', 'Neues PDF erstellt 31.10.2026, 16:10'];
+		expect(order.map((row) => history.indexOf(row))).toEqual([...order.map((row) => history.indexOf(row))].sort((a, b) => a - b));
+		expect(order.every((row) => history.includes(row))).toBe(true);
+	});
+
+	// Code-Review 534close-1 C-1: a PDF made later (the new PDF waits) never takes the place of the first one
+	it('nennt beim ersten PDF die Zeit des Versands, auch wenn danach ein PDF entstand', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({ status: 'sent', pdfGeneratedAt: '2026-10-31T15:20:00Z', newPdfMadeAt: '2026-10-31T15:10:00Z' } as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-31T15:01:00Z' }
+			},
+			form: null
+		} as never);
+		const history = text().replace(/\s+/g, ' ');
+		expect(history).toMatch(/PDF erstellt 31\.10\.2026, 16:01\s*Versendet per Brief/);
+		expect(history).toContain('Neues PDF erstellt 31.10.2026, 16:10');
+	});
+
+	// #534 (Fachreview 534-1 V-2, V-6): die Bestätigung nennt, was das erneute Zustellen setzt
+	it('bietet das erneute Zustellen an und nennt bei einer Rückerstattung deren Datum', () => {
+		const shown = (refund: boolean) => {
+			document.body.innerHTML = '';
+			show(StatementPage, { data: { statement: statement({ status: 'sent', correctable: true, redeliverable: true, refund } as never), reminders: [] }, form: null } as never);
+			click('statement-redeliver-button');
+			return text().replace(/\s+/g, ' ');
+		};
+		expect(shown(false)).toContain('Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt; eine spätere Zahlungsfrist bleibt.');
+		expect(shown(true)).toContain('Das Datum der Rückerstattung ist so viele Tage danach, wie in den Einstellungen festgelegt; ein späteres bleibt.');
+	});
+
+	it('bietet das erneute Zustellen nicht an, wenn das Backend es nicht erlaubt', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'paid', correctable: true, redeliverable: false } as never), reminders: [] }, form: null } as never);
+		expect(byTestId('statement-correct-button')).not.toBeNull();
+		expect(byTestId('statement-redeliver-button')).toBeNull();
+	});
+
+	// #968: das neue PDF nach einer Änderung liegt zum Versand bereit und lässt sich hier als versendet markieren
+	it('nennt das neue PDF als noch zu versenden und markiert es mit seinem Dokument als versendet', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'sent', newPdfToSend: 'doc-9' }), reminders: [] }, form: null } as never);
+		const hint = byTestId('statement-new-pdf-to-send')!;
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Das neue PDF ist noch nicht versendet. Es liegt unter «Dokumente» zum Versand bereit.');
+		// Persona Dr. Weber 534 P-2: marking it sent asks first, with what stays
+		click('statement-new-pdf-sent-button');
+		expect(text()).toContain('Dwello hält fest, dass Sie das neue PDF heute versenden. Abrechnungsdatum und Zahlungsfrist bleiben.');
+		expect(document.querySelector('form[action="?/newPdfSent"]')).not.toBeNull();
+	});
+
 	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
 	it('rät nach einer Änderung, das neue PDF zu senden, und nennt das versendete im Verlauf nur, wenn es eines gibt', () => {
 		const changed = (pdfChange: string, delivery: object | null) =>
@@ -1877,8 +1997,8 @@ describe('Abrechnungsdetail', () => {
 
 		expect(unknown).toBeNull();
 		expect([withDocument, byTestId('statement-pdf-changed')!.textContent!.replace(/\s+/g, ' ').trim()]).toEqual([
-			'Im versendeten PDF steht das bisherige Datum der Rückerstattung. Damit der Mieter das neue kennt, erstellen Sie das neue PDF und senden Sie es ihm. Das versendete PDF finden Sie im Verlauf.',
-			'Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, erstellen Sie das neue PDF und senden Sie es ihm.'
+			'Im versendeten PDF steht das bisherige Datum der Rückerstattung. Damit der Mieter das neue kennt, senden Sie ihm das neue PDF. Das versendete PDF finden Sie im Verlauf.',
+			'Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, senden Sie ihm das neue PDF.'
 		]);
 	});
 
@@ -2058,7 +2178,7 @@ describe('Abrechnungsdetail', () => {
 			tenantName: 'Anna Keller',
 			statementNumber: 'NK-2024-0001'
 		});
-		detail({ status: 'overdue', tenantCorrespondenceChannel: 'letter' }, null, [
+		detail({ status: 'overdue', tenantCorrespondenceChannel: 'letter', remindersCounted: 3 }, null, [
 			reminder(1),
 			reminder(2),
 			reminder(3)

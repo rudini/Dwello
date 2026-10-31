@@ -151,6 +151,8 @@ The help page quotes these labels, so the buttons must use the same words.
 | Abrechnungen erstellen | Établir les décomptes | Allestire i conteggi | Create statements |
 | Entwürfe erstellen | Créer les brouillons | Creare le bozze | Create drafts |
 | Als versendet markieren | Marquer comme envoyé | Segnare come inviato | Mark as sent |
+| Erneut per Brief zustellen | Remettre à nouveau par lettre | Recapitare di nuovo per lettera | Deliver again by letter |
+| Versendetes PDF / neues PDF | PDF envoyé / nouveau PDF | PDF inviato / nuovo PDF | PDF sent / new PDF |
 | Als bezahlt markieren | Marquer comme payé | Segnare come pagato | Mark as paid |
 | Mahnung senden | Envoyer un rappel | Inviare un sollecito | Send reminder |
 | Zurück / Weiter / Abbrechen | Retour / Continuer / Annuler | Indietro / Avanti / Annullare | Back / Next / Cancel |

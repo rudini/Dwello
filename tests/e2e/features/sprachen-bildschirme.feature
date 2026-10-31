@@ -213,6 +213,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
       | statement-sent-detail  | decline-dialog      |
+      | statement-sent-detail  | redeliver-dialog    |
+      | statement-sent-detail  | new-pdf-sent-dialog |
       | statement-unaffected-detail | default        |
       | statement-declined-detail | default          |
       | statement-lowered-detail | default           |
@@ -241,6 +243,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | documents              | default             |
       | documents              | empty               |
       | documents              | marked-sent         |
+      | documents              | mark-sent-dialog    |
       | config                 | default             |
       | config                 | backup-links        |
       | config-backup          | default             |

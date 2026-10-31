@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 
 import DocumentsPage from '../routes/documents/+page.svelte';
-import { allByTestId, byTestId, show } from './helpers/dom';
+import { allByTestId, byTestId, click, show } from './helpers/dom';
 import documentList from '../../tests/contracts/documents.json';
 
 const letter = (overrides = {}) => ({
@@ -81,6 +81,16 @@ describe('Dokumente', () => {
 		expect(sent.querySelector('[data-testid="document-mark-sent"]')).toBeNull();
 	});
 
+	// Persona Dr. Weber 534 P-2, P-4: marking a letter sent asks first and says what follows for which letter
+	it('fragt vor dem Markieren als versendet nach und nennt die Folge', () => {
+		documents([letter()]);
+		click('document-mark-sent');
+		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Markieren Sie den Brief erst am Tag, an dem Sie ihn zur Post bringen. Eine Mahnung trägt danach das heutige Datum und eine neue Zahlungsfrist; das neue PDF einer Abrechnung behält deren Datum und Zahlungsfrist.'
+		);
+		expect(byTestId('document-mark-sent-confirm')).not.toBeNull();
+	});
+
 	it('nennt das Dokument im PDF-Link', () => {
 		documents([letter()]);
 		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toContain(
@@ -104,6 +114,8 @@ describe('Dokumente', () => {
 			data: { documents: [letter()], status: null },
 			form: { actionError: 'Dokument konnte nicht aktualisiert werden.' }
 		} as never);
+		// in the open confirmation, the page behind it is inert (Code-Review 534-2 C-15)
+		click('document-mark-sent');
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Dokument konnte nicht aktualisiert werden.'
 		);
@@ -146,6 +158,21 @@ describe('Dokumente', () => {
 		expect(notice.textContent).toContain('«Zahlungserinnerung» an Anna Keller ist als versendet markiert.');
 		expect(notice.textContent).toContain('Drucken Sie ihn jetzt aus');
 		expect(byTestId('document-marked-sent-pdf')!.getAttribute('href')).toBe('/documents/d1/pdf');
+	});
+
+	// Fachreview 534-2 V-1: the new PDF of a statement keeps its date and Zahlungsfrist, the notice says so
+	it('sagt nach dem Markieren eines neuen PDF, dass Datum und Zahlungsfrist bleiben', () => {
+		documents([], 'to_send', { sent: { id: 'd2', title: 'Nebenkostenabrechnung, neues PDF', tenantName: 'Anna Keller', newPdf: true } });
+		const notice = byTestId('document-marked-sent')!.textContent!;
+		expect(notice).toContain('Das neue PDF bleibt, wie es ist: Dwello ändert kein Datum darin.');
+		expect(notice).not.toContain('heutige Datum');
+	});
+
+	// Code-Review 534-2 C-15: a refusal stays readable in the open confirmation
+	it('nennt eine Ablehnung im Dialog vor dem Markieren', () => {
+		documents([letter()], 'to_send', { actionError: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.' });
+		click('document-mark-sent');
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('Die Abrechnung ist bereits bezahlt.');
 	});
 
 	// persona Helga: «Keine Briefe zu versenden» beside it reads as if nothing were left to post

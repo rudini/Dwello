@@ -11,6 +11,7 @@ const reminderTitles = [m.documents_reminder_1, m.documents_reminder_2, m.docume
 export const localTitle = (document: StatementDocument) =>
 	(document.type === 'reminder' && reminderTitles[(document.reminderLevel ?? 0) - 1]?.()) ||
 	(document.type === 'statement' && m.documents_statement()) ||
+	(document.type === 'new_pdf' && m.documents_new_pdf()) || // #968
 	document.title;
 
 /** Stored documents, e.g. `statementId=…`, `tenantId=…` or `status=to_send`; newest first */

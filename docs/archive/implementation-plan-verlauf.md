@@ -311,3 +311,20 @@
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-528.md`
 - [x] Closing review `docs/reviews/528close-review-1.md`, `528close-review-2.md`
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #534 Erneut per Brief zustellen, #968 neues PDF als versendet, #965 Glossar
+
+- [x] @wip scenarios `statement-redeliver.feature` (#534) and in `statement-detail.feature` (#968), seen red at the missing behaviour
+- [x] fach-reviewer step 1 (`docs/reviews/534-fachreview-1.md`); follow-up decisions recorded in #534, #968, #965
+- [x] Backend #534: `redeliverByLetter` (dated today, Zahlungsfrist as at the first sending, PDF anew as a Dokument by letter, nothing changes without the PDF); reminders count only since the last sending (`delivery.ts`)
+- [x] Backend #968: `keepNewPdf` keeps the new PDF as a Dokument to send; posted without redating; refused once paid or replaced
+- [x] UI: action and confirmation, the new PDF's hint and confirmation, a confirmation before «Als versendet markieren», Verlauf of every sending and PDF
+- [x] Glossary rows (#534, #965) in `UBIQUITOUS_LANGUAGE.md` and `docs/design/i18n-begriffe.md`; the #524 hints say to send the new PDF (Spec change approved: #968)
+- [x] Screen states `statement-sent-detail redeliver-dialog`, `new-pdf-sent-dialog`, `documents mark-sent-dialog`
+- [x] code-reviewer `docs/reviews/534-review-1.md`, `534-review-2.md`, `534-review-3.md`
+- [x] Persona Dr. Weber `docs/design/personas/weber-534.md`, `weber-534-2.md`
+- [x] daten-pruefer `docs/reviews/534-datenpruefung-1.md`
+- [x] fach-reviewer step 5 `docs/reviews/534-fachreview-2.md`, `534-fachreview-3.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-534.md`
+- [x] Closing review `docs/reviews/534close-review-1.md`, `534close-review-2.md`
+- [x] PR: pushed after this archive

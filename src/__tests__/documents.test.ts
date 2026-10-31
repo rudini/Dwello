@@ -52,8 +52,16 @@ describe('Dokumente', () => {
 		const { result } = runAction(actions.markSent, '', 200, { id: 'd1' }, sent);
 
 		expect(await result).toEqual({
-			sent: { id: 'd1', title: '2. Mahnung', tenantName: 'Marco Bernasconi' }
+			sent: { id: 'd1', title: '2. Mahnung', tenantName: 'Marco Bernasconi', newPdf: false }
 		});
+	});
+
+	// Fachreview 534-2 V-1, Code-Review 534-3 C-19: the new PDF of a statement is named as one, its notice differs
+	it('nennt ein eben markiertes neues PDF als neues PDF', async () => {
+		const sent = { ...documentList.data[0], id: 'd2', type: 'new_pdf', reminderLevel: null };
+		const { result } = runAction(actions.markSent, '', 200, { id: 'd2' }, sent);
+
+		expect(await result).toMatchObject({ sent: { id: 'd2', newPdf: true } });
 	});
 
 	// #450, Fachreview V-1: a reminder still to send is remade on marking; without the Firmenadresse it is refused
