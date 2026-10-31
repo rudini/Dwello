@@ -99,6 +99,16 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
+  # #959 (A): ein kleinerer bezahlter Betrag lässt die Abrechnung offen, mit dem Rest fällig (Art. 69, 85 OR)
+  @wip
+  Szenario: Eine Teilzahlung lässt die Abrechnung mit dem Rest offen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
+    Dann hat die Abrechnung den Status "Versendet"
+    Und nennt die Abrechnung den offenen Rest
+
   # #523 (Option C, A): eine Teilzahlung ist noch keine Zahlung der Abrechnung (Art. 69 OR); Rückerstattung im DOM-Test
   Szenario: Der Zahlungseingang sagt, was bei einer Teilzahlung gilt
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

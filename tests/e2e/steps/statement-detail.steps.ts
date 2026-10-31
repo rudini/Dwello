@@ -44,6 +44,7 @@ import {
 	advanceDiffersText,
 	partialPaymentAdvice,
 	pdfChangedAdvice,
+	openRestText,
 	pdfBeforeChangeOffered,
 	sentPdfHref,
 	splitKeysLineText,
@@ -87,6 +88,7 @@ import {
 	markStatementPaidOn,
 	startMarkingPaid,
 	downloadPdfBeforeChange,
+	recordPayment,
 	downloadSentPdf,
 	openResetPaymentConfirmation,
 	openSendConfirmation,
@@ -212,6 +214,14 @@ Then('bietet die Bestätigung das PDF der Abrechnung zum Ansehen an', async ({ v
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(markStatementPaid);
+});
+
+When('der Liegenschaftsverwalter eine Zahlung von {string} Franken festhält', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(recordPayment(amount));
+});
+
+Then('nennt die Abrechnung den offenen Rest', async ({ verwalter }) => {
+	await verwalter.sees(openRestText).toMatch(/CHF/);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will', async ({ verwalter }) => {

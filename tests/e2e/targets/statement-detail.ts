@@ -68,6 +68,9 @@ export const sendRecipient = target('Empfänger', (page) => page.getByTestId('se
 export const sendPdfLink = target('PDF ansehen', (page) => page.getByTestId('send-pdf-view'));
 export const sendRecalculateButton = target('Neu berechnen in der Bestätigung des Versands', (page) => page.getByTestId('send-recalculate'));
 export const paidDateInput = target('Bezahlt am', (page) => page.getByTestId('paid-date-input'));
+// #959: what the tenant paid, prefilled with the Saldo, and the rest a smaller amount leaves open
+export const paidAmountInput = target('Bezahlter Betrag', (page) => page.getByTestId('paid-amount-input'));
+export const openRest = target('Offener Rest', (page) => page.getByTestId('statement-open-rest'));
 export const statementHistory = target('Verlauf', (page) =>
 	page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]')
 );

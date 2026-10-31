@@ -44,7 +44,8 @@ import {
 	statementEditButton,
 	statementTenantLink,
 	letterInsteadLink,
-	pdfBeforeChangeLink
+	pdfBeforeChangeLink,
+	paidAmountInput
 } from '../targets/statement-detail';
 
 /** The API path keeps the statement as the backend returns it for `heatingCostsOfTenant` */
@@ -70,6 +71,9 @@ export const markStatementPaid: Activity = (actor) =>
 	actor.attemptsTo(Click.on(markPaidButton), Click.on(confirmMarkPaidButton));
 
 export const startMarkingPaid = Click.on(markPaidButton);
+// #959: a part of the Saldo, the statement stays open
+export const recordPayment = (amount: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(markPaidButton), Enter.theValue(amount).into(paidAmountInput), Click.on(confirmMarkPaidButton));
 
 // The day the money came in, typed into the dialog's date field
 export const markStatementPaidOn = (isoDate: string): Activity => (actor) =>
