@@ -51,7 +51,7 @@ type Owed = {
 	status: StatementStatus;
 	balance: number;
 	paidAmount?: number | null;
-	waived?: boolean;
+	unpaid?: boolean; // below the Mindestbetrag, no Schlussabrechnung: no money moves (#94)
 };
 
 /** #959: what is still owed after the part payments recorded, in francs, without the sign of the Saldo */
@@ -72,12 +72,12 @@ export function partPaid(statement: Owed): string | null {
 }
 
 /** The amount of «Als bezahlt markieren» as the backend takes it: with the sign of the Saldo (#959) */
-export const signedPaid = ({ balance, waived }: Owed, amount: string) =>
-	waived ? undefined : balance < 0 ? `-${amount.trim()}` : amount.trim();
+export const signedPaid = ({ balance, unpaid }: Owed, amount: string) =>
+	unpaid ? undefined : balance < 0 ? `-${amount.trim()}` : amount.trim();
 
 /** Less than the open amount: a part payment, the statement stays open (#959) */
 export const isPartPayment = (statement: Owed, amount: string) =>
-	!statement.waived && Number(amount) < openAmount(statement);
+	!statement.unpaid && Number(amount) < openAmount(statement);
 
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>

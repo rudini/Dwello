@@ -4,6 +4,7 @@ import { statementRow } from './statements';
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const confirmReminderButton = target('Mahnung bestätigen', (page) => page.getByTestId('statement-reminder-confirm'));
 export const reminderDeliveryInfo = target('Versandweg der Mahnung', (page) => page.getByTestId('reminder-delivery-info'));
+export const reminderOwed = target('Geschuldeter Betrag der Mahnung', (page) => page.getByTestId('reminder-owed')); // #959
 export const nextReminderDate = target('Nächste Mahnung möglich ab', (page) => page.getByTestId('statement-next-reminder'));
 export const lastReminderDate = target('Letzte Mahnung', (page) => page.getByTestId('statement-last-reminder'));
 // #545: a reminder still «Zu versenden», on the detail page and in a row of the statement list

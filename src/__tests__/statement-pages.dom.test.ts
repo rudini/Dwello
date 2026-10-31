@@ -1781,7 +1781,7 @@ describe('Abrechnungsdetail', () => {
 
 	// code review 959b-1 C-7 (Fachreview 959-1, Grundregel): unter dem Mindestbetrag fliesst kein Geld, also kein Betrag
 	it('fragt bei einem Saldo unter dem Mindestbetrag nach keinem Betrag', () => {
-		detail({ status: 'sent', balance: 3.4, waived: true });
+		detail({ status: 'sent', balance: 3.4, unpaid: true, noPayment: true }); // a payment reset after #94
 		click('statement-mark-paid-button');
 		const formData = new FormData();
 		actions.get('?/markPaid')!({ formData });

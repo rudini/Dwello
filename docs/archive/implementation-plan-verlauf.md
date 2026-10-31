@@ -471,8 +471,8 @@
 - [x] fach-reviewer step 1 `docs/reviews/959-fachreview-1.md`: rules 1–7 recorded in #959 «Decided»; V-1 to V-4 (Major) done; M-1, V-5 to #1000, #1001
 - [x] Backend: part payments in `payments` (migration 0041), `paidAmount` their sum, paid once they reach the Saldo on the latest day; reset takes back the last payment; Mahnung letter and QR part, overview sums name the open amount
 - [x] UI: «Bezahlter Betrag» prefilled with the open amount, «Teilzahlung festhalten», «Bezahlt: …, offen: …» on detail page and list row, correction prefilled; help text replaces the #523 sentence (Spec change approved: #959)
-- [x] Scenarios «Eine Teilzahlung lässt die Abrechnung mit dem Rest offen», «Nach einer Teilzahlung zählt die Übersicht nur den Rest als überfällig»; axe and language rows `statement-part-paid-detail`
-- [x] code-reviewer `docs/reviews/959a-review-1.md`, `959b-review-1.md`, closing `959b-review-2.md`
+- [x] Scenarios «Eine Teilzahlung lässt die Abrechnung mit dem Rest offen», «Nach einer Teilzahlung mahnt der Liegenschaftsverwalter den Rest»; axe and language rows `statement-part-paid-detail`; No scenario for the overview sums: they add up every statement of the database, so parallel scenarios change them (`dashboard.pg.test.ts`)
+- [x] code-reviewer `docs/reviews/959a-review-1.md`, `959b-review-1.md`, `959b-review-2.md` (C-7, C-12 done), closing `959c-review-1.md`
 - [x] Personas `docs/design/personas/helga-959.md`, `weber-959.md` (P-1, Helga P-2 done; Minors stay, Weber P-2/P-3 in #1000)
 - [x] daten-pruefer `docs/reviews/959-datenpruefung-1.md`: no findings
 - [x] Glossary rows decided in #959; follow-up issues #999 to #1003

@@ -108,16 +108,16 @@ Funktionalität: Abrechnungsdetail
     Dann hat die Abrechnung den Status "Versendet"
     Und nennt das Panel Zahlung "Bezahlt: CHF 10.00, offen: CHF 432.90"
 
-  # #959: nach einer Teilzahlung ist nur der Rest überfällig (Art. 85 Abs. 1 OR, Fachreview 959-1 V-4)
-  Szenario: Nach einer Teilzahlung zählt die Übersicht nur den Rest als überfällig
+  # #959: eine Teilzahlung wird als solche bestätigt, die Mahnung verlangt den Rest (Personas Helga, Dr. Weber 959 P-1, P-2)
+  Szenario: Nach einer Teilzahlung mahnt der Liegenschaftsverwalter den Rest
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
-    Dann hat die Abrechnung den Status "Überfällig"
-    Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann nennt die Übersicht "Überfällige Beträge CHF 432.90"
+    Dann bestätigt Dwello die Zahlung mit "Teilzahlung für Abrechnung"
+    Wenn der Liegenschaftsverwalter eine Mahnung senden will
+    Dann nennt die Mahnung vor dem Senden als geschuldet "CHF 432.90"
 
   # #523, #959 (A): der Betrag am Feld ist, was für diese Abrechnung eingegangen ist; ein Teil lässt sie offen (Art. 69, 86 OR); Rückerstattung im DOM-Test
   Szenario: Der Zahlungseingang sagt, was bei einer Teilzahlung gilt
