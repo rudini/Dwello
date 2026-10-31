@@ -339,3 +339,11 @@
 - [x] code-reviewer `docs/reviews/511-review-1.md`; daten-pruefer `docs/reviews/511-datenpruefung-1.md`
 - [x] Closing review `docs/reviews/511close-review-1.md`
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #623 Glossar «Mieter anonymisieren»
+
+- [x] Glossary rows «Mieter anonymisieren» (reviewer wording from #459, Fachreview 459-B) and «Anonymisierter Mieter» (comment in #623), as decided in #623
+- [x] fr/it/en in `docs/design/i18n-begriffe.md`, from the words the UI already uses (`tenants_anonymise_*`)
+- [x] Markers `TODO(fachlich prüfen, #623)` removed (`tenant-anonymise.service.ts`, `TenantAnonymiseCard.svelte`)
+- [x] No scenario, no review round: glossary and comments only, no behaviour change
+- [x] PR: pushed after this archive

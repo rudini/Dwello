@@ -7,7 +7,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// #459 (#332): a former tenant 10 years after the end of the year of his last event (Art. 958f Abs. 1, Art. 127 OR);
-	// before that day the page names it. TODO(fachlich prüfen, #623): «Mieter anonymisieren» has no glossary row yet
+	// before that day the page names it.
 	// allowed: that day has come, the backend says by the Swiss day (#815)
 	let {
 		from,

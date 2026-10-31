@@ -25,6 +25,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Vermietet / Vermietet ab {Datum} / Vermietet bis {Datum} / Leer / Leer seit {Datum} / Gesperrt | loué / loué dès le {date} / loué jusqu’au {date} / vacant / vacant depuis le {date} / bloqué | locato / locato dal {date} / locato fino al {date} / sfitto / sfitto dal {date} / bloccato | let / let from {date} / let until {date} / vacant / vacant since {date} / blocked |
 | Mieter | locataire | inquilino | tenant |
 | Mieter: aktiv / künftig / ehemalig | actif / futur / ancien | attivo / futuro / ex | active / future / former |
+| Mieter anonymisieren | anonymiser le locataire | anonimizzare l’inquilino | anonymise the tenant |
+| Anonymisierter Mieter | locataire anonymisé | inquilino anonimizzato | anonymised tenant |
 | Korrespondenzkanal | canal de correspondance | canale di corrispondenza | correspondence channel |
 | Korrespondenzadresse | adresse de correspondance | indirizzo di corrispondenza | correspondence address |
 | Brief / E-Mail | lettre / e-mail | lettera / e-mail | letter / email |

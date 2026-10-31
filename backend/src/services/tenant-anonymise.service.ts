@@ -3,7 +3,6 @@
  * of his last contract, the last sent statement, the last reminder; Art. 958f Abs. 1, Art. 127 OR). Dwello then
  * removes name, contact data and all documents, the statement PDFs included; the amounts stay (Art. 6 Abs. 4 DSG;
  * product owner 2026-10-22, Fachreview 459-B)
- * TODO(fachlich prüfen, #623): «Mieter anonymisieren» and «Anonymisierter Mieter» have no glossary row yet
  */
 import { eq, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
