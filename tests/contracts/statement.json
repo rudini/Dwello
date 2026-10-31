@@ -59,6 +59,7 @@
 	"refund": false,
 	"resent": [],
 	"newPdfToSend": null,
+	"newPdfMadeAt": null,
 	"lineItems": [
 		{
 			"id": "l1",

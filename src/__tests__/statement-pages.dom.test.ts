@@ -1908,7 +1908,30 @@ describe('Abrechnungsdetail', () => {
 		} as never);
 		const history = text().replace(/\s+/g, ' ');
 		expect(history).toContain('Neues PDF versendet per Brief');
-		expect(history).not.toContain('PDF erstellt');
+		// the first PDF with the first sending (534-2 P-1), never with the later one's time
+		expect(history.indexOf('PDF erstellt 31.10.2026, 15:01')).toBeLessThan(history.indexOf('Versendet per Brief'));
+		expect(history).not.toContain('PDF erstellt 31.10.2026, 15:02');
+	});
+
+	// Persona Dr. Weber 534-2 P-1: the Verlauf only grows: the first PDF with its sending, each new PDF with its own time
+	it('behält nach einer Änderung das erste PDF und nennt jedes neue PDF mit seiner Zeit', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					pdfGeneratedAt: null,
+					resent: [{ id: 'doc-2', newPdf: true, sentAt: '2026-10-31T15:05:00Z', createdAt: '2026-10-31T15:02:00Z' }],
+					newPdfMadeAt: '2026-10-31T15:10:00Z'
+				} as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-31T15:01:00Z' }
+			},
+			form: null
+		} as never);
+		const history = text().replace(/\s+/g, ' ');
+		const order = ['PDF erstellt 31.10.2026, 16:01', 'Versendet per Brief', 'Neues PDF erstellt 31.10.2026, 16:02', 'Neues PDF versendet per Brief', 'Neues PDF erstellt 31.10.2026, 16:10'];
+		expect(order.map((row) => history.indexOf(row))).toEqual([...order.map((row) => history.indexOf(row))].sort((a, b) => a - b));
+		expect(order.every((row) => history.includes(row))).toBe(true);
 	});
 
 	// #534 (Fachreview 534-1 V-2, V-6): die Bestätigung nennt, was das erneute Zustellen setzt

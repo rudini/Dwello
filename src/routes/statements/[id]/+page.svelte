@@ -265,6 +265,7 @@
 				sentOn={statement.status === 'draft' ? null : statement.statementDate}
 				delivery={data.delivery}
 				resent={statement.resent}
+				newPdfMadeAt={statement.newPdfMadeAt}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
 				correctionDeclinedOn={statement.correctionDeclined?.on}

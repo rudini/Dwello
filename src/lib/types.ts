@@ -363,7 +363,8 @@ export interface StatementWithDetails
 			>
 		> {
 	tenantName: string;
-	resent: { id: string; newPdf: boolean; sentAt: string | null }[]; // sendings after the first (#534, #968)
+	resent: { id: string; newPdf: boolean; sentAt: string | null; createdAt: string }[]; // sendings after the first (#534, #968)
+	newPdfMadeAt?: string | null; // when the new PDF still to send was made (#968)
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';

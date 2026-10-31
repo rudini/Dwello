@@ -356,8 +356,8 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 
 // #534, #968: the later sendings for the Verlauf; a new PDF goes out only while the statement is sent (V-3)
 async function laterSendings(id: string, status: string) {
-	const { resent, newPdfToSend } = await sendingsOf(id);
-	return { resent, newPdfToSend: status === 'sent' ? newPdfToSend : null };
+	const { resent, newPdfToSend, newPdfMadeAt } = await sendingsOf(id);
+	return { resent, ...(status === 'sent' ? { newPdfToSend, newPdfMadeAt } : { newPdfToSend: null, newPdfMadeAt: null }) };
 }
 
 /**
