@@ -16,6 +16,21 @@ const config = {
 		outDir: process.env.BUILD_DIR ? '.svelte-kit/persona' : '.svelte-kit',
 		alias: {
 			$lib: 'src/lib'
+		},
+		// #721: only Dwello's own scripts run; SvelteKit adds a nonce (hash when prerendered) to its own inline script.
+		// Styles stay inline-capable: Svelte writes style attributes and the <style> of transitions at runtime.
+		csp: {
+			mode: 'auto',
+			directives: {
+				'default-src': ['self'],
+				'script-src': ['self'],
+				'style-src': ['self', 'unsafe-inline'],
+				'img-src': ['self', 'data:', 'blob:'],
+				'object-src': ['none'],
+				'base-uri': ['self'],
+				'form-action': ['self'],
+				'frame-ancestors': ['none']
+			}
 		}
 	}
 };
