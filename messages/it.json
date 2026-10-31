@@ -1269,6 +1269,8 @@
 	"statements_row_name": "Conteggio {number} di {tenant}",
 	"statements_reminded_on": "Sollecitato il {date}",
 	"statements_next_reminder_on": "Prossimo sollecito possibile dal {date}",
+	"statements_reminder_waits": "Il sollecito è pronto per l’invio sotto «Documenti». Lì lo segni come inviato il giorno in cui lo porta alla posta, poi lo stampi. Solo allora riporta la data del giorno e il suo termine di pagamento inizia a decorrere.",
+	"statements_reminder_to_send": "Sollecito ancora da inviare",
 	"statements_pdf_download_of": "Scaricare il PDF: {name}",
 	"statements_pdf_missing": "PDF non ancora creato",
 	"statements_pdf_missing_of": "PDF non ancora creato: aprire {name}",

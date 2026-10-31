@@ -50,6 +50,20 @@ describe('Mahnung, die nicht mehr hinausgeht', () => {
 	});
 });
 
+// #545 (persona weber-545 P-1): the Zahlungsfrist of a letter starts on the day it is marked sent, when Dwello remakes it
+describe('Mahnung, die noch zu versenden ist', () => {
+	it('nennt noch keine Zahlungsfrist, erst die versendete Mahnung nennt sie', () => {
+		documents([
+			letter({ paymentDeadline: '2025-03-11' }),
+			letter({ id: 'd2', status: 'sent', sentAt: '2025-03-01T09:00:00Z', paymentDeadline: '2025-03-11' })
+		]);
+
+		const [waiting, sent] = allByTestId('document-row');
+		expect(waiting.textContent).not.toContain('Zahlungsfrist');
+		expect(sent.textContent).toContain('Zahlungsfrist der Mahnung: 11.03.2025');
+	});
+});
+
 describe('Dokumente', () => {
 	it('nennt Empfänger, Datum, Weg und Versandstatus jedes Briefs', () => {
 		documents([letter(), letter({ id: 'd2', status: 'sent', channel: 'email' })]);

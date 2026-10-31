@@ -15,6 +15,7 @@ const statement = (fields: Record<string, unknown>) => ({
 	paidAmount: null,
 	paymentDeadline: '2026-11-10',
 	nextReminderFrom: null,
+	reminderToSend: false,
 	...fields
 });
 const of = (fields: Record<string, unknown>) => paymentOf(statement(fields), today);
@@ -55,6 +56,13 @@ describe('Was der Saldo einer Nebenkostenabrechnung verlangt', () => {
 		expect(of({ nextReminderFrom: '2026-10-11' })).toMatchObject({ reminderWaitsUntil: '2026-10-11' });
 		expect(of({ nextReminderFrom: today })).toMatchObject({ reminderWaitsUntil: null });
 		expect(of({})).toMatchObject({ reminderWaitsUntil: null });
+	});
+
+	// #545 (Fachreview 545 V-2): a letter to post only while the statement is overdue; paid or replaced it no longer goes out
+	it('sagt, dass eine Mahnung zu versenden ist, nur bei einer überfälligen Abrechnung', () => {
+		expect(of({ status: 'overdue', reminderToSend: true })).toMatchObject({ reminderToPost: true });
+		expect(of({ status: 'paid', reminderToSend: true })).toMatchObject({ reminderToPost: false });
+		expect(of({ status: 'overdue' })).toMatchObject({ reminderToPost: false });
 	});
 
 	// #92: a payment taken back makes the statement overdue again once its Zahlungsfrist has passed

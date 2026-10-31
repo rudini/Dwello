@@ -6,10 +6,13 @@ import {
 	documentFor,
 	documentsFor,
 	justMarkedSent,
+	lastReminder,
+	listedReminderDates,
 	mailsTo,
 	nextReminder,
 	printOffers,
 	reminderOffers,
+	reminderDatesShown,
 	reminderDelivery,
 	reminderOutcome
 } from '../questions/documents';
@@ -124,6 +127,11 @@ Then(
 	}
 );
 
+// a letter still to send gets its Zahlungsfrist the day it is marked sent (#545, persona weber-545 P-1)
+Then('führt die Abrechnung die {string} ohne Zahlungsfrist', async ({ verwalter }, title: string) => {
+	await verwalter.sees(documentFor(title, '')).not.toContain('Zahlungsfrist');
+});
+
 Then('nennt die Abrechnung die nächste Mahnung ab dem Tag in {int} Tagen', async ({ verwalter }, days: number) => {
 	await verwalter.sees(nextReminder).toBe(swissDate(inDays(days)));
 });
@@ -199,3 +207,36 @@ const listsNo =
 Then('ist die {string} an {string} nicht mehr bei den zu versendenden Dokumenten', listsNo(openDocumentsToSend));
 
 Then('ist die {string} an {string} nicht unter «Dokumente» abgelegt', listsNo(openDocuments));
+
+// #545: a reminder counts from the day it went out
+Then('nennt die Abrechnung keine letzte Mahnung', async ({ verwalter }) => {
+	await verwalter.sees(reminderDatesShown).toMatchObject({ last: 0 });
+});
+
+Then('nennt die Abrechnung die letzte Mahnung von heute', async ({ verwalter }) => {
+	await verwalter.sees(lastReminder).toBe(swissDate(inDays(0)));
+});
+
+Then('sagt die Abrechnung, dass die Mahnung noch zu versenden ist', async ({ verwalter }) => {
+	await verwalter.sees(reminderDatesShown).toEqual({ last: 0, next: 0, toSend: 1 });
+});
+
+// paid or replaced: the letter is «Nicht mehr versenden» (#449), nothing asks to post it (Fachreview 545 V-2)
+Then('sagt die Abrechnung nicht, dass die Mahnung noch zu versenden ist', async ({ verwalter }) => {
+	await verwalter.sees(reminderDatesShown).toMatchObject({ toSend: 0 });
+});
+
+Given(
+	'für die Abrechnung {int} von {string} liegt eine Zahlungserinnerung als Brief zum Versand bereit',
+	async ({ seed }, year: number, tenant: string) => {
+		await seed.remind(tenant, year);
+	}
+);
+
+Then(
+	'sagt die Liste der Abrechnungen bei {string}, dass die Mahnung noch zu versenden ist',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.attemptsTo(openStatementList);
+		await verwalter.sees(listedReminderDates(names.get(tenant) ?? tenant)).toEqual({ dates: [], toSend: 1 });
+	}
+);

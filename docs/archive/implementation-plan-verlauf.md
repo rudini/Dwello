@@ -219,6 +219,15 @@
 - [x] No review of its own: a test-only CI fix (Workflow 7)
 - [x] PR `Refs #954`: pushed after this archive
 
+## Session: #936, S1 for every registered route (2026-10-31)
+
+- [x] `auth.pg.test.ts`: every route of `app.routes` without a session → 401, except 11 public routes with a reason each, and each of them still registered
+- [x] Red before the fix: 40 guarded routes answered 422 (Elysia validated before the auth hook); red again with one route module registered before `authMiddleware` (2 routes)
+- [x] Fix: `authMiddleware` refuses in `derive` with `status(401)`, before the route's validation
+- [x] `utility-tree.md` S1 «Heute» and matrix, `fitness-functions.md` overview
+- [x] Code review: `docs/reviews/936-review-1.md` (no findings)
+- [x] No scenario: nothing a user sees changes (an unauthenticated request gets 401 instead of 422)
+- [x] PR `Fixes #936`: pushed after this archive
 ## Session: #953 restore keeps the newer Wiederherstellungscode (2026-10-31)
 
 - [x] Decisions of 17 needs-decision issues recorded (product owner: decide by the recommendations); #495 closed (done in #817/#943); #959 opened (#523 option B)
@@ -234,4 +243,15 @@
 - [x] DOM test for the Nachzahlung and the Rückerstattung (`statement-pages.dom.test.ts`, seen red)
 - [x] the sentence in `PaidDateFields.svelte`, texts de/fr/it/en as checked by `fach-reviewer` (#448 round 4, comment on #523); no persona: a decided text read in all four languages (CLAUDE.md, Workflow 5)
 - [x] code-reviewer round (`docs/reviews/523-review-1.md`)
+## Session: #545 a Mahnung counts from its sending (2026-10-31)
+
+- [x] @wip scenarios in `statement-reminder.feature`; «Nächste Mahnung erst nach der Zahlungsfrist der letzten» reminds by e-mail (Spec change approved: #545)
+- [x] fach-reviewer step 1 (`docs/reviews/545-fachreview-1.md`): V-1 to V-7 taken
+- [x] pg tests in `reminders.pg.test.ts`, `swiss-today.pg.test.ts` (seen red); the date of the last reminder derived from the reminders that went out (`statement.service.ts`), no column writes (`reminder.service.ts`)
+- [x] hint on the detail page and «Mahnung noch zu versenden» in the list, only when overdue; texts in de/fr/it/en
+- [x] code-reviewer round 1 (`docs/reviews/545-review-1.md`)
+- [x] persona Dr. Weber (`docs/design/personas/weber-545.md`): P-1 fixed (Zahlungsfrist only for a sent reminder, DOM test seen red)
+- [x] code-reviewer round 2 (`docs/reviews/545-review-2.md`): C-6 fixed (scenario step, seen red)
+- [x] code-reviewer round 3 (`docs/reviews/545-review-3.md`)
+- [x] CI fix: Architecture fitness Ä4, the backend answers `reminderToPost` (`docs/reviews/545ci-review-1.md`)
 - [x] PR pushed after this archive

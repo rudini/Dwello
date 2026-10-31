@@ -3,17 +3,41 @@ import { Count, MailsTo, Text } from '../screenplay/questions';
 import {
 	documentRow,
 	documentStatus,
+	lastReminderDate,
+	listedReminderWaitsHint,
 	markedSentNotice,
 	markedSentPdf,
 	nextReminderDate,
 	reminderButton,
-	reminderFeedback
+	reminderFeedback,
+	reminderWaitsHint
 } from '../targets/documents';
+import { paymentSummary } from '../targets/statement-detail';
+import { statementRow } from '../targets/statements';
 import { reminderDeliveryInfo } from '../targets/documents';
 
 export const reminderOutcome = Text.of(reminderFeedback);
 export const reminderOffers = Count.of(reminderButton);
 export const nextReminder = Text.of(nextReminderDate);
+export const lastReminder = Text.of(lastReminderDate);
+// on the loaded panel «Zahlung»: whether it names a last reminder, a next one and a reminder still to send (#545)
+export const reminderDatesShown = question('the reminder dates of the statement', async (actor) => {
+	await actor.answer(Text.of(paymentSummary));
+	return {
+		last: await actor.answer(Count.of(lastReminderDate)),
+		next: await actor.answer(Count.of(nextReminderDate)),
+		toSend: await actor.answer(Count.of(reminderWaitsHint))
+	};
+});
+// the same in the row of the statement list: its texts on «Gemahnt am» and «Nächste Mahnung», and the hint
+export const listedReminderDates = (tenantName: string) =>
+	question(`the reminder dates of the statement of ${tenantName} in the list`, async (actor) => {
+		const text = (await actor.answer(Text.of(statementRow(tenantName)))) ?? '';
+		return {
+			dates: text.match(/(?:Gemahnt am|Nächste Mahnung möglich ab) [\d.]+/g) ?? [],
+			toSend: await actor.answer(Count.of(listedReminderWaitsHint(tenantName)))
+		};
+	});
 export const justMarkedSent = Text.of(markedSentNotice);
 export const printOffers = Count.of(markedSentPdf);
 export const deliveryOf = (title: string) => Text.of(documentStatus(title));

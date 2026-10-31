@@ -21,7 +21,7 @@ import type { Language } from './pdf.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { qrBillConfig } from './statement-pdf.service';
-import { getStatement, updateStatement } from './statement.service';
+import { getStatement } from './statement.service';
 import { getTenant } from './tenant.service';
 import { belowMinimum, formatSwissDate } from './pdf-format';
 import { daysAfter, swissToday } from './today';
@@ -148,7 +148,6 @@ export async function sendReminder(statementId: string) {
 		status: 'to_send',
 		paymentDeadline
 	});
-	await updateStatement(statementId, { reminderSentDate: today });
 
 	if (!byEmail) return { document };
 	return deliverByEmail(document, tenant.email!, letter, pdf);
@@ -169,6 +168,5 @@ export async function markDocumentPosted(id: string) {
 	if (statement.status === 'paid')
 		throw new ReminderError('REMINDER_STATEMENT_PAID', 'The statement is paid; do not send this reminder any more');
 	const { pdf, paymentDeadline } = await reminderOn(statement, document.reminderLevel!, today);
-	await updateStatement(statement.id, { reminderSentDate: today });
 	return markDocumentSent(id, { content: pdf.toString('base64'), paymentDeadline });
 }

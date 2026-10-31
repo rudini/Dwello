@@ -31,6 +31,7 @@
 	"waived": false,
 	"carried": false,
 	"reminderWaitsUntil": null,
+	"reminderToPost": false,
 	"deadlinePassed": true,
 	"advanceChanged": false,
 	"offsetWith": [{ "statementNumber": "NK-2025-1", "amount": "3.00" }],
