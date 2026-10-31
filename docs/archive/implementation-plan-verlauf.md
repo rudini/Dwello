@@ -228,3 +228,11 @@
 - [x] Code review: `docs/reviews/936-review-1.md` (no findings)
 - [x] No scenario: nothing a user sees changes (an unauthenticated request gets 401 instead of 422)
 - [x] PR `Fixes #936`: pushed after this archive
+## Session: #953 restore keeps the newer Wiederherstellungscode (2026-10-31)
+
+- [x] Decisions of 17 needs-decision issues recorded (product owner: decide by the recommendations); #495 closed (done in #817/#943); #959 opened (#523 option B)
+- [x] pg test: a restore of an older Sicherung keeps the newer code (seen red: the new Sicherung opened only with the old code)
+- [x] `restoreBackup` reads the code in force before the restore and writes it back after the migrations (`backend/src/services/backup.service.ts`)
+- [x] `docs/installation.md`: which Notfallblatt opens which backup
+- [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
+- [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)

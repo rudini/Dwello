@@ -178,6 +178,8 @@ export async function restoreBackup(
 		await handle.read(head, 0, head.length, 4);
 		await handle.close();
 		const { secrets } = JSON.parse(head.toString()) as { secrets: Secrets };
+		// the code in force stays in force: the landlord's newest Notfallblatt opens the Sicherungen that follow (#953)
+		const inForce = await withClient(url, confirmedCode);
 		await withClient(url, (client) =>
 			client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;')
 		);
@@ -207,6 +209,13 @@ export async function restoreBackup(
 			await chmod(join(secretsDir, name), 0o444);
 		}
 		await migrate(url, migrations);
+		if (inForce)
+			await withClient(url, (client) =>
+				client.query(
+					'INSERT INTO backup_codes (public_key, salt, confirmed_at) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at >= $3)',
+					[inForce.public_key, inForce.salt, inForce.confirmed_at]
+				)
+			);
 	} finally {
 		await rm(work, { recursive: true, force: true });
 	}

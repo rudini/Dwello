@@ -1,0 +1,12 @@
+# Code-Review #953, Runde 1 (33b234f..bd2bcb5)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | backend/src/services/backup.service.ts:178, :207-214 | Der Code in Kraft wird nur im Speicher gehalten und erst nach `migrate` zurückgeschrieben. Bricht `pg_restore` oder eine Migration ab (die Schlüssel schreibt der Code bewusst schon vorher zurück, Test «schreibt die Schlüssel zurück, auch wenn danach eine Migration scheitert»), ist der neuere Code verloren. Der Wiederholungslauf, zu dem `docs/installation.md:82` rät («run it again with an intact backup»), liest dann eine leere Datenbank oder den alten Code der wiederhergestellten Daten. Danach gilt der ältere Code weiter, und das neueste Notfallblatt öffnet die folgenden Sicherungen nicht, entgegen dem neuen Satz in `docs/installation.md:82` («After the restore the newest code stays in force»). Datenverlust entsteht nicht: das ältere Notfallblatt öffnet sie weiter. Kein Test deckt diesen Abbruchfall ab. |
+
+Geprüft: `restoreBackup` liest den neuesten bestätigten Code (`confirmedCode`, derselbe, mit dem `createBackup` verschlüsselt) vor dem `DROP SCHEMA`. Der Code wird erst nach `migrate` eingefügt, also auch bei Sicherungen aus der Zeit vor 0038 (Tabelle noch nicht vorhanden). Auf einer neuen Maschine ohne Code wird nichts eingefügt. `confirmed_at` ist `timestamptz`; die Kürzung von `Date` auf Millisekunden lässt den Vergleich `>=` für dieselbe Zeile weiter gelten, es entsteht also kein Duplikat. Ist der Code der Sicherung neuer, gewinnt er. Der neue pg-Test schlägt ohne die Änderung fehl (die zweite Wiederherstellung mit `newer` scheitert an `decryptFile`) und prüft das Ergebnis über eine echte Sicherung und Wiederherstellung. Die Begriffe stimmen mit `UBIQUITOUS_LANGUAGE.md` überein (Wiederherstellungscode, Notfallblatt). `No scenario` ist begründet (Betreiberbefehl `backend/scripts/restore.ts`). Kein UI-Text und kein API-Vertrag ist betroffen, keine Änderung ausserhalb der Anforderung. ponytail-review ergibt keinen Befund im Sinne der Regeln.
+
+## Nicht bestätigt
+
+- `cd backend && bun test src/__tests__/backup.pg.test.ts` (23 bestanden, neuer Test vorher rot gesehen), `cd backend && bun run type-check`, eslint auf den zwei TS-Dateien: vom Aufrufer gemeldet, nicht selbst ausgeführt.
+- Das Rot des neuen Tests ist nur durch Lesen beurteilt (Test in backend/src/__tests__/backup.pg.test.ts:132-149 gegen restoreBackup auf 33b234f).
