@@ -1,0 +1,5 @@
+# Workflow notes: issue 997
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 9 (push nothing before "Done means" holds) against a check that only CI can run | The cloud container has a Docker daemon (`dockerd` starts as root), but its proxy refuses blobs from ghcr.io (403) and every Debian mirror, so neither the published release images nor the backend image (`apt-get install postgresql-client-16`) can be pulled or built as CI does. To run `compose-update-check.sh` before the push, the session built both releases' images from the tags on local stand-in base images (CA and proxy in `oven/bun:1`, `node:26-alpine`; `postgres:16-bookworm` with Bun and a stub `apt-get` as `oven/bun:1-slim`), about 30 minutes of trial. | One paragraph in `docs/architecture/fitness-functions.md` (or `backend/CLAUDE.md`) on running Docker checks in a cloud session: start `dockerd`, the stand-in base images, and that the green local run is of images built that way, not the published ones. |

@@ -18,5 +18,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Seen red locally: broken image without `--broken`; new migration without `backupBeforeMigration`
 - [x] Docs: utility tree U1 (H/L), fitness-functions table and counter-checks
 - [ ] Slice review and closing round
-- [ ] Workflow note: the local Docker daemon cannot pull from ghcr.io or reach deb.debian.org; old and new images built from the tags on local stand-in base images
+- [x] Workflow note: the local Docker daemon cannot pull from ghcr.io or reach deb.debian.org; old and new images built from the tags on local stand-in base images (`docs/reviews/workflow-notes-issue-997.md`)
 - [ ] PR
