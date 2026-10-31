@@ -50,4 +50,40 @@ describe('API-Zugriff', () => {
 	it.each(endpoints)('erlaubt %s mit gültigem Token', async (path) => {
 		expect(await status(path, `Bearer ${await token()}`)).toBe(200);
 	});
+
+	// S1 (#936): every route the app registers, taken from the app itself, answers 401 without a session, also before
+	// it checks a body or query; only these answer without one, each for its reason
+	const PUBLIC: Record<string, string> = {
+		'GET /health': 'the health check of Docker and the web app',
+		'GET /swagger': 'the API description, no data',
+		'GET /swagger/json': 'the API description, no data',
+		'GET /api/v1/invoices/llm-recipient': 'the privacy statement, which is public, names the KI',
+		'GET /api/v1/mail-transport': 'the privacy statement, which is public, names the mail provider',
+		'GET /api/v1/auth/password/': 'the sign-in page asks whether a Konto mit Passwort exists',
+		'POST /api/v1/auth/password/': 'the sign-in with a Konto mit Passwort, before there is a session',
+		'GET /api/v1/setup/': 'the setup page asks whether Dwello is set up',
+		'POST /api/v1/setup/': 'the setup with the Einrichtungscode, before there is a session',
+		'OPTIONS /': 'the CORS preflight',
+		'OPTIONS /*': 'the CORS preflight'
+	};
+	const guarded = app.routes.filter((route) => !(`${route.method} ${route.path}` in PUBLIC));
+
+	it.each(guarded.map((route) => [`${route.method} ${route.path}`, route] as const))(
+		'verweigert %s ohne Token, auch mit leerem Body',
+		async (_name, { method, path }) => {
+			const response = await app.handle(
+				new Request(`http://localhost${path.replace(/:[^/]+/g, '00000000-0000-0000-0000-000000000000')}`, {
+					method,
+					headers: { 'content-type': 'application/json' },
+					body: ['GET', 'HEAD'].includes(method) ? undefined : '{}'
+				})
+			);
+			expect(response.status).toBe(401);
+		}
+	);
+
+	it('kennt jede öffentliche Route der Ausnahmeliste noch', () => {
+		const registered = new Set(app.routes.map((route) => `${route.method} ${route.path}`));
+		expect(Object.keys(PUBLIC).filter((route) => !registered.has(route))).toEqual([]);
+	});
 });
