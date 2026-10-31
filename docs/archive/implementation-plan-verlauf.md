@@ -236,3 +236,12 @@
 - [x] `docs/installation.md`: which Notfallblatt opens which backup
 - [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
 - [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
+
+## Session: #934, P1 measured on a runner-like machine (2026-10-31)
+
+- [x] `tools/fitness/p1-benchmark.ts` (`bun run fitness:p1`): 1 building, 50 rental contracts, the wizard's form action «generate» through the BFF, then the PDFs as the run's ZIP; its own ports (3320/3321) and build (`/tmp/p1-app`)
+- [x] Measured on 4 vCPU Xeon 2.1 GHz, 15 GB: run 3.0 s, PDFs 3.5 s, together 6.5 s (seven runs 6.4–7.5 s); P1 holds by a factor of 4.6; `utility-tree.md` P1 and A4, `fitness-functions.md` §4
+- [x] Code review: `docs/reviews/934-review-1.md` (C-1, C-2 Major fixed), `934-review-2.md` (closed, C-4 Minor stays)
+- [x] No scenario: a measuring script, nothing a user sees changes
+- [ ] The demo VM run and the decision on a CI guard: the product owner (#934 stays open)
+- [x] PR `Refs #934`: pushed after this archive
