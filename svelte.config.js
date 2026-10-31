@@ -26,7 +26,8 @@ const config = {
 				'script-src': ['self'],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'data:', 'blob:'],
-				// a file the page holds itself (blob:, chosen for upload) may be read by its own scripts
+				// blob:: the acceptance test reads a file chosen for upload in the page (OpenInNewTab in
+				// tests/e2e/screenplay/interactions.ts), as headless Chromium shows no PDF in a tab; the app itself only links to it
 				'connect-src': ['self', 'blob:'],
 				'object-src': ['none'],
 				'base-uri': ['self'],

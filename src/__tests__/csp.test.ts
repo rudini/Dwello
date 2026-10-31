@@ -25,7 +25,7 @@ describe('Content-Security-Policy', () => {
 		expect(directives['img-src']).toEqual(['self', 'data:', 'blob:']);
 	});
 
-	// the page reads a file it holds itself (blob:, a file chosen for upload); nothing else from outside (CI, #721)
+	// blob:: the acceptance test reads a file chosen for upload in the page (OpenInNewTab); the app only links to it
 	it('lässt die Seite nur eigene Adressen und eigene Dateien lesen', () => {
 		expect(directives['connect-src']).toEqual(['self', 'blob:']);
 	});
