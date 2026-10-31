@@ -35,20 +35,21 @@ describe('Abrechnung aus dem Backend', () => {
 
 	// #815: what the Saldo asks of whom, the backend decides it by the Swiss day; an answer without it asks nothing
 	it('übernimmt, was der Saldo verlangt', () => {
-		const { unpaid, claimed, noPayment, waived, carried, reminderWaitsUntil, deadlinePassed, advanceChanged } =
-			toStatement({ ...backendStatement, reminderWaitsUntil: '2026-10-27' });
-		expect({ unpaid, claimed, noPayment, waived, carried, reminderWaitsUntil, deadlinePassed, advanceChanged }).toEqual({
+		const { unpaid, claimed, noPayment, waived, carried, reminderWaitsUntil, reminderToPost, deadlinePassed, advanceChanged } =
+			toStatement({ ...backendStatement, reminderWaitsUntil: '2026-10-27', reminderToPost: true });
+		expect({ unpaid, claimed, noPayment, waived, carried, reminderWaitsUntil, reminderToPost, deadlinePassed, advanceChanged }).toEqual({
 			unpaid: false,
 			claimed: true,
 			noPayment: false,
 			waived: false,
 			carried: false,
 			reminderWaitsUntil: '2026-10-27',
+			reminderToPost: true,
 			deadlinePassed: true,
 			advanceChanged: false
 		});
-		const bare = toStatement({ ...backendStatement, claimed: undefined, reminderWaitsUntil: undefined });
-		expect([bare.claimed, bare.reminderWaitsUntil]).toEqual([false, null]);
+		const bare = toStatement({ ...backendStatement, claimed: undefined, reminderWaitsUntil: undefined, reminderToPost: undefined });
+		expect([bare.claimed, bare.reminderWaitsUntil, bare.reminderToPost]).toEqual([false, null, false]);
 	});
 
 	it('zeigt den Satz der Verwaltungspauschale, mit dem die Abrechnung erstellt wurde', () => {

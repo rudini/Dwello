@@ -238,4 +238,5 @@
 - [x] persona Dr. Weber (`docs/design/personas/weber-545.md`): P-1 fixed (Zahlungsfrist only for a sent reminder, DOM test seen red)
 - [x] code-reviewer round 2 (`docs/reviews/545-review-2.md`): C-6 fixed (scenario step, seen red)
 - [x] code-reviewer round 3 (`docs/reviews/545-review-3.md`)
+- [x] CI fix: Architecture fitness Ä4, the backend answers `reminderToPost` (`docs/reviews/545ci-review-1.md`)
 - [x] PR pushed after this archive
