@@ -147,8 +147,8 @@ Dwello-Nutzen
 - **Umgebung:** VM wie die Demo (2 OCPU ARM, 12 GB, ohne GPU) (vom Nutzer bestätigt).
 - **Reaktion:** Der Assistent zeigt den Fortschritt, und alle Abrechnungen entstehen.
 - **Messgrösse und Ziel:** **≤ 30 s** vom Start bis zur letzten Abrechnung (vom Nutzer bestätigt). Damit sind die 10 s und 60 s im PRD ersetzt.
-- **Heute:** **unbekannt**. Die Schleife über die Mietverträge läuft im BFF (`src/lib/server/statement-generation.ts`, aus Repo/Config). Messung offen in #934.
-- **Fitness Function:** Benchmark-Skript, das 50 Mietverträge anlegt und den Lauf über die BFF-Route misst, wöchentlich auf der Demo-VM. Dazu ein grober Wächter in CI (z. B. ≤ 15 s auf dem Runner, Annahme A4).
+- **Heute:** einmal gemessen am 31.10.2026 (#934, `bun run fitness:p1`: 1 Liegenschaft, 50 Wohnungen, 50 Mietverträge, 12 Rechnungen 2025; echtes Backend und Produktions-Build des Frontends, die Formular-Aktion «generate» des Assistenten über das BFF, danach die PDFs als ZIP des Laufs über das BFF; 4 vCPU Intel Xeon 2.1 GHz, 15 GB RAM, wie ein Runner): Lauf bis zur letzten Abrechnung **3,0 s**, die 50 PDFs **3,5 s**, zusammen **6,5 s** (sieben Läufe 6,4–7,5 s). Damit hält P1 das Ziel auf dem Runner mit Faktor 4,6 Reserve. Die Schleife im BFF (ein `statements/generate` pro Mietvertrag, nacheinander) ist kein Engpass. Die Messung auf der Demo-VM (2 OCPU ARM, 12 GB) steht aus (A4).
+- **Fitness Function:** Benchmark-Skript, das 50 Mietverträge anlegt und den Lauf über die BFF-Route misst, wöchentlich auf der Demo-VM. Dazu ein grober Wächter in CI (z. B. ≤ 15 s auf dem Runner, Annahme A4). Das Skript gibt es seit #934 (`tools/fitness/p1-benchmark.ts`, von Hand); ob ein CI-Wächter folgt, entscheidet der PO nach der Messung auf der Demo-VM.
 
 ### P2 Wartezeit nach einem Klick
 
@@ -186,7 +186,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | U1 | H | Wöchentliches Update; Datenverlust und fehlgeschlagene Migration müssen erkennbar sein. | H | Kein Backup vor der Migration, kein Upgrade-Test mit Daten. Migrationen gehen nur vorwärts, ein Zurück gibt es nur per Restore. |
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | M | Am 23.10.2026 H: `main` 43–79 min, das Drei- bis Fünffache des Ziels, 4 von 7 abgeschlossenen Läufen rot. Am 28.10.2026 `main` Median 13 min, 2 von 29 Läufen über 15 min, 91 von 99 Läufen in 7 Tagen grün (Entscheid PO 28.10.2026: H/H → H/M). |
-| P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
+| P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Einmal auf einem Runner-ähnlichen Rechner gemessen (31.10.2026, #934): 6,5 s samt PDFs für 50 Wohnungen, Ziel 30 s. Die Schleife im BFF ist kein Engpass. Die Demo-VM ist nicht gemessen (A4). |
 | P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Einmal gemessen (28.10.2026, #781): alle Listen- und Übersichtsrouten unter dem Ziel, `statements/outdated` nach #919 80 ms statt 1110 ms p95. |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut und getestet (#917, #936). |
 
@@ -199,7 +199,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | A1 | ~~Das Release für die Vermieter ist eine Auswahl der Merge-Tags.~~ **Entschieden:** Es wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). | U1 | erledigt |
 | A2 | Eine Installation enthält nach 10 Jahren Belege für höchstens 50 Wohnungen. Der Restore schafft das in ≤ 5 min. Grösse unbekannt. | R1 | Messung mit synthetischer DB |
 | A3 | ~~Schwelle «Backup zu alt» = 26 h~~ **Entschieden:** Gelingt mehr als einen Tag kein Backup, ist das sichtbar. Ausserdem muss jedes Backup nach einem Update einspielbar sein (vom Nutzer bestätigt). | O1, R1 | erledigt |
-| A4 | Ein CI-Wächter für P1 auf dem GitHub-Runner sagt etwas über die Demo-VM aus. | P1 | Einmal auf beiden messen |
+| A4 | Ein CI-Wächter für P1 auf dem GitHub-Runner sagt etwas über die Demo-VM aus. | P1 | Einmal auf beiden messen. Runner-Seite gemessen (31.10.2026, #934): 6,5 s auf 4 vCPU Xeon 2.1 GHz, 15 GB. Der Lauf arbeitet die Mietverträge nacheinander ab, zählt also vor allem die Leistung eines Kerns. Offen: derselbe Lauf auf der Demo-VM (2 OCPU ARM, 12 GB), erst der Vergleich gibt den Faktor. Ist die VM bis zu 4,6-mal langsamer, hält P1 auch dort. |
 | A5 | ~~P2 braucht kein eigenes Szenario.~~ **Entschieden:** P2 ist ein eigenes Szenario (vom Nutzer bestätigt). Der Baum hat damit 9 statt höchstens 8 Szenarien. Einstufung H/M (vom Nutzer bestätigt). | P2 | erledigt |
 | A6 | ~~Die rote Quote auf `main` kommt von Rennen und Browser-Unterschieden.~~ **Geprüft (CI-Logs der Runs 861, 876, 886, 916):** Kein roter Lauf kam von einem Fehler im gemergten Change. Ursachen: instabile Tests (3), Infrastruktur, weil die Systempakete für Playwright bei jedem Lauf per apt installiert werden (2), ein repoweiter Label-Check (1). T1 ist damit vor allem ein Problem der Stabilität und der Laufzeit, nicht der Codequalität. | T1 | erledigt |
 | A7 | ~~Datenschutz der Backup-Dateien ist Sache des Betreibers.~~ **Entschieden:** Dwello verschlüsselt das Backup, der Schlüssel kommt aus einem generierten Wiederherstellungscode (vom Nutzer bestätigt). Das betrifft nur das Backup. Für die laufende DB bleibt die Verschlüsselung at rest «Vision, nicht geplant» (PRD, #111, #719, #722). | R1, S1 | erledigt |
