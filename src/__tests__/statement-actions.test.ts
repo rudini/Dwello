@@ -300,7 +300,7 @@ describe('Abrechnung laden', () => {
 
 		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { later: unknown };
 		// #454: and whether the Tankbestand changed, and whether a correction is due (Fachreview 454-1 E-3)
-		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
+		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false, splitKeys: [] });
 		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
 	});
 
@@ -314,7 +314,7 @@ describe('Abrechnung laden', () => {
 		}) as typeof globalThis.fetch;
 
 		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { later: unknown };
-		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
+		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false, splitKeys: [] });
 	});
 });
 
@@ -371,5 +371,17 @@ describe('Abrechnung berichtigen', () => {
 					'Der Mietvertrag hat in dieser Abrechnungsperiode keine Mietstage mehr. Darum gibt es keine berichtigte Abrechnung. Teilen Sie dem Mieter mit, dass die Abrechnung NK-AB12CD34-2024-0001 nicht mehr gilt.'
 			}
 		});
+	});
+});
+
+// #528 (Code-Review 528-1 C-7): the hint names Kategorie and keys in the UI language; an invoice without key as its
+// line, «Pro Einheit» (Fachreview 528-1 V-8)
+describe('Verschiedene Verteilschlüssel in der Sprache der Oberfläche', () => {
+	it('nennt Kategorie und Verteilschlüssel beim Namen und eine Rechnung ohne Verteilschlüssel «Pro Einheit»', async () => {
+		const { localSplitKeys } = await import('$lib/server/statement');
+		const split = { categoryId: 'c1', keyId: null, mainKeyId: 'k1', invoices: [{ id: 'i1', description: 'Hauswart Q4' }] };
+		expect(localSplitKeys([split], new Map([['c1', 'Hauswart']]), new Map([['k1', 'Pro Fläche (m²)']]))).toEqual([
+			{ ...split, categoryName: 'Hauswart', keyName: 'Pro Einheit', mainKeyName: 'Pro Fläche (m²)' }
+		]);
 	});
 });

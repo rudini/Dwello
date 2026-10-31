@@ -181,6 +181,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | tank-question       |
       | statement-generate     | old-address-preview |
       | statement-generate     | heating-hints       |
+      | statement-generate     | split-keys          |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |
@@ -202,6 +203,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-detail       | recalculate-dialog  |
       | statement-old-address-detail | default       |
       | statement-old-address-detail | send-dialog   |
+      | statement-split-keys-detail | default             |
+      | statement-split-keys-detail | recalculate-dialog  |
       | statement-parts-detail | default             |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |

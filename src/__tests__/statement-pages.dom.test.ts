@@ -24,6 +24,7 @@ import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
 import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
+import SplitKeysHint from '../routes/statements/SplitKeysHint.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
 import type { StatementWithDetails } from '$lib/types';
@@ -979,6 +980,65 @@ describe('Abrechnungsdetail', () => {
 	it('weist nur auf später erfasste Rechnungen hin, wenn die Abrechnung noch bearbeitet werden kann', () => {
 		show(StatementPage, { data: { statement: statement({ status: 'sent', editable: false }), reminders: [], later: { invoices: 1, fuelStock: true, correctionDue: false } }, form: null } as never);
 		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
+	// #528: a Kategorie the draft's invoices bill by several Verteilschlüssel, on the draft and in the «Neu berechnen» question
+	describe('Kategorie mit verschiedenen Verteilschlüsseln', () => {
+		const split = { categoryId: 'c1', keyId: null, mainKeyId: 'k1', categoryName: 'Hauswart', keyName: 'Pro Einheit', mainKeyName: 'Pro Fläche (m²)' };
+		const later = (invoices: { id: string; description: string }[]) => ({ invoices: 0, fuelStock: false, correctionDue: false, splitKeys: [{ ...split, invoices }] });
+		// the draft's hint follows its lines (Persona Dr. Weber 528 P-1), the question the invoices as they are now (V-1)
+		const showWith = (overrides: Partial<StatementWithDetails>, invoices = [{ id: 'i4', description: 'Hauswart Q4' }], now = invoices) =>
+			show(StatementPage, {
+				data: { statement: statement({ splitKeys: [{ ...split, invoices }], ...overrides } as never), reminders: [], later: later(now) },
+				form: null
+			} as never);
+
+		it('nennt auf dem Entwurf die Rechnung mit dem anderen Verteilschlüssel und führt zu ihr', () => {
+			showWith({});
+			const hint = byTestId('statement-split-keys')!;
+			expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
+				'Hauswart wird in mehreren Positionen abgerechnet. Die Position mit den höchsten Kosten wird nach «Pro Fläche (m²)» verteilt, diese Rechnung nach «Pro Einheit»:'
+			);
+			expect(hint.querySelector('[data-testid="split-keys-invoice-link"]')!.getAttribute('href')).toBe('/invoices/i4');
+			expect(hint.textContent).toContain('Legt der Mietvertrag einen Verteilschlüssel fest, gilt er für alle Rechnungen der Kategorie.');
+		});
+
+		it('spricht bei mehreren Rechnungen von diesen Rechnungen', () => {
+			showWith({}, [{ id: 'i3', description: 'Hauswart Q3' }, { id: 'i4', description: 'Hauswart Q4' }]);
+			expect(byTestId('statement-split-keys')!.textContent).toContain('diese Rechnungen nach «Pro Einheit»:');
+		});
+
+		it('nennt sie auch in der Frage vor dem Neuberechnen', () => {
+			showWith({});
+			click('statement-recalculate-button');
+			expect(byTestId('statement-recalculate-split-keys')!.textContent).toContain('Ist das nicht gewollt, ändern Sie zuerst den Verteilschlüssel der Rechnung.');
+		});
+
+		// Code-Review 528-1 C-3: the preview of several buildings names each one; the same Kategorie without a key in both
+		it('nennt in der Vorschau mehrerer Gebäude zu jeder Rechnung ihr Gebäude', () => {
+			const hint = (buildingId: string, buildingName: string, id: string) => ({ ...split, buildingId, buildingName, invoices: [{ id, description: `Hauswart ${buildingName}` }] });
+			show(SplitKeysHint, { splitKeys: [hint('b1', 'Musterhaus Zentrum', 'i1'), hint('b2', 'Seepark Residenz', 'i2')], end: '', testid: 'hint' } as never);
+			const lines = allByTestId('split-keys-line').map((line) => line.textContent!.replace(/\s+/g, ' '));
+			expect(lines).toHaveLength(2);
+			expect(lines[0]).toContain('Musterhaus Zentrum');
+			expect(lines[1]).toContain('Seepark Residenz');
+		});
+
+		it('nennt auf dem Entwurf nichts, solange seine Positionen nur einen Verteilschlüssel je Kategorie haben', () => {
+			showWith({ splitKeys: [] } as never);
+			expect(byTestId('statement-status')).not.toBeNull();
+			expect(byTestId('statement-split-keys')).toBeNull();
+			click('statement-recalculate-button');
+			expect(byTestId('statement-recalculate-split-keys')!.textContent).toContain(
+				'Ist das nicht gewollt, ändern Sie zuerst den Verteilschlüssel der Rechnung. Sonst rechnet Dwello die Kategorie in mehreren Positionen ab.'
+			);
+		});
+
+		it('nennt sie nicht auf einer versendeten Abrechnung', () => {
+			showWith({ status: 'sent', correctable: true });
+			expect(byTestId('statement-status')).not.toBeNull();
+			expect(byTestId('statement-split-keys')).toBeNull();
+		});
 	});
 
 	it('bietet beim Entwurf kein Berichtigen an', () => {

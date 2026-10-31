@@ -683,6 +683,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
 	// 2024 in Bergsicht: Ida and Kurt moved out, a heating invoice without Leistungszeitraum beside one with (#339)
 	'heating-hints': (example) => previewOf('2024', 'heating-without-service-period')(example, example.tankBuilding),
+	'split-keys': (example) => previewOf('2024', 'statement-preview-split-keys')(example, example.splitBuilding),
 	// 2014: Emil's contract in the second building is billed outside Dwello up to its end (#453)
 	'preview-skipped': (example) =>
 		previewOf('2014', `preview-all-skipped-${example.tankBuilding}`)(example, example.tankBuilding),

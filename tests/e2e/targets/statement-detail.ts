@@ -109,7 +109,26 @@ export const confirmDeclineCorrectionButton = target('Nicht berichtigen bestäti
 );
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
+export const recalculateDialog = target('Frage vor dem Neuberechnen', (page) => page.getByRole('dialog'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
+
+// #528: the hint on a Kategorie billed with different Verteilschlüssel, on the draft and in the «Neu berechnen» question
+const splitKeysOn = {
+	draft: ['Entwurf', 'statement-split-keys'],
+	question: ['Frage vor dem Neuberechnen', 'statement-recalculate-split-keys'],
+	preview: ['Vorschau', 'statement-preview-split-keys']
+} as const;
+export type SplitKeysPlace = keyof typeof splitKeysOn;
+export const splitKeysHint = (place: SplitKeysPlace) =>
+	target(`Hinweis auf verschiedene Verteilschlüssel (${splitKeysOn[place][0]})`, (page) => page.getByTestId(splitKeysOn[place][1]));
+export const splitKeysLine = (place: SplitKeysPlace, description: string) =>
+	target(`Position der Rechnung «${description}» im Hinweis auf verschiedene Verteilschlüssel`, (page) =>
+		splitKeysHint(place).locate(page).getByTestId('split-keys-line').filter({ hasText: description })
+	);
+export const splitKeysInvoiceLink = (description: string) =>
+	target(`Link zur Rechnung «${description}» im Hinweis auf verschiedene Verteilschlüssel`, (page) =>
+		splitKeysHint('draft').locate(page).getByTestId('split-keys-invoice-link').filter({ hasText: description })
+	);
 
 // #403: the Übertrag from the previous statement, the confirmation of an early payment date, «Bereits bezahlt» of a
 // correction

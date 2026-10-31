@@ -30,6 +30,7 @@ import { getUncategorizedInvoices } from './invoice.service';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
+import { splitKeysOf } from './split-keys';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
@@ -326,11 +327,20 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		building: result.building,
 		// without a heating cost position the chosen profile was not applied: it names none (#280, #451 point 8)
 		heatingProfile: (await billsHeating(lineItems)) ? result.heatingProfile : null,
-		lineItems,
+		...withOtherKeys(lineItems),
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId),
 		...allowed(result.statement.status)
 	};
+}
+
+// #528: a line of a Kategorie with several Verteilschlüssel whose key is not the Kategorie's: the PDF names its invoices
+function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
+	const parts = lineItems.map((item) => ({ ...item, amount: Number(item.totalAmount), invoices: item.invoices ?? [] }));
+	const split = splitKeysOf(parts);
+	const differs = (item: T) => split.some((other) => other.categoryId === item.categoryId && other.keyId === item.distributionKeyId);
+	// the draft's hint names those of a Kategorie (Persona Dr. Weber 528 P-1; without one «Neu berechnen» refuses, V-6)
+	return { lineItems: lineItems.map((item) => ({ ...item, otherKey: differs(item) })), splitKeys: split.filter((other) => other.categoryId) };
 }
 
 /**

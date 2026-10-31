@@ -5,6 +5,7 @@
  */
 
 import type { CorrespondenceChannel, Language, StoredStatementStatus, UtilityStatement, UtilityStatementLineItem } from '../db/schema';
+import type { SplitKey } from '../services/split-keys';
 
 /** A statement's status as the API says it: a sent one past its payment deadline is `overdue` */
 export type StatementStatus = StoredStatementStatus | 'overdue';
@@ -48,7 +49,9 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob' |
 	} | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
-	lineItems: UtilityStatementLineItem[];
+	// otherKey: the line of a Kategorie with several Verteilschlüssel whose key is not the Kategorie's (#528), in the detail
+	lineItems: (UtilityStatementLineItem & { otherKey?: boolean })[];
+	splitKeys?: SplitKey[]; // #528: the lines' invoices of another key than their Kategorie's, in the detail
 	// a berichtigte Abrechnung and the statement it replaces, and the replaced ones of its chain paid on (#120); only
 	// in the detail
 	replaces?: { id: string; statementNumber: string; statementDate: string; totalAdvancePayments: string } | null;

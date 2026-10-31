@@ -4,18 +4,22 @@
 	import Button from '$lib/ui/Button.svelte';
 	import FormDialog from './FormDialog.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import type { SplitKeyHint } from '$lib/types';
+	import SplitKeysHint from '../SplitKeysHint.svelte';
 
 	// Edit, recalculate (#338), correct (#120) or delete, as far as the status allows; a replaced statement stays as it was: no card
 	let {
 		statement,
 		oncorrect,
 		ondelete,
-		recalculating = $bindable(false) // also opened from the send dialog of a draft that is not current (#547)
+		recalculating = $bindable(false), // also opened from the send dialog of a draft that is not current (#547)
+		splitKeys
 	}: {
 		statement: StatementWithDetails;
 		oncorrect: () => void;
 		ondelete: () => void;
 		recalculating?: boolean;
+		splitKeys: SplitKeyHint[]; // #528: what the recalculation would bill in a line of its own
 	} = $props();
 </script>
 
@@ -59,4 +63,9 @@
 	success={m.statements_recalculated()}
 >
 	<p>{m.statements_recalculate_text({ number: statement.statementNumber })}</p>
+	<SplitKeysHint
+		{splitKeys}
+		end={m.statements_split_keys_recalculate_end()}
+		testid="statement-recalculate-split-keys"
+	/>
 </FormDialog>

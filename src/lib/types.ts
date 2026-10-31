@@ -1,5 +1,6 @@
 import type { StatementPayment, StatementStatus, StatementWithDetails as StatementResponse } from '../../backend/src/api/statement';
 import type { DocumentSummary } from '../../backend/src/api/document';
+import type { SplitKey } from '../../backend/src/services/split-keys';
 import type {
 	InvoiceWithDetails as InvoiceResponse,
 	LatestKey
@@ -372,6 +373,7 @@ export interface StatementWithDetails
 	buildingName: string;
 	buildingAddress: string;
 	lineItems: StatementLineItem[];
+	splitKeys?: SplitKeyHint[]; // #528: the draft's lines of another key, names in the UI language
 	priorPayments?: number; // what was paid on the replaced ones (#120)
 	// #448: the Übertrag from the previous statement, a replaced Saldo the next one counted
 	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
@@ -406,3 +408,12 @@ export type StatementDocument = Omit<ApiDocument, OptionalDocumentFields> & Part
 
 /** The Sicherung as the backend reports it (#718): off without a folder, setup until the landlord confirmed a code */
 export type BackupState = { backup: 'off' | 'setup' | 'ok' | 'stale'; since?: string };
+
+/** #528: the invoices of a Kategorie billed by another Verteilschlüssel than its largest share, names in the UI language */
+export type SplitKeyHint = SplitKey & {
+	categoryName: string;
+	keyName: string;
+	mainKeyName: string;
+	buildingId?: string; // the preview of several buildings names each (Code-Review 528-1 C-3)
+	buildingName?: string;
+};

@@ -4,5 +4,6 @@
 	"carryOverChanged": false,
 	"correctionDue": false,
 	"correctionDeclinable": false,
-	"correctionLowers": false
+	"correctionLowers": false,
+	"splitKeys": []
 }

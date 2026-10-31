@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import type { SplitKeyHint } from './types';
 import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-form';
 import { dayAfter } from './swiss-date';
@@ -100,6 +101,7 @@ export interface InvoiceCheck {
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	heatingWithoutServicePeriod?: (HintedInvoice & { categoryId: string | null })[];
 	oldHeatingRule?: string[]; // sent statements sharing the heating costs over the period although an invoice has one (#335)
+	splitKeys?: SplitKeyHint[]; // #528: invoices whose key differs from their Kategorie's, names in the UI language
 }
 
 /** An existing statement of the run's period that misses invoices or was made with other settings (#132) */
@@ -298,9 +300,9 @@ export const needsConfirmation = (coverage: Coverage[]) =>
 
 // Findings per category; missing invoices (not a hint on new or changed costs) need a confirmation
 const categoryCheck = (check?: InvoiceCheck) => {
-	const { findings = [], lateInvoices = [], invoicesWithoutServicePeriod = [], heatingWithoutServicePeriod = [] } = check ?? {};
+	const { findings = [], lateInvoices = [], invoicesWithoutServicePeriod = [], heatingWithoutServicePeriod = [], splitKeys = [] } = check ?? {};
 	const comparedWith = check?.hasComparison ? check.comparedWith : null;
-	return { findings, lateInvoices, invoicesWithoutServicePeriod, heatingWithoutServicePeriod, incomplete: lacksInvoices(check), comparedWith };
+	return { findings, lateInvoices, invoicesWithoutServicePeriod, heatingWithoutServicePeriod, splitKeys, incomplete: lacksInvoices(check), comparedWith };
 };
 
 /** The invoices each building brings into the statements, in words; a building without any is flagged */
