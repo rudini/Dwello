@@ -12,6 +12,7 @@ import { tmpdir } from 'os';
 import { createRequire } from 'module';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { fileContains } from './file-contains';
 
 const repo = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -84,8 +85,7 @@ if (phase === 'backup') {
 	const tenant = (await query(url, 'SELECT last_name FROM tenants ORDER BY last_name LIMIT 1'))[0]
 		?.last_name;
 	const file = (await readdir(dir)).find((name) => name.endsWith('.backup'))!;
-	const content = await readFile(join(dir, file), 'latin1');
-	if (content.includes('CREATE TABLE') || (tenant && content.includes(tenant)))
+	if (await fileContains(join(dir, file), ['CREATE TABLE', ...(tenant ? [tenant] : [])]))
 		fail(
 			`the Sicherung ${file} is readable without the Wiederherstellungscode (it contains CREATE TABLE or the tenant ${tenant}). Fix: encrypt the whole file.`
 		);
