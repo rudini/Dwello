@@ -8,3 +8,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #997 U1 update with Compose from the last release
+
+- [x] `tools/fitness/compose-update-check.sh`: release compose.yaml and images with demo data and a confirmed code, then `docker compose up -d` with this change's; healthy, Sicherung before new migrations, rows and sums
+- [x] `--broken` negative test: failing migration stops with file and cause from the log, after a Sicherung
+- [x] counts, sums and the fixture shared with `upgrade-check.sh` (`tools/fitness/data-totals.sh`)
+- [x] CI job «Docker images»: both runs; on every PR with app changes and on main
+- [x] Seen red locally: broken image without `--broken`; new migration without `backupBeforeMigration`
+- [x] Docs: utility tree U1 (H/L), fitness-functions table and counter-checks
+- [ ] Slice review and closing round
+- [ ] Workflow note: the local Docker daemon cannot pull from ghcr.io or reach deb.debian.org; old and new images built from the tags on local stand-in base images
+- [ ] PR
