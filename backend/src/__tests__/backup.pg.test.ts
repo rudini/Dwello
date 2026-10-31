@@ -129,6 +129,25 @@ describe('Sicherung', () => {
 		).toEqual([{ name: '0037_heating_profile_source.sql' }]);
 	}, 60_000);
 
+	it('behält nach der Wiederherstellung einer älteren Sicherung den neueren Wiederherstellungscode (#953)', async () => {
+		const { name, code } = await secured();
+		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
+		const newer = generateCode();
+		const { publicKey, salt } = await recipientOf(newer);
+		await query(
+			name,
+			`INSERT INTO backup_codes (public_key, salt, confirmed_at) VALUES ($1, $2, now() + interval '1 minute')`,
+			[publicKey.toString('base64'), salt.toString('base64')]
+		);
+
+		await restoreBackup(file, code, `${server}/${name}`, await folder(), migrations);
+
+		const after = await createBackup(`${server}/${name}`, await folder(), secrets);
+		const empty = await database();
+		await restoreBackup(after, newer, `${server}/${empty}`, await folder(), migrations);
+		expect(await query(empty, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
+	}, 60_000);
+
 	it('schreibt die Schlüssel zurück, auch wenn danach eine Migration scheitert', async () => {
 		const { name, code } = await secured();
 		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
