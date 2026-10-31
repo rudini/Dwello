@@ -489,7 +489,6 @@ export const utilityStatements = pgTable(
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		// «Nicht berichtigt» (#454): the day and the result of the recalculation the landlord did not correct to
-		// TODO(fachlich prüfen, #538): «Nicht berichtigt» has no glossary row yet
 		correctionDeclined: jsonb('correction_declined').$type<{ on: string; result: string }>(),
 		// a berichtigte Abrechnung: the statement it replaces and what was already paid on that one and its own (#120)
 		replacesId: uuid('replaces_id').references((): AnyPgColumn => utilityStatements.id),
