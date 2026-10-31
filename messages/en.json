@@ -565,6 +565,7 @@
 	"backend_reminder_refund": "No reminder is sent for a refund: you owe the tenant the amount.",
 	"backend_reminder_limit": "3 reminders have already been sent.",
 	"backend_reminder_below_minimum": "The amount is less than CHF 5.00. It is not claimed and no reminder is sent.",
+	"backend_statement_deadline_before_sent": "The payment deadline cannot be before {date}: this deadline is in the PDF sent, and the tenant is not in default before then. Enter this date or a later one.",
 	"backend_reminder_too_early": "The next reminder is possible from {date}: the payment deadline of the last reminder runs until {deadline}.",
 	"backend_tenant_no_email": "The tenant has no email address.",
 	"backend_mail_not_configured": "Email sending is not set up.",

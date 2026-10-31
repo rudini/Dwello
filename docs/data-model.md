@@ -359,7 +359,8 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 **Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
 amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee_percent`,
 `management_fee` and `balance` once the status is not `draft`). Other fields, such as `payment_deadline` or `notes`, stay
-editable; a changed `payment_deadline` clears `pdf_blob` and `pdf_generated_at`.
+editable; a changed `payment_deadline` clears `pdf_blob` and `pdf_generated_at`. A sent Nachzahlung's `payment_deadline`
+cannot go before `documents.payment_deadline` of the PDF the tenant got last (#966).
 
 **Overdue:** never stored. Reads, filters and counts treat a `sent` statement whose `payment_deadline` has
 passed as `overdue`; the CHECK does not allow it as a stored value.

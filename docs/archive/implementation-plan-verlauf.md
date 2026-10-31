@@ -418,6 +418,16 @@
 - [x] code-reviewer `docs/reviews/981-review-1.md`: no findings
 - [x] No persona: the decided text was read in four languages by the fach-reviewer; no step-5 fach-reviewer: nothing changed since step 1
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #966 Zahlungsfrist einer versendeten Abrechnung nicht verkürzen
+
+- [x] @wip scenario «Die Zahlungsfrist einer versendeten Nachzahlung lässt sich nicht vorverlegen» and pg tests (`statement-mail.pg.test.ts`), seen red; the refund test pins kept behaviour
+- [x] fach-reviewer step 1 `docs/reviews/966-fachreview-1.md`: V-1, M-1 (Major) and V-2 done; the refinement (only a Nachzahlung, the PDF the tenant got last) recorded in #966
+- [x] `refuseEarlierDeadline` with `toldDeadline` (`delivery.ts`); the e-mail Dokument stores its Zahlungsfrist; message at the field in four languages
+- [x] code-reviewer `docs/reviews/966-review-1.md`: C-1 (action test with contract), C-2 (docs) done, C-3 noted
+- [x] Closing review `docs/reviews/966close-review-1.md`: C-1 (restore in the contract test) done
+- [x] No persona: the decided message was read in four languages by the fach-reviewer
+- [x] PR: pushed after this archive
 ## Session: #722 HTTPS with compose.yaml (2026-10-31)
 
 - [x] `compose.yaml`: service `caddy` under the profile `https` (ports 80/443, inline Caddyfile like the demo's, volume `caddy_data`), started with `COMPOSE_PROFILES=https` and `DWELLO_DOMAIN` in `.env`; `DWELLO_DOMAIN` optional, since a required variable stopped `docker compose config` without the profile

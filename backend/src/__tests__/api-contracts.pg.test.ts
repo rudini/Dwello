@@ -682,6 +682,26 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #966: a sent Nachzahlung's Zahlungsfrist before the one in the PDF the tenant got
+	it('PUT /statements/:id mit einer früheren Zahlungsfrist liefert die Felder von statement-deadline-refused.json', async () => {
+		const [before] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await db.update(utilityStatements).set({ status: 'sent', balance: '120.00' }).where(eq(utilityStatements.id, statementId));
+		const [told] = await db
+			.insert(documents)
+			.values({ tenantId: before.tenantId, statementId, type: 'statement', title: 'Nebenkostenabrechnung', fileName: 'NK.pdf', content: '', channel: 'letter', status: 'sent', sentAt: new Date(), paymentDeadline: '2025-03-31' })
+			.returning();
+		try {
+			const response = await sendJson('PUT', `/api/v1/statements/${statementId}`, { paymentDeadline: '2025-03-01' });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('statement-deadline-refused'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(documents).where(eq(documents.id, told.id));
+			// all a PUT that got through would change too (closing review 966-1 C-1)
+			const { status, balance, paymentDeadline, pdfBlob, pdfGeneratedAt } = before;
+			await db.update(utilityStatements).set({ status, balance, paymentDeadline, pdfBlob, pdfGeneratedAt }).where(eq(utilityStatements.id, statementId));
+		}
+	});
+
 	it('eine Anfrage, die das Schema verletzt, liefert die Felder von validation-refused.json', async () => {
 		const response = await sendJson('POST', '/api/v1/statements/preview', { contractId: 42 });
 		expect(response.status).toBe(422);

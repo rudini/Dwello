@@ -60,6 +60,7 @@ export async function sendStatement(id: string, byLetter = false) {
 		content: made.pdf,
 		channel: 'email',
 		recipient: tenant.email,
+		paymentDeadline: sent?.paymentDeadline, // as the PDF prints it, for a later change (#966)
 		status: 'sent',
 		sentAt: new Date()
 	});

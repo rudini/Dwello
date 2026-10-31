@@ -131,6 +131,8 @@ describe('Abrechnung per E-Mail versenden', () => {
 		expect(mail.attachments[0].contentType).toBe('application/pdf');
 		expect(mail.attachments[0].content.subarray(0, 4).toString()).toBe('%PDF');
 		expect(result.document).toMatchObject({ type: 'statement', channel: 'email', status: 'sent', title: 'Nebenkostenabrechnung', paymentDeadline: null });
+		// #966 (A): stored with the Zahlungsfrist it went out with, so a later one is measured against it
+		expect((await storedFor(id))[0].paymentDeadline).toBe(result.statement!.paymentDeadline);
 		// #449 (Punkt 7): the Verlauf names the address it went to
 		expect(result.document).toMatchObject({ recipient: 'nora.beispiel@dwello.test' });
 		const [stored] = await storedFor(id);
@@ -288,6 +290,52 @@ describe('Abrechnung per Brief', () => {
 });
 
 // #534: a sent statement whose e-mail did not reach the tenant goes again by letter, dated anew
+// #966 (A, Fachreview 524-1 M-2): the tenant keeps the PDF with the Zahlungsfrist it went out with; an earlier one he
+// was not told cannot make the statement overdue
+describe('Zahlungsfrist einer versendeten Abrechnung', () => {
+	const deadlineTo = (id: string, paymentDeadline: string) => api('PUT', `/api/v1/statements/${id}`, { paymentDeadline });
+
+	it('lässt sich nicht vor die Zahlungsfrist beim Versand legen, wohl aber danach', async () => {
+		const id = await draft();
+		const { statement } = await send(id);
+		const sent = statement!.paymentDeadline;
+
+		const earlier = await deadlineTo(id, daysAfter(sent, -1));
+		const later = await deadlineTo(id, daysAfter(sent, 10));
+
+		expect(earlier.status).toBe(400);
+		expect(await earlier.json()).toMatchObject({ code: 'STATEMENT_DEADLINE_BEFORE_SENT', params: { date: sent } });
+		expect(later.status).toBe(200);
+		expect(((await later.json()) as { paymentDeadline: string }).paymentDeadline).toBe(daysAfter(sent, 10));
+		expect((await deadlineTo(id, sent)).status).toBe(200); // the same day as in the PDF (Fachreview 966-1 V-2)
+	});
+
+	// Fachreview 966-1 V-1: the new PDF marked sent tells the tenant its later Zahlungsfrist; that one counts
+	it('misst nach einem als versendet markierten neuen PDF an dessen Zahlungsfrist', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		const sent = (await send(id)).statement!.paymentDeadline;
+		const later = daysAfter(sent, 30);
+		await deadlineTo(id, later);
+		const [newPdf] = (await storedFor(id)).filter((one) => one.type === 'new_pdf');
+		await api('PUT', `/api/v1/documents/${newPdf.id}/sent`);
+
+		const between = await deadlineTo(id, daysAfter(sent, 10));
+
+		expect(between.status).toBe(400);
+		expect(await between.json()).toMatchObject({ code: 'STATEMENT_DEADLINE_BEFORE_SENT', params: { date: later } });
+	});
+
+	// Fachreview 966-1 M-1: for a refund the landlord is the debtor; paying back earlier does the tenant no harm
+	it('lässt bei einer Rückerstattung ein früheres Datum zu', async () => {
+		const id = await draft();
+		await db.update(utilityStatements).set({ balance: '-120.00' }).where(eq(utilityStatements.id, id));
+		const sent = (await send(id)).statement!.paymentDeadline;
+
+		expect((await deadlineTo(id, daysAfter(sent, -1))).status).toBe(200);
+	});
+});
+
 describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 	const redeliver = async (id: string) => {
 		const response = await api('POST', `/api/v1/statements/${id}/redeliver`);

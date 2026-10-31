@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { runAction } from './helpers/action';
+import deadlineRefused from '../../tests/contracts/statement-deadline-refused.json';
 import { actions } from '../routes/statements/[id]/edit/+page.server';
 
 const fields = { paymentDeadline: '2025-03-31', notes: 'Zahlung in zwei Raten vereinbart' };
@@ -20,6 +21,24 @@ describe('Abrechnung bearbeiten', () => {
 		expect(await result).toMatchObject({
 			status: 400,
 			data: { errors: { form: 'Abrechnung konnte nicht gespeichert werden.' } }
+		});
+	});
+
+	// #966: a Zahlungsfrist before the one the tenant got shows at its field, with the date from the backend
+	it('meldet eine Zahlungsfrist vor der versendeten am Feld', async () => {
+		const { result } = runAction(
+			actions.default,
+			's1',
+			200,
+			fields,
+			{},
+			{ status: 400, answer: deadlineRefused }
+		);
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: { paymentDeadline: expect.stringContaining('nicht vor dem 31.03.2025 liegen') }
+			}
 		});
 	});
 
