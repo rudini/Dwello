@@ -224,6 +224,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 			...row.statement,
 			status: effectiveStatus,
 			...paymentOf({ ...row.statement, status: effectiveStatus }, today),
+			asksPayment: !isReplaced(row.statement), // the row names the rest of a part payment by it (#959)
 			reminderDue: effectiveStatus === 'overdue' ? !reminderWaits(row.statement, today, mahnfrist) : null,
 			tenant: row.tenant,
 			apartment: row.apartment,
