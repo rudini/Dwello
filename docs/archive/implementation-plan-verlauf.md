@@ -465,3 +465,15 @@
 - [x] Re-review and closing round (`docs/reviews/997-review-2.md`): no findings, C-1 to C-3 closed
 - [x] Workflow note: the local Docker daemon cannot pull from ghcr.io or reach deb.debian.org; old and new images built from the tags on local stand-in base images (`docs/reviews/workflow-notes-issue-997.md`)
 - [x] PR: pushed after this archive
+
+## Session: #959 Teilzahlung (A)
+
+- [x] fach-reviewer step 1 `docs/reviews/959-fachreview-1.md`: rules 1–7 recorded in #959 «Decided»; V-1 to V-4 (Major) done; M-1, V-5 to #1000, #1001
+- [x] Backend: part payments in `payments` (migration 0041), `paidAmount` their sum, paid once they reach the Saldo on the latest day; reset takes back the last payment; Mahnung letter and QR part, overview sums name the open amount
+- [x] UI: «Bezahlter Betrag» prefilled with the open amount, «Teilzahlung festhalten», «Bezahlt: …, offen: …» on detail page and list row, correction prefilled; help text replaces the #523 sentence (Spec change approved: #959)
+- [x] Scenarios «Eine Teilzahlung lässt die Abrechnung mit dem Rest offen», «Nach einer Teilzahlung zählt die Übersicht nur den Rest als überfällig»; axe and language rows `statement-part-paid-detail`
+- [x] code-reviewer `docs/reviews/959a-review-1.md`, `959b-review-1.md`, closing `959b-review-2.md`
+- [x] Personas `docs/design/personas/helga-959.md`, `weber-959.md` (P-1, Helga P-2 done; Minors stay, Weber P-2/P-3 in #1000)
+- [x] daten-pruefer `docs/reviews/959-datenpruefung-1.md`: no findings
+- [x] Glossary rows decided in #959; follow-up issues #999 to #1003
+- [x] PR: pushed after this archive
