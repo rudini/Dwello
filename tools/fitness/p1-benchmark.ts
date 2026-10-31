@@ -4,6 +4,7 @@
 // tests/e2e/fixtures/session.ts signs it, then downloads the run's PDFs as the wizard's ZIP. It prints both times
 // (#934: measured by hand, no CI gate while A4 is open). PostgreSQL on localhost:5432, user and password dwello.
 import { execFileSync, spawn } from 'node:child_process';
+import { copyFileSync, rmSync, symlinkSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +13,10 @@ import { unzipSync } from 'fflate';
 import { E2E_JWT_SECRET, sessionToken } from '../../tests/e2e/fixtures/session';
 
 const APARTMENTS = 50;
-const [FRONTEND_PORT, BACKEND_PORT] = [3300, 3301];
+// ports of its own: 3300/3301 are the persona stack's, 3100 to 3106 the E2E stack's (code review 934-1 C-1)
+const [FRONTEND_PORT, BACKEND_PORT] = [3320, 3321];
+// a build of its own, as the persona stack has: build/ and its stamp belong to the E2E run (code review 934-1 C-2)
+const BUILD = '/tmp/p1-app';
 const frontend = `http://localhost:${FRONTEND_PORT}`;
 
 const server = 'postgresql://dwello:dwello@localhost:5432';
@@ -63,26 +67,41 @@ await db.insert(invoices).values(
 );
 await pool.end();
 
-// Stop the servers by their port; fuser exits 1 when nothing listens there
-const free = () =>
-	[FRONTEND_PORT, BACKEND_PORT].forEach((port) => {
+// Something else on the ports is never stopped: the run refuses to start (fuser exits 0 when a port is in use)
+for (const port of [FRONTEND_PORT, BACKEND_PORT]) {
+	let used = true;
+	try {
+		execFileSync('fuser', ['-s', `${port}/tcp`]);
+	} catch {
+		used = false;
+	}
+	if (used) throw new Error(`Port ${port} is in use; stop what listens there first`);
+}
+
+execFileSync('bun', ['run', 'build'], { cwd: root, stdio: 'inherit', env: { ...process.env, BUILD_DIR: BUILD } });
+// the build finds its packages as the persona stack's does (docs/design/tools/persona-stack.sh)
+copyFileSync(join(root, 'package.json'), join(BUILD, 'package.json'));
+rmSync(join(BUILD, 'node_modules'), { force: true });
+symlinkSync(join(root, 'node_modules'), join(BUILD, 'node_modules'));
+const env = { ...process.env, JWT_SECRET: E2E_JWT_SECRET };
+// each in a process group of its own, so the end stops these two and nothing else
+const servers = [
+	spawn('bun', ['src/index.ts'], { cwd: backend, env: { ...env, PORT: String(BACKEND_PORT), DATABASE_URL }, stdio: 'ignore', detached: true }),
+	spawn('node', [BUILD], {
+		cwd: root,
+		env: { ...env, PORT: String(FRONTEND_PORT), ORIGIN: frontend, BACKEND_URL: `http://localhost:${BACKEND_PORT}`, ALLOWED_EMAILS: 'verwalter@example.com' },
+		stdio: 'ignore',
+		detached: true
+	})
+];
+const stop = () =>
+	servers.forEach(({ pid }) => {
 		try {
-			execFileSync('fuser', ['-k', '-s', `${port}/tcp`]);
+			process.kill(-pid!);
 		} catch {
-			// nothing to stop
+			// already gone
 		}
 	});
-free();
-
-execFileSync('node', ['tools/e2e/build-if-changed.mjs', 'bun', 'run', 'build'], { cwd: root, stdio: 'inherit' });
-const env = { ...process.env, JWT_SECRET: E2E_JWT_SECRET };
-spawn('bun', ['src/index.ts'], { cwd: backend, env: { ...env, PORT: String(BACKEND_PORT), DATABASE_URL }, stdio: 'ignore', detached: true }).unref();
-spawn('node', ['build'], {
-	cwd: root,
-	env: { ...env, PORT: String(FRONTEND_PORT), ORIGIN: frontend, BACKEND_URL: `http://localhost:${BACKEND_PORT}`, ALLOWED_EMAILS: 'verwalter@example.com' },
-	stdio: 'ignore',
-	detached: true
-}).unref();
 
 async function up(url: string) {
 	for (let i = 0; i < 300; i++) {
@@ -112,6 +131,8 @@ try {
 	if (answer.type !== 'success') throw new Error(`generate: ${JSON.stringify(answer)}`);
 	// devalue's form of { created: [ids] }: [{ created: 1 }, [2, 3, …], id, id, …], the only strings are the ids
 	const created = (JSON.parse(answer.data) as unknown[]).filter((value) => typeof value === 'string');
+	// every contract billed, or the times would not be those of 50 apartments (code review 934-1 C-3)
+	if (created.length !== APARTMENTS) throw new Error(`generate: ${created.length} of ${APARTMENTS} statements`);
 
 	const pdfStarted = performance.now();
 	const zip = await fetch(`${frontend}/statements/zip?${new URLSearchParams({ ids: created.join(','), periodStart: run.periodStart, periodEnd: run.periodEnd })}`, { headers });
@@ -125,5 +146,5 @@ try {
 	console.log(`| PDFs (ZIP of the run) | ${files.length} | ${s(pdfTime)} |`);
 	console.log(`| Together | | ${s(runTime + pdfTime)} (target P1: ≤ 30 s) |`);
 } finally {
-	free();
+	stop();
 }
