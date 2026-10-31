@@ -400,3 +400,13 @@
 - [x] code-reviewer `docs/reviews/980-review-1.md` (C-1 Minor fixed: docstring and API spec)
 - [x] Persona Dr. Weber `docs/design/personas/weber-980.md`: P-1 to P-3 Minor, existed before (P-3 = 529-fachreview-1 V-6); stay in the report
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #966 Zahlungsfrist einer versendeten Abrechnung nicht verkürzen
+
+- [x] @wip scenario «Die Zahlungsfrist einer versendeten Nachzahlung lässt sich nicht vorverlegen» and pg tests (`statement-mail.pg.test.ts`), seen red; the refund test pins kept behaviour
+- [x] fach-reviewer step 1 `docs/reviews/966-fachreview-1.md`: V-1, M-1 (Major) and V-2 done; the refinement (only a Nachzahlung, the PDF the tenant got last) recorded in #966
+- [x] `refuseEarlierDeadline` with `toldDeadline` (`delivery.ts`); the e-mail Dokument stores its Zahlungsfrist; message at the field in four languages
+- [x] code-reviewer `docs/reviews/966-review-1.md`: C-1 (action test with contract), C-2 (docs) done, C-3 noted
+- [x] Closing review `docs/reviews/966close-review-1.md`: C-1 (restore in the contract test) done
+- [x] No persona: the decided message was read in four languages by the fach-reviewer
+- [x] PR: pushed after this archive
