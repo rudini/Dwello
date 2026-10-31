@@ -3,6 +3,9 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Gap, Text, Value } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
+	type SplitKeysPlace,
+	splitKeysHint,
+	splitKeysLine,
 	carryOverRow,
 	advanceDiffers,
 	costBreakdown,
@@ -53,6 +56,9 @@ import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
 
 export const statusOfStatement = Text.of(statementStatus);
+export const splitKeysText = (place: SplitKeysPlace) => Text.of(splitKeysHint(place));
+export const splitKeysLineText = (place: SplitKeysPlace, description: string) => Text.of(splitKeysLine(place, description));
+export const splitKeysLines = (description: string) => Count.of(splitKeysLine('draft', description));
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);

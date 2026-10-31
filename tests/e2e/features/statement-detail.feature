@@ -822,6 +822,50 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Rechnung "Hauswart 2024-12-31" der Position "Hauswart" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung "Hauswart 2024-12-31"
 
+  # #528 (Persona Dr. Weber, 452 P-1): eine Kategorie mit zwei Verteilschlüsseln steht in zwei Positionen; der Entwurf
+  # sagt es und nennt die Rechnung, deren Verteilschlüssel von dem der grösseren Position abweicht (Entscheid des Product
+  # Owners: nur ein Hinweis, keine Bestätigung)
+  @wip
+  Szenario: Der Entwurf nennt die Rechnung mit einem anderen Verteilschlüssel derselben Kategorie
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann sagt der Entwurf, dass "Hauswart" mit verschiedenen Verteilschlüsseln abgerechnet wird
+    Und nennt der Hinweis auf verschiedene Verteilschlüssel die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
+    Und nennt der Hinweis auf verschiedene Verteilschlüssel die Rechnung "Hauswart 2024-09-30" nicht
+
+  @wip
+  Szenario: Rechnung mit einem anderen Verteilschlüssel öffnen
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter im Hinweis auf verschiedene Verteilschlüssel die Rechnung "Hauswart 2024-12-31" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung "Hauswart 2024-12-31"
+
+  @wip
+  Szenario: Die Frage vor dem Neuberechnen nennt die Rechnung mit einem anderen Verteilschlüssel
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter «Neu berechnen» wählt
+    Dann nennt die Frage vor dem Neuberechnen die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
+
+  # #528: im PDF trägt die Position mit dem abweichenden Verteilschlüssel den Namen ihrer Rechnung, damit der Mieter die
+  # beiden Positionen der Kategorie auseinanderhält
+  @wip
+  Szenario: Das PDF nennt die Rechnung der Position mit einem anderen Verteilschlüssel
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2024-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-12-31" nach dem Verteilschlüssel "Pro Einheit"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Hauswart (Hauswart 2024-12-31) Pro Einheit"
+
   # #96: die Abrechnung kennt die Rechnungen, die sie abrechnet; eine Rechnung der Periode, die danach erfasst wurde,
   # fehlt darin
   Szenario: Abrechnung weist auf eine danach erfasste Rechnung hin

@@ -44,7 +44,10 @@ import {
 	advanceDiffersText,
 	partialPaymentAdvice,
 	pdfChangedAdvice,
-	sentPdfHref
+	sentPdfHref,
+	splitKeysLineText,
+	splitKeysLines,
+	splitKeysText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -87,7 +90,9 @@ import {
 	resetPayment,
 	sendStatement,
 	confirmSending,
-	settleCarryOver
+	settleCarryOver,
+	askToRecalculate,
+	openSplitKeysInvoice
 } from '../tasks/statement-detail';
 import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
@@ -739,4 +744,35 @@ When('der Liegenschaftsverwalter das versendete PDF im Verlauf herunterlädt', a
 
 Then('bietet der Verlauf das versendete PDF an', async ({ verwalter }) => {
 	await verwalter.sees(sentPdfHref).toMatch(/^\/documents\/[0-9a-f-]+\/pdf$/);
+});
+
+// #528: a Kategorie billed with different Verteilschlüssel
+Then('sagt der Entwurf, dass {string} mit verschiedenen Verteilschlüsseln abgerechnet wird', async ({ verwalter }, category: string) => {
+	await verwalter.sees(splitKeysText('draft')).toContain(`${category} steht in mehreren Positionen`);
+});
+
+Then(
+	'nennt der Hinweis auf verschiedene Verteilschlüssel die Rechnung {string} mit {string}',
+	async ({ verwalter }, invoice: string, key: string) => {
+		await verwalter.sees(splitKeysLineText('draft', invoice)).toContain(`«${key}»`);
+	}
+);
+
+Then('nennt der Hinweis auf verschiedene Verteilschlüssel die Rechnung {string} nicht', async ({ verwalter }, invoice: string) => {
+	await verwalter.sees(splitKeysLines(invoice)).toBe(0);
+});
+
+When(
+	'der Liegenschaftsverwalter im Hinweis auf verschiedene Verteilschlüssel die Rechnung {string} öffnet',
+	async ({ verwalter }, invoice: string) => {
+		await verwalter.attemptsTo(openSplitKeysInvoice(invoice));
+	}
+);
+
+When('der Liegenschaftsverwalter «Neu berechnen» wählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(askToRecalculate);
+});
+
+Then('nennt die Frage vor dem Neuberechnen die Rechnung {string} mit {string}', async ({ verwalter }, invoice: string, key: string) => {
+	await verwalter.sees(splitKeysLineText('question', invoice)).toContain(`«${key}»`);
 });
