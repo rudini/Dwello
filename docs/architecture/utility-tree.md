@@ -96,7 +96,7 @@ Dwello-Nutzen
   - Gemessen am 31.10.2026 (#974, `bun run fitness:r1`: eine synthetische Datenbank nach 10 Jahren, 5 Liegenschaften mit 50 Wohnungen und 75 Mietverträgen, 2016–2025, je Liegenschaft und Jahr 40 Rechnungen mit Beleg, je Mieter und Jahr ein versendetes Abrechnungs-PDF zu 150 KB; Dateien aus Zufallsbytes, die sich nicht komprimieren lassen; 4 vCPU Xeon, 15 GB):
     - Belege zu 400 KB: Datenbank 1,2 GB, Sicherung 864 MB in 50 s, Restore **24 s**.
     - Belege zu 1 MB: Datenbank 2,8 GB, Sicherung 2,0 GB in 109 s, Restore **97 s**.
-    - Das Ziel von 5 min hält mit Abstand. Die Dauer wächst schneller als die Grösse (2,3-fache Grösse, 4-fache Dauer); so weitergerechnet läge die Grenze bei rund 5 GB. Ob die Mengen stimmen (40 Belege pro Liegenschaft und Jahr, 400 KB bis 1 MB pro Beleg), bestätigt der PO (Annahme A2).
+    - Das Ziel von 5 min hält mit Abstand. Die Dauer wächst schneller als die Grösse (2,3-fache Grösse, 4-fache Dauer); so weitergerechnet läge die Grenze bei rund 5 GB. Die Mengen (40 Belege pro Liegenschaft und Jahr, 400 KB bis 1 MB pro Beleg) hat der PO bestätigt (31.10.2026, Annahme A2).
 - **Fitness Function:** Job pro Release:
   - Demo-Daten mit dem letzten Release-Tag laden.
   - Backup mit dem mitgelieferten Mechanismus erstellen.
@@ -200,7 +200,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | ID | Annahme | Betrifft | Zu klären durch |
 |---|---|---|---|
 | A1 | ~~Das Release für die Vermieter ist eine Auswahl der Merge-Tags.~~ **Entschieden:** Es wird nur noch wöchentlich getaggt (vom Nutzer bestätigt). | U1 | erledigt |
-| A2 | Eine Installation enthält nach 10 Jahren Belege für höchstens 50 Wohnungen. Der Restore schafft das in ≤ 5 min. | R1 | Gemessen (31.10.2026, #974): mit 2000 Belegen zu 400 KB bis 1 MB ist die Datenbank 1,2 bis 2,8 GB gross, der Restore dauert 24 bis 97 s. Offen: Bestätigt der PO die Mengen (40 Belege pro Liegenschaft und Jahr, 400 KB bis 1 MB pro Beleg)? |
+| A2 | Eine Installation enthält nach 10 Jahren Belege für höchstens 50 Wohnungen. Der Restore schafft das in ≤ 5 min. | R1 | erledigt: gemessen (31.10.2026, #974): mit 2000 Belegen zu 400 KB bis 1 MB ist die Datenbank 1,2 bis 2,8 GB gross, der Restore dauert 24 bis 97 s. Die Mengen (40 Belege pro Liegenschaft und Jahr, 400 KB bis 1 MB pro Beleg) hat der PO am 31.10.2026 bestätigt. |
 | A3 | ~~Schwelle «Backup zu alt» = 26 h~~ **Entschieden:** Gelingt mehr als einen Tag kein Backup, ist das sichtbar. Ausserdem muss jedes Backup nach einem Update einspielbar sein (vom Nutzer bestätigt). | O1, R1 | erledigt |
 | A4 | Ein CI-Wächter für P1 auf dem GitHub-Runner sagt etwas über die Demo-VM aus. | P1 | Einmal auf beiden messen. Runner-Seite gemessen (31.10.2026, #934): 6,5 s auf 4 vCPU Xeon 2.1 GHz, 15 GB. Der Lauf arbeitet die Mietverträge nacheinander ab, zählt also vor allem die Leistung eines Kerns. Offen: derselbe Lauf auf der Demo-VM (2 OCPU ARM, 12 GB), erst der Vergleich gibt den Faktor. Ist die VM bis zu 4,6-mal langsamer, hält P1 auch dort. |
 | A5 | ~~P2 braucht kein eigenes Szenario.~~ **Entschieden:** P2 ist ein eigenes Szenario (vom Nutzer bestätigt). Der Baum hat damit 9 statt höchstens 8 Szenarien. Einstufung H/M (vom Nutzer bestätigt). | P2 | erledigt |
