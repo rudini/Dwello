@@ -8,11 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session 31.10.2026: #511 Texte zu Verwaltungspauschale, Vertragsende, Kündigung und Kündigungstermin
-
-- [x] @wip scenarios (statement-detail, contract-detail, help), seen red at the missing texts
-- [ ] fach-reviewer step 1 (`docs/reviews/511-fachreview-1.md`) with the wording in four languages
-- [ ] P-2: PDF note on the agreed Verwaltungspauschale (`pdf.service.ts`, test)
-- [ ] P-3, P-4, P-5: `contracts_end_date_help`, `contracts_notice_received_help`, `glossary_termination_date_text` in four languages (DOM test of the changed help)
-- [ ] code-reviewer, persona only if the review's texts were not read in four languages, daten-pruefer (PDF), closing review, archive, PR
