@@ -1,0 +1,115 @@
+name: Fallback review
+
+# When Copilot's code review reports a rate limit or another error instead of a review, MiniMax reviews the pull
+# request's diff and posts the result as a review comment. Run it by hand for a pull request Copilot did not review.
+# Needs the repository secret MINIMAX_API_KEY.
+on:
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: fallback-review-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
+
+jobs:
+  review:
+    name: MiniMax review
+    # contains() ignores case: Copilot reviews as copilot-pull-request-reviewer[bot]
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.user.login, 'copilot')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.user.login, 'copilot'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
+      COPILOT_SAID: ${{ github.event.review.body || github.event.comment.body }}
+      MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+      MODEL: MiniMax-M3.1-Flash
+      REASONING_EFFORT: medium # unset, it thought through all 32000 tokens of a 47 kB diff without an answer
+      MAX_DIFF_BYTES: 400000
+    steps:
+      - name: Review the diff when Copilot failed
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ]; then
+            # a real Copilot review carries its overview; a refusal names the limit or the error
+            if grep -qE 'ccr-overview|Pull request overview' <<< "$COPILOT_SAID" ||
+              ! grep -qiE "rate.?limit|quota|limit (reached|exceeded)|encountered an error|unable to review|(wasn.t|was not|could not|couldn.t|cannot|can.t) (able to )?review|try again" <<< "$COPILOT_SAID"; then
+              echo "Copilot reviewed normally, nothing to do."
+              exit 0
+            fi
+          fi
+          if [ -z "$MINIMAX_API_KEY" ]; then
+            echo "::error::The repository secret MINIMAX_API_KEY is missing."
+            exit 1
+          fi
+
+          gh api "repos/$GH_REPO/pulls/$PR" --jq '"# " + .title + "\n\n" + (.body // "")' > pr.md
+          gh api "repos/$GH_REPO/pulls/$PR" -H 'Accept: application/vnd.github.diff' > full.diff
+          head -c "$MAX_DIFF_BYTES" full.diff > diff.txt
+          note=""
+          if [ "$(wc -c < full.diff)" -gt "$MAX_DIFF_BYTES" ]; then
+            note="Only the first $MAX_DIFF_BYTES bytes of the diff were reviewed."
+            echo "(diff truncated)" >> diff.txt
+          fi
+          gh api "repos/$GH_REPO/contents/CLAUDE.md" -H 'Accept: application/vnd.github.raw' > rules.md || : > rules.md
+
+          cat > system.md <<'PROMPT'
+          You are a senior code reviewer for the repository whose conventions follow. Review only the changes in the
+          diff. Report real problems: bugs, wrong behaviour, security issues, missing or wrong tests, broken
+          conventions from the repository rules. No praise, no style nits a formatter would fix, no restating the diff.
+          Answer in English Markdown:
+          - one line with the verdict: "No issues found" or "Changes recommended";
+          - then each finding as a list item: **High/Medium/Low**, `path:line` (line in the new file), what is wrong,
+            the concrete failure it causes and the fix. Most severe first, at most 10.
+          If you are not sure a finding holds, leave it out.
+
+          Repository rules:
+          PROMPT
+          cat rules.md >> system.md
+
+          jq -n --arg model "$MODEL" --arg effort "$REASONING_EFFORT" --rawfile system system.md --rawfile pr pr.md --rawfile diff diff.txt '{
+            model: $model, max_tokens: 32000, reasoning_effort: $effort, temperature: 0.2, stream: true,
+            messages: [
+              {role: "system", content: $system},
+              {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```")}
+            ]}' > request.json
+          # streamed: the model thinks for minutes before it answers, and a silent connection may be cut
+          curl -sS -N --fail-with-body --max-time 900 https://api.minimax.io/v1/chat/completions \
+            -H "Authorization: Bearer $MINIMAX_API_KEY" -H 'Content-Type: application/json' \
+            -d @request.json > response.txt || { cat response.txt; exit 1; }
+          sed -n 's/^data: {/{/p' response.txt > chunks.jsonl
+          jq -rj '.choices[0].delta.content // empty' chunks.jsonl | perl -0pe 's/<think>.*?<\/think>\s*//s' > review.md
+          if [ ! -s review.md ]; then
+            echo "::error::MiniMax returned no review."; tail -c 2000 response.txt; exit 1
+          fi
+          if grep -q '"finish_reason":"length"' chunks.jsonl; then
+            note="${note:+$note }The answer hit the token limit and may be cut off."
+          fi
+
+          {
+            echo "<!-- fallback-review -->"
+            echo "### Fallback review ($MODEL)"
+            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+              echo "_Started by hand._"
+            else
+              echo "_Copilot could not review this pull request, so $MODEL reviewed the diff._"
+            fi
+            [ -n "$note" ] && echo "_${note}_"
+            echo
+            cat review.md
+          } > body.md
+          gh api "repos/$GH_REPO/pulls/$PR/reviews" -f event=COMMENT -F body=@body.md > /dev/null
