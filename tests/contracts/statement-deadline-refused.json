@@ -1,0 +1,5 @@
+{
+	"error": "The payment deadline cannot be before the one sent",
+	"code": "STATEMENT_DEADLINE_BEFORE_SENT",
+	"params": { "date": "2025-03-31" }
+}
