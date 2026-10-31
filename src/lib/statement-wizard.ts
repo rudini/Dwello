@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import type { SplitKey } from '../../backend/src/services/split-keys';
+import type { SplitKeyHint } from './types';
 import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-form';
 import { dayAfter } from './swiss-date';
@@ -103,15 +103,6 @@ export interface InvoiceCheck {
 	oldHeatingRule?: string[]; // sent statements sharing the heating costs over the period although an invoice has one (#335)
 	splitKeys?: SplitKeyHint[]; // #528: invoices whose key differs from their Kategorie's, names in the UI language
 }
-
-/** #528: the invoices of a Kategorie billed by another Verteilschlüssel than its largest share, names in the UI language */
-export type SplitKeyHint = SplitKey & {
-	categoryName: string;
-	keyName: string;
-	mainKeyName: string;
-	buildingId?: string; // the preview of several buildings names each (Code-Review 528-1 C-3)
-	buildingName?: string;
-};
 
 /** An existing statement of the run's period that misses invoices or was made with other settings (#132) */
 export interface ChangedStatement {

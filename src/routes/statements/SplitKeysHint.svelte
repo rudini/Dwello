@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { SplitKeyHint } from '$lib/statement-wizard';
+	import type { SplitKeyHint } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// #528: a Kategorie billed with several Verteilschlüssel stands in several lines; the invoices whose key differs, each

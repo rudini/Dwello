@@ -5,7 +5,7 @@ import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import type { StatementWithDetails as StatementResponse } from '../../../backend/src/api/statement';
 import type { Json, StatementLineItem, StatementWithDetails } from '$lib/types';
-import type { SplitKeyHint } from '$lib/statement-wizard';
+import type { SplitKeyHint } from '$lib/types';
 import type { SplitKey } from '../../../backend/src/services/split-keys';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';

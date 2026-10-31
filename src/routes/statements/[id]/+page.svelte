@@ -27,7 +27,7 @@
 	import MetadataCard, { type Delivery } from './MetadataCard.svelte';
 	import LaterChanges from './LaterChanges.svelte';
 	import SplitKeysHint from '../SplitKeysHint.svelte';
-	import type { SplitKeyHint } from '$lib/statement-wizard';
+	import type { SplitKeyHint } from '$lib/types';
 	import type { ComponentProps } from 'svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';

@@ -4,7 +4,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import FormDialog from './FormDialog.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
-	import type { SplitKeyHint } from '$lib/statement-wizard';
+	import type { SplitKeyHint } from '$lib/types';
 	import SplitKeysHint from '../SplitKeysHint.svelte';
 
 	// Edit, recalculate (#338), correct (#120) or delete, as far as the status allows; a replaced statement stays as it was: no card
