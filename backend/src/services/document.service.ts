@@ -3,7 +3,7 @@
  * Stored letters (payment reminders) per tenant, sent by e-mail or kept for printing
  */
 
-import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, rentalContracts, tenants, utilityStatements, type DocumentStatus, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
@@ -173,14 +173,6 @@ export async function deleteDocument(id: string) {
 	if (!deleted && (await getDocument(id)))
 		throw new CodedError('DOCUMENT_NOT_DELETABLE', 'Payment reminders cannot be deleted');
 	return deleted ?? null;
-}
-
-export async function countReminders(statementId: string) {
-	const [result] = await db
-		.select({ value: count() })
-		.from(documents)
-		.where(and(eq(documents.statementId, statementId), eq(documents.type, 'reminder'), sinceDelivery(statementId)));
-	return result.value;
 }
 
 /**

@@ -13,7 +13,6 @@ import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { CodedError, type ErrorParams } from './coded-error';
 import {
-	countReminders,
 	createDocument,
 	DELIVERY_ERRORS,
 	getDocument,
@@ -71,7 +70,7 @@ function assertClaimable(statement: Statement) {
 
 async function nextLevel(statement: Statement) {
 	assertClaimable(statement);
-	const level = (await countReminders(statement.id)) + 1;
+	const level = statement.remindersCounted + 1; // since the last sending (#534), as the dialog says (Code-Review 534-2 C-3)
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
 	// the previous one first goes to the post: its Zahlungsfrist runs from that day (#449, decided in #404, point 2)
 	if (statement.reminderToSend)

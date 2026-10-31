@@ -216,7 +216,7 @@
 		</Alert>
 	{/if}
 	{#if statement.newPdfToSend}
-		<NewPdfToSend documentId={statement.newPdfToSend} />
+		<NewPdfToSend documentId={statement.newPdfToSend} refund={statement.refund} />
 	{/if}
 	{#if form?.actionError}
 		<Alert tone="critical" title={m.ui_action_failed()}>

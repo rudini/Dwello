@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import FormDialog from './FormDialog.svelte';
 
 	// #968: the new PDF after a change of a sent statement waits under «Dokumente»; marked sent here or there, after a
 	// confirmation (Persona Dr. Weber 534 P-2), it keeps the statement's date and Zahlungsfrist
-	let { documentId }: { documentId: string } = $props();
+	// it closes after any answer: a refusal shows on the page (Code-Review 534-2 C-15)
+	let { documentId, refund = false }: { documentId: string; refund?: boolean } = $props();
 	let confirming = $state(false);
 </script>
 
@@ -17,13 +18,14 @@
 		>
 	</div>
 </Alert>
-<ActionDialog
+<FormDialog
 	bind:open={confirming}
 	action="?/newPdfSent"
 	title={m.statements_new_pdf_mark_sent()}
 	confirmLabel={m.statements_new_pdf_mark_sent()}
 	confirmTestid="statement-new-pdf-sent-confirm"
+	success={m.statements_new_pdf_marked_sent()}
 	fields={{ documentId }}
 >
-	<p>{m.statements_new_pdf_mark_sent_text()}</p>
-</ActionDialog>
+	<p>{refund ? m.statements_new_pdf_mark_sent_text_refund() : m.statements_new_pdf_mark_sent_text()}</p>
+</FormDialog>

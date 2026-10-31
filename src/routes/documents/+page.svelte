@@ -67,11 +67,7 @@
 		</ul>
 	</nav>
 
-	{#if form?.actionError}
-		<Alert tone="critical" title={m.buildings_not_saved()}>
-			<p data-testid="form-error">{form.actionError}</p>
-		</Alert>
-	{/if}
+	<!-- a refusal of «Als versendet markieren» shows in its open confirmation (Code-Review 534-2 C-15) -->
 
 	<MarkedSentNotice sent={form?.sent} />
 
@@ -79,7 +75,7 @@
 		<ul class="divide-y divide-line rounded-panel border border-line bg-surface px-6">
 			{#each data.documents as document (document.id)}
 				<DocumentItem {document} showTenant>
-					<MarkSentButton {document} />
+					<MarkSentButton {document} error={form?.actionError} />
 				</DocumentItem>
 			{/each}
 		</ul>

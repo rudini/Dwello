@@ -384,6 +384,10 @@ describe('Mahnstufe nach dem erneuten Zustellen', () => {
 
 		const after = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { remindersCounted: number; nextReminderFrom: string | null };
 		expect([before.remindersCounted, after.remindersCounted, after.nextReminderFrom]).toEqual([1, 0, null]);
+		// Code-Review 534-2 C-3: the reminder the backend then makes is the first again, as the dialog says
+		await db.update(utilityStatements).set({ paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		const next = (await (await api('POST', `/api/v1/statements/${id}/reminders`)).json()) as { document: { reminderLevel: number } };
+		expect(next.document.reminderLevel).toBe(1);
 	});
 });
 

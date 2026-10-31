@@ -52,7 +52,7 @@ describe('Dokumente', () => {
 		const { result } = runAction(actions.markSent, '', 200, { id: 'd1' }, sent);
 
 		expect(await result).toEqual({
-			sent: { id: 'd1', title: '2. Mahnung', tenantName: 'Marco Bernasconi' }
+			sent: { id: 'd1', title: '2. Mahnung', tenantName: 'Marco Bernasconi', newPdf: false }
 		});
 	});
 
