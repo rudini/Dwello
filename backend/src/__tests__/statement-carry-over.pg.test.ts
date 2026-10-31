@@ -433,6 +433,18 @@ describe('Bemerkung', () => {
 		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, sent.id));
 		expect(row.pdfBlob).toBeNull();
 	});
+
+	// #969 (A): sent before #449, without a Dokument of the sending: its stored PDF is the only copy and stays
+	it('legt das PDF einer Abrechnung ohne Dokument des Versands vor der Änderung als Dokument ab', async () => {
+		const sent = await sentWith(await rentalOf(), 2024, '100.00');
+		const madeAt = new Date('2025-02-03T09:00:00Z');
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: madeAt }).where(eq(utilityStatements.id, sent.id));
+
+		await sendJson('PUT', `/api/v1/statements/${sent.id}`, { notes: 'Ratenzahlung vereinbart' });
+
+		const kept = await db.select().from(documents).where(eq(documents.statementId, sent.id));
+		expect(kept).toMatchObject([{ type: 'pdf_before_change', content: 'JVBERi0=', createdAt: madeAt, status: null }]);
+	});
 });
 
 // #506 C: a draft created before the Übertrag it would count now is not current (Fachreview 448-3 V-23)

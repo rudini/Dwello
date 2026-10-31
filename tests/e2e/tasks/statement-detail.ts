@@ -43,7 +43,8 @@ import {
 	statementApartmentLink,
 	statementEditButton,
 	statementTenantLink,
-	letterInsteadLink
+	letterInsteadLink,
+	pdfBeforeChangeLink
 } from '../targets/statement-detail';
 
 /** The API path keeps the statement as the backend returns it for `heatingCostsOfTenant` */
@@ -86,6 +87,7 @@ export const generateStatementPdf: Activity = (actor) =>
 	actor.attemptsTo(Click.on(generatePdfButton), Wait.until(successToast));
 export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 export const downloadSentPdf = DownloadFrom(sentPdfLink);
+export const downloadPdfBeforeChange = DownloadFrom(pdfBeforeChangeLink);
 /** Follows the PDF link in the tab, as a browser does when the answer is no PDF */
 export const requestStatementPdf = Click.on(downloadPdfLink);
 export const leavePdfRefusal = Click.on(pdfRefusalBackLink);

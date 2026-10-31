@@ -54,6 +54,7 @@ import {
 	oldAddressWarning,
 	confirmSendButton,
 	letterInsteadLink,
+	pdfBeforeChangeLink,
 	sendStatementButton
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
@@ -165,3 +166,6 @@ export const pdfChangedAdvice = question('the hint on the new PDF', async (actor
 	return actor.answer(Text.of(pdfChangedHint));
 });
 export const sentPdfHref = Attribute.named('href').of(sentPdfLink);
+
+// #969: the PDF before the change, kept in the Verlauf
+export const pdfBeforeChangeOffered = Visibility.of(pdfBeforeChangeLink);
