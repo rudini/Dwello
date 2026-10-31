@@ -2008,7 +2008,6 @@ describe('Abrechnungsdetail', () => {
 		expect(document.querySelector('form[action="?/newPdfSent"]')).not.toBeNull();
 	});
 
-	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
 	// #969 (Code-Review 969-1 C-2): nach «Erneut per Brief zustellen» hat sie ein Dokument des Versands; die Kopie bleibt
 	it('bietet das PDF vor der Änderung auch nach dem erneuten Zustellen an', () => {
 		show(StatementPage, {
@@ -2038,6 +2037,7 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-pdf-changed')!.textContent).toContain('Das PDF vor der Änderung finden Sie im Verlauf.');
 	});
 
+	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
 	it('rät nach einer Änderung, das neue PDF zu senden, und nennt das versendete im Verlauf nur, wenn es eines gibt', () => {
 		const changed = (pdfChange: string, delivery: object | null) =>
 			show(StatementPage, {
