@@ -804,6 +804,9 @@ function recordPayment(existing: StatementWithDetails, waived: boolean, data?: {
 	const balance = Number(existing.balance);
 	const before = Number(existing.paidAmount ?? 0);
 	const rest = roundToRappen(balance - before);
+	// francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1); a refund with its minus
+	if (data?.paidAmount !== undefined && !/^-?\d+(\.\d{1,2})?$/.test(data.paidAmount.trim()))
+		throw new CodedError('STATEMENT_PAID_AMOUNT_INVALID', 'Invalid amount paid', { amount: data.paidAmount });
 	const amount = data?.paidAmount === undefined ? rest : Number(data.paidAmount);
 	if (!(amount * Math.sign(balance) > 0)) throw new CodedError('STATEMENT_PAID_AMOUNT_ZERO', 'Paid amount not above 0.00');
 	if (Math.abs(amount) > Math.abs(rest)) throw new CodedError('STATEMENT_PAID_AMOUNT_TOO_HIGH', 'Paid amount above the open amount', { rest: Math.abs(rest).toFixed(2) });
@@ -832,7 +835,8 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	// the last recorded payment, a part payment too; the parts before stay (#959); a statement paid before #959 has no list
 	const last = existing.payments.at(-1);
-	if (existing.status !== 'paid' && !last) throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
+	if (existing.status !== 'paid' && !(last && ['sent', 'overdue'].includes(existing.status)))
+		throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
 	const kept = existing.payments.slice(0, -1);
 	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount };
 	const paidAmount = kept.length ? roundToRappen(kept.reduce((sum, p) => sum + Number(p.amount), 0)).toFixed(2) : null;
@@ -849,7 +853,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
-	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: existing.paidDate }); // #357
+	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: reset.paidDate }); // #357
 	return updated;
 }
 

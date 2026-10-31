@@ -235,6 +235,12 @@ describe('Teilzahlung', () => {
 		await expectRejection(await pay('-5.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
 	});
 
+	// code review 959a-1 C-1: francs and Rappen, as «Bereits bezahlt»; a refund with its minus
+	it('nimmt nur Franken mit höchstens zwei Dezimalstellen an', async () => {
+		for (const amount of ['432.899', 'abc', "1'000.00"])
+			await expectRejection(await pay(amount), 400, 'Invalid amount paid', 'STATEMENT_PAID_AMOUNT_INVALID', { amount });
+	});
+
 	it('zählt die Zahlungen zusammen und ist bezahlt, sobald sie den Saldo erreichen', async () => {
 		const response = await pay('432.90');
 
@@ -247,5 +253,36 @@ describe('Teilzahlung', () => {
 
 		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: '10.00', payments: [{ amount: '10.00' }] });
 		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidAmount: null, payments: [] });
+	});
+
+	// code review 959a-1 C-2: a replaced statement stays replaced, also with a part payment on it
+	it('setzt bei einer ersetzten Abrechnung keine Teilzahlung zurück', async () => {
+		await pay('10.00');
+		await sendJson('POST', `/api/v1/statements/${id}/replace`, {});
+
+		await expectRejection(await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' }), 400, 'Statement is not paid', 'STATEMENT_NOT_PAID');
+	});
+});
+
+// Fachreview 959-1, Regel 5: auf eine Rückerstattung gilt dieselbe Regel, die Beträge negativ (code review 959a-1 C-5)
+describe('Teilrückerstattung', () => {
+	let id: string;
+	const pay = (paidAmount?: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount });
+
+	beforeAll(async () => {
+		id = await sentStatement(2026);
+		// a period that has ended, so today is a payment day
+		await db.update(utilityStatements).set({ balance: '-120.00', periodEnd: '2026-06-30' }).where(eq(utilityStatements.id, id));
+	});
+
+	afterAll(async () => {
+		await db.delete(documents).where(eq(documents.statementId, id));
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+	});
+
+	it('lässt die Rückerstattung mit dem Rest offen und zahlt ohne Betrag den Rest', async () => {
+		await expectRejection(await pay('50.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
+		expect(await (await pay('-50.00')).json()).toMatchObject({ status: 'sent', paidAmount: '-50.00' });
+		expect(await (await pay()).json()).toMatchObject({ status: 'paid', paidAmount: '-120.00', payments: [{ amount: '-50.00' }, { amount: '-70.00' }] });
 	});
 });
