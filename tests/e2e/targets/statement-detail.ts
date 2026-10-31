@@ -48,7 +48,7 @@ export const pdfBeforeChangeLink = target('PDF vor der Änderung herunterladen',
 );
 export const sentPdfLink = target('Versendetes PDF herunterladen', (page) => page.getByTestId('statement-history-sent-pdf'));
 export const pdfChangedHint = target('Hinweis neues PDF', (page) => page.getByTestId('statement-pdf-changed'));
-export const partialPaymentHint = target('Hinweis Teilzahlung', (page) => page.getByTestId('paid-partial-hint'));
+export const partialPaymentHint = target('Hilfe zum bezahlten Betrag', (page) => page.getByTestId('paid-amount-input-help'));
 export const deleteStatementButton = target('Abrechnung löschen', (page) => page.getByTestId('statement-delete-button'));
 export const confirmDeleteStatementButton = target('Löschen bestätigen', (page) =>
 	page.getByTestId('statement-delete-confirm')

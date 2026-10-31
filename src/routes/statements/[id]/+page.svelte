@@ -8,7 +8,10 @@
 	import {
 		balanceLabel,
 		earlyPaidDate,
+		isPartPayment,
+		openAmount,
 		paidDateError,
+		signedPaid,
 		statementIcons,
 		statusLabels,
 		statusTones
@@ -93,10 +96,16 @@
 	let earlyFor = $state('');
 	const early = $derived(earlyPaidDate(paidDate, statement.statementDate));
 	const asking = $derived(!!early && earlyFor === paidDate);
+	let paidAmount = $state(''); // #959: prefilled with the open amount, less is a part payment
 	const confirm = $derived(
 		asking
 			? { label: m.statements_save_anyway(), testid: 'statement-mark-paid-early-confirm' }
-			: { label: m.statements_mark_paid(), testid: 'statement-mark-paid-confirm' }
+			: {
+					label: isPartPayment(statement, paidAmount)
+						? m.statements_record_part_payment()
+						: m.statements_mark_paid(),
+					testid: 'statement-mark-paid-confirm'
+				}
 	);
 
 	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
@@ -142,9 +151,6 @@
 	const period = $derived(
 		`${formatDate(statement.periodStart)} – ${formatDate(statement.periodEnd)}`
 	);
-	const balance = $derived(
-		`${balanceLabel(statement.balance)} ${formatCurrency(Math.abs(statement.balance))}`
-	);
 	// the backend's PdfChange, as the edit page passes it on; anything else shows nothing
 	const pdfChanged: Record<string, (() => string) | undefined> = {
 		notes: m.statements_sent_pdf_changed_notes,
@@ -183,7 +189,11 @@
 				waiting={!!statement.reminderWaitsUntil}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => (
-					(paidDate = localToday()), (paidError = ''), (earlyFor = ''), (showMarkPaid = true)
+					(paidDate = localToday()),
+					(paidAmount = openAmount(statement).toFixed(2)),
+					(paidError = ''),
+					(earlyFor = ''),
+					(showMarkPaid = true)
 				)}
 				onsend={() => ((sendByLetter = false), (showSend = true))}
 				onresetpayment={() => (showResetPayment = true)}
@@ -284,14 +294,21 @@
 	title={m.statements_mark_paid_title()}
 	confirmLabel={confirm.label}
 	confirmTestid={confirm.testid}
-	fields={{ paidDate, periodEnd: statement.periodEnd }}
+	fields={{
+		paidDate,
+		paidAmount: signedPaid(statement.balance, paidAmount),
+		periodEnd: statement.periodEnd
+	}}
 	check={checkPaidDate}
 	success={m.statements_marked_paid()}
 >
 	<PaidDateFields
 		{statement}
-		summary="{statement.tenantName}: {balance}"
+		summary="{statement.tenantName}: {balanceLabel(statement.balance)} {formatCurrency(
+			openAmount(statement)
+		)}"
 		bind:paidDate
+		bind:paidAmount
 		error={paidError}
 		early={asking ? early : null}
 	/>

@@ -1,28 +1,34 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { paidHelp } from '$lib/statement';
+	import { isPartPayment, paidHelp } from '$lib/statement';
 	import Alert from '$lib/ui/Alert.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
+	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 
 	// The fields of «Als bezahlt markieren», on the list and the detail page: the day, the question before a day before
-	// the Abrechnungsdatum is saved (#448), and what is paid
+	// the Abrechnungsdatum is saved (#448), what came in (#959), and what is paid
 	let {
 		statement,
 		summary,
 		paidDate = $bindable(),
+		paidAmount = $bindable(),
 		error,
 		early
 	}: {
 		statement: StatementWithDetails;
 		summary: string;
 		paidDate: string;
+		paidAmount: string; // without the sign of the Saldo; less than the open amount is a part payment (#959)
 		error: string;
 		early: string | null; // asked once the landlord confirmed that day
 	} = $props();
 </script>
 
-{#if statement.claimed}<p>{m.statements_no_reminder_after()}</p>{/if}
+<!-- after a part payment the rest is reminded on (Fachreview 959-1 V-1) -->
+{#if statement.claimed && !isPartPayment(statement, paidAmount)}<p>
+		{m.statements_no_reminder_after()}
+	</p>{/if}
 <DateInput
 	id="paidDate"
 	label={m.statements_paid_on()}
@@ -38,7 +44,11 @@
 	{/if}
 </div>
 <p class="rounded-panel bg-sunken p-4 font-semibold text-ink">{summary}</p>
-<!-- a part paid is no payment of the statement yet (#523; Art. 69 OR, Fachreview 448-4 point 5) -->
-<p class="text-ink" data-testid="paid-partial-hint">
-	{statement.balance < 0 ? m.statements_paid_partial_refund() : m.statements_paid_partial()}
-</p>
+<!-- what came in for this statement, also a part (#523, #959; Art. 69, 86 OR, Fachreview 959-1) -->
+<MoneyInput
+	id="paidAmount"
+	label={statement.balance < 0 ? m.statements_paid_amount_refund() : m.statements_paid_amount()}
+	help={statement.balance < 0 ? m.statements_paid_partial_refund() : m.statements_paid_partial()}
+	bind:value={paidAmount}
+	testid="paid-amount-input"
+/>

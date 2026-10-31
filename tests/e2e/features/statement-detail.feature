@@ -100,22 +100,32 @@ Funktionalität: Abrechnungsdetail
     Dann hat die Abrechnung den Status "Bezahlt"
 
   # #959 (A): ein kleinerer bezahlter Betrag lässt die Abrechnung offen, mit dem Rest fällig (Art. 69, 85 OR)
-  @wip
   Szenario: Eine Teilzahlung lässt die Abrechnung mit dem Rest offen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
     Dann hat die Abrechnung den Status "Versendet"
-    Und nennt die Abrechnung den offenen Rest
+    Und nennt das Panel Zahlung "Bezahlt: CHF 10.00, offen: CHF 432.90"
 
-  # #523 (Option C, A): eine Teilzahlung ist noch keine Zahlung der Abrechnung (Art. 69 OR); Rückerstattung im DOM-Test
+  # #959: nach einer Teilzahlung ist nur der Rest überfällig (Art. 85 Abs. 1 OR, Fachreview 959-1 V-4)
+  Szenario: Nach einer Teilzahlung zählt die Übersicht nur den Rest als überfällig
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
+    Dann hat die Abrechnung den Status "Überfällig"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht "Überfällige Beträge CHF 432.90"
+
+  # #523, #959 (A): der Betrag am Feld ist, was für diese Abrechnung eingegangen ist; ein Teil lässt sie offen (Art. 69, 86 OR); Rückerstattung im DOM-Test
   Szenario: Der Zahlungseingang sagt, was bei einer Teilzahlung gilt
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will
-    Dann sagt die Frage «Als bezahlt markieren» "Hat der Mieter erst einen Teil überwiesen, markieren Sie die Abrechnung noch nicht als bezahlt."
+    Dann sagt die Frage «Als bezahlt markieren» "Was an diesem Tag für diese Abrechnung eingegangen ist. Hat der Mieter erst einen Teil überwiesen, geben Sie diesen Betrag ein. Die Abrechnung bleibt dann mit dem Rest offen."
 
   # Festgehalten wird der eingegebene Tag, frühestens das Abrechnungsdatum (beim Versenden der Tag des Versands, #138)
   Szenario: Zahlungseingang mit Datum festhalten

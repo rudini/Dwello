@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { isDay, localToday } from '$lib/contract-status';
-import { formatDate } from '$lib/utils/format';
+import { formatCurrency, formatDate } from '$lib/utils/format';
 import { apiCall } from './api';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
@@ -46,6 +46,33 @@ export function balanceLabel(balance: number): string {
 	if (balance < 0) return m.statements_balance_refund();
 	return m.statements_balance_settled();
 }
+
+type Owed = { status: StatementStatus; balance: number; paidAmount?: number | null };
+
+/** #959: what is still owed after the part payments recorded, in francs, without the sign of the Saldo */
+export const openAmount = ({ balance, paidAmount }: Owed) =>
+	Math.abs(Math.round((balance - (paidAmount ?? 0)) * 100) / 100);
+
+/** «Bezahlt: CHF x, offen: CHF y» on a sent or overdue statement a part was paid on (#959, Fachreview 959-1 Regel 1) */
+export function partPaid(statement: Owed): string | null {
+	if (!statement.paidAmount || (statement.status !== 'sent' && statement.status !== 'overdue'))
+		return null;
+	const amounts = {
+		paid: formatCurrency(Math.abs(statement.paidAmount)),
+		rest: formatCurrency(openAmount(statement))
+	};
+	return statement.balance < 0
+		? m.statements_part_refunded(amounts)
+		: m.statements_part_paid(amounts);
+}
+
+/** The amount of «Als bezahlt markieren» as the backend takes it: with the sign of the Saldo (#959) */
+export const signedPaid = (balance: number, amount: string) =>
+	(balance < 0 ? `-${amount.trim()}` : amount.trim());
+
+/** Less than the open amount: a part payment, the statement stays open (#959) */
+export const isPartPayment = (statement: Owed, amount: string) =>
+	Number(amount) < openAmount(statement);
 
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>

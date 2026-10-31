@@ -69,7 +69,8 @@ export const actions: Actions = {
 			fetch,
 			params.id,
 			sent === null ? undefined : String(sent),
-			String(form.get('periodEnd') ?? '')
+			String(form.get('periodEnd') ?? ''),
+			form.get('paidAmount')?.toString().trim() || undefined
 		);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},

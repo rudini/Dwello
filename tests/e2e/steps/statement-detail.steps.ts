@@ -220,8 +220,8 @@ When('der Liegenschaftsverwalter eine Zahlung von {string} Franken festhält', a
 	await verwalter.attemptsTo(recordPayment(amount));
 });
 
-Then('nennt die Abrechnung den offenen Rest', async ({ verwalter }) => {
-	await verwalter.sees(openRestText).toMatch(/CHF/);
+Then('nennt das Panel Zahlung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(openRestText).toBe(text);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will', async ({ verwalter }) => {

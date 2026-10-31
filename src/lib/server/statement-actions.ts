@@ -22,14 +22,20 @@ export async function markStatementPaid(
 	fetch: Fetch,
 	id: string,
 	paidDate = localToday(),
-	periodEnd = ''
+	periodEnd = '',
+	paidAmount?: string // with the sign of the Saldo; less than the open amount is a part payment (#959); none: all of it
 ): Promise<Refusal | null> {
 	const invalid = paidDateError(paidDate, periodEnd);
 	if (invalid) return { status: 400, message: invalid };
+	if (paidAmount !== undefined && !FRANCS.test(paidAmount.replace(/^-/, '')))
+		return {
+			status: 400,
+			message: m.backend_statement_paid_amount_invalid({ amount: paidAmount.replace(/^-/, '') })
+		};
 	const response = await fetch(`${API}/${id}/status`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ status: 'paid', paidDate })
+		body: JSON.stringify({ status: 'paid', paidDate, paidAmount })
 	});
 	if (response.ok) return null;
 	return { status: response.status, message: await refusalOf(response, m.statements_mark_paid_failed()) };

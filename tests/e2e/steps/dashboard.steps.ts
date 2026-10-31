@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	deadlineText,
 	deadlines,
+	overdueAmountText,
 	markedNavItems,
 	occupancyHelp,
 	occupancyText,
@@ -309,3 +310,7 @@ Then(
 		await verwalter.sees(pageAddress).toMatch(new RegExp(`/statements/${seed.idOf(`Abrechnung ${tenant} ${lastYear}`)}$`));
 	}
 );
+
+Then('nennt die Übersicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(overdueAmountText).toBe(text);
+});

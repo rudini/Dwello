@@ -11,7 +11,8 @@ import {
 	outdatedDraftsLink,
 	overviewTaskTitles,
 	overviewTaskFor,
-	overviewTasksOf
+	overviewTasksOf,
+	statTile
 } from '../targets/dashboard';
 import { pageAddress } from './navigation';
 
@@ -54,3 +55,6 @@ export const outdatedDraftsAnd = (title: string) =>
 			.map((shown) => (/nicht aktuell/.test(shown) ? 'nicht aktuell' : shown))
 			.filter((shown) => shown === 'nicht aktuell' || shown === title)
 	);
+
+// #959: what the overview counts as overdue, with its label
+export const overdueAmountText = Text.of(statTile('stat-overdue-amount'));

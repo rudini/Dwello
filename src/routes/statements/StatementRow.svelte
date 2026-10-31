@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel, statementIcons, statusLabels, statusTones } from '$lib/statement';
+	import {
+		balanceLabel,
+		partPaid,
+		statementIcons,
+		statusLabels,
+		statusTones
+	} from '$lib/statement';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
@@ -52,6 +58,11 @@
 	<p class="flex gap-2 tabular-nums xl:w-40 xl:shrink-0 xl:flex-col xl:gap-0 xl:text-right">
 		<span class="text-ink-muted">{balanceLabel(statement.balance)}</span>
 		<span class="font-semibold text-ink">{formatCurrency(Math.abs(statement.balance))}</span>
+		{#if partPaid(statement)}
+			<!-- #959: after a part payment, what is paid and what is still open -->
+			<span class="text-ink-muted" data-testid="statement-row-part-paid">{partPaid(statement)}</span
+			>
+		{/if}
 	</p>
 	<div class="flex flex-col items-start gap-1 xl:w-40 xl:shrink-0">
 		<Badge

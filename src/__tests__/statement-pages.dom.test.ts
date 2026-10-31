@@ -245,13 +245,20 @@ describe('Abrechnungsliste', () => {
 			{
 				method: 'POST',
 				path: '/statements/s1/mark-paid',
-				body: { paidDate: today, periodEnd: '2024-12-31' }
+				body: { paidDate: today, periodEnd: '2024-12-31', paidAmount: '363.00' }
 			}
 		]);
 		expect(invalidateAll).toHaveBeenCalled();
 	});
 
 	// #448 (4), Code-Review 448-1 C-6: ein Tag vor dem Abrechnungsdatum wird nach der Frage gespeichert
+	// #959 (Fachreview 959-1, Regel 1): die Zeile nennt nach einer Teilzahlung den bezahlten Teil und den Rest
+	it('nennt in der Liste nach einer Teilzahlung den bezahlten Teil und den offenen Betrag', () => {
+		list([statement({ status: 'sent', balance: 442.9, paidAmount: 10 })]);
+
+		expect(byTestId('statement-row-part-paid')!.textContent!.trim().replace(/\s/g, ' ')).toBe('Bezahlt: CHF 10.00, offen: CHF 432.90');
+	});
+
 	it('speichert aus der Liste einen Tag vor dem Abrechnungsdatum erst nach der Bestätigung', async () => {
 		const calls = fakeBff();
 		list([statement({ status: 'sent', statementDate: '2025-01-15' })]);
@@ -268,7 +275,7 @@ describe('Abrechnungsliste', () => {
 		await settle();
 
 		expect(calls).toEqual([
-			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-10', periodEnd: '2024-12-31' } }
+			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-10', periodEnd: '2024-12-31', paidAmount: '363.00' } }
 		]);
 	});
 
@@ -420,7 +427,7 @@ describe('Abrechnungsliste', () => {
 			{
 				method: 'POST',
 				path: '/statements/s1/mark-paid',
-				body: { paidDate: '2025-01-20', periodEnd: '2024-12-31' }
+				body: { paidDate: '2025-01-20', periodEnd: '2024-12-31', paidAmount: '363.00' }
 			}
 		]);
 	});
@@ -432,7 +439,7 @@ describe('Abrechnungsliste', () => {
 		click('statement-row-mark-paid');
 		byTestId('paid-date-input-calendar')!.focus();
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
+		expect(document.activeElement).toBe(byTestId('paid-amount-input')); // the next field after the date (#959)
 
 		byTestId('paid-date-input')!.dispatchEvent(
 			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
@@ -833,6 +840,17 @@ describe('Abrechnungsdetail', () => {
 		const formData = new FormData();
 		actions.get('?/replace')!({ formData });
 		expect(formData.get('paidAmount')).toBe('0.00');
+	});
+
+	// #959 (Fachreview 959-1, Regel 3): vorausgefüllt mit den festgehaltenen Teilzahlungen, auch bei einer Rückerstattung
+	it.each([
+		[442.9, 10, '10.00'],
+		[-120, -50, '50.00']
+	])('füllt beim Berichtigen das bereits Bezahlte mit den Teilzahlungen vor (Saldo %d)', (balance, paidAmount, shown) => {
+		detail({ status: 'sent', balance, paidAmount });
+		click('statement-correct-button');
+
+		expect(byTestId<HTMLInputElement>('statement-correct-paid-amount')!.value).toBe(shown);
 	});
 
 	// Fachreview 448-1 V-1: bei einer Rückerstattung hat der Vermieter schon überwiesen
@@ -1718,19 +1736,62 @@ describe('Abrechnungsdetail', () => {
 		]);
 	});
 
-	// #523 (Option C, A; Fachreview 448-4 Punkt 5): eine Teilzahlung ist noch keine Zahlung der Abrechnung
-	it('sagt im Dialog, dass eine Teilzahlung noch nicht als bezahlt markiert wird, auch bei einer Rückerstattung', () => {
+	// #523, #959 (A; Fachreview 959-1 V-2): der Betrag ist, was für diese Abrechnung eingegangen ist; ein Teil lässt sie offen
+	it('sagt am Feld, was als Betrag gilt und dass ein Teil die Abrechnung offen lässt, auch bei einer Rückerstattung', () => {
 		detail({ status: 'sent', balance: 120 });
 		click('statement-mark-paid-button');
-		const due = byTestId('paid-partial-hint')!.textContent!.trim();
+		const due = byTestId('paid-amount-input-help')!.textContent!.trim();
 		document.body.innerHTML = '';
 		detail({ status: 'sent', balance: -80 });
 		click('statement-mark-paid-button');
 
-		expect([due, byTestId('paid-partial-hint')!.textContent!.trim()]).toEqual([
-			'Hat der Mieter erst einen Teil überwiesen, markieren Sie die Abrechnung noch nicht als bezahlt.',
-			'Haben Sie erst einen Teil zurückerstattet, markieren Sie die Abrechnung noch nicht als bezahlt.'
+		expect([due, byTestId('paid-amount-input-help')!.textContent!.trim()]).toEqual([
+			'Was an diesem Tag für diese Abrechnung eingegangen ist. Hat der Mieter erst einen Teil überwiesen, geben Sie diesen Betrag ein. Die Abrechnung bleibt dann mit dem Rest offen.',
+			'Was Sie an diesem Tag zurückerstattet haben. Haben Sie erst einen Teil zurückerstattet, geben Sie diesen Betrag ein. Die Abrechnung bleibt dann mit dem Rest offen.'
 		]);
+	});
+
+	// #959 (Fachreview 959-1, Regeln 1 und 4): vorausgefüllt mit dem offenen Betrag; eine Rückerstattung negativ gesendet
+	it('sendet den eingegebenen Betrag mit, vorausgefüllt mit dem offenen Betrag', () => {
+		detail({ status: 'sent', balance: 120, paidAmount: 20 });
+		click('statement-mark-paid-button');
+		const prefilled = byTestId<HTMLInputElement>('paid-amount-input')!.value;
+		const open = new FormData();
+		actions.get('?/markPaid')!({ formData: open });
+		fireEvent(byTestId<HTMLInputElement>('paid-amount-input')!, 'input', '30.00');
+		const part = new FormData();
+		actions.get('?/markPaid')!({ formData: part });
+
+		expect([prefilled, open.get('paidAmount'), part.get('paidAmount')]).toEqual(['100.00', '100.00', '30.00']);
+	});
+
+	it('sendet eine Rückerstattung als negativen Betrag', () => {
+		detail({ status: 'sent', balance: -80 });
+		click('statement-mark-paid-button');
+		const formData = new FormData();
+		actions.get('?/markPaid')!({ formData });
+
+		expect(formData.get('paidAmount')).toBe('-80.00');
+	});
+
+	// Fachreview 959-1 V-1, Regel 4: nach einem Teil bleibt die Mahnung möglich, und der Knopf sagt, was geschieht
+	it('nennt bei einem kleineren Betrag die Teilzahlung statt des Endes der Mahnungen', () => {
+		detail({ status: 'sent', balance: 120, claimed: true });
+		click('statement-mark-paid-button');
+		const full = [byTestId('statement-mark-paid-confirm')!.textContent!.trim(), document.body.textContent!.includes('keine Mahnung mehr')];
+		fireEvent(byTestId<HTMLInputElement>('paid-amount-input')!, 'input', '30.00');
+
+		expect([full, [byTestId('statement-mark-paid-confirm')!.textContent!.trim(), document.body.textContent!.includes('keine Mahnung mehr')]]).toEqual([
+			['Als bezahlt markieren', true],
+			['Teilzahlung festhalten', false]
+		]);
+	});
+
+	// Fachreview 959-1, Regel 1: nach einer Teilzahlung nennt das Panel «Zahlung» den bezahlten Teil und den Rest
+	it('nennt nach einer Teilzahlung den bezahlten Teil und den offenen Betrag', () => {
+		detail({ status: 'sent', balance: 442.9, paidAmount: 10 });
+
+		expect(byTestId('statement-open-rest')!.textContent!.trim().replace(/\s/g, ' ')).toBe('Bezahlt: CHF 10.00, offen: CHF 432.90');
 	});
 
 	// Das Datumsfeld liegt im Dialog, ausserhalb des Formulars: der gewählte Tag muss mitgesendet werden

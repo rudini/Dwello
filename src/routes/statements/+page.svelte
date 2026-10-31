@@ -4,7 +4,14 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
-	import { balanceLabel, earlyPaidDate, paidDateError } from '$lib/statement';
+	import {
+		balanceLabel,
+		earlyPaidDate,
+		isPartPayment,
+		openAmount,
+		paidDateError,
+		signedPaid
+	} from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -48,6 +55,7 @@
 	// Payment received on a day asked for (today proposed), after a confirmation; the endpoint stores it
 	let paying = $state<StatementWithDetails | null>(null);
 	let paidDate = $state(localToday());
+	let paidAmount = $state(''); // #959: prefilled with the open amount, less is a part payment
 	let saving = $state(false);
 	let payError = $state('');
 	let paidError = $state('');
@@ -57,6 +65,7 @@
 	function startPaying(chosen: StatementWithDetails) {
 		paying = chosen;
 		paidDate = localToday();
+		paidAmount = openAmount(chosen).toFixed(2);
 		paidError = '';
 		earlyFor = '';
 	}
@@ -64,7 +73,13 @@
 	const confirm = $derived(
 		asking
 			? { label: m.statements_save_anyway(), testid: 'statement-list-mark-paid-early-confirm' }
-			: { label: m.statements_mark_paid(), testid: 'statement-list-mark-paid-confirm' }
+			: {
+					label:
+						paying && isPartPayment(paying, paidAmount)
+							? m.statements_record_part_payment()
+							: m.statements_mark_paid(),
+					testid: 'statement-list-mark-paid-confirm'
+				}
 	);
 	async function markPaid() {
 		// a wrong date is said at the field, which gets the focus; nothing is sent
@@ -80,7 +95,11 @@
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
-				body: JSON.stringify({ paidDate, periodEnd: paying!.periodEnd })
+				body: JSON.stringify({
+					paidDate,
+					periodEnd: paying!.periodEnd,
+					paidAmount: signedPaid(paying!.balance, paidAmount)
+				})
 			});
 			if (!response.ok) {
 				// the date check says what to do; any other refusal gets the general sentence
@@ -199,8 +218,9 @@
 			statement={paying}
 			summary="{paying.statementNumber}, {paying.tenantName}: {balanceLabel(
 				paying.balance
-			)} {formatCurrency(Math.abs(paying.balance))}"
+			)} {formatCurrency(openAmount(paying))}"
 			bind:paidDate
+			bind:paidAmount
 			error={paidError}
 			early={asking ? early : null}
 		/>
