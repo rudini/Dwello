@@ -217,6 +217,25 @@ describe('Abrechnung ohne nicht vereinbarte Nebenkosten', () => {
 		expect(before).not.toContain('vereinbarten Nebenkosten');
 	});
 
+	// #511 (Persona Dr. Weber 461 P-2, Fachreview 511-1 V-1): the PDF names the Verwaltungspauschale as agreed when it
+	// bills one, with its legal basis; not without a fee
+	it('nennt im PDF die Verwaltungspauschale als vereinbart, wenn die Abrechnung eine verrechnet', async () => {
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH4431999123000889012');
+		const text = async (managementFee: string) => {
+			await db.update(utilityStatements).set({ managementFee }).where(eq(utilityStatements.id, statementId));
+			await generateStatementPdf(statementId, 'de');
+			return readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).flowing;
+		};
+		const [{ fee }] = await db.select({ fee: utilityStatements.managementFee }).from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		const [withFee, without] = [await text('12.90'), await text('0.00')];
+		await db.update(utilityStatements).set({ managementFee: fee }).where(eq(utilityStatements.id, statementId));
+		await (iban ? setConfig('iban', iban) : deleteConfig('iban'));
+
+		expect(withFee).toContain('Die Verwaltungspauschale ist im Mietvertrag vereinbart. Sie gilt den Aufwand für das Erstellen dieser Abrechnung ab (Art. 4 Abs. 3 VMWG).');
+		expect(without).not.toContain('Verwaltungspauschale ist im Mietvertrag');
+	});
+
 		// Code review C-1: a billed invoice stays billed, also in a category the contract does not agree
 	it('nennt die Abrechnung weiter, wenn eine abgerechnete Rechnung in eine nicht vereinbarte Kategorie wechselt', async () => {
 		const [caretaker] = await db

@@ -30,6 +30,10 @@ Funktionalität: Hilfe
   Szenario: Die Hilfe erklärt Kosten über mehrere Jahre
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
 
+  # #511 (Persona Dr. Weber 461, P-5): ohne Ortsgebrauch gilt das Ende einer dreimonatigen Mietdauer (Art. 266c OR)
+  Szenario: Die Hilfe nennt den Kündigungstermin ohne Ortsgebrauch
+    Dann erklärt die Hilfe den Begriff "Kündigungstermin" mit "ohne Ortsgebrauch das Ende einer dreimonatigen Mietdauer"
+
   # Begriffe zum Mietvertrag und zur KI-Kategorie (#109); Abrechnungsperiode wie im Glossar (#67); Fachreview (#69);
   # «bis 3 %» und der Saldo einer berichtigten Abrechnung wie im Glossar (#447, Entscheid in #402)
   Szenariogrundriss: Die Hilfe erklärt den Begriff "<Begriff>"

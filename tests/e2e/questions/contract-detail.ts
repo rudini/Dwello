@@ -1,6 +1,8 @@
 import { question } from '../screenplay/actor';
-import { Attribute, Checked, Count, ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	contractEndInput,
+	noticeReceivedInput,
 	advancePeriod,
 	nextSteps,
 	endDialogDeathHint,
@@ -70,3 +72,6 @@ export const agreedCostsOfContract = Text.of(contractAgreedCosts);
 export const advancePeriodOf = (amount: string) => Text.of(advancePeriod(amount));
 export const mistakeConfirmed = Checked.of(deleteMistakeConfirmation);
 export const dialogErrorCount = Count.of(dialogErrors);
+// #511: the help each field of «Mietvertrag beenden» gives, as its accessible description
+export const endDateHelp = Accessible.descriptionOf(contractEndInput);
+export const noticeReceivedHelp = Accessible.descriptionOf(noticeReceivedInput);

@@ -30,7 +30,9 @@ import {
 	flatRateUtilityCharge,
 	advancePeriodOf,
 	dialogErrorCount,
-	mistakeConfirmed
+	mistakeConfirmed,
+	endDateHelp,
+	noticeReceivedHelp
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -459,7 +461,7 @@ Then(
 
 // anchored on the field's help: an empty or broken dialog shows no hint either
 Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
-	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist.');
+	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist');
 	await verwalter.sees(endDialogText).toContain('Die Kündigung des Mieters muss schriftlich sein.');
 	await verwalter.sees(noticePeriodHintShown).toBe(false);
 });
@@ -529,4 +531,13 @@ Then('sagt der Hinweis zum abgelaufenen Mietvertrag {string}', async ({ verwalte
 
 When('der Liegenschaftsverwalter das Akonto {string} löscht', async ({ verwalter }, amount: string) => {
 	await verwalter.attemptsTo(deleteAdvance(amount));
+});
+
+// #511: what the fields of «Mietvertrag beenden» explain
+Then('erklärt der Dialog beim Vertragsende {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(endDateHelp).toContain(text);
+});
+
+Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(noticeReceivedHelp).toContain(text);
 });
