@@ -299,5 +299,5 @@
 - [x] daten-pruefer `docs/reviews/528-datenpruefung-1.md`
 - [x] fach-reviewer step 5 `docs/reviews/528-fachreview-2.md`
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-528.md`
-- [x] Closing review `docs/reviews/528close-review-1.md`
+- [x] Closing review `docs/reviews/528close-review-1.md`, `528close-review-2.md`
 - [x] PR: pushed after this archive
