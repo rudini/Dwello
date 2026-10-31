@@ -284,3 +284,20 @@
 - [x] No scenario: CI release tooling, nothing a user sees in the app changes
 - [x] Workflow notes: none for #935; collected review of this request `docs/reviews/workflow-rules-review-2026-10-31.md`
 - [x] PR `Fixes #935`: pushed after this archive
+
+## Session 31.10.2026: #528 Kategorie mit zwei Verteilschlüsseln
+
+- [x] @wip scenarios in `statement-detail.feature` (draft hint, link, «Neu berechnen» question, PDF) and `statement-generate.feature` (preview), seen red at the missing behaviour
+- [x] fach-reviewer step 1 (`docs/reviews/528-fachreview-1.md`)
+- [x] Backend: pure `splitKeysOf` (`split-keys.ts`); `getStatement` marks `otherKey` and returns `splitKeys` from the lines; lines of one Kategorie together (`calculation.service.ts`); `invoiceSplitKeys` in the completeness check and `changed-invoices` (pg and unit tests)
+- [x] PDF: the marked line names its invoices after the Kategorie (`statement-pdf.service.ts`, unit test)
+- [x] Preview, draft and «Neu berechnen» question: `SplitKeysHint.svelte` with a link to each invoice (DOM tests, texts in four languages)
+- [x] Screen states `statement-generate split-keys`, `statement-split-keys-detail` `default` and `recalculate-dialog` (`screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`)
+- [x] Spec change approved: #528 — the tank scenario (#770) names the invoice in its «Pro Einheit» line
+- [x] code-reviewer `docs/reviews/528-review-1.md`, `528-review-2.md`, `528-review-3.md`
+- [x] Persona Dr. Weber `docs/design/personas/weber-528.md`
+- [x] daten-pruefer `docs/reviews/528-datenpruefung-1.md`
+- [x] fach-reviewer step 5 `docs/reviews/528-fachreview-2.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-528.md`
+- [x] Closing review `docs/reviews/528close-review-1.md`
+- [x] PR: pushed after this archive
