@@ -255,6 +255,17 @@
 - [x] code-reviewer round 3 (`docs/reviews/545-review-3.md`)
 - [x] CI fix: Architecture fitness Ä4, the backend answers `reminderToPost` (`docs/reviews/545ci-review-1.md`)
 - [x] PR pushed after this archive
+
+## Session: #524 the sent PDF stays in the Verlauf (2026-10-31)
+
+- [x] @wip scenarios in `statement-detail.feature`; fach-reviewer step 1 (`docs/reviews/524-fachreview-1.md`): V-1 to V-7 and M-1 taken, V-8 not (Minor: a status branch on the edit page would need a backend field), M-2 is #966, missing terms #965 (marker in `MetadataCard.svelte`)
+- [x] pg tests `statement.routes.pg.test.ts`, contract `statement-updated.json` (seen red); `pdfChange` in the answer of `PUT /statements/:id` (`statement.service.ts`, `PdfChange` in `api/statement.ts`)
+- [x] hint after saving (`?pdf-change=`), «Versendetes PDF herunterladen» and «Neues PDF erstellt» in the Verlauf; DOM tests seen red; texts de/fr/it/en from the fach review
+- [x] screen state `statement-reminded-detail` `pdf-changed`; `statement-sent-detail` sent by letter in the screen seeds
+- [x] code-reviewer rounds 1 to 3 (`docs/reviews/524-review-1.md`, `-2.md`, `-3.md`)
+- [x] persona Dr. Weber (`docs/design/personas/weber-524.md`): P-1 and P-2 beyond the decision, #968 and #969
+- [x] Workflow note: the step «der Liegenschaftsverwalter die Abrechnung versendet» does not wait for the sending; a scenario that leaves the page right after it needs «hat die Abrechnung den Status "Versendet"»
+- [x] PR pushed after this archive
 ## Session: #934, P1 measured on a runner-like machine (2026-10-31)
 
 - [x] `tools/fitness/p1-benchmark.ts` (`bun run fitness:p1`): 1 building, 50 rental contracts, the wizard's form action «generate» through the BFF, then the PDFs as the run's ZIP; its own ports (3320/3321) and build (`/tmp/p1-app`)

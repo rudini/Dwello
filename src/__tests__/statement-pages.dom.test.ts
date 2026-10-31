@@ -1782,6 +1782,46 @@ describe('Abrechnungsdetail', () => {
 		expect(text().replace(/\s+/g, ' ')).toContain('Versendet per E-Mail an anna@example.ch 28.09.2026, 10:15');
 	});
 
+	// #524 (Fachreview 524-1 V-3, V-4): das versendete PDF zum Herunterladen, ein später erstelltes als neues nach dem Versand
+	it('bietet im Verlauf das versendete PDF an und nennt ein später erstelltes als neues PDF', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({ status: 'sent', statementDate: '2026-09-28', pdfGeneratedAt: '2026-10-05T09:00:00Z' }),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-09-28T08:15:00Z' }
+			},
+			form: null
+		} as never);
+
+		const history = text().replace(/\s+/g, ' ');
+		expect(byTestId<HTMLAnchorElement>('statement-history-sent-pdf')!.getAttribute('href')).toBe('/documents/doc-1/pdf');
+		expect(history.indexOf('Versendet per Brief')).toBeLessThan(history.indexOf('Neues PDF erstellt 05.10.2026'));
+	});
+
+	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
+	it('rät nach einer Änderung, das neue PDF zu senden, und nennt das versendete im Verlauf nur, wenn es eines gibt', () => {
+		const changed = (pdfChange: string, delivery: object | null) =>
+			show(StatementPage, {
+				data: { statement: statement({ status: 'sent' }), reminders: [], delivery, pdfChange },
+				form: null
+			} as never);
+
+		// code review 524-2 C-7: an address with another value shows no hint, also a name every object has
+		changed('toString', null);
+		const unknown = byTestId('statement-pdf-changed');
+		document.body.innerHTML = '';
+		changed('refund_by', { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-09-28T08:15:00Z' });
+		const withDocument = byTestId('statement-pdf-changed')!.textContent!.replace(/\s+/g, ' ').trim();
+		document.body.innerHTML = '';
+		changed('notes', null);
+
+		expect(unknown).toBeNull();
+		expect([withDocument, byTestId('statement-pdf-changed')!.textContent!.replace(/\s+/g, ' ').trim()]).toEqual([
+			'Im versendeten PDF steht das bisherige Datum der Rückerstattung. Damit der Mieter das neue kennt, erstellen Sie das neue PDF und senden Sie es ihm. Das versendete PDF finden Sie im Verlauf.',
+			'Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, erstellen Sie das neue PDF und senden Sie es ihm.'
+		]);
+	});
+
 	// #609 (persona Dr. Weber P-1 of #503): a draft's PDF is made anew on every request, so its Verlauf claims none;
 	// a sent statement keeps the PDF as sent and names it
 	it('nennt im Verlauf eines Entwurfs kein erstelltes PDF', () => {

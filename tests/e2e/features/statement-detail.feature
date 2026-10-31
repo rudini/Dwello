@@ -1150,6 +1150,42 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Ratenzahlung bis Ende März vereinbart"
 
+  # #524 (A, B; Fachreview 524-1): das versendete PDF bleibt unter «Dokumente», der Verlauf nennt es und ein neues PDF;
+  # nach dem Speichern sagt Dwello, was nur im neuen PDF steht
+  Szenario: Nach einer neuen Bemerkung bleibt das versendete PDF, und Dwello rät, das neue zu senden
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und hat die Abrechnung den Status "Versendet"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Dann rät die Abrechnung "Die neue Bemerkung steht nur im neuen PDF. Soll der Mieter sie lesen, erstellen Sie das neue PDF und senden Sie es ihm. Das versendete PDF finden Sie im Verlauf."
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Dann nennt der Verlauf nach dem Versand ein neues PDF
+    Wenn der Liegenschaftsverwalter das versendete PDF im Verlauf herunterlädt
+    Dann steht im PDF nicht "Ratenzahlung bis Ende März vereinbart"
+
+  # #524: eine neue Zahlungsfrist kennt der Mieter erst aus dem neuen PDF
+  Szenario: Nach einer neuen Zahlungsfrist rät Dwello, das neue PDF zu senden
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und hat die Abrechnung den Status "Versendet"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Zahlungsfrist auf "2026-12-31" verlängert mit der Bemerkung ""
+    Dann rät die Abrechnung "Im versendeten PDF steht die bisherige Zahlungsfrist. Damit der Mieter die neue kennt, erstellen Sie das neue PDF und senden Sie es ihm. Das versendete PDF finden Sie im Verlauf."
+
+  # #524: ohne Änderung nach dem Versand gilt das versendete PDF; der Verlauf bietet es an
+  Szenario: Ohne Änderung nach dem Versand rät Dwello kein neues PDF
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung versendet
+    Dann rät die Abrechnung kein neues PDF
+    Und bietet der Verlauf das versendete PDF an
+
   # #403 (6): der Mieter erfährt den Grund der Berichtigung aus der Bemerkung; ein eigenes Feld gibt es nicht
   Szenario: Bei einer berichtigten Abrechnung rät die Bemerkung, den Grund der Berichtigung zu nennen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

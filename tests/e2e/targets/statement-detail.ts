@@ -41,6 +41,9 @@ export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page
 export const sendStatementButton = target('Abrechnung versenden', (page) => page.getByTestId('statement-send-button'));
 export const markPaidButton = target('Als bezahlt markieren', (page) => page.getByTestId('statement-mark-paid-button'));
 export const confirmMarkPaidButton = target('Bezahlt bestätigen', (page) => page.getByTestId('statement-mark-paid-confirm'));
+// #524: the PDF as sent, in the Verlauf, and the hint after a change it does not show
+export const sentPdfLink = target('Versendetes PDF herunterladen', (page) => page.getByTestId('statement-history-sent-pdf'));
+export const pdfChangedHint = target('Hinweis neues PDF', (page) => page.getByTestId('statement-pdf-changed'));
 export const partialPaymentHint = target('Hinweis Teilzahlung', (page) => page.getByTestId('paid-partial-hint'));
 export const deleteStatementButton = target('Abrechnung löschen', (page) => page.getByTestId('statement-delete-button'));
 export const confirmDeleteStatementButton = target('Löschen bestätigen', (page) =>

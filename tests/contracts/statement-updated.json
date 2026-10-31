@@ -1,0 +1,106 @@
+{
+	"id": "s1",
+	"statementNumber": "NK-2024-1",
+	"tenantId": "t1",
+	"contractId": "c1",
+	"apartmentId": "a1",
+	"periodStart": "2024-01-01",
+	"periodEnd": "2024-12-31",
+	"statementDate": "2025-01-15",
+	"rentalDays": 366,
+	"rentalStart": "2024-01-01",
+	"rentalEnd": "2024-12-31",
+	"totalCosts": "1045.00",
+	"totalAdvancePayments": "0.00",
+	"managementFee": "45.00",
+	"managementFeePercent": "3.00",
+	"balance": "1045.00",
+	"priorPayments": "0.00",
+	"replacesId": null,
+	"replaces": null,
+	"replacedBy": null,
+	"priorPaidOn": [],
+	"carriedFrom": {
+		"id": "s0",
+		"statementNumber": "NK-2023-1",
+		"balance": "-3.00"
+	},
+	"editable": true,
+	"correctable": false,
+	"superseded": false,
+	"asksPayment": true,
+	"unpaid": false,
+	"claimed": true,
+	"noPayment": false,
+	"waived": false,
+	"carried": false,
+	"reminderWaitsUntil": null,
+	"reminderToPost": false,
+	"deadlinePassed": true,
+	"advanceChanged": false,
+	"offsetWith": [],
+	"final": false,
+	"status": "draft",
+	"oldAddress": false,
+	"openCarry": false,
+	"carryChanged": false,
+	"carrySettledOn": null,
+	"paymentDeadline": "2025-02-14",
+	"paidDate": null,
+	"paidAmount": "1045.00",
+	"pdfGeneratedAt": null,
+	"reminderSentDate": null,
+	"nextReminderFrom": "2026-10-27",
+	"reminderToSend": false,
+	"notes": "Hauswart neu",
+	"createdAt": "2025-01-15T08:00:00.000Z",
+	"tenant": {
+		"firstName": "Eva",
+		"lastName": "Frei",
+		"email": "eva@example.com",
+		"correspondenceChannel": "letter",
+		"language": "fr"
+	},
+	"apartment": {
+		"number": "3.01",
+		"floor": 3
+	},
+	"building": {
+		"id": "b1",
+		"name": "Lindenhof",
+		"address": "Testweg 1"
+	},
+	"lineItems": [
+		{
+			"id": "l1",
+			"categoryId": "c1",
+			"distributionKeyId": "k1",
+			"description": "Heating",
+			"totalAmount": "1000.00",
+			"tenantShare": "1000.00",
+			"sharePercentage": "100.0000",
+			"apartmentShare": "1000.00",
+			"periodShare": "1.0000",
+			"positionRentalDays": 366,
+			"billedDays": 366,
+			"invoiceParts": null,
+			"invoices": [
+				{
+					"id": "i1",
+					"description": "Heizöl 2024",
+					"amount": 1000,
+					"start": "2024-01-01",
+					"end": "2024-12-31"
+				}
+			]
+		}
+	],
+	"heatingProfile": {
+		"id": "h1",
+		"name": "Standard"
+	},
+	"heatingShare": null,
+	"paymentResets": [],
+	"correctionDeclined": null,
+	"pdfChange": "notes"
+}

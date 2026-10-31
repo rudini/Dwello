@@ -32,6 +32,8 @@ export const actions: Actions = {
 		if (!response.ok) {
 			return failed(response.status, { form: m.statements_save_failed() });
 		}
-		throw redirect(303, `/statements/${params.id}`);
+		// after sending, what only the new PDF prints, named on the detail page (#524)
+		const { pdfChange } = (await response.json()) as { pdfChange?: string | null };
+		throw redirect(303, `/statements/${params.id}${pdfChange ? `?pdf-change=${pdfChange}` : ''}`);
 	}
 };
