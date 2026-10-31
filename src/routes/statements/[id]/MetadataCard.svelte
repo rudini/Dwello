@@ -65,7 +65,8 @@
 	const dates = $derived(
 		[
 			{ label: m.statements_history_created(), date: createdAt && formatDateTime(createdAt) },
-			...(newPdf ? [] : [pdfRow]),
+			// once sent again, the PDF goes with that sending, not before the first (Persona Dr. Weber 534 P-3)
+			...(newPdf || resent.length ? [] : [pdfRow]),
 			{ label: sent.label, date: sentOn && sent.date },
 			...later,
 			...(newPdf ? [pdfRow] : []),

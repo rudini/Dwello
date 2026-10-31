@@ -336,7 +336,7 @@ export type StatementLineInvoice = NonNullable<ApiLineItem['invoices']>[number] 
 
 export interface Statement
 	extends Pick<ApiStatement, 'id' | 'statementNumber' | 'tenantId' | 'apartmentId' | 'periodStart' | 'periodEnd' | 'statementDate' | 'rentalDays' | 'status' | 'paymentDeadline'>,
-		Partial<Pick<ApiStatement, 'contractId' | 'paidDate' | 'nextReminderFrom' | 'reminderToSend' | 'oldAddress' | 'pdfGeneratedAt' | 'notes' | 'createdAt' | 'updatedAt'>>,
+		Partial<Pick<ApiStatement, 'contractId' | 'paidDate' | 'nextReminderFrom' | 'reminderToSend' | 'remindersCounted' | 'oldAddress' | 'pdfGeneratedAt' | 'notes' | 'createdAt' | 'updatedAt'>>,
 		// the balance positive when the tenant owes, negative a refund
 		Amounts<Pick<StatementResponse, 'totalCosts' | 'totalAdvancePayments' | 'balance'>>,
 		// what was paid; a refund paid to the tenant negative (#93)

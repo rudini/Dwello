@@ -41,7 +41,8 @@ const summary = {
 	sentAt: documents.sentAt,
 	deliveryError: documents.deliveryError,
 	recipient: documents.recipient,
-	paymentDeadline: documents.paymentDeadline,
+	// the Zahlungsfrist a reminder prints; a statement's letters keep theirs for #966, not to show (Persona Dr. Weber 534 P-1)
+	paymentDeadline: sql<string | null>`case when ${documents.type} = 'reminder' then ${documents.paymentDeadline} end`,
 	notToSend,
 	createdAt: documents.createdAt,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,

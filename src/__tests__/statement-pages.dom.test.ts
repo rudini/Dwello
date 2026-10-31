@@ -580,6 +580,15 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-reminder-button')).not.toBeNull();
 	});
 
+	// Code-Review 534-1 C-1: nach dem erneuten Zustellen zählt das Backend die früheren Mahnungen nicht mehr
+	it('nennt die Mahnstufe, die das Backend zählt, nicht jede gespeicherte Mahnung', () => {
+		const earlier = { id: 'r1', tenantId: 't1', statementId: 's1', type: 'reminder', reminderLevel: 1, title: 'Zahlungserinnerung', fileName: 'z.pdf', mimeType: 'application/pdf', channel: 'letter', status: 'sent', sentAt: '2025-03-01T00:00:00Z', deliveryError: null, createdAt: '2025-03-01T00:00:00Z', tenantName: 'Anna Keller', statementNumber: 'NK-2024-0001' };
+		detail({ status: 'overdue', remindersCounted: 0 }, null, [earlier]);
+		click('statement-reminder-button');
+		expect(text()).toContain('Zahlungserinnerung');
+		expect(text()).not.toContain('2. Mahnung');
+	});
+
 	// #403: der Übertrag aus der letzten Abrechnung desselben Mietvertrags, zwischen Akonto und Saldo
 	it.each([
 		[-3, 'Übertrag aus Abrechnung NK-2023-0001 − CHF 3.00'],
@@ -1878,9 +1887,28 @@ describe('Abrechnungsdetail', () => {
 
 		const history = text().replace(/\s+/g, ' ');
 		expect(history).toContain('Versendet per E-Mail an eva@example.ch 10.09.2026');
-		expect(history).toContain('Erneut zugestellt per Brief 20.10.2026');
+		expect(history).toContain('Erneut versendet per Brief 20.10.2026');
 		expect(history).toContain('Neues PDF versendet per Brief 25.10.2026');
 		expect(byTestId<HTMLAnchorElement>('statement-history-sent-pdf')!.getAttribute('href')).toBe('/documents/doc-3/pdf');
+	});
+
+	// Persona Dr. Weber 534 P-3: das PDF eines späteren Versands steht nicht als «PDF erstellt» vor dem ersten Versand
+	it('nennt das mit einem späteren Versand erstellte PDF nicht vor dem ersten Versand', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					pdfGeneratedAt: '2026-10-31T14:02:00Z',
+					resent: [{ id: 'doc-2', newPdf: true, sentAt: '2026-10-31T14:02:30Z' }]
+				} as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-31T14:01:00Z' }
+			},
+			form: null
+		} as never);
+		const history = text().replace(/\s+/g, ' ');
+		expect(history).toContain('Neues PDF versendet per Brief');
+		expect(history).not.toContain('PDF erstellt');
 	});
 
 	// #534 (Fachreview 534-1 V-2, V-6): die Bestätigung nennt, was das erneute Zustellen setzt
@@ -1906,8 +1934,10 @@ describe('Abrechnungsdetail', () => {
 		show(StatementPage, { data: { statement: statement({ status: 'sent', newPdfToSend: 'doc-9' }), reminders: [] }, form: null } as never);
 		const hint = byTestId('statement-new-pdf-to-send')!;
 		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Das neue PDF ist noch nicht versendet. Es liegt unter «Dokumente» zum Versand bereit.');
-		expect(hint.querySelector<HTMLInputElement>('input[name="documentId"]')!.value).toBe('doc-9');
-		expect(hint.querySelector('form')!.getAttribute('action')).toBe('?/newPdfSent');
+		// Persona Dr. Weber 534 P-2: marking it sent asks first, with what stays
+		click('statement-new-pdf-sent-button');
+		expect(text()).toContain('Dwello hält fest, dass Sie das neue PDF heute versenden. Abrechnungsdatum und Zahlungsfrist bleiben.');
+		expect(document.querySelector('form[action="?/newPdfSent"]')).not.toBeNull();
 	});
 
 	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf
@@ -2110,7 +2140,7 @@ describe('Abrechnungsdetail', () => {
 			tenantName: 'Anna Keller',
 			statementNumber: 'NK-2024-0001'
 		});
-		detail({ status: 'overdue', tenantCorrespondenceChannel: 'letter' }, null, [
+		detail({ status: 'overdue', tenantCorrespondenceChannel: 'letter', remindersCounted: 3 }, null, [
 			reminder(1),
 			reminder(2),
 			reminder(3)

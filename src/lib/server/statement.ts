@@ -121,6 +121,7 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		lastReminderDate: data.reminderSentDate,
 		nextReminderFrom: data.nextReminderFrom,
 		reminderToSend: !!data.reminderToSend,
+		remindersCounted: data.remindersCounted ?? 0,
 		oldAddress: !!data.oldAddress, // A-5: the moved-out tenant still has the building's address
 		notes: data.notes,
 		createdAt: data.createdAt,

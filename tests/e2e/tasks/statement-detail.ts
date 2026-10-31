@@ -17,6 +17,7 @@ import {
 	redeliverButton,
 	confirmRedeliverButton,
 	newPdfSentButton,
+	confirmNewPdfSentButton,
 	splitKeysInvoiceLink,
 	sendRecalculateButton,
 	createCorrectionButton,
@@ -104,7 +105,8 @@ export const askToRedeliver = Click.on(redeliverButton);
 // done once its success is said, before the next step leaves the page
 export const redeliverByLetter: Activity = (actor) =>
 	actor.attemptsTo(Click.on(redeliverButton), Click.on(confirmRedeliverButton), Wait.until(successToast));
-export const markNewPdfSent = Click.on(newPdfSentButton);
+export const markNewPdfSent: Activity = (actor) =>
+	actor.attemptsTo(Click.on(newPdfSentButton), Click.on(confirmNewPdfSentButton));
 export const openSplitKeysInvoice = (description: string) => Click.on(splitKeysInvoiceLink(description));
 export const recalculateDraft: Activity = (actor) =>
 	actor.attemptsTo(Click.on(recalculateButton), Click.on(confirmRecalculateButton));

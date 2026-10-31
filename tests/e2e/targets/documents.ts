@@ -37,3 +37,5 @@ export const deleteTenantMessage = target('Bestätigung Mieter löschen', (page)
 export const deleteDocumentMessage = target('Bestätigung Dokument löschen', (page) =>
 	page.getByTestId('document-delete-message')
 );
+// the confirmation before a letter counts as posted (Persona Dr. Weber 534 P-2)
+export const confirmMarkSentButton = target('Als versendet markieren bestätigen', (page) => page.getByTestId('document-mark-sent-confirm'));

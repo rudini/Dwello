@@ -29,7 +29,7 @@ Funktionalität: Versendete Abrechnung erneut per Brief zustellen
     Wenn der Liegenschaftsverwalter die Abrechnung erneut per Brief zustellt
     Dann hat die Abrechnung den Status "Versendet"
     Und ist die Zahlungsfrist 30 Tage nach dem Tag des Versands
-    Und nennt der Verlauf "Erneut zugestellt per Brief" am heutigen Tag
+    Und nennt der Verlauf "Erneut versendet per Brief" am heutigen Tag
     Und nennt der Verlauf den Versand per E-Mail an "Nora Beispiel" vor 40 Tagen
 
   # Fachreview 534-1 M-1 (Entscheid in #534): eine Mahnung von vor dem Brief zählt nicht mehr; eine noch zu versendende

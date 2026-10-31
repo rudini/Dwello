@@ -245,7 +245,8 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 				}
 				// the new PDF of a sent statement waits under «Dokumente» to be sent (#968)
-				if (statement.pdfChange) await keepNewPdf(params.id);
+				// the change is saved: a failure here is only logged (Code-Review 534-1 C-6)
+				if (statement.pdfChange) await keepNewPdf(params.id).catch((error) => console.error('New PDF not kept:', error));
 
 				return statement;
 			} catch (error) {

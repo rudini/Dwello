@@ -116,6 +116,7 @@ export const redeliverDialog = target('Bestätigung des erneuten Zustellens', (p
 export const confirmRedeliverButton = target('Erneut zustellen bestätigen', (page) => page.getByTestId('statement-redeliver-confirm'));
 export const newPdfToSend = target('Neues PDF noch zu versenden', (page) => page.getByTestId('statement-new-pdf-to-send'));
 export const newPdfSentButton = target('Neues PDF als versendet markieren', (page) => page.getByTestId('statement-new-pdf-sent-button'));
+export const confirmNewPdfSentButton = target('Neues PDF als versendet bestätigen', (page) => page.getByTestId('statement-new-pdf-sent-confirm'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
 
 // #528: the hint on a Kategorie billed with different Verteilschlüssel, on the draft and in the «Neu berechnen» question

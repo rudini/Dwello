@@ -71,6 +71,12 @@ const reminderSentDate = sql<string | null>`(
 	select (max(${documents.sentAt}) at time zone 'UTC' at time zone 'Europe/Zurich')::date::text
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'sent'
+		and ${sinceDelivery(utilityStatements.id)}
+)`;
+// The reminders that count for the next Mahnstufe: those since the last sending (#534, Code-Review 534-1 C-1)
+const remindersCounted = sql<number>`(
+	select count(*)::int from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${sinceDelivery(utilityStatements.id)}
 )`;
 // A reminder still «Zu versenden»: the next Mahnstufe waits until it is marked sent (#449, decided in #404, point 2)
 const reminderToSend = sql<boolean>`exists (
@@ -95,7 +101,7 @@ const reminderWaits = (
 ) =>
 	s.reminderToSend ||
 	(s.nextReminderFrom ? s.nextReminderFrom > today : Number(s.balance) >= 0 && s.paymentDeadline! >= daysAfter(today, -mahnfrist));
-const statementColumns = { ...tableColumns, reminderSentDate, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
+const statementColumns = { ...tableColumns, reminderSentDate, nextReminderFrom, reminderToSend, remindersCounted, final, oldAddress: oldAddress(utilityStatements.contractId), openCarry, carryChanged };
 
 /**
  * Status filter; 'overdue' is computed as sent with a past payment deadline,

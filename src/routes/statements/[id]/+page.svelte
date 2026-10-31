@@ -317,4 +317,4 @@
 	onrecalculate={() => ((showSend = false), (showRecalculate = true))}
 />
 
-<ReminderModal bind:open={showReminder} {statement} sentReminders={data.reminders.length} />
+<ReminderModal bind:open={showReminder} {statement} sentReminders={statement.remindersCounted ?? 0} />

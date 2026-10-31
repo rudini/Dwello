@@ -318,6 +318,25 @@ describe('Versendete Abrechnung erneut per Brief zustellen', () => {
 			['letter', 'sent']
 		]);
 		expect(stored[1].content).not.toBe(stored[0].content); // the PDF made anew, with the new date
+		// Persona Dr. Weber 534 P-1: «Dokumente» names a Zahlungsfrist only for a reminder, not for the statement's letters
+		const listed = (await (await api('GET', `/api/v1/documents?statementId=${id}`)).json()) as { data: { paymentDeadline: string | null }[] };
+		expect(listed.data.map((document) => document.paymentDeadline)).toEqual([null, null]);
+	});
+
+	// Code-Review 534-1 C-2: without the PDF nothing changes, the statement keeps its date and Zahlungsfrist
+	it('lässt die Abrechnung unverändert, wenn das PDF nicht entstehen kann', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await db.update(utilityStatements).set({ statementDate: '2021-01-15', paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		await deleteConfig('iban');
+
+		const result = await redeliver(id).finally(() => setConfig('iban', 'CH93 0076 2011 6238 5295 7'));
+
+		expect(result).toMatchObject({ status: 400, code: 'IBAN_MISSING' });
+		const [kept] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, id));
+		expect([kept.statementDate, kept.paymentDeadline, !!kept.pdfBlob]).toEqual(['2021-01-15', '2021-02-14', true]);
+		expect(await storedFor(id)).toHaveLength(1);
 	});
 
 	it('verweigert einen Entwurf und eine bezahlte Abrechnung', async () => {
@@ -347,6 +366,24 @@ describe('Mahnungen nach dem erneuten Zustellen', () => {
 		expect(detail.reminderToSend).toBe(false);
 		const toSend = (await (await api('GET', `/api/v1/documents?status=to_send&tenantId=${rental.tenant}`)).json()) as { data: { id: string }[] };
 		expect(toSend.data.map((document) => document.id)).not.toContain(reminder.document.id);
+	});
+});
+
+// Code-Review 534-1 C-3, C-1: a reminder sent before the redelivery counts no more for the next Mahnstufe
+describe('Mahnstufe nach dem erneuten Zustellen', () => {
+	it('beginnt nach dem erneuten Zustellen wieder bei der Zahlungserinnerung', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await db.update(utilityStatements).set({ paymentDeadline: '2021-02-14' }).where(eq(utilityStatements.id, id));
+		const reminder = (await (await api('POST', `/api/v1/statements/${id}/reminders`)).json()) as { document: { id: string } };
+		await api('PUT', `/api/v1/documents/${reminder.document.id}/sent`);
+		const before = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { remindersCounted: number };
+
+		await api('POST', `/api/v1/statements/${id}/redeliver`);
+
+		const after = (await (await api('GET', `/api/v1/statements/${id}`)).json()) as { remindersCounted: number; nextReminderFrom: string | null };
+		expect([before.remindersCounted, after.remindersCounted, after.nextReminderFrom]).toEqual([1, 0, null]);
 	});
 });
 

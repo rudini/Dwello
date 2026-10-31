@@ -13,7 +13,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, utilityStatements, type Language } from '../db/schema';
 import { newPdfTitle, statementMail, statementTitle } from './reminder-letter';
-import { changeStatementStatus, generateStatementPdf } from './statement-pdf.service';
+import { changeStatementStatus, generateStatementPdf, qrBillConfig } from './statement-pdf.service';
 import { datedToday, getStatement } from './statement.service';
 import { getTenant } from './tenant.service';
 
@@ -129,9 +129,18 @@ export async function redeliverByLetter(id: string) {
 	const statement = await getStatement(id);
 	if (!statement) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!statement.redeliverable) throw new CodedError('STATEMENT_NOT_REDELIVERABLE', 'Only a sent statement can be delivered again');
+	// without its PDF nothing changes: the statement keeps its date, Zahlungsfrist and PDF (Code-Review 534-1 C-2)
+	if (!(await qrBillConfig())) throw new CodedError('IBAN_MISSING', 'IBAN not configured');
+	const [before] = await db
+		.select({ statementDate: utilityStatements.statementDate, paymentDeadline: utilityStatements.paymentDeadline, pdfBlob: utilityStatements.pdfBlob, pdfGeneratedAt: utilityStatements.pdfGeneratedAt })
+		.from(utilityStatements)
+		.where(eq(utilityStatements.id, id));
 	const dated = { ...(await datedToday(statement.paymentDeadline)), pdfBlob: null, pdfGeneratedAt: null, updatedAt: new Date() };
 	await db.update(utilityStatements).set(dated).where(eq(utilityStatements.id, id));
-	const made = await pdfOf(id);
+	const made = await pdfOf(id).catch(async (error) => {
+		await db.update(utilityStatements).set(before).where(eq(utilityStatements.id, id));
+		throw error;
+	});
 	await dropPendingNewPdf(id);
 	const document = await storeLetter(id, statement, made.language);
 	return { statement: (await getStatement(id))!, document };
@@ -149,7 +158,8 @@ export async function keepNewPdf(id: string) {
 		.from(documents)
 		.where(and(eq(documents.statementId, id), eq(documents.type, 'statement'), eq(documents.status, 'sent')))
 		.limit(1);
-	if (!statement || !sent) return;
+	// a paid or replaced statement's new PDF never goes out (Code-Review 534-1 C-5)
+	if (!statement?.redeliverable || !sent) return;
 	const made = await generateStatementPdf(id);
 	if (typeof made === 'string') return;
 	await dropPendingNewPdf(id);

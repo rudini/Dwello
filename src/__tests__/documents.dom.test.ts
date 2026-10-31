@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 
 import DocumentsPage from '../routes/documents/+page.svelte';
-import { allByTestId, byTestId, show } from './helpers/dom';
+import { allByTestId, byTestId, click, show } from './helpers/dom';
 import documentList from '../../tests/contracts/documents.json';
 
 const letter = (overrides = {}) => ({
@@ -79,6 +79,16 @@ describe('Dokumente', () => {
 			'Versendet'
 		);
 		expect(sent.querySelector('[data-testid="document-mark-sent"]')).toBeNull();
+	});
+
+	// Persona Dr. Weber 534 P-2, P-4: marking a letter sent asks first and says what follows for which letter
+	it('fragt vor dem Markieren als versendet nach und nennt die Folge', () => {
+		documents([letter()]);
+		click('document-mark-sent');
+		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Markieren Sie den Brief erst am Tag, an dem Sie ihn zur Post bringen. Eine Mahnung trägt danach das heutige Datum und eine neue Zahlungsfrist; das neue PDF einer Abrechnung behält deren Datum und Zahlungsfrist.'
+		);
+		expect(byTestId('document-mark-sent-confirm')).not.toBeNull();
 	});
 
 	it('nennt das Dokument im PDF-Link', () => {
