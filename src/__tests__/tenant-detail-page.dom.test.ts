@@ -170,6 +170,15 @@ describe('Mieterdetail', () => {
 		);
 	});
 
+	// #969 (Fachreview 969-1 V-1): ohne Weg und Versandstatus, nicht zu löschen
+	it('nennt ein PDF vor der Änderung mit Erstellungsdatum, ohne Versandstatus', () => {
+		open([], null, [{ ...upload, type: 'pdf_before_change', status: null, channel: null }]);
+		const row = byTestId('document-row')!.textContent!.replace(/\s+/g, ' ');
+		expect(row).toContain('Erstellt am 14.10.2026');
+		expect(byTestId('document-status')).toBeNull();
+		expect(byTestId('document-delete-button')).toBeNull();
+	});
+
 	it('nennt ein hochgeladenes Dokument mit Datum, ohne Versandstatus', () => {
 		open([], null, [upload]);
 		const row = byTestId('document-row')!.textContent!.replace(/\s+/g, ' ');

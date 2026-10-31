@@ -60,6 +60,7 @@
 	"resent": [],
 	"newPdfToSend": null,
 	"newPdfMadeAt": null,
+	"pdfBeforeChange": [],
 	"lineItems": [
 		{
 			"id": "l1",

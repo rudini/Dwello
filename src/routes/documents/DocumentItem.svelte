@@ -23,14 +23,19 @@
 	);
 	const date = $derived(formatDate(document.createdAt));
 	const upload = $derived(document.type === 'upload'); // no channel, no Versandstatus
+	// a PDF kept before a change (#969) has no way and no Versandstatus (Fachreview 969-1 V-1)
 	const created = $derived(
 		upload
 			? showTenant
 				? m.documents_uploaded_to({ name: document.tenantName, date })
 				: m.documents_uploaded({ date })
-			: showTenant
-				? m.documents_created_to({ name: document.tenantName, date, channel })
-				: m.documents_created({ date, channel })
+			: !document.status
+				? showTenant
+					? m.documents_pdf_before_change_made_to({ name: document.tenantName, date })
+					: m.documents_pdf_before_change_made({ date })
+				: showTenant
+					? m.documents_created_to({ name: document.tenantName, date, channel })
+					: m.documents_created({ date, channel })
 	);
 	const status = $derived(documentStatus(document));
 </script>
@@ -49,7 +54,7 @@
 				{m.documents_payment_deadline({ date: formatDate(document.paymentDeadline) })}
 			</p>
 		{/if}
-		{#if !upload}
+		{#if document.status}
 			<p>
 				<Badge tone={status.tone} label={status.label} testid="document-status" />
 			</p>

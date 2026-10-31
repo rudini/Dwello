@@ -31,7 +31,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { splitKeysOf } from './split-keys';
-import { sendingsOf, sinceDelivery, toldDeadline } from './delivery';
+import { keepPdfBeforeChange, sendingsOf, sinceDelivery, toldDeadline } from './delivery';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
@@ -356,8 +356,8 @@ function withOtherKeys<T extends UtilityStatementLineItem>(lineItems: T[]) {
 
 // #534, #968: the later sendings for the Verlauf; a new PDF goes out only while the statement is sent (V-3)
 async function laterSendings(id: string, status: string) {
-	const { resent, newPdfToSend, newPdfMadeAt } = await sendingsOf(id);
-	return { resent, ...(status === 'sent' ? { newPdfToSend, newPdfMadeAt } : { newPdfToSend: null, newPdfMadeAt: null }) };
+	const { resent, newPdfToSend, newPdfMadeAt, pdfBeforeChange } = await sendingsOf(id);
+	return { resent, pdfBeforeChange, ...(status === 'sent' ? { newPdfToSend, newPdfMadeAt } : { newPdfToSend: null, newPdfMadeAt: null }) };
 }
 
 /**
@@ -694,6 +694,8 @@ export async function updateStatement(
 
 	// The PDF prints date, payment deadline and remark (#448); a change discards it, it is made again. Once paid, the PDF as sent stays
 	const pdfOutdated = changesPdf(data, existing);
+	// the only copy of a PDF sent without a Dokument stays (#969; also «Zahlung zurücksetzen», Fachreview 969-1 V-3)
+	if (pdfOutdated || data.pdfBlob === null) await keepPdfBeforeChange(id);
 
 	// Update the statement
 	const [updated] = await db

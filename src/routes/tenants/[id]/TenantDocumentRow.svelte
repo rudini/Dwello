@@ -12,10 +12,13 @@
 	const upload = $derived(document.type === 'upload');
 	const heading = (d: StatementDocument) =>
 		[d.title, d.statementNumber].filter(Boolean).join(' · ');
+	// a PDF kept before a change (#969) has no way and no Versandstatus: only when it was made (Fachreview 969-1 V-1)
 	const details = (d: StatementDocument) =>
 		d.type === 'upload'
 			? m.documents_uploaded({ date: formatDate(d.createdAt) })
-			: `${formatDate(d.createdAt)} · ${d.channel === 'email' ? m.tenants_document_by_email() : m.tenants_document_by_letter()}`;
+			: !d.status
+				? m.documents_pdf_before_change_made({ date: formatDate(d.createdAt) })
+				: `${formatDate(d.createdAt)} · ${d.channel === 'email' ? m.tenants_document_by_email() : m.tenants_document_by_letter()}`;
 </script>
 
 <li class="flex flex-wrap items-center justify-between gap-4 py-4" data-testid="document-row">
@@ -23,7 +26,7 @@
 		<p class="font-semibold text-ink">{heading(document)}</p>
 		<p class="text-ink-muted">
 			{details(document)}
-			{#if !upload}
+			{#if document.status}
 				·
 				<span data-testid="document-status">{documentStatus(document).label}</span>
 			{/if}

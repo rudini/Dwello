@@ -42,6 +42,10 @@ export const sendStatementButton = target('Abrechnung versenden', (page) => page
 export const markPaidButton = target('Als bezahlt markieren', (page) => page.getByTestId('statement-mark-paid-button'));
 export const confirmMarkPaidButton = target('Bezahlt bestätigen', (page) => page.getByTestId('statement-mark-paid-confirm'));
 // #524: the PDF as sent, in the Verlauf, and the hint after a change it does not show
+// #969: the PDF a statement sent before #449 had before a change
+export const pdfBeforeChangeLink = target('PDF vor der Änderung herunterladen', (page) =>
+	page.getByTestId('statement-history-pdf-before-change')
+);
 export const sentPdfLink = target('Versendetes PDF herunterladen', (page) => page.getByTestId('statement-history-sent-pdf'));
 export const pdfChangedHint = target('Hinweis neues PDF', (page) => page.getByTestId('statement-pdf-changed'));
 export const partialPaymentHint = target('Hinweis Teilzahlung', (page) => page.getByTestId('paid-partial-hint'));

@@ -134,6 +134,17 @@ describe('Dokumente', () => {
 		expect(byTestId('document-pdf-link')!.hasAttribute('download')).toBe(true);
 	});
 
+	// #969 (Fachreview 969-1 V-1): ein PDF vor der Änderung ging nicht nachweislich an den Mieter: ohne Weg und Versandstatus
+	it('nennt ein PDF vor der Änderung mit Mieter und Erstellungsdatum, ohne Versandstatus und ohne Markieren', () => {
+		documents([
+			{ ...documentList.data[0], type: 'pdf_before_change', status: null, channel: null, title: 'Nebenkostenabrechnung, PDF vor der Änderung' } as never
+		]);
+
+		expect(byTestId('document-row')!.textContent).toContain('Zu Marco Bernasconi, erstellt am 14.10.2026');
+		expect(byTestId('document-status')).toBeNull();
+		expect(byTestId('document-mark-sent')).toBeNull();
+	});
+
 	it('nennt hochgeladene Dokumente, wenn noch keine Dokumente da sind', () => {
 		documents([]);
 		expect(byTestId('documents-empty')!.textContent).toContain(

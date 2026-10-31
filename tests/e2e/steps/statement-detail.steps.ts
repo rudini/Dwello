@@ -44,6 +44,7 @@ import {
 	advanceDiffersText,
 	partialPaymentAdvice,
 	pdfChangedAdvice,
+	pdfBeforeChangeOffered,
 	sentPdfHref,
 	splitKeysLineText,
 	splitKeysLines,
@@ -85,6 +86,7 @@ import {
 	markStatementPaid,
 	markStatementPaidOn,
 	startMarkingPaid,
+	downloadPdfBeforeChange,
 	downloadSentPdf,
 	openResetPaymentConfirmation,
 	openSendConfirmation,
@@ -744,6 +746,15 @@ Then('rät die Abrechnung kein neues PDF', async ({ verwalter }) => {
 
 Then('nennt der Verlauf nach dem Versand ein neues PDF', async ({ verwalter }) => {
 	await verwalter.sees(history).toMatch(/Versendet.*Neues PDF erstellt/);
+});
+
+// #969 (A): the PDF of a statement sent before #449, kept before a change discards it
+Then('bietet der Verlauf das PDF vor der Änderung an', async ({ verwalter }) => {
+	await verwalter.sees(pdfBeforeChangeOffered).toBe(true);
+});
+
+When('der Liegenschaftsverwalter das PDF vor der Änderung im Verlauf herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadPdfBeforeChange);
 });
 
 When('der Liegenschaftsverwalter das versendete PDF im Verlauf herunterlädt', async ({ verwalter }) => {

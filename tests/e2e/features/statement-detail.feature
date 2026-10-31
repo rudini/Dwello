@@ -1250,6 +1250,18 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das versendete PDF im Verlauf herunterlädt
     Dann steht im PDF nicht "Ratenzahlung bis Ende März vereinbart"
 
+  # #969 (A): eine vor #449 versendete Abrechnung hat kein Dokument des Versands; ihr gespeichertes PDF ist die einzige
+  # Kopie und bleibt vor der Änderung als «PDF vor der Änderung» im Verlauf (Persona Dr. Weber 524 P-2)
+  Szenario: Vor der Änderung einer Abrechnung ohne Dokument des Versands bleibt ihr PDF
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Dann bietet der Verlauf das PDF vor der Änderung an
+    Wenn der Liegenschaftsverwalter das PDF vor der Änderung im Verlauf herunterlädt
+    Dann steht im PDF nicht "Ratenzahlung bis Ende März vereinbart"
+
   # #968 (Option A): das neue PDF nach einer Änderung liegt unter «Dokumente» zum Versand bereit, bis der
   # Liegenschaftsverwalter es als versendet markiert; die Abrechnung nennt es bis dann als noch zu versenden
   Szenario: Nach einer Änderung liegt das neue PDF zum Versand bereit

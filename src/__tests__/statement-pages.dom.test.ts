@@ -1867,6 +1867,36 @@ describe('Abrechnungsdetail', () => {
 		expect(history.indexOf('Versendet per Brief')).toBeLessThan(history.indexOf('Neues PDF erstellt 05.10.2026'));
 	});
 
+	// #969 (Fachreview 969-1 V-2): ohne Dokument des Versands das erste PDF vor der Änderung als «PDF erstellt», jedes
+	// spätere und das jetzige als neues nach «Versendet»; jedes zum Herunterladen, mit dem Hinweis
+	it('bietet ohne Dokument des Versands die PDFs vor der Änderung an', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({
+					status: 'sent',
+					statementDate: '2026-09-28',
+					pdfGeneratedAt: '2026-10-20T09:00:00Z',
+					pdfBeforeChange: [
+						{ id: 'kept-1', madeAt: '2026-09-28T08:00:00Z' },
+						{ id: 'kept-2', madeAt: '2026-10-05T09:00:00Z' }
+					]
+				} as never),
+				reminders: [],
+				delivery: null
+			},
+			form: null
+		} as never);
+
+		const history = text().replace(/\s+/g, ' ');
+		const links = allByTestId('statement-history-pdf-before-change');
+		expect(links.map((link) => link.getAttribute('href'))).toEqual(['/documents/kept-1/pdf', '/documents/kept-2/pdf']);
+		expect(links[1].textContent).toContain('PDF vor der Änderung vom 05.10.2026, 11:00 herunterladen');
+		expect(history).toContain('PDF erstellt 28.09.2026, 10:00');
+		expect(history.indexOf('Versendet')).toBeLessThan(history.indexOf('Neues PDF erstellt 05.10.2026, 11:00'));
+		expect(history).toContain('Neues PDF erstellt 20.10.2026, 11:00');
+		expect(history).toContain('Ob der Mieter genau dieses PDF erhalten hat, weiss Dwello nicht.');
+	});
+
 	// #534, #968: jeder spätere Versand an seinem Tag; das PDF, das der Mieter zuletzt bekam (#965)
 	it('nennt im Verlauf jeden späteren Versand und bietet das zuletzt versendete PDF an', () => {
 		show(StatementPage, {
@@ -1976,6 +2006,35 @@ describe('Abrechnungsdetail', () => {
 		click('statement-new-pdf-sent-button');
 		expect(text()).toContain('Dwello hält fest, dass Sie das neue PDF heute versenden. Abrechnungsdatum und Zahlungsfrist bleiben.');
 		expect(document.querySelector('form[action="?/newPdfSent"]')).not.toBeNull();
+	});
+
+	// #969 (Code-Review 969-1 C-2): nach «Erneut per Brief zustellen» hat sie ein Dokument des Versands; die Kopie bleibt
+	it('bietet das PDF vor der Änderung auch nach dem erneuten Zustellen an', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({ status: 'sent', pdfBeforeChange: [{ id: 'kept-1', madeAt: '2026-09-28T08:00:00Z' }] } as never),
+				reminders: [],
+				delivery: { id: 'doc-1', channel: 'letter', recipient: null, sentAt: '2026-10-20T08:15:00Z' }
+			},
+			form: null
+		} as never);
+
+		expect(byTestId<HTMLAnchorElement>('statement-history-pdf-before-change')!.getAttribute('href')).toBe('/documents/kept-1/pdf');
+	});
+
+	// #969 (Fachreview 969-1 V-6): ohne Dokument des Versands sagt der Hinweis, wo das PDF vor der Änderung liegt
+	it('nennt nach einer Änderung das PDF vor der Änderung im Verlauf', () => {
+		show(StatementPage, {
+			data: {
+				statement: statement({ status: 'sent', pdfBeforeChange: [{ id: 'kept-1', madeAt: '2026-09-28T08:00:00Z' }] } as never),
+				reminders: [],
+				delivery: null,
+				pdfChange: 'notes'
+			},
+			form: null
+		} as never);
+
+		expect(byTestId('statement-pdf-changed')!.textContent).toContain('Das PDF vor der Änderung finden Sie im Verlauf.');
 	});
 
 	// #524 (Fachreview 524-1 V-1, M-1): nach dem Speichern, was nur im neuen PDF steht; ohne Dokument (vor #449) kein Satz zum Verlauf

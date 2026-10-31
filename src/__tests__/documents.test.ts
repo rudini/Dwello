@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/documents/+page.server';
 import { GET as pdf } from '../routes/documents/[id]/pdf/+server';
 import { runAction } from './helpers/action';
+import { localTitle } from '$lib/server/documents';
 import documentList from '../../tests/contracts/documents.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import paidRefused from '../../tests/contracts/reminder-paid-refused.json';
@@ -62,6 +63,13 @@ describe('Dokumente', () => {
 		const { result } = runAction(actions.markSent, '', 200, { id: 'd2' }, sent);
 
 		expect(await result).toMatchObject({ sent: { id: 'd2', newPdf: true } });
+	});
+
+	// #969 (Code-Review 969-1 C-1): stored in the tenant's language, named in the UI's
+	it('nennt ein PDF vor der Änderung in der Sprache der Oberfläche', () => {
+		const kept = { ...documentList.data[0], type: 'pdf_before_change', title: 'Décompte des charges, PDF avant la modification' };
+
+		expect(localTitle(kept as never)).toBe('Nebenkostenabrechnung, PDF vor der Änderung');
 	});
 
 	// #450, Fachreview V-1: a reminder still to send is remade on marking; without the Firmenadresse it is refused

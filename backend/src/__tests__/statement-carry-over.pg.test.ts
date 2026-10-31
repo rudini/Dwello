@@ -433,6 +433,58 @@ describe('Bemerkung', () => {
 		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, sent.id));
 		expect(row.pdfBlob).toBeNull();
 	});
+
+	// #969 (A): sent before #449, without a Dokument of the sending: its stored PDF is the only copy and stays
+	it('legt das PDF einer Abrechnung ohne Dokument des Versands vor der Änderung als Dokument ab', async () => {
+		const sent = await sentWith(await rentalOf(), 2024, '100.00');
+		const madeAt = new Date('2025-02-03T09:00:00Z');
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: madeAt }).where(eq(utilityStatements.id, sent.id));
+
+		await sendJson('PUT', `/api/v1/statements/${sent.id}`, { notes: 'Ratenzahlung vereinbart' });
+
+		const kept = await db.select().from(documents).where(eq(documents.statementId, sent.id));
+		// without channel and Versandstatus, in the tenant's language (Fachreview 969-1 V-8)
+		expect(kept).toMatchObject([
+			{ type: 'pdf_before_change', title: 'Nebenkostenabrechnung, PDF vor der Änderung', content: 'JVBERi0=', createdAt: madeAt, status: null, channel: null }
+		]);
+	});
+
+	// Fachreview 969-1 V-4: the PDF made after a first change may have gone to the tenant too: every discarded copy stays
+	it('legt bei einer zweiten Änderung auch das PDF nach der ersten ab', async () => {
+		const sent = await sentWith(await rentalOf(), 2024, '100.00');
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0x', pdfGeneratedAt: new Date('2025-02-03T09:00:00Z') }).where(eq(utilityStatements.id, sent.id));
+		await sendJson('PUT', `/api/v1/statements/${sent.id}`, { notes: 'Erste Bemerkung' });
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0y', pdfGeneratedAt: new Date('2025-03-03T09:00:00Z') }).where(eq(utilityStatements.id, sent.id));
+
+		await sendJson('PUT', `/api/v1/statements/${sent.id}`, { notes: 'Zweite Bemerkung' });
+
+		const kept = await db.select({ content: documents.content }).from(documents).where(eq(documents.statementId, sent.id));
+		expect(kept.map((one) => one.content).sort()).toEqual(['JVBERi0x', 'JVBERi0y']);
+	});
+
+	// Fachreview 969-1 V-3: «Zahlung zurücksetzen» discards a PDF made after the payment, without a change of the fields
+	it('legt das PDF vor dem Zurücksetzen der Zahlung ab', async () => {
+		const sent = await sentWith(await rentalOf(), 2024, '100.00');
+		await sendJson('PUT', `/api/v1/statements/${sent.id}/status`, { status: 'paid', paidDate: today() });
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date(Date.now() + 60_000) }).where(eq(utilityStatements.id, sent.id));
+
+		await callApi(`/api/v1/statements/${sent.id}/payment-reset`, { method: 'POST' });
+
+		const kept = await db.select({ type: documents.type }).from(documents).where(eq(documents.statementId, sent.id));
+		expect(kept).toEqual([{ type: 'pdf_before_change' }]);
+	});
+
+	it('legt bei einer Abrechnung mit Dokument des Versands keine Kopie ab', async () => {
+		const sent = await sentWith(await rentalOf(), 2024, '100.00');
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, sent.id));
+		const [{ tenantId }] = await db.select({ tenantId: utilityStatements.tenantId }).from(utilityStatements).where(eq(utilityStatements.id, sent.id));
+		await db.insert(documents).values({ tenantId, statementId: sent.id, type: 'statement', title: 'NK', fileName: 'NK.pdf', content: 'JVBERi0=', channel: 'letter', status: 'sent', sentAt: new Date() });
+
+		await sendJson('PUT', `/api/v1/statements/${sent.id}`, { notes: 'Ratenzahlung vereinbart' });
+
+		const kept = await db.select({ type: documents.type }).from(documents).where(eq(documents.statementId, sent.id));
+		expect(kept).toEqual([{ type: 'statement' }]);
+	});
 });
 
 // #506 C: a draft created before the Übertrag it would count now is not current (Fachreview 448-3 V-23)

@@ -3,7 +3,7 @@
  * Stored letters (payment reminders) per tenant, sent by e-mail or kept for printing
  */
 
-import { and, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, notInArray, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, rentalContracts, tenants, utilityStatements, type DocumentStatus, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
@@ -183,7 +183,8 @@ export async function markDocumentSent(id: string, posted?: { content: string; p
 	const [sent] = await db
 		.update(documents)
 		.set({ status: 'sent', sentAt: new Date(), deliveryError: null, ...(posted && { ...posted, channel: 'letter' }) })
-		.where(and(eq(documents.id, id), ne(documents.type, 'upload')))
+		// an upload and a PDF kept before a change (#969, Code-Review 969-1 C-4) are no letters to send
+		.where(and(eq(documents.id, id), notInArray(documents.type, ['upload', 'pdf_before_change'])))
 		.returning({ id: documents.id });
 	return sent ? getDocument(id) : null;
 }
