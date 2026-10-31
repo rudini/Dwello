@@ -44,11 +44,12 @@
 	{/if}
 </div>
 <p class="rounded-panel bg-sunken p-4 font-semibold text-ink">{summary}</p>
-<!-- what came in for this statement, also a part (#523, #959; Art. 69, 86 OR, Fachreview 959-1) -->
-<MoneyInput
+<!-- what came in for this statement, also a part (#523, #959; Art. 69, 86 OR, Fachreview 959-1); below the
+	Mindestbetrag no money moves (#94): no amount -->
+{#if !statement.waived}<MoneyInput
 	id="paidAmount"
 	label={statement.balance < 0 ? m.statements_paid_amount_refund() : m.statements_paid_amount()}
 	help={statement.balance < 0 ? m.statements_paid_partial_refund() : m.statements_paid_partial()}
 	bind:value={paidAmount}
 	testid="paid-amount-input"
-/>
+	/>{/if}

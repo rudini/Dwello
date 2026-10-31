@@ -70,7 +70,7 @@ export const actions: Actions = {
 			params.id,
 			sent === null ? undefined : String(sent),
 			String(form.get('periodEnd') ?? ''),
-			form.get('paidAmount')?.toString().trim() || undefined
+			form.get('paidAmount')?.toString().trim() // empty: refused, not all of it (code review 959b-1 C-9)
 		);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},

@@ -799,22 +799,27 @@ export async function updateStatementStatus(
 // paid without an amount: the open amount, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94: a
 // statement settled under #94 whose payment was reset). A smaller amount is a part payment (#959, Art. 69, 85 OR): the
 // payments add up, and the statement stays open with the rest until they reach the Saldo
-function recordPayment(existing: StatementWithDetails, waived: boolean, data?: { paidDate?: string; paidAmount?: string }) {
-	if (waived) return { paidAmount: data?.paidAmount ?? '0.00', paymentRecordedAt: new Date() };
-	const balance = Number(existing.balance);
+function recordPayment(existing: StatementWithDetails, waived: boolean, { paidDate, paidAmount: entered }: { paidDate?: string; paidAmount?: string } = {}) {
+	if (waived) return { paidAmount: entered ?? '0.00', paymentRecordedAt: new Date() };
 	const before = Number(existing.paidAmount ?? 0);
-	const rest = roundToRappen(balance - before);
-	// francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1); a refund with its minus
-	if (data?.paidAmount !== undefined && !/^-?\d+(\.\d{1,2})?$/.test(data.paidAmount.trim()))
-		throw new CodedError('STATEMENT_PAID_AMOUNT_INVALID', 'Invalid amount paid', { amount: data.paidAmount });
-	const amount = data?.paidAmount === undefined ? rest : Number(data.paidAmount);
-	if (!(amount * Math.sign(balance) > 0)) throw new CodedError('STATEMENT_PAID_AMOUNT_ZERO', 'Paid amount not above 0.00');
-	if (Math.abs(amount) > Math.abs(rest)) throw new CodedError('STATEMENT_PAID_AMOUNT_TOO_HIGH', 'Paid amount above the open amount', { rest: Math.abs(rest).toFixed(2) });
-	const payments = [...existing.payments, { date: data?.paidDate ?? swissToday(), amount: amount.toFixed(2) }];
+	const rest = roundToRappen(Number(existing.balance) - before);
+	const amount = paidAmountOf(entered, rest);
+	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2) }];
 	const paidAmount = roundToRappen(before + amount).toFixed(2);
 	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments };
-	const paidDate = data?.paidDate && payments.map((p) => p.date).sort().at(-1);
-	return { paidAmount, payments, paidDate, paymentRecordedAt: new Date() };
+	// paid on the day of the latest payment
+	return { paidAmount, payments, paidDate: paidDate && payments.map((p) => p.date).sort().at(-1), paymentRecordedAt: new Date() };
+}
+
+// The amount paid, the rest when none is given: francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1), with
+// the sign of the Saldo, above 0.00 and at most the rest
+function paidAmountOf(entered: string | undefined, rest: number) {
+	if (entered === undefined) return rest;
+	if (!/^-?\d+(\.\d{1,2})?$/.test(entered.trim())) throw new CodedError('STATEMENT_PAID_AMOUNT_INVALID', 'Invalid amount paid', { amount: entered });
+	const amount = Number(entered);
+	if (!(amount * Math.sign(rest) > 0)) throw new CodedError('STATEMENT_PAID_AMOUNT_ZERO', 'Paid amount not above 0.00');
+	if (Math.abs(amount) > Math.abs(rest)) throw new CodedError('STATEMENT_PAID_AMOUNT_TOO_HIGH', 'Paid amount above the open amount', { rest: `CHF ${formatCHF(Math.abs(rest))}` });
+	return amount;
 }
 
 // #138: a day that exists, up to today; from the end of the Abrechnungsperiode: a tenant may pay before the

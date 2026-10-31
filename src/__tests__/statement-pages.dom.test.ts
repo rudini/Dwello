@@ -284,6 +284,20 @@ describe('Abrechnungsliste', () => {
 		expect(byTestId('statement-row-mark-paid')!.textContent).toContain('Als bezahlt markieren');
 	});
 
+	// Persona Helga 959 P-2: eine Teilzahlung ist keine Zahlung der ganzen Abrechnung
+	it('bestätigt eine Teilzahlung als Teilzahlung', async () => {
+		toasts.set([]);
+		fakeBff();
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		fireEvent(byTestId<HTMLInputElement>('paid-amount-input')!, 'input', '30.00');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toContain('Teilzahlung für Abrechnung NK-2024-0001 festgehalten');
+	});
+
 	it('bestätigt den Zahlungseingang mit einer Meldung', async () => {
 		toasts.set([]);
 		fakeBff();
@@ -1763,6 +1777,24 @@ describe('Abrechnungsdetail', () => {
 		actions.get('?/markPaid')!({ formData: part });
 
 		expect([prefilled, open.get('paidAmount'), part.get('paidAmount')]).toEqual(['100.00', '100.00', '30.00']);
+	});
+
+	// code review 959b-1 C-7 (Fachreview 959-1, Grundregel): unter dem Mindestbetrag fliesst kein Geld, also kein Betrag
+	it('fragt bei einem Saldo unter dem Mindestbetrag nach keinem Betrag', () => {
+		detail({ status: 'sent', balance: 3.4, waived: true });
+		click('statement-mark-paid-button');
+		const formData = new FormData();
+		actions.get('?/markPaid')!({ formData });
+
+		expect([byTestId('paid-amount-input'), formData.get('paidAmount')]).toEqual([null, null]);
+	});
+
+	// Persona Helga 959 P-1: nach einer Teilzahlung nennt die Mahnung den Rest
+	it('nennt beim Mahnen nach einer Teilzahlung den offenen Betrag', () => {
+		detail({ status: 'overdue', balance: 215.8, paidAmount: 50, claimed: true });
+		click('statement-reminder-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain('schuldet noch CHF 165.80');
 	});
 
 	it('sendet eine Rückerstattung als negativen Betrag', () => {

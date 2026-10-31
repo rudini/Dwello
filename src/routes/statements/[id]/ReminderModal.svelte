@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Dialog from '$lib/ui/Dialog.svelte';
+	import { openAmount } from '$lib/statement';
 	import { formatCurrency } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
 
@@ -45,7 +46,8 @@
 		</p>
 		<p class="rounded-panel bg-sunken p-4 text-ink">
 			{m.statements_owes({ tenant: statement.tenantName })}
-			<strong class="tabular-nums">{formatCurrency(Math.abs(statement.balance))}</strong>.
+			<!-- after a part payment the rest (#959) -->
+			<strong class="tabular-nums">{formatCurrency(openAmount(statement))}</strong>.
 		</p>
 	</FormDialog>
 {:else}

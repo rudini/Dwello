@@ -98,7 +98,7 @@
 				body: JSON.stringify({
 					paidDate,
 					periodEnd: paying!.periodEnd,
-					paidAmount: signedPaid(paying!.balance, paidAmount)
+					paidAmount: signedPaid(paying!, paidAmount)
 				})
 			});
 			if (!response.ok) {
@@ -106,7 +106,13 @@
 				payError = (await response.json().catch(() => ({}))).message ?? failed;
 				return;
 			}
-			addToast('success', m.statements_marked_paid_number({ number: paying!.statementNumber }));
+			const number = paying!.statementNumber;
+			addToast(
+				'success',
+				isPartPayment(paying!, paidAmount)
+					? m.statements_part_payment_recorded({ number })
+					: m.statements_marked_paid_number({ number })
+			);
 			paying = null;
 			await invalidateAll();
 			await tick(); // its row's button is gone now: the focus goes to the page title

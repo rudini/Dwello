@@ -71,9 +71,14 @@ export const markStatementPaid: Activity = (actor) =>
 	actor.attemptsTo(Click.on(markPaidButton), Click.on(confirmMarkPaidButton));
 
 export const startMarkingPaid = Click.on(markPaidButton);
-// #959: a part of the Saldo, the statement stays open
+// #959: a part of the Saldo, the statement stays open; done once it is saved (code review 959b-1 C-8)
 export const recordPayment = (amount: string): Activity => (actor) =>
-	actor.attemptsTo(Click.on(markPaidButton), Enter.theValue(amount).into(paidAmountInput), Click.on(confirmMarkPaidButton));
+	actor.attemptsTo(
+		Click.on(markPaidButton),
+		Enter.theValue(amount).into(paidAmountInput),
+		Click.on(confirmMarkPaidButton),
+		Wait.until(successToast)
+	);
 
 // The day the money came in, typed into the dialog's date field
 export const markStatementPaidOn = (isoDate: string): Activity => (actor) =>

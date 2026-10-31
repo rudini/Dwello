@@ -230,7 +230,7 @@ describe('Teilzahlung', () => {
 	});
 
 	it('nimmt höchstens den offenen Betrag an und keinen Betrag von 0.00', async () => {
-		await expectRejection(await pay('432.91'), 400, 'Paid amount above the open amount', 'STATEMENT_PAID_AMOUNT_TOO_HIGH', { rest: '432.90' });
+		await expectRejection(await pay('432.91'), 400, 'Paid amount above the open amount', 'STATEMENT_PAID_AMOUNT_TOO_HIGH', { rest: 'CHF 432.90' });
 		await expectRejection(await pay('0.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
 		await expectRejection(await pay('-5.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
 	});
@@ -267,7 +267,7 @@ describe('Teilzahlung', () => {
 // Fachreview 959-1, Regel 5: auf eine Rückerstattung gilt dieselbe Regel, die Beträge negativ (code review 959a-1 C-5)
 describe('Teilrückerstattung', () => {
 	let id: string;
-	const pay = (paidAmount?: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount });
+	const pay = (paidAmount?: string, paidDate = today()) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate, paidAmount });
 
 	beforeAll(async () => {
 		id = await sentStatement(2026);
@@ -283,6 +283,12 @@ describe('Teilrückerstattung', () => {
 	it('lässt die Rückerstattung mit dem Rest offen und zahlt ohne Betrag den Rest', async () => {
 		await expectRejection(await pay('50.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
 		expect(await (await pay('-50.00')).json()).toMatchObject({ status: 'sent', paidAmount: '-50.00' });
-		expect(await (await pay()).json()).toMatchObject({ status: 'paid', paidAmount: '-120.00', payments: [{ amount: '-50.00' }, { amount: '-70.00' }] });
+		// the rest entered with an earlier day: paid on the day of the latest payment (code review 959a-1 C-5)
+		expect(await (await pay(undefined, '2026-07-01')).json()).toMatchObject({
+			status: 'paid',
+			paidDate: today(),
+			paidAmount: '-120.00',
+			payments: [{ amount: '-50.00' }, { amount: '-70.00', date: '2026-07-01' }]
+		});
 	});
 });
