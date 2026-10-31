@@ -50,6 +50,7 @@
 			statement: StatementWithDetails;
 			reminders: StatementDocument[];
 			delivery?: Delivery | null;
+			pdfChange?: string | null;
 			later?: ComponentProps<typeof LaterChanges>['later'];
 		};
 		form: ActionData;
@@ -141,6 +142,13 @@
 	const balance = $derived(
 		`${balanceLabel(statement.balance)} ${formatCurrency(Math.abs(statement.balance))}`
 	);
+	// the backend's PdfChange, as the edit page passes it on; anything else shows nothing
+	const pdfChanged: Record<string, (() => string) | undefined> = {
+		notes: m.statements_sent_pdf_changed_notes,
+		deadline: m.statements_sent_pdf_changed_deadline,
+		refund_by: m.statements_sent_pdf_changed_refund_by
+	};
+	const pdfAdvice = $derived(data.pdfChange ? pdfChanged[data.pdfChange] : undefined);
 </script>
 
 <svelte:head>
@@ -196,6 +204,12 @@
 		<LaterChanges {statement} later={data.later} oncorrect={() => (showCorrect = true)} />
 	{/if}
 
+	<!-- after saving a change of a sent statement: what only the new PDF prints (#524, Fachreview 524-1 V-1, M-1) -->
+	{#if pdfAdvice}
+		<Alert tone="info" title={pdfAdvice()} testid="statement-pdf-changed">
+			{#if data.delivery}<p>{m.statements_sent_pdf_in_history()}</p>{/if}
+		</Alert>
+	{/if}
 	{#if form?.actionError}
 		<Alert tone="critical" title={m.ui_action_failed()}>
 			<p data-testid="form-error">{form.actionError}</p>

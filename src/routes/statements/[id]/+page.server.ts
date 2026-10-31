@@ -27,7 +27,7 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' '), abroad].filter(Boolean).join(', ');
 }
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const statement = await loadStatement(fetch, params.id);
 	const [address, documents, later] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
@@ -41,7 +41,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		// how the statement went out: its own Dokument, by e-mail or by letter (#449, decided in #404, point 7)
 		delivery: documents
 			.filter((document) => document.type === 'statement')
-			.map(({ channel, recipient, sentAt }) => ({ channel, recipient: recipient ?? null, sentAt }))[0] ?? null,
+			.map(({ id, channel, recipient, sentAt }) => ({ id, channel, recipient: recipient ?? null, sentAt }))[0] ?? null,
+		// set by the edit page after a change the sent PDF does not show (#524)
+		pdfChange: url.searchParams.get('pdf-change'),
 		later
 	};
 };

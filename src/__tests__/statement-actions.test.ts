@@ -243,7 +243,7 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { reminders: { id: string }[] };
+		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { reminders: { id: string }[] };
 		expect(data.reminders.map((document) => document.id)).toEqual(['d1']);
 	});
 
@@ -259,7 +259,7 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as {
 			statement: { tenantAddress: string };
 		};
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
@@ -278,7 +278,7 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as {
 			statement: { tenantAddress: string; oldAddress: boolean };
 		};
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich, Deutschland');
@@ -298,7 +298,7 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
+		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { later: unknown };
 		// #454: and whether the Tankbestand changed, and whether a correction is due (Fachreview 454-1 E-3)
 		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
 		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
@@ -313,7 +313,7 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
+		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { later: unknown };
 		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, carryOver: false });
 	});
 });

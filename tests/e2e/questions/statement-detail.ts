@@ -14,6 +14,8 @@ import {
 	paymentDeadline,
 	paymentSummary,
 	partialPaymentHint,
+	pdfChangedHint,
+	sentPdfLink,
 	correctStatementButton,
 	markPaidButton,
 	priorPayments,
@@ -141,3 +143,10 @@ export const declineCorrectionOffered = Count.of(declineCorrectionButton);
 
 // what «Als bezahlt markieren» says about a part paid (#523)
 export const partialPaymentAdvice = Text.of(partialPaymentHint);
+
+// #524: the hint after a change of a sent statement, on the loaded page; the link to the PDF as sent
+export const pdfChangedAdvice = question('the hint on the new PDF', async (actor) => {
+	await actor.answer(Text.of(paymentSummary));
+	return actor.answer(Text.of(pdfChangedHint));
+});
+export const sentPdfHref = Attribute.named('href').of(sentPdfLink);
