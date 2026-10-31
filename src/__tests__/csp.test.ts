@@ -18,4 +18,10 @@ describe('Content-Security-Policy', () => {
 		expect(directives['base-uri']).toEqual(['self']);
 		expect(directives['form-action']).toEqual(['self']);
 	});
+
+	// the app needs both: style attributes Svelte writes (ProgressBar) and the data: JPEG preview of an upload (file-pages.ts)
+	it('lässt Stil-Attribute von Svelte und die Vorschau eines Uploads als data:-Bild zu', () => {
+		expect(directives['style-src']).toEqual(['self', 'unsafe-inline']);
+		expect(directives['img-src']).toEqual(['self', 'data:', 'blob:']);
+	});
 });
