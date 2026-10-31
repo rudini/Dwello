@@ -127,6 +127,11 @@ Then(
 	}
 );
 
+// a letter still to send gets its Zahlungsfrist the day it is marked sent (#545, persona weber-545 P-1)
+Then('führt die Abrechnung die {string} ohne Zahlungsfrist', async ({ verwalter }, title: string) => {
+	await verwalter.sees(documentFor(title, '')).not.toContain('Zahlungsfrist');
+});
+
 Then('nennt die Abrechnung die nächste Mahnung ab dem Tag in {int} Tagen', async ({ verwalter }, days: number) => {
 	await verwalter.sees(nextReminder).toBe(swissDate(inDays(days)));
 });

@@ -137,6 +137,7 @@ Funktionalität: Mahnungen
     Wenn der Liegenschaftsverwalter eine Mahnung sendet
     Dann nennt die Abrechnung keine letzte Mahnung
     Und sagt die Abrechnung, dass die Mahnung noch zu versenden ist
+    Und führt die Abrechnung die "Zahlungserinnerung" ohne Zahlungsfrist
     Und sagt die Liste der Abrechnungen bei "Anna Keller", dass die Mahnung noch zu versenden ist
 
   # #545: beim Markieren erstellt Dwello den Brief neu, mit der Zahlungsfrist ab diesem Tag (#193)
