@@ -13,6 +13,9 @@ import {
 	confirmDeclineCorrectionButton,
 	declineCorrectionButton,
 	recalculateButton,
+	redeliverButton,
+	confirmRedeliverButton,
+	newPdfSentButton,
 	splitKeysInvoiceLink,
 	sendRecalculateButton,
 	createCorrectionButton,
@@ -96,6 +99,9 @@ export const declineCorrection: Activity = (actor) =>
 
 // #338: a draft is calculated again from the invoices as they are now, after the confirmation names the consequence
 export const askToRecalculate = Click.on(recalculateButton);
+export const askToRedeliver = Click.on(redeliverButton);
+export const redeliverByLetter: Activity = (actor) => actor.attemptsTo(Click.on(redeliverButton), Click.on(confirmRedeliverButton));
+export const markNewPdfSent = Click.on(newPdfSentButton);
 export const openSplitKeysInvoice = (description: string) => Click.on(splitKeysInvoiceLink(description));
 export const recalculateDraft: Activity = (actor) =>
 	actor.attemptsTo(Click.on(recalculateButton), Click.on(confirmRecalculateButton));

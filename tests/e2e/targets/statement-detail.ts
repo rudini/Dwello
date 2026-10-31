@@ -110,6 +110,12 @@ export const confirmDeclineCorrectionButton = target('Nicht berichtigen bestäti
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const recalculateDialog = target('Frage vor dem Neuberechnen', (page) => page.getByRole('dialog'));
+// #534: «Erneut per Brief zustellen» and its confirmation; #968: the new PDF still to send and «Neues PDF als versendet markieren»
+export const redeliverButton = target('Erneut per Brief zustellen', (page) => page.getByTestId('statement-redeliver-button'));
+export const redeliverDialog = target('Bestätigung des erneuten Zustellens', (page) => page.getByRole('dialog'));
+export const confirmRedeliverButton = target('Erneut zustellen bestätigen', (page) => page.getByTestId('statement-redeliver-confirm'));
+export const newPdfToSend = target('Neues PDF noch zu versenden', (page) => page.getByTestId('statement-new-pdf-to-send'));
+export const newPdfSentButton = target('Neues PDF als versendet markieren', (page) => page.getByTestId('statement-new-pdf-sent-button'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
 
 // #528: the hint on a Kategorie billed with different Verteilschlüssel, on the draft and in the «Neu berechnen» question

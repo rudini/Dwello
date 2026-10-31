@@ -1231,6 +1231,34 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF nicht "Ratenzahlung bis Ende März vereinbart"
 
   # #524: eine neue Zahlungsfrist kennt der Mieter erst aus dem neuen PDF
+  # #968 (Option A): das neue PDF nach einer Änderung liegt unter «Dokumente» zum Versand bereit, bis der
+  # Liegenschaftsverwalter es als versendet markiert; die Abrechnung nennt es bis dann als noch zu versenden
+  @wip
+  Szenario: Nach einer Änderung liegt das neue PDF zum Versand bereit
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und hat die Abrechnung den Status "Versendet"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Dann nennt die Abrechnung das neue PDF als noch zu versenden
+    Und der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten
+    Dann ist die "Nebenkostenabrechnung, neues PDF" an "Eva Frei" zu versenden
+
+  @wip
+  Szenario: Das neue PDF als versendet markieren
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und hat die Abrechnung den Status "Versendet"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Wenn der Liegenschaftsverwalter das neue PDF als versendet markiert
+    Dann nennt der Verlauf "Neues PDF versendet per Brief" am heutigen Tag
+    Und nennt die Abrechnung das neue PDF nicht mehr als noch zu versenden
+
   Szenario: Nach einer neuen Zahlungsfrist rät Dwello, das neue PDF zu senden
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

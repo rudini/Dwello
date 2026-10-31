@@ -49,7 +49,10 @@ import {
 	splitKeysLines,
 	splitKeysHints,
 	recalculateQuestion,
-	splitKeysText
+	splitKeysText,
+	redeliverConfirmation,
+	redeliverOffers,
+	newPdfStillToSend
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -94,7 +97,10 @@ import {
 	confirmSending,
 	settleCarryOver,
 	askToRecalculate,
-	openSplitKeysInvoice
+	openSplitKeysInvoice,
+	askToRedeliver,
+	redeliverByLetter,
+	markNewPdfSent
 } from '../tasks/statement-detail';
 import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
@@ -791,4 +797,34 @@ Then('nennt die Vorschau die Rechnung {string} mit {string}', async ({ verwalter
 Then('sagt der Entwurf nicht, dass eine Kategorie mit verschiedenen Verteilschlüsseln abgerechnet wird', async ({ verwalter }) => {
 	await verwalter.sees(statusOfStatement).toContain('Entwurf');
 	await verwalter.sees(splitKeysHints('draft')).toBe(0);
+});
+
+// #534: a sent statement delivered again by letter
+When('der Liegenschaftsverwalter die Abrechnung erneut per Brief zustellt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(redeliverByLetter);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung erneut per Brief zustellen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(askToRedeliver);
+});
+
+Then('erklärt die Bestätigung des erneuten Zustellens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(redeliverConfirmation).toContain(text);
+});
+
+Then('bietet die Abrechnung kein erneutes Zustellen an', async ({ verwalter }) => {
+	await verwalter.sees(redeliverOffers).toBe(0);
+});
+
+// #968: the new PDF after a change of a sent statement
+Then('nennt die Abrechnung das neue PDF als noch zu versenden', async ({ verwalter }) => {
+	await verwalter.sees(newPdfStillToSend).toBe(true);
+});
+
+Then('nennt die Abrechnung das neue PDF nicht mehr als noch zu versenden', async ({ verwalter }) => {
+	await verwalter.sees(newPdfStillToSend).toBe(false);
+});
+
+When('der Liegenschaftsverwalter das neue PDF als versendet markiert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(markNewPdfSent);
 });
