@@ -222,6 +222,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Mahnstufe** | Zahlungserinnerung (1. Stufe), 2. Mahnung, 3. Mahnung. | `reminder_level` Feld |
 | **Mahnfrist** | Anzahl Tage nach Ablauf der Zahlungsfrist bis zur Mahnung. | `reminder_after_days` Config |
 | **Dokument** | Brief oder E-Mail an einen Mieter (z.B. Mahnung) mit PDF, oder vom Liegenschaftsverwalter hochgeladene Datei zu einem Mieter. | `documents` Tabelle |
+| **Dokumente geprüft** | Der Vermieter hat die hochgeladenen Dokumente eines ehemaligen Mieters, die vor dem Vertragsende seines letzten Mietvertrags hochgeladen wurden, durchgesehen und gelöscht, was er nicht mehr braucht. Dwello speichert den Tag am letzten Mietvertrag und nennt die Aufgabe in der Übersicht nicht mehr. Ändert sich das Vertragsende, fällt die Prüfung weg. | `documents_checked_on` Feld |
 | **Hochgeladenes Dokument** | Datei, die der Liegenschaftsverwalter zu einem Mieter ablegt, z.B. Übergabeprotokoll oder Betreibungsauszug. | `documents.type = 'upload'` |
 | **Ausweiskopie** | Kopie eines amtlichen Ausweises des Mieters, als hochgeladenes Dokument abgelegt. | `documents.type = 'upload'` |
 | **Versandstatus** | Zu versenden (`to_send`, Brief noch zu verschicken) oder Versendet (`sent`). | `status` Feld |
