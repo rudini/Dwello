@@ -194,3 +194,27 @@
 - [x] Personas: `helga-718c.md` (P-1 Major fixed; `-2`), `sven-718c.md` (P-1, P-2 Major fixed; `-2`), `marco-718c.md`, `weber-718c.md`, `anna-718c.md` (P-1 Major fixed; `-2`); Minors met by several personas: #956, #957
 - [x] No scenario for an expired code: the 30 minutes need the server clock; `backup-new-code.pg.test.ts`
 - [x] PR `Fixes #718`, `Fixes #957`: pushed after this archive
+## Session: #951 Protokoll names access keys and AI program queries
+
+- [x] @wip scenario «Das Protokoll nennt die Zugangsschlüssel und die Abrufe von KI-Programmen» (`settings.feature`), seen red at the old description
+- [x] `fach-reviewer` round 1 on the scenario and the wording in four languages (`docs/reviews/951-fachreview-1.md`)
+- [x] `audit_link`, `audit_purpose`, `audit_empty_text` in `messages/{de,fr,it,en}.json`; DOM test of the empty state follows
+- [x] Scenario green without `@wip`
+- [x] Closing `code-reviewer` round (`docs/reviews/951-review-1.md`)
+- [x] PR (Fixes #951), pushed after this archive
+
+## Session: #954 main red in the scheduled run (2026-10-30)
+
+- [x] Run 41028478233 on b5d45ce: two Firefox failures, read from the traces of `e2e-reports-3` and `e2e-reports-4`
+- [x] «Hochladen abbrechen verwirft die Dateien»: the KI answer came 24 ms before the click; the hints pushed «Abbrechen» down and the click hit them. The step waits until no file is still read; both cancel scenarios green in Chromium, 3 times each
+- [ ] «Suche ohne Treffer» (Firefox, third time after #754, #869): no request after the click, the caret stays in the field. Cause not confirmed: this container has no Firefox; comment on #954
+- [x] No review of its own: a test-only CI fix (Workflow 7)
+- [x] PR `Refs #954`: pushed after this archive
+
+## Session: #954 main red after #955 (2026-10-30)
+
+- [x] Push run 41048205819 on f8bd05f: language row «access-keys key-created» found «her» in the random key «dwello_HEr374…»
+- [x] `tests/e2e/questions/language.ts` masks access keys as it masks the Wiederherstellungscode; 10'000 random keys masked completely, the access-keys language rows green
+- [x] Firefox (loaded with the product owner's approval): «Suche ohne Treffer» not reproduced (90, 240 and 507 runs green); comment on #954
+- [x] No review of its own: a test-only CI fix (Workflow 7)
+- [x] PR `Refs #954`: pushed after this archive

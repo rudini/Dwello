@@ -16,6 +16,7 @@ import {
 	belegDistributionKey,
 	belegInvoiceDate,
 	anyBelegRow,
+	belegeBeingRead,
 	belegRow,
 	belegSelected,
 	belegUploadButton,
@@ -101,7 +102,9 @@ export const chooseKey = (fileName: string, key: string): Activity => async (act
 
 export const createInvoices = Click.on(createInvoicesButton);
 // once the files are listed: a click right after choosing them closed the dialog without asking (#607, firefox in CI)
-export const startCancellingUpload: Activity = (actor) => actor.attemptsTo(Wait.until(anyBelegRow), Click.on(cancelUploadButton));
+// once every file is read: a reading that ends during the click moves «Abbrechen» away from the pointer (#954)
+export const startCancellingUpload: Activity = (actor) =>
+	actor.attemptsTo(Wait.until(anyBelegRow), Wait.forCount(belegeBeingRead, 0), Click.on(cancelUploadButton));
 export const confirmCancelling = Click.on(discardConfirm);
 
 // The BFF endpoints the dialog calls, answered with an error

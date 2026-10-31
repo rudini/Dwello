@@ -12,6 +12,10 @@ export const discardConfirm = target('Abbrechen bestätigen', (page) => page.get
 
 /** Any file's row: the dialog lists the chosen files */
 export const anyBelegRow = target('ein Beleg', (page) => page.getByTestId('invoice-upload-row').first());
+/** The rows of files the KI still reads: their hints come when the reading ends and push the buttons below down */
+export const belegeBeingRead = target('Belege, die noch gelesen werden', (page) =>
+	page.getByTestId('invoice-upload-row-status').filter({ hasText: 'Wird gelesen' })
+);
 /** The row of one file in the dialog, by its file name */
 export const belegRow = (fileName: string) =>
 	target(`Beleg «${fileName}»`, (page) => page.getByTestId('invoice-upload-row').filter({ hasText: fileName }));
