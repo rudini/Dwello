@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { backendMessage, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import type { Actions, PageServerLoad } from './$types';
@@ -30,6 +31,12 @@ export const actions: Actions = {
 			})
 		});
 		if (!response.ok) {
+			const refusal = (await response.json().catch(() => ({}))) as BackendError;
+			// a Zahlungsfrist before the one the tenant got (#966): at its field
+			if (refusal.code === 'STATEMENT_DEADLINE_BEFORE_SENT')
+				return failed(response.status, {
+					paymentDeadline: backendMessage(refusal, m.statements_save_failed())
+				});
 			return failed(response.status, { form: m.statements_save_failed() });
 		}
 		// after sending, what only the new PDF prints, named on the detail page (#524)

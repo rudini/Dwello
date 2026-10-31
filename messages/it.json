@@ -565,6 +565,7 @@
 	"backend_reminder_refund": "Un rimborso non viene sollecitato: Lei deve l’importo all’inquilino.",
 	"backend_reminder_limit": "Sono già stati inviati 3 solleciti.",
 	"backend_reminder_below_minimum": "L’importo è inferiore a CHF 5.00. Non viene richiesto né sollecitato.",
+	"backend_statement_deadline_before_sent": "Il termine di pagamento non può essere anteriore al {date}: questo termine figura nel PDF inviato e prima di tale data l’inquilino non è in mora. Inserisca questa data o una data successiva.",
 	"backend_reminder_too_early": "Il prossimo sollecito è possibile solo dal {date}: il termine di pagamento dell’ultimo sollecito scade il {deadline}.",
 	"backend_tenant_no_email": "L’inquilino non ha un indirizzo e-mail.",
 	"backend_mail_not_configured": "L’invio di e-mail non è configurato.",
