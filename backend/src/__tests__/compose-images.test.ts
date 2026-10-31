@@ -83,7 +83,8 @@ describe('Installation mit compose.yaml', () => {
 
 	// docker-compose.prod.yml stays for installations from a clone: both start the same Dwello
 	it('startet dieselben Dienste mit denselben Einstellungen wie docker-compose.prod.yml', () => {
-		// a service of a profile (Caddy, #722) is compose.yaml's own: a clone gets HTTPS through deploy/demo/
+		// a service of a profile (Caddy, #722) is compose.yaml's own: deploy/demo/ brings its own Caddy for the clone, which
+		// would inherit the profile if docker-compose.prod.yml had one
 		const same = ({ services }: Compose) =>
 			Object.fromEntries(
 				Object.entries(services)

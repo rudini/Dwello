@@ -130,7 +130,7 @@ Over plain `http` the password and every page cross the network unencrypted, and
    DWELLO_DOMAIN=dwello.example.ch
    ```
 
-   `docker compose up -d` then starts Caddy as well, on ports 80 and 443. A reverse proxy of your own instead (leave out both lines and forward the domain to `localhost:3000`) must let requests of at least 11 MB through, or uploads of documents fail (nginx refuses more than 1 MB by default: `client_max_body_size 11m;`). Caddy sets no limit.
+   `docker compose up -d` then starts Caddy as well, on ports 80 and 443. Set both lines together: without `DWELLO_DOMAIN`, Caddy does not start and `docker logs dwello-caddy` names the error. A reverse proxy of your own instead (leave out both lines and forward the domain to `localhost:3000`) must let requests of at least 11 MB through, or uploads of documents fail (nginx refuses more than 1 MB by default: `client_max_body_size 11m;`). Caddy sets no limit.
 
 3. In `.env`, instead of the PC values:
 
@@ -155,7 +155,7 @@ CORS_ORIGIN=http://homeserver.local:3000
 
 and keep `COOKIE_SECURE=false`. Dwello accepts the sign-in only at the address in `PUBLIC_APP_URL`.
 
-For a home server that should stay out of the internet, Caddy can get the certificate through the DNS of the domain instead (see the Caddy documentation, «DNS challenge»); access from outside then goes through a VPN such as Tailscale.
+For a home server that should stay out of the internet, a Caddy you install yourself (with the module of your DNS provider; the one in `compose.yaml` has none) can get the certificate through the DNS of the domain instead (see the Caddy documentation, «DNS challenge»); access from outside then goes through a VPN such as Tailscale.
 
 ## 8. Security
 
