@@ -378,3 +378,9 @@
 - [x] Marker `TODO(fachlich prüfen, #532)` removed (`src/lib/document-status.ts`, a comment only)
 - [x] No scenario, no review round: glossary, requirements and a comment only
 - [x] PR: pushed after this archive
+
+## Session 31.10.2026: #986 Main CI rot auf fd00105 (Download des versendeten PDF in Firefox)
+
+- [x] Root cause from the job log: the Verlauf names the new PDF before «PDF erstellen» ends (#968); the re-render takes the download click
+- [x] `generateStatementPdf` waits for the success toast; the 29 scenarios that make a PDF pass in chromium (no Firefox locally)
+- [x] PR: pushed after this archive
