@@ -281,7 +281,7 @@
 	"dashboard_task_drafts_action": "Vedere le bozze",
 	"dashboard_task_outdated_drafts_one": "{count} bozza non è aggiornata",
 	"dashboard_task_outdated_drafts_many": "{count} bozze non sono aggiornate",
-	"dashboard_task_outdated_drafts_text": "Dalla loro creazione sono state registrate, modificate o eliminate fatture del loro periodo di conteggio, oppure è stata modificata la scorta di combustibile. Ricalcoli queste bozze prima di recapitarle.",
+	"dashboard_task_outdated_drafts_text": "Dalla loro creazione sono state registrate, modificate o eliminate fatture del loro periodo di conteggio, è stata modificata la scorta di combustibile, oppure è cambiato il riporto da un conteggio precedente che devono compensare. Ricalcoli queste bozze prima di recapitarle.",
 	"dashboard_task_correct_text": "Dall’allestimento del conteggio {number} di {tenant} {later}. Rettifichi il conteggio con «Rettificare il conteggio». Il conteggio rettificato computa quanto è già stato pagato.",
 	"dashboard_task_correct_old": "Questo periodo di conteggio è terminato più di cinque anni fa. Si faccia consigliare se il credito è prescritto.",
 	"dashboard_task_correct_action": "Aprire il conteggio",

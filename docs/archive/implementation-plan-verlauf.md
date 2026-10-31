@@ -370,6 +370,15 @@
 - [x] Marker `TODO(fachlich prüfen, #538)` removed (`backend/src/db/schema.ts`, a comment only)
 - [x] No scenario, no review round: glossary and a comment only
 - [x] PR: pushed after this archive
+## Session: #721 a Content-Security-Policy (2026-10-31)
+
+- [x] `svelte.config.js` `kit.csp` (mode auto): script-src 'self' with SvelteKit's nonce, default-src 'self', style-src 'self' 'unsafe-inline', img-src 'self' data: blob:, object-src 'none', base-uri 'self', form-action 'self', frame-ancestors 'none'; `src/__tests__/csp.test.ts` (seen red)
+- [x] Checked: E2E in Chromium for hydration, authentication, invoice-new, sicherung, documents, statement-detail (186 passed); a console scan of 11 pages and an upload of two invoice PDFs on the production persona build: no CSP violation
+- [x] The PDF refusal page is HTML from a `+server.ts` route, outside `kit.csp`; it works unchanged
+- [x] Code review `docs/reviews/721-review-1.md` (C-1 Minor fixed), closing round `721c-review-1.md` (no findings)
+- [x] No scenario: a response header the landlord does not see
+- [x] Also: A2 volumes confirmed by the product owner in `utility-tree.md` (#974)
+- [x] PR `Fixes #721`: pushed after this archive
 
 ## Session 31.10.2026: #532 Glossar «Zahlungsfrist einer Mahnung», «Mahnung», «Nicht mehr versenden»
 
@@ -409,4 +418,11 @@
 - [x] code-reviewer `docs/reviews/966-review-1.md`: C-1 (action test with contract), C-2 (docs) done, C-3 noted
 - [x] Closing review `docs/reviews/966close-review-1.md`: C-1 (restore in the contract test) done
 - [x] No persona: the decided message was read in four languages by the fach-reviewer
+## Session 31.10.2026: #981 Entwurf mit geändertem Übertrag fehlt in der Übersicht
+
+- [x] @wip scenario «Ein Entwurf mit geändertem Übertrag ist nicht aktuell» and pg test (`statement-carry-over.pg.test.ts`), both seen red
+- [x] fach-reviewer step 1 `docs/reviews/981-fachreview-1.md`: V-1 (task text in four languages) done; V-2 Minor existed before, stays in the report
+- [x] `outdatedStatements` counts `carryChanged` drafts (#981 A); `dashboard_task_outdated_drafts_text` names the third reason; scenario «Nicht aktuelle Entwürfe als eigene Aufgabe» takes the new text (Spec change approved: #981)
+- [x] code-reviewer `docs/reviews/981-review-1.md`: no findings
+- [x] No persona: the decided text was read in four languages by the fach-reviewer; no step-5 fach-reviewer: nothing changed since step 1
 - [x] PR: pushed after this archive

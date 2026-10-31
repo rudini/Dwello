@@ -281,7 +281,7 @@
 	"dashboard_task_drafts_action": "View drafts",
 	"dashboard_task_outdated_drafts_one": "{count} draft is not up to date",
 	"dashboard_task_outdated_drafts_many": "{count} drafts are not up to date",
-	"dashboard_task_outdated_drafts_text": "Since they were created, invoices of their billing period have been added, changed or deleted, or the fuel stock has been changed. Recalculate these drafts before you deliver them.",
+	"dashboard_task_outdated_drafts_text": "Since they were created, invoices of their billing period have been added, changed or deleted, the fuel stock has been changed, or the amount carried over from an earlier statement that they must offset has changed. Recalculate these drafts before you deliver them.",
 	"dashboard_task_correct_text": "Since statement {number} of {tenant} was created, {later}. Correct the statement with «Correct statement». The corrected statement takes into account what has already been paid.",
 	"dashboard_task_correct_old": "This billing period ended more than five years ago. Seek advice on whether the claim is time-barred.",
 	"dashboard_task_correct_action": "Open statement",

@@ -177,7 +177,8 @@ export async function outdatedStatements() {
 		counting(statements)
 			.map(async (s) => {
 				const changes = await changesOf(s, load);
-				const outdated = s.status === 'draft' ? draftOutdated(changes) : changes?.correctionDue;
+				// a draft that would count another Übertrag now as well (#981 A, Fachreview 529-1 V-5)
+				const outdated = s.status === 'draft' ? s.carryChanged || draftOutdated(changes) : changes?.correctionDue;
 				return outdated
 					? {
 							id: s.id,
