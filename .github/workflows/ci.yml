@@ -76,7 +76,7 @@ jobs:
           # The API contracts are checked against the backend (api-contracts.pg.test.ts); the upgrade check and the queries
           # per route run with the backend steps, so a change to them or to their ratchet runs them too (#922); the compose
           # files and the keys script, which backend tests compare (compose-images.test.ts, #578)
-          echo "backend=$(grep -qE '^(backend|tests/contracts|docker)/|^(compose\.yaml|docker-compose\.prod\.yml)$|^tools/fitness/(upgrade-check\.sh|restore-check\.ts|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "backend=$(grep -qE '^(backend|tests/contracts|docker)/|^(compose\.yaml|docker-compose\.prod\.yml)$|^tools/fitness/(upgrade-check\.sh|data-totals\.sh|restore-check\.ts|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
@@ -110,7 +110,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # tagged as compose.yaml names the published images, so the step below starts these
+        with:
+          fetch-depth: 0 # the update check starts from the previous release tag
+      # tagged as compose.yaml names the published images, so the steps below start these
       - name: Build frontend image
         run: docker build --file Dockerfile --tag ghcr.io/rudini/dwello-frontend:latest .
       # The Sicherung (#718) needs pg_dump of the database's major version (postgres:16) in the image
@@ -131,6 +133,13 @@ jobs:
           }
           curl --fail --silent --show-error http://localhost:3000/health
           docker compose down --volumes
+      # U1 (docs/architecture/fitness-functions.md, #997): the update a landlord runs: docker compose up -d with the last
+      # weekly release's compose.yaml, from its images (pulled) to these, with demo data and a confirmed Wiederherstellungscode
+      - name: Update from the previous release
+        run: tools/fitness/compose-update-check.sh latest
+      # the negative test: a failing migration stops the update with its cause in the log, after a Sicherung
+      - name: Update with a failing migration
+        run: tools/fitness/compose-update-check.sh --broken latest
 
   static-checks:
     name: Lint and types
