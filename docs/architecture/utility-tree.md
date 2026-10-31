@@ -21,7 +21,7 @@ Bestehende Szenarien aus `docs/archive/migration-mva.md` (Q1–Q5, D1–D2, S1�
 | Betrieb | Jede Installation läuft selbst betrieben mit Docker Compose (Postgres 16, Ollama). Dazu kommt eine öffentliche Demo auf einer Oracle-VM (2 OCPU ARM, 12 GB, ohne GPU), die jede Nacht zurückgesetzt wird. Ein gehostetes Angebot ist nicht geplant. | aus Repo/Config (`docker-compose.prod.yml`, `deploy/demo/README.md`); vom Nutzer bestätigt |
 | Daten | Namen und Adressen von Mietern, IBAN, Beträge, Belege (Rechnungsdateien und PDFs liegen in der DB). Es gilt das DSG. Bei einer externen KI gehen Belege an den Anbieter. Aufbewahrung 10 Jahre. | aus Repo/Config (`README.md`, `docs/installation.md` §5, PRD §7.3) |
 | Releases | Seit #935 wird `main` wöchentlich am Montag um 06:00 (Schweizer Zeit) getaggt und als Release veröffentlicht, eine Woche ohne Änderung bekommt kein Release. Vorher wurde jeder Merge getaggt. | aus Repo/Config (`release.yml`); vom Nutzer bestätigt (31.10.2026) |
-| Backup | Manuelles `pg_dump` und Restore sind dokumentiert (`docs/installation.md` §5). Es gibt keine Automatik, keinen Test und keine Überwachung. | aus Repo/Config |
+| Backup | Seit #718 sichert Dwello täglich, beim Start nach mehr als einem Tag und vor jeder Migration, verschlüsselt mit dem Wiederherstellungscode. Den Restore führt der Betreiber mit einem Befehl aus. `restore-check.ts` prüft ihn bei jedem PR mit Backend-Änderung. `/health` und die Übersicht melden, wenn seit mehr als einem Tag keine Sicherung gelang. Vorher gab es nur ein dokumentiertes manuelles `pg_dump`. | aus Repo/Config (`backup.service.ts`, `docs/installation.md` §5) |
 | Teuerster Fehler | Datenverlust | vom Nutzer bestätigt |
 | Sofort erkennbar | Fehlgeschlagenes Backup; fehlgeschlagener Start oder Migration | vom Nutzer bestätigt |
 | Verfügbarkeit | Der Betreiber ist zuständig, Dwello liefert Backup und Restore mit. Die 99,5 % aus PRD §7.4 gelten nicht als Ziel von Dwello. | vom Nutzer bestätigt |
@@ -34,10 +34,10 @@ Dwello-Nutzen
 │  ├─ Form eines Felds an einem Ort .......... Ä1 Neues Feld an einer Entität            (H/L)
 │  └─ Fachregel an einem Ort ................. Ä4 Fachregel nur im Backend              (H/L)
 ├─ Verfügbarkeit / Resilienz
-│  ├─ Kein Datenverlust ...................... R1 Verschlüsseltes, kompatibles Backup   (H/H)
-│  └─ Sicheres Update ........................ U1 Wöchentliches Update mit Migration    (H/H)
+│  ├─ Kein Datenverlust ...................... R1 Verschlüsseltes, kompatibles Backup   (H/L)
+│  └─ Sicheres Update ........................ U1 Wöchentliches Update mit Migration    (H/L)
 ├─ Betreibbarkeit / Beobachtbarkeit
-│  └─ Fehler sofort erkennen ................. O1 Fehlgeschlagenes Backup sichtbar      (H/M)
+│  └─ Fehler sofort erkennen ................. O1 Fehlgeschlagenes Backup sichtbar      (H/L)
 ├─ Testbarkeit
 │  └─ Schnelle, verlässliche Rückmeldung ..... T1 CI auf PR und main ≤ 15 min, main grün (H/M)
 ├─ Performance
@@ -109,14 +109,15 @@ Dwello-Nutzen
 ### U1 Wöchentliches Update mit Migration
 
 - **Auslöser:** Der Betreiber installiert das wöchentliche Update. Es enthält eine Migration.
-- **Umgebung:** Selbst betrieben, echte Daten aus mehreren Jahren, Update laut `docs/installation.md` §5 (`git pull`, `up -d --build`).
+- **Umgebung:** Selbst betrieben, echte Daten aus mehreren Jahren, Update laut `docs/installation.md` §5 (`docker compose pull`, `docker compose up -d`; vor #578 `git pull`, `up -d --build`).
 - **Reaktion:** Das Update läuft durch. Schlägt es fehl, ist der Fehler sofort erkennbar, und der Stand vor dem Update lässt sich ohne Datenverlust wiederherstellen.
 - **Messgrösse und Ziel:** Datenverlust **0** (vom Nutzer bestätigt: Datenverlust ist der teuerste Fehler). **100 %** der Releases sind als Upgrade von der Vorversion mit Daten getestet (vom Nutzer bestätigt). Ein fehlgeschlagener Start oder eine fehlgeschlagene Migration zeigt sich als «unhealthy», und das Log nennt die Ursache (vom Nutzer bestätigt: muss sofort erkennbar sein). Entscheid PO 28.10.2026 (#782): Ein Container, der wegen der gescheiterten Migration immer wieder neu startet («Restarting»), mit Datei und Ursache im Log, erfüllt das; einen Start ohne Migration mit «unhealthy» gibt es nicht.
 - **Heute:**
-  - Migrationen laufen beim Start des Backends (`bun scripts/migrate.ts && exec bun run src/index.ts`), je eine Transaktion pro Migration (`backend/src/db/migrate.ts`). Ein Backup vor der Migration gibt es nicht (aus Repo/Config).
+  - Migrationen laufen beim Start des Backends (`bun scripts/migrate.ts && exec bun run src/index.ts`), je eine Transaktion pro Migration (`backend/src/db/migrate.ts`). Seit #718 sichert Dwello vor jeder Migration; scheitert die Sicherung, bricht das Update ab, ohne die Datenbank zu ändern, und das Log nennt die Ursache (aus Repo/Config, `docs/installation.md` §5).
   - E2E testet nur Migrationen auf leere DB («migrated fresh before each run», `docs/test-pyramid.md`). Seit Phase 2a prüft `tools/fitness/upgrade-check.sh` jeden PR mit Backend-Änderung als Upgrade vom letzten Release mit Demo-Daten: Zeilenzahlen, Summen der Abrechnungsbeträge und die in den Demo-Daten leeren Tabellen (#783, #782). Eine scheiternde Migration lässt ihre Daten unverändert, der Start bricht mit Exit-Code 1 ab und das Log nennt Datei und Ursache (`migrations.pg.test.ts`, #782).
   - Seit #935 entsteht ein Release wöchentlich am Montag um 06:00 (Schweizer Zeit) und bei einem Lauf von Hand, nicht mehr bei jedem Merge; eine Woche ohne Änderung bekommt keins (`release.yml`, `tools/release/release.sh`, Entscheid PO 31.10.2026). `upgrade-check.sh` prüft damit jeden PR gegen das letzte wöchentliche Release, also den Weg der Vermieter. Die Fusszeile zeigt zwischen zwei Releases die Version mit den Commits seither (`0.4.0+3-gabc1234`).
-- **Fitness Function:** CI-Job pro Release: Compose mit dem letzten Tag und Demo-Daten starten → auf HEAD aktualisieren → Healthcheck grün, Zeilenzahlen und Summen gleich. Dazu ein Negativtest: Eine absichtlich fehlschlagende Migration lässt die Daten unverändert und macht den Container «unhealthy» mit lesbarer Ursache.
+  - Seit #997 prüft der CI-Job «Docker images» bei jedem PR mit App-Änderung und auf `main` das Update so, wie der Vermieter es macht (`tools/fitness/compose-update-check.sh`): `compose.yaml` und Images des letzten wöchentlichen Release mit Demo-Daten und bestätigtem Wiederherstellungscode starten, dann `docker compose up -d` mit den Images des PR und derselben `compose.yaml`, die der Vermieter behält. Rot wird er, wenn ein Dienst nicht gesund wird, eine Migration ohne Sicherung davor läuft, eine Tabelle Zeilen verliert oder sich eine Summe der Abrechnungsbeträge ändert. Ein zweiter Lauf mit absichtlich scheiternder Migration muss am Log mit Datei und Ursache erkennbar sein und die Sicherung davor zeigen.
+- **Fitness Function:** CI-Job pro Release: Compose mit dem letzten Tag und Demo-Daten starten → auf HEAD aktualisieren → Healthcheck grün, Zeilenzahlen und Summen gleich. Umgesetzt: der Teil auf der Datenbank (`upgrade-check.sh`, bei jedem PR mit Backend-Änderung) und seit #997 das Update der Images mit Compose samt Healthcheck (`compose-update-check.sh`, bei jedem PR mit App-Änderung). Dazu der Negativtest: Eine absichtlich fehlschlagende Migration stoppt das Update; der Container startet immer wieder neu, und die erste `error:`-Zeile des Logs nennt Datei und Ursache (Entscheid PO 28.10.2026, #782).
 
 ### O1 Fehlgeschlagenes Backup ist sichtbar
 
@@ -177,7 +178,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 
 | | Schwierigkeit **H** | **M** | **L** |
 |---|---|---|---|
-| **Wichtigkeit H** | **U1, R1** | O1, P2, T1 | Ä1, Ä4, S1 |
+| **Wichtigkeit H** | | P2, T1 | R1, U1, O1, Ä1, Ä4, S1 |
 | **M** | | P1 | |
 | **L** | | | |
 
@@ -185,15 +186,15 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 |---|---|---|---|---|
 | Ä1 | H | Der PO hat die Zielwerte am 23.10. festgelegt. Ein neues Feld ist die häufigste Änderung (`db:schema` in 31 % der Features). | L | Bis 28.10.2026 H: Median 6 → 4, P90 19 → 8, ohne gemeinsamen Vertrag zwischen den Schichten (0 Importe FE/BFF → Backend). Nach #910 und #912 Median 1, P90 6: Ziel erreicht, `field-spread` hält es (Entscheid PO 28.10.2026: H/H → H/L). |
 | Ä4 | H | Entscheid des PO, #717; das MCP über die API allein hängt daran (#815, #817) | H | Der BFF liest 0 (#717, #788). Seit #815 zählt auch das Frontend: 41 Ableitungen in 20 Dateien (25.10.2026). Entscheid PO 25.10.2026: H/M → H/H. Nach #815 Teil B bis D 0 Ableitungen: Ziel erreicht, `bff-decision` und `frontend-decision` halten es (Entscheid PO 28.10.2026: H/H → H/L). |
-| R1 | H | Datenverlust ist der teuerste Fehler. | H | Mehrere Anforderungen zugleich: Automatik, Verschlüsselung mit Wiederherstellungscode, Kompatibilität über Releases und Restore ≤ 5 min. Heute gibt es nur ein manuelles, unverschlüsseltes, ungetestetes Verfahren. Ob 5 min reichen, ist unbekannt (A2). |
-| U1 | H | Wöchentliches Update; Datenverlust und fehlgeschlagene Migration müssen erkennbar sein. | H | Kein Backup vor der Migration, kein Upgrade-Test mit Daten. Migrationen gehen nur vorwärts, ein Zurück gibt es nur per Restore. |
-| O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
+| R1 | H | Datenverlust ist der teuerste Fehler. | L | Bis 31.10.2026 H: nur ein manuelles, unverschlüsseltes, ungetestetes Verfahren. Seit #718 tägliche verschlüsselte Sicherung, Restore bei jedem PR mit Backend-Änderung geprüft, nach 10 Jahren 24–97 s gemessen (#974, A2 bestätigt). |
+| U1 | H | Wöchentliches Update; Datenverlust und fehlgeschlagene Migration müssen erkennbar sein. | L | Bis 31.10.2026 H, dann M: kein Backup vor der Migration, kein Upgrade-Test mit Daten. Seit #718 Sicherung vor jeder Migration, seit Phase 2a Upgrade-Test der Datenbank bei jedem PR, seit #935 wöchentliches Release. Seit #997 prüft CI auch das Update der Images mit Compose samt Healthcheck, Sicherung vor der Migration und Negativtest. Migrationen gehen nur vorwärts, ein Zurück gibt es nur per Restore. |
+| O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | L | Bis 31.10.2026 M (fehlte ganz). Seit #718 melden `/health` und die Übersicht eine Sicherung, die älter als ein Tag ist, getestet in Backend und E2E. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | M | Am 23.10.2026 H: `main` 43–79 min, das Drei- bis Fünffache des Ziels, 4 von 7 abgeschlossenen Läufen rot. Am 28.10.2026 `main` Median 13 min, 2 von 29 Läufen über 15 min, 91 von 99 Läufen in 7 Tagen grün (Entscheid PO 28.10.2026: H/H → H/M). |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Einmal auf einem Runner-ähnlichen Rechner gemessen (31.10.2026, #934): 6,5 s samt PDFs für 50 Wohnungen, Ziel 30 s. Die Schleife im BFF ist kein Engpass. Die Demo-VM ist nicht gemessen (A4). |
 | P2 | H | Wartezeit verunsichert unerfahrene Nutzer (vom Nutzer bestätigt). | M | Einmal gemessen (28.10.2026, #781): alle Listen- und Übersichtsrouten unter dem Ziel, `statements/outdated` nach #919 80 ms statt 1110 ms p95. |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut und getestet (#917, #936). |
 
-**Kandidaten für die ersten Refactorings (H/H):** U1, R1 (bis 28.10.2026 auch Ä1 und T1). **Quick Win (H/L):** S1; Ä1 und Ä4 halten ihr Ziel, der Ratchet sichert es.
+**Kandidaten (Neueinstufung der Schwierigkeit 31.10.2026, abgeleitet; die Wichtigkeit bleibt, wie der PO sie bestätigt hat):** Kein Szenario steht mehr auf H/H (bis 31.10.2026 U1 und R1, bis 28.10.2026 auch Ä1 und T1). U1 ist seit #997 erreicht. P2 und T1 halten ihr Ziel bis auf Ausreisser, ihre Prüfung in CI hängt an A4. **Erreicht (H/L):** R1, U1, O1, S1; Ä1 und Ä4 halten ihr Ziel, der Ratchet sichert es.
 
 ## 5. Offene Annahmen
 
