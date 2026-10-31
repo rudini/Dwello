@@ -11,7 +11,7 @@ flock -n 9 || exit 0
 [ "$(git branch --show-current)" = main ] || { echo "$(date -Is) not on main, no update"; exit 1; }
 # Tags pruned: a version set by hand replaces the tag of main on GitHub (tools/release/release.sh), so drop the old one here
 git fetch -q --prune origin main '+refs/tags/*:refs/tags/*'
-# Only a tagged main, so the footer shows a clean version: the release workflow tags it seconds after the merge
+# Only a tagged main, so the footer shows a clean version: the release workflow tags it weekly, Monday 06:00 Swiss time (#935)
 version=$(git describe --tags --exact-match --match 'v*' origin/main 2>/dev/null) || { echo "$(date -Is) main not tagged yet, no update"; exit 0; }
 # The commit and version of the last successful build: a failed build is tried again on the next run
 [ "$(git rev-parse origin/main) $version" = "$(cat .git/demo-deployed 2>/dev/null)" ] && exit 0

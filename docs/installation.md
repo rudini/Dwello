@@ -24,7 +24,7 @@ cd dwello
 curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
 ```
 
-It starts the newest version. To stay on one version, write it into `.env` (section 4), e.g. `DWELLO_VERSION=1.4.0`; the versions are listed under [Releases](https://github.com/rudini/Dwello/releases). A new version comes out at most once a week, on Monday morning.
+It starts the newest version. To stay on one version, write it into `.env` (section 4), e.g. `DWELLO_VERSION=1.4.0`; the versions are listed under [Releases](https://github.com/rudini/Dwello/releases). A new version comes out on Monday morning, in a week with changes.
 
 ## 3. Optional: Google sign-in
 
