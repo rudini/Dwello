@@ -209,7 +209,7 @@ const snap = (date: string, health: number, red: number, d: number) => ({
 	kpis: { tangles: 0, health, duplication: 1, maintainability: 90 },
 	lights: { green: 5, yellow: 3, red },
 	functions: 10,
-	modules: { 'be:a': [0.5, 0, d] as [number, number, number], 'be:b': [1, 0, 0] as [number, number, number] }
+	modules: { 'be:services/a': [0.5, 0.75, d] as [number, number, number], 'be:routes/a': [1, 0, 0] as [number, number, number] }
 });
 
 describe('report mit Verlauf', () => {
@@ -224,7 +224,7 @@ describe('report mit Verlauf', () => {
 	it('listet die Module, deren Abstand D sich seit dem ersten Stand am stärksten verändert hat, ohne unveränderte', () => {
 		const html = report(analyze(input), [snap('2026-05-04', 70, 9, 0.8), snap('2026-08-03', 80, 6, 0.5), snap('2026-10-26', 87.1, 4, 0.2)]);
 		const rows = [...html.matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
-		expect(rows).toEqual([['be:a', '0.8', '0.2']]);
+		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
 	});
 });
 
@@ -245,7 +245,7 @@ describe('Verlauf: Reihenfolge und Zeitachse', () => {
 		const [, , first] = markdown([late, early]).split('\n');
 		expect(first).toBe('| 2026-10-26 | 87.1 | 10 | 5 | 3 | 4 | 0 |');
 		const rows = [...report(analyze(input), [late, early]).matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
-		expect(rows).toEqual([['be:a', '0.8', '0.2']]);
+		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
 	});
 
 	it('setzt die Punkte nach der Zeit, so dass eine Pause als Lücke erscheint', () => {
@@ -253,5 +253,14 @@ describe('Verlauf: Reihenfolge und Zeitachse', () => {
 		const cx = [...html.matchAll(/<circle cx="([\d.]+)"[^>]*><title>2026-01-\d\d: (?:70|71|80)<\/title>/g)].map((m) => Number(m[1]));
 		expect(cx).toHaveLength(3);
 		expect(cx[1] - cx[0]).toBeLessThan((cx[2] - cx[1]) / 10);
+	});
+});
+
+describe('Verlauf: D jetzt', () => {
+	it('nimmt «D now» aus dem analysierten Stand, nicht aus dem neuesten Stand des Verlaufs', () => {
+		const at = (date: string, d: number) => ({ ...snap(date, 80, 4, 0), modules: { 'be:services/a': [0.5, 0.75, d] as [number, number, number] } });
+		const html = report(analyze(input), [at('2026-10-01', 0.8), at('2026-11-01', 0.6)]);
+		const rows = [...html.matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
+		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
 	});
 });

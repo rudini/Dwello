@@ -230,13 +230,12 @@ function lineChart(id: string, title: string, dates: string[], series: Series[])
 ${lines.join('')}</svg></div>`;
 }
 
-/** Modules whose distance D changed most between the first snapshot that has them and the last one. */
-function moved(history: Snapshot[]): string {
-	const last = history[history.length - 1].modules;
-	const rows = Object.entries(last)
-		.map(([name, [, , d]]) => {
-			const first = history.find((h) => h.modules[name])!;
-			return { name, from: first.modules[name][2], to: d, since: first.date };
+/** Modules whose distance D changed most between the first snapshot that has them and the analysed state now. */
+function moved(history: Snapshot[], now: Module[]): string {
+	const rows = now
+		.map(({ name, d }) => {
+			const first = history.find((h) => h.modules[name]);
+			return { name, from: first?.modules[name][2] ?? d, to: d, since: first?.date ?? '' };
 		})
 		.filter((r) => r.from !== r.to)
 		.sort((a, b) => Math.abs(b.to - b.from) - Math.abs(a.to - a.from))
@@ -245,7 +244,7 @@ function moved(history: Snapshot[]): string {
 	return `<h3>Modules whose distance D changed most</h3><div class="scroll"><table><tr><th>Module</th><th>D at first snapshot</th><th>D now</th><th>First snapshot</th></tr>${rows.join('')}</table></div>`;
 }
 
-function historySection(unsorted: Snapshot[]): string {
+function historySection(unsorted: Snapshot[], now: Module[]): string {
 	if (unsorted.length < 2) return '';
 	const history = byTime(unsorted);
 	const dates = history.map((h) => h.date);
@@ -259,7 +258,7 @@ ${lineChart('history-lights', 'Modules per traffic light', dates, [
 ${lineChart('history-health', 'fallow health score', dates, [{ label: 'health', color: 'var(--l1)', values: kpi('health') }])}
 ${lineChart('history-functions', "Functions above fallow's thresholds", dates, [{ label: 'functions', color: 'var(--l1)', values: history.map((h) => h.functions) }])}
 ${lineChart('history-tangles', 'Tangles (module cycles)', dates, [{ label: 'tangles', color: 'var(--l1)', values: kpi('tangles') }])}
-</div>${moved(history)}`;
+</div>${moved(history, now)}`;
 }
 
 export function report(analysis: Analysis, history: Snapshot[] = []): string {
@@ -300,7 +299,7 @@ table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;p
 <h1>Dwello: structure and code quality</h1>
 <p>Production code (backend, database, BFF, frontend): ${modules.length} modules, ${edges.length} module dependencies. Modules: ${badge('green', `${count('green')} green`)}, ${badge('yellow', `${count('yellow')} yellow`)}, ${badge('red', `${count('red')} red`)}.</p>
 <div class="kpis">${tiles}</div>
-${historySection(history)}
+${historySection(history, modules)}
 <h2>Traffic lights</h2>
 <ul><li><b>Distance D</b> from the main sequence A + I = 1 (Robert C. Martin): green up to ${LIMITS.distance[0]}, yellow up to ${LIMITS.distance[1]}, else red, but red only from ${LIMITS.painUsers} users (Ca), yellow below: with few users a change is cheap. Red at the bottom left means stable and concrete (zone of pain): many depend on it, so changes ripple. For helpers that rarely change (dates, formats) this is often intended; together with a yellow or red hotspot it is worth a look. A module nothing depends on has I = 1.</li>
 <li><b>Complexity:</b> functions in the module above fallow's thresholds; one with severity high or critical makes it red, any other makes it yellow.</li>
