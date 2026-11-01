@@ -15,6 +15,7 @@ import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi, sendJson } from './helpers/auth';
 import { readPdf } from './helpers/pdf-text';
+import type { Language } from '../db/schema';
 
 const token = crypto.randomUUID();
 const buildings: string[] = [];
@@ -26,7 +27,7 @@ async function newBuilding() {
 	return id;
 }
 
-async function rent(buildingId: string, number: string, lastName: string, startDate: string, endDate?: string, language?: string) {
+async function rent(buildingId: string, number: string, lastName: string, startDate: string, endDate?: string, language?: Language) {
 	const apartment = await createApartment({ buildingId, number, floor: 1, area: '60', rooms: '3' });
 	const tenant = await createTenant({ firstName: 'Anna', lastName: `${lastName} ${token}`, language });
 	const contract = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate, endDate, baseRent: '900', monthlyAdvancePayment: '100' });
