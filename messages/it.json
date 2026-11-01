@@ -139,6 +139,7 @@
 	"error_title": "Errore",
 	"error_404": "Questa pagina non esiste.",
 	"error_403": "Non ha accesso a questa pagina.",
+	"error_413": "Il file è troppo grande.",
 	"error_unexpected": "Si è verificato un errore imprevisto.",
 	"error_hint_404": "Verifichi l’indirizzo o vada alla panoramica.",
 	"error_hint_retry": "Riprovi più tardi.",

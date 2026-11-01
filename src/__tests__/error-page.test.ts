@@ -35,6 +35,15 @@ describe('Fehlerseite', () => {
 		expect(body).not.toContain(message);
 	});
 
+	// #847: SvelteKit refuses a body over BODY_SIZE_LIMIT with its own English words; without JavaScript a file over 10 MB gets here
+	it('sagt bei einer zu grossen Datei, dass sie zu gross ist und was zu tun ist, statt «Payload Too Large»', async () => {
+		const body = await page(413, 'Payload Too Large');
+		expect(body).toMatch(/<h1[^>]*>Die Datei ist zu gross\.<\/h1>/);
+		expect(body).toContain('Die Datei ist grösser als 10 MB. Wählen Sie eine kleinere Datei oder verkleinern Sie den Scan.');
+		expect(body).not.toContain('Payload Too Large');
+		expect(body).not.toContain('Versuchen Sie es später erneut.');
+	});
+
 	it('verspricht nichts, was die Seite nicht weiss', async () => {
 		expect(await page(404)).not.toContain('nicht betroffen');
 	});

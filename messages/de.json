@@ -139,6 +139,7 @@
 	"error_title": "Fehler",
 	"error_404": "Diese Seite gibt es nicht.",
 	"error_403": "Sie haben keinen Zugriff auf diese Seite.",
+	"error_413": "Die Datei ist zu gross.",
 	"error_unexpected": "Ein unerwarteter Fehler ist aufgetreten.",
 	"error_hint_404": "Prüfen Sie die Adresse oder gehen Sie zur Übersicht.",
 	"error_hint_retry": "Versuchen Sie es später erneut.",
