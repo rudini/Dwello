@@ -99,13 +99,41 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
-  # #523 (Option C, A): eine Teilzahlung ist noch keine Zahlung der Abrechnung (Art. 69 OR); Rückerstattung im DOM-Test
+  # #959 (A): ein kleinerer bezahlter Betrag lässt die Abrechnung offen, mit dem Rest fällig (Art. 69, 85 OR)
+  Szenario: Eine Teilzahlung lässt die Abrechnung mit dem Rest offen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
+    Dann hat die Abrechnung den Status "Versendet"
+    Und nennt das Panel Zahlung "Bezahlt: CHF 10.00, offen: CHF 432.90"
+
+  # #959: eine Teilzahlung wird als solche bestätigt, die Mahnung verlangt den Rest (Personas Helga, Dr. Weber 959 P-1, P-2)
+  Szenario: Nach einer Teilzahlung mahnt der Liegenschaftsverwalter den Rest
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
+    Dann bestätigt Dwello die Zahlung mit "Teilzahlung für Abrechnung"
+    Wenn der Liegenschaftsverwalter eine Mahnung senden will
+    Dann nennt die Mahnung vor dem Senden als geschuldet "CHF 432.90"
+
+  # #959: mehr als die Hälfte bezahlt ist auch nach dem Neuladen der Seite eine Teilzahlung (Copilot-Review PR #1006)
+  Szenario: Eine Teilzahlung über die Hälfte des Saldos wird als Teilzahlung bestätigt
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter eine Zahlung von "300.00" Franken festhält
+    Dann bestätigt Dwello die Zahlung mit "Teilzahlung für Abrechnung"
+
+  # #523, #959 (A): der Betrag am Feld ist, was für diese Abrechnung eingegangen ist; ein Teil lässt sie offen (Art. 69, 86 OR); Rückerstattung im DOM-Test
   Szenario: Der Zahlungseingang sagt, was bei einer Teilzahlung gilt
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will
-    Dann sagt die Frage «Als bezahlt markieren» "Hat der Mieter erst einen Teil überwiesen, markieren Sie die Abrechnung noch nicht als bezahlt."
+    Dann sagt die Frage «Als bezahlt markieren» "Was an diesem Tag für diese Abrechnung eingegangen ist. Hat der Mieter erst einen Teil überwiesen, geben Sie diesen Betrag ein. Die Abrechnung bleibt dann mit dem Rest offen."
 
   # Festgehalten wird der eingegebene Tag, frühestens das Abrechnungsdatum (beim Versenden der Tag des Versands, #138)
   Szenario: Zahlungseingang mit Datum festhalten

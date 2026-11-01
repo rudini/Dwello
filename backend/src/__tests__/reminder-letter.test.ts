@@ -31,6 +31,16 @@ describe('Mahnschreiben', () => {
 		expect(text).toContain('Freundliche Grüsse\nVerwaltung Muster AG');
 	});
 
+	// #959 (Fachreview 959-1, Regel 2): nach einer Teilzahlung den Betrag der Abrechnung, was bezahlt ist, und den Rest
+	it.each([
+		['de', 'Betrag der Abrechnung: CHF 245.50\nBereits bezahlt: CHF 45.50\nOffener Betrag: CHF 200.00'],
+		['fr', 'Montant du décompte\u00a0: CHF 245.50\nDéjà payé\u00a0: CHF 45.50\nMontant dû\u00a0: CHF 200.00'],
+		['it', 'Importo del conteggio: CHF 245.50\nGià pagato: CHF 45.50\nImporto dovuto: CHF 200.00'],
+		['en', 'Statement amount: CHF 245.50\nAlready paid: CHF 45.50\nAmount outstanding: CHF 200.00']
+	] as const)('nennt nach einer Teilzahlung den Rest (%s)', (language, lines) => {
+		expect(reminderLetter({ ...input, paid: 45.5, language }).paragraphs).toContain(lines);
+	});
+
 	// Auf eine QR-IBAN geht eine Zahlung nur mit der QR-Referenz durch (SIX)
 	it('nennt bei einer QR-IBAN die Referenz, die bei der Zahlung anzugeben ist', () => {
 		const { text } = reminderLetter({ ...input, sender: { ...input.sender, iban: 'CH44 3199 9123 0008 8901 2' }, reference: '21 00000 00003 13947 14300 09017' });

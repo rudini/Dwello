@@ -85,7 +85,7 @@
 		data-sveltekit-reload={reload || undefined}
 		download={download || undefined}
 		{target}
-		rel={target ? 'noopener' : undefined}
+		rel={target ? 'noopener noreferrer' : undefined}
 		{onclick}
 	>
 		{@render content()}

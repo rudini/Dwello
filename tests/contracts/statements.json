@@ -19,6 +19,7 @@
 			"heatingProfileId": "hp1",
 			"balance": "-40.00",
 			"status": "draft",
+			"asksPayment": true,
 			"oldAddress": false,
 			"openCarry": false,
 			"carryChanged": false,

@@ -159,7 +159,7 @@ describe('Berichtigte Abrechnung', () => {
 	});
 
 	it('rechnet an, was auf die ersetzte Abrechnung bezahlt wurde, und rundet den Saldo auf 5 Rappen', async () => {
-		const id = await sentStatement();
+		const id = await sentStatement('442.90');
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount: '100.03' });
 		await replace(id);
 
@@ -178,10 +178,11 @@ describe('Berichtigte Abrechnung', () => {
 	});
 
 	it('rechnet auch an, was die ersetzte Abrechnung selbst schon angerechnet hat', async () => {
-		const first = await sentStatement();
+		const first = await sentStatement('442.90');
 		await sendJson('PUT', `/api/v1/statements/${first}/status`, { status: 'paid', paidDate: today(), paidAmount: '200.00' });
 		await replace(first);
 		const second = ((await (await correct(first)).json()) as Statement).id;
+		await db.update(utilityStatements).set({ balance: '442.90' }).where(eq(utilityStatements.id, second)); // a part paid on it (#959)
 		await sendJson('PUT', `/api/v1/statements/${second}/status`, { status: 'sent' });
 		await sendJson('PUT', `/api/v1/statements/${second}/status`, { status: 'paid', paidDate: today(), paidAmount: '50.00' });
 		await replace(second);
@@ -220,7 +221,7 @@ describe('Berichtigte Abrechnung', () => {
 	});
 
 	it('rechnet eine schon bezahlte Rückerstattung dazu', async () => {
-		const id = await sentStatement();
+		const id = await sentStatement('-120.00');
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount: '-20.00' });
 		await replace(id);
 
@@ -233,7 +234,7 @@ describe('Berichtigte Abrechnung', () => {
 
 	// Fachreview W2e V-4: der Betrag enthält die Zahlungen der ganzen Kette, die Abrechnung nennt jede davon
 	it('nennt jede ersetzte Abrechnung, auf die schon bezahlt wurde', async () => {
-		const first = await sentStatement();
+		const first = await sentStatement('442.90');
 		await sendJson('PUT', `/api/v1/statements/${first}/status`, { status: 'paid', paidDate: today(), paidAmount: '200.00' });
 		await replace(first);
 		const second = ((await (await correct(first)).json()) as Statement).id;
@@ -247,7 +248,7 @@ describe('Berichtigte Abrechnung', () => {
 	});
 
 	it('entsteht auch im Abrechnungslauf der Periode', async () => {
-		const id = await sentStatement();
+		const id = await sentStatement('442.90');
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount: '80.00' });
 		await replace(id);
 
@@ -319,9 +320,9 @@ describe('Ohne Mietstage in der Periode', () => {
 	it('sagt je nach Zahlung, was zu tun ist', async () => {
 		await removeStatements();
 		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-01-01' });
-		const paid = await sentStatement();
+		const paid = await sentStatement('1036.00');
 		await sendJson('PUT', `/api/v1/statements/${paid}/status`, { status: 'paid', paidDate: today(), paidAmount: '1036.00' });
-		const refunded = await sentStatement();
+		const refunded = await sentStatement('-20.00');
 		await sendJson('PUT', `/api/v1/statements/${refunded}/status`, { status: 'paid', paidDate: today(), paidAmount: '-20.00' });
 		const sent = await sentStatement();
 		for (const id of [paid, refunded, sent]) await replace(id);

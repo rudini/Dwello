@@ -11,6 +11,7 @@ export interface ReminderLetterInput {
 	periodStart: string;
 	periodEnd: string;
 	balance: number;
+	paid?: number; // the part payments recorded (#959): the letter then names the rest
 	deadline: string;
 	tenant: { firstName: string; lastName: string };
 	sender: { name: string; iban: string };
@@ -38,6 +39,8 @@ const WORDING = {
 				`Trotz zweimaliger Mahnung ist die ${s} noch immer nicht bezahlt. Geht der Betrag nicht innert der unten genannten Frist ein, müssen wir weitere Schritte einleiten.`
 		],
 		amount: 'Offener Betrag: ',
+		statementAmount: 'Betrag der Abrechnung: ',
+		paidSoFar: 'Bereits bezahlt: ',
 		payBy: (date: string) => `Bitte überweisen Sie den Betrag bis ${date} auf folgendes Konto:`,
 		reference: (reference: string) => `Referenz ${reference} (bitte bei der Zahlung angeben)`,
 		alreadyPaid: 'Haben Sie die Zahlung bereits geleistet, betrachten Sie dieses Schreiben als gegenstandslos.',
@@ -59,6 +62,8 @@ const WORDING = {
 				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
 		amount: `Montant dû${NBSP}: `,
+		statementAmount: `Montant du décompte${NBSP}: `,
+		paidSoFar: `Déjà payé${NBSP}: `,
 		payBy: (date: string) => `Veuillez virer le montant au plus tard le ${date} sur le compte suivant${NBSP}:`,
 		reference: (reference: string) => `Référence ${reference} (à indiquer lors du paiement)`,
 		alreadyPaid: 'Si vous avez déjà effectué le paiement, veuillez considérer ce rappel comme sans objet.',
@@ -80,6 +85,8 @@ const WORDING = {
 				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.`
 		],
 		amount: 'Importo dovuto: ',
+		statementAmount: 'Importo del conteggio: ',
+		paidSoFar: 'Già pagato: ',
 		payBy: (date: string) => `La preghiamo di versare l’importo entro il ${date} sul seguente conto:`,
 		reference: (reference: string) => `Riferimento ${reference} (da indicare al momento del pagamento)`,
 		alreadyPaid: 'Se ha già effettuato il pagamento, non tenga conto della presente.',
@@ -101,6 +108,8 @@ const WORDING = {
 				`Despite two reminders, the ${s} has still not been paid. If the amount is not received by the deadline below, we will have to take further steps.`
 		],
 		amount: 'Amount outstanding: ',
+		statementAmount: 'Statement amount: ',
+		paidSoFar: 'Already paid: ',
 		payBy: (date: string) => `Please transfer the amount by ${date} to the following account:`,
 		reference: (reference: string) => `Reference ${reference} (please quote it with your payment)`,
 		alreadyPaid: 'If you have already made the payment, please disregard this reminder.',
@@ -130,7 +139,9 @@ export function reminderLetter(input: ReminderLetterInput) {
 	});
 	const paragraphs = [
 		w.openings[input.level - 1](statement),
-		`${w.amount}${chf(input.balance)}`,
+		input.paid
+			? `${w.statementAmount}${chf(input.balance)}\n${w.paidSoFar}${chf(input.paid)}\n${w.amount}${chf(input.balance - input.paid)}`
+			: `${w.amount}${chf(input.balance)}`,
 		`${w.payBy(swissDate(input.deadline))}\nIBAN ${input.sender.iban}${input.reference ? `\n${w.reference(input.reference)}` : ''}`,
 		w.alreadyPaid
 	];

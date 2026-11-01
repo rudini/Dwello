@@ -53,4 +53,32 @@ describe('Datenschutzerklärung auf Französisch, Italienisch und Englisch', () 
 			expect(document.body.textContent).toContain(text);
 		}
 	});
+
+	// #671: Zahlungserinnerung und Mahnung beide genannt, wie in docs/design/i18n-begriffe.md, auch ohne Anbieter und über Resend
+	it('nennt Zahlungserinnerungen und Mahnungen auch beim eigenen Mailserver und bei Resend', () => {
+		for (const [locale, sent, content] of [
+			[
+				'fr',
+				'les rappels de paiement et les rappels suivants envoyés par e-mail',
+				'pour un rappel de paiement ou un rappel suivant'
+			],
+			[
+				'en',
+				'payment reminders and further reminders sent by email',
+				'for a payment reminder or further reminder'
+			]
+		] as const)
+			for (const mail of ['smtp', 'resend'] as const) {
+				overwriteGetLocale(() => locale);
+				// each variant in its own container: the page of the one before stays mounted until the test ends
+				const target = document.body.appendChild(document.createElement('div'));
+				show(
+					PrivacyPage,
+					{ data: { recipient: null, providers: ['Google'], mail } } as never,
+					target
+				);
+				expect(target.textContent).toContain(sent);
+				expect(target.textContent).toContain(content);
+			}
+	});
 });

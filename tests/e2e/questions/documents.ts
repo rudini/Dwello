@@ -14,7 +14,7 @@ import {
 } from '../targets/documents';
 import { paymentSummary } from '../targets/statement-detail';
 import { statementRow } from '../targets/statements';
-import { reminderDeliveryInfo } from '../targets/documents';
+import { reminderDeliveryInfo, reminderOwed } from '../targets/documents';
 
 export const reminderOutcome = Text.of(reminderFeedback);
 export const reminderOffers = Count.of(reminderButton);
@@ -50,3 +50,4 @@ export const mailsTo = (address: string) =>
 		(await actor.answer(MailsTo(address))).map((mail) => [mail.subject.split(' – ')[0], mail.attachments.map((name) => /\.pdf$/.test(name))])
 	);
 export const reminderDelivery = Text.of(reminderDeliveryInfo);
+export const reminderOwedText = Text.of(reminderOwed);

@@ -108,6 +108,17 @@ Funktionalität: Datenschutz
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "werden über den Mailserver von Muster Mail AG (Liechtenstein) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
+  # #671 (Fachreview 671-1): Zahlungserinnerung und Mahnung wie in docs/design/i18n-begriffe.md, nicht beide «rappel»/«reminder»
+  Szenariogrundriss: Die Datenschutzerklärung nennt auf Französisch und Englisch Zahlungserinnerungen und Mahnungen
+    Wenn der Liegenschaftsverwalter die Sprache "<Sprache>" wählt
+    Dann nennt die Datenschutzerklärung unter "<Abschnitt>" "<Versand>"
+    Und nennt die Datenschutzerklärung unter "<Abschnitt>" "<Inhalt>"
+
+    Beispiele:
+      | Sprache  | Abschnitt                | Versand                                                                                    | Inhalt                                                                   |
+      | Français | Transmission à des tiers | Les décomptes des charges, les rappels de paiement et les rappels suivants envoyés par e-mail | pour un rappel de paiement ou un rappel suivant, l’adresse et le montant dû |
+      | English  | Sharing with third parties  | Utility cost statements, payment reminders and further reminders sent by email          | for a payment reminder or further reminder, the address and the amount due |
+
   Szenario: Länder und Datenschutzerklärungen der Dienste, die der Browser aufruft
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps" in "USA" mit seiner Datenschutzerklärung "https://policies.google.com/privacy"
 

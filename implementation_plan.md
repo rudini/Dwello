@@ -8,3 +8,16 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+
+## Session: NFR issues on my own (#671 first)
+
+- [x] #671 part 1: new-tab links send no Referer (`Button.svelte`, `ui-button.dom.test.ts` seen red)
+- [x] #671 part 2: @wip scenario seen red; `fach-reviewer` (`docs/reviews/671-fachreview-1.md`): V-1 wording «rappels suivants» taken, V-2 English gap taken; Stand stays (no content change)
+- [x] fr and en texts of `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider`; scenario green without @wip, privacy.feature 37 passed
+- [x] Slice review (`docs/reviews/671-review-1.md`): C-1 smtp/resend variants now in `privacy-i18n.dom.test.ts` (red with the old texts), C-2 scenario title
+- [x] #671 PR: pushed
+- [x] #847: a 413 shows «Die Datei ist zu gross.» and what to do in four languages (`error-page.test.ts` seen red); No scenario: with JavaScript the browser refuses the file first (tests/e2e/CLAUDE.md, No scenario, item 4)
+- [x] #847 review (`docs/reviews/847-review-1.md`): no findings
+- [x] #847 PR: pushed
+- Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)

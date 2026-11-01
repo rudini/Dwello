@@ -431,6 +431,8 @@ type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string
 export type HeatingSources = { de: string; fr: string | null; it: string | null; en: string | null };
 /** A payment taken back (#92): the day of the reset and what it cleared */
 export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: string | null };
+/** A payment recorded on a statement, a part payment too (#959): the amount with the sign of the Saldo */
+export type Payment = { date: string; amount: string };
 
 export type HeatingShare =
 	// the chosen profile and why it was not applied (#247); both absent on statements created before
@@ -487,6 +489,7 @@ export const utilityStatements = pgTable(
 		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
 		agreedFrom: jsonb('agreed_from').$type<Record<string, string>>(), // «Vereinbart ab» per category when created (#368)
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
+		payments: jsonb('payments').$type<Payment[]>().notNull().default([]), // recorded payments, paidAmount their sum (#959)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		// «Nicht berichtigt» (#454): the day and the result of the recalculation the landlord did not correct to
 		correctionDeclined: jsonb('correction_declined').$type<{ on: string; result: string }>(),

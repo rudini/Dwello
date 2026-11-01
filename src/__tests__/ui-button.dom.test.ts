@@ -43,7 +43,7 @@ describe('Button', () => {
 		});
 		const link = byTestId('go')!;
 		expect(link.getAttribute('target')).toBe('_blank');
-		expect(link.getAttribute('rel')).toBe('noopener');
+		expect(link.getAttribute('rel')).toBe('noopener noreferrer');
 		expect(link.textContent).toContain('(öffnet in neuem Tab)');
 	});
 

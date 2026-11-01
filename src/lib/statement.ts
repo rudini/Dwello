@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { isDay, localToday } from '$lib/contract-status';
-import { formatDate } from '$lib/utils/format';
+import { formatCurrency, formatDate } from '$lib/utils/format';
 import { apiCall } from './api';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
@@ -46,6 +46,38 @@ export function balanceLabel(balance: number): string {
 	if (balance < 0) return m.statements_balance_refund();
 	return m.statements_balance_settled();
 }
+
+type Owed = {
+	balance: number;
+	paidAmount?: number | null;
+	unpaid?: boolean; // below the Mindestbetrag, no Schlussabrechnung: no money moves (#94)
+	asksPayment?: boolean;
+};
+
+/** #959: what is still owed after the part payments recorded, in francs, without the sign of the Saldo */
+export const openAmount = ({ balance, paidAmount }: Owed) =>
+	Math.abs(Math.round((balance - (paidAmount ?? 0)) * 100) / 100);
+
+/** «Bezahlt: CHF x, offen: CHF y» on a sent or overdue statement a part was paid on (#959, Fachreview 959-1 Regel 1) */
+export function partPaid(statement: Owed): string | null {
+	// a paid one has nothing open, a replaced one asks for nothing (the backend says so, #788)
+	if (!statement.paidAmount || !openAmount(statement) || statement.asksPayment === false) return null;
+	const amounts = {
+		paid: formatCurrency(Math.abs(statement.paidAmount)),
+		rest: formatCurrency(openAmount(statement))
+	};
+	return statement.balance < 0
+		? m.statements_part_refunded(amounts)
+		: m.statements_part_paid(amounts);
+}
+
+/** The amount of «Als bezahlt markieren» as the backend takes it: with the sign of the Saldo (#959) */
+export const signedPaid = ({ balance, unpaid }: Owed, amount: string) =>
+	unpaid ? undefined : balance < 0 ? `-${amount.trim()}` : amount.trim();
+
+/** Less than the open amount: a part payment, the statement stays open (#959) */
+export const isPartPayment = (statement: Owed, amount: string) =>
+	!statement.unpaid && Number(amount) < openAmount(statement);
 
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>

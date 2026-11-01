@@ -76,6 +76,18 @@ describe('Abrechnungsliste laden', () => {
 		expect(data.statements[0]).toMatchObject({ rentalStart: '2025-07-01', rentalEnd: '2025-12-31' });
 	});
 
+	// #959 (code review 959d-1 C-1): die Zeile nennt nach einer Teilzahlung den Rest, nur wenn die Abrechnung noch etwas verlangt
+	it('übernimmt vom Backend, ob die Abrechnung eine Zahlung verlangt', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(url.includes('/statements?') ? listedStatements : {})) as typeof globalThis.fetch;
+		const data = (await load({
+			url: new URL('http://localhost/statements'),
+			fetch
+		} as never)) as StatementsListData;
+
+		expect(data.statements[0].asksPayment).toBe(true);
+	});
+
 	it('zeigt eine leere Liste, wenn das Backend nicht erreichbar ist', async () => {
 		const fetch = (async () => {
 			throw new Error('ECONNREFUSED');
