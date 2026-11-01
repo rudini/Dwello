@@ -4,6 +4,7 @@ import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-form';
 import { dayAfter } from './swiss-date';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
+import { francs } from './statement';
 import type { CategoryFindingKind } from '../../backend/src/api/invoice';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
@@ -115,6 +116,19 @@ export interface ChangedStatement {
 	profileEdited: string | null; // its Heizprofil, edited after it was created
 	fee: { used: number; now: number; source: 'run' | 'contract' | 'none' } | null;
 	oldRule: boolean; // sent, its heating costs over the whole period; the run bills its apartment again (#335)
+	heatingSum: HeatingSum | null; // #508: its apartment's heating costs against what its statements bill, once per apartment
+}
+
+/** #508 (Fachreview 508-1): amounts in francs as the backend gives them (backend/src/services/statement-run.service.ts) */
+export interface HeatingSum {
+	statementId: string;
+	costs: string;
+	tenants: string;
+	landlord: string;
+	billed: string;
+	difference: string;
+	result: 'more' | 'less' | 'equal';
+	landlordFor: 'vacancy' | 'leases' | null;
 }
 
 type Range = { start: string; end: string };
@@ -352,15 +366,26 @@ const feeNotes = {
 };
 
 /** What changed since an existing statement was made, or what it does differently from the run, in words (#132) */
-export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee, oldRule, tenantName }: ChangedStatement) =>
+export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee, oldRule, heatingSum, tenantName }: ChangedStatement) =>
 	[
 		outdated && !fuelStock && m.statements_existing_outdated(),
 		fuelStock && (outdated ? m.statements_existing_outdated_fuel_stock() : m.statements_existing_fuel_stock()),
 		profile && m.statements_existing_profile(profile),
 		profileEdited && m.statements_existing_profile_edited({ profile: profileEdited }),
 		fee && feeNotes[fee.source](fee),
-		oldRule && m.statements_existing_old_heating_rule({ tenant: tenantName })
+		oldRule && m.statements_existing_old_heating_rule({ tenant: tenantName }),
+		heatingSum && heatingSumText(heatingSum)
 	].filter(Boolean) as string[];
+
+const sumCosts = { vacancy: m.statements_heating_sum_costs_vacancy, leases: m.statements_heating_sum_costs_landlord };
+const sumResult = { more: m.statements_heating_sum_more, less: m.statements_heating_sum_less, equal: m.statements_heating_sum_equal };
+
+/** #508: the apartment's heating costs, the landlord's part and what its statements bill for them, in words */
+export function heatingSumText(sum: HeatingSum) {
+	const [costs, tenants, landlord, billed, difference] = [sum.costs, sum.tenants, sum.landlord, sum.billed, sum.difference].map((amount) => francs(Number(amount)));
+	const costsText = sum.landlordFor ? sumCosts[sum.landlordFor]({ costs, tenants, landlord }) : m.statements_heating_sum_costs({ costs });
+	return `${costsText} ${sumResult[sum.result]({ billed, difference })}`;
+}
 
 /** The hint on heating invoices without Leistungszeitraum beside ones with (#339): its categories, each quoted (V-15) */
 export function heatingWholeText(rows: { invoices: { categoryName?: string }[] }[]) {

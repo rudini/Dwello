@@ -17,6 +17,7 @@ import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { loadModel } from '../services/ki-model.service';
 import { resetSetupAttempts } from '../services/setup.service';
+import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { app } from '../app';
 import { daysAfter, swissToday } from '../services/today';
@@ -319,6 +320,32 @@ describe('API-Verträge des Frontends', () => {
 			await deleteContract(moving.id, true);
 			await deleteTenant(tenant.id);
 			await deleteApartment(apartment.id);
+		}
+	});
+
+	// #508: a sent statement under the old heating rule beside a contract the run bills names the apartment's heating sum
+	it('GET /statements/run-heating liefert die Felder von statement-run-heating-sum.json', async () => {
+		const may = await createRental(`Summe ${token}`, { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		const [profile] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-04-10', description: 'Heizung Q1' });
+		const sent = await generateStatement({ contractId: may.contract, buildingId: may.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: profile.id, managementFeePercent: 0 });
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, sent.id));
+		await db.update(invoices).set({ servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' }).where(and(eq(invoices.buildingId, may.building), eq(invoices.description, 'Heizung Q1')));
+		const tenant = await createTenant({ firstName: 'Eva', lastName: `Frei ${token}` });
+		const before = await createContract({ apartmentId: may.apartment, tenantId: tenant.id, startDate: '2025-01-01', endDate: '2025-03-31', baseRent: '900', monthlyAdvancePayment: '0' });
+		try {
+			const actual = await (
+				await callApi(`/api/v1/statements/run-heating?buildingId=${may.building}&periodStart=2025-01-01&periodEnd=2025-12-31&heatingProfileId=${profile.id}`)
+			).json();
+			expect(drift(await sample('statement-run-heating-sum'), actual)).toEqual([]);
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.apartmentId, may.apartment));
+			await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+			await deleteContract(before.id, true);
+			await deleteTenant(tenant.id);
+			await may.remove();
 		}
 	});
 

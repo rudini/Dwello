@@ -75,6 +75,12 @@ Funktionalität: Kostenkategorien
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
     Dann nennt die Kategorie als Grund "umstritten"
 
+  # Der Grund steht unter einer eigenen Bezeichnung und gehört zur Frage, nicht zur zweiten Wahl (#683)
+  Szenario: Begründung der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
+    Dann steht der Grund der Kategorie unter der Bezeichnung "Begründung"
+    Und nennt die Frage der Umlagefähigkeit den Grund "umstritten"
+
   # Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); die längste ist die der Heizung
   Szenario: Ganze Beschreibung einer vordefinierten Kategorie auf dem Telefon
     Angenommen der Liegenschaftsverwalter benutzt ein Telefon

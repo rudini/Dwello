@@ -10,7 +10,7 @@
 	import SaveForm from '../SaveForm.svelte';
 	import AllocabilityQuestion from './AllocabilityQuestion.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
-	import CategoryReason from './CategoryReason.svelte';
+	import CategoryReason, { reasonOf } from './CategoryReason.svelte';
 	import HeatingChoice from './HeatingChoice.svelte';
 
 	// `ki` and `proposal` only on a new category: whether the KI is on (#219), its answer to «Von der KI prüfen lassen»
@@ -126,9 +126,10 @@
 			options={allowance}
 			bind:value={values.allowed}
 			error={values.allowed ? undefined : errors.isAllowedUtilityCost}
+			describedby={reasonOf(chosen) ? 'category-reason' : undefined}
 			testid="category-allowance"
 		/>
-		<CategoryReason category={chosen} />
+		<CategoryReason category={chosen} id="category-reason" />
 		{#if ki}
 			<div>
 				<div>
