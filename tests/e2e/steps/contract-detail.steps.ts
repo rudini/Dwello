@@ -183,7 +183,7 @@ Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: st
 
 // The end action sets today's date in Switzerland as a notice; the page shows it as formatDate does
 Then('endet der Mietvertrag heute', async ({ verwalter }) => {
-	const today = swissDate(inDays(0)); // 01.11.2026: two digits, as on the page
+	const today = swissDate(inDays(0));
 	await verwalter.sees(endOfContract).toBe(`Unbefristet, gekündigt auf den ${today}`);
 });
 

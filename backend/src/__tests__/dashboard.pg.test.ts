@@ -24,7 +24,6 @@ type Dashboard = {
 	buildingOccupancy: { buildingId: string; totalApartments: number; occupiedApartments: number; occupancyRate: number }[];
 };
 
-// the Swiss day, as the overview counts «this month» (backend/CLAUDE.md, «Today»): in UTC the last evening of a month is the next one's in Zurich
 const day = (offset: number) => daysAfter(swissToday(), offset);
 const token = crypto.randomUUID();
 const dashboard = async () => (await (await callApi('/api/v1/dashboard')).json()) as Dashboard;
