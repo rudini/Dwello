@@ -28,6 +28,28 @@ Funktionalität: Navigation
       | Heizprofile             | Heizprofile             |
       | Hilfe                   | Hilfe                   |
 
+  # #661: im schmalen Fenster öffnet das Menü dieselben Bereiche wie die Hauptnavigation
+  Szenariogrundriss: Bereich über das Menü im schmalen Fenster öffnen
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Wenn der Liegenschaftsverwalter im Menü "<Bereich>" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
+
+    Beispiele:
+      | Bereich                 | Seite                   |
+      | Übersicht               | Übersicht               |
+      | Gebäude                 | Gebäude                 |
+      | Wohnungen               | Wohnungen               |
+      | Mieter                  | Mieter                  |
+      | Mietverträge            | Mietverträge            |
+      | Rechnungen              | Rechnungen              |
+      | Nebenkostenabrechnungen | Nebenkostenabrechnungen |
+      | Dokumente               | Dokumente               |
+      | Einstellungen           | Einstellungen           |
+      | Kategorien              | Kategorien              |
+      | Verteilschlüssel        | Verteilschlüssel        |
+      | Heizprofile             | Heizprofile             |
+      | Hilfe                   | Hilfe                   |
+
   Szenario: Über das Logo zur Übersicht
     Wenn der Liegenschaftsverwalter das Logo wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"

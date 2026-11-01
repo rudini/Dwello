@@ -23,6 +23,7 @@ import {
 	chooseInFooter,
 	chooseInHelpContents,
 	chooseInMainNav,
+	chooseInMobileMenu,
 	chooseLogo,
 	goToOverviewWhileItFails,
 	openPrivacySectionFromTerms,
@@ -62,6 +63,10 @@ When(
 		await verwalter.attemptsTo(openPrivacySectionFromTerms(heading));
 	}
 );
+
+When('der Liegenschaftsverwalter im Menü {string} wählt', async ({ verwalter }, label: string) => {
+	await verwalter.attemptsTo(chooseInMobileMenu(label));
+});
 
 When('der Liegenschaftsverwalter das Logo wählt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(chooseLogo);

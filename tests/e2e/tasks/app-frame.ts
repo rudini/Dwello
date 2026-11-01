@@ -7,6 +7,8 @@ import {
 	helpContentsLink,
 	logo,
 	mainNavLink,
+	mobileMenuButton,
+	mobileNavLink,
 	privacyLinkOnLogin,
 	publicHelpLink,
 	publicLoginLink,
@@ -17,6 +19,8 @@ import {
 } from '../targets/app-frame';
 
 export const chooseInMainNav = (label: string) => Click.on(mainNavLink(label));
+export const chooseInMobileMenu = (label: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(mobileMenuButton), Click.on(mobileNavLink(label)));
 export const chooseLogo = Click.on(logo);
 export const openSettingsFromUserMenu: Activity = (actor) =>
 	actor.attemptsTo(Click.on(userMenuButton), Click.on(userMenuSettings));
