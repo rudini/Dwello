@@ -530,6 +530,35 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] No scenario: glossary and a code comment only, the UI texts already use the terms in all four languages
 - [x] PR: pushed after this archive
 
+## Session: NFR issues on my own (#671 first)
+
+- [x] #671 part 1: new-tab links send no Referer (`Button.svelte`, `ui-button.dom.test.ts` seen red)
+- [x] #671 part 2: @wip scenario seen red; `fach-reviewer` (`docs/reviews/671-fachreview-1.md`): V-1 wording «rappels suivants» taken, V-2 English gap taken; Stand stays (no content change)
+- [x] fr and en texts of `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider`; scenario green without @wip, privacy.feature 37 passed
+- [x] Slice review (`docs/reviews/671-review-1.md`): C-1 smtp/resend variants now in `privacy-i18n.dom.test.ts` (red with the old texts), C-2 scenario title
+- [x] #671 PR: pushed
+- [x] #847: a 413 shows «Die Datei ist zu gross.» and what to do in four languages (`error-page.test.ts` seen red); No scenario: with JavaScript the browser refuses the file first (tests/e2e/CLAUDE.md, No scenario, item 4)
+- [x] #847 review (`docs/reviews/847-review-1.md`): no findings
+- [x] #847 PR: pushed
+- [x] #713: PreToolUse hook `main-push-guard.mjs` asks before a push whose resolved target is main; tests red first
+- [x] #713 reviews: `docs/reviews/713-review-1.md` (C-1 Major: cd not followed, fixed; C-2 to C-5 fixed), `713-review-2.md` (C-6 to C-8 Minor, fixed), `713-review-3.md` (closing round, C-9 to C-11 Minor, fixed without a further round)
+- [x] #713 PR: pushed
+- [x] #713 Copilot review on #1011 (six findings, all held, fixed with tests red first); closing rounds `713-review-4.md` (C-12 to C-15), `713-review-5.md` (C-16), `713-review-6.md` (C-17, C-18), all Minor and fixed; the last fixes without a further round (three rounds reached)
+- [x] #724: cause found (cold import in the first test against the old 5 s timeout, removed by #849); three full server runs green; issue closed with the evidence, no code change
+- [x] #728: footer shows «Version unbekannt» in four languages when the build has no version (`src/lib/app-version.ts`, `shell.dom.test.ts` seen red); No scenario: the E2E app is always a build with a version
+- [x] #728 review (`docs/reviews/728-review-1.md`): no findings
+- [x] #728 PR: pushed
+- [x] #710: one matcher for the commit gates and the main push guard (`.claude/hooks/git-calls.mjs`): -C (quoted, -C/x), -c key=val, cd and subshells, heredoc text skipped; ten gate tests seen red first
+- [x] #710 review `docs/reviews/710-review-1.md`: C-1 Major (shell keywords before git), C-2 to C-4 Minor, fixed with tests seen red (C-3 documented)
+- [x] #710 re-review `docs/reviews/710-review-2.md` (closing round): C-1 to C-4 closed; C-5 Minor (crash tests only for the deepcheck gate) stays in the report
+- [x] #710 Copilot review on #1017 (four findings, all held, fixed with tests red first); closing round `docs/reviews/710-review-3.md`: C-6 to C-8 Minor fixed without a further round (three rounds reached), C-5 stays in the report
+- [x] #661: scenario outline «Bereich über das Menü im schmalen Fenster öffnen» (13 areas, the same targets as the sidebar) pins existing behaviour, so no red run; navigation.feature 51 passed
+- [x] #661 review `docs/reviews/661-review-1.md` (closing round): C-1 formatting slip and C-2 duplicate target, both Minor, fixed (13 scenarios green again)
+- [x] #750: recording already covered by `trace: retain-on-failure` (#849); issue commented, left open for the cause at the next failure
+- [x] #739 deferred: naming the Heizprofil changes scenarios that are not @wip, which needs a product-owner decision (Blocked on me)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-710.md`; collected review `docs/reviews/workflow-rules-review-2026-11-01.md`
+- [x] #661 PR: pushed after this archive
+- Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)
 ## Session: #1015 resetting a part payment drops its PDF
 
 - [x] pg tests in `statement-lock.pg.test.ts`, seen red; fix in `recordPayment` and `resetPayment`
@@ -549,4 +578,9 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Backend `recalculated` (Saldo, difference, below CHF 5, cost sentence), BFF mapper, `recalculatedText`, 11 texts in four languages; unit tests and scenario seen red
 - [x] code-reviewer `docs/reviews/546-review-1.md`: C-1 (Major) and C-2 tests seen red, C-3 done; closing round `546b-review-1.md`
 - [x] Persona `docs/design/personas/weber-546.md`: amounts plausible; P-1, P-2 (Minor) stay in the report (P-2 is the open point the issue left as is)
+- [x] PR: pushed after this archive
+
+## Session: Copilot's refusal is no outside review (#1007 follow-up)
+
+- [x] #1024 was merged a minute after CI, 15 seconds before its fallback review, after Copilot's «unable to review … quota»: skill `pull-request` says such a refusal is not a review and the session waits for the fallback
 - [x] PR: pushed after this archive

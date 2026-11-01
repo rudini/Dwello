@@ -9,27 +9,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
-
-## Session: NFR issues on my own (#671 first)
-
-- [x] #671 part 1: new-tab links send no Referer (`Button.svelte`, `ui-button.dom.test.ts` seen red)
-- [x] #671 part 2: @wip scenario seen red; `fach-reviewer` (`docs/reviews/671-fachreview-1.md`): V-1 wording «rappels suivants» taken, V-2 English gap taken; Stand stays (no content change)
-- [x] fr and en texts of `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider`; scenario green without @wip, privacy.feature 37 passed
-- [x] Slice review (`docs/reviews/671-review-1.md`): C-1 smtp/resend variants now in `privacy-i18n.dom.test.ts` (red with the old texts), C-2 scenario title
-- [x] #671 PR: pushed
-- [x] #847: a 413 shows «Die Datei ist zu gross.» and what to do in four languages (`error-page.test.ts` seen red); No scenario: with JavaScript the browser refuses the file first (tests/e2e/CLAUDE.md, No scenario, item 4)
-- [x] #847 review (`docs/reviews/847-review-1.md`): no findings
-- [x] #847 PR: pushed
-- [x] #713: PreToolUse hook `main-push-guard.mjs` asks before a push whose resolved target is main; tests red first
-- [x] #713 reviews: `docs/reviews/713-review-1.md` (C-1 Major: cd not followed, fixed; C-2 to C-5 fixed), `713-review-2.md` (C-6 to C-8 Minor, fixed), `713-review-3.md` (closing round, C-9 to C-11 Minor, fixed without a further round)
-- [x] #713 PR: pushed
-- [x] #713 Copilot review on #1011 (six findings, all held, fixed with tests red first); closing rounds `713-review-4.md` (C-12 to C-15), `713-review-5.md` (C-16), `713-review-6.md` (C-17, C-18), all Minor and fixed; the last fixes without a further round (three rounds reached)
-- [x] #724: cause found (cold import in the first test against the old 5 s timeout, removed by #849); three full server runs green; issue closed with the evidence, no code change
-- [x] #728: footer shows «Version unbekannt» in four languages when the build has no version (`src/lib/app-version.ts`, `shell.dom.test.ts` seen red); No scenario: the E2E app is always a build with a version
-- [x] #728 review (`docs/reviews/728-review-1.md`): no findings
-- [x] #728 PR: pushed
-- [x] #710: one matcher for the commit gates and the main push guard (`.claude/hooks/git-calls.mjs`): -C (quoted, -C/x), -c key=val, cd and subshells, heredoc text skipped; ten gate tests seen red first
-- [x] #710 review `docs/reviews/710-review-1.md`: C-1 Major (shell keywords before git), C-2 to C-4 Minor, fixed with tests seen red (C-3 documented)
-- [x] #710 re-review `docs/reviews/710-review-2.md` (closing round): C-1 to C-4 closed; C-5 Minor (crash tests only for the deepcheck gate) stays in the report
-- [x] #710 Copilot review on #1017 (four findings, all held, fixed with tests red first); closing round `docs/reviews/710-review-3.md`: C-6 to C-8 Minor fixed without a further round (three rounds reached), C-5 stays in the report
-- Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)

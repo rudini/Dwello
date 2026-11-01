@@ -5,6 +5,14 @@ export const mainNavLink = (label: string) =>
 	target(`Hauptnavigation «${label}»`, (page) =>
 		page.getByTestId('main-nav-link').filter({ has: page.getByText(label, { exact: true }) })
 	);
+/** A link of the main menu in the drawer of a narrow window */
+export const mobileNavLink = (label: string) =>
+	target(`Menü «${label}»`, (page) =>
+		page
+			.getByRole('dialog', { name: 'Hauptnavigation' })
+			.getByTestId('main-nav-link')
+			.filter({ has: page.getByText(label, { exact: true }) })
+	);
 export const currentNavItem = target('Markierter Eintrag der Hauptnavigation', (page) =>
 	page.getByRole('navigation', { name: 'Hauptnavigation' }).locator('[aria-current="page"]')
 );
