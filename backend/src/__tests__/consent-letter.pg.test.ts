@@ -26,9 +26,9 @@ async function newBuilding() {
 	return id;
 }
 
-async function rent(buildingId: string, number: string, lastName: string, startDate: string, endDate?: string) {
+async function rent(buildingId: string, number: string, lastName: string, startDate: string, endDate?: string, language?: string) {
 	const apartment = await createApartment({ buildingId, number, floor: 1, area: '60', rooms: '3' });
-	const tenant = await createTenant({ firstName: 'Anna', lastName: `${lastName} ${token}` });
+	const tenant = await createTenant({ firstName: 'Anna', lastName: `${lastName} ${token}`, language });
 	const contract = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate, endDate, baseRent: '900', monthlyAdvancePayment: '100' });
 	rentals.push({ apartment: apartment.id, tenant: tenant.id, contract: contract.id });
 	return contract.id;
@@ -58,7 +58,9 @@ describe('Brief zur Zustimmung zu einer neuen Abrechnungsperiode', () => {
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get('content-type')).toBe('application/pdf');
-		expect(response.headers.get('content-disposition')).toBe('attachment; filename="Zustimmung-Abrechnungsperiode-2.01.pdf"');
+		expect(response.headers.get('content-disposition')).toBe(
+			`attachment; filename="Zustimmung zu einer neuen Abrechnungsperiode 2.01 Keller ${token}.pdf"; filename*=UTF-8''${encodeURIComponent(`Zustimmung zu einer neuen Abrechnungsperiode 2.01 Keller ${token}.pdf`)}`
+		);
 		expect(text).toContain(`Anna Keller ${token}`);
 		expect(text).toContain('Mietvertrag für die Wohnung 2.01, Seeweg 1, 8400 Winterthur');
 		expect(text).toContain('vom 1. Juli bis 30. Juni abgerechnet');
@@ -66,6 +68,19 @@ describe('Brief zur Zustimmung zu einer neuen Abrechnungsperiode', () => {
 		expect(text).toContain('Ort, Datum');
 		expect(text).toContain(`Unterschrift Anna Keller ${token}`);
 		expect(text).toContain('Unterschrift weiterer Mieter');
+	});
+
+	// C-5 (Fachreview 521-2 V-9): two tenants of one apartment in the short period get two names, in the letter's language
+	it('benennt die Datei nach dem Titel in der Sprache des Mieters, der Wohnung und dem Nachnamen', async () => {
+		const building = await newBuilding();
+		const contract = await rent(building, '2.01', 'Favre', '2024-04-01', undefined, 'fr');
+		await bill(contract, building, '2024-07-01', '2025-06-30');
+
+		const response = await callApi(`/api/v1/contracts/${contract}/consent-letter`);
+
+		expect(response.headers.get('content-disposition')).toBe(
+			`attachment; filename="Accord sur une nouvelle p_riode de d_compte 2.01 Favre ${token}.pdf"; filename*=UTF-8''${encodeURIComponent(`Accord sur une nouvelle période de décompte 2.01 Favre ${token}.pdf`)}`
+		);
 	});
 
 	// the contract page shows the link at the short period the letter is for

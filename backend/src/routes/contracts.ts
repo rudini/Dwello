@@ -7,6 +7,7 @@ import { Elysia, t } from 'elysia';
 import { missingByContract, missingOfContract } from '../services/statement-run.service';
 import { errorBody, refusal, refusedWith } from '../services/coded-error';
 import { consentLetterPdf } from '../services/consent-letter.service';
+import { fileResponse } from './file-response';
 import type { ContractResponse } from '../api/contract';
 import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
@@ -147,9 +148,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 				set.status = 404;
 				return { error: 'Contract not found' };
 			}
-			set.headers['content-type'] = 'application/pdf';
-			set.headers['content-disposition'] = `attachment; filename="${letter.name}"`;
-			return letter.pdf;
+			return fileResponse(set, letter);
 		} catch (error) {
 			return refusedWith({ CONSENT_LETTER_NONE: 409 })(error, set);
 		}

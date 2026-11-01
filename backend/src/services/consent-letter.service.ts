@@ -13,7 +13,7 @@ import { consentOfContract } from './statement-run.service';
 import { getTenant } from './tenant.service';
 import { swissToday } from './today';
 
-/** The letter's file name and PDF; null for an unknown contract; refused without a short period after a change */
+/** The letter as a file (name, kind, PDF); null for an unknown contract; refused without a short period after a change */
 export async function consentLetterPdf(contractId: string) {
 	const found = await consentOfContract(contractId);
 	if (!found) return null;
@@ -36,5 +36,7 @@ export async function consentLetterPdf(contractId: string) {
 		language: tenant.language as Language
 	});
 	const pdf = await renderReminderPdf(letter, from, { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` }, formatSwissDate(today));
-	return { name: `Zustimmung-Abrechnungsperiode-${contract.apartment.number.replace(/[^\w.-]+/g, '-')}.pdf`, pdf };
+	// one name per tenant in the letter's language, like the reminder (Fachreview 521-2 V-9)
+	const fileName = `${letter.title} ${contract.apartment.number} ${tenant.lastName}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+	return { fileName, mimeType: 'application/pdf', content: pdf };
 }
