@@ -581,6 +581,28 @@ describe('Rechnungen hochladen', () => {
 		expect(allByTestId('invoice-upload-record-rest').map((link) => link.getAttribute('href'))).toEqual(['/invoices/new']);
 	});
 
+	// #535, Copilot review PR #1012: with a file still open in the dialog, the link opens a new tab and says so; following
+	// it in the same tab would drop that file without the question before discarding
+	it('öffnet «Rechnung erfassen» in einem neuen Tab, solange eine Datei offen ist', async () => {
+		const proposals: Record<string, object> = {
+			'lift.pdf': { ...read, nonAllocableItems: true },
+			'werke.pdf': { ...read, categorization: null }
+		};
+		open(((call: { path: string; body: unknown }) =>
+			call.path === '/invoices'
+				? [201, { id: 'i9' }]
+				: [200, proposals[(call.body as { fileName: string }).fileName]]) as never);
+		chooseBuilding();
+		await upload(pdf('lift.pdf'), pdf('werke.pdf'));
+		click('invoice-upload-row-select');
+		click('invoice-upload-create-button');
+		await settle();
+
+		const link = byTestId('invoice-upload-record-rest')!;
+		expect([link.getAttribute('target'), link.getAttribute('rel')]).toEqual(['_blank', 'noopener noreferrer']);
+		expect(link.textContent).toContain('Rechnung erfassen (öffnet in neuem Tab)');
+	});
+
 	it('lehnt eine Datei ab, die weder PDF noch Bild ist, ohne sie der KI zu zeigen', async () => {
 		const { calls } = open(() => [200, read]);
 		chooseBuilding();
