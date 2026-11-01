@@ -50,6 +50,7 @@ describe('push to main by its resolved target (#713)', () => {
 		['a redirection with a space', () => onMain, 'git push origin > /tmp/push.log 2> /dev/null'],
 		['a continued line', () => onFeature, 'git push origin \\\nHEAD:main'],
 		['a cd the hook cannot resolve', () => onFeature, 'cd "$CHECKOUT" && git push'],
+		['a relative cd after one the hook cannot resolve', () => onFeature, 'cd "$CHECKOUT" && cd sub && git push'],
 		['a pushd into a checkout of main', () => onFeature, 'pushd "%MAIN%" && git push'],
 		['env and variables before git', () => onMain, 'env GIT_TRACE=0 X=1 git push'],
 		['command and timeout before git', () => onMain, 'timeout 60 command git push'],

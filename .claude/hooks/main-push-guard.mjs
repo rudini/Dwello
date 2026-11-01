@@ -4,7 +4,8 @@
 // `HEAD:main`, `heads/main`, `:main`, `:` and wildcard refspecs, `--all`/`--mirror`, in the directory a `cd`, `-C` or
 // `--git-dir` gives, also behind `env`, variables, `command` or `timeout`. A refspec to another branch (main-fix) and text
 // that only mentions a push (in quotes) pass. Not followed: `bash -c '…'` and other shells; the ask rules for force and
-// delete in settings.json stay as they are. A `cd` or `pushd` it cannot resolve ($VAR, `cd -`) makes a push ask.
+// delete in settings.json stay as they are. A `cd` or `pushd` it cannot resolve ($VAR, ~, `cd -`) makes a push ask. A push inside backticks (echo `git push`) is
+// not seen, as `$(…)` is.
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -94,8 +95,9 @@ let reason;
 for (const words of commands(command).map(withoutRedirections)) {
 	// a cd before the push moves it (review 713-1, C-1); one the hook cannot resolve ($VAR, cd -) makes any push ask (C-8)
 	if (words[0] === 'cd' || words[0] === 'pushd') {
-		const to = (words[1] ?? '~').replace(/^~(?=\/|$)/, process.env.HOME ?? '~');
-		dir = /[$`~]|^-$/.test(to) ? undefined : resolve(dir ?? '.', to);
+		const to = words[1] ?? '~';
+		// unknown stays unknown, also for a relative cd after it (review 713-3, C-9)
+		dir = /[$`~]|^-$/.test(to) || (!dir && !to.startsWith('/')) ? undefined : resolve(dir ?? '/', to);
 	}
 	const git = withoutPrefixes(words);
 	if (!dir && git[0] === 'git' && git.includes('push')) reason ??= 'runs in a directory the hook cannot resolve';
