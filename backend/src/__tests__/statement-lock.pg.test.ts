@@ -163,7 +163,7 @@ describe('Zahlung zurücksetzen', () => {
 		expect(response.status).toBe(200);
 		expect(await response.json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: null, statementDate: today() });
 		const stored = (await (await callApi(`/api/v1/statements/${sentId}`)).json()) as { balance: string; paymentResets: unknown[] };
-		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance }]);
+		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance, part: false }]);
 	});
 
 	// erstellt, als die Abrechnung versendet war, das Geld kam aber am selben Tag: das PDF nennt keine Zahlung (Code-Review C-11)
@@ -253,6 +253,20 @@ describe('Teilzahlung', () => {
 
 		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: '10.00', payments: [{ amount: '10.00' }] });
 		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidAmount: null, payments: [] });
+	});
+
+	// #999: the Verlauf names a reset part payment as one (Fachreview 999-1); the payment that reached the Saldo is none
+	it('hält beim Zurücksetzen fest, ob es eine Teilzahlung war', async () => {
+		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+		await pay('10.00');
+		await pay('432.90');
+		await reset();
+
+		const resets = ((await (await reset()).json()) as { paymentResets: unknown[] }).paymentResets.slice(-2);
+		expect(resets).toEqual([
+			{ resetOn: today(), paidDate: today(), paidAmount: '432.90', part: false },
+			{ resetOn: today(), paidDate: today(), paidAmount: '10.00', part: true }
+		]);
 	});
 
 	// Copilot review PR #1006: the last payment without a date is of today, and so is the Zahlungsdatum

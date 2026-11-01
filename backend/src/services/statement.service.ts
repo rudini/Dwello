@@ -855,7 +855,8 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	if (existing.status !== 'paid' && !(last && ['sent', 'overdue'].includes(existing.status)))
 		throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
 	const kept = existing.payments.slice(0, -1);
-	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount };
+	// a part payment did not reach the Saldo: the Verlauf names it as one (#999)
+	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount, part: existing.status !== 'paid' };
 	const paidAmount = kept.length ? roundToRappen(kept.reduce((sum, p) => sum + Number(p.amount), 0)).toFixed(2) : null;
 	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
 	const { pdfGeneratedAt, paymentRecordedAt } = existing;
@@ -872,7 +873,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	}))!;
 	// a new PDF still to send made after it names the payment as well (#1015)
 	if (paymentRecordedAt) await dropNewPdfSince(id, paymentRecordedAt);
-	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: reset.paidDate }); // #357
+	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: reset.paidDate, paidAmount: reset.paidAmount }); // #357, #999
 	return updated;
 }
 

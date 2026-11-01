@@ -976,9 +976,13 @@ describe('API-Verträge der Zahlung', () => {
 
 	it('POST /statements/:id/payment-reset liefert die Felder von statement-payment-reset.json', async () => {
 		const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+		// a part payment before the payment that reached the Saldo, so the one kept fills `payments` (#999)
+		const { balance } = (await (await callApi(`/api/v1/statements/${statementId}`)).json()) as { balance: string };
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: today, paidAmount: Number(balance) < 0 ? '-0.01' : '0.01' });
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: today });
 		const actual = await (await callApi(`/api/v1/statements/${statementId}/payment-reset`, { method: 'POST' })).json();
 		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
+		await callApi(`/api/v1/statements/${statementId}/payment-reset`, { method: 'POST' });
 	});
 
 	// #524: a change of a sent statement names what only the new PDF prints (after the payment reset above: sent)

@@ -174,7 +174,7 @@ describe('Protokoll der umlagefähigen Rechnungen', () => {
 });
 
 describe('Protokoll einer zurückgesetzten Zahlung', () => {
-	it('hält die Abrechnung mit dem Zahlungsdatum fest', async () => {
+	it('hält die Abrechnung mit Zahlungsdatum und Betrag fest', async () => {
 		const rental = await createRental(token, { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
 		cleanUps.push(() => rental.remove());
 		const id = await idOf(
@@ -191,9 +191,10 @@ describe('Protokoll einer zurückgesetzten Zahlung', () => {
 
 		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
 
-		const statement = (await (await callApi(`/api/v1/statements/${id}`)).json()) as { statementNumber: string };
+		const statement = (await (await callApi(`/api/v1/statements/${id}`)).json()) as { statementNumber: string; balance: string };
 		const [entry] = await entriesOf('payment_reset', (details) => details.statementId === id);
-		expect(entry.details).toEqual({ statementId: id, number: statement.statementNumber, paidDate: today() });
+		// with its amount (Fachreview 999-1 V-5)
+		expect(entry.details).toEqual({ statementId: id, number: statement.statementNumber, paidDate: today(), paidAmount: statement.balance });
 	});
 });
 
