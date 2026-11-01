@@ -1,7 +1,8 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { deletionConfirmable, errorMessageShown } from '../questions/form';
-import { pageTitle } from '../questions/navigation';
+import { focusedPlace, pageTitle } from '../questions/navigation';
+import { goBackInBrowser } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb } from '../tasks/form';
 
 const { When, Then } = createBdd(test);
@@ -48,3 +49,12 @@ Then(
 		await verwalter.sees(pageTitle).toBe(`${names.get(title) ?? title} bearbeiten - Dwello`);
 	}
 );
+
+When('der Liegenschaftsverwalter im Browser zurückgeht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(goBackInBrowser);
+});
+
+// #681: after a search, a reset, a page of the list or the browser's back button
+Then('steht der Fokus auf dem Ergebnis der Liste', async ({ verwalter }) => {
+	await verwalter.sees(focusedPlace).toBe('list-results');
+});

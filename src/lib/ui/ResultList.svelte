@@ -25,7 +25,7 @@
 </script>
 
 <section aria-labelledby={id} class="flex flex-col gap-4">
-	<h2 {id} tabindex="-1" data-results class="text-xl font-bold text-ink">{heading}</h2>
+	<h2 {id} tabindex="-1" data-results data-testid="list-results" class="text-xl font-bold text-ink">{heading}</h2>
 	<ul class={listClass}>
 		{@render children()}
 	</ul>

@@ -108,6 +108,9 @@
 					illustration="no-results"
 					title={m.invoices_none_found()}
 					text={m.invoices_none_found_text()}
+					actionLabel={m.buildings_reset_filters()}
+					actionHref="/invoices"
+					actionTestid="invoices-show-all"
 				/>
 			{:else}
 				<EmptyState

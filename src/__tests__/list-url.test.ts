@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isListSearch, listPageUrl, listSearchUrl } from '../lib/list-url';
+import { isListNavigation, listPageUrl, listSearchUrl } from '../lib/list-url';
 
 describe('listSearchUrl', () => {
 	it('keeps only filled filters and starts at page 1', () => {
@@ -29,19 +29,32 @@ describe('Suche in einer Liste', () => {
 	});
 
 	it('erkennt das Absenden der Filter, auch mit unveränderten Filtern', () => {
-		expect(isListSearch(nav('form', '/contracts', '/contracts?status=future'))).toBe(true);
-		expect(isListSearch(nav('form', '/contracts?status=future', '/contracts?status=future'))).toBe(
+		expect(isListNavigation(nav('form', '/contracts', '/contracts?status=future'))).toBe(true);
+		expect(
+			isListNavigation(nav('form', '/contracts?status=future', '/contracts?status=future'))
+		).toBe(true);
+		expect(isListNavigation(nav('goto', '/invoices', '/invoices?search=Hauswart&page=1'))).toBe(
 			true
 		);
-		expect(isListSearch(nav('goto', '/invoices', '/invoices?search=Hauswart&page=1'))).toBe(true);
-		expect(isListSearch(nav('goto', '/apartments?status=vacant&page=1', '/apartments'))).toBe(true);
+		expect(isListNavigation(nav('goto', '/apartments?status=vacant&page=1', '/apartments'))).toBe(
+			true
+		);
 	});
 
-	it('lässt den Fokus bei Links, beim ersten Laden und bei anderen Seiten', () => {
-		expect(isListSearch(nav('link', '/contracts', '/contracts?page=2'))).toBe(false);
-		expect(isListSearch(nav('enter', null, '/contracts?status=future'))).toBe(false);
-		expect(isListSearch(nav('goto', '/invoices/i1', '/invoices'))).toBe(false);
+	// #681: a page of the list, the reset link of an empty list, the browser's back and forward buttons
+	it('erkennt jede andere Bewegung innerhalb der Liste', () => {
+		expect(isListNavigation(nav('link', '/contracts', '/contracts?page=2'))).toBe(true);
+		expect(isListNavigation(nav('link', '/apartments?search=x&page=1', '/apartments'))).toBe(true);
+		expect(isListNavigation(nav('popstate', '/apartments', '/apartments?search=x&page=1'))).toBe(
+			true
+		);
+	});
+
+	it('lässt den Fokus beim ersten Laden und bei anderen Seiten', () => {
+		expect(isListNavigation(nav('link', '/contracts/c1', '/contracts'))).toBe(false);
+		expect(isListNavigation(nav('enter', null, '/contracts?status=future'))).toBe(false);
+		expect(isListNavigation(nav('goto', '/invoices/i1', '/invoices'))).toBe(false);
 		// a form action that leads back to its own page, e.g. after deleting
-		expect(isListSearch(nav('goto', '/config/categories', '/config/categories'))).toBe(false);
+		expect(isListNavigation(nav('goto', '/config/categories', '/config/categories'))).toBe(false);
 	});
 });
