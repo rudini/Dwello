@@ -28,3 +28,7 @@ Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by 
 ## Commit subject (`.claude/hooks/commit-msg-gate.mjs`)
 
 Blocks `git commit -m` with a subject that breaks `CLAUDE.md`, "Conventions" (type and scope from the lists there, at most 50 characters, no period), and a `git push` while any commit since `origin/main` (merges left out, as in CI «Commit subjects») has one, whatever gave its subject (`-F`, a heredoc file). A subject found at the push: reword the unpushed commit (`git commit --amend` for the last one). `node .claude/hooks/commit-msg-gate.mjs --check "<subject>"` checks a subject first. Commits in another repository (a scratch repository, reached by `git -C` or the cwd, not by a `cd` in the command) pass; a worktree of Dwello is checked wherever it lies.
+
+## Push to main (`.claude/hooks/main-push-guard.mjs`)
+
+Asks before a `git push` whose resolved target is `main` (#713): a bare `git push` or `git push origin HEAD` with `main` checked out (by `@{push}`), `git -C <checkout of main> push`, `HEAD:main`, `refs/heads/main`, `--all`/`--mirror`. A refspec to another branch (`main-fix`) and text that only mentions a push (in quotes, an `echo`) pass. It never blocks, it only asks; the ask rules for force and delete in `.claude/settings.json` stay. Tests: `tools/claude-hooks/main-push-guard.test.ts`.
