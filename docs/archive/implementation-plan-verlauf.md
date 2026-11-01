@@ -498,3 +498,9 @@
 - [x] Its Minors fixed: reason when the answer stays empty, Copilot waited for 5 minutes, concurrency on the job, diff per file (GitHub refuses large diffs)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1007.md`
 - [x] PR: pushed after this archive
+
+## Session: fallback review without Copilot triggers (#1007 follow-up)
+
+- [x] Runs triggered by Copilot's review wait for an approval no setting gives and expire (#1009, run 41256102317): `pull_request_review` and `issue_comment` triggers removed; an error review of Copilot still counts as no review when CI finishes
+- [x] Local run of the bash step: #1009 and #941 already reviewed, missing key → «No review»
+- [x] PR: pushed after this archive
