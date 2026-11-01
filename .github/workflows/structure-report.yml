@@ -1,0 +1,48 @@
+name: Structure report
+
+# Structure report with its history on every push to main (bun run structure:report, docs/architecture/fitness-functions.md):
+# the HTML report as an artifact, the history as a table in the job summary. A report, never a gate.
+# Snapshots of earlier commits never change, so they are cached between runs; a lost cache only costs time.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Jobs read the repository only (CodeQL actions/missing-workflow-permissions)
+permissions:
+  contents: read
+
+concurrency:
+  group: structure-report
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  report:
+    name: Structure report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # snapshots of earlier commits and fallow's hotspots need the full history
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - uses: actions/cache@v5
+        with:
+          path: build/structure/history
+          # snapshots stay valid while the tools that measure them do not change (structure-history.sh checks it too)
+          key: structure-history-${{ hashFiles('tools/arch-baseline/*.ts', 'tools/arch-baseline/structure-history.sh', 'tools/arch-baseline/layers.json', '.fallowrc.json', 'bun.lock') }}-${{ github.sha }}
+          restore-keys: structure-history-${{ hashFiles('tools/arch-baseline/*.ts', 'tools/arch-baseline/structure-history.sh', 'tools/arch-baseline/layers.json', '.fallowrc.json', 'bun.lock') }}-
+      - run: bun run structure:report
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: structure-report
+          path: build/structure/index.html
+          retention-days: 90

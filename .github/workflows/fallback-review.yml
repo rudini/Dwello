@@ -39,7 +39,9 @@ jobs:
       PR: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
       MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
       MODEL: MiniMax-M3.1-Flash
-      REASONING_EFFORT: medium # unset, it thought through all 32000 tokens of a 47 kB diff without an answer
+      # unset, it thought through all 32000 tokens of a 47 kB diff without an answer; medium answered in a minute but
+      # with mostly false findings (#1024, #1031, #1033), high dropped them in about two minutes
+      REASONING_EFFORT: high
       MAX_DIFF_BYTES: 400000
     steps:
       - name: Review the diff when Copilot did not
