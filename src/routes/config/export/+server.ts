@@ -30,8 +30,12 @@ const field = (value: Cell) => {
 const csv = (rows: Cell[][]) =>
 	strToU8(`\ufeff${rows.map((row) => row.map(field).join(';')).join('\r\n')}\r\n`);
 
-/** Everything the landlord entered, as one ZIP (#496); the export goes into the Protokoll once the ZIP is made (F-4) */
-export const GET: RequestHandler = async ({ fetch }) => {
+/**
+ * Everything the landlord entered, as one ZIP (#496); the export goes into the Protokoll once the ZIP is made (F-4).
+ * A form POST, as the other forms of the Einstellungen: SvelteKit refuses one from another site (its origin check), so
+ * no other page can start an export with a link (Review 496-1 C-2)
+ */
+export const POST: RequestHandler = async ({ fetch }) => {
 	const response = await fetch(`${API}/export?language=${getLocale()}`);
 	// a download: the page stays open, the browser names the failed download (as the export of a tenant, #435)
 	if (!response.ok) error(500);
@@ -51,6 +55,7 @@ export const GET: RequestHandler = async ({ fetch }) => {
 			files.map(({ path, content }) => [path, [Buffer.from(content, 'base64'), { level: 0 }]])
 		)
 	});
-	await fetch(`${API}/audit-log/exports`, { method: 'POST' });
+	// no export without its entry in the Protokoll (F-4, Review 496-1 C-1): the browser names the failed download
+	if (!(await fetch(`${API}/audit-log/exports`, { method: 'POST' })).ok) error(500);
 	return download;
 };

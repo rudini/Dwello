@@ -1,27 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import { unzipSync } from 'fflate';
-import { GET } from '../routes/config/export/+server';
+import * as route from '../routes/config/export/+server';
 import sample from '../../tests/contracts/data-export.json';
 
 const BACKEND = 'http://localhost:3001/api/v1';
+const POST = route.POST as (event: never) => Promise<Response>;
 
-// The backend's answer as the BFF gets it; it turns it into the ZIP of all data (#496)
-async function exported(status = 200) {
+// The backend's answer as the BFF gets it; it turns it into the ZIP of all data (#496); the Protokoll answers `logged`
+async function exported(logged = 201) {
 	const calls: string[] = [];
 	const fetch = async (url: string, init?: RequestInit) => (
 		calls.push(`${init?.method ?? 'GET'} ${url}`),
-		Response.json(status === 200 || init?.method ? sample : {}, {
-			status: init?.method ? 201 : status
-		})
+		init?.method ? new Response(null, { status: logged }) : Response.json(sample)
 	);
-	const response = await (GET as (event: never) => Promise<Response>)({ fetch } as never);
+	const response = await POST({ fetch } as never);
 	const zip = unzipSync(new Uint8Array(await response.arrayBuffer()));
 	// keeps the byte order mark, which Excel reads UTF-8 by
 	const text = (name: string) => new TextDecoder('utf-8', { ignoreBOM: true }).decode(zip[name]);
 	return { calls, response, zip, text };
 }
 
-describe('GET /config/export', () => {
+describe('POST /config/export', () => {
+	// a GET would let any page start an export with a link: a form POST passes SvelteKit's origin check (Review 496-1 C-2)
+	it('exportiert nur auf ein Formular hin, nicht über einen Link', () => {
+		expect(Object.keys(route)).toEqual(['POST']);
+	});
+
 	it('lädt alle Daten als ZIP mit Datendatei, Tabellen und Belegen herunter und hält den Export danach im Protokoll fest', async () => {
 		const { calls, response, zip } = await exported();
 
@@ -78,8 +82,12 @@ describe('GET /config/export', () => {
 		);
 
 		await expect(
-			(GET as (event: never) => Promise<Response>)({ fetch } as never)
+			POST({ fetch } as never)
 		).rejects.toMatchObject({ status: 500 });
 		expect(calls).toEqual([`GET ${BACKEND}/export?language=de`]);
+	});
+
+	it('gibt die ZIP-Datei nicht heraus, wenn das Protokoll den Export nicht festhält (Review 496-1 C-1)', async () => {
+		await expect(exported(401)).rejects.toMatchObject({ status: 500 });
 	});
 });
