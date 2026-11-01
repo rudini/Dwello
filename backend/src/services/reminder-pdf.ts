@@ -47,8 +47,16 @@ export async function renderReminderPdf(
 	for (const paragraph of letter.paragraphs) doc.moveDown().text(paragraph, { width: 455 });
 	doc.moveDown(1.5).text(letter.closing);
 	if (letter.agreement) {
-		doc.moveDown(2).font(FONT.bold).text(letter.agreement.heading).font(FONT.regular);
-		for (const paragraph of letter.agreement.paragraphs) doc.moveDown().text(paragraph, { width: 455 });
+		// the text the tenant agrees to and its signatures stay on one page (persona Helga P-3)
+		const { heading, paragraphs } = letter.agreement;
+		const height =
+			(2 + paragraphs.length) * doc.currentLineHeight(true) +
+			doc.heightOfString(heading) +
+			paragraphs.reduce((sum, paragraph) => sum + doc.heightOfString(paragraph, { width: 455 }), 0);
+		if (doc.y + height > doc.page.height - doc.page.margins.bottom) doc.addPage();
+		else doc.moveDown(2);
+		doc.font(FONT.bold).text(heading).font(FONT.regular);
+		for (const paragraph of paragraphs) doc.moveDown().text(paragraph, { width: 455 });
 	}
 	if (payment) await addPaymentPart(doc, payment.statement, payment.config, payment.language);
 	doc.end();
