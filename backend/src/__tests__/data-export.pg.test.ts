@@ -4,9 +4,9 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { auditLog, documents, invoiceDocuments, invoices, rentalContracts, utilityStatements } from '../db/schema';
+import { apartments, auditLog, documents, invoiceDocuments, invoices, rentalContracts, utilityStatements } from '../db/schema';
 import { createRental } from './helpers/rental';
 import { callApi, sendJson } from './helpers/auth';
 import { idOf, insertInvoice } from './helpers/records';
@@ -21,7 +21,7 @@ type Export = {
 		tenants: { id: string; lastName: string }[];
 		buildings: {
 			name: string;
-			apartments: { number: string; contracts: { tenantId: string; file: string | null }[] }[];
+			apartments: { number: string; status: string; rentalStatus: string; contracts: { tenantId: string; file: string | null }[] }[];
 			invoices: { billingEntityName: string; documents: { fileName: string; file: string }[] }[];
 		}[];
 		auditLog: { id: string; action: string }[];
@@ -80,6 +80,8 @@ beforeAll(async () => {
 	namesake = (await createTenant({ firstName: 'Anna', lastName: `Keller ${token}` })).id;
 	for (const tenant of [rental.tenant, namesake])
 		await sendJson('POST', `/api/v1/tenants/${tenant}/documents`, { title: 'Übergabeprotokoll', fileName: 'scan.pdf', content: pdf('upload') });
+	// an apartment the landlord blocked by hand, without a contract (Fachreview 496-2 V-11)
+	await db.insert(apartments).values({ buildingId: rental.building, number: '2.02', area: '50', rooms: '2.5', status: 'reserved' });
 });
 
 afterAll(async () => {
@@ -87,6 +89,7 @@ afterAll(async () => {
 	await db.delete(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await deleteTenant(namesake);
+	await db.delete(apartments).where(and(eq(apartments.buildingId, rental.building), eq(apartments.number, '2.02')));
 	await rental.remove();
 });
 
@@ -97,7 +100,7 @@ describe('Alle Daten exportieren', () => {
 		expect(exported.fileName).toBe(`Dwello-Daten-${swissToday()}.zip`);
 		expect(exported.dataFile).toBe('daten.json');
 		const building = exported.data.buildings.find((b) => b.name === `Ahornhof ${token}`);
-		expect(building?.apartments.map((a) => [a.number, ...a.contracts.map((c) => c.tenantId)])).toEqual([['2.01', rental.tenant]]);
+		expect(building?.apartments.map((a) => [a.number, ...a.contracts.map((c) => c.tenantId)])).toEqual([['2.01', rental.tenant], ['2.02']]);
 		expect(rowsOf(exported, 'tabellen/gebäude.csv').find((row) => row.Name === `Ahornhof ${token}`)).toMatchObject({
 			ID: rental.building,
 			Ort: 'Winterthur',
@@ -194,6 +197,21 @@ describe('Alle Daten exportieren', () => {
 		} finally {
 			await db.delete(auditLog).where(eq(auditLog.id, entry.id));
 		}
+	});
+
+	it('nennt den Mietstatus der Wohnung am Tag des Exports wie die Oberfläche, die Datendatei auch den gespeicherten Code (Fachreview 496-2 V-11)', async () => {
+		const exported = await exportIn();
+		const rows = rowsOf(exported, 'tabellen/wohnungen.csv').filter((row) => row['Gebäude-ID'] === rental.building);
+
+		expect(rows.map((row) => [row.Nummer, row.Mietstatus])).toEqual([
+			['2.01', 'Vermietet'],
+			['2.02', 'Gesperrt']
+		]);
+		const building = exported.data.buildings.find((b) => b.name === `Ahornhof ${token}`)!;
+		expect(building.apartments.map(({ number, status, rentalStatus }) => [number, status, rentalStatus])).toEqual([
+			['2.01', 'vacant', 'occupied'],
+			['2.02', 'reserved', 'reserved']
+		]);
 	});
 
 	it('gibt die Einstellungen mit den Namen des Formulars heraus', async () => {

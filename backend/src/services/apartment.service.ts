@@ -18,7 +18,7 @@ import { sqlToday, swissToday } from './today';
 import type { ApartmentStatus, ApartmentWithDetails } from '../api/apartment';
 
 /** First day of the next rental contract that has not started yet */
-const nextContractStart = sql<string | null>`(
+export const nextContractStart = sql<string | null>`(
 	select min(c.start_date)::text from rental_contracts c
 	where c.apartment_id = "apartments"."id" and c.start_date > ${sqlToday}
 )`;

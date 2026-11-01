@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { auditEntryCountOn } from '../questions/audit-log';
 import {
 	downloadedFileName,
+	exportedApartmentCell,
 	exportedApartments,
 	exportedColumn,
 	exportedFileStart,
@@ -93,6 +94,13 @@ Then(
 	'führt die Tabelle {string} des Exports das Gebäude {string} mit {string} in der Spalte {string}, durch Strichpunkte getrennt',
 	async ({ verwalter, names }, table: string, building: string, value: string, column: string) => {
 		await verwalter.sees(exportedCell(table, names.get(building)!, column)).toBe(value);
+	}
+);
+
+Then(
+	'führt die Tabelle {string} des Exports die Wohnung {string} im Gebäude {string} mit {string} in der Spalte {string}',
+	async ({ verwalter, names }, table: string, apartment: string, building: string, value: string, column: string) => {
+		await verwalter.sees(exportedApartmentCell(table, names.get(building)!, apartment, column)).toBe(value);
 	}
 );
 

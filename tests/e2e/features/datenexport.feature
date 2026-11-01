@@ -50,6 +50,7 @@ Funktionalität: Alle Daten exportieren
       | tabellen/protokoll.csv          |
       | tabellen/einstellungen.csv      |
     Und nennt die Datendatei des Exports beim Gebäude "Seeblick" die Wohnung "1.01" mit dem Mietvertrag von "Hans Müller"
+    Und führt die Tabelle "tabellen/wohnungen.csv" des Exports die Wohnung "1.01" im Gebäude "Seeblick" mit "Vermietet" in der Spalte "Mietstatus"
     Und nennt die Datendatei des Exports beim Gebäude "Seeblick" die Rechnung von "Hauswart Meier" mit ihrem Beleg "meier-q1.pdf"
     Und enthält der Export den Beleg "meier-q1.pdf" der Rechnung von "Hauswart Meier" im Ordner "belege" als PDF
 

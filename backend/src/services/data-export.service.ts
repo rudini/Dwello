@@ -7,7 +7,7 @@
  * records the export (F-4). TODO(fachlich prüfen, #1039): the terms «Export aller Daten» and «Datendatei»
  */
 
-import { asc } from 'drizzle-orm';
+import { asc, getTableColumns } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	apartments,
@@ -27,6 +27,7 @@ import {
 	utilityStatements
 } from '../db/schema';
 import { auditLogWithExpiries } from './access-key.service';
+import { apartmentStatus, nextContractStart } from './apartment.service';
 import { getAllConfig } from './config.service';
 import { EXTENSIONS, NAMES, safe, zipFiles } from './tenant-export.service';
 import { swissToday } from './today';
@@ -62,6 +63,7 @@ const COLUMNS = {
 	area: ['Fläche (m²)', 'Surface (m²)', 'Superficie (m²)', 'Area (m²)'],
 	rooms: ['Zimmer', 'Pièces', 'Locali', 'Rooms'],
 	status: ['Status', 'Statut', 'Stato', 'Status'],
+	rentalStatus: ['Mietstatus', 'Statut de location', 'Stato di locazione', 'Rental status'],
 	firstName: ['Vorname', 'Prénom', 'Nome', 'First name'],
 	lastName: ['Nachname', 'Nom', 'Cognome', 'Last name'],
 	email: ['E-Mail', 'E-mail', 'E-mail', 'Email'],
@@ -203,7 +205,11 @@ const WORDS = {
 	settled: ['Erledigt', 'Clôturé', 'Chiuso', 'Closed'],
 	replaced: ['Ersetzt', 'Remplacé', 'Sostituito', 'Replaced'],
 	predefined: ['Von Dwello', 'De Dwello', 'Da Dwello', 'From Dwello'],
-	custom: ['Eigene', 'Personnalisée', 'Personalizzata', 'Custom']
+	custom: ['Eigene', 'Personnalisée', 'Personalizzata', 'Custom'],
+	occupied: ['Vermietet', 'Loué', 'Locato', 'Let'],
+	relet: ['Vermietet ab {date}', 'Loué dès le {date}', 'Locato dal {date}', 'Let from {date}'],
+	vacant: ['Leer', 'Vacant', 'Sfitto', 'Vacant'],
+	reserved: ['Gesperrt', 'Bloqué', 'Bloccato', 'Blocked']
 } as const;
 
 // The settings by the names of the form under «Einstellungen»
@@ -267,7 +273,11 @@ export async function exportAllData(language: Language) {
 			await Promise.all([
 				tx.select().from(tenants).orderBy(asc(tenants.lastName), asc(tenants.firstName), asc(tenants.createdAt)),
 				tx.select().from(buildings).orderBy(asc(buildings.name)),
-				tx.select().from(apartments).orderBy(asc(apartments.number)),
+				// the Mietstatus on the day of the export, as the UI shows it (Fachreview 496-2 V-11)
+				tx
+					.select({ ...getTableColumns(apartments), rentalStatus: apartmentStatus, nextContractStart })
+					.from(apartments)
+					.orderBy(asc(apartments.number)),
 				tx.select().from(rentalContracts).orderBy(asc(rentalContracts.startDate)),
 				tx.select().from(contractAdvancePayments).orderBy(asc(contractAdvancePayments.validFrom)),
 				tx.select().from(contractCategories),
@@ -369,7 +379,7 @@ export async function exportAllData(language: Language) {
 			...building,
 			apartments: allApartments
 				.filter((apartment) => apartment.buildingId === building.id)
-				.map((apartment) => ({ ...apartment, contracts: contractRows.filter((contract) => contract.apartmentId === apartment.id) })),
+				.map(({ nextContractStart: _, ...apartment }) => ({ ...apartment, contracts: contractRows.filter((contract) => contract.apartmentId === apartment.id) })),
 			invoices: allInvoices
 				.filter((invoice) => invoice.buildingId === building.id)
 				.map((invoice) => ({ ...invoice, documents: belegRows.filter((beleg) => beleg.invoiceId === invoice.id) })),
@@ -382,8 +392,12 @@ export async function exportAllData(language: Language) {
 	table('buildings', ['id', 'name', 'address', 'postalCode', 'city', 'canton', 'country', 'latitude', 'longitude', 'buildingType', 'yearBuilt', 'noTank', 'createdAt', 'updatedAt'], allBuildings);
 	table(
 		'apartments',
-		['id', 'buildingId', 'building', 'number', 'floor', 'area', 'rooms', 'status', 'createdAt', 'updatedAt'],
-		allApartments.map((apartment) => ({ ...apartment, building: buildingOf.get(apartment.buildingId)?.name }))
+		['id', 'buildingId', 'building', 'number', 'floor', 'area', 'rooms', 'rentalStatus', 'createdAt', 'updatedAt'],
+		allApartments.map((apartment) => ({
+			...apartment,
+			building: buildingOf.get(apartment.buildingId)?.name,
+			rentalStatus: word(apartment.rentalStatus).replace('{date}', apartment.nextContractStart ?? '')
+		}))
 	);
 	table(
 		'tenants',

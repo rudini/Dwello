@@ -171,3 +171,9 @@ export const exportedCell = (table: string, name: string, column: string) =>
 	question(`the ${column} of ${name} in ${table}`, async (actor) =>
 		(await actor.answer(exportedTableRows(table))).find((row) => row.Name === name)?.[column] ?? null
 	);
+
+/** The cell of the column in the row of the apartment of the building in a table of apartments; null without that row */
+export const exportedApartmentCell = (table: string, building: string, apartment: string, column: string) =>
+	question(`the ${column} of ${apartment} in ${building} in ${table}`, async (actor) =>
+		(await actor.answer(exportedTableRows(table))).find((row) => row.Gebäude === building && row.Nummer === apartment)?.[column] ?? null
+	);
