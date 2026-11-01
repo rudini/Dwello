@@ -2386,7 +2386,10 @@ describe('Abrechnung bearbeiten', () => {
 		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('28.02.2025');
 		expect(text()).toContain('Freitag, 28. Februar 2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
-		expect(allByTestId('statement-line-item')).toHaveLength(2);
+		// #691: the narrow form shows the lines one below the other at every width, the table never
+		expect(allByTestId('statement-line-card')).toHaveLength(2);
+		expect(byTestId('statement-line-card')!.closest('ul')!.className).not.toContain('md:hidden');
+		expect(allByTestId('statement-line-item')[0].closest('.hidden')!.className).not.toContain('md:block');
 		expect(byTestId('statement-recalculate-hint')).not.toBeNull();
 	});
 

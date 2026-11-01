@@ -91,11 +91,11 @@
 		/>
 	</Panel>
 
-	<Panel title={m.statements_cost_breakdown()}>
+	<Panel title={m.statements_cost_breakdown()} testid="statement-edit-costs">
 		<p class="text-ink-muted" data-testid="statement-recalculate-hint">
 			{m.statements_recalculate_hint()}
 		</p>
-		<CostTable {statement} />
+		<CostTable {statement} stacked />
 	</Panel>
 
 	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">

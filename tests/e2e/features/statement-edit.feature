@@ -22,6 +22,16 @@ Funktionalität: Abrechnung bearbeiten
   Szenario: Berechnete Kosten werden nur durch Neuerstellen korrigiert
     Dann sieht der Liegenschaftsverwalter, dass Kosten durch Neuerstellen der Abrechnung korrigiert werden
 
+  # #691: die Bearbeitungsseite ist schmal; jede Position zeigt alle Werte, keine Spalte ist abgeschnitten
+  Szenario: Die Kostenaufstellung passt ganz auf die Bearbeitungsseite
+    Angenommen im Gebäude "Ahornhof" gibt es eine Rechnung der Kategorie "Hauswart" über "3060" Franken vom "2024-09-30"
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Nina Brunner" existiert
+    Und "Nina Brunner" mietet die Wohnung "2.02" seit "2014-01-01" für "1200" Franken mit "180" Franken Akonto
+    Und für "Nina Brunner" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Nina Brunner"
+    Dann zeigt die Bearbeitungsseite die ganze Kostenaufstellung, ohne seitlich zu verschieben
+
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
