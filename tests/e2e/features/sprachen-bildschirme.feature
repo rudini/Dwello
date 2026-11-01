@@ -119,6 +119,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | missing-statements  |
       | contract-partly-billed-detail | default          |
       | contract-consent-detail       | default          |
+      | contract-consent-letter-refused | default        |
       | contract-moved-out-detail | default          |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |

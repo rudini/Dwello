@@ -1884,7 +1884,7 @@
 	"contracts_withdraw_notice_help": "Il contratto di locazione prosegue allora a tempo indeterminato. È possibile solo se inquilino e locatore ritirano insieme la disdetta, oppure se l’autorità di conciliazione o un tribunale la dichiara non valida. Una volta ricevuta, la disdetta non può essere ritirata né dall’inquilino né dal locatore da solo.",
 	"contracts_notice_withdrawn_toast": "Disdetta di {name} annullata. Il contratto di locazione prosegue a tempo indeterminato.",
 	"backend_contract_notice_without_end": "Una disdetta richiede una fine del contratto. Inserisca la scadenza di disdetta.",
-	"backend_consent_letter_none": "Per questo contratto di locazione non esiste una lettera di consenso: il periodo di conteggio non è cambiato prima del suo periodo di conteggio breve. Ricarichi la pagina del contratto di locazione.",
+	"backend_consent_letter_none": "Per questo contratto di locazione non esiste più una lettera di consenso: non ha alcun periodo di conteggio breve da conteggiare dopo un cambiamento del periodo di conteggio. Ricarichi la pagina.",
 	"backend_contract_parties_fixed": "L’inquilino e l’appartamento di un contratto di locazione non possono essere modificati. Dia a questo contratto di locazione una fine del contratto e registri un nuovo contratto di locazione.",
 	"apartments_status_occupied_until": "Locato fino al {date}",
 	"dashboard_task_successor": "Cercare un nuovo inquilino per l’appartamento {apartment}",

@@ -85,7 +85,6 @@
 						{#if period.consentLetter}
 							<Button
 								href={period.consentLetter}
-								download
 								variant="ghost"
 								icon="document-download"
 								testid="contract-missing-statement-consent-letter"

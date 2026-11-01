@@ -1884,7 +1884,7 @@
 	"contracts_withdraw_notice_help": "The rental contract then runs on without an end. This is only possible if tenant and landlord withdraw the notice of termination together, or if the conciliation authority or a court declares it invalid. Once received, a notice cannot be withdrawn by the tenant or the landlord alone.",
 	"contracts_notice_withdrawn_toast": "Notice of termination of {name} withdrawn. The rental contract runs on without an end.",
 	"backend_contract_notice_without_end": "A notice of termination needs a contract end. Enter the termination date.",
-	"backend_consent_letter_none": "There is no agreement letter for this rental contract: the billing period did not change before its short billing period. Reload the rental contract page.",
+	"backend_consent_letter_none": "There is no longer an agreement letter for this rental contract: it has no short billing period left to bill after a change of the billing period. Reload the page.",
 	"backend_contract_parties_fixed": "The tenant and the apartment of a rental contract cannot be changed. Give this rental contract a contract end and add a new rental contract.",
 	"apartments_status_occupied_until": "Let until {date}",
 	"dashboard_task_successor": "Find a new tenant for apartment {apartment}",

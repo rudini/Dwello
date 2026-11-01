@@ -95,3 +95,6 @@ export const deleteAdvance = (amount: string): Activity => (actor) =>
 
 /** #521: downloads the letter for the tenants' consent to a new Abrechnungsperiode */
 export const downloadConsentLetter = DownloadFrom(consentLetterLink);
+export const requestConsentLetter = Click.on(consentLetterLink);
+// #521 (C-1): the letter's address typed in or kept from a stale page
+export const openConsentLetter = (contractId: string) => Navigate.to(`/contracts/${contractId}/consent-letter`);

@@ -58,6 +58,8 @@ import {
 	openContractTenant,
 	openRefusedStatement,
 	downloadConsentLetter,
+	openConsentLetter,
+	requestConsentLetter,
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
@@ -550,6 +552,10 @@ When('der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechn
 	await verwalter.attemptsTo(downloadConsentLetter);
 });
 
+When('der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestConsentLetter);
+});
+
 Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(downloadedPdfText).toContain(names.get(tenant) ?? tenant);
 });
@@ -558,3 +564,10 @@ Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: 
 Then('bietet der Mietvertrag keinen Brief zur Zustimmung an', async ({ verwalter }) => {
 	await verwalter.sees(consentLetterShown).toBe(false);
 });
+
+When(
+	'der Liegenschaftsverwalter den Brief zur Zustimmung für den Mietvertrag von {string} direkt öffnet',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.attemptsTo(openConsentLetter(seed.idOf(`Mietvertrag ${tenant}`)!));
+	}
+);

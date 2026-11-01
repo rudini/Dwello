@@ -436,6 +436,13 @@
 			]
 		},
 		{
+			"name": "contract-consent-letter-refused",
+			"path": "/contracts/{contract}/consent-letter",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "contract-moved-out-detail",
 			"path": "/contracts/{movedOutContract}",
 			"states": [

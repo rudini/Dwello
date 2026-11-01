@@ -46,7 +46,6 @@
 		{#each overlap.consent as contract (contract.id)}
 			<Button
 				href="/contracts/{contract.id}/consent-letter"
-				download
 				variant="ghost"
 				icon="document-download"
 				testid="generate-building-consent-letter-{buildingId}-{contract.id}"
