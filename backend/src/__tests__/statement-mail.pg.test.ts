@@ -498,6 +498,21 @@ describe('Neues PDF nach einer Änderung', () => {
 		expect([posted.status, ((await posted.json()) as { code: string }).code]).toEqual([400, 'NEW_PDF_STATEMENT_PAID']);
 	});
 
+	// #1016 (decided 01.11.2026): a new PDF still to send names the amount before the part payment; it is made anew
+	it('erstellt das neue PDF «Zu versenden» nach einer Teilzahlung neu', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		const [before] = await newPdfs(id);
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidAmount: '10.00' });
+
+		const after = await newPdfs(id);
+		expect(after).toHaveLength(1);
+		expect(after[0]).toMatchObject({ status: 'to_send' });
+		expect(after[0].id).not.toBe(before.id);
+	});
+
 	it('legt kein neues PDF an, wenn die Abrechnung ohne Dokument versendet wurde (vor #449, #969)', async () => {
 		const id = await draft();
 		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });

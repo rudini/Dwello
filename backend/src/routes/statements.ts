@@ -383,6 +383,11 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					set.status = 404;
 					return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 				}
+				// #1016: a part payment leaves it open; a new PDF still to send names the amount before it, so it is made anew
+				if (body.status === 'paid' && statement.newPdfToSend) {
+					await keepNewPdf(params.id).catch((error) => console.error('New PDF not kept:', error));
+					return (await getStatement(params.id)) ?? statement;
+				}
 
 				return statement;
 			} catch (error) {
