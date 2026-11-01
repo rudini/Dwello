@@ -678,3 +678,15 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] daten-pruefer `docs/reviews/496-datenpruefung-1.md`: amounts and QR-bills right; D-1, D-2 Minor stay
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-496.md`
 - [x] PR: pushed after this archive
+
+## Session: #679 list filter and stale pages after deleting a draft
+
+- [x] Scenarios `@wip` in `statements.feature`, both seen red at the missing behaviour (filter gone after delete; back shows the deleted draft from the browser cache)
+- [x] Delete returns to the list with the filter it was opened from (`list` field, only `/statements?…`; unit tests seen red, the guard ones by taking the check out)
+- [x] Every page answers `Cache-Control: no-store` (`src/hooks.server.ts`, unit test seen red)
+- [x] E2E: the affected feature files (statements, statement-detail, navigation, authentication, apartments, invoices; chromium + api: 267 passed); the full run with every axe row was too slow next to the personas and is left to CI
+- [x] Slice review round 1: `docs/reviews/679-review-1.md` (C-1 Minor fixed: return on page 1)
+- [x] Persona review: `docs/design/personas/sven-679.md`, `weber-679.md` (both P-1 Minor in the same place: issue #1047)
+- [x] Workflow note: `docs/design/personas/README.md` («Who saves») names `demo-records.md`, which does not exist; the demo records are in `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts` (in `docs/reviews/workflow-notes-issue-679.md`)
+- [x] Closing `code-reviewer` round: `docs/reviews/679-review-2.md` (no findings)
+- [x] Archive, PR: pushed after this archive

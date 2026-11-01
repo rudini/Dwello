@@ -214,6 +214,28 @@ describe('Abrechnung löschen', () => {
 		expect(calls).toEqual([{ method: 'DELETE', url: API, body: undefined }]);
 	});
 
+	it('kehrt zur Abrechnungsliste mit dem Filter zurück, von dem sie kam (#679)', async () => {
+		const list = '/statements?building=b1&status=draft';
+		const { result } = runAction(actions.delete, 's1', 204, { list });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: list });
+	});
+
+	it('beginnt die Liste nach dem Löschen wieder auf Seite 1, die letzte Seite kann leer sein (#679)', async () => {
+		const { result } = runAction(actions.delete, 's1', 204, { list: '/statements?status=draft&page=2' });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/statements?status=draft' });
+	});
+
+	it.each(['https://example.com/statements', '//example.com', '/invoices?status=draft'])(
+		'kehrt nach %s nicht zurück, nur zur Abrechnungsliste (#679)',
+		async (list) => {
+			const { result } = runAction(actions.delete, 's1', 204, { list });
+
+			await expect(result).rejects.toMatchObject({ status: 303, location: '/statements' });
+		}
+	);
+
 	it('meldet einen Fehler, wenn das Backend das Löschen ablehnt', async () => {
 		const { result } = runAction(actions.delete, 's1', 400);
 

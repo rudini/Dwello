@@ -17,6 +17,7 @@ import {
 	sendStatementReminder
 } from '$lib/server/statement-actions';
 import { countryName } from '$lib/tenant';
+import { localPath } from '$lib/invoice';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -113,11 +114,15 @@ export const actions: Actions = {
 		if ('error' in result) return fail(result.status, { actionError: result.error });
 		return { reminder: result.reminder };
 	},
-	delete: async ({ params, fetch }) => {
+	delete: async ({ params, fetch, request }) => {
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {
 			method: 'DELETE'
 		});
 		if (!response.ok) return fail(response.status, { actionError: m.statements_delete_failed() });
-		throw redirect(303, '/statements');
+		// back to the list as it was filtered (#679), never to another page; on page 1, the last one may now be empty
+		const list = localPath(String((await request.formData()).get('list') ?? ''));
+		const search = new URLSearchParams(list?.startsWith('/statements?') ? list.slice(12) : '');
+		search.delete('page');
+		throw redirect(303, search.size ? `/statements?${search}` : '/statements');
 	}
 };

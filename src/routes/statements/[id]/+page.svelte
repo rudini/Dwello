@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { flushSync } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import { backendMessage } from '$lib/backend-error';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
@@ -66,6 +67,11 @@
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
+	// the list as it was filtered when it opened this statement: the delete returns there (#679)
+	let list = $state('');
+	afterNavigate(({ from }) => {
+		if (from?.url.pathname === '/statements') list = from.url.pathname + from.url.search;
+	});
 	let showSend = $state(false);
 	let showRecalculate = $state(false);
 	// a draft whose invoices or Tankbestand changed since it was created is not current (#454, #547), nor one that
@@ -322,6 +328,7 @@
 <FormDialog
 	bind:open={showDelete}
 	action="?/delete"
+	fields={{ list }}
 	title={m.statements_delete()}
 	confirmLabel={m.statements_delete()}
 	confirmTestid="statement-delete-confirm"

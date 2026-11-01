@@ -5,7 +5,11 @@ import { SvelteMap } from 'svelte/reactivity';
 
 let url = new URL('http://localhost/statements');
 vi.mock('$app/environment', () => ({ browser: true }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	invalidateAll: vi.fn(),
+	afterNavigate: vi.fn()
+}));
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
 const actions = vi.hoisted(() => new Map<string, (input?: unknown) => unknown>());
 vi.mock('$app/forms', () => ({
