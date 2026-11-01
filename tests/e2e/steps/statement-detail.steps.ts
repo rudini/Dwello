@@ -112,6 +112,7 @@ import {
 } from '../tasks/statement-detail';
 import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
+import { auditEntryDay } from '../questions/audit-log';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -501,6 +502,17 @@ When('der Liegenschaftsverwalter die Zahlung zurücksetzen will', async ({ verwa
 Then('nennt der Verlauf das Zurücksetzen der Zahlung über {string} vom Tag des Versands', async ({ verwalter }, amount: string) => {
 	await verwalter.sees(history).toContain(`Zahlung vom ${sendingDay()} über ${amount} zurückgesetzt ${sendingDay()}`);
 });
+
+// #999 (Fachreview 999-1 V-5): the Protokoll names the amount too
+Then(
+	'nennt das Protokoll mit heutigem Datum das Zurücksetzen der Zahlung der Abrechnung {int} von {string} über {string} vom Tag des Versands',
+	async ({ verwalter, seed }, year: number, tenant: string, amount: string) => {
+		const number = await seed.statementNumber(tenant, year);
+		await verwalter
+			.sees(auditEntryDay(`Zahlung vom ${sendingDay()} über ${amount} zur Abrechnung ${number} zurückgesetzt`))
+			.toContain(sendingDay());
+	}
+);
 
 When('der Liegenschaftsverwalter das Zurücksetzen bestätigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(confirmResetPayment);

@@ -95,16 +95,16 @@
 	);
 	const pdfRow = $derived({ label: m.statements_pdf_created(), date: firstPdfAt && formatDateTime(firstPdfAt) });
 	const newPdfRow = $derived(madeRow(pdfGeneratedAt));
-	// #999 (#959 Regel 1, Fachreview 999-1 M-1): each part payment; the one that reached the Saldo after parts too
+	// #999 (#959 Regel 1, Fachreview 999-1 M-1): each part payment; the one that reached the Saldo after parts too; a
+	// refund each as refunded, never read as received (Antwort 4, Code-Review 999-1 C-3)
 	const chf = (amount: number) => formatCurrency(Math.abs(amount));
 	const paymentRows = $derived(
 		payments.map((payment, index) => ({
-			label:
-				paidOn && index === payments.length - 1
+			label: refund
+				? m.statements_history_part_refund({ amount: chf(payment.amount) })
+				: paidOn && index === payments.length - 1
 					? m.statements_history_payment({ amount: chf(payment.amount) })
-					: refund
-						? m.statements_history_part_refund({ amount: chf(payment.amount) })
-						: m.statements_history_part_payment({ amount: chf(payment.amount) }),
+					: m.statements_history_part_payment({ amount: chf(payment.amount) }),
 			date: formatDate(payment.date)
 		}))
 	);

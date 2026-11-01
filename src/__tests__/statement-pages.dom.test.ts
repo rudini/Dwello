@@ -2347,6 +2347,20 @@ describe('Abrechnungsdetail', () => {
 		expect(text().replace(/\s+/g, ' ')).toContain('Versendet 15.01.2025Bezahlt 05.02.2025');
 	});
 
+	// Code-Review 999-1 C-3 (Fachreview 999-1, Antwort 4): eine in Teilen bezahlte Rückerstattung, auch die letzte Zahlung
+	// liest sich nicht als Eingang
+	it('nennt im Verlauf auch die letzte Zahlung einer Rückerstattung als zurückerstattet', () => {
+		const payments = [
+			{ date: '2025-02-01', amount: -50 },
+			{ date: '2025-02-05', amount: -70 }
+		];
+		detail({ status: 'paid', statementDate: '2025-01-15', paidDate: '2025-02-05', balance: -120, paidAmount: -120, payments });
+
+		expect(text().replace(/\s+/g, ' ')).toContain(
+			'Zurückerstattet: CHF 50.00 01.02.2025Zurückerstattet: CHF 70.00 05.02.2025Bezahlt 05.02.2025'
+		);
+	});
+
 	// #999 (Fachreview 999-1 V-1 A, V-2): das Zurücksetzen mit Datum und Betrag; die zurückgesetzte Teilzahlung hat keine Zeile mehr
 	it('nennt im Verlauf das Zurücksetzen mit Datum und Betrag der zurückgesetzten Zahlung', () => {
 		detail({

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { statusLabels } from '$lib/statement';
+	import { openAmount, statusLabels } from '$lib/statement';
 	import type { StatementWithDetails } from '$lib/types';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
@@ -25,7 +25,7 @@
 				date: formatDate(last.date),
 				amount: chf(last.amount),
 				kept: chf(kept),
-				open: chf(statement.balance - kept),
+				open: formatCurrency(openAmount({ balance: statement.balance, paidAmount: kept })),
 				number,
 				status
 			});
@@ -33,7 +33,7 @@
 			return m.statements_reset_only_part_payment_text({
 				date: formatDate(last.date),
 				amount: chf(last.amount),
-				open: chf(statement.balance),
+				open: formatCurrency(openAmount({ balance: statement.balance })),
 				number,
 				status
 			});

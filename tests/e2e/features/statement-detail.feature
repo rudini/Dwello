@@ -174,7 +174,7 @@ Funktionalität: Abrechnungsdetail
     Und hat die Abrechnung den Status "Versendet"
 
   # #92: eine Zahlung auf der falschen Abrechnung oder mit falschem Datum lässt sich zurücksetzen; der Verlauf hält das
-  # Zurücksetzen mit Datum und Betrag der zurückgesetzten Zahlung fest (#999)
+  # Zurücksetzen mit Datum und Betrag der zurückgesetzten Zahlung fest, das Protokoll auch (#999)
   Szenario: Zahlung zurücksetzen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -185,6 +185,8 @@ Funktionalität: Abrechnungsdetail
     Und nennt der Verlauf das Zurücksetzen der Zahlung über "CHF 442.90" vom Tag des Versands
     Wenn der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
+    Wenn der Liegenschaftsverwalter im Protokoll nachsieht
+    Dann nennt das Protokoll mit heutigem Datum das Zurücksetzen der Zahlung der Abrechnung 2024 von "Eva Frei" über "CHF 442.90" vom Tag des Versands
 
   # #92 (Persona Dr. Weber P-1): das PDF des Versands nennt keine Zahlung; es bleibt nach dem Zurücksetzen, mit seinem
   # Eintrag im Verlauf
@@ -308,6 +310,20 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann ist der Seitentitel lesbar
+    Und scrollt die Seite nicht seitwärts
+
+  # #999 (Code-Review 999-1): vier Aktionen im Seitenkopf einer überfälligen Abrechnung mit Teilzahlung (PDF, Mahnung,
+  # Zahlung zurücksetzen, Bezahlt) passen auch auf ein Handy
+  Szenario: Seitenkopf einer überfälligen Abrechnung mit Teilzahlung auf dem Handy
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ging vor 20 Tagen hinaus
+    Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
+    Und für die Abrechnung 2024 von "Eva Frei" sind vor 5 Tagen "10.00" Franken eingegangen
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann hat die Abrechnung den Status "Überfällig"
+    Und ist der Seitentitel lesbar
     Und scrollt die Seite nicht seitwärts
 
   # Leere Bereiche für spätere Meldungen lassen keine Lücke über der Kostenaufstellung

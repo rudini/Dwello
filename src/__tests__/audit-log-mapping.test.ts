@@ -80,7 +80,6 @@ describe('Protokoll aus dem Backend', () => {
 		);
 	});
 
-	// Fachprüfung V-3: eine früher erfasste Zahlung ohne Datum
 	// #999 (Fachreview 999-1 V-5): eine Rückerstattung ohne Vorzeichen; vor #999 ohne Betrag festgehalten
 	it('nennt eine zurückgesetzte Rückerstattung ohne Vorzeichen und eine Zahlung ohne Betrag mit dem Datum allein', () => {
 		expect(textOf(reset, { paidAmount: '-120.00' })).toBe(
@@ -91,6 +90,7 @@ describe('Protokoll aus dem Backend', () => {
 		);
 	});
 
+	// Fachprüfung V-3: eine früher erfasste Zahlung ohne Datum
 	it('nennt eine zurückgesetzte Zahlung ohne Datum', () => {
 		expect(textOf(reset, { paidDate: null, paidAmount: undefined })).toBe(
 			'Zahlung zur Abrechnung NK-2025-0001 zurückgesetzt'
