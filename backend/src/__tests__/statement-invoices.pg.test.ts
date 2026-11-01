@@ -456,6 +456,18 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(await due(id)).toBe(false);
 		}));
 
+	// #546: the hint names the Saldo the recalculation gives, the question before «Nicht berichtigen» the difference
+	it('nennt den Saldo, den die Neuberechnung ergibt', () =>
+		sent(async (id) => {
+			const [{ balance }] = await db.select({ balance: utilityStatements.balance }).from(utilityStatements).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { correctionDue: boolean; recalculatedBalance: string };
+
+			expect(changes.correctionDue).toBe(true);
+			expect(changes.recalculatedBalance).toMatch(/^-?\d+\.\d{2}$/);
+			expect(Number(changes.recalculatedBalance)).toBeGreaterThan(Number(balance));
+		}));
+
 	// PO 2026-10-20 (Fachreview 454-2 M-3 B, 454-3 V-30 A): «Nicht berichtigen» only when the Saldo does not fall
 	it('erlaubt «Nicht berichtigen» nur, wenn die Neuberechnung den Saldo nicht senkt', () =>
 		sent(async (id) => {
