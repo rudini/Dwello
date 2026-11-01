@@ -130,7 +130,7 @@ describe('Alle Daten exportieren', () => {
 		const readme = Buffer.from((await exportIn()).files[0].content, 'base64').toString();
 
 		expect(readme).toContain('Haben Sie keinen Beleg hochgeladen, fehlt der Ordner, und belege.csv hat nur die Kopfzeile.');
-		expect(readme).toContain('liegt unter dokumente/, sofern Dwello es beim Versand oder vor einer Änderung aufbewahrt hat; sonst ist es das aktuelle PDF.');
+		expect(readme).toContain('ob der Mieter genau dieses PDF erhalten hat, ist dann nicht bekannt.');
 		expect(readme).toContain('Jeder Datensatz hat eine ID; die Tabellen nennen einen anderen Datensatz mit seiner ID, seinem Namen oder seiner Nummer.');
 		expect(readme).not.toContain('Sicherung');
 	});
@@ -233,7 +233,7 @@ describe('Alle Daten exportieren', () => {
 
 			expect(rowsOf(exported, 'tabellen/mieter.csv').find((row) => row.ID === rental.tenant)).toMatchObject({ Sprache: 'Deutsch', Korrespondenzkanal: 'Per Brief' });
 			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row.ID === reminder.id)).toMatchObject({ Art: 'Mahnung', Kanal: 'Per Brief', Status: 'Zu versenden' });
-			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row['Mieter-ID'] === rental.tenant && row.Titel === 'Übergabeprotokoll')).toMatchObject({ Art: 'Hochgeladen', Kanal: null, Status: null });
+			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row['Mieter-ID'] === rental.tenant && row.Titel === 'Übergabeprotokoll')).toMatchObject({ Art: 'Hochgeladenes Dokument', Kanal: null, Status: null });
 			expect(rowsOf(exported, 'tabellen/mietverträge.csv').find((row) => row.ID === rental.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Ja, zum Satz des Abrechnungslaufs' });
 		} finally {
 			await db.delete(documents).where(eq(documents.id, reminder.id));
