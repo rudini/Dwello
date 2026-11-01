@@ -81,9 +81,7 @@ describe('POST /config/export', () => {
 			Response.json({}, { status: 500 })
 		);
 
-		await expect(
-			POST({ fetch } as never)
-		).rejects.toMatchObject({ status: 500 });
+		await expect(POST({ fetch } as never)).rejects.toMatchObject({ status: 500 });
 		expect(calls).toEqual([`GET ${BACKEND}/export?language=de`]);
 	});
 
