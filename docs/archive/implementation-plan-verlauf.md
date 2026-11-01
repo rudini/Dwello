@@ -584,3 +584,17 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 
 - [x] #1024 was merged a minute after CI, 15 seconds before its fallback review, after Copilot's «unable to review … quota»: skill `pull-request` says such a refusal is not a review and the session waits for the fallback
 - [x] PR: pushed after this archive
+
+## Session: structure report (Structure101-style, A/I graph, traffic lights)
+
+Request from the product owner (chat, 1.11.2026): build the structure report as a tool in the repo, show the results with the full Git history, add an Abstractness/Instability graph and scores with a traffic-light system. No scenario: developer tooling, nothing a landlord sees. Parallel session (the #742 session opened on `main` meanwhile): checklist also in the pull request.
+
+- [x] `tools/arch-baseline/structure.ts` with tests: Lakos levels from module edges and cycles
+- [x] Abstractness per module (exported types and interfaces / all exports), instability, distance from the main sequence
+- [x] Traffic lights per module (distance, complexity findings, hotspot) and per KPI (tangles, health score, duplication, maintainability)
+- [x] HTML report: KPI tiles, DSM with back-edges red, A/I graph, module table worst first
+- [x] `bun run structure:report` (01-map, 02-imports, fallow health without cache, structure.ts), docs in `docs/architecture/fitness-functions.md`
+- [x] code-reviewer round 1: `docs/reviews/structure-report-review-1.md`; closing round: `docs/reviews/structure-report-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-structure-report.md`; issue #1032 (fallow churn cache after unshallow)
+- [x] Results with full history to the product owner (chat)
+- [x] PR: pushed after this archive
