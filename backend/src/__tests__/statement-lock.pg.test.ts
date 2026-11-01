@@ -314,6 +314,23 @@ describe('Teilzahlung', () => {
 		expect(await db.select().from(documents).where(eq(documents.id, pending.id))).toEqual([]);
 	});
 
+	// fallback review of #1049: a part recorded before #999 has no time of its own; its reset drops the PDFs that may name it
+	it('verwirft beim Zurücksetzen einer Teilzahlung ohne eigene Zeit die PDFs, die sie nennen können', async () => {
+		const pdfBlob = async () => (await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id)))[0].pdfBlob;
+		await pay('10.00');
+		const [{ payments }] = await db.select({ payments: utilityStatements.payments }).from(utilityStatements).where(eq(utilityStatements.id, id));
+		await db.update(utilityStatements).set({ payments: payments.map(({ date, amount }) => ({ date, amount })) }).where(eq(utilityStatements.id, id));
+		await Bun.sleep(5);
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, id));
+		await Bun.sleep(5);
+		await pay('20.00');
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		expect(await pdfBlob()).toBeNull();
+	});
+
 	it('verwirft beim Zurücksetzen einer Teilzahlung das neue PDF «Zu versenden», das danach erstellt wurde', async () => {
 		const [{ tenantId }] = await db.select({ tenantId: utilityStatements.tenantId }).from(utilityStatements).where(eq(utilityStatements.id, id));
 		await pay('10.00');

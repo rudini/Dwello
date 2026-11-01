@@ -869,9 +869,9 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paidDate: null,
 		paidAmount,
 		payments: kept,
-		// the part that stays is now the last recorded one (D-1); ponytail: one recorded before #999 has no time of its own
-		// and keeps that of the reset one, so a PDF made between them stays
-		paymentRecordedAt: stays ? (stays.recordedAt ? new Date(stays.recordedAt) : paymentRecordedAt) : null,
+		// the part that stays is now the last recorded one (D-1); one recorded before #999 has no time of its own: any PDF
+		// may name it, so its reset drops them all (fallback review of #1049)
+		paymentRecordedAt: stays ? new Date(stays.recordedAt ?? 0) : null,
 		carrySettledOn: null, // a refund settled under #94 is carried over again (Fachreview 506-1 V-9)
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
