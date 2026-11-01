@@ -5,6 +5,7 @@ import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ANCHORED_RE, ARCH_LAYERS, ROOT, STATUS_CMP, changedFiles, classify, git, median, quantile, tablesOf } from '../arch-baseline/lib';
+import { LIMITS, analyze, type Input } from '../arch-baseline/structure';
 
 type Spread = { median: number; p90: number; max: number };
 type Exception = { reason: string; scenario: string };
@@ -18,7 +19,11 @@ export type Measured = {
 	entityMirrors: { table: string; path: string }[];
 	moduleCycles: string[];
 	boundaryImports: string[];
+	/** XS of the structure report: production files and code modules over its limits (functions: fallow, tangles: module-cycle) */
+	fat?: { files: { path: string; lines: number }[]; modules: { module: string; files: number; ce: number }[] };
 };
+
+type Fat = { files: Record<string, number>; modules: Record<string, { files: number; ce: number }>; roots: { module: string; reason: string }[] };
 
 export type Ratchet = {
 	fieldSpread: Spread;
@@ -42,6 +47,8 @@ export type Ratchet = {
 	};
 	prSizeWarn: { files: number; modules: number; layers: number };
 	coChangeWarn: number;
+	/** Fat files and modules allowed at their size; roots (a composition root that imports every route) may grow */
+	fat?: Fat;
 };
 
 export type Finding = { check: string; message: string };
@@ -106,6 +113,7 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 			check: 'module-cycle',
 			message: `Ä1 «Änderung an einem Ort»: the modules ${c} import each other, so a change in one can force a change in the other. Fix: move what both need into one of them or into a module both import.`
 		});
+	findings.push(...fatFindings(m, r));
 	for (const b of m.boundaryImports)
 		findings.push({
 			check: 'boundary-import',
@@ -114,6 +122,32 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 				: `AP1/Architecture (BFF): ${b} imports against the layer direction (components may not import the BFF, the shared types not the frontend; #857), \`import type\` included. Fix: take page data from \`./$types\` (PageData) and move a shared type to src/lib/types.ts or the backend's API module.`
 		});
 	return findings;
+}
+
+/** XS (structure report, after Structure101): no new fat file or module, a listed one does not grow */
+function fatFindings(m: Measured, r: Ratchet): Finding[] {
+	return m.fat && r.fat ? [...fatFileFindings(m.fat.files, r.fat), ...fatModuleFindings(m.fat.modules, r.fat)] : [];
+}
+
+function fatFileFindings(measured: NonNullable<Measured['fat']>['files'], { files }: Fat): Finding[] {
+	return measured
+		.map((f) => ({ ...f, allowed: Math.max(LIMITS.fatFile, files[f.path] ?? 0) }))
+		.filter((f) => f.lines > f.allowed)
+		.map((f) => ({
+			check: 'fat-file',
+			message: `Ä1 «Änderung an einem Ort», XS: ${f.path} has ${f.lines} lines (allowed ${f.allowed}). Fix: move a part with its own concern into a file of its own; the structure report (bun run structure:report) shows the module's files.`
+		}));
+}
+
+function fatModuleFindings(measured: NonNullable<Measured['fat']>['modules'], { modules, roots }: Fat): Finding[] {
+	return measured
+		.filter((x) => !roots.some((root) => root.module === x.module))
+		.map((x) => ({ ...x, maxFiles: Math.max(LIMITS.fatModule.files, modules[x.module]?.files ?? 0), maxCe: Math.max(LIMITS.fatModule.ce, modules[x.module]?.ce ?? 0) }))
+		.filter((x) => x.files > x.maxFiles || x.ce > x.maxCe)
+		.map((x) => ({
+			check: 'fat-module',
+			message: `Ä1 «Änderung an einem Ort», XS: the module ${x.module} has ${x.files} files and ${x.ce} module dependencies (allowed ${x.maxFiles} and ${x.maxCe}). Fix: put the new code into a module of its own (a folder that tools/arch-baseline/layers.json maps to its own module) or split the module.`
+		}));
 }
 
 /** Ä1 target (utility-tree.md): a new field is declared by hand in at most 4 production files outside the DB */
@@ -206,8 +240,29 @@ export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 	for (const k of Object.keys(now) as (keyof typeof now)[])
 		if (before[k] !== undefined && now[k] === undefined) loose(`exceptions.${k} was removed; keep it, empty, so it cannot come back with entries unseen.`);
 		else if (before[k] !== undefined && (now[k] ?? 0) > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
+	loosenedFat(working.fat, base.fat).forEach(loose);
 	return findings;
 }
+
+/** A fat entry the base does not have (a renamed file included) or one with a higher limit loosens the ratchet. */
+function loosenedFat(w: Fat = { files: {}, modules: {}, roots: [] }, b?: Fat): string[] {
+	return b ? [...loosenedFatFiles(w, b), ...loosenedFatModules(w, b), ...w.roots.filter((r) => !b.roots.some((x) => x.module === r.module)).map((r) => `fat.roots.${r.module} was added.`)] : [];
+}
+
+const loosenedFatFiles = (w: Fat, b: Fat) =>
+	Object.entries(w.files).flatMap(([path, lines]) => {
+		const was = b.files[path];
+		if (was === undefined) return [`fat.files.${path} was added with ${lines} lines.`];
+		return lines > was ? [`fat.files.${path} rose to ${lines} lines.`] : [];
+	});
+
+const loosenedFatModules = (w: Fat, b: Fat) =>
+	Object.entries(w.modules).flatMap(([module, x]) => {
+		const was = b.modules[module];
+		const size = `${x.files} files and ${x.ce} module dependencies`;
+		if (!was) return [`fat.modules.${module} was added with ${size}.`];
+		return x.files > was.files || x.ce > was.ce ? [`fat.modules.${module} rose to ${size}.`] : [];
+	});
 
 /** The ratchet after an improvement: lower thresholds stay lower, and exceptions the code no longer needs drop out. */
 export function tighten(m: Measured, r: Ratchet): Ratchet {
@@ -224,6 +279,7 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 	const mirrors = new Set(m.entityMirrors.map((e) => `${e.table}\t${e.path}`));
 	return {
 		...r,
+		...(r.fat && m.fat && { fat: tightenFat(m.fat, r.fat) }),
 		fieldSpread,
 		exceptions: {
 			bffDecisions: x.bffDecisions.filter((d) => !stale.includes(d)),
@@ -236,6 +292,14 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 			...(x.frontendDecisions && { frontendDecisions: x.frontendDecisions.filter((d) => !staleFrontend.includes(d)) })
 		}
 	};
+}
+
+function tightenFat(m: NonNullable<Measured['fat']>, r: Fat): Fat {
+	const files = Object.fromEntries(m.files.filter((f) => r.files[f.path] !== undefined).map((f) => [f.path, Math.min(f.lines, r.files[f.path])]));
+	const modules = Object.fromEntries(
+		m.modules.filter((x) => r.modules[x.module]).map((x) => [x.module, { files: Math.min(x.files, r.modules[x.module].files), ce: Math.min(x.ce, r.modules[x.module].ce) }])
+	);
+	return { files, modules, roots: r.roots };
 }
 
 /** Items left after taking out one listed entry per occurrence (a multiset difference by key). */
@@ -297,7 +361,7 @@ export const crossesBoundary = (e: Record<string, string>) =>
 	(e.from_layer === 'Shared/Contracts' && e.to_layer === 'FE');
 
 function measure(out: string): Measured {
-	const read = scripts(out, ['02-imports.ts', '05-knowledge.ts']);
+	const read = scripts(out, ['01-map.ts', '02-imports.ts', '05-knowledge.ts']);
 	const spread = read('m4-field-spread.csv')
 		.map(handDeclared)
 		.sort((a, b) => a - b);
@@ -319,7 +383,26 @@ function measure(out: string): Measured {
 			.filter((c) => c.split(' ').every(isProdModule)),
 		boundaryImports: read('imports-file.csv')
 			.filter(crossesBoundary)
-			.map((e) => `${e.from} -> ${e.to}`)
+			.map((e) => `${e.from} -> ${e.to}`),
+		fat: fatItems(read)
+	};
+}
+
+/** The structure report's fat items; a module without code (migrations) has no XS, so it is never fat */
+function fatItems(read: (name: string) => Record<string, string>[]): Measured['fat'] {
+	const health = { findings: [], health_score: { score: 0, grade: '' }, vital_signs: { duplication_pct: 0, maintainability_avg: 0 } };
+	const a = analyze({
+		edges: read('imports-module.csv') as unknown as Input['edges'],
+		cycles: read('cycles-module.csv') as unknown as Input['cycles'],
+		files: read('files.csv') as unknown as Input['files'],
+		source: (path) => readFileSync(join(ROOT, path), 'utf8'),
+		health
+	});
+	return {
+		files: a.files.filter((f) => f.loc > LIMITS.fatFile).map((f) => ({ path: f.path, lines: f.loc })),
+		modules: a.modules
+			.filter((x) => (x.files > LIMITS.fatModule.files || x.ce > LIMITS.fatModule.ce) && a.files.some((f) => f.module === x.name))
+			.map((x) => ({ module: x.name, files: x.files, ce: x.ce }))
 	};
 }
 
@@ -387,7 +470,7 @@ if (import.meta.main) {
 	errors.forEach((f) => say('error', f));
 	warnings.forEach((f) => say('warning', f));
 	if (m) {
-		const values = `field spread median ${m.fieldSpread.median}, P90 ${m.fieldSpread.p90}, max ${m.fieldSpread.max}; BFF decisions ${m.bffDecisions.length}; frontend decisions ${m.frontendDecisions?.length ?? 0} (exceptions ${ratchet.exceptions.frontendDecisions?.length ?? 0}); cross-layer value lists ${m.literalSets.length}; entity mirrors ${m.entityMirrors.length}; module cycles ${m.moduleCycles.length}; boundary imports ${m.boundaryImports.length}`;
+		const values = `field spread median ${m.fieldSpread.median}, P90 ${m.fieldSpread.p90}, max ${m.fieldSpread.max}; BFF decisions ${m.bffDecisions.length}; frontend decisions ${m.frontendDecisions?.length ?? 0} (exceptions ${ratchet.exceptions.frontendDecisions?.length ?? 0}); cross-layer value lists ${m.literalSets.length}; entity mirrors ${m.entityMirrors.length}; module cycles ${m.moduleCycles.length}; boundary imports ${m.boundaryImports.length}; fat files ${m.fat?.files.length ?? 0}; fat modules ${m.fat?.modules.length ?? 0}`;
 		console.log(`Fitness: ${values}`);
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Architecture fitness\n\n${values}\n`);
 	}

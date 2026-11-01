@@ -586,5 +586,50 @@
 		"/api/v1/distribution-keys": 2,
 		"/api/v1/heating-profiles": 2,
 		"/api/v1/audit-log": 1
+	},
+	"fat": {
+		"files": {
+			"backend/src/services/pdf.service.ts": 1446,
+			"backend/src/services/statement.service.ts": 1029,
+			"backend/src/db/schema.ts": 685,
+			"backend/src/services/data-export.service.ts": 645,
+			"backend/src/services/invoice.service.ts": 555,
+			"backend/src/services/contract.service.ts": 533,
+			"backend/src/routes/statements.ts": 507,
+			"backend/src/services/calculation.service.ts": 461,
+			"backend/src/services/statement-run.service.ts": 409
+		},
+		"modules": {
+			"be:services/reminder": {
+				"files": 1,
+				"ce": 16
+			},
+			"be:services/statement": {
+				"files": 1,
+				"ce": 21
+			},
+			"fe:routes/config": {
+				"files": 39,
+				"ce": 8
+			},
+			"fe:routes/contracts": {
+				"files": 27,
+				"ce": 16
+			},
+			"fe:routes/statements": {
+				"files": 53,
+				"ce": 17
+			},
+			"fe:ui": {
+				"files": 56,
+				"ce": 9
+			}
+		},
+		"roots": [
+			{
+				"module": "be:app",
+				"reason": "composition root: registers every route module of the backend, so it imports each one"
+			}
+		]
 	}
 }
