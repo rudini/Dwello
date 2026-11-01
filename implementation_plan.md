@@ -15,5 +15,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] Structure report: dependencies against stability (Stable Dependencies Principle, I gap > 0.2) per module and as KPI; distance D out of the overall light; the A/I section says why A says little for modules that export functions (tests first)
 - [x] Fitness check `unstable-dependency` (issue #1055) with today's 4 listed (reason each), shrink-only; docs row
-- [ ] code-reviewer rounds
+- [ ] code-reviewer: `docs/reviews/sdp-review-1.md` (no Blocker/Major; C-1 to C-3 Minor fixed: comment order, tighten keeps a measured entry, message names a new dependency as possible cause)
 - [ ] Archive the session; PR

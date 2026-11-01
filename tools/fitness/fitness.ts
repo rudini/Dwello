@@ -128,15 +128,15 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 	return findings;
 }
 
-/** XS (structure report, after Structure101): no new fat file or module, a listed one does not grow */
 /** Stable Dependencies Principle: no new dependency on a module that changes more easily (#1055 lists today's) */
 function unstableFindings(m: Measured, r: Ratchet): Finding[] {
 	return unlisted(m.unstable ?? [], r.exceptions.unstableDependencies ?? [], (x) => `${x.from} ${x.to}`).map((u) => ({
 		check: 'unstable-dependency',
-		message: `Ä1 «Änderung an einem Ort», Stable Dependencies Principle: ${u.from} uses ${u.to}, whose instability I is ${u.gap} higher, so a module others rely on depends on one that changes more easily. Fix: move what ${u.from} needs from ${u.to} into a module both can use (often a small one with the shared type or rule), or let ${u.to}'s caller pass it in.`
+		message: `Ä1 «Änderung an einem Ort», Stable Dependencies Principle: ${u.from} uses ${u.to}, whose instability I is ${u.gap} higher, so a module others rely on depends on one that changes more easily. Fix: move what ${u.from} needs from ${u.to} into a module both can use (often a small one with the shared type or rule), or let ${u.to}'s caller pass it in. When the import itself is old, a new dependency on ${u.from} (more users, so lower I) can have caused it; the structure report shows Ca and I.`
 	}));
 }
 
+/** XS (structure report, after Structure101): no new fat file or module, a listed one does not grow */
 function fatFindings(m: Measured, r: Ratchet): Finding[] {
 	return m.fat && r.fat ? [...fatFileFindings(m.fat.files, r.fat), ...fatModuleFindings(m.fat.modules, r.fat)] : [];
 }

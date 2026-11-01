@@ -467,5 +467,6 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 		const longer: Ratchet = { ...r, exceptions: { ...r.exceptions, unstableDependencies: [listed, { ...listed, from: 'x' }] } };
 		expect(loosened(longer, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.unstableDependencies grew from 1 to 2.']);
 		expect(tighten(m([]), r).exceptions.unstableDependencies).toEqual([]);
+		expect(tighten(m([{ from: 'be:middleware', to: 'be:services/local-account', gap: 0.34 }]), r).exceptions.unstableDependencies).toEqual([listed]);
 	});
 });
