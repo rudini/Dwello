@@ -5,6 +5,11 @@ import sample from '../../tests/contracts/data-export.json';
 
 const BACKEND = 'http://localhost:3001/api/v1';
 const POST = route.POST as (event: never) => Promise<Response>;
+// the button's form post, as the browser sends it
+const form = new Request('http://localhost/config/export', {
+	method: 'POST',
+	headers: { 'content-type': 'application/x-www-form-urlencoded' }
+});
 
 // The backend's answer as the BFF gets it; it turns it into the ZIP of all data (#496); the Protokoll answers `logged`
 async function exported(logged = 201) {
@@ -13,7 +18,7 @@ async function exported(logged = 201) {
 		calls.push(`${init?.method ?? 'GET'} ${url}`),
 		init?.method ? new Response(null, { status: logged }) : Response.json(sample)
 	);
-	const response = await POST({ fetch } as never);
+	const response = await POST({ fetch, request: form } as never);
 	const zip = unzipSync(new Uint8Array(await response.arrayBuffer()));
 	// keeps the byte order mark, which Excel reads UTF-8 by
 	const text = (name: string) => new TextDecoder('utf-8', { ignoreBOM: true }).decode(zip[name]);
@@ -24,6 +29,20 @@ describe('POST /config/export', () => {
 	// a GET would let any page start an export with a link: a form POST passes SvelteKit's origin check (Review 496-1 C-2)
 	it('exportiert nur auf ein Formular hin, nicht über einen Link', () => {
 		expect(Object.keys(route)).toEqual(['POST']);
+	});
+
+	// SvelteKit checks the origin of form content types only: another type would pass it (fallback review of #1044)
+	it('exportiert nicht auf einen POST hin, der kein Formular ist', async () => {
+		const calls: string[] = [];
+		const fetch = async (url: string) => (calls.push(url), Response.json(sample));
+		const request = new Request('http://localhost/config/export', {
+			method: 'POST',
+			headers: { 'content-type': 'text/plain' },
+			body: 'x'
+		});
+
+		await expect(POST({ fetch, request } as never)).rejects.toMatchObject({ status: 415 });
+		expect(calls).toEqual([]);
 	});
 
 	it('lädt alle Daten als ZIP mit Datendatei, Tabellen und Belegen herunter und hält den Export danach im Protokoll fest', async () => {
@@ -81,7 +100,7 @@ describe('POST /config/export', () => {
 			Response.json({}, { status: 500 })
 		);
 
-		await expect(POST({ fetch } as never)).rejects.toMatchObject({ status: 500 });
+		await expect(POST({ fetch, request: form } as never)).rejects.toMatchObject({ status: 500 });
 		expect(calls).toEqual([`GET ${BACKEND}/export?language=de`]);
 	});
 
