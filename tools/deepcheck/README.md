@@ -68,7 +68,7 @@ node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules t
 | CI job "Deep modules" (`.github/workflows/ci.yml`, pull requests) | `bunx svelte-kit sync`, then `bun run deepcheck:ci -- "origin/<base>"`: error annotations and a step summary | yes |
 | `.github/workflows/deepcheck-scan.yml` (`workflow_dispatch`: path, top, min_score; commented weekly `schedule`) | ranked scan to the job summary, JSON and markdown as the `deepcheck-report` artifact | never |
 
-The hook matches commands like fallow-gate.sh does (`git commit`, `git push`, also after `&&` or `;`). `git -C <dir> commit` is not matched, by either gate; a command that merely mentions it (`echo git commit`) is.
+The hook finds `git commit` and `git push` with the matcher the commit gates share (`.claude/hooks/git-calls.mjs`, #710): also after `&&`, `;` or a `cd`, behind `git -C <dir>` (quoted or `-C/x`) and `-c key=val`; text in quotes or in a heredoc (`echo "git commit"`) is not matched. Wherever the call runs (`-C`, a `cd`, a scratch repository), deepcheck, testcheck and fallow judge the project (`$CLAUDE_PROJECT_DIR`), so a commit in a scratch repository is gated by the project's findings too; only `commit-msg-gate.mjs` lets it pass.
 
 - **On commit** it judges the working tree against HEAD, so unstaged and untracked TypeScript files count too, even if they are not part of the commit.
 - **On push** it judges everything since the merge-base with the upstream (`@{u}`, else `origin/HEAD`, else `origin/main`), so committed but unpushed modules are covered. Uncommitted files count too. With none of these refs it says so and judges against HEAD only.

@@ -41,6 +41,27 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		expect(hook(root, 'git status && npm test')).toMatchObject({ status: 0, stdout: '', stderr: '' });
 	});
 
+	// #710: the shared matcher of .claude/hooks/git-calls.mjs
+	it('blocks a commit behind git -C with a quoted path and -c key=val', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });
+		expect(hook(root, `git -C "${root}" -c user.name=t commit -m x`).status).toBe(2);
+	});
+
+	it('lets the command through with a notice when the matcher crashes (review 710-1, C-2)', () => {
+		const install = writeProject({ '.claude/hooks/git-calls.mjs': "throw new Error('broken');\n" });
+		copyFileSync(HOOK, `${install}/.claude/hooks/deepcheck-gate.sh`);
+		const result = hook(writeRepo({ 'src/store.ts': STORE }), 'git commit -m x', `${install}/.claude/hooks/deepcheck-gate.sh`);
+		expect(result.status).toBe(0);
+		expect(result.stderr).toBe('deepcheck-gate: git-calls.mjs failed, skipping deepcheck.\n');
+	});
+
+	it('ignores a commit that is only text in a heredoc, without running deepcheck', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });
+		expect(hook(root, "cat > notes.md <<'EOF'\ngit commit -m x\nEOF")).toMatchObject({ status: 0, stderr: '' });
+	});
+
 	it('fails open with one notice on a tool error, so errors never block like findings', () => {
 		const root = writeRepo({ 'src/store.ts': STORE, 'deepcheck.config.json': '{ "nope": 1 }' });
 		const result = hook(root, 'git commit -m x');
@@ -63,6 +84,7 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		const install = writeProject({ 'tools/deepcheck/src/cli.ts': "throw new Error('Cannot find package ts-morph');\n" });
 		writeFiles(install, { '.claude/hooks/.keep': '' });
 		copyFileSync(HOOK, `${install}/.claude/hooks/deepcheck-gate.sh`);
+		copyFileSync(HOOK.replace('deepcheck-gate.sh', 'git-calls.mjs'), `${install}/.claude/hooks/git-calls.mjs`);
 		const result = hook(writeRepo({ 'src/store.ts': STORE }), 'git commit -m x', `${install}/.claude/hooks/deepcheck-gate.sh`);
 		expect(result.status).toBe(0);
 		expect(result.stderr).toMatch(/^deepcheck-gate: deepcheck error \(.*Cannot find package ts-morph.*\), skipping\.\n$/);

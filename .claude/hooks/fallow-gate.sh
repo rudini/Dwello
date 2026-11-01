@@ -24,7 +24,15 @@ fi
 INPUT="$(cat)"
 CMD="$(jq -r '.tool_input.command // empty' <<<"$INPUT")"
 
-if ! printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+(commit|push)([[:space:]]|$)'; then
+# Changed for Dwello (keep when regenerating): the git calls come from the matcher the commit gates share
+# (git-calls.mjs, #710), which knows git -C, -c key=val and quoted paths and skips heredoc text; when it cannot run
+# (no node), the command passes with a notice
+case "$CMD" in *commit* | *push*) ;; *) exit 0 ;; esac
+if ! VERBS="$(node "$(dirname "${BASH_SOURCE[0]}")/git-calls.mjs" <<<"$INPUT" 2>/dev/null)"; then
+  echo "fallow-gate: git-calls.mjs failed, skipping audit." >&2
+  exit 0
+fi
+if ! grep -qxE 'commit|push' <<<"$VERBS"; then
   exit 0
 fi
 

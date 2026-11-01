@@ -47,6 +47,19 @@ describe('fallow gate without a base branch', () => {
 	});
 });
 
+// #710: the shared matcher of .claude/hooks/git-calls.mjs
+describe('fallow gate matcher', () => {
+	it('gates a commit behind git -C with a quoted path and -c key=val', () => {
+		const root = singleBranchClone();
+		expect(hook(root, `git -C "${root}" -c user.name=t commit -m x`).status).toBe(2);
+	});
+
+	it('ignores a commit that is only text in a heredoc, without running the audit', () => {
+		const root = singleBranchClone();
+		expect(hook(root, "cat > notes.md <<'EOF'\ngit commit -m x\nEOF")).toMatchObject({ status: 0, stderr: '' });
+	});
+});
+
 describe('fallow gate on a finding', () => {
 	it('names the finding in a few lines instead of the whole audit JSON', () => {
 		const root = writeProject({

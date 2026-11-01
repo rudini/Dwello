@@ -16,12 +16,19 @@ if ! CMD="$(jq -r '.tool_input.command // empty' <<<"$INPUT" 2>/dev/null)"; then
   exit 0
 fi
 
-if ! printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+(commit|push)([[:space:]]|$)'; then
-  exit 0
-fi
+case "$CMD" in *commit* | *push*) ;; *) exit 0 ;; esac
 
 if ! command -v node >/dev/null 2>&1; then
   echo "testcheck-gate: node not on PATH, skipping testcheck." >&2
+  exit 0
+fi
+
+# the git calls the command makes, by the matcher the commit gates share (git-calls.mjs, #710)
+if ! VERBS="$(node "$(dirname "${BASH_SOURCE[0]}")/git-calls.mjs" <<<"$INPUT" 2>/dev/null)"; then
+  echo "testcheck-gate: git-calls.mjs failed, skipping testcheck." >&2
+  exit 0
+fi
+if ! grep -qxE 'commit|push' <<<"$VERBS"; then
   exit 0
 fi
 
@@ -30,7 +37,7 @@ CLI="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/tools/testcheck/src/cli
 
 # A commit is judged against HEAD (working tree included); a push against the upstream (else origin/HEAD, else origin/main)
 ARGS=(check --agent)
-if printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+push([[:space:]]|$)'; then
+if grep -qx push <<<"$VERBS"; then
   BASE="$(cd "$ROOT" && { git merge-base HEAD '@{u}' 2>/dev/null || git merge-base HEAD origin/HEAD 2>/dev/null ||
     git merge-base HEAD origin/main 2>/dev/null || true; })"
   if [ -n "$BASE" ]; then
