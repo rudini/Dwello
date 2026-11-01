@@ -16,6 +16,7 @@ import calculationRefused from '../../tests/contracts/statement-calculation-refu
 import statements from '../../tests/contracts/statements.json';
 import runDifferences from '../../tests/contracts/statement-run-differences.json';
 import runHeating from '../../tests/contracts/statement-run-heating.json';
+import runHeatingSum from '../../tests/contracts/statement-run-heating-sum.json';
 import contractAgreements from '../../tests/contracts/contract-agreements.json';
 import category from '../../tests/contracts/category.json';
 import building from '../../tests/contracts/building.json';
@@ -601,12 +602,12 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 
 	// #508: with it the heating sum of its apartment, as the backend gives it
 	it('nennt zur Abrechnung nach der alten Regel die Summe der Heizkosten ihrer Wohnung', async () => {
-		const heatingSum = { statementId: '1', costs: '2000.00', tenants: '1920.00', landlord: '80.00', billed: '2370.00', difference: '450.00', result: 'more', landlordFor: 'vacancy' };
+		const heatingSum = { ...runHeatingSum.heatingSums[0], statementId: '1' };
 		const fetch = (async (url: string) =>
 			url.includes('/invoices/completeness/')
 				? Response.json({ ...invoiceCompleteness, oldHeatingRule: ['1'] })
 				: url.includes('/statements/run-heating?')
-					? Response.json({ ...runHeating, oldHeatingRule: ['1'], heatingSums: [heatingSum] })
+					? Response.json({ ...runHeatingSum, oldHeatingRule: ['1'], heatingSums: [heatingSum] })
 					: fetchWith([statement('1', c1, 'sent', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
 
 		expect(await changedOf(fetch)).toEqual([named('1', { oldRule: true, heatingSum })]);

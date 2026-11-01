@@ -333,7 +333,7 @@ export function heatingSum({ costs, tenants, billed, unagreed }: Heating) {
 	const landlord = roundToRappen(costs - tenants);
 	const difference = roundToRappen(billed - tenants);
 	const result = Math.abs(difference) < 0.05 ? 'equal' : difference > 0 ? 'more' : 'less';
-	const landlordFor = unagreed ? 'leases' : landlord >= 0.05 ? 'vacancy' : null;
+	const landlordFor = landlord < 0.05 ? null : unagreed ? 'leases' : 'vacancy';
 	const chf = (n: number) => n.toFixed(2);
 	return { costs: chf(costs), tenants: chf(tenants), landlord: chf(landlord), billed: chf(billed), difference: chf(Math.abs(difference)), result, landlordFor };
 }
@@ -362,20 +362,31 @@ async function heatingSumsOf(run: { period: Range; heatingProfileId: string | nu
 	const planned = planRun(run.period, contracts, statements).contracts;
 	const same = (s: Placed) => s.periodStart === run.period.start && s.periodEnd === run.period.end && !isReplaced(s);
 	const stored = await storedHeating(statements.filter(same).map((s) => s.id));
-	const apartments = [...new Map(sent.map((id) => [statements.find((s) => s.id === id)!.apartmentId, id])).entries()];
+	// the first statement under the old rule of each apartment
+	const apartments = [...new Map([...sent].reverse().map((id) => [statements.find((s) => s.id === id)!.apartmentId, id])).entries()];
 	return Promise.all(
 		apartments.map(async ([apartmentId, statementId]) => {
-			const sum: Heating = { costs: 0, tenants: 0, billed: 0, unagreed: false };
-			for (const c of planned.filter((p) => p.apartmentId === apartmentId)) {
-				const { lineItems } = await calculateStatement({ contractId: c.id, periodStart: run.period.start, periodEnd: run.period.end, heatingProfileId: run.heatingProfileId ?? undefined });
-				const items = lineItems.filter((item) => item.isHeatingCost);
-				const own = statements.find((s) => s.contractId === c.id && same(s));
-				sum.costs = Math.max(sum.costs, sumOf(items, 'apartmentShare'));
-				sum.tenants += sumOf(items, 'tenantShare');
-				sum.billed += own ? (stored.get(own.id) ?? 0) : sumOf(items, 'tenantShare');
-				sum.unagreed ||= !items.length;
-			}
-			return { statementId, ...heatingSum(sum) };
+			const rented = await Promise.all(
+				planned
+					.filter((p) => p.apartmentId === apartmentId)
+					.map(async (c) => {
+						const { lineItems } = await calculateStatement({ contractId: c.id, periodStart: run.period.start, periodEnd: run.period.end, heatingProfileId: run.heatingProfileId ?? undefined });
+						const own = statements.find((s) => s.contractId === c.id && same(s));
+						return { items: lineItems.filter((item) => item.isHeatingCost), own };
+					})
+			);
+			// per heating category the apartment's share, from any contract that agrees it (Fachreview 508-1 V-3, code review 508-1 C-3)
+			const shares = new Map(rented.flatMap(({ items }) => items.map((item) => [item.categoryId ?? item.description, item.apartmentShare] as const)));
+			const tenants = rented.reduce((sum, { items }) => sum + sumOf(items, 'tenantShare'), 0);
+			return {
+				statementId,
+				...heatingSum({
+					costs: roundToRappen([...shares.values()].reduce((sum, share) => sum + share, 0)),
+					tenants,
+					billed: rented.reduce((sum, { items, own }) => sum + (own ? (stored.get(own.id) ?? 0) : sumOf(items, 'tenantShare')), 0),
+					unagreed: rented.some(({ items }) => items.length < shares.size)
+				})
+			};
 		})
 	);
 }

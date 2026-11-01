@@ -5,7 +5,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, invoices, utilityStatements } from '../db/schema';
+import { apartments, categories, fuelStocks, invoices, rentalContracts, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { setAgreedCategories } from '../services/agreed-category.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { generateStatement } from '../services/statement.service';
@@ -296,9 +297,9 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		expect(withoutProfile.heatingWithoutServicePeriod).toEqual([]);
 	});
 
-	// #508 (Fachreview 508-1 M-1, V-4): per apartment the heating costs, the part of the vacancy the landlord bears, what
-	// the apartment's statements bill for them (the sent one as stored, the new one as the run would) and the difference
-	it('nennt die Heizkosten der Wohnung, den Leerstand und wie viel die Abrechnungen mehr verrechnen', async () => {
+	// #508: Marc from May, his statement sent under the old rule; Eva, before him to 31.03., is billed by the run
+	type Sum = { statementId: string; costs: string; tenants: string; landlord: string; billed: string; difference: string; result: string; landlordFor: string | null };
+	const heatingSumsAt = async (eva: (contract: string, sumsNow: () => Promise<Sum[]>) => Promise<void> = async () => {}) => {
 		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
@@ -308,13 +309,24 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		const tenant = await createTenant({ firstName: 'Eva', lastName: `Vormieterin ${crypto.randomUUID()}` });
 		const before = await createContract({ apartmentId: may.apartment, tenantId: tenant.id, startDate: '2025-01-01', endDate: '2025-03-31', baseRent: '900', monthlyAdvancePayment: '0' });
 		const heatingProfileId = (await getHeatingProfileByName('Heating Mittelland'))!.id;
-		const response = await callApi(`/api/v1/statements/run-heating?buildingId=${may.building}&periodStart=2025-01-01&periodEnd=2025-12-31&heatingProfileId=${heatingProfileId}`);
-		const { heatingSums } = (await response.json()) as { heatingSums: { statementId: string; costs: string; tenants: string; landlord: string; billed: string; difference: string; result: string; landlordFor: string | null }[] };
-		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
-		await db.delete(invoices).where(eq(invoices.buildingId, may.building));
-		await deleteContract(before.id, true);
-		await deleteTenant(tenant.id);
-		await may.remove();
+		const sumsNow = async () =>
+			((await (await callApi(`/api/v1/statements/run-heating?buildingId=${may.building}&periodStart=2025-01-01&periodEnd=2025-12-31&heatingProfileId=${heatingProfileId}`)).json()) as { heatingSums: Sum[] }).heatingSums;
+		try {
+			await eva(before.id, sumsNow);
+			return { id, heatingSums: await sumsNow() };
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.apartmentId, may.apartment));
+			await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+			await deleteContract(before.id, true);
+			await deleteTenant(tenant.id);
+			await may.remove();
+		}
+	};
+
+	// #508 (Fachreview 508-1 M-1, V-4): per apartment the heating costs, the part of the vacancy the landlord bears, what
+	// the apartment's statements bill for them (the sent one as stored, the new one as the run would) and the difference
+	it('nennt die Heizkosten der Wohnung, den Leerstand und wie viel die Abrechnungen mehr verrechnen', async () => {
+		const { id, heatingSums } = await heatingSumsAt();
 
 		const [sum] = heatingSums;
 		expect(heatingSums).toHaveLength(1);
@@ -323,5 +335,29 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		expect(Number(sum.landlord)).toBeGreaterThan(0);
 		expect(Number(sum.billed) - Number(sum.tenants)).toBeCloseTo(Number(sum.difference), 2);
 		expect(Number(sum.difference)).toBeGreaterThan(0);
+	});
+
+	// Fachreview 508-1 V-3, code review 508-1 C-2, C-3: a lease without agreed heating costs bills none, its part is the landlord's
+	it('nennt den Anteil eines Mietvertrags ohne vereinbarte Heizkosten beim Vermieter', async () => {
+		const { heatingSums } = await heatingSumsAt((contract) => setAgreedCategories(contract, []));
+
+		const [sum] = heatingSums;
+		expect(sum).toMatchObject({ costs: '2000.00', landlordFor: 'leases' });
+		expect(Number(sum.tenants) + Number(sum.landlord)).toBeCloseTo(2000, 2);
+	});
+
+	// code review 508-1 C-2: a replaced statement counts no more, the run bills its berichtigte Abrechnung (#647)
+	it('zählt eine ersetzte Abrechnung nicht, sondern die berichtigte, die der Lauf erstellt', async () => {
+		let without: Sum[] = [];
+		const { heatingSums } = await heatingSumsAt(async (contract, sumsNow) => {
+			without = await sumsNow();
+			const heatingProfileId = (await getHeatingProfileByName('Heating Mittelland'))!.id;
+			const [{ buildingId }] = await db.select({ buildingId: apartments.buildingId }).from(apartments).innerJoin(rentalContracts, eq(rentalContracts.apartmentId, apartments.id)).where(eq(rentalContracts.id, contract));
+			const replaced = await generateStatement({ contractId: contract, buildingId, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId, managementFeePercent: 0 });
+			await db.update(utilityStatements).set({ status: 'replaced' }).where(eq(utilityStatements.id, replaced.id));
+			await db.update(utilityStatementLineItems).set({ tenantShare: '0.00' }).where(eq(utilityStatementLineItems.statementId, replaced.id));
+		});
+
+		expect(heatingSums).toEqual(without);
 	});
 });

@@ -28,4 +28,9 @@ describe('Summe der Heizkosten einer Wohnung beim Mieterwechsel', () => {
 			landlordFor: 'leases'
 		});
 	});
+
+	// code review 508-1 C-5: a lease without agreed heating costs only in months the Heizprofil gives no share
+	it('nennt keinen Anteil des Vermieters unter CHF 0.05, auch mit einem Mietvertrag ohne vereinbarte Heizkosten', () => {
+		expect(heatingSum({ costs: 2000, tenants: 2000, billed: 2000, unagreed: true })).toMatchObject({ landlord: '0.00', landlordFor: null });
+	});
 });
