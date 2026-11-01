@@ -245,8 +245,9 @@ export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 }
 
 /** A fat entry the base does not have (a renamed file included) or one with a higher limit loosens the ratchet. */
-function loosenedFat(w: Fat = { files: {}, modules: {}, roots: [] }, b?: Fat): string[] {
-	return b ? [...loosenedFatFiles(w, b), ...loosenedFatModules(w, b), ...w.roots.filter((r) => !b.roots.some((x) => x.module === r.module)).map((r) => `fat.roots.${r.module} was added.`)] : [];
+function loosenedFat(w?: Fat, b?: Fat): string[] {
+	if (b && !w) return ['fat was removed; keep it, so the check stays on.'];
+	return b && w ? [...loosenedFatFiles(w, b), ...loosenedFatModules(w, b), ...w.roots.filter((r) => !b.roots.some((x) => x.module === r.module)).map((r) => `fat.roots.${r.module} was added.`)] : [];
 }
 
 const loosenedFatFiles = (w: Fat, b: Fat) =>
@@ -389,7 +390,7 @@ function measure(out: string): Measured {
 }
 
 /** The structure report's fat items; a module without code (migrations) has no XS, so it is never fat */
-function fatItems(read: (name: string) => Record<string, string>[]): Measured['fat'] {
+export function fatItems(read: (name: string) => Record<string, string>[]): Measured['fat'] {
 	const health = { findings: [], health_score: { score: 0, grade: '' }, vital_signs: { duplication_pct: 0, maintainability_avg: 0 } };
 	const a = analyze({
 		edges: read('imports-module.csv') as unknown as Input['edges'],

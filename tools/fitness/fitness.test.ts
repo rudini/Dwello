@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, fatItems, isFrontendFile, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -431,6 +431,19 @@ describe('fette Dateien und Module (XS)', () => {
 			'tools/fitness/ratchet.json: fat.roots.fe:y was added.'
 		]);
 		expect(loosened(r, looser)).toEqual([]);
+	});
+
+	it('zählt eine gelöschte Liste fat als Lockerung, damit die Prüfung nicht still ausfällt', () => {
+		expect(loosened({ ...ratchet, fat: undefined }, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: fat was removed; keep it, so the check stays on.']);
+	});
+
+	it('misst fette Dateien und Module wie der Strukturbericht, ein Modul ohne Code nie', () => {
+		const files = [
+			...Array.from({ length: 31 }, (_, i) => ({ path: `src/lib/ui/C${i}.svelte`, kind: 'prod', module: 'fe:ui', loc: i ? '10' : '401' })),
+			...Array.from({ length: 42 }, (_, i) => ({ path: `backend/drizzle/${i}.sql`, kind: 'prod', module: 'db:migrations', loc: '0' }))
+		];
+		const read = (name: string) => (name === 'files.csv' ? files : []);
+		expect(fatItems(read)).toEqual({ files: [{ path: 'src/lib/ui/C0.svelte', lines: 401 }], modules: [{ module: 'fe:ui', files: 31, ce: 0 }] });
 	});
 
 	it('senkt die Grenzen auf die gemessenen Werte und streicht, was nicht mehr fett ist', () => {
