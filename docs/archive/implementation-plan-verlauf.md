@@ -651,3 +651,14 @@ Request from the product owner (chat, 1.11.2026): history of the structure repor
 
 - [x] MiniMax with `reasoning_effort: medium` gave mostly false or known findings (#1021 to #1033); `high` run locally on #1024, #1031, #1033 dropped the false ones in about two minutes each: `REASONING_EFFORT: high`
 - [x] PR: pushed after this archive
+
+## Session: #496 export of all data
+
+- [x] @wip scenarios seen red, draft `docs/reviews/496-entwurf.md`; fach-reviewer step 1 `docs/reviews/496-fachreview-1.md`: V-1, V-2 (Major), R-1 (no privacy change, «Stand» stays) and the Minors taken; glossary terms to #1039 (needs-decision)
+- [x] Backend export service and route, BFF CSV and ZIP, control under Einstellungen, Protokoll entry; nine scenarios green without @wip
+- [x] code-reviewer `docs/reviews/496-review-1.md` (Minors fixed), re-review `496b-review-1.md` (C-1, C-3 fixed; C-2 rejected, accepted by the fach-reviewer), `496c-review-1.md` (C-1, C-2 fixed; C-3 stays), closing round `496d-review-1.md`
+- [x] fach-reviewer step 5 `docs/reviews/496-fachreview-2.md` (V-11 Major fixed), `-3.md`, `-4.md`: all wording taken
+- [x] Persona `docs/design/personas/helga-496.md` (P-1 Major fixed), re-run `helga-496b.md` (P-1 to P-3 Minor fixed)
+- [x] daten-pruefer `docs/reviews/496-datenpruefung-1.md`: amounts and QR-bills right; D-1, D-2 Minor stay
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-496.md`
+- [x] PR: pushed after this archive

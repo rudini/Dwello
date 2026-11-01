@@ -7,15 +7,28 @@ import { getStatement } from './statement.service';
 import { swissToday } from './today';
 
 // Folder and file names in the tenant's language: the tenant receives the ZIP, and its PDFs are in that language
-const NAMES = {
+export const NAMES = {
 	de: { zip: 'Daten', data: 'daten.json', documents: 'dokumente', statements: 'abrechnungen', contract: 'Mietvertrag Wohnung' },
 	fr: { zip: 'Données', data: 'données.json', documents: 'documents', statements: 'décomptes', contract: 'Contrat de bail appartement' },
 	it: { zip: 'Dati', data: 'dati.json', documents: 'documenti', statements: 'conteggi', contract: 'Contratto di locazione appartamento' },
 	en: { zip: 'Data', data: 'data.json', documents: 'documents', statements: 'statements', contract: 'Rental contract apartment' }
 };
-const EXTENSIONS: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png' };
+export const EXTENSIONS: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png' };
 // a name a user typed, safe as one file name in the ZIP (domain review F-11)
-const safe = (name: string) => name.replace(/[\\/:*?"<>|]/g, '_');
+export const safe = (name: string) => name.replace(/[\\/:*?"<>|]/g, '_');
+
+/** The files of a ZIP; two of the same name both stay: the second gets a counter */
+export function zipFiles() {
+	const files: { path: string; content: string }[] = [];
+	const file = (folder: string, name: string, content: string, extension = 'pdf') => {
+		const base = `${folder}/${safe(name)}`;
+		let path = `${base}.${extension}`;
+		for (let n = 2; files.some((taken) => taken.path === path); n++) path = `${base} (${n}).${extension}`;
+		files.push({ path, content });
+		return path;
+	};
+	return { files, file };
+}
 
 /**
  * Everything Dwello holds about one tenant, for the right to data handover (#435, Art. 28 DSG; domain review
@@ -27,15 +40,7 @@ export async function exportTenant(id: string) {
 	if (!tenant) return null;
 
 	const names = NAMES[tenant.language as keyof typeof NAMES] ?? NAMES.de;
-	const files: { path: string; content: string }[] = [];
-	// two documents of the same name both stay: the second gets a counter
-	const file = (folder: string, name: string, content: string, extension = 'pdf') => {
-		const base = `${folder}/${safe(name)}`;
-		let path = `${base}.${extension}`;
-		for (let n = 2; files.some((taken) => taken.path === path); n++) path = `${base} (${n}).${extension}`;
-		files.push({ path, content });
-		return path;
-	};
+	const { files, file } = zipFiles();
 
 	const contracts = await Promise.all(
 		(

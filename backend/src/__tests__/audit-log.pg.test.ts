@@ -236,6 +236,19 @@ describe('Protokoll der Anmeldungen', () => {
 		await callApi(`/api/v1/audit-log/${logins[0].id}`, { method: 'DELETE' });
 	});
 
+	// #496 (Fachreview F-4): after the BFF made the ZIP, only its date and time
+	it('hält einen Export aller Daten fest, ohne weitere Angaben', async () => {
+		const before = (await entriesOf('data_exported')).length;
+
+		const response = await sendJson('POST', '/api/v1/audit-log/exports');
+
+		expect(response.status).toBe(201);
+		const exports = await entriesOf('data_exported');
+		expect(exports.length).toBe(before + 1);
+		expect(exports[0].details).toEqual({});
+		await callApi(`/api/v1/audit-log/${exports[0].id}`, { method: 'DELETE' });
+	});
+
 	it('lehnt einen unbekannten Anbieter ab', async () => {
 		const response = await sendJson('POST', '/api/v1/audit-log/logins', { provider: `x-${token}` });
 

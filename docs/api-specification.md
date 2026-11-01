@@ -227,12 +227,20 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 | `access_key_created`, `access_key_revoked` | `POST`, `DELETE /access-keys` (#817) | `name` |
 | `access_key_expired` | the first time Dwello sees a key that ran out (key list, Protokoll, `/mcp`), dated at the start of the day after its last valid one | `name` |
 | `mcp_call` | each `tools/call` at `/mcp` (#817), without contents | `tool`, `name` (of the key) |
+| `data_exported` | the BFF once it made the ZIP of all data (#496) | none |
 
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/` | → `{ data: [entry] }`, newest first |
 | POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
+| POST | `/exports` | 201, no body (#496) |
 | DELETE | `/:id` | 204. 404 |
+
+### Export of all data `/api/v1/export` (#496)
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/?language=de\|fr\|it\|en` | → `{ fileName, dataFile, data, tables: [{ path, rows }], logTable, files: [{ path, content }] }` (contract `tests/contracts/data-export.json`). `data` is everything the landlord entered, English keys and values as stored: categories, distribution keys, heating profiles, tenants with their documents, buildings with apartments (with `rentalStatus`, the Mietstatus on the day of the export), contracts (Akonto, agreed Nebenkosten), invoices (Belege) and fuel stocks, statements with line items, carry-over and open amount, read in one snapshot; the settings and the Protokoll read after it. Not in it: access keys, accounts, the KI setting, backups, the numbering, file contents. `tables` are the rows of one table per kind, header first, cells as text in the UI language; the BFF writes them as CSV and fills the column «Eintrag» of `logTable` and `data.auditLog[].text` with the UI's words. `files` (Base64) are `README.txt`, the Belege, the tenants' documents and contract PDFs, and each statement's current PDF; names in the UI language. Reads only. The BFF route `POST /config/export` (a form) zips it, then `POST /audit-log/exports`, and hands out no ZIP when that fails |
 
 ## 11c. Zugangsschlüssel für KI-Programme `/api/v1/access-keys` and `/mcp` (#817, ADR 0007)
 
