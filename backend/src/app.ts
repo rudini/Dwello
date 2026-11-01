@@ -21,6 +21,7 @@ import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
 import { auditLogRoutes } from './routes/audit-log';
+import { dataExportRoutes } from './routes/data-export';
 import { accessKeyRoutes } from './routes/access-keys';
 import { callApiWith, mcpRoutes } from './routes/mcp';
 import { localAccountRoutes, passwordSignInRoutes, setupRoutes } from './routes/local-accounts';
@@ -124,6 +125,7 @@ export const app = new Elysia()
 	.use(statementRoutes)
 	.use(documentRoutes)
 	.use(auditLogRoutes)
+	.use(dataExportRoutes)
 	.use(accessKeyRoutes);
 
 // the MCP tools call the routes above in-process (#817)

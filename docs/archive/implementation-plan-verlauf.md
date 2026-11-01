@@ -666,4 +666,13 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] code-reviewer round 1: `docs/reviews/structure-s101-review-1.md` (C-1 Major: folder rule only for route folders, C-2 empty gaps file, C-3 Ce test: fixed; C-4 Minor, no test for the inline script that opens details: stays in the report)
 - [x] code-reviewer round 2: `docs/reviews/structure-s101-review-2.md` (C-1 to C-3 closed, no new finding; C-4 stays)
 - [x] Workflow note: none new
+## Session: #496 export of all data
+
+- [x] @wip scenarios seen red, draft `docs/reviews/496-entwurf.md`; fach-reviewer step 1 `docs/reviews/496-fachreview-1.md`: V-1, V-2 (Major), R-1 (no privacy change, «Stand» stays) and the Minors taken; glossary terms to #1039 (needs-decision)
+- [x] Backend export service and route, BFF CSV and ZIP, control under Einstellungen, Protokoll entry; nine scenarios green without @wip
+- [x] code-reviewer `docs/reviews/496-review-1.md` (Minors fixed), re-review `496b-review-1.md` (C-1, C-3 fixed; C-2 rejected, accepted by the fach-reviewer), `496c-review-1.md` (C-1, C-2 fixed; C-3 stays), closing round `496d-review-1.md`
+- [x] fach-reviewer step 5 `docs/reviews/496-fachreview-2.md` (V-11 Major fixed), `-3.md`, `-4.md`: all wording taken
+- [x] Persona `docs/design/personas/helga-496.md` (P-1 Major fixed), re-run `helga-496b.md` (P-1 to P-3 Minor fixed)
+- [x] daten-pruefer `docs/reviews/496-datenpruefung-1.md`: amounts and QR-bills right; D-1, D-2 Minor stay
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-496.md`
 - [x] PR: pushed after this archive
