@@ -129,6 +129,17 @@ const translations: Record<Language, Record<string, string>> = {
 		refundPaidOn: 'Überwiesen am {date}.',
 		refundBy: 'Wir überweisen Ihnen den Betrag bis {date}.',
 		refundNoDate: 'Wir überweisen Ihnen den Betrag.',
+		// #1003: after a part payment, what is still open (Fachreview 1003-1)
+		openAmount: 'Offener Betrag',
+		openRefund: 'Offene Rückerstattung',
+		paidSoFarLine: 'Betrag der Abrechnung {amount} – Bereits bezahlt {paid}',
+		refundedSoFarLine: 'Betrag der Abrechnung {amount} – Bereits zurückerstattet {paid}',
+		paidSoFarOwnLine: 'Betrag der Abrechnung {amount} – Bereits bezahlt auf diese Abrechnung {paid}',
+		payOpenBy: 'Bitte bezahlen Sie den offenen Betrag bis {date} mit dem Zahlteil.',
+		payOpenNoDate: 'Bitte bezahlen Sie den offenen Betrag mit dem Zahlteil.',
+		refundOpenBy: 'Wir überweisen Ihnen die offene Rückerstattung bis {date}.',
+		refundOpenNoDate: 'Wir überweisen Ihnen die offene Rückerstattung.',
+		replacesPayOpen: ' Bezahlen Sie nur noch den offenen Betrag dieser Abrechnung.',
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
 		balancedRounded: 'Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.',
@@ -256,6 +267,17 @@ const translations: Record<Language, Record<string, string>> = {
 		refundPaidOn: 'Versé le {date}.',
 		refundBy: 'Nous vous verserons le montant au plus tard le {date}.',
 		refundNoDate: 'Nous vous verserons le montant.',
+		// #1003: after a part payment, what is still open (Fachreview 1003-1)
+		openAmount: 'Reste dû',
+		openRefund: 'Remboursement restant',
+		paidSoFarLine: 'Montant du décompte {amount} – Déjà payé {paid}',
+		refundedSoFarLine: 'Montant du décompte {amount} – Déjà remboursé {paid}',
+		paidSoFarOwnLine: 'Montant du décompte {amount} – Déjà payé sur le présent décompte {paid}',
+		payOpenBy: 'Veuillez payer le reste dû au plus tard le {date} au moyen de la section paiement.',
+		payOpenNoDate: 'Veuillez payer le reste dû au moyen de la section paiement.',
+		refundOpenBy: 'Nous vous verserons le remboursement restant au plus tard le {date}.',
+		refundOpenNoDate: 'Nous vous verserons le remboursement restant.',
+		replacesPayOpen: ' Payez uniquement le reste dû du présent décompte.',
 		refundAccount: 'Pour ce faire, veuillez nous communiquer votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
 		balancedRounded: 'Après l’arrondi à 5 centimes, vous n’avez rien à payer et ne recevez rien.',
@@ -383,6 +405,17 @@ const translations: Record<Language, Record<string, string>> = {
 		refundPaidOn: 'Bonificato il {date}.',
 		refundBy: 'Le bonifichiamo l’importo entro il {date}.',
 		refundNoDate: 'Le bonifichiamo l’importo.',
+		// #1003: after a part payment, what is still open (Fachreview 1003-1)
+		openAmount: 'Importo ancora dovuto',
+		openRefund: 'Rimborso residuo',
+		paidSoFarLine: 'Importo del conteggio {amount} – Già pagato {paid}',
+		refundedSoFarLine: 'Importo del conteggio {amount} – Già rimborsato {paid}',
+		paidSoFarOwnLine: 'Importo del conteggio {amount} – Già pagato su questo conteggio {paid}',
+		payOpenBy: 'La preghiamo di pagare l’importo ancora dovuto entro il {date} tramite la sezione pagamento.',
+		payOpenNoDate: 'La preghiamo di pagare l’importo ancora dovuto tramite la sezione pagamento.',
+		refundOpenBy: 'Le bonifichiamo il rimborso residuo entro il {date}.',
+		refundOpenNoDate: 'Le bonifichiamo il rimborso residuo.',
+		replacesPayOpen: ' Paghi solo l’importo ancora dovuto di questo conteggio.',
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie corrispondono ai suoi acconti. Non deve pagare nulla.',
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla né riceve alcun rimborso.',
@@ -510,6 +543,17 @@ const translations: Record<Language, Record<string, string>> = {
 		refundPaidOn: 'Transferred on {date}.',
 		refundBy: 'We will transfer the amount to you by {date}.',
 		refundNoDate: 'We will transfer the amount to you.',
+		// #1003: after a part payment, what is still open (Fachreview 1003-1)
+		openAmount: 'Amount still outstanding',
+		openRefund: 'Remaining refund',
+		paidSoFarLine: 'Statement amount {amount} – Already paid {paid}',
+		refundedSoFarLine: 'Statement amount {amount} – Already refunded {paid}',
+		paidSoFarOwnLine: 'Statement amount {amount} – Already paid on this statement {paid}',
+		payOpenBy: 'Please pay the amount still outstanding by {date} using the payment part.',
+		payOpenNoDate: 'Please pay the amount still outstanding using the payment part.',
+		refundOpenBy: 'We will transfer the remaining refund to you by {date}.',
+		refundOpenNoDate: 'We will transfer the remaining refund to you.',
+		replacesPayOpen: ' Pay only the amount still outstanding on this statement.',
 		refundAccount: 'Please send us your IBAN if you have not already done so.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
 		balancedRounded: 'After rounding to 5 centimes, you have nothing to pay and nothing will be refunded.',
@@ -649,6 +693,7 @@ export interface StatementPDFData {
 	// Payment info
 	paymentDeadline?: string;
 	paidDate?: string; // paid: no payment part, or the tenant pays twice
+	paidSoFar?: number; // #1003: part payments (refunds negative) on a statement still open
 	agreedCosts?: { name: string; from?: string }[]; // the agreed categories it bills (#91), «Vereinbart ab» (#368); absent before
 }
 
@@ -803,7 +848,7 @@ function title({ doc, t, data, config, language }: Page, y: number) {
 	if (data.replaces) {
 		const note = fill(t.replacesNote, { number: data.replaces.statementNumber, date: formatDate(data.replaces.statementDate) });
 		const pay = data.balance > 0 && !data.paidDate;
-		doc.font(FONT.bold).text(pay ? note + t.replacesPay : note).font(FONT.regular);
+		doc.font(FONT.bold).text(pay ? note + (data.paidSoFar ? t.replacesPayOpen : t.replacesPay) : note).font(FONT.regular);
 	}
 	return doc.y + 14;
 }
@@ -817,6 +862,14 @@ function settledText(t: Record<string, string>, data: StatementPDFData) {
 	return data.balance < 0 ? t.waivedRefund : t.waivedDue;
 }
 const unpaid = (data: StatementPDFData) => data.balance === 0 || data.carried || data.waived;
+// what the tenant still pays or gets back: the Saldo less the part payments (#1003), not rounded again to 5 Rappen
+const openOf = (data: StatementPDFData) => roundToRappen(data.balance - (data.paidSoFar ?? 0));
+
+// #1003: after a part payment, the rest to pay or to get back; the tenant gave the IBAN for the first part already
+function openText(t: Record<string, string>, balance: number, date: string | undefined) {
+	if (balance < 0) return date ? fill(t.refundOpenBy, { date }) : t.refundOpenNoDate;
+	return date ? fill(t.payOpenBy, { date }) : t.payOpenNoDate;
+}
 
 // What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing (also the e-mail, #86)
 export function balanceText(data: StatementPDFData, language: Language) {
@@ -824,6 +877,7 @@ export function balanceText(data: StatementPDFData, language: Language) {
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
 	if (unpaid(data)) return settledText(t, data);
 	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
+	if (data.paidSoFar) return openText(t, data.balance, date);
 	if (data.balance < 0) return `${date ? fill(t.refundBy, { date }) : t.refundNoDate} ${t.refundAccount}`;
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
 }
@@ -879,13 +933,20 @@ function rounding(data: StatementPDFData) {
 const labelOf = (balance: number, t: Record<string, string>) => (balance === 0 ? t.balanced : balance < 0 ? t.refund : t.amountDue);
 const signed = (amount: number) => `${amount > 0 ? '+' : '–'} ${formatCHF(Math.abs(amount))}`;
 
-const balanceLabel = ({ t, data }: Page) => labelOf(data.balance, t);
+const balanceLabel = ({ t, data }: Page) =>
+	data.paidSoFar ? (data.balance < 0 ? t.openRefund : t.openAmount) : labelOf(data.balance, t);
+// #1003: «Betrag der Abrechnung … – Bereits bezahlt …»; on a corrected statement its own part (Fachreview 1003-1 V-9)
+function paidSoFarText({ t, data }: Page) {
+	if (!data.paidSoFar) return '';
+	const line = data.balance < 0 ? t.refundedSoFarLine : data.replaces ? t.paidSoFarOwnLine : t.paidSoFarLine;
+	return fill(line, { amount: formatCurrency(Math.abs(data.balance)), paid: formatCurrency(Math.abs(data.paidSoFar)) });
+}
 
 // The result first: what the tenant pays or gets back, and how it comes about
 function balanceBox(page: Page, y: number) {
 	const { doc, t, data } = page;
 	const width = PAGE.right - PAGE.left;
-	const what = balanceText(page.data, page.language);
+	const what = [balanceText(page.data, page.language), paidSoFarText(page)].filter(Boolean).join('\n');
 	const rounded = rounding(data) ? `, ${t.roundedNote}` : '';
 	const prior = priorLine(data, t);
 	const offset = offsetLine(data, t);
@@ -899,7 +960,7 @@ function balanceBox(page: Page, y: number) {
 		.font(FONT.bold)
 		.fontSize(13)
 		.text(balanceLabel(page), PAGE.left + 12, y + 12)
-		.text(formatCurrency(data.balance), PAGE.left + 12, y + 12, { width: width - 24, align: 'right' });
+		.text(formatCurrency(data.paidSoFar ? Math.abs(openOf(data)) : data.balance), PAGE.left + 12, y + 12, { width: width - 24, align: 'right' });
 	doc
 		.font(FONT.regular)
 		.fontSize(9)
@@ -986,7 +1047,7 @@ function costTable(page: Page, y: number) {
 		top = row(doc, total(before, formatCHF(Math.abs(unrounded(data)))), top + 2, { above: 1 });
 		top = row(doc, total(t.rounding, signed(rounding(data))), top);
 	}
-	top = row(doc, total(balanceLabel(page), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 });
+	top = row(doc, total(labelOf(data.balance, page.t), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 }); // the Saldo, also after a part payment (#1003)
 	const note = sharesNote(data, t);
 	doc.font(FONT.regular).fontSize(7.5);
 	const height = doc.heightOfString(note, { width: PAGE.right - PAGE.left });
@@ -1355,7 +1416,7 @@ export async function addPaymentPart(
 function paymentInfo({ doc, t, data, config }: Page, y: number) {
 	let top = heading(doc, t.paymentInfo, y);
 	top = amountLine(doc, t.account, formatIBANForDisplay(config.iban), top);
-	return amountLine(doc, t.amount, formatCurrency(data.balance), top);
+	return amountLine(doc, t.amount, formatCurrency(openOf(data)), top);
 }
 
 // Sender and page on every page; the property and period at the foot of pages without the payment part
@@ -1386,7 +1447,7 @@ async function qrCodeFor(data: StatementPDFData, config: QRBillConfig, t: Record
 	if (!owed(data)) return null;
 	try {
 		return await generateQRBillForStatement(
-			{ id: data.id, statementNumber: data.statementNumber, balance: data.balance.toString(), tenant: data.tenant, title: t.title },
+			{ id: data.id, statementNumber: data.statementNumber, balance: openOf(data).toString(), tenant: data.tenant, title: t.title },
 			config
 		);
 	} catch (qrError) {
@@ -1440,7 +1501,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 			if (qr) {
 				if (y > PAGE.height - PAYMENT_PART - 24) doc.addPage();
 				qrPage = doc.bufferedPageRange().count - 1;
-				paymentPart(page, qr, data.balance);
+				paymentPart(page, qr, openOf(data));
 			} else if (owed(data)) {
 				paymentInfo(page, y);
 			}
