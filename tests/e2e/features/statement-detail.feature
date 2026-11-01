@@ -1324,6 +1324,7 @@ Funktionalität: Abrechnungsdetail
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Und der Liegenschaftsverwalter die Abrechnung versendet
+    Und hat die Abrechnung den Status "Versendet"
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
     Und der Liegenschaftsverwalter nur die Bemerkung "Rest bis Ende März" festhält
     Und der Liegenschaftsverwalter eine Zahlung von "10.00" Franken festhält
