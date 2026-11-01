@@ -14,6 +14,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] #742: the status line of «Rechnungen hochladen» says how many invoices are ready to create; @wip scenario seen red (received «Bitte prüfen: 1.»)
 - [x] #742: text «Bereit zum Erstellen» in de, fr, it, en (`InvoiceUploadDialog.svelte`, `messages/*.json`, two DOM expectations); scenario green without @wip; invoices + ki-einstellungen 59 passed; axe and language rows of the five upload screens 10 passed
-- [ ] #742 slice review
-- [ ] #742 persona Sven (screen reader) on the upload dialog
+- [x] #742 slice review: no Blocker/Major, Minor C-1 stays in `docs/reviews/742-review-1.md` (needs a PO decision on the exact status text)
+- [x] #742 persona Sven (screen reader) on the upload dialog: P-1 to P-3 Minor, not trivial (status wording needs decisions), stay in `docs/design/personas/sven-742.md`
 - [ ] #742 PR
