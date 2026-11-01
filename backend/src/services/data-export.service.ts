@@ -84,12 +84,12 @@ const COLUMNS = {
 	terminated: ['Gekündigt', 'Résilié', 'Disdetto', 'Terminated by notice'],
 	noticeReceivedOn: ['Kündigung erhalten am', 'Résiliation reçue le', 'Disdetta ricevuta il', 'Notice received on'],
 	billedUntil: ['Abgerechnet bis', 'Décompté jusqu’au', 'Conteggiato fino al', 'Billed until'],
-	movedOut: ['Auszug bestätigt', 'Départ confirmé', 'Trasloco confermato', 'Move-out confirmed'],
+	movedOut: ['Auszug bestätigt', 'Déménagement confirmé', 'Trasloco confermato', 'Move-out confirmed'],
 	documentsCheckedOn: ['Dokumente geprüft am', 'Documents vérifiés le', 'Documenti verificati il', 'Documents checked on'],
 	baseRent: ['Nettomiete', 'Loyer net', 'Pigione netta', 'Net rent'],
 	additionalRent: ['Zusatzmiete', 'Loyer supplémentaire', 'Pigione supplementare', 'Additional rent'],
 	monthlyAdvancePayment: ['Akonto', 'Acompte', 'Acconto', 'Advance payment'],
-	flatRateUtilityCharge: ['Nebenkostenpauschale', 'Forfait de frais accessoires', 'Forfait spese accessorie', 'Flat-rate utility charge'],
+	flatRateUtilityCharge: ['Nebenkostenpauschale', 'Forfait de frais accessoires', 'Forfait per le spese accessorie', 'Flat-rate utility charge'],
 	managementFeeAgreed: ['Vereinbarte Verwaltungspauschale', 'Frais d’administration convenus', 'Spese amministrative pattuite', 'Agreed management fee'],
 	ownRate: ['Eigener Satz (%)', 'Taux propre (%)', 'Aliquota propria (%)', 'Own rate (%)'],
 	contractFile: ['Mietvertrag im Export', 'Contrat de bail dans l’exportation', 'Contratto di locazione nell’esportazione', 'Rental contract in the export'],
@@ -139,7 +139,7 @@ const COLUMNS = {
 	heatingProfile: ['Heizprofil', 'Profil de chauffage', 'Profilo di riscaldamento', 'Heating profile'],
 	carryOver: ['Übertrag', 'Report', 'Riporto', 'Carried over'],
 	carriedFrom: ['Übertrag aus Abrechnung', 'Report du décompte', 'Riporto dal conteggio', 'Carried over from statement'],
-	carrySettledOn: ['Von Hand ausgeglichen am', 'Soldé à la main le', 'Pareggiato a mano il', 'Settled by hand on'],
+	carrySettledOn: ['Von Hand ausgeglichen am', 'Soldé manuellement le', 'Saldato manualmente il', 'Settled by hand on'],
 	priorPayments: ['Bereits bezahlt', 'Déjà payé', 'Già pagato', 'Already paid'],
 	balance: ['Saldo', 'Solde', 'Saldo', 'Balance'],
 	paidAmount: ['Bezahlter Betrag', 'Montant payé', 'Importo pagato', 'Amount paid'],
@@ -147,7 +147,7 @@ const COLUMNS = {
 	paymentDeadline: ['Zahlungsfrist', 'Délai de paiement', 'Termine di pagamento', 'Payment deadline'],
 	reminderSentDate: ['Erinnert am', 'Rappel envoyé le', 'Promemoria inviato il', 'Reminded on'],
 	replaces: ['Ersetzt Abrechnung', 'Remplace le décompte', 'Sostituisce il conteggio', 'Replaces statement'],
-	correctionDeclined: ['Nicht berichtigt am', 'Non corrigé le', 'Non rettificato il', 'Not corrected on'],
+	correctionDeclined: ['Nicht berichtigt am', 'Non rectifié le', 'Non rettificato il', 'Not corrected on'],
 	qrBillReference: ['QR-Referenz', 'Référence QR', 'Riferimento QR', 'QR reference'],
 	pdf: ['PDF im Export', 'PDF dans l’exportation', 'PDF nell’esportazione', 'PDF in the export'],
 	date: ['Datum', 'Date', 'Data', 'Date'],
@@ -205,17 +205,38 @@ const WORDS = {
 	settled: ['Erledigt', 'Clôturé', 'Chiuso', 'Closed'],
 	replaced: ['Ersetzt', 'Remplacé', 'Sostituito', 'Replaced'],
 	predefined: ['Von Dwello', 'De Dwello', 'Da Dwello', 'From Dwello'],
+	keyPredefined: ['Vordefiniert', 'Prédéfinie', 'Preimpostata', 'Predefined'],
+	profilePredefined: ['Vordefiniert', 'Prédéfini', 'Preimpostato', 'Predefined'],
 	custom: ['Eigene', 'Personnalisée', 'Personalizzata', 'Custom'],
 	occupied: ['Vermietet', 'Loué', 'Locato', 'Let'],
 	relet: ['Vermietet ab {date}', 'Loué dès le {date}', 'Locato dal {date}', 'Let from {date}'],
 	vacant: ['Leer', 'Vacant', 'Sfitto', 'Vacant'],
-	reserved: ['Gesperrt', 'Bloqué', 'Bloccato', 'Blocked']
+	reserved: ['Gesperrt', 'Bloqué', 'Bloccato', 'Blocked'],
+	feeRun: ['Ja, zum Satz des Abrechnungslaufs', 'Oui, au taux de l’établissement des décomptes', 'Sì, all’aliquota dell’allestimento dei conteggi', 'Yes, at the rate of the statement run'],
+	feeOwn: ['Ja, mit eigenem Satz', 'Oui, avec un taux propre', 'Sì, con un’aliquota propria', 'Yes, with its own rate'],
+	feeNone: ['Nein', 'Non', 'No', 'No'],
+	de: ['Deutsch', 'Allemand', 'Tedesco', 'German'],
+	fr: ['Französisch', 'Français', 'Francese', 'French'],
+	it: ['Italienisch', 'Italien', 'Italiano', 'Italian'],
+	en: ['Englisch', 'Anglais', 'Inglese', 'English'],
+	letter: ['Per Brief', 'Par lettre', 'Per lettera', 'By letter'],
+	email: ['Per E-Mail', 'Par e-mail', 'Per e-mail', 'By email'],
+	to_send: ['Zu versenden', 'À envoyer', 'Da inviare', 'To send'],
+	// the kind of a Dokument; TODO(fachlich prüfen, #1039): these five terms
+	reminder: ['Mahnung', 'Rappel', 'Sollecito', 'Reminder'],
+	statement: ['Abrechnung', 'Décompte', 'Conteggio', 'Statement'],
+	new_pdf: ['Neues PDF', 'Nouveau PDF', 'Nuovo PDF', 'New PDF'],
+	pdf_before_change: ['PDF vor der Änderung', 'PDF avant la modification', 'PDF prima della modifica', 'PDF before the change'],
+	upload: ['Hochgeladen', 'Téléversé', 'Caricato', 'Uploaded'],
+	calendar: ['Kalenderjahr (Januar – Dezember)', 'Année civile (janvier – décembre)', 'Anno civile (gennaio – dicembre)', 'Calendar year (January – December)'],
+	'july-june': ['Juli – Juni', 'Juillet – juin', 'Luglio – giugno', 'July – June'],
+	'november-october': ['November – Oktober', 'Novembre – octobre', 'Novembre – ottobre', 'November – October']
 } as const;
 
 // The settings by the names of the form under «Einstellungen»
 const SETTINGS: Record<string, readonly [string, string, string, string]> = {
-	company_name: ['Firmenname', 'Nom de l’entreprise', 'Nome della ditta', 'Company name'],
-	company_address: ['Adresse', 'Adresse', 'Indirizzo', 'Address'],
+	company_name: ['Firmenname', 'Nom de l’entreprise', 'Nome dell’azienda', 'Company name'],
+	company_address: ['Strasse und Hausnummer', 'Rue et numéro', 'Via e numero civico', 'Street and house number'],
 	company_postal_code: ['PLZ', 'NPA', 'NPA', 'Postcode'],
 	company_city: ['Ort', 'Localité', 'Località', 'Town'],
 	company_phone: ['Telefon', 'Téléphone', 'Telefono', 'Phone'],
@@ -223,7 +244,7 @@ const SETTINGS: Record<string, readonly [string, string, string, string]> = {
 	iban: ['IBAN', 'IBAN', 'IBAN', 'IBAN'],
 	payment_deadline_days: ['Zahlungsfrist (Tage)', 'Délai de paiement (jours)', 'Termine di pagamento (giorni)', 'Payment deadline (days)'],
 	reminder_after_days: ['Mahnfrist (Tage)', 'Délai de rappel (jours)', 'Termine di sollecito (giorni)', 'Reminder period (days)'],
-	management_fee_pct: ['Verwaltungspauschale (%)', 'Frais d’administration (%)', 'Spese amministrative (%)', 'Management fee (%)'],
+	management_fee_pct: ['Verwaltungspauschale in %', 'Frais d’administration en %', 'Spese amministrative in %', 'Management fee in %'],
 	default_distribution_key_id: ['Standard-Verteilschlüssel', 'Clé de répartition par défaut', 'Chiave di riparto predefinita', 'Default distribution key'],
 	default_heating_profile_id: ['Standard-Heizprofil', 'Profil de chauffage par défaut', 'Profilo di riscaldamento predefinito', 'Default heating profile'],
 	accounting_period: ['Abrechnungsperiode', 'Période de décompte', 'Periodo di conteggio', 'Billing period'],
@@ -264,7 +285,12 @@ export async function exportAllData(language: Language) {
 	const localName = (record: { name: string; nameDE?: string | null; nameFR?: string | null; nameIT?: string | null; nameEN?: string | null } | undefined) =>
 		record && (record[LOCAL_NAME[language]] ?? record.name);
 	const byId = <T extends { id: string }>(rows: T[]) => new Map(rows.map((row) => [row.id, row]));
-	const typeWord = <T extends { type: string }>(row: T) => ({ ...row, type: row.type in WORDS ? word(row.type as keyof typeof WORDS) : row.type });
+	// the name in the UI language first, and the kind as the page of its kind words it (V-14)
+	const named = <T extends { type: string; name: string }>(predefined: 'predefined' | 'keyPredefined' | 'profilePredefined') => (row: T) => ({
+		...row,
+		name: localName(row),
+		type: word(row.type === 'predefined' ? predefined : 'custom')
+	});
 
 	// one snapshot: a record deleted while the export reads stays out of every table, not only some (a Beleg without
 	// its invoice)
@@ -304,6 +330,14 @@ export async function exportAllData(language: Language) {
 	const categoryOf = byId(allCategories);
 	const keyOf = byId(keys);
 	const statementOf = byId(statements);
+	const profileOf = byId(profiles);
+	// the words and names the form shows; the data file keeps the codes and ids (V-14)
+	const settingValue = (key: string, value: string | null) => {
+		if (value === null) return null;
+		if (key === 'default_distribution_key_id') return localName(keyOf.get(value)) ?? value;
+		if (key === 'default_heating_profile_id') return localName(profileOf.get(value)) ?? value;
+		return ['accounting_period', 'default_language'].includes(key) && value in WORDS ? word(value as keyof typeof WORDS) : value;
+	};
 	const invoiceOf = byId(allInvoices);
 	const tenantName = (id: string | null) => {
 		const tenant = id ? tenantOf.get(id) : undefined;
@@ -404,6 +438,8 @@ export async function exportAllData(language: Language) {
 		['id', 'firstName', 'lastName', 'email', 'phone', 'language', 'correspondenceAddress', 'correspondencePostalCode', 'correspondenceCity', 'correspondenceCountry', 'correspondenceChannel', 'anonymisedOn', 'createdAt', 'updatedAt'],
 		allTenants.map((tenant) => ({
 			...tenant,
+			language: word(tenant.language),
+			correspondenceChannel: word(tenant.correspondenceChannel),
 			correspondenceAddress: tenant.address,
 			correspondencePostalCode: tenant.postalCode,
 			correspondenceCity: tenant.city,
@@ -420,6 +456,8 @@ export async function exportAllData(language: Language) {
 				building: apartment && buildingOf.get(apartment.buildingId)?.name,
 				apartment: apartment?.number,
 				tenant: tenantName(contract.tenantId),
+				// the choice of the contract form (V-4)
+				managementFeeAgreed: word(contract.managementFeeAgreed ? (contract.managementFeePercent ? 'feeOwn' : 'feeRun') : 'feeNone'),
 				ownRate: contract.managementFeePercent,
 				contractFile: contract.file
 			};
@@ -474,7 +512,7 @@ export async function exportAllData(language: Language) {
 			carriedFrom: statement.carriedFromId && statementOf.get(statement.carriedFromId)?.statementNumber,
 			advancePayments: statement.totalAdvancePayments,
 			status: word(statement.status as keyof typeof WORDS),
-			heatingProfile: statement.heatingProfileId && localName(profiles.find((profile) => profile.id === statement.heatingProfileId)),
+			heatingProfile: statement.heatingProfileId && localName(profileOf.get(statement.heatingProfileId)),
 			replaces: statement.replacesId && statementOf.get(statement.replacesId)?.statementNumber,
 			correctionDeclined: statement.correctionDeclined?.on,
 			pdf: statement.file
@@ -509,6 +547,9 @@ export async function exportAllData(language: Language) {
 		['id', 'tenantId', 'tenant', 'statement', 'type', 'reminderLevel', 'title', 'file', 'channel', 'status', 'sentAt', 'recipient', 'paymentDeadline', 'deliveryError', 'createdAt'],
 		documentRows.map((document) => ({
 			...document,
+			type: word(document.type),
+			channel: document.channel && word(document.channel),
+			status: document.status && word(document.status),
 			tenant: tenantName(document.tenantId),
 			statement: document.statementId && statementOf.get(document.statementId)?.statementNumber
 		}))
@@ -516,24 +557,25 @@ export async function exportAllData(language: Language) {
 	table(
 		'categories',
 		['id', 'name', 'nameDE', 'nameFR', 'nameIT', 'nameEN', 'allocable', 'isHeatingCost', 'isFuel', 'type', 'description', 'sortOrder'],
-		allCategories.map((category) => ({ ...typeWord(category), allocable: category.isAllowedUtilityCost }))
+		allCategories.map((category) => ({ ...named<typeof category>('predefined')(category), allocable: category.isAllowedUtilityCost }))
 	);
-	table('keys', ['id', 'name', 'nameDE', 'nameFR', 'nameIT', 'nameEN', 'type', 'formula', 'description'], keys.map(typeWord));
+	table('keys', ['id', 'name', 'nameDE', 'nameFR', 'nameIT', 'nameEN', 'type', 'formula', 'description'], keys.map(named('keyPredefined')));
 	table(
 		'profiles',
 		['id', 'name', 'nameDE', 'nameFR', 'nameIT', 'nameEN', 'type', 'januaryPct', 'februaryPct', 'marchPct', 'aprilPct', 'mayPct', 'junePct', 'julyPct', 'augustPct', 'septemberPct', 'octoberPct', 'novemberPct', 'decemberPct', 'description', 'sourceDE', 'sourceFR', 'sourceIT', 'sourceEN'],
-		profiles.map(typeWord)
+		profiles.map(named('profilePredefined'))
 	);
 	// the entry's text is the UI's: the BFF fills it in (column «Eintrag»)
 	table(
 		'log',
 		['id', 'occurredAt', 'entry', 'type', 'details'],
-		auditLog.map((entry) => ({ ...entry, type: entry.action, details: JSON.stringify(entry.details) }))
+		// the raw query answers the time as text in UTC, not as a Date (C-6): in Swiss time like every other column
+		auditLog.map((entry) => ({ ...entry, occurredAt: new Date(entry.occurredAt), type: entry.action, details: JSON.stringify(entry.details) }))
 	);
 	table(
 		'settings',
 		['setting', 'value'],
-		Object.entries(settings).map(([key, value]) => ({ setting: SETTINGS[key]?.[index] ?? key, value }))
+		Object.entries(settings).map(([key, value]) => ({ setting: SETTINGS[key]?.[index] ?? key, value: settingValue(key, value) }))
 	);
 
 	files.unshift({ path: 'README.txt', content: Buffer.from(readme(language, folders, names)).toString('base64') });
@@ -548,6 +590,7 @@ function readme(language: Language, folders: (typeof FILES)[Language], names: (t
 	const t = folders.tables;
 	const agreed = `${folders.agreed}.csv`;
 	const payments = `${folders.payments}.csv`;
+	const belege = `${folders.belegeTable}.csv`;
 	const texts = {
 		de: `Dwello – Export aller Daten
 Erstellt am ${day} um ${time} Uhr
@@ -556,12 +599,12 @@ Diese ZIP-Datei enthält alle Daten, die Sie in Dwello erfasst haben, so wie sie
 
 Inhalt
 - ${t}/: eine Tabelle je Art von Daten (Gebäude, Wohnungen, Mieter, Mietverträge, Rechnungen, Abrechnungen, Kategorien, Verteilschlüssel, Heizprofile, Protokoll und weitere). Öffnen Sie sie mit Excel oder einem anderen Tabellenprogramm. Die Spalten sind durch Strichpunkte getrennt; Beträge in Franken mit Punkt (1234.50), Datum als Jahr-Monat-Tag (2026-03-31).
-- ${names.data}: dieselben Daten mit allen Beziehungen, für ein anderes Programm. Jeder Datensatz hat eine ID; eine Tabelle nennt einen anderen Datensatz mit dessen ID und Namen.
-- ${folders.belege}/: die Belege Ihrer Rechnungen, wie Sie sie hochgeladen haben.
+- ${names.data}: dieselben Daten mit allen Beziehungen, für ein anderes Programm. Jeder Datensatz hat eine ID; die Tabellen nennen einen anderen Datensatz mit seiner ID, seinem Namen oder seiner Nummer.
+- ${folders.belege}/: die Belege Ihrer Rechnungen, wie Sie sie hochgeladen haben. Haben Sie keinen Beleg hochgeladen, fehlt der Ordner, und ${belege} hat nur die Kopfzeile.
 - ${names.documents}/: die Dokumente zu Ihren Mietern, auch versendete Zahlungserinnerungen und Mahnungen, und die PDF der Mietverträge.
-- ${names.statements}/: das aktuelle PDF jeder Abrechnung. Das PDF, das der Mieter erhalten hat (Versendetes PDF), liegt unter ${names.documents}/.
+- ${names.statements}/: das aktuelle PDF jeder Abrechnung. Das PDF, das der Mieter erhalten hat (Versendetes PDF), liegt unter ${names.documents}/, sofern Dwello es beim Versand oder vor einer Änderung aufbewahrt hat; sonst ist es das aktuelle PDF.
 
-Saldo: positiv ist eine Nachzahlung des Mieters, negativ eine Rückerstattung. Der Saldo ist auf 5 Rappen gerundet. Offener Betrag: Saldo minus die Teilzahlungen in ${payments}.
+Saldo: positiv ist eine Nachzahlung des Mieters, negativ eine Rückerstattung. Der Saldo ist auf 5 Rappen gerundet. Bereits bezahlt, Bezahlter Betrag, Offener Betrag und die Beträge in ${payments} haben das Vorzeichen des Saldos: Bei einer Rückerstattung sind sie negativ und nennen, was Sie zurückerstattet haben oder noch zurückerstatten. Offener Betrag: Saldo minus die Teilzahlungen in ${payments}. Bei einer ersetzten Abrechnung kann Bezahlter Betrag auch einen Saldo enthalten, den die nächste Abrechnung als Übertrag verrechnet hat oder den Sie von Hand ausgeglichen haben.
 
 ${agreed} nennt je Mietvertrag die Kategorien, zu denen Sie etwas angegeben haben. Fehlt eine Kategorie, ist beim Mietvertrag noch nichts angegeben, und Dwello rechnet sie nicht ab.
 
@@ -569,7 +612,7 @@ Das Protokoll und die Abrechnungen können Rechnungen und andere Datensätze nen
 
 Die Datei enthält Personendaten Ihrer Mieter und Rechnungssteller. Bewahren Sie sie sicher auf und löschen Sie sie, wenn Sie sie nicht mehr brauchen.
 
-Dwello kann diese Datei nicht wieder einlesen. Zum Wiederherstellen dient die Sicherung unter «Einstellungen» › «Sicherung»: Ist sie eingerichtet, legt Dwello jeden Tag eine an.
+Dwello kann diese Datei nicht wieder einlesen.
 `,
 		fr: `Dwello – Exportation de toutes les données
 Créé le ${day} à ${time}
@@ -578,12 +621,12 @@ Ce fichier ZIP contient toutes les données que vous avez saisies dans Dwello, t
 
 Contenu
 - ${t}/\u00a0: un tableau par type de données (immeubles, appartements, locataires, contrats de bail, factures, décomptes, catégories, clés de répartition, profils de chauffage, journal et autres). Ouvrez-les avec Excel ou un autre tableur. Les colonnes sont séparées par des points-virgules\u00a0; montants en francs avec un point (1234.50), dates sous la forme année-mois-jour (2026-03-31).
-- ${names.data}\u00a0: les mêmes données avec toutes leurs relations, pour un autre programme. Chaque enregistrement a un ID\u00a0; un tableau mentionne un autre enregistrement par son ID et son nom.
-- ${folders.belege}/\u00a0: les pièces justificatives de vos factures, telles que vous les avez téléversées.
+- ${names.data}\u00a0: les mêmes données avec toutes leurs relations, pour un autre programme. Chaque enregistrement a un ID\u00a0; les tableaux mentionnent un autre enregistrement par son ID, son nom ou son numéro.
+- ${folders.belege}/\u00a0: les pièces justificatives de vos factures, telles que vous les avez téléversées. Si vous n’avez téléversé aucune pièce justificative, le dossier manque et ${belege} ne contient que la ligne d’en-tête.
 - ${names.documents}/\u00a0: les documents de vos locataires, y compris les rappels de paiement et les rappels envoyés, et les PDF des contrats de bail.
-- ${names.statements}/\u00a0: le PDF actuel de chaque décompte. Le PDF que le locataire a reçu (PDF envoyé) se trouve sous ${names.documents}/.
+- ${names.statements}/\u00a0: le PDF actuel de chaque décompte. Le PDF que le locataire a reçu (PDF envoyé) se trouve sous ${names.documents}/ si Dwello l’a conservé lors de l’envoi ou avant une modification\u00a0; sinon, c’est le PDF actuel.
 
-Solde\u00a0: positif, c’est un montant à payer par le locataire\u00a0; négatif, un remboursement. Le solde est arrondi à 5 centimes. Montant dû\u00a0: solde moins les paiements partiels de ${payments}.
+Solde\u00a0: positif, c’est un montant à payer par le locataire\u00a0; négatif, un remboursement. Le solde est arrondi à 5 centimes. Déjà payé, Montant payé, Montant dû et les montants de ${payments} ont le signe du solde\u00a0: pour un remboursement, ils sont négatifs et indiquent ce que vous avez remboursé ou devez encore rembourser. Montant dû\u00a0: solde moins les paiements partiels de ${payments}. Pour un décompte remplacé, Montant payé peut aussi contenir un solde que le décompte suivant a compensé comme report ou que vous avez soldé manuellement.
 
 ${agreed} indique pour chaque contrat de bail les catégories pour lesquelles vous avez fait une indication. Si une catégorie manque, rien n’est encore indiqué pour ce contrat et Dwello ne la décompte pas.
 
@@ -591,7 +634,7 @@ Le journal et les décomptes peuvent mentionner des factures et d’autres donn�
 
 Le fichier contient des données personnelles de vos locataires et des émetteurs des factures. Conservez-le en lieu sûr et supprimez-le lorsque vous n’en avez plus besoin.
 
-Dwello ne peut pas réimporter ce fichier. Pour restaurer vos données, utilisez la sauvegarde sous «\u00a0Paramètres\u00a0» › «\u00a0Sauvegarde\u00a0»\u00a0: si elle est configurée, Dwello en crée une chaque jour.
+Dwello ne peut pas réimporter ce fichier.
 `,
 		it: `Dwello – Esportazione di tutti i dati
 Creato il ${day} alle ${time}
@@ -600,12 +643,12 @@ Questo file ZIP contiene tutti i dati che ha registrato in Dwello, così come er
 
 Contenuto
 - ${t}/: una tabella per tipo di dati (immobili, appartamenti, inquilini, contratti di locazione, fatture, conteggi, categorie, chiavi di riparto, profili di riscaldamento, registro e altri). Le apra con Excel o con un altro programma di fogli di calcolo. Le colonne sono separate da punti e virgola; importi in franchi con il punto (1234.50), date nella forma anno-mese-giorno (2026-03-31).
-- ${names.data}: gli stessi dati con tutte le relazioni, per un altro programma. Ogni record ha un ID; una tabella indica un altro record con il suo ID e il suo nome.
-- ${folders.belege}/: i giustificativi delle sue fatture, come li ha caricati.
+- ${names.data}: gli stessi dati con tutte le relazioni, per un altro programma. Ogni record ha un ID; le tabelle indicano un altro record con il suo ID, il suo nome o il suo numero.
+- ${folders.belege}/: i giustificativi delle sue fatture, come li ha caricati. Se non ha caricato alcun giustificativo, la cartella manca e ${belege} contiene solo la riga d’intestazione.
 - ${names.documents}/: i documenti dei suoi inquilini, anche i promemoria di pagamento e i solleciti inviati, e i PDF dei contratti di locazione.
-- ${names.statements}/: il PDF attuale di ogni conteggio. Il PDF che l’inquilino ha ricevuto (PDF inviato) si trova in ${names.documents}/.
+- ${names.statements}/: il PDF attuale di ogni conteggio. Il PDF che l’inquilino ha ricevuto (PDF inviato) si trova in ${names.documents}/ se Dwello lo ha conservato all’invio o prima di una modifica; altrimenti è il PDF attuale.
 
-Saldo: positivo è un importo dovuto dall’inquilino, negativo un rimborso. Il saldo è arrotondato a 5 centesimi. Importo ancora dovuto: saldo meno i pagamenti parziali in ${payments}.
+Saldo: positivo è un importo dovuto dall’inquilino, negativo un rimborso. Il saldo è arrotondato a 5 centesimi. Già pagato, Importo pagato, Importo dovuto e gli importi in ${payments} hanno il segno del saldo: per un rimborso sono negativi e indicano ciò che ha rimborsato o deve ancora rimborsare. Importo dovuto: saldo meno i pagamenti parziali in ${payments}. Per un conteggio sostituito, Importo pagato può contenere anche un saldo che il conteggio successivo ha compensato come riporto o che Lei ha saldato manualmente.
 
 ${agreed} indica per ogni contratto di locazione le categorie per cui ha dato un’indicazione. Se una categoria manca, per il contratto non è ancora indicato nulla e Dwello non la conteggia.
 
@@ -613,7 +656,7 @@ Il registro e i conteggi possono menzionare fatture e altri dati che ha eliminat
 
 Il file contiene dati personali dei suoi inquilini e degli emittenti delle fatture. Lo conservi al sicuro e lo elimini quando non Le serve più.
 
-Dwello non può reimportare questo file. Per ripristinare i dati serve la copia di sicurezza in «Impostazioni» › «Copia di sicurezza»: se è configurata, Dwello ne crea una ogni giorno.
+Dwello non può reimportare questo file.
 `,
 		en: `Dwello – Export of all data
 Created on ${day} at ${time}
@@ -622,12 +665,12 @@ This ZIP file contains all the data you have entered in Dwello, as it was stored
 
 Contents
 - ${t}/: one table per kind of data (buildings, apartments, tenants, rental contracts, invoices, statements, categories, distribution keys, heating profiles, log and others). Open them with Excel or another spreadsheet program. The columns are separated by semicolons; amounts in francs with a point (1234.50), dates as year-month-day (2026-03-31).
-- ${names.data}: the same data with all relations, for another program. Every record has an ID; a table names another record by its ID and name.
-- ${folders.belege}/: the supporting documents of your invoices, as you uploaded them.
+- ${names.data}: the same data with all relations, for another program. Every record has an ID; the tables name another record by its ID, its name or its number.
+- ${folders.belege}/: the supporting documents of your invoices, as you uploaded them. If you have not uploaded any supporting document, the folder is missing and ${belege} holds only the header row.
 - ${names.documents}/: the documents of your tenants, also payment reminders and reminders sent, and the PDFs of the rental contracts.
-- ${names.statements}/: the current PDF of each statement. The PDF the tenant received (PDF sent) is under ${names.documents}/.
+- ${names.statements}/: the current PDF of each statement. The PDF the tenant received (PDF sent) is under ${names.documents}/ if Dwello kept it when sending or before a change; otherwise it is the current PDF.
 
-Balance: positive is an amount due from the tenant, negative a refund. The balance is rounded to 5 centimes. Amount still outstanding: the balance minus the part payments in ${payments}.
+Balance: positive is an amount due from the tenant, negative a refund. The balance is rounded to 5 centimes. Already paid, Amount paid, Amount outstanding and the amounts in ${payments} have the sign of the balance: for a refund they are negative and show what you have refunded or still have to refund. Amount outstanding: the balance minus the part payments in ${payments}. For a replaced statement, Amount paid may also hold a balance that the next statement offset as carried over or that you settled by hand.
 
 ${agreed} lists for each rental contract the categories you have answered. If a category is missing, nothing has been answered for that contract yet, and Dwello does not bill it.
 
@@ -635,7 +678,7 @@ The log and the statements may name invoices and other records you have deleted 
 
 The file contains personal data of your tenants and invoice issuers. Keep it safe and delete it when you no longer need it.
 
-Dwello cannot read this file back in. To restore your data, use the backup under «Settings» › «Backup»: once it is set up, Dwello creates one every day.
+Dwello cannot read this file back in.
 `
 	};
 	return texts[language].replace(/\n/g, '\r\n');

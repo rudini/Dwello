@@ -4,12 +4,12 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { apartments, auditLog, documents, invoiceDocuments, invoices, rentalContracts, utilityStatements } from '../db/schema';
+import { apartments, auditLog, categories, configuration, distributionKeys, documents, heatingProfiles, invoiceDocuments, invoices, rentalContracts, utilityStatements } from '../db/schema';
 import { createRental } from './helpers/rental';
 import { callApi, sendJson } from './helpers/auth';
-import { idOf, insertInvoice } from './helpers/records';
+import { firstPredefined, idOf, insertInvoice } from './helpers/records';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { swissToday } from '../services/today';
 
@@ -126,6 +126,15 @@ describe('Alle Daten exportieren', () => {
 		);
 	});
 
+	it('sagt in der Anleitung, wann ein Ordner fehlt und wo das versendete PDF liegt, und verweist auf keinen Abschnitt «Sicherung» (Persona P-2, P-3, Review C-5)', async () => {
+		const readme = Buffer.from((await exportIn()).files[0].content, 'base64').toString();
+
+		expect(readme).toContain('Haben Sie keinen Beleg hochgeladen, fehlt der Ordner, und belege.csv hat nur die Kopfzeile.');
+		expect(readme).toContain('liegt unter dokumente/, sofern Dwello es beim Versand oder vor einer Änderung aufbewahrt hat; sonst ist es das aktuelle PDF.');
+		expect(readme).toContain('Jeder Datensatz hat eine ID; die Tabellen nennen einen anderen Datensatz mit seiner ID, seinem Namen oder seiner Nummer.');
+		expect(readme).not.toContain('Sicherung');
+	});
+
 	it('legt den Beleg mit Datum und Rechnungssteller in den Ordner der Belege und nennt ihn bei der Rechnung', async () => {
 		const exported = await exportIn();
 		const path = `belege/2024-03-31 Muster AG ${token} meier-q1.pdf`;
@@ -214,9 +223,78 @@ describe('Alle Daten exportieren', () => {
 		]);
 	});
 
+	it('nennt Sprache, Korrespondenzkanal, Art und Status eines Dokuments und die Verwaltungspauschale mit den Wörtern der Oberfläche (Fachreview 496-2 V-4, V-14)', async () => {
+		const [reminder] = await db
+			.insert(documents)
+			.values({ tenantId: rental.tenant, type: 'reminder', title: 'Zahlungserinnerung', fileName: 'mahnung.pdf', content: pdf('reminder'), channel: 'letter', status: 'to_send' })
+			.returning();
+		try {
+			const exported = await exportIn();
+
+			expect(rowsOf(exported, 'tabellen/mieter.csv').find((row) => row.ID === rental.tenant)).toMatchObject({ Sprache: 'Deutsch', Korrespondenzkanal: 'Per Brief' });
+			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row.ID === reminder.id)).toMatchObject({ Art: 'Mahnung', Kanal: 'Per Brief', Status: 'Zu versenden' });
+			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row['Mieter-ID'] === rental.tenant && row.Titel === 'Übergabeprotokoll')).toMatchObject({ Art: 'Hochgeladen', Kanal: null, Status: null });
+			expect(rowsOf(exported, 'tabellen/mietverträge.csv').find((row) => row.ID === rental.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Ja, zum Satz des Abrechnungslaufs' });
+		} finally {
+			await db.delete(documents).where(eq(documents.id, reminder.id));
+		}
+	});
+
+	it('nennt Verteilschlüssel, Heizprofile und Kategorien zuerst mit dem Namen in der Sprache der Oberfläche, die vordefinierten als «Vordefiniert» bzw. «Von Dwello» (Fachreview 496-2 V-14)', async () => {
+		const exported = await exportIn();
+		const [key] = await db.select().from(distributionKeys).where(eq(distributionKeys.id, await firstPredefined('distribution-keys')));
+		const [profile] = await db.select().from(heatingProfiles).where(eq(heatingProfiles.id, await firstPredefined('heating-profiles')));
+		const [category] = await db.select().from(categories).where(eq(categories.type, 'predefined')).limit(1);
+
+		expect(rowsOf(exported, 'tabellen/verteilschlüssel.csv').find((row) => row.ID === key.id)).toMatchObject({ Name: key.nameDE, Art: 'Vordefiniert' });
+		expect(rowsOf(exported, 'tabellen/heizprofile.csv').find((row) => row.ID === profile.id)).toMatchObject({ Name: profile.nameDE, Art: 'Vordefiniert' });
+		expect(rowsOf(exported, 'tabellen/kategorien.csv').find((row) => row.ID === category.id)).toMatchObject({ Name: category.nameDE, Art: 'Von Dwello' });
+	});
+
+	it('schreibt ja und nein als Wort, eine eigene Kategorie als «Eigene», die Konfidenz in % und die Zeit in Schweizer Zeit (Review 496-1 C-6)', async () => {
+		const [category] = await db.insert(categories).values({ name: `Eigene ${token}`, nameDE: `Eigene ${token}`, type: 'custom', isAllowedUtilityCost: false }).returning();
+		const [invoice] = await db.select().from(invoices).where(eq(invoices.buildingId, rental.building)).limit(1);
+		await db.update(invoices).set({ llmConfidence: '0.8530', wasManuallyOverridden: true }).where(eq(invoices.id, invoice.id));
+		// 10:30 UTC is 12:30 in Zürich in summer
+		const [entry] = await db.insert(auditLog).values({ action: 'statement_corrected', details: {}, occurredAt: new Date('2026-07-01T10:30:00Z') }).returning();
+		try {
+			const exported = await exportIn();
+
+			expect(rowsOf(exported, 'tabellen/kategorien.csv').find((row) => row.ID === category.id)).toMatchObject({ Art: 'Eigene', Umlagefähig: 'nein', Heizkosten: 'nein' });
+			expect(rowsOf(exported, 'tabellen/rechnungen.csv').find((row) => row.ID === invoice.id)).toMatchObject({ 'Konfidenz (%)': '85', 'Von Hand geändert': 'ja' });
+			expect(rowsOf(exported, 'tabellen/protokoll.csv').find((row) => row.ID === entry.id)).toMatchObject({ 'Datum und Uhrzeit': '2026-07-01 12:30' });
+		} finally {
+			await db.delete(auditLog).where(eq(auditLog.id, entry.id));
+			await db.delete(categories).where(eq(categories.id, category.id));
+		}
+	});
+
 	it('gibt die Einstellungen mit den Namen des Formulars heraus', async () => {
 		const settings = rowsOf(await exportIn(), 'tabellen/einstellungen.csv').map((row) => row.Einstellung);
 
 		expect(settings).toEqual(expect.arrayContaining(['Firmenname', 'IBAN', 'Zahlungsfrist (Tage)']));
+	});
+
+	it('nennt die Abrechnungsperiode, die Sprache und den Standard-Verteilschlüssel und das Standard-Heizprofil mit Namen wie das Formular (Fachreview 496-2 V-14)', async () => {
+		const [key, profile] = [await firstPredefined('distribution-keys'), await firstPredefined('heating-profiles')];
+		const [{ nameDE: keyName }] = await db.select().from(distributionKeys).where(eq(distributionKeys.id, key));
+		const [{ nameDE: profileName }] = await db.select().from(heatingProfiles).where(eq(heatingProfiles.id, profile));
+		const keys = ['default_distribution_key_id', 'default_heating_profile_id'];
+		const before = await db.select().from(configuration).where(inArray(configuration.key, keys));
+		await db.delete(configuration).where(inArray(configuration.key, keys));
+		await db.insert(configuration).values([{ key: keys[0], value: key }, { key: keys[1], value: profile }]);
+		try {
+			const settings = Object.fromEntries(rowsOf(await exportIn(), 'tabellen/einstellungen.csv').map((row) => [row.Einstellung, row.Wert]));
+
+			expect(settings).toMatchObject({
+				Abrechnungsperiode: 'Kalenderjahr (Januar – Dezember)',
+				Sprache: 'Deutsch',
+				'Standard-Verteilschlüssel': keyName,
+				'Standard-Heizprofil': profileName
+			});
+		} finally {
+			await db.delete(configuration).where(inArray(configuration.key, keys));
+			if (before.length) await db.insert(configuration).values(before);
+		}
 	});
 });
