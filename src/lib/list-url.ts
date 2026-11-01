@@ -14,8 +14,11 @@ export function listPageUrl(url: URL, page: number): string {
 
 type Navigation = { type: string; from: { url: URL } | null; to: { url: URL } | null };
 
-/** The list was searched or filtered on its own page (a GET form, or a filter changing the URL) */
-export function isListSearch({ type, from, to }: Navigation): boolean {
+/**
+ * The list moved on its own page: searched or filtered (a GET form, also with unchanged filters), or another page,
+ * the reset link of an empty list, the browser's back and forward buttons (#681)
+ */
+export function isListNavigation({ type, from, to }: Navigation): boolean {
 	if (!from || !to || from.url.pathname !== to.url.pathname) return false;
-	return type === 'form' || (type === 'goto' && from.url.search !== to.url.search);
+	return type === 'form' || from.url.search !== to.url.search;
 }

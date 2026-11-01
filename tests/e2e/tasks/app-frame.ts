@@ -41,3 +41,4 @@ export const goToOverviewWhileItFails: Activity = (actor) =>
 		// the error page of the failed load, not the 404 page it came from
 		Wait.until(text('Versuchen Sie es später erneut.'))
 	);
+export const goBackInBrowser = Browser.back;

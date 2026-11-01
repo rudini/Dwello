@@ -8,6 +8,7 @@ import {
 	invoiceSearchInput,
 	invoiceValidityFilter,
 	newInvoiceButton,
+	showAllInvoicesLink,
 	viewInvoiceButton
 } from '../targets/invoices';
 
@@ -36,3 +37,6 @@ export const filterInvoices =
 export const startNewInvoice = Click.on(newInvoiceButton);
 export const viewInvoice = (supplier: string) => Click.on(viewInvoiceButton(supplier));
 export const editInvoice = (supplier: string) => Click.on(editInvoiceButton(supplier));
+
+export const showAllInvoices: Activity = (actor) =>
+	actor.attemptsTo(Click.on(showAllInvoicesLink), Wait.forUrl((url) => url.search === ''));
