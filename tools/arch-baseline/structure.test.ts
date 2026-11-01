@@ -304,6 +304,13 @@ describe('Testabdeckung (statisch)', () => {
 		expect([m['be:services/a'].lights.tests, m['be:routes/a'].lights.tests, m['db:schema'].lights.tests]).toEqual(['yellow', 'red', 'green']);
 		expect(a.kpis.find((k) => k.key === 'reach')).toMatchObject({ value: 80, light: 'yellow' });
 	});
+
+	it('zeigt ohne Daten von fallow zur Testabdeckung «n/a» statt einer grünen Ampel', () => {
+		const a = analyze(input);
+		expect(a.modules.map((m) => m.untested)).toEqual(a.modules.map(() => null));
+		const row = report(a).match(/<tr class="module"><td>be:routes\/a<\/td>.*?<\/tr>/)![0];
+		expect(row.split('<td>')[7]).toBe('n/a</td>');
+	});
 });
 
 describe('Versteckte Kopplung', () => {
@@ -349,7 +356,9 @@ describe('report: DSM aufklappen', () => {
 			'backend/src/routes/a.ts → backend/src/services/a.ts',
 			'backend/src/routes/a.ts → backend/src/services/types.ts'
 		]);
-		expect(html.match(/<details id="m-be-services-a">[\s\S]*?<\/details>/)![0]).toContain('<code>backend/src/services/types.ts</code>');
+		const details = html.match(/<details id="m-be-services-a">[\s\S]*?<\/details>/)![0];
+		expect(details).toContain('<code>backend/src/services/types.ts</code>');
+		expect(details).toContain('<th>Code file (.ts, .svelte)</th>');
 		expect(html).not.toContain('tests/e2e/x.ts');
 	});
 });

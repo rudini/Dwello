@@ -33,7 +33,7 @@ export type Module = {
 	findings: number;
 	hotspot: number;
 	xs: number;
-	untested: number;
+	untested: number | null; // null: fallow gave no coverage gaps
 	hidden: number;
 	lights: { distance: Light; complexity: Light; hotspot: Light; fat: Light; tests: Light; coupling: Light };
 	light: Light;
@@ -156,13 +156,13 @@ export function analyze(input: Input): Analysis {
 		const { lines, excess, fat } = excessOf(name, paths, ce);
 		excessLines += excess;
 		const hidden = hiddenPairs.filter((p) => p.includes(name)).length;
-		const untested = untestedOf(paths);
+		const untested = input.gaps ? untestedOf(paths) : null;
 		const lights = {
 			distance: ca < LIMITS.painUsers && d > LIMITS.distance[1] ? 'yellow' : scale(d, LIMITS.distance),
 			complexity: severities.some((s) => s === 'critical' || s === 'high') ? 'red' : severities.length ? 'yellow' : 'green',
 			hotspot: scale(hotspot, LIMITS.hotspot),
 			fat,
-			tests: scale(untested, LIMITS.untested),
+			tests: scale(untested ?? 0, LIMITS.untested),
 			coupling: scale(hidden, LIMITS.hidden)
 		} satisfies Module['lights'];
 		const xs = share(excess, lines);
@@ -354,7 +354,7 @@ function details(analysis: Analysis): string {
 				([to, es]) =>
 					`<h4 id="dep-${id(m.name)}--${id(to)}">→ ${esc(to)}</h4><ul>${es.map((e) => `<li><code>${esc(e.from)}</code> → <code>${esc(e.to)}</code></li>`).join('')}</ul>`
 			);
-			return `<details id="m-${id(m.name)}"><summary>${esc(m.name)} ${badge(m.light)} · ${m.files} files</summary><table><tr><th>File</th><th>Lines</th><th></th><th></th></tr>${files.join('')}</table>${deps.join('')}</details>`;
+			return `<details id="m-${id(m.name)}"><summary>${esc(m.name)} ${badge(m.light)} · ${m.files} files</summary><table><tr><th>Code file (.ts, .svelte)</th><th>Lines</th><th></th><th></th></tr>${files.join('')}</table>${deps.join('')}</details>`;
 		})
 		.join('\n');
 }
@@ -376,7 +376,7 @@ export function report(analysis: Analysis, history: Snapshot[] = []): string {
 	const rows = sorted
 		.map(
 			(m) =>
-				`<tr class="module"><td>${esc(m.name)}</td><td>${badge(m.light)}</td><td>${badge(m.lights.distance, String(m.d))}</td><td>${badge(m.lights.complexity, String(m.findings))}</td><td>${badge(m.lights.hotspot, String(m.hotspot))}</td><td>${badge(m.lights.fat, String(m.xs))}</td><td>${badge(m.lights.tests, String(m.untested))}</td><td>${badge(m.lights.coupling, String(m.hidden))}</td><td>${m.level}</td><td>${m.files}</td><td>${m.ca}</td><td>${m.ce}</td><td>${m.i}</td><td>${m.a}</td></tr>`
+				`<tr class="module"><td>${esc(m.name)}</td><td>${badge(m.light)}</td><td>${badge(m.lights.distance, String(m.d))}</td><td>${badge(m.lights.complexity, String(m.findings))}</td><td>${badge(m.lights.hotspot, String(m.hotspot))}</td><td>${badge(m.lights.fat, String(m.xs))}</td><td>${m.untested === null ? 'n/a' : badge(m.lights.tests, String(m.untested))}</td><td>${badge(m.lights.coupling, String(m.hidden))}</td><td>${m.level}</td><td>${m.files}</td><td>${m.ca}</td><td>${m.ce}</td><td>${m.i}</td><td>${m.a}</td></tr>`
 		)
 		.join('');
 	const fns = functions.map((f) => `<tr><td><code>${esc(f.path)}</code></td><td><code>${esc(f.name)}</code></td><td>${f.cyclomatic}</td><td>${f.cognitive}</td></tr>`).join('');
