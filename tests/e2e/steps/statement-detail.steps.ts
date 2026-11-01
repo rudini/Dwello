@@ -31,6 +31,7 @@ import {
 	paidDateInvalid,
 	paidDateProblem,
 	resetOffers,
+	reminderOffers,
 	pdfRefusalText,
 	pdfToView,
 	recipient,
@@ -932,4 +933,10 @@ When('der Liegenschaftsverwalter das neue PDF als versendet markiert', async ({ 
 // #968: the Verlauf only grows (Persona Dr. Weber 534-2 P-1)
 Then('nennt der Verlauf zuerst das PDF des Versands, dann den Versand und dann das neue PDF', async ({ verwalter }) => {
 	await verwalter.sees(history).toMatch(/PDF erstellt.*Versendet per Brief.*Neues PDF erstellt/);
+});
+
+// Code-Review 999b C-4: the four actions of the header are all there, not only no sideways scrolling
+Then('bietet die Detailseite eine Mahnung und das Zurücksetzen der Zahlung an', async ({ verwalter }) => {
+	await verwalter.sees(reminderOffers).toBe(1);
+	await verwalter.sees(resetOffers).toBe(1);
 });

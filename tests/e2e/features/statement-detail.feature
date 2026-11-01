@@ -323,6 +323,7 @@ Funktionalität: Abrechnungsdetail
     Und für die Abrechnung 2024 von "Eva Frei" sind vor 5 Tagen "10.00" Franken eingegangen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann hat die Abrechnung den Status "Überfällig"
+    Und bietet die Detailseite eine Mahnung und das Zurücksetzen der Zahlung an
     Und ist der Seitentitel lesbar
     Und scrollt die Seite nicht seitwärts
 

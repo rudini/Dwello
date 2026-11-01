@@ -148,6 +148,7 @@ export const correctPaidAmount = Value.of(correctPaidAmountInput);
 export const correctPaidAmountHelp = Accessible.descriptionOf(correctPaidAmountInput);
 export const correctPaidAmountAsked = Count.of(correctPaidAmountInput);
 export const resetOffers = Count.of(resetPaymentButton);
+export const reminderOffers = Count.of(reminderButton);
 
 // The page's usual spacing between the status line and the first panel, no empty items in between
 export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown);
