@@ -14,6 +14,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, utilityStatementLineItems } from '../db/schema';
 import { roundToRappen } from './pdf-format';
+import type { CalculatedLineItem } from './calculation.service';
 import { calculateStatement, listStatements } from './statement.service';
 import { swissToday } from './today';
 import { counting, isReplaced } from './counting-statements';
@@ -354,7 +355,7 @@ async function storedHeating(ids: string[]) {
 }
 
 /**
- * #508: the heating sum of each apartment a sent statement under the old rule names, once per apartment (on its first
+ * #508: the heating sum of each apartment a sent statement under the old rule names, once per apartment (on its latest
  * such statement): every contract with Mietstage under today's rule gives the tenants' part; the statements of the
  * period not replaced count as stored, the contracts the run bills as it would bill them
  */
@@ -362,8 +363,9 @@ async function heatingSumsOf(run: { period: Range; heatingProfileId: string | nu
 	const planned = planRun(run.period, contracts, statements).contracts;
 	const same = (s: Placed) => s.periodStart === run.period.start && s.periodEnd === run.period.end && !isReplaced(s);
 	const stored = await storedHeating(statements.filter(same).map((s) => s.id));
-	// the first statement under the old rule of each apartment
-	const apartments = [...new Map([...sent].reverse().map((id) => [statements.find((s) => s.id === id)!.apartmentId, id])).entries()];
+	// per apartment its latest statement under the old rule, in the order of listStatements (code review 508b-1 C-4)
+	const named = statements.filter((s) => sent.includes(s.id)).reverse();
+	const apartments = [...new Map(named.map((s) => [s.apartmentId, s.id])).entries()];
 	return Promise.all(
 		apartments.map(async ([apartmentId, statementId]) => {
 			const rented = await Promise.all(
@@ -376,7 +378,10 @@ async function heatingSumsOf(run: { period: Range; heatingProfileId: string | nu
 					})
 			);
 			// per heating category the apartment's share, from any contract that agrees it (Fachreview 508-1 V-3, code review 508-1 C-3)
-			const shares = new Map(rented.flatMap(({ items }) => items.map((item) => [item.categoryId ?? item.description, item.apartmentShare] as const)));
+			// and per distribution key: a category's invoices under two keys are two positions (#528, code review 508b-1 C-6)
+			const shares = new Map(rented.flatMap(({ items }) => items.map((item) => [`${item.categoryId ?? item.description}/${item.distributionKeyId}`, item.apartmentShare] as const)));
+			const categoriesOf = (items: CalculatedLineItem[]) => new Set(items.map((item) => item.categoryId ?? item.description));
+			const heated = categoriesOf(rented.flatMap(({ items }) => items));
 			const tenants = rented.reduce((sum, { items }) => sum + sumOf(items, 'tenantShare'), 0);
 			return {
 				statementId,
@@ -384,7 +389,7 @@ async function heatingSumsOf(run: { period: Range; heatingProfileId: string | nu
 					costs: roundToRappen([...shares.values()].reduce((sum, share) => sum + share, 0)),
 					tenants,
 					billed: rented.reduce((sum, { items, own }) => sum + (own ? (stored.get(own.id) ?? 0) : sumOf(items, 'tenantShare')), 0),
-					unagreed: rented.some(({ items }) => items.length < shares.size)
+					unagreed: rented.some(({ items }) => categoriesOf(items).size < heated.size)
 				})
 			};
 		})
