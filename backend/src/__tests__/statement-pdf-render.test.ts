@@ -1065,7 +1065,7 @@ describe('PDF nach einer Teilzahlung', () => {
 		const error = spyOn(console, 'error').mockImplementation(() => {});
 		try {
 			const { flowing } = await textOf({ ...due, paidSoFar: 84.15 });
-			expect(flowing).toMatch(/Betrag CHF 100\.00/);
+			expect(flowing).toMatch(/Zahlungsinformationen Konto .+ Betrag CHF 100\.00/); // code review 1003b-1 C-3
 			expect(flowing).not.toMatch(/Betrag CHF 184\.15/);
 		} finally {
 			qr.mockRestore();
