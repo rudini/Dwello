@@ -570,9 +570,9 @@ export async function exportAllData(language: Language) {
 	// the entry's text is the UI's: the BFF fills it in (column «Eintrag»)
 	table(
 		'log',
-		['id', 'occurredAt', 'entry', 'type', 'details'],
+		['id', 'occurredAt', 'entry', 'details'],
 		// the raw query answers the time as text in UTC, not as a Date (C-6): in Swiss time like every other column
-		auditLog.map((entry) => ({ ...entry, occurredAt: new Date(entry.occurredAt), type: entry.action, details: JSON.stringify(entry.details) }))
+		auditLog.map((entry) => ({ ...entry, occurredAt: new Date(entry.occurredAt), details: JSON.stringify(entry.details) }))
 	);
 	table(
 		'settings',
@@ -593,6 +593,8 @@ function readme(language: Language, folders: (typeof FILES)[Language], names: (t
 	const agreed = `${folders.agreed}.csv`;
 	const payments = `${folders.payments}.csv`;
 	const belege = `${folders.belegeTable}.csv`;
+	const log = `${folders.log}.csv`;
+	const contracts = `${folders.contracts}.csv`;
 	const texts = {
 		de: `Dwello – Export aller Daten
 Erstellt am ${day} um ${time} Uhr
@@ -603,12 +605,14 @@ Inhalt
 - ${t}/: eine Tabelle je Art von Daten (Gebäude, Wohnungen, Mieter, Mietverträge, Rechnungen, Abrechnungen, Kategorien, Verteilschlüssel, Heizprofile, Protokoll und weitere). Öffnen Sie sie mit Excel oder einem anderen Tabellenprogramm. Die Spalten sind durch Strichpunkte getrennt; Beträge in Franken mit Punkt (1234.50), Datum als Jahr-Monat-Tag (2026-03-31).
 - ${names.data}: dieselben Daten mit allen Beziehungen, für ein anderes Programm. Jeder Datensatz hat eine ID; die Tabellen nennen einen anderen Datensatz mit seiner ID, seinem Namen oder seiner Nummer.
 - ${folders.belege}/: die Belege Ihrer Rechnungen, wie Sie sie hochgeladen haben. Haben Sie keinen Beleg hochgeladen, fehlt der Ordner, und ${belege} hat nur die Kopfzeile.
-- ${names.documents}/: die Dokumente zu Ihren Mietern, auch versendete Zahlungserinnerungen und Mahnungen, und die PDF der Mietverträge.
+- ${names.documents}/: die Dokumente zu Ihren Mietern, auch versendete Zahlungserinnerungen und Mahnungen, und die PDF der Mietverträge. Haben Sie zu einem Mietvertrag kein PDF gespeichert, ist «Mietvertrag im Export» in ${contracts} leer. Gibt es weder Dokumente noch PDF der Mietverträge, fehlt der Ordner.
 - ${names.statements}/: das aktuelle PDF jeder Abrechnung. Das PDF, das der Mieter erhalten hat (Versendetes PDF), liegt unter ${names.documents}/. Hat Dwello beim Versand kein PDF abgelegt, liegt dort nach einer Änderung das PDF vor der Änderung, und ohne Änderung ist es das aktuelle PDF; ob der Mieter genau dieses PDF erhalten hat, ist dann nicht bekannt.
 
-Saldo: positiv ist eine Nachzahlung des Mieters, negativ eine Rückerstattung. Der Saldo ist auf 5 Rappen gerundet. Bereits bezahlt, Bezahlter Betrag, Offener Betrag und die Beträge in ${payments} haben das Vorzeichen des Saldos: Bei einer Rückerstattung sind sie negativ und nennen, was Sie zurückerstattet haben oder noch zurückerstatten. Offener Betrag: Saldo minus die Teilzahlungen in ${payments}. Bei einer ersetzten Abrechnung kann Bezahlter Betrag auch einen Saldo enthalten, den die nächste Abrechnung als Übertrag verrechnet hat oder den Sie von Hand ausgeglichen haben.
+Saldo: positiv ist eine Nachzahlung des Mieters, negativ eine Rückerstattung. Der Saldo ist auf 5 Rappen gerundet. Bereits bezahlt, Bezahlter Betrag, Offener Betrag und die Beträge in ${payments} haben das Vorzeichen des Saldos: Bei einer Rückerstattung sind sie negativ und nennen, was Sie zurückerstattet haben oder noch zurückerstatten. Offener Betrag: bei einer versendeten oder überfälligen Abrechnung der Saldo minus die Teilzahlungen in ${payments}, bei einer bezahlten, erledigten oder ersetzten 0.00. Bereits bezahlt nennt bei einer berichtigten Abrechnung, was der Mieter auf die ersetzte Abrechnung schon bezahlt hat; sonst steht dort 0.00. Bezahlter Betrag ist die Summe der Zahlungen in ${payments} und bleibt leer, solange keine Zahlung festgehalten ist. Bei einem Entwurf sind Bezahlter Betrag und Offener Betrag leer, weil er noch nicht versendet ist. Bei einer ersetzten Abrechnung kann Bezahlter Betrag auch einen Saldo enthalten, den die nächste Abrechnung als Übertrag verrechnet hat oder den Sie von Hand ausgeglichen haben.
 
 ${agreed} nennt je Mietvertrag die Kategorien, zu denen Sie etwas angegeben haben. Fehlt eine Kategorie, ist beim Mietvertrag noch nichts angegeben, und Dwello rechnet sie nicht ab.
+
+${log} nennt jeden Eintrag in Worten; «Angaben (JSON)» enthält die gespeicherten Angaben des Eintrags für ein anderes Programm.
 
 Das Protokoll und die Abrechnungen können Rechnungen und andere Datensätze nennen, die Sie inzwischen gelöscht haben; sie halten fest, was damals galt.
 
@@ -625,12 +629,14 @@ Contenu
 - ${t}/\u00a0: un tableau par type de données (immeubles, appartements, locataires, contrats de bail, factures, décomptes, catégories, clés de répartition, profils de chauffage, journal et autres). Ouvrez-les avec Excel ou un autre tableur. Les colonnes sont séparées par des points-virgules\u00a0; montants en francs avec un point (1234.50), dates sous la forme année-mois-jour (2026-03-31).
 - ${names.data}\u00a0: les mêmes données avec toutes leurs relations, pour un autre programme. Chaque enregistrement a un ID\u00a0; les tableaux mentionnent un autre enregistrement par son ID, son nom ou son numéro.
 - ${folders.belege}/\u00a0: les pièces justificatives de vos factures, telles que vous les avez téléversées. Si vous n’avez téléversé aucune pièce justificative, le dossier manque et ${belege} ne contient que la ligne d’en-tête.
-- ${names.documents}/\u00a0: les documents de vos locataires, y compris les rappels de paiement et les rappels envoyés, et les PDF des contrats de bail.
+- ${names.documents}/\u00a0: les documents de vos locataires, y compris les rappels de paiement et les rappels envoyés, et les PDF des contrats de bail. Si vous n’avez enregistré aucun PDF pour un contrat de bail, «\u00a0Contrat de bail dans l’exportation\u00a0» est vide dans ${contracts}. S’il n’y a ni documents ni PDF de contrats de bail, le dossier manque.
 - ${names.statements}/\u00a0: le PDF actuel de chaque décompte. Le PDF que le locataire a reçu (PDF envoyé) se trouve sous ${names.documents}/. Si Dwello n’a pas conservé de PDF lors de l’envoi, vous y trouvez après une modification le PDF avant la modification, et sans modification c’est le PDF actuel\u00a0; on ne sait alors pas si le locataire a reçu exactement ce PDF.
 
-Solde\u00a0: positif, c’est un montant à payer par le locataire\u00a0; négatif, un remboursement. Le solde est arrondi à 5 centimes. Déjà payé, Montant payé, Montant dû et les montants de ${payments} ont le signe du solde\u00a0: pour un remboursement, ils sont négatifs et indiquent ce que vous avez remboursé ou devez encore rembourser. Montant dû\u00a0: solde moins les paiements partiels de ${payments}. Pour un décompte remplacé, Montant payé peut aussi contenir un solde que le décompte suivant a compensé comme report ou que vous avez soldé manuellement.
+Solde\u00a0: positif, c’est un montant à payer par le locataire\u00a0; négatif, un remboursement. Le solde est arrondi à 5 centimes. Déjà payé, Montant payé, Montant dû et les montants de ${payments} ont le signe du solde\u00a0: pour un remboursement, ils sont négatifs et indiquent ce que vous avez remboursé ou devez encore rembourser. Montant dû\u00a0: pour un décompte envoyé ou en retard, le solde moins les paiements partiels de ${payments}\u00a0; pour un décompte payé, clôturé ou remplacé, 0.00. Déjà payé indique, pour un décompte rectifié, ce que le locataire a déjà payé sur le décompte remplacé\u00a0; sinon, il indique 0.00. Montant payé est la somme des paiements de ${payments} et reste vide tant qu’aucun paiement n’est enregistré. Pour un brouillon, Montant payé et Montant dû sont vides, car il n’est pas encore envoyé. Pour un décompte remplacé, Montant payé peut aussi contenir un solde que le décompte suivant a compensé comme report ou que vous avez soldé manuellement.
 
 ${agreed} indique pour chaque contrat de bail les catégories pour lesquelles vous avez fait une indication. Si une catégorie manque, rien n’est encore indiqué pour ce contrat et Dwello ne la décompte pas.
+
+${log} indique chaque entrée en toutes lettres\u00a0; «\u00a0Indications (JSON)\u00a0» contient les indications enregistrées de l’entrée, pour un autre programme.
 
 Le journal et les décomptes peuvent mentionner des factures et d’autres données que vous avez supprimées depuis\u00a0; ils consignent ce qui valait alors.
 
@@ -647,12 +653,14 @@ Contenuto
 - ${t}/: una tabella per tipo di dati (immobili, appartamenti, inquilini, contratti di locazione, fatture, conteggi, categorie, chiavi di riparto, profili di riscaldamento, registro e altri). Le apra con Excel o con un altro programma di fogli di calcolo. Le colonne sono separate da punti e virgola; importi in franchi con il punto (1234.50), date nella forma anno-mese-giorno (2026-03-31).
 - ${names.data}: gli stessi dati con tutte le relazioni, per un altro programma. Ogni record ha un ID; le tabelle indicano un altro record con il suo ID, il suo nome o il suo numero.
 - ${folders.belege}/: i giustificativi delle sue fatture, come li ha caricati. Se non ha caricato alcun giustificativo, la cartella manca e ${belege} contiene solo la riga d’intestazione.
-- ${names.documents}/: i documenti dei suoi inquilini, anche i promemoria di pagamento e i solleciti inviati, e i PDF dei contratti di locazione.
+- ${names.documents}/: i documenti dei suoi inquilini, anche i promemoria di pagamento e i solleciti inviati, e i PDF dei contratti di locazione. Se per un contratto di locazione non ha salvato alcun PDF, «Contratto di locazione nell’esportazione» è vuoto in ${contracts}. Se non ci sono né documenti né PDF dei contratti di locazione, la cartella manca.
 - ${names.statements}/: il PDF attuale di ogni conteggio. Il PDF che l’inquilino ha ricevuto (PDF inviato) si trova in ${names.documents}/. Se Dwello non ha conservato un PDF all’invio, dopo una modifica vi trova il PDF prima della modifica, e senza modifica è il PDF attuale; non si sa allora se l’inquilino ha ricevuto proprio questo PDF.
 
-Saldo: positivo è un importo dovuto dall’inquilino, negativo un rimborso. Il saldo è arrotondato a 5 centesimi. Già pagato, Importo pagato, Importo dovuto e gli importi in ${payments} hanno il segno del saldo: per un rimborso sono negativi e indicano ciò che ha rimborsato o deve ancora rimborsare. Importo dovuto: saldo meno i pagamenti parziali in ${payments}. Per un conteggio sostituito, Importo pagato può contenere anche un saldo che il conteggio successivo ha compensato come riporto o che Lei ha saldato manualmente.
+Saldo: positivo è un importo dovuto dall’inquilino, negativo un rimborso. Il saldo è arrotondato a 5 centesimi. Già pagato, Importo pagato, Importo dovuto e gli importi in ${payments} hanno il segno del saldo: per un rimborso sono negativi e indicano ciò che ha rimborsato o deve ancora rimborsare. Importo dovuto: per un conteggio inviato o scaduto, il saldo meno i pagamenti parziali in ${payments}; per un conteggio pagato, chiuso o sostituito, 0.00. Già pagato indica, per un conteggio rettificato, ciò che l’inquilino ha già pagato sul conteggio sostituito; altrimenti vi figura 0.00. Importo pagato è la somma dei pagamenti in ${payments} e resta vuoto finché nessun pagamento è registrato. Per una bozza, Importo pagato e Importo dovuto sono vuoti, perché non è ancora inviata. Per un conteggio sostituito, Importo pagato può contenere anche un saldo che il conteggio successivo ha compensato come riporto o che Lei ha saldato manualmente.
 
 ${agreed} indica per ogni contratto di locazione le categorie per cui ha dato un’indicazione. Se una categoria manca, per il contratto non è ancora indicato nulla e Dwello non la conteggia.
+
+${log} indica ogni voce a parole; «Indicazioni (JSON)» contiene le indicazioni salvate della voce, per un altro programma.
 
 Il registro e i conteggi possono menzionare fatture e altri dati che ha eliminato nel frattempo; registrano ciò che valeva allora.
 
@@ -669,12 +677,14 @@ Contents
 - ${t}/: one table per kind of data (buildings, apartments, tenants, rental contracts, invoices, statements, categories, distribution keys, heating profiles, log and others). Open them with Excel or another spreadsheet program. The columns are separated by semicolons; amounts in francs with a point (1234.50), dates as year-month-day (2026-03-31).
 - ${names.data}: the same data with all relations, for another program. Every record has an ID; the tables name another record by its ID, its name or its number.
 - ${folders.belege}/: the supporting documents of your invoices, as you uploaded them. If you have not uploaded any supporting document, the folder is missing and ${belege} holds only the header row.
-- ${names.documents}/: the documents of your tenants, also payment reminders and reminders sent, and the PDFs of the rental contracts.
+- ${names.documents}/: the documents of your tenants, also payment reminders and reminders sent, and the PDFs of the rental contracts. If you have not stored a PDF for a rental contract, «Rental contract in the export» is empty in ${contracts}. If there are neither documents nor PDFs of rental contracts, the folder is missing.
 - ${names.statements}/: the current PDF of each statement. The PDF the tenant received (PDF sent) is under ${names.documents}/. If Dwello kept no PDF when sending, you find the PDF before the change there after a change, and without a change it is the current PDF; whether the tenant received exactly this PDF is then not known.
 
-Balance: positive is an amount due from the tenant, negative a refund. The balance is rounded to 5 centimes. Already paid, Amount paid, Amount outstanding and the amounts in ${payments} have the sign of the balance: for a refund they are negative and show what you have refunded or still have to refund. Amount outstanding: the balance minus the part payments in ${payments}. For a replaced statement, Amount paid may also hold a balance that the next statement offset as carried over or that you settled by hand.
+Balance: positive is an amount due from the tenant, negative a refund. The balance is rounded to 5 centimes. Already paid, Amount paid, Amount outstanding and the amounts in ${payments} have the sign of the balance: for a refund they are negative and show what you have refunded or still have to refund. Amount outstanding: for a sent or overdue statement, the balance minus the part payments in ${payments}; for a paid, closed or replaced statement, 0.00. Already paid shows, for a corrected statement, what the tenant had already paid on the replaced statement; otherwise it is 0.00. Amount paid is the sum of the payments in ${payments} and stays empty as long as no payment is recorded. For a draft, Amount paid and Amount outstanding are empty, because it has not been sent yet. For a replaced statement, Amount paid may also hold a balance that the next statement offset as carried over or that you settled by hand.
 
 ${agreed} lists for each rental contract the categories you have answered. If a category is missing, nothing has been answered for that contract yet, and Dwello does not bill it.
+
+${log} names each entry in words; «Details (JSON)» holds the stored details of the entry, for another program.
 
 The log and the statements may name invoices and other records you have deleted since; they record what applied at the time.
 

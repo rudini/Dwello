@@ -23,8 +23,8 @@
 		{
 			"path": "tabellen/protokoll.csv",
 			"rows": [
-				["ID", "Datum und Uhrzeit", "Eintrag", "Art", "Angaben (JSON)"],
-				["a1", "2026-10-15 11:00", null, "statement_corrected", "{\"number\":\"NK-2025-0002\"}"]
+				["ID", "Datum und Uhrzeit", "Eintrag", "Angaben (JSON)"],
+				["a1", "2026-10-15 11:00", null, "{\"number\":\"NK-2025-0002\"}"]
 			]
 		}
 	],

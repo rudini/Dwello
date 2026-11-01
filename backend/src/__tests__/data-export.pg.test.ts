@@ -120,7 +120,7 @@ describe('Alle Daten exportieren', () => {
 		const exported = await exportIn();
 
 		expect(exported.files[0].path).toBe('README.txt');
-		expect(Buffer.from(exported.files[0].content, 'base64').toString()).toContain('Offener Betrag: Saldo minus die Teilzahlungen in zahlungen.csv.');
+		expect(Buffer.from(exported.files[0].content, 'base64').toString()).toContain('Offener Betrag: bei einer versendeten oder überfälligen Abrechnung der Saldo minus die Teilzahlungen in zahlungen.csv, bei einer bezahlten, erledigten oder ersetzten 0.00.');
 		expect(exported.tables.map((table) => table.path)).toEqual(
 			['gebäude', 'wohnungen', 'mieter', 'mietverträge', 'akonto', 'vereinbarte-nebenkosten', 'rechnungen', 'belege', 'tankbestände', 'abrechnungen', 'abrechnungspositionen', 'zahlungen', 'dokumente', 'kategorien', 'verteilschlüssel', 'heizprofile', 'protokoll', 'einstellungen'].map((name) => `tabellen/${name}.csv`)
 		);
@@ -133,6 +133,15 @@ describe('Alle Daten exportieren', () => {
 		expect(readme).toContain('ob der Mieter genau dieses PDF erhalten hat, ist dann nicht bekannt.');
 		expect(readme).toContain('Jeder Datensatz hat eine ID; die Tabellen nennen einen anderen Datensatz mit seiner ID, seinem Namen oder seiner Nummer.');
 		expect(readme).not.toContain('Sicherung');
+	});
+
+	it('erklärt in der Anleitung Bereits bezahlt, leere Beträge, die Angaben des Protokolls und fehlende PDF der Mietverträge (Persona 496b P-1 bis P-3, Review 496b C-3)', async () => {
+		const readme = Buffer.from((await exportIn()).files[0].content, 'base64').toString();
+
+		expect(readme).toContain('Bereits bezahlt nennt bei einer berichtigten Abrechnung, was der Mieter auf die ersetzte Abrechnung schon bezahlt hat; sonst steht dort 0.00.');
+		expect(readme).toContain('Bezahlter Betrag ist die Summe der Zahlungen in zahlungen.csv und bleibt leer, solange keine Zahlung festgehalten ist. Bei einem Entwurf sind Bezahlter Betrag und Offener Betrag leer, weil er noch nicht versendet ist.');
+		expect(readme).toContain('protokoll.csv nennt jeden Eintrag in Worten; «Angaben (JSON)» enthält die gespeicherten Angaben des Eintrags für ein anderes Programm.');
+		expect(readme).toContain('Haben Sie zu einem Mietvertrag kein PDF gespeichert, ist «Mietvertrag im Export» in mietverträge.csv leer. Gibt es weder Dokumente noch PDF der Mietverträge, fehlt der Ordner.');
 	});
 
 	it('legt den Beleg mit Datum und Rechnungssteller in den Ordner der Belege und nennt ihn bei der Rechnung', async () => {
@@ -198,9 +207,11 @@ describe('Alle Daten exportieren', () => {
 
 			expect(exported.logTable).toBe('tabellen/protokoll.csv');
 			expect(exported.data.auditLog).toContainEqual(expect.objectContaining({ id: entry.id, action: 'statement_corrected' }));
-			expect(rowsOf(exported, 'tabellen/protokoll.csv').find((row) => row.ID === entry.id)).toMatchObject({
+			// no column with the code: «Eintrag» names it in words (Persona 496b P-1)
+			expect(rowsOf(exported, 'tabellen/protokoll.csv').find((row) => row.ID === entry.id)).toEqual({
+				ID: entry.id,
+				'Datum und Uhrzeit': expect.any(String),
 				Eintrag: null,
-				Art: 'statement_corrected',
 				'Angaben (JSON)': JSON.stringify({ number: `NK-${token}` })
 			});
 		} finally {
