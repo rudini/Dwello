@@ -320,7 +320,7 @@ payment_deadline       DATE                    -- Zahlungsfrist
 paid_date              DATE                    -- from the end of the Abrechnungsperiode up to today (#138, #448; before the Abrechnungsdatum after a confirmation in the UI)
 paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 for a Saldo below CHF 5 settled under #94 (sent before #448); on a replaced sent or overdue statement «Bereits bezahlt», a refund negative (#448)
 payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount, part } (#92; part: a part payment, #999, absent before)
-payments               JSONB   NOT NULL DEFAULT '[]' -- recorded payments, a part payment too: { date, amount }, amount signed as the Saldo; paid_amount their sum (#959)
+payments               JSONB   NOT NULL DEFAULT '[]' -- recorded payments, a part payment too: { date, amount, recordedAt }, amount signed as the Saldo, recordedAt when it was entered (#999, absent before); paid_amount their sum (#959); a reset sets payment_recorded_at to the recordedAt of the payment that stays
 payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
 replaces_id            UUID → utility_statements(id) -- a berichtigte Abrechnung: the statement it replaces (#120, unique)
 prior_payments         DECIMAL(12,2) NOT NULL DEFAULT 0 -- paid on the replaced statement and its own replaced ones; a refund paid negative (#120)

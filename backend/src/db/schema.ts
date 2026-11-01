@@ -432,7 +432,7 @@ export type HeatingSources = { de: string; fr: string | null; it: string | null;
 /** A payment taken back (#92): the day of the reset and what it cleared */
 export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: string | null; part?: boolean }; // part: a part payment (#999), absent before
 /** A payment recorded on a statement, a part payment too (#959): the amount with the sign of the Saldo */
-export type Payment = { date: string; amount: string };
+export type Payment = { date: string; amount: string; recordedAt?: string }; // recordedAt: when it was entered (#999), absent before
 
 export type HeatingShare =
 	// the chosen profile and why it was not applied (#247); both absent on statements created before

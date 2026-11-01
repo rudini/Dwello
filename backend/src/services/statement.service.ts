@@ -810,12 +810,14 @@ function recordPayment(existing: StatementWithDetails, waived: boolean, { paidDa
 	const before = Number(existing.paidAmount ?? 0);
 	const rest = roundToRappen(Number(existing.balance) - before);
 	const amount = paidAmountOf(entered, rest);
-	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2) }];
+	// recorded now: a PDF made after it names it, so resetting it discards that PDF (#1015); each payment keeps its own
+	// time for the reset of the one before (Datenprüfung 999-1 D-1)
+	const paymentRecordedAt = new Date();
+	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2), recordedAt: paymentRecordedAt.toISOString() }];
 	const paidAmount = roundToRappen(before + amount).toFixed(2);
-	// recorded now: a PDF made after it names it, so resetting it discards that PDF (#1015)
-	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments, paymentRecordedAt: new Date() };
+	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments, paymentRecordedAt };
 	// paid on the day of the latest payment, one without a date of today (Copilot review PR #1006)
-	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt: new Date() };
+	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt };
 }
 
 // The amount paid, the rest when none is given: francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1), with
@@ -855,6 +857,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	if (existing.status !== 'paid' && !(last && ['sent', 'overdue'].includes(existing.status)))
 		throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
 	const kept = existing.payments.slice(0, -1);
+	const stays = kept.at(-1);
 	// a part payment did not reach the Saldo: the Verlauf names it as one (#999)
 	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount, part: existing.status !== 'paid' };
 	const paidAmount = kept.length ? roundToRappen(kept.reduce((sum, p) => sum + Number(p.amount), 0)).toFixed(2) : null;
@@ -866,7 +869,9 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paidDate: null,
 		paidAmount,
 		payments: kept,
-		paymentRecordedAt: null,
+		// the part that stays is now the last recorded one (D-1); ponytail: one recorded before #999 has no time of its own
+		// and keeps that of the reset one, so a PDF made between them stays
+		paymentRecordedAt: stays ? (stays.recordedAt ? new Date(stays.recordedAt) : paymentRecordedAt) : null,
 		carrySettledOn: null, // a refund settled under #94 is carried over again (Fachreview 506-1 V-9)
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })

@@ -291,6 +291,29 @@ describe('Teilzahlung', () => {
 		expect(row.pdfBlob).toBeNull();
 	});
 
+	// Datenprüfung 999-1 D-1: after a reset that leaves a part, the PDF and the new PDF made after that part name it; the
+	// next reset takes them back too
+	it('verwirft beim Zurücksetzen der Teilzahlung, die nach einem Zurücksetzen bleibt, die PDFs, die sie nennen', async () => {
+		const [{ tenantId }] = await db.select({ tenantId: utilityStatements.tenantId }).from(utilityStatements).where(eq(utilityStatements.id, id));
+		const pdfBlob = async () => (await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id)))[0].pdfBlob;
+		await pay('10.00');
+		await Bun.sleep(5);
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, id));
+		const [pending] = await db
+			.insert(documents)
+			.values({ tenantId, statementId: id, type: 'new_pdf', status: 'to_send', title: 'Nebenkostenabrechnung, neues PDF', fileName: 'neu.pdf', content: 'JVBERi0=' })
+			.returning({ id: documents.id });
+		await Bun.sleep(5);
+		await pay('20.00');
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+		expect(await pdfBlob()).toBe('JVBERi0=');
+
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		expect(await pdfBlob()).toBeNull();
+		expect(await db.select().from(documents).where(eq(documents.id, pending.id))).toEqual([]);
+	});
+
 	it('verwirft beim Zurücksetzen einer Teilzahlung das neue PDF «Zu versenden», das danach erstellt wurde', async () => {
 		const [{ tenantId }] = await db.select({ tenantId: utilityStatements.tenantId }).from(utilityStatements).where(eq(utilityStatements.id, id));
 		await pay('10.00');
