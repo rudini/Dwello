@@ -536,3 +536,9 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] No scenario: the UI cannot reset a part payment yet (#999); two tried scenarios failed at the missing button
 - [x] code-reviewer `docs/reviews/1015-review-1.md`: C-1 test added (seen red); C-2 (reachable with #999 only) and C-3 (database not on UTC) stay in the report
 - [x] PR: pushed after this archive
+
+## Session: #1016 a part payment makes the waiting new PDF anew
+
+- [x] pg test in `statement-mail.pg.test.ts` seen red; fix in the payment route (`keepNewPdf` after a part payment)
+- [x] code-reviewer `docs/reviews/1016-review-1.md`: C-1 scenario «Nach einer Teilzahlung verlangt das bereitliegende neue PDF den offenen Betrag» (seen red), C-2 the pg test reads the PDF text; re-review `1016b-review-1.md`
+- [x] PR: pushed after this archive
