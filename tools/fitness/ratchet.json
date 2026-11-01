@@ -44,6 +44,11 @@
 			"path": "src/routes/contracts/[id]/+page.server.ts",
 			"line": "if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(validFrom)) return fail(400, { validFrom, advanceDeleteError: m.contracts_save_failed() });",
 			"reason": "ISO date of the Akonto a form posts, checked before it goes into a backend URL path (technical, review 464-1 C-9); the backend checks the real day (H-28, #717)"
+		},
+		{
+			"path": "src/routes/config/export/+server.ts",
+			"line": "const number = /^-?\\d+(\\.\\d+)?$/;",
+			"reason": "CSV formula guard: a plain number is written as is, every other text with a leading = + - @ gets an apostrophe (technical)"
 		}
 	],
 	"display": [
