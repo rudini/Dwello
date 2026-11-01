@@ -509,6 +509,43 @@ Then(
 	}
 );
 
+// #999 (#959): payments on days after the sending, which «ging vor … Tagen hinaus» moved back
+Given(
+	'für die Abrechnung {int} von {string} sind vor {int} Tagen {string} Franken eingegangen',
+	async ({ seed }, year: number, tenant: string, days: number, amount: string) => {
+		await seed.paymentOn(tenant, year, inDays(-days), amount);
+	}
+);
+
+Then(
+	'nennt die Bestätigung des Zurücksetzens die Zahlung von vor {int} Tagen über {string}',
+	async ({ verwalter }, days: number, amount: string) => {
+		await verwalter.sees(resetConfirmation).toContain(`vom ${swissDate(inDays(-days))} über ${amount}`);
+	}
+);
+
+Then('sagt die Bestätigung des Zurücksetzens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(resetConfirmation).toContain(text);
+});
+
+// after the status as a positive anchor
+Then('nennt das Panel Zahlung keine Teilzahlung', async ({ verwalter }) => {
+	await verwalter.sees(openRestText).toBeNull();
+});
+
+Then(
+	'nennt der Verlauf das Zurücksetzen der Teilzahlung über {string} von vor {int} Tagen',
+	async ({ verwalter }, amount: string, days: number) => {
+		await verwalter
+			.sees(history)
+			.toContain(`Teilzahlung vom ${swissDate(inDays(-days))} über ${amount} zurückgesetzt ${sendingDay()}`);
+	}
+);
+
+Then('nennt der Verlauf die Teilzahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
+	await verwalter.sees(history).toMatch(new RegExp(`Teilzahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
+
 // #120, #358: berichtigte Abrechnung
 Given('die Abrechnung {int} von {string} ist ersetzt', async ({ seed }, year: number, tenant: string) => {
 	await seed.replaceStatement(tenant, year);

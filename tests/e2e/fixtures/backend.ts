@@ -423,6 +423,11 @@ export function testData(api: CallTheApi) {
 			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0), paidAmount });
 		},
 
+		// #999: a payment on a given day, a part payment when below the open amount (#959)
+		async paymentOn(tenantTitle: string, year: number, paidDate: string, paidAmount: string) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate, paidAmount });
+		},
+
 		// Monthly shares January..December in percent
 		// A profile of the scenario, or a predefined one by its German name: named explicitly, never the preselection, which
 		// a parallel scenario's own profile can take (own profiles are listed first)
