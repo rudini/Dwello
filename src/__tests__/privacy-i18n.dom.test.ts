@@ -70,9 +70,15 @@ describe('Datenschutzerklärung auf Französisch, Italienisch und Englisch', () 
 		] as const)
 			for (const mail of ['smtp', 'resend'] as const) {
 				overwriteGetLocale(() => locale);
-				show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail } } as never);
-				expect(document.body.textContent).toContain(sent);
-				expect(document.body.textContent).toContain(content);
+				// each variant in its own container: the page of the one before stays mounted until the test ends
+				const target = document.body.appendChild(document.createElement('div'));
+				show(
+					PrivacyPage,
+					{ data: { recipient: null, providers: ['Google'], mail } } as never,
+					target
+				);
+				expect(target.textContent).toContain(sent);
+				expect(target.textContent).toContain(content);
 			}
 	});
 });
