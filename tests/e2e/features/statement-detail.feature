@@ -1305,7 +1305,6 @@ Funktionalität: Abrechnungsdetail
     Dann ist die "Nebenkostenabrechnung, neues PDF" an "Eva Frei" zu versenden
 
   # #1003: ein neues PDF nach einer Teilzahlung nennt, was schon bezahlt ist, und verlangt den offenen Betrag (#959)
-  @wip
   Szenario: Ein neues PDF nach einer Teilzahlung verlangt den offenen Betrag
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -1316,8 +1315,8 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter nur die Bemerkung "Rest bis Ende März" festhält
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Bereits bezahlt CHF 10.00"
-    Und steht im PDF "Offener Betrag CHF 432.90"
+    Dann steht im PDF "Offener Betrag CHF 432.90"
+    Und steht im PDF "Betrag der Abrechnung CHF 442.90 – Bereits bezahlt CHF 10.00"
 
   Szenario: Das neue PDF als versendet markieren
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
