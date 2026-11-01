@@ -6,18 +6,34 @@
 	let {
 		created,
 		open = []
-	}: { created: { id: string; name: string }[]; open?: { key: number; name: string; reason: string }[] } =
+	}: { created: { id: string; name: string; rest?: boolean }[]; open?: { key: number; name: string; reason: string }[] } =
 		$props();
 	const title = $derived(
 		created.length === 1 ? m.invoices_upload_created_one() : m.invoices_upload_created({ count: created.length })
 	);
+	// files still open in the dialog stay there: the link opens a new tab and says so (Copilot review PR #1012)
+	const newTab = $derived(open.length > 0);
 </script>
 
 <div tabindex="-1" data-testid="invoice-upload-result">
 	<Alert tone="positive" {title}>
 		<ul class="flex flex-col gap-2">
 			{#each created as one (one.id)}
-				<li><a class="font-semibold underline" href="/invoices/{one.id}">{one.name}</a></li>
+				<li class="flex flex-col gap-1">
+					<a class="font-semibold underline" href="/invoices/{one.id}" data-testid="invoice-upload-created-link">{one.name}</a>
+					<!-- #535: the row that said so is gone; its remainder is a second invoice (Fachreview 535-1 V-1) -->
+					{#if one.rest}
+						<span>{m.invoices_upload_mixed_rest()}</span>
+						<a
+							class="inline-flex min-h-12 items-center underline underline-offset-4"
+							href="/invoices/new"
+							target={newTab ? '_blank' : undefined}
+							rel={newTab ? 'noopener noreferrer' : undefined}
+							data-testid="invoice-upload-record-rest"
+							>{m.dashboard_add_invoice()}{newTab ? ` ${m.ui_opens_new_tab()}` : ''}</a
+						>
+					{/if}
+				</li>
 			{/each}
 		</ul>
 		{#if open.length}

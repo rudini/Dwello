@@ -1070,6 +1070,7 @@
 	"invoices_upload_credit_note_amount": "Si tratta di una nota di credito di {amount}. Non ne crei una fattura. Riduca l’importo della fattura a cui si riferisce dell’importo della nota di credito: nella riga di questa fattura, se il suo file è selezionato qui, altrimenti sulla sua pagina con «Modificare la fattura». Conservi la nota di credito con la fattura originale.",
 	"invoices_upload_advance_invoice": "Questa è una fattura d’acconto: un anticipo che l’emittente della fattura conteggia più tardi con la fattura finale. Di regola registri solo la fattura finale con il totale. Se la fattura finale arriva solo dopo il conteggio di questo periodo, spunti «Creare questa fattura» e registri la fattura d’acconto; la elimini quando registra la fattura finale.",
 	"invoices_upload_mixed": "La fattura contiene costi non addebitabili (p. es. riparazioni). Inserisca qui solo l’importo addebitabile. Registri poi il resto con «Registrare una fattura» come seconda fattura nella categoria Riparazioni e vi aggiunga questo file con «Aggiungere il giustificativo».",
+	"invoices_upload_mixed_rest": "Registri anche il resto come seconda fattura nella categoria Riparazioni e vi aggiunga lo stesso file con «Aggiungere il giustificativo».",
 	"invoices_upload_category_missing": "Scelga una categoria.",
 	"invoices_upload_fields_missing": "Compili i campi segnalati.",
 	"invoices_upload_create_failed": "La fattura non è stata creata perché Dwello non ha risposto. Riprovi.",

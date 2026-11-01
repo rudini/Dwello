@@ -550,6 +550,59 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-row-select-help')).toBeNull();
 	});
 
+	// #535 (Persona Marco 245 P-1, Fachreview 535-1 V-1, V-4): the row with the note goes when its invoice is created; the
+	// result names the rest at that invoice, not at another; one file stays open, so the result shows in the dialog
+	it('nennt nach dem Erstellen den Rest bei der Rechnung mit Kosten, die nicht umlagefähig sind, und wo er erfasst wird', async () => {
+		const proposals: Record<string, object> = {
+			'lift.pdf': { ...read, nonAllocableItems: true, fields: { ...read.fields, billingEntityName: 'Lift AG' } },
+			'werke.pdf': { ...read, categorization: null }
+		};
+		let created = 0;
+		const answers = (call: { path: string; body: unknown }) =>
+			call.path === '/invoices'
+				? [201, { id: `i${++created}` }]
+				: [200, proposals[(call.body as { fileName: string }).fileName] ?? read];
+		open(answers as never);
+		chooseBuilding();
+		await upload(pdf('lift.pdf'), pdf('blitz.pdf'), pdf('werke.pdf'));
+		click('invoice-upload-row-select'); // the first row: lift.pdf, not ticked while its amount is to split
+		click('invoice-upload-create-button');
+		await settle();
+
+		const items = [...byTestId('invoice-upload-result')!.querySelectorAll('li')].map((li) =>
+			li.textContent?.replace(/\s+/g, ' ').trim()
+		);
+		expect(items[0]).toContain('Lift AG');
+		expect(items[0]).toContain(
+			'Erfassen Sie noch den Rest als zweite Rechnung in der Kategorie Reparaturen und fügen Sie dort dieselbe Datei mit «Beleg hinzufügen» an.'
+		);
+		expect(items[1]).toContain('Elektro Blitz AG');
+		expect(items[1]).not.toContain('Rest');
+		expect(allByTestId('invoice-upload-record-rest').map((link) => link.getAttribute('href'))).toEqual(['/invoices/new']);
+	});
+
+	// #535, Copilot review PR #1012: with a file still open in the dialog, the link opens a new tab and says so; following
+	// it in the same tab would drop that file without the question before discarding
+	it('öffnet «Rechnung erfassen» in einem neuen Tab, solange eine Datei offen ist', async () => {
+		const proposals: Record<string, object> = {
+			'lift.pdf': { ...read, nonAllocableItems: true },
+			'werke.pdf': { ...read, categorization: null }
+		};
+		open(((call: { path: string; body: unknown }) =>
+			call.path === '/invoices'
+				? [201, { id: 'i9' }]
+				: [200, proposals[(call.body as { fileName: string }).fileName]]) as never);
+		chooseBuilding();
+		await upload(pdf('lift.pdf'), pdf('werke.pdf'));
+		click('invoice-upload-row-select');
+		click('invoice-upload-create-button');
+		await settle();
+
+		const link = byTestId('invoice-upload-record-rest')!;
+		expect([link.getAttribute('target'), link.getAttribute('rel')]).toEqual(['_blank', 'noopener noreferrer']);
+		expect(link.textContent).toContain('Rechnung erfassen (öffnet in neuem Tab)');
+	});
+
 	it('lehnt eine Datei ab, die weder PDF noch Bild ist, ohne sie der KI zu zeigen', async () => {
 		const { calls } = open(() => [200, read]);
 		chooseBuilding();
