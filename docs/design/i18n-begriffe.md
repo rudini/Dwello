@@ -116,6 +116,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Nicht mehr versenden | ne plus envoyer | non più da inviare | do not send any more |
 | Mahnstufe / Mahnfrist | niveau de rappel / délai de rappel | livello di sollecito / termine di sollecito | reminder level / reminder period |
 | Dokument / Versandstatus / Zu versenden | document / statut d’envoi / à envoyer | documento / stato di invio / da inviare | document / dispatch status / to send |
+| PDF vor der Änderung | PDF avant la modification | PDF prima della modifica | PDF before the change |
 | Dokumente geprüft | documents vérifiés | documenti verificati | documents checked |
 | hochladen / Hochgeladenes Dokument | téléverser / document téléversé | caricare / documento caricato | upload / uploaded document |
 | Übergabeprotokoll | procès-verbal de remise | verbale di consegna | handover report |

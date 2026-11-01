@@ -1070,6 +1070,7 @@
 	"invoices_upload_credit_note_amount": "Il s’agit d’une note de crédit de {amount}. N’en créez pas de facture. Réduisez le montant de la facture à laquelle elle se rapporte du montant de la note de crédit : dans la ligne de cette facture si son fichier est sélectionné ici, sinon sur sa page avec « Modifier la facture ». Conservez la note de crédit avec la facture originale.",
 	"invoices_upload_advance_invoice": "C’est une facture d’acompte : une avance que l’émetteur de la facture décompte plus tard avec la facture finale. En règle générale, saisissez seulement la facture finale avec le total. Si la facture finale n’arrive qu’après le décompte de cette période, cochez « Créer cette facture » et saisissez la facture d’acompte ; supprimez-la lorsque vous saisissez la facture finale.",
 	"invoices_upload_mixed": "La facture contient des frais qui ne sont pas répercutables (p. ex. réparations). Saisissez ici seulement le montant répercutable. Saisissez ensuite le reste avec « Saisir une facture » comme deuxième facture dans la catégorie Réparations et ajoutez-y ce fichier avec « Ajouter la pièce justificative ».",
+	"invoices_upload_mixed_rest": "Saisissez aussi le reste comme deuxième facture dans la catégorie Réparations et ajoutez-y le même fichier avec « Ajouter la pièce justificative ».",
 	"invoices_upload_category_missing": "Choisissez une catégorie.",
 	"invoices_upload_fields_missing": "Remplissez les champs signalés.",
 	"invoices_upload_create_failed": "La facture n’a pas été créée, car Dwello n’a pas répondu. Réessayez.",
