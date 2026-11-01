@@ -163,7 +163,7 @@ describe('Zahlung zurücksetzen', () => {
 		expect(response.status).toBe(200);
 		expect(await response.json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: null, statementDate: today() });
 		const stored = (await (await callApi(`/api/v1/statements/${sentId}`)).json()) as { balance: string; paymentResets: unknown[] };
-		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance }]);
+		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance, part: false }]);
 	});
 
 	// erstellt, als die Abrechnung versendet war, das Geld kam aber am selben Tag: das PDF nennt keine Zahlung (Code-Review C-11)
@@ -255,6 +255,20 @@ describe('Teilzahlung', () => {
 		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidAmount: null, payments: [] });
 	});
 
+	// #999: the Verlauf names a reset part payment as one (Fachreview 999-1); the payment that reached the Saldo is none
+	it('hält beim Zurücksetzen fest, ob es eine Teilzahlung war', async () => {
+		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+		await pay('10.00');
+		await pay('432.90');
+		await reset();
+
+		const resets = ((await (await reset()).json()) as { paymentResets: unknown[] }).paymentResets.slice(-2);
+		expect(resets).toEqual([
+			{ resetOn: today(), paidDate: today(), paidAmount: '432.90', part: false },
+			{ resetOn: today(), paidDate: today(), paidAmount: '10.00', part: true }
+		]);
+	});
+
 	// Copilot review PR #1006: the last payment without a date is of today, and so is the Zahlungsdatum
 	it('ist am Tag der letzten Zahlung bezahlt, auch wenn diese ohne Datum festgehalten wird', async () => {
 		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
@@ -275,6 +289,29 @@ describe('Teilzahlung', () => {
 
 		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id));
 		expect(row.pdfBlob).toBeNull();
+	});
+
+	// Datenprüfung 999-1 D-1: after a reset that leaves a part, the PDF and the new PDF made after that part name it; the
+	// next reset takes them back too
+	it('verwirft beim Zurücksetzen der Teilzahlung, die nach einem Zurücksetzen bleibt, die PDFs, die sie nennen', async () => {
+		const [{ tenantId }] = await db.select({ tenantId: utilityStatements.tenantId }).from(utilityStatements).where(eq(utilityStatements.id, id));
+		const pdfBlob = async () => (await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id)))[0].pdfBlob;
+		await pay('10.00');
+		await Bun.sleep(5);
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, id));
+		const [pending] = await db
+			.insert(documents)
+			.values({ tenantId, statementId: id, type: 'new_pdf', status: 'to_send', title: 'Nebenkostenabrechnung, neues PDF', fileName: 'neu.pdf', content: 'JVBERi0=' })
+			.returning({ id: documents.id });
+		await Bun.sleep(5);
+		await pay('20.00');
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+		expect(await pdfBlob()).toBe('JVBERi0=');
+
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		expect(await pdfBlob()).toBeNull();
+		expect(await db.select().from(documents).where(eq(documents.id, pending.id))).toEqual([]);
 	});
 
 	it('verwirft beim Zurücksetzen einer Teilzahlung das neue PDF «Zu versenden», das danach erstellt wurde', async () => {

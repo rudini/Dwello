@@ -334,6 +334,9 @@ export type StatementLineInvoice = NonNullable<ApiLineItem['invoices']>[number] 
 	part: NonNullable<ApiLineItem['invoiceParts']>[number] | null;
 };
 
+/** A payment taken back (#92): its amount since #959, whether it was a part payment since #999 */
+export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: number | null; part: boolean };
+
 export interface Statement
 	extends Pick<ApiStatement, 'id' | 'statementNumber' | 'tenantId' | 'apartmentId' | 'periodStart' | 'periodEnd' | 'statementDate' | 'rentalDays' | 'status' | 'paymentDeadline'>,
 		Partial<Pick<ApiStatement, 'contractId' | 'paidDate' | 'nextReminderFrom' | 'reminderToSend' | 'remindersCounted' | 'oldAddress' | 'pdfGeneratedAt' | 'notes' | 'createdAt' | 'updatedAt'>>,
@@ -344,7 +347,8 @@ export interface Statement
 	buildingId: string;
 	managementFee: number; // 0 when it has none
 	managementFeePercent: number; // rate used when the statement was generated; 0 when it has none
-	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
+	paymentResets?: PaymentReset[]; // payments taken back (#92)
+	payments?: { date: string; amount: number }[]; // recorded payments, part payments too, with the sign of the Saldo (#959)
 	correctionDeclined?: { on: string } | null; // «Nicht berichtigt» (#454)
 	lastReminderDate?: string | null;
 }

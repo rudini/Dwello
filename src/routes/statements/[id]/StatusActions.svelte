@@ -9,6 +9,7 @@
 		byEmail,
 		owes,
 		waiting,
+		partPaid,
 		onremind,
 		onmarkpaid,
 		onsend,
@@ -18,6 +19,7 @@
 		byEmail: boolean; // the tenant wants e-mail: Dwello sends a draft itself (#86)
 		owes: boolean; // an amount due; a refund is owed to the tenant and never reminded
 		waiting: boolean; // the Zahlungsfrist of the last Mahnung still runs (#107)
+		partPaid: boolean; // a part payment is recorded: it can be taken back (#999)
 		onremind: () => void;
 		onmarkpaid: () => void;
 		onsend: () => void;
@@ -30,6 +32,11 @@
 	{#if status === 'overdue' && owes && !waiting}
 		<Button onclick={onremind} icon="mail" testid="statement-reminder-button"
 			>{m.statements_send_reminder()}</Button
+		>
+	{/if}
+	{#if partPaid}
+		<Button onclick={onresetpayment} icon="refresh" testid="statement-reset-payment-button"
+			>{m.statements_reset_payment()}</Button
 		>
 	{/if}
 	<Button variant="primary" onclick={onmarkpaid} icon="success" testid="statement-mark-paid-button"
