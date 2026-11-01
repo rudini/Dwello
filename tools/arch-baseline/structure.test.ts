@@ -365,3 +365,21 @@ describe('Versteckte Kopplung: Framework', () => {
 		expect(a.kpis.find((k) => k.key === 'hidden')).toMatchObject({ value: 0 });
 	});
 });
+
+describe('Versteckte Kopplung: Geschwistermodule', () => {
+	it('zählt ein Paar zweier Module aus demselben Ordner ausserhalb der Routen, etwa zweier Services', () => {
+		const b = { path: 'backend/src/services/b.ts', kind: 'prod', module: 'be:services/b' };
+		const change_coupling = { pairs: [{ path_a: 'backend/src/services/a.ts', path_b: 'backend/src/services/b.ts', shared_revisions: 6, degree: 0.5 }] };
+		const a = analyze({ ...input, files: [...files, b], source: () => '', health: { ...health, change_coupling } });
+		expect(a.modules.find((m) => m.name === 'be:services/b')!.hidden).toBe(1);
+	});
+});
+
+describe('XS: Modul mit zu vielen Abhängigkeiten', () => {
+	it('wertet ein Modul mit mehr als 15 Modul-Abhängigkeiten als fett, mit dem Anteil über der Grenze', () => {
+		const deps = Array.from({ length: 16 }, (_, k) => ({ path: `backend/src/services/d${k}.ts`, kind: 'prod', module: `be:services/d${k}`, loc: '10' }));
+		const hub = { path: 'backend/src/routes/hub.ts', kind: 'prod', module: 'be:routes/hub', loc: '160' };
+		const a = analyze({ ...input, files: [hub, ...deps], edges: deps.map((d) => ({ from: hub.module, to: d.module, file_edges: '1' })), source: () => '' });
+		expect(a.modules.find((m) => m.name === 'be:routes/hub')).toMatchObject({ ce: 16, xs: 6.3, lights: { fat: 'red' } });
+	});
+});

@@ -19,4 +19,5 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] DSM drill-down: module details with files and the imports behind each cell
 - [x] History: XS chart; snapshots and CI measure coverage gaps too
 - [x] Hidden coupling leaves out pairs in one folder: SvelteKit's page and load function change together without import (16 of 49 pairs)
-- [ ] Slice review, PR
+- [x] code-reviewer round 1: `docs/reviews/structure-s101-review-1.md` (C-1 Major: folder rule only for route folders, C-2 empty gaps file, C-3 Ce test: fixed; C-4 Minor, no test for the inline script that opens details: stays in the report)
+- [ ] Re-review, PR

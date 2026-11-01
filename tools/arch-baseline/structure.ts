@@ -115,12 +115,12 @@ export function analyze(input: Input): Analysis {
 			.filter((f) => f.path === path)
 			.reduce((s, f) => s + (f.line_count ?? 0) * over(Math.max(f.cyclomatic / LIMITS.fatFunction.cyclomatic, f.cognitive / LIMITS.fatFunction.cognitive)), 0);
 	// file pairs changed together whose modules import neither way: coupling the import graph does not show;
-	// a pair in one folder is SvelteKit's own wiring (a page and its load function), not hidden
+	// a pair in one route folder is SvelteKit's own wiring (a page and its load function), not hidden
 	const moduleOf = new Map(prod.map((f) => [f.path, f.module]));
 	const linked = new Set(edges.flatMap((e) => [`${e.from} ${e.to}`, `${e.to} ${e.from}`]));
-	const folder = (path: string) => path.slice(0, path.lastIndexOf('/'));
+	const routeFolder = (path: string) => (path.startsWith('src/routes/') ? path.slice(0, path.lastIndexOf('/')) : path);
 	const hiddenPairs = (input.health.change_coupling?.pairs ?? [])
-		.filter((p) => folder(p.path_a) !== folder(p.path_b))
+		.filter((p) => routeFolder(p.path_a) !== routeFolder(p.path_b))
 		.map((p) => [moduleOf.get(p.path_a), moduleOf.get(p.path_b)])
 		.filter(([a, b]) => a && b && a !== b && !linked.has(`${a} ${b}`)) as [string, string][];
 	const untestedFiles = new Set((input.gaps?.files ?? []).map((f) => f.path));
@@ -404,7 +404,7 @@ ${historySection(history, modules)}
 <li><b>Hotspot:</b> highest fallow hotspot score (complexity × changes in the last 6 months) of a file in the module: green up to ${LIMITS.hotspot[0]}, yellow up to ${LIMITS.hotspot[1]}, else red.</li>
 <li><b>XS</b> (excess complexity, after Structure101): lines beyond the limits of fat items, in % of the module's code lines. A module is fat with more than ${LIMITS.fatModule.files} files or more than ${LIMITS.fatModule.ce} module dependencies (Ce), a file with more than ${LIMITS.fatFile} lines, a function above fallow's thresholds (cyclomatic ${LIMITS.fatFunction.cyclomatic}, cognitive ${LIMITS.fatFunction.cognitive}); the share beyond the limit counts, a module in a tangle counts whole. Light: red for a fat or tangled module, yellow for a fat file in it. At the top: green up to ${LIMITS.xs[0]} %, yellow up to ${LIMITS.xs[1]} %.</li>
 <li><b>Untested:</b> share of the module's code files that no test reaches through imports (fallow's static estimate, not line coverage; end-to-end tests reach code over HTTP, which it does not see, so API endpoints show as untested): green at ${LIMITS.untested[0]}, yellow up to ${LIMITS.untested[1]} %, else red.</li>
-<li><b>Hidden coupling:</b> file pairs changed together often (fallow, at least 5 shared commits and 30 % of their commits) whose modules import neither way, without pairs in one folder (a SvelteKit page and its load function): green at ${LIMITS.hidden[0]}, yellow up to ${LIMITS.hidden[1]}, else red.</li>
+<li><b>Hidden coupling:</b> file pairs changed together often (fallow, at least 5 shared commits and 30 % of their commits) whose modules import neither way, without pairs in one route folder under src/routes (a SvelteKit page and its load function): green at ${LIMITS.hidden[0]}, yellow up to ${LIMITS.hidden[1]}, else red.</li>
 <li><b>Overall:</b> the worst of the six colours. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
 <h2>Abstractness and instability (A/I graph)</h2>
 <p>I = Ce / (Ca + Ce): Ca = modules that use it, Ce = modules it uses. A = exported types and interfaces / all exports (a Svelte component counts as one concrete export). The green band is D ≤ ${LIMITS.distance[0]}. Dot size = number of modules at the same position. Hover over a dot for the names.</p>
@@ -431,13 +431,15 @@ if (import.meta.main) {
 	const { appendFileSync, existsSync, readdirSync, readFileSync } = await import('node:fs');
 	const { join } = await import('node:path');
 	const { OUT, ROOT, readCsv } = await import('./lib');
+	// a failed fallow run still leaves the file its output was redirected to, empty
+	const optionalJson = (path: string) => (existsSync(path) && readFileSync(path, 'utf8').trim() ? JSON.parse(readFileSync(path, 'utf8')) : undefined);
 	const analysis = analyze({
 		edges: readCsv('imports-module.csv') as Input['edges'],
 		cycles: readCsv('cycles-module.csv') as Input['cycles'],
 		files: readCsv('files.csv') as Input['files'],
 		source: (path) => readFileSync(join(ROOT, path), 'utf8'),
 		health: JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8')),
-		gaps: existsSync(join(OUT, 'fallow-gaps.json')) ? JSON.parse(readFileSync(join(OUT, 'fallow-gaps.json'), 'utf8')).coverage_gaps : undefined,
+		gaps: optionalJson(join(OUT, 'fallow-gaps.json'))?.coverage_gaps,
 		fileEdges: readCsv('imports-file.csv') as Input['fileEdges']
 	});
 	const [flag, commit, date] = process.argv.slice(2);
