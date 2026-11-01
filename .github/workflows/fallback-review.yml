@@ -3,11 +3,9 @@ name: Fallback review
 # Copilot reviews each pull request once by itself, but not always: it may report a rate limit or an error, or stay
 # silent. Then MiniMax reviews the pull request's diff and posts one review comment (#1007): once per pull request,
 # drafts skipped, by hand for any pull request. Needs the repository secret MINIMAX_API_KEY.
+# Checked when CI finished, not on Copilot's own review or comment: a run Copilot triggers waits for an approval that
+# no setting gives, and expires (#1009).
 on:
-  pull_request_review:
-    types: [submitted]
-  issue_comment:
-    types: [created]
   pull_request:
     types: [ready_for_review]
   workflow_run:
@@ -26,26 +24,19 @@ permissions:
 jobs:
   review:
     name: MiniMax review
-    # contains() ignores case: Copilot reviews as copilot-pull-request-reviewer[bot]; only a bot has type Bot, so a
-    # person whose login contains "copilot" starts nothing
     if: >-
-      github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' &&
-        github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.pull_requests[0]) ||
-      (github.event_name == 'pull_request_review' && github.event.review.user.type == 'Bot' && contains(github.event.review.user.login, 'copilot')) ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.user.type == 'Bot' &&
-        contains(github.event.comment.user.login, 'copilot'))
-    # on the job, after its `if`: every other comment on the pull request would queue a run and cancel a waiting one
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' &&
+        github.event.workflow_run.pull_requests[0])
     concurrency:
       # one run per pull request at a time, so a second trigger sees the first one's review
-      group: fallback-review-${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
+      group: fallback-review-${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      PR: ${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
-      COPILOT_SAID: ${{ github.event.review.body || github.event.comment.body }}
+      PR: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
       MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
       MODEL: MiniMax-M3.1-Flash
       REASONING_EFFORT: medium # unset, it thought through all 32000 tokens of a 47 kB diff without an answer
@@ -81,23 +72,13 @@ jobs:
             exit 0
           fi
           if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ]; then
-            case "$GITHUB_EVENT_NAME" in
-              pull_request_review | issue_comment)
-                if ! copilot_failed "$COPILOT_SAID"; then
-                  echo "Copilot reviewed normally, nothing to do."
-                  exit 0
-                fi
-                ;;
-              *)
-                # CI finished or the draft became ready: Copilot gets up to 10 minutes while it is still requested (on
-                # #1006 it took 7 minutes from its request); MiniMax answers in 1 to 3, within the 15 minutes a session
-                # waits after CI (skill pull-request)
-                for _ in $(seq 10); do
-                  sleep 60
-                  if reviewed || ! copilot_requested; then break; fi
-                done
-                ;;
-            esac
+            # CI finished or the draft became ready: Copilot gets up to 10 minutes while it is still requested (on #1006
+            # it took 7 minutes from its request); MiniMax answers in 1 to 3, within the 15 minutes a session waits
+            # after CI (skill pull-request)
+            for _ in $(seq 10); do
+              sleep 60
+              if reviewed || ! copilot_requested; then break; fi
+            done
             if reviewed; then
               echo "Already reviewed by Copilot or MiniMax."
               exit 0
