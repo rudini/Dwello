@@ -155,7 +155,11 @@ export function analyze(input: Input): Analysis {
 	};
 	const inst = new Map([...names].map((n) => [n, instability(n)]));
 	// Stable Dependencies Principle (Martin): a module uses only modules more stable than itself
-	const unstable = edges.map((e) => ({ from: e.from, to: e.to, gap: round(inst.get(e.to)! - inst.get(e.from)!) })).filter((e) => e.gap > LIMITS.unstable.gap);
+	// the raw gap counts (1/4 − 1/21 = 0.2024 is over 0.2); 1e-9 absorbs float noise, so exactly 0.2 passes
+	const unstable = edges
+		.map((e) => ({ from: e.from, to: e.to, gap: inst.get(e.to)! - inst.get(e.from)! }))
+		.filter((e) => e.gap > LIMITS.unstable.gap + 1e-9)
+		.map((e) => ({ ...e, gap: round(e.gap) }));
 	const modules = [...names].sort().map((name) => {
 		const paths = prod.filter((f) => f.module === name).map((f) => f.path);
 		const a = abstractOf(paths);

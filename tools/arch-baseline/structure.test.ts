@@ -412,6 +412,23 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 		expect(a.kpis.find((k) => k.key === 'unstable')).toMatchObject({ value: 1, light: 'yellow' });
 	});
 
+	it('vergleicht den ungerundeten Abstand: 1/4 − 1/21 = 0.2024 liegt über 0.2', () => {
+		// be:services/s (Ca 20, Ce 1: I 1/21) uses be:services/t (Ca 3, Ce 1: I 1/4)
+		const mod = (x: string) => ({ path: `backend/src/services/${x}.ts`, kind: 'prod', module: `be:services/${x}` });
+		const users = Array.from({ length: 20 }, (_, i) => `u${i}`);
+		const close = {
+			...input,
+			files: [...['s', 't', 'x', 'y', 'd', ...users].map(mod)],
+			source: () => 'export function f() {}',
+			edges: [
+				...users.map((u) => ({ from: `be:services/${u}`, to: 'be:services/s', file_edges: '1' })),
+				...['s', 'x', 'y'].map((x) => ({ from: `be:services/${x}`, to: 'be:services/t', file_edges: '1' })),
+				{ from: 'be:services/t', to: 'be:services/d', file_edges: '1' }
+			]
+		};
+		expect(analyze(close).unstable).toEqual([{ from: 'be:services/s', to: 'be:services/t', gap: 0.2 }]);
+	});
+
 	it('zeigt die Spalte gegen die Stabilität und sagt, warum A bei Modulen mit Funktionen wenig aussagt', () => {
 		const html = report(analyze(against));
 		expect(html).toContain('<th>Against stability</th>');
