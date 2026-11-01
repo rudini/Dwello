@@ -15,6 +15,8 @@ import {
 	descriptionOf,
 	contractHint,
 	formReasonText,
+	formReasonLabelText,
+	allowanceQuestionDescription,
 	hiddenDescription,
 	kindOf,
 	predefinedHintText,
@@ -278,6 +280,14 @@ Then(
 
 Then('nennt die Kategorie als Grund {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(formReasonText).toContain(text);
+});
+
+Then('steht der Grund der Kategorie unter der Bezeichnung {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(formReasonLabelText).toBe(label);
+});
+
+Then('nennt die Frage der Umlagefähigkeit den Grund {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allowanceQuestionDescription).toContain(text);
 });
 
 Then(

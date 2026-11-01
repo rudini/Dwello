@@ -32,6 +32,8 @@ export const reason = (name: string) =>
 	target(`Grund der Umlagefähigkeit von ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-reason'));
 export const descriptionInput = target('Beschreibung', (page) => page.getByTestId('category-description-input'));
 export const formReason = target('Grund der Umlagefähigkeit', (page) => page.getByTestId('category-reason'));
+export const formReasonLabel = target('Bezeichnung des Grundes', (page) => page.getByTestId('category-reason-label'));
+export const allowanceQuestion = target('Frage der Umlagefähigkeit', (page) => page.getByTestId('category-allowance'));
 export const contractNote = target('Hinweis auf den Mietvertrag', (page) => page.getByTestId('category-contract-note'));
 // Whether Dwello supplies the category or the Liegenschaftsverwalter recorded it (#166)
 export const kindBadge = (name: string) =>

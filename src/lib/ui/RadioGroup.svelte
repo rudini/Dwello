@@ -12,6 +12,7 @@
 		value = $bindable(''),
 		help,
 		error,
+		describedby,
 		testid
 	}: {
 		name: string;
@@ -20,6 +21,8 @@
 		value?: string;
 		help?: string;
 		error?: string;
+		// the id of further text that explains the question, outside the group (#683)
+		describedby?: string;
 		testid?: string;
 	} = $props();
 
@@ -32,7 +35,9 @@
 			.filter(Boolean)
 			.join(' ') || undefined;
 	const describedBy = $derived(
-		[sent.shown && `${name}-error`, help && `${name}-help`].filter(Boolean).join(' ') || undefined
+		[sent.shown && `${name}-error`, help && `${name}-help`, describedby]
+			.filter(Boolean)
+			.join(' ') || undefined
 	);
 </script>
 

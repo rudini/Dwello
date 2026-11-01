@@ -46,11 +46,19 @@
 </script>
 
 <script lang="ts">
-	let { category }: { category?: Shown } = $props();
+	// With an id the reason stands under its own label, for a control that names it in aria-describedby (#683)
+	let { category, id }: { category?: Shown; id?: string } = $props();
 
 	const reason = $derived(reasonOf(category));
 </script>
 
-{#if reason}
+{#if reason && id}
+	<div>
+		<p class="font-semibold text-ink" data-testid="category-reason-label">
+			{m.categories_reason_label()}
+		</p>
+		<p {id} class="text-ink-muted" data-testid="category-reason">{reason}</p>
+	</div>
+{:else if reason}
 	<p class="text-ink-muted" data-testid="category-reason">{reason}</p>
 {/if}
