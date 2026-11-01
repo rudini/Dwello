@@ -1418,6 +1418,27 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Offener Betrag CHF 432.90"
     Und steht im PDF "Betrag der Abrechnung CHF 442.90 – Bereits bezahlt CHF 10.00"
 
+  # #999 (Datenprüfung 999-1 D-1): das PDF, das nach der ersten von zwei Teilzahlungen erstellt wurde, fällt weg, wenn
+  # beide zurückgesetzt sind; das neu erstellte nennt keine Zahlung
+  Szenario: Nach dem Zurücksetzen aller Teilzahlungen nennt das PDF keine Zahlung
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter eine Zahlung von "100.00" Franken festhält
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter nur die Bemerkung "Rest bis Ende März" festhält
+    Und der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter eine Zahlung von "50.00" Franken festhält
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
+    Dann nennt das Panel Zahlung "Bezahlt: CHF 100.00, offen: CHF 342.90"
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
+    Dann nennt das Panel Zahlung keine Teilzahlung
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "CHF 442.90"
+    Und steht im PDF nicht "Bereits bezahlt"
+
   # #1016 (Option 1): ein neues PDF, das vor einer Teilzahlung zum Versand bereitlag, wird neu erstellt und verlangt den Rest
   Szenario: Nach einer Teilzahlung verlangt das bereitliegende neue PDF den offenen Betrag
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
