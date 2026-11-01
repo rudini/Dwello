@@ -8,12 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-
-## Session: XS ratchet in the fitness checks (request in chat, follow-up to #1045)
-
-- [x] Issues (`nfr:maintainability`): #1052 fat files and modules, #1053 hidden coupling pairs
-- [x] Check `fat` in `tools/fitness/fitness.ts`: no new file over 400 lines, no new code module over 30 files or 15 module dependencies, listed ones may not grow; composition roots listed with a reason (tests first)
-- [x] `ratchet.json`: today's fat files, modules and roots; `docs/architecture/fitness-functions.md` row
-- [ ] code-reviewer: `docs/reviews/xs-ratchet-review-1.md` (C-1 Major: a removed `fat` list switched the check off, fixed; C-2 Minor: `fatItems` untested, fixed)
-- [ ] Archive the session; PR
