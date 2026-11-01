@@ -21,6 +21,8 @@ export type Measured = {
 	boundaryImports: string[];
 	/** XS of the structure report: production files and code modules over its limits (functions: fallow, tangles: module-cycle) */
 	fat?: { files: { path: string; lines: number }[]; modules: { module: string; files: number; ce: number }[] };
+	/** Stable Dependencies Principle: module dependencies whose target's instability I is more than LIMITS.unstable.gap higher */
+	unstable?: { from: string; to: string; gap: number }[];
 };
 
 type Fat = { files: Record<string, number>; modules: Record<string, { files: number; ce: number }>; roots: { module: string; reason: string }[] };
@@ -44,6 +46,8 @@ export type Ratchet = {
 		literalSets: ({ values: string; files: number } & Exception)[];
 		entityMirrors: ({ table: string; paths: string[] } & Exception)[];
 		moduleCycles: ({ modules: string } & Exception)[];
+		/** Module dependencies against stability found when the check came; shrink with the code */
+		unstableDependencies?: ({ from: string; to: string } & Exception)[];
 	};
 	prSizeWarn: { files: number; modules: number; layers: number };
 	coChangeWarn: number;
@@ -113,7 +117,7 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 			check: 'module-cycle',
 			message: `Ä1 «Änderung an einem Ort»: the modules ${c} import each other, so a change in one can force a change in the other. Fix: move what both need into one of them or into a module both import.`
 		});
-	findings.push(...fatFindings(m, r));
+	findings.push(...fatFindings(m, r), ...unstableFindings(m, r));
 	for (const b of m.boundaryImports)
 		findings.push({
 			check: 'boundary-import',
@@ -125,6 +129,14 @@ export function judge(m: Measured, r: Ratchet, read: (path: string) => string | 
 }
 
 /** XS (structure report, after Structure101): no new fat file or module, a listed one does not grow */
+/** Stable Dependencies Principle: no new dependency on a module that changes more easily (#1055 lists today's) */
+function unstableFindings(m: Measured, r: Ratchet): Finding[] {
+	return unlisted(m.unstable ?? [], r.exceptions.unstableDependencies ?? [], (x) => `${x.from} ${x.to}`).map((u) => ({
+		check: 'unstable-dependency',
+		message: `Ä1 «Änderung an einem Ort», Stable Dependencies Principle: ${u.from} uses ${u.to}, whose instability I is ${u.gap} higher, so a module others rely on depends on one that changes more easily. Fix: move what ${u.from} needs from ${u.to} into a module both can use (often a small one with the shared type or rule), or let ${u.to}'s caller pass it in.`
+	}));
+}
+
 function fatFindings(m: Measured, r: Ratchet): Finding[] {
 	return m.fat && r.fat ? [...fatFileFindings(m.fat.files, r.fat), ...fatModuleFindings(m.fat.modules, r.fat)] : [];
 }
@@ -217,7 +229,8 @@ const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
 	frontendDecisions: x.frontendDecisions?.length,
 	literalSets: x.literalSets.reduce((n, e) => n + e.files, 0),
 	entityMirrors: x.entityMirrors.reduce((n, e) => n + e.paths.length, 0),
-	moduleCycles: x.moduleCycles.length
+	moduleCycles: x.moduleCycles.length,
+	unstableDependencies: x.unstableDependencies?.length
 });
 
 /**
@@ -289,6 +302,7 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 				.map((e) => ({ ...e, paths: e.paths.filter((p) => mirrors.has(`${e.table}\t${p}`)) }))
 				.filter((e) => e.paths.length > 0),
 			moduleCycles: x.moduleCycles.filter((c) => m.moduleCycles.includes(c.modules)),
+			...(x.unstableDependencies && { unstableDependencies: x.unstableDependencies.filter((u) => m.unstable?.some((v) => v.from === u.from && v.to === u.to)) }),
 			...(x.bffDates && { bffDates: x.bffDates.filter((d) => !staleDates.includes(d)) }),
 			...(x.frontendDecisions && { frontendDecisions: x.frontendDecisions.filter((d) => !staleFrontend.includes(d)) })
 		}
@@ -385,12 +399,12 @@ function measure(out: string): Measured {
 		boundaryImports: read('imports-file.csv')
 			.filter(crossesBoundary)
 			.map((e) => `${e.from} -> ${e.to}`),
-		fat: fatItems(read)
+		...structureItems(read)
 	};
 }
 
-/** The structure report's fat items; a module without code (migrations) has no XS, so it is never fat */
-export function fatItems(read: (name: string) => Record<string, string>[]): Measured['fat'] {
+/** The structure report's fat items (a module without code, migrations, has no XS, so it is never fat) and its dependencies against stability */
+export function structureItems(read: (name: string) => Record<string, string>[]): Pick<Measured, 'fat' | 'unstable'> {
 	const health = { findings: [], health_score: { score: 0, grade: '' }, vital_signs: { duplication_pct: 0, maintainability_avg: 0 } };
 	const a = analyze({
 		edges: read('imports-module.csv') as unknown as Input['edges'],
@@ -399,12 +413,13 @@ export function fatItems(read: (name: string) => Record<string, string>[]): Meas
 		source: (path) => readFileSync(join(ROOT, path), 'utf8'),
 		health
 	});
-	return {
+	const fat = {
 		files: a.files.filter((f) => f.loc > LIMITS.fatFile).map((f) => ({ path: f.path, lines: f.loc })),
 		modules: a.modules
 			.filter((x) => (x.files > LIMITS.fatModule.files || x.ce > LIMITS.fatModule.ce) && a.files.some((f) => f.module === x.name))
 			.map((x) => ({ module: x.name, files: x.files, ce: x.ce }))
 	};
+	return { fat, unstable: a.unstable };
 }
 
 function prSize(base: string) {
@@ -471,7 +486,7 @@ if (import.meta.main) {
 	errors.forEach((f) => say('error', f));
 	warnings.forEach((f) => say('warning', f));
 	if (m) {
-		const values = `field spread median ${m.fieldSpread.median}, P90 ${m.fieldSpread.p90}, max ${m.fieldSpread.max}; BFF decisions ${m.bffDecisions.length}; frontend decisions ${m.frontendDecisions?.length ?? 0} (exceptions ${ratchet.exceptions.frontendDecisions?.length ?? 0}); cross-layer value lists ${m.literalSets.length}; entity mirrors ${m.entityMirrors.length}; module cycles ${m.moduleCycles.length}; boundary imports ${m.boundaryImports.length}; fat files ${m.fat?.files.length ?? 0}; fat modules ${m.fat?.modules.length ?? 0}`;
+		const values = `field spread median ${m.fieldSpread.median}, P90 ${m.fieldSpread.p90}, max ${m.fieldSpread.max}; BFF decisions ${m.bffDecisions.length}; frontend decisions ${m.frontendDecisions?.length ?? 0} (exceptions ${ratchet.exceptions.frontendDecisions?.length ?? 0}); cross-layer value lists ${m.literalSets.length}; entity mirrors ${m.entityMirrors.length}; module cycles ${m.moduleCycles.length}; boundary imports ${m.boundaryImports.length}; fat files ${m.fat?.files.length ?? 0}; fat modules ${m.fat?.modules.length ?? 0}; dependencies against stability ${m.unstable?.length ?? 0}`;
 		console.log(`Fitness: ${values}`);
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Architecture fitness\n\n${values}\n`);
 	}

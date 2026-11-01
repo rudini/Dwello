@@ -10,3 +10,10 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
 
+
+## Session: dependency direction check, A/I in the report (request in chat, follow-up to #1054)
+
+- [x] Structure report: dependencies against stability (Stable Dependencies Principle, I gap > 0.2) per module and as KPI; distance D out of the overall light; the A/I section says why A says little for modules that export functions (tests first)
+- [x] Fitness check `unstable-dependency` (issue #1055) with today's 4 listed (reason each), shrink-only; docs row
+- [ ] code-reviewer rounds
+- [ ] Archive the session; PR
