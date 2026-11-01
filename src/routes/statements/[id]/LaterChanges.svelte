@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import { laterText } from '$lib/overview';
+	import { francs, recalculatedText, type Recalculated } from '$lib/statement';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -23,11 +24,19 @@
 			correctionDue: boolean;
 			correctionDeclinable: boolean;
 			correctionLowers: boolean;
+			recalculated?: Recalculated | null; // #546
 			carryOver?: boolean; // #506 C: said in the send dialog, not here
 		};
 	} = $props();
 
 	let declining = $state(false);
+	// #546: the Saldo the recalculation gives, and what «Nicht berichtigen» costs the landlord
+	const recalculated = $derived(
+		later.correctionDue && later.recalculated
+			? recalculatedText(statement.tenantName, Number(statement.balance), later.recalculated)
+			: null
+	);
+	const declineCosts = $derived(later.recalculated?.declineCosts && francs(Number(later.recalculated.declineCosts)));
 	const changed = $derived(laterText(later.invoices, later.fuelStock));
 	const title = $derived(
 		!later.fuelStock
@@ -53,6 +62,7 @@
 {#if statement.editable && (later.invoices || later.fuelStock)}
 	<Alert {tone} {title} testid="statement-later-invoices">
 		<p>{text}</p>
+		{#if recalculated}<p data-testid="statement-later-recalculated">{recalculated}</p>{/if}
 		{#if later.correctionLowers}<p>
 				{m.statements_later_lowers({ tenant: statement.tenantName })}
 			</p>{/if}
@@ -78,6 +88,7 @@
 		confirmLabel={m.statements_decline_correction()}
 		confirmTestid="statement-decline-correction-confirm"
 	>
+		{#if declineCosts}<p>{m.statements_decline_correction_difference({ amount: declineCosts })}</p>{/if}
 		<p>{m.statements_decline_correction_text({ number: statement.statementNumber })}</p>
 	</FormDialog>
 {/if}

@@ -461,11 +461,14 @@ describe('Abrechnung berichtigen fällig', () => {
 		sent(async (id) => {
 			const [{ balance }] = await db.select({ balance: utilityStatements.balance }).from(utilityStatements).where(eq(utilityStatements.id, id));
 			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
-			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { correctionDue: boolean; recalculatedBalance: string };
+			type Recalculated = { balance: string; difference: string; belowMinimum: boolean };
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { correctionDue: boolean; recalculated: Recalculated };
 
 			expect(changes.correctionDue).toBe(true);
-			expect(changes.recalculatedBalance).toMatch(/^-?\d+\.\d{2}$/);
-			expect(Number(changes.recalculatedBalance)).toBeGreaterThan(Number(balance));
+			const { balance: now, difference, belowMinimum } = changes.recalculated;
+			expect(Number(now)).toBeGreaterThan(Number(balance));
+			expect(difference).toBe((Number(now) - Number(balance)).toFixed(2)); // the raw Saldos (Fachreview 546-1 V-2)
+			expect(belowMinimum).toBe(false);
 		}));
 
 	// PO 2026-10-20 (Fachreview 454-2 M-3 B, 454-3 V-30 A): «Nicht berichtigen» only when the Saldo does not fall

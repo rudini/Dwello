@@ -167,6 +167,8 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 /** What changed since the statement was created: how many invoices of its period were recorded, changed or deleted
  *  (#96), whether its Tankbestand changed, and whether correcting it is due and may be declined (#454); only a hint:
  *  nothing if it cannot be loaded */
+import type { Recalculated } from '$lib/statement';
+
 export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	const [response, categories, keys] = await Promise.all([
 		fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(() => null),
@@ -179,6 +181,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
+		recalculated?: Recalculated | null;
 		carryOverChanged?: boolean;
 		splitKeys?: SplitKey[];
 	} = response?.ok ? await response.json() : {};
@@ -188,6 +191,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,
+		recalculated: changed.recalculated ?? null, // #546: the Saldo the recalculation gives
 		carryOver: !!changed.carryOverChanged, // #506 C: the draft would count another Übertrag now
 		splitKeys: localSplitKeys(changed.splitKeys, categories, keys) // #528, as «Neu berechnen» would bill them
 	};

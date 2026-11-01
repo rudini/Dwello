@@ -134,6 +134,7 @@ async function changesOf(statement: StatementWithDetails | null, load: Loaders) 
 		correctionDue: due,
 		correctionDeclinable: due && !!check?.raises,
 		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
+		recalculated: (due && check?.now) || null, // #546: the Saldo the recalculation gives, for the hint and «Nicht berichtigen»
 		result: check?.result
 	};
 }
