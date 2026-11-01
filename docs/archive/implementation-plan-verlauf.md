@@ -723,3 +723,11 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
 - [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
 - [x] PR: pushed after this archive
+
+## Session: stability and changes instead of the A/I graph (request in chat, follow-up to #1056)
+
+- [x] Structure report: graph «Stability and changes» (I over the commits of a module's most-changed file in fallow's hotspot window) with the zone stable and changing often; light per module (I ≤ 0.3 and Ca ≥ 5: green up to 12 changes, yellow up to 25, else red); A, D, the A/I graph and the D history table removed (tests first)
+- [x] Docs: report bullet and fitness row without A/D
+- [x] code-reviewer: `docs/reviews/change-graph-review-1.md` (no Blocker/Major; C-1 unused `--band`, C-2 zone text and tooltip without Ca: fixed), `-2.md` (closing round, both closed)
+- [x] Workflow note: none new
+- [x] Archive the session; PR pushed after this archive, once #1056 is merged
