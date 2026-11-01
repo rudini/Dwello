@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { deletionConfirmable, errorMessageShown } from '../questions/form';
-import { focusedPlace, pageTitle } from '../questions/navigation';
+import { focusedPlace, focusedText, pageTitle } from '../questions/navigation';
 import { goBackInBrowser } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb } from '../tasks/form';
 
@@ -57,4 +57,9 @@ When('der Liegenschaftsverwalter im Browser zurückgeht', async ({ verwalter }) 
 // #681: after a search, a reset, a page of the list or the browser's back button
 Then('steht der Fokus auf dem Ergebnis der Liste', async ({ verwalter }) => {
 	await verwalter.sees(focusedPlace).toBe('list-results');
+});
+
+// Names the result, so a check after the browser's back button tells the page it returns to from the one it left
+Then('steht der Fokus auf dem Ergebnis {string}', async ({ verwalter }, result: string) => {
+	await verwalter.sees(focusedText).toBe(result);
 });

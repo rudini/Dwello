@@ -93,4 +93,4 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
     Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
     Und der Liegenschaftsverwalter im Browser zurückgeht
-    Dann steht der Fokus auf dem Ergebnis der Liste
+    Dann steht der Fokus auf dem Ergebnis "Keine Wohnungen gefunden"

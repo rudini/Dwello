@@ -66,6 +66,10 @@ export const HiddenText = {
 export const FocusedElement = question('the focused element', (actor) =>
 	pageOf(actor).evaluate(() => document.activeElement?.getAttribute('data-testid') ?? null)
 );
+/** The text of the element that has the focus, whitespace normalized like Text.of */
+export const FocusedText = question('the text of the focused element', (actor) =>
+	pageOf(actor).evaluate(() => document.activeElement?.textContent?.replace(/\s+/g, ' ').trim() ?? null)
+);
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {

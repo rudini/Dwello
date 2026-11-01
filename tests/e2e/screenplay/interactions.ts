@@ -188,7 +188,7 @@ export const Browser = {
 		);
 		await pageOf(actor).addInitScript((list) => Object.defineProperty(navigator, 'languages', { get: () => list, configurable: true }), languages);
 	},
-	// The browser's back button, waiting for the page it returns to
+	// The browser's back button; it returns once the URL changed, the next question waits for the page
 	back: ((actor) => pageOf(actor).goBack().then(() => undefined)) as Activity,
 	resizeTo: (size: { width: number; height: number }): Activity => (actor) => pageOf(actor).setViewportSize(size),
 	useColorScheme: (colorScheme: 'light' | 'dark'): Activity => (actor) =>
