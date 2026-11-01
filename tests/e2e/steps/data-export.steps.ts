@@ -112,3 +112,12 @@ Then('führt die Tabelle {string} des Exports keine Rechnung von {string}', asyn
 Then('nennt das Protokoll heute öfter {string} als vor dem Export', async ({ verwalter }, text: string) => {
 	await verwalter.sees(auditEntryCountOn(text, swissDate(inDays(0)))).toBeGreaterThan(verwalter.recall<number>(AUDIT_COUNT));
 });
+
+// positive anchor: the Beleg of the scenario's other supplier in the same folder
+Then(
+	'enthält der Ordner {string} des Exports keinen Beleg der Rechnung von {string}',
+	async ({ verwalter, names }, folder: string, supplier: string) => {
+		await verwalter.sees(filesInExportFolder(folder, names.get('Hauswart Meier')!, 'meier-q1.pdf')).toEqual(['meier-q1.pdf %PDF-']);
+		await verwalter.sees(filesInExportFolder(folder, names.get(supplier)!, '')).toEqual([]);
+	}
+);

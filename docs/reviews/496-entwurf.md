@@ -1,6 +1,8 @@
 # #496 Alle Daten exportieren: Entwurf für die Fachprüfung
 
-Stand: 1. November 2026, vor der Fachprüfung (CLAUDE.md, Workflow 1). Noch keine Texte in `messages/*.json`, kein
+Stand: 1. November 2026, vor der Fachprüfung (CLAUDE.md, Workflow 1). Nach der Fachprüfung
+(`docs/reviews/496-fachreview-1.md`) gelten deren Befunde und Wortlaut; der Absatz der Datenschutzerklärung (§4) und sein
+Szenario sind gestrichen (R-1). Noch keine Texte in `messages/*.json`, kein
 Produktionscode. Szenarien (`@wip`): `tests/e2e/features/datenexport.feature` und in `tests/e2e/features/privacy.feature`
 «Die Datenschutzerklärung nennt den Export aller Daten».
 
@@ -155,6 +157,9 @@ Mieter fehlen die entfernten Angaben. Offen (Frage F-3): Einträge im Protokoll,
 («Die Einträge bleiben, auch wenn Sie die Rechnung löschen»), bleiben als Teil des Protokolls im Export.
 
 ## 4. Datenschutzerklärung und andere Texte
+
+Gestrichen nach R-1 der Fachprüfung: keine Änderung der Datenschutzerklärung; der Hinweis zur Aufbewahrung steht in der
+Hilfe an der Aktion und im README.
 
 Datenschutzerklärung (`src/routes/privacy/+page.svelte`, `messages/*.json`), Abschnitt «Welche Daten Dwello speichert»,
 ein neuer Absatz `privacy_stored_export` nach `privacy_stored_2`:

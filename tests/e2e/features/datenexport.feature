@@ -8,8 +8,8 @@ Funktionalität: Alle Daten exportieren
   # #496 (Entscheid des Product Owners, 31.10.2026): eine ZIP-Datei unter den Einstellungen mit einer Datendatei (JSON,
   # vollständig, mit den Beziehungen), einer Tabelle (CSV, UTF-8, Strichpunkt) je Art von Daten, den Belegen als Dateien
   # und einer Anleitung README.txt; das Protokoll gehört dazu, Gelöschtes nicht; der Export kommt ins Protokoll; die
-  # Dateinamen in der Sprache der Oberfläche. Kein Import. Wortlaut und Namen: Entwurf docs/reviews/496-entwurf.md, vor
-  # der Fachprüfung. Der Export enthält auch die Daten parallel laufender Szenarien: die Schritte suchen die eigenen
+  # Dateinamen in der Sprache der Oberfläche. Kein Import. Wortlaut und Namen: Entwurf docs/reviews/496-entwurf.md mit
+  # der Fachprüfung docs/reviews/496-fachreview-1.md. Der Export enthält auch die Daten parallel laufender Szenarien: die Schritte suchen die eigenen
   # Datensätze, sie zählen nicht. Kein Szenario für einen misslungenen Export: der Download ist eine Antwort des Servers
   # ohne Seite, ein Fehler zwischen BFF und Backend («No scenario», tests/e2e/CLAUDE.md); den prüft ein Test darunter.
 
@@ -18,7 +18,7 @@ Funktionalität: Alle Daten exportieren
 
   @wip
   Szenario: Die Einstellungen erklären den Export
-    Dann erklären die Einstellungen beim Export "Eine ZIP-Datei mit allen Daten, die Sie in Dwello erfasst haben, mit Belegen, Dokumenten, Abrechnungen und dem Protokoll. Die Tabellen öffnen Sie mit Excel; die Datei «daten.json» kann ein anderes Programm einlesen. Was Sie gelöscht haben, ist nicht dabei."
+    Dann erklären die Einstellungen beim Export "Eine ZIP-Datei mit allen Daten, die Sie in Dwello erfasst haben, mit Belegen, Dokumenten, Abrechnungen und dem Protokoll. Die Tabellen öffnen Sie mit Excel; die Datei «daten.json» kann ein anderes Programm einlesen. Was Sie gelöscht haben, ist nicht dabei. Die Datei enthält die Daten Ihrer Mieter: Bewahren Sie sie sicher auf und löschen Sie sie, wenn Sie sie nicht mehr brauchen."
 
   @wip
   Szenario: Alle Daten unter den Einstellungen exportieren
@@ -44,6 +44,7 @@ Funktionalität: Alle Daten exportieren
       | tabellen/tankbestände.csv       |
       | tabellen/abrechnungen.csv       |
       | tabellen/abrechnungspositionen.csv |
+      | tabellen/zahlungen.csv          |
       | tabellen/dokumente.csv          |
       | tabellen/kategorien.csv         |
       | tabellen/verteilschlüssel.csv   |
@@ -101,8 +102,10 @@ Funktionalität: Alle Daten exportieren
     Und "Hauswart Meier" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
     Und die Rechnung von "Hauswart Meier" hat den Beleg "meier-q1.pdf"
     Und "Hauswart Huber" stellt dem Gebäude "Seeblick" "120.00" Franken für "Gartenpflege" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und die Rechnung von "Hauswart Huber" ist inzwischen gelöscht
     Wenn der Liegenschaftsverwalter alle Daten exportiert
     Dann nennt die Datendatei des Exports beim Gebäude "Seeblick" die Rechnung von "Hauswart Meier" mit ihrem Beleg "meier-q1.pdf"
     Und nennt die Datendatei des Exports beim Gebäude "Seeblick" keine Rechnung von "Hauswart Huber"
     Und führt die Tabelle "tabellen/rechnungen.csv" des Exports keine Rechnung von "Hauswart Huber"
+    Und enthält der Ordner "belege" des Exports keinen Beleg der Rechnung von "Hauswart Huber"

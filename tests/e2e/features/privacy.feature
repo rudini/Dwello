@@ -153,10 +153,3 @@ Funktionalität: Datenschutz
   Szenario: Ohne Sicherung nennt die Datenschutzerklärung keine
     Dann nennt die Datenschutzerklärung unter "Aufbewahrung" "löscht Dwello keine gespeicherten Daten von selbst"
     Und nennt die Datenschutzerklärung unter "Aufbewahrung" nicht "Sicherung"
-
-  # #496 (Entscheid des Product Owners, 31.10.2026): der Export aller Daten bringt die Daten der Mieter und
-  # Rechnungssteller auf den Computer des Liegenschaftsverwalters; Wortlaut: Entwurf docs/reviews/496-entwurf.md
-  @wip
-  Szenario: Die Datenschutzerklärung nennt den Export aller Daten
-    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Unter «Einstellungen» › «Alle Daten exportieren» laden Sie alle Daten, die Dwello speichert, als ZIP-Datei auf Ihren Computer herunter, mit Belegen, Dokumenten, Abrechnungen und dem Protokoll. Jeder Export kommt mit Datum ins Protokoll."
-    Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Datei enthält auch die Daten Ihrer Mieter und Rechnungssteller. Dwello gibt sie niemandem weiter; wem Sie die Datei geben und wie lange Sie sie aufbewahren, entscheiden Sie. Bewahren Sie sie wie Ihre Mietverträge auf und löschen Sie sie, wenn Sie sie nicht mehr brauchen."
