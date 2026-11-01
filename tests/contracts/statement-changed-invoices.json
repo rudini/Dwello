@@ -5,5 +5,6 @@
 	"correctionDue": false,
 	"correctionDeclinable": false,
 	"correctionLowers": false,
+	"recalculated": null,
 	"splitKeys": []
 }

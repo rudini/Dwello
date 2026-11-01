@@ -111,6 +111,7 @@ export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) 
 export const laterCorrectButton = target('Abrechnung berichtigen im Hinweis', (page) => page.getByTestId('statement-later-correct-button'));
 // #454 (Fachreview 454-1 E-6): a sent statement left as it is, after the confirmation
 export const declineCorrectionButton = target('Nicht berichtigen', (page) => page.getByTestId('statement-decline-correction-button'));
+export const declineCorrectionDialog = target('Frage vor «Nicht berichtigen»', (page) => page.getByRole('dialog'));
 export const confirmDeclineCorrectionButton = target('Nicht berichtigen bestätigen', (page) =>
 	page.getByTestId('statement-decline-correction-confirm')
 );

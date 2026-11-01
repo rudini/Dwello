@@ -11,6 +11,7 @@ import {
 	costBreakdown,
 	statementAdvancePaid,
 	correctDialog,
+	declineCorrectionDialog,
 	recalculateDialog,
 	redeliverDialog,
 	redeliverButton,
@@ -115,6 +116,8 @@ export const languageOfPdf = Text.of(pdfLanguage);
 
 // #120
 export const correctConfirmation = Text.of(correctDialog);
+// #546: what «Nicht berichtigen» costs the landlord
+export const declineCorrectionQuestion = Text.of(declineCorrectionDialog);
 export const recalculateQuestion = Text.of(recalculateDialog);
 export const redeliverConfirmation = Text.of(redeliverDialog);
 export const redeliverOffers = Count.of(redeliverButton);

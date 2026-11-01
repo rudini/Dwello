@@ -1033,6 +1033,18 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieser Abrechnung wurde der Tankbestand der Abrechnungsperiode geändert."
 
+  # #546 (PO 31.10.2026, Personas Anna 454 P-2, Dr. Weber 454 P-1): der Hinweis nennt den neu berechneten Saldo, die
+  # Frage vor «Nicht berichtigen» den Unterschied, den der Liegenschaftsverwalter dann selbst trägt; neu (430 + 732 ×
+  # 91/366 = 182) × 1.03 = 630.36, zugunsten des Mieters 630.35; Unterschied 630.35 − 442.90 = 187.45 (Fachreview 546-1 V-2)
+  Szenario: Der Hinweis zum Berichtigen nennt den neuen Saldo und was es kostet, nicht zu berichtigen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "eine Nachzahlung von CHF 630.35 statt CHF 442.90."
+    Wenn der Liegenschaftsverwalter die Abrechnung nicht berichtigen will
+    Dann fragt Dwello vor «Nicht berichtigen» "Den Unterschied von CHF 187.45 tragen Sie selbst."
+
   # code review 454-2 C-8: senkt die Neuberechnung den Saldo (eine doppelt erfasste Rechnung gelöscht), sagt die
   # Abrechnung warum «Nicht berichtigen» fehlt (Fachreview 454-3 V-32) und führt aus dem Hinweis zum Berichtigen
   # (Persona Anna 454 P-1)

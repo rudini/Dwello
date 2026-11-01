@@ -609,7 +609,12 @@ export async function recalculation(statement: StatementWithDetails) {
 	// as claimed: a Saldo below CHF 5 is neither claimed nor paid out, but in a Schlussabrechnung (PO 2026-10-20, V-30 A)
 	const claimed = (balance: string) => (!statement.final && belowMinimum(Number(balance)) ? 0 : Number(balance));
 	const [before, after] = [claimed(statement.balance), claimed(now.balance)];
-	return { changes, result, raises: after >= before, lowers: after < before };
+	// #546 (Fachreview 546-1 V-2, V-4): the raw Saldo it gives, the difference to the one billed, and whether it is below CHF 5
+	const balance = Number(now.balance).toFixed(2);
+	const difference = roundToRappen(Number(now.balance) - Number(statement.balance)).toFixed(2);
+	const small = (value: number) => value !== 0 && belowMinimum(value); // either Saldo (code review 546-1 C-2)
+	const belowMin = !statement.final && (small(Number(now.balance)) || small(Number(statement.balance)));
+	return { changes, result, raises: after >= before, lowers: after < before, now: { balance, difference, belowMinimum: belowMin, declineCosts: after >= before && Number(difference) > 0 ? difference : null } };
 }
 
 /**

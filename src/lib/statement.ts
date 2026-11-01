@@ -106,3 +106,30 @@ export async function periodRunning(periodEnd: string): Promise<boolean> {
 	);
 	return response.data?.running === true;
 }
+
+/** #546: what the backend says the recalculation of a sent statement gives (`recalculation()`) */
+export type Recalculated = { balance: string; difference: string; belowMinimum: boolean; declineCosts: string | null };
+
+// the amount the texts put after «CHF», without a sign
+export const francs = (amount: number) => formatCurrency(Math.abs(amount)).replace(/^CHF\s*/, '');
+const kindOf = (balance: number) => (balance > 0 ? 'due' : balance < 0 ? 'refund' : 'settled');
+type Kind = ReturnType<typeof kindOf>;
+const NOW_WAS: Record<`${Kind}_${Kind}`, (values: { tenant: string; now: string; before: string }) => string> = {
+	due_due: m.statements_later_now_due_was_due,
+	refund_refund: m.statements_later_now_refund_was_refund,
+	due_refund: m.statements_later_now_due_was_refund,
+	refund_due: m.statements_later_now_refund_was_due,
+	due_settled: m.statements_later_now_due_was_settled,
+	refund_settled: m.statements_later_now_refund_was_settled,
+	settled_due: m.statements_later_now_settled_was_due,
+	settled_refund: m.statements_later_now_settled_was_refund,
+	settled_settled: m.statements_later_now_same
+};
+
+/** #546 (Fachreview 546-1): «Neu berechnet ergibt sich für … statt …», amounts without a sign; the same Saldo says so */
+export function recalculatedText(tenant: string, before: number, recalculated: Recalculated): string {
+	const now = Number(recalculated.balance);
+	const amounts = { tenant, now: francs(now), before: francs(before) };
+	const text = now === before ? m.statements_later_now_same({ tenant }) : NOW_WAS[`${kindOf(now)}_${kindOf(before)}`](amounts);
+	return recalculated.belowMinimum ? `${text} ${m.statements_later_below_minimum()}` : text;
+}

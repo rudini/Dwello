@@ -109,6 +109,7 @@ export const resetPayment: Activity = (actor) =>
 	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));
 
 // #454 (Fachreview 454-1 E-6): a sent statement left as it is, after the confirmation
+export const startDecliningCorrection = Click.on(declineCorrectionButton);
 export const declineCorrection: Activity = (actor) =>
 	actor.attemptsTo(Click.on(declineCorrectionButton), Click.on(confirmDeclineCorrectionButton));
 

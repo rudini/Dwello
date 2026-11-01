@@ -7,6 +7,7 @@ import type { StatementWithDetails as StatementResponse } from '../../../backend
 import type { Json, StatementLineItem, StatementWithDetails } from '$lib/types';
 import type { SplitKeyHint } from '$lib/types';
 import type { SplitKey } from '../../../backend/src/services/split-keys';
+import type { Recalculated } from '$lib/statement';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -179,6 +180,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
+		recalculated?: Recalculated | null;
 		carryOverChanged?: boolean;
 		splitKeys?: SplitKey[];
 	} = response?.ok ? await response.json() : {};
@@ -188,6 +190,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,
+		recalculated: changed.recalculated ?? null, // #546: the Saldo the recalculation gives
 		carryOver: !!changed.carryOverChanged, // #506 C: the draft would count another Übertrag now
 		splitKeys: localSplitKeys(changed.splitKeys, categories, keys) // #528, as «Neu berechnen» would bill them
 	};
