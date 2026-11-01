@@ -579,3 +579,8 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] code-reviewer `docs/reviews/546-review-1.md`: C-1 (Major) and C-2 tests seen red, C-3 done; closing round `546b-review-1.md`
 - [x] Persona `docs/design/personas/weber-546.md`: amounts plausible; P-1, P-2 (Minor) stay in the report (P-2 is the open point the issue left as is)
 - [x] PR: pushed after this archive
+
+## Session: Copilot's refusal is no outside review (#1007 follow-up)
+
+- [x] #1024 was merged a minute after CI, 15 seconds before its fallback review, after Copilot's «unable to review … quota»: skill `pull-request` says such a refusal is not a review and the session waits for the fallback
+- [x] PR: pushed after this archive
