@@ -56,6 +56,7 @@ import {
 	openContractApartment,
 	openContractTenant,
 	openRefusedStatement,
+	downloadConsentLetter,
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
@@ -69,6 +70,7 @@ import {
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
+import { downloadedPdfText } from '../questions/download';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -540,4 +542,13 @@ Then('erklärt der Dialog beim Vertragsende {string}', async ({ verwalter }, tex
 
 Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(noticeReceivedHelp).toContain(text);
+});
+
+// #521: the letter template for the tenants' consent to a new Abrechnungsperiode
+When('der Liegenschaftsverwalter die Vorlage für die Zustimmung zur neuen Abrechnungsperiode herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadConsentLetter);
+});
+
+Then('richtet sich die Vorlage an {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(downloadedPdfText).toContain(names.get(tenant) ?? tenant);
 });

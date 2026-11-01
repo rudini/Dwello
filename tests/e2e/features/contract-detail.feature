@@ -328,6 +328,22 @@ Funktionalität: Mietvertragsdetail
     Und rät der Mietvertrag bei den Tagen ab "2025-07-01" zur Abrechnungsperiode im Mietvertrag
     Und rät der Mietvertrag bei den Tagen ab "2023-07-01" nichts zur Abrechnungsperiode im Mietvertrag
 
+  # #521: zum Rat bei der kurzen Abrechnungsperiode (#486) gibt es pro Mietvertrag einen Brief, mit dem der Mieter der
+  # neuen Abrechnungsperiode schriftlich zustimmt: die bisherige und die neue Abrechnungsperiode, die kurze Periode
+  # dazwischen, die erste neue Periode und eine Zeile für die Unterschrift
+  @wip
+  Szenario: Vorlage für die Zustimmung des Mieters zu einer neuen Abrechnungsperiode
+    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Vorlage für die Zustimmung zur neuen Abrechnungsperiode herunterlädt
+    Dann steht im PDF "Zustimmung zu einer neuen Abrechnungsperiode"
+    Und richtet sich die Vorlage an "Anna Keller"
+    Und steht im PDF "1. Juli bis 30. Juni"
+    Und steht im PDF "1. Januar bis 31. Dezember"
+    Und steht im PDF "01.07.2025 – 31.12.2025"
+    Und steht im PDF "01.01.2026 – 31.12.2026"
+    Und steht im PDF "Unterschrift"
+
   Szenario: Vor einem Wechsel der Abrechnungsperiode rät der Mietvertrag nichts zur Abrechnungsperiode im Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert

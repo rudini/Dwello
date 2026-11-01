@@ -1,8 +1,9 @@
 import { inDays } from '../fixtures/dates';
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, EnterDate, Navigate, Scroll } from '../screenplay/interactions';
+import { Browser, Check, Click, DownloadFrom, EnterDate, Navigate, Scroll } from '../screenplay/interactions';
 import {
 	confirmDeleteContractButton,
+	consentLetterLink,
 	confirmEndContractButton,
 	contractApartmentLink,
 	contractEditButton,
@@ -91,3 +92,6 @@ export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);
 // #464: a later Akonto is deleted; the one before applies again from then on
 export const deleteAdvance = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(advanceDeleteButton(amount)), Click.on(confirmAdvanceDeleteButton));
+
+/** #521: downloads the letter template for the tenants' consent to a new Abrechnungsperiode */
+export const downloadConsentLetter = DownloadFrom(consentLetterLink);
