@@ -690,3 +690,14 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Workflow note: `docs/design/personas/README.md` («Who saves») names `demo-records.md`, which does not exist; the demo records are in `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts` (in `docs/reviews/workflow-notes-issue-679.md`)
 - [x] Closing `code-reviewer` round: `docs/reviews/679-review-2.md` (no findings)
 - [x] Archive, PR: pushed after this archive
+
+## Session: #691 cut-off cost table on the statement edit page
+
+- [x] Reproduced at 1440 × 900 (persona stack, demo data): the table needs 1010 px, the edit page's panel gives 716 px; «Zeitanteil» is cut, the scroll bar sits below the whole table. The detail page is 22 px short too, but its mid widths are #658 (`needs-decision`), so it stays as is
+- [x] Scenario in `statement-edit.feature` seen red (203 px hidden sideways), then green: the edit page shows the lines one below the other at every width (`CostTable` `stacked`), as phones already do
+- [x] E2E: `statement-edit.feature`, `statement-detail.feature` (132 passed), axe and language rows of `statement-edit` (4 passed); unit tests on changed files (322 passed)
+- [x] Slice review round 1: `docs/reviews/691-review-1.md` (C-1, C-2 Minor fixed; the DOM test seen red without `stacked`)
+- [x] Persona review: `docs/design/personas/anna-691.md` (task done; P-1, P-2 Minor, both on the base already, stay in the report; the detail page observation added to #658)
+- [x] Closing `code-reviewer` round: `docs/reviews/691-review-2.md`
+- [x] Workflow notes: nothing came up
+- [x] Archive, PR: pushed after this archive
