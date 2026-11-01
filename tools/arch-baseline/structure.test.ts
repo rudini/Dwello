@@ -121,7 +121,7 @@ describe('report', () => {
 		const html = report(analyze({ ...input, health: { ...health, hotspots: [{ path: 'backend/src/services/types.ts', score: 1, commits: 7 }] } }));
 		expect(html).toContain('id="change-graph"');
 		expect(html).toMatch(/<rect class="change-zone"/);
-		expect(html).toMatch(/<circle[^>]*><title>be:services\/a: I 0.5, 7 changes<\/title>/);
+		expect(html).toMatch(/<circle[^>]*><title>be:services\/a: I 0.5, Ca 1, 7 changes<\/title>/);
 		expect(html).toContain('<th>Changes</th>');
 		expect(html).not.toMatch(/ai-graph|Abstractness|<th>[AD]<\/th>/);
 	});

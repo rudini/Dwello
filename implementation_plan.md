@@ -13,5 +13,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] Structure report: graph «Stability and changes» (I over the commits of a module's most-changed file in fallow's hotspot window) with the zone stable and changing often; light per module (I ≤ 0.3 and Ca ≥ 5: green up to 12 changes, yellow up to 25, else red); A, D, the A/I graph and the D history table removed (tests first)
 - [x] Docs: report bullet and fitness row without A/D
-- [ ] code-reviewer rounds
+- [ ] code-reviewer: `docs/reviews/change-graph-review-1.md` (no Blocker/Major; C-1 unused `--band`, C-2 zone text and tooltip without Ca: fixed)
 - [ ] Archive the session; PR after #1056 is merged

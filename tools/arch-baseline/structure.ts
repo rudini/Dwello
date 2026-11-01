@@ -207,7 +207,7 @@ function changeGraph(modules: Module[]): string {
 	const at = new Map<string, Module[]>();
 	for (const m of modules) at.set(`${m.i} ${m.changes}`, [...(at.get(`${m.i} ${m.changes}`) ?? []), m]);
 	const dots = [...at.values()].map((ms) => {
-		const title = ms.map((m) => `${m.name}: I ${m.i}, ${m.changes} changes`).join('\n');
+		const title = ms.map((m) => `${m.name}: I ${m.i}, Ca ${m.ca}, ${m.changes} changes`).join('\n');
 		const r = Math.min(16, 4 + 2 * Math.sqrt(ms.length - 1));
 		return `<circle cx="${x(ms[0].i)}" cy="${y(ms[0].changes)}" r="${r}" fill="${layerColor(ms[0].name)}" stroke="var(--surface)" stroke-width="2"><title>${esc(title)}</title></circle>`;
 	});
@@ -366,9 +366,9 @@ export function report(analysis: Analysis, history: Snapshot[] = []): string {
 		.join('');
 	const fns = functions.map((f) => `<tr><td><code>${esc(f.path)}</code></td><td><code>${esc(f.name)}</code></td><td>${f.cyclomatic}</td><td>${f.cognitive}</td></tr>`).join('');
 	return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dwello: structure report</title><style>
-:root{--surface:#fcfcfb;--plane:#f9f9f7;--ink:#0b0b0b;--ink2:#52514e;--line:#e4e3df;--band:#e6f4e6;--crit:#d03b3b;--good:#0ca30c;--warn:#b37a00;
+:root{--surface:#fcfcfb;--plane:#f9f9f7;--ink:#0b0b0b;--ink2:#52514e;--line:#e4e3df;--crit:#d03b3b;--good:#0ca30c;--warn:#b37a00;
 --l1:#2a78d6;--l2:#eb6834;--l3:#1baf7a;--l4:#eda100;--l5:#e87ba4;--s0:#cde2fb;--s1:#86b6ef;--s2:#2a78d6;--s3:#184f95}
-@media (prefers-color-scheme:dark){:root{--surface:#1a1a19;--plane:#0d0d0d;--ink:#f0efec;--ink2:#c3c2b7;--line:#383835;--band:#1f3320;--warn:#fab219;
+@media (prefers-color-scheme:dark){:root{--surface:#1a1a19;--plane:#0d0d0d;--ink:#f0efec;--ink2:#c3c2b7;--line:#383835;--warn:#fab219;
 --l1:#3987e5;--l2:#d95926;--l3:#199e70;--l4:#c98500;--l5:#d55181;--s0:#184f95;--s1:#256abf;--s2:#5598e7;--s3:#b7d3f6}}
 body{margin:0;background:var(--plane);color:var(--ink);font:15px/1.5 system-ui,sans-serif}main{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
 h1{font-size:28px;margin:0}h2{font-size:20px;margin:40px 0 8px}h3{font-size:16px;margin:24px 0 8px}p,li{color:var(--ink2)}
@@ -393,7 +393,7 @@ ${historySection(history)}
 <li><b>Against stability</b> (Stable Dependencies Principle, Robert C. Martin): the module's dependencies on a module whose instability I is more than ${LIMITS.unstable.gap} higher than its own, so a module many depend on uses one that changes more easily: green at ${LIMITS.unstable.module[0]}, yellow at ${LIMITS.unstable.module[1]}, else red. At the top: green at ${LIMITS.unstable.total[0]}, yellow up to ${LIMITS.unstable.total[1]}.</li>
 <li><b>Overall:</b> the worst of the colours. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
 <h2>Stability and changes</h2>
-<p>I = Ce / (Ca + Ce): Ca = modules that use it, Ce = modules it uses; changes as in the column «Changes». Martin's A/I graph fits code that hides behind interfaces; Dwello's modules export functions, so the question here is whether a module many depend on changes often (the red zone top left). Dot size = number of modules at the same position. Hover over a dot for the names.</p>
+<p>I = Ce / (Ca + Ce): Ca = modules that use it, Ce = modules it uses; changes as in the column «Changes». Martin's A/I graph fits code that hides behind interfaces; Dwello's modules export functions, so the question here is whether a module many depend on changes often. The shaded zone top left holds the modules with I ≤ ${LIMITS.stable.i} and more than ${LIMITS.changes[0]} changes; one with at least ${LIMITS.stable.users} users (Ca, in the tooltip) is yellow or red in the column «Changes». Dot size = number of modules at the same position. Hover over a dot for the names.</p>
 ${legend}
 <div class="scroll">${changeGraph(modules)}</div>
 <h2>Dependency Structure Matrix</h2>
