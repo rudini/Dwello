@@ -651,3 +651,19 @@ Request from the product owner (chat, 1.11.2026): history of the structure repor
 
 - [x] MiniMax with `reasoning_effort: medium` gave mostly false or known findings (#1021 to #1033); `high` run locally on #1024, #1031, #1033 dropped the false ones in about two minutes each: `REASONING_EFFORT: high`
 - [x] PR: pushed after this archive
+
+
+## Session: structure report like Structure101 (XS, drill-down DSM, tests and change coupling)
+
+Request from the product owner (chat, 1.11.2026): add what the report misses compared with Structure101 and in quantitative quality: an XS value (fat and tangles) with traffic light and history, a DSM that opens to files and to the imports behind a cell, and per module the test reach and the change coupling without import. No scenario: developer tooling, nothing a landlord sees. Test reach is fallow's static estimate (a test imports the file), not line coverage: that needs the test suites with PostgreSQL.
+
+- [x] XS: share of production lines in excess (tangled modules, fat modules, files and functions), KPI with light, module light "fat"
+- [x] Test reach per module (fallow `--coverage-gaps`), KPI and module light
+- [x] Hidden change coupling (file pairs changed together, modules without import), KPI and module light
+- [x] DSM drill-down: module details with files and the imports behind each cell
+- [x] History: XS chart; snapshots and CI measure coverage gaps too
+- [x] Hidden coupling leaves out pairs in one folder: SvelteKit's page and load function change together without import (16 of 49 pairs)
+- [x] code-reviewer round 1: `docs/reviews/structure-s101-review-1.md` (C-1 Major: folder rule only for route folders, C-2 empty gaps file, C-3 Ce test: fixed; C-4 Minor, no test for the inline script that opens details: stays in the report)
+- [x] code-reviewer round 2: `docs/reviews/structure-s101-review-2.md` (C-1 to C-3 closed, no new finding; C-4 stays)
+- [x] Workflow note: none new
+- [x] PR: pushed after this archive
