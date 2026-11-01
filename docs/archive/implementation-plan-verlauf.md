@@ -632,6 +632,21 @@ Request from the product owner (chat, 1.11.2026): build the structure report as 
 - [x] Persona `docs/design/personas/dr-weber-508.md`: P-1 (Major, no advice at «zu wenig») to #1026; P-2 to P-5 (Minor) stay in the report
 - [x] PR: pushed after this archive
 
+
+## Session: structure report history and English report
+
+Request from the product owner (chat, 1.11.2026): history of the structure report, retroactive (one snapshot per day with commits on `main`, whole history from 23.1.2026; a pause April to late September shows as a gap on a time axis) and ongoing (CI on every push to `main`); the report in English. No scenario: developer tooling, nothing a landlord sees.
+
+- [x] Report texts in English
+- [x] Snapshot summary per commit (KPIs, module lights, functions over the thresholds, I and A per module)
+- [x] `tools/arch-baseline/structure-history.sh`: last first-parent commit of each day with commits of `main` and HEAD, measured with today's tools and fallow config (`ARCH_ROOT`), cached per commit
+- [x] History section: one chart per measure, modules whose distance D changed most
+- [x] CI workflow on push to `main`: cache of snapshots, report as artifact, trend table in the job summary
+- [x] code-reviewer round 1: `docs/reviews/structure-history-review-1.md` (C-1 Major cache keyed by commit only, C-2 Minor same-day order: fixed)
+- [x] code-reviewer round 2: `docs/reviews/structure-history-review-2.md` (C-1, C-2 closed; Minors C-3 script in the cache fingerprint, C-4 comment: fixed)
+- [x] Results to the product owner (chat, page updated)
+- [x] code-reviewer closing round: `docs/reviews/structure-history-review-3.md` (no findings)
+- [x] Workflow note: none new (stop hook as in `workflow-notes-architecture-phase-2.md`)
 ## Session: fallback review thinks harder (#1007 follow-up)
 
 - [x] MiniMax with `reasoning_effort: medium` gave mostly false or known findings (#1021 to #1033); `high` run locally on #1024, #1031, #1033 dropped the false ones in about two minutes each: `REASONING_EFFORT: high`

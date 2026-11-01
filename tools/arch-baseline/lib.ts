@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 export const HERE = dirname(fileURLToPath(import.meta.url));
 
-export const ROOT = join(HERE, '..', '..');
+export const ROOT = process.env.ARCH_ROOT ?? join(HERE, '..', '..');
 // ARCH_OUT: another output directory, e.g. for tools/fitness, so the kept raw data stays untouched
 export const OUT = process.env.ARCH_OUT ?? join(HERE, 'out');
 mkdirSync(OUT, { recursive: true });
