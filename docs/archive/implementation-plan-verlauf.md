@@ -584,3 +584,14 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 
 - [x] #1024 was merged a minute after CI, 15 seconds before its fallback review, after Copilot's «unable to review … quota»: skill `pull-request` says such a refusal is not a review and the session waits for the fallback
 - [x] PR: pushed after this archive
+
+## Session: #521 letter for the tenants' consent to a new Abrechnungsperiode
+
+- [x] @wip scenario seen red; fach-reviewer step 1 `docs/reviews/521-fachreview-1.md`: V-1 to V-6, M-1, M-2 taken; glossary term to #1035 (needs-decision)
+- [x] Backend letter PDF (`consent-letter.ts`, `consent-letter.service.ts`, `consentPeriod`), route, `consent` flags, links on the contract page and in wizard step 2; three scenarios green without @wip
+- [x] code-reviewer `docs/reviews/521-review-1.md`: C-1 (Major) refusal as a page, C-2 to C-5 fixed; re-review `521b-review-1.md`: C-1 file-name step, C-3 code CONTRACT_NOT_FOUND fixed, C-2 stays (way back of the refusal page, noted in #734)
+- [x] fach-reviewer step 5 `docs/reviews/521-fachreview-2.md`: V-7 to V-9 fixed, V-10 to #1036 (needs-decision)
+- [x] Persona `docs/design/personas/helga-521.md`: P-3 fixed; P-1 (Major), P-2 to #1036; P-4 to P-7 stay in the report
+- [x] daten-pruefer `docs/reviews/521-datenpruefung-1.md`: no findings
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-521.md`
+- [x] PR: pushed after this archive
