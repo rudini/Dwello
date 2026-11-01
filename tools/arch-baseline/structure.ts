@@ -3,17 +3,22 @@
 
 type Edge = { from: string; to: string };
 type Health = {
-	findings: { path: string; name: string; cyclomatic: number; cognitive: number; severity: string }[];
+	findings: { path: string; name: string; cyclomatic: number; cognitive: number; severity: string; line_count?: number }[];
 	hotspots?: { path: string; score: number }[]; // missing when no file has enough commits
 	health_score: { score: number; grade: string };
 	vital_signs: { duplication_pct: number; maintainability_avg: number };
+	change_coupling?: { pairs: { path_a: string; path_b: string; shared_revisions: number; degree: number }[] };
 };
 export type Input = {
 	edges: (Edge & { file_edges: string })[];
 	cycles: { modules: string }[];
-	files: { path: string; kind: string; module: string }[];
+	files: { path: string; kind: string; module: string; loc?: string }[];
 	source: (path: string) => string;
 	health: Health;
+	/** fallow health --coverage-gaps: runtime files no test reaches (static, not line coverage) */
+	gaps?: { summary: { file_coverage_pct: number }; files: { path: string }[] };
+	/** 02-imports imports-file.csv, for the files behind a DSM cell */
+	fileEdges?: { from: string; to: string; from_module: string; to_module: string }[];
 };
 export type Light = 'green' | 'yellow' | 'red';
 export type Module = {
@@ -27,7 +32,10 @@ export type Module = {
 	d: number;
 	findings: number;
 	hotspot: number;
-	lights: { distance: Light; complexity: Light; hotspot: Light };
+	xs: number;
+	untested: number;
+	hidden: number;
+	lights: { distance: Light; complexity: Light; hotspot: Light; fat: Light; tests: Light; coupling: Light };
 	light: Light;
 };
 
@@ -60,7 +68,16 @@ export function abstractness(src: string): { abstract: number; exports: number }
 const round = (x: number) => Math.round(x * 100) / 100;
 
 /** Limits for green and yellow; beyond the second a value is red (for scores where higher is better: lower limits). */
-export const LIMITS = { distance: [0.3, 0.6], painUsers: 5, hotspot: [10, 20], health: [85, 70], duplication: [3, 5], maintainability: [85, 70] } as const;
+export const LIMITS = {
+	xs: [5, 10],
+	fatModule: { files: 30, ce: 15 },
+	fatFile: 400,
+	untested: [0, 50],
+	reach: [90, 75],
+	hidden: [0, 2],
+	hiddenTotal: [2, 10],
+	fatFunction: { cyclomatic: 20, cognitive: 15 },
+	distance: [0.3, 0.6], painUsers: 5, hotspot: [10, 20], health: [85, 70], duplication: [3, 5], maintainability: [85, 70] } as const;
 const scale = (x: number, [green, yellow]: readonly number[]): Light => (x <= green ? 'green' : x <= yellow ? 'yellow' : 'red');
 const ORDER: Light[] = ['green', 'yellow', 'red'];
 const worst = (lights: Light[]): Light => ORDER[Math.max(...lights.map((l) => ORDER.indexOf(l)))];
@@ -73,7 +90,15 @@ function fileExports(path: string, source: (path: string) => string) {
 
 export type Kpi = { key: string; label: string; value: number; light: Light };
 
-export type Analysis = { modules: Module[]; kpis: Kpi[]; edges: (Edge & { weight: number })[]; functions: Health['findings'] };
+type CodeFile = { path: string; module: string; loc: number; untested: boolean };
+export type Analysis = {
+	modules: Module[];
+	kpis: Kpi[];
+	edges: (Edge & { weight: number })[];
+	functions: Health['findings'];
+	files: CodeFile[];
+	fileEdges: NonNullable<Input['fileEdges']>;
+};
 
 export function analyze(input: Input): Analysis {
 	const prod = input.files.filter((f) => f.kind === 'prod');
@@ -81,23 +106,67 @@ export function analyze(input: Input): Analysis {
 	const edges = input.edges.filter((e) => names.has(e.from) && names.has(e.to) && e.from !== e.to);
 	const level = levels(edges, input.cycles);
 	const count = (side: 'from' | 'to', m: string) => edges.filter((e) => e[side] === m).length;
-	const modules = [...names].sort().map((name) => {
-		const paths = new Set(prod.filter((f) => f.module === name).map((f) => f.path));
-		const own = [...paths].map((p) => fileExports(p, input.source));
+	const tangled = new Set(input.cycles.flatMap((c) => c.modules.split(' ')));
+	const code = (path: string) => /\.(ts|svelte)$/.test(path);
+	const loc = new Map(prod.filter((f) => code(f.path)).map((f) => [f.path, Number(f.loc ?? 0)]));
+	const over = (ratio: number) => (ratio > 1 ? 1 - 1 / ratio : 0); // share of an item beyond its limit
+	const fnExcess = (path: string) =>
+		input.health.findings
+			.filter((f) => f.path === path)
+			.reduce((s, f) => s + (f.line_count ?? 0) * over(Math.max(f.cyclomatic / LIMITS.fatFunction.cyclomatic, f.cognitive / LIMITS.fatFunction.cognitive)), 0);
+	// file pairs changed together whose modules import neither way: coupling the import graph does not show;
+	// a pair in one folder is SvelteKit's own wiring (a page and its load function), not hidden
+	const moduleOf = new Map(prod.map((f) => [f.path, f.module]));
+	const linked = new Set(edges.flatMap((e) => [`${e.from} ${e.to}`, `${e.to} ${e.from}`]));
+	const folder = (path: string) => path.slice(0, path.lastIndexOf('/'));
+	const hiddenPairs = (input.health.change_coupling?.pairs ?? [])
+		.filter((p) => folder(p.path_a) !== folder(p.path_b))
+		.map((p) => [moduleOf.get(p.path_a), moduleOf.get(p.path_b)])
+		.filter(([a, b]) => a && b && a !== b && !linked.has(`${a} ${b}`)) as [string, string][];
+	const untestedFiles = new Set((input.gaps?.files ?? []).map((f) => f.path));
+	const share = (part: number, whole: number) => (whole ? Math.round((part / whole) * 1000) / 10 : 0);
+	// XS like Structure101: lines beyond the limits of fat modules, files and functions; a tangled module counts whole
+	const excessOf = (name: string, paths: string[], ce: number) => {
+		const lines = paths.reduce((s, p) => s + (loc.get(p) ?? 0), 0);
+		const fatModule = over(Math.max(paths.length / LIMITS.fatModule.files, ce / LIMITS.fatModule.ce));
+		const fatFiles = paths.filter((p) => (loc.get(p) ?? 0) > LIMITS.fatFile);
+		const inner = fatFiles.reduce((s, p) => s + loc.get(p)! - LIMITS.fatFile, 0) + paths.reduce((s, p) => s + fnExcess(p), 0);
+		const excess = tangled.has(name) ? lines : Math.min(lines, lines * fatModule + inner); // ponytail: overlaps summed, capped at the module
+		const fat: Light = tangled.has(name) || fatModule ? 'red' : fatFiles.length ? 'yellow' : 'green';
+		return { lines, excess, fat };
+	};
+	const abstractOf = (paths: string[]) => {
+		const own = paths.map((p) => fileExports(p, input.source));
 		const exports = own.reduce((s, x) => s + x.exports, 0);
-		const a = exports ? own.reduce((s, x) => s + x.abstract, 0) / exports : 0;
+		return exports ? own.reduce((s, x) => s + x.abstract, 0) / exports : 0;
+	};
+	const untestedOf = (paths: string[]) => {
+		const codeFiles = paths.filter(code);
+		return codeFiles.length ? Math.round((codeFiles.filter((p) => untestedFiles.has(p)).length / codeFiles.length) * 100) : 0;
+	};
+	let excessLines = 0;
+	const modules = [...names].sort().map((name) => {
+		const paths = prod.filter((f) => f.module === name).map((f) => f.path);
+		const a = abstractOf(paths);
 		const [ca, ce] = [count('to', name), count('from', name)];
 		const i = ca ? ce / (ca + ce) : 1; // nothing depends on it: free to change
 		const d = round(Math.abs(a + i - 1));
-		const severities = input.health.findings.filter((f) => paths.has(f.path)).map((f) => f.severity);
-		const hotspot = Math.max(0, ...(input.health.hotspots ?? []).filter((h) => paths.has(h.path)).map((h) => h.score));
+		const severities = input.health.findings.filter((f) => paths.includes(f.path)).map((f) => f.severity);
+		const hotspot = Math.max(0, ...(input.health.hotspots ?? []).filter((h) => paths.includes(h.path)).map((h) => h.score));
+		const { lines, excess, fat } = excessOf(name, paths, ce);
+		excessLines += excess;
+		const hidden = hiddenPairs.filter((p) => p.includes(name)).length;
+		const untested = untestedOf(paths);
 		const lights = {
 			distance: ca < LIMITS.painUsers && d > LIMITS.distance[1] ? 'yellow' : scale(d, LIMITS.distance),
 			complexity: severities.some((s) => s === 'critical' || s === 'high') ? 'red' : severities.length ? 'yellow' : 'green',
-			hotspot: scale(hotspot, LIMITS.hotspot)
+			hotspot: scale(hotspot, LIMITS.hotspot),
+			fat,
+			tests: scale(untested, LIMITS.untested),
+			coupling: scale(hidden, LIMITS.hidden)
 		} satisfies Module['lights'];
-		const light = worst(Object.values(lights));
-		return { name, files: paths.size, level: level.get(name) ?? 1, ca, ce, i: round(i), a: round(a), d, findings: severities.length, hotspot: round(hotspot), lights, light };
+		const xs = share(excess, lines);
+		return { name, files: paths.length, level: level.get(name) ?? 1, ca, ce, i: round(i), a: round(a), d, findings: severities.length, hotspot: round(hotspot), xs, untested, hidden, lights, light: worst(Object.values(lights)) };
 	});
 	const tangles = input.cycles.filter((c) => c.modules.split(' ').some((m) => names.has(m))).length;
 	const { health_score, vital_signs } = input.health;
@@ -107,16 +176,23 @@ export function analyze(input: Input): Analysis {
 		value,
 		light: higherIsBetter ? scale(-value, limits.map((l) => -l)) : scale(value, limits)
 	});
+	const codeLines = [...loc.values()].reduce((s, l) => s + l, 0);
 	const kpis = [
+		kpi('xs', 'XS: excess (fat and tangles) in % of code lines', share(excessLines, codeLines), LIMITS.xs),
 		kpi('tangles', 'Tangles (module cycles)', tangles, [0, 0]),
 		kpi('health', `fallow health score (${health_score.grade})`, health_score.score, LIMITS.health, true),
 		kpi('duplication', 'Duplication in %', vital_signs.duplication_pct, LIMITS.duplication),
-		kpi('maintainability', 'Maintainability index (avg)', vital_signs.maintainability_avg, LIMITS.maintainability, true)
+		kpi('maintainability', 'Maintainability index (avg)', vital_signs.maintainability_avg, LIMITS.maintainability, true),
+		...(input.health.change_coupling ? [kpi('hidden', 'File pairs changed together across modules without import', hiddenPairs.length, LIMITS.hiddenTotal)] : []),
+		...(input.gaps ? [kpi('reach', 'Code files a test reaches, in % (static)', input.gaps.summary.file_coverage_pct, LIMITS.reach, true)] : [])
 	];
 	const functions = input.health.findings.filter((f) => prod.some((p) => p.path === f.path)).sort((a, b) => b.cyclomatic - a.cyclomatic);
-	return { modules, kpis, edges: edges.map((e) => ({ from: e.from, to: e.to, weight: Number(e.file_edges) })), functions };
+	const files = prod.filter((f) => code(f.path)).map((f) => ({ path: f.path, module: f.module, loc: loc.get(f.path)!, untested: untestedFiles.has(f.path) }));
+	const fileEdges = (input.fileEdges ?? []).filter((e) => e.from_module !== e.to_module && names.has(e.from_module) && names.has(e.to_module));
+	return { modules, kpis, edges: edges.map((e) => ({ from: e.from, to: e.to, weight: Number(e.file_edges) })), functions, files, fileEdges };
 }
 
+const id = (m: string) => m.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const LAYER: Record<string, string> = { be: 'var(--l1)', db: 'var(--l2)', bff: 'var(--l3)', fe: 'var(--l4)', shared: 'var(--l5)' };
 const layerColor = (m: string) => LAYER[m.split(':')[0]] ?? 'var(--ink2)';
@@ -161,7 +237,7 @@ function dsm(modules: Module[], edges: (Edge & { weight: number })[]): string {
 		.filter((e) => pos.has(e.from) && pos.has(e.to))
 		.map((e) => {
 			const [r, c] = [pos.get(e.from)!, pos.get(e.to)!];
-			return `<rect class="cell${c > r ? ' back' : ''}" x="${L + c * C + 1}" y="${r * C + 1}" width="${C - 2}" height="${C - 2}" rx="1" fill="var(${c > r ? '--crit' : shade(e.weight)})"><title>${esc(e.from)} → ${esc(e.to)}: ${e.weight} import(s)</title></rect>`;
+			return `<a href="#dep-${id(e.from)}--${id(e.to)}"><rect class="cell${c > r ? ' back' : ''}" x="${L + c * C + 1}" y="${r * C + 1}" width="${C - 2}" height="${C - 2}" rx="1" fill="var(${c > r ? '--crit' : shade(e.weight)})"><title>${esc(e.from)} → ${esc(e.to)}: ${e.weight} import(s)</title></rect></a>`;
 		});
 	return `<svg width="${L + n * C}" height="${n * C}" role="img" aria-label="Dependency Structure Matrix"><rect x="${L}" y="0" width="${n * C}" height="${n * C}" fill="var(--surface)" stroke="var(--line)"/>${rows.join('')}${cells.join('')}</svg>`;
 }
@@ -196,8 +272,8 @@ const byTime = (history: Snapshot[]) => [...history].sort((a, b) => Date.parse(a
 export function markdown(history: Snapshot[]): string {
 	const rows = byTime(history)
 		.reverse()
-		.map((h) => `| ${h.date.slice(0, 10)} | ${h.kpis.health} | ${h.functions} | ${h.lights.green} | ${h.lights.yellow} | ${h.lights.red} | ${h.kpis.tangles} |`);
-	return ['| Date | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |', '|---|---|---|---|---|---|---|', ...rows].join('\n');
+		.map((h) => `| ${h.date.slice(0, 10)} | ${h.kpis.xs} | ${h.kpis.health} | ${h.functions} | ${h.lights.green} | ${h.lights.yellow} | ${h.lights.red} | ${h.kpis.tangles} |`);
+	return ['| Date | XS % | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |', '|---|---|---|---|---|---|---|---|', ...rows].join('\n');
 }
 
 const LABEL: Record<Light, string> = { green: '● Green', yellow: '● Yellow', red: '● Red' };
@@ -257,8 +333,30 @@ ${lineChart('history-lights', 'Modules per traffic light', dates, [
 ])}
 ${lineChart('history-health', 'fallow health score', dates, [{ label: 'health', color: 'var(--l1)', values: kpi('health') }])}
 ${lineChart('history-functions', "Functions above fallow's thresholds", dates, [{ label: 'functions', color: 'var(--l1)', values: history.map((h) => h.functions) }])}
+${lineChart('history-xs', 'XS: excess (fat and tangles) in % of code lines', dates, [{ label: 'XS', color: 'var(--l1)', values: kpi('xs') }])}
 ${lineChart('history-tangles', 'Tangles (module cycles)', dates, [{ label: 'tangles', color: 'var(--l1)', values: kpi('tangles') }])}
 </div>${moved(history, now)}`;
+}
+
+/** Per module its files and, per module it uses, the file imports behind the DSM cell; opened from a cell link. */
+function details(analysis: Analysis): string {
+	return [...analysis.modules]
+		.sort((a, b) => a.name.localeCompare(b.name))
+		.map((m) => {
+			const files = analysis.files
+				.filter((f) => f.module === m.name)
+				.map((f) => `<tr><td><code>${esc(f.path)}</code></td><td>${f.loc}</td><td>${f.loc > LIMITS.fatFile ? badge('yellow', 'fat') : ''}</td><td>${f.untested ? badge('yellow', 'no test reaches it') : ''}</td></tr>`);
+			const uses = Map.groupBy(
+				analysis.fileEdges.filter((e) => e.from_module === m.name),
+				(e) => e.to_module
+			);
+			const deps = [...uses].map(
+				([to, es]) =>
+					`<h4 id="dep-${id(m.name)}--${id(to)}">→ ${esc(to)}</h4><ul>${es.map((e) => `<li><code>${esc(e.from)}</code> → <code>${esc(e.to)}</code></li>`).join('')}</ul>`
+			);
+			return `<details id="m-${id(m.name)}"><summary>${esc(m.name)} ${badge(m.light)} · ${m.files} files</summary><table><tr><th>File</th><th>Lines</th><th></th><th></th></tr>${files.join('')}</table>${deps.join('')}</details>`;
+		})
+		.join('\n');
 }
 
 export function report(analysis: Analysis, history: Snapshot[] = []): string {
@@ -278,7 +376,7 @@ export function report(analysis: Analysis, history: Snapshot[] = []): string {
 	const rows = sorted
 		.map(
 			(m) =>
-				`<tr class="module"><td>${esc(m.name)}</td><td>${badge(m.light)}</td><td>${badge(m.lights.distance, String(m.d))}</td><td>${badge(m.lights.complexity, String(m.findings))}</td><td>${badge(m.lights.hotspot, String(m.hotspot))}</td><td>${m.level}</td><td>${m.files}</td><td>${m.ca}</td><td>${m.ce}</td><td>${m.i}</td><td>${m.a}</td></tr>`
+				`<tr class="module"><td>${esc(m.name)}</td><td>${badge(m.light)}</td><td>${badge(m.lights.distance, String(m.d))}</td><td>${badge(m.lights.complexity, String(m.findings))}</td><td>${badge(m.lights.hotspot, String(m.hotspot))}</td><td>${badge(m.lights.fat, String(m.xs))}</td><td>${badge(m.lights.tests, String(m.untested))}</td><td>${badge(m.lights.coupling, String(m.hidden))}</td><td>${m.level}</td><td>${m.files}</td><td>${m.ca}</td><td>${m.ce}</td><td>${m.i}</td><td>${m.a}</td></tr>`
 		)
 		.join('');
 	const fns = functions.map((f) => `<tr><td><code>${esc(f.path)}</code></td><td><code>${esc(f.name)}</code></td><td>${f.cyclomatic}</td><td>${f.cognitive}</td></tr>`).join('');
@@ -304,7 +402,10 @@ ${historySection(history, modules)}
 <ul><li><b>Distance D</b> from the main sequence A + I = 1 (Robert C. Martin): green up to ${LIMITS.distance[0]}, yellow up to ${LIMITS.distance[1]}, else red, but red only from ${LIMITS.painUsers} users (Ca), yellow below: with few users a change is cheap. Red at the bottom left means stable and concrete (zone of pain): many depend on it, so changes ripple. For helpers that rarely change (dates, formats) this is often intended; together with a yellow or red hotspot it is worth a look. A module nothing depends on has I = 1.</li>
 <li><b>Complexity:</b> functions in the module above fallow's thresholds; one with severity high or critical makes it red, any other makes it yellow.</li>
 <li><b>Hotspot:</b> highest fallow hotspot score (complexity × changes in the last 6 months) of a file in the module: green up to ${LIMITS.hotspot[0]}, yellow up to ${LIMITS.hotspot[1]}, else red.</li>
-<li><b>Overall:</b> the worst of the three colours. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
+<li><b>XS</b> (excess complexity, after Structure101): lines beyond the limits of fat items, in % of the module's code lines. A module is fat with more than ${LIMITS.fatModule.files} files or more than ${LIMITS.fatModule.ce} module dependencies (Ce), a file with more than ${LIMITS.fatFile} lines, a function above fallow's thresholds (cyclomatic ${LIMITS.fatFunction.cyclomatic}, cognitive ${LIMITS.fatFunction.cognitive}); the share beyond the limit counts, a module in a tangle counts whole. Light: red for a fat or tangled module, yellow for a fat file in it. At the top: green up to ${LIMITS.xs[0]} %, yellow up to ${LIMITS.xs[1]} %.</li>
+<li><b>Untested:</b> share of the module's code files that no test reaches through imports (fallow's static estimate, not line coverage; end-to-end tests reach code over HTTP, which it does not see, so API endpoints show as untested): green at ${LIMITS.untested[0]}, yellow up to ${LIMITS.untested[1]} %, else red.</li>
+<li><b>Hidden coupling:</b> file pairs changed together often (fallow, at least 5 shared commits and 30 % of their commits) whose modules import neither way, without pairs in one folder (a SvelteKit page and its load function): green at ${LIMITS.hidden[0]}, yellow up to ${LIMITS.hidden[1]}, else red.</li>
+<li><b>Overall:</b> the worst of the six colours. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
 <h2>Abstractness and instability (A/I graph)</h2>
 <p>I = Ce / (Ca + Ce): Ca = modules that use it, Ce = modules it uses. A = exported types and interfaces / all exports (a Svelte component counts as one concrete export). The green band is D ≤ ${LIMITS.distance[0]}. Dot size = number of modules at the same position. Hover over a dot for the names.</p>
 ${legend}
@@ -314,10 +415,16 @@ ${legend}
 ${legend}
 ${groups}
 <h2>Modules</h2>
-<div class="scroll"><table><tr><th>Module</th><th>Overall</th><th>D</th><th>Complex functions</th><th>Hotspot</th><th>Level</th><th>Files</th><th>Ca</th><th>Ce</th><th>I</th><th>A</th></tr>${rows}</table></div>
+<div class="scroll"><table><tr><th>Module</th><th>Overall</th><th>D</th><th>Complex functions</th><th>Hotspot</th><th>XS %</th><th>Untested %</th><th>Hidden coupling</th><th>Level</th><th>Files</th><th>Ca</th><th>Ce</th><th>I</th><th>A</th></tr>${rows}</table></div>
 <h2>Functions above fallow's thresholds</h2>
 <div class="scroll"><table><tr><th>File</th><th>Function</th><th>Cyclomatic</th><th>Cognitive</th></tr>${fns}</table></div>
-</main></body></html>`;
+<h2>Module details</h2>
+<p>Every module with its files and, per module it uses, the file imports behind its DSM cell. A click on a DSM cell opens it here.</p>
+${details(analysis)}
+</main><script>
+function openTarget() { const t = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (!t) return; const d = t.closest('details'); if (d) d.open = true; t.scrollIntoView(); }
+addEventListener('hashchange', openTarget); openTarget();
+</script></body></html>`;
 }
 
 if (import.meta.main) {
@@ -329,7 +436,9 @@ if (import.meta.main) {
 		cycles: readCsv('cycles-module.csv') as Input['cycles'],
 		files: readCsv('files.csv') as Input['files'],
 		source: (path) => readFileSync(join(ROOT, path), 'utf8'),
-		health: JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8'))
+		health: JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8')),
+		gaps: existsSync(join(OUT, 'fallow-gaps.json')) ? JSON.parse(readFileSync(join(OUT, 'fallow-gaps.json'), 'utf8')).coverage_gaps : undefined,
+		fileEdges: readCsv('imports-file.csv') as Input['fileEdges']
 	});
 	const [flag, commit, date] = process.argv.slice(2);
 	if (flag === '--snapshot') console.log(JSON.stringify(snapshot(analysis, commit, date)));

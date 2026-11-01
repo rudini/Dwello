@@ -94,9 +94,9 @@ describe('Ampel', () => {
 			]
 		};
 		const m = Object.fromEntries(analyze({ ...input, health: h }).modules.map((x) => [x.name, x]));
-		expect(m['be:routes/a'].lights).toEqual({ distance: 'green', complexity: 'yellow', hotspot: 'yellow' });
-		expect(m['be:services/a'].lights).toEqual({ distance: 'green', complexity: 'red', hotspot: 'green' });
-		expect(m['db:schema'].lights).toEqual({ distance: 'yellow', complexity: 'green', hotspot: 'green' });
+		expect(m['be:routes/a'].lights).toEqual({ distance: 'green', complexity: 'yellow', hotspot: 'yellow', fat: 'green', tests: 'green', coupling: 'green' });
+		expect(m['be:services/a'].lights).toEqual({ distance: 'green', complexity: 'red', hotspot: 'green', fat: 'green', tests: 'green', coupling: 'green' });
+		expect(m['db:schema'].lights).toEqual({ distance: 'yellow', complexity: 'green', hotspot: 'green', fat: 'green', tests: 'green', coupling: 'green' });
 		expect([m['be:routes/a'].light, m['be:services/a'].light, m['db:schema'].light]).toEqual(['yellow', 'red', 'yellow']);
 	});
 
@@ -195,7 +195,7 @@ describe('snapshot', () => {
 		expect(snapshot(analyze({ ...input, health: h }), 'abc123', '2026-10-26')).toEqual({
 			commit: 'abc123',
 			date: '2026-10-26',
-			kpis: { tangles: 0, health: 90, duplication: 1, maintainability: 90 },
+			kpis: { xs: 0, tangles: 0, health: 90, duplication: 1, maintainability: 90 },
 			lights: { green: 1, yellow: 1, red: 1 },
 			functions: 1,
 			modules: { 'be:routes/a': [1, 0, 0], 'be:services/a': [0.5, 0.75, 0.25], 'db:schema': [0, 0, 1] }
@@ -206,7 +206,7 @@ describe('snapshot', () => {
 const snap = (date: string, health: number, red: number, d: number) => ({
 	commit: date,
 	date,
-	kpis: { tangles: 0, health, duplication: 1, maintainability: 90 },
+	kpis: { xs: 3, tangles: 0, health, duplication: 1, maintainability: 90 },
 	lights: { green: 5, yellow: 3, red },
 	functions: 10,
 	modules: { 'be:services/a': [0.5, 0.75, d] as [number, number, number], 'be:routes/a': [1, 0, 0] as [number, number, number] }
@@ -231,10 +231,10 @@ describe('report mit Verlauf', () => {
 describe('markdown', () => {
 	it('gibt den Verlauf als Tabelle aus, eine Zeile pro Stand, der neueste zuerst', () => {
 		expect(markdown([snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]).split('\n')).toEqual([
-			'| Date | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |',
-			'|---|---|---|---|---|---|---|',
-			'| 2026-10-26 | 87.1 | 10 | 5 | 3 | 4 | 0 |',
-			'| 2026-05-04 | 70 | 10 | 5 | 3 | 9 | 0 |'
+			'| Date | XS % | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |',
+			'|---|---|---|---|---|---|---|---|',
+			'| 2026-10-26 | 3 | 87.1 | 10 | 5 | 3 | 4 | 0 |',
+			'| 2026-05-04 | 3 | 70 | 10 | 5 | 3 | 9 | 0 |'
 		]);
 	});
 });
@@ -243,7 +243,7 @@ describe('Verlauf: Reihenfolge und Zeitachse', () => {
 	it('ordnet Stände nach Zeitpunkt, auch zwei vom selben Tag, unabhängig von der Reihenfolge der Eingabe', () => {
 		const late = snap('2026-10-26T17:00:00Z', 87.1, 4, 0.2), early = snap('2026-10-26T08:00:00Z', 80, 6, 0.8);
 		const [, , first] = markdown([late, early]).split('\n');
-		expect(first).toBe('| 2026-10-26 | 87.1 | 10 | 5 | 3 | 4 | 0 |');
+		expect(first).toBe('| 2026-10-26 | 3 | 87.1 | 10 | 5 | 3 | 4 | 0 |');
 		const rows = [...report(analyze(input), [late, early]).matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
 		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
 	});
@@ -262,5 +262,106 @@ describe('Verlauf: D jetzt', () => {
 		const html = report(analyze(input), [at('2026-10-01', 0.8), at('2026-11-01', 0.6)]);
 		const rows = [...html.matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
 		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
+	});
+});
+
+describe('XS (Fat und Tangles)', () => {
+	it('zählt den Überschuss zu grosser Module, Dateien und Funktionen und ganzer Zyklen als Anteil der Codezeilen', () => {
+		const ui = Array.from({ length: 40 }, (_, k) => ({ path: `src/lib/ui/C${k}.svelte`, kind: 'prod', module: 'fe:ui', loc: '10' }));
+		const xsInput = {
+			...input,
+			files: [
+				{ path: 'backend/src/services/big.ts', kind: 'prod', module: 'be:services/big', loc: '600' },
+				{ path: 'backend/src/services/ok.ts', kind: 'prod', module: 'be:services/ok', loc: '200' },
+				{ path: 'backend/src/routes/x.ts', kind: 'prod', module: 'be:routes/x', loc: '100' },
+				{ path: 'backend/src/routes/y.ts', kind: 'prod', module: 'be:routes/y', loc: '100' },
+				{ path: 'messages/de.json', kind: 'prod', module: 'fe:i18n', loc: '5000' },
+				...ui
+			],
+			edges: [
+				{ from: 'be:routes/x', to: 'be:routes/y', file_edges: '1' },
+				{ from: 'be:routes/y', to: 'be:routes/x', file_edges: '1' }
+			],
+			cycles: [{ modules: 'be:routes/x be:routes/y' }],
+			source: () => 'export const a = 1;',
+			health: { ...health, findings: [{ path: 'backend/src/services/ok.ts', name: 'f', cyclomatic: 40, cognitive: 10, severity: 'high', line_count: 50 }] }
+		};
+		const a = analyze(xsInput);
+		const m = Object.fromEntries(a.modules.map((x) => [x.name, x]));
+		// big.ts: 600 - 400 = 200; ok.ts: f with cyclomatic 40 / 20 → half of its 50 lines; x, y: whole cycle; fe:ui: 40 files / 30 → a quarter of 400
+		expect([m['be:services/big'].xs, m['be:services/ok'].xs, m['be:routes/x'].xs, m['fe:ui'].xs, m['fe:i18n'].xs]).toEqual([33.3, 12.5, 100, 25, 0]);
+		expect(a.kpis.find((k) => k.key === 'xs')).toMatchObject({ value: 37.5, light: 'red' });
+		expect([m['be:services/big'].lights.fat, m['be:services/ok'].lights.fat, m['be:routes/x'].lights.fat, m['fe:ui'].lights.fat]).toEqual(['yellow', 'green', 'red', 'red']);
+	});
+});
+
+describe('Testabdeckung (statisch)', () => {
+	it('zeigt pro Modul den Anteil der Dateien, die kein Test erreicht, und die Abdeckung des Codes als Kennzahl', () => {
+		const gaps = { summary: { file_coverage_pct: 80 }, files: [{ path: 'backend/src/services/types.ts' }, { path: 'backend/src/routes/a.ts' }] };
+		const a = analyze({ ...input, gaps });
+		const m = Object.fromEntries(a.modules.map((x) => [x.name, x]));
+		expect([m['be:services/a'].untested, m['be:routes/a'].untested, m['db:schema'].untested]).toEqual([50, 100, 0]);
+		expect([m['be:services/a'].lights.tests, m['be:routes/a'].lights.tests, m['db:schema'].lights.tests]).toEqual(['yellow', 'red', 'green']);
+		expect(a.kpis.find((k) => k.key === 'reach')).toMatchObject({ value: 80, light: 'yellow' });
+	});
+});
+
+describe('Versteckte Kopplung', () => {
+	it('zählt Dateipaare, die oft gemeinsam geändert werden, aus Modulen ohne Import zwischen ihnen', () => {
+		const pair = (path_a: string, path_b: string) => ({ path_a, path_b, shared_revisions: 6, degree: 0.5 });
+		const change_coupling = {
+			pairs: [
+				pair('backend/src/routes/a.ts', 'backend/src/db/schema.ts'),
+				pair('backend/src/services/a.ts', 'backend/src/db/schema.ts'),
+				pair('backend/src/services/a.ts', 'backend/src/services/types.ts'),
+				pair('backend/src/routes/a.ts', 'tests/e2e/x.ts')
+			]
+		};
+		const a = analyze({ ...input, health: { ...health, change_coupling } });
+		const m = Object.fromEntries(a.modules.map((x) => [x.name, x]));
+		expect([m['be:routes/a'].hidden, m['db:schema'].hidden, m['be:services/a'].hidden]).toEqual([1, 1, 0]);
+		expect([m['be:routes/a'].lights.coupling, m['be:services/a'].lights.coupling]).toEqual(['yellow', 'green']);
+		expect(a.kpis.find((k) => k.key === 'hidden')).toMatchObject({ value: 1, light: 'green' });
+	});
+});
+
+describe('report: neue Spalten und Verlauf', () => {
+	it('zeigt pro Modul XS, ungetestete Dateien und versteckte Kopplung mit Ampel und zeichnet den XS-Verlauf', () => {
+		const gaps = { summary: { file_coverage_pct: 80 }, files: [{ path: 'backend/src/routes/a.ts' }] };
+		const html = report(analyze({ ...input, gaps }), [snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]);
+		const row = html.match(/<tr class="module"><td>be:routes\/a<\/td>.*?<\/tr>/)![0];
+		expect(row).toContain('<td><span class="green">0</span></td><td><span class="red">100</span></td><td><span class="green">0</span></td>');
+		expect(html).toContain('id="history-xs"');
+	});
+});
+
+describe('report: DSM aufklappen', () => {
+	it('verlinkt jede Zelle auf die Datei-Imports dahinter und listet pro Modul seine Dateien', () => {
+		const fileEdges = [
+			{ from: 'backend/src/routes/a.ts', to: 'backend/src/services/a.ts', from_module: 'be:routes/a', to_module: 'be:services/a' },
+			{ from: 'backend/src/routes/a.ts', to: 'backend/src/services/types.ts', from_module: 'be:routes/a', to_module: 'be:services/a' },
+			{ from: 'tests/e2e/x.ts', to: 'backend/src/routes/a.ts', from_module: 'tests/e2e', to_module: 'be:routes/a' }
+		];
+		const html = report(analyze({ ...input, fileEdges }));
+		expect(html).toMatch(/<a href="#dep-be-routes-a--be-services-a"><rect class="cell"/);
+		const dep = html.match(/<h4 id="dep-be-routes-a--be-services-a">[\s\S]*?<\/ul>/)![0];
+		expect([...dep.matchAll(/<li><code>([^<]*)<\/code> → <code>([^<]*)<\/code><\/li>/g)].map((m) => `${m[1]} → ${m[2]}`)).toEqual([
+			'backend/src/routes/a.ts → backend/src/services/a.ts',
+			'backend/src/routes/a.ts → backend/src/services/types.ts'
+		]);
+		expect(html.match(/<details id="m-be-services-a">[\s\S]*?<\/details>/)![0]).toContain('<code>backend/src/services/types.ts</code>');
+		expect(html).not.toContain('tests/e2e/x.ts');
+	});
+});
+
+describe('Versteckte Kopplung: Framework', () => {
+	it('zählt kein Paar aus demselben Ordner, das SvelteKit ohne Import verbindet (Seite und Lade-Funktion)', () => {
+		const route = [
+			{ path: 'src/routes/x/+page.svelte', kind: 'prod', module: 'fe:routes/x' },
+			{ path: 'src/routes/x/+page.server.ts', kind: 'prod', module: 'bff:load/x' }
+		];
+		const change_coupling = { pairs: [{ path_a: 'src/routes/x/+page.svelte', path_b: 'src/routes/x/+page.server.ts', shared_revisions: 9, degree: 0.8 }] };
+		const a = analyze({ ...input, files: [...files, ...route], source: () => '', health: { ...health, change_coupling } });
+		expect(a.kpis.find((k) => k.key === 'hidden')).toMatchObject({ value: 0 });
 	});
 });

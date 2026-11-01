@@ -35,6 +35,7 @@ for c in $commits; do
 	ARCH_ROOT=$wt ARCH_OUT=$snap bun tools/arch-baseline/02-imports.ts >/dev/null
 	# exits 1 when it has findings; --no-cache: a churn cache can outlive the history it was built from (#1032)
 	(cd "$wt" && bunx fallow health --no-cache -c "$ROOT_DIR/.fallowrc.json" --format json >"$snap/fallow-health.json" 2>/dev/null) || true
+	(cd "$wt" && bunx fallow health --no-cache --coverage-gaps -c "$ROOT_DIR/.fallowrc.json" --format json >"$snap/fallow-gaps.json" 2>/dev/null) || true
 	ARCH_ROOT=$wt ARCH_OUT=$snap bun tools/arch-baseline/structure.ts --snapshot "$c" "$(TZ=UTC git log -1 --date=format-local:%FT%TZ --format=%cd "$c")" >"$OUT/history/$c.json"
 	git worktree remove --force "$wt"
 	rm -rf "$snap"
