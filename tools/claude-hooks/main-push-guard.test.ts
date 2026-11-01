@@ -48,7 +48,9 @@ describe('push to main by its resolved target (#713)', () => {
 		// review 713-1
 		['a cd into a checkout of main', () => onFeature, 'cd "%MAIN%" && git push'],
 		['a redirection with a space', () => onMain, 'git push origin > /tmp/push.log 2> /dev/null'],
-		['a continued line', () => onMain, 'git push \\\n  origin'],
+		['a continued line', () => onFeature, 'git push origin \\\nHEAD:main'],
+		['a cd the hook cannot resolve', () => onFeature, 'cd "$CHECKOUT" && git push'],
+		['a pushd into a checkout of main', () => onFeature, 'pushd "%MAIN%" && git push'],
 		['env and variables before git', () => onMain, 'env GIT_TRACE=0 X=1 git push'],
 		['command and timeout before git', () => onMain, 'timeout 60 command git push'],
 		['git --git-dir of a checkout of main', () => onFeature, 'git --git-dir "%MAIN%/.git" push'],
@@ -66,6 +68,7 @@ describe('push to main by its resolved target (#713)', () => {
 		['the session branch with -u', () => onFeature, 'git push -q -u origin feature 2>&1 | tail -1'],
 		['a branch whose name starts with main', () => onFeature, 'git push origin feature:main-fix'],
 		['a command that only mentions a push', () => onMain, 'echo "git push origin main" > notes.txt'],
+		['a push named in backticks in a heredoc', () => onFeature, "cat > d.md <<'EOF'\nRun `git push origin main` first\nEOF"],
 		['no push at all', () => onMain, 'git status && git log --oneline -1']
 	])('lets %s through', (_, cwd, command) => {
 		expect(decision(cwd(), command)).toBeUndefined();
