@@ -15,6 +15,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Delete returns to the list with the filter it was opened from (`list` field, only `/statements?…`; unit tests seen red, the guard ones by taking the check out)
 - [x] Every page answers `Cache-Control: no-store` (`src/hooks.server.ts`, unit test seen red)
 - [ ] Full chromium/api E2E run (the header touches every page)
-- [ ] Slice review (`code-reviewer`)
-- [ ] Persona review: none, the screens show nothing new (same list, same error page); only where the delete leads changed. Sven checks the return with a screen reader
+- [x] Slice review round 1: `docs/reviews/679-review-1.md` (C-1 Minor fixed: return on page 1)
+- [x] Persona review: `docs/design/personas/sven-679.md`, `weber-679.md` (both P-1 Minor in the same place: issue #1047)
+- [ ] Workflow note: `docs/design/personas/README.md` («Who saves») names `demo-records.md`, which does not exist; the demo records are in `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts`
+- [ ] Closing `code-reviewer` round
 - [ ] Archive, PR
