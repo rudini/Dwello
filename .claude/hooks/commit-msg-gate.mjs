@@ -17,16 +17,18 @@ const [flag, subject] = process.argv.slice(2);
 const checking = flag === '--check';
 const input = checking ? {} : JSON.parse(readFileSync(0, 'utf8'));
 const cwd = input.cwd ?? process.cwd();
-const repositoryOf = (dir) =>
-	spawnSync('git', ['-C', dir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' }).stdout?.trim();
-const project = repositoryOf(fileURLToPath(new URL('../..', import.meta.url)));
+/** git as the call runs it: its options (--git-dir, -c) and GIT_ variables, in its directory (Copilot on #1017) */
+const gitAs = ({ dir, options = [], env = {} }, ...args) =>
+	spawnSync('git', [...options, '-C', dir ?? cwd, ...args], { encoding: 'utf8', env: { ...process.env, ...env } }).stdout ?? '';
+const repositoryOf = (call) => gitAs(call, 'rev-parse', '--path-format=absolute', '--git-common-dir').trim();
+const project = repositoryOf({ dir: fileURLToPath(new URL('../..', import.meta.url)) });
 const calls = gitCalls(input.tool_input?.command ?? '', cwd).filter((call) => {
-	const repository = call.dir && repositoryOf(call.dir);
+	const repository = call.dir && repositoryOf(call);
 	return !repository || repository === project;
 });
 /** The subjects a push would send: the commits since origin/main, merges left out as in CI */
 const pushed = (call) =>
-	(spawnSync('git', ['-C', call.dir ?? cwd, 'log', '--no-merges', '--format=%s', 'origin/main..HEAD'], { encoding: 'utf8' }).stdout ?? '')
+	gitAs(call, 'log', '--no-merges', '--format=%s', 'origin/main..HEAD')
 		.split('\n')
 		.filter(Boolean);
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // The git calls of a Bash command as the shell runs them (#710), shared by the commit gates and the main push guard:
 // `-C` (also `-C/x` and quoted paths with spaces), `-c key=val`, `--git-dir`, GIT_ variables that choose the
-// repository, prefixes (`env`, variables, `command`, `timeout`), a `cd` or `pushd` before the call and the end of a
-// subshell. Text in quotes or in a heredoc body is no command; a `$(…)` in double quotes or in an unquoted heredoc is.
+// repository, wrappers with their options (`env`, `nice -n 10`, `timeout 60`, `xargs`), variables and shell keywords, a
+// `cd` or `pushd` before the call (not one in a pipe or in the background; one after `||` leaves the directory unknown)
+// and the end of a subshell. Text in quotes or in a heredoc body is no command; a `$(…)` in double quotes or in an
+// unquoted heredoc is.
 // Not followed: `bash -c '…'`, backticks, and heredocs with `<<\EOF` or a partly quoted delimiter.
 // `node git-calls.mjs` reads the PreToolUse JSON on stdin and prints the verb of each git call, one per line, for the
 // shell gates.
@@ -11,7 +13,8 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const unresolvable = /[$`~]/;
-const heredocs = /<<-?\s*(['"]?)(\w+)\1([^\n]*)\n((?:[\s\S]*?\n)?)\s*\2(?=\n|$)/g;
+// any delimiter word (END-NOTES too); several heredocs on one line take their bodies in turn (Copilot on #1017)
+const heredocs = /<<-?\s*(['"]?)([^\s'"<>;&|()]+)\1([^\n]*)\n((?:[\s\S]*?\n)?)\s*\2(?=\n|$)/g;
 const placeholder = /\0(\d+)\0/g;
 const substitutions = (text) => [...text.matchAll(/\$\(([^)]*)\)?/g)].map(([, inner]) => `(${inner})`);
 
@@ -22,10 +25,14 @@ const substitutions = (text) => [...text.matchAll(/\$\(([^)]*)\)?/g)].map(([, in
  */
 function commandsOf(line) {
 	const bodies = [];
-	const s = line.replace(/\\\n/g, ' ').replace(heredocs, (_, quote, _end, rest, body) => {
-		bodies.push({ text: body.replace(/\n$/, ''), quoted: Boolean(quote) });
-		return ` \0${bodies.length - 1}\0 ${rest}`;
-	});
+	let s = line.replace(/\\\n/g, ' ');
+	for (let previous; previous !== s; ) {
+		previous = s;
+		s = s.replace(heredocs, (_, quote, _end, rest, body) => {
+			bodies.push({ text: body.replace(/\n$/, ''), quoted: Boolean(quote) });
+			return ` \0${bodies.length - 1}\0 ${rest}`;
+		});
+	}
 	const split = (s) => {
 		const all = [[]];
 		let word = null;
@@ -46,7 +53,11 @@ function commandsOf(line) {
 				i = close < 0 ? s.length : close;
 			} else if (/[;&|\n()]/.test(c) && !(c === '&' && /[<>]/.test(s[i - 1]))) {
 				end();
-				if (all.at(-1).length) all.push([]);
+				// the operator between two commands, so a cd in a pipe, in the background or after || is known
+				const op = c === '&' && s[i + 1] === '&' ? '&&' : c === '|' && s[i + 1] === '|' ? '||' : c;
+				if (op.length === 2) i++;
+				if (all.at(-1).length) (all.at(-1).next = op), all.push([]);
+				all.at(-1).after = op;
 				if (c === '(' || c === ')') all.push([c], []);
 			} else if (/\s/.test(c)) end();
 			else word = (word ?? '') + c;
@@ -61,9 +72,10 @@ function commandsOf(line) {
 const withoutRedirections = (words) =>
 	words.filter((word, i) => !/^\d*[<>]/.test(word) && !/^\d*[<>]+&?$/.test(words[i - 1] ?? ''));
 
-// what may stand before git and still run it (review 713-1, C-3)
-// and the shell keywords and braces that may open a command (review 710-1, C-1)
-const prefix = /^(env|command|exec|nohup|time|sudo|nice|xargs|if|then|elif|else|do|while|until|!|\{)$/;
+// what may stand before git and still run it (review 713-1, C-3), with its options and operands (nice -n 10, timeout
+// -k 5s 60s: Copilot on #1017), and the shell keywords and braces that may open a command (review 710-1, C-1)
+const wrapper = /^(env|command|exec|nohup|time|sudo|nice|xargs|timeout)$/;
+const keyword = /^(if|then|elif|else|do|while|until|!|\{)$/;
 const repositoryVariable = /^GIT_(DIR|WORK_TREE|COMMON_DIR|NAMESPACE|CONFIG\w*)=/;
 
 /**
@@ -74,13 +86,14 @@ const repositoryVariable = /^GIT_(DIR|WORK_TREE|COMMON_DIR|NAMESPACE|CONFIG\w*)=
 function callOf(words, dir, bodies) {
 	const env = {};
 	let i = 0;
+	let wrapped = false;
 	for (; i < words.length && words[i] !== 'git'; i++) {
 		if (repositoryVariable.test(words[i])) {
 			const [name, value] = words[i].split(/=(.*)/s, 2);
 			env[name] = value;
 			if (unresolvable.test(value)) dir = undefined;
-		} else if (words[i] === 'timeout') i++;
-		else if (!prefix.test(words[i]) && !/^[A-Za-z_]\w*=/.test(words[i]) && !words[i].startsWith('-')) return;
+		} else if (wrapped || wrapper.test(words[i])) wrapped = true;
+		else if (!keyword.test(words[i]) && !/^[A-Za-z_]\w*=/.test(words[i])) return;
 	}
 	const options = [];
 	for (i++; i < words.length && words[i].startsWith('-'); i++) {
@@ -109,13 +122,16 @@ export function gitCalls(command, cwd) {
 	const calls = [];
 	const outer = []; // the directories outside the open subshells
 	let dir = resolve(cwd);
-	for (const words of commands.map(withoutRedirections)) {
+	for (const command of commands) {
+		const words = withoutRedirections(command);
 		if (words.length === 1 && words[0] === '(') outer.push(dir);
 		else if (words.length === 1 && words[0] === ')') dir = outer.length ? outer.pop() : dir;
 		// a cd the hook cannot resolve ($VAR, ~, cd -) leaves the directory unknown, also for a relative cd after it
-		else if (words[0] === 'cd' || words[0] === 'pushd') {
+		// a cd in a pipe or in the background moves a child shell only; one after || may not run (Copilot on #1017)
+		else if ((words[0] === 'cd' || words[0] === 'pushd') && ![command.after, command.next].includes('|') && command.next !== '&') {
 			const to = words[1] ?? '~';
-			dir = unresolvable.test(to) || to === '-' || (!dir && !to.startsWith('/')) ? undefined : resolve(dir ?? '/', to);
+			const unknown = unresolvable.test(to) || to === '-' || command.after === '||' || (!dir && !to.startsWith('/'));
+			dir = unknown ? undefined : resolve(dir ?? '/', to);
 		} else {
 			const call = callOf(words, dir, bodies);
 			if (call) calls.push(call);

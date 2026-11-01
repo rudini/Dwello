@@ -32,7 +32,10 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		['echo "git commit -m nope"'],
 		['git commit -am "fix(contracts): guard retries" -m "a body line that is longer than fifty characters"'],
 		// #710: text in a heredoc is no commit
-		["cat > notes.md <<'EOF'\ngit commit -m \"fix: guard retries\"\nEOF"]
+		["cat > notes.md <<'EOF'\ngit commit -m \"fix: guard retries\"\nEOF"],
+		// Copilot on #1017: a hyphenated delimiter and two heredocs on one line
+		["cat <<'END-NOTES'\ngit commit -m \"fix: guard retries\"\nEND-NOTES"],
+		['cat <<A <<B\nfirst\nA\ngit commit -m "fix: guard retries"\nB']
 	])('lets %j through', (command) => {
 		expect(hook(command)).toMatchObject({ status: 0, stderr: '' });
 	});
@@ -58,7 +61,10 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		// review 710-1, C-1: shell keywords and braces before git
 		['if git commit -m "fix: guard retries"; then :; fi', 'type(scope)'],
 		['{ git commit -m "fix: guard retries"; }', 'type(scope)'],
-		['! git commit -m "fix: guard retries"', 'type(scope)']
+		['! git commit -m "fix: guard retries"', 'type(scope)'],
+		// Copilot on #1017: wrappers with options and operands
+		['nice -n 10 git commit -m "fix: guard retries"', 'type(scope)'],
+		['timeout -k 5s 60s git commit -m "fix: guard retries"', 'type(scope)']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);
@@ -75,6 +81,10 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(hook('git commit -m a', scratch)).toMatchObject({ status: 0, stderr: '' });
 		expect(hook(`git -C ${scratch} commit -m a`)).toMatchObject({ status: 0, stderr: '' });
 		expect(hook(`cd ${scratch} && git commit -m a`)).toMatchObject({ status: 0, stderr: '' });
+		// Copilot on #1017: GIT_DIR of the project, a cd in a pipe or after || leave the commit in the project
+		expect(hook(`GIT_DIR=${ROOT}/.git git commit -m a`, scratch).status).toBe(2);
+		expect(hook(`cd ${scratch} | cat; git commit -m a`).status).toBe(2);
+		expect(hook(`true || cd ${scratch}; git commit -m a`).status).toBe(2);
 	});
 
 	it('checks a commit whose directory is no repository (the safe side)', () => {
