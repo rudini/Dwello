@@ -66,7 +66,11 @@ describe('push to main by its resolved target (#713)', () => {
 		['GIT_DIR of a checkout of main', () => onFeature, 'env GIT_DIR="%MAIN%/.git" git push'],
 		['git -C into a directory the hook cannot resolve', () => onFeature, 'git -C "$CHECKOUT" push'],
 		['a configured push refspec to main', () => onFeature, 'git -c remote.origin.push=refs/heads/main:refs/heads/main push'],
-		['a push after a cd in a subshell', () => onMain, '(cd "%FEATURE%" && true); git push']
+		['a push after a cd in a subshell', () => onMain, '(cd "%FEATURE%" && true); git push'],
+		// review 713-4
+		['a quoted substitution in a subshell into main', () => onFeature, '(cd "%MAIN%" && echo "$(git push)")'],
+		['a substitution in an unquoted heredoc', () => onMain, 'cat <<EOF\n$(git push)\nEOF'],
+		['--git-dir= with a variable', () => onFeature, 'git --git-dir="$REPO" push']
 	])('asks before %s', (_, cwd, command) => {
 		expect(decision(cwd(), command.replaceAll('%MAIN%', onMain).replaceAll('%FEATURE%', onFeature))).toBe('ask');
 	});
@@ -78,7 +82,8 @@ describe('push to main by its resolved target (#713)', () => {
 		['a command that only mentions a push', () => onMain, 'echo "git push origin main" > notes.txt'],
 		['a push named in backticks in a heredoc', () => onFeature, "cat > d.md <<'EOF'\nRun `git push origin main` first\nEOF"],
 		['no push at all', () => onMain, 'git status && git log --oneline -1'],
-		['a push line in a heredoc body', () => onFeature, "cat > d.md <<'EOF'\ngit push origin main\nEOF"]
+		['a push line in a heredoc body', () => onFeature, "cat > d.md <<'EOF'\ngit push origin main\nEOF"],
+		['a GIT_SSH_COMMAND with a home path', () => onFeature, 'GIT_SSH_COMMAND="ssh -i ~/.ssh/id" git push origin feature']
 	])('lets %s through', (_, cwd, command) => {
 		expect(decision(cwd(), command)).toBeUndefined();
 	});

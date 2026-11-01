@@ -15,12 +15,11 @@ const command = input.tool_input?.command ?? '';
 
 /**
  * The shell commands of a line, each as its words; quotes are kept together and dropped, so text in them is no command,
- * except a `$(…)` in double quotes; heredoc bodies are dropped; `(` and `)` stand alone, so a subshell's cd ends with it
+ * except a `$(…)` in double quotes (checked before its command); bodies of quoted heredocs are dropped; `(` and `)` stand alone, so a subshell's cd ends with it
  */
 function commands(line) {
-	const s = line.replace(/\\\n/g, ' ').replace(/<<-?\s*(['"]?)(\w+)\1([^\n]*)\n(?:[\s\S]*?\n)?\s*\2(?=\n|$)/g, '$3');
+	const s = line.replace(/\\\n/g, ' ').replace(/<<-?\s*(['"])(\w+)\1([^\n]*)\n(?:[\s\S]*?\n)?\s*\2(?=\n|$)/g, '$3');
 	const all = [[]];
-	const substitutions = [];
 	let word = null;
 	const end = () => (word !== null && all.at(-1).push(word), (word = null));
 	for (let i = 0; i < s.length; i++) {
@@ -28,7 +27,7 @@ function commands(line) {
 		if (c === '"' || c === "'") {
 			const close = s.indexOf(c, i + 1);
 			const quoted = s.slice(i + 1, close < 0 ? undefined : close);
-			if (c === '"') for (const [, inner] of quoted.matchAll(/\$\(([^)]*)\)?/g)) substitutions.push(`(${inner})`);
+			if (c === '"') for (const [, inner] of quoted.matchAll(/\$\(([^)]*)\)?/g)) all.splice(-1, 0, ...commands(`(${inner})`));
 			word = (word ?? '') + quoted;
 			i = close < 0 ? s.length : close;
 		} else if (/[;&|\n()]/.test(c)) {
@@ -39,7 +38,7 @@ function commands(line) {
 		else word = (word ?? '') + c;
 	}
 	end();
-	return [...all.filter((words) => words.length), ...substitutions.flatMap(commands)];
+	return all.filter((words) => words.length);
 }
 
 /** The words without redirections (`> log`, `2>/dev/null`, `< in`) */
@@ -67,7 +66,8 @@ function toMain(words, dir, env) {
 	const git = []; // the options before push, so the questions below see the same repository and config
 	let i = 1;
 	for (; i < words.length && words[i] !== 'push'; i++) {
-		if (/^(-C|--git-dir|--work-tree)$/.test(words[i]) && unresolvable.test(words[i + 1] ?? ''))
+		const option = words[i].match(/^(-C|--git-dir|--work-tree)(=(.*))?$/);
+		if (option && unresolvable.test(option[2] ? option[3] : (words[i + 1] ?? '')))
 			return 'runs in a repository the hook cannot resolve';
 		if (words[i] === '-C') dir = resolve(dir, words[++i] ?? '.');
 		else if (/^(-c|--git-dir|--work-tree|--namespace)$/.test(words[i])) git.push(words[i], words[++i] ?? '');
@@ -123,7 +123,7 @@ for (const words of commands(command).map(withoutRedirections)) {
 	const git = withoutPrefixes(words);
 	if (!dir && git[0] === 'git' && git.includes('push')) reason ??= 'runs in a directory the hook cannot resolve';
 	else if (dir) {
-		const assignments = words.slice(0, words.length - git.length).filter((word) => /^GIT_\w*=/.test(word));
+		const assignments = words.slice(0, words.length - git.length).filter((word) => /^GIT_(DIR|WORK_TREE|COMMON_DIR|NAMESPACE|CONFIG\w*)=/.test(word));
 		reason ??= toMain(git, dir, Object.fromEntries(assignments.map((word) => word.split(/=(.*)/s, 2))));
 	}
 }
