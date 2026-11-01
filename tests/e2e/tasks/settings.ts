@@ -1,6 +1,6 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, Navigate } from '../screenplay/interactions';
-import { masterDataLink, saveSettingsButton, settingField } from '../targets/settings';
+import { Click, DownloadFrom, Enter, Navigate } from '../screenplay/interactions';
+import { exportAllDataButton, masterDataLink, saveSettingsButton, settingField } from '../targets/settings';
 
 export const openSettings = Navigate.to('/config');
 
@@ -11,3 +11,7 @@ export const saveSettings = (fields: Record<string, string>): Activity => (actor
 	);
 
 export const openMasterData = (label: string) => Click.on(masterDataLink(label));
+
+/** #496: the ZIP with everything Dwello holds, from the Einstellungen */
+export const exportAllData: Activity = (actor) =>
+	actor.attemptsTo(openSettings, DownloadFrom(exportAllDataButton));

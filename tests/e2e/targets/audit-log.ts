@@ -12,3 +12,8 @@ export const deleteAuditEntryButton = (text: string) =>
 export const deleteAuditEntryMessage = target('Bestätigung Protokolleintrag löschen', (page) =>
 	page.getByTestId('audit-entry-delete-message')
 );
+// the entries with this text on that day («01.11.2026»)
+export const auditEntriesOn = (text: string, day: string) =>
+	target(`Protokolleinträge «${text}» vom ${day}`, (page) =>
+		entry(text)(page).filter({ has: page.getByTestId('audit-entry-date').getByText(day) })
+	);

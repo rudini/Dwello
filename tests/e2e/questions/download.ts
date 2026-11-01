@@ -1,5 +1,5 @@
 import { unzipSync } from 'fflate';
-import { question } from '../screenplay/actor';
+import { question, type Actor } from '../screenplay/actor';
 import { DownloadedFile } from '../screenplay/questions';
 import { readPdf } from '../../../backend/src/__tests__/helpers/pdf-text';
 
@@ -71,3 +71,103 @@ export const everythingExported = question('everything in the export', async (ac
 export const fileNamesInDownloadedZip = question('the file names in the downloaded ZIP', async (actor) =>
 	Object.keys(unzipSync((await actor.answer(DownloadedFile)).content)).sort()
 );
+
+// #496: the export of all data. Its ZIP holds the records of parallel scenarios too, so these questions look up the
+// records by their names and never count. Shape of the data file: docs/reviews/496-entwurf.md
+const exportedFiles = question('the files in the downloaded export', async (actor) =>
+	unzipSync((await actor.answer(DownloadedFile)).content)
+);
+// the data file is the one JSON file at the top of the ZIP, named in the UI language
+const allExportedData = question('the data file of the export', async (actor) => {
+	const [, data] = Object.entries(await actor.answer(exportedFiles)).find(([name]) => /^[^/]+\.json$/.test(name)) ?? [];
+	return JSON.parse(data ? Buffer.from(data).toString() : '{}');
+});
+type ExportedInvoice = { billingEntityName: string; documents?: { fileName: string; file: string }[] };
+type ExportedBuilding = {
+	name: string;
+	apartments?: { number: string; contracts?: { tenantId: string }[] }[];
+	invoices?: ExportedInvoice[];
+};
+const exportedBuilding = async (actor: Actor, name: string) =>
+	((await actor.answer(allExportedData)).buildings ?? []).find((building: ExportedBuilding) => building.name === name) as
+		| ExportedBuilding
+		| undefined;
+
+/** The apartments of the building in the data file, each with the names of its contracts' tenants: «1.01 Hans Müller …» */
+export const exportedApartments = (building: string) =>
+	question(`the apartments of ${building} in the export`, async (actor) => {
+		const tenants = new Map(
+			((await actor.answer(allExportedData)).tenants ?? []).map((tenant: { id: string; firstName: string; lastName: string }) => [
+				tenant.id,
+				`${tenant.firstName} ${tenant.lastName}`
+			])
+		);
+		return ((await exportedBuilding(actor, building))?.apartments ?? []).map((apartment) =>
+			[apartment.number, ...(apartment.contracts ?? []).map((contract) => tenants.get(contract.tenantId))].join(' ')
+		);
+	});
+
+/** The invoices of the building in the data file, each «supplier: file name of its Beleg», the file name marked when
+ * the path the invoice names is not in the ZIP */
+export const exportedInvoices = (building: string) =>
+	question(`the invoices of ${building} in the export`, async (actor) => {
+		const files = await actor.answer(fileNamesInDownloadedZip);
+		return ((await exportedBuilding(actor, building))?.invoices ?? []).map((invoice) =>
+			[
+				invoice.billingEntityName,
+				...(invoice.documents ?? []).map(({ fileName, file }) => (files.includes(file) ? fileName : `${fileName} (not in the ZIP: ${file})`))
+			].join(': ')
+		);
+	});
+export const exportedInvoiceSuppliers = (building: string) =>
+	question(`the suppliers of the invoices of ${building} in the export`, async (actor) =>
+		((await exportedBuilding(actor, building))?.invoices ?? []).map((invoice) => invoice.billingEntityName)
+	);
+
+/** Those of the named files that the downloaded ZIP holds */
+export const presentInDownloadedZip = (names: string[]) =>
+	question('the named files in the downloaded ZIP', async (actor) => {
+		const files = await actor.answer(fileNamesInDownloadedZip);
+		return names.filter((name) => files.includes(name));
+	});
+
+/** The files in the folder whose name holds the text, each with its first bytes; a name that ends in the file name
+ * answers as that file name («meier-q1.pdf %PDF-»), any other with its path */
+export const filesInExportFolder = (folder: string, holding: string, fileName: string) =>
+	question(`the files of ${holding} in ${folder}`, async (actor) =>
+		Object.entries(await actor.answer(exportedFiles))
+			.filter(([name]) => name.startsWith(`${folder}/`) && name.includes(holding))
+			.map(([name, content]) => `${name.endsWith(fileName) ? fileName : name} ${Buffer.from(content.subarray(0, 5)).toString()}`)
+	);
+
+/** The first three bytes of a file in the ZIP in hex: «efbbbf» is the mark Excel reads UTF-8 by */
+export const exportedFileStart = (name: string) =>
+	question(`the first bytes of ${name}`, async (actor) => {
+		const content = (await actor.answer(exportedFiles))[name];
+		return content ? Buffer.from(content.subarray(0, 3)).toString('hex') : null;
+	});
+
+/** The rows of a table in the ZIP, each as its columns by the names of the first row; the cells split at «;» */
+export const exportedTableRows = (name: string) =>
+	question(`the rows of ${name}`, async (actor) => {
+		const content = (await actor.answer(exportedFiles))[name];
+		if (!content) return [];
+		const [head = [], ...rows] = new TextDecoder()
+			.decode(content)
+			.split(/\r?\n/)
+			.filter(Boolean)
+			.map((line) => line.split(';').map((cell) => cell.replace(/^"(.*)"$/, '$1').replaceAll('""', '"')));
+		return rows.map((row) => Object.fromEntries(head.map((column, index) => [column, row[index]])));
+	});
+
+/** The values of one column of a table in the ZIP */
+export const exportedColumn = (name: string, column: string) =>
+	question(`the column ${column} of ${name}`, async (actor) =>
+		(await actor.answer(exportedTableRows(name))).map((row) => row[column])
+	);
+
+/** The cell of the column in the row whose «Name» is the name; null when no row has it */
+export const exportedCell = (table: string, name: string, column: string) =>
+	question(`the ${column} of ${name} in ${table}`, async (actor) =>
+		(await actor.answer(exportedTableRows(table))).find((row) => row.Name === name)?.[column] ?? null
+	);
