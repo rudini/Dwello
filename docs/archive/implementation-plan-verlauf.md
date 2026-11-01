@@ -465,3 +465,11 @@
 - [x] Re-review and closing round (`docs/reviews/997-review-2.md`): no findings, C-1 to C-3 closed
 - [x] Workflow note: the local Docker daemon cannot pull from ghcr.io or reach deb.debian.org; old and new images built from the tags on local stand-in base images (`docs/reviews/workflow-notes-issue-997.md`)
 - [x] PR: pushed after this archive
+
+## Session: #1004 main red, «vor 40 Tagen» across summer time
+
+- [x] Cause: `backend/scripts/e2e-sent-days-ago.ts` moved `sent_at` by 40 × 24 h in UTC; at 23:12 Zurich (CET) that lands at 00:12 of the next Swiss day in summer time, while the step expects today minus 40 Swiss days
+- [x] Reproducing test `backend/src/__tests__/e2e-sent-days-ago.pg.test.ts`, seen red («2026-09-22 00:12» against «2026-09-21 23:12»)
+- [x] Fix: move `sent_at` in Swiss local time; test green, scenario «Eine per E-Mail versendete Abrechnung erneut per Brief zustellen» green in Chromium
+- [x] No code-reviewer round: test-only CI fix (`CLAUDE.md`, Workflow 7)
+- [x] PR: pushed after this archive
