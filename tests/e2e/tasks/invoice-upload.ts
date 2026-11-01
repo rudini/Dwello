@@ -100,6 +100,12 @@ export const chooseKey = (fileName: string, key: string): Activity => async (act
 	await actor.attemptsTo(Select.option({ label: key }).from(belegDistributionKey(fileName)));
 };
 
+// the amount of the file, e.g. only the allocable part of an invoice with mixed costs (#535)
+export const enterAmount = (fileName: string, amount: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegAmount(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(Enter.theValue(amount).into(belegAmount(fileName)));
+};
+
 export const createInvoices = Click.on(createInvoicesButton);
 // once the files are listed: a click right after choosing them closed the dialog without asking (#607, firefox in CI)
 // once every file is read: a reading that ends during the click moves «Abbrechen» away from the pointer (#954)

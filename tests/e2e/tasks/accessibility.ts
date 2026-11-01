@@ -23,6 +23,7 @@ import {
 import { randomUUID } from 'crypto';
 import {
 	belegDetailsToggle,
+	belegSelected,
 	belegMessage,
 	belegUnsure,
 	cancelUploadButton,
@@ -222,6 +223,21 @@ const createPartly = (building: string): Activity => (actor) => {
 	);
 };
 
+// #535: an invoice with mixed costs, ticked once its amount is the allocable part, created; the other file stays open, so
+// the result shows in the dialog with what is still to record
+const createMixed = (building: string): Activity => (actor) => {
+	const mixed = `Elektro Blitz Reparatur ${randomUUID()}.pdf`;
+	const open = `Werke ${randomUUID()}.pdf`;
+	return actor.attemptsTo(
+		uploadBelege(building, [invoicePdf(mixed), invoicePdf(open)]),
+		Wait.until(belegDetailsToggle(mixed)),
+		Wait.until(belegDetailsToggle(open)),
+		Check.the(belegSelected(mixed)),
+		Click.on(createInvoicesButton),
+		Wait.until(uploadResult)
+	);
+};
+
 // The new code shown: made with Google signed in just now, unless an earlier look made it and it still waits
 const newCodeShown: Activity = async (actor) => {
 	if (!(await actor.answer(Visibility.of(backupCode)))) await actor.attemptsTo(Click.on(newCodeButton));
@@ -370,6 +386,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// one invoice created, the other kept with what it lacks (no Kategorie: the stand-in categorizes only «Elektro Blitz»)
 	'upload-partial': (example) => (actor) => actor.attemptsTo(createPartly(example.building)),
+	'upload-mixed-rest': (example) => (actor) => actor.attemptsTo(createMixed(example.building)),
 	'upload-discard-created': (example) => (actor) =>
 		actor.attemptsTo(createPartly(example.building), Click.on(cancelUploadButton), Wait.until(discardMessage)),
 	// the stand-in answers no JSON for a file so named

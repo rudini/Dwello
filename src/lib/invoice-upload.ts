@@ -191,7 +191,7 @@ const creditNote = (proposal: Proposal) =>
 
 // costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also one the
 // property manager chooses later (domain review V-1, V-8)
-const mixedCosts = (row: UploadRow) => row.hints.nonAllocableItems && row.values.isValidUtilityCost;
+export const mixedCosts = (row: UploadRow) => row.hints.nonAllocableItems && row.values.isValidUtilityCost;
 
 /** Why a file Dwello read is not ticked for creating, said at its checkbox until it is (#245, product owner) */
 export function selectionHelp(row: UploadRow) {

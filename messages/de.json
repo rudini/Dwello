@@ -1069,6 +1069,7 @@
 	"invoices_upload_credit_note_amount": "Das ist eine Gutschrift über {amount}. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: in der Zeile dieser Rechnung, wenn ihre Datei hier ausgewählt ist, sonst auf ihrer Seite mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.",
 	"invoices_upload_advance_invoice": "Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt die Schlussrechnung erst nach der Abrechnung dieser Periode, setzen Sie das Häkchen bei «Diese Rechnung erstellen» und erfassen Sie die Akontorechnung; löschen Sie sie, wenn Sie die Schlussrechnung erfassen.",
 	"invoices_upload_mixed": "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z. B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein. Erfassen Sie den Rest danach mit «Rechnung erfassen» als zweite Rechnung in der Kategorie Reparaturen und fügen Sie dort diese Datei mit «Beleg hinzufügen» an.",
+	"invoices_upload_mixed_rest": "Erfassen Sie noch den Rest als zweite Rechnung in der Kategorie Reparaturen und fügen Sie dort dieselbe Datei mit «Beleg hinzufügen» an.",
 	"invoices_upload_category_missing": "Wählen Sie eine Kategorie.",
 	"invoices_upload_fields_missing": "Füllen Sie die markierten Felder aus.",
 	"invoices_upload_create_failed": "Die Rechnung wurde nicht erstellt, weil Dwello nicht geantwortet hat. Versuchen Sie es noch einmal.",
