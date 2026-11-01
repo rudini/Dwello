@@ -62,6 +62,19 @@ export const HiddenText = {
 			)
 		)
 };
+/** How many pixels the widest part of a box (itself or anything in it) hides sideways; 0 when everything fits */
+export const HiddenSideways = {
+	within: (target: Target) =>
+		about(target, 'what is hidden sideways in', (element) =>
+			single(element, (one) =>
+				one.evaluate(
+					(box) => Math.max(...[box, ...box.querySelectorAll('*')].map((part) => part.scrollWidth - part.clientWidth)),
+					undefined,
+					quick
+				)
+			)
+		)
+};
 /** The data-testid of the element that has the focus, null without one */
 export const FocusedElement = question('the focused element', (actor) =>
 	pageOf(actor).evaluate(() => document.activeElement?.getAttribute('data-testid') ?? null)

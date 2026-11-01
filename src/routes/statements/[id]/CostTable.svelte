@@ -8,7 +8,13 @@
 	import LineInvoices from './LineInvoices.svelte';
 
 	// The costs line by line, then the Verwaltungspauschale, the Akonto and what remains: the Saldo
-	let { statement }: { statement: StatementWithDetails } = $props();
+	// stacked: the lines one below the other at every width, for a page too narrow for the table (the edit page, #691)
+	let { statement, stacked = false }: { statement: StatementWithDetails; stacked?: boolean } =
+		$props();
+	// the list below md, the table from md; stacked keeps the list
+	const shown = $derived(
+		stacked ? { list: '', table: 'hidden' } : { list: 'md:hidden', table: 'hidden md:block' }
+	);
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
 	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
@@ -120,7 +126,7 @@
 	<p class="text-ink-muted">{m.statements_no_lines()}</p>
 {:else}
 	<!-- Phones get the lines one below the other, every amount in view; the table from md -->
-	<ul class="flex flex-col gap-4 md:hidden" aria-label={m.statements_lines()}>
+	<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
 		{#each statement.lineItems as item (item.id)}
 			<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
 				<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
@@ -148,7 +154,7 @@
 		{/each}
 	</ul>
 
-	<div class="hidden md:block">
+	<div class={shown.table}>
 		<Table caption={m.statements_lines()} captionHidden {columns}>
 			{#each statement.lineItems as item (item.id)}
 				<tr data-testid="statement-line-item">
