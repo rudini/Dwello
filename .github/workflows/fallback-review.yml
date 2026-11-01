@@ -26,13 +26,15 @@ permissions:
 jobs:
   review:
     name: MiniMax review
-    # contains() ignores case: Copilot reviews as copilot-pull-request-reviewer[bot]
+    # contains() ignores case: Copilot reviews as copilot-pull-request-reviewer[bot]; only a bot has type Bot, so a
+    # person whose login contains "copilot" starts nothing
     if: >-
       github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' &&
         github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.pull_requests[0]) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.user.login, 'copilot')) ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.user.login, 'copilot'))
+      (github.event_name == 'pull_request_review' && github.event.review.user.type == 'Bot' && contains(github.event.review.user.login, 'copilot')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.user.type == 'Bot' &&
+        contains(github.event.comment.user.login, 'copilot'))
     # on the job, after its `if`: every other comment on the pull request would queue a run and cancel a waiting one
     concurrency:
       # one run per pull request at a time, so a second trigger sees the first one's review
@@ -61,7 +63,8 @@ jobs:
           reviewed() {
             local bodies body
             bodies=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/reviews" \
-              --jq '.[] | select((.user.login | test("copilot"; "i")) or ((.body // "") | contains("<!-- fallback-review -->"))) | (.body // "") | @json')
+              --jq '.[] | select(.user.type == "Bot") | select((.user.login | test("copilot"; "i")) or
+                (.user.login == "github-actions[bot]" and ((.body // "") | contains("<!-- fallback-review -->")))) | (.body // "") | @json')
             while read -r body; do
               [ -n "$body" ] || continue
               body=$(jq -r . <<< "$body")
@@ -73,11 +76,11 @@ jobs:
             [ "$(gh api "repos/$GH_REPO/pulls/$PR/requested_reviewers" --jq '[.users[].login] | any(test("copilot"; "i"))')" = true ]
           }
 
+          if [ "$(gh api "repos/$GH_REPO/pulls/$PR" --jq .draft)" = true ]; then
+            echo "Draft, reviewed once it is ready for review."
+            exit 0
+          fi
           if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ]; then
-            if [ "$(gh api "repos/$GH_REPO/pulls/$PR" --jq .draft)" = true ]; then
-              echo "Draft, reviewed once it is ready for review."
-              exit 0
-            fi
             case "$GITHUB_EVENT_NAME" in
               pull_request_review | issue_comment)
                 if ! copilot_failed "$COPILOT_SAID"; then
@@ -112,6 +115,8 @@ jobs:
           [ -n "$MINIMAX_API_KEY" ] || fail "the repository secret MINIMAX_API_KEY is missing."
 
           gh api "repos/$GH_REPO/pulls/$PR" --jq '"# " + .title + "\n\n" + (.body // "")' > pr.md
+          # the review belongs to the commit whose diff was read, not to one pushed while MiniMax thinks
+          sha=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .head.sha)
           # per file, because GitHub refuses the whole diff of a large pull request; lock files out: generated, and
           # they would fill the limit
           gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
@@ -146,10 +151,11 @@ jobs:
               {role: "system", content: $system},
               {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```")}
             ]}' > request.json
-          # a second try when the answer is empty or a made-up tool call instead of a review
+          # a second try when the answer is empty or a made-up tool call instead of a review; 5 minutes for Copilot and
+          # two tries of 10 stay within the job's 30, with time left to comment «No review»
           for attempt in 1 2; do
             # streamed: the model thinks for minutes before it answers, and a silent connection may be cut
-            curl -sS -N --fail-with-body --max-time 900 https://api.minimax.io/v1/chat/completions \
+            curl -sS -N --fail-with-body --max-time 600 https://api.minimax.io/v1/chat/completions \
               -H "Authorization: Bearer $MINIMAX_API_KEY" -H 'Content-Type: application/json' \
               -d @request.json > response.txt ||
               fail "MiniMax refused the request: $(tail -c 300 response.txt | tr '\n' ' ')"
@@ -160,7 +166,7 @@ jobs:
             [ -s review.md ] || cp response.txt review.md
             fail "MiniMax answered twice without a review: $(tail -c 300 review.md | tr '\n' ' ')"
           done
-          if grep -q '"finish_reason":"length"' chunks.jsonl; then
+          if jq -e 'select(.choices[0].finish_reason == "length")' chunks.jsonl > /dev/null; then
             note="${note:+$note }The answer hit the token limit and may be cut off."
           fi
 
@@ -176,4 +182,4 @@ jobs:
             echo
             cat review.md
           } > body.md
-          gh api "repos/$GH_REPO/pulls/$PR/reviews" -f event=COMMENT -F body=@body.md > /dev/null
+          gh api "repos/$GH_REPO/pulls/$PR/reviews" -f event=COMMENT -f commit_id="$sha" -F body=@body.md > /dev/null
