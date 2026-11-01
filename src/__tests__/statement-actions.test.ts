@@ -221,6 +221,12 @@ describe('Abrechnung löschen', () => {
 		await expect(result).rejects.toMatchObject({ status: 303, location: list });
 	});
 
+	it('beginnt die Liste nach dem Löschen wieder auf Seite 1, die letzte Seite kann leer sein (#679)', async () => {
+		const { result } = runAction(actions.delete, 's1', 204, { list: '/statements?status=draft&page=2' });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/statements?status=draft' });
+	});
+
 	it.each(['https://example.com/statements', '//example.com', '/invoices?status=draft'])(
 		'kehrt nach %s nicht zurück, nur zur Abrechnungsliste (#679)',
 		async (list) => {

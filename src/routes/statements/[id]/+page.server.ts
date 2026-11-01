@@ -119,8 +119,10 @@ export const actions: Actions = {
 			method: 'DELETE'
 		});
 		if (!response.ok) return fail(response.status, { actionError: m.statements_delete_failed() });
-		// back to the list as it was filtered (#679), never to another page
+		// back to the list as it was filtered (#679), never to another page; on page 1, the last one may now be empty
 		const list = localPath(String((await request.formData()).get('list') ?? ''));
-		throw redirect(303, list?.startsWith('/statements?') ? list : '/statements');
+		const search = new URLSearchParams(list?.startsWith('/statements?') ? list.slice(12) : '');
+		search.delete('page');
+		throw redirect(303, search.size ? `/statements?${search}` : '/statements');
 	}
 };
