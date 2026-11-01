@@ -3,9 +3,10 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, invoices, utilityStatements } from '../db/schema';
+import { apartments, categories, distributionKeys, fuelStocks, invoices, rentalContracts, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { setAgreedCategories } from '../services/agreed-category.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { generateStatement } from '../services/statement.service';
@@ -294,5 +295,111 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		expect(withProfile.heatingWithoutServicePeriod.map((i) => i.billingEntityName)).toEqual(['Fernwärme AG']);
 		expect(withProfile.oldHeatingRule).toEqual([id]);
 		expect(withoutProfile.heatingWithoutServicePeriod).toEqual([]);
+	});
+
+	// #508: Marc from May, his statement sent under the old rule; Eva, before him to 31.03., is billed by the run
+	type Sum = { statementId: string; costs: string; tenants: string; landlord: string; billed: string; difference: string; result: string; landlordFor: string | null };
+	const heatingSumsAt = async (eva: (contract: string, sumsNow: () => Promise<Sum[]>) => Promise<void> = async () => {}) => {
+		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-04-10', description: 'Heizung Q1' });
+		const id = await sentStatement(may, 'sent');
+		await db.update(invoices).set({ servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' }).where(and(eq(invoices.buildingId, may.building), eq(invoices.description, 'Heizung Q1')));
+		const tenant = await createTenant({ firstName: 'Eva', lastName: `Vormieterin ${crypto.randomUUID()}` });
+		const before = await createContract({ apartmentId: may.apartment, tenantId: tenant.id, startDate: '2025-01-01', endDate: '2025-03-31', baseRent: '900', monthlyAdvancePayment: '0' });
+		const heatingProfileId = (await getHeatingProfileByName('Heating Mittelland'))!.id;
+		const sumsNow = async () =>
+			((await (await callApi(`/api/v1/statements/run-heating?buildingId=${may.building}&periodStart=2025-01-01&periodEnd=2025-12-31&heatingProfileId=${heatingProfileId}`)).json()) as { heatingSums: Sum[] }).heatingSums;
+		try {
+			await eva(before.id, sumsNow);
+			return { id, heatingSums: await sumsNow() };
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.apartmentId, may.apartment));
+			await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+			await deleteContract(before.id, true);
+			await deleteTenant(tenant.id);
+			await may.remove();
+		}
+	};
+
+	// #508 (Fachreview 508-1 M-1, V-4): per apartment the heating costs, the part of the vacancy the landlord bears, what
+	// the apartment's statements bill for them (the sent one as stored, the new one as the run would) and the difference
+	it('nennt die Heizkosten der Wohnung, den Leerstand und wie viel die Abrechnungen mehr verrechnen', async () => {
+		const { id, heatingSums } = await heatingSumsAt();
+
+		const [sum] = heatingSums;
+		expect(heatingSums).toHaveLength(1);
+		expect(sum).toMatchObject({ statementId: id, costs: '2000.00', result: 'more', landlordFor: 'vacancy' });
+		expect(Number(sum.tenants) + Number(sum.landlord)).toBeCloseTo(2000, 2);
+		expect(Number(sum.landlord)).toBeGreaterThan(0);
+		expect(Number(sum.billed) - Number(sum.tenants)).toBeCloseTo(Number(sum.difference), 2);
+		expect(Number(sum.difference)).toBeGreaterThan(0);
+	});
+
+	// Fachreview 508-1 V-3, code review 508-1 C-2, C-3: a lease without agreed heating costs bills none, its part is the landlord's
+	it('nennt den Anteil eines Mietvertrags ohne vereinbarte Heizkosten beim Vermieter', async () => {
+		const { heatingSums } = await heatingSumsAt((contract) => setAgreedCategories(contract, []));
+
+		const [sum] = heatingSums;
+		expect(sum).toMatchObject({ costs: '2000.00', landlordFor: 'leases' });
+		expect(Number(sum.tenants) + Number(sum.landlord)).toBeCloseTo(2000, 2);
+	});
+
+	// code review 508-1 C-2: a replaced statement counts no more, the run bills its berichtigte Abrechnung (#647)
+	it('zählt eine ersetzte Abrechnung nicht, sondern die berichtigte, die der Lauf erstellt', async () => {
+		let without: Sum[] = [];
+		const { heatingSums } = await heatingSumsAt(async (contract, sumsNow) => {
+			without = await sumsNow();
+			const heatingProfileId = (await getHeatingProfileByName('Heating Mittelland'))!.id;
+			const [{ buildingId }] = await db.select({ buildingId: apartments.buildingId }).from(apartments).innerJoin(rentalContracts, eq(rentalContracts.apartmentId, apartments.id)).where(eq(rentalContracts.id, contract));
+			const replaced = await generateStatement({ contractId: contract, buildingId, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId, managementFeePercent: 0 });
+			await db.update(utilityStatements).set({ status: 'replaced' }).where(eq(utilityStatements.id, replaced.id));
+			await db.update(utilityStatementLineItems).set({ tenantShare: '0.00' }).where(eq(utilityStatementLineItems.statementId, replaced.id));
+		});
+
+		expect(heatingSums).toEqual(without);
+	});
+
+	// code review 508-1 C-2: three contracts in the apartment, two of them billed by the run; the April tenant ends the vacancy
+	it('zählt alle Mietverträge der Wohnung, auch den dritten, der den Leerstand füllt', async () => {
+		const tenant = await createTenant({ firstName: 'Ruth', lastName: `April ${crypto.randomUUID()}` });
+		let april = '';
+		const { heatingSums } = await heatingSumsAt(async (contract) => {
+			const [{ apartmentId }] = await db.select({ apartmentId: rentalContracts.apartmentId }).from(rentalContracts).where(eq(rentalContracts.id, contract));
+			april = (await createContract({ apartmentId, tenantId: tenant.id, startDate: '2025-04-01', endDate: '2025-04-30', baseRent: '900', monthlyAdvancePayment: '0' })).id;
+		}).finally(async () => {
+			if (april) await deleteContract(april, true);
+			await deleteTenant(tenant.id);
+		});
+
+		const [sum] = heatingSums;
+		expect(sum).toMatchObject({ costs: '2000.00', landlordFor: null, result: 'more' });
+		expect(Number(sum.tenants)).toBeCloseTo(2000, 1);
+	});
+
+	// code review 508b-1 C-6: a heating category with invoices under two distribution keys bills two positions
+	it('zählt eine Heizkategorie mit Rechnungen unter zwei Verteilschlüsseln ganz', async () => {
+		const { heatingSums } = await heatingSumsAt(async (contract) => {
+			const [{ buildingId }] = await db.select({ buildingId: apartments.buildingId }).from(apartments).innerJoin(rentalContracts, eq(rentalContracts.apartmentId, apartments.id)).where(eq(rentalContracts.id, contract));
+			const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+			const [perUnit] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Unit'));
+			await insertInvoice(buildingId, { categoryId: heating.id, distributionKeyId: perUnit.id, amount: '1000.00', invoiceDate: '2025-08-31' });
+		});
+
+		expect(heatingSums[0]).toMatchObject({ costs: '3000.00', landlordFor: 'vacancy' });
+	});
+
+	// code review 508-1 C-3: a lease that agrees one of two heating categories leaves the other's part to the landlord
+	it('nennt den Anteil einer nicht vereinbarten Heizkategorie beim Vermieter', async () => {
+		const { heatingSums } = await heatingSumsAt(async (contract) => {
+			const [{ buildingId }] = await db.select({ buildingId: apartments.buildingId }).from(apartments).innerJoin(rentalContracts, eq(rentalContracts.apartmentId, apartments.id)).where(eq(rentalContracts.id, contract));
+			const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+			const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
+			await insertInvoice(buildingId, { categoryId: chimney.id, amount: '500.00', invoiceDate: '2025-08-31' });
+			await setAgreedCategories(contract, [heating.id]);
+		});
+
+		expect(heatingSums[0]).toMatchObject({ costs: '2500.00', landlordFor: 'leases' });
 	});
 });

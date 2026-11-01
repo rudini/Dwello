@@ -602,3 +602,11 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] #681 persona Sven: `docs/design/personas/sven-681.md`, P-1 and P-2 Minor (need new texts), stay in the report
 - [x] #681 PR: pushed after this archive
 - [x] Workflow notes `docs/reviews/workflow-notes-nfr-part-2.md`, collected review `workflow-rules-review-2026-11-01-2.md`
+## Session: #508 the statement run names the heating sum of an apartment
+
+- [x] @wip scenario seen red; fach-reviewer step 1 `docs/reviews/508-fachreview-1.md`: M-1 (vacancy), V-1, V-3 to V-6 taken; V-2 to #1026 (needs-decision)
+- [x] Backend `heatingSums` on GET /statements/run-heating, BFF mapper, `heatingSumText`, six texts in four languages; pg, unit and text tests seen red
+- [x] code-reviewer `docs/reviews/508-review-1.md`: C-1 to C-5 fixed (C-1 contract `statement-run-heating-sum.json`, C-2 and C-5 tests seen red); re-review `508b-review-1.md`: C-6 (two distribution keys) fixed, test seen red; round 3 `508c-review-1.md`
+- [x] daten-pruefer `docs/reviews/508-datenpruefung-1.md`: every amount holds to the Rappen
+- [x] Persona `docs/design/personas/dr-weber-508.md`: P-1 (Major, no advice at «zu wenig») to #1026; P-2 to P-5 (Minor) stay in the report
+- [x] PR: pushed after this archive
