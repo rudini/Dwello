@@ -223,6 +223,22 @@ describe('Alle Daten exportieren', () => {
 		]);
 	});
 
+	it('nennt eine Wohnung mit nur einem künftigen Mietvertrag «Vermietet ab» seinem Beginn, und die Verwaltungspauschale mit eigenem Satz und ohne (Review 496b C-1)', async () => {
+		const future = await createRental(crypto.randomUUID(), { startDate: '2027-01-01', monthlyAdvancePayment: '100', managementFeePercent: '4.00' });
+		const none = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', monthlyAdvancePayment: '100', managementFeeAgreed: false });
+		try {
+			const exported = await exportIn();
+			const contracts = rowsOf(exported, 'tabellen/mietverträge.csv');
+
+			expect(rowsOf(exported, 'tabellen/wohnungen.csv').find((row) => row.ID === future.apartment)).toMatchObject({ Mietstatus: 'Vermietet ab 2027-01-01' });
+			expect(contracts.find((row) => row.ID === future.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Ja, mit eigenem Satz', 'Eigener Satz (%)': '4.00' });
+			expect(contracts.find((row) => row.ID === none.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Nein' });
+		} finally {
+			await future.remove();
+			await none.remove();
+		}
+	});
+
 	it('nennt Sprache, Korrespondenzkanal, Art und Status eines Dokuments und die Verwaltungspauschale mit den Wörtern der Oberfläche (Fachreview 496-2 V-4, V-14)', async () => {
 		const [reminder] = await db
 			.insert(documents)
