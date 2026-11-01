@@ -41,9 +41,24 @@ describe('push to main by its resolved target (#713)', () => {
 		['HEAD:main from another branch', () => onFeature, 'git push origin HEAD:main'],
 		['a forced refspec to refs/heads/main', () => onFeature, 'git push origin +feature:refs/heads/main'],
 		['git -C into a checkout of main', () => onFeature, `git -C ${'"'}%MAIN%${'"'} push`],
-		['every branch at once', () => onFeature, 'git push --all origin']
+		['every branch at once', () => onFeature, 'git push --all origin'],
+		['a mirror', () => onFeature, 'git push --mirror origin'],
+		['main named as the source', () => onFeature, 'git push origin main'],
+		['the deletion of main', () => onFeature, 'git push origin :main'],
+		// review 713-1
+		['a cd into a checkout of main', () => onFeature, 'cd "%MAIN%" && git push'],
+		['a redirection with a space', () => onMain, 'git push origin > /tmp/push.log 2> /dev/null'],
+		['a continued line', () => onMain, 'git push \\\n  origin'],
+		['env and variables before git', () => onMain, 'env GIT_TRACE=0 X=1 git push'],
+		['command and timeout before git', () => onMain, 'timeout 60 command git push'],
+		['git --git-dir of a checkout of main', () => onFeature, 'git --git-dir "%MAIN%/.git" push'],
+		['the matching refspec', () => onFeature, 'git push origin :'],
+		['a wildcard refspec', () => onFeature, 'git push origin "refs/heads/*:refs/heads/*"'],
+		['@ for HEAD with main checked out', () => onMain, 'git push origin @'],
+		['an abbreviated heads/main', () => onFeature, 'git push origin feature:heads/main'],
+		['a bare push with push.default matching', () => onFeature, 'git -c push.default=matching push']
 	])('asks before %s', (_, cwd, command) => {
-		expect(decision(cwd(), command.replace('%MAIN%', onMain))).toBe('ask');
+		expect(decision(cwd(), command.replaceAll('%MAIN%', onMain))).toBe('ask');
 	});
 
 	it.each([

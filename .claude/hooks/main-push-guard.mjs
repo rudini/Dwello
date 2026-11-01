@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // Asks before a `git push` whose resolved target is main (#713), which the ask rules in settings.json cannot see from the
-// command text: a bare `git push` or `git push origin HEAD` with main checked out, `git -C <checkout of main> push`,
-// `HEAD:main`, `--all`/`--mirror`. A refspec to another branch (main-fix) and text that only mentions a push pass.
-// The rules for force and delete in settings.json stay as they are.
+// command text: a bare `git push` with main checked out (@{push}; push.default matching or a mirror remote), HEAD/@,
+// `HEAD:main`, `heads/main`, `:main`, `:` and wildcard refspecs, `--all`/`--mirror`, in the directory a `cd`, `-C` or
+// `--git-dir` gives, also behind `env`, variables, `command` or `timeout`. A refspec to another branch (main-fix) and text
+// that only mentions a push (in quotes) pass. Not followed: `bash -c '…'` and other shells; the ask rules for force and
+// delete in settings.json stay as they are.
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -11,7 +13,8 @@ const input = JSON.parse(readFileSync(0, 'utf8'));
 const command = input.tool_input?.command ?? '';
 
 /** The shell commands of a line, each as its words; quotes are kept together and dropped, so text in them is no command */
-function commands(s) {
+function commands(line) {
+	const s = line.replace(/\\\n/g, ' ');
 	const all = [[]];
 	let word = null;
 	const end = () => (word !== null && all.at(-1).push(word), (word = null));
@@ -21,7 +24,7 @@ function commands(s) {
 			const close = s.indexOf(c, i + 1);
 			word = (word ?? '') + s.slice(i + 1, close < 0 ? undefined : close);
 			i = close < 0 ? s.length : close;
-		} else if (/[;&|\n()]/.test(c)) {
+		} else if (/[;&|\n()`]/.test(c)) {
 			end();
 			if (all.at(-1).length) all.push([]);
 		} else if (/\s/.test(c)) end();
@@ -31,43 +34,68 @@ function commands(s) {
 	return all.filter((words) => words.length);
 }
 
-const gitIn = (dir, ...args) => spawnSync('git', ['-C', dir, ...args], { encoding: 'utf8' }).stdout?.trim() ?? '';
-const branchOf = (ref) => ref.replace(/^\+/, '').replace(/^refs\/heads\//, '');
+/** The words without redirections (`> log`, `2>/dev/null`, `< in`) */
+const withoutRedirections = (words) =>
+	words.filter((word, i) => !/^\d*[<>]/.test(word) && !/^\d*[<>]+&?$/.test(words[i - 1] ?? ''));
 
-/** Why this push reaches main, or nothing */
-function toMain(words) {
-	let dir = resolve(input.cwd ?? process.cwd());
+// what may stand before git and still run it (review 713-1, C-3)
+const prefix = /^(env|command|exec|nohup|time|sudo)$/;
+function withoutPrefixes(words) {
+	let i = 0;
+	while (i < words.length && words[i] !== 'git') {
+		if (words[i] === 'timeout') i += 2;
+		else if (prefix.test(words[i]) || /^[A-Za-z_]\w*=/.test(words[i]) || words[i].startsWith('-')) i++;
+		else return [];
+	}
+	return words.slice(i);
+}
+
+const branchOf = (ref) => ref.replace(/^\+/, '').replace(/^(refs\/)?heads\//, '');
+
+/** Why this push reaches main, or nothing; dir is where the command runs */
+function toMain(words, dir) {
+	const git = []; // the options before push, so the questions below see the same repository and config
 	let i = 1;
 	for (; i < words.length && words[i] !== 'push'; i++) {
 		if (words[i] === '-C') dir = resolve(dir, words[++i] ?? '.');
-		else if (words[i] === '-c') i++;
-		else if (!words[i].startsWith('-')) return; // another git command
+		else if (/^(-c|--git-dir|--work-tree|--namespace)$/.test(words[i])) git.push(words[i], words[++i] ?? '');
+		else if (words[i].startsWith('-')) git.push(words[i]);
+		else return; // another git command
 	}
 	if (words[i] !== 'push') return;
-	const args = words.slice(i + 1).filter((word) => !/^\d?>/.test(word));
-	if (args.some((arg) => arg === '--all' || arg === '--mirror' || arg === '--branches')) return 'pushes every branch';
+	const ask = (...args) => spawnSync('git', [...git, ...args], { cwd: dir, encoding: 'utf8' }).stdout?.trim() ?? '';
+	const args = words.slice(i + 1);
+	if (args.some((arg) => /^--(all|mirror|branches)$/.test(arg))) return 'pushes every branch';
 	const positional = [];
 	for (let k = 0; k < args.length; k++) {
 		if (/^(--repo|--push-option|-o|--receive-pack|--exec)$/.test(args[k])) k++;
 		else if (!args[k].startsWith('-')) positional.push(args[k]);
 	}
-	const current = gitIn(dir, 'rev-parse', '--abbrev-ref', 'HEAD');
-	// no refspec: the branch push.default sends, @{push}, else the current one
+	const current = ask('rev-parse', '--abbrev-ref', 'HEAD');
+	// no refspec: what push.default and the remote send (@{push}, else the current branch; matching and mirror take main)
 	if (positional.length < 2) {
-		const target = gitIn(dir, 'rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{push}').replace(/^[^/]+\//, '');
+		const remote = positional[0] ?? 'origin';
+		if (ask('config', 'push.default') === 'matching' || ask('config', '--bool', `remote.${remote}.mirror`) === 'true')
+			return 'pushes every matching branch';
+		const target = ask('rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{push}').replace(/^[^/]+\//, '');
 		return (target || current) === 'main' ? `pushes ${current} to main` : undefined;
 	}
 	for (const spec of positional.slice(1)) {
+		if (spec === ':' || spec === '+:') return 'pushes every matching branch';
+		if (spec.includes('*')) return `pushes the pattern ${spec}`;
 		const [source, target = source] = spec.split(':');
-		const branch = branchOf(target === 'HEAD' || (!spec.includes(':') && branchOf(source) === 'HEAD') ? current : target);
-		if (branch === 'main') return `pushes ${source} to main`;
+		const head = (ref) => (/^\+?(HEAD|@)$/.test(ref) ? current : ref);
+		if (branchOf(head(target)) === 'main') return `pushes ${source || 'a deletion'} to main`;
 	}
 }
 
-const reason = commands(command)
-	.filter((words) => words[0] === 'git')
-	.map(toMain)
-	.find(Boolean);
+let dir = resolve(input.cwd ?? process.cwd());
+let reason;
+for (const words of commands(command).map(withoutRedirections)) {
+	// a cd before the push moves it (review 713-1, C-1)
+	if (words[0] === 'cd') dir = resolve(dir, words[1] ?? process.env.HOME ?? '.');
+	reason ??= toMain(withoutPrefixes(words), dir);
+}
 if (reason)
 	console.log(
 		JSON.stringify({
