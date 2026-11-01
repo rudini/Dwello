@@ -346,6 +346,7 @@ Funktionalität: Mietvertragsdetail
     Und steht im PDF "Ohne Ihre Unterschrift ändert dieses Schreiben an Ihrem Mietvertrag nichts"
     Und steht im PDF "Ort, Datum"
     Und steht im PDF "Unterschrift weiterer Mieter"
+    Und heisst die Datei "Zustimmung zu einer neuen Abrechnungsperiode 2.01" mit dem Nachnamen von "Anna Keller"
 
   # #521 (Fachreview 521-1 V-1): ohne frühere Abrechnungsperiode gibt es keine bisherige Periode für den Brief
   Szenario: Ohne Wechsel der Abrechnungsperiode bietet der Mietvertrag keinen Brief zur Zustimmung an
@@ -360,6 +361,11 @@ Funktionalität: Mietvertragsdetail
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter den Brief zur Zustimmung für den Mietvertrag von "Anna Keller" direkt öffnet
     Dann liest der Liegenschaftsverwalter "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
+
+  # #521 (Code-Review 521b C-3): eine eingetippte Adresse eines Mietvertrags, den es nicht gibt
+  Szenario: Den Brief zur Zustimmung eines unbekannten Mietvertrags direkt öffnen
+    Wenn der Liegenschaftsverwalter den Brief zur Zustimmung für einen unbekannten Mietvertrag direkt öffnet
+    Dann liest der Liegenschaftsverwalter "Der Mietvertrag wurde nicht gefunden. Laden Sie die Seite neu."
 
   # #521 (C-1): die kurze Abrechnungsperiode ist inzwischen abgerechnet (z.B. in einem zweiten Tab)
   Szenario: Den Brief zur Zustimmung einer inzwischen abgerechneten kurzen Abrechnungsperiode anfordern

@@ -111,7 +111,10 @@ describe('Brief zur Zustimmung zu einer neuen Abrechnungsperiode', () => {
 	});
 
 	it('meldet einen unbekannten Mietvertrag als nicht gefunden', async () => {
-		expect((await callApi(`/api/v1/contracts/${crypto.randomUUID()}/consent-letter`)).status).toBe(404);
+		const response = await callApi(`/api/v1/contracts/${crypto.randomUUID()}/consent-letter`);
+
+		expect(response.status).toBe(404);
+		expect(((await response.json()) as { code: string }).code).toBe('CONTRACT_NOT_FOUND');
 	});
 });
 

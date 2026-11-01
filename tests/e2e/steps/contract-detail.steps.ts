@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { createBdd } from 'playwright-bdd';
 import { invoicePeriodFilterText } from '../questions/invoices';
 import { test } from '../fixtures/test';
@@ -73,7 +74,7 @@ import {
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
-import { downloadedPdfText } from '../questions/download';
+import { downloadedFileName, downloadedPdfText } from '../questions/download';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -560,6 +561,11 @@ Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: 
 	await verwalter.sees(downloadedPdfText).toContain(names.get(tenant) ?? tenant);
 });
 
+// Fachreview 521-2 V-9: the letter's title, the apartment and the tenant's last name (the seed's token)
+Then('heisst die Datei {string} mit dem Nachnamen von {string}', async ({ verwalter, names }, title: string, tenant: string) => {
+	await verwalter.sees(downloadedFileName).toBe(`${title} ${(names.get(tenant) ?? tenant).split(' ').at(-1)}.pdf`);
+});
+
 // Fachreview 521-1 V-1: without an earlier Abrechnungsperiode there is no letter
 Then('bietet der Mietvertrag keinen Brief zur Zustimmung an', async ({ verwalter }) => {
 	await verwalter.sees(consentLetterShown).toBe(false);
@@ -571,3 +577,8 @@ When(
 		await verwalter.attemptsTo(openConsentLetter(seed.idOf(`Mietvertrag ${tenant}`)!));
 	}
 );
+
+// Code review 521b C-3: a typed address of a contract that does not exist
+When('der Liegenschaftsverwalter den Brief zur Zustimmung für einen unbekannten Mietvertrag direkt öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openConsentLetter(randomUUID()));
+});

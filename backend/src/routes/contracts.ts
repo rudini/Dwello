@@ -146,7 +146,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			const letter = await consentLetterPdf(params.id);
 			if (!letter) {
 				set.status = 404;
-				return { error: 'Contract not found' };
+				return refusal('CONTRACT_NOT_FOUND', 'Contract not found');
 			}
 			return fileResponse(set, letter);
 		} catch (error) {
