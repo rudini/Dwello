@@ -125,7 +125,7 @@
 {#if statement.lineItems.length === 0}
 	<p class="text-ink-muted">{m.statements_no_lines()}</p>
 {:else}
-	<!-- Phones get the lines one below the other, every amount in view; the table from md -->
+	<!-- Phones (and stacked pages at every width) get the lines one below the other, every amount in view; the table from md -->
 	<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
 		{#each statement.lineItems as item (item.id)}
 			<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
