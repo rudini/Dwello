@@ -138,10 +138,11 @@ describe('Alle Daten exportieren', () => {
 	it('erklärt in der Anleitung Bereits bezahlt, leere Beträge, die Angaben des Protokolls und fehlende PDF der Mietverträge (Persona 496b P-1 bis P-3, Review 496b C-3)', async () => {
 		const readme = Buffer.from((await exportIn()).files[0].content, 'base64').toString();
 
-		expect(readme).toContain('Bereits bezahlt nennt bei einer berichtigten Abrechnung, was der Mieter auf die ersetzte Abrechnung schon bezahlt hat; sonst steht dort 0.00.');
+		expect(readme).toContain('Bereits bezahlt nennt bei einer berichtigten Abrechnung, was auf die ersetzten Abrechnungen schon angerechnet ist: die Zahlungen und einen Saldo, den die nächste Abrechnung schon als Übertrag verrechnet hat oder den Sie von Hand ausgeglichen haben; sonst steht dort 0.00.');
+		expect(readme).toContain('Hat eine erledigte Abrechnung einen Saldo, ist er damit nicht bezahlt: Er ist ein Übertrag, den die nächste Abrechnung des Mietvertrags verrechnet');
 		expect(readme).toContain('Bezahlter Betrag ist die Summe der Zahlungen in zahlungen.csv und bleibt leer, solange keine Zahlung festgehalten ist. Bei einem Entwurf sind Bezahlter Betrag und Offener Betrag leer, weil er noch nicht versendet ist.');
 		expect(readme).toContain('protokoll.csv nennt jeden Eintrag in Worten; «Angaben (JSON)» enthält die gespeicherten Angaben des Eintrags für ein anderes Programm.');
-		expect(readme).toContain('Haben Sie zu einem Mietvertrag kein PDF gespeichert, ist «Mietvertrag im Export» in mietverträge.csv leer. Gibt es weder Dokumente noch PDF der Mietverträge, fehlt der Ordner.');
+		expect(readme).toContain('«Mietvertrag im Export» in mietverträge.csv nennt ein PDF, das direkt beim Mietvertrag gespeichert ist; in der Oberfläche lässt sich keines ablegen, deshalb ist die Spalte in der Regel leer. Gibt es weder Dokumente noch ein solches PDF, fehlt der Ordner.');
 	});
 
 	it('legt den Beleg mit Datum und Rechnungssteller in den Ordner der Belege und nennt ihn bei der Rechnung', async () => {
@@ -235,13 +236,15 @@ describe('Alle Daten exportieren', () => {
 	});
 
 	it('nennt eine Wohnung mit nur einem künftigen Mietvertrag «Vermietet ab» seinem Beginn, und die Verwaltungspauschale mit eigenem Satz und ohne (Review 496b C-1)', async () => {
-		const future = await createRental(crypto.randomUUID(), { startDate: '2027-01-01', monthlyAdvancePayment: '100', managementFeePercent: '4.00' });
+		// the first day of next year: always still to come (Review 496c C-1)
+		const nextYear = `${Number(swissToday().slice(0, 4)) + 1}-01-01`;
+		const future = await createRental(crypto.randomUUID(), { startDate: nextYear, monthlyAdvancePayment: '100', managementFeePercent: '4.00' });
 		const none = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', monthlyAdvancePayment: '100', managementFeeAgreed: false });
 		try {
 			const exported = await exportIn();
 			const contracts = rowsOf(exported, 'tabellen/mietverträge.csv');
 
-			expect(rowsOf(exported, 'tabellen/wohnungen.csv').find((row) => row.ID === future.apartment)).toMatchObject({ Mietstatus: 'Vermietet ab 2027-01-01' });
+			expect(rowsOf(exported, 'tabellen/wohnungen.csv').find((row) => row.ID === future.apartment)).toMatchObject({ Mietstatus: `Vermietet ab ${nextYear}` });
 			expect(contracts.find((row) => row.ID === future.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Ja, mit eigenem Satz', 'Eigener Satz (%)': '4.00' });
 			expect(contracts.find((row) => row.ID === none.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Nein' });
 		} finally {
@@ -251,19 +254,23 @@ describe('Alle Daten exportieren', () => {
 	});
 
 	it('nennt Sprache, Korrespondenzkanal, Art und Status eines Dokuments und die Verwaltungspauschale mit den Wörtern der Oberfläche (Fachreview 496-2 V-4, V-14)', async () => {
-		const [reminder] = await db
+		const [reminder, sent] = await db
 			.insert(documents)
-			.values({ tenantId: rental.tenant, type: 'reminder', title: 'Zahlungserinnerung', fileName: 'mahnung.pdf', content: pdf('reminder'), channel: 'letter', status: 'to_send' })
+			.values([
+				{ tenantId: rental.tenant, type: 'reminder', title: 'Zahlungserinnerung', fileName: 'mahnung.pdf', content: pdf('reminder'), channel: 'letter', status: 'to_send' },
+				{ tenantId: rental.tenant, statementId: statements.open, type: 'statement', title: 'Nebenkostenabrechnung', fileName: 'abrechnung.pdf', content: pdf('sent'), channel: 'email', status: 'sent' }
+			])
 			.returning();
 		try {
 			const exported = await exportIn();
 
 			expect(rowsOf(exported, 'tabellen/mieter.csv').find((row) => row.ID === rental.tenant)).toMatchObject({ Sprache: 'Deutsch', Korrespondenzkanal: 'Per Brief' });
 			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row.ID === reminder.id)).toMatchObject({ Art: 'Mahnung', Kanal: 'Per Brief', Status: 'Zu versenden' });
+			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row.ID === sent.id)).toMatchObject({ Art: 'Versendetes PDF', Kanal: 'Per E-Mail', Status: 'Versendet' });
 			expect(rowsOf(exported, 'tabellen/dokumente.csv').find((row) => row['Mieter-ID'] === rental.tenant && row.Titel === 'Übergabeprotokoll')).toMatchObject({ Art: 'Hochgeladenes Dokument', Kanal: null, Status: null });
 			expect(rowsOf(exported, 'tabellen/mietverträge.csv').find((row) => row.ID === rental.contract)).toMatchObject({ 'Vereinbarte Verwaltungspauschale': 'Ja, zum Satz des Abrechnungslaufs' });
 		} finally {
-			await db.delete(documents).where(eq(documents.id, reminder.id));
+			await db.delete(documents).where(inArray(documents.id, [reminder.id, sent.id]));
 		}
 	});
 
@@ -280,6 +287,12 @@ describe('Alle Daten exportieren', () => {
 
 	it('schreibt ja und nein als Wort, eine eigene Kategorie als «Eigene», die Konfidenz in % und die Zeit in Schweizer Zeit (Review 496-1 C-6)', async () => {
 		const [category] = await db.insert(categories).values({ name: `Eigene ${token}`, nameDE: `Eigene ${token}`, type: 'custom', isAllowedUtilityCost: false }).returning();
+		const [key] = await db.insert(distributionKeys).values({ name: `Eigener ${token}`, type: 'custom', formula: '{area}' }).returning();
+		const pct = '8.33';
+		const [profile] = await db
+			.insert(heatingProfiles)
+			.values({ name: `Eigenes ${token}`, type: 'custom', januaryPct: pct, februaryPct: pct, marchPct: pct, aprilPct: pct, mayPct: pct, junePct: pct, julyPct: pct, augustPct: pct, septemberPct: pct, octoberPct: pct, novemberPct: pct, decemberPct: pct })
+			.returning();
 		const [invoice] = await db.select().from(invoices).where(eq(invoices.buildingId, rental.building)).limit(1);
 		await db.update(invoices).set({ llmConfidence: '0.8530', wasManuallyOverridden: true }).where(eq(invoices.id, invoice.id));
 		// 10:30 UTC is 12:30 in Zürich in summer
@@ -288,11 +301,15 @@ describe('Alle Daten exportieren', () => {
 			const exported = await exportIn();
 
 			expect(rowsOf(exported, 'tabellen/kategorien.csv').find((row) => row.ID === category.id)).toMatchObject({ Art: 'Eigene', Umlagefähig: 'nein', Heizkosten: 'nein' });
+			expect(rowsOf(exported, 'tabellen/verteilschlüssel.csv').find((row) => row.ID === key.id)).toMatchObject({ Art: 'Eigener Verteilschlüssel' });
+			expect(rowsOf(exported, 'tabellen/heizprofile.csv').find((row) => row.ID === profile.id)).toMatchObject({ Art: 'Eigenes Heizprofil' });
 			expect(rowsOf(exported, 'tabellen/rechnungen.csv').find((row) => row.ID === invoice.id)).toMatchObject({ 'Konfidenz (%)': '85', 'Von Hand geändert': 'ja' });
 			expect(rowsOf(exported, 'tabellen/protokoll.csv').find((row) => row.ID === entry.id)).toMatchObject({ 'Datum und Uhrzeit': '2026-07-01 12:30' });
 		} finally {
 			await db.delete(auditLog).where(eq(auditLog.id, entry.id));
 			await db.delete(categories).where(eq(categories.id, category.id));
+			await db.delete(distributionKeys).where(eq(distributionKeys.id, key.id));
+			await db.delete(heatingProfiles).where(eq(heatingProfiles.id, profile.id));
 		}
 	});
 
