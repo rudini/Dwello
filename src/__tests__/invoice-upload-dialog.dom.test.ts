@@ -320,7 +320,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'), word);
 		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
-		expect(status()).toBe('Bitte prüfen: 1. Nicht möglich: 1.');
+		expect(status()).toBe('Bitte prüfen: 1. Nicht möglich: 1. Bereit zum Erstellen: 1.');
 		allByTestId('invoice-upload-row-remove')[1].click();
 		await settle();
 		expect(status()).toBe('notizen.docx entfernt.');
@@ -765,7 +765,7 @@ describe('Rechnungen hochladen', () => {
 		expect(status.textContent).toBe('Gelesen: 0 von 2');
 		await settle();
 		await settle();
-		expect(status.textContent).toBe('Bitte prüfen: 2.');
+		expect(status.textContent).toBe('Bitte prüfen: 2. Bereit zum Erstellen: 2.');
 	});
 
 	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {
