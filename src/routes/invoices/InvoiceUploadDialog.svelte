@@ -8,6 +8,7 @@
 		checkRow,
 		fileRefusal,
 		invoiceOf,
+		mixedCosts,
 		newRow,
 		openReason,
 		stateOf,
@@ -29,7 +30,7 @@
 	import UploadFiles from './UploadFiles.svelte';
 	import UploadResult from './UploadResult.svelte';
 
-	export type Created = { id: string; name: string };
+	export type Created = { id: string; name: string; rest?: boolean }; // rest: still to record as a second invoice (#535)
 
 	// «Rechnungen hochladen»: the building, then up to 20 files; the KI reads each as soon as it is added, the property
 	// manager checks the proposals, and only «{n} Rechnungen erstellen» saves anything (#217)
@@ -195,7 +196,8 @@
 		const answer = await api.post<{ id: string }>('/invoices', form);
 		if (answer.data) {
 			// named with its date: two invoices of one Rechnungssteller are told apart (C-27)
-			created = [...created, { id: answer.data.id, name: `${row.values.billingEntity.trim()}, ${formatDate(row.values.invoiceDate)}` }];
+			const name = `${row.values.billingEntity.trim()}, ${formatDate(row.values.invoiceDate)}`;
+			created = [...created, { id: answer.data.id, name, ...(mixedCosts(row) && { rest: true }) }];
 			return remove(row.key);
 		}
 		update(row.key, (one) => ({ ...one, createError: reasonOf(answer.error, m.invoices_upload_create_failed()) }));
