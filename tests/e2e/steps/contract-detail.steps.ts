@@ -562,8 +562,10 @@ Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: 
 });
 
 // Fachreview 521-2 V-9: the letter's title, the apartment and the tenant's last name (the seed's token)
+// WebKit saves the download with «_» for each space of the name (#1038)
 Then('heisst die Datei {string} mit dem Nachnamen von {string}', async ({ verwalter, names }, title: string, tenant: string) => {
-	await verwalter.sees(downloadedFileName).toBe(`${title} ${(names.get(tenant) ?? tenant).split(' ').at(-1)}.pdf`);
+	const name = `${title} ${(names.get(tenant) ?? tenant).split(' ').at(-1)}.pdf`;
+	await verwalter.sees(downloadedFileName).toMatch(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replaceAll(' ', '[ _]')}$`));
 });
 
 // Fachreview 521-1 V-1: without an earlier Abrechnungsperiode there is no letter
