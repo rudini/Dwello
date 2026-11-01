@@ -35,5 +35,6 @@
 	],
 	"heatingProfile": { "id": "h1", "name": "Standard" },
 	"heatingShare": null,
-	"paymentResets": [{ "resetOn": "2025-02-10", "paidDate": "2025-02-05" }]
+	"payments": [{ "date": "2025-01-20", "amount": "100.00" }],
+	"paymentResets": [{ "resetOn": "2025-02-10", "paidDate": "2025-02-05", "paidAmount": "945.00", "part": false }]
 }

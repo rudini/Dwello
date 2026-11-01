@@ -101,11 +101,14 @@ describe('Abrechnung aus dem Backend', () => {
 	});
 
 	// #92: der Verlauf nennt jede zurückgesetzte Zahlung
-	it('übernimmt die zurückgesetzten Zahlungen', () => {
+	// #999: mit Betrag und ob es eine Teilzahlung war, und die festgehaltenen Zahlungen
+	it('übernimmt die zurückgesetzten und die festgehaltenen Zahlungen mit ihren Beträgen', () => {
 		expect(toStatement(resetStatement).paymentResets).toEqual([
-			{ resetOn: '2025-02-10', paidDate: '2025-02-05' }
+			{ resetOn: '2025-02-10', paidDate: '2025-02-05', paidAmount: 945, part: false }
 		]);
+		expect(toStatement(resetStatement).payments).toEqual([{ date: '2025-01-20', amount: 100 }]);
 		expect(toStatement(backendStatement).paymentResets).toEqual([]);
+		expect(toStatement(backendStatement).payments).toEqual([]);
 	});
 
 	// #120: die berichtigte Abrechnung nennt die ersetzte und rechnet an, was darauf bezahlt ist

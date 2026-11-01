@@ -198,6 +198,7 @@
 				{byEmail}
 				owes={statement.claimed}
 				waiting={!!statement.reminderWaitsUntil}
+				partPaid={!!statement.payments?.length}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => (
 					(paidDate = localToday()),
@@ -293,6 +294,8 @@
 				pdfBeforeChange={statement.pdfBeforeChange}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
+				payments={statement.payments}
+				refund={statement.balance < 0}
 				correctionDeclinedOn={statement.correctionDeclined?.on}
 			/>
 		</div>

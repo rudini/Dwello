@@ -174,7 +174,7 @@ Funktionalität: Abrechnungsdetail
     Und hat die Abrechnung den Status "Versendet"
 
   # #92: eine Zahlung auf der falschen Abrechnung oder mit falschem Datum lässt sich zurücksetzen; der Verlauf hält das
-  # Zurücksetzen mit dem Datum der zurückgesetzten Zahlung fest
+  # Zurücksetzen mit Datum und Betrag der zurückgesetzten Zahlung fest (#999)
   Szenario: Zahlung zurücksetzen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -182,7 +182,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
     Dann hat die Abrechnung den Status "Versendet"
-    Und nennt der Verlauf das Zurücksetzen der Zahlung vom Tag des Versands
+    Und nennt der Verlauf das Zurücksetzen der Zahlung über "CHF 442.90" vom Tag des Versands
     Wenn der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
@@ -231,7 +231,6 @@ Funktionalität: Abrechnungsdetail
 
   # #999 (#959 Regel 6): eine falsch erfasste Teilzahlung lässt sich zurücksetzen; zurückgesetzt wird nur die zuletzt
   # festgehaltene, die Teilzahlungen davor bleiben; der Verlauf hält das Zurücksetzen mit Datum und Betrag fest
-  @wip
   Szenario: Die letzte Teilzahlung einer versendeten Abrechnung zurücksetzen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -244,9 +243,9 @@ Funktionalität: Abrechnungsdetail
     Und nennt das Panel Zahlung "Bezahlt: CHF 100.00, offen: CHF 342.90"
     Und nennt der Verlauf das Zurücksetzen der Teilzahlung über "CHF 50.00" von vor 5 Tagen
     Und nennt der Verlauf die Teilzahlung über "CHF 100.00" von vor 10 Tagen
+    Und nennt der Verlauf keine Teilzahlung über "CHF 50.00" von vor 5 Tagen
 
   # #999 (#959 Regel 6): die Bestätigung nennt Datum und Betrag der Teilzahlung, die zurückgesetzt wird, und was bleibt
-  @wip
   Szenario: Vor dem Zurücksetzen einer Teilzahlung die Folge bestätigen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -256,12 +255,11 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Zahlung zurücksetzen will
     Dann nennt die Bestätigung des Zurücksetzens die Zahlung von vor 5 Tagen über "CHF 50.00"
-    Und sagt die Bestätigung des Zurücksetzens "Die Teilzahlungen davor bleiben festgehalten: CHF 100.00. Offen sind dann CHF 342.90."
+    Und sagt die Bestätigung des Zurücksetzens "Was davor festgehalten ist, bleibt: CHF 100.00. Offen sind dann CHF 342.90."
     Und hat die Abrechnung den Status "Versendet"
 
   # #999 (#959 Regel 6): auch eine überfällige Abrechnung mit einer Teilzahlung bietet das Zurücksetzen an; danach ist
   # nichts mehr bezahlt, und sie bleibt überfällig
-  @wip
   Szenario: Die einzige Teilzahlung einer überfälligen Abrechnung zurücksetzen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -275,8 +273,7 @@ Funktionalität: Abrechnungsdetail
     Und nennt der Verlauf das Zurücksetzen der Teilzahlung über "CHF 10.00" von vor 5 Tagen
 
   # #999 (#959 Regel 6): ist eine Abrechnung in Teilen bezahlt, nimmt das Zurücksetzen nur die letzte Zahlung zurück;
-  # die Bestätigung sagt, dass die Teilzahlungen davor bleiben
-  @wip
+  # die Bestätigung sagt, dass die Teilzahlungen davor bleiben; der Verlauf nennt die letzte Zahlung mit Betrag (M-1)
   Szenario: Die letzte Zahlung einer in Teilen bezahlten Abrechnung zurücksetzen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -285,12 +282,15 @@ Funktionalität: Abrechnungsdetail
     Und für die Abrechnung 2024 von "Eva Frei" sind vor 5 Tagen "342.90" Franken eingegangen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Und hat die Abrechnung den Status "Bezahlt"
+    Und nennt der Verlauf die Zahlung über "CHF 342.90" von vor 5 Tagen
     Wenn der Liegenschaftsverwalter die Zahlung zurücksetzen will
     Dann nennt die Bestätigung des Zurücksetzens die Zahlung von vor 5 Tagen über "CHF 342.90"
-    Und sagt die Bestätigung des Zurücksetzens "Die Teilzahlungen davor bleiben festgehalten: CHF 100.00. Offen sind dann CHF 342.90."
+    Und sagt die Bestätigung des Zurücksetzens "Was davor festgehalten ist, bleibt: CHF 100.00. Offen sind dann CHF 342.90."
+    Wenn der Liegenschaftsverwalter das Zurücksetzen bestätigt
+    Dann hat die Abrechnung den Status "Versendet"
+    Und nennt das Panel Zahlung "Bezahlt: CHF 100.00, offen: CHF 342.90"
 
   # #999 (#959 Regel 1): der Verlauf nennt jede Teilzahlung mit Datum und Betrag, die Quittung nach Art. 88 Abs. 2 OR
-  @wip
   Szenario: Der Verlauf nennt jede Teilzahlung mit Datum und Betrag
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet

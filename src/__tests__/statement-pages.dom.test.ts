@@ -2235,12 +2235,19 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// #92: eine erfasste Zahlung lässt sich zurücksetzen, nach einer Bestätigung mit der Folge
-	it('bietet nur bei einer bezahlten Abrechnung an, die Zahlung zurückzusetzen', () => {
+	// #999: auch eine Teilzahlung auf einer versendeten oder überfälligen Abrechnung
+	it('bietet nur bei einer festgehaltenen Zahlung an, die Zahlung zurückzusetzen', () => {
 		detail({ status: 'sent' });
 		expect(byTestId('statement-reset-payment-button')).toBeNull();
 		document.body.innerHTML = '';
 		detail({ status: 'paid', paidDate: '2025-02-05' });
 		expect(byTestId('statement-reset-payment-button')!.textContent!.trim()).toBe('Zahlung zurücksetzen');
+		for (const status of ['sent', 'overdue'] as const) {
+			document.body.innerHTML = '';
+			detail({ status, paidAmount: 50, payments: [{ date: '2025-02-05', amount: 50 }] });
+			expect(byTestId('statement-reset-payment-button')!.textContent!.trim()).toBe('Zahlung zurücksetzen');
+			expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+		}
 	});
 
 	// die Folge mit dem Status, der dann gilt: vor Ablauf der Zahlungsfrist «Versendet», danach «Überfällig» (Fachprüfung V-4)
@@ -2258,6 +2265,42 @@ describe('Abrechnungsdetail', () => {
 		expect(dialogText()).toContain('hat den Status «Überfällig».');
 	});
 
+	// #999 (Fachreview 999-1 V-3, Antwort 7): die letzte von mehreren Zahlungen, was davor festgehalten ist, bleibt
+	it('nennt vor dem Zurücksetzen der letzten von mehreren Zahlungen, was davor festgehalten bleibt und was offen ist', () => {
+		const dialogText = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		const payments = [
+			{ date: '2025-02-01', amount: 100 },
+			{ date: '2025-02-05', amount: 50 }
+		];
+		detail({ status: 'sent', balance: 442.9, paidAmount: 150, payments, deadlinePassed: false });
+		click('statement-reset-payment-button');
+		expect(dialogText()).toContain(
+			'Die Zahlung vom 05.02.2025 über CHF 50.00 wird gelöscht. Was davor festgehalten ist, bleibt: CHF 100.00. Offen sind dann CHF 342.90. Die Abrechnung NK-2024-0001 hat dann den Status «Versendet». Der Verlauf hält das Zurücksetzen fest.'
+		);
+
+		// in Teilen bezahlt; eine Rückerstattung ohne Vorzeichen
+		document.body.innerHTML = '';
+		const refund = [
+			{ date: '2025-02-01', amount: -50 },
+			{ date: '2025-02-05', amount: -70 }
+		];
+		detail({ status: 'paid', paidDate: '2025-02-05', balance: -120, paidAmount: -120, payments: refund });
+		click('statement-reset-payment-button');
+		expect(dialogText()).toContain(
+			'Die Zahlung vom 05.02.2025 über CHF 70.00 wird gelöscht. Was davor festgehalten ist, bleibt: CHF 50.00. Offen sind dann CHF 70.00. Die Abrechnung NK-2024-0001 hat dann den Status «Überfällig».'
+		);
+	});
+
+	// #999 (Fachreview 999-1 V-3): die einzige Teilzahlung
+	it('nennt vor dem Zurücksetzen der einzigen Teilzahlung, dass dann keine Zahlung mehr festgehalten ist', () => {
+		detail({ status: 'overdue', balance: 442.9, paidAmount: 10, payments: [{ date: '2025-02-05', amount: 10 }] });
+		click('statement-reset-payment-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die Teilzahlung vom 05.02.2025 über CHF 10.00 wird gelöscht. Für die Abrechnung NK-2024-0001 ist dann keine Zahlung mehr festgehalten. Offen sind CHF 442.90, der Status bleibt «Überfällig». Der Verlauf hält das Zurücksetzen fest.'
+		);
+	});
+
 	it('bestätigt das Zurücksetzen der Zahlung', async () => {
 		toasts.set([]);
 		detail({ status: 'paid', paidDate: '2025-02-05' });
@@ -2273,9 +2316,59 @@ describe('Abrechnungsdetail', () => {
 		]);
 	});
 
+	// #999 (#959 Regel 1): jede Teilzahlung mit Datum und Betrag; eine Rückerstattung ohne Vorzeichen (Fachreview 999-1, Antwort 4)
+	it('nennt im Verlauf jede Teilzahlung mit Betrag und Datum', () => {
+		const payments = [
+			{ date: '2025-02-01', amount: 100 },
+			{ date: '2025-02-05', amount: 50 }
+		];
+		detail({ status: 'sent', statementDate: '2025-01-15', balance: 442.9, paidAmount: 150, payments });
+		expect(text().replace(/\s+/g, ' ')).toContain('Teilzahlung über CHF 100.00 01.02.2025Teilzahlung über CHF 50.00 05.02.2025');
+
+		document.body.innerHTML = '';
+		detail({ status: 'sent', statementDate: '2025-01-15', balance: -120, paidAmount: -50, payments: [{ date: '2025-02-01', amount: -50 }] });
+		expect(text().replace(/\s+/g, ' ')).toContain('Zurückerstattet: CHF 50.00 01.02.2025');
+	});
+
+	// #999 (Fachreview 999-1 M-1): in Teilen bezahlt, die Zahlung, die den Saldo erreichte, mit ihrem Betrag; mit einer
+	// einzigen Zahlung genügt «Bezahlt», ihr Betrag ist der Saldo
+	it('nennt im Verlauf die letzte Zahlung mit Betrag nur nach Teilzahlungen', () => {
+		const payments = [
+			{ date: '2025-02-01', amount: 100 },
+			{ date: '2025-02-05', amount: 342.9 }
+		];
+		detail({ status: 'paid', statementDate: '2025-01-15', paidDate: '2025-02-05', balance: 442.9, paidAmount: 442.9, payments });
+		expect(text().replace(/\s+/g, ' ')).toContain(
+			'Teilzahlung über CHF 100.00 01.02.2025Zahlung über CHF 342.90 05.02.2025Bezahlt 05.02.2025'
+		);
+
+		document.body.innerHTML = '';
+		detail({ status: 'paid', statementDate: '2025-01-15', paidDate: '2025-02-05', balance: 442.9, paidAmount: 442.9, payments: payments.slice(1) });
+		expect(text().replace(/\s+/g, ' ')).toContain('Versendet 15.01.2025Bezahlt 05.02.2025');
+	});
+
+	// #999 (Fachreview 999-1 V-1 A, V-2): das Zurücksetzen mit Datum und Betrag; die zurückgesetzte Teilzahlung hat keine Zeile mehr
+	it('nennt im Verlauf das Zurücksetzen mit Datum und Betrag der zurückgesetzten Zahlung', () => {
+		detail({
+			status: 'sent',
+			statementDate: '2025-01-15',
+			balance: 442.9,
+			paidAmount: 100,
+			payments: [{ date: '2025-02-01', amount: 100 }],
+			paymentResets: [
+				{ resetOn: '2025-02-08', paidDate: '2025-02-05', paidAmount: 342.9, part: false },
+				{ resetOn: '2025-02-10', paidDate: '2025-02-03', paidAmount: 50, part: true }
+			]
+		});
+
+		expect(text().replace(/\s+/g, ' ')).toContain(
+			'Teilzahlung über CHF 100.00 01.02.2025Zahlung vom 05.02.2025 über CHF 342.90 zurückgesetzt 08.02.2025Teilzahlung vom 03.02.2025 über CHF 50.00 zurückgesetzt 10.02.2025'
+		);
+	});
+
 	// zweimal dieselbe Zahlung zurückgesetzt: beide Zeilen stehen im Verlauf (Fachprüfung V-11)
 	it('führt im Verlauf jedes Zurücksetzen einer Zahlung', () => {
-		const reset = { resetOn: '2025-02-10', paidDate: '2025-02-05' };
+		const reset = { resetOn: '2025-02-10', paidDate: '2025-02-05', paidAmount: null, part: false };
 		detail({ status: 'sent', statementDate: '2025-01-15', paymentResets: [reset, reset] });
 
 		expect(text().replace(/\s+/g, ' ').split('Zahlung vom 05.02.2025 zurückgesetzt 10.02.2025')).toHaveLength(3);

@@ -38,7 +38,7 @@ describe('Protokoll aus dem Backend', () => {
 			'Vorgeschlagene Verwaltungspauschale von 3 % auf 4.5 % geändert',
 			'Kategorie «Gartenpflege»: von umlagefähig auf nicht umlagefähig geändert; 2 Rechnungen sind damit nicht mehr umlagefähig',
 			'Rechnung «Treppenhausreinigung» von Hauswart Meier vom 31.03.2026 über CHF\u00a0450.00 (Lindenhof): als nicht umlagefähig markiert',
-			'Zahlung vom 02.03.2026 zur Abrechnung NK-2025-0001 zurückgesetzt',
+			'Zahlung vom 02.03.2026 über CHF\u00a0442.90 zur Abrechnung NK-2025-0001 zurückgesetzt',
 			'Abrechnung NK-2025-0002 durch eine berichtigte Abrechnung ersetzt'
 		]);
 	});
@@ -81,8 +81,18 @@ describe('Protokoll aus dem Backend', () => {
 	});
 
 	// Fachprüfung V-3: eine früher erfasste Zahlung ohne Datum
+	// #999 (Fachreview 999-1 V-5): eine Rückerstattung ohne Vorzeichen; vor #999 ohne Betrag festgehalten
+	it('nennt eine zurückgesetzte Rückerstattung ohne Vorzeichen und eine Zahlung ohne Betrag mit dem Datum allein', () => {
+		expect(textOf(reset, { paidAmount: '-120.00' })).toBe(
+			'Zahlung vom 02.03.2026 über CHF\u00a0120.00 zur Abrechnung NK-2025-0001 zurückgesetzt'
+		);
+		expect(textOf(reset, { paidAmount: undefined })).toBe(
+			'Zahlung vom 02.03.2026 zur Abrechnung NK-2025-0001 zurückgesetzt'
+		);
+	});
+
 	it('nennt eine zurückgesetzte Zahlung ohne Datum', () => {
-		expect(textOf(reset, { paidDate: null })).toBe(
+		expect(textOf(reset, { paidDate: null, paidAmount: undefined })).toBe(
 			'Zahlung zur Abrechnung NK-2025-0001 zurückgesetzt'
 		);
 	});

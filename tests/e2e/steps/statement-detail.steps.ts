@@ -94,6 +94,7 @@ import {
 	recordPayment,
 	downloadSentPdf,
 	openResetPaymentConfirmation,
+	confirmResetPayment,
 	openSendConfirmation,
 	openStatementApartment,
 	openInvoiceOfPosition,
@@ -497,8 +498,12 @@ When('der Liegenschaftsverwalter die Zahlung zurücksetzen will', async ({ verwa
 	await verwalter.attemptsTo(openResetPaymentConfirmation);
 });
 
-Then('nennt der Verlauf das Zurücksetzen der Zahlung vom Tag des Versands', async ({ verwalter }) => {
-	await verwalter.sees(history).toContain(`Zahlung vom ${sendingDay()} zurückgesetzt ${sendingDay()}`);
+Then('nennt der Verlauf das Zurücksetzen der Zahlung über {string} vom Tag des Versands', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(history).toContain(`Zahlung vom ${sendingDay()} über ${amount} zurückgesetzt ${sendingDay()}`);
+});
+
+When('der Liegenschaftsverwalter das Zurücksetzen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmResetPayment);
 });
 
 Then(
@@ -544,6 +549,16 @@ Then(
 
 Then('nennt der Verlauf die Teilzahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
 	await verwalter.sees(history).toMatch(new RegExp(`Teilzahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
+
+// after the payment rows as a positive anchor (Fachreview 999-1 V-2)
+Then('nennt der Verlauf keine Teilzahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
+	await verwalter.sees(history).not.toMatch(new RegExp(`Teilzahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
+
+// the payment that reached the Saldo, not a part payment (Fachreview 999-1 M-1)
+Then('nennt der Verlauf die Zahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
+	await verwalter.sees(history).toMatch(new RegExp(`(?<!Teil)Zahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
 });
 
 // #120, #358: berichtigte Abrechnung
