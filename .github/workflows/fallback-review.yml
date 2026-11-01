@@ -23,10 +23,6 @@ permissions:
   contents: read
   pull-requests: write
 
-concurrency:
-  # one run per pull request at a time, so a second trigger sees the first one's review
-  group: fallback-review-${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
-
 jobs:
   review:
     name: MiniMax review
@@ -37,6 +33,10 @@ jobs:
         github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.pull_requests[0]) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.user.login, 'copilot')) ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.user.login, 'copilot'))
+    # on the job, after its `if`: every other comment on the pull request would queue a run and cancel a waiting one
+    concurrency:
+      # one run per pull request at a time, so a second trigger sees the first one's review
+      group: fallback-review-${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -86,8 +86,9 @@ jobs:
                 fi
                 ;;
               *)
-                # CI finished or the draft became ready: Copilot gets up to 10 minutes while it is still requested
-                for _ in $(seq 10); do
+                # CI finished or the draft became ready: Copilot gets up to 5 minutes while it is still requested, so
+                # the review comes within the 15 minutes a session waits after CI (skill pull-request)
+                for _ in $(seq 5); do
                   sleep 60
                   if reviewed || ! copilot_requested; then break; fi
                 done
@@ -111,9 +112,11 @@ jobs:
           [ -n "$MINIMAX_API_KEY" ] || fail "the repository secret MINIMAX_API_KEY is missing."
 
           gh api "repos/$GH_REPO/pulls/$PR" --jq '"# " + .title + "\n\n" + (.body // "")' > pr.md
-          # lock files out: generated, and they would fill the limit
-          gh api "repos/$GH_REPO/pulls/$PR" -H 'Accept: application/vnd.github.diff' |
-            awk '/^diff --git /{ skip = ($NF ~ /\.lock$/) } !skip' > full.diff
+          # per file, because GitHub refuses the whole diff of a large pull request; lock files out: generated, and
+          # they would fill the limit
+          gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
+            --jq '.[] | select(.filename | endswith(".lock") | not) |
+              "diff --git a/\(.filename) b/\(.filename)\n\(.patch // "(no diff shown: binary or too large)")"' > full.diff
           head -c "$MAX_DIFF_BYTES" full.diff > diff.txt
           note=""
           if [ "$(wc -c < full.diff)" -gt "$MAX_DIFF_BYTES" ]; then
@@ -154,6 +157,7 @@ jobs:
             jq -rj '.choices[0].delta.content // empty' chunks.jsonl | perl -0pe 's/<think>.*?<\/think>\s*//s' > review.md
             if [ -s review.md ] && ! grep -qE '<tool_call>|<invoke' review.md; then break; fi
             [ "$attempt" = 2 ] || continue
+            [ -s review.md ] || cp response.txt review.md
             fail "MiniMax answered twice without a review: $(tail -c 300 review.md | tr '\n' ' ')"
           done
           if grep -q '"finish_reason":"length"' chunks.jsonl; then

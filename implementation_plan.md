@@ -18,5 +18,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Skill `pull-request`: wait for a review after CI, answer it like Copilot's, merge after 15 minutes without one
 - [x] Local runs against real pull requests (error, silent, real Copilot review, draft, failure)
 - [x] Files: `.github/workflows/fallback-review.yml`, `.claude/skills/pull-request/SKILL.md`; local runs found a made-up tool call and a "missing file" behind the cut, both answered in the prompt (tool call: second try, then «No review»)
-- [ ] Slice review (`code-reviewer`)
+- [x] Slice review round 1: `docs/reviews/1007-review-1.md`
+- [x] Its Minors fixed: reason when the answer stays empty, Copilot waited for 5 minutes, concurrency on the job, diff per file (GitHub refuses large diffs)
 - [ ] PR
