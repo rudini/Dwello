@@ -2,7 +2,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { readable, get } from 'svelte/store';
 
 vi.mock('$app/environment', () => ({ browser: true }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	invalidateAll: vi.fn(),
+	afterNavigate: vi.fn()
+}));
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
 const actions = vi.hoisted(() => new Map<string, (input?: unknown) => unknown>());
 vi.mock('$app/forms', () => ({

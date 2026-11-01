@@ -5,6 +5,8 @@ import {
 	countedStatements,
 	listedStatementCount,
 	listScope,
+	listStatusShown,
+	listBuildingShown,
 	pageAddressInApp,
 	statementOfYearListed,
 	statementPath
@@ -221,5 +223,13 @@ When(
 	'der Liegenschaftsverwalter beim fehlenden PDF der Abrechnung {int} von {string} weitergeht',
 	async ({ verwalter, names }, year: number, tenant: string) => {
 		await verwalter.attemptsTo(openStatementWithoutPdf(names.get(tenant) ?? tenant, year));
+	}
+);
+
+Then(
+	'zeigt die Abrechnungsliste nur die Entwürfe im Gebäude {string}',
+	async ({ verwalter, names }, building: string) => {
+		await verwalter.sees(listStatusShown).toBe('true');
+		await verwalter.sees(listBuildingShown).toBe(names.get(building) ?? building);
 	}
 );

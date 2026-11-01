@@ -114,3 +114,22 @@ describe('Start in Produktion (#51)', () => {
 		expect(() => init()).not.toThrow();
 	});
 });
+
+describe('Browser-Cache (#679)', () => {
+	it('bewahrt keine Seite auf, damit Zurück eine gelöschte Abrechnung nicht mehr zeigt', async () => {
+		const jwt = await generateJwt({
+			sub: 's-1',
+			email: 'verwalter@example.com',
+			name: 'Vera',
+			provider: 'google'
+		});
+		const url = new URL('http://localhost/statements/s-1');
+		const response = await handle({
+			event: { url, request: new Request(url), cookies: { get: () => jwt }, locals: {} },
+			resolve: async () => new Response('page')
+		} as never);
+
+		expect(await response.text()).toBe('page');
+		expect(response.headers.get('cache-control')).toBe('no-store');
+	});
+});

@@ -86,3 +86,18 @@ Funktionalität: Nebenkostenabrechnungen
     Angenommen der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
     Wenn der Liegenschaftsverwalter beim fehlenden PDF der Abrechnung 2024 von "Anna Keller" weitergeht
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+
+  # #679: nach dem Löschen eines Entwurfs zurück zur Liste, wie sie vorher gefiltert war
+  Szenario: Nach dem Löschen eines Entwurfs behält die Liste ihren Filter
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
+    Und der Liegenschaftsverwalter die Abrechnung löscht
+    Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
+
+  # #679: der Browser zeigt keine gespeicherte Seite einer Abrechnung, die es nicht mehr gibt
+  Szenario: Ein gelöschter Entwurf erscheint nach Zurück im Browser nicht mehr
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und der Liegenschaftsverwalter ist auf der Abrechnungsliste
+    Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter im Browser zurückgeht
+    Dann sagt die Fehlerseite "Diese Seite gibt es nicht."
