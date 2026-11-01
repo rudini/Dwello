@@ -34,7 +34,8 @@
 		"fitness:p1": "bun tools/fitness/p1-benchmark.ts",
 		"fitness:p2": "bun tools/fitness/p2-benchmark.ts",
 		"fitness:r1": "bun tools/fitness/r1-benchmark.ts",
-		"deps:graph": "ARCH_OUT=build/deps bun tools/arch-baseline/02-imports.ts >/dev/null && ARCH_OUT=build/deps bun tools/arch-baseline/graph.ts | dot -Tsvg -o build/deps/modules.svg && echo build/deps/modules.svg"
+		"deps:graph": "ARCH_OUT=build/deps bun tools/arch-baseline/02-imports.ts >/dev/null && ARCH_OUT=build/deps bun tools/arch-baseline/graph.ts | dot -Tsvg -o build/deps/modules.svg && echo build/deps/modules.svg",
+		"structure:report": "export ARCH_OUT=build/structure && bunx svelte-kit sync >/dev/null && bun tools/arch-baseline/01-map.ts >/dev/null && bun tools/arch-baseline/02-imports.ts >/dev/null && { bunx fallow health --no-cache --format json >build/structure/fallow-health.json 2>/dev/null || true; } && bun tools/arch-baseline/structure.ts >build/structure/index.html && echo build/structure/index.html"
 	},
 	"dependencies": {
 		"@fontsource-variable/inter": "^5.3.0",
