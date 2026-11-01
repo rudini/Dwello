@@ -51,6 +51,17 @@ describe('testcheck Claude Code hook', () => {
 		expect(result.stderr).toContain('testcheck-gate: testcheck error');
 	});
 
+	// #710: the shared matcher of .claude/hooks/git-calls.mjs
+	it('blocks a commit behind git -C with a quoted path and -c key=val', () => {
+		const root = repoWith(`it('adds', () => { expect(add(1, 2)); });\n`);
+		expect(hook(root, ['git -C', `"${root}"`, '-c user.name=t commit -m x'].join(' ')).status).toBe(2);
+	});
+
+	it('ignores a commit that is only text in a heredoc', () => {
+		const root = repoWith(`it('adds', () => { expect(add(1, 2)); });\n`);
+		expect(hook(root, ["cat > notes.md <<'EOF'", COMMIT, 'EOF'].join('\n'))).toMatchObject({ status: 0, stderr: '' });
+	});
+
 	it('lets other commands and passing tests through', () => {
 		expect(hook(repoWith(`it('adds', () => { expect(add(1, 2)).toBe(3); });\n`), COMMIT).status).toBe(0);
 		expect(hook(repoWith(`it('a', () => {});\n`), 'ls src').status).toBe(0);

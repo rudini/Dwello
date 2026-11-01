@@ -17,12 +17,16 @@ if ! CMD="$(jq -r '.tool_input.command // empty' <<<"$INPUT" 2>/dev/null)"; then
   exit 0
 fi
 
-if ! printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+(commit|push)([[:space:]]|$)'; then
-  exit 0
-fi
+case "$CMD" in *commit* | *push*) ;; *) exit 0 ;; esac
 
 if ! command -v node >/dev/null 2>&1; then
   echo "deepcheck-gate: node not on PATH, skipping deepcheck." >&2
+  exit 0
+fi
+
+# the git calls the command makes, by the matcher the commit gates share (git-calls.mjs, #710)
+VERBS="$(node "$(dirname "${BASH_SOURCE[0]}")/git-calls.mjs" <<<"$INPUT" 2>/dev/null || true)"
+if ! grep -qxE 'commit|push' <<<"$VERBS"; then
   exit 0
 fi
 
@@ -32,7 +36,7 @@ CLI="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/tools/deepcheck/src/cli
 # A commit is judged against HEAD (working tree included); a push against the upstream (else origin/HEAD,
 # else origin/main), so commits not pushed yet are covered even when the tree is clean (like fallow audit).
 ARGS=(check --agent)
-if printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+push([[:space:]]|$)'; then
+if grep -qx push <<<"$VERBS"; then
   BASE="$(cd "$ROOT" && { git merge-base HEAD '@{u}' 2>/dev/null || git merge-base HEAD origin/HEAD 2>/dev/null ||
     git merge-base HEAD origin/main 2>/dev/null || true; })"
   if [ -n "$BASE" ]; then

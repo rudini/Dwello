@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { commitAll, git, writeProject, writeRepo } from '../deepcheck/test/helpers.ts';
 
 const HOOK = fileURLToPath(new URL('../../.claude/hooks/commit-msg-gate.mjs', import.meta.url));
+const GIT_CALLS = fileURLToPath(new URL('../../.claude/hooks/git-calls.mjs', import.meta.url));
 const ROOT = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '');
 const SETTINGS = fileURLToPath(new URL('../../.claude/settings.json', import.meta.url));
 
@@ -29,7 +30,9 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		["git log -1 --format=%B | git commit --amend -F - && cat > notes.txt <<'EOF'\nsome notes here\nEOF"],
 		['git status && git log -m'],
 		['echo "git commit -m nope"'],
-		['git commit -am "fix(contracts): guard retries" -m "a body line that is longer than fifty characters"']
+		['git commit -am "fix(contracts): guard retries" -m "a body line that is longer than fifty characters"'],
+		// #710: text in a heredoc is no commit
+		["cat > notes.md <<'EOF'\ngit commit -m \"fix: guard retries\"\nEOF"]
 	])('lets %j through', (command) => {
 		expect(hook(command)).toMatchObject({ status: 0, stderr: '' });
 	});
@@ -47,7 +50,11 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)'],
 		// a commit and a push in one command: the push check runs before the commit exists
 		["git commit -q -F - <<'EOF'\nfix(contracts): mark unchecked apartments in choice\n\nBody.\nEOF\ngit push", '51 characters'],
-		["git commit -F - 2>&1 <<'EOF' && git push\nfix(contracts): mark unchecked apartments in choice\nEOF", '51 characters']
+		["git commit -F - 2>&1 <<'EOF' && git push\nfix(contracts): mark unchecked apartments in choice\nEOF", '51 characters'],
+		// #710: -c key=val, -C without a space and a quoted path with a space before commit
+		['git -c user.name=t commit -m "fix: guard retries"', 'type(scope)'],
+		['git -C/tmp commit -m "fix: guard retries"', 'type(scope)'],
+		['git -C "/tmp/a b" commit -m "fix: guard retries"', 'type(scope)']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);
@@ -72,6 +79,7 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 	it('checks a worktree of the project outside its folder', () => {
 		const project = writeRepo({
 			'.claude/hooks/commit-msg-gate.mjs': readFileSync(HOOK, 'utf8'),
+			'.claude/hooks/git-calls.mjs': readFileSync(GIT_CALLS, 'utf8'),
 			'CLAUDE.md': readFileSync(`${ROOT}/CLAUDE.md`, 'utf8')
 		});
 		const worktree = `${writeProject({})}/w`;
@@ -97,6 +105,7 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 	it('blocks a push while a commit since origin/main breaks the rules, whatever gave its subject', () => {
 		const project = writeRepo({
 			'.claude/hooks/commit-msg-gate.mjs': readFileSync(HOOK, 'utf8'),
+			'.claude/hooks/git-calls.mjs': readFileSync(GIT_CALLS, 'utf8'),
 			'CLAUDE.md': readFileSync(`${ROOT}/CLAUDE.md`, 'utf8')
 		});
 		git(project, 'update-ref', 'refs/remotes/origin/main', 'HEAD');

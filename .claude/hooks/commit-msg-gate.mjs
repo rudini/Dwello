@@ -4,66 +4,37 @@
 // Exit 2 blocks the Bash call and shows stderr to Claude. `-F -` with a heredoc is checked like -m; other commits without
 // -m (-F <file>, --no-edit) pass unchecked here; a `git push` checks every commit since origin/main, as CI «Commit
 // subjects» does, so those are caught before a push in a later command.
-// Commits and pushes in another repository (a scratch repository), found by `git -C` or the cwd, pass; a `cd` in the
-// command is not followed, so such a call is checked (use `git -C`). A worktree of this repository is checked wherever
-// it lies.
+// Which calls are commits and pushes and where they run comes from git-calls.mjs (#710). Those in another repository
+// (a scratch repository) pass; one in a directory the hook cannot resolve or that is no repository is checked. A
+// worktree of this repository is checked wherever it lies.
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gitCalls } from './git-calls.mjs';
 
 // `node commit-msg-gate.mjs --check "<subject>"` checks a subject before the commit, so a blocked command loses no edits
 const [flag, subject] = process.argv.slice(2);
 const checking = flag === '--check';
 const input = checking ? {} : JSON.parse(readFileSync(0, 'utf8'));
-const command = input.tool_input?.command ?? '';
+const cwd = input.cwd ?? process.cwd();
 const repositoryOf = (dir) =>
 	spawnSync('git', ['-C', dir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' }).stdout?.trim();
 const project = repositoryOf(fileURLToPath(new URL('../..', import.meta.url)));
-const dirOf = (call) => resolve(input.cwd ?? process.cwd(), call[2]?.trim().slice(2).trim() ?? '.');
-const inProject = (call) => {
-	const repository = repositoryOf(dirOf(call));
+const calls = gitCalls(input.tool_input?.command ?? '', cwd).filter((call) => {
+	const repository = call.dir && repositoryOf(call.dir);
 	return !repository || repository === project;
-};
-const gitCalls = (verb) => [...command.matchAll(new RegExp(`(^|[\\s;|&()])git(\\s+-C\\s+\\S+)?\\s+${verb}(?=\\s|$)`, 'g'))].filter(inProject);
-const calls = gitCalls('commit');
+});
 /** The subjects a push would send: the commits since origin/main, merges left out as in CI */
 const pushed = (call) =>
-	(spawnSync('git', ['-C', dirOf(call), 'log', '--no-merges', '--format=%s', 'origin/main..HEAD'], { encoding: 'utf8' }).stdout ?? '')
+	(spawnSync('git', ['-C', call.dir ?? cwd, 'log', '--no-merges', '--format=%s', 'origin/main..HEAD'], { encoding: 'utf8' }).stdout ?? '')
 		.split('\n')
 		.filter(Boolean);
 
-/** The shell words up to the end of the git call; a `"$(cat <<'EOF' … EOF )"` message is one word */
-function* words(s) {
-	let i = 0;
-	while (i < s.length) {
-		while (s[i] === ' ' || s[i] === '\t') i++;
-		if (i >= s.length || /[;&|\n]/.test(s[i])) return;
-		let word = '';
-		while (i < s.length && !/[\s;&|]/.test(s[i])) {
-			const heredoc = /^"\$\(cat <<-?'?(\w+)'?\n([\s\S]*?)\n\s*\1\n\s*\)"/.exec(s.slice(i));
-			if (heredoc) {
-				word += heredoc[2];
-				i += heredoc[0].length;
-			} else if (s[i] === '"' || s[i] === "'") {
-				const end = s.indexOf(s[i], i + 1);
-				word += s.slice(i + 1, end < 0 ? undefined : end);
-				i = end < 0 ? s.length : end + 1;
-			} else word += s[i++];
-		}
-		yield word;
-	}
-}
-
-function messageOf(args, rest) {
+/** The message of a commit: -m, --message=, -m<text>, or `-F -` with the heredoc the commit reads */
+function messageOf({ args, stdin }) {
 	for (let i = 0; i < args.length; i++) {
 		if (/^(-[a-zA-Z]*m|--message)$/.test(args[i])) return args[i + 1];
-		// `-F -` with a heredoc: the message is in the command (a push in the same command runs before this commit)
-		if (/^(-[a-zA-Z]*F|--file)$/.test(args[i]) && args[i + 1] === '-') {
-			// only a heredoc this git call opens, not one of a later command
-			const marker = /<<-?\s*['"]?(\w+)['"]?/.exec(rest.split(/\n|;|&&|\|/)[0])?.[1];
-			return marker && new RegExp(`\\n([\\s\\S]*?)\\n\\s*${marker}\\s*(\\n|$)`).exec(rest)?.[1];
-		}
+		if (/^(-[a-zA-Z]*F|--file)$/.test(args[i]) && args[i + 1] === '-') return stdin;
 		const joined = /^(?:-m|--message=)([\s\S]+)$/.exec(args[i]);
 		if (joined) return joined[1];
 	}
@@ -72,11 +43,8 @@ function messageOf(args, rest) {
 const messages = checking
 	? [subject ?? '']
 	: [
-			...calls.map((call) => {
-			const rest = command.slice(call.index + call[0].length);
-			return messageOf([...words(rest)], rest);
-		}),
-			...gitCalls('push').flatMap(pushed)
+			...calls.filter((call) => call.verb === 'commit').map(messageOf),
+			...calls.filter((call) => call.verb === 'push').flatMap(pushed)
 		];
 if (messages.every((message) => message === undefined)) process.exit(0);
 

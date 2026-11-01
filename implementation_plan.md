@@ -28,4 +28,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] #728: footer shows «Version unbekannt» in four languages when the build has no version (`src/lib/app-version.ts`, `shell.dom.test.ts` seen red); No scenario: the E2E app is always a build with a version
 - [x] #728 review (`docs/reviews/728-review-1.md`): no findings
 - [x] #728 PR: pushed
+- [x] #710: one matcher for the commit gates and the main push guard (`.claude/hooks/git-calls.mjs`): -C (quoted, -C/x), -c key=val, cd and subshells, heredoc text skipped; ten gate tests seen red first
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)

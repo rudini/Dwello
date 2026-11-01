@@ -5,7 +5,7 @@ description: What the four Dwello commit hooks (fallow, deepcheck, testcheck, co
 
 # Commit gates
 
-Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate. The hooks match `git commit` or `git push` anywhere in the command text: write a file whose text contains them with Write or Edit, not with a heredoc in Bash.
+Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate. The hooks find the git calls with one shared matcher (`.claude/hooks/git-calls.mjs`, #710): `git -C <dir>` (quoted, `-C/x`), `-c key=val`, a `cd` or subshell before the call; text in quotes or a heredoc body is no call (its header names what it does not follow).
 
 ## Fallow (`.claude/hooks/fallow-gate.sh`)
 
@@ -27,7 +27,7 @@ Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by 
 
 ## Commit subject (`.claude/hooks/commit-msg-gate.mjs`)
 
-Blocks `git commit -m` with a subject that breaks `CLAUDE.md`, "Conventions" (type and scope from the lists there, at most 50 characters, no period), and a `git push` while any commit since `origin/main` (merges left out, as in CI «Commit subjects») has one, whatever gave its subject (`-F`, a heredoc file). A subject found at the push: reword the unpushed commit (`git commit --amend` for the last one). `node .claude/hooks/commit-msg-gate.mjs --check "<subject>"` checks a subject first. Commits in another repository (a scratch repository, reached by `git -C` or the cwd, not by a `cd` in the command) pass; a worktree of Dwello is checked wherever it lies.
+Blocks `git commit -m` with a subject that breaks `CLAUDE.md`, "Conventions" (type and scope from the lists there, at most 50 characters, no period), and a `git push` while any commit since `origin/main` (merges left out, as in CI «Commit subjects») has one, whatever gave its subject (`-F`, a heredoc file). A subject found at the push: reword the unpushed commit (`git commit --amend` for the last one). `node .claude/hooks/commit-msg-gate.mjs --check "<subject>"` checks a subject first. Commits in another repository (a scratch repository, reached by `git -C`, a `cd` or the cwd) pass; a worktree of Dwello is checked wherever it lies.
 
 ## Push to main (`.claude/hooks/main-push-guard.mjs`)
 
