@@ -48,6 +48,14 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		expect(hook(root, `git -C "${root}" -c user.name=t commit -m x`).status).toBe(2);
 	});
 
+	it('lets the command through with a notice when the matcher crashes (review 710-1, C-2)', () => {
+		const install = writeProject({ '.claude/hooks/git-calls.mjs': "throw new Error('broken');\n" });
+		copyFileSync(HOOK, `${install}/.claude/hooks/deepcheck-gate.sh`);
+		const result = hook(writeRepo({ 'src/store.ts': STORE }), 'git commit -m x', `${install}/.claude/hooks/deepcheck-gate.sh`);
+		expect(result.status).toBe(0);
+		expect(result.stderr).toBe('deepcheck-gate: git-calls.mjs failed, skipping deepcheck.\n');
+	});
+
 	it('ignores a commit that is only text in a heredoc, without running deepcheck', () => {
 		const root = writeRepo({ 'src/store.ts': STORE });
 		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });

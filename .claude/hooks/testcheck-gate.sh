@@ -24,7 +24,10 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 # the git calls the command makes, by the matcher the commit gates share (git-calls.mjs, #710)
-VERBS="$(node "$(dirname "${BASH_SOURCE[0]}")/git-calls.mjs" <<<"$INPUT" 2>/dev/null || true)"
+if ! VERBS="$(node "$(dirname "${BASH_SOURCE[0]}")/git-calls.mjs" <<<"$INPUT" 2>/dev/null)"; then
+  echo "testcheck-gate: git-calls.mjs failed, skipping testcheck." >&2
+  exit 0
+fi
 if ! grep -qxE 'commit|push' <<<"$VERBS"; then
   exit 0
 fi

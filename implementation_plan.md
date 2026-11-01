@@ -29,4 +29,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] #728 review (`docs/reviews/728-review-1.md`): no findings
 - [x] #728 PR: pushed
 - [x] #710: one matcher for the commit gates and the main push guard (`.claude/hooks/git-calls.mjs`): -C (quoted, -C/x), -c key=val, cd and subshells, heredoc text skipped; ten gate tests seen red first
+- [x] #710 review `docs/reviews/710-review-1.md`: C-1 Major (shell keywords before git), C-2 to C-4 Minor, fixed with tests seen red (C-3 documented)
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)

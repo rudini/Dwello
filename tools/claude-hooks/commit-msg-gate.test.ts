@@ -54,7 +54,11 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		// #710: -c key=val, -C without a space and a quoted path with a space before commit
 		['git -c user.name=t commit -m "fix: guard retries"', 'type(scope)'],
 		['git -C/tmp commit -m "fix: guard retries"', 'type(scope)'],
-		['git -C "/tmp/a b" commit -m "fix: guard retries"', 'type(scope)']
+		['git -C "/tmp/a b" commit -m "fix: guard retries"', 'type(scope)'],
+		// review 710-1, C-1: shell keywords and braces before git
+		['if git commit -m "fix: guard retries"; then :; fi', 'type(scope)'],
+		['{ git commit -m "fix: guard retries"; }', 'type(scope)'],
+		['! git commit -m "fix: guard retries"', 'type(scope)']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);
@@ -65,11 +69,12 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(hook('git add -A && git commit -m "fix: x"').stderr).toContain('nothing in this command ran');
 	});
 
-	it('lets a commit through in another repository (a scratch repository), by cwd or git -C', () => {
+	it('lets a commit through in another repository (a scratch repository), by cwd, git -C or a cd (review 710-1, C-4)', () => {
 		const scratch = mkdtempSync(`${tmpdir()}/scratch-`);
 		spawnSync('git', ['init', '-q', scratch]);
 		expect(hook('git commit -m a', scratch)).toMatchObject({ status: 0, stderr: '' });
 		expect(hook(`git -C ${scratch} commit -m a`)).toMatchObject({ status: 0, stderr: '' });
+		expect(hook(`cd ${scratch} && git commit -m a`)).toMatchObject({ status: 0, stderr: '' });
 	});
 
 	it('checks a commit whose directory is no repository (the safe side)', () => {

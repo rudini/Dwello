@@ -74,7 +74,9 @@ describe('push to main by its resolved target (#713)', () => {
 		// review 713-5
 		['a push after an apostrophe in an unquoted heredoc', () => onMain, "cat > n.md <<EOF\nit's done\nEOF\ngit push"],
 		// review 713-6
-		['a substitution in an unquoted heredoc before a cd', () => onMain, 'cat <<EOF && cd "%FEATURE%"\n$(git push)\nEOF']
+		['a substitution in an unquoted heredoc before a cd', () => onMain, 'cat <<EOF && cd "%FEATURE%"\n$(git push)\nEOF'],
+		// review 710-1, C-1
+		['a push after if', () => onMain, 'if git push; then echo ok; fi']
 	])('asks before %s', (_, cwd, command) => {
 		expect(decision(cwd(), command.replaceAll('%MAIN%', onMain).replaceAll('%FEATURE%', onFeature))).toBe('ask');
 	});

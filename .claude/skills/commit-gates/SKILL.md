@@ -5,7 +5,7 @@ description: What the four Dwello commit hooks (fallow, deepcheck, testcheck, co
 
 # Commit gates
 
-Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate. The hooks find the git calls with one shared matcher (`.claude/hooks/git-calls.mjs`, #710): `git -C <dir>` (quoted, `-C/x`), `-c key=val`, a `cd` or subshell before the call; text in quotes or a heredoc body is no call (its header names what it does not follow).
+Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate. The hooks find the git calls with one shared matcher (`.claude/hooks/git-calls.mjs`, #710): `git -C <dir>` (quoted, `-C/x`), `-c key=val`, a `cd` or subshell before the call; text in quotes or a heredoc body is no call (its header names what it does not follow). fallow, deepcheck and testcheck judge the project wherever the call runs, also a commit in a scratch repository.
 
 ## Fallow (`.claude/hooks/fallow-gate.sh`)
 

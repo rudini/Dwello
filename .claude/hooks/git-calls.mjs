@@ -62,7 +62,8 @@ const withoutRedirections = (words) =>
 	words.filter((word, i) => !/^\d*[<>]/.test(word) && !/^\d*[<>]+&?$/.test(words[i - 1] ?? ''));
 
 // what may stand before git and still run it (review 713-1, C-3)
-const prefix = /^(env|command|exec|nohup|time|sudo)$/;
+// and the shell keywords and braces that may open a command (review 710-1, C-1)
+const prefix = /^(env|command|exec|nohup|time|sudo|nice|xargs|if|then|elif|else|do|while|until|!|\{)$/;
 const repositoryVariable = /^GIT_(DIR|WORK_TREE|COMMON_DIR|NAMESPACE|CONFIG\w*)=/;
 
 /**
