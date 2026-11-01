@@ -690,3 +690,12 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Workflow note: `docs/design/personas/README.md` («Who saves») names `demo-records.md`, which does not exist; the demo records are in `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts` (in `docs/reviews/workflow-notes-issue-679.md`)
 - [x] Closing `code-reviewer` round: `docs/reviews/679-review-2.md` (no findings)
 - [x] Archive, PR: pushed after this archive
+
+## Session: #999 take back a part payment and name it in the Verlauf
+
+- [x] @wip scenarios seen red, draft `docs/reviews/999-entwurf.md`; fach-reviewer step 1 `docs/reviews/999-fachreview-1.md`: V-1 (Major) decided by the product owner (option A, spec change of «Zahlung zurücksetzen» approved in #999), M-1 decided (final payment with amount), V-2 to V-5 taken
+- [x] Backend reset keeps `part` and the audit amount; reset button on sent and overdue statements with a payment; Verlauf rows per payment and reset; texts in four languages from the review's table; scenarios green without @wip
+- [x] code-reviewer `docs/reviews/999-review-1.md` (C-1 Major fixed, C-2, C-4 fixed, C-3 rejected after 999b: it changed the text M-1 decided), `999b-review-1.md` (C-1, C-3, C-4 fixed), closing round `999c-review-1.md`
+- [x] Persona `docs/design/personas/helga-999.md`: P-1 (order of the Verlauf) stays (resets hold dates only), P-2, P-3 stay
+- [x] daten-pruefer `docs/reviews/999-datenpruefung-1.md`: D-1 (Major, PDF kept after the second reset) fixed with pg test and scenario; D-2 = P-1
+- [x] PR: pushed after this archive
