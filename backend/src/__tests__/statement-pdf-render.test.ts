@@ -2,10 +2,11 @@
  * The statement PDF as the tenant reads it, rendered from given data (no database)
  */
 
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it, spyOn } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
 import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
+import * as qrBill from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
 const config = { iban: 'CH4431999123000889012', companyName: 'Muster Immobilien AG', address: 'Firmenweg 9', postalCode: '8001', city: 'Zürich' };
@@ -1026,7 +1027,7 @@ describe('PDF nach einer Teilzahlung', () => {
 	it('nennt nach einer Teilrückerstattung die offene Rückerstattung', async () => {
 		const { flowing } = await textOf({ ...refund, paidSoFar: -10 });
 
-		expect(flowing).toContain('Offene Rückerstattung');
+		expect(flowing).toContain('Offene Rückerstattung CHF 83.85');
 		expect(flowing).toContain('Bereits zurückerstattet CHF 10.00');
 		expect(flowing).not.toContain('Teilen Sie uns dafür Ihre IBAN mit');
 	});
@@ -1045,6 +1046,31 @@ describe('PDF nach einer Teilzahlung', () => {
 		expect(flowing).toContain('Bezahlen Sie nur noch den offenen Betrag dieser Abrechnung.');
 		expect(flowing).toContain('Bereits bezahlt auf diese Abrechnung CHF 4.10');
 		expect(flowing).toContain('Offener Betrag CHF 80.00');
+	});
+
+	// code review 1003-1 C-1: the amount in the QR code itself, which the text of the PDF does not show
+	it('legt den offenen Betrag in den QR-Code', async () => {
+		const qr = spyOn(qrBill, 'generateQRBillForStatement');
+		try {
+			await textOf({ ...due, paidSoFar: 84.15 });
+			expect(qr.mock.calls.map(([statement]) => statement.balance)).toEqual(['100']);
+		} finally {
+			qr.mockRestore();
+		}
+	});
+
+	// C-2: without a QR code (it could not be made) the payment info names the open amount
+	it('nennt ohne QR-Code in den Zahlungsangaben den offenen Betrag', async () => {
+		const qr = spyOn(qrBill, 'generateQRBillForStatement').mockRejectedValue(new Error('no QR code'));
+		const error = spyOn(console, 'error').mockImplementation(() => {});
+		try {
+			const { flowing } = await textOf({ ...due, paidSoFar: 84.15 });
+			expect(flowing).toMatch(/Betrag CHF 100\.00/);
+			expect(flowing).not.toMatch(/Betrag CHF 184\.15/);
+		} finally {
+			qr.mockRestore();
+			error.mockRestore();
+		}
 	});
 
 	it('bleibt ohne Teilzahlung, wie es war', async () => {
