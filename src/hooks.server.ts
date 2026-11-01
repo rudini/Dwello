@@ -73,6 +73,8 @@ export const handle: Handle = ({ event, resolve }) =>
 				response.headers.append('Vary', 'Accept-Language');
 				// A landlord's own app: no page of it (the sign-in page included) belongs in a search engine
 				response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+				// Private and changing data: back, forward and another tab load it anew, never a deleted record (#679)
+				response.headers.set('Cache-Control', 'no-store');
 				return response;
 			}
 		});

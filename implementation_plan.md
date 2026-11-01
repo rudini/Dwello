@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #679 list filter and stale pages after deleting a draft
+
+- [x] Scenarios `@wip` in `statements.feature`, both seen red at the missing behaviour (filter gone after delete; back shows the deleted draft from the browser cache)
+- [x] Delete returns to the list with the filter it was opened from (`list` field, only `/statements?…`; unit tests seen red, the guard ones by taking the check out)
+- [x] Every page answers `Cache-Control: no-store` (`src/hooks.server.ts`, unit test seen red)
+- [ ] Full chromium/api E2E run (the header touches every page)
+- [ ] Slice review (`code-reviewer`)
+- [ ] Persona review: none, the screens show nothing new (same list, same error page); only where the delete leads changed. Sven checks the return with a screen reader
+- [ ] Archive, PR

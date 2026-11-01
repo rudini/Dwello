@@ -1,7 +1,16 @@
 import type { TestData } from '../fixtures/backend';
 import { question } from '../screenplay/actor';
-import { Count, DownloadedFile, Text, ThePage, Visibility } from '../screenplay/questions';
-import { statementRow, statementRowForYear, statementRows, statementsEmptyNotice, statementsScope, statusCount } from '../targets/statements';
+import { Attribute, Count, DownloadedFile, Text, ThePage, Value, Visibility } from '../screenplay/questions';
+import {
+	draftFilter,
+	statementBuildingFilter,
+	statementRow,
+	statementRowForYear,
+	statementRows,
+	statementsEmptyNotice,
+	statementsScope,
+	statusCount
+} from '../targets/statements';
 
 export const listedStatement = (tenantName: string) => Text.of(statementRow(tenantName));
 export const statementOfYearListed = (tenantName: string, year: number) =>
@@ -36,3 +45,6 @@ export const downloadedFileNameByNumber = question('the downloaded file name by 
 	const name = (await actor.answer(DownloadedFile)).name;
 	return number ? name.replace(number, '<Nummer>') : name;
 });
+// #679: whether the filter «Entwurf» is the one shown, and the building the list is filtered by
+export const listStatusShown = Attribute.named('aria-current').of(draftFilter);
+export const listBuildingShown = Value.chosenIn(statementBuildingFilter);
