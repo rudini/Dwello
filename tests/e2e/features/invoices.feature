@@ -107,6 +107,12 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
     Dann meldet Dwello "notizen.docx entfernt."
 
+  # #742: auch wer einen Screenreader nutzt, hört, wie viele Rechnungen Dwello erstellen wird
+  Szenario: Dwello meldet, wie viele Rechnungen bereit zum Erstellen sind
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
+    Dann meldet Dwello "Bitte prüfen: 1. Bereit zum Erstellen: 1."
+
   Szenario: Eine hochgeladene Datei gross ansehen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Und der Liegenschaftsverwalter die Datei von "Elektro Blitz" gross ansieht

@@ -1038,6 +1038,7 @@
 	"invoices_upload_status_reading": "Wird gelesen …",
 	"invoices_upload_status_check": "Bitte prüfen",
 	"invoices_upload_status_fill": "Bitte ausfüllen",
+	"invoices_upload_status_create": "Bereit zum Erstellen",
 	"invoices_upload_status_error": "Fehler – erneut versuchen",
 	"invoices_upload_status_refused": "Nicht möglich",
 	"backend_extraction_unavailable": "Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.",
