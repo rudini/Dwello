@@ -5,6 +5,7 @@
 
 import type { Language } from '../db/schema';
 import type { AccountingPeriodType, Range } from './period-types';
+import { formatSwissDate } from './pdf-format';
 import { greetingWords } from './reminder-letter';
 import { daysAfter } from './today';
 
@@ -117,8 +118,7 @@ const WORDING = {
 } satisfies Record<Language, unknown>;
 
 // dd.mm.yyyy in every language, as on the statement PDF
-const swissDate = (date: string) => date.split('-').reverse().join('.');
-const days = ({ start, end }: Range) => `${swissDate(start)} – ${swissDate(end)}`;
+const days = ({ start, end }: Range) => `${formatSwissDate(start)} – ${formatSwissDate(end)}`;
 
 // room for a handwritten signature above the line that names it
 const signatureLine = (name: string) => `\n\n______________________________\n${name}`;
@@ -133,7 +133,7 @@ export function consentLetter(input: ConsentLetterInput) {
 	const tenant = `${input.tenant.firstName} ${input.tenant.lastName}`;
 	// a contract that ends by the end of the short period has no first new period (Fachreview 521-1 V-3)
 	const ending = !!input.contractEnd && input.contractEnd <= input.short.end;
-	const paragraphs = [w.change(w.types[input.earlier], next), w.short(days(input.short)), ...(ending ? [] : [w.first(first)]), w.voluntary, w.reply(swissDate(daysAfter(input.date, REPLY_DAYS)))];
+	const paragraphs = [w.change(w.types[input.earlier], next), w.short(days(input.short)), ...(ending ? [] : [w.first(first)]), w.voluntary, w.reply(formatSwissDate(daysAfter(input.date, REPLY_DAYS)))];
 	const clause = (ending ? w.clauseEnding : w.clause)({ apartment: input.apartment, address: input.address, short: days(input.short), next, first });
 	const agreement = [clause, signatureLine(w.placeDate), signatureLine(w.signature(tenant)), signatureLine(w.signatureOther)];
 	const subject = `${w.title}\n${w.contract(input.apartment, input.address)}`;
