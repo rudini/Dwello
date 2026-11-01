@@ -691,6 +691,14 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Closing `code-reviewer` round: `docs/reviews/679-review-2.md` (no findings)
 - [x] Archive, PR: pushed after this archive
 
+## Session: XS ratchet in the fitness checks (request in chat, follow-up to #1045)
+
+- [x] Issues (`nfr:maintainability`): #1052 fat files and modules, #1053 hidden coupling pairs
+- [x] Check `fat` in `tools/fitness/fitness.ts`: no new file over 400 lines, no new code module over 30 files or 15 module dependencies, listed ones may not grow; composition roots listed with a reason (tests first)
+- [x] `ratchet.json`: today's fat files, modules and roots; `docs/architecture/fitness-functions.md` row
+- [x] code-reviewer: `docs/reviews/xs-ratchet-review-1.md` (C-1 Major: a removed `fat` list switched the check off, fixed; C-2 Minor: `fatItems` untested, fixed), `-2.md` (both closed, nothing new)
+- [x] Workflow note: none new (the stop hook asked to push during the review again, as in `workflow-notes-structure-report.md`)
+- [x] Archive the session; PR pushed after this archive
 ## Session: #691 cut-off cost table on the statement edit page
 
 - [x] Reproduced at 1440 × 900 (persona stack, demo data): the table needs 1010 px, the edit page's panel gives 716 px; «Zeitanteil» is cut, the scroll bar sits below the whole table. The detail page is 22 px short too, but its mid widths are #658 (`needs-decision`), so it stays as is
