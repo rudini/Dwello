@@ -33,4 +33,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] #710 re-review `docs/reviews/710-review-2.md` (closing round): C-1 to C-4 closed; C-5 Minor (crash tests only for the deepcheck gate) stays in the report
 - [x] #710 Copilot review on #1017 (four findings, all held, fixed with tests red first); closing round `docs/reviews/710-review-3.md`: C-6 to C-8 Minor fixed without a further round (three rounds reached), C-5 stays in the report
 - [x] #661: scenario outline «Bereich über das Menü im schmalen Fenster öffnen» (13 areas, the same targets as the sidebar) pins existing behaviour, so no red run; navigation.feature 51 passed
+- [x] #661 review `docs/reviews/661-review-1.md` (closing round): C-1 formatting slip and C-2 duplicate target, both Minor, fixed (13 scenarios green again)
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)

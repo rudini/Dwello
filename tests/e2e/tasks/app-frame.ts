@@ -1,13 +1,12 @@
 import type { Activity } from '../screenplay/actor';
 import { Browser, Click, FailRequests, Wait } from '../screenplay/interactions';
-import { text } from '../targets/accessibility';
+import { mobileMenuButton, text } from '../targets/accessibility';
 import {
 	errorPageToOverview,
 	footerLink,
 	helpContentsLink,
 	logo,
 	mainNavLink,
-	mobileMenuButton,
 	mobileNavLink,
 	privacyLinkOnLogin,
 	publicHelpLink,
