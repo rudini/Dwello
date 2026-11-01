@@ -1,0 +1,186 @@
+name: Fallback review
+
+# Copilot reviews each pull request once by itself, but not always: it may report a rate limit or an error, or stay
+# silent. Then MiniMax reviews the pull request's diff and posts one review comment (#1007): once per pull request,
+# drafts skipped, by hand for any pull request. Needs the repository secret MINIMAX_API_KEY.
+on:
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [ready_for_review]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: MiniMax review
+    # contains() ignores case: Copilot reviews as copilot-pull-request-reviewer[bot]; only a bot has type Bot, so a
+    # person whose login contains "copilot" starts nothing
+    if: >-
+      github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.pull_requests[0]) ||
+      (github.event_name == 'pull_request_review' && github.event.review.user.type == 'Bot' && contains(github.event.review.user.login, 'copilot')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.user.type == 'Bot' &&
+        contains(github.event.comment.user.login, 'copilot'))
+    # on the job, after its `if`: every other comment on the pull request would queue a run and cancel a waiting one
+    concurrency:
+      # one run per pull request at a time, so a second trigger sees the first one's review
+      group: fallback-review-${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number || inputs.pr }}
+      COPILOT_SAID: ${{ github.event.review.body || github.event.comment.body }}
+      MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+      MODEL: MiniMax-M3.1-Flash
+      REASONING_EFFORT: medium # unset, it thought through all 32000 tokens of a 47 kB diff without an answer
+      MAX_DIFF_BYTES: 400000
+    steps:
+      - name: Review the diff when Copilot did not
+        shell: bash
+        run: |
+          # a real Copilot review carries its overview; a refusal names the limit or the error
+          copilot_failed() {
+            ! grep -qE 'ccr-overview|Pull request overview' <<< "$1" &&
+              grep -qiE "rate.?limit|quota|limit (reached|exceeded)|encountered an error|unable to review|(wasn.t|was not|could not|couldn.t|cannot|can.t) (able to )?review|try again" <<< "$1"
+          }
+          # the pull request has a real Copilot review or a fallback review
+          reviewed() {
+            local bodies body
+            bodies=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/reviews" \
+              --jq '.[] | select(.user.type == "Bot") | select((.user.login | test("copilot"; "i")) or
+                (.user.login == "github-actions[bot]" and ((.body // "") | contains("<!-- fallback-review -->")))) | (.body // "") | @json')
+            while read -r body; do
+              [ -n "$body" ] || continue
+              body=$(jq -r . <<< "$body")
+              if grep -q '<!-- fallback-review -->' <<< "$body" || ! copilot_failed "$body"; then return 0; fi
+            done <<< "$bodies"
+            return 1
+          }
+          copilot_requested() {
+            [ "$(gh api "repos/$GH_REPO/pulls/$PR/requested_reviewers" --jq '[.users[].login] | any(test("copilot"; "i"))')" = true ]
+          }
+
+          if [ "$(gh api "repos/$GH_REPO/pulls/$PR" --jq .draft)" = true ]; then
+            echo "Draft, reviewed once it is ready for review."
+            exit 0
+          fi
+          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ]; then
+            case "$GITHUB_EVENT_NAME" in
+              pull_request_review | issue_comment)
+                if ! copilot_failed "$COPILOT_SAID"; then
+                  echo "Copilot reviewed normally, nothing to do."
+                  exit 0
+                fi
+                ;;
+              *)
+                # CI finished or the draft became ready: Copilot gets up to 10 minutes while it is still requested (on
+                # #1006 it took 7 minutes from its request); MiniMax answers in 1 to 3, within the 15 minutes a session
+                # waits after CI (skill pull-request)
+                for _ in $(seq 10); do
+                  sleep 60
+                  if reviewed || ! copilot_requested; then break; fi
+                done
+                ;;
+            esac
+            if reviewed; then
+              echo "Already reviewed by Copilot or MiniMax."
+              exit 0
+            fi
+          fi
+
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fail() {
+            trap - ERR
+            echo "::error::$1"
+            gh api "repos/$GH_REPO/issues/$PR/comments" -f body="<!-- fallback-review-failed -->
+          No review: $1 ([run]($run_url))" > /dev/null || true
+            exit 1
+          }
+          trap 'fail "the workflow failed on line $LINENO."' ERR
+          [ -n "$MINIMAX_API_KEY" ] || fail "the repository secret MINIMAX_API_KEY is missing."
+
+          gh api "repos/$GH_REPO/pulls/$PR" --jq '"# " + .title + "\n\n" + (.body // "")' > pr.md
+          # the review belongs to the commit whose diff was read, not to one pushed while MiniMax thinks
+          sha=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .head.sha)
+          # per file, because GitHub refuses the whole diff of a large pull request; lock files out: generated, and
+          # they would fill the limit
+          gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
+            --jq '.[] | select(.filename | endswith(".lock") | not) |
+              "diff --git a/\(.filename) b/\(.filename)\n\(.patch // "(no diff shown: binary or too large)")"' > full.diff
+          head -c "$MAX_DIFF_BYTES" full.diff > diff.txt
+          note=""
+          if [ "$(wc -c < full.diff)" -gt "$MAX_DIFF_BYTES" ]; then
+            note="The diff is longer than $MAX_DIFF_BYTES bytes; only its first $MAX_DIFF_BYTES bytes were reviewed."
+            echo "(the diff is cut off here: the files after this point exist but are not shown, do not report them missing)" >> diff.txt
+          fi
+          gh api "repos/$GH_REPO/contents/CLAUDE.md" -H 'Accept: application/vnd.github.raw' > rules.md || : > rules.md
+
+          cat > system.md <<'PROMPT'
+          You are a senior code reviewer for the repository whose conventions follow. Review only the changes in the
+          diff. Report real problems: bugs, wrong behaviour, security issues, missing or wrong tests, broken
+          conventions from the repository rules. No praise, no style nits a formatter would fix, no restating the diff.
+          Answer in English Markdown:
+          - one line with the verdict: "No issues found" or "Changes recommended";
+          - then each finding as a list item: **High/Medium/Low**, `path:line` (line in the new file), what is wrong,
+            the concrete failure it causes and the fix. Most severe first, at most 10.
+          If you are not sure a finding holds, leave it out. You have no tools and cannot open the repository: review
+          the text below as it is and answer at once.
+
+          Repository rules:
+          PROMPT
+          cat rules.md >> system.md
+
+          jq -n --arg model "$MODEL" --arg effort "$REASONING_EFFORT" --rawfile system system.md --rawfile pr pr.md --rawfile diff diff.txt '{
+            model: $model, max_tokens: 32000, reasoning_effort: $effort, temperature: 0.2, stream: true,
+            messages: [
+              {role: "system", content: $system},
+              {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```")}
+            ]}' > request.json
+          # a second try when the answer is empty or a made-up tool call instead of a review; 10 minutes for Copilot and
+          # two tries of 8 stay within the job's 30, with time left to comment «No review»
+          for attempt in 1 2; do
+            # streamed: the model thinks for minutes before it answers, and a silent connection may be cut
+            curl -sS -N --fail-with-body --max-time 480 https://api.minimax.io/v1/chat/completions \
+              -H "Authorization: Bearer $MINIMAX_API_KEY" -H 'Content-Type: application/json' \
+              -d @request.json > response.txt ||
+              fail "MiniMax refused the request: $(tail -c 300 response.txt | tr '\n' ' ')"
+            sed -n 's/^data: {/{/p' response.txt > chunks.jsonl
+            jq -rj '.choices[0].delta.content // empty' chunks.jsonl | perl -0pe 's/<think>.*?<\/think>\s*//s' > review.md
+            if [ -s review.md ] && ! grep -qE '<tool_call>|<invoke' review.md; then break; fi
+            [ "$attempt" = 2 ] || continue
+            [ -s review.md ] || cp response.txt review.md
+            fail "MiniMax answered twice without a review: $(tail -c 300 review.md | tr '\n' ' ')"
+          done
+          if jq -e 'select(.choices[0].finish_reason == "length")' chunks.jsonl > /dev/null; then
+            note="${note:+$note }The answer hit the token limit and may be cut off."
+          fi
+
+          {
+            echo "<!-- fallback-review -->"
+            echo "### Fallback review ($MODEL)"
+            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+              echo "_Started by hand._"
+            else
+              echo "_Copilot did not review this pull request, so $MODEL reviewed the diff._"
+            fi
+            if [ -n "$note" ]; then echo "_${note}_"; fi
+            echo
+            cat review.md
+          } > body.md
+          gh api "repos/$GH_REPO/pulls/$PR/reviews" -f event=COMMENT -f commit_id="$sha" -F body=@body.md > /dev/null

@@ -485,3 +485,16 @@
 - [x] Fix: move `sent_at` in Swiss local time; test green, scenario «Eine per E-Mail versendete Abrechnung erneut per Brief zustellen» green in Chromium
 - [x] No code-reviewer round: test-only CI fix (`CLAUDE.md`, Workflow 7)
 - [x] PR: pushed after this archive
+
+## Session: fallback code review with MiniMax (#1007)
+
+- [x] Workflow: review when Copilot reports an error, by hand, and when Copilot stays silent after CI (green or red) or after ready for review; once per pull request; drafts skipped
+- [x] Workflow: lock files out of the diff, cut off over 400 kB with a note, review in English, one review comment
+- [x] Workflow: MiniMax failure turns the run red and comments "No review: <reason>"
+- [x] Skill `pull-request`: wait for a review after CI, answer it like Copilot's, merge after 15 minutes without one
+- [x] Local runs against real pull requests (error, silent, real Copilot review, draft, failure)
+- [x] Files: `.github/workflows/fallback-review.yml`, `.claude/skills/pull-request/SKILL.md`; local runs found a made-up tool call and a "missing file" behind the cut, both answered in the prompt (tool call: second try, then «No review»)
+- [x] Slice review round 1: `docs/reviews/1007-review-1.md`
+- [x] Its Minors fixed: reason when the answer stays empty, Copilot waited for 5 minutes, concurrency on the job, diff per file (GitHub refuses large diffs)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-1007.md`
+- [x] PR: pushed after this archive
