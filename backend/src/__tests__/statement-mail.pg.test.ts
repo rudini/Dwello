@@ -3,6 +3,7 @@
  * letter; a failed e-mail leaves it a draft (real PostgreSQL database, real local SMTP server)
  */
 
+import { readPdf } from './helpers/pdf-text';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { SMTPServer } from 'smtp-server';
@@ -496,6 +497,25 @@ describe('Neues PDF nach einer Änderung', () => {
 		const posted = await api('PUT', `/api/v1/documents/${pending.id}/sent`);
 
 		expect([posted.status, ((await posted.json()) as { code: string }).code]).toEqual([400, 'NEW_PDF_STATEMENT_PAID']);
+	});
+
+	// #1016 (decided 01.11.2026): a new PDF still to send names the amount before the part payment; it is made anew
+	it('erstellt das neue PDF «Zu versenden» nach einer Teilzahlung neu', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		await send(id);
+		await api('PUT', `/api/v1/statements/${id}`, { notes: 'Ratenzahlung' });
+		const [before] = await newPdfs(id);
+		await api('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidAmount: '10.00' });
+
+		const after = await newPdfs(id);
+		expect(after).toHaveLength(1);
+		expect(after[0]).toMatchObject({ status: 'to_send' });
+		expect(after[0].id).not.toBe(before.id);
+		// code review 1016-1 C-2: it names the payment and asks for the rest
+		const text = readPdf(Buffer.from(after[0].content, 'base64')).flowing;
+		expect(text).toContain('Bereits bezahlt CHF 10.00');
+		expect(text).toContain('Offener Betrag');
 	});
 
 	it('legt kein neues PDF an, wenn die Abrechnung ohne Dokument versendet wurde (vor #449, #969)', async () => {
