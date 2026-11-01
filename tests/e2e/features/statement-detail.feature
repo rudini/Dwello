@@ -119,6 +119,14 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter eine Mahnung senden will
     Dann nennt die Mahnung vor dem Senden als geschuldet "CHF 432.90"
 
+  # #959: mehr als die Hälfte bezahlt ist auch nach dem Neuladen der Seite eine Teilzahlung (Copilot-Review PR #1006)
+  Szenario: Eine Teilzahlung über die Hälfte des Saldos wird als Teilzahlung bestätigt
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter eine Zahlung von "300.00" Franken festhält
+    Dann bestätigt Dwello die Zahlung mit "Teilzahlung für Abrechnung"
+
   # #523, #959 (A): der Betrag am Feld ist, was für diese Abrechnung eingegangen ist; ein Teil lässt sie offen (Art. 69, 86 OR); Rückerstattung im DOM-Test
   Szenario: Der Zahlungseingang sagt, was bei einer Teilzahlung gilt
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

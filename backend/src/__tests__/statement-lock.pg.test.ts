@@ -255,6 +255,18 @@ describe('Teilzahlung', () => {
 		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidAmount: null, payments: [] });
 	});
 
+	// Copilot review PR #1006: the last payment without a date is of today, and so is the Zahlungsdatum
+	it('ist am Tag der letzten Zahlung bezahlt, auch wenn diese ohne Datum festgehalten wird', async () => {
+		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+		await pay('10.00');
+
+		const response = await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidAmount: '432.90' });
+
+		expect(await response.json()).toMatchObject({ status: 'paid', paidDate: today(), payments: [{ amount: '10.00' }, { date: today(), amount: '432.90' }] });
+		await reset();
+		await reset();
+	});
+
 	// code review 959a-1 C-2: a replaced statement stays replaced, also with a part payment on it
 	it('setzt bei einer ersetzten Abrechnung keine Teilzahlung zurück', async () => {
 		await pay('10.00');

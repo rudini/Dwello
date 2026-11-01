@@ -808,8 +808,8 @@ function recordPayment(existing: StatementWithDetails, waived: boolean, { paidDa
 	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2) }];
 	const paidAmount = roundToRappen(before + amount).toFixed(2);
 	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments };
-	// paid on the day of the latest payment
-	return { paidAmount, payments, paidDate: paidDate && payments.map((p) => p.date).sort().at(-1), paymentRecordedAt: new Date() };
+	// paid on the day of the latest payment, one without a date of today (Copilot review PR #1006)
+	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt: new Date() };
 }
 
 // The amount paid, the rest when none is given: francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1), with
