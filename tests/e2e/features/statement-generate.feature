@@ -786,6 +786,20 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
     Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "ist schon versendet. Sie verteilt die Heizkosten noch über die ganze Abrechnungsperiode, nicht nach dem Leistungszeitraum der Heizrechnungen. Prüfen Sie, ob beide Abrechnungen zusammen mehr als die Heizkosten der Wohnung verrechnen. Wenn ja, erstellen Sie für"
 
+  # #508 (A, Persona Dr. Weber 451 P-3): die Vorschau nennt die Heizkosten der Wohnung, was die versendete und die neue
+  # Abrechnung zusammen dafür verrechnen, und den Unterschied; Beträge nach Fachreview 508-1: Marc alt 900.00 + Eva neu
+  # 1'470.00 = 2'370.00 gegen den Anteil der Mieter 1'920.00; den Leerstand im April (80.00) trägt der Vermieter
+  Szenario: Die Vorschau nennt, wie viel die Abrechnungen einer Wohnung mehr als ihre Heizkosten verrechnen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Rechnung "Heizung 2024-04-10" gilt danach für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "Die Heizkosten der Wohnung betragen CHF 2’000.00, davon tragen die Mieter CHF 1’920.00 und Sie CHF 80.00 für den Leerstand. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 2’370.00 ohne Verwaltungspauschale, CHF 450.00 zu viel."
+
   # #335 (#451, Punkt 5): hatte die Heizrechnung ihren Leistungszeitraum schon beim Erstellen, rechnet die versendete
   # Abrechnung die Monate darin; kein Hinweis
   Szenario: Kein Hinweis auf die alte Regel, wenn die versendete Abrechnung die Monate im Leistungszeitraum rechnet

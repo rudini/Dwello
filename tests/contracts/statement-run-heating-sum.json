@@ -1,0 +1,16 @@
+{
+	"heatingWithoutServicePeriod": [],
+	"oldHeatingRule": ["e0000000-0000-4000-8000-000000000001"],
+	"heatingSums": [
+		{
+			"statementId": "e0000000-0000-4000-8000-000000000001",
+			"costs": "2000.00",
+			"tenants": "1920.00",
+			"landlord": "80.00",
+			"billed": "2370.00",
+			"difference": "450.00",
+			"result": "more",
+			"landlordFor": "vacancy"
+		}
+	]
+}
