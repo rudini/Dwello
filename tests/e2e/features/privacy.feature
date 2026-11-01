@@ -109,7 +109,7 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
   # #671 (Fachreview 671-1): Zahlungserinnerung und Mahnung wie in docs/design/i18n-begriffe.md, nicht beide «rappel»/«reminder»
-  Szenariogrundriss: Die Datenschutzerklärung nennt in jeder Sprache Zahlungserinnerungen und Mahnungen
+  Szenariogrundriss: Die Datenschutzerklärung nennt auf Französisch und Englisch Zahlungserinnerungen und Mahnungen
     Wenn der Liegenschaftsverwalter die Sprache "<Sprache>" wählt
     Dann nennt die Datenschutzerklärung unter "<Abschnitt>" "<Versand>"
     Und nennt die Datenschutzerklärung unter "<Abschnitt>" "<Inhalt>"
