@@ -1653,6 +1653,7 @@
 	"categories_predefined_ki": "If you change the German name or the description, the AI may suggest a different category for new invoices.",
 	"categories_allocable": "Allocable utility costs",
 	"categories_allocable_help": "Costs linked to the use of the property are allocable (Art. 257a–257b Code of Obligations, CO), e.g. heating, water, caretaker. Repairs, renewals, building insurance and taxes are borne by the landlord; for the heating and the lift only operation and servicing of the system count. For water, waste water and waste, base fees that depend on the value of the property do not count; for waste water the rainwater fee does not count either. The tenant pays allocable costs only if the rental contract names each of these cost types separately (Art. 257a para. 2 CO).",
+	"categories_reason_label": "Reasoning",
 	"categories_reason_heating": "Fuel, energy, servicing and operation of the heating are chargeable (Art. 5 Tenancy Ordinance, VMWG); repair, renewal, interest and depreciation of the system are not (Art. 6 VMWG). The running heating costs are therefore allocable.",
 	"categories_reason_hot_water": "Energy and operation of the central hot water supply are chargeable (Art. 5 para. 1 Tenancy Ordinance, VMWG); repair and renewal of the system are not (Art. 6 VMWG). The running hot water costs are therefore allocable.",
 	"categories_reason_cold_water": "The water used is linked to the use (Art. 257b para. 1 Code of Obligations, CO); base fees that depend on the value of the property are not. The water used is therefore allocable.",
