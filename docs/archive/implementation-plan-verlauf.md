@@ -542,3 +542,11 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] pg test in `statement-mail.pg.test.ts` seen red; fix in the payment route (`keepNewPdf` after a part payment)
 - [x] code-reviewer `docs/reviews/1016-review-1.md`: C-1 scenario «Nach einer Teilzahlung verlangt das bereitliegende neue PDF den offenen Betrag» (seen red), C-2 the pg test reads the PDF text; re-review `1016b-review-1.md`
 - [x] PR: pushed after this archive
+
+## Session: #546 the hint to correct names the recalculated Saldo
+
+- [x] @wip scenario and pg test seen red; fach-reviewer step 1 `docs/reviews/546-fachreview-1.md`: V-1 to V-5 taken, M-1 to #1023 (needs-decision)
+- [x] Backend `recalculated` (Saldo, difference, below CHF 5, cost sentence), BFF mapper, `recalculatedText`, 11 texts in four languages; unit tests and scenario seen red
+- [x] code-reviewer `docs/reviews/546-review-1.md`: C-1 (Major) and C-2 tests seen red, C-3 done; closing round `546b-review-1.md`
+- [x] Persona `docs/design/personas/weber-546.md`: amounts plausible; P-1, P-2 (Minor) stay in the report (P-2 is the open point the issue left as is)
+- [x] PR: pushed after this archive
