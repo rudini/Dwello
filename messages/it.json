@@ -1038,6 +1038,7 @@
 	"invoices_upload_status_reading": "Lettura …",
 	"invoices_upload_status_check": "Da verificare",
 	"invoices_upload_status_fill": "Da compilare",
+	"invoices_upload_status_create": "Da creare",
 	"invoices_upload_status_error": "Errore – riprovare",
 	"invoices_upload_status_refused": "Non possibile",
 	"backend_extraction_unavailable": "L’IA non è disponibile. Compili i campi.",

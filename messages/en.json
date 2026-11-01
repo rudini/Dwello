@@ -1038,6 +1038,7 @@
 	"invoices_upload_status_reading": "Reading …",
 	"invoices_upload_status_check": "Please check",
 	"invoices_upload_status_fill": "Please fill in",
+	"invoices_upload_status_create": "Ready to create",
 	"invoices_upload_status_error": "Error – try again",
 	"invoices_upload_status_refused": "Not possible",
 	"backend_extraction_unavailable": "The AI is not available. Please fill in the fields.",
