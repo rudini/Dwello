@@ -4,7 +4,7 @@
 type Edge = { from: string; to: string };
 type Health = {
 	findings: { path: string; name: string; cyclomatic: number; cognitive: number; severity: string }[];
-	hotspots: { path: string; score: number }[];
+	hotspots?: { path: string; score: number }[]; // missing when no file has enough commits
 	health_score: { score: number; grade: string };
 	vital_signs: { duplication_pct: number; maintainability_avg: number };
 };
@@ -90,7 +90,7 @@ export function analyze(input: Input): Analysis {
 		const i = ca ? ce / (ca + ce) : 1; // nothing depends on it: free to change
 		const d = round(Math.abs(a + i - 1));
 		const severities = input.health.findings.filter((f) => paths.has(f.path)).map((f) => f.severity);
-		const hotspot = Math.max(0, ...input.health.hotspots.filter((h) => paths.has(h.path)).map((h) => h.score));
+		const hotspot = Math.max(0, ...(input.health.hotspots ?? []).filter((h) => paths.has(h.path)).map((h) => h.score));
 		const lights = {
 			distance: ca < LIMITS.painUsers && d > LIMITS.distance[1] ? 'yellow' : scale(d, LIMITS.distance),
 			complexity: severities.some((s) => s === 'critical' || s === 'high') ? 'red' : severities.length ? 'yellow' : 'green',
@@ -108,10 +108,10 @@ export function analyze(input: Input): Analysis {
 		light: higherIsBetter ? scale(-value, limits.map((l) => -l)) : scale(value, limits)
 	});
 	const kpis = [
-		kpi('tangles', 'Tangles (Modulzyklen)', tangles, [0, 0]),
-		kpi('health', `fallow Health-Score (${health_score.grade})`, health_score.score, LIMITS.health, true),
-		kpi('duplication', 'Duplikate in %', vital_signs.duplication_pct, LIMITS.duplication),
-		kpi('maintainability', 'Maintainability-Index Ø', vital_signs.maintainability_avg, LIMITS.maintainability, true)
+		kpi('tangles', 'Tangles (module cycles)', tangles, [0, 0]),
+		kpi('health', `fallow health score (${health_score.grade})`, health_score.score, LIMITS.health, true),
+		kpi('duplication', 'Duplication in %', vital_signs.duplication_pct, LIMITS.duplication),
+		kpi('maintainability', 'Maintainability index (avg)', vital_signs.maintainability_avg, LIMITS.maintainability, true)
 	];
 	const functions = input.health.findings.filter((f) => prod.some((p) => p.path === f.path)).sort((a, b) => b.cyclomatic - a.cyclomatic);
 	return { modules, kpis, edges: edges.map((e) => ({ from: e.from, to: e.to, weight: Number(e.file_edges) })), functions };
@@ -132,14 +132,14 @@ function aiGraph(modules: Module[]): string {
 		const r = Math.min(16, 4 + 2 * Math.sqrt(ms.length - 1));
 		return `<circle cx="${x(ms[0].i)}" cy="${y(ms[0].a)}" r="${r}" fill="${layerColor(ms[0].name)}" stroke="var(--surface)" stroke-width="2"><title>${esc(title)}</title></circle>`;
 	});
-	return `<svg id="ai-graph" viewBox="0 0 ${S + 2 * P} ${S + 2 * P}" width="100%" style="max-width:${S + 2 * P}px" role="img" aria-label="Abstraktheit über Instabilität">
+	return `<svg id="ai-graph" viewBox="0 0 ${S + 2 * P} ${S + 2 * P}" width="100%" style="max-width:${S + 2 * P}px" role="img" aria-label="Abstractness over instability">
 <rect x="${P}" y="${P}" width="${S}" height="${S}" fill="var(--surface)" stroke="var(--line)"/>
 <polygon points="${x(0)},${y(1 - g)} ${x(0)},${y(1)} ${x(g)},${y(1)} ${x(1)},${y(g)} ${x(1)},${y(0)} ${x(1 - g)},${y(0)}" fill="var(--band)"/>
 <line class="main-sequence" x1="${x(0)}" y1="${y(1)}" x2="${x(1)}" y2="${y(0)}" stroke="var(--ink2)" stroke-dasharray="4 4"/>
-<text x="${x(0) + 12}" y="${y(0) + 14}" font-size="11" fill="var(--ink2)">Zone of Pain (stabil, konkret)</text>
-<text x="${x(1)}" y="${y(1) - 8}" font-size="11" fill="var(--ink2)" text-anchor="end">Zone of Uselessness (instabil, abstrakt)</text>
-<text x="${x(0.5)}" y="${S + P + 32}" font-size="12" fill="var(--ink2)" text-anchor="middle">Instabilität I = Ce / (Ca + Ce)</text>
-<text transform="translate(14 ${y(0.5)}) rotate(-90)" font-size="12" fill="var(--ink2)" text-anchor="middle">Abstraktheit A</text>
+<text x="${x(0) + 12}" y="${y(0) + 14}" font-size="11" fill="var(--ink2)">Zone of pain (stable, concrete)</text>
+<text x="${x(1)}" y="${y(1) - 8}" font-size="11" fill="var(--ink2)" text-anchor="end">Zone of uselessness (unstable, abstract)</text>
+<text x="${x(0.5)}" y="${S + P + 32}" font-size="12" fill="var(--ink2)" text-anchor="middle">Instability I = Ce / (Ca + Ce)</text>
+<text transform="translate(14 ${y(0.5)}) rotate(-90)" font-size="12" fill="var(--ink2)" text-anchor="middle">Abstractness A</text>
 <text x="${x(0)}" y="${S + P + 14}" font-size="11" fill="var(--ink2)" text-anchor="middle">0</text><text x="${x(1)}" y="${S + P + 14}" font-size="11" fill="var(--ink2)" text-anchor="middle">1</text>
 <text x="${P - 6}" y="${y(0) + 4}" font-size="11" fill="var(--ink2)" text-anchor="end">0</text><text x="${P - 6}" y="${y(1) + 4}" font-size="11" fill="var(--ink2)" text-anchor="end">1</text>
 ${dots.join('\n')}
@@ -161,29 +161,110 @@ function dsm(modules: Module[], edges: (Edge & { weight: number })[]): string {
 		.filter((e) => pos.has(e.from) && pos.has(e.to))
 		.map((e) => {
 			const [r, c] = [pos.get(e.from)!, pos.get(e.to)!];
-			return `<rect class="cell${c > r ? ' back' : ''}" x="${L + c * C + 1}" y="${r * C + 1}" width="${C - 2}" height="${C - 2}" rx="1" fill="var(${c > r ? '--crit' : shade(e.weight)})"><title>${esc(e.from)} → ${esc(e.to)}: ${e.weight} Import(s)</title></rect>`;
+			return `<rect class="cell${c > r ? ' back' : ''}" x="${L + c * C + 1}" y="${r * C + 1}" width="${C - 2}" height="${C - 2}" rx="1" fill="var(${c > r ? '--crit' : shade(e.weight)})"><title>${esc(e.from)} → ${esc(e.to)}: ${e.weight} import(s)</title></rect>`;
 		});
 	return `<svg width="${L + n * C}" height="${n * C}" role="img" aria-label="Dependency Structure Matrix"><rect x="${L}" y="0" width="${n * C}" height="${n * C}" fill="var(--surface)" stroke="var(--line)"/>${rows.join('')}${cells.join('')}</svg>`;
 }
 
-const LABEL: Record<Light, string> = { green: '● Grün', yellow: '● Gelb', red: '● Rot' };
+export type Snapshot = {
+	commit: string;
+	date: string;
+	kpis: Record<string, number>;
+	lights: Record<Light, number>;
+	functions: number;
+	modules: Record<string, [number, number, number]>;
+};
+
+/** One point of the history: what the charts and the D comparison need, nothing else. */
+export function snapshot(analysis: Analysis, commit: string, date: string): Snapshot {
+	const lights = { green: 0, yellow: 0, red: 0 };
+	for (const m of analysis.modules) lights[m.light]++;
+	return {
+		commit,
+		date,
+		kpis: Object.fromEntries(analysis.kpis.map((k) => [k.key, k.value])),
+		lights,
+		functions: analysis.functions.length,
+		modules: Object.fromEntries(analysis.modules.map((m) => [m.name, [m.i, m.a, m.d]]))
+	};
+}
+
+/** The history as a markdown table for the CI job summary, newest first. */
+export function markdown(history: Snapshot[]): string {
+	const rows = [...history].reverse().map((h) => `| ${h.date} | ${h.kpis.health} | ${h.functions} | ${h.lights.green} | ${h.lights.yellow} | ${h.lights.red} | ${h.kpis.tangles} |`);
+	return ['| Date | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |', '|---|---|---|---|---|---|---|', ...rows].join('\n');
+}
+
+const LABEL: Record<Light, string> = { green: '● Green', yellow: '● Yellow', red: '● Red' };
 const badge = (l: Light, text = LABEL[l]) => `<span class="${l}">${text}</span>`;
 const GROUPS = [
-	{ title: 'Backend und Datenbank', layers: ['be', 'db'] },
-	{ title: 'BFF, Frontend und gemeinsame Typen', layers: ['bff', 'fe', 'shared'] }
+	{ title: 'Backend and database', layers: ['be', 'db'] },
+	{ title: 'BFF, frontend and shared types', layers: ['bff', 'fe', 'shared'] }
 ];
 
-export function report(analysis: Analysis): string {
+type Series = { label: string; color: string; values: number[] };
+
+/** One measure over the snapshots: one y-axis from 0, a dot per snapshot whose title names date and value. */
+function lineChart(id: string, title: string, dates: string[], series: Series[]): string {
+	const W = 480, H = 180, P = 40, n = dates.length;
+	const max = Math.max(1, ...series.flatMap((s) => s.values)) * 1.1;
+	const x = (k: number) => P + (n > 1 ? (k * (W - 2 * P)) / (n - 1) : 0), y = (v: number) => H - P + 10 - (v / max) * (H - P - 10);
+	const label = (s: Series, k: number) => `${dates[k]}${series.length > 1 ? ` ${s.label}` : ''}: ${s.values[k]}`;
+	const lines = series.map(
+		(s) =>
+			`<polyline fill="none" stroke="${s.color}" stroke-width="2" points="${s.values.map((v, k) => `${x(k)},${y(v)}`).join(' ')}"/>` +
+			s.values.map((v, k) => `<circle cx="${x(k)}" cy="${y(v)}" r="4" fill="${s.color}" stroke="var(--surface)" stroke-width="2"><title>${esc(label(s, k))}</title></circle>`).join('')
+	);
+	const legend = series.length > 1 ? `<p>${series.map((s) => `<span style="color:${s.color}">●</span> ${s.label}`).join(' &nbsp; ')}</p>` : '';
+	return `<div class="chart"><h3>${title}</h3>${legend}<svg id="${id}" viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="${esc(title)}">
+<line x1="${P}" y1="${y(0)}" x2="${W - P}" y2="${y(0)}" stroke="var(--line)"/>
+<text x="${P - 6}" y="${y(0) + 4}" font-size="14" fill="var(--ink2)" text-anchor="end">0</text><text x="${P - 6}" y="${y(max / 1.1) + 4}" font-size="14" fill="var(--ink2)" text-anchor="end">${round(max / 1.1)}</text>
+<text x="${x(0)}" y="${H - 6}" font-size="14" fill="var(--ink2)">${dates[0]}</text><text x="${x(n - 1)}" y="${H - 6}" font-size="14" fill="var(--ink2)" text-anchor="end">${dates[n - 1]}</text>
+${lines.join('')}</svg></div>`;
+}
+
+/** Modules whose distance D changed most between the first snapshot that has them and the last one. */
+function moved(history: Snapshot[]): string {
+	const last = history[history.length - 1].modules;
+	const rows = Object.entries(last)
+		.map(([name, [, , d]]) => {
+			const first = history.find((h) => h.modules[name])!;
+			return { name, from: first.modules[name][2], to: d, since: first.date };
+		})
+		.filter((r) => r.from !== r.to)
+		.sort((a, b) => Math.abs(b.to - b.from) - Math.abs(a.to - a.from))
+		.slice(0, 15)
+		.map((r) => `<tr class="moved"><td>${esc(r.name)}</td><td>${r.from}</td><td>${r.to}</td><td>${r.since}</td></tr>`);
+	return `<h3>Modules whose distance D changed most</h3><div class="scroll"><table><tr><th>Module</th><th>D at first snapshot</th><th>D now</th><th>First snapshot</th></tr>${rows.join('')}</table></div>`;
+}
+
+function historySection(history: Snapshot[]): string {
+	if (history.length < 2) return '';
+	const dates = history.map((h) => h.date);
+	const kpi = (key: string) => history.map((h) => h.kpis[key]);
+	return `<h2>History</h2><p>${history.length} snapshots of <code>main</code>, measured with today's tools and thresholds. Hover over a dot for date and value.</p><div class="charts">
+${lineChart('history-lights', 'Modules per traffic light', dates, [
+	{ label: 'green', color: 'var(--good)', values: history.map((h) => h.lights.green) },
+	{ label: 'yellow', color: 'var(--warn)', values: history.map((h) => h.lights.yellow) },
+	{ label: 'red', color: 'var(--crit)', values: history.map((h) => h.lights.red) }
+])}
+${lineChart('history-health', 'fallow health score', dates, [{ label: 'health', color: 'var(--l1)', values: kpi('health') }])}
+${lineChart('history-functions', "Functions above fallow's thresholds", dates, [{ label: 'functions', color: 'var(--l1)', values: history.map((h) => h.functions) }])}
+${lineChart('history-tangles', 'Tangles (module cycles)', dates, [{ label: 'tangles', color: 'var(--l1)', values: kpi('tangles') }])}
+</div>${moved(history)}`;
+}
+
+export function report(analysis: Analysis, history: Snapshot[] = []): string {
 	const { modules, kpis, edges, functions } = analysis;
 	const sorted = [...modules].sort((a, b) => ORDER.indexOf(b.light) - ORDER.indexOf(a.light) || a.name.localeCompare(b.name));
 	const count = (l: Light) => modules.filter((m) => m.light === l).length;
-	const legend = `<p>${Object.entries({ be: 'Backend', db: 'Datenbank', bff: 'BFF', fe: 'Frontend', shared: 'gemeinsame Typen' })
+	const legend = `<p>${Object.entries({ be: 'Backend', db: 'Database', bff: 'BFF', fe: 'Frontend', shared: 'Shared types' })
 		.map(([k, v]) => `<span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:${LAYER[k]}"></span> ${v}`)
 		.join(' &nbsp; ')}</p>`;
 	const tiles = kpis.map((k) => `<div class="kpi"><b>${k.value}</b><span>${esc(k.label)}</span>${badge(k.light)}</div>`).join('');
 	const groups = GROUPS.map((g) => {
 		const ms = modules.filter((m) => g.layers.includes(m.name.split(':')[0]));
-		return `<h3>${g.title} (${ms.length} Module)</h3><div class="scroll">${dsm(ms, edges)}</div>`;
+		return `<h3>${g.title} (${ms.length} modules)</h3><div class="scroll">${dsm(ms, edges)}</div>`;
 	}).join('');
 	const group = (m: string) => GROUPS.findIndex((g) => g.layers.includes(m.split(':')[0]));
 	const cross = edges.filter((e) => group(e.from) !== group(e.to)).length;
@@ -194,7 +275,7 @@ export function report(analysis: Analysis): string {
 		)
 		.join('');
 	const fns = functions.map((f) => `<tr><td><code>${esc(f.path)}</code></td><td><code>${esc(f.name)}</code></td><td>${f.cyclomatic}</td><td>${f.cognitive}</td></tr>`).join('');
-	return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dwello: Strukturbericht</title><style>
+	return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dwello: structure report</title><style>
 :root{--surface:#fcfcfb;--plane:#f9f9f7;--ink:#0b0b0b;--ink2:#52514e;--line:#e4e3df;--band:#e6f4e6;--crit:#d03b3b;--good:#0ca30c;--warn:#b37a00;
 --l1:#2a78d6;--l2:#eb6834;--l3:#1baf7a;--l4:#eda100;--l5:#e87ba4;--s0:#cde2fb;--s1:#86b6ef;--s2:#2a78d6;--s3:#184f95}
 @media (prefers-color-scheme:dark){:root{--surface:#1a1a19;--plane:#0d0d0d;--ink:#f0efec;--ink2:#c3c2b7;--line:#383835;--band:#1f3320;--warn:#fab219;
@@ -204,42 +285,52 @@ h1{font-size:28px;margin:0}h2{font-size:20px;margin:40px 0 8px}h3{font-size:16px
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
 .kpi b{display:block;font-size:26px}.kpi span{display:block;font-size:13px;color:var(--ink2)}.green{color:var(--good)}.yellow{color:var(--warn)}.red{color:var(--crit)}
 .kpi span.green{color:var(--good);font-weight:600}.kpi span.yellow{color:var(--warn);font-weight:600}.kpi span.red{color:var(--crit);font-weight:600}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}.chart h3{margin:8px 0}
 .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
 table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line)}th{color:var(--ink2)}
 </style></head><body><main>
-<h1>Dwello: Struktur und Code-Qualität</h1>
-<p>Produktivcode (Backend, DB, BFF, Frontend): ${modules.length} Module, ${edges.length} Modul-Abhängigkeiten. Module: ${badge('green', `${count('green')} grün`)}, ${badge('yellow', `${count('yellow')} gelb`)}, ${badge('red', `${count('red')} rot`)}.</p>
+<h1>Dwello: structure and code quality</h1>
+<p>Production code (backend, database, BFF, frontend): ${modules.length} modules, ${edges.length} module dependencies. Modules: ${badge('green', `${count('green')} green`)}, ${badge('yellow', `${count('yellow')} yellow`)}, ${badge('red', `${count('red')} red`)}.</p>
 <div class="kpis">${tiles}</div>
-<h2>Ampel</h2>
-<ul><li><b>Abstand D</b> zur Hauptreihe A + I = 1 (Robert C. Martin): grün bis ${LIMITS.distance[0]}, gelb bis ${LIMITS.distance[1]}, sonst rot, aber erst ab ${LIMITS.painUsers} Verwendern (Ca), darunter gelb: Bei wenigen Verwendern ist eine Änderung billig. Rot unten links heisst stabil und konkret («Zone of Pain»): viele hängen davon ab, Änderungen ziehen Kreise. Für Helfer, die sich selten ändern (Datum, Formate), ist das oft gewollt; zusammen mit einem gelben oder roten Hotspot lohnt sich ein Blick. Ein Modul, von dem nichts abhängt, hat I = 1.</li>
-<li><b>Komplexität:</b> Funktionen über den Schwellen von fallow im Modul; eine mit Schwere hoch oder kritisch macht rot, sonst eine gelb.</li>
-<li><b>Hotspot:</b> höchster Hotspot-Score von fallow (Komplexität × Änderungen der letzten 6 Monate) einer Datei im Modul: grün bis ${LIMITS.hotspot[0]}, gelb bis ${LIMITS.hotspot[1]}, sonst rot.</li>
-<li><b>Gesamt:</b> die schlechteste der drei Farben. Kennzahlen oben: Tangles 0 grün, sonst rot; Health-Score und Wartbarkeit grün ab ${LIMITS.health[0]} bzw. ${LIMITS.maintainability[0]}, gelb ab ${LIMITS.health[1]} bzw. ${LIMITS.maintainability[1]}; Duplikate grün bis ${LIMITS.duplication[0]} %, gelb bis ${LIMITS.duplication[1]} %.</li></ul>
-<h2>Abstraktheit und Instabilität (A/I-Diagramm)</h2>
-<p>I = Ce / (Ca + Ce): Ca = Module, die es verwenden, Ce = Module, die es verwendet. A = exportierte Typen und Interfaces / alle Exporte (eine Svelte-Komponente zählt als ein konkreter Export). Das grüne Band ist D ≤ ${LIMITS.distance[0]}. Punktgrösse = Anzahl Module an derselben Stelle. Fahren Sie über einen Punkt für die Namen.</p>
+${historySection(history)}
+<h2>Traffic lights</h2>
+<ul><li><b>Distance D</b> from the main sequence A + I = 1 (Robert C. Martin): green up to ${LIMITS.distance[0]}, yellow up to ${LIMITS.distance[1]}, else red, but red only from ${LIMITS.painUsers} users (Ca), yellow below: with few users a change is cheap. Red at the bottom left means stable and concrete (zone of pain): many depend on it, so changes ripple. For helpers that rarely change (dates, formats) this is often intended; together with a yellow or red hotspot it is worth a look. A module nothing depends on has I = 1.</li>
+<li><b>Complexity:</b> functions in the module above fallow's thresholds; one with severity high or critical makes it red, any other makes it yellow.</li>
+<li><b>Hotspot:</b> highest fallow hotspot score (complexity × changes in the last 6 months) of a file in the module: green up to ${LIMITS.hotspot[0]}, yellow up to ${LIMITS.hotspot[1]}, else red.</li>
+<li><b>Overall:</b> the worst of the three colours. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
+<h2>Abstractness and instability (A/I graph)</h2>
+<p>I = Ce / (Ca + Ce): Ca = modules that use it, Ce = modules it uses. A = exported types and interfaces / all exports (a Svelte component counts as one concrete export). The green band is D ≤ ${LIMITS.distance[0]}. Dot size = number of modules at the same position. Hover over a dot for the names.</p>
 ${legend}
 <div class="scroll">${aiGraph(modules)}</div>
 <h2>Dependency Structure Matrix</h2>
-<p>Zeile verwendet Spalte; Module nach Level geordnet (oben die Basis). Blau unter der Diagonale: Abhängigkeit nach unten, je dunkler, desto mehr Imports (1, 2–3, 4–9, ab 10). Rot über der Diagonale: Rückkante, Teil eines Tangles. Fahren Sie über eine Zelle für die Module. ${cross} Abhängigkeit(en) zwischen den beiden Gruppen (z. B. Typen aus dem Backend) zeigt keine Matrix.</p>
+<p>Row uses column; modules ordered by level (the base at the top). Blue below the diagonal: a dependency downwards, darker means more imports (1, 2–3, 4–9, 10 and more). Red above the diagonal: a back-edge, part of a tangle. Hover over a cell for the modules. Dependencies between the two groups, shown in neither matrix: ${cross} (e.g. types from the backend).</p>
 ${legend}
 ${groups}
-<h2>Module</h2>
-<div class="scroll"><table><tr><th>Modul</th><th>Gesamt</th><th>D</th><th>Komplexe Funktionen</th><th>Hotspot</th><th>Level</th><th>Dateien</th><th>Ca</th><th>Ce</th><th>I</th><th>A</th></tr>${rows}</table></div>
-<h2>Funktionen über den Schwellen von fallow</h2>
-<div class="scroll"><table><tr><th>Datei</th><th>Funktion</th><th>zyklomatisch</th><th>kognitiv</th></tr>${fns}</table></div>
+<h2>Modules</h2>
+<div class="scroll"><table><tr><th>Module</th><th>Overall</th><th>D</th><th>Complex functions</th><th>Hotspot</th><th>Level</th><th>Files</th><th>Ca</th><th>Ce</th><th>I</th><th>A</th></tr>${rows}</table></div>
+<h2>Functions above fallow's thresholds</h2>
+<div class="scroll"><table><tr><th>File</th><th>Function</th><th>Cyclomatic</th><th>Cognitive</th></tr>${fns}</table></div>
 </main></body></html>`;
 }
 
 if (import.meta.main) {
-	const { readFileSync } = await import('node:fs');
+	const { appendFileSync, existsSync, readdirSync, readFileSync } = await import('node:fs');
 	const { join } = await import('node:path');
 	const { OUT, ROOT, readCsv } = await import('./lib');
-	const input: Input = {
+	const analysis = analyze({
 		edges: readCsv('imports-module.csv') as Input['edges'],
 		cycles: readCsv('cycles-module.csv') as Input['cycles'],
 		files: readCsv('files.csv') as Input['files'],
 		source: (path) => readFileSync(join(ROOT, path), 'utf8'),
 		health: JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8'))
-	};
-	console.log(report(analyze(input)));
+	});
+	const [flag, commit, date] = process.argv.slice(2);
+	if (flag === '--snapshot') console.log(JSON.stringify(snapshot(analysis, commit, date)));
+	else {
+		const dir = join(OUT, 'history');
+		const history: Snapshot[] = existsSync(dir) ? readdirSync(dir).map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8'))) : [];
+		history.sort((a, b) => a.date.localeCompare(b.date));
+		console.log(report(analysis, history));
+		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Structure report\n\n${markdown(history)}\n`);
+	}
 }

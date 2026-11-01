@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { abstractness, analyze, levels, report } from './structure';
+import { abstractness, analyze, levels, markdown, report, snapshot } from './structure';
 
 describe('levels', () => {
 	it('gibt einem Modul ohne Abhängigkeit Level 1 und jedem Verwender eins mehr als seine höchste Abhängigkeit', () => {
@@ -119,6 +119,14 @@ describe('Ampel', () => {
 	});
 });
 
+describe('fallow ohne Hotspots', () => {
+	it('wertet einen Stand, für den fallow keine Hotspots meldet, als hotspotfrei', () => {
+		const { hotspots: _, ...noHotspots } = health;
+		const m = analyze({ ...input, health: noHotspots as typeof health }).modules.find((x) => x.name === 'be:routes/a')!;
+		expect(m).toMatchObject({ hotspot: 0, lights: { hotspot: 'green' } });
+	});
+});
+
 describe('Kennzahlen', () => {
 	it('gibt jeder Gesamtkennzahl eine Ampelfarbe: Zyklen im Produktivcode, Health-Score, Duplikate, Wartbarkeit', () => {
 		const h = { ...health, health_score: { score: 75, grade: 'B' }, vital_signs: { duplication_pct: 6, maintainability_avg: 88 } };
@@ -145,8 +153,8 @@ describe('report', () => {
 		const cells = [...report(analyze(cyclic)).matchAll(/<rect class="cell( back)?"[^>]*><title>([^<]*)<\/title>/g)].map((m) => [m[2], !!m[1]]);
 		expect(cells).toEqual(
 			expect.arrayContaining([
-				['be:services/a → db:schema: 1 Import(s)', false],
-				['be:routes/a → be:services/a: 2 Import(s)', true]
+				['be:services/a → db:schema: 1 import(s)', false],
+				['be:routes/a → be:services/a: 2 import(s)', true]
 			])
 		);
 		expect(cells.filter(([, back]) => back)).toHaveLength(1);
@@ -154,7 +162,7 @@ describe('report', () => {
 
 	it('nennt die Abhängigkeiten zwischen den beiden DSM-Gruppen, die keine Matrix zeigt', () => {
 		const cross = { ...input, files: [...files, { path: 'src/lib/types.ts', kind: 'prod', module: 'shared:types' }], source: (p: string) => sources[p] ?? 'export type T = 1;', edges: [...edges, { from: 'shared:types', to: 'be:services/a', file_edges: '1' }] };
-		expect(report(analyze(cross))).toContain('1 Abhängigkeit(en) zwischen den beiden Gruppen');
+		expect(report(analyze(cross))).toContain('Dependencies between the two groups, shown in neither matrix: 1');
 	});
 
 	it('listet die Funktionen über den Schwellen aus Produktivcode, die komplexeste zuerst', () => {
@@ -170,13 +178,63 @@ describe('report', () => {
 		expect(names).toEqual(['big', 'small']);
 	});
 
-	it('listet die Module mit der schlechtesten Ampel zuerst und schreibt die Farbe aus', () => {
+	it('listet die Module mit der schlechtesten Ampel zuerst und schreibt die Farbe englisch aus', () => {
 		const h = { ...health, findings: [{ path: 'backend/src/routes/a.ts', name: 'r', cyclomatic: 12, cognitive: 16, severity: 'moderate' }] };
 		const rows = [...report(analyze({ ...input, health: h })).matchAll(/<tr class="module"><td>([^<]*)<\/td><td><span class="\w+">([^<]*)<\/span><\/td>/g)].map((m) => [m[1], m[2]]);
 		expect(rows).toEqual([
-			['be:routes/a', '● Gelb'],
-			['db:schema', '● Gelb'],
-			['be:services/a', '● Grün']
+			['be:routes/a', '● Yellow'],
+			['db:schema', '● Yellow'],
+			['be:services/a', '● Green']
+		]);
+	});
+});
+
+describe('snapshot', () => {
+	it('fasst einen Stand zusammen: Kennzahlen, Ampelzählung, Funktionen über den Schwellen, I, A und D pro Modul', () => {
+		const h = { ...health, findings: [{ path: 'backend/src/services/a.ts', name: 'a', cyclomatic: 22, cognitive: 22, severity: 'critical' }] };
+		expect(snapshot(analyze({ ...input, health: h }), 'abc123', '2026-10-26')).toEqual({
+			commit: 'abc123',
+			date: '2026-10-26',
+			kpis: { tangles: 0, health: 90, duplication: 1, maintainability: 90 },
+			lights: { green: 1, yellow: 1, red: 1 },
+			functions: 1,
+			modules: { 'be:routes/a': [1, 0, 0], 'be:services/a': [0.5, 0.75, 0.25], 'db:schema': [0, 0, 1] }
+		});
+	});
+});
+
+const snap = (date: string, health: number, red: number, d: number) => ({
+	commit: date,
+	date,
+	kpis: { tangles: 0, health, duplication: 1, maintainability: 90 },
+	lights: { green: 5, yellow: 3, red },
+	functions: 10,
+	modules: { 'be:a': [0.5, 0, d] as [number, number, number], 'be:b': [1, 0, 0] as [number, number, number] }
+});
+
+describe('report mit Verlauf', () => {
+	it('zeichnet pro Kennzahl eine Linie mit einem Punkt pro Stand, der Datum und Wert nennt', () => {
+		const html = report(analyze(input), [snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]);
+		expect(html).toMatch(/<svg id="history-health"[\s\S]*?<title>2026-05-04: 70<\/title>[\s\S]*?<title>2026-10-26: 87.1<\/title>/);
+		expect(html).toMatch(/<svg id="history-lights"[\s\S]*?<title>2026-05-04 red: 9<\/title>/);
+		expect(html).toContain('id="history-functions"');
+		expect(html).toContain('id="history-tangles"');
+	});
+
+	it('listet die Module, deren Abstand D sich seit dem ersten Stand am stärksten verändert hat, ohne unveränderte', () => {
+		const html = report(analyze(input), [snap('2026-05-04', 70, 9, 0.8), snap('2026-08-03', 80, 6, 0.5), snap('2026-10-26', 87.1, 4, 0.2)]);
+		const rows = [...html.matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
+		expect(rows).toEqual([['be:a', '0.8', '0.2']]);
+	});
+});
+
+describe('markdown', () => {
+	it('gibt den Verlauf als Tabelle aus, eine Zeile pro Stand, der neueste zuerst', () => {
+		expect(markdown([snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]).split('\n')).toEqual([
+			'| Date | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |',
+			'|---|---|---|---|---|---|---|',
+			'| 2026-10-26 | 87.1 | 10 | 5 | 3 | 4 | 0 |',
+			'| 2026-05-04 | 70 | 10 | 5 | 3 | 9 | 0 |'
 		]);
 	});
 });
