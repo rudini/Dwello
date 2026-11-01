@@ -5,7 +5,9 @@
 
 import { Elysia, t } from 'elysia';
 import { missingByContract, missingOfContract } from '../services/statement-run.service';
-import { errorBody, refusal } from '../services/coded-error';
+import { errorBody, refusal, refusedWith } from '../services/coded-error';
+import { consentLetterPdf } from '../services/consent-letter.service';
+import { fileResponse } from './file-response';
 import type { ContractResponse } from '../api/contract';
 import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
@@ -137,6 +139,19 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 		const missing = await missingOfContract(params.id);
 		if (!missing) set.status = 404;
 		return missing ?? { error: 'Contract not found' };
+	})
+	// #521: the letter for the tenants' consent to a new Abrechnungsperiode, as a PDF to print
+	.get('/:id/consent-letter', async ({ params, set }) => {
+		try {
+			const letter = await consentLetterPdf(params.id);
+			if (!letter) {
+				set.status = 404;
+				return refusal('CONTRACT_NOT_FOUND', 'Contract not found');
+			}
+			return fileResponse(set, letter);
+		} catch (error) {
+			return refusedWith({ CONSENT_LETTER_NONE: 409 })(error, set);
+		}
 	})
 	// Get single contract
 	.get('/:id', async ({ params, set }) => {

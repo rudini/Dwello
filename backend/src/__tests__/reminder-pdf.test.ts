@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { consentLetter } from '../services/consent-letter';
 import { reminderLetter } from '../services/reminder-letter';
 import { renderReminderPdf } from '../services/reminder-pdf';
 import { readPdf } from './helpers/pdf-text';
@@ -31,5 +32,29 @@ describe('Adresse im Mahnschreiben', () => {
 describe('Zeichen im Mahnschreiben', () => {
 	it('druckt einen Namen mit Sonderzeichen so, wie er erfasst ist', async () => {
 		expect(await textOf({ name: 'Łukasz Dragoș', address: 'Seeweg 15', postalCode: '6003', city: 'Luzern' })).toContain('Łukasz Dragoș Seeweg 15');
+	});
+});
+
+// #521 (persona Helga P-3): the tenant signs the text he agrees to; one page holds the agreement and its signatures
+describe('Zustimmung im Brief zur neuen Abrechnungsperiode', () => {
+	it('druckt den Teil zur Zustimmung samt Unterschriftszeilen auf einer Seite', async () => {
+		const consent = consentLetter({
+			earlier: 'july-june',
+			type: 'calendar',
+			short: { start: '2025-07-01', end: '2025-12-31' },
+			contractEnd: null,
+			date: '2026-11-01',
+			apartment: '1.01',
+			address: 'Bahnhofstrasse 1, 8400 Winterthur',
+			tenant: { firstName: 'Hans', lastName: 'Müller' },
+			sender: 'Verwaltung Muster AG'
+		});
+		const { pageTexts } = readPdf(await renderReminderPdf(consent, sender, { name: 'Hans Müller' }, '01.11.2026'));
+		const signed = pageTexts.find((page) => page.includes('Unterschrift weiterer Mieter'))!;
+
+		expect(pageTexts.length).toBe(2);
+		expect(signed).toContain(consent.agreement.heading);
+		expect(signed).toContain('Ort, Datum');
+		expect(signed).toContain('Unterschrift Hans Müller');
 	});
 });

@@ -101,6 +101,7 @@
 		"old-address-task": "Overview with a draft statement of a tenant who moved out and still has the building's address: the task «Neue Adresse eintragen» (A-5, #114).",
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
 		"buildings-overlap": "Statement wizard step «Gebäude» with a period that overlaps the building's statement period without being equal: the building cannot be chosen, the text names the existing period and the ways out (#199, #408 point 2).",
+		"buildings-consent": "Statement wizard step «Gebäude» with a period that overlaps a statement period of another type than the setting: the ways out with the short period and one link per contract to the letter for the tenant's consent to the new Abrechnungsperiode (#521).",
 		"formula-tested": "Distribution key form after testing a formula.",
 		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
 		"ki-unsure": "New category form after the KI was not sure: the hint to choose oneself, nothing preset (#176, #186).",
@@ -428,6 +429,20 @@
 			]
 		},
 		{
+			"name": "contract-consent-detail",
+			"path": "/contracts/{consentContract}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "contract-consent-letter-refused",
+			"path": "/contracts/{contract}/consent-letter",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "contract-moved-out-detail",
 			"path": "/contracts/{movedOutContract}",
 			"states": [
@@ -610,6 +625,7 @@
 				"draft-dropped",
 				"buildings-billed",
 				"buildings-overlap",
+				"buildings-consent",
 				"link-preset",
 				"agreed-costs",
 				"agreement-save-failed",

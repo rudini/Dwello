@@ -117,6 +117,8 @@ Funktionalität: Barrierefreiheit
       | contract-detail        | advance-delete-refused |
       | contract-detail        | missing-statements  |
       | contract-partly-billed-detail | default          |
+      | contract-consent-detail       | default          |
+      | contract-consent-letter-refused | default        |
       | contract-moved-out-detail | default          |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
@@ -189,6 +191,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | buildings-overlap   |
+      | statement-generate     | buildings-consent   |
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |

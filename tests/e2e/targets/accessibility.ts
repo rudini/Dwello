@@ -78,6 +78,8 @@ export const generateBuilding = (buildingId: string) =>
 export const confirmMissingInvoices = byTestId('Fehlende Rechnungen bestätigen', 'confirm-missing-invoices');
 /** What shows that a state or a wizard step is reached, by its test id */
 export const shown = (testId: string) => bySelector(testId, `[data-testid="${testId}"]`);
+// #521: a link to the letter for a tenant's consent in step «Gebäude»
+export const firstConsentLetter = target('Erster Brief zur Zustimmung', (page) => page.getByTestId(/^generate-building-consent-letter-/).first());
 // #91: the first answer «Vereinbart» in the statement wizard's step 3
 export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) => page.getByTestId(/^agreement-.+-yes$/).first());
 export const firstAgreementFrom = target('Erste Antwort «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from$/).first());

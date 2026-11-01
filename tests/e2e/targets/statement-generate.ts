@@ -26,6 +26,15 @@ export const offeredPeriodLink = (buildingId: string, periodStart: string) =>
 	target(`Abrechnungsperiode ab ${periodStart} für Gebäude ${buildingId}`, (page) =>
 		page.getByTestId(`generate-building-period-${buildingId}-${periodStart}`)
 	);
+// #521 (Fachreview 521-1 V-2): the letters for the tenants' consent to a new Abrechnungsperiode, one per contract
+export const consentLettersOf = (buildingId: string) =>
+	target(`Briefe zur Zustimmung für Gebäude ${buildingId}`, (page) =>
+		page.getByTestId(new RegExp(`^generate-building-consent-letter-${buildingId}-`))
+	);
+export const consentLetterOf = (buildingId: string, tenantName: string) =>
+	target(`Brief zur Zustimmung für ${tenantName} in Gebäude ${buildingId}`, (page) =>
+		page.getByTestId(new RegExp(`^generate-building-consent-letter-${buildingId}-`)).filter({ hasText: tenantName })
+	);
 // Mietverträge of the building that already have a statement for the period (step 2)
 export const buildingBilled = (buildingId: string) =>
 	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));

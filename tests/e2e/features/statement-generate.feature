@@ -528,6 +528,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter für "Lindenhof" die Abrechnungsperiode ab "2024-07-01" wählt
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Lindenhof" vom "2024-07-01" bis "2024-12-31"
 
+  # #521 (Fachreview 521-1 V-2): zum Rat bei der kurzen Abrechnungsperiode bietet die Wahl der Gebäude den Brief zur
+  # Zustimmung für jeden Mietvertrag mit Mietstagen in der kurzen Abrechnungsperiode an; Eva Frei hat dort keine
+  Szenario: Die Wahl der Gebäude bietet den Brief zur Zustimmung zur neuen Abrechnungsperiode an
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann bietet die Wahl für "Lindenhof" den Brief zur Zustimmung nur für "Marc Huber" in der Wohnung "3.01" an
+    Wenn der Liegenschaftsverwalter bei "Lindenhof" den Brief zur Zustimmung für "Marc Huber" herunterlädt
+    Dann richtet sich der Brief an "Marc Huber"
+    Und steht im PDF "kurze Abrechnungsperiode 01.07.2024 – 31.12.2024"
+
   # Beispiel des Fachreviews zu #408: die Rechnung vom 15.11.2024 liegt nur in der kurzen Abrechnungsperiode und
   # zählt dort einmal ganz (Marc 184 von 184 Tagen, dazu 3 % Verwaltungspauschale); den Nachweis «nicht über 100 %»
   # über beide Perioden trägt backend/src/__tests__/statement-period-overlap.pg.test.ts
