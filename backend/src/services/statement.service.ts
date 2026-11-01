@@ -807,7 +807,8 @@ function recordPayment(existing: StatementWithDetails, waived: boolean, { paidDa
 	const amount = paidAmountOf(entered, rest);
 	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2) }];
 	const paidAmount = roundToRappen(before + amount).toFixed(2);
-	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments };
+	// recorded now: a PDF made after it names it, so resetting it discards that PDF (#1015)
+	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments, paymentRecordedAt: new Date() };
 	// paid on the day of the latest payment, one without a date of today (Copilot review PR #1006)
 	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt: new Date() };
 }
@@ -831,6 +832,11 @@ function checkPaidDate(paidDate: string, periodEnd: string) {
 	const today = swissToday();
 	if (paidDate > today) throw new CodedError('PAID_DATE_IN_FUTURE', 'Payment date in the future', { date: today });
 }
+
+const dropNewPdfSince = (id: string, since: Date) =>
+	db
+		.delete(documents)
+		.where(and(eq(documents.statementId, id), eq(documents.type, 'new_pdf'), eq(documents.status, 'to_send'), gte(documents.createdAt, since)));
 
 /**
  * Take back a recorded payment (#92): back to sent (overdue once the payment deadline has passed), paid date and amount
@@ -859,6 +865,8 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
+	// a new PDF still to send made after it names the payment as well (#1015)
+	if (paymentRecordedAt) await dropNewPdfSince(id, paymentRecordedAt);
 	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: reset.paidDate }); // #357
 	return updated;
 }
