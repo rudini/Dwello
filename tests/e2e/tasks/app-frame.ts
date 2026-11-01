@@ -1,12 +1,13 @@
 import type { Activity } from '../screenplay/actor';
 import { Browser, Click, FailRequests, Wait } from '../screenplay/interactions';
-import { text } from '../targets/accessibility';
+import { mobileMenuButton, text } from '../targets/accessibility';
 import {
 	errorPageToOverview,
 	footerLink,
 	helpContentsLink,
 	logo,
 	mainNavLink,
+	mobileNavLink,
 	privacyLinkOnLogin,
 	publicHelpLink,
 	publicLoginLink,
@@ -17,6 +18,8 @@ import {
 } from '../targets/app-frame';
 
 export const chooseInMainNav = (label: string) => Click.on(mainNavLink(label));
+export const chooseInMobileMenu = (label: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(mobileMenuButton), Click.on(mobileNavLink(label)));
 export const chooseLogo = Click.on(logo);
 export const openSettingsFromUserMenu: Activity = (actor) =>
 	actor.attemptsTo(Click.on(userMenuButton), Click.on(userMenuSettings));
