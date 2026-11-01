@@ -89,9 +89,10 @@ jobs:
                 fi
                 ;;
               *)
-                # CI finished or the draft became ready: Copilot gets up to 5 minutes while it is still requested, so
-                # the review comes within the 15 minutes a session waits after CI (skill pull-request)
-                for _ in $(seq 5); do
+                # CI finished or the draft became ready: Copilot gets up to 10 minutes while it is still requested (on
+                # #1006 it took 7 minutes from its request); MiniMax answers in 1 to 3, within the 15 minutes a session
+                # waits after CI (skill pull-request)
+                for _ in $(seq 10); do
                   sleep 60
                   if reviewed || ! copilot_requested; then break; fi
                 done
@@ -151,11 +152,11 @@ jobs:
               {role: "system", content: $system},
               {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```")}
             ]}' > request.json
-          # a second try when the answer is empty or a made-up tool call instead of a review; 5 minutes for Copilot and
-          # two tries of 10 stay within the job's 30, with time left to comment «No review»
+          # a second try when the answer is empty or a made-up tool call instead of a review; 10 minutes for Copilot and
+          # two tries of 8 stay within the job's 30, with time left to comment «No review»
           for attempt in 1 2; do
             # streamed: the model thinks for minutes before it answers, and a silent connection may be cut
-            curl -sS -N --fail-with-body --max-time 600 https://api.minimax.io/v1/chat/completions \
+            curl -sS -N --fail-with-body --max-time 480 https://api.minimax.io/v1/chat/completions \
               -H "Authorization: Bearer $MINIMAX_API_KEY" -H 'Content-Type: application/json' \
               -d @request.json > response.txt ||
               fail "MiniMax refused the request: $(tail -c 300 response.txt | tr '\n' ' ')"
