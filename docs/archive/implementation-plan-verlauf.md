@@ -647,4 +647,7 @@ Request from the product owner (chat, 1.11.2026): history of the structure repor
 - [x] Results to the product owner (chat, page updated)
 - [x] code-reviewer closing round: `docs/reviews/structure-history-review-3.md` (no findings)
 - [x] Workflow note: none new (stop hook as in `workflow-notes-architecture-phase-2.md`)
+## Session: fallback review thinks harder (#1007 follow-up)
+
+- [x] MiniMax with `reasoning_effort: medium` gave mostly false or known findings (#1021 to #1033); `high` run locally on #1024, #1031, #1033 dropped the false ones in about two minutes each: `REASONING_EFFORT: high`
 - [x] PR: pushed after this archive
