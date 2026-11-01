@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { abstractness, analyze, levels, markdown, report, snapshot } from './structure';
+import { analyze, levels, markdown, report, snapshot } from './structure';
 
 describe('levels', () => {
 	it('gibt einem Modul ohne Abhängigkeit Level 1 und jedem Verwender eins mehr als seine höchste Abhängigkeit', () => {
@@ -28,26 +28,6 @@ describe('levels', () => {
 	});
 });
 
-describe('abstractness', () => {
-	it('zählt exportierte Typen und Interfaces als abstrakt, Funktionen, Konstanten und Klassen als konkret', () => {
-		const src = [
-			'export interface Building { id: string }',
-			'export type Status = "draft" | "sent";',
-			'export abstract class Repo {}',
-			'export function load() {}',
-			'export async function save() {}',
-			'export const x = 1;',
-			'export class Service {}',
-			'export default function page() {}',
-			'type Local = string;',
-			'export { a, b } from "./c";',
-			'export type { D } from "./d";',
-			'export type { E };'
-		].join('\n');
-		expect(abstractness(src)).toEqual({ abstract: 3, exports: 8 });
-	});
-});
-
 const health = { findings: [], hotspots: [], health_score: { score: 90, grade: 'A' }, vital_signs: { duplication_pct: 1, maintainability_avg: 90 } };
 const files = [
 	{ path: 'backend/src/routes/a.ts', kind: 'prod', module: 'be:routes/a' },
@@ -56,31 +36,25 @@ const files = [
 	{ path: 'backend/src/db/schema.ts', kind: 'prod', module: 'db:schema' },
 	{ path: 'tests/e2e/x.ts', kind: 'test', module: 'tests/e2e' }
 ];
-const sources: Record<string, string> = {
-	'backend/src/routes/a.ts': 'export const routes = 1;',
-	'backend/src/services/a.ts': 'export function a() {}',
-	'backend/src/services/types.ts': 'export interface A {}\nexport type B = string;\nexport type C = number;',
-	'backend/src/db/schema.ts': 'export const t = 1;'
-};
 const edges = [
 	{ from: 'be:routes/a', to: 'be:services/a', file_edges: '2' },
 	{ from: 'be:services/a', to: 'db:schema', file_edges: '1' },
 	{ from: 'tests/e2e', to: 'be:routes/a', file_edges: '1' }
 ];
-const input = { edges, cycles: [], files, source: (p: string) => sources[p], health };
+const input = { edges, cycles: [], files, health };
 
 describe('analyze', () => {
-	it('rechnet pro Produktivmodul Instabilität, Abstraktheit und Abstand zur Hauptreihe', () => {
+	it('rechnet pro Produktivmodul Verwender, Abhängigkeiten, Instabilität und Level', () => {
 		const m = Object.fromEntries(analyze(input).modules.map((x) => [x.name, x]));
 		expect(Object.keys(m).sort()).toEqual(['be:routes/a', 'be:services/a', 'db:schema']);
-		expect(m['be:services/a']).toMatchObject({ ca: 1, ce: 1, i: 0.5, a: 0.75, d: 0.25, level: 2, files: 2 });
-		expect(m['db:schema']).toMatchObject({ ca: 1, ce: 0, i: 0, a: 0, d: 1 });
-		expect(m['be:routes/a']).toMatchObject({ ca: 0, ce: 1, i: 1, a: 0, d: 0 });
+		expect(m['be:services/a']).toMatchObject({ ca: 1, ce: 1, i: 0.5, level: 2, files: 2 });
+		expect(m['db:schema']).toMatchObject({ ca: 1, ce: 0, i: 0 });
+		expect(m['be:routes/a']).toMatchObject({ ca: 0, ce: 1, i: 1 });
 	});
 });
 
 describe('Ampel', () => {
-	it('bewertet Abstand, Komplexität und Hotspot je Modul und nimmt die schlechteste Farbe ohne den Abstand als Gesamtfarbe', () => {
+	it('bewertet Komplexität und Hotspot je Modul und nimmt die schlechteste Farbe als Gesamtfarbe', () => {
 		const h = {
 			...health,
 			findings: [
@@ -94,29 +68,30 @@ describe('Ampel', () => {
 			]
 		};
 		const m = Object.fromEntries(analyze({ ...input, health: h }).modules.map((x) => [x.name, x]));
-		const ok = { fat: 'green', tests: 'green', coupling: 'green', stability: 'green' };
-		expect(m['be:routes/a'].lights).toEqual({ distance: 'green', complexity: 'yellow', hotspot: 'yellow', ...ok });
-		expect(m['be:services/a'].lights).toEqual({ distance: 'green', complexity: 'red', hotspot: 'green', ...ok });
-		expect(m['db:schema'].lights).toEqual({ distance: 'yellow', complexity: 'green', hotspot: 'green', ...ok });
+		const ok = { change: 'green', fat: 'green', tests: 'green', coupling: 'green', stability: 'green' };
+		expect(m['be:routes/a'].lights).toEqual({ complexity: 'yellow', hotspot: 'yellow', ...ok });
+		expect(m['be:services/a'].lights).toEqual({ complexity: 'red', hotspot: 'green', ...ok });
+		expect(m['db:schema'].lights).toEqual({ complexity: 'green', hotspot: 'green', ...ok });
 		expect([m['be:routes/a'].light, m['be:services/a'].light, m['db:schema'].light]).toEqual(['yellow', 'red', 'green']);
 	});
 
-	it('färbt einen grossen Abstand erst ab 5 Verwendern rot, darunter gelb', () => {
+	it('färbt ein stabiles Modul (I bis 0.3, ab 5 Verwendern) nach seinen Änderungen: bis 12 grün, bis 25 gelb, darüber rot', () => {
 		const users = ['a', 'b', 'c', 'd'].map((x) => ({ path: `backend/src/routes/${x}x.ts`, kind: 'prod', module: `be:routes/${x}x` }));
-		const more = {
-			...input,
-			files: [...files, ...users],
-			source: (p: string) => sources[p] ?? 'export const r = 1;',
-			edges: [...edges, ...users.map((u) => ({ from: u.module, to: 'db:schema', file_edges: '1' }))]
-		};
-		const schema = analyze(more).modules.find((m) => m.name === 'db:schema')!;
-		expect(schema).toMatchObject({ ca: 5, d: 1 });
-		expect(schema.lights.distance).toBe('red');
+		const changed = (commits: number, withUsers = users) =>
+			analyze({
+				...input,
+				files: [...files, ...withUsers],
+				edges: [...edges, ...withUsers.map((u) => ({ from: u.module, to: 'db:schema', file_edges: '1' }))],
+				health: { ...health, hotspots: [{ path: 'backend/src/db/schema.ts', score: 1, commits }] }
+			}).modules.find((m) => m.name === 'db:schema')!;
+		expect([12, 13, 25, 26].map((c) => changed(c).lights.change)).toEqual(['green', 'yellow', 'yellow', 'red']);
+		expect(changed(26)).toMatchObject({ ca: 5, i: 0, changes: 26, light: 'red' });
+		expect(changed(26, users.slice(1)).lights.change).toBe('green');
 	});
 
 	it('wertet ein Modul, von dem nichts abhängt, als instabil (I = 1), auch ohne eigene Abhängigkeiten', () => {
-		const lone = { ...input, files: [...files, { path: 'src/routes/health/+server.ts', kind: 'prod', module: 'bff:endpoint/health' }], source: (p: string) => sources[p] ?? 'export function GET() {}' };
-		expect(analyze(lone).modules.find((m) => m.name === 'bff:endpoint/health')).toMatchObject({ ca: 0, ce: 0, i: 1, d: 0, light: 'green' });
+		const lone = { ...input, files: [...files, { path: 'src/routes/health/+server.ts', kind: 'prod', module: 'bff:endpoint/health' }] };
+		expect(analyze(lone).modules.find((m) => m.name === 'bff:endpoint/health')).toMatchObject({ ca: 0, ce: 0, i: 1, light: 'green' });
 	});
 });
 
@@ -142,11 +117,13 @@ describe('Kennzahlen', () => {
 });
 
 describe('report', () => {
-	it('zeichnet das A/I-Diagramm mit Hauptreihe und einem Punkt pro Position, der die Module nennt', () => {
-		const html = report(analyze(input));
-		expect(html).toContain('id="ai-graph"');
-		expect(html).toMatch(/<line[^>]*class="main-sequence"/);
-		expect(html).toMatch(/<circle[^>]*><title>be:services\/a: I 0.5, A 0.75, D 0.25<\/title>/);
+	it('zeichnet Stabilität und Änderungen mit der Zone «stabil und oft geändert», einen Punkt pro Position, ohne A und D', () => {
+		const html = report(analyze({ ...input, health: { ...health, hotspots: [{ path: 'backend/src/services/types.ts', score: 1, commits: 7 }] } }));
+		expect(html).toContain('id="change-graph"');
+		expect(html).toMatch(/<rect class="change-zone"/);
+		expect(html).toMatch(/<circle[^>]*><title>be:services\/a: I 0.5, 7 changes<\/title>/);
+		expect(html).toContain('<th>Changes</th>');
+		expect(html).not.toMatch(/ai-graph|Abstractness|<th>[AD]<\/th>/);
 	});
 
 	it('zeigt in der DSM eine Abhängigkeit gegen die Level-Ordnung als Rückkante, die übrigen nicht', () => {
@@ -162,7 +139,7 @@ describe('report', () => {
 	});
 
 	it('nennt die Abhängigkeiten zwischen den beiden DSM-Gruppen, die keine Matrix zeigt', () => {
-		const cross = { ...input, files: [...files, { path: 'src/lib/types.ts', kind: 'prod', module: 'shared:types' }], source: (p: string) => sources[p] ?? 'export type T = 1;', edges: [...edges, { from: 'shared:types', to: 'be:services/a', file_edges: '1' }] };
+		const cross = { ...input, files: [...files, { path: 'src/lib/types.ts', kind: 'prod', module: 'shared:types' }], edges: [...edges, { from: 'shared:types', to: 'be:services/a', file_edges: '1' }] };
 		expect(report(analyze(cross))).toContain('Dependencies between the two groups, shown in neither matrix: 1');
 	});
 
@@ -191,47 +168,39 @@ describe('report', () => {
 });
 
 describe('snapshot', () => {
-	it('fasst einen Stand zusammen: Kennzahlen, Ampelzählung, Funktionen über den Schwellen, I, A und D pro Modul', () => {
+	it('fasst einen Stand zusammen: Kennzahlen, Ampelzählung, Funktionen über den Schwellen', () => {
 		const h = { ...health, findings: [{ path: 'backend/src/services/a.ts', name: 'a', cyclomatic: 22, cognitive: 22, severity: 'critical' }] };
 		expect(snapshot(analyze({ ...input, health: h }), 'abc123', '2026-10-26')).toEqual({
 			commit: 'abc123',
 			date: '2026-10-26',
 			kpis: { xs: 0, tangles: 0, health: 90, duplication: 1, maintainability: 90, unstable: 0 },
 			lights: { green: 2, yellow: 0, red: 1 },
-			functions: 1,
-			modules: { 'be:routes/a': [1, 0, 0], 'be:services/a': [0.5, 0.75, 0.25], 'db:schema': [0, 0, 1] }
+			functions: 1
 		});
 	});
 });
 
-const snap = (date: string, health: number, red: number, d: number) => ({
+const snap = (date: string, health: number, red: number) => ({
 	commit: date,
 	date,
 	kpis: { xs: 3, tangles: 0, health, duplication: 1, maintainability: 90 },
 	lights: { green: 5, yellow: 3, red },
-	functions: 10,
-	modules: { 'be:services/a': [0.5, 0.75, d] as [number, number, number], 'be:routes/a': [1, 0, 0] as [number, number, number] }
+	functions: 10
 });
 
 describe('report mit Verlauf', () => {
 	it('zeichnet pro Kennzahl eine Linie mit einem Punkt pro Stand, der Datum und Wert nennt', () => {
-		const html = report(analyze(input), [snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]);
+		const html = report(analyze(input), [snap('2026-05-04', 70, 9), snap('2026-10-26', 87.1, 4)]);
 		expect(html).toMatch(/<svg id="history-health"[\s\S]*?<title>2026-05-04: 70<\/title>[\s\S]*?<title>2026-10-26: 87.1<\/title>/);
 		expect(html).toMatch(/<svg id="history-lights"[\s\S]*?<title>2026-05-04 red: 9<\/title>/);
 		expect(html).toContain('id="history-functions"');
 		expect(html).toContain('id="history-tangles"');
 	});
-
-	it('listet die Module, deren Abstand D sich seit dem ersten Stand am stärksten verändert hat, ohne unveränderte', () => {
-		const html = report(analyze(input), [snap('2026-05-04', 70, 9, 0.8), snap('2026-08-03', 80, 6, 0.5), snap('2026-10-26', 87.1, 4, 0.2)]);
-		const rows = [...html.matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
-		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
-	});
 });
 
 describe('markdown', () => {
 	it('gibt den Verlauf als Tabelle aus, eine Zeile pro Stand, der neueste zuerst', () => {
-		expect(markdown([snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]).split('\n')).toEqual([
+		expect(markdown([snap('2026-05-04', 70, 9), snap('2026-10-26', 87.1, 4)]).split('\n')).toEqual([
 			'| Date | XS % | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |',
 			'|---|---|---|---|---|---|---|---|',
 			'| 2026-10-26 | 3 | 87.1 | 10 | 5 | 3 | 4 | 0 |',
@@ -242,27 +211,16 @@ describe('markdown', () => {
 
 describe('Verlauf: Reihenfolge und Zeitachse', () => {
 	it('ordnet Stände nach Zeitpunkt, auch zwei vom selben Tag, unabhängig von der Reihenfolge der Eingabe', () => {
-		const late = snap('2026-10-26T17:00:00Z', 87.1, 4, 0.2), early = snap('2026-10-26T08:00:00Z', 80, 6, 0.8);
+		const late = snap('2026-10-26T17:00:00Z', 87.1, 4), early = snap('2026-10-26T08:00:00Z', 80, 6);
 		const [, , first] = markdown([late, early]).split('\n');
 		expect(first).toBe('| 2026-10-26 | 3 | 87.1 | 10 | 5 | 3 | 4 | 0 |');
-		const rows = [...report(analyze(input), [late, early]).matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
-		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
 	});
 
 	it('setzt die Punkte nach der Zeit, so dass eine Pause als Lücke erscheint', () => {
-		const html = report(analyze(input), [snap('2026-01-01', 70, 9, 0.8), snap('2026-01-02', 71, 9, 0.8), snap('2026-01-31', 80, 4, 0.2)]);
+		const html = report(analyze(input), [snap('2026-01-01', 70, 9), snap('2026-01-02', 71, 9), snap('2026-01-31', 80, 4)]);
 		const cx = [...html.matchAll(/<circle cx="([\d.]+)"[^>]*><title>2026-01-\d\d: (?:70|71|80)<\/title>/g)].map((m) => Number(m[1]));
 		expect(cx).toHaveLength(3);
 		expect(cx[1] - cx[0]).toBeLessThan((cx[2] - cx[1]) / 10);
-	});
-});
-
-describe('Verlauf: D jetzt', () => {
-	it('nimmt «D now» aus dem analysierten Stand, nicht aus dem neuesten Stand des Verlaufs', () => {
-		const at = (date: string, d: number) => ({ ...snap(date, 80, 4, 0), modules: { 'be:services/a': [0.5, 0.75, d] as [number, number, number] } });
-		const html = report(analyze(input), [at('2026-10-01', 0.8), at('2026-11-01', 0.6)]);
-		const rows = [...html.matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
-		expect(rows).toEqual([['be:services/a', '0.8', '0.25']]);
 	});
 });
 
@@ -284,7 +242,6 @@ describe('XS (Fat und Tangles)', () => {
 				{ from: 'be:routes/y', to: 'be:routes/x', file_edges: '1' }
 			],
 			cycles: [{ modules: 'be:routes/x be:routes/y' }],
-			source: () => 'export const a = 1;',
 			health: { ...health, findings: [{ path: 'backend/src/services/ok.ts', name: 'f', cyclomatic: 40, cognitive: 10, severity: 'high', line_count: 50 }] }
 		};
 		const a = analyze(xsInput);
@@ -336,7 +293,7 @@ describe('Versteckte Kopplung', () => {
 describe('report: neue Spalten und Verlauf', () => {
 	it('zeigt pro Modul XS, ungetestete Dateien und versteckte Kopplung mit Ampel und zeichnet den XS-Verlauf', () => {
 		const gaps = { summary: { file_coverage_pct: 80 }, files: [{ path: 'backend/src/routes/a.ts' }] };
-		const html = report(analyze({ ...input, gaps }), [snap('2026-05-04', 70, 9, 0.8), snap('2026-10-26', 87.1, 4, 0.2)]);
+		const html = report(analyze({ ...input, gaps }), [snap('2026-05-04', 70, 9), snap('2026-10-26', 87.1, 4)]);
 		const row = html.match(/<tr class="module"><td>be:routes\/a<\/td>.*?<\/tr>/)![0];
 		expect(row).toContain('<td><span class="green">0</span></td><td><span class="red">100</span></td><td><span class="green">0</span></td>');
 		expect(html).toContain('id="history-xs"');
@@ -371,7 +328,7 @@ describe('Versteckte Kopplung: Framework', () => {
 			{ path: 'src/routes/x/+page.server.ts', kind: 'prod', module: 'bff:load/x' }
 		];
 		const change_coupling = { pairs: [{ path_a: 'src/routes/x/+page.svelte', path_b: 'src/routes/x/+page.server.ts', shared_revisions: 9, degree: 0.8 }] };
-		const a = analyze({ ...input, files: [...files, ...route], source: () => '', health: { ...health, change_coupling } });
+		const a = analyze({ ...input, files: [...files, ...route], health: { ...health, change_coupling } });
 		expect(a.kpis.find((k) => k.key === 'hidden')).toMatchObject({ value: 0 });
 	});
 });
@@ -380,7 +337,7 @@ describe('Versteckte Kopplung: Geschwistermodule', () => {
 	it('zählt ein Paar zweier Module aus demselben Ordner ausserhalb der Routen, etwa zweier Services', () => {
 		const b = { path: 'backend/src/services/b.ts', kind: 'prod', module: 'be:services/b' };
 		const change_coupling = { pairs: [{ path_a: 'backend/src/services/a.ts', path_b: 'backend/src/services/b.ts', shared_revisions: 6, degree: 0.5 }] };
-		const a = analyze({ ...input, files: [...files, b], source: () => '', health: { ...health, change_coupling } });
+		const a = analyze({ ...input, files: [...files, b], health: { ...health, change_coupling } });
 		expect(a.modules.find((m) => m.name === 'be:services/b')!.hidden).toBe(1);
 	});
 });
@@ -389,7 +346,7 @@ describe('XS: Modul mit zu vielen Abhängigkeiten', () => {
 	it('wertet ein Modul mit mehr als 15 Modul-Abhängigkeiten als fett, mit dem Anteil über der Grenze', () => {
 		const deps = Array.from({ length: 16 }, (_, k) => ({ path: `backend/src/services/d${k}.ts`, kind: 'prod', module: `be:services/d${k}`, loc: '10' }));
 		const hub = { path: 'backend/src/routes/hub.ts', kind: 'prod', module: 'be:routes/hub', loc: '160' };
-		const a = analyze({ ...input, files: [hub, ...deps], edges: deps.map((d) => ({ from: hub.module, to: d.module, file_edges: '1' })), source: () => '' });
+		const a = analyze({ ...input, files: [hub, ...deps], edges: deps.map((d) => ({ from: hub.module, to: d.module, file_edges: '1' })) });
 		expect(a.modules.find((m) => m.name === 'be:routes/hub')).toMatchObject({ ce: 16, xs: 6.3, lights: { fat: 'red' } });
 	});
 });
@@ -400,7 +357,6 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 	const against = {
 		...input,
 		files: [...files, ...extra],
-		source: (p: string) => sources[p] ?? 'export function f() {}',
 		edges: [...edges, { from: 'db:schema', to: 'be:services/u', file_edges: '1' }, ...['v', 'w', 'z'].map((x) => ({ from: 'be:services/u', to: `be:services/${x}`, file_edges: '1' }))]
 	};
 
@@ -419,7 +375,6 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 		const close = {
 			...input,
 			files: [...['s', 't', 'x', 'y', 'd', ...users].map(mod)],
-			source: () => 'export function f() {}',
 			edges: [
 				...users.map((u) => ({ from: `be:services/${u}`, to: 'be:services/s', file_edges: '1' })),
 				...['s', 'x', 'y'].map((x) => ({ from: `be:services/${x}`, to: 'be:services/t', file_edges: '1' })),
@@ -429,10 +384,9 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 		expect(analyze(close).unstable).toEqual([{ from: 'be:services/s', to: 'be:services/t', gap: 0.2 }]);
 	});
 
-	it('zeigt die Spalte gegen die Stabilität und sagt, warum A bei Modulen mit Funktionen wenig aussagt', () => {
+	it('zeigt die Spalte gegen die Stabilität', () => {
 		const html = report(analyze(against));
 		expect(html).toContain('<th>Against stability</th>');
 		expect(html.match(/<tr class="module"><td>db:schema<\/td>.*?<\/tr>/)![0]).toContain('<td><span class="yellow">1</span></td>');
-		expect(html).toContain('Dwello\'s modules export functions');
 	});
 });
