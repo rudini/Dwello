@@ -935,7 +935,7 @@ Then('nennt der Verlauf zuerst das PDF des Versands, dann den Versand und dann d
 	await verwalter.sees(history).toMatch(/PDF erstellt.*Versendet per Brief.*Neues PDF erstellt/);
 });
 
-// Code-Review 999b C-4: the four actions of the header are all there, not only no sideways scrolling
+// Code-Review 999b C-4: Mahnung and the reset of the header are there too, not only no sideways scrolling
 Then('bietet die Detailseite eine Mahnung und das Zurücksetzen der Zahlung an', async ({ verwalter }) => {
 	await verwalter.sees(reminderOffers).toBe(1);
 	await verwalter.sees(resetOffers).toBe(1);
