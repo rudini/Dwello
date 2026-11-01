@@ -665,6 +665,8 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Hidden coupling leaves out pairs in one folder: SvelteKit's page and load function change together without import (16 of 49 pairs)
 - [x] code-reviewer round 1: `docs/reviews/structure-s101-review-1.md` (C-1 Major: folder rule only for route folders, C-2 empty gaps file, C-3 Ce test: fixed; C-4 Minor, no test for the inline script that opens details: stays in the report)
 - [x] code-reviewer round 2: `docs/reviews/structure-s101-review-2.md` (C-1 to C-3 closed, no new finding; C-4 stays)
+- [x] Fallback review on #1045: missing coverage gaps showed green (fixed, n/a), drill-down table counts code files only (fixed, header); fat light without functions and no DOM test for the inline script: answered on the pull request
+- [x] code-reviewer round 3 (closing): `docs/reviews/structure-s101-review-3.md` (no new finding)
 - [x] Workflow note: none new
 ## Session: #496 export of all data
 
