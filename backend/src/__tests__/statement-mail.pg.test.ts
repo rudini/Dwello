@@ -3,6 +3,7 @@
  * letter; a failed e-mail leaves it a draft (real PostgreSQL database, real local SMTP server)
  */
 
+import { readPdf } from './helpers/pdf-text';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { SMTPServer } from 'smtp-server';
@@ -511,6 +512,10 @@ describe('Neues PDF nach einer Änderung', () => {
 		expect(after).toHaveLength(1);
 		expect(after[0]).toMatchObject({ status: 'to_send' });
 		expect(after[0].id).not.toBe(before.id);
+		// code review 1016-1 C-2: it names the payment and asks for the rest
+		const text = readPdf(Buffer.from(after[0].content, 'base64')).flowing;
+		expect(text).toContain('Bereits bezahlt CHF 10.00');
+		expect(text).toContain('Offener Betrag');
 	});
 
 	it('legt kein neues PDF an, wenn die Abrechnung ohne Dokument versendet wurde (vor #449, #969)', async () => {
