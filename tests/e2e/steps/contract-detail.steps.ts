@@ -17,6 +17,7 @@ import {
 	missingStatementsShown,
 	shortPeriodHelpText,
 	shortPeriodHelpShownAt,
+	consentLetterShown,
 	missingStatementInvoicesLabel,
 	missingStatementOffer,
 	billedUntilOfContract,
@@ -544,11 +545,16 @@ Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwal
 	await verwalter.sees(noticeReceivedHelp).toContain(text);
 });
 
-// #521: the letter template for the tenants' consent to a new Abrechnungsperiode
-When('der Liegenschaftsverwalter die Vorlage für die Zustimmung zur neuen Abrechnungsperiode herunterlädt', async ({ verwalter }) => {
+// #521: the letter for the tenants' consent to a new Abrechnungsperiode
+When('der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode herunterlädt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(downloadConsentLetter);
 });
 
-Then('richtet sich die Vorlage an {string}', async ({ verwalter, names }, tenant: string) => {
+Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(downloadedPdfText).toContain(names.get(tenant) ?? tenant);
+});
+
+// Fachreview 521-1 V-1: without an earlier Abrechnungsperiode there is no letter
+Then('bietet der Mietvertrag keinen Brief zur Zustimmung an', async ({ verwalter }) => {
+	await verwalter.sees(consentLetterShown).toBe(false);
 });

@@ -93,5 +93,5 @@ export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);
 export const deleteAdvance = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(advanceDeleteButton(amount)), Click.on(confirmAdvanceDeleteButton));
 
-/** #521: downloads the letter template for the tenants' consent to a new Abrechnungsperiode */
+/** #521: downloads the letter for the tenants' consent to a new Abrechnungsperiode */
 export const downloadConsentLetter = DownloadFrom(consentLetterLink);

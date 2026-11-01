@@ -63,8 +63,8 @@ export const shortPeriodHelpAt = (periodStart: string) =>
 	target(`Hinweis zur kurzen Abrechnungsperiode ab ${periodStart}`, (page) =>
 		page.getByTestId(`contract-missing-statement-period-${periodStart}`).getByTestId('contract-missing-statement-short-help')
 	);
-// #521: the letter template for the tenants' consent to a new Abrechnungsperiode, from the help text of #486
-export const consentLetterLink = target('Vorlage für die Zustimmung zur neuen Abrechnungsperiode', (page) =>
+// #521: the letter for the tenants' consent to a new Abrechnungsperiode, from the help text of #486
+export const consentLetterLink = target('Brief zur Zustimmung zur neuen Abrechnungsperiode', (page) =>
 	page.getByTestId('contract-missing-statement-consent-letter')
 );
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));

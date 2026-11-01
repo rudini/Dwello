@@ -9,6 +9,7 @@ import {
 	announcedFeeHint,
 	balanceOf,
 	billedOfBuilding,
+	consentLettersOfBuilding,
 	buildingChosen,
 	buildingSelectable,
 	categoryFindingOf,
@@ -66,6 +67,7 @@ import {
 	chooseBuilding,
 	chooseBuildingsFor,
 	chooseOfferedPeriod,
+	downloadConsentLetterOf,
 	chooseBuildingsForPeriod,
 	closeRestoredNotice,
 	confirmDespiteWarnings,
@@ -727,3 +729,20 @@ When(
 Then('sagt die leere Vorschau zu {string} {string}', async ({ verwalter, seed, names }, building: string, text: string) => {
 	await verwalter.sees(allSkippedText(seed.idOf(building)!)).toBe(text.replace(building, names.get(building)!));
 });
+
+// #521 (Fachreview 521-1 V-2): one letter for the tenant's consent per contract with Mietstage in the short period
+Then(
+	'bietet die Wahl für {string} den Brief zur Zustimmung nur für {string} in der Wohnung {string} an',
+	async ({ verwalter, seed, names }, building: string, tenant: string, apartment: string) => {
+		await verwalter
+			.sees(consentLettersOfBuilding(seed.idOf(building)!))
+			.toEqual([`Brief zur Zustimmung herunterladen: ${names.get(tenant) ?? tenant}, Wohnung ${apartment}`]);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter bei {string} den Brief zur Zustimmung für {string} herunterlädt',
+	async ({ verwalter, seed, names }, building: string, tenant: string) => {
+		await verwalter.attemptsTo(downloadConsentLetterOf(seed.idOf(building)!, names.get(tenant) ?? tenant));
+	}
+);
