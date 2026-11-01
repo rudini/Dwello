@@ -71,3 +71,4 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `validation-refused.json` | jede Anfrage, die das Schema verletzt, z.B. `POST /api/v1/statements/preview` mit einer Zahl als `contractId` (422) |
 | `audit-log.json` | `GET /api/v1/audit-log` (Protokoll unter «Einstellungen», neuste zuerst) |
 | `tenant-export.json` | `GET /api/v1/tenants/:id/export` (#435: Name der ZIP-Datei, ihre Datendatei und ihre Dateien; das BFF schreibt `data` unverändert) |
+| `data-export.json` | `GET /api/v1/export?language=` (#496: Name der ZIP-Datei, Datendatei, Tabellen als Zeilen, die Tabelle des Protokolls, deren Eintrag das BFF einsetzt, und die Dateien) |

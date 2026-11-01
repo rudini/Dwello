@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { strToU8, zipSync } from 'fflate';
+import { strToU8 } from 'fflate';
+import { zipDownload } from '$lib/server/zip-download';
 import type { RequestHandler } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -19,22 +20,11 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	if (!response.ok) error(response.status === 404 ? 404 : 500);
 	const { fileName, dataFile, data, files }: TenantExport = await response.json();
 
-	const zip = zipSync({
+	return zipDownload(fileName, {
 		[dataFile]: strToU8(JSON.stringify(data, null, 2)),
 		// PDFs and photos are compressed already: stored as they are
 		...Object.fromEntries(
 			files.map(({ path, content }) => [path, [Buffer.from(content, 'base64'), { level: 0 }]])
 		)
-	});
-	// the name keeps its umlauts where the browser reads filename*, an ASCII name elsewhere
-	const ascii = fileName
-		.normalize('NFD')
-		.replace(/[^\x20-\x7e]/g, '')
-		.replace(/"/g, '');
-	return new Response(zip, {
-		headers: {
-			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(fileName)}`
-		}
 	});
 };

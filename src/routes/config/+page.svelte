@@ -94,6 +94,24 @@
 		]}
 	/>
 
+	<!-- #496: everything the landlord entered, as one ZIP; a download, so the page stays open.
+	     TODO(fachlich prüfen, #1039): the term «Export aller Daten» -->
+	<Panel title={m.config_export_title()}>
+		<div class="flex flex-col items-start gap-4">
+			<p id="config-export-help" class="text-ink" data-testid="config-export-help">
+				{m.config_export_help()}
+			</p>
+			<Button
+				href="/config/export"
+				reload
+				download
+				icon="document-download"
+				describedby="config-export-help"
+				testid="config-export-button">{m.config_export()}</Button
+			>
+		</div>
+	</Panel>
+
 	<form
 		method="POST"
 		use:enhance={() => {

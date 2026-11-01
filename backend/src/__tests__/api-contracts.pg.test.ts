@@ -11,13 +11,14 @@ import { join } from 'path';
 import { generateCode, recipientOf } from '../services/backup-crypto';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
+import { auditLog, backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { loadModel } from '../services/ki-model.service';
 import { resetSetupAttempts } from '../services/setup.service';
 import { generateStatement } from '../services/statement.service';
+import { recordStatementCorrection } from '../services/audit-log.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { app } from '../app';
 import { daysAfter, swissToday } from '../services/today';
@@ -623,6 +624,14 @@ describe('API-Verträge des Frontends', () => {
 		} finally {
 			llm.stop();
 		}
+	});
+
+	// #496: the newest Protokoll entry is the one the sample names
+	it('GET /export liefert die Felder von data-export.json', async () => {
+		await recordStatementCorrection({ id: crypto.randomUUID(), statementNumber: `NK-${token}` });
+		const actual = await (await callApi('/api/v1/export?language=de')).json();
+		await db.delete(auditLog).where(sql`${auditLog.details}->>'number' = ${`NK-${token}`}`);
+		expect(drift(await sample('data-export'), actual)).toEqual([]);
 	});
 
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {

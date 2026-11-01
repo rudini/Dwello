@@ -16,11 +16,9 @@ Funktionalität: Alle Daten exportieren
   Grundlage:
     Angenommen der Liegenschaftsverwalter ist auf den Einstellungen
 
-  @wip
   Szenario: Die Einstellungen erklären den Export
     Dann erklären die Einstellungen beim Export "Eine ZIP-Datei mit allen Daten, die Sie in Dwello erfasst haben, mit Belegen, Dokumenten, Abrechnungen und dem Protokoll. Die Tabellen öffnen Sie mit Excel; die Datei «daten.json» kann ein anderes Programm einlesen. Was Sie gelöscht haben, ist nicht dabei. Die Datei enthält die Daten Ihrer Mieter: Bewahren Sie sie sicher auf und löschen Sie sie, wenn Sie sie nicht mehr brauchen."
 
-  @wip
   Szenario: Alle Daten unter den Einstellungen exportieren
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
@@ -55,14 +53,12 @@ Funktionalität: Alle Daten exportieren
     Und nennt die Datendatei des Exports beim Gebäude "Seeblick" die Rechnung von "Hauswart Meier" mit ihrem Beleg "meier-q1.pdf"
     Und enthält der Export den Beleg "meier-q1.pdf" der Rechnung von "Hauswart Meier" im Ordner "belege" als PDF
 
-  @wip
   Szenario: Die Tabellen des Exports öffnen sich in Excel
     Angenommen das Gebäude "Seeblick" in "Zürich" existiert
     Wenn der Liegenschaftsverwalter alle Daten exportiert
     Dann ist die Tabelle "tabellen/gebäude.csv" des Exports als UTF-8 für Excel gekennzeichnet
     Und führt die Tabelle "tabellen/gebäude.csv" des Exports das Gebäude "Seeblick" mit "Zürich" in der Spalte "Ort", durch Strichpunkte getrennt
 
-  @wip
   Szenariogrundriss: Die Dateinamen des Exports in der Sprache der Oberfläche
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und "Hauswart Meier" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
@@ -82,21 +78,18 @@ Funktionalität: Alle Daten exportieren
       | Italiano | Dwello-Dati    | dati.json    | tabelle/immobili.csv  | giustificativi           |
       | English  | Dwello-Data    | data.json    | tables/buildings.csv  | supporting-documents     |
 
-  @wip
   Szenario: Das Protokoll gehört zum Export
     Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Ost"
     Und die Kategorie "Gartenpflege Ost" ist inzwischen nicht umlagefähig
     Wenn der Liegenschaftsverwalter alle Daten exportiert
     Dann nennt die Tabelle "tabellen/protokoll.csv" des Exports in der Spalte "Eintrag" "Kategorie «Gartenpflege Ost»: von umlagefähig auf nicht umlagefähig geändert"
 
-  @wip
   Szenario: Der Export steht im Protokoll
     Angenommen der Liegenschaftsverwalter hat gezählt, wie oft das Protokoll heute "Alle Daten exportiert" nennt
     Wenn der Liegenschaftsverwalter alle Daten exportiert
     Und der Liegenschaftsverwalter das Protokoll öffnet
     Dann nennt das Protokoll heute öfter "Alle Daten exportiert" als vor dem Export
 
-  @wip
   Szenario: Gelöschte Daten sind nicht im Export
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und "Hauswart Meier" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung

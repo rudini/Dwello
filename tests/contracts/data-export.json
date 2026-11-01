@@ -1,0 +1,33 @@
+{
+	"fileName": "Dwello-Daten-2026-11-01.zip",
+	"dataFile": "daten.json",
+	"data": {
+		"format": "dwello-export",
+		"auditLog": [
+			{
+				"id": "a1",
+				"occurredAt": "2026-10-15T09:00:00.000Z",
+				"action": "statement_corrected",
+				"details": { "statementId": "s2", "number": "NK-2025-0002" }
+			}
+		]
+	},
+	"tables": [
+		{
+			"path": "tabellen/rechnungen.csv",
+			"rows": [
+				["ID", "Rechnungssteller", "Beschreibung", "Betrag"],
+				["i1", "Hauswart Meier; Winterthur", "=HYPERLINK(\"https://example.com\";\"Details\")", "-166.00"]
+			]
+		},
+		{
+			"path": "tabellen/protokoll.csv",
+			"rows": [
+				["ID", "Datum und Uhrzeit", "Eintrag", "Art", "Angaben (JSON)"],
+				["a1", "2026-10-15 11:00", null, "statement_corrected", "{\"number\":\"NK-2025-0002\"}"]
+			]
+		}
+	],
+	"logTable": "tabellen/protokoll.csv",
+	"files": [{ "path": "belege/2026-03-31 Hauswart Meier meier-q1.pdf", "content": "JVBERi0xLjQK" }]
+}

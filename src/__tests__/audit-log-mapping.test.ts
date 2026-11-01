@@ -25,6 +25,13 @@ describe('Protokoll aus dem Backend', () => {
 		expect(textOf(login, { provider: 'local' })).toBe('Anmeldung mit Passwort');
 	});
 
+	// #496 (Fachreview 496-1 F-4): the export of all data, only with its date and time
+	it('nennt einen Export aller Daten', () => {
+		expect(toAuditEntries([{ ...login, action: 'data_exported', details: {} }])[0].text).toBe(
+			'Alle Daten exportiert'
+		);
+	});
+
 	it('nennt, was sich geändert hat', () => {
 		expect(entries.map((entry) => entry.text)).toEqual([
 			'Anmeldung mit Google',

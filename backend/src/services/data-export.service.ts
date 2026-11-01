@@ -260,27 +260,33 @@ export async function exportAllData(language: Language) {
 	const byId = <T extends { id: string }>(rows: T[]) => new Map(rows.map((row) => [row.id, row]));
 	const typeWord = <T extends { type: string }>(row: T) => ({ ...row, type: row.type in WORDS ? word(row.type as keyof typeof WORDS) : row.type });
 
-	const [allTenants, allBuildings, allApartments, allContracts, advances, agreements, allCategories, keys, profiles] = await Promise.all([
-		db.select().from(tenants).orderBy(asc(tenants.lastName), asc(tenants.firstName), asc(tenants.createdAt)),
-		db.select().from(buildings).orderBy(asc(buildings.name)),
-		db.select().from(apartments).orderBy(asc(apartments.number)),
-		db.select().from(rentalContracts).orderBy(asc(rentalContracts.startDate)),
-		db.select().from(contractAdvancePayments).orderBy(asc(contractAdvancePayments.validFrom)),
-		db.select().from(contractCategories),
-		db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
-		db.select().from(distributionKeys).orderBy(asc(distributionKeys.name)),
-		db.select().from(heatingProfiles).orderBy(asc(heatingProfiles.name))
-	]);
-	const [allInvoices, belege, stocks, statements, lineItems, allDocuments, auditLog, settings] = await Promise.all([
-		db.select().from(invoices).orderBy(asc(invoices.invoiceDate), asc(invoices.createdAt)),
-		db.select().from(invoiceDocuments).orderBy(asc(invoiceDocuments.createdAt)),
-		db.select().from(fuelStocks).orderBy(asc(fuelStocks.readingDate)),
-		db.select().from(utilityStatements).orderBy(asc(utilityStatements.periodStart), asc(utilityStatements.createdAt)),
-		db.select().from(utilityStatementLineItems).orderBy(asc(utilityStatementLineItems.sortOrder)),
-		db.select().from(documents).orderBy(asc(documents.createdAt)),
-		auditLogWithExpiries(),
-		getAllConfig()
-	]);
+	// one snapshot: a record deleted while the export reads stays out of every table, not only some (a Beleg without
+	// its invoice)
+	const [[allTenants, allBuildings, allApartments, allContracts, advances, agreements, allCategories, keys, profiles], [allInvoices, belege, stocks, statements, lineItems, allDocuments]] = await db.transaction(
+		async (tx) => [
+			await Promise.all([
+				tx.select().from(tenants).orderBy(asc(tenants.lastName), asc(tenants.firstName), asc(tenants.createdAt)),
+				tx.select().from(buildings).orderBy(asc(buildings.name)),
+				tx.select().from(apartments).orderBy(asc(apartments.number)),
+				tx.select().from(rentalContracts).orderBy(asc(rentalContracts.startDate)),
+				tx.select().from(contractAdvancePayments).orderBy(asc(contractAdvancePayments.validFrom)),
+				tx.select().from(contractCategories),
+				tx.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
+				tx.select().from(distributionKeys).orderBy(asc(distributionKeys.name)),
+				tx.select().from(heatingProfiles).orderBy(asc(heatingProfiles.name))
+			]),
+			await Promise.all([
+				tx.select().from(invoices).orderBy(asc(invoices.invoiceDate), asc(invoices.createdAt)),
+				tx.select().from(invoiceDocuments).orderBy(asc(invoiceDocuments.createdAt)),
+				tx.select().from(fuelStocks).orderBy(asc(fuelStocks.readingDate)),
+				tx.select().from(utilityStatements).orderBy(asc(utilityStatements.periodStart), asc(utilityStatements.createdAt)),
+				tx.select().from(utilityStatementLineItems).orderBy(asc(utilityStatementLineItems.sortOrder)),
+				tx.select().from(documents).orderBy(asc(documents.createdAt))
+			])
+		] as const,
+		{ isolationLevel: 'repeatable read', accessMode: 'read only' }
+	);
+	const [auditLog, settings] = await Promise.all([auditLogWithExpiries(), getAllConfig()]);
 	const buildingOf = byId(allBuildings);
 	const apartmentOf = byId(allApartments);
 	const tenantOf = byId(allTenants);
