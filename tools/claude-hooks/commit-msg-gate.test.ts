@@ -85,6 +85,11 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(hook(`GIT_DIR=${ROOT}/.git git commit -m a`, scratch).status).toBe(2);
 		expect(hook(`cd ${scratch} | cat; git commit -m a`).status).toBe(2);
 		expect(hook(`true || cd ${scratch}; git commit -m a`).status).toBe(2);
+		// review 710-3: a cd in the background (C-8), after || and a newline, and in a |& pipe (C-7) stay; one with &> moves (C-6)
+		expect(hook(`cd ${scratch} & git commit -m a`).status).toBe(2);
+		expect(hook(`true ||\ncd ${scratch}; git commit -m a`).status).toBe(2);
+		expect(hook(`echo a |& cd ${scratch}; git commit -m a`).status).toBe(2);
+		expect(hook(`cd ${scratch} &>/dev/null && git commit -m a`)).toMatchObject({ status: 0, stderr: '' });
 	});
 
 	it('checks a commit whose directory is no repository (the safe side)', () => {

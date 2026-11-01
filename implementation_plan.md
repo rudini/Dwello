@@ -31,4 +31,5 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] #710: one matcher for the commit gates and the main push guard (`.claude/hooks/git-calls.mjs`): -C (quoted, -C/x), -c key=val, cd and subshells, heredoc text skipped; ten gate tests seen red first
 - [x] #710 review `docs/reviews/710-review-1.md`: C-1 Major (shell keywords before git), C-2 to C-4 Minor, fixed with tests seen red (C-3 documented)
 - [x] #710 re-review `docs/reviews/710-review-2.md` (closing round): C-1 to C-4 closed; C-5 Minor (crash tests only for the deepcheck gate) stays in the report
+- [x] #710 Copilot review on #1017 (four findings, all held, fixed with tests red first); closing round `docs/reviews/710-review-3.md`: C-6 to C-8 Minor fixed without a further round (three rounds reached), C-5 stays in the report
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)

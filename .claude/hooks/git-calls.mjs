@@ -51,13 +51,14 @@ function commandsOf(line) {
 				if (c === '"') before(quoted);
 				word = (word ?? '') + quoted;
 				i = close < 0 ? s.length : close;
-			} else if (/[;&|\n()]/.test(c) && !(c === '&' && /[<>]/.test(s[i - 1]))) {
+			} else if (/[;&|\n()]/.test(c) && !(c === '&' && (/[<>]/.test(s[i - 1]) || s[i + 1] === '>'))) {
 				end();
 				// the operator between two commands, so a cd in a pipe, in the background or after || is known
-				const op = c === '&' && s[i + 1] === '&' ? '&&' : c === '|' && s[i + 1] === '|' ? '||' : c;
+				// |& is a pipe too; &> (both outputs) stays a redirection above (review 710-3, C-6, C-7)
+				const op = c === '&' && s[i + 1] === '&' ? '&&' : c === '|' && s[i + 1] === '|' ? '||' : c === '|' && s[i + 1] === '&' ? '|&' : c;
 				if (op.length === 2) i++;
 				if (all.at(-1).length) (all.at(-1).next = op), all.push([]);
-				all.at(-1).after = op;
+				all.at(-1).after ??= op; // the first operator counts, not a newline after it
 				if (c === '(' || c === ')') all.push([c], []);
 			} else if (/\s/.test(c)) end();
 			else word = (word ?? '') + c;
@@ -70,7 +71,7 @@ function commandsOf(line) {
 
 /** The words without redirections (`> log`, `2>/dev/null`, `< in`) */
 const withoutRedirections = (words) =>
-	words.filter((word, i) => !/^\d*[<>]/.test(word) && !/^\d*[<>]+&?$/.test(words[i - 1] ?? ''));
+	words.filter((word, i) => !/^&?\d*[<>]/.test(word) && !/^\d*[<>]+&?$/.test(words[i - 1] ?? ''));
 
 // what may stand before git and still run it (review 713-1, C-3), with its options and operands (nice -n 10, timeout
 // -k 5s 60s: Copilot on #1017), and the shell keywords and braces that may open a command (review 710-1, C-1)
@@ -128,7 +129,7 @@ export function gitCalls(command, cwd) {
 		else if (words.length === 1 && words[0] === ')') dir = outer.length ? outer.pop() : dir;
 		// a cd the hook cannot resolve ($VAR, ~, cd -) leaves the directory unknown, also for a relative cd after it
 		// a cd in a pipe or in the background moves a child shell only; one after || may not run (Copilot on #1017)
-		else if ((words[0] === 'cd' || words[0] === 'pushd') && ![command.after, command.next].includes('|') && command.next !== '&') {
+		else if ((words[0] === 'cd' || words[0] === 'pushd') && ![command.after, command.next].some((op) => op === '|' || op === '|&') && command.next !== '&') {
 			const to = words[1] ?? '~';
 			const unknown = unresolvable.test(to) || to === '-' || command.after === '||' || (!dir && !to.startsWith('/'));
 			dir = unknown ? undefined : resolve(dir ?? '/', to);
