@@ -5,7 +5,8 @@ import type { QRBillConfig } from './qr-bill.service';
 import { countryLine } from './postal-address';
 import type { reminderLetter } from './reminder-letter';
 
-type Letter = ReturnType<typeof reminderLetter>;
+// #521: the letter for the tenants' consent ends with its own part for their signatures
+type Letter = Omit<ReturnType<typeof reminderLetter>, 'text' | 'title'> & { agreement?: { heading: string; paragraphs: string[] } };
 
 export interface PostalAddress {
 	name: string;
@@ -45,6 +46,10 @@ export async function renderReminderPdf(
 	doc.font(FONT.regular).fontSize(11).moveDown().text(`${letter.salutation},`);
 	for (const paragraph of letter.paragraphs) doc.moveDown().text(paragraph, { width: 455 });
 	doc.moveDown(1.5).text(letter.closing);
+	if (letter.agreement) {
+		doc.moveDown(2).font(FONT.bold).text(letter.agreement.heading).font(FONT.regular);
+		for (const paragraph of letter.agreement.paragraphs) doc.moveDown().text(paragraph, { width: 455 });
+	}
 	if (payment) await addPaymentPart(doc, payment.statement, payment.config, payment.language);
 	doc.end();
 

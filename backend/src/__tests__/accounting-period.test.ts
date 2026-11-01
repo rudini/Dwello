@@ -3,7 +3,7 @@
  * ended period, the ended periods since a day, and the parts of them a contract has no statement for
  */
 import { describe, expect, it } from 'bun:test';
-import { endedPeriodsSince, lastCompletedPeriod, missingPeriods, missingWays } from '../services/accounting-period';
+import { consentPeriod, endedPeriodsSince, lastCompletedPeriod, missingPeriods, missingWays } from '../services/accounting-period';
 
 // #199, #211: one rule for dashboard, contract list, contract page and step 2 of the wizard: a statement that overlaps
 // an ended Abrechnungsperiode counts, only the days no statement covers are missing, and only where the contract has
@@ -224,3 +224,39 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 	});
 });
 
+
+// #521: the letter for the tenants' consent needs the earlier and the new Abrechnungsperiode; it is for the short
+// period that starts on the day the building switched (Fachreview 521-1 V-1)
+describe('Kurze Abrechnungsperiode für den Brief zur Zustimmung', () => {
+	const today = '2026-10-15';
+	const own = (periodStart: string, periodEnd: string) => ({ periodStart, periodEnd, status: 'sent' });
+	const contract = (startDate: string, endDate: string | null = null) => ({ startDate, endDate, billedUntil: null });
+
+	it('nennt nach der letzten Abrechnung nach Juli–Juni die kurze Abrechnungsperiode bis zum Kalenderjahr', () => {
+		const building = [own('2024-07-01', '2025-06-30')];
+		expect(consentPeriod('calendar', contract('2024-04-01'), building, building, today)).toEqual({
+			earlier: 'july-june',
+			short: { start: '2025-07-01', end: '2025-12-31' }
+		});
+	});
+
+	it('nennt nach einem gespeicherten Wechsel der Einstellung die Abrechnungsperiode davor', () => {
+		const building = [own('2024-01-01', '2024-12-31')];
+		expect(consentPeriod('july-june', contract('2024-01-01'), building, building, today, { on: '2026-10-01', from: 'calendar' })).toEqual({
+			earlier: 'calendar',
+			short: { start: '2026-01-01', end: '2026-06-30' }
+		});
+	});
+
+	// Fachreview 521-1 V-1: a statement over part of a period tells no earlier type; there is no earlier period to name
+	it('nennt ohne frühere Abrechnungsperiode keine', () => {
+		const building = [own('2024-04-01', '2024-09-30')];
+		expect(consentPeriod('calendar', contract('2024-04-01'), building, building, today)).toBeNull();
+	});
+
+	// the short period stays the building's, also for a contract that starts in it (Fachreview 521-1 section 1)
+	it('nennt bei einem Vertragsbeginn in der kurzen Abrechnungsperiode die des Gebäudes', () => {
+		const building = [own('2024-07-01', '2025-06-30')];
+		expect(consentPeriod('calendar', contract('2025-10-01'), [], building, today)?.short).toEqual({ start: '2025-07-01', end: '2025-12-31' });
+	});
+});

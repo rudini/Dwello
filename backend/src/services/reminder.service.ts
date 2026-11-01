@@ -47,7 +47,8 @@ export class ReminderError extends CodedError {
 type Document = NonNullable<Awaited<ReturnType<typeof markDocumentSent>>>;
 type Statement = NonNullable<Awaited<ReturnType<typeof getStatement>>>;
 
-async function sender(): Promise<PostalAddress & { iban: string }> {
+// the Firmenadresse as a letter's sender, with the IBAN of its payment part (also the letter of #521)
+export async function sender(): Promise<PostalAddress & { iban: string }> {
 	return {
 		name: await getTypedConfig('company_name'),
 		address: await getTypedConfig('company_address'),

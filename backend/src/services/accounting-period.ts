@@ -153,3 +153,23 @@ export function missingWays(
 			.filter((part, i, all) => all.findIndex((other) => other.start === part.start) === i)
 	);
 }
+
+/**
+ * #521: the contract's short Abrechnungsperiode that starts on the day the building switched to the setting, with the
+ * type before it, for the letter with which the tenants agree to the new one; null without an earlier type: then the
+ * letter has no earlier period to name (Fachreview 521-1 V-1)
+ */
+export function consentPeriod(
+	type: AccountingPeriodType,
+	contract: Rental,
+	statements: Dated[],
+	building: Dated[],
+	today = swissToday(),
+	change: PeriodChange = null
+) {
+	const earlier = earlierType(type, building, change);
+	const part = earlier
+		? missingWays(type, contract, statements, building, today, change).find(({ way, open }) => open && way.kind === 'short' && way.start === earlier.switched)
+		: undefined;
+	return part ? { earlier: earlier!.type, short: { start: part.way.start, end: part.way.end } } : null;
+}

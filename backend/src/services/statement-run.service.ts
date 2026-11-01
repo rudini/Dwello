@@ -3,7 +3,7 @@
  * in the period, which of them have a statement there already (a run bills those no more), those «Abgerechnet bis»
  * leaves without Mietstage there, and whether the period overlaps one of the building's
  */
-import { lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
+import { consentPeriod, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
 import { getTypedConfig, periodSetting } from './config.service';
 import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
@@ -83,18 +83,27 @@ export function planRun<C extends Contract>(period: Range, contracts: C[], state
 }
 
 export async function runPlan(buildingId: string, period: Range) {
-	const [{ contracts }, { statements }] = await Promise.all([
+	const [{ contracts }, { statements }, { type, change }] = await Promise.all([
 		listContracts({ buildingId, limit: 1000 }),
-		listStatements({ buildingId, limit: 1000 })
+		listStatements({ buildingId, limit: 1000 }),
+		periodSetting()
 	]);
-	return planRun(period, contracts, statements);
+	const plan = planRun(period, contracts, statements);
+	if (!plan.overlap) return plan;
+	// #521 (Fachreview 521-1 V-2): the contracts with a letter for the tenants' consent to the new Abrechnungsperiode
+	// at a short period the run offers, as on the contract page
+	const short = plan.overlap.short;
+	const consent = contracts
+		.filter((c) => {
+			const found = consentPeriod(type, c, statements.filter((s) => s.contractId === c.id), statements, undefined, change);
+			return !!found && short.some((days) => same(days, found.short));
+		})
+		.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }));
+	return { ...plan, overlap: { ...plan.overlap, consent } };
 }
 
-/**
- * A-10, #142, #199, #408 point 2: the parts of ended Abrechnungsperioden since the Vertragsbeginn with Mietstage but no
- * statement, the latest first, each with its way into the wizard; null for an unknown contract
- */
-export async function missingOfContract(id: string) {
+// A contract with the setting «Abrechnungsperiode», its statements and those of its building; null for an unknown one
+async function periodsOfContract(id: string) {
 	const contract = await getContract(id);
 	if (!contract) return null;
 	const [{ type, change }, { statements }, { statements: ofBuilding }] = await Promise.all([
@@ -102,7 +111,31 @@ export async function missingOfContract(id: string) {
 		listStatements({ contractId: id, limit: 1000 }),
 		listStatements({ buildingId: contract.buildingId, limit: 1000 })
 	]);
-	return missingWays(type, contract, statements, ofBuilding, undefined, change);
+	return { contract, type, change, statements, ofBuilding };
+}
+
+/**
+ * A-10, #142, #199, #408 point 2: the parts of ended Abrechnungsperioden since the Vertragsbeginn with Mietstage but no
+ * statement, the latest first, each with its way into the wizard; `consent` at the short period the letter for the
+ * tenants' consent to the new Abrechnungsperiode is for (#521); null for an unknown contract
+ */
+export async function missingOfContract(id: string) {
+	const found = await periodsOfContract(id);
+	if (!found) return null;
+	const { contract, type, change, statements, ofBuilding } = found;
+	const consent = consentPeriod(type, contract, statements, ofBuilding, undefined, change);
+	return missingWays(type, contract, statements, ofBuilding, undefined, change).map((part) => ({
+		...part,
+		consent: !!consent && part.open && same(part.way, consent.short)
+	}));
+}
+
+/** #521: the contract with its short Abrechnungsperiode after a change and the type before; null for an unknown one */
+export async function consentOfContract(id: string) {
+	const found = await periodsOfContract(id);
+	if (!found) return null;
+	const { contract, type, change, statements, ofBuilding } = found;
+	return { contract, type, consent: consentPeriod(type, contract, statements, ofBuilding, undefined, change) };
 }
 
 /** #211: per contract id, the parts of ended Abrechnungsperioden without a statement, as on the contract page */
