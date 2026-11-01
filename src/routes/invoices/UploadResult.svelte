@@ -22,7 +22,7 @@
 					<!-- #535: the row that said so is gone; its remainder is a second invoice (Fachreview 535-1 V-1) -->
 					{#if one.rest}
 						<span>{m.invoices_upload_mixed_rest()}</span>
-						<a class="underline" href="/invoices/new" data-testid="invoice-upload-record-rest">{m.dashboard_add_invoice()}</a>
+						<a class="inline-flex min-h-12 items-center underline underline-offset-4" href="/invoices/new" data-testid="invoice-upload-record-rest">{m.dashboard_add_invoice()}</a>
 					{/if}
 				</li>
 			{/each}

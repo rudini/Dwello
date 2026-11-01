@@ -35,7 +35,7 @@ import {
 import { setUpDwello } from './einrichtung';
 import { createAccessKey } from './access-keys';
 import { createAccessKeyRefusal, newAccessKey } from '../targets/access-keys';
-import { invoicePdf, uploadBelege } from './invoice-upload';
+import { enterAmount, invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
 import { agreementsLoading, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
@@ -232,6 +232,7 @@ const createMixed = (building: string): Activity => (actor) => {
 		uploadBelege(building, [invoicePdf(mixed), invoicePdf(open)]),
 		Wait.until(belegDetailsToggle(mixed)),
 		Wait.until(belegDetailsToggle(open)),
+		enterAmount(mixed, '180.00'),
 		Check.the(belegSelected(mixed)),
 		Click.on(createInvoicesButton),
 		Wait.until(uploadResult)
