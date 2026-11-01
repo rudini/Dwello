@@ -40,7 +40,9 @@ describe('abstractness', () => {
 			'export class Service {}',
 			'export default function page() {}',
 			'type Local = string;',
-			'export { a, b } from "./c";'
+			'export { a, b } from "./c";',
+			'export type { D } from "./d";',
+			'export type { E };'
 		].join('\n');
 		expect(abstractness(src)).toEqual({ abstract: 3, exports: 8 });
 	});
@@ -148,6 +150,24 @@ describe('report', () => {
 			])
 		);
 		expect(cells.filter(([, back]) => back)).toHaveLength(1);
+	});
+
+	it('nennt die Abhängigkeiten zwischen den beiden DSM-Gruppen, die keine Matrix zeigt', () => {
+		const cross = { ...input, files: [...files, { path: 'src/lib/types.ts', kind: 'prod', module: 'shared:types' }], source: (p: string) => sources[p] ?? 'export type T = 1;', edges: [...edges, { from: 'shared:types', to: 'be:services/a', file_edges: '1' }] };
+		expect(report(analyze(cross))).toContain('1 Abhängigkeit(en) zwischen den beiden Gruppen');
+	});
+
+	it('listet die Funktionen über den Schwellen aus Produktivcode, die komplexeste zuerst', () => {
+		const h = {
+			...health,
+			findings: [
+				{ path: 'backend/src/routes/a.ts', name: 'small', cyclomatic: 12, cognitive: 16, severity: 'moderate' },
+				{ path: 'tests/e2e/x.ts', name: 'test', cyclomatic: 30, cognitive: 30, severity: 'critical' },
+				{ path: 'backend/src/services/a.ts', name: 'big', cyclomatic: 22, cognitive: 22, severity: 'critical' }
+			]
+		};
+		const names = [...report(analyze({ ...input, health: h })).matchAll(/<tr><td><code>[^<]*<\/code><\/td><td><code>([^<]*)<\/code>/g)].map((m) => m[1]);
+		expect(names).toEqual(['big', 'small']);
 	});
 
 	it('listet die Module mit der schlechtesten Ampel zuerst und schreibt die Farbe aus', () => {

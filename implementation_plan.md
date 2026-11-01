@@ -20,4 +20,5 @@ Request from the product owner (chat, 1.11.2026): build the structure report as 
 - [x] HTML report: KPI tiles, DSM with back-edges red, A/I graph, module table worst first
 - [x] `bun run structure:report` (01-map, 02-imports, fallow health without cache, structure.ts), docs in `docs/architecture/fitness-functions.md`
 - [ ] Results with full history to the product owner
-- [ ] Slice review, PR
+- [x] code-reviewer round 1: `docs/reviews/structure-report-review-1.md`
+- [ ] Closing review, PR

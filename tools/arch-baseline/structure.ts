@@ -52,8 +52,8 @@ export function levels(edges: Edge[], cycles: { modules: string }[]): Map<string
 
 /** Exported declarations of a TypeScript file; interfaces, type aliases and abstract classes count as abstract. */
 export function abstractness(src: string): { abstract: number; exports: number } {
-	// ponytail: line regex, not the TypeScript AST; re-exports count where they are declared
-	const decl = [...src.matchAll(/^export\s+(?:default\s+)?(?:declare\s+)?(abstract\s+class|interface|type|async\s+function|function|const|let|class|enum)\b/gm)];
+	// ponytail: line regex, not the TypeScript AST; re-exports (also `export type { … }`) count where they are declared
+	const decl = [...src.matchAll(/^export\s+(?:default\s+)?(?:declare\s+)?(abstract\s+class|interface|type(?!\s*\{)|async\s+function|function|const|let|class|enum)\b/gm)];
 	return { abstract: decl.filter((d) => /^(abstract|interface|type)/.test(d[1])).length, exports: decl.length };
 }
 
@@ -185,6 +185,8 @@ export function report(analysis: Analysis): string {
 		const ms = modules.filter((m) => g.layers.includes(m.name.split(':')[0]));
 		return `<h3>${g.title} (${ms.length} Module)</h3><div class="scroll">${dsm(ms, edges)}</div>`;
 	}).join('');
+	const group = (m: string) => GROUPS.findIndex((g) => g.layers.includes(m.split(':')[0]));
+	const cross = edges.filter((e) => group(e.from) !== group(e.to)).length;
 	const rows = sorted
 		.map(
 			(m) =>
@@ -218,7 +220,7 @@ table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;p
 ${legend}
 <div class="scroll">${aiGraph(modules)}</div>
 <h2>Dependency Structure Matrix</h2>
-<p>Zeile verwendet Spalte; Module nach Level geordnet (oben die Basis). Blau unter der Diagonale: Abhängigkeit nach unten, je dunkler, desto mehr Imports (1, 2–3, 4–9, ab 10). Rot über der Diagonale: Rückkante, Teil eines Tangles. Fahren Sie über eine Zelle für die Module.</p>
+<p>Zeile verwendet Spalte; Module nach Level geordnet (oben die Basis). Blau unter der Diagonale: Abhängigkeit nach unten, je dunkler, desto mehr Imports (1, 2–3, 4–9, ab 10). Rot über der Diagonale: Rückkante, Teil eines Tangles. Fahren Sie über eine Zelle für die Module. ${cross} Abhängigkeit(en) zwischen den beiden Gruppen (z. B. Typen aus dem Backend) zeigt keine Matrix.</p>
 ${legend}
 ${groups}
 <h2>Module</h2>
