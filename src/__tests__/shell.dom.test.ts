@@ -7,11 +7,19 @@ import Footer from '$lib/ui/Footer.svelte';
 import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
 import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
 vi.mock('$app/stores', () => ({
 	page: readable({ url: new URL('http://localhost/tenants') })
 }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+// the version a build without a tag lacks (#728); vitest.config.ts defines 1.4.0 for the others
+const build = vi.hoisted(() => ({ version: '1.4.0' as string | null }));
+vi.mock('$lib/app-version', () => ({
+	get appVersion() {
+		return build.version;
+	}
+}));
 
 const user = {
 	id: 'u1',
@@ -127,6 +135,27 @@ describe('Fusszeile', () => {
 		show(Footer, {});
 		expect(byTestId('footer-version')!.textContent).toBe('Version 1.4.0');
 	});
+
+	// #728: a build without a tag (vite.config.ts) knows no version
+	it.each([
+		['de', 'Version unbekannt'],
+		['fr', 'Version inconnue'],
+		['it', 'Versione sconosciuta'],
+		['en', 'Version unknown']
+	] as const)(
+		'sagt auf %s, dass die Version unbekannt ist, wenn der Build keine kennt',
+		(locale, text) => {
+			build.version = null;
+			overwriteGetLocale(() => locale);
+			try {
+				show(Footer, {});
+				expect(byTestId('footer-version')!.textContent).toBe(text);
+			} finally {
+				build.version = '1.4.0';
+				overwriteGetLocale(() => baseLocale);
+			}
+		}
+	);
 
 	// #676: a long development version (0.12.0+123-gabcdef1) wrapped inside the number on a 390 px phone
 	it('bricht die Version nicht um', () => {

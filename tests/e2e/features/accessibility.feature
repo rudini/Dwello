@@ -149,6 +149,7 @@ Funktionalität: Barrierefreiheit
       | invoices               | upload-dialog       |
       | invoices               | upload-discard-dialog |
       | invoices               | upload-partial      |
+      | invoices               | upload-mixed-rest   |
       | invoices               | upload-discard-created |
       | invoices               | upload-unreadable   |
       | invoices               | upload-ki-none      |

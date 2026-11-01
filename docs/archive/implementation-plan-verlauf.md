@@ -486,6 +486,17 @@
 - [x] No code-reviewer round: test-only CI fix (`CLAUDE.md`, Workflow 7)
 - [x] PR: pushed after this archive
 
+## Session: #535 Upload result names the mixed rest
+
+Parallel session (the #671 session stays in `implementation_plan.md`): checklist kept here and in the pull request.
+
+- [x] @wip scenario «Nach dem Erstellen nennt Dwello den Rest einer Rechnung mit Kosten, die nicht umlagefähig sind», seen red
+- [x] fach-reviewer step 1 `docs/reviews/535-fachreview-1.md`: V-1 wording taken, V-2 amount step, V-4 in the DOM test; V-3 «Reparaturen» kept as recommended
+- [x] Upload result: line and link «Rechnung erfassen» at each created invoice with mixed costs, four languages; DOM test seen red; state `upload-mixed-rest`
+- [x] code-reviewer `docs/reviews/535-review-1.md` (C-1, C-2 done), closing `535b-review-1.md` (no findings)
+- [x] Persona `docs/design/personas/marco-535.md`: four Minors, stay in the report
+- [x] Workflow note: `docs/design/personas/demo-records.md` is missing, which the persona README names for records
+- [x] Workflow note: a merge of `main` drops the archive's last line «PR: pushed after this archive» (seen twice in #959)
 ## Session: fallback code review with MiniMax (#1007)
 
 - [x] Workflow: review when Copilot reports an error, by hand, and when Copilot stays silent after CI (green or red) or after ready for review; once per pull request; drafts skipped
@@ -497,4 +508,10 @@
 - [x] Slice review round 1: `docs/reviews/1007-review-1.md`
 - [x] Its Minors fixed: reason when the answer stays empty, Copilot waited for 5 minutes, concurrency on the job, diff per file (GitHub refuses large diffs)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1007.md`
+- [x] PR: pushed after this archive
+
+## Session: fallback review without Copilot triggers (#1007 follow-up)
+
+- [x] Runs triggered by Copilot's review wait for an approval no setting gives and expire (#1009, run 41256102317): `pull_request_review` and `issue_comment` triggers removed; an error review of Copilot still counts as no review when CI finishes
+- [x] Local run of the bash step: #1009 and #941 already reviewed, missing key → «No review»
 - [x] PR: pushed after this archive

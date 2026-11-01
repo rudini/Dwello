@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { appVersion } from '$lib/app-version';
 </script>
 
 <footer class="border-t border-line bg-surface">
@@ -9,9 +10,7 @@
 		<p>
 			© {new Date().getFullYear()} Dwello <span aria-hidden="true">·</span>
 			<span data-testid="footer-version" class="whitespace-nowrap"
-				>{__APP_VERSION__
-					? m.footer_version({ version: __APP_VERSION__ })
-					: m.footer_version_unknown()}</span
+				>{appVersion ? m.footer_version({ version: appVersion }) : m.footer_version_unknown()}</span
 			>
 		</p>
 		<nav aria-label={m.footer_legal()} class="flex gap-6">

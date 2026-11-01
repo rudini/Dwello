@@ -26,6 +26,7 @@
 		"upload-dialog": "«Rechnungen hochladen» open with a building chosen, a PDF the KI stand-in read (deducted amounts, costs not allocable, an unsure Rechnungsdatum) opened for checking, and a refused Word file.",
 		"upload-discard-dialog": "«Rechnungen hochladen» with a file in it, cancelled: the confirmation that the files and entries are lost.",
 		"upload-partial": "«Rechnungen hochladen» after creating one of two invoices: the result naming the file still open, that file with its missing Kategorie, the button counting the incomplete one.",
+		"upload-mixed-rest": "«Rechnungen hochladen» after creating an invoice with costs that are not allocable, the other file still open: the result names the rest to record as a second invoice, with a link to «Rechnung erfassen» (#535).",
 		"upload-discard-created": "«Rechnungen hochladen» after creating one of two invoices, cancelled: the confirmation that created invoices stay.",
 		"upload-ki-none": "«Rechnungen hochladen» open with «Keine KI» chosen on the fresh installation: the purpose says the property manager enters the details (#626).",
 		"upload-unreadable": "«Rechnungen hochladen» with a file the KI answered nothing readable for: the row with its note and «Erneut versuchen».",
@@ -501,6 +502,7 @@
 				"upload-dialog",
 				"upload-discard-dialog",
 				"upload-partial",
+				"upload-mixed-rest",
 				"upload-discard-created",
 				"upload-unreadable",
 				"upload-ki-none"

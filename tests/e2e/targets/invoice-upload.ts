@@ -48,7 +48,10 @@ export const deleteBelegNote = target('Hinweis Beleg beim Löschen', (page) =>
 export const keepOriginalHint = target('Hinweis Originalrechnung', (page) => page.getByTestId('invoice-keep-original'));
 export const belegBilledNote = target('Warnung abgerechneter Beleg', (page) => page.getByTestId('invoice-document-billed'));
 export const createdInvoiceLinks = target('Links der erstellten Rechnungen', (page) =>
-	page.getByTestId('invoice-upload-result').getByRole('link')
+	page.getByTestId('invoice-upload-created-link')
+);
+export const recordRestLink = target('Link zum Erfassen des Rests', (page) =>
+	page.getByTestId('invoice-upload-record-rest')
 );
 export const belegHow = target('Anleitung zum Beleg', (page) => page.getByTestId('invoice-document-file-help'));
 export const belegUploadHints = target('Hinweise aus dem Hochladen', (page) => page.getByTestId('invoice-document-hints'));
