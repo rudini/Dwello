@@ -254,6 +254,20 @@ describe('Kurze Abrechnungsperiode für den Brief zur Zustimmung', () => {
 		expect(consentPeriod('calendar', contract('2024-04-01'), building, building, today)).toBeNull();
 	});
 
+	// code review 521-1 C-3: a short period the contract's own statement already bills has no letter
+	it('nennt keine kurze Abrechnungsperiode, die eine Abrechnung des Mietvertrags schon abrechnet', () => {
+		const building = [own('2024-07-01', '2025-06-30')];
+		const statements = [own('2024-07-01', '2025-06-30'), own('2025-07-01', '2025-09-30')];
+		expect(consentPeriod('calendar', contract('2024-04-01'), statements, building, today)).toBeNull();
+	});
+
+	// code review 521-1 C-3: after the switch another contract's statement starts the building's next part; the short
+	// period left after it is not the one after the change
+	it('nennt keine kurze Abrechnungsperiode, die nicht am Tag des Wechsels beginnt', () => {
+		const building = [own('2024-07-01', '2025-06-30'), own('2025-07-01', '2025-09-30')];
+		expect(consentPeriod('calendar', contract('2024-04-01'), [own('2024-07-01', '2025-06-30')], building, today)).toBeNull();
+	});
+
 	// the short period stays the building's, also for a contract that starts in it (Fachreview 521-1 section 1)
 	it('nennt bei einem Vertragsbeginn in der kurzen Abrechnungsperiode die des Gebäudes', () => {
 		const building = [own('2024-07-01', '2025-06-30')];
