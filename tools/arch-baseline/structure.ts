@@ -189,9 +189,14 @@ export function snapshot(analysis: Analysis, commit: string, date: string): Snap
 	};
 }
 
+/** Snapshots in the order they were taken (dates are ISO timestamps in UTC, or days). */
+const byTime = (history: Snapshot[]) => [...history].sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
 /** The history as a markdown table for the CI job summary, newest first. */
 export function markdown(history: Snapshot[]): string {
-	const rows = [...history].reverse().map((h) => `| ${h.date} | ${h.kpis.health} | ${h.functions} | ${h.lights.green} | ${h.lights.yellow} | ${h.lights.red} | ${h.kpis.tangles} |`);
+	const rows = byTime(history)
+		.reverse()
+		.map((h) => `| ${h.date.slice(0, 10)} | ${h.kpis.health} | ${h.functions} | ${h.lights.green} | ${h.lights.yellow} | ${h.lights.red} | ${h.kpis.tangles} |`);
 	return ['| Date | Health score | Functions above thresholds | Green | Yellow | Red | Tangles |', '|---|---|---|---|---|---|---|', ...rows].join('\n');
 }
 
@@ -206,10 +211,12 @@ type Series = { label: string; color: string; values: number[] };
 
 /** One measure over the snapshots: one y-axis from 0, a dot per snapshot whose title names date and value. */
 function lineChart(id: string, title: string, dates: string[], series: Series[]): string {
-	const W = 480, H = 180, P = 40, n = dates.length;
+	const W = 1000, H = 200, P = 40, n = dates.length;
 	const max = Math.max(1, ...series.flatMap((s) => s.values)) * 1.1;
-	const x = (k: number) => P + (n > 1 ? (k * (W - 2 * P)) / (n - 1) : 0), y = (v: number) => H - P + 10 - (v / max) * (H - P - 10);
-	const label = (s: Series, k: number) => `${dates[k]}${series.length > 1 ? ` ${s.label}` : ''}: ${s.values[k]}`;
+	const t = dates.map((d) => Date.parse(d)), span = t[n - 1] - t[0] || 1;
+	const x = (k: number) => P + ((t[k] - t[0]) / span) * (W - 2 * P), y = (v: number) => H - P + 10 - (v / max) * (H - P - 10);
+	const day = (k: number) => dates[k].slice(0, 10);
+	const label = (s: Series, k: number) => `${day(k)}${series.length > 1 ? ` ${s.label}` : ''}: ${s.values[k]}`;
 	const lines = series.map(
 		(s) =>
 			`<polyline fill="none" stroke="${s.color}" stroke-width="2" points="${s.values.map((v, k) => `${x(k)},${y(v)}`).join(' ')}"/>` +
@@ -219,7 +226,7 @@ function lineChart(id: string, title: string, dates: string[], series: Series[])
 	return `<div class="chart"><h3>${title}</h3>${legend}<svg id="${id}" viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="${esc(title)}">
 <line x1="${P}" y1="${y(0)}" x2="${W - P}" y2="${y(0)}" stroke="var(--line)"/>
 <text x="${P - 6}" y="${y(0) + 4}" font-size="14" fill="var(--ink2)" text-anchor="end">0</text><text x="${P - 6}" y="${y(max / 1.1) + 4}" font-size="14" fill="var(--ink2)" text-anchor="end">${round(max / 1.1)}</text>
-<text x="${x(0)}" y="${H - 6}" font-size="14" fill="var(--ink2)">${dates[0]}</text><text x="${x(n - 1)}" y="${H - 6}" font-size="14" fill="var(--ink2)" text-anchor="end">${dates[n - 1]}</text>
+<text x="${x(0)}" y="${H - 6}" font-size="14" fill="var(--ink2)">${day(0)}</text><text x="${x(n - 1)}" y="${H - 6}" font-size="14" fill="var(--ink2)" text-anchor="end">${day(n - 1)}</text>
 ${lines.join('')}</svg></div>`;
 }
 
@@ -234,12 +241,13 @@ function moved(history: Snapshot[]): string {
 		.filter((r) => r.from !== r.to)
 		.sort((a, b) => Math.abs(b.to - b.from) - Math.abs(a.to - a.from))
 		.slice(0, 15)
-		.map((r) => `<tr class="moved"><td>${esc(r.name)}</td><td>${r.from}</td><td>${r.to}</td><td>${r.since}</td></tr>`);
+		.map((r) => `<tr class="moved"><td>${esc(r.name)}</td><td>${r.from}</td><td>${r.to}</td><td>${r.since.slice(0, 10)}</td></tr>`);
 	return `<h3>Modules whose distance D changed most</h3><div class="scroll"><table><tr><th>Module</th><th>D at first snapshot</th><th>D now</th><th>First snapshot</th></tr>${rows.join('')}</table></div>`;
 }
 
-function historySection(history: Snapshot[]): string {
-	if (history.length < 2) return '';
+function historySection(unsorted: Snapshot[]): string {
+	if (unsorted.length < 2) return '';
+	const history = byTime(unsorted);
 	const dates = history.map((h) => h.date);
 	const kpi = (key: string) => history.map((h) => h.kpis[key]);
 	return `<h2>History</h2><p>${history.length} snapshots of <code>main</code>, measured with today's tools and thresholds. Hover over a dot for date and value.</p><div class="charts">
@@ -285,7 +293,7 @@ h1{font-size:28px;margin:0}h2{font-size:20px;margin:40px 0 8px}h3{font-size:16px
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
 .kpi b{display:block;font-size:26px}.kpi span{display:block;font-size:13px;color:var(--ink2)}.green{color:var(--good)}.yellow{color:var(--warn)}.red{color:var(--crit)}
 .kpi span.green{color:var(--good);font-weight:600}.kpi span.yellow{color:var(--warn);font-weight:600}.kpi span.red{color:var(--crit);font-weight:600}
-.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}.chart h3{margin:8px 0}
+.charts{display:grid;gap:16px}.chart h3{margin:8px 0}
 .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
 table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line)}th{color:var(--ink2)}
 </style></head><body><main>
@@ -328,8 +336,9 @@ if (import.meta.main) {
 	if (flag === '--snapshot') console.log(JSON.stringify(snapshot(analysis, commit, date)));
 	else {
 		const dir = join(OUT, 'history');
-		const history: Snapshot[] = existsSync(dir) ? readdirSync(dir).map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8'))) : [];
-		history.sort((a, b) => a.date.localeCompare(b.date));
+		const history: Snapshot[] = existsSync(dir) ? readdirSync(dir)
+					.filter((f) => f.endsWith('.json'))
+					.map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8'))) : [];
 		console.log(report(analysis, history));
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Structure report\n\n${markdown(history)}\n`);
 	}

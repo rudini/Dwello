@@ -238,3 +238,20 @@ describe('markdown', () => {
 		]);
 	});
 });
+
+describe('Verlauf: Reihenfolge und Zeitachse', () => {
+	it('ordnet Stände nach Zeitpunkt, auch zwei vom selben Tag, unabhängig von der Reihenfolge der Eingabe', () => {
+		const late = snap('2026-10-26T17:00:00Z', 87.1, 4, 0.2), early = snap('2026-10-26T08:00:00Z', 80, 6, 0.8);
+		const [, , first] = markdown([late, early]).split('\n');
+		expect(first).toBe('| 2026-10-26 | 87.1 | 10 | 5 | 3 | 4 | 0 |');
+		const rows = [...report(analyze(input), [late, early]).matchAll(/<tr class="moved"><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/g)].map((m) => m.slice(1));
+		expect(rows).toEqual([['be:a', '0.8', '0.2']]);
+	});
+
+	it('setzt die Punkte nach der Zeit, so dass eine Pause als Lücke erscheint', () => {
+		const html = report(analyze(input), [snap('2026-01-01', 70, 9, 0.8), snap('2026-01-02', 71, 9, 0.8), snap('2026-01-31', 80, 4, 0.2)]);
+		const cx = [...html.matchAll(/<circle cx="([\d.]+)"[^>]*><title>2026-01-\d\d: (?:70|71|80)<\/title>/g)].map((m) => Number(m[1]));
+		expect(cx).toHaveLength(3);
+		expect(cx[1] - cx[0]).toBeLessThan((cx[2] - cx[1]) / 10);
+	});
+});
