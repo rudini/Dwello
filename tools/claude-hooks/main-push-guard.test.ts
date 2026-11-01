@@ -72,7 +72,9 @@ describe('push to main by its resolved target (#713)', () => {
 		['a substitution in an unquoted heredoc', () => onMain, 'cat <<EOF\n$(git push)\nEOF'],
 		['--git-dir= with a variable', () => onFeature, 'git --git-dir="$REPO" push'],
 		// review 713-5
-		['a push after an apostrophe in an unquoted heredoc', () => onMain, "cat > n.md <<EOF\nit's done\nEOF\ngit push"]
+		['a push after an apostrophe in an unquoted heredoc', () => onMain, "cat > n.md <<EOF\nit's done\nEOF\ngit push"],
+		// review 713-6
+		['a substitution in an unquoted heredoc before a cd', () => onMain, 'cat <<EOF && cd "%FEATURE%"\n$(git push)\nEOF']
 	])('asks before %s', (_, cwd, command) => {
 		expect(decision(cwd(), command.replaceAll('%MAIN%', onMain).replaceAll('%FEATURE%', onFeature))).toBe('ask');
 	});
@@ -85,6 +87,7 @@ describe('push to main by its resolved target (#713)', () => {
 		['a push named in backticks in a heredoc', () => onFeature, "cat > d.md <<'EOF'\nRun `git push origin main` first\nEOF"],
 		['no push at all', () => onMain, 'git status && git log --oneline -1'],
 		['a push line in a heredoc body', () => onFeature, "cat > d.md <<'EOF'\ngit push origin main\nEOF"],
+		['a push line in an unquoted heredoc body', () => onFeature, 'cat > d.md <<EOF\ngit push origin main\nEOF'],
 		['a GIT_SSH_COMMAND with a home path', () => onFeature, 'GIT_SSH_COMMAND="ssh -i ~/.ssh/id" git push origin feature']
 	])('lets %s through', (_, cwd, command) => {
 		expect(decision(cwd(), command)).toBeUndefined();

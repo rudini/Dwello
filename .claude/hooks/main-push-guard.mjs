@@ -15,15 +15,15 @@ const command = input.tool_input?.command ?? '';
 
 /**
  * The shell commands of a line, each as its words; quotes are kept together and dropped, so text in them is no command,
- * except a `$(…)` in double quotes (checked before its command) or in an unquoted heredoc (after it); heredoc bodies
- * are dropped; `(` and `)` stand alone, so a subshell's cd ends with it
+ * except a `$(…)` in double quotes (checked before its command) or in an unquoted heredoc (before the rest of its
+ * line); heredoc bodies are dropped; `(` and `)` stand alone, so a subshell's cd ends with it
  */
 const substitutions = (text) => [...text.matchAll(/\$\(([^)]*)\)?/g)].map(([, inner]) => `(${inner})`);
 function commands(line) {
 	const s = line
 		.replace(/\\\n/g, ' ')
 		.replace(/<<-?\s*(['"]?)(\w+)\1([^\n]*)\n((?:[\s\S]*?\n)?)\s*\2(?=\n|$)/g, (_, quote, _end, rest, body) =>
-			[rest, ...(quote ? [] : substitutions(body))].join(';')
+			[...(quote ? [] : substitutions(body)), rest].join(';')
 		);
 	const all = [[]];
 	let word = null;
