@@ -20,4 +20,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] #847: a 413 shows «Die Datei ist zu gross.» and what to do in four languages (`error-page.test.ts` seen red); No scenario: with JavaScript the browser refuses the file first (tests/e2e/CLAUDE.md, No scenario, item 4)
 - [x] #847 review (`docs/reviews/847-review-1.md`): no findings
 - [x] #847 PR: pushed
+- [x] #713: PreToolUse hook `main-push-guard.mjs` asks before a push whose resolved target is main; tests red first
+- [x] #713 reviews: `docs/reviews/713-review-1.md` (C-1 Major: cd not followed, fixed; C-2 to C-5 fixed), `713-review-2.md` (C-6 to C-8 Minor, fixed), `713-review-3.md` (closing round, C-9 to C-11 Minor, fixed without a further round)
+- [x] #713 PR: pushed
+- [x] #713 Copilot review on #1011 (six findings, all held, fixed with tests red first); closing rounds `713-review-4.md` (C-12 to C-15), `713-review-5.md` (C-16), `713-review-6.md` (C-17, C-18), all Minor and fixed; the last fixes without a further round (three rounds reached)
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)
