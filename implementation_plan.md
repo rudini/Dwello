@@ -9,3 +9,11 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: NFR issues on my own, part 2 (#742 first)
+
+- [x] #742: the status line of «Rechnungen hochladen» says how many invoices are ready to create; @wip scenario seen red (received «Bitte prüfen: 1.»)
+- [x] #742: text «Bereit zum Erstellen» in de, fr, it, en (`InvoiceUploadDialog.svelte`, `messages/*.json`, two DOM expectations); scenario green without @wip; invoices + ki-einstellungen 59 passed; axe and language rows of the five upload screens 10 passed
+- [ ] #742 slice review
+- [ ] #742 persona Sven (screen reader) on the upload dialog
+- [ ] #742 PR
