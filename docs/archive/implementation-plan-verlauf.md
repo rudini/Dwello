@@ -529,3 +529,10 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «PDF vor der Änderung» as decided, the row «Dokument» names it; `docs/design/i18n-begriffe.md` fr/it/en; marker in `delivery.ts` removed
 - [x] No scenario: glossary and a code comment only, the UI texts already use the terms in all four languages
 - [x] PR: pushed after this archive
+
+## Session: #1015 resetting a part payment drops its PDF
+
+- [x] pg tests in `statement-lock.pg.test.ts`, seen red; fix in `recordPayment` and `resetPayment`
+- [x] No scenario: the UI cannot reset a part payment yet (#999); two tried scenarios failed at the missing button
+- [x] code-reviewer `docs/reviews/1015-review-1.md`: C-1 test added (seen red); C-2 (reachable with #999 only) and C-3 (database not on UTC) stay in the report
+- [x] PR: pushed after this archive
