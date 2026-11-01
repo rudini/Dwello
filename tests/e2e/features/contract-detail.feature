@@ -332,7 +332,6 @@ Funktionalität: Mietvertragsdetail
   # neuen Abrechnungsperiode schriftlich zustimmt: die bisherige und die neue Abrechnungsperiode, die kurze Periode
   # dazwischen, die erste neue Periode und Zeilen für die Unterschriften (Fachreview 521-1, Abschnitt 4); die
   # Zustimmung ist freiwillig (M-2)
-  @wip
   Szenario: Brief für die Zustimmung des Mieters zu einer neuen Abrechnungsperiode
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -349,7 +348,6 @@ Funktionalität: Mietvertragsdetail
     Und steht im PDF "Unterschrift weiterer Mieter"
 
   # #521 (Fachreview 521-1 V-1): ohne frühere Abrechnungsperiode gibt es keine bisherige Periode für den Brief
-  @wip
   Szenario: Ohne Wechsel der Abrechnungsperiode bietet der Mietvertrag keinen Brief zur Zustimmung an
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"

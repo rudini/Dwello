@@ -24,7 +24,8 @@
 		"choose": [{ "start": "2023-07-01", "end": "2024-06-30" }],
 		"short": [{ "start": "2024-07-01", "end": "2024-12-31" }],
 		"vacant": false,
-		"statements": 2
+		"statements": 2,
+		"consent": [{ "id": "c2", "tenantName": "Marc Huber", "apartmentNumber": "3.01" }]
 	},
 	"skipped": [{ "id": "c2", "tenantName": "Marc Huber", "billedUntil": "2024-12-31" }]
 }

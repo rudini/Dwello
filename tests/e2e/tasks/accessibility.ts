@@ -734,6 +734,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(on.shown(`generate-building-billed-${example.building}`))
 		),
+	// #521: 2020 overlaps Ahornweg's statement 01.11.2019 – 31.10.2020: the letter for Vera's consent
+	// (step 2 answers for all buildings at once)
+	'buildings-consent': () => (actor) =>
+		actor.attemptsTo(
+			EnterDate.of('2020-01-01').into(on.periodStartInput),
+			EnterDate.of('2020-12-31').into(on.periodEndInput),
+			Click.on(nextButton),
+			Wait.until(on.firstConsentLetter)
+		),
 	'period-not-over': () => (actor) =>
 		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))
 };

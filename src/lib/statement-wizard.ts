@@ -133,6 +133,8 @@ export type Billed = {
 		short: Range[];
 		vacant: boolean;
 		statements: number;
+		// #521: the contracts with a letter for the tenants' consent to the new Abrechnungsperiode
+		consent: { id: string; tenantName: string; apartmentNumber: string }[];
 	} | null;
 };
 

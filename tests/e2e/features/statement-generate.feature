@@ -530,7 +530,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #521 (Fachreview 521-1 V-2): zum Rat bei der kurzen Abrechnungsperiode bietet die Wahl der Gebäude den Brief zur
   # Zustimmung für jeden Mietvertrag mit Mietstagen in der kurzen Abrechnungsperiode an; Eva Frei hat dort keine
-  @wip
   Szenario: Die Wahl der Gebäude bietet den Brief zur Zustimmung zur neuen Abrechnungsperiode an
     Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
     Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"

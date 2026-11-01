@@ -8,6 +8,7 @@
 		start: string;
 		end: string;
 		href: string | null; // none when step 2 would refuse its period (Fachreview 199-1 V-1)
+		consentLetter: string | null; // #521: only after a change of the Abrechnungsperiode (Fachreview 521-1 V-1)
 		way: { kind: string; start: string; end: string };
 		invoices: { href: string; label: string };
 	};
@@ -80,6 +81,17 @@
 						<p class="w-full" data-testid="contract-missing-statement-short-help">
 							{m.statements_short_period_help()}
 						</p>
+						<!-- #521: the letter for the tenants' consent; TODO(fachlich prüfen, #1035) -->
+						{#if period.consentLetter}
+							<Button
+								href={period.consentLetter}
+								download
+								variant="ghost"
+								icon="document-download"
+								testid="contract-missing-statement-consent-letter"
+								>{m.contracts_consent_letter_download()}</Button
+							>
+						{/if}
 					{/if}
 				</div>
 			{/each}

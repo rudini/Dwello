@@ -42,5 +42,19 @@
 				{m.statements_short_period_help()}
 			</p>
 		{/if}
+		<!-- #521 (Fachreview 521-1 V-2): the letter for each tenant's consent; TODO(fachlich prüfen, #1035) -->
+		{#each overlap.consent as contract (contract.id)}
+			<Button
+				href="/contracts/{contract.id}/consent-letter"
+				download
+				variant="ghost"
+				icon="document-download"
+				testid="generate-building-consent-letter-{buildingId}-{contract.id}"
+				>{m.statements_consent_letter_download_of({
+					tenant: contract.tenantName,
+					apartment: contract.apartmentNumber
+				})}</Button
+			>
+		{/each}
 	</div>
 {/if}

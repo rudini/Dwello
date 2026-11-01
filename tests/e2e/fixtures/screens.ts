@@ -90,7 +90,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'buildings-consent', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -252,6 +252,13 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Lea');
 	await seed.contract('Lea', '2.06', { startDate: '2024-01-01', baseRent: '1200.00' });
 	await seed.statement('Lea', 'Felsblick', 2024, 'Standard', ['2024-01-01', '2024-06-30']);
+	// #521: Ahornweg billed November–Oktober until 31.10.2020, then the setting: Vera's contract page and step 2 of a
+	// 2020 run offer the letter for her consent to the new Abrechnungsperiode (a period no other look runs)
+	await seed.building('Ahornweg', 'Winterthur');
+	await seed.apartment('Ahornweg', '4.01', 'vacant');
+	await seed.tenant('Vera');
+	await seed.contract('Vera', '4.01', { startDate: '2019-11-01', baseRent: '1100.00' });
+	await seed.statement('Vera', 'Ahornweg', 2020, 'Standard', ['2019-11-01', '2020-10-31']);
 	// A-6 (#115): an agreed end in the past, the 2025 statement bills the time after it as Leerstand
 	await seed.building('Talblick', 'Winterthur');
 	await seed.apartment('Talblick', '3.01', 'vacant');
@@ -298,6 +305,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		expiredContract: seed.idOf('Mietvertrag Gina'),
 		movedOutContract: seed.idOf('Mietvertrag Ida'),
 		partlyBilledContract: seed.idOf('Mietvertrag Lea'),
+		consentContract: seed.idOf('Mietvertrag Vera'), // #521
 		oldAddressStatement: seed.idOf('Abrechnung Ida 2024'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
