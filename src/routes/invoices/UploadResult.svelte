@@ -17,7 +17,9 @@
 	<Alert tone="positive" {title}>
 		<ul class="flex flex-col gap-2">
 			{#each created as one (one.id)}
-				<li><a class="font-semibold underline" href="/invoices/{one.id}">{one.name}</a></li>
+				<li>
+					<a class="font-semibold underline" href="/invoices/{one.id}" data-testid="invoice-upload-created-link">{one.name}</a>
+				</li>
 			{/each}
 		</ul>
 		{#if open.length}

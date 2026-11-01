@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { Checked, OpenedFile, Text, Value, Visibility } from '../screenplay/questions';
+import { Attribute, Checked, OpenedFile, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	belegAmount,
 	belegDetailsToggle,
@@ -27,6 +27,7 @@ import {
 	uploadBuildingSelect,
 	uploadFileChoose,
 	uploadPurpose,
+	recordRestLink,
 	uploadResult,
 	uploadStatus
 } from '../targets/invoice-upload';
@@ -54,6 +55,8 @@ export const openedBelegMagic = question('the kind of the opened Beleg', async (
 	(await actor.answer(OpenedFile)).content.subarray(0, 3).toString('hex')
 );
 export const createdInvoiceNames = Text.ofAll(createdInvoiceLinks);
+// #535: the rest of an invoice with mixed costs is recorded on its own
+export const recordRestHref = Attribute.named('href').of(recordRestLink);
 export const createButtonLabel = Text.of(createInvoicesButton);
 export const belegHowTo = Text.of(belegHow);
 export const hintsOfUpload = Text.of(belegUploadHints);

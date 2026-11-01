@@ -12,6 +12,7 @@ import {
 	billedRuleOnDelete,
 	createButtonLabel,
 	createdInvoiceNames,
+	recordRestHref,
 	hintsOfUpload,
 	hintsOfUploadOrNone,
 	uploadDialogShown,
@@ -274,6 +275,10 @@ Then('erklärt Dwello {string}', async ({ verwalter }, text: string) => {
 
 Then('bietet Dwello {string} an', async ({ verwalter }, label: string) => {
 	await verwalter.sees(createButtonLabel).toBe(label);
+});
+
+Then('führt Dwello von dort zum Erfassen einer Rechnung', async ({ verwalter }) => {
+	await verwalter.sees(recordRestHref).toBe('/invoices/new');
 });
 
 Then('nennt Dwello die Datei von {string} als noch offen', async ({ verwalter, names }, supplier: string) => {

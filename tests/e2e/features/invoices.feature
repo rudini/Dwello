@@ -191,6 +191,18 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Lift Service und Reparatur" nicht "nicht umlagefähig sind"
     Und erklärt die Auswahl der Datei von "Lift Service und Reparatur" nichts mehr
 
+  # #535: nach dem Erstellen sagt das Ergebnis, dass der Rest noch zu erfassen ist, und wo (Persona Marco 245 P-1)
+  @wip
+  Szenario: Nach dem Erstellen nennt Dwello den Rest einer Rechnung mit Kosten, die nicht umlagefähig sind
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Lift Service und Reparatur" hochlädt
+    Und der Liegenschaftsverwalter bei der Datei von "Lift Service und Reparatur" die Kategorie "Lift" wählt
+    Und der Liegenschaftsverwalter bei der Datei von "Lift Service und Reparatur" den Verteilschlüssel "Pro Einheit" wählt
+    Und der Liegenschaftsverwalter die Datei von "Lift Service und Reparatur" zum Erstellen auswählt
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
+    Dann sagt Dwello "1 Rechnung erstellt"
+    Und sagt Dwello "Erfassen Sie noch den Rest in der Kategorie Reparaturen und fügen Sie diese Datei mit «Beleg hinzufügen» an."
+    Und führt Dwello von dort zum Erfassen einer Rechnung
+
   # #245: die Gutschrift nennt ihren Betrag und die Zeile, in der er abgezogen wird, und warum sie nicht ausgewählt ist
   Szenario: Eine Gutschrift ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Gutschrift" hochlädt
