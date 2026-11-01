@@ -631,3 +631,8 @@ Request from the product owner (chat, 1.11.2026): build the structure report as 
 - [x] daten-pruefer `docs/reviews/508-datenpruefung-1.md`: every amount holds to the Rappen
 - [x] Persona `docs/design/personas/dr-weber-508.md`: P-1 (Major, no advice at «zu wenig») to #1026; P-2 to P-5 (Minor) stay in the report
 - [x] PR: pushed after this archive
+
+## Session: fallback review thinks harder (#1007 follow-up)
+
+- [x] MiniMax with `reasoning_effort: medium` gave mostly false or known findings (#1021 to #1033); `high` run locally on #1024, #1031, #1033 dropped the false ones in about two minutes each: `REASONING_EFFORT: high`
+- [x] PR: pushed after this archive
