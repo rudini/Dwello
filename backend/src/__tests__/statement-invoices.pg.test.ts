@@ -469,7 +469,27 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(Number(now)).toBeGreaterThan(Number(balance));
 			expect(difference).toBe((Number(now) - Number(balance)).toFixed(2)); // the raw Saldos (Fachreview 546-1 V-2)
 			expect(belowMinimum).toBe(false);
+			expect(changes.recalculated).toMatchObject({ declineCosts: difference }); // code review 546-1 C-1
 		}));
+
+	// code review 546-1 C-2 (Fachreview 546-1 V-4): the billed Saldo below CHF 5 is explained too
+	// not a Schlussabrechnung: its own rental without an end (the shared one ends 31.03.2024)
+	it('erklärt einen bisherigen Saldo unter CHF 5', async () => {
+		const whole = await createRental(`${token}-small`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		const created = await generateStatement({ contractId: whole.contract, buildingId: whole.building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
+		try {
+			await db.update(utilityStatements).set({ status: 'sent', balance: '3.00' }).where(eq(utilityStatements.id, created.id));
+			await invoice({ buildingId: whole.building, amount: '100.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${created.id}/changed-invoices`)).json()) as { recalculated: { belowMinimum: boolean } };
+
+			expect(changes.recalculated.belowMinimum).toBe(true);
+		} finally {
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, created.id));
+			await deleteStatement(created.id);
+			await db.delete(invoices).where(eq(invoices.buildingId, whole.building));
+			await whole.remove();
+		}
+	});
 
 	// PO 2026-10-20 (Fachreview 454-2 M-3 B, 454-3 V-30 A): «Nicht berichtigen» only when the Saldo does not fall
 	it('erlaubt «Nicht berichtigen» nur, wenn die Neuberechnung den Saldo nicht senkt', () =>
@@ -537,6 +557,8 @@ describe('Abrechnung berichtigen fällig', () => {
 				correctionLowers: boolean;
 			};
 			expect(changes).toMatchObject({ correctionDue: true, correctionDeclinable: true, correctionLowers: false });
+			// code review 546-1 C-1 (Fachreview 546-1 V-1): 4.00 → 3.00, no difference the landlord bears
+			expect((changes as unknown as { recalculated: { declineCosts: string | null } }).recalculated.declineCosts).toBeNull();
 		} finally {
 			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, created.id));
 			await deleteStatement(created.id);
