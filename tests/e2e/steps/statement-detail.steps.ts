@@ -21,6 +21,7 @@ import {
 	laterInvoicesHint,
 	laterInvoicesHints,
 	declineCorrectionOffered,
+	declineCorrectionQuestion,
 	languageOfPdf,
 	carryOver,
 	correctPaidAmount,
@@ -73,6 +74,7 @@ import {
 	recalculateDraft,
 	recalculateFromSending,
 	declineCorrection,
+	startDecliningCorrection,
 	createCorrection,
 	openCorrectConfirmation,
 	openCorrectionFromHint,
@@ -425,6 +427,14 @@ Then('weist die Abrechnung auf keine Änderung seit dem Erstellen hin', async ({
 // the title leads the hint
 Then('nennt der Hinweis auf Änderungen seit dem Erstellen den Titel {string}', async ({ verwalter }, title: string) => {
 	await verwalter.sees(laterInvoicesHint).toMatch(new RegExp(`^${title}`));
+});
+
+When('der Liegenschaftsverwalter die Abrechnung nicht berichtigen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startDecliningCorrection);
+});
+
+Then('fragt Dwello vor «Nicht berichtigen» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(declineCorrectionQuestion).toContain(text);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung nicht berichtigt', async ({ verwalter }) => {
