@@ -507,6 +507,7 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		profileEdited: null,
 		fee: null,
 		oldRule: false,
+		heatingSum: null,
 		...more
 	});
 	const changedOf = async (fetch: typeof globalThis.fetch) => (await invoicesInPeriod(fetch, period))[0].changed;
@@ -596,6 +597,19 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 					: fetchWith([statement('1', c1, 'sent', 'hp1', '4.50'), statement('2', c1, 'sent', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
 
 		expect(await changedOf(fetch)).toEqual([named('1', { oldRule: true })]);
+	});
+
+	// #508: with it the heating sum of its apartment, as the backend gives it
+	it('nennt zur Abrechnung nach der alten Regel die Summe der Heizkosten ihrer Wohnung', async () => {
+		const heatingSum = { statementId: '1', costs: '2000.00', tenants: '1920.00', landlord: '80.00', billed: '2370.00', difference: '450.00', result: 'more', landlordFor: 'vacancy' };
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/completeness/')
+				? Response.json({ ...invoiceCompleteness, oldHeatingRule: ['1'] })
+				: url.includes('/statements/run-heating?')
+					? Response.json({ ...runHeating, oldHeatingRule: ['1'], heatingSums: [heatingSum] })
+					: fetchWith([statement('1', c1, 'sent', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
+
+		expect(await changedOf(fetch)).toEqual([named('1', { oldRule: true, heatingSum })]);
 	});
 
 });

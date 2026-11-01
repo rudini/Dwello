@@ -10,7 +10,11 @@ import { billingStart, billsIn, getContract, listContracts, type ContractWithDet
 import { listHeatingProfiles } from './heating-profile.service';
 import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
-import { listStatements } from './statement.service';
+import { and, eq, inArray, sql } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { categories, utilityStatementLineItems } from '../db/schema';
+import { roundToRappen } from './pdf-format';
+import { calculateStatement, listStatements } from './statement.service';
 import { swissToday } from './today';
 import { counting, isReplaced } from './counting-statements';
 
@@ -318,12 +322,71 @@ export function runHeatingHints<I>(
 	return { heatingWithoutServicePeriod: change ? check.heatingWithoutServicePeriod : [], oldHeatingRule: check.oldHeatingRule.filter(rebilled) };
 }
 
-/** The heating hints of the building's check for a run of the period with the Heizprofil (#335, #339, H-28) */
+type Heating = { costs: number; tenants: number; billed: number; unagreed: boolean };
+
+/**
+ * #508 (Fachreview 508-1 M-1, V-3, V-4): the apartment's heating costs (its share before the Zeitanteil), the part the
+ * landlord bears (vacancy, leases without agreed heating costs: Art. 7 Abs. 1 VMWG), what its statements bill for them
+ * without the Verwaltungspauschale, and the difference to the tenants' part; under CHF 0.05 it is rounding
+ */
+export function heatingSum({ costs, tenants, billed, unagreed }: Heating) {
+	const landlord = roundToRappen(costs - tenants);
+	const difference = roundToRappen(billed - tenants);
+	const result = Math.abs(difference) < 0.05 ? 'equal' : difference > 0 ? 'more' : 'less';
+	const landlordFor = unagreed ? 'leases' : landlord >= 0.05 ? 'vacancy' : null;
+	const chf = (n: number) => n.toFixed(2);
+	return { costs: chf(costs), tenants: chf(tenants), landlord: chf(landlord), billed: chf(billed), difference: chf(Math.abs(difference)), result, landlordFor };
+}
+
+const sumOf = (items: { tenantShare: number | string; apartmentShare?: number | string | null }[], key: 'tenantShare' | 'apartmentShare') =>
+	roundToRappen(items.reduce((sum, item) => sum + Number(item[key] ?? 0), 0));
+
+/** The heating line items' tenant shares of stored statements, by statement */
+async function storedHeating(ids: string[]) {
+	if (!ids.length) return new Map<string, number>();
+	const rows = await db
+		.select({ id: utilityStatementLineItems.statementId, share: sql<string>`sum(${utilityStatementLineItems.tenantShare})` })
+		.from(utilityStatementLineItems)
+		.innerJoin(categories, eq(utilityStatementLineItems.categoryId, categories.id))
+		.where(and(inArray(utilityStatementLineItems.statementId, ids), eq(categories.isHeatingCost, true)))
+		.groupBy(utilityStatementLineItems.statementId);
+	return new Map(rows.map((row) => [row.id, Number(row.share)]));
+}
+
+/**
+ * #508: the heating sum of each apartment a sent statement under the old rule names, once per apartment (on its first
+ * such statement): every contract with Mietstage under today's rule gives the tenants' part; the statements of the
+ * period not replaced count as stored, the contracts the run bills as it would bill them
+ */
+async function heatingSumsOf(run: { period: Range; heatingProfileId: string | null }, contracts: Billed[], statements: Placed[], sent: string[]) {
+	const planned = planRun(run.period, contracts, statements).contracts;
+	const same = (s: Placed) => s.periodStart === run.period.start && s.periodEnd === run.period.end && !isReplaced(s);
+	const stored = await storedHeating(statements.filter(same).map((s) => s.id));
+	const apartments = [...new Map(sent.map((id) => [statements.find((s) => s.id === id)!.apartmentId, id])).entries()];
+	return Promise.all(
+		apartments.map(async ([apartmentId, statementId]) => {
+			const sum: Heating = { costs: 0, tenants: 0, billed: 0, unagreed: false };
+			for (const c of planned.filter((p) => p.apartmentId === apartmentId)) {
+				const { lineItems } = await calculateStatement({ contractId: c.id, periodStart: run.period.start, periodEnd: run.period.end, heatingProfileId: run.heatingProfileId ?? undefined });
+				const items = lineItems.filter((item) => item.isHeatingCost);
+				const own = statements.find((s) => s.contractId === c.id && same(s));
+				sum.costs = Math.max(sum.costs, sumOf(items, 'apartmentShare'));
+				sum.tenants += sumOf(items, 'tenantShare');
+				sum.billed += own ? (stored.get(own.id) ?? 0) : sumOf(items, 'tenantShare');
+				sum.unagreed ||= !items.length;
+			}
+			return { statementId, ...heatingSum(sum) };
+		})
+	);
+}
+
+/** The heating hints of the building's check for a run of the period with the Heizprofil (#335, #339, H-28, #508) */
 export async function runHeatingHintsOf(buildingId: string, run: { period: Range; heatingProfileId: string | null }) {
 	const [{ contracts }, { statements }, check] = await Promise.all([
 		listContracts({ buildingId, limit: 1000 }),
 		listStatements({ buildingId, limit: 1000 }),
 		heatingHintsOf(buildingId, run.period)
 	]);
-	return runHeatingHints(run, contracts, statements, check);
+	const hints = runHeatingHints(run, contracts, statements, check);
+	return { ...hints, heatingSums: await heatingSumsOf(run, contracts, statements, hints.oldHeatingRule) };
 }
