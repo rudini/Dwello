@@ -289,6 +289,20 @@ describe('Teilzahlung', () => {
 		expect(await db.select().from(documents).where(eq(documents.id, pending.id))).toEqual([]);
 	});
 
+	// code review 1015-1 C-1: one made before the part payment does not name it and stays
+	it('behält beim Zurücksetzen einer Teilzahlung das neue PDF «Zu versenden», das davor erstellt wurde', async () => {
+		const [{ tenantId }] = await db.select({ tenantId: utilityStatements.tenantId }).from(utilityStatements).where(eq(utilityStatements.id, id));
+		const [pending] = await db
+			.insert(documents)
+			.values({ tenantId, statementId: id, type: 'new_pdf', status: 'to_send', title: 'Nebenkostenabrechnung, neues PDF', fileName: 'neu.pdf', content: 'JVBERi0=', createdAt: new Date(Date.now() - 86_400_000) })
+			.returning({ id: documents.id });
+		await pay('10.00');
+		await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		expect(await db.select({ id: documents.id }).from(documents).where(eq(documents.id, pending.id))).toEqual([pending]);
+		await db.delete(documents).where(eq(documents.id, pending.id));
+	});
+
 	// code review 959a-1 C-2: a replaced statement stays replaced, also with a part payment on it
 	it('setzt bei einer ersetzten Abrechnung keine Teilzahlung zurück', async () => {
 		await pay('10.00');
