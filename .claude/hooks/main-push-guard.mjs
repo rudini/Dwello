@@ -15,10 +15,16 @@ const command = input.tool_input?.command ?? '';
 
 /**
  * The shell commands of a line, each as its words; quotes are kept together and dropped, so text in them is no command,
- * except a `$(…)` in double quotes (checked before its command); bodies of quoted heredocs are dropped; `(` and `)` stand alone, so a subshell's cd ends with it
+ * except a `$(…)` in double quotes (checked before its command) or in an unquoted heredoc (after it); heredoc bodies
+ * are dropped; `(` and `)` stand alone, so a subshell's cd ends with it
  */
+const substitutions = (text) => [...text.matchAll(/\$\(([^)]*)\)?/g)].map(([, inner]) => `(${inner})`);
 function commands(line) {
-	const s = line.replace(/\\\n/g, ' ').replace(/<<-?\s*(['"])(\w+)\1([^\n]*)\n(?:[\s\S]*?\n)?\s*\2(?=\n|$)/g, '$3');
+	const s = line
+		.replace(/\\\n/g, ' ')
+		.replace(/<<-?\s*(['"]?)(\w+)\1([^\n]*)\n((?:[\s\S]*?\n)?)\s*\2(?=\n|$)/g, (_, quote, _end, rest, body) =>
+			[rest, ...(quote ? [] : substitutions(body))].join(';')
+		);
 	const all = [[]];
 	let word = null;
 	const end = () => (word !== null && all.at(-1).push(word), (word = null));
@@ -27,7 +33,7 @@ function commands(line) {
 		if (c === '"' || c === "'") {
 			const close = s.indexOf(c, i + 1);
 			const quoted = s.slice(i + 1, close < 0 ? undefined : close);
-			if (c === '"') for (const [, inner] of quoted.matchAll(/\$\(([^)]*)\)?/g)) all.splice(-1, 0, ...commands(`(${inner})`));
+			if (c === '"') all.splice(-1, 0, ...substitutions(quoted).flatMap(commands));
 			word = (word ?? '') + quoted;
 			i = close < 0 ? s.length : close;
 		} else if (/[;&|\n()]/.test(c)) {
@@ -123,7 +129,9 @@ for (const words of commands(command).map(withoutRedirections)) {
 	const git = withoutPrefixes(words);
 	if (!dir && git[0] === 'git' && git.includes('push')) reason ??= 'runs in a directory the hook cannot resolve';
 	else if (dir) {
-		const assignments = words.slice(0, words.length - git.length).filter((word) => /^GIT_(DIR|WORK_TREE|COMMON_DIR|NAMESPACE|CONFIG\w*)=/.test(word));
+		const assignments = words
+			.slice(0, words.length - git.length)
+			.filter((word) => /^GIT_(DIR|WORK_TREE|COMMON_DIR|NAMESPACE|CONFIG\w*)=/.test(word));
 		reason ??= toMain(git, dir, Object.fromEntries(assignments.map((word) => word.split(/=(.*)/s, 2))));
 	}
 }

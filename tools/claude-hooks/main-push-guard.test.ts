@@ -70,7 +70,9 @@ describe('push to main by its resolved target (#713)', () => {
 		// review 713-4
 		['a quoted substitution in a subshell into main', () => onFeature, '(cd "%MAIN%" && echo "$(git push)")'],
 		['a substitution in an unquoted heredoc', () => onMain, 'cat <<EOF\n$(git push)\nEOF'],
-		['--git-dir= with a variable', () => onFeature, 'git --git-dir="$REPO" push']
+		['--git-dir= with a variable', () => onFeature, 'git --git-dir="$REPO" push'],
+		// review 713-5
+		['a push after an apostrophe in an unquoted heredoc', () => onMain, "cat > n.md <<EOF\nit's done\nEOF\ngit push"]
 	])('asks before %s', (_, cwd, command) => {
 		expect(decision(cwd(), command.replaceAll('%MAIN%', onMain).replaceAll('%FEATURE%', onFeature))).toBe('ask');
 	});
