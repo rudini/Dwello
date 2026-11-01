@@ -498,3 +498,13 @@
 - [x] Its Minors fixed: reason when the answer stays empty, Copilot waited for 5 minutes, concurrency on the job, diff per file (GitHub refuses large diffs)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1007.md`
 - [x] PR: pushed after this archive
+
+## Session: #1003 new PDF after a part payment asks for the open amount
+
+- [x] @wip scenario «Ein neues PDF nach einer Teilzahlung verlangt den offenen Betrag» and pg test, seen red
+- [x] fach-reviewer step 1 `docs/reviews/1003-fachreview-1.md`: decided by recommendation (product owner 01.11.2026) and recorded in #1003; V-3 to #1015, V-4 to #1016
+- [x] PDF: box, request, «Betrag der Abrechnung … – Bereits bezahlt …», QR code, receipt, payment part and payment info with the open amount; part refund; corrected statement (V-5, V-9); glossary rows (V-8)
+- [x] code-reviewer `docs/reviews/1003-review-1.md`: C-1 (Major) and C-2 tests added, seen red; closing round `1003b-review-1.md`
+- [x] Persona `docs/design/personas/weber-1003.md`: four Minors, stay in the report (P-1 is the decided cost table)
+- [x] daten-pruefer `docs/reviews/1003-datenpruefung-1.md`: no findings, QR payload decoded with 35.80
+- [x] PR: pushed after this archive
