@@ -290,3 +290,10 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter ist auf der Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Dann schlägt Dwello bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" vor
+
+  # #681: die leere Rechnungssuche bietet das Zurücksetzen bei ihrem Ergebnis an, nicht erst beim Suchformular
+  Szenario: Leere Rechnungssuche setzt die Filter zurück
+    Angenommen der Liegenschaftsverwalter ist auf der Rechnungsliste
+    Wenn der Liegenschaftsverwalter nach dem Rechnungssteller "Gibt es nicht" sucht
+    Und der Liegenschaftsverwalter wieder alle Rechnungen anzeigt
+    Dann steht der Fokus auf dem Ergebnis der Liste

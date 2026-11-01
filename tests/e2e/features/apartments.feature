@@ -82,3 +82,15 @@ Funktionalität: Wohnungsliste
     Angenommen der Liegenschaftsverwalter zeigt die Wohnungen im Gebäude "Ahornhof" an
     Wenn der Liegenschaftsverwalter die Wohnung "2.01" aus der Liste öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 2.01"
+
+  # #681: jede Bewegung innerhalb der Liste bringt den Fokus zum Ergebnis, wie eine Suche
+  Szenario: Nach dem Zurücksetzen der Filter steht der Fokus auf dem Ergebnis
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
+    Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
+    Dann steht der Fokus auf dem Ergebnis der Liste
+
+  Szenario: Nach dem Zurückgehen im Browser steht der Fokus auf dem Ergebnis
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
+    Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann steht der Fokus auf dem Ergebnis "Keine Wohnungen gefunden"

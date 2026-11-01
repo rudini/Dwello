@@ -130,6 +130,21 @@ describe('Auswahlgruppe', () => {
 		).toContain('Bitte wählen Sie die Dauer.');
 	});
 
+	// #683: text outside the group that explains the question, e.g. the reason of a predefined category
+	it('nennt einen erklärenden Text ausserhalb der Gruppe nach der Hilfe', () => {
+		show(RadioGroup, {
+			name: 'duration',
+			legend: 'Dauer',
+			options,
+			value: '',
+			help: 'Hilfe',
+			describedby: 'reason'
+		});
+		expect(document.querySelector('fieldset')!.getAttribute('aria-describedby')).toBe(
+			'duration-help reason'
+		);
+	});
+
 	// #654: the error belongs to the choice that was sent
 	it('nimmt den Fehler weg, sobald eine Option gewählt wird', async () => {
 		show(RadioGroup, { name: 'duration', legend: 'Dauer', options, value: '', error: 'Bitte wählen Sie die Dauer.' });

@@ -594,4 +594,40 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Persona `docs/design/personas/helga-521.md`: P-3 fixed; P-1 (Major), P-2 to #1036; P-4 to P-7 stay in the report
 - [x] daten-pruefer `docs/reviews/521-datenpruefung-1.md`: no findings
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-521.md`
+## Session: NFR issues on my own, part 2 (#742 first)
+
+- [x] #742: the status line of «Rechnungen hochladen» says how many invoices are ready to create; @wip scenario seen red (received «Bitte prüfen: 1.»)
+- [x] #742: text «Bereit zum Erstellen» in de, fr, it, en (`InvoiceUploadDialog.svelte`, `messages/*.json`, two DOM expectations); scenario green without @wip; invoices + ki-einstellungen 59 passed; axe and language rows of the five upload screens 10 passed
+- [x] #742 slice review: no Blocker/Major, Minor C-1 stays in `docs/reviews/742-review-1.md` (needs a PO decision on the exact status text)
+- [x] #742 persona Sven (screen reader) on the upload dialog: P-1 to P-3 Minor, not trivial (status wording needs decisions), stay in `docs/design/personas/sven-742.md`
+- [x] #742 PR #1027 merged (2e7e7e892); Copilot out of quota, fallback review: no issues
+- [x] #683: @wip scenario «Begründung der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie» seen red at the missing label, then at the missing description; green without @wip; categories.feature 28 passed, axe and language rows 12 passed
+- [x] #683 slice review: `docs/reviews/683-review-1.md`, Minor C-1 fixed (DOM test for `describedby`, seen red)
+- [x] #683 personas Helga and Sven: `docs/design/personas/{helga,sven}-683.md`; Sven P-1 (Major, from the #186 rule) tracked in #1029 on the product owner's decision to merge as built; the rest of #683 split into #1028
+- [x] #683 closing round: `docs/reviews/683-review-2.md`, no Blocker/Major; C-1 rest (label only in the scenario) stays in the report
+- [x] #683 PR #1030 merged (b6b80a5cd); fallback review Low finding answered (stays, goes with #1029)
+- [x] #681: scenarios «Nach dem Zurücksetzen der Filter …», «Nach dem Zurückgehen im Browser …» (apartments) and «Leere Rechnungssuche setzt die Filter zurück» (invoices) seen red; unit test for `isListNavigation` seen red; apartments + invoices 51 passed, axe and language rows 28 passed
+- [x] #681 slice review: `docs/reviews/681-review-1.md`, Major C-1 (back scenario could not fail) fixed, seen red without popstate; round 2 `681-review-2.md` closes it
+- [x] #681 persona Sven: `docs/design/personas/sven-681.md`, P-1 and P-2 Minor (need new texts), stay in the report
+- [x] #681 PR: pushed after this archive
+- [x] Workflow notes `docs/reviews/workflow-notes-nfr-part-2.md`, collected review `workflow-rules-review-2026-11-01-2.md`
+## Session: structure report (Structure101-style, A/I graph, traffic lights)
+
+Request from the product owner (chat, 1.11.2026): build the structure report as a tool in the repo, show the results with the full Git history, add an Abstractness/Instability graph and scores with a traffic-light system. No scenario: developer tooling, nothing a landlord sees. Parallel session (the #742 session opened on `main` meanwhile): checklist also in the pull request.
+
+- [x] `tools/arch-baseline/structure.ts` with tests: Lakos levels from module edges and cycles
+- [x] Abstractness per module (exported types and interfaces / all exports), instability, distance from the main sequence
+- [x] Traffic lights per module (distance, complexity findings, hotspot) and per KPI (tangles, health score, duplication, maintainability)
+- [x] HTML report: KPI tiles, DSM with back-edges red, A/I graph, module table worst first
+- [x] `bun run structure:report` (01-map, 02-imports, fallow health without cache, structure.ts), docs in `docs/architecture/fitness-functions.md`
+- [x] code-reviewer round 1: `docs/reviews/structure-report-review-1.md`; closing round: `docs/reviews/structure-report-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-structure-report.md`; issue #1032 (fallow churn cache after unshallow)
+- [x] Results with full history to the product owner (chat)
+## Session: #508 the statement run names the heating sum of an apartment
+
+- [x] @wip scenario seen red; fach-reviewer step 1 `docs/reviews/508-fachreview-1.md`: M-1 (vacancy), V-1, V-3 to V-6 taken; V-2 to #1026 (needs-decision)
+- [x] Backend `heatingSums` on GET /statements/run-heating, BFF mapper, `heatingSumText`, six texts in four languages; pg, unit and text tests seen red
+- [x] code-reviewer `docs/reviews/508-review-1.md`: C-1 to C-5 fixed (C-1 contract `statement-run-heating-sum.json`, C-2 and C-5 tests seen red); re-review `508b-review-1.md`: C-6 (two distribution keys) fixed, test seen red; round 3 `508c-review-1.md`
+- [x] daten-pruefer `docs/reviews/508-datenpruefung-1.md`: every amount holds to the Rappen
+- [x] Persona `docs/design/personas/dr-weber-508.md`: P-1 (Major, no advice at «zu wenig») to #1026; P-2 to P-5 (Minor) stay in the report
 - [x] PR: pushed after this archive

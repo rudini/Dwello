@@ -13,7 +13,7 @@
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
-	import { isListSearch } from '$lib/list-url';
+	import { isListNavigation } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -60,7 +60,7 @@
 
 	// After a search on a list the focus goes to its results, so their number is read out
 	afterNavigate((navigation) => {
-		if (isListSearch(navigation))
+		if (isListNavigation(navigation))
 			document.querySelector<HTMLElement>('main [data-results]')?.focus();
 	});
 

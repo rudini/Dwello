@@ -13,7 +13,7 @@ import {
 	statusOfListedInvoice
 } from '../questions/invoices';
 import { pageAddress, pageTitle } from '../questions/navigation';
-import { editInvoice, filterInvoices, openInvoiceList, openInvoicesOfPeriod, searchInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
+import { editInvoice, filterInvoices, openInvoiceList, openInvoicesOfPeriod, searchInvoices, showAllInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -30,6 +30,10 @@ Given('der Liegenschaftsverwalter ist auf der Rechnungsliste', async ({ verwalte
 
 When('der Liegenschaftsverwalter nach dem Rechnungssteller {string} sucht', async ({ verwalter, names }, supplier: string) => {
 	await verwalter.attemptsTo(searchInvoices(names.get(supplier) ?? supplier));
+});
+
+When('der Liegenschaftsverwalter wieder alle Rechnungen anzeigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(showAllInvoices);
 });
 
 When(

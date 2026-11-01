@@ -3,7 +3,7 @@ import { periodDays } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { localSplitKeys, namesById, toStatement } from '$lib/server/statement';
-import type { ChangedStatement, HintedInvoice, InvoiceCheck } from '$lib/statement-wizard';
+import type { ChangedStatement, HeatingSum, HintedInvoice, InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -242,7 +242,7 @@ async function changedStatements(
 	buildingId: string,
 	run: GenerationRequest,
 	overlapping: Listed[],
-	oldRule: (listed: Listed) => boolean
+	heating: Pick<Awaited<ReturnType<typeof heatingHints>>, 'oldRule' | 'heatingSum'>
 ): Promise<ChangedStatement[]> {
 	const query = runQuery(buildingId, run);
 	query.set('managementFeePercent', String(run.managementFeePercent));
@@ -264,7 +264,7 @@ async function changedStatements(
 		// a row of GET /statements has the statement's form (backend/src/api/statement.ts)
 		const { id, statementNumber, tenantName } = toStatement(listed as Parameters<typeof toStatement>[0]);
 		// the invoices and the Tankbestand changed since (#454, #408 point 8), and what it does differently
-		const notes = { ...settings(listed), oldRule: oldRule(listed) };
+		const notes = { ...settings(listed), oldRule: heating.oldRule(listed), heatingSum: heating.heatingSum(listed) };
 		return Object.values(notes).some(Boolean) ? [{ id, statementNumber, tenantName, ...notes }] : [];
 	});
 }
@@ -273,10 +273,15 @@ async function changedStatements(
 // only when the check has some, none when they do not load
 async function heatingHints(fetch: Fetch, buildingId: string, run: GenerationRequest, check?: InvoiceCheck) {
 	const { heatingWithoutServicePeriod: hinted = [], oldHeatingRule: sent = [] } = check ?? {};
-	const forRun: Partial<Pick<InvoiceCheck, 'heatingWithoutServicePeriod' | 'oldHeatingRule'>> =
+	const forRun: Partial<Pick<InvoiceCheck, 'heatingWithoutServicePeriod' | 'oldHeatingRule'> & { heatingSums: HeatingSum[] }> =
 		hinted.length + sent.length ? await call(fetch, `statements/run-heating?${runQuery(buildingId, run)}`).catch(() => ({})) : {};
-	const { heatingWithoutServicePeriod = [], oldHeatingRule = [] } = forRun;
-	return { found: check && { ...check, heatingWithoutServicePeriod }, oldRule: (listed: Listed) => oldHeatingRule.includes(listed.id) };
+	const { heatingWithoutServicePeriod = [], oldHeatingRule = [], heatingSums = [] } = forRun;
+	return {
+		found: check && { ...check, heatingWithoutServicePeriod },
+		oldRule: (listed: Listed) => oldHeatingRule.includes(listed.id),
+		// #508: the heating sum of its apartment, on its first statement under the old rule
+		heatingSum: (listed: Listed) => heatingSums.find((sum) => sum.statementId === listed.id) ?? null
+	};
 }
 
 /** Per building: the utility invoices of the period, the statements whose period overlaps it and the check per category */
@@ -312,7 +317,7 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 					)
 					.sort();
 				const overlapping = (statements as Listed[]).filter((s) => overlaps(s as Period));
-				const { found, oldRule } = await heatingHints(fetch, buildingId, run, check as InvoiceCheck | undefined);
+				const { found, ...heating } = await heatingHints(fetch, buildingId, run, check as InvoiceCheck | undefined);
 				return {
 					buildingId,
 					count: invoices.length,
@@ -320,7 +325,7 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 					last: dates.at(-1) ?? null,
 					statements: (statements as Period[]).filter(overlaps).length,
 					check: found,
-					changed: await changedStatements(fetch, buildingId, run, overlapping, oldRule),
+					changed: await changedStatements(fetch, buildingId, run, overlapping, heating),
 					// #382: the agreement is checked through the category, so the run waits for one on each
 					uncategorized: (invoices as Bill[])
 						.filter((i) => !i.categoryId)
