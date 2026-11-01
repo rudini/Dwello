@@ -36,8 +36,8 @@ jobs:
         with:
           path: build/structure/history
           # snapshots stay valid while the tools that measure them do not change (structure-history.sh checks it too)
-          key: structure-history-${{ hashFiles('tools/arch-baseline/*.ts', 'tools/arch-baseline/layers.json', '.fallowrc.json', 'bun.lock') }}-${{ github.sha }}
-          restore-keys: structure-history-${{ hashFiles('tools/arch-baseline/*.ts', 'tools/arch-baseline/layers.json', '.fallowrc.json', 'bun.lock') }}-
+          key: structure-history-${{ hashFiles('tools/arch-baseline/*.ts', 'tools/arch-baseline/structure-history.sh', 'tools/arch-baseline/layers.json', '.fallowrc.json', 'bun.lock') }}-${{ github.sha }}
+          restore-keys: structure-history-${{ hashFiles('tools/arch-baseline/*.ts', 'tools/arch-baseline/structure-history.sh', 'tools/arch-baseline/layers.json', '.fallowrc.json', 'bun.lock') }}-
       - run: bun run structure:report
       - name: Upload report
         if: ${{ !cancelled() }}

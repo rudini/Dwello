@@ -19,5 +19,6 @@ Request from the product owner (chat, 1.11.2026): history of the structure repor
 - [x] History section: one chart per measure, modules whose distance D changed most
 - [x] CI workflow on push to `main`: cache of snapshots, report as artifact, trend table in the job summary
 - [x] code-reviewer round 1: `docs/reviews/structure-history-review-1.md` (C-1 Major cache keyed by commit only, C-2 Minor same-day order: fixed)
-- [ ] Results to the product owner
+- [x] code-reviewer round 2: `docs/reviews/structure-history-review-2.md` (C-1, C-2 closed; Minors C-3 script in the cache fingerprint, C-4 comment: fixed)
+- [x] Results to the product owner (chat, page updated)
 - [ ] Slice review, PR
