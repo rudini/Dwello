@@ -143,6 +143,8 @@ export function toPdfData(
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
 		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,
+		// #1003: a part paid on a statement still open; its PDF asks for the rest
+		paidSoFar: (['sent', 'overdue'].includes(statement.status) && Number(statement.paidAmount)) || undefined,
 		// the agreed categories it bills, as its positions name them (#91, domain review M-2); not next to a position
 		// without a category, which no contract agrees (round 2 M-1)
 		agreedCosts:

@@ -1096,3 +1096,18 @@ describe('PDF ohne vollständige Firmenadresse', () => {
 			expect(text).toContain('Melden Sie sich dafür bei Muster Immobilien AG, 8001 Zürich');
 		}));
 });
+
+// #1003 (decided 01.11.2026): a new PDF after a part payment asks in the Zahlteil for the open amount, not the Saldo
+describe('Neues PDF nach einer Teilzahlung', () => {
+	it('verlangt auf Empfangsschein und Zahlteil den offenen Betrag', async () => {
+		const balance = Number((await getStatement(statementId))!.balance);
+		const paid = (balance - 123.45).toFixed(2); // open: 123.45, below 1'000 so no thousands separator
+		await db.update(utilityStatements).set({ status: 'sent', paidAmount: paid }).where(eq(utilityStatements.id, statementId));
+		await generateStatementPdf(statementId, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft', paidAmount: null }).where(eq(utilityStatements.id, statementId)); // afterAll deletes drafts only
+
+		// on the receipt and on the payment part
+		expect(text.split('123.45').length - 1).toBeGreaterThanOrEqual(2);
+	});
+});

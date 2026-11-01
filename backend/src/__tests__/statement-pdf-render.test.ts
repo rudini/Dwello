@@ -2,10 +2,11 @@
  * The statement PDF as the tenant reads it, rendered from given data (no database)
  */
 
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it, spyOn } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
 import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
+import * as qrBill from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
 const config = { iban: 'CH4431999123000889012', companyName: 'Muster Immobilien AG', address: 'Firmenweg 9', postalCode: '8001', city: 'Zürich' };
@@ -1005,5 +1006,77 @@ describe('Brief im PDF', () => {
 		const { flowing } = await letterOf({ ...heated, heating: { profile: 'Winter', percent: 18, months, source: 'Eigenes Profil des Vermieters' } });
 
 		expect(flowing).toContain('Quelle der Monatsanteile: Eigenes Profil des Vermieters');
+	});
+});
+
+// #1003 (Fachreview 1003-1): after a part payment the PDF asks for what is still open, in the box, on the receipt and the
+// payment part; without one it stays as it was
+describe('PDF nach einer Teilzahlung', () => {
+	it('nennt im Kasten den offenen Betrag und was schon bezahlt ist, und verlangt im Zahlteil den Rest', async () => {
+		const { flowing, text } = await textOf({ ...due, paidSoFar: 84.15 });
+
+		expect(flowing).toContain('Offener Betrag CHF 100.00');
+		expect(flowing).toContain('Bitte bezahlen Sie den offenen Betrag bis 17.03.2026 mit dem Zahlteil.');
+		expect(flowing).toContain('Betrag der Abrechnung CHF 184.15 – Bereits bezahlt CHF 84.15');
+		// box, receipt and payment part; the cost table still ends at the Saldo
+		expect(text.split('100.00').length - 1).toBeGreaterThanOrEqual(3);
+		expect(flowing).toContain('Nachzahlung 184.15');
+	});
+
+	// V-6: a part refund: the rest is «Offene Rückerstattung», without the request for the IBAN the tenant gave already
+	it('nennt nach einer Teilrückerstattung die offene Rückerstattung', async () => {
+		const { flowing } = await textOf({ ...refund, paidSoFar: -10 });
+
+		expect(flowing).toContain('Offene Rückerstattung CHF 83.85');
+		expect(flowing).toContain('Bereits zurückerstattet CHF 10.00');
+		expect(flowing).not.toContain('Teilen Sie uns dafür Ihre IBAN mit');
+	});
+
+	// V-5, V-9: a corrected statement with a part payment of its own
+	it('sagt auf einer berichtigten Abrechnung mit eigener Teilzahlung, dass nur noch der offene Betrag zu bezahlen ist', async () => {
+		const corrected: StatementPDFData = {
+			...due,
+			statementNumber: 'NK-1-2025-0002',
+			balance: 84.1,
+			paidSoFar: 4.1,
+			replaces: { statementNumber: 'NK-1-2025-0001', statementDate: '2026-02-01', paidOn: ['NK-1-2025-0001'], priorPayments: 100 }
+		};
+		const { flowing } = await textOf(corrected);
+
+		expect(flowing).toContain('Bezahlen Sie nur noch den offenen Betrag dieser Abrechnung.');
+		expect(flowing).toContain('Bereits bezahlt auf diese Abrechnung CHF 4.10');
+		expect(flowing).toContain('Offener Betrag CHF 80.00');
+	});
+
+	// code review 1003-1 C-1: the amount in the QR code itself, which the text of the PDF does not show
+	it('legt den offenen Betrag in den QR-Code', async () => {
+		const qr = spyOn(qrBill, 'generateQRBillForStatement');
+		try {
+			await textOf({ ...due, paidSoFar: 84.15 });
+			expect(qr.mock.calls.map(([statement]) => statement.balance)).toEqual(['100']);
+		} finally {
+			qr.mockRestore();
+		}
+	});
+
+	// C-2: without a QR code (it could not be made) the payment info names the open amount
+	it('nennt ohne QR-Code in den Zahlungsangaben den offenen Betrag', async () => {
+		const qr = spyOn(qrBill, 'generateQRBillForStatement').mockRejectedValue(new Error('no QR code'));
+		const error = spyOn(console, 'error').mockImplementation(() => {});
+		try {
+			const { flowing } = await textOf({ ...due, paidSoFar: 84.15 });
+			expect(flowing).toMatch(/Zahlungsinformationen Konto .+ Betrag CHF 100\.00/); // code review 1003b-1 C-3
+			expect(flowing).not.toMatch(/Betrag CHF 184\.15/);
+		} finally {
+			qr.mockRestore();
+			error.mockRestore();
+		}
+	});
+
+	it('bleibt ohne Teilzahlung, wie es war', async () => {
+		const { flowing } = await textOf(due);
+
+		expect(flowing).toContain('Nachzahlung CHF 184.15');
+		expect(flowing).not.toContain('Offener Betrag');
 	});
 });

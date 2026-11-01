@@ -510,6 +510,14 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1007.md`
 - [x] PR: pushed after this archive
 
+## Session: #1003 new PDF after a part payment asks for the open amount
+
+- [x] @wip scenario «Ein neues PDF nach einer Teilzahlung verlangt den offenen Betrag» and pg test, seen red
+- [x] fach-reviewer step 1 `docs/reviews/1003-fachreview-1.md`: decided by recommendation (product owner 01.11.2026) and recorded in #1003; V-3 to #1015, V-4 to #1016
+- [x] PDF: box, request, «Betrag der Abrechnung … – Bereits bezahlt …», QR code, receipt, payment part and payment info with the open amount; part refund; corrected statement (V-5, V-9); glossary rows (V-8)
+- [x] code-reviewer `docs/reviews/1003-review-1.md`: C-1 (Major) and C-2 tests added, seen red; closing round `1003b-review-1.md`
+- [x] Persona `docs/design/personas/weber-1003.md`: four Minors, stay in the report (P-1 is the decided cost table)
+- [x] daten-pruefer `docs/reviews/1003-datenpruefung-1.md`: no findings, QR payload decoded with 35.80
 ## Session: fallback review without Copilot triggers (#1007 follow-up)
 
 - [x] Runs triggered by Copilot's review wait for an approval no setting gives and expire (#1009, run 41256102317): `pull_request_review` and `issue_comment` triggers removed; an error review of Copilot still counts as no review when CI finishes
@@ -551,3 +559,9 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-710.md`; collected review `docs/reviews/workflow-rules-review-2026-11-01.md`
 - [x] #661 PR: pushed after this archive
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)
+## Session: #1015 resetting a part payment drops its PDF
+
+- [x] pg tests in `statement-lock.pg.test.ts`, seen red; fix in `recordPayment` and `resetPayment`
+- [x] No scenario: the UI cannot reset a part payment yet (#999); two tried scenarios failed at the missing button
+- [x] code-reviewer `docs/reviews/1015-review-1.md`: C-1 test added (seen red); C-2 (reachable with #999 only) and C-3 (database not on UTC) stay in the report
+- [x] PR: pushed after this archive
