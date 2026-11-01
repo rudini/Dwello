@@ -44,6 +44,8 @@ import {
 	advanceDiffersText,
 	partialPaymentAdvice,
 	pdfChangedAdvice,
+	openRestText,
+	paymentDone,
 	pdfBeforeChangeOffered,
 	sentPdfHref,
 	splitKeysLineText,
@@ -87,6 +89,7 @@ import {
 	markStatementPaidOn,
 	startMarkingPaid,
 	downloadPdfBeforeChange,
+	recordPayment,
 	downloadSentPdf,
 	openResetPaymentConfirmation,
 	openSendConfirmation,
@@ -212,6 +215,18 @@ Then('bietet die Bestätigung das PDF der Abrechnung zum Ansehen an', async ({ v
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(markStatementPaid);
+});
+
+When('der Liegenschaftsverwalter eine Zahlung von {string} Franken festhält', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(recordPayment(amount));
+});
+
+Then('bestätigt Dwello die Zahlung mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentDone).toContain(text);
+});
+
+Then('nennt das Panel Zahlung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(openRestText).toBe(text);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markieren will', async ({ verwalter }) => {

@@ -54,7 +54,12 @@
 	});
 	// #448 (5): what was already paid on a sent or overdue statement, also a part; on a refund by the landlord
 	const askPaid = $derived(statement.status === 'sent' || statement.status === 'overdue');
+	// #959: the part payments recorded, which the landlord can still change (Fachreview 959-1, Regel 3); set anew on each
+	// opening, so a payment recorded since counts
 	let paidAmount = $state('0.00');
+	$effect.pre(() => {
+		if (open) paidAmount = Math.abs(statement.paidAmount ?? 0).toFixed(2);
+	});
 	let paidError = $state('');
 	function checkPaid() {
 		const valid = !askPaid || FRANCS.test(paidAmount.trim());

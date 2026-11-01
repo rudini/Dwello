@@ -11,10 +11,10 @@ import { createApartment, deleteApartment } from '../services/apartment.service'
 import { createContract, deleteContract } from '../services/contract.service';
 import { updateStatementStatus } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
+import { daysAfter, swissToday } from '../services/today';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
-import { daysAfter, swissToday } from '../services/today';
 
 type Dashboard = {
 	portfolio: Record<string, number>;
@@ -144,6 +144,16 @@ describe('Dashboard', () => {
 
 	it('summiert ausstehende Nachzahlungen der Mieter ohne Guthaben', () => {
 		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 270 });
+	});
+
+	// #959: nach einer Teilzahlung ist nur der offene Betrag ausstehend (Art. 85 Abs. 1 OR, Fachreview 959-1 V-4)
+	it('summiert nach einer Teilzahlung nur den offenen Betrag', async () => {
+		const start = await dashboard();
+		await statement(11, { status: 'sent', balance: '400', paidAmount: '100', paymentDeadline: day(-1) });
+		const end = await dashboard();
+
+		expect(end.financial.totalPending - start.financial.totalPending).toBe(300);
+		expect(end.financial.overdueAmount - start.financial.overdueAmount).toBe(300);
 	});
 
 	it('zeigt die Belegung des Gebäudes', () => {

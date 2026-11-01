@@ -36,6 +36,7 @@
 
 	let form = $state<HTMLFormElement>();
 	let busy = $state(false);
+	let said: string | undefined; // the success text at submit: the refreshed page may name another (#959, a part payment)
 </script>
 
 <!-- hidden: an empty form would still take a gap in the page's column -->
@@ -45,12 +46,12 @@
 	method="POST"
 	{action}
 	use:enhance={dialogSubmit(
-		() => fields,
+		() => ((said = success), fields),
 		(running) => (busy = running),
 		async (result) => {
 			open = false;
-			if (result.type === 'success' && success) {
-				addToast('success', success);
+			if (result.type === 'success' && said) {
+				addToast('success', said);
 				await tick(); // after the dialog has handed the focus back
 				document.querySelector<HTMLElement>('h1')?.focus(); // its button may be gone now
 			}

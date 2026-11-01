@@ -3,6 +3,7 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import { partPaid } from '$lib/statement';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Who pays whom by when; a refund has no Zahlungsfrist for the tenant
@@ -55,6 +56,9 @@
 
 <Panel title={m.statements_payment()}>
 	<p class="text-ink" data-testid="statement-payment-summary">{summary}</p>
+	{#if partPaid(statement)}<p class="text-ink" data-testid="statement-open-rest">
+			{partPaid(statement)}
+		</p>{/if}
 	{#if statement.openCarry && !replaced && onsettle}
 		<div>
 			<Button variant="secondary" icon="check" onclick={onsettle} testid="statement-carry-settle"

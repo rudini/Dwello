@@ -207,3 +207,100 @@ describe('Zahlung zurücksetzen', () => {
 		await expectRejection(await reset(crypto.randomUUID()), 404, 'Statement not found', 'STATEMENT_NOT_FOUND');
 	});
 });
+
+// #959 (A): ein kleinerer Betrag ist eine Teilzahlung; die Abrechnung bleibt mit dem Rest offen (Art. 69, 85 OR)
+describe('Teilzahlung', () => {
+	let id: string;
+	const pay = (paidAmount: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount });
+
+	beforeAll(async () => {
+		id = await sentStatement(2025);
+		await db.update(utilityStatements).set({ balance: '442.90' }).where(eq(utilityStatements.id, id));
+	});
+
+	afterAll(async () => {
+		await db.delete(documents).where(eq(documents.statementId, id));
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+	});
+
+	it('lässt die Abrechnung versendet, ohne Zahlungsdatum, mit dem bezahlten Teil', async () => {
+		const response = await pay('10.00');
+
+		expect(await response.json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: '10.00', payments: [{ date: today(), amount: '10.00' }] });
+	});
+
+	it('nimmt höchstens den offenen Betrag an und keinen Betrag von 0.00', async () => {
+		await expectRejection(await pay('432.91'), 400, 'Paid amount above the open amount', 'STATEMENT_PAID_AMOUNT_TOO_HIGH', { rest: 'CHF 432.90' });
+		await expectRejection(await pay('0.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
+		await expectRejection(await pay('-5.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
+	});
+
+	// code review 959a-1 C-1: francs and Rappen, as «Bereits bezahlt»; a refund with its minus
+	it('nimmt nur Franken mit höchstens zwei Dezimalstellen an', async () => {
+		for (const amount of ['432.899', 'abc', "1'000.00"])
+			await expectRejection(await pay(amount), 400, 'Invalid amount paid', 'STATEMENT_PAID_AMOUNT_INVALID', { amount });
+	});
+
+	it('zählt die Zahlungen zusammen und ist bezahlt, sobald sie den Saldo erreichen', async () => {
+		const response = await pay('432.90');
+
+		expect(await response.json()).toMatchObject({ status: 'paid', paidDate: today(), paidAmount: '442.90', payments: [{ amount: '10.00' }, { amount: '432.90' }] });
+	});
+
+	// Fachreview 959-1, Regel 6: zurückgesetzt wird die zuletzt festgehaltene Zahlung, die Teile davor bleiben
+	it('setzt nur die zuletzt festgehaltene Zahlung zurück, auch eine Teilzahlung', async () => {
+		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: '10.00', payments: [{ amount: '10.00' }] });
+		expect(await (await reset()).json()).toMatchObject({ status: 'sent', paidAmount: null, payments: [] });
+	});
+
+	// Copilot review PR #1006: the last payment without a date is of today, and so is the Zahlungsdatum
+	it('ist am Tag der letzten Zahlung bezahlt, auch wenn diese ohne Datum festgehalten wird', async () => {
+		const reset = () => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+		await pay('10.00');
+
+		const response = await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidAmount: '432.90' });
+
+		expect(await response.json()).toMatchObject({ status: 'paid', paidDate: today(), payments: [{ amount: '10.00' }, { date: today(), amount: '432.90' }] });
+		await reset();
+		await reset();
+	});
+
+	// code review 959a-1 C-2: a replaced statement stays replaced, also with a part payment on it
+	it('setzt bei einer ersetzten Abrechnung keine Teilzahlung zurück', async () => {
+		await pay('10.00');
+		await sendJson('POST', `/api/v1/statements/${id}/replace`, {});
+
+		await expectRejection(await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' }), 400, 'Statement is not paid', 'STATEMENT_NOT_PAID');
+	});
+});
+
+// Fachreview 959-1, Regel 5: auf eine Rückerstattung gilt dieselbe Regel, die Beträge negativ (code review 959a-1 C-5)
+describe('Teilrückerstattung', () => {
+	let id: string;
+	const pay = (paidAmount?: string, paidDate = today()) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate, paidAmount });
+
+	beforeAll(async () => {
+		id = await sentStatement(2026);
+		// a period that has ended, so today is a payment day
+		await db.update(utilityStatements).set({ balance: '-120.00', periodEnd: '2026-06-30' }).where(eq(utilityStatements.id, id));
+	});
+
+	afterAll(async () => {
+		await db.delete(documents).where(eq(documents.statementId, id));
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+	});
+
+	it('lässt die Rückerstattung mit dem Rest offen und zahlt ohne Betrag den Rest', async () => {
+		await expectRejection(await pay('50.00'), 400, 'Paid amount not above 0.00', 'STATEMENT_PAID_AMOUNT_ZERO');
+		expect(await (await pay('-50.00')).json()).toMatchObject({ status: 'sent', paidAmount: '-50.00' });
+		// the rest entered with an earlier day: paid on the day of the latest payment (code review 959a-1 C-5)
+		expect(await (await pay(undefined, '2026-07-01')).json()).toMatchObject({
+			status: 'paid',
+			paidDate: today(),
+			paidAmount: '-120.00',
+			payments: [{ amount: '-50.00' }, { amount: '-70.00', date: '2026-07-01' }]
+		});
+	});
+});

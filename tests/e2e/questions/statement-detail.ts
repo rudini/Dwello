@@ -54,6 +54,7 @@ import {
 	oldAddressWarning,
 	confirmSendButton,
 	letterInsteadLink,
+	openRest,
 	pdfBeforeChangeLink,
 	sendStatementButton
 } from '../targets/statement-detail';
@@ -169,3 +170,9 @@ export const sentPdfHref = Attribute.named('href').of(sentPdfLink);
 
 // #969: the PDF before the change, kept in the Verlauf
 export const pdfBeforeChangeOffered = Visibility.of(pdfBeforeChangeLink);
+
+// #959: the rest a part payment leaves open
+export const openRestText = Text.of(openRest);
+
+// #959: what Dwello confirms after recording a payment
+export const paymentDone = Text.of(successToast);

@@ -48,7 +48,7 @@ export const pdfBeforeChangeLink = target('PDF vor der Änderung herunterladen',
 );
 export const sentPdfLink = target('Versendetes PDF herunterladen', (page) => page.getByTestId('statement-history-sent-pdf'));
 export const pdfChangedHint = target('Hinweis neues PDF', (page) => page.getByTestId('statement-pdf-changed'));
-export const partialPaymentHint = target('Hinweis Teilzahlung', (page) => page.getByTestId('paid-partial-hint'));
+export const partialPaymentHint = target('Hilfe zum bezahlten Betrag', (page) => page.getByTestId('paid-amount-input-help'));
 export const deleteStatementButton = target('Abrechnung löschen', (page) => page.getByTestId('statement-delete-button'));
 export const confirmDeleteStatementButton = target('Löschen bestätigen', (page) =>
 	page.getByTestId('statement-delete-confirm')
@@ -68,6 +68,9 @@ export const sendRecipient = target('Empfänger', (page) => page.getByTestId('se
 export const sendPdfLink = target('PDF ansehen', (page) => page.getByTestId('send-pdf-view'));
 export const sendRecalculateButton = target('Neu berechnen in der Bestätigung des Versands', (page) => page.getByTestId('send-recalculate'));
 export const paidDateInput = target('Bezahlt am', (page) => page.getByTestId('paid-date-input'));
+// #959: what the tenant paid, prefilled with the Saldo, and the rest a smaller amount leaves open
+export const paidAmountInput = target('Bezahlter Betrag', (page) => page.getByTestId('paid-amount-input'));
+export const openRest = target('Offener Rest', (page) => page.getByTestId('statement-open-rest'));
 export const statementHistory = target('Verlauf', (page) =>
 	page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]')
 );

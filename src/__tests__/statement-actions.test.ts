@@ -94,6 +94,19 @@ describe('Zahlungsdatum', () => {
 		expect(calls).toEqual([]);
 	});
 
+	// #959: der Betrag geht mit; ein leeres Feld ist kein Betrag, nicht still die ganze Zahlung (code review 959b-1 C-9)
+	it('sendet den bezahlten Betrag mit und lehnt ein leeres Betragsfeld ab', async () => {
+		const sent = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-05', paidAmount: '-30.00' });
+		await sent.result;
+		const empty = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-05', paidAmount: '' });
+
+		expect(sent.calls).toEqual([
+			{ method: 'PUT', url: `${API}/status`, body: { status: 'paid', paidDate: '2026-01-05', paidAmount: '-30.00' } }
+		]);
+		expect(await empty.result).toMatchObject({ status: 400 });
+		expect(empty.calls).toEqual([]);
+	});
+
 	it('lehnt ein Zahlungsdatum in der Zukunft ab, ohne zu speichern', async () => {
 		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2999-01-01' });
 

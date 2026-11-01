@@ -14,6 +14,7 @@ import {
 	reminderOffers,
 	reminderDatesShown,
 	reminderDelivery,
+	reminderOwedText,
 	reminderOutcome
 } from '../questions/documents';
 import { pageTitleText } from '../questions/app-frame';
@@ -177,6 +178,11 @@ When('der Liegenschaftsverwalter eine Mahnung senden will', async ({ verwalter }
 
 Then('sagt die Mahnung vor dem Senden {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(reminderDelivery).toContain(text);
+});
+
+// #959: after a part payment the rest
+Then('nennt die Mahnung vor dem Senden als geschuldet {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(reminderOwedText).toContain(`schuldet noch ${amount}`);
 });
 
 Then(
