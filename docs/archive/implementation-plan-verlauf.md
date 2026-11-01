@@ -515,3 +515,9 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Runs triggered by Copilot's review wait for an approval no setting gives and expire (#1009, run 41256102317): `pull_request_review` and `issue_comment` triggers removed; an error review of Copilot still counts as no review when CI finishes
 - [x] Local run of the bash step: #1009 and #941 already reviewed, missing key → «No review»
 - [x] PR: pushed after this archive
+
+## Session: #994 glossary row «PDF vor der Änderung» (Option 1)
+
+- [x] `UBIQUITOUS_LANGUAGE.md`: row «PDF vor der Änderung» as decided, the row «Dokument» names it; `docs/design/i18n-begriffe.md` fr/it/en; marker in `delivery.ts` removed
+- [x] No scenario: glossary and a code comment only, the UI texts already use the terms in all four languages
+- [x] PR: pushed after this archive
