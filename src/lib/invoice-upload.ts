@@ -26,7 +26,7 @@ export type Proposal = {
 
 export const MAX_FILES = 20;
 export const MAX_PAGES = 3; // the pages of a PDF the KI reads
-const MAX_MEGABYTES = 10; // as the backend counts them: 10 × 1024 × 1024 bytes
+export const MAX_MEGABYTES = 10; // as the backend counts them: 10 × 1024 × 1024 bytes
 
 /** The fields of one invoice as the dialog edits them */
 export type UploadValues = {

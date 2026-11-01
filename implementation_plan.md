@@ -17,4 +17,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] fr and en texts of `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider`; scenario green without @wip, privacy.feature 37 passed
 - [x] Slice review (`docs/reviews/671-review-1.md`): C-1 smtp/resend variants now in `privacy-i18n.dom.test.ts` (red with the old texts), C-2 scenario title
 - [x] #671 PR: pushed
+- [x] #847: a 413 shows «Die Datei ist zu gross.» and what to do in four languages (`error-page.test.ts` seen red); No scenario: with JavaScript the browser refuses the file first (tests/e2e/CLAUDE.md, No scenario, item 4)
+- [x] #847 review (`docs/reviews/847-review-1.md`): no findings
+- [x] #847 PR: pushed
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)
