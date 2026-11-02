@@ -801,3 +801,4 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Persona: `docs/design/personas/helga-736.md` (P-1 Major, «Mahnung senden» offered while the last one waits: fixed, button hidden; P-2 to P-6 Minor stay in the report)
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-736.md`
 - [x] Archive, PR: pushed after this archive
+- [x] Fallback review of PR #1067 (contract of the undelivered reminder answer): `tests/contracts/reminder-undelivered.json`; closing round `docs/reviews/736c-review-1.md` (no findings)
