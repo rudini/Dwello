@@ -718,3 +718,8 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Fallback review on #1056: the gap was rounded before the comparison (fixed, test seen red); `docs/reviews/sdp-review-3.md` (closing round, nothing new)
 - [x] Workflow note: none new
 - [x] Archive the session; PR pushed after this archive
+## Session: fallback review sees the changed files whole (#1007 follow-up)
+
+- [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
+- [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
+- [x] PR: pushed after this archive
