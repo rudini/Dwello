@@ -3,7 +3,8 @@ import { periodDays } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { localSplitKeys, namesById, toStatement } from '$lib/server/statement';
-import type { ChangedStatement, HeatingSum, HintedInvoice, InvoiceCheck } from '$lib/statement-wizard';
+import type { ChangedStatement, HintedInvoice, InvoiceCheck } from '$lib/statement-wizard';
+import type { HeatingSum } from '$lib/heating-sum';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 

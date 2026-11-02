@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { heatingSumText, type HeatingSum } from '$lib/statement-wizard';
+import { heatingSumText, type HeatingSum } from '$lib/heating-sum';
 
 // #508 (Fachreview 508-1 M-1, V-3, V-4): the apartment's heating costs, the landlord's part and what its statements bill
 const sum = (more: Partial<HeatingSum>): HeatingSum => ({
