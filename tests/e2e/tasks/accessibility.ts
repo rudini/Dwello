@@ -100,7 +100,7 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
-import { leaveSettings } from './statement-generate';
+import { billedCannotBeChecked, invoicesCannotBeCounted, leaveSettings } from './statement-generate';
 import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
@@ -744,6 +744,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2026-06-30').into(on.periodEndInput),
 			Click.on(nextButton),
 			Wait.until(on.shown(`generate-building-billed-${example.building}`))
+		),
+	// #738: neither count of step «Gebäude» loads: the note on what it could not load
+	'buildings-counts-failed': () => (actor) =>
+		actor.attemptsTo(
+			invoicesCannotBeCounted,
+			billedCannotBeChecked,
+			Click.on(nextButton),
+			Wait.until(on.shown('generate-counts-failed'))
 		),
 	// #521: 2020 overlaps Ahornweg's statement 01.11.2019 – 31.10.2020: the letter for Vera's consent
 	// (step 2 answers for all buildings at once)

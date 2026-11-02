@@ -164,6 +164,7 @@
 - [x] CI «Docker images» on main: `curl` exit 56 while the backend image fetched the PostgreSQL apt key (network, not this change); failed job re-run once
 - [x] Slice review: `docs/reviews/945-review-1.md` (C-1 Minor: the comment now names the optional canvas binary of pdfjs-dist, unused on the server)
 - [x] PR: pushed after this archive (the next release publishes both images)
+
 ## Session: #718 part 2, «Sicherung einrichten» (2026-10-29)
 
 - [x] Spec change of `einrichtung.feature` approved by the product owner in #718 (the setup now leads to the Sicherung)
@@ -194,6 +195,7 @@
 - [x] Personas: `helga-718c.md` (P-1 Major fixed; `-2`), `sven-718c.md` (P-1, P-2 Major fixed; `-2`), `marco-718c.md`, `weber-718c.md`, `anna-718c.md` (P-1 Major fixed; `-2`); Minors met by several personas: #956, #957
 - [x] No scenario for an expired code: the 30 minutes need the server clock; `backup-new-code.pg.test.ts`
 - [x] PR `Fixes #718`, `Fixes #957`: pushed after this archive
+
 ## Session: #951 Protokoll names access keys and AI program queries
 
 - [x] @wip scenario «Das Protokoll nennt die Zugangsschlüssel und die Abrufe von KI-Programmen» (`settings.feature`), seen red at the old description
@@ -228,6 +230,7 @@
 - [x] Code review: `docs/reviews/936-review-1.md` (no findings)
 - [x] No scenario: nothing a user sees changes (an unauthenticated request gets 401 instead of 422)
 - [x] PR `Fixes #936`: pushed after this archive
+
 ## Session: #953 restore keeps the newer Wiederherstellungscode (2026-10-31)
 
 - [x] Decisions of 17 needs-decision issues recorded (product owner: decide by the recommendations); #495 closed (done in #817/#943); #959 opened (#523 option B)
@@ -243,6 +246,7 @@
 - [x] DOM test for the Nachzahlung and the Rückerstattung (`statement-pages.dom.test.ts`, seen red)
 - [x] the sentence in `PaidDateFields.svelte`, texts de/fr/it/en as checked by `fach-reviewer` (#448 round 4, comment on #523); no persona: a decided text read in all four languages (CLAUDE.md, Workflow 5)
 - [x] code-reviewer round (`docs/reviews/523-review-1.md`)
+
 ## Session: #545 a Mahnung counts from its sending (2026-10-31)
 
 - [x] @wip scenarios in `statement-reminder.feature`; «Nächste Mahnung erst nach der Zahlungsfrist der letzten» reminds by e-mail (Spec change approved: #545)
@@ -266,6 +270,7 @@
 - [x] persona Dr. Weber (`docs/design/personas/weber-524.md`): P-1 and P-2 beyond the decision, #968 and #969
 - [x] Workflow note: the step «der Liegenschaftsverwalter die Abrechnung versendet» does not wait for the sending; a scenario that leaves the page right after it needs «hat die Abrechnung den Status "Versendet"»
 - [x] PR pushed after this archive
+
 ## Session: #934, P1 measured on a runner-like machine (2026-10-31)
 
 - [x] `tools/fitness/p1-benchmark.ts` (`bun run fitness:p1`): 1 building, 50 rental contracts, the wizard's form action «generate» through the BFF, then the PDFs as the run's ZIP; its own ports (3320/3321) and build (`/tmp/p1-app`)
@@ -274,6 +279,7 @@
 - [x] No scenario: a measuring script, nothing a user sees changes
 - [ ] The demo VM run and the decision on a CI guard: the product owner (#934 stays open)
 - [x] PR `Refs #934`: pushed after this archive
+
 ## Session: #935 a release weekly, Monday 06:00 (2026-10-31)
 
 - [x] Decided (product owner, #935): weekly on Monday at 06:00 Swiss time; a week without changes gets no tag
@@ -284,6 +290,7 @@
 - [x] No scenario: CI release tooling, nothing a user sees in the app changes
 - [x] Workflow notes: none for #935; collected review of this request `docs/reviews/workflow-rules-review-2026-10-31.md`
 - [x] PR `Fixes #935`: pushed after this archive
+
 ## Session: #947 and #956 a refused backup code, the end of a new code (2026-10-31)
 
 - [x] Scenarios in `sicherung.feature`: «Den Wiederherstellungscode leer lassen», «Nur einen Teil des Wiederherstellungscodes eingeben», «Nach der Bestätigung bietet die Seite keinen weiteren neuen Code an», «Von der Bestätigung des neuen Codes zurück zu den Einstellungen» (seen red as @wip)
@@ -311,6 +318,7 @@
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-528.md`
 - [x] Closing review `docs/reviews/528close-review-1.md`, `528close-review-2.md`
 - [x] PR: pushed after this archive
+
 ## Session: #974 R1, the restore of a database after 10 years (2026-10-31)
 
 - [x] Issue #974 opened (A2 / R1, product owner chose it)
@@ -370,6 +378,7 @@
 - [x] Marker `TODO(fachlich prüfen, #538)` removed (`backend/src/db/schema.ts`, a comment only)
 - [x] No scenario, no review round: glossary and a comment only
 - [x] PR: pushed after this archive
+
 ## Session: #721 a Content-Security-Policy (2026-10-31)
 
 - [x] `svelte.config.js` `kit.csp` (mode auto): script-src 'self' with SvelteKit's nonce, default-src 'self', style-src 'self' 'unsafe-inline', img-src 'self' data: blob:, object-src 'none', base-uri 'self', form-action 'self', frame-ancestors 'none'; `src/__tests__/csp.test.ts` (seen red)
@@ -428,6 +437,7 @@
 - [x] Closing review `docs/reviews/966close-review-1.md`: C-1 (restore in the contract test) done
 - [x] No persona: the decided message was read in four languages by the fach-reviewer
 - [x] PR: pushed after this archive
+
 ## Session: #722 HTTPS with compose.yaml (2026-10-31)
 
 - [x] `compose.yaml`: service `caddy` under the profile `https` (ports 80/443, inline Caddyfile like the demo's, volume `caddy_data`), started with `COMPOSE_PROFILES=https` and `DWELLO_DOMAIN` in `.env`; `DWELLO_DOMAIN` optional, since a required variable stopped `docker compose config` without the profile
@@ -445,6 +455,7 @@
 - [x] code-reviewer `docs/reviews/969-review-1.md` (C-1, C-2, C-4, C-7 to C-9 done; C-3 rejected: the screens seed shows the variants; C-5 stays; C-6 noted), `969-review-2.md` (C-10 done)
 - [x] No persona: the decided texts were read in four languages by the fach-reviewer
 - [x] PR: pushed after this archive
+
 ## Session: utility tree brought up to date after #718, #935, #974 (2026-10-31)
 
 - [x] `utility-tree.md`: context «Backup», U1 environment and «Heute» (backup before every migration), U1 fitness function (the Compose update of the images is missing)
@@ -497,6 +508,7 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Persona `docs/design/personas/marco-535.md`: four Minors, stay in the report
 - [x] Workflow note: `docs/design/personas/demo-records.md` is missing, which the persona README names for records
 - [x] Workflow note: a merge of `main` drops the archive's last line «PR: pushed after this archive» (seen twice in #959)
+
 ## Session: fallback code review with MiniMax (#1007)
 
 - [x] Workflow: review when Copilot reports an error, by hand, and when Copilot stays silent after CI (green or red) or after ready for review; once per pull request; drafts skipped
@@ -518,6 +530,7 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] code-reviewer `docs/reviews/1003-review-1.md`: C-1 (Major) and C-2 tests added, seen red; closing round `1003b-review-1.md`
 - [x] Persona `docs/design/personas/weber-1003.md`: four Minors, stay in the report (P-1 is the decided cost table)
 - [x] daten-pruefer `docs/reviews/1003-datenpruefung-1.md`: no findings, QR payload decoded with 35.80
+
 ## Session: fallback review without Copilot triggers (#1007 follow-up)
 
 - [x] Runs triggered by Copilot's review wait for an approval no setting gives and expire (#1009, run 41256102317): `pull_request_review` and `issue_comment` triggers removed; an error review of Copilot still counts as no review when CI finishes
@@ -559,6 +572,7 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-710.md`; collected review `docs/reviews/workflow-rules-review-2026-11-01.md`
 - [x] #661 PR: pushed after this archive
 - Deferred (need thresholds first): #748 tenant export streaming, #746 Protokoll paging («once the length is felt»)
+
 ## Session: #1015 resetting a part payment drops its PDF
 
 - [x] pg tests in `statement-lock.pg.test.ts`, seen red; fix in `recordPayment` and `resetPayment`
@@ -594,6 +608,7 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] Persona `docs/design/personas/helga-521.md`: P-3 fixed; P-1 (Major), P-2 to #1036; P-4 to P-7 stay in the report
 - [x] daten-pruefer `docs/reviews/521-datenpruefung-1.md`: no findings
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-521.md`
+
 ## Session: NFR issues on my own, part 2 (#742 first)
 
 - [x] #742: the status line of «Rechnungen hochladen» says how many invoices are ready to create; @wip scenario seen red (received «Bitte prüfen: 1.»)
@@ -611,6 +626,7 @@ Parallel session (the #671 session stays in `implementation_plan.md`): checklist
 - [x] #681 persona Sven: `docs/design/personas/sven-681.md`, P-1 and P-2 Minor (need new texts), stay in the report
 - [x] #681 PR: pushed after this archive
 - [x] Workflow notes `docs/reviews/workflow-notes-nfr-part-2.md`, collected review `workflow-rules-review-2026-11-01-2.md`
+
 ## Session: structure report (Structure101-style, A/I graph, traffic lights)
 
 Request from the product owner (chat, 1.11.2026): build the structure report as a tool in the repo, show the results with the full Git history, add an Abstractness/Instability graph and scores with a traffic-light system. No scenario: developer tooling, nothing a landlord sees. Parallel session (the #742 session opened on `main` meanwhile): checklist also in the pull request.
@@ -623,6 +639,7 @@ Request from the product owner (chat, 1.11.2026): build the structure report as 
 - [x] code-reviewer round 1: `docs/reviews/structure-report-review-1.md`; closing round: `docs/reviews/structure-report-review-2.md`
 - [x] Workflow note: `docs/reviews/workflow-notes-structure-report.md`; issue #1032 (fallow churn cache after unshallow)
 - [x] Results with full history to the product owner (chat)
+
 ## Session: #508 the statement run names the heating sum of an apartment
 
 - [x] @wip scenario seen red; fach-reviewer step 1 `docs/reviews/508-fachreview-1.md`: M-1 (vacancy), V-1, V-3 to V-6 taken; V-2 to #1026 (needs-decision)
@@ -647,6 +664,7 @@ Request from the product owner (chat, 1.11.2026): history of the structure repor
 - [x] Results to the product owner (chat, page updated)
 - [x] code-reviewer closing round: `docs/reviews/structure-history-review-3.md` (no findings)
 - [x] Workflow note: none new (stop hook as in `workflow-notes-architecture-phase-2.md`)
+
 ## Session: fallback review thinks harder (#1007 follow-up)
 
 - [x] MiniMax with `reasoning_effort: medium` gave mostly false or known findings (#1021 to #1033); `high` run locally on #1024, #1031, #1033 dropped the false ones in about two minutes each: `REASONING_EFFORT: high`
@@ -668,6 +686,7 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Fallback review on #1045: missing coverage gaps showed green (fixed, n/a), drill-down table counts code files only (fixed, header); fat light without functions and no DOM test for the inline script: answered on the pull request
 - [x] code-reviewer round 3 (closing): `docs/reviews/structure-s101-review-3.md` (no new finding)
 - [x] Workflow note: none new
+
 ## Session: #496 export of all data
 
 - [x] @wip scenarios seen red, draft `docs/reviews/496-entwurf.md`; fach-reviewer step 1 `docs/reviews/496-fachreview-1.md`: V-1, V-2 (Major), R-1 (no privacy change, «Stand» stays) and the Minors taken; glossary terms to #1039 (needs-decision)
@@ -699,6 +718,7 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Persona `docs/design/personas/helga-999.md`: P-1 (order of the Verlauf) stays (resets hold dates only), P-2, P-3 stay
 - [x] daten-pruefer `docs/reviews/999-datenpruefung-1.md`: D-1 (Major, PDF kept after the second reset) fixed with pg test and scenario; D-2 = P-1
 - [x] PR: pushed after this archive
+
 ## Session: XS ratchet in the fitness checks (request in chat, follow-up to #1045)
 
 - [x] Issues (`nfr:maintainability`): #1052 fat files and modules, #1053 hidden coupling pairs
@@ -707,6 +727,7 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] code-reviewer: `docs/reviews/xs-ratchet-review-1.md` (C-1 Major: a removed `fat` list switched the check off, fixed; C-2 Minor: `fatItems` untested, fixed), `-2.md` (both closed, nothing new)
 - [x] Workflow note: none new (the stop hook asked to push during the review again, as in `workflow-notes-structure-report.md`)
 - [x] Archive the session; PR pushed after this archive
+
 ## Session: #691 cut-off cost table on the statement edit page
 
 - [x] Reproduced at 1440 × 900 (persona stack, demo data): the table needs 1010 px, the edit page's panel gives 716 px; «Zeitanteil» is cut, the scroll bar sits below the whole table. The detail page is 22 px short too, but its mid widths are #658 (`needs-decision`), so it stays as is
@@ -726,6 +747,7 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Fallback review on #1056: the gap was rounded before the comparison (fixed, test seen red); `docs/reviews/sdp-review-3.md` (closing round, nothing new)
 - [x] Workflow note: none new
 - [x] Archive the session; PR pushed after this archive
+
 ## Session: fallback review sees the changed files whole (#1007 follow-up)
 
 - [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
@@ -772,6 +794,7 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Checks: lint, check, type-check, backend test, Prettier
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1057.md`
 - [x] Archive, PR: pushed after this archive
+
 ## Session: stability and changes instead of the A/I graph (request in chat, follow-up to #1056)
 
 - [x] Structure report: graph «Stability and changes» (I over the commits of a module's most-changed file in fallow's hotspot window) with the zone stable and changing often; light per module (I ≤ 0.3 and Ca ≥ 5: green up to 12 changes, yellow up to 25, else red); A, D, the A/I graph and the D history table removed (tests first)
@@ -802,6 +825,7 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-736.md`
 - [x] Archive, PR: pushed after this archive
 - [x] Fallback review of PR #1067 (contract of the undelivered reminder answer): `tests/contracts/reminder-undelivered.json`; closing round `docs/reviews/736c-review-1.md` (no findings)
+
 ## Session: #1065 «rappel de paiement» / «promemoria di pagamento» after a part payment
 
 - [x] Unit test rows in `reminder-letter.test.ts` (level 2, fr and it) seen red, then green: the texts of the decision in #1065 (domain review 1000-1, V-1)
@@ -817,3 +841,23 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No scenario: a fix of the E2E harness; the scenario that failed is the test (Firefox ×5 green)
 - [x] Slice review round 1, also the closing round: `docs/reviews/1046-review-1.md` (no findings)
 - [x] Archive, PR: pushed after this archive
+## Session: #1039, #1035 glossary rows (export of all data, data file, export of a tenant, consent letter)
+
+- [x] Rows in `UBIQUITOUS_LANGUAGE.md` and `docs/design/i18n-begriffe.md` as the product owner decided on 02.11.2026; the TODO markers naming #1039 and #1035 removed
+- [x] No scenario: glossary and code comments only; the help texts already use the terms in all four languages
+- [x] Slice review round 1, also the closing round: `docs/reviews/1039-review-1.md` (C-1 Minor, fixed: issue references in brackets, as in the two-column table)
+- [x] Archive, PR: pushed after this archive
+
+## Session: #738 statement wizard step «Gebäude»
+
+- [x] Scenarios (`statement-generate.feature`): failed invoice count, failed existing-statements check, name and description of a building's choice, 390 px, focus on the step when resumed; seen red (390 px: red only at the missing test id, the overflow does not reproduce; it pins kept behaviour)
+- [x] A failed state per count (`BuildingStep.svelte`, `statements_buildings_invoices_failed`, `statements_buildings_billed_failed` in de/fr/it/en)
+- [x] Checkbox named by building and address, counts and apartments as description; «1 Wohnung» singular (`BuildingChoice.svelte`)
+- [x] Focus on the step heading when the wizard opens in a later step (`StatementWizard.svelte`)
+- [x] a11y and language rows: state `buildings-counts-failed`
+- [x] Code review round 1: `docs/reviews/738-review-1.md`
+- [x] Persona round 1: `docs/design/personas/sven-738.md`, `docs/design/personas/marco-738.md`
+- [x] Code review round 2 (closing round): `docs/reviews/738-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-738.md`
+- [x] Issue for the Minor two personas met (Marco P-3, Sven P-4): #1068
+- [x] PR: pushed after this archive
