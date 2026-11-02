@@ -2467,15 +2467,28 @@ describe('Abrechnungsdetail', () => {
 		const document = {
 			title: 'Zahlungserinnerung',
 			channel: 'email',
-			deliveryErrorCode: 'MAIL_DELIVERY_FAILED'
+			deliveryErrorCode: 'MAIL_DELIVERY_FAILED',
+			recipient: 'anna@example.com',
+			tenantId: 't1',
+			tenantName: 'Anna Keller'
 		};
 		detail(
 			{ status: 'overdue' },
 			{ reminder: { document, deliveryError: 'Die E-Mail konnte nicht zugestellt werden.' } }
 		);
 
-		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» zum Versand bereit. Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung unter «Dokumente» am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+		// #736: the address it went to, the way to the tenant and to «Dokumente», which the text no longer names
+		const box = byTestId('reminder-feedback-box')!;
+		expect(box.textContent).toContain(
+			'Das Dokument «Zahlungserinnerung» liegt zum Versand bereit.'
+		);
+		expect(box.textContent).toContain('E-Mail an anna@example.com');
+		const href = (testid: string) =>
+			box.querySelector(`[data-testid="${testid}"]`)!.getAttribute('href');
+		expect(href('delivery-tenant-link')).toBe('/tenants/t1');
+		expect(href('delivery-documents-link')).toBe('/documents');
+		expect(box.textContent).toContain(
+			'Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
 		);
 	});
 

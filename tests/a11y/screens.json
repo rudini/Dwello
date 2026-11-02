@@ -333,6 +333,13 @@
 			]
 		},
 		{
+			"name": "tenant-detail-undelivered",
+			"path": "/tenants/{undeliveredTenant}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "tenant-detail-former",
 			"path": "/tenants/{endedTenant}",
 			"states": [

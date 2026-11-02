@@ -8,3 +8,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #736 undelivered reminder e-mail: address and links
+
+- [x] @wip scenarios in `statement-reminder.feature` (address in «Dokumente», no «Dokumente» there; ways to the tenant, from the feedback and from the tenant page to «Dokumente»), seen red
+- [x] Backend: a reminder by e-mail keeps its `recipient`; a letter posted after it has none (pg tests red first)
+- [x] `DeliveryFailure.svelte` in «Dokumente», tenant page and reminder feedback; texts without «unter «Dokumente»» in de/fr/it/en (DOM tests red first)
+- [x] a11y/language: «Dokumente» default shows the row; new screen `tenant-detail-undelivered`. No row for the reminder feedback: a reminder still to send refuses the next (#545), so the state cannot be reached once per view; the scenario and the DOM test cover it
+- [x] Scenarios green without @wip: statement-reminder, documents, tenant-detail 36 passed; axe/language rows of the touched screens 62 passed
+- [ ] Code review
+- [ ] Persona (Helga)
+- [ ] Workflow note: a11y state reached only by an action that can run once
+- [ ] Archive, PR

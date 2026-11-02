@@ -188,6 +188,18 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Lea', 'Lindenweg', 2023);
 	await seed.sendStatement('Lea', 2023);
 	await seed.contractEnd('Lea', '2023-12-31');
+	// #736: a reminder e-mail the mail server refuses: the tenant page and «Dokumente» name the address and the ways on
+	await seed.building('Felsweg', 'Winterthur');
+	await seed.apartment('Felsweg', 'F1', 'vacant');
+	await seed.tenant('Hugo');
+	await seed.contract('Hugo', 'F1', { startDate: '2023-01-01', baseRent: '1200.00' });
+	await seed.invoiceOn('Felsweg', 'Hauswart', '500.00', '2023-06-30');
+	await seed.statement('Hugo', 'Felsweg', 2023);
+	await seed.sendStatement('Hugo', 2023);
+	await seed.paymentDeadline('Hugo', 2023, '2024-01-31');
+	await seed.correspondence('Hugo', 'email');
+	await seed.email('Hugo', 'abgewiesen.dwello.test');
+	await seed.remind('Hugo', 2023);
 	// January to May 2026 without a statement of Seeblick (a shorter period of 2025 overlaps its statements, #199): an
 	// invoice without Leistungszeitraum in it and one shortly after it
 	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2026-01-31');
@@ -330,6 +342,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
 		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
+		undeliveredTenant: seed.idOf('Hugo'), // #736
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
 		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract

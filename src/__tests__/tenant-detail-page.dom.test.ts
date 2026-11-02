@@ -480,3 +480,24 @@ describe('Mieterdetail', () => {
 		expect(byTestId('tenant-former-documents')).toBeNull();
 	});
 });
+
+// #736: the tenant's own page needs no way to the tenant, but one to «Dokumente», where the letter is marked sent
+describe('E-Mail an den Mieter, die nicht zugestellt wurde', () => {
+	it('nennt die Adresse und führt zu den Dokumenten', () => {
+		open([], null, [
+			{
+				...document_,
+				channel: 'email',
+				deliveryError: 'MAIL_DELIVERY_FAILED',
+				deliveryErrorCode: 'MAIL_DELIVERY_FAILED',
+				recipient: 'anna@example.com'
+			}
+		]);
+
+		expect(byTestId('document-row')!.textContent).toContain('E-Mail an anna@example.com');
+		expect(byTestId<HTMLAnchorElement>('delivery-documents-link')!.getAttribute('href')).toBe(
+			'/documents'
+		);
+		expect(byTestId('delivery-tenant-link')).toBeNull();
+	});
+});

@@ -84,6 +84,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | tenant-detail-former   | default             |
       | tenant-detail-former   | anonymise-dialog    |
       | tenant-detail-recent   | default             |
+      | tenant-detail-undelivered | default |
       | tenant-edit            | default             |
       | tenant-edit            | submit-cleared      |
       | contracts              | default             |
