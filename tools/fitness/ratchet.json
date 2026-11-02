@@ -563,7 +563,33 @@
 		],
 		"moduleCycles": [],
 		"bffDates": [],
-		"frontendDecisions": []
+		"frontendDecisions": [],
+		"unstableDependencies": [
+			{
+				"from": "be:middleware",
+				"to": "be:services/local-account",
+				"reason": "dependency against stability present when the check came; resolve with #1055",
+				"scenario": "Ä1"
+			},
+			{
+				"from": "be:routes/data-export",
+				"to": "be:services/data-export",
+				"reason": "dependency against stability present when the check came; resolve with #1055",
+				"scenario": "Ä1"
+			},
+			{
+				"from": "be:services/config",
+				"to": "be:services/distribution-key",
+				"reason": "dependency against stability present when the check came; resolve with #1055",
+				"scenario": "Ä1"
+			},
+			{
+				"from": "be:services/utility-validation",
+				"to": "be:services/category",
+				"reason": "dependency against stability present when the check came; resolve with #1055",
+				"scenario": "Ä1"
+			}
+		]
 	},
 	"prSizeWarn": {
 		"files": 31,

@@ -80,7 +80,7 @@ describe('analyze', () => {
 });
 
 describe('Ampel', () => {
-	it('bewertet Abstand, Komplexität und Hotspot je Modul und nimmt die schlechteste Farbe als Gesamtfarbe', () => {
+	it('bewertet Abstand, Komplexität und Hotspot je Modul und nimmt die schlechteste Farbe ohne den Abstand als Gesamtfarbe', () => {
 		const h = {
 			...health,
 			findings: [
@@ -94,10 +94,11 @@ describe('Ampel', () => {
 			]
 		};
 		const m = Object.fromEntries(analyze({ ...input, health: h }).modules.map((x) => [x.name, x]));
-		expect(m['be:routes/a'].lights).toEqual({ distance: 'green', complexity: 'yellow', hotspot: 'yellow', fat: 'green', tests: 'green', coupling: 'green' });
-		expect(m['be:services/a'].lights).toEqual({ distance: 'green', complexity: 'red', hotspot: 'green', fat: 'green', tests: 'green', coupling: 'green' });
-		expect(m['db:schema'].lights).toEqual({ distance: 'yellow', complexity: 'green', hotspot: 'green', fat: 'green', tests: 'green', coupling: 'green' });
-		expect([m['be:routes/a'].light, m['be:services/a'].light, m['db:schema'].light]).toEqual(['yellow', 'red', 'yellow']);
+		const ok = { fat: 'green', tests: 'green', coupling: 'green', stability: 'green' };
+		expect(m['be:routes/a'].lights).toEqual({ distance: 'green', complexity: 'yellow', hotspot: 'yellow', ...ok });
+		expect(m['be:services/a'].lights).toEqual({ distance: 'green', complexity: 'red', hotspot: 'green', ...ok });
+		expect(m['db:schema'].lights).toEqual({ distance: 'yellow', complexity: 'green', hotspot: 'green', ...ok });
+		expect([m['be:routes/a'].light, m['be:services/a'].light, m['db:schema'].light]).toEqual(['yellow', 'red', 'green']);
 	});
 
 	it('färbt einen grossen Abstand erst ab 5 Verwendern rot, darunter gelb', () => {
@@ -183,8 +184,8 @@ describe('report', () => {
 		const rows = [...report(analyze({ ...input, health: h })).matchAll(/<tr class="module"><td>([^<]*)<\/td><td><span class="\w+">([^<]*)<\/span><\/td>/g)].map((m) => [m[1], m[2]]);
 		expect(rows).toEqual([
 			['be:routes/a', '● Yellow'],
-			['db:schema', '● Yellow'],
-			['be:services/a', '● Green']
+			['be:services/a', '● Green'],
+			['db:schema', '● Green']
 		]);
 	});
 });
@@ -195,8 +196,8 @@ describe('snapshot', () => {
 		expect(snapshot(analyze({ ...input, health: h }), 'abc123', '2026-10-26')).toEqual({
 			commit: 'abc123',
 			date: '2026-10-26',
-			kpis: { xs: 0, tangles: 0, health: 90, duplication: 1, maintainability: 90 },
-			lights: { green: 1, yellow: 1, red: 1 },
+			kpis: { xs: 0, tangles: 0, health: 90, duplication: 1, maintainability: 90, unstable: 0 },
+			lights: { green: 2, yellow: 0, red: 1 },
 			functions: 1,
 			modules: { 'be:routes/a': [1, 0, 0], 'be:services/a': [0.5, 0.75, 0.25], 'db:schema': [0, 0, 1] }
 		});
@@ -390,5 +391,48 @@ describe('XS: Modul mit zu vielen Abhängigkeiten', () => {
 		const hub = { path: 'backend/src/routes/hub.ts', kind: 'prod', module: 'be:routes/hub', loc: '160' };
 		const a = analyze({ ...input, files: [hub, ...deps], edges: deps.map((d) => ({ from: hub.module, to: d.module, file_edges: '1' })), source: () => '' });
 		expect(a.modules.find((m) => m.name === 'be:routes/hub')).toMatchObject({ ce: 16, xs: 6.3, lights: { fat: 'red' } });
+	});
+});
+
+describe('Abhängigkeiten gegen die Stabilität', () => {
+	// db:schema (I 0.5) uses be:services/u (I 0.75), which uses three modules nothing else uses
+	const extra = ['u', 'v', 'w', 'z'].map((x) => ({ path: `backend/src/services/${x}.ts`, kind: 'prod', module: `be:services/${x}` }));
+	const against = {
+		...input,
+		files: [...files, ...extra],
+		source: (p: string) => sources[p] ?? 'export function f() {}',
+		edges: [...edges, { from: 'db:schema', to: 'be:services/u', file_edges: '1' }, ...['v', 'w', 'z'].map((x) => ({ from: 'be:services/u', to: `be:services/${x}`, file_edges: '1' }))]
+	};
+
+	it('meldet eine Abhängigkeit zu einem um mehr als 0.2 instabileren Modul, pro Modul mit Ampel und als Kennzahl', () => {
+		const a = analyze(against);
+		expect(a.unstable).toEqual([{ from: 'db:schema', to: 'be:services/u', gap: 0.25 }]);
+		const schema = a.modules.find((m) => m.name === 'db:schema')!;
+		expect([schema.unstable, schema.lights.stability, schema.light]).toEqual([1, 'yellow', 'yellow']);
+		expect(a.kpis.find((k) => k.key === 'unstable')).toMatchObject({ value: 1, light: 'yellow' });
+	});
+
+	it('vergleicht den ungerundeten Abstand: 1/4 − 1/21 = 0.2024 liegt über 0.2', () => {
+		// be:services/s (Ca 20, Ce 1: I 1/21) uses be:services/t (Ca 3, Ce 1: I 1/4)
+		const mod = (x: string) => ({ path: `backend/src/services/${x}.ts`, kind: 'prod', module: `be:services/${x}` });
+		const users = Array.from({ length: 20 }, (_, i) => `u${i}`);
+		const close = {
+			...input,
+			files: [...['s', 't', 'x', 'y', 'd', ...users].map(mod)],
+			source: () => 'export function f() {}',
+			edges: [
+				...users.map((u) => ({ from: `be:services/${u}`, to: 'be:services/s', file_edges: '1' })),
+				...['s', 'x', 'y'].map((x) => ({ from: `be:services/${x}`, to: 'be:services/t', file_edges: '1' })),
+				{ from: 'be:services/t', to: 'be:services/d', file_edges: '1' }
+			]
+		};
+		expect(analyze(close).unstable).toEqual([{ from: 'be:services/s', to: 'be:services/t', gap: 0.2 }]);
+	});
+
+	it('zeigt die Spalte gegen die Stabilität und sagt, warum A bei Modulen mit Funktionen wenig aussagt', () => {
+		const html = report(analyze(against));
+		expect(html).toContain('<th>Against stability</th>');
+		expect(html.match(/<tr class="module"><td>db:schema<\/td>.*?<\/tr>/)![0]).toContain('<td><span class="yellow">1</span></td>');
+		expect(html).toContain('Dwello\'s modules export functions');
 	});
 });

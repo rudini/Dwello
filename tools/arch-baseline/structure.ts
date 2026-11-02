@@ -35,7 +35,9 @@ export type Module = {
 	xs: number;
 	untested: number | null; // null: fallow gave no coverage gaps
 	hidden: number;
-	lights: { distance: Light; complexity: Light; hotspot: Light; fat: Light; tests: Light; coupling: Light };
+	/** its dependencies on a module whose instability I is more than LIMITS.unstable.gap higher */
+	unstable: number;
+	lights: { distance: Light; complexity: Light; hotspot: Light; fat: Light; tests: Light; coupling: Light; stability: Light };
 	light: Light;
 };
 
@@ -76,6 +78,7 @@ export const LIMITS = {
 	reach: [90, 75],
 	hidden: [0, 2],
 	hiddenTotal: [2, 10],
+	unstable: { gap: 0.2, module: [0, 1], total: [0, 5] },
 	fatFunction: { cyclomatic: 20, cognitive: 15 },
 	distance: [0.3, 0.6], painUsers: 5, hotspot: [10, 20], health: [85, 70], duplication: [3, 5], maintainability: [85, 70] } as const;
 const scale = (x: number, [green, yellow]: readonly number[]): Light => (x <= green ? 'green' : x <= yellow ? 'yellow' : 'red');
@@ -98,6 +101,7 @@ export type Analysis = {
 	functions: Health['findings'];
 	files: CodeFile[];
 	fileEdges: NonNullable<Input['fileEdges']>;
+	unstable: { from: string; to: string; gap: number }[];
 };
 
 export function analyze(input: Input): Analysis {
@@ -145,11 +149,23 @@ export function analyze(input: Input): Analysis {
 		return codeFiles.length ? Math.round((codeFiles.filter((p) => untestedFiles.has(p)).length / codeFiles.length) * 100) : 0;
 	};
 	let excessLines = 0;
+	const instability = (name: string) => {
+		const [ca, ce] = [count('to', name), count('from', name)];
+		return ca ? ce / (ca + ce) : 1; // nothing depends on it: free to change
+	};
+	const inst = new Map([...names].map((n) => [n, instability(n)]));
+	// Stable Dependencies Principle (Martin): a module uses only modules more stable than itself
+	// the raw gap counts (1/4 − 1/21 = 0.2024 is over 0.2); 1e-9 absorbs float noise, so exactly 0.2 passes
+	const unstable = edges
+		.map((e) => ({ from: e.from, to: e.to, gap: inst.get(e.to)! - inst.get(e.from)! }))
+		.filter((e) => e.gap > LIMITS.unstable.gap + 1e-9)
+		.map((e) => ({ ...e, gap: round(e.gap) }));
 	const modules = [...names].sort().map((name) => {
 		const paths = prod.filter((f) => f.module === name).map((f) => f.path);
 		const a = abstractOf(paths);
 		const [ca, ce] = [count('to', name), count('from', name)];
-		const i = ca ? ce / (ca + ce) : 1; // nothing depends on it: free to change
+		const i = inst.get(name)!;
+		const against = unstable.filter((e) => e.from === name).length;
 		const d = round(Math.abs(a + i - 1));
 		const severities = input.health.findings.filter((f) => paths.includes(f.path)).map((f) => f.severity);
 		const hotspot = Math.max(0, ...(input.health.hotspots ?? []).filter((h) => paths.includes(h.path)).map((h) => h.score));
@@ -163,10 +179,11 @@ export function analyze(input: Input): Analysis {
 			hotspot: scale(hotspot, LIMITS.hotspot),
 			fat,
 			tests: scale(untested ?? 0, LIMITS.untested),
-			coupling: scale(hidden, LIMITS.hidden)
+			coupling: scale(hidden, LIMITS.hidden),
+			stability: scale(against, LIMITS.unstable.module)
 		} satisfies Module['lights'];
 		const xs = share(excess, lines);
-		return { name, files: paths.length, level: level.get(name) ?? 1, ca, ce, i: round(i), a: round(a), d, findings: severities.length, hotspot: round(hotspot), xs, untested, hidden, lights, light: worst(Object.values(lights)) };
+		return { name, files: paths.length, level: level.get(name) ?? 1, ca, ce, i: round(i), a: round(a), d, findings: severities.length, hotspot: round(hotspot), xs, untested, hidden, unstable: against, lights, light: worst(Object.entries(lights).filter(([k]) => k !== 'distance').map(([, l]) => l)) };
 	});
 	const tangles = input.cycles.filter((c) => c.modules.split(' ').some((m) => names.has(m))).length;
 	const { health_score, vital_signs } = input.health;
@@ -183,13 +200,14 @@ export function analyze(input: Input): Analysis {
 		kpi('health', `fallow health score (${health_score.grade})`, health_score.score, LIMITS.health, true),
 		kpi('duplication', 'Duplication in %', vital_signs.duplication_pct, LIMITS.duplication),
 		kpi('maintainability', 'Maintainability index (avg)', vital_signs.maintainability_avg, LIMITS.maintainability, true),
+		kpi('unstable', `Dependencies against stability (I rises by more than ${LIMITS.unstable.gap})`, unstable.length, LIMITS.unstable.total),
 		...(input.health.change_coupling ? [kpi('hidden', 'File pairs changed together across modules without import', hiddenPairs.length, LIMITS.hiddenTotal)] : []),
 		...(input.gaps ? [kpi('reach', 'Code files a test reaches, in % (static)', input.gaps.summary.file_coverage_pct, LIMITS.reach, true)] : [])
 	];
 	const functions = input.health.findings.filter((f) => prod.some((p) => p.path === f.path)).sort((a, b) => b.cyclomatic - a.cyclomatic);
 	const files = prod.filter((f) => code(f.path)).map((f) => ({ path: f.path, module: f.module, loc: loc.get(f.path)!, untested: untestedFiles.has(f.path) }));
 	const fileEdges = (input.fileEdges ?? []).filter((e) => e.from_module !== e.to_module && names.has(e.from_module) && names.has(e.to_module));
-	return { modules, kpis, edges: edges.map((e) => ({ from: e.from, to: e.to, weight: Number(e.file_edges) })), functions, files, fileEdges };
+	return { modules, kpis, edges: edges.map((e) => ({ from: e.from, to: e.to, weight: Number(e.file_edges) })), functions, files, fileEdges, unstable };
 }
 
 const id = (m: string) => m.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '');
@@ -376,7 +394,7 @@ export function report(analysis: Analysis, history: Snapshot[] = []): string {
 	const rows = sorted
 		.map(
 			(m) =>
-				`<tr class="module"><td>${esc(m.name)}</td><td>${badge(m.light)}</td><td>${badge(m.lights.distance, String(m.d))}</td><td>${badge(m.lights.complexity, String(m.findings))}</td><td>${badge(m.lights.hotspot, String(m.hotspot))}</td><td>${badge(m.lights.fat, String(m.xs))}</td><td>${m.untested === null ? 'n/a' : badge(m.lights.tests, String(m.untested))}</td><td>${badge(m.lights.coupling, String(m.hidden))}</td><td>${m.level}</td><td>${m.files}</td><td>${m.ca}</td><td>${m.ce}</td><td>${m.i}</td><td>${m.a}</td></tr>`
+				`<tr class="module"><td>${esc(m.name)}</td><td>${badge(m.light)}</td><td>${badge(m.lights.distance, String(m.d))}</td><td>${badge(m.lights.complexity, String(m.findings))}</td><td>${badge(m.lights.hotspot, String(m.hotspot))}</td><td>${badge(m.lights.fat, String(m.xs))}</td><td>${m.untested === null ? 'n/a' : badge(m.lights.tests, String(m.untested))}</td><td>${badge(m.lights.coupling, String(m.hidden))}</td><td>${badge(m.lights.stability, String(m.unstable))}</td><td>${m.level}</td><td>${m.files}</td><td>${m.ca}</td><td>${m.ce}</td><td>${m.i}</td><td>${m.a}</td></tr>`
 		)
 		.join('');
 	const fns = functions.map((f) => `<tr><td><code>${esc(f.path)}</code></td><td><code>${esc(f.name)}</code></td><td>${f.cyclomatic}</td><td>${f.cognitive}</td></tr>`).join('');
@@ -399,15 +417,17 @@ table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;p
 <div class="kpis">${tiles}</div>
 ${historySection(history, modules)}
 <h2>Traffic lights</h2>
-<ul><li><b>Distance D</b> from the main sequence A + I = 1 (Robert C. Martin): green up to ${LIMITS.distance[0]}, yellow up to ${LIMITS.distance[1]}, else red, but red only from ${LIMITS.painUsers} users (Ca), yellow below: with few users a change is cheap. Red at the bottom left means stable and concrete (zone of pain): many depend on it, so changes ripple. For helpers that rarely change (dates, formats) this is often intended; together with a yellow or red hotspot it is worth a look. A module nothing depends on has I = 1.</li>
+<ul><li><b>Distance D</b> from the main sequence A + I = 1 (Robert C. Martin): green up to ${LIMITS.distance[0]}, yellow up to ${LIMITS.distance[1]}, else red, but red only from ${LIMITS.painUsers} users (Ca), yellow below: with few users a change is cheap. Red at the bottom left means stable and concrete (zone of pain): many depend on it, so changes ripple. For helpers that rarely change (dates, formats) this is often intended; together with a yellow or red hotspot it is worth a look. A module nothing depends on has I = 1. For information only: it does not count for the overall light (see the A/I graph).</li>
 <li><b>Complexity:</b> functions in the module above fallow's thresholds; one with severity high or critical makes it red, any other makes it yellow.</li>
 <li><b>Hotspot:</b> highest fallow hotspot score (complexity × changes in the last 6 months) of a file in the module: green up to ${LIMITS.hotspot[0]}, yellow up to ${LIMITS.hotspot[1]}, else red.</li>
 <li><b>XS</b> (excess complexity, after Structure101): lines beyond the limits of fat items, in % of the module's code lines. A module is fat with more than ${LIMITS.fatModule.files} files or more than ${LIMITS.fatModule.ce} module dependencies (Ce), a file with more than ${LIMITS.fatFile} lines, a function above fallow's thresholds (cyclomatic ${LIMITS.fatFunction.cyclomatic}, cognitive ${LIMITS.fatFunction.cognitive}); the share beyond the limit counts, a module in a tangle counts whole. Light: red for a fat or tangled module, yellow for a fat file in it. At the top: green up to ${LIMITS.xs[0]} %, yellow up to ${LIMITS.xs[1]} %.</li>
 <li><b>Untested:</b> share of the module's code files that no test reaches through imports (fallow's static estimate, not line coverage; end-to-end tests reach code over HTTP, which it does not see, so API endpoints show as untested): green at ${LIMITS.untested[0]}, yellow up to ${LIMITS.untested[1]} %, else red.</li>
 <li><b>Hidden coupling:</b> file pairs changed together often (fallow, at least 5 shared commits and 30 % of their commits) whose modules import neither way, without pairs in one route folder under src/routes (a SvelteKit page and its load function): green at ${LIMITS.hidden[0]}, yellow up to ${LIMITS.hidden[1]}, else red.</li>
-<li><b>Overall:</b> the worst of the six colours. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
+<li><b>Against stability</b> (Stable Dependencies Principle, Robert C. Martin): the module's dependencies on a module whose instability I is more than ${LIMITS.unstable.gap} higher than its own, so a module many depend on uses one that changes more easily: green at ${LIMITS.unstable.module[0]}, yellow at ${LIMITS.unstable.module[1]}, else red. At the top: green at ${LIMITS.unstable.total[0]}, yellow up to ${LIMITS.unstable.total[1]}.</li>
+<li><b>Overall:</b> the worst colour except distance D. Indicators at the top: tangles green at 0, else red; health score and maintainability green from ${LIMITS.health[0]} and ${LIMITS.maintainability[0]}, yellow from ${LIMITS.health[1]} and ${LIMITS.maintainability[1]}; duplication green up to ${LIMITS.duplication[0]} %, yellow up to ${LIMITS.duplication[1]} %.</li></ul>
 <h2>Abstractness and instability (A/I graph)</h2>
 <p>I = Ce / (Ca + Ce): Ca = modules that use it, Ce = modules it uses. A = exported types and interfaces / all exports (a Svelte component counts as one concrete export). The green band is D ≤ ${LIMITS.distance[0]}. Dot size = number of modules at the same position. Hover over a dot for the names.</p>
+<p>Read A with care: Dwello's modules export functions, not interfaces. A caller imports the function itself, so A counts exported types, which describe data rather than an abstraction the caller depends on instead of the code (Martin's dependency inversion). Most modules have A = 0 and sit in the zone of pain without a problem. What counts here is the direction: a module should use only modules more stable than itself (column «Against stability»).</p>
 ${legend}
 <div class="scroll">${aiGraph(modules)}</div>
 <h2>Dependency Structure Matrix</h2>
@@ -415,7 +435,7 @@ ${legend}
 ${legend}
 ${groups}
 <h2>Modules</h2>
-<div class="scroll"><table><tr><th>Module</th><th>Overall</th><th>D</th><th>Complex functions</th><th>Hotspot</th><th>XS %</th><th>Untested %</th><th>Hidden coupling</th><th>Level</th><th>Files</th><th>Ca</th><th>Ce</th><th>I</th><th>A</th></tr>${rows}</table></div>
+<div class="scroll"><table><tr><th>Module</th><th>Overall</th><th>D</th><th>Complex functions</th><th>Hotspot</th><th>XS %</th><th>Untested %</th><th>Hidden coupling</th><th>Against stability</th><th>Level</th><th>Files</th><th>Ca</th><th>Ce</th><th>I</th><th>A</th></tr>${rows}</table></div>
 <h2>Functions above fallow's thresholds</h2>
 <div class="scroll"><table><tr><th>File</th><th>Function</th><th>Cyclomatic</th><th>Cognitive</th></tr>${fns}</table></div>
 <h2>Module details</h2>

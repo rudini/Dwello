@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, fatItems, isFrontendFile, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, structureItems, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -443,11 +443,30 @@ describe('fette Dateien und Module (XS)', () => {
 			...Array.from({ length: 42 }, (_, i) => ({ path: `backend/drizzle/${i}.sql`, kind: 'prod', module: 'db:migrations', loc: '0' }))
 		];
 		const read = (name: string) => (name === 'files.csv' ? files : []);
-		expect(fatItems(read)).toEqual({ files: [{ path: 'src/lib/ui/C0.svelte', lines: 401 }], modules: [{ module: 'fe:ui', files: 31, ce: 0 }] });
+		expect(structureItems(read).fat).toEqual({ files: [{ path: 'src/lib/ui/C0.svelte', lines: 401 }], modules: [{ module: 'fe:ui', files: 31, ce: 0 }] });
 	});
 
 	it('senkt die Grenzen auf die gemessenen Werte und streicht, was nicht mehr fett ist', () => {
 		const m = measured([{ path: 'backend/src/services/pdf.service.ts', lines: 1200 }], [{ module: 'be:app', files: 1, ce: 26 }]);
 		expect(tighten(m, r).fat).toEqual({ files: { 'backend/src/services/pdf.service.ts': 1200 }, modules: {}, roots: fat.roots });
+	});
+});
+
+describe('Abhängigkeiten gegen die Stabilität', () => {
+	const listed = { from: 'be:middleware', to: 'be:services/local-account', reason: 'r', scenario: 'Ä1' };
+	const r: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, unstableDependencies: [listed] } };
+	const m = (unstable: { from: string; to: string; gap: number }[]): Measured => ({ ...clean, unstable });
+
+	it('meldet eine neue Abhängigkeit zu einem instabileren Modul und lässt eine gelistete', () => {
+		const findings = judge(m([{ from: 'be:middleware', to: 'be:services/local-account', gap: 0.34 }, { from: 'fe:lib/utils', to: 'fe:lib/stores', gap: 0.3 }]), r);
+		expect(findings.map((f) => f.check)).toEqual(['unstable-dependency']);
+		expect(findings[0].message).toContain('fe:lib/utils uses fe:lib/stores, whose instability I is 0.3 higher');
+	});
+
+	it('hält die Liste wie die anderen Ausnahmen und streicht, was der Code nicht mehr hat', () => {
+		const longer: Ratchet = { ...r, exceptions: { ...r.exceptions, unstableDependencies: [listed, { ...listed, from: 'x' }] } };
+		expect(loosened(longer, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.unstableDependencies grew from 1 to 2.']);
+		expect(tighten(m([]), r).exceptions.unstableDependencies).toEqual([]);
+		expect(tighten(m([{ from: 'be:middleware', to: 'be:services/local-account', gap: 0.34 }]), r).exceptions.unstableDependencies).toEqual([listed]);
 	});
 });

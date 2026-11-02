@@ -710,6 +710,14 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Workflow notes: nothing came up
 - [x] Archive, PR: pushed after this archive
 
+## Session: dependency direction check, A/I in the report (request in chat, follow-up to #1054)
+
+- [x] Structure report: dependencies against stability (Stable Dependencies Principle, I gap > 0.2) per module and as KPI; distance D out of the overall light; the A/I section says why A says little for modules that export functions (tests first)
+- [x] Fitness check `unstable-dependency` (issue #1055) with today's 4 listed (reason each), shrink-only; docs row
+- [x] code-reviewer: `docs/reviews/sdp-review-1.md` (no Blocker/Major; C-1 to C-3 Minor fixed: comment order, tighten keeps a measured entry, message names a new dependency as possible cause), `-2.md` (closing round, all closed)
+- [x] Fallback review on #1056: the gap was rounded before the comparison (fixed, test seen red); `docs/reviews/sdp-review-3.md` (closing round, nothing new)
+- [x] Workflow note: none new
+- [x] Archive the session; PR pushed after this archive
 ## Session: fallback review sees the changed files whole (#1007 follow-up)
 
 - [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
