@@ -842,6 +842,7 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No persona: the texts are the PO's and the domain review's, read in all four languages
 - [x] Slice review round 1, also the closing round: `docs/reviews/1026-review-1.md` (no findings)
 - [x] Archive, PR: pushed after this archive
+
 ## Session: #1023 «Nicht berichtigen» compares the raw Saldos, below CHF 5 too
 
 - [x] Scenario «Sinkt ein Saldo unter CHF 5 weiter, bietet die Abrechnung «Nicht berichtigen» nicht an» (`statement-minimum-balance.feature`), seen red, then green
