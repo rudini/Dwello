@@ -69,7 +69,8 @@ function open(
 	billedBy: { id?: string; statementNumber: string; status: string }[] | null = [],
 	// as the backend decides it by the Swiss day (#784); the page only shows it (#815)
 	status = startDate > today ? 'future' : endDate && endDate < today ? 'ended' : 'active',
-	endsToday = false // the reloaded contract ends today, the backend says (#815)
+	endsToday = false, // the reloaded contract ends today, the backend says (#815)
+	runningConsent: object | null = null // #1036: the letter while the short period still runs
 ) {
 	show(ContractPage, {
 		data: {
@@ -83,6 +84,7 @@ function open(
 			billedBy,
 			nextSteps: terminated ? { successor: false, ended: false } : null, // the loader decides (review K-1)
 			endsToday,
+			runningConsent,
 			contract: { ...contract(startDate, endDate, terminated), status },
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
@@ -382,6 +384,22 @@ describe('Mietvertragsdetail', () => {
 	});
 
 	// #512 (Fachreview 512-1 V-2): the help of #486 stands in the row of the short period, not under an earlier period
+	// #1036 (Option 1): the letter from the day of the change, not only once the short period has ended
+	it('bietet den Brief zur Zustimmung an, solange die kurze Abrechnungsperiode läuft', () => {
+		const consent = {
+			start: '2027-01-01',
+			short: { start: '2026-11-01', end: '2026-12-31' },
+			letter: '/contracts/c1/consent-letter'
+		};
+		open('2024-04-01', null, null, '2026-11-02', false, [], [], undefined, false, consent);
+		expect(text('contract-consent')).toContain(
+			'Die neue Abrechnungsperiode beginnt am 01.01.2027. Die Tage davor rechnen Sie als kurze Abrechnungsperiode 01.11.2026 – 31.12.2026 ab.'
+		);
+		expect(byTestId('contract-consent-letter')!.getAttribute('href')).toBe(
+			'/contracts/c1/consent-letter'
+		);
+	});
+
 	it('rät nur bei der kurzen Abrechnungsperiode zur Abrechnungsperiode im Mietvertrag', () => {
 		open('2024-04-01', null, null, '2026-10-10', false, [
 			{ start: '2025-07-01', end: '2025-12-31', href: '/statements/generate?short', way: { kind: 'short', start: '2025-07-01', end: '2025-12-31' } },

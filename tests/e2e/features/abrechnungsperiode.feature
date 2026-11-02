@@ -15,7 +15,6 @@ Funktionalität: Wechsel der Abrechnungsperiode
     Und "Anna Keller" mietet die Wohnung "2.01" seit "2024-04-01" für "950" Franken
 
   # nur wer in der kurzen Abrechnungsperiode Miettage hat, muss zustimmen
-  @wip
   Szenario: Nach dem Wechsel der Abrechnungsperiode nennen die Einstellungen die Mietverträge mit ihrem Brief zur Zustimmung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert
@@ -29,14 +28,12 @@ Funktionalität: Wechsel der Abrechnungsperiode
 
   # Fachreview 1036-1 V-1: bei manchen Wechseln ist die kurze Abrechnungsperiode am Tag des Wechsels schon beendet und
   # die neue Abrechnungsperiode hat schon begonnen; dann kommt der Brief jetzt
-  @wip
   Szenario: Nach einem Wechsel, dessen kurze Abrechnungsperiode schon beendet ist, sagen die Einstellungen, dass die neue Abrechnungsperiode schon begonnen hat
     Wenn der Liegenschaftsverwalter die Abrechnungsperiode wechselt, nachdem die kurze Abrechnungsperiode schon beendet ist
     Dann sagen die Einstellungen, dass die neue Abrechnungsperiode schon begonnen hat
     Und nennen die Einstellungen den Mietvertrag von "Anna Keller" in der Wohnung "2.01" mit dem Brief zur Zustimmung
 
   # die Zustimmung wird eingeholt, bevor die neue Abrechnungsperiode beginnt, nicht erst nach der kurzen
-  @wip
   Szenario: Während die kurze Abrechnungsperiode läuft, bietet der Mietvertrag den Brief zur Zustimmung an
     Angenommen die Abrechnungsperiode hat heute gewechselt, und die kurze Abrechnungsperiode läuft noch
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -44,7 +41,6 @@ Funktionalität: Wechsel der Abrechnungsperiode
     Dann steht im PDF "Zustimmung zu einer neuen Abrechnungsperiode"
     Und nennt der Brief die kurze Abrechnungsperiode, die noch läuft
 
-  @wip
   Szenario: Ohne Wechsel der Abrechnungsperiode nennen die Einstellungen keinen Mietvertrag zur Zustimmung
     Angenommen der Liegenschaftsverwalter ist auf den Einstellungen
     Wenn der Liegenschaftsverwalter die Zahlungsfrist "30" speichert

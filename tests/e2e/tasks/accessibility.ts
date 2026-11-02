@@ -1,5 +1,5 @@
 import { writeDraft } from '../../../src/lib/wizard-draft';
-import { inDays } from '../fixtures/dates';
+import { inDays, runningPeriodChange } from '../fixtures/dates';
 import { type Example, type Viewport, variants, viewports } from '../fixtures/screens';
 import { accessibilityViolations } from '../questions/accessibility';
 import { inPageLanguage, languageFindings, pageLanguage } from '../questions/language';
@@ -43,7 +43,7 @@ import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } fro
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
-import { FRESH_ACCOUNT, FRESH_APP, FRESH_KI_STUB, freshLocalAccount, resetFreshBackup } from '../fixtures/fresh-installation';
+import { FRESH_ACCOUNT, FRESH_APP, FRESH_KI_STUB, freshAccountingPeriod, freshLocalAccount, resetFreshBackup } from '../fixtures/fresh-installation';
 import {
 	backupCode,
 	backupConfirmation,
@@ -108,7 +108,9 @@ import { deleteDocumentButton } from '../targets/documents';
 import { anonymiseTenantButton } from '../targets/tenant-detail';
 import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
 import { registerNotice } from '../targets/building-register';
-import { advanceDeleteButton } from '../targets/contract-detail';
+import { advanceDeleteButton, runningConsentNotice } from '../targets/contract-detail';
+import { periodChangeHint } from '../targets/settings';
+import { saveAccountingPeriod } from './settings';
 import { UPLOADED } from '../fixtures/screens';
 
 // How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
@@ -247,6 +249,13 @@ const newCodeShown: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(backupCode));
 };
 
+// #1036: the earlier type set without a stored change, the new one saved in the Einstellungen
+const changePeriodWhileShortRuns: Activity = (actor) => {
+	const { from, to } = runningPeriodChange();
+	freshAccountingPeriod(from);
+	return actor.attemptsTo(saveAccountingPeriod(to));
+};
+
 // What a user does to reach each state
 const states: Record<string, (example: Example, viewport: Viewport) => Activity> = {
 	default: () => async () => {},
@@ -274,6 +283,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// #718, part 3: «Neuer Wiederherstellungscode» signed in with a password (the account made by inTurn), with Google an
 	// hour ago, and with the new code shown, refused and confirmed
 	'backup-links': () => Wait.until(backupSettingsLink),
+	// #1036: another Abrechnungsperiode saved while its short period still runs (the default again after the scenario)
+	'period-change': () => (actor) => actor.attemptsTo(changePeriodWhileShortRuns, Wait.until(periodChangeHint)),
+	'consent-running': (example) => (actor) =>
+		actor.attemptsTo(changePeriodWhileShortRuns, Navigate.to(example.path), Wait.until(runningConsentNotice)),
 	'new-code-password': () => (actor) =>
 		actor.attemptsTo(
 			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),

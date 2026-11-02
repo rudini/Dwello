@@ -26,6 +26,7 @@
 	import ContractTerms from './ContractTerms.svelte';
 	import MissingStatement from './MissingStatement.svelte';
 	import NextSteps from './NextSteps.svelte';
+	import RunningConsent from './RunningConsent.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -150,6 +151,7 @@
 	/>
 	<FixedTermCheck shown={data.fixedTermCheck} endDate={contract.endDate} {name} {form} />
 	<MissingStatement missing={data.missingStatements} />
+	<RunningConsent consent={data.runningConsent} />
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<ContractParties

@@ -17,6 +17,7 @@ import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
 import { monthlyTotal } from '$lib/server/contract-history';
 import { toTenant } from '$lib/server/tenant';
+import { periodChange } from '$lib/server/settings';
 import {
 	isDay,
 	localToday,
@@ -43,6 +44,8 @@ interface ContractDetailsData {
 	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
 	fixedTermCheck: boolean; // A-6: an agreed end passed, the tenant may have stayed
 	endsToday: boolean; // the contract ends today, the backend says by the Swiss day (#815)
+	// #1036: the letter for the tenants' consent while the short Abrechnungsperiode after a change still runs
+	runningConsent: { start: string; short: { start: string; end: string }; letter: string } | null;
 	agreedCosts: string[] | null; // #91: the agreed Nebenkosten by name; null when the categories cannot be read
 	contract: RentalContract & {
 		tenant: Tenant;
@@ -88,6 +91,14 @@ async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) 
 		way,
 		invoices: invoicesOf(way, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
 	}));
+}
+
+// #1036: the short period after a change of the Abrechnungsperiode, while it runs and the contract's tenants must agree;
+// none when it cannot be read: better no hint than a wrong one
+async function runningConsent(fetch: typeof globalThis.fetch, id: string) {
+	const change = await periodChange(fetch).catch(() => null);
+	const listed = change && !change.started && change.contracts.find((c) => c.id === id);
+	return listed ? { start: change.start, short: change.short, letter: listed.letter } : null;
 }
 
 // Each field as the backend sends it, or its default when empty or when the record is missing
@@ -159,6 +170,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			nextSteps: data.nextSteps ?? null,
 			fixedTermCheck: data.fixedTermCheck === true,
 			endsToday: data.endsToday === true,
+			runningConsent: await runningConsent(fetch, String(data.id)),
 			contract,
 			// the agreed Nebenkosten (#91); without the categories the page still shows the rest
 			agreedCosts: await agreeableCategories(fetch).then(

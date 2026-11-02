@@ -63,9 +63,13 @@ export const shortPeriodHelpAt = (periodStart: string) =>
 	target(`Hinweis zur kurzen Abrechnungsperiode ab ${periodStart}`, (page) =>
 		page.getByTestId(`contract-missing-statement-period-${periodStart}`).getByTestId('contract-missing-statement-short-help')
 	);
-// #521: the letter for the tenants' consent to a new Abrechnungsperiode, from the help text of #486
+// #521: the letter for the tenants' consent to a new Abrechnungsperiode, from the help text of #486, or while the short
+// period still runs (#1036)
 export const consentLetterLink = target('Brief zur Zustimmung zur neuen Abrechnungsperiode', (page) =>
-	page.getByTestId('contract-missing-statement-consent-letter')
+	page.getByTestId('contract-missing-statement-consent-letter').or(page.getByTestId('contract-consent-letter'))
+);
+export const runningConsentNotice = target('Hinweis zur Zustimmung, solange die kurze Abrechnungsperiode läuft', (page) =>
+	page.getByTestId('contract-consent')
 );
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
 // One link per Abrechnungsperiode without a statement to the building's invoices of that period, by its first day (#211)

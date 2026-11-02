@@ -75,7 +75,6 @@ Funktionalität: Einstellungen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben."
 
   # #1036 (Option 1): steht die Abrechnungsperiode im Mietvertrag, gilt eine neue erst mit der Zustimmung der Mieter
-  @wip
   Szenario: Die Einstellungen sagen, dass die Mieter einer neuen Abrechnungsperiode zustimmen müssen
     # Fachreview 1036-1 V-2
     Dann erklärt die Einstellung "Abrechnungsperiode" "Zeitraum, für den Sie die Nebenkosten abrechnen, zum Beispiel Kalenderjahr (01.01.–31.12.), Juli–Juni oder November–Oktober. Steht die Abrechnungsperiode in einem Mietvertrag, gilt eine neue dort erst, wenn die Mieter schriftlich zustimmen. Nach dem Speichern nennt Dwello die Mietverträge mit ihrem Brief zur Zustimmung. Sie finden ihn auch auf der Seite des Mietvertrags."

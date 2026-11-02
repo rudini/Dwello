@@ -77,6 +77,15 @@ export type Example = {
 /** A screen in a state, with the records it needs */
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
 	const screen = screenList.screens.find((candidate) => candidate.name === name)!;
+	// #1036: on the fresh installation (@frische-installation), one contract whose tenants must agree after the change
+	if (['period-change', 'consent-running'].includes(state)) {
+		await seed.building('Seeblick', 'Winterthur');
+		await seed.apartment('Seeblick', '1.01', 'vacant');
+		await seed.tenant('Anna');
+		await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00' });
+		const path = address(screen, state).replace('{contract}', seed.idOf('Mietvertrag Anna')!);
+		return { path, state, public: false, building: '', tankBuilding: '', splitBuilding: '', heatingProfile: '' };
+	}
 	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
 	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
 	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');

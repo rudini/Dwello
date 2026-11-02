@@ -125,6 +125,45 @@ describe('Einstellungen', () => {
 		expect(settingsPage()).not.toContain('data-testid="settings-saved"');
 	});
 
+	// #1036 (Fachreview 1036-1): after saving another Abrechnungsperiode, the contracts whose tenants must agree
+	it('nennt nach dem Wechsel der Abrechnungsperiode die Mietverträge mit ihrem Brief zur Zustimmung', () => {
+		const change = {
+			start: '2027-01-01',
+			short: { start: '2026-11-01', end: '2026-12-31' },
+			started: false,
+			contracts: [
+				{
+					id: 'c1',
+					tenant: 'Anna Keller',
+					apartment: '2.01',
+					letter: '/contracts/c1/consent-letter'
+				}
+			]
+		};
+		const body = settingsPage({ saved: true, periodChange: change }).replace(/\s+/g, ' ');
+		expect(body).toContain('data-testid="settings-period-change"');
+		expect(body).toContain('Zustimmung der Mieter einholen');
+		expect(body).toContain(
+			'Die neue Abrechnungsperiode beginnt am 01.01.2027. Die Tage davor rechnen Sie als kurze Abrechnungsperiode 01.11.2026 – 31.12.2026 ab. Steht die Abrechnungsperiode im Mietvertrag, senden Sie den Mietern den Brief zur Zustimmung vor dem 01.01.2027.'
+		);
+		expect(body).toContain('Diese Mietverträge laufen in der kurzen Abrechnungsperiode:');
+		expect(body).toContain('Anna Keller, Wohnung 2.01');
+		expect(body).toMatch(
+			/href="\/contracts\/c1\/consent-letter"[^>]*data-testid="settings-period-change-letter-c1"/
+		);
+		expect(body).toContain('Brief zur Zustimmung herunterladen: Anna Keller, Wohnung 2.01');
+		// Fachreview 1036-1 V-1: the new period began before the change
+		const started = settingsPage({
+			saved: true,
+			periodChange: { ...change, started: true }
+		}).replace(/\s+/g, ' ');
+		expect(started).toContain('Die neue Abrechnungsperiode hat am 01.01.2027 schon begonnen.');
+		expect(started).toContain('senden Sie den Mietern den Brief zur Zustimmung jetzt.');
+		expect(settingsPage({ saved: true, periodChange: null })).not.toContain(
+			'settings-period-change'
+		);
+	});
+
 	it('erklärt die Begriffe in Alltagssprache', () => {
 		const body = settingsPage().replace(/\s+/g, ' ');
 

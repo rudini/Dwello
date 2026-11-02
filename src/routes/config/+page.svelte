@@ -8,14 +8,22 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import ConfigLinks from './ConfigLinks.svelte';
 	import DefaultsSection from './DefaultsSection.svelte';
+	import PeriodChange from './PeriodChange.svelte';
 	import SettingField from './SettingField.svelte';
 	import { help } from './help';
+	import type { PeriodChangeHint } from '$lib/server/settings';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const settings = $derived(data.settings);
-	const result = $derived(form as { errors?: Record<string, string>; saved?: boolean } | null);
+	const result = $derived(
+		form as {
+			errors?: Record<string, string>;
+			saved?: boolean;
+			periodChange?: PeriodChangeHint | null;
+		} | null
+	);
 	const errors = $derived(result?.errors ?? {});
 	// empty fields of the Firmenadresse that the IBAN's error names (#450, persona Helga P-2)
 	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? []);
@@ -234,6 +242,9 @@
 				<Alert tone="positive" title={m.settings_saved()} testid="settings-saved">
 					<p>{m.settings_saved_text()}</p>
 				</Alert>
+			{/if}
+			{#if result?.periodChange}
+				<PeriodChange change={result.periodChange} />
 			{/if}
 		</div>
 		<div>

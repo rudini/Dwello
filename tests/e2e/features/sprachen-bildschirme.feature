@@ -323,3 +323,11 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | help-public            | default             |
       | privacy-public         | default             |
       | terms-public           | default             |
+
+    # #1036: die Abrechnungsperiode gilt für alle Szenarien; gewechselt wird sie in der frischen Installation
+    @frische-installation
+    # title-format: <Bildschirm> <Zustand>
+    Beispiele:
+      | Bildschirm             | Zustand             |
+      | config                 | period-change       |
+      | contract-detail        | consent-running     |

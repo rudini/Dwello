@@ -45,12 +45,23 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	const typed = Object.fromEntries(
 		Object.entries(KEYS).map(([field, key]) => [key, String(formData.get(field) ?? '').trim()])
 	);
+	// #1036: the Abrechnungsperiode before this save, to name the contracts whose tenants must agree to a change
+	const before = await fetch(API)
+		.then((response) => response.json())
+		.then(
+			(stored) => stored?.data?.accounting_period,
+			() => undefined
+		);
 	const saved = await fetch(API, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(typed)
 	});
-	if (saved.ok) return { saved: true };
+	if (saved.ok)
+		return {
+			saved: true,
+			periodChange: before && typed.accounting_period !== before ? await periodChange(fetch) : null
+		};
 
 	const refused = (await saved.json().catch(() => ({}))) as BackendError;
 	if (!refused.causes) return fail(400, { errors: { form: m.settings_save_failed() } as Record<string, string> });
@@ -67,3 +78,33 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	);
 	return fail(400, { errors: refusedFields({ causes }), missing });
 }
+
+type Range = { start: string; end: string };
+type PeriodChange = {
+	short: Range;
+	start: string;
+	started: boolean;
+	contracts: { id: string; tenantName: string; apartmentNumber: string }[];
+};
+
+/** #1036: the short Abrechnungsperiode after the change, and each contract whose tenants must agree with its letter */
+export async function periodChange(fetch: typeof globalThis.fetch) {
+	const { data } = (await fetch(`${API}/period-change`).then((response) => response.json())) as {
+		data: PeriodChange | null;
+	};
+	return (
+		data && {
+			start: data.start,
+			short: data.short,
+			started: data.started,
+			contracts: data.contracts.map(({ id, tenantName, apartmentNumber }) => ({
+				id,
+				tenant: tenantName,
+				apartment: apartmentNumber,
+				letter: `/contracts/${encodeURIComponent(id)}/consent-letter`
+			}))
+		}
+	);
+}
+
+export type PeriodChangeHint = NonNullable<Awaited<ReturnType<typeof periodChange>>>;

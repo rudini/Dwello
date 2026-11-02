@@ -78,8 +78,10 @@ describe('Einstellungen speichern', () => {
 	it('sendet jedes Feld, wie es getippt wurde, und setzt geleerte mit demselben Speichern zurück', async () => {
 		const { calls, result } = runAction(actions.default, '', 200, { ...valid, managementFeePercent: '2,5' });
 
-		expect(await result).toEqual({ saved: true });
+		// #1036: the Abrechnungsperiode before the save first; unknown here, so no contracts to name
+		expect(await result).toEqual({ saved: true, periodChange: null });
 		expect(calls).toEqual([
+			{ method: undefined, url: `${API}/config`, body: undefined },
 			{
 				method: 'PUT',
 				url: `${API}/config`,
@@ -139,7 +141,7 @@ describe('Einstellungen speichern', () => {
 			status: 400,
 			data: { errors: { form: 'Die Einstellungen konnten nicht gespeichert werden.' } }
 		});
-		expect(calls.map((call) => call.method)).toEqual(['PUT']);
+		expect(calls.map((call) => call.method)).toEqual([undefined, 'PUT']);
 	});
 });
 
