@@ -1,0 +1,8 @@
+{
+	"data": {
+		"short": { "start": "2026-11-01", "end": "2026-12-31" },
+		"start": "2027-01-01",
+		"started": false,
+		"contracts": [{ "id": "c1", "tenantName": "Anna Keller", "apartmentNumber": "2.01" }]
+	}
+}

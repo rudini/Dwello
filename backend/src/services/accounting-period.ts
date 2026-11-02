@@ -77,7 +77,7 @@ const typeOf = (period: Range) =>
  */
 function earlierType(type: AccountingPeriodType, building: Omit<Dated, 'status'>[], change: PeriodChange) {
 	// a change back to the type before that day is none
-	if (change && change.from !== type) return { type: change.from, switched: daysAfter(lastCompletedPeriod(change.from, change.on).end, 1) };
+	if (change && change.from !== type) return { type: change.from, switched: switchDay(change) };
 	const whole = periodsOf(building).filter((p) => typeOf(p));
 	const first = whole.find((p) => typeOf(p) === type);
 	const last = whole.filter((p) => typeOf(p) !== type && (!first || p.start < first.start)).at(-1);
@@ -168,8 +168,27 @@ export function consentPeriod(
 	change: PeriodChange = null
 ) {
 	const earlier = earlierType(type, building, change);
-	const part = earlier
-		? missingWays(type, contract, statements, building, today, change).find(({ way, open }) => open && way.kind === 'short' && way.start === earlier.switched)
-		: undefined;
-	return part ? { earlier: earlier!.type, short: { start: part.way.start, end: part.way.end } } : null;
+	if (!earlier) return null;
+	const part = missingWays(type, contract, statements, building, today, change).find(
+		({ way, open }) => open && way.kind === 'short' && way.start === earlier.switched
+	);
+	if (part) return { earlier: earlier.type, short: { start: part.way.start, end: part.way.end } };
+	// #1036: from the day of the change, while the short period still runs and no statement bills any of it
+	const short = shortPeriodFrom(type, earlier.switched);
+	const running = short.end >= today && billsIn(contract, short) && !periodsOf(building).some((p) => overlaps(p, short));
+	return running ? { earlier: earlier.type, short } : null;
 }
+
+// #512: the day after the earlier type's last period ended before the change
+const switchDay = (change: NonNullable<PeriodChange>) => daysAfter(lastCompletedPeriod(change.from, change.on).end, 1);
+
+/** #1036: the short Abrechnungsperiode after the stored change of the setting; null without one */
+export const shortPeriodOfChange = (type: AccountingPeriodType, change: PeriodChange) =>
+	change && change.from !== type ? shortPeriodFrom(type, switchDay(change)) : null;
+
+/** #1036: the short Abrechnungsperiode from the switch day to the end of the setting's period it falls in */
+const shortPeriodFrom = (type: AccountingPeriodType, switched: string): Range => ({
+	start: switched,
+	// a year later lies in the next period, so the last one ended then is the one of the switch day
+	end: lastCompletedPeriod(type, `${Number(switched.slice(0, 4)) + 1}${switched.slice(4)}`).end
+});

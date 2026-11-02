@@ -273,4 +273,13 @@ describe('Kurze Abrechnungsperiode für den Brief zur Zustimmung', () => {
 		const building = [own('2024-07-01', '2025-06-30')];
 		expect(consentPeriod('calendar', contract('2025-10-01'), [], building, today)?.short).toEqual({ start: '2025-07-01', end: '2025-12-31' });
 	});
+
+	// #1036: the letter from the day of the change, while the short period still runs, not only after it ended
+	it('nennt ab dem Tag des Wechsels die kurze Abrechnungsperiode, die noch läuft', () => {
+		const change = { on: '2026-11-02', from: 'november-october' as const };
+		expect(consentPeriod('calendar', contract('2024-04-01'), [], [], '2026-11-02', change)).toEqual({
+			earlier: 'november-october',
+			short: { start: '2026-11-01', end: '2026-12-31' }
+		});
+	});
 });

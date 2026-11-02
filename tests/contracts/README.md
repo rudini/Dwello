@@ -31,6 +31,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
 | `statement-send-refused.json` | `POST /api/v1/statements/:id/send`, wenn die E-Mail an einen Mieter mit Korrespondenzkanal E-Mail nicht hinausgeht (400) |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
+| `config-period-change.json` | `GET /api/v1/config/period-change` (die kurze Abrechnungsperiode nach einem Wechsel der Einstellung und die Mietverträge zur Zustimmung, #1036) |
 | `contract-missing-statements.json` | `GET /api/v1/contracts/:id/missing-statements` (fehlende Abrechnungen am Mietvertrag mit ihrem Weg in den Assistenten, H-28) |
 | `contracts-missing-statements.json` | `GET /api/v1/contracts/missing-statements` (je Mietvertrag die Tage abgelaufener Perioden ohne Abrechnung, Mietvertragsliste und Übersicht, H-28; im Beispiel steht `c1` für eine Mietvertrags-ID) |
 | `statement-run-defaults.json` | `GET /api/v1/statements/run-defaults?buildingId=…&periodStart=…&periodEnd=…` (Vorgaben des Abrechnungs-Assistenten aus einem Link oder den Einstellungen, A-10, H-28) |

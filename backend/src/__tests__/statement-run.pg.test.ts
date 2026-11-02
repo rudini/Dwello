@@ -168,6 +168,39 @@ describe('Wechsel der Einstellung «Abrechnungsperiode»', () => {
 	});
 });
 
+// #1036 (product owner 2026-11-02, Option 1): after a change the settings name the contracts whose tenants must agree,
+// from the day of the change; here the type whose period began last, so the short period still runs
+describe('Mietverträge zur Zustimmung nach einem Wechsel der Abrechnungsperiode', () => {
+	const types = ['calendar', 'july-june', 'november-october'] as const;
+	const startOf = (type: (typeof types)[number]) => daysAfter(lastCompletedPeriod(type, swissToday()).end, 1);
+	const [from, to] = [...types].sort((a, b) => startOf(b).localeCompare(startOf(a)));
+	afterAll(async () => {
+		await db.delete(configuration).where(inArray(configuration.key, ['accounting_period', 'accounting_period_changed']));
+	});
+
+	it('nennt die Mietverträge mit Mietstagen in der kurzen Abrechnungsperiode, die noch läuft', async () => {
+		const building = await newBuilding();
+		const running = await rent('1.01', 'Zustimmung', '2024-01-01', undefined, building);
+		const ended = await rent('1.02', 'Ausgezogen', '2023-01-01', '2023-12-31', building);
+		await db.delete(configuration).where(inArray(configuration.key, ['accounting_period', 'accounting_period_changed']));
+		await db.insert(configuration).values({ key: 'accounting_period', value: from });
+		await sendJson('PUT', '/api/v1/config', { accounting_period: to });
+
+		type Change = { short: { start: string; end: string }; start: string; started: boolean; contracts: { id: string }[] };
+		const { data } = (await (await sendJson('GET', '/api/v1/config/period-change')).json()) as { data: Change };
+		expect(data.short.start).toBe(startOf(from));
+		expect(data.start).toBe(daysAfter(data.short.end, 1));
+		expect(data.started).toBe(false);
+		expect(data.contracts).toContainEqual(expect.objectContaining({ id: running, apartmentNumber: '1.01' }));
+		expect(data.contracts.map((c) => c.id)).not.toContain(ended);
+	});
+
+	it('nennt ohne Wechsel keinen', async () => {
+		await db.delete(configuration).where(inArray(configuration.key, ['accounting_period', 'accounting_period_changed']));
+		expect(((await (await sendJson('GET', '/api/v1/config/period-change')).json()) as { data: unknown }).data).toBeNull();
+	});
+});
+
 // A-10: the wizard's defaults from a link to a building and period, decided by the backend (H-28)
 describe('Vorgaben des Abrechnungs-Assistenten', () => {
 	it('übernimmt Heizprofil und Verwaltungspauschale der übrigen Abrechnungen der Periode', async () => {

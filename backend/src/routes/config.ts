@@ -14,6 +14,7 @@ import {
 	type ConfigKey
 } from '../services/config.service';
 import { errorBody, fieldsRefused } from '../services/coded-error';
+import { periodChange } from '../services/statement-run.service';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values
@@ -24,6 +25,9 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 			keys: Object.keys(CONFIG_KEYS)
 		};
 	})
+
+	// #1036: the short Abrechnungsperiode after a change of the setting and the contracts whose tenants must agree
+	.get('/period-change', async () => ({ data: await periodChange() }))
 
 	// Get a single configuration value
 	.get(

@@ -289,6 +289,20 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-missing-statements'), actual)).toEqual([]);
 	});
 
+	it('GET /config/period-change liefert die Felder von config-period-change.json', async () => {
+		const periodKeys = ['accounting_period', 'accounting_period_changed'];
+		const stored = await db.select().from(configuration).where(inArray(configuration.key, periodKeys));
+		await db.delete(configuration).where(inArray(configuration.key, periodKeys));
+		await setConfig('accounting_period', 'july-june');
+		try {
+			const actual = await (await callApi('/api/v1/config/period-change')).json();
+			expect(drift(await sample('config-period-change'), actual)).toEqual([]);
+		} finally {
+			await db.delete(configuration).where(inArray(configuration.key, periodKeys));
+			if (stored.length) await db.insert(configuration).values(stored);
+		}
+	});
+
 	it('GET /contracts/missing-statements liefert die Felder von contracts-missing-statements.json', async () => {
 		const byContract = (await (await callApi('/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
 		expect(drift(await sample('contracts-missing-statements'), { c1: byContract[rental.contract] })).toEqual([]);
