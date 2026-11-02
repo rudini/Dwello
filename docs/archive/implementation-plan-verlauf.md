@@ -809,3 +809,10 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Slice review round 1, also the closing round: `docs/reviews/1065-review-1.md` (no findings)
 - [x] No `fach-reviewer` round: the texts are its own (1000-fachreview-1, V-1), read in all four languages
 - [x] Archive, PR: pushed after this archive
+
+## Session: #1039, #1035 glossary rows (export of all data, data file, export of a tenant, consent letter)
+
+- [x] Rows in `UBIQUITOUS_LANGUAGE.md` and `docs/design/i18n-begriffe.md` as the product owner decided on 02.11.2026; the TODO markers naming #1039 and #1035 removed
+- [x] No scenario: glossary and code comments only; the help texts already use the terms in all four languages
+- [x] Slice review round 1, also the closing round: `docs/reviews/1039-review-1.md` (C-1 Minor, fixed: issue references in brackets, as in the two-column table)
+- [x] Archive, PR: pushed after this archive
