@@ -45,7 +45,13 @@ export const Navigate = {
 };
 
 export const Click = {
-	on: (target: Target) => on(target, (element) => element.click()),
+	// Scrolled into view first: in Firefox a click right after filling a field below the fold missed its target about
+	// once in a hundred (#1046: 7 of 600 without, 0 of 600 with this)
+	on: (target: Target) =>
+		on(target, async (element) => {
+			await element.scrollIntoViewIfNeeded();
+			await element.click();
+		}),
 	// A click that loads the page anew (e.g. the language selection); waits until it is hydrated again
 	toReload: (target: Target): Activity => async (actor) => {
 		await Promise.all([pageOf(actor).waitForEvent('load'), locate(actor, target).click()]);

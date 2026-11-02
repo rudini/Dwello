@@ -834,6 +834,14 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No `fach-reviewer` round: the texts are its own (1000-fachreview-1, V-1), read in all four languages
 - [x] Archive, PR: pushed after this archive
 
+## Session: #1046 red main run, a Firefox click that missed its target
+
+- [x] Cause from the trace of run 41327289095: the click on «Dokument hochladen» right after filling the title field sent no request and left the field focused; reproduced in plain Firefox (7 of 600 clicks after a fill below the fold missed; with the target scrolled into view first, 0 of 600)
+- [x] Fix: `Click.on` scrolls its target into view before clicking (`tests/e2e/screenplay/interactions.ts`)
+- [x] No scenario: a fix of the E2E harness; the scenario that failed is the test (Firefox ×5 green)
+- [x] Slice review round 1, also the closing round: `docs/reviews/1046-review-1.md` (no findings)
+- [x] Archive, PR: pushed after this archive
+
 ## Session: #1039, #1035 glossary rows (export of all data, data file, export of a tenant, consent letter)
 
 - [x] Rows in `UBIQUITOUS_LANGUAGE.md` and `docs/design/i18n-begriffe.md` as the product owner decided on 02.11.2026; the TODO markers naming #1039 and #1035 removed
