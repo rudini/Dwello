@@ -15,13 +15,14 @@ const sum = (more: Partial<HeatingSum>): HeatingSum => ({
 });
 
 describe('Summe der Heizkosten einer Wohnung in der Vorschau', () => {
-	it('nennt den Leerstand und wie viel die Abrechnungen zu viel verrechnen', () => {
-		expect(heatingSumText(sum({}))).toBe(
-			'Die Heizkosten der Wohnung betragen CHF 2’000.00, davon tragen die Mieter CHF 1’920.00 und Sie CHF 80.00 für den Leerstand. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 2’370.00 ohne Verwaltungspauschale, CHF 450.00 zu viel.'
+	// #1026 (PO 02.11.2026, A): after the numbers the advice of the result
+	it('nennt den Leerstand, wie viel die Abrechnungen zu viel verrechnen, und rät zu berichtigen', () => {
+		expect(heatingSumText(sum({}), 'Marc Huber')).toBe(
+			'Die Heizkosten der Wohnung betragen CHF 2’000.00, davon tragen die Mieter CHF 1’920.00 und Sie CHF 80.00 für den Leerstand. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 2’370.00 ohne Verwaltungspauschale, CHF 450.00 zu viel. Erstellen Sie für Marc Huber eine berichtigte Abrechnung.'
 		);
 	});
 
-	it('nennt ohne Leerstand nur die Heizkosten und wie viel zu wenig verrechnet wird', () => {
+	it('nennt ohne Leerstand nur die Heizkosten, wie viel zu wenig verrechnet wird, und wer den Unterschied trägt', () => {
 		expect(
 			heatingSumText(
 				sum({
@@ -31,14 +32,15 @@ describe('Summe der Heizkosten einer Wohnung in der Vorschau', () => {
 					difference: '530.00',
 					result: 'less',
 					landlordFor: null
-				})
+				}),
+				'Marc Huber'
 			)
 		).toBe(
-			'Die Heizkosten der Wohnung betragen CHF 2’000.00. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 1’470.00 ohne Verwaltungspauschale, CHF 530.00 zu wenig.'
+			'Die Heizkosten der Wohnung betragen CHF 2’000.00. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 1’470.00 ohne Verwaltungspauschale, CHF 530.00 zu wenig. Den Unterschied tragen Sie, wenn Sie die Abrechnung von Marc Huber nicht berichtigen.'
 		);
 	});
 
-	it('nennt Mietverträge ohne vereinbarte Heizkosten und gleich viel', () => {
+	it('nennt Mietverträge ohne vereinbarte Heizkosten und gleich viel, ohne Rat', () => {
 		expect(
 			heatingSumText(
 				sum({
@@ -48,10 +50,19 @@ describe('Summe der Heizkosten einer Wohnung in der Vorschau', () => {
 					difference: '0.00',
 					result: 'equal',
 					landlordFor: 'leases'
-				})
+				}),
+				'Marc Huber'
 			)
 		).toBe(
 			'Die Heizkosten der Wohnung betragen CHF 2’000.00, davon tragen die Mieter CHF 1’500.00 und Sie CHF 500.00 für Leerstand und Mietverträge ohne vereinbarte Heizkosten. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 1’500.00 ohne Verwaltungspauschale, gleich viel.'
+		);
+	});
+
+	// #1026 (A, Fachreview 508-1 V-2, 1026-1): with heating invoices without Leistungszeitraum in the run the numbers may be
+	// wrong; only the advice to enter it first, whatever the result
+	it('rät bei Heizrechnungen ohne Leistungszeitraum nur, diesen zuerst einzutragen', () => {
+		expect(heatingSumText(sum({ periodFirst: true }), 'Marc Huber')).toBe(
+			'Die Heizkosten der Wohnung betragen CHF 2’000.00, davon tragen die Mieter CHF 1’920.00 und Sie CHF 80.00 für den Leerstand. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 2’370.00 ohne Verwaltungspauschale, CHF 450.00 zu viel. Fehlt einer Heizrechnung der Leistungszeitraum, tragen Sie ihn zuerst ein und öffnen Sie die Vorschau erneut. Erst dann zeigt sich, ob eine Abrechnung berichtigt werden muss.'
 		);
 	});
 });

@@ -280,7 +280,11 @@ async function heatingHints(fetch: Fetch, buildingId: string, run: GenerationReq
 		found: check && { ...check, heatingWithoutServicePeriod },
 		oldRule: (listed: Listed) => oldHeatingRule.includes(listed.id),
 		// #508: the heating sum of its apartment, on its first statement under the old rule
-		heatingSum: (listed: Listed) => heatingSums.find((sum) => sum.statementId === listed.id) ?? null
+		// #1026: with heating invoices without Leistungszeitraum beside ones with (#339) only the advice to enter it first
+		heatingSum: (listed: Listed) => {
+			const sum = heatingSums.find((one) => one.statementId === listed.id);
+			return sum ? { ...sum, periodFirst: heatingWithoutServicePeriod.length > 0 } : null;
+		}
 	};
 }
 

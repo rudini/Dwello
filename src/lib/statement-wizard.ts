@@ -129,6 +129,7 @@ export interface HeatingSum {
 	difference: string;
 	result: 'more' | 'less' | 'equal';
 	landlordFor: 'vacancy' | 'leases' | null;
+	periodFirst?: boolean; // #1026: the run has heating invoices without Leistungszeitraum beside ones with (#339)
 }
 
 type Range = { start: string; end: string };
@@ -376,17 +377,31 @@ export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee,
 		profileEdited && m.statements_existing_profile_edited({ profile: profileEdited }),
 		fee && feeNotes[fee.source](fee),
 		oldRule && m.statements_existing_old_heating_rule({ tenant: tenantName }),
-		heatingSum && heatingSumText(heatingSum)
+		heatingSum && heatingSumText(heatingSum, tenantName)
 	].filter(Boolean) as string[];
 
 const sumCosts = { vacancy: m.statements_heating_sum_costs_vacancy, leases: m.statements_heating_sum_costs_landlord };
 const sumResult = { more: m.statements_heating_sum_more, less: m.statements_heating_sum_less, equal: m.statements_heating_sum_equal };
 
-/** #508: the apartment's heating costs, the landlord's part and what its statements bill for them, in words */
-export function heatingSumText(sum: HeatingSum) {
+const sumAdvice = {
+	more: m.statements_heating_sum_advice_more,
+	less: m.statements_heating_sum_advice_less,
+	equal: () => ''
+};
+
+/**
+ * #508: the apartment's heating costs, the landlord's part and what its statements bill for them, in words; #1026: then
+ * the advice of the result, or with heating invoices without Leistungszeitraum in the run only to enter it first
+ */
+export function heatingSumText(sum: HeatingSum, tenant: string) {
 	const [costs, tenants, landlord, billed, difference] = [sum.costs, sum.tenants, sum.landlord, sum.billed, sum.difference].map((amount) => francs(Number(amount)));
 	const costsText = sum.landlordFor ? sumCosts[sum.landlordFor]({ costs, tenants, landlord }) : m.statements_heating_sum_costs({ costs });
-	return `${costsText} ${sumResult[sum.result]({ billed, difference })}`;
+	const advice = sum.periodFirst
+		? m.statements_heating_sum_period_first()
+		: sumAdvice[sum.result]({ tenant });
+	return [costsText, sumResult[sum.result]({ billed, difference }), advice]
+		.filter(Boolean)
+		.join(' ');
 }
 
 /** The hint on heating invoices without Leistungszeitraum beside ones with (#339): its categories, each quoted (V-15) */
