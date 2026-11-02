@@ -723,3 +723,15 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
 - [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
 - [x] PR: pushed after this archive
+
+## Session: #1057 sending dated back across summer time
+
+Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days-ago.ts` (#1004) and its test treat it as `timestamptz`: in the late evening the shown time lands on the next day.
+
+- [x] Test on the real column type (`timestamp`, UTC), seen red
+- [x] Script converts UTC → Zurich, moves Swiss days back, converts back
+- [x] Affected E2E scenario green (statement-redeliver, 4 passed)
+- [x] Code review: `docs/reviews/1057-review-1.md` (no findings; covers all code, so no closing round)
+- [x] Checks: lint, check, type-check, backend test, Prettier
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1057.md`
+- [x] Archive, PR: pushed after this archive
