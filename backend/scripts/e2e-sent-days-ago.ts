@@ -13,8 +13,9 @@ await onE2eDatabase(async (client) => {
 		[statementId, days]
 	);
 	await client.query(
-		// with the Zahlungsfrist it printed (#966); by Swiss days, which across summer time are not 24 hours (#1004)
-		"UPDATE documents SET sent_at = (sent_at AT TIME ZONE 'Europe/Zurich' - make_interval(days => $2::int)) AT TIME ZONE 'Europe/Zurich', payment_deadline = payment_deadline - $2::int WHERE statement_id = $1 AND type = 'statement'",
+		// with the Zahlungsfrist it printed (#966); by Swiss days, which across summer time are not 24 hours (#1004);
+		// sent_at is a timestamp without zone in UTC (#1057)
+		"UPDATE documents SET sent_at = ((sent_at AT TIME ZONE 'UTC' AT TIME ZONE 'Europe/Zurich' - make_interval(days => $2::int)) AT TIME ZONE 'Europe/Zurich') AT TIME ZONE 'UTC', payment_deadline = payment_deadline - $2::int WHERE statement_id = $1 AND type = 'statement'",
 		[statementId, days]
 	);
 });
