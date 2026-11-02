@@ -841,6 +841,7 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Unit tests in `statement-heating-sum.test.ts` and the BFF test in `statement-generation.test.ts` seen red, then green
 - [x] No persona: the texts are the PO's and the domain review's, read in all four languages
 - [x] Slice review round 1, also the closing round: `docs/reviews/1026-review-1.md` (no findings)
+- [x] CI fix (fitness Ä1, `statement-wizard.ts` over 400 lines): the heating sum moved to `src/lib/heating-sum.ts`; closing round `docs/reviews/1026b-review-1.md` (no findings)
 - [x] Archive, PR: pushed after this archive
 
 ## Session: #1023 «Nicht berichtigen» compares the raw Saldos, below CHF 5 too
