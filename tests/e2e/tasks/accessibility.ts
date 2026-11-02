@@ -100,7 +100,7 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
-import { leaveSettings } from './statement-generate';
+import { billedCannotBeChecked, invoicesCannotBeCounted, leaveSettings } from './statement-generate';
 import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
@@ -748,8 +748,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// #738: neither count of step «Gebäude» loads: the note on what it could not load
 	'buildings-counts-failed': () => (actor) =>
 		actor.attemptsTo(
-			FailRequests.to('/api/invoices', { isValidUtilityCost: 'true' }),
-			FailRequests.to('/api/statements/billed', {}),
+			invoicesCannotBeCounted,
+			billedCannotBeChecked,
 			Click.on(nextButton),
 			Wait.until(on.shown('generate-counts-failed'))
 		),

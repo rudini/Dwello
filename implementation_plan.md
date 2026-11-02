@@ -16,6 +16,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Checkbox named by building and address, counts and apartments as description; «1 Wohnung» singular (`BuildingChoice.svelte`)
 - [x] Focus on the step heading when the wizard opens in a later step (`StatementWizard.svelte`)
 - [x] a11y and language rows: state `buildings-counts-failed`
-- [ ] Code review
-- [ ] Persona (UI changed)
+- [x] Code review round 1: `docs/reviews/738-review-1.md`
+- [x] Persona round 1: `docs/design/personas/sven-738.md`, `docs/design/personas/marco-738.md`
+- [ ] Code review of the review fixes (Sven P-1 Major)
 - [ ] PR

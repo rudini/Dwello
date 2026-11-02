@@ -28,6 +28,13 @@
 	let billed = $state<Record<string, Billed>>({});
 	// #738: a count that failed is said, so no building reads as having no invoices or statements
 	let failed = $state({ invoices: false, billed: false });
+	// read with the group, not only seen (persona Sven 738 P-1)
+	const countsFailed = $derived(failed.invoices || failed.billed);
+	const describedBy = $derived(
+		[error && 'buildings-error', countsFailed && 'buildings-counts-failed']
+			.filter(Boolean)
+			.join(' ') || undefined
+	);
 	$effect(() => {
 		const ids = buildings.map((b) => b.id);
 		// both answers shown at once: one arriving later would push the rows below away while a building is clicked
@@ -95,10 +102,7 @@
 			: [...selectedBuildingIds, id]);
 </script>
 
-<fieldset
-	class="flex min-w-0 flex-col gap-4"
-	aria-describedby={error ? 'buildings-error' : undefined}
->
+<fieldset class="flex min-w-0 flex-col gap-4" aria-describedby={describedBy}>
 	<legend class="sr-only">{m.statements_step_buildings()}</legend>
 	<div class="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
 		<label class="flex min-h-12 cursor-pointer items-center gap-4 font-semibold text-ink">
@@ -114,11 +118,16 @@
 		<span class="text-ink-muted" aria-live="polite">
 			{m.statements_selected_of({ selected: selectedBuildingIds.length, total: buildings.length })}
 		</span>
-		{#if failed.invoices || failed.billed}
-			<p class="basis-full font-semibold text-caution" data-testid="generate-counts-failed">
+		{#if countsFailed}
+			<p
+				id="buildings-counts-failed"
+				class="basis-full font-semibold text-caution"
+				data-testid="generate-counts-failed"
+			>
 				{[
 					failed.invoices && m.statements_buildings_invoices_failed(),
-					failed.billed && m.statements_buildings_billed_failed()
+					failed.billed && m.statements_buildings_billed_failed(),
+					m.statements_buildings_reload()
 				]
 					.filter(Boolean)
 					.join(' ')}

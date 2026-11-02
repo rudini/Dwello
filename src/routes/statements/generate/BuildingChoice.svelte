@@ -74,15 +74,17 @@
 	);
 	// #738: named by building and address; the counts and notes describe it
 	const id = (part: string) => `building-${part}-${building.id}`;
-	const describedBy = $derived(
-		[
-			invoices !== undefined && id('invoices'),
-			id('apartments'),
-			error && 'buildings-error',
-			billedText && billedId
-		]
+	const apartmentsWord = $derived(
+		building.apartmentCount === 1 ? m.buildings_apartment_one() : m.buildings_apartment_many()
+	);
+	// read as sentences, so the apartments are not heard as part of the period (persona Sven 738 P-3)
+	const countsText = $derived(
+		[invoices !== undefined && invoicesText, `${building.apartmentCount} ${apartmentsWord}`]
 			.filter(Boolean)
-			.join(' ')
+			.join('. ')
+	);
+	const describedBy = $derived(
+		[id('counts'), error && 'buildings-error', billedText && billedId].filter(Boolean).join(' ')
 	);
 </script>
 
@@ -110,16 +112,16 @@
 		>
 		{#if invoices !== undefined}
 			<span
-				id={id('invoices')}
 				class={invoices === 0 ? 'font-semibold text-caution' : 'text-ink-muted'}
 				data-testid="generate-building-invoices-{building.id}">{invoicesText}</span
 			>
 		{/if}
 	</span>
-	<span id={id('apartments')} class="text-right text-ink-muted">
+	<span class="text-right text-ink-muted">
 		<span class="font-semibold tabular-nums text-ink">{building.apartmentCount}</span>
-		{building.apartmentCount === 1 ? m.buildings_apartment_one() : m.buildings_apartment_many()}
+		{apartmentsWord}
 	</span>
+	<span id={id('counts')} hidden>{countsText}</span>
 	{#if billedText}
 		<span
 			id={billedId}

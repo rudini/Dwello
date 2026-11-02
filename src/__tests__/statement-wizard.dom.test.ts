@@ -2036,3 +2036,98 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		);
 	});
 });
+
+// #738: what step «Gebäude» could not count, how it names a building, and where a resumed wizard starts
+describe('Wahl der Gebäude, wenn eine Zählung fehlt, und wie ein Gebäude heisst', () => {
+	const failedNote = () => byTestId('generate-counts-failed')?.textContent?.trim();
+	const toBuildings = async (buildings = data.buildings) => {
+		show(GeneratePage, { data: { ...data, buildings }, form: null } as never);
+		await settle();
+		next();
+		await settle();
+	};
+
+	it('sagt, dass die Anzahl Rechnungen nicht geladen werden konnte, und nennt keine', async () => {
+		fakeBff((call) => (call.path.startsWith('/statements/billed') ? [200, []] : [500]));
+		await toBuildings();
+
+		expect(failedNote()).toBe(
+			'Die Anzahl Rechnungen je Gebäude konnte nicht geladen werden. Laden Sie die Seite neu.'
+		);
+		expect(byTestId('generate-building-invoices-b1')).toBeNull();
+	});
+
+	it('sagt, dass die bestehenden Abrechnungen nicht geprüft werden konnten', async () => {
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed') ? [500] : [200, { invoices: [], total: 0 }]
+		);
+		await toBuildings();
+
+		expect(failedNote()).toBe(
+			'Ob Mietverträge in dieser Abrechnungsperiode schon eine Abrechnung haben, konnte nicht geladen werden. Laden Sie die Seite neu.'
+		);
+	});
+
+	// persona Marco 738 P-2: with both counts failed, «Laden Sie die Seite neu.» once
+	it('nennt beide fehlenden Zählungen und das Neuladen nur einmal', async () => {
+		fakeBff(() => [500]);
+		await toBuildings();
+
+		expect(failedNote()).toBe(
+			'Die Anzahl Rechnungen je Gebäude konnte nicht geladen werden. Ob Mietverträge in dieser Abrechnungsperiode schon eine Abrechnung haben, konnte nicht geladen werden. Laden Sie die Seite neu.'
+		);
+	});
+
+	// persona Sven 738 P-1: the note is read with the group of buildings, not only seen
+	it('liest den Hinweis auf die fehlenden Zählungen mit der Wahl der Gebäude', async () => {
+		fakeBff(() => [500]);
+		await toBuildings();
+
+		const group = byTestId('generate-building-b1')!.closest('fieldset')!;
+		const note = byTestId('generate-counts-failed')!;
+		expect(group.getAttribute('aria-describedby')?.split(' ')).toContain(note.id);
+	});
+
+	it('sagt nichts, wenn beide Zählungen geladen sind', async () => {
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed') ? [200, []] : [200, { invoices: [], total: 0 }]
+		);
+		await toBuildings();
+
+		expect(byTestId('generate-building-invoices-b1')).not.toBeNull();
+		expect(failedNote()).toBeUndefined();
+	});
+
+	it('nennt das Gebäude mit Name und Adresse und beschreibt es mit Rechnungen und Wohnungen', async () => {
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed') ? [200, []] : [200, { invoices: [], total: 0 }]
+		);
+		await toBuildings([{ ...data.buildings[0], apartmentCount: 1 }]);
+
+		const text = (ids: string | null) =>
+			ids!
+				.split(' ')
+				.map((id) => document.getElementById(id)!.textContent!.replace(/\s+/g, ' ').trim())
+				.join(' ');
+		const checkbox = byTestId('generate-building-b1')!;
+		expect(text(checkbox.getAttribute('aria-labelledby'))).toBe('Ahornhof Ahornweg 3, 8400 Winterthur');
+		expect(text(checkbox.getAttribute('aria-describedby'))).toBe(
+			'Keine Rechnungen in der Abrechnungsperiode erfasst. 1 Wohnung'
+		);
+	});
+
+	it('setzt den Fokus auf den Namen des Schritts, wenn der Assistent im Schritt «Gebäude» weitergeht', async () => {
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed') ? [200, []] : [200, { invoices: [], total: 0 }]
+		);
+		await toBuildings();
+		click('generate-building-b2');
+		await settle();
+
+		document.body.innerHTML = '';
+		open();
+		await settle();
+		expect(heading()).toBe('Gebäude');
+		expect(document.activeElement).toBe(document.querySelector('h2'));
+	});
+});

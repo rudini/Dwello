@@ -171,4 +171,3 @@ export const previewAllSkipped = (buildingId: string) =>
 export const countsFailedNote = target('Hinweis auf nicht geladene Zählungen', (page) => page.getByTestId('generate-counts-failed'));
 export const buildingCard = (buildingId: string) =>
 	target(`Karte von Gebäude ${buildingId} in der Wahl`, (page) => page.getByTestId(`generate-building-card-${buildingId}`));
-export const stepHeading = target('Überschrift des Schritts', (page) => page.getByTestId('statement-step-heading'));

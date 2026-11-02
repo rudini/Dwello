@@ -878,7 +878,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   Szenario: Ein Gebäude heisst bei der Wahl nach Name und Adresse
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
     Dann heisst das Gebäude "Lindenhof" bei der Wahl "Lindenhof Testweg 1, 8400 Winterthur"
-    Und beschreibt die Wahl das Gebäude "Lindenhof" mit "Keine Rechnungen in der Abrechnungsperiode erfasst 1 Wohnung"
+    Und beschreibt die Wahl das Gebäude "Lindenhof" mit "Keine Rechnungen in der Abrechnungsperiode erfasst. 1 Wohnung"
 
   Szenario: Die Wahl der Gebäude passt in ein schmales Fenster
     Angenommen das Browserfenster ist 390 Pixel breit
