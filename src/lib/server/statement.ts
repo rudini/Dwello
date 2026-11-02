@@ -133,10 +133,13 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		heatingProfileName: profileName(data),
 		...correctionOf(data),
 		...carryOf(data),
-		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
+		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate, paidAmount, part }: BackendStatement) => ({
 			resetOn,
-			paidDate
+			paidDate,
+			paidAmount: amountOrNull(paidAmount),
+			part: !!part
 		})),
+		payments: (data.payments ?? []).map(({ date, amount }: BackendStatement) => ({ date, amount: Number(amount) })), // #999
 		correctionDeclined: data.correctionDeclined ? { on: data.correctionDeclined.on } : null,
 		// what it allows, the backend decides it (#788)
 		editable: data.editable === true,

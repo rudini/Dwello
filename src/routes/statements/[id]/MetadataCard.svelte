@@ -7,7 +7,8 @@
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { formatDate, formatDateTime } from '$lib/utils/format';
+	import type { PaymentReset } from '$lib/types';
+	import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
 
 	// When the statement and its PDF were made, sent (its date, from which the deadline runs) and paid
 	let {
@@ -16,6 +17,8 @@
 		sentOn,
 		paidOn,
 		paymentResets = [],
+		payments = [],
+		refund = false,
 		correctionDeclinedOn,
 		delivery = null,
 		resent = [],
@@ -26,7 +29,9 @@
 		pdfGeneratedAt?: string | null;
 		sentOn?: string | null;
 		paidOn?: string | null;
-		paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
+		paymentResets?: PaymentReset[]; // payments taken back (#92)
+		payments?: { date: string; amount: number }[]; // recorded payments, part payments too (#959)
+		refund?: boolean; // a negative Saldo: its part payments are refunds
 		correctionDeclinedOn?: string | null; // «Nicht berichtigen» (#454)
 		delivery?: Delivery | null; // without a Dokument (before #449, or no PDF) only «Versendet»
 		resent?: { id: string; newPdf: boolean; sentAt: string | null; createdAt?: string }[]; // again by letter (#534), a new PDF (#968)
@@ -90,6 +95,28 @@
 	);
 	const pdfRow = $derived({ label: m.statements_pdf_created(), date: firstPdfAt && formatDateTime(firstPdfAt) });
 	const newPdfRow = $derived(madeRow(pdfGeneratedAt));
+	// #999 (#959 Regel 1, Fachreview 999-1 M-1): each part payment; the one that reached the Saldo after parts too
+	const chf = (amount: number) => formatCurrency(Math.abs(amount));
+	const paymentRows = $derived(
+		payments.map((payment, index) => ({
+			label:
+				paidOn && index === payments.length - 1
+					? m.statements_history_payment({ amount: chf(payment.amount) })
+					: refund
+						? m.statements_history_part_refund({ amount: chf(payment.amount) })
+						: m.statements_history_part_payment({ amount: chf(payment.amount) }),
+			date: formatDate(payment.date)
+		}))
+	);
+	// with its amount since #959; a payment recorded before has none (#999, Fachreview 999-1 V-1 A)
+	const resetLabel = ({ paidDate, paidAmount, part }: PaymentReset) => {
+		const date = paidDate ? formatDate(paidDate) : '–';
+		if (paidAmount === null) return m.statements_history_payment_reset({ date });
+		const values = { date, amount: chf(paidAmount) };
+		return part
+			? m.statements_history_part_payment_reset(values)
+			: m.statements_history_payment_reset_amount(values);
+	};
 	const dates = $derived(
 		[
 			{ label: m.statements_history_created(), date: createdAt && formatDateTime(createdAt) },
@@ -99,10 +126,9 @@
 			...afterKept,
 			...(newPdf ? [newPdfRow] : []),
 			...(newPdfMadeAt ? [madeRow(newPdfMadeAt)] : []),
+			...(paidOn && payments.length < 2 ? [] : paymentRows),
 			...paymentResets.map((reset) => ({
-				label: m.statements_history_payment_reset({
-					date: reset.paidDate ? formatDate(reset.paidDate) : '–'
-				}),
+				label: resetLabel(reset),
 				date: formatDate(reset.resetOn)
 			})),
 			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) },
