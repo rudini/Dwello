@@ -735,3 +735,10 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Checks: lint, check, type-check, backend test, Prettier
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1057.md`
 - [x] Archive, PR: pushed after this archive
+## Session: stability and changes instead of the A/I graph (request in chat, follow-up to #1056)
+
+- [x] Structure report: graph «Stability and changes» (I over the commits of a module's most-changed file in fallow's hotspot window) with the zone stable and changing often; light per module (I ≤ 0.3 and Ca ≥ 5: green up to 12 changes, yellow up to 25, else red); A, D, the A/I graph and the D history table removed (tests first)
+- [x] Docs: report bullet and fitness row without A/D
+- [x] code-reviewer: `docs/reviews/change-graph-review-1.md` (no Blocker/Major; C-1 unused `--band`, C-2 zone text and tooltip without Ca: fixed), `-2.md` (closing round, both closed)
+- [x] Workflow note: none new
+- [x] Archive the session; PR pushed after this archive, once #1056 is merged
