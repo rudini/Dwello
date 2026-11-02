@@ -760,6 +760,7 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Domain review (step 5, asked by the fallback review of PR #1061): `docs/reviews/1000-fachreview-1.md` (no Blocker/Major; Minor V-1, fr/it «rappel de paiement»/«promemoria di pagamento» in the level-2 text, stays in its report: the issue decided the M-1 texts)
 - [x] Workflow note: no step-1 `fach-reviewer` round for texts a domain review already gives word for word (`docs/reviews/workflow-notes-issue-1000.md`)
 - [x] Archive, PR: pushed after this archive
+
 ## Session: #1057 sending dated back across summer time
 
 Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days-ago.ts` (#1004) and its test treat it as `timestamptz`: in the late evening the shown time lands on the next day.
