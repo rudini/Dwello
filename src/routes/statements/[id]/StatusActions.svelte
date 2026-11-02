@@ -18,7 +18,7 @@
 		status: StatementWithDetails['status'];
 		byEmail: boolean; // the tenant wants e-mail: Dwello sends a draft itself (#86)
 		owes: boolean; // an amount due; a refund is owed to the tenant and never reminded
-		waiting: boolean; // the Zahlungsfrist of the last Mahnung still runs (#107)
+		waiting: boolean; // the Zahlungsfrist of the last Mahnung still runs (#107), or it is still to send (#449, #736)
 		partPaid: boolean; // a part payment is recorded: it can be taken back (#999)
 		onremind: () => void;
 		onmarkpaid: () => void;

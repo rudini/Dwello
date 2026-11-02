@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { deliveryErrorText } from '$lib/backend-error';
+	import DeliveryFailure from '../../documents/DeliveryFailure.svelte';
 	import { documentStatus } from '$lib/document-status';
 	import type { StatementDocument } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -31,9 +31,8 @@
 				<span data-testid="document-status">{documentStatus(document).label}</span>
 			{/if}
 		</p>
-		{#if document.deliveryError}<p class="text-caution">
-				{deliveryErrorText(document)}
-			</p>{/if}
+		<!-- on the tenant's own page: no way to the tenant -->
+		{#if document.deliveryError}<DeliveryFailure {document} tenantLink={false} />{/if}
 	</div>
 	<div class="flex flex-wrap items-center gap-4">
 		<Button

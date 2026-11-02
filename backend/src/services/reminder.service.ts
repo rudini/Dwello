@@ -151,6 +151,7 @@ export async function sendReminder(statementId: string) {
 		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_'),
 		content: pdf.toString('base64'),
 		channel: byEmail ? 'email' : 'letter',
+		recipient: byEmail ? tenant.email : null, // the address it went to, for a failed e-mail (#736)
 		status: 'to_send',
 		paymentDeadline
 	});

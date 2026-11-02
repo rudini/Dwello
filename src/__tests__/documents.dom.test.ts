@@ -195,3 +195,50 @@ describe('Dokumente', () => {
 		expect(byTestId('documents-empty')).toBeNull();
 	});
 });
+
+// #736: an undelivered e-mail names the address it went to and leads to the tenant; on this page no way to it
+describe('E-Mail, die nicht zugestellt wurde', () => {
+	const refused = {
+		channel: 'email',
+		deliveryError: 'MAIL_DELIVERY_FAILED',
+		deliveryErrorCode: 'MAIL_DELIVERY_FAILED',
+		recipient: 'anna@example.com'
+	};
+
+	it('nennt die Adresse und führt zum Mieter, ohne auf «Dokumente» zu verweisen', () => {
+		documents([letter(refused)]);
+
+		const row = byTestId('document-row')!;
+		expect(row.textContent).toContain('E-Mail an anna@example.com');
+		const tenant = byTestId<HTMLAnchorElement>('delivery-tenant-link')!;
+		expect(tenant.getAttribute('href')).toBe('/tenants/t1');
+		expect(tenant.textContent).toBe('E-Mail-Adresse von Anna Keller prüfen');
+		expect(byTestId('delivery-documents-link')).toBeNull();
+		expect(row.textContent).not.toContain('Dokumente');
+	});
+
+	it('nennt keine Adresse, wenn eine ältere Mahnung keine festhält', () => {
+		documents([letter({ ...refused, recipient: null })]);
+
+		expect(byTestId('document-row')!.textContent).not.toContain('E-Mail an');
+		expect(byTestId('delivery-tenant-link')).not.toBeNull();
+	});
+});
+
+// #736 (code review 736-1 C-3): without a mail setup the address is not the tenant's to check
+describe('E-Mail ohne eingerichteten Versand', () => {
+	it('führt nicht zum Mieter', () => {
+		documents([
+			letter({
+				channel: 'email',
+				deliveryError: 'MAIL_NOT_CONFIGURED',
+				deliveryErrorCode: 'MAIL_NOT_CONFIGURED'
+			})
+		]);
+
+		expect(byTestId('document-row')!.textContent).toContain(
+			'Der E-Mail-Versand ist nicht eingerichtet.'
+		);
+		expect(byTestId('delivery-tenant-link')).toBeNull();
+	});
+});

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
-	import { deliveryErrorText } from '$lib/backend-error';
+	import DeliveryFailure from './DeliveryFailure.svelte';
 	import { documentStatus } from '$lib/document-status';
 	import type { StatementDocument } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -59,7 +59,8 @@
 				<Badge tone={status.tone} label={status.label} testid="document-status" />
 			</p>
 		{/if}
-		{#if document.deliveryError}<p class="text-caution">{deliveryErrorText(document)}</p>{/if}
+		<!-- the list of every tenant's documents is «Dokumente» itself -->
+		{#if document.deliveryError}<DeliveryFailure {document} documentsLink={!showTenant} />{/if}
 	</div>
 	<div class="flex flex-wrap gap-4">
 		{@render children?.()}

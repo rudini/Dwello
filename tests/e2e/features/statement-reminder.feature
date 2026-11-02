@@ -66,6 +66,42 @@ Funktionalität: Mahnungen
     Und der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" in den Dokumenten als versendet markiert
     Dann ist die "Zahlungserinnerung" an "Anna Keller" per Brief versendet festgehalten
 
+  # #736: eine nicht zugestellte Mahnung nennt die Adresse, an die sie ging, und führt zum Mieter, wo sie sich ändern lässt
+  Szenario: Eine nicht zugestellte Mahnung nennt in den Dokumenten die E-Mail-Adresse
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail an eine Adresse, die der Mailserver abweist
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Dann nennen die Dokumente bei der "Zahlungserinnerung" an "Anna Keller" die E-Mail-Adresse von "Anna Keller"
+    Und verweisen die Dokumente bei der "Zahlungserinnerung" an "Anna Keller" nicht auf «Dokumente»
+
+  Szenario: Von einer nicht zugestellten Mahnung in den Dokumenten zum Mieter
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail an eine Adresse, die der Mailserver abweist
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und der Liegenschaftsverwalter eine Mahnung sendet
+    Wenn der Liegenschaftsverwalter bei der "Zahlungserinnerung" an "Anna Keller" in den Dokumenten die E-Mail-Adresse prüft
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
+
+  Szenario: Von der Meldung einer nicht zugestellten Mahnung zu den Dokumenten
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail an eine Adresse, die der Mailserver abweist
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und der Liegenschaftsverwalter eine Mahnung sendet
+    Wenn der Liegenschaftsverwalter von der Meldung zu den Dokumenten geht
+    Dann ist der Liegenschaftsverwalter auf der Seite "Dokumente"
+
+  Szenario: Von einer nicht zugestellten Mahnung beim Mieter zu den Dokumenten
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail an eine Adresse, die der Mailserver abweist
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und der Liegenschaftsverwalter eine Mahnung sendet
+    Wenn der Liegenschaftsverwalter bei der "Zahlungserinnerung" auf der Seite von "Anna Keller" zu den Dokumenten geht
+    Dann ist der Liegenschaftsverwalter auf der Seite "Dokumente"
+
+  # #736 (Persona Helga P-1): solange die letzte Mahnung noch zur Post muss, bietet die Abrechnung keine weitere an
+  Szenario: Solange die Mahnung noch zu versenden ist, bietet die Abrechnung keine weitere an
+    Angenommen "Anna Keller" wünscht Korrespondenz per Brief
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Dann bietet die Abrechnung keine Mahnung an
+
   # #108: jede Mahnung trägt einen Zahlteil für den offenen Saldo, mit der Referenz der Abrechnung
   # (die Referenz gibt es nur mit einer QR-IBAN, die IBAN gilt für alle Szenarien: geprüft in reminders.pg.test.ts)
   Szenario: Zahlungserinnerung mit Zahlteil für den offenen Saldo

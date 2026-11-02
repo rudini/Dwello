@@ -37,6 +37,7 @@ import type { StatementWithDetails } from '$lib/types';
 const noPayment = { unpaid: true, claimed: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
+import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, settled: 4, overdue: 1 };
@@ -1922,6 +1923,37 @@ describe('Abrechnungsdetail', () => {
 		);
 	});
 
+	// #736 (code review 736-1 C-4): the statement's own list of reminders leads to the tenant and to «Dokumente»
+	it('führt bei einer nicht zugestellten Mahnung zum Mieter und zu den Dokumenten', () => {
+		const reminder = {
+			id: 'd1',
+			type: 'reminder',
+			title: 'Zahlungserinnerung',
+			channel: 'email',
+			status: 'to_send',
+			createdAt: '2026-11-01T09:00:00Z',
+			deliveryError: 'MAIL_DELIVERY_FAILED',
+			deliveryErrorCode: 'MAIL_DELIVERY_FAILED',
+			recipient: 'anna@example.com',
+			tenantId: 't1',
+			tenantName: 'Anna Keller'
+		};
+		detail({ status: 'overdue', reminderToSend: true }, null, [reminder]);
+
+		expect(byTestId('delivery-tenant-link')!.getAttribute('href')).toBe('/tenants/t1');
+		expect(byTestId('delivery-documents-link')!.getAttribute('href')).toBe('/documents');
+		expect(text()).toContain('E-Mail an anna@example.com');
+	});
+
+	// persona helga-736 P-1: the backend refuses the next Mahnstufe until the last one is posted (#449); the page says
+	// to mark it instead of offering a reminder to the address that did not take the last one
+	it('bietet keine weitere Mahnung an, solange die letzte noch zu versenden ist', () => {
+		detail({ status: 'overdue', reminderToSend: true });
+
+		expect(byTestId('statement-reminder-button')).toBeNull();
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+	});
+
 	// Gemahnt wird erst nach Ablauf der Frist, und nie bei einer Rückerstattung: dann schuldet der Vermieter
 	it('bietet eine Mahnung nur bei einer überfälligen Nachzahlung an', () => {
 		detail({ status: 'sent' });
@@ -2464,18 +2496,21 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('meldet, wenn eine Mahnung nicht per E-Mail zugestellt werden konnte', () => {
-		const document = {
-			title: 'Zahlungserinnerung',
-			channel: 'email',
-			deliveryErrorCode: 'MAIL_DELIVERY_FAILED'
-		};
-		detail(
-			{ status: 'overdue' },
-			{ reminder: { document, deliveryError: 'Die E-Mail konnte nicht zugestellt werden.' } }
-		);
+		// as the backend answers it (the BFF only names the title in the UI language)
+		detail({ status: 'overdue' }, { reminder: undeliveredReminder });
 
-		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» zum Versand bereit. Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung unter «Dokumente» am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+		// #736: the address it went to, the way to the tenant and to «Dokumente», which the text no longer names
+		const box = byTestId('reminder-feedback-box')!;
+		expect(box.textContent).toContain(
+			'Das Dokument «Zahlungserinnerung» liegt zum Versand bereit.'
+		);
+		expect(box.textContent).toContain('E-Mail an anna.keller@example.ch');
+		const href = (testid: string) =>
+			box.querySelector(`[data-testid="${testid}"]`)!.getAttribute('href');
+		expect(href('delivery-tenant-link')).toBe(`/tenants/${undeliveredReminder.document.tenantId}`);
+		expect(href('delivery-documents-link')).toBe('/documents');
+		expect(box.textContent).toContain(
+			'Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
 		);
 	});
 

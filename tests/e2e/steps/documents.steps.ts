@@ -19,7 +19,17 @@ import {
 } from '../questions/documents';
 import { pageTitleText } from '../questions/app-frame';
 import { listedStatement } from '../questions/statements';
-import { downloadDocument, markLetterSent, openDocuments, openDocumentsToSend, openReminder, sendReminder } from '../tasks/documents';
+import {
+	checkAddressOfUndelivered,
+	downloadDocument,
+	goToDocumentsFromFeedback,
+	goToDocumentsFromTenant,
+	markLetterSent,
+	openDocuments,
+	openDocumentsToSend,
+	openReminder,
+	sendReminder
+} from '../tasks/documents';
 import { openStatementList } from '../tasks/statements';
 
 const { Given, When, Then } = createBdd(test);
@@ -244,5 +254,40 @@ Then(
 	async ({ verwalter, names }, tenant: string) => {
 		await verwalter.attemptsTo(openStatementList);
 		await verwalter.sees(listedReminderDates(names.get(tenant) ?? tenant)).toEqual({ dates: [], toSend: 1 });
+	}
+);
+
+// #736: an undelivered e-mail names the address it went to and leads to the tenant and to «Dokumente»
+Then(
+	'nennen die Dokumente bei der {string} an {string} die E-Mail-Adresse von {string}',
+	async ({ verwalter, names }, title: string, tenant: string, owner: string) => {
+		await verwalter.attemptsTo(openDocuments);
+		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toContain(names.get(`E-Mail ${owner}`)!);
+	}
+);
+
+Then(
+	'verweisen die Dokumente bei der {string} an {string} nicht auf «Dokumente»',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		// the step before saw the row with its address
+		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).not.toContain('Dokumente');
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter bei der {string} an {string} in den Dokumenten die E-Mail-Adresse prüft',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(checkAddressOfUndelivered(title, names.get(tenant) ?? tenant));
+	}
+);
+
+When('der Liegenschaftsverwalter von der Meldung zu den Dokumenten geht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(goToDocumentsFromFeedback);
+});
+
+When(
+	'der Liegenschaftsverwalter bei der {string} auf der Seite von {string} zu den Dokumenten geht',
+	async ({ verwalter, seed }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(goToDocumentsFromTenant(seed.idOf(tenant)!, title));
 	}
 );

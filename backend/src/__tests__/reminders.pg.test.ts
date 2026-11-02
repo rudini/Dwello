@@ -26,6 +26,7 @@ type Document = {
 	status: string;
 	title: string;
 	paymentDeadline: string | null;
+	recipient: string | null;
 };
 type ReminderResult = { document: Document & { deliveryErrorCode?: string }; deliveryError?: string; error?: string; code?: string };
 
@@ -193,6 +194,28 @@ describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
 		expect(result.document).toMatchObject({ status: 'to_send', deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
 		expect(result.deliveryError).not.toContain('550');
 		expect(await listed(result.document.id)).toMatchObject({ deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
+	});
+
+	// the frontend's tests take this answer from the contract (fallback review of PR #1067)
+	it('antwortet mit den Feldern von reminder-undelivered.json', async () => {
+		const { result } = await refusedReminder();
+		const { status: _, ...body } = result; // the helper adds the HTTP status
+		const contract = await Bun.file(`${import.meta.dir}/../../../tests/contracts/reminder-undelivered.json`).json();
+		const shape = (value: Record<string, unknown>) =>
+			Object.fromEntries(Object.entries(value).map(([key, field]) => [key, field === null ? 'null' : typeof field]));
+
+		expect(Object.keys(body).sort()).toEqual(Object.keys(contract).sort());
+		expect(shape(result.document as never)).toEqual(shape(contract.document));
+		expect(typeof result.deliveryError).toBe('string');
+	});
+
+	// #736: the address the e-mail went to, also after the tenant changes it
+	it('hält die E-Mail-Adresse fest, an die die Mahnung ging', async () => {
+		const { result } = await refusedReminder();
+		await updateTenant(rental.tenant, { email: 'neu@example.com' });
+
+		expect(result.document.recipient).toBe('abgelehnt@example.com');
+		expect((await listed(result.document.id))?.recipient).toBe('abgelehnt@example.com');
 	});
 
 	it('nennt auch für eine früher gespeicherte Fehlermeldung des Mailservers den Code', async () => {
@@ -484,12 +507,12 @@ describe('Mahnung nach gescheiterter E-Mail per Post versendet', () => {
 		await updateTenant(rental.tenant, { email: '', correspondenceChannel: 'email' });
 		const { document: made } = await remind(await statement('sent'));
 		// as an e-mail the mail server refused leaves it (since #449 a reminder without an address is a letter at once)
-		const [document] = await db.update(documents).set({ channel: 'email', deliveryError: 'MAIL_DELIVERY_FAILED' }).where(eq(documents.id, made.id)).returning();
+		const [document] = await db.update(documents).set({ channel: 'email', recipient: 'abgelehnt@example.com', deliveryError: 'MAIL_DELIVERY_FAILED' }).where(eq(documents.id, made.id)).returning();
 
 		const sent = (await (await api('PUT', `/api/v1/documents/${document.id}/sent`)).json()) as Document;
 
 		expect(document.channel).toBe('email');
-		expect(sent).toMatchObject({ channel: 'letter', status: 'sent' });
+		expect(sent).toMatchObject({ channel: 'letter', status: 'sent', recipient: null }); // a letter has no e-mail address (#736)
 	});
 });
 

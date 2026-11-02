@@ -1,0 +1,24 @@
+{
+	"document": {
+		"id": "d0000001-0001-0001-0001-000000000002",
+		"tenantId": "a0000001-0001-0001-0001-000000000007",
+		"statementId": "c0000001-0001-0001-0001-000000000003",
+		"type": "reminder",
+		"reminderLevel": 1,
+		"title": "Zahlungserinnerung",
+		"fileName": "Zahlungserinnerung NK-11111111-2025-0001.pdf",
+		"mimeType": "application/pdf",
+		"channel": "email",
+		"status": "to_send",
+		"sentAt": null,
+		"deliveryError": "Die E-Mail konnte nicht zugestellt werden.",
+		"recipient": "anna.keller@example.ch",
+		"notToSend": null,
+		"paymentDeadline": "2026-11-12",
+		"deliveryErrorCode": "MAIL_DELIVERY_FAILED",
+		"createdAt": "2026-11-02T09:00:00.000Z",
+		"tenantName": "Anna Keller",
+		"statementNumber": "NK-11111111-2025-0001"
+	},
+	"deliveryError": "Die E-Mail konnte nicht zugestellt werden."
+}

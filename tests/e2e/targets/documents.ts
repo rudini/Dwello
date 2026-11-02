@@ -40,3 +40,15 @@ export const deleteDocumentMessage = target('Bestätigung Dokument löschen', (p
 );
 // the confirmation before a letter counts as posted (Persona Dr. Weber 534 P-2)
 export const confirmMarkSentButton = target('Als versendet markieren bestätigen', (page) => page.getByTestId('document-mark-sent-confirm'));
+// #736: what an undelivered e-mail says, with the way to the tenant and to «Dokumente»
+export const deliveryTenantLink = (title: string, tenantName: string) =>
+	target(`E-Mail-Adresse prüfen bei «${title}» an ${tenantName}`, (page) =>
+		documentRow(title, tenantName).locate(page).getByTestId('delivery-tenant-link')
+	);
+export const rowDocumentsLink = (title: string) =>
+	target(`Zu den Dokumenten bei «${title}»`, (page) =>
+		documentRow(title).locate(page).getByTestId('delivery-documents-link')
+	);
+export const feedbackDocumentsLink = target('Zu den Dokumenten in der Rückmeldung der Mahnung', (page) =>
+	page.getByTestId('reminder-feedback-box').getByTestId('delivery-documents-link')
+);

@@ -182,7 +182,7 @@ export async function deleteDocument(id: string) {
 export async function markDocumentSent(id: string, posted?: { content: string; paymentDeadline: string }) {
 	const [sent] = await db
 		.update(documents)
-		.set({ status: 'sent', sentAt: new Date(), deliveryError: null, ...(posted && { ...posted, channel: 'letter' }) })
+		.set({ status: 'sent', sentAt: new Date(), deliveryError: null, ...(posted && { ...posted, channel: 'letter', recipient: null }) })
 		// an upload and a PDF kept before a change (#969, Code-Review 969-1 C-4) are no letters to send
 		.where(and(eq(documents.id, id), notInArray(documents.type, ['upload', 'pdf_before_change'])))
 		.returning({ id: documents.id });
