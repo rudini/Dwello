@@ -723,3 +723,11 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
 - [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
 - [x] PR: pushed after this archive
+
+## Session: #1002 «Diesen Monat bezahlt» by the day of each payment
+
+- [x] pg test in `dashboard.pg.test.ts` seen red (300 instead of 250), then green: `paidThisMonth` sums each recorded payment by its day, part payments included (domain review 959-1, rule 4); a statement paid before #959 (no `payments`) counts as before; `docs/api-specification.md` names it
+- [x] No scenario: no page shows `paidThisMonth` (only `src/routes/dashboard/+page.server.ts` types it)
+- [x] Slice review round 1: `docs/reviews/1002-review-1.md` (no findings)
+- [x] Workflow note: no `daten-pruefer` round, as no screen, PDF or QR-bill shows the sum; the pg test recomputes it (`docs/reviews/workflow-notes-issue-1002.md`)
+- [x] Archive, PR: pushed after this archive
