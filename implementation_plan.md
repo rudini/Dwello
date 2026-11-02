@@ -14,9 +14,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] @wip scenarios in `statement-reminder.feature` (address in «Dokumente», no «Dokumente» there; ways to the tenant, from the feedback and from the tenant page to «Dokumente»), seen red
 - [x] Backend: a reminder by e-mail keeps its `recipient`; a letter posted after it has none (pg tests red first)
 - [x] `DeliveryFailure.svelte` in «Dokumente», tenant page and reminder feedback; texts without «unter «Dokumente»» in de/fr/it/en (DOM tests red first)
-- [x] a11y/language: «Dokumente» default shows the row; new screen `tenant-detail-undelivered`. No row for the reminder feedback: a reminder still to send refuses the next (#545), so the state cannot be reached once per view; the scenario and the DOM test cover it
+- [x] a11y/language: «Dokumente» default shows the row; new screens `tenant-detail-undelivered`, `statement-detail-undelivered` (its reminder list shows both links). No row for the feedback right after sending: a reminder still to send refuses the next (#449), so it is reached once, not once per look; scenario and DOM test cover it
 - [x] Scenarios green without @wip: statement-reminder, documents, tenant-detail 36 passed; axe/language rows of the touched screens 62 passed
-- [ ] Code review
-- [ ] Persona (Helga)
+- [ ] Code review: `docs/reviews/736-review-1.md` (C-1 statement page row: added; C-2 feedback row: rejected, see PR; C-3, C-4 Minor: tests added), round 2
+- [x] Persona: `docs/design/personas/helga-736.md` (P-1 Major, «Mahnung senden» offered while the last one waits: fixed, button hidden; P-2 to P-6 Minor stay in the report)
 - [ ] Workflow note: a11y state reached only by an action that can run once
 - [ ] Archive, PR

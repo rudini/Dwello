@@ -662,6 +662,13 @@
 			]
 		},
 		{
+			"name": "statement-detail-undelivered",
+			"path": "/statements/{undeliveredStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-old-address-detail",
 			"path": "/statements/{oldAddressStatement}",
 			"states": [

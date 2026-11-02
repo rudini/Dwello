@@ -206,6 +206,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
       | statement-detail       | recalculate-dialog  |
+      | statement-detail-undelivered | default |
       | statement-old-address-detail | default       |
       | statement-old-address-detail | send-dialog   |
       | statement-split-keys-detail | default             |

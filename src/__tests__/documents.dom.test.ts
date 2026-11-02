@@ -224,3 +224,21 @@ describe('E-Mail, die nicht zugestellt wurde', () => {
 		expect(byTestId('delivery-tenant-link')).not.toBeNull();
 	});
 });
+
+// #736 (code review 736-1 C-3): without a mail setup the address is not the tenant's to check
+describe('E-Mail ohne eingerichteten Versand', () => {
+	it('führt nicht zum Mieter', () => {
+		documents([
+			letter({
+				channel: 'email',
+				deliveryError: 'MAIL_NOT_CONFIGURED',
+				deliveryErrorCode: 'MAIL_NOT_CONFIGURED'
+			})
+		]);
+
+		expect(byTestId('document-row')!.textContent).toContain(
+			'Der E-Mail-Versand ist nicht eingerichtet.'
+		);
+		expect(byTestId('delivery-tenant-link')).toBeNull();
+	});
+});

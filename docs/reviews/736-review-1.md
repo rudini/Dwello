@@ -1,0 +1,29 @@
+# Code-Review 736, Runde 1
+
+Bereich: `git diff b5d261db2^ b5d261db2 -- . ':!implementation_plan.md'` (Worktree `review-736-code`)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Major | tests/a11y/screens.json:335, src/routes/statements/[id]/ReminderHistory.svelte:14 | Die Abrechnungsdetailseite zeigt eine nicht zugestellte Mahnung in «Mahnungen» jetzt mit Adresse und zwei Links (DocumentItem ohne `showTenant`: `tenantLink` und `documentsLink` beide true). Für diesen Ort gibt es keine Zeile in screens.json, accessibility.feature und sprachen-bildschirme.feature, obwohl die Seite mit den Daten von Hugo schon erreichbar ist |
+| C-2 | Major | tests/a11y/screens.json (fehlt), src/routes/statements/[id]/ReminderFeedback.svelte:31 | Die Rückmeldung nach einer Mahnung, die nicht zugestellt wurde, hat jetzt eigene Bedienelemente (zwei Links), hat aber keine Zeile in screens.json. Die Begründung «nicht einmal pro Ansicht erreichbar» trifft nicht zu: Wie bei `generation-result` lassen sich pro Ansicht eigene Daten anlegen |
+| C-3 | Minor | src/routes/documents/DeliveryFailure.svelte:16 | Der Fall `MAIL_NOT_CONFIGURED` ohne Link zum Mieter ist nicht getestet. Ohne die Bedingung `addressRefused` bleiben alle Tests grün (kein Test in `src/__tests__` oder `tests/e2e` nennt `MAIL_NOT_CONFIGURED`) |
+| C-4 | Minor | src/routes/statements/[id]/ReminderHistory.svelte:14 | Dass «Mahnungen» auf der Abrechnungsseite beide Links zeigt, prüft kein Test auf irgendeiner Ebene. In statement-pages.dom.test.ts hat jede Mahnung in `reminders` `deliveryError: null` (z. B. Z. 610). Wird `documentsLink` auf `!showTenant` umgestellt oder das Default geändert, bleibt alles grün |
+
+## C-1 (Major): Abrechnungsdetail mit nicht zugestellter Mahnung fehlt in den a11y-/Sprachzeilen
+
+Warum falsch: Laut CLAUDE.md, Abschnitt «Process», kommt ein neuer Zustand in screens.json, `accessibility.feature` und `sprachen-bildschirme.feature`, «once per place it appears» und «once per variant with its own controls». DeliveryFailure erscheint an vier Orten: Dokumente, Mieterdetail, Abrechnungsdetail/«Mahnungen» und Rückmeldung. Abgedeckt sind nur Dokumente (default) und `tenant-detail-undelivered`. In «Mahnungen» erscheinen auf der Abrechnungsseite neu die Adresse, «E-Mail-Adresse von {name} prüfen» und «Zu den Dokumenten». Auf dem Basis-Commit stand dort nur der Fehlertext. Die Seite ist ohne weiteren Aufwand erreichbar: `fixtures/screens.ts:191-202` legt mit Hugo bereits eine abgelehnte Mahnung an, es fehlt nur ein Schlüssel wie `undeliveredStatement: seed.idOf('Abrechnung Hugo 2023')` mit einer Zeile `statement-undelivered-detail` / `default`.
+
+Nachweis: `grep -n "Hugo\|undelivered" tests/a11y/screens.json` findet nur `tenant-detail-undelivered`. Keine der Zeilen `/statements/{…}` führt auf Hugos Abrechnung. Ob axe und die Sprachprüfung die Links auf der Abrechnungsseite in fr/it/en und allen Ansichten sehen, prüft damit niemand.
+
+## C-2 (Major): Rückmeldung «Mahnung nicht zugestellt» fehlt in den a11y-/Sprachzeilen
+
+Warum falsch: Die Ausnahme in CLAUDE.md gilt für «a state the E2E stack cannot produce». Diesen Zustand kann der Stack herstellen. `lookAt` (tasks/accessibility.ts:877-893) ruft `reachState` pro Ansicht und Farbschema mit denselben Seed-Daten auf. Ein Zustand, der sich nur einmal erreichen lässt, braucht deshalb eigene Daten pro Durchlauf. Das Repo kennt das Muster schon: `generation-result` zählt die Läufe (`resultRuns`, tasks/accessibility.ts:139-141) und nimmt pro Lauf ein anderes Jahr. Genauso lassen sich hier sechs Abrechnungen mit abgewiesener Adresse anlegen (oder sechs Mieter wie Hugo), und der Zustand sendet pro Ansicht die Mahnung einer anderen. Die Sperre aus #545 betrifft nur dieselbe Abrechnung. Der DOM-Test und das Szenario prüfen weder axe noch fr/it/en.
+
+Nachweis: Ein Zustand `reminder-undelivered` auf `statement-sent-detail` (oder einem eigenen Screen) fehlt in screens.json und in beiden Features.
+
+Nicht bestätigt:
+- Vom Aufrufer gemeldet: alle vitest-Tests (4036 bestanden; danach documents, statement-pages und tenant-detail DOM erneut grün), Backend-pg-Tests reminders, api-contracts und documents grün, lint 0, svelte-check 0, Backend type-check 0, Prettier auf den eigenen Zeilen, E2E chromium statement-reminder, documents und tenant-detail (36 bestanden), axe- und Sprachzeilen undelivered, documents, dashboard, statements, tenants und buildings (62 bestanden). Ich habe keine Tests ausgeführt.
+- Ob das Seed von Hugo (für jedes Beispiel mit id im Pfad) andere a11y- und Sprachzeilen verändert, etwa Dashboard-Aufgaben oder Listen anderer Screens, die nicht unter den 62 genannten sind: nur gelesen, nicht ausgeführt.
+- Ob die Sprachprüfung den deutschen Titel «Zahlungserinnerung» von Hugos Mahnung als Nutzerdaten durchlässt: vom Aufrufer als bestanden gemeldet, in `checkLanguagesOf` nicht nachverfolgt.
+
+Geprüft: Backend `recipient` beim Senden (reminder.service.ts:154) und das Leeren beim Postversand (document.service.ts:185; betrifft nur `posted`, also Mahnung und new_pdf; passt zum Schema-Kommentar und zur Spalte im Datenexport), mit pg-Tests, die ohne die Änderung rot wären. `tenantId`/`tenantName`/`recipient` kommen über `getDocument` (summary) auch in der Antwort auf `POST reminders` an, und `sendStatementReminder` reicht sie durch. Links pro Ort: Dokumente nur Mieter, Mieterdetail nur Dokumente, Rückmeldung und «Mahnungen» beide. Die Texte fr/it/en passen zum Stil in i18n-begriffe.md (Infinitiv, «Go to …» wie `documents_to_settings`) und `{reason}` wird nirgends mehr übergeben. Tokens, `min-h-12`, testids und die Screenplay-Schichten der neuen Steps, Tasks und Targets sind in Ordnung. Die vier Szenarien und die DOM-Tests schlagen ohne die Änderung fehl. Nichts im Diff gehört nicht zur Anforderung.

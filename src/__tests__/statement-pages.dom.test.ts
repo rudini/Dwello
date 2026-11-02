@@ -1922,6 +1922,37 @@ describe('Abrechnungsdetail', () => {
 		);
 	});
 
+	// #736 (code review 736-1 C-4): the statement's own list of reminders leads to the tenant and to «Dokumente»
+	it('führt bei einer nicht zugestellten Mahnung zum Mieter und zu den Dokumenten', () => {
+		const reminder = {
+			id: 'd1',
+			type: 'reminder',
+			title: 'Zahlungserinnerung',
+			channel: 'email',
+			status: 'to_send',
+			createdAt: '2026-11-01T09:00:00Z',
+			deliveryError: 'MAIL_DELIVERY_FAILED',
+			deliveryErrorCode: 'MAIL_DELIVERY_FAILED',
+			recipient: 'anna@example.com',
+			tenantId: 't1',
+			tenantName: 'Anna Keller'
+		};
+		detail({ status: 'overdue', reminderToSend: true }, null, [reminder]);
+
+		expect(byTestId('delivery-tenant-link')!.getAttribute('href')).toBe('/tenants/t1');
+		expect(byTestId('delivery-documents-link')!.getAttribute('href')).toBe('/documents');
+		expect(text()).toContain('E-Mail an anna@example.com');
+	});
+
+	// persona helga-736 P-1: the backend refuses the next Mahnstufe until the last one is posted (#449); the page says
+	// to mark it instead of offering a reminder to the address that did not take the last one
+	it('bietet keine weitere Mahnung an, solange die letzte noch zu versenden ist', () => {
+		detail({ status: 'overdue', reminderToSend: true });
+
+		expect(byTestId('statement-reminder-button')).toBeNull();
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+	});
+
 	// Gemahnt wird erst nach Ablauf der Frist, und nie bei einer Rückerstattung: dann schuldet der Vermieter
 	it('bietet eine Mahnung nur bei einer überfälligen Nachzahlung an', () => {
 		detail({ status: 'sent' });

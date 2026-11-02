@@ -343,6 +343,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		undeliveredTenant: seed.idOf('Hugo'), // #736
+		undeliveredStatement: seed.idOf('Abrechnung Hugo 2023'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
 		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract

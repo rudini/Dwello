@@ -203,7 +203,7 @@
 				status={statement.status}
 				{byEmail}
 				owes={statement.claimed}
-				waiting={!!statement.reminderWaitsUntil}
+				waiting={!!statement.reminderWaitsUntil || !!statement.reminderToSend}
 				partPaid={!!statement.payments?.length}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => (
