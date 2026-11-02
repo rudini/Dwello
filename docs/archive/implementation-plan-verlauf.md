@@ -741,6 +741,25 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Workflow note: a `daten-pruefer` round for an amount no screen, PDF or QR-bill shows (`docs/reviews/workflow-notes-issue-1002.md`)
 - [x] Archive, PR: pushed after this archive
 
+## Session: #1001 each part payment in the tenant's export
+
+- [x] pg test in `tenant-export.pg.test.ts` seen red, then green: each statement of the export lists `payments` as `{ date, amount }` (domain review 959-1, V-5); `docs/api-specification.md` names it
+- [x] No scenario: the export is a file the existing export scenario covers (the issue says so)
+- [x] Slice review round 1: `docs/reviews/1001-review-1.md` (no findings)
+- [x] Domain review (step 5): `docs/reviews/1001-fachreview-1.md` (Minor V-1, a statement paid before #959: fixed, the tenant export gives that payment as the data export does)
+- [x] Closing review: `docs/reviews/1001b-review-1.md` (no findings)
+- [x] Workflow note: the same as #1000 (no step-1 `fach-reviewer` round for a rule a domain review already decided), in `docs/reviews/workflow-notes-issue-1000.md`
+- [x] Archive, PR: pushed after this archive
+
+## Session: #1000 2nd and 3rd Mahnung after a part payment
+
+- [x] Unit test in `reminder-letter.test.ts` seen red (8 cases: levels 2 and 3 in de, fr, it, en), then green: after a part payment the 2nd and 3rd Mahnung say «noch nicht vollständig bezahlt», texts of M-1 in `docs/reviews/959-fachreview-1.md` word for word; level 1 and letters without a part stay
+- [x] No scenario: the letter text is pinned at the lowest layer (the issue says so)
+- [x] Slice review round 1: `docs/reviews/1000-review-1.md` (C-1 Minor: the control test pins kept behaviour, named in the pull request)
+- [x] Data check: `docs/reviews/1000-datenpruefung-1.md` (no findings; 53 PDFs, opening, amounts and QR amount per level and language)
+- [x] Domain review (step 5, asked by the fallback review of PR #1061): `docs/reviews/1000-fachreview-1.md` (no Blocker/Major; Minor V-1, fr/it «rappel de paiement»/«promemoria di pagamento» in the level-2 text, stays in its report: the issue decided the M-1 texts)
+- [x] Workflow note: no step-1 `fach-reviewer` round for texts a domain review already gives word for word (`docs/reviews/workflow-notes-issue-1000.md`)
+- [x] Archive, PR: pushed after this archive
 ## Session: #1057 sending dated back across summer time
 
 Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days-ago.ts` (#1004) and its test treat it as `timestamptz`: in the late evening the shown time lands on the next day.
@@ -759,3 +778,13 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] code-reviewer: `docs/reviews/change-graph-review-1.md` (no Blocker/Major; C-1 unused `--band`, C-2 zone text and tooltip without Ca: fixed), `-2.md` (closing round, both closed)
 - [x] Workflow note: none new
 - [x] Archive the session; PR pushed after this archive, once #1056 is merged
+
+## Session: #1047 no deleted statement in the history
+
+- [x] @wip scenario «Nach dem Löschen eines Entwurfs führt Zurück im Browser nicht auf den Entwurf», seen red (address of the deleted statement after back)
+- [x] Delete redirect replaces the history entry in `dialogSubmit` (all its redirects are deletes: statement, tenant, contract), DOM test red first
+- [x] Scenario green without @wip; statements, statement-detail, tenants, contract-detail, contracts: 227 passed (after C-2)
+- [x] Code review: `docs/reviews/1047-review-1.md` (C-1 replace only for deletes, C-2 @wip left: fixed); `docs/reviews/1047-review-2.md` (closing round: C-1, C-2 closed; Minor C-3 untested ActionDialog flag: test added, red without it)
+- [x] Persona: `docs/design/personas/sven-1047.md` (no 404 any more; P-1 Minor: back shows the same list silently, stays in its report)
+- [x] Checks: lint, check, type-check, tests --changed, Prettier
+- [x] Archive, PR: pushed after this archive

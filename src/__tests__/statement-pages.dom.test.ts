@@ -22,7 +22,7 @@ vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
 
-import { invalidateAll } from '$app/navigation';
+import { goto, invalidateAll } from '$app/navigation';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
@@ -1538,6 +1538,27 @@ describe('Abrechnungsdetail', () => {
 		) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'redirect' } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung NK-2024-0001 gelöscht']);
+	});
+
+	// #1047: browser back then leads to the page before, not to the page of a statement that no longer exists
+	it('ersetzt nach dem Löschen die Seite der Abrechnung im Verlauf durch die Liste', async () => {
+		vi.mocked(goto).mockClear();
+		detail();
+		click('statement-delete-button');
+		const after = actions.get('?/delete')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		const update = vi.fn(async () => {});
+		await after({
+			update,
+			result: { type: 'redirect', status: 303, location: '/statements?status=draft' }
+		});
+
+		expect(goto).toHaveBeenCalledWith('/statements?status=draft', {
+			replaceState: true,
+			invalidateAll: true
+		});
+		expect(update).not.toHaveBeenCalled(); // it would add the list as a new entry
 	});
 
 	it('fragt vor dem Versenden nach und nennt Empfänger, Korrespondenzweg und PDF', () => {

@@ -26,3 +26,9 @@ export function checkPaidDate(paidDate: string, periodEnd: string) {
 	const today = swissToday();
 	if (paidDate > today) throw new CodedError('PAID_DATE_IN_FUTURE', 'Payment date in the future', { date: today });
 }
+
+// The payments of a statement: one paid before #959 has no list but its date and amount (data export V-1, domain
+// review 1001-1 V-1)
+export function recordedPayments(statement: { payments: { date: string; amount: string }[]; paidDate: string | null; paidAmount: string | null }) {
+	return statement.payments.length ? statement.payments : statement.paidDate ? [{ date: statement.paidDate, amount: statement.paidAmount }] : [];
+}

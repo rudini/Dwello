@@ -41,6 +41,26 @@ describe('Mahnschreiben', () => {
 		expect(reminderLetter({ ...input, paid: 45.5, language }).paragraphs).toContain(lines);
 	});
 
+	// #1000 (Fachreview 959-1, M-1): nach einer Teilzahlung ist die Abrechnung nicht unbezahlt, sondern nicht vollständig bezahlt
+	it.each([
+		[2, 'de', 'Trotz unserer Zahlungserinnerung ist die Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024 noch nicht vollständig bezahlt.'],
+		[3, 'de', 'Trotz zweimaliger Mahnung ist die Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024 noch immer nicht vollständig bezahlt. Geht der Betrag nicht innert der unten genannten Frist ein, müssen wir weitere Schritte einleiten.'],
+		[2, 'fr', 'Malgré notre rappel, le décompte des charges NK-2024-0007 pour la période du 01.01.2024 au 31.12.2024 n’a toujours pas été entièrement réglé.'],
+		[3, 'fr', 'Malgré deux rappels, le décompte des charges NK-2024-0007 pour la période du 01.01.2024 au 31.12.2024 n’a toujours pas été entièrement réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.'],
+		[2, 'it', 'Nonostante il nostro promemoria, il conteggio spese accessorie NK-2024-0007 per il periodo dal 01.01.2024 al 31.12.2024 non risulta ancora interamente pagato.'],
+		[3, 'it', 'Nonostante il promemoria e il sollecito, il conteggio spese accessorie NK-2024-0007 per il periodo dal 01.01.2024 al 31.12.2024 risulta tuttora non interamente pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.'],
+		[2, 'en', 'Despite our payment reminder, the utility cost statement NK-2024-0007 for the period 01.01.2024 – 31.12.2024 has still not been paid in full.'],
+		[3, 'en', 'Despite two reminders, the utility cost statement NK-2024-0007 for the period 01.01.2024 – 31.12.2024 has still not been paid in full. If the amount is not received by the deadline below, we will have to take further steps.']
+	] as const)('sagt in Stufe %i nach einer Teilzahlung «nicht vollständig bezahlt» (%s)', (level, language, opening) => {
+		expect(reminderLetter({ ...input, level, paid: 45.5, language }).paragraphs[0]).toBe(opening);
+	});
+
+	it('sagt in der 2. Mahnung ohne Teilzahlung weiter «noch nicht bezahlt»', () => {
+		expect(reminderLetter({ ...input, level: 2 }).paragraphs[0]).toBe(
+			'Trotz unserer Zahlungserinnerung ist die Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024 noch nicht bezahlt.'
+		);
+	});
+
 	// Auf eine QR-IBAN geht eine Zahlung nur mit der QR-Referenz durch (SIX)
 	it('nennt bei einer QR-IBAN die Referenz, die bei der Zahlung anzugeben ist', () => {
 		const { text } = reminderLetter({ ...input, sender: { ...input.sender, iban: 'CH44 3199 9123 0008 8901 2' }, reference: '21 00000 00003 13947 14300 09017' });
