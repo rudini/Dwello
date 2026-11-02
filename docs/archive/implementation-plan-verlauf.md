@@ -723,3 +723,12 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
 - [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
 - [x] PR: pushed after this archive
+
+## Session: #1000 2nd and 3rd Mahnung after a part payment
+
+- [x] Unit test in `reminder-letter.test.ts` seen red (8 cases: levels 2 and 3 in de, fr, it, en), then green: after a part payment the 2nd and 3rd Mahnung say «noch nicht vollständig bezahlt», texts of M-1 in `docs/reviews/959-fachreview-1.md` word for word; level 1 and letters without a part stay
+- [x] No scenario: the letter text is pinned at the lowest layer (the issue says so)
+- [x] Slice review round 1: `docs/reviews/1000-review-1.md` (C-1 Minor: the control test pins kept behaviour, named in the pull request)
+- [x] Data check: `docs/reviews/1000-datenpruefung-1.md` (no findings; 53 PDFs, opening, amounts and QR amount per level and language)
+- [x] Workflow note: no step-1 `fach-reviewer` round for texts a domain review already gives word for word (`docs/reviews/workflow-notes-issue-1000.md`)
+- [x] Archive, PR: pushed after this archive
