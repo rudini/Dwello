@@ -4,7 +4,7 @@
  */
 
 import { Elysia } from 'elysia';
-import { count, eq, and, sum, desc, gt, gte, or, sql, type SQL } from 'drizzle-orm';
+import { count, eq, and, sum, desc, gt, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
 import { apartmentStatus } from '../services/apartment.service';
@@ -16,7 +16,6 @@ import { deadlinesOf } from '../services/overview-deadlines';
 import { getTypedConfig } from '../services/config.service';
 import { listContracts } from '../services/contract.service';
 import { listStatements } from '../services/statement.service';
-import { replacedInSql } from '../services/counting-statements';
 
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
@@ -139,14 +138,15 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 			outstandingStatements: await countStatements(statusCondition('open')),
 			totalPending: await sumStatements(openAmount, owed('open')),
 			overdueAmount: await sumStatements(openAmount, owed('overdue')),
+			// each payment by its day, part payments included (#1002, domain review 959-1 rule 4); a statement paid before
+			// #959 has no list of payments: its paidAmount on its paidDate; only Nachzahlungen, not refunds (#93); also on a
+			// statement replaced since (#120)
 			paidThisMonth: await sumStatements(
-				utilityStatements.paidAmount,
-				// only Nachzahlungen, not refunds (#93); also on a statement replaced since (#120)
-				and(
-					or(statusCondition('paid'), replacedInSql),
-					gt(utilityStatements.balance, '0'),
-					gte(utilityStatements.paidDate, monthStart)
-				)
+				sql`case when jsonb_array_length(${utilityStatements.payments}) = 0
+					then case when ${utilityStatements.paidDate} >= ${monthStart} then ${utilityStatements.paidAmount} end
+					else (select sum((p ->> 'amount')::numeric) from jsonb_array_elements(${utilityStatements.payments}) p where p ->> 'date' >= ${monthStart})
+				end`,
+				gt(utilityStatements.balance, '0')
 			)
 		},
 		statements,
