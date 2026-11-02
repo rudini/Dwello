@@ -233,3 +233,17 @@ Funktionalität: Saldo unter CHF 5
     Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
     Dann sagt die Bestätigung des Berichtigens "Ihren Übertrag von CHF 3.00 haben Sie am"
     Und sagt die Bestätigung des Berichtigens "von Hand ausgeglichen: Die berichtigte Abrechnung rechnet ihn als bezahlt an, der Mieter bezahlt oder erhält ihn nicht doppelt."
+
+  # #1023 (PO 02.11.2026, Fachreview 546-1 M-1): «Nicht berichtigen» vergleicht die Saldi, wie sie sind, auch unter
+  # CHF 5; ein Saldo unter CHF 5 geht als Übertrag in die nächste Abrechnung. Nebenkosten 1'197.00 + 6.00 = 1'203.00 –
+  # Akonto 1'200.00 = Nachzahlung 3.00; ohne die Rechnung über 6.00 eine Rückerstattung von 3.00
+  @wip
+  Szenario: Sinkt ein Saldo unter CHF 5, bietet die Abrechnung «Nicht berichtigen» nicht an
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1197" Franken für 2024
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "6" Franken vom "2024-12-31"
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und die Rechnung "Hauswart 2024-12-31" ist danach gelöscht
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Dann weist die Abrechnung darauf hin: "Berichtigen Sie die Abrechnung, sonst verlangen Sie mehr als die tatsächlichen Kosten."
+    Und bietet die Abrechnung «Nicht berichtigen» nicht mehr an
