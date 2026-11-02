@@ -105,8 +105,8 @@ export const openInvoiceOfPosition = (category: string, description: string) => 
 export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
 
 // The confirmation names the consequence; the user confirms it (#92)
-export const resetPayment: Activity = (actor) =>
-	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));
+export const confirmResetPayment = Click.on(confirmResetPaymentButton);
+export const resetPayment: Activity = (actor) => actor.attemptsTo(Click.on(resetPaymentButton), confirmResetPayment);
 
 // #454 (Fachreview 454-1 E-6): a sent statement left as it is, after the confirmation
 export const startDecliningCorrection = Click.on(declineCorrectionButton);

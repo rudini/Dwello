@@ -49,10 +49,17 @@ const TEXTS: Record<string, (d: Details) => string> = {
 		};
 		return d.allocable ? m.audit_invoice_included(values) : m.audit_invoice_excluded(values);
 	},
+	// with its amount since #999 (Fachreview 999-1 V-5), a refund without its sign
 	payment_reset: (d) =>
-		d.paidDate
-			? m.audit_payment_reset({ number: String(d.number), date: formatDate(String(d.paidDate)) })
-			: m.audit_payment_reset_undated({ number: String(d.number) }),
+		!d.paidDate
+			? m.audit_payment_reset_undated({ number: String(d.number) })
+			: d.paidAmount
+				? m.audit_payment_reset_amount({
+						number: String(d.number),
+						date: formatDate(String(d.paidDate)),
+						amount: formatCurrency(Math.abs(Number(d.paidAmount)))
+					})
+				: m.audit_payment_reset({ number: String(d.number), date: formatDate(String(d.paidDate)) }),
 	statement_corrected: (d) => m.audit_statement_corrected({ number: String(d.number) }),
 	// #496: the export of all data, only its date and time (Fachreview 496-1 F-4); TODO(fachlich prüfen, #1039)
 	data_exported: () => m.audit_data_exported(),
