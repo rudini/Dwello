@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 const server = vi.hoisted(() => ({
 	submit: null as null | ((input: { formData: FormData }) => unknown)
 }));
+// the page a delete leads to (#1047): the test plays the action's answer, no router behind it
+vi.mock('$app/navigation', async (original) => ({ ...(await original<object>()), goto: vi.fn() }));
 vi.mock('$app/forms', () => ({
 	enhance: (_form: unknown, submit: (input: { formData: FormData }) => unknown) => {
 		server.submit = submit;
@@ -11,6 +13,7 @@ vi.mock('$app/forms', () => ({
 	}
 }));
 
+import { goto } from '$app/navigation';
 import ActionDialog from '$lib/ui/ActionDialog.svelte';
 import { byTestId, settle, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
@@ -61,6 +64,18 @@ describe('Bestätigung einer Seitenaktion', () => {
 		const onsuccess = open();
 		await answer('redirect');
 		expect(onsuccess).toHaveBeenCalledOnce();
+	});
+
+	// #1047 (code review 1047-2 C-3): the deleted record's page leaves the history, back leads to the page before
+	it('ersetzt nach dem Löschen die Seite im Verlauf durch die nächste', async () => {
+		open();
+		const after = server.submit!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({
+			update: async () => {},
+			result: { type: 'redirect', status: 303, location: '/tenants' }
+		});
+
+		expect(goto).toHaveBeenCalledWith('/tenants', { replaceState: true, invalidateAll: true });
 	});
 
 	it('bleibt bei einer Ablehnung offen und nennt den Grund', async () => {

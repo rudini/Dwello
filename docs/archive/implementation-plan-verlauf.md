@@ -759,3 +759,13 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] code-reviewer: `docs/reviews/change-graph-review-1.md` (no Blocker/Major; C-1 unused `--band`, C-2 zone text and tooltip without Ca: fixed), `-2.md` (closing round, both closed)
 - [x] Workflow note: none new
 - [x] Archive the session; PR pushed after this archive, once #1056 is merged
+
+## Session: #1047 no deleted statement in the history
+
+- [x] @wip scenario «Nach dem Löschen eines Entwurfs führt Zurück im Browser nicht auf den Entwurf», seen red (address of the deleted statement after back)
+- [x] Delete redirect replaces the history entry in `dialogSubmit` (all its redirects are deletes: statement, tenant, contract), DOM test red first
+- [x] Scenario green without @wip; statements, statement-detail, tenants, contract-detail, contracts: 227 passed (after C-2)
+- [x] Code review: `docs/reviews/1047-review-1.md` (C-1 replace only for deletes, C-2 @wip left: fixed); `docs/reviews/1047-review-2.md` (closing round: C-1, C-2 closed; Minor C-3 untested ActionDialog flag: test added, red without it)
+- [x] Persona: `docs/design/personas/sven-1047.md` (no 404 any more; P-1 Minor: back shows the same list silently, stays in its report)
+- [x] Checks: lint, check, type-check, tests --changed, Prettier
+- [x] Archive, PR: pushed after this archive

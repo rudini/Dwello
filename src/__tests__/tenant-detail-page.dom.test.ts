@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
 const actions = vi.hoisted(() => new Map<string, (input: { formData: FormData }) => unknown>());
+// the page a delete leads to (#1047): the test plays the action's answer, no router behind it
+vi.mock('$app/navigation', async (original) => ({ ...(await original<object>()), goto: vi.fn() }));
 vi.mock('$app/forms', () => ({
 	enhance: (form: HTMLFormElement, submit: (input: { formData: FormData }) => unknown) => {
 		actions.set(form.getAttribute('action')!, submit);

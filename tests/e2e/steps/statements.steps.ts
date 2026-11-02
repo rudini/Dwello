@@ -233,3 +233,8 @@ Then(
 		await verwalter.sees(listBuildingShown).toBe(names.get(building) ?? building);
 	}
 );
+
+// #1047: the address changes at once on browser back, the title only once the page has loaded
+Then('ist der Liegenschaftsverwalter wieder auf der Abrechnungsliste', async ({ verwalter }) => {
+	await verwalter.sees(pageAddressInApp).toBe('/statements');
+});

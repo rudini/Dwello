@@ -1,4 +1,5 @@
 import type { SubmitFunction } from '@sveltejs/kit';
+import { goto } from '$app/navigation';
 
 type Result = Parameters<Exclude<Awaited<ReturnType<SubmitFunction>>, void>>[0]['result'];
 
@@ -10,14 +11,18 @@ export function dialogSubmit(
 	fields: () => Record<string, string>,
 	busy: (busy: boolean) => void,
 	answered: (result: Result) => unknown,
-	redirected?: () => void // the action led to another page, which then shows
+	redirected?: () => void, // the action led to another page, which then shows
+	deletes = false // the action deletes the record the page shows: the next page takes its place in the history
 ): SubmitFunction {
 	return ({ formData }) => {
 		for (const [name, value] of Object.entries(fields())) formData.set(name, value);
 		busy(true);
 		return async ({ result, update }) => {
 			if (result.type === 'redirect') redirected?.();
-			await update();
+			// browser back then leads to the page before the deleted record's, not to a page that no longer exists (#1047)
+			if (result.type === 'redirect' && deletes)
+				await goto(result.location, { replaceState: true, invalidateAll: true });
+			else await update();
 			busy(false);
 			await answered(result);
 		};

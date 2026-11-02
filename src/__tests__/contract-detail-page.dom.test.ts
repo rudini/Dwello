@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
 const actions = vi.hoisted(() => new Map<string, (input: { formData: FormData }) => unknown>());
+// the page a delete leads to (#1047): the test plays the action's answer, no router behind it
+vi.mock('$app/navigation', async (original) => ({ ...(await original<object>()), goto: vi.fn() }));
 vi.mock('$app/forms', () => ({
 	enhance: (form: HTMLFormElement, submit: (input: { formData: FormData }) => unknown) => {
 		actions.set(form.getAttribute('action')!, submit);
@@ -197,6 +199,25 @@ describe('Mietvertragsdetail', () => {
 		expect(get(toasts).map((t) => t.message)).toContain(
 			'Entwurf NK-2025-0003 gelöscht. Der Mietvertrag von Anna Keller endet am 31.03.2025. Erstellen Sie jetzt die Nebenkostenabrechnung neu.'
 		);
+	});
+
+	// #1047 (code review 1047-1 C-1): only a deleted record's page leaves the history; this contract page stays
+	it('lässt die Vertragsseite im Verlauf, wenn nach dem Löschen des Entwurfs der Assistent öffnet', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		const after = actions.get('?/endDeletingDraft')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		const update = vi.fn(async () => {});
+		await after({ update, result: { type: 'redirect', status: 303, location: '/statements/generate' } });
+
+		expect(update).toHaveBeenCalled(); // SvelteKit's own redirect: the wizard as a new entry after this page
 	});
 
 	// Haiku-Review R4: lehnt die Aktion ab, nimmt die Meldung den Fokus
