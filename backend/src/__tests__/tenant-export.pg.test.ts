@@ -19,7 +19,14 @@ type Export = {
 	data: {
 		tenant: { firstName: string; lastName: string };
 		contracts: { apartment: { number: string; building: { name: string } }; file?: string | null; advancePayments: { validFrom: string; amount: string }[] }[];
-		statements: { number: string; status: string; file: string | null; statementDate: string | null; paymentDeadline: string | null }[];
+		statements: {
+			number: string;
+			status: string;
+			file: string | null;
+			statementDate: string | null;
+			paymentDeadline: string | null;
+			payments?: { date: string; amount: string }[];
+		}[];
 		documents: { title: string; file: string }[];
 		reminders: { statement: string; level: number; status: string; file: string }[];
 	};
@@ -260,6 +267,23 @@ describe('Daten eines Mieters exportieren', () => {
 			expect(data.statements.find((statement) => statement.number === statementNumber)!.status).toBe('overdue');
 		} finally {
 			await db.update(utilityStatements).set({ paymentDeadline }).where(sent);
+		}
+	});
+
+	// #1001 (Fachreview 959-1, V-5): die Auskunft nennt jede festgehaltene Zahlung, nicht nur ihre Summe
+	it('nennt jede Teilzahlung einer Abrechnung mit Datum und Betrag', async () => {
+		const sent = eq(utilityStatements.statementNumber, statementNumber);
+		const payments = [
+			{ date: '2025-03-10', amount: '50.00' },
+			{ date: '2025-04-02', amount: '20.50' }
+		];
+		await db.update(utilityStatements).set({ payments, paidAmount: '70.50' }).where(sent);
+		try {
+			const { data } = await exportOf(rental.tenant);
+
+			expect(data.statements.find((statement) => statement.number === statementNumber)!.payments).toEqual(payments);
+		} finally {
+			await db.update(utilityStatements).set({ payments: [], paidAmount: null }).where(sent);
 		}
 	});
 
