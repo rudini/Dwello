@@ -56,7 +56,8 @@
 				document.querySelector<HTMLElement>('h1')?.focus(); // its button may be gone now
 			}
 		},
-		() => ondone?.()
+		() => ondone?.(),
+		true // only the delete leads to another page
 	)}
 ></form>
 

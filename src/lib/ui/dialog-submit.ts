@@ -11,18 +11,18 @@ export function dialogSubmit(
 	fields: () => Record<string, string>,
 	busy: (busy: boolean) => void,
 	answered: (result: Result) => unknown,
-	redirected?: () => void // the action led to another page, which then shows
+	redirected?: () => void, // the action led to another page, which then shows
+	deletes = false // the action deletes the record the page shows: the next page takes its place in the history
 ): SubmitFunction {
 	return ({ formData }) => {
 		for (const [name, value] of Object.entries(fields())) formData.set(name, value);
 		busy(true);
 		return async ({ result, update }) => {
-			if (result.type === 'redirect') {
-				redirected?.();
-				// a delete: the next page takes the deleted record's place in the history, so browser back leads to the
-				// page before it, not to a page that no longer exists (#1047)
+			if (result.type === 'redirect') redirected?.();
+			// browser back then leads to the page before the deleted record's, not to a page that no longer exists (#1047)
+			if (result.type === 'redirect' && deletes)
 				await goto(result.location, { replaceState: true, invalidateAll: true });
-			} else await update();
+			else await update();
 			busy(false);
 			await answered(result);
 		};

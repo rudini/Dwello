@@ -95,7 +95,6 @@ Funktionalität: Nebenkostenabrechnungen
     Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
 
   # #1047: das Löschen ersetzt die Seite des Entwurfs im Verlauf, Zurück führt nicht auf eine Seite, die es nicht mehr gibt
-  @wip
   Szenario: Nach dem Löschen eines Entwurfs führt Zurück im Browser nicht auf den Entwurf
     Angenommen der Liegenschaftsverwalter ist auf der Abrechnungsliste
     Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet

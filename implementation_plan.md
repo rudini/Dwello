@@ -13,8 +13,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] @wip scenario «Nach dem Löschen eines Entwurfs führt Zurück im Browser nicht auf den Entwurf», seen red (address of the deleted statement after back)
 - [x] Delete redirect replaces the history entry in `dialogSubmit` (all its redirects are deletes: statement, tenant, contract), DOM test red first
-- [x] Scenario green without @wip; statements, statement-detail, tenants, contract-detail: 214 passed
-- [ ] Code review (slice + closing round)
-- [ ] Persona re-check (Sven) of the delete flow
+- [x] Scenario green without @wip; statements, statement-detail, tenants, contract-detail, contracts: 227 passed (after C-2)
+- [ ] Code review: `docs/reviews/1047-review-1.md` (C-1 replace only for deletes, C-2 @wip left: fixed), round 2 on the fixes
+- [x] Persona: `docs/design/personas/sven-1047.md` (no 404 any more; P-1 Minor: back shows the same list silently, stays in its report)
 - [ ] Checks: lint, check, type-check, tests --changed, Prettier
 - [ ] Archive, PR

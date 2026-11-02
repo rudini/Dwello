@@ -1549,9 +1549,15 @@ describe('Abrechnungsdetail', () => {
 			input: unknown
 		) => Promise<void>;
 		const update = vi.fn(async () => {});
-		await after({ update, result: { type: 'redirect', status: 303, location: '/statements?status=draft' } });
+		await after({
+			update,
+			result: { type: 'redirect', status: 303, location: '/statements?status=draft' }
+		});
 
-		expect(goto).toHaveBeenCalledWith('/statements?status=draft', { replaceState: true, invalidateAll: true });
+		expect(goto).toHaveBeenCalledWith('/statements?status=draft', {
+			replaceState: true,
+			invalidateAll: true
+		});
 		expect(update).not.toHaveBeenCalled(); // it would add the list as a new entry
 	});
 
