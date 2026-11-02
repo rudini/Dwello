@@ -841,6 +841,7 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No scenario: a fix of the E2E harness; the scenario that failed is the test (Firefox ×5 green)
 - [x] Slice review round 1, also the closing round: `docs/reviews/1046-review-1.md` (no findings)
 - [x] Archive, PR: pushed after this archive
+
 ## Session: #1039, #1035 glossary rows (export of all data, data file, export of a tenant, consent letter)
 
 - [x] Rows in `UBIQUITOUS_LANGUAGE.md` and `docs/design/i18n-begriffe.md` as the product owner decided on 02.11.2026; the TODO markers naming #1039 and #1035 removed
