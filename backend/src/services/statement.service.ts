@@ -35,11 +35,11 @@ import { keepPdfBeforeChange, sendingsOf, sinceDelivery, toldDeadline } from './
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
-import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
+import { checkPaidDate, paidAmountOf } from './payment-entry';
 import { carriable, carriedOverId, carryChanged, countedBy, openCarry } from './carry-over';
 import type { PdfChange, StatementWithDetails } from '../api/statement';
 
@@ -818,26 +818,6 @@ function recordPayment(existing: StatementWithDetails, waived: boolean, { paidDa
 	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments, paymentRecordedAt };
 	// paid on the day of the latest payment, one without a date of today (Copilot review PR #1006)
 	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt };
-}
-
-// The amount paid, the rest when none is given: francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1), with
-// the sign of the Saldo, above 0.00 and at most the rest
-function paidAmountOf(entered: string | undefined, rest: number) {
-	if (entered === undefined) return rest;
-	if (!/^-?\d+(\.\d{1,2})?$/.test(entered.trim())) throw new CodedError('STATEMENT_PAID_AMOUNT_INVALID', 'Invalid amount paid', { amount: entered });
-	const amount = Number(entered);
-	if (!(amount * Math.sign(rest) > 0)) throw new CodedError('STATEMENT_PAID_AMOUNT_ZERO', 'Paid amount not above 0.00');
-	if (Math.abs(amount) > Math.abs(rest)) throw new CodedError('STATEMENT_PAID_AMOUNT_TOO_HIGH', 'Paid amount above the open amount', { rest: `CHF ${formatCHF(Math.abs(rest))}` });
-	return amount;
-}
-
-// #138: a day that exists, up to today; from the end of the Abrechnungsperiode: a tenant may pay before the
-// Abrechnungsdatum, which the UI confirms first (#448)
-function checkPaidDate(paidDate: string, periodEnd: string) {
-	if (!isRealDate(paidDate)) throw new CodedError('PAID_DATE_INVALID', 'Invalid payment date', { date: paidDate });
-	if (paidDate < periodEnd) throw new CodedError('PAID_DATE_BEFORE_PERIOD_END', 'Payment date before the end of the period', { date: periodEnd });
-	const today = swissToday();
-	if (paidDate > today) throw new CodedError('PAID_DATE_IN_FUTURE', 'Payment date in the future', { date: today });
 }
 
 const dropNewPdfSince = (id: string, since: Date) =>
