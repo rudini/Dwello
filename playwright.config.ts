@@ -30,7 +30,7 @@ const usesExtraInstances =
 // the overview's state 'ki-model-loading'
 const usesFreshInstallation =
 	!existsSync('.features-gen') ||
-	['einrichtung', 'sicherung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme'].some((feature) =>
+	['einrichtung', 'sicherung', 'ki-einstellungen', 'abrechnungsperiode', 'accessibility', 'sprachen-bildschirme'].some((feature) =>
 		existsSync(generated(feature))
 	);
 const freshDatabaseUrl = (() => {

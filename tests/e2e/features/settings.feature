@@ -74,6 +74,12 @@ Funktionalität: Einstellungen
     Wenn der Liegenschaftsverwalter die PLZ "80" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben."
 
+  # #1036 (Option 1): steht die Abrechnungsperiode im Mietvertrag, gilt eine neue erst mit der Zustimmung der Mieter
+  @wip
+  Szenario: Die Einstellungen sagen, dass die Mieter einer neuen Abrechnungsperiode zustimmen müssen
+    # Wortlaut nach Fachreview
+    Dann erklärt die Einstellung "Abrechnungsperiode" "zustimmen"
+
   Szenario: Fristen sind erklärt
     Dann erklärt die Einstellung "Zahlungsfrist (Tage)" "Wie viele Tage nach dem Versand der Mieter eine Nachzahlung bezahlt oder Sie eine Rückerstattung überweisen. Erlaubt sind 7 bis 90 Tage, Vorgabe: 30 Tage. Gilt für Abrechnungen, die Sie ab jetzt versenden; die Frist einer einzelnen Abrechnung ändern Sie dort mit «Frist und Bemerkungen bearbeiten»."
     Und erklärt die Einstellung "Mahnfrist (Tage)" "Wie viele Tage nach der Zahlungsfrist einer Nachzahlung die Übersicht eine Mahnung vorschlägt. Erlaubt sind 7 bis 60 Tage, Vorgabe: 14 Tage. Überfällig ist die Abrechnung schon ab dem Tag nach der Zahlungsfrist, und mahnen können Sie ab dann. Nach einer Mahnung schlägt die Übersicht die nächste vor, sobald die Frist in dieser Mahnung abgelaufen ist."

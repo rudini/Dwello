@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, Enter, Navigate } from '../screenplay/interactions';
+import { Click, DownloadFrom, Enter, Navigate, Select } from '../screenplay/interactions';
 import { exportAllDataButton, masterDataLink, saveSettingsButton, settingField } from '../targets/settings';
 
 export const openSettings = Navigate.to('/config');
@@ -9,6 +9,10 @@ export const saveSettings = (fields: Record<string, string>): Activity => (actor
 		...Object.entries(fields).map(([name, value]) => Enter.theValue(value).into(settingField(name))),
 		Click.on(saveSettingsButton)
 	);
+
+/** #1036: saves another Abrechnungsperiode in the Einstellungen */
+export const saveAccountingPeriod = (type: string): Activity => (actor) =>
+	actor.attemptsTo(openSettings, Select.option(type).from(settingField('accountingPeriod')), Click.on(saveSettingsButton));
 
 export const openMasterData = (label: string) => Click.on(masterDataLink(label));
 

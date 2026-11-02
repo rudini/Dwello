@@ -1,7 +1,17 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
-import { openMasterData, openSettings, saveSettings } from '../tasks/settings';
+import { runningPeriodChange } from '../fixtures/dates';
+import { freshAccountingPeriod } from '../fixtures/fresh-installation';
+import {
+	periodChangeHintShown,
+	periodChangeHintText,
+	periodChangeLetterAddress,
+	settingHelp,
+	settingInvalid,
+	settingsSaved,
+	storedSetting
+} from '../questions/settings';
+import { openMasterData, openSettings, saveAccountingPeriod, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -17,7 +27,8 @@ const FIELDS: Record<string, string> = {
 	Zahlungsfrist: 'paymentDeadlineDays',
 	'Zahlungsfrist (Tage)': 'paymentDeadlineDays',
 	Mahnfrist: 'reminderAfterDays',
-	'Mahnfrist (Tage)': 'reminderAfterDays'
+	'Mahnfrist (Tage)': 'reminderAfterDays',
+	Abrechnungsperiode: 'accountingPeriod'
 };
 
 Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter }) => {
@@ -78,4 +89,38 @@ Then('kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend', async
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(settingHelp(FIELDS.IBAN)).toContain(text);
+});
+
+// #1036 (@frische-installation): the change of the day whose short period still runs (fixtures/dates.ts), from the
+// earlier type set without a stored change
+When(
+	'der Liegenschaftsverwalter die Abrechnungsperiode wechselt, während die kurze Abrechnungsperiode noch läuft',
+	async ({ verwalter }) => {
+		const { from, to } = runningPeriodChange();
+		freshAccountingPeriod(from);
+		await verwalter.attemptsTo(saveAccountingPeriod(to));
+	}
+);
+
+Given('die Abrechnungsperiode hat heute gewechselt, und die kurze Abrechnungsperiode läuft noch', async ({ seed }) => {
+	const { from, to } = runningPeriodChange();
+	freshAccountingPeriod(from);
+	await seed.accountingPeriod(to);
+});
+
+Then(
+	'nennen die Einstellungen den Mietvertrag von {string} mit dem Brief zur Zustimmung',
+	async ({ verwalter, seed, names }, tenant: string) => {
+		const contractId = seed.idOf(`Mietvertrag ${tenant}`)!;
+		await verwalter.sees(periodChangeHintText).toContain(names.get(tenant)!);
+		await verwalter.sees(periodChangeLetterAddress(contractId)).toBe(`/contracts/${contractId}/consent-letter`);
+	}
+);
+
+Then('nennen die Einstellungen den Mietvertrag von {string} nicht', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(periodChangeHintText).not.toContain(names.get(tenant)!);
+});
+
+Then('nennen die Einstellungen keinen Mietvertrag zur Zustimmung', async ({ verwalter }) => {
+	await verwalter.sees(periodChangeHintShown).toBe(false);
 });

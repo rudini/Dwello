@@ -17,22 +17,21 @@ const FRESH_DATABASE_URL = (() => {
 	url.pathname = `${url.pathname}_fresh`;
 	return url.href;
 })();
+// a script of backend/scripts on its database
+const onFreshDatabase = (script: string, args: string[]) =>
+	execFileSync('bun', ['run', script, ...args], { cwd: 'backend', env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL } });
 
 /** No Wiederherstellungscode on the fresh installation (#718): the API cannot undo a confirmed one; `stale`: no
  * Sicherung for two days (backend/scripts/e2e-backup-reset.ts) */
-export const resetFreshBackup = (state?: 'stale') =>
-	execFileSync('bun', ['run', 'e2e-backup-reset', ...(state ? [state] : [])], {
-		cwd: 'backend',
-		env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL }
-	});
+export const resetFreshBackup = (state?: 'stale') => onFreshDatabase('e2e-backup-reset', state ? [state] : []);
+
+/** #1036: the fresh installation's Abrechnungsperiode without a stored change, the default without a type */
+export const freshAccountingPeriod = (type?: string) => onFreshDatabase('e2e-period', type ? [type] : []);
 
 /** A Konto mit Passwort on the fresh installation for the axe and language check, and its removal (#718, part 3) */
 export const FRESH_ACCOUNT = { email: 'a11y@dwello.test', password: 'a11y-password-2026' };
 export const freshLocalAccount = (action: 'add' | 'remove') =>
-	execFileSync('bun', ['run', 'e2e-local-account', action, FRESH_ACCOUNT.email, FRESH_ACCOUNT.password], {
-		cwd: 'backend',
-		env: { ...process.env, DATABASE_URL: FRESH_DATABASE_URL }
-	});
+	onFreshDatabase('e2e-local-account', [action, FRESH_ACCOUNT.email, FRESH_ACCOUNT.password]);
 
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];

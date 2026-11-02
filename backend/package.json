@@ -32,7 +32,8 @@
     "e2e-sent-days-ago": "bun scripts/e2e-sent-days-ago.ts",
     "e2e-purge-statements": "bun scripts/e2e-purge-statements.ts",
     "e2e-backup-reset": "bun scripts/e2e-backup-reset.ts",
-    "e2e-local-account": "bun scripts/e2e-local-account.ts"
+    "e2e-local-account": "bun scripts/e2e-local-account.ts",
+    "e2e-period": "bun scripts/e2e-period.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",

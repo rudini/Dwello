@@ -334,6 +334,11 @@ export function testData(api: CallTheApi) {
 			}));
 		},
 
+		// #1036: on the fresh installation only (@frische-installation), which takes the default back afterwards
+		async accountingPeriod(type: string) {
+			await put('config', { accounting_period: type });
+		},
+
 		// #465: the Verwaltung's phone and e-mail in the PDF header; global, so every scenario sets the same (as the IBAN)
 		async contact(phone: string, email: string) {
 			await withSettingsLock(() => put('config', { company_phone: phone, company_email: email }));

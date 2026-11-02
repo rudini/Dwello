@@ -73,7 +73,7 @@ import {
 	deleteDraftAndContinue
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
-import { inDays, swissDate } from '../fixtures/dates';
+import { inDays, runningPeriodChange, swissDate } from '../fixtures/dates';
 import { downloadedFileName, downloadedPdfText } from '../questions/download';
 
 const { Given, When, Then } = createBdd(test);
@@ -566,6 +566,12 @@ Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: 
 Then('heisst die Datei {string} mit dem Nachnamen von {string}', async ({ verwalter, names }, title: string, tenant: string) => {
 	const name = `${title} ${(names.get(tenant) ?? tenant).split(' ').at(-1)}.pdf`;
 	await verwalter.sees(downloadedFileName).toMatch(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replaceAll(' ', '[ _]')}$`));
+});
+
+// #1036: the short period of the change of the day, still running (fixtures/dates.ts)
+Then('nennt der Brief die kurze Abrechnungsperiode, die noch läuft', async ({ verwalter }) => {
+	const { start, end } = runningPeriodChange().short;
+	await verwalter.sees(downloadedPdfText).toContain(`kurze Abrechnungsperiode ${swissDate(start)} – ${swissDate(end)}`);
 });
 
 // Fachreview 521-1 V-1: without an earlier Abrechnungsperiode there is no letter

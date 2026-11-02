@@ -1,15 +1,35 @@
+import type { TestInfo } from '@playwright/test';
 import { test as base } from 'playwright-bdd';
 import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi, CallTheMcp } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
-import { FRESH_API, FRESH_KI_STUB, freshInstallation, resetFreshBackup, type FreshInstallation } from './fresh-installation';
+import {
+	FRESH_API,
+	FRESH_APP,
+	FRESH_KI_STUB,
+	freshAccountingPeriod,
+	freshInstallation,
+	resetFreshBackup,
+	type FreshInstallation
+} from './fresh-installation';
 import { withLock, withSettingsLock } from './settings-lock';
 import { sessionCookies, sessionToken } from './session';
 
 // Protocol driver the scenarios talk to the system through (Dave Farley): the browser, or the backend API.
 // The Liegenschaftsverwalter gets the matching ability; the project "api" runs the @api scenarios with it.
 export type Driver = 'ui' | 'api';
+
+// The fresh installation's scenarios take turns; the turns of the others do not count against this one's time
+async function inTurn(testInfo: TestInfo, work: () => Promise<void>) {
+	const timeout = testInfo.timeout;
+	const waiting = Date.now();
+	testInfo.setTimeout(0);
+	await withLock('installation', async () => {
+		testInfo.setTimeout(timeout + Date.now() - waiting);
+		await work();
+	});
+}
 
 // Define custom fixtures for Dwello E2E tests
 export const test = base.extend<{
@@ -48,10 +68,27 @@ export const test = base.extend<{
 	// An AI program the Liegenschaftsverwalter gave an access key (#817): it reaches only the MCP server
 	kiProgramm: async ({ request }, use) => use(new Actor('KI-Programm').whoCan(new CallTheMcp(request))),
 
-	seed: async ({ request }, use) => {
-		const data = testData(new CallTheApi(request, await sessionToken()));
-		await use(data);
-		await data.cleanUp();
+	// #1036: a scenario tagged @frische-installation changes the Abrechnungsperiode, one setting for every scenario
+	// (CLAUDE.md, "No scenario"): it runs on the fresh installation, set up, in its turn, and leaves the default
+	baseURL: async ({ baseURL, $tags }, use) => use($tags.includes('@frische-installation') ? FRESH_APP : baseURL),
+
+	seed: async ({ request, $tags }, use, testInfo) => {
+		const fresh = $tags.includes('@frische-installation');
+		const api = new CallTheApi(request, await sessionToken(), fresh ? FRESH_API : undefined);
+		const data = testData(api);
+		if (!fresh) {
+			await use(data);
+			return data.cleanUp();
+		}
+		const installation = freshInstallation(api, new CallTheApi(request, '', FRESH_KI_STUB));
+		await inTurn(testInfo, async () => {
+			resetFreshBackup();
+			await installation.setUp();
+			await use(data);
+			await data.cleanUp();
+			await installation.cleanUp();
+			freshAccountingPeriod();
+		});
 	},
 
 	names: async ({ seed }, use) => use(seed.names),
@@ -62,12 +99,7 @@ export const test = base.extend<{
 			new CallTheApi(request, await sessionToken(), FRESH_API),
 			new CallTheApi(request, '', FRESH_KI_STUB)
 		);
-		// the turns of the other scenarios do not count against this one's time
-		const timeout = testInfo.timeout;
-		const waiting = Date.now();
-		testInfo.setTimeout(0);
-		await withLock('installation', async () => {
-			testInfo.setTimeout(timeout + Date.now() - waiting);
+		await inTurn(testInfo, async () => {
 			resetFreshBackup(); // a look of the axe check may have left a confirmed code (tasks/accessibility.ts)
 			await use(installation);
 			await installation.cleanUp();
