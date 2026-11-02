@@ -732,6 +732,15 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
 - [x] PR: pushed after this archive
 
+## Session: #1000 2nd and 3rd Mahnung after a part payment
+
+- [x] Unit test in `reminder-letter.test.ts` seen red (8 cases: levels 2 and 3 in de, fr, it, en), then green: after a part payment the 2nd and 3rd Mahnung say «noch nicht vollständig bezahlt», texts of M-1 in `docs/reviews/959-fachreview-1.md` word for word; level 1 and letters without a part stay
+- [x] No scenario: the letter text is pinned at the lowest layer (the issue says so)
+- [x] Slice review round 1: `docs/reviews/1000-review-1.md` (C-1 Minor: the control test pins kept behaviour, named in the pull request)
+- [x] Data check: `docs/reviews/1000-datenpruefung-1.md` (no findings; 53 PDFs, opening, amounts and QR amount per level and language)
+- [x] Domain review (step 5, asked by the fallback review of PR #1061): `docs/reviews/1000-fachreview-1.md` (no Blocker/Major; Minor V-1, fr/it «rappel de paiement»/«promemoria di pagamento» in the level-2 text, stays in its report: the issue decided the M-1 texts)
+- [x] Workflow note: no step-1 `fach-reviewer` round for texts a domain review already gives word for word (`docs/reviews/workflow-notes-issue-1000.md`)
+- [x] Archive, PR: pushed after this archive
 ## Session: #1057 sending dated back across summer time
 
 Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days-ago.ts` (#1004) and its test treat it as `timestamptz`: in the late evening the shown time lands on the next day.

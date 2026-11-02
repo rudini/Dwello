@@ -38,6 +38,12 @@ const WORDING = {
 			(s: string) =>
 				`Trotz zweimaliger Mahnung ist die ${s} noch immer nicht bezahlt. Geht der Betrag nicht innert der unten genannten Frist ein, müssen wir weitere Schritte einleiten.`
 		],
+		// after a part payment, levels 2 and 3 (#1000, domain review 959-1 M-1)
+		partOpenings: [
+			(s: string) => `Trotz unserer Zahlungserinnerung ist die ${s} noch nicht vollständig bezahlt.`,
+			(s: string) =>
+				`Trotz zweimaliger Mahnung ist die ${s} noch immer nicht vollständig bezahlt. Geht der Betrag nicht innert der unten genannten Frist ein, müssen wir weitere Schritte einleiten.`
+		],
 		amount: 'Offener Betrag: ',
 		statementAmount: 'Betrag der Abrechnung: ',
 		paidSoFar: 'Bereits bezahlt: ',
@@ -60,6 +66,11 @@ const WORDING = {
 			(s: string) => `Malgré notre rappel de paiement, le ${s} n’a toujours pas été réglé.`,
 			(s: string) =>
 				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.`
+		],
+		partOpenings: [
+			(s: string) => `Malgré notre rappel, le ${s} n’a toujours pas été entièrement réglé.`,
+			(s: string) =>
+				`Malgré deux rappels, le ${s} n’a toujours pas été entièrement réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
 		amount: `Montant dû${NBSP}: `,
 		statementAmount: `Montant du décompte${NBSP}: `,
@@ -84,6 +95,11 @@ const WORDING = {
 			(s: string) =>
 				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.`
 		],
+		partOpenings: [
+			(s: string) => `Nonostante il nostro promemoria, il ${s} non risulta ancora interamente pagato.`,
+			(s: string) =>
+				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non interamente pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.`
+		],
 		amount: 'Importo dovuto: ',
 		statementAmount: 'Importo del conteggio: ',
 		paidSoFar: 'Già pagato: ',
@@ -106,6 +122,11 @@ const WORDING = {
 			(s: string) => `Despite our payment reminder, the ${s} has still not been paid.`,
 			(s: string) =>
 				`Despite two reminders, the ${s} has still not been paid. If the amount is not received by the deadline below, we will have to take further steps.`
+		],
+		partOpenings: [
+			(s: string) => `Despite our payment reminder, the ${s} has still not been paid in full.`,
+			(s: string) =>
+				`Despite two reminders, the ${s} has still not been paid in full. If the amount is not received by the deadline below, we will have to take further steps.`
 		],
 		amount: 'Amount outstanding: ',
 		statementAmount: 'Statement amount: ',
@@ -138,7 +159,7 @@ export function reminderLetter(input: ReminderLetterInput) {
 		end: swissDate(input.periodEnd)
 	});
 	const paragraphs = [
-		w.openings[input.level - 1](statement),
+		(input.paid && input.level > 1 ? w.partOpenings[input.level - 2] : w.openings[input.level - 1])(statement),
 		input.paid
 			? `${w.statementAmount}${chf(input.balance)}\n${w.paidSoFar}${chf(input.paid)}\n${w.amount}${chf(input.balance - input.paid)}`
 			: `${w.amount}${chf(input.balance)}`,
