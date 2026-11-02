@@ -43,6 +43,9 @@ jobs:
       # with mostly false findings (#1024, #1031, #1033), high dropped them in about two minutes
       REASONING_EFFORT: high
       MAX_DIFF_BYTES: 400000
+      # the changed files whole, so the model sees what the diff leaves out (#1045, #1049: findings that the rest of
+      # the file disproved)
+      MAX_FILES_BYTES: 200000
     steps:
       - name: Review the diff when Copilot did not
         shell: bash
@@ -113,6 +116,22 @@ jobs:
             echo "(the diff is cut off here: the files after this point exist but are not shown, do not report them missing)" >> diff.txt
           fi
           gh api "repos/$GH_REPO/contents/CLAUDE.md" -H 'Accept: application/vnd.github.raw' > rules.md || : > rules.md
+          : > files.txt
+          budget=$MAX_FILES_BYTES
+          gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
+            --jq '.[] | select(.status != "removed") | select(.filename | endswith(".lock") | not) | .filename' |
+            while read -r file; do
+              encoded=$(jq -rn --arg p "$file" '$p | split("/") | map(@uri) | join("/")')
+              gh api "repos/$GH_REPO/contents/$encoded?ref=$sha" -H 'Accept: application/vnd.github.raw' > one.txt 2> /dev/null || continue
+              grep -qI . one.txt || continue # binary or empty
+              size=$(wc -c < one.txt)
+              if [ "$size" -gt "$budget" ]; then
+                printf '=== %s (left out: over the size limit)\n\n' "$file" >> files.txt
+                continue
+              fi
+              { printf '=== %s\n' "$file"; cat one.txt; printf '\n'; } >> files.txt
+              budget=$((budget - size))
+            done
 
           cat > system.md <<'PROMPT'
           You are a senior code reviewer for the repository whose conventions follow. Review only the changes in the
@@ -122,6 +141,8 @@ jobs:
           - one line with the verdict: "No issues found" or "Changes recommended";
           - then each finding as a list item: **High/Medium/Low**, `path:line` (line in the new file), what is wrong,
             the concrete failure it causes and the fix. Most severe first, at most 10.
+          The changed files follow the diff whole, as they are at the head commit: before reporting, check a finding
+          against them (other branches, callers and guards in the same file), and report only what the diff changes.
           If you are not sure a finding holds, leave it out. You have no tools and cannot open the repository: review
           the text below as it is and answer at once.
 
@@ -129,11 +150,11 @@ jobs:
           PROMPT
           cat rules.md >> system.md
 
-          jq -n --arg model "$MODEL" --arg effort "$REASONING_EFFORT" --rawfile system system.md --rawfile pr pr.md --rawfile diff diff.txt '{
+          jq -n --arg model "$MODEL" --arg effort "$REASONING_EFFORT" --rawfile system system.md --rawfile pr pr.md --rawfile diff diff.txt --rawfile files files.txt '{
             model: $model, max_tokens: 32000, reasoning_effort: $effort, temperature: 0.2, stream: true,
             messages: [
               {role: "system", content: $system},
-              {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```")}
+              {role: "user", content: ("Pull request:\n" + $pr + "\n\nDiff:\n```diff\n" + $diff + "\n```\n\nChanged files at the head commit:\n" + $files)}
             ]}' > request.json
           # a second try when the answer is empty or a made-up tool call instead of a review; 10 minutes for Copilot and
           # two tries of 8 stay within the job's 30, with time left to comment «No review»

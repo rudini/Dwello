@@ -699,3 +699,43 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] Persona `docs/design/personas/helga-999.md`: P-1 (order of the Verlauf) stays (resets hold dates only), P-2, P-3 stay
 - [x] daten-pruefer `docs/reviews/999-datenpruefung-1.md`: D-1 (Major, PDF kept after the second reset) fixed with pg test and scenario; D-2 = P-1
 - [x] PR: pushed after this archive
+## Session: XS ratchet in the fitness checks (request in chat, follow-up to #1045)
+
+- [x] Issues (`nfr:maintainability`): #1052 fat files and modules, #1053 hidden coupling pairs
+- [x] Check `fat` in `tools/fitness/fitness.ts`: no new file over 400 lines, no new code module over 30 files or 15 module dependencies, listed ones may not grow; composition roots listed with a reason (tests first)
+- [x] `ratchet.json`: today's fat files, modules and roots; `docs/architecture/fitness-functions.md` row
+- [x] code-reviewer: `docs/reviews/xs-ratchet-review-1.md` (C-1 Major: a removed `fat` list switched the check off, fixed; C-2 Minor: `fatItems` untested, fixed), `-2.md` (both closed, nothing new)
+- [x] Workflow note: none new (the stop hook asked to push during the review again, as in `workflow-notes-structure-report.md`)
+- [x] Archive the session; PR pushed after this archive
+## Session: #691 cut-off cost table on the statement edit page
+
+- [x] Reproduced at 1440 × 900 (persona stack, demo data): the table needs 1010 px, the edit page's panel gives 716 px; «Zeitanteil» is cut, the scroll bar sits below the whole table. The detail page is 22 px short too, but its mid widths are #658 (`needs-decision`), so it stays as is
+- [x] Scenario in `statement-edit.feature` seen red (203 px hidden sideways), then green: the edit page shows the lines one below the other at every width (`CostTable` `stacked`), as phones already do
+- [x] E2E: `statement-edit.feature`, `statement-detail.feature` (132 passed), axe and language rows of `statement-edit` (4 passed); unit tests on changed files (322 passed)
+- [x] Slice review round 1: `docs/reviews/691-review-1.md` (C-1, C-2 Minor fixed; the DOM test seen red without `stacked`)
+- [x] Persona review: `docs/design/personas/anna-691.md` (task done; P-1, P-2 Minor, both on the base already, stay in the report; the detail page observation added to #658)
+- [x] Closing `code-reviewer` round: `docs/reviews/691-review-2.md`
+- [x] Workflow notes: nothing came up
+- [x] Archive, PR: pushed after this archive
+
+## Session: dependency direction check, A/I in the report (request in chat, follow-up to #1054)
+
+- [x] Structure report: dependencies against stability (Stable Dependencies Principle, I gap > 0.2) per module and as KPI; distance D out of the overall light; the A/I section says why A says little for modules that export functions (tests first)
+- [x] Fitness check `unstable-dependency` (issue #1055) with today's 4 listed (reason each), shrink-only; docs row
+- [x] code-reviewer: `docs/reviews/sdp-review-1.md` (no Blocker/Major; C-1 to C-3 Minor fixed: comment order, tighten keeps a measured entry, message names a new dependency as possible cause), `-2.md` (closing round, all closed)
+- [x] Fallback review on #1056: the gap was rounded before the comparison (fixed, test seen red); `docs/reviews/sdp-review-3.md` (closing round, nothing new)
+- [x] Workflow note: none new
+- [x] Archive the session; PR pushed after this archive
+## Session: fallback review sees the changed files whole (#1007 follow-up)
+
+- [x] Evaluation of the high reviews (7 reviews, 13 findings: 5 fixed, 4 known, 1 declined, 3 false); two false ones came from code outside the diff (#1045, #1049)
+- [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
+- [x] PR: pushed after this archive
+
+## Session: stability and changes instead of the A/I graph (request in chat, follow-up to #1056)
+
+- [x] Structure report: graph «Stability and changes» (I over the commits of a module's most-changed file in fallow's hotspot window) with the zone stable and changing often; light per module (I ≤ 0.3 and Ca ≥ 5: green up to 12 changes, yellow up to 25, else red); A, D, the A/I graph and the D history table removed (tests first)
+- [x] Docs: report bullet and fitness row without A/D
+- [x] code-reviewer: `docs/reviews/change-graph-review-1.md` (no Blocker/Major; C-1 unused `--band`, C-2 zone text and tooltip without Ca: fixed), `-2.md` (closing round, both closed)
+- [x] Workflow note: none new
+- [x] Archive the session; PR pushed after this archive, once #1056 is merged

@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	costsAreRecalculated,
+	costsHiddenSideways,
 	deadlineFields,
 	notes,
 	notesField,
@@ -78,4 +79,8 @@ Given(
 // #403 (6): visible help at the field, not a tooltip
 Then('erklärt die Bearbeitungsseite die Bemerkung mit {string}', async ({ verwalter }, help: string) => {
 	await verwalter.sees(notesHelp).toBe(help);
+});
+
+Then('zeigt die Bearbeitungsseite die ganze Kostenaufstellung, ohne seitlich zu verschieben', async ({ verwalter }) => {
+	await verwalter.sees(costsHiddenSideways).toBe(0);
 });
