@@ -606,9 +606,10 @@ export async function recalculation(statement: StatementWithDetails) {
 	if (!now) return null;
 	const result = JSON.stringify([now.balance, sharesOf(now.lineItems)]);
 	const changes = result !== JSON.stringify([String(Number(statement.balance)), sharesOf(statement.lineItems)]);
-	// as claimed: a Saldo below CHF 5 is neither claimed nor paid out, but in a Schlussabrechnung (PO 2026-10-20, V-30 A)
-	const claimed = (balance: string) => (!statement.final && belowMinimum(Number(balance)) ? 0 : Number(balance));
-	const [before, after] = [claimed(statement.balance), claimed(now.balance)];
+	// the raw Saldos, below CHF 5 too: such a Saldo is carried over (#1023, replaces V-30 A); a Nachzahlung waived
+	// under #94 is no longer claimed (Fachreview 1023-1 M-1)
+	const waived = paymentOf(statement, swissToday()).waived;
+	const [before, after] = [waived ? 0 : Number(statement.balance), Number(now.balance)];
 	// #546 (Fachreview 546-1 V-2, V-4): the raw Saldo it gives, the difference to the one billed, and whether it is below CHF 5
 	const balance = Number(now.balance).toFixed(2);
 	const difference = roundToRappen(Number(now.balance) - Number(statement.balance)).toFixed(2);

@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { pageAddress } from '../questions/navigation';
+import { focusedPlace, pageAddress } from '../questions/navigation';
 import {
 	allBuildingsNoteText,
 	currentStep,
@@ -60,6 +60,11 @@ import {
 	vacancyNoteText,
 	skippedContractText,
 	allSkippedText,
+	buildingCardHiddenSideways,
+	buildingChoiceDescription,
+	buildingChoiceName,
+	countsFailedText,
+	invoiceCountShown,
 } from '../questions/statement-generate';
 import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
@@ -94,6 +99,9 @@ import {
 	tryNextWithoutConfirmation,
 	typeManagementFee,
 	openSkippedContract,
+	billedCannotBeChecked,
+	invoicesCannotBeCounted,
+	waitForBuildingCounts,
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
 import { filesInDownloadedZip } from '../questions/download';
@@ -746,3 +754,39 @@ When(
 		await verwalter.attemptsTo(downloadConsentLetterOf(seed.idOf(building)!, names.get(tenant) ?? tenant));
 	}
 );
+
+// #738: step «Gebäude» when one of its counts fails, how it names a building, at 390 px, and resumed
+Given('die Rechnungen der Gebäude lassen sich nicht zählen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(invoicesCannotBeCounted);
+});
+
+Given('die bestehenden Abrechnungen der Gebäude lassen sich nicht prüfen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(billedCannotBeChecked);
+});
+
+Then('sagt die Wahl der Gebäude {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(countsFailedText).toBe(text);
+});
+
+Then('nennt die Wahl für {string} keine Anzahl Rechnungen', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(invoiceCountShown(seed.idOf(building)!)).toBe(false);
+});
+
+Then('heisst das Gebäude {string} bei der Wahl {string}', async ({ verwalter, seed, names }, building: string, name: string) => {
+	await verwalter.sees(buildingChoiceName(seed.idOf(building)!)).toBe(name.replaceAll(building, names.get(building) ?? building));
+});
+
+Then('beschreibt die Wahl das Gebäude {string} mit {string}', async ({ verwalter, seed }, building: string, text: string) => {
+	await verwalter.sees(buildingChoiceDescription(seed.idOf(building)!)).toBe(text);
+});
+
+Then('zeigt die Wahl das Gebäude {string} ganz', async ({ verwalter, seed }, building: string) => {
+	const id = seed.idOf(building)!;
+	await verwalter.attemptsTo(waitForBuildingCounts(id));
+	await verwalter.sees(buildingCardHiddenSideways(id)).toBe(0);
+});
+
+Then('steht der Fokus auf dem Schritt {string}', async ({ verwalter }, step: string) => {
+	await verwalter.sees(currentStep).toBe(step);
+	await verwalter.sees(focusedPlace).toBe('statement-step-heading');
+});
