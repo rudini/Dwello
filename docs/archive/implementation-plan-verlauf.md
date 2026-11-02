@@ -737,8 +737,10 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] pg test in `dashboard.pg.test.ts` seen red (300 instead of 250), then green: `paidThisMonth` sums each recorded payment by its day, part payments included (domain review 959-1, rule 4); a statement paid before #959 (no `payments`) counts as before; `docs/api-specification.md` names it
 - [x] No scenario: no page shows `paidThisMonth` (only `src/routes/dashboard/+page.server.ts` types it)
 - [x] Slice review round 1: `docs/reviews/1002-review-1.md` (no findings)
-- [x] Workflow note: no `daten-pruefer` round, as no screen, PDF or QR-bill shows the sum; the pg test recomputes it (`docs/reviews/workflow-notes-issue-1002.md`)
+- [x] Data check: `docs/reviews/1002-datenpruefung-1.md` (no findings; eight cases recomputed from `dwello_persona`, API equal to the Rappen)
+- [x] Workflow note: a `daten-pruefer` round for an amount no screen, PDF or QR-bill shows (`docs/reviews/workflow-notes-issue-1002.md`)
 - [x] Archive, PR: pushed after this archive
+
 ## Session: #1057 sending dated back across summer time
 
 Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days-ago.ts` (#1004) and its test treat it as `timestamptz`: in the late evening the shown time lands on the next day.
