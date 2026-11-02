@@ -802,3 +802,10 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-736.md`
 - [x] Archive, PR: pushed after this archive
 - [x] Fallback review of PR #1067 (contract of the undelivered reminder answer): `tests/contracts/reminder-undelivered.json`; closing round `docs/reviews/736c-review-1.md` (no findings)
+## Session: #1065 «rappel de paiement» / «promemoria di pagamento» after a part payment
+
+- [x] Unit test rows in `reminder-letter.test.ts` (level 2, fr and it) seen red, then green: the texts of the decision in #1065 (domain review 1000-1, V-1)
+- [x] No scenario: the letter text is pinned at the lowest layer, as in #1000
+- [x] Slice review round 1, also the closing round: `docs/reviews/1065-review-1.md` (no findings)
+- [x] No `fach-reviewer` round: the texts are its own (1000-fachreview-1, V-1), read in all four languages
+- [x] Archive, PR: pushed after this archive

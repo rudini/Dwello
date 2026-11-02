@@ -68,7 +68,7 @@ const WORDING = {
 				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
 		partOpenings: [
-			(s: string) => `Malgré notre rappel, le ${s} n’a toujours pas été entièrement réglé.`,
+			(s: string) => `Malgré notre rappel de paiement, le ${s} n’a toujours pas été entièrement réglé.`,
 			(s: string) =>
 				`Malgré deux rappels, le ${s} n’a toujours pas été entièrement réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
@@ -96,7 +96,7 @@ const WORDING = {
 				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.`
 		],
 		partOpenings: [
-			(s: string) => `Nonostante il nostro promemoria, il ${s} non risulta ancora interamente pagato.`,
+			(s: string) => `Nonostante il nostro promemoria di pagamento, il ${s} non risulta ancora interamente pagato.`,
 			(s: string) =>
 				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non interamente pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.`
 		],

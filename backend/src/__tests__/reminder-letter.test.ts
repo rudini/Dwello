@@ -45,9 +45,9 @@ describe('Mahnschreiben', () => {
 	it.each([
 		[2, 'de', 'Trotz unserer Zahlungserinnerung ist die Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024 noch nicht vollständig bezahlt.'],
 		[3, 'de', 'Trotz zweimaliger Mahnung ist die Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024 noch immer nicht vollständig bezahlt. Geht der Betrag nicht innert der unten genannten Frist ein, müssen wir weitere Schritte einleiten.'],
-		[2, 'fr', 'Malgré notre rappel, le décompte des charges NK-2024-0007 pour la période du 01.01.2024 au 31.12.2024 n’a toujours pas été entièrement réglé.'],
+		[2, 'fr', 'Malgré notre rappel de paiement, le décompte des charges NK-2024-0007 pour la période du 01.01.2024 au 31.12.2024 n’a toujours pas été entièrement réglé.'],
 		[3, 'fr', 'Malgré deux rappels, le décompte des charges NK-2024-0007 pour la période du 01.01.2024 au 31.12.2024 n’a toujours pas été entièrement réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.'],
-		[2, 'it', 'Nonostante il nostro promemoria, il conteggio spese accessorie NK-2024-0007 per il periodo dal 01.01.2024 al 31.12.2024 non risulta ancora interamente pagato.'],
+		[2, 'it', 'Nonostante il nostro promemoria di pagamento, il conteggio spese accessorie NK-2024-0007 per il periodo dal 01.01.2024 al 31.12.2024 non risulta ancora interamente pagato.'],
 		[3, 'it', 'Nonostante il promemoria e il sollecito, il conteggio spese accessorie NK-2024-0007 per il periodo dal 01.01.2024 al 31.12.2024 risulta tuttora non interamente pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.'],
 		[2, 'en', 'Despite our payment reminder, the utility cost statement NK-2024-0007 for the period 01.01.2024 – 31.12.2024 has still not been paid in full.'],
 		[3, 'en', 'Despite two reminders, the utility cost statement NK-2024-0007 for the period 01.01.2024 – 31.12.2024 has still not been paid in full. If the amount is not received by the deadline below, we will have to take further steps.']
