@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Checked, Count, Enabled, Gap, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Checked, Count, Enabled, Gap, HiddenSideways, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	allBuildingsNote,
 	confirmMissingInvoices,
@@ -8,7 +8,10 @@ import {
 	stepLabel,
 	announcement,
 	buildingBilled,
+	buildingCard,
 	buildingCheckbox,
+	buildingInvoiceCount,
+	countsFailedNote,
 	buildingInvoices,
 	categoryFinding,
 	existingStatementNotes,
@@ -185,3 +188,9 @@ export const previewRowText = (tenantName: string) => Text.of(previewRow(tenantN
 export const vacancyNoteText = Text.of(previewVacancyNote);
 export const skippedContractText = (contractId: string) => Text.of(previewSkipped(contractId));
 export const allSkippedText = (buildingId: string) => Text.of(previewAllSkipped(buildingId));
+// #738: what step 2 could not load; how a building's choice is named and described; what its card hides sideways
+export const countsFailedText = Text.of(countsFailedNote);
+export const invoiceCountShown = (buildingId: string) => Visibility.of(buildingInvoiceCount(buildingId));
+export const buildingChoiceName = (buildingId: string) => Accessible.nameOf(buildingCheckbox(buildingId));
+export const buildingChoiceDescription = (buildingId: string) => Accessible.descriptionOf(buildingCheckbox(buildingId));
+export const buildingCardHiddenSideways = (buildingId: string) => HiddenSideways.within(buildingCard(buildingId));

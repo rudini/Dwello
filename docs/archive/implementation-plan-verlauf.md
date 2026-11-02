@@ -816,3 +816,16 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No scenario: glossary and code comments only; the help texts already use the terms in all four languages
 - [x] Slice review round 1, also the closing round: `docs/reviews/1039-review-1.md` (C-1 Minor, fixed: issue references in brackets, as in the two-column table)
 - [x] Archive, PR: pushed after this archive
+## Session: #738 statement wizard step «Gebäude»
+
+- [x] Scenarios (`statement-generate.feature`): failed invoice count, failed existing-statements check, name and description of a building's choice, 390 px, focus on the step when resumed; seen red (390 px: red only at the missing test id, the overflow does not reproduce; it pins kept behaviour)
+- [x] A failed state per count (`BuildingStep.svelte`, `statements_buildings_invoices_failed`, `statements_buildings_billed_failed` in de/fr/it/en)
+- [x] Checkbox named by building and address, counts and apartments as description; «1 Wohnung» singular (`BuildingChoice.svelte`)
+- [x] Focus on the step heading when the wizard opens in a later step (`StatementWizard.svelte`)
+- [x] a11y and language rows: state `buildings-counts-failed`
+- [x] Code review round 1: `docs/reviews/738-review-1.md`
+- [x] Persona round 1: `docs/design/personas/sven-738.md`, `docs/design/personas/marco-738.md`
+- [x] Code review round 2 (closing round): `docs/reviews/738-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-738.md`
+- [x] Issue for the Minor two personas met (Marco P-3, Sven P-4): #1068
+- [x] PR: pushed after this archive

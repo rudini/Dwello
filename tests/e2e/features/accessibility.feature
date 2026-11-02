@@ -193,6 +193,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | buildings-billed    |
       | statement-generate     | buildings-overlap   |
       | statement-generate     | buildings-consent   |
+      | statement-generate     | buildings-counts-failed |
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |
