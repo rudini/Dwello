@@ -37,6 +37,7 @@ import type { StatementWithDetails } from '$lib/types';
 const noPayment = { unpaid: true, claimed: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
+import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, settled: 4, overdue: 1 };
@@ -2495,28 +2496,18 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('meldet, wenn eine Mahnung nicht per E-Mail zugestellt werden konnte', () => {
-		const document = {
-			title: 'Zahlungserinnerung',
-			channel: 'email',
-			deliveryErrorCode: 'MAIL_DELIVERY_FAILED',
-			recipient: 'anna@example.com',
-			tenantId: 't1',
-			tenantName: 'Anna Keller'
-		};
-		detail(
-			{ status: 'overdue' },
-			{ reminder: { document, deliveryError: 'Die E-Mail konnte nicht zugestellt werden.' } }
-		);
+		// as the backend answers it (the BFF only names the title in the UI language)
+		detail({ status: 'overdue' }, { reminder: undeliveredReminder });
 
 		// #736: the address it went to, the way to the tenant and to «Dokumente», which the text no longer names
 		const box = byTestId('reminder-feedback-box')!;
 		expect(box.textContent).toContain(
 			'Das Dokument «Zahlungserinnerung» liegt zum Versand bereit.'
 		);
-		expect(box.textContent).toContain('E-Mail an anna@example.com');
+		expect(box.textContent).toContain('E-Mail an anna.keller@example.ch');
 		const href = (testid: string) =>
 			box.querySelector(`[data-testid="${testid}"]`)!.getAttribute('href');
-		expect(href('delivery-tenant-link')).toBe('/tenants/t1');
+		expect(href('delivery-tenant-link')).toBe(`/tenants/${undeliveredReminder.document.tenantId}`);
 		expect(href('delivery-documents-link')).toBe('/documents');
 		expect(box.textContent).toContain(
 			'Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'

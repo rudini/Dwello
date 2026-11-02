@@ -196,6 +196,19 @@ describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
 		expect(await listed(result.document.id)).toMatchObject({ deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
 	});
 
+	// the frontend's tests take this answer from the contract (fallback review of PR #1067)
+	it('antwortet mit den Feldern von reminder-undelivered.json', async () => {
+		const { result } = await refusedReminder();
+		const { status: _, ...body } = result; // the helper adds the HTTP status
+		const contract = await Bun.file(`${import.meta.dir}/../../../tests/contracts/reminder-undelivered.json`).json();
+		const shape = (value: Record<string, unknown>) =>
+			Object.fromEntries(Object.entries(value).map(([key, field]) => [key, field === null ? 'null' : typeof field]));
+
+		expect(Object.keys(body).sort()).toEqual(Object.keys(contract).sort());
+		expect(shape(result.document as never)).toEqual(shape(contract.document));
+		expect(typeof result.deliveryError).toBe('string');
+	});
+
 	// #736: the address the e-mail went to, also after the tenant changes it
 	it('hält die E-Mail-Adresse fest, an die die Mahnung ging', async () => {
 		const { result } = await refusedReminder();
