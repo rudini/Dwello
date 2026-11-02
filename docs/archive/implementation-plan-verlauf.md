@@ -738,6 +738,14 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] No scenario: the export is a file the existing export scenario covers (the issue says so)
 - [x] Slice review round 1: `docs/reviews/1001-review-1.md` (no findings)
 - [x] Workflow note: the same as #1000 (no step-1 `fach-reviewer` round for a rule a domain review already decided), in `docs/reviews/workflow-notes-issue-1000.md`
+## Session: #1000 2nd and 3rd Mahnung after a part payment
+
+- [x] Unit test in `reminder-letter.test.ts` seen red (8 cases: levels 2 and 3 in de, fr, it, en), then green: after a part payment the 2nd and 3rd Mahnung say «noch nicht vollständig bezahlt», texts of M-1 in `docs/reviews/959-fachreview-1.md` word for word; level 1 and letters without a part stay
+- [x] No scenario: the letter text is pinned at the lowest layer (the issue says so)
+- [x] Slice review round 1: `docs/reviews/1000-review-1.md` (C-1 Minor: the control test pins kept behaviour, named in the pull request)
+- [x] Data check: `docs/reviews/1000-datenpruefung-1.md` (no findings; 53 PDFs, opening, amounts and QR amount per level and language)
+- [x] Domain review (step 5, asked by the fallback review of PR #1061): `docs/reviews/1000-fachreview-1.md` (no Blocker/Major; Minor V-1, fr/it «rappel de paiement»/«promemoria di pagamento» in the level-2 text, stays in its report: the issue decided the M-1 texts)
+- [x] Workflow note: no step-1 `fach-reviewer` round for texts a domain review already gives word for word (`docs/reviews/workflow-notes-issue-1000.md`)
 - [x] Archive, PR: pushed after this archive
 ## Session: #1057 sending dated back across summer time
 
