@@ -30,6 +30,7 @@ import { auditLogWithExpiries } from './access-key.service';
 import { apartmentStatus, nextContractStart } from './apartment.service';
 import { getAllConfig } from './config.service';
 import { EXTENSIONS, NAMES, safe, zipFiles } from './tenant-export.service';
+import { recordedPayments } from './payment-entry';
 import { swissToday } from './today';
 
 export type Language = keyof typeof NAMES;
@@ -531,12 +532,11 @@ export async function exportAllData(language: Language) {
 			buildingCosts: item.totalAmount
 		}))
 	);
-	// one row per part payment; a statement paid before #959 has no list but its date and amount (V-1)
 	table(
 		'payments',
 		['statementId', 'statementNumber', 'tenant', 'date', 'amount'],
 		statements.flatMap((statement) =>
-			(statement.payments.length ? statement.payments : statement.paidDate ? [{ date: statement.paidDate, amount: statement.paidAmount }] : []).map((payment) => ({
+			recordedPayments(statement).map((payment) => ({
 				...payment,
 				statementId: statement.id,
 				statementNumber: statement.statementNumber,

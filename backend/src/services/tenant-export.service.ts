@@ -3,6 +3,7 @@ import { db } from '../db/connection';
 import { apartments, buildings, categories, documents, rentalContracts, tenants, utilityStatements } from '../db/schema';
 import { advancesOf } from './advance-payment.service';
 import { agreedCategoryIds } from './agreed-category.service';
+import { recordedPayments } from './payment-entry';
 import { getStatement } from './statement.service';
 import { swissToday } from './today';
 
@@ -131,7 +132,7 @@ export async function exportTenant(id: string) {
 			paidDate: statement.paidDate,
 			paidAmount: statement.paidAmount,
 			// each recorded payment, not only their sum (#1001, domain review 959-1 V-5)
-			payments: statement.payments.map(({ date, amount }) => ({ date, amount })),
+			payments: recordedPayments(statement).map(({ date, amount }) => ({ date, amount })),
 			paymentResets: statement.paymentResets,
 			qrBillReference: statement.qrBillReference,
 			notes: statement.notes,

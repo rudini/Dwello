@@ -287,6 +287,21 @@ describe('Daten eines Mieters exportieren', () => {
 		}
 	});
 
+	// Fachreview 1001-1, V-1: eine vor #959 bezahlte Abrechnung hat keine Liste, nur Datum und Betrag
+	it('nennt bei einer vor den Teilzahlungen bezahlten Abrechnung die Zahlung aus Datum und Betrag', async () => {
+		const sent = eq(utilityStatements.statementNumber, statementNumber);
+		await db.update(utilityStatements).set({ payments: [], paidDate: '2025-03-10', paidAmount: '70.50' }).where(sent);
+		try {
+			const { data } = await exportOf(rental.tenant);
+
+			expect(data.statements.find((statement) => statement.number === statementNumber)!.payments).toEqual([
+				{ date: '2025-03-10', amount: '70.50' }
+			]);
+		} finally {
+			await db.update(utilityStatements).set({ paidDate: null, paidAmount: null }).where(sent);
+		}
+	});
+
 	it('legt die PDF des Mietvertrags bei, wenn sie gespeichert ist (Fachreview F-18, Review C-3)', async () => {
 		const contract = eq(rentalContracts.id, rental.contract);
 		await db.update(rentalContracts).set({ contractPdf: pdf('contract') }).where(contract);
