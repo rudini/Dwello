@@ -22,8 +22,18 @@ Funktionalität: Wechsel der Abrechnungsperiode
     Und "Ben Meier" mietete die Wohnung "2.02" von "2024-04-01" bis "2024-12-31" für "900" Franken
     Wenn der Liegenschaftsverwalter die Abrechnungsperiode wechselt, während die kurze Abrechnungsperiode noch läuft
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
-    Und nennen die Einstellungen den Mietvertrag von "Anna Keller" mit dem Brief zur Zustimmung
+    Und sagen die Einstellungen, wann die neue Abrechnungsperiode beginnt
+    # Fachreview 1036-1 V-3: Mieter und Wohnung
+    Und nennen die Einstellungen den Mietvertrag von "Anna Keller" in der Wohnung "2.01" mit dem Brief zur Zustimmung
     Und nennen die Einstellungen den Mietvertrag von "Ben Meier" nicht
+
+  # Fachreview 1036-1 V-1: bei manchen Wechseln ist die kurze Abrechnungsperiode am Tag des Wechsels schon beendet und
+  # die neue Abrechnungsperiode hat schon begonnen; dann kommt der Brief jetzt
+  @wip
+  Szenario: Nach einem Wechsel, dessen kurze Abrechnungsperiode schon beendet ist, sagen die Einstellungen, dass die neue Abrechnungsperiode schon begonnen hat
+    Wenn der Liegenschaftsverwalter die Abrechnungsperiode wechselt, nachdem die kurze Abrechnungsperiode schon beendet ist
+    Dann sagen die Einstellungen, dass die neue Abrechnungsperiode schon begonnen hat
+    Und nennen die Einstellungen den Mietvertrag von "Anna Keller" in der Wohnung "2.01" mit dem Brief zur Zustimmung
 
   # die Zustimmung wird eingeholt, bevor die neue Abrechnungsperiode beginnt, nicht erst nach der kurzen
   @wip

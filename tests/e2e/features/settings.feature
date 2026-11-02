@@ -77,8 +77,8 @@ Funktionalität: Einstellungen
   # #1036 (Option 1): steht die Abrechnungsperiode im Mietvertrag, gilt eine neue erst mit der Zustimmung der Mieter
   @wip
   Szenario: Die Einstellungen sagen, dass die Mieter einer neuen Abrechnungsperiode zustimmen müssen
-    # Wortlaut nach Fachreview
-    Dann erklärt die Einstellung "Abrechnungsperiode" "zustimmen"
+    # Fachreview 1036-1 V-2
+    Dann erklärt die Einstellung "Abrechnungsperiode" "Zeitraum, für den Sie die Nebenkosten abrechnen, zum Beispiel Kalenderjahr (01.01.–31.12.), Juli–Juni oder November–Oktober. Steht die Abrechnungsperiode in einem Mietvertrag, gilt eine neue dort erst, wenn die Mieter schriftlich zustimmen. Nach dem Speichern nennt Dwello die Mietverträge mit ihrem Brief zur Zustimmung. Sie finden ihn auch auf der Seite des Mietvertrags."
 
   Szenario: Fristen sind erklärt
     Dann erklärt die Einstellung "Zahlungsfrist (Tage)" "Wie viele Tage nach dem Versand der Mieter eine Nachzahlung bezahlt oder Sie eine Rückerstattung überweisen. Erlaubt sind 7 bis 90 Tage, Vorgabe: 30 Tage. Gilt für Abrechnungen, die Sie ab jetzt versenden; die Frist einer einzelnen Abrechnung ändern Sie dort mit «Frist und Bemerkungen bearbeiten»."

@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { runningPeriodChange } from '../fixtures/dates';
+import { runningPeriodChange, startedPeriodChange, swissDate } from '../fixtures/dates';
 import { freshAccountingPeriod } from '../fixtures/fresh-installation';
 import {
 	periodChangeHintShown,
@@ -91,12 +91,12 @@ Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, 
 	await verwalter.sees(settingHelp(FIELDS.IBAN)).toContain(text);
 });
 
-// #1036 (@frische-installation): the change of the day whose short period still runs (fixtures/dates.ts), from the
-// earlier type set without a stored change
+// #1036 (@frische-installation): the change of the day whose short period still runs, or has ended (fixtures/dates.ts),
+// from the earlier type set without a stored change
 When(
-	'der Liegenschaftsverwalter die Abrechnungsperiode wechselt, während die kurze Abrechnungsperiode noch läuft',
-	async ({ verwalter }) => {
-		const { from, to } = runningPeriodChange();
+	/^der Liegenschaftsverwalter die Abrechnungsperiode wechselt, (während die kurze Abrechnungsperiode noch läuft|nachdem die kurze Abrechnungsperiode schon beendet ist)$/,
+	async ({ verwalter }, when: string) => {
+		const { from, to } = when.startsWith('während') ? runningPeriodChange() : startedPeriodChange();
 		freshAccountingPeriod(from);
 		await verwalter.attemptsTo(saveAccountingPeriod(to));
 	}
@@ -108,11 +108,25 @@ Given('die Abrechnungsperiode hat heute gewechselt, und die kurze Abrechnungsper
 	await seed.accountingPeriod(to);
 });
 
+const shortPeriod = ({ short }: { short: { start: string; end: string } }) =>
+	`Die Tage davor rechnen Sie als kurze Abrechnungsperiode ${swissDate(short.start)} – ${swissDate(short.end)} ab.`;
+
+Then('sagen die Einstellungen, wann die neue Abrechnungsperiode beginnt', async ({ verwalter }) => {
+	const change = runningPeriodChange();
+	await verwalter.sees(periodChangeHintText).toContain(`Die neue Abrechnungsperiode beginnt am ${swissDate(change.start)}. ${shortPeriod(change)}`);
+});
+
+// Fachreview 1036-1 V-1: the letter now, not before a day already past
+Then('sagen die Einstellungen, dass die neue Abrechnungsperiode schon begonnen hat', async ({ verwalter }) => {
+	const change = startedPeriodChange();
+	await verwalter.sees(periodChangeHintText).toContain(`Die neue Abrechnungsperiode hat am ${swissDate(change.start)} schon begonnen. ${shortPeriod(change)}`);
+});
+
 Then(
-	'nennen die Einstellungen den Mietvertrag von {string} mit dem Brief zur Zustimmung',
-	async ({ verwalter, seed, names }, tenant: string) => {
+	'nennen die Einstellungen den Mietvertrag von {string} in der Wohnung {string} mit dem Brief zur Zustimmung',
+	async ({ verwalter, seed, names }, tenant: string, apartment: string) => {
 		const contractId = seed.idOf(`Mietvertrag ${tenant}`)!;
-		await verwalter.sees(periodChangeHintText).toContain(names.get(tenant)!);
+		await verwalter.sees(periodChangeHintText).toContain(`${names.get(tenant)}, Wohnung ${apartment}`);
 		await verwalter.sees(periodChangeLetterAddress(contractId)).toBe(`/contracts/${contractId}/consent-letter`);
 	}
 );
