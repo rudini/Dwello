@@ -139,6 +139,8 @@ const askKi = (name: string): Activity => (actor) =>
 // 'generation-result' bills its contracts once per year; counted per worker, over all its scenarios: 2016-2022 have
 // neither statements nor invoices in the seed (2023 to 2025 do)
 let resultRuns = 0;
+// #736: each look of 'reminder-undelivered' reminds another of the example's statements (9: 6 looks of axe, 3 languages)
+let undeliveredLooks = 0;
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
@@ -569,6 +571,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
+	'reminder-undelivered': (example) => (actor) => {
+		const statements = example.undeliveredStatements!;
+		const id = statements[undeliveredLooks++ % statements.length];
+		return actor.attemptsTo(
+			Navigate.to(instanceOf(example) + `/statements/${id}`),
+			PostFormAction('?/remind'),
+			Wait.until(on.shown('reminder-feedback'))
+		);
+	},
 	// the seeded reminder, named in the screen's query; marking it again keeps it as it is, so each viewport can
 	'marked-sent': (example) => (actor) =>
 		actor.attemptsTo(

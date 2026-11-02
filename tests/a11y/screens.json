@@ -51,6 +51,7 @@
 		"recalculate-dialog": "Draft statement, «Neu berechnen» chosen (#338): the confirmation that names what stays and what changes.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
+		"reminder-undelivered": "A Mahnung just sent by e-mail that the mail server refused (#736): the feedback names the address it went to and leads to the tenant and to «Dokumente»; each look reminds another overdue statement (the last reminder waits to be posted, #449).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"pdf-changed": "A sent statement right after its Zahlungsfrist was changed: the hint that the PDF sent shows the earlier one and the tenant needs the new PDF (#524).",
 		"mark-paid-early": "The dialog that marks a statement as paid, with a day before the Abrechnungsdatum entered and confirmed once: the question whether to save it anyway (#448).",
@@ -665,7 +666,8 @@
 			"name": "statement-detail-undelivered",
 			"path": "/statements/{undeliveredStatement}",
 			"states": [
-				"default"
+				"default",
+				"reminder-undelivered"
 			]
 		},
 		{

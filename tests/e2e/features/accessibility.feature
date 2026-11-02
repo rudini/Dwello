@@ -206,6 +206,7 @@ Funktionalität: Barrierefreiheit
       | statement-detail       | delete-dialog       |
       | statement-detail       | recalculate-dialog  |
       | statement-detail-undelivered | default |
+      | statement-detail-undelivered | reminder-undelivered |
       | statement-old-address-detail | default       |
       | statement-old-address-detail | send-dialog   |
       | statement-split-keys-detail | default             |

@@ -71,6 +71,7 @@ export type Example = {
 	heatingProfile: string;
 	accessKey?: string; // the name of a Zugangsschlüssel the key states create or revoke (#817)
 	account?: { email: string; password: string }; // a Konto mit Passwort for the login states (#576)
+	undeliveredStatements?: string[]; // #736: overdue statements of Hugo, one per look of the feedback state
 };
 
 /** A screen in a state, with the records it needs */
@@ -79,6 +80,7 @@ export async function exampleOf(seed: TestData, name: string, state: string): Pr
 	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
 	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
 	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');
+	if (state === 'reminder-undelivered') return { ...example, undeliveredStatements: await undeliveredStatements(seed) };
 	if (state.startsWith('key-')) return { ...example, accessKey: seed.unique('Claude Desktop') };
 	if (!state.startsWith('login-password') && state !== 'login-locked') return example;
 	await seed.localAccount();
@@ -192,7 +194,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.building('Felsweg', 'Winterthur');
 	await seed.apartment('Felsweg', 'F1', 'vacant');
 	await seed.tenant('Hugo');
-	await seed.contract('Hugo', 'F1', { startDate: '2023-01-01', baseRent: '1200.00' });
+	await seed.contract('Hugo', 'F1', { startDate: '2014-01-01', baseRent: '1200.00' }); // 2014-2022: the feedback state's statements
 	await seed.invoiceOn('Felsweg', 'Hauswart', '500.00', '2023-06-30');
 	await seed.statement('Hugo', 'Felsweg', 2023);
 	await seed.sendStatement('Hugo', 2023);
@@ -367,3 +369,18 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	};
 }
 
+
+/**
+ * #736: the feedback after a reminder e-mail the mail server refuses, once per look (views, schemes, languages): the
+ * last reminder waits to be posted, so each look reminds another overdue statement of Hugo (2014-2022)
+ */
+async function undeliveredStatements(seed: TestData) {
+	const years = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022];
+	for (const year of years) {
+		await seed.invoiceOn('Felsweg', 'Hauswart', '500.00', `${year}-06-30`);
+		await seed.statement('Hugo', 'Felsweg', year);
+		await seed.sendStatement('Hugo', year);
+		await seed.paymentDeadline('Hugo', year, `${year + 1}-01-31`);
+	}
+	return years.map((year) => seed.idOf(`Abrechnung Hugo ${year}`)!);
+}

@@ -95,6 +95,13 @@ Funktionalität: Mahnungen
     Wenn der Liegenschaftsverwalter bei der "Zahlungserinnerung" auf der Seite von "Anna Keller" zu den Dokumenten geht
     Dann ist der Liegenschaftsverwalter auf der Seite "Dokumente"
 
+  # #736 (Persona Helga P-1): solange die letzte Mahnung noch zur Post muss, bietet die Abrechnung keine weitere an
+  Szenario: Solange die Mahnung noch zu versenden ist, bietet die Abrechnung keine weitere an
+    Angenommen "Anna Keller" wünscht Korrespondenz per Brief
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Dann bietet die Abrechnung keine Mahnung an
+
   # #108: jede Mahnung trägt einen Zahlteil für den offenen Saldo, mit der Referenz der Abrechnung
   # (die Referenz gibt es nur mit einer QR-IBAN, die IBAN gilt für alle Szenarien: geprüft in reminders.pg.test.ts)
   Szenario: Zahlungserinnerung mit Zahlteil für den offenen Saldo
