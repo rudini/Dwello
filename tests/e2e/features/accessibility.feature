@@ -211,6 +211,7 @@ Funktionalität: Barrierefreiheit
       | statement-parts-detail | default             |
       | statement-part-paid-detail | default          |
       | statement-part-paid-detail | mark-paid-dialog |
+      | statement-part-paid-detail | reset-payment-dialog |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |

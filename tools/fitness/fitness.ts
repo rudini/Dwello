@@ -410,7 +410,6 @@ export function structureItems(read: (name: string) => Record<string, string>[])
 		edges: read('imports-module.csv') as unknown as Input['edges'],
 		cycles: read('cycles-module.csv') as unknown as Input['cycles'],
 		files: read('files.csv') as unknown as Input['files'],
-		source: (path) => readFileSync(join(ROOT, path), 'utf8'),
 		health
 	});
 	const fat = {
