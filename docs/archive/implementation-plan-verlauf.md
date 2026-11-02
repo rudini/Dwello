@@ -732,6 +732,16 @@ Request from the product owner (chat, 1.11.2026): add what the report misses com
 - [x] The changed files at the head commit go along with the diff (up to 200 kB); run locally: #1049's false «two buttons» finding gone, #1045's design question stays; about 1½ minutes each
 - [x] PR: pushed after this archive
 
+## Session: #1001 each part payment in the tenant's export
+
+- [x] pg test in `tenant-export.pg.test.ts` seen red, then green: each statement of the export lists `payments` as `{ date, amount }` (domain review 959-1, V-5); `docs/api-specification.md` names it
+- [x] No scenario: the export is a file the existing export scenario covers (the issue says so)
+- [x] Slice review round 1: `docs/reviews/1001-review-1.md` (no findings)
+- [x] Domain review (step 5): `docs/reviews/1001-fachreview-1.md` (Minor V-1, a statement paid before #959: fixed, the tenant export gives that payment as the data export does)
+- [x] Closing review: `docs/reviews/1001b-review-1.md` (no findings)
+- [x] Workflow note: the same as #1000 (no step-1 `fach-reviewer` round for a rule a domain review already decided), in `docs/reviews/workflow-notes-issue-1000.md`
+- [x] Archive, PR: pushed after this archive
+
 ## Session: #1000 2nd and 3rd Mahnung after a part payment
 
 - [x] Unit test in `reminder-letter.test.ts` seen red (8 cases: levels 2 and 3 in de, fr, it, en), then green: after a part payment the 2nd and 3rd Mahnung say «noch nicht vollständig bezahlt», texts of M-1 in `docs/reviews/959-fachreview-1.md` word for word; level 1 and letters without a part stay
