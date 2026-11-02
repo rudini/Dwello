@@ -13,6 +13,7 @@ vi.mock('$app/forms', () => ({
 	}
 }));
 
+import { goto } from '$app/navigation';
 import ActionDialog from '$lib/ui/ActionDialog.svelte';
 import { byTestId, settle, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
@@ -63,6 +64,18 @@ describe('Bestätigung einer Seitenaktion', () => {
 		const onsuccess = open();
 		await answer('redirect');
 		expect(onsuccess).toHaveBeenCalledOnce();
+	});
+
+	// #1047 (code review 1047-2 C-3): the deleted record's page leaves the history, back leads to the page before
+	it('ersetzt nach dem Löschen die Seite im Verlauf durch die nächste', async () => {
+		open();
+		const after = server.submit!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({
+			update: async () => {},
+			result: { type: 'redirect', status: 303, location: '/tenants' }
+		});
+
+		expect(goto).toHaveBeenCalledWith('/tenants', { replaceState: true, invalidateAll: true });
 	});
 
 	it('bleibt bei einer Ablehnung offen und nennt den Grund', async () => {
