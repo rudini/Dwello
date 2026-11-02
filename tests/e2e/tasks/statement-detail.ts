@@ -2,6 +2,7 @@ import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
 import { successToast } from '../targets/form';
 import { Click, DownloadFrom, Enter, EnterDate, Navigate, Wait } from '../screenplay/interactions';
+import { goBackInBrowser } from './app-frame';
 import {
 	carrySettleButton,
 	confirmCarrySettleButton,
@@ -86,6 +87,12 @@ export const markStatementPaidOn = (isoDate: string): Activity => (actor) =>
 
 export const deleteStatement: Activity = (actor) =>
 	actor.attemptsTo(Click.on(deleteStatementButton), Click.on(confirmDeleteStatementButton));
+// #1047: once the delete has led to the list, one step back in the browser
+export const goBackAfterDelete: Activity = (actor) =>
+	actor.attemptsTo(
+		Wait.forUrl((url) => url.pathname === '/statements'),
+		goBackInBrowser
+	);
 
 export const editStatementFromDetail = Click.on(statementEditButton);
 export const openStatementTenant = Click.on(statementTenantLink);

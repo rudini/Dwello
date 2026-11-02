@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #1047 no deleted statement in the history
+
+- [x] @wip scenario «Nach dem Löschen eines Entwurfs führt Zurück im Browser nicht auf den Entwurf», seen red (address of the deleted statement after back)
+- [x] Delete redirect replaces the history entry in `dialogSubmit` (all its redirects are deletes: statement, tenant, contract), DOM test red first
+- [x] Scenario green without @wip; statements, statement-detail, tenants, contract-detail: 214 passed
+- [ ] Code review (slice + closing round)
+- [ ] Persona re-check (Sven) of the delete flow
+- [ ] Checks: lint, check, type-check, tests --changed, Prettier
+- [ ] Archive, PR

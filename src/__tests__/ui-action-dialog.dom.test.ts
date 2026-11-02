@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 const server = vi.hoisted(() => ({
 	submit: null as null | ((input: { formData: FormData }) => unknown)
 }));
+// the page a delete leads to (#1047): the test plays the action's answer, no router behind it
+vi.mock('$app/navigation', async (original) => ({ ...(await original<object>()), goto: vi.fn() }));
 vi.mock('$app/forms', () => ({
 	enhance: (_form: unknown, submit: (input: { formData: FormData }) => unknown) => {
 		server.submit = submit;

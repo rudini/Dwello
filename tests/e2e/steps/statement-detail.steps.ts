@@ -82,6 +82,7 @@ import {
 	openReplacedContract,
 	openReplacedStatement,
 	deleteStatement,
+	goBackAfterDelete,
 	downloadStatementPdf,
 	requestStatementPdf,
 	leavePdfRefusal,
@@ -250,6 +251,10 @@ Then('meldet das Feld «Bezahlt am» {string}', async ({ verwalter }, message: s
 
 When('der Liegenschaftsverwalter die Abrechnung löscht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(deleteStatement);
+});
+
+When('der Liegenschaftsverwalter nach dem Löschen im Browser zurückgeht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(goBackAfterDelete);
 });
 
 Then('bietet die Detailseite das Löschen der Abrechnung nicht an', async ({ verwalter }) => {
