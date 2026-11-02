@@ -4,7 +4,7 @@
  * as stored), one table per kind of data in the UI language, the files and a README.txt. What was deleted is gone
  * from the database and so from the export; Protokoll entries naming it stay (F-3). Left out as secrets or technique
  * (F-2): access keys, accounts, the chosen KI, backups, the numbering. Reads only: the BFF makes the ZIP and then
- * records the export (F-4). TODO(fachlich prüfen, #1039): the terms «Export aller Daten» and «Datendatei»
+ * records the export (F-4).
  */
 
 import { asc, getTableColumns } from 'drizzle-orm';

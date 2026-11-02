@@ -125,6 +125,8 @@
 		const back = new URL(location.href).searchParams.get('schritt') === '3';
 		step = restoredStep(back ? 3 : left, selection, dropped);
 		resumed = back && step === 3;
+		// opened in a later step: the landlord starts at its name, not at the top of the page (#738)
+		if (step > 1) focusHeading();
 	});
 
 	// #470: what a step loads late never moves «Weiter» on the screen: the page scrolls by the height it added above;
@@ -273,7 +275,12 @@
 		aria-labelledby="step-heading"
 		class="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6"
 	>
-		<h2 id="step-heading" tabindex="-1" class="text-2xl font-bold text-ink">
+		<h2
+			id="step-heading"
+			tabindex="-1"
+			class="text-2xl font-bold text-ink"
+			data-testid="statement-step-heading"
+		>
 			<span class="sr-only"
 				>{m.contracts_step_of({ current: step, total: statementSteps.length })}</span
 			>

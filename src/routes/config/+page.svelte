@@ -95,7 +95,7 @@
 	/>
 
 	<!-- #496: everything the landlord entered, as one ZIP; a download, so the page stays open. A form POST: it writes
-	     into the Protokoll (Review 496-1 C-2). TODO(fachlich prüfen, #1039): the term «Export aller Daten» -->
+	     into the Protokoll (Review 496-1 C-2). -->
 	<Panel title={m.config_export_title()}>
 		<form method="POST" action="/config/export" class="flex flex-col items-start gap-4">
 			<p id="config-export-help" class="text-ink" data-testid="config-export-help">
