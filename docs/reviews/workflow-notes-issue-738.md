@@ -1,0 +1,7 @@
+# Workflow notes: issue #738
+
+| Rule | What happened | Proposed change |
+|------|---------------|-----------------|
+| skill `issue-work` (when an issue is ready); `CLAUDE.md`, Workflow 1 (scenarios are the specification) | #734, chosen first as the next ready NFR issue, has a «Done means» («the sentence says the statement was probably deleted») that changes the text three non-`@wip` scenarios on `main` read. It carries no «Decided (product owner)» and no `needs-decision`, so it looked ready and cost a round of reading before it went back to the product owner. | Say in `issue-work` that an issue whose «Done means» changes a text or step a non-`@wip` scenario reads is ready only with «Decided (product owner)»; the `nfr.md` template could ask for it when such a text is named. |
+| `tests/e2e/CLAUDE.md`, Screenplay questions (`HiddenSideways`) | The 390 px check measures every part of a card, `sr-only` elements included: a spoken period in an `sr-only` span counted as 4 px hidden sideways and turned the scenario red, though nothing was visible. Fixed with a `hidden` description span instead. | Note in the description of `HiddenSideways` that `sr-only` parts count, so a spoken-only text goes into a `hidden` span named by `aria-describedby`. |
+| `~/.claude/stop-hook-git-check.sh` against Workflow 9 | As in earlier notes: the hook asked twice to push before the reviews were done; answered that Workflow 9 holds the push. | — |
