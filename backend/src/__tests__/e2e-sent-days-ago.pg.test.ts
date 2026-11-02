@@ -25,23 +25,23 @@ beforeAll(async () => {
 	// only the columns the script changes
 	await client.query(`
 		CREATE TABLE utility_statements (id int PRIMARY KEY, statement_date date, payment_deadline date);
-		CREATE TABLE documents (statement_id int, type text, sent_at timestamptz, payment_deadline date);
+		CREATE TABLE documents (statement_id int, type text, sent_at timestamp, payment_deadline date); -- UTC, as in the schema
 		INSERT INTO utility_statements VALUES (1, '2026-10-31', '2026-11-30');
-		INSERT INTO documents VALUES (1, 'statement', '2026-10-31T22:12:00Z', '2026-11-30');`);
+		INSERT INTO documents VALUES (1, 'statement', '2026-10-31 22:12', '2026-11-30');`);
 	await client.end();
 });
 
 afterAll(() => onServer(`DROP DATABASE IF EXISTS ${database} WITH (FORCE)`));
 
 describe('Versand für den E2E-Test zurückdatieren', () => {
-	it('verschiebt den Versand um Schweizer Tage, auch um 23 Uhr über die Zeitumstellung', async () => {
+	it('verschiebt den Versand um Schweizer Tage, auch um 23 Uhr über die Zeitumstellung (#1057: sent_at ohne Zeitzone, in UTC)', async () => {
 		const run = Bun.spawnSync(['bun', script, '1', '40'], { env: { ...process.env, DATABASE_URL: url } });
 		expect(run.exitCode).toBe(0);
 
 		const client = new pg.Client({ connectionString: url });
 		await client.connect();
 		const { rows } = await client
-			.query(`SELECT to_char(sent_at AT TIME ZONE 'Europe/Zurich', 'YYYY-MM-DD HH24:MI') AS sent FROM documents`)
+			.query(`SELECT to_char((sent_at AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Zurich', 'YYYY-MM-DD HH24:MI') AS sent FROM documents`)
 			.finally(() => client.end());
 		// 31.10.2026 23:12 in Zurich, 40 Swiss days back
 		expect(rows[0].sent).toBe('2026-09-21 23:12');
