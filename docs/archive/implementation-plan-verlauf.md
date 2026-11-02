@@ -809,3 +809,11 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Slice review round 1, also the closing round: `docs/reviews/1065-review-1.md` (no findings)
 - [x] No `fach-reviewer` round: the texts are its own (1000-fachreview-1, V-1), read in all four languages
 - [x] Archive, PR: pushed after this archive
+
+## Session: #1046 red main run, a Firefox click that missed its target
+
+- [x] Cause from the trace of run 41327289095: the click on «Dokument hochladen» right after filling the title field sent no request and left the field focused; reproduced in plain Firefox (7 of 600 clicks after a fill below the fold missed; with the target scrolled into view first, 0 of 600)
+- [x] Fix: `Click.on` scrolls its target into view before clicking (`tests/e2e/screenplay/interactions.ts`)
+- [x] No scenario: a fix of the E2E harness; the scenario that failed is the test (Firefox ×5 green)
+- [x] Slice review round 1, also the closing round: `docs/reviews/1046-review-1.md` (no findings)
+- [x] Archive, PR: pushed after this archive
