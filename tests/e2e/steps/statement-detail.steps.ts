@@ -31,6 +31,7 @@ import {
 	paidDateInvalid,
 	paidDateProblem,
 	resetOffers,
+	reminderOffers,
 	pdfRefusalText,
 	pdfToView,
 	recipient,
@@ -94,6 +95,7 @@ import {
 	recordPayment,
 	downloadSentPdf,
 	openResetPaymentConfirmation,
+	confirmResetPayment,
 	openSendConfirmation,
 	openStatementApartment,
 	openInvoiceOfPosition,
@@ -111,6 +113,7 @@ import {
 } from '../tasks/statement-detail';
 import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
+import { auditEntryDay } from '../questions/audit-log';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -497,8 +500,23 @@ When('der Liegenschaftsverwalter die Zahlung zurücksetzen will', async ({ verwa
 	await verwalter.attemptsTo(openResetPaymentConfirmation);
 });
 
-Then('nennt der Verlauf das Zurücksetzen der Zahlung vom Tag des Versands', async ({ verwalter }) => {
-	await verwalter.sees(history).toContain(`Zahlung vom ${sendingDay()} zurückgesetzt ${sendingDay()}`);
+Then('nennt der Verlauf das Zurücksetzen der Zahlung über {string} vom Tag des Versands', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(history).toContain(`Zahlung vom ${sendingDay()} über ${amount} zurückgesetzt ${sendingDay()}`);
+});
+
+// #999 (Fachreview 999-1 V-5): the Protokoll names the amount too
+Then(
+	'nennt das Protokoll mit heutigem Datum das Zurücksetzen der Zahlung der Abrechnung {int} von {string} über {string} vom Tag des Versands',
+	async ({ verwalter, seed }, year: number, tenant: string, amount: string) => {
+		const number = await seed.statementNumber(tenant, year);
+		await verwalter
+			.sees(auditEntryDay(`Zahlung vom ${sendingDay()} über ${amount} zur Abrechnung ${number} zurückgesetzt`))
+			.toContain(sendingDay());
+	}
+);
+
+When('der Liegenschaftsverwalter das Zurücksetzen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmResetPayment);
 });
 
 Then(
@@ -508,6 +526,53 @@ Then(
 		await verwalter.sees(resetConfirmation).toContain(`Das Zahlungsdatum ${sendingDay()} wird gelöscht.`);
 	}
 );
+
+// #999 (#959): payments on days after the sending, which «ging vor … Tagen hinaus» moved back
+Given(
+	'für die Abrechnung {int} von {string} sind vor {int} Tagen {string} Franken eingegangen',
+	async ({ seed }, year: number, tenant: string, days: number, amount: string) => {
+		await seed.paymentOn(tenant, year, inDays(-days), amount);
+	}
+);
+
+Then(
+	'nennt die Bestätigung des Zurücksetzens die Zahlung von vor {int} Tagen über {string}',
+	async ({ verwalter }, days: number, amount: string) => {
+		await verwalter.sees(resetConfirmation).toContain(`vom ${swissDate(inDays(-days))} über ${amount}`);
+	}
+);
+
+Then('sagt die Bestätigung des Zurücksetzens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(resetConfirmation).toContain(text);
+});
+
+// after the status as a positive anchor
+Then('nennt das Panel Zahlung keine Teilzahlung', async ({ verwalter }) => {
+	await verwalter.sees(openRestText).toBeNull();
+});
+
+Then(
+	'nennt der Verlauf das Zurücksetzen der Teilzahlung über {string} von vor {int} Tagen',
+	async ({ verwalter }, amount: string, days: number) => {
+		await verwalter
+			.sees(history)
+			.toContain(`Teilzahlung vom ${swissDate(inDays(-days))} über ${amount} zurückgesetzt ${sendingDay()}`);
+	}
+);
+
+Then('nennt der Verlauf die Teilzahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
+	await verwalter.sees(history).toMatch(new RegExp(`Teilzahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
+
+// after the payment rows as a positive anchor (Fachreview 999-1 V-2)
+Then('nennt der Verlauf keine Teilzahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
+	await verwalter.sees(history).not.toMatch(new RegExp(`Teilzahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
+
+// the payment that reached the Saldo, not a part payment (Fachreview 999-1 M-1)
+Then('nennt der Verlauf die Zahlung über {string} von vor {int} Tagen', async ({ verwalter }, amount: string, days: number) => {
+	await verwalter.sees(history).toMatch(new RegExp(`(?<!Teil)Zahlung über ${escapeRegExp(amount)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
 
 // #120, #358: berichtigte Abrechnung
 Given('die Abrechnung {int} von {string} ist ersetzt', async ({ seed }, year: number, tenant: string) => {
@@ -868,4 +933,10 @@ When('der Liegenschaftsverwalter das neue PDF als versendet markiert', async ({ 
 // #968: the Verlauf only grows (Persona Dr. Weber 534-2 P-1)
 Then('nennt der Verlauf zuerst das PDF des Versands, dann den Versand und dann das neue PDF', async ({ verwalter }) => {
 	await verwalter.sees(history).toMatch(/PDF erstellt.*Versendet per Brief.*Neues PDF erstellt/);
+});
+
+// Code-Review 999b C-4: Mahnung and the reset of the header are there too, not only no sideways scrolling
+Then('bietet die Detailseite eine Mahnung und das Zurücksetzen der Zahlung an', async ({ verwalter }) => {
+	await verwalter.sees(reminderOffers).toBe(1);
+	await verwalter.sees(resetOffers).toBe(1);
 });

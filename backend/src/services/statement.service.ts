@@ -35,11 +35,11 @@ import { keepPdfBeforeChange, sendingsOf, sinceDelivery, toldDeadline } from './
 import { CodedError, refusal, type Refusal } from './coded-error';
 import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
-import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
 import { isReplaced, replacedInSql } from './counting-statements';
 import { daysAfter, swissToday } from './today';
 import { advanceChanged, paymentOf } from './statement-payment';
+import { checkPaidDate, paidAmountOf } from './payment-entry';
 import { carriable, carriedOverId, carryChanged, countedBy, openCarry } from './carry-over';
 import type { PdfChange, StatementWithDetails } from '../api/statement';
 
@@ -810,32 +810,14 @@ function recordPayment(existing: StatementWithDetails, waived: boolean, { paidDa
 	const before = Number(existing.paidAmount ?? 0);
 	const rest = roundToRappen(Number(existing.balance) - before);
 	const amount = paidAmountOf(entered, rest);
-	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2) }];
+	// recorded now: a PDF made after it names it, so resetting it discards that PDF (#1015); each payment keeps its own
+	// time for the reset of the one before (Datenprüfung 999-1 D-1)
+	const paymentRecordedAt = new Date();
+	const payments = [...existing.payments, { date: paidDate ?? swissToday(), amount: amount.toFixed(2), recordedAt: paymentRecordedAt.toISOString() }];
 	const paidAmount = roundToRappen(before + amount).toFixed(2);
-	// recorded now: a PDF made after it names it, so resetting it discards that PDF (#1015)
-	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments, paymentRecordedAt: new Date() };
+	if (amount !== rest) return { status: 'sent' as const, paidDate: null, paidAmount, payments, paymentRecordedAt };
 	// paid on the day of the latest payment, one without a date of today (Copilot review PR #1006)
-	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt: new Date() };
-}
-
-// The amount paid, the rest when none is given: francs and Rappen, as «Bereits bezahlt» (code review 959a-1 C-1), with
-// the sign of the Saldo, above 0.00 and at most the rest
-function paidAmountOf(entered: string | undefined, rest: number) {
-	if (entered === undefined) return rest;
-	if (!/^-?\d+(\.\d{1,2})?$/.test(entered.trim())) throw new CodedError('STATEMENT_PAID_AMOUNT_INVALID', 'Invalid amount paid', { amount: entered });
-	const amount = Number(entered);
-	if (!(amount * Math.sign(rest) > 0)) throw new CodedError('STATEMENT_PAID_AMOUNT_ZERO', 'Paid amount not above 0.00');
-	if (Math.abs(amount) > Math.abs(rest)) throw new CodedError('STATEMENT_PAID_AMOUNT_TOO_HIGH', 'Paid amount above the open amount', { rest: `CHF ${formatCHF(Math.abs(rest))}` });
-	return amount;
-}
-
-// #138: a day that exists, up to today; from the end of the Abrechnungsperiode: a tenant may pay before the
-// Abrechnungsdatum, which the UI confirms first (#448)
-function checkPaidDate(paidDate: string, periodEnd: string) {
-	if (!isRealDate(paidDate)) throw new CodedError('PAID_DATE_INVALID', 'Invalid payment date', { date: paidDate });
-	if (paidDate < periodEnd) throw new CodedError('PAID_DATE_BEFORE_PERIOD_END', 'Payment date before the end of the period', { date: periodEnd });
-	const today = swissToday();
-	if (paidDate > today) throw new CodedError('PAID_DATE_IN_FUTURE', 'Payment date in the future', { date: today });
+	return { paidAmount, payments, paidDate: payments.map((p) => p.date).sort().at(-1), paymentRecordedAt };
 }
 
 const dropNewPdfSince = (id: string, since: Date) =>
@@ -855,7 +837,9 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	if (existing.status !== 'paid' && !(last && ['sent', 'overdue'].includes(existing.status)))
 		throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
 	const kept = existing.payments.slice(0, -1);
-	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount };
+	const stays = kept.at(-1);
+	// a part payment did not reach the Saldo: the Verlauf names it as one (#999)
+	const reset = { resetOn: swissToday(), paidDate: last?.date ?? existing.paidDate, paidAmount: last?.amount ?? existing.paidAmount, part: existing.status !== 'paid' };
 	const paidAmount = kept.length ? roundToRappen(kept.reduce((sum, p) => sum + Number(p.amount), 0)).toFixed(2) : null;
 	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
 	const { pdfGeneratedAt, paymentRecordedAt } = existing;
@@ -865,14 +849,16 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paidDate: null,
 		paidAmount,
 		payments: kept,
-		paymentRecordedAt: null,
+		// the part that stays is now the last recorded one (D-1); one recorded before #999 has no time of its own: any PDF
+		// may name it, so its reset drops them all (fallback review of #1049)
+		paymentRecordedAt: stays ? new Date(stays.recordedAt ?? 0) : null,
 		carrySettledOn: null, // a refund settled under #94 is carried over again (Fachreview 506-1 V-9)
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
 	// a new PDF still to send made after it names the payment as well (#1015)
 	if (paymentRecordedAt) await dropNewPdfSince(id, paymentRecordedAt);
-	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: reset.paidDate }); // #357
+	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: reset.paidDate, paidAmount: reset.paidAmount }); // #357, #999
 	return updated;
 }
 
