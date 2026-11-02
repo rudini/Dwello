@@ -809,3 +809,11 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Slice review round 1, also the closing round: `docs/reviews/1065-review-1.md` (no findings)
 - [x] No `fach-reviewer` round: the texts are its own (1000-fachreview-1, V-1), read in all four languages
 - [x] Archive, PR: pushed after this archive
+
+## Session: #1023 «Nicht berichtigen» compares the raw Saldos, below CHF 5 too
+
+- [x] Scenario «Sinkt ein Saldo unter CHF 5 weiter, bietet die Abrechnung «Nicht berichtigen» nicht an» (`statement-minimum-balance.feature`), seen red, then green
+- [x] Domain review of the scenario: `docs/reviews/1023-fachreview-1.md` (V-1 Major fixed: the pg test of V-30 A reversed; V-2, V-3 and M-1 fixed, M-1 with a pin test seen red)
+- [x] pg tests in `statement-invoices.pg.test.ts` seen red, then green
+- [x] Slice review round 1, also the closing round: `docs/reviews/1023-review-1.md` (C-1 Minor fixed: JSDoc)
+- [x] Archive, PR: pushed after this archive
