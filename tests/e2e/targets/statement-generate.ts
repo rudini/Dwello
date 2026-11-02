@@ -167,3 +167,8 @@ export const previewAllSkipped = (buildingId: string) =>
 	target('Hinweis alle Mietverträge ausserhalb von Dwello abgerechnet', (page) =>
 		page.getByTestId(`preview-all-skipped-${buildingId}`)
 	);
+// #738: step 2 says which of its counts it could not load; the card of one building
+export const countsFailedNote = target('Hinweis auf nicht geladene Zählungen', (page) => page.getByTestId('generate-counts-failed'));
+export const buildingCard = (buildingId: string) =>
+	target(`Karte von Gebäude ${buildingId} in der Wahl`, (page) => page.getByTestId(`generate-building-card-${buildingId}`));
+export const stepHeading = target('Überschrift des Schritts', (page) => page.getByTestId('statement-step-heading'));

@@ -1794,7 +1794,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		// building (persona Marco P-3)
 		const checkbox = byTestId('generate-building-b1')!;
 		const note = byTestId('generate-building-billed-b1')!;
-		expect(checkbox.getAttribute('aria-describedby')).toBe(note.id);
+		expect(checkbox.getAttribute('aria-describedby')!.split(' ')).toContain(note.id);
 		expect(note.getAttribute('aria-hidden')).toBe('true');
 		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
 		click('generate-building-billed-b1');

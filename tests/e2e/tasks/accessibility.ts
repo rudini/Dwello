@@ -745,6 +745,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(on.shown(`generate-building-billed-${example.building}`))
 		),
+	// #738: neither count of step «Gebäude» loads: the note on what it could not load
+	'buildings-counts-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/invoices', { isValidUtilityCost: 'true' }),
+			FailRequests.to('/api/statements/billed', {}),
+			Click.on(nextButton),
+			Wait.until(on.shown('generate-counts-failed'))
+		),
 	// #521: 2020 overlaps Ahornweg's statement 01.11.2019 – 31.10.2020: the letter for Vera's consent
 	// (step 2 answers for all buildings at once)
 	'buildings-consent': () => (actor) =>

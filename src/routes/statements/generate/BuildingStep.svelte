@@ -26,6 +26,8 @@
 	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
 	let invoiceCounts = $state<Record<string, number>>({});
 	let billed = $state<Record<string, Billed>>({});
+	// #738: a count that failed is said, so no building reads as having no invoices or statements
+	let failed = $state({ invoices: false, billed: false });
 	$effect(() => {
 		const ids = buildings.map((b) => b.id);
 		// both answers shown at once: one arriving later would push the rows below away while a building is clicked
@@ -46,6 +48,7 @@
 			})
 		]).then(([invoices, statements]) => {
 			if (left) return;
+			failed = { invoices: !invoices.data, billed: !statements.data };
 			if (invoices.data) {
 				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
 				for (const { buildingId } of invoices.data.invoices)
@@ -111,6 +114,16 @@
 		<span class="text-ink-muted" aria-live="polite">
 			{m.statements_selected_of({ selected: selectedBuildingIds.length, total: buildings.length })}
 		</span>
+		{#if failed.invoices || failed.billed}
+			<p class="basis-full font-semibold text-caution" data-testid="generate-counts-failed">
+				{[
+					failed.invoices && m.statements_buildings_invoices_failed(),
+					failed.billed && m.statements_buildings_billed_failed()
+				]
+					.filter(Boolean)
+					.join(' ')}
+			</p>
+		{/if}
 		{#if leftOut.length}
 			<p class="basis-full text-ink-muted" data-testid="generate-all-buildings-note">
 				{leftOut.length === 1

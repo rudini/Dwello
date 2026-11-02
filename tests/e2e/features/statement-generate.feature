@@ -861,3 +861,31 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
     Und der Liegenschaftsverwalter die Rechnung vom "31.03.2024" aus dem Hinweis bearbeitet
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
+  # #738: der Schritt «Gebäude» sagt, was er nicht laden konnte, statt ein Gebäude ohne Rechnungen zu zeigen
+  Szenario: Die Wahl der Gebäude sagt, wenn die Rechnungen nicht gezählt werden konnten
+    Angenommen die Rechnungen der Gebäude lassen sich nicht zählen
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann sagt die Wahl der Gebäude "Die Anzahl Rechnungen je Gebäude konnte nicht geladen werden. Laden Sie die Seite neu."
+    Und nennt die Wahl für "Lindenhof" keine Anzahl Rechnungen
+
+  Szenario: Die Wahl der Gebäude sagt, wenn die bestehenden Abrechnungen nicht geprüft werden konnten
+    Angenommen die bestehenden Abrechnungen der Gebäude lassen sich nicht prüfen
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann sagt die Wahl der Gebäude "Ob Mietverträge in dieser Abrechnungsperiode schon eine Abrechnung haben, konnte nicht geladen werden. Laden Sie die Seite neu."
+
+  # #738: ein Screenreader nennt das Gebäude mit Name und Adresse, den Rest als Beschreibung
+  Szenario: Ein Gebäude heisst bei der Wahl nach Name und Adresse
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann heisst das Gebäude "Lindenhof" bei der Wahl "Lindenhof Testweg 1, 8400 Winterthur"
+    Und beschreibt die Wahl das Gebäude "Lindenhof" mit "Keine Rechnungen in der Abrechnungsperiode erfasst 1 Wohnung"
+
+  Szenario: Die Wahl der Gebäude passt in ein schmales Fenster
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann zeigt die Wahl das Gebäude "Lindenhof" ganz
+
+  Szenario: Fortgesetzte Abrechnungen beginnen beim Namen des Schritts
+    Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
+    Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
+    Dann steht der Fokus auf dem Schritt "Gebäude"
