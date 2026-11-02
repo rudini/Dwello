@@ -156,6 +156,17 @@ describe('Dashboard', () => {
 		expect(end.financial.overdueAmount - start.financial.overdueAmount).toBe(300);
 	});
 
+	// #1002 (Fachreview 959-1, Regel 4): «Diesen Monat bezahlt» zählt jede Zahlung nach ihrem Tag, Teilzahlungen eingeschlossen
+	it('zählt diesen Monat nur die Zahlungen, die in diesem Monat eingingen', async () => {
+		const start = await dashboard();
+		const earlier = { date: '2020-01-15', amount: '100.00' };
+		await statement(12, { status: 'sent', balance: '500', paidAmount: '150', payments: [earlier, { date: day(0), amount: '50.00' }], paymentDeadline: day(30) });
+		await statement(13, { status: 'paid', balance: '300', paidAmount: '300', paidDate: day(0), payments: [earlier, { date: day(0), amount: '200.00' }] });
+		const end = await dashboard();
+
+		expect(end.financial.paidThisMonth - start.financial.paidThisMonth).toBe(250);
+	});
+
 	it('zeigt die Belegung des Gebäudes', () => {
 		expect(after.buildingOccupancy.find((b) => b.buildingId === rental.building)).toMatchObject({
 			totalApartments: 3,
