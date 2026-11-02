@@ -61,7 +61,7 @@ const TEXTS: Record<string, (d: Details) => string> = {
 					})
 				: m.audit_payment_reset({ number: String(d.number), date: formatDate(String(d.paidDate)) }),
 	statement_corrected: (d) => m.audit_statement_corrected({ number: String(d.number) }),
-	// #496: the export of all data, only its date and time (Fachreview 496-1 F-4); TODO(fachlich prüfen, #1039)
+	// #496: the export of all data, only its date and time (Fachreview 496-1 F-4)
 	data_exported: () => m.audit_data_exported(),
 	// #580: the KI chosen in the settings, with whom invoices went to
 	ki_setting_changed: (d) =>

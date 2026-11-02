@@ -81,7 +81,7 @@
 						<p class="w-full" data-testid="contract-missing-statement-short-help">
 							{m.statements_short_period_help()}
 						</p>
-						<!-- #521: the letter for the tenants' consent; TODO(fachlich prüfen, #1035) -->
+						<!-- #521: the letter for the tenants' consent -->
 						{#if period.consentLetter}
 							<Button
 								href={period.consentLetter}

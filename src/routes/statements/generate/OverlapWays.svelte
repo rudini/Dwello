@@ -42,7 +42,7 @@
 				{m.statements_short_period_help()}
 			</p>
 		{/if}
-		<!-- #521 (Fachreview 521-1 V-2): the letter for each tenant's consent; TODO(fachlich prüfen, #1035) -->
+		<!-- #521 (Fachreview 521-1 V-2): the letter for each tenant's consent -->
 		{#each overlap.consent as contract (contract.id)}
 			<Button
 				href="/contracts/{contract.id}/consent-letter"
