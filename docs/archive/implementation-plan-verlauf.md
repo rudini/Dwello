@@ -834,6 +834,24 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No `fach-reviewer` round: the texts are its own (1000-fachreview-1, V-1), read in all four languages
 - [x] Archive, PR: pushed after this archive
 
+## Session: #1026 advice after the heating sum in the preview
+
+- [x] Scenarios in `statement-generate.feature`: «zu viel», «zu wenig» and the advice to enter the Leistungszeitraum first, seen red, then green; the #451 sentence replaced (Spec change approved: #1026)
+- [x] Domain review of the scenarios: `docs/reviews/1026-fachreview-1.md` (V-1 Blocker fixed: Heizöl with a Leistungszeitraum over the whole year in the new scenarios; V-2 decided by the PO on 02.11.2026, the sentence names the tenant; V-3 fixed)
+- [x] Unit tests in `statement-heating-sum.test.ts` and the BFF test in `statement-generation.test.ts` seen red, then green
+- [x] No persona: the texts are the PO's and the domain review's, read in all four languages
+- [x] Slice review round 1, also the closing round: `docs/reviews/1026-review-1.md` (no findings)
+- [x] CI fix (fitness Ä1, `statement-wizard.ts` over 400 lines): the heating sum moved to `src/lib/heating-sum.ts`; closing round `docs/reviews/1026b-review-1.md` (no findings)
+- [x] Archive, PR: pushed after this archive
+
+## Session: #1023 «Nicht berichtigen» compares the raw Saldos, below CHF 5 too
+
+- [x] Scenario «Sinkt ein Saldo unter CHF 5 weiter, bietet die Abrechnung «Nicht berichtigen» nicht an» (`statement-minimum-balance.feature`), seen red, then green
+- [x] Domain review of the scenario: `docs/reviews/1023-fachreview-1.md` (V-1 Major fixed: the pg test of V-30 A reversed; V-2, V-3 and M-1 fixed, M-1 with a pin test seen red)
+- [x] pg tests in `statement-invoices.pg.test.ts` seen red, then green
+- [x] Slice review round 1, also the closing round: `docs/reviews/1023-review-1.md` (C-1 Minor fixed: JSDoc)
+- [x] Archive, PR: pushed after this archive
+
 ## Session: #1046 red main run, a Firefox click that missed its target
 
 - [x] Cause from the trace of run 41327289095: the click on «Dokument hochladen» right after filling the title field sent no request and left the field focused; reproduced in plain Firefox (7 of 600 clicks after a fill below the fold missed; with the target scrolled into view first, 0 of 600)

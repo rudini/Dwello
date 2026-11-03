@@ -610,9 +610,30 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 					? Response.json({ ...runHeatingSum, oldHeatingRule: ['1'], heatingSums: [heatingSum] })
 					: fetchWith([statement('1', c1, 'sent', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
 
-		expect(await changedOf(fetch)).toEqual([named('1', { oldRule: true, heatingSum })]);
+		expect(await changedOf(fetch)).toEqual([
+			named('1', { oldRule: true, heatingSum: { ...heatingSum, periodFirst: false } })
+		]);
 	});
 
+	// #1026 (A): with heating invoices without Leistungszeitraum in the run, the sum says to enter it first
+	it('sagt zur Summe der Heizkosten, ob der Lauf Heizrechnungen ohne Leistungszeitraum hat', async () => {
+		const heatingSum = { ...runHeatingSum.heatingSums[0], statementId: '1' };
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/completeness/')
+				? Response.json({ ...invoiceCompleteness, oldHeatingRule: ['1'] })
+				: url.includes('/statements/run-heating?')
+					? Response.json({
+							...runHeatingSum,
+							heatingWithoutServicePeriod: runHeating.heatingWithoutServicePeriod,
+							oldHeatingRule: ['1'],
+							heatingSums: [heatingSum]
+						})
+					: fetchWith([statement('1', c1, 'sent', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
+
+		expect(await changedOf(fetch)).toEqual([
+			named('1', { oldRule: true, heatingSum: { ...heatingSum, periodFirst: true } })
+		]);
+	});
 });
 
 // #91, step «Einstellungen»: what the run's contracts have not answered, and what they do not agree

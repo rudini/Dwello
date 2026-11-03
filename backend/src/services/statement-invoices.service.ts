@@ -104,8 +104,8 @@ const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte 
  * What changed in a statement's period since it was created: its invoices (#96) and its Tankbestand (#454); for a
  * statement a berichtigte Abrechnung would replace, whether correcting it is due: only when the hint names a change and
  * recalculating changes the Saldo or a share of the tenant, unless the landlord chose «Nicht berichtigen» for that very
- * result (Fachreview 454-1 E-3, E-6, 454-2 V-18, V-21), and whether he may: only when the Saldo as claimed does not
- * fall (M-3 B, 454-3 V-30 A).
+ * result (Fachreview 454-1 E-3, E-6, 454-2 V-18, V-21), and whether he may: only when the raw Saldo does not fall,
+ * below CHF 5 too; a Nachzahlung waived under #94 counts as 0 (M-3 B, #1023).
  * Null without the statement
  */
 export async function statementChanges(statementId: string) {
