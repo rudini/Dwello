@@ -27,7 +27,7 @@
 	{#if data.category.predefined}
 		<Alert title={m.categories_predefined_title()} testid="category-predefined-hint">
 			<p>{m.categories_predefined_hint()}</p>
-			<p>
+			<p id="category-consequence">
 				{data.category.isAllowedUtilityCost
 					? m.categories_predefined_allocable()
 					: m.categories_predefined_not_allocable()}

@@ -76,3 +76,5 @@ export const saveAsAllowed = (name: string): Activity => (actor) =>
 export const confirmAllocability: Activity = (actor) =>
 	actor.attemptsTo(Click.on(allocabilityConfirm), Wait.until(allowedFilter));
 export const cancelAllocability = Click.on(allocabilityCancel);
+// #1029: the choice on the edit page, not saved
+export const chooseAllowed = Check.the(allowanceOption('Umlagefähig'));

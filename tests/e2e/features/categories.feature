@@ -81,6 +81,12 @@ Funktionalität: Kostenkategorien
     Dann steht der Grund der Kategorie unter der Bezeichnung "Begründung"
     Und nennt die Frage der Umlagefähigkeit den Grund "umstritten"
 
+  # Weicht die Wahl von Dwellos Voreinstellung ab, verschwindet der Grund; die Folgen gehören weiter zur Frage (#1029)
+  Szenario: Folgen des Umstellens einer vordefinierten Kategorie gehören zur Frage
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
+    Wenn der Liegenschaftsverwalter die Kategorie als umlagefähig wählt
+    Dann nennt die Frage der Umlagefähigkeit die Folge "schuldet der Mieter Kosten, die das Gesetz dem Vermieter zuweist, trotzdem nicht"
+
   # Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); die längste ist die der Heizung
   Szenario: Ganze Beschreibung einer vordefinierten Kategorie auf dem Telefon
     Angenommen der Liegenschaftsverwalter benutzt ein Telefon
