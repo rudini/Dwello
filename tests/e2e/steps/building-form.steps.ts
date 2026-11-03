@@ -1,6 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
+	changeAccountingPeriod,
 	changePostalCode,
 	changeYearBuilt,
 	markNoTank,
@@ -11,7 +12,12 @@ import {
 	saveBuilding
 } from '../tasks/building-form';
 
-import { focusedField } from '../questions/building-form';
+import {
+	accountingPeriodChangeable,
+	accountingPeriodHelpText,
+	chosenAccountingPeriod,
+	focusedField
+} from '../questions/building-form';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -29,7 +35,8 @@ When(
 				address: fields.Adresse,
 				postalCode: fields.PLZ,
 				city: fields.Ort,
-				canton: fields.Kanton
+				canton: fields.Kanton,
+				accountingPeriod: fields.Abrechnungsperiode
 			})
 		);
 	}
@@ -67,4 +74,22 @@ Given('der Liegenschaftsverwalter ist zum Inhalt der Seite "Neues Gebäude" gesp
 
 Then('steht der Fokus im Feld {string}', async ({ verwalter }, field: string) => {
 	await verwalter.sees(focusedField).toBe(field);
+});
+
+When('der Liegenschaftsverwalter die Abrechnungsperiode auf {string} ändert', async ({ verwalter }, label: string) => {
+	await verwalter.attemptsTo(changeAccountingPeriod(label));
+});
+
+Then('schlägt das Formular die Abrechnungsperiode {string} vor', async ({ verwalter }, label: string) => {
+	await verwalter.sees(chosenAccountingPeriod).toBe(label);
+});
+
+// the text may name the building: by its seeded name
+Then('sagt das Formular zur Abrechnungsperiode {string}', async ({ verwalter, names }, text: string) => {
+	const named = [...names.entries()].reduce((all, [title, name]) => all.replaceAll(title, name), text);
+	await verwalter.sees(accountingPeriodHelpText).toBe(named);
+});
+
+Then('lässt das Formular die Abrechnungsperiode nicht ändern', async ({ verwalter }) => {
+	await verwalter.sees(accountingPeriodChangeable).toBe(false);
 });

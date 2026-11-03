@@ -421,6 +421,15 @@ Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed, names },
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text.replaceAll(building, names.get(building) ?? building));
 });
 
+Given('das Gebäude {string} rechnet von Juli bis Juni ab', async ({ seed }, building: string) => {
+	await seed.accountingPeriod(building, 'july-june');
+});
+
+// #1088: a building whose own Abrechnungsperiode does not hold the chosen one
+Then('lässt die Wahl das Gebäude {string} nicht wählen', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(buildingSelectable(seed.idOf(building)!)).toBe(false);
+});
+
 // #199, #408 point 2: a building whose statements' period the run's overlaps without being equal
 Then('lässt sich das Gebäude {string} für diese Abrechnungsperiode nicht wählen', async ({ verwalter, seed }, building: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toContain('überschneidet sich');

@@ -1,6 +1,8 @@
 import { question } from '../screenplay/actor';
-import { FocusedElement, Value } from '../screenplay/questions';
+import { Enabled, FocusedElement, Text, Value } from '../screenplay/questions';
 import {
+	accountingPeriodHelp,
+	accountingPeriodSelect,
 	addressInput,
 	buildingTypeSelect,
 	cantonSelect,
@@ -29,3 +31,7 @@ export const focusedField = question('the focused field of the building form', a
 	const testid = await actor.answer(FocusedElement);
 	return testid ? (fieldNames[testid] ?? testid) : null;
 });
+
+export const chosenAccountingPeriod = Value.chosenIn(accountingPeriodSelect);
+export const accountingPeriodChangeable = Enabled.of(accountingPeriodSelect);
+export const accountingPeriodHelpText = Text.of(accountingPeriodHelp);

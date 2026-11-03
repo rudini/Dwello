@@ -468,6 +468,11 @@ export function testData(api: CallTheApi) {
 			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
 		},
 
+		// The building's own Abrechnungsperiode (#1088)
+		async accountingPeriod(buildingTitle: string, accountingPeriod: 'calendar' | 'july-june' | 'november-october') {
+			await put(`buildings/${ids.get(buildingTitle)}`, { accountingPeriod });
+		},
+
 		// A Tankbestand recorded anew for its day, e.g. corrected after a statement (#454)
 		async changeFuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const building = ids.get(buildingTitle);

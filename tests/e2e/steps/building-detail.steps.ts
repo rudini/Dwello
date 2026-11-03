@@ -6,6 +6,7 @@ import {
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
+	periodOfBuilding,
 	tankOfBuilding,
 	yearBuilt
 } from '../questions/building-detail';
@@ -123,6 +124,10 @@ When(
 		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), saveFuelStockWithoutDate(date, amount));
 	}
 );
+
+Then('nennt die Gebäudeseite die Abrechnungsperiode {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(periodOfBuilding).toBe(label);
+});
 
 Then('nennt die Gebäudeseite zum Tank {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(tankOfBuilding).toContain(text);
