@@ -62,7 +62,11 @@ describe('Fehlerseite eines abgelehnten PDF', () => {
 			'%2F%0A%2Fevil.example',
 			'%2F%2Fevil.example',
 			'https%3A%2F%2Fevil.example',
-			'%2F%5Cevil.example'
+			'%2F%5Cevil.example',
+			// code review 734 C-1 (round 2): a path the URL resolves to //x, and C-5: no URL at all
+			'%2F.%2F%2Fevil.example',
+			'%2Fx%2F..%2F%2Fevil.example',
+			'http%3A%2F%2F%5B'
 		])
 			expect({ back, to: pageOf(`back=${back}`).back }).toEqual({ back, to: null });
 		expect(pageOf('back=%2Fstatements%3Fstatus%3Ddraft').back).toBe('/statements?status=draft');

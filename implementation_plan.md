@@ -18,5 +18,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] code-reviewer round 1 (`docs/reviews/734-review-1.md`): C-1 open redirect fixed with a test seen red, C-2 screen row `documents-refused-settings`, C-3 tests pin the PDF title and view sentence, C-4 docs (D7c)
 - [x] Personas Helga and Marco (`docs/design/personas/helga-734.md`, `marco-734.md`): no Blocker/Major; P-1 and P-2 met by both became #1094
 - [x] Issue for the `proxyFile` downloads: #1093
-- [ ] code-reviewer round 2 (C-1)
+- [x] code-reviewer round 2 (`docs/reviews/734-review-2.md`): C-1 still open (a path resolving to //x), C-5 an invalid URL threw; both fixed with test cases seen red
+- [ ] code-reviewer round 3 (C-1, C-5)
 - [ ] PR (`Fixes #734`, `Spec change approved: #734`)

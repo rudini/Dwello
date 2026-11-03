@@ -9,7 +9,7 @@ export const load: PageServerLoad = ({ url }) => {
 	const query = url.searchParams;
 	const code = query.get('code') ?? undefined;
 	// resolved as the browser does (it drops tabs and line breaks): a path of this app only, never another site
-	const back = new URL(query.get('back') ?? '/statements', url);
+	const back = query.has('back') ? URL.parse(query.get('back')!, url) : null;
 	return {
 		title: query.has('letter')
 			? m.documents_refused_letter()
@@ -20,7 +20,11 @@ export const load: PageServerLoad = ({ url }) => {
 			{ code },
 			query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()
 		),
-		back: query.has('back') && back.origin === url.origin ? `${back.pathname}${back.search}` : null,
+		// «//x» as a path is another site too (code review 734 C-1, round 2)
+		back:
+			back?.origin === url.origin && !back.pathname.startsWith('//')
+				? `${back.pathname}${back.search}`
+				: null,
 		// a refusal whose way out is in «Einstellungen» links there too (persona Dr. Weber P-2, #450)
 		settings: SETTINGS_CODES.includes(code ?? '')
 	};
