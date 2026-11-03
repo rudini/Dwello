@@ -899,3 +899,11 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Persona Sven: `docs/design/personas/sven-1029.md` (P-1 Major needs a product decision: #1084; P-2 to P-4 Minor stay in the report)
 - [x] Closing round: `docs/reviews/1029-review-2.md` (C-2 Minor fixed: the test checks the switch took effect)
 - [x] Archive, PR: pushed after this archive
+
+## Session: #1087 red main run, a recipient address wider than the phone
+
+- [x] Cause from the CI screenshot of run 41706105448: the sentence naming the recipient of an undelivered e-mail (#736, `DeliveryFailure.svelte`) holds `<UUID>@abgewiesen.dwello.test` without a break opportunity; Firefox showed «tenant-detail-undelivered» 560 px wide in fr, it and en
+- [x] Fix: `wrap-anywhere` on that sentence (lowers its min-content width in a flex row)
+- [x] No scenario: the failing language row «tenant-detail-undelivered default» covers it unchanged
+- [x] Slice review round 1, also the closing round: `docs/reviews/1087-review-1.md` (no findings)
+- [x] Archive, PR: pushed after this archive
