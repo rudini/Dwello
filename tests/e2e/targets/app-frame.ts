@@ -65,3 +65,7 @@ export const glossaryExplanation = (term: string) =>
 export const errorPageToOverview = target('Zur Übersicht auf der Fehlerseite', (page) =>
 	page.getByTestId('error-to-overview')
 );
+
+/** #1081: whatever has the keyboard focus, and the newest confirmation */
+export const focusedPart = target('Element mit dem Fokus', (page) => page.locator(':focus'));
+export const newestSuccessToast = target('Neueste Erfolgsmeldung', (page) => page.getByTestId('toast-success').last());

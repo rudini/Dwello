@@ -921,3 +921,16 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] code-reviewer round 3 (`docs/reviews/734-review-3.md`): C-1 and C-5 closed, nothing new (closing round)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-734.md`
 - [x] PR (`Fixes #734`, `Spec change approved: #734`): pushed after this archive
+
+## Session 2026-11-03: #1081 success toast never covers the focused content
+
+- [x] Scenario outline «Die Erfolgsmeldung verdeckt nicht, was den Fokus hat» (zugangsschluessel.feature) at 390 × 844, 1024 × 768 and 960 × 600 (150 % of 1440 × 900), with the copy at the bottom edge of the window; seen red (the toast stood 96 px over the focused button)
+- [x] `ToastRegion`: while a confirmation shows, `scroll-padding-bottom` and a spacer keep its height plus 16 px clear below the focused part, which scrolls above it; on phones it already sat at the bottom
+- [x] lint, check, `vitest --changed`
+- [x] Chromium E2E of categories, zugangsschluessel, tenant-documents, statement-detail (181); the full suite (1739 tests, hours locally) runs in the PR's CI
+- [x] code-reviewer round 1 (`docs/reviews/1081-review-1.md`): C-1 a dialog opened while a confirmation shows sat under it on phones: scenario in categories.feature seen red (−80 px), fixed with `--toast-room` as the dialog's bottom padding; C-2 Minor stays in the report
+- [x] Personas Helga (150 %, 200 %) and Marco (phone, 1024 px): `docs/design/personas/helga-1081.md`, `marco-1081.md`, no Blocker/Major
+- [x] code-reviewer round 2 (`docs/reviews/1081-review-2.md`): C-1 closed, nothing new (closing round); C-2 Minor stays
+- [x] Persona Minors around toasts: #1096
+- [ ] Firefox and WebKit: not installed here; the all-browser CI run (workflow_dispatch) before the merge
+- [x] PR (`Fixes #1081`): pushed after this archive

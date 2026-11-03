@@ -99,7 +99,11 @@ export const Select = {
 	option: (option: Option) => ({ from: (target: Target) => on(target, (element) => element.selectOption(option)) })
 };
 
-export const Scroll = { to: (target: Target) => on(target, (element) => element.scrollIntoViewIfNeeded()) };
+export const Scroll = {
+	to: (target: Target) => on(target, (element) => element.scrollIntoViewIfNeeded()),
+	/** the part at the bottom edge of the window, as after scrolling down to it (#1081) */
+	toBottomEdge: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'end' })))
+};
 export const Check = { the: (target: Target) => on(target, (element) => element.check()) };
 export const Uncheck = { the: (target: Target) => on(target, (element) => element.uncheck()) };
 export const Press = {

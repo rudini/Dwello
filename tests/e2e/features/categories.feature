@@ -204,3 +204,12 @@ Funktionalität: Kostenkategorien
     Dann ist im Formular der Kategorie "Nicht umlagefähig" gewählt
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist die vordefinierte Kategorie "Liegenschaftssteuer" nicht umlagefähig
+
+  # #1081 (Code-Review 1081 C-1): ein Dialog, der sich öffnet, während die Meldung noch steht, sitzt auf dem Telefon unten
+  Szenario: Die Erfolgsmeldung verdeckt einen danach geöffneten Dialog nicht
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Und es gibt die umlagefähige Kategorie "Gartenpflege"
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" löscht
+    Und der Liegenschaftsverwalter beginnt, die Kategorie "Gartenpflege" zu löschen
+    Dann verdeckt die Erfolgsmeldung nicht, was den Fokus hat
