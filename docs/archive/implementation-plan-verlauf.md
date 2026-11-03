@@ -891,4 +891,5 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Feature domain review: `docs/reviews/1036-fachreview-2.md` (V-6, V-7 Minor with wording, V-4 stays)
 - [x] Fitness before the push: `periodChange` in `period-change.service.ts`, `PeriodChange.svelte` in `src/lib`, `PeriodChangeHint` in `src/lib/types.ts`; closing round `docs/reviews/1036c-review-1.md` (no new findings)
 - [x] CI fix (fitness Ä1, Stable Dependencies: `period-change.service` imported `statement.service`): letters per contract from `consentOfContract`; closing round `docs/reviews/1036d-review-1.md` (no findings)
+- [x] Fallback review of PR #1083: the failing hint request after a save no longer throws (C-1 of 1036-1, BFF test seen red first). The building-overlap finding: a fix only for the running case broke the #521 rule (`docs/reviews/1036e-review-1.md`, C-1 Major), so it is reverted and the question is #1085 (`needs-decision`)
 - [x] Archive, PR: pushed after this archive
