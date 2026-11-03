@@ -1,11 +1,10 @@
-import { m } from '$lib/paraglide/messages';
 import { pdfFileName, pdfRefusal } from '$lib/server/statement';
 import type { RequestHandler } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 /** The statement's PDF: as a download, or with ?ansehen shown in the browser */
-export const GET: RequestHandler = async ({ params, fetch, url }) => {
+export const GET: RequestHandler = async ({ params, fetch, url, request }) => {
 	const { id } = params;
 	const view = url.searchParams.has('ansehen');
 
@@ -15,7 +14,7 @@ export const GET: RequestHandler = async ({ params, fetch, url }) => {
 
 		if (!response.ok) {
 			const body = await response.json().catch(() => null);
-			return pdfRefusal(response.status, body, view ? m.statements_pdf_view_failed() : undefined);
+			return pdfRefusal(request, body, view ? 'view' : undefined);
 		}
 
 		return new Response(await response.arrayBuffer(), {
@@ -27,6 +26,6 @@ export const GET: RequestHandler = async ({ params, fetch, url }) => {
 		});
 	} catch (error) {
 		console.error('PDF download error:', error);
-		return pdfRefusal(500, null);
+		return pdfRefusal(request, null);
 	}
 };

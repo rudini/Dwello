@@ -8,3 +8,14 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-11-03: #734 refused PDF opens the app's error page
+
+- [x] Scenarios: decided sentence and step «liest der Liegenschaftsverwalter auf der Fehlerseite {string}» (statements, statement-detail, statement-generate, contract-detail); new: tab title and app navigation, back to the filtered list, letter's tab title and back to the contract; seen red at the missing behaviour
+- [x] `pdfRefusal` redirects (303) to `/documents/refused` with the code, `view`/`letter` and the Dwello referrer; a gone statement leads back only to the list (the other pages show that statement); unit tests seen red
+- [x] Page `src/routes/documents/refused` in the look of `+error.svelte`; texts in four languages; endpoint unit tests follow the redirect
+- [x] lint, check, vitest (4060), E2E of the four features (319) and the rows of the three refusal screens green
+- [ ] code-reviewer slice review
+- [ ] Personas Helga and Marco
+- [ ] Issue for the `proxyFile` downloads
+- [ ] PR (`Fixes #734`, `Spec change approved: #734`)

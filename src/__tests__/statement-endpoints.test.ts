@@ -12,14 +12,17 @@ import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import reminderPaid from '../../tests/contracts/reminder-paid-refused.json';
 import { localToday } from '$lib/contract-status';
+import { load as refusedPage } from '../routes/documents/refused/+page.server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 
-/** The sentence of a refusal page, which opens in the tab instead of the PDF */
-async function sentenceOf(response: Response) {
-	expect(response.headers.get('Content-Type')).toMatch(/text\/html/);
-	return (await response.text()).match(/<p[^>]*>([^<]*)<\/p>/)?.[1];
+/** The app's refusal page a refused PDF leads to in its tab (#734) */
+function refusalOf(response: Response) {
+	expect(response.status).toBe(303);
+	const url = new URL(response.headers.get('location')!, 'http://localhost');
+	return refusedPage({ url } as never) as Exclude<ReturnType<typeof refusedPage>, void | Promise<unknown>>;
 }
+const sentenceOf = (response: Response) => refusalOf(response).sentence;
 
 function call(handler: unknown, status: number, answer: object) {
 	const calls: { method?: string; url: string; body?: unknown }[] = [];
@@ -126,6 +129,7 @@ describe('GET /statements/[id]/pdf', () => {
 		getPdf({
 			params: { id: 's1' },
 			fetch,
+			request: new Request('http://localhost/statements/s1/pdf'),
 			url: new URL(`http://localhost/statements/s1/pdf${search}`)
 		} as never);
 
@@ -152,51 +156,47 @@ describe('GET /statements/[id]/pdf', () => {
 		// a refusal without a code the UI knows (an older backend, a proxy in between)
 		const fetch = async () => new Response('Bad Gateway', { status: 502 });
 		const response = await get(fetch, '?ansehen');
-		expect(response.status).toBe(502);
-		expect(await sentenceOf(response)).toContain('Das PDF konnte nicht erstellt werden');
+		expect(sentenceOf(response)).toContain('Das PDF konnte nicht erstellt werden');
 	});
 
 	// A tab with a statement deleted in the meantime: the download opens in the tab, as the view does
 	it('sagt beim Herunterladen in Worten, dass es die Abrechnung nicht gibt', async () => {
 		const response = await get(async () => Response.json(refusedPdf, { status: 404 }));
-		expect(response.status).toBe(404);
-		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+		expect(sentenceOf(response)).toBe('Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.');
 	});
 
 	it('nennt beim Ansehen den Grund, den das Backend mit Code angibt', async () => {
 		const response = await get(async () => Response.json(refusedPdf, { status: 404 }), '?ansehen');
-		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+		expect(sentenceOf(response)).toBe('Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.');
 	});
 
 	// #450: an installation from before has an IBAN without the Firmenadresse; the page says where to add it
 	it('sagt, dass für den Zahlteil die Firmenadresse fehlt und wo man sie ergänzt', async () => {
 		const response = await get(async () => Response.json(creditorRefused, { status: 400 }));
-		expect(await sentenceOf(response)).toBe(
+		expect(sentenceOf(response)).toBe(
 			'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
 		);
 	});
 
 	// persona Dr. Weber P-2 (#450): the way to where the landlord adds what is missing, only when the settings help
 	it('führt bei fehlender Firmenadresse auch zu den Einstellungen', async () => {
-		const settingsLink = /<a [^>]*href="\/config"[^>]*>Zu den Einstellungen<\/a>/;
 		const pageFor = async (body: object, status = 400) =>
-			(await get(async () => Response.json(body, { status }))).text();
+			refusalOf(await get(async () => Response.json(body, { status })));
 
 		for (const code of ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID']) {
-			const page = await pageFor({ ...creditorRefused, code });
-			expect({ code, link: settingsLink.test(page) }).toEqual({ code, link: true });
-			expect(page).toContain('Zu den Nebenkostenabrechnungen');
+			expect({ code, settings: (await pageFor({ ...creditorRefused, code })).settings }).toEqual({
+				code,
+				settings: true
+			});
 		}
-		expect(await pageFor(refusedPdf, 404)).not.toMatch(settingsLink);
+		expect((await pageFor(refusedPdf, 404)).settings).toBe(false);
 	});
 
-	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello
-	it('zeigt den Satz auf einer Seite mit Titel, lesbar auf dem Handy und mit dem Weg zurück zur Liste', async () => {
-		const html = await (await get(async () => Response.json(refusedPdf, { status: 404 }))).text();
-		expect(html).toContain('<html lang="de">');
-		expect(html).toContain('<meta name="viewport" content="width=device-width, initial-scale=1">');
-		expect(html).toContain('<title>Nebenkostenabrechnungen - Dwello</title>');
-		expect(html).toMatch(/<a [^>]*href="\/statements"[^>]*>Zu den Nebenkostenabrechnungen<\/a>/);
+	// Helga, Marco (#125, #734): the tab names the error; without a page of Dwello it came from, the way leads to the list
+	it('nennt den Fehler im Titel und führt ohne Herkunft zurück zur Liste', async () => {
+		const page = refusalOf(await get(async () => Response.json(refusedPdf, { status: 404 })));
+		expect(page.title).toBe('Abrechnung nicht gefunden');
+		expect(page.back).toBeNull();
 	});
 
 	// The backend makes a missing PDF itself (getStatementPdf)
@@ -222,6 +222,7 @@ describe('GET /statements/zip', () => {
 	const get = (fetch: unknown, ids = 's1,s2') =>
 		getZip({
 			fetch,
+			request: new Request('http://localhost/statements/zip'),
 			url: new URL(
 				`http://localhost/statements/zip?ids=${ids}&periodStart=2024-01-01&periodEnd=2024-12-31`
 			)
@@ -255,8 +256,7 @@ describe('GET /statements/zip', () => {
 		const response = await get(async (url: string) =>
 			url.includes('/s2/') ? Response.json(refusedPdf, { status: 404 }) : pdfOf('s1')
 		);
-		expect(response.status).toBe(404);
-		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+		expect(sentenceOf(response)).toBe('Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.');
 	});
 
 	// an id from the address stays one path segment: it cannot reach another backend route
@@ -273,7 +273,11 @@ describe('GET /statements/zip', () => {
 describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 	afterEach(() => vi.unstubAllGlobals());
 	const get = () =>
-		getListPdf({ params: { id: 's1' }, cookies: { get: () => 'jwt' } } as never);
+		getListPdf({
+			params: { id: 's1' },
+			cookies: { get: () => 'jwt' },
+			request: new Request('http://localhost/api/statements/s1/pdf')
+		} as never);
 
 	it('lädt das PDF unter der Nummer der Abrechnung herunter', async () => {
 		vi.stubGlobal(
@@ -291,8 +295,7 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 	it('sagt in Worten, dass es die Abrechnung nicht gibt, statt die Antwort als PDF auszugeben', async () => {
 		vi.stubGlobal('fetch', async () => Response.json(refusedPdf, { status: 404 }));
 		const response = await get();
-		expect(response.status).toBe(404);
-		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+		expect(sentenceOf(response)).toBe('Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.');
 	});
 
 	it('sagt in Worten, wenn das Backend nicht erreichbar ist', async () => {
@@ -300,8 +303,7 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 			throw new TypeError('fetch failed');
 		});
 		const response = await get();
-		expect(response.status).toBe(503);
-		expect(await sentenceOf(response)).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
+		expect(sentenceOf(response)).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
 	});
 });
 

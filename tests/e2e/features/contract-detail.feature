@@ -360,12 +360,22 @@ Funktionalität: Mietvertragsdetail
   Szenario: Den Brief zur Zustimmung ohne Wechsel der Abrechnungsperiode direkt öffnen
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter den Brief zur Zustimmung für den Mietvertrag von "Anna Keller" direkt öffnet
-    Dann liest der Liegenschaftsverwalter "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
 
   # #521 (Code-Review 521b C-3): eine eingetippte Adresse eines Mietvertrags, den es nicht gibt
   Szenario: Den Brief zur Zustimmung eines unbekannten Mietvertrags direkt öffnen
     Wenn der Liegenschaftsverwalter den Brief zur Zustimmung für einen unbekannten Mietvertrag direkt öffnet
-    Dann liest der Liegenschaftsverwalter "Der Mietvertrag wurde nicht gefunden. Laden Sie die Seite neu."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Der Mietvertrag wurde nicht gefunden. Laden Sie die Seite neu."
+
+  # #734: der Tab nennt den Fehler; zurück geht es zum Mietvertrag
+  Szenario: Die Fehlerseite des Briefs zur Zustimmung nennt den Fehler im Tab und führt zurück zum Mietvertrag
+    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und für "Anna Keller" gibt es die Abrechnung vom "2025-07-01" bis "2025-12-31" im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode anfordert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Brief nicht verfügbar"
+    Wenn der Liegenschaftsverwalter von dort zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
 
   # #521 (C-1): die kurze Abrechnungsperiode ist inzwischen abgerechnet (z.B. in einem zweiten Tab)
   Szenario: Den Brief zur Zustimmung einer inzwischen abgerechneten kurzen Abrechnungsperiode anfordern
@@ -373,7 +383,7 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Und für "Anna Keller" gibt es die Abrechnung vom "2025-07-01" bis "2025-12-31" im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode anfordert
-    Dann liest der Liegenschaftsverwalter "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
 
   Szenario: Vor einem Wechsel der Abrechnungsperiode rät der Mietvertrag nichts zur Abrechnungsperiode im Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
