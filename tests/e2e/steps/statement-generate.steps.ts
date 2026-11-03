@@ -60,7 +60,7 @@ import {
 	vacancyNoteText,
 	skippedContractText,
 	allSkippedText,
-	buildingCardHiddenSideways,
+	buildingCardReachingOut,
 	buildingChoiceDescription,
 	buildingChoiceName,
 	countsFailedText,
@@ -783,7 +783,7 @@ Then('beschreibt die Wahl das Gebäude {string} mit {string}', async ({ verwalte
 Then('zeigt die Wahl das Gebäude {string} ganz', async ({ verwalter, seed }, building: string) => {
 	const id = seed.idOf(building)!;
 	await verwalter.attemptsTo(waitForBuildingCounts(id));
-	await verwalter.sees(buildingCardHiddenSideways(id)).toBe(0);
+	await verwalter.sees(buildingCardReachingOut(id)).toBe(0);
 });
 
 Then('steht der Fokus auf dem Schritt {string}', async ({ verwalter }, step: string) => {

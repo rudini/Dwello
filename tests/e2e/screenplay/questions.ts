@@ -75,6 +75,32 @@ export const HiddenSideways = {
 			)
 		)
 };
+/** How many pixels the farthest part of a box reaches beyond the box's sides, or the box beyond the window's; 0 when
+ *  everything shows within. Measured by bounding rectangles, so it reads alike in every browser (#1071) */
+export const ReachingOut = {
+	of: (target: Target) =>
+		about(target, 'how far a part reaches out of', (element) =>
+			single(element, (one) =>
+				one.evaluate(
+					(box) => {
+						const outer = box.getBoundingClientRect();
+						const overhang = (inner: DOMRect, { left, right }: { left: number; right: number }) =>
+							inner.width ? Math.max(0, left - inner.left, inner.right - right) : 0;
+						// the text lines too: a text runs on beyond the element that holds it (code review 1071 C-1)
+						const lines = document.createRange();
+						lines.selectNodeContents(box);
+						const parts = [...[...box.querySelectorAll('*')].map((part) => part.getBoundingClientRect()), ...lines.getClientRects()].map(
+							(part) => overhang(part, outer)
+						);
+						const window = { left: 0, right: document.documentElement.clientWidth };
+						return Math.round(Math.max(overhang(outer, window), ...parts));
+					},
+					undefined,
+					quick
+				)
+			)
+		)
+};
 /** The data-testid of the element that has the focus, null without one */
 export const FocusedElement = question('the focused element', (actor) =>
 	pageOf(actor).evaluate(() => document.activeElement?.getAttribute('data-testid') ?? null)

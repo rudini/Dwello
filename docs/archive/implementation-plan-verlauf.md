@@ -880,3 +880,12 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-738.md`
 - [x] Issue for the Minor two personas met (Marco P-3, Sven P-4): #1068
 - [x] PR: pushed after this archive
+
+## Session: #1071 red main run, the building card measured in Firefox
+
+- [x] Product-owner decision recorded in #1071 (2026-11-03): the step «zeigt die Wahl das Gebäude {string} ganz» measures by bounding rectangles
+- [x] `ReachingOut` (`tests/e2e/screenplay/questions.ts`): how far a part or a text line of the card reaches beyond it, and the card beyond the window; seen red in Chromium with a part 600 px wide (310 px)
+- [x] No scenario: a fix of a step definition; the scenario that failed, «Die Wahl der Gebäude passt in ein schmales Fenster», is the test
+- [x] Slice review round 1, also the closing round: `docs/reviews/1071-review-1.md` (C-1 fixed: text lines measured too, seen red with a nowrap address)
+- [x] Slice review round 2: `docs/reviews/1071-review-2.md`
+- [x] Archive, PR: pushed after this archive
