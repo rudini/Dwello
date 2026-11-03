@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-11-03: #1081 success toast never covers the focused content
+
+- [x] Scenario outline «Die Erfolgsmeldung verdeckt nicht, was den Fokus hat» (zugangsschluessel.feature) at 390 × 844, 1024 × 768 and 960 × 600 (150 % of 1440 × 900), with the copy at the bottom edge of the window; seen red (the toast stood 96 px over the focused button)
+- [x] `ToastRegion`: while a confirmation shows, `scroll-padding-bottom` and a spacer keep its height plus 16 px clear below the focused part, which scrolls above it; on phones it already sat at the bottom
+- [x] lint, check, `vitest --changed`
+- [ ] Full Chromium E2E
+- [ ] code-reviewer slice review
+- [ ] Personas Helga (150 %) and Marco (phone)
+- [ ] PR (`Fixes #1081`)

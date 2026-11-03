@@ -58,3 +58,19 @@ Funktionalität: Zugangsschlüssel für KI-Programme
     Und erhält ein KI-Programm mit dem Zugangsschlüssel "Claude Desktop Büro" keine Daten mehr
     Wenn der Liegenschaftsverwalter im Protokoll nachsieht
     Dann nennt das Protokoll mit heutigem Datum "Zugangsschlüssel «Claude Desktop Büro» widerrufen"
+
+  # #1081 (#658, U-20, U-21, U-24): auf dem Telefon, bei 1024 Pixeln und mit 150 % Zoom verdeckte die Meldung, was den Fokus hat
+  Szenariogrundriss: Die Erfolgsmeldung verdeckt nicht, was den Fokus hat
+    Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Seite "Zugangsschlüssel für KI-Programme"
+    Und der Liegenschaftsverwalter den Zugangsschlüssel "Claude Desktop Büro" erstellt
+    Und beim neuen Zugangsschlüssel steht das Kopieren der Adresse am unteren Rand des Fensters
+    Wenn der Liegenschaftsverwalter die Adresse für das KI-Programm beim neuen Zugangsschlüssel kopiert
+    Dann bestätigt Dwello das Kopieren mit "Die Adresse ist kopiert."
+    Und verdeckt die Erfolgsmeldung nicht, was den Fokus hat
+
+    Beispiele:
+      | Breite | Höhe |
+      | 390    | 844  |
+      | 1024   | 768  |
+      | 960    | 600  |

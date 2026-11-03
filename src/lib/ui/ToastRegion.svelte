@@ -36,6 +36,19 @@
 	const confirmations = $derived(
 		$toasts.filter((toast) => toast.type !== 'error' && toast.id <= shownUpTo)
 	);
+	// #1081: while a confirmation shows, the page keeps room below the focused part, so the confirmation never covers it
+	let region = $state<HTMLElement>();
+	let room = $state(0);
+	$effect(() => {
+		// the confirmation stands 16 px above the bottom edge, and 16 px of the page stay clear above it
+		const clear = confirmations.length && region ? region.offsetHeight + 32 : 0;
+		room = clear;
+		document.documentElement.style.scrollPaddingBottom = clear ? `${clear}px` : '';
+		const focused = document.activeElement;
+		// jsdom has no scrollIntoView
+		if (clear && focused && focused !== document.body)
+			focused.scrollIntoView?.({ block: 'nearest' });
+	});
 </script>
 
 {#snippet message(toast: Toast, role?: 'alert')}
@@ -51,10 +64,14 @@
 	</div>
 {/snippet}
 
+<!-- the room to scroll the last part of the page above the confirmation -->
+<div aria-hidden="true" style:height="{room}px"></div>
+
 <!-- Above an open dialog (same layer, later on the page), which leaves it reachable -->
 <div
 	class="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96"
 	data-toast-region
+	bind:this={region}
 >
 	{#each errors as toast (toast.id)}{@render message(toast, 'alert')}{/each}
 	<div role="status" aria-atomic="false" class="flex flex-col gap-2">

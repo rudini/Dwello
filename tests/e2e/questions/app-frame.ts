@@ -1,11 +1,13 @@
 import { question } from '../screenplay/actor';
-import { Attribute, Count, ShareInViewport, Text, ThePage, Visibility, Width } from '../screenplay/questions';
+import { Attribute, Count, Gap, ShareInViewport, Text, ThePage, Visibility, Width } from '../screenplay/questions';
 import {
 	draftNotice,
+	focusedPart,
 	footerVersion,
 	glossaryExplanation,
 	legalAsOf,
 	llmRecipient,
+	newestSuccessToast,
 	operatorNotice,
 	pagePurpose,
 	pageSection,
@@ -36,3 +38,6 @@ export const glossaryExplanationText = (term: string) => Text.of(glossaryExplana
 /** The anchor of the page address, e.g. «#glossary», or '' without one */
 export const pageAnchor = question('the anchor of the page address', async (actor) => new URL(await actor.answer(ThePage.url)).hash);
 export const sectionShareInWindow = (heading: string) => ShareInViewport.of(pageSection(heading));
+
+/** #1081: the room between what has the focus and the confirmation below it (negative: the confirmation covers it) */
+export const roomAboveConfirmation = Gap.between(focusedPart, newestSuccessToast);
