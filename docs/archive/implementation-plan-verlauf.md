@@ -889,4 +889,5 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Slice review round 1: `docs/reviews/1036-review-1.md` (C-2, C-6, C-7 Minor fixed; C-1, C-3 to C-5 Minor stay). The worker's log of the red runs was lost in a container restart; the review judged from the code that each new test fails without its change
 - [x] Persona Helga: `docs/design/personas/helga-1036.md` (task done; P-1 to P-3 Minor)
 - [x] Feature domain review: `docs/reviews/1036-fachreview-2.md` (V-6, V-7 Minor with wording, V-4 stays)
+- [x] Fitness before the push: `periodChange` in `period-change.service.ts`, `PeriodChange.svelte` in `src/lib`, `PeriodChangeHint` in `src/lib/types.ts`; closing round `docs/reviews/1036c-review-1.md` (no new findings)
 - [x] Archive, PR: pushed after this archive
