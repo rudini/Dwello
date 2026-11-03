@@ -890,4 +890,5 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Persona Helga: `docs/design/personas/helga-1036.md` (task done; P-1 to P-3 Minor)
 - [x] Feature domain review: `docs/reviews/1036-fachreview-2.md` (V-6, V-7 Minor with wording, V-4 stays)
 - [x] Fitness before the push: `periodChange` in `period-change.service.ts`, `PeriodChange.svelte` in `src/lib`, `PeriodChangeHint` in `src/lib/types.ts`; closing round `docs/reviews/1036c-review-1.md` (no new findings)
+- [x] CI fix (fitness Ä1, Stable Dependencies: `period-change.service` imported `statement.service`): letters per contract from `consentOfContract`; closing round `docs/reviews/1036d-review-1.md` (no findings)
 - [x] Archive, PR: pushed after this archive

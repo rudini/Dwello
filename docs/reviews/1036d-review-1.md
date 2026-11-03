@@ -1,0 +1,12 @@
+# Review 1036d, Runde 1 (70dd0b2, `git diff HEAD^ HEAD`)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| – | – | – | Keine Befunde. |
+
+Geprüft: Gleichwertigkeit von `consentOfContract(id)` (statement-run.service.ts:139) mit dem früheren Inline-Aufruf: gleiche Argumente `type`, `change` aus `periodSetting()`; Verträge aus `getContract` statt `listContracts` (beide `contractFields`); Abrechnungen des Vertrags per `listStatements({ contractId })` = früher `s.contractId === c.id`; die der Liegenschaft per `listStatements({ buildingId })` (Filter `apartments.buildingId`) = früher `s.building?.id === c.buildingId` (Join über apartments → buildings); `today` war in beiden Fällen `swissToday()`, da einziger Aufrufer `GET /config/period-change` (backend/src/routes/config.ts:30) kein `today` übergibt; `letters[i]?.consent` deckt einen zwischenzeitlich gelöschten Vertrag (null) ab; der Kommentar stimmt (Vertragsseite und Zustimmungsbrief lesen `consentPeriod` über dieselbe `periodsOfContract`); Verhalten unverändert, daher kein roter Test nötig, abgedeckt durch statement-run.pg.test.ts:180–201 und den Vertrag `config-period-change`; Ponytail-Review: Import `consentPeriod`/`listStatements` entfernt, nichts Unbenutztes zurückgelassen, keine Kopie eines Helfers; nichts im Diff ohne Bezug zur Anforderung.
+
+## Nicht bestätigt
+
+- Kosten der Aufrufe pro Vertrag: statt 3 Abfragen jetzt 2 + 4 je Vertrag (`getContract`, `periodSetting`, zweimal `listStatements` mit `limit: 1000`), alle gleichzeitig über `Promise.all` gegen einen Pool von 20 (backend/src/db/connection.ts:12). Das fällt nur an, solange eine Änderung gespeichert ist (frühe Rückgabe vor den Aufrufen), dann aber bei jedem Laden einer Vertragsseite (src/routes/contracts/[id]/+page.server.ts:99) und dauerhaft: `shortPeriodOfChange` bleibt nicht-null, solange `change.from !== type` gilt, auch nachdem `started` wahr ist. `listContracts` zählt auch beendete Verträge, N wächst also mit der Zeit über die Zahl der Wohnungen hinaus. Ob das unter dem Ziel von 500 ms (p95, docs/tech-stack.md:464) bleibt, ist nicht gemessen. Bei unter 50 Wohnungen kein Befund.
+- `bun run fitness` ohne Fehler, Backend-Type-Check sauber, Prettier auf der neuen Datei, `bun test` (api-contracts, statement-run, consent-letter, accounting-period: 162 bestanden), E2E chromium abrechnungsperiode.feature (4 bestanden): vom Aufrufer gemeldet.
