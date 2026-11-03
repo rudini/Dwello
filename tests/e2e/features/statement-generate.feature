@@ -795,7 +795,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und die Rechnung "Heizung 2024-04-10" gilt danach für die Zeit vom "2024-01-01" bis "2024-03-31"
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
-    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "ist schon versendet. Sie verteilt die Heizkosten noch über die ganze Abrechnungsperiode, nicht nach dem Leistungszeitraum der Heizrechnungen. Prüfen Sie, ob beide Abrechnungen zusammen mehr als die Heizkosten der Wohnung verrechnen. Wenn ja, erstellen Sie für"
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "ist schon versendet. Sie verteilt die Heizkosten noch über die ganze Abrechnungsperiode, nicht nach dem Leistungszeitraum der Heizrechnungen. Die Heizkosten der Wohnung betragen"
 
   # #508 (A, Persona Dr. Weber 451 P-3): die Vorschau nennt die Heizkosten der Wohnung, was die versendete und die neue
   # Abrechnung zusammen dafür verrechnen, und den Unterschied; Beträge nach Fachreview 508-1: Marc alt 900.00 + Eva neu
@@ -810,6 +810,48 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
     Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "Die Heizkosten der Wohnung betragen CHF 2’000.00, davon tragen die Mieter CHF 1’920.00 und Sie CHF 80.00 für den Leerstand. Die Abrechnungen der Wohnung verrechnen dafür zusammen CHF 2’370.00 ohne Verwaltungspauschale, CHF 450.00 zu viel."
+
+  # #1026 (PO 02.11.2026, A, Fachreview 1026-1 V-1): verrechnen die Abrechnungen der Wohnung zu viel, rät die
+  # Vorschau, die versendete Abrechnung zu berichtigen; Heizöl mit Leistungszeitraum über das ganze Jahr, damit kein
+  # Hinweis auf Rechnungen ohne Leistungszeitraum erscheint. Beträge wie im Szenario davor (#508): CHF 450.00 zu viel
+  Szenario: Die Vorschau rät zu berichtigen, wenn die Abrechnungen einer Wohnung zu viel Heizkosten verrechnen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-30" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Rechnung "Heizung 2024-04-10" gilt danach für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "CHF 450.00 zu viel. Erstellen Sie für Marc Huber"
+
+  # #1026 (PO 02.11.2026, A, Persona Dr. Weber 508 P-1; Fachreview 1026-1 V-2, V-3): verrechnen die Abrechnungen der
+  # Wohnung zu wenig, sagt die Vorschau, wer den Unterschied trägt. Heizung 1'000.00 für Oktober bis Dezember: Marc alt
+  # nach "Winter" Mai bis Dezember 45 % = 450.00, Eva neu 0.00; Heizöl 1'000.00 über das ganze Jahr: Marc 450.00, Eva
+  # 470.00, Leerstand 80.00. Verrechnet 900.00 + 470.00 = 1'370.00 gegen 1'920.00 der Mieter: CHF 550.00 zu wenig
+  Szenario: Die Vorschau sagt, wer den Unterschied trägt, wenn die Abrechnungen einer Wohnung zu wenig Heizkosten verrechnen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-30" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-12-10"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Rechnung "Heizung 2024-12-10" gilt danach für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "CHF 550.00 zu wenig. Den Unterschied tragen Sie, wenn Sie die Abrechnung von Marc Huber"
+
+  # #1026 (PO 02.11.2026, A; Fachreview 508-1 V-2, Persona Dr. Weber 451 P-3): fehlt einer Heizrechnung der
+  # Leistungszeitraum, zeigt erst die Vorschau mit ihm, ob eine Abrechnung berichtigt werden muss
+  Szenario: Fehlt einer Heizrechnung der Leistungszeitraum, rät die Vorschau, ihn zuerst einzutragen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Rechnung "Heizung 2024-04-10" gilt danach für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "zu viel. Fehlt einer Heizrechnung der Leistungszeitraum, tragen Sie ihn zuerst ein und öffnen Sie die Vorschau erneut. Erst dann zeigt sich, ob eine Abrechnung berichtigt werden muss."
 
   # #335 (#451, Punkt 5): hatte die Heizrechnung ihren Leistungszeitraum schon beim Erstellen, rechnet die versendete
   # Abrechnung die Monate darin; kein Hinweis
