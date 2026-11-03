@@ -1,7 +1,7 @@
-import { consentPeriod, same, shortPeriodOfChange } from './accounting-period';
+import { same, shortPeriodOfChange } from './accounting-period';
 import { periodSetting } from './config.service';
 import { listContracts } from './contract.service';
-import { listStatements } from './statement.service';
+import { consentOfContract } from './statement-run.service';
 import { daysAfter, swissToday } from './today';
 
 /**
@@ -10,17 +10,15 @@ import { daysAfter, swissToday } from './today';
  * a change
  */
 export async function periodChange(today = swissToday()) {
-	const [{ type, change }, { contracts }, { statements }] = await Promise.all([
-		periodSetting(),
-		listContracts({ limit: 1000 }),
-		listStatements({ limit: 1000 })
-	]);
+	const [{ type, change }, { contracts }] = await Promise.all([periodSetting(), listContracts({ limit: 1000 })]);
 	const short = shortPeriodOfChange(type, change);
 	if (!short) return null;
-	const consenting = contracts.filter((c) => {
-		const ofBuilding = statements.filter((s) => s.building?.id === c.buildingId);
-		const found = consentPeriod(type, c, statements.filter((s) => s.contractId === c.id), ofBuilding, today, change);
-		return !!found && same(found.short, short);
+	// each contract's letter as its own page offers it (statement-run.service), not a second reading of the rule; the
+	// statements stay out of this module (fitness Ä1, Stable Dependencies)
+	const letters = await Promise.all(contracts.map((c) => consentOfContract(c.id)));
+	const consenting = contracts.filter((_, i) => {
+		const consent = letters[i]?.consent;
+		return !!consent && same(consent.short, short);
 	});
 	return {
 		short,
