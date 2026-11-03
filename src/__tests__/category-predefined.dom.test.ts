@@ -161,6 +161,10 @@ describe('Kennzeichnung und Schutz vordefinierter Kategorien', () => {
 		byTestId<HTMLInputElement>('category-allowance-false')!.click();
 		await Promise.resolve();
 
+		// switched away from the preset: the reason is gone (code review 1029 C-2)
+		expect(byTestId('category-allowance')!.getAttribute('aria-describedby')).not.toContain(
+			'category-reason'
+		);
 		expect(description(byTestId('category-allowance')!)).toContain(
 			'Stellen Sie die Kategorie auf nicht umlagefähig, fliessen ihre schon erfassten Rechnungen nicht mehr in neue Nebenkostenabrechnungen'
 		);
