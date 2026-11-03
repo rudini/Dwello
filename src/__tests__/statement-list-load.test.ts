@@ -107,6 +107,7 @@ describe('PDF einer Abrechnung herunterladen', () => {
 		downloadPdf({
 			params: { id: 's1' },
 			url: new URL('http://localhost/statements/s1/pdf'),
+			request: new Request('http://localhost/statements/s1/pdf'),
 			fetch: (async () => response()) as typeof globalThis.fetch
 		} as never);
 
@@ -129,8 +130,8 @@ describe('PDF einer Abrechnung herunterladen', () => {
 	it('sagt in Worten, dass es die Abrechnung nicht gibt', async () => {
 		const response = await call(() => Response.json(refusedPdf, { status: 404 }));
 
-		expect(response.status).toBe(404);
-		expect(await response.text()).toContain('>Abrechnung nicht gefunden.</p>');
+		expect(response.status).toBe(303);
+		expect(response.headers.get('location')).toBe('/documents/refused?code=STATEMENT_NOT_FOUND');
 	});
 
 	it('meldet einen Fehler, wenn das Backend nicht erreichbar ist', async () => {
@@ -138,7 +139,8 @@ describe('PDF einer Abrechnung herunterladen', () => {
 			throw new Error('ECONNREFUSED');
 		});
 
-		expect(response.status).toBe(500);
+		expect(response.status).toBe(303);
+		expect(response.headers.get('location')).toBe('/documents/refused?');
 	});
 });
 
