@@ -10,8 +10,5 @@ export const help = {
 	},
 	get managementFee() {
 		return m.config_help_management_fee();
-	},
-	get accountingPeriod() {
-		return m.config_help_accounting_period();
 	}
 };

@@ -3,11 +3,11 @@
  * ended period, the ended periods since a day, and the parts of them a contract has no statement for
  */
 import { describe, expect, it } from 'bun:test';
-import { consentPeriod, endedPeriodsSince, lastCompletedPeriod, missingPeriods, missingWays } from '../services/accounting-period';
+import { endedPeriodsSince, otherPeriod, lastCompletedPeriod, missingPeriods, missingWays } from '../services/accounting-period';
 
-// #199, #211: one rule for dashboard, contract list, contract page and step 2 of the wizard: a statement that overlaps
-// an ended Abrechnungsperiode counts, only the days no statement covers are missing, and only where the contract has
-// rent days
+// #211, #1088: one rule for dashboard, contract list, contract page and step 2 of the wizard: each ended whole period
+// of the building's Abrechnungsperiode in which the contract has rent days and no statement of its own; a statement
+// that overlaps it counts (older statements of another period), there are no short periods (product owner 03.11.2026)
 describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 	const today = '2026-10-15';
 	const statement = (periodStart: string, periodEnd: string, status = 'sent') => ({ periodStart, periodEnd, status });
@@ -20,30 +20,17 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		]);
 	});
 
-	it('zählt eine Abrechnung, die die Periode überlappt, und nennt nur die Tage ohne Abrechnung', () => {
-		// a statement made under July–June before the switch to the calendar year
-		expect(missingPeriods('calendar', contract('2023-07-01', '2024-12-31'), [statement('2023-07-01', '2024-06-30')], today)).toEqual([
-			{ start: '2024-07-01', end: '2024-12-31' }
+	it('folgt der Abrechnungsperiode des Gebäudes', () => {
+		expect(missingPeriods('july-june', contract('2024-04-01', null), [], today)).toEqual([
+			{ start: '2025-07-01', end: '2026-06-30' },
+			{ start: '2024-07-01', end: '2025-06-30' },
+			{ start: '2023-07-01', end: '2024-06-30' }
 		]);
 	});
 
-	it('nennt Tage ohne Abrechnung nicht, an denen der Mietvertrag nicht läuft', () => {
-		expect(missingPeriods('calendar', contract('2024-04-01', '2024-12-31'), [statement('2024-04-01', '2024-09-30')], today)).toEqual([
-			{ start: '2024-10-01', end: '2024-12-31' }
-		]);
-	});
-
-	it('nennt eine Lücke zwischen zwei Abrechnungen und die Tage danach, die späteren zuerst', () => {
-		const statements = [statement('2025-01-01', '2025-03-31'), statement('2025-07-01', '2025-09-30')];
-		expect(missingPeriods('calendar', contract('2025-01-01', '2025-12-31'), statements, today)).toEqual([
-			{ start: '2025-10-01', end: '2025-12-31' },
-			{ start: '2025-04-01', end: '2025-06-30' }
-		]);
-	});
-
-	it('schweigt, wenn Abrechnungen zusammen jeden Tag der Periode abdecken', () => {
-		const statements = [statement('2024-07-01', '2025-06-30'), statement('2025-06-01', '2026-06-30')];
-		expect(missingPeriods('calendar', contract('2025-01-01', '2025-12-31'), statements, today)).toEqual([]);
+	it('zählt eine Abrechnung, die die Periode überlappt, und nennt für die übrigen Tage keine kurze Periode', () => {
+		// an older statement of July–June in a building that bills the calendar year
+		expect(missingPeriods('calendar', contract('2023-07-01', '2024-12-31'), [statement('2023-07-01', '2024-06-30')], today)).toEqual([]);
 	});
 
 	// A-9: the tenant who moved out still gets a statement for his days of the period
@@ -54,7 +41,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 	});
 
 	// #133: the days up to «Abgerechnet bis» were billed outside Dwello
-	it('übergeht die Tage bis «Abgerechnet bis»', () => {
+	it('übergeht die Perioden bis «Abgerechnet bis»', () => {
 		expect(missingPeriods('calendar', contract('2023-01-01', null, '2024-12-31'), [], today)).toEqual([{ start: '2025-01-01', end: '2025-12-31' }]);
 	});
 
@@ -62,22 +49,6 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 	it('zählt eine ersetzte Abrechnung nicht', () => {
 		expect(missingPeriods('calendar', contract('2025-01-01', '2025-12-31'), [statement('2025-01-01', '2025-12-31', 'replaced')], today)).toEqual([
 			{ start: '2025-01-01', end: '2025-12-31' }
-		]);
-	});
-
-	// #512: before the building's last statement over a period of another type than the setting, its type cuts the periods
-	it('folgt bis zur letzten Abrechnung nach einer anderen Abrechnungsperiode deren Perioden, danach der Einstellung', () => {
-		expect(missingPeriods('calendar', contract('2022-07-01', null), [statement('2023-07-01', '2024-06-30')], today)).toEqual([
-			{ start: '2025-01-01', end: '2025-12-31' },
-			{ start: '2024-07-01', end: '2024-12-31' },
-			{ start: '2022-07-01', end: '2023-06-30' }
-		]);
-	});
-
-	it('folgt den Abrechnungen des Gebäudes, auch wenn der Mietvertrag selbst keine hat', () => {
-		const building = [statement('2023-07-01', '2024-06-30')];
-		expect(missingPeriods('calendar', contract('2023-07-01', '2024-06-30'), [], today, building)).toEqual([
-			{ start: '2023-07-01', end: '2024-06-30' }
 		]);
 	});
 });
@@ -118,6 +89,7 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 	const own = (periodStart: string, periodEnd: string, status = 'sent') => ({ periodStart, periodEnd, status });
 	const contract = (startDate: string) => ({ startDate, endDate: null, billedUntil: null });
 	const whole = (y: number) => ({ start: `${y}-01-01`, end: `${y}-12-31`, way: { kind: 'whole', start: `${y}-01-01`, end: `${y}-12-31` }, open: true });
+	const part = (start: string, end: string, kind: string, way = { start, end }, open = true) => ({ start, end, way: { kind, ...way }, open });
 
 	it('führt jede ganze abgelaufene Periode ohne Abrechnung in diese Periode', () => {
 		expect(missingWays('calendar', contract('2023-04-01'), [own('2024-01-01', '2024-12-31')], [own('2024-01-01', '2024-12-31')], today)).toEqual([
@@ -126,96 +98,31 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 		]);
 	});
 
-	const part = (start: string, end: string, kind: string, way = { start, end }, open = true) => ({ start, end, way: { kind, ...way }, open });
-	const days = (parts: { start: string; end: string }[]) => parts.map(({ start, end }) => [start, end]);
-
 	// #120, Fachreview W2e: a replaced statement does not count as a statement of the period
 	it('nennt die Periode einer ersetzten Abrechnung ohne berichtigte', () => {
 		const replaced = own('2025-01-01', '2025-12-31', 'replaced');
 		expect(missingWays('calendar', contract('2025-03-01'), [replaced], [replaced], today)).toEqual([whole(2025)]);
 	});
 
-	// #199, #408 point 2: an overlapping statement counts; the days no statement of the building covers get a short period
-	it('bietet für die Tage, die keine Abrechnung des Gebäudes abdeckt, eine kurze Abrechnungsperiode an', () => {
-		const overlapping = own('2024-07-01', '2025-06-30');
-		expect(missingWays('calendar', contract('2025-01-01'), [overlapping], [overlapping], today)).toEqual([part('2025-07-01', '2025-12-31', 'short')]);
-	});
-
-	// #408 point 2: days inside the period of another contract's statement are billed in exactly that period
-	it('bietet für Tage in der Periode einer Abrechnung des Gebäudes genau diese Periode an', () => {
-		expect(missingWays('calendar', contract('2025-01-01'), [], [own('2024-07-01', '2025-06-30')], today)).toEqual([
-			part('2025-07-01', '2025-12-31', 'short'),
-			part('2025-01-01', '2025-06-30', 'existing', { start: '2024-07-01', end: '2025-06-30' })
+	// #1088 (Fachreview 1088-1 V-1): a period that overlaps older statements of the building in another period goes to
+	// those periods, each with the contract's days there; no short period for the rest
+	it('führt in die Perioden älterer Abrechnungen des Gebäudes, die die Periode schneiden', () => {
+		expect(missingWays('calendar', contract('2025-04-01'), [], [own('2024-07-01', '2025-06-30'), own('2025-07-01', '2026-06-30')], today)).toEqual([
+			part('2025-07-01', '2026-06-30', 'existing'),
+			part('2025-04-01', '2025-06-30', 'existing', { start: '2024-07-01', end: '2025-06-30' })
 		]);
 	});
 
 	// code review 199-1 C-2: days in a period equal to a statement period of the building go there only
-	it('nennt bei überschneidenden Altdaten dieselben Tage nur einmal', () => {
+	it('führt eine Periode gleich einer Abrechnung des Gebäudes nur in diese Periode', () => {
 		expect(missingWays('calendar', contract('2025-01-01'), [], [own('2024-07-01', '2025-06-30'), own('2025-01-01', '2025-12-31')], today)).toEqual([whole(2025)]);
-	});
-
-	// code review 199-3 C-12: another contract's replaced statement still holds its period for the building (C-8)
-	it('führt Tage in der Periode einer ersetzten Abrechnung des Gebäudes in diese Periode', () => {
-		expect(missingWays('calendar', contract('2025-01-01'), [], [own('2024-07-01', '2025-06-30', 'replaced')], today)).toEqual([
-			part('2025-07-01', '2025-12-31', 'short'),
-			part('2025-01-01', '2025-06-30', 'existing', { start: '2024-07-01', end: '2025-06-30' })
-		]);
-	});
-
-	// code review 199-2 C-9: two older periods with one first day: the longer one, so no missing day is lost
-	it('nennt bei zwei Altperioden mit gleichem Beginn die Tage der längeren', () => {
-		const parts = missingWays('calendar', contract('2025-01-01'), [], [own('2025-01-01', '2025-03-31'), own('2025-01-01', '2025-06-30')], today);
-		expect(days(parts)).toEqual([
-			['2025-07-01', '2025-12-31'],
-			['2025-01-01', '2025-06-30']
-		]);
-	});
-
-	// a part names the contract's own days: from the Vertragsbeginn, not from the start of the period
-	it('nennt bei einem Teil die Tage ab Vertragsbeginn', () => {
-		const parts = missingWays('calendar', contract('2025-04-01'), [], [own('2024-07-01', '2025-06-30')], today);
-		expect(days(parts)).toEqual([
-			['2025-07-01', '2025-12-31'],
-			['2025-04-01', '2025-06-30']
-		]);
 	});
 
 	// Fachreview 199-1 V-1: a run of a period the contract cuts with its own statement would bill it no more there
 	it('führt nicht in eine Periode, die der Mietvertrag mit einer eigenen Abrechnung schneidet', () => {
 		const mine = own('2025-01-01', '2025-06-30');
-		const parts = missingWays('calendar', contract('2025-01-01'), [mine], [mine, own('2025-01-01', '2025-12-31')], today);
-		expect(parts.map(({ start, open }) => [start, open])).toEqual([['2025-07-01', false]]);
-	});
-
-	// #512: an ended period of the earlier type without a statement is offered whole; the days after the switch are a
-	// short period of the setting, where the hint of #486 belongs
-	it('bietet vor dem Wechsel der Abrechnungsperiode die ganze frühere Periode an, danach eine kurze Abrechnungsperiode', () => {
-		const mine = own('2024-07-01', '2025-06-30');
-		expect(missingWays('calendar', contract('2024-04-01'), [mine], [mine], today)).toEqual([
-			part('2025-07-01', '2025-12-31', 'short'),
-			part('2023-07-01', '2024-06-30', 'whole')
-		]);
-	});
-
-	// Fachreview 512-1 V-1: a contract billed by its own period (#486) after the first statement under the setting is no
-	// change of the setting; the other contracts keep the setting's periods (kept behaviour)
-	it('folgt der Einstellung, wenn die andere Abrechnungsperiode erst nach der ersten Abrechnung nach der Einstellung beginnt', () => {
-		const building = [own('2023-01-01', '2023-12-31'), own('2024-01-01', '2024-12-31'), own('2023-07-01', '2024-06-30'), own('2024-07-01', '2025-06-30')];
-		expect(missingWays('calendar', contract('2024-04-01'), [], building, today)).toEqual([
-			part('2025-07-01', '2025-12-31', 'short'),
-			part('2025-01-01', '2025-06-30', 'existing', { start: '2024-07-01', end: '2025-06-30' }),
-			whole(2024)
-		]);
-	});
-
-	// #512 (product owner 2026-10-28, persona Weber 512 P-1): the stored day of the change ends the earlier type, also
-	// for a year after the building's last statement that ended before that day
-	it('folgt bis zum Tag des Wechsels der Einstellung der früheren Abrechnungsperiode, danach der Einstellung', () => {
-		const building = [own('2024-01-01', '2024-12-31')];
-		expect(missingWays('july-june', contract('2024-01-01'), building, building, today, { on: '2026-10-01', from: 'calendar' })).toEqual([
-			part('2026-01-01', '2026-06-30', 'short'),
-			whole(2025)
-		]);
+		const parts = missingWays('calendar', contract('2024-01-01'), [mine], [mine, own('2024-07-01', '2025-06-30')], today);
+		expect(parts.map(({ start, open }) => [start, open])).toEqual([['2024-07-01', false]]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', () => {
@@ -224,53 +131,17 @@ describe('Wege der fehlenden Abrechnungen am Mietvertrag', () => {
 	});
 });
 
+// #1088 (Fachreview 1088-1 V-1): a building takes a run only for a whole period of its own Abrechnungsperiode or for
+// the period of one of its statements (older ones of another period stay billable)
+describe('Lauf in einer anderen Abrechnungsperiode als der des Gebäudes', () => {
+	const run = { start: '2023-07-01', end: '2024-06-30' };
 
-// #521: the letter for the tenants' consent needs the earlier and the new Abrechnungsperiode; it is for the short
-// period that starts on the day the building switched (Fachreview 521-1 V-1)
-describe('Kurze Abrechnungsperiode für den Brief zur Zustimmung', () => {
-	const today = '2026-10-15';
-	const own = (periodStart: string, periodEnd: string) => ({ periodStart, periodEnd, status: 'sent' });
-	const contract = (startDate: string, endDate: string | null = null) => ({ startDate, endDate, billedUntil: null });
-
-	it('nennt nach der letzten Abrechnung nach Juli–Juni die kurze Abrechnungsperiode bis zum Kalenderjahr', () => {
-		const building = [own('2024-07-01', '2025-06-30')];
-		expect(consentPeriod('calendar', contract('2024-04-01'), building, building, today)).toEqual({
-			earlier: 'july-june',
-			short: { start: '2025-07-01', end: '2025-12-31' }
-		});
+	it('nennt die Abrechnungsperiode des Gebäudes, wenn der Lauf keine ganze Periode davon ist', () => {
+		expect(otherPeriod('calendar', run, [])).toBe('calendar');
 	});
 
-	it('nennt nach einem gespeicherten Wechsel der Einstellung die Abrechnungsperiode davor', () => {
-		const building = [own('2024-01-01', '2024-12-31')];
-		expect(consentPeriod('july-june', contract('2024-01-01'), building, building, today, { on: '2026-10-01', from: 'calendar' })).toEqual({
-			earlier: 'calendar',
-			short: { start: '2026-01-01', end: '2026-06-30' }
-		});
-	});
-
-	// Fachreview 521-1 V-1: a statement over part of a period tells no earlier type; there is no earlier period to name
-	it('nennt ohne frühere Abrechnungsperiode keine', () => {
-		const building = [own('2024-04-01', '2024-09-30')];
-		expect(consentPeriod('calendar', contract('2024-04-01'), building, building, today)).toBeNull();
-	});
-
-	// code review 521-1 C-3: a short period the contract's own statement already bills has no letter
-	it('nennt keine kurze Abrechnungsperiode, die eine Abrechnung des Mietvertrags schon abrechnet', () => {
-		const building = [own('2024-07-01', '2025-06-30')];
-		const statements = [own('2024-07-01', '2025-06-30'), own('2025-07-01', '2025-09-30')];
-		expect(consentPeriod('calendar', contract('2024-04-01'), statements, building, today)).toBeNull();
-	});
-
-	// code review 521-1 C-3: after the switch another contract's statement starts the building's next part; the short
-	// period left after it is not the one after the change
-	it('nennt keine kurze Abrechnungsperiode, die nicht am Tag des Wechsels beginnt', () => {
-		const building = [own('2024-07-01', '2025-06-30'), own('2025-07-01', '2025-09-30')];
-		expect(consentPeriod('calendar', contract('2024-04-01'), [own('2024-07-01', '2025-06-30')], building, today)).toBeNull();
-	});
-
-	// the short period stays the building's, also for a contract that starts in it (Fachreview 521-1 section 1)
-	it('nennt bei einem Vertragsbeginn in der kurzen Abrechnungsperiode die des Gebäudes', () => {
-		const building = [own('2024-07-01', '2025-06-30')];
-		expect(consentPeriod('calendar', contract('2025-10-01'), [], building, today)?.short).toEqual({ start: '2025-07-01', end: '2025-12-31' });
+	it('nimmt den Lauf in einer ganzen Periode des Gebäudes oder der Periode einer seiner Abrechnungen', () => {
+		expect(otherPeriod('july-june', run, [])).toBeNull();
+		expect(otherPeriod('calendar', run, [{ periodStart: '2023-07-01', periodEnd: '2024-06-30' }])).toBeNull();
 	});
 });

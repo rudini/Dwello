@@ -21,9 +21,6 @@ import {
 	deleteDialog,
 	deleteDialogStatementLink,
 	missingStatements,
-	shortPeriodHelp,
-	shortPeriodHelpAt,
-	consentLetterLink,
 	missingStatementLink,
 	missingStatementInvoicesLink,
 	fixedTermCheck,
@@ -52,9 +49,6 @@ export const endConfirmationInWindow = question(
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
 export const missingStatementInvoicesLabel = (periodStart: string) => Text.of(missingStatementInvoicesLink(periodStart));
-export const shortPeriodHelpText = Text.of(shortPeriodHelp);
-export const shortPeriodHelpShownAt = (periodStart: string) => Visibility.of(shortPeriodHelpAt(periodStart));
-export const consentLetterShown = Visibility.of(consentLetterLink); // #521
 // the way into the wizard for the missing days from that day on
 export const missingStatementOffer = (periodStart: string) => Text.of(missingStatementLink(periodStart));
 export const managementFeeOfContract = Text.of(contractManagementFee);

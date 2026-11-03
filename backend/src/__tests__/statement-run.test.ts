@@ -84,12 +84,11 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		statement('vorher', '2023-07-01', '2024-06-30')
 	];
 
-	it('lehnt den Lauf für das Gebäude ab und nennt die bestehende Periode und die übrigen Tage', () => {
+	// #1088: no short period for the other days (product owner 03.11.2026)
+	it('lehnt den Lauf für das Gebäude ab und nennt die bestehende Periode', () => {
 		expect(planRun(year2024, contracts, switched).overlap).toEqual({
 			periods: [{ start: '2023-07-01', end: '2024-06-30' }],
 			choose: [],
-			short: [{ start: '2024-07-01', end: '2024-12-31' }],
-			vacant: false,
 			statements: 3
 		});
 	});
@@ -98,15 +97,6 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		const plan = planRun(year2024, contracts, switched.filter((s) => s.contractId !== 'vorher'));
 
 		expect(plan.overlap?.choose).toEqual([{ start: '2023-07-01', end: '2024-06-30' }]);
-	});
-
-	it('bietet keine kurze Periode für Tage ohne Mietstage an', () => {
-		// only «einzug» has days after 30.06.2024, and they are billed outside Dwello (#133)
-		const plan = planRun(year2024, [contract('auszug', '2020-01-01', '2024-03-31'), contract('einzug', '2024-05-01', null, '2024-12-31')], switched);
-
-		expect(plan.overlap?.short).toEqual([]);
-		// Fachreview 199-1 V-3: step 2 says there is nothing to bill
-		expect(plan.overlap?.vacant).toBe(true);
 	});
 
 	it('lässt eine ersetzte Abrechnung und eine Abrechnung genau dieser Periode zu', () => {
@@ -135,29 +125,6 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		]);
 
 		expect(plan.overlap).toBeNull();
-	});
-
-	// Fachreview 199-1 V-2: a statement period inside the run leaves two pieces, each its own short period
-	it('bietet für jedes Stück übriger Tage eine eigene kurze Periode an', () => {
-		const plan = planRun(year2024, contracts, [statement('einzug', '2024-03-01', '2024-09-30')]);
-
-		expect(plan.overlap?.short).toEqual([
-			{ start: '2024-01-01', end: '2024-02-29' },
-			{ start: '2024-10-01', end: '2024-12-31' }
-		]);
-	});
-
-	// Fachreview 199-1 V-4: a short period only for days of an ended period, none for days still to come
-	it('bietet keine kurze Periode für Tage an, die noch nicht vorbei sind', () => {
-		const plan = planRun(
-			{ start: '2099-01-01', end: '2099-12-31' },
-			[contract('einzug', '2024-05-01', null)],
-			[statement('einzug', '2099-01-01', '2099-06-30')],
-			'2026-10-23'
-		);
-
-		expect(plan.overlap?.short).toEqual([]);
-		expect(plan.overlap?.vacant).toBe(false);
 	});
 
 	// Fachreview 199-1 V-5: «without a statement» counts Mietstage (after «Abgerechnet bis») and no replaced statement
@@ -191,16 +158,6 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		]);
 
 		expect(plan.overlap?.statements).toBe(1);
-	});
-
-	// code review 199-3 C-12: days a replaced statement holds are no days for a short period
-	it('bietet keine kurze Periode für Tage einer ersetzten Abrechnung an', () => {
-		const plan = planRun(year2024, contracts, [
-			statement('einzug', '2023-07-01', '2024-06-30'),
-			statement('einzug', '2024-07-01', '2024-09-30', 'replaced')
-		]);
-
-		expect(plan.overlap?.short).toEqual([{ start: '2024-10-01', end: '2024-12-31' }]);
 	});
 });
 

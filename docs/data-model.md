@@ -74,6 +74,7 @@ longitude     DECIMAL(10,7)
 building_type VARCHAR(50)            -- Gebäudetyp
 year_built    INTEGER                -- Baujahr
 no_tank       BOOLEAN      NOT NULL DEFAULT false -- kein Tank oder Tank stillgelegt: no Tankbestand asked for periods without readings (#72)
+accounting_period VARCHAR(20) NOT NULL DEFAULT 'calendar' -- Abrechnungsperiode: calendar | july-june | november-october, fixed from the building's first statement (#1088)
 ```
 
 Index: `buildings_city_idx (city)`.
@@ -448,7 +449,6 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 
 | Key | Default | Validation |
 |---|---|---|
-| `accounting_period` | `calendar` | `calendar` \| `july-june` \| `november-october` |
 | `management_fee_pct` | `3` | number 0–10 (3 % is the guideline, not a cap; #124) |
 | `default_heating_profile_id` | none | an existing heating profile |
 | `default_distribution_key_id` | none | an existing distribution key |
@@ -463,7 +463,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `reminder_after_days` | `14` | 7–60 |
 | `default_language` | `de` | `de` \| `fr` \| `it` \| `en` |
 
-One more key is written by the service, not by the settings form (it is not in `CONFIG_KEYS` and `GET /config` leaves it out): `accounting_period_changed`, `YYYY-MM-DD:<type>`, the Swiss day `accounting_period` last changed and the type it had before; a second change on the same day keeps the first's type (#512).
+Migration 0042 (#1088) gave each building the Abrechnungsperiode of its latest whole statement, else the former setting `accounting_period`, and removed that setting and `accounting_period_changed`.
 
 The IBAN is stored in plain text.
 

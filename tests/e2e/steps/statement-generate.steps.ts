@@ -9,7 +9,6 @@ import {
 	announcedFeeHint,
 	balanceOf,
 	billedOfBuilding,
-	consentLettersOfBuilding,
 	buildingChosen,
 	buildingSelectable,
 	categoryFindingOf,
@@ -17,8 +16,6 @@ import {
 	lateChecksNoteAboveNext,
 	lateChecksNoteText,
 	confirmationAsked,
-	invoiceWithoutServicePeriodOn,
-	countOfInvoicesWithoutServicePeriodOn,
 	heatingHintText,
 	heatingWithoutServicePeriodOn,
 	countOfHeatingWithoutServicePeriodOn,
@@ -72,7 +69,6 @@ import {
 	chooseBuilding,
 	chooseBuildingsFor,
 	chooseOfferedPeriod,
-	downloadConsentLetterOf,
 	chooseBuildingsForPeriod,
 	closeRestoredNotice,
 	confirmDespiteWarnings,
@@ -187,14 +183,6 @@ When(
 		await verwalter.attemptsTo(
 			openPreview(year, seed.idOf(building)!, { heatingProfileId: await seed.heatingProfileId(profile), managementFeePercent: fee })
 		);
-	}
-);
-
-When(
-	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} mit dem Heizprofil {string} öffnet',
-	async ({ verwalter, seed }, start: string, end: string, building: string, profile: string) => {
-		const options = { periodStart: start, periodEnd: end, heatingProfileId: await seed.heatingProfileId(profile) };
-		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, options));
 	}
 );
 
@@ -543,13 +531,6 @@ Then('sagt der Assistent {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(presetNoticeText).toContain(text);
 });
 
-When(
-	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
-	async ({ verwalter, seed }, start: string, end: string, building: string) => {
-		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
-	}
-);
-
 Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
 	await verwalter.sees(confirmationAsked).toBe(false);
 });
@@ -570,17 +551,6 @@ Then(
 
 Then('nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
 	await verwalter.sees(countOfLateInvoicesOn(date)).toBe(0);
-});
-
-Then(
-	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
-	async ({ verwalter }, date: string, amount: string) => {
-		await verwalter.sees(invoiceWithoutServicePeriodOn(date)).toContain(amount);
-	}
-);
-
-Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
-	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
 });
 
 Then('sagt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
@@ -644,9 +614,9 @@ When(
 
 // Tankbestand checks (#136, #72)
 Given(
-	'im Gebäude {string} war vor {int} Tagen Heizöl für {string} Franken im Tank',
-	async ({ seed }, building: string, days: number, amount: string) => {
-		await seed.fuelStock(building, inDays(-days), amount);
+	'im Gebäude {string} war am Ende des letzten Jahres Heizöl für {string} Franken im Tank',
+	async ({ seed }, building: string, amount: string) => {
+		await seed.fuelStock(building, `${Number(inDays(0).slice(0, 4)) - 1}-12-31`, amount);
 	}
 );
 
@@ -663,10 +633,9 @@ Given('das Gebäude {string} hat keinen Tank oder der Tank ist stillgelegt', asy
 
 // A period relative to today: running whatever day today is
 When(
-	'der Liegenschaftsverwalter die Vorschau der Abrechnungen von vor {int} Tagen bis in {int} Tagen für das Gebäude {string} öffnet',
-	async ({ verwalter, seed }, ago: number, ahead: number, building: string) => {
-		const [periodStart, periodEnd] = [inDays(-ago), inDays(ahead)];
-		await verwalter.attemptsTo(openPreview(Number(periodStart.slice(0, 4)), seed.idOf(building)!, { periodStart, periodEnd }));
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen des laufenden Jahres für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(inDays(0).slice(0, 4)), seed.idOf(building)!));
 	}
 );
 
@@ -746,23 +715,6 @@ When(
 Then('sagt die leere Vorschau zu {string} {string}', async ({ verwalter, seed, names }, building: string, text: string) => {
 	await verwalter.sees(allSkippedText(seed.idOf(building)!)).toBe(text.replace(building, names.get(building)!));
 });
-
-// #521 (Fachreview 521-1 V-2): one letter for the tenant's consent per contract with Mietstage in the short period
-Then(
-	'bietet die Wahl für {string} den Brief zur Zustimmung nur für {string} in der Wohnung {string} an',
-	async ({ verwalter, seed, names }, building: string, tenant: string, apartment: string) => {
-		await verwalter
-			.sees(consentLettersOfBuilding(seed.idOf(building)!))
-			.toEqual([`Brief zur Zustimmung herunterladen: ${names.get(tenant) ?? tenant}, Wohnung ${apartment}`]);
-	}
-);
-
-When(
-	'der Liegenschaftsverwalter bei {string} den Brief zur Zustimmung für {string} herunterlädt',
-	async ({ verwalter, seed, names }, building: string, tenant: string) => {
-		await verwalter.attemptsTo(downloadConsentLetterOf(seed.idOf(building)!, names.get(tenant) ?? tenant));
-	}
-);
 
 // #738: step «Gebäude» when one of its counts fails, how it names a building, at 390 px, and resumed
 Given('die Rechnungen der Gebäude lassen sich nicht zählen', async ({ verwalter }) => {

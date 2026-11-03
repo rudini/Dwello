@@ -332,64 +332,21 @@ describe('Mietvertragsdetail', () => {
 		]);
 		const link = byTestId('contract-missing-statement-invoices-2025-01-01')!;
 		expect(link.getAttribute('href')).toBe(invoices.href);
-		expect(byTestId('contract-missing-statement-short-help')).toBeNull();
 		expect(link.textContent!.trim()).toBe('Rechnungen 2025 ansehen');
-	});
-
-	// #199, #408 point 2: a statement covers part of the period; the days no statement of the building covers get a
-	// short Abrechnungsperiode
-	it('bietet für Tage, die eine Abrechnung nicht abdeckt, eine kurze Abrechnungsperiode an', () => {
-		const invoices = { href: '/invoices?building=b1&year=2025', label: 'Rechnungen 2025 ansehen' };
-		const way = { kind: 'short', start: '2025-10-01', end: '2025-12-31' };
-		open('2024-04-01', null, null, '2026-10-10', false, [
-			{ start: '2025-10-01', end: '2025-12-31', href: '/statements/generate?short', way, invoices }
-		]);
-		expect(text('contract-missing-statement')).toContain(
-			'Abrechnung 01.10.2025 – 31.12.2025 fehlt'
-		);
-		expect(text('contract-missing-statement')).toContain(
-			'Eine bestehende Abrechnung deckt nur einen Teil der Abrechnungsperiode ab; für 01.10.2025 – 31.12.2025 gibt es noch keine Abrechnung.'
-		);
-		// it would change the statement that covers the rest (Fachreview 2 V-9)
-		expect(text('contract-missing-statement')).not.toContain('Abgerechnet bis');
-		expect(text('contract-missing-statement')).not.toContain('noch keine Nebenkostenabrechnung');
-		const link = byTestId('contract-missing-statement-link-2025-10-01')!;
-		expect(link.getAttribute('href')).toBe('/statements/generate?short');
-		expect(link.textContent!.trim()).toBe(
-			'Kurze Abrechnungsperiode 01.10.2025 – 31.12.2025 abrechnen'
-		);
-		// #486: a visible help text at the link
-		expect(text('contract-missing-statement-short-help')).toBe(
-			'Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab.'
-		);
-		expect(byTestId('contract-missing-statement-invoices-2025-10-01')).not.toBeNull();
 	});
 
 	// #408 point 2: days in the period of another statement of the building are billed in exactly that period
 	it('bietet für Tage in der Periode einer Abrechnung des Gebäudes diese Periode an', () => {
 		const way = { kind: 'existing', start: '2024-07-01', end: '2025-06-30' };
 		open('2024-04-01', null, null, '2026-10-10', false, [
-			{ start: '2025-01-01', end: '2025-06-30', href: '/statements/generate?existing', way },
-			{ start: '2025-07-01', end: '2025-12-31', href: '/statements/generate?short', way: { kind: 'short', start: '2025-07-01', end: '2025-12-31' } }
+			{ start: '2025-01-01', end: '2025-06-30', href: '/statements/generate?existing', way }
 		]);
 		expect(text('contract-missing-statement')).toContain(
-			'für 01.01.2025 – 30.06.2025, 01.07.2025 – 31.12.2025 gibt es noch keine Abrechnung.'
+			'für 01.01.2025 – 30.06.2025 gibt es noch keine Abrechnung.'
 		);
 		expect(byTestId('contract-missing-statement-link-2025-01-01')!.textContent!.trim()).toBe(
 			'Abrechnungsperiode 01.07.2024 – 30.06.2025 wählen'
 		);
-		expect(byTestId('contract-missing-statement-short-help')).not.toBeNull();
-	});
-
-	// #512 (Fachreview 512-1 V-2): the help of #486 stands in the row of the short period, not under an earlier period
-	it('rät nur bei der kurzen Abrechnungsperiode zur Abrechnungsperiode im Mietvertrag', () => {
-		open('2024-04-01', null, null, '2026-10-10', false, [
-			{ start: '2025-07-01', end: '2025-12-31', href: '/statements/generate?short', way: { kind: 'short', start: '2025-07-01', end: '2025-12-31' } },
-			{ start: '2023-07-01', end: '2024-06-30', href: '/statements/generate?whole' }
-		]);
-		const row = (start: string) => byTestId(`contract-missing-statement-period-${start}`)!;
-		expect(row('2025-07-01').querySelector('[data-testid="contract-missing-statement-short-help"]')).not.toBeNull();
-		expect(row('2023-07-01').querySelector('[data-testid="contract-missing-statement-short-help"]')).toBeNull();
 	});
 
 	// Fachreview 199-1 V-1: statements made before #408 point 2; a statement of the contract overlaps the period, so a

@@ -26,15 +26,6 @@ export const offeredPeriodLink = (buildingId: string, periodStart: string) =>
 	target(`Abrechnungsperiode ab ${periodStart} für Gebäude ${buildingId}`, (page) =>
 		page.getByTestId(`generate-building-period-${buildingId}-${periodStart}`)
 	);
-// #521 (Fachreview 521-1 V-2): the letters for the tenants' consent to a new Abrechnungsperiode, one per contract
-export const consentLettersOf = (buildingId: string) =>
-	target(`Briefe zur Zustimmung für Gebäude ${buildingId}`, (page) =>
-		page.getByTestId(new RegExp(`^generate-building-consent-letter-${buildingId}-`))
-	);
-export const consentLetterOf = (buildingId: string, tenantName: string) =>
-	target(`Brief zur Zustimmung für ${tenantName} in Gebäude ${buildingId}`, (page) =>
-		page.getByTestId(new RegExp(`^generate-building-consent-letter-${buildingId}-`)).filter({ hasText: tenantName })
-	);
 // Mietverträge of the building that already have a statement for the period (step 2)
 export const buildingBilled = (buildingId: string) =>
 	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));
@@ -103,9 +94,6 @@ export const uncategorizedInvoices = target('Hinweis auf Rechnungen ohne Kategor
 	page.getByTestId('uncategorized-invoices')
 );
 export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
-export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne Leistungszeitraum', (page) =>
-	page.getByTestId('invoices-without-service-period')
-);
 // Heating invoices without Leistungszeitraum next to ones with one, at a tenant change with a Heizprofil (#339)
 export const heatingWithoutServicePeriod = target('Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum', (page) =>
 	page.getByTestId('heating-without-service-period')

@@ -5,7 +5,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import BuildingChoice from './BuildingChoice.svelte';
 	import type { Building } from '$lib/types';
-	import type { Billed } from '$lib/statement-wizard';
+	import { unchoosable, type Billed } from '$lib/statement-wizard';
 
 	// Step 2: the buildings whose rental contracts get a Nebenkostenabrechnung
 	let {
@@ -64,8 +64,9 @@
 			}
 			if (statements.data) {
 				billed = Object.fromEntries(statements.data.map((row) => [row.buildingId, row]));
-				// a building the period overlaps is not chosen, also not from a link or a draft (#408 point 2)
-				selectedBuildingIds = selectedBuildingIds.filter((id) => !billed[id]?.overlap);
+				// a building the period overlaps or that bills another period is not chosen, also not from a link or a
+				// draft (#408 point 2, #1088)
+				selectedBuildingIds = selectedBuildingIds.filter((id) => !unchoosable(billed[id]));
 			}
 			loading = false;
 		});
@@ -80,11 +81,11 @@
 	const leftOut = $derived(
 		buildings.filter(({ id }) => {
 			const row = billed[id];
-			return !!row?.contracts && row.billed === row.contracts && !row.overlap;
+			return !!row?.contracts && row.billed === row.contracts && !unchoosable(row);
 		})
 	);
 	const all = $derived(
-		buildings.filter((b) => !leftOut.includes(b) && !billed[b.id]?.overlap).map((b) => b.id)
+		buildings.filter((b) => !leftOut.includes(b) && !unchoosable(billed[b.id])).map((b) => b.id)
 	);
 	const allSelected = $derived(
 		all.length > 0 && all.every((id) => selectedBuildingIds.includes(id))

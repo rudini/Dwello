@@ -69,7 +69,6 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 		},
 		{
 			body: t.Object({
-				accounting_period: t.Optional(t.String()),
 				management_fee_pct: t.Optional(t.String()),
 				default_heating_profile_id: t.Optional(t.String()),
 				default_distribution_key_id: t.Optional(t.String()),

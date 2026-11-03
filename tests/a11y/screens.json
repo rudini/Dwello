@@ -71,7 +71,7 @@
 		"uncategorized-invoices": "Statement wizard preview of 2015 with an allocable invoice without Kategorie: the hint that holds the run, with the invoice's edit link (#382, #452).",
 		"allocability-confirm": "Edit form of a category with allocable invoices, saved as not allocable: the question that names how many invoices it takes out (#309, #452).",
 		"allocable-confirm": "Edit form of a predefined category that is not allocable, saved as allocable: the question that names the law (#309, #452).",
-		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
+		"invoice-hints": "Statement wizard preview of 2025 with an invoice dated shortly after the period end, with its edit link (#134; #1088: no periods under a year, so no invoices without Leistungszeitraum that count in full, #131).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
 		"preview-outdated": "Statement wizard preview of a period whose existing statements include an outdated draft (a later invoice): named with its link and what changed (#132).",
@@ -103,7 +103,7 @@
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
 		"buildings-counts-failed": "Statement wizard step «Gebäude» when neither the invoice count nor the existing statements load: the note saying so (#738).",
 		"buildings-overlap": "Statement wizard step «Gebäude» with a period that overlaps the building's statement period without being equal: the building cannot be chosen, the text names the existing period and the ways out (#199, #408 point 2).",
-		"buildings-consent": "Statement wizard step «Gebäude» with a period that overlaps a statement period of another type than the setting: the ways out with the short period and one link per contract to the letter for the tenant's consent to the new Abrechnungsperiode (#521).",
+		"buildings-other-period": "Statement wizard step «Gebäude» with a building that bills another Abrechnungsperiode than the chosen one: the building cannot be chosen, the text names its period and what to choose in step 1 (#1088).",
 		"formula-tested": "Distribution key form after testing a formula.",
 		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
 		"ki-unsure": "New category form after the KI was not sure: the hint to choose oneself, nothing preset (#176, #186).",
@@ -431,27 +431,6 @@
 			]
 		},
 		{
-			"name": "contract-partly-billed-detail",
-			"path": "/contracts/{partlyBilledContract}",
-			"states": [
-				"default"
-			]
-		},
-		{
-			"name": "contract-consent-detail",
-			"path": "/contracts/{consentContract}",
-			"states": [
-				"default"
-			]
-		},
-		{
-			"name": "contract-consent-letter-refused",
-			"path": "/contracts/{contract}/consent-letter",
-			"states": [
-				"default"
-			]
-		},
-		{
 			"name": "contract-moved-out-detail",
 			"path": "/contracts/{movedOutContract}",
 			"states": [
@@ -634,7 +613,7 @@
 				"draft-dropped",
 				"buildings-billed",
 				"buildings-overlap",
-				"buildings-consent",
+				"buildings-other-period",
 				"buildings-counts-failed",
 				"link-preset",
 				"agreed-costs",

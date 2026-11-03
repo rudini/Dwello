@@ -29,14 +29,12 @@ Funktionalität: Gebäude bearbeiten
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Eichenhof"
 
   # #1088: bis zur ersten Abrechnung des Gebäudes lässt sich die Abrechnungsperiode ändern
-  @wip
   Szenario: Die Abrechnungsperiode vor der ersten Abrechnung ändern
     Wenn der Liegenschaftsverwalter die Abrechnungsperiode auf "November – Oktober" ändert
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Eichenhof"
     Und nennt die Gebäudeseite die Abrechnungsperiode "November – Oktober"
 
   # #1088: ab der ersten Abrechnung bleibt die Abrechnungsperiode fest, das Feld sagt warum
-  @wip
   Szenario: Ab der ersten Abrechnung bleibt die Abrechnungsperiode fest
     Angenommen im Gebäude "Eichenhof" gibt es die leere Wohnung "1.01"
     Und der Mieter "Lea Graf" existiert
@@ -47,7 +45,6 @@ Funktionalität: Gebäude bearbeiten
     Und sagt das Formular zur Abrechnungsperiode "Für Eichenhof gibt es schon Abrechnungen. Die Abrechnungsperiode bleibt darum fest."
 
   # #1088: die Seite war offen, als die erste Abrechnung entstand (z.B. in einem zweiten Tab)
-  @wip
   Szenario: Die Abrechnungsperiode ändern, nachdem inzwischen eine Abrechnung entstanden ist
     Angenommen im Gebäude "Eichenhof" gibt es die leere Wohnung "1.01"
     Und der Mieter "Lea Graf" existiert

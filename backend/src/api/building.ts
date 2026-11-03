@@ -11,4 +11,6 @@ export interface BuildingWithStats extends Building {
 	apartmentCount: number;
 	occupiedCount: number;
 	vacantCount: number;
+	/** #1088: the building has a statement, so its Abrechnungsperiode stays as it is (only `GET /buildings/:id`) */
+	accountingPeriodLocked?: boolean;
 }

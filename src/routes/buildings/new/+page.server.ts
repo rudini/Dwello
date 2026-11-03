@@ -2,9 +2,17 @@ import { m } from '$lib/paraglide/messages';
 import { backendMessage, refusedFields } from '$lib/backend-error';
 import { redirect } from '@sveltejs/kit';
 import { formError, parseBuildingForm, parseRegisterApartments } from '$lib/server/building-form';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+// #1088 (Fachreview 1088-1 V-8): the form proposes the Abrechnungsperiode most buildings have; the calendar year when
+// it cannot be read
+export const load: PageServerLoad = async ({ fetch }) => {
+	const response = await fetch(`${BACKEND_URL}/api/v1/buildings/new-defaults`).catch(() => null);
+	const defaults: { accountingPeriod?: string } = response?.ok ? await response.json() : {};
+	return { accountingPeriod: defaults.accountingPeriod ?? 'calendar' };
+};
 
 export const actions: Actions = {
 	default: async ({ request, fetch }) => {

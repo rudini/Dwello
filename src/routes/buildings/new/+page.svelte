@@ -3,9 +3,9 @@
 	import BuildingForm from '../BuildingForm.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
-	let { form }: { form: ActionData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 	const errors = $derived(form?.errors || {});
 </script>
 
@@ -20,6 +20,11 @@
 		trail={[{ href: '/buildings', label: m.nav_buildings() }]}
 	/>
 	<Panel>
-		<BuildingForm mode="create" {errors} cancelHref="/buildings" />
+		<BuildingForm
+			mode="create"
+			initial={{ accountingPeriod: data.accountingPeriod }}
+			{errors}
+			cancelHref="/buildings"
+		/>
 	</Panel>
 </div>

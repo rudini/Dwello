@@ -10,4 +10,4 @@ export const noTankCheckbox = target('Kein Tank oder Tank stillgelegt', (page) =
 export const submitButton = target('Gebäude speichern', (page) => page.getByTestId('building-form-submit'));
 export const buildingTypeSelect = target('Gebäudetyp', (page) => page.getByTestId('building-type-select'));
 export const accountingPeriodSelect = target('Abrechnungsperiode', (page) => page.getByTestId('building-accounting-period-select'));
-export const accountingPeriodHelp = target('Hilfe zur Abrechnungsperiode', (page) => page.getByTestId('building-accounting-period-help'));
+export const accountingPeriodHelp = target('Hilfe zur Abrechnungsperiode', (page) => page.getByTestId('building-accounting-period-select-help'));

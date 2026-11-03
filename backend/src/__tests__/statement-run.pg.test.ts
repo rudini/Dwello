@@ -6,15 +6,13 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, configuration, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { sendJson } from './helpers/auth';
-import { daysAfter, swissToday } from '../services/today';
-import { lastCompletedPeriod } from '../services/accounting-period';
 import { insertInvoice } from './helpers/records';
 
 const token = crypto.randomUUID();
@@ -82,7 +80,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual([
-			{ start: '2025-01-01', end: '2025-12-31', way: { kind: 'whole', start: '2025-01-01', end: '2025-12-31' }, open: true, consent: false }
+			{ start: '2025-01-01', end: '2025-12-31', way: { kind: 'whole', start: '2025-01-01', end: '2025-12-31' }, open: true }
 		]);
 	});
 
@@ -104,67 +102,34 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		expect([byContract[billed], byContract[missing]]).toEqual([[], [{ start: '2024-01-01', end: '2024-12-31' }]]);
 	});
 
-	// #512 (code review 512-1 C-2): the list and the Übersicht take the earlier Abrechnungsperiode from the building's
-	// statements, also from another contract's
-	it('schneidet je Mietvertrag nach den Abrechnungen des Gebäudes, auch eines anderen Mietvertrags', async () => {
+	// #1088: the list and the Übersicht follow the Abrechnungsperiode of the contract's building
+	it('folgt je Mietvertrag der Abrechnungsperiode seines Gebäudes', async () => {
 		const building = await newBuilding();
+		expect((await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'july-june' })).status).toBe(200);
 		const missing = await rent('1.01', 'Brunner', '2022-07-01', '2023-06-30', building);
-		const other = await rent('1.02', 'Huber', '2023-07-01', '2024-06-30', building);
-		await generateStatement({ contractId: other, buildingId: building, periodStart: '2023-07-01', periodEnd: '2024-06-30', managementFeePercent: 0 });
 
-		const response = await sendJson('GET', '/api/v1/contracts/missing-statements');
-		const byContract = (await response.json()) as Record<string, unknown>;
+		const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
+		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${missing}/missing-statements`)).json()) as { start: string; end: string }[];
 
 		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		expect(ofContract.map(({ start, end }) => ({ start, end }))).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
 	});
 });
 
-// #512 (product owner 2026-10-28, persona Weber 512 P-1): saving another Abrechnungsperiode stores the day of the
-// change and the type before; periods ended before that day keep the earlier type
-describe('Wechsel der Einstellung «Abrechnungsperiode»', () => {
-	const missingOf = async (contract: string) =>
-		(await (await sendJson('GET', `/api/v1/contracts/${contract}/missing-statements`)).json()) as { start: string; end: string }[];
-	const setPeriod = (value: string) => sendJson('PUT', '/api/v1/config', { accounting_period: value });
-	afterAll(async () => {
-		await db.delete(configuration).where(inArray(configuration.key, ['accounting_period', 'accounting_period_changed']));
-	});
+// #1088: a run whose period lies in no period of the building's own type cannot choose the building
+describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
+	const planOf = async (building: string, start: string, end: string) =>
+		(await (await sendJson('GET', `/api/v1/statements/run?buildingId=${building}&periodStart=${start}&periodEnd=${end}`)).json()) as {
+			otherPeriod: string | null;
+		};
 
-	it('lässt ein Jahr, das vor dem Wechsel endete, in der früheren Abrechnungsperiode', async () => {
+	it('nennt die eigene Abrechnungsperiode eines Gebäudes, in die der Lauf nicht passt', async () => {
 		const building = await newBuilding();
-		const contract = await rent('1.01', 'Weber', '2024-01-01', undefined, building);
-		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
+		await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'july-june' });
+		await rent('1.01', 'Graf', '2023-07-01', undefined, building);
 
-		expect((await setPeriod('july-june')).status).toBe(200);
-
-		const missing = await missingOf(contract);
-		expect(missing).toContainEqual(expect.objectContaining({ start: '2025-01-01', end: '2025-12-31' }));
-		expect(missing.map((part) => part.start)).not.toContain('2025-07-01');
-	});
-
-	// code review 512-2 C-4: a setting that ended no period of its own before it was changed back is no earlier type
-	it('nimmt einen Wechsel an einem späteren Tag zurück, wenn in der Zwischenzeit keine Periode endete', async () => {
-		const building = await newBuilding();
-		const contract = await rent('1.01', 'Später', '2024-01-01', undefined, building);
-		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
-		await setPeriod('july-june');
-		const [, from] = (await db.select().from(configuration).where(eq(configuration.key, 'accounting_period_changed')))[0].value.split(':');
-		await db.update(configuration).set({ value: `${daysAfter(lastCompletedPeriod('july-june', swissToday()).end, 1)}:${from}` }).where(eq(configuration.key, 'accounting_period_changed'));
-		await setPeriod('calendar');
-
-		const missing = await missingOf(contract);
-		expect(missing).toContainEqual(expect.objectContaining({ start: '2025-01-01', end: '2025-12-31' }));
-		expect(missing.map((part) => part.start)).not.toContain('2025-07-01');
-	});
-
-	it('nimmt einen Wechsel am selben Tag zurück, wenn die frühere Abrechnungsperiode wieder gewählt ist', async () => {
-		const building = await newBuilding();
-		const contract = await rent('1.01', 'Zurück', '2025-01-01', undefined, building);
-		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2025-07-01', periodEnd: '2026-06-30', managementFeePercent: 0 });
-		await setPeriod('july-june');
-		await setPeriod('calendar');
-
-		// without a stored change the statement of July–June cuts the earlier days, as before
-		expect(await missingOf(contract)).toContainEqual(expect.objectContaining({ start: '2024-07-01', end: '2025-06-30' }));
+		expect((await planOf(building, '2024-01-01', '2024-12-31')).otherPeriod).toBe('july-june');
+		expect((await planOf(building, '2023-07-01', '2024-06-30')).otherPeriod).toBeNull();
 	});
 });
 

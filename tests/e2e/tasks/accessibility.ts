@@ -685,7 +685,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
-	'invoice-hints': (example) => previewOf('2026', 'late-invoices', '2026-05-31')(example),
+	// #1088: a whole period; the Hauswart invoice of 31.01.2026 is dated shortly after its end
+	'invoice-hints': (example) => previewOf('2025', 'late-invoices')(example),
 	// 2015: an allocable invoice without Kategorie holds the preview (#382)
 	'uncategorized-invoices': (example) => previewOf('2015', 'uncategorized-invoices')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
@@ -753,14 +754,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(on.shown('generate-counts-failed'))
 		),
-	// #521: 2020 overlaps Ahornweg's statement 01.11.2019 – 31.10.2020: the letter for Vera's consent
-	// (step 2 answers for all buildings at once)
-	'buildings-consent': () => (actor) =>
+	// #1088: Ahornweg bills November – October, so a run of 2020 cannot choose it
+	'buildings-other-period': (example) => (actor) =>
 		actor.attemptsTo(
 			EnterDate.of('2020-01-01').into(on.periodStartInput),
 			EnterDate.of('2020-12-31').into(on.periodEndInput),
 			Click.on(nextButton),
-			Wait.until(on.firstConsentLetter)
+			Wait.until(on.shown(`generate-building-billed-${example.otherPeriodBuilding}`))
 		),
 	'period-not-over': () => (actor) =>
 		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))

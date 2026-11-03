@@ -69,7 +69,6 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 	it('Einstellungen: behalten die gewählten Standardwerte', async () => {
 		const props = {
 			settings: {
-				accountingPeriod: 'calendar',
 				defaultHeatingProfileId: '',
 				defaultDistributionKeyId: ''
 			},
@@ -77,13 +76,11 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 			distributionKeys: [{ id: 'd1', name: 'Nach Fläche' }]
 		} as never;
 		await serverRender('routes/config/DefaultsSection.svelte', props);
-		select('setting-accountingPeriod').value = 'july-june';
 		select('setting-defaultHeatingProfileId').value = 'h2';
 		select('setting-defaultDistributionKeyId').value = 'd1';
 
 		hydrateAs(DefaultsSection, props);
 
-		expect(select('setting-accountingPeriod').value).toBe('july-june');
 		expect(select('setting-defaultHeatingProfileId').value).toBe('h2');
 		expect(select('setting-defaultDistributionKeyId').value).toBe('d1');
 	});

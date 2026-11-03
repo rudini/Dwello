@@ -5,10 +5,12 @@
 
 import { eq, ilike, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { buildings, apartments, type Building, type NewApartment, type NewBuilding } from '../db/schema';
+import { buildings, apartments, utilityStatements, type Building, type NewApartment, type NewBuilding } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { everyWordIn } from './word-search';
 import type { BuildingWithStats } from '../api/building';
+import { CodedError } from './coded-error';
+import { commonType } from './period-types';
 
 export interface BuildingFilters {
 	search?: string;
@@ -131,8 +133,25 @@ export async function getBuilding(id: string): Promise<BuildingWithStats | null>
 		...building,
 		apartmentCount: Number(counts?.total ?? 0),
 		occupiedCount: Number(counts?.occupied ?? 0),
-		vacantCount: Number(counts?.vacant ?? 0)
+		vacantCount: Number(counts?.vacant ?? 0),
+		accountingPeriodLocked: await hasStatement(id)
 	};
+}
+
+/** #1088: whether the building has a statement, a draft or a replaced one included: then its Abrechnungsperiode is fixed */
+async function hasStatement(id: string) {
+	const [row] = await db
+		.select({ id: utilityStatements.id })
+		.from(utilityStatements)
+		.innerJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
+		.where(eq(apartments.buildingId, id))
+		.limit(1);
+	return !!row;
+}
+
+/** #1088 (Fachreview 1088-1 V-8): a new building's Abrechnungsperiode as proposed: the one most buildings have */
+export async function proposedAccountingPeriod() {
+	return commonType((await db.select({ type: buildings.accountingPeriod }).from(buildings)).map((b) => b.type));
 }
 
 /**
@@ -180,6 +199,12 @@ export async function updateBuilding(
 	id: string,
 	data: Partial<NewBuilding>
 ): Promise<Building | null> {
+	if (data.accountingPeriod) {
+		const [current] = await db.select({ type: buildings.accountingPeriod }).from(buildings).where(eq(buildings.id, id));
+		if (current && current.type !== data.accountingPeriod && (await hasStatement(id))) {
+			throw new CodedError('BUILDING_PERIOD_LOCKED', 'The building has statements: its Abrechnungsperiode stays as it is');
+		}
+	}
 	const [building] = await db
 		.update(buildings)
 		.set({ ...data, updatedAt: new Date() })

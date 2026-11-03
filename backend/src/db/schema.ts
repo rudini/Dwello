@@ -40,6 +40,7 @@ export const buildings = pgTable(
 		buildingType: varchar('building_type', { length: 50 }),
 		yearBuilt: integer('year_built'),
 		noTank: boolean('no_tank').notNull().default(false), // no tank or decommissioned: no Tankbestand asked (#72)
+		accountingPeriod: varchar('accounting_period', { length: 20 }).$type<import('../services/period-types').AccountingPeriodType>().notNull().default('calendar'), // fixed from the first statement (#1088)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -679,23 +680,8 @@ export const kiSettings = pgTable('ki_settings', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 });
 
-// #718: the Sicherung; per Wiederherstellungscode only its public key and salt (base64), and each run
-export const backupCodes = pgTable('backup_codes', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	publicKey: text('public_key').notNull(),
-	salt: text('salt').notNull(),
-	confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
-	pendingCode: text('pending_code'), // only until the confirmation
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
-});
-
-export const backupRuns = pgTable('backup_runs', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
-	finishedAt: timestamp('finished_at', { withTimezone: true }),
-	file: text('file'),
-	error: text('error')
-});
+// #718: the Sicherung, in a file of its own
+export * from './backup-schema';
 
 // ============================================================================
 // Type Exports for Use in Application

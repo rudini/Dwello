@@ -1,4 +1,6 @@
+import { m } from '$lib/paraglide/messages';
 import { formatDate } from './utils/format';
+import type { BuildingWithStats } from '../../backend/src/api/building';
 
 type Range = { start: string; end: string };
 
@@ -17,3 +19,23 @@ export const periodQuery = ({ start, end }: Range) => ({ periodStart: start, per
 /** The period of a query in those names; a missing day stays empty */
 export const periodOf = (query: URLSearchParams) =>
 	periodQuery({ start: query.get('periodStart') ?? '', end: query.get('periodEnd') ?? '' });
+
+/** #1088: a building's own Abrechnungsperiode, as the backend stores it */
+export type AccountingPeriodType = BuildingWithStats['accountingPeriod'];
+
+/** #1088: the Abrechnungsperioden a building can have, by their labels in the building form */
+export const accountingPeriods = (): { value: AccountingPeriodType; label: string }[] => [
+	{ value: 'calendar', label: m.buildings_period_calendar() },
+	{ value: 'july-june', label: m.buildings_period_july() },
+	{ value: 'november-october', label: m.buildings_period_november() }
+];
+
+/** #1088 (Fachreview 1088-1 V-6): a building that bills another Abrechnungsperiode, with what to choose in step 1 */
+export function otherPeriodText(type: AccountingPeriodType, building: string) {
+	const text = {
+		calendar: m.statements_building_other_period_calendar,
+		'july-june': m.statements_building_other_period_july,
+		'november-october': m.statements_building_other_period_november
+	}[type];
+	return text({ building });
+}

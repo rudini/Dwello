@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { createBdd } from 'playwright-bdd';
 import { invoicePeriodFilterText } from '../questions/invoices';
 import { test } from '../fixtures/test';
@@ -16,9 +15,6 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	missingStatementsShown,
-	shortPeriodHelpText,
-	shortPeriodHelpShownAt,
-	consentLetterShown,
 	missingStatementInvoicesLabel,
 	missingStatementOffer,
 	billedUntilOfContract,
@@ -58,9 +54,6 @@ import {
 	openContractApartment,
 	openContractTenant,
 	openRefusedStatement,
-	downloadConsentLetter,
-	openConsentLetter,
-	requestConsentLetter,
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
@@ -74,7 +67,6 @@ import {
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
-import { downloadedFileName, downloadedPdfText } from '../questions/download';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -269,39 +261,13 @@ Then('meldet der Mietvertrag die fehlende Abrechnung {string}', async ({ verwalt
 	await verwalter.sees(missingStatementsText).toContain(period);
 });
 
-Then(
-	'erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt',
-	async ({ verwalter }) => {
-		await verwalter.sees(missingStatementsText).toMatch(/deckt nur einen Teil der Abrechnungsperiode ab; für .+ gibt es noch keine Abrechnung/);
-	}
-);
-
 // #408 point 2: the way the warning offers for the days from that day, by its label
 Then('bietet der Mietvertrag für die Tage ab {string} {string} an', async ({ verwalter }, periodStart: string, label: string) => {
 	await verwalter.sees(missingStatementOffer(periodStart)).toBe(label);
 });
 
-// #512 (Fachreview 512-1 V-2): the help of #486 belongs to the days of a short period, not to an earlier period
-Then('rät der Mietvertrag bei den Tagen ab {string} zur Abrechnungsperiode im Mietvertrag', async ({ verwalter }, periodStart: string) => {
-	await verwalter.sees(shortPeriodHelpShownAt(periodStart)).toBe(true);
-});
-
-Then('rät der Mietvertrag bei den Tagen ab {string} nichts zur Abrechnungsperiode im Mietvertrag', async ({ verwalter }, periodStart: string) => {
-	await verwalter.sees(missingStatementOffer(periodStart)).toBeTruthy();
-	await verwalter.sees(shortPeriodHelpShownAt(periodStart)).toBe(false);
-});
-
-Then('rät der Mietvertrag {string}', async ({ verwalter }, help: string) => {
-	await verwalter.sees(shortPeriodHelpText).toBe(help);
-});
-
 When('der Liegenschaftsverwalter die fehlende Abrechnung ab {string} erstellen will', async ({ verwalter }, periodStart: string) => {
 	await verwalter.attemptsTo(createMissingStatement(periodStart));
-});
-
-Then('nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg', async ({ verwalter }) => {
-	await verwalter.sees(missingStatementsShown).toBe(true);
-	await verwalter.sees(missingStatementsText).not.toContain('Abgerechnet bis');
 });
 
 When(
@@ -546,41 +512,4 @@ Then('erklärt der Dialog beim Vertragsende {string}', async ({ verwalter }, tex
 
 Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(noticeReceivedHelp).toContain(text);
-});
-
-// #521: the letter for the tenants' consent to a new Abrechnungsperiode
-When('der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode herunterlädt', async ({ verwalter }) => {
-	await verwalter.attemptsTo(downloadConsentLetter);
-});
-
-When('der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode anfordert', async ({ verwalter }) => {
-	await verwalter.attemptsTo(requestConsentLetter);
-});
-
-Then('richtet sich der Brief an {string}', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.sees(downloadedPdfText).toContain(names.get(tenant) ?? tenant);
-});
-
-// Fachreview 521-2 V-9: the letter's title, the apartment and the tenant's last name (the seed's token)
-// WebKit saves the download with «_» for each space of the name (#1038)
-Then('heisst die Datei {string} mit dem Nachnamen von {string}', async ({ verwalter, names }, title: string, tenant: string) => {
-	const name = `${title} ${(names.get(tenant) ?? tenant).split(' ').at(-1)}.pdf`;
-	await verwalter.sees(downloadedFileName).toMatch(new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replaceAll(' ', '[ _]')}$`));
-});
-
-// Fachreview 521-1 V-1: without an earlier Abrechnungsperiode there is no letter
-Then('bietet der Mietvertrag keinen Brief zur Zustimmung an', async ({ verwalter }) => {
-	await verwalter.sees(consentLetterShown).toBe(false);
-});
-
-When(
-	'der Liegenschaftsverwalter den Brief zur Zustimmung für den Mietvertrag von {string} direkt öffnet',
-	async ({ verwalter, seed }, tenant: string) => {
-		await verwalter.attemptsTo(openConsentLetter(seed.idOf(`Mietvertrag ${tenant}`)!));
-	}
-);
-
-// Code review 521b C-3: a typed address of a contract that does not exist
-When('der Liegenschaftsverwalter den Brief zur Zustimmung für einen unbekannten Mietvertrag direkt öffnet', async ({ verwalter }) => {
-	await verwalter.attemptsTo(openConsentLetter(randomUUID()));
 });

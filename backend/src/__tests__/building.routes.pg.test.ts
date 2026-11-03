@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { sendJson } from './helpers/auth';
+import { createRental } from './helpers/rental';
 
 describe('PUT /api/v1/buildings/:id', () => {
 	const created: string[] = [];
@@ -151,5 +152,61 @@ describe('PUT /api/v1/buildings/:id prüft das Formular', () => {
 		} finally {
 			await deleteBuilding(id);
 		}
+	});
+});
+
+// #1088: jedes Gebäude hat seine eigene Abrechnungsperiode; ab der ersten Abrechnung bleibt sie fest
+describe('Abrechnungsperiode des Gebäudes', () => {
+	const rentals: Awaited<ReturnType<typeof createRental>>[] = [];
+	const statements: string[] = [];
+	afterAll(async () => {
+		for (const id of statements) await sendJson('DELETE', `/api/v1/statements/${id}`);
+		for (const rental of rentals) await rental.remove();
+	});
+	const rental = async () => {
+		const created = await createRental(crypto.randomUUID().slice(0, 8), { startDate: '2024-01-01', monthlyAdvancePayment: '100' });
+		rentals.push(created);
+		return created;
+	};
+	const read = async (id: string) =>
+		(await (await sendJson('GET', `/api/v1/buildings/${id}`)).json()) as { accountingPeriod: string; accountingPeriodLocked: boolean };
+
+	it('rechnet ein neues Gebäude ohne Angabe im Kalenderjahr ab und lässt die Periode bis zur ersten Abrechnung ändern', async () => {
+		const { building } = await rental();
+		expect(await read(building)).toMatchObject({ accountingPeriod: 'calendar', accountingPeriodLocked: false });
+
+		const response = await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'july-june' });
+
+		expect(response.status).toBe(200);
+		expect(await read(building)).toMatchObject({ accountingPeriod: 'july-june', accountingPeriodLocked: false });
+	});
+
+	it('lehnt eine Abrechnungsperiode ab, die es nicht gibt', async () => {
+		const { building } = await rental();
+
+		const response = await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'march-february' });
+
+		expect(response.status).toBe(422);
+	});
+
+	it('lehnt nach der ersten Abrechnung eine andere Abrechnungsperiode mit ihrem Code ab und nimmt dieselbe an', async () => {
+		const { building, contract } = await rental();
+		const created = await sendJson('POST', '/api/v1/statements/generate', {
+			contractId: contract,
+			buildingId: building,
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31',
+			managementFeePercent: 0
+		});
+		statements.push(((await created.json()) as { id: string }).id);
+		expect(await read(building)).toMatchObject({ accountingPeriod: 'calendar', accountingPeriodLocked: true });
+
+		const refused = await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'july-june' });
+		const same = await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'calendar', yearBuilt: 1972 });
+
+		expect(refused.status).toBe(409);
+		expect(await refused.json()).toMatchObject({ code: 'BUILDING_PERIOD_LOCKED' });
+		expect(same.status).toBe(200);
+		expect(await read(building)).toMatchObject({ accountingPeriod: 'calendar' });
 	});
 });

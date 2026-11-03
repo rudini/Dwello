@@ -1,6 +1,5 @@
 {
 	"data": {
-		"accounting_period": "july-june",
 		"management_fee_pct": "2.5",
 		"default_heating_profile_id": "hp1",
 		"default_distribution_key_id": "dk1",

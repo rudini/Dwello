@@ -275,27 +275,8 @@ Funktionalität: Mietvertragsdetail
     Dann zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres
     Und meldet der Mietvertrag keine fehlende Abrechnung
 
-  # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Mietstage ohne Abrechnung.
-  # #408 Punkt 2: Tage, die keine Abrechnung des Gebäudes abdeckt, rechnet eine kurze Abrechnungsperiode ab
-  Szenario: Teilweise abgerechnete Periode am Mietvertrag
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Dann meldet der Mietvertrag die fehlende Abrechnung "01.10.2024 – 31.12.2024"
-    Und erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt
-    Und bietet der Mietvertrag für die Tage ab "2024-10-01" "Kurze Abrechnungsperiode 01.10.2024 – 31.12.2024 abrechnen" an
-    # #486: die Abrechnungsperiode kann im Mietvertrag stehen
-    Und rät der Mietvertrag "Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab."
-    # Fachreview 2 V-9: «Abgerechnet bis» würde die bestehende Abrechnung ändern
-    Und nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg
-
-  Szenario: Kurze Abrechnungsperiode am Mietvertrag abrechnen
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter die fehlende Abrechnung ab "2024-10-01" erstellen will
-    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" vom "2024-10-01" bis "2024-12-31"
-
-  # #408 Punkt 2: Tage in der Periode einer bestehenden Abrechnung des Gebäudes rechnet genau diese Periode ab,
-  # die übrigen Tage eine kurze Abrechnungsperiode für alle Mietverträge des Gebäudes
+  # #408 Punkt 2: Tage in der Periode einer bestehenden Abrechnung des Gebäudes rechnet genau diese Periode ab; für
+  # die übrigen Tage gibt es keine kurze Abrechnungsperiode (#1088)
   Szenario: Fehlende Tage in der Abrechnungsperiode eines anderen Mietvertrags
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert
@@ -303,9 +284,7 @@ Funktionalität: Mietvertragsdetail
     Und für "Ben Meier" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung "01.04.2024 – 30.06.2024"
-    Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2024 – 31.12.2024"
     Und bietet der Mietvertrag für die Tage ab "2024-04-01" "Abrechnungsperiode 01.07.2023 – 30.06.2024 wählen" an
-    Und bietet der Mietvertrag für die Tage ab "2024-07-01" "Kurze Abrechnungsperiode 01.07.2024 – 31.12.2024 abrechnen" an
 
   Szenario: Von fehlenden Tagen zur Abrechnungsperiode eines anderen Mietvertrags
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
@@ -316,87 +295,14 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter die fehlende Abrechnung ab "2024-04-01" erstellen will
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" vom "2023-07-01" bis "2024-06-30"
 
-  # #1088: die fehlenden Abrechnungen folgen der Abrechnungsperiode des Gebäudes
-  @wip
+  # #1088: die fehlenden Abrechnungen folgen der Abrechnungsperiode des Gebäudes, jede eine ganze Periode; Anna Keller
+  # zog im April 2024 ein (Fachreview 1088-1 V-2)
   Szenario: Fehlende Abrechnungen folgen der Abrechnungsperiode des Gebäudes
     Angenommen das Gebäude "Ahornhof" rechnet von Juli bis Juni ab
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Dann meldet der Mietvertrag die fehlende Abrechnung "01.04.2024 – 30.06.2024"
-    Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2024 – 30.06.2025"
-
-  # #512: vor der letzten Abrechnung des Gebäudes nach einer anderen Abrechnungsperiode als der Einstellung folgen die
-  # fehlenden Abrechnungen den Perioden der bestehenden Abrechnungen; danach gilt die Einstellung (hier Kalenderjahr)
-  Szenario: Fehlende Abrechnungen vor einem Wechsel der Abrechnungsperiode folgen den bestehenden Abrechnungen
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung "01.07.2023 – 30.06.2024"
-    Und bietet der Mietvertrag für die Tage ab "2023-07-01" "01.07.2023 – 30.06.2024 abrechnen" an
-    Und bietet der Mietvertrag für die Tage ab "2025-07-01" "Kurze Abrechnungsperiode 01.07.2025 – 31.12.2025 abrechnen" an
-    # Fachreview 512-1 V-2: der Rat zur Abrechnungsperiode im Mietvertrag gilt ab dem Wechsel, nicht für die frühere Periode
-    Und rät der Mietvertrag bei den Tagen ab "2025-07-01" zur Abrechnungsperiode im Mietvertrag
-    Und rät der Mietvertrag bei den Tagen ab "2023-07-01" nichts zur Abrechnungsperiode im Mietvertrag
-
-  # #521: zum Rat bei der kurzen Abrechnungsperiode (#486) gibt es pro Mietvertrag einen Brief, mit dem der Mieter der
-  # neuen Abrechnungsperiode schriftlich zustimmt: die bisherige und die neue Abrechnungsperiode, die kurze Periode
-  # dazwischen, die erste neue Periode und Zeilen für die Unterschriften (Fachreview 521-1, Abschnitt 4); die
-  # Zustimmung ist freiwillig (M-2)
-  Szenario: Brief für die Zustimmung des Mieters zu einer neuen Abrechnungsperiode
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode herunterlädt
-    Dann steht im PDF "Zustimmung zu einer neuen Abrechnungsperiode"
-    Und richtet sich der Brief an "Anna Keller"
-    Und steht im PDF "Mietvertrag für die Wohnung 2.01"
-    Und steht im PDF "bisher haben wir die Nebenkosten jeweils vom 1. Juli bis 30. Juni abgerechnet"
-    Und steht im PDF "neu jeweils vom 1. Januar bis 31. Dezember ab"
-    Und steht im PDF "kurze Abrechnungsperiode 01.07.2025 – 31.12.2025"
-    Und steht im PDF "Die erste neue Abrechnungsperiode ist 01.01.2026 – 31.12.2026"
-    Und steht im PDF "Ohne Ihre Unterschrift ändert dieses Schreiben an Ihrem Mietvertrag nichts"
-    Und steht im PDF "Ort, Datum"
-    Und steht im PDF "Unterschrift weiterer Mieter"
-    Und heisst die Datei "Zustimmung zu einer neuen Abrechnungsperiode 2.01" mit dem Nachnamen von "Anna Keller"
-
-  # #521 (Fachreview 521-1 V-1): ohne frühere Abrechnungsperiode gibt es keine bisherige Periode für den Brief
-  Szenario: Ohne Wechsel der Abrechnungsperiode bietet der Mietvertrag keinen Brief zur Zustimmung an
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Dann rät der Mietvertrag bei den Tagen ab "2024-10-01" zur Abrechnungsperiode im Mietvertrag
-    Und bietet der Mietvertrag keinen Brief zur Zustimmung an
-
-  # #521 (C-1): eine veraltete Seite oder eine eingetippte Adresse öffnet einen Brief, den es nicht gibt: ein Satz statt
-  # einer Datei
-  Szenario: Den Brief zur Zustimmung ohne Wechsel der Abrechnungsperiode direkt öffnen
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
-    Wenn der Liegenschaftsverwalter den Brief zur Zustimmung für den Mietvertrag von "Anna Keller" direkt öffnet
-    Dann liest der Liegenschaftsverwalter "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
-
-  # #521 (Code-Review 521b C-3): eine eingetippte Adresse eines Mietvertrags, den es nicht gibt
-  Szenario: Den Brief zur Zustimmung eines unbekannten Mietvertrags direkt öffnen
-    Wenn der Liegenschaftsverwalter den Brief zur Zustimmung für einen unbekannten Mietvertrag direkt öffnet
-    Dann liest der Liegenschaftsverwalter "Der Mietvertrag wurde nicht gefunden. Laden Sie die Seite neu."
-
-  # #521 (C-1): die kurze Abrechnungsperiode ist inzwischen abgerechnet (z.B. in einem zweiten Tab)
-  Szenario: Den Brief zur Zustimmung einer inzwischen abgerechneten kurzen Abrechnungsperiode anfordern
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Und für "Anna Keller" gibt es die Abrechnung vom "2025-07-01" bis "2025-12-31" im Gebäude "Ahornhof"
-    Wenn der Liegenschaftsverwalter den Brief für die Zustimmung zur neuen Abrechnungsperiode anfordert
-    Dann liest der Liegenschaftsverwalter "Für diesen Mietvertrag gibt es keinen Brief zur Zustimmung mehr: Er hat keine kurze Abrechnungsperiode nach einem Wechsel der Abrechnungsperiode, die noch abzurechnen ist. Laden Sie die Seite neu."
-
-  Szenario: Vor einem Wechsel der Abrechnungsperiode rät der Mietvertrag nichts zur Abrechnungsperiode im Mietvertrag
-    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
-    Und der Mieter "Ben Meier" existiert
-    Und "Ben Meier" mietete die Wohnung "2.02" von "2022-07-01" bis "2024-06-30" für "900" Franken
-    Und für "Ben Meier" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Ben Meier"
-    Dann bietet der Mietvertrag für die Tage ab "2022-07-01" "Abrechnungen erstellen" an
-    Und rät der Mietvertrag bei den Tagen ab "2022-07-01" nichts zur Abrechnungsperiode im Mietvertrag
-
-  Szenario: Fehlende Abrechnung vor einem Wechsel der Abrechnungsperiode abrechnen
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-07-01" bis "2025-06-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter die fehlende Abrechnung ab "2023-07-01" erstellen will
-    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" vom "2023-07-01" bis "2024-06-30"
+    Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2024 – 30.06.2025"
+    Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2025 – 30.06.2026"
 
   # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode; #454 (#408 Punkt 1): gefiltert nach
   # der Abrechnungsperiode, wie eine Abrechnung sie nimmt
@@ -405,14 +311,6 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung 2024 anzeigt
     Dann zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom "2024-01-01" bis "2024-12-31" im Gebäude "Ahornhof"
-
-  # #454 (#408 Punkt 1): für einen Teil der Periode genau die fehlenden Tage
-  Szenario: Rechnungen der fehlenden Tage anzeigen
-    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Dann bietet der Mietvertrag für die Tage ab "2024-10-01" die Rechnungen "Rechnungen für 01.10.2024 – 31.12.2024 ansehen" an
-    Wenn der Liegenschaftsverwalter die Rechnungen der fehlenden Tage ab "2024-10-01" anzeigt
-    Dann zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom "2024-10-01" bis "2024-12-31" im Gebäude "Ahornhof"
 
   # Fachreview 454-1 V-2: für Tage in der Abrechnungsperiode einer bestehenden Abrechnung des Gebäudes zeigt der Link die
   # Rechnungen dieser Periode, denn die angebotene Abrechnung nimmt sie (Regel 1)

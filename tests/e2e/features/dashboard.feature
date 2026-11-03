@@ -251,38 +251,13 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "2023"
 
-  # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Tage ohne Abrechnung
-  Szenario: Erinnerung nennt nur die Tage ohne Abrechnung
-    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
-    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
-    Und der Mieter "Bruno Meier" existiert
-    Und "Bruno Meier" mietete die Wohnung "2.01" von "2023-01-01" bis "2023-12-31" für "900" Franken
-    Und für "Bruno Meier" gibt es die Abrechnung vom "2022-07-01" bis "2023-06-30" im Gebäude "Ahornhof"
-    Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2023 – 31.12.2023"
-
   # #1088: die Erinnerung folgt der Abrechnungsperiode des Gebäudes
-  @wip
   Szenario: Die Erinnerung folgt der Abrechnungsperiode des Gebäudes
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und das Gebäude "Ahornhof" rechnet von Juli bis Juni ab
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
     Und der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.01" von "2022-07-01" bis "2023-06-30" für "900" Franken
-    Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2022 – 30.06.2023"
-
-  # #512: vor der letzten Abrechnung des Gebäudes nach einer anderen Abrechnungsperiode folgt die Erinnerung deren Perioden,
-  # auch wenn die Abrechnung einem anderen Mietvertrag gehört (Fachreview 512-1 V-3)
-  Szenario: Erinnerung nennt vor einem Wechsel der Abrechnungsperiode die Periode der bestehenden Abrechnungen
-    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
-    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
-    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
-    Und der Mieter "Bruno Meier" existiert
-    Und der Mieter "Carla Huber" existiert
-    Und "Bruno Meier" mietete die Wohnung "2.01" von "2022-07-01" bis "2023-06-30" für "900" Franken
-    Und "Carla Huber" mietete die Wohnung "2.02" von "2023-07-01" bis "2024-06-30" für "900" Franken
-    Und für "Carla Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2022 – 30.06.2023"
 

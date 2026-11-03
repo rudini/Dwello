@@ -1,20 +1,33 @@
 /**
- * #512: the change of the setting «Abrechnungsperiode» the settings store when it is saved with another type
+ * #1088: each building has its own Abrechnungsperiode; a run's period fits a building when it is a whole period of the
+ * building's type (no short periods), and the wizard proposes the last ended period of the type most buildings have
  */
 import { describe, expect, it } from 'bun:test';
-import { changeOnSave } from '../services/period-types';
+import { commonType, fitsType } from '../services/period-types';
 
-describe('Gespeicherter Wechsel der Abrechnungsperiode', () => {
-	it('speichert den Tag und die bisherige Abrechnungsperiode beim ersten Wechsel', () => {
-		expect(changeOnSave('calendar', undefined, '2026-10-28')).toBe('2026-10-28:calendar');
+describe('Abrechnungsperiode eines Gebäudes im Lauf', () => {
+	it('passt, wenn der Lauf die ganze Periode des Gebäudes ist', () => {
+		expect(fitsType('july-june', { start: '2023-07-01', end: '2024-06-30' })).toBe(true);
 	});
 
-	// code review 512-3 C-5: a setting that ended no period of its own keeps the first change, its day included
-	it('behält Tag und Abrechnungsperiode des ersten Wechsels, wenn die Zwischeneinstellung keine Periode beendete', () => {
-		expect(changeOnSave('july-june', '2026-10-28:calendar', '2027-03-01')).toBe('2026-10-28:calendar');
+	// Fachreview 1088-1: keine kurzen Abrechnungsperioden (product owner 03.11.2026)
+	it('passt nicht, wenn der Lauf kürzer ist als eine Periode des Gebäudes', () => {
+		expect(fitsType('calendar', { start: '2024-10-01', end: '2024-12-31' })).toBe(false);
 	});
 
-	it('speichert einen neuen Wechsel, wenn die Zwischeneinstellung eine Periode beendete', () => {
-		expect(changeOnSave('july-june', '2026-10-28:calendar', '2027-07-02')).toBe('2027-07-02:july-june');
+	it('passt nicht, wenn der Lauf über das Ende einer Periode des Gebäudes reicht', () => {
+		expect(fitsType('july-june', { start: '2024-01-01', end: '2024-12-31' })).toBe(false);
+	});
+});
+
+describe('Vorgeschlagene Abrechnungsperiode', () => {
+	it('nimmt die Abrechnungsperiode, die die meisten Gebäude haben', () => {
+		expect(commonType(['calendar', 'july-june', 'july-june'], '2026-11-03')).toBe('july-june');
+	});
+
+	// Fachreview 1088-1 V-5: am 03.11.2026 endete November – Oktober zuletzt (31.10.2026)
+	it('nimmt bei gleich vielen Gebäuden die zuletzt beendete und ohne Gebäude das Kalenderjahr', () => {
+		expect(commonType(['july-june', 'november-october'], '2026-11-03')).toBe('november-october');
+		expect(commonType([], '2026-11-03')).toBe('calendar');
 	});
 });

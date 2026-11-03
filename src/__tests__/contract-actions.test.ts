@@ -161,25 +161,22 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 			.missingStatements;
 	const building = contractDetail.building.id;
 
-	// each part leads into the wizard with its way, and to the building's invoices of that period (#211, #454); the
-	// short period after a change of the Abrechnungsperiode also to the letter for the tenants' consent (#521)
-	it('führt jeden fehlenden Teil in den Assistenten, zu den Rechnungen seiner Periode und zum Brief zur Zustimmung', async () => {
-		const [short, existing] = contractMissing.map(({ open: _open, consent: _consent, ...part }) => part);
+	// each part leads into the wizard with its way, and to the building's invoices of that period (#211, #454)
+	it('führt jeden fehlenden Teil in den Assistenten und zu den Rechnungen seiner Periode', async () => {
+		const [whole, existing] = contractMissing.map(({ open: _open, ...part }) => part);
 		expect(await missingOf(backend([]))).toEqual([
 			{
-				...short,
-				href: `/statements/generate?building=${building}&start=${short.way.start}&end=${short.way.end}`,
-				consentLetter: '/contracts/c1/consent-letter',
+				...whole,
+				href: `/statements/generate?building=${building}&start=${whole.way.start}&end=${whole.way.end}`,
 				invoices: {
-					href: `/invoices?building=${building}&periodStart=${short.way.start}&periodEnd=${short.way.end}`,
-					label: `Rechnungen für ${day(short.way.start)} – ${day(short.way.end)} ansehen`
+					href: `/invoices?building=${building}&periodStart=${whole.way.start}&periodEnd=${whole.way.end}`,
+					label: `Rechnungen ${whole.way.start.slice(0, 4)} ansehen`
 				}
 			},
 			{
 				...existing,
 				// Fachreview 199-1 V-1: the contract's own statement cuts that period, the run would not bill it there
 				href: null,
-				consentLetter: null,
 				invoices: {
 					href: `/invoices?building=${building}&periodStart=${existing.way.start}&periodEnd=${existing.way.end}`,
 					label: `Rechnungen für ${day(existing.way.start)} – ${day(existing.way.end)} ansehen`

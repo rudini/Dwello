@@ -149,6 +149,5 @@ Funktionalität: Einstellungen
     Dann nennt das Protokoll "Kategorie «Gartenpflege West»: von umlagefähig auf nicht umlagefähig geändert" nicht mehr
 
   # #1088: die Abrechnungsperiode steht beim Gebäude; die Einstellungen haben keine mehr
-  @wip
   Szenario: Die Einstellungen bieten keine Abrechnungsperiode an
     Dann bieten die Einstellungen keine Abrechnungsperiode an

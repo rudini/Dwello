@@ -13,7 +13,6 @@ const KEYS = {
 	companyPhone: 'company_phone',
 	companyEmail: 'company_email',
 	iban: 'iban',
-	accountingPeriod: 'accounting_period',
 	managementFeePercent: 'management_fee_pct',
 	defaultHeatingProfileId: 'default_heating_profile_id',
 	defaultDistributionKeyId: 'default_distribution_key_id',

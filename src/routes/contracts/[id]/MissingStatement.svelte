@@ -8,13 +8,12 @@
 		start: string;
 		end: string;
 		href: string | null; // none when step 2 would refuse its period (Fachreview 199-1 V-1)
-		consentLetter: string | null; // #521: only after a change of the Abrechnungsperiode (Fachreview 521-1 V-1)
 		way: { kind: string; start: string; end: string };
 		invoices: { href: string; label: string };
 	};
 	// Rent days in ended Abrechnungsperioden without a statement, the newest first, each with its way to the wizard
-	// (A-10, #142): the whole period, the period of a statement of the building that holds the days, or a short
-	// period for days no statement of the building covers (#199, #408 point 2); and to the building's invoices (#211)
+	// (A-10, #142): the whole period, or the period of an older statement of the building that holds the days (#408
+	// point 2); there are no short periods (#1088); and to the building's invoices (#211)
 	let { missing }: { missing: Missing[] } = $props();
 
 	const single = $derived(missing.length === 1);
@@ -38,16 +37,13 @@
 				? m.contracts_statement_missing_billed_elsewhere()
 				: m.contracts_statements_missing_billed_elsewhere()
 	);
-	const firstShort = $derived(missing.find((period) => period.href && period.way.kind === 'short'));
 	// several: short labels side by side, each with its verb (#142 personas, code review C-8)
 	const createLabel = ({ way, ...period }: Missing) =>
 		way.kind === 'existing'
 			? m.statements_period_choose({ period: periodDays(way) })
-			: way.kind === 'short'
-				? m.statements_period_short({ period: periodDays(way) })
-				: single
-					? m.dashboard_create_statements()
-					: m.contracts_statement_create({ period: periodName(period) });
+			: single
+				? m.dashboard_create_statements()
+				: m.contracts_statement_create({ period: periodName(period) });
 </script>
 
 {#if missing.length}
@@ -75,23 +71,6 @@
 						testid="contract-missing-statement-invoices-{period.start}"
 						>{period.invoices.label}</Button
 					>
-					<!-- #486: the Abrechnungsperiode may be part of the Mietvertrag; said at the short period, not at an
-					     earlier one (#512, Fachreview 512-1 V-2) -->
-					{#if period === firstShort}
-						<p class="w-full" data-testid="contract-missing-statement-short-help">
-							{m.statements_short_period_help()}
-						</p>
-						<!-- #521: the letter for the tenants' consent -->
-						{#if period.consentLetter}
-							<Button
-								href={period.consentLetter}
-								variant="ghost"
-								icon="document-download"
-								testid="contract-missing-statement-consent-letter"
-								>{m.contracts_consent_letter_download()}</Button
-							>
-						{/if}
-					{/if}
 				</div>
 			{/each}
 		</div>

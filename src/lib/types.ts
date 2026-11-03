@@ -37,7 +37,14 @@ export type Building = BuildingAddress &
 	Partial<
 		Pick<
 			ApiBuilding,
-			'country' | 'buildingType' | 'yearBuilt' | 'noTank' | 'createdAt' | 'updatedAt'
+			| 'country'
+			| 'buildingType'
+			| 'yearBuilt'
+			| 'noTank'
+			| 'accountingPeriod'
+			| 'accountingPeriodLocked'
+			| 'createdAt'
+			| 'updatedAt'
 		>
 	>;
 

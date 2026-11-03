@@ -415,7 +415,7 @@ describe('Gebäude erfassen und bearbeiten', () => {
 		]);
 
 	it('erfasst ein neues Gebäude mit dem Weg zurück zur Liste', () => {
-		show(NewBuildingPage, { form: null } as never);
+		show(NewBuildingPage, { data: { accountingPeriod: 'calendar' }, form: null } as never);
 		expect(document.querySelector('h1')!.textContent).toBe('Neues Gebäude');
 		expect(trail()).toEqual([['Gebäude', '/buildings']]);
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/buildings');

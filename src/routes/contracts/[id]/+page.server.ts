@@ -34,7 +34,6 @@ interface ContractDetailsData {
 		start: string;
 		end: string;
 		href: string | null;
-		consentLetter: string | null; // #521: the letter for the tenants' consent to a new Abrechnungsperiode
 		way: { kind: string; start: string; end: string };
 		invoices: { href: string; label: string };
 	}[];
@@ -67,10 +66,10 @@ async function rows(fetch: typeof globalThis.fetch, path: string): Promise<Row[]
 }
 
 type Range = { start: string; end: string };
-type MissingPart = Range & { way: Range & { kind: string }; open: boolean; consent: boolean };
+type MissingPart = Range & { way: Range & { kind: string }; open: boolean };
 
-// The parts of ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first,
-// each with its way into the wizard, as the backend decides them (A-10, #142, #199, #408 point 2, H-28), and each to the
+// The ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first, each with
+// its way into the wizard, as the backend decides them (A-10, #142, #408 point 2, #1088, H-28), and each to the
 // building's invoices (#211). None when they cannot be read: better no hint than a wrong one
 async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) {
 	const response = await fetch(
@@ -78,13 +77,10 @@ async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) 
 	).catch(() => null);
 	if (!response?.ok) return [];
 	const building = String((contract.building as Row | undefined)?.id);
-	const id = encodeURIComponent(String(contract.id));
-	return ((await response.json()) as MissingPart[]).map(({ start, end, way, open, consent }) => ({
+	return ((await response.json()) as MissingPart[]).map(({ start, end, way, open }) => ({
 		start,
 		end,
 		href: open ? wizardLink(building, way.start, way.end) : null,
-		// the backend marks the short period after a change of the Abrechnungsperiode (#521, Fachreview 521-1 V-1)
-		consentLetter: consent ? `/contracts/${id}/consent-letter` : null,
 		way,
 		invoices: invoicesOf(way, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
 	}));
