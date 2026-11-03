@@ -14,7 +14,7 @@ import {
 	type ConfigKey
 } from '../services/config.service';
 import { errorBody, fieldsRefused } from '../services/coded-error';
-import { periodChange } from '../services/statement-run.service';
+import { periodChange } from '../services/period-change.service';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values

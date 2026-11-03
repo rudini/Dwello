@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import { refusedFields, type BackendError } from '$lib/backend-error';
+import type { PeriodChangeHint } from '$lib/types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/config`;
 
@@ -88,7 +89,9 @@ type PeriodChange = {
 };
 
 /** #1036: the short Abrechnungsperiode after the change, and each contract whose tenants must agree with its letter */
-export async function periodChange(fetch: typeof globalThis.fetch) {
+export async function periodChange(
+	fetch: typeof globalThis.fetch
+): Promise<PeriodChangeHint | null> {
 	const { data } = (await fetch(`${API}/period-change`).then((response) => response.json())) as {
 		data: PeriodChange | null;
 	};
@@ -106,5 +109,3 @@ export async function periodChange(fetch: typeof globalThis.fetch) {
 		}
 	);
 }
-
-export type PeriodChangeHint = NonNullable<Awaited<ReturnType<typeof periodChange>>>;

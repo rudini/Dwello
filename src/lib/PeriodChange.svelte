@@ -3,7 +3,7 @@
 	import { periodDays } from '$lib/accounting-period';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import type { PeriodChangeHint } from '$lib/server/settings';
+	import type { PeriodChangeHint } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 
 	// #1036 (Option 1): after saving another Abrechnungsperiode, the contracts whose tenants must agree, each with its

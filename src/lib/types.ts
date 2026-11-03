@@ -424,3 +424,11 @@ export type SplitKeyHint = SplitKey & {
 	buildingId?: string; // the preview of several buildings names each (Code-Review 528-1 C-3)
 	buildingName?: string;
 };
+
+/** #1036: after saving another Abrechnungsperiode, its short period and the contracts whose tenants must agree (src/lib/server/settings.ts) */
+export interface PeriodChangeHint {
+	start: string;
+	short: { start: string; end: string };
+	started: boolean;
+	contracts: { id: string; tenant: string; apartment: string; letter: string }[];
+}

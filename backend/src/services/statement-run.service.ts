@@ -3,7 +3,7 @@
  * in the period, which of them have a statement there already (a run bills those no more), those «Abgerechnet bis»
  * leaves without Mietstage there, and whether the period overlaps one of the building's
  */
-import { consentPeriod, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, shortPeriodOfChange, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
+import { consentPeriod, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
 import { getTypedConfig, periodSetting } from './config.service';
 import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
@@ -16,7 +16,7 @@ import { categories, utilityStatementLineItems } from '../db/schema';
 import { roundToRappen } from './pdf-format';
 import type { CalculatedLineItem } from './calculation.service';
 import { calculateStatement, listStatements } from './statement.service';
-import { daysAfter, swissToday } from './today';
+import { swissToday } from './today';
 import { counting, isReplaced } from './counting-statements';
 
 type Contract = Pick<ContractWithDetails, 'id' | 'startDate' | 'endDate' | 'billedUntil' | 'tenantName'> &
@@ -105,32 +105,6 @@ export async function runPlan(buildingId: string, period: Range) {
 		})
 		.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }));
 	return { ...plan, overlap: { ...plan.overlap, consent } };
-}
-
-/**
- * #1036 (Option 1): after a stored change of the setting «Abrechnungsperiode», its short period, the first day of the
- * new one, whether that has begun already, and the contracts with a letter for the tenants' consent there; null without
- * a change
- */
-export async function periodChange(today = swissToday()) {
-	const [{ type, change }, { contracts }, { statements }] = await Promise.all([
-		periodSetting(),
-		listContracts({ limit: 1000 }),
-		listStatements({ limit: 1000 })
-	]);
-	const short = shortPeriodOfChange(type, change);
-	if (!short) return null;
-	const consenting = contracts.filter((c) => {
-		const ofBuilding = statements.filter((s) => s.building?.id === c.buildingId);
-		const found = consentPeriod(type, c, statements.filter((s) => s.contractId === c.id), ofBuilding, today, change);
-		return !!found && same(found.short, short);
-	});
-	return {
-		short,
-		start: daysAfter(short.end, 1),
-		started: short.end < today,
-		contracts: consenting.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))
-	};
 }
 
 // A contract with the setting «Abrechnungsperiode», its statements and those of its building; null for an unknown one

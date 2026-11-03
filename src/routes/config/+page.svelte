@@ -8,10 +8,10 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import ConfigLinks from './ConfigLinks.svelte';
 	import DefaultsSection from './DefaultsSection.svelte';
-	import PeriodChange from './PeriodChange.svelte';
+	import PeriodChange from '$lib/PeriodChange.svelte';
 	import SettingField from './SettingField.svelte';
 	import { help } from './help';
-	import type { PeriodChangeHint } from '$lib/server/settings';
+	import type { PeriodChangeHint } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
