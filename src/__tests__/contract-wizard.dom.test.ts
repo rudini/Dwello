@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const location = vi.hoisted(() => ({ url: new URL('http://localhost/contracts/new') }));
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
-vi.mock('$app/stores', () => ({
-	page: { subscribe: (run: (value: unknown) => void) => (run({ url: location.url }), () => {}) }
-}));
+vi.mock('$app/state', () => ({ page: location }));
 
 import { goto } from '$app/navigation';
 import { get } from 'svelte/store';

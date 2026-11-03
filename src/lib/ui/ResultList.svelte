@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { ReadonlyURL } from '$app/state';
 	import Pagination from './Pagination.svelte';
 
 	// The records of a list page: a heading that counts them and takes the focus after a search, the list, its pages
@@ -16,7 +17,7 @@
 		id: string; // of the heading, which names the section
 		heading: string;
 		listClass?: string;
-		url: URL;
+		url: ReadonlyURL;
 		page: number;
 		pageSize: number;
 		total: number;

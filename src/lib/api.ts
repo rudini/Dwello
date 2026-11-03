@@ -3,7 +3,7 @@
  * Provides type-safe API calls with automatic XSRF token handling
  */
 
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
 import { m } from '$lib/paraglide/messages';
 

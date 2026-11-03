@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 import Header from '$lib/ui/Header.svelte';
 import MobileNav from '$lib/ui/MobileNav.svelte';
@@ -9,9 +8,7 @@ import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
-vi.mock('$app/stores', () => ({
-	page: readable({ url: new URL('http://localhost/tenants') })
-}));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/tenants') } }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
 // the version a build without a tag lacks (#728); vitest.config.ts defines 1.4.0 for the others
 const build = vi.hoisted(() => ({ version: '1.4.0' as string | null }));

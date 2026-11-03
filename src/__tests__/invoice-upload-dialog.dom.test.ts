@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
 
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
 // The pages the KI reads: rendering needs a canvas, which jsdom lacks
 vi.mock('$lib/file-pages', () => ({

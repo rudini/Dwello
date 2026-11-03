@@ -2,14 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createRawSnippet } from 'svelte';
 import { show } from './helpers/dom';
 
-vi.mock('$app/stores', () => ({
-	page: {
-		subscribe: (run: (value: { url: URL }) => void) => (
-			run({ url: new URL('http://localhost/buildings') }),
-			() => {}
-		)
-	}
-}));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/buildings') } }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 
 // E2E steps type and click once body[data-hydrated] is set (tests/e2e/screenplay/interactions.ts). SvelteKit starts

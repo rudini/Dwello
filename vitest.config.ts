@@ -14,10 +14,9 @@ export default defineConfig({
 	test: {
 		globals: true,
 		alias: {
-			'$lib': resolve('./src/lib'),
-			'$env/dynamic/private': resolve('./tests/mocks/env.ts'),
-			'$env/dynamic/public': resolve('./tests/mocks/env.ts')
+			'$lib': resolve('./src/lib')
 		},
+		setupFiles: ['tests/mocks/app-env.ts'],
 		projects: [
 			{
 				extends: true,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { generateOAuthUrl } from '$lib/server/oauth';
 
 // #718, part 3: a new Wiederherstellungscode needs a new sign-in with Google, not the one the browser still holds

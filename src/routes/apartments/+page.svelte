@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { ApartmentsListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -13,9 +13,9 @@
 	let { data }: { data: ApartmentsListData } = $props();
 
 	const filtered = $derived(
-		['search', 'building', 'status'].some((key) => $page.url.searchParams.get(key))
+		['search', 'building', 'status'].some((key) => page.url.searchParams.get(key))
 	);
-	const search = $derived($page.url.searchParams.get('search')?.trim());
+	const search = $derived(page.url.searchParams.get('search')?.trim());
 </script>
 
 <svelte:head>
@@ -32,7 +32,7 @@
 	</PageHeader>
 
 	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
-	{#key $page.url.search}
+	{#key page.url.search}
 		<ApartmentFilters buildings={data.buildings} />
 	{/key}
 
@@ -68,7 +68,7 @@
 				count: data.total
 			})}
 			listClass="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-			url={$page.url}
+			url={page.url}
 			page={data.page}
 			pageSize={data.pageSize}
 			total={data.total}

@@ -1,13 +1,16 @@
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
 let url = new URL('http://localhost/invoices?search=Hauswart');
-vi.mock('$app/stores', () => ({
-	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
+vi.mock('$app/state', () => ({
+	page: {
+		get url() {
+			return url;
+		}
+	}
 }));
 
 import { goto, invalidateAll } from '$app/navigation';

@@ -46,7 +46,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		const authUrl = generateOAuthUrl(provider, state, { again: url.searchParams.get('reauth') === '1' });
 
 		// Redirect to OAuth provider
-		throw redirect(302, authUrl);
+		throw redirect(302, authUrl, { external: true }); // the provider's own page, built from the server's config
 	} catch (error) {
 		// Re-throw redirects
 		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error)) {

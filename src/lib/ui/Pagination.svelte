@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import type { ReadonlyURL } from '$app/state';
 	import { listPageUrl } from '$lib/list-url';
 	import Button from './Button.svelte';
 
 	// Paging of a list whose filters live in the URL: where am I, and the page before and after
-	let { url, page, pageSize, total }: { url: URL; page: number; pageSize: number; total: number } =
-		$props();
+	let {
+		url,
+		page,
+		pageSize,
+		total
+	}: { url: ReadonlyURL; page: number; pageSize: number; total: number } = $props();
 
 	const pages = $derived(Math.ceil(total / pageSize));
 </script>

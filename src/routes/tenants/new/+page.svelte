@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import TenantForm from '../TenantForm.svelte';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
 	// Opened from the rental contract wizard, which continues with the new tenant
-	const forContract = $derived($page.url.searchParams.get('for') === 'contract');
+	const forContract = $derived(page.url.searchParams.get('for') === 'contract');
 	// the apartment chosen there, kept on the detour (#144)
-	const apartment = $derived(forContract ? ($page.url.searchParams.get('apartment') ?? '') : '');
+	const apartment = $derived(forContract ? (page.url.searchParams.get('apartment') ?? '') : '');
 </script>
 
 <svelte:head>

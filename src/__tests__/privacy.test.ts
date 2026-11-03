@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { load } from '../routes/privacy/+page.server';
 import answer from '../../tests/contracts/llm-recipient.json';
 import mail from '../../tests/contracts/mail-transport.json';

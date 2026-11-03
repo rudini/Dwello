@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';
 	import type { InvoicesListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -16,7 +16,7 @@
 	let { data }: { data: InvoicesListData } = $props();
 
 	// open at once when the Übersicht's «Rechnungen hochladen» led here
-	let uploading = $state($page.url.searchParams.has('upload'));
+	let uploading = $state(page.url.searchParams.has('upload'));
 	const openUpload = (event: MouseEvent) => {
 		event.preventDefault();
 		uploading = true;
@@ -26,21 +26,23 @@
 	// Only the year is chosen: an empty list means nothing is recorded yet, not a filter mistake
 	const onlyYear = $derived(
 		['search', 'building', 'categoryId', 'validity', 'periodStart'].some((key) =>
-			$page.url.searchParams.get(key)
+			page.url.searchParams.get(key)
 		)
 			? ''
-			: ($page.url.searchParams.get('year') ?? '')
+			: (page.url.searchParams.get('year') ?? '')
 	);
 	const filtered = $derived(
 		['search', 'building', 'categoryId', 'validity', 'year', 'periodStart'].some((key) =>
-			$page.url.searchParams.get(key)
+			page.url.searchParams.get(key)
 		)
 	);
 	// #454: the filter «Abrechnungsperiode», named with its building and rule
 	const period = $derived.by(() => {
-		const [start, end] = ['periodStart', 'periodEnd'].map((key) => $page.url.searchParams.get(key) ?? '');
+		const [start, end] = ['periodStart', 'periodEnd'].map(
+			(key) => page.url.searchParams.get(key) ?? ''
+		);
 		if (![start, end].every((day) => /^\d{4}-\d{2}-\d{2}$/.test(day))) return null; // as the loader sends them
-		const building = data.buildings.find((b) => b.id === $page.url.searchParams.get('building'));
+		const building = data.buildings.find((b) => b.id === page.url.searchParams.get('building'));
 		const days = { start: formatDate(start), end: formatDate(end) };
 		return building
 			? m.invoices_period_filter({ building: building.name, ...days })
@@ -82,9 +84,9 @@
 	/>
 
 	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
-	{#key $page.url.search}
+	{#key page.url.search}
 		<InvoiceSearch
-			params={$page.url.searchParams}
+			params={page.url.searchParams}
 			buildings={data.buildings}
 			categories={data.categories}
 			years={data.years}
@@ -127,7 +129,7 @@
 			id="invoices-count"
 			heading={data.total === 1 ? m.invoices_count_one() : m.invoices_count({ count: data.total })}
 			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
-			url={$page.url}
+			url={page.url}
 			page={data.page}
 			pageSize={data.pageSize}
 			total={data.total}

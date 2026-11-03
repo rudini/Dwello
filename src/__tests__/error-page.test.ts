@@ -1,10 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render } from 'svelte/server';
-import { readable } from 'svelte/store';
 
 let current = { status: 404, error: { message: 'Not found' } };
-vi.mock('$app/stores', () => ({
-	page: { subscribe: (run: (v: unknown) => void) => readable(current).subscribe(run) }
+vi.mock('$app/state', () => ({
+	page: {
+		get status() {
+			return current.status;
+		},
+		get error() {
+			return current.error;
+		}
+	}
 }));
 
 const page = async (status: number, message = '') => {

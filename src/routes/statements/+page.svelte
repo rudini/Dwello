@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { flushSync, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
 	import {
 		balanceLabel,
@@ -29,7 +29,7 @@
 
 	let { data }: { data: StatementsListData } = $props();
 
-	const params = $derived($page.url.searchParams);
+	const params = $derived(page.url.searchParams);
 	const search = $derived(params.get('search') || '');
 	const building = $derived(params.get('building') || '');
 	const status = $derived(params.get('status') || '');
@@ -43,7 +43,7 @@
 	// Filters and paging live in the URL so the server filters across all statements
 	function linkWith(changes: Record<string, string>): string {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- a local copy, read once
-		const next = new URLSearchParams(params);
+		const next = new URLSearchParams(params.toString());
 		for (const [key, value] of Object.entries(changes)) {
 			if (value) next.set(key, value);
 			else next.delete(key);
@@ -194,7 +194,7 @@
 				? m.statements_count_one()
 				: m.statements_count_many({ count: data.total })}
 			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
-			url={$page.url}
+			url={page.url}
 			page={data.page}
 			pageSize={data.pageSize}
 			total={data.total}

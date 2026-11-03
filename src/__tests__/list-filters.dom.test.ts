@@ -1,21 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import type { Writable } from 'svelte/store';
 
 // The address changes while the list stays mounted, as after a link, back or forward within the list
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
-vi.mock('$app/stores', async () => {
-	const { writable } = await import('svelte/store');
-	return { page: writable({ url: new URL('http://localhost/') }) };
-});
+vi.mock('$app/state', () => import('./helpers/app-state.svelte'));
 
 import ApartmentsPage from '../routes/apartments/+page.svelte';
 import BuildingsPage from '../routes/buildings/+page.svelte';
 import TenantsPage from '../routes/tenants/+page.svelte';
 import ContractsPage from '../routes/contracts/+page.svelte';
 import InvoicesPage from '../routes/invoices/+page.svelte';
-import { page } from '$app/stores';
+import { page } from './helpers/app-state.svelte';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
 const empty = { total: 0, page: 1, pageSize: 10, buildings: [], categories: [], years: [] };
@@ -43,7 +39,7 @@ const lists = [
 ];
 
 const goTo = (address: string) => {
-	(page as unknown as Writable<{ url: URL }>).set({ url: new URL(address, 'http://localhost') });
+	page.url = new URL(address, 'http://localhost');
 	flushSync();
 };
 const valueOf = (testid: string) => byTestId<HTMLInputElement>(testid)!.value;

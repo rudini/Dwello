@@ -1,17 +1,8 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "$app/tsconfig",
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
 		"sourceMap": true,
-		"strict": true,
-		"isolatedModules": true,
-		"verbatimModuleSyntax": true,
-		"allowImportingTsExtensions": true
+		"strict": true
 	},
 	"include": [
 		".svelte-kit/ambient.d.ts",

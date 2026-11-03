@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { backendMessage } from '$lib/backend-error';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { onMount, tick, untrack } from 'svelte';
 	import { apiCall } from '$lib/api';
 	import {
@@ -74,7 +74,7 @@
 	const OVERLAP = m.contracts_overlap_wizard();
 	// Error keys of the fields whose id differs from the value's name
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
-	const params = untrack(() => $page.url.searchParams);
+	const params = untrack(() => page.url.searchParams);
 	const today = localToday(); // the Swiss day, as the backend decides (review i815b2 C-1)
 	let values = $state(
 		untrack(() => ({
@@ -141,7 +141,7 @@
 		if (!draft) return;
 		// a tenant chosen before the page was live counts like one in the address
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- a local copy, read once
-		const given = new URLSearchParams(params);
+		const given = new URLSearchParams(params.toString());
 		if (values.tenantId) given.set('tenant', values.tenantId);
 		const known = {
 			tenantIds: tenants.map((t) => t.id),

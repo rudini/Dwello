@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { load } from '../routes/config/backup/+page.server';
 
 import pending from '../../tests/contracts/backup-new-code.json';

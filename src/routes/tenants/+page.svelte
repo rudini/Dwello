@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { TenantsListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -12,8 +12,8 @@
 	let { data }: { data: TenantsListData } = $props();
 
 	const filters = $derived({
-		search: $page.url.searchParams.get('search') ?? '',
-		status: $page.url.searchParams.get('status') ?? ''
+		search: page.url.searchParams.get('search') ?? '',
+		status: page.url.searchParams.get('status') ?? ''
 	});
 	const filtered = $derived(!!(filters.search || filters.status));
 </script>
@@ -61,7 +61,7 @@
 			heading={(data.total === 1 ? m.tenants_count_one : m.tenants_count_many)({
 				count: data.total
 			})}
-			url={$page.url}
+			url={page.url}
 			page={data.page}
 			pageSize={data.pageSize}
 			total={data.total}

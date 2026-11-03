@@ -1,3 +1,5 @@
+import type { ReadonlyURL } from '$app/state';
+
 /** URL of a list page filtered by the given values (empty ones left out), starting again at page 1 */
 export function listSearchUrl(path: string, filters: Record<string, string>): string {
 	const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
@@ -6,8 +8,8 @@ export function listSearchUrl(path: string, filters: Record<string, string>): st
 }
 
 /** URL of another page of the current list, keeping its filters */
-export function listPageUrl(url: URL, page: number): string {
-	const params = new URLSearchParams(url.searchParams);
+export function listPageUrl(url: ReadonlyURL, page: number): string {
+	const params = new URLSearchParams(url.search);
 	params.set('page', String(page));
 	return `${url.pathname}?${params}`;
 }

@@ -1,3 +1,5 @@
+import adapter from '@sveltejs/adapter-node';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
@@ -17,6 +19,25 @@ function describeVersion(): string {
 	}
 }
 
+// #721: only Dwello's own scripts run; SvelteKit adds a nonce (hash when prerendered) to its own inline script.
+// Styles stay inline-capable: Svelte writes style attributes and the <style> of transitions at runtime.
+export const csp: NonNullable<Parameters<typeof sveltekit>[0]>['csp'] = {
+	mode: 'auto',
+	directives: {
+		'default-src': ['self'],
+		'script-src': ['self'],
+		'style-src': ['self', 'unsafe-inline'],
+		'img-src': ['self', 'data:', 'blob:'],
+		// blob:: the acceptance test reads a file chosen for upload in the page (OpenInNewTab in
+		// tests/e2e/screenplay/interactions.ts), as headless Chromium shows no PDF in a tab; the app itself only links to it
+		'connect-src': ['self', 'blob:'],
+		'object-src': ['none'],
+		'base-uri': ['self'],
+		'form-action': ['self'],
+		'frame-ancestors': ['none']
+	}
+};
+
 export default defineConfig(({ mode }) => {
 	// The server code reads BACKEND_URL from process.env, as `node build` gets it; in dev it comes from .env.
 	// Variables set in the shell win; a value copied here counts as such, so a changed .env needs `bun run dev`
@@ -27,7 +48,20 @@ export default defineConfig(({ mode }) => {
 		define: { __APP_VERSION__: JSON.stringify(versionFrom(describeVersion()) ?? null) },
 		plugins: [
 			tailwindcss(),
-			sveltekit(),
+			sveltekit({
+				// Consult https://svelte.dev/docs/kit/integrations
+				// for more information about preprocessors
+				preprocess: vitePreprocess(),
+
+				// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
+				// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
+				// See https://svelte.dev/docs/kit/adapters for more information about adapters.
+				// BUILD_DIR: persona-stack.sh builds into its own directory, so an E2E run can build and serve build/ meanwhile
+				adapter: adapter({ out: process.env.BUILD_DIR ?? 'build' }),
+				outDir: process.env.BUILD_DIR ? '.svelte-kit/persona' : '.svelte-kit',
+				alias: { $lib: 'src/lib' },
+				csp
+			}),
 			// UI language from the cookie, else the browser's (de, fr, it, en), else German; no URL prefix
 			paraglideVitePlugin(paraglideOptions)
 		],

@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect } from 'vitest';
-import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { jwtConfig } from '$lib/server/jwt-config';
 
 // #577: .env.example names no JWT_SECRET any more (an installation makes its own); development runs without one,

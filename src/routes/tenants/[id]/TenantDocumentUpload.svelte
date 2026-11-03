@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { enhance } from '$app/forms';
-	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance, type SubmitFunction } from '$app/forms';
 	import { tick, untrack } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';

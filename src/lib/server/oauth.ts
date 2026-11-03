@@ -3,7 +3,15 @@
  * Handles OAuth 2.0 flows for Google and Microsoft
  */
 
-import { env } from '$env/dynamic/private';
+import {
+	OAUTH_MICROSOFT_TENANT_ID,
+	OAUTH_GOOGLE_CLIENT_ID,
+	OAUTH_GOOGLE_CLIENT_SECRET,
+	OAUTH_GOOGLE_REDIRECT_URI,
+	OAUTH_MICROSOFT_CLIENT_ID,
+	OAUTH_MICROSOFT_CLIENT_SECRET,
+	OAUTH_MICROSOFT_REDIRECT_URI
+} from '$app/env/private';
 import type { JwtPayload } from './auth';
 
 export type OAuthProvider = 'google' | 'microsoft';
@@ -47,11 +55,11 @@ const providerConfigs = {
 	},
 	microsoft: {
 		get authorizeUrl() {
-			const tenantId = env.OAUTH_MICROSOFT_TENANT_ID || 'common';
+			const tenantId = OAUTH_MICROSOFT_TENANT_ID || 'common';
 			return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize`;
 		},
 		get tokenUrl() {
-			const tenantId = env.OAUTH_MICROSOFT_TENANT_ID || 'common';
+			const tenantId = OAUTH_MICROSOFT_TENANT_ID || 'common';
 			return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
 		},
 		userInfoUrl: 'https://graph.microsoft.com/v1.0/me',
@@ -69,15 +77,15 @@ function getClientCredentials(provider: OAuthProvider): {
 } {
 	if (provider === 'google') {
 		return {
-			clientId: env.OAUTH_GOOGLE_CLIENT_ID || '',
-			clientSecret: env.OAUTH_GOOGLE_CLIENT_SECRET || '',
-			redirectUri: env.OAUTH_GOOGLE_REDIRECT_URI || ''
+			clientId: OAUTH_GOOGLE_CLIENT_ID || '',
+			clientSecret: OAUTH_GOOGLE_CLIENT_SECRET || '',
+			redirectUri: OAUTH_GOOGLE_REDIRECT_URI || ''
 		};
 	} else {
 		return {
-			clientId: env.OAUTH_MICROSOFT_CLIENT_ID || '',
-			clientSecret: env.OAUTH_MICROSOFT_CLIENT_SECRET || '',
-			redirectUri: env.OAUTH_MICROSOFT_REDIRECT_URI || ''
+			clientId: OAUTH_MICROSOFT_CLIENT_ID || '',
+			clientSecret: OAUTH_MICROSOFT_CLIENT_SECRET || '',
+			redirectUri: OAUTH_MICROSOFT_REDIRECT_URI || ''
 		};
 	}
 }

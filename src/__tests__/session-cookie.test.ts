@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
-import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { setSessionCookie } from '$lib/server/auth';
 
 // S2 (#917, migration-mva.md): a script in the browser cannot read the session; only the BFF sees the JWT

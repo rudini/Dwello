@@ -4,8 +4,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock $app/environment
-vi.mock('$app/environment', () => ({
+// Mock $app/env
+vi.mock('$app/env', () => ({
 	browser: true
 }));
 

@@ -3,7 +3,7 @@
 	import { backendMessage } from '$lib/backend-error';
 	import { periodName } from '$lib/accounting-period';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { tick, untrack } from 'svelte';
 	import { apiCall } from '$lib/api';
 	import {
@@ -54,7 +54,7 @@
 		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 	} = $props();
 
-	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
+	let values = $state(untrack(() => initialContractValues(contract, page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save

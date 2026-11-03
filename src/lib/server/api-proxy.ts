@@ -3,7 +3,7 @@
  * Forwards requests from SvelteKit BFF to ElysiaJS backend
  */
 
-import { env } from '$env/dynamic/private';
+import { BACKEND_API_TIMEOUT } from '$app/env/private';
 import { getJwtFromCookie, validateXsrfToken } from './auth';
 import { JWTError, ValidationError, AppError, logger } from './error-handler';
 import type { Cookies } from '@sveltejs/kit';
@@ -42,7 +42,7 @@ function getBackendUrl(): string {
  * Get the backend API timeout from environment
  */
 function getBackendTimeout(): number {
-	return parseInt(env.BACKEND_API_TIMEOUT || '30000', 10);
+	return parseInt(BACKEND_API_TIMEOUT || '30000', 10);
 }
 
 // Requests the KI answers: two KI calls (reading, then categorizing) of the backend's LLM_TIMEOUT (120 s) on a server

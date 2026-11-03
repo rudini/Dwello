@@ -2,9 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render } from 'svelte/server';
 
 const location = vi.hoisted(() => ({ url: new URL('http://localhost/contracts') }));
-vi.mock('$app/stores', () => ({
-	page: { subscribe: (run: (value: unknown) => void) => (run({ url: location.url }), () => {}) }
-}));
+vi.mock('$app/state', () => ({ page: location }));
 
 import ContractsPage from '../routes/contracts/+page.svelte';
 import { withoutComments } from './helpers/markup';

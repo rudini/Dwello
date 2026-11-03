@@ -1,27 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createRawSnippet, flushSync } from 'svelte';
 import { show } from './helpers/dom';
+import { page } from './helpers/app-state.svelte';
 
 // The address the layout reads, set per test
-const page = vi.hoisted(() => {
-	let set = (_: { url: URL }) => {};
-	const store = {
-		subscribe(run: (value: { url: URL }) => void) {
-			set = run;
-			run({ url: new URL('http://localhost/terms') });
-			return () => {};
-		}
-	};
-	return { store, go: (path: string) => set({ url: new URL(`http://localhost${path}`) }) };
-});
-vi.mock('$app/stores', () => ({ page: page.store }));
+vi.mock('$app/state', () => import('./helpers/app-state.svelte'));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 
 async function signedOut(path: string) {
 	const { default: Layout } = await import('../routes/+layout.svelte');
 	const children = createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }));
 	show(Layout, { data: { user: null }, children } as never);
-	page.go(path);
+	page.url = new URL(`http://localhost${path}`);
 	flushSync();
 	return document.querySelector('main')!;
 }
@@ -71,7 +61,7 @@ async function shown(path: string, data: { user: object | null; demo: boolean })
 	const { default: Layout } = await import('../routes/+layout.svelte');
 	const children = createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }));
 	show(Layout, { data, children } as never);
-	page.go(path);
+	page.url = new URL(`http://localhost${path}`);
 	flushSync();
 	return document.querySelector('main [data-testid="demo-notice"]');
 }

@@ -4,9 +4,7 @@ import { get } from 'svelte/store';
 
 const location = vi.hoisted(() => ({ url: new URL('http://localhost/tenants/new') }));
 vi.mock('$app/forms', () => ({ enhance: () => ({}) }));
-vi.mock('$app/stores', () => ({
-	page: { subscribe: (run: (value: unknown) => void) => (run({ url: location.url }), () => {}) }
-}));
+vi.mock('$app/state', () => ({ page: location }));
 
 import NewTenantPage from '../routes/tenants/new/+page.svelte';
 import EditTenantPage from '../routes/tenants/[id]/edit/+page.svelte';

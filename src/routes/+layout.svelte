@@ -3,7 +3,7 @@
 	import '@fontsource-variable/inter';
 	import '../styles/globals.css';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Header from '$lib/ui/Header.svelte';
@@ -30,7 +30,7 @@
 	onMount(() => {
 		const refreshInterval = setInterval(
 			async () => {
-				if (data.user && !isPublicPath($page.url.pathname)) {
+				if (data.user && !isPublicPath(page.url.pathname)) {
 					try {
 						const xsrfToken = getXsrfTokenFromCookie();
 						const response = await fetch('/auth/refresh', {
@@ -65,9 +65,9 @@
 	});
 
 	// Derived state for showing authenticated layout
-	const showAuthenticatedLayout = $derived(!isPublicPath($page.url.pathname) && data.user !== null);
+	const showAuthenticatedLayout = $derived(!isPublicPath(page.url.pathname) && data.user !== null);
 	const publicLink = 'inline-flex min-h-12 items-center text-accent underline underline-offset-4';
-	const contentPage = $derived(['/help', '/privacy', '/terms'].includes($page.url.pathname));
+	const contentPage = $derived(['/help', '/privacy', '/terms'].includes(page.url.pathname));
 </script>
 
 <svelte:head>
@@ -116,7 +116,7 @@
 				{#if contentPage}
 					<a href="/login" class={publicLink} data-testid="public-login-link">{m.login_title()}</a>
 				{/if}
-				{#if $page.url.pathname !== '/help'}
+				{#if page.url.pathname !== '/help'}
 					<a href="/help" class={publicLink} data-testid="public-help-link">{m.nav_help()}</a>
 				{/if}
 			</div>

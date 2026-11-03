@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { untrack } from 'svelte';
 	import { statusLabels } from '$lib/apartment';
 	import { listSearchUrl } from '$lib/list-url';
@@ -12,9 +12,9 @@
 	let { buildings }: { buildings: { id: string; name: string }[] } = $props();
 
 	const fromUrl = () => ({
-		search: $page.url.searchParams.get('search') ?? '',
-		building: $page.url.searchParams.get('building') ?? '',
-		status: $page.url.searchParams.get('status') ?? ''
+		search: page.url.searchParams.get('search') ?? '',
+		building: page.url.searchParams.get('building') ?? '',
+		status: page.url.searchParams.get('status') ?? ''
 	});
 	let filters = $state(untrack(fromUrl));
 	const filtered = $derived(Object.values(filters).some(Boolean));

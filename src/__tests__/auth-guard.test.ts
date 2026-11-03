@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { SignJWT } from 'jose';
-import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { generateJwt } from '$lib/server/auth';
 import { handle } from '../hooks.server';
 import setupHealth from '../../tests/contracts/health-backup-setup.json';

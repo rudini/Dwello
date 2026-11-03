@@ -1,4 +1,5 @@
-import { json, type Handle, type HandleFetch, type ServerInit } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
+import type { Handle, HandleFetch, ServerInit } from '@sveltejs/kit/hooks';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { getJwtFromCookie, verifyJwt } from '$lib/server/auth';
 import { cookieConfig } from '$lib/server/jwt-config';
@@ -61,8 +62,7 @@ const session: Handle = async ({ event, resolve }) => {
 
 // UI language from the cookie, else the browser's, else German, around the session check; <html lang> follows it
 export const handle: Handle = ({ event, resolve }) =>
-	paraglideMiddleware(event.request, ({ request, locale }) => {
-		event.request = request;
+	paraglideMiddleware(event.request, ({ locale }) => {
 		return session({
 			event,
 			resolve: async (event) => {

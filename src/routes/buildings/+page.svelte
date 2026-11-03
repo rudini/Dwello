@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { BuildingsListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -14,7 +14,7 @@
 
 	// follow the address, so a link, back or forward shows the filters of the list shown (#159); only the address:
 	// the store also reports other changes, and these reset a term typed meanwhile (O-41)
-	const query = $derived($page.url.search);
+	const query = $derived(page.url.search);
 	const param = (key: string) => new URLSearchParams(query).get(key) || '';
 	let searchTerm = $derived(param('search'));
 	let cityFilter = $derived(param('city'));
@@ -108,7 +108,7 @@
 				count: data.total
 			})}
 			listClass="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-			url={$page.url}
+			url={page.url}
 			page={data.page}
 			pageSize={data.pageSize}
 			total={data.total}

@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import config from '../../svelte.config.js';
+import { csp } from '../../vite.config';
 
 // #721: a Content-Security-Policy that runs only Dwello's own scripts (SvelteKit adds a nonce to its own inline one)
-const csp = config.kit?.csp;
 const directives = (csp?.directives ?? {}) as Record<string, string[] | undefined>;
 
 describe('Content-Security-Policy', () => {

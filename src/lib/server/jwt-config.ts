@@ -3,7 +3,13 @@
  * Exports JWT secret and configuration for token handling
  */
 
-import { env } from '$env/dynamic/private';
+import {
+	JWT_SECRET,
+	JWT_EXPIRY,
+	COOKIE_SECURE,
+	COOKIE_SAME_SITE,
+	COOKIE_DOMAIN
+} from '$app/env/private';
 
 const MIN_SECRET_LENGTH = 32;
 
@@ -15,7 +21,8 @@ function getJwtSecret(): string {
 	// development without a JWT_SECRET uses the backend's fallback (backend/src/middleware/auth.ts); an installation
 	// makes its own (docker/init-secrets.sh, #577)
 	const secret =
-		env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'development-secret-key-change-in-production');
+		JWT_SECRET ||
+		(process.env.NODE_ENV === 'production' ? '' : 'development-secret-key-change-in-production');
 
 	if (!secret) {
 		throw new Error('JWT_SECRET environment variable is required');
@@ -59,7 +66,7 @@ export const jwtConfig = {
 		return getJwtSecret();
 	},
 	get expirySeconds() {
-		return parseExpiry(env.JWT_EXPIRY || '7d');
+		return parseExpiry(JWT_EXPIRY || '7d');
 	},
 	algorithm: 'HS256' as const,
 	issuer: 'dwello',
@@ -71,13 +78,13 @@ export const cookieConfig = {
 	xsrfName: 'dwello_xsrf',
 	oauthStateName: 'dwello_oauth_state',
 	get secure() {
-		return env.COOKIE_SECURE === 'true';
+		return COOKIE_SECURE === 'true';
 	},
 	get sameSite() {
-		return (env.COOKIE_SAME_SITE || 'lax') as 'lax' | 'strict' | 'none';
+		return (COOKIE_SAME_SITE || 'lax') as 'lax' | 'strict' | 'none';
 	},
 	get domain() {
-		return env.COOKIE_DOMAIN || undefined;
+		return COOKIE_DOMAIN || undefined;
 	},
 	path: '/'
 };

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Button from '$lib/ui/Button.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
 	import { MAX_MEGABYTES } from '$lib/invoice-upload';
@@ -14,15 +14,15 @@
 	// SvelteKit's own words for an unexpected failure are English in every language (#519); a load's own message stays
 	const ownWords = /^(Internal Error|Unknown Error|Error: \d+)$/;
 	const message = $derived(
-		messages[$page.status]?.() ??
-			(ownWords.test($page.error?.message ?? '') ? undefined : $page.error?.message) ??
+		messages[page.status]?.() ??
+			(ownWords.test(page.error?.message ?? '') ? undefined : page.error?.message) ??
 			m.error_unexpected()
 	);
 	const hints: Record<number, () => string> = {
 		404: m.error_hint_404,
 		413: () => m.backend_document_too_large({ megabytes: MAX_MEGABYTES })
 	};
-	const hint = $derived(hints[$page.status]?.() ?? m.error_hint_retry());
+	const hint = $derived(hints[page.status]?.() ?? m.error_hint_retry());
 </script>
 
 <svelte:head>

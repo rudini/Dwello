@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { navigating } from '$app/stores';
+	import { navigating } from '$app/state';
 	import { dismissToast, toasts, type Toast } from '$lib/stores';
 	import IconButton from './IconButton.svelte';
 	import Icon from './Icon.svelte';
@@ -19,7 +19,7 @@
 	let shownUpTo = $state(0);
 	$effect(() => {
 		const newest = $toasts.filter((toast) => toast.type !== 'error').at(-1)?.id ?? 0;
-		if (newest <= shownUpTo || $navigating) return;
+		if (newest <= shownUpTo || navigating.to) return;
 		const timer = setTimeout(() => {
 			// the action removed the focused button, or the page changed: go on from the page title
 			if (document.activeElement === document.body)

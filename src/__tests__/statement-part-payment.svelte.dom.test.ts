@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { readable, get } from 'svelte/store';
+import { get } from 'svelte/store';
 
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn(),
 	invalidateAll: vi.fn(),
@@ -15,12 +15,7 @@ vi.mock('$app/forms', () => ({
 		return { destroy() {} };
 	}
 }));
-vi.mock('$app/stores', () => ({
-	page: {
-		subscribe: (run: (value: unknown) => void) =>
-			readable({ url: new URL('http://localhost/statements/s1') }).subscribe(run)
-	}
-}));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/statements/s1') } }));
 
 import { toasts } from '$lib/stores';
 import StatementPage from '../routes/statements/[id]/+page.svelte';

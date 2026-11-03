@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
-	import { enhance } from '$app/forms';
-	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance, type SubmitFunction } from '$app/forms';
 	import { addToast } from '$lib/stores';
 	import { apiCall } from '$lib/api';
 	import AddressSearch from './AddressSearch.svelte';

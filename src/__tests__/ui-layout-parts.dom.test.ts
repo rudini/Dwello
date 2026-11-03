@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import type { Writable } from 'svelte/store';
-import { navigating as navigatingStore } from '$app/stores';
+import { navigating, page } from './helpers/app-state.svelte';
 import Table from '$lib/ui/Table.svelte';
 import ToastRegion from '$lib/ui/ToastRegion.svelte';
 import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -12,13 +11,8 @@ import { addToast, toasts } from '$lib/stores';
 import { byTestId, click, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
 
-vi.mock('$app/stores', async () => {
-	const { readable, writable } = await import('svelte/store');
-	return {
-		page: readable({ url: new URL('http://localhost/tenants/42') }),
-		navigating: writable(null)
-	};
-});
+vi.mock('$app/state', () => import('./helpers/app-state.svelte'));
+page.url = new URL('http://localhost/tenants/42');
 
 describe('Tabelle', () => {
 	it('hat eine Beschriftung und Spaltenköpfe, Beträge rechtsbündig', () => {
@@ -57,11 +51,10 @@ describe('Tabelle', () => {
 });
 
 describe('Meldungen', () => {
-	const navigating = navigatingStore as unknown as Writable<object | null>;
 	const status = () => document.querySelector('[role="status"]')!;
 	afterEach(() => {
 		vi.useRealTimers();
-		navigating.set(null);
+		navigating.to = null;
 	});
 
 	it('liest Erfolge höflich vor und lässt sie schliessen', () => {
@@ -83,14 +76,14 @@ describe('Meldungen', () => {
 		const region = status();
 		expect(region.textContent!.trim()).toBe('');
 
-		navigating.set({}); // the save opens the saved record: its title is announced first
+		navigating.to = {}; // the save opens the saved record: its title is announced first
 		addToast('success', 'Mieter gespeichert');
 		flushSync();
 		vi.advanceTimersByTime(2000);
 		flushSync();
 		expect(region.textContent).not.toContain('Mieter gespeichert');
 
-		navigating.set(null);
+		navigating.to = null;
 		flushSync();
 		vi.advanceTimersByTime(1000);
 		flushSync();
@@ -120,11 +113,11 @@ describe('Meldungen', () => {
 		vi.useFakeTimers();
 		toasts.set([]);
 		show(ToastRegion, {});
-		navigating.set({});
+		navigating.to = {};
 		addToast('success', 'Mieter gespeichert');
 		flushSync();
 		vi.advanceTimersByTime(6000);
-		navigating.set(null);
+		navigating.to = null;
 		flushSync();
 		vi.advanceTimersByTime(500); // shown now
 		flushSync();

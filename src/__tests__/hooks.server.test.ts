@@ -1,7 +1,7 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { generateJwt } from '$lib/server/auth';
 import { handle, handleFetch, init } from '../hooks.server';
-import { env as mockEnv } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env as mockEnv } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 
 async function forwarded(url: string, session?: string) {
 	let sent: Request | undefined;

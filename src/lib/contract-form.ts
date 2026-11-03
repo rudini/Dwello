@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import type { ReadonlyURLSearchParams } from '$app/state';
 import type { RentalContract } from './types';
 import { formatDate, isFeeRate, parsePercent } from './utils/format';
 import {
@@ -57,7 +58,7 @@ const advanceChanged = (values: ContractFormValues) =>
 /** Values of the contract being edited, or of a new contract for the tenant and apartment given in the URL */
 export function initialContractValues(
 	contract: RentalContract | undefined,
-	params: URLSearchParams
+	params: ReadonlyURLSearchParams
 ): ContractFormValues {
 	if (!contract) {
 		const start = params.get('start') || '';

@@ -1,12 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 import Header from '$lib/ui/Header.svelte';
 import { setLocale } from '$lib/paraglide/runtime';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
 
-vi.mock('$app/stores', () => ({ page: readable({ url: new URL('http://localhost/tenants') }) }));
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/tenants') } }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$lib/paraglide/runtime', async (original) => ({
 	...(await original<object>()),

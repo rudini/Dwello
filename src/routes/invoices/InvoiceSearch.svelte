@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
+	import type { ReadonlyURLSearchParams } from '$app/state';
 	import { listSearchUrl } from '$lib/list-url';
 	import type { InvoicesListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -15,7 +16,7 @@
 		categories,
 		years
 	}: {
-		params: URLSearchParams;
+		params: ReadonlyURLSearchParams;
 		buildings: InvoicesListData['buildings'];
 		categories: InvoicesListData['categories'];
 		years: string[];

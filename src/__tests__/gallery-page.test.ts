@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { load } from '../routes/gallery/+page.server';
 
 // The component gallery exists for the accessibility check only, never in a real installation

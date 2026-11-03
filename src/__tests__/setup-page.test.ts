@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
+import { env } from '../../tests/mocks/env'; // what vitest provides as $app/env/private
 import { m } from '$lib/paraglide/messages';
 import { verifyJwt } from '$lib/server/auth';
 import { actions, load } from '../routes/setup/+page.server';

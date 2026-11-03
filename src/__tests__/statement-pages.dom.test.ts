@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
 
 let url = new URL('http://localhost/statements');
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn(),
 	invalidateAll: vi.fn(),
@@ -18,8 +17,12 @@ vi.mock('$app/forms', () => ({
 		return { destroy() {} };
 	}
 }));
-vi.mock('$app/stores', () => ({
-	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
+vi.mock('$app/state', () => ({
+	page: {
+		get url() {
+			return url;
+		}
+	}
 }));
 
 import { goto, invalidateAll } from '$app/navigation';
