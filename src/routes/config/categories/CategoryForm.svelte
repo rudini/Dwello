@@ -126,7 +126,13 @@
 			options={allowance}
 			bind:value={values.allowed}
 			error={values.allowed ? undefined : errors.isAllowedUtilityCost}
-			describedby={reasonOf(chosen) ? 'category-reason' : undefined}
+			describedby={[
+				// the edit page's info box: what switching does, also once the reason is gone (#1029)
+				category?.predefined && 'category-consequence',
+				reasonOf(chosen) && 'category-reason'
+			]
+				.filter(Boolean)
+				.join(' ') || undefined}
 			testid="category-allowance"
 		/>
 		<CategoryReason category={chosen} id="category-reason" />
