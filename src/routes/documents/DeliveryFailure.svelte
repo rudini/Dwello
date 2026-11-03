@@ -19,7 +19,11 @@
 <div class="flex flex-col gap-1">
 	<p class="text-caution">{deliveryErrorText(document)}</p>
 	{#if document.recipient}
-		<p class="text-ink-muted">{m.documents_delivery_recipient({ address: document.recipient })}</p>
+		<!-- wrap-anywhere: Firefox does not break an address of digit groups at its hyphens, and the narrowest the row
+		can be has to count the breaks inside the address, or it pushes the page past 390 px (#1087) -->
+		<p class="text-ink-muted wrap-anywhere">
+			{m.documents_delivery_recipient({ address: document.recipient })}
+		</p>
 	{/if}
 	{#if (tenantLink && addressRefused) || documentsLink}
 		<p class="flex flex-wrap gap-x-4">
