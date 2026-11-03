@@ -22,7 +22,7 @@
 		<p>{m.config_period_change_list()}</p>
 		<ul class="flex flex-col gap-2">
 			{#each change.contracts as contract (contract.id)}
-				<li class="flex flex-col gap-1">
+				<li class="flex flex-col gap-2">
 					<span>{m.config_period_change_contract(contract)}</span>
 					<Button
 						href={contract.letter}

@@ -383,7 +383,6 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('contract-missing-statement-short-help')).not.toBeNull();
 	});
 
-	// #512 (Fachreview 512-1 V-2): the help of #486 stands in the row of the short period, not under an earlier period
 	// #1036 (Option 1): the letter from the day of the change, not only once the short period has ended
 	it('bietet den Brief zur Zustimmung an, solange die kurze Abrechnungsperiode läuft', () => {
 		const consent = {
@@ -400,6 +399,7 @@ describe('Mietvertragsdetail', () => {
 		);
 	});
 
+	// #512 (Fachreview 512-1 V-2): the help of #486 stands in the row of the short period, not under an earlier period
 	it('rät nur bei der kurzen Abrechnungsperiode zur Abrechnungsperiode im Mietvertrag', () => {
 		open('2024-04-01', null, null, '2026-10-10', false, [
 			{ start: '2025-07-01', end: '2025-12-31', href: '/statements/generate?short', way: { kind: 'short', start: '2025-07-01', end: '2025-12-31' } },

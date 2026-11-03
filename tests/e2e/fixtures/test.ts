@@ -84,10 +84,13 @@ export const test = base.extend<{
 		await inTurn(testInfo, async () => {
 			resetFreshBackup();
 			await installation.setUp();
-			await use(data);
-			await data.cleanUp();
-			await installation.cleanUp();
-			freshAccountingPeriod();
+			try {
+				await use(data);
+				await data.cleanUp();
+				await installation.cleanUp();
+			} finally {
+				freshAccountingPeriod(); // code review 1036-1 C-2: the next scenario starts from the default period
+			}
 		});
 	},
 
