@@ -173,9 +173,13 @@ export function consentPeriod(
 		({ way, open }) => open && way.kind === 'short' && way.start === earlier.switched
 	);
 	if (part) return { earlier: earlier.type, short: { start: part.way.start, end: part.way.end } };
-	// #1036: from the day of the change, while the short period still runs and no statement bills any of it
+	// #1036: from the day of the change, while the short period still runs and none of the contract's own statements
+	// bills any of it (another tenant's Schlussabrechnung there is not this contract's; fallback review of PR #1083)
 	const short = shortPeriodFrom(type, earlier.switched);
-	const running = short.end >= today && billsIn(contract, short) && !periodsOf(building).some((p) => overlaps(p, short));
+	const running =
+		short.end >= today &&
+		billsIn(contract, short) &&
+		!periodsOf(statements).some((p) => overlaps(p, short));
 	return running ? { earlier: earlier.type, short } : null;
 }
 

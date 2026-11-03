@@ -47,4 +47,16 @@ describe('Wechsel der Abrechnungsperiode in den Einstellungen', () => {
 		});
 		expect(asked).not.toContain('GET config/period-change');
 	});
+
+	// code review 1036-1 C-1, fallback review of PR #1083: the settings are saved; a hint that does not load costs no error page
+	it('bestätigt das Speichern, auch wenn der Hinweis zum Wechsel nicht lädt', async () => {
+		const failing = (async (url: string, init?: RequestInit) =>
+			url.endsWith('/period-change')
+				? Promise.reject(new TypeError('fetch failed'))
+				: backend([])(url, init)) as unknown as typeof fetch;
+		expect(await saveSettings(failing, form({ accountingPeriod: 'calendar' }))).toEqual({
+			saved: true,
+			periodChange: null
+		});
+	});
 });

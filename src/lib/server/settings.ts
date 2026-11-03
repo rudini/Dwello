@@ -61,7 +61,11 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	if (saved.ok)
 		return {
 			saved: true,
-			periodChange: before && typed.accounting_period !== before ? await periodChange(fetch) : null
+			// saved either way: a hint that does not load costs no error page (code review 1036-1 C-1)
+			periodChange:
+				before && typed.accounting_period !== before
+					? await periodChange(fetch).catch(() => null)
+					: null
 		};
 
 	const refused = (await saved.json().catch(() => ({}))) as BackendError;

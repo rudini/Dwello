@@ -282,4 +282,21 @@ describe('Kurze Abrechnungsperiode für den Brief zur Zustimmung', () => {
 			short: { start: '2026-11-01', end: '2026-12-31' }
 		});
 	});
+
+	// Fallback review of PR #1083: another tenant's Schlussabrechnung in the short period is not this contract's; only its
+	// own statements bill its days there
+	it('nennt die laufende kurze Abrechnungsperiode auch, wenn ein anderer Mietvertrag des Gebäudes darin abgerechnet ist', () => {
+		const change = { on: '2026-11-02', from: 'november-october' as const };
+		const ofAnother = own('2026-11-01', '2026-11-15');
+		expect(consentPeriod('calendar', contract('2024-04-01'), [], [ofAnother], '2026-11-20', change)).toEqual({
+			earlier: 'november-october',
+			short: { start: '2026-11-01', end: '2026-12-31' }
+		});
+	});
+
+	it('nennt die laufende kurze Abrechnungsperiode nicht, wenn eine eigene Abrechnung schon Tage darin abrechnet', () => {
+		const change = { on: '2026-11-02', from: 'november-october' as const };
+		const billed = own('2026-11-01', '2026-11-15');
+		expect(consentPeriod('calendar', contract('2024-04-01'), [billed], [billed], '2026-11-20', change)).toBeNull();
+	});
 });
