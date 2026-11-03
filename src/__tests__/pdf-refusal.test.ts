@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import { pdfRefusal } from '../lib/server/statement';
 import { load as refusedPage } from '../routes/documents/refused/+page.server';
 
@@ -79,5 +79,28 @@ describe('Fehlerseite eines abgelehnten PDF', () => {
 			'Das PDF konnte nicht erstellt werden. Schliessen Sie diesen Tab und versuchen Sie es später erneut.'
 		);
 		expect(pageOf('letter&code=CONTRACT_NOT_FOUND').title).toBe('Brief nicht verfügbar');
+	});
+});
+
+// fallback review of #1095: Node 20, which README and package.json still name, has no URL.parse
+describe('Abgelehntes PDF unter Node 20', () => {
+	const parse = URL.parse;
+	beforeEach(() => {
+		Reflect.deleteProperty(URL, 'parse');
+	});
+	afterEach(() => {
+		URL.parse = parse;
+	});
+
+	it('führt auch ohne URL.parse auf die Fehlerseite und von dort zurück', () => {
+		const response = pdfRefusal(from('http://dwello.test/statements?building=b-1'), {
+			code: 'IBAN_MISSING'
+		});
+		const back = target(response).searchParams.get('back');
+
+		expect(back).toBe('/statements?building=b-1');
+		expect((refusedPage({ url: target(response) } as never) as { back: string | null }).back).toBe(
+			'/statements?building=b-1'
+		);
 	});
 });

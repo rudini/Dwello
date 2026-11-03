@@ -9,7 +9,8 @@ export const load: PageServerLoad = ({ url }) => {
 	const query = url.searchParams;
 	const code = query.get('code') ?? undefined;
 	// resolved as the browser does (it drops tabs and line breaks): a path of this app only, never another site
-	const back = query.has('back') ? URL.parse(query.get('back')!, url) : null;
+	const path = query.get('back');
+	const back = path !== null && URL.canParse(path, url) ? new URL(path, url) : null;
 	return {
 		title: query.has('letter')
 			? m.documents_refused_letter()

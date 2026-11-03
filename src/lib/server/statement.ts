@@ -258,7 +258,9 @@ export function pdfRefusal(request: Request, body: unknown, kind?: 'view' | 'let
 	const code = (body as BackendError | null)?.code;
 	const refused = new URLSearchParams(code && { code });
 	if (kind) refused.set(kind, '');
-	const from = URL.parse(request.headers.get('referer') ?? '');
+	// URL.canParse, not URL.parse: Node 20 has only the first
+	const referer = request.headers.get('referer') ?? '';
+	const from = URL.canParse(referer) ? new URL(referer) : null;
 	const own = from?.origin === new URL(request.url).origin;
 	if (from && own && (code !== 'STATEMENT_NOT_FOUND' || from.pathname === '/statements'))
 		refused.set('back', `${from.pathname}${from.search}`);
