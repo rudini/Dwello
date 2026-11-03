@@ -19,7 +19,10 @@
 <div class="flex flex-col gap-1">
 	<p class="text-caution">{deliveryErrorText(document)}</p>
 	{#if document.recipient}
-		<p class="text-ink-muted">{m.documents_delivery_recipient({ address: document.recipient })}</p>
+		<!-- an address has no place to break: without one it widens the page (Firefox, #1087) -->
+		<p class="text-ink-muted wrap-anywhere">
+			{m.documents_delivery_recipient({ address: document.recipient })}
+		</p>
 	{/if}
 	{#if (tenantLink && addressRefused) || documentsLink}
 		<p class="flex flex-wrap gap-x-4">
