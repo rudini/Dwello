@@ -2,7 +2,9 @@
 	"extends": "$app/tsconfig",
 	"compilerOptions": {
 		"sourceMap": true,
-		"strict": true
+		"strict": true,
+		// Kit 3's generated tsconfig names no $lib: Playwright and Bun resolve it from here (E2E steps import src/lib)
+		"paths": { "$lib": ["./src/lib"], "$lib/*": ["./src/lib/*"] }
 	},
 	"include": [
 		".svelte-kit/ambient.d.ts",
