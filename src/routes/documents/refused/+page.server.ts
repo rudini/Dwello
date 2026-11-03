@@ -8,7 +8,8 @@ const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALI
 export const load: PageServerLoad = ({ url }) => {
 	const query = url.searchParams;
 	const code = query.get('code') ?? undefined;
-	const back = query.get('back');
+	// resolved as the browser does (it drops tabs and line breaks): a path of this app only, never another site
+	const back = new URL(query.get('back') ?? '/statements', url);
 	return {
 		title: query.has('letter')
 			? m.documents_refused_letter()
@@ -19,8 +20,7 @@ export const load: PageServerLoad = ({ url }) => {
 			{ code },
 			query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()
 		),
-		// a path of this app only, never another site
-		back: back && /^\/(?![/\\])/.test(back) ? back : null,
+		back: query.has('back') && back.origin === url.origin ? `${back.pathname}${back.search}` : null,
 		// a refusal whose way out is in «Einstellungen» links there too (persona Dr. Weber P-2, #450)
 		settings: SETTINGS_CODES.includes(code ?? '')
 	};
