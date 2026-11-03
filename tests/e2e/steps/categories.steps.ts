@@ -38,6 +38,7 @@ import {
 	createCategory,
 	createFuelCategory,
 	deleteCategory,
+	startDeletingCategory,
 	saveWithoutFuel,
 	openCategories,
 	openCategoryEdit,
@@ -165,6 +166,10 @@ When(
 
 When('der Liegenschaftsverwalter die Kategorie {string} löscht', async ({ verwalter, names }, title: string) => {
 	await verwalter.attemptsTo(deleteCategory(names.get(title)!));
+});
+
+When('der Liegenschaftsverwalter beginnt, die Kategorie {string} zu löschen', async ({ verwalter, names }, title: string) => {
+	await verwalter.attemptsTo(startDeletingCategory(names.get(title)!));
 });
 
 Then('sieht der Liegenschaftsverwalter die Kategorie {string}', async ({ verwalter, names }, title: string) => {

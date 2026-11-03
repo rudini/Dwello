@@ -54,6 +54,8 @@ export const saveAsNotAllowed = (name: string): Activity => (actor) =>
 export const saveWithoutFuel = (categoryId: string): Activity => (actor) =>
 	actor.attemptsTo(openCategoryEdit(categoryId), Uncheck.the(fuelCheckbox), Click.on(submitButton));
 
+// #1081: the delete dialog open, its question not answered yet
+export const startDeletingCategory = (name: string) => Click.on(deleteButton(name));
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));
 

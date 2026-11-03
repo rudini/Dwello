@@ -44,6 +44,8 @@
 		const clear = confirmations.length && region ? region.offsetHeight + 32 : 0;
 		room = clear;
 		document.documentElement.style.scrollPaddingBottom = clear ? `${clear}px` : '';
+		// a dialog opened meanwhile keeps the same room (Dialog.svelte, code review 1081 C-1)
+		document.documentElement.style.setProperty('--toast-room', `${clear}px`);
 		const focused = document.activeElement;
 		// jsdom has no scrollIntoView
 		if (clear && focused && focused !== document.body)
