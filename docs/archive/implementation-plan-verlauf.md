@@ -889,3 +889,12 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Slice review round 1, also the closing round: `docs/reviews/1071-review-1.md` (C-1 fixed: text lines measured too, seen red with a nowrap address)
 - [x] Slice review round 2: `docs/reviews/1071-review-2.md`
 - [x] Archive, PR: pushed after this archive
+
+## Session: #1087 red main run, a refused address wider than 390 px in Firefox
+
+- [x] Cause 1: Firefox does not break a recipient address of hyphenated digit groups, so the row of an undelivered letter (`DeliveryFailure.svelte`) pushed the page to 396–556 px; seen red in Firefox locally (3 of 5 runs of «tenant-detail-undelivered default»)
+- [x] Fix: `wrap-anywhere` on the recipient; Firefox and Chromium rows «undelivered» green
+- [x] Cause 2, «Die Wahl der Gebäude passt in ein schmales Fenster»: already fixed on `main` by #1082 (red only in the run of 460eabde, green in the run of 791f6532); 7 of 7 green in Firefox locally, no change
+- [x] No scenario: the fix of a red `main`; the scenario that failed, «Bildschirm ohne deutschen Text» tenant-detail-undelivered, is the test (jsdom measures no layout)
+- [x] Slice review round 1, also the closing round: `docs/reviews/1087-review-1.md`
+- [x] Archive, PR: pushed after this archive
