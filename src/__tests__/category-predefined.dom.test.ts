@@ -154,4 +154,23 @@ describe('Kennzeichnung und Schutz vordefinierter Kategorien', () => {
 
 		expect(byTestId('category-predefined-hint')).toBeNull();
 	});
+
+	// #1029 (persona Sven 683 P-1): the group still says what switching does once the reason is gone
+	it('nennt bei der Frage der Umlagefähigkeit die Folge des Umstellens, auch nach dem Umstellen', async () => {
+		show(EditCategoryPage, { data: { category: seeded, kiEnabled: false }, form: null } as never);
+		byTestId<HTMLInputElement>('category-allowance-false')!.click();
+		await Promise.resolve();
+
+		expect(description(byTestId('category-allowance')!)).toContain(
+			'Stellen Sie die Kategorie auf nicht umlagefähig, fliessen ihre schon erfassten Rechnungen nicht mehr in neue Nebenkostenabrechnungen'
+		);
+	});
+
+	it('verweist bei einer eigenen Kategorie auf keine Folge des Umstellens', () => {
+		show(EditCategoryPage, { data: { category: own }, form: null } as never);
+
+		expect(byTestId('category-allowance')!.getAttribute('aria-describedby')).not.toContain(
+			'category-consequence'
+		);
+	});
 });
