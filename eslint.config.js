@@ -122,7 +122,7 @@ export default [
 		},
 		rules: {
 			...Object.assign({}, ...svelte.configs.recommended.map((c) => c.rules)),
-			// no paths.base in svelte.config.js, so links need no resolve()
+			// no paths.base in vite.config.ts, so links need no resolve()
 			'svelte/no-navigation-without-resolve': 'off',
 			// a $bindable() default is read by the parent, which the core rule cannot see
 			'no-useless-assignment': 'off',

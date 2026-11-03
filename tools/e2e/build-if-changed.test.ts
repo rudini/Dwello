@@ -51,7 +51,7 @@ describe('build-if-changed', () => {
 		run();
 		writeFileSync(join(root, 'messages/de.json'), '{}');
 		expect(run()).toBe(2);
-		writeFileSync(join(root, 'svelte.config.js'), 'export default {};');
+		writeFileSync(join(root, 'vite.config.ts'), 'export default {};');
 		expect(run()).toBe(3);
 	});
 

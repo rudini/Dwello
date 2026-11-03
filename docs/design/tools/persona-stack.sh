@@ -19,7 +19,7 @@ case " $* " in *" --keep-db "*) KEEP_DB=1 ;; esac
 [ -n "$KEEP_DB" ] || { su postgres -c "dropdb --if-exists $NAME" && su postgres -c "createdb -O dwello $NAME"; }
 (cd backend && DATABASE_URL=$DB bun scripts/migrate.ts > /tmp/persona-migrate.log 2>&1)
 [ -n "$KEEP_DB$FRESH" ] || (cd backend && DATABASE_URL=$DB bun scripts/demo-data.ts) > /tmp/persona-demo.log 2>&1
-# its own build directories (svelte.config.js, BUILD_DIR), so an E2E build cannot change the pages under a running persona;
+# its own build directories (vite.config.ts, BUILD_DIR), so an E2E build cannot change the pages under a running persona;
 # the build gets package.json (ES modules) and a link to node_modules; --no-build serves the last one again
 case " $* " in *" --no-build "* | *" --second "*) ;; *) BUILD_DIR=/tmp/persona-app bun run build > /tmp/persona-build.log 2>&1 ;; esac
 [ -f /tmp/persona-app/index.js ] || { echo "no persona build in /tmp/persona-app: run without --no-build"; exit 1; }

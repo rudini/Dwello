@@ -406,7 +406,6 @@ dwello/
 ├── docs/
 ├── docker-compose.yml / .dev.yml / .prod.yml
 ├── Dockerfile
-├── svelte.config.js
 ├── vite.config.ts
 ├── tailwind.config.js
 ├── tsconfig.json

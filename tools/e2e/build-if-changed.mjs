@@ -14,7 +14,6 @@ const INPUTS = [
 	'messages',
 	'static',
 	'project.inlang',
-	'svelte.config.js',
 	'vite.config.ts',
 	'tailwind.config.js',
 	'tsconfig.json',
