@@ -33,6 +33,7 @@ import {
 	cancelAllocability,
 	confirmAllocability,
 	saveAsAllowed,
+	chooseAllowed,
 	kiFails,
 	createCategory,
 	createFuelCategory,
@@ -417,4 +418,13 @@ When('der Liegenschaftsverwalter das Umstellen abbricht', async ({ verwalter }) 
 
 Then('ist die Kategorie {string} umlagefähig', async ({ verwalter, names }, title: string) => {
 	await verwalter.sees(allowance(names.get(title)!)).toBe('Umlagefähig');
+});
+
+// #1029: the consequences of the info box describe the question, also once the reason is gone
+When('der Liegenschaftsverwalter die Kategorie als umlagefähig wählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseAllowed);
+});
+
+Then('nennt die Frage der Umlagefähigkeit die Folge {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allowanceQuestionDescription).toContain(text);
 });

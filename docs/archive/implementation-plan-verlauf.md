@@ -897,4 +897,12 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Cause 2, «Die Wahl der Gebäude passt in ein schmales Fenster»: already fixed on `main` by #1082 (red only in the run of 460eabde, green in the run of 791f6532); 7 of 7 green in Firefox locally, no change
 - [x] No scenario: the fix of a red `main`; the scenario that failed, «Bildschirm ohne deutschen Text» tenant-detail-undelivered, is the test (jsdom measures no layout)
 - [x] Slice review round 1, also the closing round: `docs/reviews/1087-review-1.md`
+## Session: #1029 consequence of switching describes the allocability question
+
+- [x] Product-owner decision recorded in #1029 (2026-11-03): option 2, the info box's consequence describes the radio group
+- [x] Scenario «Folgen des Umstellens einer vordefinierten Kategorie gehören zur Frage» (`categories.feature`), seen red at the missing description
+- [x] `CategoryForm` links `category-consequence` (the edit page's info box paragraph) for predefined categories
+- [x] Slice review round 1: `docs/reviews/1029-review-1.md` (C-1 Minor fixed: DOM tests in `category-predefined.dom.test.ts`)
+- [x] Persona Sven: `docs/design/personas/sven-1029.md` (P-1 Major needs a product decision: #1084; P-2 to P-4 Minor stay in the report)
+- [x] Closing round: `docs/reviews/1029-review-2.md` (C-2 Minor fixed: the test checks the switch took effect)
 - [x] Archive, PR: pushed after this archive
