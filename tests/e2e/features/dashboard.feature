@@ -261,6 +261,17 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2023 – 31.12.2023"
 
+  # #1088: die Erinnerung folgt der Abrechnungsperiode des Gebäudes
+  @wip
+  Szenario: Die Erinnerung folgt der Abrechnungsperiode des Gebäudes
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und das Gebäude "Ahornhof" rechnet von Juli bis Juni ab
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2022-07-01" bis "2023-06-30" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2022 – 30.06.2023"
+
   # #512: vor der letzten Abrechnung des Gebäudes nach einer anderen Abrechnungsperiode folgt die Erinnerung deren Perioden,
   # auch wenn die Abrechnung einem anderen Mietvertrag gehört (Fachreview 512-1 V-3)
   Szenario: Erinnerung nennt vor einem Wechsel der Abrechnungsperiode die Periode der bestehenden Abrechnungen

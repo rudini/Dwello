@@ -528,6 +528,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter für "Lindenhof" die Abrechnungsperiode ab "2024-07-01" wählt
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Lindenhof" vom "2024-07-01" bis "2024-12-31"
 
+  # #1088: ein Gebäude rechnet immer in seiner eigenen Abrechnungsperiode ab; eine gewählte Periode, die nicht in
+  # eine Periode des Gebäudes passt, lässt das Gebäude nicht wählen
+  @wip
+  Szenario: Ein Gebäude mit einer anderen Abrechnungsperiode ist nicht wählbar
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und das Gebäude "Ahornhof" rechnet von Juli bis Juni ab
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "2.01" seit "2023-07-01" für "950" Franken
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann lässt die Wahl das Gebäude "Ahornhof" nicht wählen
+    Und nennt die Wahl für "Ahornhof" "Ahornhof rechnet von Juli bis Juni ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen."
+
   # #521 (Fachreview 521-1 V-2): zum Rat bei der kurzen Abrechnungsperiode bietet die Wahl der Gebäude den Brief zur
   # Zustimmung für jeden Mietvertrag mit Mietstagen in der kurzen Abrechnungsperiode an; Eva Frei hat dort keine
   Szenario: Die Wahl der Gebäude bietet den Brief zur Zustimmung zur neuen Abrechnungsperiode an
