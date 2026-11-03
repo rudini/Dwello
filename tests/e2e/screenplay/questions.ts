@@ -86,7 +86,12 @@ export const ReachingOut = {
 						const outer = box.getBoundingClientRect();
 						const overhang = (inner: DOMRect, { left, right }: { left: number; right: number }) =>
 							inner.width ? Math.max(0, left - inner.left, inner.right - right) : 0;
-						const parts = [...box.querySelectorAll('*')].map((part) => overhang(part.getBoundingClientRect(), outer));
+						// the text lines too: a text runs on beyond the element that holds it (code review 1071 C-1)
+						const lines = document.createRange();
+						lines.selectNodeContents(box);
+						const parts = [...[...box.querySelectorAll('*')].map((part) => part.getBoundingClientRect()), ...lines.getClientRects()].map(
+							(part) => overhang(part, outer)
+						);
 						const window = { left: 0, right: document.documentElement.clientWidth };
 						return Math.round(Math.max(overhang(outer, window), ...parts));
 					},
