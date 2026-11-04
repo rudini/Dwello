@@ -70,6 +70,15 @@
 		};
 	});
 
+	// The dialog describes itself with its first paragraph, the consequence, not with warnings and lists (#653)
+	let paragraph = $state<string>();
+	$effect(() => {
+		if (!open || !panel) return;
+		const first = panel.querySelector<HTMLElement>(`[id="${id}-body"] p`);
+		if (first && !first.id) first.id = `${id}-description`;
+		paragraph = first?.id;
+	});
+
 	// While busy both buttons are disabled: the panel itself holds the focus
 	$effect(() => {
 		if (open && busy) panel?.focus();
@@ -130,7 +139,7 @@
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="{id}-title"
-			aria-describedby={describedby ?? (wide ? undefined : `${id}-body`)}
+			aria-describedby={describedby ?? (wide ? undefined : paragraph)}
 			tabindex="-1"
 			class="flex max-h-full w-full {wide ? 'max-w-4xl' : 'max-w-lg'} flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>

@@ -154,7 +154,6 @@ Funktionalität: Rechnungsdetail
     Dann ist der Titel der Bestätigung "Rechnung löschen" ganz zu sehen
 
   # #653: ein Screenreader liest als Beschreibung der Bestätigung ihren ersten Absatz, nicht die Warnung und die Liste
-  @wip
   Szenario: Die Bestätigung zum Löschen einer abgerechneten Rechnung beschreibt sich mit ihrem ersten Absatz
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und der Mieter "Anna Keller" existiert

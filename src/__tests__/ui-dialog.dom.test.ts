@@ -43,6 +43,26 @@ describe('Dialog', () => {
 		).toContain('als versendet markiert');
 	});
 
+	// #653: a screen reader read the whole content, warnings and lists included, as the description
+	it('beschreibt sich mit dem ersten Absatz, nicht mit dem ganzen Inhalt', () => {
+		openDialog({
+			children: markup(
+				'<div><p>Die Rechnung wird gelöscht.</p><div role="alert"><p>Schon abgerechnet.</p><ul><li>NK-1</li></ul></div></div>'
+			)
+		});
+		const dialog = document.querySelector('[role=dialog]')!;
+		const description = (dialog.getAttribute('aria-describedby') ?? '')
+			.split(' ')
+			.map((id) => document.getElementById(id)?.textContent)
+			.join(' ');
+		expect(description).toBe('Die Rechnung wird gelöscht.');
+	});
+
+	it('hat ohne Absatz keine Beschreibung', () => {
+		openDialog({ children: markup('<div><label>Datum <input /></label></div>') });
+		expect(document.querySelector('[role=dialog]')!.hasAttribute('aria-describedby')).toBe(false);
+	});
+
 	it('macht die Seite dahinter unerreichbar, solange er offen ist', () => {
 		const { opener } = openDialog();
 		const dialog = document.querySelector('[role=dialog]')!;
