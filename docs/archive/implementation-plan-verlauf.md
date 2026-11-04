@@ -1003,6 +1003,15 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] CI all browsers (WebKit: an image Dokument without `download`, #424): hand-run of ci.yml, result in the pull request
 - [x] PR: pushed after this archive
 
+## Session 2026-11-04: #1068 one short sentence on billed contracts per building
+
+- [x] Scenarios in `statement-generate.feature` changed as #1068 decided (Spec change approved: #1068), seen red at the old texts
+- [x] One sentence per building card: none, some or all contracts billed (singular and plural); the «Neu berechnen» sentence once under the buildings, read with the group; red first in DOM and i18n tests
+- [x] Fachreview 1068-1 (`docs/reviews/1068-fachreview-1.md`); wording decided by the product owner
+- [x] Code review round 1 (`docs/reviews/1068-review-1.md`): C-1, C-2 Minor fixed; closing round 2 (`1068-review-2.md`) clean
+- [x] Personas Marco, Sven (`marco-1068.md`, `sven-1068.md`): no Blocker/Major; Sven P-1, P-2 fixed, red first; the other Minors existed before and stay in their reports
+- [x] PR (`Fixes #1068`): pushed after this archive
+
 ## Session: search engine tags for dwello.ch
 
 - [x] Landing pages: canonical, absolute hreflang with x-default, Open Graph, JSON-LD SoftwareApplication; `i18n/build.py` sets canonical, og:url, og:image and og:locale per language

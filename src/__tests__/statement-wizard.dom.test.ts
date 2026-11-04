@@ -1787,14 +1787,15 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung für diese Abrechnungsperiode. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'2 von 3 Mietverträgen haben schon eine Abrechnung; nur der übrige wird abgerechnet.'
 		);
 		expect(billedText('b2')).toBeUndefined();
 		// read after the building's name, not as part of it (persona Sven P-1), and a tap on it still chooses the
 		// building (persona Marco P-3)
 		const checkbox = byTestId('generate-building-b1')!;
 		const note = byTestId('generate-building-billed-b1')!;
-		expect(checkbox.getAttribute('aria-describedby')!.split(' ')).toContain(note.id);
+		// #1068 (persona Sven 1068 P-1): what happens to the building is read first, before the counts
+		expect(checkbox.getAttribute('aria-describedby')!.split(' ')[0]).toBe(note.id);
 		expect(note.getAttribute('aria-hidden')).toBe('true');
 		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
 		click('generate-building-billed-b1');
@@ -1818,10 +1819,10 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung für diese Abrechnungsperiode. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Keine neue Abrechnung: Alle Mietverträge haben schon eine.'
 		);
 		expect(billedText('b2')).toBe(
-			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung für diese Abrechnungsperiode. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Keine neue Abrechnung: Der Mietvertrag hat schon eine.'
 		);
 	});
 
@@ -1948,9 +1949,43 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		next();
 		await settle();
 
-		expect(billedText('b1')).toBe(
-			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung für diese Abrechnungsperiode. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+		expect(billedText('b1')).toBe('1 von 2 Mietverträgen hat schon eine Abrechnung; nur der übrige wird abgerechnet.');
+	});
+
+	// #1068 (code review 1068-1 C-1): no note on «Neu berechnen» without billed contracts, nor for a building that cannot be
+	// chosen (another Abrechnungsperiode)
+	it('erklärt «Neu berechnen» nicht ohne abgerechnete Mietverträge in wählbaren Gebäuden', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 0 },
+			{ buildingId: 'b2', contracts: 2, billed: 1, otherPeriod: 'july-june' }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(byTestId('generate-recalculate-note')).toBeNull();
+	});
+
+	// #1068: the counts in the singular and plural of both halves; «Neu berechnen» once in the step, not on the cards
+	it('nennt abgerechnete und übrige Mietverträge in Ein- und Mehrzahl und erklärt «Neu berechnen» einmal', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 3, billed: 1 },
+			{ buildingId: 'b2', contracts: 4, billed: 2 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe('1 von 3 Mietverträgen hat schon eine Abrechnung; nur die übrigen werden abgerechnet.');
+		expect(billedText('b2')).toBe('2 von 4 Mietverträgen haben schon eine Abrechnung; nur die übrigen werden abgerechnet.');
+		expect(document.querySelectorAll('[data-testid="generate-recalculate-note"]')).toHaveLength(1);
+		// read once with the group of buildings, not on each checkbox (code review 1068-1 C-2, persona Sven 1068 P-2)
+		expect(byTestId('generate-building-b1')!.closest('fieldset')!.getAttribute('aria-describedby')!.split(' ')).toContain(
+			byTestId('generate-recalculate-note')!.id
 		);
+		expect(byTestId('generate-recalculate-note')!.textContent!.trim()).toBe('Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.');
 	});
 });
 

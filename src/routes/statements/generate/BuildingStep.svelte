@@ -30,8 +30,10 @@
 	let failed = $state({ invoices: false, billed: false });
 	// read with the group, not only seen (persona Sven 738 P-1)
 	const countsFailed = $derived(failed.invoices || failed.billed);
+	// #1068: how an existing draft is recalculated, once for the step when a building has billed contracts (Helga P-7, #201)
+	const recalculate = $derived(buildings.some((b) => billed[b.id]?.billed && !unchoosable(billed[b.id])));
 	const describedBy = $derived(
-		[error && 'buildings-error', countsFailed && 'buildings-counts-failed']
+		[error && 'buildings-error', countsFailed && 'buildings-counts-failed', recalculate && 'buildings-recalculate']
 			.filter(Boolean)
 			.join(' ') || undefined
 	);
@@ -131,6 +133,11 @@
 				]
 					.filter(Boolean)
 					.join(' ')}
+			</p>
+		{/if}
+		{#if recalculate}
+			<p id="buildings-recalculate" class="basis-full text-ink-muted" data-testid="generate-recalculate-note">
+				{m.statements_building_recalculate()}
 			</p>
 		{/if}
 		{#if leftOut.length}

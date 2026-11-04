@@ -38,6 +38,7 @@ import {
 	periodStartInput,
 	periodEndInput,
 	periodProposedText,
+	recalculateNote,
 	periodRunningWarning,
 	previewEmpty,
 	previewFee,
@@ -195,3 +196,5 @@ export const invoiceCountShown = (buildingId: string) => Visibility.of(buildingI
 export const buildingChoiceName = (buildingId: string) => Accessible.nameOf(buildingCheckbox(buildingId));
 export const buildingChoiceDescription = (buildingId: string) => Accessible.descriptionOf(buildingCheckbox(buildingId));
 export const buildingCardReachingOut = (buildingId: string) => ReachingOut.of(buildingCard(buildingId));
+// #1068: said once in the step, not on each card
+export const recalculateNotes = Text.ofAll(recalculateNote);
