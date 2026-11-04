@@ -1032,3 +1032,12 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] `marketing/.htaccess`: 301 from www.dwello.ch to https://dwello.ch with the path (Infomaniak's web redirection served a self-signed certificate on HTTPS and dropped the path; the owner deleted it)
 - [x] Slice review (`docs/reviews/www-review-1.md`); C-1 fixed: host with trailing dot or port
 - [x] PR: pushed after this archive
+
+## Session 2026-11-04: #651 the page behind the mobile menu is inert
+
+- [x] No scenario: inert changes only what assistive technology reads; Playwright's aria snapshot and role locators still list inert content (checked with a test page), and focus and pointer already stayed in the drawer. DOM tests instead, red first
+- [x] MobileNav makes the page around it inert with the Dialog's `makeInert` (shared in `src/lib/ui/inert.ts`); the scrim stays clickable, toasts readable; the menu closes at `lg` (64rem)
+- [x] Code review round 1 (`docs/reviews/651-review-1.md`): C-1 Minor fixed; closing round 2 (`651-review-2.md`) clean
+- [x] No persona: what the screen shows is unchanged, and the persona tools list inert content too
+- [ ] Manual check of toast announcements with NVDA and VoiceOver: product owner (stays in #651)
+- [x] PR (`Refs #651`): pushed after this archive
