@@ -318,15 +318,17 @@ describe('Abrechnungsliste', () => {
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
 
-	// Der Knopf der Zeile verschwindet nach dem Speichern: der Fokus geht auf den Titel, nicht auf die Seite
-	it('setzt nach dem Zahlungseingang aus der Liste den Fokus auf den Titel', async () => {
+	// Der Knopf der Zeile verschwindet nach dem Speichern: der Fokus geht auf die Zeile, nicht auf den Titel (#653)
+	it('setzt nach dem Zahlungseingang aus der Liste den Fokus auf die Zeile der Abrechnung', async () => {
 		fakeBff();
 		list([statement({ status: 'sent' })]);
 		click('statement-row-mark-paid');
 		click('statement-list-mark-paid-confirm');
 		await settle();
 
-		expect(document.activeElement).toBe(document.querySelector('h1'));
+		expect(document.activeElement).toBe(
+			document.querySelector('[data-testid="statement-row-s1"] [data-testid="statement-view-link"]')
+		);
 	});
 
 	it('meldet im Dialog, wenn der Zahlungseingang nicht gespeichert wird', async () => {
@@ -965,7 +967,7 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
-	it('bestätigt das Ersetzen und setzt den Fokus auf den Titel', async () => {
+	it('bestätigt das Ersetzen und setzt den Fokus auf den Status', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-correct-button');
@@ -974,7 +976,7 @@ describe('Abrechnungsdetail', () => {
 		await settle();
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Die Abrechnung ist ersetzt.']);
-		expect(document.activeElement).toBe(document.querySelector('h1'));
+		expect(document.activeElement).toBe(byTestId('statement-status-line'));
 	});
 
 	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
@@ -1899,8 +1901,8 @@ describe('Abrechnungsdetail', () => {
 		}
 	});
 
-	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem Titel statt auf der Seite
-	it('bestätigt den Zahlungseingang und setzt den Fokus auf den Titel', async () => {
+	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem neuen Status statt auf dem Titel (#653)
+	it('bestätigt den Zahlungseingang und setzt den Fokus auf den Status', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-mark-paid-button');
@@ -1911,7 +1913,7 @@ describe('Abrechnungsdetail', () => {
 		await settle();
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung als bezahlt markiert']);
-		expect(document.activeElement).toBe(document.querySelector('h1'));
+		expect(document.activeElement).toBe(byTestId('statement-status-line'));
 	});
 
 	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {

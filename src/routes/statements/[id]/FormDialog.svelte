@@ -53,7 +53,8 @@
 			if (result.type === 'success' && said) {
 				addToast('success', said);
 				await tick(); // after the dialog has handed the focus back
-				document.querySelector<HTMLElement>('h1')?.focus(); // its button may be gone now
+				// its button may be gone now: the focus names the new status, not the page title again (#653)
+				document.getElementById('statement-status-line')?.focus();
 			}
 		},
 		() => ondone?.(),

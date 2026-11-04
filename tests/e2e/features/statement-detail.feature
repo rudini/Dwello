@@ -73,7 +73,6 @@ Funktionalität: Abrechnungsdetail
     Dann hat die Abrechnung den Status "Versendet"
 
   # #653: nach dem Versand liest ein Screenreader den neuen Status, nicht noch einmal den Titel der Seite
-  @wip
   Szenario: Nach dem Versand steht der Fokus auf dem Status
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
