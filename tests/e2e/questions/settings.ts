@@ -1,4 +1,4 @@
-import { Accessible, Attribute, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Value, Visibility } from '../screenplay/questions';
 import { exportAllDataButton, savedNotice, settingField } from '../targets/settings';
 
 export const settingsSaved = Visibility.of(savedNotice);
@@ -8,3 +8,5 @@ export const settingInvalid = (name: string) => Attribute.named('aria-invalid').
 export const settingHelp = (name: string) => Accessible.descriptionOf(settingField(name));
 /** #496: the help at «Alle Daten exportieren», as a screen reader reads it with the control */
 export const exportHelp = Accessible.descriptionOf(exportAllDataButton);
+/** #1088: how many fields of a setting the page has */
+export const settingCount = (name: string) => Count.of(settingField(name));

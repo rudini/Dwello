@@ -10,6 +10,7 @@
 	import RegisterNotices from './RegisterNotices.svelte';
 	import type { AddressHit, RegisterBuilding } from '$lib/types';
 	import { buildingTypeLabel, buildingTypes } from '$lib/building-type';
+	import { accountingPeriods } from '$lib/accounting-period';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -26,6 +27,8 @@
 		buildingType?: string | null;
 		yearBuilt?: number | null;
 		noTank?: boolean;
+		accountingPeriod?: string;
+		accountingPeriodLocked?: boolean;
 	}
 
 	interface Props {
@@ -48,6 +51,7 @@
 	let buildingType = $state(start.buildingType || '');
 	let yearBuilt = $state(start.yearBuilt?.toString() || '');
 	let noTank = $state(!!start.noTank);
+	let accountingPeriod = $state(start.accountingPeriod || 'calendar');
 
 	let isSubmitting = $state(false);
 
@@ -271,6 +275,21 @@
 			help={m.buildings_no_tank_help()}
 			bind:checked={noTank}
 			testid="building-no-tank-checkbox"
+		/>
+		<!-- #1088: each building has its own Abrechnungsperiode, fixed from its first statement; the help leads to the
+		     Mietvertrag, where it is often agreed (Fachreview 1088-1 M-2) -->
+		<Select
+			id="accountingPeriod"
+			name="accountingPeriod"
+			label={m.glossary_period_term()}
+			help={start.accountingPeriodLocked
+				? m.buildings_period_locked({ building: start.name ?? '' })
+				: m.buildings_help_accounting_period()}
+			options={accountingPeriods()}
+			bind:value={accountingPeriod}
+			disabled={start.accountingPeriodLocked}
+			error={errors.accountingPeriod}
+			testid="building-accounting-period-select"
 		/>
 	</fieldset>
 

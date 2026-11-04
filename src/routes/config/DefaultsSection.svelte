@@ -22,11 +22,6 @@
 	type Option = { value: string; label: string; disabled?: boolean };
 	const NONE: Option = { value: '', label: m.settings_no_suggestion() };
 
-	const periods: Option[] = [
-		{ value: 'calendar', label: m.settings_period_calendar() },
-		{ value: 'july-june', label: m.settings_period_july() },
-		{ value: 'november-october', label: m.settings_period_november() }
-	];
 	// Only profiles summing to 100 % distribute all heating costs
 	const profiles = $derived([
 		NONE,
@@ -75,12 +70,6 @@
 	<p class="text-ink-muted">
 		{m.settings_suggestions_text()}
 	</p>
-	{@render choice(
-		'accountingPeriod',
-		m.glossary_period_term(),
-		`${help.accountingPeriod} ${m.settings_period_suggested()}`,
-		periods
-	)}
 	{@render choice(
 		'defaultHeatingProfileId',
 		m.settings_default_profile(),

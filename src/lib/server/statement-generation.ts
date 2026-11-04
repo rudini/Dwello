@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { periodDays } from '$lib/accounting-period';
+import { otherPeriodText, overlapText, type AccountingPeriodType } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { localSplitKeys, namesById, toStatement } from '$lib/server/statement';
@@ -46,26 +46,19 @@ async function call(fetch: Fetch, path: string, body?: object) {
 
 type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
-type Range = { start: string; end: string };
 /** The backend's plan of a run for one building (H-28: the backend decides which contracts a run bills) */
 type Plan = {
 	// what the preview says about each contract (H-28, #717): moved out, befristet, «Abgerechnet bis» where it shortens
 	contracts: (Contract & { billed: boolean; movedOut: boolean; fixedTerm: boolean; shortenedTo: string | null })[];
 	withoutFee: { id: string; tenantName: string; apartmentNumber: string }[];
-	overlap: {
-		periods: Range[];
-		choose: Range[];
-		short: Range[];
-		vacant: boolean;
-		statements: number;
-		// #521: the contracts with a letter for the tenants' consent to the new Abrechnungsperiode
-		consent: { id: string; tenantName: string; apartmentNumber: string }[];
-	} | null;
+	// #1088: the building's own Abrechnungsperiode when the run's period is none of its periods
+	otherPeriod: AccountingPeriodType | null;
+	overlap?: { start: string; end: string }[]; // older statements of the building the period overlaps (C-7)
 	skipped: { id: string; tenantName: string; billedUntil: string }[];
 };
 
 // Per building: its contracts with Mietstage in the period, those of them with a statement there already, whether the
-// period overlaps one of the building's, and those «Abgerechnet bis» leaves no Mietstage there
+// period is one of the building's (#1088), and those «Abgerechnet bis» leaves no Mietstage there
 async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }: Run) {
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
@@ -79,6 +72,7 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 				inPeriod: plan.contracts,
 				billed,
 				withoutFee: plan.withoutFee,
+				otherPeriod: plan.otherPeriod,
 				overlap: plan.overlap,
 				skipped: plan.skipped
 			};
@@ -88,42 +82,32 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 
 // Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
 // statements); a contract that already has one in the period gets none, so a deleted draft can be created again.
-// A building whose statement period the run overlaps refuses the run, as step 2 and the backend do (#408 point 2)
+// A building that bills another Abrechnungsperiode refuses the run, as step 2 and the backend do (#1088)
 async function contractsInPeriod(fetch: Fetch, request: Run) {
 	const buildings = await contractsOf(fetch, request);
-	// each building and every period it overlaps (Fachreview 199-1 V-7, code review C-3)
-	const refusals = await Promise.all(
-		buildings.flatMap(({ buildingId, overlap }) =>
-			overlap
-				? [
-						call(fetch, `buildings/${encodeURIComponent(buildingId)}`).then(({ name }) => {
-							const params = {
-								building: name,
-								periods: overlap.periods.map(periodDays).join(', ')
-							};
-							return backendMessage({ code: 'STATEMENT_PERIOD_OVERLAPS', params }, '');
-						})
-					]
-				: []
-		)
-	);
-	if (refusals.length) throw new Error(refusals.join(' '));
+	// before any draft is made, so no run stops half way (code review 1088-2 C-7)
+	const other = buildings.find((b) => b.otherPeriod || b.overlap?.length);
+	if (other) {
+		const { name } = await call(fetch, `buildings/${encodeURIComponent(other.buildingId)}`);
+		throw new Error(other.otherPeriod ? otherPeriodText(other.otherPeriod, name) : overlapText(other.overlap!, name));
+	}
 	return buildings.flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
 	);
 }
 
 /**
- * Per building: its contracts in the period, how many of them have a statement there already, whether the period
- * overlaps one of the building's (wizard step 2), and those this run bills without an agreed Verwaltungspauschale
+ * Per building: its contracts in the period, how many of them have a statement there already, whether the period is
+ * one of the building's (wizard step 2, #1088), and those this run bills without an agreed Verwaltungspauschale
  * (#89, step «Einstellungen»)
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
 	return (await contractsOf(fetch, request)).map(
-		({ buildingId, inPeriod, billed, overlap, withoutFee, skipped }) => ({
+		({ buildingId, inPeriod, billed, otherPeriod, overlap, withoutFee, skipped }) => ({
 			buildingId,
 			contracts: inPeriod.length,
 			billed: billed.length,
+			otherPeriod,
 			overlap,
 			withoutFee,
 			...(skipped.length ? { skipped } : {})

@@ -1,57 +1,29 @@
 /**
  * H-28: the run of an Abrechnungsperiode for a building, decided here and not in the BFF: the contracts with Mietstage
  * in the period, which of them have a statement there already (a run bills those no more), those «Abgerechnet bis»
- * leaves without Mietstage there, and whether the period overlaps one of the building's
+ * leaves without Mietstage there, and whether the period is one of the building's (#1088)
  */
-import { consentPeriod, lastCompletedPeriod, missingPeriods, missingWays, overlaps, periodsOf, same, uncovered, type AccountingPeriodType, type Range } from './accounting-period';
+import { commonType, lastCompletedPeriod, missingPeriods, otherPeriod, overlapped, same, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
-import { getTypedConfig, periodSetting } from './config.service';
+import { getTypedConfig } from './config.service';
 import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
 import { listHeatingProfiles } from './heating-profile.service';
 import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, utilityStatementLineItems } from '../db/schema';
-import { roundToRappen } from './pdf-format';
+import { buildings, categories, utilityStatementLineItems } from '../db/schema';
+import { formatSwissDate, roundToRappen } from './pdf-format';
 import type { CalculatedLineItem } from './calculation.service';
-import { calculateStatement, listStatements } from './statement.service';
+import { calculateStatement, generateStatement, listStatements } from './statement.service';
 import { swissToday } from './today';
+import { CodedError } from './coded-error';
 import { counting, isReplaced } from './counting-statements';
 
 type Contract = Pick<ContractWithDetails, 'id' | 'startDate' | 'endDate' | 'billedUntil' | 'tenantName'> &
 	Partial<Pick<ContractWithDetails, 'terminated' | 'managementFeeAgreed' | 'apartmentNumber'>>;
 type Statement = { contractId: string; periodStart: string; periodEnd: string; status: string };
 
-const within = (s: Statement, p: Range) => overlaps({ start: s.periodStart, end: s.periodEnd }, p);
-
-/**
- * #199, #408 point 2: one Abrechnungsperiode per day and building. When the run's period overlaps a statement period
- * of the building without being equal, the run is refused for it (a run equal to one of the periods is allowed:
- * statements made before this rule may overlap, product owner, Fachreview 199-1 V-1); the ways out are the overlapped
- * periods in which a contract has Mietstage but no statement, and the days of the run that no statement covers, ended
- * and with Mietstage (short periods), neither ever refused itself (Fachreview 199-1 V-1, V-4, V-5); `vacant`: those
- * days have no Mietstage (V-3); `statements`: how many statements have the overlapped periods. Statements made before
- * stay as they are
- */
-function overlapOf(run: Range, contracts: Contract[], statements: Statement[], today: string) {
-	const periods = periodsOf(statements);
-	const overlapped = periods.some((p) => same(p, run)) ? [] : periods.filter((p) => overlaps(p, run));
-	if (!overlapped.length) return null;
-	// a contract with a statement that overlaps the period is billed there (#199), a replaced one bills there no more (#120)
-	const billing = counting(statements);
-	const unbilled = (p: Range) => contracts.some((c) => billsIn(c, p) && !billing.some((s) => s.contractId === c.id && within(s, p)));
-	const rest = uncovered(run, statements).filter((days) => days.end < today).reverse();
-	const short = rest.filter((days) => contracts.some((c) => billsIn(c, days)));
-	return {
-		periods: overlapped,
-		choose: overlapped.filter(unbilled),
-		short,
-		vacant: rest.length > 0 && !short.length,
-		// a replaced statement and its berichtigte Abrechnung are one (code review 199-3 C-12)
-		statements: new Set(statements.filter((s) => overlapped.some((p) => within(s, p))).map((s) => `${s.contractId}/${s.periodStart}/${s.periodEnd}`)).size
-	};
-}
 
 /**
  * What the preview says about a contract (H-28, #717): moved out by the period's end or by today, whichever is later
@@ -79,7 +51,6 @@ export function planRun<C extends Contract>(period: Range, contracts: C[], state
 		withoutFee: inPeriod
 			.filter((c) => !c.billed && !c.managementFeeAgreed)
 			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber })),
-		overlap: overlapOf(period, contracts, statements, today),
 		// #453 (#327): in the period by its dates, but «Abgerechnet bis» leaves it no Mietstage there
 		skipped: contracts
 			.filter((c) => !billsIn(c, period) && billsIn({ ...c, billedUntil: null }, period))
@@ -87,83 +58,80 @@ export function planRun<C extends Contract>(period: Range, contracts: C[], state
 	};
 }
 
+/** #1088: a building's own Abrechnungsperiode, and for the wizard's proposals the type of every building */
+async function typeOf(buildingId: string) {
+	return (await buildingOf(buildingId))?.type ?? 'calendar';
+}
+const buildingOf = async (id: string) =>
+	(await db.select({ name: buildings.name, type: buildings.accountingPeriod }).from(buildings).where(eq(buildings.id, id)))[0];
+const typesByBuilding = async () =>
+	new Map((await db.select({ id: buildings.id, type: buildings.accountingPeriod }).from(buildings)).map((b) => [b.id, b.type]));
+
+/**
+ * The plan of a building's run; `otherPeriod`: the building's own Abrechnungsperiode when the run's period is none of
+ * its periods: then the wizard cannot choose it (#1088)
+ */
 export async function runPlan(buildingId: string, period: Range) {
-	const [{ contracts }, { statements }, { type, change }] = await Promise.all([
+	const [{ contracts }, { statements }, type] = await Promise.all([
 		listContracts({ buildingId, limit: 1000 }),
 		listStatements({ buildingId, limit: 1000 }),
-		periodSetting()
+		typeOf(buildingId)
 	]);
-	const plan = planRun(period, contracts, statements);
-	if (!plan.overlap) return plan;
-	// #521 (Fachreview 521-1 V-2): the contracts with a letter for the tenants' consent to the new Abrechnungsperiode
-	// at a short period the run offers, as on the contract page
-	const short = plan.overlap.short;
-	const consent = contracts
-		.filter((c) => {
-			const found = consentPeriod(type, c, statements.filter((s) => s.contractId === c.id), statements, undefined, change);
-			return !!found && short.some((days) => same(days, found.short));
-		})
-		.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }));
-	return { ...plan, overlap: { ...plan.overlap, consent } };
-}
-
-// A contract with the setting «Abrechnungsperiode», its statements and those of its building; null for an unknown one
-async function periodsOfContract(id: string) {
-	const contract = await getContract(id);
-	if (!contract) return null;
-	const [{ type, change }, { statements }, { statements: ofBuilding }] = await Promise.all([
-		periodSetting(),
-		listStatements({ contractId: id, limit: 1000 }),
-		listStatements({ buildingId: contract.buildingId, limit: 1000 })
-	]);
-	return { contract, type, change, statements, ofBuilding };
+	return { ...planRun(period, contracts, statements), otherPeriod: otherPeriod(type, period), overlap: overlapped(period, statements) };
 }
 
 /**
- * A-10, #142, #199, #408 point 2: the parts of ended Abrechnungsperioden since the Vertragsbeginn with Mietstage but no
- * statement, the latest first, each with its way into the wizard; `consent` at the short period the letter for the
- * tenants' consent to the new Abrechnungsperiode is for (#521); null for an unknown contract
+ * #1088 (Fachreview 1088-2 V-10): a statement of a run bills a whole period of its building's own Abrechnungsperiode,
+ * one that overlaps no older statement of the building (code review 1088-1 C-1); a berichtigte Abrechnung keeps the
+ * period of the replaced one (correctStatement)
+ */
+export async function generateInPeriod(input: Parameters<typeof generateStatement>[0]) {
+	const run = { start: input.periodStart, end: input.periodEnd };
+	const [building, { statements }] = await Promise.all([buildingOf(input.buildingId), listStatements({ buildingId: input.buildingId, limit: 1000 })]);
+	if (!building) return generateStatement(input);
+	if (otherPeriod(building.type, run)) throw new CodedError('STATEMENT_PERIOD_OF_BUILDING', 'The period is no whole period of the building', { building: building.name });
+	const older = overlapped(run, statements);
+	if (older.length) {
+		const periods = older.map((p) => `${formatSwissDate(p.start)} – ${formatSwissDate(p.end)}`).join(', ');
+		throw new CodedError('STATEMENT_PERIOD_OVERLAPS', 'The period overlaps an older statement period of the building', { building: building.name, periods });
+	}
+	return generateStatement(input);
+}
+
+/**
+ * A-10, #142, #1088: the ended whole periods of the building's Abrechnungsperiode since the Vertragsbeginn with
+ * Mietstage but no statement, the latest first, `outside` when only outside Dwello; null for an unknown contract
  */
 export async function missingOfContract(id: string) {
-	const found = await periodsOfContract(id);
-	if (!found) return null;
-	const { contract, type, change, statements, ofBuilding } = found;
-	const consent = consentPeriod(type, contract, statements, ofBuilding, undefined, change);
-	return missingWays(type, contract, statements, ofBuilding, undefined, change).map((part) => ({
-		...part,
-		consent: !!consent && part.open && same(part.way, consent.short)
-	}));
+	const contract = await getContract(id);
+	if (!contract) return null;
+	const [type, { statements }, { statements: ofBuilding }] = await Promise.all([
+		typeOf(contract.buildingId),
+		listStatements({ contractId: id, limit: 1000 }),
+		listStatements({ buildingId: contract.buildingId, limit: 1000 })
+	]);
+	// code review 1088-3 C-9 (product owner 04.11.2026): a period an older statement of the building overlaps cannot
+	// be billed in Dwello (the run refuses it, C-7): named, to bill outside Dwello
+	return missingPeriods(type, contract, statements).map((period) => ({ ...period, outside: overlapped(period, ofBuilding).length > 0 }));
 }
 
-/** #521: the contract with its short Abrechnungsperiode after a change and the type before; null for an unknown one */
-export async function consentOfContract(id: string) {
-	const found = await periodsOfContract(id);
-	if (!found) return null;
-	const { contract, type, change, statements, ofBuilding } = found;
-	return { contract, type, consent: consentPeriod(type, contract, statements, ofBuilding, undefined, change) };
-}
-
-/** #211: per contract id, the parts of ended Abrechnungsperioden without a statement, as on the contract page */
+/** #211: per contract id, the ended periods without a statement, as on the contract page */
 export async function missingByContract(listed?: Awaited<ReturnType<typeof listContracts>>['contracts']) {
 	// ponytail: every contract and statement in one list; under 50 apartments that stays far below the limit; the
 	// Übersicht hands in the contracts it listed (#506: one query less for its open Überträge)
-	const [{ type, change }, contracts, { statements }] = await Promise.all([
-		periodSetting(),
+	const [types, contracts, { statements }] = await Promise.all([
+		typesByBuilding(),
 		listed ?? listContracts({ limit: 1000 }).then((list) => list.contracts),
 		listStatements({ limit: 1000 })
 	]);
 	return Object.fromEntries(
 		contracts.map((c) => [
 			c.id,
-			// #512: the building's statements tell the earlier Abrechnungsperiode, as on the contract page
-			missingPeriods(
-				type,
-				c,
-				statements.filter((s) => s.contractId === c.id),
-				undefined,
-				statements.filter((s) => s.building?.id === c.buildingId),
-				change
-			)
+			// `outside`: an older statement of the building overlaps it, to bill outside Dwello (code review 1088-4 C-11)
+			missingPeriods(types.get(c.buildingId) ?? 'calendar', c, statements.filter((s) => s.contractId === c.id)).map((period) => ({
+				...period,
+				outside: overlapped(period, statements.filter((s) => s.building?.id === c.buildingId)).length > 0
+			}))
 		])
 	);
 }
@@ -220,12 +188,13 @@ export function runDefaults(settings: Settings, link: Link | null, contracts: Te
 
 /** The wizard's defaults for a link (A-10); a link with an impossible period is ignored: the settings (review K-5) */
 export async function runDefaultsOf(query: { buildingId?: string; periodStart?: string; periodEnd?: string }) {
-	const [accountingPeriod, managementFeePercent, heatingProfileId] = await Promise.all([
-		getTypedConfig('accounting_period'),
+	const [types, managementFeePercent, heatingProfileId] = await Promise.all([
+		typesByBuilding(),
 		getTypedConfig('management_fee_pct'),
 		getTypedConfig('default_heating_profile_id')
 	]);
-	const settings = { accountingPeriod: accountingPeriod as AccountingPeriodType, managementFeePercent, heatingProfileId };
+	// #1088: the wizard proposes the last ended period of the type most buildings have
+	const settings = { accountingPeriod: commonType([...types.values()]), managementFeePercent, heatingProfileId };
 	const { buildingId, periodStart, periodEnd } = query;
 	const real = (day?: string) => !!day && isRealDate(day);
 	if (!buildingId || !real(periodStart) || !real(periodEnd) || periodStart! > periodEnd!) return runDefaults(settings, null, [], []);

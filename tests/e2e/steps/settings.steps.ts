@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
+import { settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
 import { openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -78,4 +78,10 @@ Then('kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend', async
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(settingHelp(FIELDS.IBAN)).toContain(text);
+});
+
+// #1088: the Zahlungsfrist is the anchor: the page shows its settings
+Then('bieten die Einstellungen keine Abrechnungsperiode an', async ({ verwalter }) => {
+	await verwalter.sees(settingCount('paymentDeadlineDays')).toBe(1);
+	await verwalter.sees(settingCount('accountingPeriod')).toBe(0);
 });

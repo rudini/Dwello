@@ -81,7 +81,6 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnung (short) | décompte | conteggio | statement |
 | Abrechnungslauf | établissement des décomptes | allestimento dei conteggi | statement run |
 | Abrechnungsperiode | période de décompte | periodo di conteggio | billing period |
-| Zustimmung (Abrechnungsperiode) | accord | consenso | agreement |
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
 | Abrechnungsnummer / Abrechnungsdatum | numéro de décompte / date du décompte | numero di conteggio / data del conteggio | statement number / statement date |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |

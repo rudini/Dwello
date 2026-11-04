@@ -3,6 +3,7 @@
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { occupancyParts } from '$lib/apartment';
 	import { buildingTypeLabel } from '$lib/building-type';
+	import { accountingPeriods } from '$lib/accounting-period';
 	import type { BuildingWithStats } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
 
@@ -39,6 +40,13 @@
 				</dd>
 			</div>
 		{/if}
+		<!-- #1088: the building's own Abrechnungsperiode -->
+		<div>
+			<dt class="text-ink-muted">{m.glossary_period_term()}</dt>
+			<dd class="font-semibold text-ink" data-testid="building-accounting-period">
+				{accountingPeriods().find((p) => p.value === building.accountingPeriod)?.label}
+			</dd>
+		</div>
 		{#if building.noTank}
 			<div>
 				<dt class="text-ink-muted">{m.buildings_tank()}</dt>

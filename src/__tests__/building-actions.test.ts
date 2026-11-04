@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import fuelStockRefused from '../../tests/contracts/fuel-stock-fields-refused.json';
 import fuelStockDateTaken from '../../tests/contracts/fuel-stock-date-taken.json';
-import { actions as newActions } from '../routes/buildings/new/+page.server';
+import { actions as newActions, load as newLoad } from '../routes/buildings/new/+page.server';
+import newDefaults from '../../tests/contracts/building-new-defaults.json';
 import { actions as editActions } from '../routes/buildings/[id]/edit/+page.server';
 import {
 	actions as detailActions,
@@ -56,6 +57,16 @@ const rejected = () => Response.json({ message: 'Kanton fehlt' }, { status: 422 
 const refused = () => Response.json({ error: 'Gebäude existiert bereits' }, { status: 400 });
 
 describe('Neues Gebäude', () => {
+	// #1088 (code review 1088-1 C-5): the form proposes what the backend proposes, the calendar year when it cannot say
+	it('schlägt die Abrechnungsperiode des Backends vor und sonst das Kalenderjahr', async () => {
+		const answering = (response: Response) => (async () => response) as unknown as typeof globalThis.fetch;
+		const proposed = await newLoad({ fetch: answering(Response.json({ ...newDefaults, accountingPeriod: 'july-june' })) } as never);
+		const failed = await newLoad({ fetch: answering(new Response(null, { status: 500 })) } as never);
+
+		expect(proposed).toEqual({ accountingPeriod: 'july-june' });
+		expect(failed).toEqual({ accountingPeriod: 'calendar' });
+	});
+
 	// #852: eine Ablehnung ohne Code zeigt den Satz der Seite, nie den Text des Backends
 	it('zeigt bei einer Ablehnung des Backends ohne Code den Satz der Seite', async () => {
 		const result = await run(newActions.default as Action, rejected);

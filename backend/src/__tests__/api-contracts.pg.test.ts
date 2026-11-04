@@ -399,6 +399,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('invoice-list-period'), actual)).toEqual([]);
 	});
 
+	// #1088: what the form of a new building proposes
+	it('GET /buildings/new-defaults liefert die Felder von building-new-defaults.json', async () => {
+		const actual = await (await callApi('/api/v1/buildings/new-defaults')).json();
+		expect(drift(await sample('building-new-defaults'), actual)).toEqual([]);
+	});
+
 	it('GET /buildings/:id liefert die Felder von building.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings/${rental.building}`)).json();
 		expect(drift(await sample('building'), actual)).toEqual([]);

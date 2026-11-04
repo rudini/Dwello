@@ -249,12 +249,12 @@ export const pdfFileName = (headers: Headers) =>
 		.replace(/[^\w.-]/g, '') || 'statement.pdf';
 
 /**
- * A statement PDF or letter the backend refused: the app's own error page (#734), which says why from the refusal's
+ * A statement PDF the backend refused: the app's own error page (#734), which says why from the refusal's
  * code (the backend's own text never) and leads back to the Dwello page the request came from, else to the list.
  * A statement that is gone leads only back to the list: the other pages it came from show that statement.
- * `view`: the PDF was to open in its own tab; `letter`: the letter for the tenants' consent (#521)
+ * `view`: the PDF was to open in its own tab
  */
-export function pdfRefusal(request: Request, body: unknown, kind?: 'view' | 'letter') {
+export function pdfRefusal(request: Request, body: unknown, kind?: 'view') {
 	const code = (body as BackendError | null)?.code;
 	const refused = new URLSearchParams(code && { code });
 	if (kind) refused.set(kind, '');

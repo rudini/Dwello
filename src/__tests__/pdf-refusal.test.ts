@@ -78,7 +78,6 @@ describe('Fehlerseite eines abgelehnten PDF', () => {
 		expect(pageOf('view').sentence).toBe(
 			'Das PDF konnte nicht erstellt werden. Schliessen Sie diesen Tab und versuchen Sie es später erneut.'
 		);
-		expect(pageOf('letter&code=CONTRACT_NOT_FOUND').title).toBe('Brief nicht verfügbar');
 	});
 });
 

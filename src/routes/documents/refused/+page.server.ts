@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 
 const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID'];
 
-/** #734: a PDF or letter the backend refused (`pdfRefusal`): what its code says, and the way back */
+/** #734: a PDF the backend refused (`pdfRefusal`): what its code says, and the way back */
 export const load: PageServerLoad = ({ url }) => {
 	const query = url.searchParams;
 	const code = query.get('code') ?? undefined;
@@ -12,11 +12,7 @@ export const load: PageServerLoad = ({ url }) => {
 	const path = query.get('back');
 	const back = path !== null && URL.canParse(path, url) ? new URL(path, url) : null;
 	return {
-		title: query.has('letter')
-			? m.documents_refused_letter()
-			: code === 'STATEMENT_NOT_FOUND'
-				? m.documents_refused_statement()
-				: m.documents_refused_pdf(),
+		title: code === 'STATEMENT_NOT_FOUND' ? m.documents_refused_statement() : m.documents_refused_pdf(),
 		sentence: backendMessage(
 			{ code },
 			query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()

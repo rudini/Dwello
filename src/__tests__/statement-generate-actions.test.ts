@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/statements/generate/+page.server';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
-import statementRun from '../../tests/contracts/statement-run.json';
 import runDefaults from '../../tests/contracts/statement-run-defaults.json';
 
 // The backend's plan of the run (H-28): these contracts with Mietstage in the period, billed or not
@@ -54,9 +53,8 @@ describe('Vorschau der Abrechnungen', () => {
 		});
 	});
 
-	// #199, #408 point 2: a period that overlaps a statement period of the building without being equal is refused; the
-	// backend finds the overlap (statement-run.test.ts)
-	it('lehnt die Vorschau ab, wenn die Periode eine bestehende des Gebäudes schneidet', async () => {
+	// #1088: a period that is none of the building's is refused; the backend finds it (accounting-period.test.ts)
+	it('lehnt die Vorschau ab, wenn die Periode keine Periode des Gebäudes ist', async () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries({
 			...run,
@@ -65,7 +63,7 @@ describe('Vorschau der Abrechnungen', () => {
 		}))
 			form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		// moved in on 01.05.2024, billed for 2024: 01.07.2024–30.06.2025 overlaps that period
+		// the building bills the calendar year: 01.07.2024–30.06.2025 is none of its periods
 		const contract = {
 			...buildingContracts.contracts[0],
 			startDate: '2024-05-01',
@@ -74,7 +72,7 @@ describe('Vorschau der Abrechnungen', () => {
 		const statement = periodStatements.data[0];
 		const fetch = async (url: string) =>
 			url.includes('/statements/run?')
-				? plan([{ ...contract, billed: true }], { overlap: statementRun.overlap })
+				? plan([{ ...contract, billed: true }], { otherPeriod: 'calendar' })
 				: Response.json(
 						url.includes('/for-statement/')
 							? []
@@ -85,7 +83,7 @@ describe('Vorschau der Abrechnungen', () => {
 			request
 		})) as { status: number; data: { error: string } };
 		expect(result.status).toBe(400);
-		expect(result.data.error).toContain('Die gewählte Abrechnungsperiode überschneidet sich');
+		expect(result.data.error).toContain('rechnet im Kalenderjahr ab');
 	});
 
 	// #453 (#327): a contract «Abgerechnet bis» covers in full is named; its building has its own text when all are

@@ -1,14 +1,14 @@
 /**
- * H-28: the rules of Abrechnungsperioden, decided here and not in the BFF: the last ended period of the setting, the
- * ended periods since a day, which days the statements cover, and the parts of ended periods a contract has no
- * statement for. Days are YYYY-MM-DD; today is the Swiss day
+ * H-28: the rules of Abrechnungsperioden, decided here and not in the BFF: the last ended period of a building's
+ * Abrechnungsperiode (#1088), the ended periods since a day, and the ended periods a contract has no statement for.
+ * Days are YYYY-MM-DD; today is the Swiss day
  */
-import { billingStart, billsIn } from './contract.service';
-import { daysAfter, swissToday } from './today';
+import { billsIn } from './contract.service';
+import { swissToday } from './today';
 import { counting } from './counting-statements';
-import { FIRST_MONTH, lastCompletedPeriod, month, type AccountingPeriodType, type PeriodChange, type Range } from './period-types';
+import { commonType, fitsType, lastCompletedPeriod, month, type AccountingPeriodType, type Range } from './period-types';
 
-export { lastCompletedPeriod, type AccountingPeriodType, type PeriodChange, type Range };
+export { commonType, lastCompletedPeriod, type AccountingPeriodType, type Range };
 type Dated = { periodStart: string; periodEnd: string; status: string };
 type Rental = { startDate: string; endDate: string | null; billedUntil: string | null };
 
@@ -23,153 +23,37 @@ export function endedPeriodsSince(type: AccountingPeriodType, since: string, tod
 	}
 }
 
-export const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
+const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
 export const same = (a: Range, b: Range) => a.start === b.start && a.end === b.end;
 
 /**
  * The Abrechnungsperioden of the statements, each once, the earliest first; a replaced one's too: its period stays the
  * building's for its berichtigte Abrechnung (#120, code review 199-2 C-8)
  */
-export function periodsOf(statements: Omit<Dated, 'status'>[]): Range[] {
+function periodsOf(statements: Omit<Dated, 'status'>[]): Range[] {
 	const periods = new Map(statements.map((s) => [`${s.periodStart}/${s.periodEnd}`, { start: s.periodStart, end: s.periodEnd }]));
 	return [...periods.values()].sort((a, b) => a.start.localeCompare(b.start));
 }
 
-/** The parts of the period no statement covers, the latest first */
-export function uncovered(period: Range, statements: Omit<Dated, 'status'>[]) {
-	const gaps: Range[] = [];
-	let from = period.start;
-	for (const s of [...statements].sort((a, b) => a.periodStart.localeCompare(b.periodStart))) {
-		if (s.periodStart > period.end) break;
-		if (s.periodStart > from) gaps.push({ start: from, end: daysAfter(s.periodStart, -1) });
-		if (s.periodEnd >= from) from = daysAfter(s.periodEnd, 1);
-	}
-	if (from <= period.end) gaps.push({ start: from, end: period.end });
-	return gaps.reverse();
-}
-
 /**
- * Each part of an ended period since the Vertragsbeginn that no statement of the contract covers and in which Dwello
- * bills rent days (from the day after «Abgerechnet bis», #133), the latest first (#199, #211); a replaced statement no
- * longer covers its days (#120)
+ * Each ended whole period of the building's type since the Vertragsbeginn in which Dwello bills rent days (from the day
+ * after «Abgerechnet bis», #133) and no statement of the contract overlaps it, the latest first (#142, #211); a
+ * replaced statement no longer counts (#120); every statement is a whole period of its building (#1088, Fachreview
+ * 1088-2 V-10)
  */
-export function missingPeriods(
-	type: AccountingPeriodType,
-	contract: Rental,
-	statements: Dated[],
-	today = swissToday(),
-	building = statements,
-	change: PeriodChange = null
-) {
+export function missingPeriods(type: AccountingPeriodType, contract: Rental, statements: Dated[], today = swissToday()) {
 	const billing = counting(statements);
-	return cutPeriods(type, contract.startDate, building, today, change)
-		.flatMap(({ period }) => uncovered(period, billing))
-		.filter((gap) => billsIn(contract, gap));
-}
-
-const typeOf = (period: Range) =>
-	(Object.keys(FIRST_MONTH) as AccountingPeriodType[]).find((type) => same(lastCompletedPeriod(type, daysAfter(period.end, 1)), period));
-
-/**
- * #512: the stored change of the setting: the earlier type until the end of its last period ended before that day.
- * Without one, before the building's first whole statement under the setting, its last whole statement of another
- * type tells the type the landlord billed by until its end; null when there is none
- */
-function earlierType(type: AccountingPeriodType, building: Omit<Dated, 'status'>[], change: PeriodChange) {
-	// a change back to the type before that day is none
-	if (change && change.from !== type) return { type: change.from, switched: daysAfter(lastCompletedPeriod(change.from, change.on).end, 1) };
-	const whole = periodsOf(building).filter((p) => typeOf(p));
-	const first = whole.find((p) => typeOf(p) === type);
-	const last = whole.filter((p) => typeOf(p) !== type && (!first || p.start < first.start)).at(-1);
-	// the setting's first statement ends the earlier type, also when an earlier statement overlaps it
-	return last ? { type: typeOf(last)!, switched: [daysAfter(last.end, 1), first?.start ?? '9999-12-31'].sort()[0] } : null;
-}
-
-/**
- * The ended periods since a day, the newest first, each with the whole period of its type: until the end of the
- * building's earlier type (#512) cut by that type, after it by the setting, the first of these from the day after
- */
-function cutPeriods(type: AccountingPeriodType, since: string, building: Omit<Dated, 'status'>[], today: string, change: PeriodChange) {
-	const earlier = earlierType(type, building, change);
-	const switched = earlier?.switched ?? '';
-	const current = endedPeriodsSince(type, since, today)
-		.filter((full) => full.end >= switched)
-		.map((full) => ({ period: { start: [full.start, switched].sort()[1], end: full.end }, full, earlier: false }));
-	const before = earlier
-		? endedPeriodsSince(earlier.type, since, today)
-				.filter((full) => full.start < switched)
-				.map((full) => ({ period: { start: full.start, end: [full.end, daysAfter(switched, -1)].sort()[0] }, full, earlier: true }))
-		: [];
-	return [...current, ...before];
-}
-
-/**
- * The contract page's way for each part of its missing periods (#408 point 2): days inside the period of a statement
- * of the building go to exactly that period; the days of an ended period no statement of the building covers to a
- * period of their own, the whole one or a short one for all its contracts. `open` is false when a statement of the
- * contract overlaps that period: the run would not bill it there (periods made before this rule, Fachreview 199-1 V-1)
- */
-export function missingWays(
-	type: AccountingPeriodType,
-	contract: Rental,
-	statements: Dated[],
-	building: Dated[],
-	today = swissToday(),
-	change: PeriodChange = null
-) {
-	const periods = periodsOf(building);
-	// a replaced statement of the contract: the run of its period bills it again (#120)
-	const own = periodsOf(counting(statements));
-	const ways = (period: Range) => [
-		...periods.filter((p) => overlaps(p, period)).map((p) => ({ ...p, kind: 'existing' })),
-		...uncovered(period, building).map((u) => ({ ...u, kind: 'short' }))
-	];
-	const cut = cutPeriods(type, contract.startDate, building, today, change);
-	return (
-		missingPeriods(type, contract, statements, today, building, change)
-			.flatMap((gap) => {
-				const { period, full, earlier } = cut.find((p) => p.period.start <= gap.start)!;
-				// days in a period equal to the building's go there only, not again to an overlapping older one (code
-				// review 199-1 C-2)
-				const found = ways(period).filter((way) => overlaps(way, gap));
-				const whole = found.filter((way) => same(way, full));
-				return (whole.length ? whole.slice(0, 1) : found).map(({ kind, ...way }) => {
-					// a period of the earlier type that a statement of the building has is chosen, as before #512
-					const isWhole = same(way, full) && !(earlier && kind === 'existing');
-					// a whole period by its name, a part by the contract's own days in it
-					const [from, to] = isWhole ? [gap.start, gap.end] : [billingStart(contract), contract.endDate];
-					return {
-						start: [gap.start, way.start, from].sort()[2],
-						end: [gap.end, way.end, to ?? gap.end].sort()[0],
-						way: { kind: isWhole ? 'whole' : kind, ...way },
-						open: !own.some((p) => overlaps(p, way))
-					};
-				});
-			})
-			.filter((part) => part.start <= part.end && billsIn(contract, part))
-			// the latest first; of two older periods with one first day the longer one, so no day is lost (code review
-			// 199-2 C-9)
-			.sort((a, b) => b.start.localeCompare(a.start) || b.end.localeCompare(a.end))
-			.filter((part, i, all) => all.findIndex((other) => other.start === part.start) === i)
+	return endedPeriodsSince(type, contract.startDate, today).filter(
+		(period) => billsIn(contract, period) && !billing.some((s) => overlaps({ start: s.periodStart, end: s.periodEnd }, period))
 	);
 }
 
+/** #1088: the building's own type when a run's period is no whole period of it (Fachreview 1088-2 V-10); else null */
+export const otherPeriod = (type: AccountingPeriodType, run: Range) => (fitsType(type, run) ? null : type);
+
 /**
- * #521: the contract's short Abrechnungsperiode that starts on the day the building switched to the setting, with the
- * type before it, for the letter with which the tenants agree to the new one; null without an earlier type: then the
- * letter has no earlier period to name (Fachreview 521-1 V-1)
+ * The periods of older statements of the building that a run's period overlaps without being equal: the migration
+ * (#1088) leaves statements of another period, whose days a run must not bill a second time (#199, code review 1088-1
+ * C-1); a replaced one's period stays the building's (#120)
  */
-export function consentPeriod(
-	type: AccountingPeriodType,
-	contract: Rental,
-	statements: Dated[],
-	building: Dated[],
-	today = swissToday(),
-	change: PeriodChange = null
-) {
-	const earlier = earlierType(type, building, change);
-	const part = earlier
-		? missingWays(type, contract, statements, building, today, change).find(({ way, open }) => open && way.kind === 'short' && way.start === earlier.switched)
-		: undefined;
-	return part ? { earlier: earlier!.type, short: { start: part.way.start, end: part.way.end } } : null;
-}
+export const overlapped = (run: Range, building: Omit<Dated, 'status'>[]) => periodsOf(building).filter((p) => overlaps(p, run) && !same(p, run));

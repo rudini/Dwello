@@ -507,7 +507,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Option 1: July 1 - June 30 (fiscal year variant)
 - Option 2: November 1 - October 31 (winter-focused)
 - Option 3: January 1 - December 31 (calendar year)
-- Global setting applies to all statements
+- Each building has its own, chosen when it is recorded and fixed from its first statement; a building bills only whole periods of it (no short periods); the backend refuses any other period (#1088)
 
 **Other Configuration:**
 - Management cost percentage (see section 5.8)
@@ -1034,13 +1034,7 @@ BALANCE (refund): CHF 30
 
 **Purpose:** Global settings for statement generation and cost allocation rules.
 
-**Tab 1: Accounting Period**
-- Radio buttons:
-  - "July 1 - June 30" (selected shows as "2024-07-01 bis 2025-06-30")
-  - "November 1 - October 31"
-  - "January 1 - December 31"
-- Selected period shown with next period preview
-- Warning if current date is past accounting period
+The Abrechnungsperiode is no setting: it belongs to each building (building form and page, #1088).
 
 **Tab 2: Management Costs**
 - Percentage input (0% or more)
@@ -1121,7 +1115,7 @@ BALANCE (refund): CHF 30
 **Statement Creation Wizard:**
 
 **Step 1: Select Accounting Period**
-- Display current configured period (e.g., "July 1, 2024 - June 30, 2025")
+- Propose the last ended period of the Abrechnungsperiode most buildings have (#1088)
 - Option to override period for this statement run (e.g., generate for different period)
 - Date range picker if overriding
 - Next button
@@ -1553,7 +1547,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - **Invoice** (`invoices`)
 - **Utility statement** (`utility_statements`, status `draft`, `sent`, `paid`; `overdue` is computed) and its **line items** (`utility_statement_line_items`)
 - **Document** (`documents`)
-- **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `accounting_period`, `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
+- **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
 
 - **Protokoll** (`audit_log`, #357): logins and changes, each with its time and a snapshot of what it names (`docs/data-model.md`)
 
@@ -1634,7 +1628,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
   - Heating cost monthly distribution
   - Vacancy cost handling
   - Management cost calculation
-- Statement configuration UI (accounting period, management %, heating profile)
+- Statement configuration UI (management %, heating profile); the accounting period per building (#1088)
 - Distribution key management (predefined and custom)
 - Heating profile selection and custom percentage input
 - Statement calculation preview and review

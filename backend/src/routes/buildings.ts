@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { fieldsRefused, refusal } from '../services/coded-error';
+import { fieldsRefused, refusal, refusedWith } from '../services/coded-error';
 import { apartmentFieldErrors, buildingFieldErrors, decimalOf } from '../services/building-fields';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -14,7 +14,8 @@ import {
 	createBuilding,
 	updateBuilding,
 	deleteBuilding,
-	buildingExists
+	buildingExists,
+	proposedAccountingPeriod
 } from '../services/building.service';
 import {
 	createFuelStock,
@@ -25,6 +26,7 @@ import {
 	otherTankCategory
 } from '../services/fuel-stock.service';
 import { numberTakenError } from './apartments';
+import { FIRST_MONTH, type AccountingPeriodType } from '../services/period-types';
 
 const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
 
@@ -49,7 +51,9 @@ const buildingBodySchema = t.Object({
 	longitude: t.Optional(t.Nullable(t.String())),
 	buildingType: t.Optional(t.Nullable(t.String())),
 	yearBuilt: t.Optional(t.Nullable(t.Number())),
-	noTank: t.Optional(t.Boolean())
+	noTank: t.Optional(t.Boolean()),
+	// #1088: the building's own Abrechnungsperiode
+	accountingPeriod: t.Optional(t.Union((Object.keys(FIRST_MONTH) as AccountingPeriodType[]).map((type) => t.Literal(type))))
 });
 
 const buildingUpdateSchema = t.Partial(buildingBodySchema);
@@ -85,6 +89,8 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 			query: buildingQuerySchema
 		}
 	)
+	// #1088: what a new building's form proposes
+	.get('/new-defaults', async () => ({ accountingPeriod: await proposedAccountingPeriod() }))
 	// Get single building
 	.get('/:id', async ({ params, set }) => {
 		const building = await getBuilding(params.id);
@@ -140,7 +146,12 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 				set.status = 400;
 				return fieldsRefused(invalid);
 			}
-			const building = await updateBuilding(params.id, body);
+			let building;
+			try {
+				building = await updateBuilding(params.id, body);
+			} catch (error) {
+				return refusedWith({ BUILDING_PERIOD_LOCKED: 409 })(error, set);
+			}
 			if (!building) {
 				set.status = 404;
 				return refusal('BUILDING_NOT_FOUND', 'Building not found');

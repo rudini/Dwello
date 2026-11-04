@@ -280,6 +280,47 @@ describe('Migrationen anwenden', () => {
 		]);
 	});
 
+	// #1088: jedes Gebäude bekommt die Abrechnungsperiode seiner letzten ganzen Abrechnung, ohne eine die bisherige
+	// Einstellung; die Einstellung und ihr Wechsel verschwinden
+	it('gibt jedem Gebäude die Abrechnungsperiode seiner letzten ganzen Abrechnung, sonst die der Einstellung', async () => {
+		const name = await database();
+		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		for (const file of files.filter((file) => file < '0042')) await copyFile(join(migrations, file), join(before, file));
+		await migrate(`${server}/${name}`, before);
+		await query(
+			name,
+			`INSERT INTO configuration (key, value) VALUES ('accounting_period', 'november-october'), ('accounting_period_changed', '2025-03-01:july-june')
+			ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`
+		);
+		await query(
+			name,
+			`WITH b AS (INSERT INTO buildings (name, address, postal_code, city, canton)
+				VALUES ('Gewechselt', 'Weg 1', '8400', 'Winterthur', 'ZH'), ('Juli', 'Weg 2', '8400', 'Winterthur', 'ZH'),
+				('Ohne', 'Weg 3', '8400', 'Winterthur', 'ZH'), ('Kurz', 'Weg 4', '8400', 'Winterthur', 'ZH') RETURNING id, name),
+			a AS (INSERT INTO apartments (building_id, number, area, rooms) SELECT id, '1.01', 50, 2 FROM b RETURNING id, building_id),
+			t AS (INSERT INTO tenants (first_name, last_name) VALUES ('Eva', 'Frei') RETURNING id),
+			c AS (INSERT INTO rental_contracts (apartment_id, tenant_id, start_date, base_rent, monthly_advance_payment)
+				SELECT a.id, t.id, '2020-01-01', 900, 20 FROM a, t RETURNING id, apartment_id, tenant_id)
+			INSERT INTO utility_statements (tenant_id, apartment_id, contract_id, statement_number, period_start, period_end,
+				statement_date, rental_days, rental_start, rental_end, total_costs, total_advance_payments, balance, status)
+			SELECT c.tenant_id, c.apartment_id, c.id, 'S-' || b.name || p.s, p.s::date, p.e::date, '2026-01-15', 300, p.s::date, p.e::date, 0, 0, 0, 'sent'
+			FROM c JOIN a ON a.id = c.apartment_id JOIN b ON b.id = a.building_id
+			JOIN (VALUES ('Gewechselt', '2022-07-01', '2023-06-30'), ('Gewechselt', '2024-01-01', '2024-12-31'),
+				('Gewechselt', '2025-01-01', '2025-03-31'), ('Juli', '2023-07-01', '2024-06-30'), ('Kurz', '2024-10-01', '2024-12-31')) AS p (b, s, e)
+			ON p.b = b.name`
+		);
+
+		await migrate(`${server}/${name}`, migrations);
+
+		expect(await query(name, 'SELECT name, accounting_period FROM buildings ORDER BY name')).toEqual([
+			{ name: 'Gewechselt', accounting_period: 'calendar' },
+			{ name: 'Juli', accounting_period: 'july-june' },
+			{ name: 'Kurz', accounting_period: 'november-october' },
+			{ name: 'Ohne', accounting_period: 'november-october' }
+		]);
+		expect(await query(name, `SELECT key FROM configuration WHERE key LIKE 'accounting_period%'`)).toEqual([]);
+	});
+
 	// #100: Brennstoff ist die Heizung und jede Heizkosten-Kategorie, die schon einen Tankbestand hat; sonst liesse sich
 	// ihr nächster Endbestand nicht mehr erfassen
 	it('kennzeichnet die Heizung und Heizkosten-Kategorien mit Tankbestand als Brennstoff', async () => {

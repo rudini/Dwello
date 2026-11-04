@@ -11,6 +11,8 @@
 	"yearBuilt": 1965,
 	"buildingType": "residential",
 	"noTank": true,
+	"accountingPeriod": "july-june",
+	"accountingPeriodLocked": true,
 	"apartmentCount": 2,
 	"occupiedCount": 1,
 	"vacantCount": 1

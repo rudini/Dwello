@@ -17,7 +17,6 @@ import {
 	existingStatementNotes,
 	hintedInvoice,
 	hintedInvoices,
-	invoicesWithoutServicePeriod,
 	heatingWithoutServicePeriod,
 	lateInvoices,
 	uncategorizedInvoices,
@@ -37,6 +36,8 @@ import {
 	partialInvoices,
 	oldAddress,
 	periodStartInput,
+	periodEndInput,
+	periodProposedText,
 	periodRunningWarning,
 	previewEmpty,
 	previewFee,
@@ -48,8 +49,7 @@ import {
 	previewAllSkipped,
 	tankQuestion,
 	wizardChoices,
-	wizardPresetNotice,
-	consentLettersOf
+	wizardPresetNotice
 } from '../targets/statement-generate';
 import { discardDraftMessage, nextButton } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
@@ -131,14 +131,15 @@ export const announcedFeeHint = Visibility.of(announcement('Über dem üblichen 
 export const settingsChoiceCount = Count.of(wizardChoices);
 export const settingsChoiceName = Accessible.nameOf(wizardChoices);
 export const periodChoiceShown = Visibility.of(periodStartInput);
+/** #1088: the period step 1 proposes, as typed in its fields, and the sentence on where it comes from */
+export const proposedPeriod = question('the proposed Abrechnungsperiode', async (actor) => [await actor.answer(Value.of(periodStartInput)), await actor.answer(Value.of(periodEndInput))]);
+export const proposedPeriodText = Text.of(periodProposedText);
 export const missingInvoicesWarning = Text.of(missingInvoices);
 export const missingInvoicesWarnings = Count.of(missingInvoices);
 export const partialInvoicesHints = Count.of(partialInvoices);
 export const invoicesOfBuilding = (buildingName: string) => Text.of(buildingInvoices(buildingName));
 export const draftsOnly = Text.of(draftsOnlyNote);
 export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(buildingId));
-// #521: the letters for the tenants' consent the building offers, by their labels
-export const consentLettersOfBuilding = (buildingId: string) => Text.ofAll(consentLettersOf(buildingId));
 export const discardQuestion = Text.of(discardDraftMessage);
 export const allBuildingsNoteText = Text.of(allBuildingsNote);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
@@ -157,8 +158,6 @@ export const lateInvoicesInOrder = (amounts: string[]) =>
 	question('the invoices in the hint on late invoices, in order', async (actor) =>
 		(await actor.answer(Text.ofAll(hintedInvoices(lateInvoices)))).map((row, i) => (row.includes(amounts[i]) ? amounts[i] : row))
 	);
-export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));
-export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(invoicesWithoutServicePeriod, date));
 export const heatingHintText = Text.of(heatingWithoutServicePeriod);
 export const heatingWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(heatingWithoutServicePeriod, date));
 export const countOfHeatingWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(heatingWithoutServicePeriod, date));

@@ -1,6 +1,7 @@
 import type { Activity } from '../screenplay/actor';
 import { Check, Click, Enter, Navigate, Select } from '../screenplay/interactions';
 import {
+	accountingPeriodSelect,
 	addressInput,
 	cantonSelect,
 	cityInput,
@@ -11,7 +12,15 @@ import {
 	yearBuiltInput
 } from '../targets/building-form';
 
-export type BuildingData = { name: string; address: string; postalCode: string; city: string; canton: string };
+export type BuildingData = {
+	name: string;
+	address: string;
+	postalCode: string;
+	city: string;
+	canton: string;
+	/** the label of the Abrechnungsperiode; the form's proposal when left out (#1088) */
+	accountingPeriod?: string;
+};
 
 export const openNewBuilding = Navigate.to('/buildings/new');
 // what «Zum Inhalt springen» leaves in the address
@@ -27,6 +36,7 @@ export const registerBuilding = (building: BuildingData): Activity => (actor) =>
 		Enter.theValue(building.postalCode).into(postalCodeInput),
 		Enter.theValue(building.city).into(cityInput),
 		Select.option(building.canton).from(cantonSelect),
+		...(building.accountingPeriod ? [Select.option({ label: building.accountingPeriod }).from(accountingPeriodSelect)] : []),
 		saveBuilding
 	);
 
@@ -37,3 +47,6 @@ export const changePostalCode = (postalCode: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(postalCode).into(postalCodeInput), saveBuilding);
 
 export const markNoTank: Activity = (actor) => actor.attemptsTo(Check.the(noTankCheckbox), saveBuilding);
+
+export const changeAccountingPeriod = (label: string): Activity => (actor) =>
+	actor.attemptsTo(Select.option({ label }).from(accountingPeriodSelect), saveBuilding);

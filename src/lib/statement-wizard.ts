@@ -5,6 +5,7 @@ import { impossible, impossibleYear } from './contract-form';
 import { dayAfter } from './swiss-date';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
 import { heatingSumText, type HeatingSum } from './heating-sum';
+import type { AccountingPeriodType } from './accounting-period';
 import type { CategoryFindingKind } from '../../backend/src/api/invoice';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
@@ -119,26 +120,19 @@ export interface ChangedStatement {
 	heatingSum: HeatingSum | null; // #508: its apartment's heating costs against what its statements bill, once per apartment
 }
 
-type Range = { start: string; end: string };
-
 /**
- * Step 2, per building: its contracts in the period and those with a statement there already; `overlap` when the
- * period overlaps one of the building's statement periods without being equal: the building cannot be chosen, with
- * the ways out (#199, #408 point 2, `overlapOf` in `$lib/server/statement-generation`)
+ * Step 2, per building: its contracts in the period and those with a statement there already; `otherPeriod`: the
+ * building's own Abrechnungsperiode when the period is none of its periods: the building cannot be chosen (#1088)
  */
 export type Billed = {
 	contracts: number;
 	billed: number;
-	overlap?: {
-		periods: Range[];
-		choose: Range[];
-		short: Range[];
-		vacant: boolean;
-		statements: number;
-		// #521: the contracts with a letter for the tenants' consent to the new Abrechnungsperiode
-		consent: { id: string; tenantName: string; apartmentNumber: string }[];
-	} | null;
+	otherPeriod?: AccountingPeriodType | null;
+	// the periods of older statements of the building that the period overlaps (code review 1088-2 C-7)
+	overlap?: { start: string; end: string }[];
 };
+/** Step 2: a building that bills another Abrechnungsperiode or whose older statements the period overlaps (#1088) */
+export const unchoosable = (billed: Billed | undefined) => !!billed?.otherPeriod || !!billed?.overlap?.length;
 
 type Coverage = {
 	buildingId: string;

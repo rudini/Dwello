@@ -14,7 +14,6 @@ const settings: Settings = {
 	companyEmail: 'info@muster.ch',
 	iban: 'CH93 0076 2011 6238 5295 7',
 	managementFeePercent: '3',
-	accountingPeriod: 'july-june',
 	defaultHeatingProfileId: 'hp1',
 	defaultDistributionKeyId: 'dk1'
 } as Settings;
@@ -85,11 +84,12 @@ describe('Einstellungen', () => {
 		expect(body).toMatch(/<option value="hp2" disabled[^>]*>Unvollständig \(60%\)/);
 	});
 
-	it('bietet die Verteilschlüssel und Abrechnungsperioden zur Auswahl an', () => {
+	// #1088: the Abrechnungsperiode belongs to each building, the settings no longer offer one
+	it('bietet die Verteilschlüssel zur Auswahl an, aber keine Abrechnungsperiode', () => {
 		const body = settingsPage();
 
 		expect(body).toContain('Nach Fläche');
-		expect(body).toContain('Juli – Juni');
+		expect(body).not.toContain('Juli – Juni');
 	});
 
 	it('meldet Fehler pro Feld', () => {
@@ -128,7 +128,6 @@ describe('Einstellungen', () => {
 	it('erklärt die Begriffe in Alltagssprache', () => {
 		const body = settingsPage().replace(/\s+/g, ' ');
 
-		expect(body).toContain('Zeitraum, für den Sie die Nebenkosten abrechnen');
 		expect(body).toContain(
 			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters, für dessen Mietvertrag eine Verwaltungspauschale vereinbart ist. Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art. 4 Absatz 3 VMWG). Dwello nimmt höchstens 10 % an.'
 		);
@@ -137,7 +136,6 @@ describe('Einstellungen', () => {
 		// Fachreview #69 (V-7, V-10, V-12)
 		for (const said of [
 			'Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen.',
-			'zum Beispiel Kalenderjahr (01.01.–31.12.)',
 			// Fachreview 452-2 V-20: the latest invoice of the category in the building comes first (#379)
 			'Dwello schlägt den hier gewählten Verteilschlüssel beim Erfassen einer Rechnung vor, wenn im Gebäude noch keine Rechnung derselben Kategorie einen hat.',
 			'Mit einer IBAN braucht es Firmenname, PLZ und Ort.' // #490

@@ -59,13 +59,13 @@ async function oldAddresses() {
 // Per building the parts of ended Abrechnungsperioden since a Vertragsbeginn without a statement, as on the contract
 // page (#211); each once, the latest first, also of a contract that has ended since
 async function missingStatements(contracts: Awaited<ReturnType<typeof listContracts>>['contracts']) {
-	const missing: Record<string, Range[]> = await missingByContract(contracts);
-	const byBuilding = new Map<string, { building: string; buildingId: string; periods: Map<string, Range> }>();
+	const missing: Record<string, (Range & { outside: boolean })[]> = await missingByContract(contracts);
+	const byBuilding = new Map<string, { building: string; buildingId: string; periods: Map<string, Range & { outside: boolean }> }>();
 	for (const c of contracts)
-		for (const { start, end } of missing[c.id] ?? []) {
+		for (const { start, end, outside } of missing[c.id] ?? []) {
 			const entry = byBuilding.get(c.buildingName) ?? { building: c.buildingName, buildingId: c.buildingId, periods: new Map() };
 			entry.buildingId = c.buildingId; // the building's id, for the link to its invoices (#454)
-			entry.periods.set(`${start}/${end}`, { start, end });
+			entry.periods.set(`${start}/${end}`, { start, end, outside });
 			byBuilding.set(c.buildingName, entry);
 		}
 	return [...byBuilding.values()]

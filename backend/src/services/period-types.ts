@@ -1,6 +1,5 @@
 /**
- * The types of the setting «Abrechnungsperiode» and their last ended period, without other services, so the settings
- * can store a change of it (#512)
+ * The types of a building's Abrechnungsperiode (#1088) and their last ended period, without other services
  */
 import { daysAfter, swissToday } from './today';
 
@@ -9,8 +8,6 @@ export const FIRST_MONTH = { calendar: 1, 'july-june': 7, 'november-october': 11
 
 export type AccountingPeriodType = keyof typeof FIRST_MONTH;
 export type Range = { start: string; end: string };
-/** #512: the day the setting changed and the type it had before, as stored when it was saved */
-export type PeriodChange = { on: string; from: AccountingPeriodType } | null;
 
 export const month = (n: number) => String(n).padStart(2, '0');
 
@@ -22,13 +19,19 @@ export function lastCompletedPeriod(type: AccountingPeriodType, today = swissTod
 	return { start: `${runningSince - 1}-${month(first)}-01`, end: daysAfter(`${runningSince}-${month(first)}-01`, -1) };
 }
 
+/** #1088: whether a run's period is a whole period of the type; there are no short periods (product owner 03.11.2026) */
+export function fitsType(type: AccountingPeriodType, period: Range) {
+	const whole = lastCompletedPeriod(type, daysAfter(period.end, 1));
+	return whole.start === period.start && whole.end === period.end;
+}
+
 /**
- * The change to store when the setting goes from `before` to another type today, as `YYYY-MM-DD:<type>`: a setting
- * that ended no period of its own since the stored change is none, so the stored change stays (code review 512-2 C-4,
- * 512-3 C-5)
+ * #1088: the type most buildings have, for the wizard's proposal and a new building's; a tie goes to the type whose
+ * last period ended last (Fachreview 1088-1 V-5), none to the calendar year
  */
-export function changeOnSave(before: AccountingPeriodType, stored: string | undefined, today: string) {
-	const [on] = (stored ?? '').split(':');
-	const brief = !!on && lastCompletedPeriod(before, on).end === lastCompletedPeriod(before, today).end;
-	return brief ? stored! : `${today}:${before}`;
+export function commonType(types: AccountingPeriodType[], today = swissToday()): AccountingPeriodType {
+	const count = (type: AccountingPeriodType) => types.filter((t) => t === type).length;
+	const ended = (type: AccountingPeriodType) => lastCompletedPeriod(type, today).end;
+	const [first] = (Object.keys(FIRST_MONTH) as AccountingPeriodType[]).sort((a, b) => count(b) - count(a) || ended(b).localeCompare(ended(a)));
+	return types.length ? first : 'calendar';
 }

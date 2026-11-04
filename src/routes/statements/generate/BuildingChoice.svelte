@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Building } from '$lib/types';
-	import { periodDays } from '$lib/accounting-period';
-	import type { Billed } from '$lib/statement-wizard';
-	import OverlapWays from './OverlapWays.svelte';
+	import { otherPeriodText, overlapText } from '$lib/accounting-period';
+	import { unchoosable, type Billed } from '$lib/statement-wizard';
 
 	// One building to choose in step 2, with its utility invoices in the Abrechnungsperiode once they are counted
 	let {
@@ -31,27 +30,11 @@
 	);
 
 	const billedId = $derived(`building-billed-${building.id}`);
-	const overlap = $derived(billed?.overlap);
-	const named = (periods: { start: string; end: string }[]) => periods.map(periodDays).join(', ');
-	// #199, #408 point 2: a period that overlaps one of the building's: the existing period and the ways out
-	const overlapText = (o: NonNullable<Billed['overlap']>) =>
-		[
-			(o.statements === 1
-				? m.statements_building_period_overlaps_one
-				: m.statements_building_period_overlaps_many)({
-				building: building.name,
-				periods: named(o.periods)
-			}),
-			o.choose.length && m.statements_building_period_choose_text({ periods: named(o.choose) }),
-			o.short.length === 1 && m.statements_building_period_short_text({ periods: named(o.short) }),
-			o.short.length > 1 && m.statements_building_period_short_many({ periods: named(o.short) }),
-			o.vacant && m.statements_building_period_vacant()
-		]
-			.filter(Boolean)
-			.join(' ');
+	const blocked = $derived(unchoosable(billed));
 	// Said only when some contract of the period has a statement already
 	const billedText = $derived.by(() => {
-		if (overlap) return overlapText(overlap);
+		if (billed?.otherPeriod) return otherPeriodText(billed.otherPeriod, building.name);
+		if (billed?.overlap?.length) return overlapText(billed.overlap, building.name);
 		if (!billed?.billed) return '';
 		const { contracts: total, billed: count } = billed;
 		const one = total === 1;
@@ -64,9 +47,9 @@
 		// how an existing draft is recalculated, here already (persona Helga P-7, #201)
 		return `${count < total ? some() : all()} ${m.statements_building_recalculate()}`;
 	});
-	// a building the period overlaps cannot be chosen (#408 point 2)
+	// a building that bills another period cannot be chosen (#1088)
 	const cardClass = $derived(
-		overlap
+		blocked
 			? 'border-line-strong bg-sunken'
 			: selected
 				? 'cursor-pointer border-accent bg-accent-soft'
@@ -97,7 +80,7 @@
 	<input
 		type="checkbox"
 		checked={selected}
-		disabled={!!overlap}
+		disabled={blocked}
 		onchange={ontoggle}
 		aria-invalid={error ? true : undefined}
 		aria-labelledby="{id('name')} {id('address')}"
@@ -131,6 +114,3 @@
 		>
 	{/if}
 </label>
-{#if overlap}
-	<OverlapWays buildingId={building.id} {overlap} />
-{/if}

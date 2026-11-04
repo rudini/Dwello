@@ -23,7 +23,8 @@ export interface OverviewInput {
 	}[];
 	lettersToSend: number;
 	// per building the parts of ended Abrechnungsperioden without a statement, the latest first (#211)
-	missingStatements?: { building: string; buildingId: string; periods: { start: string; end: string }[] }[];
+	// `outside`: an older statement of the building overlaps it, to bill outside Dwello (code review 1088-4 C-11)
+	missingStatements?: { building: string; buildingId: string; periods: { start: string; end: string; outside?: boolean }[] }[];
 	// drafts with a change since and sent, paid or settled statements due for correcting, with what changed (#454)
 	outdatedStatements?: {
 		id: string;
@@ -133,10 +134,15 @@ export function invoicesOf(period: { start: string; end: string }, building: str
 
 type Missing = NonNullable<OverviewInput['missingStatements']>;
 // «Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023)»
+const buildingsText = (missing: Missing) =>
+	missing.map(({ building, periods }) => `${building} (${periods.map(periodName).join(', ')})`).join(', ');
+// the periods Dwello can bill, or those to bill outside Dwello; buildings left without one dropped
+const missingOf = (missing: Missing, outside: boolean) =>
+	missing
+		.map((b) => ({ ...b, periods: b.periods.filter((p) => !!p.outside === outside) }))
+		.filter((b) => b.periods.length);
 function missingText(missing: Missing) {
-	const buildings = missing
-		.map(({ building, periods }) => `${building} (${periods.map(periodName).join(', ')})`)
-		.join(', ');
+	const buildings = buildingsText(missing);
 	return missing.flatMap((b) => b.periods).length === 1
 		? m.dashboard_task_missing_period_text({ buildings })
 		: m.dashboard_task_missing_periods_text({ buildings });
@@ -203,9 +209,10 @@ function workTasks({
 	statementCounts,
 	dueStatements,
 	lettersToSend,
-	missingStatements = [],
+	missingStatements: allMissing = [],
 	outdatedStatements = []
 }: OverviewInput): Task[] {
+	const [missingStatements, outside] = [missingOf(allMissing, false), missingOf(allMissing, true)];
 	const outdatedDrafts = outdatedStatements.filter((s) => s.status === 'draft');
 	// «Überfällig» from the day after the Zahlungsfrist, a Mahnung only when the backend names it due (#64, #107, #788);
 	// an overdue statement whose list failed to load still counts
@@ -233,6 +240,17 @@ function workTasks({
 			href: '/documents?status=to_send',
 			action: m.dashboard_task_letters_action(),
 			icon: 'mail'
+		},
+		outside.length > 0 && {
+			id: 'missing-outside',
+			title: m.dashboard_task_missing_outside(),
+			// one period in the singular (code review 1088-5 C-15)
+			text: (outside.flatMap((b) => b.periods).length === 1 ? m.dashboard_task_missing_outside_one : m.dashboard_task_missing_outside_text)({
+				buildings: buildingsText(outside)
+			}),
+			href: '/contracts',
+			action: m.dashboard_task_missing_outside_action(),
+			icon: 'contract'
 		},
 		missingStatements.length > 0 && {
 			// right after the Abrechnungsperiode, without a legal deadline: a UX choice (#64)

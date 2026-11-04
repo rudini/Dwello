@@ -9,3 +9,5 @@ export const yearBuiltInput = target('Baujahr', (page) => page.getByTestId('buil
 export const noTankCheckbox = target('Kein Tank oder Tank stillgelegt', (page) => page.getByTestId('building-no-tank-checkbox'));
 export const submitButton = target('Gebäude speichern', (page) => page.getByTestId('building-form-submit'));
 export const buildingTypeSelect = target('Gebäudetyp', (page) => page.getByTestId('building-type-select'));
+export const accountingPeriodSelect = target('Abrechnungsperiode', (page) => page.getByTestId('building-accounting-period-select'));
+export const accountingPeriodHelp = target('Hilfe zur Abrechnungsperiode', (page) => page.getByTestId('building-accounting-period-select-help'));

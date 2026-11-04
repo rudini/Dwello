@@ -22,7 +22,7 @@
 		"formerTenants": [{ "tenantId": "t3", "tenantName": "Carla Frei", "endDate": "2025-03-31", "count": 1 }],
 		"oldAddresses": [{ "tenantId": "t3", "tenantName": "Carla Frei" }],
 		"missingStatements": [
-			{ "building": "Ahornhof", "buildingId": "b1", "periods": [{ "start": "2025-01-01", "end": "2025-12-31" }] }
+			{ "building": "Ahornhof", "buildingId": "b1", "periods": [{ "start": "2025-01-01", "end": "2025-12-31", "outside": false }] }
 		],
 		"openCarryOvers": [{ "id": "s9", "statementNumber": "NK-2024-7", "tenantName": "Bruno Meier", "balance": "3.00" }]
 	},

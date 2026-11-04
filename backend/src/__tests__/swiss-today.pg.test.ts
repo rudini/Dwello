@@ -108,7 +108,7 @@ describe('Heute ist der Schweizer Tag, auch kurz nach Mitternacht', () => {
 			contractId: rental.contract,
 			buildingId: rental.building,
 			periodStart: '2026-01-01',
-			periodEnd: '2026-06-30',
+			periodEnd: '2026-12-31',
 			managementFeePercent: 0
 		});
 

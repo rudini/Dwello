@@ -17,7 +17,7 @@
 	} = $props();
 </script>
 
-<p class="text-ink-muted">{m.statements_period_proposed()}</p>
+<p class="text-ink-muted" data-testid="period-proposed">{m.statements_period_proposed()}</p>
 
 <div class="grid gap-6 md:grid-cols-2">
 	<DateInput

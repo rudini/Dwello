@@ -104,7 +104,9 @@ describe('Alle Daten exportieren', () => {
 		expect(rowsOf(exported, 'tabellen/gebäude.csv').find((row) => row.Name === `Ahornhof ${token}`)).toMatchObject({
 			ID: rental.building,
 			Ort: 'Winterthur',
-			Kanton: 'ZH'
+			Kanton: 'ZH',
+			// #1088: in the words of the building form
+			Abrechnungsperiode: 'Kalenderjahr (Januar – Dezember)'
 		});
 	});
 
@@ -319,7 +321,8 @@ describe('Alle Daten exportieren', () => {
 		expect(settings).toEqual(expect.arrayContaining(['Firmenname', 'IBAN', 'Zahlungsfrist (Tage)']));
 	});
 
-	it('nennt die Abrechnungsperiode, die Sprache und den Standard-Verteilschlüssel und das Standard-Heizprofil mit Namen wie das Formular (Fachreview 496-2 V-14)', async () => {
+	// #1088: die Abrechnungsperiode steht beim Gebäude, nicht mehr in den Einstellungen
+	it('nennt die Sprache und den Standard-Verteilschlüssel und das Standard-Heizprofil mit Namen wie das Formular (Fachreview 496-2 V-14)', async () => {
 		const [key, profile] = [await firstPredefined('distribution-keys'), await firstPredefined('heating-profiles')];
 		const [{ nameDE: keyName }] = await db.select().from(distributionKeys).where(eq(distributionKeys.id, key));
 		const [{ nameDE: profileName }] = await db.select().from(heatingProfiles).where(eq(heatingProfiles.id, profile));
@@ -330,8 +333,8 @@ describe('Alle Daten exportieren', () => {
 		try {
 			const settings = Object.fromEntries(rowsOf(await exportIn(), 'tabellen/einstellungen.csv').map((row) => [row.Einstellung, row.Wert]));
 
+			expect(settings.Abrechnungsperiode).toBeUndefined();
 			expect(settings).toMatchObject({
-				Abrechnungsperiode: 'Kalenderjahr (Januar – Dezember)',
 				Sprache: 'Deutsch',
 				'Standard-Verteilschlüssel': keyName,
 				'Standard-Heizprofil': profileName

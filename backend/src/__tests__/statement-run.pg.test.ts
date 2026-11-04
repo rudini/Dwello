@@ -6,16 +6,16 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, configuration, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { buildings, categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { sendJson } from './helpers/auth';
-import { daysAfter, swissToday } from '../services/today';
-import { lastCompletedPeriod } from '../services/accounting-period';
 import { insertInvoice } from './helpers/records';
+import { lastCompletedPeriod } from '../services/period-types';
+import { swissToday } from '../services/today';
 
 const token = crypto.randomUUID();
 let buildingId = '';
@@ -58,7 +58,7 @@ describe('Lauf einer Abrechnungsperiode', () => {
 		await generateStatement({ contractId: billed, buildingId, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
 
 		const response = await sendJson('GET', `/api/v1/statements/run?buildingId=${buildingId}&periodStart=2024-01-01&periodEnd=2024-12-31`);
-		const plan = (await response.json()) as { contracts: { id: string; billed: boolean; tenantName: string }[]; overlap: unknown; skipped: unknown[] };
+		const plan = (await response.json()) as { contracts: { id: string; billed: boolean; tenantName: string }[]; skipped: unknown[] };
 
 		expect(response.status).toBe(200);
 		// the latest Vertragsbeginn first, as the contract list
@@ -67,14 +67,13 @@ describe('Lauf einer Abrechnungsperiode', () => {
 			{ id: billed, billed: true }
 		]);
 		expect(plan.contracts[0].tenantName).toBe(`Eva Meier ${token}`);
-		expect(plan.overlap).toBeNull();
 		expect(plan.skipped).toEqual([]);
 	});
 });
 
 // H-28 (#5): the missing statements of a contract and their way into the wizard, decided by the backend
 describe('Fehlende Abrechnungen eines Mietvertrags', () => {
-	it('nennt die abgelaufenen Perioden mit Mietstagen ohne Abrechnung und ihren Weg in den Assistenten', async () => {
+	it('nennt die abgelaufenen Perioden mit Mietstagen ohne Abrechnung', async () => {
 		const contract = await rent('2.01', 'Frei', '2024-04-01', '2025-12-31');
 		await generateStatement({ contractId: contract, buildingId, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
 
@@ -82,7 +81,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual([
-			{ start: '2025-01-01', end: '2025-12-31', way: { kind: 'whole', start: '2025-01-01', end: '2025-12-31' }, open: true, consent: false }
+			{ start: '2025-01-01', end: '2025-12-31', outside: false }
 		]);
 	});
 
@@ -101,75 +100,112 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		const byContract = (await response.json()) as Record<string, unknown>;
 
 		expect(response.status).toBe(200);
-		expect([byContract[billed], byContract[missing]]).toEqual([[], [{ start: '2024-01-01', end: '2024-12-31' }]]);
+		expect([byContract[billed], byContract[missing]]).toEqual([[], [{ start: '2024-01-01', end: '2024-12-31', outside: false }]]);
 	});
 
-	// #512 (code review 512-1 C-2): the list and the Übersicht take the earlier Abrechnungsperiode from the building's
-	// statements, also from another contract's
-	it('schneidet je Mietvertrag nach den Abrechnungen des Gebäudes, auch eines anderen Mietvertrags', async () => {
+	// #1088: the list and the Übersicht follow the Abrechnungsperiode of the contract's building
+	it('folgt je Mietvertrag der Abrechnungsperiode seines Gebäudes', async () => {
 		const building = await newBuilding();
+		expect((await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'july-june' })).status).toBe(200);
 		const missing = await rent('1.01', 'Brunner', '2022-07-01', '2023-06-30', building);
-		const other = await rent('1.02', 'Huber', '2023-07-01', '2024-06-30', building);
-		await generateStatement({ contractId: other, buildingId: building, periodStart: '2023-07-01', periodEnd: '2024-06-30', managementFeePercent: 0 });
 
-		const response = await sendJson('GET', '/api/v1/contracts/missing-statements');
-		const byContract = (await response.json()) as Record<string, unknown>;
+		const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
+		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${missing}/missing-statements`)).json()) as { start: string; end: string; outside: boolean }[];
 
-		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
+		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 	});
 });
 
-// #512 (product owner 2026-10-28, persona Weber 512 P-1): saving another Abrechnungsperiode stores the day of the
-// change and the type before; periods ended before that day keep the earlier type
-describe('Wechsel der Einstellung «Abrechnungsperiode»', () => {
-	const missingOf = async (contract: string) =>
-		(await (await sendJson('GET', `/api/v1/contracts/${contract}/missing-statements`)).json()) as { start: string; end: string }[];
-	const setPeriod = (value: string) => sendJson('PUT', '/api/v1/config', { accounting_period: value });
-	afterAll(async () => {
-		await db.delete(configuration).where(inArray(configuration.key, ['accounting_period', 'accounting_period_changed']));
+// #1088: a run whose period lies in no period of the building's own type cannot choose the building
+describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
+	const planOf = async (building: string, start: string, end: string) =>
+		(await (await sendJson('GET', `/api/v1/statements/run?buildingId=${building}&periodStart=${start}&periodEnd=${end}`)).json()) as {
+			otherPeriod: string | null;
+			overlap: unknown;
+		};
+
+	it('nennt die eigene Abrechnungsperiode eines Gebäudes, in die der Lauf nicht passt', async () => {
+		const building = await newBuilding();
+		await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'july-june' });
+		await rent('1.01', 'Graf', '2023-07-01', undefined, building);
+
+		expect((await planOf(building, '2024-01-01', '2024-12-31')).otherPeriod).toBe('july-june');
+		expect((await planOf(building, '2023-07-01', '2024-06-30')).otherPeriod).toBeNull();
 	});
 
-	it('lässt ein Jahr, das vor dem Wechsel endete, in der früheren Abrechnungsperiode', async () => {
+	// Fachreview 1088-2 V-10 (product owner 03.11.2026): the backend refuses it too, also a period under a year
+	it('lehnt eine Abrechnung ab, deren Periode keine ganze Periode des Gebäudes ist', async () => {
 		const building = await newBuilding();
-		const contract = await rent('1.01', 'Weber', '2024-01-01', undefined, building);
-		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
+		const contract = await rent('1.01', 'Kurz', '2024-01-01', undefined, building);
+		const generate = (periodStart: string, periodEnd: string) =>
+			sendJson('POST', '/api/v1/statements/generate', { contractId: contract, buildingId: building, periodStart, periodEnd, managementFeePercent: 0 });
 
-		expect((await setPeriod('july-june')).status).toBe(200);
-
-		const missing = await missingOf(contract);
-		expect(missing).toContainEqual(expect.objectContaining({ start: '2025-01-01', end: '2025-12-31' }));
-		expect(missing.map((part) => part.start)).not.toContain('2025-07-01');
+		for (const [start, end] of [['2024-01-01', '2024-06-30'], ['2023-07-01', '2024-06-30']]) {
+			const refused = await generate(start, end);
+			expect({ status: refused.status, code: ((await refused.json()) as { code?: string }).code }).toEqual({
+				status: 400,
+				code: 'STATEMENT_PERIOD_OF_BUILDING'
+			});
+		}
+		expect((await generate('2024-01-01', '2024-12-31')).status).toBe(201);
 	});
 
-	// code review 512-2 C-4: a setting that ended no period of its own before it was changed back is no earlier type
-	it('nimmt einen Wechsel an einem späteren Tag zurück, wenn in der Zwischenzeit keine Periode endete', async () => {
+	// code review 1088-1 C-1: an older statement of another period (left by the migration) still holds its days
+	it('lehnt eine ganze Periode ab, die eine ältere Abrechnung einer anderen Periode schneidet', async () => {
 		const building = await newBuilding();
-		const contract = await rent('1.01', 'Später', '2024-01-01', undefined, building);
-		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
-		await setPeriod('july-june');
-		const [, from] = (await db.select().from(configuration).where(eq(configuration.key, 'accounting_period_changed')))[0].value.split(':');
-		await db.update(configuration).set({ value: `${daysAfter(lastCompletedPeriod('july-june', swissToday()).end, 1)}:${from}` }).where(eq(configuration.key, 'accounting_period_changed'));
-		await setPeriod('calendar');
+		const older = await rent('1.01', 'Alt', '2022-07-01', '2023-06-30', building);
+		const later = await rent('1.02', 'Neu', '2022-07-01', undefined, building);
+		await generateStatement({ contractId: older, buildingId: building, periodStart: '2022-07-01', periodEnd: '2023-06-30', managementFeePercent: 0 });
 
-		const missing = await missingOf(contract);
-		expect(missing).toContainEqual(expect.objectContaining({ start: '2025-01-01', end: '2025-12-31' }));
-		expect(missing.map((part) => part.start)).not.toContain('2025-07-01');
-	});
+		const refused = await sendJson('POST', '/api/v1/statements/generate', {
+			contractId: later,
+			buildingId: building,
+			periodStart: '2023-01-01',
+			periodEnd: '2023-12-31',
+			managementFeePercent: 0
+		});
 
-	it('nimmt einen Wechsel am selben Tag zurück, wenn die frühere Abrechnungsperiode wieder gewählt ist', async () => {
-		const building = await newBuilding();
-		const contract = await rent('1.01', 'Zurück', '2025-01-01', undefined, building);
-		await generateStatement({ contractId: contract, buildingId: building, periodStart: '2025-07-01', periodEnd: '2026-06-30', managementFeePercent: 0 });
-		await setPeriod('july-june');
-		await setPeriod('calendar');
-
-		// without a stored change the statement of July–June cuts the earlier days, as before
-		expect(await missingOf(contract)).toContainEqual(expect.objectContaining({ start: '2024-07-01', end: '2025-06-30' }));
+		expect({ status: refused.status, body: await refused.json() }).toMatchObject({
+			status: 400,
+			body: { code: 'STATEMENT_PERIOD_OVERLAPS', params: { periods: '01.07.2022 – 30.06.2023' } }
+		});
+		// code review 1088-2 C-7: step 2 says so before the run, so no run stops half way
+		expect((await planOf(building, '2023-01-01', '2023-12-31')).overlap).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		// code review 1088-3 C-9 (product owner 04.11.2026): the contract page still names those periods, to bill outside
+		const missing = (await (await sendJson('GET', `/api/v1/contracts/${later}/missing-statements`)).json()) as { start: string; outside: boolean }[];
+		const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, { start: string }[]>;
+		expect(missing.filter((p) => p.start <= '2023-01-01').map(({ start, outside }) => [start, outside])).toEqual([
+			['2023-01-01', true],
+			['2022-01-01', true]
+		]);
+		expect(missing.find((p) => p.start === '2024-01-01')?.outside).toBe(false);
+		expect(byContract[later].map((p) => p.start)).toContain('2023-01-01');
+		// code review 1088-4 C-11: the Übersicht marks them too
+		const tasks = (await (await sendJson('GET', '/api/v1/dashboard')).json()) as {
+			contractTasks: { missingStatements: { buildingId: string; periods: { start: string; outside: boolean }[] }[] };
+		};
+		const ofBuilding = tasks.contractTasks.missingStatements.find((b) => b.buildingId === building)!;
+		expect(ofBuilding.periods.find((p) => p.start === '2023-01-01')?.outside).toBe(true);
+		expect(ofBuilding.periods.find((p) => p.start === '2024-01-01')?.outside).toBe(false);
 	});
 });
 
 // A-10: the wizard's defaults from a link to a building and period, decided by the backend (H-28)
 describe('Vorgaben des Abrechnungs-Assistenten', () => {
+	// #1088 (code review 1088-1 C-3, C-5): step 1 and the form of a new building propose the period most buildings have
+	it('schlägt die letzte abgelaufene Periode der Abrechnungsperiode der meisten Gebäude vor, auch einem neuen Gebäude', async () => {
+		const types = (await db.select({ type: buildings.accountingPeriod }).from(buildings)).map((b) => b.type);
+		const others = types.filter((type) => type !== 'november-october').length;
+		for (let i = 0; i <= others; i++) await sendJson('PUT', `/api/v1/buildings/${await newBuilding()}`, { accountingPeriod: 'november-october' });
+
+		const defaults = (await (await sendJson('GET', '/api/v1/statements/run-defaults')).json()) as { period: unknown };
+		const proposed = (await (await sendJson('GET', '/api/v1/buildings/new-defaults')).json()) as { accountingPeriod: string };
+
+		expect(defaults.period).toEqual(lastCompletedPeriod('november-october', swissToday()));
+		expect(proposed.accountingPeriod).toBe('november-october');
+	});
+
 	it('übernimmt Heizprofil und Verwaltungspauschale der übrigen Abrechnungen der Periode', async () => {
 		const [profile] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
 		const contract = await rent('3.01', 'Iten', '2025-01-01', '2025-12-31');

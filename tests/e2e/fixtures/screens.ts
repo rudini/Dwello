@@ -68,6 +68,7 @@ export type Example = {
 	building: string;
 	tankBuilding: string;
 	splitBuilding: string; // #528: a Kategorie billed by two Verteilschlüssel
+	otherPeriodBuilding: string; // #1088: a building that bills November – October
 	heatingProfile: string;
 	accessKey?: string; // the name of a Zugangsschlüssel the key states create or revoke (#817)
 	account?: { email: string; password: string }; // a Konto mit Passwort for the login states (#576)
@@ -92,7 +93,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'buildings-consent', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -202,10 +203,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.correspondence('Hugo', 'email');
 	await seed.email('Hugo', 'abgewiesen.dwello.test');
 	await seed.remind('Hugo', 2023);
-	// January to May 2026 without a statement of Seeblick (a shorter period of 2025 overlaps its statements, #199): an
-	// invoice without Leistungszeitraum in it and one shortly after it
+	// an invoice shortly after the end of 2025 (#134; #1088: no periods under a year, so no hint on invoices without
+	// Leistungszeitraum)
 	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2026-01-31');
-	await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2026-06-30');
 	// heating costs without any Tankbestand: the wizard asks about a tank; rented, so its preview has a row too
 	await seed.building('Bergsicht', 'Winterthur');
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
@@ -258,17 +258,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// #339: 2024 heating invoices with and without a Leistungszeitraum at the move-outs: the wizard names the one without
 	await seed.invoiceOn('Bergsicht', 'Heizung', '800.00', '2024-03-31');
 	await seed.invoiceOn('Bergsicht', 'Heizung', '700.00', '2025-01-10', ['2024-10-01', '2024-12-31']);
-	// #199, #408 point 2: Felsblick's only statement covers 2024 up to 30.06. (one Abrechnungsperiode per day and
-	// building): the contract page offers a short period for the rest of Lea's 2024; its own building, so the runs of
-	// 2024 in Bergsicht stay possible
-	await seed.building('Felsblick', 'Winterthur');
-	await seed.apartment('Felsblick', '2.06', 'vacant');
-	await seed.tenant('Lea');
-	await seed.contract('Lea', '2.06', { startDate: '2024-01-01', baseRent: '1200.00' });
-	await seed.statement('Lea', 'Felsblick', 2024, 'Standard', ['2024-01-01', '2024-06-30']);
-	// #521: Ahornweg billed November–Oktober until 31.10.2020, then the setting: Vera's contract page and step 2 of a
-	// 2020 run offer the letter for her consent to the new Abrechnungsperiode (a period no other look runs)
+	// #1088: Ahornweg bills November – October: step 2 of a run of a calendar year cannot choose it
 	await seed.building('Ahornweg', 'Winterthur');
+	await seed.accountingPeriod('Ahornweg', 'november-october');
 	await seed.apartment('Ahornweg', '4.01', 'vacant');
 	await seed.tenant('Vera');
 	await seed.contract('Vera', '4.01', { startDate: '2019-11-01', baseRent: '1100.00' });
@@ -318,8 +310,6 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		expiredTenant: seed.idOf('Gina'), // ended 2025: the page names the first day (#459)
 		expiredContract: seed.idOf('Mietvertrag Gina'),
 		movedOutContract: seed.idOf('Mietvertrag Ida'),
-		partlyBilledContract: seed.idOf('Mietvertrag Lea'),
-		consentContract: seed.idOf('Mietvertrag Vera'), // #521
 		oldAddressStatement: seed.idOf('Abrechnung Ida 2024'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
@@ -358,13 +348,16 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen'),
-		agreedBuilding: seed.idOf('Waldblick')
+		agreedBuilding: seed.idOf('Waldblick'),
+		// #1088 (code review 1088-1 C-4): no statement yet, so its Abrechnungsperiode can still be changed
+		openPeriodBuilding: seed.idOf('Holzhof')
 	};
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),
 		building: ids.building!,
 		tankBuilding: seed.idOf('Bergsicht')!,
 		splitBuilding: seed.idOf('Kreuzweg')!,
+		otherPeriodBuilding: seed.idOf('Ahornweg')!,
 		heatingProfile: ids.heatingProfile!
 	};
 }

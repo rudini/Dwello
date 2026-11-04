@@ -2,52 +2,34 @@
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import { periodDays, periodName } from '$lib/accounting-period';
+	import { periodName } from '$lib/accounting-period';
 
-	type Missing = {
-		start: string;
-		end: string;
-		href: string | null; // none when step 2 would refuse its period (Fachreview 199-1 V-1)
-		consentLetter: string | null; // #521: only after a change of the Abrechnungsperiode (Fachreview 521-1 V-1)
-		way: { kind: string; start: string; end: string };
-		invoices: { href: string; label: string };
-	};
-	// Rent days in ended Abrechnungsperioden without a statement, the newest first, each with its way to the wizard
-	// (A-10, #142): the whole period, the period of a statement of the building that holds the days, or a short
-	// period for days no statement of the building covers (#199, #408 point 2); and to the building's invoices (#211)
+	// no href: an older statement of the building overlaps the period, to bill outside Dwello (code review 1088-3 C-9)
+	type Missing = { start: string; end: string; href: string | null; invoices: { href: string; label: string } };
+	// Ended Abrechnungsperioden of the building with rent days but no statement, the newest first, each with its way to
+	// the wizard (A-10, #142) and to the building's invoices (#211); whole periods only (#1088)
 	let { missing }: { missing: Missing[] } = $props();
 
 	const single = $derived(missing.length === 1);
-	const parts = $derived(missing.filter((period) => period.way.kind !== 'whole' || !period.href));
 	const title = $derived(
 		single
 			? m.contracts_statement_missing({ period: periodName(missing[0]) })
 			: m.contracts_statements_missing({ count: missing.length })
 	);
-	// the general text says «noch keine Nebenkostenabrechnung», untrue for a single part
+	// the wizard only where a period leads to it (code review 1088-4 C-12)
 	const text = $derived(
-		single
-			? !parts.length && m.contracts_statement_missing_text()
-			: m.contracts_statements_missing_text()
-	);
-	// «Abgerechnet bis» (#133) would change the statement that covers the rest (Fachreview 2 V-9)
-	const hint = $derived(
-		parts.length
-			? m.contracts_statement_missing_partial({ periods: parts.map(periodName).join(', ') })
+		!missing.some((period) => period.href)
+			? ''
 			: single
-				? m.contracts_statement_missing_billed_elsewhere()
-				: m.contracts_statements_missing_billed_elsewhere()
+				? m.contracts_statement_missing_text()
+				: m.contracts_statements_missing_text()
 	);
-	const firstShort = $derived(missing.find((period) => period.href && period.way.kind === 'short'));
+	const hint = $derived(
+		single ? m.contracts_statement_missing_billed_elsewhere() : m.contracts_statements_missing_billed_elsewhere()
+	);
 	// several: short labels side by side, each with its verb (#142 personas, code review C-8)
-	const createLabel = ({ way, ...period }: Missing) =>
-		way.kind === 'existing'
-			? m.statements_period_choose({ period: periodDays(way) })
-			: way.kind === 'short'
-				? m.statements_period_short({ period: periodDays(way) })
-				: single
-					? m.dashboard_create_statements()
-					: m.contracts_statement_create({ period: periodName(period) });
+	const createLabel = (period: Missing) =>
+		single ? m.dashboard_create_statements() : m.contracts_statement_create({ period: periodName(period) });
 </script>
 
 {#if missing.length}
@@ -67,6 +49,10 @@
 							icon="calculate"
 							testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
 						>
+					{:else}
+						<p class="w-full" data-testid="contract-missing-statement-outside-{period.start}">
+							{m.contracts_statement_missing_outside()}
+						</p>
 					{/if}
 					<Button
 						href={period.invoices.href}
@@ -75,23 +61,6 @@
 						testid="contract-missing-statement-invoices-{period.start}"
 						>{period.invoices.label}</Button
 					>
-					<!-- #486: the Abrechnungsperiode may be part of the Mietvertrag; said at the short period, not at an
-					     earlier one (#512, Fachreview 512-1 V-2) -->
-					{#if period === firstShort}
-						<p class="w-full" data-testid="contract-missing-statement-short-help">
-							{m.statements_short_period_help()}
-						</p>
-						<!-- #521: the letter for the tenants' consent -->
-						{#if period.consentLetter}
-							<Button
-								href={period.consentLetter}
-								variant="ghost"
-								icon="document-download"
-								testid="contract-missing-statement-consent-letter"
-								>{m.contracts_consent_letter_download()}</Button
-							>
-						{/if}
-					{/if}
 				</div>
 			{/each}
 		</div>

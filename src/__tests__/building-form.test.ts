@@ -31,7 +31,8 @@ describe('BuildingForm', () => {
 			'Kanton',
 			'Gebäudetyp (optional)',
 			'Baujahr (optional)',
-			'Kein Tank oder Tank stillgelegt'
+			'Kein Tank oder Tank stillgelegt',
+			'Abrechnungsperiode'
 		]);
 		expect(body).toContain('Mehrfamilienhaus, Einfamilienhaus');
 		expect(body).not.toMatch(/text-gray|bg-blue|text-sm/);
@@ -106,5 +107,28 @@ describe('Kein Tank oder Tank stillgelegt (#72)', () => {
 		expect(form(false)).toContain('fragt Dwello dann nicht mehr nach dem Tankbestand');
 		// the year of decommissioning: first the closing reading, then the box (persona Helga P-1)
 		expect(form(false)).toContain('erfassen Sie zuerst auf der Seite des Gebäudes den Endbestand');
+	});
+});
+
+// #1088: each building has its own Abrechnungsperiode, fixed from its first statement
+describe('Abrechnungsperiode des Gebäudes', () => {
+	const form = (initial: Record<string, unknown>) =>
+		render(BuildingForm, {
+			props: { mode: 'edit', initial: { name: 'Eichenhof', ...initial }, errors: {}, cancelHref: '/buildings/42' }
+		}).body;
+
+	it('wählt die Abrechnungsperiode des Gebäudes und führt zum Mietvertrag', () => {
+		const body = form({ accountingPeriod: 'july-june' });
+
+		expect(body).toMatch(/<option value="july-june"[^>]*selected/);
+		expect(textOf(body)).toContain('Wählen Sie den, der in den Mietverträgen steht (oft bei den Nebenkosten).');
+		expect(body).not.toMatch(/name="accountingPeriod"[^>]*\sdisabled(=""|[\s>])/);
+	});
+
+	it('sperrt die Abrechnungsperiode ab der ersten Abrechnung und sagt warum', () => {
+		const body = form({ accountingPeriod: 'calendar', accountingPeriodLocked: true });
+
+		expect(body).toMatch(/name="accountingPeriod"[^>]*\sdisabled(=""|[\s>])/);
+		expect(textOf(body)).toContain('Für Eichenhof gibt es schon Abrechnungen. Die Abrechnungsperiode bleibt darum fest.');
 	});
 });

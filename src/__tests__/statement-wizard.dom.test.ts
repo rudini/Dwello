@@ -1768,7 +1768,7 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 
 describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 	const billed = (
-		rows: { buildingId: string; contracts: number; billed: number; overlap?: unknown; withoutFee?: [] }[]
+		rows: { buildingId: string; contracts: number; billed: number; otherPeriod?: string | null; overlap?: { start: string; end: string }[]; withoutFee?: [] }[]
 	) =>
 		fakeBff((call) =>
 			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
@@ -1849,20 +1849,11 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(false);
 	});
 
-	// #199, #408 point 2: one Abrechnungsperiode per day and building; a period that overlaps one of the building's
-	// statements without being equal is refused, with the ways out
-	const overlap = {
-		periods: [{ start: '2023-07-01', end: '2024-06-30' }],
-		choose: [{ start: '2023-07-01', end: '2024-06-30' }],
-		short: [{ start: '2024-07-01', end: '2024-12-31' }],
-		vacant: false,
-		statements: 2
-	};
-
-	it('lässt ein Gebäude nicht wählen, dessen Abrechnungsperiode die gewählte schneidet, und nennt die Wege', async () => {
+	// #1088: a building that bills another Abrechnungsperiode cannot be chosen; the text says what to choose
+	it('lässt ein Gebäude mit einer anderen Abrechnungsperiode nicht wählen und sagt, welche es hat', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },
-			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null }
+			{ buildingId: 'b1', contracts: 1, billed: 0, otherPeriod: 'july-june' },
+			{ buildingId: 'b2', contracts: 1, billed: 0, otherPeriod: null }
 		]);
 		open();
 		await settle();
@@ -1870,42 +1861,21 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Für Ahornhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie Mietverträge ohne Abrechnung in der Abrechnungsperiode 01.07.2023 – 30.06.2024 ab. Rechnen Sie die übrigen Tage in einer kurzen Abrechnungsperiode 01.07.2024 – 31.12.2024 ab.'
+			'Ahornhof rechnet von Juli bis Juni ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von Juli bis Juni.'
 		);
-		const checkbox = byTestId<HTMLInputElement>('generate-building-b1')!;
-		expect(checkbox.disabled).toBe(true);
-		expect(checkbox.getAttribute('aria-describedby')).toContain('building-billed-b1');
-		const existing = byTestId('generate-building-period-b1-2023-07-01')!;
-		expect(existing.getAttribute('href')).toBe(
-			'/statements/generate?building=b1&start=2023-07-01&end=2024-06-30'
-		);
-		expect(existing.textContent!.trim()).toBe('Abrechnungsperiode 01.07.2023 – 30.06.2024 wählen');
-		const short = byTestId('generate-building-period-b1-2024-07-01')!;
-		expect(short.getAttribute('href')).toBe(
-			'/statements/generate?building=b1&start=2024-07-01&end=2024-12-31'
-		);
-		expect(short.textContent!.trim()).toBe(
-			'Kurze Abrechnungsperiode 01.07.2024 – 31.12.2024 abrechnen'
-		);
-		// #486: a visible help text at the link
-		expect(byTestId('generate-building-short-help-b1')!.textContent!.trim()).toBe(
-			'Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab.'
-		);
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.disabled).toBe(true);
+		click('generate-all-buildings');
+		await settle();
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
+		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(true);
 	});
 
-	// Fachreview 199-1 V-2: a statement period inside the run leaves two pieces
-	it('nennt für mehrere Stücke übriger Tage je eine kurze Abrechnungsperiode', async () => {
-		const short = [
-			{ start: '2024-07-01', end: '2024-09-30' },
-			{ start: '2025-01-01', end: '2025-06-30' }
-		];
+	// code review 1088-2 C-7: an older statement of another period (left by migration 0042) overlaps the period: the
+	// building cannot be chosen, so no run stops half way at the backend's refusal
+	it('lässt ein Gebäude nicht wählen, dessen ältere Abrechnung die gewählte Periode schneidet', async () => {
 		billed([
-			{
-				buildingId: 'b1',
-				contracts: 1,
-				billed: 1,
-				overlap: { periods: [{ start: '2024-10-01', end: '2024-12-31' }], choose: [], short, vacant: false, statements: 1 }
-			}
+			{ buildingId: 'b1', contracts: 1, billed: 0, otherPeriod: null, overlap: [{ start: '2022-07-01', end: '2023-06-30' }] },
+			{ buildingId: 'b2', contracts: 1, billed: 0, otherPeriod: null, overlap: [] }
 		]);
 		open();
 		await settle();
@@ -1913,69 +1883,16 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Für Ahornhof gibt es schon eine Abrechnung für 01.10.2024 – 31.12.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie die übrigen Tage in kurzen Abrechnungsperioden ab: 01.07.2024 – 30.09.2024, 01.01.2025 – 30.06.2025.'
+			'Die gewählte Abrechnungsperiode überschneidet sich mit älteren Abrechnungen von Ahornhof (01.07.2022 – 30.06.2023). Wählen Sie eine Abrechnungsperiode, die keine davon schneidet.'
 		);
-		expect(byTestId('generate-building-period-b1-2024-07-01')).not.toBeNull();
-		expect(byTestId('generate-building-period-b1-2025-01-01')).not.toBeNull();
-	});
-
-	// Fachreview 199-1 V-3: the remaining days are vacancy
-	it('sagt, wenn in den übrigen Tagen kein Mietvertrag Mietstage hat', async () => {
-		billed([
-			{ buildingId: 'b1', contracts: 1, billed: 1, overlap: { ...overlap, choose: [], short: [], vacant: true } }
-		]);
-		open();
-		await settle();
-		next();
-		await settle();
-
-		expect(billedText('b1')).toBe(
-			'Für Ahornhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. In den übrigen Tagen hat kein Mietvertrag Mietstage; dafür ist nichts abzurechnen.'
-		);
-	});
-
-	// persona Dr. Weber P-5 (#199): after a change of the setting «2025» could be 2025/26: the days, not the year
-	it('nennt eine bestehende Periode über ein Kalenderjahr mit ihren Tagen', async () => {
-		const year = { start: '2025-01-01', end: '2025-12-31' };
-		billed([
-			{
-				buildingId: 'b1',
-				contracts: 2,
-				billed: 1,
-				overlap: { periods: [year], choose: [year], short: [], vacant: false, statements: 1 }
-			}
-		]);
-		open();
-		await settle();
-		next();
-		await settle();
-
-		expect(billedText('b1')).toContain('gibt es schon eine Abrechnung für 01.01.2025 – 31.12.2025.');
-		expect(billedText('b1')).toContain('in der Abrechnungsperiode 01.01.2025 – 31.12.2025 ab.');
-		expect(byTestId('generate-building-period-b1-2025-01-01')!.textContent!.trim()).toBe(
-			'Abrechnungsperiode 01.01.2025 – 31.12.2025 wählen'
-		);
-	});
-
-	it('nennt nur die bestehende Periode, wenn es keinen Weg für die übrigen Tage gibt', async () => {
-		billed([{ buildingId: 'b1', contracts: 1, billed: 1, overlap: { ...overlap, choose: [], short: [] } }]);
-		open();
-		await settle();
-		next();
-		await settle();
-
-		expect(billedText('b1')).toBe(
-			'Für Ahornhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit.'
-		);
-		expect(byTestId('generate-building-period-b1-2023-07-01')).toBeNull();
-		expect(byTestId('generate-building-short-help-b1')).toBeNull();
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.disabled).toBe(true);
 	});
 
 	// code review 199-1 C-5: a building chosen before (a link, a draft, back from step 3) is no longer chosen
-	it('nimmt ein schon gewähltes Gebäude aus der Auswahl, dessen Abrechnungsperiode die gewählte schneidet', async () => {
+	it('nimmt ein schon gewähltes Gebäude aus der Auswahl, das eine andere Abrechnungsperiode hat', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 1, overlap, withoutFee: [] },
-			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null, withoutFee: [] }
+			{ buildingId: 'b1', contracts: 2, billed: 1, otherPeriod: 'july-june', withoutFee: [] },
+			{ buildingId: 'b2', contracts: 1, billed: 0, otherPeriod: null, withoutFee: [] }
 		]);
 		show(GeneratePage, { data: { ...data, defaultBuildingIds: ['b1'] }, form: null } as never);
 		await settle();
@@ -1986,10 +1903,10 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(text()).toContain('0 von 2 gewählt');
 	});
 
-	it('wählt bei «Alle Gebäude» kein Gebäude, dessen Abrechnungsperiode die gewählte schneidet', async () => {
+	it('wählt bei «Alle Gebäude» kein Gebäude, das eine andere Abrechnungsperiode hat', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },
-			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null }
+			{ buildingId: 'b1', contracts: 2, billed: 1, otherPeriod: 'july-june' },
+			{ buildingId: 'b2', contracts: 1, billed: 0, otherPeriod: null }
 		]);
 		open();
 		await settle();

@@ -168,13 +168,6 @@ Given(
 	}
 );
 
-Given(
-	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung vom {string} bis {string} mit dem Heizprofil {string}',
-	async ({ seed }, tenant: string, building: string, start: string, end: string, profile: string) => {
-		await seed.statement(tenant, building, Number(start.slice(0, 4)), profile, [start, end]);
-	}
-);
-
 Given('die Abrechnung {int} von {string} ist versendet', async ({ seed }, year: number, tenant: string) => {
 	await seed.sendStatement(tenant, year);
 });
@@ -375,11 +368,6 @@ When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ ver
 });
 
 When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt', async ({ verwalter }) => {
-	await verwalter.attemptsTo(leavePdfRefusal);
-});
-
-// #734: the way back of a refusal page leads to the page the Liegenschaftsverwalter came from
-When('der Liegenschaftsverwalter von dort zurückkehrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(leavePdfRefusal);
 });
 

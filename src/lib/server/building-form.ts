@@ -15,7 +15,9 @@ export function parseBuildingForm(formData: FormData) {
 		canton: field('canton'),
 		buildingType: field('buildingType') || undefined,
 		yearBuilt: yearBuilt ? Number(yearBuilt) : null,
-		noTank: formData.has('noTank')
+		noTank: formData.has('noTank'),
+		// #1088: a locked field is disabled and not sent: the building keeps its period
+		accountingPeriod: field('accountingPeriod') || undefined
 	};
 	return { building };
 }

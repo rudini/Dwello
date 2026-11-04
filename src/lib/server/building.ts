@@ -13,6 +13,8 @@ export const toBuilding = (data: Json<BuildingResponse>): BuildingWithStats => (
 	yearBuilt: data.yearBuilt ? Number(data.yearBuilt) : undefined,
 	buildingType: data.buildingType,
 	noTank: !!data.noTank,
+	accountingPeriod: data.accountingPeriod,
+	accountingPeriodLocked: !!data.accountingPeriodLocked,
 	apartmentCount: Number(data.apartmentCount) || 0,
 	occupiedCount: Number(data.occupiedCount) || 0,
 	vacantCount: Number(data.vacantCount) || 0

@@ -147,3 +147,7 @@ Funktionalität: Einstellungen
     Und der Eintrag zur Kategorie "Gartenpflege West" ist inzwischen anderswo gelöscht
     Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann nennt das Protokoll "Kategorie «Gartenpflege West»: von umlagefähig auf nicht umlagefähig geändert" nicht mehr
+
+  # #1088: die Abrechnungsperiode steht beim Gebäude; die Einstellungen haben keine mehr
+  Szenario: Die Einstellungen bieten keine Abrechnungsperiode an
+    Dann bieten die Einstellungen keine Abrechnungsperiode an

@@ -55,6 +55,7 @@ const COLUMNS = {
 	buildingType: ['Gebäudetyp', 'Type d’immeuble', 'Tipo di immobile', 'Building type'],
 	yearBuilt: ['Baujahr', 'Année de construction', 'Anno di costruzione', 'Year built'],
 	noTank: ['Kein Tank', 'Pas de citerne', 'Nessun serbatoio', 'No tank'],
+	accountingPeriod: ['Abrechnungsperiode', 'Période de décompte', 'Periodo di conteggio', 'Billing period'],
 	createdAt: ['Erfasst am', 'Saisi le', 'Registrato il', 'Entered on'],
 	updatedAt: ['Geändert am', 'Modifié le', 'Modificato il', 'Changed on'],
 	buildingId: ['Gebäude-ID', 'ID de l’immeuble', 'ID dell’immobile', 'Building ID'],
@@ -250,7 +251,6 @@ const SETTINGS: Record<string, readonly [string, string, string, string]> = {
 	management_fee_pct: ['Verwaltungspauschale in %', 'Frais d’administration en %', 'Spese amministrative in %', 'Management fee in %'],
 	default_distribution_key_id: ['Standard-Verteilschlüssel', 'Clé de répartition par défaut', 'Chiave di riparto predefinita', 'Default distribution key'],
 	default_heating_profile_id: ['Standard-Heizprofil', 'Profil de chauffage par défaut', 'Profilo di riscaldamento predefinito', 'Default heating profile'],
-	accounting_period: ['Abrechnungsperiode', 'Période de décompte', 'Periodo di conteggio', 'Billing period'],
 	default_language: ['Sprache', 'Langue', 'Lingua', 'Language']
 };
 
@@ -339,7 +339,7 @@ export async function exportAllData(language: Language) {
 		if (value === null) return null;
 		if (key === 'default_distribution_key_id') return localName(keyOf.get(value)) ?? value;
 		if (key === 'default_heating_profile_id') return localName(profileOf.get(value)) ?? value;
-		return ['accounting_period', 'default_language'].includes(key) && value in WORDS ? word(value as keyof typeof WORDS) : value;
+		return key === 'default_language' && value in WORDS ? word(value as keyof typeof WORDS) : value;
 	};
 	const invoiceOf = byId(allInvoices);
 	const tenantName = (id: string | null) => {
@@ -426,7 +426,7 @@ export async function exportAllData(language: Language) {
 		auditLog
 	};
 
-	table('buildings', ['id', 'name', 'address', 'postalCode', 'city', 'canton', 'country', 'latitude', 'longitude', 'buildingType', 'yearBuilt', 'noTank', 'createdAt', 'updatedAt'], allBuildings);
+	table('buildings', ['id', 'name', 'address', 'postalCode', 'city', 'canton', 'country', 'latitude', 'longitude', 'buildingType', 'yearBuilt', 'noTank', 'accountingPeriod', 'createdAt', 'updatedAt'], allBuildings.map((b) => ({ ...b, accountingPeriod: word(b.accountingPeriod) })));
 	table(
 		'apartments',
 		['id', 'buildingId', 'building', 'number', 'floor', 'area', 'rooms', 'rentalStatus', 'createdAt', 'updatedAt'],

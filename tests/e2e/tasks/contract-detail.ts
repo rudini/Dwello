@@ -1,9 +1,8 @@
 import { inDays } from '../fixtures/dates';
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, DownloadFrom, EnterDate, Navigate, Scroll } from '../screenplay/interactions';
+import { Browser, Check, Click, EnterDate, Navigate, Scroll } from '../screenplay/interactions';
 import {
 	confirmDeleteContractButton,
-	consentLetterLink,
 	confirmEndContractButton,
 	contractApartmentLink,
 	contractEditButton,
@@ -93,8 +92,3 @@ export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);
 export const deleteAdvance = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(advanceDeleteButton(amount)), Click.on(confirmAdvanceDeleteButton));
 
-/** #521: downloads the letter for the tenants' consent to a new Abrechnungsperiode */
-export const downloadConsentLetter = DownloadFrom(consentLetterLink);
-export const requestConsentLetter = Click.on(consentLetterLink);
-// #521 (C-1): the letter's address typed in or kept from a stale page
-export const openConsentLetter = (contractId: string) => Navigate.to(`/contracts/${contractId}/consent-letter`);
