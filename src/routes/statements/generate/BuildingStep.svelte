@@ -75,6 +75,8 @@
 		};
 	});
 
+	// #1068: how an existing draft is recalculated, once for the step when a building has billed contracts (Helga P-7, #201)
+	const recalculate = $derived(buildings.some((b) => billed[b.id]?.billed && !unchoosable(billed[b.id])));
 	// «Alle Gebäude» leaves out buildings whose contracts are all billed: none gets a statement (#201), said at the
 	// counter; and buildings that bill another period, which say so themselves (#1088)
 	const leftOut = $derived(
@@ -131,6 +133,11 @@
 				]
 					.filter(Boolean)
 					.join(' ')}
+			</p>
+		{/if}
+		{#if recalculate}
+			<p class="basis-full text-ink-muted" data-testid="generate-recalculate-note">
+				{m.statements_building_recalculate()}
 			</p>
 		{/if}
 		{#if leftOut.length}

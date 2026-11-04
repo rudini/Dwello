@@ -38,14 +38,16 @@
 		if (!billed?.billed) return '';
 		const { contracts: total, billed: count } = billed;
 		const one = total === 1;
-		const some = () =>
-			count === 1
-				? m.statements_building_billed_one({ billed: count, total })
-				: m.statements_building_billed_many({ billed: count, total });
-		const all = () =>
-			one ? m.statements_building_billed_all_one() : m.statements_building_billed_all_many();
-		// how an existing draft is recalculated, here already (persona Helga P-7, #201)
-		return `${count < total ? some() : all()} ${m.statements_building_recalculate()}`;
+		// #1068: one sentence that leads with what happens; «Neu berechnen» is said once in the step
+		const rest = total - count;
+		if (count === total) return one ? m.statements_building_billed_all_one() : m.statements_building_billed_all_many();
+		if (count === 1)
+			return rest === 1
+				? m.statements_building_billed_one_rest_one({ billed: count, total })
+				: m.statements_building_billed_one_rest_many({ billed: count, total });
+		return rest === 1
+			? m.statements_building_billed_many_rest_one({ billed: count, total })
+			: m.statements_building_billed_many_rest_many({ billed: count, total });
 	});
 	// a building that bills another period cannot be chosen (#1088)
 	const cardClass = $derived(
