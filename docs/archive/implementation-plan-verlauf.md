@@ -1,3 +1,12 @@
+## Session 2026-11-04: #1094 keep the list filter from the statement detail
+
+- [x] Decision recorded in #1094 (product owner: «nach deiner Empfehlung»): breadcrumb and the PDF refusal page of the detail page keep the list's filter; the refusal page does not name the statement
+- [x] Scenarios in `statements.feature`, seen red at the missing filter; `openStatement` waits for the detail page (a deletion meanwhile overtook it)
+- [x] `pdfRefusal` takes the filtered list from `?list=` of the PDF link for a gone record; breadcrumb uses the list (as `$derived`, fallow template complexity); D7c
+- [x] Code review: round 1 C-1 Major (the way back to the list of a gone statement read «Zurück»; the load names it, `way`) and C-2 fixed, C-3 Minor (SendDialog «PDF ansehen» passes no list) stays in the report; closing round 2 clean (`docs/reviews/1094-review-1.md`, `-2.md`)
+- [x] Persona Helga: no findings; «Alpenblick» had no draft, she checked the same way on «Musterhaus Zentrum» (`docs/design/personas/helga-1094.md`); her note «Zurück sagt nicht wohin» is C-1
+- [x] PR: merge of origin/main clean
+
 ## Session: #932 E2E purge after a berichtigte Abrechnung
 
 - [x] Cause: `createCorrection` only clicked «Berichtigte Abrechnung erstellen»; the next step could pass on the replaced statement (same Akonto) and the clean-up deleted it while the new one was still saved (FK `replaces_id`, CI run 40708772660)

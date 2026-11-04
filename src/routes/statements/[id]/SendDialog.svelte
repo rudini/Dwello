@@ -16,13 +16,15 @@
 		statement,
 		byLetter = false,
 		outdated,
-		onrecalculate
+		onrecalculate,
+		list = ''
 	}: {
 		open: boolean;
 		statement: StatementWithDetails;
 		byLetter?: boolean;
 		outdated?: string; // what changed since a draft was created, as sentences: it is not current (#547, #506)
 		onrecalculate?: () => void;
+		list?: string; // the list it was opened from: the refusal page of the PDF leads back there (#1094)
 	} = $props();
 
 	let form = $state<HTMLFormElement>();
@@ -130,7 +132,7 @@
 	<OldAddressWarning {statement} testid="send-old-address" />
 	<div>
 		<Button
-			href="/statements/{statement.id}/pdf?ansehen"
+			href="/statements/{statement.id}/pdf?ansehen{list ? `&${new URLSearchParams({ list })}` : ''}"
 			target="_blank"
 			icon="document"
 			testid="send-pdf-view">{m.statements_view_pdf()}</Button

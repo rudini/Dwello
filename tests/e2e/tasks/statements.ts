@@ -1,5 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { Click, DownloadFrom, Enter, Navigate, Select, Wait } from '../screenplay/interactions';
+import { statementStatus } from '../targets/statement-detail';
 import {
 	draftFilter,
 	settledFilter,
@@ -59,7 +60,9 @@ export const showSettledOfBuilding = (buildingId: string): Activity => (actor) =
 
 export const turnToNextPage = Click.on(nextPageLink);
 export const startGeneratingStatements = Click.on(generateStatementsButton);
-export const openStatement = (tenantName: string, year: number) => Click.on(openStatementLink(tenantName, year));
+// until its page is there: a step after it (a deletion meanwhile, #1094) must not overtake the navigation
+export const openStatement = (tenantName: string, year: number): Activity => (actor) =>
+	actor.attemptsTo(Click.on(openStatementLink(tenantName, year)), Wait.until(statementStatus));
 export const openStatementWithoutPdf = (tenantName: string, year: number) =>
 	Click.on(statementPdfMissingLink(tenantName, year));
 export const downloadStatementPdfFromList = (tenantName: string, year: number) =>

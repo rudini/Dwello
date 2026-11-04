@@ -34,6 +34,32 @@ describe('Abgelehntes PDF', () => {
 		expect(target(response).searchParams.has('back')).toBe(false);
 	});
 
+	// #1094: the detail page names the list it was opened from, as it was filtered
+	it('führt von der Detailseite einer gelöschten Abrechnung zur Liste, wie sie gefiltert war', () => {
+		const request = new Request(
+			'http://dwello.test/statements/s-1/pdf?list=%2Fstatements%3Fstatus%3Ddraft',
+			{ headers: { referer: 'http://dwello.test/statements/s-1' } }
+		);
+
+		expect(
+			target(pdfRefusal(request, { code: 'STATEMENT_NOT_FOUND' })).searchParams.get('back')
+		).toBe('/statements?status=draft');
+	});
+
+	// code review 1094 C-2: the detail page names its list, no other page
+	it('führt von der Detailseite einer gelöschten Abrechnung nicht zu einer anderen Seite als ihrer Liste', () => {
+		for (const list of ['/invoices?status=open', '/statementsx?a=1', '/statements'])
+			expect({
+				list,
+				back: target(
+					pdfRefusal(
+						new Request(`http://dwello.test/statements/s-1/pdf?${new URLSearchParams({ list })}`),
+						{ code: 'STATEMENT_NOT_FOUND' }
+					)
+				).searchParams.get('back')
+			}).toEqual({ list, back: null });
+	});
+
 	// the page it came from shows the statement that is gone (its detail page, the run of the wizard)
 	it('führt bei einer gelöschten Abrechnung nur zur Liste zurück', () => {
 		const gone = { code: 'STATEMENT_NOT_FOUND' };
@@ -73,6 +99,15 @@ describe('Fehlerseite eines abgelehnten PDF', () => {
 		])
 			expect({ back, to: pageOf(`back=${back}`).back }).toEqual({ back, to: null });
 		expect(pageOf('back=%2Fstatements%3Fstatus%3Ddraft').back).toBe('/statements?status=draft');
+	});
+
+	// code review 1094 C-1: the way back to the list of a statement that is gone names the list, not «Zurück»
+	it('nennt den Weg zur gefilterten Liste einer gelöschten Abrechnung nach der Liste', () => {
+		expect(pageOf('code=STATEMENT_NOT_FOUND&back=%2Fstatements%3Fstatus%3Ddraft')).toMatchObject({
+			back: '/statements?status=draft',
+			way: 'Zu den Nebenkostenabrechnungen'
+		});
+		expect(pageOf('code=IBAN_MISSING&back=%2Fstatements%2Fs-1')).toMatchObject({ way: 'Zurück' });
 	});
 
 	// code review 734 C-3
