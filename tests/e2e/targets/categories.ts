@@ -49,3 +49,8 @@ export const allocabilityQuestion = target('Rückfrage zur Umlagefähigkeit', (p
 export const allocabilityText = target('Folge der Umstellung', (page) => page.getByTestId('category-allocability-text'));
 export const allocabilityConfirm = target('Umstellen bestätigen', (page) => page.getByTestId('category-allocability-confirm'));
 export const allocabilityCancel = target('Umstellen abbrechen', (page) => page.getByRole('dialog').getByTestId('dialog-cancel'));
+/** #1096: the name of the category the list shows after the given one */
+export const followingCategoryName = (name: string) =>
+	target(`Kategorie nach ${name} in der Liste`, (page) =>
+		categoryRow(name).locate(page).locator('xpath=following-sibling::li[1]').getByTestId('category-name')
+	);

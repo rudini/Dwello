@@ -1049,14 +1049,13 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 	it('meldet, was gespeichert ist', async () => {
 		expired();
 		await answer('?/continueOpenEnded', 'success');
-		await answer('?/movedOut', 'success');
-		expect(get(toasts).map((t) => t.message)).toEqual(
-			expect.arrayContaining([
-				// Fachreview A-6 V-15: die Folge des Weiterführens
-				'Der Mietvertrag von Anna Keller läuft unbefristet weiter. Er endet erst mit einer Kündigung.',
-				'Gespeichert: Anna Keller ist ausgezogen'
-			])
+		// Fachreview A-6 V-15: die Folge des Weiterführens
+		expect(get(toasts).map((t) => t.message)).toContain(
+			'Der Mietvertrag von Anna Keller läuft unbefristet weiter. Er endet erst mit einer Kündigung.'
 		);
+		// #1096: a new confirmation replaces the older one
+		await answer('?/movedOut', 'success');
+		expect(get(toasts).map((t) => t.message)).toContain('Gespeichert: Anna Keller ist ausgezogen');
 	});
 
 	// A-10: die Abrechnung rechnet die Zeit nach dem Vertragsende als Leerstand ab; der Entwurf lässt sich löschen

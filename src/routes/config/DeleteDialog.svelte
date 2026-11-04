@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
@@ -64,7 +65,13 @@
 				addToast('success', text.deleted({ name }));
 				open = false;
 			}
-			await update();
+			// back to the same list: the page stays where the landlord was (#1096)
+			if (
+				result.type === 'redirect' &&
+				new URL(result.location, location.href).pathname === location.pathname
+			)
+				await goto(result.location, { invalidateAll: true, noScroll: true });
+			else await update();
 			deleting = false;
 		};
 	}}

@@ -30,6 +30,7 @@ let toastId = 0;
 
 /**
  * Add a toast notification: long enough to read (WCAG 2.2.1); an error stays until it is closed.
+ * A confirmation replaces the one before it: at most one shows (#1096).
  * The reading time starts when the toast region shows it.
  */
 export function addToast(
@@ -38,7 +39,10 @@ export function addToast(
 	duration = type === 'error' ? 0 : 8000
 ): void {
 	const id = ++toastId;
-	toasts.update((all) => [...all, { id, type, message, duration }]);
+	toasts.update((all) => [
+		...all.filter((toast) => type !== 'success' || toast.type !== 'success'),
+		{ id, type, message, duration }
+	]);
 }
 
 /**

@@ -22,7 +22,9 @@ export const createAccessKey = (name: string): Activity => (actor) =>
 export const closeTheNewAccessKey = Click.on(closeNewAccessKey);
 export const copyTheNewAccessKey = Click.on(copyNewAccessKey);
 export const copyTheAddress = Click.on(copyNewAccessKeyAddress);
-export const bringTheAddressCopyToTheBottomEdge = Scroll.toBottomEdge(copyNewAccessKeyAddress);
+// #1096: from there on, the page's movement is noted
+export const bringTheAddressCopyToTheBottomEdge: Activity = (actor) =>
+	actor.attemptsTo(Scroll.toBottomEdge(copyNewAccessKeyAddress), Scroll.watch);
 export const startRevokingAccessKey = (name: string): Activity => (actor) =>
 	actor.attemptsTo(goToAccessKeys, Click.on(revokeAccessKeyButton(name)));
 export const confirmRevoking = Click.on(confirmRevokeAccessKey);

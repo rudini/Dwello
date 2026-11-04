@@ -127,7 +127,6 @@
 	<div
 		class="fixed inset-0 z-50 flex items-end justify-center bg-scrim p-4 sm:items-center"
 		role="presentation"
-		style:padding-bottom="max(1rem, var(--toast-room, 0px))"
 	>
 		<div
 			bind:this={panel}

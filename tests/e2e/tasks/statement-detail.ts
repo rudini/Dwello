@@ -1,7 +1,7 @@
 import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
 import { successToast } from '../targets/form';
-import { Click, DownloadFrom, Enter, EnterDate, Navigate, Wait } from '../screenplay/interactions';
+import { Click, DownloadFrom, Enter, EnterDate, Navigate, Scroll, Wait } from '../screenplay/interactions';
 import { goBackInBrowser } from './app-frame';
 import {
 	carrySettleButton,
@@ -157,3 +157,5 @@ export const correctStatementPaid = (amount: string): Activity => (actor) =>
 
 // #506 B: the landlord paid out or claimed the Übertrag himself
 export const settleCarryOver: Activity = (actor) => actor.attemptsTo(Click.on(carrySettleButton), Click.on(confirmCarrySettleButton));
+/** #1096: the landlord is at the statement's further actions; the page's movement is noted from there */
+export const stayAtMoreActions: Activity = (actor) => actor.attemptsTo(Scroll.toMiddle(recalculateButton), Scroll.watch);

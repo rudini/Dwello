@@ -102,7 +102,16 @@ export const Select = {
 export const Scroll = {
 	to: (target: Target) => on(target, (element) => element.scrollIntoViewIfNeeded()),
 	/** the part at the bottom edge of the window, as after scrolling down to it (#1081) */
-	toBottomEdge: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'end' })))
+	toBottomEdge: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'end' }))),
+	/** the part in the middle of the window, clear of a confirmation that may cover the bottom (#1096) */
+	toMiddle: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'center' }))),
+	/** from now on, notes how far the page moves from where it stands (#1096): `ThePage.movedUntilGone` */
+	watch: ((actor) =>
+		pageOf(actor).evaluate(() => {
+			const from = scrollY;
+			const seen = Object.assign(window, { dwelloMoved: 0 });
+			addEventListener('scroll', () => (seen.dwelloMoved = Math.max(seen.dwelloMoved, Math.abs(scrollY - from))));
+		})) as Activity
 };
 export const Check = { the: (target: Target) => on(target, (element) => element.check()) };
 export const Uncheck = { the: (target: Target) => on(target, (element) => element.uncheck()) };

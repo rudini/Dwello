@@ -1032,3 +1032,18 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] `marketing/.htaccess`: 301 from www.dwello.ch to https://dwello.ch with the path (Infomaniak's web redirection served a self-signed certificate on HTTPS and dropped the path; the owner deleted it)
 - [x] Slice review (`docs/reviews/www-review-1.md`); C-1 fixed: host with trailing dot or port
 - [x] PR: pushed after this archive
+
+## Session #1096: toasts never move the page; focus after removal
+
+Branch `ccr-7b33ff2a-sj3b8c`. Decided (product owner) 2026-11-04 in #1096. Spec change approved: #1096 (the step «verdeckt die Erfolgsmeldung nicht, was den Fokus hat» checks no overlap instead of «below the focus»: the toast may stand at the top).
+
+- [x] S1 @wip scenario «Die Erfolgsmeldung bewegt die Seite nicht» (zugangsschluessel.feature), seen red (the page moved 112 px); the step «verdeckt … nicht» now measures above, below and beside (spec change #1096)
+- [x] S1 ToastRegion: no scroll padding, spacer, `scrollIntoView` or `--toast-room`; top placement when the focused element lies where the toast would stand. Files: `src/lib/ui/ToastRegion.svelte`, `Dialog.svelte`, `tests/e2e/{features/zugangsschluessel.feature,questions/app-frame.ts,screenplay/{interactions,questions}.ts,steps/app-frame.steps.ts,tasks/{access-keys,categories}.ts}`
+- [x] S2 @wip scenario «Eine neue Erfolgsmeldung ersetzt die ältere» (categories.feature) and DOM test, both seen red
+- [x] S2 implementation (`addToast` in `src/lib/stores.ts`); code review 1096-1: C-1 (close button focus moved the toast) and C-3 fixed, C-2 covered by a DOM test seen red without the focusin handler
+- [x] S3 @wip scenarios «Nach dem Löschen steht der Fokus auf der nächsten Kategorie» (categories.feature) and «Nach dem Neuberechnen bleibt der Liegenschaftsverwalter, wo er war» (statement-detail.feature), both seen red with the focus on the page title
+- [x] S3 implementation: `src/lib/ui/focus-after-action.ts` (noteFocus on focusin, refocus when the confirmation shows), its DOM tests; `DeleteDialog` reloads the same list without scrolling; the statement `FormDialog` no longer focuses the title (two DOM tests now check it does not); a contract DOM test checks each confirmation after its own action
+- [x] Slice reviews: 1096-review-1 (S1: C-1..C-3 Minor fixed), -2 (S2: none), -3 (S3: C-1 Major, C-2, C-3 fixed), -4 (re-review: closed)
+- [x] Personas Helga (150 %, 200 %) and Marco (phone, tablet): `docs/design/personas/helga-1096.md`, `marco-1096.md`. Marco P-1 (Major: the toast covers the next row's «Löschen») contradicts what #1096 decided (covering content without focus is accepted) and, with Helga P-1 to P-4 (same pattern), is #1113 (needs-decision); Marco P-2, P-3 stay in the report
+- [x] Before marking complete: lint, check, backend type-check, affected vitest and E2E, Prettier on added files; workflow note `docs/reviews/workflow-notes-issue-1096.md`
+- [x] Archive the session; PR pushed after this archive

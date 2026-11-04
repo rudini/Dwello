@@ -9,7 +9,7 @@ import Panel from '$lib/ui/Panel.svelte';
 import IconButton from '$lib/ui/IconButton.svelte';
 import NavList from '$lib/ui/NavList.svelte';
 import { addToast, toasts } from '$lib/stores';
-import { byTestId, click, show } from './helpers/dom';
+import { allByTestId, byTestId, click, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
 
 vi.mock('$app/stores', async () => {
@@ -113,6 +113,80 @@ describe('Meldungen', () => {
 		flushSync();
 		expect(document.body.textContent).not.toContain('Mieter gespeichert');
 		expect(byTestId('toast-error')!.textContent).toContain('Speichern fehlgeschlagen');
+	});
+
+	// #1096: two confirmations on top of each other covered half the page at 200 % (Helga P-3 in #1081)
+	it('ersetzt eine Erfolgsmeldung durch die neue und lässt Fehler stehen', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		addToast('error', 'Speichern fehlgeschlagen');
+		addToast('success', 'Kategorie «Lift» gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		addToast('success', 'Kategorie «Lift» gelöscht');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+
+		expect(allByTestId('toast-success').map((toast) => toast.textContent!.trim())).toEqual([
+			'Kategorie «Lift» gelöscht'
+		]);
+		expect(byTestId('toast-error')!.textContent).toContain('Speichern fehlgeschlagen');
+	});
+
+	// #1096: the page never moves; the confirmation stands at the top while the focus is where it would stand
+	// fallback review on #1114: scrolling while the confirmation shows can bring the focused part under it
+	it('stellt die Erfolgsmeldung neu hin, wenn der Fokus beim Scrollen oder einer neuen Fenstergrösse wandert', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const part = document.body.appendChild(document.createElement('button'));
+		let top = 100;
+		part.getBoundingClientRect = () => ({ top, bottom: top + 20, left: 0, right: 100 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		part.focus();
+		addToast('success', 'Adresse kopiert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(region.className).toContain('bottom-4');
+
+		top = 740;
+		window.dispatchEvent(new Event('scroll'));
+		flushSync();
+		expect(region.className).toContain('top-4');
+
+		top = 100; // code review 1096-6 C-1: a resize places it again too
+		window.dispatchEvent(new Event('resize'));
+		flushSync();
+		expect(region.className).toContain('bottom-4');
+		part.remove();
+	});
+
+	it('stellt die Erfolgsmeldung oben hin, sobald der Fokus unten steht, auch auf ihrem Schliessen-Knopf', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const bottom = document.body.appendChild(document.createElement('button'));
+		bottom.getBoundingClientRect = () =>
+			({ top: 740, bottom: 760, left: 0, right: 100 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		addToast('success', 'Adresse kopiert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(region.className).toContain('bottom-4');
+
+		bottom.focus();
+		flushSync();
+		expect(region.className).toContain('top-4');
+
+		region.querySelector<HTMLElement>('[aria-label="Meldung schliessen"]')!.focus();
+		flushSync();
+		expect(region.className).toContain('top-4');
+		bottom.remove();
 	});
 
 	// The reading time starts when the confirmation appears, not while the next page loads
