@@ -15,6 +15,7 @@ import {
 	pageTitle,
 	userMenuButton
 } from '../targets/app-frame';
+import { successToast } from '../targets/form';
 
 export const sectionShown = (heading: string) => Visibility.of(pageSection(heading));
 export const sectionText = (heading: string) => Text.of(pageSection(heading));
@@ -53,3 +54,5 @@ export const roomAroundConfirmation = question('the room between the focus and t
 });
 /** #1096: how far the page moved until the confirmation left by itself */
 export const pageMovedUntilConfirmationLeft = ThePage.movedUntilGone(newestSuccessToast);
+/** #1096: every confirmation the page shows, oldest first */
+export const shownConfirmations = Text.ofAll(successToast);

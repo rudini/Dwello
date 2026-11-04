@@ -105,7 +105,7 @@ export const Scroll = {
 	toBottomEdge: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'end' }))),
 	/** the part in the middle of the window, clear of a confirmation that may cover the bottom (#1096) */
 	toMiddle: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'center' }))),
-	/** from now on, notes how far the page moves from where it stands (#1096): `ThePage.movedSinceWatching` */
+	/** from now on, notes how far the page moves from where it stands (#1096): `ThePage.movedUntilGone` */
 	watch: ((actor) =>
 		pageOf(actor).evaluate(() => {
 			const from = scrollY;

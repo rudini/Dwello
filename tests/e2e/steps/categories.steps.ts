@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { errorMessageShown } from '../questions/form';
 import { pageTitle } from '../questions/navigation';
+import { shownConfirmations } from '../questions/app-frame';
 import {
 	allocabilityConsequence,
 	allocabilityQuestionText,
@@ -432,4 +433,9 @@ When('der Liegenschaftsverwalter die Kategorie als umlagefähig wählt', async (
 
 Then('nennt die Frage der Umlagefähigkeit die Folge {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(allowanceQuestionDescription).toContain(text);
+});
+
+// #1096: a new confirmation replaces the older one
+Then('bestätigt Dwello nur das Löschen der Kategorie {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(shownConfirmations).toEqual([`Kategorie «${names.get(title)}» gelöscht`]);
 });

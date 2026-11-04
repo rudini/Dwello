@@ -46,6 +46,8 @@
 		const focused = document.activeElement;
 		if (!confirmations.length || !region || !focused || focused === document.body)
 			return (atTop = false);
+		// its own close button keeps it where it is (code review 1096 C-1)
+		if (region.contains(focused)) return;
 		const part = focused.getBoundingClientRect();
 		const own = region.getBoundingClientRect();
 		// the confirmation at the bottom: 16 px above the edge, and 16 px of the page clear around it

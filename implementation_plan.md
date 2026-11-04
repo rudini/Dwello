@@ -15,8 +15,8 @@ Branch `ccr-7b33ff2a-sj3b8c`. Decided (product owner) 2026-11-04 in #1096. Spec 
 
 - [x] S1 @wip scenario «Die Erfolgsmeldung bewegt die Seite nicht» (zugangsschluessel.feature), seen red (the page moved 112 px); the step «verdeckt … nicht» now measures above, below and beside (spec change #1096)
 - [x] S1 ToastRegion: no scroll padding, spacer, `scrollIntoView` or `--toast-room`; top placement when the focused element lies where the toast would stand. Files: `src/lib/ui/ToastRegion.svelte`, `Dialog.svelte`, `tests/e2e/{features/zugangsschluessel.feature,questions/app-frame.ts,screenplay/{interactions,questions}.ts,steps/app-frame.steps.ts,tasks/{access-keys,categories}.ts}`
-- [ ] S2 @wip scenario: one success toast at a time, a new one replaces the older; errors stay; seen red
-- [ ] S2 implementation
+- [x] S2 @wip scenario «Eine neue Erfolgsmeldung ersetzt die ältere» (categories.feature) and DOM test, both seen red
+- [x] S2 implementation (`addToast` in `src/lib/stores.ts`); code review 1096-1: C-1 (close button focus moved the toast) and C-3 fixed, C-2 covered by a DOM test seen red without the focusin handler
 - [ ] S3 @wip scenarios: after deleting a category the focus is on the next row, without one on the list's heading; the page does not jump; recalculating a statement keeps the place; seen red
 - [ ] S3 implementation
 - [ ] Slice reviews (code-reviewer) per slice
