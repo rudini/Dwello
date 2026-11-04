@@ -954,3 +954,10 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] code-reviewer closing round (`docs/reviews/1089-review-2.md`): C-2 closed, nothing new
 - [ ] Firefox and WebKit: the all-browser CI run (workflow_dispatch) before the merge
 - [x] PR (`Fixes #1089`): pushed after this archive
+
+## Session: fallback review after CI started by hand, lock files named (#1007 follow-up)
+
+- [x] #1101's CI was started by hand (workflow_dispatch), which carries no pull request, so the fallback skipped it: such a run on a branch other than main now finds the open pull request by its branch
+- [x] Dependabot's PRs got «lock file not updated» findings (#1075, #1077, #1078, #1080) because lock files were left out silently: a changed lock file is now named in the diff without its content
+- [x] Local runs: #1077 now «No issues found»; a branch without an open PR exits; the branch query returns #1101 for its branch
+- [x] PR: pushed after this archive
