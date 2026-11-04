@@ -169,3 +169,20 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Abrechnung des laufenden Jahres von "Anna Keller" öffnet, in der die Rechnung enthalten ist
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung des laufenden Jahres von "Anna Keller"
+
+  # #1093: eine abgelehnte Datei zeigt die Fehlerseite der App, keinen Download
+  Szenario: Beleg einer inzwischen gelöschten Rechnung anzeigen
+    Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Und die Rechnung von "Hauswart Huber" ist inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter den Beleg öffnet
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Die Rechnung wurde nicht gefunden. Laden Sie die Seite neu."
+
+  # #1093: die Rechnung gibt es nicht mehr, der Weg führt zur Liste
+  Szenario: Von der Fehlerseite eines Belegs zu den Rechnungen
+    Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Und die Rechnung von "Hauswart Huber" ist inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter den Beleg öffnet
+    Und der Liegenschaftsverwalter die Fehlerseite verlässt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnungen"

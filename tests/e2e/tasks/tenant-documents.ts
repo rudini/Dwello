@@ -42,6 +42,8 @@ export const startDeletingDocument = (title: string) => Click.on(deleteDocumentB
 export const confirmDeleting = Click.on(deleteConfirmButton);
 
 export const openDocument = (title: string) => DownloadFrom(openDocumentLink(title));
+// a file the backend refuses opens the app's error page instead (#1093)
+export const requestDocument = (title: string) => Click.on(openDocumentLink(title));
 
 // The page's form action that stores the upload answers with an error
 export const uploadsFail = (tenantId: string) => FailRequests.to(`/tenants/${tenantId}`, { '/upload': '' });

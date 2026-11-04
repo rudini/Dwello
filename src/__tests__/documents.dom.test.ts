@@ -130,8 +130,10 @@ describe('Dokumente', () => {
 		expect(byTestId('document-mark-sent')).toBeNull();
 		expect(byTestId('document-pdf-link')!.textContent).toContain('Datei herunterladen');
 		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
-		// gespeichert, nicht angezeigt: WebKit zeigt ein Foto sonst im Browser an (#424)
-		expect(byTestId('document-pdf-link')!.hasAttribute('download')).toBe(true);
+		// #1093: the server answers it (a file, or the error page of a refusal), not the app's router; without
+		// `download`, which saved the error page as a file too (the backend sends the file as an attachment)
+		expect(byTestId('document-pdf-link')!.hasAttribute('data-sveltekit-reload')).toBe(true);
+		expect(byTestId('document-pdf-link')!.hasAttribute('download')).toBe(false);
 	});
 
 	// #969 (Fachreview 969-1 V-1): ein PDF vor der Änderung ging nicht nachweislich an den Mieter: ohne Weg und Versandstatus

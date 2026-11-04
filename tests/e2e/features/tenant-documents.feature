@@ -71,3 +71,20 @@ Funktionalität: Dokumente eines Mieters
     Dann sagt die Bestätigung, dass "Lea Frei" zusammen mit den hochgeladenen Dokumenten endgültig gelöscht wird
     Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann findet der Liegenschaftsverwalter den Mieter "Lea Frei" nicht mehr
+
+  # #1093: eine abgelehnte Datei zeigt die Fehlerseite der App, keinen Download
+  Szenario: Ein inzwischen gelöschtes Dokument herunterladen
+    Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und das Dokument "Ausweiskopie" von "Lea Frei" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" herunterladen will
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Das Dokument gibt es nicht mehr. Laden Sie die Seite neu."
+
+  # #1093: zurück zum Mieter, dessen Seite es noch gibt
+  Szenario: Von der Fehlerseite eines Dokuments zurück zum Mieter
+    Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und das Dokument "Ausweiskopie" von "Lea Frei" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" herunterladen will
+    Und der Liegenschaftsverwalter die Fehlerseite verlässt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lea Frei"

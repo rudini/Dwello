@@ -75,6 +75,8 @@ describe('Beleg einer Rechnung', () => {
 			sendJson('PUT', `/api/v1/invoices/${id}/document`, { fileName, content: content.toString('base64') });
 
 		expect(((await (await callApi(`/api/v1/invoices/${id}`)).json()) as { beleg: unknown }).beleg).toBeNull();
+		// #1093: the invoice is there, only its Beleg is missing
+		expect(await (await callApi(`/api/v1/invoices/${id}/document`)).json()).toMatchObject({ code: 'BELEG_NOT_FOUND' });
 		expect((await put('rechnung.pdf', pdf)).status).toBe(200);
 		const replaced = await put('rechnung.jpg', jpg);
 		expect(await replaced.json()).toMatchObject({ id, beleg: { fileName: 'rechnung.jpg', mimeType: 'image/jpeg' } });
@@ -101,7 +103,7 @@ describe('Beleg einer Rechnung', () => {
 		expect(left).toBeUndefined();
 	});
 
-	it('meldet eine unbekannte Rechnung, auch mit einer Datei, die Dwello nicht nimmt', async () => {
+	it('meldet eine unbekannte Rechnung, auch beim Anzeigen ihres Belegs und mit einer Datei, die Dwello nicht nimmt', async () => {
 		const unknown = crypto.randomUUID();
 		const word = Buffer.from('PK\x03\x04').toString('base64');
 		const put = await sendJson('PUT', `/api/v1/invoices/${unknown}/document`, { fileName: 'x.docx', content: word });
@@ -109,6 +111,6 @@ describe('Beleg einer Rechnung', () => {
 		expect(await put.json()).toMatchObject({ code: 'INVOICE_NOT_FOUND' });
 		const get = await callApi(`/api/v1/invoices/${unknown}/document`);
 		expect(get.status).toBe(404);
-		expect(await get.json()).toMatchObject({ code: 'BELEG_NOT_FOUND' });
+		expect(await get.json()).toMatchObject({ code: 'INVOICE_NOT_FOUND' });
 	});
 });

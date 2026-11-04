@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import { pdfRefusal } from '../lib/server/statement';
+import { proxyFile } from '../lib/server/file-proxy';
 import { load as refusedPage } from '../routes/documents/refused/+page.server';
 
 const from = (referer?: string) =>
@@ -101,5 +102,51 @@ describe('Abgelehntes PDF unter Node 20', () => {
 		expect((refusedPage({ url: target(response) } as never) as { back: string | null }).back).toBe(
 			'/statements?building=b-1'
 		);
+	});
+});
+
+// #1093: a refused Beleg or Dokument opens the same error page, not a download of the backend's answer
+describe('Abgelehnte Datei', () => {
+	const backend = (status: number, body: unknown) =>
+		(async () => Response.json(body, { status })) as typeof fetch;
+
+	it('führt auf die Fehlerseite der App und zurück zur Seite, von der sie angefordert wurde', async () => {
+		const request = new Request('http://dwello.test/documents/d-1/pdf', {
+			headers: { referer: 'http://dwello.test/tenants/t-1' }
+		});
+
+		const response = await proxyFile(
+			backend(404, { code: 'DOCUMENT_NOT_FOUND' }),
+			request,
+			'http://api/x',
+			'application/pdf'
+		);
+
+		expect(response.status).toBe(303);
+		expect(target(response).pathname).toBe('/documents/refused');
+		expect(target(response).searchParams.get('code')).toBe('DOCUMENT_NOT_FOUND');
+		expect(target(response).searchParams.get('back')).toBe('/tenants/t-1');
+	});
+
+	// the invoice's page is gone with it
+	it('führt bei einer gelöschten Rechnung zur Liste der Rechnungen', () => {
+		const response = pdfRefusal(from('http://dwello.test/invoices/i-1'), {
+			code: 'INVOICE_NOT_FOUND'
+		});
+		const page = refusedPage({ url: target(response) } as never) as {
+			title: string;
+			back: string | null;
+			list: string;
+		};
+
+		expect(page).toMatchObject({ title: 'Rechnung nicht gefunden', back: null, list: '/invoices' });
+	});
+
+	it('nennt ein gelöschtes Dokument im Titel', () => {
+		const page = refusedPage({
+			url: new URL('http://dwello.test/documents/refused?code=DOCUMENT_NOT_FOUND')
+		} as never);
+
+		expect(page).toMatchObject({ title: 'Dokument nicht gefunden', list: '/statements' });
 	});
 });
