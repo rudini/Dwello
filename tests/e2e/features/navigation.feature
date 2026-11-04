@@ -70,6 +70,14 @@ Funktionalität: Navigation
       | Datenschutz         |
       | Nutzungsbedingungen |
 
+  # #651 (Fallback-Review von #1115): ein Tablet quer gedreht schliesst das offene Menü; der Fokus geht nicht verloren
+  @wip
+  Szenario: Wird das Fenster mit offenem Menü breit, steht der Fokus auf dem aktuellen Bereich
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Und der Liegenschaftsverwalter hat das Menü geöffnet
+    Wenn das Browserfenster 1280 Pixel breit wird
+    Dann steht der Fokus in der Hauptnavigation auf "Gebäude"
+
   Szenario: Nur der aktuelle Bereich ist markiert
     Wenn der Liegenschaftsverwalter in der Hauptnavigation "Heizprofile" wählt
     Dann ist in der Hauptnavigation nur "Heizprofile" markiert

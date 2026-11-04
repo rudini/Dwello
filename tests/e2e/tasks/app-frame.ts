@@ -25,6 +25,7 @@ export const openSettingsFromUserMenu: Activity = (actor) =>
 	actor.attemptsTo(Click.on(userMenuButton), Click.on(userMenuSettings));
 export const chooseInFooter = (label: string) => Click.on(footerLink(label));
 export const useWindowWidth = (width: number) => Browser.resizeTo({ width, height: 768 });
+export const openMobileMenu = Click.on(mobileMenuButton);
 export const openTermsFromLogin = Click.on(termsLinkOnLogin);
 export const openPrivacySectionFromTerms = (heading: string) => Click.on(privacySectionLinkInTerms(heading));
 export const openPrivacyFromLogin = Click.on(privacyLinkOnLogin);
