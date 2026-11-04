@@ -23,8 +23,8 @@
 		};
 	});
 
-	// at 1024 px the main navigation shows and the drawer hides: a menu left open would keep the page inert
-	const wide = new MediaQuery('min-width: 1024px');
+	// at lg (64rem, 1024 px at the default font size) the main navigation shows and the drawer hides: a menu left open would keep the page inert
+	const wide = new MediaQuery('min-width: 64rem');
 	$effect(() => {
 		if (wide.current) closeMobileNav();
 	});
