@@ -994,3 +994,9 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Workflow note (`docs/reviews/workflow-notes-issue-1093.md`)
 - [x] CI all browsers (WebKit: an image Dokument without `download`, #424): hand-run of ci.yml, result in the pull request
 - [x] PR: pushed after this archive
+
+## Session: search engine tags for dwello.ch
+
+- [x] Landing pages: canonical, absolute hreflang with x-default, Open Graph, JSON-LD SoftwareApplication; `i18n/build.py` sets canonical, og:url, og:image and og:locale per language
+- [x] Slice review (`docs/reviews/seotags-review-1.md`); C-1 fixed: JPEG link preview per language
+- [x] PR #1109: pushed after this archive
