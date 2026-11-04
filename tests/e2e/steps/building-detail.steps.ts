@@ -176,3 +176,9 @@ Then('nicht den Stichtag {string}', async ({ verwalter }, day: string) => {
 Then('nennt das Beispiel beim Stichtag den Tag {string}', async ({ verwalter }, day: string) => {
 	await verwalter.sees(fuelStockDateExample).toContain(`Beispiel: ${day}`);
 });
+
+// #1103: the day the field's example names, also in the help
+Then('nennt die Hilfe zum Tankbestand den Stichtag aus dem Beispiel beim Stichtag', async ({ verwalter }) => {
+	const example = (await verwalter.answer(fuelStockDateExample))?.match(/\d{2}\.\d{2}\.\d{4}/)?.[0];
+	await verwalter.sees(fuelStocksHelp).toContain(example);
+});
