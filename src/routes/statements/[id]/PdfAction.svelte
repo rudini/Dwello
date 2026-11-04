@@ -9,13 +9,15 @@
 		generated,
 		generating,
 		language = 'de',
-		ongenerate
+		ongenerate,
+		list = ''
 	}: {
 		id: string;
 		generated: boolean;
 		generating: boolean;
 		language?: Tenant['language'];
 		ongenerate: () => void;
+		list?: string; // the list it was opened from: the refusal page of the PDF leads back there (#1094)
 	} = $props();
 
 	const pdfIn = {
@@ -27,8 +29,10 @@
 </script>
 
 {#if generated}
-	<Button href="/statements/{id}/pdf" icon="document-download" testid="statement-pdf-download"
-		>{m.documents_download()}</Button
+	<Button
+		href="/statements/{id}/pdf{list ? `?${new URLSearchParams({ list })}` : ''}"
+		icon="document-download"
+		testid="statement-pdf-download">{m.documents_download()}</Button
 	>
 {:else}
 	<div class="flex flex-col gap-2">

@@ -34,6 +34,18 @@ describe('Abgelehntes PDF', () => {
 		expect(target(response).searchParams.has('back')).toBe(false);
 	});
 
+	// #1094: the detail page names the list it was opened from, as it was filtered
+	it('führt von der Detailseite einer gelöschten Abrechnung zur Liste, wie sie gefiltert war', () => {
+		const request = new Request(
+			'http://dwello.test/statements/s-1/pdf?list=%2Fstatements%3Fstatus%3Ddraft',
+			{ headers: { referer: 'http://dwello.test/statements/s-1' } }
+		);
+
+		expect(
+			target(pdfRefusal(request, { code: 'STATEMENT_NOT_FOUND' })).searchParams.get('back')
+		).toBe('/statements?status=draft');
+	});
+
 	// the page it came from shows the statement that is gone (its detail page, the run of the wizard)
 	it('führt bei einer gelöschten Abrechnung nur zur Liste zurück', () => {
 		const gone = { code: 'STATEMENT_NOT_FOUND' };
