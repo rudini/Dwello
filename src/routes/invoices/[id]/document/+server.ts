@@ -5,4 +5,4 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/invoic
 
 // The Beleg of an invoice as its file, with its kind and name
 export const GET: RequestHandler = ({ params, fetch, request }) =>
-	proxyFile(fetch, request, `${API}/${params.id}/document`, 'application/octet-stream', true);
+	proxyFile(fetch, request, `${API}/${params.id}/document`, true);

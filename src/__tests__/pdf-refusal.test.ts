@@ -117,12 +117,7 @@ describe('Abgelehnte Datei', () => {
 			headers: { referer: 'http://dwello.test/tenants/t-1' }
 		});
 
-		const response = await proxyFile(
-			backend(404, documentNotFound),
-			request,
-			'http://api/x',
-			'application/pdf'
-		);
+		const response = await proxyFile(backend(404, documentNotFound), request, 'http://api/x');
 
 		expect(response.status).toBe(303);
 		expect(target(response).pathname).toBe('/documents/refused');
@@ -165,5 +160,31 @@ describe('Abgelehnte Datei', () => {
 		} as never);
 
 		expect(page).toMatchObject({ title: 'Dokument nicht gefunden', list: '/statements' });
+	});
+});
+
+// #1093: without the link's `download`, WebKit shows a photo sent as an attachment instead of saving it (#424)
+describe('Datei zum Herunterladen', () => {
+	const photo = (async () =>
+		new Response(new Uint8Array([0xff, 0xd8, 0xff]), {
+			headers: {
+				'content-type': 'image/jpeg',
+				'content-disposition': 'attachment; filename="ausweis.jpg"'
+			}
+		})) as typeof fetch;
+	const request = new Request('http://dwello.test/documents/d-1/pdf');
+
+	it('wird von jedem Browser gespeichert, mit ihrem Namen', async () => {
+		const response = await proxyFile(photo, request, 'http://api/x');
+
+		expect(response.headers.get('content-type')).toBe('application/octet-stream');
+		expect(response.headers.get('content-disposition')).toBe('attachment; filename="ausweis.jpg"');
+	});
+
+	it('wird als Beleg im Browser mit seiner Art angezeigt', async () => {
+		const response = await proxyFile(photo, request, 'http://api/x', true);
+
+		expect(response.headers.get('content-type')).toBe('image/jpeg');
+		expect(response.headers.get('content-disposition')).toBe('inline; filename="ausweis.jpg"');
 	});
 });

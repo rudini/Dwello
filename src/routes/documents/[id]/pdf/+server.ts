@@ -3,4 +3,4 @@ import { proxyFile } from '$lib/server/file-proxy';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/documents`;
 
-export const GET: RequestHandler = ({ params, fetch, request }) => proxyFile(fetch, request, `${API}/${params.id}/pdf`, 'application/pdf');
+export const GET: RequestHandler = ({ params, fetch, request }) => proxyFile(fetch, request, `${API}/${params.id}/pdf`);
