@@ -29,6 +29,10 @@ const building = (overrides: Record<string, unknown> = {}) => ({
 	occupiedCount: 3,
 	vacantCount: 1,
 	accountingPeriod: 'calendar',
+	stockPeriods: {
+		ended: { start: '2025-01-01', end: '2025-12-31' },
+		next: { start: '2026-01-01', end: '2026-12-31' }
+	},
 	...overrides
 });
 const list = (buildings: ReturnType<typeof building>[], total = buildings.length) =>
@@ -264,15 +268,24 @@ describe('Tankbestand', () => {
 
 	// #1098: since #1088 each building has its own Abrechnungsperiode; the help names its last day as the Stichtag
 	it.each([
-		['calendar', '31.12.', '30.06.'],
-		['july-june', '30.06.', '31.12.'],
-		['november-october', '31.10.', '31.12.']
+		['calendar', '31.12.', '30.06.', ['2025-01-01', '2025-12-31', '2026-01-01', '2026-12-31']],
+		['july-june', '30.06.', '31.12.', ['2025-07-01', '2026-06-30', '2026-07-01', '2027-06-30']],
+		[
+			'november-october',
+			'31.10.',
+			'31.12.',
+			['2025-11-01', '2026-10-31', '2026-11-01', '2027-10-31']
+		]
 	])(
 		'nennt als Stichtag den letzten Tag der Abrechnungsperiode %s des Gebäudes',
-		(accountingPeriod, day, other) => {
+		(accountingPeriod, day, other, [endedStart, endedEnd, nextStart, nextEnd]) => {
+			const stockPeriods = {
+				ended: { start: endedStart, end: endedEnd },
+				next: { start: nextStart, end: nextEnd }
+			};
 			show(BuildingPage, {
 				data: {
-					building: building({ accountingPeriod }),
+					building: building({ accountingPeriod, stockPeriods }),
 					apartments: [],
 					fuelStocks: [],
 					heatingCategories
@@ -287,11 +300,17 @@ describe('Tankbestand', () => {
 		}
 	);
 
-	// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, as the backend names it
-	it('schlägt beim Stichtag das nächste Ende der Abrechnungsperiode vor, das das Backend nennt', () => {
+	// #1103: help and field example name the same Stichtag, the end of the last ended period, as the backend names it
+	it('nennt in Hilfe und Beispiel denselben Stichtag und die Perioden, die er beendet und beginnt', () => {
 		show(BuildingPage, {
 			data: {
-				building: building({ accountingPeriod: 'july-june', nextPeriodEnd: '2031-06-30' }),
+				building: building({
+					accountingPeriod: 'july-june',
+					stockPeriods: {
+						ended: { start: '2030-07-01', end: '2031-06-30' },
+						next: { start: '2031-07-01', end: '2032-06-30' }
+					}
+				}),
 				apartments: [],
 				fuelStocks: [],
 				heatingCategories
@@ -299,6 +318,9 @@ describe('Tankbestand', () => {
 			form: null
 		} as never);
 		expect(byTestId('fuel-stock-date-input-help')!.textContent).toContain('Beispiel: 30.06.2031');
+		expect(byTestId('fuel-stocks-intro')!.textContent).toContain(
+			'Der Wert vom 30.06.2031 ist der Endbestand der Abrechnungsperiode 01.07.2030 – 30.06.2031 und der Anfangsbestand der Abrechnungsperiode 01.07.2031 – 30.06.2032.'
+		);
 	});
 
 	it('listet die Stichtage mit Wert und Kategorie und erklärt, wozu sie dienen und wie man bewertet', () => {

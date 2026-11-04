@@ -64,6 +64,11 @@ def build(lang, tag, name, page, table, used):
         if n1 + n2:
             used.add(german)
     page = page.replace('<html lang="de-CH">', f'<html lang="{tag}">')
+    # the page's own address for search engines and link previews
+    page = page.replace('rel="canonical" href="https://dwello.ch/', f'rel="canonical" href="https://dwello.ch/{lang}/')
+    page = page.replace('property="og:url" content="https://dwello.ch/', f'property="og:url" content="https://dwello.ch/{lang}/')
+    page = page.replace('content="https://dwello.ch/shots/', f'content="https://dwello.ch/shots/{lang}/')
+    page = page.replace('property="og:locale" content="de_CH"', f'property="og:locale" content="{tag.replace("-", "_") if "-" in tag else "en_US"}"')
     # paths: the page lives one folder down; screenshots per language
     page = re.sub(r'(src|href)="shots/', rf'\1="../shots/{lang}/', page)
     page = re.sub(r'(src|href)="(assets|fonts)/', r'\1="../\2/', page)
