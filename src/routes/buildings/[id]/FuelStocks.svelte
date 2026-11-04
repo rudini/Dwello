@@ -18,7 +18,7 @@
 	let {
 		stocks,
 		period,
-		periodEnd,
+		stockPeriods,
 		categories,
 		errors = {},
 		saved = false,
@@ -26,7 +26,7 @@
 	}: {
 		stocks: FuelStock[] | null; // null: could not be loaded
 		period: AccountingPeriodType; // #1098: the building's own, its last day is the Stichtag
-		periodEnd?: string; // the end of its running period, from the backend: the field's example
+		stockPeriods: { ended: { start: string; end: string }; next: { start: string; end: string } }; // #1103, from the backend
 		categories: { id: string; name: string }[] | null; // null: could not be loaded
 		errors?: Record<string, string>;
 		saved?: boolean;
@@ -40,7 +40,7 @@
 
 <Panel title={m.buildings_fuel_title()} testid="fuel-stocks">
 	<p class="text-ink-muted" data-testid="fuel-stocks-intro">
-		{fuelStockIntro(period)}
+		{fuelStockIntro(period, stockPeriods)}
 	</p>
 
 	{#if stocks === null}
@@ -58,7 +58,7 @@
 				name="readingDate"
 				label={m.buildings_fuel_date()}
 				error={errors.readingDate}
-				example={periodEnd && formatDate(periodEnd)}
+				example={formatDate(stockPeriods.ended.end)}
 				testid="fuel-stock-date-input"
 			/>
 			<MoneyInput

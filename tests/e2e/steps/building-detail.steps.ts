@@ -5,6 +5,9 @@ import {
 	fuelStockCategoryNames,
 	fuelStocksHelp,
 	fuelStockDateExample,
+	fuelStockDateExampleRecent,
+	fuelStockDateExampleDay,
+	fuelStocksHelpNamesExample,
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
@@ -179,6 +182,15 @@ Then('nennt das Beispiel beim Stichtag den Tag {string}', async ({ verwalter }, 
 
 // #1103: the day the field's example names, also in the help
 Then('nennt die Hilfe zum Tankbestand den Stichtag aus dem Beispiel beim Stichtag', async ({ verwalter }) => {
-	const example = (await verwalter.answer(fuelStockDateExample))?.match(/\d{2}\.\d{2}\.\d{4}/)?.[0];
-	await verwalter.sees(fuelStocksHelp).toContain(example);
+	await verwalter.sees(fuelStockDateExampleDay).not.toBeNull(); // Fachreview 1103-1 V-4
+	await verwalter.sees(fuelStocksHelpNamesExample).toBe(true);
 });
+
+// Fachreview 1103-1 V-1: the last ended end, by its day and month, neither after today nor a year or more before it
+Then(
+	'ist das Beispiel beim Stichtag der {string} der zuletzt abgelaufenen Abrechnungsperiode',
+	async ({ verwalter }, end: string) => {
+		await verwalter.sees(fuelStockDateExample).toContain(`Beispiel: ${end}`);
+		await verwalter.sees(fuelStockDateExampleRecent).toBe(true);
+	}
+);

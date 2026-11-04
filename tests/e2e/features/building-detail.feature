@@ -93,15 +93,15 @@ Funktionalität: Gebäudedetail
       | von November bis Oktober | 31.10.   | 31.12.           |
 
   # #1103: Hilfe und Beispiel beim Stichtag nennen denselben Tag, das Ende der zuletzt abgelaufenen Abrechnungsperiode
-  # (Personas Helga und Dr. Weber P-1 in #1098)
-  @wip
+  # (Personas Helga und Dr. Weber P-1 in #1098; Fachreview 1103-1 V-1: nicht in der Zukunft, nicht älter als ein Jahr)
   Szenariogrundriss: Die Hilfe zum Tankbestand und das Beispiel beim Stichtag nennen denselben Stichtag
     Angenommen das Gebäude "Birkenhof" rechnet <Periode> ab
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann nennt die Hilfe zum Tankbestand den Stichtag aus dem Beispiel beim Stichtag
+    Und ist das Beispiel beim Stichtag der "<Ende>" der zuletzt abgelaufenen Abrechnungsperiode
 
     Beispiele:
-      | Periode                  |
-      | im Kalenderjahr          |
-      | von Juli bis Juni        |
-      | von November bis Oktober |
+      | Periode                  | Ende   |
+      | im Kalenderjahr          | 31.12. |
+      | von Juli bis Juni        | 30.06. |
+      | von November bis Oktober | 31.10. |
