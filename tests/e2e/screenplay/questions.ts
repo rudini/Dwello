@@ -212,7 +212,8 @@ export const CutInChoice = {
 				one.evaluate((select: HTMLSelectElement) => {
 					const style = getComputedStyle(select);
 					const pen = document.createElement('canvas').getContext('2d')!;
-					pen.font = style.font;
+					// from its parts: Firefox may answer the shorthand empty, and the canvas would measure 10px sans-serif (code review 1089 C-2)
+					pen.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
 					const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
 					const text = select.selectedOptions[0]?.text ?? '';
 					return Math.max(0, Math.ceil(pen.measureText(text).width - room));

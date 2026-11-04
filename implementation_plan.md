@@ -14,6 +14,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Verlauf (`MetadataCard.svelte`): a long entry (an e-mail address) wraps its words, never its date; dates flush right on one line. Scenario «Im Verlauf stehen die Daten bündig untereinander» (statement-send.feature, 390 px), seen red (a date on 2 lines, edges 2 px apart)
 - [x] Italian Heizprofil choice at 390 px: scenario «Die Wahl des Heizprofils passt auf Italienisch aufs Telefon» (statement-generate.feature); it pins kept behaviour, the base already shows the whole name (no red run)
 - [x] lint, check, Chromium E2E of statement-send, statement-generate, statement-detail (243)
-- [ ] code-reviewer slice review
+- [x] code-reviewer round 1 (`docs/reviews/1089-review-1.md`): no Blocker/Major; C-2 (an empty font shorthand in Firefox measured nothing) fixed, C-1 (the select's arrow not subtracted) stays
 - [ ] Persona Marco (phone)
 - [ ] PR (`Fixes #1089`)
