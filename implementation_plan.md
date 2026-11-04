@@ -8,14 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session 2026-11-04: #1093 refused Beleg or Dokument opens the error page
-
-- [x] Scenarios (`invoice-detail.feature`, `tenant-documents.feature`), seen red at the missing error page
-- [x] `proxyFile` redirects a refusal through `pdfRefusal`; the Beleg of a deleted invoice says `INVOICE_NOT_FOUND`; the error page names a gone invoice or Dokument and leads to the invoice list
-- [x] Dokument links without `download` (it saved the error page as a file); `reload` as the statement list's PDF link
-- [x] Screen rows `invoice-document-refused`, `document-pdf-refused`; D7c, API spec
-- [x] Code review round 1 (`docs/reviews/1093-review-1.md`)
-- [x] Personas Helga, Marco (`helga-1093.md`, `marco-1093.md`); their P-1 and C-2 fixed: the error page says a gone invoice or Dokument was deleted
-- [ ] CI all browsers (WebKit: an image Dokument without `download`, #424)
-- [ ] PR

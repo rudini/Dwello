@@ -981,3 +981,16 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] lint, check, type-check, vitest, E2E building features (44) and the building-detail axe and language rows (23)
 - [x] PR (`Fixes #1098`): pushed after this archive
 - [x] CI fix: Architecture fitness (Ä4/AP2) refused the date rule in the frontend; the backend sends `nextPeriodEnd` on `GET /buildings/:id` (red first: unit, route and DOM tests); closing round `docs/reviews/1098-review-2.md`: nothing found
+
+## Session 2026-11-04: #1093 refused Beleg or Dokument opens the error page
+
+- [x] Scenarios (`invoice-detail.feature`, `tenant-documents.feature`), seen red at the missing error page
+- [x] `proxyFile` redirects a refusal through `pdfRefusal`; the Beleg of a deleted invoice says `INVOICE_NOT_FOUND`; the error page names a gone invoice or Dokument and leads to the invoice list
+- [x] Dokument links without `download` (it saved the error page as a file); `reload` as the statement list's PDF link
+- [x] Screen rows `invoice-document-refused`, `document-pdf-refused`; D7c, API spec
+- [x] Code review round 1 (`docs/reviews/1093-review-1.md`)
+- [x] Personas Helga, Marco (`helga-1093.md`, `marco-1093.md`); their P-1 and C-2 fixed: the error page says a gone invoice or Dokument was deleted
+- [x] Closing review (`docs/reviews/1093c-review-1.md`); C-1 Minor stays in its report
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-1093.md`)
+- [x] CI all browsers (WebKit: an image Dokument without `download`, #424): hand-run of ci.yml, result in the pull request
+- [x] PR: pushed after this archive
