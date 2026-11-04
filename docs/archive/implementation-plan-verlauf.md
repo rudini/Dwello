@@ -974,3 +974,4 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1098.md`
 - [x] lint, check, type-check, vitest, E2E building features (44) and the building-detail axe and language rows (23)
 - [x] PR (`Fixes #1098`): pushed after this archive
+- [x] CI fix: Architecture fitness (Ä4/AP2) refused the date rule in the frontend; the backend sends `nextPeriodEnd` on `GET /buildings/:id` (red first: unit, route and DOM tests); closing round `docs/reviews/1098-review-2.md`: nothing found
