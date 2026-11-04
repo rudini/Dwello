@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import { pdfRefusal } from '../lib/server/statement';
 import { proxyFile } from '../lib/server/file-proxy';
+import documentNotFound from '../../tests/contracts/document-not-found.json';
+import invoiceNotFound from '../../tests/contracts/invoice-not-found.json';
 import { load as refusedPage } from '../routes/documents/refused/+page.server';
 
 const from = (referer?: string) =>
@@ -116,7 +118,7 @@ describe('Abgelehnte Datei', () => {
 		});
 
 		const response = await proxyFile(
-			backend(404, { code: 'DOCUMENT_NOT_FOUND' }),
+			backend(404, documentNotFound),
 			request,
 			'http://api/x',
 			'application/pdf'
@@ -130,9 +132,7 @@ describe('Abgelehnte Datei', () => {
 
 	// the invoice's page is gone with it
 	it('führt bei einer gelöschten Rechnung zur Liste der Rechnungen', () => {
-		const response = pdfRefusal(from('http://dwello.test/invoices/i-1'), {
-			code: 'INVOICE_NOT_FOUND'
-		});
+		const response = pdfRefusal(from('http://dwello.test/invoices/i-1'), invoiceNotFound);
 		const page = refusedPage({ url: target(response) } as never) as {
 			title: string;
 			back: string | null;
