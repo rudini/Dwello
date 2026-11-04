@@ -8,8 +8,7 @@ const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALI
 /** #734: a PDF or file the backend refused (`pdfRefusal`): what its code says, and the way back */
 export const load: PageServerLoad = ({ url }) => {
 	const query = url.searchParams;
-	// a code is upper case: `__proto__` and the like name what every object has (fallback review of #1107)
-	const code = query.get('code')?.match(/^[A-Z_]+$/)?.[0];
+	const code = query.get('code') ?? undefined;
 	// resolved as the browser does (it drops tabs and line breaks): a path of this app only, never another site
 	const path = query.get('back');
 	const back = path !== null && URL.canParse(path, url) ? new URL(path, url) : null;
@@ -24,10 +23,13 @@ export const load: PageServerLoad = ({ url }) => {
 		INVOICE_NOT_FOUND: m.documents_refused_invoice_gone,
 		DOCUMENT_NOT_FOUND: m.documents_refused_document_gone
 	};
+	// only the code's own entry: `__proto__` and the like name what every object has (fallback review of #1107)
+	const of = <T>(table: Record<string, T>) =>
+		code && Object.hasOwn(table, code) ? table[code] : undefined;
 	return {
-		title: (gone[code ?? ''] ?? m.documents_refused_pdf)(),
+		title: (of(gone) ?? m.documents_refused_pdf)(),
 		sentence:
-			deleted[code ?? '']?.() ??
+			of(deleted)?.() ??
 			backendMessage(
 				{ code },
 				query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()
@@ -38,7 +40,7 @@ export const load: PageServerLoad = ({ url }) => {
 				? `${back.pathname}${back.search}`
 				: null,
 		// without a way back: the list of what was refused
-		list: listOfGone[code ?? ''] ?? '/statements',
+		list: of(listOfGone) ?? '/statements',
 		// a refusal whose way out is in «Einstellungen» links there too (persona Dr. Weber P-2, #450)
 		settings: SETTINGS_CODES.includes(code ?? '')
 	};
