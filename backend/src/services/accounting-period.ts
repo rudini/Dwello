@@ -48,10 +48,12 @@ export function missingPeriods(type: AccountingPeriodType, contract: Rental, sta
 	);
 }
 
+/** #1088: the building's own type when a run's period is no whole period of it (Fachreview 1088-2 V-10); else null */
+export const otherPeriod = (type: AccountingPeriodType, run: Range) => (fitsType(type, run) ? null : type);
+
 /**
- * #1088: the building's own type when a run's period is neither a whole period of it nor the period of one of the
- * building's statements (statements made before stay as they are, Fachreview 1088-2 V-10); else null
+ * The periods of older statements of the building that a run's period overlaps without being equal: the migration
+ * (#1088) leaves statements of another period, whose days a run must not bill a second time (#199, code review 1088-1
+ * C-1); a replaced one's period stays the building's (#120)
  */
-export function otherPeriod(type: AccountingPeriodType, run: Range, building: Omit<Dated, 'status'>[]) {
-	return fitsType(type, run) || periodsOf(building).some((p) => same(p, run)) ? null : type;
-}
+export const overlapped = (run: Range, building: Omit<Dated, 'status'>[]) => periodsOf(building).filter((p) => overlaps(p, run) && !same(p, run));

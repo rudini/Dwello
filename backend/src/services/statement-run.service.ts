@@ -3,7 +3,7 @@
  * in the period, which of them have a statement there already (a run bills those no more), those «Abgerechnet bis»
  * leaves without Mietstage there, and whether the period is one of the building's (#1088)
  */
-import { commonType, lastCompletedPeriod, missingPeriods, otherPeriod, same, type AccountingPeriodType, type Range } from './accounting-period';
+import { commonType, lastCompletedPeriod, missingPeriods, otherPeriod, overlapped, same, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
 import { getTypedConfig } from './config.service';
 import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
@@ -13,7 +13,7 @@ import { isRealDate } from './real-date';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, categories, utilityStatementLineItems } from '../db/schema';
-import { roundToRappen } from './pdf-format';
+import { formatSwissDate, roundToRappen } from './pdf-format';
 import type { CalculatedLineItem } from './calculation.service';
 import { calculateStatement, generateStatement, listStatements } from './statement.service';
 import { swissToday } from './today';
@@ -77,19 +77,23 @@ export async function runPlan(buildingId: string, period: Range) {
 		listStatements({ buildingId, limit: 1000 }),
 		typeOf(buildingId)
 	]);
-	return { ...planRun(period, contracts, statements), otherPeriod: otherPeriod(type, period, statements) };
+	return { ...planRun(period, contracts, statements), otherPeriod: otherPeriod(type, period) };
 }
 
 /**
- * #1088 (Fachreview 1088-2 V-10): a building bills only whole periods of its own Abrechnungsperiode, so no two of its
- * periods overlap; a period equal to one of its statements stays allowed: statements made before stay as they are, and
- * a replaced one's period stays the building's for its berichtigte Abrechnung (#120)
+ * #1088 (Fachreview 1088-2 V-10): a statement of a run bills a whole period of its building's own Abrechnungsperiode,
+ * one that overlaps no older statement of the building (code review 1088-1 C-1); a berichtigte Abrechnung keeps the
+ * period of the replaced one (correctStatement)
  */
 export async function generateInPeriod(input: Parameters<typeof generateStatement>[0]) {
-	const { buildingId, periodStart, periodEnd } = input;
-	const [building, { statements }] = await Promise.all([buildingOf(buildingId), listStatements({ buildingId, limit: 1000 })]);
-	if (building && otherPeriod(building.type, { start: periodStart, end: periodEnd }, statements)) {
-		throw new CodedError('STATEMENT_PERIOD_OF_BUILDING', 'The period is no whole period of the building', { building: building.name });
+	const run = { start: input.periodStart, end: input.periodEnd };
+	const [building, { statements }] = await Promise.all([buildingOf(input.buildingId), listStatements({ buildingId: input.buildingId, limit: 1000 })]);
+	if (!building) return generateStatement(input);
+	if (otherPeriod(building.type, run)) throw new CodedError('STATEMENT_PERIOD_OF_BUILDING', 'The period is no whole period of the building', { building: building.name });
+	const older = overlapped(run, statements);
+	if (older.length) {
+		const periods = older.map((p) => `${formatSwissDate(p.start)} – ${formatSwissDate(p.end)}`).join(', ');
+		throw new CodedError('STATEMENT_PERIOD_OVERLAPS', 'The period overlaps an older statement period of the building', { building: building.name, periods });
 	}
 	return generateStatement(input);
 }

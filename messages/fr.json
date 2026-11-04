@@ -2278,5 +2278,6 @@
 	"statements_building_other_period_calendar": "{building} est décompté par année civile. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de janvier à décembre.",
 	"statements_building_other_period_july": "{building} est décompté de juillet à juin. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de juillet à juin.",
 	"statements_building_other_period_november": "{building} est décompté de novembre à octobre. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de novembre à octobre.",
-	"backend_statement_period_of_building": "Cette période de décompte ne convient pas pour {building} : un immeuble ne décompte que des périodes entières de sa propre période de décompte. Rechargez la page."
+	"backend_statement_period_of_building": "Cette période de décompte ne convient pas pour {building} : un immeuble ne décompte que des périodes entières de sa propre période de décompte. Rechargez la page.",
+	"backend_statement_period_overlaps": "La période de décompte choisie chevauche des décomptes plus anciens de {building} ({periods}). Choisissez une période de décompte qui n’en chevauche aucun."
 }

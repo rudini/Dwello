@@ -2278,5 +2278,6 @@
 	"statements_building_other_period_calendar": "{building} viene conteggiato per anno civile. Non può sceglierlo per il periodo di conteggio scelto. Per conteggiarlo, scelga al primo passo un periodo di conteggio da gennaio a dicembre.",
 	"statements_building_other_period_july": "{building} viene conteggiato da luglio a giugno. Non può sceglierlo per il periodo di conteggio scelto. Per conteggiarlo, scelga al primo passo un periodo di conteggio da luglio a giugno.",
 	"statements_building_other_period_november": "{building} viene conteggiato da novembre a ottobre. Non può sceglierlo per il periodo di conteggio scelto. Per conteggiarlo, scelga al primo passo un periodo di conteggio da novembre a ottobre.",
-	"backend_statement_period_of_building": "Questo periodo di conteggio non è adatto per {building}: un immobile conteggia solo periodi interi del proprio periodo di conteggio. Ricarichi la pagina."
+	"backend_statement_period_of_building": "Questo periodo di conteggio non è adatto per {building}: un immobile conteggia solo periodi interi del proprio periodo di conteggio. Ricarichi la pagina.",
+	"backend_statement_period_overlaps": "Il periodo di conteggio scelto si sovrappone a conteggi precedenti di {building} ({periods}). Scelga un periodo di conteggio che non si sovrapponga a nessuno di essi."
 }

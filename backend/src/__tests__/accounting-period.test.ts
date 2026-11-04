@@ -3,7 +3,7 @@
  * ended period, the ended periods since a day, and the parts of them a contract has no statement for
  */
 import { describe, expect, it } from 'bun:test';
-import { endedPeriodsSince, otherPeriod, lastCompletedPeriod, missingPeriods } from '../services/accounting-period';
+import { endedPeriodsSince, otherPeriod, overlapped, lastCompletedPeriod, missingPeriods } from '../services/accounting-period';
 
 // #211, #1088: one rule for dashboard, contract list, contract page and step 2 of the wizard: each ended whole period
 // of the building's Abrechnungsperiode in which the contract has rent days and no statement of its own; a statement
@@ -79,17 +79,31 @@ describe('Abrechnungsperioden der Einstellung', () => {
 // A-10, #142, #408 point 2: the contract page's way for each missing part: the period of a statement of the building
 // that holds its days, else the whole ended period or a short one; `open` is false where the contract's own statement
 // overlaps that period (the run would not bill it there)
-// #1088: a building takes a run only for a whole period of its own Abrechnungsperiode or for the period of one of its
-// statements (statements made before stay as they are, Fachreview 1088-2 V-10)
+// #1088 (Fachreview 1088-2 V-10, code review 1088-1 C-2): a building takes a run only for a whole period of its own
+// Abrechnungsperiode, also not for the period of an older statement of another period
 describe('Lauf in einer anderen Abrechnungsperiode als der des Gebäudes', () => {
 	const run = { start: '2023-07-01', end: '2024-06-30' };
 
 	it('nennt die Abrechnungsperiode des Gebäudes, wenn der Lauf keine ganze Periode davon ist', () => {
-		expect(otherPeriod('calendar', run, [])).toBe('calendar');
+		expect(otherPeriod('calendar', run)).toBe('calendar');
 	});
 
-	it('nimmt den Lauf in einer ganzen Periode des Gebäudes oder der Periode einer seiner Abrechnungen', () => {
-		expect(otherPeriod('july-june', run, [])).toBeNull();
-		expect(otherPeriod('calendar', run, [{ periodStart: '2023-07-01', periodEnd: '2024-06-30' }])).toBeNull();
+	it('nimmt den Lauf nur in einer ganzen Periode des Gebäudes', () => {
+		expect(otherPeriod('july-june', run)).toBeNull();
+	});
+});
+
+// code review 1088-1 C-1: the migration leaves older statements of another period; a whole period that overlaps one of
+// them would share an invoice out a second time over the same days (#199)
+describe('Lauf, der eine ältere Abrechnung des Gebäudes schneidet', () => {
+	const older = { periodStart: '2022-07-01', periodEnd: '2023-06-30' };
+
+	it('nennt die Perioden älterer Abrechnungen, die der Lauf schneidet, ohne gleich zu sein', () => {
+		expect(overlapped({ start: '2023-01-01', end: '2023-12-31' }, [older])).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+	});
+
+	it('nennt keine Periode, die der Lauf nicht schneidet oder die ihm gleicht', () => {
+		expect(overlapped({ start: '2024-01-01', end: '2024-12-31' }, [older])).toEqual([]);
+		expect(overlapped({ start: '2022-07-01', end: '2023-06-30' }, [older])).toEqual([]);
 	});
 });

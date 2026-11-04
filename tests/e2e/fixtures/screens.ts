@@ -348,7 +348,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen'),
-		agreedBuilding: seed.idOf('Waldblick')
+		agreedBuilding: seed.idOf('Waldblick'),
+		// #1088 (code review 1088-1 C-4): no statement yet, so its Abrechnungsperiode can still be changed
+		openPeriodBuilding: seed.idOf('Holzhof')
 	};
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),

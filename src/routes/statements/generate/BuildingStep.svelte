@@ -64,8 +64,7 @@
 			}
 			if (statements.data) {
 				billed = Object.fromEntries(statements.data.map((row) => [row.buildingId, row]));
-				// a building the period overlaps or that bills another period is not chosen, also not from a link or a
-				// draft (#408 point 2, #1088)
+				// a building that bills another period is not chosen, also not from a link or a draft (#1088)
 				selectedBuildingIds = selectedBuildingIds.filter((id) => !unchoosable(billed[id]));
 			}
 			loading = false;
@@ -77,7 +76,7 @@
 	});
 
 	// «Alle Gebäude» leaves out buildings whose contracts are all billed: none gets a statement (#201), said at the
-	// counter; and buildings the period overlaps, which say so themselves (#408 point 2)
+	// counter; and buildings that bill another period, which say so themselves (#1088)
 	const leftOut = $derived(
 		buildings.filter(({ id }) => {
 			const row = billed[id];

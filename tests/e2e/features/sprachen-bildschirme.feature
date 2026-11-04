@@ -62,6 +62,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | building-edit          | default             |
       | building-edit          | submit-cleared      |
       | building-edit          | saved-toast         |
+      | building-edit-open-period | default          |
       | apartments             | default             |
       | apartments             | empty               |
       | apartments             | filtered-empty      |

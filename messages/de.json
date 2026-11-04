@@ -2278,5 +2278,6 @@
 	"statements_building_other_period_calendar": "{building} rechnet im Kalenderjahr ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von Januar bis Dezember.",
 	"statements_building_other_period_july": "{building} rechnet von Juli bis Juni ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von Juli bis Juni.",
 	"statements_building_other_period_november": "{building} rechnet von November bis Oktober ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von November bis Oktober.",
-	"backend_statement_period_of_building": "Für {building} passt diese Abrechnungsperiode nicht: Ein Gebäude rechnet nur ganze Perioden seiner eigenen Abrechnungsperiode ab. Laden Sie die Seite neu."
+	"backend_statement_period_of_building": "Für {building} passt diese Abrechnungsperiode nicht: Ein Gebäude rechnet nur ganze Perioden seiner eigenen Abrechnungsperiode ab. Laden Sie die Seite neu.",
+	"backend_statement_period_overlaps": "Die gewählte Abrechnungsperiode überschneidet sich mit älteren Abrechnungen von {building} ({periods}). Wählen Sie eine Abrechnungsperiode, die keine davon schneidet."
 }

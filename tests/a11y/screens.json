@@ -267,6 +267,13 @@
 			]
 		},
 		{
+			"name": "building-edit-open-period",
+			"path": "/buildings/{openPeriodBuilding}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "apartments",
 			"path": "/apartments",
 			"states": [

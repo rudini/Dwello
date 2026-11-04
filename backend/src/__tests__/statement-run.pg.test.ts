@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { buildings, categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -14,6 +14,8 @@ import { generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
+import { lastCompletedPeriod } from '../services/period-types';
+import { swissToday } from '../services/today';
 
 const token = crypto.randomUUID();
 let buildingId = '';
@@ -147,10 +149,44 @@ describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
 		}
 		expect((await generate('2024-01-01', '2024-12-31')).status).toBe(201);
 	});
+
+	// code review 1088-1 C-1: an older statement of another period (left by the migration) still holds its days
+	it('lehnt eine ganze Periode ab, die eine ältere Abrechnung einer anderen Periode schneidet', async () => {
+		const building = await newBuilding();
+		const older = await rent('1.01', 'Alt', '2022-07-01', '2023-06-30', building);
+		const later = await rent('1.02', 'Neu', '2022-07-01', undefined, building);
+		await generateStatement({ contractId: older, buildingId: building, periodStart: '2022-07-01', periodEnd: '2023-06-30', managementFeePercent: 0 });
+
+		const refused = await sendJson('POST', '/api/v1/statements/generate', {
+			contractId: later,
+			buildingId: building,
+			periodStart: '2023-01-01',
+			periodEnd: '2023-12-31',
+			managementFeePercent: 0
+		});
+
+		expect({ status: refused.status, body: await refused.json() }).toMatchObject({
+			status: 400,
+			body: { code: 'STATEMENT_PERIOD_OVERLAPS', params: { periods: '01.07.2022 – 30.06.2023' } }
+		});
+	});
 });
 
 // A-10: the wizard's defaults from a link to a building and period, decided by the backend (H-28)
 describe('Vorgaben des Abrechnungs-Assistenten', () => {
+	// #1088 (code review 1088-1 C-3, C-5): step 1 and the form of a new building propose the period most buildings have
+	it('schlägt die letzte abgelaufene Periode der Abrechnungsperiode der meisten Gebäude vor, auch einem neuen Gebäude', async () => {
+		const types = (await db.select({ type: buildings.accountingPeriod }).from(buildings)).map((b) => b.type);
+		const others = types.filter((type) => type !== 'november-october').length;
+		for (let i = 0; i <= others; i++) await sendJson('PUT', `/api/v1/buildings/${await newBuilding()}`, { accountingPeriod: 'november-october' });
+
+		const defaults = (await (await sendJson('GET', '/api/v1/statements/run-defaults')).json()) as { period: unknown };
+		const proposed = (await (await sendJson('GET', '/api/v1/buildings/new-defaults')).json()) as { accountingPeriod: string };
+
+		expect(defaults.period).toEqual(lastCompletedPeriod('november-october', swissToday()));
+		expect(proposed.accountingPeriod).toBe('november-october');
+	});
+
 	it('übernimmt Heizprofil und Verwaltungspauschale der übrigen Abrechnungen der Periode', async () => {
 		const [profile] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
 		const contract = await rent('3.01', 'Iten', '2025-01-01', '2025-12-31');
