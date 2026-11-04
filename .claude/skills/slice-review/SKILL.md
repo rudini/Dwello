@@ -19,7 +19,7 @@ Personas get no worktree, only the running app (`docs/design/tools/persona-stack
 
 ## 2. The prompt
 
-Every prompt names the requirement (the scenario, the issue's "Done means", or the request in its words) and the report path. Reviewers in a worktree write it to your scratchpad: `<slice>-review-<n>.md` (`code-reviewer`; a new slice name must not exist in `docs/reviews/` yet: `ls docs/reviews/<slice>-*`), `<slice>-fachreview-<n>.md` (`fach-reviewer`), `<slice>-datenpruefung-<n>.md` (`daten-pruefer`); personas write `docs/design/personas/<persona>-<slice>.md` themselves. Add per agent:
+Every prompt names the requirement (the scenario, the issue's "Done means", or the request in its words) and the report path. Reviewers in a worktree write it to your scratchpad: `<slice>-review-<n>.md` (`code-reviewer`; a new slice name must not exist in `docs/reviews/` yet: `ls docs/reviews/<slice>-*`), `<slice>-fachreview-<n>.md` (`fach-reviewer`), `<slice>-datenpruefung-<n>.md` (`daten-pruefer`); personas write `<tree>/docs/design/personas/<persona>-<slice>.md` themselves, with `<tree>` the absolute path of the tree the task runs in (a worktree included), named in the prompt. Add per agent:
 
 - `code-reviewer`: the worktree, the commit range (`git diff <base> <commit>`), the checks you ran on that commit and whether they passed (a check run before a later change, run again).
   Before you start it, check the three gaps it reported most often (#852): each change a user can see has a scenario or `No scenario: <reason>`; each new screen state has its rows in `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature`; each refusal the UI shows carries a code with a message `backend_<code>`.

@@ -1,0 +1,28 @@
+# Code-Review wfr-1104, Runde 1 (`f051d83ee..7e4e3ff55`)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Major | docs/reviews/workflow-rules-review-2026-11-04.md:3 | «Applied since those reviews: `bun run fitness` in «Before marking anything complete» (`2026-10-31`, 1) and the persona report path in skill `slice-review` (note `issue-1098`, 1)» ist auf `f051d83ee` falsch: keiner der beiden Punkte steht in den Regeln. Damit fallen zwei offene Vorschläge aus den Vorschlägen und aus «Still open» heraus, und der Entscheid vom 04.11. beruht auf dieser Angabe. |
+| C-2 | Minor | .claude/agents/daten-pruefer.md:3 | Die Beschreibung sagt weiterhin «when a change touches amounts, statements, PDFs or QR-bills (CLAUDE.md, Workflow step 5)». Das widerspricht dem eingeengten Workflow 5 («an amount none of them shows stays with its tests»), und genau diese Beschreibung liest die Sitzung, wenn sie entscheidet, ob sie den Agenten startet. |
+| C-3 | Minor | .claude/agents/code-reviewer.md:24 | Die Regel zur `Grundlage` (2026-11-01, 6) steht in der Unterliste «Acceptance tests, when the diff touches `tests/e2e/`». Ein Befund «Szenario schlägt fehl», den eine reine App-Änderung auslöst (ohne `tests/e2e/` im Diff), fällt damit nicht darunter. Der Vorschlag gilt aber für jeden solchen Befund. |
+| C-4 | Minor | backend/CLAUDE.md:37 | «(`timestamp`, not `timestamptz`)» ist als allgemeine Aussage falsch: `schema.ts` führt drei Spalten `withTimezone: true` (`audit_log.occurred_at`, `access_keys.created_at`, `last_used_at`). Wer der Klammer folgt, legt für diese Tabellen den falschen Typ an. |
+| C-5 | Minor | docs/design/personas/demo-records.md:5 | «Personas that save at the same time each get their own building (`CLAUDE.md`, Workflow 5)» verweist auf eine Stelle, die das nicht sagt. Die Regel steht in `docs/design/personas/README.md`, «Who saves». (Der Text ist unverändert wiederhergestellt, aber dieser Diff fügt ihn neu ein.) |
+| C-6 | Minor | docs/reviews/workflow-rules-review-2026-11-04.md:33 | Zu 8: «a pull request still lists each removed scenario» behauptet eine geltende Regel, die nirgends steht. Gesucht in `CLAUDE.md` (Workflow 1), `tests/e2e/CLAUDE.md` «Rules», Skill `pull-request` und `check-issues.mjs`. Der Entscheid, Entfernungen nicht nach Art zu genehmigen, ist damit nicht als Regel festgehalten. |
+
+## C-1
+
+Warum falsch: Das «Applied since» auf Zeile 3 ist der Grund, weshalb `2026-10-31`, 1 (`bun run fitness` vor dem Abschluss; er hat CI schon einmal rot gemacht, issue-718) und `issue-1098`, 1 (absoluter Pfad des Persona-Berichts im Worktree) weder in der Vorschlagstabelle noch unter «Still open from earlier reviews» stehen. Der Product Owner hat auf dieser Grundlage entschieden. Beide Punkte gelten nun als erledigt, wurden aber nie umgesetzt und nie entschieden.
+
+Nachweis:
+- `git grep -n 'bun run fitness' f051d83ee -- CLAUDE.md` findet nur Zeile 119 (Dokumentationsliste), nicht die Liste «Before marking anything complete» (Zeile 86). `git log -S"bun run fitness" -- CLAUDE.md` zeigt nur e68b17f39, und dieser Commit hat nur die Zeile 119 hinzugefügt.
+- `.claude/skills/slice-review/SKILL.md:22,29` und `.claude/agents/persona.md:19` nennen weiterhin den relativen Pfad `docs/design/personas/<persona>-<slice>.md` ohne Worktree. Das ist genau der Fall, den `docs/reviews/workflow-notes-issue-1098.md`, Note 1, beschreibt.
+
+Behebung: Den Satz streichen und beide Punkte als Vorschläge (oder unter «Still open») aufführen, zur Entscheidung des Product Owners.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`, `bun run check`, `cd backend && bun run type-check`, `bunx vitest run src/__tests__/open-work.test.ts tools/claude-hooks/commit-msg-gate.test.ts tools/deepcheck/test/readme.test.ts tests/unit/persona-readme.test.ts tools/open-work` (65 bestanden), Prettier auf den hinzugefügten Dateien, `bash -n` auf `persona-stack.sh`, der Rotlauf von `persona-readme.test.ts` ohne `demo-records.md`. Beim Lesen bestätigt: Fehlt die Datei, wird `missing` zu `["demo-records.md"]`. Hinweis zu Prettier: `.prettierignore` schliesst alles ausserhalb von `src/` aus, die Prüfung auf `tests/unit/persona-readme.test.ts` (Zeile 13 mit 115 Zeichen) beweist also nichts.
+- Dass Chromium ohne `LANG=C.UTF-8` einen Download mit Nicht-ASCII-Namen «download» nennt: nur durch `docs/reviews/workflow-notes-issue-496.md` belegt, nicht nachgestellt.
+- Dass `PLAYWRIGHT_BROWSERS_PATH=<scratchpad>/pw npx playwright install <browser>` in der Cloud-Sitzung ohne Systempakete (`--with-deps`) läuft: nur durch `workflow-notes-issue-1046.md` belegt.
+
+Geprüft: Jeder Entscheid aus «Decided (product owner), 04.11.2026» (1, 3, 4 ohne den nackten `test:e2e`, 5 ohne `seedFor` mit #1119 offen, 6, 7, 9, 10, 11, 12, 13) und 2026-11-01, 6 und 13 steht in der genannten Datei und sagt dasselbe wie sein Vorschlag. `demo-records.md` ist byte-gleich mit `c893731c5^`; `demo-data.sql` und `demo-data.ts` haben sich seither nicht geändert, und jede Zeile (IDs, Mieter, Daten, Status, Verwaltungspauschale, bezahlte Abrechnungen 2024) stimmt mit beiden überein. `ci.yml`: Pull Requests laufen nur mit `--project=api --project=chromium` (axe nur Chromium), `workflow_dispatch` mit allen Browsern. `persona-stack.sh` exportiert `LANG`. `bun run check` erzeugt `src/lib/paraglide/` neu (`bun run i18n`), `vitest` über das Paraglide-Plugin ebenfalls. Die Fixture `screens.ts` kennt `queries` und Seeds pro Ansicht (#736). Der Kommentar zu `HiddenSideways` stimmt mit der Messung überein. Die Regelnamen «Isolation» und «Negative checks» gibt es in `tests/e2e/CLAUDE.md`. `Grundlage` ist das Schlüsselwort für Background in den Features.
