@@ -69,7 +69,8 @@
 			.join('. ')
 	);
 	const describedBy = $derived(
-		[id('counts'), error && 'buildings-error', billedText && billedId].filter(Boolean).join(' ')
+		// #1068 (persona Sven 1068 P-1): what happens to the building first, then the counts
+		[billedText && billedId, id('counts'), error && 'buildings-error'].filter(Boolean).join(' ')
 	);
 </script>
 
