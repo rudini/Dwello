@@ -37,7 +37,7 @@
 		wide?: boolean; // room for a list of records, e.g. the files of «Rechnungen hochladen»
 		onrequestclose?: () => void; // asks before closing (cancel, Escape) instead of closing at once
 		enterConfirms?: boolean; // false where a form in the dialog holds many records
-		describedby?: string; // the id of the sentence that describes a wide dialog, instead of its whole content
+		describedby?: string; // the ids of the sentences that describe the dialog, instead of its first paragraph
 		children: Snippet;
 	} = $props();
 
