@@ -355,6 +355,7 @@
 	byLetter={sendByLetter}
 	{outdated}
 	onrecalculate={() => ((showSend = false), (showRecalculate = true))}
+	{list}
 />
 
 <ReminderModal bind:open={showReminder} {statement} sentReminders={statement.remindersCounted ?? 0} />
