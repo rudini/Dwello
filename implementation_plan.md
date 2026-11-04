@@ -8,12 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session 2026-11-04: #1094 keep the list filter from the statement detail
-
-- [x] Decision recorded in #1094 (product owner: «nach deiner Empfehlung»): breadcrumb and the PDF refusal page of the detail page keep the list's filter; the refusal page does not name the statement
-- [x] Scenarios in `statements.feature`, seen red at the missing filter; `openStatement` waits for the detail page (a deletion meanwhile overtook it)
-- [x] `pdfRefusal` takes the filtered list from `?list=` of the PDF link for a gone record; breadcrumb uses the list (as `$derived`, fallow template complexity); D7c
-- [ ] Code review
-- [ ] Persona
-- [ ] PR
