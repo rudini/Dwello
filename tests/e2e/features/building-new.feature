@@ -142,7 +142,10 @@ Funktionalität: Neues Gebäude erfassen
     Und nennt die Gebäudeseite die Abrechnungsperiode "Juli – Juni"
 
   # #1088 (Fachreview 1088-1 V-8, M-2): vorgeschlagen ist die Abrechnungsperiode der meisten Gebäude, hier das
-  # Kalenderjahr; die Hilfe führt zum Mietvertrag, denn ab der ersten Abrechnung lässt sich die Wahl nicht mehr ändern
+  # Kalenderjahr; die Hilfe führt zum Mietvertrag, denn ab der ersten Abrechnung lässt sich die Wahl nicht mehr ändern.
+  # Die vier eigenen Gebäude sind mehr, als parallele Szenarien zugleich mit anderen Perioden erfassen (#1102)
   Szenario: Die Erfassung schlägt die Abrechnungsperiode der meisten Gebäude vor und sagt, wann sie fest wird
+    Angenommen es gibt vier Gebäude, die im Kalenderjahr abrechnen
+    Wenn der Liegenschaftsverwalter die Seite "Neues Gebäude" erneut öffnet
     Dann schlägt das Formular die Abrechnungsperiode "Kalenderjahr (Januar – Dezember)" vor
     Und sagt das Formular zur Abrechnungsperiode "Zeitraum, für den Sie die Nebenkosten dieses Gebäudes abrechnen. Wählen Sie den, der in den Mietverträgen steht (oft bei den Nebenkosten). Ab der ersten Abrechnung des Gebäudes bleibt er fest."
