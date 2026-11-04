@@ -1047,3 +1047,14 @@ Branch `ccr-7b33ff2a-sj3b8c`. Decided (product owner) 2026-11-04 in #1096. Spec 
 - [x] Personas Helga (150 %, 200 %) and Marco (phone, tablet): `docs/design/personas/helga-1096.md`, `marco-1096.md`. Marco P-1 (Major: the toast covers the next row's «Löschen») contradicts what #1096 decided (covering content without focus is accepted) and, with Helga P-1 to P-4 (same pattern), is #1113 (needs-decision); Marco P-2, P-3 stay in the report
 - [x] Before marking complete: lint, check, backend type-check, affected vitest and E2E, Prettier on added files; workflow note `docs/reviews/workflow-notes-issue-1096.md`
 - [x] Archive the session; PR pushed after this archive
+
+## Session: collected workflow review 2026-11-04 (parallel: checklist in the pull request)
+
+Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not covered by a review and apply the improvements the product owner chose.
+
+- [x] Collected review `docs/reviews/workflow-rules-review-2026-11-04.md` of 15 notes; decisions recorded there
+- [x] Restore `docs/design/personas/demo-records.md`; `tests/unit/persona-readme.test.ts` seen red without it
+- [x] Rules applied: proposals 3 to 7, 9 to 15, 8 (already on `main`), and 6 and 13 of `2026-11-01`; `seedFor` message as #1119
+- [x] Code review wfr-1104-review-1 (C-1 Major, C-2..C-6 Minor fixed), -2 (closing round: none open)
+- [x] Before marking complete: lint, check, backend type-check, fitness, rule-file tests, Prettier on added files
+- [x] Archive the session; PR pushed after this archive
