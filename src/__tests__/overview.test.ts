@@ -256,7 +256,8 @@ describe('Aufgaben der Übersicht', () => {
 		expect(tasks.find((one) => one.id === 'missing-period')!.text).toContain('Noch nicht abgerechnet: Ahornhof (2025).');
 		expect(tasks.find((one) => one.id === 'missing-outside')).toMatchObject({
 			title: 'Abrechnungen ausserhalb von Dwello',
-			text: 'Ahornhof (2023): Diese Perioden überschneiden sich mit älteren Abrechnungen des Gebäudes, Dwello kann sie darum nicht abrechnen. Rechnen Sie sie ausserhalb von Dwello ab und tragen Sie bei den Mietverträgen «Abgerechnet bis» ein.',
+			// code review 1088-5 C-15: one period in the singular
+			text: 'Ahornhof (2023): Diese Periode überschneidet sich mit älteren Abrechnungen, Dwello kann sie darum nicht abrechnen. Rechnen Sie sie ausserhalb von Dwello ab und tragen Sie bei den Mietverträgen «Abgerechnet bis» ein.',
 			href: '/contracts'
 		});
 	});

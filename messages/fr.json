@@ -2284,6 +2284,7 @@
 	"backend_statement_period_overlaps": "La période de décompte choisie chevauche des décomptes plus anciens de {building} ({periods}). Choisissez une période de décompte qui n’en chevauche aucun.",
 	"contracts_statement_missing_outside": "Cette période chevauche un décompte plus ancien de l’immeuble, Dwello ne peut donc pas la décompter. Décomptez-la en dehors de Dwello et saisissez « Décompté jusqu’au » en modifiant le contrat de bail.",
 	"dashboard_task_missing_outside": "Décomptes en dehors de Dwello",
-	"dashboard_task_missing_outside_text": "{buildings} : ces périodes chevauchent des décomptes plus anciens de l’immeuble, Dwello ne peut donc pas les décompter. Décomptez-les en dehors de Dwello et saisissez « Décompté jusqu’au » dans les contrats de bail.",
-	"dashboard_task_missing_outside_action": "Voir les contrats de bail"
+	"dashboard_task_missing_outside_text": "{buildings} : ces périodes chevauchent des décomptes plus anciens, Dwello ne peut donc pas les décompter. Décomptez-les en dehors de Dwello et saisissez « Décompté jusqu’au » dans les contrats de bail.",
+	"dashboard_task_missing_outside_action": "Voir les contrats de bail",
+	"dashboard_task_missing_outside_one": "{buildings} : cette période chevauche des décomptes plus anciens, Dwello ne peut donc pas la décompter. Décomptez-la en dehors de Dwello et saisissez « Décompté jusqu’au » dans les contrats de bail."
 }

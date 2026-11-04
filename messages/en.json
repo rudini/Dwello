@@ -2284,6 +2284,7 @@
 	"backend_statement_period_overlaps": "The chosen billing period overlaps older statements of {building} ({periods}). Choose a billing period that overlaps none of them.",
 	"contracts_statement_missing_outside": "This period overlaps an older statement of the building, so Dwello cannot bill it. Bill it outside Dwello and enter «Billed until» when you edit the rental contract.",
 	"dashboard_task_missing_outside": "Statements outside Dwello",
-	"dashboard_task_missing_outside_text": "{buildings}: these periods overlap older statements of the building, so Dwello cannot bill them. Bill them outside Dwello and enter «Billed until» in the rental contracts.",
-	"dashboard_task_missing_outside_action": "View rental contracts"
+	"dashboard_task_missing_outside_text": "{buildings}: these periods overlap older statements, so Dwello cannot bill them. Bill them outside Dwello and enter «Billed until» in the rental contracts.",
+	"dashboard_task_missing_outside_action": "View rental contracts",
+	"dashboard_task_missing_outside_one": "{buildings}: this period overlaps older statements, so Dwello cannot bill it. Bill it outside Dwello and enter «Billed until» in the rental contracts."
 }

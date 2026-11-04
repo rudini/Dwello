@@ -2284,6 +2284,7 @@
 	"backend_statement_period_overlaps": "Il periodo di conteggio scelto si sovrappone a conteggi precedenti di {building} ({periods}). Scelga un periodo di conteggio che non si sovrapponga a nessuno di essi.",
 	"contracts_statement_missing_outside": "Questo periodo si sovrappone a un conteggio precedente dell’immobile, quindi Dwello non può conteggiarlo. Lo conteggi al di fuori di Dwello e inserisca «Conteggiato fino al» modificando il contratto di locazione.",
 	"dashboard_task_missing_outside": "Conteggi al di fuori di Dwello",
-	"dashboard_task_missing_outside_text": "{buildings}: questi periodi si sovrappongono a conteggi precedenti dell’immobile, quindi Dwello non può conteggiarli. Li conteggi al di fuori di Dwello e inserisca «Conteggiato fino al» nei contratti di locazione.",
-	"dashboard_task_missing_outside_action": "Vedere i contratti di locazione"
+	"dashboard_task_missing_outside_text": "{buildings}: questi periodi si sovrappongono a conteggi precedenti, quindi Dwello non può conteggiarli. Li conteggi al di fuori di Dwello e inserisca «Conteggiato fino al» nei contratti di locazione.",
+	"dashboard_task_missing_outside_action": "Vedere i contratti di locazione",
+	"dashboard_task_missing_outside_one": "{buildings}: questo periodo si sovrappone a conteggi precedenti, quindi Dwello non può conteggiarlo. Lo conteggi al di fuori di Dwello e inserisca «Conteggiato fino al» nei contratti di locazione."
 }

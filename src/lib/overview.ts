@@ -244,7 +244,10 @@ function workTasks({
 		outside.length > 0 && {
 			id: 'missing-outside',
 			title: m.dashboard_task_missing_outside(),
-			text: m.dashboard_task_missing_outside_text({ buildings: buildingsText(outside) }),
+			// one period in the singular (code review 1088-5 C-15)
+			text: (outside.flatMap((b) => b.periods).length === 1 ? m.dashboard_task_missing_outside_one : m.dashboard_task_missing_outside_text)({
+				buildings: buildingsText(outside)
+			}),
 			href: '/contracts',
 			action: m.dashboard_task_missing_outside_action(),
 			icon: 'contract'
