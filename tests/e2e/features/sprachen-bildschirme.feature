@@ -59,6 +59,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | building-detail        | default             |
       | building-detail        | delete-dialog       |
       | building-detail        | fuel-stock-dialog   |
+      | building-detail-other-period | default       |
       | building-edit          | default             |
       | building-edit          | submit-cleared      |
       | building-edit          | saved-toast         |

@@ -33,7 +33,7 @@
 </script>
 
 <Panel title={m.buildings_fuel_title()} testid="fuel-stocks">
-	<p class="text-ink-muted">
+	<p class="text-ink-muted" data-testid="fuel-stocks-intro">
 		{m.buildings_fuel_intro()}
 	</p>
 

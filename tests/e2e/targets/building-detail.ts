@@ -17,6 +17,7 @@ export const noTankValue = target('Tank des Gebäudes', (page) => page.getByTest
 export const buildingMap = target('Karte des Gebäudes', (page) => page.getByTestId('building-mini-map'));
 export const accountingPeriodValue = target('Abrechnungsperiode des Gebäudes', (page) => page.getByTestId('building-accounting-period'));
 export const yearBuiltValue = target('Baujahr', (page) => page.getByTestId('building-year-built'));
+export const fuelStocksIntro = target('Hilfe zum Tankbestand', (page) => page.getByTestId('fuel-stocks-intro'));
 export const fuelStockDate = target('Stichtag Tankbestand', (page) => page.getByTestId('fuel-stock-date-input'));
 export const fuelStockAmount = target('Wert Tankbestand', (page) => page.getByTestId('fuel-stock-amount-input'));
 export const saveFuelStockButton = target('Tankbestand speichern', (page) => page.getByTestId('fuel-stock-save-button'));

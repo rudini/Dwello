@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	buildingAddress,
 	fuelStockCategoryNames,
+	fuelStocksHelp,
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
@@ -152,3 +153,20 @@ Then(
 		await verwalter.sees(fuelStockCategoryNames).not.toContain(names.get(second) ?? second);
 	}
 );
+
+// #1098: the building's own Abrechnungsperiode (#1088); «von Juli bis Juni» is in statement-generate.steps.ts
+Given('das Gebäude {string} rechnet im Kalenderjahr ab', async ({ seed }, building: string) => {
+	await seed.accountingPeriod(building, 'calendar');
+});
+
+Given('das Gebäude {string} rechnet von November bis Oktober ab', async ({ seed }, building: string) => {
+	await seed.accountingPeriod(building, 'november-october');
+});
+
+Then('nennt die Hilfe zum Tankbestand den Stichtag {string}', async ({ verwalter }, day: string) => {
+	await verwalter.sees(fuelStocksHelp).toContain(day);
+});
+
+Then('nicht den Stichtag {string}', async ({ verwalter }, day: string) => {
+	await verwalter.sees(fuelStocksHelp).not.toContain(day);
+});
