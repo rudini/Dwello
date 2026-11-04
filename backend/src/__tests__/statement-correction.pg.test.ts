@@ -265,9 +265,8 @@ describe('Berichtigte Abrechnung', () => {
 	});
 });
 
-// Fachreview W2e V-3: eine Abrechnung einer anderen, nur überlappenden Periode rechnet keine Zahlung an; seit #199
-// hält die ersetzte Abrechnung ihre Periode bis zur berichtigten, ein Lauf, der sie schneidet, entsteht nicht
-// (code review 199-2 C-8)
+// Fachreview W2e V-3: eine Abrechnung einer anderen, nur überlappenden Periode rechnet keine Zahlung an; seit #1088
+// gibt es eine solche Periode im Gebäude nicht (Fachreview 1088-2 V-10)
 it('erstellt im Abrechnungslauf keine Abrechnung einer Periode, die eine ersetzte schneidet', async () => {
 	await removeStatements();
 	const id = await sentStatement();
@@ -282,7 +281,7 @@ it('erstellt im Abrechnungslauf keine Abrechnung einer Periode, die eine ersetzt
 
 	expect({ status: response.status, code: ((await response.json()) as { code?: string }).code }).toEqual({
 		status: 400,
-		code: 'STATEMENT_PERIOD_OVERLAPS'
+		code: 'STATEMENT_PERIOD_OF_BUILDING'
 	});
 });
 

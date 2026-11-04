@@ -28,13 +28,11 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
-	// A-10, #142: the latest first, each with its way into the wizard (#199, #408 point 2); no href when step 2 would
-	// refuse that period (Fachreview 199-1 V-1)
+	// A-10, #142: the latest first, each with its way into the wizard; whole periods only (#1088)
 	missingStatements: {
 		start: string;
 		end: string;
-		href: string | null;
-		way: { kind: string; start: string; end: string };
+		href: string;
 		invoices: { href: string; label: string };
 	}[];
 	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
@@ -66,10 +64,9 @@ async function rows(fetch: typeof globalThis.fetch, path: string): Promise<Row[]
 }
 
 type Range = { start: string; end: string };
-type MissingPart = Range & { way: Range & { kind: string }; open: boolean };
 
 // The ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first, each with
-// its way into the wizard, as the backend decides them (A-10, #142, #408 point 2, #1088, H-28), and each to the
+// its way into the wizard, as the backend decides them (A-10, #142, #1088, H-28), and each to the
 // building's invoices (#211). None when they cannot be read: better no hint than a wrong one
 async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) {
 	const response = await fetch(
@@ -77,12 +74,11 @@ async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) 
 	).catch(() => null);
 	if (!response?.ok) return [];
 	const building = String((contract.building as Row | undefined)?.id);
-	return ((await response.json()) as MissingPart[]).map(({ start, end, way, open }) => ({
+	return ((await response.json()) as Range[]).map(({ start, end }) => ({
 		start,
 		end,
-		href: open ? wizardLink(building, way.start, way.end) : null,
-		way,
-		invoices: invoicesOf(way, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
+		href: wizardLink(building, start, end),
+		invoices: invoicesOf({ start, end }, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
 	}));
 }
 

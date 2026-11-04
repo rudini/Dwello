@@ -46,7 +46,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-type Planned = { contracts?: object[]; withoutFee?: object[]; overlap?: object | null; skipped?: object[] };
+type Planned = { contracts?: object[]; withoutFee?: object[]; otherPeriod?: string | null; skipped?: object[] };
 
 // The backend decides which contracts a run bills (H-28): by default the two of 2024, neither billed yet
 function backend(
@@ -72,7 +72,7 @@ function backend(
 				...c
 			})),
 			withoutFee: plan.withoutFee ?? [],
-			overlap: plan.overlap ?? null,
+			otherPeriod: plan.otherPeriod ?? null,
 			skipped: plan.skipped ?? []
 		});
 	// the reads by their address; the run of any period of b1
@@ -112,7 +112,7 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 		});
 
 		expect(await billedContracts(fetch, period)).toEqual([
-			{ buildingId: 'b1', contracts: 2, billed: 1, overlap: null, withoutFee: [] }
+			{ buildingId: 'b1', contracts: 2, billed: 1, otherPeriod: null, withoutFee: [] }
 		]);
 	});
 
@@ -129,64 +129,21 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 	});
 });
 
-// #199, #408 point 2: one Abrechnungsperiode per day and building; the backend finds the overlap (statement-run.test.ts),
-// the BFF names it in the refusal
-describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () => {
-	const refused = (...periods: [string, string][]) => ({
-		...statementRun.overlap,
-		periods: periods.map(([start, end]) => ({ start, end }))
+// #1088: a building that bills another Abrechnungsperiode; the backend finds it (accounting-period.test.ts), the BFF
+// names it in the refusal
+describe('Gebäude mit einer anderen Abrechnungsperiode', () => {
+	it('gibt die Abrechnungsperiode des Gebäudes an Schritt 2 weiter', async () => {
+		const { fetch } = backend([], contracts, { otherPeriod: 'july-june' });
+
+		expect((await billedContracts(fetch, period))[0].otherPeriod).toBe('july-june');
 	});
 
-	it('gibt die Überschneidung des Backends an Schritt 2 weiter', async () => {
-		const { fetch } = backend([], contracts, { overlap: statementRun.overlap });
-
-		expect((await billedContracts(fetch, period))[0].overlap).toEqual(statementRun.overlap);
-	});
-
-	it('nennt in der Ablehnung jede überschnittene Periode', async () => {
-		const { fetch } = backend([], contracts, {
-			overlap: refused(['2023-07-01', '2024-06-30'], ['2024-07-01', '2024-09-30'])
-		});
+	it('lehnt die Vorschau ab und sagt, welche Abrechnungsperiode das Gebäude hat', async () => {
+		const { fetch } = backend([], contracts, { otherPeriod: 'july-june' });
 
 		await expect(previewStatements(fetch, period)).rejects.toThrow(
-			'(01.07.2023 – 30.06.2024, 01.07.2024 – 30.09.2024)'
+			'Seeblick rechnet von Juli bis Juni ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen.'
 		);
-	});
-
-	// persona Dr. Weber P-5: a calendar year by its days, not «2024»
-	it('nennt in der Ablehnung ein Kalenderjahr mit seinen Tagen', async () => {
-		const { fetch } = backend([], contracts, { overlap: refused(['2024-01-01', '2024-12-31']) });
-
-		await expect(
-			previewStatements(fetch, { ...period, periodStart: '2024-07-01', periodEnd: '2025-06-30' })
-		).rejects.toThrow('von Seeblick (01.01.2024 – 31.12.2024)');
-	});
-
-	// code review 199-2 C-10: every refused building is named
-	it('nennt in der Ablehnung jedes abgelehnte Gebäude', async () => {
-		const fetch = (async (url: string) => {
-			const id = new URL(url).searchParams.get('buildingId') ?? url.split('/').at(-1)!;
-			if (url.includes('/statements/run?'))
-				return Response.json({ ...statementRun, overlap: refused(['2023-07-01', '2024-06-30']) });
-			return Response.json({ ...building, id, name: id === 'b1' ? 'Seeblick' : 'Bergsicht' });
-		}) as typeof globalThis.fetch;
-
-		await expect(previewStatements(fetch, { ...period, buildingIds: ['b1', 'b2'] })).rejects.toThrow(
-			/von Seeblick \(01\.07\.2023 – 30\.06\.2024\)\..* von Bergsicht \(01\.07\.2023 – 30\.06\.2024\)\./
-		);
-	});
-
-	it('erstellt und berechnet für ein solches Gebäude nichts', async () => {
-		const { fetch, posts } = backend([], contracts, {
-			overlap: refused(['2023-07-01', '2024-06-30'])
-		});
-
-		// the building by its name, every overlapped period by its days (Fachreview 199-1 V-7, code review C-3)
-		await expect(generateStatements(fetch, period)).rejects.toThrow(
-			'Die gewählte Abrechnungsperiode überschneidet sich mit bestehenden Abrechnungen von Seeblick (01.07.2023 – 30.06.2024).'
-		);
-		await expect(previewStatements(fetch, period)).rejects.toThrow('überschneidet sich');
-		expect(posts).toEqual([]);
 	});
 });
 
@@ -253,7 +210,7 @@ describe('Abrechnungen erstellen', () => {
 				buildingId: 'b1',
 				contracts: 1,
 				billed: 0,
-				overlap: null,
+				otherPeriod: null,
 				withoutFee: [],
 				skipped: statementRun.skipped
 			}
@@ -326,7 +283,7 @@ describe('Abrechnungen erstellen', () => {
 				? Response.json({
 						...statementRun,
 						contracts: [{ ...contract('auszug', '2020-01-01', null), billed: false }],
-						overlap: null,
+						otherPeriod: null,
 						skipped: []
 					})
 				: Response.json(calculationRefused, { status: 400 })) as typeof globalThis.fetch;
@@ -650,7 +607,7 @@ describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
 			return Response.json({
 				...statementRun,
 				contracts: [{ ...contracts[2], billed: false }],
-				overlap: null,
+				otherPeriod: null,
 				skipped: []
 			});
 		if (url === `${API}/categories?limit=1000`) return Response.json({ categories: names });

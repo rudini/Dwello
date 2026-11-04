@@ -168,13 +168,6 @@ Given(
 	}
 );
 
-Given(
-	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung vom {string} bis {string} mit dem Heizprofil {string}',
-	async ({ seed }, tenant: string, building: string, start: string, end: string, profile: string) => {
-		await seed.statement(tenant, building, Number(start.slice(0, 4)), profile, [start, end]);
-	}
-);
-
 Given('die Abrechnung {int} von {string} ist versendet', async ({ seed }, year: number, tenant: string) => {
 	await seed.sendStatement(tenant, year);
 });

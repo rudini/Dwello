@@ -475,27 +475,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Aber nicht das Gebäude "Lindenhof"
     Und sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, deren Mietverträge alle schon eine Abrechnung haben
 
-  # #199, #408 Punkt 2: eine Abrechnungsperiode pro Tag und Gebäude; eine Periode, die eine bestehende des Gebäudes
-  # schneidet, ohne gleich zu sein, ist für das Gebäude nicht wählbar, sonst verteilt Dwello eine Rechnung über 100 %
-  Szenario: Eine Abrechnungsperiode, die eine bestehende schneidet, lässt sich nicht wählen
-    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
-    Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
-    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Für Lindenhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit."
-    Und lässt sich das Gebäude "Lindenhof" für diese Abrechnungsperiode nicht wählen
-
-  # Tage eines Mietvertrags in der Periode einer bestehenden Abrechnung des Gebäudes rechnet genau diese Periode ab
-  Szenario: Die Wahl nennt die bestehende Abrechnungsperiode für Mietverträge ohne Abrechnung
-    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
-    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Für Lindenhof gibt es schon eine Abrechnung für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie Mietverträge ohne Abrechnung in der Abrechnungsperiode 01.07.2023 – 30.06.2024 ab."
-
-  Szenario: Von der Wahl der Gebäude zur bestehenden Abrechnungsperiode
-    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
-    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Und der Liegenschaftsverwalter für "Lindenhof" die Abrechnungsperiode ab "2023-07-01" wählt
-    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Lindenhof" vom "2023-07-01" bis "2024-06-30"
-
   # #1088: ein Gebäude rechnet immer ganze Perioden seiner eigenen Abrechnungsperiode ab; eine andere gewählte Periode
   # lässt das Gebäude nicht wählen, und die Wahl sagt, was zu tun ist (Fachreview 1088-1 V-6)
   Szenario: Ein Gebäude mit einer anderen Abrechnungsperiode ist nicht wählbar
@@ -509,12 +488,11 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann lässt die Wahl das Gebäude "Ahornhof" nicht wählen
     Und nennt die Wahl für "Ahornhof" "Ahornhof rechnet von Juli bis Juni ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von Juli bis Juni."
 
-  # «Alle Gebäude» wählt kein Gebäude, dessen bestehende Abrechnungsperiode die gewählte schneidet (#199)
-  Szenario: Alle Gebäude lässt ein Gebäude mit überschneidender Abrechnungsperiode aus
+  # «Alle Gebäude» wählt kein Gebäude, das eine andere Abrechnungsperiode hat (#1088; zuvor #199: eine überschneidende);
+  # der Lauf vom Juli bis Juni ist eine ganze Periode von Ahornhof, Lindenhof rechnet im Kalenderjahr ab
+  Szenario: Alle Gebäude lässt ein Gebäude mit einer anderen Abrechnungsperiode aus
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
-    # #1088: der Lauf vom Juli bis Juni ist eine ganze Periode von Ahornhof
     Und das Gebäude "Ahornhof" rechnet von Juli bis Juni ab
-    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom "2024-07-01" bis "2025-06-30" wählen will
     Und der Liegenschaftsverwalter alle Gebäude wählt

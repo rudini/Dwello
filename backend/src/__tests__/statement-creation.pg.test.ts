@@ -2,6 +2,7 @@
  * Creating a Nebenkostenabrechnung as a function, without HTTP and without PDF (scenario Q5), against the real database
  */
 
+import { updateBuilding } from '../services/building.service';
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
@@ -58,6 +59,8 @@ describe('Nebenkostenabrechnung erstellen', () => {
 
 	// Das PDF erklärt jede Position: Anteil der Wohnung an den Kosten der Liegenschaft und Anteil der Mietdauer
 	it('hält je Position den Anteil der Wohnung und den Zeitanteil fest', async () => {
+		// #1088: a period of July – June needs a building that bills it
+		await updateBuilding(rental.building, { accountingPeriod: 'july-june' });
 		const statement = await generateStatement({
 			contractId: rental.contract,
 			buildingId: rental.building,
@@ -69,6 +72,7 @@ describe('Nebenkostenabrechnung erstellen', () => {
 		// eingezogen am 1.1.2024: 182 von 366 Tagen
 		expect(statement.lineItems[0]).toMatchObject({ apartmentShare: '1500.00', periodShare: '0.4973', tenantShare: '745.90' });
 		await deleteStatement(statement.id);
+		await updateBuilding(rental.building, { accountingPeriod: 'calendar' });
 	});
 });
 

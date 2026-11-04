@@ -120,22 +120,13 @@ export interface ChangedStatement {
 	heatingSum: HeatingSum | null; // #508: its apartment's heating costs against what its statements bill, once per apartment
 }
 
-type Range = { start: string; end: string };
-
 /**
- * Step 2, per building: its contracts in the period and those with a statement there already; `overlap` when the
- * period overlaps one of the building's statement periods without being equal: the building cannot be chosen, with
- * the ways out (#199, #408 point 2, `overlapOf` in `$lib/server/statement-generation`); `otherPeriod`: the building's
- * own Abrechnungsperiode when the period is none of its periods: the building cannot be chosen either (#1088)
+ * Step 2, per building: its contracts in the period and those with a statement there already; `otherPeriod`: the
+ * building's own Abrechnungsperiode when the period is none of its periods: the building cannot be chosen (#1088)
  */
-export type Billed = {
-	contracts: number;
-	billed: number;
-	overlap?: { periods: Range[]; choose: Range[]; statements: number } | null;
-	otherPeriod?: AccountingPeriodType | null;
-};
-/** Step 2: a building the period overlaps or that bills another Abrechnungsperiode cannot be chosen (#408, #1088) */
-export const unchoosable = (billed: Billed | undefined) => !!billed?.overlap || !!billed?.otherPeriod;
+export type Billed = { contracts: number; billed: number; otherPeriod?: AccountingPeriodType | null };
+/** Step 2: a building that bills another Abrechnungsperiode cannot be chosen (#1088) */
+export const unchoosable = (billed: Billed | undefined) => !!billed?.otherPeriod;
 
 type Coverage = {
 	buildingId: string;

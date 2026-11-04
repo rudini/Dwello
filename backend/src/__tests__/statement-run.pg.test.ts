@@ -56,7 +56,7 @@ describe('Lauf einer Abrechnungsperiode', () => {
 		await generateStatement({ contractId: billed, buildingId, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
 
 		const response = await sendJson('GET', `/api/v1/statements/run?buildingId=${buildingId}&periodStart=2024-01-01&periodEnd=2024-12-31`);
-		const plan = (await response.json()) as { contracts: { id: string; billed: boolean; tenantName: string }[]; overlap: unknown; skipped: unknown[] };
+		const plan = (await response.json()) as { contracts: { id: string; billed: boolean; tenantName: string }[]; skipped: unknown[] };
 
 		expect(response.status).toBe(200);
 		// the latest Vertragsbeginn first, as the contract list
@@ -65,14 +65,13 @@ describe('Lauf einer Abrechnungsperiode', () => {
 			{ id: billed, billed: true }
 		]);
 		expect(plan.contracts[0].tenantName).toBe(`Eva Meier ${token}`);
-		expect(plan.overlap).toBeNull();
 		expect(plan.skipped).toEqual([]);
 	});
 });
 
 // H-28 (#5): the missing statements of a contract and their way into the wizard, decided by the backend
 describe('Fehlende Abrechnungen eines Mietvertrags', () => {
-	it('nennt die abgelaufenen Perioden mit Mietstagen ohne Abrechnung und ihren Weg in den Assistenten', async () => {
+	it('nennt die abgelaufenen Perioden mit Mietstagen ohne Abrechnung', async () => {
 		const contract = await rent('2.01', 'Frei', '2024-04-01', '2025-12-31');
 		await generateStatement({ contractId: contract, buildingId, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 });
 
@@ -80,7 +79,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual([
-			{ start: '2025-01-01', end: '2025-12-31', way: { kind: 'whole', start: '2025-01-01', end: '2025-12-31' }, open: true }
+			{ start: '2025-01-01', end: '2025-12-31' }
 		]);
 	});
 
@@ -112,7 +111,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${missing}/missing-statements`)).json()) as { start: string; end: string }[];
 
 		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
-		expect(ofContract.map(({ start, end }) => ({ start, end }))).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
 	});
 });
 
@@ -130,6 +129,23 @@ describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
 
 		expect((await planOf(building, '2024-01-01', '2024-12-31')).otherPeriod).toBe('july-june');
 		expect((await planOf(building, '2023-07-01', '2024-06-30')).otherPeriod).toBeNull();
+	});
+
+	// Fachreview 1088-2 V-10 (product owner 03.11.2026): the backend refuses it too, also a period under a year
+	it('lehnt eine Abrechnung ab, deren Periode keine ganze Periode des Gebäudes ist', async () => {
+		const building = await newBuilding();
+		const contract = await rent('1.01', 'Kurz', '2024-01-01', undefined, building);
+		const generate = (periodStart: string, periodEnd: string) =>
+			sendJson('POST', '/api/v1/statements/generate', { contractId: contract, buildingId: building, periodStart, periodEnd, managementFeePercent: 0 });
+
+		for (const [start, end] of [['2024-01-01', '2024-06-30'], ['2023-07-01', '2024-06-30']]) {
+			const refused = await generate(start, end);
+			expect({ status: refused.status, code: ((await refused.json()) as { code?: string }).code }).toEqual({
+				status: 400,
+				code: 'STATEMENT_PERIOD_OF_BUILDING'
+			});
+		}
+		expect((await generate('2024-01-01', '2024-12-31')).status).toBe(201);
 	});
 });
 

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Building } from '$lib/types';
-	import { otherPeriodText, periodDays } from '$lib/accounting-period';
+	import { otherPeriodText } from '$lib/accounting-period';
 	import { unchoosable, type Billed } from '$lib/statement-wizard';
-	import OverlapWays from './OverlapWays.svelte';
 
 	// One building to choose in step 2, with its utility invoices in the Abrechnungsperiode once they are counted
 	let {
@@ -31,26 +30,10 @@
 	);
 
 	const billedId = $derived(`building-billed-${building.id}`);
-	const overlap = $derived(billed?.overlap);
-	const named = (periods: { start: string; end: string }[]) => periods.map(periodDays).join(', ');
-	// #199, #408 point 2: a period that overlaps one of the building's: the existing period and the ways out
-	const overlapText = (o: NonNullable<Billed['overlap']>) =>
-		[
-			(o.statements === 1
-				? m.statements_building_period_overlaps_one
-				: m.statements_building_period_overlaps_many)({
-				building: building.name,
-				periods: named(o.periods)
-			}),
-			o.choose.length && m.statements_building_period_choose_text({ periods: named(o.choose) })
-		]
-			.filter(Boolean)
-			.join(' ');
 	const blocked = $derived(unchoosable(billed));
 	// Said only when some contract of the period has a statement already
 	const billedText = $derived.by(() => {
 		if (billed?.otherPeriod) return otherPeriodText(billed.otherPeriod, building.name);
-		if (overlap) return overlapText(overlap);
 		if (!billed?.billed) return '';
 		const { contracts: total, billed: count } = billed;
 		const one = total === 1;
@@ -63,7 +46,7 @@
 		// how an existing draft is recalculated, here already (persona Helga P-7, #201)
 		return `${count < total ? some() : all()} ${m.statements_building_recalculate()}`;
 	});
-	// a building the period overlaps or that bills another period cannot be chosen (#408 point 2, #1088)
+	// a building that bills another period cannot be chosen (#1088)
 	const cardClass = $derived(
 		blocked
 			? 'border-line-strong bg-sunken'
@@ -130,6 +113,3 @@
 		>
 	{/if}
 </label>
-{#if overlap}
-	<OverlapWays buildingId={building.id} {overlap} />
-{/if}

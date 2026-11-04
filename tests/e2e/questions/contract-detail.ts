@@ -21,8 +21,6 @@ import {
 	deleteDialog,
 	deleteDialogStatementLink,
 	missingStatements,
-	missingStatementLink,
-	missingStatementInvoicesLink,
 	fixedTermCheck,
 	fixedTermError,
 	contractFlatRate,
@@ -48,9 +46,6 @@ export const endConfirmationInWindow = question(
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
-export const missingStatementInvoicesLabel = (periodStart: string) => Text.of(missingStatementInvoicesLink(periodStart));
-// the way into the wizard for the missing days from that day on
-export const missingStatementOffer = (periodStart: string) => Text.of(missingStatementLink(periodStart));
 export const managementFeeOfContract = Text.of(contractManagementFee);
 export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);

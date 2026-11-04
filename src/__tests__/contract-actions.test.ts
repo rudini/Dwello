@@ -135,7 +135,6 @@ describe('Nächste Schritte und abgelaufener befristeter Mietvertrag', () => {
 // A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung; the backend decides them and their way
 // into the wizard (H-28, backend/src/__tests__/accounting-period.test.ts), the page links each
 describe('Fehlende Abrechnungen am Mietvertrag', () => {
-	const day = (date: string) => date.split('-').reverse().join('.');
 	const statementOf = (contractId: string, y: number) => ({
 		...periodStatements.data[0],
 		contractId,
@@ -161,28 +160,19 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 			.missingStatements;
 	const building = contractDetail.building.id;
 
-	// each part leads into the wizard with its way, and to the building's invoices of that period (#211, #454)
-	it('führt jeden fehlenden Teil in den Assistenten und zu den Rechnungen seiner Periode', async () => {
-		const [whole, existing] = contractMissing.map(({ open: _open, ...part }) => part);
-		expect(await missingOf(backend([]))).toEqual([
-			{
-				...whole,
-				href: `/statements/generate?building=${building}&start=${whole.way.start}&end=${whole.way.end}`,
+	// each period leads into the wizard and to the building's invoices of that period (#211, #454)
+	it('führt jede fehlende Periode in den Assistenten und zu den Rechnungen ihrer Periode', async () => {
+		expect(await missingOf(backend([]))).toEqual(
+			contractMissing.map(({ start, end }) => ({
+				start,
+				end,
+				href: `/statements/generate?building=${building}&start=${start}&end=${end}`,
 				invoices: {
-					href: `/invoices?building=${building}&periodStart=${whole.way.start}&periodEnd=${whole.way.end}`,
-					label: `Rechnungen ${whole.way.start.slice(0, 4)} ansehen`
+					href: `/invoices?building=${building}&periodStart=${start}&periodEnd=${end}`,
+					label: `Rechnungen ${start.slice(0, 4)} ansehen`
 				}
-			},
-			{
-				...existing,
-				// Fachreview 199-1 V-1: the contract's own statement cuts that period, the run would not bill it there
-				href: null,
-				invoices: {
-					href: `/invoices?building=${building}&periodStart=${existing.way.start}&periodEnd=${existing.way.end}`,
-					label: `Rechnungen für ${day(existing.way.start)} – ${day(existing.way.end)} ansehen`
-				}
-			}
-		]);
+			}))
+		);
 	});
 
 	// code review 199-1 C-6: better no hint than a wrong one

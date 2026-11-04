@@ -576,21 +576,6 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "können die Belege einsehen"
     Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
 
-  # Eine Abrechnungsperiode nur aus Monaten mit 0 % im Heizprofil (Sommer): die Heizkosten werden nach Mietstagen
-  # verteilt; der Hinweis auf die detaillierte Heizkostenabrechnung bleibt (Art. 8 Abs. 1 VMWG)
-  Szenario: Heizkosten stehen im PDF nach Mietstagen, wenn die Monate der Periode im Heizprofil 0 % haben
-    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
-    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
-    Und der Mieter "Lea Graf" existiert
-    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-07-15" für "900" Franken
-    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2024-06-01" bis "2024-08-31" mit dem Heizprofil "Winter"
-    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
-    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
-    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "48/92 Tage"
-    Und steht im PDF nicht "Heizprofil"
-    Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
-
   # Regel 5: nach dem Heizprofil nur bei Ein- oder Auszug; wer die ganze Periode mietet, trägt die Heizkosten nach
   # Mietstagen, die er im PDF nachrechnen kann (#208, D-2)
   Szenario: Heizkosten eines Mietvertrags über die ganze Periode stehen im PDF nach Mietstagen
@@ -605,21 +590,6 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "366/366 Tage"
     Und steht im PDF nicht "Heizprofil"
     Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
-
-  # Eine Rechnung mit Leistungszeitraum zählt mit ihren Tagen in der Periode: Hauswart Juli bis September in der Periode
-  # Juni bis August, Mietvertrag 15. Juni bis 31. Juli: 31 der 62 Tage, als Bruch nachrechenbar (#208, D-3; Thema 6)
-  Szenario: Eine Rechnung mit Leistungszeitraum steht im PDF mit ihren Tagen in der Periode
-    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
-    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
-    Und der Mieter "Lea Graf" existiert
-    Und "Lea Graf" mietete die Wohnung "3.02" von "2025-06-15" bis "2025-07-31" für "900" Franken
-    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
-    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2025-06-01" bis "2025-08-31" mit dem Heizprofil "Winter"
-    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
-    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
-    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "31/62 Tage"
-    Und steht im PDF "Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum."
 
   # Ein eigenes Heizprofil lässt sich nach dem Erstellen der Abrechnung ändern; das PDF zeigt den Anteil und die Monate,
   # mit denen die Abrechnung gerechnet ist: Januar bis März im «Winter» 18 + 14 + 11 = 43 % (#209)
@@ -646,40 +616,6 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "43.00 % der Heizkosten"
     Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
     Und steht im PDF "43.00 % 430.00"
-
-  # Eine Periode kürzer als ein Jahr: der Mieter trägt seine Monate von denen der Periode, Januar bis März im «Winter»
-  # 18 + 14 + 11 = 43 % von 18 + 14 + 11 + 5 + 2 + 0 = 50 %, also 86 %; das PDF nennt die Monate beider Summen und
-  # die Teilung (#229, F-6; #232, F-7)
-  Szenario: PDF nennt bei einer Periode unter einem Jahr die Monatsanteile und die Teilung
-    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
-    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2024-01-01" bis "2024-06-30" mit dem Heizprofil "Winter"
-    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
-    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "86.00 % der Heizkosten"
-    Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
-    Und steht im PDF "zusammen 43.00 %. Anteile der Monate der Abrechnungsperiode im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %, Apr 5.00 %, Mai 2.00 %, Jun 0.00 %; zusammen 50.00 %. Anteil nach Heizprofil: 43.00 % / 50.00 % = 86.00 %."
-
-  # Einzug am 5. Januar, Periode Januar bis Juni: Januar 18 % × 27/31 = 15.68 %, zusammen 47.68 % von 50.00 %; der
-  # Anteil folgt aus den gedruckten Monaten, 47.68 / 50.00 = 95.36 %, also CHF 953.60 (aus den ungerundeten Monaten
-  # wären es 95.35 % und CHF 953.55) (#232); der angebrochene Januar steht mit seinem Bruch, und die Erläuterung sagt,
-  # dass der Prozentwert gerundet ist (#451, Punkt 3)
-  Szenario: PDF rechnet den Anteil nach dem Heizprofil aus den gedruckten Monatsanteilen
-    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
-    Und das Gebäude "Rosenhof" in "Winterthur" existiert
-    Und im Gebäude "Rosenhof" gibt es die leere Wohnung "1.01"
-    Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
-    Und der Mieter "Lea Graf" existiert
-    Und "Lea Graf" mietet die Wohnung "1.01" seit "2024-01-05" für "900" Franken
-    Und für "Lea Graf" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung vom "2024-01-01" bis "2024-06-30" mit dem Heizprofil "Winter"
-    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
-    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
-    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "95.36 % der Heizkosten"
-    Und steht im PDF "Jan 15.68 % (18.00 % × 27/31 Tage), Feb 14.00 %"
-    Und steht im PDF "Anteil nach Heizprofil: 47.68 % / 50.00 % = 95.36 %."
-    Und steht im PDF "95.36 % 953.60"
-    Und steht im PDF "Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet. Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil."
 
   # #71: unter den Heizkosten steht jede Rechnung mit ihrem Anteil nach Heizprofil; eine mit Leistungszeitraum mit den
   # Monaten des Heizprofils darin, den Monaten des Mieters darin und der Teilung (nachrechenbar wie #232). Marc Huber
@@ -844,15 +780,6 @@ Funktionalität: Abrechnungsdetail
     Und das Heizprofil "Winter" heisst danach "Sommer"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
     Dann nennt die Abrechnung das Heizprofil "Winter" als nicht angewendet: "Mietvertrag über die ganze Periode"
-
-  # #247: eine Periode nur aus Monaten mit 0 % im Heizprofil (Sommer) teilt die Heizkosten nach Mietstagen
-  Szenario: Abrechnung nennt ihr Heizprofil als nicht angewendet, wenn die Monate der Periode 0 % haben
-    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
-    Und der Mieter "Lea Graf" existiert
-    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-07-15" für "900" Franken
-    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2024-06-01" bis "2024-08-31" mit dem Heizprofil "Winter"
-    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
-    Dann nennt die Abrechnung das Heizprofil "Winter" als nicht angewendet: "die Monate der Abrechnungsperiode haben im Heizprofil zusammen 0 %"
 
   # #229 (Rundung): Einzug am 22. Februar, Februar 13.9 × 7/28 = 3.475 % genau zwischen zwei Hundertsteln, gerundet
   # 3.48 % (#232); Erläuterung und Position im PDF nennen denselben Wert

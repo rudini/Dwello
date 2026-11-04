@@ -15,8 +15,6 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	missingStatementsShown,
-	missingStatementInvoicesLabel,
-	missingStatementOffer,
 	billedUntilOfContract,
 	nextStepsText,
 	statementLinkedInDeleteDialog,
@@ -261,32 +259,12 @@ Then('meldet der Mietvertrag die fehlende Abrechnung {string}', async ({ verwalt
 	await verwalter.sees(missingStatementsText).toContain(period);
 });
 
-// #408 point 2: the way the warning offers for the days from that day, by its label
-Then('bietet der Mietvertrag für die Tage ab {string} {string} an', async ({ verwalter }, periodStart: string, label: string) => {
-	await verwalter.sees(missingStatementOffer(periodStart)).toBe(label);
-});
-
-When('der Liegenschaftsverwalter die fehlende Abrechnung ab {string} erstellen will', async ({ verwalter }, periodStart: string) => {
-	await verwalter.attemptsTo(createMissingStatement(periodStart));
-});
-
 When(
 	'der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung {int} anzeigt',
 	async ({ verwalter }, year: number) => {
 		await verwalter.attemptsTo(showMissingStatementInvoices(`${year}-01-01`));
 	}
 );
-
-Then(
-	'bietet der Mietvertrag für die Tage ab {string} die Rechnungen {string} an',
-	async ({ verwalter }, periodStart: string, label: string) => {
-		await verwalter.sees(missingStatementInvoicesLabel(periodStart)).toBe(label);
-	}
-);
-
-When('der Liegenschaftsverwalter die Rechnungen der fehlenden Tage ab {string} anzeigt', async ({ verwalter }, periodStart: string) => {
-	await verwalter.attemptsTo(showMissingStatementInvoices(periodStart));
-});
 
 // #454: the link sets building and period; the list names the filter
 Then(

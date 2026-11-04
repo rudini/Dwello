@@ -189,7 +189,6 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
-      | statement-generate     | buildings-overlap   |
       | statement-generate     | buildings-other-period   |
       | statement-generate     | buildings-counts-failed |
       | statement-generate     | link-preset         |

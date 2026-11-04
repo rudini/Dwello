@@ -15,7 +15,6 @@ import {
 	addLineItems,
 	getStatementCountsByStatus,
 	calculateStatement,
-	generateStatement,
 	resetPayment,
 	settleCarryOver,
 	replaceStatement,
@@ -25,7 +24,7 @@ import {
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
 import { keepNewPdf, redeliverByLetter, sendStatement } from '../services/statement-send.service';
-import { runDefaultsOf, runDifferencesOf, runHeatingHintsOf, runPlan } from '../services/statement-run.service';
+import { generateInPeriod, runDefaultsOf, runDifferencesOf, runHeatingHintsOf, runPlan } from '../services/statement-run.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
@@ -170,7 +169,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/generate',
 		async ({ body, set }) => {
 			try {
-				const statement = await generateStatement(body);
+				const statement = await generateInPeriod(body); // #1088: whole periods of the building only
 
 				set.status = 201;
 				return statement;

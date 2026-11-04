@@ -29,10 +29,11 @@ describe('Abrechnungsnummer', () => {
 	it('zählt pro Gebäude und Jahr hoch und vergibt eine gelöschte Nummer nicht neu', async () => {
 		const prefix = `NK-${rental.building.substring(0, 8).toUpperCase()}-2024-`;
 
-		const first = await generate('2024-01-01', '2024-06-30');
-		const second = await generate('2024-07-01', '2024-12-31');
+		// #1088: whole periods only; a second statement of the same period, as a run of another contract would make
+		const first = await generate('2024-01-01', '2024-12-31');
+		const second = await generate('2024-01-01', '2024-12-31');
 		await deleteStatement(first.id);
-		const third = await generate('2024-01-01', '2024-06-30');
+		const third = await generate('2024-01-01', '2024-12-31');
 
 		expect([first, second, third].map((s) => s.statementNumber)).toEqual([`${prefix}0001`, `${prefix}0002`, `${prefix}0003`]);
 	});

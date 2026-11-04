@@ -2,53 +2,31 @@
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import { periodDays, periodName } from '$lib/accounting-period';
+	import { periodName } from '$lib/accounting-period';
 
-	type Missing = {
-		start: string;
-		end: string;
-		href: string | null; // none when step 2 would refuse its period (Fachreview 199-1 V-1)
-		way: { kind: string; start: string; end: string };
-		invoices: { href: string; label: string };
-	};
-	// Rent days in ended Abrechnungsperioden without a statement, the newest first, each with its way to the wizard
-	// (A-10, #142): the whole period, or the period of an older statement of the building that holds the days (#408
-	// point 2); there are no short periods (#1088); and to the building's invoices (#211)
+	type Missing = { start: string; end: string; href: string; invoices: { href: string; label: string } };
+	// Ended Abrechnungsperioden of the building with rent days but no statement, the newest first, each with its way to
+	// the wizard (A-10, #142) and to the building's invoices (#211); whole periods only (#1088)
 	let { missing }: { missing: Missing[] } = $props();
 
 	const single = $derived(missing.length === 1);
-	const parts = $derived(missing.filter((period) => period.way.kind !== 'whole' || !period.href));
 	const title = $derived(
 		single
 			? m.contracts_statement_missing({ period: periodName(missing[0]) })
 			: m.contracts_statements_missing({ count: missing.length })
 	);
-	// the general text says «noch keine Nebenkostenabrechnung», untrue for a single part
-	const text = $derived(
-		single
-			? !parts.length && m.contracts_statement_missing_text()
-			: m.contracts_statements_missing_text()
-	);
-	// «Abgerechnet bis» (#133) would change the statement that covers the rest (Fachreview 2 V-9)
+	const text = $derived(single ? m.contracts_statement_missing_text() : m.contracts_statements_missing_text());
 	const hint = $derived(
-		parts.length
-			? m.contracts_statement_missing_partial({ periods: parts.map(periodName).join(', ') })
-			: single
-				? m.contracts_statement_missing_billed_elsewhere()
-				: m.contracts_statements_missing_billed_elsewhere()
+		single ? m.contracts_statement_missing_billed_elsewhere() : m.contracts_statements_missing_billed_elsewhere()
 	);
 	// several: short labels side by side, each with its verb (#142 personas, code review C-8)
-	const createLabel = ({ way, ...period }: Missing) =>
-		way.kind === 'existing'
-			? m.statements_period_choose({ period: periodDays(way) })
-			: single
-				? m.dashboard_create_statements()
-				: m.contracts_statement_create({ period: periodName(period) });
+	const createLabel = (period: Missing) =>
+		single ? m.dashboard_create_statements() : m.contracts_statement_create({ period: periodName(period) });
 </script>
 
 {#if missing.length}
 	<Alert tone="caution" {title} testid="contract-missing-statement">
-		{#if text}<p>{text}</p>{/if}
+		<p>{text}</p>
 		<p>{hint}</p>
 		<!-- each period's links on their own row (personas Helga P-4, Anna P-5 #211) -->
 		<div class="flex flex-col gap-2">
@@ -57,13 +35,11 @@
 					class="flex flex-wrap gap-2"
 					data-testid="contract-missing-statement-period-{period.start}"
 				>
-					{#if period.href}
-						<Button
-							href={period.href}
-							icon="calculate"
-							testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
-						>
-					{/if}
+					<Button
+						href={period.href}
+						icon="calculate"
+						testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
+					>
 					<Button
 						href={period.invoices.href}
 						variant="ghost"

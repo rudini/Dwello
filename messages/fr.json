@@ -490,7 +490,6 @@
 	"backend_invoice_amount_negative": "Le montant d’une facture ne peut pas être négatif. Déduisez une note de crédit du montant de la facture à laquelle elle se rapporte. Si cette facture est déjà décomptée, établissez ensuite un décompte rectificatif.",
 	"backend_heating_profile_not_found": "Le profil de chauffage est introuvable. Rechargez la page.",
 	"backend_invoice_not_found": "La facture est introuvable. Rechargez la page.",
-	"backend_statement_period_overlaps": "La période de décompte choisie chevauche des décomptes existants de {building} ({periods}). Choisissez l’une de ces périodes de décompte ou une période qui n’en chevauche aucune.",
 	"backend_document_not_found": "Ce document n’existe plus. Rechargez la page.",
 	"backend_statement_not_found": "Décompte introuvable.",
 	"backend_paid_date_invalid": "Veuillez saisir la date de paiement au format JJ.MM.AAAA.",
@@ -1497,10 +1496,6 @@
 	"statements_building_billed_many": "Sur {total} contrats de bail de cette période de décompte, {billed} ont déjà un décompte pour cette période.",
 	"statements_building_billed_all_one": "Le seul contrat de bail de cette période de décompte a déjà un décompte pour cette période. Aucun nouveau décompte n’est créé pour cet immeuble. Vous n’avez pas besoin de le choisir. Si vous le choisissez, aucun décompte n’est créé pour cet immeuble.",
 	"statements_building_billed_all_many": "Tous les contrats de bail de cette période de décompte ont déjà un décompte pour cette période. Aucun nouveau décompte n’est créé pour cet immeuble. Vous n’avez pas besoin de le choisir. Si vous le choisissez, aucun décompte n’est créé pour cet immeuble.",
-	"statements_building_period_overlaps_one": "Pour {building}, il existe déjà un décompte pour {periods}. La période de décompte choisie le chevauche.",
-	"statements_building_period_overlaps_many": "Pour {building}, il existe déjà des décomptes pour {periods}. La période de décompte choisie les chevauche.",
-	"statements_building_period_choose_text": "Établissez le décompte des contrats de bail sans décompte dans la période de décompte {periods}.",
-	"statements_period_choose": "Choisir la période de décompte {period}",
 	"statements_building_recalculate": "Pour recalculer un brouillon, choisissez « Recalculer » sur sa page. Les décomptes envoyés ne peuvent pas être recalculés.",
 	"statements_all_buildings_left_out_one": "« Tous les immeubles » laisse de côté 1 immeuble dont tous les contrats de bail ont déjà un décompte dans cette période de décompte.",
 	"statements_all_buildings_left_out_many": "« Tous les immeubles » laisse de côté {count} immeubles dont tous les contrats de bail ont déjà un décompte dans cette période de décompte.",
@@ -1923,7 +1918,6 @@
 	"contracts_statement_missing_billed_elsewhere": "Avez-vous décompté cette période en dehors de Dwello ? Indiquez « Décompté jusqu’au » en modifiant le contrat de bail.",
 	"contracts_statements_missing_billed_elsewhere": "Avez-vous décompté l’une de ces périodes en dehors de Dwello ? Indiquez « Décompté jusqu’au » en modifiant le contrat de bail.",
 	"contracts_statement_create": "Établir {period}",
-	"contracts_statement_missing_partial": "Un décompte existant ne couvre qu’une partie de la période de décompte ; pour {periods}, il n’existe pas encore de décompte.",
 	"contracts_missing_statement_badge": "Décompte manquant",
 	"contracts_refused_open": "Ouvrir le décompte des charges {number}",
 	"contracts_delete_draft_consequence": "Le brouillon {number} sera supprimé. Établissez ensuite le décompte des charges à nouveau.",
@@ -2283,5 +2277,6 @@
 	"buildings_help_accounting_period": "Période pour laquelle vous décomptez les frais accessoires de cet immeuble. Choisissez celle qui figure dans les contrats de bail (souvent sous les frais accessoires). Dès le premier décompte de l’immeuble, elle ne peut plus être modifiée.",
 	"statements_building_other_period_calendar": "{building} est décompté par année civile. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de janvier à décembre.",
 	"statements_building_other_period_july": "{building} est décompté de juillet à juin. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de juillet à juin.",
-	"statements_building_other_period_november": "{building} est décompté de novembre à octobre. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de novembre à octobre."
+	"statements_building_other_period_november": "{building} est décompté de novembre à octobre. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de novembre à octobre.",
+	"backend_statement_period_of_building": "Cette période de décompte ne convient pas pour {building} : un immeuble ne décompte que des périodes entières de sa propre période de décompte. Rechargez la page."
 }

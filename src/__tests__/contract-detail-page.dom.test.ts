@@ -335,44 +335,6 @@ describe('Mietvertragsdetail', () => {
 		expect(link.textContent!.trim()).toBe('Rechnungen 2025 ansehen');
 	});
 
-	// #408 point 2: days in the period of another statement of the building are billed in exactly that period
-	it('bietet für Tage in der Periode einer Abrechnung des Gebäudes diese Periode an', () => {
-		const way = { kind: 'existing', start: '2024-07-01', end: '2025-06-30' };
-		open('2024-04-01', null, null, '2026-10-10', false, [
-			{ start: '2025-01-01', end: '2025-06-30', href: '/statements/generate?existing', way }
-		]);
-		expect(text('contract-missing-statement')).toContain(
-			'für 01.01.2025 – 30.06.2025 gibt es noch keine Abrechnung.'
-		);
-		expect(byTestId('contract-missing-statement-link-2025-01-01')!.textContent!.trim()).toBe(
-			'Abrechnungsperiode 01.07.2024 – 30.06.2025 wählen'
-		);
-	});
-
-	// Fachreview 199-1 V-1: statements made before #408 point 2; a statement of the contract overlaps the period, so a
-	// run there would not bill it: the days without a way into the wizard
-	it('nennt Tage ohne Weg in den Assistenten, wenn ein Lauf den Mietvertrag nicht abrechnen würde', () => {
-		open('2024-04-01', null, null, '2026-10-10', false, [
-			{ start: '2025-07-01', end: '2025-12-31', href: null }
-		]);
-		expect(text('contract-missing-statement')).toContain(
-			'für 01.07.2025 – 31.12.2025 gibt es noch keine Abrechnung.'
-		);
-		expect(text('contract-missing-statement')).not.toContain('Abgerechnet bis');
-		expect(byTestId('contract-missing-statement-link-2025-07-01')).toBeNull();
-	});
-
-	// persona Dr. Weber P-5: after a change of the setting «2024» could be 2024/25: the link names the days
-	it('nennt eine bestehende Periode über ein Kalenderjahr mit ihren Tagen', () => {
-		const way = { kind: 'existing', start: '2024-01-01', end: '2024-12-31' };
-		open('2024-04-01', null, null, '2026-10-10', false, [
-			{ start: '2024-07-01', end: '2024-12-31', href: '/statements/generate?existing', way }
-		]);
-		expect(byTestId('contract-missing-statement-link-2024-07-01')!.textContent!.trim()).toBe(
-			'Abrechnungsperiode 01.01.2024 – 31.12.2024 wählen'
-		);
-	});
-
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
 		const missing = [{ start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' }];
 		open('2024-04-01', null, null, '2026-10-10', false, missing);

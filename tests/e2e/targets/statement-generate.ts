@@ -21,11 +21,6 @@ export const stepLabel = target('Name des Schritts', (page) => page.getByTestId(
 export const allBuildingsCheckbox = target('Alle Gebäude', (page) => page.getByTestId('generate-all-buildings'));
 // Next to the counter: the buildings «Alle Gebäude» leaves out
 export const allBuildingsNote = target('Hinweis zu «Alle Gebäude»', (page) => page.getByTestId('generate-all-buildings-note'));
-// #199, #408 point 2: a way out of a period that overlaps the building's statements, by the first day of the period it opens
-export const offeredPeriodLink = (buildingId: string, periodStart: string) =>
-	target(`Abrechnungsperiode ab ${periodStart} für Gebäude ${buildingId}`, (page) =>
-		page.getByTestId(`generate-building-period-${buildingId}-${periodStart}`)
-	);
 // Mietverträge of the building that already have a statement for the period (step 2)
 export const buildingBilled = (buildingId: string) =>
 	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));

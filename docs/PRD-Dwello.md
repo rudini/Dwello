@@ -507,7 +507,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Option 1: July 1 - June 30 (fiscal year variant)
 - Option 2: November 1 - October 31 (winter-focused)
 - Option 3: January 1 - December 31 (calendar year)
-- Each building has its own, chosen when it is recorded and fixed from its first statement; a building bills only whole periods of it (no short periods), plus the periods of its older statements (#1088)
+- Each building has its own, chosen when it is recorded and fixed from its first statement; a building bills only whole periods of it (no short periods); the backend refuses any other period (#1088)
 
 **Other Configuration:**
 - Management cost percentage (see section 5.8)
