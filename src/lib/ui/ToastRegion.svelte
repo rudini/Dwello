@@ -66,7 +66,7 @@
 
 <svelte:window
 	onfocusin={(event) => {
-		if (!region?.contains(event.target as Node)) noteFocus(event.target as Element);
+		noteFocus(event.target as Element);
 		untrack(() => focusMoved++);
 	}}
 />

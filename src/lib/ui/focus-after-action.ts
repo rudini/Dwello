@@ -14,8 +14,8 @@ let before: Place | null = null;
 
 /** Notes where the focus is, from a `focusin` on the window */
 export function noteFocus(part: Element): void {
-	// the page itself, e.g. after SvelteKit loaded it again: no place of its own
-	if (part === document.body) return;
+	// the page itself (after SvelteKit loaded it again), a dialog that works or the confirmation: no place of their own
+	if (part === document.body || part.closest('[role="dialog"], [data-toast-region]')) return;
 	const row = part.closest('li, tr');
 	before = {
 		path: location.pathname,

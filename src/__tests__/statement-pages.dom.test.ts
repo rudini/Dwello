@@ -966,7 +966,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
 	// #1096: the page stays where the landlord was; where the focus goes: focus-after-action.dom.test.ts
-	it('bestätigt das Ersetzen und lässt den Fokus nicht zum Seitentitel springen', async () => {
+	it('bestätigt das Ersetzen und setzt den Fokus nicht selbst auf den Seitentitel', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-correct-button');
@@ -1915,7 +1915,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem Titel statt auf der Seite
 	// #1096: the page stays where the landlord was; where the focus goes: focus-after-action.dom.test.ts
-	it('bestätigt den Zahlungseingang und lässt den Fokus nicht zum Seitentitel springen', async () => {
+	it('bestätigt den Zahlungseingang und setzt den Fokus nicht selbst auf den Seitentitel', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-mark-paid-button');
