@@ -1,3 +1,12 @@
+## Session 2026-11-04: #1094 keep the list filter from the statement detail
+
+- [x] Decision recorded in #1094 (product owner: «nach deiner Empfehlung»): breadcrumb and the PDF refusal page of the detail page keep the list's filter; the refusal page does not name the statement
+- [x] Scenarios in `statements.feature`, seen red at the missing filter; `openStatement` waits for the detail page (a deletion meanwhile overtook it)
+- [x] `pdfRefusal` takes the filtered list from `?list=` of the PDF link for a gone record; breadcrumb uses the list (as `$derived`, fallow template complexity); D7c
+- [x] Code review: round 1 C-1 Major (the way back to the list of a gone statement read «Zurück»; the load names it, `way`) and C-2 fixed, C-3 Minor (SendDialog «PDF ansehen» passes no list) stays in the report; closing round 2 clean (`docs/reviews/1094-review-1.md`, `-2.md`)
+- [x] Persona Helga: no findings; «Alpenblick» had no draft, she checked the same way on «Musterhaus Zentrum» (`docs/design/personas/helga-1094.md`); her note «Zurück sagt nicht wohin» is C-1
+- [x] PR: merge of origin/main clean
+
 ## Session: #932 E2E purge after a berichtigte Abrechnung
 
 - [x] Cause: `createCorrection` only clicked «Berichtigte Abrechnung erstellen»; the next step could pass on the replaced statement (same Akonto) and the clean-up deleted it while the new one was still saved (FK `replaces_id`, CI run 40708772660)
@@ -1003,8 +1012,23 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] CI all browsers (WebKit: an image Dokument without `download`, #424): hand-run of ci.yml, result in the pull request
 - [x] PR: pushed after this archive
 
+## Session 2026-11-04: #1068 one short sentence on billed contracts per building
+
+- [x] Scenarios in `statement-generate.feature` changed as #1068 decided (Spec change approved: #1068), seen red at the old texts
+- [x] One sentence per building card: none, some or all contracts billed (singular and plural); the «Neu berechnen» sentence once under the buildings, read with the group; red first in DOM and i18n tests
+- [x] Fachreview 1068-1 (`docs/reviews/1068-fachreview-1.md`); wording decided by the product owner
+- [x] Code review round 1 (`docs/reviews/1068-review-1.md`): C-1, C-2 Minor fixed; closing round 2 (`1068-review-2.md`) clean
+- [x] Personas Marco, Sven (`marco-1068.md`, `sven-1068.md`): no Blocker/Major; Sven P-1, P-2 fixed, red first; the other Minors existed before and stay in their reports
+- [x] PR (`Fixes #1068`): pushed after this archive
+
 ## Session: search engine tags for dwello.ch
 
 - [x] Landing pages: canonical, absolute hreflang with x-default, Open Graph, JSON-LD SoftwareApplication; `i18n/build.py` sets canonical, og:url, og:image and og:locale per language
 - [x] Slice review (`docs/reviews/seotags-review-1.md`); C-1 fixed: JPEG link preview per language
 - [x] PR #1109: pushed after this archive
+
+## Session: www.dwello.ch to dwello.ch
+
+- [x] `marketing/.htaccess`: 301 from www.dwello.ch to https://dwello.ch with the path (Infomaniak's web redirection served a self-signed certificate on HTTPS and dropped the path; the owner deleted it)
+- [x] Slice review (`docs/reviews/www-review-1.md`); C-1 fixed: host with trailing dot or port
+- [x] PR: pushed after this archive

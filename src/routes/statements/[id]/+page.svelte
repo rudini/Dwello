@@ -67,8 +67,10 @@
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
-	// the list as it was filtered when it opened this statement: the delete returns there (#679)
+	// the list as it was filtered when it opened this statement: the delete (#679), the breadcrumb and the refusal
+	// page of its PDF (#1094) return there
 	let list = $state('');
+	const trail = $derived([{ href: list || '/statements', label: m.nav_statements() }]);
 	afterNavigate(({ from }) => {
 		if (from?.url.pathname === '/statements') list = from.url.pathname + from.url.search;
 	});
@@ -189,7 +191,7 @@
 		purpose="{statement.tenantName}, {statement.buildingName}, {m.buildings_apartment_number({
 			number: statement.apartmentUnit
 		})} · {m.glossary_period_term()} {period}"
-		trail={[{ href: '/statements', label: m.nav_statements() }]}
+		{trail}
 	>
 		{#snippet action()}
 			<PdfAction
@@ -198,6 +200,7 @@
 				generating={generatingPdf}
 				language={statement.tenantLanguage}
 				ongenerate={generatePdf}
+				{list}
 			/>
 			<StatusActions
 				status={statement.status}
@@ -352,6 +355,7 @@
 	byLetter={sendByLetter}
 	{outdated}
 	onrecalculate={() => ((showSend = false), (showRecalculate = true))}
+	{list}
 />
 
 <ReminderModal bind:open={showReminder} {statement} sentReminders={statement.remindersCounted ?? 0} />

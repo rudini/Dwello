@@ -32,9 +32,9 @@ const perArea = {
 describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 	it('nennt schon abgerechnete Mietverträge auf Italienisch und Englisch ohne falschen Bezug (fach-review V-10, V-11)', () => {
 		overwriteGetLocale(() => 'it');
-		expect(m.statements_building_billed_many({ billed: 2, total: 8 })).toMatch(/^Su 8 contratti/);
+		expect(m.statements_building_billed_many_rest_many({ billed: 2, total: 8 })).toMatch(/^2 contratti di locazione su 8/);
 		overwriteGetLocale(() => 'en');
-		expect(m.statements_building_billed_all_many()).toContain('already have a statement for this period');
+		expect(m.statements_building_billed_all_many()).toBe('No new statement: all rental contracts already have one.');
 	});
 
 	it('nennt den Saldo auf Französisch wie das PDF', () => {

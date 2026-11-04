@@ -130,3 +130,21 @@ Funktionalität: Nebenkostenabrechnungen
     Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter im Browser zurückgeht
     Dann sagt die Fehlerseite "Diese Seite gibt es nicht."
+
+  # #1094: der Pfad der Detailseite führt zur Liste, wie sie gefiltert war
+  Szenario: Vom Abrechnungsdetail zurück zur gefilterten Liste
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
+    Und der Liegenschaftsverwalter im Breadcrumb "Nebenkostenabrechnungen" wählt
+    Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
+
+  # #1094: auch die Fehlerseite des PDF, das auf der Detailseite angefordert wurde
+  Szenario: Von der Fehlerseite eines PDF der Detailseite zurück zur gefilterten Liste
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für die Abrechnung 2024 von "Anna Keller" gibt es ein PDF
+    Und der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
+    Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
+    Und der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"

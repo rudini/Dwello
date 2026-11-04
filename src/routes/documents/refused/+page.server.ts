@@ -26,6 +26,10 @@ export const load: PageServerLoad = ({ url }) => {
 	// only the code's own entry: `__proto__` and the like name what every object has (fallback review of #1107)
 	const of = <T>(table: Record<string, T>) =>
 		code && Object.hasOwn(table, code) ? table[code] : undefined;
+	// «//x» as a path is another site too (code review 734 C-1, round 2)
+	const own = back?.origin === url.origin && !back.pathname.startsWith('//') ? back : null;
+	// without a way back: the list of what was refused
+	const list = of(listOfGone) ?? '/statements';
 	return {
 		title: (of(gone) ?? m.documents_refused_pdf)(),
 		sentence:
@@ -34,13 +38,15 @@ export const load: PageServerLoad = ({ url }) => {
 				{ code },
 				query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()
 			),
-		// «//x» as a path is another site too (code review 734 C-1, round 2)
-		back:
-			back?.origin === url.origin && !back.pathname.startsWith('//')
-				? `${back.pathname}${back.search}`
-				: null,
-		// without a way back: the list of what was refused
-		list: of(listOfGone) ?? '/statements',
+		back: own ? `${own.pathname}${own.search}` : null,
+		list,
+		// a way back to the list of a record that is gone names the list (code review 1094 C-1)
+		way:
+			own && !(of(listOfGone) && own.pathname === list)
+				? m.ui_back()
+				: list === '/invoices'
+					? m.documents_to_invoices()
+					: m.documents_to_statements(),
 		// a refusal whose way out is in «Einstellungen» links there too (persona Dr. Weber P-2, #450)
 		settings: SETTINGS_CODES.includes(code ?? '')
 	};
