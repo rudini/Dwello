@@ -4,7 +4,7 @@
 	import { navGroups } from './navigation';
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import NavList from '$lib/ui/NavList.svelte';
-	import { makeInert } from './inert';
+	import { makeInert } from '$lib/inert';
 	import { MediaQuery } from 'svelte/reactivity';
 
 	// The main menu below 1024 px: a modal drawer that holds the focus while open;
