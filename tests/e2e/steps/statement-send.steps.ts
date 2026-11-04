@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { history, letterInsteadOffers, sendButtonLabel, sendConfirmLabel, sendConfirmation } from '../questions/statement-detail';
+import { history, historyDates, letterInsteadOffers, sendButtonLabel, sendConfirmLabel, sendConfirmation } from '../questions/statement-detail';
 import { correspondence } from '../questions/tenant-form';
 import { openTenantDetail } from '../tasks/tenant-detail';
 import { paymentDeadline } from '../questions/statement-edit';
@@ -86,4 +86,9 @@ Given('die Abrechnung {int} von {string} ging vor {int} Tagen hinaus', async ({ 
 Then('nennt der Verlauf den Versand per E-Mail an {string} vor {int} Tagen', async ({ verwalter, seed }, tenant: string, days: number) => {
 	const email = `${seed.idOf(tenant)}@dwello.test`;
 	await verwalter.sees(history).toMatch(new RegExp(`Versendet per E-Mail an ${escapeRegExp(email)}\\s*${escapeRegExp(swissDate(inDays(-days)))}`));
+});
+
+// #1089: a long entry wraps its words, never its date
+Then('stehen die Daten im Verlauf bündig untereinander, jedes auf einer Zeile', async ({ verwalter }) => {
+	await verwalter.sees(historyDates).toEqual({ offset: 0, lines: 1 });
 });

@@ -49,6 +49,7 @@ import {
 	presetNoticeText,
 	previewHasStatementOf,
 	proposedHeatingProfile,
+	heatingProfileCut,
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
@@ -789,4 +790,9 @@ Then('zeigt die Wahl das Gebäude {string} ganz', async ({ verwalter, seed }, bu
 Then('steht der Fokus auf dem Schritt {string}', async ({ verwalter }, step: string) => {
 	await verwalter.sees(currentStep).toBe(step);
 	await verwalter.sees(focusedPlace).toBe('statement-step-heading');
+});
+
+// #1089: a select clips its text; the Italian names were cut at 390 px
+Then('zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz', async ({ verwalter }) => {
+	await verwalter.sees(heatingProfileCut).toBe(0);
 });

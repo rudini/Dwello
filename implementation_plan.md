@@ -8,3 +8,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-11-04: #1089 Verlauf labels and the Italian Heizprofil choice
+
+- [x] Verlauf (`MetadataCard.svelte`): a long entry (an e-mail address) wraps its words, never its date; dates flush right on one line. Scenario «Im Verlauf stehen die Daten bündig untereinander» (statement-send.feature, 390 px), seen red (a date on 2 lines, edges 2 px apart)
+- [x] Italian Heizprofil choice at 390 px: scenario «Die Wahl des Heizprofils passt auf Italienisch aufs Telefon» (statement-generate.feature); it pins kept behaviour, the base already shows the whole name (no red run)
+- [x] lint, check, Chromium E2E of statement-send, statement-generate, statement-detail (243)
+- [ ] code-reviewer slice review
+- [ ] Persona Marco (phone)
+- [ ] PR (`Fixes #1089`)

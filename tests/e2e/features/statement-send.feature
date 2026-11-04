@@ -33,6 +33,15 @@ Funktionalität: Abrechnung per E-Mail senden
     Und hat "Nora Beispiel" per E-Mail "Nebenkostenabrechnung" mit PDF erhalten
     Und ist die "Nebenkostenabrechnung" an "Nora Beispiel" als versendet festgehalten
 
+  # #1089 (#658): eine lange Zeile des Verlaufs bricht ihre Wörter um, nie ihr Datum
+  Szenario: Im Verlauf stehen die Daten bündig untereinander
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Und "Nora Beispiel" wünscht Korrespondenz per E-Mail
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"
+    Wenn der Liegenschaftsverwalter die Abrechnung per E-Mail sendet
+    Dann hat die Abrechnung den Status "Versendet"
+    Und stehen die Daten im Verlauf bündig untereinander, jedes auf einer Zeile
+
   # #449 (Entscheid in #404, Punkt 6; Persona Helga P-2): ohne E-Mail-Adresse bietet der Versand nur den Brief an,
   # schon die Detailseite
   Szenario: Mieter ohne E-Mail-Adresse
