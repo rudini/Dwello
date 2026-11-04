@@ -8,7 +8,8 @@ const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALI
 /** #734: a PDF or file the backend refused (`pdfRefusal`): what its code says, and the way back */
 export const load: PageServerLoad = ({ url }) => {
 	const query = url.searchParams;
-	const code = query.get('code') ?? undefined;
+	// a code is upper case: `__proto__` and the like name what every object has (fallback review of #1107)
+	const code = query.get('code')?.match(/^[A-Z_]+$/)?.[0];
 	// resolved as the browser does (it drops tabs and line breaks): a path of this app only, never another site
 	const path = query.get('back');
 	const back = path !== null && URL.canParse(path, url) ? new URL(path, url) : null;

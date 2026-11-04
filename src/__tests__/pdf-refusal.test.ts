@@ -154,6 +154,16 @@ describe('Abgelehnte Datei', () => {
 		);
 	});
 
+	// fallback review of #1107: a name every object has is no code
+	it('zeigt die Fehlerseite auch mit einem Code, den Dwello nicht kennt', () => {
+		for (const code of ['__proto__', 'constructor', 'toString'])
+			expect(
+				refusedPage({
+					url: new URL(`http://dwello.test/documents/refused?code=${code}`)
+				} as never)
+			).toMatchObject({ title: 'PDF nicht verfügbar', list: '/statements' });
+	});
+
 	it('nennt ein gelöschtes Dokument im Titel', () => {
 		const page = refusedPage({
 			url: new URL('http://dwello.test/documents/refused?code=DOCUMENT_NOT_FOUND')

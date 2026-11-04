@@ -1,7 +1,7 @@
 import { pdfRefusal } from './statement';
 
 /** A file of the backend handed to the browser with its name; `inline` shows it in the browser with its kind (a Beleg
- * to look at). Any other is saved: sent as bytes, since WebKit shows a photo sent as an attachment (#424) and the
+ * to look at). Any other is saved: a photo as bytes, since WebKit shows it even as an attachment (#424) and the
  * link cannot ask for saving (`download` would save the error page too). A refusal opens the app's error page (#1093) */
 export async function proxyFile(
 	fetch: typeof globalThis.fetch,
@@ -15,7 +15,7 @@ export async function proxyFile(
 	return new Response(response.body, {
 		status: response.status,
 		headers: {
-			'content-type': inline ? kind : 'application/octet-stream',
+			'content-type': inline || kind === 'application/pdf' ? kind : 'application/octet-stream',
 			'content-disposition': (response.headers.get('content-disposition') ?? 'attachment').replace(
 				/^attachment/,
 				inline ? 'inline' : 'attachment'
