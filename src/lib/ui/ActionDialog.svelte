@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import { tick, type Snippet } from 'svelte';
 	import Alert from './Alert.svelte';
 	import Dialog from './Dialog.svelte';
@@ -37,6 +38,11 @@
 		afterError?: Snippet; // a way out of a refusal, read after the refusal itself
 	} = $props();
 
+	// «?/name» alone drops the address's query, and SvelteKit 3 then opens that other address (/documents for
+	// /documents?status=to_send): the action keeps the query, so the page and a refusal in the dialog stay
+	const target = $derived(
+		action.startsWith('?/') && page.url.search ? `${page.url.search}&${action.slice(1)}` : action
+	);
 	let form = $state<HTMLFormElement>();
 	let busy = $state(false);
 	let refusal = $state<HTMLElement>();
@@ -57,7 +63,7 @@
 <form
 	bind:this={form}
 	method="POST"
-	{action}
+	action={target}
 	use:enhance={dialogSubmit(
 		() => fields,
 		(running) => (busy = running),

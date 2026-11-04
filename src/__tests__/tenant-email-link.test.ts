@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render } from 'svelte/server';
+
+// the address the page's confirmations post to (ActionDialog), as SvelteKit gives it while rendering
+vi.mock('$app/state', () => ({ page: { url: new URL('http://localhost/contracts/c1') } }));
+
 import TenantContactCard from '../routes/tenants/[id]/TenantContactCard.svelte';
 import ContractDetailPage from '../routes/contracts/[id]/+page.svelte';
 

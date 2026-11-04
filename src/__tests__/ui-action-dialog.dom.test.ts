@@ -13,10 +13,13 @@ vi.mock('$app/forms', () => ({
 	}
 }));
 
+vi.mock('$app/state', () => import('./helpers/app-state.svelte'));
+
 import { goto } from '$app/navigation';
 import ActionDialog from '$lib/ui/ActionDialog.svelte';
 import { byTestId, settle, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
+import { page } from './helpers/app-state.svelte';
 
 async function answer(type: 'success' | 'failure' | 'redirect') {
 	const after = server.submit!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
@@ -115,5 +118,15 @@ describe('Bestätigung einer Seitenaktion', () => {
 	it('lässt nicht bestätigen, was nicht möglich ist', () => {
 		open({ disabled: true });
 		expect(byTestId<HTMLButtonElement>('tenant-delete-confirm')!.disabled).toBe(true);
+	});
+
+	// SvelteKit 3 opens the action's address when it differs from the page's: a filtered list stays as it was
+	it('sendet an die Adresse der Seite mit ihren Filtern', () => {
+		page.url = new URL('http://localhost/documents?status=to_send');
+		open({ action: '?/markSent' });
+		expect(document.querySelector('form')!.getAttribute('action')).toBe(
+			'?status=to_send&/markSent'
+		);
+		page.url = new URL('http://localhost/');
 	});
 });
