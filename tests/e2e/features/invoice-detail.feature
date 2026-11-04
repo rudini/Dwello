@@ -153,6 +153,17 @@ Funktionalität: Rechnungsdetail
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
     Dann ist der Titel der Bestätigung "Rechnung löschen" ganz zu sehen
 
+  # #653: ein Screenreader liest als Beschreibung der Bestätigung ihren ersten Absatz, nicht die Warnung und die Liste
+  @wip
+  Szenario: Die Bestätigung zum Löschen einer abgerechneten Rechnung beschreibt sich mit ihrem ersten Absatz
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Rechnung löschen will
+    Dann beschreibt sich die Bestätigung mit "Die Rechnung von Hauswart Huber über CHF 450.00 wird gelöscht. Sie fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen."
+
   # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter
   Szenario: Abgezogene Akontorechnungen beim Betrag
     Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen

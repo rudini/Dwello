@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	amountOfInvoice,
 	billedWarningOnDelete,
+	deleteDialogDescription,
 	deleteDialogTitleShare,
 	deleteDialogTitleText,
 	deductedHintAtAmount,
@@ -232,4 +233,9 @@ Then(
 Then('ist der Titel der Bestätigung {string} ganz zu sehen', async ({ verwalter }, title: string) => {
 	await verwalter.sees(deleteDialogTitleText).toBe(title);
 	await verwalter.sees(deleteDialogTitleShare).toBe(1);
+});
+
+// #653: the confirmation describes itself with its first paragraph, not with its whole content
+Then('beschreibt sich die Bestätigung mit {string}', async ({ verwalter, seed }, text: string) => {
+	await verwalter.sees(deleteDialogDescription).toBe(seed.withNames(text));
 });
