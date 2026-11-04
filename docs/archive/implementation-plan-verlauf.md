@@ -961,3 +961,11 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Dependabot's PRs got «lock file not updated» findings (#1075, #1077, #1078, #1080) because lock files were left out silently: a changed lock file is now named in the diff without its content
 - [x] Local runs: #1077 now «No issues found»; a branch without an open PR exits; the branch query returns #1101 for its branch
 - [x] PR: pushed after this archive
+## Session 2026-11-04: #1102 red main after #1101 (proposal scenario)
+
+- [x] Cause: `building-new.feature` «Die Erfassung schlägt die Abrechnungsperiode der meisten Gebäude vor …» seeded no building; the proposal counts all buildings, and in Firefox a parallel scenario's July – June building won (code review 1088-5 C-10, left open in #1101)
+- [x] Product owner approved the scenario change in #1102 («Decided (product owner)»): four own calendar-year buildings, then the page opened again
+- [x] Reproduced: the old scenario with one extra July – June building fails with «Juli – Juni», the new one passes (temporary feature, not committed)
+- [x] lint; building-new.feature in Chromium and Firefox (44)
+- [ ] All-browser CI run (workflow_dispatch) before the merge
+- [x] PR (`Fixes #1102`, `Spec change approved: #1102`): pushed after this archive
