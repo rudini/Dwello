@@ -232,12 +232,26 @@ export const Gap = {
 	between: (upper: Target, lower: Target) =>
 		question(`the gap between ${upper} and ${lower}`, async (actor) => {
 			const page = pageOf(actor);
-			const [top, bottom] = await Promise.all([upper, lower].map((one) => one.locate(page).boundingBox(quick)));
+			const [top, bottom] = await Promise.all([upper, lower].map((one) => one.locate(page).boundingBox(quick).catch(() => null)));
 			return top && bottom ? Math.round(bottom.y - (top.y + top.height)) : null;
+		}),
+	/** the room between the right edge of `left` and the left edge of `right` (#1096) */
+	beside: (left: Target, right: Target) =>
+		question(`the gap between ${left} and ${right} beside it`, async (actor) => {
+			const page = pageOf(actor);
+			const [one, other] = await Promise.all([left, right].map((part) => part.locate(page).boundingBox(quick).catch(() => null)));
+			return one && other ? Math.round(other.x - (one.x + one.width)) : null;
 		})
 };
 
 export const ThePage = {
+	/** How far the page moved since `Scroll.watch`, in pixels, once the target is gone (null while it shows; #1096) */
+	movedUntilGone: (gone: Target) =>
+		question(`how far the page moved until ${gone} left`, async (actor) => {
+			const page = pageOf(actor);
+			if (await gone.locate(page).count()) return null;
+			return page.evaluate(() => (window as { dwelloMoved?: number }).dwelloMoved ?? null);
+		}),
 	url: question('the address of the page', (actor) => pageOf(actor).url()),
 	title: question('the title of the page', (actor) => pageOf(actor).title()),
 	/** The type of the icon the page names for its browser tab, or the status when it does not load */

@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, Enter, Navigate, Uncheck, Wait } from '../screenplay/interactions';
+import { Browser, Check, Click, Enter, Navigate, Scroll, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
 import {
 	allocabilityCancel,
@@ -55,7 +55,9 @@ export const saveWithoutFuel = (categoryId: string): Activity => (actor) =>
 	actor.attemptsTo(openCategoryEdit(categoryId), Uncheck.the(fuelCheckbox), Click.on(submitButton));
 
 // #1081: the delete dialog open, its question not answered yet
-export const startDeletingCategory = (name: string) => Click.on(deleteButton(name));
+// #1096: a confirmation may cover a control at the bottom, so the landlord brings the row to the middle first
+export const startDeletingCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Scroll.toMiddle(deleteButton(name)), Click.on(deleteButton(name)));
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));
 

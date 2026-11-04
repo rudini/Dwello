@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { untrack } from 'svelte';
 	import { navigating } from '$app/stores';
 	import { dismissToast, toasts, type Toast } from '$lib/stores';
 	import IconButton from './IconButton.svelte';
@@ -36,22 +37,32 @@
 	const confirmations = $derived(
 		$toasts.filter((toast) => toast.type !== 'error' && toast.id <= shownUpTo)
 	);
-	// #1081: while a confirmation shows, the page keeps room below the focused part, so the confirmation never covers it
+	// #1096: the page never moves for a confirmation; when the focused part stands where it would stand at the
+	// bottom, it stands at the top of the window instead (it may briefly cover what has no focus)
 	let region = $state<HTMLElement>();
-	let room = $state(0);
-	$effect(() => {
-		// the confirmation stands 16 px above the bottom edge, and 16 px of the page stay clear above it
-		const clear = confirmations.length && region ? region.offsetHeight + 32 : 0;
-		room = clear;
-		document.documentElement.style.scrollPaddingBottom = clear ? `${clear}px` : '';
-		// a dialog opened meanwhile keeps the same room (Dialog.svelte, code review 1081 C-1)
-		document.documentElement.style.setProperty('--toast-room', `${clear}px`);
+	let atTop = $state(false);
+	let focusMoved = $state(0); // the handler only counts: it may run inside another component's effect
+	const place = () => {
 		const focused = document.activeElement;
-		// jsdom has no scrollIntoView
-		if (clear && focused && focused !== document.body)
-			focused.scrollIntoView?.({ block: 'nearest' });
+		if (!confirmations.length || !region || !focused || focused === document.body)
+			return (atTop = false);
+		const part = focused.getBoundingClientRect();
+		const own = region.getBoundingClientRect();
+		// the confirmation at the bottom: 16 px above the edge, and 16 px of the page clear around it
+		const top = innerHeight - 16 - own.height - 16;
+		atTop =
+			part.bottom > top &&
+			part.top < innerHeight &&
+			part.left < own.right + 16 &&
+			part.right > own.left - 16;
+	};
+	$effect(() => {
+		void focusMoved;
+		place();
 	});
 </script>
+
+<svelte:window onfocusin={() => untrack(() => focusMoved++)} />
 
 {#snippet message(toast: Toast, role?: 'alert')}
 	{@const style = toneStyle[tones[toast.type]]}
@@ -66,12 +77,11 @@
 	</div>
 {/snippet}
 
-<!-- the room to scroll the last part of the page above the confirmation -->
-<div aria-hidden="true" style:height="{room}px"></div>
-
 <!-- Above an open dialog (same layer, later on the page), which leaves it reachable -->
 <div
-	class="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96"
+	class="fixed inset-x-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96 {atTop
+		? 'top-4'
+		: 'bottom-4'}"
 	data-toast-region
 	bind:this={region}
 >
