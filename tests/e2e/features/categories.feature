@@ -221,3 +221,13 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" löscht
     Und der Liegenschaftsverwalter die Kategorie "Gartenpflege" löscht
     Dann bestätigt Dwello nur das Löschen der Kategorie "Gartenpflege"
+
+  # #1096 (Helga P-3 in #1081): nach dem Löschen sprang die Seite nach oben zum Seitentitel
+  Szenario: Nach dem Löschen steht der Fokus auf der nächsten Kategorie
+    Angenommen es gibt die umlagefähige Kategorie "Heckenschnitt"
+    Und es gibt die umlagefähige Kategorie "Heckenschnitt Ost"
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Und der Liegenschaftsverwalter ist in der Liste bei der Kategorie "Heckenschnitt"
+    Wenn der Liegenschaftsverwalter die Kategorie "Heckenschnitt" löscht
+    Dann steht der Fokus auf der Kategorie, die in der Liste auf "Heckenschnitt" folgte
+    Und bleibt die Seite an ihrer Stelle, bis die Erfolgsmeldung wieder geht

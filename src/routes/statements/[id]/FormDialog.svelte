@@ -2,7 +2,6 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import { dialogSubmit } from '$lib/ui/dialog-submit';
@@ -30,7 +29,7 @@
 		ondone?: () => void; // the action led to another page
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
-		success?: string; // said after the action succeeded; the focus then goes to the page title
+		success?: string; // said after the action succeeded; where the focus goes then: focus-after-action.ts (#1096)
 		children: Snippet;
 	} = $props();
 
@@ -52,8 +51,6 @@
 			open = false;
 			if (result.type === 'success' && said) {
 				addToast('success', said);
-				await tick(); // after the dialog has handed the focus back
-				document.querySelector<HTMLElement>('h1')?.focus(); // its button may be gone now
 			}
 		},
 		() => ondone?.(),

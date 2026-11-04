@@ -56,3 +56,5 @@ export const roomAroundConfirmation = question('the room between the focus and t
 export const pageMovedUntilConfirmationLeft = ThePage.movedUntilGone(newestSuccessToast);
 /** #1096: every confirmation the page shows, oldest first */
 export const shownConfirmations = Text.ofAll(successToast);
+/** #1096: what the part with the focus says, e.g. the name of a row's link */
+export const focusedText = Text.of(focusedPart);

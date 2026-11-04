@@ -110,8 +110,10 @@ import {
 	openSplitKeysInvoice,
 	askToRedeliver,
 	redeliverByLetter,
-	markNewPdfSent
+	markNewPdfSent,
+	stayAtMoreActions
 } from '../tasks/statement-detail';
+import { focusedText } from '../questions/app-frame';
 import { inDays, swissDate } from '../fixtures/dates';
 import { escapeRegExp } from '../questions/pattern';
 import { auditEntryDay } from '../questions/audit-log';
@@ -938,4 +940,13 @@ Then('nennt der Verlauf zuerst das PDF des Versands, dann den Versand und dann d
 Then('bietet die Detailseite eine Mahnung und das Zurücksetzen der Zahlung an', async ({ verwalter }) => {
 	await verwalter.sees(reminderOffers).toBe(1);
 	await verwalter.sees(resetOffers).toBe(1);
+});
+
+Given('der Liegenschaftsverwalter ist bei den weiteren Aktionen der Abrechnung', async ({ verwalter }) => {
+	await verwalter.attemptsTo(stayAtMoreActions);
+});
+
+// #1096: the control the landlord used keeps the focus; the page stays where it was
+Then('steht der Fokus wieder auf «Neu berechnen»', async ({ verwalter }) => {
+	await verwalter.sees(focusedText).toBe('Neu berechnen');
 });

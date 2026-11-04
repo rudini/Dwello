@@ -6,6 +6,7 @@
 	import IconButton from './IconButton.svelte';
 	import Icon from './Icon.svelte';
 	import { toneStyle } from './tone';
+	import { noteFocus, refocus } from './focus-after-action';
 
 	// Short confirmations after an action; errors interrupt (alert), the rest is read when there is a pause (status)
 	const tones = {
@@ -22,9 +23,8 @@
 		const newest = $toasts.filter((toast) => toast.type !== 'error').at(-1)?.id ?? 0;
 		if (newest <= shownUpTo || $navigating) return;
 		const timer = setTimeout(() => {
-			// the action removed the focused button, or the page changed: go on from the page title
-			if (document.activeElement === document.body)
-				document.querySelector<HTMLElement>('h1[tabindex="-1"]')?.focus();
+			// the action removed the focused control, or the page changed (#1096)
+			refocus();
 			// the reading time starts now that the confirmation is shown
 			for (const toast of $toasts)
 				if (toast.type !== 'error' && toast.id > shownUpTo && toast.duration)
@@ -64,7 +64,12 @@
 	});
 </script>
 
-<svelte:window onfocusin={() => untrack(() => focusMoved++)} />
+<svelte:window
+	onfocusin={(event) => {
+		if (!region?.contains(event.target as Node)) noteFocus(event.target as Element);
+		untrack(() => focusMoved++);
+	}}
+/>
 
 {#snippet message(toast: Toast, role?: 'alert')}
 	{@const style = toneStyle[tones[toast.type]]}
