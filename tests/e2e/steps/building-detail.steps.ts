@@ -5,9 +5,10 @@ import {
 	fuelStockCategoryNames,
 	fuelStocksHelp,
 	fuelStockDateExample,
-	fuelStockDateExampleRecent,
 	fuelStockDateExampleDay,
-	fuelStocksHelpNamesExample,
+	fuelStocksHelpDay,
+	daysBeforeToday,
+	daysAfterTodayAYearLater,
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
@@ -175,22 +176,19 @@ Then('nicht den Stichtag {string}', async ({ verwalter }, day: string) => {
 	await verwalter.sees(fuelStocksHelp).not.toContain(day);
 });
 
-// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, so only its day is fixed
+// Fachreview 1098-1 V-1: the example of the field follows the building's period; its year moves with today
 Then('nennt das Beispiel beim Stichtag den Tag {string}', async ({ verwalter }, day: string) => {
 	await verwalter.sees(fuelStockDateExample).toContain(`Beispiel: ${day}`);
 });
 
-// #1103: the day the field's example names, also in the help
-Then('nennt die Hilfe zum Tankbestand den Stichtag aus dem Beispiel beim Stichtag', async ({ verwalter }) => {
-	await verwalter.sees(fuelStockDateExampleDay).not.toBeNull(); // Fachreview 1103-1 V-4
-	await verwalter.sees(fuelStocksHelpNamesExample).toBe(true);
-});
-
-// Fachreview 1103-1 V-1: the last ended end, by its day and month, neither after today nor a year or more before it
+// #1103, Fachreview 1103-1 V-1: the field's example and the help each name the last ended end of the period
 Then(
-	'ist das Beispiel beim Stichtag der {string} der zuletzt abgelaufenen Abrechnungsperiode',
+	'nennen das Beispiel beim Stichtag und die Hilfe zum Tankbestand den {string} der zuletzt abgelaufenen Abrechnungsperiode',
 	async ({ verwalter }, end: string) => {
-		await verwalter.sees(fuelStockDateExample).toContain(`Beispiel: ${end}`);
-		await verwalter.sees(fuelStockDateExampleRecent).toBe(true);
+		for (const named of [fuelStockDateExampleDay, fuelStocksHelpDay]) {
+			await verwalter.sees(named).toMatch(new RegExp(`^${end.replaceAll('.', '\\.')}\\d{4}$`)); // V-4: a date first
+			await verwalter.sees(daysBeforeToday(named)).toBeGreaterThanOrEqual(0);
+			await verwalter.sees(daysAfterTodayAYearLater(named)).toBeGreaterThan(0);
+		}
 	}
 );

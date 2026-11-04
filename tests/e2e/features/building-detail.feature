@@ -97,8 +97,7 @@ Funktionalität: Gebäudedetail
   Szenariogrundriss: Die Hilfe zum Tankbestand und das Beispiel beim Stichtag nennen denselben Stichtag
     Angenommen das Gebäude "Birkenhof" rechnet <Periode> ab
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
-    Dann nennt die Hilfe zum Tankbestand den Stichtag aus dem Beispiel beim Stichtag
-    Und ist das Beispiel beim Stichtag der "<Ende>" der zuletzt abgelaufenen Abrechnungsperiode
+    Dann nennen das Beispiel beim Stichtag und die Hilfe zum Tankbestand den "<Ende>" der zuletzt abgelaufenen Abrechnungsperiode
 
     Beispiele:
       | Periode                  | Ende   |
