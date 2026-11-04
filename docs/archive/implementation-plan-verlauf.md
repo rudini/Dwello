@@ -981,3 +981,9 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] lint, check, type-check, vitest, E2E building features (44) and the building-detail axe and language rows (23)
 - [x] PR (`Fixes #1098`): pushed after this archive
 - [x] CI fix: Architecture fitness (Ä4/AP2) refused the date rule in the frontend; the backend sends `nextPeriodEnd` on `GET /buildings/:id` (red first: unit, route and DOM tests); closing round `docs/reviews/1098-review-2.md`: nothing found
+
+## Session: search engine tags for dwello.ch
+
+- [x] Landing pages: canonical, absolute hreflang with x-default, Open Graph, JSON-LD SoftwareApplication; `i18n/build.py` sets canonical, og:url, og:image and og:locale per language
+- [x] Slice review (`docs/reviews/seotags-review-1.md`); C-1 fixed: JPEG link preview per language
+- [x] PR: pushed after this archive
