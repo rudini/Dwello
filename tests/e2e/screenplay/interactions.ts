@@ -110,6 +110,8 @@ export const Scroll = {
 	/** from now on, notes how far the page moves from where it stands (#1096): `ThePage.movedUntilGone` */
 	watch: ((actor) =>
 		pageOf(actor).evaluate(() => {
+			// Firefox's scroll anchoring corrects layout changes by a fraction of a pixel, which scrollY rounds to 1 px
+			document.documentElement.style.overflowAnchor = 'none';
 			const from = scrollY;
 			const seen = Object.assign(window, { dwelloMoved: 0 });
 			addEventListener('scroll', () => (seen.dwelloMoved = Math.max(seen.dwelloMoved, Math.abs(scrollY - from))));
