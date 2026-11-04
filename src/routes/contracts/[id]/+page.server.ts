@@ -32,7 +32,7 @@ interface ContractDetailsData {
 	missingStatements: {
 		start: string;
 		end: string;
-		href: string;
+		href: string | null; // none for a period to bill outside Dwello (code review 1088-3 C-9)
 		invoices: { href: string; label: string };
 	}[];
 	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
@@ -74,10 +74,10 @@ async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) 
 	).catch(() => null);
 	if (!response?.ok) return [];
 	const building = String((contract.building as Row | undefined)?.id);
-	return ((await response.json()) as Range[]).map(({ start, end }) => ({
+	return ((await response.json()) as (Range & { outside: boolean })[]).map(({ start, end, outside }) => ({
 		start,
 		end,
-		href: wizardLink(building, start, end),
+		href: outside ? null : wizardLink(building, start, end),
 		invoices: invoicesOf({ start, end }, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
 	}));
 }

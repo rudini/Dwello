@@ -335,6 +335,20 @@ describe('Mietvertragsdetail', () => {
 		expect(link.textContent!.trim()).toBe('Rechnungen 2025 ansehen');
 	});
 
+	// code review 1088-3 C-9 (product owner 04.11.2026): a period an older statement of the building overlaps is named
+	// without a way into the wizard, to bill outside Dwello
+	it('nennt eine Periode, die nur ausserhalb von Dwello abzurechnen ist, ohne Weg in den Assistenten', () => {
+		open('2024-04-01', null, null, '2026-10-10', false, [
+			{ start: '2025-01-01', end: '2025-12-31', href: '/statements/generate?x' },
+			{ start: '2024-01-01', end: '2024-12-31', href: null }
+		]);
+		expect(byTestId('contract-missing-statement-link-2024-01-01')).toBeNull();
+		expect(text('contract-missing-statement-outside-2024-01-01')).toBe(
+			'Diese Periode überschneidet sich mit einer älteren Abrechnung des Gebäudes, Dwello kann sie darum nicht abrechnen. Rechnen Sie sie ausserhalb von Dwello ab und tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
+		);
+		expect(byTestId('contract-missing-statement-outside-2025-01-01')).toBeNull();
+	});
+
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
 		const missing = [{ start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' }];
 		open('2024-04-01', null, null, '2026-10-10', false, missing);

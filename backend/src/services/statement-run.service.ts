@@ -100,7 +100,7 @@ export async function generateInPeriod(input: Parameters<typeof generateStatemen
 
 /**
  * A-10, #142, #1088: the ended whole periods of the building's Abrechnungsperiode since the Vertragsbeginn with
- * Mietstage but no statement, the latest first; null for an unknown contract
+ * Mietstage but no statement, the latest first, `outside` when only outside Dwello; null for an unknown contract
  */
 export async function missingOfContract(id: string) {
 	const contract = await getContract(id);
@@ -110,7 +110,9 @@ export async function missingOfContract(id: string) {
 		listStatements({ contractId: id, limit: 1000 }),
 		listStatements({ buildingId: contract.buildingId, limit: 1000 })
 	]);
-	return missingPeriods(type, contract, statements, undefined, ofBuilding);
+	// code review 1088-3 C-9 (product owner 04.11.2026): a period an older statement of the building overlaps cannot
+	// be billed in Dwello (the run refuses it, C-7): named, to bill outside Dwello
+	return missingPeriods(type, contract, statements).map((period) => ({ ...period, outside: overlapped(period, ofBuilding).length > 0 }));
 }
 
 /** #211: per contract id, the ended periods without a statement, as on the contract page */
@@ -128,9 +130,7 @@ export async function missingByContract(listed?: Awaited<ReturnType<typeof listC
 			missingPeriods(
 				types.get(c.buildingId) ?? 'calendar',
 				c,
-				statements.filter((s) => s.contractId === c.id),
-				undefined,
-				statements.filter((s) => s.building?.id === c.buildingId)
+				statements.filter((s) => s.contractId === c.id)
 			)
 		])
 	);

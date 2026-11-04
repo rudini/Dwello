@@ -32,7 +32,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement-send-refused.json` | `POST /api/v1/statements/:id/send`, wenn die E-Mail an einen Mieter mit Korrespondenzkanal E-Mail nicht hinausgeht (400) |
 | `building-new-defaults.json` | `GET /api/v1/buildings/new-defaults` (was das Formular für ein neues Gebäude vorschlägt: die Abrechnungsperiode der meisten Gebäude, #1088) |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
-| `contract-missing-statements.json` | `GET /api/v1/contracts/:id/missing-statements` (fehlende Abrechnungen am Mietvertrag: die ganzen Perioden der Abrechnungsperiode des Gebäudes ohne Abrechnung, H-28, #1088) |
+| `contract-missing-statements.json` | `GET /api/v1/contracts/:id/missing-statements` (fehlende Abrechnungen am Mietvertrag: die ganzen Perioden der Abrechnungsperiode des Gebäudes ohne Abrechnung, `outside` wenn nur ausserhalb von Dwello abzurechnen, H-28, #1088) |
 | `contracts-missing-statements.json` | `GET /api/v1/contracts/missing-statements` (je Mietvertrag die Tage abgelaufener Perioden ohne Abrechnung, Mietvertragsliste und Übersicht, H-28; im Beispiel steht `c1` für eine Mietvertrags-ID) |
 | `statement-run-defaults.json` | `GET /api/v1/statements/run-defaults?buildingId=…&periodStart=…&periodEnd=…` (Vorgaben des Abrechnungs-Assistenten aus einem Link oder den Einstellungen, A-10, H-28) |
 | `statement-counts.json` | `GET /api/v1/statements/counts` (Anzahl Abrechnungen je Status für die Filter der Abrechnungsliste) |

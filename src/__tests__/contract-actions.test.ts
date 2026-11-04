@@ -160,13 +160,14 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 			.missingStatements;
 	const building = contractDetail.building.id;
 
-	// each period leads into the wizard and to the building's invoices of that period (#211, #454)
+	// each period leads into the wizard and to the building's invoices of that period (#211, #454); one to bill outside
+	// Dwello has no way into the wizard (code review 1088-3 C-9)
 	it('führt jede fehlende Periode in den Assistenten und zu den Rechnungen ihrer Periode', async () => {
 		expect(await missingOf(backend([]))).toEqual(
-			contractMissing.map(({ start, end }) => ({
+			contractMissing.map(({ start, end, outside }) => ({
 				start,
 				end,
-				href: `/statements/generate?building=${building}&start=${start}&end=${end}`,
+				href: outside ? null : `/statements/generate?building=${building}&start=${start}&end=${end}`,
 				invoices: {
 					href: `/invoices?building=${building}&periodStart=${start}&periodEnd=${end}`,
 					label: `Rechnungen ${start.slice(0, 4)} ansehen`

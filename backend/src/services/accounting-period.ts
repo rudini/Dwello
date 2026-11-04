@@ -41,15 +41,10 @@ export function periodsOf(statements: Omit<Dated, 'status'>[]): Range[] {
  * replaced statement no longer counts (#120); every statement is a whole period of its building (#1088, Fachreview
  * 1088-2 V-10)
  */
-export function missingPeriods(type: AccountingPeriodType, contract: Rental, statements: Dated[], today = swissToday(), building: Dated[] = []) {
+export function missingPeriods(type: AccountingPeriodType, contract: Rental, statements: Dated[], today = swissToday()) {
 	const billing = counting(statements);
 	return endedPeriodsSince(type, contract.startDate, today).filter(
-		(period) =>
-			billsIn(contract, period) &&
-			!billing.some((s) => overlaps({ start: s.periodStart, end: s.periodEnd }, period)) &&
-			// an older statement of the building in another period holds days of it: no run can bill it (code review
-			// 1088-2 C-7; such statements must not occur, product owner, Fachreview 1088-2 V-10)
-			!overlapped(period, building).length
+		(period) => billsIn(contract, period) && !billing.some((s) => overlaps({ start: s.periodStart, end: s.periodEnd }, period))
 	);
 }
 

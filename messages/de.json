@@ -2279,5 +2279,6 @@
 	"statements_building_other_period_july": "{building} rechnet von Juli bis Juni ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von Juli bis Juni.",
 	"statements_building_other_period_november": "{building} rechnet von November bis Oktober ab. Für die gewählte Abrechnungsperiode können Sie es nicht wählen. Um es abzurechnen, wählen Sie im ersten Schritt eine Abrechnungsperiode von November bis Oktober.",
 	"backend_statement_period_of_building": "Für {building} passt diese Abrechnungsperiode nicht: Ein Gebäude rechnet nur ganze Perioden seiner eigenen Abrechnungsperiode ab. Laden Sie die Seite neu.",
-	"backend_statement_period_overlaps": "Die gewählte Abrechnungsperiode überschneidet sich mit älteren Abrechnungen von {building} ({periods}). Wählen Sie eine Abrechnungsperiode, die keine davon schneidet."
+	"backend_statement_period_overlaps": "Die gewählte Abrechnungsperiode überschneidet sich mit älteren Abrechnungen von {building} ({periods}). Wählen Sie eine Abrechnungsperiode, die keine davon schneidet.",
+	"contracts_statement_missing_outside": "Diese Periode überschneidet sich mit einer älteren Abrechnung des Gebäudes, Dwello kann sie darum nicht abrechnen. Rechnen Sie sie ausserhalb von Dwello ab und tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein."
 }

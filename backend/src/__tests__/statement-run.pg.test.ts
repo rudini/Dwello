@@ -81,7 +81,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual([
-			{ start: '2025-01-01', end: '2025-12-31' }
+			{ start: '2025-01-01', end: '2025-12-31', outside: false }
 		]);
 	});
 
@@ -110,10 +110,10 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		const missing = await rent('1.01', 'Brunner', '2022-07-01', '2023-06-30', building);
 
 		const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
-		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${missing}/missing-statements`)).json()) as { start: string; end: string }[];
+		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${missing}/missing-statements`)).json()) as { start: string; end: string; outside: boolean }[];
 
 		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
-		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 	});
 });
 
@@ -172,6 +172,15 @@ describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
 		});
 		// code review 1088-2 C-7: step 2 says so before the run, so no run stops half way
 		expect((await planOf(building, '2023-01-01', '2023-12-31')).overlap).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		// code review 1088-3 C-9 (product owner 04.11.2026): the contract page still names those periods, to bill outside
+		const missing = (await (await sendJson('GET', `/api/v1/contracts/${later}/missing-statements`)).json()) as { start: string; outside: boolean }[];
+		const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, { start: string }[]>;
+		expect(missing.filter((p) => p.start <= '2023-01-01').map(({ start, outside }) => [start, outside])).toEqual([
+			['2023-01-01', true],
+			['2022-01-01', true]
+		]);
+		expect(missing.find((p) => p.start === '2024-01-01')?.outside).toBe(false);
+		expect(byContract[later].map((p) => p.start)).toContain('2023-01-01');
 	});
 });
 

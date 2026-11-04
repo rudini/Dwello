@@ -46,7 +46,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-type Planned = { contracts?: object[]; withoutFee?: object[]; otherPeriod?: string | null; skipped?: object[] };
+type Planned = { contracts?: object[]; withoutFee?: object[]; otherPeriod?: string | null; overlap?: object[]; skipped?: object[] };
 
 // The backend decides which contracts a run bills (H-28): by default the two of 2024, neither billed yet
 function backend(
@@ -73,6 +73,7 @@ function backend(
 			})),
 			withoutFee: plan.withoutFee ?? [],
 			otherPeriod: plan.otherPeriod ?? null,
+			overlap: plan.overlap ?? [],
 			skipped: plan.skipped ?? []
 		});
 	// the reads by their address; the run of any period of b1
@@ -112,7 +113,7 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 		});
 
 		expect(await billedContracts(fetch, period)).toEqual([
-			{ buildingId: 'b1', contracts: 2, billed: 1, otherPeriod: null, withoutFee: [] }
+			{ buildingId: 'b1', contracts: 2, billed: 1, otherPeriod: null, overlap: [], withoutFee: [] }
 		]);
 	});
 
@@ -136,6 +137,16 @@ describe('Gebäude mit einer anderen Abrechnungsperiode', () => {
 		const { fetch } = backend([], contracts, { otherPeriod: 'july-june' });
 
 		expect((await billedContracts(fetch, period))[0].otherPeriod).toBe('july-june');
+	});
+
+	// code review 1088-2 C-7, 1088-3 C-8: older statements the period overlaps refuse the run before any draft
+	it('lehnt den Lauf ab, bevor ein Entwurf entsteht, wenn die Periode eine ältere Abrechnung schneidet', async () => {
+		const { fetch, posts } = backend([], contracts, { overlap: [{ start: '2023-07-01', end: '2024-06-30' }] });
+
+		await expect(generateStatements(fetch, period)).rejects.toThrow(
+			'überschneidet sich mit älteren Abrechnungen von Seeblick (01.07.2023 – 30.06.2024)'
+		);
+		expect(posts).toEqual([]);
 	});
 
 	it('lehnt die Vorschau ab und sagt, welche Abrechnungsperiode das Gebäude hat', async () => {
@@ -211,6 +222,7 @@ describe('Abrechnungen erstellen', () => {
 				contracts: 1,
 				billed: 0,
 				otherPeriod: null,
+				overlap: [],
 				withoutFee: [],
 				skipped: statementRun.skipped
 			}
@@ -284,6 +296,7 @@ describe('Abrechnungen erstellen', () => {
 						...statementRun,
 						contracts: [{ ...contract('auszug', '2020-01-01', null), billed: false }],
 						otherPeriod: null,
+						overlap: [],
 						skipped: []
 					})
 				: Response.json(calculationRefused, { status: 400 })) as typeof globalThis.fetch;
@@ -608,6 +621,7 @@ describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
 				...statementRun,
 				contracts: [{ ...contracts[2], billed: false }],
 				otherPeriod: null,
+				overlap: [],
 				skipped: []
 			});
 		if (url === `${API}/categories?limit=1000`) return Response.json({ categories: names });

@@ -4,7 +4,8 @@
 	import Button from '$lib/ui/Button.svelte';
 	import { periodName } from '$lib/accounting-period';
 
-	type Missing = { start: string; end: string; href: string; invoices: { href: string; label: string } };
+	// no href: an older statement of the building overlaps the period, to bill outside Dwello (code review 1088-3 C-9)
+	type Missing = { start: string; end: string; href: string | null; invoices: { href: string; label: string } };
 	// Ended Abrechnungsperioden of the building with rent days but no statement, the newest first, each with its way to
 	// the wizard (A-10, #142) and to the building's invoices (#211); whole periods only (#1088)
 	let { missing }: { missing: Missing[] } = $props();
@@ -35,11 +36,17 @@
 					class="flex flex-wrap gap-2"
 					data-testid="contract-missing-statement-period-{period.start}"
 				>
-					<Button
-						href={period.href}
-						icon="calculate"
-						testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
-					>
+					{#if period.href}
+						<Button
+							href={period.href}
+							icon="calculate"
+							testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
+						>
+					{:else}
+						<p class="w-full" data-testid="contract-missing-statement-outside-{period.start}">
+							{m.contracts_statement_missing_outside()}
+						</p>
+					{/if}
 					<Button
 						href={period.invoices.href}
 						variant="ghost"

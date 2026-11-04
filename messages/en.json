@@ -2279,5 +2279,6 @@
 	"statements_building_other_period_july": "{building} is billed from July to June. You cannot choose it for the chosen billing period. To bill it, choose a billing period from July to June in the first step.",
 	"statements_building_other_period_november": "{building} is billed from November to October. You cannot choose it for the chosen billing period. To bill it, choose a billing period from November to October in the first step.",
 	"backend_statement_period_of_building": "This billing period does not fit {building}: a building bills only whole periods of its own billing period. Reload the page.",
-	"backend_statement_period_overlaps": "The chosen billing period overlaps older statements of {building} ({periods}). Choose a billing period that overlaps none of them."
+	"backend_statement_period_overlaps": "The chosen billing period overlaps older statements of {building} ({periods}). Choose a billing period that overlaps none of them.",
+	"contracts_statement_missing_outside": "This period overlaps an older statement of the building, so Dwello cannot bill it. Bill it outside Dwello and enter «Billed until» when you edit the rental contract."
 }
