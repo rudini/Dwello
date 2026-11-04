@@ -8,3 +8,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: search engine tags for dwello.ch
+
+- [x] Landing pages: canonical, absolute hreflang with x-default, Open Graph, JSON-LD SoftwareApplication; `i18n/build.py` sets canonical, og:url, og:image and og:locale per language
+- [ ] Slice review (`code-reviewer`)
+- [ ] PR
