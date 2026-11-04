@@ -71,7 +71,6 @@ Funktionalität: Navigation
       | Nutzungsbedingungen |
 
   # #651 (Fallback-Review von #1115): ein Tablet quer gedreht schliesst das offene Menü; der Fokus geht nicht verloren
-  @wip
   Szenario: Wird das Fenster mit offenem Menü breit, steht der Fokus auf dem aktuellen Bereich
     Angenommen das Browserfenster ist 390 Pixel breit
     Und der Liegenschaftsverwalter hat das Menü geöffnet

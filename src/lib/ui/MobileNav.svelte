@@ -19,7 +19,14 @@
 		drawer.querySelector<HTMLElement>('a, button')?.focus();
 		return () => {
 			restore();
-			opener?.focus();
+			// closed by a wide window, the menu button is hidden: the focus goes to the current area of the main
+			// navigation, not to the page (fallback review of #1115)
+			const shown = (element: HTMLElement | null | undefined) =>
+				element?.checkVisibility?.() ?? !!element;
+			const current = [...document.querySelectorAll<HTMLElement>('[aria-current="page"]')].find(
+				shown
+			);
+			(shown(opener) ? opener : current)?.focus();
 		};
 	});
 
