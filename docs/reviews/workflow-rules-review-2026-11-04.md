@@ -27,3 +27,7 @@ No proposal: `issue-1046` second row (the «flaky is not a cause» rule led to t
 ## Still open from earlier reviews, not repeated by a new note
 
 `2026-10-29`: 2 (word list of the German check), 3 (`FailRequests` and form actions). `2026-10-31`: 2 (random values taken for German). `2026-11-01`: 2 (closing-round chain of Minor fixes), 3 (older persona findings widen a task), 4 (related issues in one pull request), 6 (code-reviewer reads the feature's `Grundlage`), 9 (checks only CI can run), 10 (editing a hook runs it), 11 (shell forms a hook follows), 13 (Prettier on an appended block). `2026-11-01-2`: 1 (a persona finding against an earlier decision), 2 (prepare the next issue on a local branch). They stay as written there.
+
+## Decided (product owner), 04.11.2026
+
+Applied: 1 (`demo-records.md` restored, unchanged against the demo data; `tests/unit/persona-readme.test.ts` checks the README's file names), 3, 4 without the bare `test:e2e` change (CI on `main` runs it without `--project` for all browsers, so `2026-11-01`, 8 stays as is), 5 without the `seedFor` message (#1119), 6, 7, 9, 10, 11, 12 (in the comment of `HiddenSideways`), 13; from `2026-11-01`: 6 and 13. 8: only the «Stand» date, already in `CLAUDE.md` on `main`; a pull request still lists each removed scenario. 2 stays the product owner's setting outside the repository.

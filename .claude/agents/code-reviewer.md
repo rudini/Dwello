@@ -21,6 +21,7 @@ Check against `CLAUDE.md` and the docs it names:
   - The UI and the API path of a `throughUiOrApi` task or question answer in the same form; the API path calls system code (backend, or BFF server code in `src/lib/server`) and never copies a rule into the test.
   - Tasks are domain activities and wait for the state they lead to before the next step (no two clicks in a row on an asynchronous step).
   - The rules of `tests/e2e/CLAUDE.md`, "Rules" (isolation, negative checks, failure states, `@api`).
+  - A finding that a scenario fails, rated above Minor, first reads the feature's `Grundlage` (its Background) and the run the caller reported.
   - Features say what the Liegenschaftsverwalter wants, not how (no «klickt», «Button», «Feld»).
   - The same scenarios and the same strictness as before (`tests/e2e/CLAUDE.md`, "Rules", specification): a step definition used by a scenario without `@wip` on `main` that drops, loosens or redirects a check is a Blocker unless the pull request's `Spec change approved: #<n>` issue decides it.
 
