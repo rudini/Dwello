@@ -990,3 +990,15 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] code-reviewer round 1 (`docs/reviews/1103-review-1.md`): C-1 (Major, yes/no questions) fixed, red with the code taken out; round 2 (`1103-review-2.md`) closed it
 - [x] Persona Helga (`docs/design/personas/helga-1103.md`): no Blocker/Major; P-1, P-2 Minor stay
 - [x] PR (`Fixes #1103`): pushed after this archive
+## Session 2026-11-04: #1093 refused Beleg or Dokument opens the error page
+
+- [x] Scenarios (`invoice-detail.feature`, `tenant-documents.feature`), seen red at the missing error page
+- [x] `proxyFile` redirects a refusal through `pdfRefusal`; the Beleg of a deleted invoice says `INVOICE_NOT_FOUND`; the error page names a gone invoice or Dokument and leads to the invoice list
+- [x] Dokument links without `download` (it saved the error page as a file); `reload` as the statement list's PDF link
+- [x] Screen rows `invoice-document-refused`, `document-pdf-refused`; D7c, API spec
+- [x] Code review round 1 (`docs/reviews/1093-review-1.md`)
+- [x] Personas Helga, Marco (`helga-1093.md`, `marco-1093.md`); their P-1 and C-2 fixed: the error page says a gone invoice or Dokument was deleted
+- [x] Closing review (`docs/reviews/1093c-review-1.md`); C-1 Minor stays in its report
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-1093.md`)
+- [x] CI all browsers (WebKit: an image Dokument without `download`, #424): hand-run of ci.yml, result in the pull request
+- [x] PR: pushed after this archive

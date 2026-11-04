@@ -1,0 +1,5 @@
+{
+	"error": "Invoice not found",
+	"code": "INVOICE_NOT_FOUND",
+	"params": {}
+}

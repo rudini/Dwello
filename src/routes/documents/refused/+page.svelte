@@ -26,9 +26,14 @@
 		{/if}
 		<Button
 			variant="primary"
-			href={data.back ?? '/statements'}
+			href={data.back ?? data.list}
 			icon="arrow-back"
-			testid="pdf-refusal-back">{data.back ? m.ui_back() : m.documents_to_statements()}</Button
+			testid="pdf-refusal-back"
+			>{data.back
+				? m.ui_back()
+				: data.list === '/invoices'
+					? m.documents_to_invoices()
+					: m.documents_to_statements()}</Button
 		>
 	</div>
 </div>
