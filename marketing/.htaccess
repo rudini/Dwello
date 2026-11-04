@@ -2,6 +2,14 @@
 
 # HTTPS: the redirect is set in the Infomaniak Manager (a rule here looped: HTTPS ends in front of Apache)
 
+# www.dwello.ch to dwello.ch, path kept (the hosting serves www with its own certificate; Infomaniak's
+# web redirection had none for HTTPS). Redirects to another host, so it cannot loop like the HTTPS rule did
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteCond %{HTTP_HOST} ^www\.dwello\.ch$ [NC]
+	RewriteRule ^ https://dwello.ch%{REQUEST_URI} [R=301,L]
+</IfModule>
+
 # The build tools and notes are not part of the site
 RedirectMatch 404 ^/(i18n/|README\.md)
 
