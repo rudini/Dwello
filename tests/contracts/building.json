@@ -13,7 +13,7 @@
 	"noTank": true,
 	"accountingPeriod": "july-june",
 	"accountingPeriodLocked": true,
-	"nextPeriodEnd": "2027-06-30",
+	"stockPeriods": { "ended": { "start": "2025-07-01", "end": "2026-06-30" }, "next": { "start": "2026-07-01", "end": "2027-06-30" } },
 	"apartmentCount": 2,
 	"occupiedCount": 1,
 	"vacantCount": 1

@@ -3,7 +3,7 @@
  * building's type (no short periods), and the wizard proposes the last ended period of the type most buildings have
  */
 import { describe, expect, it } from 'bun:test';
-import { commonType, fitsType, nextPeriodEnd } from '../services/period-types';
+import { commonType, fitsType, stockPeriods } from '../services/period-types';
 
 describe('Abrechnungsperiode eines Gebäudes im Lauf', () => {
 	it('passt, wenn der Lauf die ganze Periode des Gebäudes ist', () => {
@@ -32,16 +32,19 @@ describe('Vorgeschlagene Abrechnungsperiode', () => {
 	});
 });
 
-// #1098 (Fachreview 1098-1 V-1): the Stichtag field's example is the next end of the building's period, never in the past
-describe('Nächstes Ende der Abrechnungsperiode', () => {
+// #1103: the Tankbestand's Stichtag is the end of the last ended period; help and field example name it
+describe('Stichtag des Tankbestands', () => {
 	it.each([
-		['calendar', '2026-11-04', '2026-12-31'],
-		['july-june', '2026-11-04', '2027-06-30'],
-		['november-october', '2026-11-04', '2027-10-31'],
-		['november-october', '2026-10-31', '2026-10-31'],
-		['july-june', '2026-07-01', '2027-06-30'],
-		['calendar', '2027-01-01', '2027-12-31']
-	] as const)('ist für %s am %s der %s', (type, today, end) => {
-		expect(nextPeriodEnd(type, today)).toBe(end);
+		['calendar', '2026-11-04', ['2025-01-01', '2025-12-31'], ['2026-01-01', '2026-12-31']],
+		['july-june', '2026-11-04', ['2025-07-01', '2026-06-30'], ['2026-07-01', '2027-06-30']],
+		['november-october', '2026-11-04', ['2025-11-01', '2026-10-31'], ['2026-11-01', '2027-10-31']],
+		['november-october', '2026-10-31', ['2025-11-01', '2026-10-31'], ['2026-11-01', '2027-10-31']],
+		['november-october', '2026-10-30', ['2024-11-01', '2025-10-31'], ['2025-11-01', '2026-10-31']],
+		['calendar', '2027-01-01', ['2026-01-01', '2026-12-31'], ['2027-01-01', '2027-12-31']]
+	] as const)('nennt für %s am %s die zuletzt abgelaufene Periode, heute eingeschlossen, und die folgende', (type, today, ended, next) => {
+		expect(stockPeriods(type, today)).toEqual({
+			ended: { start: ended[0], end: ended[1] },
+			next: { start: next[0], end: next[1] }
+		});
 	});
 });

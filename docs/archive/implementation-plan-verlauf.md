@@ -982,6 +982,14 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] PR (`Fixes #1098`): pushed after this archive
 - [x] CI fix: Architecture fitness (Ä4/AP2) refused the date rule in the frontend; the backend sends `nextPeriodEnd` on `GET /buildings/:id` (red first: unit, route and DOM tests); closing round `docs/reviews/1098-review-2.md`: nothing found
 
+## Session 2026-11-04: #1103 one Stichtag in the Tankbestand help and its example
+
+- [x] Scenario outline «Die Hilfe zum Tankbestand und das Beispiel beim Stichtag nennen denselben Stichtag» (building-detail.feature), seen red in all three rows
+- [x] Fachreview 1103-1 before implementing (`docs/reviews/1103-fachreview-1.md`): the last ended end is right; V-1 (Major, the scenario must pin the rule) and V-2 to V-4 fixed; Fachreview 1103-2 closed all
+- [x] `stockPeriods { ended, next }` on `GET /buildings/:id` instead of `nextPeriodEnd`; the help fills {end}, {ended}, {next}; calendar text «bei diesem Gebäude am 31.12.»; red first: unit, route and DOM tests
+- [x] code-reviewer round 1 (`docs/reviews/1103-review-1.md`): C-1 (Major, yes/no questions) fixed, red with the code taken out; round 2 (`1103-review-2.md`) closed it
+- [x] Persona Helga (`docs/design/personas/helga-1103.md`): no Blocker/Major; P-1, P-2 Minor stay
+- [x] PR (`Fixes #1103`): pushed after this archive
 ## Session 2026-11-04: #1093 refused Beleg or Dokument opens the error page
 
 - [x] Scenarios (`invoice-detail.feature`, `tenant-documents.feature`), seen red at the missing error page

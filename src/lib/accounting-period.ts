@@ -30,13 +30,16 @@ export const accountingPeriods = (): { value: AccountingPeriodType; label: strin
 	{ value: 'november-october', label: m.buildings_period_november() }
 ];
 
-/** #1098: the Tankbestand help, naming the last day of the building's own Abrechnungsperiode as the Stichtag */
-export const fuelStockIntro = (type: AccountingPeriodType) =>
+/** #1098, #1103: the Tankbestand help of a building's Abrechnungsperiode, naming its Stichtag and the periods around it */
+export const fuelStockIntro = (
+	type: AccountingPeriodType,
+	{ ended, next }: { ended: Range; next: Range }
+) =>
 	({
 		calendar: m.buildings_fuel_intro,
 		'july-june': m.buildings_fuel_intro_july_june,
 		'november-october': m.buildings_fuel_intro_november_october
-	})[type]();
+	})[type]({ end: formatDate(ended.end), ended: periodName(ended), next: periodName(next) });
 
 /** #1088 (Fachreview 1088-1 V-6): a building that bills another Abrechnungsperiode, with what to choose in step 1 */
 export function otherPeriodText(type: AccountingPeriodType, building: string) {
