@@ -955,6 +955,12 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [ ] Firefox and WebKit: the all-browser CI run (workflow_dispatch) before the merge
 - [x] PR (`Fixes #1089`): pushed after this archive
 
+## Session: fallback review after CI started by hand, lock files named (#1007 follow-up)
+
+- [x] #1101's CI was started by hand (workflow_dispatch), which carries no pull request, so the fallback skipped it: such a run on a branch other than main now finds the open pull request by its branch
+- [x] Dependabot's PRs got «lock file not updated» findings (#1075, #1077, #1078, #1080) because lock files were left out silently: a changed lock file is now named in the diff without its content
+- [x] Local runs: #1077 now «No issues found»; a branch without an open PR exits; the branch query returns #1101 for its branch
+- [x] PR: pushed after this archive
 ## Session 2026-11-04: #1102 red main after #1101 (proposal scenario)
 
 - [x] Cause: `building-new.feature` «Die Erfassung schlägt die Abrechnungsperiode der meisten Gebäude vor …» seeded no building; the proposal counts all buildings, and in Firefox a parallel scenario's July – June building won (code review 1088-5 C-10, left open in #1101)
@@ -963,3 +969,15 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] lint; building-new.feature in Chromium and Firefox (44)
 - [ ] All-browser CI run (workflow_dispatch) before the merge
 - [x] PR (`Fixes #1102`, `Spec change approved: #1102`): pushed after this archive
+
+## Session 2026-11-04: #1098 Tankbestand help names the building's own period end
+
+- [x] Scenario outline «Die Hilfe zum Tankbestand nennt den letzten Tag der Abrechnungsperiode des Gebäudes» (building-detail.feature), seen red at the July – June and November – October rows; the calendar row pins kept behaviour. New axe and language rows `building-detail-other-period default`
+- [x] Fachreview 1098-1 before implementing (`docs/reviews/1098-fachreview-1.md`): texts correct in all four languages; V-1 (Major, the Stichtag example stayed 31.12.) fixed: the example is the next end of the building's period; Fachreview 1098-2 closed it
+- [x] Help per Abrechnungsperiode (`buildings_fuel_intro_july_june`, `buildings_fuel_intro_november_october`), calendar text unchanged; DOM tests red first
+- [x] code-reviewer round 1 (`docs/reviews/1098-review-1.md`): no Blocker/Major; C-1 rejected (without the fallback svelte-check fails)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-1098.md`, `weber-1098.md`): no Blocker/Major; P-1 of both (example and help name different years): #1103
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1098.md`
+- [x] lint, check, type-check, vitest, E2E building features (44) and the building-detail axe and language rows (23)
+- [x] PR (`Fixes #1098`): pushed after this archive
+- [x] CI fix: Architecture fitness (Ä4/AP2) refused the date rule in the frontend; the backend sends `nextPeriodEnd` on `GET /buildings/:id` (red first: unit, route and DOM tests); closing round `docs/reviews/1098-review-2.md`: nothing found

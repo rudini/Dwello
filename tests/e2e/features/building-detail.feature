@@ -75,3 +75,19 @@ Funktionalität: Gebäudedetail
     Angenommen es gibt die umlagefähige Heizkosten-Kategorie "Heizungsservice"
     Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Heizung" an
     Aber weder die Kategorie "Heizungsservice" noch die Kategorie "Kaminfeger"
+
+  # #1098: seit #1088 hat jedes Gebäude seine Abrechnungsperiode; die Hilfe zum Tankbestand nennt ihren letzten Tag als
+  # Stichtag, nicht immer den 31.12., und das Beispiel im Feld folgt ihr (Personas Helga und Dr. Weber P-3 in #1088,
+  # Fachreview 1098-1 V-1)
+  Szenariogrundriss: Die Hilfe zum Tankbestand nennt den letzten Tag der Abrechnungsperiode des Gebäudes
+    Angenommen das Gebäude "Birkenhof" rechnet <Periode> ab
+    Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
+    Dann nennt die Hilfe zum Tankbestand den Stichtag "<Stichtag>"
+    Aber nicht den Stichtag "<anderer Stichtag>"
+    Und nennt das Beispiel beim Stichtag den Tag "<Stichtag>"
+
+    Beispiele:
+      | Periode                  | Stichtag | anderer Stichtag |
+      | im Kalenderjahr          | 31.12.   | 30.06.           |
+      | von Juli bis Juni        | 30.06.   | 31.12.           |
+      | von November bis Oktober | 31.10.   | 31.12.           |

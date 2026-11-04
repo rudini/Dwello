@@ -259,6 +259,13 @@
 			]
 		},
 		{
+			"name": "building-detail-other-period",
+			"path": "/buildings/{otherPeriodBuilding}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "building-edit",
 			"path": "/buildings/{building}/edit",
 			"states": [

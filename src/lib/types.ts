@@ -43,6 +43,7 @@ export type Building = BuildingAddress &
 			| 'noTank'
 			| 'accountingPeriod'
 			| 'accountingPeriodLocked'
+			| 'nextPeriodEnd'
 			| 'createdAt'
 			| 'updatedAt'
 		>

@@ -350,7 +350,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		distributionKey: seed.idOf('Nach Wohnungen'),
 		agreedBuilding: seed.idOf('Waldblick'),
 		// #1088 (code review 1088-1 C-4): no statement yet, so its Abrechnungsperiode can still be changed
-		openPeriodBuilding: seed.idOf('Holzhof')
+		openPeriodBuilding: seed.idOf('Holzhof'),
+		// #1098: its page names its own last day of the period in the Tankbestand help
+		otherPeriodBuilding: seed.idOf('Ahornweg')
 	};
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),
