@@ -835,6 +835,20 @@
 			]
 		},
 		{
+			"name": "invoice-document-refused",
+			"path": "/invoices/00000000-0000-4000-8000-000000000000/document",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "document-pdf-refused",
+			"path": "/documents/00000000-0000-4000-8000-000000000000/pdf",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "documents-refused-settings",
 			"path": "/documents/refused?code=IBAN_MISSING&back=%2Fstatements",
 			"states": [

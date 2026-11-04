@@ -248,10 +248,16 @@ export const pdfFileName = (headers: Headers) =>
 		?.match(/filename="(.*)"/)?.[1]
 		.replace(/[^\w.-]/g, '') || 'statement.pdf';
 
+/** The list a record that is gone leads back to (`pdfRefusal`, the error page) */
+export const listOfGone: Record<string, string> = {
+	STATEMENT_NOT_FOUND: '/statements',
+	INVOICE_NOT_FOUND: '/invoices'
+};
+
 /**
- * A statement PDF the backend refused: the app's own error page (#734), which says why from the refusal's
+ * A statement PDF or a file the backend refused: the app's own error page (#734), which says why from the refusal's
  * code (the backend's own text never) and leads back to the Dwello page the request came from, else to the list.
- * A statement that is gone leads only back to the list: the other pages it came from show that statement.
+ * A statement or invoice that is gone leads only back to its list: the other pages it came from show it (#1093).
  * `view`: the PDF was to open in its own tab
  */
 export function pdfRefusal(request: Request, body: unknown, kind?: 'view') {
@@ -262,7 +268,8 @@ export function pdfRefusal(request: Request, body: unknown, kind?: 'view') {
 	const referer = request.headers.get('referer') ?? '';
 	const from = URL.canParse(referer) ? new URL(referer) : null;
 	const own = from?.origin === new URL(request.url).origin;
-	if (from && own && (code !== 'STATEMENT_NOT_FOUND' || from.pathname === '/statements'))
+	const list = listOfGone[code ?? ''];
+	if (from && own && (!list || from.pathname === list))
 		refused.set('back', `${from.pathname}${from.search}`);
 	return new Response(null, {
 		status: 303,

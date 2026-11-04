@@ -1,6 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { Check, Click, EnterDate, Enter, FailRequests, Navigate, OpenInNewTab, Press, Select, Upload, Wait } from '../screenplay/interactions';
-import { Visibility } from '../screenplay/questions';
+import { Attribute, Visibility } from '../screenplay/questions';
 import { deleteButton } from '../targets/invoice-detail';
 import { successToast } from '../targets/form';
 import {
@@ -124,6 +124,9 @@ export const replaceBeleg = (file: File): Activity => (actor) =>
 export const startDeletingInvoice = Click.on(deleteButton);
 
 export const openBelegOfInvoice = OpenInNewTab(belegLink);
+// the Beleg in the tab it opens: there the browser sends no Referer (#1093)
+export const openBelegHere: Activity = async (actor) =>
+	actor.attemptsTo(Navigate.to((await actor.answer(Attribute.named('href').of(belegLink)))!));
 // the invoice of the file opened, then the whole file in a new tab
 export const openFileLarge = (fileName: string): Activity => (actor) =>
 	actor.attemptsTo(openBeleg(fileName), Wait.until(belegFileLink(fileName)), OpenInNewTab(belegFileLink(fileName)));

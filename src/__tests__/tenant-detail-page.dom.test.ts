@@ -391,8 +391,9 @@ describe('Mieterdetail', () => {
 		expect(letter.getAttribute('aria-label')).toBe('PDF herunterladen: Zahlungserinnerung · NK-2024-001');
 		expect(file.textContent!.trim()).toBe('Datei herunterladen');
 		expect(file.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
-		// gespeichert, nicht angezeigt: WebKit zeigt ein Foto sonst im Browser an (#424)
-		expect([letter, file].every((link) => link.hasAttribute('download'))).toBe(true);
+		// #1093: answered by the server (the file as an attachment, or the error page of a refusal), not saved as it is
+		expect([letter, file].every((link) => link.hasAttribute('data-sveltekit-reload'))).toBe(true);
+		expect([letter, file].some((link) => link.hasAttribute('download'))).toBe(false);
 	});
 
 	it('sagt bei einem Mieter mit Mietverträgen, dass hochgeladene Dokumente einzeln gelöscht werden', () => {

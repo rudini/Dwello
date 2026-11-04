@@ -229,6 +229,8 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		const beleg = await getBeleg(params.id);
 		if (!beleg) {
 			set.status = 404;
+			// an invoice deleted meanwhile is gone, not only its Beleg (#1093)
+			if (!(await getInvoice(params.id))) return refusal('INVOICE_NOT_FOUND', 'Invoice not found');
 			return refusal('BELEG_NOT_FOUND', 'Beleg not found');
 		}
 		return fileResponse(set, beleg);

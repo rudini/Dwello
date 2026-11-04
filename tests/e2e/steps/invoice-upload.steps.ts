@@ -50,6 +50,7 @@ import {
 	openBelegOnce,
 	openBelegOnceRead,
 	openBelegOfInvoice,
+	openBelegHere,
 	openFileLarge,
 	removeFile,
 	replaceBeleg,
@@ -401,4 +402,8 @@ Then('bietet Dwello zum Verwerfen {string} an', async ({ verwalter }, label: str
 Then('erklärt die Auswahl der Datei von {string} nichts mehr', async ({ verwalter, names }, supplier: string) => {
 	await verwalter.sees(noteOnBeleg(pdfOf(names.get(supplier)!))).not.toBeNull();
 	await verwalter.sees(whyBelegSelectedOrNot(pdfOf(names.get(supplier)!))).toBeNull();
+});
+
+When('der Liegenschaftsverwalter den Beleg öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openBelegHere);
 });
