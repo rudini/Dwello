@@ -3,7 +3,7 @@
  * building's type (no short periods), and the wizard proposes the last ended period of the type most buildings have
  */
 import { describe, expect, it } from 'bun:test';
-import { commonType, fitsType } from '../services/period-types';
+import { commonType, fitsType, nextPeriodEnd } from '../services/period-types';
 
 describe('Abrechnungsperiode eines Gebäudes im Lauf', () => {
 	it('passt, wenn der Lauf die ganze Periode des Gebäudes ist', () => {
@@ -29,5 +29,19 @@ describe('Vorgeschlagene Abrechnungsperiode', () => {
 	it('nimmt bei gleich vielen Gebäuden die zuletzt beendete und ohne Gebäude das Kalenderjahr', () => {
 		expect(commonType(['july-june', 'november-october'], '2026-11-03')).toBe('november-october');
 		expect(commonType([], '2026-11-03')).toBe('calendar');
+	});
+});
+
+// #1098 (Fachreview 1098-1 V-1): the Stichtag field's example is the next end of the building's period, never in the past
+describe('Nächstes Ende der Abrechnungsperiode', () => {
+	it.each([
+		['calendar', '2026-11-04', '2026-12-31'],
+		['july-june', '2026-11-04', '2027-06-30'],
+		['november-october', '2026-11-04', '2027-10-31'],
+		['november-october', '2026-10-31', '2026-10-31'],
+		['july-june', '2026-07-01', '2027-06-30'],
+		['calendar', '2027-01-01', '2027-12-31']
+	] as const)('ist für %s am %s der %s', (type, today, end) => {
+		expect(nextPeriodEnd(type, today)).toBe(end);
 	});
 });

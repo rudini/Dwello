@@ -19,6 +19,12 @@ export function lastCompletedPeriod(type: AccountingPeriodType, today = swissTod
 	return { start: `${runningSince - 1}-${month(first)}-01`, end: daysAfter(`${runningSince}-${month(first)}-01`, -1) };
 }
 
+/** #1098 (Fachreview 1098-1 V-1): the end of the running period, today included: the example of the Tankbestand's Stichtag */
+export function nextPeriodEnd(type: AccountingPeriodType, today = swissToday()) {
+	const { end } = lastCompletedPeriod(type, today);
+	return `${Number(end.slice(0, 4)) + 1}${end.slice(4)}`;
+}
+
 /** #1088: whether a run's period is a whole period of the type; there are no short periods (product owner 03.11.2026) */
 export function fitsType(type: AccountingPeriodType, period: Range) {
 	const whole = lastCompletedPeriod(type, daysAfter(period.end, 1));

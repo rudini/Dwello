@@ -3,6 +3,8 @@ import { test } from '../fixtures/test';
 import {
 	buildingAddress,
 	fuelStockCategoryNames,
+	fuelStocksHelp,
+	fuelStockDateExample,
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
@@ -152,3 +154,25 @@ Then(
 		await verwalter.sees(fuelStockCategoryNames).not.toContain(names.get(second) ?? second);
 	}
 );
+
+// #1098: the building's own Abrechnungsperiode (#1088); «von Juli bis Juni» is in statement-generate.steps.ts
+Given('das Gebäude {string} rechnet im Kalenderjahr ab', async ({ seed }, building: string) => {
+	await seed.accountingPeriod(building, 'calendar');
+});
+
+Given('das Gebäude {string} rechnet von November bis Oktober ab', async ({ seed }, building: string) => {
+	await seed.accountingPeriod(building, 'november-october');
+});
+
+Then('nennt die Hilfe zum Tankbestand den Stichtag {string}', async ({ verwalter }, day: string) => {
+	await verwalter.sees(fuelStocksHelp).toContain(day);
+});
+
+Then('nicht den Stichtag {string}', async ({ verwalter }, day: string) => {
+	await verwalter.sees(fuelStocksHelp).not.toContain(day);
+});
+
+// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, so only its day is fixed
+Then('nennt das Beispiel beim Stichtag den Tag {string}', async ({ verwalter }, day: string) => {
+	await verwalter.sees(fuelStockDateExample).toContain(`Beispiel: ${day}`);
+});

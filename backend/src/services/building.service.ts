@@ -10,7 +10,7 @@ import { apartmentStatus } from './apartment.service';
 import { everyWordIn } from './word-search';
 import type { BuildingWithStats } from '../api/building';
 import { CodedError } from './coded-error';
-import { commonType } from './period-types';
+import { commonType, nextPeriodEnd } from './period-types';
 
 export interface BuildingFilters {
 	search?: string;
@@ -134,7 +134,8 @@ export async function getBuilding(id: string): Promise<BuildingWithStats | null>
 		apartmentCount: Number(counts?.total ?? 0),
 		occupiedCount: Number(counts?.occupied ?? 0),
 		vacantCount: Number(counts?.vacant ?? 0),
-		accountingPeriodLocked: await hasStatement(id)
+		accountingPeriodLocked: await hasStatement(id),
+		nextPeriodEnd: nextPeriodEnd(building.accountingPeriod)
 	};
 }
 
