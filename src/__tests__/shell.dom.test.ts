@@ -27,6 +27,26 @@ const user = {
 	name: 'Vera Verwalter',
 	email: 'vera@example.ch'
 };
+// the window width the menu reacts to (#651); jsdom has no matchMedia
+const wide = vi.hoisted(() => {
+	const listeners = new Set<(event: Event) => void>();
+	return {
+		matches: false,
+		listeners,
+		set(matches: boolean) {
+			this.matches = matches;
+			listeners.forEach((listener) => listener(new Event('change')));
+		}
+	};
+});
+vi.stubGlobal('matchMedia', () => ({
+	get matches() {
+		return wide.matches;
+	},
+	addEventListener: (_: string, listener: (event: Event) => void) => wide.listeners.add(listener),
+	removeEventListener: (_: string, listener: (event: Event) => void) => wide.listeners.delete(listener)
+}));
+
 const press = (key: string) => {
 	document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
 	flushSync();
@@ -119,6 +139,37 @@ describe('Menü für kleine Bildschirme', () => {
 		expect(drawer.contains(document.activeElement)).toBe(true);
 		press('Escape');
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
+	});
+
+	// #651: a screen reader's browse mode stays in the open menu; the scrim still closes it, toasts stay readable
+	it('macht die Seite dahinter unerreichbar, solange es offen ist', () => {
+		document.body.innerHTML =
+			'<main data-testid="page-main"></main><div data-toast-region data-testid="toasts"></div><div id="shell"></div>';
+		show(MobileNav, {}, document.getElementById('shell')!);
+		mobileNavOpen.set(true);
+		flushSync();
+		const inert = () =>
+			['page-main', 'toasts', 'mobile-nav-scrim'].filter((id) => byTestId(id)?.closest('[inert]'));
+		expect(inert()).toEqual(['page-main']);
+		expect(document.querySelector('[role="dialog"]')!.closest('[inert]')).toBeNull();
+		closeMobileNav();
+		flushSync();
+		expect(document.querySelector('[inert]')).toBeNull();
+	});
+
+	// #651: a tablet turned to landscape hides the menu; the page behind it must not stay inert
+	it('schliesst sich, wenn das Fenster so breit wird, dass die Hauptnavigation erscheint', () => {
+		document.body.innerHTML = '<main data-testid="page-main"></main><div id="shell"></div>';
+		show(MobileNav, {}, document.getElementById('shell')!);
+		mobileNavOpen.set(true);
+		flushSync();
+		wide.set(true);
+		flushSync();
+		let open = true;
+		mobileNavOpen.subscribe((value) => (open = value))();
+		expect(open).toBe(false);
+		expect(document.querySelector('[inert]')).toBeNull();
+		wide.set(false);
 	});
 });
 

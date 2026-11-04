@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Button from './Button.svelte';
+	import { makeInert } from './inert';
 
 	// Confirmation of an action: the title asks, the content names the consequence, the button repeats the verb
 	let {
@@ -48,18 +49,6 @@
 		if (onrequestclose) return onrequestclose();
 		open = false;
 		onclose?.();
-	}
-
-	// Everything around the dialog is inert while it is open, so a screen reader's browse mode stays inside too;
-	// only the toasts stay reachable, so one raised meanwhile is still read out and can be closed
-	function makeInert(dialog: HTMLElement) {
-		const around: Element[] = [];
-		for (let node = dialog; node.parentElement && node !== document.body; node = node.parentElement)
-			for (const sibling of node.parentElement.children)
-				if (sibling !== node && !sibling.matches('[inert], [data-toast-region]'))
-					around.push(sibling);
-		around.forEach((element) => element.setAttribute('inert', ''));
-		return () => around.forEach((element) => element.removeAttribute('inert'));
 	}
 
 	// Focus starts on "Abbrechen", stays inside while open and returns to the opener afterwards
