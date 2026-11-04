@@ -28,6 +28,7 @@ const building = (overrides: Record<string, unknown> = {}) => ({
 	apartmentCount: 4,
 	occupiedCount: 3,
 	vacantCount: 1,
+	accountingPeriod: 'calendar',
 	...overrides
 });
 const list = (buildings: ReturnType<typeof building>[], total = buildings.length) =>
@@ -260,6 +261,61 @@ describe('Tankbestand', () => {
 			form
 		} as never);
 	const section = () => byTestId('fuel-stocks')!.textContent!.replace(/\s+/g, ' ');
+
+	// #1098: since #1088 each building has its own Abrechnungsperiode; the help names its last day as the Stichtag
+	it.each([
+		['calendar', '31.12.', '30.06.'],
+		['july-june', '30.06.', '31.12.'],
+		['november-october', '31.10.', '31.12.']
+	])(
+		'nennt als Stichtag den letzten Tag der Abrechnungsperiode %s des Gebäudes',
+		(accountingPeriod, day, other) => {
+			show(BuildingPage, {
+				data: {
+					building: building({ accountingPeriod }),
+					apartments: [],
+					fuelStocks: [],
+					heatingCategories
+				},
+				form: null
+			} as never);
+
+			const help = byTestId('fuel-stocks-intro')!.textContent!;
+			expect(help).toContain(`am letzten Tag jeder Abrechnungsperiode`);
+			expect(help).toContain(day);
+			expect(help).not.toContain(other);
+		}
+	);
+
+	// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, never one in the past
+	it.each([
+		['calendar', '2026-11-04', '31.12.2026'],
+		['july-june', '2026-11-04', '30.06.2027'],
+		['november-october', '2026-11-04', '31.10.2027'],
+		['november-october', '2026-10-31', '31.10.2026']
+	])(
+		'schlägt beim Stichtag das nächste Ende der Abrechnungsperiode %s vor (heute %s)',
+		(accountingPeriod, today, example) => {
+			vi.useFakeTimers({ toFake: ['Date'] });
+			vi.setSystemTime(new Date(`${today}T10:00:00Z`));
+			try {
+				show(BuildingPage, {
+					data: {
+						building: building({ accountingPeriod }),
+						apartments: [],
+						fuelStocks: [],
+						heatingCategories
+					},
+					form: null
+				} as never);
+				expect(byTestId('fuel-stock-date-input-help')!.textContent).toContain(
+					`Beispiel: ${example}`
+				);
+			} finally {
+				vi.useRealTimers();
+			}
+		}
+	);
 
 	it('listet die Stichtage mit Wert und Kategorie und erklärt, wozu sie dienen und wie man bewertet', () => {
 		detail([

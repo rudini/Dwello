@@ -7,6 +7,7 @@ import {
 	fuelStockCategories,
 	fuelStocksHeading,
 	fuelStocksIntro,
+	fuelStockDateHelp,
 	noTankValue,
 	yearBuiltValue
 } from '../targets/building-detail';
@@ -22,3 +23,4 @@ export const fuelStocksTitle = Text.of(fuelStocksHeading);
 export const fuelStockCategoryNames = Text.ofAll(fuelStockCategories);
 // #1098: the help names the last day of the building's own Abrechnungsperiode
 export const fuelStocksHelp = Text.of(fuelStocksIntro);
+export const fuelStockDateExample = Text.of(fuelStockDateHelp);

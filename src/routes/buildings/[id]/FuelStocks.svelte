@@ -7,6 +7,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
+	import { fuelStockIntro, nextPeriodEnd, type AccountingPeriodType } from '$lib/accounting-period';
 	import type { PageData } from './$types';
 
 	type FuelStock = NonNullable<PageData['fuelStocks']>[number];
@@ -15,12 +16,14 @@
 	// Heating oil or pellets in the tank (Tankbestand): statements take the consumption, not the purchases
 	let {
 		stocks,
+		period,
 		categories,
 		errors = {},
 		saved = false,
 		deleteError
 	}: {
 		stocks: FuelStock[] | null; // null: could not be loaded
+		period: AccountingPeriodType; // #1098: the building's own, its last day is the Stichtag
 		categories: { id: string; name: string }[] | null; // null: could not be loaded
 		errors?: Record<string, string>;
 		saved?: boolean;
@@ -34,7 +37,7 @@
 
 <Panel title={m.buildings_fuel_title()} testid="fuel-stocks">
 	<p class="text-ink-muted" data-testid="fuel-stocks-intro">
-		{m.buildings_fuel_intro()}
+		{fuelStockIntro(period)}
 	</p>
 
 	{#if stocks === null}
@@ -52,6 +55,7 @@
 				name="readingDate"
 				label={m.buildings_fuel_date()}
 				error={errors.readingDate}
+				example={nextPeriodEnd(period)}
 				testid="fuel-stock-date-input"
 			/>
 			<MoneyInput

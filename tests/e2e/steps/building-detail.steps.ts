@@ -4,6 +4,7 @@ import {
 	buildingAddress,
 	fuelStockCategoryNames,
 	fuelStocksHelp,
+	fuelStockDateExample,
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
@@ -169,4 +170,9 @@ Then('nennt die Hilfe zum Tankbestand den Stichtag {string}', async ({ verwalter
 
 Then('nicht den Stichtag {string}', async ({ verwalter }, day: string) => {
 	await verwalter.sees(fuelStocksHelp).not.toContain(day);
+});
+
+// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, so only its day is fixed
+Then('nennt das Beispiel beim Stichtag den Tag {string}', async ({ verwalter }, day: string) => {
+	await verwalter.sees(fuelStockDateExample).toContain(`Beispiel: ${day}`);
 });

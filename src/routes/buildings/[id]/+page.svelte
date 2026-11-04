@@ -79,6 +79,7 @@
 
 	<FuelStocks
 		stocks={data.fuelStocks}
+		period={building.accountingPeriod ?? 'calendar'}
 		categories={data.heatingCategories}
 		errors={form?.fuelStockErrors}
 		saved={!!form?.fuelStockSaved}

@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { formatDate } from './utils/format';
+import { localToday } from './contract-status';
 import type { BuildingWithStats } from '../../backend/src/api/building';
 
 type Range = { start: string; end: string };
@@ -29,6 +30,28 @@ export const accountingPeriods = (): { value: AccountingPeriodType; label: strin
 	{ value: 'july-june', label: m.buildings_period_july() },
 	{ value: 'november-october', label: m.buildings_period_november() }
 ];
+
+/** #1098: the last day of a building's Abrechnungsperiode, as MM-DD */
+const LAST_DAY: Record<AccountingPeriodType, string> = {
+	calendar: '12-31',
+	'july-june': '06-30',
+	'november-october': '10-31'
+};
+
+/** #1098 (Fachreview 1098-1 V-1): the next end of a building's Abrechnungsperiode from today on, never one in the past */
+export function nextPeriodEnd(type: AccountingPeriodType, today = localToday()) {
+	const year = Number(today.slice(0, 4));
+	const end = `${year}-${LAST_DAY[type]}`;
+	return formatDate(end >= today ? end : `${year + 1}-${LAST_DAY[type]}`);
+}
+
+/** #1098: the Tankbestand help, naming the last day of the building's own Abrechnungsperiode as the Stichtag */
+export const fuelStockIntro = (type: AccountingPeriodType) =>
+	({
+		calendar: m.buildings_fuel_intro,
+		'july-june': m.buildings_fuel_intro_july_june,
+		'november-october': m.buildings_fuel_intro_november_october
+	})[type]();
 
 /** #1088 (Fachreview 1088-1 V-6): a building that bills another Abrechnungsperiode, with what to choose in step 1 */
 export function otherPeriodText(type: AccountingPeriodType, building: string) {
