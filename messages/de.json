@@ -1153,6 +1153,8 @@
 	"documents_refused_invoice": "Rechnung nicht gefunden",
 	"documents_refused_document": "Dokument nicht gefunden",
 	"documents_to_invoices": "Zu den Rechnungen",
+	"documents_refused_invoice_gone": "Diese Rechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.",
+	"documents_refused_document_gone": "Dieses Dokument gibt es nicht mehr. Wahrscheinlich wurde es gelöscht.",
 	"documents_created_to": "An {name}, erstellt am {date}, {channel}",
 	"documents_created": "erstellt am {date}, {channel}",
 	"documents_download": "PDF herunterladen",

@@ -142,6 +142,23 @@ describe('Abgelehnte Datei', () => {
 		expect(page).toMatchObject({ title: 'Rechnung nicht gefunden', back: null, list: '/invoices' });
 	});
 
+	// personas Helga and Marco 1093 P-1, code review 1093 C-2: reloading the error page shows it again
+	it('sagt bei einer gelöschten Rechnung oder einem gelöschten Dokument, dass es gelöscht wurde, ohne neu laden zu lassen', () => {
+		const sentenceOf = (code: string) =>
+			(
+				refusedPage({
+					url: new URL(`http://dwello.test/documents/refused?code=${code}`)
+				} as never) as { sentence: string }
+			).sentence;
+
+		expect(sentenceOf('INVOICE_NOT_FOUND')).toBe(
+			'Diese Rechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.'
+		);
+		expect(sentenceOf('DOCUMENT_NOT_FOUND')).toBe(
+			'Dieses Dokument gibt es nicht mehr. Wahrscheinlich wurde es gelöscht.'
+		);
+	});
+
 	it('nennt ein gelöschtes Dokument im Titel', () => {
 		const page = refusedPage({
 			url: new URL('http://dwello.test/documents/refused?code=DOCUMENT_NOT_FOUND')

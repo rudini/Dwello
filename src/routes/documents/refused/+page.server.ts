@@ -18,12 +18,19 @@ export const load: PageServerLoad = ({ url }) => {
 		INVOICE_NOT_FOUND: m.documents_refused_invoice,
 		DOCUMENT_NOT_FOUND: m.documents_refused_document
 	};
+	// not their «Laden Sie die Seite neu»: here that shows this page again (personas 1093 P-1)
+	const deleted: Record<string, () => string> = {
+		INVOICE_NOT_FOUND: m.documents_refused_invoice_gone,
+		DOCUMENT_NOT_FOUND: m.documents_refused_document_gone
+	};
 	return {
 		title: (gone[code ?? ''] ?? m.documents_refused_pdf)(),
-		sentence: backendMessage(
-			{ code },
-			query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()
-		),
+		sentence:
+			deleted[code ?? '']?.() ??
+			backendMessage(
+				{ code },
+				query.has('view') ? m.statements_pdf_view_failed() : m.backend_pdf_failed()
+			),
 		// «//x» as a path is another site too (code review 734 C-1, round 2)
 		back:
 			back?.origin === url.origin && !back.pathname.startsWith('//')

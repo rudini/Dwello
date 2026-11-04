@@ -1153,6 +1153,8 @@
 	"documents_refused_invoice": "Fattura non trovata",
 	"documents_refused_document": "Documento non trovato",
 	"documents_to_invoices": "Alle fatture",
+	"documents_refused_invoice_gone": "Questa fattura non esiste più. Probabilmente è stata eliminata.",
+	"documents_refused_document_gone": "Questo documento non esiste più. Probabilmente è stato eliminato.",
 	"documents_created_to": "A {name}, creato il {date}, {channel}",
 	"documents_created": "creato il {date}, {channel}",
 	"documents_download": "Scaricare il PDF",

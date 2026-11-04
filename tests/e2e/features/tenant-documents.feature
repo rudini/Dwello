@@ -78,7 +78,7 @@ Funktionalität: Dokumente eines Mieters
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Und das Dokument "Ausweiskopie" von "Lea Frei" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" herunterladen will
-    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Das Dokument gibt es nicht mehr. Laden Sie die Seite neu."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Dieses Dokument gibt es nicht mehr. Wahrscheinlich wurde es gelöscht."
 
   # #1093: zurück zum Mieter, dessen Seite es noch gibt
   Szenario: Von der Fehlerseite eines Dokuments zurück zum Mieter

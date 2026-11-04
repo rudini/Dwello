@@ -176,7 +176,7 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Und die Rechnung von "Hauswart Huber" ist inzwischen gelöscht
     Wenn der Liegenschaftsverwalter den Beleg öffnet
-    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Die Rechnung wurde nicht gefunden. Laden Sie die Seite neu."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Diese Rechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht."
 
   # #1093: die Rechnung gibt es nicht mehr, der Weg führt zur Liste
   Szenario: Von der Fehlerseite eines Belegs zu den Rechnungen

@@ -1153,6 +1153,8 @@
 	"documents_refused_invoice": "Facture introuvable",
 	"documents_refused_document": "Document introuvable",
 	"documents_to_invoices": "Vers les factures",
+	"documents_refused_invoice_gone": "Cette facture n’existe plus. Elle a probablement été supprimée.",
+	"documents_refused_document_gone": "Ce document n’existe plus. Il a probablement été supprimé.",
 	"documents_created_to": "À {name}, créé le {date}, {channel}",
 	"documents_created": "créé le {date}, {channel}",
 	"documents_download": "Télécharger le PDF",

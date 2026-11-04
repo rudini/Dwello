@@ -1153,6 +1153,8 @@
 	"documents_refused_invoice": "Invoice not found",
 	"documents_refused_document": "Document not found",
 	"documents_to_invoices": "Go to invoices",
+	"documents_refused_invoice_gone": "This invoice no longer exists. It was probably deleted.",
+	"documents_refused_document_gone": "This document no longer exists. It was probably deleted.",
 	"documents_created_to": "To {name}, created on {date}, {channel}",
 	"documents_created": "created on {date}, {channel}",
 	"documents_download": "Download PDF",

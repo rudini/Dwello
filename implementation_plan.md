@@ -15,7 +15,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `proxyFile` redirects a refusal through `pdfRefusal`; the Beleg of a deleted invoice says `INVOICE_NOT_FOUND`; the error page names a gone invoice or Dokument and leads to the invoice list
 - [x] Dokument links without `download` (it saved the error page as a file); `reload` as the statement list's PDF link
 - [x] Screen rows `invoice-document-refused`, `document-pdf-refused`; D7c, API spec
-- [ ] Code review
-- [ ] Persona (UI changed)
+- [x] Code review round 1 (`docs/reviews/1093-review-1.md`)
+- [x] Personas Helga, Marco (`helga-1093.md`, `marco-1093.md`); their P-1 and C-2 fixed: the error page says a gone invoice or Dokument was deleted
 - [ ] CI all browsers (WebKit: an image Dokument without `download`, #424)
 - [ ] PR
