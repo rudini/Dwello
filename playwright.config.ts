@@ -47,6 +47,7 @@ mkdirSync(freshBackups, { recursive: true });
 const frontendEnv = {
 	PORT: '3100',
 	ORIGIN: 'http://localhost:3100',
+	PROTOCOL_HEADER: 'x-e2e-proto',
 	BODY_SIZE_LIMIT: '11M', // as the Dockerfile: uploaded documents of up to 10 MB
 	BACKEND_URL: E2E_BACKEND_URL,
 	JWT_SECRET: E2E_JWT_SECRET,
@@ -254,6 +255,7 @@ export default defineConfig<{ driver: Driver }>({
 		// A click on a missing element fails after 10 s naming the action, not only at the test timeout
 		actionTimeout: 10000,
 		locale: 'de-CH',
+		extraHTTPHeaders: { 'x-e2e-proto': 'http' },
 		screenshot: 'only-on-failure',
 		video: 'off',
 		// kept for every failing test: without retries, «on-first-retry» never recorded one (O-47)
