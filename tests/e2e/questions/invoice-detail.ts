@@ -1,8 +1,9 @@
-import { Count, Text } from '../screenplay/questions';
+import { Count, ShareInViewport, Text } from '../screenplay/questions';
 import {
 	invoiceNumber,
 	amount,
 	billedIn,
+	deleteDialogTitle,
 	deleteDialogWarning,
 	deductedHint,
 	deductedRule,
@@ -34,3 +35,5 @@ export const deductedHintAtAmount = Text.of(deductedHint);
 export const deductedRuleAtAmount = Text.of(deductedRule);
 export const statementsOfInvoice = Text.of(billedIn);
 export const billedWarningOnDelete = Text.of(deleteDialogWarning);
+export const deleteDialogTitleText = Text.of(deleteDialogTitle);
+export const deleteDialogTitleShare = ShareInViewport.of(deleteDialogTitle);

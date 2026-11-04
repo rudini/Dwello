@@ -3,6 +3,8 @@ import { test } from '../fixtures/test';
 import {
 	amountOfInvoice,
 	billedWarningOnDelete,
+	deleteDialogTitleShare,
+	deleteDialogTitleText,
 	deductedHintAtAmount,
 	deductedRuleAtAmount,
 	statementsOfInvoice,
@@ -225,3 +227,9 @@ Then(
 		await verwalter.sees(billedWarningOnDelete).toContain(`${await seed.statementNumber(tenant, thisYear())}, ${status}`);
 	}
 );
+
+// #653: on a phone the long confirmation opens at its top
+Then('ist der Titel der Bestätigung {string} ganz zu sehen', async ({ verwalter }, title: string) => {
+	await verwalter.sees(deleteDialogTitleText).toBe(title);
+	await verwalter.sees(deleteDialogTitleShare).toBe(1);
+});

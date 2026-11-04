@@ -33,6 +33,9 @@ export const billedInLink = (statementNumber: string) =>
 	target(`Abrechnung ${statementNumber} der Rechnung`, (page) =>
 		page.getByTestId('invoice-billed-in-link').filter({ hasText: statementNumber })
 	);
+export const deleteDialogTitle = target('Titel der Bestätigung zum Löschen', (page) =>
+	page.getByRole('dialog').getByRole('heading')
+);
 export const deleteDialogWarning = target('Warnung in der Bestätigung zum Löschen', (page) =>
 	page.getByRole('dialog').getByTestId('invoice-billed-warning')
 );

@@ -21,6 +21,13 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter den Mietvertrag beendet
     Dann endet der Mietvertrag heute
 
+  # #653: ein Dialog mit Feldern beginnt im ersten Feld, so folgt die Bestätigung erst nach den Feldern
+  @wip
+  Szenario: Der Dialog zum Beenden beginnt im Feld Vertragsende
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
+    Dann steht der Fokus im Feld "Vertragsende" des Dialogs
+
   # #511 (Persona Dr. Weber 461, P-3, P-4): das Vertragsende ist nicht immer der Kündigungstermin; kündigt der
   # Vermieter, braucht es das amtliche Formular (Art. 266l bis 266o OR)
   Szenario: Der Dialog zum Beenden erklärt Vertragsende und Kündigung durch den Vermieter

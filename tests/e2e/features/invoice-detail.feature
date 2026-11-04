@@ -142,6 +142,18 @@ Funktionalität: Rechnungsdetail
     Und rät die Bestätigung zum Löschen der Rechnung "Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen."
     Und sagt die Bestätigung zum Löschen einer abgerechneten Rechnung "Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter"
 
+  # #653 (Persona Marco 245 P-3): auf dem Telefon öffnet die lange Bestätigung oben, ihr Titel ist zu sehen
+  @wip
+  Szenario: Die lange Bestätigung zum Löschen öffnet auf dem Telefon oben
+    Angenommen das Browserfenster ist 390 auf 640 Pixel gross
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Rechnung löschen will
+    Dann ist der Titel der Bestätigung "Rechnung löschen" ganz zu sehen
+
   # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter
   Szenario: Abgezogene Akontorechnungen beim Betrag
     Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen
