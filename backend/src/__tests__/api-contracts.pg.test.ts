@@ -1209,6 +1209,19 @@ describe('API-Verträge der Ablehnungen mit Code', () => {
 		expect(drift(await sample('document-not-found'), await response.json())).toEqual([]);
 	});
 
+	// #1093: the file of a Dokument or the Beleg of an invoice deleted meanwhile
+	it('GET /documents/:id/pdf eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {
+		const response = await callApi(`/api/v1/documents/${crypto.randomUUID()}/pdf`);
+		expect(response.status).toBe(404);
+		expect(drift(await sample('document-not-found'), await response.json())).toEqual([]);
+	});
+
+	it('GET /invoices/:id/document einer gelöschten Rechnung liefert die Felder von invoice-not-found.json', async () => {
+		const response = await callApi(`/api/v1/invoices/${crypto.randomUUID()}/document`);
+		expect(response.status).toBe(404);
+		expect(drift(await sample('invoice-not-found'), await response.json())).toEqual([]);
+	});
+
 	it('PUT /documents/:id/sent eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {
 		const response = await sendJson('PUT', `/api/v1/documents/${crypto.randomUUID()}/sent`, {});
 		expect(response.status).toBe(404);

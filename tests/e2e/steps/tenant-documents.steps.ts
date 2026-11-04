@@ -17,6 +17,7 @@ import {
 	confirmDeleting,
 	imageFile,
 	openDocument,
+	requestDocument,
 	pdfFile,
 	startDeletingDocument,
 	uploadDocument,
@@ -141,4 +142,8 @@ Then(
 Then('kann der Liegenschaftsverwalter die {string} nicht löschen', async ({ verwalter }, title: string) => {
 	await verwalter.sees(documentFor(title, '')).toContain(title);
 	await verwalter.sees(deleteOffersFor(title)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter das Dokument {string} herunterladen will', async ({ verwalter }, title: string) => {
+	await verwalter.attemptsTo(requestDocument(title));
 });

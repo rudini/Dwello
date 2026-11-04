@@ -248,6 +248,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
       | statement-zip-refused  | default             |
+      | invoice-document-refused | default          |
+      | document-pdf-refused   | default             |
       | documents-refused-settings | default        |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |

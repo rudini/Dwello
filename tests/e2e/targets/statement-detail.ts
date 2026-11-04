@@ -74,7 +74,7 @@ export const openRest = target('Offener Rest', (page) => page.getByTestId('state
 export const statementHistory = target('Verlauf', (page) =>
 	page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]')
 );
-export const pdfRefusalBackLink = target('Zu den Nebenkostenabrechnungen', (page) => page.getByTestId('pdf-refusal-back'));
+export const pdfRefusalBackLink = target('Weg aus der Fehlerseite', (page) => page.getByTestId('pdf-refusal-back'));
 export const pdfRefusalMessage = target('Meldung statt des PDF', (page) => page.getByTestId('pdf-refusal-message'));
 export const pdfLanguage = target('Sprache des PDFs', (page) => page.getByTestId('statement-pdf-language'));
 

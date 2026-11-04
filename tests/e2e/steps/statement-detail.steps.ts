@@ -367,9 +367,10 @@ When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ ver
 	await verwalter.attemptsTo(requestStatementPdf);
 });
 
-When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt', async ({ verwalter }) => {
-	await verwalter.attemptsTo(leavePdfRefusal);
-});
+for (const step of ['der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt', 'der Liegenschaftsverwalter die Fehlerseite verlässt'])
+	When(step, async ({ verwalter }) => {
+		await verwalter.attemptsTo(leavePdfRefusal);
+	});
 
 Then('liest der Liegenschaftsverwalter auf der Fehlerseite {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(pdfRefusalText).toBe(text);
