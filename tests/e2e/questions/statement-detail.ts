@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Gap, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
 	type SplitKeysPlace,
@@ -76,6 +76,8 @@ export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);
 export const deleteOffers = Count.of(deleteStatementButton);
 export const history = Text.of(statementHistory);
+// #1089: the dates of the Verlauf in one column, each on one line
+export const historyDates = ValueColumn.of(statementHistory);
 export const paidDateInvalid = Attribute.named('aria-invalid').of(paidDateInput);
 export const paidDateProblem = Accessible.descriptionOf(paidDateInput);
 export const heatingProfileOfStatement = Text.of(statementHeatingProfile);

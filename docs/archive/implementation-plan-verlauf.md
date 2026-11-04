@@ -943,3 +943,14 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Persona Minors around toasts: #1096
 - [ ] Firefox and WebKit: not installed here; the all-browser CI run (workflow_dispatch) before the merge
 - [x] PR (`Fixes #1081`): pushed after this archive
+
+## Session 2026-11-04: #1089 Verlauf labels and the Italian Heizprofil choice
+
+- [x] Verlauf (`MetadataCard.svelte`): a long entry (an e-mail address) wraps its words, never its date; dates flush right on one line. Scenario «Im Verlauf stehen die Daten bündig untereinander» (statement-send.feature, 390 px), seen red (a date on 2 lines, edges 2 px apart)
+- [x] Italian Heizprofil choice at 390 px: scenario «Die Wahl des Heizprofils passt auf Italienisch aufs Telefon» (statement-generate.feature); it pins kept behaviour, the base already shows the whole name (no red run)
+- [x] lint, check, Chromium E2E of statement-send, statement-generate, statement-detail (243)
+- [x] code-reviewer round 1 (`docs/reviews/1089-review-1.md`): no Blocker/Major; C-2 (an empty font shorthand in Firefox measured nothing) fixed, C-1 (the select's arrow not subtracted) stays
+- [x] Persona Marco (phone, `docs/design/personas/marco-1089.md`): no Blocker/Major; P-1 (a long address breaks over several lines at 390 px) needs another arrangement on phones and stays in the report (`break-words` tried: the address is longer than the label column)
+- [x] code-reviewer closing round (`docs/reviews/1089-review-2.md`): C-2 closed, nothing new
+- [ ] Firefox and WebKit: the all-browser CI run (workflow_dispatch) before the merge
+- [x] PR (`Fixes #1089`): pushed after this archive

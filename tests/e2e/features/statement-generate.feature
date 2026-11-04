@@ -860,3 +860,11 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
     Dann steht der Fokus auf dem Schritt "Gebäude"
+
+  # #1089 (#658): auf Italienisch war die Wahl des Heizprofils bei 390 Pixeln abgeschnitten
+  Szenario: Die Wahl des Heizprofils passt auf Italienisch aufs Telefon
+    Angenommen der Liegenschaftsverwalter die Sprache "Italiano" wählt
+    Und das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz
+    Und scrollt die Seite nicht seitwärts

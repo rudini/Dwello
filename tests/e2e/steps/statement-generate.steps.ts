@@ -48,6 +48,7 @@ import {
 	presetNoticeText,
 	previewHasStatementOf,
 	proposedHeatingProfile,
+	heatingProfileCut,
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
@@ -740,4 +741,9 @@ Then('schlägt der Assistent die Abrechnungsperiode des letzten Jahres vor', asy
 
 Then('sagt der Assistent zum Vorschlag {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(proposedPeriodText).toBe(text);
+});
+
+// #1089: a select clips its text; the Italian names were cut at 390 px
+Then('zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz', async ({ verwalter }) => {
+	await verwalter.sees(heatingProfileCut).toBe(0);
 });

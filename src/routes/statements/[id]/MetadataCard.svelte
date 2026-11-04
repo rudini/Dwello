@@ -145,8 +145,9 @@
 		<dl class="flex flex-col gap-2">
 			{#each dates as row, index (index)}
 				<div class="flex justify-between gap-4">
-					<dt class="text-ink-muted">{row.label}</dt>
-					<dd class="text-ink">{row.date}</dd>
+					<!-- a long entry (an e-mail address) wraps its words, never its date (#1089) -->
+					<dt class="min-w-0 text-ink-muted wrap-anywhere">{row.label}</dt>
+					<dd class="shrink-0 text-ink whitespace-nowrap">{row.date}</dd>
 				</div>
 			{/each}
 		</dl>
