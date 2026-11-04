@@ -5,7 +5,7 @@ import type { BuildingWithStats } from '../../backend/src/api/building';
 type Range = { start: string; end: string };
 
 /** A range by its two days: after a change of the setting «2025» could also read as 2025/26 (persona Dr. Weber P-5) */
-export const periodDays = ({ start, end }: Range) => `${formatDate(start)} – ${formatDate(end)}`;
+const periodDays = ({ start, end }: Range) => `${formatDate(start)} – ${formatDate(end)}`;
 
 /** A calendar year by its number, any other range by its two days */
 export function periodName({ start, end }: Range) {

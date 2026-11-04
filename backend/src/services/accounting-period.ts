@@ -23,14 +23,14 @@ export function endedPeriodsSince(type: AccountingPeriodType, since: string, tod
 	}
 }
 
-export const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
+const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
 export const same = (a: Range, b: Range) => a.start === b.start && a.end === b.end;
 
 /**
  * The Abrechnungsperioden of the statements, each once, the earliest first; a replaced one's too: its period stays the
  * building's for its berichtigte Abrechnung (#120, code review 199-2 C-8)
  */
-export function periodsOf(statements: Omit<Dated, 'status'>[]): Range[] {
+function periodsOf(statements: Omit<Dated, 'status'>[]): Range[] {
 	const periods = new Map(statements.map((s) => [`${s.periodStart}/${s.periodEnd}`, { start: s.periodStart, end: s.periodEnd }]));
 	return [...periods.values()].sort((a, b) => a.start.localeCompare(b.start));
 }
