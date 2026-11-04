@@ -1008,3 +1008,9 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Landing pages: canonical, absolute hreflang with x-default, Open Graph, JSON-LD SoftwareApplication; `i18n/build.py` sets canonical, og:url, og:image and og:locale per language
 - [x] Slice review (`docs/reviews/seotags-review-1.md`); C-1 fixed: JPEG link preview per language
 - [x] PR #1109: pushed after this archive
+
+## Session: www.dwello.ch to dwello.ch
+
+- [x] `marketing/.htaccess`: 301 from www.dwello.ch to https://dwello.ch with the path (Infomaniak's web redirection served a self-signed certificate on HTTPS and dropped the path; the owner deleted it)
+- [x] Slice review (`docs/reviews/www-review-1.md`); C-1 fixed: host with trailing dot or port
+- [x] PR: pushed after this archive
