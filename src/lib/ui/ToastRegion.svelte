@@ -6,7 +6,7 @@
 	import IconButton from './IconButton.svelte';
 	import Icon from './Icon.svelte';
 	import { toneStyle } from './tone';
-	import { noteFocus, refocus } from './focus-after-action';
+	import { noteFocus, refocus } from '$lib/focus-after-action';
 
 	// Short confirmations after an action; errors interrupt (alert), the rest is read when there is a pause (status)
 	const tones = {

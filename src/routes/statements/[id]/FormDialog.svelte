@@ -29,7 +29,7 @@
 		ondone?: () => void; // the action led to another page
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
-		success?: string; // said after the action succeeded; where the focus goes then: focus-after-action.ts (#1096)
+		success?: string; // said after the action succeeded; where the focus goes then: $lib/focus-after-action.ts (#1096)
 		children: Snippet;
 	} = $props();
 

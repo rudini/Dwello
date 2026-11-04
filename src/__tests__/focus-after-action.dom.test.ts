@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { noteFocus, refocus } from '$lib/ui/focus-after-action';
+import { noteFocus, refocus } from '$lib/focus-after-action';
 
 // #1096: the focus after an action that removed its control
 describe('Fokus nach einer Aktion', () => {
