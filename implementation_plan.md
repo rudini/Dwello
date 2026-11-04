@@ -8,9 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: www.dwello.ch to dwello.ch
-
-- [x] `marketing/.htaccess`: 301 from www.dwello.ch to https://dwello.ch with the path (Infomaniak's web redirection served a self-signed certificate on HTTPS and dropped the path; the owner deleted it)
-- [ ] Slice review (`code-reviewer`)
-- [ ] PR

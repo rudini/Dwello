@@ -6,7 +6,7 @@
 # web redirection had none for HTTPS). Redirects to another host, so it cannot loop like the HTTPS rule did
 <IfModule mod_rewrite.c>
 	RewriteEngine On
-	RewriteCond %{HTTP_HOST} ^www\.dwello\.ch$ [NC]
+	RewriteCond %{HTTP_HOST} ^www\.dwello\.ch\.?(:\d+)?$ [NC]
 	RewriteRule ^ https://dwello.ch%{REQUEST_URI} [R=301,L]
 </IfModule>
 
