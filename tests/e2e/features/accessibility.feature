@@ -246,6 +246,7 @@ Funktionalität: Barrierefreiheit
       | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
       | statement-zip-refused  | default             |
+      | documents-refused-settings | default        |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |

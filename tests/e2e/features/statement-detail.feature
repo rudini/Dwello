@@ -552,7 +552,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Und die Abrechnung 2024 von "Eva Frei" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
-    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht."
     Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 

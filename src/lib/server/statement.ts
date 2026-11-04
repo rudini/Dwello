@@ -1,8 +1,7 @@
 import { error } from '@sveltejs/kit';
-import { backendMessage, type BackendError } from '$lib/backend-error';
+import type { BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
 import { m } from '$lib/paraglide/messages';
-import { getLocale } from '$lib/paraglide/runtime';
 import type { StatementWithDetails as StatementResponse } from '../../../backend/src/api/statement';
 import type { Json, StatementLineItem, StatementWithDetails } from '$lib/types';
 import type { SplitKeyHint } from '$lib/types';
@@ -249,41 +248,24 @@ export const pdfFileName = (headers: Headers) =>
 		?.match(/filename="(.*)"/)?.[1]
 		.replace(/[^\w.-]/g, '') || 'statement.pdf';
 
-const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID'];
-
-const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
 /**
- * A statement PDF the backend refused, as a page in the UI language for the tab it opens in: the message of its
- * code (else `fallback`, never the backend's own text or JSON) and the way back to the list. Outside the app, so
- * without its styles: readable on a phone and in dark mode through the browser's own colours (the link in `CanvasText`, underlined); without scripts it is
- * ready at once (`data-hydrated`, which the app's pages set once they react to input)
+ * A statement PDF the backend refused: the app's own error page (#734), which says why from the refusal's
+ * code (the backend's own text never) and leads back to the Dwello page the request came from, else to the list.
+ * A statement that is gone leads only back to the list: the other pages it came from show that statement.
+ * `view`: the PDF was to open in its own tab
  */
-export function pdfRefusal(status: number, body: unknown, fallback = m.backend_pdf_failed()) {
+export function pdfRefusal(request: Request, body: unknown, kind?: 'view') {
 	const code = (body as BackendError | null)?.code;
-	const sentence = backendMessage({ code }, fallback);
-	// a refusal whose way out is in «Einstellungen» links there too (persona Dr. Weber P-2, #450)
-	const settings = SETTINGS_CODES.includes(code ?? '')
-		? `\n<a href="/config" data-testid="pdf-refusal-settings">${escaped(m.documents_to_settings())}</a>`
-		: '';
-	const page = `<!doctype html>
-<html lang="${getLocale()}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>${escaped(m.nav_statements())} - Dwello</title>
-<style>
-body { font-family: system-ui, sans-serif; font-size: 1rem; line-height: 1.5; margin: 1.5rem }
-a { display: inline-block; padding: 0.75rem 0; color: CanvasText }
-</style>
-</head>
-<body data-hydrated>
-<main>
-<p data-testid="pdf-refusal-message">${escaped(sentence)}</p>
-<a href="/statements" data-testid="pdf-refusal-back">${escaped(m.documents_to_statements())}</a>${settings}
-</main>
-</body>
-</html>`;
-	return new Response(page, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+	const refused = new URLSearchParams(code && { code });
+	if (kind) refused.set(kind, '');
+	// URL.canParse, not URL.parse: Node 20 has only the first
+	const referer = request.headers.get('referer') ?? '';
+	const from = URL.canParse(referer) ? new URL(referer) : null;
+	const own = from?.origin === new URL(request.url).origin;
+	if (from && own && (code !== 'STATEMENT_NOT_FOUND' || from.pathname === '/statements'))
+		refused.set('back', `${from.pathname}${from.search}`);
+	return new Response(null, {
+		status: 303,
+		headers: { location: `/documents/refused?${refused}` }
+	});
 }

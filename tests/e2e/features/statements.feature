@@ -67,7 +67,28 @@ Funktionalität: Nebenkostenabrechnungen
     Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
     Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter in der Liste das PDF der Abrechnung 2024 von "Anna Keller" anfordert
-    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht."
+
+  # #734: die Fehlerseite gehört zur App, ihr Tab nennt den Fehler
+  Szenario: Die Fehlerseite eines PDF nennt den Fehler im Tab und führt in die App
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für die Abrechnung 2024 von "Anna Keller" gibt es ein PDF
+    Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
+    Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter in der Liste das PDF der Abrechnung 2024 von "Anna Keller" anfordert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Abrechnung nicht gefunden"
+    Wenn der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Mietverträge"
+
+  # #734: zurück zur Liste, wie sie gefiltert war
+  Szenario: Von der Fehlerseite eines PDF zurück zur gefilterten Liste
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für die Abrechnung 2024 von "Anna Keller" gibt es ein PDF
+    Und der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter in der Liste das PDF der Abrechnung 2024 von "Anna Keller" anfordert
+    Und der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
 
   Szenario: Abrechnung eines Mieters, der während der Abrechnungsperiode eingezogen ist
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

@@ -21,6 +21,7 @@ import {
 	callTool,
 	closeTheNewAccessKey,
 	copyTheAddress,
+	bringTheAddressCopyToTheBottomEdge,
 	copyTheNewAccessKey,
 	confirmRevoking,
 	createAccessKey,
@@ -62,6 +63,11 @@ When('der Liegenschaftsverwalter den neuen Zugangsschlüssel kopiert', async ({ 
 
 When('der Liegenschaftsverwalter die Adresse für das KI-Programm beim neuen Zugangsschlüssel kopiert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(copyTheAddress);
+});
+
+// #1081: the confirmation then appears where the part the landlord used is
+Given('beim neuen Zugangsschlüssel steht das Kopieren der Adresse am unteren Rand des Fensters', async ({ verwalter }) => {
+	await verwalter.attemptsTo(bringTheAddressCopyToTheBottomEdge);
 });
 
 Then('bestätigt Dwello das Kopieren mit {string}', async ({ verwalter }, text: string) => {

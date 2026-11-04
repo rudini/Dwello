@@ -828,6 +828,13 @@
 			]
 		},
 		{
+			"name": "documents-refused-settings",
+			"path": "/documents/refused?code=IBAN_MISSING&back=%2Fstatements",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-edit",
 			"path": "/statements/{statement}/edit",
 			"states": [

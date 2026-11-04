@@ -12,6 +12,7 @@ import {
 	pageOverflowsSideways,
 	pageTitleText,
 	pageTitleWidth,
+	roomAboveConfirmation,
 	sectionLinkAddresses,
 	sectionShareInWindow,
 	sectionShown,
@@ -334,4 +335,9 @@ When(
 
 Then('sagt die Fehlerseite {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(pageTitleText).toBe(message);
+});
+
+// #1081: the confirmation covers neither what has the focus nor the line around it
+Then('verdeckt die Erfolgsmeldung nicht, was den Fokus hat', async ({ verwalter }) => {
+	await verwalter.sees(roomAboveConfirmation).toBeGreaterThanOrEqual(8);
 });

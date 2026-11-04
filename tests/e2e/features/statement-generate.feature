@@ -535,7 +535,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert
-    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht."
     Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 

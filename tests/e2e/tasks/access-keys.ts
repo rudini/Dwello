@@ -1,6 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { CallTheMcp } from '../screenplay/abilities';
-import { Click, Enter, Navigate } from '../screenplay/interactions';
+import { Click, Enter, Navigate, Scroll } from '../screenplay/interactions';
 import {
 	accessKeyNameInput,
 	accessKeysLink,
@@ -22,6 +22,7 @@ export const createAccessKey = (name: string): Activity => (actor) =>
 export const closeTheNewAccessKey = Click.on(closeNewAccessKey);
 export const copyTheNewAccessKey = Click.on(copyNewAccessKey);
 export const copyTheAddress = Click.on(copyNewAccessKeyAddress);
+export const bringTheAddressCopyToTheBottomEdge = Scroll.toBottomEdge(copyNewAccessKeyAddress);
 export const startRevokingAccessKey = (name: string): Activity => (actor) =>
 	actor.attemptsTo(goToAccessKeys, Click.on(revokeAccessKeyButton(name)));
 export const confirmRevoking = Click.on(confirmRevokeAccessKey);
