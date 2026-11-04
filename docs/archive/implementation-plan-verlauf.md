@@ -954,3 +954,12 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] code-reviewer closing round (`docs/reviews/1089-review-2.md`): C-2 closed, nothing new
 - [ ] Firefox and WebKit: the all-browser CI run (workflow_dispatch) before the merge
 - [x] PR (`Fixes #1089`): pushed after this archive
+
+## Session 2026-11-04: #1102 red main after #1101 (proposal scenario)
+
+- [x] Cause: `building-new.feature` «Die Erfassung schlägt die Abrechnungsperiode der meisten Gebäude vor …» seeded no building; the proposal counts all buildings, and in Firefox a parallel scenario's July – June building won (code review 1088-5 C-10, left open in #1101)
+- [x] Product owner approved the scenario change in #1102 («Decided (product owner)»): four own calendar-year buildings, then the page opened again
+- [x] Reproduced: the old scenario with one extra July – June building fails with «Juli – Juni», the new one passes (temporary feature, not committed)
+- [x] lint; building-new.feature in Chromium and Firefox (44)
+- [ ] All-browser CI run (workflow_dispatch) before the merge
+- [x] PR (`Fixes #1102`, `Spec change approved: #1102`): pushed after this archive

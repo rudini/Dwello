@@ -25,6 +25,15 @@ Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ 
 	await verwalter.attemptsTo(openNewBuilding);
 });
 
+// #1102: the proposal counts all buildings, also those of parallel scenarios: the scenario seeds the majority itself
+Given('es gibt vier Gebäude, die im Kalenderjahr abrechnen', async ({ seed }) => {
+	for (const title of ['Kalenderhof 1', 'Kalenderhof 2', 'Kalenderhof 3', 'Kalenderhof 4']) await seed.building(title, 'Winterthur');
+});
+
+When('der Liegenschaftsverwalter die Seite "Neues Gebäude" erneut öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openNewBuilding);
+});
+
 When(
 	'der Liegenschaftsverwalter folgendes Gebäude erfasst:',
 	async ({ verwalter, seed }, table: DataTable) => {
