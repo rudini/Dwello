@@ -138,7 +138,7 @@ describe('Meldungen', () => {
 
 	// #1096: the page never moves; the confirmation stands at the top while the focus is where it would stand
 	// fallback review on #1114: scrolling while the confirmation shows can bring the focused part under it
-	it('stellt die Erfolgsmeldung oben hin, wenn der Fokus beim Scrollen nach unten kommt', () => {
+	it('stellt die Erfolgsmeldung neu hin, wenn der Fokus beim Scrollen oder einer neuen Fenstergrösse wandert', () => {
 		vi.useFakeTimers();
 		toasts.set([]);
 		const part = document.body.appendChild(document.createElement('button'));
@@ -157,6 +157,11 @@ describe('Meldungen', () => {
 		window.dispatchEvent(new Event('scroll'));
 		flushSync();
 		expect(region.className).toContain('top-4');
+
+		top = 100; // code review 1096-6 C-1: a resize places it again too
+		window.dispatchEvent(new Event('resize'));
+		flushSync();
+		expect(region.className).toContain('bottom-4');
 		part.remove();
 	});
 
