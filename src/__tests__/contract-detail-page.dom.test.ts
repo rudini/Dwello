@@ -349,6 +349,13 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('contract-missing-statement-outside-2025-01-01')).toBeNull();
 	});
 
+	// code review 1088-4 C-12: only such a period: no sentence about the wizard
+	it('spricht nicht vom Assistenten, wenn jede fehlende Periode nur ausserhalb von Dwello abzurechnen ist', () => {
+		open('2024-04-01', null, null, '2026-10-10', false, [{ start: '2024-01-01', end: '2024-12-31', href: null }]);
+		expect(text('contract-missing-statement')).not.toContain('Assistent');
+		expect(byTestId('contract-missing-statement-outside-2024-01-01')).not.toBeNull();
+	});
+
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
 		const missing = [{ start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' }];
 		open('2024-04-01', null, null, '2026-10-10', false, missing);

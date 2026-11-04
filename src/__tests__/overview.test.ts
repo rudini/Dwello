@@ -236,6 +236,31 @@ describe('Aufgaben der Übersicht', () => {
 		});
 	});
 
+	// code review 1088-4 C-11 (product owner 04.11.2026): a period an older statement of the building overlaps is named
+	// in a task of its own, without the wizard, to bill outside Dwello
+	it('nennt eine nur ausserhalb von Dwello abzurechnende Periode in einer eigenen Aufgabe ohne Assistenten', () => {
+		const tasks = overviewTasks(
+			input({
+				missingStatements: [
+					{
+						building: 'Ahornhof',
+						buildingId: 'b2',
+						periods: [
+							{ start: '2025-01-01', end: '2025-12-31', outside: false },
+							{ start: '2023-01-01', end: '2023-12-31', outside: true }
+						]
+					}
+				]
+			})
+		);
+		expect(tasks.find((one) => one.id === 'missing-period')!.text).toContain('Noch nicht abgerechnet: Ahornhof (2025).');
+		expect(tasks.find((one) => one.id === 'missing-outside')).toMatchObject({
+			title: 'Abrechnungen ausserhalb von Dwello',
+			text: 'Ahornhof (2023): Diese Perioden überschneiden sich mit älteren Abrechnungen des Gebäudes, Dwello kann sie darum nicht abrechnen. Rechnen Sie sie ausserhalb von Dwello ab und tragen Sie bei den Mietverträgen «Abgerechnet bis» ein.',
+			href: '/contracts'
+		});
+	});
+
 	it('erinnert nicht, wenn jeder Mietvertrag abgerechnet ist', () => {
 		const tasks = overviewTasks(input({ missingStatements: [] }));
 		expect(tasks.map((task) => task.id)).not.toContain('missing-period');

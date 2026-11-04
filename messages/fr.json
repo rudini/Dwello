@@ -2282,5 +2282,8 @@
 	"statements_building_other_period_november": "{building} est décompté de novembre à octobre. Vous ne pouvez pas le choisir pour la période de décompte choisie. Pour le décompter, choisissez à la première étape une période de décompte de novembre à octobre.",
 	"backend_statement_period_of_building": "Cette période de décompte ne convient pas pour {building} : un immeuble ne décompte que des périodes entières de sa propre période de décompte. Rechargez la page.",
 	"backend_statement_period_overlaps": "La période de décompte choisie chevauche des décomptes plus anciens de {building} ({periods}). Choisissez une période de décompte qui n’en chevauche aucun.",
-	"contracts_statement_missing_outside": "Cette période chevauche un décompte plus ancien de l’immeuble, Dwello ne peut donc pas la décompter. Décomptez-la en dehors de Dwello et saisissez « Décompté jusqu’au » en modifiant le contrat de bail."
+	"contracts_statement_missing_outside": "Cette période chevauche un décompte plus ancien de l’immeuble, Dwello ne peut donc pas la décompter. Décomptez-la en dehors de Dwello et saisissez « Décompté jusqu’au » en modifiant le contrat de bail.",
+	"dashboard_task_missing_outside": "Décomptes en dehors de Dwello",
+	"dashboard_task_missing_outside_text": "{buildings} : ces périodes chevauchent des décomptes plus anciens de l’immeuble, Dwello ne peut donc pas les décompter. Décomptez-les en dehors de Dwello et saisissez « Décompté jusqu’au » dans les contrats de bail.",
+	"dashboard_task_missing_outside_action": "Voir les contrats de bail"
 }

@@ -16,7 +16,14 @@
 			? m.contracts_statement_missing({ period: periodName(missing[0]) })
 			: m.contracts_statements_missing({ count: missing.length })
 	);
-	const text = $derived(single ? m.contracts_statement_missing_text() : m.contracts_statements_missing_text());
+	// the wizard only where a period leads to it (code review 1088-4 C-12)
+	const text = $derived(
+		!missing.some((period) => period.href)
+			? ''
+			: single
+				? m.contracts_statement_missing_text()
+				: m.contracts_statements_missing_text()
+	);
 	const hint = $derived(
 		single ? m.contracts_statement_missing_billed_elsewhere() : m.contracts_statements_missing_billed_elsewhere()
 	);
@@ -27,7 +34,7 @@
 
 {#if missing.length}
 	<Alert tone="caution" {title} testid="contract-missing-statement">
-		<p>{text}</p>
+		{#if text}<p>{text}</p>{/if}
 		<p>{hint}</p>
 		<!-- each period's links on their own row (personas Helga P-4, Anna P-5 #211) -->
 		<div class="flex flex-col gap-2">

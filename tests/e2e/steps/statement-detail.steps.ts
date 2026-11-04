@@ -371,11 +371,6 @@ When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurück
 	await verwalter.attemptsTo(leavePdfRefusal);
 });
 
-// #734: the way back of a refusal page leads to the page the Liegenschaftsverwalter came from
-When('der Liegenschaftsverwalter von dort zurückkehrt', async ({ verwalter }) => {
-	await verwalter.attemptsTo(leavePdfRefusal);
-});
-
 Then('liest der Liegenschaftsverwalter auf der Fehlerseite {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(pdfRefusalText).toBe(text);
 });

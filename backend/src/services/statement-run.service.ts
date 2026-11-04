@@ -127,11 +127,11 @@ export async function missingByContract(listed?: Awaited<ReturnType<typeof listC
 	return Object.fromEntries(
 		contracts.map((c) => [
 			c.id,
-			missingPeriods(
-				types.get(c.buildingId) ?? 'calendar',
-				c,
-				statements.filter((s) => s.contractId === c.id)
-			)
+			// `outside`: an older statement of the building overlaps it, to bill outside Dwello (code review 1088-4 C-11)
+			missingPeriods(types.get(c.buildingId) ?? 'calendar', c, statements.filter((s) => s.contractId === c.id)).map((period) => ({
+				...period,
+				outside: overlapped(period, statements.filter((s) => s.building?.id === c.buildingId)).length > 0
+			}))
 		])
 	);
 }

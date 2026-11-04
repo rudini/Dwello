@@ -100,7 +100,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		const byContract = (await response.json()) as Record<string, unknown>;
 
 		expect(response.status).toBe(200);
-		expect([byContract[billed], byContract[missing]]).toEqual([[], [{ start: '2024-01-01', end: '2024-12-31' }]]);
+		expect([byContract[billed], byContract[missing]]).toEqual([[], [{ start: '2024-01-01', end: '2024-12-31', outside: false }]]);
 	});
 
 	// #1088: the list and the Übersicht follow the Abrechnungsperiode of the contract's building
@@ -112,7 +112,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
 		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${missing}/missing-statements`)).json()) as { start: string; end: string; outside: boolean }[];
 
-		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
+		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 	});
 });
@@ -181,6 +181,13 @@ describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
 		]);
 		expect(missing.find((p) => p.start === '2024-01-01')?.outside).toBe(false);
 		expect(byContract[later].map((p) => p.start)).toContain('2023-01-01');
+		// code review 1088-4 C-11: the Übersicht marks them too
+		const tasks = (await (await sendJson('GET', '/api/v1/dashboard')).json()) as {
+			contractTasks: { missingStatements: { buildingId: string; periods: { start: string; outside: boolean }[] }[] };
+		};
+		const ofBuilding = tasks.contractTasks.missingStatements.find((b) => b.buildingId === building)!;
+		expect(ofBuilding.periods.find((p) => p.start === '2023-01-01')?.outside).toBe(true);
+		expect(ofBuilding.periods.find((p) => p.start === '2024-01-01')?.outside).toBe(false);
 	});
 });
 
