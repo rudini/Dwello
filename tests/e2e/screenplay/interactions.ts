@@ -101,8 +101,10 @@ export const Select = {
 
 export const Scroll = {
 	to: (target: Target) => on(target, (element) => element.scrollIntoViewIfNeeded()),
-	/** the part at the bottom edge of the window, as after scrolling down to it (#1081) */
-	toBottomEdge: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'end' }))),
+	/** the part at the bottom edge of the window, as after scrolling down to it (#1081); 2 px inside, so that Firefox,
+	 * which may leave it a fraction of a pixel outside, does not scroll it in on the click (#1096) */
+	toBottomEdge: (target: Target) =>
+		on(target, (element) => element.evaluate((part) => (part.scrollIntoView({ block: 'end' }), scrollBy(0, 2)))),
 	/** the part in the middle of the window, clear of a confirmation that may cover the bottom (#1096) */
 	toMiddle: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'center' }))),
 	/** from now on, notes how far the page moves from where it stands (#1096): `ThePage.movedUntilGone` */
