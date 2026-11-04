@@ -13,6 +13,7 @@
 	"noTank": true,
 	"accountingPeriod": "july-june",
 	"accountingPeriodLocked": true,
+	"nextPeriodEnd": "2027-06-30",
 	"apartmentCount": 2,
 	"occupiedCount": 1,
 	"vacantCount": 1

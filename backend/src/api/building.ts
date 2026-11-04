@@ -13,4 +13,6 @@ export interface BuildingWithStats extends Building {
 	vacantCount: number;
 	/** #1088: the building has a statement, so its Abrechnungsperiode stays as it is (only `GET /buildings/:id`) */
 	accountingPeriodLocked?: boolean;
+	/** #1098: the end of its running Abrechnungsperiode, the Tankbestand's next Stichtag (only `GET /buildings/:id`) */
+	nextPeriodEnd?: string;
 }

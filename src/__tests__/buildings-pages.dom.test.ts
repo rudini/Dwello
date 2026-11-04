@@ -287,35 +287,19 @@ describe('Tankbestand', () => {
 		}
 	);
 
-	// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, never one in the past
-	it.each([
-		['calendar', '2026-11-04', '31.12.2026'],
-		['july-june', '2026-11-04', '30.06.2027'],
-		['november-october', '2026-11-04', '31.10.2027'],
-		['november-october', '2026-10-31', '31.10.2026']
-	])(
-		'schlägt beim Stichtag das nächste Ende der Abrechnungsperiode %s vor (heute %s)',
-		(accountingPeriod, today, example) => {
-			vi.useFakeTimers({ toFake: ['Date'] });
-			vi.setSystemTime(new Date(`${today}T10:00:00Z`));
-			try {
-				show(BuildingPage, {
-					data: {
-						building: building({ accountingPeriod }),
-						apartments: [],
-						fuelStocks: [],
-						heatingCategories
-					},
-					form: null
-				} as never);
-				expect(byTestId('fuel-stock-date-input-help')!.textContent).toContain(
-					`Beispiel: ${example}`
-				);
-			} finally {
-				vi.useRealTimers();
-			}
-		}
-	);
+	// Fachreview 1098-1 V-1: the example of the field is the next end of the building's period, as the backend names it
+	it('schlägt beim Stichtag das nächste Ende der Abrechnungsperiode vor, das das Backend nennt', () => {
+		show(BuildingPage, {
+			data: {
+				building: building({ accountingPeriod: 'july-june', nextPeriodEnd: '2031-06-30' }),
+				apartments: [],
+				fuelStocks: [],
+				heatingCategories
+			},
+			form: null
+		} as never);
+		expect(byTestId('fuel-stock-date-input-help')!.textContent).toContain('Beispiel: 30.06.2031');
+	});
 
 	it('listet die Stichtage mit Wert und Kategorie und erklärt, wozu sie dienen und wie man bewertet', () => {
 		detail([

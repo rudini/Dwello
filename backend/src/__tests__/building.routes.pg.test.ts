@@ -181,6 +181,16 @@ describe('Abrechnungsperiode des Gebäudes', () => {
 		expect(await read(building)).toMatchObject({ accountingPeriod: 'july-june', accountingPeriodLocked: false });
 	});
 
+	// #1098: the next end of its period, the example of the Tankbestand's Stichtag (Fachreview 1098-1 V-1)
+	it('nennt das nächste Ende der Abrechnungsperiode des Gebäudes', async () => {
+		const { building } = await rental();
+		await sendJson('PUT', `/api/v1/buildings/${building}`, { accountingPeriod: 'november-october' });
+
+		const { nextPeriodEnd } = (await read(building)) as unknown as { nextPeriodEnd: string };
+		expect(nextPeriodEnd).toMatch(/^\d{4}-10-31$/);
+		expect(nextPeriodEnd >= new Date().toISOString().slice(0, 10)).toBe(true);
+	});
+
 	it('lehnt eine Abrechnungsperiode ab, die es nicht gibt', async () => {
 		const { building } = await rental();
 
