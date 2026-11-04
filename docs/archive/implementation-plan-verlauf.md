@@ -963,3 +963,14 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] lint; building-new.feature in Chromium and Firefox (44)
 - [ ] All-browser CI run (workflow_dispatch) before the merge
 - [x] PR (`Fixes #1102`, `Spec change approved: #1102`): pushed after this archive
+
+## Session 2026-11-04: #1098 Tankbestand help names the building's own period end
+
+- [x] Scenario outline «Die Hilfe zum Tankbestand nennt den letzten Tag der Abrechnungsperiode des Gebäudes» (building-detail.feature), seen red at the July – June and November – October rows; the calendar row pins kept behaviour. New axe and language rows `building-detail-other-period default`
+- [x] Fachreview 1098-1 before implementing (`docs/reviews/1098-fachreview-1.md`): texts correct in all four languages; V-1 (Major, the Stichtag example stayed 31.12.) fixed: the example is the next end of the building's period; Fachreview 1098-2 closed it
+- [x] Help per Abrechnungsperiode (`buildings_fuel_intro_july_june`, `buildings_fuel_intro_november_october`), calendar text unchanged; DOM tests red first
+- [x] code-reviewer round 1 (`docs/reviews/1098-review-1.md`): no Blocker/Major; C-1 rejected (without the fallback svelte-check fails)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-1098.md`, `weber-1098.md`): no Blocker/Major; P-1 of both (example and help name different years): #1103
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1098.md`
+- [x] lint, check, type-check, vitest, E2E building features (44) and the building-detail axe and language rows (23)
+- [x] PR (`Fixes #1098`): pushed after this archive
