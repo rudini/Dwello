@@ -78,6 +78,17 @@ describe('Dialog', () => {
 		expect(document.activeElement!.id).toBe('end');
 	});
 
+	// #653 (R7-F2): pressing a button left the field, its error grew the dialog and the release missed the button
+	it('lässt beim Drücken eines Knopfs den Fokus im Feld, damit kein Fehler den Knopf verschiebt', () => {
+		openDialog();
+		const pressed = ['dialog-confirm', 'dialog-cancel'].map((testid) => {
+			const press = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+			byTestId(testid)!.dispatchEvent(press);
+			return press.defaultPrevented;
+		});
+		expect(pressed).toEqual([true, true]);
+	});
+
 	it('hält den Fokus mit Tab im Dialog', () => {
 		openDialog();
 		byTestId('dialog-confirm')!.focus();

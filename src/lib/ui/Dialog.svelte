@@ -136,7 +136,13 @@
 		>
 			<h2 id="{id}-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>
-			<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+			<!-- a press on a button keeps the focus in the field: leaving it would show its error, grow the dialog
+			     and move the button away before the release (R7-F2, #653); the click itself still counts -->
+			<div
+				class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end"
+				role="presentation"
+				onmousedown={(event) => event.preventDefault()}
+			>
 				<Button onclick={close} testid="dialog-cancel" disabled={busy}>{cancelLabel}</Button>
 				<Button
 					variant={danger ? 'danger' : 'primary'}
