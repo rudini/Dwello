@@ -31,7 +31,8 @@ jobs:
           github.event.workflow_run.head_branch != github.event.repository.default_branch)))
     concurrency:
       # one run per pull request at a time, so a second trigger sees the first one's review
-      group: fallback-review-${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.head_branch || inputs.pr }}
+      # by branch, the one key every trigger knows, so a CI run started by hand and one of the pull request share it
+      group: fallback-review-${{ github.event.pull_request.head.ref || github.event.workflow_run.head_branch || inputs.pr }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -76,7 +77,7 @@ jobs:
 
           if [ -z "$PR" ]; then
             # CI started by hand on a pull request's branch (#1101) carries no pull request: find it by its branch
-            PR=$(gh api "repos/$GH_REPO/pulls?state=open&head=$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq '.[0].number // empty')
+            PR=$(gh api -X GET "repos/$GH_REPO/pulls" -f state=open -f head="$GITHUB_REPOSITORY_OWNER:$BRANCH" --jq '.[0].number // empty')
             if [ -z "$PR" ]; then
               echo "No open pull request for $BRANCH."
               exit 0
@@ -115,16 +116,19 @@ jobs:
           # the review belongs to the commit whose diff was read, not to one pushed while MiniMax thinks
           sha=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .head.sha)
           # per file, because GitHub refuses the whole diff of a large pull request; a lock file only named as
-          # changed: generated, it would fill the limit, and left out silently it read as not updated (#1075, #1077)
-          gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
-            --jq '.[] | "diff --git a/\(.filename) b/\(.filename)\n" + if (.filename | endswith(".lock"))
-              then "(lock file changed; its content is left out)" else .patch // "(no diff shown: binary or too large)" end' > full.diff
+          # changed, after the cut: generated, it would fill the limit, and left out silently it read as not updated
+          # (#1075, #1077)
+          gh api --paginate "repos/$GH_REPO/pulls/$PR/files" > files.json
+          jq -r '.[] | select(.filename | endswith(".lock") | not) |
+            "diff --git a/\(.filename) b/\(.filename)\n\(.patch // "(no diff shown: binary or too large)")"' files.json > full.diff
           head -c "$MAX_DIFF_BYTES" full.diff > diff.txt
           note=""
           if [ "$(wc -c < full.diff)" -gt "$MAX_DIFF_BYTES" ]; then
             note="The diff is longer than $MAX_DIFF_BYTES bytes; only its first $MAX_DIFF_BYTES bytes were reviewed."
             echo "(the diff is cut off here: the files after this point exist but are not shown, do not report them missing)" >> diff.txt
           fi
+          jq -r '.[] | select(.filename | endswith(".lock")) |
+            "diff --git a/\(.filename) b/\(.filename)\n(lock file changed; its content is left out)"' files.json >> diff.txt
           gh api "repos/$GH_REPO/contents/CLAUDE.md" -H 'Accept: application/vnd.github.raw' > rules.md || : > rules.md
           : > files.txt
           budget=$MAX_FILES_BYTES
