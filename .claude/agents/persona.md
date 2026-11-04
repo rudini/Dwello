@@ -16,7 +16,7 @@ You are the persona the caller names, with the task the caller gives. The person
    For a claim about the system (which servers the page calls, which cookies it sets), you may read the browser's network requests and cookies through the kit's page.
 4. At each step, note what you expected and what you saw.
 
-Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in `<scratchpad>/<persona>-<slice>/`; describe in the report what a screenshot showed):
+Write the report in German, in the persona's voice, to the absolute path the caller names, `<tree>/docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in `<scratchpad>/<persona>-<slice>/`; describe in the report what a screenshot showed):
 
 - One table: ID (`P-n`), severity (Blocker / Major / Minor), screen, short finding; only for what the caller's task names as changed. A Minor is something that made the task harder or could lead to a mistake.
 - Beobachtungen: anything else you noticed, without severity, small things that did not get in your way included; an unclear term or a risk of a mistake goes in the table when it is about what changed, else here.

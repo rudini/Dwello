@@ -10,7 +10,7 @@ describe('persona README', () => {
 	it('names only files that exist, from the repository root or its own folder', () => {
 		const named = [...readme.matchAll(/`([\w./-]+\.(?:md|sh|ts|sql|json))`/g)].map((m) => m[1]);
 		expect(named).toContain('demo-records.md');
-		const missing = named.filter((path) => !existsSync(new URL(path, ROOT)) && !existsSync(new URL(path, FOLDER)));
-		expect(missing).toEqual([]);
+		const exists = (path: string) => existsSync(new URL(path, ROOT)) || existsSync(new URL(path, FOLDER));
+		expect(named.filter((path) => !exists(path))).toEqual([]);
 	});
 });

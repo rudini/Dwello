@@ -83,7 +83,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 
 End every run with three headings: **Blocked on me** (decisions, open Blocker/Major, new issues), **Changed** (files, commits), **Found** (findings by ID and status, issues closed and opened, what could not be confirmed and where you looked).
 
-Before marking anything complete, all of these pass: `bun run lint`, `bun run check`, `cd backend && bun run type-check`, the tests the change affects, also those that read a changed file (`bunx vitest run <files>`, `cd backend && bun test <files>`; for rule files `open-work`, `commit-msg-gate`, `check-issues` and deepcheck `readme`), the affected E2E scenarios, and Prettier on the files added since `origin/main`, as CI runs it (`git diff --name-only --diff-filter=A -z origin/main... | xargs -0 -r bunx prettier --check --ignore-unknown`). CI runs the full suites with the coverage floors before the merge.
+Before marking anything complete, all of these pass: `bun run lint`, `bun run check`, `bun run fitness`, `cd backend && bun run type-check`, the tests the change affects, also those that read a changed file (`bunx vitest run <files>`, `cd backend && bun test <files>`; for rule files `open-work`, `commit-msg-gate`, `check-issues` and deepcheck `readme`), the affected E2E scenarios, and Prettier on the files added since `origin/main`, as CI runs it (`git diff --name-only --diff-filter=A -z origin/main... | xargs -0 -r bunx prettier --check --ignore-unknown`). CI runs the full suites with the coverage floors before the merge.
 
 ## Open work
 
