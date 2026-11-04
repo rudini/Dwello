@@ -71,6 +71,19 @@ describe('Dialog', () => {
 		);
 	});
 
+	// Persona Sven 653 P-1: the date's words are a status that fills while typing, not the dialog's description
+	it('nimmt eine Statuszeile eines Felds nicht als Beschreibung', () => {
+		openDialog({
+			children: markup(
+				'<div><input id="d" /><p id="d-words" aria-live="polite"></p><p>Die Frist beachten.</p></div>'
+			)
+		});
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(document.getElementById(dialog.getAttribute('aria-describedby')!)!.textContent).toBe(
+			'Die Frist beachten.'
+		);
+	});
+
 	// Code-Review 653-1 C-3: Enter in a prefilled field would confirm an irreversible action at once
 	it('beginnt einen gefährlichen Dialog mit Feldern auf dem Dialog selbst, Tab führt ins Feld', () => {
 		openDialog({

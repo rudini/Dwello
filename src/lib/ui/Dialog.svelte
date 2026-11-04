@@ -74,10 +74,10 @@
 	let paragraph = $state<string>();
 	$effect(() => {
 		if (!open || !panel) return;
-		// a field's help is that field's description (code review 653-1 C-4)
-		const first = [...panel.querySelectorAll<HTMLElement>(`[id="${id}-body"] p`)].find(
-			(p) => !p.id || !panel!.querySelector(`[aria-describedby~="${p.id}"]`)
-		);
+		// a field's help is that field's description (code review 653-1 C-4), a live line a status (Sven 653 P-1)
+		const first = [
+			...panel.querySelectorAll<HTMLElement>(`[id="${id}-body"] p:not([aria-live])`)
+		].find((p) => !p.id || !panel!.querySelector(`[aria-describedby~="${p.id}"]`));
 		if (first && !first.id) first.id = `${id}-description`;
 		paragraph = first?.id;
 	});
