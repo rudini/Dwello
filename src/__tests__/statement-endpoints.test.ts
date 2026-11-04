@@ -313,7 +313,7 @@ describe('GET /api/statements/billed', () => {
 			return Response.json({
 				...statementRun,
 				contracts: [{ ...statementRun.contracts[0], billed: true }],
-				overlap: null,
+				overlap: [],
 				skipped: []
 			});
 		};
@@ -326,7 +326,7 @@ describe('GET /api/statements/billed', () => {
 
 		expect(await response.json()).toEqual([
 			// the contracts without an agreed fee as the backend names them (H-28, #717)
-			{ buildingId: 'b/1', contracts: 1, billed: 1, otherPeriod: null, withoutFee: statementRun.withoutFee }
+			{ buildingId: 'b/1', contracts: 1, billed: 1, otherPeriod: null, overlap: [], withoutFee: statementRun.withoutFee }
 		]);
 		// an id goes into the backend address encoded, as in the preview (code review C-4)
 		expect(urls).toEqual([

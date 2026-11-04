@@ -61,6 +61,7 @@
 		"period-filter": "Invoice list filtered by an Abrechnungsperiode, as the warnings on missing statements link to it (#454): the filter named with its building and rule, the invoices grouped by allocability.",
 		"correct-dialog": "The confirmation before a sent, paid or settled statement is replaced by a berichtigte Abrechnung open, with the amount it offsets, on a sent one the field «Bereits bezahlt» (#448), and the limitation (#120).",
 		"generation-result": "«Abrechnungen erstellen» after creating the drafts of a year without invoices: how many were created, «Entwürfe ansehen», «Alle als ZIP herunterladen» (#356) and «Weitere Abrechnungen erstellen».",
+		"period-locked-refused": "Building edit form posted with another Abrechnungsperiode after the building has statements (as from a tab opened before them): the refusal BUILDING_PERIOD_LOCKED at the top of the form (#1088).",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
@@ -263,7 +264,8 @@
 			"states": [
 				"default",
 				"submit-cleared",
-				"saved-toast"
+				"saved-toast",
+				"period-locked-refused"
 			]
 		},
 		{

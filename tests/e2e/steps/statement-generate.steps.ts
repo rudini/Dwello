@@ -2,6 +2,8 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { focusedPlace, pageAddress } from '../questions/navigation';
 import {
+	proposedPeriod,
+	proposedPeriodText,
 	allBuildingsNoteText,
 	currentStep,
 	existingStatementsText,
@@ -728,4 +730,14 @@ Then('zeigt die Wahl das Gebäude {string} ganz', async ({ verwalter, seed }, bu
 Then('steht der Fokus auf dem Schritt {string}', async ({ verwalter }, step: string) => {
 	await verwalter.sees(currentStep).toBe(step);
 	await verwalter.sees(focusedPlace).toBe('statement-step-heading');
+});
+
+// #1088 (code review 1088-1 C-3): the parallel scenarios' buildings bill the calendar year, so most of them do
+Then('schlägt der Assistent die Abrechnungsperiode des letzten Jahres vor', async ({ verwalter }) => {
+	const year = Number(inDays(0).slice(0, 4)) - 1;
+	await verwalter.sees(proposedPeriod).toEqual([`01.01.${year}`, `31.12.${year}`]);
+});
+
+Then('sagt der Assistent zum Vorschlag {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(proposedPeriodText).toBe(text);
 });

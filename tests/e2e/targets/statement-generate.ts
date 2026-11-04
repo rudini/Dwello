@@ -1,6 +1,7 @@
 import { type Target, target } from '../screenplay/target';
 
 export const periodStartInput = target('Beginn der Abrechnungsperiode', (page) => page.getByTestId('period-start-input'));
+export const periodProposedText = target('Hinweis zum Vorschlag der Abrechnungsperiode', (page) => page.getByTestId('period-proposed'));
 export const periodEndInput = target('Ende der Abrechnungsperiode', (page) => page.getByTestId('period-end-input'));
 export const heatingProfileSelect = target('Heizprofil', (page) => page.getByTestId('heating-profile-select'));
 export const managementFeeInput = target('Verwaltungspauschale', (page) => page.getByTestId('management-fee-input'));

@@ -77,7 +77,7 @@ export async function runPlan(buildingId: string, period: Range) {
 		listStatements({ buildingId, limit: 1000 }),
 		typeOf(buildingId)
 	]);
-	return { ...planRun(period, contracts, statements), otherPeriod: otherPeriod(type, period) };
+	return { ...planRun(period, contracts, statements), otherPeriod: otherPeriod(type, period), overlap: overlapped(period, statements) };
 }
 
 /**
@@ -105,8 +105,12 @@ export async function generateInPeriod(input: Parameters<typeof generateStatemen
 export async function missingOfContract(id: string) {
 	const contract = await getContract(id);
 	if (!contract) return null;
-	const [type, { statements }] = await Promise.all([typeOf(contract.buildingId), listStatements({ contractId: id, limit: 1000 })]);
-	return missingPeriods(type, contract, statements);
+	const [type, { statements }, { statements: ofBuilding }] = await Promise.all([
+		typeOf(contract.buildingId),
+		listStatements({ contractId: id, limit: 1000 }),
+		listStatements({ buildingId: contract.buildingId, limit: 1000 })
+	]);
+	return missingPeriods(type, contract, statements, undefined, ofBuilding);
 }
 
 /** #211: per contract id, the ended periods without a statement, as on the contract page */
@@ -124,7 +128,9 @@ export async function missingByContract(listed?: Awaited<ReturnType<typeof listC
 			missingPeriods(
 				types.get(c.buildingId) ?? 'calendar',
 				c,
-				statements.filter((s) => s.contractId === c.id)
+				statements.filter((s) => s.contractId === c.id),
+				undefined,
+				statements.filter((s) => s.building?.id === c.buildingId)
 			)
 		])
 	);

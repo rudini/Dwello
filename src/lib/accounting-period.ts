@@ -39,3 +39,7 @@ export function otherPeriodText(type: AccountingPeriodType, building: string) {
 	}[type];
 	return text({ building });
 }
+
+/** Code review 1088-2 C-7: the older statements of a building that a chosen period overlaps, as the backend refuses it */
+export const overlapText = (periods: Range[], building: string) =>
+	m.backend_statement_period_overlaps({ building, periods: periods.map(periodDays).join(', ') });

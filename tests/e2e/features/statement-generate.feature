@@ -475,6 +475,12 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Aber nicht das Gebäude "Lindenhof"
     Und sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, deren Mietverträge alle schon eine Abrechnung haben
 
+  # #1088 (Fachreview 1088-1 V-5): vorgeschlagen ist die letzte abgelaufene Periode der Abrechnungsperiode, die die
+  # meisten Gebäude haben; hier das Kalenderjahr
+  Szenario: Der Assistent schlägt die letzte abgelaufene Abrechnungsperiode der meisten Gebäude vor
+    Dann schlägt der Assistent die Abrechnungsperiode des letzten Jahres vor
+    Und sagt der Assistent zum Vorschlag "Vorgeschlagen ist die letzte abgelaufene Abrechnungsperiode, die die meisten Gebäude haben."
+
   # #1088: ein Gebäude rechnet immer ganze Perioden seiner eigenen Abrechnungsperiode ab; eine andere gewählte Periode
   # lässt das Gebäude nicht wählen, und die Wahl sagt, was zu tun ist (Fachreview 1088-1 V-6)
   Szenario: Ein Gebäude mit einer anderen Abrechnungsperiode ist nicht wählbar

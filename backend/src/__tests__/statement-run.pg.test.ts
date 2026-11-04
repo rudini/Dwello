@@ -122,6 +122,7 @@ describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
 	const planOf = async (building: string, start: string, end: string) =>
 		(await (await sendJson('GET', `/api/v1/statements/run?buildingId=${building}&periodStart=${start}&periodEnd=${end}`)).json()) as {
 			otherPeriod: string | null;
+			overlap: unknown;
 		};
 
 	it('nennt die eigene Abrechnungsperiode eines Gebäudes, in die der Lauf nicht passt', async () => {
@@ -169,6 +170,8 @@ describe('Abrechnungsperiode des Gebäudes im Lauf', () => {
 			status: 400,
 			body: { code: 'STATEMENT_PERIOD_OVERLAPS', params: { periods: '01.07.2022 – 30.06.2023' } }
 		});
+		// code review 1088-2 C-7: step 2 says so before the run, so no run stops half way
+		expect((await planOf(building, '2023-01-01', '2023-12-31')).overlap).toEqual([{ start: '2022-07-01', end: '2023-06-30' }]);
 	});
 });
 

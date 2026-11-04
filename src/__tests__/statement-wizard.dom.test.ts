@@ -1768,7 +1768,7 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 
 describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 	const billed = (
-		rows: { buildingId: string; contracts: number; billed: number; otherPeriod?: string | null; withoutFee?: [] }[]
+		rows: { buildingId: string; contracts: number; billed: number; otherPeriod?: string | null; overlap?: { start: string; end: string }[]; withoutFee?: [] }[]
 	) =>
 		fakeBff((call) =>
 			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
@@ -1868,6 +1868,24 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
 		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(true);
+	});
+
+	// code review 1088-2 C-7: an older statement of another period (left by migration 0042) overlaps the period: the
+	// building cannot be chosen, so no run stops half way at the backend's refusal
+	it('lässt ein Gebäude nicht wählen, dessen ältere Abrechnung die gewählte Periode schneidet', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 1, billed: 0, otherPeriod: null, overlap: [{ start: '2022-07-01', end: '2023-06-30' }] },
+			{ buildingId: 'b2', contracts: 1, billed: 0, otherPeriod: null, overlap: [] }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Die gewählte Abrechnungsperiode überschneidet sich mit älteren Abrechnungen von Ahornhof (01.07.2022 – 30.06.2023). Wählen Sie eine Abrechnungsperiode, die keine davon schneidet.'
+		);
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.disabled).toBe(true);
 	});
 
 	// code review 199-1 C-5: a building chosen before (a link, a draft, back from step 3) is no longer chosen

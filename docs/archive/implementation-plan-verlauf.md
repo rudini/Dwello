@@ -907,3 +907,13 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] No scenario: the failing language row «tenant-detail-undelivered default» covers it unchanged
 - [x] Slice review round 1, also the closing round: `docs/reviews/1087-review-1.md` (no findings)
 - [x] Archive, PR: pushed after this archive
+
+## Session: #1088 Abrechnungsperiode per building, fixed; no short periods
+
+- [x] Product-owner decisions recorded in #1088 (2026-11-03): wizard step 2 offers only fitting buildings; Fachreview 1088-1 (no short periods at all, period never changed, glossary rows, proposals, help to the Mietvertrag); Fachreview 1088-2 V-10 (statements of other periods or under a year must not occur, the backend enforces it)
+- [x] `@wip` scenarios (building-new, building-edit, settings, contract-detail, dashboard, statement-generate), seen red at the missing behaviour; Fachreview step 1: `docs/reviews/1088-fachreview-1.md`
+- [x] Migration 0042, field and lock at the building (`BUILDING_PERIOD_LOCKED`), `GET /buildings/new-defaults`, missing periods per building, wizard `otherPeriod`, backend refusal `STATEMENT_PERIOD_OF_BUILDING` and of overlaps with older statements; setting, consent letter (#521), change (#512) and short periods removed
+- [x] Slice reviews: `docs/reviews/1088-review-1.md` (C-1 to C-6 fixed), `docs/reviews/1088-review-2.md`
+- [x] Feature review: `docs/reviews/1088-fachreview-2.md` (V-10 decided, V-11 Minor stays, V-12 rejected: #1099), personas `docs/design/personas/helga-1088.md`, `weber-1088.md` (Minors stay; the one both met: #1098)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1088.md`
+- [x] Archive, PR: pushed after this archive

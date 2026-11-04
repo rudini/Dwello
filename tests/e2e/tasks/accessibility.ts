@@ -570,6 +570,12 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'mark-sent-dialog': () => openDialog(on.markSentButton),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
+	// #1088 (code review 1088-2 C-4): another Abrechnungsperiode posted as from a tab opened before the first statement
+	'period-locked-refused': () => (actor) =>
+		actor.attemptsTo(
+			PostFormAction('', { name: 'Seeblick', address: 'Seeweg 1', postalCode: '8400', city: 'Winterthur', canton: 'ZH', accountingPeriod: 'july-june' }),
+			Wait.until(on.formProblem)
+		),
 	'reminder-dialog': () => openDialog(on.reminderButton),
 	'reminder-undelivered': (example) => (actor) => {
 		const statements = example.undeliveredStatements!;

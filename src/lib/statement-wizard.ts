@@ -124,9 +124,15 @@ export interface ChangedStatement {
  * Step 2, per building: its contracts in the period and those with a statement there already; `otherPeriod`: the
  * building's own Abrechnungsperiode when the period is none of its periods: the building cannot be chosen (#1088)
  */
-export type Billed = { contracts: number; billed: number; otherPeriod?: AccountingPeriodType | null };
-/** Step 2: a building that bills another Abrechnungsperiode cannot be chosen (#1088) */
-export const unchoosable = (billed: Billed | undefined) => !!billed?.otherPeriod;
+export type Billed = {
+	contracts: number;
+	billed: number;
+	otherPeriod?: AccountingPeriodType | null;
+	// the periods of older statements of the building that the period overlaps (code review 1088-2 C-7)
+	overlap?: { start: string; end: string }[];
+};
+/** Step 2: a building that bills another Abrechnungsperiode or whose older statements the period overlaps (#1088) */
+export const unchoosable = (billed: Billed | undefined) => !!billed?.otherPeriod || !!billed?.overlap?.length;
 
 type Coverage = {
 	buildingId: string;

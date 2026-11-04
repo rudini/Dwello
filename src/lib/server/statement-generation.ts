@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { otherPeriodText, type AccountingPeriodType } from '$lib/accounting-period';
+import { otherPeriodText, overlapText, type AccountingPeriodType } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { localSplitKeys, namesById, toStatement } from '$lib/server/statement';
@@ -53,6 +53,7 @@ type Plan = {
 	withoutFee: { id: string; tenantName: string; apartmentNumber: string }[];
 	// #1088: the building's own Abrechnungsperiode when the run's period is none of its periods
 	otherPeriod: AccountingPeriodType | null;
+	overlap?: { start: string; end: string }[]; // older statements of the building the period overlaps (C-7)
 	skipped: { id: string; tenantName: string; billedUntil: string }[];
 };
 
@@ -72,6 +73,7 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 				billed,
 				withoutFee: plan.withoutFee,
 				otherPeriod: plan.otherPeriod,
+				overlap: plan.overlap,
 				skipped: plan.skipped
 			};
 		})
@@ -83,10 +85,11 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 // A building that bills another Abrechnungsperiode refuses the run, as step 2 and the backend do (#1088)
 async function contractsInPeriod(fetch: Fetch, request: Run) {
 	const buildings = await contractsOf(fetch, request);
-	const other = buildings.find((b) => b.otherPeriod);
+	// before any draft is made, so no run stops half way (code review 1088-2 C-7)
+	const other = buildings.find((b) => b.otherPeriod || b.overlap?.length);
 	if (other) {
 		const { name } = await call(fetch, `buildings/${encodeURIComponent(other.buildingId)}`);
-		throw new Error(otherPeriodText(other.otherPeriod!, name));
+		throw new Error(other.otherPeriod ? otherPeriodText(other.otherPeriod, name) : overlapText(other.overlap!, name));
 	}
 	return buildings.flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
@@ -100,11 +103,12 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
 	return (await contractsOf(fetch, request)).map(
-		({ buildingId, inPeriod, billed, otherPeriod, withoutFee, skipped }) => ({
+		({ buildingId, inPeriod, billed, otherPeriod, overlap, withoutFee, skipped }) => ({
 			buildingId,
 			contracts: inPeriod.length,
 			billed: billed.length,
 			otherPeriod,
+			overlap,
 			withoutFee,
 			...(skipped.length ? { skipped } : {})
 		})

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Building } from '$lib/types';
-	import { otherPeriodText } from '$lib/accounting-period';
+	import { otherPeriodText, overlapText } from '$lib/accounting-period';
 	import { unchoosable, type Billed } from '$lib/statement-wizard';
 
 	// One building to choose in step 2, with its utility invoices in the Abrechnungsperiode once they are counted
@@ -34,6 +34,7 @@
 	// Said only when some contract of the period has a statement already
 	const billedText = $derived.by(() => {
 		if (billed?.otherPeriod) return otherPeriodText(billed.otherPeriod, building.name);
+		if (billed?.overlap?.length) return overlapText(billed.overlap, building.name);
 		if (!billed?.billed) return '';
 		const { contracts: total, billed: count } = billed;
 		const one = total === 1;

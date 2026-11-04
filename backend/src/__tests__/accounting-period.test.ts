@@ -40,6 +40,13 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		expect(missingPeriods('calendar', contract('2023-01-01', null, '2024-12-31'), [], today)).toEqual([{ start: '2025-01-01', end: '2025-12-31' }]);
 	});
 
+	// code review 1088-2 C-7: a period an older statement of the building overlaps cannot be billed (the run refuses
+	// it), so it is not named as missing
+	it('nennt keine Periode, die eine ältere Abrechnung des Gebäudes einer anderen Periode schneidet', () => {
+		const building = [statement('2022-07-01', '2023-06-30')];
+		expect(missingPeriods('calendar', contract('2023-01-01', '2024-12-31'), [], today, building)).toEqual([{ start: '2024-01-01', end: '2024-12-31' }]);
+	});
+
 	// #120: a replaced statement no longer bills its days
 	it('zählt eine ersetzte Abrechnung nicht', () => {
 		expect(missingPeriods('calendar', contract('2025-01-01', '2025-12-31'), [statement('2025-01-01', '2025-12-31', 'replaced')], today)).toEqual([

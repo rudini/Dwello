@@ -61,6 +61,7 @@ Funktionalität: Barrierefreiheit
       | building-edit          | default             |
       | building-edit          | submit-cleared      |
       | building-edit          | saved-toast         |
+      | building-edit          | period-locked-refused |
       | building-edit-open-period | default          |
       | apartments             | default             |
       | apartments             | empty               |

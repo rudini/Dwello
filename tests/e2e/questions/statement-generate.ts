@@ -36,6 +36,8 @@ import {
 	partialInvoices,
 	oldAddress,
 	periodStartInput,
+	periodEndInput,
+	periodProposedText,
 	periodRunningWarning,
 	previewEmpty,
 	previewFee,
@@ -129,6 +131,9 @@ export const announcedFeeHint = Visibility.of(announcement('Über dem üblichen 
 export const settingsChoiceCount = Count.of(wizardChoices);
 export const settingsChoiceName = Accessible.nameOf(wizardChoices);
 export const periodChoiceShown = Visibility.of(periodStartInput);
+/** #1088: the period step 1 proposes, as typed in its fields, and the sentence on where it comes from */
+export const proposedPeriod = question('the proposed Abrechnungsperiode', async (actor) => [await actor.answer(Value.of(periodStartInput)), await actor.answer(Value.of(periodEndInput))]);
+export const proposedPeriodText = Text.of(periodProposedText);
 export const missingInvoicesWarning = Text.of(missingInvoices);
 export const missingInvoicesWarnings = Count.of(missingInvoices);
 export const partialInvoicesHints = Count.of(partialInvoices);

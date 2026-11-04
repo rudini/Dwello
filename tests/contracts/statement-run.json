@@ -20,5 +20,6 @@
 	],
 	"withoutFee": [{ "id": "c3", "tenantName": "Lea Graf", "apartmentNumber": "2.02" }],
 	"otherPeriod": null,
+	"overlap": [],
 	"skipped": [{ "id": "c2", "tenantName": "Marc Huber", "billedUntil": "2024-12-31" }]
 }
