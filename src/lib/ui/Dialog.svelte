@@ -51,12 +51,19 @@
 		onclose?.();
 	}
 
-	// Focus starts on "Abbrechen", stays inside while open and returns to the opener afterwards
+	// Focus starts in the first field, so the fields come before the confirm button (#653), else on "Abbrechen";
+	// it stays inside while open and returns to the opener afterwards
 	$effect(() => {
 		if (!open || !panel) return;
 		const opener = document.activeElement as HTMLElement | null;
 		const restore = makeInert(panel);
-		panel.querySelector<HTMLElement>('[data-testid="dialog-cancel"]')?.focus();
+		const field = panel.querySelector<HTMLElement>(
+			'input:not([type="hidden"]):not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled])'
+		);
+		// without scrolling: a long dialog opens at its top, title and warning in sight on a phone
+		(field ?? panel.querySelector<HTMLElement>('[data-testid="dialog-cancel"]'))?.focus({
+			preventScroll: true
+		});
 		return () => {
 			restore();
 			opener?.focus();

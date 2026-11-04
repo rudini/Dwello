@@ -68,6 +68,16 @@ describe('Dialog', () => {
 		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
 	});
 
+	// #653: with the focus on «Abbrechen», Tab reached the confirm button before the fields
+	it('setzt den Fokus in das erste Feld, wenn der Dialog Felder hat', () => {
+		openDialog({
+			children: markup(
+				'<div><input type="hidden" name="id" value="1" /><input id="disabled" disabled /><label>Vertragsende <input id="end" /></label><select id="kind"></select></div>'
+			)
+		});
+		expect(document.activeElement!.id).toBe('end');
+	});
+
 	it('hält den Fokus mit Tab im Dialog', () => {
 		openDialog();
 		byTestId('dialog-confirm')!.focus();

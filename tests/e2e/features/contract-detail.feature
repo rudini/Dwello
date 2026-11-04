@@ -22,7 +22,6 @@ Funktionalität: Mietvertragsdetail
     Dann endet der Mietvertrag heute
 
   # #653: ein Dialog mit Feldern beginnt im ersten Feld, so folgt die Bestätigung erst nach den Feldern
-  @wip
   Szenario: Der Dialog zum Beenden beginnt im Feld Vertragsende
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beenden will

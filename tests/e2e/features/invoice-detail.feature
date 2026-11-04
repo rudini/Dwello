@@ -143,7 +143,6 @@ Funktionalität: Rechnungsdetail
     Und sagt die Bestätigung zum Löschen einer abgerechneten Rechnung "Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter"
 
   # #653 (Persona Marco 245 P-3): auf dem Telefon öffnet die lange Bestätigung oben, ihr Titel ist zu sehen
-  @wip
   Szenario: Die lange Bestätigung zum Löschen öffnet auf dem Telefon oben
     Angenommen das Browserfenster ist 390 auf 640 Pixel gross
     Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
