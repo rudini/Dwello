@@ -52,7 +52,8 @@
 	}
 
 	// Focus starts in the first field, so the fields come before the confirm button (#653), else on "Abbrechen";
-	// it stays inside while open and returns to the opener afterwards
+	// a danger dialog with fields starts on the panel, so Enter in a prefilled field cannot confirm at once and
+	// Tab still reaches the field first (code review 653-1 C-3); it stays inside and returns to the opener afterwards
 	$effect(() => {
 		if (!open || !panel) return;
 		const opener = document.activeElement as HTMLElement | null;
@@ -61,9 +62,8 @@
 			'input:not([type="hidden"]):not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled])'
 		);
 		// without scrolling: a long dialog opens at its top, title and warning in sight on a phone
-		(field ?? panel.querySelector<HTMLElement>('[data-testid="dialog-cancel"]'))?.focus({
-			preventScroll: true
-		});
+		const cancel = panel.querySelector<HTMLElement>('[data-testid="dialog-cancel"]');
+		(field && danger ? panel : (field ?? cancel))?.focus({ preventScroll: true });
 		return () => {
 			restore();
 			opener?.focus();
@@ -74,7 +74,10 @@
 	let paragraph = $state<string>();
 	$effect(() => {
 		if (!open || !panel) return;
-		const first = panel.querySelector<HTMLElement>(`[id="${id}-body"] p`);
+		// a field's help is that field's description (code review 653-1 C-4)
+		const first = [...panel.querySelectorAll<HTMLElement>(`[id="${id}-body"] p`)].find(
+			(p) => !p.id || !panel!.querySelector(`[aria-describedby~="${p.id}"]`)
+		);
 		if (first && !first.id) first.id = `${id}-description`;
 		paragraph = first?.id;
 	});
@@ -146,11 +149,13 @@
 			<h2 id="{id}-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>
 			<!-- a press on a button keeps the focus in the field: leaving it would show its error, grow the dialog
-			     and move the button away before the release (R7-F2, #653); the click itself still counts -->
+			     and move the button away before the release (R7-F2, #653); the click then leaves the field, so it
+			     takes its value (a two-digit year) before the button acts (code review 653-1 C-1) -->
 			<div
 				class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end"
 				role="presentation"
 				onmousedown={(event) => event.preventDefault()}
+				onclickcapture={(event) => (event.target as HTMLElement).closest('button')?.focus()}
 			>
 				<Button onclick={close} testid="dialog-cancel" disabled={busy}>{cancelLabel}</Button>
 				<Button

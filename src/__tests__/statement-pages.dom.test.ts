@@ -331,6 +331,18 @@ describe('Abrechnungsliste', () => {
 		);
 	});
 
+	// Code-Review 653-1 C-2: in a list filtered by status the row is gone after the payment
+	it('setzt den Fokus auf das Ergebnis der Liste, wenn die Zeile nach dem Zahlungseingang weg ist', async () => {
+		fakeBff();
+		list([statement({ status: 'sent' })]);
+		vi.mocked(invalidateAll).mockImplementationOnce(async () => byTestId('statement-row-s1')!.remove());
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.activeElement).toBe(byTestId('list-results'));
+	});
+
 	it('meldet im Dialog, wenn der Zahlungseingang nicht gespeichert wird', async () => {
 		fakeBff(() => [400, { error: 'Invalid status transition' }]);
 		list([statement({ status: 'sent' })]);
@@ -967,6 +979,18 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
+	// Code-Review 653-1 C-3: the irreversible replacement says so in its description, not only after the field
+	it('beschreibt das Ersetzen mit der Folge und dass es sich nicht rückgängig machen lässt', () => {
+		detail({ status: 'sent' });
+		click('statement-correct-button');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		const description = (dialog.getAttribute('aria-describedby') ?? '')
+			.split(' ')
+			.map((id) => document.getElementById(id)?.textContent?.trim())
+			.join(' ');
+		expect(description).toMatch(/Das lässt sich nicht rückgängig machen\.$/);
+	});
+
 	it('bestätigt das Ersetzen und setzt den Fokus auf den Status', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });

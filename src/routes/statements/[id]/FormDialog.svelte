@@ -19,6 +19,7 @@
 		fields = {},
 		check = () => true,
 		success,
+		describedby,
 		children
 	}: {
 		open: boolean;
@@ -30,7 +31,8 @@
 		ondone?: () => void; // the action led to another page
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
-		success?: string; // said after the action succeeded; the focus then goes to the page title
+		success?: string; // said after the action succeeded; the focus then goes to the new status
+		describedby?: string; // the ids of the sentences that describe the dialog, when its first paragraph is not enough
 		children: Snippet;
 	} = $props();
 
@@ -70,6 +72,7 @@
 	{busy}
 	busyLabel={m.ui_saving()}
 	{confirmTestid}
+	{describedby}
 	onconfirm={() => check() && form?.requestSubmit()}
 >
 	{@render children()}

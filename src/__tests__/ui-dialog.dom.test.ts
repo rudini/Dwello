@@ -58,6 +58,32 @@ describe('Dialog', () => {
 		expect(description).toBe('Die Rechnung wird gelöscht.');
 	});
 
+	// Code-Review 653-1 C-4: the help of a field at the start is the field's description, not the dialog's
+	it('nimmt den Hilfetext eines Felds nicht als Beschreibung', () => {
+		openDialog({
+			children: markup(
+				'<div><label for="d">Datum</label><input id="d" aria-describedby="d-help" /><p id="d-help">Format TT.MM.JJJJ</p><p>Der Vertrag endet.</p></div>'
+			)
+		});
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(document.getElementById(dialog.getAttribute('aria-describedby')!)!.textContent).toBe(
+			'Der Vertrag endet.'
+		);
+	});
+
+	// Code-Review 653-1 C-3: Enter in a prefilled field would confirm an irreversible action at once
+	it('beginnt einen gefährlichen Dialog mit Feldern auf dem Dialog selbst, Tab führt ins Feld', () => {
+		openDialog({
+			danger: true,
+			children: markup(
+				'<div><p>Die Abrechnung wird ersetzt.</p><input id="amount" value="10.00" /></div>'
+			)
+		});
+		expect(document.activeElement!.getAttribute('role')).toBe('dialog');
+		press('Tab');
+		expect(document.activeElement!.id).toBe('amount');
+	});
+
 	it('hat ohne Absatz keine Beschreibung', () => {
 		openDialog({ children: markup('<div><label>Datum <input /></label></div>') });
 		expect(document.querySelector('[role=dialog]')!.hasAttribute('aria-describedby')).toBe(false);
@@ -107,6 +133,17 @@ describe('Dialog', () => {
 			return press.defaultPrevented;
 		});
 		expect(pressed).toEqual([true, true]);
+	});
+
+	// Code-Review 653-1 C-1: a field takes a two-digit year when it is left; the click must leave it before confirming
+	it('verlässt das Feld beim Klick auf die Bestätigung, bevor sie ausgeführt wird', () => {
+		const { onconfirm } = openDialog({ children: markup('<div><input id="end" /></div>') });
+		let focusedAtConfirm: Element | null = null;
+		onconfirm.mockImplementation(() => (focusedAtConfirm = document.activeElement));
+		const confirm = byTestId('dialog-confirm')!;
+		confirm.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+		click('dialog-confirm');
+		expect(focusedAtConfirm).toBe(confirm);
 	});
 
 	it('hält den Fokus mit Tab im Dialog', () => {
