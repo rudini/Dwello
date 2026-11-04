@@ -182,6 +182,46 @@ export const ShareInViewport = {
 		)
 };
 
+/**
+ * How the values of a list of terms (`dd`) line up: how far their right edges differ, and how many lines the longest
+ * one takes (#1089)
+ */
+export const ValueColumn = {
+	of: (target: Target) =>
+		about(target, 'how the values line up in', (element) =>
+			single(element, (one) =>
+				one.evaluate((list) => {
+					const values = [...list.querySelectorAll('dd')];
+					const rights = values.map((value) => Math.round(value.getBoundingClientRect().right));
+					const lines = values.map((value) => {
+						const text = document.createRange();
+						text.selectNodeContents(value);
+						return new Set([...text.getClientRects()].map((line) => Math.round(line.top))).size;
+					});
+					return { offset: Math.max(...rights) - Math.min(...rights), lines: Math.max(...lines) };
+				}, undefined, quick)
+			)
+		)
+};
+
+/** How many pixels of the chosen option's text a select cuts off: a select clips its text instead of wrapping (#1089) */
+export const CutInChoice = {
+	of: (target: Target) =>
+		about(target, 'how much of the chosen text is cut in', (element) =>
+			single(element, (one) =>
+				one.evaluate((select: HTMLSelectElement) => {
+					const style = getComputedStyle(select);
+					const pen = document.createElement('canvas').getContext('2d')!;
+					// from its parts: Firefox may answer the shorthand empty, and the canvas would measure 10px sans-serif (code review 1089 C-2)
+					pen.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+					const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+					const text = select.selectedOptions[0]?.text ?? '';
+					return Math.max(0, Math.ceil(pen.measureText(text).width - room));
+				}, undefined, quick)
+			)
+		)
+};
+
 export const Width = {
 	of: (target: Target) =>
 		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox(quick))?.width ?? 0))
