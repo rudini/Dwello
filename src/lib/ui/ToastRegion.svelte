@@ -41,7 +41,7 @@
 	// bottom, it stands at the top of the window instead (it may briefly cover what has no focus)
 	let region = $state<HTMLElement>();
 	let atTop = $state(false);
-	let focusMoved = $state(0); // the handler only counts: it may run inside another component's effect
+	let moved = $state(0); // focus, scroll or size changed; the handlers only count: one may run inside another component's effect
 	const place = () => {
 		const focused = document.activeElement;
 		if (!confirmations.length || !region || !focused || focused === document.body)
@@ -59,7 +59,7 @@
 			part.right > own.left - 16;
 	};
 	$effect(() => {
-		void focusMoved;
+		void moved;
 		place();
 	});
 </script>
@@ -67,8 +67,10 @@
 <svelte:window
 	onfocusin={(event) => {
 		noteFocus(event.target as Element);
-		untrack(() => focusMoved++);
+		untrack(() => moved++);
 	}}
+	onscroll={() => untrack(() => moved++)}
+	onresize={() => untrack(() => moved++)}
 />
 
 {#snippet message(toast: Toast, role?: 'alert')}

@@ -137,6 +137,29 @@ describe('Meldungen', () => {
 	});
 
 	// #1096: the page never moves; the confirmation stands at the top while the focus is where it would stand
+	// fallback review on #1114: scrolling while the confirmation shows can bring the focused part under it
+	it('stellt die Erfolgsmeldung oben hin, wenn der Fokus beim Scrollen nach unten kommt', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const part = document.body.appendChild(document.createElement('button'));
+		let top = 100;
+		part.getBoundingClientRect = () => ({ top, bottom: top + 20, left: 0, right: 100 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		part.focus();
+		addToast('success', 'Adresse kopiert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(region.className).toContain('bottom-4');
+
+		top = 740;
+		window.dispatchEvent(new Event('scroll'));
+		flushSync();
+		expect(region.className).toContain('top-4');
+		part.remove();
+	});
+
 	it('stellt die Erfolgsmeldung oben hin, sobald der Fokus unten steht, auch auf ihrem Schliessen-Knopf', () => {
 		vi.useFakeTimers();
 		toasts.set([]);
