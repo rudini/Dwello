@@ -8,18 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: #664 usability pass (contract «Beenden», move-out hint, wizard announcement, refusal naming)
-
-- [x] Start: issue read, «Decided (product owner)» items 1–4 are the requirement; persona reports `helga-664.md`, `sven-664.md` committed
-- [x] Step 1: `@wip` scenarios (contract-detail, apartments, statement-generate), steps red at the missing behaviour; the two «nicht mehr» scenarios pin the end of the hint
-- [x] Step 1: `fach-reviewer` of the `@wip` scenarios and proposed texts before implementing (items 1, 2, 4): `docs/reviews/664-1-fachreview-1.md`
-- [x] Slice 1: «Beenden» becomes «Enddatum erfassen» (`contracts_end_action`), texts quoting it follow
-- [x] Slice 2: move-out hint in the apartment lists and on the ended contract (backend `moveOut`, timing as the missing-statement rule; none while `fixedTermCheck` holds, M-1; list rows without a link: the row is the apartment's link; new a11y screen `contract-final-due-detail`)
-- [x] Slice 3: wizard result in the live region, focus on a heading that names the result
-- [x] Slice 4: refused draft named by tenant and period (`RefusedStatements`)
-- [ ] Code review round 1 of slices 1–4 (`code-reviewer`, handed to the coordinator): `docs/reviews/664-review-1.md`
-- [ ] Workflow note: a worker without the Agent tool waits for each hand-over; the step-1 gate let slice 3 (a11y only, no domain text) go ahead meanwhile
-- [ ] Feature review: personas Helga and Sven (`persona-stack.sh`)
-- [ ] Checks: lint, check, backend type-check, full vitest, backend tests, affected E2E, fallow audit, Prettier on added files
-- [ ] Archive the session; PR (`Fixes #664`, `Spec change approved: #664`) by the parent session

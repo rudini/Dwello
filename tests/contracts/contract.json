@@ -24,7 +24,7 @@
 	"fixedTermCheck": false,
 	"proposedAdvanceFrom": "2025-01-01",
 	"endsToday": false,
-	"moveOut": { "endDate": "2024-03-31", "tenantName": "Sarah Meier", "period": { "start": "2024-01-01", "end": "2024-12-31" }, "due": true, "outside": false },
+	"moveOut": { "endDate": "2024-03-31", "tenantName": "Anna Keller", "period": { "start": "2024-01-01", "end": "2024-12-31" }, "due": true, "outside": false },
 	"tenant": { "id": "t1", "firstName": "Anna", "lastName": "Keller" },
 	"apartment": { "id": "a1", "number": "2.01" },
 	"building": { "id": "b1", "name": "Ahornhof", "address": "Ahornweg 1" }
