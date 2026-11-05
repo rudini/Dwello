@@ -58,6 +58,7 @@ export const openStatementDetail = (statementPath: string) =>
 	);
 
 export const openSendConfirmation = Click.on(sendStatementButton);
+export const chooseLetterInstead = Click.on(letterInsteadLink);
 
 // The confirmation names the recipient and the PDF; the user confirms having delivered it
 export const confirmSending = Click.on(confirmSendButton);

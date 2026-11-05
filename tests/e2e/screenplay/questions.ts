@@ -117,6 +117,13 @@ export const FocusedLabel = question('the label of the focused field', (actor) =
 export const FocusedText = question('the text of the focused element', (actor) =>
 	pageOf(actor).evaluate(() => document.activeElement?.textContent?.replace(/\s+/g, ' ').trim() ?? null)
 );
+/** Whether the focus lies inside the element, e.g. a dialog after a control in it removed itself */
+export const HoldsFocus = {
+	of: (target: Target) =>
+		about(target, 'whether it holds the focus:', (element) =>
+			single(element, (one) => one.evaluate((part) => part.contains(document.activeElement), undefined, quick))
+		)
+};
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {
