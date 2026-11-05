@@ -1,24 +1,12 @@
 import type { Reconciliation } from '$lib/cost-reconciliation';
+import type { ReconciliationBody, ReportPeriod } from '../../../backend/src/api/report';
 import { m } from '$lib/paraglide/messages';
 import { namesById } from '$lib/server/statement';
-import { call } from '$lib/server/statement-generation';
+import { call, type GenerationRequest } from '$lib/server/statement-generation';
 import { formatDate } from '$lib/utils/format';
 
 /** #1126: the Kostenabstimmung of a building's period, as the backend gives it (tests/contracts/report-reconciliation.json) */
-type Amounts = { buildingCosts: number; tenants: number; landlord: number };
-type Body = {
-	positions: (Amounts & {
-		categoryId: string | null;
-		distributionKeyId: string | null;
-		severalKeys: boolean;
-	})[];
-	total: Amounts;
-	managementFee: number;
-	nonAllocable: number;
-	withoutStatement?: number;
-	drafts?: { id: string; tenantName: string }[];
-	notUpToDate?: { id: string; tenantName: string }[];
-};
+type Body = ReconciliationBody;
 
 type Fetch = typeof globalThis.fetch;
 
@@ -52,22 +40,18 @@ async function toReconciliation(fetch: Fetch, body: Body): Promise<Reconciliatio
 	};
 }
 
-type Run = {
-	periodStart: string;
-	periodEnd: string;
-	heatingProfileId: string;
-	managementFeePercent: number;
-};
+type Run = Omit<GenerationRequest, 'buildingIds'>;
 
 /** The preview's Kostenabstimmung of each building of a run */
 export async function runReconciliations(fetch: Fetch, run: Run & { buildingIds: string[] }) {
+	const { periodStart, periodEnd, heatingProfileId } = run;
 	const query = (buildingId: string) =>
 		new URLSearchParams({
 			buildingId,
-			periodStart: run.periodStart,
-			periodEnd: run.periodEnd,
+			periodStart,
+			periodEnd,
 			managementFeePercent: String(run.managementFeePercent),
-			...(run.heatingProfileId ? { heatingProfileId: run.heatingProfileId } : {})
+			...(heatingProfileId ? { heatingProfileId } : {})
 		});
 	return Promise.all(
 		run.buildingIds.map(async (buildingId) => ({
@@ -82,27 +66,27 @@ export async function runReconciliations(fetch: Fetch, run: Run & { buildingIds:
 
 /** «Berichte»: each building and period with statements, named as its link */
 export async function reportPeriods(fetch: Fetch) {
-	const { periods } = (await call(fetch, 'reports/reconciliations')) as {
-		periods: { buildingId: string; buildingName: string; periodStart: string; periodEnd: string }[];
-	};
-	return periods.map((p) => ({
-		...p,
-		key: `${p.buildingId}-${p.periodStart}`,
-		href: `/reports/${p.buildingId}?${new URLSearchParams({ periodStart: p.periodStart, periodEnd: p.periodEnd })}`,
-		name: m.reports_row_name({
-			building: p.buildingName,
-			period: periodName(p.periodStart, p.periodEnd)
-		})
-	}));
+	const { periods } = (await call(fetch, 'reports/reconciliations')) as { periods: ReportPeriod[] };
+	return periods.map((p) => {
+		const { buildingId, periodStart, periodEnd } = p;
+		return {
+			...p,
+			key: `${buildingId}-${periodStart}`,
+			href: `/reports/${buildingId}?${new URLSearchParams({ periodStart, periodEnd })}`,
+			name: m.reports_row_name({
+				building: p.buildingName,
+				period: periodName(periodStart, periodEnd)
+			})
+		};
+	});
 }
 
 /** The Kostenabstimmung of one building's period on «Berichte» */
 export async function reportReconciliation(
 	fetch: Fetch,
-	buildingId: string,
-	periodStart: string,
-	periodEnd: string
+	period: Omit<ReportPeriod, 'buildingName'>
 ) {
+	const { buildingId, periodStart, periodEnd } = period;
 	const query = new URLSearchParams({ buildingId, periodStart, periodEnd });
 	return toReconciliation(fetch, await call(fetch, `reports/reconciliation?${query}`));
 }

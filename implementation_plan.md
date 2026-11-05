@@ -27,6 +27,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `daten-pruefer`: `docs/reviews/1126-datenpruefung-1.md` (all amounts to the Rappen; D-1 = code review C-1, fixed)
 - [x] `fach-reviewer` 1126-3 on the help text and menu label: `docs/reviews/1126-fachreview-3.md` (V-14, V-15 fixed); closing `code-reviewer` 1126-3: `docs/reviews/1126-review-3.md` (C-5 scenario added, C-6 fixed; C-7, C-8 Minor stay)
 - [x] PO 05.11.2026 on persona Sven P-2: the drafts note names its tenants as links
-- [ ] `fach-reviewer` 1126-4 on the drafts texts; `code-reviewer` 1126-4 on the delta
+- [x] `fach-reviewer` 1126-4 on the drafts texts: `docs/reviews/1126-fachreview-4.md` (V-16 fixed); `code-reviewer` 1126-4: `docs/reviews/1126-review-4.md` (C-7 to C-9 Minor, stay)
+- [x] Merged `origin/main` (clean); for `bun run fitness` the Kostenabstimmung components moved to `src/lib/statement-wizard/`, the report types to `backend/src/api/report.ts`
+- [ ] `code-reviewer` 1126-5 on the move
 - [ ] Before marking complete: lint, check, fitness, backend type-check, affected tests and E2E, Prettier on added files
 - [ ] Archive the session; PR `Fixes #1126`

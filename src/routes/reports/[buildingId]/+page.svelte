@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import CostReconciliation from '../CostReconciliation.svelte';
+	import CostReconciliation from '$lib/statement-wizard/CostReconciliation.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

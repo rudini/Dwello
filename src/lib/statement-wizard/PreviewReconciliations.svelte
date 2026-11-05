@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { invoiceRows } from '$lib/statement-wizard';
-	import CostReconciliation from '../../reports/CostReconciliation.svelte';
+	import CostReconciliation from './CostReconciliation.svelte';
 
 	// #1126: the Kostenabstimmung of each building of the run; a building without allocable invoices (or statements
 	// billing any) shows none, only its non-allocable invoices when there are any (code review 1126-2 C-1)

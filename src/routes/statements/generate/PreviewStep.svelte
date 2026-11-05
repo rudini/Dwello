@@ -5,7 +5,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import PreviewChecks from './PreviewChecks.svelte';
-	import PreviewReconciliations from './PreviewReconciliations.svelte';
+	import PreviewReconciliations from '$lib/statement-wizard/PreviewReconciliations.svelte';
 	import PreviewEmpty from './PreviewEmpty.svelte';
 	import PreviewSkipped from './PreviewSkipped.svelte';
 	import type { PreviewRow } from './preview';

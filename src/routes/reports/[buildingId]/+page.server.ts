@@ -21,11 +21,6 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 			building: period.buildingName,
 			period: periodName(period.periodStart, period.periodEnd)
 		}),
-		reconciliation: await reportReconciliation(
-			fetch,
-			period.buildingId,
-			period.periodStart,
-			period.periodEnd
-		)
+		reconciliation: await reportReconciliation(fetch, period)
 	};
 };

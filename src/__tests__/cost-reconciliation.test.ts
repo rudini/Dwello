@@ -8,6 +8,8 @@ import periods from '../../tests/contracts/report-periods.json';
 import report from '../../tests/contracts/report-reconciliation.json';
 import run from '../../tests/contracts/statement-run-reconciliation.json';
 
+const period = { buildingId: 'b1', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+
 // #1126: the BFF names the positions of a Kostenabstimmung in the UI language and the periods of «Berichte»
 const category = {
 	id: report.positions[0].categoryId,
@@ -43,7 +45,7 @@ function backend(answers: Record<string, unknown>) {
 describe('Kostenabstimmung im BFF', () => {
 	it('benennt die Positionen mit der Kategorie in der Sprache der Oberfläche', async () => {
 		const { fetch } = backend({ 'reports/reconciliation': report });
-		const result = await reportReconciliation(fetch, 'b1', '2024-01-01', '2024-12-31');
+		const result = await reportReconciliation(fetch, period);
 		expect(result.positions).toEqual([
 			{ label: 'Hauswart', buildingCosts: 1200, tenants: 1101.64, landlord: 98.36 }
 		]);
@@ -57,7 +59,7 @@ describe('Kostenabstimmung im BFF', () => {
 	it('nennt bei einer Kategorie mit mehreren Verteilschlüsseln den Schlüssel', async () => {
 		const several = { ...report, positions: [{ ...report.positions[0], severalKeys: true }] };
 		const { fetch } = backend({ 'reports/reconciliation': several });
-		const result = await reportReconciliation(fetch, 'b1', '2024-01-01', '2024-12-31');
+		const result = await reportReconciliation(fetch, period);
 		expect(result.positions[0].label).toBe('Hauswart (Pro Fläche (m²))');
 	});
 
@@ -68,7 +70,7 @@ describe('Kostenabstimmung im BFF', () => {
 			positions: [{ ...report.positions[0], severalKeys: true, distributionKeyId: null }]
 		};
 		const { fetch } = backend({ 'reports/reconciliation': several });
-		const result = await reportReconciliation(fetch, 'b1', '2024-01-01', '2024-12-31');
+		const result = await reportReconciliation(fetch, period);
 		expect(result.positions[0].label).toBe('Hauswart');
 	});
 
@@ -76,7 +78,7 @@ describe('Kostenabstimmung im BFF', () => {
 	it('nennt eine Position ohne Kategorie «Ohne Kategorie»', async () => {
 		const none = { ...report, positions: [{ ...report.positions[0], categoryId: null }] };
 		const { fetch } = backend({ 'reports/reconciliation': none });
-		const result = await reportReconciliation(fetch, 'b1', '2024-01-01', '2024-12-31');
+		const result = await reportReconciliation(fetch, period);
 		expect(result.positions[0].label).toBe('Ohne Kategorie');
 	});
 

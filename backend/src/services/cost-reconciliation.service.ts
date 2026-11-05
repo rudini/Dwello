@@ -15,6 +15,7 @@ import { roundToRappen } from './pdf-format';
 import { notUpToDate } from './statement-invoices.service';
 import { runPlan } from './statement-run.service';
 import { listStatements } from './statement.service';
+import type { ReconciliationBody, ReportPeriod } from '../api/report';
 
 type Range = { start: string; end: string };
 // what a statement bills: its positions with the tenant's share, and its Verwaltungspauschale
@@ -121,7 +122,7 @@ const named = (
  * The Kostenabstimmung of «Berichte»: the valid statements of the period, and as notes the contracts the period would
  * bill that have none, the drafts, and the statements not up to date (PO 05.11.2026, Fachreview 1126-1 M-1, V-1)
  */
-export async function reportReconciliation(buildingId: string, period: Range) {
+export async function reportReconciliation(buildingId: string, period: Range): Promise<ReconciliationBody> {
 	const [statements, plan] = await Promise.all([
 		validStatements(buildingId, period),
 		runPlan(buildingId, period)
@@ -166,7 +167,7 @@ export async function runReconciliation(
 /** The periods of «Berichte»: each building and period with a valid statement, the latest first */
 export async function reportPeriods() {
 	const { statements } = await listStatements({ limit: 10000 });
-	const periods = new Map<string, { buildingId: string; periodStart: string; periodEnd: string }>();
+	const periods = new Map<string, Omit<ReportPeriod, 'buildingName'>>();
 	for (const s of counting(statements)) {
 		if (s.building)
 			periods.set(`${s.building.id} ${s.periodStart} ${s.periodEnd}`, {
