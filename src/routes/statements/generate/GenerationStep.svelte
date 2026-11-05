@@ -3,6 +3,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
+	import RunSummary, { type Summary } from './RunSummary.svelte';
 
 	// Step 5: before creating, what happens; after, how many drafts there are and where to find them
 	let {
@@ -15,7 +16,7 @@
 		zipHref
 	}: {
 		// what the run bills, said once more before creating (#663)
-		summary?: { period: string; buildings: string; heatingProfile?: string; feePercent: number };
+		summary?: Summary;
 		count: number;
 		createdCount: number | null;
 		draftsHref: string;
@@ -23,32 +24,10 @@
 		withoutInvoices?: string[];
 		incomplete?: string[];
 	} = $props();
-
-	const facts = $derived(
-		summary
-			? [
-					[m.glossary_period_term(), summary.period],
-					[m.statements_step_buildings(), summary.buildings],
-					[m.glossary_profile_term(), summary.heatingProfile],
-					[m.glossary_fee_term(), m.statements_fee_of_own({ percent: summary.feePercent })]
-				]
-			: []
-	);
 </script>
 
 {#if createdCount === null}
-	{#if summary}
-		<dl class="grid gap-4 sm:grid-cols-2" data-testid="run-summary">
-			{#each facts as [term, value] (term)}
-				{#if value}
-					<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
-						<dt class="text-ink-muted">{term}</dt>
-						<dd class="font-semibold text-ink">{value}</dd>
-					</div>
-				{/if}
-			{/each}
-		</dl>
-	{/if}
+	<RunSummary {summary} />
 	<div class="flex flex-col items-center gap-4 text-center" data-testid="generate-drafts-note">
 		<Illustration name="statement" />
 		<p class="text-lg text-ink">

@@ -55,3 +55,23 @@ Etwa 15 Minuten, 9 Durchläufe. Ein Durchgang bis Schritt 5 braucht rund 45 Tabs
 - Ein echter Screenreader (NVDA/VoiceOver): Ich habe den Accessibility-Tree von Chromium gelesen und den Fokus abgefragt. Ob und wann der Screenreader die leeren Status-Regionen vorliest, habe ich nicht gehört.
 - Eine andere Periode als die vorgeschlagene: 01.01.2025 – 31.12.2025 war schon eingetragen, ich habe sie nicht geändert und auch die Kalender-Buttons nicht benutzt.
 - Andere Sprachen und Mobile: nicht Teil von Svens Profil.
+
+## Nachprüfung
+
+Gleiches Profil: Desktop 1440 × 900, nur Tastatur, beurteilt über den Accessibility-Tree. Weg: Übersicht → «Abrechnungen erstellen» → Abrechnungsperiode 01.01.2025 – 31.12.2025 (vorgeschlagen) → Alpenblick → Heizprofil «Heizung + Warmwasser», Verwaltungspauschale 3 % → «Die Abrechnungen trotzdem erstellen» → Schritt 5. «Entwürfe erstellen» nicht gedrückt. Danach über den Brotkrümel weg, Assistent wieder geöffnet, «Angaben verwerfen» bestätigt. Der Browser-Entwurf ist weg, der Fokus steht auf «Schritt 1 von 5: Abrechnungsperiode». Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/ced2483f-edfc-5afc-974d-77650a29fe78/scratchpad/sven-663-recheck/`.
+
+| ID | Stand | Was ich jetzt höre |
+|---|---|---|
+| P-1 | behoben | Schritt 5 hat jetzt vor «Es werden 2 Nebenkostenabrechnungen als Entwurf erstellt.» eine Liste mit Begriffspaaren: «Abrechnungsperiode: 01.01.2025 – 31.12.2025», «Gebäude: Alpenblick», «Heizprofil: Heizung + Warmwasser», «Verwaltungspauschale: 3 % der eigenen Nebenkosten jedes Mieters mit vereinbarter Verwaltungspauschale. Ein eigener Satz im Mietvertrag geht vor.» Ich lese sie direkt nach der fokussierten Überschrift «Schritt 5 von 5: Erstellen» und vor «Zurück» und «Entwürfe erstellen». Sichtbar sind es vier Kacheln (Screenshot step5). |
+| P-2 | behoben | Die erledigten Schritte heissen jetzt «Abrechnungsperiode 01.01.2025 – 31.12.2025 (erledigt)» (ab Schritt 2), «Gebäude Alpenblick (erledigt)» (ab Schritt 3), «Heizprofil und Verwaltungspauschale Heizung + Warmwasser (erledigt)» (ab Schritt 4) und «Vorschau (erledigt)». Mit Shift+Tab von der Schrittüberschrift aus höre ich sie der Reihe nach. Sichtbar steht der Wert unter dem Namen des Schritts. Auch nach dem Wiederherstellen (Einstieg auf Schritt 3) nennen die Buttons Periode und Gebäude. |
+
+Damit ist auch P-3 erledigt: Auf Schritt 2 und 3 stehen Periode und Gebäude jetzt in den Buttons der Fortschrittsliste. P-4 gilt weiter, die Vorschau auf Schritt 4 hat kein Begriffspaar «Gebäude». P-5 habe ich nicht neu geprüft.
+
+### Beobachtungen der Nachprüfung
+
+- Der Button des dritten Schritts nennt nur das Heizprofil, nicht die Verwaltungspauschale, obwohl der Schritt «Heizprofil und Verwaltungspauschale» heisst. Vorgelesen klingt das wie ein Satz: «Heizprofil und Verwaltungspauschale Heizung + Warmwasser». Ohne Trennzeichen könnte ich kurz meinen, die Verwaltungspauschale heisse «Heizung + Warmwasser». Mit einem Doppelpunkt oder Komma («…: Heizung + Warmwasser, 3 %») wäre das klar. Die 3 % höre ich sicher auf Schritt 5.
+- Auf Schritt 5 springt Tab von der Überschrift direkt zu «Zurück» und «Entwürfe erstellen», weil die Zusammenfassung nicht fokussierbar ist. Mit dem Lesecursor kommt sie aber vor den Buttons. Das ist in Ordnung.
+- Sichtbar trennt die Fortschrittsliste bei 1440 px die Wörter mitten im Wort («Abrech-nungsperi-ode», «Warmwass er»). Für mich spielt das keine Rolle, sehenden Nutzern fällt es auf.
+- Der Hinweis «Angaben wiederhergestellt» nennt weiterhin keine Periode und kein Gebäude, und der Fokus geht beim Wiedereinstieg an ihm vorbei auf «Schritt 3 von 5» (wie in der ersten Runde). Mit P-2 höre ich Periode und Gebäude jetzt aber per Shift+Tab in der Fortschrittsliste.
+
+Aufgabe der Nachprüfung geschafft: ja. Aufwand: etwa 5 Minuten, 3 Durchläufe. Ein Durchlauf ist an einem neuen Browser-Kontext gescheitert, weil der Entwurf dort nicht mehr da war. Danach habe ich Weggehen und Verwerfen in einem Durchlauf gemacht.
