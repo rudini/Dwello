@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { noteFocus, refocus } from '$lib/focus-after-action';
+import { focusRowLinkingTo, noteFocus, refocus } from '$lib/focus-after-action';
 
 // #1096: the focus after an action that removed its control
 describe('Fokus nach einer Aktion', () => {
@@ -99,6 +99,15 @@ describe('Fokus nach einer Aktion', () => {
 		refocus();
 
 		expect(document.activeElement!.textContent).toBe('Zahlung');
+	});
+
+	// #1124: back on the list after saving, the saved record's row has the focus, not the page title
+	it('setzt den Fokus nach dem Speichern auf die Zeile des gespeicherten Eintrags in der Liste', () => {
+		document.body.insertAdjacentHTML('afterbegin', '<a href="/b">Zurück zu Beleuchtung</a>');
+
+		focusRowLinkingTo('/b');
+
+		expect(document.activeElement!.textContent).toBe('Beleuchtung');
 	});
 
 	it('setzt den Fokus nach einer neuen Seite auf den Seitentitel', () => {

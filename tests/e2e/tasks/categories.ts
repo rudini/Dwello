@@ -1,7 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { Browser, Check, Click, Enter, Navigate, Scroll, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
-import { Text } from '../screenplay/questions';
 import {
 	allocabilityCancel,
 	allocabilityConfirm,
@@ -10,7 +9,6 @@ import {
 	categoryRow,
 	deleteButton,
 	editButton,
-	followingCategoryName,
 	fuelCheckbox,
 	heatingCheckbox,
 	nameInput,
@@ -86,12 +84,9 @@ export const cancelAllocability = Click.on(allocabilityCancel);
 // #1029: the choice on the edit page, not saved
 export const chooseAllowed = Check.the(allowanceOption('Umlagefähig'));
 
-export const FOLLOWING_CATEGORY = 'followingCategory';
-/** #1096: the landlord is at the category's row; the page's movement and the row after it are noted */
-export const stayAtCategory = (name: string): Activity => async (actor) => {
-	await actor.attemptsTo(Scroll.toMiddle(categoryRow(name)), Scroll.watch);
-	actor.remember(FOLLOWING_CATEGORY, await actor.answer(Text.of(followingCategoryName(name))));
-};
+/** #1096: the landlord is at the category's row; the page's movement is noted */
+export const stayAtCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Scroll.toMiddle(categoryRow(name)), Scroll.watch);
 /** #1113: the category's row at the bottom edge of the window, where a confirmation stands */
 export const bringCategoryToBottomEdge = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Scroll.toBottomEdge(categoryRow(name)));

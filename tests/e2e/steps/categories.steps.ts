@@ -51,7 +51,6 @@ import {
 	saveWithoutChoice,
 	showAllowedCategories,
 	usePhone,
-	FOLLOWING_CATEGORY,
 	stayAtCategory,
 	bringCategoryToBottomEdge
 } from '../tasks/categories';
@@ -61,6 +60,13 @@ const { Given, When, Then } = createBdd(test);
 Given('es gibt die umlagefähige Kategorie {string}', async ({ seed }, title: string) => {
 	await seed.category(title, true);
 });
+
+Given(
+	'es gibt die umlagefähige Kategorie {string}, die in der Liste gleich auf {string} folgt',
+	async ({ seed }, title: string, before: string) => {
+		await seed.categoryRightAfter(title, before);
+	}
+);
 
 Given(
 	'es gibt die eigene Kategorie {string} mit gleichem englischem Namen und der Beschreibung {string}',
@@ -449,8 +455,8 @@ Given('der Liegenschaftsverwalter ist in der Liste bei der Kategorie {string}', 
 });
 
 // #1096: the focus goes to the next row of the list, not to the page title
-Then('steht der Fokus auf der Kategorie, die in der Liste auf {string} folgte', async ({ verwalter }, _title: string) => {
-	await verwalter.sees(focusedText).toBe(verwalter.recall<string>(FOLLOWING_CATEGORY));
+Then('steht der Fokus auf der Kategorie {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(focusedText).toBe(names.get(title));
 });
 
 Given('die Kategorie {string} steht am unteren Rand des Fensters', async ({ verwalter, names }, title: string) => {

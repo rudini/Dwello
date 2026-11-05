@@ -59,3 +59,10 @@ export function refocus(): void {
 				headingOf(at.section);
 	(target || title)?.focus({ preventScroll: true });
 }
+
+/** #1124: after a save that returned to a list, the focus goes to the saved record's row, the one linking to its form */
+export function focusRowLinkingTo(path: string): void {
+	[...document.querySelectorAll<HTMLElement>(`a[href="${CSS.escape(path)}"]`)]
+		.find((link) => link.closest('li, tr'))
+		?.focus();
+}
