@@ -1139,6 +1139,6 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 
 - [x] `tests/unit/screens-seed-hint.test.ts` seen red (`withSeedHint is not a function`), then `withSeedHint` in `tests/e2e/fixtures/screens.ts`, applied in `lookAt` (`tests/e2e/tasks/accessibility.ts`)
 - [x] E2E: `invoice-hints` taken out of the list by hand fails with the hint; restored, 6 rows pass (chromium)
-- [x] Code review 1119-review-1: no findings
+- [x] Code review 1119-review-1: no findings; -2 (German test titles after the fallback review): no findings
 - [x] Before marking complete: lint, check, fitness, backend type-check, Prettier on added files
 - [x] Archive the session; PR pushed after this archive
