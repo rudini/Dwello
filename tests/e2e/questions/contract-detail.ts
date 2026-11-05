@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { Accessible, Attribute, Checked, Count, FocusedLabel, ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
 	contractEndInput,
 	noticeReceivedInput,
@@ -65,6 +65,9 @@ export const mistakeConfirmed = Checked.of(deleteMistakeConfirmation);
 export const dialogErrorCount = Count.of(dialogErrors);
 // #511: the help each field of «Mietvertrag beenden» gives, as its accessible description
 export const endDateHelp = Accessible.descriptionOf(contractEndInput);
+// #663: the refused draft opens in a new tab
+export const openedInNewTab = question('whether the draft opened in a new tab', async (actor) => (await actor.answer(OpenedPage)).newTab);
+export const openedPath = question('the path of the opened draft', async (actor) => (await actor.answer(OpenedPage)).path);
 export const noticeReceivedHelp = Accessible.descriptionOf(noticeReceivedInput);
 
 /** The field of the dialog «Mietvertrag beenden» that has the focus, by its label (#653) */

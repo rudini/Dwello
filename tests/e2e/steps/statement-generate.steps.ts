@@ -68,6 +68,8 @@ import {
 	countsFailedText,
 	invoiceCountShown,
 	recalculateNotes,
+	finishedStepText,
+	runSummaryText,
 } from '../questions/statement-generate';
 import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
@@ -768,4 +770,16 @@ Then('sagt die Warnung zu den Zählern {string}', async ({ verwalter }, text: st
 
 Then('sagt die Hilfe zum Heizprofil nur {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(heatingProfileHelp).toBe(text);
+});
+
+// #663: before creating, the run says what it bills; a finished step names its choice
+Then(
+	'fasst der Assistent vor dem Erstellen {string}, {string} und {string} zusammen',
+	async ({ verwalter }, period: string, building: string, profile: string) => {
+		for (const part of [period, building, profile]) await verwalter.sees(runSummaryText).toContain(part);
+	}
+);
+
+Then('nennt der erledigte Schritt {string} die Wahl {string}', async ({ verwalter }, step: string, choice: string) => {
+	await verwalter.sees(finishedStepText(step)).toContain(choice);
 });

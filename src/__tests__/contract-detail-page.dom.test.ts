@@ -171,6 +171,9 @@ describe('Mietvertragsdetail', () => {
 		const link = byTestId('refused-statement-link')!;
 		expect(link.getAttribute('href')).toBe('/statements/s1');
 		expect(link.textContent).toContain('NK-2025-0003');
+		// #663 (Decided): in a new tab, so the dialog keeps what was typed; the link says so
+		expect(link.getAttribute('target')).toBe('_blank');
+		expect(link.textContent).toContain('(öffnet in neuem Tab)');
 		expect(text('refused-statements')).toContain(
 			'Der Entwurf NK-2025-0003 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
 		);

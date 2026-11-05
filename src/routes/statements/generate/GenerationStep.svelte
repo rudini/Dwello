@@ -3,9 +3,11 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
+	import RunSummary, { type Summary } from './RunSummary.svelte';
 
 	// Step 5: before creating, what happens; after, how many drafts there are and where to find them
 	let {
+		summary,
 		count,
 		createdCount,
 		withoutInvoices = [],
@@ -13,6 +15,8 @@
 		draftsHref,
 		zipHref
 	}: {
+		// what the run bills, said once more before creating (#663)
+		summary?: Summary;
 		count: number;
 		createdCount: number | null;
 		draftsHref: string;
@@ -23,6 +27,7 @@
 </script>
 
 {#if createdCount === null}
+	<RunSummary {summary} />
 	<div class="flex flex-col items-center gap-4 text-center" data-testid="generate-drafts-note">
 		<Illustration name="statement" />
 		<p class="text-lg text-ink">

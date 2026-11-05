@@ -333,6 +333,11 @@ export const ThePage = {
 		})
 };
 
+/** The page a link opened (`OpenInNewTab`): whether in a new tab, and the path it leads to */
+export const OpenedPage = question('the page opened by a link', async (actor) => {
+	const { newTab, url } = actor.recall<{ newTab: boolean; url: string }>(OPENED);
+	return { newTab, path: new URL(url).pathname };
+});
 /** The file the actor opened in a new tab last (`OpenInNewTab`): whether it was shown there, its name and bytes */
 export const OpenedFile = question('the file opened in a new tab', async (actor) => {
 	const { newTab, disposition, content } = actor.recall<{ newTab: boolean; disposition: string; content: Buffer }>(OPENED);
