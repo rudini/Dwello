@@ -30,6 +30,20 @@ describe('Fokus nach einer Aktion', () => {
 		expect(document.activeElement!.textContent).toBe('Beleuchtung');
 	});
 
+	// #1123: the next row went away in the same reload; the row now in its place takes the focus, not the page title
+	it('setzt den Fokus auf die Zeile, die jetzt an der Stelle steht, wenn auch die nächste Zeile weg ist', () => {
+		const list = document.querySelector('ul')!;
+		list.insertAdjacentHTML('beforeend', '<li><a href="/c">Cheminée</a></li>');
+		const [first, second] = document.querySelectorAll('li');
+		focusOn(first.querySelector('button')!);
+		first.remove();
+		second.remove();
+
+		refocus();
+
+		expect(document.activeElement!.textContent).toBe('Cheminée');
+	});
+
 	// SvelteKit puts the focus on the page itself after loading it again
 	it('merkt sich die Zeile, auch wenn danach die Seite selbst den Fokus bekommt', () => {
 		const [first] = document.querySelectorAll('li');

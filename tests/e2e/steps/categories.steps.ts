@@ -27,7 +27,8 @@ import {
 	allowedChosen,
 	listedCategoriesNamed,
 	notAllowedChosen,
-	proposalText
+	proposalText,
+	roomBesideFocusedCategory
 } from '../questions/categories';
 import {
 	askKi,
@@ -51,7 +52,8 @@ import {
 	showAllowedCategories,
 	usePhone,
 	FOLLOWING_CATEGORY,
-	stayAtCategory
+	stayAtCategory,
+	bringCategoryToBottomEdge
 } from '../tasks/categories';
 
 const { Given, When, Then } = createBdd(test);
@@ -449,4 +451,13 @@ Given('der Liegenschaftsverwalter ist in der Liste bei der Kategorie {string}', 
 // #1096: the focus goes to the next row of the list, not to the page title
 Then('steht der Fokus auf der Kategorie, die in der Liste auf {string} folgte', async ({ verwalter }, _title: string) => {
 	await verwalter.sees(focusedText).toBe(verwalter.recall<string>(FOLLOWING_CATEGORY));
+});
+
+Given('die Kategorie {string} steht am unteren Rand des Fensters', async ({ verwalter, names }, title: string) => {
+	await verwalter.attemptsTo(bringCategoryToBottomEdge(names.get(title)!));
+});
+
+// #1113: the confirmation keeps clear of the whole row, so none of its buttons lies under it
+Then('verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat', async ({ verwalter }) => {
+	await verwalter.sees(roomBesideFocusedCategory).toBeGreaterThanOrEqual(8);
 });

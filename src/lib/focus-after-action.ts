@@ -7,6 +7,7 @@ type Place = {
 	part: Element;
 	row: Element | null;
 	next: Element | null;
+	index: number;
 	list: Element | null;
 	section: Element | null;
 };
@@ -22,6 +23,7 @@ export function noteFocus(part: Element): void {
 		part,
 		row,
 		next: row?.nextElementSibling ?? null,
+		index: row?.parentElement ? [...row.parentElement.children].indexOf(row) : -1,
 		list: row?.parentElement ?? null,
 		section: part.closest('section')
 	};
@@ -44,10 +46,15 @@ export function refocus(): void {
 	const at = before;
 	if (!at || at.path !== location.pathname) return title?.focus();
 	const testid = at.part.getAttribute('data-testid');
+	// #1123: the next row may have gone in the same reload; then the row now in the removed one's place
+	const next = at.next?.isConnected
+		? at.next
+		: at.list?.isConnected
+			? at.list.children[at.index]
+			: null;
 	const target =
 		at.row && !at.row.isConnected
-			? (at.next?.isConnected && at.next.querySelector<HTMLElement>(focusable)) ||
-				headingOf(at.list)
+			? next?.querySelector<HTMLElement>(focusable) || headingOf(at.list)
 			: (testid && document.querySelector<HTMLElement>(`[data-testid="${CSS.escape(testid)}"]`)) ||
 				headingOf(at.section);
 	(target || title)?.focus({ preventScroll: true });

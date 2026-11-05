@@ -27,3 +27,7 @@ export const copyNewAccessKeyAddress = target('Adresse beim neuen Zugangsschlüs
 );
 // each copy adds a toast: the newest says what was copied last
 export const lastSuccessToast = target('Letzte Erfolgsmeldung', (page) => page.getByTestId('toast-success').last());
+/** #1113: the buttons of a new access key, one group */
+export const newAccessKeyActions = target('Knöpfe beim neuen Zugangsschlüssel', (page) =>
+	page.getByTestId('access-key-new-actions')
+);

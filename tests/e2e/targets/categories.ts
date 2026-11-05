@@ -54,3 +54,7 @@ export const followingCategoryName = (name: string) =>
 	target(`Kategorie nach ${name} in der Liste`, (page) =>
 		categoryRow(name).locate(page).locator('xpath=following-sibling::li[1]').getByTestId('category-name')
 	);
+/** #1113: the row of the list that holds the keyboard focus */
+export const focusedCategoryRow = target('Kategorie mit dem Fokus', (page) =>
+	page.getByTestId('category-row').filter({ has: page.locator(':focus') })
+);
