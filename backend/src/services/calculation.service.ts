@@ -116,7 +116,7 @@ const emptyGroup = (invoice: PeriodCost): InvoiceGroup => ({
 	isHeatingCost: invoice.category?.isHeatingCost ?? false
 });
 
-function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
+export function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
 	const groups = new Map<string, InvoiceGroup>();
 
 	for (const invoice of invoices) {

@@ -562,7 +562,7 @@ const daysFrom = (start: string, end: string) => (Date.parse(end) - Date.parse(s
  * An invoice's part in a period: the days of its Leistungszeitraum within the period (without one, the whole period
  * when the Rechnungsdatum lies in it) and the amount of those days
  */
-function inPeriod(
+export function inPeriod(
 	invoice: { amount: string; servicePeriodStart: string | null; servicePeriodEnd: string | null },
 	periodStart: string,
 	periodEnd: string
@@ -578,7 +578,7 @@ function inPeriod(
 }
 
 // Rule 1: in the period by its Leistungszeitraum, without one by its Rechnungsdatum
-const inPeriodOf = (periodStart: string, periodEnd: string) =>
+export const inPeriodOf = (periodStart: string, periodEnd: string) =>
 	or(
 		and(isNull(invoices.servicePeriodStart), gte(invoices.invoiceDate, periodStart), lte(invoices.invoiceDate, periodEnd)),
 		and(lte(invoices.servicePeriodStart, periodEnd), gte(invoices.servicePeriodEnd, periodStart))

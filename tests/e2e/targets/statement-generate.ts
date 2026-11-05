@@ -144,7 +144,6 @@ export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft',
 export const agreementsRetry = target('Erneut versuchen', (page) => page.getByTestId('agreements-retry'));
 export const agreementsWait = target('Warten auf die Prüfung der Mietverträge', (page) => page.getByTestId('agreements-wait'));
 // #453 (#327): the note on the total, a contract «Abgerechnet bis» covers in full, and a building all of whose are
-export const previewVacancyNote = target('Notiz zum Total der Vorschau', (page) => page.getByTestId('preview-vacancy-note'));
 export const previewSkipped = (contractId: string) =>
 	target('übergangener Mietvertrag in der Vorschau', (page) => page.getByTestId(`preview-skipped-${contractId}`));
 export const previewSkippedLink = (contractId: string) =>

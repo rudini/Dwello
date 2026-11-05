@@ -79,6 +79,13 @@ export const navGroups: {
 				},
 				href: '/documents',
 				icon: 'folder'
+			},
+			{
+				get label() {
+					return m.reports_title();
+				},
+				href: '/reports', // #1126: the Kostenabstimmung of each building's period
+				icon: 'calculate'
 			}
 		]
 	},
