@@ -46,7 +46,6 @@ import {
 	previewAkontoHint,
 	previewRow,
 	previewRows,
-	previewVacancyNote,
 	previewSkipped,
 	previewAllSkipped,
 	tankQuestion,
@@ -191,7 +190,6 @@ export const agreementsWaiting = Text.of(agreementsWait);
 
 // #453 (#327): what the preview says per contract, on its total, and on contracts «Abgerechnet bis» covers
 export const previewRowText = (tenantName: string) => Text.of(previewRow(tenantName));
-export const vacancyNoteText = Text.of(previewVacancyNote);
 export const skippedContractText = (contractId: string) => Text.of(previewSkipped(contractId));
 export const allSkippedText = (buildingId: string) => Text.of(previewAllSkipped(buildingId));
 // #738: what step 2 could not load; how a building's choice is named and described; how far a part of its card reaches out

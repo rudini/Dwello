@@ -12,7 +12,7 @@ export const reportReconciliation = target('Kostenabstimmung der Berichte', (pag
 // the column headings and the cells of the positions and the total, row by row
 export const reconciliationCells = (scope: Target) =>
 	target(`Zellen der ${scope}`, (page) =>
-		scope.locate(page).getByTestId(/^cost-reconciliation-(head|cell)$/)
+		scope.locate(page).getByRole('columnheader').or(scope.locate(page).getByTestId('cost-reconciliation-cell'))
 	);
 // a row by its label: a position, the total, or a row beside the comparison
 export const reconciliationRowCells = (scope: Target, label: string) =>
@@ -21,7 +21,7 @@ export const reconciliationRowCells = (scope: Target, label: string) =>
 			.locate(page)
 			.getByTestId(/^cost-reconciliation-(row|extra)$/)
 			.filter({ hasText: label })
-			.getByTestId(/^cost-reconciliation-(cell|amount)$/)
+			.getByTestId(/^cost-reconciliation-(cell|label|amount)$/)
 	);
 export const reconciliationHelp = (scope: Target) =>
 	target(`Hilfetext der ${scope}`, (page) => scope.locate(page).getByTestId('cost-reconciliation-help'));

@@ -4,12 +4,13 @@
  * landlord bears the difference. The Verwaltungspauschale and the non-allocable invoices stand beside it
  */
 
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { buildings } from '../db/schema';
+import { buildings, invoices } from '../db/schema';
 import { calculateStatementForContract, groupInvoicesByCategory } from './calculation.service';
 import { counting } from './counting-statements';
 import { fuelStockChange } from './fuel-stock.service';
-import { getInvoicesForStatement, nonAllocableInPeriod } from './invoice.service';
+import { getInvoicesForStatement, inPeriod, inPeriodOf } from './invoice.service';
 import { roundToRappen } from './pdf-format';
 import { notUpToDate } from './statement-invoices.service';
 import { runPlan } from './statement-run.service';
@@ -74,8 +75,25 @@ async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 		managementFee: cents(
 			billed.reduce((total, statement) => total + Number(statement.managementFee ?? 0), 0)
 		),
-		nonAllocable: await nonAllocableInPeriod(buildingId, period.start, period.end)
+		nonAllocable: await nonAllocableInPeriod(buildingId, period)
 	};
+}
+
+/** What the non-allocable invoices of a building cost in a period, counted like the allocable ones (Rule 1) */
+async function nonAllocableInPeriod(buildingId: string, period: Range) {
+	const rows = await db
+		.select()
+		.from(invoices)
+		.where(
+			and(
+				eq(invoices.buildingId, buildingId),
+				eq(invoices.isValidUtilityCost, false),
+				inPeriodOf(period.start, period.end)
+			)
+		);
+	return cents(
+		rows.reduce((sum, invoice) => sum + inPeriod(invoice, period.start, period.end).amount, 0)
+	);
 }
 
 // the statements of the building that count in exactly this period: drafts included, a replaced one not

@@ -67,15 +67,9 @@ Then('nennen die Berichte die Kostenabstimmung {string}', async ({ verwalter, se
 	await verwalter.sees(reportPeriodName(seed.idOf(building)!, start)).toBe(`${names.get(building)}, ${period}`);
 });
 
+// from «Berichte», by the link of the building's period
 When(
 	'der Liegenschaftsverwalter die Kostenabstimmung {int} von {string} öffnet',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(openReports, openReportOf(seed.idOf(building)!, yearStart(year)));
-	}
-);
-
-Given(
-	'der Liegenschaftsverwalter ist auf der Kostenabstimmung {int} von {string}',
 	async ({ verwalter, seed }, year: number, building: string) => {
 		await verwalter.attemptsTo(openReports, openReportOf(seed.idOf(building)!, yearStart(year)));
 	}

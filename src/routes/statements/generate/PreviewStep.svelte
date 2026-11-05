@@ -5,6 +5,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import PreviewChecks from './PreviewChecks.svelte';
+	import PreviewReconciliations from './PreviewReconciliations.svelte';
 	import PreviewEmpty from './PreviewEmpty.svelte';
 	import PreviewSkipped from './PreviewSkipped.svelte';
 	import type { PreviewRow } from './preview';
@@ -34,7 +35,6 @@
 		running: boolean; // the backend says the period is not over (#815)
 	} = $props();
 
-	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
 	const rows = $derived(invoiceRows(invoices, buildings));
 	const billed = $derived(rows.filter((row) => row.existing > 0));
 	// #453: every building says itself that «Abgerechnet bis» covers all its contracts
@@ -72,12 +72,6 @@
 			{previewRows.length}
 		</dd>
 	</div>
-	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
-		<dt class="text-ink-muted">{m.statements_all_costs()}</dt>
-		<dd class="font-semibold tabular-nums text-ink">{formatCurrency(total)}</dd>
-		<!-- Glossary (Vermieter, Proration): the landlord bears the costs of vacancy -->
-		<dd class="text-ink-muted" data-testid="preview-vacancy-note">{m.statements_vacancy_note()}</dd>
-	</div>
 	{#if heatingProfile}
 		<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
 			<dt class="text-ink-muted">{m.glossary_profile_term()}</dt>
@@ -107,6 +101,8 @@
 		{/each}
 	</ul>
 </section>
+
+<PreviewReconciliations {rows} />
 
 {#if previewRows.length}
 	<PreviewChecks

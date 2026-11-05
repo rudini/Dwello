@@ -456,12 +456,38 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
-	// #453 (#327, V-13): days billed outside Dwello are missing from the total too
-	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {
-		open({ preview, invoices });
-		expect(byTestId('preview-vacancy-note')!.textContent).toBe(
-			'Den Anteil leerer Wohnungen und der Tage, die ausserhalb von Dwello abgerechnet sind, enthält das Total nicht.'
-		);
+	// #1126: the Kostenabstimmung replaces the total of all statements; a building without allocable invoices shows none
+	it('zeigt je Gebäude die Kostenabstimmung statt der Kosten aller Abrechnungen', () => {
+		const amounts = { buildingCosts: 1200, tenants: 1101.64, landlord: 98.36 };
+		const reconciliation = {
+			positions: [{ label: 'Hauswart', ...amounts }],
+			total: amounts,
+			managementFee: 0,
+			nonAllocable: 0,
+			withoutStatement: 0,
+			drafts: 0,
+			notUpToDate: []
+		};
+		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
+		const table = byTestId(`preview-reconciliation-${invoices[0].buildingId}`)!;
+		expect(table.textContent!.replace(/\s+/g, ' ')).toContain('CHF 98.36');
+		expect(document.body.textContent).not.toContain('Kosten aller Abrechnungen');
+	});
+
+	it('zeigt ohne Positionen keine Kostenabstimmung', () => {
+		const empty = { buildingCosts: 0, tenants: 0, landlord: 0 };
+		const reconciliation = {
+			positions: [],
+			total: empty,
+			managementFee: 0,
+			nonAllocable: 0,
+			withoutStatement: 0,
+			drafts: 0,
+			notUpToDate: []
+		};
+		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
+		expect(byTestId('preview-row')).not.toBeNull(); // anchor: the preview shows
+		expect(byTestId(`preview-reconciliation-${invoices[0].buildingId}`)).toBeNull();
 	});
 
 	// #453 (#327): before creating, the landlord checks per contract whether «Abgerechnet bis» works

@@ -3,6 +3,7 @@ import { periodQuery } from '$lib/accounting-period';
 import { error, fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile, type HeatingProfileRow } from '$lib/server/heating-profile';
+import { runReconciliations } from '$lib/server/cost-reconciliation';
 import {
 	billedContracts,
 	generateStatements,
@@ -96,10 +97,11 @@ export const actions: Actions = {
 	preview: async ({ request, fetch }) => {
 		try {
 			const run = generationRequest(await request.formData());
-			const [preview, invoices, billed] = await Promise.all([
+			const [preview, invoices, billed, reconciliations] = await Promise.all([
 				previewStatements(fetch, run),
 				invoicesInPeriod(fetch, run),
-				billedContracts(fetch, run)
+				billedContracts(fetch, run),
+				runReconciliations(fetch, run)
 			]);
 			const byBuilding = new Map(billed.map((row) => [row.buildingId, row]));
 			// new costs are the building's: say whether it bills a running befristeter Mietvertrag (#76)
@@ -111,7 +113,9 @@ export const actions: Actions = {
 					...row,
 					// #453 (#327): contracts «Abgerechnet bis» covers, and whether no contract is left to bill
 					...skippedIn(byBuilding.get(row.buildingId)),
-					fixedTerm: fixedTerm(row.buildingId)
+					fixedTerm: fixedTerm(row.buildingId),
+					reconciliation: reconciliations.find((one) => one.buildingId === row.buildingId)
+						?.reconciliation
 				}))
 			};
 		} catch (err) {

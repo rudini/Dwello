@@ -3,6 +3,7 @@ import { actions, load } from '../routes/statements/generate/+page.server';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import runDefaults from '../../tests/contracts/statement-run-defaults.json';
+import runReconciliation from '../../tests/contracts/statement-run-reconciliation.json';
 
 // The backend's plan of the run (H-28): these contracts with Mietstage in the period, billed or not
 const plan = (contracts: object[], more: object = {}) =>
@@ -29,11 +30,13 @@ describe('Vorschau der Abrechnungen', () => {
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
 		const fetch = async (url: string) =>
-			url.includes('/statements/run?')
-				? plan([])
-				: Response.json(
-						url.includes('/for-statement/') ? [] : { contracts: [], data: [], total: 0 }
-					);
+			url.includes('/run-reconciliation')
+				? Response.json(runReconciliation)
+				: url.includes('/statements/run?')
+					? plan([])
+					: Response.json(
+							url.includes('/for-statement/') ? [] : { contracts: [], data: [], total: 0 }
+						);
 		const result = (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request });
 		expect(await result).toEqual({
 			preview: [],
@@ -47,7 +50,9 @@ describe('Vorschau der Abrechnungen', () => {
 					check: expect.anything(),
 					changed: [],
 					fixedTerm: false,
-					uncategorized: []
+					uncategorized: [],
+					// #1126: the building's Kostenabstimmung
+					reconciliation: expect.objectContaining({ managementFee: 33.05, nonAllocable: 500 })
 				}
 			]
 		});
@@ -71,13 +76,15 @@ describe('Vorschau der Abrechnungen', () => {
 		};
 		const statement = periodStatements.data[0];
 		const fetch = async (url: string) =>
-			url.includes('/statements/run?')
-				? plan([{ ...contract, billed: true }], { otherPeriod: 'calendar' })
-				: Response.json(
-						url.includes('/for-statement/')
-							? []
-							: { ...periodStatements, contracts: [contract], data: [statement] }
-					);
+			url.includes('/run-reconciliation')
+				? Response.json(runReconciliation)
+				: url.includes('/statements/run?')
+					? plan([{ ...contract, billed: true }], { otherPeriod: 'calendar' })
+					: Response.json(
+							url.includes('/for-statement/')
+								? []
+								: { ...periodStatements, contracts: [contract], data: [statement] }
+						);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
@@ -91,14 +98,21 @@ describe('Vorschau der Abrechnungen', () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const covered = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: null, billedUntil: '2024-12-31' };
+		const covered = {
+			...buildingContracts.contracts[0],
+			startDate: '2020-01-01',
+			endDate: null,
+			billedUntil: '2024-12-31'
+		};
 		const skipped = [{ id: covered.id, tenantName: covered.tenantName, billedUntil: '2024-12-31' }];
 		const fetch = async (url: string) =>
-			url.includes('/statements/run?')
-				? plan([], { skipped })
-				: Response.json(
-						url.includes('/for-statement/') ? [] : { contracts: [covered], data: [], total: 0 }
-					);
+			url.includes('/run-reconciliation')
+				? Response.json(runReconciliation)
+				: url.includes('/statements/run?')
+					? plan([], { skipped })
+					: Response.json(
+							url.includes('/for-statement/') ? [] : { contracts: [covered], data: [], total: 0 }
+						);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
@@ -116,19 +130,37 @@ describe('Vorschau der Abrechnungen', () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const covered = { ...buildingContracts.contracts[0], id: 'eva', startDate: '2020-01-01', endDate: '2024-03-31', billedUntil: '2024-12-31' };
-		const billed = { ...buildingContracts.contracts[0], id: 'marc', startDate: '2024-05-01', endDate: null };
-		const statement = { ...periodStatements.data[0], contractId: 'marc', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+		const covered = {
+			...buildingContracts.contracts[0],
+			id: 'eva',
+			startDate: '2020-01-01',
+			endDate: '2024-03-31',
+			billedUntil: '2024-12-31'
+		};
+		const billed = {
+			...buildingContracts.contracts[0],
+			id: 'marc',
+			startDate: '2024-05-01',
+			endDate: null
+		};
+		const statement = {
+			...periodStatements.data[0],
+			contractId: 'marc',
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31'
+		};
 		const fetch = async (url: string) =>
-			url.includes('/statements/run?')
-				? plan([{ ...billed, billed: true }], {
-						skipped: [{ id: 'eva', tenantName: covered.tenantName, billedUntil: '2024-12-31' }]
-					})
-				: Response.json(
-						url.includes('/for-statement/')
-							? []
-							: { contracts: [covered, billed], data: [statement], total: 1 }
-					);
+			url.includes('/run-reconciliation')
+				? Response.json(runReconciliation)
+				: url.includes('/statements/run?')
+					? plan([{ ...billed, billed: true }], {
+							skipped: [{ id: 'eva', tenantName: covered.tenantName, billedUntil: '2024-12-31' }]
+						})
+					: Response.json(
+							url.includes('/for-statement/')
+								? []
+								: { contracts: [covered, billed], data: [statement], total: 1 }
+						);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
@@ -144,13 +176,19 @@ describe('Vorschau der Abrechnungen', () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const befristet = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: '2099-12-31' };
+		const befristet = {
+			...buildingContracts.contracts[0],
+			startDate: '2020-01-01',
+			endDate: '2099-12-31'
+		};
 		const fetch = async (url: string) =>
-			url.includes('/statements/run?')
-				? plan([{ ...befristet, fixedTerm: true }]) // the backend says befristet (H-28, #717)
-				: Response.json(
-						url.includes('/for-statement/') ? [] : { contracts: [befristet], data: [], total: 0 }
-					);
+			url.includes('/run-reconciliation')
+				? Response.json(runReconciliation)
+				: url.includes('/statements/run?')
+					? plan([{ ...befristet, fixedTerm: true }]) // the backend says befristet (H-28, #717)
+					: Response.json(
+							url.includes('/for-statement/') ? [] : { contracts: [befristet], data: [], total: 0 }
+						);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
@@ -250,4 +288,3 @@ describe('Vorgaben des Assistenten aus dem Backend', () => {
 		});
 	});
 });
-

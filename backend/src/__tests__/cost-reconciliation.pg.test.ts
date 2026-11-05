@@ -116,6 +116,15 @@ describe('Kostenabstimmung der Berichte', () => {
 
 	it('zählt die Abrechnungen im Entwurf und die Mietverträge ohne Abrechnung', async () => {
 		expect(await report()).toMatchObject({ drafts: 1, withoutStatement: 0, notUpToDate: [] });
+		// code review 1126-1 C-4: a sent statement is no draft
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, first.id));
+		expect((await report()).drafts).toBe(0);
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, first.id));
+	});
+
+	// PO 05.11.2026, code review 1126-1 C-3: the preview counts the statement already created, once
+	it('zählt in der Vorschau die schon erstellte Abrechnung einmal mit', async () => {
+		expect((await run()).total.tenants).toBe(182);
 	});
 
 	it('nennt die nicht umlagefähigen Rechnungen getrennt, ohne dass die Abrechnung deshalb nicht aktuell ist', async () => {
@@ -201,6 +210,16 @@ describe('Kostenabstimmung der Vorschau', () => {
 			total: { buildingCosts: 732, tenants: 182, landlord: 550 },
 			managementFee: 5.46
 		});
+	});
+});
+
+describe('Kostenabstimmung eines unbekannten Gebäudes', () => {
+	it('wird mit BUILDING_NOT_FOUND abgelehnt', async () => {
+		const unknown = crypto.randomUUID();
+		for (const path of [`reports/reconciliation`, `statements/run-reconciliation`]) {
+			const response = await callApi(`/api/v1/${path}?buildingId=${unknown}&${period}`);
+			expect([response.status, ((await response.json()) as { code: string }).code]).toEqual([404, 'BUILDING_NOT_FOUND']);
+		}
 	});
 });
 

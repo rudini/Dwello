@@ -1,0 +1,20 @@
+# Code-Review 1126-1 (Kostenabstimmung, Backend, `git diff bb697b7 c4ae72c`)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Minor | `docs/api-specification.md` (fehlt im Diff) | Die drei neuen Endpunkte `GET /reports/reconciliation`, `GET /reports/reconciliations` und `GET /statements/run-reconciliation` stehen nicht in der API-Spezifikation. Dort ist jeder Endpunkt beschrieben (z. B. `/run-differences` Z. 297, mit Verweis auf seinen Vertrag). |
+| C-2 | Minor | `backend/src/services/statement-invoices.service.ts:161` | `notUpToDate` ist nur über den Rechnungszweig getestet. Nimmt man `\|\| fuelStockChanged(…)` heraus, bleibt `cost-reconciliation.pg.test.ts` grün. Der Glossar-Begriff «Nicht aktuelle Abrechnung» nennt auch den Tankbestand. Ebenfalls ungetestet sind die übrigen Fälle aus Fachreview 1126-2 V-10: eine Teilberichtigung, bei der nur der nicht berichtigte Mieter genannt wird, und eine Abrechnung, die nach «Nicht berichtigen» genannt bleibt. |
+| C-3 | Minor | `backend/src/services/cost-reconciliation.service.ts:128`, `:139` | Kein pg-Test prüft den PO-Entscheid «Preview of a run that bills only the remaining contracts». Der Test der Vorschau hat nur einen Mietvertrag, und der hat keine gültige Abrechnung. Wer `...statements` aus Z. 139 streicht oder den Filter `!c.billed` in Z. 128 entfernt, bekommt keinen roten Test: Die schon erstellten Abrechnungen würden weggelassen oder doppelt gezählt, und es fällt nicht auf. Abgedeckt ist das nur durch das `@wip`-Szenario `statement-cost-reconciliation.feature:73`, nicht auf der tiefsten Schicht. |
+| C-4 | Minor | `backend/src/services/cost-reconciliation.service.ts:109` | Der Filter `status === 'draft'` hat keinen roten Test. Im Test ist die einzige gültige Abrechnung ein Entwurf, danach gibt es keine mehr. Mit `drafts: statements.length` bleiben alle Tests grün. Es fehlt eine versendete Abrechnung, die nicht mitgezählt wird. |
+| C-5 | Minor | `backend/src/services/cost-reconciliation.service.ts:162-164` | Die Sortierung von `reportPeriods` («newest first», bei gleicher Periode nach Gebäude) hat keinen Test. Der Test filtert auf ein Gebäude mit einer einzigen Periode. |
+
+Keine Blocker, keine Major.
+
+## Nicht bestätigt
+
+- `cd backend && bun run type-check`, `bun test src/__tests__/cost-reconciliation.pg.test.ts` (11 pass), die Rot-Läufe je Verhalten und `bun test src/__tests__/api-contracts.pg.test.ts -t reconciliation`: vom Aufrufer gemeldet. Ich habe keine Tests laufen lassen.
+- `bun run lint`, `bun run fitness`, die ganze Backend-Suite und die Commit-Gates (testcheck, deepcheck): laut Aufrufer noch nicht gelaufen, von mir auch nicht.
+- Eine umlagefähige Rechnung ohne Kategorie, die nach dem Erstellen erfasst wurde, ergibt eine Position mit `categoryId: null`. Auch eine Zeile, deren Kategorie gelöscht ist, bekommt `categoryId: null` (`onDelete: 'set null'`, `db/schema.ts:553`). Die Antwort enthält keinen Namen der Position. Ob das Frontend solche Positionen benennen kann, entscheidet erst der Frontend-Slice. Gelesen: `calculation.service.ts:108-131`, Schema der Abrechnungszeilen.
+- Die Summen nach Rappen bei mehreren Wohnungen mit Heizprofil (Anteil aus dem Profil statt aus dem Verteilschlüssel): nur im Code nachgelesen (`calculation.service.ts:224-236`). Der Test hat nur eine Wohnung ohne Heizkosten; hier prüft `daten-pruefer`.
+
+Geprüft: Schlüssel Kategorie × Verteilschlüssel stimmt zwischen `groupInvoicesByCategory` und den gespeicherten bzw. berechneten Zeilen überein. Tankbestand und Rule 1 sind wie in der Berechnung, Verwaltungspauschale getrennt, «davon tragen Sie» abgeleitet, also stimmt die Summe je Zeile und im Total. Ersetzte Abrechnungen zählen nicht (`counting`), «Abgerechnet bis» über `runPlan`, gelöschte Positionen bleiben als Zeile mit 0.00 (V-9). Die Routen liegen hinter `authMiddleware` und validieren UUID und Datum, die Antwort gibt keine Zeilenfelder über das Nötige hinaus weiter. Die drei Verträge samt README sind nachgeführt, die Testtitel deutsch, der Commit-Betreff entspricht den Regeln, und im Diff steht nichts, was nicht zur Anforderung gehört.
