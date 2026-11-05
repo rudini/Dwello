@@ -4,7 +4,7 @@ import { exampleOf } from '../fixtures/screens';
 import { findings } from '../questions/accessibility';
 import { userMenuCount } from '../questions/app-frame';
 import { languageCode, pageLanguage, shownLanguage } from '../questions/language';
-import { pagePath, pageTitle } from '../questions/navigation';
+import { focusedPlace, pagePath, pageTitle } from '../questions/navigation';
 import { checkLanguagesOf } from '../tasks/accessibility';
 import {
 	chooseInFooter,
@@ -110,4 +110,9 @@ When('der Besucher in der Fusszeile {string} wählt', async ({ besucher }, label
 Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: string) => {
 	// retried: a link opens the page in the browser, after the click returns
 	await besucher.sees(pagePath).toBe(path);
+});
+
+// #656: after the reload in the new language the focus is back where the landlord chose it
+Then('steht der Fokus auf der Sprachwahl', async ({ verwalter }) => {
+	await verwalter.sees(focusedPlace).toBe('language-button');
 });

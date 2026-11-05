@@ -1078,6 +1078,15 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Slice review round 2 (`docs/reviews/1113-review-2.md`); C-3 kept in this PR as the product owner decided
 - [x] PR: pushed after this archive
 
+## Session 2026-11-05: #656 keys and landmarks in the header
+
+- [x] Decided in #656 (product owner): implement now; after a language change the focus is back on the language choice and a message in the new language names it
+- [x] Scenarios (navigation, sprachen), red first: arrow keys, Home and End in the user menu; the footer marks the open legal page; after a language change the focus is on the language choice and Dwello names the language; «Anmelden» and «Hilfe» sit in the header area
+- [x] The user menu moves like the language choice (`src/lib/menu-keys.ts`, shared); `aria-current="page"` in the footer; a session flag carries the change across the reload; the public layout's top bar is a `<header>`
+- [x] Screen state `language-changed` for login and dashboard (screens.json, accessibility and language rows)
+- [x] Code review round 1 (`docs/reviews/656-review-1.md`): C-1 Blocker (a layout test expected no header), C-2 Major (screen state), C-3 Minor fixed; round 2 (`656-review-2.md`) clean
+- [x] Persona Sven (`docs/design/personas/sven-656.md`): P-1 Minor (the language already shown left the list open and set the flag) fixed, DOM test red first; his notes (no menu role, the account language) stay in the report
+- [x] PR (`Fixes #656`): pushed after this archive
 ## Session 2026-11-05: #653 shared dialogs: tab order, initial focus, description
 
 - [x] Scenarios (contract-detail, invoice-detail, statement-detail), red first: the dialog «Mietvertrag beenden» starts in its field; the long delete confirmation opens at its top on a phone and describes itself with its first paragraph; after sending, the focus is on the status

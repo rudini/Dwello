@@ -2,7 +2,8 @@ import { writeDraft } from '../../../src/lib/wizard-draft';
 import { inDays } from '../fixtures/dates';
 import { type Example, type Viewport, variants, viewports } from '../fixtures/screens';
 import { accessibilityViolations } from '../questions/accessibility';
-import { inPageLanguage, languageFindings, pageLanguage } from '../questions/language';
+import { inPageLanguage, languageFindings, languageName, pageLanguage } from '../questions/language';
+import { chooseLanguage } from './language';
 import { pageAddress } from '../questions/navigation';
 import type { Activity, Actor, Question } from '../screenplay/actor';
 import {
@@ -342,6 +343,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		if ((await actor.answer(pageLanguage)) !== 'fr')
 			await actor.attemptsTo(Click.on(languageButton), Click.toReload(on.frenchOption));
 		await actor.attemptsTo(Wait.until(on.frenchPage));
+	},
+	// #656: the page reloaded after a language change, its message naming the language; the page's language stays, so the
+	// language rows see the message in theirs: away to Deutsch and back, from Deutsch to Français
+	'language-changed': () => async (actor) => {
+		const shown = await actor.answer(pageLanguage);
+		if (shown !== 'de') await actor.attemptsTo(chooseLanguage('Deutsch'));
+		await actor.attemptsTo(chooseLanguage(languageName(shown === 'de' ? 'fr' : shown!)), Wait.until(on.savedToast));
 	},
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
 	// #817: the new key, shown once; the revoke dialog of the first key in the list

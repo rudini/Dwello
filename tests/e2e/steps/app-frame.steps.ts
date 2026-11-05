@@ -5,6 +5,8 @@ import {
 	footerVersionText,
 	glossaryExplanationText,
 	legalAsOfText,
+	linksInBanner,
+	markedFooterLinks,
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageAnchor,
@@ -30,8 +32,10 @@ import {
 	chooseLogo,
 	goToOverviewWhileItFails,
 	openMobileMenu,
+	openUserMenuByKey,
 	openPrivacySectionFromTerms,
 	openSettingsFromUserMenu,
+	pressInUserMenu,
 	useWindowWidth
 } from '../tasks/app-frame';
 
@@ -362,3 +366,32 @@ Then('verdeckt die Erfolgsmeldung nicht, was den Fokus hat', async ({ verwalter 
 Then('bleibt die Seite an ihrer Stelle, bis die Erfolgsmeldung wieder geht', async ({ verwalter }) => {
 	await verwalter.sees(pageMovedUntilConfirmationLeft, { timeout: 20_000 }).toBeLessThanOrEqual(1);
 });
+
+// #656: the user menu moves by keys like the language choice
+When(
+	'der Liegenschaftsverwalter das Benutzermenü mit der Taste {string} öffnet',
+	async ({ verwalter }, key: string) => {
+		await verwalter.attemptsTo(openUserMenuByKey(key));
+	}
+);
+
+When('der Liegenschaftsverwalter im Benutzermenü die Taste {string} drückt', async ({ verwalter }, key: string) => {
+	await verwalter.attemptsTo(pressInUserMenu(key));
+});
+
+Then('steht der Fokus im Benutzermenü auf {string}', async ({ verwalter }, item: string) => {
+	await verwalter.sees(focusedText).toBe(item);
+});
+
+Then('ist in der Fusszeile nur {string} als aktuelle Seite markiert', async ({ verwalter }, label: string) => {
+	await verwalter.sees(markedFooterLinks).toEqual([label]);
+});
+
+// asked of whoever looks at the page: the Besucher before signing in
+Then(
+	'stehen die Links {string} und {string} im Kopfbereich der Seite',
+	async ({ verwalter: viewer }, first: string, second: string) => {
+		await viewer.sees(linksInBanner(first)).toBe(1);
+		await viewer.sees(linksInBanner(second)).toBe(1);
+	}
+);
