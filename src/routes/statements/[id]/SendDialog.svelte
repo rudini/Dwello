@@ -73,7 +73,8 @@
 			if (result.type === 'success') {
 				addToast('success', words.done);
 				await tick(); // after the dialog has handed the focus back
-				document.querySelector<HTMLElement>('h1')?.focus(); // "Als versendet markieren" is gone now
+				// its button may be gone now: the focus names the new status, not the page title again (#653)
+				document.getElementById('statement-status-line')?.focus();
 			}
 		};
 	}}

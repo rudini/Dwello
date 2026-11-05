@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { Accessible, Attribute, Checked, Count, ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, FocusedLabel, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
 	contractEndInput,
 	noticeReceivedInput,
@@ -66,3 +66,6 @@ export const dialogErrorCount = Count.of(dialogErrors);
 // #511: the help each field of «Mietvertrag beenden» gives, as its accessible description
 export const endDateHelp = Accessible.descriptionOf(contractEndInput);
 export const noticeReceivedHelp = Accessible.descriptionOf(noticeReceivedInput);
+
+/** The field of the dialog «Mietvertrag beenden» that has the focus, by its label (#653) */
+export const focusedEndDialogField = FocusedLabel;

@@ -1087,3 +1087,21 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Code review round 1 (`docs/reviews/656-review-1.md`): C-1 Blocker (a layout test expected no header), C-2 Major (screen state), C-3 Minor fixed; round 2 (`656-review-2.md`) clean
 - [x] Persona Sven (`docs/design/personas/sven-656.md`): P-1 Minor (the language already shown left the list open and set the flag) fixed, DOM test red first; his notes (no menu role, the account language) stay in the report
 - [x] PR (`Fixes #656`): pushed after this archive
+## Session 2026-11-05: #653 shared dialogs: tab order, initial focus, description
+
+- [x] Scenarios (contract-detail, invoice-detail, statement-detail), red first: the dialog «Mietvertrag beenden» starts in its field; the long delete confirmation opens at its top on a phone and describes itself with its first paragraph; after sending, the focus is on the status
+- [x] Dialog: focus starts in the first field (a danger dialog with fields on the panel), the confirm button comes after the fields; the description is the first paragraph (not field help, not a live line) unless a dialog names its own (`describedby`, the correction: consequence and «nicht rückgängig»); a button press does not move the dialog under the pointer
+- [x] Scrollbar: product owner decided to leave it to the system setting («System lassen»)
+- [x] Focus after saving: the status line (`#statement-status-line`) when the action's button is gone; a button that stays keeps it (#1096); after «bezahlt» in the list, the row's link or the list's result
+- [x] Code review rounds 1 and 2 (`docs/reviews/653-review-1.md`, `-2.md`) fixed; closing round 3 (`653-review-3.md`) on the merge with #1096: C-6 Blocker («Neu berechnen» lost its focus) and C-7 Major fixed, DOM test red first; round 4 (`653-review-4.md`): C-8 Minor fixed
+- [x] Personas Sven and Marco (`docs/design/personas/sven-653.md`, `marco-653.md`): P-1 (the live date line read as description) fixed
+- [x] Fallback review of #1127 (Medium: the send dialog's switch to the letter left the description on a removed paragraph and the focus on the page) fixed, DOM test red first; review round 5 (`653-review-5.md`) C-1 Major (no scenario) answered by a new scenario in `statement-send.feature`; round 6 (`653-review-6.md`) clean
+- [x] PR (`Fixes #653`): pushed after this archive
+## Session 2026-11-05: #1123 isolation, #1124 focus after saving
+
+- [x] Record the product owner's decisions in #1123 and #1124
+- [x] #1123: the scenario «Nach dem Löschen steht der Fokus auf der nächsten Kategorie» seeds its next row right after its first (`tests/e2e/fixtures/backend.ts`, steps, tasks, targets); spec change approved: #1123
+- [x] #1124: scenario «Nach dem Speichern steht der Fokus auf der gespeicherten Kategorie» seen red; DOM test seen red; `focusRowLinkingTo` in `src/lib/focus-after-action.ts`, called by `src/routes/config/SaveForm.svelte`
+- [x] Code review round 1 (`docs/reviews/1124-review-1.md`)
+- [x] Personas Helga and Sven (`docs/design/personas/helga-1124.md`, `sven-1124.md`); Minors stay in the reports, #1128 opened (create flow)
+- [x] Workflow 9: no closing round needed (no code since 962382c3c); PR pushed after this archive

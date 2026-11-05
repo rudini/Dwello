@@ -1,11 +1,20 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { history, historyDates, letterInsteadOffers, sendButtonLabel, sendConfirmLabel, sendConfirmation } from '../questions/statement-detail';
+import {
+	focusInSendConfirmation,
+	history,
+	historyDates,
+	letterInsteadOffers,
+	sendButtonLabel,
+	sendConfirmLabel,
+	sendConfirmation,
+	sendConfirmationDescription
+} from '../questions/statement-detail';
 import { correspondence } from '../questions/tenant-form';
 import { openTenantDetail } from '../tasks/tenant-detail';
 import { paymentDeadline } from '../questions/statement-edit';
-import { deliverByLetter, deliverByLetterInstead, openSendConfirmation, sendStatement } from '../tasks/statement-detail';
+import { chooseLetterInstead, deliverByLetter, deliverByLetterInstead, openSendConfirmation, sendStatement } from '../tasks/statement-detail';
 import { escapeRegExp } from '../questions/pattern';
 
 const { Given, When, Then } = createBdd(test);
@@ -91,4 +100,17 @@ Then('nennt der Verlauf den Versand per E-Mail an {string} vor {int} Tagen', asy
 // #1089: a long entry wraps its words, never its date
 Then('stehen die Daten im Verlauf bündig untereinander, jedes auf einer Zeile', async ({ verwalter }) => {
 	await verwalter.sees(historyDates).toEqual({ offset: 0, lines: 1 });
+});
+
+// fallback review of #1127: the dialog changes its content while open; its description and the focus follow
+When('der Liegenschaftsverwalter in der Bestätigung den Brief statt der E-Mail wählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseLetterInstead);
+});
+
+Then('beschreibt sich die Bestätigung des Versands mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(sendConfirmationDescription).toContain(text);
+});
+
+Then('steht der Fokus in der Bestätigung des Versands', async ({ verwalter }) => {
+	await verwalter.sees(focusInSendConfirmation).toBe(true);
 });

@@ -81,3 +81,12 @@ Funktionalität: Abrechnung per E-Mail senden
     Und nennt der Verlauf "Versendet per Brief" am Tag des Versands
     Und ist die "Nebenkostenabrechnung" an "Nora Beispiel" per Brief versendet festgehalten
     Und wünscht "Nora Beispiel" weiterhin Korrespondenz per E-Mail
+
+  # Fallback-Review von #1127: der Dialog wechselt offen zum Brief; seine Beschreibung und der Fokus gehen mit
+  Szenario: Nach dem Wechsel zum Brief beschreibt sich die Bestätigung mit dem Brief und behält den Fokus
+    Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"
+    Und der Liegenschaftsverwalter die Abrechnung per E-Mail senden will
+    Wenn der Liegenschaftsverwalter in der Bestätigung den Brief statt der E-Mail wählt
+    Dann beschreibt sich die Bestätigung des Versands mit "Dwello verschickt die Abrechnung nicht selbst."
+    Und steht der Fokus in der Bestätigung des Versands

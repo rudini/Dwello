@@ -153,9 +153,10 @@
 	check={checkPaid}
 	success={m.statements_replaced_done()}
 	danger
+	describedby="correct-consequence correct-final"
 >
-	<!-- the real consequence, what is offset, and the limitation -->
-	<p>{consequence}</p>
+	<!-- the real consequence, what is offset, and the limitation; consequence and finality describe it (#653) -->
+	<p id="correct-consequence">{consequence}</p>
 	{#if askPaid}
 		<MoneyInput
 			id="paidAmount"
@@ -171,6 +172,6 @@
 		/>
 	{/if}
 	<p>{m.statements_correct_next()}</p>
-	<p class="font-semibold">{m.statements_correct_final()}</p>
+	<p id="correct-final" class="font-semibold">{m.statements_correct_final()}</p>
 	<p>{m.statements_correct_limit()}</p>
 </FormDialog>
