@@ -869,6 +869,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und das Browserfenster ist 390 auf 844 Pixel gross
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz
+    Und scrollt die Seite nicht seitwärts
 
   # #659 (Decided): die Sätze zu den Zählern stehen als Warnung unter der Wahl des Heizprofils, nicht im langen Hilfetext davor
   Szenario: Auf dem Telefon steht die Warnung zu den Zählern gleich bei der Wahl des Heizprofils

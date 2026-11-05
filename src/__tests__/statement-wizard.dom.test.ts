@@ -380,6 +380,9 @@ describe('Abrechnungen erstellen', () => {
 			'Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
 		expect(select.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		// right under the choice, before the chart of the chosen profile (fach-reviewer 659-1 V-1, code review 659-1 C-2)
+		const chart = byTestId('heating-profile-chart')!;
+		expect(warning.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 		const help = document.getElementById(select.getAttribute('aria-describedby')!.split(' ')[0])!;
 		expect(help.textContent).not.toContain('Zähler');
 		expect(help.textContent).toContain('Nur Heizprofile mit zusammen 100 % lassen sich wählen.');
