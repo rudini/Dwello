@@ -609,6 +609,15 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 		}));
 }
 
+/** #1126: what the non-allocable invoices of a building cost in a period, counted like the allocable ones (Rule 1) */
+export async function nonAllocableInPeriod(buildingId: string, periodStart: string, periodEnd: string) {
+	const rows = await db
+		.select()
+		.from(invoices)
+		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, false), inPeriodOf(periodStart, periodEnd)));
+	return roundToRappen(rows.reduce((sum, invoice) => sum + inPeriod(invoice, periodStart, periodEnd).amount, 0));
+}
+
 /**
  * The building's invoices the period would bill without a category (#382): Dwello checks the agreement of the
  * Mietvertrag through the category, so the run waits until each has one or is not allocable

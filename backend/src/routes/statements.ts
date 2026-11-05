@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { runReconciliation } from '../services/cost-reconciliation.service';
 import { swissToday } from '../services/today';
 import { CodedError, codedBody, errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
@@ -83,6 +84,10 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// The statements of the run's period a new run keeps although they differ from its settings (#132, H-28)
 	.get('/run-differences', ({ query }) => runDifferencesOf(query.buildingId, { ...runOf(query), managementFeePercent: query.managementFeePercent }), {
 		query: t.Object({ ...runQuery, managementFeePercent: t.Numeric({ minimum: 0, maximum: 10 }) })
+	})
+	// #1126: the Kostenabstimmung of the run's preview: the valid statements of the period and those the run creates
+	.get('/run-reconciliation', ({ query }) => runReconciliation(query.buildingId, { ...runOf(query), managementFeePercent: query.managementFeePercent }), {
+		query: t.Object({ ...runQuery, managementFeePercent: t.Optional(t.Numeric({ minimum: 0, maximum: 10 })) })
 	})
 	// The heating hints of the period's check that concern the run (#335, #339, H-28)
 	.get('/run-heating', ({ query }) => runHeatingHintsOf(query.buildingId, runOf(query)), { query: t.Object(runQuery) })
