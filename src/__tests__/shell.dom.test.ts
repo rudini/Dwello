@@ -101,6 +101,14 @@ describe('Kopfzeile', () => {
 		expect(document.activeElement).toBe(byTestId('logout-button'));
 	});
 
+	// fallback review of #1132: from the closed button, the arrow up opens on the last entry
+	it('öffnet das Benutzermenü mit der Pfeiltaste nach oben beim letzten Eintrag', () => {
+		show(Header, { user });
+		byTestId('user-menu-button')!.focus();
+		press('ArrowUp');
+		expect(document.activeElement).toBe(byTestId('logout-button'));
+	});
+
 	it('nennt das Benutzermenü und bietet eine Fläche von mindestens 48 Pixeln', () => {
 		show(Header, { user });
 		const button = byTestId('user-menu-button')!;

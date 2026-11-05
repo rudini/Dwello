@@ -3,17 +3,21 @@ import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 import Header from '$lib/ui/Header.svelte';
-import { setLocale } from '$lib/paraglide/runtime';
+import { baseLocale, overwriteGetLocale, setLocale } from '$lib/paraglide/runtime';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 
 vi.mock('$app/stores', () => ({ page: readable({ url: new URL('http://localhost/tenants') }) }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
-vi.mock('$lib/paraglide/runtime', async (original) => ({
-	...(await original<object>()),
-	setLocale: vi.fn() // sets the cookie and reloads the page
-}));
+vi.mock('$lib/paraglide/runtime', async (original) => {
+	const real = await original<typeof import('$lib/paraglide/runtime')>();
+	return {
+		...real,
+		getLocale: () => real.getLocale(), // follows overwriteGetLocale, as after a reload in the new language
+		setLocale: vi.fn() // sets the cookie and reloads the page
+	};
+});
 
 const button = () => byTestId<HTMLButtonElement>('language-button')!;
 const press = (key: string) => {
@@ -58,14 +62,20 @@ describe('Sprachwahl', () => {
 
 	// #656 (Decided): the page reloads in the new language; then the focus is back on the switcher and a message names the language
 	it('steht nach dem Wechsel wieder auf der Sprachwahl und nennt die Sprache', () => {
+		sessionStorage.clear();
 		toasts.set([]);
 		show(LanguageSwitcher, {});
 		click(button());
 		click(allByTestId('language-option')[1]);
-		document.body.innerHTML = ''; // the reload
-		show(LanguageSwitcher, {});
-		expect(document.activeElement).toBe(button());
-		expect(get(toasts).map((toast) => toast.message)).toEqual(['Sprache: Deutsch']);
+		document.body.innerHTML = ''; // the reload, in the language chosen (fallback review of #1132)
+		overwriteGetLocale(() => 'fr');
+		try {
+			show(LanguageSwitcher, {});
+			expect(document.activeElement).toBe(button());
+			expect(get(toasts).map((toast) => toast.message)).toEqual(['Langue\u00a0: Français']);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 
 	// persona Sven 656 P-1: the language already shown changes nothing, so the list closes like with Escape, and no reload names it
