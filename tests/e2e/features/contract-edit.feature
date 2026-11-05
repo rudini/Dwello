@@ -78,6 +78,22 @@ Funktionalität: Mietvertrag bearbeiten
     Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Überschneidung noch nicht geprüft"
     Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung."
 
+  # #665 (Persona Sven B-13): wer mit der Tastatur zum Vertragsbeginn kommt, hört den Hinweis mit dem Feld
+  @wip
+  Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann liest ein Screenreader beim Vertragsbeginn den Hinweis "Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung." vor
+
+  # #666 (Personas Marco und Helga B-13): das Wichtigste zuerst, in einfachen Worten, kurz genug fürs Telefon
+  @wip
+  Szenario: Der Hinweis auf nicht geladene Mietverträge sagt zuerst, dass Dwello beim Speichern prüft
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist"
+    Und sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten."
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Mehr dazu oben bei der Wohnung."
+
   # Statt die Seite neu zu laden, bleibt die Eingabe erhalten (#151)
   Szenario: Mietverträge der Wohnung erneut laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden

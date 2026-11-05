@@ -113,6 +113,22 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
     Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Überschneidung noch nicht geprüft"
 
+  # #665 (Persona Sven B-13): wer mit der Tastatur zum Feld kommt, hört den Hinweis mit dem Feld
+  @wip
+  Szenario: Die Wohnungsauswahl nennt die nicht geladenen Mietverträge
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Dwello konnte die Mietverträge dieser Wohnung nicht laden." vor
+
+  @wip
+  Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Dann liest ein Screenreader beim Vertragsbeginn den Hinweis "Dwello konnte die Mietverträge dieser Wohnung nicht laden." vor
+
   # Ohne ihre Mietverträge sieht die Wohnung nicht wie eine freie aus (#151, Dr. Weber W-01)
   Szenario: Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
