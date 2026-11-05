@@ -6,7 +6,8 @@
 import { commonType, lastCompletedPeriod, missingPeriods, moveOut, otherPeriod, overlapped, same, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
 import { getTypedConfig } from './config.service';
-import { billingStart, billsIn, fixedTermCheck, getContract, listContracts, type ContractWithDetails } from './contract.service';
+import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
+import { laterContract } from './later-contract';
 import { listHeatingProfiles } from './heating-profile.service';
 import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
@@ -137,16 +138,18 @@ export async function missingByContract(listed?: Awaited<ReturnType<typeof listC
 }
 
 /**
- * #664: an ended contract's move-out until its Schlussabrechnung exists; none while Dwello asks whether the tenant of
- * an expired fixed-term contract stayed (Art. 266 Abs. 2 OR, Fachreview 664-1 M-1); `outside` as for a missing statement
+ * #664: an ended contract's move-out until its Schlussabrechnung exists, with whose it is (Persona Helga 664-2 P-2);
+ * none for a fixed-term end without notice, «Auszug bestätigt» or a later contract, also on the end day: whether the
+ * tenant stays is open (Art. 266 Abs. 2 OR, Fachreview 664-1 M-1, code review 664-1 C-1); `outside` as for a missing
+ * statement
  */
 export async function moveOutOf(contract: ContractWithDetails) {
-	if (await fixedTermCheck(contract)) return null;
+	if (!contract.terminated && !contract.movedOut && contract.endDate && !(await laterContract(contract.apartmentId, contract.endDate))) return null;
 	const [type, { statements }] = await Promise.all([typeOf(contract.buildingId), listStatements({ contractId: contract.id, limit: 1000 })]);
 	const move = moveOut(type, contract, statements);
-	if (!move?.due) return move && { ...move, outside: false };
-	const { statements: ofBuilding } = await listStatements({ buildingId: contract.buildingId, limit: 1000 });
-	return { ...move, outside: overlapped(move.period, ofBuilding).length > 0 };
+	if (!move) return null;
+	const { statements: ofBuilding } = move.due ? await listStatements({ buildingId: contract.buildingId, limit: 1000 }) : { statements: [] };
+	return { ...move, tenantName: contract.tenantName, outside: overlapped(move.period, ofBuilding).length > 0 };
 }
 
 /** #664: per apartment the move-out of its latest contract ended by today */

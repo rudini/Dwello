@@ -9,7 +9,7 @@ import type { Apartment, Building } from '../db/schema';
 export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
 
 /** #664: an ended contract's move-out until its Schlussabrechnung exists, `due` after the end of its period */
-export type MoveOut = { endDate: string; period: { start: string; end: string }; due: boolean; outside: boolean };
+export type MoveOut = { endDate: string; tenantName: string; period: { start: string; end: string }; due: boolean; outside: boolean };
 
 export interface ApartmentWithDetails extends Omit<Apartment, 'status'> {
 	status: ApartmentStatus;

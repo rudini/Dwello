@@ -104,7 +104,7 @@ Funktionalität: Wohnungsliste
     Und "Nina Brunner" mietet die Wohnung "2.01" ab morgen für "1250" Franken
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann ist die Wohnung "2.01" "Vermietet"
-    Und nennt die Wohnungsliste bei der Wohnung "2.01" den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres
+    Und nennt die Wohnungsliste bei der Wohnung "2.01" den Auszug von "Sarah Meier" heute mit der Schlussabrechnung nach dem Ende des Jahres
 
   # #664: nach dem Ende der Abrechnungsperiode und solange die Schlussabrechnung fehlt, ist sie fällig
   Szenario: Die Wohnungsliste nennt die fällige Schlussabrechnung
@@ -112,7 +112,7 @@ Funktionalität: Wohnungsliste
     Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" für "1200" Franken
     Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
-    Dann nennt die Wohnungsliste bei der Wohnung "2.01" "Auszug am 30.06.2025, Schlussabrechnung fällig"
+    Dann nennt die Wohnungsliste bei der Wohnung "2.01" "Auszug von Sarah Meier am 30.06.2025, Schlussabrechnung fällig"
 
   Szenario: Mit der Schlussabrechnung nennt die Wohnungsliste den Auszug nicht mehr
     Angenommen der Mieter "Sarah Meier" existiert

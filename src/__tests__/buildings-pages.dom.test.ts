@@ -202,6 +202,7 @@ describe('Gebäudedetail', () => {
 	it('nennt den Auszug bis zur Schlussabrechnung in der Zeile', () => {
 		const moveOut = {
 			endDate: '2026-06-30',
+			tenantName: 'Kevin Fischer',
 			period: { start: '2026-01-01', end: '2026-12-31' },
 			due: false,
 			outside: false
@@ -209,7 +210,7 @@ describe('Gebäudedetail', () => {
 		detail([{ ...flat('a1', '1.01', 1, 'occupied'), moveOut }] as never);
 		const row = byTestId('apartment-row-a1')!;
 		expect(row.querySelector('[data-testid="apartment-move-out"]')!.textContent!.trim()).toBe(
-			'Auszug am 30.06.2026, Schlussabrechnung nach dem 31.12.2026'
+			'Auszug von Kevin Fischer am 30.06.2026, Schlussabrechnung nach dem 31.12.2026'
 		);
 		expect(row.querySelectorAll('a')).toHaveLength(1);
 	});

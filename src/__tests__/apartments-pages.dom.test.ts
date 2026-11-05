@@ -96,6 +96,7 @@ describe('Wohnungsliste', () => {
 	it('nennt den Auszug bis zur Schlussabrechnung in der Karte, ohne zweiten Link', () => {
 		const moveOut = {
 			endDate: '2025-06-30',
+			tenantName: 'Kevin Fischer',
 			period: { start: '2025-01-01', end: '2025-12-31' },
 			due: true,
 			outside: false
@@ -103,7 +104,7 @@ describe('Wohnungsliste', () => {
 		list([apartment({ status: 'occupied', moveOut })]);
 		const card = byTestId('apartment-card-a1')!;
 		expect(card.querySelector('[data-testid="apartment-move-out"]')!.textContent!.trim()).toBe(
-			'Auszug am 30.06.2025, Schlussabrechnung fällig'
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung fällig'
 		);
 		expect(card.querySelectorAll('a')).toHaveLength(1);
 	});

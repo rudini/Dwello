@@ -163,14 +163,13 @@ export function statusText(a: {
 	return statusLabels[a.status];
 }
 
-/** #664: an ended contract's move-out until its Schlussabrechnung exists, as the backend decides it; '' without one */
-export function moveOutText(moveOut?: MoveOut | null) {
-	if (!moveOut) return '';
-	const date = formatDate(moveOut.endDate);
+/** #664: an ended contract's move-out until its Schlussabrechnung exists, as the backend decides it, with whose it is */
+export function moveOutText(moveOut: MoveOut) {
+	const text = { name: moveOut.tenantName, date: formatDate(moveOut.endDate) };
 	if (!moveOut.due)
-		return m.apartments_move_out_pending({ date, end: formatDate(moveOut.period.end) });
+		return m.apartments_move_out_pending({ ...text, end: formatDate(moveOut.period.end) });
 	const due = moveOut.outside ? m.apartments_move_out_due_outside : m.apartments_move_out_due;
-	return due({ date });
+	return due(text);
 }
 
 /** «3.5 Zimmer» in the UI language, singular where its plural rule says so (French: «1.5 pièce») */

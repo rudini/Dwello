@@ -139,6 +139,11 @@ describe('Nächste Schritte und abgelaufener befristeter Mietvertrag', () => {
 			...contractDetail.moveOut,
 			href: `/statements/generate?building=${contractDetail.building.id}&start=${start}&end=${end}`
 		});
+		// code review 664-1 C-2: a period only outside Dwello has no way into the wizard, the run refuses it
+		const outside = { ...contractDetail.moveOut, outside: true };
+		expect(((await page({ moveOut: outside })) as unknown as { moveOut: unknown }).moveOut).toEqual(
+			{ ...outside, href: null }
+		);
 		const pending = { ...contractDetail.moveOut, due: false };
 		expect(((await page({ moveOut: pending })) as unknown as { moveOut: unknown }).moveOut).toEqual(
 			{ ...pending, href: null }

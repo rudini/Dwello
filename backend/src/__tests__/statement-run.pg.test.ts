@@ -120,6 +120,8 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 // #664: the move-out of an ended contract until its Schlussabrechnung exists, on the contract and the apartment's row
 describe('Auszug bis zur Schlussabrechnung', () => {
 	const due = { endDate: '2025-06-30', period: { start: '2025-01-01', end: '2025-12-31' }, due: true, outside: false };
+	const moveOutOf = async (contract: string) =>
+		((await (await sendJson('GET', `/api/v1/contracts/${contract}`)).json()) as { moveOut: unknown }).moveOut;
 
 	it('nennt beim gekündigten Mietvertrag und in der Wohnungsliste die fällige Schlussabrechnung', async () => {
 		const building = await newBuilding();
@@ -128,8 +130,9 @@ describe('Auszug bis zur Schlussabrechnung', () => {
 		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${contract}`)).json()) as { moveOut: unknown };
 		const rows = (await (await sendJson('GET', `/api/v1/apartments?buildingId=${building}`)).json()) as { apartments: { moveOut: unknown }[] };
 
-		expect(ofContract.moveOut).toEqual(due);
-		expect(rows.apartments.map((a) => a.moveOut)).toEqual([due]);
+		// Persona Helga 664-2 P-2: the list names whose move-out it is, not the tenant living there now
+		expect(ofContract.moveOut).toEqual({ ...due, tenantName: `Eva Meier ${token}` });
+		expect(rows.apartments.map((a) => a.moveOut)).toEqual([{ ...due, tenantName: `Eva Meier ${token}` }]);
 	});
 
 	// Fachreview 664-1 M-1: after a fixed-term end without «Auszug bestätigt» Dwello asks whether the tenant stayed
@@ -140,7 +143,24 @@ describe('Auszug bis zur Schlussabrechnung', () => {
 
 		expect(await moveOut()).toBeNull();
 		expect((await sendJson('PUT', `/api/v1/contracts/${contract}`, { movedOut: true })).status).toBe(200);
-		expect(await moveOut()).toEqual(due);
+		expect(await moveOut()).toEqual({ ...due, tenantName: `Eva Brunner ${token}` });
+	});
+
+	// code review 664-1 C-1: on the agreed end itself it is as open whether the tenant leaves
+	it('nennt am Tag eines befristeten Vertragsendes ohne Nachmieter keinen Auszug', async () => {
+		const building = await newBuilding();
+		const contract = await rent('1.01', 'Weber', '2021-08-01', swissToday(), building);
+		expect(await moveOutOf(contract)).toBeNull();
+	});
+
+	// code review 664-1 C-2 (Fachreview 664-1 V-2): an older statement of the building overlaps the period: outside Dwello
+	it('nennt die Schlussabrechnung ausserhalb von Dwello, wenn eine ältere Abrechnung die Periode schneidet', async () => {
+		const building = await newBuilding();
+		const older = await rent('1.01', 'Alt', '2024-07-01', '2025-06-30', building);
+		const contract = await rent('1.02', 'Gerber', '2021-08-01', '2025-06-30', building, true);
+		await generateStatement({ contractId: older, buildingId: building, periodStart: '2024-07-01', periodEnd: '2025-06-30', managementFeePercent: 0 });
+
+		expect(await moveOutOf(contract)).toEqual({ ...due, outside: true, tenantName: `Eva Gerber ${token}` });
 	});
 });
 

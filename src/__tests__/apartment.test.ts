@@ -208,28 +208,25 @@ describe('Wohnungsliste', () => {
 // #664 (Persona Helga M4): until the end of the Abrechnungsperiode of the Vertragsende, then due while it is missing
 describe('Auszug bis zur Schlussabrechnung', () => {
 	const period = { start: '2025-01-01', end: '2025-12-31' };
+	const tenantName = 'Kevin Fischer'; // Persona Helga 664-2 P-2: whose move-out, not the tenant living there now
 
 	it('nennt bis zum Ende der Abrechnungsperiode, ab wann die Schlussabrechnung kommt', () => {
-		expect(moveOutText({ endDate: '2025-06-30', period, due: false, outside: false })).toBe(
-			'Auszug am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
+		expect(moveOutText({ endDate: '2025-06-30', tenantName, period, due: false, outside: false })).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
 		);
 	});
 
 	it('nennt danach die fällige Schlussabrechnung', () => {
-		expect(moveOutText({ endDate: '2025-06-30', period, due: true, outside: false })).toBe(
-			'Auszug am 30.06.2025, Schlussabrechnung fällig'
+		expect(moveOutText({ endDate: '2025-06-30', tenantName, period, due: true, outside: false })).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung fällig'
 		);
 	});
 
 	// Fachreview 664-1 V-2: an older statement of the building overlaps the period: Dwello cannot bill it
 	it('sagt, dass die Schlussabrechnung ausserhalb von Dwello fällig ist', () => {
-		expect(moveOutText({ endDate: '2025-06-30', period, due: true, outside: true })).toBe(
-			'Auszug am 30.06.2025, Schlussabrechnung ausserhalb von Dwello fällig'
+		expect(moveOutText({ endDate: '2025-06-30', tenantName, period, due: true, outside: true })).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung ausserhalb von Dwello fällig'
 		);
-	});
-
-	it('nennt ohne offene Schlussabrechnung nichts', () => {
-		expect(moveOutText(null)).toBe('');
 	});
 });
 

@@ -450,7 +450,7 @@ Funktionalität: Mietvertragsdetail
   Szenario: Der beendete Mietvertrag nennt den Auszug und wann die Schlussabrechnung kommt
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beendet
-    Dann nennt der Mietvertrag den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres
+    Dann nennt der Mietvertrag den Auszug von "Anna Keller" heute mit der Schlussabrechnung nach dem Ende des Jahres
 
   # #664: nach dem Ende der Abrechnungsperiode und solange die Schlussabrechnung fehlt, ist sie fällig
   Szenario: Der beendete Mietvertrag nennt die fällige Schlussabrechnung
@@ -459,7 +459,7 @@ Funktionalität: Mietvertragsdetail
     Und "Sarah Meier" mietet die Wohnung "2.02" seit "2021-08-01" für "1200" Franken
     Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Sarah Meier"
-    Dann nennt der Mietvertrag den Auszug "Auszug am 30.06.2025, Schlussabrechnung fällig"
+    Dann nennt der Mietvertrag den Auszug "Auszug von Sarah Meier am 30.06.2025, Schlussabrechnung fällig"
 
   Szenario: Vom Auszug zur Schlussabrechnung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
@@ -491,7 +491,7 @@ Funktionalität: Mietvertragsdetail
     Dann sagt der Hinweis zum abgelaufenen Mietvertrag "noch in der Wohnung"
     Und nennt der Mietvertrag keinen Auszug
     Wenn der Liegenschaftsverwalter bestätigt, dass der Mieter ausgezogen ist
-    Dann nennt der Mietvertrag den Auszug "Auszug am 30.06.2025, Schlussabrechnung fällig"
+    Dann nennt der Mietvertrag den Auszug "Auszug von Sarah Meier am 30.06.2025, Schlussabrechnung fällig"
 
   # #664 (Persona Sven M3): die Ablehnung nennt den Entwurf mit Mieter und Abrechnungsperiode, nicht nur mit seiner Nummer
   Szenario: Abgelehnter Entwurf ist mit Mieter und Abrechnungsperiode benannt

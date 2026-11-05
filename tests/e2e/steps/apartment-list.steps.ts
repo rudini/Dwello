@@ -96,16 +96,16 @@ Then('die Wohnungssuche ist leer', async ({ verwalter }) => {
 
 // #664: the calendar year is the building's Abrechnungsperiode, the one the Vertragsende falls in
 Then(
-	'nennt die Wohnungsliste bei der Wohnung {string} den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres',
-	async ({ verwalter }, number: string) => {
+	'nennt die Wohnungsliste bei der Wohnung {string} den Auszug von {string} heute mit der Schlussabrechnung nach dem Ende des Jahres',
+	async ({ verwalter, names }, number: string, tenant: string) => {
 		await verwalter.sees(moveOutOf(number)).toBe(
-			`Auszug am ${swissDate(inDays(0))}, Schlussabrechnung nach dem 31.12.${inDays(0).slice(0, 4)}`
+			`Auszug von ${names.get(tenant) ?? tenant} am ${swissDate(inDays(0))}, Schlussabrechnung nach dem 31.12.${inDays(0).slice(0, 4)}`
 		);
 	}
 );
 
-Then('nennt die Wohnungsliste bei der Wohnung {string} {string}', async ({ verwalter }, number: string, text: string) => {
-	await verwalter.sees(moveOutOf(number)).toBe(text);
+Then('nennt die Wohnungsliste bei der Wohnung {string} {string}', async ({ verwalter, seed }, number: string, text: string) => {
+	await verwalter.sees(moveOutOf(number)).toBe(seed.withNames(text));
 });
 
 // after its Mietstatus, so an error page does not pass

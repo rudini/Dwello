@@ -266,7 +266,7 @@ describe('Mietvertragsdetail', () => {
 	});
 
 	// F-23 (#155), Fachreview W10 M-1: beim Tod des Mieters endet der Mietvertrag nicht
-	it('sagt im Dialog «Beenden», dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
+	it('sagt im Dialog zum Vertragsende, dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
 		open();
 		click('contract-end-button');
 		// Fachreview W10-2 M-1: die Kündigung der Erben wird hier erfasst (Art. 266i OR)
@@ -944,8 +944,8 @@ describe('Mietvertrag löschen', () => {
 		);
 	});
 
-	// Fachreview V-11: mit Vertragsende gibt es kein «Beenden»
-	it('nennt bei einem Mietvertrag mit Vertragsende das Ende statt «Beenden»', () => {
+	// Fachreview V-11: mit Vertragsende gibt es kein «Enddatum erfassen»
+	it('nennt bei einem Mietvertrag mit Vertragsende das Ende statt «Enddatum erfassen»', () => {
 		open('2018-01-01', '2021-12-31');
 		click('contract-delete-button');
 
@@ -977,7 +977,6 @@ describe('Mietvertrag löschen', () => {
 	});
 });
 
-// A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag fragt die Seite, ob der Mieter noch in der Wohnung wohnt
 // #664 (Persona Helga M4): from the Vertragsende until the Schlussabrechnung exists
 describe('Auszug am Mietvertrag', () => {
 	const moveOut = (due: boolean, href: string | null) => {
@@ -989,6 +988,7 @@ describe('Auszug am Mietvertrag', () => {
 				nextSteps: null,
 				moveOut: {
 					endDate: '2025-06-30',
+					tenantName: 'Anna Keller',
 					period: { start: '2025-01-01', end: '2025-12-31' },
 					due,
 					outside: false,
@@ -1004,7 +1004,7 @@ describe('Auszug am Mietvertrag', () => {
 	it('nennt den Auszug und wann die Schlussabrechnung kommt', () => {
 		moveOut(false, null);
 		expect(text('contract-move-out')).toBe(
-			'Auszug am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
+			'Auszug von Anna Keller am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
 		);
 		expect(byTestId('contract-move-out-link')).toBeNull();
 	});
@@ -1012,13 +1012,16 @@ describe('Auszug am Mietvertrag', () => {
 	it('führt zur fälligen Schlussabrechnung', () => {
 		const href = '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31';
 		moveOut(true, href);
-		expect(text('contract-move-out')).toContain('Auszug am 30.06.2025, Schlussabrechnung fällig');
+		expect(text('contract-move-out')).toContain(
+			'Auszug von Anna Keller am 30.06.2025, Schlussabrechnung fällig'
+		);
 		const link = byTestId('contract-move-out-link')!;
 		expect(link.getAttribute('href')).toBe(href);
 		expect(link.textContent!.trim()).toBe('Schlussabrechnung erstellen');
 	});
 });
 
+// A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag fragt die Seite, ob der Mieter noch in der Wohnung wohnt
 describe('Abgelaufener befristeter Mietvertrag', () => {
 	function expired(form: unknown = null, fixedTermCheck = true) {
 		show(ContractPage, {

@@ -518,16 +518,16 @@ Then('bietet der Mietvertrag {string} an', async ({ verwalter }, label: string) 
 });
 
 // the hint, followed by its way into the wizard once it is due
-Then('nennt der Mietvertrag den Auszug {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(moveOutText).toContain(text);
+Then('nennt der Mietvertrag den Auszug {string}', async ({ verwalter, seed }, text: string) => {
+	await verwalter.sees(moveOutText).toContain(seed.withNames(text));
 });
 
 // the Abrechnungsperiode of the building is the calendar year, the one the Vertragsende falls in
 Then(
-	'nennt der Mietvertrag den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres',
-	async ({ verwalter }) => {
+	'nennt der Mietvertrag den Auszug von {string} heute mit der Schlussabrechnung nach dem Ende des Jahres',
+	async ({ verwalter, names }, tenant: string) => {
 		await verwalter.sees(moveOutText).toBe(
-			`Auszug am ${swissDate(inDays(0))}, Schlussabrechnung nach dem 31.12.${inDays(0).slice(0, 4)}`
+			`Auszug von ${names.get(tenant) ?? tenant} am ${swissDate(inDays(0))}, Schlussabrechnung nach dem 31.12.${inDays(0).slice(0, 4)}`
 		);
 	}
 );

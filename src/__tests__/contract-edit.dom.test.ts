@@ -393,7 +393,7 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// Persona H15-2: die Hilfe nennt den Ort, an dem es weitergeht
-	it('führt bei einem unbefristeten Mietvertrag zu «Beenden» auf der Seite des Mietvertrags', async () => {
+	it('führt bei einem unbefristeten Mietvertrag zu «Enddatum erfassen» auf der Seite des Mietvertrags', async () => {
 		await open();
 		const help = byTestId('contract-parties-help')!.textContent!;
 		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
@@ -407,7 +407,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Zur Seite des Mietvertrags von Anna Keller'
 		);
 		expect(byTestId('contract-parties-link')!.getAttribute('href')).toBe('/contracts/c1');
-		// Code-Review m-6: zuerst «Beenden», dann der neue Mietvertrag (dazu #156)
+		// Code-Review m-6: zuerst «Enddatum erfassen», dann der neue Mietvertrag (dazu #156)
 		expect(byTestId('contract-parties-new')).toBeNull();
 	});
 
@@ -431,7 +431,7 @@ describe('Mietvertrag bearbeiten', () => {
 		}
 	);
 
-	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
+	// Fachreview V-2: mit Vertragsende gibt es kein «Enddatum erfassen» mehr
 	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
 		await open('2099-03-31');
 		const help = byTestId('contract-parties-help')!.textContent!;
@@ -902,13 +902,13 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung
-	describe('Hinweis auf «Beenden»', () => {
+	describe('Hinweis auf «Enddatum erfassen»', () => {
 		const choose = async (value: string) => {
 			click(document.querySelector<HTMLInputElement>(`input[name="duration"][value="${value}"]`)!);
 			await settle();
 		};
 
-		it('verweist bei «Befristet» auf «Beenden»', async () => {
+		it('verweist bei «Befristet» auf «Enddatum erfassen»', async () => {
 			await open();
 			await choose('limited');
 			const hint = byTestId('contract-notice-hint')!;
