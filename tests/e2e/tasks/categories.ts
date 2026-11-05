@@ -92,3 +92,6 @@ export const stayAtCategory = (name: string): Activity => async (actor) => {
 	await actor.attemptsTo(Scroll.toMiddle(categoryRow(name)), Scroll.watch);
 	actor.remember(FOLLOWING_CATEGORY, await actor.answer(Text.of(followingCategoryName(name))));
 };
+/** #1113: the category's row at the bottom edge of the window, where a confirmation stands */
+export const bringCategoryToBottomEdge = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Scroll.toBottomEdge(categoryRow(name)));

@@ -37,7 +37,7 @@
 	const confirmations = $derived(
 		$toasts.filter((toast) => toast.type !== 'error' && toast.id <= shownUpTo)
 	);
-	// #1096: the page never moves for a confirmation; when the focused part stands where it would stand at the
+	// #1096: the page never moves for a confirmation; when the focused part (#1113: its row) stands where it would stand at the
 	// bottom, it stands at the top of the window instead (it may briefly cover what has no focus)
 	let region = $state<HTMLElement>();
 	let atTop = $state(false);
@@ -48,7 +48,8 @@
 			return (atTop = false);
 		// its own close button keeps it where it is (code review 1096 C-1)
 		if (region.contains(focused)) return;
-		const part = focused.getBoundingClientRect();
+		// #1113: the whole row the focus is in, so none of its buttons lies under it
+		const part = (focused.closest('li, tr') ?? focused).getBoundingClientRect();
 		const own = region.getBoundingClientRect();
 		// the confirmation at the bottom: 16 px above the edge, and 16 px of the page clear around it
 		const top = innerHeight - 16 - own.height - 16;

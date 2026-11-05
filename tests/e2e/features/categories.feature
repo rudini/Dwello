@@ -231,3 +231,13 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter die Kategorie "Heckenschnitt" löscht
     Dann steht der Fokus auf der Kategorie, die in der Liste auf "Heckenschnitt" folgte
     Und bleibt die Seite an ihrer Stelle, bis die Erfolgsmeldung wieder geht
+
+  # #1113 (Marco P-1 in #1096): auf dem Telefon lag die Meldung nach dem Löschen über «Löschen» der nächsten Kategorie
+  Szenario: Die Erfolgsmeldung verdeckt die Kategorie mit dem Fokus nicht
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Und es gibt die umlagefähige Kategorie "Hagelschutz"
+    Und es gibt die umlagefähige Kategorie "Hagelschutz Nord"
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Und die Kategorie "Hagelschutz" steht am unteren Rand des Fensters
+    Wenn der Liegenschaftsverwalter die Kategorie "Hagelschutz" löscht
+    Dann verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat

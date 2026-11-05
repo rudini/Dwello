@@ -1,10 +1,12 @@
 import { Accessible, Checked, Count, Enabled, HiddenText, Text, Visibility } from '../screenplay/questions';
+import { roomBesideConfirmation } from './app-frame';
 import {
 	allocabilityQuestion,
 	allocabilityText,
 	allowanceOption,
 	allowedBadge,
 	categoryRow,
+	focusedCategoryRow,
 	deleteButton,
 	description,
 	descriptionInput,
@@ -45,3 +47,5 @@ export const heatingChecked = Checked.of(heatingCheckbox);
 export const heatingHelpText = Text.of(heatingHelp);
 export const allocabilityQuestionText = Text.of(allocabilityQuestion);
 export const allocabilityConsequence = Text.of(allocabilityText);
+/** #1113: the room between the row with the focus and the confirmation (negative: it covers the row) */
+export const roomBesideFocusedCategory = roomBesideConfirmation(focusedCategoryRow);

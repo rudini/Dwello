@@ -189,6 +189,27 @@ describe('Meldungen', () => {
 		bottom.remove();
 	});
 
+	// #1113 (Marco P-1 in #1096): it covered «Löschen» of the row whose name had the focus
+	it('stellt die Erfolgsmeldung oben hin, wenn die Zeile mit dem Fokus unten steht', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const row = document.body.appendChild(document.createElement('li'));
+		row.getBoundingClientRect = () => ({ top: 650, bottom: 760, left: 0, right: 390 }) as DOMRect;
+		const name = row.appendChild(document.createElement('a'));
+		name.href = '/config/categories/1';
+		name.getBoundingClientRect = () => ({ top: 650, bottom: 680, left: 0, right: 200 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		name.focus();
+		addToast('success', 'Kategorie «Lift» gelöscht');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+
+		expect(region.className).toContain('top-4');
+		row.remove();
+	});
+
 	// The reading time starts when the confirmation appears, not while the next page loads
 	it('zählt die Lesezeit erst ab dem Erscheinen der Meldung', () => {
 		vi.useFakeTimers();
