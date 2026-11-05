@@ -117,6 +117,15 @@ describe('Fokus nach einer Aktion', () => {
 		expect(document.activeElement!.getAttribute('href')).toBe('/b');
 	});
 
+	// code review 1128 C-1: the main menu and the breadcrumb are lists of links too, and they come first
+	it('setzt den Fokus nach dem Erfassen nicht auf einen gleich benannten Link im Menü', () => {
+		document.body.insertAdjacentHTML('afterbegin', '<nav><ul><li><a href="/hilfe">Beleuchtung</a></li></ul></nav>');
+
+		focusSavedRow('/neu', 'Beleuchtung');
+
+		expect(document.activeElement!.getAttribute('href')).toBe('/b');
+	});
+
 	it('setzt den Fokus nach einer neuen Seite auf den Seitentitel', () => {
 		const [first] = document.querySelectorAll('li');
 		focusOn(first.querySelector('button')!);
