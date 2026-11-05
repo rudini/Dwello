@@ -1,0 +1,23 @@
+# Code-Review 1113, Runde 1 (9b3f7bfbb..aafe3b366)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Major | src/lib/ui/ToastRegion.svelte:52 | Die Meldung meidet nur `li`/`tr`, nicht «die Gruppe von Knöpfen um das Element» aus dem Entscheid. Helga P-2 (im Issue ausdrücklich als Fall genannt) bleibt bestehen: die Knopfreihe in `NewAccessKey.svelte` ist ein `div`, kein `li`/`tr`. |
+| C-2 | Minor | src/lib/ui/ToastRegion.svelte:52 | Ist die Zeile höher als das Fenster ohne die beiden Plätze der Meldung (Karte `ApartmentCard`/`BuildingCard` bei 200 % Zoom), überlappt sie immer den unteren Platz. Die Meldung geht dann nach oben, auch wenn das Element mit dem Fokus oben im Fenster steht. Sie verdeckt so das Element mit dem Fokus, was vor #1113 nie geschah. Kein Test dafür. |
+
+## C-1 (Major): die Knopfgruppe aus dem Entscheid fehlt, P-2 bleibt
+
+Der Entscheid in #1113: «The toast avoids the row or group the focused element is in (the list row `li`/`tr`, or the group of buttons around it)». «Done means» verlangt, dass «the personas' cases no longer block a click», und das Issue nennt unter den Fällen: «Zugangsschlüssel … «Schlüssel kopieren» at the bottom edge leaves the toast over «Adresse kopieren» and «Schliessen» in the same row» (Helga P-2).
+
+In `src/routes/config/access-keys/NewAccessKey.svelte` stehen die drei Knöpfe in `<div class="flex flex-wrap gap-4">` innerhalb eines `Panel`. Weder ein `li` noch ein `tr` liegt darum herum. Nach dem Klick auf «Schlüssel kopieren» gibt `focused.closest('li, tr')` daher `null` zurück, und `place()` misst wie vor der Änderung nur den Knopf selbst. Die Meldung bleibt unten rechts und liegt weiterhin über «Schliessen» (bei 200 % auch über «Adresse kopieren»). Die Frage des Aufrufers, ob eine Stelle der App mehr braucht als `li`/`tr`, ist damit beantwortet: ja, diese hier.
+
+So zeigt man es: einen DOM-Test analog zum neuen Test in `ui-layout-parts.dom.test.ts` schreiben, mit einem `div` als Knopfreihe statt `li` (Rechteck bis an den unteren Rand, der fokussierte Knopf links darüber). Er bleibt rot und `region.className` enthält kein `top-4`. Im E2E zeigt es Helgas Ablauf aus `docs/design/personas/helga-1096.md` («Vorschläge» P-2). Für die Lösung gibt es zwei Wege. Der eine ist eine Gruppe, die als solche markiert ist (zum Beispiel `role="group"`, dann `closest('li, tr, [role="group"]')`). Der andere ist ein Issue mit `needs-decision`, falls die Lösung über den Entscheid hinausgeht. Ein Szenario oder DOM-Test für die Gruppe gehört dazu.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`, `bun run check`, `bun run fitness`, `bunx vitest run --changed origin/main` (48 bestanden), E2E Chromium `--grep "Erfolgsmeldung|Fokus|Kostenkategorien"` (41 bestanden); das neue Szenario rot am letzten Schritt (-93 px) und der neue DOM-Test rot vor dem Fix. Beim Lesen ist beides plausibel. Im DOM-Test endet der Name bei 680 px, die Grenze liegt bei 736 px (jsdom: `innerHeight` 768, Höhe der Meldung 0). Die Zeile endet bei 760 px. Der alte Code gibt also `false`, der neue `true`.
+- Helga P-3 (Widerrufen eines Zugangsschlüssels) und Helga P-1 (nach «Änderungen speichern» einen Schritt gescrollt) fallen nicht unter die entschiedene Regel. Bei P-1 hat die Zeile über dem verdeckten «Löschen» den Fokus. Bei P-3 geht der Fokus nach dem Widerrufen des letzten Schlüssels der Liste auf die Überschrift der Liste (`refocus()` in `src/lib/focus-after-action.ts`). Die verdeckte Zeile hat in beiden Fällen keinen Fokus. Für sie hält «the personas' cases no longer block a click» mit dieser Änderung nicht. Ob das ein eigenes Issue oder eine Entscheidung braucht, hängt an der Lesart von «Done means». Gelesen habe ich `helga-1096.md`, das Issue #1113 (REST) sowie `AccessKeyRow.svelte` und `+page.svelte` unter `access-keys`.
+- Ob «Hagelschutz Nord» in der Kategorienliste direkt auf «Hagelschutz» folgt: von der Sortierung und dem Fixture `names` hängt ab, ob das Szenario wirklich die nächste Zeile misst. Ich habe es nicht laufen lassen. Das Szenario misst aber die Zeile mit dem Fokus, wo immer sie steht. Das genügt der Regel.
+- Der Zweig `tr` von `closest('li, tr')` hat keinen eigenen Test; die Zeile ist über `li` abgedeckt.
+
+Geprüft: die Regel in `place()` gegenüber dem Entscheid; `roomBesideConfirmation(part)` ändert das Verhalten von `roomAroundConfirmation` nicht (`app-frame.steps.ts:343` unverändert); das neue Szenario und der DOM-Test schlagen ohne die Änderung fehl; Screenplay-Schichten (die Steps rufen nur Tasks und Questions auf); Feature-Sprache; neue Fragen liefern Pixelwerte; keine neuen Texte oder Bildschirme; der Diff enthält nichts Fremdes.

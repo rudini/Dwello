@@ -59,6 +59,20 @@ describe('Zugangsschlüssel für KI-Programme', () => {
 		]);
 	});
 
+	// #1113 (Helga P-2 in #1096): a confirmation keeps clear of all three buttons, not only the focused one
+	it('fasst die Knöpfe des neuen Schlüssels zu einer Gruppe, der die Erfolgsmeldung ausweicht', () => {
+		show(AccessKeysPage, {
+			data: { keys: [key], mcpUrl: 'https://dwello.example/mcp' },
+			form: { created: { name: key.name, key: 'dwello_geheim' } }
+		} as never);
+
+		const groups = ['access-key-new-copy', 'access-key-new-address-copy', 'access-key-new-close'].map(
+			(testid) => byTestId(testid)?.closest('[data-focus-row]')
+		);
+		expect(groups[0]).toBeTruthy();
+		expect(groups).toEqual([groups[0], groups[0], groups[0]]);
+	});
+
 	// code review 817-3 C-14: the address on the page says the same
 	it('kopiert auch die Adresse oben auf der Seite und sagt es', async () => {
 		const writeText = vi.fn(async () => {});

@@ -210,6 +210,48 @@ describe('Meldungen', () => {
 		row.remove();
 	});
 
+	// code review 1113 C-1 (Helga P-2 in #1096): the buttons of a new access key form a group, not a row
+	it('stellt die Erfolgsmeldung oben hin, wenn die Knopfgruppe mit dem Fokus unten steht', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const group = document.body.appendChild(document.createElement('div'));
+		group.dataset.focusRow = '';
+		group.getBoundingClientRect = () => ({ top: 650, bottom: 760, left: 0, right: 390 }) as DOMRect;
+		const copy = group.appendChild(document.createElement('button'));
+		copy.getBoundingClientRect = () => ({ top: 650, bottom: 698, left: 0, right: 200 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		copy.focus();
+		addToast('success', 'Die Adresse ist kopiert.');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+
+		expect(region.className).toContain('top-4');
+		group.remove();
+	});
+
+	// code review 1113 C-2: at 200 % a card can be taller than the window; at the top it would cover the focus
+	it('lässt die Erfolgsmeldung unten, wenn sie oben das Element mit dem Fokus einer hohen Zeile verdeckte', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const row = document.body.appendChild(document.createElement('li'));
+		row.getBoundingClientRect = () => ({ top: 0, bottom: 900, left: 0, right: 390 }) as DOMRect;
+		const name = row.appendChild(document.createElement('a'));
+		name.href = '/buildings/1';
+		name.getBoundingClientRect = () => ({ top: 20, bottom: 68, left: 0, right: 200 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		name.focus();
+		addToast('success', 'Gebäude gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+
+		expect(region.className).toContain('bottom-4');
+		row.remove();
+	});
+
 	// The reading time starts when the confirmation appears, not while the next page loads
 	it('zählt die Lesezeit erst ab dem Erscheinen der Meldung', () => {
 		vi.useFakeTimers();

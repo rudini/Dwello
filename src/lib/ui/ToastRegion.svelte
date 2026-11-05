@@ -48,16 +48,19 @@
 			return (atTop = false);
 		// its own close button keeps it where it is (code review 1096 C-1)
 		if (region.contains(focused)) return;
-		// #1113: the whole row the focus is in, so none of its buttons lies under it
-		const part = (focused.closest('li, tr') ?? focused).getBoundingClientRect();
 		const own = region.getBoundingClientRect();
 		// the confirmation at the bottom: 16 px above the edge, and 16 px of the page clear around it
 		const top = innerHeight - 16 - own.height - 16;
-		atTop =
+		const below = (part: DOMRect) =>
 			part.bottom > top &&
 			part.top < innerHeight &&
 			part.left < own.right + 16 &&
 			part.right > own.left - 16;
+		const focus = focused.getBoundingClientRect();
+		// #1113: the whole row or group the focus is in, so none of its buttons lies under it; a row so tall
+		// that the confirmation at the top would cover the focus itself counts by the focused part alone
+		const row = focused.closest('li, tr, [data-focus-row]')?.getBoundingClientRect();
+		atTop = below(focus) || (!!row && below(row) && focus.top >= own.height + 32);
 	};
 	$effect(() => {
 		void moved;
