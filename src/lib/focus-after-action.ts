@@ -1,3 +1,5 @@
+import { localName } from '$lib/names';
+
 // #1096: where the focus goes when an action removed the control that had it. The page stays where the
 // landlord was: the next row of the same list, without one the list's heading; a control drawn anew keeps it.
 // Only after a new page does the focus go to the page title.
@@ -61,14 +63,15 @@ export function refocus(): void {
 }
 
 /** #1124: after a save that returned to a list, the focus goes to the saved record's row, the one linking to its form;
- * #1128: after creating, the form links nowhere yet, so the row named as the record was entered */
-export function focusSavedRow(path: string, name: string): void {
+ * #1128: after creating, the form links nowhere yet, so the row named as entered, in the UI language as the list shows it */
+export function focusSavedRow(path: string, record: Parameters<typeof localName>[0]): void {
+	const name = localName(record).trim();
 	// the rows of the page's own lists, not those of the menu or the breadcrumb (code review 1128 C-1)
 	const links = [...document.querySelectorAll<HTMLAnchorElement>('li a[href], tr a[href]')].filter(
 		(link) => !link.closest('nav')
 	);
 	(
 		links.find((link) => link.getAttribute('href') === path) ??
-		links.find((link) => link.textContent?.trim() === name.trim())
+		links.find((link) => link.textContent?.trim() === name)
 	)?.focus();
 }

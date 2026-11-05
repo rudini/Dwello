@@ -51,13 +51,17 @@
 		if (check) checking = true;
 		else saving = true;
 		const name = String(formData.get('name') ?? '').trim();
+		// the names the list shows in the UI language (#345)
+		const [nameFR, nameIT, nameEN] = ['nameFR', 'nameIT', 'nameEN'].map((key) =>
+			String(formData.get(key) ?? '')
+		);
 		return async ({ result, update, formElement }) => {
 			const focused = document.activeElement;
 			const formPage = location.pathname;
 			if (result.type === 'redirect') addToast('success', text.saved({ name }));
 			await update({ reset: false });
 			// #1124, #1128: back on the list, the saved record's row has the focus, which the confirmation keeps clear of
-			if (result.type === 'redirect') focusSavedRow(formPage, name);
+			if (result.type === 'redirect') focusSavedRow(formPage, { name, nameFR, nameIT, nameEN });
 			if (check) checking = false;
 			else saving = false;
 			await focusFirstError(formElement);

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { focusSavedRow, noteFocus, refocus } from '$lib/focus-after-action';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
 // #1096: the focus after an action that removed its control
 describe('Fokus nach einer Aktion', () => {
@@ -105,23 +106,38 @@ describe('Fokus nach einer Aktion', () => {
 	it('setzt den Fokus nach dem Speichern auf die Zeile des gespeicherten Eintrags in der Liste', () => {
 		document.body.insertAdjacentHTML('afterbegin', '<a href="/b">Zurück zu Beleuchtung</a>');
 
-		focusSavedRow('/b', 'Abwasser');
+		focusSavedRow('/b', { name: 'Abwasser' });
 
 		expect(document.activeElement!.textContent).toBe('Beleuchtung');
 	});
 
 	// #1128: a new record's form links nowhere yet; its row is the one named as it was entered
 	it('setzt den Fokus nach dem Erfassen auf die Zeile, die den neuen Namen trägt', () => {
-		focusSavedRow('/neu', ' Beleuchtung ');
+		focusSavedRow('/neu', { name: ' Beleuchtung ' });
+
+		expect(document.activeElement!.getAttribute('href')).toBe('/b');
+	});
+
+	// code review 1128 C-2, fallback review #1131: in fr/it/en the row shows the name in that language
+	it('setzt den Fokus nach dem Erfassen in einer anderen Sprache auf die Zeile mit dem Namen in dieser Sprache', () => {
+		overwriteGetLocale(() => 'fr');
+		try {
+			focusSavedRow('/neu', { name: 'Beleuchtung DE', nameFR: 'Beleuchtung' });
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 
 		expect(document.activeElement!.getAttribute('href')).toBe('/b');
 	});
 
 	// code review 1128 C-1: the main menu and the breadcrumb are lists of links too, and they come first
 	it('setzt den Fokus nach dem Erfassen nicht auf einen gleich benannten Link im Menü', () => {
-		document.body.insertAdjacentHTML('afterbegin', '<nav><ul><li><a href="/hilfe">Beleuchtung</a></li></ul></nav>');
+		document.body.insertAdjacentHTML(
+			'afterbegin',
+			'<nav><ul><li><a href="/hilfe">Beleuchtung</a></li></ul></nav>'
+		);
 
-		focusSavedRow('/neu', 'Beleuchtung');
+		focusSavedRow('/neu', { name: 'Beleuchtung' });
 
 		expect(document.activeElement!.getAttribute('href')).toBe('/b');
 	});
