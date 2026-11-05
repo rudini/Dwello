@@ -49,6 +49,7 @@ import {
 	previewHasStatementOf,
 	proposedHeatingProfile,
 	heatingProfileCut,
+	heatingProfileHelp,
 	meterWarningInWindow,
 	meterWarningText,
 	settingsChoiceCount,
@@ -103,6 +104,7 @@ import {
 	billedCannotBeChecked,
 	invoicesCannotBeCounted,
 	waitForBuildingCounts,
+	scrollToHeatingProfile,
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
 import { filesInDownloadedZip } from '../questions/download';
@@ -756,11 +758,19 @@ Then('sagt die Wahl der Gebäude einmal {string}', async ({ verwalter }, text: s
 	await verwalter.sees(recalculateNotes).toEqual([text]);
 });
 
-// #659: on a phone the warning about meters is in the first screen, not behind the help
-Then('sieht der Liegenschaftsverwalter die Warnung zu den Zählern, ohne zu scrollen', async ({ verwalter }) => {
+// #659: on a phone the warning about meters comes right with the choice, not behind its long help
+When('der Liegenschaftsverwalter bis zur Wahl des Heizprofils scrollt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(scrollToHeatingProfile);
+});
+
+Then('sieht der Liegenschaftsverwalter die Warnung zu den Zählern, ohne weiter zu scrollen', async ({ verwalter }) => {
 	await verwalter.sees(meterWarningInWindow).toBeGreaterThan(0);
 });
 
 Then('sagt die Warnung zu den Zählern {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(meterWarningText).toContain(text);
+});
+
+Then('sagt die Hilfe zum Heizprofil nur {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(heatingProfileHelp).toBe(text);
 });

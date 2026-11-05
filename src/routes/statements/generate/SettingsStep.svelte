@@ -77,6 +77,10 @@
 		</select>
 	{/snippet}
 </Field>
+<!-- #659: whether this run suits the apartments at all, whatever the profile: right under the choice, not in its help -->
+<Alert tone="caution" title={m.statements_heating_meters_title()} testid="heating-meter-warning">
+	<p>{m.statements_heating_meters()}</p>
+</Alert>
 {#if ownDescription}<p class="text-ink-muted">{ownDescription}</p>{/if}
 <HeatingProfileChart shares={selected?.monthlyPercentages} />
 

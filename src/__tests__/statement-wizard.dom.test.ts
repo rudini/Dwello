@@ -368,6 +368,23 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).not.toContain('Gleichmässig Verteilung');
 	});
 
+	// #659 (Decided): the sentences about meters are a warning after the choice; the help before it stays short
+	it('warnt nach der Wahl des Heizprofils vor Zählern, die Hilfe davor bleibt kurz', async () => {
+		await toSettings();
+		const select = byTestId('heating-profile-select')!;
+		const warning = byTestId('heating-meter-warning')!;
+		expect(warning.textContent).toContain(
+			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen.'
+		);
+		expect(warning.textContent).toContain(
+			'Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
+		);
+		expect(select.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		const help = document.getElementById(select.getAttribute('aria-describedby')!.split(' ')[0])!;
+		expect(help.textContent).not.toContain('Zähler');
+		expect(help.textContent).toContain('Nur Heizprofile mit zusammen 100 % lassen sich wählen.');
+	});
+
 	// Nebenkosten, Pauschale und Heizkostentabelle gelten nur, wenn der Mietvertrag sie vorsieht (Art. 257a Abs. 2 OR)
 	it('erinnert daran, dass Heizprofil und Verwaltungspauschale im Mietvertrag vereinbart sein müssen', async () => {
 		await toSettings();

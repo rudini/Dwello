@@ -871,10 +871,11 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz
 
   # #659 (Decided): die Sätze zu den Zählern stehen als Warnung unter der Wahl des Heizprofils, nicht im langen Hilfetext davor
-  @wip
-  Szenario: Auf dem Telefon steht die Warnung zu den Zählern im ersten Bildschirm
+  Szenario: Auf dem Telefon steht die Warnung zu den Zählern gleich bei der Wahl des Heizprofils
     Angenommen das Browserfenster ist 390 auf 844 Pixel gross
-    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
-    Dann sieht der Liegenschaftsverwalter die Warnung zu den Zählern, ohne zu scrollen
+    Und der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Wenn der Liegenschaftsverwalter bis zur Wahl des Heizprofils scrollt
+    Dann sieht der Liegenschaftsverwalter die Warnung zu den Zählern, ohne weiter zu scrollen
     Und sagt die Warnung zu den Zählern "Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen."
+    Und sagt die Hilfe zum Heizprofil nur "Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
     Und scrollt die Seite nicht seitwärts

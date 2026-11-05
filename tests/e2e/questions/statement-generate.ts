@@ -169,6 +169,7 @@ export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileCut = CutInChoice.of(heatingProfileSelect);
 export const meterWarningInWindow = ShareInViewport.of(heatingMeterWarning);
 export const meterWarningText = Text.of(heatingMeterWarning);
+export const heatingProfileHelp = Accessible.descriptionOf(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const existingStatementsText = Text.of(existingStatements);
 // the warnings the confirmation confirms, read with its checkbox
