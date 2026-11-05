@@ -1,18 +1,22 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createRawSnippet, flushSync } from 'svelte';
-import { show } from './helpers/dom';
+import { byTestId, show } from './helpers/dom';
 
 // The address the layout reads, set per test
+// every subscriber hears it: the layout and, since #656, the footer
 const page = vi.hoisted(() => {
-	let set = (_: { url: URL }) => {};
+	const runs = new Set<(value: { url: URL }) => void>();
 	const store = {
 		subscribe(run: (value: { url: URL }) => void) {
-			set = run;
+			runs.add(run);
 			run({ url: new URL('http://localhost/terms') });
-			return () => {};
+			return () => runs.delete(run);
 		}
 	};
-	return { store, go: (path: string) => set({ url: new URL(`http://localhost${path}`) }) };
+	return {
+		store,
+		go: (path: string) => runs.forEach((run) => run({ url: new URL(`http://localhost${path}`) }))
+	};
 });
 vi.mock('$app/stores', () => ({ page: page.store }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
@@ -31,7 +35,8 @@ describe('Hilfe und Rechtliches ohne Anmeldung', () => {
 		'%s hat ohne Kopfzeile denselben Rand wie mit Kopfzeile',
 		async (path) => {
 			const main = await signedOut(path);
-			expect(document.querySelector('header')).toBeNull();
+			// without the app's header; the page's own header holds only the links and the language choice (#656)
+			expect(byTestId('header-logo')).toBeNull();
 			expect(main.className).toMatch(/(^| )px-4( |$)/);
 			expect(main.querySelector('.mx-auto.max-w-6xl h1')).not.toBeNull();
 		}
