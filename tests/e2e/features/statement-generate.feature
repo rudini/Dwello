@@ -870,3 +870,10 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz
     Und scrollt die Seite nicht seitwärts
+
+  # #663 (Decided): vor dem Erstellen sagt der Assistent, was er abrechnet, und erledigte Schritte nennen ihre Wahl
+  Szenario: Vor dem Erstellen nennt der Assistent, was er abrechnet
+    Angenommen der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" und 3 % Verwaltungspauschale öffnet
+    Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann fasst der Assistent vor dem Erstellen "01.01.2024 – 31.12.2024", "Lindenhof" und "Heizung Mittelland" zusammen
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"

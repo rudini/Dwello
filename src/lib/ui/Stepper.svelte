@@ -4,11 +4,18 @@
 	import ProgressBar from './ProgressBar.svelte';
 
 	// Steps of a wizard (current counts from 1); finished steps lead back, later ones wait
+	// a finished step names what was chosen in it (#663), e.g. the period
 	let {
 		steps,
 		current,
-		onselect
-	}: { steps: string[]; current: number; onselect: (step: number) => void } = $props();
+		onselect,
+		values = []
+	}: {
+		steps: string[];
+		current: number;
+		onselect: (step: number) => void;
+		values?: (string | undefined)[];
+	} = $props();
 </script>
 
 <nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
@@ -38,10 +45,17 @@
 						>
 							<Icon name="check" />
 						</span>
-						<span
-							data-testid="wizard-step-label"
-							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
-						><span class="sr-only">{m.ui_step_done()}</span>
+						<span class="flex min-w-0 flex-col text-left">
+							<span
+								data-testid="wizard-step-label"
+								class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
+							>{#if values[i]}<span
+									data-testid="wizard-step-value"
+									class="sr-only min-w-0 break-words font-normal text-ink-muted xl:not-sr-only"
+								>
+									{values[i]}</span
+								>{/if}
+						</span><span class="sr-only"> {m.ui_step_done()}</span>
 					</button>
 				{:else}
 					<span

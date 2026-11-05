@@ -21,6 +21,7 @@
 		previewRows,
 		invoices,
 		periodLabel,
+		buildingNames,
 		created
 	}: {
 		step: number;
@@ -35,6 +36,7 @@
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
 		periodLabel: string;
+		buildingNames: string; // the chosen buildings, for the summary before creating (#663)
 		created: string[] | null;
 	} = $props();
 
@@ -89,6 +91,12 @@
 	/>
 {:else}
 	<GenerationStep
+		summary={{
+			period: periodLabel,
+			buildings: buildingNames,
+			heatingProfile: heatingProfile && localName(heatingProfile),
+			feePercent: selection.managementFeePercent
+		}}
 		count={previewRows.length}
 		createdCount={created?.length ?? null}
 		draftsHref={draftsLink(selection)}
