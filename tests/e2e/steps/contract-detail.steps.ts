@@ -31,7 +31,11 @@ import {
 	openedInNewTab,
 	openedPath,
 	noticeReceivedHelp,
-	focusedEndDialogField
+	focusedEndDialogField,
+	endActionLabel,
+	moveOutText,
+	moveOutShown,
+	refusedStatementName
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -64,7 +68,8 @@ import {
 	useWindowOf,
 	continueOpenEnded,
 	confirmMovedOut,
-	deleteDraftAndContinue
+	deleteDraftAndContinue,
+	createFinalStatement
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
@@ -506,3 +511,38 @@ Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwal
 Then('steht der Fokus im Feld {string} des Dialogs', async ({ verwalter }, field: string) => {
 	await verwalter.sees(focusedEndDialogField).toBe(field);
 });
+
+// #664: the action only opens the entry of the Vertragsende, and says so
+Then('bietet der Mietvertrag {string} an', async ({ verwalter }, label: string) => {
+	await verwalter.sees(endActionLabel).toBe(label);
+});
+
+Then('nennt der Mietvertrag den Auszug {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(moveOutText).toBe(text);
+});
+
+// the Abrechnungsperiode of the building is the calendar year, the one the Vertragsende falls in
+Then(
+	'nennt der Mietvertrag den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres',
+	async ({ verwalter }) => {
+		await verwalter.sees(moveOutText).toBe(
+			`Auszug am ${swissDate(inDays(0))}, Schlussabrechnung nach dem 31.12.${inDays(0).slice(0, 4)}`
+		);
+	}
+);
+
+// after the names above, so an error page does not pass
+Then('nennt der Mietvertrag keinen Auszug', async ({ verwalter }) => {
+	await verwalter.sees(moveOutShown).toBe(false);
+});
+
+When('der Liegenschaftsverwalter die Schlussabrechnung erstellen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(createFinalStatement);
+});
+
+Then(
+	'nennt die Ablehnung den Entwurf für {string}, {int}',
+	async ({ verwalter, names }, tenant: string, year: number) => {
+		await verwalter.sees(refusedStatementName).toContain(`Entwurf für ${names.get(tenant) ?? tenant}, ${year}`);
+	}
+);

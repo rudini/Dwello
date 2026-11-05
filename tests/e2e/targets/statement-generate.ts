@@ -161,3 +161,5 @@ export const recalculateNote = target('Hinweis zu «Neu berechnen» in der Wahl 
 
 // #663: what the run bills, summed up before creating
 export const runSummary = target('Zusammenfassung vor dem Erstellen', (page) => page.getByTestId('run-summary'));
+// read out while the server works, and the result once it is done (#664)
+export const wizardStatus = target('Statusmeldung des Assistenten', (page) => page.getByTestId('wizard-status'));

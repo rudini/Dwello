@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentCount, apartmentEmptyHint, apartmentSearchHelp, apartmentSearchTerm, occupancyOf } from '../questions/apartments';
+import { inDays, swissDate } from '../fixtures/dates';
+import { apartmentCount, apartmentEmptyHint, apartmentSearchHelp, apartmentSearchTerm, occupancyOf, moveOutOf, moveOutShownOf } from '../questions/apartments';
 import {
 	openApartment,
 	openApartmentList,
@@ -91,4 +92,23 @@ Then('zeigt die Wohnungsliste wieder Wohnungen', async ({ verwalter }) => {
 
 Then('die Wohnungssuche ist leer', async ({ verwalter }) => {
 	await verwalter.sees(apartmentSearchTerm).toBe('');
+});
+
+// #664: the calendar year is the building's Abrechnungsperiode, the one the Vertragsende falls in
+Then(
+	'nennt die Wohnungsliste bei der Wohnung {string} den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres',
+	async ({ verwalter }, number: string) => {
+		await verwalter.sees(moveOutOf(number)).toBe(
+			`Auszug am ${swissDate(inDays(0))}, Schlussabrechnung nach dem 31.12.${inDays(0).slice(0, 4)}`
+		);
+	}
+);
+
+Then('nennt die Wohnungsliste bei der Wohnung {string} {string}', async ({ verwalter }, number: string, text: string) => {
+	await verwalter.sees(moveOutOf(number)).toBe(text);
+});
+
+// after its Mietstatus, so an error page does not pass
+Then('nennt die Wohnungsliste bei der Wohnung {string} keinen Auszug', async ({ verwalter }, number: string) => {
+	await verwalter.sees(moveOutShownOf(number)).toBe(false);
 });

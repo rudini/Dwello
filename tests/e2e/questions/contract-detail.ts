@@ -2,6 +2,9 @@ import { question } from '../screenplay/actor';
 import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
 	contractEndInput,
+	moveOutHint,
+	refusedStatementLink,
+	endContractButton,
 	noticeReceivedInput,
 	advancePeriod,
 	nextSteps,
@@ -72,3 +75,7 @@ export const noticeReceivedHelp = Accessible.descriptionOf(noticeReceivedInput);
 
 /** The field of the dialog «Mietvertrag beenden» that has the focus, by its label (#653) */
 export const focusedEndDialogField = FocusedLabel;
+export const moveOutText = Text.of(moveOutHint);
+export const refusedStatementName = Text.of(refusedStatementLink);
+export const endActionLabel = Text.of(endContractButton);
+export const moveOutShown = Visibility.of(moveOutHint);

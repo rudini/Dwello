@@ -29,6 +29,7 @@ import {
 	agreementsOf,
 	notAgreedCostsLink,
 	generationResult,
+	wizardStatus,
 	heatingMeterWarning,
 	heatingProfileSelect,
 	managementFeeHint,
@@ -207,3 +208,4 @@ export const recalculateNotes = Text.ofAll(recalculateNote);
 // #663: the summary before creating, and what a finished step says it chose
 export const runSummaryText = Text.of(runSummary);
 export const finishedStepText = (label: string) => Text.of(finishedStep(label));
+export const wizardAnnouncement = Text.of(wizardStatus);

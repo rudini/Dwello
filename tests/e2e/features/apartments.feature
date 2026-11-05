@@ -94,3 +94,32 @@ Funktionalität: Wohnungsliste
     Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
     Und der Liegenschaftsverwalter im Browser zurückgeht
     Dann steht der Fokus auf dem Ergebnis "Keine Wohnungen gefunden"
+
+  # #664 (Persona Helga M4, review K-4): mit einem Nachmieter ab dem Tag danach steht «Vermietet»; der Auszug und ab
+  # wann die Schlussabrechnung erstellt werden kann, stehen dabei, bis die Abrechnungsperiode des Vertragsendes endet
+  @wip
+  Szenario: Die Wohnungsliste nennt den Auszug bis zum Ende seiner Abrechnungsperiode
+    Angenommen der Mieter "Sarah Meier" existiert
+    Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" bis heute für "1200" Franken
+    Und der Mieter "Nina Brunner" existiert
+    Und "Nina Brunner" mietet die Wohnung "2.01" ab morgen für "1250" Franken
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann ist die Wohnung "2.01" "Vermietet"
+    Und nennt die Wohnungsliste bei der Wohnung "2.01" den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres
+
+  # #664: nach dem Ende der Abrechnungsperiode und solange die Schlussabrechnung fehlt, ist sie fällig
+  @wip
+  Szenario: Die Wohnungsliste nennt die fällige Schlussabrechnung
+    Angenommen der Mieter "Sarah Meier" existiert
+    Und "Sarah Meier" mietete die Wohnung "2.01" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann nennt die Wohnungsliste bei der Wohnung "2.01" "Auszug am 30.06.2025, Schlussabrechnung fällig"
+
+  @wip
+  Szenario: Mit der Schlussabrechnung nennt die Wohnungsliste den Auszug nicht mehr
+    Angenommen der Mieter "Sarah Meier" existiert
+    Und "Sarah Meier" mietete die Wohnung "2.01" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Und für "Sarah Meier" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2025
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann ist die Wohnung "2.01" "Leer seit 01.07.2025"
+    Und nennt die Wohnungsliste bei der Wohnung "2.01" keinen Auszug

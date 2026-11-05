@@ -107,3 +107,8 @@ export const advanceDeleteButton = (amount: string) =>
 export const confirmAdvanceDeleteButton = target('Akonto löschen bestätigen', (page) =>
 	page.getByTestId('contract-advance-delete-confirm')
 );
+// #664: the move-out until its final statement exists, with the way into the wizard once it is due
+export const moveOutHint = target('Hinweis auf den Auszug', (page) => page.getByTestId('contract-move-out'));
+export const moveOutStatementLink = target('Schlussabrechnung erstellen', (page) =>
+	page.getByTestId('contract-move-out-link')
+);

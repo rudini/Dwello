@@ -21,6 +21,7 @@ import {
 	endContractButton,
 	missingStatementInvoicesLink,
 	missingStatementLink,
+	moveOutStatementLink,
 	nextStep,
 	refusedStatementLink,
 	continueOpenEndedButton,
@@ -93,3 +94,4 @@ export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);
 export const deleteAdvance = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(advanceDeleteButton(amount)), Click.on(confirmAdvanceDeleteButton));
 
+export const createFinalStatement = Click.on(moveOutStatementLink);

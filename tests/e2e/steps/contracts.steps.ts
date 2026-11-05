@@ -1,5 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { inDays } from '../fixtures/dates';
 import { listedAmount, listedContract, listedContractCount, missingStatementOfContract } from '../questions/contracts';
 import { pageAddress, pageTitle } from '../questions/navigation';
 import {
@@ -160,5 +161,20 @@ Then(
 		await verwalter.attemptsTo(openContractList, searchContracts(name));
 		await verwalter.sees(listedContract(name)).toContain(name);
 		await verwalter.sees(missingStatementOfContract(name)).toBeNull();
+	}
+);
+
+// #664: a Vertragsende today, with the next tenant from tomorrow
+Given(
+	'{string} mietet die Wohnung {string} seit {string} bis heute für {string} Franken',
+	async ({ seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
+		await seed.contract(tenant, apartment, { startDate, endDate: inDays(0), baseRent });
+	}
+);
+
+Given(
+	'{string} mietet die Wohnung {string} ab morgen für {string} Franken',
+	async ({ seed }, tenant: string, apartment: string, baseRent: string) => {
+		await seed.contract(tenant, apartment, { startDate: inDays(1), baseRent });
 	}
 );
