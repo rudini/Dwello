@@ -1404,6 +1404,15 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('wizard-next')).toBeNull();
 	});
 
+	// #664 (Persona Sven M2): the status that said «Entwürfe werden erstellt …» says the result, and the heading the
+	// focus moves to names it instead of the step
+	it('sagt das Ergebnis an und nennt es in der Überschrift des Schritts', () => {
+		open({ created: ['s1', 's2'] });
+		const result = '2 Nebenkostenabrechnungen sind als Entwurf erstellt.';
+		expect(byTestId('wizard-status')!.textContent!.trim()).toBe(result);
+		expect(byTestId('statement-step-heading')!.textContent!.trim()).toBe(result);
+	});
+
 	// the PDFs of this run only, e.g. to print them in one go (#356)
 	it('bietet die PDFs der erstellten Entwürfe als eine ZIP-Datei an', () => {
 		open({ created: ['s1', 's2'] });

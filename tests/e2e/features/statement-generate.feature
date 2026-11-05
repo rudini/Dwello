@@ -889,7 +889,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
 
   # #664 (Persona Sven M2): das Ergebnis wird angesagt, und der Fokus steht auf einer Überschrift, die es nennt
-  @wip
   Szenario: Nach dem Erstellen steht der Fokus auf dem Ergebnis
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann steht der Fokus auf dem Ergebnis "2 Nebenkostenabrechnungen sind als Entwurf erstellt."

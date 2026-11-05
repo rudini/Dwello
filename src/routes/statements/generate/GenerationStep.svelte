@@ -49,11 +49,6 @@
 {:else}
 	<div class="flex flex-col items-center gap-4 text-center">
 		<Illustration name="done" />
-		<p class="text-lg font-semibold text-ink" role="status" data-testid="generation-result">
-			{createdCount === 1
-				? m.statements_created_one()
-				: m.statements_created_many({ count: createdCount })}
-		</p>
 		<p class="max-w-prose text-ink-muted">{m.statements_check_drafts()}</p>
 		<div class="flex flex-wrap justify-center gap-4">
 			<Button href={draftsHref} variant="primary" icon="statement" testid="show-statements-button"
