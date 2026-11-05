@@ -85,6 +85,15 @@ async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) 
 	}));
 }
 
+// #664: a due Schlussabrechnung leads into the wizard for its period, unless only outside Dwello
+const withWizard = (moveOut: MoveOut, building: string) => ({
+	...moveOut,
+	href:
+		moveOut.due && !moveOut.outside
+			? wizardLink(building, moveOut.period.start, moveOut.period.end)
+			: null
+});
+
 // Each field as the backend sends it, or its default when empty or when the record is missing
 const filled = <T extends Record<string, unknown>>(values: Record<string, unknown> | null | undefined, defaults: T) =>
 	Object.fromEntries(Object.entries(defaults).map(([key, value]) => [key, values?.[key] || value])) as T;
@@ -153,19 +162,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			// what a notice or an agreed end still asks of the landlord, the backend decides (A-4 to A-6, #788)
 			nextSteps: data.nextSteps ?? null,
 			fixedTermCheck: data.fixedTermCheck === true,
-			moveOut: data.moveOut
-				? {
-						...data.moveOut,
-						href:
-							data.moveOut.due && !data.moveOut.outside
-								? wizardLink(
-										contract.building.id,
-										data.moveOut.period.start,
-										data.moveOut.period.end
-									)
-								: null
-					}
-				: null,
+			moveOut: data.moveOut && withWizard(data.moveOut, contract.building.id),
 			endsToday: data.endsToday === true,
 			contract,
 			// the agreed Nebenkosten (#91); without the categories the page still shows the rest
