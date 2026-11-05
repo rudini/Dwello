@@ -11,11 +11,11 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: contracts-not-loaded hint linked and shorter (#665, #666)
 
-- [ ] @wip scenarios: the hint is the description of «Wohnung» and «Vertragsbeginn» (#665); its shorter wording (#666)
-- [ ] fach-reviewer step 1 on the wording of #666 (`docs/reviews/b665-fachreview-1.md`)
+- [x] @wip scenarios: the hint is the description of «Wohnung» and «Vertragsbeginn» (#665); its shorter wording (#666)
+- [x] fach-reviewer step 1 on the wording of #666 (`docs/reviews/b665-fachreview-1.md`); V-1 fixed (af5fab3), issues #1142, #1143
 - [ ] Product decision on the changed lines of the non-@wip scenarios that quote the old wording (#666)
-- [ ] Slice 1 (#665): `Field` `describedby` through `Select` and `DateInput`; the hint linked
-- [ ] Slice 2 (#665): `src/lib/ui/LiveRegion.svelte` replaces the hand-made `role="status"` wrappers
+- [x] Slice 1 (#665): `Field` `describedby` through `Select` and `DateInput`; the hint linked (`Field`, `Select`, `DateInput`, `ContractsUnknown`, `ApartmentStep`, `PeriodStep`)
+- [x] Slice 2 (#665): `src/lib/ui/LiveRegion.svelte` replaces the hand-made `role="status"` wrappers (also `ContractForm`); the hint at «Vertragsbeginn» in the wizard is announced (review B-13 round 3)
 - [ ] code-reviewer slice 1+2 (`docs/reviews/b665-review-1.md`)
 - [ ] Slice 3 (#666): shorter wording in all four languages
 - [ ] code-reviewer slice 3

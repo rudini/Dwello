@@ -91,7 +91,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist"
     Und sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten."
-    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Mehr dazu oben bei der Wohnung."
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben bei der Wohnung."
 
   # Statt die Seite neu zu laden, bleibt die Eingabe erhalten (#151)
   Szenario: Mietverträge der Wohnung erneut laden
