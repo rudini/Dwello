@@ -1,8 +1,9 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Click, FailRequests, Wait } from '../screenplay/interactions';
+import { Browser, Click, FailRequests, Press, Wait } from '../screenplay/interactions';
 import { mobileMenuButton, text } from '../targets/accessibility';
 import {
 	errorPageToOverview,
+	focusedUserMenuItem,
 	footerLink,
 	helpContentsLink,
 	logo,
@@ -23,6 +24,9 @@ export const chooseInMobileMenu = (label: string): Activity => (actor) =>
 export const chooseLogo = Click.on(logo);
 export const openSettingsFromUserMenu: Activity = (actor) =>
 	actor.attemptsTo(Click.on(userMenuButton), Click.on(userMenuSettings));
+// #656: arrow keys, Home and End in the user menu
+export const openUserMenuByKey = (key: string) => Press.theKey(key).on(userMenuButton);
+export const pressInUserMenu = (key: string) => Press.theKey(key).on(focusedUserMenuItem);
 export const chooseInFooter = (label: string) => Click.on(footerLink(label));
 export const useWindowWidth = (width: number) => Browser.resizeTo({ width, height: 768 });
 export const openMobileMenu = Click.on(mobileMenuButton);

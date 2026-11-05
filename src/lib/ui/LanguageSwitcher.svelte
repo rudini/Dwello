@@ -3,6 +3,8 @@
 	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
 	import { flushSync } from 'svelte';
 	import Icon from './Icon.svelte';
+	import { addToast } from '$lib/stores';
+	import { isMenuKey, moveInMenu } from '$lib/menu-keys';
 
 	// Each language in its own words, so it is found whatever language the page shows
 	const names: Record<Locale, string> = {
@@ -17,20 +19,37 @@
 	let button = $state<HTMLButtonElement>();
 	let frame = $state<HTMLElement>();
 
+	// #656: the choice reloads the page; after the reload the focus is back here and a message names the new language
+	const changed = 'dwello-language-changed';
+	function choose(locale: Locale) {
+		try {
+			sessionStorage.setItem(changed, '1');
+		} catch {
+			// without storage the page reloads without the message
+		}
+		setLocale(locale);
+	}
+	$effect(() => {
+		let after = false;
+		try {
+			after = sessionStorage.getItem(changed) !== null;
+			sessionStorage.removeItem(changed);
+		} catch {
+			return;
+		}
+		if (!after) return;
+		button?.focus();
+		addToast('success', m.language_prefix() + names[current]);
+	});
+
 	function close() {
 		open = false;
 		button?.focus();
 	}
 
 	// Arrow keys, Home and End move between the languages; from the closed button they open on the current one
-	const moves: Record<string, (at: number, last: number) => number> = {
-		ArrowDown: (at, last) => (at < last ? at + 1 : 0),
-		ArrowUp: (at, last) => (at > 0 ? at - 1 : last),
-		Home: () => 0,
-		End: (_, last) => last
-	};
 	function move(event: KeyboardEvent) {
-		if (!(event.key in moves)) return;
+		if (!isMenuKey(event)) return;
 		event.preventDefault();
 		const options = () => [
 			...(frame?.querySelectorAll<HTMLElement>('[data-testid="language-option"]') ?? [])
@@ -40,10 +59,7 @@
 			flushSync();
 			return options()[locales.indexOf(current)]?.focus();
 		}
-		const all = options();
-		all[
-			moves[event.key](all.indexOf(document.activeElement as HTMLElement), all.length - 1)
-		]?.focus();
+		moveInMenu(event, options());
 	}
 </script>
 
@@ -89,7 +105,7 @@
 						type="button"
 						lang={locale}
 						aria-current={locale === current ? 'true' : undefined}
-						onclick={() => setLocale(locale)}
+						onclick={() => choose(locale)}
 						onkeydown={move}
 						class="flex min-h-12 w-full items-center gap-2 px-4 text-left text-ink hover:bg-sunken {locale ===
 						current

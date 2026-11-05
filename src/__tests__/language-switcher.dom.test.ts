@@ -5,6 +5,8 @@ import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 import Header from '$lib/ui/Header.svelte';
 import { setLocale } from '$lib/paraglide/runtime';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
+import { get } from 'svelte/store';
+import { toasts } from '$lib/stores';
 
 vi.mock('$app/stores', () => ({ page: readable({ url: new URL('http://localhost/tenants') }) }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
@@ -52,6 +54,26 @@ describe('Sprachwahl', () => {
 		click(button());
 		click(allByTestId('language-option')[1]);
 		expect(setLocale).toHaveBeenCalledWith('fr');
+	});
+
+	// #656 (Decided): the page reloads in the new language; then the focus is back on the switcher and a message names the language
+	it('steht nach dem Wechsel wieder auf der Sprachwahl und nennt die Sprache', () => {
+		toasts.set([]);
+		show(LanguageSwitcher, {});
+		click(button());
+		click(allByTestId('language-option')[1]);
+		document.body.innerHTML = ''; // the reload
+		show(LanguageSwitcher, {});
+		expect(document.activeElement).toBe(button());
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Sprache: Deutsch']);
+	});
+
+	it('nennt die Sprache beim Laden einer Seite ohne Wechsel nicht', () => {
+		sessionStorage.clear();
+		toasts.set([]);
+		show(LanguageSwitcher, {});
+		expect(document.activeElement).not.toBe(button());
+		expect(get(toasts)).toEqual([]);
 	});
 
 	it('schliesst mit Escape und gibt den Fokus zurück', () => {
@@ -103,7 +125,9 @@ describe('Sprachwahl ohne Kopfzeile', () => {
 		const { createRawSnippet } = await import('svelte');
 		const children = createRawSnippet(() => ({ render: () => '<p>Anmelden</p>' }));
 		show(Layout, { data: { user: null }, children } as never);
-		expect(document.querySelector('header')).toBeNull();
+		// without the app's header (its own header since #656 holds only the links and the language choice)
+		expect(byTestId('user-menu-button')).toBeNull();
+		expect(byTestId('header-logo')).toBeNull();
 		expect(allByTestId('language-button')).toHaveLength(1);
 		expect(document.querySelector('nav[aria-label="Sprachwahl"] [data-testid="language-button"]')).not.toBeNull();
 	});

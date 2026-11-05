@@ -21,6 +21,16 @@ export const userMenuButton = target('Benutzermenü', (page) => page.getByTestId
 export const userMenuSettings = target('Einstellungen', (page) => page.getByTestId('user-menu-settings'));
 export const footerLink = (label: string) =>
 	target(`Fusszeile «${label}»`, (page) => page.getByTestId('footer-link').filter({ hasText: label }));
+// #656: the item of the user menu that has the focus, and the legal page the footer marks
+export const focusedUserMenuItem = target('Eintrag des Benutzermenüs mit dem Fokus', (page) =>
+	page.getByTestId('user-menu').locator(':focus')
+);
+export const currentFooterLink = target('Markierter Link der Fusszeile', (page) =>
+	page.getByRole('contentinfo').locator('[aria-current="page"]')
+);
+/** A link in the banner landmark, the page's header area */
+export const bannerLink = (label: string) =>
+	target(`Kopfbereich «${label}»`, (page) => page.getByRole('banner').getByRole('link', { name: label, exact: true }));
 export const footerVersion = target('Version in der Fusszeile', (page) => page.getByTestId('footer-version'));
 export const pageSection = (heading: string) =>
 	target(`Abschnitt «${heading}»`, (page) =>

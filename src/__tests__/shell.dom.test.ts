@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
 import Header from '$lib/ui/Header.svelte';
 import MobileNav from '$lib/ui/MobileNav.svelte';
@@ -9,8 +8,15 @@ import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
+// the page the shell is on; the footer marks a legal page (#656)
+const at = vi.hoisted(() => ({ path: '/tenants' }));
 vi.mock('$app/stores', () => ({
-	page: readable({ url: new URL('http://localhost/tenants') })
+	page: {
+		subscribe: (run: (value: unknown) => void) => (
+			run({ url: new URL(at.path, 'http://localhost') }),
+			() => {}
+		)
+	}
 }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
 // the version a build without a tag lacks (#728); vitest.config.ts defines 1.4.0 for the others
@@ -75,6 +81,24 @@ describe('Kopfzeile', () => {
 		press('Escape');
 		expect(byTestId('user-menu-settings')).toBeNull();
 		expect(document.activeElement).toBe(button);
+	});
+
+	// #656: arrow keys, Home and End like the language choice
+	it('führt mit den Pfeiltasten, Pos1 und Ende durch das Benutzermenü', () => {
+		show(Header, { user });
+		byTestId('user-menu-button')!.focus();
+		press('ArrowDown');
+		expect(document.activeElement).toBe(byTestId('user-menu-settings'));
+		press('ArrowDown');
+		expect(document.activeElement).toBe(byTestId('logout-button'));
+		press('ArrowDown');
+		expect(document.activeElement).toBe(byTestId('user-menu-settings'));
+		press('ArrowUp');
+		expect(document.activeElement).toBe(byTestId('logout-button'));
+		press('Home');
+		expect(document.activeElement).toBe(byTestId('user-menu-settings'));
+		press('End');
+		expect(document.activeElement).toBe(byTestId('logout-button'));
 	});
 
 	it('nennt das Benutzermenü und bietet eine Fläche von mindestens 48 Pixeln', () => {
@@ -182,6 +206,19 @@ describe('Fusszeile', () => {
 			link.getAttribute('href')
 		);
 		expect(links).toEqual(['/privacy', '/terms']);
+	});
+
+	it.each(['/privacy', '/terms'])('markiert %s als aktuelle Seite, wenn sie offen ist', (path) => {
+		at.path = path;
+		try {
+			show(Footer, {});
+			const marked = [
+				...document.querySelectorAll('[data-testid="footer-link"][aria-current="page"]')
+			];
+			expect(marked.map((link) => link.getAttribute('href'))).toEqual([path]);
+		} finally {
+			at.path = '/tenants';
+		}
 	});
 
 	it('zeigt die Version der App', () => {

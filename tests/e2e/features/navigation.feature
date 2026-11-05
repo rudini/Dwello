@@ -70,6 +70,25 @@ Funktionalität: Navigation
       | Datenschutz         |
       | Nutzungsbedingungen |
 
+  # #656: das Benutzermenü geht mit den Tasten wie die Sprachwahl
+  Szenario: Im Benutzermenü führen die Pfeiltasten von Eintrag zu Eintrag
+    Wenn der Liegenschaftsverwalter das Benutzermenü mit der Taste "ArrowDown" öffnet
+    Dann steht der Fokus im Benutzermenü auf "Einstellungen"
+    Wenn der Liegenschaftsverwalter im Benutzermenü die Taste "End" drückt
+    Dann steht der Fokus im Benutzermenü auf "Abmelden"
+    Wenn der Liegenschaftsverwalter im Benutzermenü die Taste "ArrowDown" drückt
+    Dann steht der Fokus im Benutzermenü auf "Einstellungen"
+
+  # #656
+  Szenariogrundriss: Die Fusszeile markiert die rechtliche Seite, die offen ist
+    Wenn der Liegenschaftsverwalter in der Fusszeile "<Link>" wählt
+    Dann ist in der Fusszeile nur "<Link>" als aktuelle Seite markiert
+
+    Beispiele:
+      | Link                |
+      | Datenschutz         |
+      | Nutzungsbedingungen |
+
   # #651 (Fallback-Review von #1115): ein Tablet quer gedreht schliesst das offene Menü; der Fokus geht nicht verloren
   Szenario: Wird das Fenster mit offenem Menü breit, steht der Fokus auf dem aktuellen Bereich
     Angenommen das Browserfenster ist 390 Pixel breit

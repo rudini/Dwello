@@ -8,12 +8,27 @@
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import type { User } from '$lib/stores';
 	import { browserStorage, clearAllDrafts } from '$lib/wizard-draft';
+	import { isMenuKey, moveInMenu } from '$lib/menu-keys';
+	import { flushSync } from 'svelte';
 
 	let { user }: { user: User | null } = $props();
 
 	let menuOpen = $state(false);
 	let menuButton = $state<HTMLButtonElement>();
 	const displayName = $derived(user?.name || user?.email || '');
+
+	let menu = $state<HTMLElement>();
+
+	// #656: arrow keys, Home and End like the language choice; from the closed button they open the menu
+	function move(event: KeyboardEvent) {
+		if (!isMenuKey(event)) return;
+		event.preventDefault();
+		if (!menuOpen) {
+			menuOpen = true;
+			flushSync();
+		}
+		moveInMenu(event, [...(menu?.querySelectorAll<HTMLElement>('a, button') ?? [])]);
+	}
 
 	function closeMenu() {
 		menuOpen = false;
@@ -75,6 +90,7 @@
 						onclick={() => (menuOpen = !menuOpen)}
 						aria-expanded={menuOpen}
 						aria-controls="user-menu"
+						onkeydown={move}
 						class="flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-control px-2 text-ink hover:bg-sunken"
 						data-testid="user-menu-button"
 					>
@@ -94,13 +110,16 @@
 							onclick={() => (menuOpen = false)}
 						></button>
 						<div
+							bind:this={menu}
 							id="user-menu"
+							data-testid="user-menu"
 							class="absolute right-0 z-20 mt-2 flex w-64 flex-col rounded-panel border border-line bg-surface py-2 shadow-raised"
 						>
 							<p class="truncate px-4 py-2 text-ink-muted">{user.email}</p>
 							<a
 								href="/config"
 								onclick={() => (menuOpen = false)}
+								onkeydown={move}
 								class="flex min-h-12 items-center gap-2 px-4 text-ink hover:bg-sunken"
 								data-testid="user-menu-settings"
 							>
@@ -110,6 +129,7 @@
 							<button
 								type="button"
 								onclick={logout}
+								onkeydown={move}
 								class="flex min-h-12 items-center gap-2 px-4 text-left text-critical hover:bg-critical-soft"
 								data-testid="logout-button"
 							>
