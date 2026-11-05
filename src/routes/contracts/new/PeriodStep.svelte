@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
@@ -91,15 +92,12 @@
 	<ContractsUnknown {onretry} testid="start-contracts-unknown" />
 {/if}
 
-<!-- always present, so screen readers hear the hint when it appears -->
-<div role="status" data-testid="start-date-notice">
-	{#if pastStart}
-		<Alert tone="caution" title={m.contracts_check_start()}>
-			<p>{pastStart}</p>
-			{#if offerBilledUntil}<p>{m.contracts_start_in_past_billed()}</p>{/if}
-		</Alert>
-	{/if}
-</div>
+<LiveRegion shown={!!pastStart} testid="start-date-notice">
+	<Alert tone="caution" title={m.contracts_check_start()}>
+		<p>{pastStart}</p>
+		{#if offerBilledUntil}<p>{m.contracts_start_in_past_billed()}</p>{/if}
+	</Alert>
+</LiveRegion>
 
 <RadioGroup
 	name="duration"

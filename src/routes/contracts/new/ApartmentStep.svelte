@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { apartmentChoices } from '$lib/contract-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import type { AvailabilityInfo } from '$lib/utils/contract-availability';
@@ -44,12 +45,9 @@
 	/>
 {/if}
 
-<!-- always present, so screen readers hear the hint when it appears -->
-<div role="status">
-	{#if unknown}
-		<ContractsUnknown {onretry} testid="apartment-contracts-unknown" />
-	{/if}
-</div>
+<LiveRegion shown={unknown}>
+	<ContractsUnknown {onretry} testid="apartment-contracts-unknown" />
+</LiveRegion>
 
 {#if notice}
 	<Alert title={m.contracts_free_later()} testid="availability-info">

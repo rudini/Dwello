@@ -6,6 +6,7 @@
 	import { localName } from '$lib/names';
 	import { isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import { controlClass } from '$lib/ui/field';
@@ -95,10 +96,8 @@
 	testid="management-fee-input"
 />
 <!-- announced while typing: the hint appears without the focus moving -->
-<div role="status">
-	{#if managementFeePercent > USUAL_MAXIMUM && isFeeRate(managementFeePercent)}
-		<Alert tone="caution" title={m.statements_fee_above_title()} testid="management-fee-hint">
-			<p>{m.statements_fee_above_text({ max: USUAL_MAXIMUM })}</p>
-		</Alert>
-	{/if}
-</div>
+<LiveRegion shown={managementFeePercent > USUAL_MAXIMUM && isFeeRate(managementFeePercent)}>
+	<Alert tone="caution" title={m.statements_fee_above_title()} testid="management-fee-hint">
+		<p>{m.statements_fee_above_text({ max: USUAL_MAXIMUM })}</p>
+	</Alert>
+</LiveRegion>

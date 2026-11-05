@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementDocument } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import DeliveryFailure from '../../documents/DeliveryFailure.svelte';
 
 	// What became of the Mahnung just sent: e-mailed, or waiting as a letter in the documents
@@ -18,8 +19,7 @@
 	});
 </script>
 
-<!-- empty: no gap in the page's column (gap-8), but still in the accessibility tree, so a message is announced -->
-<div role="status" class="empty:-mt-8" data-testid="reminder-feedback-box">
+<LiveRegion shown={!!reminder} testid="reminder-feedback-box">
 	{#if reminder}
 		<Alert
 			tone={reminder.deliveryError ? 'caution' : 'positive'}
@@ -36,4 +36,4 @@
 			{/if}
 		</Alert>
 	{/if}
-</div>
+</LiveRegion>
