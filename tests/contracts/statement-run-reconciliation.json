@@ -1,0 +1,15 @@
+{
+	"positions": [
+		{
+			"categoryId": "c0000000-0000-4000-8000-000000000001",
+			"distributionKeyId": "e0000000-0000-4000-8000-000000000002",
+			"severalKeys": false,
+			"buildingCosts": 1200,
+			"tenants": 1101.64,
+			"landlord": 98.36
+		}
+	],
+	"total": { "buildingCosts": 1200, "tenants": 1101.64, "landlord": 98.36 },
+	"managementFee": 33.05,
+	"nonAllocable": 500
+}

@@ -26,7 +26,7 @@ export interface GenerationRequest {
 	managementFeePercent: number;
 }
 
-async function call(fetch: Fetch, path: string, body?: object) {
+export async function call(fetch: Fetch, path: string, body?: object) {
 	const response = await fetch(
 		`${API}/${path}`,
 		body && {

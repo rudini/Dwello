@@ -6,6 +6,7 @@ import { dayAfter } from './swiss-date';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
 import { heatingSumText, type HeatingSum } from './heating-sum';
 import type { AccountingPeriodType } from './accounting-period';
+import type { Reconciliation } from './cost-reconciliation';
 import type { CategoryFindingKind } from '../../backend/src/api/invoice';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
@@ -146,6 +147,7 @@ type Coverage = {
 	uncategorized?: HintedInvoice[]; // allocable invoices of the period without a category hold the run (#382)
 	skipped?: SkippedContract[]; // #453 (#327): no Mietstage after «Abgerechnet bis» in the period
 	allSkipped?: boolean; // no contract of the building is left to bill
+	reconciliation?: Reconciliation; // #1126: its Kostenabstimmung
 };
 
 /** A contract «Abgerechnet bis» covers in the whole period (#453) */
@@ -316,6 +318,7 @@ export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name:
 		uncategorized: c.uncategorized ?? [],
 		skipped: c.skipped ?? [],
 		allSkipped: !!c.allSkipped,
+		reconciliation: c.reconciliation,
 		...categoryCheck(c.check)
 	}));
 

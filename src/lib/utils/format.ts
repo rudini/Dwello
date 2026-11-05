@@ -23,10 +23,12 @@ export function normalizeDecimal(val: string): string {
 
 /** Swiss franc amount, e.g. "CHF 1’800.00" */
 export function formatCurrency(amount: number): string {
-	// ICU versions differ in the de-CH thousands separator (' or ’); always show the typographic one
+	// ICU versions differ in the de-CH thousands separator (' or ’); always show the typographic one; a negative
+	// amount (#1126) with a space after CHF, which ICU de-CH omits
 	return new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' })
 		.format(amount)
-		.replace(/'/g, '’');
+		.replace(/'/g, '’')
+		.replace(/^CHF-/, 'CHF\u00a0-');
 }
 
 /** Date in words, so a wrong pick shows, e.g. "Mittwoch, 1. Januar 2025"; the words follow the UI language */

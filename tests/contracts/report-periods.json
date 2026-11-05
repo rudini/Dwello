@@ -1,0 +1,10 @@
+{
+	"periods": [
+		{
+			"buildingId": "b0000000-0000-4000-8000-000000000001",
+			"buildingName": "Lindenhof",
+			"periodStart": "2024-01-01",
+			"periodEnd": "2024-12-31"
+		}
+	]
+}

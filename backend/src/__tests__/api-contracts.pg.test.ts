@@ -306,6 +306,20 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-run-differences'), actual)).toEqual([]);
 	});
 
+	// #1126: the 2024 statement is a draft; an invoice recorded after it makes it not up to date
+	it('GET /reports/reconciliation, /reports/reconciliations und /statements/run-reconciliation liefern die Felder von report-reconciliation.json, report-periods.json und statement-run-reconciliation.json', async () => {
+		const query = `buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`;
+		await insertInvoice(rental.building, { description: `Spät ${token}`, amount: '120.00', invoiceDate: '2024-11-30' });
+		try {
+			expect(drift(await sample('report-reconciliation'), await (await callApi(`/api/v1/reports/reconciliation?${query}`)).json())).toEqual([]);
+			expect(drift(await sample('report-periods'), await (await callApi('/api/v1/reports/reconciliations')).json())).toEqual([]);
+			const run = await (await callApi(`/api/v1/statements/run-reconciliation?${query}&managementFeePercent=3`)).json();
+			expect(drift(await sample('statement-run-reconciliation'), run)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Spät ${token}`));
+		}
+	});
+
 	// H-28: a run of 2025 with a move-in names the heating invoice without Leistungszeitraum beside one with
 	it('GET /statements/run-heating liefert die Felder von statement-run-heating.json', async () => {
 		const apartment = await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '50', rooms: '2' });

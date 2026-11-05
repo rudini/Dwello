@@ -60,7 +60,6 @@ import {
 	tankQuestions,
 	totalCostsOf,
 	previewRowText,
-	vacancyNoteText,
 	skippedContractText,
 	allSkippedText,
 	buildingCardReachingOut,
@@ -680,10 +679,6 @@ Then('nennt die Vorschau bei {string} {string}', async ({ verwalter, names }, te
 
 Then('nennt die Vorschau bei {string} nicht {string}', async ({ verwalter, names }, tenant: string, text: string) => {
 	await verwalter.sees(previewRowText(names.get(tenant)!)).not.toContain(text);
-});
-
-Then('sagt die Vorschau zum Total {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(vacancyNoteText).toBe(text);
 });
 
 Then(

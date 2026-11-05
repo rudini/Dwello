@@ -2,7 +2,7 @@
 // Usage (from any directory): import { open, shot } from '<this file>';
 //   const { page, close } = await open({ viewport: 'mobile' | 'desktop', zoom: 1.5 });
 //   await page.goto('/dashboard'); await shot(page, '/tmp/persona-x/01-start.png'); await close();
-/* global TextEncoder, URL, crypto -- Node 20 globals */
+/* global TextEncoder, URL, crypto, process -- Node 20 globals */
 import { createRequire } from 'module';
 // Resolved from this file, so it works wherever the repo is checked out; import it in place, do not copy it.
 const require = createRequire(new URL('../../../package.json', import.meta.url));
@@ -22,7 +22,8 @@ export async function open({ viewport = 'desktop', zoom = 1, keyboardOnly = fals
 		.setIssuedAt()
 		.setExpirationTime('8h')
 		.sign(new TextEncoder().encode(SECRET));
-	const browser = await chromium.launch();
+	// without a UTF-8 locale Chromium names a download with a non-ASCII name «download» (#496, #1122)
+	const browser = await chromium.launch({ env: { ...process.env, LC_ALL: 'C.UTF-8' } });
 	const context = await browser.newContext({
 		baseURL: BASE,
 		// Browser zoom (e.g. 1.5 = 150 %): the page gets a smaller CSS width, drawn larger
