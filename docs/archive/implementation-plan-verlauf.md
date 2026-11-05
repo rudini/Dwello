@@ -1132,3 +1132,13 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Wizard: `Stepper` takes values (period, buildings, heating profile), shown from md and in the accessible name; step 5 summary in `GenerationStep`; existing texts only. Workflow note: the scenario came after the DOM tests and was seen red with the code taken out
 - [x] Code review round 1 (`docs/reviews/663-review-1.md`): C-1 Blocker (the changed step no longer checked which draft opens) and C-2 Major (values only from xl) fixed with C-3, C-4, C-5, C-7; round 2 (`663-review-2.md`) clean but C-8 (a comment, fixed); C-6 Minor (step 3's value names only the heating profile) stays in its report
 - [x] PR (`Fixes #663`, `Spec change approved: #663`): pushed after this archive
+
+## Session #1119: seedFor names itself when a state gets no records (parallel: checklist in the pull request)
+
+Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language checks; a unit test shows the hint.
+
+- [x] `tests/unit/screens-seed-hint.test.ts` seen red (`withSeedHint is not a function`), then `withSeedHint` in `tests/e2e/fixtures/screens.ts`, applied in `lookAt` (`tests/e2e/tasks/accessibility.ts`)
+- [x] E2E: `invoice-hints` taken out of the list by hand fails with the hint; restored, 6 rows pass (chromium)
+- [x] Code review 1119-review-1: no findings
+- [x] Before marking complete: lint, check, fitness, backend type-check, Prettier on added files
+- [x] Archive the session; PR pushed after this archive
