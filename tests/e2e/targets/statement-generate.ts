@@ -155,3 +155,4 @@ export const previewAllSkipped = (buildingId: string) =>
 export const countsFailedNote = target('Hinweis auf nicht geladene Zählungen', (page) => page.getByTestId('generate-counts-failed'));
 export const buildingCard = (buildingId: string) =>
 	target(`Karte von Gebäude ${buildingId} in der Wahl`, (page) => page.getByTestId(`generate-building-card-${buildingId}`));
+export const recalculateNote = target('Hinweis zu «Neu berechnen» in der Wahl der Gebäude', (page) => page.getByTestId('generate-recalculate-note'));

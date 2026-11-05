@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { errorMessageShown } from '../questions/form';
 import { pageTitle } from '../questions/navigation';
+import { focusedText, shownConfirmations } from '../questions/app-frame';
 import {
 	allocabilityConsequence,
 	allocabilityQuestionText,
@@ -26,7 +27,8 @@ import {
 	allowedChosen,
 	listedCategoriesNamed,
 	notAllowedChosen,
-	proposalText
+	proposalText,
+	roomBesideFocusedCategory
 } from '../questions/categories';
 import {
 	askKi,
@@ -48,7 +50,10 @@ import {
 	saveFormAsNotAllowed,
 	saveWithoutChoice,
 	showAllowedCategories,
-	usePhone
+	usePhone,
+	FOLLOWING_CATEGORY,
+	stayAtCategory,
+	bringCategoryToBottomEdge
 } from '../tasks/categories';
 
 const { Given, When, Then } = createBdd(test);
@@ -432,4 +437,27 @@ When('der Liegenschaftsverwalter die Kategorie als umlagefähig wählt', async (
 
 Then('nennt die Frage der Umlagefähigkeit die Folge {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(allowanceQuestionDescription).toContain(text);
+});
+
+// #1096: a new confirmation replaces the older one
+Then('bestätigt Dwello nur das Löschen der Kategorie {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(shownConfirmations).toEqual([`Kategorie «${names.get(title)}» gelöscht`]);
+});
+
+Given('der Liegenschaftsverwalter ist in der Liste bei der Kategorie {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.attemptsTo(stayAtCategory(names.get(title)!));
+});
+
+// #1096: the focus goes to the next row of the list, not to the page title
+Then('steht der Fokus auf der Kategorie, die in der Liste auf {string} folgte', async ({ verwalter }, _title: string) => {
+	await verwalter.sees(focusedText).toBe(verwalter.recall<string>(FOLLOWING_CATEGORY));
+});
+
+Given('die Kategorie {string} steht am unteren Rand des Fensters', async ({ verwalter, names }, title: string) => {
+	await verwalter.attemptsTo(bringCategoryToBottomEdge(names.get(title)!));
+});
+
+// #1113: the confirmation keeps clear of the whole row, so none of its buttons lies under it
+Then('verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat', async ({ verwalter }) => {
+	await verwalter.sees(roomBesideFocusedCategory).toBeGreaterThanOrEqual(8);
 });

@@ -65,6 +65,7 @@ import {
 	buildingChoiceName,
 	countsFailedText,
 	invoiceCountShown,
+	recalculateNotes,
 } from '../questions/statement-generate';
 import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
@@ -746,4 +747,9 @@ Then('sagt der Assistent zum Vorschlag {string}', async ({ verwalter }, text: st
 // #1089: a select clips its text; the Italian names were cut at 390 px
 Then('zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz', async ({ verwalter }) => {
 	await verwalter.sees(heatingProfileCut).toBe(0);
+});
+
+// #1068: the sentence on «Neu berechnen» stands once in the step, not on each card
+Then('sagt die Wahl der Gebäude einmal {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(recalculateNotes).toEqual([text]);
 });

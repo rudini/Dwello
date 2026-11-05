@@ -999,6 +999,15 @@ Funktionalität: Abrechnungsdetail
     Und nennt die Position "Hauswart" "Hauswart 2024-12-31"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
 
+  # #1096 (Marco P-2 in #1081): nach «Neu berechnen» sprang die Seite ganz nach oben
+  Szenario: Nach dem Neuberechnen bleibt der Liegenschaftsverwalter, wo er war
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und der Liegenschaftsverwalter ist bei den weiteren Aktionen der Abrechnung
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann steht der Fokus wieder auf «Neu berechnen»
+    Und bleibt die Seite an ihrer Stelle, bis die Erfolgsmeldung wieder geht
+
   # #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; «Neu berechnen» wartet darauf
   Szenario: Kein Neuberechnen, solange eine umlagefähige Rechnung keine Kategorie hat
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

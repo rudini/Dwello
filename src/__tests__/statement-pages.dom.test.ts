@@ -22,7 +22,7 @@ vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
 
-import { goto, invalidateAll } from '$app/navigation';
+import { afterNavigate, goto, invalidateAll } from '$app/navigation';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
@@ -1606,6 +1606,19 @@ describe('Abrechnungsdetail', () => {
 		expect(pdf.getAttribute('href')).toBe('/statements/s1/pdf?ansehen');
 		expect(pdf.getAttribute('target')).toBe('_blank');
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+	});
+
+	// #1094 (fallback review): auch die Fehlerseite des PDF aus dem Versand-Dialog führt zur gefilterten Liste
+	it('gibt dem PDF im Versand-Dialog die Liste mit, aus der die Abrechnung geöffnet wurde', () => {
+		vi.mocked(afterNavigate).mockImplementationOnce((run) =>
+			run({ from: { url: new URL('http://localhost/statements?status=draft') } } as never)
+		);
+		detail({ tenantCorrespondenceChannel: 'letter' });
+		click('statement-send-button');
+
+		expect(byTestId('send-pdf-view')!.getAttribute('href')).toBe(
+			'/statements/s1/pdf?ansehen&list=%2Fstatements%3Fstatus%3Ddraft'
+		);
 	});
 
 	// #86: wünscht der Mieter E-Mail, sendet Dwello das PDF selbst

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { Snippet } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import { dialogSubmit } from '$lib/ui/dialog-submit';
@@ -31,7 +30,7 @@
 		ondone?: () => void; // the action led to another page
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
-		success?: string; // said after the action succeeded; the focus then goes to the new status
+		success?: string; // said after the action succeeded; the focus then goes to the new status, before $lib/focus-after-action.ts would (#1096)
 		describedby?: string; // the ids of the sentences that describe the dialog, when its first paragraph is not enough
 		children: Snippet;
 	} = $props();

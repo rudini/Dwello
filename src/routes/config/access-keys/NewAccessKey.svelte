@@ -17,7 +17,8 @@
 	<p class="font-semibold text-ink" data-testid="access-key-new-hint">{m.ai_keys_created_hint()}</p>
 	<p class="text-ink" data-testid="access-key-new-secret">{m.ai_keys_created_secret()}</p>
 	<p class="break-all text-ink">{m.ai_keys_address({ url })}</p>
-	<div class="flex flex-wrap gap-4">
+	<!-- one group: a confirmation keeps clear of all its buttons (#1113) -->
+	<div class="flex flex-wrap gap-4" data-focus-row data-testid="access-key-new-actions">
 		<CopyButton
 			text={key}
 			label={m.ai_keys_copy()}

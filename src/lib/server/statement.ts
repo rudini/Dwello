@@ -269,8 +269,11 @@ export function pdfRefusal(request: Request, body: unknown, kind?: 'view') {
 	const from = URL.canParse(referer) ? new URL(referer) : null;
 	const own = from?.origin === new URL(request.url).origin;
 	const list = listOfGone[code ?? ''];
+	// the list the page was opened from, as it was filtered (#1094); the error page checks it is Dwello's
+	const filtered = new URL(request.url).searchParams.get('list');
 	if (from && own && (!list || from.pathname === list))
 		refused.set('back', `${from.pathname}${from.search}`);
+	else if (list && filtered?.startsWith(`${list}?`)) refused.set('back', filtered);
 	return new Response(null, {
 		status: 303,
 		headers: { location: `/documents/refused?${refused}` }

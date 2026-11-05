@@ -1,9 +1,11 @@
 import { question } from '../screenplay/actor';
+import { roomBesideConfirmation } from './app-frame';
 import { Count, Text, Visibility } from '../screenplay/questions';
 import { MCP_ANSWER } from '../tasks/access-keys';
 import { successToast } from '../targets/form';
 import {
 	accessKeyRows,
+	newAccessKeyActions,
 	createAccessKeyRefusal,
 	lastSuccessToast,
 	newAccessKey,
@@ -31,3 +33,5 @@ export const newAccessKeyWarning = Text.of(newAccessKeySecret);
 export const createRefusal = Text.of(createAccessKeyRefusal);
 export const doneMessage = Text.of(successToast);
 export const lastConfirmation = Text.of(lastSuccessToast);
+/** #1113: the room between the buttons of a new access key and the confirmation (negative: it covers one) */
+export const roomBesideNewAccessKeyActions = roomBesideConfirmation(newAccessKeyActions);
