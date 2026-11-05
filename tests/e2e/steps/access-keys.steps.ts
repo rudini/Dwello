@@ -158,6 +158,6 @@ Then(
 );
 
 // #1113: the confirmation keeps clear of all buttons of the new key, not only of the one just used
-Then('verdeckt die Erfolgsmeldung keinen Knopf beim neuen Zugangsschlüssel', async ({ verwalter }) => {
+Then('verdeckt die Erfolgsmeldung nichts, was zum neuen Zugangsschlüssel gehört', async ({ verwalter }) => {
 	await verwalter.sees(roomBesideNewAccessKeyActions).toBeGreaterThanOrEqual(8);
 });
