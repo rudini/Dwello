@@ -429,9 +429,11 @@ describe('Prüfungen im Mietvertrag', () => {
 		const description = (testid: string) =>
 			(byTestId(testid)!.getAttribute('aria-describedby') ?? '')
 				.split(' ')
-				.map((id) => document.getElementById(id)?.textContent ?? '')
+				.map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
 				.join(' ');
-		const hint = 'Dwello konnte die Mietverträge dieser Wohnung nicht laden.';
+		// the title too: it says what matters most (fach-reviewer b665 V-1)
+		const hint =
+			'Überschneidung noch nicht geprüft Dwello konnte die Mietverträge dieser Wohnung nicht laden.';
 		await toPeriod('a3');
 		expect(description('start-date-input')).toContain(hint);
 		click('wizard-back');

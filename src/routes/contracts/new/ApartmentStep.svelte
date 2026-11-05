@@ -40,7 +40,9 @@
 		bind:value={apartmentId}
 		placeholder={m.contracts_choose_apartment()}
 		{error}
-		describedby={unknown ? 'apartment-contracts-unknown-text' : undefined}
+		describedby={unknown
+			? 'apartment-contracts-unknown-title apartment-contracts-unknown-text'
+			: undefined}
 		testid="apartment-select"
 	/>
 {/if}

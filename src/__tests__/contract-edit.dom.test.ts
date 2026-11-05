@@ -517,8 +517,9 @@ describe('Mietvertrag bearbeiten', () => {
 		fakeBff(() => [500, {}]);
 		await open();
 		const ids = (byTestId('start-date-input')!.getAttribute('aria-describedby') ?? '').split(' ');
-		expect(ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ')).toContain(
-			'Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
+		// the title too: it says what matters most (fach-reviewer b665 V-1)
+		expect(ids.map((id) => document.getElementById(id)?.textContent?.trim() ?? '').join(' ')).toContain(
+			'Überschneidung noch nicht geprüft Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
 		);
 	});
 

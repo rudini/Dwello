@@ -16,7 +16,7 @@
 
 	// The apartment's contracts could not be loaded (#143): with `onretry` the hint loads them again, the
 	// input stays (#151); without it, it points to the hint at the apartment, so a page has one such button;
-	// its text describes the field it is about (`{testid}-text`, #665)
+	// its title and text describe the field it is about (`{testid}-title {testid}-text`, #665)
 	let { onretry, testid }: { onretry?: () => void; testid: string } = $props();
 </script>
 
@@ -29,6 +29,7 @@
 <Alert
 	tone="caution"
 	title={m.contracts_apartment_contracts_unknown()}
+	titleId="{testid}-title"
 	action={onretry ? retry : undefined}
 	{testid}
 >
