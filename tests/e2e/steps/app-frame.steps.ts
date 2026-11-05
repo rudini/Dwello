@@ -343,7 +343,7 @@ Then('verdeckt die Erfolgsmeldung nicht, was den Fokus hat', async ({ verwalter 
 	await verwalter.sees(roomAroundConfirmation).toBeGreaterThanOrEqual(8);
 });
 
-// #1096: no scrolling when it shows, no shift when it leaves
+// #1096: no scrolling when it shows, no shift when it leaves; #1118: Firefox rounds a subpixel shift to 1 px
 Then('bleibt die Seite an ihrer Stelle, bis die Erfolgsmeldung wieder geht', async ({ verwalter }) => {
-	await verwalter.sees(pageMovedUntilConfirmationLeft, { timeout: 20_000 }).toBe(0);
+	await verwalter.sees(pageMovedUntilConfirmationLeft, { timeout: 20_000 }).toBeLessThanOrEqual(1);
 });
