@@ -7,7 +7,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
-	import { focusRowLinkingTo } from '$lib/focus-after-action';
+	import { focusSavedRow } from '$lib/focus-after-action';
 
 	// Form of a master data record: the reason it was not saved on top, cancel and save at the bottom;
 	// once saved, a message names the kind of record (`record`) and the name the user gave it
@@ -56,8 +56,8 @@
 			const formPage = location.pathname;
 			if (result.type === 'redirect') addToast('success', text.saved({ name }));
 			await update({ reset: false });
-			// #1124: back on the list, the saved record's row has the focus, which the confirmation keeps clear of
-			if (result.type === 'redirect') focusRowLinkingTo(formPage);
+			// #1124, #1128: back on the list, the saved record's row has the focus, which the confirmation keeps clear of
+			if (result.type === 'redirect') focusSavedRow(formPage, name);
 			if (check) checking = false;
 			else saving = false;
 			await focusFirstError(formElement);

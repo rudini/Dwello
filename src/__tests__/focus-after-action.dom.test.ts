@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { focusRowLinkingTo, noteFocus, refocus } from '$lib/focus-after-action';
+import { focusSavedRow, noteFocus, refocus } from '$lib/focus-after-action';
 
 // #1096: the focus after an action that removed its control
 describe('Fokus nach einer Aktion', () => {
@@ -105,9 +105,16 @@ describe('Fokus nach einer Aktion', () => {
 	it('setzt den Fokus nach dem Speichern auf die Zeile des gespeicherten Eintrags in der Liste', () => {
 		document.body.insertAdjacentHTML('afterbegin', '<a href="/b">Zurück zu Beleuchtung</a>');
 
-		focusRowLinkingTo('/b');
+		focusSavedRow('/b', 'Abwasser');
 
 		expect(document.activeElement!.textContent).toBe('Beleuchtung');
+	});
+
+	// #1128: a new record's form links nowhere yet; its row is the one named as it was entered
+	it('setzt den Fokus nach dem Erfassen auf die Zeile, die den neuen Namen trägt', () => {
+		focusSavedRow('/neu', ' Beleuchtung ');
+
+		expect(document.activeElement!.getAttribute('href')).toBe('/b');
 	});
 
 	it('setzt den Fokus nach einer neuen Seite auf den Seitentitel', () => {
