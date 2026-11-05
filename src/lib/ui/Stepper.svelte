@@ -4,11 +4,18 @@
 	import ProgressBar from './ProgressBar.svelte';
 
 	// Steps of a wizard (current counts from 1); finished steps lead back, later ones wait
+	// a finished step names what was chosen in it (#663), e.g. the period
 	let {
 		steps,
 		current,
-		onselect
-	}: { steps: string[]; current: number; onselect: (step: number) => void } = $props();
+		onselect,
+		values = []
+	}: {
+		steps: string[];
+		current: number;
+		onselect: (step: number) => void;
+		values?: (string | undefined)[];
+	} = $props();
 </script>
 
 <nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
@@ -20,7 +27,8 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Up to xl only the numbers: five names do not fit next to the sidebar (the current one is named above).
+	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above);
+	     a finished step shows its value at every width the list shows (#663).
 	     min-w-0 and hyphenation keep long names inside their step instead of widening the page -->
 	<ol class="hidden gap-2 md:flex">
 		{#each steps as step, i (i)}
@@ -38,10 +46,17 @@
 						>
 							<Icon name="check" />
 						</span>
-						<span
-							data-testid="wizard-step-label"
-							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
-						><span class="sr-only">{m.ui_step_done()}</span>
+						<span class="flex min-w-0 flex-col text-left">
+							<span
+								data-testid="wizard-step-label"
+								class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
+							><span
+								data-testid="wizard-step-value"
+								class="min-w-0 break-words font-normal text-ink-muted"
+							>
+								{values[i] ?? ''}</span
+							>
+						</span><span class="sr-only"> {m.ui_step_done()}</span>
 					</button>
 				{:else}
 					<span

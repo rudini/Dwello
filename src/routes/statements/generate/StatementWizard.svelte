@@ -19,6 +19,7 @@
 	import Stepper from '$lib/ui/Stepper.svelte';
 	import WizardNav from '$lib/ui/WizardNav.svelte';
 	import { formatDate } from '$lib/utils/format';
+	import { localName } from '$lib/names';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
 	import LateChecks from './LateChecks.svelte';
 	import PresetNotice from './PresetNotice.svelte';
@@ -109,6 +110,17 @@
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
 	);
+	// what each finished step chose, shown with it and summed up before creating (#663)
+	const buildingNames = $derived(
+		data.buildings
+			.filter((b) => selection.buildingIds.includes(b.id))
+			.map((b) => b.name)
+			.join(', ')
+	);
+	const profileName = $derived.by(() => {
+		const profile = data.heatingProfiles.find((p) => p.id === selection.heatingProfileId);
+		return profile && localName(profile);
+	});
 
 	onMount(() => {
 		if (form || chosen) return; // coming back from the server, or a link chose for this visit
@@ -268,7 +280,12 @@
 	<!-- read out while the server works: the busy button itself cannot keep the focus -->
 	<p role="status" class="sr-only" data-testid="wizard-status">{statusText}</p>
 
-	<Stepper steps={statementSteps} current={step} onselect={goTo} />
+	<Stepper
+		steps={statementSteps}
+		current={step}
+		onselect={goTo}
+		values={[periodLabel, buildingNames, profileName]}
+	/>
 
 	<section
 		bind:this={section}
@@ -312,6 +329,8 @@
 			{previewRows}
 			{invoices}
 			{periodLabel}
+			{buildingNames}
+			{profileName}
 			created={form?.created ?? null}
 		/>
 	</section>

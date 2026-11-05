@@ -1123,3 +1123,12 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Fallback review on #1131 (Medium, = C-2) fixed with a test; closing round 3 (`docs/reviews/1128-review-3.md`), C-3 (Minor) stays in the report
 - [x] Personas Helga and Sven (`docs/design/personas/helga-1128.md`, `sven-1128.md`): no findings
 - [x] Workflow 9: PR pushed after this archive
+
+## Session 2026-11-05: #663 refused draft in a new tab; the wizard names its run
+
+- [x] Persona re-run on main (Helga, Anna, Sven 663, `docs/design/personas/*-663.md`): findings 1 («Schlussabrechnung» without year), 2 (yellow message read as part of the notice) and 5 («… trotzdem erstellen») are gone; 3 (refused draft link loses the entries) and 4 (wizard steps are bare check marks, step 5 names nothing) hold
+- [x] Decided in #663 (product owner): the link opens the draft in a new tab and says so, the scenario «Abgelehnter Entwurf ist verlinkt» changes with it; finished steps show their value, step 5 sums up the run
+- [x] New tab: `RefusedStatements` with `target="_blank"` and the existing `ui_opens_new_tab`; changed scenario red first; Helga's re-check: P-1 fixed
+- [x] Wizard: `Stepper` takes values (period, buildings, heating profile), shown from md and in the accessible name; step 5 summary in `GenerationStep`; existing texts only. Workflow note: the scenario came after the DOM tests and was seen red with the code taken out
+- [x] Code review round 1 (`docs/reviews/663-review-1.md`): C-1 Blocker (the changed step no longer checked which draft opens) and C-2 Major (values only from xl) fixed with C-3, C-4, C-5, C-7; round 2 (`663-review-2.md`) clean but C-8 (a comment, fixed); C-6 Minor (step 3's value names only the heating profile) stays in its report
+- [x] PR (`Fixes #663`, `Spec change approved: #663`): pushed after this archive

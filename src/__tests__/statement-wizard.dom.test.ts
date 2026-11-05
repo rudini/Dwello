@@ -607,6 +607,22 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('generate-warning')!.textContent).toContain('ohne Rechnungen');
 	});
 
+	// #663 (Decided): before «Entwürfe erstellen» the run says what it bills
+	it('fasst vor dem Erstellen Periode, Gebäude, Heizprofil und Verwaltungspauschale zusammen', async () => {
+		const form = { preview, invoices: [invoices[0]] };
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b2'], defaultHeatingProfileId: 'hp1' },
+			form
+		} as never);
+		next();
+		await settle();
+		const summary = byTestId('run-summary')!.textContent!.replace(/\s+/g, ' ');
+		expect(summary).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
+		expect(summary).toContain('Gebäude Lindenhof');
+		expect(summary).toContain('Heizprofil Gleichmässig');
+		expect(summary).toContain('Verwaltungspauschale 3 % der eigenen Nebenkosten');
+	});
+
 	it('sagt vor dem Erstellen, dass nur Entwürfe entstehen und nichts verschickt wird', async () => {
 		open({ preview, invoices: [invoices[0]] });
 		next();

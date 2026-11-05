@@ -28,6 +28,8 @@ import {
 	dialogErrorCount,
 	mistakeConfirmed,
 	endDateHelp,
+	openedInNewTab,
+	openedPath,
 	noticeReceivedHelp,
 	focusedEndDialogField
 } from '../questions/contract-detail';
@@ -227,6 +229,14 @@ Then('gilt der neue Mietvertrag für die Wohnung {string}', async ({ verwalter, 
 When('der Liegenschaftsverwalter den genannten Entwurf öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openRefusedStatement);
 });
+
+Then(
+	'öffnet sich die Abrechnung {int} von {string} in einem neuen Tab',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(openedInNewTab).toBe(true);
+		await verwalter.sees(openedPath).toBe(statementPath(seed, tenant, year));
+	}
+);
 
 When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(deleteDraftAndEndContract);

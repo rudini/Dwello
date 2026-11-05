@@ -26,8 +26,15 @@
 		<ul class="flex flex-col gap-2">
 			{#each statements as statement (statement.id)}
 				<li>
-					<a href="/statements/{statement.id}" class={link} data-testid="refused-statement-link"
-						>{m.contracts_refused_open({ number: statement.statementNumber })}</a
+					<!-- in a new tab, so the dialog keeps what was typed (#663) -->
+					<a
+						href="/statements/{statement.id}"
+						target="_blank"
+						rel="noopener noreferrer"
+						class={link}
+						data-testid="refused-statement-link"
+						>{m.contracts_refused_open({ number: statement.statementNumber })}
+						{m.ui_opens_new_tab()}</a
 					>
 				</li>
 			{/each}

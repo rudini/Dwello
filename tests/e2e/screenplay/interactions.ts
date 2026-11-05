@@ -163,8 +163,9 @@ export const OpenInNewTab = (target: Target): Activity => async (actor) => {
 		}, href);
 		return actor.remember(OPENED, { newTab, disposition: `inline; type=${type}`, content: Buffer.from(bytes) });
 	}
-	const response = await page.context().request.get(new URL(href, page.url()).toString());
-	actor.remember(OPENED, { newTab, disposition: response.headers()['content-disposition'] ?? '', content: await response.body() });
+	const url = new URL(href, page.url()).toString();
+	const response = await page.context().request.get(url);
+	actor.remember(OPENED, { newTab, url, disposition: response.headers()['content-disposition'] ?? '', content: await response.body() });
 };
 export const OPENED = 'opened';
 

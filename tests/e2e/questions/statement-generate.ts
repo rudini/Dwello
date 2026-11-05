@@ -51,9 +51,10 @@ import {
 	previewAllSkipped,
 	tankQuestion,
 	wizardChoices,
-	wizardPresetNotice
+	wizardPresetNotice,
+	runSummary
 } from '../targets/statement-generate';
-import { discardDraftMessage, nextButton } from '../targets/wizard';
+import { discardDraftMessage, finishedStep, nextButton } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
 import { amountAfter, signedFrancs } from './amounts';
 
@@ -202,3 +203,7 @@ export const buildingChoiceDescription = (buildingId: string) => Accessible.desc
 export const buildingCardReachingOut = (buildingId: string) => ReachingOut.of(buildingCard(buildingId));
 // #1068: said once in the step, not on each card
 export const recalculateNotes = Text.ofAll(recalculateNote);
+
+// #663: the summary before creating, and what a finished step says it chose
+export const runSummaryText = Text.of(runSummary);
+export const finishedStepText = (label: string) => Text.of(finishedStep(label));

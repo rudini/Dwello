@@ -34,6 +34,23 @@ describe('Schrittanzeige', () => {
 		expect(items[0].querySelector('[data-testid="wizard-step"]')).not.toBeNull();
 	});
 
+	// #663 (Decided): a finished step says what was chosen in it, not only a check mark
+	it('nennt bei erledigten Schritten, was darin gewählt ist', () => {
+		show(Stepper, {
+			steps,
+			current: 3,
+			onselect: vi.fn(),
+			values: ['01.01.2025 – 31.12.2025', 'Alpenblick']
+		});
+		const done = [...document.querySelectorAll<HTMLElement>('[data-testid="wizard-step"]')];
+		expect(done.map((button) => button.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
+			expect.stringContaining('01.01.2025 – 31.12.2025'),
+			expect.stringContaining('Alpenblick')
+		]);
+		// on screen at every width the steps show, not only from xl like their names (code review 663-1 C-2)
+		expect(byTestId('wizard-step-value')!.className.split(/\s+/)).not.toContain('sr-only');
+	});
+
 	it('zeigt die Namen der Schritte erst ab breiten Fenstern, Screenreadern immer', () => {
 		show(Stepper, { steps, current: 3, onselect: vi.fn() });
 		const labels = [...document.querySelectorAll('[data-testid="wizard-step-label"]')];

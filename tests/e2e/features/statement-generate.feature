@@ -880,3 +880,10 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sagt die Warnung zu den Zählern "Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen."
     Und sagt die Hilfe zum Heizprofil nur "Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
     Und scrollt die Seite nicht seitwärts
+
+  # #663 (Decided): vor dem Erstellen sagt der Assistent, was er abrechnet, und erledigte Schritte nennen ihre Wahl
+  Szenario: Vor dem Erstellen nennt der Assistent, was er abrechnet
+    Angenommen der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" und 3 % Verwaltungspauschale öffnet
+    Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann fasst der Assistent vor dem Erstellen "01.01.2024 – 31.12.2024", "Lindenhof" und "Heizung Mittelland" zusammen
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"

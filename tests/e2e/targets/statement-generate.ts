@@ -158,3 +158,6 @@ export const countsFailedNote = target('Hinweis auf nicht geladene Zählungen', 
 export const buildingCard = (buildingId: string) =>
 	target(`Karte von Gebäude ${buildingId} in der Wahl`, (page) => page.getByTestId(`generate-building-card-${buildingId}`));
 export const recalculateNote = target('Hinweis zu «Neu berechnen» in der Wahl der Gebäude', (page) => page.getByTestId('generate-recalculate-note'));
+
+// #663: what the run bills, summed up before creating
+export const runSummary = target('Zusammenfassung vor dem Erstellen', (page) => page.getByTestId('run-summary'));
