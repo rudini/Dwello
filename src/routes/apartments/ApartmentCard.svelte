@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { floorLabel, roomsLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
+	import {
+		floorLabel,
+		moveOutText,
+		roomsLabel,
+		statusText,
+		statusIcons,
+		statusTones
+	} from '$lib/apartment';
 	import type { ApartmentListItem } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -38,6 +45,10 @@
 			testid="apartment-status"
 		/>
 	</div>
+	<!-- #664: the move-out until its Schlussabrechnung exists; the card's one link stays the apartment -->
+	{#if apartment.moveOut}
+		<p class="text-ink" data-testid="apartment-move-out">{moveOutText(apartment.moveOut)}</p>
+	{/if}
 	<p class="flex min-w-0 items-center gap-2 break-words text-ink-muted">
 		<Icon name="building" /><span class="min-w-0">{apartment.buildingName}</span>
 	</p>

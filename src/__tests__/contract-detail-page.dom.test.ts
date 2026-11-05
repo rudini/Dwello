@@ -170,12 +170,13 @@ describe('Mietvertragsdetail', () => {
 		await settle();
 		const link = byTestId('refused-statement-link')!;
 		expect(link.getAttribute('href')).toBe('/statements/s1');
-		expect(link.textContent).toContain('NK-2025-0003');
+		// #664 (Persona Sven M3): the draft by tenant and period, not by its number only
+		expect(link.textContent).toContain('Entwurf für Anna Keller, 2025 öffnen');
 		// #663 (Decided): in a new tab, so the dialog keeps what was typed; the link says so
 		expect(link.getAttribute('target')).toBe('_blank');
 		expect(link.textContent).toContain('(öffnet in neuem Tab)');
 		expect(text('refused-statements')).toContain(
-			'Der Entwurf NK-2025-0003 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
+			'Der Entwurf für Anna Keller, 2025 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
 		);
 		const form = document.querySelector<HTMLFormElement>('form[action="?/endDeletingDraft"]')!;
 		const value = (name: string) => form.querySelector<HTMLInputElement>(`[name="${name}"]`)!.value;
@@ -256,8 +257,16 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('form-error')).toBeNull();
 	});
 
+	// #664 (Persona Helga M1): «Beenden» neben «Löschen» klang wie «sofort beenden»; die Aktion öffnet nur das Feld
+	it('nennt die Aktion «Enddatum erfassen» und öffnet damit das Feld Vertragsende', () => {
+		open();
+		expect(byTestId('contract-end-button')!.textContent!.trim()).toBe('Enddatum erfassen');
+		click('contract-end-button');
+		expect(byTestId('contract-end-date-input')).not.toBeNull();
+	});
+
 	// F-23 (#155), Fachreview W10 M-1: beim Tod des Mieters endet der Mietvertrag nicht
-	it('sagt im Dialog «Beenden», dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
+	it('sagt im Dialog zum Vertragsende, dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
 		open();
 		click('contract-end-button');
 		// Fachreview W10-2 M-1: die Kündigung der Erben wird hier erfasst (Art. 266i OR)
@@ -886,7 +895,7 @@ describe('Mietvertrag löschen', () => {
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
 		expect(dialog).toContain('Der Mietvertrag von Anna Keller hat am 01.04.2024 begonnen.');
 		expect(dialog).toContain(
-			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Zieht der Mieter aus, wählen Sie «Beenden».'
+			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Zieht der Mieter aus, wählen Sie «Enddatum erfassen».'
 		);
 		expect(dialog).toContain('Nach dem Löschen erinnert Dwello nicht mehr daran.');
 		expect(byTestId('contract-delete-mistake-confirm-help')!.textContent).toContain('Leerstand');
@@ -935,8 +944,8 @@ describe('Mietvertrag löschen', () => {
 		);
 	});
 
-	// Fachreview V-11: mit Vertragsende gibt es kein «Beenden»
-	it('nennt bei einem Mietvertrag mit Vertragsende das Ende statt «Beenden»', () => {
+	// Fachreview V-11: mit Vertragsende gibt es kein «Enddatum erfassen»
+	it('nennt bei einem Mietvertrag mit Vertragsende das Ende statt «Enddatum erfassen»', () => {
 		open('2018-01-01', '2021-12-31');
 		click('contract-delete-button');
 
@@ -944,7 +953,7 @@ describe('Mietvertrag löschen', () => {
 		expect(dialog).toContain(
 			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Sein Vertragsende ist der 31.12.2021, danach bleibt er als Historie der Wohnung erhalten.'
 		);
-		expect(dialog).not.toContain('«Beenden»');
+		expect(dialog).not.toContain('«Enddatum erfassen»');
 	});
 
 	// Review C-1: konnten die Abrechnungen nicht geladen werden, behauptet der Dialog keine
@@ -965,6 +974,50 @@ describe('Mietvertrag löschen', () => {
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
 			'Zu diesem Mietvertrag gibt es in Dwello keine Nebenkostenabrechnung.'
 		);
+	});
+});
+
+// #664 (Persona Helga M4): from the Vertragsende until the Schlussabrechnung exists
+describe('Auszug am Mietvertrag', () => {
+	const moveOut = (due: boolean, href: string | null) => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				moveOut: {
+					endDate: '2025-06-30',
+					tenantName: 'Anna Keller',
+					period: { start: '2025-01-01', end: '2025-12-31' },
+					due,
+					outside: false,
+					href
+				},
+				contract: { ...contract('2021-08-01', '2025-06-30', true), status: 'ended' },
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+	};
+
+	it('nennt den Auszug und wann die Schlussabrechnung kommt', () => {
+		moveOut(false, null);
+		expect(text('contract-move-out')).toBe(
+			'Auszug von Anna Keller am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
+		);
+		expect(byTestId('contract-move-out-link')).toBeNull();
+	});
+
+	it('führt zur fälligen Schlussabrechnung', () => {
+		const href = '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31';
+		moveOut(true, href);
+		expect(text('contract-move-out')).toContain(
+			'Auszug von Anna Keller am 30.06.2025, Schlussabrechnung fällig'
+		);
+		const link = byTestId('contract-move-out-link')!;
+		expect(link.getAttribute('href')).toBe(href);
+		expect(link.textContent!.trim()).toBe('Schlussabrechnung erstellen');
 	});
 });
 

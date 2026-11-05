@@ -4,7 +4,7 @@
  */
 
 import type { Apartment, RentalContract, Tenant } from '../db/schema';
-import type { ApartmentStatus } from './apartment';
+import type { ApartmentStatus, MoveOut } from './apartment';
 import type { BuildingAddress } from './building';
 
 /** The Vertragsstatus, by the Swiss day (#784, #815) */
@@ -38,4 +38,5 @@ export interface ContractResponse extends ContractDetails {
 	nextSteps: { successor: boolean; ended: boolean } | null; // A-4, A-5
 	fixedTermCheck: boolean; // A-6
 	endsToday: boolean; // #815
+	moveOut: MoveOut | null; // #664
 }

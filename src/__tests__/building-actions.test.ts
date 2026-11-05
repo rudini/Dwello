@@ -12,6 +12,8 @@ import {
 import backendBuilding from '../../tests/contracts/building.json';
 import buildingList from '../../tests/contracts/buildings.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
+import apartmentList from '../../tests/contracts/apartments.json';
+import moveOuts from '../../tests/contracts/apartment-move-outs.json';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import fieldsRefused from '../../tests/contracts/building-fields-refused.json';
 import { load as listLoad } from '../routes/buildings/+page.server';
@@ -246,6 +248,21 @@ describe('Gebäudedetail', () => {
 			occupiedCount: 1,
 			vacantCount: 1
 		});
+	});
+
+	// #664: the move-out of the building's apartments, from its own route (P2)
+	it('gibt den Auszug bis zur Schlussabrechnung weiter', async () => {
+		const asked: string[] = [];
+		const fetch = (async (url: string) => {
+			asked.push(url);
+			if (url.includes('/apartments/move-outs')) return Response.json(moveOuts);
+			return Response.json(url.includes('/apartments') ? apartmentList : backendBuilding);
+		}) as typeof globalThis.fetch;
+
+		const data = (await detailLoad({ params: { id: 'b1' }, fetch } as never)) as BuildingDetailsData;
+
+		expect(asked).toContain('http://localhost:3001/api/v1/apartments/move-outs?buildingId=b1');
+		expect(data.apartments[0].moveOut).toEqual(moveOuts.moveOuts[0].moveOut);
 	});
 
 	it('zählt künftig vermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {

@@ -3,7 +3,7 @@
  * ended period, the ended periods since a day, and the parts of them a contract has no statement for
  */
 import { describe, expect, it } from 'bun:test';
-import { endedPeriodsSince, otherPeriod, overlapped, lastCompletedPeriod, missingPeriods } from '../services/accounting-period';
+import { endedPeriodsSince, otherPeriod, overlapped, lastCompletedPeriod, missingPeriods, moveOut } from '../services/accounting-period';
 
 // #211, #1088: one rule for dashboard, contract list, contract page and step 2 of the wizard: each ended whole period
 // of the building's Abrechnungsperiode in which the contract has rent days and no statement of its own; a statement
@@ -105,5 +105,49 @@ describe('Lauf, der eine ältere Abrechnung des Gebäudes schneidet', () => {
 	it('nennt keine Periode, die der Lauf nicht schneidet oder die ihm gleicht', () => {
 		expect(overlapped({ start: '2024-01-01', end: '2024-12-31' }, [older])).toEqual([]);
 		expect(overlapped({ start: '2022-07-01', end: '2023-06-30' }, [older])).toEqual([]);
+	});
+});
+
+// #664: from the Vertragsende until the end of the Abrechnungsperiode it falls in, the period of the Schlussabrechnung;
+// after it as long as that period is one of the contract's missing statements (only ended periods count as missing)
+describe('Auszug bis zur Schlussabrechnung', () => {
+	const ended = (endDate: string, billedUntil: string | null = null) => ({ startDate: '2021-08-01', endDate, billedUntil });
+
+	it('nennt ab dem Vertragsende das Ende der Abrechnungsperiode, in die es fällt', () => {
+		expect(moveOut('calendar', ended('2026-06-30'), [], '2026-06-30')).toEqual({
+			endDate: '2026-06-30',
+			period: { start: '2026-01-01', end: '2026-12-31' },
+			due: false
+		});
+	});
+
+	it('nennt vor dem Vertragsende keinen Auszug', () => {
+		expect(moveOut('calendar', ended('2026-06-30'), [], '2026-06-29')).toBeNull();
+	});
+
+	it('nennt die Schlussabrechnung nach dem Ende ihrer Abrechnungsperiode fällig, solange sie fehlt', () => {
+		expect(moveOut('calendar', ended('2025-06-30'), [], '2026-11-05')).toEqual({
+			endDate: '2025-06-30',
+			period: { start: '2025-01-01', end: '2025-12-31' },
+			due: true
+		});
+	});
+
+	// a draft counts as the statement, as in «Abrechnung fehlt»; a replaced one does not (#120)
+	it('nennt keinen Auszug mehr, sobald die Schlussabrechnung erstellt ist', () => {
+		const draft = { periodStart: '2025-01-01', periodEnd: '2025-12-31', status: 'draft' };
+		expect(moveOut('calendar', ended('2025-06-30'), [draft], '2026-11-05')).toBeNull();
+	});
+
+	// Fachreview 664-1 V-4: the building's own Abrechnungsperiode
+	it('folgt der Abrechnungsperiode des Gebäudes', () => {
+		expect(moveOut('july-june', ended('2026-06-30'), [], '2026-06-30')?.period).toEqual({ start: '2025-07-01', end: '2026-06-30' });
+		expect(moveOut('july-june', ended('2026-07-01'), [], '2026-11-05')?.period).toEqual({ start: '2026-07-01', end: '2027-06-30' });
+	});
+
+	// Fachreview 664-1 V-4: «Abgerechnet bis» covers the period: billed outside Dwello, nothing is open (#133)
+	it('nennt keinen Auszug, wenn «Abgerechnet bis» die Abrechnungsperiode abdeckt', () => {
+		expect(moveOut('calendar', ended('2026-06-30', '2026-06-30'), [], '2026-07-01')).toBeNull();
+		expect(moveOut('calendar', ended('2025-06-30', '2025-06-30'), [], '2026-11-05')).toBeNull();
 	});
 });

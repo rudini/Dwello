@@ -1133,6 +1133,21 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Code review round 1 (`docs/reviews/663-review-1.md`): C-1 Blocker (the changed step no longer checked which draft opens) and C-2 Major (values only from xl) fixed with C-3, C-4, C-5, C-7; round 2 (`663-review-2.md`) clean but C-8 (a comment, fixed); C-6 Minor (step 3's value names only the heating profile) stays in its report
 - [x] PR (`Fixes #663`, `Spec change approved: #663`): pushed after this archive
 
+## Session 2026-11-05: #664 usability pass (contract «Beenden», move-out hint, wizard announcement, refusal naming)
+
+- [x] Start: issue read, «Decided (product owner)» items 1–4 are the requirement; persona reports `helga-664.md`, `sven-664.md` committed
+- [x] Step 1: `@wip` scenarios (contract-detail, apartments, statement-generate), steps red at the missing behaviour; the two «nicht mehr» scenarios pin the end of the hint
+- [x] Step 1: `fach-reviewer` of the `@wip` scenarios and proposed texts before implementing (items 1, 2, 4): `docs/reviews/664-1-fachreview-1.md`
+- [x] Slice 1: «Beenden» becomes «Enddatum erfassen» (`contracts_end_action`), texts quoting it follow
+- [x] Slice 2: move-out hint in the apartment lists and on the ended contract (backend `moveOut`, timing as the missing-statement rule; none while `fixedTermCheck` holds, M-1; list rows without a link: the row is the apartment's link; new a11y screen `contract-final-due-detail`)
+- [x] Slice 3: wizard result in the live region, focus on a heading that names the result
+- [x] Slice 4: refused draft named by tenant and period (`RefusedStatements`)
+- [x] Code review round 1 of slices 1–4 (`code-reviewer`, handed to the coordinator): `docs/reviews/664-review-1.md`
+- [x] Workflow note: a worker without the Agent tool waits for each hand-over; the step-1 gate let slice 3 (a11y only, no domain text) go ahead meanwhile
+- [x] Feature review: personas Helga and Sven (`persona-stack.sh`): `docs/design/personas/helga-664-2.md`, `sven-664-2.md`; fixes of code review C-1..C-5 and Helga P-2 in 62614c7
+- [x] Closing code-review round (`code-reviewer`): `docs/reviews/664-review-2.md`; C-6 fixed (fixture), C-7 stays in the report
+- [x] Checks: lint, check, backend type-check, full vitest, full backend suite, affected E2E and axe/language rows, fallow audit, Prettier on added files; workflow notes `docs/reviews/workflow-notes-issue-664.md`
+- [x] PR (`Fixes #664`, `Spec change approved: #664`): pushed by the coordinating session after this archive
 ## Session #1119: seedFor names itself when a state gets no records (parallel: checklist in the pull request)
 
 Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language checks; a unit test shows the hint.

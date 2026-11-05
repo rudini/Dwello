@@ -70,7 +70,7 @@
 			<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 				<p>{error}</p>
 			</Alert>
-			<RefusedStatements statements={refused}>
+			<RefusedStatements statements={refused} tenant={name}>
 				{#snippet action(draft, consequence)}
 					<form
 						method="POST"

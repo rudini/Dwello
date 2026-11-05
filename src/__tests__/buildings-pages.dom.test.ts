@@ -198,6 +198,23 @@ describe('Gebäudedetail', () => {
 		expect(floors).toEqual(['EG', '1. OG', '2. OG', '10. OG']);
 	});
 
+	// #664 (Persona Helga M4, review K-4): the move-out until the Schlussabrechnung exists, in the row's one link
+	it('nennt den Auszug bis zur Schlussabrechnung in der Zeile', () => {
+		const moveOut = {
+			endDate: '2026-06-30',
+			tenantName: 'Kevin Fischer',
+			period: { start: '2026-01-01', end: '2026-12-31' },
+			due: false,
+			outside: false
+		};
+		detail([{ ...flat('a1', '1.01', 1, 'occupied'), moveOut }] as never);
+		const row = byTestId('apartment-row-a1')!;
+		expect(row.querySelector('[data-testid="apartment-move-out"]')!.textContent!.trim()).toBe(
+			'Auszug von Kevin Fischer am 30.06.2026, Schlussabrechnung nach dem 31.12.2026'
+		);
+		expect(row.querySelectorAll('a')).toHaveLength(1);
+	});
+
 	it('macht die ganze Zeile zum Link mit der Wohnung als Linktext', () => {
 		detail([flat('a1', '1.01', 1)]);
 		const row = byTestId('apartment-row-a1')!;

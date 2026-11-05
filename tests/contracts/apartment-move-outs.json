@@ -1,0 +1,14 @@
+{
+	"moveOuts": [
+		{
+			"apartmentId": "a1",
+			"moveOut": {
+				"endDate": "2024-03-31",
+				"tenantName": "Sarah Meier",
+				"period": { "start": "2024-01-01", "end": "2024-12-31" },
+				"due": true,
+				"outside": false
+			}
+		}
+	]
+}

@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
-	import type { RefusedStatement } from '$lib/contract-status';
+	import { draftName, type RefusedStatement } from '$lib/contract-status';
 
 	// The statements that refused new contract dates, each a link (A-10); the only one, a draft, can be deleted first
 	// `consequence` replaces the default one of deleting the draft
 	let {
 		statements,
+		tenant,
 		action,
 		consequence
 	}: {
 		statements: RefusedStatement[];
+		tenant: string; // a draft is named by tenant and period (#664)
 		action?: Snippet<[RefusedStatement, string]>;
 		consequence?: string;
 	} = $props();
@@ -33,7 +35,9 @@
 						rel="noopener noreferrer"
 						class={link}
 						data-testid="refused-statement-link"
-						>{m.contracts_refused_open({ number: statement.statementNumber })}
+						>{statement.status === 'draft'
+							? m.contracts_refused_open_draft(draftName(statement, tenant))
+							: m.contracts_refused_open({ number: statement.statementNumber })}
 						{m.ui_opens_new_tab()}</a
 					>
 				</li>
@@ -42,7 +46,7 @@
 		{#if draft && action}
 			<!-- the button names this consequence as its description -->
 			<p class="text-ink" id="delete-draft-consequence">
-				{consequence ?? m.contracts_delete_draft_consequence({ number: draft.statementNumber })}
+				{consequence ?? m.contracts_delete_draft_consequence(draftName(draft, tenant))}
 			</p>
 			{@render action(draft, 'delete-draft-consequence')}
 		{/if}

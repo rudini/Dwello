@@ -19,6 +19,7 @@
 		localToday,
 		pastEndConfirmation,
 		billedDaysError,
+		draftName,
 		type RefusedStatement
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
@@ -143,7 +144,7 @@
 
 	const coveredConsequence = $derived(
 		onlyCovered(refused)
-			? m.contracts_delete_draft_covered_consequence({ number: refused[0].statementNumber })
+			? m.contracts_delete_draft_covered_consequence(draftName(refused[0], tenant))
 			: undefined
 	);
 
@@ -169,7 +170,7 @@
 	}) {
 		const statements = details?.statements;
 		if (Array.isArray(statements) && onlyCovered(statements))
-			return m.contracts_billed_draft_covered({ number: statements[0].statementNumber });
+			return m.contracts_billed_draft_covered(draftName(statements[0], tenant));
 		if (Array.isArray(statements)) return billedDaysError(statements);
 		if (/overlap/i.test(message)) return m.backend_contract_overlap();
 		// a refusal with its own message, e.g. an Akonto in a billed time (#464); never the backend's own text
@@ -355,7 +356,7 @@
 			<p>{errors.form}</p>
 		</Alert>
 		{#if refused.length}
-			<RefusedStatements statements={refused} consequence={coveredConsequence}>
+			<RefusedStatements statements={refused} {tenant} consequence={coveredConsequence}>
 				{#snippet action(draft, consequence)}
 					<div>
 						<Button

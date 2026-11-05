@@ -1,7 +1,11 @@
 import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
 import type { ApartmentListItem, Json } from '$lib/types';
-import type { ApartmentWithDetails } from '../../../backend/src/api/apartment';
+import type {
+	ApartmentWithDetails,
+	MoveOut,
+	MoveOutsResponse
+} from '../../../backend/src/api/apartment';
 import { monthlyTotal, toContractHistory, type ContractRow } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -20,6 +24,23 @@ export const toApartmentRow = (a: Json<ApartmentWithDetails>): ApartmentListItem
 	currentContractEnd: a.currentContractEnd ?? null,
 	lastContractEnd: a.lastContractEnd ?? null
 });
+
+/**
+ * #664: the rows with the move-out of GET /apartments/move-outs, its own route so the list stays cheap (P2); without
+ * it the list shows no hints
+ */
+export async function withMoveOuts<R extends { id: string }>(
+	fetch: typeof globalThis.fetch,
+	rows: R[],
+	buildingId?: string
+): Promise<(R & { moveOut: MoveOut | null })[]> {
+	const query = buildingId ? `?buildingId=${encodeURIComponent(buildingId)}` : '';
+	const answer = await fetch(`${API}/apartments/move-outs${query}`)
+		.then((r) => r.json() as Promise<Partial<Json<MoveOutsResponse>>>)
+		.catch(() => null);
+	const byApartment = new Map(answer?.moveOuts?.map((m) => [m.apartmentId, m.moveOut]));
+	return rows.map((row) => ({ ...row, moveOut: byApartment.get(row.id) ?? null }));
+}
 
 /** Apartment with its building, as the detail and edit pages show it */
 export async function fetchApartment(fetch: typeof globalThis.fetch, id: string) {
