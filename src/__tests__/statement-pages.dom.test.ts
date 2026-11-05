@@ -1669,6 +1669,20 @@ describe('Abrechnungsdetail', () => {
 		expect(document.querySelector<HTMLInputElement>('input[name="byLetter"]')?.value).toBe('true');
 	});
 
+	// fallback review of #1127: the content changes with the dialog open; its description and the focus follow
+	it('beschreibt den Dialog nach dem Wechsel zum Brief mit dem Brief und behält den Fokus darin', async () => {
+		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		byTestId('send-by-letter-instead')!.focus();
+		click('send-by-letter-instead');
+		await settle();
+
+		const description = document.getElementById(dialog.getAttribute('aria-describedby') ?? '');
+		expect(description?.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst.');
+		expect(dialog.contains(document.activeElement)).toBe(true);
+	});
+
 	it('bietet ohne E-Mail-Adresse nur den Brief an', () => {
 		detail({ tenantEmail: null, tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
 		// persona Helga P-2: schon der Knopf nennt den Brief, nicht die E-Mail

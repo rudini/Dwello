@@ -74,12 +74,22 @@
 	let paragraph = $state<string>();
 	$effect(() => {
 		if (!open || !panel) return;
-		// a field's help is that field's description (code review 653-1 C-4), a live line a status (Sven 653 P-1)
-		const first = [
-			...panel.querySelectorAll<HTMLElement>(`[id="${id}-body"] p:not([aria-live])`)
-		].find((p) => !p.id || !panel!.querySelector(`[aria-describedby~="${p.id}"]`));
-		if (first && !first.id) first.id = `${id}-description`;
-		paragraph = first?.id;
+		const own = panel;
+		const describe = () => {
+			// a field's help is that field's description (code review 653-1 C-4), a live line a status (Sven 653 P-1)
+			const first = [
+				...own.querySelectorAll<HTMLElement>(`[id="${id}-body"] p:not([aria-live])`)
+			].find((p) => !p.id || !own.querySelector(`[aria-describedby~="${p.id}"]`));
+			if (first && !first.id) first.id = `${id}-description`;
+			paragraph = first?.id;
+			// a control that removed itself (the letter instead of the e-mail) leaves the focus in the dialog
+			if (document.activeElement === document.body) own.focus({ preventScroll: true });
+		};
+		describe();
+		// the content can change while the dialog is open (fallback review of #1127)
+		const observer = new MutationObserver(describe);
+		observer.observe(own, { childList: true, subtree: true });
+		return () => observer.disconnect();
 	});
 
 	// While busy both buttons are disabled: the panel itself holds the focus
