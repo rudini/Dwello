@@ -22,6 +22,7 @@
 	// #656: the choice reloads the page; after the reload the focus is back here and a message names the new language
 	const changed = 'dwello-language-changed';
 	function choose(locale: Locale) {
+		if (locale === current) return close(); // nothing changes, so nothing reloads (persona Sven 656 P-1)
 		try {
 			sessionStorage.setItem(changed, '1');
 		} catch {

@@ -68,6 +68,22 @@ describe('Sprachwahl', () => {
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Sprache: Deutsch']);
 	});
 
+	// persona Sven 656 P-1: the language already shown changes nothing, so the list closes like with Escape, and no reload names it
+	it('schliesst bei der Wahl der aktuellen Sprache und nennt sie beim nächsten Laden nicht', () => {
+		sessionStorage.clear();
+		vi.mocked(setLocale).mockClear();
+		toasts.set([]);
+		show(LanguageSwitcher, {});
+		click(button());
+		click(allByTestId('language-option')[0]);
+		expect(setLocale).not.toHaveBeenCalled();
+		expect(button().getAttribute('aria-expanded')).toBe('false');
+		expect(document.activeElement).toBe(button());
+		document.body.innerHTML = ''; // a later reload
+		show(LanguageSwitcher, {});
+		expect(get(toasts)).toEqual([]);
+	});
+
 	it('nennt die Sprache beim Laden einer Seite ohne Wechsel nicht', () => {
 		sessionStorage.clear();
 		toasts.set([]);
