@@ -2,6 +2,7 @@ import type { ContractHistory } from './types';
 import type { Tone } from './ui/tone';
 import { dayAfter } from './swiss-date';
 import { formatDate } from './utils/format';
+import { periodName } from './accounting-period';
 import { m } from '$lib/paraglide/messages';
 
 type Status = ContractHistory['status'];
@@ -116,6 +117,12 @@ export type RefusedStatement = {
 	buildingId: string;
 	covered?: boolean; // «Abgerechnet bis» now covers its whole period, as the backend says (#815)
 };
+
+/** #664 (Persona Sven M3): a refused draft by tenant and period, «Entwurf für Sarah Meier, 2025» */
+export const draftName = (statement: RefusedStatement, name: string) => ({
+	name,
+	period: periodName({ start: statement.periodStart, end: statement.periodEnd })
+});
 
 /**
  * New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json);

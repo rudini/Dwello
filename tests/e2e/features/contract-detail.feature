@@ -494,7 +494,6 @@ Funktionalität: Mietvertragsdetail
     Dann nennt der Mietvertrag den Auszug "Auszug am 30.06.2025, Schlussabrechnung fällig"
 
   # #664 (Persona Sven M3): die Ablehnung nennt den Entwurf mit Mieter und Abrechnungsperiode, nicht nur mit seiner Nummer
-  @wip
   Szenario: Abgelehnter Entwurf ist mit Mieter und Abrechnungsperiode benannt
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"

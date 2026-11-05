@@ -230,10 +230,13 @@ describe('Mietvertrag bearbeiten', () => {
 		const covered =
 			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.';
 		expect(byTestId('form-error')!.textContent).toContain(
-			'Der Entwurf NK-2025-0003 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
+			'Der Entwurf für Anna Keller, 2025 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
 		);
 		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
-		expect(document.getElementById(described)!.textContent).toContain(covered);
+		// #664 (Fachreview 664-1 V-3): the draft by tenant and period, as in every refusal of it
+		expect(document.getElementById(described)!.textContent).toContain(
+			`Der Entwurf für Anna Keller, 2025 wird gelöscht. ${covered}`
+		);
 		expect(document.body.textContent).not.toContain('neu erstellen');
 		click('delete-draft-and-save');
 		await settle();

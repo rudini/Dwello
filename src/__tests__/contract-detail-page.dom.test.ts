@@ -170,12 +170,13 @@ describe('Mietvertragsdetail', () => {
 		await settle();
 		const link = byTestId('refused-statement-link')!;
 		expect(link.getAttribute('href')).toBe('/statements/s1');
-		expect(link.textContent).toContain('NK-2025-0003');
+		// #664 (Persona Sven M3): the draft by tenant and period, not by its number only
+		expect(link.textContent).toContain('Entwurf für Anna Keller, 2025 öffnen');
 		// #663 (Decided): in a new tab, so the dialog keeps what was typed; the link says so
 		expect(link.getAttribute('target')).toBe('_blank');
 		expect(link.textContent).toContain('(öffnet in neuem Tab)');
 		expect(text('refused-statements')).toContain(
-			'Der Entwurf NK-2025-0003 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
+			'Der Entwurf für Anna Keller, 2025 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
 		);
 		const form = document.querySelector<HTMLFormElement>('form[action="?/endDeletingDraft"]')!;
 		const value = (name: string) => form.querySelector<HTMLInputElement>(`[name="${name}"]`)!.value;

@@ -204,7 +204,7 @@
 	onsuccess={() => addToast('success', endedMessage())}
 >
 	{#snippet afterError()}
-		<RefusedStatements statements={refused ?? []}>
+		<RefusedStatements statements={refused ?? []} tenant={name}>
 			{#snippet action(draft, consequence)}
 				<form
 					method="POST"
