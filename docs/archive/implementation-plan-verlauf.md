@@ -1058,3 +1058,13 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Code review wfr-1104-review-1 (C-1 Major, C-2..C-6 Minor fixed), -2 (closing round: none open)
 - [x] Before marking complete: lint, check, backend type-check, fitness, rule-file tests, Prettier on added files
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #1113 the toast avoids the focused row
+
+- [x] Scenario «Die Erfolgsmeldung verdeckt die Kategorie mit dem Fokus nicht» (`categories.feature`), seen red at its last step (-93 px)
+- [x] DOM test in `ui-layout-parts.dom.test.ts`, seen red; `place()` in `src/lib/ui/ToastRegion.svelte` measures the focused element's `li`/`tr`
+- [x] Slice review round 1 (`docs/reviews/1113-review-1.md`)
+- [x] Personas Marco and Helga (`docs/design/personas/marco-1113.md`, `helga-1113.md`)
+- [x] Fixes: button group of a new key (`data-focus-row`), tall rows count by the focused part, focus to the row now in place when the next row went too (#1123)
+- [x] Slice review round 2 (`docs/reviews/1113-review-2.md`); C-3 kept in this PR as the product owner decided
+- [x] PR: pushed after this archive
