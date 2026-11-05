@@ -168,6 +168,11 @@
 			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
 		},
 		{
+			"path": "src/routes/contracts/RefusedStatements.svelte",
+			"line": ">{statement.status === 'draft'",
+			"reason": "status display: names a draft by tenant and period, another statement by its number; branches on the status value alone (#664; #815, decided 25.10.2026)"
+		},
+		{
 			"path": "src/routes/contracts/[id]/+page.svelte",
 			"line": "future={status === 'future'}",
 			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"

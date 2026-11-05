@@ -4,7 +4,8 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { missingByContract, missingOfContract, moveOutOf } from '../services/statement-run.service';
+import { missingByContract, missingOfContract } from '../services/statement-run.service';
+import { moveOutOf } from '../services/move-out.service';
 import { errorBody, refusal } from '../services/coded-error';
 import type { ContractResponse } from '../api/contract';
 import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';

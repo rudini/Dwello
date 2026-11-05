@@ -15,7 +15,7 @@ import {
 	deleteApartment
 } from '../services/apartment.service';
 import { buildingExists } from '../services/building.service';
-import { moveOutsByApartment } from '../services/statement-run.service';
+import { moveOutsByApartment } from '../services/move-out.service';
 
 // Apartment numbers are unique per building (apartments_building_number_idx)
 // Drizzle wraps the PostgreSQL error (DrizzleQueryError.cause)
