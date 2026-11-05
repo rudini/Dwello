@@ -241,3 +241,13 @@ Funktionalität: Kostenkategorien
     Und die Kategorie "Hagelschutz" steht am unteren Rand des Fensters
     Wenn der Liegenschaftsverwalter die Kategorie "Hagelschutz" löscht
     Dann verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat
+
+  # #1124 (Helga P-3 in #1113): nach dem Speichern stand der Fokus auf dem Seitentitel, und die Meldung lag über «Löschen»
+  # der gespeicherten Kategorie
+  Szenario: Nach dem Speichern steht der Fokus auf der gespeicherten Kategorie
+    Angenommen das Browserfenster ist 720 auf 450 Pixel gross
+    Und es gibt die umlagefähige Kategorie "Hangsicherung"
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Wenn der Liegenschaftsverwalter die Kategorie "Hangsicherung" als nicht umlagefähig speichert
+    Dann steht der Fokus auf der Kategorie "Hangsicherung"
+    Und verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat
