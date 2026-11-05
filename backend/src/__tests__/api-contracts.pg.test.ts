@@ -695,6 +695,18 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('apartments'), actual)).toEqual([]);
 	});
 
+	// #664: the move-out hint of the apartment lists, its own route (P2)
+	it('GET /apartments/move-outs liefert die Felder von apartment-move-outs.json', async () => {
+		const left = await createRental(`${token}-left`, { startDate: '2020-04-01', endDate: '2025-06-30', monthlyAdvancePayment: '0' });
+		try {
+			await db.update(rentalContracts).set({ terminated: true }).where(eq(rentalContracts.id, left.contract));
+			const actual = await (await callApi(`/api/v1/apartments/move-outs?buildingId=${left.building}`)).json();
+			expect(drift(await sample('apartment-move-outs'), actual)).toEqual([]);
+		} finally {
+			await left.remove();
+		}
+	});
+
 	it('GET /buildings liefert die Felder von buildings.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings?search=${encodeURIComponent(`Ahornhof ${token}`)}`)).json();
 		expect(drift(await sample('buildings'), actual)).toEqual([]);

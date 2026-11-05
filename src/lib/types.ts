@@ -9,7 +9,11 @@ import type {
 	ContractResponse,
 	ContractWithDetails as ContractRow
 } from '../../backend/src/api/contract';
-import type { ApartmentStatus, ApartmentWithDetails } from '../../backend/src/api/apartment';
+import type {
+	ApartmentStatus,
+	ApartmentWithDetails,
+	MoveOut
+} from '../../backend/src/api/apartment';
 import type {
 	BuildingAddress,
 	BuildingWithStats as BuildingResponse
@@ -102,7 +106,7 @@ export type Apartment = Pick<ApiApartment, 'id' | 'buildingId' | 'number' | 'flo
 			'nextContractStart' | 'currentContractEnd' | 'lastContractEnd' | 'createdAt' | 'updatedAt'
 		>
 	> & {
-		moveOut?: ApiApartment['moveOut']; // #664
+		moveOut?: MoveOut | null; // #664, from GET /apartments/move-outs
 		area: string | number; // decimal from DB
 		rooms: string | number; // decimal from DB (e.g., 3.5)
 	};

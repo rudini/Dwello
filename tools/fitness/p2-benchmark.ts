@@ -97,6 +97,7 @@ const routes = [
 	'/api/v1/dashboard',
 	'/api/v1/buildings',
 	'/api/v1/apartments',
+	'/api/v1/apartments/move-outs',
 	'/api/v1/tenants',
 	'/api/v1/contracts',
 	'/api/v1/contracts/missing-statements',

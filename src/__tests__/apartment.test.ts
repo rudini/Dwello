@@ -14,6 +14,7 @@ import {
 	statusText
 } from '../lib/apartment';
 import apartmentsResponse from '../../tests/contracts/apartments.json';
+import moveOutsResponse from '../../tests/contracts/apartment-move-outs.json';
 import { runAction } from './helpers/action';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import apartmentResponse from '../../tests/contracts/apartment.json';
@@ -193,15 +194,35 @@ describe('Wohnungsliste', () => {
 		expect(data.apartments[0].lastContractEnd).toBe('2024-03-31');
 	});
 
-	// #664: the backend decides the move-out until the Schlussabrechnung exists
-	it('gibt den Auszug bis zur Schlussabrechnung weiter', async () => {
-		const fetch = (async (url: string) =>
-			Response.json(url.includes('/apartments') ? apartmentsResponse : { buildings: [] })) as typeof globalThis.fetch;
-		const data = (await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
-			apartments: { moveOut: unknown }[];
+	// #664: the backend decides the move-out until the Schlussabrechnung exists, on its own route (P2)
+	const withMoveOuts = (moveOuts: () => Response) =>
+		(async (url: string) =>
+			url.includes('/apartments/move-outs')
+				? moveOuts()
+				: Response.json(url.includes('/apartments') ? apartmentsResponse : { buildings: [] })) as typeof globalThis.fetch;
+	const listed = async (fetch: typeof globalThis.fetch) =>
+		(await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
+			apartments: { id: string; moveOut: unknown }[];
 		};
 
-		expect(data.apartments[0].moveOut).toEqual(apartmentsResponse.apartments[0].moveOut);
+	it('gibt den Auszug bis zur Schlussabrechnung weiter', async () => {
+		const data = await listed(withMoveOuts(() => Response.json(moveOutsResponse)));
+
+		expect(data.apartments[0].moveOut).toEqual(moveOutsResponse.moveOuts[0].moveOut);
+	});
+
+	it('zeigt die Wohnungen ohne Auszug, wenn er nicht geladen werden kann', async () => {
+		const failed = await listed(
+			withMoveOuts(() => Response.json({ error: 'kaputt' }, { status: 500 }))
+		);
+		const unreachable = await listed(
+			withMoveOuts(() => {
+				throw new TypeError('fetch failed');
+			})
+		);
+
+		expect(failed.apartments.map((a) => [a.id, a.moveOut])).toEqual([['a1', null]]);
+		expect(unreachable.apartments.map((a) => [a.id, a.moveOut])).toEqual([['a1', null]]);
 	});
 });
 

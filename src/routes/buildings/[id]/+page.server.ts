@@ -4,7 +4,7 @@ import { countStatus, reletStarts } from '$lib/apartment';
 import { backendMessage, refusedFields, type BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
 import type { BuildingWithStats, Apartment } from '$lib/types';
-import { toApartmentRow } from '$lib/server/apartment';
+import { toApartmentRow, withMoveOuts } from '$lib/server/apartment';
 import { toBuilding } from '$lib/server/building';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -91,8 +91,10 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 
 		const building = toBuilding(buildingData);
 
-		const apartments: Apartment[] = (apartmentsData.apartments || apartmentsData.data || []).map(
-			toApartmentRow
+		const apartments: Apartment[] = await withMoveOuts(
+			fetch,
+			(apartmentsData.apartments || apartmentsData.data || []).map(toApartmentRow),
+			params.id
 		);
 		building.reletStarts = reletStarts(apartments);
 		building.reservedCount = countStatus(apartments, 'reserved');

@@ -117,7 +117,7 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 	});
 });
 
-// #664: the move-out of an ended contract until its Schlussabrechnung exists, on the contract and the apartment's row
+// #664: the move-out of an ended contract until its Schlussabrechnung exists, on the contract and per apartment of a list
 describe('Auszug bis zur Schlussabrechnung', () => {
 	const due = { endDate: '2025-06-30', period: { start: '2025-01-01', end: '2025-12-31' }, due: true, outside: false };
 	const moveOutOf = async (contract: string) =>
@@ -128,11 +128,12 @@ describe('Auszug bis zur Schlussabrechnung', () => {
 		const contract = await rent('1.01', 'Meier', '2021-08-01', '2025-06-30', building, true);
 
 		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${contract}`)).json()) as { moveOut: unknown };
-		const rows = (await (await sendJson('GET', `/api/v1/apartments?buildingId=${building}`)).json()) as { apartments: { moveOut: unknown }[] };
+		const apartment = (await (await sendJson('GET', `/api/v1/contracts/${contract}`)).json()) as { apartmentId: string };
+		const list = (await (await sendJson('GET', `/api/v1/apartments/move-outs?buildingId=${building}`)).json()) as { moveOuts: unknown[] };
 
 		// Persona Helga 664-2 P-2: the list names whose move-out it is, not the tenant living there now
 		expect(ofContract.moveOut).toEqual({ ...due, tenantName: `Eva Meier ${token}` });
-		expect(rows.apartments.map((a) => a.moveOut)).toEqual([{ ...due, tenantName: `Eva Meier ${token}` }]);
+		expect(list.moveOuts).toEqual([{ apartmentId: apartment.apartmentId, moveOut: { ...due, tenantName: `Eva Meier ${token}` } }]);
 	});
 
 	// Fachreview 664-1 M-1: after a fixed-term end without «Auszug bestätigt» Dwello asks whether the tenant stayed

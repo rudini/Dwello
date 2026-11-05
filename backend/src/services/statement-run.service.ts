@@ -64,7 +64,7 @@ export async function typeOf(buildingId: string) {
 }
 const buildingOf = async (id: string) =>
 	(await db.select({ name: buildings.name, type: buildings.accountingPeriod }).from(buildings).where(eq(buildings.id, id)))[0];
-const typesByBuilding = async () =>
+export const typesByBuilding = async () =>
 	new Map((await db.select({ id: buildings.id, type: buildings.accountingPeriod }).from(buildings)).map((b) => [b.id, b.type]));
 
 /**
