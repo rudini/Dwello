@@ -29,9 +29,14 @@ export const reconciliationNotes = (scope: Target) =>
 	target(`Hinweise der ${scope}`, (page) => scope.locate(page).getByTestId('cost-reconciliation-note'));
 export const reconciliationStatement = (scope: Target, tenantName: string) =>
 	target(`Abrechnung von «${tenantName}» in der ${scope}`, (page) =>
-		scope.locate(page).getByTestId('cost-reconciliation-note').getByRole('link', { name: tenantName })
+		scope.locate(page).getByTestId('cost-reconciliation-note').getByRole('link', { name: tenantName }).first()
 	);
 
 // a row of the list on «Berichte»: a building and one of its periods
 export const reportPeriod = (buildingId: string, periodStart: string) =>
 	target('Kostenabstimmung in den Berichten', (page) => page.getByTestId(`report-period-${buildingId}-${periodStart}`));
+// #1126 (PO on persona Sven 1126 P-2): the tenants the note on drafts names
+export const draftsNoteLinks = (scope: Target) =>
+	target(`Abrechnungen im Hinweis zu den Entwürfen der ${scope}`, (page) =>
+		scope.locate(page).getByTestId('cost-reconciliation-drafts').getByRole('link')
+	);

@@ -25,6 +25,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Code review 1126-2 (frontend): `docs/reviews/1126-review-2.md` (C-1, C-2, C-3 fixed; C-4: the apostrophe test pins kept behaviour)
 - [x] Personas Helga, Marco, Dr. Weber, Sven, Anna: `docs/design/personas/*-1126.md` (P-1 «Berichte» not reachable: menu item and help text; Sven P-4 row headers fixed; Minors met by several personas: #1138; Sven P-2 drafts without link: product decision)
 - [x] `daten-pruefer`: `docs/reviews/1126-datenpruefung-1.md` (all amounts to the Rappen; D-1 = code review C-1, fixed)
-- [ ] `fach-reviewer` on the new help text and menu label; closing `code-reviewer` round
+- [x] `fach-reviewer` 1126-3 on the help text and menu label: `docs/reviews/1126-fachreview-3.md` (V-14, V-15 fixed); closing `code-reviewer` 1126-3: `docs/reviews/1126-review-3.md` (C-5 scenario added, C-6 fixed; C-7, C-8 Minor stay)
+- [x] PO 05.11.2026 on persona Sven P-2: the drafts note names its tenants as links
+- [ ] `fach-reviewer` 1126-4 on the drafts texts; `code-reviewer` 1126-4 on the delta
 - [ ] Before marking complete: lint, check, fitness, backend type-check, affected tests and E2E, Prettier on added files
 - [ ] Archive the session; PR `Fixes #1126`

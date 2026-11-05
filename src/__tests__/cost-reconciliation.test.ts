@@ -49,7 +49,7 @@ describe('Kostenabstimmung im BFF', () => {
 		]);
 		expect(result).toMatchObject({
 			withoutStatement: 1,
-			drafts: 1,
+			drafts: report.drafts,
 			notUpToDate: report.notUpToDate
 		});
 	});
@@ -94,7 +94,7 @@ describe('Kostenabstimmung im BFF', () => {
 		);
 		expect(result).toMatchObject({
 			buildingId: 'b1',
-			reconciliation: { managementFee: 33.05, withoutStatement: 0, drafts: 0, notUpToDate: [] }
+			reconciliation: { managementFee: 33.05, withoutStatement: 0, drafts: [], notUpToDate: [] }
 		});
 	});
 

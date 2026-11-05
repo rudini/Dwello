@@ -465,7 +465,7 @@ describe('Abrechnungen erstellen', () => {
 			managementFee: 0,
 			nonAllocable: 0,
 			withoutStatement: 0,
-			drafts: 0,
+			drafts: [],
 			notUpToDate: []
 		};
 		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
@@ -483,7 +483,7 @@ describe('Abrechnungen erstellen', () => {
 			managementFee: 0,
 			nonAllocable: 500,
 			withoutStatement: 0,
-			drafts: 0,
+			drafts: [],
 			notUpToDate: []
 		};
 		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
@@ -502,7 +502,7 @@ describe('Abrechnungen erstellen', () => {
 			managementFee: 0,
 			nonAllocable: 0,
 			withoutStatement: 0,
-			drafts: 0,
+			drafts: [],
 			notUpToDate: []
 		};
 		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });

@@ -16,7 +16,7 @@ type Body = {
 	managementFee: number;
 	nonAllocable: number;
 	withoutStatement?: number;
-	drafts?: number;
+	drafts?: { id: string; tenantName: string }[];
 	notUpToDate?: { id: string; tenantName: string }[];
 };
 
@@ -47,7 +47,7 @@ async function toReconciliation(fetch: Fetch, body: Body): Promise<Reconciliatio
 		managementFee: body.managementFee,
 		nonAllocable: body.nonAllocable,
 		withoutStatement: body.withoutStatement ?? 0,
-		drafts: body.drafts ?? 0,
+		drafts: body.drafts ?? [],
 		notUpToDate: body.notUpToDate ?? []
 	};
 }

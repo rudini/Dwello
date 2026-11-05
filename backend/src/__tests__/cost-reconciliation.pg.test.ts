@@ -115,10 +115,15 @@ describe('Kostenabstimmung der Berichte', () => {
 	});
 
 	it('zählt die Abrechnungen im Entwurf und die Mietverträge ohne Abrechnung', async () => {
-		expect(await report()).toMatchObject({ drafts: 1, withoutStatement: 0, notUpToDate: [] });
+		// PO 05.11.2026 (persona Sven 1126 P-2): the drafts named by their tenants, for links
+		expect(await report()).toMatchObject({
+			drafts: [{ id: first.id, tenantName: `Anna Keller ${token}` }],
+			withoutStatement: 0,
+			notUpToDate: []
+		});
 		// code review 1126-1 C-4: a sent statement is no draft
 		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, first.id));
-		expect((await report()).drafts).toBe(0);
+		expect((await report()).drafts).toEqual([]);
 		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, first.id));
 	});
 
@@ -185,7 +190,7 @@ describe('Kostenabstimmung der Berichte', () => {
 		expect(await report()).toMatchObject({
 			total: { buildingCosts: 732, tenants: 0, landlord: 732 },
 			withoutStatement: 1,
-			drafts: 0
+			drafts: []
 		});
 	});
 

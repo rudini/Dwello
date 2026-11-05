@@ -58,7 +58,9 @@
 						<!-- the position names its row, so a screen reader names it with each amount (persona Sven 1126 P-4) -->
 						<th
 							scope="row"
-							class="px-4 py-4 text-left font-normal text-ink"
+							class="px-4 py-4 text-left text-ink {'total' in row
+								? 'font-semibold'
+								: 'font-normal'}"
 							data-testid="cost-reconciliation-cell">{row.label}</th
 						>
 						<td class="text-right text-ink" data-testid="cost-reconciliation-cell"

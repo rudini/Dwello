@@ -6,6 +6,6 @@ export type Reconciliation = {
 	managementFee: number;
 	nonAllocable: number;
 	withoutStatement: number; // «Berichte» only: contracts of the period without a statement
-	drafts: number;
+	drafts: { id: string; tenantName: string }[];
 	notUpToDate: { id: string; tenantName: string }[];
 };

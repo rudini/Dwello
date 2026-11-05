@@ -12,7 +12,7 @@ const reconciliation = {
 	managementFee: 0,
 	nonAllocable: 500,
 	withoutStatement: 2,
-	drafts: 1,
+	drafts: [{ id: 's3', tenantName: 'Lea Graf' }],
 	notUpToDate: [
 		{ id: 's1', tenantName: 'Eva Frei' },
 		{ id: 's2', tenantName: 'Marc Huber' }
@@ -74,9 +74,11 @@ describe('Kostenabstimmung der Berichte', () => {
 		const notes = allByTestId('cost-reconciliation-note');
 		expect(notes.map(text)).toEqual([
 			'2 Mietverträge haben für diese Abrechnungsperiode noch keine Abrechnung. Ihr Anteil ist in «davon tragen Sie» enthalten.',
-			'1 Abrechnung ist noch ein Entwurf. Sie zählt schon mit, ist aber noch nicht versendet.',
+			'1 Abrechnung ist noch ein Entwurf: Lea Graf. Sie zählt schon mit, ist aber noch nicht versendet.',
 			'2 Abrechnungen dieser Abrechnungsperiode sind nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht oder der Tankbestand geändert. Öffnen Sie sie, um zu sehen, ob Sie sie neu berechnen oder berichtigen müssen: Eva Frei, Marc Huber.'
 		]);
+		// PO 05.11.2026 (persona Sven 1126 P-2): the drafts linked as the statements not up to date
+		expect(notes[1].querySelector('a')?.getAttribute('href')).toBe('/statements/s3');
 		expect([...notes[2].querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual([
 			'/statements/s1',
 			'/statements/s2'

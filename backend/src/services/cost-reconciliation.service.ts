@@ -109,6 +109,14 @@ async function validStatements(buildingId: string, period: Range) {
 	);
 }
 
+const named = (
+	statements: { id: string; tenant: { firstName: string; lastName: string } | null }[]
+) =>
+	statements.map((s) => ({
+		id: s.id,
+		tenantName: s.tenant ? `${s.tenant.firstName} ${s.tenant.lastName}` : ''
+	}));
+
 /**
  * The Kostenabstimmung of «Berichte»: the valid statements of the period, and as notes the contracts the period would
  * bill that have none, the drafts, and the statements not up to date (PO 05.11.2026, Fachreview 1126-1 M-1, V-1)
@@ -124,11 +132,9 @@ export async function reportReconciliation(buildingId: string, period: Range) {
 		// Fachreview 1126-1 V-3: a contract «Abgerechnet bis» leaves no Mietstage is not in the plan's contracts
 		withoutStatement: plan.contracts.filter((c) => !statements.some((s) => s.contractId === c.id))
 			.length,
-		drafts: statements.filter((s) => s.status === 'draft').length,
-		notUpToDate: outdated.map((s) => ({
-			id: s.id,
-			tenantName: s.tenant ? `${s.tenant.firstName} ${s.tenant.lastName}` : ''
-		}))
+		// PO 05.11.2026 (persona Sven 1126 P-2): named by their tenants, as the statements not up to date
+		drafts: named(statements.filter((s) => s.status === 'draft')),
+		notUpToDate: named(outdated)
 	};
 }
 

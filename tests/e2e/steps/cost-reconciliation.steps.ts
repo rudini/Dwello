@@ -1,7 +1,7 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { cellsOf, helpOf, noteCount, notesOf, reportPeriodName, rowOf, shown, textOf } from '../questions/cost-reconciliation';
+import { cellsOf, draftsNamed, helpOf, noteCount, notesOf, reportPeriodName, rowOf, shown, textOf } from '../questions/cost-reconciliation';
 import { invoicesOfBuilding } from '../questions/statement-generate';
 import { pageAddressInApp } from '../questions/statements';
 import { openStatementInReport, openReportOf, openReports } from '../tasks/cost-reconciliation';
@@ -113,3 +113,7 @@ When(
 		await verwalter.attemptsTo(openStatementInReport(names.get(tenant) ?? tenant));
 	}
 );
+
+Then('nennt der Hinweis zu den Entwürfen die Abrechnung von {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(draftsNamed).toEqual([names.get(tenant) ?? tenant]);
+});

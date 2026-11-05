@@ -65,6 +65,19 @@ Funktionalität: Kostenabstimmung in der Vorschau
     Dann nennt die Vorschau bei den Rechnungen von "Birkenhof" "Keine Rechnungen erfasst"
     Aber zeigt die Vorschau keine Kostenabstimmung für "Birkenhof"
 
+  # #1126 «Empty» (code review 1126-2 C-1, 1126-3 C-5): ohne umlagefähige Rechnungen keine Tabelle, die nicht
+  # umlagefähigen Rechnungen trotzdem
+  Szenario: Ohne umlagefähige Rechnungen nennt die Vorschau die nicht umlagefähigen Rechnungen
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "1.01" seit "2024-01-01" für "900" Franken
+    Und im Gebäude "Birkenhof" gibt es eine nicht umlagefähige Rechnung der Kategorie "Reparaturen" über "500" Franken vom "2024-08-20"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Birkenhof" öffnet
+    Dann nennt die Kostenabstimmung der Vorschau für "Birkenhof" "Nicht umlagefähige Rechnungen (tragen Sie ganz)" mit "CHF 500.00"
+    Aber nennt die Kostenabstimmung der Vorschau für "Birkenhof" nicht "Total"
+
   # #1126 (PO): rechnet der Lauf nur die übrigen Mietverträge ab, zählen die schon erstellten Abrechnungen mit
   Szenario: Die Kostenabstimmung der Vorschau zählt die schon erstellten Abrechnungen der Periode mit
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
