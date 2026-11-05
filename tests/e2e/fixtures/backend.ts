@@ -496,6 +496,13 @@ export function testData(api: CallTheApi) {
 			return id;
 		},
 
+		// #1126: an invoice the landlord bears alone, in a predefined category given by its German name
+		async nonAllocableInvoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string) {
+			const category = await predefinedCategory(categoryName);
+			const values = { categoryId: category.id, isValidUtilityCost: false };
+			ids.set(`Rechnung ${categoryName} ${date}`, await invoice(buildingTitle, values, `${categoryName} ${date}`, amount, date));
+		},
+
 		// Invoice in a predefined category distributed by another predefined key, given by its German name (#770)
 		async invoiceOnByKey(buildingTitle: string, categoryName: string, amount: string, date: string, keyName: string) {
 			const category = await predefinedCategory(categoryName);
