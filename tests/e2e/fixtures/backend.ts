@@ -34,8 +34,7 @@ export function testData(api: CallTheApi) {
 		return name;
 	};
 
-	async function addCategory(title: string, fields: (name: string) => object) {
-		const name = unique(title);
+	async function addCategory(title: string, fields: (name: string) => object, name = unique(title)) {
 		const category = await post('categories', { name, nameDE: name, ...fields(name) });
 		ids.set(title, category.id);
 		extras.push(`categories/${category.id}`);
@@ -533,6 +532,13 @@ export function testData(api: CallTheApi) {
 		},
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
+		// #1123: an allocable category the list shows right after another one, whatever other workers add or remove:
+		// its name is the other's with the rest of its title, and only names that begin with the other's sort in between
+		async categoryRightAfter(title: string, before: string) {
+			const name = `${names.get(before)} ${title.slice(before.length).trim()}`;
+			names.set(title, name);
+			await addCategory(title, () => ({ isAllowedUtilityCost: true }), name);
+		},
 
 		// An own allocable category shared like heating, not marked as fuel (#100)
 		heatingCategory: (title: string) => addCategory(title, () => ({ isAllowedUtilityCost: true, isHeatingCost: true })),
