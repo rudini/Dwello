@@ -62,7 +62,8 @@ export const HiddenText = {
 			)
 		)
 };
-/** How many pixels the widest part of a box (itself or anything in it) hides sideways; 0 when everything fits */
+/** How many pixels the widest part of a box (itself or anything in it) hides sideways; 0 when everything fits. An `sr-only`
+ * part counts too: put a spoken-only text in a `hidden` element named by `aria-describedby` */
 export const HiddenSideways = {
 	within: (target: Target) =>
 		about(target, 'what is hidden sideways in', (element) =>

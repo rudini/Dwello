@@ -13,4 +13,4 @@ What is wrong or missing today, with evidence (files, behaviour, a review or per
 The files or screens.
 
 ## Done means
-- What holds once it is fixed. When the point first needs a product-owner decision, list the options and add the label `needs-decision`.
+- What holds once it is fixed. When the point first needs a product-owner decision, list the options and add the label `needs-decision`. A change to a text or step of a scenario that is not `@wip` is such a decision: name the scenario and the change.
