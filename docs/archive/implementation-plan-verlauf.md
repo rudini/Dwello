@@ -1086,4 +1086,5 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Focus after saving: the status line (`#statement-status-line`) when the action's button is gone; a button that stays keeps it (#1096); after «bezahlt» in the list, the row's link or the list's result
 - [x] Code review rounds 1 and 2 (`docs/reviews/653-review-1.md`, `-2.md`) fixed; closing round 3 (`653-review-3.md`) on the merge with #1096: C-6 Blocker («Neu berechnen» lost its focus) and C-7 Major fixed, DOM test red first; round 4 (`653-review-4.md`): C-8 Minor fixed
 - [x] Personas Sven and Marco (`docs/design/personas/sven-653.md`, `marco-653.md`): P-1 (the live date line read as description) fixed
+- [x] Fallback review of #1127 (Medium: the send dialog's switch to the letter left the description on a removed paragraph and the focus on the page) fixed, DOM test red first; review round 5 (`653-review-5.md`) C-1 Major (no scenario) answered by a new scenario in `statement-send.feature`; round 6 (`653-review-6.md`) clean
 - [x] PR (`Fixes #653`): pushed after this archive
