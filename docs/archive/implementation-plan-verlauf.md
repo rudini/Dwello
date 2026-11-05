@@ -1157,3 +1157,12 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1126.md`
 - [x] Before marking complete: lint, check, fitness, backend type-check, affected tests and E2E, Prettier on added files
 - [x] Archive the session; PR `Fixes #1126` pushed after this archive
+
+## Session: #1122 persona Chromium locale
+
+- [x] Reproduction: a non-ASCII download through persona-kit's `open()` named «download» with LANG unset and with LC_ALL=C (scratch script, red)
+- [x] persona-kit launches Chromium with `LC_ALL=C.UTF-8`; the export in `persona-stack.sh` removed (green in four shell setups)
+- [x] Code review 1122-1: `docs/reviews/1122-review-1.md` (no findings)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1122.md`
+- [x] Before marking complete: lint, check, fitness, backend type-check, Prettier on added files
+- [x] Archive the session; PR `Fixes #1122` pushed after this archive
