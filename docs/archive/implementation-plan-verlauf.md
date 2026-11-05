@@ -1093,5 +1093,6 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Scenario «Nach dem Erfassen steht der Fokus auf der neuen Kategorie» seen red; DOM test seen red; `focusSavedRow` (renamed from `focusRowLinkingTo`) falls back to the row link named as entered, in `src/lib/focus-after-action.ts` and `src/routes/config/SaveForm.svelte`
 - [x] Code review round 1 (`docs/reviews/1128-review-1.md`); C-1 fixed with a test (links in `nav` left out), C-2 (Minor) stays in the report
 - [x] Closing code review round 2 (`docs/reviews/1128-review-2.md`)
+- [x] Fallback review on #1131 (Medium, = C-2) fixed with a test; closing round 3 (`docs/reviews/1128-review-3.md`), C-3 (Minor) stays in the report
 - [x] Personas Helga and Sven (`docs/design/personas/helga-1128.md`, `sven-1128.md`): no findings
 - [x] Workflow 9: PR pushed after this archive
