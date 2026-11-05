@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Button from './Button.svelte';
-	import { makeInert } from './inert';
+	import { makeInert } from '$lib/inert';
 
 	// Confirmation of an action: the title asks, the content names the consequence, the button repeats the verb
 	let {

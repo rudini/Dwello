@@ -1033,6 +1033,15 @@ Cause: `documents.sent_at` is `timestamp` without zone (UTC), but `e2e-sent-days
 - [x] Slice review (`docs/reviews/www-review-1.md`); C-1 fixed: host with trailing dot or port
 - [x] PR: pushed after this archive
 
+## Session 2026-11-04: #651 the page behind the mobile menu is inert
+
+- [x] No scenario: inert changes only what assistive technology reads; Playwright's aria snapshot and role locators still list inert content (checked with a test page), and focus and pointer already stayed in the drawer. DOM tests instead, red first
+- [x] MobileNav makes the page around it inert with the Dialog's `makeInert` (shared in `src/lib/inert.ts`, a module of its own for fitness Ä1); the scrim stays clickable, toasts readable; the menu closes at `lg` (64rem)
+- [x] Code review round 1 (`docs/reviews/651-review-1.md`): C-1 Minor fixed; closing rounds 2 and 3 (`651-review-2.md`, `651-review-3.md`, the move for fitness Ä1) clean
+- [x] Fallback review of #1115: Medium (focus after a wide window closed the menu) and Low (stub ignored the query) fixed, scenario red first; closing round 4 (`651-review-4.md`): C-1 Minor (pages without a main navigation area keep the old fallback to the page) stays in its report
+- [x] No persona: what the screen shows is unchanged, and the persona tools list inert content too
+- [ ] Manual check of toast announcements with NVDA and VoiceOver: product owner (stays in #651)
+- [x] PR (`Refs #651`): pushed after this archive
 ## Session #1096: toasts never move the page; focus after removal
 
 Branch `ccr-7b33ff2a-sj3b8c`. Decided (product owner) 2026-11-04 in #1096. Spec change approved: #1096 (the step «verdeckt die Erfolgsmeldung nicht, was den Fokus hat» checks no overlap instead of «below the focus»: the toast may stand at the top).

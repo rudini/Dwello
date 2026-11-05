@@ -4,7 +4,7 @@
 	import { navGroups } from './navigation';
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import NavList from '$lib/ui/NavList.svelte';
-	import { makeInert } from './inert';
+	import { makeInert } from '$lib/inert';
 	import { MediaQuery } from 'svelte/reactivity';
 
 	// The main menu below 1024 px: a modal drawer that holds the focus while open;
@@ -19,7 +19,14 @@
 		drawer.querySelector<HTMLElement>('a, button')?.focus();
 		return () => {
 			restore();
-			opener?.focus();
+			// closed by a wide window, the menu button is hidden: the focus goes to the current area of the main
+			// navigation, not to the page (fallback review of #1115)
+			const shown = (element: HTMLElement | null | undefined) =>
+				element?.checkVisibility?.() ?? !!element;
+			const current = [...document.querySelectorAll<HTMLElement>('[aria-current="page"]')].find(
+				shown
+			);
+			(shown(opener) ? opener : current)?.focus();
 		};
 	});
 

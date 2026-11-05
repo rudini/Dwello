@@ -20,6 +20,7 @@ import {
 	sectionText,
 	tabIcon
 } from '../questions/app-frame';
+import { focusedText } from '../questions/navigation';
 import { openPage } from '../tasks/navigation';
 import {
 	chooseInFooter,
@@ -28,6 +29,7 @@ import {
 	chooseInMobileMenu,
 	chooseLogo,
 	goToOverviewWhileItFails,
+	openMobileMenu,
 	openPrivacySectionFromTerms,
 	openSettingsFromUserMenu,
 	useWindowWidth
@@ -160,6 +162,19 @@ Then(
 
 Given('das Browserfenster ist {int} Pixel breit', async ({ verwalter }, width: number) => {
 	await verwalter.attemptsTo(useWindowWidth(width));
+});
+
+Given('der Liegenschaftsverwalter hat das Menü geöffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openMobileMenu);
+});
+
+When('das Browserfenster {int} Pixel breit wird', async ({ verwalter }, width: number) => {
+	await verwalter.attemptsTo(useWindowWidth(width));
+});
+
+// #651: the menu closes when the main navigation shows; the focus goes to its current area, not to the page
+Then('steht der Fokus in der Hauptnavigation auf {string}', async ({ verwalter }, area: string) => {
+	await verwalter.sees(focusedText).toBe(area);
 });
 
 // Readable: wide enough for a few words per line, not one letter per line
