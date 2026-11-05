@@ -474,6 +474,26 @@ describe('Abrechnungen erstellen', () => {
 		expect(document.body.textContent).not.toContain('Kosten aller Abrechnungen');
 	});
 
+	// code review 1126-2 C-1 (PO «Empty»): no table, but the row of the non-allocable invoices still shows
+	it('zeigt ohne Positionen die nicht umlagefähigen Rechnungen ohne Tabelle', () => {
+		const empty = { buildingCosts: 0, tenants: 0, landlord: 0 };
+		const reconciliation = {
+			positions: [],
+			total: empty,
+			managementFee: 0,
+			nonAllocable: 500,
+			withoutStatement: 0,
+			drafts: 0,
+			notUpToDate: []
+		};
+		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
+		const shown = byTestId(`preview-reconciliation-${invoices[0].buildingId}`)!;
+		expect(shown.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nicht umlagefähige Rechnungen (tragen Sie ganz) CHF 500.00'
+		);
+		expect(shown.querySelector('table')).toBeNull();
+	});
+
 	it('zeigt ohne Positionen keine Kostenabstimmung', () => {
 		const empty = { buildingCosts: 0, tenants: 0, landlord: 0 };
 		const reconciliation = {

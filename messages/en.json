@@ -80,6 +80,7 @@
 	"help_statements_2": "In the preview you check the costs: Dwello shares them out by distribution key and, when tenants change or an apartment is vacant, bills them by days rented. Only «Create drafts» creates the statements.",
 	"help_statements_3": "The statements are then available as drafts. You can change the payment deadline and the notes; to correct wrong costs, create the statements again.",
 	"help_statements_4": "If the tenant wants correspondence by email, Dwello sends the statement as a PDF with «Send by email» and files it under «Documents». For a letter, deliver the PDF to the tenant yourself and choose «Mark as sent» on the same day. The payment deadline runs from the day it is sent.",
+	"help_statements_5": "Under «Reports» you find the cost reconciliation of each billing period of a building with statements: which part of the building costs the statements charge to the tenants and which part you bear yourself. The preview already shows the same cost reconciliation.",
 	"help_payments_title": "Payments and reminders",
 	"help_payments_1": "The «Overview» shows you overdue statements and upcoming deadlines.",
 	"help_payments_2": "When a payment comes in, choose «Mark as paid» in the statement.",

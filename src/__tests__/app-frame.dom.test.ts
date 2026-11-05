@@ -27,6 +27,7 @@ describe('Hauptnavigation', () => {
 			['Rechnungen', '/invoices'],
 			['Nebenkostenabrechnungen', '/statements'],
 			['Dokumente', '/documents'],
+			['Berichte', '/reports'],
 			['Einstellungen', '/config'],
 			['Kategorien', '/config/categories'],
 			['Verteilschlüssel', '/config/distribution-keys'],

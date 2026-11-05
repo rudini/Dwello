@@ -55,6 +55,13 @@ describe('Kostenabstimmung der Berichte', () => {
 		expect(cells.slice(0, 4)).toEqual(['Hauswart', 'CHF 1’200.00', 'CHF 1’377.05', 'CHF -177.05']);
 	});
 
+	// persona Sven 1126 P-4: a screen reader names the position with each amount
+	it('nennt jede Position als Überschrift ihrer Zeile', () => {
+		show(ReconciliationPage, { data: { title: 'Kostenabstimmung', reconciliation } } as never);
+		const heads = [...document.querySelectorAll('tbody th[scope="row"]')].map(text);
+		expect(heads).toEqual(['Hauswart', 'Total']);
+	});
+
 	it('nennt die nicht umlagefähigen Rechnungen und keine Verwaltungspauschale von CHF 0.00', () => {
 		show(ReconciliationPage, { data: { title: 'Kostenabstimmung', reconciliation } } as never);
 		expect(allByTestId('cost-reconciliation-extra').map(text)).toEqual([

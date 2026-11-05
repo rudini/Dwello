@@ -61,6 +61,17 @@ describe('Kostenabstimmung im BFF', () => {
 		expect(result.positions[0].label).toBe('Hauswart (Pro Fläche (m²))');
 	});
 
+	// code review 1126-2 C-3: a deleted Verteilschlüssel leaves no empty brackets
+	it('nennt bei einem gelöschten Verteilschlüssel nur die Kategorie', async () => {
+		const several = {
+			...report,
+			positions: [{ ...report.positions[0], severalKeys: true, distributionKeyId: null }]
+		};
+		const { fetch } = backend({ 'reports/reconciliation': several });
+		const result = await reportReconciliation(fetch, 'b1', '2024-01-01', '2024-12-31');
+		expect(result.positions[0].label).toBe('Hauswart');
+	});
+
 	// code review 1126-1: an invoice without a Kategorie recorded since, or a line whose Kategorie is deleted
 	it('nennt eine Position ohne Kategorie «Ohne Kategorie»', async () => {
 		const none = { ...report, positions: [{ ...report.positions[0], categoryId: null }] };

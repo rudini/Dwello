@@ -36,9 +36,11 @@ async function toReconciliation(fetch: Fetch, body: Body): Promise<Reconciliatio
 	const category = (id: string | null) => name(id, categories) || m.invoices_no_category();
 	return {
 		positions: body.positions.map(({ categoryId, distributionKeyId, severalKeys, ...amounts }) => ({
-			label: severalKeys
-				? `${category(categoryId)} (${name(distributionKeyId, keys)})`
-				: category(categoryId),
+			// code review 1126-2 C-3: a deleted key leaves the Kategorie alone
+			label:
+				severalKeys && name(distributionKeyId, keys)
+					? `${category(categoryId)} (${name(distributionKeyId, keys)})`
+					: category(categoryId),
 			...amounts
 		})),
 		total: body.total,

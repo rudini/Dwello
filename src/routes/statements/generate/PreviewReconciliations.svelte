@@ -4,9 +4,11 @@
 	import CostReconciliation from '../../reports/CostReconciliation.svelte';
 
 	// #1126: the Kostenabstimmung of each building of the run; a building without allocable invoices (or statements
-	// billing any) shows none
+	// billing any) shows none, only its non-allocable invoices when there are any (code review 1126-2 C-1)
 	let { rows }: { rows: ReturnType<typeof invoiceRows> } = $props();
-	const reconciled = $derived(rows.filter((row) => row.reconciliation?.positions.length));
+	const reconciled = $derived(
+		rows.filter((row) => row.reconciliation?.positions.length || row.reconciliation?.nonAllocable)
+	);
 </script>
 
 {#if reconciled.length}

@@ -98,12 +98,7 @@ describe('Vorschau der Abrechnungen', () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const covered = {
-			...buildingContracts.contracts[0],
-			startDate: '2020-01-01',
-			endDate: null,
-			billedUntil: '2024-12-31'
-		};
+		const covered = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: null, billedUntil: '2024-12-31' };
 		const skipped = [{ id: covered.id, tenantName: covered.tenantName, billedUntil: '2024-12-31' }];
 		const fetch = async (url: string) =>
 			url.includes('/run-reconciliation')
@@ -130,25 +125,9 @@ describe('Vorschau der Abrechnungen', () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const covered = {
-			...buildingContracts.contracts[0],
-			id: 'eva',
-			startDate: '2020-01-01',
-			endDate: '2024-03-31',
-			billedUntil: '2024-12-31'
-		};
-		const billed = {
-			...buildingContracts.contracts[0],
-			id: 'marc',
-			startDate: '2024-05-01',
-			endDate: null
-		};
-		const statement = {
-			...periodStatements.data[0],
-			contractId: 'marc',
-			periodStart: '2024-01-01',
-			periodEnd: '2024-12-31'
-		};
+		const covered = { ...buildingContracts.contracts[0], id: 'eva', startDate: '2020-01-01', endDate: '2024-03-31', billedUntil: '2024-12-31' };
+		const billed = { ...buildingContracts.contracts[0], id: 'marc', startDate: '2024-05-01', endDate: null };
+		const statement = { ...periodStatements.data[0], contractId: 'marc', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 		const fetch = async (url: string) =>
 			url.includes('/run-reconciliation')
 				? Response.json(runReconciliation)
@@ -176,11 +155,7 @@ describe('Vorschau der Abrechnungen', () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries(run)) form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		const befristet = {
-			...buildingContracts.contracts[0],
-			startDate: '2020-01-01',
-			endDate: '2099-12-31'
-		};
+		const befristet = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: '2099-12-31' };
 		const fetch = async (url: string) =>
 			url.includes('/run-reconciliation')
 				? Response.json(runReconciliation)
@@ -288,3 +263,4 @@ describe('Vorgaben des Assistenten aus dem Backend', () => {
 		});
 	});
 });
+

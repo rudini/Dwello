@@ -80,6 +80,7 @@
 	"help_statements_2": "Dans l’aperçu, vous vérifiez les coûts : Dwello les répartit selon la clé de répartition et, en cas de changement de locataire ou de vacance, les décompte selon les jours de location. Seul « Créer les brouillons » crée les décomptes.",
 	"help_statements_3": "Les décomptes sont ensuite disponibles comme brouillons. Vous pouvez adapter le délai de paiement et la remarque ; pour corriger des coûts erronés, établissez à nouveau les décomptes.",
 	"help_statements_4": "Si le locataire souhaite la correspondance par e-mail, Dwello envoie le décompte en PDF avec « Envoyer par e-mail » et le classe sous « Documents ». Pour une lettre, remettez vous-même le PDF au locataire, puis choisissez le même jour « Marquer comme envoyé ». Le délai de paiement court à partir du jour de l’envoi.",
+	"help_statements_5": "Sous « Rapports », vous trouvez pour chaque période de décompte d’un immeuble avec des décomptes le rapprochement des coûts : quelle part des coûts de l’immeuble les décomptes mettent à la charge des locataires et quelle part vous supportez vous-même. L’aperçu montre déjà le même rapprochement des coûts.",
 	"help_payments_title": "Paiements et rappels",
 	"help_payments_1": "La « Vue d’ensemble » vous montre les décomptes en retard et les délais à venir.",
 	"help_payments_2": "Lorsqu’un paiement arrive, choisissez « Marquer comme payé » dans le décompte.",

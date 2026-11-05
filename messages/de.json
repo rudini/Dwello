@@ -80,6 +80,7 @@
 	"help_statements_2": "In der Vorschau prüfen Sie die Kosten: Dwello verteilt sie nach Verteilschlüssel und rechnet bei Mieterwechsel und Leerstand nach Mietstagen ab. Erst «Entwürfe erstellen» legt die Abrechnungen an.",
 	"help_statements_3": "Die Abrechnungen liegen danach als Entwurf vor. Zahlungsfrist und Bemerkung können Sie anpassen; falsche Kosten korrigieren Sie, indem Sie die Abrechnungen neu erstellen.",
 	"help_statements_4": "Wünscht der Mieter Korrespondenz per E-Mail, sendet Dwello die Abrechnung mit «Per E-Mail senden» als PDF und legt sie unter «Dokumente» ab. Für einen Brief stellen Sie dem Mieter das PDF selbst zu und wählen am selben Tag «Als versendet markieren». Ab dem Tag des Versands läuft die Zahlungsfrist.",
+	"help_statements_5": "Unter «Berichte» finden Sie für jede Abrechnungsperiode eines Gebäudes mit Abrechnungen die Kostenabstimmung: welchen Teil der Kosten des Gebäudes die Abrechnungen den Mietern belasten und welchen Sie selbst tragen. Dieselbe Kostenabstimmung zeigt schon die Vorschau.",
 	"help_payments_title": "Zahlungen und Mahnungen",
 	"help_payments_1": "Überfällige Abrechnungen und anstehende Fristen zeigt Ihnen die «Übersicht».",
 	"help_payments_2": "Geht eine Zahlung ein, wählen Sie in der Abrechnung «Als bezahlt markieren».",
