@@ -1003,6 +1003,21 @@ describe('Abrechnungsdetail', () => {
 		expect(document.activeElement).toBe(byTestId('statement-status-line'));
 	});
 
+	// Code-Review 653-3 C-6: a button the action keeps keeps the focus (#1096), the page does not jump to the status
+	it('lässt den Fokus nach dem Neuberechnen auf «Neu berechnen»', async () => {
+		detail({ status: 'sent', correctable: false });
+		const button = byTestId('statement-recalculate-button')!;
+		button.focus();
+		click(button);
+		const after = actions.get('?/recalculate')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(document.activeElement).toBe(button);
+	});
+
 	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
 		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 0, balance: 0 });
 		click('statement-correct-button');
