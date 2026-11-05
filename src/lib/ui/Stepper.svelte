@@ -27,7 +27,8 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Up to xl only the numbers: five names do not fit next to the sidebar (the current one is named above).
+	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above);
+	     a finished step shows its value at every width the list shows (#663).
 	     min-w-0 and hyphenation keep long names inside their step instead of widening the page -->
 	<ol class="hidden gap-2 md:flex">
 		{#each steps as step, i (i)}
