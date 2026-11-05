@@ -1,6 +1,6 @@
 import { inDays } from '../fixtures/dates';
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, EnterDate, Navigate, Scroll } from '../screenplay/interactions';
+import { Browser, Check, Click, EnterDate, Navigate, OpenInNewTab, Scroll } from '../screenplay/interactions';
 import {
 	confirmDeleteContractButton,
 	confirmEndContractButton,
@@ -71,7 +71,8 @@ export const openContractApartment = Click.on(contractApartmentLink);
 export const showContractStatements = Click.on(contractStatementsLink);
 export const showBuildingInvoices = Click.on(contractInvoicesLink);
 export const chooseNextStep = (label: string) => Click.on(nextStep(label));
-export const openRefusedStatement = Click.on(refusedStatementLink);
+// #663: in a new tab, so the dialog keeps its entries
+export const openRefusedStatement = OpenInNewTab(refusedStatementLink);
 export const deleteDraftAndEndContract = Click.on(deleteDraftAndEndButton);
 export const createMissingStatement = (periodStart: string) => Click.on(missingStatementLink(periodStart));
 

@@ -232,12 +232,14 @@ Funktionalität: Mietvertragsdetail
     Und ist im Mietvertrag der Mieter "Anna Keller" gewählt
 
   # A-10: die Ablehnung führt zum Entwurf und bietet den Weg über das Löschen an
+  # #663 (Decided): der Entwurf öffnet in einem neuen Tab; der Dialog bleibt mit seinen Angaben offen
   Szenario: Abgelehnter Entwurf ist verlinkt
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
     Und der Liegenschaftsverwalter den genannten Entwurf öffnet
-    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2025 von "Anna Keller"
+    Dann öffnet sich die Abrechnung 2025 von "Anna Keller" in einem neuen Tab
+    Und steht im Dialog zum Beenden noch der letzte Tag "2025-03-31"
 
   Szenario: Entwurf löschen und Mietvertrag beenden
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
