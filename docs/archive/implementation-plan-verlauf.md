@@ -1068,3 +1068,13 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Fixes: button group of a new key (`data-focus-row`), tall rows count by the focused part, focus to the row now in place when the next row went too (#1123)
 - [x] Slice review round 2 (`docs/reviews/1113-review-2.md`); C-3 kept in this PR as the product owner decided
 - [x] PR: pushed after this archive
+
+## Session 2026-11-05: #653 shared dialogs: tab order, initial focus, description
+
+- [x] Scenarios (contract-detail, invoice-detail, statement-detail), red first: the dialog «Mietvertrag beenden» starts in its field; the long delete confirmation opens at its top on a phone and describes itself with its first paragraph; after sending, the focus is on the status
+- [x] Dialog: focus starts in the first field (a danger dialog with fields on the panel), the confirm button comes after the fields; the description is the first paragraph (not field help, not a live line) unless a dialog names its own (`describedby`, the correction: consequence and «nicht rückgängig»); a button press does not move the dialog under the pointer
+- [x] Scrollbar: product owner decided to leave it to the system setting («System lassen»)
+- [x] Focus after saving: the status line (`#statement-status-line`) when the action's button is gone; a button that stays keeps it (#1096); after «bezahlt» in the list, the row's link or the list's result
+- [x] Code review rounds 1 and 2 (`docs/reviews/653-review-1.md`, `-2.md`) fixed; closing round 3 (`653-review-3.md`) on the merge with #1096: C-6 Blocker («Neu berechnen» lost its focus) and C-7 Major fixed, DOM test red first; round 4 (`653-review-4.md`): C-8 Minor fixed
+- [x] Personas Sven and Marco (`docs/design/personas/sven-653.md`, `marco-653.md`): P-1 (the live date line read as description) fixed
+- [x] PR (`Fixes #653`): pushed after this archive
