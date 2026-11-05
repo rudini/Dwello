@@ -252,6 +252,29 @@ describe('Meldungen', () => {
 		row.remove();
 	});
 
+	// fallback review on #1125: at the top on the right it does not cover a focused link on the left of a tall row
+	it('stellt die Erfolgsmeldung oben hin, wenn sie dort neben dem Element mit dem Fokus einer hohen Zeile steht', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		const row = document.body.appendChild(document.createElement('li'));
+		row.getBoundingClientRect = () => ({ top: 0, bottom: 900, left: 0, right: 1440 }) as DOMRect;
+		const name = row.appendChild(document.createElement('a'));
+		name.href = '/buildings/1';
+		name.getBoundingClientRect = () => ({ top: 20, bottom: 68, left: 0, right: 400 }) as DOMRect;
+		show(ToastRegion, {});
+		const region = document.querySelector<HTMLElement>('[data-toast-region]')!;
+		region.getBoundingClientRect = () =>
+			({ top: 0, bottom: 80, height: 80, left: 1000, right: 1424 }) as DOMRect;
+		name.focus();
+		addToast('success', 'Gebäude gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+
+		expect(region.className).toContain('top-4');
+		row.remove();
+	});
+
 	// The reading time starts when the confirmation appears, not while the next page loads
 	it('zählt die Lesezeit erst ab dem Erscheinen der Meldung', () => {
 		vi.useFakeTimers();

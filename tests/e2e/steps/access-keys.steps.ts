@@ -13,7 +13,8 @@ import {
 	newAccessKeyShown,
 	newAccessKeyText,
 	newAccessKeyWarning,
-	revokeConsequence
+	revokeConsequence,
+	roomBesideNewAccessKeyActions
 } from '../questions/access-keys';
 import { pageTitle } from '../questions/navigation';
 import { goToAuditLog } from '../tasks/audit-log';
@@ -155,3 +156,8 @@ Then(
 		await kiProgramm.sees(mcpStatus).toBe(401);
 	}
 );
+
+// #1113: the confirmation keeps clear of all buttons of the new key, not only of the one just used
+Then('verdeckt die Erfolgsmeldung keinen Knopf beim neuen Zugangsschlüssel', async ({ verwalter }) => {
+	await verwalter.sees(roomBesideNewAccessKeyActions).toBeGreaterThanOrEqual(8);
+});

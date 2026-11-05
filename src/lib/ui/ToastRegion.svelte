@@ -51,16 +51,14 @@
 		const own = region.getBoundingClientRect();
 		// the confirmation at the bottom: 16 px above the edge, and 16 px of the page clear around it
 		const top = innerHeight - 16 - own.height - 16;
-		const below = (part: DOMRect) =>
-			part.bottom > top &&
-			part.top < innerHeight &&
-			part.left < own.right + 16 &&
-			part.right > own.left - 16;
+		const sameColumn = (part: DOMRect) => part.left < own.right + 16 && part.right > own.left - 16;
+		const below = (part: DOMRect) => part.bottom > top && part.top < innerHeight && sameColumn(part);
 		const focus = focused.getBoundingClientRect();
 		// #1113: the whole row or group the focus is in, so none of its buttons lies under it; a row so tall
 		// that the confirmation at the top would cover the focus itself counts by the focused part alone
 		const row = focused.closest('li, tr, [data-focus-row]')?.getBoundingClientRect();
-		atTop = below(focus) || (!!row && below(row) && focus.top >= own.height + 32);
+		const coveredAtTop = focus.top < own.height + 32 && sameColumn(focus);
+		atTop = below(focus) || (!!row && below(row) && !coveredAtTop);
 	};
 	$effect(() => {
 		void moved;

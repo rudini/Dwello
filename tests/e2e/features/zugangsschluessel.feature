@@ -90,3 +90,18 @@ Funktionalität: Zugangsschlüssel für KI-Programme
       | 390    | 844  |
       | 1024   | 768  |
       | 960    | 600  |
+
+  # #1113 (Helga P-2 in #1096): die Meldung lag über «Schliessen» neben dem gerade benutzten Knopf
+  Szenariogrundriss: Die Erfolgsmeldung verdeckt keinen Knopf beim neuen Zugangsschlüssel
+    Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Seite "Zugangsschlüssel für KI-Programme"
+    Und der Liegenschaftsverwalter den Zugangsschlüssel "Claude Desktop Büro" erstellt
+    Und beim neuen Zugangsschlüssel steht das Kopieren der Adresse am unteren Rand des Fensters
+    Wenn der Liegenschaftsverwalter die Adresse für das KI-Programm beim neuen Zugangsschlüssel kopiert
+    Dann verdeckt die Erfolgsmeldung keinen Knopf beim neuen Zugangsschlüssel
+
+    Beispiele:
+      | Breite | Höhe |
+      | 390    | 844  |
+      | 960    | 600  |
+      | 720    | 450  |
