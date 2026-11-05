@@ -27,9 +27,9 @@ export const reconciliationHelp = (scope: Target) =>
 	target(`Hilfetext der ${scope}`, (page) => scope.locate(page).getByTestId('cost-reconciliation-help'));
 export const reconciliationNotes = (scope: Target) =>
 	target(`Hinweise der ${scope}`, (page) => scope.locate(page).getByTestId('cost-reconciliation-note'));
-export const reconciliationInvoice = (scope: Target, description: string) =>
-	target(`Rechnung «${description}» in der ${scope}`, (page) =>
-		scope.locate(page).getByRole('link', { name: description })
+export const reconciliationStatement = (scope: Target, tenantName: string) =>
+	target(`Abrechnung von «${tenantName}» in der ${scope}`, (page) =>
+		scope.locate(page).getByTestId('cost-reconciliation-note').getByRole('link', { name: tenantName })
 	);
 
 // a row of the list on «Berichte»: a building and one of its periods

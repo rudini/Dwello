@@ -4,7 +4,7 @@ import { test } from '../fixtures/test';
 import { cellsOf, helpOf, noteCount, notesOf, reportPeriodName, rowOf, shown, textOf } from '../questions/cost-reconciliation';
 import { invoicesOfBuilding } from '../questions/statement-generate';
 import { pageAddressInApp } from '../questions/statements';
-import { openInvoiceInReport, openReportOf, openReports } from '../tasks/cost-reconciliation';
+import { openStatementInReport, openReportOf, openReports } from '../tasks/cost-reconciliation';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -114,8 +114,8 @@ Then('nennt die Kostenabstimmung der Berichte keinen Hinweis', async ({ verwalte
 });
 
 When(
-	'der Liegenschaftsverwalter in der Kostenabstimmung die Rechnung {string} öffnet',
-	async ({ verwalter }, invoice: string) => {
-		await verwalter.attemptsTo(openInvoiceInReport(invoice));
+	'der Liegenschaftsverwalter in der Kostenabstimmung die Abrechnung von {string} öffnet',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.attemptsTo(openStatementInReport(names.get(tenant) ?? tenant));
 	}
 );

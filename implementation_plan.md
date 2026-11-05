@@ -12,7 +12,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 ## Session: #1126 Kostenabstimmung (preview and «Berichte»)
 
 - [ ] `@wip` scenarios: preview (statement-generate.feature) and «Berichte» (reports.feature), steps seen red
-- [ ] `fach-reviewer` round 1 on the scenarios: title, help text, notes and row texts in all four languages
+- [x] `fach-reviewer` round 1 on the scenarios: `docs/reviews/1126-fachreview-1.md` (M-1, V-1 decided by the PO 05.11.2026: note on statements not up to date; V-7: no notes in the preview)
+- [ ] `fach-reviewer` round 2 on the M-1/V-1 fix
 - [ ] Backend: building costs per position, tenant shares of valid statements and of the run, fee, non-allocable invoices (`*.pg.test.ts` red first)
 - [ ] Backend: «Berichte» periods list, notes (contracts without statement, drafts, invoices no valid statement contains)
 - [ ] API contracts for the new responses

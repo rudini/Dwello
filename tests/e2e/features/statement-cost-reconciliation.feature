@@ -29,7 +29,7 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Hauswart   | CHF 1’200.00        | CHF 1’101.64 | CHF 98.36        |
       | Kaminfeger | CHF 366.00          | CHF 91.00    | CHF 275.00       |
       | Total      | CHF 1’566.00        | CHF 1’192.64 | CHF 373.36       |
-    Und erklärt die Kostenabstimmung der Vorschau für "Lindenhof" "Sie tragen den Anteil für Leerstand, für Mietverträge, die eine Kategorie nicht vereinbaren, und für Tage, die ausserhalb von Dwello abgerechnet sind."
+    Und erklärt die Kostenabstimmung der Vorschau für "Lindenhof" "Sie tragen den Anteil für Leerstand, für Kategorien, die ein Mietvertrag nicht oder erst ab einem späteren Tag vereinbart, und für Tage, die ausserhalb von Dwello abgerechnet sind. Auch Nebenkosten, die ein Mieter pauschal bezahlt, sind in Ihrem Anteil enthalten. Weil jeder Anteil auf Rappen gerundet ist, kann «davon tragen Sie» einige Rappen höher oder tiefer sein."
 
   # Die Pauschale gehört nicht zu den Kosten des Gebäudes: 3 % von 298.36 = 8.95 und von 803.28 = 24.10
   @wip

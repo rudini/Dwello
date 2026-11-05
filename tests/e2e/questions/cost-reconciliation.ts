@@ -1,3 +1,4 @@
+import { question } from '../screenplay/actor';
 import { Count, Text, Visibility } from '../screenplay/questions';
 import {
 	previewReconciliation,
@@ -17,6 +18,8 @@ export const rowOf = (building: Place, label: string) => Text.ofAll(reconciliati
 export const textOf = (building: Place) => Text.of(scopeOf(building));
 export const shown = (building: Place) => Visibility.of(scopeOf(building));
 export const helpOf = (building: Place) => Text.of(reconciliationHelp(scopeOf(building)));
-export const notesOf = (building: Place) => Text.ofAll(reconciliationNotes(scopeOf(building)));
+const joined = (texts: string[]) => texts.join(' ');
+export const notesOf = (building: Place) =>
+	question(`the notes of ${scopeOf(building)}`, async (actor) => joined(await actor.answer(Text.ofAll(reconciliationNotes(scopeOf(building))))));
 export const noteCount = (building: Place) => Count.of(reconciliationNotes(scopeOf(building)));
 export const reportPeriodName = (buildingId: string, periodStart: string) => Text.of(reportPeriod(buildingId, periodStart));
