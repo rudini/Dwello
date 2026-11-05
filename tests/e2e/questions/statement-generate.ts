@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Checked, Count, CutInChoice, Enabled, Gap, ReachingOut, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Checked, Count, CutInChoice, Enabled, Gap, ReachingOut, ShareInViewport, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	allBuildingsNote,
 	confirmMissingInvoices,
@@ -29,6 +29,7 @@ import {
 	agreementsOf,
 	notAgreedCostsLink,
 	generationResult,
+	heatingMeterWarning,
 	heatingProfileSelect,
 	managementFeeHint,
 	managementFeeInput,
@@ -166,6 +167,8 @@ export const countOfHeatingWithoutServicePeriodOn = (date: string) => Count.of(h
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 // #1089: the chosen profile's name as far as the choice shows it
 export const heatingProfileCut = CutInChoice.of(heatingProfileSelect);
+export const meterWarningInWindow = ShareInViewport.of(heatingMeterWarning);
+export const meterWarningText = Text.of(heatingMeterWarning);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const existingStatementsText = Text.of(existingStatements);
 // the warnings the confirmation confirms, read with its checkbox

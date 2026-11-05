@@ -49,6 +49,8 @@ import {
 	previewHasStatementOf,
 	proposedHeatingProfile,
 	heatingProfileCut,
+	meterWarningInWindow,
+	meterWarningText,
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
@@ -752,4 +754,13 @@ Then('zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz', asy
 // #1068: the sentence on «Neu berechnen» stands once in the step, not on each card
 Then('sagt die Wahl der Gebäude einmal {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(recalculateNotes).toEqual([text]);
+});
+
+// #659: on a phone the warning about meters is in the first screen, not behind the help
+Then('sieht der Liegenschaftsverwalter die Warnung zu den Zählern, ohne zu scrollen', async ({ verwalter }) => {
+	await verwalter.sees(meterWarningInWindow).toBeGreaterThan(0);
+});
+
+Then('sagt die Warnung zu den Zählern {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(meterWarningText).toContain(text);
 });

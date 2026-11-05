@@ -869,4 +869,12 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und das Browserfenster ist 390 auf 844 Pixel gross
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann zeigt die Wahl des Heizprofils den Namen des gewählten Profils ganz
+
+  # #659 (Decided): die Sätze zu den Zählern stehen als Warnung unter der Wahl des Heizprofils, nicht im langen Hilfetext davor
+  @wip
+  Szenario: Auf dem Telefon steht die Warnung zu den Zählern im ersten Bildschirm
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann sieht der Liegenschaftsverwalter die Warnung zu den Zählern, ohne zu scrollen
+    Und sagt die Warnung zu den Zählern "Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen."
     Und scrollt die Seite nicht seitwärts
