@@ -106,7 +106,7 @@
 				payError = (await response.json().catch(() => ({}))).message ?? failed;
 				return;
 			}
-			const number = paying!.statementNumber;
+			const { id, statementNumber: number } = paying!;
 			addToast(
 				'success',
 				isPartPayment(paying!, paidAmount)
@@ -115,8 +115,13 @@
 			);
 			paying = null;
 			await invalidateAll();
-			await tick(); // its row's button is gone now: the focus goes to the page title
-			document.querySelector<HTMLElement>('h1')?.focus();
+			await tick(); // its row's button is gone now: the focus goes to its row, not to the page title (#653);
+			// in a list filtered by status the row is gone too: then to the list's result (code review 653-1 C-2)
+			(
+				document.querySelector<HTMLElement>(
+					`[data-testid="statement-row-${id}"] [data-testid="statement-view-link"]`
+				) ?? document.querySelector<HTMLElement>('[data-results]')
+			)?.focus();
 		} catch {
 			payError = failed;
 		} finally {

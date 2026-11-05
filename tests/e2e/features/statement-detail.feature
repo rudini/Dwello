@@ -72,6 +72,14 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung versendet
     Dann hat die Abrechnung den Status "Versendet"
 
+  # #653: nach dem Versand liest ein Screenreader den neuen Status, nicht noch einmal den Titel der Seite
+  Szenario: Nach dem Versand steht der Fokus auf dem Status
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung versendet
+    Dann steht der Fokus auf dem Status "Status: Versendet"
+
   # A-5 (#114): nach dem Auszug ginge die Abrechnung an die verlassene Wohnung; die Warnung sperrt den Versand nicht
   Szenario: Abrechnung an einen ausgezogenen Mieter mit alter Adresse
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"

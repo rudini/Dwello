@@ -28,7 +28,8 @@ import {
 	dialogErrorCount,
 	mistakeConfirmed,
 	endDateHelp,
-	noticeReceivedHelp
+	noticeReceivedHelp,
+	focusedEndDialogField
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -490,4 +491,8 @@ Then('erklärt der Dialog beim Vertragsende {string}', async ({ verwalter }, tex
 
 Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(noticeReceivedHelp).toContain(text);
+});
+
+Then('steht der Fokus im Feld {string} des Dialogs', async ({ verwalter }, field: string) => {
+	await verwalter.sees(focusedEndDialogField).toBe(field);
 });

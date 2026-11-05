@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { Snippet } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { addToast } from '$lib/stores';
 	import Dialog from '$lib/ui/Dialog.svelte';
@@ -18,6 +18,7 @@
 		fields = {},
 		check = () => true,
 		success,
+		describedby,
 		children
 	}: {
 		open: boolean;
@@ -29,7 +30,8 @@
 		ondone?: () => void; // the action led to another page
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
-		success?: string; // said after the action succeeded; where the focus goes then: $lib/focus-after-action.ts (#1096)
+		success?: string; // said after the action succeeded; when its button is gone, the focus then goes to the new status, before $lib/focus-after-action.ts would (#1096)
+		describedby?: string; // the ids of the sentences that describe the dialog, when its first paragraph is not enough
 		children: Snippet;
 	} = $props();
 
@@ -51,6 +53,11 @@
 			open = false;
 			if (result.type === 'success' && said) {
 				addToast('success', said);
+				await tick(); // after the dialog has handed the focus back
+				// its button is gone when the status changed: the focus names the new status, not the page title again (#653);
+				// a button that stays keeps it (#1096, code review 653-3 C-6)
+				if (document.activeElement === document.body)
+					document.getElementById('statement-status-line')?.focus();
 			}
 		},
 		() => ondone?.(),
@@ -66,6 +73,7 @@
 	{busy}
 	busyLabel={m.ui_saving()}
 	{confirmTestid}
+	{describedby}
 	onconfirm={() => check() && form?.requestSubmit()}
 >
 	{@render children()}

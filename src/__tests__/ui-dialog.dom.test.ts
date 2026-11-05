@@ -43,6 +43,65 @@ describe('Dialog', () => {
 		).toContain('als versendet markiert');
 	});
 
+	// #653: a screen reader read the whole content, warnings and lists included, as the description
+	it('beschreibt sich mit dem ersten Absatz, nicht mit dem ganzen Inhalt', () => {
+		openDialog({
+			children: markup(
+				'<div><p>Die Rechnung wird gelöscht.</p><div role="alert"><p>Schon abgerechnet.</p><ul><li>NK-1</li></ul></div></div>'
+			)
+		});
+		const dialog = document.querySelector('[role=dialog]')!;
+		const description = (dialog.getAttribute('aria-describedby') ?? '')
+			.split(' ')
+			.map((id) => document.getElementById(id)?.textContent)
+			.join(' ');
+		expect(description).toBe('Die Rechnung wird gelöscht.');
+	});
+
+	// Code-Review 653-1 C-4: the help of a field at the start is the field's description, not the dialog's
+	it('nimmt den Hilfetext eines Felds nicht als Beschreibung', () => {
+		openDialog({
+			children: markup(
+				'<div><label for="d">Datum</label><input id="d" aria-describedby="d-help" /><p id="d-help">Format TT.MM.JJJJ</p><p>Der Vertrag endet.</p></div>'
+			)
+		});
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(document.getElementById(dialog.getAttribute('aria-describedby')!)!.textContent).toBe(
+			'Der Vertrag endet.'
+		);
+	});
+
+	// Persona Sven 653 P-1: the date's words are a status that fills while typing, not the dialog's description
+	it('nimmt eine Statuszeile eines Felds nicht als Beschreibung', () => {
+		openDialog({
+			children: markup(
+				'<div><input id="d" /><p id="d-words" aria-live="polite"></p><p>Die Frist beachten.</p></div>'
+			)
+		});
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(document.getElementById(dialog.getAttribute('aria-describedby')!)!.textContent).toBe(
+			'Die Frist beachten.'
+		);
+	});
+
+	// Code-Review 653-1 C-3: Enter in a prefilled field would confirm an irreversible action at once
+	it('beginnt einen gefährlichen Dialog mit Feldern auf dem Dialog selbst, Tab führt ins Feld', () => {
+		openDialog({
+			danger: true,
+			children: markup(
+				'<div><p>Die Abrechnung wird ersetzt.</p><input id="amount" value="10.00" /></div>'
+			)
+		});
+		expect(document.activeElement!.getAttribute('role')).toBe('dialog');
+		press('Tab');
+		expect(document.activeElement!.id).toBe('amount');
+	});
+
+	it('hat ohne Absatz keine Beschreibung', () => {
+		openDialog({ children: markup('<div><label>Datum <input /></label></div>') });
+		expect(document.querySelector('[role=dialog]')!.hasAttribute('aria-describedby')).toBe(false);
+	});
+
 	it('macht die Seite dahinter unerreichbar, solange er offen ist', () => {
 		const { opener } = openDialog();
 		const dialog = document.querySelector('[role=dialog]')!;
@@ -66,6 +125,38 @@ describe('Dialog', () => {
 	it('setzt den Fokus auf "Abbrechen", damit nichts aus Versehen bestätigt wird', () => {
 		openDialog();
 		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
+	});
+
+	// #653: with the focus on «Abbrechen», Tab reached the confirm button before the fields
+	it('setzt den Fokus in das erste Feld, wenn der Dialog Felder hat', () => {
+		openDialog({
+			children: markup(
+				'<div><input type="hidden" name="id" value="1" /><input id="disabled" disabled /><label>Vertragsende <input id="end" /></label><select id="kind"></select></div>'
+			)
+		});
+		expect(document.activeElement!.id).toBe('end');
+	});
+
+	// #653 (R7-F2): pressing a button left the field, its error grew the dialog and the release missed the button
+	it('lässt beim Drücken eines Knopfs den Fokus im Feld, damit kein Fehler den Knopf verschiebt', () => {
+		openDialog();
+		const pressed = ['dialog-confirm', 'dialog-cancel'].map((testid) => {
+			const press = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+			byTestId(testid)!.dispatchEvent(press);
+			return press.defaultPrevented;
+		});
+		expect(pressed).toEqual([true, true]);
+	});
+
+	// Code-Review 653-1 C-1: a field takes a two-digit year when it is left; the click must leave it before confirming
+	it('verlässt das Feld beim Klick auf die Bestätigung, bevor sie ausgeführt wird', () => {
+		const { onconfirm } = openDialog({ children: markup('<div><input id="end" /></div>') });
+		let focusedAtConfirm: Element | null = null;
+		onconfirm.mockImplementation(() => (focusedAtConfirm = document.activeElement));
+		const confirm = byTestId('dialog-confirm')!;
+		confirm.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+		click('dialog-confirm');
+		expect(focusedAtConfirm).toBe(confirm);
 	});
 
 	it('hält den Fokus mit Tab im Dialog', () => {

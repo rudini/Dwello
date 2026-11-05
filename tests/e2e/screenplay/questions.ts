@@ -106,10 +106,24 @@ export const ReachingOut = {
 export const FocusedElement = question('the focused element', (actor) =>
 	pageOf(actor).evaluate(() => document.activeElement?.getAttribute('data-testid') ?? null)
 );
+/** The label of the field that has the focus, whitespace normalized like Text.of (#653) */
+export const FocusedLabel = question('the label of the focused field', (actor) =>
+	pageOf(actor).evaluate(() => {
+		const labels = (document.activeElement as HTMLInputElement | null)?.labels;
+		return labels?.length ? [...labels].map((label) => label.textContent).join(' ').replace(/\s+/g, ' ').trim() : null;
+	})
+);
 /** The text of the element that has the focus, whitespace normalized like Text.of */
 export const FocusedText = question('the text of the focused element', (actor) =>
 	pageOf(actor).evaluate(() => document.activeElement?.textContent?.replace(/\s+/g, ' ').trim() ?? null)
 );
+/** Whether the focus lies inside the element, e.g. a dialog after a control in it removed itself */
+export const HoldsFocus = {
+	of: (target: Target) =>
+		about(target, 'whether it holds the focus:', (element) =>
+			single(element, (one) => one.evaluate((part) => part.contains(document.activeElement), undefined, quick))
+		)
+};
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {
