@@ -18,6 +18,7 @@
 		disabled = false,
 		onchange,
 		note,
+		describedby,
 		testid
 	}: {
 		id: string;
@@ -33,11 +34,22 @@
 		disabled?: boolean;
 		onchange?: (value: string) => void;
 		note?: { text: string; testid: string }; // see Field
+		describedby?: string; // see Field
 		testid?: string;
 	} = $props();
 </script>
 
-<Field {id} {label} {help} {example} {error} {optional} {note} helpTestid={testid && `${testid}-help`}>
+<Field
+	{id}
+	{label}
+	{help}
+	{example}
+	{error}
+	{optional}
+	{note}
+	{describedby}
+	helpTestid={testid && `${testid}-help`}
+>
 	{#snippet children(control)}
 		<select
 			id={control.id}

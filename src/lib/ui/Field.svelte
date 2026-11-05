@@ -17,6 +17,7 @@
 		labelTestid,
 		testid,
 		invalidBy,
+		describedby,
 		children
 	}: {
 		id: string;
@@ -30,6 +31,7 @@
 		helpTestid?: string;
 		testid?: string; // the whole field, label to error: a test finds the error of this field (#499)
 		invalidBy?: string; // the id of another field's error that names this field too, e.g. an empty required one
+		describedby?: string; // the id of a hint elsewhere on the page about this field's value (#665)
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
@@ -74,9 +76,11 @@
 	// a quiet note is only a hint, not a warning (#245, persona Helga of #233)
 	const warning = $derived(!note?.quiet);
 	const noteLook = $derived(warning ? 'font-semibold text-caution' : 'text-ink-muted');
-	// a caution about the value first: it is missed at the end of a long help (persona Sven)
+	// a caution about the value first, a hint about it too: it is missed at the end of a long help (persona Sven)
 	const describedBy = $derived(
-		[note && noteId, hasHelp && helpId, shown && errorId, flagged].filter(Boolean).join(' ') || undefined
+		[note && noteId, describedby, hasHelp && helpId, shown && errorId, flagged]
+			.filter(Boolean)
+			.join(' ') || undefined
 	);
 </script>
 

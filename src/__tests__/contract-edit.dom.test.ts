@@ -512,6 +512,16 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).toBeNull();
 	});
 
+	// #665 (Sven B-13 1): a keyboard user hears the hint with «Vertragsbeginn»
+	it('nennt den Hinweis auf nicht geladene Mietverträge mit dem Vertragsbeginn', async () => {
+		fakeBff(() => [500, {}]);
+		await open();
+		const ids = (byTestId('start-date-input')!.getAttribute('aria-describedby') ?? '').split(' ');
+		expect(ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ')).toContain(
+			'Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
+		);
+	});
+
 	// #151: «Erneut versuchen» loads the contracts again; the input stays (Helga B-13 H2)
 	it('lädt die Mietverträge der Wohnung erneut und behält die Eingabe', async () => {
 		let failing = true;

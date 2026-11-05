@@ -82,6 +82,7 @@
 	bind:value={startDate}
 	{min}
 	error={errors.startDate}
+	describedby={unknown ? 'start-contracts-unknown-text' : undefined}
 	testid="start-date-input"
 />
 

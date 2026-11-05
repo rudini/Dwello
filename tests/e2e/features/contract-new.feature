@@ -114,7 +114,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Überschneidung noch nicht geprüft"
 
   # #665 (Persona Sven B-13): wer mit der Tastatur zum Feld kommt, hört den Hinweis mit dem Feld
-  @wip
   Szenario: Die Wohnungsauswahl nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
@@ -122,7 +121,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Dwello konnte die Mietverträge dieser Wohnung nicht laden." vor
 
-  @wip
   Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"

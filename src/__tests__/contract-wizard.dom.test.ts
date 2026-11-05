@@ -421,6 +421,23 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 	});
 
+	// #665 (Sven B-13 1, 2): a keyboard user hears the hint with the field it is about
+	it('nennt den Hinweis auf nicht geladene Mietverträge mit der Wohnung und dem Vertragsbeginn', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		const description = (testid: string) =>
+			(byTestId(testid)!.getAttribute('aria-describedby') ?? '')
+				.split(' ')
+				.map((id) => document.getElementById(id)?.textContent ?? '')
+				.join(' ');
+		const hint = 'Dwello konnte die Mietverträge dieser Wohnung nicht laden.';
+		await toPeriod('a3');
+		expect(description('start-date-input')).toContain(hint);
+		click('wizard-back');
+		expect(description('apartment-select')).toContain(hint);
+	});
+
 	// #151: «Erneut versuchen» loads the contracts again; the start already typed stays
 	it('lädt die Mietverträge der Wohnung erneut und behält die Eingabe', async () => {
 		let failing = true;

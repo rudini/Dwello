@@ -79,7 +79,6 @@ Funktionalität: Mietvertrag bearbeiten
     Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung."
 
   # #665 (Persona Sven B-13): wer mit der Tastatur zum Vertragsbeginn kommt, hört den Hinweis mit dem Feld
-  @wip
   Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"

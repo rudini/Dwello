@@ -15,7 +15,8 @@
 	import Button from '$lib/ui/Button.svelte';
 
 	// The apartment's contracts could not be loaded (#143): with `onretry` the hint loads them again, the
-	// input stays (#151); without it, it points to the hint at the apartment, so a page has one such button
+	// input stays (#151); without it, it points to the hint at the apartment, so a page has one such button;
+	// its text describes the field it is about (`{testid}-text`, #665)
 	let { onretry, testid }: { onretry?: () => void; testid: string } = $props();
 </script>
 
@@ -31,7 +32,7 @@
 	action={onretry ? retry : undefined}
 	{testid}
 >
-	<p>
+	<p id="{testid}-text">
 		{onretry
 			? m.contracts_apartment_contracts_unknown_text()
 			: m.contracts_apartment_contracts_see_apartment()}
