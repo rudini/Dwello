@@ -44,7 +44,8 @@
 				m.help_statements_1(),
 				m.help_statements_2(),
 				m.help_statements_3(),
-				m.help_statements_4()
+				m.help_statements_4(),
+				m.help_statements_5()
 			]
 		},
 		{

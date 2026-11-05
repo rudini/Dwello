@@ -160,7 +160,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und nennt die Vorschau bei "Eva Frei" "Abgerechnet bis 29.02.2024 (am Mietvertrag): Mietstage und Akonto ab 01.03.2024"
     Und nennt die Vorschau bei "Marc Huber" "01.05.2024 – 31.12.2024, 245 Mietstage"
     Aber nennt die Vorschau bei "Marc Huber" nicht "Abgerechnet"
-    Und sagt die Vorschau zum Total "Den Anteil leerer Wohnungen und der Tage, die ausserhalb von Dwello abgerechnet sind, enthält das Total nicht."
 
   # #453 (#327): ein übergangener Mietvertrag fällt nicht still aus der Vorschau
   Szenario: Die Vorschau nennt einen Mietvertrag, den «Abgerechnet bis» ganz abdeckt

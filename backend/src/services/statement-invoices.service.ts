@@ -154,6 +154,15 @@ export async function declineCorrection(statementId: string) {
 	return (await getStatement(statementId))!;
 }
 
+/** #1126: the listed statements whose invoices or Tankbestand changed since they were created («Nicht aktuelle Abrechnung») */
+export async function notUpToDate<S extends StatementWithDetails>(statements: S[]) {
+	const load = perPeriod();
+	const changed = async (s: S) =>
+		!!s.building && ((await changedInvoices(s as Located, load)).length > 0 || (await fuelStockChanged(s as Located, load)));
+	const flags = await Promise.all(statements.map(changed));
+	return statements.filter((_, i) => flags[i]);
+}
+
 /** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
 export const draftOutdated = (changes: Awaited<ReturnType<typeof changesOf>>) =>
 	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged);

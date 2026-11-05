@@ -324,6 +324,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | terms                  | demo                |
       | analytics              | default             |
       | reports                | default             |
+      | reports                | empty               |
+      | report-reconciliation  | default             |
       | help-public            | default             |
       | privacy-public         | default             |
       | terms-public           | default             |
