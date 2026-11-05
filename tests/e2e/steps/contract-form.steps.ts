@@ -349,7 +349,7 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(partiesHelpText).toContain('Bei einem Mieterwechsel');
 		// the place where it goes on, not only the rule (code review m-5)
-		await verwalter.sees(partiesHelpText).toContain('mit «Beenden»');
+		await verwalter.sees(partiesHelpText).toContain('mit «Enddatum erfassen»');
 	}
 );
 

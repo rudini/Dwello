@@ -441,7 +441,6 @@ Funktionalität: Mietvertragsdetail
 
   # #664 (Persona Helga M1): «Beenden» neben «Löschen» klang wie «sofort beenden»; die Aktion öffnet nur die Eingabe
   # des Vertragsendes
-  @wip
   Szenario: Das Vertragsende wird mit «Enddatum erfassen» eingetragen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann bietet der Mietvertrag "Enddatum erfassen" an
@@ -459,7 +458,8 @@ Funktionalität: Mietvertragsdetail
   Szenario: Der beendete Mietvertrag nennt die fällige Schlussabrechnung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert
-    Und "Sarah Meier" mietete die Wohnung "2.02" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Und "Sarah Meier" mietet die Wohnung "2.02" seit "2021-08-01" für "1200" Franken
+    Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Sarah Meier"
     Dann nennt der Mietvertrag den Auszug "Auszug am 30.06.2025, Schlussabrechnung fällig"
 
@@ -467,7 +467,8 @@ Funktionalität: Mietvertragsdetail
   Szenario: Vom Auszug zur Schlussabrechnung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert
-    Und "Sarah Meier" mietete die Wohnung "2.02" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Und "Sarah Meier" mietet die Wohnung "2.02" seit "2021-08-01" für "1200" Franken
+    Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Sarah Meier"
     Wenn der Liegenschaftsverwalter die Schlussabrechnung erstellen will
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
@@ -477,11 +478,25 @@ Funktionalität: Mietvertragsdetail
   Szenario: Mit der Schlussabrechnung nennt der Mietvertrag den Auszug nicht mehr
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert
-    Und "Sarah Meier" mietete die Wohnung "2.02" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Und "Sarah Meier" mietet die Wohnung "2.02" seit "2021-08-01" für "1200" Franken
+    Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Und für "Sarah Meier" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2025
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Sarah Meier"
     Dann meldet der Mietvertrag die fehlende Abrechnung 2024
     Und nennt der Mietvertrag keinen Auszug
+
+  # #664 (Fachreview 664-1 M-1): ob der Mieter nach dem befristeten Vertragsende ausgezogen ist, ist offen, bis der
+  # Liegenschaftsverwalter es bestätigt (Art. 266 Abs. 2 OR); bis dahin nennt Dwello keinen Auszug
+  @wip
+  Szenario: Der abgelaufene befristete Mietvertrag nennt den Auszug erst nach der Bestätigung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Sarah Meier" existiert
+    Und "Sarah Meier" mietete die Wohnung "2.02" befristet von "2021-08-01" bis "2025-06-30" für "1200" Franken mit "100" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Sarah Meier"
+    Dann sagt der Hinweis zum abgelaufenen Mietvertrag "noch in der Wohnung"
+    Und nennt der Mietvertrag keinen Auszug
+    Wenn der Liegenschaftsverwalter bestätigt, dass der Mieter ausgezogen ist
+    Dann nennt der Mietvertrag den Auszug "Auszug am 30.06.2025, Schlussabrechnung fällig"
 
   # #664 (Persona Sven M3): die Ablehnung nennt den Entwurf mit Mieter und Abrechnungsperiode, nicht nur mit seiner Nummer
   @wip

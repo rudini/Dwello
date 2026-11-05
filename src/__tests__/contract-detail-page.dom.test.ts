@@ -256,6 +256,14 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('form-error')).toBeNull();
 	});
 
+	// #664 (Persona Helga M1): «Beenden» neben «Löschen» klang wie «sofort beenden»; die Aktion öffnet nur das Feld
+	it('nennt die Aktion «Enddatum erfassen» und öffnet damit das Feld Vertragsende', () => {
+		open();
+		expect(byTestId('contract-end-button')!.textContent!.trim()).toBe('Enddatum erfassen');
+		click('contract-end-button');
+		expect(byTestId('contract-end-date-input')).not.toBeNull();
+	});
+
 	// F-23 (#155), Fachreview W10 M-1: beim Tod des Mieters endet der Mietvertrag nicht
 	it('sagt im Dialog «Beenden», dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
 		open();
@@ -886,7 +894,7 @@ describe('Mietvertrag löschen', () => {
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
 		expect(dialog).toContain('Der Mietvertrag von Anna Keller hat am 01.04.2024 begonnen.');
 		expect(dialog).toContain(
-			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Zieht der Mieter aus, wählen Sie «Beenden».'
+			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Zieht der Mieter aus, wählen Sie «Enddatum erfassen».'
 		);
 		expect(dialog).toContain('Nach dem Löschen erinnert Dwello nicht mehr daran.');
 		expect(byTestId('contract-delete-mistake-confirm-help')!.textContent).toContain('Leerstand');
@@ -944,7 +952,7 @@ describe('Mietvertrag löschen', () => {
 		expect(dialog).toContain(
 			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Sein Vertragsende ist der 31.12.2021, danach bleibt er als Historie der Wohnung erhalten.'
 		);
-		expect(dialog).not.toContain('«Beenden»');
+		expect(dialog).not.toContain('«Enddatum erfassen»');
 	});
 
 	// Review C-1: konnten die Abrechnungen nicht geladen werden, behauptet der Dialog keine

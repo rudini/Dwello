@@ -111,15 +111,26 @@ Funktionalität: Wohnungsliste
   @wip
   Szenario: Die Wohnungsliste nennt die fällige Schlussabrechnung
     Angenommen der Mieter "Sarah Meier" existiert
-    Und "Sarah Meier" mietete die Wohnung "2.01" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" für "1200" Franken
+    Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann nennt die Wohnungsliste bei der Wohnung "2.01" "Auszug am 30.06.2025, Schlussabrechnung fällig"
 
   @wip
   Szenario: Mit der Schlussabrechnung nennt die Wohnungsliste den Auszug nicht mehr
     Angenommen der Mieter "Sarah Meier" existiert
-    Und "Sarah Meier" mietete die Wohnung "2.01" von "2021-08-01" bis "2025-06-30" für "1200" Franken
+    Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" für "1200" Franken
+    Und der Mietvertrag von "Sarah Meier" ist auf den "2025-06-30" gekündigt
     Und für "Sarah Meier" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2025
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann ist die Wohnung "2.01" "Leer seit 01.07.2025"
+    Und nennt die Wohnungsliste bei der Wohnung "2.01" keinen Auszug
+
+  # #664 (Fachreview 664-1 M-1): nach einem befristeten Vertragsende ohne «Auszug bestätigt» ist der Auszug offen
+  @wip
+  Szenario: Ohne bestätigten Auszug nennt die Wohnungsliste keinen Auszug
+    Angenommen der Mieter "Sarah Meier" existiert
+    Und "Sarah Meier" mietete die Wohnung "2.01" befristet von "2021-08-01" bis "2025-06-30" für "1200" Franken mit "100" Franken Akonto
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann ist die Wohnung "2.01" "Leer seit 01.07.2025"
     Und nennt die Wohnungsliste bei der Wohnung "2.01" keinen Auszug

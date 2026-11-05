@@ -394,7 +394,7 @@ describe('Mietvertrag bearbeiten', () => {
 		await open();
 		const help = byTestId('contract-parties-help')!.textContent!;
 		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
-		expect(help).toContain('mit «Beenden»');
+		expect(help).toContain('mit «Enddatum erfassen»');
 		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel; auch ein begonnener wird gelöscht (#116)
 		expect(help).toContain(
 			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt, löschen Sie den Mietvertrag auf seiner Seite und erfassen Sie ihn neu. Gibt es dazu schon den Entwurf einer Nebenkostenabrechnung, löschen Sie zuerst den Entwurf.'
@@ -440,7 +440,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Bei einem Wechsel der Wohnung erfassen Sie einen neuen Mietvertrag für die andere Wohnung.'
 		);
 		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
-		expect(help).not.toContain('«Beenden»');
+		expect(help).not.toContain('«Enddatum erfassen»');
 		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt; B-16 (#156): mit Mieter und frühestem Beginn,
 		// den der Link nennt, damit ihn niemand für den Nachmieter nimmt (Fachreview W10 V-1)
 		expect(byTestId('contract-parties-new')!.textContent).toBe(
@@ -923,7 +923,7 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(region.classList.contains('sr-only')).toBe(false);
 			expect(region.contains(byTestId('contract-notice-hint'))).toBe(true);
 			expect(byTestId('contract-notice-hint')!.querySelector('a')!.textContent).toBe(
-				'Kündigung mit «Beenden» eintragen'
+				'Kündigung mit «Enddatum erfassen» eintragen'
 			);
 		});
 
