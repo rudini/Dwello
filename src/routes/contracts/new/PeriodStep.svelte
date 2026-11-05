@@ -87,9 +87,14 @@
 	testid="start-date-input"
 />
 
-<!-- read out at the apartment choice already; a second live region would say it twice (Sven B-13) -->
-{#if unknown}
-	<ContractsUnknown {onretry} testid="start-contracts-unknown" />
+<!-- the wizard: the request can fail once this step is open, so it is announced here (#665); the edit form
+     announces it at the apartment, a second live region would say it twice (Sven B-13) -->
+{#if onretry}
+	<LiveRegion shown={unknown}>
+		<ContractsUnknown {onretry} testid="start-contracts-unknown" />
+	</LiveRegion>
+{:else if unknown}
+	<ContractsUnknown testid="start-contracts-unknown" />
 {/if}
 
 <LiveRegion shown={!!pastStart} testid="start-date-notice">

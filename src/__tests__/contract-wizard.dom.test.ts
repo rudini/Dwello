@@ -438,6 +438,15 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(description('apartment-select')).toContain(hint);
 	});
 
+	// #665 (review B-13 round 3): the request can fail only once step 3 is open («Weiter» while loading)
+	it('sagt den Hinweis auf nicht geladene Mietverträge auch beim Vertragsbeginn an', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await toPeriod('a3');
+		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
+	});
+
 	// #151: «Erneut versuchen» loads the contracts again; the start already typed stays
 	it('lädt die Mietverträge der Wohnung erneut und behält die Eingabe', async () => {
 		let failing = true;
