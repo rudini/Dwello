@@ -33,3 +33,5 @@ No proposal: `issue-1046` second row (the «flaky is not a cause» rule led to t
 ## Decided (product owner), 04.11.2026
 
 Applied: 1 (`demo-records.md` restored, unchanged against the demo data; `tests/unit/persona-readme.test.ts` checks the README's file names), 3, 4 without the bare `test:e2e` change (CI on `main` runs it without `--project` for all browsers, so `2026-11-01`, 8 stays as is), 5 without the `seedFor` message (#1119), 6, 7, 9, 10, 11, 12 (in the comment of `HiddenSideways`), 13, 14, 15; from `2026-11-01`: 6 and 13. 8: only the «Stand» date, already in `CLAUDE.md` on `main`; removals by kind are not approved, so a «Decided (product owner)» names each scenario it changes, as Workflow 1 says. 2 stays the product owner's setting outside the repository.
+
+Amended 05.11.2026: 2 is closed as not solvable in the repository. The script belongs to root and the cloud environment writes it anew at each session start, so there is no setting of the product owner to change; `CLAUDE.md`, Workflow 9, already says it overrides neither step 4 nor step 9. Skill `workflow-review` tells notes to leave it out; feedback on it goes to Anthropic (`/feedback`).
