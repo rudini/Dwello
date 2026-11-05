@@ -44,7 +44,7 @@ export default defineConfig({
 					environment: 'jsdom',
 					// One jsdom per worker instead of one per file (dom tests 45 s -> 25 s), files still isolated
 					pool: 'vmThreads',
-					setupFiles: ['tests/mocks/browser-language.ts']
+					setupFiles: ['tests/mocks/browser-language.ts', 'tests/mocks/narrow-window.ts']
 				}
 			}
 		],
