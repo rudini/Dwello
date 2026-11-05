@@ -222,7 +222,13 @@
 		{/snippet}
 	</PageHeader>
 
-	<p class="flex flex-wrap items-center gap-2 text-ink">
+	<!-- after an action of a dialog the focus comes here: it names the new status instead of the page title (#653) -->
+	<p
+		class="flex flex-wrap items-center gap-2 text-ink"
+		id="statement-status-line"
+		data-testid="statement-status-line"
+		tabindex="-1"
+	>
 		{m.statements_status_label()}
 		<Badge
 			tone={statusTones[statement.status]}

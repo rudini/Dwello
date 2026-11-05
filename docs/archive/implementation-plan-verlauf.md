@@ -1078,6 +1078,25 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Slice review round 2 (`docs/reviews/1113-review-2.md`); C-3 kept in this PR as the product owner decided
 - [x] PR: pushed after this archive
 
+## Session 2026-11-05: #656 keys and landmarks in the header
+
+- [x] Decided in #656 (product owner): implement now; after a language change the focus is back on the language choice and a message in the new language names it
+- [x] Scenarios (navigation, sprachen), red first: arrow keys, Home and End in the user menu; the footer marks the open legal page; after a language change the focus is on the language choice and Dwello names the language; «Anmelden» and «Hilfe» sit in the header area
+- [x] The user menu moves like the language choice (`src/lib/menu-keys.ts`, shared); `aria-current="page"` in the footer; a session flag carries the change across the reload; the public layout's top bar is a `<header>`
+- [x] Screen state `language-changed` for login and dashboard (screens.json, accessibility and language rows)
+- [x] Code review round 1 (`docs/reviews/656-review-1.md`): C-1 Blocker (a layout test expected no header), C-2 Major (screen state), C-3 Minor fixed; round 2 (`656-review-2.md`) clean
+- [x] Persona Sven (`docs/design/personas/sven-656.md`): P-1 Minor (the language already shown left the list open and set the flag) fixed, DOM test red first; his notes (no menu role, the account language) stay in the report
+- [x] PR (`Fixes #656`): pushed after this archive
+## Session 2026-11-05: #653 shared dialogs: tab order, initial focus, description
+
+- [x] Scenarios (contract-detail, invoice-detail, statement-detail), red first: the dialog «Mietvertrag beenden» starts in its field; the long delete confirmation opens at its top on a phone and describes itself with its first paragraph; after sending, the focus is on the status
+- [x] Dialog: focus starts in the first field (a danger dialog with fields on the panel), the confirm button comes after the fields; the description is the first paragraph (not field help, not a live line) unless a dialog names its own (`describedby`, the correction: consequence and «nicht rückgängig»); a button press does not move the dialog under the pointer
+- [x] Scrollbar: product owner decided to leave it to the system setting («System lassen»)
+- [x] Focus after saving: the status line (`#statement-status-line`) when the action's button is gone; a button that stays keeps it (#1096); after «bezahlt» in the list, the row's link or the list's result
+- [x] Code review rounds 1 and 2 (`docs/reviews/653-review-1.md`, `-2.md`) fixed; closing round 3 (`653-review-3.md`) on the merge with #1096: C-6 Blocker («Neu berechnen» lost its focus) and C-7 Major fixed, DOM test red first; round 4 (`653-review-4.md`): C-8 Minor fixed
+- [x] Personas Sven and Marco (`docs/design/personas/sven-653.md`, `marco-653.md`): P-1 (the live date line read as description) fixed
+- [x] Fallback review of #1127 (Medium: the send dialog's switch to the letter left the description on a removed paragraph and the focus on the page) fixed, DOM test red first; review round 5 (`653-review-5.md`) C-1 Major (no scenario) answered by a new scenario in `statement-send.feature`; round 6 (`653-review-6.md`) clean
+- [x] PR (`Fixes #653`): pushed after this archive
 ## Session 2026-11-05: #1123 isolation, #1124 focus after saving
 
 - [x] Record the product owner's decisions in #1123 and #1124
@@ -1095,3 +1114,12 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Code review round 1 (`docs/reviews/659-review-1.md`): C-1 Blocker (the #1089 phone scenario had lost its last step to the new one) and C-2 Minor (warning before the chart pinned) fixed; round 2 (`659-review-2.md`)
 - [x] Persona Marco (`docs/design/personas/marco-659.md`): task done; three Minors about the warning's length and wording (decided to stay) and the profile pre-selection stay in the report
 - [x] PR (`Fixes #659`): pushed after this archive
+## Session 2026-11-05: #1128 focus after creating
+
+- [x] Record the product owner's decision in #1128
+- [x] Scenario «Nach dem Erfassen steht der Fokus auf der neuen Kategorie» seen red; DOM test seen red; `focusSavedRow` (renamed from `focusRowLinkingTo`) falls back to the row link named as entered, in `src/lib/focus-after-action.ts` and `src/routes/config/SaveForm.svelte`
+- [x] Code review round 1 (`docs/reviews/1128-review-1.md`); C-1 fixed with a test (links in `nav` left out), C-2 (Minor) stays in the report
+- [x] Closing code review round 2 (`docs/reviews/1128-review-2.md`)
+- [x] Fallback review on #1131 (Medium, = C-2) fixed with a test; closing round 3 (`docs/reviews/1128-review-3.md`), C-3 (Minor) stays in the report
+- [x] Personas Helga and Sven (`docs/design/personas/helga-1128.md`, `sven-1128.md`): no findings
+- [x] Workflow 9: PR pushed after this archive

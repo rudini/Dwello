@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Gap, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, HoldsFocus, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
 	type SplitKeysPlace,
@@ -70,6 +70,9 @@ export const splitKeysHints = (place: SplitKeysPlace) => Count.of(splitKeysHint(
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
+// fallback review of #1127: after the switch to the letter
+export const sendConfirmationDescription = Accessible.descriptionOf(sendDialog);
+export const focusInSendConfirmation = HoldsFocus.of(sendDialog);
 export const sendButtonLabel = Text.of(sendStatementButton);
 export const resetConfirmation = Text.of(resetPaymentDialog);
 export const recipient = Text.of(sendRecipient);

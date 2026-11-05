@@ -110,8 +110,9 @@
 	<MobileNav />
 {:else}
 	<div class="flex min-h-screen flex-col bg-canvas">
-		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages -->
-		<div class="flex items-center justify-end gap-4 px-4 pt-4">
+		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages;
+		     a header of its own, so the links sit in a landmark (#656) -->
+		<header class="flex items-center justify-end gap-4 px-4 pt-4">
 			<div class="mr-auto flex gap-4">
 				{#if contentPage}
 					<a href="/login" class={publicLink} data-testid="public-login-link">{m.login_title()}</a>
@@ -123,7 +124,7 @@
 			<nav aria-label={m.language_choice()}>
 				<LanguageSwitcher />
 			</nav>
-		</div>
+		</header>
 		{#if contentPage}
 			<!-- Help and the legal pages, read before signing in: the same margins as inside the frame -->
 			<main id="main-content" class="flex-1 px-4 py-8 lg:px-10" tabindex="-1">

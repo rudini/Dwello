@@ -63,3 +63,8 @@ Then('steht der Fokus auf dem Ergebnis der Liste', async ({ verwalter }) => {
 Then('steht der Fokus auf dem Ergebnis {string}', async ({ verwalter }, result: string) => {
 	await verwalter.sees(focusedText).toBe(result);
 });
+
+// #653: after saving, the focus names what changed instead of announcing the page title again
+Then('steht der Fokus auf dem Status {string}', async ({ verwalter }, status: string) => {
+	await verwalter.sees(focusedText).toBe(status);
+});

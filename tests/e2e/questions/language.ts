@@ -5,6 +5,7 @@ import { documentRoot, languageButton } from '../targets/language';
 
 const codes: Record<string, string> = { Deutsch: 'de', Français: 'fr', Italiano: 'it', English: 'en' };
 export const languageCode = (language: string) => codes[language];
+export const languageName = (code: string) => Object.keys(codes).find((name) => codes[name] === code)!;
 
 export const pageLanguage = Attribute.named('lang').of(documentRoot);
 export const shownLanguage = Text.of(languageButton);

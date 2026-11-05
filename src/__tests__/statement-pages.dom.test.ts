@@ -318,15 +318,29 @@ describe('Abrechnungsliste', () => {
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
 
-	// Der Knopf der Zeile verschwindet nach dem Speichern: der Fokus geht auf den Titel, nicht auf die Seite
-	it('setzt nach dem Zahlungseingang aus der Liste den Fokus auf den Titel', async () => {
+	// Der Knopf der Zeile verschwindet nach dem Speichern: der Fokus geht auf die Zeile, nicht auf den Titel (#653)
+	it('setzt nach dem Zahlungseingang aus der Liste den Fokus auf die Zeile der Abrechnung', async () => {
 		fakeBff();
 		list([statement({ status: 'sent' })]);
 		click('statement-row-mark-paid');
 		click('statement-list-mark-paid-confirm');
 		await settle();
 
-		expect(document.activeElement).toBe(document.querySelector('h1'));
+		expect(document.activeElement).toBe(
+			document.querySelector('[data-testid="statement-row-s1"] [data-testid="statement-view-link"]')
+		);
+	});
+
+	// Code-Review 653-1 C-2: in a list filtered by status the row is gone after the payment
+	it('setzt den Fokus auf das Ergebnis der Liste, wenn die Zeile nach dem Zahlungseingang weg ist', async () => {
+		fakeBff();
+		list([statement({ status: 'sent' })]);
+		vi.mocked(invalidateAll).mockImplementationOnce(async () => byTestId('statement-row-s1')!.remove());
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.activeElement).toBe(byTestId('list-results'));
 	});
 
 	it('meldet im Dialog, wenn der Zahlungseingang nicht gespeichert wird', async () => {
@@ -965,8 +979,19 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
-	// #1096: the page stays where the landlord was; where the focus goes: focus-after-action.dom.test.ts
-	it('bestätigt das Ersetzen und setzt den Fokus nicht selbst auf den Seitentitel', async () => {
+	// Code-Review 653-1 C-3: the irreversible replacement says so in its description, not only after the field
+	it('beschreibt das Ersetzen mit der Folge und dass es sich nicht rückgängig machen lässt', () => {
+		detail({ status: 'sent' });
+		click('statement-correct-button');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		const description = (dialog.getAttribute('aria-describedby') ?? '')
+			.split(' ')
+			.map((id) => document.getElementById(id)?.textContent?.trim())
+			.join(' ');
+		expect(description).toMatch(/Das lässt sich nicht rückgängig machen\.$/);
+	});
+
+	it('bestätigt das Ersetzen und setzt den Fokus auf den Status', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-correct-button');
@@ -975,7 +1000,22 @@ describe('Abrechnungsdetail', () => {
 		await settle();
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Die Abrechnung ist ersetzt.']);
-		expect(document.activeElement).not.toBe(document.querySelector('h1'));
+		expect(document.activeElement).toBe(byTestId('statement-status-line'));
+	});
+
+	// Code-Review 653-3 C-6: a button the action keeps keeps the focus (#1096), the page does not jump to the status
+	it('lässt den Fokus nach dem Neuberechnen auf «Neu berechnen»', async () => {
+		detail({ status: 'sent', correctable: false });
+		const button = byTestId('statement-recalculate-button')!;
+		button.focus();
+		click(button);
+		const after = actions.get('?/recalculate')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(document.activeElement).toBe(button);
 	});
 
 	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
@@ -1629,6 +1669,20 @@ describe('Abrechnungsdetail', () => {
 		expect(document.querySelector<HTMLInputElement>('input[name="byLetter"]')?.value).toBe('true');
 	});
 
+	// fallback review of #1127: the content changes with the dialog open; its description and the focus follow
+	it('beschreibt den Dialog nach dem Wechsel zum Brief mit dem Brief und behält den Fokus darin', async () => {
+		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		byTestId('send-by-letter-instead')!.focus();
+		click('send-by-letter-instead');
+		await settle();
+
+		const description = document.getElementById(dialog.getAttribute('aria-describedby') ?? '');
+		expect(description?.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst.');
+		expect(dialog.contains(document.activeElement)).toBe(true);
+	});
+
 	it('bietet ohne E-Mail-Adresse nur den Brief an', () => {
 		detail({ tenantEmail: null, tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
 		// persona Helga P-2: schon der Knopf nennt den Brief, nicht die E-Mail
@@ -1913,9 +1967,8 @@ describe('Abrechnungsdetail', () => {
 		}
 	});
 
-	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem Titel statt auf der Seite
-	// #1096: the page stays where the landlord was; where the focus goes: focus-after-action.dom.test.ts
-	it('bestätigt den Zahlungseingang und setzt den Fokus nicht selbst auf den Seitentitel', async () => {
+	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem neuen Status statt auf dem Titel (#653)
+	it('bestätigt den Zahlungseingang und setzt den Fokus auf den Status', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-mark-paid-button');
@@ -1926,7 +1979,7 @@ describe('Abrechnungsdetail', () => {
 		await settle();
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung als bezahlt markiert']);
-		expect(document.activeElement).not.toBe(document.querySelector('h1'));
+		expect(document.activeElement).toBe(byTestId('statement-status-line'));
 	});
 
 	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {

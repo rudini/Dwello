@@ -57,6 +57,18 @@ Funktionalität: Sprache der Oberfläche
     Und ist die Seite auf "Français"
     Und heisst die Seite "Aide - Dwello"
 
+  # #656 (Decided): nach dem Neuladen steht der Fokus wieder auf der Sprachwahl, eine Meldung nennt die neue Sprache
+  Szenario: Nach dem Sprachwechsel steht der Fokus auf der Sprachwahl und Dwello nennt die neue Sprache
+    Angenommen der Liegenschaftsverwalter liest die Hilfe
+    Wenn der Liegenschaftsverwalter die Sprache "Français" wählt
+    Dann steht der Fokus auf der Sprachwahl
+    Und bestätigt Dwello "Langue : Français"
+
+  # #656: die Links vor der Anmeldung gehören zum Kopfbereich der Seite, nicht neben die Bereiche
+  Szenario: Die Links zu Anmeldung und Hilfe stehen im Kopfbereich
+    Angenommen ein Besucher hat die Seite "/privacy" geöffnet
+    Dann stehen die Links "Anmelden" und "Hilfe" im Kopfbereich der Seite
+
   Szenario: Die Wahl bleibt nach Neuladen und neuer Anmeldung
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Und der Liegenschaftsverwalter die Sprache "Italiano" wählt

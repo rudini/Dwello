@@ -126,6 +126,7 @@
 		"saved-toast": "An edit form saved unchanged: the success message (toast) visible on the page it leads to.",
 		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
+		"language-changed": "Right after a language change: the page reloaded in the chosen language, the focus on the language selection and a message naming the language (#656).",
 		"language-menu-open": "The language menu in the header open.",
 		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo.",
 		"backup-error": "«Sicherung einrichten» (#718) with a code typed that is not the one shown: the refusal above the field. The screen runs on the fresh installation of the E2E stack, the only one with a folder for the Sicherung; its look first removes any confirmed code.",
@@ -170,6 +171,7 @@
 				"login-password-error",
 				"login-locked",
 				"other-language",
+				"language-changed",
 				"demo"
 			]
 		},
@@ -223,6 +225,7 @@
 				"mobile-menu-open",
 				"user-menu-open",
 				"other-language",
+				"language-changed",
 				"language-menu-open",
 				"demo"
 			]
