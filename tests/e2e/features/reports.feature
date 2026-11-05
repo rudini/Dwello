@@ -56,7 +56,7 @@ Funktionalität: Berichte
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
     Dann nennt die Kostenabstimmung der Berichte "Total" mit "CHF 1’200.00", "CHF 1’101.64" und "CHF 98.36"
-    Und nennt die Kostenabstimmung der Berichte den Hinweis "1 Abrechnung ist noch ein Entwurf:"
+    Und nennt die Kostenabstimmung der Berichte den Hinweis "1 Abrechnung ist noch ein Entwurf. Sie zählt schon mit, ist aber noch nicht versendet:"
     Und nennt der Hinweis zu den Entwürfen die Abrechnung von "Marc Huber"
 
   # Die ersetzte Abrechnung von Eva zählt nicht; ohne berichtigte hat ihr Mietvertrag keine gültige Abrechnung

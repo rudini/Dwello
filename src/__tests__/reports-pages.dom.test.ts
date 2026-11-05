@@ -74,7 +74,7 @@ describe('Kostenabstimmung der Berichte', () => {
 		const notes = allByTestId('cost-reconciliation-note');
 		expect(notes.map(text)).toEqual([
 			'2 Mietverträge haben für diese Abrechnungsperiode noch keine Abrechnung. Ihr Anteil ist in «davon tragen Sie» enthalten.',
-			'1 Abrechnung ist noch ein Entwurf: Lea Graf. Sie zählt schon mit, ist aber noch nicht versendet.',
+			'1 Abrechnung ist noch ein Entwurf. Sie zählt schon mit, ist aber noch nicht versendet: Lea Graf.',
 			'2 Abrechnungen dieser Abrechnungsperiode sind nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht oder der Tankbestand geändert. Öffnen Sie sie, um zu sehen, ob Sie sie neu berechnen oder berichtigen müssen: Eva Frei, Marc Huber.'
 		]);
 		// PO 05.11.2026 (persona Sven 1126 P-2): the drafts linked as the statements not up to date
