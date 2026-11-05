@@ -965,7 +965,8 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
-	it('bestätigt das Ersetzen und setzt den Fokus auf den Titel', async () => {
+	// #1096: the page stays where the landlord was; where the focus goes: focus-after-action.dom.test.ts
+	it('bestätigt das Ersetzen und setzt den Fokus nicht selbst auf den Seitentitel', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-correct-button');
@@ -974,7 +975,7 @@ describe('Abrechnungsdetail', () => {
 		await settle();
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Die Abrechnung ist ersetzt.']);
-		expect(document.activeElement).toBe(document.querySelector('h1'));
+		expect(document.activeElement).not.toBe(document.querySelector('h1'));
 	});
 
 	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
@@ -1913,7 +1914,8 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem Titel statt auf der Seite
-	it('bestätigt den Zahlungseingang und setzt den Fokus auf den Titel', async () => {
+	// #1096: the page stays where the landlord was; where the focus goes: focus-after-action.dom.test.ts
+	it('bestätigt den Zahlungseingang und setzt den Fokus nicht selbst auf den Seitentitel', async () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-mark-paid-button');
@@ -1924,7 +1926,7 @@ describe('Abrechnungsdetail', () => {
 		await settle();
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung als bezahlt markiert']);
-		expect(document.activeElement).toBe(document.querySelector('h1'));
+		expect(document.activeElement).not.toBe(document.querySelector('h1'));
 	});
 
 	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {

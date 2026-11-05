@@ -1,13 +1,16 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, Enter, Navigate, Uncheck, Wait } from '../screenplay/interactions';
+import { Browser, Check, Click, Enter, Navigate, Scroll, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
+import { Text } from '../screenplay/questions';
 import {
 	allocabilityCancel,
 	allocabilityConfirm,
 	allowanceOption,
 	allowedFilter,
+	categoryRow,
 	deleteButton,
 	editButton,
+	followingCategoryName,
 	fuelCheckbox,
 	heatingCheckbox,
 	nameInput,
@@ -55,7 +58,9 @@ export const saveWithoutFuel = (categoryId: string): Activity => (actor) =>
 	actor.attemptsTo(openCategoryEdit(categoryId), Uncheck.the(fuelCheckbox), Click.on(submitButton));
 
 // #1081: the delete dialog open, its question not answered yet
-export const startDeletingCategory = (name: string) => Click.on(deleteButton(name));
+// #1096: a confirmation may cover a control at the bottom, so the landlord brings the row to the middle first
+export const startDeletingCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Scroll.toMiddle(deleteButton(name)), Click.on(deleteButton(name)));
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));
 
@@ -80,3 +85,13 @@ export const confirmAllocability: Activity = (actor) =>
 export const cancelAllocability = Click.on(allocabilityCancel);
 // #1029: the choice on the edit page, not saved
 export const chooseAllowed = Check.the(allowanceOption('Umlagefähig'));
+
+export const FOLLOWING_CATEGORY = 'followingCategory';
+/** #1096: the landlord is at the category's row; the page's movement and the row after it are noted */
+export const stayAtCategory = (name: string): Activity => async (actor) => {
+	await actor.attemptsTo(Scroll.toMiddle(categoryRow(name)), Scroll.watch);
+	actor.remember(FOLLOWING_CATEGORY, await actor.answer(Text.of(followingCategoryName(name))));
+};
+/** #1113: the category's row at the bottom edge of the window, where a confirmation stands */
+export const bringCategoryToBottomEdge = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Scroll.toBottomEdge(categoryRow(name)));

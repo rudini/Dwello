@@ -13,7 +13,11 @@ bunx bddgen && bunx playwright test --project=chromium -g "Bildschirm ohne .* co
 bun run test:e2e:wip                               # the @wip scenarios, to see them fail (-- -g "Szenarioname" for one)
 ```
 
-Locally run the feature files the change affects and the axe and language rows of its screens (`-g`); the full suite runs in CI. The run builds from the tree when it starts: while one waits or builds, neither run `bun run i18n` nor merge `main`.
+Locally run the feature files the change affects and the axe and language rows of its screens (`-g`); the full suite runs in CI. The run builds from the tree when it starts: while one waits or builds, run neither `bun run i18n`, `bun run check` nor `vitest` (all regenerate `src/lib/paraglide/`), and do not merge `main`.
+
+- Set `LANG=C.UTF-8` for a run (`persona-stack.sh` sets it too): without it Chromium names a download with a non-ASCII name «download».
+- A failure in only one other browser: install it into the scratchpad with `PLAYWRIGHT_BROWSERS_PATH=<scratchpad>/pw npx playwright install <browser>` and run that project with the same variable.
+- A change whose reason is a browser other than Chromium starts `ci.yml` by `workflow_dispatch` on the branch before the merge: pull requests run only Chromium and `api`.
 
 The run builds the frontend into `build/` and its servers load their pages from there; `docs/design/tools/persona-stack.sh` builds into its own `/tmp/persona-app` (`BUILD_DIR`, `svelte.config.js`) with its KI stand-in on 2528, so E2E may run while personas run (both compete for the machine: give E2E a longer Bash timeout). Stop the servers by port (`fuser -k 3100/tcp`), never with `pkill -f <pattern>`: the pattern is in the command's own shell too, which it kills. In cloud sessions `.claude/hooks/session-start.sh` installs dependencies, starts PostgreSQL with the role `dwello` and, when Playwright expects another Chromium build than the image has, sets `PLAYWRIGHT_BROWSERS_PATH` to a shim (`.claude/hooks/pw-shim.sh`), or says at session start that it found no Chromium. If E2E cannot start a browser, check that warning and the links (`ls -L "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome*`) instead of running it again; if it cannot reach the database, run it again. Before a long run, run one feature file. The run drops the backend's stdout; only `console.error` shows in its output.
 
