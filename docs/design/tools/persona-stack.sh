@@ -6,8 +6,6 @@
 set -e
 cd "$(dirname "$0")/../../.."
 export JWT_SECRET=persona-secret-key-at-least-32-characters-long
-# without a UTF-8 locale Chromium names a download with a non-ASCII name «download» (#496)
-export LANG=C.UTF-8
 case " $* " in *" --fresh "*) FRESH=1 ;; esac
 case " $* " in *" --second "*) [ -n "$FRESH" ] || { echo "--second needs --fresh"; exit 1; }; SECOND=1 ;; esac
 # the second shares the first's KI stand-in, which answers like an Ollama only when started with --fresh (code review 774 C-2)
