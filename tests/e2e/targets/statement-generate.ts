@@ -4,6 +4,8 @@ export const periodStartInput = target('Beginn der Abrechnungsperiode', (page) =
 export const periodProposedText = target('Hinweis zum Vorschlag der Abrechnungsperiode', (page) => page.getByTestId('period-proposed'));
 export const periodEndInput = target('Ende der Abrechnungsperiode', (page) => page.getByTestId('period-end-input'));
 export const heatingProfileSelect = target('Heizprofil', (page) => page.getByTestId('heating-profile-select'));
+// #659: the sentences about meters, under the choice
+export const heatingMeterWarning = target('Warnung zu den Zählern', (page) => page.getByTestId('heating-meter-warning'));
 export const managementFeeInput = target('Verwaltungspauschale', (page) => page.getByTestId('management-fee-input'));
 export const wizardChoices = target('Auswahlfelder des Assistenten', (page) => page.getByRole('combobox'));
 export const managementFeeHint = target('Hinweis zur Verwaltungspauschale', (page) =>

@@ -2,6 +2,8 @@ import { question } from '../screenplay/actor';
 import type { Target } from '../screenplay/target';
 import { Attribute, Count, Gap, ShareInViewport, Text, ThePage, Visibility, Width } from '../screenplay/questions';
 import {
+	bannerLink,
+	currentFooterLink,
 	draftNotice,
 	focusedPart,
 	footerVersion,
@@ -18,6 +20,9 @@ import {
 } from '../targets/app-frame';
 import { successToast } from '../targets/form';
 
+// #656
+export const markedFooterLinks = Text.ofAll(currentFooterLink);
+export const linksInBanner = (label: string) => Count.of(bannerLink(label));
 export const sectionShown = (heading: string) => Visibility.of(pageSection(heading));
 export const sectionText = (heading: string) => Text.of(pageSection(heading));
 export const sectionLinkAddresses = (heading: string) => Attribute.named('href').ofAll(sectionLinks(heading));

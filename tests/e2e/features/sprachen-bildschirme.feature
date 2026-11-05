@@ -25,6 +25,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | login                  | login-password-error |
       | login                  | login-locked        |
       | login                  | other-language      |
+      | login                  | language-changed    |
       | login                  | demo                |
       | backup                 | default             |
       | backup                 | backup-error        |
@@ -44,6 +45,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |
+      | dashboard              | language-changed    |
       | dashboard              | language-menu-open  |
       | dashboard              | demo                |
       | buildings              | default             |

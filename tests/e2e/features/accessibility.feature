@@ -24,6 +24,7 @@ Funktionalität: Barrierefreiheit
       | login                  | login-password-error |
       | login                  | login-locked        |
       | login                  | other-language      |
+      | login                  | language-changed    |
       | login                  | demo                |
       | backup                 | default             |
       | backup                 | backup-error        |
@@ -43,6 +44,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |
+      | dashboard              | language-changed    |
       | dashboard              | language-menu-open  |
       | dashboard              | demo                |
       | buildings              | default             |

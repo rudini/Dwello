@@ -105,6 +105,8 @@ export const Scroll = {
 	 * which may leave it a fraction of a pixel outside, does not scroll it in on the click (#1096) */
 	toBottomEdge: (target: Target) =>
 		on(target, (element) => element.evaluate((part) => (part.scrollIntoView({ block: 'end' }), scrollBy(0, 2)))),
+	/** the part at the top of the window, as when the landlord has just scrolled down to it (#659) */
+	toTop: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'start' }))),
 	/** the part in the middle of the window, clear of a confirmation that may cover the bottom (#1096) */
 	toMiddle: (target: Target) => on(target, (element) => element.evaluate((part) => part.scrollIntoView({ block: 'center' }))),
 	/** from now on, notes how far the page moves from where it stands (#1096): `ThePage.movedUntilGone` */
