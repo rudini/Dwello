@@ -88,6 +88,15 @@ export async function exampleOf(seed: TestData, name: string, state: string): Pr
 	return { ...example, account: { email: seed.names.get('E-Mail Konto')!, password: seed.names.get('Passwort Konto')! } };
 }
 
+/** #1119: the error of a state that got no records (it is not in the list of seedFor), with the hint to add it there */
+export const withSeedHint = (example: Example, error: unknown): unknown =>
+	example.building
+		? error
+		: new Error(
+				`state «${example.state}» got no records; if it needs some, add it to the list in seedFor (tests/e2e/fixtures/screens.ts): ${error instanceof Error ? error.message : error}`,
+				{ cause: error }
+			);
+
 /** Title of the document uploaded to the tenant Anna: a file name, not a German word the language check would flag */
 export const UPLOADED = 'IMG_0412';
 

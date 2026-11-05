@@ -1148,6 +1148,15 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Closing code-review round (`code-reviewer`): `docs/reviews/664-review-2.md`; C-6 fixed (fixture), C-7 stays in the report
 - [x] Checks: lint, check, backend type-check, full vitest, full backend suite, affected E2E and axe/language rows, fallow audit, Prettier on added files; workflow notes `docs/reviews/workflow-notes-issue-664.md`
 - [x] PR (`Fixes #664`, `Spec change approved: #664`): pushed by the coordinating session after this archive
+## Session #1119: seedFor names itself when a state gets no records (parallel: checklist in the pull request)
+
+Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language checks; a unit test shows the hint.
+
+- [x] `tests/unit/screens-seed-hint.test.ts` seen red (`withSeedHint is not a function`), then `withSeedHint` in `tests/e2e/fixtures/screens.ts`, applied in `lookAt` (`tests/e2e/tasks/accessibility.ts`)
+- [x] E2E: `invoice-hints` taken out of the list by hand fails with the hint; restored, 6 rows pass (chromium)
+- [x] Code review 1119-review-1: no findings; -2 (German test titles after the fallback review): no findings
+- [x] Before marking complete: lint, check, fitness, backend type-check, Prettier on added files
+- [x] Archive the session; PR pushed after this archive
 ## Session: #1126 Kostenabstimmung (preview and «Berichte»)
 
 - [x] `@wip` scenarios: preview (`statement-cost-reconciliation.feature`) and «Berichte» (`reports.feature`), steps seen red; `@wip` removed, all green

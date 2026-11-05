@@ -1,6 +1,6 @@
 import { writeDraft } from '../../../src/lib/wizard-draft';
 import { inDays } from '../fixtures/dates';
-import { type Example, type Viewport, variants, viewports } from '../fixtures/screens';
+import { type Example, type Viewport, variants, viewports, withSeedHint } from '../fixtures/screens';
 import { accessibilityViolations } from '../questions/accessibility';
 import { inPageLanguage, languageFindings, languageName, pageLanguage } from '../questions/language';
 import { chooseLanguage } from './language';
@@ -913,7 +913,10 @@ const lookAt =
 		const noted = note(look, prefix);
 		if (example.state !== 'every-wizard-step') {
 			const reachState = states[example.state]; // a lookup, then a call: lint refuses calls by computed name
-			return actor.attemptsTo(reachState(example, viewport), noted);
+			await actor.attemptsTo(reachState(example, viewport)).catch((error: unknown) => {
+				throw withSeedHint(example, error);
+			});
+			return actor.attemptsTo(noted);
 		}
 		const wizard = new URL(example.path, 'http://x').pathname;
 		await actor.attemptsTo(
