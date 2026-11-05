@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { localName } from '$lib/names';
 	import { periodRunning } from '$lib/statement';
 	import { draftsLink, invoiceRows, zipLink, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
@@ -22,6 +21,7 @@
 		invoices,
 		periodLabel,
 		buildingNames,
+		profileName,
 		created
 	}: {
 		step: number;
@@ -37,12 +37,10 @@
 		invoices: Parameters<typeof invoiceRows>[0];
 		periodLabel: string;
 		buildingNames: string; // the chosen buildings, for the summary before creating (#663)
+		profileName?: string; // the chosen heating profile, in the language shown
 		created: string[] | null;
 	} = $props();
 
-	const heatingProfile = $derived(
-		data.heatingProfiles.find((p) => p.id === selection.heatingProfileId)
-	);
 	// whether the period is still running, asked of the backend for each end; an answer counts only for its day (#815)
 	let checked = $state({ end: '', running: false });
 	const running = $derived(checked.end === selection.periodEnd && checked.running);
@@ -83,7 +81,7 @@
 		buildings={data.buildings}
 		{periodLabel}
 		period={selection}
-		heatingProfile={heatingProfile && localName(heatingProfile)}
+		heatingProfile={profileName}
 		feePercent={selection.managementFeePercent}
 		bind:confirmed
 		{running}
@@ -94,7 +92,7 @@
 		summary={{
 			period: periodLabel,
 			buildings: buildingNames,
-			heatingProfile: heatingProfile && localName(heatingProfile),
+			heatingProfile: profileName,
 			feePercent: selection.managementFeePercent
 		}}
 		count={previewRows.length}

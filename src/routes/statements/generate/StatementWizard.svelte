@@ -330,6 +330,7 @@
 			{invoices}
 			{periodLabel}
 			{buildingNames}
+			{profileName}
 			created={form?.created ?? null}
 		/>
 	</section>

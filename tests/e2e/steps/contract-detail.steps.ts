@@ -28,9 +28,8 @@ import {
 	dialogErrorCount,
 	mistakeConfirmed,
 	endDateHelp,
-	endDateTyped,
 	openedInNewTab,
-	openedPageText,
+	openedPath,
 	noticeReceivedHelp,
 	focusedEndDialogField
 } from '../questions/contract-detail';
@@ -233,16 +232,11 @@ When('der Liegenschaftsverwalter den genannten Entwurf öffnet', async ({ verwal
 
 Then(
 	'öffnet sich die Abrechnung {int} von {string} in einem neuen Tab',
-	async ({ verwalter }, year: number, tenant: string) => {
+	async ({ verwalter, seed }, year: number, tenant: string) => {
 		await verwalter.sees(openedInNewTab).toBe(true);
-		await verwalter.sees(openedPageText).toContain(tenant);
-		await verwalter.sees(openedPageText).toContain(String(year));
+		await verwalter.sees(openedPath).toBe(statementPath(seed, tenant, year));
 	}
 );
-
-Then('steht im Dialog zum Beenden noch der letzte Tag {string}', async ({ verwalter }, date: string) => {
-	await verwalter.sees(endDateTyped).toBe(swissDate(date));
-});
 
 When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(deleteDraftAndEndContract);

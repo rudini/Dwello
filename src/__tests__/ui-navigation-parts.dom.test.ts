@@ -47,7 +47,8 @@ describe('Schrittanzeige', () => {
 			expect.stringContaining('01.01.2025 – 31.12.2025'),
 			expect.stringContaining('Alpenblick')
 		]);
-		expect(byTestId('wizard-step-value')!.className.split(/\s+/)).toContain('xl:not-sr-only');
+		// on screen at every width the steps show, not only from xl like their names (code review 663-1 C-2)
+		expect(byTestId('wizard-step-value')!.className.split(/\s+/)).not.toContain('sr-only');
 	});
 
 	it('zeigt die Namen der Schritte erst ab breiten Fenstern, Screenreadern immer', () => {

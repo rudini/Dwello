@@ -49,3 +49,36 @@ Etwa 30 Minuten, rund 20 Schritte (davon drei abgelehnte Speicherversuche und zw
 - Den Assistenten über Schritt 3 hinaus habe ich nicht weitergeführt, weil ich keine Abrechnungen erstellen sollte. Ob die neue Abrechnung 2025 mit dem Ende 31.10.2025 richtig rechnet, weiss ich deshalb nicht.
 - Zoom 200 % habe ich nicht versucht, nur 150 %.
 - Einen Abschnitt «Nächste Schritte» habe ich auf der Vertragsseite von Sarah Meier, auf der Vertragsseite von Nina Brunner, auf der Wohnungsseite A2 und auf der Übersicht gesucht. Gefunden habe ich nur «Als Nächstes zu tun» auf der Übersicht.
+
+## Nachprüfung
+
+Nur P-1 nachgeprüft. Desktop 1440 × 900, Zoom 150 %, Maus. Seepark Residenz, Wohnung A2, Mietvertrag von Sarah Meier, nichts gespeichert.
+
+| ID  | Schwere | Bildschirm | Befund |
+| --- | ------- | ---------- | ------ |
+| P-1 | behoben | Mietvertrag bearbeiten, Meldung «Der Mietvertrag wurde nicht gespeichert» | Der Link heisst jetzt sichtbar «Nebenkostenabrechnung NK-22222222-2025-0002 öffnen (öffnet in neuem Tab)» und öffnet den Entwurf in einem zweiten Tab. Im Tab des Mietvertrags stand danach alles noch so, wie ich es getippt hatte. |
+
+### Beobachtungen
+
+- Mit dem Vertragsende 31.10.2025 kam ich gar nicht bis zum Speichern: Schon beim Tippen erschien unter dem Feld «Zeitraum überschneidet sich – Überschneidung mit bestehendem Vertrag: ab 01.07.2025 (unbefristet)», wie in der ersten Runde, wieder ohne den Namen Nina Brunner. Ich habe deshalb ein früheres Ende genommen, den 31.05.2025. Damit kam die Ablehnung wegen des Entwurfs.
+- Es ist kein Dialog, sondern eine rote Meldung unten im Formular, darunter der Link, der Satz «Der Entwurf NK-22222222-2025-0002 wird gelöscht …», der Knopf «Entwurf löschen und Mietvertrag speichern», «Abbrechen» und «Änderungen speichern».
+- «(öffnet in neuem Tab)» steht als normaler Text im Link, in der gleichen Grösse. Ich sehe es also, bevor ich klicke (Aufnahme 06: rote Meldung, darunter der blaue, unterstrichene Link mit diesem Zusatz).
+- Der neue Tab zeigt «Abrechnung NK-22222222-2025-0002», Sarah Meier, Seepark Residenz, Wohnung A2, Abrechnungsperiode 01.01.2025 – 31.12.2025, «Status: Entwurf». Das ist der richtige Entwurf.
+- Zurück im ersten Tab (Aufnahme 08): Vertragsende 31.05.2025, das Kästchen «Der Mietvertrag endete am 31.05.2025» angekreuzt, Zusatzmiete 85.00, «Monatlich total CHF 1’855.00», die rote Meldung noch da. Nichts ist verloren.
+- «Abbrechen» führt zur Seite des Mietvertrags. Dort steht weiter «Unbefristet, gekündigt auf den 30.06.2025» und Zusatzmiete CHF 80.00. Es wurde nichts gespeichert. Gefragt, ob ich meine Eingaben wirklich verwerfen will, hat mich «Abbrechen» nicht; das hatte ich auch nicht erwartet.
+
+### Aufgabe geschafft: ja
+
+### Aufwand
+
+Etwa 5 Minuten, 8 Schritte (ein Versuch mit 31.10.2025, der schon am Feld an der Überschneidung hängen blieb).
+
+### Ablauf
+
+- Vertragsende 31.10.2025 getippt. Erwartet: speichern und die Ablehnung wegen des Entwurfs. Gesehen: schon am Feld der Hinweis zur Überschneidung mit dem Mietvertrag ab 01.07.2025; mit 31.05.2025 ging es weiter.
+- Der Bearbeiten-Bildschirm ist eine eigene Seite, kein Dialog. Erwartet (vom Auftrag her): ein Dialog. Gesehen: eine Meldung im Formular. Für mich macht das keinen Unterschied.
+
+### Nicht geprüft
+
+- Zoom 200 % habe ich nicht versucht.
+- Den Weg über das Mittelklick- oder Rechtsklick-Menü habe ich nicht geprüft, nur den normalen Klick.

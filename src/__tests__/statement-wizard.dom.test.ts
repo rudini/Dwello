@@ -599,8 +599,8 @@ describe('Abrechnungen erstellen', () => {
 		const summary = byTestId('run-summary')!.textContent!.replace(/\s+/g, ' ');
 		expect(summary).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(summary).toContain('Gebäude Lindenhof');
-		expect(summary).toContain('Heizprofil');
-		expect(summary).toContain('Verwaltungspauschale');
+		expect(summary).toContain('Heizprofil Gleichmässig');
+		expect(summary).toContain('Verwaltungspauschale 3 % der eigenen Nebenkosten');
 	});
 
 	it('sagt vor dem Erstellen, dass nur Entwürfe entstehen und nichts verschickt wird', async () => {

@@ -51,7 +51,7 @@
 								class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
 							>{#if values[i]}<span
 									data-testid="wizard-step-value"
-									class="sr-only min-w-0 break-words font-normal text-ink-muted xl:not-sr-only"
+									class="min-w-0 break-words font-normal text-ink-muted"
 								>
 									{values[i]}</span
 								>{/if}
