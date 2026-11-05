@@ -124,6 +124,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | advance-delete-refused |
       | contract-detail        | missing-statements  |
       | contract-moved-out-detail | default          |
+      | contract-final-due-detail | default          |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |

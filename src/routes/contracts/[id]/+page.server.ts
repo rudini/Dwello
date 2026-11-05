@@ -8,6 +8,7 @@ import type {
 	Json
 } from '$lib/types';
 import type { ContractResponse } from '../../../../backend/src/api/contract';
+import type { MoveOut } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { agreeableCategories } from '$lib/server/category';
 import { agreedNames } from '$lib/contract-form';
@@ -39,6 +40,8 @@ interface ContractDetailsData {
 	billedBy: { id: string; statementNumber: string; status: string }[] | null;
 	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
 	fixedTermCheck: boolean; // A-6: an agreed end passed, the tenant may have stayed
+	// #664: the move-out until the Schlussabrechnung exists, once due with its way into the wizard
+	moveOut: (MoveOut & { href: string | null }) | null;
 	endsToday: boolean; // the contract ends today, the backend says by the Swiss day (#815)
 	agreedCosts: string[] | null; // #91: the agreed Nebenkosten by name; null when the categories cannot be read
 	contract: RentalContract & {
@@ -150,6 +153,19 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			// what a notice or an agreed end still asks of the landlord, the backend decides (A-4 to A-6, #788)
 			nextSteps: data.nextSteps ?? null,
 			fixedTermCheck: data.fixedTermCheck === true,
+			moveOut: data.moveOut
+				? {
+						...data.moveOut,
+						href:
+							data.moveOut.due && !data.moveOut.outside
+								? wizardLink(
+										contract.building.id,
+										data.moveOut.period.start,
+										data.moveOut.period.end
+									)
+								: null
+					}
+				: null,
 			endsToday: data.endsToday === true,
 			contract,
 			// the agreed Nebenkosten (#91); without the categories the page still shows the rest

@@ -447,14 +447,12 @@ Funktionalität: Mietvertragsdetail
 
   # #664 (Persona Helga M4): ab dem Vertragsende nennt der Mietvertrag den Auszug und ab wann die Schlussabrechnung
   # erstellt werden kann, das Ende der Abrechnungsperiode des Vertragsendes
-  @wip
   Szenario: Der beendete Mietvertrag nennt den Auszug und wann die Schlussabrechnung kommt
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beendet
     Dann nennt der Mietvertrag den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres
 
   # #664: nach dem Ende der Abrechnungsperiode und solange die Schlussabrechnung fehlt, ist sie fällig
-  @wip
   Szenario: Der beendete Mietvertrag nennt die fällige Schlussabrechnung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert
@@ -463,7 +461,6 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Sarah Meier"
     Dann nennt der Mietvertrag den Auszug "Auszug am 30.06.2025, Schlussabrechnung fällig"
 
-  @wip
   Szenario: Vom Auszug zur Schlussabrechnung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert
@@ -474,7 +471,6 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
 
   # #664: mit der Schlussabrechnung ist nichts mehr offen
-  @wip
   Szenario: Mit der Schlussabrechnung nennt der Mietvertrag den Auszug nicht mehr
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert
@@ -487,7 +483,6 @@ Funktionalität: Mietvertragsdetail
 
   # #664 (Fachreview 664-1 M-1): ob der Mieter nach dem befristeten Vertragsende ausgezogen ist, ist offen, bis der
   # Liegenschaftsverwalter es bestätigt (Art. 266 Abs. 2 OR); bis dahin nennt Dwello keinen Auszug
-  @wip
   Szenario: Der abgelaufene befristete Mietvertrag nennt den Auszug erst nach der Bestätigung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Sarah Meier" existiert

@@ -28,10 +28,10 @@ async function newBuilding() {
 }
 const rentals: { apartment: string; tenant: string; contract: string }[] = [];
 
-async function rent(number: string, lastName: string, startDate: string, endDate?: string, building = buildingId) {
+async function rent(number: string, lastName: string, startDate: string, endDate?: string, building = buildingId, terminated = false) {
 	const apartment = await createApartment({ buildingId: building, number, floor: 1, area: '60', rooms: '3' });
 	const tenant = await createTenant({ firstName: 'Eva', lastName: `${lastName} ${token}` });
-	const contract = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate, endDate, baseRent: '900', monthlyAdvancePayment: '100', managementFeeAgreed: true });
+	const contract = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, startDate, endDate, baseRent: '900', monthlyAdvancePayment: '100', managementFeeAgreed: true, terminated });
 	rentals.push({ apartment: apartment.id, tenant: tenant.id, contract: contract.id });
 	return contract.id;
 }
@@ -114,6 +114,33 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 
 		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
+	});
+});
+
+// #664: the move-out of an ended contract until its Schlussabrechnung exists, on the contract and the apartment's row
+describe('Auszug bis zur Schlussabrechnung', () => {
+	const due = { endDate: '2025-06-30', period: { start: '2025-01-01', end: '2025-12-31' }, due: true, outside: false };
+
+	it('nennt beim gekündigten Mietvertrag und in der Wohnungsliste die fällige Schlussabrechnung', async () => {
+		const building = await newBuilding();
+		const contract = await rent('1.01', 'Meier', '2021-08-01', '2025-06-30', building, true);
+
+		const ofContract = (await (await sendJson('GET', `/api/v1/contracts/${contract}`)).json()) as { moveOut: unknown };
+		const rows = (await (await sendJson('GET', `/api/v1/apartments?buildingId=${building}`)).json()) as { apartments: { moveOut: unknown }[] };
+
+		expect(ofContract.moveOut).toEqual(due);
+		expect(rows.apartments.map((a) => a.moveOut)).toEqual([due]);
+	});
+
+	// Fachreview 664-1 M-1: after a fixed-term end without «Auszug bestätigt» Dwello asks whether the tenant stayed
+	it('nennt nach einem befristeten Vertragsende keinen Auszug, bis er bestätigt ist', async () => {
+		const building = await newBuilding();
+		const contract = await rent('1.01', 'Brunner', '2021-08-01', '2025-06-30', building);
+		const moveOut = async () => ((await (await sendJson('GET', `/api/v1/contracts/${contract}`)).json()) as { moveOut: unknown }).moveOut;
+
+		expect(await moveOut()).toBeNull();
+		expect((await sendJson('PUT', `/api/v1/contracts/${contract}`, { movedOut: true })).status).toBe(200);
+		expect(await moveOut()).toEqual(due);
 	});
 });
 

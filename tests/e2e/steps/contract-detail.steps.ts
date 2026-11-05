@@ -517,8 +517,9 @@ Then('bietet der Mietvertrag {string} an', async ({ verwalter }, label: string) 
 	await verwalter.sees(endActionLabel).toBe(label);
 });
 
+// the hint, followed by its way into the wizard once it is due
 Then('nennt der Mietvertrag den Auszug {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(moveOutText).toBe(text);
+	await verwalter.sees(moveOutText).toContain(text);
 });
 
 // the Abrechnungsperiode of the building is the calendar year, the one the Vertragsende falls in

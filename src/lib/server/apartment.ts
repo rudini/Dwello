@@ -18,7 +18,8 @@ export const toApartmentRow = (a: Json<ApartmentWithDetails>): ApartmentListItem
 	buildingName: a.buildingName || '',
 	nextContractStart: a.nextContractStart ?? null,
 	currentContractEnd: a.currentContractEnd ?? null,
-	lastContractEnd: a.lastContractEnd ?? null
+	lastContractEnd: a.lastContractEnd ?? null,
+	moveOut: a.moveOut ?? null // #664
 });
 
 /** Apartment with its building, as the detail and edit pages show it */

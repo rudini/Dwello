@@ -130,6 +130,21 @@ describe('Nächste Schritte und abgelaufener befristeter Mietvertrag', () => {
 		const expired = { endDate: '2025-12-31', terminated: false, movedOut: false };
 		expect((await page({ ...expired, fixedTermCheck: false })).fixedTermCheck).toBe(false);
 	});
+
+	// #664: the move-out the backend names, once due with its way into the wizard for that period of the building
+	it('nennt den Auszug und führt zur fälligen Schlussabrechnung', async () => {
+		const { moveOut } = (await page({})) as unknown as { moveOut: unknown };
+		const { start, end } = contractDetail.moveOut.period;
+		expect(moveOut).toEqual({
+			...contractDetail.moveOut,
+			href: `/statements/generate?building=${contractDetail.building.id}&start=${start}&end=${end}`
+		});
+		const pending = { ...contractDetail.moveOut, due: false };
+		expect(((await page({ moveOut: pending })) as unknown as { moveOut: unknown }).moveOut).toEqual(
+			{ ...pending, href: null }
+		);
+		expect(((await page({ moveOut: null })) as unknown as { moveOut: unknown }).moveOut).toBeNull();
+	});
 });
 
 // A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung; the backend decides them and their way

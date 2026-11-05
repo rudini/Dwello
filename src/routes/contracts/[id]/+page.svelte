@@ -25,6 +25,7 @@
 	import FixedTermCheck from './FixedTermCheck.svelte';
 	import ContractTerms from './ContractTerms.svelte';
 	import MissingStatement from './MissingStatement.svelte';
+	import MoveOut from './MoveOut.svelte';
 	import NextSteps from './NextSteps.svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -149,6 +150,7 @@
 		{name}
 	/>
 	<FixedTermCheck shown={data.fixedTermCheck} endDate={contract.endDate} {name} {form} />
+	<MoveOut moveOut={data.moveOut} />
 	<MissingStatement missing={data.missingStatements} />
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

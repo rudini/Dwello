@@ -4,7 +4,16 @@ import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { monthlyTotal } from '../lib/server/contract-history';
-import { floorLabel, floorOptions, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
+import {
+	floorLabel,
+	floorOptions,
+	moveOutText,
+	occupancyParts,
+	statusHelp,
+	statusLabels,
+	statusText
+} from '../lib/apartment';
+import apartmentsResponse from '../../tests/contracts/apartments.json';
 import { runAction } from './helpers/action';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import apartmentResponse from '../../tests/contracts/apartment.json';
@@ -182,6 +191,45 @@ describe('Wohnungsliste', () => {
 		};
 
 		expect(data.apartments[0].lastContractEnd).toBe('2024-03-31');
+	});
+
+	// #664: the backend decides the move-out until the Schlussabrechnung exists
+	it('gibt den Auszug bis zur Schlussabrechnung weiter', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(url.includes('/apartments') ? apartmentsResponse : { buildings: [] })) as typeof globalThis.fetch;
+		const data = (await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
+			apartments: { moveOut: unknown }[];
+		};
+
+		expect(data.apartments[0].moveOut).toEqual(apartmentsResponse.apartments[0].moveOut);
+	});
+});
+
+// #664 (Persona Helga M4): until the end of the Abrechnungsperiode of the Vertragsende, then due while it is missing
+describe('Auszug bis zur Schlussabrechnung', () => {
+	const period = { start: '2025-01-01', end: '2025-12-31' };
+
+	it('nennt bis zum Ende der Abrechnungsperiode, ab wann die Schlussabrechnung kommt', () => {
+		expect(moveOutText({ endDate: '2025-06-30', period, due: false, outside: false })).toBe(
+			'Auszug am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
+		);
+	});
+
+	it('nennt danach die fällige Schlussabrechnung', () => {
+		expect(moveOutText({ endDate: '2025-06-30', period, due: true, outside: false })).toBe(
+			'Auszug am 30.06.2025, Schlussabrechnung fällig'
+		);
+	});
+
+	// Fachreview 664-1 V-2: an older statement of the building overlaps the period: Dwello cannot bill it
+	it('sagt, dass die Schlussabrechnung ausserhalb von Dwello fällig ist', () => {
+		expect(moveOutText({ endDate: '2025-06-30', period, due: true, outside: true })).toBe(
+			'Auszug am 30.06.2025, Schlussabrechnung ausserhalb von Dwello fällig'
+		);
+	});
+
+	it('nennt ohne offene Schlussabrechnung nichts', () => {
+		expect(moveOutText(null)).toBe('');
 	});
 });
 

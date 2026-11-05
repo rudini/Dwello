@@ -97,7 +97,6 @@ Funktionalität: Wohnungsliste
 
   # #664 (Persona Helga M4, review K-4): mit einem Nachmieter ab dem Tag danach steht «Vermietet»; der Auszug und ab
   # wann die Schlussabrechnung erstellt werden kann, stehen dabei, bis die Abrechnungsperiode des Vertragsendes endet
-  @wip
   Szenario: Die Wohnungsliste nennt den Auszug bis zum Ende seiner Abrechnungsperiode
     Angenommen der Mieter "Sarah Meier" existiert
     Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" bis heute für "1200" Franken
@@ -108,7 +107,6 @@ Funktionalität: Wohnungsliste
     Und nennt die Wohnungsliste bei der Wohnung "2.01" den Auszug von heute mit der Schlussabrechnung nach dem Ende des Jahres
 
   # #664: nach dem Ende der Abrechnungsperiode und solange die Schlussabrechnung fehlt, ist sie fällig
-  @wip
   Szenario: Die Wohnungsliste nennt die fällige Schlussabrechnung
     Angenommen der Mieter "Sarah Meier" existiert
     Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" für "1200" Franken
@@ -116,7 +114,6 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann nennt die Wohnungsliste bei der Wohnung "2.01" "Auszug am 30.06.2025, Schlussabrechnung fällig"
 
-  @wip
   Szenario: Mit der Schlussabrechnung nennt die Wohnungsliste den Auszug nicht mehr
     Angenommen der Mieter "Sarah Meier" existiert
     Und "Sarah Meier" mietet die Wohnung "2.01" seit "2021-08-01" für "1200" Franken
@@ -127,7 +124,6 @@ Funktionalität: Wohnungsliste
     Und nennt die Wohnungsliste bei der Wohnung "2.01" keinen Auszug
 
   # #664 (Fachreview 664-1 M-1): nach einem befristeten Vertragsende ohne «Auszug bestätigt» ist der Auszug offen
-  @wip
   Szenario: Ohne bestätigten Auszug nennt die Wohnungsliste keinen Auszug
     Angenommen der Mieter "Sarah Meier" existiert
     Und "Sarah Meier" mietete die Wohnung "2.01" befristet von "2021-08-01" bis "2025-06-30" für "1200" Franken mit "100" Franken Akonto

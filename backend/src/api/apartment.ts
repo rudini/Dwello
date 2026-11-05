@@ -8,6 +8,9 @@ import type { Apartment, Building } from '../db/schema';
 /** An apartment's Belegung, as the backend decides it by the Swiss day */
 export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
 
+/** #664: an ended contract's move-out until its Schlussabrechnung exists, `due` after the end of its period */
+export type MoveOut = { endDate: string; period: { start: string; end: string }; due: boolean; outside: boolean };
+
 export interface ApartmentWithDetails extends Omit<Apartment, 'status'> {
 	status: ApartmentStatus;
 	buildingName: string;
@@ -16,6 +19,7 @@ export interface ApartmentWithDetails extends Omit<Apartment, 'status'> {
 	lastContractEnd: string | null; // last day of the latest ended contract: «Leer seit» the day after (#145)
 	blocked: boolean; // an open-ended contract: no new one can be recorded (#815)
 	availableFrom: string | null; // the day after the latest Vertragsende while it is still to come (#815)
+	moveOut?: MoveOut | null; // only the list (#664)
 	// only the single apartment
 	building?: Pick<Building, 'id' | 'name' | 'address' | 'postalCode' | 'city'>;
 	currentTenantName?: string;

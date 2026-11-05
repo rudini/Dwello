@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { floorLabel, roomsLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
+	import {
+		floorLabel,
+		moveOutText,
+		roomsLabel,
+		statusText,
+		statusIcons,
+		statusTones
+	} from '$lib/apartment';
 	import type { Apartment } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -33,6 +40,12 @@
 								>{roomsLabel(normalizeDecimal(String(apartment.rooms)))}</span
 							>
 							<span class="text-ink-muted">{normalizeDecimal(String(apartment.area))} m²</span>
+							<!-- #664: the move-out until its Schlussabrechnung exists -->
+							{#if apartment.moveOut}
+								<span class="text-ink" data-testid="apartment-move-out"
+									>{moveOutText(apartment.moveOut)}</span
+								>
+							{/if}
 						</div>
 						<Badge
 							tone={statusTones[apartment.status]}

@@ -4,7 +4,7 @@
  * Days are YYYY-MM-DD; today is the Swiss day
  */
 import { billsIn } from './contract.service';
-import { swissToday } from './today';
+import { daysAfter, swissToday } from './today';
 import { counting } from './counting-statements';
 import { commonType, fitsType, lastCompletedPeriod, month, type AccountingPeriodType, type Range } from './period-types';
 
@@ -57,3 +57,17 @@ export const otherPeriod = (type: AccountingPeriodType, run: Range) => (fitsType
  * C-1); a replaced one's period stays the building's (#120)
  */
 export const overlapped = (run: Range, building: Omit<Dated, 'status'>[]) => periodsOf(building).filter((p) => overlaps(p, run) && !same(p, run));
+
+/**
+ * #664: an ended contract's move-out until its Schlussabrechnung exists: from the Vertragsende until the end of the
+ * Abrechnungsperiode it falls in, then due while that period is one of its missing statements; null otherwise
+ */
+export function moveOut(type: AccountingPeriodType, contract: Rental, statements: Dated[], today = swissToday()) {
+	const end = contract.endDate;
+	if (!end || end > today) return null;
+	const before = lastCompletedPeriod(type, end);
+	const period = { start: daysAfter(before.end, 1), end: `${Number(before.end.slice(0, 4)) + 1}${before.end.slice(4)}` };
+	if (!billsIn(contract, period)) return null; // «Abgerechnet bis» covers it: billed outside Dwello (#133)
+	if (today <= period.end) return { endDate: end, period, due: false };
+	return missingPeriods(type, contract, statements, today).some((p) => same(p, period)) ? { endDate: end, period, due: true } : null;
+}

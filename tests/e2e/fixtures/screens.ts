@@ -310,6 +310,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		expiredTenant: seed.idOf('Gina'), // ended 2025: the page names the first day (#459)
 		expiredContract: seed.idOf('Mietvertrag Gina'),
 		movedOutContract: seed.idOf('Mietvertrag Ida'),
+		finalDueContract: seed.idOf('Mietvertrag Kurt'), // moved out 2024 without a statement: «Schlussabrechnung fällig» (#664)
 		oldAddressStatement: seed.idOf('Abrechnung Ida 2024'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,

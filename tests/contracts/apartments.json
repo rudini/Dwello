@@ -13,7 +13,8 @@
 			"lastContractEnd": "2024-03-31",
 			"blocked": false,
 			"availableFrom": null,
-			"buildingName": "Seeblick"
+			"buildingName": "Seeblick",
+			"moveOut": { "endDate": "2024-03-31", "period": { "start": "2024-01-01", "end": "2024-12-31" }, "due": true, "outside": false }
 		}
 	],
 	"total": 1

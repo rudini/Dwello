@@ -977,6 +977,47 @@ describe('Mietvertrag löschen', () => {
 });
 
 // A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag fragt die Seite, ob der Mieter noch in der Wohnung wohnt
+// #664 (Persona Helga M4): from the Vertragsende until the Schlussabrechnung exists
+describe('Auszug am Mietvertrag', () => {
+	const moveOut = (due: boolean, href: string | null) => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				moveOut: {
+					endDate: '2025-06-30',
+					period: { start: '2025-01-01', end: '2025-12-31' },
+					due,
+					outside: false,
+					href
+				},
+				contract: { ...contract('2021-08-01', '2025-06-30', true), status: 'ended' },
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+	};
+
+	it('nennt den Auszug und wann die Schlussabrechnung kommt', () => {
+		moveOut(false, null);
+		expect(text('contract-move-out')).toBe(
+			'Auszug am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
+		);
+		expect(byTestId('contract-move-out-link')).toBeNull();
+	});
+
+	it('führt zur fälligen Schlussabrechnung', () => {
+		const href = '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31';
+		moveOut(true, href);
+		expect(text('contract-move-out')).toContain('Auszug am 30.06.2025, Schlussabrechnung fällig');
+		const link = byTestId('contract-move-out-link')!;
+		expect(link.getAttribute('href')).toBe(href);
+		expect(link.textContent!.trim()).toBe('Schlussabrechnung erstellen');
+	});
+});
+
 describe('Abgelaufener befristeter Mietvertrag', () => {
 	function expired(form: unknown = null, fixedTermCheck = true) {
 		show(ContractPage, {

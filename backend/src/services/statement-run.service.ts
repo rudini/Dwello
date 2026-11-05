@@ -3,10 +3,10 @@
  * in the period, which of them have a statement there already (a run bills those no more), those «Abgerechnet bis»
  * leaves without Mietstage there, and whether the period is one of the building's (#1088)
  */
-import { commonType, lastCompletedPeriod, missingPeriods, otherPeriod, overlapped, same, type AccountingPeriodType, type Range } from './accounting-period';
+import { commonType, lastCompletedPeriod, missingPeriods, moveOut, otherPeriod, overlapped, same, type AccountingPeriodType, type Range } from './accounting-period';
 import { draftOutdated, statementChanges } from './statement-invoices.service';
 import { getTypedConfig } from './config.service';
-import { billingStart, billsIn, getContract, listContracts, type ContractWithDetails } from './contract.service';
+import { billingStart, billsIn, fixedTermCheck, getContract, listContracts, type ContractWithDetails } from './contract.service';
 import { listHeatingProfiles } from './heating-profile.service';
 import { heatingHintsOf } from './invoice-completeness.service';
 import { isRealDate } from './real-date';
@@ -134,6 +134,29 @@ export async function missingByContract(listed?: Awaited<ReturnType<typeof listC
 			}))
 		])
 	);
+}
+
+/**
+ * #664: an ended contract's move-out until its Schlussabrechnung exists; none while Dwello asks whether the tenant of
+ * an expired fixed-term contract stayed (Art. 266 Abs. 2 OR, Fachreview 664-1 M-1); `outside` as for a missing statement
+ */
+export async function moveOutOf(contract: ContractWithDetails) {
+	if (await fixedTermCheck(contract)) return null;
+	const [type, { statements }] = await Promise.all([typeOf(contract.buildingId), listStatements({ contractId: contract.id, limit: 1000 })]);
+	const move = moveOut(type, contract, statements);
+	if (!move?.due) return move && { ...move, outside: false };
+	const { statements: ofBuilding } = await listStatements({ buildingId: contract.buildingId, limit: 1000 });
+	return { ...move, outside: overlapped(move.period, ofBuilding).length > 0 };
+}
+
+/** #664: per apartment the move-out of its latest contract ended by today */
+export async function moveOutsByApartment(apartmentIds: string[]) {
+	// ponytail: every contract in one list and a few queries per apartment; under 50 apartments that stays small
+	const { contracts } = await listContracts({ limit: 1000 });
+	const today = swissToday();
+	const latestEnded = (id: string) =>
+		contracts.filter((c) => c.apartmentId === id && c.endDate && c.endDate <= today).sort((a, b) => b.endDate!.localeCompare(a.endDate!))[0];
+	return new Map(await Promise.all(apartmentIds.map(async (id) => [id, latestEnded(id) ? await moveOutOf(latestEnded(id)) : null] as const)));
 }
 
 type Settings = { accountingPeriod: AccountingPeriodType; managementFeePercent: number; heatingProfileId: string | null };
