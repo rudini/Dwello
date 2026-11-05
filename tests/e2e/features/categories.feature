@@ -251,3 +251,12 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter die Kategorie "Hangsicherung" als nicht umlagefähig speichert
     Dann steht der Fokus auf der Kategorie "Hangsicherung"
     Und verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat
+
+  # #1128 (Helga, Sven P-2 in #1124): nach dem Erfassen stand der Fokus auf der Überschrift der Liste, und die Meldung lag
+  # über «Löschen» der neuen Kategorie
+  Szenario: Nach dem Erfassen steht der Fokus auf der neuen Kategorie
+    Angenommen das Browserfenster ist 720 auf 450 Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die umlagefähige Kategorie "Hangsicherung" erfasst
+    Dann steht der Fokus auf der Kategorie "Hangsicherung"
+    Und verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat
