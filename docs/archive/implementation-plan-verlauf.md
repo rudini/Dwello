@@ -1077,3 +1077,12 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Fixes: button group of a new key (`data-focus-row`), tall rows count by the focused part, focus to the row now in place when the next row went too (#1123)
 - [x] Slice review round 2 (`docs/reviews/1113-review-2.md`); C-3 kept in this PR as the product owner decided
 - [x] PR: pushed after this archive
+
+## Session 2026-11-05: #1123 isolation, #1124 focus after saving
+
+- [x] Record the product owner's decisions in #1123 and #1124
+- [x] #1123: the scenario «Nach dem Löschen steht der Fokus auf der nächsten Kategorie» seeds its next row right after its first (`tests/e2e/fixtures/backend.ts`, steps, tasks, targets); spec change approved: #1123
+- [x] #1124: scenario «Nach dem Speichern steht der Fokus auf der gespeicherten Kategorie» seen red; DOM test seen red; `focusRowLinkingTo` in `src/lib/focus-after-action.ts`, called by `src/routes/config/SaveForm.svelte`
+- [x] Code review round 1 (`docs/reviews/1124-review-1.md`)
+- [x] Personas Helga and Sven (`docs/design/personas/helga-1124.md`, `sven-1124.md`); Minors stay in the reports, #1128 opened (create flow)
+- [x] Workflow 9: no closing round needed (no code since 962382c3c); PR pushed after this archive
