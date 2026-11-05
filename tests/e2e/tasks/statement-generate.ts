@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Scroll, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
 	agreementsRetry,
@@ -182,3 +182,6 @@ export const openSkippedContract = (contractId: string) => Click.on(previewSkipp
 export const invoicesCannotBeCounted = FailRequests.to('/api/invoices', { isValidUtilityCost: 'true' });
 export const billedCannotBeChecked = FailRequests.to('/api/statements/billed', {});
 export const waitForBuildingCounts = (buildingId: string) => Wait.until(buildingInvoiceCount(buildingId));
+
+// #659: down to the heating profile choice, as on a phone after the step's heading and notice
+export const scrollToHeatingProfile = Scroll.toTop(heatingProfileSelect);

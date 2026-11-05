@@ -1106,6 +1106,14 @@ Branch `ccr-33d8e016-x8cm7h`. Request: look for workflow notes on `main` not cov
 - [x] Personas Helga and Sven (`docs/design/personas/helga-1124.md`, `sven-1124.md`); Minors stay in the reports, #1128 opened (create flow)
 - [x] Workflow 9: no closing round needed (no code since 962382c3c); PR pushed after this archive
 
+## Session 2026-11-05: #659 the meter warning under the heating profile choice
+
+- [x] Decided in #659 (product owner): split the help; the sentences about meters become a warning directly under the choice, wording unchanged, in all four languages
+- [x] `@wip` scenario first, `fach-reviewer` round 1 (`docs/reviews/659-fachreview-1.md`) before any code: the split loses nothing; V-1 Major (warning before the chart) and the Minors V-2 (title from the warning's own words) and V-3 (scenario checks the short help) fixed; the missing glossary terms went to #1130 (`needs-decision`)
+- [x] Scenario reads «without scrolling past the help» as: scrolled to the choice, the warning is in the window (at 390 × 844 the page head and the preset notice already fill the first screen); new interaction `Scroll.toTop`
+- [x] Code review round 1 (`docs/reviews/659-review-1.md`): C-1 Blocker (the #1089 phone scenario had lost its last step to the new one) and C-2 Minor (warning before the chart pinned) fixed; round 2 (`659-review-2.md`)
+- [x] Persona Marco (`docs/design/personas/marco-659.md`): task done; three Minors about the warning's length and wording (decided to stay) and the profile pre-selection stay in the report
+- [x] PR (`Fixes #659`): pushed after this archive
 ## Session 2026-11-05: #1128 focus after creating
 
 - [x] Record the product owner's decision in #1128
