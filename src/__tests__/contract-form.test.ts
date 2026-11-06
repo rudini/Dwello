@@ -456,26 +456,26 @@ describe('apartmentOption', () => {
 
 	it('blocks rented apartments except the one of the contract being edited', () => {
 		expect(apartmentOption(apartment, rented, false)).toEqual({
-			label: 'Wohnung 2.01 - Ahornhof (nicht verfügbar)',
+			label: 'Wohnung 2.01 · Ahornhof (nicht verfügbar)',
 			disabled: true
 		});
 		expect(apartmentOption(apartment, rented, true)).toEqual({
-			label: 'Wohnung 2.01 - Ahornhof (aktuell)',
+			label: 'Wohnung 2.01 · Ahornhof (aktuell)',
 			disabled: false
 		});
 	});
 
 	it('names the day an apartment becomes free', () => {
 		expect(apartmentOption(apartment, freeFrom('2025-04-01'), false).label).toBe(
-			'Wohnung 2.01 - Ahornhof (verfügbar ab 01.04.2025)'
+			'Wohnung 2.01 · Ahornhof (verfügbar ab 01.04.2025)'
 		);
-		expect(apartmentOption(apartment, undefined, false).label).toBe('Wohnung 2.01 - Ahornhof');
+		expect(apartmentOption(apartment, undefined, false).label).toBe('Wohnung 2.01 · Ahornhof');
 	});
 
 	// Dr. Weber #151 W-01: an apartment whose contracts could not be loaded does not look free in the choice
 	it('marks an apartment whose contracts could not be loaded', () => {
 		expect(apartmentOption(apartment, null, false)).toEqual({
-			label: 'Wohnung 2.01 - Ahornhof (nicht geprüft)',
+			label: 'Wohnung 2.01 · Ahornhof (nicht geprüft)',
 			disabled: false
 		});
 	});

@@ -98,3 +98,20 @@ export const billedUntilError = target('Fehler bei «Abgerechnet bis»', (page) 
 // each element of the contract wizard that holds the text, also one only a screen reader reads (#667)
 export const wizardText = (text: string) =>
 	target(`«${text}» im Assistenten`, (page) => page.getByTestId('contract-wizard').getByText(text));
+// #668: the hint under «Befristet» for a contract saved open-ended, and «Monatlich total» in a live region
+export const noticeHint = target('Hinweis zum Vertragsende', (page) => page.getByTestId('contract-notice-hint'));
+export const announcedMonthlyTotal = target('Ansage des Monatlich total', (page) =>
+	page.getByRole('status').and(page.getByTestId('contract-monthly-total-announced'))
+);
+// #668 (Sven N-3): the question before leaving the edit form with unsaved changes
+export const leaveDialogTitle = target('Rückfrage vor dem Verlassen', (page) =>
+	page.getByRole('dialog').getByRole('heading')
+);
+export const discardChangesButton = target('Änderungen verwerfen', (page) =>
+	page.getByRole('dialog').getByTestId('contract-leave-confirm')
+);
+export const keepEditingButton = target('Weiter bearbeiten', (page) => page.getByRole('dialog').getByTestId('dialog-cancel'));
+export const partiesContractLink = target('Mietvertrag bei Mieter und Wohnung', (page) => page.getByTestId('contract-parties-link'));
+export const noticeHintLink = target('Link im Hinweis zum Vertragsende', (page) =>
+	page.getByTestId('contract-notice-hint').getByRole('link')
+);

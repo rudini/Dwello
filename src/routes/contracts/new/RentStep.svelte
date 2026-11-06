@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { advancePaymentNotice, flatRateNotice, normalizeAmounts } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
@@ -28,14 +29,37 @@
 		advanceHelp?: string; // editing: a new Akonto applies from «Gültig ab», an increase needs the form (#464)
 	} = $props();
 
-	const total = $derived.by(() => {
+	const amounts = $derived.by(() => {
 		const plain = normalizeAmounts(values); // "1'450" as typed
 		return [
 			plain.baseRent,
 			plain.advancePayment,
 			plain.flatRateUtilityCharge ?? '',
 			plain.additionalRent
-		].reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
+		];
+	});
+	const total = $derived(amounts.reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0));
+	// «2x0» is no amount: no total is announced for it (persona Sven 668 P-2); its field says why on saving
+	const typo = $derived(
+		amounts.some((amount) => amount.trim() !== '' && Number.isNaN(Number(amount)))
+	);
+	// ponytail: a fixed pause of 1 s; a pause by field (blur) if screen reader users find it too slow
+	let announced = $state('');
+	let heard = untrack(() => total);
+	$effect(() => {
+		const now = total;
+		// a total heard before goes too, so the status keeps no stale amount (fallback review on #1150)
+		if (typo) {
+			announced = '';
+			heard = NaN;
+			return;
+		}
+		if (now === heard) return;
+		const timer = setTimeout(() => {
+			heard = now;
+			announced = formatCurrency(now);
+		}, 1000);
+		return () => clearTimeout(timer);
 	});
 	const notice = $derived(advancePaymentNotice(values));
 	const flatRateWarning = $derived(flatRateNotice(values, categories)); // #429
@@ -158,4 +182,8 @@
 	<span class="font-bold tabular-nums text-ink" data-testid="contract-monthly-total"
 		>{formatCurrency(total)}</span
 	>
+</p>
+<!-- a changed total is announced once typing pauses (persona Sven S-3, code review 668-s3 C-1); empty before -->
+<p role="status" class="sr-only" data-testid="contract-monthly-total-announced">
+	{#if announced}{m.common_monthly_total()} {announced}{/if}
 </p>

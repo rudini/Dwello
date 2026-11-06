@@ -135,7 +135,7 @@ Funktionalität: Mietvertragsdetail
   Szenario: Zur Bearbeitung des Mietvertrags wechseln
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
-    Dann ist der Liegenschaftsverwalter auf der Seite "Mietvertrag bearbeiten"
+    Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
 
   Szenario: Mieter öffnen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"

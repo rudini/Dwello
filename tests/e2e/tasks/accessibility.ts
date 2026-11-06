@@ -96,7 +96,7 @@ import {
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
-import { errorToast } from '../targets/form';
+import { cancelButton, errorToast } from '../targets/form';
 import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
@@ -726,6 +726,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Click.on(contractSubmitButton), Wait.until(on.formProblem), Wait.forCount(on.contractsUnknownHints, 0));
 	},
 	'draft-restored': (example) => restoreDraft(example),
+	// #668 (Sven N-3): «Abbrechen» after a change asks before the input is lost
+	'leave-dialog': () => (actor) =>
+		actor.attemptsTo(Enter.theValue('980').into(baseRentInput), openDialog(cancelButton)),
 	'draft-discard-dialog': (example) => (actor) => actor.attemptsTo(restoreDraft(example), openDialog(discardDraftButton)),
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (example) => previewOf('2026', 'category-check')(example),

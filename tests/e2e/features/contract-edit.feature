@@ -306,3 +306,99 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-03-15" mit "180" Franken Akonto ab "2024-03-15" speichert
     Dann zeigt der Mietvertrag das Monatlich total "CHF 1’130.00"
+
+  # #668 (Persona Sven S-4): Überschrift und Seitentitel nennen den Mieter, wie die Seite des Mietvertrags
+  Szenario: Die Bearbeitungsseite nennt den Mieter
+    Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
+
+  # #668 (Persona Sven S-3): wer einen Screenreader nutzt, hört das Monatlich total, wenn es sich beim Tippen ändert
+  Szenario: Das Formular sagt das geänderte Monatlich total an
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Dann sagt das Formular das Monatlich total "CHF 980.00" an
+
+  # #668 (Fallback-Review #1150): nach einem Tippfehler bleibt kein früher angesagtes Total zu hören
+  Szenario: Nach einem Tippfehler sagt das Formular kein Monatlich total an
+    Angenommen der Liegenschaftsverwalter hat die Nettomiete "980" eingetragen und das Formular hat "CHF 980.00" angesagt
+    Wenn der Liegenschaftsverwalter die Nettomiete "9x0" einträgt
+    Dann sagt das Formular kein Monatlich total an
+
+  # #668 (Persona Helga H15-3): der Hinweis unter «Befristet» spricht auch den Wechsel in eine andere Wohnung an
+  Szenario: Der Hinweis unter «Befristet» nennt auch den Wechsel in eine andere Wohnung
+    Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
+    Dann fragt der Hinweis zum Vertragsende "Zieht der Mieter aus oder in eine andere Wohnung?"
+
+  # #668 (Persona Sven N-3, Code-Review n-4): wer das Formular mit ungespeicherten Änderungen verlässt, wird gefragt
+  Szenario: Abbrechen mit ungespeicherten Änderungen fragt nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668
+  Szenario: Ungespeicherte Änderungen verwerfen
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht und die Änderungen verwirft
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 950.00"
+
+  # #668
+  Szenario: Nach der Rückfrage weiter bearbeiten
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht und weiter bearbeitet
+    Dann ist die Nettomiete "980" noch eingetragen
+
+  # #668
+  Szenario: Der Link zum Mietvertrag fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter bei Mieter und Wohnung den Mietvertrag öffnet
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668
+  Szenario: Der Hinweis unter «Befristet» fragt vor dem Verlassen nach
+    Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
+    Und der Liegenschaftsverwalter dem Hinweis zum Vertragsende folgt
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668
+  Szenario: Die Hauptnavigation fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668 (Fallback-Review #1150, entschieden): auch «Abmelden» fragt, bevor es die Sitzung beendet
+  Szenario: Abmelden fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter sich im Benutzermenü abmelden will
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668 (Fallback-Review #1150): wer nach der Rückfrage weiter bearbeitet, bleibt angemeldet und kann speichern
+  Szenario: Nach der Rückfrage beim Abmelden weiter bearbeiten und speichern
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter sich im Benutzermenü abmelden will und weiter bearbeitet
+    Und der Liegenschaftsverwalter den Mietvertrag speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 980.00"
+
+  # #668 (Fachreview 668-n3 V-2): nach dem Verwerfen geht Dwello dorthin, wohin der Liegenschaftsverwalter wollte
+  Szenario: Nach dem Verwerfen öffnet Dwello die gewählte Seite
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt und die Änderungen verwirft
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+
+  # #668 (Fachreview 668-n3 V-1): jeder Weg aus dem Formular fragt, auch der Breadcrumb
+  Szenario: Der Breadcrumb fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter im Breadcrumb "Mietverträge" wählt
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668 (Code-Review 668-closing C-5): nach «Zurück» und dem Verwerfen öffnet ein weiteres «Zurück» das Formular nicht wieder
+  Szenario: Nach dem Verwerfen führt «Zurück» weiter zurück
+    Angenommen der Liegenschaftsverwalter ist auf der Mietvertragsliste
+    Und der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" ansieht
+    Und ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und der Liegenschaftsverwalter den Mietvertrag bearbeiten will
+    Und heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter im Browser zurückgeht und die Änderungen verwirft
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter im Browser zurückgeht
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste

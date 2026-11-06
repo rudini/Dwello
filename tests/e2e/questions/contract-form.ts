@@ -28,7 +28,10 @@ import {
 	flatRateInput,
 	flatRateWarning,
 	runningContractEditHint,
-	wizardText
+	wizardText,
+	noticeHint,
+	announcedMonthlyTotal,
+	leaveDialogTitle
 } from '../targets/contract-form';
 import { stepNames } from '../targets/wizard';
 import { errorToast, successToast } from '../targets/form';
@@ -78,3 +81,6 @@ export const billedUntilAsked = Visibility.of(billedUntilField);
 export const billedUntilErrorText = Text.of(billedUntilError);
 export const timesInWizard = (text: string) => Count.of(wizardText(text));
 export const brokenStepNames = BrokenWords.in(stepNames);
+export const noticeHintText = Text.of(noticeHint);
+export const announcedTotal = Text.of(announcedMonthlyTotal);
+export const leaveQuestion = Text.of(leaveDialogTitle);

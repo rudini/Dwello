@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), beforeNavigate: vi.fn() }));
 vi.mock('$app/stores', () => ({
 	page: {
 		subscribe: (run: (value: unknown) => void) => (
@@ -10,10 +10,12 @@ vi.mock('$app/stores', () => ({
 	}
 }));
 
-import { goto } from '$app/navigation';
+import { beforeNavigate, goto } from '$app/navigation';
+import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
+import { leaveGuard } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
@@ -968,6 +970,211 @@ describe('Mietvertrag bearbeiten', () => {
 		});
 	});
 
+	// #668 (Sven S-3, code review 668-s3 C-1): ein Screenreader hört das Monatlich total, wenn das Tippen pausiert,
+	// nicht bei jeder Ziffer
+	it('sagt das Monatlich total erst an, wenn das Tippen pausiert', async () => {
+		await open();
+		const heard = new Set<string>();
+		const listen = () =>
+			document.querySelectorAll('[role="status"]').forEach((region) => {
+				const text = region.textContent!.replace(/\s+/g, ' ').trim();
+				if (text.includes('Monatlich total')) heard.add(text);
+			});
+		vi.useFakeTimers();
+		try {
+			for (const value of ['1', '14', '145', '1450']) {
+				type('contract-base-rent-input', value);
+				listen();
+			}
+			vi.advanceTimersByTime(1000);
+			flushSync();
+			listen();
+		} finally {
+			vi.useRealTimers();
+		}
+		expect([...heard]).toEqual(['Monatlich total CHF 1’600.00']); // with the saved Akonto of 150
+	});
+
+	// #668 (Persona Sven 668 P-2): «2x0» is no amount, so no total is announced for it
+	it('sagt kein Monatlich total an, solange ein Betrag keiner ist', async () => {
+		await open();
+		vi.useFakeTimers();
+		try {
+			type('contract-advance-payment-input', '2x0');
+			vi.advanceTimersByTime(1000);
+			flushSync();
+		} finally {
+			vi.useRealTimers();
+		}
+		expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
+	});
+
+	// #668 (fallback review on #1150): a total heard before does not stay readable once an amount is none
+	it('nimmt ein angesagtes Monatlich total zurück, sobald ein Betrag keiner ist', async () => {
+		await open();
+		vi.useFakeTimers();
+		try {
+			type('contract-advance-payment-input', '200');
+			vi.advanceTimersByTime(1000);
+			flushSync();
+			expect(byTestId('contract-monthly-total-announced')!.textContent).toContain('CHF');
+			const heard = byTestId('contract-monthly-total-announced')!.textContent;
+			type('contract-advance-payment-input', '2x0');
+			flushSync();
+			expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
+			// the same total as before the typo is heard again once the amount is fixed (code review C-2)
+			type('contract-advance-payment-input', '200');
+			vi.advanceTimersByTime(1000);
+			flushSync();
+			expect(byTestId('contract-monthly-total-announced')!.textContent).toBe(heard);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// #668 (Persona Sven N-3, code review n-4, decided by the product owner): leaving with unsaved changes asks
+	describe('Verlassen mit ungespeicherten Änderungen', () => {
+		// the page's last beforeNavigate, called as SvelteKit calls it before a navigation
+		const navigate = (type = 'link', delta?: number, path = '/contracts') => {
+			const cancel = vi.fn();
+			const leave = vi.mocked(beforeNavigate).mock.calls.at(-1)![0];
+			leave({ cancel, type, delta, to: { url: new URL(`http://localhost${path}`) } } as never);
+			flushSync();
+			return cancel;
+		};
+		const dialog = () => document.querySelector('[role="dialog"]');
+
+		it('lässt ohne Änderung gehen', async () => {
+			await open();
+			expect(navigate()).not.toHaveBeenCalled();
+			expect(dialog()).toBeNull();
+		});
+
+		it('fragt nach einer Änderung und geht erst nach «verwerfen»', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate()).toHaveBeenCalled();
+			expect(dialog()!.textContent).toContain('Änderungen verwerfen?');
+			expect(dialog()!.textContent).toContain(
+				'Ihre Änderungen sind noch nicht gespeichert und gehen verloren. Der Mietvertrag bleibt, wie er zuletzt gespeichert wurde.'
+			);
+			click('contract-leave-confirm');
+			await settle();
+			expect(goto).toHaveBeenCalledWith(new URL('http://localhost/contracts'));
+			expect(navigate('goto')).not.toHaveBeenCalled(); // the navigation it started is not asked again
+		});
+
+		// the form is compared with its saved state (fach review 668-n3)
+		it('lässt gehen, wenn eine Änderung wieder zurückgenommen ist', async () => {
+			await open();
+			const saved = byTestId<HTMLInputElement>('contract-base-rent-input')!.value;
+			type('contract-base-rent-input', '980');
+			type('contract-base-rent-input', saved);
+			expect(navigate()).not.toHaveBeenCalled();
+		});
+
+		// code review 668-n3 C-2: what would be saved counts, not the order of a list or an empty «Gültig ab»
+		it('lässt gehen, wenn eine Nebenkostenart ab- und wieder angekreuzt ist', async () => {
+			const categories = [
+				{ id: 'k1', name: 'Heizung' },
+				{ id: 'k2', name: 'Lift' }
+			];
+			show(EditPage, { data: { ...data(), categories } } as never);
+			await settle();
+			click('contract-category-k1');
+			click('contract-category-k1');
+			click('contract-agreed-from-toggle');
+			click('contract-agreed-from-toggle');
+			flushSync();
+			expect(navigate()).not.toHaveBeenCalled();
+		});
+
+		// code review 668-n3 C-1: discarding after «Zurück» goes back, so the next «Zurück» does not reopen the form
+		it('geht nach «Zurück» und «verwerfen» im Verlauf zurück', async () => {
+			const go = vi.spyOn(history, 'go').mockImplementation(() => {});
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('popstate', -1)).toHaveBeenCalled();
+			click('contract-leave-confirm');
+			await settle();
+			expect(go).toHaveBeenCalledWith(-1);
+			expect(goto).not.toHaveBeenCalled();
+			go.mockRestore();
+		});
+
+		// code review 668-n3 C-3: a `goto` of another part of the app asks too
+		it('fragt auch bei einer Navigation durch Code', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('goto')).toHaveBeenCalled();
+		});
+
+		// code review 668-closing C-4: after «Abmelden» or a 401 the session is gone, so nothing could be saved
+		it('lässt den Weg zur Anmeldung ohne Rückfrage gehen', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('goto', undefined, '/login')).not.toHaveBeenCalled();
+		});
+
+		// fallback review on #1150 (decided by the product owner): «Abmelden» asks before it ends the session
+		it('fragt vor dem Abmelden und meldet nach «weiter bearbeiten» nicht ab', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			const answer = leaveGuard.ask!();
+			flushSync();
+			expect(dialog()!.textContent).toContain('Änderungen verwerfen?');
+			click('dialog-cancel');
+			expect(await answer).toBe(false);
+			expect(dialog()).toBeNull();
+		});
+
+		it('meldet nach «verwerfen» ab und ohne Änderung ohne Rückfrage', async () => {
+			await open();
+			expect(await leaveGuard.ask!()).toBe(true);
+			type('contract-base-rent-input', '980');
+			const answer = leaveGuard.ask!();
+			flushSync();
+			click('contract-leave-confirm');
+			expect(await answer).toBe(true);
+		});
+
+		// code review 668-closing C-6: while the save is under way, leaving still asks; it may still be refused
+		it('fragt, solange das Speichern läuft', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			submit('submit-button');
+			flushSync();
+			expect(navigate()).toHaveBeenCalled();
+			await settle();
+		});
+
+		it('behält die Eingabe bei «Weiter bearbeiten»', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			navigate();
+			click('dialog-cancel');
+			flushSync();
+			expect(dialog()).toBeNull();
+			expect(goto).not.toHaveBeenCalled();
+			expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('980');
+		});
+
+		it('überlässt beim Schliessen des Tabs die Frage dem Browser', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('leave')).toHaveBeenCalled(); // SvelteKit then shows the browser's own prompt
+			expect(dialog()).toBeNull();
+		});
+
+		it('fragt nach dem Speichern nicht', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			await save();
+			expect(goto).toHaveBeenCalledWith('/contracts/c1');
+			expect(navigate('goto')).not.toHaveBeenCalled();
+		});
+	});
+
 	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung
 	describe('Hinweis auf «Enddatum erfassen»', () => {
 		const choose = async (value: string) => {
@@ -979,11 +1186,25 @@ describe('Mietvertrag bearbeiten', () => {
 			await open();
 			await choose('limited');
 			const hint = byTestId('contract-notice-hint')!;
-			expect(hint.textContent).toContain('Hat der Mieter gekündigt?');
+			// #668 (Persona Helga H15-3, fach review 668-1 V-2): also a move to another apartment
+			expect(hint.textContent).toContain('Zieht der Mieter aus oder in eine andere Wohnung?');
+			expect(hint.textContent).toContain(
+				'Zieht der Mieter in eine andere Ihrer Wohnungen, erfassen Sie danach für diese Wohnung einen neuen Mietvertrag.'
+			);
 			expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c1');
 		});
 
 		// Persona Sven K2 M1: der Hinweis erscheint erst nach der Wahl; er wird angesagt, der Link sagt, wozu er führt
+		// #668 (Persona Helga 668 P-1): the hint comes before the empty Vertragsende, so it is read first
+		it('steht vor dem Feld Vertragsende', async () => {
+			await open();
+			await choose('limited');
+			const end = byTestId('end-date-input')!;
+			expect(byTestId('contract-notice-hint')!.compareDocumentPosition(end)).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
 		it('sagt den Hinweis an und nennt im Link, was dort zu tun ist', async () => {
 			await open();
 			const region = document.querySelector('[data-testid="contract-notice-region"]')!;
@@ -993,7 +1214,7 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(region.classList.contains('sr-only')).toBe(false);
 			expect(region.contains(byTestId('contract-notice-hint'))).toBe(true);
 			expect(byTestId('contract-notice-hint')!.querySelector('a')!.textContent).toBe(
-				'Kündigung mit «Enddatum erfassen» eintragen'
+				'Vertragsende mit «Enddatum erfassen» eintragen' // a move by agreement is no notice (fach review 668-1 V-1)
 			);
 		});
 
