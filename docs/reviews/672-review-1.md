@@ -14,3 +14,18 @@ Geprüft: Die Texte in allen vier `messages/*.json` stimmen Wort für Wort mit `
 - Lint, check, Backend-Type-Check, vitest (212 Dateien, 4236 Tests), `categories.feature` Chromium (40), das Szenario ohne KI, a11y- und Sprachzeilen «categor» (42), fitness, fallow, Prettier: vom Aufrufer gemeldet.
 - Rot gesehen (5 Szenarien und der Unit-Test in 1897008, 7 DOM/Unit-Tests per Stash, das Szenario ohne KI): vom Aufrufer gemeldet, von mir nur durch Lesen beurteilt.
 - Dass `Accessible.descriptionOf(sortOrderInput)` die Hilfe von `TextInput` über `aria-describedby` liest: nur aus dem grünen Lauf des Aufrufers erschlossen, `Field.svelte` nicht gelesen.
+
+# Abschlussrunde (3894cf5..8386bde, `src tests`)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-2 | Minor | tests/e2e/questions/categories.ts:389–393 | Weiter offen, wie oben. |
+
+Geschlossen: C-1.
+
+Geprüft: Die beiden neuen DOM-Tests (`categories-page.dom.test.ts:666–681`) zeigen `NewCategoryPage` mit `kiEnabled` true und false und prüfen den ganzen Hilfetext mit `toBe`. Mit `CategoryForm.svelte` aus 8ed2b9c sind sie rot, weil die Hilfe dort fehlt. Die neue Seite gibt `ki={data.kiEnabled}` weiter (`new/+page.svelte:25`). Keine neuen Befunde.
+
+## Nicht bestätigt
+
+- Rot (8ed2b9c) und grün (8386bde) der zwei neuen Tests: vom Aufrufer gemeldet.
+- Den Bericht von Helga (`docs/design/personas/helga-672.md`) habe ich nicht gelesen, er gehört nicht zum Bereich `src tests`.
