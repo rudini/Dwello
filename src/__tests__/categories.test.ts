@@ -138,7 +138,7 @@ describe('Neue Kategorie', () => {
 		await result.catch(() => {});
 
 		expect(calls[0].body).toMatchObject({ isAllowedUtilityCost: false, isHeatingCost: false });
-		expect(calls[0].body).not.toHaveProperty('sortOrder');
+		expect(calls[0].body).toMatchObject({ sortOrder: 0 }); // without a number: 0, at the top (#672)
 	});
 
 	// Heiz- und Warmwasserkosten folgen beim Mieterwechsel dem Heizprofil
