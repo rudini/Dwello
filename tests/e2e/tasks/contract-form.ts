@@ -25,7 +25,11 @@ import {
 	startDateInput,
 	tenantSelect,
 	agreedFromInput,
-	agreedFromToggle
+	agreedFromToggle,
+	discardChangesButton,
+	keepEditingButton,
+	partiesContractLink,
+	noticeHintLink
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
@@ -212,3 +216,8 @@ export const enterStartAndBilledUntil = (startDate: string, billedUntil: string)
 	actor.attemptsTo(enterStartDate(startDate), EnterDate.of(billedUntil).into(billedUntilInput), goToNextStep);
 export const saveContract = Click.on(contractSubmitButton);
 export const chooseFixedTerm = Click.on(durationChoice('Befristet'));
+// #668 (Sven N-3): leaving with unsaved changes asks first
+export const discardChanges = Click.on(discardChangesButton);
+export const keepEditing = Click.on(keepEditingButton);
+export const openContractFromParties = Click.on(partiesContractLink);
+export const followNoticeHint = Click.on(noticeHintLink);

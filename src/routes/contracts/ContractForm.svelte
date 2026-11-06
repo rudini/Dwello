@@ -321,7 +321,9 @@
 			overlap={overlap?.text === errors.form ? null : overlap}
 			newTab
 			{errors}
-		/>
+		>
+			{#snippet beforeEnd()}<NoticeHint shown={noticeHint} href={back} />{/snippet}
+		</PeriodStep>
 		<PastEndConfirm
 			endDate={endChanged ? values.endDate : ''}
 			startDate={values.startDate}
@@ -329,7 +331,6 @@
 			bind:confirmedDay
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
-		<NoticeHint shown={noticeHint} href={back} />
 		<!-- #133: billed outside Dwello up to this day; runs bill from the day after -->
 		<DateInput
 			id="billedUntil"

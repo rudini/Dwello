@@ -1,4 +1,5 @@
 import { createBdd } from 'playwright-bdd';
+import { cancelEditing } from '../tasks/form';
 import { errorMessage, errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
@@ -41,7 +42,8 @@ import {
 	timesInWizard,
 	brokenStepNames,
 	noticeHintText,
-	announcedTotal
+	announcedTotal,
+	leaveQuestion
 } from '../questions/contract-form';
 import { pageTitleText } from '../questions/app-frame';
 import { contractListed } from '../questions/contracts';
@@ -49,6 +51,10 @@ import { pageAddress, pageTitle } from '../questions/navigation';
 import { restoredDraftText, saveStatusText } from '../questions/wizard';
 import {
 	chooseFixedTerm,
+	discardChanges,
+	keepEditing,
+	openContractFromParties,
+	followNoticeHint,
 	agreeManagementFee,
 	enterBilledUntil,
 	changeBaseRent,
@@ -714,9 +720,9 @@ Then('heisst die Bearbeitungsseite {string}', async ({ verwalter, seed }, title:
 	await verwalter.sees(pageTitle).toBe(`${seed.withNames(title)} - Dwello`);
 });
 
-// #668 (Persona Sven S-3): the total is in a live region, so a screen reader hears it change
+// #668 (Persona Sven S-3): a live region says the changed total once typing pauses (code review 668-s3 C-1)
 Then('sagt das Formular das Monatlich total {string} an', async ({ verwalter }, amount: string) => {
-	await verwalter.sees(announcedTotal).toBe(amount);
+	await verwalter.sees(announcedTotal).toBe(`Monatlich total ${amount}`);
 });
 
 // #668 (Persona Helga H15-3)
@@ -726,4 +732,25 @@ When('der Liegenschaftsverwalter den Mietvertrag befristen will', async ({ verwa
 
 Then('fragt der Hinweis zum Vertragsende {string}', async ({ verwalter }, question: string) => {
 	await verwalter.sees(noticeHintText).toContain(question);
+});
+
+// #668 (Persona Sven N-3, code review n-4): leaving the edit form with unsaved changes asks first
+Then('fragt Dwello vor dem Verlassen {string}', async ({ verwalter }, question: string) => {
+	await verwalter.sees(leaveQuestion).toBe(question);
+});
+
+When('der Liegenschaftsverwalter die Bearbeitung abbricht und die Änderungen verwirft', async ({ verwalter }) => {
+	await verwalter.attemptsTo(cancelEditing, discardChanges);
+});
+
+When('der Liegenschaftsverwalter die Bearbeitung abbricht und weiter bearbeitet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(cancelEditing, keepEditing);
+});
+
+When('der Liegenschaftsverwalter bei Mieter und Wohnung den Mietvertrag öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openContractFromParties);
+});
+
+When('der Liegenschaftsverwalter dem Hinweis zum Vertragsende folgt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(followNoticeHint);
 });

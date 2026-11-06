@@ -11,6 +11,7 @@ vi.mock('$app/stores', () => ({
 }));
 
 import { goto } from '$app/navigation';
+import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
@@ -968,6 +969,45 @@ describe('Mietvertrag bearbeiten', () => {
 		});
 	});
 
+	// #668 (Sven S-3, code review 668-s3 C-1): ein Screenreader hört das Monatlich total, wenn das Tippen pausiert,
+	// nicht bei jeder Ziffer
+	it('sagt das Monatlich total erst an, wenn das Tippen pausiert', async () => {
+		await open();
+		const heard = new Set<string>();
+		const listen = () =>
+			document.querySelectorAll('[role="status"]').forEach((region) => {
+				const text = region.textContent!.replace(/\s+/g, ' ').trim();
+				if (text.includes('Monatlich total')) heard.add(text);
+			});
+		vi.useFakeTimers();
+		try {
+			for (const value of ['1', '14', '145', '1450']) {
+				type('contract-base-rent-input', value);
+				listen();
+			}
+			vi.advanceTimersByTime(1000);
+			flushSync();
+			listen();
+		} finally {
+			vi.useRealTimers();
+		}
+		expect([...heard]).toEqual(['Monatlich total CHF 1’600.00']); // with the saved Akonto of 150
+	});
+
+	// #668 (Persona Sven 668 P-2): «2x0» is no amount, so no total is announced for it
+	it('sagt kein Monatlich total an, solange ein Betrag keiner ist', async () => {
+		await open();
+		vi.useFakeTimers();
+		try {
+			type('contract-advance-payment-input', '2x0');
+			vi.advanceTimersByTime(1000);
+			flushSync();
+		} finally {
+			vi.useRealTimers();
+		}
+		expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
+	});
+
 	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung
 	describe('Hinweis auf «Enddatum erfassen»', () => {
 		const choose = async (value: string) => {
@@ -988,6 +1028,16 @@ describe('Mietvertrag bearbeiten', () => {
 		});
 
 		// Persona Sven K2 M1: der Hinweis erscheint erst nach der Wahl; er wird angesagt, der Link sagt, wozu er führt
+		// #668 (Persona Helga 668 P-1): the hint comes before the empty Vertragsende, so it is read first
+		it('steht vor dem Feld Vertragsende', async () => {
+			await open();
+			await choose('limited');
+			const end = byTestId('end-date-input')!;
+			expect(byTestId('contract-notice-hint')!.compareDocumentPosition(end)).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
 		it('sagt den Hinweis an und nennt im Link, was dort zu tun ist', async () => {
 			await open();
 			const region = document.querySelector('[data-testid="contract-notice-region"]')!;

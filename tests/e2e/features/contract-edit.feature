@@ -308,7 +308,6 @@ Funktionalität: Mietvertrag bearbeiten
     Dann zeigt der Mietvertrag das Monatlich total "CHF 1’130.00"
 
   # #668 (Persona Sven S-4): Überschrift und Seitentitel nennen den Mieter, wie die Seite des Mietvertrags
-  @wip
   Szenario: Die Bearbeitungsseite nennt den Mieter
     Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
 
@@ -321,3 +320,46 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Der Hinweis unter «Befristet» nennt auch den Wechsel in eine andere Wohnung
     Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
     Dann fragt der Hinweis zum Vertragsende "Zieht der Mieter aus oder in eine andere Wohnung?"
+
+  # #668 (Persona Sven N-3, Code-Review n-4): wer das Formular mit ungespeicherten Änderungen verlässt, wird gefragt
+  @wip
+  Szenario: Abbrechen mit ungespeicherten Änderungen fragt nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668
+  @wip
+  Szenario: Ungespeicherte Änderungen verwerfen
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht und die Änderungen verwirft
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 950.00"
+
+  # #668
+  @wip
+  Szenario: Nach der Rückfrage weiter bearbeiten
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht und weiter bearbeitet
+    Dann ist die Nettomiete "980" noch eingetragen
+
+  # #668
+  @wip
+  Szenario: Der Link zum Mietvertrag fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter bei Mieter und Wohnung den Mietvertrag öffnet
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668
+  @wip
+  Szenario: Der Hinweis unter «Befristet» fragt vor dem Verlassen nach
+    Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
+    Und der Liegenschaftsverwalter dem Hinweis zum Vertragsende folgt
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668
+  @wip
+  Szenario: Die Hauptnavigation fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
