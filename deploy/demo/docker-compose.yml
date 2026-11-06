@@ -16,12 +16,15 @@ services:
     ports: !reset []
     logging: *logging
     environment:
-      # The demo notice on every page and the demo section of the privacy statement (#162)
+      # The demo notice on every page, its section in the help and in the privacy statement (#162, #675)
       - DEMO=on
 
   backend:
     ports: !reset []
     logging: *logging
+    environment:
+      # No Sicherung: it would keep the visitors' data for up to 12 months, past the nightly reset (#675, fach review R-1)
+      - BACKUP_DIR=
 
   postgres:
     ports: !reset []
