@@ -2,13 +2,29 @@ import { fail } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import { backendMessage } from '$lib/backend-error';
 import { loadDocuments, localTitle } from '$lib/server/documents';
+import { toTenantChoice } from '$lib/server/tenant';
 import type { Actions, PageServerLoad } from './$types';
 
-const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/documents`;
+const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
+const API = `${BACKEND}/documents`;
+
+// the choice of the filter «Mieter» (#677): every tenant, by name as the backend sorts them; without it only «Alle Mieter»
+async function loadTenantChoices(fetch: typeof globalThis.fetch) {
+	const response = await fetch(`${BACKEND}/tenants?limit=1000`); // far more than a small portfolio has
+	return response.ok ? ((await response.json()).tenants ?? []).map(toTenantChoice) : [];
+}
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const status = url.searchParams.get('status') === 'to_send' ? 'to_send' : null;
-	return { documents: await loadDocuments(fetch, status ? `status=${status}` : ''), status };
+	const tenantId = url.searchParams.get('tenant') || null;
+	const query = new URLSearchParams();
+	if (status) query.set('status', status);
+	if (tenantId) query.set('tenantId', tenantId);
+	const [documents, tenants] = await Promise.all([
+		loadDocuments(fetch, query.toString()),
+		loadTenantChoices(fetch)
+	]);
+	return { documents, status, tenantId, tenants };
 };
 
 export const actions: Actions = {

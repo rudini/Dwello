@@ -1255,7 +1255,7 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'replaced', replacedBy: null });
 		actions.get('?/correct')!();
 		flushSync();
-		expect((byTestId('statement-create-correction-button') as HTMLButtonElement).disabled).toBe(true);
+		expect((byTestId('statement-create-correction-button') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
 	});
 
 	// #788: whether the statement is replaced, the backend says (`superseded`); the page does not read the status for it

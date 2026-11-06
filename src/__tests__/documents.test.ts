@@ -7,14 +7,17 @@ import documentList from '../../tests/contracts/documents.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import paidRefused from '../../tests/contracts/reminder-paid-refused.json';
 import notFound from '../../tests/contracts/document-not-found.json';
+import tenantList from '../../tests/contracts/tenants.json';
 
 const API = 'http://localhost:3001/api/v1/documents';
+const TENANTS = 'http://localhost:3001/api/v1/tenants?limit=1000';
 
 function backend(answer: Response) {
 	const urls: string[] = [];
 	const fetch = async (url: string) => {
 		urls.push(url);
-		return answer;
+		// the choice of the filter «Mieter» (#677)
+		return url === TENANTS ? Response.json(tenantList) : answer;
 	};
 	return { urls, fetch: fetch as typeof globalThis.fetch };
 }
@@ -28,8 +31,8 @@ describe('Dokumente', () => {
 			url: new URL('http://localhost/documents?status=to_send')
 		} as never);
 
-		expect(urls).toEqual([`${API}?status=to_send`]);
-		expect(data).toEqual({ documents: [{ id: 'd1' }], status: 'to_send' });
+		expect(urls).toEqual([`${API}?status=to_send`, TENANTS]);
+		expect(data).toMatchObject({ documents: [{ id: 'd1' }], status: 'to_send' });
 	});
 
 	it('zeigt ohne Filter alle Dokumente', async () => {
@@ -37,7 +40,35 @@ describe('Dokumente', () => {
 
 		await load({ fetch, url: new URL('http://localhost/documents') } as never);
 
-		expect(urls).toEqual([API]);
+		expect(urls).toEqual([API, TENANTS]);
+	});
+
+	// #677 (decision 6): the filter «Mieter» offers every tenant in the backend's order, by name
+	it('zeigt nur die Dokumente des gewählten Mieters und bietet alle Mieter zur Wahl an', async () => {
+		const { urls, fetch } = backend(Response.json({ data: [] }));
+
+		const data = await load({
+			fetch,
+			url: new URL('http://localhost/documents?status=to_send&tenant=t1')
+		} as never);
+
+		expect(urls[0]).toBe(`${API}?status=to_send&tenantId=t1`);
+		expect(data).toMatchObject({
+			tenantId: 't1',
+			tenants: [{ id: 't1', name: 'Anna Keller', place: 'Zürich' }]
+		});
+	});
+
+	// #677 (Code-Review C-4): without the tenants the filter offers only «Alle Mieter», the documents still load
+	it('zeigt die Dokumente auch, wenn die Mieter nicht geladen werden', async () => {
+		const fetch = (async (url: string) =>
+			url === TENANTS
+				? new Response(null, { status: 500 })
+				: Response.json({ data: [{ id: 'd1' }] })) as typeof globalThis.fetch;
+
+		const data = await load({ fetch, url: new URL('http://localhost/documents') } as never);
+
+		expect(data).toMatchObject({ documents: [{ id: 'd1' }], tenants: [] });
 	});
 
 	it('hält fest, dass ein Brief versendet wurde', async () => {

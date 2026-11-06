@@ -219,12 +219,13 @@ describe('Dialog', () => {
 		expect(onconfirm).toHaveBeenCalledOnce();
 	});
 
-	it('lässt sich während der Arbeit nicht schliessen und behält den Fokus', () => {
+	// #677 (decision 10): the focus stays on the confirm button, which says what is being done
+	it('lässt sich während der Arbeit nicht schliessen und behält den Fokus auf dem Bestätigen', () => {
 		const { onclose } = openDialog({ busy: true, busyLabel: 'Wird versendet …' });
-		const panel = document.querySelector<HTMLElement>('[role=dialog]')!;
-		expect(document.activeElement).toBe(panel);
+		const confirm = byTestId('dialog-confirm');
+		expect(document.activeElement).toBe(confirm);
 		press('Tab');
-		expect(document.activeElement).toBe(panel);
+		expect(document.activeElement).toBe(confirm);
 		press('Escape');
 		expect(onclose).not.toHaveBeenCalled();
 	});
