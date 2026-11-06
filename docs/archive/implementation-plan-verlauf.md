@@ -1358,3 +1358,8 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: lint, check, fitness, backend type-check, Prettier, vitest (ui-navigation-parts, open-work), E2E statement-generate + contract-new, axe and language rows of both wizards
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: README opening for search engines
+
+- [x] `README.md`: first paragraph says what Dwello is (English and the German sentence of dwello.ch), links to dwello.ch, the demo and the installation guide; the stale «Status» and «Version» lines are gone
+- [x] PR: pushed after this archive

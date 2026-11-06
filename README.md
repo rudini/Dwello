@@ -1,8 +1,10 @@
-# Dwello - Swiss Property Management System
+# Dwello – free open-source software for Swiss private landlords
 
-**Status:** In Development
-**Version:** 0.1.0
-**Architecture:** SvelteKit BFF + ElysiaJS Backend + PostgreSQL
+**Dwello** is free, open-source software (AGPL-3.0) for private landlords in Switzerland who manage their own rented property. It produces the yearly utility cost statement (Nebenkostenabrechnung) with a Swiss QR-bill, sorts invoices with an AI that runs on your own computer, and keeps buildings, apartments, tenants and contracts in one place. It runs self-hosted with Docker; with the default local AI, your data stays on your own server (invoice data goes to an external AI provider only if you configure one). The app, statements and reminders are in German, French, Italian and English.
+
+> Dwello ist die kostenlose Open-Source-Software für private Vermieterinnen und Vermieter in der Schweiz: Nebenkostenabrechnung mit QR-Rechnung, Belege per Drag & Drop, KI auf Ihrem eigenen Rechner.
+
+**Website:** [dwello.ch](https://dwello.ch) · **Demo:** [demo.dwello.ch](https://demo.dwello.ch/dashboard) · **Installation:** [docs/installation.md](docs/installation.md) · **Architecture:** SvelteKit BFF + ElysiaJS backend + PostgreSQL
 
 ---
 
