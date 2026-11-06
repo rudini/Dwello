@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
+	import { on } from 'svelte/events';
 	import { navigating } from '$app/stores';
 	import { dismissToast, toasts, type Toast } from '$lib/stores';
 	import IconButton from './IconButton.svelte';
@@ -30,6 +31,14 @@
 		if (pointer || region?.contains(into as Node | null)) return;
 		for (const toast of expired) setTimeout(() => expire(toast), toast.duration);
 		expired = [];
+	};
+	// the pointer over the toasts, attached: the region is no control of its own
+	const hover = (node: HTMLElement) => {
+		const off = [
+			on(node, 'pointerenter', () => (pointer = true)),
+			on(node, 'pointerleave', () => ((pointer = false), resume()))
+		];
+		return () => off.forEach((remove) => remove());
 	};
 	$effect(() => {
 		const newest = $toasts.filter((toast) => toast.type !== 'error').at(-1)?.id ?? 0;
@@ -108,8 +117,7 @@
 	data-toast-region
 	bind:this={region}
 	onfocusout={(event) => resume(event.relatedTarget)}
-	onpointerenter={() => (pointer = true)}
-	onpointerleave={() => ((pointer = false), resume())}
+	{@attach hover}
 >
 	{#each errors as toast (toast.id)}{@render message(toast, 'alert')}{/each}
 	<div role="status" aria-atomic="false" class="flex flex-col gap-2">
