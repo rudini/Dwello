@@ -33,7 +33,10 @@ import {
 	wizardText,
 	noticeHint,
 	announcedMonthlyTotal,
-	leaveDialogTitle
+	leaveDialogTitle,
+	apartmentCleared,
+	apartmentClearedLink,
+	apartmentClearedText
 } from '../targets/contract-form';
 import { stepNames } from '../targets/wizard';
 import { errorToast, successToast, warningToast } from '../targets/form';
@@ -88,6 +91,9 @@ export const failures = Count.of(errorToast);
 export const failureOnTop = OnTop.of(errorToast);
 export const confirmationShown = Visibility.of(successToast);
 export const warning = Text.of(warningToast);
+export const apartmentClearedHint = Text.of(apartmentCleared);
+export const apartmentClearedExplanation = Text.of(apartmentClearedText);
+export const apartmentClearedLinkText = Text.of(apartmentClearedLink);
 export const overlapBoxText = Text.of(overlapBox);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);

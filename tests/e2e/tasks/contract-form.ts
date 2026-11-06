@@ -29,9 +29,10 @@ import {
 	discardChangesButton,
 	keepEditingButton,
 	partiesContractLink,
-	noticeHintLink
+	noticeHintLink,
+	apartmentClearedLink
 } from '../targets/contract-form';
-import { errorToast, errorToastClose, loadedToast, successToastClose } from '../targets/form';
+import { errorToast, errorToastClose, loadedToast, successToastClose, warningToastClose } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -226,3 +227,7 @@ export const discardChanges = Click.on(discardChangesButton);
 export const keepEditing = Click.on(keepEditingButton);
 export const openContractFromParties = Click.on(partiesContractLink);
 export const followNoticeHint = Click.on(noticeHintLink);
+
+// #1153: the warning after «Erneut versuchen» closed; the hint in the step stays
+export const closeWarning: Activity = Click.on(warningToastClose);
+export const openClearedApartmentContract: Activity = Click.on(apartmentClearedLink);
