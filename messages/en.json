@@ -739,8 +739,6 @@
 	"contracts_availability_available": "Apartment available",
 	"contracts_availability_blocked": "Apartment not available – open-ended rental contract, not terminated",
 	"contracts_availability_from": "Apartment available from {date}",
-	"contracts_overlap": "Overlap with an existing contract: {period}",
-	"contracts_overlap_open_ended": "from {date} (open-ended)",
 	"tenants_example_first_name": "Anna",
 	"tenants_example_last_name": "Meier",
 	"tenants_example_email": "anna.meier@example.ch",

@@ -40,8 +40,7 @@ describe('checkDateRangeOverlap', () => {
 	it('returns no overlap when no contracts exist', () => {
 		const result = checkDateRangeOverlap('2026-01-01', '2026-12-31', []);
 
-		expect(result.hasOverlap).toBe(false);
-		expect(result.message).toBeNull();
+		expect(result).toBeUndefined();
 	});
 
 	it('detects overlap with existing fixed-term contract', () => {
@@ -56,10 +55,7 @@ describe('checkDateRangeOverlap', () => {
 
 		const result = checkDateRangeOverlap('2026-06-01', '2026-12-31', contracts);
 
-		expect(result.hasOverlap).toBe(true);
-		expect(result.message).toContain('Überschneidung');
-		expect(result.message).toContain('01.03.2026');
-		expect(result.message).toContain('31.08.2026');
+		expect(result?.id).toBe('contract-1');
 	});
 
 	it('detects overlap with unlimited contract', () => {
@@ -74,8 +70,7 @@ describe('checkDateRangeOverlap', () => {
 
 		const result = checkDateRangeOverlap('2026-01-01', null, contracts);
 
-		expect(result.hasOverlap).toBe(true);
-		expect(result.message).toContain('unbefristet');
+		expect(result?.id).toBe('contract-1');
 	});
 
 	it('returns no overlap when date ranges do not intersect', () => {
@@ -90,8 +85,7 @@ describe('checkDateRangeOverlap', () => {
 
 		const result = checkDateRangeOverlap('2026-01-01', '2026-12-31', contracts);
 
-		expect(result.hasOverlap).toBe(false);
-		expect(result.message).toBeNull();
+		expect(result).toBeUndefined();
 	});
 
 	it('excludes contract by ID when checking overlap', () => {
@@ -106,7 +100,7 @@ describe('checkDateRangeOverlap', () => {
 
 		// Without exclusion - should overlap
 		const resultWithOverlap = checkDateRangeOverlap('2026-06-01', '2026-08-31', contracts);
-		expect(resultWithOverlap.hasOverlap).toBe(true);
+		expect(resultWithOverlap?.id).toBe('contract-1');
 
 		// With exclusion - no overlap
 		const resultExcluded = checkDateRangeOverlap(
@@ -115,7 +109,7 @@ describe('checkDateRangeOverlap', () => {
 			contracts,
 			'contract-1'
 		);
-		expect(resultExcluded.hasOverlap).toBe(false);
+		expect(resultExcluded).toBeUndefined();
 	});
 
 	it('detects edge case: new contract starts on end date of existing', () => {
@@ -130,11 +124,11 @@ describe('checkDateRangeOverlap', () => {
 
 		// Start on last day of existing contract - this is an overlap
 		const resultOverlap = checkDateRangeOverlap('2026-01-31', '2026-12-31', contracts);
-		expect(resultOverlap.hasOverlap).toBe(true);
+		expect(resultOverlap?.id).toBe('contract-1');
 
 		// Start day after existing contract ends - no overlap
 		const resultNoOverlap = checkDateRangeOverlap('2026-02-01', '2026-12-31', contracts);
-		expect(resultNoOverlap.hasOverlap).toBe(false);
+		expect(resultNoOverlap).toBeUndefined();
 	});
 
 	it('handles proposed unlimited contract correctly', () => {
@@ -150,6 +144,6 @@ describe('checkDateRangeOverlap', () => {
 		// Proposed unlimited contract that starts before existing
 		const result = checkDateRangeOverlap('2026-06-01', null, contracts);
 
-		expect(result.hasOverlap).toBe(true);
+		expect(result?.id).toBe('contract-1');
 	});
 });

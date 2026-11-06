@@ -739,8 +739,6 @@
 	"contracts_availability_available": "Appartamento disponibile",
 	"contracts_availability_blocked": "Appartamento non disponibile – contratto di locazione a tempo indeterminato, non disdetto",
 	"contracts_availability_from": "Appartamento disponibile a partire dal {date}",
-	"contracts_overlap": "Sovrapposizione con un contratto esistente: {period}",
-	"contracts_overlap_open_ended": "a partire dal {date} (a tempo indeterminato)",
 	"tenants_example_first_name": "Anna",
 	"tenants_example_last_name": "Bernasconi",
 	"tenants_example_email": "anna.bernasconi@example.ch",

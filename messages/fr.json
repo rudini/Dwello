@@ -739,8 +739,6 @@
 	"contracts_availability_available": "Appartement disponible",
 	"contracts_availability_blocked": "Appartement non disponible – contrat de bail de durée indéterminée, non résilié",
 	"contracts_availability_from": "Appartement disponible dès le {date}",
-	"contracts_overlap": "Chevauchement avec un contrat existant : {period}",
-	"contracts_overlap_open_ended": "dès le {date} (durée indéterminée)",
 	"tenants_example_first_name": "Anne",
 	"tenants_example_last_name": "Rochat",
 	"tenants_example_email": "anne.rochat@example.ch",

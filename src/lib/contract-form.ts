@@ -360,7 +360,7 @@ export function overlapError(
 	const endDate = values.isUnlimited ? null : values.endDate || null;
 	const other =
 		values.startDate &&
-		checkDateRangeOverlap(values.startDate, endDate, contracts, excludeContractId).contract;
+		checkDateRangeOverlap(values.startDate, endDate, contracts, excludeContractId);
 	if (!other) return null;
 	return overlapOf(
 		{

@@ -739,8 +739,6 @@
 	"contracts_availability_available": "Wohnung verfügbar",
 	"contracts_availability_blocked": "Wohnung nicht verfügbar – unbefristeter Mietvertrag, nicht gekündigt",
 	"contracts_availability_from": "Wohnung verfügbar ab {date}",
-	"contracts_overlap": "Überschneidung mit bestehendem Vertrag: {period}",
-	"contracts_overlap_open_ended": "ab {date} (unbefristet)",
 	"tenants_example_first_name": "Anna",
 	"tenants_example_last_name": "Keller",
 	"tenants_example_email": "anna.keller@example.ch",

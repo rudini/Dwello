@@ -92,57 +92,22 @@ export function computeAvailability(apartment: {
 }
 
 /**
- * Checks if a proposed contract date range overlaps with existing contracts
- *
- * @param startDate - Proposed start date (YYYY-MM-DD)
- * @param endDate - Proposed end date (YYYY-MM-DD), null for unlimited
- * @param contracts - Array of existing contracts
- * @param excludeContractId - Optional contract ID to exclude
- * @returns Object with overlap status and message
+ * The earliest existing contract the proposed range overlaps, as the backend names it (fach review b667 V-3); none when
+ * it overlaps none. `endDate` null: unlimited; `excludeContractId`: the contract being edited
  */
 export function checkDateRangeOverlap(
 	startDate: string,
 	endDate: string | null,
 	contracts: ContractForAvailability[],
 	excludeContractId?: string
-): { hasOverlap: boolean; message: string | null; contract?: ContractForAvailability } {
-	// Filter out the excluded contract
-	const relevantContracts = excludeContractId
-		? contracts.filter((c) => c.id !== excludeContractId)
-		: contracts;
-
-	if (relevantContracts.length === 0) {
-		return { hasOverlap: false, message: null };
-	}
-
+): ContractForAvailability | undefined {
 	const proposedStart = new Date(startDate);
-	// For unlimited contracts, use a far future date for comparison
 	const proposedEnd = endDate ? new Date(endDate) : new Date('9999-12-31');
-
-	// the earliest one first, as the backend names it (fach review b667 V-3)
-	const byStart = [...relevantContracts].sort(
-		(a, b) => +parseDate(a.start_date) - +parseDate(b.start_date)
-	);
-	for (const contract of byStart) {
-		const contractStart = parseDate(contract.start_date);
-		const contractEnd = contract.end_date ? parseDate(contract.end_date) : new Date('9999-12-31');
-
-		// Check for overlap: ranges overlap if one starts before the other ends
-		// and the other starts before the first one ends
-		const overlaps = proposedStart <= contractEnd && contractStart <= proposedEnd;
-
-		if (overlaps) {
-			const periodStr = contract.end_date
-				? `${formatDateDE(contractStart)} - ${formatDateDE(contractEnd)}`
-				: m.contracts_overlap_open_ended({ date: formatDateDE(contractStart) });
-
-			return {
-				hasOverlap: true,
-				message: m.contracts_overlap({ period: periodStr }),
-				contract
-			};
-		}
-	}
-
-	return { hasOverlap: false, message: null };
+	return contracts
+		.filter((c) => c.id !== excludeContractId)
+		.sort((a, b) => +parseDate(a.start_date) - +parseDate(b.start_date))
+		.find((contract) => {
+			const contractEnd = contract.end_date ? parseDate(contract.end_date) : new Date('9999-12-31');
+			return proposedStart <= contractEnd && parseDate(contract.start_date) <= proposedEnd;
+		});
 }

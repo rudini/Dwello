@@ -23,6 +23,7 @@ import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
 import checkStart from '../../tests/contracts/contract-check-start.json';
 import overlap from '../../tests/contracts/contract-overlap.json';
+import listed from '../../tests/contracts/contracts.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -540,12 +541,16 @@ describe('Mietvertrag bearbeiten', () => {
 	// fach review b667 V-1, V-5: the refusal links the other contract in a new tab, so the input stays; the box at the
 	// period says nothing twice
 	it('verlinkt nach der Ablehnung den anderen Mietvertrag in einem neuen Tab und zeigt den Kasten nicht doppelt', async () => {
-		const other = { id: overlap.params.contract, startDate: '2024-01-01', endDate: '2024-12-31' };
-		fakeBff(({ method }) =>
-			method === 'PUT'
-				? [400, overlap]
-				: [200, { contracts: [{ ...other, tenantName: 'Anna Keller', status: 'ended' }] }]
-		);
+		// the list as the backend answers it (code review b667 C-7), its contract the one the refusal names
+		const other = {
+			...listed.contracts[0],
+			id: overlap.params.contract,
+			startDate: '2024-01-01',
+			endDate: '2024-12-31',
+			terminated: false,
+			status: 'ended'
+		};
+		fakeBff(({ method }) => (method === 'PUT' ? [400, overlap] : [200, { contracts: [other] }]));
 		await open();
 		type('start-date-input', '01.06.2024');
 		await settle();
