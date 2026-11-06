@@ -21,6 +21,7 @@
 		firstStepWithError,
 		lastRent,
 		normalizeAmounts,
+		openContractsOf,
 		rentTakenOver,
 		rentToPreset,
 		type ListedContract,
@@ -119,15 +120,9 @@
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapError(values, contracts?.get(values.apartmentId) ?? [], true));
 	const reviewUnknown = $derived(unknown && !refusedWith);
+	const reviewOverlap = $derived(refusedWith ? null : overlap); // found by «Erneut versuchen» there (#669)
 	const overlapAtField = $derived(!!overlap && errors[overlap.field] === overlap.text);
-	// contracts of the chosen tenant without a Vertragsende (#156)
-	const openContracts = $derived(
-		apartments.flatMap((apartment) =>
-			(contracts?.get(apartment.id) ?? [])
-				.filter((c) => c.tenant_id === values.tenantId && !c.end_date)
-				.map((c) => ({ id: c.id, apartment }))
-		)
-	);
+	const openContracts = $derived(openContractsOf(apartments, contracts, values.tenantId));
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	const contractsOf = async (apartmentId: string) => {
@@ -404,7 +399,7 @@
 				{apartments}
 				{categories}
 				unknown={reviewUnknown}
-				overlap={refusedWith ? null : overlap}
+				overlap={reviewOverlap}
 				onretry={retry}
 				onedit={editField}
 			/>

@@ -214,6 +214,21 @@ const toRentStep: Activity = async (actor) => {
 
 // Two files, one created: the result with the file still open. Files go into the example's own building: the first
 // in the list may be a parallel scenario's, deleted by its cleanUp while the files are read
+// the wizard at «Prüfen» with the apartments' rental contracts not loaded (#143); tenant and apartment from the address
+const toReviewWithoutContracts: Activity = (actor) =>
+	actor.attemptsTo(
+		FailRequests.to('/api/contracts', {}),
+		Navigate.reload,
+		Click.on(nextButton),
+		Wait.until(apartmentContractsUnknown),
+		Click.on(nextButton),
+		EnterDate.of('2030-01-01').into(startDateInput),
+		Click.on(nextButton),
+		Enter.theValue('1500').into(baseRentInput),
+		Click.on(feeChoice('run')),
+		Click.on(nextButton),
+		Wait.until(reviewContractsUnknown)
+	);
 const createPartly = (building: string): Activity => (actor) => {
 	const complete = `Elektro Blitz ${randomUUID()}.pdf`;
 	const open = `Werke ${randomUUID()}.pdf`;
@@ -679,34 +694,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Wait.until(apartmentContractsUnknown), Click.on(retryContractsButton), Wait.until(errorToast));
 	},
 	// the same, at the step before saving: tenant and apartment come from the address
-	'contracts-unknown-review': () => (actor) =>
-		actor.attemptsTo(
-			FailRequests.to('/api/contracts', {}),
-			Navigate.reload,
-			Click.on(nextButton),
-			Wait.until(apartmentContractsUnknown),
-			Click.on(nextButton),
-			EnterDate.of('2030-01-01').into(startDateInput),
-			Click.on(nextButton),
-			Enter.theValue('1500').into(baseRentInput),
-			Click.on(feeChoice('run')),
-			Click.on(nextButton),
-			Wait.until(reviewContractsUnknown)
-		),
+	'contracts-unknown-review': () => toReviewWithoutContracts,
 	// #669 (Helga H-1): the same with Carla's apartment; «Erneut versuchen» in «Prüfen» loads them and finds the overlap
 	'overlap-review': () => (actor) =>
 		actor.attemptsTo(
-			FailRequests.to('/api/contracts', {}),
-			Navigate.reload,
-			Click.on(nextButton),
-			Wait.until(apartmentContractsUnknown),
-			Click.on(nextButton),
-			EnterDate.of('2030-01-01').into(startDateInput),
-			Click.on(nextButton),
-			Enter.theValue('1500').into(baseRentInput),
-			Click.on(feeChoice('run')),
-			Click.on(nextButton),
-			Wait.until(reviewContractsUnknown),
+			toReviewWithoutContracts,
 			FailRequests.noLonger,
 			Click.on(retryContractsButton),
 			Wait.until(on.overlapWarning)
