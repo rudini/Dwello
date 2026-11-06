@@ -53,7 +53,22 @@ describe('Dokumente', () => {
 		} as never);
 
 		expect(urls[0]).toBe(`${API}?status=to_send&tenantId=t1`);
-		expect(data).toMatchObject({ tenantId: 't1', tenants: [{ id: 't1', name: 'Anna Keller' }] });
+		expect(data).toMatchObject({
+			tenantId: 't1',
+			tenants: [{ id: 't1', name: 'Anna Keller', place: 'Zürich' }]
+		});
+	});
+
+	// #677 (Code-Review C-4): without the tenants the filter offers only «Alle Mieter», the documents still load
+	it('zeigt die Dokumente auch, wenn die Mieter nicht geladen werden', async () => {
+		const fetch = (async (url: string) =>
+			url === TENANTS
+				? new Response(null, { status: 500 })
+				: Response.json({ data: [{ id: 'd1' }] })) as typeof globalThis.fetch;
+
+		const data = await load({ fetch, url: new URL('http://localhost/documents') } as never);
+
+		expect(data).toMatchObject({ documents: [{ id: 'd1' }], tenants: [] });
 	});
 
 	it('hält fest, dass ein Brief versendet wurde', async () => {

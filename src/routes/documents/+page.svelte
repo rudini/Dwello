@@ -19,7 +19,7 @@
 			documents: StatementDocument[];
 			status: string | null;
 			tenantId: string | null;
-			tenants: { id: string; name: string }[];
+			tenants: { id: string; name: string; place?: string }[];
 		};
 		form: ActionData;
 	} = $props();
@@ -77,7 +77,7 @@
 <div class="flex flex-col gap-8">
 	<PageHeader
 		title={m.nav_documents()}
-		purpose={`${m.documents_purpose()} ${m.documents_upload_where()}`}
+		purpose={`${m.documents_upload_where()} ${m.documents_purpose()}`}
 	/>
 
 	<nav aria-label={m.documents_filter()}>
@@ -107,7 +107,9 @@
 			>
 				<option value="">{m.tenants_all()}</option>
 				{#each data.tenants as tenant (tenant.id)}
-					<option value={tenant.id}>{tenant.name}</option>
+					<option value={tenant.id}
+						>{tenant.place ? `${tenant.name}, ${tenant.place}` : tenant.name}</option
+					>
 				{/each}
 			</select>
 		{/snippet}

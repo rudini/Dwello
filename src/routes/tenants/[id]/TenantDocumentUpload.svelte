@@ -131,6 +131,10 @@
 			/>
 		{/snippet}
 	</Field>
+	<!-- the hint shows while the focus is on the field: announced, not only in its description (persona Sven S-2) -->
+	<p role="status" class="sr-only" data-testid="tenant-document-file-duplicate-status">
+		{duplicate?.text ?? ''}
+	</p>
 	<TextInput
 		id="tenant-document-title"
 		name="title"

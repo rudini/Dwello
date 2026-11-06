@@ -2,7 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import { backendMessage } from '$lib/backend-error';
 import { loadDocuments, localTitle } from '$lib/server/documents';
-import type { Tenant } from '$lib/types';
+import { toTenantChoice } from '$lib/server/tenant';
 import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -11,8 +11,7 @@ const API = `${BACKEND}/documents`;
 // the choice of the filter «Mieter» (#677): every tenant, by name as the backend sorts them; without it only «Alle Mieter»
 async function loadTenantChoices(fetch: typeof globalThis.fetch) {
 	const response = await fetch(`${BACKEND}/tenants?limit=1000`); // far more than a small portfolio has
-	const tenants: Tenant[] = response.ok ? ((await response.json()).tenants ?? []) : [];
-	return tenants.map((t) => ({ id: t.id, name: `${t.firstName} ${t.lastName}` }));
+	return response.ok ? ((await response.json()).tenants ?? []).map(toTenantChoice) : [];
 }
 
 export const load: PageServerLoad = async ({ fetch, url }) => {

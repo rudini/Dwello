@@ -33,3 +33,10 @@ export const toTenant = (data: BackendTenant): Tenant => ({
 	rentalContractId: data.rentalContractId,
 	isFuture: !!data.isFuture
 });
+
+/** A tenant to choose in a list (a filter, the contract wizard); two of the same name are told apart by their town */
+export const toTenantChoice = (data: BackendTenant) => ({
+	id: data.id as string,
+	name: `${data.firstName} ${data.lastName}`,
+	place: (data.city as string | null) ?? undefined
+});

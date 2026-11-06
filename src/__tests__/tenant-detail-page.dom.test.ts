@@ -400,6 +400,20 @@ describe('Mieterdetail', () => {
 		expect(byTestId<HTMLButtonElement>('tenant-document-upload-button')!.disabled).toBe(false);
 	});
 
+	// #677 (persona Sven S-2): the hint appears while the focus is on the file field; a status there before says it
+	it('sagt den Hinweis auf eine schon hochgeladene Datei an', () => {
+		open([], null, [upload]);
+		const status = byTestId('tenant-document-file-duplicate-status')!;
+		expect(status.getAttribute('role')).toBe('status');
+		expect(status.textContent!.trim()).toBe('');
+		const input = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		Object.defineProperty(input, 'files', { value: [new File(['x'], 'ausweis.jpg')] });
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+		expect(status.textContent!.trim()).toBe(text('tenant-document-file-duplicate'));
+		expect(status.textContent).toContain('«ausweis.jpg»');
+	});
+
 	it('sendet eine Datei bis 10 MB', () => {
 		open([], null, []);
 		const formData = new FormData();

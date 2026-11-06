@@ -189,11 +189,11 @@ describe('Dokumente', () => {
 		);
 	});
 
-	// #677 (decision 5): the page says where a document is uploaded
-	it('sagt, dass ein Dokument auf der Seite des Mieters hochgeladen wird', () => {
+	// #677 (decision 5; personas Anna A-1, Helga N-6: first, not after the paragraph about posting letters)
+	it('sagt zuerst, dass ein Dokument auf der Seite des Mieters hochgeladen wird', () => {
 		documents([]);
-		expect(document.body.textContent).toContain(
-			'Ein Dokument laden Sie auf der Seite des Mieters unter «Dokument hochladen» hoch.'
+		expect(byTestId('page-purpose')!.textContent!.trim()).toMatch(
+			/^Ein Dokument laden Sie auf der Seite des Mieters unter «Dokument hochladen» hoch\. Mahnungen/
 		);
 	});
 
@@ -226,6 +226,26 @@ describe('Dokumente', () => {
 			'Beat Huber'
 		]);
 		expect(filter.value).toBe('t2');
+	});
+
+	// #677 (Code-Review C-3): two tenants of the same name are told apart by their town, as in the contract wizard
+	it('unterscheidet im Filter zwei Mieter mit gleichem Namen am Ort', () => {
+		show(DocumentsPage, {
+			data: {
+				documents: [],
+				status: null,
+				tenantId: null,
+				tenants: [
+					{ id: 't1', name: 'Anna Keller', place: 'Zürich' },
+					{ id: 't3', name: 'Anna Keller', place: 'Bern' },
+					{ id: 't4', name: 'Beat Huber' }
+				]
+			},
+			form: null
+		} as never);
+		expect(
+			[...byTestId<HTMLSelectElement>('documents-tenant-filter')!.options].map((o) => o.text)
+		).toEqual(['Alle Mieter', 'Anna Keller, Zürich', 'Anna Keller, Bern', 'Beat Huber']);
 	});
 
 	// #677 (decision 6, V-3): «Alle» and «Zu versenden» keep the chosen tenant

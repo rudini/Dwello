@@ -2,7 +2,8 @@ import { m } from '$lib/paraglide/messages';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { roomsLabel, statusLabels } from '$lib/apartment';
-import type { ApartmentStatus, Tenant } from '$lib/types';
+import type { ApartmentStatus } from '$lib/types';
+import { toTenantChoice } from '$lib/server/tenant';
 import { agreeableCategories } from '$lib/server/category';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -51,11 +52,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const apartmentsData = await apartmentsRes.json();
 
 	// Transform tenants for dropdown
-	const tenants = (tenantsData.tenants || []).map((t: Tenant) => ({
-		id: t.id,
-		name: `${t.firstName} ${t.lastName}`,
-		place: t.city ?? undefined // two tenants of the same name are told apart by their town
-	}));
+	const tenants = (tenantsData.tenants || []).map(toTenantChoice);
 
 	// Transform apartments for dropdown
 	const apartments = (apartmentsData.apartments || []).map((a: Apartment) => ({
