@@ -8,7 +8,7 @@
 	// Leaving the edit form with unsaved changes asks first, on every way out (links, menu, «Zurück»); closing the
 	// tab gets the browser's own prompt (Sven N-3, code review n-4, decided in #668). What would be saved counts, so
 	// a change undone asks nothing (code review 668-n3 C-2). The form's own `goto` after a save passes, a link while
-	// the save runs still asks (668-closing C-6); so does the way to the sign-in: after «Abmelden» or a 401 the
+	// the save runs still asks (668-closing C-6). The way to the sign-in passes too: after «Abmelden» or a 401 the
 	// session is gone and nothing could be saved any more (668-closing C-4)
 	let {
 		values,
