@@ -1989,7 +1989,7 @@
 	"contracts_apartment_contracts_overlap_step": "The other rental contracts for this apartment are loaded. The period overlaps with one of them. Change the contract start or contract end in step {number} «{step}».",
 	"contracts_apartment_contracts_retry_failed": "The apartment’s rental contracts still could not be loaded. Try again later; your entries are kept.",
 	"contracts_apartment_contracts_see_top": "«Try again» is at the top of the page.",
-	"contracts_delete_draft_contracts_unknown": "Dwello did not delete the draft: without the rental contracts for this apartment an overlap cannot be ruled out. Choose «Try again» at the apartment, then «Delete draft and save rental contract» again.",
+	"contracts_delete_draft_contracts_unknown": "Dwello did not delete the draft: without the rental contracts for this apartment an overlap cannot be ruled out. Choose «Try again» at the top of the page, then «Delete draft and save rental contract» again.",
 	"contracts_apartment_contracts_loading": "The apartment’s rental contracts are still loading. Try again in a moment.",
 	"contracts_notice_hint_title": "Has the tenant given notice?",
 	"contracts_notice_hint_text": "Then enter the contract end on the rental contract page with «Enter end date». The contract stays open-ended, and Dwello shows the next steps.",

@@ -1989,7 +1989,7 @@
 	"contracts_apartment_contracts_overlap_step": "Les autres contrats de bail de cet appartement sont chargés. La période chevauche l’un d’entre eux. Modifiez le début ou la fin du contrat à l’étape {number} « {step} ».",
 	"contracts_apartment_contracts_retry_failed": "Les contrats de bail de l’appartement n’ont de nouveau pas pu être chargés. Réessayez plus tard ; vos saisies sont conservées.",
 	"contracts_apartment_contracts_see_top": "« Réessayer » se trouve en haut de la page.",
-	"contracts_delete_draft_contracts_unknown": "Dwello n’a pas supprimé le brouillon : sans les contrats de bail de cet appartement, un chevauchement ne peut pas être exclu. Choisissez « Réessayer » dans la partie Appartement, puis à nouveau « Supprimer le brouillon et enregistrer le contrat de bail ».",
+	"contracts_delete_draft_contracts_unknown": "Dwello n’a pas supprimé le brouillon : sans les contrats de bail de cet appartement, un chevauchement ne peut pas être exclu. Choisissez « Réessayer » en haut de la page, puis à nouveau « Supprimer le brouillon et enregistrer le contrat de bail ».",
 	"contracts_apartment_contracts_loading": "Les contrats de bail de l’appartement sont encore en cours de chargement. Réessayez dans un instant.",
 	"contracts_notice_hint_title": "Le locataire a-t-il résilié ?",
 	"contracts_notice_hint_text": "Saisissez alors la fin du contrat sur la page du contrat de bail avec « Saisir la date de fin ». Il reste ainsi de durée indéterminée et Dwello indique les prochaines étapes.",

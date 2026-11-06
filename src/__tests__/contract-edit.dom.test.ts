@@ -836,6 +836,10 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen.'
 			);
+			// #669 (code review C-2, fach-review V-6): «Erneut versuchen» stands at the top of the page now
+			expect(byTestId('form-error')!.textContent).toContain(
+				'Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern».'
+			);
 			// review #151 R-1: the text sends the landlord back to this button after «Erneut versuchen»
 			expect(byTestId('delete-draft-and-save')).not.toBeNull();
 		});
