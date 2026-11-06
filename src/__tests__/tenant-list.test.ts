@@ -52,9 +52,10 @@ describe('Mieterliste', () => {
 	});
 
 	it('nennt die aktuelle Wohnung und kennzeichnet aktive Mieter, ohne Live-Region', () => {
-		const body = row(list([tenant('t1', true, '2.01')]), 't1');
+		const body = row(list([tenant('t1', true, 'Wohnung 2.01')]), 't1');
 
-		expect(body).toContain('Wohnung 2.01 · Ahornhof');
+		expect(body).toContain('Wohnung 2.01 · Ahornhof'); // as the load maps it, «Wohnung» once (code review 1149 C-1)
+		expect(body).not.toContain('Wohnung Wohnung');
 		expect(body).toMatch(/data-testid="tenant-status"[^>]*>[^]*Aktiv/);
 		expect(body).not.toContain('role="status"');
 	});

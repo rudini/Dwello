@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { apartmentName } from '$lib/contract-form'; // as the contract pages write it (#1149)
 	import type { TenantListItem } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -25,7 +24,7 @@
 	</div>
 	<span class="text-ink md:flex-1">
 		{tenant.currentApartment && tenant.currentBuilding
-			? apartmentName(tenant.currentApartment, tenant.currentBuilding)
+			? `${tenant.currentApartment} · ${tenant.currentBuilding}`
 			: tenant.nextContractStart
 				? m.tenants_contract_from({ date: formatDate(tenant.nextContractStart) })
 				: m.tenants_no_rent()}
