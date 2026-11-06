@@ -5,7 +5,6 @@
 	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
 	import OverlapLink from '../OverlapLink.svelte';
-	import OverlapWarning from '../OverlapWarning.svelte';
 	import type { Overlap } from '$lib/contract-form';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
@@ -148,7 +147,10 @@
 {/if}
 
 {#if overlap && !overlapSaid}
-	<OverlapWarning {overlap} {newTab} />
+	<Alert tone="caution" title={m.contracts_overlap_title()} testid="overlap-warning">
+		<p>{overlap.text}</p>
+		<OverlapLink contract={overlap.contract} {newTab} />
+	</Alert>
 {:else if overlap}
 	<OverlapLink contract={overlap.contract} {newTab} />
 {/if}

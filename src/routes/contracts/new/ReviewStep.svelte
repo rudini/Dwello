@@ -4,7 +4,8 @@
 	import type { ContractFormValues, Overlap } from '$lib/contract-form';
 	import ContractsUnknown from './ContractsUnknown.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import OverlapWarning from '../OverlapWarning.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
+	import OverlapLink from '../OverlapLink.svelte';
 
 	// Step 5: the whole contract in words before it is saved; each fact leads back to its step
 	let {
@@ -33,7 +34,8 @@
 {#if unknown}
 	<ContractsUnknown {onretry} testid="review-contracts-unknown" />
 {:else if overlap}
-	<OverlapWarning {overlap}>
+	<Alert tone="caution" title={m.contracts_overlap_title()} testid="overlap-warning">
+		<p>{overlap.text}</p>
 		<p>
 			{m.contracts_overlap_review_where({
 				period: 3,
@@ -42,7 +44,8 @@
 				apartmentStep: m.tenants_apartment()
 			})}
 		</p>
-	</OverlapWarning>
+		<OverlapLink contract={overlap.contract} />
+	</Alert>
 {/if}
 
 <dl class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
