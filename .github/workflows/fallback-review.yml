@@ -3,6 +3,8 @@ name: Fallback review
 # Copilot reviews each pull request once by itself, but not always: it may report a rate limit or an error, or stay
 # silent. Then MiniMax reviews the pull request's diff and posts one review comment (#1007): once per pull request,
 # drafts skipped, by hand for any pull request. Needs the repository secret MINIMAX_API_KEY.
+# Sets the commit status «Outside review» on the pull request's head once it has a real Copilot review, a fallback
+# review or a «No review» comment; the ruleset of main requires it, so no pull request merges before its review (#1121).
 # Checked when CI finished, not on Copilot's own review or comment: a run Copilot triggers waits for an approval that
 # no setting gives, and expires (#1009).
 on:
@@ -20,6 +22,8 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  # the commit status «Outside review», which the ruleset of main requires (#1121)
+  statuses: write
 
 jobs:
   review:
@@ -74,6 +78,12 @@ jobs:
           copilot_requested() {
             [ "$(gh api "repos/$GH_REPO/pulls/$PR/requested_reviewers" --jq '[.users[].login] | any(test("copilot"; "i"))')" = true ]
           }
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # the head the review belongs to, or, before one is read, the pull request's head now; a new push needs it again
+          passed() {
+            gh api "repos/$GH_REPO/statuses/${sha:-$(gh api "repos/$GH_REPO/pulls/$PR" --jq .head.sha)}" -f state=success \
+              -f context="Outside review" -f description="$1" -f target_url="$run_url" > /dev/null
+          }
 
           if [ -z "$PR" ]; then
             # CI started by hand on a pull request's branch (#1101) carries no pull request: find it by its branch
@@ -97,16 +107,18 @@ jobs:
             done
             if reviewed; then
               echo "Already reviewed by Copilot or MiniMax."
+              passed "Copilot or MiniMax reviewed this pull request."
               exit 0
             fi
           fi
 
-          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           fail() {
             trap - ERR
             echo "::error::$1"
             gh api "repos/$GH_REPO/issues/$PR/comments" -f body="<!-- fallback-review-failed -->
           No review: $1 ([run]($run_url))" > /dev/null || true
+            # the skill merges without a review then
+            passed "No review: see the comment." || true
             exit 1
           }
           trap 'fail "the workflow failed on line $LINENO."' ERR
@@ -202,3 +214,4 @@ jobs:
             cat review.md
           } > body.md
           gh api "repos/$GH_REPO/pulls/$PR/reviews" -f event=COMMENT -f commit_id="$sha" -F body=@body.md > /dev/null
+          passed "MiniMax reviewed this pull request."
