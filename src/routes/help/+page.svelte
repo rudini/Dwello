@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
-	import DemoNotice from '$lib/ui/DemoNotice.svelte';
+	import DemoNotice from '$lib/DemoNotice.svelte';
 	import Glossary from './Glossary.svelte';
 	import type { PageData } from './$types';
 

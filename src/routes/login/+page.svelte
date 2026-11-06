@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
-	import DemoNotice from '$lib/ui/DemoNotice.svelte';
+	import DemoNotice from '$lib/DemoNotice.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
 	import PasswordForm from './PasswordForm.svelte';

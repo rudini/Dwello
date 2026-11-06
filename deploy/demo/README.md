@@ -2,7 +2,7 @@
 
 The public demo runs on one Oracle Cloud "Always Free" VM: `docker-compose.prod.yml` plus `deploy/demo/docker-compose.yml`, which adds Caddy for HTTPS and publishes no port but 80 and 443. Self-hosting stays as in the main README (`docker-compose.prod.yml` on its own); nothing here changes it.
 
-**Every visitor shares the same data.** Anyone with a Google account can sign in and sees and edits the same demo landlord. A cron job resets the database to the demo data every night (`reset-demo.sh`). `DEMO=on` (set in `docker-compose.yml`) tells visitors so: the full notice on the sign-in page, one line at the top of every other page, a section in the help and in the privacy statement. The demo keeps no Sicherung (`BACKUP_DIR` empty in `docker-compose.yml`): it would keep the visitors' data on the server past the nightly reset (#675).
+**Every visitor shares the same data.** Anyone with a Google account can sign in and sees and edits the same demo landlord. A cron job resets the database to the demo data every night (`reset-demo.sh`). `DEMO=on` (set in `docker-compose.yml`) tells visitors so: the full notice on the sign-in page, one line at the top of every other page, a section in the help and in the privacy statement. The demo keeps no Sicherung (`BACKUP_DIR` empty in `docker-compose.yml`): it would keep the visitors' data on the server past the nightly reset (#675). Without `BACKUP_DIR` Dwello no longer clears old Sicherungen either: when updating a demo that already made some, empty the folder `./backups` on the VM once.
 
 ## 1. VM (Oracle Cloud)
 

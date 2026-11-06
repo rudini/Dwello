@@ -64,10 +64,19 @@ describe('Anmeldeseite (Ansicht)', () => {
 
 	// #675 F3: one's own installation through the operator of the demo; without a contact the sentence is left out
 	it('nennt in der Demo den Betreiber für eine eigene Installation, nur wenn ein Kontakt gesetzt ist', () => {
-		expect(page({ demo: true, contact: 'betrieb@muster-hosting.ch' })).toContain(
+		const text = page({ demo: true, contact: 'betrieb@muster-hosting.ch' }).replace(/<[^>]+>/g, '');
+		expect(text).toContain(
 			'Fragen Sie dafür den Betreiber dieser Demo: betrieb@muster-hosting.ch.'
 		);
 		expect(page({ demo: true, contact: null })).not.toContain('eigene Installation');
+	});
+
+	// personas Helga H-1 and Marco N-5 on #675: an e-mail address opens the mail program instead of being copied
+	it('verlinkt in der Demo eine E-Mail-Adresse des Betreibers', () => {
+		expect(page({ demo: true, contact: 'betrieb@muster-hosting.ch' })).toContain(
+			'href="mailto:betrieb@muster-hosting.ch"'
+		);
+		expect(page({ demo: true, contact: '+41 44 000 00 00' })).not.toContain('mailto:');
 	});
 
 	it('meldet einen Fehler sofort', () => {

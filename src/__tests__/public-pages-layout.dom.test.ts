@@ -110,6 +110,8 @@ describe('Öffentliche Demo', () => {
 		const notice = document.querySelector('[data-testid="demo-notice"]');
 		expect(notice?.textContent).toContain('Alle Besucher sehen und ändern dieselben Daten.');
 		expect(document.querySelector('main')!.contains(notice)).toBe(false);
+		// code review 675 C-2: inside the frame of the screen's height, so a short page needs no scrolling
+		expect(notice?.closest('.min-h-screen')).not.toBeNull();
 	});
 
 	// #675 (review b162-2 C-11): no region and title of the same name, so «Öffentliche Demo» is read once
