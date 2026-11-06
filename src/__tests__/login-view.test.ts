@@ -36,6 +36,55 @@ describe('Anmeldeseite (Ansicht)', () => {
 		expect(body).not.toContain('akzeptieren');
 	});
 
+	// #675: the full demo notice after the h1 and before signing in, read once (Sven P-1, review b162-2 C-11)
+	it('zeigt in der Demo den ganzen Hinweis nach der Überschrift und vor den Anmeldeknöpfen', () => {
+		const body = page({ demo: true });
+		const notice = body.indexOf('data-testid="demo-notice"');
+		expect(body.indexOf('</h1>')).toBeLessThan(notice);
+		expect(notice).toBeLessThan(body.indexOf('data-testid="login-google"'));
+		expect(body).toContain('Probieren Sie alles aus');
+		expect(body).not.toContain('aria-label="Öffentliche Demo"');
+	});
+
+	// moved from the layout (#675): why only made-up data, also for contact data
+	it('begründet in der Demo, warum nur erfundene Daten eingegeben werden dürfen, auch bei Kontaktdaten', () => {
+		const body = page({ demo: true });
+		expect(body).toContain('Alle Besucher sehen und ändern dieselben Daten');
+		expect(body).toContain(
+			'Geben Sie deshalb nur erfundene Daten ein, auch bei E-Mail-Adressen und Telefonnummern'
+		);
+	});
+
+	// #675 (fach review V-3, V-4): an own API key would serve every visitor; uploads are made up too
+	it('warnt in der Demo vor einem eigenen API-Schlüssel und vor echten Rechnungen', () => {
+		const body = page({ demo: true });
+		expect(body).toContain('keinen eigenen API-Schlüssel ein: Alle Besucher würden ihn nutzen.');
+		expect(body).toContain('Laden Sie nur erfundene Rechnungen und Dokumente hoch.');
+	});
+
+	// #675 F3: one's own installation through the operator of the demo; without a contact the sentence is left out
+	it('nennt in der Demo den Betreiber für eine eigene Installation, nur wenn ein Kontakt gesetzt ist', () => {
+		// the address is a link inside the sentence (Svelte marks blocks with comments)
+		expect(page({ demo: true, contact: 'betrieb@muster-hosting.ch' })).toMatch(
+			/Fragen Sie dafür den Betreiber dieser Demo: (<!--[^>]*-->)?<a [^>]*>betrieb@muster-hosting\.ch<\/a>(<!--[^>]*-->)?\./
+		);
+		expect(page({ demo: true, contact: null })).not.toContain('eigene Installation');
+	});
+
+	// personas Helga H-1 and Marco N-5 on #675: an e-mail address opens the mail program instead of being copied
+	it('verlinkt in der Demo eine E-Mail-Adresse des Betreibers', () => {
+		expect(page({ demo: true, contact: 'betrieb@muster-hosting.ch' })).toContain(
+			'href="mailto:betrieb@muster-hosting.ch"'
+		);
+		expect(page({ demo: true, contact: '+41 44 000 00 00' })).not.toContain('mailto:');
+		// code review 675 C-3: the format of .env.example, address and phone; only the address is the link
+		const both = page({ demo: true, contact: 'betrieb@muster-hosting.ch, 044 123 45 67' });
+		expect(both).toContain('href="mailto:betrieb@muster-hosting.ch"');
+		expect(both).toMatch(
+			/Betreiber dieser Demo: (<!--[^>]*-->)?<a [^>]*>betrieb@muster-hosting\.ch<\/a>, 044 123 45 67(<!--[^>]*-->)?\./
+		);
+	});
+
 	it('meldet einen Fehler sofort', () => {
 		const body = page({ error: 'Die Anmeldung wurde abgebrochen.' });
 		expect(body).toMatch(

@@ -1,10 +1,17 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { sectionText } from '../questions/app-frame';
-import { demoNoticeShown, demoNoticeText } from '../questions/demo';
-import { openDemoOverview, openDemoPrivacy, openDemoSignIn, openDemoTerms } from '../tasks/demo';
+import { demoNoticeLinkText, demoNoticeShown, demoNoticeText } from '../questions/demo';
+import {
+	followDemoNoticeLink,
+	openDemoHelp,
+	openDemoOverview,
+	openDemoPrivacy,
+	openDemoSignIn,
+	openDemoTerms
+} from '../tasks/demo';
 
-const { When, Then } = createBdd(test);
+const { Given, When, Then } = createBdd(test);
 
 When('ein Besucher die Anmeldeseite der Demo öffnet', async ({ besucher }) => {
 	await besucher.attemptsTo(openDemoSignIn);
@@ -59,4 +66,38 @@ Then(
 
 Then('sieht der Besucher keinen Demo-Hinweis', async ({ besucher }) => {
 	await besucher.sees(demoNoticeShown).toBe(false);
+});
+
+// #675: the full notice on the sign-in page, one line with a link inside the app
+Then(
+	'sagt der Demo-Hinweis dem Besucher, dass er alles ausprobieren darf und für echte Daten eine eigene Installation braucht',
+	async ({ besucher }) => {
+		await besucher.sees(demoNoticeText).toContain('Probieren Sie alles aus');
+		await besucher.sees(demoNoticeText).toContain('eigene Installation');
+	}
+);
+
+Then(
+	'nennt der Demo-Hinweis dem Besucher für eine eigene Installation den Kontakt {string}',
+	async ({ besucher }, contact: string) => {
+		await besucher.sees(demoNoticeText).toContain(`Fragen Sie dafür den Betreiber dieser Demo: ${contact}.`);
+	}
+);
+
+Then('zeigt der Demo-Hinweis nur eine Zeile mit dem Link {string}', async ({ verwalter }, link: string) => {
+	await verwalter.sees(demoNoticeLinkText(link)).toBe(link);
+	// the rule of the full notice stays on the sign-in page and in the help
+	await verwalter.sees(demoNoticeText).not.toContain('erfundene');
+});
+
+Given('der Liegenschaftsverwalter ist auf der Übersicht der Demo', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openDemoOverview);
+});
+
+When('der Liegenschaftsverwalter im Demo-Hinweis {string} wählt', async ({ verwalter }, link: string) => {
+	await verwalter.attemptsTo(followDemoNoticeLink(link));
+});
+
+When('der Liegenschaftsverwalter die Hilfe der Demo liest', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openDemoHelp);
 });

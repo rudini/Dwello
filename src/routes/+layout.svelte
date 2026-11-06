@@ -12,7 +12,6 @@
 	import Footer from '$lib/ui/Footer.svelte';
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
-	import Alert from '$lib/ui/Alert.svelte';
 	import { isListNavigation } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -74,18 +73,6 @@
 	<title>Dwello</title>
 </svelte:head>
 
-<!-- Public demo (DEMO=on): every visitor shares the data, reset every night; at the top of every page -->
-{#snippet demoNotice(spacing: string)}
-	{#if data.demo}
-		<!-- a named region: found with landmark navigation, also before signing in -->
-		<section class={spacing} aria-label={m.demo_notice_title()}>
-			<Alert tone="caution" title={m.demo_notice_title()} testid="demo-notice">
-				<p>{m.demo_notice_text()}</p>
-			</Alert>
-		</section>
-	{/if}
-{/snippet}
-
 <a
 	href="#main-content"
 	class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent"
@@ -93,14 +80,26 @@
 	{m.shell_skip_to_content()}
 </a>
 
+<!-- Public demo (DEMO=on): one line before the header, outside main, so the skip link leads to the h1 (#675);
+     the sign-in page shows the full notice itself, the help explains it under #demo -->
+{#snippet demoLine()}
+	{#if data.demo && $page.url.pathname !== '/login'}
+		<p class="bg-caution-soft px-4 py-2 text-ink" data-testid="demo-notice">
+			{m.demo_line_text()}
+			<a href="/help#demo" class={publicLink}>{m.demo_line_link()}</a>
+		</p>
+	{/if}
+{/snippet}
+
 {#if showAuthenticatedLayout}
 	<div class="flex min-h-screen flex-col bg-canvas">
+		<!-- inside the frame, so a short page still fits the screen (code review 675 C-2) -->
+		{@render demoLine()}
 		<Header user={data.user} />
 		<div class="flex flex-1">
 			<Navigation />
 			<main id="main-content" class="min-w-0 flex-1 px-4 py-8 lg:px-10" tabindex="-1">
 				<div class="mx-auto max-w-6xl">
-					{@render demoNotice('mb-8')}
 					{@render children()}
 				</div>
 			</main>
@@ -112,6 +111,8 @@
 	</div>
 {:else}
 	<div class="flex min-h-screen flex-col bg-canvas">
+		<!-- inside the frame, so a short page still fits the screen (code review 675 C-2) -->
+		{@render demoLine()}
 		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages;
 		     a header of its own, so the links sit in a landmark (#656) -->
 		<header class="flex items-center justify-end gap-4 px-4 pt-4">
@@ -131,13 +132,11 @@
 			<!-- Help and the legal pages, read before signing in: the same margins as inside the frame -->
 			<main id="main-content" class="flex-1 px-4 py-8 lg:px-10" tabindex="-1">
 				<div class="mx-auto max-w-6xl">
-					{@render demoNotice('mb-8')}
 					{@render children()}
 				</div>
 			</main>
 		{:else}
 			<main id="main-content" class="flex flex-1 flex-col" tabindex="-1">
-				{@render demoNotice('px-4 pt-4')}
 				{@render children()}
 			</main>
 		{/if}

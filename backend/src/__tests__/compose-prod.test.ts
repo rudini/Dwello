@@ -131,4 +131,9 @@ describe('Demo mit deploy/demo/docker-compose.yml', () => {
 		const reset = readFileSync(join(root, 'deploy/demo/reset-demo.sh'), 'utf8');
 		expect(reset).toContain('export DATABASE_URL=postgresql://dwello:$(cat /run/dwello/db_password)@postgres:5432/dwello');
 	});
+
+	// #675 (fach review R-1): a Sicherung would keep the visitors' data for up to 12 months, past the nightly reset
+	it('legt in der Demo keine Sicherungen an', () => {
+		expect(service('backend')).toMatch(/^\s+- BACKUP_DIR=$/m);
+	});
 });

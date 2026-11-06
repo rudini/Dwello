@@ -16,6 +16,7 @@ describe('Anmeldeseite', () => {
 			password: false,
 			insecure: false,
 			redirectTo: '/buildings',
+			contact: null,
 			providers: [
 				{
 					id: 'google',
@@ -30,6 +31,18 @@ describe('Anmeldeseite', () => {
 			],
 			error: null
 		});
+	});
+
+	// #675 F3: the demo notice names the operator for one's own installation (OPERATOR_* as in /terms)
+	it('gibt der Demo den Kontakt des Betreibers mit', async () => {
+		process.env.OPERATOR_NAME = 'Muster Hosting GmbH';
+		process.env.OPERATOR_CONTACT = 'betrieb@muster-hosting.ch';
+		try {
+			expect((await open()).contact).toBe('betrieb@muster-hosting.ch');
+		} finally {
+			delete process.env.OPERATOR_NAME;
+			delete process.env.OPERATOR_CONTACT;
+		}
 	});
 
 	it('lässt nicht eingerichtete Anbieter weg', async () => {
