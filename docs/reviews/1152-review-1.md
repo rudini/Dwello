@@ -1,0 +1,12 @@
+# Code-Review #1152, Runde 1 (4bbfe5629~1..4bbfe5629)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| – | – | – | Keine Befunde. |
+
+Geprüft: `listContracts` hat mit `apartmentId` und ohne `limit` keine Grenze mehr; ein explizites `limit` gilt weiter, und ohne `apartmentId` bleibt die Vorgabe 50 (`limit = apartmentId ? undefined : 50`). `limit=0` und `apartmentId=` (leer) verhalten sich wie auf der Basis. Der BFF-Proxy `src/routes/api/contracts/+server.ts` gibt die Query unverändert weiter, `ContractForm.svelte:120` und `ContractWizard.svelte:135` senden kein `limit`, also sehen beide jetzt alle Mietverträge der Wohnung (der Wizard auch für `lastRent`). Es gibt keine anderen Aufrufer mit `apartmentId` (`move-out.ts`, `statement-run.service.ts`, `dashboard.ts` und `contract-tasks.service.ts` übergeben `limit`). Die Antwortform bleibt gleich, darum braucht `tests/contracts` keine Anpassung. `docs/api-specification.md:101` stimmt mit dem Code überein. Der neue pg-Routentest liegt auf der tiefsten Schicht, die den Fehler zeigt, und ist auf der Basis rot: 51 Mietverträge auf der Wohnung, die Basis liefert 50. Die 50 Monatsverträge 2019-01 bis 2023-02 überschneiden sich nicht mit dem Vertrag ab 2024-04. Der zweite Mietvertrag (`other`) zeigt mit `toEqual`, dass der Filter fremde Wohnungen ausschliesst. Die Aufräumlogik ist sicher: Bleibt ein Vertrag liegen, scheitert `rental.remove()` im `afterAll`. Ponytail-review findet nichts. `$dynamic()` und der Ternary sind der kürzeste typsichere Weg zu einer optionalen Grenze. Prettier prüft `backend/` nicht (`.prettierignore`). UI, Texte, Tokens, a11y und E2E sind nicht berührt. `No scenario` passt, weil der Stack keine Wohnung mit mehr als 50 Mietverträgen anlegt.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet: `bun run lint`, `bun run check`, `bun run fitness`, `cd backend && bun run type-check`, der Prettier-Diff der beiden TS-Dateien, die Backend-Tests (147 pass) und der rote Lauf des neuen Tests (50 statt 51).
+- Kein Test hält fest, dass ein explizites `limit` zusammen mit `apartmentId` weiter gilt (`src/lib/server/apartment.ts:72`, `limit=100`) und dass ohne `apartmentId` die Vorgabe 50 bleibt. Gesucht habe ich in `backend/src/__tests__` nach `limit`: Nur `buildingId&limit=1000` in `api-contracts.pg.test.ts:274,948` deckt den Zweig `ordered.limit(limit)` ab. Das Verhalten ist nur am Code bestätigt; die Basis zeigt es auch, es bleibt gleich.
