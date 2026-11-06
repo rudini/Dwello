@@ -1326,3 +1326,15 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1162 (keep the chosen tile in view), #1163 (E2E contract row depends on the list page)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #677 busy buttons, field errors and the document list (personas upload174)
+
+- [x] Read #677 and the upload174 reports (from PR #183); Sven 2 P-4 focus already fixed on main
+- [x] @wip scenarios and red DOM tests (9670954)
+- [x] Product owner decided 1, 5, 6, 8; 2–4, 7, 9–11 by the coordinator on the implementer's recommendation (recorded in #677); 11 became #1173
+- [x] fach-reviewer step 1 (`docs/reviews/677-1-fach-review.md`): V-1..V-4 Minor fixed
+- [x] Busy Button with aria-disabled and status, dialog focus, Field describedby order (b272fc6); document list filter, links, file names, duplicate hint (ce92205)
+- [x] code-reviewer round 1 (`docs/reviews/677-review-1.md`): C-1 Major (scenarios) and C-2..C-5 fixed (0e25e25..e9c00c2); round 2 (`677-review-2.md`): C-6, C-7 Minor fixed (e83126d, ddf7bae)
+- [x] Personas Sven, Helga, Anna (`docs/design/personas/{sven,helga,anna}-677.md`): P-3, P-7, P-4, Helga P-3, Anna P-3/P-4, Weber P-4, Marco 2 fixed; Sven S-1 Major (focus left the filter) and S-2, Anna A-1 = Helga N-6 fixed; Minors that stay: A-2, H-1, H-2, S-3, S-4
+- [x] Issue opened: #1173 (page title announced again after a form action)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
