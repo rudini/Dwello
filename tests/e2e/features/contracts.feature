@@ -58,7 +58,7 @@ Funktionalität: Mietvertragsliste
 
   Szenario: Mietvertrag aus der Liste bearbeiten
     Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" bearbeiten will
-    Dann ist der Liegenschaftsverwalter auf der Seite "Mietvertrag bearbeiten"
+    Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
 
   # #211: die Liste zeigt, welchem Mietvertrag eine Abrechnung fehlt, ohne jeden Vertrag zu öffnen
   Szenario: Mietvertragsliste zeigt eine fehlende Abrechnung

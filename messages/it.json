@@ -815,7 +815,7 @@
 	"contracts_delete_failed": "Non è stato possibile eliminare il contratto di locazione.",
 	"contracts_name": "Nome",
 	"contracts_rent_per_month": "Pigione al mese",
-	"contracts_edit_title": "Modificare il contratto di locazione",
+	"contracts_edit_title": "Modificare il contratto di locazione di {name}",
 	"contracts_edit_purpose": "Modifichi la durata del contratto o la pigione di questo contratto di locazione.",
 	"contracts_new_title": "Nuovo contratto di locazione",
 	"contracts_new_purpose": "Registri passo dopo passo chi ha in locazione quale appartamento, da quando e a quale pigione.",

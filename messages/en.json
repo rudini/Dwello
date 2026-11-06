@@ -815,7 +815,7 @@
 	"contracts_delete_failed": "The rental contract could not be deleted.",
 	"contracts_name": "Name",
 	"contracts_rent_per_month": "Rent per month",
-	"contracts_edit_title": "Edit rental contract",
+	"contracts_edit_title": "Edit rental contract of {name}",
 	"contracts_edit_purpose": "Change the contract term or rent of this rental contract.",
 	"contracts_new_title": "New rental contract",
 	"contracts_new_purpose": "Add step by step who rents which apartment, from when and at what rent.",

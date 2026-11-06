@@ -815,7 +815,7 @@
 	"contracts_delete_failed": "Mietvertrag konnte nicht gelöscht werden.",
 	"contracts_name": "Name",
 	"contracts_rent_per_month": "Miete pro Monat",
-	"contracts_edit_title": "Mietvertrag bearbeiten",
+	"contracts_edit_title": "Mietvertrag von {name} bearbeiten",
 	"contracts_edit_purpose": "Ändern Sie Vertragsdauer oder Miete dieses Mietvertrags.",
 	"contracts_new_title": "Neuer Mietvertrag",
 	"contracts_new_purpose": "Erfassen Sie Schritt für Schritt, wer welche Wohnung ab wann zu welcher Miete mietet.",

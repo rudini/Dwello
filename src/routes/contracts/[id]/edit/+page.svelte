@@ -15,12 +15,12 @@
 </script>
 
 <svelte:head>
-	<title>{m.contracts_edit_title()} - Dwello</title>
+	<title>{m.contracts_edit_title({ name: data.tenant })} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title={m.contracts_edit_title()}
+		title={m.contracts_edit_title({ name: data.tenant })}
 		purpose={m.contracts_edit_purpose()}
 		trail={[
 			{ href: '/contracts', label: m.nav_contracts() },

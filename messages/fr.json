@@ -815,7 +815,7 @@
 	"contracts_delete_failed": "Le contrat de bail n’a pas pu être supprimé.",
 	"contracts_name": "Nom",
 	"contracts_rent_per_month": "Loyer par mois",
-	"contracts_edit_title": "Modifier le contrat de bail",
+	"contracts_edit_title": "Modifier le contrat de bail de {name}",
 	"contracts_edit_purpose": "Modifiez la durée du contrat ou le loyer de ce contrat de bail.",
 	"contracts_new_title": "Nouveau contrat de bail",
 	"contracts_new_purpose": "Saisissez étape par étape qui loue quel appartement, à partir de quand et pour quel loyer.",
