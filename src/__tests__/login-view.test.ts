@@ -64,9 +64,9 @@ describe('Anmeldeseite (Ansicht)', () => {
 
 	// #675 F3: one's own installation through the operator of the demo; without a contact the sentence is left out
 	it('nennt in der Demo den Betreiber für eine eigene Installation, nur wenn ein Kontakt gesetzt ist', () => {
-		const text = page({ demo: true, contact: 'betrieb@muster-hosting.ch' }).replace(/<[^>]+>/g, '');
-		expect(text).toContain(
-			'Fragen Sie dafür den Betreiber dieser Demo: betrieb@muster-hosting.ch.'
+		// the address is a link inside the sentence (Svelte marks blocks with comments)
+		expect(page({ demo: true, contact: 'betrieb@muster-hosting.ch' })).toMatch(
+			/Fragen Sie dafür den Betreiber dieser Demo: (<!--[^>]*-->)?<a [^>]*>betrieb@muster-hosting\.ch<\/a>(<!--[^>]*-->)?\./
 		);
 		expect(page({ demo: true, contact: null })).not.toContain('eigene Installation');
 	});
@@ -80,8 +80,8 @@ describe('Anmeldeseite (Ansicht)', () => {
 		// code review 675 C-3: the format of .env.example, address and phone; only the address is the link
 		const both = page({ demo: true, contact: 'betrieb@muster-hosting.ch, 044 123 45 67' });
 		expect(both).toContain('href="mailto:betrieb@muster-hosting.ch"');
-		expect(both.replace(/<[^>]+>/g, '')).toContain(
-			'Betreiber dieser Demo: betrieb@muster-hosting.ch, 044 123 45 67.'
+		expect(both).toMatch(
+			/Betreiber dieser Demo: (<!--[^>]*-->)?<a [^>]*>betrieb@muster-hosting\.ch<\/a>, 044 123 45 67(<!--[^>]*-->)?\./
 		);
 	});
 
