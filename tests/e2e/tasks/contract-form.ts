@@ -1,6 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { Count } from '../screenplay/questions';
-import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Press, Select, Uncheck, Wait } from '../screenplay/interactions';
+import { Check, Click, Enter, EnterDate, FailRequests, Focus, Navigate, Press, Select, Uncheck, Wait } from '../screenplay/interactions';
 import {
 	agreedCategory,
 	agreedCategoryBoxAt,
@@ -27,7 +27,7 @@ import {
 	agreedFromInput,
 	agreedFromToggle
 } from '../targets/contract-form';
-import { errorToast, errorToastClose, successToast } from '../targets/form';
+import { errorToast, errorToastClose, successToast, successToastClose } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -68,6 +68,9 @@ export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(ret
 export const retryContractsInVain: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(errorToast));
 // #669: on from the error message's close button with the Tab key
 export const tabOnFromErrorMessage = Press.theKey('Tab').on(errorToastClose);
+// #669 (Sven S-1): stays on the confirmation's close button longer than its reading time
+export const stayOnConfirmationClose = (seconds: number): Activity => (actor) =>
+	actor.attemptsTo(Focus.on(successToastClose), Wait.forSeconds(seconds));
 export const enterBaseRent = (baseRent: string) => Enter.theValue(baseRent).into(baseRentInput);
 
 // Step "Mieter"

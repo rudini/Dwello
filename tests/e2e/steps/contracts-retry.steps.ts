@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, failureOnTop, failures } from '../questions/contract-form';
+import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
-import { tabOnFromErrorMessage } from '../tasks/contract-form';
+import { stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
 const { When, Then } = createBdd(test);
 
@@ -40,4 +40,12 @@ Then('steht der Hinweis oben im Formular ganz im ersten Bildschirm', async ({ ve
 // #669 (code review C-1): the drawer of the menu does not cover the messages
 Then('liegt die Fehlermeldung über dem offenen Menü', async ({ verwalter }) => {
 	await verwalter.sees(failureOnTop).toBe(true);
+});
+
+When('der Liegenschaftsverwalter {int} Sekunden auf «Meldung schliessen» bleibt', async ({ verwalter }, seconds: number) => {
+	await verwalter.attemptsTo(stayOnConfirmationClose(seconds));
+});
+
+Then('steht die Erfolgsmeldung noch da', async ({ verwalter }) => {
+	await verwalter.sees(confirmationShown).toBe(true);
 });

@@ -19,6 +19,18 @@
 	// A confirmation goes into the status region, which is on the page from the start, once the page it
 	// leads to has been announced: inserted at the same moment, it would be drowned out by the title
 	let shownUpTo = $state(0);
+	// #669 (Sven S-1, WCAG 2.2.1): the reading time stops while the focus or the pointer is in a toast, and starts anew after
+	let pointer = false;
+	let expired: Toast[] = [];
+	const expire = (toast: Toast) =>
+		pointer || region?.contains(document.activeElement)
+			? expired.push(toast)
+			: dismissToast(toast.id);
+	const resume = (into?: EventTarget | null) => {
+		if (pointer || region?.contains(into as Node | null)) return;
+		for (const toast of expired) setTimeout(() => expire(toast), toast.duration);
+		expired = [];
+	};
 	$effect(() => {
 		const newest = $toasts.filter((toast) => toast.type !== 'error').at(-1)?.id ?? 0;
 		if (newest <= shownUpTo || $navigating) return;
@@ -28,7 +40,7 @@
 			// the reading time starts now that the confirmation is shown
 			for (const toast of $toasts)
 				if (toast.type !== 'error' && toast.id > shownUpTo && toast.duration)
-					setTimeout(() => dismissToast(toast.id), toast.duration);
+					setTimeout(() => expire(toast), toast.duration);
 			shownUpTo = newest;
 		}, 500);
 		return () => clearTimeout(timer);
@@ -95,6 +107,9 @@
 		: 'bottom-4'}"
 	data-toast-region
 	bind:this={region}
+	onfocusout={(event) => resume(event.relatedTarget)}
+	onpointerenter={() => (pointer = true)}
+	onpointerleave={() => ((pointer = false), resume())}
 >
 	{#each errors as toast (toast.id)}{@render message(toast, 'alert')}{/each}
 	<div role="status" aria-atomic="false" class="flex flex-col gap-2">

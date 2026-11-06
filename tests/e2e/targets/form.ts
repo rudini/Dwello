@@ -10,3 +10,4 @@ export const deleteConfirmButton = target('Löschen bestätigen', (page) => page
 export const successToast = target('Erfolgsmeldung', (page) => page.getByTestId('toast-success'));
 export const errorToast = target('Fehlermeldung', (page) => page.getByTestId('toast-error'));
 export const errorToastClose = target('Meldung schliessen', (page) => errorToast.locate(page).getByRole('button'));
+export const successToastClose = target('Meldung schliessen der Erfolgsmeldung', (page) => successToast.locate(page).getByRole('button'));

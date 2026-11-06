@@ -125,6 +125,15 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Dann kündigt ein Screenreader bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" ohne "Erneut versuchen" an
 
+  # #669 (Persona Sven S-1, WCAG 2.2.1): wer die Meldung mit der Tastatur erreicht, kann sie lesen und schliessen
+  Szenario: Die Erfolgsmeldung bleibt stehen, solange der Fokus auf «Meldung schliessen» liegt
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Und der Liegenschaftsverwalter 10 Sekunden auf «Meldung schliessen» bleibt
+    Dann steht die Erfolgsmeldung noch da
+
   # #669 (code review C-1, Persona Sven S-6): das offene Menü verdeckt die Meldungen nicht
   Szenario: Die Fehlermeldung nach dem erneuten Versuch bleibt über dem offenen Menü sichtbar
     Angenommen das Browserfenster ist 390 Pixel breit
