@@ -121,3 +121,13 @@ export const partiesContractLink = target('Mietvertrag bei Mieter und Wohnung', 
 export const noticeHintLink = target('Link im Hinweis zum Vertragsende', (page) =>
 	page.getByTestId('contract-notice-hint').getByRole('link')
 );
+// #1153: after «Erneut versuchen» cleared a choice that is «nicht verfügbar», the step says which apartment and contract
+export const apartmentCleared = target('Hinweis auf die nicht verfügbare Wohnung', (page) =>
+	page.getByTestId('apartment-cleared')
+);
+export const apartmentClearedText = target('Erklärung im Hinweis auf die nicht verfügbare Wohnung', (page) =>
+	page.getByTestId('apartment-cleared-text')
+);
+export const apartmentClearedLink = target('Link zum Mietvertrag im Hinweis auf die nicht verfügbare Wohnung', (page) =>
+	apartmentCleared.locate(page).getByTestId('overlap-contract-link')
+);

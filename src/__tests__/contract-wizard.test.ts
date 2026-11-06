@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	advancePaymentNotice,
 	apartmentChoices,
+	clearedApartment,
 	normalizeAmounts,
 	startDateNotice,
 	contractSteps,
@@ -347,5 +348,23 @@ describe('Beträge des letzten Mietvertrags', () => {
 		const flat = { ...contract, flatRateUtilityCharge: '80.00' };
 		expect(lastRent({ data: { contracts: [flat] } })?.flatRateUtilityCharge).toBe('80.00');
 		expect(rentTakenOver({ ...empty, ...taken, flatRateUtilityCharge: '90' }, taken)).toBe(false);
+	});
+});
+
+// #1153 (Personas Sven S-7, Helga H-6): the step «Wohnung» names a cleared choice and the contract that blocks it
+describe('Aufgehobene Wahl einer nicht verfügbaren Wohnung', () => {
+	const ended = {
+		id: 'c1',
+		start_date: '2020-01-01',
+		end_date: '2023-12-31',
+		tenant_name: 'Carla Rossi'
+	};
+	const open = { id: 'c2', start_date: '2024-04-01', end_date: null, tenant_name: 'Bruno Meier' };
+
+	it('nennt die Wohnung und ihren unbefristeten Mietvertrag', () => {
+		expect(clearedApartment({ unit: '2.01', building: 'Ahornhof' }, [ended, open])).toEqual({
+			apartment: 'Wohnung 2.01 · Ahornhof',
+			contract: { id: 'c2', tenant: 'Bruno Meier' }
+		});
 	});
 });
