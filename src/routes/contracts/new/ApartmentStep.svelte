@@ -16,7 +16,7 @@
 		notice,
 		unknown = false,
 		onretry,
-		cleared,
+		cleared = $bindable(),
 		error
 	}: {
 		apartmentId: string;
@@ -29,6 +29,10 @@
 		cleared?: { apartment: string; contract?: { id: string; tenant?: string } } | null; // a choice «Erneut versuchen» cleared (#1153)
 		error?: string;
 	} = $props();
+	// the hint is for the cleared choice: once an apartment is chosen it is gone for good (code review 1153 C-1)
+	$effect(() => {
+		if (apartmentId) cleared = null;
+	});
 </script>
 
 {#if loading}
@@ -52,7 +56,7 @@
 <ContractsUnknown {onretry} shown={unknown} testid="apartment-contracts-unknown" />
 
 <!-- stays until an apartment is chosen: the toast that says so goes away (#1153, Sven S-7, Helga H-6) -->
-{#if cleared && !apartmentId}
+{#if cleared}
 	<Alert
 		tone="caution"
 		title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}

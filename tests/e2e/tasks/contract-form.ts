@@ -32,7 +32,7 @@ import {
 	noticeHintLink,
 	apartmentClearedLink
 } from '../targets/contract-form';
-import { errorToast, errorToastClose, loadedToast, successToastClose, warningToastClose } from '../targets/form';
+import { errorToast, errorToastClose, loadedToast, successToastClose, warningToast, warningToastClose } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -229,5 +229,6 @@ export const openContractFromParties = Click.on(partiesContractLink);
 export const followNoticeHint = Click.on(noticeHintLink);
 
 // #1153: the warning after «Erneut versuchen» closed; the hint in the step stays
-export const closeWarning: Activity = Click.on(warningToastClose);
+// waits until it is gone, so what is checked next outlasted it (code review 1153 C-2)
+export const closeWarning: Activity = (actor) => actor.attemptsTo(Click.on(warningToastClose), Wait.forCount(warningToast, 0));
 export const openClearedApartmentContract: Activity = Click.on(apartmentClearedLink);

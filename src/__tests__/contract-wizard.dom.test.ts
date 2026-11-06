@@ -537,6 +537,39 @@ describe('Prüfungen im Mietvertrag', () => {
 		select('apartment-select', 'a1');
 		await settle();
 		expect(byTestId('apartment-cleared')).toBeNull();
+		// code review 1153 C-1: once another apartment was chosen, emptying the choice again does not bring it back
+		select('apartment-select', '');
+		await settle();
+		expect(byTestId('apartment-cleared')).toBeNull();
+	});
+
+	// code review 1153 C-1: «Angaben verwerfen» starts anew, without the hint of the cleared choice
+	it('nennt die aufgehobene Wohnung nach dem Verwerfen des Entwurfs nicht mehr', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a2')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());
+		show(NewContractPage, { data } as never);
+		await settle();
+		next();
+		await settle();
+		select('apartment-select', 'a2');
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('apartment-cleared')).not.toBeNull();
+		click('draft-discard');
+		await settle();
+		click('draft-discard-confirm');
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // in the step «Wohnung» again
+		expect(byTestId('apartment-cleared')).toBeNull();
 	});
 
 	// review #151 R2-6: a retry that fails again says so; the hint stays

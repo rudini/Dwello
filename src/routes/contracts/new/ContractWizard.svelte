@@ -256,6 +256,7 @@
 		clearDraft(browserStorage(), DRAFT);
 		values = initialContractValues(undefined, params);
 		restored = null;
+		cleared = null;
 		savedAt = null;
 		touched = false;
 		startEdited = false;
@@ -363,7 +364,7 @@
 				notice={startLimit.notice}
 				{unknown}
 				onretry={retry}
-				{cleared}
+				bind:cleared
 				error={errors.apartmentId}
 			/>
 		{:else if step === 3}
