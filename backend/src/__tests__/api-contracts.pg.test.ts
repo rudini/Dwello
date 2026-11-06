@@ -256,6 +256,18 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('config-iban-address-missing'), await response.json())).toEqual([]);
 	});
 
+	// #1166: a separate Kontoinhaber without name and town, the fields it misses named
+	it('PUT /config liefert ohne Name und Ort des Kontoinhabers die Felder von config-account-holder-missing.json', async () => {
+		const response = await sendJson('PUT', '/api/v1/config', {
+			iban: 'CH93 0076 2011 6238 5295 7',
+			account_holder_separate: 'true',
+			account_holder_postal_code: '6003'
+		});
+		await deleteConfig('account_holder_postal_code');
+		expect(response.status).toBe(400);
+		expect(drift(await sample('config-account-holder-missing'), await response.json())).toEqual([]);
+	});
+
 	// H-28 (#717): the Tankbestand form refused, each check with its field; a day already taken with its code
 	it('POST /buildings/:id/fuel-stocks liefert die Felder von fuel-stock-fields-refused.json und fuel-stock-date-taken.json', async () => {
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));

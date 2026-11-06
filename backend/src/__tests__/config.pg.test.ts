@@ -260,3 +260,71 @@ describe('Einstellungen prüfen', () => {
 		expect(response.status).toBe(status);
 	});
 });
+
+// #1166: the payment part names the Kontoinhaber of the IBAN; one other than the Absender needs name, PLZ and Ort
+describe('Eigener Kontoinhaber', () => {
+	const HOLDER = ['account_holder_name', 'account_holder_address', 'account_holder_postal_code', 'account_holder_city'] as const;
+	const absender = { company_name: 'Muster Immobilien AG', company_postal_code: '8001', company_city: 'Zürich' };
+	const clearHolder = () => Promise.all(HOLDER.map((key) => deleteConfig(key)));
+	afterAll(clearHolder);
+
+	it('verlangt mit einer IBAN Name, PLZ und Ort eines eigenen Kontoinhabers, die Strasse nicht', async () => {
+		const refused = await sendJson('PUT', '/api/v1/config', {
+			...absender,
+			iban: 'CH93 0076 2011 6238 5295 7',
+			account_holder_separate: 'true',
+			account_holder_address: 'Seeweg 5'
+		});
+		const saved = await sendJson('PUT', '/api/v1/config', {
+			...absender,
+			iban: 'CH93 0076 2011 6238 5295 7',
+			account_holder_separate: 'true',
+			account_holder_name: 'Erika Muster',
+			account_holder_address: '',
+			account_holder_postal_code: '6003',
+			account_holder_city: 'Luzern'
+		});
+
+		expect(refused.status).toBe(400);
+		expect(await refused.json()).toMatchObject({
+			causes: [{ code: 'ACCOUNT_HOLDER_MISSING', params: { field: 'account_holder_name', missing: 'account_holder_name,account_holder_postal_code,account_holder_city' } }]
+		});
+		expect(saved.status).toBe(200);
+		expect(await Promise.all(HOLDER.map((key) => getConfig(key)))).toEqual(['Erika Muster', '', '6003', 'Luzern']);
+	});
+
+	// the checkbox cleared without any field: still refused, not silently the Absender
+	it('lehnt einen eigenen Kontoinhaber ganz ohne Angaben mit einer IBAN ab', async () => {
+		await clearHolder();
+		const refused = await sendJson('PUT', '/api/v1/config', { ...absender, iban: 'CH93 0076 2011 6238 5295 7', account_holder_separate: 'true' });
+
+		expect(refused.status).toBe(400);
+		expect(await refused.json()).toMatchObject({ causes: [{ code: 'ACCOUNT_HOLDER_MISSING' }] });
+	});
+
+	it('speichert einen unvollständigen Kontoinhaber ohne IBAN', async () => {
+		const saved = await sendJson('PUT', '/api/v1/config', { account_holder_separate: 'true', account_holder_name: 'Erika Muster' });
+
+		expect(saved.status).toBe(200);
+		expect(await getConfig('account_holder_name')).toBe('Erika Muster');
+	});
+
+	it('verlangt eine PLZ des Kontoinhabers mit 4 Ziffern', async () => {
+		const refused = await sendJson('PUT', '/api/v1/config', { account_holder_separate: 'true', account_holder_postal_code: '600' });
+
+		expect(await refused.json()).toMatchObject({ causes: [{ code: 'POSTAL_CODE_DIGITS', params: { field: 'account_holder_postal_code' } }] });
+	});
+
+	// the form sends the four fields empty when «Kontoinhaber ist der Absender» is ticked: they are deleted
+	it('löscht den Kontoinhaber, wenn wieder der Absender der Kontoinhaber ist', async () => {
+		await setConfig('account_holder_name', 'Erika Muster');
+		const saved = await sendJson('PUT', '/api/v1/config', {
+			...absender,
+			iban: 'CH93 0076 2011 6238 5295 7',
+			...Object.fromEntries(HOLDER.map((key) => [key, '']))
+		});
+
+		expect(saved.status).toBe(200);
+		expect(await getConfig('account_holder_name')).toBe('');
+	});
+});

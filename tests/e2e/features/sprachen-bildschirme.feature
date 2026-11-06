@@ -270,6 +270,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | documents              | mark-sent-dialog    |
       | config                 | default             |
       | config                 | backup-links        |
+      | config                 | account-holder      |
+      | config                 | account-holder-missing |
       | config-backup          | default             |
       | config-backup          | new-code-password   |
       | config-backup          | new-code-password-error |

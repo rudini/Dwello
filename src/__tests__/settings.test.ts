@@ -4,6 +4,7 @@ import { runAction } from './helpers/action';
 import config from '../../tests/contracts/config.json';
 import fieldsRefused from '../../tests/contracts/config-fields-refused.json';
 import ibanAddressMissing from '../../tests/contracts/config-iban-address-missing.json';
+import accountHolderMissing from '../../tests/contracts/config-account-holder-missing.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -18,6 +19,7 @@ const valid = {
 	companyPhone: '044 123 45 67',
 	companyEmail: 'info@muster.ch',
 	iban: 'CH93 0076 2011 6238 5295 7',
+	accountHolderIsSender: 'on',
 	managementFeePercent: '3',
 	defaultHeatingProfileId: 'hp1',
 	defaultDistributionKeyId: '',
@@ -42,6 +44,10 @@ describe('Einstellungen laden', () => {
 			companyPhone: '044 123 45 67',
 			companyEmail: 'info@muster.ch',
 			iban: 'CH93 0076 2011 6238 5295 7',
+			accountHolderName: 'Erika Muster',
+			accountHolderAddress: 'Seeweg 5',
+			accountHolderPostalCode: '6003',
+			accountHolderCity: 'Luzern',
 			managementFeePercent: '2.5',
 			defaultHeatingProfileId: 'hp1',
 			defaultDistributionKeyId: '',
@@ -89,6 +95,11 @@ describe('Einstellungen speichern', () => {
 					company_phone: '044 123 45 67',
 					company_email: 'info@muster.ch',
 					iban: 'CH93 0076 2011 6238 5295 7',
+					account_holder_name: '',
+					account_holder_address: '',
+					account_holder_postal_code: '',
+					account_holder_city: '',
+					account_holder_separate: '',
 					management_fee_pct: '2,5',
 					default_heating_profile_id: 'hp1',
 					default_distribution_key_id: '',
@@ -127,6 +138,38 @@ describe('Einstellungen speichern', () => {
 				missing: ['companyName', 'companyCity']
 			}
 		});
+	});
+
+	// #1166: «Kontoinhaber ist der Absender» ticked deletes a Kontoinhaber still stored, also one typed before ticking
+	it('sendet den Kontoinhaber leer, solange der Absender der Kontoinhaber ist', async () => {
+		const { calls } = runAction(actions.default, '', 200, { ...valid, accountHolderName: 'Erika Muster' });
+
+		expect(calls[0].body).toMatchObject({ account_holder_name: '', account_holder_separate: '' });
+	});
+
+	it('sendet einen eigenen Kontoinhaber, wie er getippt wurde', async () => {
+		const { accountHolderIsSender: _ticked, ...cleared } = valid;
+		const { calls } = runAction(actions.default, '', 200, {
+			...cleared,
+			accountHolderName: ' Erika Muster ',
+			accountHolderAddress: '',
+			accountHolderPostalCode: '6003',
+			accountHolderCity: 'Luzern'
+		});
+
+		expect(calls[0].body).toMatchObject({
+			account_holder_name: 'Erika Muster',
+			account_holder_address: '',
+			account_holder_postal_code: '6003',
+			account_holder_city: 'Luzern',
+			account_holder_separate: 'true'
+		});
+	});
+
+	it('markiert die Felder des Kontoinhabers, die zur IBAN fehlen', async () => {
+		const { result } = runAction(actions.default, '', 200, valid, {}, { status: 400, answer: accountHolderMissing });
+
+		expect(await result).toMatchObject({ status: 400, data: { missing: ['accountHolderName', 'accountHolderCity'] } });
 	});
 
 	it('meldet, wenn das Backend die Einstellungen nicht speichern kann', async () => {
