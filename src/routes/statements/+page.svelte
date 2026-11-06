@@ -39,6 +39,12 @@
 	const filtered = $derived(
 		!!(search || building || status || contract || periodStart || periodEnd)
 	);
+	// #673 (Marco P-4): a reset lifts search, building and status; the contract and the period stay
+	const reset = $derived(
+		search || building || status ? linkWith({ search: '', building: '', status: '' }) : ''
+	);
+	// without the sentence (a contract that is gone) the empty list still leads to all statements (fallback review)
+	const emptyReset = $derived(reset || (data.scope ? '' : '/statements'));
 
 	// Filters and paging live in the URL so the server filters across all statements
 	function linkWith(changes: Record<string, string>): string {
@@ -146,18 +152,9 @@
 		{/snippet}
 	</PageHeader>
 
-	{#if data.scope}
-		<p class="text-ink" data-testid="statements-scope">
-			{data.scope}
-			<a
-				href="/statements"
-				class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
-				>{m.statements_scope_all()}</a
-			>
-		</p>
-	{/if}
-
 	<StatusFilter
+		scope={data.scope ?? ''}
+		{contract}
 		counts={data.statusCounts}
 		active={status}
 		href={(value) => linkWith({ status: value })}
@@ -169,6 +166,7 @@
 		{contract}
 		{periodStart}
 		{periodEnd}
+		{reset}
 		buildings={data.buildings}
 	/>
 
@@ -180,7 +178,8 @@
 					title={m.statements_none_found()}
 					text={m.statements_adjust_filters()}
 					actionLabel={m.buildings_reset_filters()}
-					actionHref="/statements"
+					actionHref={emptyReset}
+					actionTestid="statements-empty-reset"
 				/>
 			{:else}
 				<EmptyState

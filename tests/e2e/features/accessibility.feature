@@ -184,6 +184,7 @@ Funktionalität: Barrierefreiheit
       | statements             | list-scoped         |
       | statements             | pdf-missing         |
       | statements-period      | default             |
+      | statements-period      | list-scoped         |
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
