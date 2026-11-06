@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import type { RentalContract } from './types';
 import { formatDate, isFeeRate, parsePercent } from './utils/format';
+import { contractPeriod } from './contract-status';
 import {
 	checkDateRangeOverlap,
 	type AvailabilityInfo,
@@ -206,7 +207,16 @@ export const agreedNames = (
  */
 export function forAvailability(response: {
 	data?: {
-		contracts?: { id: string; startDate: string; endDate: string | null; tenantId?: string }[];
+		contracts?: {
+			id: string;
+			startDate: string;
+			endDate: string | null;
+			tenantId?: string;
+			tenantName?: string;
+			tenantAnonymised?: boolean;
+			terminated?: boolean;
+			status?: RentalContract['status'];
+		}[];
 	};
 	error?: unknown;
 }): ContractForAvailability[] | null {
@@ -216,20 +226,12 @@ export function forAvailability(response: {
 		id: c.id,
 		start_date: c.startDate,
 		end_date: c.endDate,
-		tenant_id: c.tenantId
+		tenant_id: c.tenantId,
+		tenant_name: c.tenantName,
+		tenant_anonymised: c.tenantAnonymised,
+		terminated: c.terminated,
+		contract_status: c.status
 	}));
-}
-
-/** Warning when the contract overlaps another contract of the apartment */
-export function overlapWarning(
-	values: ContractFormValues,
-	contracts: ContractForAvailability[],
-	excludeContractId?: string
-): string | null {
-	if (!values.startDate || contracts.length === 0) return null;
-	const endDate = values.isUnlimited ? null : values.endDate || null;
-	const result = checkDateRangeOverlap(values.startDate, endDate, contracts, excludeContractId);
-	return result.hasOverlap ? result.message : null;
 }
 
 /**
@@ -274,4 +276,102 @@ export function suggestedStartDate(
 ) {
 	const free = availability?.availableFrom;
 	return startDate || !free || impossible(free) ? null : free;
+}
+
+/** The other contract of an overlap: its tenant (none when anonymised), period and status, as the backend says */
+type Overlapped = {
+	id: string;
+	tenant?: string;
+	start: string;
+	end?: string | null;
+	terminated?: boolean;
+	status?: RentalContract['status'];
+};
+
+/** An overlap in words, the field its advice is about and the other contract, to link to it (#667) */
+export type Overlap = {
+	text: string;
+	field: 'startDate' | 'endDate';
+	contract: { id: string; tenant?: string };
+};
+
+/**
+ * The advice states the condition, then the check against the signed lease, then the other contract; «Befristet»
+ * only in the wizard with «Unbefristet» chosen (#667, Dr. Weber W-04, W-07; fach review b667 step 1 M-1, step 5)
+ */
+function adviceOf(other: Overlapped, values: ContractFormValues, wizard: boolean) {
+	if (other.start > values.startDate) {
+		const date = formatDate(other.start);
+		return wizard && values.isUnlimited
+			? m.contracts_overlap_advice_end_before({ date })
+			: m.contracts_overlap_advice_end_earlier({ date });
+	}
+	if (other.end) return m.contracts_overlap_advice_start_after({ date: formatDate(other.end) });
+	if (other.start === values.startDate) return m.contracts_overlap_advice_same_start();
+	const date = formatDate(values.startDate);
+	return wizard
+		? m.contracts_overlap_advice_end_other({ date })
+		: m.contracts_overlap_advice_end_other_edit({ date });
+}
+
+function overlapOf(other: Overlapped, values: ContractFormValues, wizard: boolean): Overlap {
+	const period = contractPeriod(other.start, other.end, other.status ?? 'active', other.terminated);
+	const said = other.tenant
+		? m.contracts_overlap_with({ tenant: other.tenant, period })
+		: m.contracts_overlap_with_anonymised({ period });
+	// an earlier Vertragsende is advised at its field (fach review b667 V-3)
+	const atEnd = other.start > values.startDate && !values.isUnlimited;
+	return {
+		text: `${said} ${adviceOf(other, values, wizard)}`,
+		field: atEnd ? 'endDate' : 'startDate',
+		contract: { id: other.id, tenant: other.tenant }
+	};
+}
+
+/** The backend's refusal of an overlap in words; null for any other refusal */
+export function overlapRefusal(
+	{ code, params }: { code?: string; params?: Record<string, string | number> },
+	values: ContractFormValues,
+	wizard: boolean
+): Overlap | null {
+	if (code !== 'CONTRACT_OVERLAP' || !params?.start) return null;
+	const { contract, tenant, start, end, terminated, status } = params;
+	return overlapOf(
+		{
+			id: String(contract),
+			tenant: tenant ? String(tenant) : undefined,
+			start: String(start),
+			end: end ? String(end) : null,
+			terminated: terminated === 1,
+			status: status as RentalContract['status']
+		},
+		values,
+		wizard
+	);
+}
+
+/** The same when the browser finds the overlap in the apartment's contracts (fach review b667 V-1) */
+export function overlapError(
+	values: ContractFormValues,
+	contracts: ContractForAvailability[],
+	wizard: boolean,
+	excludeContractId?: string
+): Overlap | null {
+	const endDate = values.isUnlimited ? null : values.endDate || null;
+	const other =
+		values.startDate &&
+		checkDateRangeOverlap(values.startDate, endDate, contracts, excludeContractId);
+	if (!other) return null;
+	return overlapOf(
+		{
+			id: other.id,
+			tenant: other.tenant_anonymised ? undefined : other.tenant_name,
+			start: String(other.start_date),
+			end: other.end_date && String(other.end_date),
+			terminated: other.terminated,
+			status: other.contract_status
+		},
+		values,
+		wizard
+	);
 }

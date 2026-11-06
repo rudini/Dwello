@@ -95,3 +95,6 @@ export const startDateNotice = target('Hinweis zum Vertragsbeginn', (page) => pa
 export const billedUntilError = target('Fehler bei «Abgerechnet bis»', (page) =>
 	page.getByTestId('billed-until-input-field').getByTestId('form-error')
 );
+// each element of the contract wizard that holds the text, also one only a screen reader reads (#667)
+export const wizardText = (text: string) =>
+	target(`«${text}» im Assistenten`, (page) => page.getByTestId('contract-wizard').getByText(text));

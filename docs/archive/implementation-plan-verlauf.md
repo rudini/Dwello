@@ -1216,3 +1216,20 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Code review 1121-1: `docs/reviews/1121-review-1.md` (C-1 fixed in the skill; C-2 rejected: a function does not inherit the ERR trap without `set -E`, so a failed status call ends the script before the trap, as a test showed)
 - [x] Before marking complete: lint, check, testcheck, Prettier on added files, tools/ci tests
 - [x] Archive the session; PR `Fixes #1121` pushed after this archive; the ruleset command for the owner under "Blocked on me"
+## Session: overlap refusal and contract wizard repetitions (#667)
+
+- [x] @wip scenarios: overlap refusal names the other contract and advises per case, hint gone after it (W-03, W-04, W-07); past-start warning once (W-08); stepper names unbroken at 1440 px (W-10)
+- [x] fach-reviewer step 1: every new or changed text in de/fr/it/en (`docs/reviews/b667-fachreview-1.md`; V-1, V-2, M-1, M-2, V-3, V-4 taken)
+- [x] Backend: CONTRACT_OVERLAP names the earliest other contract's tenant (none when anonymised) and period; `tenantAnonymised` in the contract list; API contracts `contract-overlap.json`, `contracts.json`
+- [x] Frontend: refusal and step-3 error from one builder (`overlapRefusal`, `overlapError`), hint hidden after the refusal, field error without the repeated notice, stepper `flex-auto`; axe and language rows `overlap-error`, `overlap-refused`, screen `contract-edit-earlier`
+- [x] code-reviewer round 1 (`docs/reviews/b667-review-1.md`): C-1 Major fixed (the a11y state fails only the load and waits for the hints to go), C-2, C-4, C-5 fixed, C-3 to fach-reviewer step 5
+- [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-b667.md`): W-03, W-04, W-07, W-08, W-10 confirmed fixed; P-1, P-2 fixed, P-3, P-4 to fach-reviewer step 5, P-5 stays (#1142), P-6 stays (rule on main)
+- [x] fach-reviewer step 5 (`docs/reviews/b667-fachreview-2.md`): V-1, M-1 Major and M-2, V-2, V-3, V-5 fixed (advice with condition, check of the signed lease, link to the other contract); V-4 eased by the wording
+- [x] Fitness: the other contract's status (`seit`/`ab`) from the backend (param `status`), not the frontend's today
+- [x] Stepper: `flex-auto` only without values; the statement wizard keeps `flex-1` (its names break on main too: #1146)
+- [x] code-reviewer round 2 (`docs/reviews/b667-review-2.md`): C-1 to C-5 closed; C-6, C-7 Minor fixed (0ab2f38); fallow and fitness fixes (00709bc, 6f2b776)
+- [x] Issue #1146 opened: the statement wizard's stepper breaks names at xl (on main too)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-667.md`
+- [x] Checks: full vitest, fitness `--base origin/main`, backend tests and p2 queries, fallow audit, Prettier on added files, lint, check, type-check, affected E2E with axe and language rows
+- [x] Closing code-reviewer round on the delta since 00709bc (`docs/reviews/b667-review-3.md`, no findings)
+- [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive

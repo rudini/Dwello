@@ -6,6 +6,7 @@
 	"status": "active",
 	"endDate": "2099-03-31",
 	"oldAddress": false,
+	"tenantAnonymised": false,
 	"terminated": true,
 	"movedOut": false,
 	"documentsCheckedOn": null,

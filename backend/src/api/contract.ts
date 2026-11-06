@@ -14,6 +14,7 @@ export type ContractStatus = 'active' | 'ended' | 'future';
 export interface ContractWithDetails extends RentalContract {
 	status: ContractStatus;
 	tenantName: string;
+	tenantAnonymised: boolean; // #667: an overlap names an anonymised tenant without a name
 	tenantEmail: string | null;
 	apartmentNumber: string;
 	buildingId: string;

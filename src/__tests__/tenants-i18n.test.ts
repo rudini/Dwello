@@ -3,7 +3,7 @@ import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { languageLabels } from '$lib/tenant';
 import { parseTenantForm } from '$lib/server/tenant-form';
 import { refusedFields } from '$lib/backend-error';
-import { checkDateRangeOverlap, computeAvailability } from '$lib/utils/contract-availability';
+import { computeAvailability } from '$lib/utils/contract-availability';
 import { load as tenantsLoad } from '../routes/tenants/+page.server';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
@@ -29,12 +29,8 @@ describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 		expect(errors.address).toBe('Per le lettere è obbligatorio un indirizzo.');
 	});
 
-	it('nennt Überschneidung und Verfügbarkeit auf Englisch', () => {
+	it('nennt die Verfügbarkeit auf Englisch', () => {
 		overwriteGetLocale(() => 'en');
-		const contracts = [{ id: 'c1', start_date: '2024-01-01' }];
-		expect(checkDateRangeOverlap('2025-01-01', null, contracts).message).toBe(
-			'Overlap with an existing contract: from 01.01.2024 (open-ended)'
-		);
 		expect(computeAvailability({}).message).toBe('Apartment available');
 	});
 

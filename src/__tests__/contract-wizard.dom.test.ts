@@ -18,6 +18,7 @@ import checkStart from '../../tests/contracts/contract-check-start.json';
 import listed from '../../tests/contracts/contracts.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
+import overlap from '../../tests/contracts/contract-overlap.json';
 
 const data = {
 	tenants: [
@@ -322,15 +323,14 @@ describe('Mietvertrag erfassen', () => {
 
 	it('meldet einen Fehler beim Speichern und bleibt bei der Prüfung', async () => {
 		await untilReview();
-		// as the backend answers an overlap: English, with the other contract's id
-		fakeBff(() => [
-			400,
-			{ error: 'Contract overlaps with existing contract 3f2a0000-0000-4000-8000-000000000000' }
-		]);
+		fakeBff(() => [400, overlap]); // as the backend answers an overlap (#667)
 		submit('submit-button');
 		await settle();
 		const error = byTestId('form-error')!.textContent!;
-		expect(error).toContain('überschneidet sich mit einem anderen Mietvertrag');
+		expect(error).toContain('überschneidet sich mit dem Mietvertrag von Anna Keller');
+		expect(byTestId('overlap-contract-link')!.getAttribute('href')).toBe(
+			`/contracts/${overlap.params.contract}`
+		);
 		expect(error).not.toContain('Contract');
 		expect(goto).not.toHaveBeenCalled();
 	});
@@ -387,6 +387,19 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 	}
+
+	// fach review b667 V-1: the browser's check names the other contract as the refusal on saving does
+	it('nennt bei einer Überschneidung den anderen Mietvertrag und was hilft', async () => {
+		await toPeriod('a3');
+		type('start-date-input', '01.01.2099');
+		type('start-date-input', '01.06.2098');
+		next();
+		await settle();
+		expect(heading()).toBe('Vertragsdauer');
+		expect(byTestId('start-date-input-field')!.textContent).toContain(
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Ida Roth (01.01.2015 – 31.12.2098, befristet). Der Vertragsbeginn muss nach dem 31.12.2098 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags.'
+		);
+	});
 
 	// #815: when an apartment is free, the backend says; the wizard does not compare dates
 	it('nennt den Tag, ab dem die Wohnung frei ist, wie ihn das Backend nennt', async () => {
@@ -518,6 +531,28 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('review-contracts-unknown')!.textContent).toContain(UNKNOWN);
 	});
 
+	// #667 (Dr. Weber W-03): once saving found the overlap, «Dwello prüft beim Speichern» is done
+	it('zeigt den Hinweis auf nicht geladene Mietverträge nach der Ablehnung einer Überschneidung nicht mehr', async () => {
+		fakeBff(({ method, path }) => {
+			if (method === 'POST') return [400, overlap];
+			return path.endsWith('=a3')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }];
+		});
+		await toPeriod('a3');
+		type('start-date-input', '01.01.2027');
+		next();
+		await settle();
+		type('contract-base-rent-input', '950');
+		chooseFee('run');
+		next();
+		await settle();
+		submit('submit-button');
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('überschneidet sich');
+		expect(byTestId('review-contracts-unknown')).toBeNull();
+	});
+
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
 		await toPeriod();
 		type('start-date-input', '11.01.2020');
@@ -527,6 +562,8 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(heading()).toBe('Vertragsdauer');
 		expect(byTestId('form-error')!.textContent).toContain('nochmals auf «Weiter»');
+		// #667 (Dr. Weber W-08): the notice above says it; the field says only what to do
+		expect(byTestId('form-error')!.textContent).not.toContain('liegt in der Vergangenheit');
 		expect(document.activeElement).toBe(byTestId('start-date-input'));
 		next();
 		await settle();
@@ -721,6 +758,28 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich.');
 	});
 
+	// Dr. Weber b667 P-2: the advice names the Vertragsende, so the error stands there
+	it('zeigt den Rat zu einem früheren Vertragsende beim Vertragsende', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a1'); // its last contract ran 2015–2019
+		next();
+		await settle();
+		type('start-date-input', '01.01.2014');
+		click(byTestId('contract-duration')!.querySelectorAll('input')[1]);
+		type('end-date-input', '31.12.2016');
+		next();
+		await settle();
+		expect(byTestId('end-date-input-field')!.textContent).toContain(
+			'Das Vertragsende muss vor dem 01.01.2015 liegen.'
+		);
+		expect(
+			byTestId('start-date-input-field')!.querySelector('[data-testid="form-error"]')
+		).toBeNull();
+	});
+
 	it('geht bei einer Überschneidung nicht weiter', async () => {
 		await open();
 		select('contract-tenant-select', 't1');
@@ -730,9 +789,19 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 		type('start-date-input', '01.01.2016');
+		await settle();
+		// Dr. Weber b667 P-1: the box names the contract as the error does, and goes when the error says it
+		expect(byTestId('overlap-warning')!.textContent).toContain('Mietvertrag von Ueli Graf');
 		next();
 		await settle(); // step 3 waits for the backend's check of the start (#815)
-		expect(byTestId('overlap-warning')).not.toBeNull();
+		expect(byTestId('start-date-input-field')!.textContent).toContain('Mietvertrag von Ueli Graf');
+		expect(byTestId('overlap-warning')).toBeNull();
+		// fach review b667 V-1: the other contract a link away, in this tab: the input stays as a draft
+		const link = byTestId<HTMLAnchorElement>('overlap-contract-link')!;
+		expect([link.getAttribute('href'), link.textContent!.trim()]).toEqual([
+			'/contracts/c8',
+			'Zum Mietvertrag von Ueli Graf'
+		]);
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
 		click(byTestId('contract-duration')!.querySelectorAll('input')[1]);

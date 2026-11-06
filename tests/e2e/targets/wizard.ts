@@ -12,3 +12,4 @@ export const closeDraftNotice = target('Hinweis schliessen', (page) => page.getB
 export const saveStatusLine = target('Speicherstatus', (page) => page.getByTestId('save-status'));
 export const saveStatus = (text: string) =>
 	target(`Speicherstatus «${text}»`, (page) => page.getByTestId('save-status').getByText(text));
+export const stepNames = target('Namen der Schritte', (page) => page.getByTestId('wizard-step-label'));

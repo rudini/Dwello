@@ -219,6 +219,27 @@ export const ValueColumn = {
 		)
 };
 
+/** The words of the targets' texts that run over two lines, broken inside the word (#667, Dr. Weber W-10) */
+export const BrokenWords = {
+	in: (target: Target) =>
+		about(target, 'the words broken across lines in', (element) =>
+			element.evaluateAll((all) =>
+				all.flatMap((one) => {
+					const texts = document.createTreeWalker(one, NodeFilter.SHOW_TEXT);
+					const broken: string[] = [];
+					for (let text = texts.nextNode(); text; text = texts.nextNode())
+						for (const word of (text.textContent ?? '').matchAll(/\S+/g)) {
+							const range = document.createRange();
+							range.setStart(text, word.index);
+							range.setEnd(text, word.index + word[0].length);
+							if (new Set([...range.getClientRects()].map((line) => Math.round(line.top))).size > 1) broken.push(word[0]);
+						}
+					return broken;
+				})
+			)
+		)
+};
+
 /** How many pixels of the chosen option's text a select cuts off: a select clips its text instead of wrapping (#1089) */
 export const CutInChoice = {
 	of: (target: Target) =>

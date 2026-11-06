@@ -693,6 +693,38 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
+	// #667 (fach review b667 V-1): «Weiter» with the overlap: the error at «Vertragsbeginn» names Carla's contract
+	'overlap-error': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(nextButton), // tenant and apartment come from the address
+			Click.on(nextButton),
+			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
+			EnterDate.of('2030-01-01').into(startDateInput),
+			Wait.until(on.overlapWarning),
+			Click.on(nextButton),
+			Wait.until(on.formProblem)
+		),
+	// #667 (Dr. Weber W-03, W-04, W-07): without the apartment's contracts the save refuses the overlap with Carla's
+	'overlap-refused': () => async (actor) => {
+		// only the load of the apartment's contracts fails, not the save (code review b667 C-1); the form saves elsewhere
+		const apartmentId = new URL(await actor.answer(pageAddress)).searchParams.get('apartment');
+		await actor.attemptsTo(FailRequests.to('/api/contracts', apartmentId ? { apartmentId } : {}), Navigate.reload);
+		if (apartmentId)
+			await actor.attemptsTo(
+				Click.on(nextButton),
+				Wait.until(apartmentContractsUnknown),
+				Click.on(nextButton),
+				EnterDate.of('2030-01-01').into(startDateInput),
+				Click.on(nextButton),
+				Enter.theValue('1500').into(baseRentInput),
+				Click.on(feeChoice('run')),
+				Click.on(nextButton)
+			);
+		// the form: Vreni's contract ending after Carla's start, a day before today confirmed
+		else await actor.attemptsTo(EnterDate.of('2015-06-30').into(endDateInput), Check.the(contractEndPastConfirm));
+		// the refusal of the overlap, not any other error: saving checked it, so the hints are gone (W-03)
+		await actor.attemptsTo(Click.on(contractSubmitButton), Wait.until(on.formProblem), Wait.forCount(on.contractsUnknownHints, 0));
+	},
 	'draft-restored': (example) => restoreDraft(example),
 	'draft-discard-dialog': (example) => (actor) => actor.attemptsTo(restoreDraft(example), openDialog(discardDraftButton)),
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet

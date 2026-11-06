@@ -800,6 +800,24 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #667: an overlap names the other contract, here a befristeter one
+	it('POST /contracts mit einem überschneidenden Zeitraum liefert die Felder von contract-overlap.json', async () => {
+		const fixed = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', endDate: '2020-12-31', monthlyAdvancePayment: '0' });
+		try {
+			const response = await sendJson('POST', '/api/v1/contracts', {
+				tenantId: fixed.tenant,
+				apartmentId: fixed.apartment,
+				startDate: '2020-06-01',
+				baseRent: '900',
+				monthlyAdvancePayment: '0'
+			});
+			expect(response.status).toBe(400);
+			expect(drift(await sample('contract-overlap'), await response.json())).toEqual([]);
+		} finally {
+			await fixed.remove();
+		}
+	});
+
 	// an unknown tenant: a refusal without a code (#453, code review C-2)
 	it('POST /contracts mit einem unbekannten Mieter liefert die Felder von contract-tenant-refused.json', async () => {
 		const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, rental.contract));

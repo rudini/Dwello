@@ -58,6 +58,7 @@ const contractFields = {
 	// whether it runs on the Swiss day (H-28, #717): the pages take it from here
 	status: sql<ContractStatus>`case when ${rentalContracts.startDate} > ${sqlToday} then 'future' when ${rentalContracts.endDate} < ${sqlToday} then 'ended' else 'active' end`,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+	tenantAnonymised: sql<boolean>`${tenants.anonymisedOn} is not null`, // shown without a name (#667, fach review b667 V-4)
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
 	buildingId: buildings.id, // the Übersicht links to its invoices (#454)
@@ -215,7 +216,8 @@ export async function getContract(id: string): Promise<ContractDetails | null> {
 }
 
 /**
- * Check for overlapping contracts for an apartment
+ * Refuses a period that overlaps another contract of the apartment, naming the earliest one: its tenant (none when
+ * anonymised) and period, so the UI can say which and what helps (#667, fach review b667 V-3, V-4)
  */
 async function checkContractOverlap(
 	apartmentId: string,
@@ -223,35 +225,39 @@ async function checkContractOverlap(
 	endDate: string | null,
 	excludeContractId?: string,
 	q: Query = db
-): Promise<{ hasOverlap: boolean; overlappingContract?: string }> {
-	// A contract overlaps if:
-	// - Its start date is before the new contract's end date (or new has no end)
-	// - Its end date is after the new contract's start date (or existing has no end)
+): Promise<void> {
+	// both bounds count: a contract ending on the day the other starts overlaps it
 	const conditions = [
 		eq(rentalContracts.apartmentId, apartmentId),
-		or(
-			isNull(rentalContracts.endDate),
-			gte(rentalContracts.endDate, startDate)
-		),
-		endDate
-			? lte(rentalContracts.startDate, endDate)
-			: sql`1=1` // If no end date, any future contract overlaps
+		or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, startDate)),
+		endDate ? lte(rentalContracts.startDate, endDate) : sql`1=1` // without an end, any later contract overlaps
 	];
+	if (excludeContractId) conditions.push(sql`${rentalContracts.id} != ${excludeContractId}`);
 
-	if (excludeContractId) {
-		conditions.push(sql`${rentalContracts.id} != ${excludeContractId}`);
-	}
-
-	const [overlapping] = await q
-		.select({ id: rentalContracts.id })
+	const [other] = await q
+		.select({
+			id: rentalContracts.id,
+			tenant: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+			anonymised: tenants.anonymisedOn,
+			start: rentalContracts.startDate,
+			end: rentalContracts.endDate,
+			terminated: rentalContracts.terminated,
+			status: contractFields.status // by the Swiss day: «seit» or «ab» (#815)
+		})
 		.from(rentalContracts)
+		.innerJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
 		.where(and(...conditions))
+		.orderBy(rentalContracts.startDate)
 		.limit(1);
-
-	return {
-		hasOverlap: !!overlapping,
-		overlappingContract: overlapping?.id
-	};
+	if (!other) return;
+	throw new CodedError('CONTRACT_OVERLAP', `Contract overlaps with existing contract ${other.id}`, {
+		contract: other.id,
+		...(!other.anonymised && { tenant: other.tenant }),
+		start: other.start,
+		...(other.end && { end: other.end }),
+		terminated: other.terminated ? 1 : 0,
+		status: other.status
+	});
 }
 
 /**
@@ -350,18 +356,7 @@ export async function createContract({ agreedCategoryIds, agreedFrom, ...data }:
 	checkNotice(data.terminated, data.endDate);
 	checkAgreedFrom({ startDate: data.startDate, endDate: data.endDate ?? null }, Object.values(agreedFrom ?? {}));
 	checkBilledUntil(data.startDate, data.billedUntil, true);
-	// Check for overlapping contracts
-	const { hasOverlap, overlappingContract } = await checkContractOverlap(
-		data.apartmentId,
-		data.startDate,
-		data.endDate || null
-	);
-
-	if (hasOverlap) {
-		throw new CodedError('CONTRACT_OVERLAP', `Contract overlaps with existing contract ${overlappingContract}`, {
-			contract: overlappingContract!
-		});
-	}
+	await checkContractOverlap(data.apartmentId, data.startDate, data.endDate || null);
 
 	// a new contract agrees every umlagefähige category unless the form names the agreed ones (#91)
 	return db.transaction(async (tx) => {
@@ -433,11 +428,7 @@ const newDates = ({ startDate, endDate, billedUntil }: Partial<NewRentalContract
 async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>, q: Query, draft?: string) {
 	if (!data.startDate && data.endDate === undefined && data.billedUntil === undefined) return;
 	const { startDate, endDate, billedUntil } = { ...current, ...newDates(data) };
-	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id, q);
-	if (hasOverlap)
-		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
-			contract: overlappingContract!
-		});
+	await checkContractOverlap(current.apartmentId, startDate, endDate, current.id, q);
 	await checkBilledByDwello(current, data.billedUntil, startDate, q);
 	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));

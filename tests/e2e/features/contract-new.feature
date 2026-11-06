@@ -136,6 +136,46 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann steht bei der Wohnung "2.01" in der Auswahl "(nicht geprüft)"
 
+  # #667 (Dr. Weber W-03, W-04): ohne die Mietverträge der Wohnung prüft erst das Speichern; die Ablehnung nennt den
+  # anderen Mietvertrag und rät, was bei ihm hilft; der Hinweis, dass Dwello beim Speichern prüft, ist dann erledigt
+  Szenario: Die Ablehnung nennt den laufenden Mietvertrag ohne Vertragsende
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (seit 01.04.2024, unbefristet). Endet der andere Mietvertrag vor dem 01.01.2027, weil er gekündigt oder ein Vertragsende vereinbart ist, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
+    Und sieht der Liegenschaftsverwalter in der Prüfung keinen Hinweis mehr
+
+  Szenario: Die Ablehnung rät zu einem Vertragsbeginn nach dem früheren Mietvertrag
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" befristet von "2024-04-01" bis "2027-03-31" für "900" Franken mit "100" Franken Akonto
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (01.04.2024 – 31.03.2027, befristet). Der Vertragsbeginn muss nach dem 31.03.2027 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags."
+
+  Szenario: Die Ablehnung rät zu einem Vertragsende vor dem späteren Mietvertrag
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2027-04-01" für "900" Franken
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (ab 01.04.2027, unbefristet). Ist im unterschriebenen Mietvertrag ein Vertragsende vor dem 01.04.2027 vereinbart, wählen Sie «Befristet» mit diesem Vertragsende. Sonst prüfen Sie den Vertragsbeginn des anderen Mietvertrags."
+
+  # #667 (Dr. Weber W-08): die Warnung steht einmal im Kasten; das Feld sagt nur, was zu tun ist
+  Szenario: Die Warnung zum Vertragsbeginn in der Vergangenheit steht nur einmal
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter den Vertragsbeginn "2020-01-01" einträgt
+    Und der Liegenschaftsverwalter weitergeht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Stimmt der Vertragsbeginn, klicken Sie nochmals auf «Weiter»."
+    Und steht im Assistenten "liegt in der Vergangenheit" nur einmal
+
+  # #667 (Dr. Weber W-10): auf einem breiten Bildschirm stehen die Namen der Schritte ganz
+  Szenario: Die Schrittanzeige trennt keinen Namen eines Schritts
+    Angenommen das Browserfenster ist 1440 auf 900 Pixel gross
+    Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+
   # #57: «Entwurf» heisst nur der Abrechnungsstatus; die Eingaben im Assistenten sind «Ihre Angaben»
   Szenario: Angefangener Mietvertrag ist noch nicht gespeichert
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt

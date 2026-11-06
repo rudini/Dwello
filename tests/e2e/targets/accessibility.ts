@@ -6,6 +6,8 @@ const bySelector = (description: string, selector: string) =>
 	target(description, (page) => page.locator(selector).first());
 
 export const emptyHint = bySelector('Hinweis auf leere Liste', '[data-testid$="-empty"]');
+// #667: the hints that the apartment's contracts could not be loaded, at the apartment, the start or the review
+export const contractsUnknownHints = bySelector('Hinweise auf nicht geladene Mietverträge', '[data-testid$="-contracts-unknown"]');
 export const loginError = bySelector('Anmeldefehler', '[data-testid="login-error"]');
 export const text = (shown: string) => target(`Text «${shown}»`, (page) => page.getByText(shown));
 export const link = (name: string) => target(`Link «${name}»`, (page) => page.getByRole('link', { name }));

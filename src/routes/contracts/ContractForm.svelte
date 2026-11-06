@@ -10,7 +10,8 @@
 		contractBody,
 		forAvailability,
 		initialContractValues,
-		overlapWarning,
+		overlapRefusal,
+		overlapError,
 		validateContract,
 		billedUntilError
 	} from '$lib/contract-form';
@@ -35,6 +36,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { ContractForAvailability } from '$lib/utils/contract-availability';
 	import ContractsUnknown, { retried } from './new/ContractsUnknown.svelte';
+	import OverlapLink from './OverlapLink.svelte';
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
 	import AdvancePeriods from './[id]/AdvancePeriods.svelte';
@@ -93,12 +95,16 @@
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
 	let unknown = $state(false);
+	// the overlap the save was refused for: saving checked it, so the hint that saving will check goes (#667, W-03)
+	let refusal = $state<ReturnType<typeof overlapRefusal>>(null);
+	const refusedOverlap = $derived(!!refusal && errors.form === refusal.text);
+	const shownUnknown = $derived(unknown && !refusedOverlap);
 	// a changed Vertragsende in the past is confirmed as in «Beenden»; an unchanged one is not asked again
 	const endChanged = $derived(
 		!values.isUnlimited && values.endDate !== (contract.endDate?.slice(0, 10) ?? '')
 	);
 	let confirmedDay = $state('');
-	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
+	const overlap = $derived(overlapError(values, apartmentContracts, false, contract.id));
 	const back = $derived(`/contracts/${contract.id}`);
 	const link =
 		'inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong';
@@ -136,6 +142,9 @@
 		// the offer belongs to the values refused (review K-2); its message points to it below
 		if (refused.length) delete errors.form;
 		refused = [];
+		// a changed period is not checked yet: the refusal of an overlap goes, the hint comes back (code review b667 C-5)
+		const period = [id, name].some((field) => ['startDate', 'endDate', 'duration'].includes(field));
+		if (period && refusedOverlap) delete errors.form;
 	}
 
 	// a draft whose whole period «Abgerechnet bis» now covers, not the contract dates: no statement is created for it
@@ -159,12 +168,10 @@
 	}
 
 	function saveError({
-		message,
 		code,
 		params,
 		details
 	}: {
-		message: string;
 		code?: string;
 		params?: Record<string, string | number>;
 		details?: Record<string, unknown>;
@@ -173,9 +180,10 @@
 		if (Array.isArray(statements) && onlyCovered(statements))
 			return m.contracts_billed_draft_covered(draftName(statements[0], tenant));
 		if (Array.isArray(statements)) return billedDaysError(statements);
-		if (/overlap/i.test(message)) return m.backend_contract_overlap();
-		// a refusal with its own message, e.g. an Akonto in a billed time (#464); never the backend's own text
-		return backendMessage({ code, params }, m.contracts_save_failed());
+		// an overlap names the other contract and what to do (#667, W-07); a refusal with its own message, e.g. an
+		// Akonto in a billed time (#464); never the backend's own text
+		refusal = overlapRefusal({ code, params }, values, false);
+		return refusal?.text ?? backendMessage({ code, params }, m.contracts_save_failed());
 	}
 
 	// the fields' errors; true when the form may be sent
@@ -275,7 +283,7 @@
 				<dd class="text-ink" data-testid="contract-form-apartment">{apartment}</dd>
 			</div>
 		</dl>
-		<LiveRegion shown={unknown}>
+		<LiveRegion shown={shownUnknown}>
 			<ContractsUnknown onretry={retry} testid="apartment-contracts-unknown" />
 		</LiveRegion>
 		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
@@ -308,9 +316,10 @@
 			bind:isUnlimited={values.isUnlimited}
 			bind:terminated={values.terminated}
 			noticed={contract.terminated}
-			{unknown}
+			unknown={shownUnknown}
 			{startPast}
-			{overlap}
+			overlap={overlap?.text === errors.form ? null : overlap}
+			newTab
 			{errors}
 		/>
 		<PastEndConfirm
@@ -352,6 +361,7 @@
 	{#if errors.form}
 		<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
+			{#if refusedOverlap && refusal}<OverlapLink contract={refusal.contract} newTab />{/if}
 		</Alert>
 		{#if refused.length}
 			<RefusedStatements statements={refused} {tenant} consequence={coveredConsequence}>
