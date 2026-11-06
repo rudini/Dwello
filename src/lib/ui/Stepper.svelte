@@ -17,7 +17,9 @@
 		values?: (string | undefined)[];
 	} = $props();
 	// without values each step as wide as its name (#667, W-10); with them the steps share the width
+	// whole words that do not fit in one row (a long building name) move the next steps to a second one (#1146)
 	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
+	const rows = $derived(values.length ? 'flex-wrap' : '');
 	// #673 (Helga P-6): from md the current step is named next to its number too; from xl all of them,
 	// unless the finished steps show values: next to them five names do not fit unbroken (#1146)
 	const wide = $derived(values.length ? '' : 'xl:not-sr-only');
@@ -43,7 +45,7 @@
 	     Without values min-w-0 and hyphenation keep the other long names inside their step instead of widening the
 	     page, and each step is as wide as its name, so a long one is not cut inside the word next to short ones
 	     (#667, Dr. Weber W-10); with values the steps share the width and keep their words whole -->
-	<ol class="hidden gap-2 md:flex">
+	<ol class="hidden gap-2 md:flex {rows}">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}
 			<li class="flex items-center gap-2 {width} {shrink(number)}">

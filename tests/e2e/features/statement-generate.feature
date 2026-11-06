@@ -928,3 +928,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
       | 960    |
       | 1280   |
       | 1440   |
+
+  # #1146 (Fallback review): ein langer Gebäudename in einem Wort schiebt die Schrittanzeige nicht über den Rand
+  Szenario: Ein langer Gebäudename passt in die Schrittanzeige
+    Angenommen das Gebäude "Mehrfamilienhausüberbauung" in "Winterthur" existiert
+    Und im Gebäude "Mehrfamilienhausüberbauung" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Lea Gross" existiert
+    Und "Lea Gross" mietet die Wohnung "1.01" seit "2024-01-01" für "1200" Franken
+    Und das Browserfenster ist 768 auf 900 Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Mehrfamilienhausüberbauung" mit 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann nennt der erledigte Schritt "Gebäude" die Wahl "Mehrfamilienhausüberbauung"
+    Und scrollt die Seite nicht seitwärts
