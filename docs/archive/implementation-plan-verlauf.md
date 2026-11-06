@@ -1233,3 +1233,28 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: full vitest, fitness `--base origin/main`, backend tests and p2 queries, fallow audit, Prettier on added files, lint, check, type-check, affected E2E with axe and language rows
 - [x] Closing code-reviewer round on the delta since 00709bc (`docs/reviews/b667-review-3.md`, no findings)
 - [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive
+## Session: #668 usability pass, contract edit form and rent step (personas B-15)
+
+- [x] Read #668 and the B-15 reports (`helga-b15*.md` from history at `c893731^`; no Sven B-15 report exists, the issue text names his findings)
+- [x] @wip scenarios (contract-edit, contract-new), seen red at the missing behaviour (84e7003)
+- [x] fach-reviewer step 1, round 1: texts of S-4 and H15-3 in de/fr/it/en (`docs/reviews/668-fachreview-1.md`); M-1 became #1148
+- [x] S-3: «Monatlich total» announced by a screen-reader-only status 1 s after typing (`RentStep.svelte`, 8497f84, 3b1476c)
+- [x] H15-9: apartment written «Wohnung X · Gebäude» in the wizard's choice and review (`apartmentName` in `contract-form.ts`, `contract-wizard.ts`, edit `+page.server.ts`; 6913ed8); the tenant list's hyphen became #1149
+- [x] H15-3: notice hint wording of fach review 668-1 (`messages/*.json`, dfb15f9)
+- [x] S-4: heading and page title name the tenant (012dc33); Spec change approved: #668 for `contracts.feature:61`, `contract-detail.feature:138`
+- [x] S-7: already fixed by #654 (`RadioGroup` labels an option by its label, describes it once); no change
+- [x] H15-10: #1096 decided that a toast may briefly cover content without the focus; the «Vertragsstatus» filter is not focused after saving; no change
+- [x] N-3 / n-4: product owner chose option 1; @wip scenarios and DOM tests seen red; fach-reviewer step 1 (`docs/reviews/668-n3-fachreview-1.md`): texts word for word, V-1 (every way out, breadcrumb scenario), V-2 (lands where clicked) fixed; `LeaveConfirm.svelte` with `beforeNavigate` (back button included), the form's own `goto` not asked; axe and language rows `contract-edit leave-dialog`
+- [x] code-reviewer round 1, slice 668-n3 (`docs/reviews/668-n3-review-1.md`): C-1 (discard after «Zurück» goes back in history), C-2 (compare what would be saved), C-3 (every `goto` asks except the save and the discard) fixed, each test seen red
+- [x] Persona re-runs: `docs/design/personas/helga-668-2.md` (P-1 = round-1 P-2, stays), `sven-668-2.md` (P-1 field validation of «2x0», on main; P-2 total heard twice when reading the page: both stay)
+- [x] Issues opened: #1148 (end by agreement vs. notice, fach M-1, Helga P-4), #1149 (tenant list hyphen)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-668.md`
+- [x] code-reviewer round 1, slice 668-s3 (`docs/reviews/668-s3-review-1.md`)
+- [x] code-reviewer round 1, slice 668-texts (`docs/reviews/668-texts-review-1.md`)
+- [x] C-1, C-2, Sven P-2, Helga P-1 fixed, each test seen red (3b1476c)
+- [x] code-reviewer round 2, slice 668-s3 (`docs/reviews/668-s3-review-2.md`): C-1, C-2 closed
+- [x] Feature review round 1: personas Helga and Sven (`docs/design/personas/helga-668.md`, `sven-668.md`)
+- [x] Persona re-run after S-4 and N-3
+- [x] Checks on 30ee569: full vitest (4220 passed), lint, check, backend type-check, fitness `--base origin/main`, fallow audit, Prettier on added files; E2E contract-edit, contract-new, contracts, contract-detail, breadcrumb, statement-agreed-costs (220 passed); axe and language rows of contract-edit, contract-edit-notice, contract-edit-earlier, contract-new (76 passed)
+- [x] Closing code-reviewer round on the delta since cd4a0d8 handed to the coordinator (`668-closing-review-1.md`)
+- [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive
