@@ -73,3 +73,10 @@ Funktionalität: Dokumente
     Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller", heute hochgeladen, ohne Versandstatus vor
     Und nennt das Dokument "Ausweiskopie" die Datei "Ausweiskopie.pdf" und die Uhrzeit, zu der es heute hochgeladen wurde
     Und liegt kein Dokument zu "Beat Huber" vor
+
+  # #677 (Persona Sven S-1): wer mit den Pfeiltasten durch die Mieter geht, bleibt im Filter, auch bei einem Mieter ohne Dokumente
+  Szenario: Nach dem Filtern bleibt der Fokus im Filter «Mieter», auch ohne Dokumente
+    Angenommen der Mieter "Beat Huber" existiert
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter im Filter «Mieter» mit der Tastatur "Beat Huber" wählt
+    Dann zeigt «Dokumente» "Noch keine Dokumente", und der Fokus bleibt im Filter «Mieter»

@@ -111,3 +111,25 @@ Funktionalität: Dokumente eines Mieters
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" zum Hochladen wählt
     Dann nennt das Feld «Datei» die gewählte Datei "Uebergabeprotokoll.pdf" ohne Warnung
+
+  # #677 (Entscheid 9, Persona Sven P-3): während Dwello sendet, bleibt der Fokus auf der Schaltfläche, und Dwello sagt es an
+  Szenario: Während des Hochladens bleibt der Fokus auf «Dokument hochladen»
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
+    Dann sagt Dwello bei «Dokument hochladen» "Bitte warten …" an, und der Fokus bleibt dort
+
+  # #677 (Entscheid 10, Persona Sven P-3): im Dialog bleibt der Fokus auf der Bestätigung
+  Szenario: Während des Löschens bleibt der Fokus auf der Bestätigung im Dialog
+    Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Löschen von Dokumenten zu "Lea Frei" noch nicht
+    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
+    Und der Liegenschaftsverwalter das Löschen bestätigt
+    Dann sagt Dwello bei «Dokument löschen» "Bitte warten …" an, und der Fokus bleibt dort
+
+  # #677 (Persona Sven P-7): der Fehler kommt vor der Hilfe, sonst geht er am Ende einer langen Hilfe unter
+  Szenario: Ein Screenreader liest beim Feld «Datei» zuerst den Fehler
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Wenn der Liegenschaftsverwalter das Dokument "Notizen" ohne Datei hochladen will
+    Dann liest ein Screenreader beim Feld «Datei» zuerst den Fehler "Wählen Sie eine Datei aus." und danach den Hinweis "PDF, JPG oder PNG, höchstens 10 MB." vor

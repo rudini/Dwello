@@ -29,6 +29,15 @@ export const markSentButton = (title: string, tenantName: string) =>
 export const documentFileInput = target('Datei des Dokuments', (page) => page.getByTestId('tenant-document-file-input'));
 export const documentTitleInput = target('Titel des Dokuments', (page) => page.getByTestId('tenant-document-title-input'));
 export const uploadDocumentButton = target('Dokument hochladen', (page) => page.getByTestId('tenant-document-upload-button'));
+// #677 (decision 9): what a busy button says, next to it
+export const uploadDocumentStatus = target('Status von «Dokument hochladen»', (page) =>
+	page.getByTestId('tenant-document-upload-button-busy-status')
+);
+export const deleteDocumentConfirm = target('Dokument löschen bestätigen', (page) => page.getByTestId('document-delete-confirm'));
+export const deleteDocumentStatus = target('Status von «Dokument löschen»', (page) =>
+	page.getByTestId('document-delete-confirm-busy-status')
+);
+export const documentsEmpty = target('Hinweis keine Dokumente in «Dokumente»', (page) => page.getByTestId('documents-empty'));
 export const noDocumentsHint = target('Hinweis keine Dokumente', (page) => page.getByTestId('tenant-documents-empty'));
 // #677: the caution at the file field when a file of that name is already uploaded to the tenant
 export const duplicateFileNote = target('Hinweis Datei schon hochgeladen', (page) => page.getByTestId('tenant-document-file-duplicate'));

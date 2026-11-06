@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, Enter, FailRequests, Upload } from '../screenplay/interactions';
+import { Click, DownloadFrom, Enter, FailRequests, HoldRequests, Upload } from '../screenplay/interactions';
 import { deleteConfirmButton } from '../targets/form';
 import {
 	deleteDocumentButton,
@@ -50,3 +50,9 @@ export const requestDocument = (title: string) => Click.on(openDocumentLink(titl
 
 // The page's form action that stores the upload answers with an error
 export const uploadsFail = (tenantId: string) => FailRequests.to(`/tenants/${tenantId}`, { '/upload': '' });
+// #677 (decisions 9, 10): the upload and the deleting get no answer while the busy button is looked at
+export const uploadsWait = (tenantId: string) => HoldRequests.to(`/tenants/${tenantId}`, { '/upload': '' });
+export const deletingWaits = (tenantId: string) => HoldRequests.to(`/tenants/${tenantId}`, { '/deleteDocument': '' });
+// a title, but no file chosen
+export const uploadWithoutFile = (title: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(title).into(documentTitleInput), Click.on(uploadDocumentButton));

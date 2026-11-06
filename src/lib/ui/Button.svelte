@@ -114,5 +114,7 @@
 		{@render content()}
 	</button>
 	<!-- there before busy, so the change is announced: a focused button's new name often is not -->
-	<span role="status" class="sr-only">{busy ? busyLabel : ''}</span>
+	<span role="status" class="sr-only" data-testid={testid && `${testid}-busy-status`}
+		>{busy ? busyLabel : ''}</span
+	>
 {/if}

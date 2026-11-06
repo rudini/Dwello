@@ -10,15 +10,30 @@ import {
 	deliveryStatesOf,
 	documentTitleEntered,
 	chosenFile,
+	deleteConfirmFocused,
+	deleteConfirmStatus,
+	documentsEmptyNote,
 	duplicateFileWarning,
 	duplicateFileWarnings,
+	fileFieldDescription,
 	listedDocuments,
-	noDocumentsNote
+	noDocumentsNote,
+	tenantFilterFocused,
+	uploadButtonFocused,
+	uploadButtonStatus
 } from '../questions/tenant-documents';
-import { chooseView, openDocuments, openDocumentsToSend, openTenantOf, showDocumentsOf } from '../tasks/documents';
+import {
+	chooseView,
+	openDocuments,
+	openDocumentsToSend,
+	openTenantOf,
+	showDocumentsByKeyboardOf,
+	showDocumentsOf
+} from '../tasks/documents';
 import {
 	chooseFile,
 	confirmDeleting,
+	deletingWaits,
 	imageFile,
 	openDocument,
 	requestDocument,
@@ -26,6 +41,8 @@ import {
 	startDeletingDocument,
 	uploadDocument,
 	uploadsFail,
+	uploadsWait,
+	uploadWithoutFile,
 	wordFile
 } from '../tasks/tenant-documents';
 
@@ -190,8 +207,8 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter nur die Dokumente von {string} ansieht', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.attemptsTo(showDocumentsOf(names.get(tenant) ?? tenant));
+When('der Liegenschaftsverwalter nur die Dokumente von {string} ansieht', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.attemptsTo(showDocumentsOf(seed.idOf(tenant)!));
 });
 
 Then('liegt kein Dokument zu {string} vor', async ({ verwalter, names }, tenant: string) => {
@@ -206,4 +223,47 @@ When('der Liegenschaftsverwalter die Ansicht {string} wählt', async ({ verwalte
 Then('nennt das Feld «Datei» die gewählte Datei {string} ohne Warnung', async ({ verwalter }, file: string) => {
 	await verwalter.sees(chosenFile).toBe(file);
 	await verwalter.sees(duplicateFileWarnings).toBe(0);
+});
+
+// #677 (decisions 9, 10, persona Sven P-3): while Dwello sends, the busy button keeps the focus and says so
+Given('Dwello antwortet beim Hochladen von Dokumenten zu {string} noch nicht', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.attemptsTo(uploadsWait(seed.idOf(tenant)!));
+});
+
+Given('Dwello antwortet beim Löschen von Dokumenten zu {string} noch nicht', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.attemptsTo(deletingWaits(seed.idOf(tenant)!));
+});
+
+// the status first: it speaks only while busy, so the focus is checked while the request waits
+Then('sagt Dwello bei «Dokument hochladen» {string} an, und der Fokus bleibt dort', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadButtonStatus).toBe(text);
+	await verwalter.sees(uploadButtonFocused).toBe(true);
+});
+
+Then('sagt Dwello bei «Dokument löschen» {string} an, und der Fokus bleibt dort', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteConfirmStatus).toBe(text);
+	await verwalter.sees(deleteConfirmFocused).toBe(true);
+});
+
+When('der Liegenschaftsverwalter das Dokument {string} ohne Datei hochladen will', async ({ verwalter }, title: string) => {
+	await verwalter.attemptsTo(uploadWithoutFile(title));
+});
+
+// #677 (persona Sven P-7): the error comes right after the field's name, the help after it
+Then(
+	'liest ein Screenreader beim Feld «Datei» zuerst den Fehler {string} und danach den Hinweis {string} vor',
+	async ({ verwalter }, error: string, help: string) => {
+		const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		await verwalter.sees(fileFieldDescription).toMatch(new RegExp(`^${escaped(error)} .*${escaped(help)}`));
+	}
+);
+
+// #677 (persona Sven S-1): a filter that applies on change keeps the focus, also when nothing is left to show
+When('der Liegenschaftsverwalter im Filter «Mieter» mit der Tastatur {string} wählt', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.attemptsTo(showDocumentsByKeyboardOf(seed.idOf(tenant)!));
+});
+
+Then('zeigt «Dokumente» {string}, und der Fokus bleibt im Filter «Mieter»', async ({ verwalter }, text: string) => {
+	await verwalter.sees(documentsEmptyNote).toContain(text);
+	await verwalter.sees(tenantFilterFocused).toBe(true);
 });

@@ -59,8 +59,9 @@
 	});
 
 	// After a search on a list the focus goes to its results, so their number is read out
+	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
-		if (isListNavigation(navigation))
+		if (isListNavigation(navigation) && !(document.activeElement instanceof HTMLSelectElement))
 			document.querySelector<HTMLElement>('main [data-results]')?.focus();
 	});
 
