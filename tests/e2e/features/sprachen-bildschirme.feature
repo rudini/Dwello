@@ -326,6 +326,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | heating-profile-edit   | default             |
       | heating-profile-edit   | submit-cleared      |
       | help                   | default             |
+      | help                   | demo                |
       | privacy                | default             |
       | privacy                | demo                |
       | terms                  | default             |

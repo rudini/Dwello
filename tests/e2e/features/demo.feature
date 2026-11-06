@@ -33,26 +33,26 @@ Funktionalität: Öffentliche Demo
     Und sieht der Besucher keinen Demo-Hinweis
 
   # #675: auf der Anmeldeseite der ganze Hinweis, in der App eine Zeile mit einem Link zur Hilfe
-  @wip
   Szenario: Der Hinweis auf der Anmeldeseite sagt, was Besucher ausprobieren dürfen und wie sie mit echten Daten beginnen
     Wenn ein Besucher die Anmeldeseite der Demo öffnet
     Dann sagt der Demo-Hinweis dem Besucher, dass er alles ausprobieren darf und für echte Daten eine eigene Installation braucht
+    Und nennt der Demo-Hinweis dem Besucher für eine eigene Installation den Kontakt "betrieb@muster-hosting.ch"
 
-  @wip
   Szenario: In der App steht der Demo-Hinweis in einer Zeile
     Wenn der Liegenschaftsverwalter die Übersicht der Demo öffnet
     Dann zeigt der Demo-Hinweis nur eine Zeile mit dem Link "Mehr zur Demo"
 
-  @wip
   Szenario: Vom Demo-Hinweis in der App zur Hilfe
     Angenommen der Liegenschaftsverwalter ist auf der Übersicht der Demo
     Wenn der Liegenschaftsverwalter im Demo-Hinweis "Mehr zur Demo" wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Hilfe"
 
-  @wip
   Szenario: Die Hilfe der Demo erklärt die Demo vollständig
     Wenn der Liegenschaftsverwalter die Hilfe der Demo liest
     Dann erklärt die Hilfe unter "Öffentliche Demo" "Alle Besucher sehen und ändern dieselben Daten."
     Und erklärt die Hilfe unter "Öffentliche Demo" "Geben Sie deshalb nur erfundene Daten ein"
     Und erklärt die Hilfe unter "Öffentliche Demo" "Probieren Sie alles aus"
+    Und erklärt die Hilfe unter "Öffentliche Demo" "Laden Sie nur erfundene Rechnungen und Dokumente hoch."
+    Und erklärt die Hilfe unter "Öffentliche Demo" "keinen eigenen API-Schlüssel"
     Und erklärt die Hilfe unter "Öffentliche Demo" "eigene Installation"
+    Und erklärt die Hilfe unter "Öffentliche Demo" "Betreiber dieser Demo: betrieb@muster-hosting.ch"

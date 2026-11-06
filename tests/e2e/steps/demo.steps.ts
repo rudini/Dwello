@@ -77,6 +77,13 @@ Then(
 	}
 );
 
+Then(
+	'nennt der Demo-Hinweis dem Besucher für eine eigene Installation den Kontakt {string}',
+	async ({ besucher }, contact: string) => {
+		await besucher.sees(demoNoticeText).toContain(`Fragen Sie dafür den Betreiber dieser Demo: ${contact}.`);
+	}
+);
+
 Then('zeigt der Demo-Hinweis nur eine Zeile mit dem Link {string}', async ({ verwalter }, link: string) => {
 	await verwalter.sees(demoNoticeLinkText(link)).toBe(link);
 	// the rule of the full notice stays on the sign-in page and in the help

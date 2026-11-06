@@ -46,6 +46,30 @@ describe('Anmeldeseite (Ansicht)', () => {
 		expect(body).not.toContain('aria-label="Öffentliche Demo"');
 	});
 
+	// moved from the layout (#675): why only made-up data, also for contact data
+	it('begründet in der Demo, warum nur erfundene Daten eingegeben werden dürfen, auch bei Kontaktdaten', () => {
+		const body = page({ demo: true });
+		expect(body).toContain('Alle Besucher sehen und ändern dieselben Daten');
+		expect(body).toContain(
+			'Geben Sie deshalb nur erfundene Daten ein, auch bei E-Mail-Adressen und Telefonnummern'
+		);
+	});
+
+	// #675 (fach review V-3, V-4): an own API key would serve every visitor; uploads are made up too
+	it('warnt in der Demo vor einem eigenen API-Schlüssel und vor echten Rechnungen', () => {
+		const body = page({ demo: true });
+		expect(body).toContain('keinen eigenen API-Schlüssel ein: Alle Besucher würden ihn nutzen.');
+		expect(body).toContain('Laden Sie nur erfundene Rechnungen und Dokumente hoch.');
+	});
+
+	// #675 F3: one's own installation through the operator of the demo; without a contact the sentence is left out
+	it('nennt in der Demo den Betreiber für eine eigene Installation, nur wenn ein Kontakt gesetzt ist', () => {
+		expect(page({ demo: true, contact: 'betrieb@muster-hosting.ch' })).toContain(
+			'Fragen Sie dafür den Betreiber dieser Demo: betrieb@muster-hosting.ch.'
+		);
+		expect(page({ demo: true, contact: null })).not.toContain('eigene Installation');
+	});
+
 	it('meldet einen Fehler sofort', () => {
 		const body = page({ error: 'Die Anmeldung wurde abgebrochen.' });
 		expect(body).toMatch(

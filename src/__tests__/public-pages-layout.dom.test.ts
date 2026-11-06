@@ -78,15 +78,15 @@ async function shown(path: string, data: { user: object | null; demo: boolean })
 	show(Layout, { data, children } as never);
 	page.go(path);
 	flushSync();
-	return document.querySelector('main [data-testid="demo-notice"]');
+	return document.querySelector('[data-testid="demo-notice"]');
 }
 
 const user = { id: 'u1', sub: 'u1', name: 'Vera Verwalter', email: 'vera@example.ch' };
 
 describe('Öffentliche Demo', () => {
-	it('warnt auf der Anmeldeseite, dass alle Besucher dieselben Daten sehen', async () => {
-		const notice = await shown('/login', { user: null, demo: true });
-		expect(notice?.textContent).toContain('Alle Besucher sehen und ändern dieselben Daten');
+	// #675: the sign-in page shows the full notice itself (login-view.test.ts), so not twice
+	it('zeigt auf der Anmeldeseite keine zweite Zeile', async () => {
+		expect(await shown('/login', { user: null, demo: true })).toBeNull();
 	});
 
 	it('warnt nach der Anmeldung auf jeder Seite der App', async () => {
@@ -94,22 +94,15 @@ describe('Öffentliche Demo', () => {
 		expect(notice?.textContent).toContain('Jede Nacht werden alle Änderungen gelöscht');
 	});
 
-	it.each(['/help', '/privacy', '/terms'])('warnt auch auf %s ohne Anmeldung', async (path) => {
-		expect(await shown(path, { user: null, demo: true })).not.toBeNull();
-	});
-
-	it('ist ein Bereich namens «Öffentliche Demo», den man mit der Landmarken-Navigation findet', async () => {
-		const notice = await shown('/login', { user: null, demo: true });
-		expect(notice?.closest('section')?.getAttribute('aria-label')).toBe('Öffentliche Demo');
-	});
-
-	it('begründet, warum nur erfundene Daten eingegeben werden dürfen, auch bei Kontaktdaten', async () => {
-		const text = (await shown('/login', { user: null, demo: true }))?.textContent;
-		expect(text).toContain('erfundenen Beispieldaten');
-		expect(text).toContain(
-			'Geben Sie deshalb nur erfundene Daten ein, auch bei E-Mail-Adressen und Telefonnummern'
-		);
-	});
+	// #675 F4: the same line with its link, also without a session
+	it.each(['/help', '/privacy', '/terms'])(
+		'warnt auch auf %s ohne Anmeldung mit derselben Zeile',
+		async (path) => {
+			const notice = await shown(path, { user: null, demo: true });
+			expect(notice?.textContent).toContain('Jede Nacht werden alle Änderungen gelöscht.');
+			expect(notice?.querySelector('a')?.getAttribute('href')).toBe('/help#demo');
+		}
+	);
 
 	// #675: inside the app one line, outside the main area, so «Zum Inhalt springen» leads straight to the h1 (Sven P-1)
 	it('steht in der App ausserhalb des Hauptbereichs, damit «Zum Inhalt springen» zur Überschrift führt', async () => {
@@ -137,7 +130,7 @@ describe('Öffentliche Demo', () => {
 	});
 
 	it('zeigt in einer eigenen Installation keinen Demo-Hinweis', async () => {
-		expect(await shown('/login', { user: null, demo: false })).toBeNull();
+		expect(await shown('/tenants', { user, demo: false })).toBeNull();
 		expect(document.querySelector('main h1')).not.toBeNull();
 	});
 });

@@ -2,7 +2,11 @@
 	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import DemoNotice from '$lib/ui/DemoNotice.svelte';
 	import Glossary from './Glossary.svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 
 	// the year the date fields use in their examples, as at the Leistungszeitraum of an invoice
 	const year = new Date().getFullYear();
@@ -60,6 +64,11 @@
 			]
 		}
 	];
+	const contents = $derived([
+		...(data.demo ? [{ id: 'demo', title: m.demo_notice_title() }] : []),
+		...sections,
+		{ id: 'glossary', title: m.glossary_title() }
+	]);
 </script>
 
 <svelte:head>
@@ -71,7 +80,7 @@
 
 	<nav aria-label={m.help_contents()} data-testid="help-contents">
 		<ul class="flex flex-col">
-			{#each [...sections, { id: 'glossary', title: m.glossary_title() }] as { id, title } (id)}
+			{#each contents as { id, title } (id)}
 				<li>
 					<a
 						href="#{id}"
@@ -82,6 +91,15 @@
 			{/each}
 		</ul>
 	</nav>
+
+	<!-- the public demo (DEMO=on), where «Mehr zur Demo» of its line leads (#675) -->
+	{#if data.demo}
+		<Panel id="demo" title={m.demo_notice_title()} testid="page-section">
+			<div class="flex flex-col gap-2 text-ink">
+				<DemoNotice contact={data.contact} />
+			</div>
+		</Panel>
+	{/if}
 
 	{#each sections as section (section.id)}
 		<Panel id={section.id} title={section.title} testid="page-section">
