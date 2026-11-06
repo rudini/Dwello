@@ -92,9 +92,9 @@
 		return () => observer.disconnect();
 	});
 
-	// While busy both buttons are disabled: the panel itself holds the focus
+	// While busy the confirm button holds the focus and says what is being done (#677)
 	$effect(() => {
-		if (open && busy) panel?.focus();
+		if (open && busy) panel?.querySelector<HTMLElement>('[aria-busy]')?.focus();
 	});
 
 	function keydown(event: KeyboardEvent) {
@@ -117,7 +117,7 @@
 		if (!busy && !confirmDisabled) onconfirm();
 	}
 
-	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays on the panel.
+	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays where it is.
 	// From an element that is not a control (a refusal focused by script) it goes on from where that element is
 	function trapFocus(event: KeyboardEvent) {
 		event.preventDefault();

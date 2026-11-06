@@ -851,11 +851,11 @@ describe('Prüfungen im Mietvertrag', () => {
 		await open();
 		next();
 		const button = byTestId<HTMLButtonElement>('wizard-next')!;
-		expect(button.disabled).toBe(true);
+		expect(button.getAttribute('aria-disabled')).toBe('true');
 		expect(button.textContent!.trim()).toBe('Bitte warten …');
 		release();
 		await settle();
-		expect(button.disabled).toBe(false);
+		expect(button.getAttribute('aria-disabled')).toBeNull();
 		expect(button.textContent!.trim()).toBe('Weiter');
 	});
 
