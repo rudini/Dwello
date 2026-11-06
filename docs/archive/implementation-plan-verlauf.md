@@ -1292,5 +1292,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] P-3, P-5, P-6, P-9 texts in de/fr/it/en; description help composed by new/own/predefined and KI on/off (3894cf5)
 - [x] code-reviewer round 1 (`docs/reviews/672-review-1.md`): C-1 Minor fixed (8386bde), C-2 Minor stays
 - [x] Persona Helga (`docs/design/personas/helga-672.md`): P-3, P-5, P-6, P-7, P-9 fixed; H-1 (contract sentence always shown, per fach-review) and H-2 (= P-8) Minor, stay
+## Session: #670 apartment list count heading and building filter order (personas B-1)
+
+- [x] Read #670; U-12 (filters on change) left to #662 as the issue says
+- [x] @wip scenarios (heading names range and page; filter in the list's order), seen red; three DOM tests seen red
+- [x] Heading «Wohnungen 1–12 von 13, Seite 1 von 2» when there is more than one page (`src/routes/apartments/+page.svelte`); building filter sorted by name (`ApartmentFilters.svelte`); texts in de/fr/it/en (40dc123)
+- [x] code-reviewer round 1 (`docs/reviews/670-review-1.md`): C-1 Minor (locale for `localeCompare`) fixed (162ee5c)
+- [x] Persona Marco (`docs/design/personas/marco-670.md`): P-5, P-6 fixed; M-1 (heading below the fold on phones), M-2 (page out of range) Minor, stay
+- [x] Issue opened: #1156 (the same heading for the other lists)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive

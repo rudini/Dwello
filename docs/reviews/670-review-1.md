@@ -1,0 +1,13 @@
+# Code-Review #670, Runde 1 (a6690f2..40dc123)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | src/routes/apartments/ApartmentFilters.svelte:26 | `a.label.localeCompare(b.label)` ohne Locale: die Reihenfolge hängt von der Standard-Locale der Laufzeit ab, die beim SSR (Node, im Container oft `en-US`/POSIX) und im Browser verschieden sein kann; bei Namen mit Umlauten können Server- und Client-Render die Optionen dann verschieden ordnen. Das Muster im Repo (`src/routes/tenants/TenantFormFields.svelte:28`) gibt `getLocale()` mit; der `ponytail:`-Kommentar nennt nur die Abweichung zur DB-Collation, nicht diese. |
+
+Geprüft: Überschrift für erste Seite, letzte Seite mit einem Eintrag, eine Seite (alte Texte), Seite ausserhalb des Bereichs (leere Liste zeigt den EmptyState, also kein «49–48»), Filter (Backend liefert den gefilterten `total`); Sortierung der Wohnungsliste nach `buildings.name` (`backend/src/services/apartment.service.ts:134`) gegen `updatedAt desc` der Gebäude (`building.service.ts:51`); de/fr/it/en sinngemäss und mit `ui_page_of` übereinstimmend, kein U+00A0 nötig (keine hohe Interpunktion); Überschrift bleibt das `h2` mit `aria-labelledby` der Section, kein neuer Zustand mit eigenen Bedienelementen; DOM-Tests und beide Szenarien schlagen ohne die Änderung fehl (Birkenhof ist das zuletzt angelegte Gebäude und stünde vorn; «13 Wohnungen» statt des neuen Texts); Screenplay-Schichten, Isolation (Filter auf das eigene Gebäude, Namen über `names` und auf die beiden Gebäude gefiltert); `Closes #670` im Commit schliesst dasselbe Issue wie `Fixes #670` im PR, unschädlich; ponytail-review ohne weiteren Befund.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet: lint 0; check 0; backend type-check 0; vitest apartments-pages, list-filters, ui-pagination, i18n, no-german-in-code, design-guard, tokens (1101 bestanden), open-work 4, `--changed origin/main` 555; E2E Chromium apartments.feature + hydration + Sprachzeilen 27 bestanden, a11y-Zeilen der Wohnungen 3 bestanden; fitness --base origin/main exit 0; fallow sauber; Rot gesehen bei zwei @wip-Szenarien und drei DOM-Tests.
+- Ob ein Screenreader die neue Überschrift beim Blättern ansagt: der Fokus nach einem Seitenwechsel (gleicher Pfad, andere Query) wird von dieser Änderung nicht berührt (`src/lib/focus-after-action.ts`, `ResultList.svelte`); nicht im Browser geprüft, und die Anforderung verlangt es nicht.
+- Ob ein a11y-/Sprachen-Bildschirm mit mehr als 12 Wohnungen die neuen Texte in fr/it/en tatsächlich rendert (`tests/a11y/screens.json`, Eintrag `apartments`): nicht nachgesehen, welche Daten die Zeile hat; die Schlüssel sind in allen vier Dateien vorhanden.
