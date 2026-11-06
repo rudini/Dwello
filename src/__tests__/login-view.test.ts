@@ -77,6 +77,12 @@ describe('Anmeldeseite (Ansicht)', () => {
 			'href="mailto:betrieb@muster-hosting.ch"'
 		);
 		expect(page({ demo: true, contact: '+41 44 000 00 00' })).not.toContain('mailto:');
+		// code review 675 C-3: the format of .env.example, address and phone; only the address is the link
+		const both = page({ demo: true, contact: 'betrieb@muster-hosting.ch, 044 123 45 67' });
+		expect(both).toContain('href="mailto:betrieb@muster-hosting.ch"');
+		expect(both.replace(/<[^>]+>/g, '')).toContain(
+			'Betreiber dieser Demo: betrieb@muster-hosting.ch, 044 123 45 67.'
+		);
 	});
 
 	it('meldet einen Fehler sofort', () => {
