@@ -37,6 +37,7 @@
 	{/if}
 	<CategoryForm
 		category={data.category}
+		ki={data.kiEnabled}
 		errors={form?.errors}
 		submitLabel={m.buildings_save_changes()}
 	/>

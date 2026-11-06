@@ -262,30 +262,25 @@ Funktionalität: Kostenkategorien
     Und verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat
 
   # #672 (Helga P-3, P-5): die Hilfe bei der Beschreibung sagt, wofür sie dient
-  @wip
   Szenario: Die Beschreibung einer eigenen Kategorie sagt, wofür sie dient
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
-    Dann erklärt das Feld «Beschreibung» "Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die KI liest die Beschreibung, wenn sie eine Kategorie für eine Rechnung vorschlägt. Die Liste der Kategorien zeigt sie unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht."
+    Dann erklärt das Feld «Beschreibung» "Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die KI liest die Beschreibung, wenn Sie «Von der KI prüfen lassen» wählen und wenn sie für eine Rechnung eine Kategorie vorschlägt. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht."
 
-  @wip
   Szenario: Die Beschreibung einer vordefinierten Kategorie sagt, wofür sie dient
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Heizung"
-    Dann erklärt das Feld «Beschreibung» "Die Beschreibung sagt, welche Kosten zu dieser Kategorie gehören. Die KI liest sie, wenn sie eine Kategorie für eine Rechnung vorschlägt. Auf der Nebenkostenabrechnung steht sie nicht."
+    Dann erklärt das Feld «Beschreibung» "Die Beschreibung sagt, welche Kosten zu dieser Kategorie gehören. Die KI liest die Beschreibung, wenn sie für eine Rechnung eine Kategorie vorschlägt. Auf der Nebenkostenabrechnung steht sie nicht."
 
   # #672 (Helga P-6): die Rückfrage nennt die Folgen des Löschens, auch dass es endgültig ist
-  @wip
   Szenario: Die Rückfrage vor dem Löschen einer Kategorie nennt die Folgen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Wenn der Liegenschaftsverwalter beginnt, die Kategorie "Treppenhausreinigung" zu löschen
-    Dann erklärt die Rückfrage zum Löschen "Die Kategorie verschwindet aus der Auswahl beim Erfassen von Rechnungen. Mietverträge verlieren die Angabe, ob diese Kategorie vereinbart oder nicht vereinbart ist. Das lässt sich nicht rückgängig machen."
+    Dann erklärt die Rückfrage zum Löschen "Die Kategorie verschwindet aus der Auswahl beim Erfassen von Rechnungen. Bei den Mietverträgen löscht Dwello die Angaben, ob und ab wann diese Kategorie vereinbart ist. Was im unterschriebenen Mietvertrag steht, gilt weiter. Das lässt sich nicht rückgängig machen."
 
   # #672 (Helga P-9): ohne Zahl steht eine Kategorie ganz oben
-  @wip
   Szenario: Die Reihenfolge sagt, wo eine Kategorie ohne Zahl steht
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
-    Dann erklärt das Feld «Reihenfolge» "Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben, bei gleicher Zahl entscheidet der Name. Ohne Zahl steht die Kategorie ganz oben, wie mit der Zahl 0."
+    Dann erklärt das Feld «Reihenfolge» "Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben. Ohne Zahl steht die Kategorie ganz oben, wie mit der Zahl 0."
 
-  @wip
   Szenario: Eine Kategorie ohne Reihenfolge steht ganz oben
     Angenommen es gibt die umlagefähige Kategorie "Zaunpflege" mit der Reihenfolge 90
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie "Zaunpflege"

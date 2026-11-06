@@ -38,6 +38,10 @@ export const openFreshSettingsKi: Activity = (actor) =>
 	actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/config`), Click.on(kiLinkInSettings));
 export const openFreshKi: Activity = (actor) => actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/config/ki`));
 export const openKi = Navigate.to('/config/ki');
+// #672: «Neue Kategorie» on the fresh installation
+export const openFreshNewCategory: Activity = (actor) =>
+	actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/config/categories/new`));
+
 export const openFreshUpload: Activity = (actor) =>
 	actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/invoices`), Click.on(uploadInvoicesButton));
 

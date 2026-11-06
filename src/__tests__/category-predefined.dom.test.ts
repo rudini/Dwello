@@ -19,7 +19,7 @@ const seeded = toCategory({
 	description: 'Wages and services of the caretaker'
 });
 const pageText = () => document.body.textContent ?? '';
-const PREDEFINED_HELP = 'Die Liste zeigt die Beschreibung vordefinierter Kategorien nicht.';
+const PREDEFINED_HELP = 'Die Beschreibung sagt, welche Kosten zu dieser Kategorie gehören.';
 
 describe('Vordefinierte und eigene Kategorien', () => {
 	it('liest die Herkunft aus dem Backend statt aus den Namen', () => {

@@ -214,7 +214,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 			'Ihn zeigt die Nebenkostenabrechnung eines Mieters mit dieser Sprache, ebenso Dwello in dieser Sprache. Fehlt er, steht der deutsche Name.'
 		);
 		expect(text()).toContain(
-			'Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben, bei gleicher Zahl entscheidet der Name.'
+			'Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben. Ohne Zahl steht die Kategorie ganz oben, wie mit der Zahl 0.'
 		);
 		// ein Screenreader liest die Hilfe mit den Feldern der Übersetzungen
 		const fieldset = [...document.querySelectorAll('fieldset')].find(
@@ -632,19 +632,35 @@ describe('Grund der Umlagefähigkeit', () => {
 });
 
 describe('Kategorie bearbeiten', () => {
-	// The list hides the (English) descriptions of the predefined categories
-	it('sagt bei vordefinierten Kategorien, dass die Beschreibung nicht in der Liste steht', () => {
-		const heating = category('c1', 'Heizung', true, 0, { predefined: true });
-		show(EditCategoryPage, { data: { category: heating }, form: null } as never);
+	// #672 (Helga P-3, P-5): what the description is for; the list shows it only for own categories
+	const descriptionHelp = () => document.getElementById('description-help')?.textContent?.trim();
 
-		expect(text()).toContain('Die Liste zeigt die Beschreibung vordefinierter Kategorien nicht.');
+	it('sagt bei vordefinierten Kategorien, wofür die Beschreibung dient', () => {
+		const heating = category('c1', 'Heizung', true, 0, { predefined: true });
+		show(EditCategoryPage, { data: { category: heating, kiEnabled: true }, form: null } as never);
+
+		expect(descriptionHelp()).toBe(
+			'Die Beschreibung sagt, welche Kosten zu dieser Kategorie gehören. Die KI liest die Beschreibung, wenn sie für eine Rechnung eine Kategorie vorschlägt. Auf der Nebenkostenabrechnung steht sie nicht.'
+		);
 	});
 
-	it('zeigt den Hinweis bei eigenen Kategorien nicht', () => {
+	it('sagt bei eigenen Kategorien, wofür die Beschreibung dient und dass die Liste sie zeigt', () => {
 		const own = category('c4', 'Treppenhausreinigung', true);
-		show(EditCategoryPage, { data: { category: own }, form: null } as never);
+		show(EditCategoryPage, { data: { category: own, kiEnabled: true }, form: null } as never);
 
-		expect(text()).not.toContain('vordefinierter Kategorien');
+		expect(descriptionHelp()).toBe(
+			'Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die KI liest die Beschreibung, wenn sie für eine Rechnung eine Kategorie vorschlägt. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht.'
+		);
+		expect(byTestId('category-propose-button')).toBeNull();
+	});
+
+	it('nennt die KI bei der Beschreibung nicht, wenn keine KI gewählt ist', () => {
+		const own = category('c4', 'Treppenhausreinigung', true);
+		show(EditCategoryPage, { data: { category: own, kiEnabled: false }, form: null } as never);
+
+		expect(descriptionHelp()).toBe(
+			'Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht.'
+		);
 	});
 
 	// Heizkosten folgen beim Mieterwechsel dem Heizprofil statt den Tagen; separates Warmwasser nicht

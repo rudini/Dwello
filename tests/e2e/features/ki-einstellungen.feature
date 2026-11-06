@@ -42,6 +42,13 @@ Funktionalität: KI in den Einstellungen wählen
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Rechnungen und Kategorien werden nicht von einer KI bearbeitet."
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Muster KI AG"
 
+  # #672 (Helga P-5, Fach-Review V-2): ohne KI liest keine KI die Beschreibung einer Kategorie
+  Szenario: Ohne KI nennt die Hilfe zur Beschreibung einer neuen Kategorie keine KI
+    Angenommen Dwello ist eingerichtet
+    Und in der frischen Installation ist keine KI gewählt
+    Wenn der Liegenschaftsverwalter in der frischen Installation "Neue Kategorie" öffnet
+    Dann erklärt das Feld «Beschreibung» "Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht."
+
   # #626: ohne KI liest niemand die Dateien; der Dialog sagt es mit dem Begriff der Seite «KI»
   Szenario: Rechnungen hochladen, wenn keine KI gewählt ist
     Angenommen Dwello ist eingerichtet
