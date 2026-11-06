@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, Enter, Navigate, Scroll, Uncheck, Wait } from '../screenplay/interactions';
+import { Browser, Check, Click, Enter, Navigate, Press, Scroll, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
 import {
 	allocabilityCancel,
@@ -74,6 +74,17 @@ export const askKi = (name: string): Activity => (actor) =>
 
 export const saveWithoutChoice = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(name).into(nameInput), Click.on(submitButton));
+
+// #678: the Enter key in «Name» submits the form, as in every other form
+export const saveWithEnter = (name: string, allowed?: boolean): Activity => (actor) =>
+	actor.attemptsTo(
+		...(allowed === undefined ? [] : [Check.the(allowanceOption(allowed ? 'Umlagefähig' : 'Nicht umlagefähig'))]),
+		Enter.theValue(name).into(nameInput),
+		Press.theKey('Enter').on(nameInput)
+	);
+export const askKiWithoutName = Click.on(proposeButton);
+export const chooseNotAllowed = Check.the(allowanceOption('Nicht umlagefähig'));
+export const rename = (name: string) => Enter.theValue(name).into(nameInput);
 
 export const saveAsAllowed = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(editButton(name)), Check.the(allowanceOption('Umlagefähig')), Click.on(submitButton));

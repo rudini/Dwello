@@ -19,6 +19,14 @@ Funktionalität: Verteilschlüssel
     Dann ist der Liegenschaftsverwalter auf der Seite "Verteilschlüssel"
     Und verteilt der Verteilschlüssel "Nach Zimmern" nach der Formel "{rooms}"
 
+  # #678 (entschieden): die Eingabetaste speichert, «Formel testen» läuft nur auf Wunsch
+  @wip
+  Szenario: Die Eingabetaste speichert den Verteilschlüssel
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Zimmern" mit der Formel "{rooms}" mit der Eingabetaste speichert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Verteilschlüssel"
+    Und verteilt der Verteilschlüssel "Nach Zimmern" nach der Formel "{rooms}"
+
   # #461 (#345, 3b): ein eigener Verteilschlüssel bekommt seinen Namen auf Französisch, Italienisch und Englisch
   Szenario: Eigener Verteilschlüssel mit französischem Namen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"

@@ -28,6 +28,7 @@ import {
 	listedCategoriesNamed,
 	notAllowedChosen,
 	proposalText,
+	kiCheckText,
 	roomBesideFocusedCategory,
 	deleteQuestionText,
 	fieldHelp,
@@ -52,6 +53,10 @@ import {
 	saveAsNotAllowed,
 	saveFormAsNotAllowed,
 	saveWithoutChoice,
+	saveWithEnter,
+	askKiWithoutName,
+	chooseNotAllowed,
+	rename,
 	showAllowedCategories,
 	usePhone,
 	stayAtCategory,
@@ -499,3 +504,55 @@ Then(
 		await verwalter.sees(listedBefore(names.get(title)!, predefined)).toBe(true);
 	}
 );
+
+// #678 (Sven P-5, decided): the Enter key saves; the KI checks only by its button
+When(
+	'der Liegenschaftsverwalter die nicht umlagefähige Kategorie {string} mit der Eingabetaste speichert',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(saveWithEnter(seed.unique(title), false));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Kategorie {string} mit der Eingabetaste speichert, ohne zu wählen, ob sie umlagefähig ist',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(saveWithEnter(seed.unique(title)));
+	}
+);
+
+// #678 (Marco P-3, Helga P-4): the help as a screen reader reads it with the question
+Then('erklärt die Frage der Umlagefähigkeit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allowanceQuestionDescription).toContain(text);
+});
+
+// a negative check: the step before it names what the question explains instead
+Then('die Frage der Umlagefähigkeit nennt nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allowanceQuestionDescription).not.toContain(text);
+});
+
+// #678 (Helga P-5)
+When('der Liegenschaftsverwalter die KI prüfen lässt, ohne einen Namen einzugeben', async ({ verwalter }) => {
+	await verwalter.attemptsTo(askKiWithoutName);
+});
+
+Given('der Liegenschaftsverwalter hat die Kategorie als nicht umlagefähig gewählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseNotAllowed);
+});
+
+Given('der Liegenschaftsverwalter hat die Kategorie als umlagefähig gewählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseAllowed);
+});
+
+// #678 (Helga P-7, P-9, P-10; Sven P-11): what Dwello says about the KI's check, next to «Von der KI prüfen lassen»
+Then('sagt Dwello zur Prüfung durch die KI {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(kiCheckText).toContain(text);
+});
+
+// a negative check: the step before it names what Dwello says instead
+Then('sagt Dwello zur Prüfung durch die KI nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(kiCheckText).not.toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Kategorie in {string} umbenennt', async ({ verwalter, seed }, title: string) => {
+	await verwalter.attemptsTo(rename(seed.unique(title)));
+});

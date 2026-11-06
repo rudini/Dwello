@@ -304,6 +304,83 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(byTestId('category-proposal')!.textContent).toContain('Ihre Wahl bleibt');
 	});
 
+	// #678 (Helga P-9): Dwello sagt, ob die KI es gleich sieht wie die eigene Wahl
+	it('sagt, dass die KI es gleich sieht wie die eigene Wahl', () => {
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
+		show(NewCategoryPage, props as never);
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
+		click(choice('Umlagefähig'));
+		props.form = {
+			proposal: {
+				name: 'Gartenpflege',
+				description: '',
+				isAllowedUtilityCost: true,
+				reasoning: 'Betrieb'
+			}
+		};
+		flushSync();
+
+		expect(byTestId('category-proposal')!.textContent).toContain(
+			'Die KI sieht es wie Sie. Ihre Wahl bleibt: «Umlagefähig».'
+		);
+	});
+
+	// #678 (Helga P-8): nach dem Umwählen sieht die KI es anders als der Liegenschaftsverwalter
+	it('sagt nach dem Umwählen, dass die KI es anders sieht', () => {
+		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
+		click(choice('Umlagefähig'));
+
+		expect(byTestId('category-proposal')!.textContent).toContain(
+			'Die KI sieht es anders als Sie. Ihre Wahl bleibt: «Umlagefähig».'
+		);
+	});
+
+	// #678 (Code-Review G-8): eine Antwort für einen inzwischen geänderten Namen fällt nicht stumm weg
+	it('sagt, dass sich der Name seit der Prüfung geändert hat, wenn die Antwort danach kommt', () => {
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
+		show(NewCategoryPage, props as never);
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenunterhalt');
+		props.form = {
+			proposal: {
+				name: 'Gartenpflege',
+				description: '',
+				isAllowedUtilityCost: true,
+				reasoning: 'Betrieb'
+			}
+		};
+		flushSync();
+
+		const region = byTestId('category-proposal-region')!.textContent!.replace(/\s+/g, ' ');
+		expect(region).toContain(
+			'Name oder Beschreibung haben sich seit der Prüfung geändert. Wählen Sie selbst oder lassen Sie die KI nochmals prüfen.'
+		);
+		expect(region).not.toContain('zurückgenommen');
+	});
+
+	// #678 (Sven P-11): nach dem Umbenennen bleibt die eigene Wahl, und Dwello sagt es
+	it('sagt nach dem Umbenennen, dass die eigene Wahl bleibt', () => {
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
+		show(NewCategoryPage, props as never);
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
+		click(choice('Nicht umlagefähig'));
+		props.form = {
+			proposal: {
+				name: 'Gartenpflege',
+				description: '',
+				isAllowedUtilityCost: true,
+				reasoning: 'Betrieb'
+			}
+		};
+		flushSync();
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenunterhalt');
+		flushSync();
+
+		expect(byTestId('category-proposal-region')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Name oder Beschreibung haben sich seit der Prüfung geändert. Ihre Wahl bleibt. Lassen Sie die KI bei Bedarf nochmals prüfen.'
+		);
+		expect(choice('Nicht umlagefähig').checked).toBe(true);
+	});
+
 	// Helga P-1: ein Vorschlag gilt nur für den geprüften Namen
 	it('nimmt Vorschlag und Wahl der KI zurück, sobald der Name ändert', () => {
 		checked('Treppenhausreinigung', { isAllowedUtilityCost: true, reasoning: 'Betrieb' });

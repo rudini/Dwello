@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, Navigate } from '../screenplay/interactions';
+import { Click, Enter, Navigate, Press } from '../screenplay/interactions';
 import {
 	deleteButton,
 	editButton,
@@ -20,6 +20,10 @@ export const testFormula = (formula: string): Activity => (actor) =>
 
 export const createDistributionKey = (name: string, formula: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(formula).into(formulaInput), Enter.theValue(name).into(nameInput), Click.on(submitButton));
+
+// #678: the Enter key in «Formel» submits the form; «Formel testen» runs only by its button
+export const createDistributionKeyWithEnter = (name: string, formula: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(name).into(nameInput), Enter.theValue(formula).into(formulaInput), Press.theKey('Enter').on(formulaInput));
 
 export const createDistributionKeyInFrench = (name: string, formula: string, frenchName: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(frenchName).into(frenchNameInput), createDistributionKey(name, formula));

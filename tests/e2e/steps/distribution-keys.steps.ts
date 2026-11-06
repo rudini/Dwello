@@ -15,6 +15,7 @@ import {
 	changeFormula,
 	createDistributionKey,
 	createDistributionKeyInFrench,
+	createDistributionKeyWithEnter,
 	deleteDistributionKey,
 	openDistributionKeyEdit,
 	openDistributionKeys,
@@ -61,6 +62,13 @@ When(
 	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} erfasst',
 	async ({ verwalter, seed }, title: string, formula: string) => {
 		await verwalter.attemptsTo(createDistributionKey(seed.unique(title), formula));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} mit der Eingabetaste speichert',
+	async ({ verwalter, seed }, title: string, formula: string) => {
+		await verwalter.attemptsTo(createDistributionKeyWithEnter(seed.unique(title), formula));
 	}
 );
 
