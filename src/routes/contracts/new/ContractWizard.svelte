@@ -404,6 +404,7 @@
 				{apartments}
 				{categories}
 				unknown={reviewUnknown}
+				overlap={refusedWith ? null : overlap}
 				onretry={retry}
 				onedit={editField}
 			/>

@@ -163,8 +163,8 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon."
 
-  # #669 (fach-reviewer V-1): in der Prüfung steht der Kasten zur Überschneidung nicht; die Meldung nennt den Schritt
-  Szenario: Die Meldung nach dem Laden in der Prüfung nennt den Schritt, in dem die Überschneidung zu beheben ist
+  # #669 (Persona Helga H-1, fach-reviewer V-7): in der Prüfung bleibt der Kasten zur Überschneidung stehen, wenn die Meldung geht
+  Szenario: Nach dem Laden zeigt die Prüfung den Kasten zur Überschneidung
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
@@ -172,7 +172,9 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
-    Dann warnt Dwello nach dem Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Ändern Sie den Vertragsbeginn oder das Vertragsende im Schritt 3 «Vertragsdauer»."
+    Dann warnt Dwello nach dem Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich»."
+    Und steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (seit 01.04.2024, unbefristet)."
+    Und steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit "Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt 3 «Vertragsdauer», die Wohnung im Schritt 2 «Wohnung»."
 
   Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden

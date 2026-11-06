@@ -102,3 +102,5 @@ export const billedUntilError = target('Fehler bei «Abgerechnet bis»', (page) 
 // each element of the contract wizard that holds the text, also one only a screen reader reads (#667)
 export const wizardText = (text: string) =>
 	target(`«${text}» im Assistenten`, (page) => page.getByTestId('contract-wizard').getByText(text));
+// #669 (Helga H-1): the box «Zeitraum überschneidet sich», at «Vertragsdauer» and in «Prüfen»
+export const overlapBox = target('Hinweis «Zeitraum überschneidet sich»', (page) => page.getByTestId('overlap-warning'));

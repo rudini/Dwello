@@ -693,6 +693,24 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
+	// #669 (Helga H-1): the same with Carla's apartment; «Erneut versuchen» in «Prüfen» loads them and finds the overlap
+	'overlap-review': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/contracts', {}),
+			Navigate.reload,
+			Click.on(nextButton),
+			Wait.until(apartmentContractsUnknown),
+			Click.on(nextButton),
+			EnterDate.of('2030-01-01').into(startDateInput),
+			Click.on(nextButton),
+			Enter.theValue('1500').into(baseRentInput),
+			Click.on(feeChoice('run')),
+			Click.on(nextButton),
+			Wait.until(reviewContractsUnknown),
+			FailRequests.noLonger,
+			Click.on(retryContractsButton),
+			Wait.until(on.overlapWarning)
+		),
 	// #667 (fach review b667 V-1): «Weiter» with the overlap: the error at «Vertragsbeginn» names Carla's contract
 	'overlap-error': () => (actor) =>
 		actor.attemptsTo(

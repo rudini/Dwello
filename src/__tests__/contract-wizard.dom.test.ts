@@ -557,6 +557,40 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('review-contracts-unknown')!.textContent).toContain(UNKNOWN);
 	});
 
+	// #669 (Helga H-1, fach-review V-7): an overlap found in «Prüfen» stays on the page, with where to change it
+	it('zeigt in der Prüfung den Kasten zur Überschneidung, die das erneute Laden findet', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a3')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await toPeriod('a3');
+		type('start-date-input', '01.01.2027');
+		next();
+		await settle();
+		type('contract-base-rent-input', '950');
+		chooseFee('run');
+		next();
+		await settle();
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		const box = byTestId('overlap-warning')!.textContent!.replace(/\s+/g, ' ');
+		expect(box).toContain('Zeitraum überschneidet sich');
+		expect(box).toContain('Der Zeitraum überschneidet sich mit dem Mietvertrag von Ida Roth');
+		expect(box).toContain(
+			'Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt 3 «Vertragsdauer», die Wohnung im Schritt 2 «Wohnung».'
+		);
+		expect(byTestId('overlap-contract-link')).not.toBeNull();
+		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
+			[
+				'warning',
+				'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich».'
+			]
+		]);
+	});
+
 	// #667 (Dr. Weber W-03): once saving found the overlap, «Dwello prüft beim Speichern» is done
 	it('zeigt den Hinweis auf nicht geladene Mietverträge nach der Ablehnung einer Überschneidung nicht mehr', async () => {
 		fakeBff(({ method, path }) => {

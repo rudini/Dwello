@@ -7,6 +7,7 @@ import {
 	advancePaymentInput,
 	apartmentContractsUnknown,
 	apartmentHintAnnouncement,
+	overlapBox,
 	apartmentOption,
 	apartmentSelect,
 	baseRentInput,
@@ -84,5 +85,6 @@ export const failures = Count.of(errorToast);
 export const failureOnTop = OnTop.of(errorToast);
 export const confirmationShown = Visibility.of(successToast);
 export const warning = Text.of(warningToast);
+export const overlapBoxText = Text.of(overlapBox);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);

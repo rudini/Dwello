@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, warning } from '../questions/contract-form';
+import { apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
 import { enterStartDate, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
@@ -61,4 +61,9 @@ When('der Liegenschaftsverwalter den Vertragsbeginn leert', async ({ verwalter }
 
 Then('ist im Mietvertrag keine Wohnung gewählt', async ({ verwalter }) => {
 	await verwalter.sees(chosenApartmentId).toBe('');
+});
+
+Then('steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit {string}', async ({ verwalter, names }, text: string) => {
+	const named = [...names].reduce((shown, [given, seeded]) => shown.replaceAll(given, seeded), text);
+	await verwalter.sees(overlapBoxText).toContain(named);
 });
