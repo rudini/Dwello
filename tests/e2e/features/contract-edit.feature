@@ -369,3 +369,16 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter im Breadcrumb "Mietverträge" wählt
     Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668 (Code-Review 668-closing C-5): nach «Zurück» und dem Verwerfen öffnet ein weiteres «Zurück» das Formular nicht wieder
+  Szenario: Nach dem Verwerfen führt «Zurück» weiter zurück
+    Angenommen der Liegenschaftsverwalter ist auf der Mietvertragsliste
+    Und der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" ansieht
+    Und ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und der Liegenschaftsverwalter den Mietvertrag bearbeiten will
+    Und heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter im Browser zurückgeht und die Änderungen verwirft
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter im Browser zurückgeht
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste

@@ -1011,10 +1011,10 @@ describe('Mietvertrag bearbeiten', () => {
 	// #668 (Persona Sven N-3, code review n-4, decided by the product owner): leaving with unsaved changes asks
 	describe('Verlassen mit ungespeicherten Änderungen', () => {
 		// the page's last beforeNavigate, called as SvelteKit calls it before a navigation
-		const navigate = (type = 'link', delta?: number) => {
+		const navigate = (type = 'link', delta?: number, path = '/contracts') => {
 			const cancel = vi.fn();
 			const leave = vi.mocked(beforeNavigate).mock.calls.at(-1)![0];
-			leave({ cancel, type, delta, to: { url: new URL('http://localhost/contracts') } } as never);
+			leave({ cancel, type, delta, to: { url: new URL(`http://localhost${path}`) } } as never);
 			flushSync();
 			return cancel;
 		};
@@ -1078,11 +1078,28 @@ describe('Mietvertrag bearbeiten', () => {
 			go.mockRestore();
 		});
 
-		// code review 668-n3 C-3: another page's `goto`, e.g. «Abmelden», asks too
-		it('fragt auch bei einer Navigation durch Code, etwa beim Abmelden', async () => {
+		// code review 668-n3 C-3: a `goto` of another part of the app asks too
+		it('fragt auch bei einer Navigation durch Code', async () => {
 			await open();
 			type('contract-base-rent-input', '980');
 			expect(navigate('goto')).toHaveBeenCalled();
+		});
+
+		// code review 668-closing C-4: after «Abmelden» or a 401 the session is gone, so nothing could be saved
+		it('lässt den Weg zur Anmeldung ohne Rückfrage gehen', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('goto', undefined, '/login')).not.toHaveBeenCalled();
+		});
+
+		// code review 668-closing C-6: while the save is under way, leaving still asks; it may still be refused
+		it('fragt, solange das Speichern läuft', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			submit('submit-button');
+			flushSync();
+			expect(navigate()).toHaveBeenCalled();
+			await settle();
 		});
 
 		it('behält die Eingabe bei «Weiter bearbeiten»', async () => {

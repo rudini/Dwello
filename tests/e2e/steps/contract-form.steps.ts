@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { cancelEditing } from '../tasks/form';
-import { chooseInMainNav } from '../tasks/app-frame';
+import { chooseInMainNav, goBackInBrowser } from '../tasks/app-frame';
 import { errorMessage, errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
@@ -762,3 +762,7 @@ When(
 		await verwalter.attemptsTo(chooseInMainNav(label), discardChanges);
 	}
 );
+
+When('der Liegenschaftsverwalter im Browser zurückgeht und die Änderungen verwirft', async ({ verwalter }) => {
+	await verwalter.attemptsTo(goBackInBrowser, discardChanges);
+});
