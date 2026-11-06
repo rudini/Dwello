@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, failures } from '../questions/contract-form';
+import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, failureOnTop, failures } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
 import { tabOnFromErrorMessage } from '../tasks/contract-form';
 
@@ -35,4 +35,9 @@ Then('bestätigt Dwello das Laden mit {string}', async ({ verwalter }, text: str
 
 Then('steht der Hinweis oben im Formular ganz im ersten Bildschirm', async ({ verwalter }) => {
 	await verwalter.sees(apartmentHintInWindow).toBe(1);
+});
+
+// #669 (code review C-1): the drawer of the menu does not cover the messages
+Then('liegt die Fehlermeldung über dem offenen Menü', async ({ verwalter }) => {
+	await verwalter.sees(failureOnTop).toBe(true);
 });

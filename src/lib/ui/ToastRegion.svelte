@@ -88,7 +88,7 @@
 	</div>
 {/snippet}
 
-<!-- Above an open dialog (same layer, later on the page), which leaves it reachable -->
+<!-- Above an open dialog or menu (same layer, later on the page; the layout puts the menu before it), which leaves it reachable -->
 <div
 	class="fixed inset-x-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96 {atTop
 		? 'top-4'

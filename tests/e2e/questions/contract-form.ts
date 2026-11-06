@@ -1,4 +1,4 @@
-import { Accessible, Attribute, BrokenWords, Checked, Count, Enabled, ShareInViewport, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, BrokenWords, Checked, Count, Enabled, OnTop, ShareInViewport, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedUntilError,
 	startDateNotice,
@@ -81,5 +81,6 @@ export const timesInWizard = (text: string) => Count.of(wizardText(text));
 export const brokenStepNames = BrokenWords.in(stepNames);
 // #669: error messages left after a retry, what the hint's status region announces, and how much of the hint the window shows
 export const failures = Count.of(errorToast);
+export const failureOnTop = OnTop.of(errorToast);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);
