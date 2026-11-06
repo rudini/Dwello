@@ -28,7 +28,10 @@ import {
 	listedCategoriesNamed,
 	notAllowedChosen,
 	proposalText,
-	roomBesideFocusedCategory
+	roomBesideFocusedCategory,
+	deleteQuestionText,
+	fieldHelp,
+	listedBefore
 } from '../questions/categories';
 import {
 	askKi,
@@ -52,7 +55,8 @@ import {
 	showAllowedCategories,
 	usePhone,
 	stayAtCategory,
-	bringCategoryToBottomEdge
+	bringCategoryToBottomEdge,
+	saveWithoutSortOrder
 } from '../tasks/categories';
 
 const { Given, When, Then } = createBdd(test);
@@ -467,3 +471,31 @@ Given('die Kategorie {string} steht am unteren Rand des Fensters', async ({ verw
 Then('verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat', async ({ verwalter }) => {
 	await verwalter.sees(roomBesideFocusedCategory).toBeGreaterThanOrEqual(8);
 });
+
+// #672 (Helga P-3, P-5, P-6, P-9)
+Then('erklärt das Feld «Beschreibung» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(fieldHelp.Beschreibung).toContain(text);
+});
+
+Then('erklärt das Feld «Reihenfolge» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(fieldHelp.Reihenfolge).toContain(text);
+});
+
+Then('erklärt die Rückfrage zum Löschen {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteQuestionText).toContain(text);
+});
+
+Given('es gibt die umlagefähige Kategorie {string} mit der Reihenfolge {int}', async ({ seed }, title: string, sortOrder: number) => {
+	await seed.categoryWithSortOrder(title, sortOrder);
+});
+
+When('der Liegenschaftsverwalter die Kategorie ohne Reihenfolge speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(saveWithoutSortOrder);
+});
+
+Then(
+	'steht die Kategorie {string} in der Liste vor der vordefinierten Kategorie {string}',
+	async ({ verwalter, names }, title: string, predefined: string) => {
+		await verwalter.sees(listedBefore(names.get(title)!, predefined)).toBe(true);
+	}
+);

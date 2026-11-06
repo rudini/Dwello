@@ -312,6 +312,14 @@ describe('Kategorie bearbeiten', () => {
 			{ method: 'PUT', url: `${API}/c1`, body: { nameDE: 'Treppenhausreinigung', ...saved } }
 		]);
 	});
+
+	// #672 (Helga P-9): ohne Zahl steht die Kategorie zuoberst, auch wenn sie vorher eine Zahl hatte
+	it('speichert eine geleerte Reihenfolge als 0', async () => {
+		const { calls, result } = runAction(editActions.default, 'c1', 200, { ...form, sortOrder: '' });
+		await result.catch(() => {});
+
+		expect(calls[0].body).toMatchObject({ sortOrder: 0 });
+	});
 });
 
 describe('Kategorie löschen', () => {
