@@ -1017,12 +1017,18 @@ describe('Mietvertrag bearbeiten', () => {
 			vi.advanceTimersByTime(1000);
 			flushSync();
 			expect(byTestId('contract-monthly-total-announced')!.textContent).toContain('CHF');
+			const heard = byTestId('contract-monthly-total-announced')!.textContent;
 			type('contract-advance-payment-input', '2x0');
 			flushSync();
+			expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
+			// the same total as before the typo is heard again once the amount is fixed (code review C-2)
+			type('contract-advance-payment-input', '200');
+			vi.advanceTimersByTime(1000);
+			flushSync();
+			expect(byTestId('contract-monthly-total-announced')!.textContent).toBe(heard);
 		} finally {
 			vi.useRealTimers();
 		}
-		expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
 	});
 
 	// #668 (Persona Sven N-3, code review n-4, decided by the product owner): leaving with unsaved changes asks

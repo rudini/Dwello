@@ -316,6 +316,12 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Dann sagt das Formular das Monatlich total "CHF 980.00" an
 
+  # #668 (Fallback-Review #1150): nach einem Tippfehler bleibt kein früher angesagtes Total zu hören
+  Szenario: Nach einem Tippfehler sagt das Formular kein Monatlich total an
+    Angenommen der Liegenschaftsverwalter hat die Nettomiete "980" eingetragen und das Formular hat "CHF 980.00" angesagt
+    Wenn der Liegenschaftsverwalter die Nettomiete "9x0" einträgt
+    Dann sagt das Formular kein Monatlich total an
+
   # #668 (Persona Helga H15-3): der Hinweis unter «Befristet» spricht auch den Wechsel in eine andere Wohnung an
   Szenario: Der Hinweis unter «Befristet» nennt auch den Wechsel in eine andere Wohnung
     Wenn der Liegenschaftsverwalter den Mietvertrag befristen will

@@ -726,6 +726,19 @@ Then('sagt das Formular das Monatlich total {string} an', async ({ verwalter }, 
 	await verwalter.sees(announcedTotal).toBe(`Monatlich total ${amount}`);
 });
 
+// #668 (fallback review on #1150): an amount that is none clears the total heard before
+Given(
+	'der Liegenschaftsverwalter hat die Nettomiete {string} eingetragen und das Formular hat {string} angesagt',
+	async ({ verwalter }, baseRent: string, amount: string) => {
+		await verwalter.attemptsTo(enterBaseRent(baseRent));
+		await verwalter.sees(announcedTotal).toBe(`Monatlich total ${amount}`);
+	}
+);
+
+Then('sagt das Formular kein Monatlich total an', async ({ verwalter }) => {
+	await verwalter.sees(announcedTotal).toBe('');
+});
+
 // #668 (Persona Helga H15-3)
 When('der Liegenschaftsverwalter den Mietvertrag befristen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(chooseFixedTerm);
