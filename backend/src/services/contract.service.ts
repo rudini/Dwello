@@ -241,7 +241,8 @@ async function checkContractOverlap(
 			anonymised: tenants.anonymisedOn,
 			start: rentalContracts.startDate,
 			end: rentalContracts.endDate,
-			terminated: rentalContracts.terminated
+			terminated: rentalContracts.terminated,
+			status: contractFields.status // by the Swiss day: «seit» or «ab» (#815)
 		})
 		.from(rentalContracts)
 		.innerJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
@@ -254,7 +255,8 @@ async function checkContractOverlap(
 		...(!other.anonymised && { tenant: other.tenant }),
 		start: other.start,
 		...(other.end && { end: other.end }),
-		terminated: other.terminated ? 1 : 0
+		terminated: other.terminated ? 1 : 0,
+		status: other.status
 	});
 }
 

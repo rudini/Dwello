@@ -706,8 +706,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		),
 	// #667 (Dr. Weber W-03, W-04, W-07): without the apartment's contracts the save refuses the overlap with Carla's
 	'overlap-refused': () => async (actor) => {
-		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
-		if ((await actor.answer(pageAddress)).includes('/contracts/new'))
+		// only the load of the apartment's contracts fails, not the save (code review b667 C-1); the form saves elsewhere
+		const apartmentId = new URL(await actor.answer(pageAddress)).searchParams.get('apartment');
+		await actor.attemptsTo(FailRequests.to('/api/contracts', apartmentId ? { apartmentId } : {}), Navigate.reload);
+		if (apartmentId)
 			await actor.attemptsTo(
 				Click.on(nextButton),
 				Wait.until(apartmentContractsUnknown),
@@ -720,7 +722,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			);
 		// the form: Vreni's contract ending after Carla's start, a day before today confirmed
 		else await actor.attemptsTo(EnterDate.of('2015-06-30').into(endDateInput), Check.the(contractEndPastConfirm));
-		await actor.attemptsTo(Click.on(contractSubmitButton), Wait.until(on.formProblem));
+		// the refusal of the overlap, not any other error: saving checked it, so the hints are gone (W-03)
+		await actor.attemptsTo(Click.on(contractSubmitButton), Wait.until(on.formProblem), Wait.forCount(on.contractsUnknownHints, 0));
 	},
 	'draft-restored': (example) => restoreDraft(example),
 	'draft-discard-dialog': (example) => (actor) => actor.attemptsTo(restoreDraft(example), openDialog(discardDraftButton)),

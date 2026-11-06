@@ -57,7 +57,8 @@ describe('POST /api/v1/contracts', () => {
 			contract: rental.contract,
 			tenant: `Anna Keller ${token}`,
 			start: '2024-04-01',
-			terminated: 0
+			terminated: 0,
+			status: 'active'
 		});
 	});
 
@@ -71,8 +72,37 @@ describe('POST /api/v1/contracts', () => {
 			tenant: `Beat Huber ${token}`,
 			start: '2019-01-01',
 			end: '2019-12-31',
-			terminated: 0
+			terminated: 0,
+			status: 'ended'
 		});
+	});
+
+	// fach review b667 V-3 (code review b667 C-2): of two overlapped contracts the earlier one is named
+	it('nennt von zwei überschnittenen Mietverträgen den früheren', async () => {
+		await letTo('2016-07-01', '2016-12-31'); // created first
+		const earlier = (await (await letTo('2016-01-01', '2016-06-30')).json()) as { id: string };
+
+		const response = await letTo('2016-03-01', '2016-09-30');
+
+		expect(((await response.json()) as { params: { contract: string } }).params.contract).toBe(earlier.id);
+	});
+
+	// code review b667 C-2: a contract ended by notice is said to be gekündigt
+	it('sagt, dass der andere Mietvertrag gekündigt ist', async () => {
+		const noticed = await contracts.create({
+			apartmentId: rental.apartment,
+			tenantId: nextTenant,
+			startDate: '2014-01-01',
+			endDate: '2014-12-31',
+			terminated: true,
+			baseRent: '950',
+			monthlyAdvancePayment: '150'
+		});
+		expect(noticed.status).toBe(201);
+
+		const response = await letTo('2014-06-01', '2014-06-30');
+
+		expect(((await response.json()) as { params: object }).params).toMatchObject({ terminated: 1 });
 	});
 
 	// fach review b667 V-4: Dwello shows an anonymised tenant without a name
@@ -86,7 +116,8 @@ describe('POST /api/v1/contracts', () => {
 				contract: fixed.id,
 				start: '2017-01-01',
 				end: '2017-12-31',
-				terminated: 0
+				terminated: 0,
+				status: 'ended'
 			});
 		} finally {
 			await db.update(tenants).set({ anonymisedOn: null }).where(eq(tenants.id, nextTenant));

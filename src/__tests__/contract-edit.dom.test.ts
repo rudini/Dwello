@@ -531,10 +531,47 @@ describe('Mietvertrag bearbeiten', () => {
 		type('start-date-input', '01.06.2024');
 		await save();
 		expect(byTestId('form-error')!.textContent).toContain(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (01.01.2024 – 31.12.2024, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.12.2024.'
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (01.01.2024 – 31.12.2024, befristet). Der Vertragsbeginn muss nach dem 31.12.2024 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags.'
 		);
 		expect(byTestId('apartment-contracts-unknown')).toBeNull();
 		expect(byTestId('start-contracts-unknown')).toBeNull();
+	});
+
+	// fach review b667 V-1, V-5: the refusal links the other contract in a new tab, so the input stays; the box at the
+	// period says nothing twice
+	it('verlinkt nach der Ablehnung den anderen Mietvertrag in einem neuen Tab und zeigt den Kasten nicht doppelt', async () => {
+		const other = { id: overlap.params.contract, startDate: '2024-01-01', endDate: '2024-12-31' };
+		fakeBff(({ method }) =>
+			method === 'PUT'
+				? [400, overlap]
+				: [200, { contracts: [{ ...other, tenantName: 'Anna Keller', status: 'ended' }] }]
+		);
+		await open();
+		type('start-date-input', '01.06.2024');
+		await settle();
+		expect(byTestId('overlap-warning')!.textContent).toContain('Mietvertrag von Anna Keller');
+		await save();
+		const link = byTestId<HTMLAnchorElement>('overlap-contract-link')!;
+		const text = link.textContent!.replace(/\s+/g, ' ').trim();
+		expect([link.getAttribute('href'), link.target, text]).toEqual([
+			`/contracts/${overlap.params.contract}`,
+			'_blank',
+			'Zum Mietvertrag von Anna Keller (öffnet in neuem Tab)'
+		]);
+		expect(byTestId('overlap-warning')).toBeNull();
+	});
+
+	// code review b667 C-5: a changed period is not checked yet, so the hint comes back with it
+	it('zeigt den Hinweis wieder, sobald der Zeitraum nach der Ablehnung geändert ist', async () => {
+		fakeBff(({ method }) => (method === 'PUT' ? [400, overlap] : [500, {}]));
+		await open();
+		type('start-date-input', '01.06.2024');
+		await save();
+		type('start-date-input', '01.02.2025');
+		await settle();
+		expect(byTestId('form-error')).toBeNull();
+		expect(byTestId('apartment-contracts-unknown')).not.toBeNull();
+		expect(byTestId('start-contracts-unknown')).not.toBeNull();
 	});
 
 	// #151: «Erneut versuchen» loads the contracts again; the input stays (Helga B-13 H2)

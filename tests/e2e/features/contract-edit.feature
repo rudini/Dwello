@@ -117,7 +117,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-01-01" speichert
-    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (01.01.2022 – 31.03.2024, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.03.2024."
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (01.01.2022 – 31.03.2024, befristet). Der Vertragsbeginn muss nach dem 31.03.2024 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags."
     Und sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr
     Und sieht der Liegenschaftsverwalter beim Vertragsbeginn keinen Hinweis mehr
 

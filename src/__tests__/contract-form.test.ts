@@ -8,7 +8,6 @@ import {
 	forAvailability,
 	overlapError,
 	overlapRefusal,
-	overlapWarning,
 	suggestedStartDate,
 	validateContract,
 	type ContractFormValues
@@ -309,81 +308,107 @@ describe('contractBody', () => {
 	});
 });
 
-describe('overlapWarning', () => {
+describe('overlapError', () => {
 	const running = [{ id: 'c1', start_date: '2024-01-01', end_date: null }];
 
 	it('warns when the contract overlaps another contract of the apartment', () => {
-		expect(overlapWarning(filled, running)).toEqual(expect.any(String));
+		expect(overlapError(filled, running, false)).toMatchObject({ field: 'startDate' });
 	});
 
 	it('ignores the contract being edited and apartments without contracts', () => {
-		expect(overlapWarning(filled, running, 'c1')).toBeNull();
-		expect(overlapWarning(filled, [])).toBeNull();
+		expect(overlapError(filled, running, false, 'c1')).toBeNull();
+		expect(overlapError(filled, [], false)).toBeNull();
 	});
 });
 
 // #667 (Dr. Weber W-04, W-07): the refusal names the other contract and advises what fits it (fach review b667)
 describe('overlapRefusal', () => {
-	const { end: _, ...openEnded } = overlap.params;
+	const { end: _, ...ended } = overlap.params;
+	const openEnded = { ...ended, status: 'active' }; // «seit» or «ab», as the backend says by the Swiss day
 	const refused = (params: Record<string, string | number>) => ({ ...overlap, params });
 	const start2025 = { ...filled, startDate: '2025-06-01' };
 	const fixedTerm = { ...start2025, isUnlimited: false, endDate: '2028-12-31' };
-	const today = '2026-06-15';
+	const later = refused({ ...openEnded, start: '2027-04-01', status: 'future' });
+	const textOf = (...args: Parameters<typeof overlapRefusal>) => overlapRefusal(...args)?.text;
 
-	it('rät nach einem früheren, befristeten Mietvertrag zu einem späteren Vertragsbeginn', () => {
-		expect(overlapRefusal(overlap, start2025, today, true)).toBe(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (01.01.2024 – 31.12.2024, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.12.2024.'
+	it('rät nach einem früheren, befristeten Mietvertrag, den Vertragsbeginn und dann dessen Vertragsende zu prüfen', () => {
+		expect(textOf(overlap, start2025, true)).toBe(
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (01.01.2024 – 31.12.2024, befristet). Der Vertragsbeginn muss nach dem 31.12.2024 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags.'
 		);
 	});
 
 	it('nennt einen gekündigten Mietvertrag gekündigt', () => {
-		expect(
-			overlapRefusal(refused({ ...overlap.params, terminated: 1 }), start2025, today, true)
-		).toContain('(01.01.2024 – 31.12.2024, gekündigt)');
-	});
-
-	it('rät nach einem früheren Mietvertrag ohne Vertragsende, zuerst dessen Vertragsende einzutragen', () => {
-		expect(overlapRefusal(refused(openEnded), start2025, today, true)).toBe(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (seit 01.01.2024, unbefristet). Endet der Mietvertrag von Anna Keller, tragen Sie zuerst auf seiner Seite mit «Enddatum erfassen» das Vertragsende ein.'
+		expect(textOf(refused({ ...overlap.params, terminated: 1 }), start2025, true)).toContain(
+			'(01.01.2024 – 31.12.2024, gekündigt)'
 		);
 	});
 
-	it('rät im Assistenten bei «Unbefristet» vor einem späteren Mietvertrag zu «Befristet»', () => {
-		expect(
-			overlapRefusal(refused({ ...openEnded, start: '2027-04-01' }), start2025, today, true)
-		).toBe(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (ab 01.04.2027, unbefristet). Wählen Sie «Befristet» mit einem Vertragsende vor dem 01.04.2027.'
+	it('rät im Assistenten nach einem früheren Mietvertrag ohne Vertragsende zu dessen Vertragsende oder einer anderen Wohnung', () => {
+		expect(textOf(refused(openEnded), start2025, true)).toBe(
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (seit 01.01.2024, unbefristet). Endet der andere Mietvertrag vor dem 01.06.2025, weil er gekündigt oder ein Vertragsende vereinbart ist, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung.'
 		);
 	});
 
-	// fach review b667 M-1: a contract is not made befristet to fit
-	it('rät beim Bearbeiten und bei «Befristet» vor einem späteren Mietvertrag nur zu einem früheren Vertragsende', () => {
-		const later = refused({ ...openEnded, start: '2027-04-01' });
-		expect(overlapRefusal(later, start2025, today, false)).toMatch(
-			/\. Wählen Sie ein Vertragsende vor dem 01\.04\.2027\.$/
+	// fach review b667 M-2: the apartment of a saved contract is fixed
+	it('rät beim Bearbeiten statt zu einer anderen Wohnung, den Vertragsbeginn zu prüfen', () => {
+		expect(textOf(refused(openEnded), start2025, false)).toMatch(
+			/Sonst prüfen Sie den Vertragsbeginn im unterschriebenen Mietvertrag\.$/
 		);
-		expect(overlapRefusal(later, fixedTerm, today, true)).toMatch(
-			/\. Wählen Sie ein Vertragsende vor dem 01\.04\.2027\.$/
+	});
+
+	// fach review b667 V-2 (code review b667 C-3)
+	it('rät bei einem Mietvertrag ohne Vertragsende, der am selben Tag beginnt, beide Mietverträge zu prüfen', () => {
+		expect(textOf(refused({ ...openEnded, start: '2025-06-01' }), start2025, true)).toMatch(
+			/\. Der andere Mietvertrag beginnt am selben Tag und hat kein Vertragsende\. Prüfen Sie den Vertragsbeginn im unterschriebenen Mietvertrag\. Stimmt er, prüfen Sie den anderen Mietvertrag und korrigieren Sie ihn, wenn er falsch erfasst ist\.$/
 		);
+	});
+
+	// fach review b667 M-1: «Befristet» only when the signed lease agrees an end
+	it('rät im Assistenten bei «Unbefristet» vor einem späteren Mietvertrag nur bei vereinbartem Vertragsende zu «Befristet»', () => {
+		expect(textOf(later, start2025, true)).toBe(
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (ab 01.04.2027, unbefristet). Ist im unterschriebenen Mietvertrag ein Vertragsende vor dem 01.04.2027 vereinbart, wählen Sie «Befristet» mit diesem Vertragsende. Sonst prüfen Sie den Vertragsbeginn des anderen Mietvertrags.'
+		);
+	});
+
+	it('rät beim Bearbeiten und bei «Befristet» vor einem späteren Mietvertrag, das Vertragsende zu prüfen', () => {
+		const advice =
+			/\. Das Vertragsende muss vor dem 01\.04\.2027 liegen\. Prüfen Sie es im unterschriebenen Mietvertrag oder in der Kündigung\. Stimmt es, prüfen Sie den Vertragsbeginn des anderen Mietvertrags\.$/;
+		expect(textOf(later, start2025, false)).toMatch(advice);
+		expect(textOf(later, fixedTerm, true)).toMatch(advice);
+	});
+
+	// fach review b667 V-3 (Dr. Weber b667 P-2): the advice about the Vertragsende stands at «Vertragsende»
+	it('nennt das Feld, um das es im Rat geht', () => {
+		expect(overlapRefusal(later, fixedTerm, true)?.field).toBe('endDate');
+		expect(overlapRefusal(later, start2025, true)?.field).toBe('startDate');
+		expect(overlapRefusal(overlap, fixedTerm, true)?.field).toBe('startDate');
+	});
+
+	// fach review b667 V-1: the other contract is a link away
+	it('nennt den anderen Mietvertrag für den Link', () => {
+		expect(overlapRefusal(overlap, start2025, true)?.contract).toEqual({
+			id: overlap.params.contract,
+			tenant: 'Anna Keller'
+		});
 	});
 
 	// fach review b667 V-4: the backend names no anonymised tenant
 	it('nennt den Mietvertrag eines anonymisierten Mieters ohne Namen', () => {
 		const { tenant: __, ...anonymised } = overlap.params;
-		expect(overlapRefusal(refused(anonymised), start2025, today, true)).toBe(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag eines anonymisierten Mieters (01.01.2024 – 31.12.2024, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.12.2024.'
+		expect(textOf(refused(anonymised), start2025, true)).toMatch(
+			/^Der Zeitraum überschneidet sich mit dem Mietvertrag eines anonymisierten Mieters \(01\.01\.2024 – 31\.12\.2024, befristet\)\. /
 		);
 	});
 
 	it('ist keine Ablehnung einer Überschneidung bei einem anderen Code', () => {
 		expect(
-			overlapRefusal({ code: 'CONTRACT_END_BEFORE_START', params: {} }, start2025, today, true)
+			overlapRefusal({ code: 'CONTRACT_END_BEFORE_START', params: {} }, start2025, true)
 		).toBeNull();
 	});
 });
 
 // fach review b667 V-1, V-3, V-4: the browser's check in the wizard words it as the refusal does
-describe('overlapError', () => {
+describe('overlapError in words', () => {
 	const listed = (...contracts: Record<string, unknown>[]) =>
 		forAvailability({ data: { contracts: contracts as never } })!;
 	const ended = {
@@ -392,6 +417,7 @@ describe('overlapError', () => {
 		endDate: '2019-12-31',
 		tenantName: 'Ueli Graf',
 		tenantAnonymised: false,
+		status: 'ended',
 		terminated: false
 	};
 
@@ -403,26 +429,24 @@ describe('overlapError', () => {
 			endDate: '2020-12-31',
 			tenantName: 'Eva Frei'
 		};
-		expect(
-			overlapError({ ...filled, startDate: '2019-06-01' }, listed(later, ended), '2026-06-15')
-		).toBe(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Ueli Graf (01.01.2015 – 31.12.2019, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.12.2019.'
+		const said = overlapError({ ...filled, startDate: '2019-06-01' }, listed(later, ended), true);
+		expect(said?.text).toMatch(
+			/^Der Zeitraum überschneidet sich mit dem Mietvertrag von Ueli Graf \(01\.01\.2015 – 31\.12\.2019, befristet\)\. Der Vertragsbeginn muss nach dem 31\.12\.2019 liegen\./
 		);
+		expect(said?.contract).toEqual({ id: 'c8', tenant: 'Ueli Graf' });
 	});
 
 	it('nennt einen anonymisierten Mieter ohne Namen', () => {
 		const anonymised = { ...ended, tenantName: 'Anonymisierter Mieter', tenantAnonymised: true };
-		expect(
-			overlapError({ ...filled, startDate: '2019-06-01' }, listed(anonymised), '2026-06-15')
-		).toContain(
+		const said = overlapError({ ...filled, startDate: '2019-06-01' }, listed(anonymised), true);
+		expect(said?.text).toContain(
 			'mit dem Mietvertrag eines anonymisierten Mieters (01.01.2015 – 31.12.2019, befristet).'
 		);
+		expect(said?.contract).toEqual({ id: 'c8', tenant: undefined });
 	});
 
 	it('findet ohne Überschneidung nichts', () => {
-		expect(
-			overlapError({ ...filled, startDate: '2020-01-01' }, listed(ended), '2026-06-15')
-		).toBeNull();
+		expect(overlapError({ ...filled, startDate: '2020-01-01' }, listed(ended), true)).toBeNull();
 	});
 });
 

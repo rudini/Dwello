@@ -12,7 +12,6 @@
 		initialContractValues,
 		overlapError,
 		overlapRefusal,
-		overlapWarning,
 		suggestedStartDate,
 		validateContract,
 		type ContractFormValues
@@ -47,6 +46,7 @@
 	import ApartmentStep from './ApartmentStep.svelte';
 	import OpenContracts from './OpenContracts.svelte';
 	import { retried } from './ContractsUnknown.svelte';
+	import OverlapLink from '../OverlapLink.svelte';
 	import PeriodStep from './PeriodStep.svelte';
 	import RentStep from './RentStep.svelte';
 	import ReviewStep from './ReviewStep.svelte';
@@ -88,8 +88,8 @@
 	let errors = $state<Record<string, string>>({});
 	let overlapSaid = ''; // the overlap at «Vertragsbeginn», which any period change may resolve
 	// the overlap the save was refused for: saving checked it, so the hint that saving will check goes (#667, W-03)
-	let refusal = $state('');
-	const refused = $derived(!!refusal && errors.form === refusal);
+	let refusal = $state<ReturnType<typeof overlapRefusal>>(null);
+	const refused = $derived(!!refusal && errors.form === refusal.text);
 	let saving = $state(false);
 	let savedAt = $state<Date | null>(null);
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
@@ -116,7 +116,7 @@
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const loading = $derived(step === 2 && !contracts); // «Weiter» waits for the apartments' contracts (#468)
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
-	const overlap = $derived(overlapWarning(values, contracts?.get(values.apartmentId) ?? []));
+	const overlap = $derived(overlapError(values, contracts?.get(values.apartmentId) ?? [], true));
 	// contracts of the chosen tenant without a Vertragsende (#156)
 	const openContracts = $derived(
 		apartments.flatMap((apartment) =>
@@ -233,7 +233,8 @@
 		if (id === 'startDate') startEdited = true;
 		delete errors[errorKey[id] ?? id];
 		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
-		if (errors.startDate === overlapSaid) delete errors.startDate;
+		for (const field of ['startDate', 'endDate'])
+			if (errors[field] === overlapSaid) delete errors[field];
 	}
 
 	async function goTo(target: number) {
@@ -278,8 +279,8 @@
 		saving = false;
 		if (response.error) {
 			// an overlap with the other contract named (#667), or «Abgerechnet bis» after the browser's today (#453)
-			refusal = overlapRefusal(response.error, values, today, true) ?? '';
-			errors = { form: refusal || savedFailed(response.error.details) };
+			refusal = overlapRefusal(response.error, values, true);
+			errors = { form: refusal?.text ?? savedFailed(response.error.details) };
 			return;
 		}
 		touched = false;
@@ -296,8 +297,8 @@
 	// The overlap blocks, named as the save names it (fach review b667 V-1); a start in the past only asks once, so it
 	// is read out and can be confirmed
 	function periodWarnings(): Record<string, string> {
-		overlapSaid = overlapError(values, contracts?.get(values.apartmentId) ?? [], today) ?? '';
-		if (overlapSaid) return { startDate: overlapSaid };
+		overlapSaid = overlap?.text ?? '';
+		if (overlap) return { [overlap.field]: overlap.text };
 		// the notice above the field says the date; the field only what to do (#667, Dr. Weber W-08)
 		if (!startDateNotice(values.startDate, startPast) || confirmedPastStart === values.startDate)
 			return {};
@@ -380,6 +381,7 @@
 				onretry={retry}
 				{startPast}
 				{overlap}
+				overlapSaid={!!overlap && errors[overlap.field] === overlap.text}
 				{errors}
 			/>
 		{:else if step === 4}
@@ -403,6 +405,7 @@
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>
+					{#if refused && refusal}<OverlapLink contract={refusal.contract} />{/if}
 				</Alert>
 			{/if}
 		{/if}

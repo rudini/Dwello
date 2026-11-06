@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd';
-import { errorMessageShown } from '../questions/form';
+import { errorMessage, errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
 	apartmentChoiceLabel,
@@ -687,7 +687,7 @@ Then('rät die Fehlermeldung nicht zum Berichtigen', async ({ verwalter }) => {
 // #667 (Dr. Weber W-04, W-07): the refusal names the other contract's tenant by the name the scenario gave
 Then('sieht der Liegenschaftsverwalter die Ablehnung {string}', async ({ verwalter, names }, text: string) => {
 	const named = [...names].reduce((shown, [given, seeded]) => shown.replaceAll(given, seeded), text);
-	await verwalter.sees(errorMessageShown(named)).toBe(true);
+	await verwalter.sees(errorMessage).toContain(named);
 });
 
 Then('sieht der Liegenschaftsverwalter in der Prüfung keinen Hinweis mehr', async ({ verwalter }) => {

@@ -4,6 +4,7 @@
  */
 
 import { m } from '$lib/paraglide/messages';
+import type { RentalContract } from '$lib/types';
 
 /**
  * Represents the availability status of an apartment
@@ -34,6 +35,7 @@ export interface ContractForAvailability {
 	tenant_name?: string;
 	tenant_anonymised?: boolean;
 	terminated?: boolean;
+	contract_status?: RentalContract['status']; // by the Swiss day, as the backend says (#815)
 }
 
 /**

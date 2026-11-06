@@ -144,7 +144,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
-    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (seit 01.04.2024, unbefristet). Endet der Mietvertrag von Bruno Meier, tragen Sie zuerst auf seiner Seite mit «Enddatum erfassen» das Vertragsende ein."
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (seit 01.04.2024, unbefristet). Endet der andere Mietvertrag vor dem 01.01.2027, weil er gekündigt oder ein Vertragsende vereinbart ist, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
     Und sieht der Liegenschaftsverwalter in der Prüfung keinen Hinweis mehr
 
   Szenario: Die Ablehnung rät zu einem Vertragsbeginn nach dem früheren Mietvertrag
@@ -153,7 +153,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
-    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (01.04.2024 – 31.03.2027, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.03.2027."
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (01.04.2024 – 31.03.2027, befristet). Der Vertragsbeginn muss nach dem 31.03.2027 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags."
 
   Szenario: Die Ablehnung rät zu einem Vertragsende vor dem späteren Mietvertrag
     Angenommen der Mieter "Bruno Meier" existiert
@@ -161,7 +161,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
-    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (ab 01.04.2027, unbefristet). Wählen Sie «Befristet» mit einem Vertragsende vor dem 01.04.2027."
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (ab 01.04.2027, unbefristet). Ist im unterschriebenen Mietvertrag ein Vertragsende vor dem 01.04.2027 vereinbart, wählen Sie «Befristet» mit diesem Vertragsende. Sonst prüfen Sie den Vertragsbeginn des anderen Mietvertrags."
 
   # #667 (Dr. Weber W-08): die Warnung steht einmal im Kasten; das Feld sagt nur, was zu tun ist
   Szenario: Die Warnung zum Vertragsbeginn in der Vergangenheit steht nur einmal

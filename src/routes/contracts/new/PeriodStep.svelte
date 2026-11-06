@@ -3,6 +3,8 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
+	import OverlapLink from '../OverlapLink.svelte';
+	import type { Overlap } from '$lib/contract-form';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { startDateNotice } from '$lib/contract-wizard';
@@ -22,6 +24,8 @@
 		onretry,
 		startPast,
 		overlap,
+		overlapSaid = false,
+		newTab = false,
 		errors
 	}: {
 		startDate: string;
@@ -35,7 +39,9 @@
 		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
 		onretry?: () => void; // loads them again; without it the hint points to the apartment's
 		startPast: boolean; // the start lies before today, as the backend says (#815); the edit form: also before the saved one
-		overlap: string | null;
+		overlap: Overlap | null;
+		overlapSaid?: boolean; // its words stand at the field already: only the link to the other contract (Weber b667 P-1)
+		newTab?: boolean; // the link keeps the input of the edit form
 		errors: Record<string, string>;
 	} = $props();
 
@@ -136,8 +142,11 @@
 	/>
 {/if}
 
-{#if overlap}
+{#if overlap && !overlapSaid}
 	<Alert tone="caution" title={m.contracts_overlap_title()} testid="overlap-warning">
-		<p>{m.contracts_overlap_text({ overlap })}</p>
+		<p>{overlap.text}</p>
+		<OverlapLink contract={overlap.contract} {newTab} />
 	</Alert>
+{:else if overlap}
+	<OverlapLink contract={overlap.contract} {newTab} />
 {/if}

@@ -328,6 +328,9 @@ describe('Mietvertrag erfassen', () => {
 		await settle();
 		const error = byTestId('form-error')!.textContent!;
 		expect(error).toContain('überschneidet sich mit dem Mietvertrag von Anna Keller');
+		expect(byTestId('overlap-contract-link')!.getAttribute('href')).toBe(
+			`/contracts/${overlap.params.contract}`
+		);
 		expect(error).not.toContain('Contract');
 		expect(goto).not.toHaveBeenCalled();
 	});
@@ -394,7 +397,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(heading()).toBe('Vertragsdauer');
 		expect(byTestId('start-date-input-field')!.textContent).toContain(
-			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Ida Roth (01.01.2015 – 31.12.2098, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.12.2098.'
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Ida Roth (01.01.2015 – 31.12.2098, befristet). Der Vertragsbeginn muss nach dem 31.12.2098 liegen. Prüfen Sie ihn im unterschriebenen Mietvertrag. Stimmt er, prüfen Sie das Vertragsende des anderen Mietvertrags.'
 		);
 	});
 
@@ -755,6 +758,28 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich.');
 	});
 
+	// Dr. Weber b667 P-2: the advice names the Vertragsende, so the error stands there
+	it('zeigt den Rat zu einem früheren Vertragsende beim Vertragsende', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a1'); // its last contract ran 2015–2019
+		next();
+		await settle();
+		type('start-date-input', '01.01.2014');
+		click(byTestId('contract-duration')!.querySelectorAll('input')[1]);
+		type('end-date-input', '31.12.2016');
+		next();
+		await settle();
+		expect(byTestId('end-date-input-field')!.textContent).toContain(
+			'Das Vertragsende muss vor dem 01.01.2015 liegen.'
+		);
+		expect(
+			byTestId('start-date-input-field')!.querySelector('[data-testid="form-error"]')
+		).toBeNull();
+	});
+
 	it('geht bei einer Überschneidung nicht weiter', async () => {
 		await open();
 		select('contract-tenant-select', 't1');
@@ -764,9 +789,19 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 		type('start-date-input', '01.01.2016');
+		await settle();
+		// Dr. Weber b667 P-1: the box names the contract as the error does, and goes when the error says it
+		expect(byTestId('overlap-warning')!.textContent).toContain('Mietvertrag von Ueli Graf');
 		next();
 		await settle(); // step 3 waits for the backend's check of the start (#815)
-		expect(byTestId('overlap-warning')).not.toBeNull();
+		expect(byTestId('start-date-input-field')!.textContent).toContain('Mietvertrag von Ueli Graf');
+		expect(byTestId('overlap-warning')).toBeNull();
+		// fach review b667 V-1: the other contract a link away, in this tab: the input stays as a draft
+		const link = byTestId<HTMLAnchorElement>('overlap-contract-link')!;
+		expect([link.getAttribute('href'), link.textContent!.trim()]).toEqual([
+			'/contracts/c8',
+			'Zum Mietvertrag von Ueli Graf'
+		]);
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
 		click(byTestId('contract-duration')!.querySelectorAll('input')[1]);
