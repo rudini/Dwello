@@ -211,8 +211,8 @@
 		const confirmPastEnd = (endChanged && confirmedDay === values.endDate) || undefined;
 		const body = { ...contractBody(values, categories), confirmPastEnd, deleteDraft };
 		const response = await apiCall(back, { method: 'PUT', body });
-		saving = false;
 		if (response.error) {
+			saving = false; // saved, it stays busy until the next page: LeaveConfirm lets that navigation pass
 			const atField = billedByDwello(response.error);
 			errors = atField ? { billedUntil: atField } : { form: saveError(response.error) };
 			const statements = response.error.details?.statements;
@@ -397,4 +397,4 @@
 	</div>
 </form>
 
-<LeaveConfirm {values} />
+<LeaveConfirm {values} {categories} {saving} />

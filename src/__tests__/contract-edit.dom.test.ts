@@ -1011,10 +1011,10 @@ describe('Mietvertrag bearbeiten', () => {
 	// #668 (Persona Sven N-3, code review n-4, decided by the product owner): leaving with unsaved changes asks
 	describe('Verlassen mit ungespeicherten Änderungen', () => {
 		// the page's last beforeNavigate, called as SvelteKit calls it before a navigation
-		const navigate = (type = 'link') => {
+		const navigate = (type = 'link', delta?: number) => {
 			const cancel = vi.fn();
 			const leave = vi.mocked(beforeNavigate).mock.calls.at(-1)![0];
-			leave({ cancel, type, to: { url: new URL('http://localhost/contracts') } } as never);
+			leave({ cancel, type, delta, to: { url: new URL('http://localhost/contracts') } } as never);
 			flushSync();
 			return cancel;
 		};
@@ -1047,6 +1047,42 @@ describe('Mietvertrag bearbeiten', () => {
 			type('contract-base-rent-input', '980');
 			type('contract-base-rent-input', saved);
 			expect(navigate()).not.toHaveBeenCalled();
+		});
+
+		// code review 668-n3 C-2: what would be saved counts, not the order of a list or an empty «Gültig ab»
+		it('lässt gehen, wenn eine Nebenkostenart ab- und wieder angekreuzt ist', async () => {
+			const categories = [
+				{ id: 'k1', name: 'Heizung' },
+				{ id: 'k2', name: 'Lift' }
+			];
+			show(EditPage, { data: { ...data(), categories } } as never);
+			await settle();
+			click('contract-category-k1');
+			click('contract-category-k1');
+			click('contract-agreed-from-toggle');
+			click('contract-agreed-from-toggle');
+			flushSync();
+			expect(navigate()).not.toHaveBeenCalled();
+		});
+
+		// code review 668-n3 C-1: discarding after «Zurück» goes back, so the next «Zurück» does not reopen the form
+		it('geht nach «Zurück» und «verwerfen» im Verlauf zurück', async () => {
+			const go = vi.spyOn(history, 'go').mockImplementation(() => {});
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('popstate', -1)).toHaveBeenCalled();
+			click('contract-leave-confirm');
+			await settle();
+			expect(go).toHaveBeenCalledWith(-1);
+			expect(goto).not.toHaveBeenCalled();
+			go.mockRestore();
+		});
+
+		// code review 668-n3 C-3: another page's `goto`, e.g. «Abmelden», asks too
+		it('fragt auch bei einer Navigation durch Code, etwa beim Abmelden', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('goto')).toHaveBeenCalled();
 		});
 
 		it('behält die Eingabe bei «Weiter bearbeiten»', async () => {
