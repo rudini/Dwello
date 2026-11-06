@@ -176,7 +176,11 @@
 	async function retry() {
 		if (!(await loadContracts())) return;
 		await tick();
-		retried(unknown, section?.querySelector('h2'), values.startDate ? overlap : undefined, step);
+		// Sven S-2, Helga H-3: a choice made «(nicht geprüft)» that turns out rented does not stay
+		const blocked = step === 2 && !!availability.get(values.apartmentId)?.hasOngoingContract;
+		if (blocked) values.apartmentId = '';
+		const found = values.startDate ? overlap : undefined;
+		retried(unknown, section?.querySelector('h2'), found, step, blocked);
 	}
 
 	onMount(() => {

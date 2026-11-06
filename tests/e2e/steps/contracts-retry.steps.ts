@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, warning } from '../questions/contract-form';
+import { apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
 import { enterStartDate, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
@@ -57,4 +57,8 @@ Then('warnt Dwello nach dem Laden mit {string}', async ({ verwalter }, text: str
 
 When('der Liegenschaftsverwalter den Vertragsbeginn leert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(enterStartDate(''));
+});
+
+Then('ist im Mietvertrag keine Wohnung gewählt', async ({ verwalter }) => {
+	await verwalter.sees(chosenApartmentId).toBe('');
 });

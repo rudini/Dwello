@@ -476,6 +476,32 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(document.activeElement).toBe(document.querySelector('h2'));
 	});
 
+	// #669 (Sven S-2, Helga H-3, fach-review V-5): the apartment chosen «(nicht geprüft)» turned out rented
+	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und sagt, warum', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a2')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		show(NewContractPage, { data } as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a2');
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId<HTMLSelectElement>('apartment-select')!.value).toBe('');
+		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
+			[
+				'warning',
+				'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar: Sie hat einen unbefristeten Mietvertrag, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung.'
+			]
+		]);
+	});
+
 	// review #151 R2-6: a retry that fails again says so; the hint stays
 	it('sagt, wenn die Mietverträge wieder nicht geladen werden konnten', async () => {
 		fakeBff(({ path }) =>

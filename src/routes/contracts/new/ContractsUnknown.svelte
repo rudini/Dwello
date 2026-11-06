@@ -21,14 +21,17 @@
 		stillUnknown: boolean,
 		next: HTMLElement | null | undefined,
 		overlap?: object | null,
-		step?: number
+		step?: number,
+		blocked = false // the chosen apartment turned out «nicht verfügbar»: its choice was cleared (fach-review 669 V-5)
 	) {
 		dismissToast(said);
 		if (stillUnknown) {
 			said = addToast('error', m.contracts_apartment_contracts_retry_failed());
 			return;
 		}
-		said = addToast(overlap ? 'warning' : 'success', loaded(overlap, step));
+		said = blocked
+			? addToast('warning', m.contracts_apartment_contracts_blocked())
+			: addToast(overlap ? 'warning' : 'success', loaded(overlap, step));
 		next?.focus();
 	}
 </script>
