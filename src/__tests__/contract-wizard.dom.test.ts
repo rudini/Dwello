@@ -509,6 +509,69 @@ describe('Prüfungen im Mietvertrag', () => {
 		]);
 	});
 
+	// #1153 (Sven S-7, Helga H-6): the step keeps saying which apartment it was and which contract blocks it
+	it('nennt nach dem Aufheben die Wohnung und verlinkt ihren Mietvertrag, bis eine Wohnung gewählt ist', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a2')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		show(NewContractPage, { data } as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a2');
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('apartment-cleared')!.textContent).toContain('Wohnung 2.02 · Ahornhof');
+		const link = byTestId('apartment-cleared')!.querySelector(
+			'[data-testid="overlap-contract-link"]'
+		);
+		expect([link?.getAttribute('href'), link?.textContent?.trim()]).toEqual([
+			'/contracts/c9',
+			'Zum Mietvertrag von Eva Frei'
+		]);
+		select('apartment-select', 'a1');
+		await settle();
+		expect(byTestId('apartment-cleared')).toBeNull();
+		// code review 1153 C-1: once another apartment was chosen, emptying the choice again does not bring it back
+		select('apartment-select', '');
+		await settle();
+		expect(byTestId('apartment-cleared')).toBeNull();
+	});
+
+	// code review 1153 C-1: «Angaben verwerfen» starts anew, without the hint of the cleared choice
+	it('nennt die aufgehobene Wohnung nach dem Verwerfen des Entwurfs nicht mehr', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a2')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());
+		show(NewContractPage, { data } as never);
+		await settle();
+		next();
+		await settle();
+		select('apartment-select', 'a2');
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('apartment-cleared')).not.toBeNull();
+		click('draft-discard');
+		await settle();
+		click('draft-discard-confirm');
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // in the step «Wohnung» again
+		expect(byTestId('apartment-cleared')).toBeNull();
+	});
+
 	// review #151 R2-6: a retry that fails again says so; the hint stays
 	it('sagt, wenn die Mietverträge wieder nicht geladen werden konnten', async () => {
 		fakeBff(({ path }) =>

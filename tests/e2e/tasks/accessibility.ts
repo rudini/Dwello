@@ -695,6 +695,17 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// the same, at the step before saving: tenant and apartment come from the address
 	'contracts-unknown-review': () => toReviewWithoutContracts,
+	// #1153: Anna's apartment, chosen while its contracts did not load; «Erneut versuchen» clears it and the step says why
+	'apartment-cleared': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/contracts', {}),
+			Navigate.reload,
+			Click.on(nextButton), // tenant and apartment come from the address
+			Wait.until(apartmentContractsUnknown),
+			FailRequests.noLonger,
+			Click.on(retryContractsButton),
+			Wait.until(on.shown('apartment-cleared'))
+		),
 	// #669 (Helga H-1): the same with Carla's apartment; «Erneut versuchen» in «Prüfen» loads them and finds the overlap
 	'overlap-review': () => (actor) =>
 		actor.attemptsTo(

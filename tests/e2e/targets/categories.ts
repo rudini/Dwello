@@ -31,6 +31,10 @@ export const description = (name: string) =>
 export const reason = (name: string) =>
 	target(`Grund der Umlagefähigkeit von ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-reason'));
 export const descriptionInput = target('Beschreibung', (page) => page.getByTestId('category-description-input'));
+export const sortOrderInput = target('Reihenfolge', (page) => page.getByRole('spinbutton', { name: /^Reihenfolge/ }));
+// #672: the question before a category is deleted
+export const deleteQuestion = target('Rückfrage zum Löschen', (page) => page.getByRole('dialog'));
+export const categoryNames = target('Namen der Kategorien in der Liste', (page) => page.getByTestId('category-name'));
 export const formReason = target('Grund der Umlagefähigkeit', (page) => page.getByTestId('category-reason'));
 export const formReasonLabel = target('Bezeichnung des Grundes', (page) => page.getByTestId('category-reason-label'));
 export const allowanceQuestion = target('Frage der Umlagefähigkeit', (page) => page.getByTestId('category-allowance'));

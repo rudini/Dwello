@@ -10,6 +10,7 @@ import {
 	openFreshKi,
 	openKiWithFailedModel,
 	openFreshSettingsKi,
+	openFreshNewCategory,
 	openFreshUpload,
 	openKi,
 	readFreshPrivacy,
@@ -144,6 +145,10 @@ When('der Liegenschaftsverwalter die Verbindung zu einer neuen Adresse ohne API-
 	await verwalter.attemptsTo(
 		checkConnection({ ...stubProvider('Muster KI AG', 'Deutschland'), address: 'http://127.0.0.1:2531/v1', key: '' })
 	);
+});
+
+When('der Liegenschaftsverwalter in der frischen Installation "Neue Kategorie" öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openFreshNewCategory);
 });
 
 // #626: «Rechnungen hochladen» on the fresh installation, after «Keine KI»

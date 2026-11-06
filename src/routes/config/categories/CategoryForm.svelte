@@ -13,7 +13,7 @@
 	import CategoryReason, { reasonOf } from './CategoryReason.svelte';
 	import HeatingChoice from './HeatingChoice.svelte';
 
-	// `ki` and `proposal` only on a new category: whether the KI is on (#219), its answer to «Von der KI prüfen lassen»
+	// `ki`: whether the KI is on (#219); `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
 	let {
 		action,
 		category,
@@ -85,6 +85,17 @@
 	let ask = $state<() => boolean>();
 	const submitAgain = () => form?.requestSubmit(); // once the question is answered
 	const predefined = $derived(!!category?.predefined); // «Heizkosten» fixed (#302)
+	// #672: what the description is for, where it shows and where not
+	const descriptionHelp = $derived(
+		[
+			predefined ? m.categories_description_predefined() : m.categories_description_help(),
+			ki && (category ? m.categories_description_ki() : m.categories_description_ki_new()),
+			!predefined && m.categories_description_list(),
+			m.categories_description_statement()
+		]
+			.filter(Boolean)
+			.join(' ')
+	);
 </script>
 
 <SaveForm
@@ -114,7 +125,7 @@
 		rows={6}
 		testid="category-description-input"
 		label={m.invoices_description()}
-		help={category?.predefined ? m.categories_description_predefined() : undefined}
+		help={descriptionHelp}
 		optional
 		bind:value={values.description}
 	/>
@@ -136,7 +147,7 @@
 			testid="category-allowance"
 		/>
 		<CategoryReason category={chosen} id="category-reason" />
-		{#if ki}
+		{#if ki && !category}
 			<div>
 				<div>
 					<Button

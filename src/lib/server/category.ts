@@ -79,7 +79,7 @@ function parseCategory(formData: FormData) {
 		isHeatingCost: formData.get('isHeatingCost') === 'on',
 		// only with heating costs, which the backend keeps (#100)
 		isFuel: formData.get('isFuel') === 'on',
-		...(field('sortOrder') && { sortOrder: Number(field('sortOrder')) }),
+		sortOrder: Number(field('sortOrder')), // empty: 0, at the top (#672)
 		...nameTranslations(field)
 	};
 	return { body, errors };

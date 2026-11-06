@@ -1,3 +1,4 @@
+import { question } from '../screenplay/actor';
 import { Accessible, Checked, Count, Enabled, HiddenText, Text, Visibility } from '../screenplay/questions';
 import { roomBesideConfirmation } from './app-frame';
 import {
@@ -8,8 +9,11 @@ import {
 	categoryRow,
 	focusedCategoryRow,
 	deleteButton,
+	categoryNames,
+	deleteQuestion,
 	description,
 	descriptionInput,
+	sortOrderInput,
 	contractNote,
 	formReason,
 	formReasonLabel,
@@ -49,3 +53,12 @@ export const allocabilityQuestionText = Text.of(allocabilityQuestion);
 export const allocabilityConsequence = Text.of(allocabilityText);
 /** #1113: the room between the row with the focus and the confirmation (negative: it covers the row) */
 export const roomBesideFocusedCategory = roomBesideConfirmation(focusedCategoryRow);
+// #672: the help of a field, as a screen reader reads it with the field
+export const fieldHelp = { Beschreibung: Accessible.descriptionOf(descriptionInput), Reihenfolge: Accessible.descriptionOf(sortOrderInput) };
+export const deleteQuestionText = Text.of(deleteQuestion);
+/** #672: whether the list shows the one category before the other */
+export const listedBefore = (first: string, second: string) =>
+	question(`whether ${first} stands before ${second}`, async (actor) => {
+		const listed = await actor.answer(Text.ofAll(categoryNames));
+		return listed.includes(first) && listed.indexOf(first) < listed.indexOf(second);
+	});
