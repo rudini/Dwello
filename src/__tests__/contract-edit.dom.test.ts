@@ -616,7 +616,10 @@ describe('Mietvertrag bearbeiten', () => {
 			failing = false;
 			click('contracts-retry');
 			await settle();
-			expect(said()).toContainEqual(['success', 'Die Mietverträge der Wohnung sind geladen.']);
+			expect(said()).toContainEqual([
+				'success',
+				'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon.'
+			]);
 			expect(document.activeElement).toBe(document.getElementById('startDate'));
 		});
 
@@ -648,7 +651,12 @@ describe('Mietvertrag bearbeiten', () => {
 			late!();
 			await settle();
 			expect(byTestId('apartment-contracts-unknown')).toBeNull();
-			expect(said()).toEqual([['success', 'Die Mietverträge der Wohnung sind geladen.']]);
+			expect(said()).toEqual([
+				[
+					'success',
+					'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon.'
+				]
+			]);
 		});
 
 		it('sagt, wenn es wieder nicht geklappt hat', async () => {

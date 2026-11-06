@@ -33,6 +33,6 @@ Then('bestätigt Dwello das Laden mit {string}', async ({ verwalter }, text: str
 	await verwalter.sees(confirmation).toBe(text);
 });
 
-Then('steht der Hinweis bei der Wohnung ganz im ersten Bildschirm', async ({ verwalter }) => {
+Then('steht der Hinweis oben im Formular ganz im ersten Bildschirm', async ({ verwalter }) => {
 	await verwalter.sees(apartmentHintInWindow).toBe(1);
 });

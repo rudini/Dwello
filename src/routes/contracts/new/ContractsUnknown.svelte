@@ -4,14 +4,30 @@
 
 	let failed = 0; // the error of the last attempt: the next result replaces it (#669, Sven P-1)
 
+	// whether the period overlaps one of them (#669, Helga P-2): `undefined` without a Vertragsbeginn; a wizard
+	// step other than 3 has no box «Zeitraum überschneidet sich», so it names the step (fach-review 669 V-1)
+	const loaded = (overlap: object | null | undefined, step = 3) =>
+		overlap === undefined
+			? m.contracts_apartment_contracts_loaded()
+			: !overlap
+				? m.contracts_apartment_contracts_checked()
+				: step === 3
+					? m.contracts_apartment_contracts_overlap()
+					: m.contracts_apartment_contracts_overlap_step({ number: 3, step: m.contracts_period() });
+
 	/** After «Erneut versuchen»: says how it went; on success the button is gone, so the focus goes to `next` */
-	export function retried(stillUnknown: boolean, next: HTMLElement | null | undefined) {
+	export function retried(
+		stillUnknown: boolean,
+		next: HTMLElement | null | undefined,
+		overlap?: object | null,
+		step?: number
+	) {
 		dismissToast(failed);
 		if (stillUnknown) {
 			failed = addToast('error', m.contracts_apartment_contracts_retry_failed());
 			return;
 		}
-		addToast('success', m.contracts_apartment_contracts_loaded());
+		addToast('success', loaded(overlap, step));
 		next?.focus();
 	}
 </script>

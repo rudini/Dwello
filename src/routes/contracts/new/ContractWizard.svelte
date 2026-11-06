@@ -176,7 +176,7 @@
 	async function retry() {
 		if (!(await loadContracts())) return;
 		await tick();
-		retried(unknown, section?.querySelector('h2'));
+		retried(unknown, section?.querySelector('h2'), values.startDate ? overlap : undefined, step);
 	}
 
 	onMount(() => {

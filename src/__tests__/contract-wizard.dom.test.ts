@@ -471,7 +471,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(minOfStart()).toBe('2099-01-01'); // a3 is free from 2099
 		// Sven #151: said, and the focus goes to the step, not to the page
 		expect(get(toasts).map((t) => t.message)).toContain(
-			'Die Mietverträge der Wohnung sind geladen.'
+			'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon.'
 		);
 		expect(document.activeElement).toBe(document.querySelector('h2'));
 	});

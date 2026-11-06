@@ -131,7 +131,7 @@
 	async function retry() {
 		if (!(await loadContracts())) return; // overtaken by a newer request: it decides (review R2-2)
 		await tick();
-		retried(unknown, document.getElementById('startDate'));
+		retried(unknown, document.getElementById('startDate'), overlap);
 	}
 
 	function edited(event: Event) {
