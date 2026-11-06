@@ -26,12 +26,12 @@ const apartment = (overrides: Record<string, unknown> = {}) => ({
 	nextContractStart: null,
 	...overrides
 });
-const list = (apartments: ReturnType<typeof apartment>[], total = apartments.length) =>
+const list = (apartments: ReturnType<typeof apartment>[], total = apartments.length, page = 1) =>
 	show(ApartmentsPage, {
 		data: {
 			apartments,
 			total,
-			page: 1,
+			page,
 			pageSize: 12,
 			buildings: [{ id: 'b1', name: 'Ahornhof', address: 'Ahornweg 1' }]
 		}
@@ -55,6 +55,21 @@ describe('Wohnungsliste', () => {
 		list([apartment()]);
 		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe('1 Wohnung');
 	});
+	// #670 (Persona Marco P-5): «13 Wohnungen» above 12 cards, the page only below the list
+	it('nennt über mehreren Seiten oben die gezeigten Wohnungen und die Seite', () => {
+		list(Array.from({ length: 12 }, (_, i) => apartment({ id: `a${i}` })), 13);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Wohnungen 1–12 von 13, Seite 1 von 2'
+		);
+	});
+
+	it('nennt auf einer Seite mit nur einer Wohnung diese in der Einzahl', () => {
+		list([apartment()], 13, 2);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Wohnung 13 von 13, Seite 2 von 2'
+		);
+	});
+
 	it('nennt Seite, Anzahl und den einen Hauptschritt', () => {
 		list([apartment()]);
 		expect(document.querySelector('h1')!.textContent).toBe('Wohnungen');
@@ -133,6 +148,28 @@ describe('Wohnungsliste', () => {
 		]) {
 			expect(legend).toContain(words);
 		}
+	});
+
+	// #670 (Persona Marco P-6): the list is ordered by building name, the backend gives the buildings by last change
+	it('nennt im Gebäudefilter die Gebäude in der Reihenfolge der Liste', () => {
+		show(ApartmentsPage, {
+			data: {
+				apartments: [apartment()],
+				total: 1,
+				page: 1,
+				pageSize: 12,
+				buildings: [
+					{ id: 'b2', name: 'Birkenhof', address: 'Birkenweg 1' },
+					{ id: 'b1', name: 'Ahornhof', address: 'Ahornweg 1' }
+				]
+			}
+		} as never);
+		const options = [...byTestId<HTMLSelectElement>('apartments-building-filter')!.options];
+		expect(options.map((option) => option.textContent!.trim())).toEqual([
+			'Alle Gebäude',
+			'Ahornhof',
+			'Birkenhof'
+		]);
 	});
 
 	it('sucht mit dem gewählten Gebäude und Mietstatus', () => {

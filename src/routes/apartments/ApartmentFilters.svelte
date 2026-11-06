@@ -18,7 +18,13 @@
 	});
 	let filters = $state(untrack(fromUrl));
 	const filtered = $derived(Object.values(filters).some(Boolean));
-	const buildingOptions = $derived(buildings.map((b) => ({ value: b.id, label: b.name })));
+	// #670: by name, as the list (the backend gives the buildings by last change)
+	// ponytail: the list sorts by the database's collation; names that differ only in case or umlauts may sort otherwise
+	const buildingOptions = $derived(
+		buildings
+			.map((b) => ({ value: b.id, label: b.name }))
+			.sort((a, b) => a.label.localeCompare(b.label))
+	);
 	const statusOptions = Object.entries(statusLabels).map(([value, label]) => ({ value, label }));
 
 	function search(event: SubmitEvent) {
