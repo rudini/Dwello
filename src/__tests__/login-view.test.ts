@@ -36,6 +36,16 @@ describe('Anmeldeseite (Ansicht)', () => {
 		expect(body).not.toContain('akzeptieren');
 	});
 
+	// #675: the full demo notice after the h1 and before signing in, read once (Sven P-1, review b162-2 C-11)
+	it('zeigt in der Demo den ganzen Hinweis nach der Überschrift und vor den Anmeldeknöpfen', () => {
+		const body = page({ demo: true });
+		const notice = body.indexOf('data-testid="demo-notice"');
+		expect(body.indexOf('</h1>')).toBeLessThan(notice);
+		expect(notice).toBeLessThan(body.indexOf('data-testid="login-google"'));
+		expect(body).toContain('Probieren Sie alles aus');
+		expect(body).not.toContain('aria-label="Öffentliche Demo"');
+	});
+
 	it('meldet einen Fehler sofort', () => {
 		const body = page({ error: 'Die Anmeldung wurde abgebrochen.' });
 		expect(body).toMatch(

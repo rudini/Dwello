@@ -111,6 +111,31 @@ describe('Öffentliche Demo', () => {
 		);
 	});
 
+	// #675: inside the app one line, outside the main area, so «Zum Inhalt springen» leads straight to the h1 (Sven P-1)
+	it('steht in der App ausserhalb des Hauptbereichs, damit «Zum Inhalt springen» zur Überschrift führt', async () => {
+		await shown('/tenants', { user, demo: true });
+		const notice = document.querySelector('[data-testid="demo-notice"]');
+		expect(notice?.textContent).toContain('Alle Besucher sehen und ändern dieselben Daten.');
+		expect(document.querySelector('main')!.contains(notice)).toBe(false);
+	});
+
+	// #675 (review b162-2 C-11): no region and title of the same name, so «Öffentliche Demo» is read once
+	it('nennt «Öffentliche Demo» in der App nur einmal', async () => {
+		await shown('/tenants', { user, demo: true });
+		const names = [...document.querySelectorAll('[aria-label]')].map((e) =>
+			e.getAttribute('aria-label')
+		);
+		const texts = document.body.textContent!.split('Öffentliche Demo').length - 1;
+		expect(names.filter((name) => name?.includes('Öffentliche Demo')).length + texts).toBe(1);
+	});
+
+	it('führt in der App mit «Mehr zur Demo» zum Abschnitt der Hilfe', async () => {
+		await shown('/tenants', { user, demo: true });
+		const link = document.querySelector<HTMLAnchorElement>('[data-testid="demo-notice"] a');
+		expect(link?.textContent).toBe('Mehr zur Demo');
+		expect(link?.getAttribute('href')).toBe('/help#demo');
+	});
+
 	it('zeigt in einer eigenen Installation keinen Demo-Hinweis', async () => {
 		expect(await shown('/login', { user: null, demo: false })).toBeNull();
 		expect(document.querySelector('main h1')).not.toBeNull();
