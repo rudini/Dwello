@@ -229,6 +229,15 @@ Funktionalität: Mietvertrag bearbeiten
     Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
 
+  # #669 (Code-Review C-2, Fachreview V-6): ohne die Mietverträge der Wohnung bleibt der Entwurf, «Erneut versuchen» steht oben
+  Szenario: Entwurf löschen, solange die Mietverträge der Wohnung nicht geladen sind
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern»."
+
   # #133 (Fachreview V-10): deckt «Abgerechnet bis» die ganze Periode des Entwurfs ab, entsteht keine neue Abrechnung
   Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"

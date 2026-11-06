@@ -212,8 +212,6 @@ const toRentStep: Activity = async (actor) => {
 		);
 };
 
-// Two files, one created: the result with the file still open. Files go into the example's own building: the first
-// in the list may be a parallel scenario's, deleted by its cleanUp while the files are read
 // the wizard at «Prüfen» with the apartments' rental contracts not loaded (#143); tenant and apartment from the address
 const toReviewWithoutContracts: Activity = (actor) =>
 	actor.attemptsTo(
@@ -229,6 +227,8 @@ const toReviewWithoutContracts: Activity = (actor) =>
 		Click.on(nextButton),
 		Wait.until(reviewContractsUnknown)
 	);
+// Two files, one created: the result with the file still open. Files go into the example's own building: the first
+// in the list may be a parallel scenario's, deleted by its cleanUp while the files are read
 const createPartly = (building: string): Activity => (actor) => {
 	const complete = `Elektro Blitz ${randomUUID()}.pdf`;
 	const open = `Werke ${randomUUID()}.pdf`;
