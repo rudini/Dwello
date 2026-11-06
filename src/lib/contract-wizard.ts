@@ -18,6 +18,7 @@ import type { RentalContract } from './types';
 import { formatCurrency, formatDateLong } from './utils/format';
 import { apiCall } from './api';
 import { isDay } from './contract-status';
+import { browserStorage, readDraft } from './wizard-draft';
 
 type Field = keyof ContractFormValues;
 
@@ -271,6 +272,25 @@ export function startValues(
 	return { values, restored: !!draft, dropped };
 }
 
+/** The draft saved under `key`, its values checked against the address and the records; null without one */
+export function restoredDraft(
+	key: string,
+	params: URLSearchParams,
+	tenantId: string,
+	records: { tenants: { id: string }[]; apartments: { id: string }[] }
+) {
+	const draft = readDraft<ContractFormValues>(browserStorage(), key);
+	if (!draft) return null;
+	// a tenant chosen before the page was live counts like one in the address
+	const given = new URLSearchParams(params);
+	if (tenantId) given.set('tenant', tenantId);
+	const start = startValues(given, draft.values, {
+		tenantIds: records.tenants.map((t) => t.id),
+		apartmentIds: records.apartments.map((a) => a.id)
+	});
+	return { values: start.values, restored: { at: draft.savedAt, dropped: start.dropped } };
+}
+
 /** The contracts of a tenant without a Vertragsende, with their apartment (#156) */
 export function openContractsOf<A extends { id: string }>(
 	apartments: A[],
@@ -282,6 +302,18 @@ export function openContractsOf<A extends { id: string }>(
 			.filter((c) => c.tenant_id === tenantId && !c.end_date)
 			.map((c) => ({ id: c.id, apartment }))
 	);
+}
+
+/** A choice «Erneut versuchen» cleared: the apartment as the wizard names it and the open-ended contract that blocks it (#1153) */
+export function clearedApartment(
+	apartment: { unit: string; building: string },
+	contracts: ContractForAvailability[]
+) {
+	const open = contracts.find((c) => !c.end_date);
+	return {
+		apartment: apartmentName(apartment.unit, apartment.building),
+		contract: open && { id: open.id, tenant: open.tenant_name }
+	};
 }
 
 /** Apartments to choose from: free ones first, rented ones shown but not selectable */

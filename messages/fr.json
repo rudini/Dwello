@@ -1995,6 +1995,8 @@
 	"contracts_apartment_contracts_overlap": "Les autres contrats de bail de cet appartement sont chargés. La période chevauche l’un d’entre eux. Le message « Les périodes se chevauchent » précise lequel.",
 	"contracts_apartment_contracts_overlap_step": "Les autres contrats de bail de cet appartement sont chargés. La période chevauche l’un d’entre eux. Modifiez le début ou la fin du contrat à l’étape {number} « {step} ».",
 	"contracts_apartment_contracts_blocked": "Les contrats de bail de l’appartement sont chargés. L’appartement choisi n’est pas disponible : il a un contrat de bail de durée indéterminée, non résilié. Dwello a donc annulé la sélection. Si ce contrat de bail est résilié, saisissez d’abord la fin du contrat sur sa page avec « Saisir la date de fin ». Sinon, choisissez un autre appartement.",
+	"contracts_apartment_cleared_title": "{apartment} n’est pas disponible",
+	"contracts_apartment_cleared_text": "Un contrat de bail de durée indéterminée, non résilié, est saisi pour cet appartement. Dwello a donc annulé la sélection. Si ce contrat de bail est résilié ou qu’une fin du contrat a été convenue, saisissez d’abord la fin du contrat sur sa page avec « Saisir la date de fin ». Sinon, choisissez un autre appartement.",
 	"contracts_overlap_review_where": "Vous modifiez le début et la fin du contrat à l’étape {period} « {periodStep} », l’appartement à l’étape {apartment} « {apartmentStep} ».",
 	"contracts_apartment_contracts_retry_failed": "Les contrats de bail de l’appartement n’ont de nouveau pas pu être chargés. Réessayez plus tard ; vos saisies sont conservées.",
 	"contracts_apartment_contracts_see_top": "« Réessayer » se trouve en haut de la page.",

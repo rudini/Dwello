@@ -105,6 +105,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | apartment-cleared   |
       | contract-new           | overlap-review      |
       | contract-new           | overlap-error       |
       | contract-new           | overlap-refused     |

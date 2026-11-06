@@ -1,10 +1,14 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
+import { apartmentClearedExplanation, apartmentClearedHint, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
-import { enterStartDate, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
+import { closeWarning, enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
 const { When, Then } = createBdd(test);
+
+// a text with the names the scenario gives, as the seed wrote them (with their suffix)
+const named = (names: Map<string, string>, text: string) =>
+	[...names].reduce((shown, [given, seeded]) => shown.replaceAll(given, seeded), text);
 
 // #669: «Erneut versuchen» for the apartment's contracts (#151): its messages, their announcement and their place
 
@@ -64,6 +68,26 @@ Then('ist im Mietvertrag keine Wohnung gewählt', async ({ verwalter }) => {
 });
 
 Then('steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit {string}', async ({ verwalter, names }, text: string) => {
-	const named = [...names].reduce((shown, [given, seeded]) => shown.replaceAll(given, seeded), text);
-	await verwalter.sees(overlapBoxText).toContain(named);
+	await verwalter.sees(overlapBoxText).toContain(named(names, text));
+});
+
+// #1153 (Personas Sven S-7, Helga H-6): the step «Wohnung» says which apartment the cleared choice was and which contract blocks it
+When('der Liegenschaftsverwalter die Warnung schliesst', async ({ verwalter }) => {
+	await verwalter.attemptsTo(closeWarning);
+});
+
+Then('steht im Schritt «Wohnung» der Hinweis {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(apartmentClearedHint).toContain(named(names, title));
+});
+
+Then('erklärt der Hinweis im Schritt «Wohnung» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(apartmentClearedExplanation).toBe(text);
+});
+
+Then('bietet der Hinweis im Schritt «Wohnung» den Link {string}', async ({ verwalter, names }, label: string) => {
+	await verwalter.sees(apartmentClearedLinkText).toBe(named(names, label));
+});
+
+When('der Liegenschaftsverwalter im Hinweis im Schritt «Wohnung» den Mietvertrag öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openClearedApartmentContract);
 });
