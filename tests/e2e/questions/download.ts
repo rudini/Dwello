@@ -34,6 +34,11 @@ export const downloadedPdfText = question(
 	async (actor) => readPdf((await actor.answer(DownloadedFile)).content).flowing
 );
 
+// #1166: text of the PDF's last page (the end of the letter, the receipt and the payment part), lines joined
+export const downloadedPaymentPartText = question('the text of the payment part of the downloaded PDF', async (actor) =>
+	(readPdf((await actor.answer(DownloadedFile)).content).pageTexts.at(-1) ?? '').replace(/\s*\n\s*/g, ' ')
+);
+
 // The first three bytes of the downloaded file in hex: what tells a PDF (255044) from a JPEG (ffd8ff)
 export const downloadedFileMagic = question('the kind of the downloaded file', async (actor) =>
 	(await actor.answer(DownloadedFile)).content.subarray(0, 3).toString('hex')

@@ -1,7 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { francs } from '../questions/amounts';
-import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
+import { downloadedFileHeader, downloadedFileName, downloadedPaymentPartText, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
 import {
 	balanceAmount,
 	changeOffers,
@@ -344,6 +344,14 @@ Given('im Gebäude {string} war am {string} Heizöl für {string} Franken im Tan
 
 Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(downloadedPdfText).toContain(text);
+});
+
+Then('steht im Zahlteil des PDF {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(downloadedPaymentPartText).toContain(text);
+});
+
+Then('steht im Zahlteil des PDF nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(downloadedPaymentPartText).not.toContain(text);
 });
 
 Then('steht im PDF nicht {string}', async ({ verwalter }, text: string) => {

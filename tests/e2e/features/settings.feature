@@ -66,6 +66,48 @@ Funktionalität: Einstellungen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
     Und kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend
 
+  # #1166: der Zahlteil nennt unter «Konto / Zahlbar an» den Kontoinhaber der IBAN (SIX); ohne eigene Angaben ist es der
+  # Absender. Die Einstellungen gelten für alle parallel laufenden Szenarien: wer den Kontoinhaber speichert oder
+  # nachliest, hat sie für sich, und der Kontoinhaber wird danach wieder auf den Absender gesetzt
+  @wip @einstellungen-global
+  Szenario: Ohne eigene Angaben ist der Absender der Kontoinhaber
+    Dann ist in den Einstellungen angegeben, dass der Kontoinhaber der Absender ist
+
+  @wip @einstellungen-global
+  Szenario: Eigenen Kontoinhaber hinterlegen
+    Wenn der Liegenschaftsverwalter folgende Einstellungen mit eigenem Kontoinhaber speichert:
+      | Firmenname                | Muster Immobilien AG       |
+      | PLZ                       | 8001                       |
+      | Ort                       | Zürich                     |
+      | IBAN                      | CH93 0076 2011 6238 5295 7 |
+      | Name des Kontoinhabers    | Erika Muster               |
+      | Adresse des Kontoinhabers | Seeweg 5                   |
+      | PLZ des Kontoinhabers     | 6003                       |
+      | Ort des Kontoinhabers     | Luzern                     |
+    Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
+    Und nach erneutem Öffnen der Einstellungen ist der Kontoinhaber "Erika Muster", "Seeweg 5", "6003" "Luzern" hinterlegt
+
+  # #1166: mit IBAN braucht ein eigener Kontoinhaber Name, PLZ und Ort, die Strasse ist freiwillig. Die Seite speichert
+  # dabei nichts
+  @wip
+  Szenario: Eigener Kontoinhaber ohne Name, PLZ und Ort
+    Wenn der Liegenschaftsverwalter folgende Einstellungen mit eigenem Kontoinhaber speichert:
+      | IBAN                   | CH93 0076 2011 6238 5295 7 |
+      | Name des Kontoinhabers |                            |
+      | PLZ des Kontoinhabers  |                            |
+      | Ort des Kontoinhabers  |                            |
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einem eigenen Kontoinhaber braucht es seinen Namen, seine PLZ und seinen Ort."
+    Und kennzeichnen die Einstellungen Name, PLZ und Ort des Kontoinhabers als fehlend
+
+  # #1166: wer den Absender wieder als Kontoinhaber angibt, löscht die Angaben des eigenen Kontoinhabers
+  @wip @einstellungen-global
+  Szenario: Den Absender wieder als Kontoinhaber angeben
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Wenn der Liegenschaftsverwalter in den Einstellungen den Absender als Kontoinhaber angibt und speichert
+    Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
+    Und nach erneutem Öffnen der Einstellungen ist angegeben, dass der Kontoinhaber der Absender ist
+    Und ist kein eigener Kontoinhaber mehr hinterlegt
+
   # #490 (Entscheid des Product Owners): die Hilfe sagt es vor dem Speichern
   Szenario: Die Einstellungen sagen, was eine IBAN braucht
     Dann erklären die Einstellungen bei der IBAN "Mit einer IBAN braucht es Firmenname, PLZ und Ort."
