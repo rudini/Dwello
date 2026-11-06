@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { formatDate } from '$lib/utils/format';
 import { toStatement } from '$lib/server/statement';
+import { statusLabels } from '$lib/statement';
 import type { StatementsListData } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -48,16 +49,33 @@ function backendQuery(url: URL, page: number, pageSize: number) {
 	return params;
 }
 
+// The sentence above the list: whose or which period's statements it shows (#673: with the building), then the status
+function scopeSentence(
+	url: URL,
+	buildings: { id: string; name: string }[],
+	contract: string | null
+) {
+	const [start, end] = [url.searchParams.get('periodStart'), url.searchParams.get('periodEnd')];
+	const building = buildings.find((b) => b.id === url.searchParams.get('building'));
+	// only a real date range is named; a hand-made address with another value gets no sentence
+	const dates =
+		isDate(start) && isDate(end) ? { start: formatDate(start), end: formatDate(end) } : null;
+	const period =
+		dates &&
+		(building
+			? m.statements_scope_period_building({ ...dates, building: building.name })
+			: m.statements_scope_period(dates));
+	const named = contract ?? period;
+	// a second sentence names the chosen status, one the list knows (fach-review 673-1 V-3)
+	const status = url.searchParams.get('status') ?? '';
+	if (!named || !Object.hasOwn(statusLabels, status)) return named;
+	return `${named} ${m.statements_scope_status({ status: statusLabels[status as keyof typeof statusLabels] })}`;
+}
+
 export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const pageSize = 10;
 	const contractId = url.searchParams.get('contract');
-	const [periodStart, periodEnd] = [url.searchParams.get('periodStart'), url.searchParams.get('periodEnd')];
-	// only a real date range is named; a hand-made address with another value gets no sentence
-	const periodScope =
-		isDate(periodStart) && isDate(periodEnd)
-			? m.statements_scope_period({ start: formatDate(periodStart), end: formatDate(periodEnd) })
-			: null;
 
 	try {
 		const params = backendQuery(url, page, pageSize);
@@ -68,7 +86,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			fetch(`${BACKEND_URL}/api/v1/statements?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`),
-			contractId ? contractScope(fetch, contractId) : periodScope
+			contractId ? contractScope(fetch, contractId) : null
 		]);
 
 		const statementsData = await statementsRes.json();
@@ -90,7 +108,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			page,
 			pageSize,
 			buildings,
-			scope,
+			scope: scopeSentence(url, buildings, scope),
 			statusCounts: {
 				draft: countsData.draft || 0,
 				sent: countsData.sent || 0,

@@ -1314,3 +1314,15 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1156 (the same heading for the other lists)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #673 statement list filters, breadcrumb and wizard progress (personas B-2)
+
+- [x] Read #673; Helga's b2 report from `c893731^`, Marco's not in the history (issue text and `marco-list.md`); already fixed on main, no change: Marco P-3/Helga P-5 (#1094), Marco P-6 (hyphenated title), Helga P-7 (#253)
+- [x] @wip scenarios, seen red (b89b921)
+- [x] Product owner decided P-4, P-2, P-5, P-7 (recorded in #673); P-6 by the coordinator's recommendation (current step named from md, #1146 separate)
+- [x] fach-reviewer step 1 (`docs/reviews/673-1-fach-review.md`): V-1 Major (empty state reset follows P-4), V-2, V-3 fixed
+- [x] Implementation (9ab37a9), each test seen red
+- [x] code-reviewer round 1 (`docs/reviews/673-review-1.md`): C-1, C-2 Minor fixed; a11y and language row `statements-period list-scoped` added (29aaf89); closing round without findings
+- [x] Personas Marco and Helga (`docs/design/personas/{marco,helga}-673.md`): P-2 to P-7 fixed; Minors that stay: M-1, M-3, H-2; M-2 = H-1 became #1162
+- [x] Issue opened: #1162 (keep the chosen tile in view), #1163 (E2E contract row depends on the list page)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive

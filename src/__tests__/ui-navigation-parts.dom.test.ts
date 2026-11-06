@@ -60,6 +60,14 @@ describe('Schrittanzeige', () => {
 				expect.arrayContaining(['sr-only', 'xl:not-sr-only'])
 			);
 		}
+		// #673 (Helga P-6, code review C-1): from md only the current step is named next to its number
+		expect(labels.map((label) => label.className.split(/\s+/).includes('md:not-sr-only'))).toEqual([
+			false,
+			false,
+			true,
+			false,
+			false
+		]);
 		// the full name of the current step stays visible above
 		expect(document.querySelector('nav p')!.textContent).toContain(
 			'Schritt 3 von 5: Vertragsdauer'

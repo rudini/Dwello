@@ -4,6 +4,7 @@ import type { StatementsListData } from '$lib/types';
 import { GET as downloadPdf } from '../routes/statements/[id]/pdf/+server';
 import backendContract from '../../tests/contracts/contract.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import listedBuildings from '../../tests/contracts/buildings.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 // What GET /api/v1/statements answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import listedStatements from '../../tests/contracts/statements.json';
@@ -165,6 +166,40 @@ describe('Abrechnungsliste eines Mietvertrags', () => {
 		);
 	});
 
+	// #673 (Helga P-2): der zweite Satz nennt jeden gewählten Status, nicht nur «Entwurf»
+	it('nennt beim Mietvertrag den gewählten Status', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.endsWith('/contracts/c1') ? backendContract : periodStatements
+			)) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?contract=c1&status=settled'),
+			fetch
+		} as never)) as StatementsListData;
+
+		expect(data.scope).toBe(
+			'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024. Es werden nur Abrechnungen mit dem Status «Erledigt» gezeigt.'
+		);
+	});
+
+	// #673 (fach-review V-3): ein Status aus einer Adresse von Hand, den es nicht gibt, wird nicht genannt
+	it('nennt keinen Status, den es nicht gibt', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.endsWith('/contracts/c1') ? backendContract : periodStatements
+			)) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?contract=c1&status=xyz'),
+			fetch
+		} as never)) as StatementsListData;
+
+		expect(data.scope).toBe(
+			'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.'
+		);
+	});
+
 	it('zeigt die Liste ohne Satz, wenn der Mietvertrag nicht geladen werden kann', async () => {
 		const fetch = (async (url: string) =>
 			url.endsWith('/contracts/c1')
@@ -226,7 +261,22 @@ describe('Abrechnungsliste einer Abrechnungsperiode', () => {
 			`${API}/statements?limit=10&offset=0&status=draft&periodStart=2024-07-01&periodEnd=2025-06-30`
 		);
 		expect(data.scope).toBe(
-			'Sie sehen die Abrechnungen der Abrechnungsperiode 01.07.2024 – 30.06.2025.'
+			'Sie sehen die Abrechnungen der Abrechnungsperiode 01.07.2024 – 30.06.2025. Es werden nur Abrechnungen mit dem Status «Entwurf» gezeigt.'
+		);
+	});
+
+	// #673 (Helga P-2): nach «Entwürfe ansehen» nennt der Satz auch das Gebäude
+	it('nennt mit der Periode das Gebäude, nach dem die Liste filtert', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(url.includes('/buildings') ? listedBuildings : periodStatements)) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?building=b1&periodStart=2024-01-01&periodEnd=2024-12-31'),
+			fetch
+		} as never)) as { scope: string | null };
+
+		expect(data.scope).toBe(
+			'Sie sehen die Abrechnungen der Abrechnungsperiode 01.01.2024 – 31.12.2024 im Gebäude Seeblick.'
 		);
 	});
 });
