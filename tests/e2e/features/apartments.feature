@@ -19,6 +19,20 @@ Funktionalität: Wohnungsliste
     Und ist die Wohnung "2.02" "Vermietet"
     Und die Wohnungsliste enthält genau 2 Wohnungen
 
+  # #670 (Persona Marco P-5): die Überschrift nennt die gezeigten Wohnungen und die Seite, nicht erst unter der Liste
+  Szenario: Die Überschrift nennt die gezeigten Wohnungen und die Seite
+    Angenommen im Gebäude "Ahornhof" gibt es 11 weitere leere Wohnungen
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann steht über der Wohnungsliste "Wohnungen 1–12 von 13, Seite 1 von 2"
+    Wenn der Liegenschaftsverwalter zur nächsten Seite blättert
+    Dann steht über der Wohnungsliste "Wohnung 13 von 13, Seite 2 von 2"
+
+  # #670 (Persona Marco P-6): die Wohnungsliste ist nach dem Gebäudenamen geordnet, der Gebäudefilter auch
+  Szenario: Der Gebäudefilter nennt die Gebäude in der Reihenfolge der Wohnungsliste
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann nennt der Gebäudefilter das Gebäude "Ahornhof" vor dem Gebäude "Birkenhof"
+
   # F-4 (#58): «Vermietet ab» statt «Wiedervermietet»
   Szenario: Künftig vermietete Wohnung
     Angenommen der Mieter "Carla Rossi" existiert

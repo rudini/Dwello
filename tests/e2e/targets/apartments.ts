@@ -16,3 +16,6 @@ export const showAllApartmentsLink = target('Alle Wohnungen anzeigen', (page) =>
 // #664: the move-out of the apartment's latest ended contract until its final statement exists
 export const apartmentMoveOut = (number: string) =>
 	target(`Auszug der Wohnung «${number}»`, (page) => apartmentCard(number).locate(page).getByTestId('apartment-move-out'));
+// #670: the heading above the list that names the apartments shown and the page
+export const apartmentResultsHeading = target('Überschrift der Wohnungsliste', (page) => page.getByTestId('list-results'));
+export const apartmentBuildingOptions = target('Gebäude zur Wahl', (page) => apartmentBuildingFilter.locate(page).getByRole('option'));

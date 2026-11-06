@@ -1295,3 +1295,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1153.md`
 - [x] Closing code-reviewer round on the delta since ee376e46c
 - [x] Archive the session
+## Session: #670 apartment list count heading and building filter order (personas B-1)
+
+- [x] Read #670; U-12 (filters on change) left to #662 as the issue says
+- [x] @wip scenarios (heading names range and page; filter in the list's order), seen red; three DOM tests seen red
+- [x] Heading «Wohnungen 1–12 von 13, Seite 1 von 2» when there is more than one page (`src/routes/apartments/+page.svelte`); building filter sorted by name (`ApartmentFilters.svelte`); texts in de/fr/it/en (40dc123)
+- [x] code-reviewer round 1 (`docs/reviews/670-review-1.md`): C-1 Minor (locale for `localeCompare`) fixed (162ee5c)
+- [x] Persona Marco (`docs/design/personas/marco-670.md`): P-5, P-6 fixed; M-1 (heading below the fold on phones), M-2 (page out of range) Minor, stay
+- [x] Issue opened: #1156 (the same heading for the other lists)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive

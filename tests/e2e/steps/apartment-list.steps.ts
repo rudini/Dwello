@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { inDays, swissDate } from '../fixtures/dates';
-import { apartmentCount, apartmentEmptyHint, apartmentSearchHelp, apartmentSearchTerm, occupancyOf, moveOutOf, moveOutShownOf } from '../questions/apartments';
+import { apartmentCount, apartmentEmptyHint, apartmentResults, filterOrderOf, apartmentSearchHelp, apartmentSearchTerm, occupancyOf, moveOutOf, moveOutShownOf } from '../questions/apartments';
 import {
 	openApartment,
 	openApartmentList,
@@ -112,3 +112,22 @@ Then('nennt die Wohnungsliste bei der Wohnung {string} {string}', async ({ verwa
 Then('nennt die Wohnungsliste bei der Wohnung {string} keinen Auszug', async ({ verwalter }, number: string) => {
 	await verwalter.sees(moveOutShownOf(number)).toBe(false);
 });
+
+Given(
+	'im Gebäude {string} gibt es {int} weitere leere Wohnungen',
+	async ({ seed }, building: string, count: number) => {
+		for (let i = 1; i <= count; i++) await seed.apartment(building, `9.${String(i).padStart(2, '0')}`, 'vacant');
+	}
+);
+
+Then('steht über der Wohnungsliste {string}', async ({ verwalter }, heading: string) => {
+	await verwalter.sees(apartmentResults).toBe(heading);
+});
+
+Then(
+	'nennt der Gebäudefilter das Gebäude {string} vor dem Gebäude {string}',
+	async ({ verwalter, names }, first: string, second: string) => {
+		const buildings = [first, second].map((title) => names.get(title)!);
+		await verwalter.sees(filterOrderOf(buildings)).toEqual(buildings);
+	}
+);

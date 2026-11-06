@@ -586,6 +586,8 @@
 	"apartments_none_yet_text": "Registri gli appartamenti dei suoi immobili per poterli locare e allestire i conteggi.",
 	"apartments_count_one": "{count} appartamento",
 	"apartments_count_many": "{count} appartamenti",
+	"apartments_count_page_many": "Appartamenti {from}–{to} di {total}, pagina {page} di {pages}",
+	"apartments_count_page_one": "Appartamento {from} di {total}, pagina {page} di {pages}",
 	"apartments_search_help": "Cerchi per numero dell’appartamento, nome dell’immobile, via o località. Più parole restringono la ricerca, per esempio il nome dell’immobile e il numero dell’appartamento.",
 	"apartments_building": "Immobile",
 	"apartments_all_buildings": "Tutti gli immobili",
