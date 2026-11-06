@@ -5,6 +5,7 @@ import {
 	draftFilter,
 	settledFilter,
 	generateStatementsButton,
+	emptyResetFiltersButton,
 	nextPageLink,
 	openStatementLink,
 	resetFiltersButton,
@@ -73,8 +74,10 @@ export const downloadStatementPdfFromList = (tenantName: string, year: number) =
 export const requestStatementPdfFromList = (tenantName: string, year: number) => Click.on(statementPdfLink(tenantName, year));
 // #673: back to the contract the list is filtered by; the reset waits until the search is gone from the address
 export const goToScopeContract = Click.on(scopeContractLink);
-export const resetStatementFilters: Activity = (actor) =>
+const resetFrom = (button: typeof resetFiltersButton): Activity => (actor) =>
 	actor.attemptsTo(
-		Click.on(resetFiltersButton),
+		Click.on(button),
 		Wait.forUrl((url) => url.pathname === '/statements' && !url.searchParams.has('search'))
 	);
+export const resetStatementFilters = resetFrom(resetFiltersButton);
+export const resetStatementFiltersWithoutResults = resetFrom(emptyResetFiltersButton);

@@ -38,4 +38,7 @@ export const settledFilter = target('Filter Erledigt', (page) => page.getByTestI
 // #673: the way back to the contract a list is filtered by, the form's reset, and the status tabs by their label
 export const scopeContractLink = target('Zum Mietvertrag', (page) => page.getByTestId('statements-scope-contract-link'));
 export const resetFiltersButton = target('Filter zurücksetzen', (page) => page.getByTestId('statement-filter-reset'));
+export const emptyResetFiltersButton = target('Filter zurücksetzen im Hinweis ohne Treffer', (page) =>
+	page.getByTestId('statements-empty-reset')
+);
 export const statusFilter = (status: string) => target(`Statusfilter ${status}`, (page) => page.getByTestId(`filter-${status}`));

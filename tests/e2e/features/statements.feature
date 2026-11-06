@@ -34,7 +34,6 @@ Funktionalität: Nebenkostenabrechnungen
     Und die Abrechnungsliste enthält genau 1 Abrechnung
 
   # #673 (Marco P-7): der gewählte Status ist nicht nur an der Farbe zu erkennen und sagt, was ein zweites Antippen tut
-  @wip
   Szenario: Der gewählte Statusfilter sagt, wie er sich aufheben lässt
     Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
     Dann sagt der Statusfilter "Entwurf" "Filter aufheben"

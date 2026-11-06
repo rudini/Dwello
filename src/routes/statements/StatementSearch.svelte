@@ -12,6 +12,7 @@
 		contract = '',
 		periodStart = '',
 		periodEnd = '',
+		reset = '',
 		buildings
 	}: {
 		search: string;
@@ -20,14 +21,13 @@
 		contract?: string;
 		periodStart?: string;
 		periodEnd?: string;
+		/** where «Filter zurücksetzen» leads, none while it would change nothing (#673) */
+		reset?: string;
 		buildings: { id: string; name: string }[];
 	} = $props();
 
 	// Bound, so what is typed before hydration is kept; EarlySelect keeps an early building choice
 	let term = $derived(search);
-	const filtered = $derived(
-		!!(search || building || status || contract || periodStart || periodEnd)
-	);
 </script>
 
 <form method="GET" action="/statements" class="flex flex-col gap-4 md:flex-row md:items-end">
@@ -46,24 +46,27 @@
 			testid="statement-search-input"
 		/>
 	</div>
-	<div class="flex-1">
-		<EarlySelect
-			id="building"
-			name="building"
-			label={m.apartments_building()}
-			placeholder={m.apartments_all_buildings()}
-			optional
-			options={buildings.map((b) => ({ value: b.id, label: b.name }))}
-			value={building}
-			testid="statement-building-filter"
-		/>
-	</div>
+	<!-- #673 (Marco P-5): a contract's statements are all of one building -->
+	{#if !contract}
+		<div class="flex-1">
+			<EarlySelect
+				id="building"
+				name="building"
+				label={m.apartments_building()}
+				placeholder={m.apartments_all_buildings()}
+				optional
+				options={buildings.map((b) => ({ value: b.id, label: b.name }))}
+				value={building}
+				testid="statement-building-filter"
+			/>
+		</div>
+	{/if}
 	<div class="flex flex-wrap gap-4">
 		<Button type="submit" icon="search" testid="statement-search-submit"
 			>{m.buildings_search_submit()}</Button
 		>
-		{#if filtered}
-			<Button href="/statements" variant="ghost" icon="close" testid="statement-filter-reset"
+		{#if reset}
+			<Button href={reset} variant="ghost" icon="close" testid="statement-filter-reset"
 				>{m.buildings_reset_filters()}</Button
 			>
 		{/if}

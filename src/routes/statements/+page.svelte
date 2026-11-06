@@ -25,6 +25,7 @@
 	import PaidDateFields from './PaidDateFields.svelte';
 	import StatementRow from './StatementRow.svelte';
 	import StatementSearch from './StatementSearch.svelte';
+	import StatementsScope from './StatementsScope.svelte';
 	import StatusFilter from './StatusFilter.svelte';
 
 	let { data }: { data: StatementsListData } = $props();
@@ -38,6 +39,10 @@
 	const periodEnd = $derived(params.get('periodEnd') || '');
 	const filtered = $derived(
 		!!(search || building || status || contract || periodStart || periodEnd)
+	);
+	// #673 (Marco P-4): a reset lifts search, building and status; the contract and the period stay
+	const reset = $derived(
+		search || building || status ? linkWith({ search: '', building: '', status: '' }) : ''
 	);
 
 	// Filters and paging live in the URL so the server filters across all statements
@@ -147,14 +152,7 @@
 	</PageHeader>
 
 	{#if data.scope}
-		<p class="text-ink" data-testid="statements-scope">
-			{data.scope}
-			<a
-				href="/statements"
-				class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
-				>{m.statements_scope_all()}</a
-			>
-		</p>
+		<StatementsScope scope={data.scope} {contract} />
 	{/if}
 
 	<StatusFilter
@@ -169,6 +167,7 @@
 		{contract}
 		{periodStart}
 		{periodEnd}
+		{reset}
 		buildings={data.buildings}
 	/>
 
@@ -180,7 +179,8 @@
 					title={m.statements_none_found()}
 					text={m.statements_adjust_filters()}
 					actionLabel={m.buildings_reset_filters()}
-					actionHref="/statements"
+					actionHref={reset}
+					actionTestid="statements-empty-reset"
 				/>
 			{:else}
 				<EmptyState

@@ -152,15 +152,86 @@ describe('Abrechnungsliste', () => {
 		expect(text()).toContain('Keine Abrechnungen gefunden');
 	});
 
-	it('bietet bei einem Mietvertrag ohne Abrechnungen «Filter zurücksetzen» an', () => {
+	// #673 (Marco P-4): nur nach dem Mietvertrag gefiltert führt der Satz darüber zu allen; ein Zurücksetzen täte dasselbe
+	it('bietet bei einem Mietvertrag ohne Abrechnungen kein «Filter zurücksetzen» an', () => {
 		url = new URL('http://localhost/statements?contract=c1');
 		list([], 0, 1, contractScope);
 
 		const reset = [...document.querySelectorAll('a')].filter(
 			(a) => a.textContent?.trim() === 'Filter zurücksetzen'
 		);
-		expect(reset.length).toBeGreaterThan(0);
-		expect(reset.every((a) => a.getAttribute('href') === '/statements')).toBe(true);
+		expect(text()).toContain('Keine Abrechnungen gefunden');
+		expect(reset).toEqual([]);
+	});
+
+	// #673 (fach-review V-1): im leeren Zustand hebt «Filter zurücksetzen» wie in der Suche nur Suche, Gebäude und Status auf
+	it('setzt im leeren Zustand die Suche zurück und behält den Mietvertrag', () => {
+		url = new URL('http://localhost/statements?contract=c1&search=Huber&status=draft');
+		list([], 0, 1, contractScope);
+
+		const reset = [...document.querySelectorAll('a')].filter(
+			(a) => a.textContent?.trim() === 'Filter zurücksetzen'
+		);
+		expect(reset.length).toBe(2);
+		expect(reset.every((a) => a.getAttribute('href') === '/statements?contract=c1')).toBe(true);
+	});
+
+	const periodScope = 'Sie sehen die Abrechnungen der Abrechnungsperiode 01.01.2024 – 31.12.2024.';
+
+	// #673 (fach-review V-2): die Abrechnungsperiode bleibt beim Zurücksetzen, allein gibt sie kein Zurücksetzen
+	it('behält beim Zurücksetzen die Abrechnungsperiode', () => {
+		url = new URL(
+			'http://localhost/statements?status=draft&building=b1&periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+		list([statement()], 1, 1, periodScope);
+
+		expect(byTestId('statement-filter-reset')?.getAttribute('href')).toBe(
+			'/statements?periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+	});
+
+	it('bietet nur mit einer Abrechnungsperiode kein «Filter zurücksetzen» an', () => {
+		url = new URL('http://localhost/statements?periodStart=2024-01-01&periodEnd=2024-12-31');
+		list([statement()], 1, 1, periodScope);
+
+		expect(byTestId('statement-filter-reset')).toBeNull();
+	});
+
+	// #673 (Marco P-5): die Abrechnungen eines Mietvertrags gehören zu einem Gebäude
+	it('bietet beim Mietvertrag keine Wahl des Gebäudes an', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		expect(byTestId('statement-building-filter')).toBeNull();
+	});
+
+	// #673 (Helga P-3): vom Satz über der Liste zurück zum Mietvertrag
+	it('führt vom Satz über der Liste zum Mietvertrag', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		const link = byTestId('statements-scope-contract-link');
+		expect(link?.textContent?.trim()).toBe('Zum Mietvertrag');
+		expect(link?.getAttribute('href')).toBe('/contracts/c1');
+	});
+
+	it('führt ohne Mietvertrag nicht zu einem Mietvertrag', () => {
+		url = new URL('http://localhost/statements?periodStart=2024-01-01&periodEnd=2024-12-31');
+		list([statement()], 1, 1, periodScope);
+
+		expect(byTestId('statements-scope')).not.toBeNull();
+		expect(byTestId('statements-scope-contract-link')).toBeNull();
+	});
+
+	// #673 (Marco P-7): der gewählte Status ist nicht nur an der Farbe zu erkennen und sagt, was ein zweites Antippen tut
+	it('sagt beim gewählten Status, dass ein Antippen den Filter aufhebt', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement()]);
+
+		expect(byTestId('filter-draft')?.textContent).toContain('Filter aufheben');
+		expect(byTestId('filter-draft')?.querySelector('svg')).not.toBeNull();
+		expect(byTestId('filter-sent')?.textContent).not.toContain('Filter aufheben');
+		expect(byTestId('filter-sent')?.querySelector('svg')).toBeNull();
 	});
 
 	// After a search the focus moves here, so the number of results is read out

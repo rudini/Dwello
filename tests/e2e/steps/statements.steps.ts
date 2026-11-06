@@ -22,6 +22,7 @@ import {
 	openStatementWithoutPdf,
 	openStatementList,
 	resetStatementFilters,
+	resetStatementFiltersWithoutResults,
 	searchStatements,
 	showDraftsOfBuilding,
 	showSettledOfBuilding,
@@ -251,6 +252,10 @@ When('der Liegenschaftsverwalter von der Abrechnungsliste zum Mietvertrag geht',
 
 When('der Liegenschaftsverwalter die Filter der Abrechnungsliste zurücksetzt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(resetStatementFilters);
+});
+
+When('der Liegenschaftsverwalter die Filter im Hinweis ohne Treffer zurücksetzt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(resetStatementFiltersWithoutResults);
 });
 
 Then('die Abrechnungsliste bietet nicht an, die Filter zurückzusetzen', async ({ verwalter }) => {

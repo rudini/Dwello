@@ -18,6 +18,8 @@
 	} = $props();
 	// without values each step as wide as its name (#667, W-10); with them the steps share the width (#1146)
 	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
+	// #673 (Helga P-6): from md the current step is named next to its number too
+	const named = (number: number) => (number === current ? 'md:not-sr-only' : '');
 </script>
 
 <nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
@@ -29,7 +31,8 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above);
+	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above,
+	     and from md next to its number);
 	     a finished step shows its value at every width the list shows (#663).
 	     min-w-0 and hyphenation keep long names inside their step instead of widening the page; without values each
 	     step as wide as its name, so a long one is not cut inside the word next to short ones (#667, Dr. Weber W-10);
@@ -77,7 +80,8 @@
 						>
 						<span
 							data-testid="wizard-step-label"
-							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
+							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only {named(number)}"
+							>{step}</span
 						>
 					</span>
 				{/if}

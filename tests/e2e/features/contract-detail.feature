@@ -313,7 +313,6 @@ Funktionalität: Mietvertragsdetail
     Und zählt die Liste 1 Entwurf
 
   # #673 (Helga P-3): von den Abrechnungen eines Mietvertrags zurück zu ihm, ohne Zurück im Browser
-  @wip
   Szenario: Von den Abrechnungen eines Mietvertrags zurück zum Mietvertrag
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Und der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt
@@ -321,7 +320,6 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
 
   # #673 (Marco P-4): «Filter zurücksetzen» hebt die Suche auf; aus dem Mietvertrag führt «Alle Abrechnungen anzeigen»
-  @wip
   Szenario: Filter zurücksetzen behält den Mietvertrag
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -330,8 +328,15 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter die Filter der Abrechnungsliste zurücksetzt
     Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen des Mietvertrags von "Anna Keller" in der Wohnung "2.01" zeigt
 
+  # #673 (fach-review V-1): auch im Hinweis ohne Treffer hebt «Filter zurücksetzen» nur die Suche auf
+  Szenario: Filter zurücksetzen ohne Treffer behält den Mietvertrag
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt
+    Und der Liegenschaftsverwalter die Abrechnungen von "Ben Meier" sucht
+    Wenn der Liegenschaftsverwalter die Filter im Hinweis ohne Treffer zurücksetzt
+    Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen des Mietvertrags von "Anna Keller" in der Wohnung "2.01" zeigt
+
   # #673 (Marco P-4): nur nach dem Mietvertrag gefiltert täte «Filter zurücksetzen» dasselbe wie «Alle Abrechnungen anzeigen»
-  @wip
   Szenario: Nur nach dem Mietvertrag gefiltert gibt es kein Filter zurücksetzen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt
@@ -339,7 +344,6 @@ Funktionalität: Mietvertragsdetail
     Aber die Abrechnungsliste bietet nicht an, die Filter zurückzusetzen
 
   # #673 (Marco P-5): die Abrechnungen eines Mietvertrags gehören zu einem Gebäude, eine Wahl des Gebäudes fände nichts
-  @wip
   Szenario: Die Abrechnungen eines Mietvertrags bieten keine Wahl des Gebäudes
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt

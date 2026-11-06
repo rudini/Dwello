@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementsListData } from '$lib/types';
 	import { statusLabels } from '$lib/statement';
+	import Icon from '$lib/ui/Icon.svelte';
 
 	// How many statements are in each status; a status is a filter that a second click switches off
 	let {
@@ -40,6 +41,12 @@
 						>{counts[status]}</span
 					>
 					<span class="text-ink">{statusLabels[status]}</span>
+					<!-- #673 (Marco P-7): chosen not by colour alone, and what a second tap does -->
+					{#if active === status}
+						<span class="flex items-center gap-2 text-ink-muted"
+							><Icon name="check" />{m.statements_filter_clear()}</span
+						>
+					{/if}
 				</a>
 			</li>
 		{/each}
