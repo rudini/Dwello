@@ -7,8 +7,7 @@
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import type { User } from '$lib/stores';
-	import { browserStorage, clearAllDrafts } from '$lib/wizard-draft';
-	import { leaveGuard } from '$lib/leave-guard';
+	import { browserStorage, clearAllDrafts, leaveGuard } from '$lib/wizard-draft';
 	import { isMenuKey, moveInMenu } from '$lib/menu-keys';
 	import { flushSync } from 'svelte';
 

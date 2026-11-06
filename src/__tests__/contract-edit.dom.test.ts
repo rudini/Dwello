@@ -15,7 +15,7 @@ import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
-import { leaveGuard } from '$lib/leave-guard';
+import { leaveGuard } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';

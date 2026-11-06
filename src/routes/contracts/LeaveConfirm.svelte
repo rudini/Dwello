@@ -3,7 +3,7 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { onDestroy, untrack } from 'svelte';
 	import { contractBody, type ContractFormValues } from '$lib/contract-form';
-	import { leaveGuard } from '$lib/leave-guard';
+	import { leaveGuard } from '$lib/wizard-draft';
 	import Dialog from '$lib/ui/Dialog.svelte';
 
 	// Leaving the edit form with unsaved changes asks first, on every way out (links, menu, «Zurück»); closing the

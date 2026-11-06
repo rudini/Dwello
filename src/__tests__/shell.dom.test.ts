@@ -4,8 +4,7 @@ import Header from '$lib/ui/Header.svelte';
 import MobileNav from '$lib/ui/MobileNav.svelte';
 import Footer from '$lib/ui/Footer.svelte';
 import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
-import { writeDraft } from '$lib/wizard-draft';
-import { leaveGuard } from '$lib/leave-guard';
+import { leaveGuard, writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
