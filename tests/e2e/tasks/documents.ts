@@ -1,8 +1,11 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, Navigate, Wait } from '../screenplay/interactions';
+import { Click, DownloadFrom, Focus, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	confirmReminderButton,
 	deliveryTenantLink,
+	documentTenantLink,
+	documentsTenantFilter,
+	documentsView,
 	feedbackDocumentsLink,
 	markSentButton,
 	confirmMarkSentButton,
@@ -15,6 +18,23 @@ import { openTenantDetail } from './tenant-detail';
 
 export const openDocumentsToSend = Navigate.to('/documents?status=to_send');
 export const openDocuments = Navigate.to('/documents');
+// #677: the filter applies on change (#662); done once the address holds it
+// by id: the choice names the town too, when the tenant has one
+export const showDocumentsOf = (tenantId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Select.option(tenantId).from(documentsTenantFilter),
+		Wait.forUrl((url) => url.searchParams.has('tenant'))
+	);
+// #677 (persona Sven S-1): from the keyboard, the focus on the filter as it chooses
+export const showDocumentsByKeyboardOf = (tenantId: string): Activity => (actor) =>
+	actor.attemptsTo(Focus.on(documentsTenantFilter), showDocumentsOf(tenantId));
+export const openTenantOf = (title: string, tenantName: string) => Click.on(documentTenantLink(title, tenantName));
+// done once the address shows the chosen view
+export const chooseView = (view: 'Alle' | 'Zu versenden'): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(documentsView(view)),
+		Wait.forUrl((url) => (url.searchParams.get('status') === 'to_send') === (view === 'Zu versenden'))
+	);
 
 // done once the statement reports how the reminder went
 export const sendReminder: Activity = (actor) =>

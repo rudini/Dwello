@@ -136,7 +136,7 @@
 			{/each}
 		</ul>
 
-		<TenantDocumentUpload {form} {demo} />
+		<TenantDocumentUpload {form} {demo} uploads={documents.filter((d) => d.type === 'upload')} />
 	</div>
 </Panel>
 

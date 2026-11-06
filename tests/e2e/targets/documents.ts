@@ -29,7 +29,28 @@ export const markSentButton = (title: string, tenantName: string) =>
 export const documentFileInput = target('Datei des Dokuments', (page) => page.getByTestId('tenant-document-file-input'));
 export const documentTitleInput = target('Titel des Dokuments', (page) => page.getByTestId('tenant-document-title-input'));
 export const uploadDocumentButton = target('Dokument hochladen', (page) => page.getByTestId('tenant-document-upload-button'));
+// #677 (decision 9): what a busy button says, next to it
+export const uploadDocumentStatus = target('Status von «Dokument hochladen»', (page) =>
+	page.getByTestId('tenant-document-upload-button-busy-status')
+);
+export const deleteDocumentConfirm = target('Dokument löschen bestätigen', (page) => page.getByTestId('document-delete-confirm'));
+export const deleteDocumentStatus = target('Status von «Dokument löschen»', (page) =>
+	page.getByTestId('document-delete-confirm-busy-status')
+);
+export const documentsEmpty = target('Hinweis keine Dokumente in «Dokumente»', (page) => page.getByTestId('documents-empty'));
 export const noDocumentsHint = target('Hinweis keine Dokumente', (page) => page.getByTestId('tenant-documents-empty'));
+// #677: the caution at the file field when a file of that name is already uploaded to the tenant
+export const duplicateFileNote = target('Hinweis Datei schon hochgeladen', (page) => page.getByTestId('tenant-document-file-duplicate'));
+// #677: in «Dokumente», the tenant's name in a row leads to the tenant; the filter shows one tenant's documents
+export const documentTenantLink = (title: string, tenantName: string) =>
+	target(`Mieter ${tenantName} bei «${title}»`, (page) => documentRow(title, tenantName).locate(page).getByTestId('document-tenant-link'));
+export const documentsTenantFilter = target('Filter Mieter der Dokumente', (page) => page.getByTestId('documents-tenant-filter'));
+export const documentsView = (view: 'Alle' | 'Zu versenden') =>
+	target(`Ansicht «${view}» der Dokumente`, (page) =>
+		page.getByTestId(view === 'Alle' ? 'documents-filter-all' : 'documents-filter-to-send')
+	);
+// the file chosen, said beside the button of the file field
+export const chosenDocumentFile = target('Gewählte Datei', (page) => page.getByTestId('tenant-document-file-chosen'));
 export const openDocumentLink = (title: string, tenantName = '') =>
 	target(`«${title}» ${tenantName}`.trim() + ' öffnen', (page) => documentRow(title, tenantName).locate(page).getByTestId('document-pdf-link'));
 export const deleteDocumentButton = (title: string) =>

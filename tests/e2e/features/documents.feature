@@ -38,3 +38,45 @@ Funktionalität: Dokumente
   Szenario: Eine Mahnung lässt sich nicht löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Anna Keller"
     Dann kann der Liegenschaftsverwalter die "Zahlungserinnerung" nicht löschen
+
+  # #677 (Anna P-3): die Liste sagt, wo Dokumente hochgeladen werden
+  Szenario: Die Seite sagt, wo Dokumente hochgeladen werden
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Dann erklärt die Seite "Dokumente" "Ein Dokument laden Sie auf der Seite des Mieters unter «Dokument hochladen» hoch."
+
+  # #677 (Anna P-4, Weber P-4): der Name des Mieters führt zum Mieter
+  Szenario: Vom Dokument zum Mieter
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter beim Dokument "Ausweiskopie" den Mieter "Anna Keller" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
+
+  # #677 (Anna P-4): ein altes Dokument eines Mieters ist schnell gefunden
+  Szenario: Nur die Dokumente eines Mieters ansehen
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Mieter "Beat Huber" existiert
+    Und "Beat Huber" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter nur die Dokumente von "Anna Keller" ansieht
+    Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller", heute hochgeladen, ohne Versandstatus vor
+    Und liegt kein Dokument zu "Beat Huber" vor
+
+  # #677 (V-3): «Alle» und «Zu versenden» behalten den gewählten Mieter; die Zeile nennt Datei und Uhrzeit
+  Szenario: Der gewählte Mieter gilt auch für «Alle» und «Zu versenden»
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Mieter "Beat Huber" existiert
+    Und "Beat Huber" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter nur die Dokumente von "Anna Keller" ansieht
+    Und der Liegenschaftsverwalter die Ansicht "Zu versenden" wählt
+    Und der Liegenschaftsverwalter die Ansicht "Alle" wählt
+    Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller", heute hochgeladen, ohne Versandstatus vor
+    Und nennt das Dokument "Ausweiskopie" die Datei "Ausweiskopie.pdf" und die Uhrzeit, zu der es heute hochgeladen wurde
+    Und liegt kein Dokument zu "Beat Huber" vor
+
+  # #677 (Persona Sven S-1): wer mit den Pfeiltasten durch die Mieter geht, bleibt im Filter, auch bei einem Mieter ohne Dokumente
+  Szenario: Nach dem Filtern bleibt der Fokus im Filter «Mieter», auch ohne Dokumente
+    Angenommen der Mieter "Beat Huber" existiert
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter im Filter «Mieter» mit der Tastatur "Beat Huber" wählt
+    Dann zeigt «Dokumente» "Noch keine Dokumente", und der Fokus bleibt im Filter «Mieter»

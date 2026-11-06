@@ -84,6 +84,7 @@ Funktionalität: Barrierefreiheit
       | tenant-detail          | delete-dialog       |
       | tenant-detail          | document-delete-dialog |
       | tenant-detail          | upload-refused      |
+      | tenant-detail          | upload-duplicate    |
       | tenant-detail          | demo                |
       | tenant-detail-former   | default             |
       | tenant-detail-former   | anonymise-dialog    |
@@ -267,6 +268,7 @@ Funktionalität: Barrierefreiheit
       | documents              | empty               |
       | documents              | marked-sent         |
       | documents              | mark-sent-dialog    |
+      | documents              | tenant-filtered     |
       | config                 | default             |
       | config                 | backup-links        |
       | config-backup          | default             |
