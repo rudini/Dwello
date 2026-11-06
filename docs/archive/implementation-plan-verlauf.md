@@ -1175,3 +1175,12 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1122.md`
 - [x] Before marking complete: lint, check, fitness, backend type-check, Prettier on added files
 - [x] Archive the session; PR `Fixes #1122` pushed after this archive
+
+## Session: #1121 outside review as a required status
+
+- [x] `fallback-review.yml` sets the commit status «Outside review» on the head after a Copilot review, a fallback review or «No review» (`statuses: write`)
+- [x] `tools/ci/fallback-review.test.ts`: the step's script with gh, curl and sleep stubbed; three tests, red against the workflow of main
+- [x] Skill `pull-request` names the status; without it after 15 minutes, re-run the latest «Fallback review» run
+- [x] Code review 1121-1: `docs/reviews/1121-review-1.md` (C-1 fixed in the skill; C-2 rejected: a function does not inherit the ERR trap without `set -E`, so a failed status call ends the script before the trap, as a test showed)
+- [x] Before marking complete: lint, check, testcheck, Prettier on added files, tools/ci tests
+- [x] Archive the session; PR `Fixes #1121` pushed after this archive; the ruleset command for the owner under "Blocked on me"
