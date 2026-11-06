@@ -1346,3 +1346,15 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1162 (keep the chosen tile in view), #1163 (E2E contract row depends on the list page)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #1146 statement wizard step display keeps words whole
+
+- [x] Read #1146; layout by my recommendation (the issue's option «the numbers only as below xl»): with values only the current step is named, every step keeps its words whole
+- [x] #1143 needs a spec change (`contract-edit.feature:239` pins the text): proposed text in the issue, `needs-decision`
+- [x] Scenario «Die Schrittanzeige trennt keinen Namen eines Schritts» in `statement-generate.feature`, seen red (Abrechnungsperiode, Verwaltungspauschale); DOM test in `ui-navigation-parts.dom.test.ts`, seen red (cb86a4a)
+- [x] code-reviewer round 1 (`docs/reviews/1146-review-1.md`): C-1 Major (step 3 unchecked) fixed, seen red; C-2 fixed; C-3 rejected
+- [x] Personas Dr. Weber and Helga (`docs/design/personas/{weber,helga}-1146.md`): P-1 Major of both (values broken) fixed, seen red (1968f5c); the Minors that stay are in the reports; Helga P-2 (on `main` too) and the Minors two personas share became #1179
+- [x] code-reviewer round 2 (`docs/reviews/1146-review-2.md`): C-1, C-2 closed, C-3 rejection accepted; C-4 Major (negative checks without anchor) fixed, anchor seen red (3d87398)
+- [x] code-reviewer round 3, closing round (`docs/reviews/1146-review-3.md`): C-4 closed, no new findings
+- [x] Checks: lint, check, fitness, backend type-check, Prettier, vitest (ui-navigation-parts, open-work), E2E statement-generate + contract-new, axe and language rows of both wizards
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
