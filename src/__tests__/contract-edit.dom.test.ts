@@ -15,6 +15,7 @@ import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
+import { leaveGuard } from '$lib/leave-guard';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
@@ -1113,6 +1114,28 @@ describe('Mietvertrag bearbeiten', () => {
 			await open();
 			type('contract-base-rent-input', '980');
 			expect(navigate('goto', undefined, '/login')).not.toHaveBeenCalled();
+		});
+
+		// fallback review on #1150 (decided by the product owner): «Abmelden» asks before it ends the session
+		it('fragt vor dem Abmelden und meldet nach «weiter bearbeiten» nicht ab', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			const answer = leaveGuard.ask!();
+			flushSync();
+			expect(dialog()!.textContent).toContain('Änderungen verwerfen?');
+			click('dialog-cancel');
+			expect(await answer).toBe(false);
+			expect(dialog()).toBeNull();
+		});
+
+		it('meldet nach «verwerfen» ab und ohne Änderung ohne Rückfrage', async () => {
+			await open();
+			expect(await leaveGuard.ask!()).toBe(true);
+			type('contract-base-rent-input', '980');
+			const answer = leaveGuard.ask!();
+			flushSync();
+			click('contract-leave-confirm');
+			expect(await answer).toBe(true);
 		});
 
 		// code review 668-closing C-6: while the save is under way, leaving still asks; it may still be refused

@@ -364,6 +364,20 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
     Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
 
+  # #668 (Fallback-Review #1150, entschieden): auch «Abmelden» fragt, bevor es die Sitzung beendet
+  Szenario: Abmelden fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter sich im Benutzermenü abmelden will
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668 (Fallback-Review #1150): wer nach der Rückfrage weiter bearbeitet, bleibt angemeldet und kann speichern
+  Szenario: Nach der Rückfrage beim Abmelden weiter bearbeiten und speichern
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter sich im Benutzermenü abmelden will und weiter bearbeitet
+    Und der Liegenschaftsverwalter den Mietvertrag speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 980.00"
+
   # #668 (Fachreview 668-n3 V-2): nach dem Verwerfen geht Dwello dorthin, wohin der Liegenschaftsverwalter wollte
   Szenario: Nach dem Verwerfen öffnet Dwello die gewählte Seite
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt

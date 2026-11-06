@@ -8,6 +8,7 @@
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import type { User } from '$lib/stores';
 	import { browserStorage, clearAllDrafts } from '$lib/wizard-draft';
+	import { leaveGuard } from '$lib/leave-guard';
 	import { isMenuKey, moveInMenu } from '$lib/menu-keys';
 	import { flushSync } from 'svelte';
 
@@ -36,6 +37,7 @@
 	}
 
 	async function logout() {
+		if (leaveGuard.ask && !(await leaveGuard.ask())) return; // unsaved changes ask first (#668)
 		clearAllDrafts(browserStorage()); // no personal data stays in the browser
 		try {
 			const xsrfToken = getXsrfTokenFromCookie();

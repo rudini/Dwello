@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { cancelEditing } from '../tasks/form';
 import { chooseInMainNav, goBackInBrowser } from '../tasks/app-frame';
+import { chooseSignOut } from '../tasks/authentication';
 import { errorMessage, errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
@@ -759,6 +760,15 @@ When('der Liegenschaftsverwalter die Bearbeitung abbricht und die Änderungen ve
 
 When('der Liegenschaftsverwalter die Bearbeitung abbricht und weiter bearbeitet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(cancelEditing, keepEditing);
+});
+
+// #668 (fallback review on #1150): «Abmelden» asks before the session ends
+When('der Liegenschaftsverwalter sich im Benutzermenü abmelden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseSignOut);
+});
+
+When('der Liegenschaftsverwalter sich im Benutzermenü abmelden will und weiter bearbeitet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseSignOut, keepEditing);
 });
 
 When('der Liegenschaftsverwalter bei Mieter und Wohnung den Mietvertrag öffnet', async ({ verwalter }) => {

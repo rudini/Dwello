@@ -5,6 +5,7 @@ import MobileNav from '$lib/ui/MobileNav.svelte';
 import Footer from '$lib/ui/Footer.svelte';
 import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
 import { writeDraft } from '$lib/wizard-draft';
+import { leaveGuard } from '$lib/leave-guard';
 import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 
@@ -138,6 +139,23 @@ describe('Kopfzeile', () => {
 		click('logout-button');
 		await settle();
 		expect(localStorage.length).toBe(0);
+	});
+
+	// #668 (fallback review on #1150, decided by the product owner): a form with unsaved changes asks first
+	it('meldet nicht ab, solange ein Formular mit ungespeicherten Änderungen weiter bearbeitet wird', async () => {
+		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());
+		const calls = fakeBff();
+		leaveGuard.ask = () => Promise.resolve(false);
+		try {
+			show(Header, { user });
+			click('user-menu-button');
+			click('logout-button');
+			await settle();
+		} finally {
+			leaveGuard.ask = undefined;
+		}
+		expect(calls).toEqual([]);
+		expect(localStorage.length).toBe(1);
 	});
 
 	it('führt über das Logo zur Übersicht', () => {
