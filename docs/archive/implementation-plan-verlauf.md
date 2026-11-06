@@ -1314,3 +1314,15 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1156 (the same heading for the other lists)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #675 demo notice inside the app (personas B-162)
+
+- [x] Read #675; only Weber's b162 report is in the history, the other findings from the issue and U-27
+- [x] @wip scenarios and unit tests, seen red (b2e6d6b)
+- [x] Product owner decided F1 (today's sentence in the line), F2 (link to /help#demo), F3 (own installation through the demo's operator), F5 (dialog issue apart: #1167); F4 by the coordinator's recommendation (the same line on /help, /privacy, /terms)
+- [x] fach-reviewer step 1 (`docs/reviews/675-1-fach-review.md`): R-1 Major (backups survive the nightly reset) fixed by an empty BACKUP_DIR in the demo (dfbe414); R-2 Major (demo can start without operator) became #1170; V-1..V-5 fixed
+- [x] One line in the app, full notice on the sign-in page and in the help (980afab)
+- [x] code-reviewer round 1 (`docs/reviews/675-review-1.md`): C-1, C-2 Minor fixed (fdbb758); closing rounds (`675-review-2.md`, `675-review-3.md`): C-3 Minor of fdbb758 fixed (f8a3ce3)
+- [x] Personas Sven, Marco, Helga (`docs/design/personas/{sven,marco,helga}-675.md`): P-1, P-2, P-4, Anna P-2, C-11 fixed; Helga H-1 = Marco N-5 (mailto) fixed; Minors that stay: Marco M-1, M-2, Helga H-2
+- [x] Issues opened: #1167 (dialogs show a disabled action), #1170 (require operator for the demo)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
