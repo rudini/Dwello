@@ -58,10 +58,11 @@ Then('die Mieterliste enthält genau {int} Mieter', async ({ verwalter }, count:
 	await verwalter.sees(tenantCount).toBe(count);
 });
 
+// the number and the separator the contract pages write too, «Wohnung 2.01 · Ahornhof» (#1149)
 Then(
 	'wohnt {string} laut Mieterliste in der Wohnung {string}',
 	async ({ verwalter, names }, tenant: string, apartment: string) => {
-		await verwalter.sees(listedTenant(names.get(tenant) ?? tenant)).toContain(`${apartment} - `);
+		await verwalter.sees(listedTenant(names.get(tenant) ?? tenant)).toContain(`${apartment} · `);
 	}
 );
 
