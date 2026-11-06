@@ -522,6 +522,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Marc Huber"
     Aber nicht die Abrechnung 2023 von "Lea Graf"
 
+  # #673 (Helga P-2): der Satz über der Liste nennt auch das Gebäude und dass nur Entwürfe gezeigt werden
+  @wip
+  Szenario: Nach dem Erstellen nennt die Liste das Gebäude und den Status der Entwürfe
+    Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
+    Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Entwürfe im Gebäude "Lindenhof" zeigt
+
+  # #673 (Helga P-6): bei 150 % Zoom ist das Fenster etwa 960 Pixel breit; die Schritte zeigen dort nur Nummern
+  @wip
+  Szenario: In einem mittelbreiten Fenster nennt die Schrittanzeige den aktuellen Schritt
+    Angenommen das Browserfenster ist 960 Pixel breit
+    Dann zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Abrechnungsperiode"
+
   # #356: ein Lauf als eine Datei, z.B. um alle Abrechnungen auf einmal zu drucken; frühere Abrechnungen gehören nicht dazu
   Szenario: Alle Abrechnungen eines Laufs als ZIP herunterladen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

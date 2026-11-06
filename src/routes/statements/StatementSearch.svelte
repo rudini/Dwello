@@ -63,7 +63,9 @@
 			>{m.buildings_search_submit()}</Button
 		>
 		{#if filtered}
-			<Button href="/statements" variant="ghost" icon="close">{m.buildings_reset_filters()}</Button>
+			<Button href="/statements" variant="ghost" icon="close" testid="statement-filter-reset"
+				>{m.buildings_reset_filters()}</Button
+			>
 		{/if}
 	</div>
 </form>

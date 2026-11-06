@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
+	buildingChoiceShown,
 	listedStatement,
 	countedStatements,
 	listedStatementCount,
@@ -8,15 +9,19 @@ import {
 	listStatusShown,
 	listBuildingShown,
 	pageAddressInApp,
+	resetFiltersShown,
 	statementOfYearListed,
-	statementPath
+	statementPath,
+	statusFilterText
 } from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
+	goToScopeContract,
 	requestStatementPdfFromList,
 	openStatement,
 	openStatementWithoutPdf,
 	openStatementList,
+	resetStatementFilters,
 	searchStatements,
 	showDraftsOfBuilding,
 	showSettledOfBuilding,
@@ -237,4 +242,42 @@ Then(
 // #1047: the address changes at once on browser back, the title only once the page has loaded
 Then('ist der Liegenschaftsverwalter wieder auf der Abrechnungsliste', async ({ verwalter }) => {
 	await verwalter.sees(pageAddressInApp).toBe('/statements');
+});
+
+// #673: the list filtered by a contract leads back to it, keeps it on a reset and offers no other building
+When('der Liegenschaftsverwalter von der Abrechnungsliste zum Mietvertrag geht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(goToScopeContract);
+});
+
+When('der Liegenschaftsverwalter die Filter der Abrechnungsliste zurücksetzt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(resetStatementFilters);
+});
+
+Then('die Abrechnungsliste bietet nicht an, die Filter zurückzusetzen', async ({ verwalter }) => {
+	await verwalter.sees(resetFiltersShown).toBe(false);
+});
+
+Then('die Abrechnungsliste bietet keine Wahl des Gebäudes an', async ({ verwalter }) => {
+	await verwalter.sees(buildingChoiceShown).toBe(false);
+});
+
+// #673 (Helga P-2): the sentence above the list names the building and the status «Entwurf», not only the period
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Entwürfe im Gebäude {string} zeigt',
+	async ({ verwalter, names }, building: string) => {
+		await verwalter.sees(listScope).toContain(names.get(building) ?? building);
+		await verwalter.sees(listScope).toContain('Entwurf');
+	}
+);
+
+const STATUSES: Record<string, string> = {
+	Entwurf: 'draft',
+	Versendet: 'sent',
+	Bezahlt: 'paid',
+	Erledigt: 'settled',
+	Überfällig: 'overdue'
+};
+// #673 (Marco P-7): the chosen tab says so in words, not only by its colour
+Then('sagt der Statusfilter {string} {string}', async ({ verwalter }, status: string, text: string) => {
+	await verwalter.sees(statusFilterText(STATUSES[status])).toContain(text);
 });

@@ -7,6 +7,8 @@ import {
 	generateStatementsButton,
 	nextPageLink,
 	openStatementLink,
+	resetFiltersButton,
+	scopeContractLink,
 	statementBuildingFilter,
 	statementPdfLink,
 	statementPdfMissingLink,
@@ -69,3 +71,10 @@ export const downloadStatementPdfFromList = (tenantName: string, year: number) =
 	DownloadFrom(statementPdfLink(tenantName, year));
 /** Follows the list's PDF link in the tab, as a browser does when the answer is no PDF */
 export const requestStatementPdfFromList = (tenantName: string, year: number) => Click.on(statementPdfLink(tenantName, year));
+// #673: back to the contract the list is filtered by; the reset waits until the search is gone from the address
+export const goToScopeContract = Click.on(scopeContractLink);
+export const resetStatementFilters: Activity = (actor) =>
+	actor.attemptsTo(
+		Click.on(resetFiltersButton),
+		Wait.forUrl((url) => url.pathname === '/statements' && !url.searchParams.has('search'))
+	);

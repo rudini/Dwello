@@ -3,13 +3,15 @@ import { question } from '../screenplay/actor';
 import { Attribute, Count, DownloadedFile, Text, ThePage, Value, Visibility } from '../screenplay/questions';
 import {
 	draftFilter,
+	resetFiltersButton,
 	statementBuildingFilter,
 	statementRow,
 	statementRowForYear,
 	statementRows,
 	statementsEmptyNotice,
 	statementsScope,
-	statusCount
+	statusCount,
+	statusFilter
 } from '../targets/statements';
 
 export const listedStatement = (tenantName: string) => Text.of(statementRow(tenantName));
@@ -48,3 +50,7 @@ export const downloadedFileNameByNumber = question('the downloaded file name by 
 // #679: whether the filter «Entwurf» is the one shown, and the building the list is filtered by
 export const listStatusShown = Attribute.named('aria-current').of(draftFilter);
 export const listBuildingShown = Value.chosenIn(statementBuildingFilter);
+// #673: what the list offers next to its filters, and what a status tab says
+export const resetFiltersShown = Visibility.of(resetFiltersButton);
+export const buildingChoiceShown = Visibility.of(statementBuildingFilter);
+export const statusFilterText = (status: string) => Text.of(statusFilter(status));
