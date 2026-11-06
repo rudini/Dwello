@@ -154,7 +154,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und ist im Mietvertrag keine Wohnung gewählt
 
   # #1153 (Personas Sven S-7, Helga H-6): nach dem Aufheben bleibt im Schritt stehen, welche Wohnung welcher Mietvertrag sperrt
-  @wip
   Szenario: Nach dem Aufheben der Wahl nennt der Schritt die Wohnung und ihren Mietvertrag
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
@@ -166,12 +165,13 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Und der Liegenschaftsverwalter die Warnung schliesst
     Dann steht im Schritt «Wohnung» der Hinweis "Wohnung 2.01 · Ahornhof ist nicht verfügbar"
-    Und erklärt der Hinweis im Schritt «Wohnung» "Sie hat einen unbefristeten Mietvertrag, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist er gekündigt, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
+    Und erklärt der Hinweis im Schritt «Wohnung» "Für diese Wohnung ist ein unbefristeter Mietvertrag erfasst, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
     Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier"
 
-  @wip
   Szenario: Der Hinweis auf die nicht verfügbare Wohnung öffnet ihren Mietvertrag
     Angenommen der Mieter "Bruno Meier" existiert
+    Und der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietete die Wohnung "2.01" von "2020-01-01" bis "2024-03-31" für "850" Franken
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"

@@ -3,6 +3,7 @@
 	import { apartmentChoices } from '$lib/contract-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
+	import OverlapLink from '../OverlapLink.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import type { AvailabilityInfo } from '$lib/utils/contract-availability';
 
@@ -15,6 +16,7 @@
 		notice,
 		unknown = false,
 		onretry,
+		cleared,
 		error
 	}: {
 		apartmentId: string;
@@ -24,6 +26,7 @@
 		notice: string | null; // when the chosen apartment becomes free
 		unknown?: boolean; // the chosen apartment's contracts could not be loaded
 		onretry: () => void; // loads them again
+		cleared?: { apartment: string; contract?: { id: string; tenant?: string } } | null; // a choice «Erneut versuchen» cleared (#1153)
 		error?: string;
 	} = $props();
 </script>
@@ -47,6 +50,18 @@
 {/if}
 
 <ContractsUnknown {onretry} shown={unknown} testid="apartment-contracts-unknown" />
+
+<!-- stays until an apartment is chosen: the toast that says so goes away (#1153, Sven S-7, Helga H-6) -->
+{#if cleared && !apartmentId}
+	<Alert
+		tone="caution"
+		title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}
+		testid="apartment-cleared"
+	>
+		<p data-testid="apartment-cleared-text">{m.contracts_apartment_cleared_text()}</p>
+		{#if cleared.contract}<OverlapLink contract={cleared.contract} />{/if}
+	</Alert>
+{/if}
 
 {#if notice}
 	<Alert title={m.contracts_free_later()} testid="availability-info">

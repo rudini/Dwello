@@ -13,12 +13,12 @@
 		overlapError,
 		overlapRefusal,
 		suggestedStartDate,
-		validateContract,
-		type ContractFormValues
+		validateContract
 	} from '$lib/contract-form';
 	import {
 		contractSteps,
 		firstStepWithError,
+		clearedApartment,
 		lastRent,
 		normalizeAmounts,
 		openContractsOf,
@@ -26,7 +26,7 @@
 		rentToPreset,
 		type ListedContract,
 		startDateNotice,
-		startValues,
+		restoredDraft,
 		stepErrors,
 		offeredBilledUntil,
 		startInPast
@@ -43,7 +43,7 @@
 		computeAvailability,
 		type ContractForAvailability
 	} from '$lib/utils/contract-availability';
-	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
+	import { browserStorage, clearDraft, writeDraft } from '$lib/wizard-draft';
 	import ApartmentStep from './ApartmentStep.svelte';
 	import OpenContracts from './OpenContracts.svelte';
 	import { retried } from './ContractsUnknown.svelte';
@@ -102,6 +102,7 @@
 	const startPast = $derived(checked.start === values.startDate && checked.past);
 	let startEdited = false; // the suggestion never overwrites a start date being typed
 	let section = $state<HTMLElement>();
+	let cleared = $state<ReturnType<typeof clearedApartment> | null>(null); // named in the step until one is chosen (#1153)
 	// per apartment; null for an apartment whose contracts could not be loaded: it is not shown as free (#143)
 	let contracts = $state<Map<string, ContractForAvailability[] | null> | null>(null);
 	let listed = $state(new Map<string, Parameters<typeof lastRent>[0]>()); // the answers, for their amounts (#144)
@@ -140,20 +141,11 @@
 	);
 
 	function restoreDraft() {
-		const draft = readDraft<ContractFormValues>(browserStorage(), DRAFT);
+		const draft = restoredDraft(DRAFT, params, values.tenantId, { tenants, apartments });
 		if (!draft) return;
-		// a tenant chosen before the page was live counts like one in the address
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- a local copy, read once
-		const given = new URLSearchParams(params);
-		if (values.tenantId) given.set('tenant', values.tenantId);
-		const known = {
-			tenantIds: tenants.map((t) => t.id),
-			apartmentIds: apartments.map((a) => a.id)
-		};
-		const start = startValues(given, draft.values, known);
 		// a contract from the old one keeps that one's agreed Nebenkosten (#368, code review C-1)
-		values = { ...start.values, ...(agreed && { agreedCategoryIds: agreed }) };
-		restored = { at: draft.savedAt, dropped: start.dropped };
+		values = { ...draft.values, ...(agreed && { agreedCategoryIds: agreed }) };
+		restored = draft.restored;
 	}
 
 	// also «Erneut versuchen» when the chosen apartment's contracts could not be loaded; the input stays (#151)
@@ -173,7 +165,11 @@
 		await tick();
 		// Sven S-2, Helga H-3: a choice made «(nicht geprüft)» that turns out rented does not stay
 		const blocked = step === 2 && !!availability.get(values.apartmentId)?.hasOngoingContract;
-		if (blocked) values.apartmentId = '';
+		if (blocked) {
+			const apartment = apartments.find((a) => a.id === values.apartmentId)!;
+			cleared = clearedApartment(apartment, contracts?.get(apartment.id) ?? []);
+			values.apartmentId = '';
+		}
 		const found = values.startDate ? overlap : undefined;
 		retried(unknown, section?.querySelector('h2'), found, step, blocked);
 	}
@@ -367,6 +363,7 @@
 				notice={startLimit.notice}
 				{unknown}
 				onretry={retry}
+				{cleared}
 				error={errors.apartmentId}
 			/>
 		{:else if step === 3}

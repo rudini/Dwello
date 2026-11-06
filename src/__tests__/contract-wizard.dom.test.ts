@@ -509,6 +509,36 @@ describe('Prüfungen im Mietvertrag', () => {
 		]);
 	});
 
+	// #1153 (Sven S-7, Helga H-6): the step keeps saying which apartment it was and which contract blocks it
+	it('nennt nach dem Aufheben die Wohnung und verlinkt ihren Mietvertrag, bis eine Wohnung gewählt ist', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a2')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		show(NewContractPage, { data } as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a2');
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('apartment-cleared')!.textContent).toContain('Wohnung 2.02 · Ahornhof');
+		const link = byTestId('apartment-cleared')!.querySelector(
+			'[data-testid="overlap-contract-link"]'
+		);
+		expect([link?.getAttribute('href'), link?.textContent?.trim()]).toEqual([
+			'/contracts/c9',
+			'Zum Mietvertrag von Eva Frei'
+		]);
+		select('apartment-select', 'a1');
+		await settle();
+		expect(byTestId('apartment-cleared')).toBeNull();
+	});
+
 	// review #151 R2-6: a retry that fails again says so; the hint stays
 	it('sagt, wenn die Mietverträge wieder nicht geladen werden konnten', async () => {
 		fakeBff(({ path }) =>
