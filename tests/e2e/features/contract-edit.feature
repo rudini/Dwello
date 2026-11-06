@@ -313,7 +313,6 @@ Funktionalität: Mietvertrag bearbeiten
     Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
 
   # #668 (Persona Sven S-3): wer einen Screenreader nutzt, hört das Monatlich total, wenn es sich beim Tippen ändert
-  @wip
   Szenario: Das Formular sagt das geänderte Monatlich total an
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Dann sagt das Formular das Monatlich total "CHF 980.00" an

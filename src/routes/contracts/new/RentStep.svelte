@@ -4,6 +4,7 @@
 	import type { ContractFormValues } from '$lib/contract-form';
 	import { plainAmount } from '$lib/invoice';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -153,9 +154,12 @@
 	advance={parseFloat(plainAmount(values.advancePayment)) > 0}
 />
 
-<p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">
-	<span class="font-semibold text-ink">{m.common_monthly_total()}</span>
-	<span class="font-bold tabular-nums text-ink" data-testid="contract-monthly-total"
-		>{formatCurrency(total)}</span
-	>
-</p>
+<!-- read again when it changes while typing (persona Sven S-3, #668) -->
+<LiveRegion shown>
+	<p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">
+		<span class="font-semibold text-ink">{m.common_monthly_total()}</span>
+		<span class="font-bold tabular-nums text-ink" data-testid="contract-monthly-total"
+			>{formatCurrency(total)}</span
+		>
+	</p>
+</LiveRegion>
