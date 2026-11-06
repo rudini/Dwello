@@ -10,6 +10,7 @@
 		contractBody,
 		forAvailability,
 		initialContractValues,
+		overlapRefusal,
 		overlapWarning,
 		validateContract,
 		billedUntilError
@@ -93,6 +94,9 @@
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
 	let unknown = $state(false);
+	// the overlap the save was refused for: saving checked it, so the hint that saving will check goes (#667, W-03)
+	let refusal = $state('');
+	const shownUnknown = $derived(unknown && !(refusal && errors.form === refusal));
 	// a changed Vertragsende in the past is confirmed as in «Beenden»; an unchanged one is not asked again
 	const endChanged = $derived(
 		!values.isUnlimited && values.endDate !== (contract.endDate?.slice(0, 10) ?? '')
@@ -159,12 +163,10 @@
 	}
 
 	function saveError({
-		message,
 		code,
 		params,
 		details
 	}: {
-		message: string;
 		code?: string;
 		params?: Record<string, string | number>;
 		details?: Record<string, unknown>;
@@ -173,9 +175,10 @@
 		if (Array.isArray(statements) && onlyCovered(statements))
 			return m.contracts_billed_draft_covered(draftName(statements[0], tenant));
 		if (Array.isArray(statements)) return billedDaysError(statements);
-		if (/overlap/i.test(message)) return m.backend_contract_overlap();
-		// a refusal with its own message, e.g. an Akonto in a billed time (#464); never the backend's own text
-		return backendMessage({ code, params }, m.contracts_save_failed());
+		// an overlap names the other contract and what to do (#667, W-07); a refusal with its own message, e.g. an
+		// Akonto in a billed time (#464); never the backend's own text
+		refusal = overlapRefusal({ code, params }, values, today, false) ?? '';
+		return refusal || backendMessage({ code, params }, m.contracts_save_failed());
 	}
 
 	// the fields' errors; true when the form may be sent
@@ -275,7 +278,7 @@
 				<dd class="text-ink" data-testid="contract-form-apartment">{apartment}</dd>
 			</div>
 		</dl>
-		<LiveRegion shown={unknown}>
+		<LiveRegion shown={shownUnknown}>
 			<ContractsUnknown onretry={retry} testid="apartment-contracts-unknown" />
 		</LiveRegion>
 		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
@@ -308,7 +311,7 @@
 			bind:isUnlimited={values.isUnlimited}
 			bind:terminated={values.terminated}
 			noticed={contract.terminated}
-			{unknown}
+			unknown={shownUnknown}
 			{startPast}
 			{overlap}
 			{errors}

@@ -22,6 +22,7 @@ import billedFromStart from '../../tests/contracts/contract-billed-until-billed-
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
 import checkStart from '../../tests/contracts/contract-check-start.json';
+import overlap from '../../tests/contracts/contract-overlap.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -521,6 +522,19 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(ids.map((id) => document.getElementById(id)?.textContent?.trim() ?? '').join(' ')).toContain(
 			'Dwello prüft beim Speichern, ob die Wohnung frei ist «Erneut versuchen» steht oben bei der Wohnung.'
 		);
+	});
+
+	// #667 (Dr. Weber W-03, W-07): the refusal names the other contract and what to do; the hint is done then
+	it('nennt nach der Ablehnung einer Überschneidung den anderen Mietvertrag und nicht mehr den Hinweis', async () => {
+		fakeBff(({ method }) => (method === 'PUT' ? [400, overlap] : [500, {}]));
+		await open();
+		type('start-date-input', '01.06.2024');
+		await save();
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Der Zeitraum überschneidet sich mit dem Mietvertrag von Anna Keller (01.01.2024 – 31.12.2024, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.12.2024.'
+		);
+		expect(byTestId('apartment-contracts-unknown')).toBeNull();
+		expect(byTestId('start-contracts-unknown')).toBeNull();
 	});
 
 	// #151: «Erneut versuchen» loads the contracts again; the input stays (Helga B-13 H2)

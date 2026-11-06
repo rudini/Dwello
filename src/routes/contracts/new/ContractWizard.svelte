@@ -10,6 +10,8 @@
 		contractBody,
 		forAvailability,
 		initialContractValues,
+		overlapError,
+		overlapRefusal,
 		overlapWarning,
 		suggestedStartDate,
 		validateContract,
@@ -71,7 +73,6 @@
 	} = $props();
 
 	const DRAFT = 'contract';
-	const OVERLAP = m.contracts_overlap_wizard();
 	// Error keys of the fields whose id differs from the value's name
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	const params = untrack(() => $page.url.searchParams);
@@ -85,6 +86,10 @@
 	let step = $state(1);
 	const agreedHelp = $derived(agreed ? m.contracts_agreed_costs_help_follow_up() : undefined);
 	let errors = $state<Record<string, string>>({});
+	let overlapSaid = ''; // the overlap at «Vertragsbeginn», which any period change may resolve
+	// the overlap the save was refused for: saving checked it, so the hint that saving will check goes (#667, W-03)
+	let refusal = $state('');
+	const refused = $derived(!!refusal && errors.form === refusal);
 	let saving = $state(false);
 	let savedAt = $state<Date | null>(null);
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
@@ -228,7 +233,7 @@
 		if (id === 'startDate') startEdited = true;
 		delete errors[errorKey[id] ?? id];
 		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
-		if (errors.startDate === OVERLAP) delete errors.startDate; // any period change may resolve it
+		if (errors.startDate === overlapSaid) delete errors.startDate;
 	}
 
 	async function goTo(target: number) {
@@ -272,10 +277,9 @@
 		});
 		saving = false;
 		if (response.error) {
-			// the backend answers in English: an overlap, or «Abgerechnet bis» after the browser's today (#453)
-			errors = /overlap/i.test(response.error.message)
-				? { form: OVERLAP }
-				: { form: savedFailed(response.error.details) };
+			// an overlap with the other contract named (#667), or «Abgerechnet bis» after the browser's today (#453)
+			refusal = overlapRefusal(response.error, values, today, true) ?? '';
+			errors = { form: refusal || savedFailed(response.error.details) };
 			return;
 		}
 		touched = false;
@@ -289,13 +293,16 @@
 	const savedFailed = (details?: Record<string, unknown>) =>
 		details?.code ? backendMessage(details, m.contracts_save_failed()) : m.contracts_save_failed();
 
-	// The overlap blocks; a start in the past only asks once, so it is read out and can be confirmed
+	// The overlap blocks, named as the save names it (fach review b667 V-1); a start in the past only asks once, so it
+	// is read out and can be confirmed
 	function periodWarnings(): Record<string, string> {
-		if (overlap) return { startDate: OVERLAP };
-		const past = startDateNotice(values.startDate, startPast);
-		if (!past || confirmedPastStart === values.startDate) return {};
+		overlapSaid = overlapError(values, contracts?.get(values.apartmentId) ?? [], today) ?? '';
+		if (overlapSaid) return { startDate: overlapSaid };
+		// the notice above the field says the date; the field only what to do (#667, Dr. Weber W-08)
+		if (!startDateNotice(values.startDate, startPast) || confirmedPastStart === values.startDate)
+			return {};
 		confirmedPastStart = values.startDate;
-		return { startDate: m.contracts_confirm_past({ notice: past }) };
+		return { startDate: m.contracts_confirm_past() };
 	}
 
 	async function submitStep(event: SubmitEvent) {
@@ -389,7 +396,7 @@
 				{tenants}
 				{apartments}
 				{categories}
-				{unknown}
+				unknown={unknown && !refused}
 				onretry={retry}
 				onedit={editField}
 			/>

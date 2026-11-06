@@ -118,6 +118,10 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.advancePayment('Anna', '240.00', '2099-01-01'); // an end before it is refused (#464)
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
 	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2098-12-31', baseRent: '1400.00' });
+	// before Carla's: a later end overlaps hers, which the contract form refuses naming her contract (#667)
+	await seed.tenant('Vreni');
+	await seed.contract('Vreni', '1.04', { startDate: '2010-01-01', endDate: '2014-12-31', baseRent: '1400.00' });
+	await seed.billedUntil('Vreni', '2014-12-31'); // as Emil's: no statement is due for it
 	await seed.managementFee('Carla', false); // step «Einstellungen» of the statement wizard names her contract (#89)
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '9000.00', 2025); // Bruno pays more than his Akonto: a reminder can be sent
@@ -348,6 +352,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		undeliveredStatement: seed.idOf('Abrechnung Hugo 2023'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
+		earlierContract: seed.idOf('Mietvertrag Vreni'),
 		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),

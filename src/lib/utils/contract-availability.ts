@@ -30,6 +30,10 @@ export interface ContractForAvailability {
 	end_date?: Date | string | null;
 	status?: 'Aktiv' | 'Beendet';
 	tenant_id?: string; // the wizard names a tenant's open-ended contract (#156)
+	// an overlap names the other contract (#667)
+	tenant_name?: string;
+	tenant_anonymised?: boolean;
+	terminated?: boolean;
 }
 
 /**
@@ -99,7 +103,7 @@ export function checkDateRangeOverlap(
 	endDate: string | null,
 	contracts: ContractForAvailability[],
 	excludeContractId?: string
-): { hasOverlap: boolean; message: string | null } {
+): { hasOverlap: boolean; message: string | null; contract?: ContractForAvailability } {
 	// Filter out the excluded contract
 	const relevantContracts = excludeContractId
 		? contracts.filter((c) => c.id !== excludeContractId)
@@ -113,7 +117,11 @@ export function checkDateRangeOverlap(
 	// For unlimited contracts, use a far future date for comparison
 	const proposedEnd = endDate ? new Date(endDate) : new Date('9999-12-31');
 
-	for (const contract of relevantContracts) {
+	// the earliest one first, as the backend names it (fach review b667 V-3)
+	const byStart = [...relevantContracts].sort(
+		(a, b) => +parseDate(a.start_date) - +parseDate(b.start_date)
+	);
+	for (const contract of byStart) {
 		const contractStart = parseDate(contract.start_date);
 		const contractEnd = contract.end_date ? parseDate(contract.end_date) : new Date('9999-12-31');
 
@@ -128,7 +136,8 @@ export function checkDateRangeOverlap(
 
 			return {
 				hasOverlap: true,
-				message: m.contracts_overlap({ period: periodStr })
+				message: m.contracts_overlap({ period: periodStr }),
+				contract
 			};
 		}
 	}

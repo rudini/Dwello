@@ -89,6 +89,8 @@
 		"agreement-save-failed": "Statement wizard at the settings step (#91): an answer whether a category is agreed that could not be saved (the save answers an error): the question's error.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
+		"overlap-error": "Rental contract wizard at the step «Vertragsdauer», «Weiter» with a start date that overlaps another contract of the apartment: the error at «Vertragsbeginn» naming that contract and what helps (#667).",
+		"overlap-refused": "Rental contract wizard or form saved with a period that overlaps another contract of the apartment while its contracts could not be loaded (that request answered with an error): the refusal naming that contract and what helps, without the hint that saving checks it (#667).",
 		"rent-follow-up": "Rental contract wizard at the step «Miete» for a new contract from an ended one of the same tenant (#368): the agreed Nebenkosten of that contract ticked and the help saying so.",
 		"rent-taken-over": "Rental contract wizard at the step «Miete» for an apartment with an earlier contract: its Nettomiete, Zusatzmiete and Akonto filled in, the note naming that contract (#144).",
 		"contracts-unknown": "Rental contract wizard or form whose apartments' rental contracts cannot be loaded (that request answered with an error): the hint at the apartment, in the form also at the start (#143), and the message after «Erneut versuchen» failed again (#151).",
@@ -405,6 +407,8 @@
 				"draft-discard-dialog",
 				"contracts-unknown",
 				"contracts-unknown-review",
+				"overlap-error",
+				"overlap-refused",
 				"agreed-costs-none",
 				"flat-rate-warning",
 				"flat-rate-warning-advance",
@@ -425,6 +429,8 @@
 				"agreed-from": "?tenant={tenant}&apartment={freeApartment}",
 				"agreed-from-refused": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
+				"overlap-error": "?tenant={tenant}&apartment={limitedApartment}",
+				"overlap-refused": "?tenant={tenant}&apartment={limitedApartment}",
 				"rent-taken-over": "?tenant={tenant}&apartment={noticedApartment}",
 				"rent-follow-up": "?tenant={endedTenant}&apartment={freeApartment}&from={endedContract}",
 				"draft-restored": "?tenant={tenant}",
@@ -507,6 +513,14 @@
 				"default",
 				"moved-out-dialog",
 				"continue-refused"
+			]
+		},
+		{
+			"name": "contract-edit-earlier",
+			"path": "/contracts/{earlierContract}/edit",
+			"states": [
+				"default",
+				"overlap-refused"
 			]
 		},
 		{

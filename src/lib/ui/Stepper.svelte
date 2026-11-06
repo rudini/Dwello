@@ -29,11 +29,12 @@
 	/>
 	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above);
 	     a finished step shows its value at every width the list shows (#663).
-	     min-w-0 and hyphenation keep long names inside their step instead of widening the page -->
+	     min-w-0 and hyphenation keep long names inside their step instead of widening the page; each step as wide as
+	     its name, so a long one is not cut inside the word next to short ones (#667, Dr. Weber W-10) -->
 	<ol class="hidden gap-2 md:flex">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}
-			<li class="flex min-w-0 flex-1 items-center gap-2">
+			<li class="flex min-w-0 flex-auto items-center gap-2">
 				{#if number < current}
 					<button
 						type="button"

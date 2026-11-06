@@ -105,6 +105,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | overlap-error       |
+      | contract-new           | overlap-refused     |
       | contract-new           | agreed-costs-none        |
       | contract-new           | flat-rate-warning        |
       | contract-new           | flat-rate-warning-advance |
@@ -148,6 +150,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail-expired | default            |
       | contract-detail-expired | moved-out-dialog   |
       | contract-detail-expired | continue-refused   |
+      | contract-edit-earlier  | default             |
+      | contract-edit-earlier  | overlap-refused     |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |

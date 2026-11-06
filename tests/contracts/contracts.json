@@ -16,6 +16,7 @@
 			"monthlyAdvancePayment": "150.00",
 			"flatRateUtilityCharge": "0.00",
 			"tenantName": "Anna Keller",
+			"tenantAnonymised": false,
 			"apartmentNumber": "2.01",
 			"buildingId": "b1",
 			"buildingName": "Ahornhof",

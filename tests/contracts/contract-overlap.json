@@ -1,0 +1,11 @@
+{
+	"error": "Contract overlaps with existing contract 3f2a0000-0000-4000-8000-000000000000",
+	"code": "CONTRACT_OVERLAP",
+	"params": {
+		"contract": "3f2a0000-0000-4000-8000-000000000000",
+		"tenant": "Anna Keller",
+		"start": "2024-01-01",
+		"end": "2024-12-31",
+		"terminated": 0
+	}
+}
