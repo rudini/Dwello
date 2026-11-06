@@ -910,10 +910,15 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit 3 % Verwaltungspauschale öffnet
     Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
     Und der Liegenschaftsverwalter zum Erstellen weitergeht
-    Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Dann zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Erstellen"
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
     Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
     Wenn der Liegenschaftsverwalter zum Schritt "Heizprofil und Verwaltungspauschale" zurückgeht
-    Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Dann zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Heizprofil und Verwaltungspauschale"
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
     Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
     Und scrollt die Seite nicht seitwärts
 
