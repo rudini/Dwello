@@ -76,15 +76,16 @@
 	// a quiet note is only a hint, not a warning (#245, persona Helga of #233)
 	const warning = $derived(!note?.quiet);
 	const noteLook = $derived(warning ? 'font-semibold text-caution' : 'text-ink-muted');
-	// a caution about the value first, a hint about it too: it is missed at the end of a long help (persona Sven)
+	// the error first, heard right after the focus jump; then a caution about the value, a hint about it too: both are
+	// missed at the end of a long help (persona Sven, #677)
 	const describedBy = $derived(
 		// a refusal that names this field's own error (#1166) adds no second reference to it
 		[
+			shown && errorId,
+			flagged !== errorId && flagged,
 			note && noteId,
 			describedby,
-			hasHelp && helpId,
-			shown && errorId,
-			flagged !== errorId && flagged
+			hasHelp && helpId
 		]
 			.filter(Boolean)
 			.join(' ') || undefined

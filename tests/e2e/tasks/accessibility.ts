@@ -107,8 +107,8 @@ import { DEMO_INSTANCE } from './demo';
 import { billedCannotBeChecked, invoicesCannotBeCounted, leaveSettings } from './statement-generate';
 import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
-import { uploadDocument, wordFile } from './tenant-documents';
-import { deleteDocumentButton } from '../targets/documents';
+import { chooseFile, pdfFile, uploadDocument, wordFile } from './tenant-documents';
+import { deleteDocumentButton, duplicateFileNote } from '../targets/documents';
 import { anonymiseTenantButton } from '../targets/tenant-detail';
 import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
 import { registerNotice } from '../targets/building-register';
@@ -412,6 +412,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// a file Dwello does not take: the refusal at the file field; its name shows beside the button (#489), so no German word
 	'upload-refused': () => (actor) =>
 		actor.attemptsTo(uploadDocument(wordFile('notes.docx'), ''), Wait.until(on.formProblem)),
+	// the file of the tenant's uploaded document (fixtures/screens.ts) chosen again: the hint names it (#677)
+	'upload-duplicate': () => (actor) =>
+		actor.attemptsTo(chooseFile(pdfFile(`${UPLOADED}.pdf`)), Wait.until(duplicateFileNote)),
+	// the list filtered to Anna by the screen's query (#677)
+	'tenant-filtered': () => Wait.until(on.shown('document-tenant-link')),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
 	'upload-dialog': (example) => (actor) => {
 		// the stand-in finds deducted amounts and costs that are not allocable in a file so named; the UUID marks it user data

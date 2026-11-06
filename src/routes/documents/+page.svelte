@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementDocument } from '$lib/types';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import { controlClass } from '$lib/ui/field';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import DocumentItem from './DocumentItem.svelte';
 	import MarkSentButton from './MarkSentButton.svelte';
@@ -11,19 +14,41 @@
 	let {
 		data,
 		form
-	}: { data: { documents: StatementDocument[]; status: string | null }; form: ActionData } =
-		$props();
+	}: {
+		data: {
+			documents: StatementDocument[];
+			status: string | null;
+			tenantId: string | null;
+			tenants: { id: string; name: string; place?: string }[];
+		};
+		form: ActionData;
+	} = $props();
+
+	// «Alle» / «Zu versenden» and the filter «Mieter» apply together (#677)
+	const listHref = (status: string | null, tenant: string | null) => {
+		const query = Object.entries({ status, tenant })
+			.filter(([, value]) => value)
+			.map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
+			.join('&');
+		return `/documents${query && `?${query}`}`;
+	};
+	// applies on change (#662), keeping the focus on the filter
+	const chooseTenant = (event: Event) =>
+		goto(listHref(data.status, (event.currentTarget as HTMLSelectElement).value || null), {
+			keepFocus: true,
+			noScroll: true
+		});
 
 	const filters = $derived(
 		[
 			{
-				href: '/documents',
+				href: listHref(null, data.tenantId),
 				label: m.documents_all(),
 				testid: 'documents-filter-all',
 				active: !data.status
 			},
 			{
-				href: '/documents?status=to_send',
+				href: listHref('to_send', data.tenantId),
 				label: m.tenants_document_to_send(),
 				testid: 'documents-filter-to-send',
 				active: data.status === 'to_send'
@@ -36,7 +61,8 @@
 				: 'border-line-strong bg-surface text-accent hover:bg-accent-soft'
 		}))
 	);
-	// under «Zu versenden» only letters can appear, never uploaded documents
+	// under «Zu versenden» only letters can appear, never uploaded documents; nothing to post needs no way to the
+	// statements (persona Marco 2, #677)
 	const empty = $derived(
 		data.status
 			? { title: m.documents_none_to_send(), text: m.documents_empty_to_send_text() }
@@ -49,7 +75,10 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<PageHeader title={m.nav_documents()} purpose={m.documents_purpose()} />
+	<PageHeader
+		title={m.nav_documents()}
+		purpose={`${m.documents_upload_where()} ${m.documents_purpose()}`}
+	/>
 
 	<nav aria-label={m.documents_filter()}>
 		<ul class="flex flex-wrap gap-4">
@@ -65,6 +94,26 @@
 			{/each}
 		</ul>
 	</nav>
+
+	<Field id="documents-tenant" label={m.contracts_tenant()}>
+		{#snippet children(control)}
+			<select
+				id={control.id}
+				aria-describedby={control.describedBy}
+				class={controlClass(false)}
+				value={data.tenantId ?? ''}
+				onchange={chooseTenant}
+				data-testid="documents-tenant-filter"
+			>
+				<option value="">{m.tenants_all()}</option>
+				{#each data.tenants as tenant (tenant.id)}
+					<option value={tenant.id}
+						>{tenant.place ? `${tenant.name}, ${tenant.place}` : tenant.name}</option
+					>
+				{/each}
+			</select>
+		{/snippet}
+	</Field>
 
 	<!-- a refusal of «Als versendet markieren» shows in its open confirmation (Code-Review 534-2 C-15) -->
 
@@ -85,7 +134,7 @@
 				illustration="envelope"
 				title={empty.title}
 				text={empty.text}
-				actionLabel={m.documents_to_statements()}
+				actionLabel={data.status ? undefined : m.documents_to_statements()}
 				actionHref="/statements"
 			/>
 		</div>

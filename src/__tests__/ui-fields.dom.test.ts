@@ -52,6 +52,23 @@ describe('Eingabefeld', () => {
 		);
 	});
 
+	// #677 (persona Sven 2 P-7): after the focus jump the error is heard first, not after a long help
+	it('liest den Fehler vor dem Hinweis und der Hilfe vor', () => {
+		show(TextInput, {
+			id: 'file',
+			label: 'Datei',
+			help: 'PDF, JPG oder PNG, höchstens 10 MB.',
+			note: { text: 'Eine Datei dieses Namens gibt es schon.', testid: 'note' },
+			error: 'Die Datei ist zu gross.',
+			value: ''
+		});
+		expect(describedBy(input())).toEqual([
+			'Die Datei ist zu gross.',
+			'Eine Datei dieses Namens gibt es schon.',
+			'PDF, JPG oder PNG, höchstens 10 MB.'
+		]);
+	});
+
 	// The error belongs to what was sent: once corrected it is gone, the next submit checks again
 	it('nimmt den Fehler weg, sobald das Feld geändert wird, und zeigt ihn beim Senden wieder', () => {
 		const form = document.body.appendChild(document.createElement('form'));

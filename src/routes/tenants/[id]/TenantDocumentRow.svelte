@@ -4,9 +4,10 @@
 	import { documentStatus } from '$lib/document-status';
 	import type { StatementDocument } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
-	import { formatDate } from '$lib/utils/format';
+	import { formatDate, formatTime } from '$lib/utils/format';
 
-	// A letter with its date, way and Versandstatus, or an uploaded file with its date, which can be deleted
+	// A letter with its date, way and Versandstatus, or an uploaded file with its date, time and file name (#677), which
+	// can be deleted
 	let { document, ondelete }: { document: StatementDocument; ondelete: () => void } = $props();
 
 	const upload = $derived(document.type === 'upload');
@@ -15,7 +16,11 @@
 	// a PDF kept before a change (#969) has no way and no Versandstatus: only when it was made (Fachreview 969-1 V-1)
 	const details = (d: StatementDocument) =>
 		d.type === 'upload'
-			? m.documents_uploaded({ date: formatDate(d.createdAt) })
+			? m.documents_uploaded({
+					date: formatDate(d.createdAt),
+					time: formatTime(new Date(d.createdAt)),
+					file: d.fileName
+				})
 			: !d.status
 				? m.documents_pdf_before_change_made({ date: formatDate(d.createdAt) })
 				: `${formatDate(d.createdAt)} · ${d.channel === 'email' ? m.tenants_document_by_email() : m.tenants_document_by_letter()}`;

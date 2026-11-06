@@ -6,7 +6,7 @@
 	import type { StatementDocument } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import { formatDate } from '$lib/utils/format';
+	import { formatDate, formatTime } from '$lib/utils/format';
 
 	// One stored letter: what, to whom, when, how it travels and whether it still has to be sent; or an uploaded file
 	let {
@@ -23,20 +23,28 @@
 	);
 	const date = $derived(formatDate(document.createdAt));
 	const upload = $derived(document.type === 'upload'); // no channel, no Versandstatus
-	// a PDF kept before a change (#969) has no way and no Versandstatus (Fachreview 969-1 V-1)
+	// two uploads of the same file differ in their time; the row names the file (#677)
+	const uploaded = $derived({
+		date,
+		time: formatTime(new Date(document.createdAt)),
+		file: document.fileName
+	});
+	// a PDF kept before a change (#969) has no way and no Versandstatus (Fachreview 969-1 V-1); the tenant's name is
+	// the link to the tenant, wherever the language puts it (#677)
 	const created = $derived(
 		upload
 			? showTenant
-				? m.documents_uploaded_to({ name: document.tenantName, date })
-				: m.documents_uploaded({ date })
+				? m.documents_uploaded_to({ name: '\u0000', ...uploaded })
+				: m.documents_uploaded(uploaded)
 			: !document.status
 				? showTenant
-					? m.documents_pdf_before_change_made_to({ name: document.tenantName, date })
+					? m.documents_pdf_before_change_made_to({ name: '\u0000', date })
 					: m.documents_pdf_before_change_made({ date })
 				: showTenant
-					? m.documents_created_to({ name: document.tenantName, date, channel })
+					? m.documents_created_to({ name: '\u0000', date, channel })
 					: m.documents_created({ date, channel })
 	);
+	const [before, after = ''] = $derived(created.split('\u0000'));
 	const status = $derived(documentStatus(document));
 </script>
 
@@ -46,7 +54,13 @@
 >
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
-		<p class="text-ink-muted">{created}</p>
+		<p class="text-ink-muted">
+			{before}{#if showTenant}<a
+					href="/tenants/{document.tenantId}"
+					class="font-semibold text-accent underline underline-offset-4 hover:text-accent-strong"
+					data-testid="document-tenant-link">{document.tenantName}</a
+				>{after}{/if}
+		</p>
 		<!-- only a sent reminder: one still to send gets its Zahlungsfrist the day it is marked sent, when Dwello remakes it
 		(#545, persona weber-545 P-1); one that no longer goes out has none (Fachreview N-7) -->
 		{#if document.paymentDeadline && document.status === 'sent'}

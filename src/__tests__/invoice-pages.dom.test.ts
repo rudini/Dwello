@@ -867,7 +867,7 @@ describe('Rechnung erfassen', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(byTestId<HTMLButtonElement>('submit-button')!.disabled).toBe(true);
+		expect(byTestId<HTMLButtonElement>('submit-button')!.getAttribute('aria-disabled')).toBe('true');
 	});
 
 	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {

@@ -55,7 +55,7 @@
 		'danger-ghost': 'bg-transparent text-critical border-transparent hover:bg-critical-soft'
 	};
 	const classes = $derived(
-		`inline-flex min-h-12 items-center justify-center gap-2 rounded-control border-2 px-6 py-2 text-base font-semibold transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${full ? 'w-full' : ''}`
+		`inline-flex min-h-12 items-center justify-center gap-2 rounded-control border-2 px-6 py-2 text-base font-semibold transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60 aria-disabled:cursor-not-allowed aria-disabled:opacity-60 ${variants[variant]} ${full ? 'w-full' : ''}`
 	);
 
 	// visible, as text right after the label so both wrap as one: a new tab can look as if Dwello had gone (personas
@@ -64,6 +64,13 @@
 
 	// A link only while it can be followed; disabled or busy it is a button that cannot be pressed
 	const isLink = $derived(!!href && !disabled && !busy);
+
+	// Busy keeps the focus on the button (aria-disabled, not disabled: persona Sven, #677); a click then does nothing,
+	// also no second submit of its form
+	function press(event: MouseEvent) {
+		if (busy) event.preventDefault();
+		else onclick?.(event);
+	}
 </script>
 
 {#snippet content()}
@@ -94,8 +101,9 @@
 	<button
 		{type}
 		{formaction}
-		{onclick}
-		disabled={disabled || busy}
+		onclick={press}
+		{disabled}
+		aria-disabled={busy || undefined}
 		aria-busy={busy || undefined}
 		aria-label={ariaLabel}
 		aria-describedby={describedby}
@@ -105,4 +113,8 @@
 	>
 		{@render content()}
 	</button>
+	<!-- there before busy, so the change is announced: a focused button's new name often is not -->
+	<span role="status" class="sr-only" data-testid={testid && `${testid}-busy-status`}
+		>{busy ? busyLabel : ''}</span
+	>
 {/if}

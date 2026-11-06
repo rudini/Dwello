@@ -126,8 +126,10 @@ describe('Mietvertragsliste', () => {
 		expect(row(body, 'c1')).toMatch(/seit 01\.04\.2024[\s\S]*contract-missing-statement-badge/);
 	});
 
+	// a button's empty status region (#677) says nothing; the status of a contract is no live region
 	it('meldet den Status nicht als Live-Region', () => {
-		expect(list([contract('c1', 'Anna Keller', '2024-04-01', null)])).not.toContain(
+		const markup = withoutComments(list([contract('c1', 'Anna Keller', '2024-04-01', null)]));
+		expect(markup.replace(/<span role="status" class="sr-only"[^>]*><\/span>/g, '')).not.toContain(
 			'role="status"'
 		);
 	});

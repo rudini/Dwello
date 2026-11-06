@@ -298,11 +298,11 @@ describe('Abrechnungen erstellen', () => {
 		next();
 		await settle();
 		const button = byTestId<HTMLButtonElement>('wizard-next')!;
-		expect(button.disabled).toBe(true);
+		expect(button.getAttribute('aria-disabled')).toBe('true');
 		expect(button.textContent!.trim()).toBe('Bitte warten …');
 		release();
 		await settle();
-		expect(button.disabled).toBe(false);
+		expect(button.getAttribute('aria-disabled')).toBeNull();
 		expect(button.textContent!.trim()).toBe('Weiter');
 	});
 
@@ -336,7 +336,7 @@ describe('Abrechnungen erstellen', () => {
 		pending[0](); // the answers to the step left
 		pending[1]();
 		await settle();
-		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(true);
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.getAttribute('aria-disabled')).toBe('true');
 	});
 
 	it('lässt weitergehen, wenn Rechnungen und Abrechnungen nicht geladen werden konnten', async () => {
@@ -344,7 +344,7 @@ describe('Abrechnungen erstellen', () => {
 		open();
 		next();
 		await settle();
-		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(false);
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.getAttribute('aria-disabled')).toBeNull();
 	});
 
 	async function toSettings() {
@@ -1359,13 +1359,13 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		const button = byTestId<HTMLButtonElement>('wizard-next')!;
 		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
-		expect(button.disabled).toBe(true);
+		expect(button.getAttribute('aria-disabled')).toBe('true');
 		pending['/api/statements/agreements']();
 		await settle();
-		expect(button.disabled).toBe(true); // the contracts without an agreed Verwaltungspauschale still load
+		expect(button.getAttribute('aria-disabled')).toBe('true'); // the contracts without an agreed Verwaltungspauschale still load
 		pending['/api/statements/billed']();
 		await settle();
-		expect(button.disabled).toBe(false);
+		expect(button.getAttribute('aria-disabled')).toBeNull();
 		expect(button.textContent!.trim()).toBe('Weiter');
 	});
 
@@ -1396,10 +1396,10 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		const button = byTestId<HTMLButtonElement>('wizard-next')!;
 		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
-		expect(button.disabled).toBe(true);
+		expect(button.getAttribute('aria-disabled')).toBe('true');
 		billed[3]();
 		await settle();
-		expect(button.disabled).toBe(false);
+		expect(button.getAttribute('aria-disabled')).toBeNull();
 	});
 
 	it('behält die Vorschau, wenn das Erstellen scheitert', async () => {
