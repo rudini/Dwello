@@ -24,7 +24,7 @@
 	</div>
 	<span class="text-ink md:flex-1">
 		{tenant.currentApartment && tenant.currentBuilding
-			? `${tenant.currentApartment} - ${tenant.currentBuilding}`
+			? `${tenant.currentApartment} · ${tenant.currentBuilding}`
 			: tenant.nextContractStart
 				? m.tenants_contract_from({ date: formatDate(tenant.nextContractStart) })
 				: m.tenants_no_rent()}
