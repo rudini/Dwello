@@ -37,7 +37,9 @@ import {
 	billedUntilErrorText,
 	startDateWarning,
 	startDateAsked,
-	billedUntilAsked
+	billedUntilAsked,
+	timesInWizard,
+	brokenStepNames
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -680,4 +682,24 @@ Then(
 
 Then('rät die Fehlermeldung nicht zum Berichtigen', async ({ verwalter }) => {
 	await verwalter.sees(errorMessageShown('berichtigen')).toBe(false);
+});
+
+// #667 (Dr. Weber W-04, W-07): the refusal names the other contract's tenant by the name the scenario gave
+Then('sieht der Liegenschaftsverwalter die Ablehnung {string}', async ({ verwalter, names }, text: string) => {
+	const named = [...names].reduce((shown, [given, seeded]) => shown.replaceAll(given, seeded), text);
+	await verwalter.sees(errorMessageShown(named)).toBe(true);
+});
+
+Then('sieht der Liegenschaftsverwalter in der Prüfung keinen Hinweis mehr', async ({ verwalter }) => {
+	await verwalter.sees(reviewHint).toBeNull();
+});
+
+// #667 (Dr. Weber W-08): also what only a screen reader reads counts
+Then('steht im Assistenten {string} nur einmal', async ({ verwalter }, text: string) => {
+	await verwalter.sees(timesInWizard(text)).toBe(1);
+});
+
+// #667 (Dr. Weber W-10)
+Then('bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um', async ({ verwalter }) => {
+	await verwalter.sees(brokenStepNames).toEqual([]);
 });

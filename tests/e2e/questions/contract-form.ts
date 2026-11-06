@@ -1,4 +1,4 @@
-import { Accessible, Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, BrokenWords, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedUntilError,
 	startDateNotice,
@@ -27,8 +27,10 @@ import {
 	noAdvanceNotice,
 	flatRateInput,
 	flatRateWarning,
-	runningContractEditHint
+	runningContractEditHint,
+	wizardText
 } from '../targets/contract-form';
+import { stepNames } from '../targets/wizard';
 import { errorToast, successToast } from '../targets/form';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
@@ -74,3 +76,5 @@ export const billedUntilAsked = Visibility.of(billedUntilField);
 
 // #499: what the field «Abgerechnet bis» says when it is refused
 export const billedUntilErrorText = Text.of(billedUntilError);
+export const timesInWizard = (text: string) => Count.of(wizardText(text));
+export const brokenStepNames = BrokenWords.in(stepNames);

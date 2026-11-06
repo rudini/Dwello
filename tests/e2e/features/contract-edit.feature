@@ -110,6 +110,18 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
     Dann meldet Dwello den Fehler "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
 
+  # #667 (Dr. Weber W-03, W-07): auch beim Bearbeiten nennt die Ablehnung den anderen Mietvertrag und sagt, was zu tun ist
+  @wip
+  Szenario: Die Ablehnung beim Bearbeiten sagt, was zu tun ist
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" befristet von "2022-01-01" bis "2024-03-31" für "900" Franken mit "100" Franken Akonto
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-01-01" speichert
+    Dann sieht der Liegenschaftsverwalter die Ablehnung "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (01.01.2022 – 31.03.2024, befristet). Wählen Sie einen Vertragsbeginn nach dem 31.03.2024."
+    Und sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn keinen Hinweis mehr
+
   # Eine Kündigung lässt sich nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht aufheben
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
