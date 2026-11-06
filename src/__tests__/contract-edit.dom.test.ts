@@ -1008,6 +1008,23 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
 	});
 
+	// #668 (fallback review on #1150): a total heard before does not stay readable once an amount is none
+	it('nimmt ein angesagtes Monatlich total zurück, sobald ein Betrag keiner ist', async () => {
+		await open();
+		vi.useFakeTimers();
+		try {
+			type('contract-advance-payment-input', '200');
+			vi.advanceTimersByTime(1000);
+			flushSync();
+			expect(byTestId('contract-monthly-total-announced')!.textContent).toContain('CHF');
+			type('contract-advance-payment-input', '2x0');
+			flushSync();
+		} finally {
+			vi.useRealTimers();
+		}
+		expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
+	});
+
 	// #668 (Persona Sven N-3, code review n-4, decided by the product owner): leaving with unsaved changes asks
 	describe('Verlassen mit ungespeicherten Änderungen', () => {
 		// the page's last beforeNavigate, called as SvelteKit calls it before a navigation

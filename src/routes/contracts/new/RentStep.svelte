@@ -48,7 +48,13 @@
 	let heard = untrack(() => total);
 	$effect(() => {
 		const now = total;
-		if (now === heard || typo) return;
+		// a total heard before goes too, so the status keeps no stale amount (fallback review on #1150)
+		if (typo) {
+			announced = '';
+			heard = NaN;
+			return;
+		}
+		if (now === heard) return;
 		const timer = setTimeout(() => {
 			heard = now;
 			announced = formatCurrency(now);
