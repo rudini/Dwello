@@ -8,3 +8,21 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: #668 usability pass, contract edit form and rent step (personas B-15)
+
+- [x] Read #668 and the B-15 reports (`helga-b15*.md` from history at `c893731^`; no Sven B-15 report exists, the issue text names his findings)
+- [x] @wip scenarios (contract-edit, contract-new), seen red at the missing behaviour (84e7003)
+- [x] fach-reviewer step 1, round 1: texts of S-4 and H15-3 in de/fr/it/en (`docs/reviews/668-fachreview-1.md`); M-1 became #1148
+- [x] S-3: «Monatlich total» in a `LiveRegion` (`RentStep.svelte`, 8497f84)
+- [x] H15-9: apartment written «Wohnung X · Gebäude» in the wizard's choice and review (`apartmentName` in `contract-form.ts`, `contract-wizard.ts`, edit `+page.server.ts`; 6913ed8); the tenant list's hyphen became #1149
+- [x] H15-3: notice hint wording of fach review 668-1 (`messages/*.json`, dfb15f9)
+- [ ] S-4: heading and page title name the tenant; blocked on the spec change of `contracts.feature:61`, `contract-detail.feature:138`
+- [x] S-7: already fixed by #654 (`RadioGroup` labels an option by its label, describes it once); no change
+- [x] H15-10: #1096 decided that a toast may briefly cover content without the focus; the «Vertragsstatus» filter is not focused after saving; no change
+- [ ] N-3 / n-4: no navigation guard in the app; options sent to the product owner
+- [ ] code-reviewer round 1, slice 668-s3 (`668-s3-review-1.md`)
+- [ ] code-reviewer round 1, slice 668-texts (`668-texts-review-1.md`)
+- [ ] Feature review: personas Helga and Sven
+- [ ] Before marking complete: lint, check, vitest (full, messages change), fitness, fallow, prettier, affected E2E with axe and language rows
+- [ ] Archive the session
