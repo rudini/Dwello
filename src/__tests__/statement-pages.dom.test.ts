@@ -164,6 +164,16 @@ describe('Abrechnungsliste', () => {
 		expect(reset).toEqual([]);
 	});
 
+	// fallback review on #1164: a contract that is gone has no sentence with «Alle Abrechnungen anzeigen», so the empty
+	// state keeps a way out
+	it('führt bei einem nicht gefundenen Mietvertrag aus der leeren Liste zu allen Abrechnungen', () => {
+		url = new URL('http://localhost/statements?contract=gone');
+		list([], 0, 1, null);
+
+		expect(byTestId('statements-scope')).toBeNull();
+		expect(byTestId('statements-empty-reset')?.getAttribute('href')).toBe('/statements');
+	});
+
 	// #673 (fach-review V-1): im leeren Zustand hebt «Filter zurücksetzen» wie in der Suche nur Suche, Gebäude und Status auf
 	it('setzt im leeren Zustand die Suche zurück und behält den Mietvertrag', () => {
 		url = new URL('http://localhost/statements?contract=c1&search=Huber&status=draft');

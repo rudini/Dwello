@@ -43,6 +43,8 @@
 	const reset = $derived(
 		search || building || status ? linkWith({ search: '', building: '', status: '' }) : ''
 	);
+	// without the sentence (a contract that is gone) the empty list still leads to all statements (fallback review)
+	const emptyReset = $derived(reset || (data.scope ? '' : '/statements'));
 
 	// Filters and paging live in the URL so the server filters across all statements
 	function linkWith(changes: Record<string, string>): string {
@@ -176,7 +178,7 @@
 					title={m.statements_none_found()}
 					text={m.statements_adjust_filters()}
 					actionLabel={m.buildings_reset_filters()}
-					actionHref={reset}
+					actionHref={emptyReset}
 					actionTestid="statements-empty-reset"
 				/>
 			{:else}
