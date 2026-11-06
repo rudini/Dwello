@@ -10,6 +10,7 @@
 		children,
 		action,
 		testid,
+		titleId,
 		element = $bindable()
 	}: {
 		tone?: Exclude<Tone, 'neutral'>;
@@ -17,6 +18,7 @@
 		children?: Snippet;
 		action?: Snippet;
 		testid?: string;
+		titleId?: string; // to name the title in a field's description (#665)
 		element?: HTMLElement; // to move the focus to the message
 	} = $props();
 	const style = $derived(toneStyle[tone]);
@@ -32,7 +34,7 @@
 >
 	<span class={style.text}><Icon name={style.icon} size={24} /></span>
 	<div class="flex min-w-0 flex-col gap-2">
-		<p class="font-semibold {style.text}">{title}</p>
+		<p id={titleId} class="font-semibold {style.text}">{title}</p>
 		{#if children}{@render children()}{/if}
 		{#if action}<div>{@render action()}</div>{/if}
 	</div>

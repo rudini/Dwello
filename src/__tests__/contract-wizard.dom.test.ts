@@ -67,7 +67,7 @@ const chooseFee = (choice: string) =>
 	byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
 
 const UNKNOWN =
-	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
+	'Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten.';
 // the earliest start, as the calendar of the start field takes it
 const minOfStart = () =>
 	byTestId('start-date-input')!.parentElement!.querySelector<HTMLInputElement>(
@@ -419,6 +419,25 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('availability-info')).toBeNull();
 		// Review M3: the hint is read out when it appears
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
+	});
+
+	// #665 (Sven B-13 1, 2): a keyboard user hears the hint with the field it is about
+	it('nennt den Hinweis auf nicht geladene Mietverträge mit der Wohnung und dem Vertragsbeginn', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		const description = (testid: string) =>
+			(byTestId(testid)!.getAttribute('aria-describedby') ?? '')
+				.split(' ')
+				.map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
+				.join(' ');
+		// the title too: it says what matters most (fach-reviewer b665 V-1)
+		const hint =
+			'Dwello prüft beim Speichern, ob die Wohnung frei ist Die anderen Mietverträge dieser Wohnung liessen sich nicht laden.';
+		await toPeriod('a3');
+		expect(description('start-date-input')).toContain(hint);
+		click('wizard-back');
+		expect(description('apartment-select')).toContain(hint);
 	});
 
 	// #151: «Erneut versuchen» loads the contracts again; the start already typed stays

@@ -43,6 +43,7 @@
 		{ "pattern": "^src/lib/types\\.ts$", "module": "shared:types" },
 		{ "pattern": "^src/routes/([^/]+)/.*", "module": "fe:routes/$1" },
 		{ "pattern": "^src/routes/[^/]+$", "module": "fe:routes/(root)" },
+		{ "pattern": "^src/lib/ui/illustrations/.*", "module": "fe:ui/illustrations" },
 		{ "pattern": "^src/lib/ui/.*", "module": "fe:ui" },
 		{ "pattern": "^src/lib/([^/.]+)\\.(ts|svelte)$", "module": "fe:lib/$1" },
 		{ "pattern": "^src/lib/([^/]+)/.*", "module": "fe:lib/$1" },

@@ -28,6 +28,7 @@
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -274,12 +275,9 @@
 				<dd class="text-ink" data-testid="contract-form-apartment">{apartment}</dd>
 			</div>
 		</dl>
-		<!-- always present, so screen readers hear the hint when it appears -->
-		<div role="status">
-			{#if unknown}
-				<ContractsUnknown onretry={retry} testid="apartment-contracts-unknown" />
-			{/if}
-		</div>
+		<LiveRegion shown={unknown}>
+			<ContractsUnknown onretry={retry} testid="apartment-contracts-unknown" />
+		</LiveRegion>
 		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
 			<p>
 				{contract.endDate

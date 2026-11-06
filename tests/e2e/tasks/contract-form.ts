@@ -101,6 +101,8 @@ export const registerContract = (contract: ContractData): Activity => (actor) =>
 export const reviewContract = (contract: ContractData): Activity => (actor) =>
 	actor.attemptsTo(chooseTenant(contract.tenantId), fillContract(contract));
 
+export const chooseApartment = (apartmentId: string) => Select.option(apartmentId).from(apartmentSelect);
+
 export const chooseTenantAndApartment = (tenantId: string, apartmentId: string): Activity => (actor) =>
 	actor.attemptsTo(chooseTenant(tenantId), Select.option(apartmentId).from(apartmentSelect), goToNextStep);
 

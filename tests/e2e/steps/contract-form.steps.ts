@@ -6,6 +6,8 @@ import {
 	apartmentChoices,
 	apartmentHint,
 	apartmentSelectable,
+	apartmentSelectDescription,
+	startDateDescription,
 	chosenApartmentId,
 	chosenTenantId,
 	chosenTenantName,
@@ -55,6 +57,7 @@ import {
 	saveStartDate,
 	withdrawNotice,
 	chooseTenant,
+	chooseApartment,
 	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
 	contractsCannotBeLoaded,
@@ -290,6 +293,21 @@ Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis {string}'
 
 Then('sieht der Liegenschaftsverwalter in der Prüfung den Hinweis {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(reviewHint).toContain(text);
+});
+
+When('der Liegenschaftsverwalter in der Auswahl die Wohnung {string} wählt', async ({ verwalter, seed }, apartment: string) => {
+	await verwalter.attemptsTo(chooseApartment(seed.idOf(apartment)!));
+});
+
+Then(
+	'liest ein Screenreader bei der Wohnungsauswahl den Hinweis {string} vor',
+	async ({ verwalter }, text: string) => {
+		await verwalter.sees(apartmentSelectDescription).toContain(text);
+	}
+);
+
+Then('liest ein Screenreader beim Vertragsbeginn den Hinweis {string} vor', async ({ verwalter }, text: string) => {
+	await verwalter.sees(startDateDescription).toContain(text);
 });
 
 When('der Liegenschaftsverwalter die Nettomiete {string} einträgt', async ({ verwalter }, baseRent: string) => {

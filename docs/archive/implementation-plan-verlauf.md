@@ -1191,6 +1191,23 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Before marking complete: lint, check, fitness, backend type-check, Prettier on added files
 - [x] Archive the session; PR `Fixes #1122` pushed after this archive
 
+## Session: contracts-not-loaded hint linked and shorter (#665, #666)
+
+- [x] @wip scenarios: the hint is the description of «Wohnung» and «Vertragsbeginn» (#665); its shorter wording (#666)
+- [x] fach-reviewer step 1 on the wording of #666 (`docs/reviews/b665-fachreview-1.md`); V-1 fixed (af5fab3), issues #1142, #1143
+- [x] Product decision on the changed lines of the non-@wip scenarios that quote the old wording (#666, «Decided (product owner)»)
+- [x] Slice 1 (#665): `Field` `describedby` through `Select` and `DateInput`; the hint linked (`Field`, `Select`, `DateInput`, `ContractsUnknown`, `ApartmentStep`, `PeriodStep`)
+- [x] Slice 2 (#665): `src/lib/ui/LiveRegion.svelte` replaces the hand-made `role="status"` wrappers (also `ContractForm`); the round-3 region at «Vertragsbeginn» was dropped again (C-1: unreachable since #468)
+- [x] code-reviewer slice 1+2 (`docs/reviews/b665-review-1.md`); C-1 fixed (8e11340)
+- [x] Slice 3 (#666): shorter wording in all four languages (`messages/*.json`, `ContractsUnknown.svelte`, scenarios, DOM tests)
+- [x] code-reviewer round 2: af5fab3, C-1 fix, #666 (`docs/reviews/b665-review-2.md`; C-1 closed, C-2 Minor fixed: `fe:ui` ratchet 56 → 46 files)
+- [x] fitness split: `fe:ui/illustrations` module (8c17129)
+- [x] Feature review: Sven (`docs/design/personas/sven-b665.md`)
+- [x] Feature review of #666: no persona (a text the issue decided whose `fach-reviewer` round read it in all four languages, `CLAUDE.md` step 5)
+- [x] #665 «the rest»: round 3 unreachable since #468 (C-1); H7/Sven 7 gone since #152 (the edit form names the apartment); H6, H8, Sven 6 stay (files not touched)
+- [x] Checks: lint, check, backend type-check, full vitest, fitness `--base origin/main`, fallow audit, Prettier on added files, affected E2E and axe/language rows
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-665.md`
+- [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive
 ## Session: #1121 outside review as a required status
 
 - [x] `fallback-review.yml` sets the commit status «Outside review» on the head after a Copilot review, a fallback review or «No review» (`statuses: write`)

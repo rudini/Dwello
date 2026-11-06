@@ -15,7 +15,8 @@
 	import Button from '$lib/ui/Button.svelte';
 
 	// The apartment's contracts could not be loaded (#143): with `onretry` the hint loads them again, the
-	// input stays (#151); without it, it points to the hint at the apartment, so a page has one such button
+	// input stays (#151); without it, it points to the hint at the apartment, so a page has one such button;
+	// its title and text describe the field it is about (`{testid}-title {testid}-text`, #665)
 	let { onretry, testid }: { onretry?: () => void; testid: string } = $props();
 </script>
 
@@ -25,13 +26,15 @@
 	>
 {/snippet}
 
+<!-- the title says what matters most: saving checks it (#666); TODO(fachlich prüfen, #1142): «frei (Wohnung)» -->
 <Alert
 	tone="caution"
 	title={m.contracts_apartment_contracts_unknown()}
+	titleId="{testid}-title"
 	action={onretry ? retry : undefined}
 	{testid}
 >
-	<p>
+	<p id="{testid}-text">
 		{onretry
 			? m.contracts_apartment_contracts_unknown_text()
 			: m.contracts_apartment_contracts_see_apartment()}

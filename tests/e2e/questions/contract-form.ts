@@ -1,4 +1,4 @@
-import { Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedUntilError,
 	startDateNotice,
@@ -40,6 +40,9 @@ export const confirmation = Text.of(successToast);
 export const durationChosen = (label: string) => Checked.of(durationOption(label));
 export const apartmentHint = Text.of(apartmentContractsUnknown);
 export const startHint = Text.of(startContractsUnknown);
+// #665: what a screen reader says with the field, so the hint is heard on the way through the form
+export const apartmentSelectDescription = Accessible.descriptionOf(apartmentSelect);
+export const startDateDescription = Accessible.descriptionOf(startDateField);
 export const reviewHint = Text.of(reviewContractsUnknown);
 export const enteredBaseRent = Value.of(baseRentInput);
 export const apartmentChoiceLabel = (apartmentId: string) => Text.of(apartmentOption(apartmentId));

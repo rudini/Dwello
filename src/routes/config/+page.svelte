@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -229,13 +230,11 @@
 				<p>{errors.form}</p>
 			</Alert>
 		{/if}
-		<div role="status">
-			{#if saved}
-				<Alert tone="positive" title={m.settings_saved()} testid="settings-saved">
-					<p>{m.settings_saved_text()}</p>
-				</Alert>
-			{/if}
-		</div>
+		<LiveRegion shown={saved}>
+			<Alert tone="positive" title={m.settings_saved()} testid="settings-saved">
+				<p>{m.settings_saved_text()}</p>
+			</Alert>
+		</LiveRegion>
 		<div>
 			<Button
 				type="submit"

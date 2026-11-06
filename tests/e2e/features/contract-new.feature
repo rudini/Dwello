@@ -105,13 +105,29 @@ Funktionalität: Neuen Mietvertrag erfassen
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
-    Dann sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Überschneidung noch nicht geprüft"
+    Dann sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist"
 
   Szenario: Die Prüfung nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
-    Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Überschneidung noch nicht geprüft"
+    Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist"
+
+  # #665 (Persona Sven B-13): wer mit der Tastatur zum Feld kommt, hört den Hinweis mit dem Feld
+  Szenario: Die Wohnungsauswahl nennt die nicht geladenen Mietverträge
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" vor
+    Und liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden." vor
+
+  Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Dann liest ein Screenreader beim Vertragsbeginn den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" vor
+    Und liest ein Screenreader beim Vertragsbeginn den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden." vor
 
   # Ohne ihre Mietverträge sieht die Wohnung nicht wie eine freie aus (#151, Dr. Weber W-01)
   Szenario: Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft

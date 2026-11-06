@@ -4,6 +4,7 @@ import Badge from '$lib/ui/Badge.svelte';
 import EmptyState from '$lib/ui/EmptyState.svelte';
 import SaveStatus from '$lib/ui/SaveStatus.svelte';
 import DraftNotice from '$lib/ui/DraftNotice.svelte';
+import LiveRegion from '$lib/ui/LiveRegion.svelte';
 import ProgressBar from '$lib/ui/ProgressBar.svelte';
 import { icons } from '$lib/ui/icons';
 import { tick } from 'svelte';
@@ -16,6 +17,24 @@ const inUtc = () => (process.env.TZ = 'UTC');
 afterEach(() => {
 	if (zone === undefined) delete process.env.TZ;
 	else process.env.TZ = zone;
+});
+
+// #665: a message that appears without the focus moving is announced, so its region is there before it
+describe('Ansage', () => {
+	it('ist vor ihrem Inhalt da und nimmt leer keinen Platz ein', () => {
+		show(LiveRegion, { shown: false, children: markup('<p>Gespeichert</p>'), testid: 'region' });
+		const region = byTestId('region')!;
+		expect(region.getAttribute('role')).toBe('status');
+		expect(region.classList.contains('sr-only')).toBe(true);
+		expect(region.textContent!.trim()).toBe('');
+	});
+
+	it('zeigt ihren Inhalt, sobald es ihn gibt', () => {
+		show(LiveRegion, { shown: true, children: markup('<p>Gespeichert</p>'), testid: 'region' });
+		const region = byTestId('region')!;
+		expect(region.classList.contains('sr-only')).toBe(false);
+		expect(region.textContent).toContain('Gespeichert');
+	});
 });
 
 describe('Hinweis', () => {

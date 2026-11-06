@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
@@ -82,23 +83,22 @@
 	bind:value={startDate}
 	{min}
 	error={errors.startDate}
+	describedby={unknown ? 'start-contracts-unknown-title start-contracts-unknown-text' : undefined}
 	testid="start-date-input"
 />
 
-<!-- read out at the apartment choice already; a second live region would say it twice (Sven B-13) -->
+<!-- read out at the apartment choice already, and with «Vertragsbeginn» (#665): a second live region would say it
+     twice (Sven B-13); step 3 opens only once the contracts are known («Weiter» waits for them, #468) -->
 {#if unknown}
 	<ContractsUnknown {onretry} testid="start-contracts-unknown" />
 {/if}
 
-<!-- always present, so screen readers hear the hint when it appears -->
-<div role="status" data-testid="start-date-notice">
-	{#if pastStart}
-		<Alert tone="caution" title={m.contracts_check_start()}>
-			<p>{pastStart}</p>
-			{#if offerBilledUntil}<p>{m.contracts_start_in_past_billed()}</p>{/if}
-		</Alert>
-	{/if}
-</div>
+<LiveRegion shown={!!pastStart} testid="start-date-notice">
+	<Alert tone="caution" title={m.contracts_check_start()}>
+		<p>{pastStart}</p>
+		{#if offerBilledUntil}<p>{m.contracts_start_in_past_billed()}</p>{/if}
+	</Alert>
+</LiveRegion>
 
 <RadioGroup
 	name="duration"

@@ -18,6 +18,7 @@
 		optional = false,
 		min,
 		note,
+		describedby,
 		testid,
 		example = `31.12.${new Date().getFullYear()}` // the last day of this year: never in the past
 	}: {
@@ -30,6 +31,7 @@
 		optional?: boolean;
 		min?: string; // limits the calendar only; the page checks the date
 		note?: { text: string; testid: string }; // see Field
+		describedby?: string; // see Field
 		testid: string;
 		example?: string;
 	} = $props();
@@ -123,6 +125,7 @@
 	<Field
 		{id}
 		{note}
+		{describedby}
 		{label}
 		help={helpText}
 		helpTestid="{testid}-help"
