@@ -1,10 +1,16 @@
 <script module lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { addToast } from '$lib/stores';
+	import { addToast, dismissToast } from '$lib/stores';
+
+	let failed = 0; // the error of the last attempt: the next result replaces it (#669, Sven P-1)
 
 	/** After «Erneut versuchen»: says how it went; on success the button is gone, so the focus goes to `next` */
 	export function retried(stillUnknown: boolean, next: HTMLElement | null | undefined) {
-		if (stillUnknown) return addToast('error', m.contracts_apartment_contracts_retry_failed());
+		dismissToast(failed);
+		if (stillUnknown) {
+			failed = addToast('error', m.contracts_apartment_contracts_retry_failed());
+			return;
+		}
 		addToast('success', m.contracts_apartment_contracts_loaded());
 		next?.focus();
 	}

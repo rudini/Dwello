@@ -37,12 +37,13 @@ export function addToast(
 	type: Toast['type'],
 	message: string,
 	duration = type === 'error' ? 0 : 8000
-): void {
+): number {
 	const id = ++toastId;
 	toasts.update((all) => [
 		...all.filter((toast) => type !== 'success' || toast.type !== 'success'),
 		{ id, type, message, duration }
 	]);
+	return id;
 }
 
 /**
