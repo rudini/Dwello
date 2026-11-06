@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
+	import DemoNotice from '$lib/DemoNotice.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
 	import PasswordForm from './PasswordForm.svelte';
@@ -30,6 +31,12 @@
 				{intro}
 			</p>
 		</div>
+
+		{#if data.demo}
+			<Alert tone="caution" title={m.demo_notice_title()} testid="demo-notice">
+				<DemoNotice contact={data.contact} />
+			</Alert>
+		{/if}
 
 		{#if error}
 			<Alert tone="critical" title={error} testid="login-error" />

@@ -1,4 +1,5 @@
-import { Navigate } from '../screenplay/interactions';
+import { Click, Navigate } from '../screenplay/interactions';
+import { demoNoticeLink } from '../targets/demo';
 
 // The instance of the E2E stack with DEMO=on (playwright.config.ts); the session cookies hold for every port of localhost.
 // It starts only for the features playwright.config.ts names in `usesExtraInstances`: a new feature using it goes there
@@ -8,3 +9,5 @@ export const openDemoSignIn = Navigate.to(`${DEMO_INSTANCE}/login`);
 export const openDemoOverview = Navigate.to(`${DEMO_INSTANCE}/dashboard`);
 export const openDemoPrivacy = Navigate.to(`${DEMO_INSTANCE}/privacy`);
 export const openDemoTerms = Navigate.to(`${DEMO_INSTANCE}/terms`);
+export const openDemoHelp = Navigate.to(`${DEMO_INSTANCE}/help`);
+export const followDemoNoticeLink = (name: string) => Click.on(demoNoticeLink(name));

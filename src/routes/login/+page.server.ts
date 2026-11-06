@@ -1,6 +1,7 @@
 import { getConfiguredProviders, PROVIDER_NAMES } from '$lib/server/oauth';
 import { LOGIN_ERRORS } from '$lib/server/login-flow';
 import { redirect } from '@sveltejs/kit';
+import { loadOperator } from '$lib/server/operator';
 import { insecureConnection, passwordAvailable, setupNeeded, signInWithPassword } from '$lib/server/password-login';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -14,6 +15,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 		password: await passwordAvailable(fetch),
 		insecure: insecureConnection(url),
 		redirectTo,
+		contact: loadOperator()?.contact || null,
 		providers: getConfiguredProviders().map((id) => ({
 			id,
 			name: PROVIDER_NAMES[id],

@@ -3,12 +3,14 @@ import HelpPage from '../routes/help/+page.svelte';
 import { navGroups } from '$lib/ui/navigation';
 import { allByTestId, byTestId, show } from './helpers/dom';
 
+// an own installation without a session: no demo, no operator
+const own = { user: null, demo: false, contact: null };
 const section = (title: string) =>
 	allByTestId('page-section').find((s) => s.querySelector('h2')?.textContent === title);
 
 describe('Hilfe', () => {
 	it('nennt die Bereiche mit den Namen der Hauptnavigation', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 
 		const text = document.body.textContent ?? '';
 		const names = navGroups
@@ -24,7 +26,7 @@ describe('Hilfe', () => {
 		vi.useFakeTimers({ toFake: ['Date'] });
 		vi.setSystemTime(new Date('2027-03-01T10:00:00Z'));
 		try {
-			show(HelpPage, {});
+			show(HelpPage, { data: own });
 
 			const invoices = section('Rechnungen erfassen')!.textContent;
 			expect(invoices).toContain('Geben Sie dann 01.04.2027 bis 31.03.2032 ein.');
@@ -39,7 +41,7 @@ describe('Hilfe', () => {
 	});
 
 	it('erklärt die Fachbegriffe in einfachen Worten', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 
 		const glossary = section('Begriffe kurz erklärt');
 		expect([...(glossary?.querySelectorAll('dt') ?? [])].map((dt) => dt.textContent)).toEqual([
@@ -79,7 +81,7 @@ describe('Hilfe', () => {
 
 	// wie das Glossar «Rechnungsdatum» und «Leistungszeitraum»; gleicher Wortlaut wie PR #289 (#67)
 	it('sagt, wann das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 		const glossary = section('Begriffe kurz erklärt')!.textContent;
 		expect(glossary).toContain(
 			'Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. Mit Leistungszeitraum zählen dessen Tage in der Abrechnungsperiode.'
@@ -88,7 +90,7 @@ describe('Hilfe', () => {
 
 	// Fachreview #69 (M-1, M-2, V-1 bis V-5): die Begriffe sagen, was Glossar und Gesetz sagen
 	it('erklärt die Begriffe so, wie Glossar und Mietrecht sie verstehen', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 		const glossary = section('Begriffe kurz erklärt')!.textContent;
 		for (const said of [
 			// Wie der Vertragshinweis der Kategorien (#292, Code-Review C-1)
@@ -115,7 +117,7 @@ describe('Hilfe', () => {
 
 	// Inhaltsverzeichnis mit eigenem Einstieg in die Begriffe (#109)
 	it('beginnt mit einem Inhalt, der zu jedem Abschnitt und zu den Begriffen führt', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 		const links = [...byTestId('help-contents')!.querySelectorAll('a')];
 		const sections = allByTestId('page-section');
 		expect(links.map((a) => a.textContent?.trim())).toEqual(
@@ -131,7 +133,7 @@ describe('Hilfe', () => {
 	});
 
 	it('erklärt die beiden geführten Abläufe Schritt für Schritt', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 
 		const contract = section('Mieter und Mietverträge verwalten')?.textContent;
 		expect(contract).toContain('«Mietvertrag erfassen»');
@@ -145,7 +147,7 @@ describe('Hilfe', () => {
 	});
 
 	it('nennt das Hochladen mehrerer Rechnungen (Persona Anna)', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 		expect(section('Rechnungen erfassen')?.textContent).toContain(
 			'Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt.'
 		);
@@ -153,7 +155,7 @@ describe('Hilfe', () => {
 
 	// #86: per E-Mail sendet Dwello selbst, per Brief stellt der Verwalter das PDF zu
 	it('sagt, wie eine Abrechnung je nach Korrespondenzkanal zum Mieter kommt', () => {
-		show(HelpPage, {});
+		show(HelpPage, { data: own });
 
 		const text = section('Nebenkostenabrechnungen erstellen')?.textContent;
 		expect(text).toContain(
@@ -163,5 +165,26 @@ describe('Hilfe', () => {
 			'Für einen Brief stellen Sie dem Mieter das PDF selbst zu und wählen am selben Tag «Als versendet markieren».'
 		);
 		expect(text).not.toContain('nicht selbst');
+	});
+
+	// #675 F2, F3: «Mehr zur Demo» leads here; the full notice, one's own installation through the operator
+	it('erklärt in der Demo unter «Öffentliche Demo» die Demo vollständig', () => {
+		show(HelpPage, { data: { ...own, demo: true, contact: 'betrieb@muster-hosting.ch' } });
+		const demo = section('Öffentliche Demo');
+		expect(demo?.id).toBe('demo');
+		for (const said of [
+			'Alle Besucher sehen und ändern dieselben Daten.',
+			'Probieren Sie alles aus',
+			'keinen eigenen API-Schlüssel ein',
+			'Fragen Sie dafür den Betreiber dieser Demo: betrieb@muster-hosting.ch.'
+		])
+			expect(demo?.textContent).toContain(said);
+		expect(byTestId('help-contents')!.querySelector('a')?.getAttribute('href')).toBe('#demo');
+	});
+
+	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
+		show(HelpPage, { data: own });
+		expect(section('Öffentliche Demo')).toBeUndefined();
+		expect(document.getElementById('demo')).toBeNull();
 	});
 });
