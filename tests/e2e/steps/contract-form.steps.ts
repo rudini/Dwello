@@ -1,5 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { cancelEditing } from '../tasks/form';
+import { chooseInMainNav } from '../tasks/app-frame';
 import { errorMessage, errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
@@ -754,3 +755,10 @@ When('der Liegenschaftsverwalter bei Mieter und Wohnung den Mietvertrag öffnet'
 When('der Liegenschaftsverwalter dem Hinweis zum Vertragsende folgt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(followNoticeHint);
 });
+
+When(
+	'der Liegenschaftsverwalter in der Hauptnavigation {string} wählt und die Änderungen verwirft',
+	async ({ verwalter }, label: string) => {
+		await verwalter.attemptsTo(chooseInMainNav(label), discardChanges);
+	}
+);

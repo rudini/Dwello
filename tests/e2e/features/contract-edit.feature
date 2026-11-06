@@ -322,14 +322,12 @@ Funktionalität: Mietvertrag bearbeiten
     Dann fragt der Hinweis zum Vertragsende "Zieht der Mieter aus oder in eine andere Wohnung?"
 
   # #668 (Persona Sven N-3, Code-Review n-4): wer das Formular mit ungespeicherten Änderungen verlässt, wird gefragt
-  @wip
   Szenario: Abbrechen mit ungespeicherten Änderungen fragt nach
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
 
   # #668
-  @wip
   Szenario: Ungespeicherte Änderungen verwerfen
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter die Bearbeitung abbricht und die Änderungen verwirft
@@ -337,29 +335,37 @@ Funktionalität: Mietvertrag bearbeiten
     Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 950.00"
 
   # #668
-  @wip
   Szenario: Nach der Rückfrage weiter bearbeiten
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter die Bearbeitung abbricht und weiter bearbeitet
     Dann ist die Nettomiete "980" noch eingetragen
 
   # #668
-  @wip
   Szenario: Der Link zum Mietvertrag fragt bei ungespeicherten Änderungen nach
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter bei Mieter und Wohnung den Mietvertrag öffnet
     Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
 
   # #668
-  @wip
   Szenario: Der Hinweis unter «Befristet» fragt vor dem Verlassen nach
     Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
     Und der Liegenschaftsverwalter dem Hinweis zum Vertragsende folgt
     Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
 
   # #668
-  @wip
   Szenario: Die Hauptnavigation fragt bei ungespeicherten Änderungen nach
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
+    Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"
+
+  # #668 (Fachreview 668-n3 V-2): nach dem Verwerfen geht Dwello dorthin, wohin der Liegenschaftsverwalter wollte
+  Szenario: Nach dem Verwerfen öffnet Dwello die gewählte Seite
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt und die Änderungen verwirft
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+
+  # #668 (Fachreview 668-n3 V-1): jeder Weg aus dem Formular fragt, auch der Breadcrumb
+  Szenario: Der Breadcrumb fragt bei ungespeicherten Änderungen nach
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und der Liegenschaftsverwalter im Breadcrumb "Mietverträge" wählt
     Dann fragt Dwello vor dem Verlassen "Änderungen verwerfen?"

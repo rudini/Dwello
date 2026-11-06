@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), beforeNavigate: vi.fn() }));
 vi.mock('$app/stores', () => ({
 	page: {
 		subscribe: (run: (value: unknown) => void) => (
@@ -10,7 +10,7 @@ vi.mock('$app/stores', () => ({
 	}
 }));
 
-import { goto } from '$app/navigation';
+import { beforeNavigate, goto } from '$app/navigation';
 import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
@@ -1006,6 +1006,74 @@ describe('Mietvertrag bearbeiten', () => {
 			vi.useRealTimers();
 		}
 		expect(byTestId('contract-monthly-total-announced')!.textContent!.trim()).toBe('');
+	});
+
+	// #668 (Persona Sven N-3, code review n-4, decided by the product owner): leaving with unsaved changes asks
+	describe('Verlassen mit ungespeicherten Änderungen', () => {
+		// the page's last beforeNavigate, called as SvelteKit calls it before a navigation
+		const navigate = (type = 'link') => {
+			const cancel = vi.fn();
+			const leave = vi.mocked(beforeNavigate).mock.calls.at(-1)![0];
+			leave({ cancel, type, to: { url: new URL('http://localhost/contracts') } } as never);
+			flushSync();
+			return cancel;
+		};
+		const dialog = () => document.querySelector('[role="dialog"]');
+
+		it('lässt ohne Änderung gehen', async () => {
+			await open();
+			expect(navigate()).not.toHaveBeenCalled();
+			expect(dialog()).toBeNull();
+		});
+
+		it('fragt nach einer Änderung und geht erst nach «verwerfen»', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate()).toHaveBeenCalled();
+			expect(dialog()!.textContent).toContain('Änderungen verwerfen?');
+			expect(dialog()!.textContent).toContain(
+				'Ihre Änderungen sind noch nicht gespeichert und gehen verloren. Der Mietvertrag bleibt, wie er zuletzt gespeichert wurde.'
+			);
+			click('contract-leave-confirm');
+			await settle();
+			expect(goto).toHaveBeenCalledWith(new URL('http://localhost/contracts'));
+			expect(navigate('goto')).not.toHaveBeenCalled(); // the navigation it started is not asked again
+		});
+
+		// the form is compared with its saved state (fach review 668-n3)
+		it('lässt gehen, wenn eine Änderung wieder zurückgenommen ist', async () => {
+			await open();
+			const saved = byTestId<HTMLInputElement>('contract-base-rent-input')!.value;
+			type('contract-base-rent-input', '980');
+			type('contract-base-rent-input', saved);
+			expect(navigate()).not.toHaveBeenCalled();
+		});
+
+		it('behält die Eingabe bei «Weiter bearbeiten»', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			navigate();
+			click('dialog-cancel');
+			flushSync();
+			expect(dialog()).toBeNull();
+			expect(goto).not.toHaveBeenCalled();
+			expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('980');
+		});
+
+		it('überlässt beim Schliessen des Tabs die Frage dem Browser', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			expect(navigate('leave')).toHaveBeenCalled(); // SvelteKit then shows the browser's own prompt
+			expect(dialog()).toBeNull();
+		});
+
+		it('fragt nach dem Speichern nicht', async () => {
+			await open();
+			type('contract-base-rent-input', '980');
+			await save();
+			expect(goto).toHaveBeenCalledWith('/contracts/c1');
+			expect(navigate('goto')).not.toHaveBeenCalled();
+		});
 	});
 
 	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung

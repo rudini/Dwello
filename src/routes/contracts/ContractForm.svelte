@@ -43,6 +43,7 @@
 	import PastEndConfirm from './PastEndConfirm.svelte';
 	import RefusedStatements from './RefusedStatements.svelte';
 	import NoticeHint from './NoticeHint.svelte';
+	import LeaveConfirm from './LeaveConfirm.svelte';
 
 	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new;
 	// tenant and apartment are fixed (#152): a move or a Mieterwechsel is a new contract
@@ -395,3 +396,5 @@
 		>
 	</div>
 </form>
+
+<LeaveConfirm {values} />

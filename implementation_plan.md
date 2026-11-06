@@ -17,12 +17,16 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] S-3: «Monatlich total» in a `LiveRegion` (`RentStep.svelte`, 8497f84)
 - [x] H15-9: apartment written «Wohnung X · Gebäude» in the wizard's choice and review (`apartmentName` in `contract-form.ts`, `contract-wizard.ts`, edit `+page.server.ts`; 6913ed8); the tenant list's hyphen became #1149
 - [x] H15-3: notice hint wording of fach review 668-1 (`messages/*.json`, dfb15f9)
-- [ ] S-4: heading and page title name the tenant; blocked on the spec change of `contracts.feature:61`, `contract-detail.feature:138`
+- [x] S-4: heading and page title name the tenant (012dc33); Spec change approved: #668 for `contracts.feature:61`, `contract-detail.feature:138`
 - [x] S-7: already fixed by #654 (`RadioGroup` labels an option by its label, describes it once); no change
 - [x] H15-10: #1096 decided that a toast may briefly cover content without the focus; the «Vertragsstatus» filter is not focused after saving; no change
-- [ ] N-3 / n-4: no navigation guard in the app; options sent to the product owner
-- [ ] code-reviewer round 1, slice 668-s3 (`668-s3-review-1.md`)
-- [ ] code-reviewer round 1, slice 668-texts (`668-texts-review-1.md`)
-- [ ] Feature review: personas Helga and Sven
+- [x] N-3 / n-4: product owner chose option 1; @wip scenarios and DOM tests seen red; fach-reviewer step 1 (`docs/reviews/668-n3-fachreview-1.md`): texts word for word, V-1 (every way out, breadcrumb scenario), V-2 (lands where clicked) fixed; `LeaveConfirm.svelte` with `beforeNavigate` (back button included), the form's own `goto` not asked; axe and language rows `contract-edit leave-dialog`
+- [ ] code-reviewer round 1, slice 668-n3 (S-4, Helga P-1, N-3; `668-n3-review-1.md`)
+- [x] code-reviewer round 1, slice 668-s3 (`docs/reviews/668-s3-review-1.md`)
+- [x] code-reviewer round 1, slice 668-texts (`docs/reviews/668-texts-review-1.md`)
+- [x] C-1, C-2, Sven P-2, Helga P-1 fixed, each test seen red (3b1476c)
+- [x] code-reviewer round 2, slice 668-s3 (`docs/reviews/668-s3-review-2.md`): C-1, C-2 closed
+- [x] Feature review round 1: personas Helga and Sven (`docs/design/personas/helga-668.md`, `sven-668.md`)
+- [ ] Persona re-run after S-4 and N-3
 - [ ] Before marking complete: lint, check, vitest (full, messages change), fitness, fallow, prettier, affected E2E with axe and language rows
 - [ ] Archive the session
