@@ -128,8 +128,9 @@ describe('Mietvertragsliste', () => {
 
 	// a button's empty status region (#677) says nothing; the status of a contract is no live region
 	it('meldet den Status nicht als Live-Region', () => {
-		expect(withoutComments(list([contract('c1', 'Anna Keller', '2024-04-01', null)]))).not.toMatch(
-			/role="status"[^>]*>[^<]/
+		const markup = withoutComments(list([contract('c1', 'Anna Keller', '2024-04-01', null)]));
+		expect(markup.replace(/<span role="status" class="sr-only"[^>]*><\/span>/g, '')).not.toContain(
+			'role="status"'
 		);
 	});
 

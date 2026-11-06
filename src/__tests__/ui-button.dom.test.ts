@@ -62,6 +62,8 @@ describe('Button', () => {
 		expect(button.getAttribute('aria-busy')).toBe('true');
 		expect(button.getAttribute('aria-disabled')).toBe('true');
 		expect(button.disabled).toBe(false);
+		button.focus();
+		expect(document.activeElement).toBe(button);
 		click(button);
 		expect(onclick).not.toHaveBeenCalled();
 	});
