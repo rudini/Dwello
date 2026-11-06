@@ -107,6 +107,21 @@ describe('Eingabefeld', () => {
 		form.remove();
 	});
 
+	// Code review 1166 C-3, fallback review of #1177: a field whose own error the refusal names reads it once
+	it('liest die eigene Fehlermeldung einmal vor, auch wenn die Ablehnung das Feld nennt', () => {
+		show(TextInput, {
+			id: 'accountHolderName',
+			label: 'Name des Kontoinhabers',
+			error: 'Mit einer IBAN braucht es den Kontoinhaber.',
+			invalidBy: 'accountHolderName-error',
+			value: ''
+		});
+
+		expect(document.querySelector('input')!.getAttribute('aria-describedby')).toBe(
+			'accountHolderName-error'
+		);
+	});
+
 	it('nennt freiwillige Felder in Worten', () => {
 		show(TextInput, { id: 'phone', label: 'Telefon', optional: true, value: '' });
 		expect(document.querySelector('label')!.textContent).toContain('(optional)');

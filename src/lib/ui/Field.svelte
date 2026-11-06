@@ -78,7 +78,14 @@
 	const noteLook = $derived(warning ? 'font-semibold text-caution' : 'text-ink-muted');
 	// a caution about the value first, a hint about it too: it is missed at the end of a long help (persona Sven)
 	const describedBy = $derived(
-		[note && noteId, describedby, hasHelp && helpId, shown && errorId, flagged]
+		// a refusal that names this field's own error (#1166) adds no second reference to it
+		[
+			note && noteId,
+			describedby,
+			hasHelp && helpId,
+			shown && errorId,
+			flagged !== errorId && flagged
+		]
 			.filter(Boolean)
 			.join(' ') || undefined
 	);
