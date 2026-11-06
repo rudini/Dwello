@@ -16,6 +16,17 @@
 		['search', 'building', 'status'].some((key) => $page.url.searchParams.get(key))
 	);
 	const search = $derived($page.url.searchParams.get('search')?.trim());
+	// #670: over several pages the heading names the apartments shown and the page, not only the total
+	const heading = $derived.by(() => {
+		const { apartments, total, page, pageSize } = data;
+		const pages = Math.ceil(total / pageSize);
+		if (pages < 2)
+			return (total === 1 ? m.apartments_count_one : m.apartments_count_many)({ count: total });
+		const from = (page - 1) * pageSize + 1;
+		const counted =
+			apartments.length === 1 ? m.apartments_count_page_one : m.apartments_count_page_many;
+		return counted({ from, to: from + apartments.length - 1, total, page, pages });
+	});
 </script>
 
 <svelte:head>
@@ -64,9 +75,7 @@
 	{:else}
 		<ResultList
 			id="apartments-count"
-			heading={(data.total === 1 ? m.apartments_count_one : m.apartments_count_many)({
-				count: data.total
-			})}
+			{heading}
 			listClass="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
 			url={$page.url}
 			page={data.page}
