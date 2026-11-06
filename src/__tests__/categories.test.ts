@@ -138,7 +138,7 @@ describe('Neue Kategorie', () => {
 		await result.catch(() => {});
 
 		expect(calls[0].body).toMatchObject({ isAllowedUtilityCost: false, isHeatingCost: false });
-		expect(calls[0].body).not.toHaveProperty('sortOrder');
+		expect(calls[0].body).toMatchObject({ sortOrder: 0 }); // without a number: 0, at the top (#672)
 	});
 
 	// Heiz- und Warmwasserkosten folgen beim Mieterwechsel dem Heizprofil
@@ -311,6 +311,14 @@ describe('Kategorie bearbeiten', () => {
 		expect(calls).toEqual([
 			{ method: 'PUT', url: `${API}/c1`, body: { nameDE: 'Treppenhausreinigung', ...saved } }
 		]);
+	});
+
+	// #672 (Helga P-9): ohne Zahl steht die Kategorie zuoberst, auch wenn sie vorher eine Zahl hatte
+	it('speichert eine geleerte Reihenfolge als 0', async () => {
+		const { calls, result } = runAction(editActions.default, 'c1', 200, { ...form, sortOrder: '' });
+		await result.catch(() => {});
+
+		expect(calls[0].body).toMatchObject({ sortOrder: 0 });
 	});
 });
 

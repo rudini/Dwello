@@ -539,6 +539,7 @@ export function testData(api: CallTheApi) {
 		},
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
+		categoryWithSortOrder: (title: string, sortOrder: number) => addCategory(title, () => ({ isAllowedUtilityCost: true, sortOrder })),
 		// #1123: an allocable category the list shows right after another one, whatever other workers add or remove:
 		// its name is the other's with the rest of its title, and only names that begin with the other's sort in between
 		async categoryRightAfter(title: string, before: string) {

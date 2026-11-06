@@ -1283,6 +1283,15 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: lint, check, fitness, backend type-check, Prettier, backend tests api-contracts, contract-overlap, contract.routes, apartment* (147 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session
+## Session: #672 category form help, delete dialog and reachability (persona Helga on #99)
+
+- [x] Read #672 and Helga's report from history; P-5 (Übersetzungen), P-7 (main navigation has «Kategorien»), P-8 (#1096: a toast may cover content without the focus) already hold on main, no change
+- [x] @wip scenarios and a unit test, seen red (1897008)
+- [x] fach-reviewer step 1 (`docs/reviews/672-1-fach-review.md`): V-1 Major (deleting a category clears statement items' category, existed before) became #1160 (needs-decision); M-1, V-2 fixed; V-3: the claim about equal numbers dropped from the help, sorting unchanged
+- [x] P-9 bug: an emptied «Reihenfolge» kept the old number; now saved as 0 (8ed2b9c), unit test seen red
+- [x] P-3, P-5, P-6, P-9 texts in de/fr/it/en; description help composed by new/own/predefined and KI on/off (3894cf5)
+- [x] code-reviewer round 1 (`docs/reviews/672-review-1.md`): C-1 Minor fixed (8386bde), C-2 Minor stays
+- [x] Persona Helga (`docs/design/personas/helga-672.md`): P-3, P-5, P-6, P-7, P-9 fixed; H-1 (contract sentence always shown, per fach-review) and H-2 (= P-8) Minor, stay
 ## Session: #1153 name the blocking contract when step 2 clears an apartment
 
 - [x] @wip scenarios in `contract-new.feature` (the box, the link to the blocking contract), seen red at the missing hint (4976c1d5f)

@@ -13,6 +13,7 @@ import {
 	heatingCheckbox,
 	nameInput,
 	proposeButton,
+	sortOrderInput,
 	submitButton
 } from '../targets/categories';
 import { deleteConfirmButton } from '../targets/form';
@@ -90,3 +91,7 @@ export const stayAtCategory = (name: string): Activity => (actor) =>
 /** #1113: the category's row at the bottom edge of the window, where a confirmation stands */
 export const bringCategoryToBottomEdge = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Scroll.toBottomEdge(categoryRow(name)));
+
+// #672: the number emptied on the edit page
+export const saveWithoutSortOrder: Activity = (actor) =>
+	actor.attemptsTo(Enter.theValue('').into(sortOrderInput), Click.on(submitButton));
