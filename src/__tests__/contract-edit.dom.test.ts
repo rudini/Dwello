@@ -498,13 +498,13 @@ describe('Mietvertrag bearbeiten', () => {
 		fakeBff(() => [500, {}]);
 		await open();
 		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(
-			'Überschneidung noch nicht geprüft'
+			'Dwello prüft beim Speichern, ob die Wohnung frei ist'
 		);
 		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(
-			'Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.'
+			'Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten.'
 		);
 		expect(byTestId('start-contracts-unknown')!.textContent).toContain(
-			'Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
+			'«Erneut versuchen» steht oben bei der Wohnung.'
 		);
 		expect(document.querySelectorAll('[data-testid="contracts-retry"]')).toHaveLength(1);
 		// Review M3: the hint is read out when it appears; once only, not again at the start (Sven B-13 Minor 3)
@@ -519,7 +519,7 @@ describe('Mietvertrag bearbeiten', () => {
 		const ids = (byTestId('start-date-input')!.getAttribute('aria-describedby') ?? '').split(' ');
 		// the title too: it says what matters most (fach-reviewer b665 V-1)
 		expect(ids.map((id) => document.getElementById(id)?.textContent?.trim() ?? '').join(' ')).toContain(
-			'Überschneidung noch nicht geprüft Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
+			'Dwello prüft beim Speichern, ob die Wohnung frei ist «Erneut versuchen» steht oben bei der Wohnung.'
 		);
 	});
 

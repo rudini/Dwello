@@ -26,6 +26,7 @@
 	>
 {/snippet}
 
+<!-- the title says what matters most: saving checks it (#666); TODO(fachlich prüfen, #1142): «frei (Wohnung)» -->
 <Alert
 	tone="caution"
 	title={m.contracts_apartment_contracts_unknown()}

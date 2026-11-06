@@ -13,13 +13,15 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 - [x] @wip scenarios: the hint is the description of «Wohnung» and «Vertragsbeginn» (#665); its shorter wording (#666)
 - [x] fach-reviewer step 1 on the wording of #666 (`docs/reviews/b665-fachreview-1.md`); V-1 fixed (af5fab3), issues #1142, #1143
-- [ ] Product decision on the changed lines of the non-@wip scenarios that quote the old wording (#666)
+- [x] Product decision on the changed lines of the non-@wip scenarios that quote the old wording (#666, «Decided (product owner)»)
 - [x] Slice 1 (#665): `Field` `describedby` through `Select` and `DateInput`; the hint linked (`Field`, `Select`, `DateInput`, `ContractsUnknown`, `ApartmentStep`, `PeriodStep`)
-- [x] Slice 2 (#665): `src/lib/ui/LiveRegion.svelte` replaces the hand-made `role="status"` wrappers (also `ContractForm`); the hint at «Vertragsbeginn» in the wizard is announced (review B-13 round 3)
-- [ ] code-reviewer slice 1+2 (`docs/reviews/b665-review-1.md`)
-- [ ] Slice 3 (#666): shorter wording in all four languages
-- [ ] code-reviewer slice 3
-- [ ] Feature review: personas (Sven; Helga or Marco)
+- [x] Slice 2 (#665): `src/lib/ui/LiveRegion.svelte` replaces the hand-made `role="status"` wrappers (also `ContractForm`); the round-3 region at «Vertragsbeginn» was dropped again (C-1: unreachable since #468)
+- [x] code-reviewer slice 1+2 (`docs/reviews/b665-review-1.md`); C-1 fixed (8e11340)
+- [x] Slice 3 (#666): shorter wording in all four languages (`messages/*.json`, `ContractsUnknown.svelte`, scenarios, DOM tests)
+- [ ] code-reviewer round 2: af5fab3, C-1 fix, #666 (`docs/reviews/b665-review-2.md`)
+- [x] fitness split: `fe:ui/illustrations` module (8c17129)
+- [x] Feature review: Sven (`docs/design/personas/sven-b665.md`)
+- [ ] Feature review: Helga or Marco on the #666 wording
 - [ ] #665 «the rest»: say which findings are fixed and which stay
 - [ ] Checks: lint, check, backend type-check, full vitest, fitness `--base origin/main`, fallow audit, Prettier on added files, affected E2E and axe/language rows
 - [ ] Archive the session; PR (step 9 by the coordinator)

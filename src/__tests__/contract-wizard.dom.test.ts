@@ -67,7 +67,7 @@ const chooseFee = (choice: string) =>
 	byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
 
 const UNKNOWN =
-	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
+	'Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten.';
 // the earliest start, as the calendar of the start field takes it
 const minOfStart = () =>
 	byTestId('start-date-input')!.parentElement!.querySelector<HTMLInputElement>(
@@ -433,7 +433,7 @@ describe('Prüfungen im Mietvertrag', () => {
 				.join(' ');
 		// the title too: it says what matters most (fach-reviewer b665 V-1)
 		const hint =
-			'Überschneidung noch nicht geprüft Dwello konnte die Mietverträge dieser Wohnung nicht laden.';
+			'Dwello prüft beim Speichern, ob die Wohnung frei ist Die anderen Mietverträge dieser Wohnung liessen sich nicht laden.';
 		await toPeriod('a3');
 		expect(description('start-date-input')).toContain(hint);
 		click('wizard-back');
