@@ -302,6 +302,15 @@ describe('Eigener Kontoinhaber', () => {
 		expect(await refused.json()).toMatchObject({ causes: [{ code: 'ACCOUNT_HOLDER_MISSING' }] });
 	});
 
+	// Fachreview 1166-1 V-5: the checkbox cleared without IBAN and fields stores nothing; the next opening ticks it again
+	it('speichert ohne IBAN einen Kontoinhaber ganz ohne Angaben als nichts', async () => {
+		await clearHolder();
+		const saved = await sendJson('PUT', '/api/v1/config', { account_holder_separate: 'true', account_holder_name: '' });
+
+		expect(saved.status).toBe(200);
+		expect(await Promise.all(HOLDER.map((key) => getConfig(key)))).toEqual(['', '', '', '']);
+	});
+
 	it('speichert einen unvollständigen Kontoinhaber ohne IBAN', async () => {
 		const saved = await sendJson('PUT', '/api/v1/config', { account_holder_separate: 'true', account_holder_name: 'Erika Muster' });
 

@@ -145,3 +145,9 @@ Then('kennzeichnen die Einstellungen Name, PLZ und Ort des Kontoinhabers als feh
 		await verwalter.sees(settingInvalid(field)).toBe('true');
 	await verwalter.sees(settingInvalid('accountHolderAddress')).toBeNull();
 });
+
+// Fachreview 1166-1 V-4: the fields show only once the checkbox is cleared
+Then('zeigen die Einstellungen keine Felder des Kontoinhabers', async ({ verwalter }) => {
+	for (const field of ['accountHolderName', 'accountHolderAddress', 'accountHolderPostalCode', 'accountHolderCity'])
+		await verwalter.sees(settingCount(field)).toBe(0);
+});

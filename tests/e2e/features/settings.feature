@@ -72,6 +72,7 @@ Funktionalität: Einstellungen
   @wip @einstellungen-global
   Szenario: Ohne eigene Angaben ist der Absender der Kontoinhaber
     Dann ist in den Einstellungen angegeben, dass der Kontoinhaber der Absender ist
+    Und zeigen die Einstellungen keine Felder des Kontoinhabers
 
   @wip @einstellungen-global
   Szenario: Eigenen Kontoinhaber hinterlegen
@@ -96,7 +97,7 @@ Funktionalität: Einstellungen
       | Name des Kontoinhabers |                            |
       | PLZ des Kontoinhabers  |                            |
       | Ort des Kontoinhabers  |                            |
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einem eigenen Kontoinhaber braucht es seinen Namen, seine PLZ und seinen Ort."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es den Kontoinhaber. Erfassen Sie Name, PLZ und Ort des Kontoinhabers oder setzen Sie das Häkchen bei «Kontoinhaber ist der Absender»."
     Und kennzeichnen die Einstellungen Name, PLZ und Ort des Kontoinhabers als fehlend
 
   # #1166: wer den Absender wieder als Kontoinhaber angibt, löscht die Angaben des eigenen Kontoinhabers

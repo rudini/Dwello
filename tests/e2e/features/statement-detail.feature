@@ -521,7 +521,8 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im Zahlteil des PDF "Konto / Zahlbar an CH93 0076 2011 6238 5295 7 Erika Muster Seeweg 5 6003 Luzern"
     Und steht im Zahlteil des PDF nicht "Zahlbar an CH93 0076 2011 6238 5295 7 Muster Immobilien"
-    Und steht im PDF "Muster Immobilien AG"
+    Und steht im PDF "Melden Sie sich dafür bei Muster Immobilien AG, Bahnhofstrasse 1, 8001 Zürich"
+    Und steht im PDF ausserhalb des Zahlteils nicht "Erika Muster"
 
   # Ohne Korrespondenzadresse des Mieters hat der Zahlteil ein leeres Feld mit Eckmarken, in das der Mieter Name und
   # Adresse schreibt (SIX, Implementation Guidelines QR-Rechnung v2.4, Zahlteil und Empfangsschein) (#78)

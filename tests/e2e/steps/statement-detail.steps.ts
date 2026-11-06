@@ -1,7 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { francs } from '../questions/amounts';
-import { downloadedFileHeader, downloadedFileName, downloadedPaymentPartText, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
+import { downloadedFileHeader, downloadedFileName, downloadedPaymentPartText, downloadedPdfText, downloadedPdfTextOutsidePaymentPart, downloadedPdfTitle } from '../questions/download';
 import {
 	balanceAmount,
 	changeOffers,
@@ -352,6 +352,10 @@ Then('steht im Zahlteil des PDF {string}', async ({ verwalter }, text: string) =
 
 Then('steht im Zahlteil des PDF nicht {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(downloadedPaymentPartText).not.toContain(text);
+});
+
+Then('steht im PDF ausserhalb des Zahlteils nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(downloadedPdfTextOutsidePaymentPart).not.toContain(text);
 });
 
 Then('steht im PDF nicht {string}', async ({ verwalter }, text: string) => {
