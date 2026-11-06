@@ -275,13 +275,7 @@ Then(
 	}
 );
 
-const STATUSES: Record<string, string> = {
-	Entwurf: 'draft',
-	Versendet: 'sent',
-	Bezahlt: 'paid',
-	Erledigt: 'settled',
-	Überfällig: 'overdue'
-};
+const STATUSES: Record<string, string> = { Entwurf: 'draft' };
 // #673 (Marco P-7): the chosen tab says so in words, not only by its colour
 Then('sagt der Statusfilter {string} {string}', async ({ verwalter }, status: string, text: string) => {
 	await verwalter.sees(statusFilterText(STATUSES[status])).toContain(text);
