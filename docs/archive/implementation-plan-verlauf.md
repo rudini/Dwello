@@ -1231,5 +1231,5 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue #1146 opened: the statement wizard's stepper breaks names at xl (on main too)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-667.md`
 - [x] Checks: full vitest, fitness `--base origin/main`, backend tests and p2 queries, fallow audit, Prettier on added files, lint, check, type-check, affected E2E with axe and language rows
-- [ ] Closing code-reviewer round on the delta since 00709bc (handed to the coordinator)
+- [x] Closing code-reviewer round on the delta since 00709bc (`docs/reviews/b667-review-3.md`, no findings)
 - [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive
