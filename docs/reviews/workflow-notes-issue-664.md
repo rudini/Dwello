@@ -1,0 +1,7 @@
+# Workflow notes #664
+
+| Rule | What happened in this task | Proposed change |
+|---|---|---|
+| CLAUDE.md, Workflow 1 (fach-reviewer before implementing) and skill `slice-review` 4 (Hand-over) | The worker had no Agent tool; each review went to the coordinator by message and came back later. The step-1 gate covers «production code» as a whole, so it was unclear whether a slice without domain text (the wizard announcement, an a11y fix) may go ahead meanwhile. It went ahead; the gated slices waited. | Say in Workflow 1 that the gate applies to the slices whose domain rules, terms or texts the review reads; a slice without them may start while it runs. |
+| CLAUDE.md, «Screens» (list rows whose whole area is one link) vs. an issue decision asking for a link «in the apartment list and on the ended contract» | The decision put a wizard link with the hint «both places»; a second link in a list row breaks the design rule. The link went on the contract page only, the list rows show the text. Code review 664-1 agreed. | Name the case in «Coding guidelines, Before coding»: a decision that would put a second link into a list row is met by the record's own page. |
+| CLAUDE.md, Gotchas «Commit gates» (subject at most 50 characters) | Three commits were refused for 51–55 characters, each refusal unstaging nothing but costing a round. | `skill commit-gates` could offer a one-line length check (`printf %s "<subject>" \| wc -c`) to run before `git commit`. |

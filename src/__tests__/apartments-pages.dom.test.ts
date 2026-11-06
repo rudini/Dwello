@@ -92,6 +92,23 @@ describe('Wohnungsliste', () => {
 		expect(status('a2')).toBe('Vermietet ab 01.11.2099');
 	});
 
+	// #664 (Persona Helga M4): with a next tenant from the day after the status says «Vermietet»; the move-out stays
+	it('nennt den Auszug bis zur Schlussabrechnung in der Karte, ohne zweiten Link', () => {
+		const moveOut = {
+			endDate: '2025-06-30',
+			tenantName: 'Kevin Fischer',
+			period: { start: '2025-01-01', end: '2025-12-31' },
+			due: true,
+			outside: false
+		};
+		list([apartment({ status: 'occupied', moveOut })]);
+		const card = byTestId('apartment-card-a1')!;
+		expect(card.querySelector('[data-testid="apartment-move-out"]')!.textContent!.trim()).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung fällig'
+		);
+		expect(card.querySelectorAll('a')).toHaveLength(1);
+	});
+
 	it('zeigt Leer mit einer offenen Tür statt einem Warndreieck', () => {
 		list([apartment()]);
 		const shape = (svg: Element) => svg.firstElementChild!.getAttribute('d');

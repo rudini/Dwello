@@ -4,7 +4,17 @@ import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { monthlyTotal } from '../lib/server/contract-history';
-import { floorLabel, floorOptions, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
+import {
+	floorLabel,
+	floorOptions,
+	moveOutText,
+	occupancyParts,
+	statusHelp,
+	statusLabels,
+	statusText
+} from '../lib/apartment';
+import apartmentsResponse from '../../tests/contracts/apartments.json';
+import moveOutsResponse from '../../tests/contracts/apartment-move-outs.json';
 import { runAction } from './helpers/action';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import apartmentResponse from '../../tests/contracts/apartment.json';
@@ -182,6 +192,62 @@ describe('Wohnungsliste', () => {
 		};
 
 		expect(data.apartments[0].lastContractEnd).toBe('2024-03-31');
+	});
+
+	// #664: the backend decides the move-out until the Schlussabrechnung exists, on its own route (P2)
+	const withMoveOuts = (moveOuts: () => Response) =>
+		(async (url: string) =>
+			url.includes('/apartments/move-outs')
+				? moveOuts()
+				: Response.json(url.includes('/apartments') ? apartmentsResponse : { buildings: [] })) as typeof globalThis.fetch;
+	const listed = async (fetch: typeof globalThis.fetch) =>
+		(await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
+			apartments: { id: string; moveOut: unknown }[];
+		};
+
+	it('gibt den Auszug bis zur Schlussabrechnung weiter', async () => {
+		const data = await listed(withMoveOuts(() => Response.json(moveOutsResponse)));
+
+		expect(data.apartments[0].moveOut).toEqual(moveOutsResponse.moveOuts[0].moveOut);
+	});
+
+	it('zeigt die Wohnungen ohne Auszug, wenn er nicht geladen werden kann', async () => {
+		const failed = await listed(
+			withMoveOuts(() => Response.json({ error: 'kaputt' }, { status: 500 }))
+		);
+		const unreachable = await listed(
+			withMoveOuts(() => {
+				throw new TypeError('fetch failed');
+			})
+		);
+
+		expect(failed.apartments.map((a) => [a.id, a.moveOut])).toEqual([['a1', null]]);
+		expect(unreachable.apartments.map((a) => [a.id, a.moveOut])).toEqual([['a1', null]]);
+	});
+});
+
+// #664 (Persona Helga M4): until the end of the Abrechnungsperiode of the Vertragsende, then due while it is missing
+describe('Auszug bis zur Schlussabrechnung', () => {
+	const period = { start: '2025-01-01', end: '2025-12-31' };
+	const tenantName = 'Kevin Fischer'; // Persona Helga 664-2 P-2: whose move-out, not the tenant living there now
+
+	it('nennt bis zum Ende der Abrechnungsperiode, ab wann die Schlussabrechnung kommt', () => {
+		expect(moveOutText({ endDate: '2025-06-30', tenantName, period, due: false, outside: false })).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung nach dem 31.12.2025'
+		);
+	});
+
+	it('nennt danach die fällige Schlussabrechnung', () => {
+		expect(moveOutText({ endDate: '2025-06-30', tenantName, period, due: true, outside: false })).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung fällig'
+		);
+	});
+
+	// Fachreview 664-1 V-2: an older statement of the building overlaps the period: Dwello cannot bill it
+	it('sagt, dass die Schlussabrechnung ausserhalb von Dwello fällig ist', () => {
+		expect(moveOutText({ endDate: '2025-06-30', tenantName, period, due: true, outside: true })).toBe(
+			'Auszug von Kevin Fischer am 30.06.2025, Schlussabrechnung ausserhalb von Dwello fällig'
+		);
 	});
 });
 

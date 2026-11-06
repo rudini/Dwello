@@ -230,10 +230,13 @@ describe('Mietvertrag bearbeiten', () => {
 		const covered =
 			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.';
 		expect(byTestId('form-error')!.textContent).toContain(
-			'Der Entwurf NK-2025-0003 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
+			'Der Entwurf für Anna Keller, 2025 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
 		);
 		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
-		expect(document.getElementById(described)!.textContent).toContain(covered);
+		// #664 (Fachreview 664-1 V-3): the draft by tenant and period, as in every refusal of it
+		expect(document.getElementById(described)!.textContent).toContain(
+			`Der Entwurf für Anna Keller, 2025 wird gelöscht. ${covered}`
+		);
 		expect(document.body.textContent).not.toContain('neu erstellen');
 		click('delete-draft-and-save');
 		await settle();
@@ -390,11 +393,11 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// Persona H15-2: die Hilfe nennt den Ort, an dem es weitergeht
-	it('führt bei einem unbefristeten Mietvertrag zu «Beenden» auf der Seite des Mietvertrags', async () => {
+	it('führt bei einem unbefristeten Mietvertrag zu «Enddatum erfassen» auf der Seite des Mietvertrags', async () => {
 		await open();
 		const help = byTestId('contract-parties-help')!.textContent!;
 		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
-		expect(help).toContain('mit «Beenden»');
+		expect(help).toContain('mit «Enddatum erfassen»');
 		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel; auch ein begonnener wird gelöscht (#116)
 		expect(help).toContain(
 			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt, löschen Sie den Mietvertrag auf seiner Seite und erfassen Sie ihn neu. Gibt es dazu schon den Entwurf einer Nebenkostenabrechnung, löschen Sie zuerst den Entwurf.'
@@ -404,7 +407,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Zur Seite des Mietvertrags von Anna Keller'
 		);
 		expect(byTestId('contract-parties-link')!.getAttribute('href')).toBe('/contracts/c1');
-		// Code-Review m-6: zuerst «Beenden», dann der neue Mietvertrag (dazu #156)
+		// Code-Review m-6: zuerst «Enddatum erfassen», dann der neue Mietvertrag (dazu #156)
 		expect(byTestId('contract-parties-new')).toBeNull();
 	});
 
@@ -428,7 +431,7 @@ describe('Mietvertrag bearbeiten', () => {
 		}
 	);
 
-	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
+	// Fachreview V-2: mit Vertragsende gibt es kein «Enddatum erfassen» mehr
 	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
 		await open('2099-03-31');
 		const help = byTestId('contract-parties-help')!.textContent!;
@@ -440,7 +443,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Bei einem Wechsel der Wohnung erfassen Sie einen neuen Mietvertrag für die andere Wohnung.'
 		);
 		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
-		expect(help).not.toContain('«Beenden»');
+		expect(help).not.toContain('«Enddatum erfassen»');
 		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt; B-16 (#156): mit Mieter und frühestem Beginn,
 		// den der Link nennt, damit ihn niemand für den Nachmieter nimmt (Fachreview W10 V-1)
 		expect(byTestId('contract-parties-new')!.textContent).toBe(
@@ -899,13 +902,13 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung
-	describe('Hinweis auf «Beenden»', () => {
+	describe('Hinweis auf «Enddatum erfassen»', () => {
 		const choose = async (value: string) => {
 			click(document.querySelector<HTMLInputElement>(`input[name="duration"][value="${value}"]`)!);
 			await settle();
 		};
 
-		it('verweist bei «Befristet» auf «Beenden»', async () => {
+		it('verweist bei «Befristet» auf «Enddatum erfassen»', async () => {
 			await open();
 			await choose('limited');
 			const hint = byTestId('contract-notice-hint')!;
@@ -923,7 +926,7 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(region.classList.contains('sr-only')).toBe(false);
 			expect(region.contains(byTestId('contract-notice-hint'))).toBe(true);
 			expect(byTestId('contract-notice-hint')!.querySelector('a')!.textContent).toBe(
-				'Kündigung mit «Beenden» eintragen'
+				'Kündigung mit «Enddatum erfassen» eintragen'
 			);
 		});
 

@@ -70,6 +70,7 @@ import {
 	recalculateNotes,
 	finishedStepText,
 	runSummaryText,
+	wizardAnnouncement
 } from '../questions/statement-generate';
 import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
@@ -782,4 +783,8 @@ Then(
 
 Then('nennt der erledigte Schritt {string} die Wahl {string}', async ({ verwalter }, step: string, choice: string) => {
 	await verwalter.sees(finishedStepText(step)).toContain(choice);
+});
+
+Then('sagt der Assistent {string} an', async ({ verwalter }, text: string) => {
+	await verwalter.sees(wizardAnnouncement).toBe(text);
 });

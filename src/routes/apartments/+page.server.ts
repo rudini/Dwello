@@ -1,4 +1,4 @@
-import { toApartmentRow } from '$lib/server/apartment';
+import { toApartmentRow, withMoveOuts } from '$lib/server/apartment';
 import type { ApartmentsListData, ApartmentListItem } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -27,11 +27,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 		const apartmentsData = await apartmentsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const apartments: ApartmentListItem[] = (
-			apartmentsData.apartments ||
-			apartmentsData.data ||
-			[]
-		).map(toApartmentRow);
+		const apartments: ApartmentListItem[] = await withMoveOuts(
+			fetch,
+			(apartmentsData.apartments || apartmentsData.data || []).map(toApartmentRow),
+			buildingId || undefined
+		);
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({

@@ -106,7 +106,13 @@
 	let invoices = $state(untrack(() => form?.invoices ?? []));
 	let shownError = $state(untrack(() => form?.error ?? '')); // only until the user moves on
 	const confirmationNeeded = $derived(needsConfirmation(invoices));
-	const statusText = $derived(busy ? busyLabels[step] : loading ? loadingText : '');
+	// #664 (Persona Sven M2): the result, said by the status and named by the heading the focus moves to
+	const createdText = $derived.by(() => {
+		const count = form?.created?.length;
+		if (count == null) return '';
+		return count === 1 ? m.statements_created_one() : m.statements_created_many({ count });
+	});
+	const statusText = $derived(busy ? busyLabels[step] : loading ? loadingText : createdText);
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
 	);
@@ -298,10 +304,14 @@
 			class="text-2xl font-bold text-ink"
 			data-testid="statement-step-heading"
 		>
-			<span class="sr-only"
-				>{m.contracts_step_of({ current: step, total: statementSteps.length })}</span
-			>
-			<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
+			{#if createdText}
+				<span data-testid="generation-result">{createdText}</span>
+			{:else}
+				<span class="sr-only"
+					>{m.contracts_step_of({ current: step, total: statementSteps.length })}</span
+				>
+				<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
+			{/if}
 		</h2>
 		<PresetNotice preset={data.preset} {step} />
 		<!-- read out by the wizard's status above -->

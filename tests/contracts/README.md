@@ -43,6 +43,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `contract-agreements.json` | `GET /api/v1/contracts/:id/agreements?periodStart=…&periodEnd=…` (Kategorien mit Kosten in der Periode und ob der Mietvertrag sie vereinbart, #91) |
 | `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
 | `apartments.json` | `GET /api/v1/apartments` (Wohnungsliste, Gebäude, Übersicht) |
+| `apartment-move-outs.json` | `GET /api/v1/apartments/move-outs?buildingId=…` (je Wohnung der Auszug bis zur Schlussabrechnung, für Wohnungsliste und Gebäude; nur Wohnungen mit Auszug, #664) |
 | `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht), `?contractId=…` (fehlende Abrechnungen am Mietvertrag, Abrechnungen, die sein Löschen sperren) |
 | `heating-profiles.json` | `GET /api/v1/heating-profiles` (Namen der Heizprofile und wann sie zuletzt bearbeitet wurden, Vorschau des Assistenten) |
 | `statement-preview.json` | `POST /api/v1/statements/preview` |

@@ -886,3 +886,9 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann fasst der Assistent vor dem Erstellen "01.01.2024 – 31.12.2024", "Lindenhof" und "Heizung Mittelland" zusammen
     Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+
+  # #664 (Persona Sven M2): das Ergebnis wird angesagt, und der Fokus steht auf einer Überschrift, die es nennt
+  Szenario: Nach dem Erstellen steht der Fokus auf dem Ergebnis
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Dann steht der Fokus auf dem Ergebnis "2 Nebenkostenabrechnungen sind als Entwurf erstellt."
+    Und sagt der Assistent "2 Nebenkostenabrechnungen sind als Entwurf erstellt." an

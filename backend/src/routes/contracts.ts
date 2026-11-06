@@ -5,6 +5,7 @@
 
 import { Elysia, t } from 'elysia';
 import { missingByContract, missingOfContract } from '../services/statement-run.service';
+import { moveOutOf } from '../services/move-out';
 import { errorBody, refusal } from '../services/coded-error';
 import type { ContractResponse } from '../api/contract';
 import { advancesOf, deleteAdvance, proposedAdvanceFrom } from '../services/advance-payment.service';
@@ -154,6 +155,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			proposedAdvanceFrom: proposedAdvanceFrom(contract, advancePayments) ?? null, // #464, #815
 			nextSteps: await nextSteps(contract),
 			fixedTermCheck: await fixedTermCheck(contract),
+			moveOut: await moveOutOf(contract), // #664
 			endsToday: contract.endDate === swissToday() // the page says «endet heute» (#815)
 		} satisfies ContractResponse;
 	})

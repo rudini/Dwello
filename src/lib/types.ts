@@ -9,7 +9,11 @@ import type {
 	ContractResponse,
 	ContractWithDetails as ContractRow
 } from '../../backend/src/api/contract';
-import type { ApartmentStatus, ApartmentWithDetails } from '../../backend/src/api/apartment';
+import type {
+	ApartmentStatus,
+	ApartmentWithDetails,
+	MoveOut
+} from '../../backend/src/api/apartment';
 import type {
 	BuildingAddress,
 	BuildingWithStats as BuildingResponse
@@ -91,6 +95,7 @@ export interface BuildingsListData {
 // Apartment status values (match backend)
 // occupied and relet follow from the rental contracts; vacant and reserved are set by hand
 export type { ApartmentStatus, LatestKey };
+export type { MoveOut } from '../../backend/src/api/apartment';
 
 // The apartment as the pages show it, derived from GET /apartments/:id (#837, ADR 0005)
 type ApiApartment = Json<ApartmentWithDetails>;
@@ -101,6 +106,7 @@ export type Apartment = Pick<ApiApartment, 'id' | 'buildingId' | 'number' | 'flo
 			'nextContractStart' | 'currentContractEnd' | 'lastContractEnd' | 'createdAt' | 'updatedAt'
 		>
 	> & {
+		moveOut?: MoveOut | null; // #664, from GET /apartments/move-outs
 		area: string | number; // decimal from DB
 		rooms: string | number; // decimal from DB (e.g., 3.5)
 	};

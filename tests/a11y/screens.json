@@ -456,6 +456,13 @@
 			]
 		},
 		{
+			"name": "contract-final-due-detail",
+			"path": "/contracts/{finalDueContract}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "contract-edit",
 			"path": "/contracts/{contract}/edit",
 			"states": [

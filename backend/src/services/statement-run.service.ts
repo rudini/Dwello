@@ -59,12 +59,12 @@ export function planRun<C extends Contract>(period: Range, contracts: C[], state
 }
 
 /** #1088: a building's own Abrechnungsperiode, and for the wizard's proposals the type of every building */
-async function typeOf(buildingId: string) {
+export async function typeOf(buildingId: string) {
 	return (await buildingOf(buildingId))?.type ?? 'calendar';
 }
 const buildingOf = async (id: string) =>
 	(await db.select({ name: buildings.name, type: buildings.accountingPeriod }).from(buildings).where(eq(buildings.id, id)))[0];
-const typesByBuilding = async () =>
+export const typesByBuilding = async () =>
 	new Map((await db.select({ id: buildings.id, type: buildings.accountingPeriod }).from(buildings)).map((b) => [b.id, b.type]));
 
 /**

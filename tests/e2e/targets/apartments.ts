@@ -13,3 +13,6 @@ export const apartmentStatus = (number: string) =>
 	target(`Status der Wohnung «${number}»`, (page) => apartmentCard(number).locate(page).getByTestId('apartment-status'));
 export const apartmentEmptyNotice = target('Hinweis leere Wohnungsliste', (page) => page.getByTestId('apartments-empty'));
 export const showAllApartmentsLink = target('Alle Wohnungen anzeigen', (page) => page.getByTestId('apartments-show-all'));
+// #664: the move-out of the apartment's latest ended contract until its final statement exists
+export const apartmentMoveOut = (number: string) =>
+	target(`Auszug der Wohnung «${number}»`, (page) => apartmentCard(number).locate(page).getByTestId('apartment-move-out'));
