@@ -979,7 +979,11 @@ describe('Mietvertrag bearbeiten', () => {
 			await open();
 			await choose('limited');
 			const hint = byTestId('contract-notice-hint')!;
-			expect(hint.textContent).toContain('Hat der Mieter gekündigt?');
+			// #668 (Persona Helga H15-3, fach review 668-1 V-2): also a move to another apartment
+			expect(hint.textContent).toContain('Zieht der Mieter aus oder in eine andere Wohnung?');
+			expect(hint.textContent).toContain(
+				'Zieht der Mieter in eine andere Ihrer Wohnungen, erfassen Sie danach für diese Wohnung einen neuen Mietvertrag.'
+			);
 			expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c1');
 		});
 
@@ -993,7 +997,7 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(region.classList.contains('sr-only')).toBe(false);
 			expect(region.contains(byTestId('contract-notice-hint'))).toBe(true);
 			expect(byTestId('contract-notice-hint')!.querySelector('a')!.textContent).toBe(
-				'Kündigung mit «Enddatum erfassen» eintragen'
+				'Vertragsende mit «Enddatum erfassen» eintragen' // a move by agreement is no notice (fach review 668-1 V-1)
 			);
 		});
 

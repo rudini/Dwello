@@ -318,7 +318,6 @@ Funktionalität: Mietvertrag bearbeiten
     Dann sagt das Formular das Monatlich total "CHF 980.00" an
 
   # #668 (Persona Helga H15-3): der Hinweis unter «Befristet» spricht auch den Wechsel in eine andere Wohnung an
-  @wip
   Szenario: Der Hinweis unter «Befristet» nennt auch den Wechsel in eine andere Wohnung
     Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
     Dann fragt der Hinweis zum Vertragsende "Zieht der Mieter aus oder in eine andere Wohnung?"
