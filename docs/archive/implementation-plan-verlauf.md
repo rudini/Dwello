@@ -1346,3 +1346,8 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1162 (keep the chosen tile in view), #1163 (E2E contract row depends on the list page)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: README opening for search engines
+
+- [x] `README.md`: first paragraph says what Dwello is (English and the German sentence of dwello.ch), links to dwello.ch, the demo and the installation guide; the stale «Status» and «Version» lines are gone
+- [x] PR: pushed after this archive
