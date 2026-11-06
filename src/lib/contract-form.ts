@@ -299,28 +299,31 @@ export type Overlap = {
  * The advice states the condition, then the check against the signed lease, then the other contract; «Befristet»
  * only in the wizard with «Unbefristet» chosen (#667, Dr. Weber W-04, W-07; fach review b667 step 1 M-1, step 5)
  */
+function adviceOf(other: Overlapped, values: ContractFormValues, wizard: boolean) {
+	if (other.start > values.startDate) {
+		const date = formatDate(other.start);
+		return wizard && values.isUnlimited
+			? m.contracts_overlap_advice_end_before({ date })
+			: m.contracts_overlap_advice_end_earlier({ date });
+	}
+	if (other.end) return m.contracts_overlap_advice_start_after({ date: formatDate(other.end) });
+	if (other.start === values.startDate) return m.contracts_overlap_advice_same_start();
+	const date = formatDate(values.startDate);
+	return wizard
+		? m.contracts_overlap_advice_end_other({ date })
+		: m.contracts_overlap_advice_end_other_edit({ date });
+}
+
 function overlapOf(other: Overlapped, values: ContractFormValues, wizard: boolean): Overlap {
 	const period = contractPeriod(other.start, other.end, other.status ?? 'active', other.terminated);
 	const said = other.tenant
 		? m.contracts_overlap_with({ tenant: other.tenant, period })
 		: m.contracts_overlap_with_anonymised({ period });
-	const date = formatDate(values.startDate);
-	const fixedTermBefore = other.start > values.startDate && (!wizard || !values.isUnlimited);
-	const advice =
-		other.start > values.startDate
-			? (fixedTermBefore
-					? m.contracts_overlap_advice_end_earlier
-					: m.contracts_overlap_advice_end_before)({ date: formatDate(other.start) })
-			: other.end
-				? m.contracts_overlap_advice_start_after({ date: formatDate(other.end) })
-				: other.start === values.startDate
-					? m.contracts_overlap_advice_same_start()
-					: wizard
-						? m.contracts_overlap_advice_end_other({ date })
-						: m.contracts_overlap_advice_end_other_edit({ date });
+	// an earlier Vertragsende is advised at its field (fach review b667 V-3)
+	const atEnd = other.start > values.startDate && !values.isUnlimited;
 	return {
-		text: `${said} ${advice}`,
-		field: fixedTermBefore && !values.isUnlimited ? 'endDate' : 'startDate',
+		text: `${said} ${adviceOf(other, values, wizard)}`,
+		field: atEnd ? 'endDate' : 'startDate',
 		contract: { id: other.id, tenant: other.tenant }
 	};
 }

@@ -90,6 +90,7 @@
 	// the overlap the save was refused for: saving checked it, so the hint that saving will check goes (#667, W-03)
 	let refusal = $state<ReturnType<typeof overlapRefusal>>(null);
 	const refused = $derived(!!refusal && errors.form === refusal.text);
+	const refusedWith = $derived(refused ? refusal?.contract : undefined); // the other contract, linked
 	let saving = $state(false);
 	let savedAt = $state<Date | null>(null);
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
@@ -117,6 +118,8 @@
 	const loading = $derived(step === 2 && !contracts); // «Weiter» waits for the apartments' contracts (#468)
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapError(values, contracts?.get(values.apartmentId) ?? [], true));
+	const reviewUnknown = $derived(unknown && !refused);
+	const overlapAtField = $derived(!!overlap && errors[overlap.field] === overlap.text);
 	// contracts of the chosen tenant without a Vertragsende (#156)
 	const openContracts = $derived(
 		apartments.flatMap((apartment) =>
@@ -381,7 +384,7 @@
 				onretry={retry}
 				{startPast}
 				{overlap}
-				overlapSaid={!!overlap && errors[overlap.field] === overlap.text}
+				overlapSaid={overlapAtField}
 				{errors}
 			/>
 		{:else if step === 4}
@@ -398,14 +401,14 @@
 				{tenants}
 				{apartments}
 				{categories}
-				unknown={unknown && !refused}
+				unknown={reviewUnknown}
 				onretry={retry}
 				onedit={editField}
 			/>
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>
-					{#if refused && refusal}<OverlapLink contract={refusal.contract} />{/if}
+					{#if refusedWith}<OverlapLink contract={refusedWith} />{/if}
 				</Alert>
 			{/if}
 		{/if}

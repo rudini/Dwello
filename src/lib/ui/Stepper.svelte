@@ -16,6 +16,8 @@
 		onselect: (step: number) => void;
 		values?: (string | undefined)[];
 	} = $props();
+	// without values each step as wide as its name (#667, W-10); with them the steps share the width (#1146)
+	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
 </script>
 
 <nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
@@ -35,7 +37,7 @@
 	<ol class="hidden gap-2 md:flex">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}
-			<li class="flex min-w-0 items-center gap-2 {values.length ? 'flex-1' : 'flex-auto'}">
+			<li class="flex min-w-0 items-center gap-2 {width}">
 				{#if number < current}
 					<button
 						type="button"
