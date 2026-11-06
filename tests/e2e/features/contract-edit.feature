@@ -306,3 +306,20 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-03-15" mit "180" Franken Akonto ab "2024-03-15" speichert
     Dann zeigt der Mietvertrag das Monatlich total "CHF 1’130.00"
+
+  # #668 (Persona Sven S-4): Überschrift und Seitentitel nennen den Mieter, wie die Seite des Mietvertrags
+  @wip
+  Szenario: Die Bearbeitungsseite nennt den Mieter
+    Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
+
+  # #668 (Persona Sven S-3): wer einen Screenreader nutzt, hört das Monatlich total, wenn es sich beim Tippen ändert
+  @wip
+  Szenario: Das Formular sagt das geänderte Monatlich total an
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Dann sagt das Formular das Monatlich total "CHF 980.00" an
+
+  # #668 (Persona Helga H15-3): der Hinweis unter «Befristet» spricht auch den Wechsel in eine andere Wohnung an
+  @wip
+  Szenario: Der Hinweis unter «Befristet» nennt auch den Wechsel in eine andere Wohnung
+    Wenn der Liegenschaftsverwalter den Mietvertrag befristen will
+    Dann fragt der Hinweis zum Vertragsende "Zieht der Mieter aus oder in eine andere Wohnung?"

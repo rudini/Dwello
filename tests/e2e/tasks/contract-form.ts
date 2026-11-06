@@ -211,3 +211,4 @@ export const enterStartDate = (isoDate: string) => EnterDate.of(isoDate).into(st
 export const enterStartAndBilledUntil = (startDate: string, billedUntil: string): Activity => (actor) =>
 	actor.attemptsTo(enterStartDate(startDate), EnterDate.of(billedUntil).into(billedUntilInput), goToNextStep);
 export const saveContract = Click.on(contractSubmitButton);
+export const chooseFixedTerm = Click.on(durationChoice('Befristet'));

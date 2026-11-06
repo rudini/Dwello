@@ -39,12 +39,16 @@ import {
 	startDateAsked,
 	billedUntilAsked,
 	timesInWizard,
-	brokenStepNames
+	brokenStepNames,
+	noticeHintText,
+	announcedTotal
 } from '../questions/contract-form';
+import { pageTitleText } from '../questions/app-frame';
 import { contractListed } from '../questions/contracts';
-import { pageAddress } from '../questions/navigation';
+import { pageAddress, pageTitle } from '../questions/navigation';
 import { restoredDraftText, saveStatusText } from '../questions/wizard';
 import {
+	chooseFixedTerm,
 	agreeManagementFee,
 	enterBilledUntil,
 	changeBaseRent,
@@ -702,4 +706,24 @@ Then('steht im Assistenten {string} nur einmal', async ({ verwalter }, text: str
 // #667 (Dr. Weber W-10)
 Then('bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um', async ({ verwalter }) => {
 	await verwalter.sees(brokenStepNames).toEqual([]);
+});
+
+// #668 (Persona Sven S-4): heading and page title name the tenant
+Then('heisst die Bearbeitungsseite {string}', async ({ verwalter, seed }, title: string) => {
+	await verwalter.sees(pageTitleText).toBe(seed.withNames(title));
+	await verwalter.sees(pageTitle).toBe(`${seed.withNames(title)} - Dwello`);
+});
+
+// #668 (Persona Sven S-3): the total is in a live region, so a screen reader hears it change
+Then('sagt das Formular das Monatlich total {string} an', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(announcedTotal).toBe(amount);
+});
+
+// #668 (Persona Helga H15-3)
+When('der Liegenschaftsverwalter den Mietvertrag befristen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseFixedTerm);
+});
+
+Then('fragt der Hinweis zum Vertragsende {string}', async ({ verwalter }, question: string) => {
+	await verwalter.sees(noticeHintText).toContain(question);
 });
