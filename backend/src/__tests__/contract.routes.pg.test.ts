@@ -116,3 +116,28 @@ describe('Status eines Mietvertrags', () => {
 	});
 });
 
+
+// #1152: the overlap check in the contract form and the wizard loads the apartment's contracts without a limit
+describe('GET /api/v1/contracts?apartmentId', () => {
+	it('liefert alle Mietverträge der Wohnung, auch mehr als 50', async () => {
+		const other = await createRental(`${token}-other`, { startDate: '2024-04-01', monthlyAdvancePayment: '0' });
+		const months = Array.from({ length: 50 }, (_, i) => {
+			const start = new Date(Date.UTC(2019, i, 1));
+			const end = new Date(Date.UTC(2019, i + 1, 0));
+			return [start, end].map((d) => d.toISOString().slice(0, 10));
+		});
+		const older: string[] = [];
+		try {
+			for (const [startDate, endDate] of months) {
+				const contract = await createContract({ apartmentId: rental.apartment, tenantId: rental.tenant, baseRent: '950', monthlyAdvancePayment: '0', startDate, endDate });
+				older.push(contract.id);
+			}
+			const listed = (await get(`?apartmentId=${rental.apartment}`)) as { contracts: { id: string }[] };
+
+			expect(listed.contracts.map((c) => c.id).sort()).toEqual([rental.contract, ...older].sort());
+		} finally {
+			for (const id of older) await deleteContract(id, true);
+			await other.remove();
+		}
+	});
+});

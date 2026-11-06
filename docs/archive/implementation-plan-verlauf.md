@@ -1259,3 +1259,11 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Closing code-reviewer round 1 (`docs/reviews/668-closing-review-1.md`): C-1, C-2 closed; C-4 Major (the way to /login no longer asks: the session is gone after «Abmelden» or a 401; a narrower reading of «the menu asks», named in the PR), C-5 Major (scenario «Nach dem Verwerfen führt «Zurück» weiter zurück», red against the former goto), C-6 Minor (a link while the PUT runs asks) fixed in b7e7a40
 - [x] Closing code-reviewer round 2 (`docs/reviews/668-closing-review-2.md`): C-4, C-5, C-6 closed; C-7 Minor (comment wording in `LeaveConfirm.svelte`) fixed
 - [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive
+## Session: #1152 overlap check sees every contract of an apartment
+
+- [x] No scenario: the state needs more than 50 contracts on one apartment, which the E2E stack does not seed; pg route test «liefert alle Mietverträge der Wohnung, auch mehr als 50», seen red (50 of 51)
+- [x] `listContracts` applies no default limit when filtered by apartment; an explicit `limit` still applies; API doc updated (4bbfe5629)
+- [x] code-reviewer round 1 (`docs/reviews/1152-review-1.md`, no findings)
+- [x] Checks: lint, check, fitness, backend type-check, Prettier, backend tests api-contracts, contract-overlap, contract.routes, apartment* (147 passed)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session

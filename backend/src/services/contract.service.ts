@@ -103,7 +103,8 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	contracts: ContractWithDetails[];
 	total: number;
 }> {
-	const { apartmentId, tenantId, buildingId, status, search, limit = 50, offset = 0 } = filters;
+	// one apartment's contracts come whole: the overlap check needs every one of them (#1152)
+	const { apartmentId, tenantId, buildingId, status, search, limit = apartmentId ? undefined : 50, offset = 0 } = filters;
 	const today = swissToday();
 
 	// Build conditions
@@ -150,11 +151,11 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	const whereClause = and(...conditions);
 
 	// Query with tenant and apartment info
-	const results = await selectContracts()
+	const ordered = selectContracts()
 		.where(whereClause)
 		.orderBy(desc(rentalContracts.startDate), desc(rentalContracts.id))
-		.limit(limit)
-		.offset(offset);
+		.$dynamic();
+	const results = await (limit === undefined ? ordered : ordered.limit(limit)).offset(offset);
 
 	// Get total count
 	const countQuery = db
