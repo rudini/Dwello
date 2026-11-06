@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import LiveRegion from '$lib/ui/LiveRegion.svelte';
@@ -27,6 +28,7 @@
 		overlap,
 		overlapSaid = false,
 		newTab = false,
+		beforeEnd,
 		errors
 	}: {
 		startDate: string;
@@ -44,6 +46,7 @@
 		overlapSaid?: boolean; // its words stand at the field already: only the link to the other contract (Weber b667 P-1)
 		newTab?: boolean; // the link keeps the input of the edit form
 		errors: Record<string, string>;
+		beforeEnd?: Snippet; // the edit form's hint under «Befristet», read before the empty end (Helga 668 P-1)
 	} = $props();
 
 	const pastStart = $derived(startDateNotice(startDate, startPast));
@@ -117,6 +120,7 @@
 	}
 	testid="contract-duration"
 />
+{@render beforeEnd?.()}
 
 {#if !isUnlimited}
 	<DateInput

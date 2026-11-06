@@ -30,7 +30,10 @@ import {
 	flatRateInput,
 	flatRateWarning,
 	runningContractEditHint,
-	wizardText
+	wizardText,
+	noticeHint,
+	announcedMonthlyTotal,
+	leaveDialogTitle
 } from '../targets/contract-form';
 import { stepNames } from '../targets/wizard';
 import { errorToast, successToast, warningToast } from '../targets/form';
@@ -88,3 +91,6 @@ export const warning = Text.of(warningToast);
 export const overlapBoxText = Text.of(overlapBox);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);
+export const noticeHintText = Text.of(noticeHint);
+export const announcedTotal = Text.of(announcedMonthlyTotal);
+export const leaveQuestion = Text.of(leaveDialogTitle);

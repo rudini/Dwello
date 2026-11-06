@@ -55,7 +55,7 @@ describe('Mietverträge in der gewählten Sprache', () => {
 	it('beschreibt Wohnung und Mietvertrag auf Englisch', () => {
 		overwriteGetLocale(() => 'en');
 		expect(apartmentOption({ unit: '2.02', building: 'Musterhaus' }, undefined, true).label).toBe(
-			'Apartment 2.02 - Musterhaus (current)'
+			'Apartment 2.02 · Musterhaus (current)'
 		);
 		const summary = contractSummary(
 			{ ...empty, apartmentId: 'a1', isUnlimited: true, startDate: '2027-01-01' },
@@ -64,7 +64,7 @@ describe('Mietverträge in der gewählten Sprache', () => {
 		);
 		expect(summary.map((item) => item.label)).toContain('Net rent');
 		expect(summary.find((item) => item.field === 'apartment')?.value).toBe(
-			'Apartment 2.02 - Musterhaus'
+			'Apartment 2.02 · Musterhaus'
 		);
 		expect(summary.find((item) => item.field === 'duration')?.value).toBe('Open-ended');
 		expect(advancePaymentNotice(empty)).toMatch(

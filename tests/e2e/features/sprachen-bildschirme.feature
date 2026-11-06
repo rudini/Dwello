@@ -143,6 +143,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | agreed-from-refused |
       | contract-edit          | billed-until-refused |
       | contract-edit          | billed-until-statement |
+      | contract-edit          | leave-dialog           |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |

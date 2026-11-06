@@ -1,3 +1,4 @@
+import { flushSync } from 'svelte';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const location = vi.hoisted(() => ({ url: new URL('http://localhost/contracts/new') }));
@@ -221,11 +222,17 @@ describe('Mietvertrag erfassen', () => {
 		expect(document.body.textContent).toContain(
 			'Monatlicher Vorschuss des Mieters für die im Mietvertrag vereinbarten Nebenkosten'
 		);
+		vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] }); // the total is announced after a pause
 		type('contract-base-rent-input', '950');
 		expect(byTestId('advance-payment-notice')).not.toBeNull();
 		type('contract-advance-payment-input', '180');
 		expect(byTestId('advance-payment-notice')).toBeNull();
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’130.00');
+		// #668 (code review 668-s3 C-2): a screen reader hears it too, once typing pauses
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		const announced = document.querySelector('[role="status"][data-testid="contract-monthly-total-announced"]')!;
+		expect(announced.textContent!.replace(/\s+/g, ' ')).toBe('Monatlich total CHF 1’130.00');
 	});
 
 	// #89, persona Helga P-1: the error at the choice goes once an answer is chosen

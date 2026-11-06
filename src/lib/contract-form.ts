@@ -234,6 +234,10 @@ export function forAvailability(response: {
 	}));
 }
 
+/** An apartment as the contract pages name it, «Wohnung 2.01 · Ahornhof» (persona Helga H15-9, #668) */
+export const apartmentName = (unit: string, building: string) =>
+	`${m.buildings_apartment_number({ number: unit })} · ${building}`;
+
 /**
  * Choice of an apartment: rented apartments cannot be chosen, except the one of the contract being edited; null for
  * an apartment whose contracts could not be loaded: it is not shown as free (#151, W-01)
@@ -243,7 +247,7 @@ export function apartmentOption(
 	availability: AvailabilityInfo | null | undefined,
 	isCurrent: boolean
 ): { label: string; disabled: boolean } {
-	const name = `${m.buildings_apartment_number({ number: apartment.unit })} - ${apartment.building}${apartment.size ? `, ${apartment.size}` : ''}`;
+	const name = `${apartmentName(apartment.unit, apartment.building)}${apartment.size ? `, ${apartment.size}` : ''}`;
 	if (isCurrent) return { label: m.contracts_option_current({ name }), disabled: false };
 	if (availability === null)
 		return { label: m.contracts_option_unchecked({ name }), disabled: false };

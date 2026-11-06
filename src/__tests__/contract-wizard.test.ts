@@ -84,7 +84,7 @@ describe('Mietvertrag Schritt für Schritt', () => {
 	it('fasst den Mietvertrag vor dem Speichern in Worten zusammen', () => {
 		expect(contractSummary(filled, tenants, apartments)).toEqual([
 			{ label: 'Mieter', value: 'Anna Keller', step: 1, field: 'tenant' },
-			{ label: 'Wohnung', value: 'Wohnung 2.01 - Ahornhof', step: 2, field: 'apartment' },
+			{ label: 'Wohnung', value: 'Wohnung 2.01 · Ahornhof', step: 2, field: 'apartment' },
 			{ label: 'Vertragsbeginn', value: 'Mittwoch, 1. Januar 2025', step: 3, field: 'startDate' },
 			{ label: 'Vertragsende', value: 'Unbefristet', step: 3, field: 'duration' },
 			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4, field: 'baseRent' },
@@ -209,7 +209,7 @@ describe('Wohnungen zur Auswahl', () => {
 			[{ id: 'a1', unit: '2.02', building: 'Musterhaus', size: '2.5 Zimmer, 65 m²' }],
 			new Map()
 		);
-		expect(choice.label).toBe('Wohnung 2.02 - Musterhaus, 2.5 Zimmer, 65 m²');
+		expect(choice.label).toBe('Wohnung 2.02 · Musterhaus, 2.5 Zimmer, 65 m²');
 	});
 
 	it('nennt freie Wohnungen zuerst und sperrt vermietete', () => {
@@ -236,9 +236,9 @@ describe('Wohnungen zur Auswahl', () => {
 			]) as never
 		);
 		expect(choices).toEqual([
-			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 01.12.2026)', disabled: false },
-			{ value: 'a3', label: 'Wohnung 1.03 - Ahornhof', disabled: false },
-			{ value: 'a1', label: 'Wohnung 1.01 - Ahornhof (nicht verfügbar)', disabled: true }
+			{ value: 'a2', label: 'Wohnung 1.02 · Ahornhof (verfügbar ab 01.12.2026)', disabled: false },
+			{ value: 'a3', label: 'Wohnung 1.03 · Ahornhof', disabled: false },
+			{ value: 'a1', label: 'Wohnung 1.01 · Ahornhof (nicht verfügbar)', disabled: true }
 		]);
 	});
 });

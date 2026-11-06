@@ -42,6 +42,7 @@
 	import PastEndConfirm from './PastEndConfirm.svelte';
 	import RefusedStatements from './RefusedStatements.svelte';
 	import NoticeHint from './NoticeHint.svelte';
+	import LeaveConfirm from './LeaveConfirm.svelte';
 
 	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new;
 	// tenant and apartment are fixed (#152): a move or a Mieterwechsel is a new contract
@@ -209,8 +210,8 @@
 		const confirmPastEnd = (endChanged && confirmedDay === values.endDate) || undefined;
 		const body = { ...contractBody(values, categories), confirmPastEnd, deleteDraft };
 		const response = await apiCall(back, { method: 'PUT', body });
-		saving = false;
 		if (response.error) {
+			saving = false; // saved, it stays busy until the next page: LeaveConfirm lets that navigation pass
 			const atField = billedByDwello(response.error);
 			errors = atField ? { billedUntil: atField } : { form: saveError(response.error) };
 			const statements = response.error.details?.statements;
@@ -319,7 +320,9 @@
 			overlap={overlap?.text === errors.form ? null : overlap}
 			newTab
 			{errors}
-		/>
+		>
+			{#snippet beforeEnd()}<NoticeHint shown={noticeHint} href={back} />{/snippet}
+		</PeriodStep>
 		<PastEndConfirm
 			endDate={endChanged ? values.endDate : ''}
 			startDate={values.startDate}
@@ -327,7 +330,6 @@
 			bind:confirmedDay
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
-		<NoticeHint shown={noticeHint} href={back} />
 		<!-- #133: billed outside Dwello up to this day; runs bill from the day after -->
 		<DateInput
 			id="billedUntil"
@@ -392,3 +394,5 @@
 		>
 	</div>
 </form>
+
+<LeaveConfirm {values} {categories} {saving} />
