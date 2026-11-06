@@ -122,6 +122,15 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" vor
     Und liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden." vor
 
+  # #669 (Persona Sven P-3): der Screenreader sagt den Hinweis, nicht den Namen der Schaltfläche dazu
+  @wip
+  Szenario: Der angekündigte Hinweis bei der Wohnungsauswahl endet nicht mit «Erneut versuchen»
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann kündigt ein Screenreader bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" ohne "Erneut versuchen" an
+
   Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"

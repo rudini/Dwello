@@ -9,3 +9,4 @@ export const formError = (text: string) =>
 export const deleteConfirmButton = target('Löschen bestätigen', (page) => page.getByTestId(/-delete-confirm$/));
 export const successToast = target('Erfolgsmeldung', (page) => page.getByTestId('toast-success'));
 export const errorToast = target('Fehlermeldung', (page) => page.getByTestId('toast-error'));
+export const errorToastClose = target('Meldung schliessen', (page) => errorToast.locate(page).getByRole('button'));

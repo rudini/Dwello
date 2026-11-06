@@ -660,6 +660,16 @@ describe('Mietvertrag bearbeiten', () => {
 				'Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.'
 			]);
 		});
+
+		// #669 (Sven P-1): a later attempt replaces the error of the earlier one, so they do not stack
+		it('zeigt nach zwei vergeblichen Versuchen nur eine Fehlermeldung', async () => {
+			await open();
+			click('contracts-retry');
+			await settle();
+			click('contracts-retry');
+			await settle();
+			expect(said().filter(([type]) => type === 'error')).toHaveLength(1);
+		});
 	});
 
 	// wie beim Beenden: ein Tippfehler im Jahr soll den Mietvertrag nicht rückwirkend beenden

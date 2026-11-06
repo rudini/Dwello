@@ -12,6 +12,10 @@ export const apartmentOption = (apartmentId: string) =>
 export const apartmentContractsUnknown = target('Hinweis bei der Wohnung', (page) =>
 	page.getByTestId('apartment-contracts-unknown')
 );
+// #669: what a screen reader announces when the hint appears (the status region around it)
+export const apartmentHintAnnouncement = target('Ansage des Hinweises bei der Wohnung', (page) =>
+	page.getByRole('status').filter({ has: page.getByTestId('apartment-contracts-unknown') })
+);
 export const retryContractsButton = target('Mietverträge erneut laden', (page) =>
 	page.getByTestId('contracts-retry')
 );
