@@ -903,3 +903,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann steht der Fokus auf dem Ergebnis "2 Nebenkostenabrechnungen sind als Entwurf erstellt."
     Und sagt der Assistent "2 Nebenkostenabrechnungen sind als Entwurf erstellt." an
+
+  # #1146: auch neben langen Angaben der fertigen Schritte stehen die Namen der Schritte ganz
+  Szenariogrundriss: Die Schrittanzeige trennt keinen Namen eines Schritts
+    Angenommen das Browserfenster ist <Breite> auf 900 Pixel gross
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+
+    Beispiele:
+      | Breite |
+      | 1280   |
+      | 1440   |

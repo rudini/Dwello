@@ -16,10 +16,15 @@
 		onselect: (step: number) => void;
 		values?: (string | undefined)[];
 	} = $props();
-	// without values each step as wide as its name (#667, W-10); with them the steps share the width (#1146)
+	// without values each step as wide as its name (#667, W-10); with them the steps share the width
 	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
-	// #673 (Helga P-6): from md the current step is named next to its number too
+	// #673 (Helga P-6): from md the current step is named next to its number too; from xl all of them,
+	// unless the finished steps show values: next to them five names do not fit unbroken (#1146)
+	const wide = $derived(values.length ? '' : 'xl:not-sr-only');
 	const named = (number: number) => (number === current ? 'md:not-sr-only' : '');
+	// the current step keeps its longest word whole, unhyphenated, and takes the room from the others (#1146)
+	const shrink = (number: number) => (number === current ? '' : 'min-w-0');
+	const wrap = (number: number) => (number === current ? '' : 'min-w-0 hyphens-auto break-words');
 </script>
 
 <nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
@@ -40,7 +45,7 @@
 	<ol class="hidden gap-2 md:flex">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}
-			<li class="flex min-w-0 items-center gap-2 {width}">
+			<li class="flex items-center gap-2 {width} {shrink(number)}">
 				{#if number < current}
 					<button
 						type="button"
@@ -56,7 +61,7 @@
 						<span class="flex min-w-0 flex-col text-left">
 							<span
 								data-testid="wizard-step-label"
-								class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
+								class="sr-only min-w-0 hyphens-auto break-words {wide}">{step}</span
 							><span
 								data-testid="wizard-step-value"
 								class="min-w-0 break-words font-normal text-ink-muted"
@@ -67,7 +72,7 @@
 					</button>
 				{:else}
 					<span
-						class="flex min-h-12 min-w-0 items-center gap-2 px-2 {number === current
+						class="flex min-h-12 items-center gap-2 px-2 {shrink(number)} {number === current
 							? 'font-bold text-ink'
 							: 'text-ink-muted'}"
 						aria-current={number === current ? 'step' : undefined}
@@ -80,7 +85,7 @@
 						>
 						<span
 							data-testid="wizard-step-label"
-							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only {named(number)}"
+							class="sr-only {wrap(number)} {wide} {named(number)}"
 							>{step}</span
 						>
 					</span>
