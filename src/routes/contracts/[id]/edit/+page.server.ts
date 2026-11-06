@@ -4,6 +4,7 @@ import type { ContractResponse } from '../../../../../backend/src/api/contract';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { agreeableCategories } from '$lib/server/category';
+import { apartmentName } from '$lib/contract-form';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -32,7 +33,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 			contract,
 			categories: await agreeableCategories(fetch),
 			tenant: `${tenant.firstName} ${tenant.lastName}`,
-			apartment: `${m.buildings_apartment_number({ number: apartment.number })} · ${building.name || building.address}`
+			apartment: apartmentName(apartment.number, building.name || building.address)
 		};
 	} catch (err) {
 		console.error('Failed to fetch contract for edit:', err);

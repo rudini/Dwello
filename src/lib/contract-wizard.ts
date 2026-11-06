@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { plainAmount } from './invoice';
 import {
+	apartmentName,
 	apartmentOption,
 	billedUntilError,
 	impossible,
@@ -175,9 +176,7 @@ export function contractSummary(
 		},
 		{
 			label: m.tenants_apartment(),
-			value: apartment
-				? `${m.buildings_apartment_number({ number: apartment.unit })} - ${apartment.building}`
-				: '',
+			value: apartment ? apartmentName(apartment.unit, apartment.building) : '',
 			step: 2,
 			field: 'apartment'
 		},

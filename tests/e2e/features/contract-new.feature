@@ -130,13 +130,11 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und liest ein Screenreader beim Vertragsbeginn den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden." vor
 
   # #668 (Persona Helga H15-9): Wohnung und Gebäude stehen mit «·» wie auf der Seite des Mietvertrags
-  @wip
   Szenario: Die Wohnungsauswahl schreibt die Wohnung wie die Seite des Mietvertrags
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann steht bei der Wohnung "2.01" in der Auswahl "Wohnung 2.01 · Ahornhof"
 
   # #668 (Persona Helga H15-9)
-  @wip
   Szenario: Die Prüfung schreibt die Wohnung wie die Seite des Mietvertrags
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Wohnung" mit "Wohnung 2.01 · Ahornhof"
