@@ -29,6 +29,7 @@ import {
 import { auditLogWithExpiries } from './access-key.service';
 import { apartmentStatus, nextContractStart } from './apartment.service';
 import { getAllConfig } from './config.service';
+import { SETTINGS } from './export-settings';
 import { EXTENSIONS, NAMES, safe, zipFiles } from './tenant-export.service';
 import { recordedPayments } from './payment-entry';
 import { swissToday } from './today';
@@ -237,22 +238,6 @@ const WORDS = {
 	'november-october': ['November – Oktober', 'Novembre – octobre', 'Novembre – ottobre', 'November – October']
 } as const;
 
-// The settings by the names of the form under «Einstellungen»
-const SETTINGS: Record<string, readonly [string, string, string, string]> = {
-	company_name: ['Firmenname', 'Nom de l’entreprise', 'Nome dell’azienda', 'Company name'],
-	company_address: ['Strasse und Hausnummer', 'Rue et numéro', 'Via e numero civico', 'Street and house number'],
-	company_postal_code: ['PLZ', 'NPA', 'NPA', 'Postcode'],
-	company_city: ['Ort', 'Localité', 'Località', 'Town'],
-	company_phone: ['Telefon', 'Téléphone', 'Telefono', 'Phone'],
-	company_email: ['E-Mail', 'E-mail', 'E-mail', 'Email'],
-	iban: ['IBAN', 'IBAN', 'IBAN', 'IBAN'],
-	payment_deadline_days: ['Zahlungsfrist (Tage)', 'Délai de paiement (jours)', 'Termine di pagamento (giorni)', 'Payment deadline (days)'],
-	reminder_after_days: ['Mahnfrist (Tage)', 'Délai de rappel (jours)', 'Termine di sollecito (giorni)', 'Reminder period (days)'],
-	management_fee_pct: ['Verwaltungspauschale in %', 'Frais d’administration en %', 'Spese amministrative in %', 'Management fee in %'],
-	default_distribution_key_id: ['Standard-Verteilschlüssel', 'Clé de répartition par défaut', 'Chiave di riparto predefinita', 'Default distribution key'],
-	default_heating_profile_id: ['Standard-Heizprofil', 'Profil de chauffage par défaut', 'Profilo di riscaldamento predefinito', 'Default heating profile'],
-	default_language: ['Sprache', 'Langue', 'Lingua', 'Language']
-};
 
 // Folder and table names in the UI language (draft docs/reviews/496-entwurf.md, F-6); the rest as the tenant's export
 const FILES = {

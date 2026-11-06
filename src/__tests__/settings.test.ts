@@ -142,20 +142,25 @@ describe('Einstellungen speichern', () => {
 
 	// #1166: «Kontoinhaber ist der Absender» ticked deletes a Kontoinhaber still stored, also one typed before ticking
 	it('sendet den Kontoinhaber leer, solange der Absender der Kontoinhaber ist', async () => {
-		const { calls } = runAction(actions.default, '', 200, { ...valid, accountHolderName: 'Erika Muster' });
+		const { calls, result } = runAction(actions.default, '', 200, {
+			...valid,
+			accountHolderName: 'Erika Muster'
+		});
+		await result;
 
 		expect(calls[0].body).toMatchObject({ account_holder_name: '', account_holder_separate: '' });
 	});
 
 	it('sendet einen eigenen Kontoinhaber, wie er getippt wurde', async () => {
 		const { accountHolderIsSender: _ticked, ...cleared } = valid;
-		const { calls } = runAction(actions.default, '', 200, {
+		const { calls, result } = runAction(actions.default, '', 200, {
 			...cleared,
 			accountHolderName: ' Erika Muster ',
 			accountHolderAddress: '',
 			accountHolderPostalCode: '6003',
 			accountHolderCity: 'Luzern'
 		});
+		await result;
 
 		expect(calls[0].body).toMatchObject({
 			account_holder_name: 'Erika Muster',
@@ -167,9 +172,19 @@ describe('Einstellungen speichern', () => {
 	});
 
 	it('markiert die Felder des Kontoinhabers, die zur IBAN fehlen', async () => {
-		const { result } = runAction(actions.default, '', 200, valid, {}, { status: 400, answer: accountHolderMissing });
+		const { result } = runAction(
+			actions.default,
+			'',
+			200,
+			valid,
+			{},
+			{ status: 400, answer: accountHolderMissing }
+		);
 
-		expect(await result).toMatchObject({ status: 400, data: { missing: ['accountHolderName', 'accountHolderCity'] } });
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { missing: ['accountHolderName', 'accountHolderCity'] }
+		});
 	});
 
 	it('meldet, wenn das Backend die Einstellungen nicht speichern kann', async () => {

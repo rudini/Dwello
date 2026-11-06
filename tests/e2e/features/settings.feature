@@ -69,12 +69,12 @@ Funktionalität: Einstellungen
   # #1166: der Zahlteil nennt unter «Konto / Zahlbar an» den Kontoinhaber der IBAN (SIX); ohne eigene Angaben ist es der
   # Absender. Die Einstellungen gelten für alle parallel laufenden Szenarien: wer den Kontoinhaber speichert oder
   # nachliest, hat sie für sich, und der Kontoinhaber wird danach wieder auf den Absender gesetzt
-  @wip @einstellungen-global
+  @einstellungen-global
   Szenario: Ohne eigene Angaben ist der Absender der Kontoinhaber
     Dann ist in den Einstellungen angegeben, dass der Kontoinhaber der Absender ist
     Und zeigen die Einstellungen keine Felder des Kontoinhabers
 
-  @wip @einstellungen-global
+  @einstellungen-global
   Szenario: Eigenen Kontoinhaber hinterlegen
     Wenn der Liegenschaftsverwalter folgende Einstellungen mit eigenem Kontoinhaber speichert:
       | Firmenname                | Muster Immobilien AG       |
@@ -90,7 +90,6 @@ Funktionalität: Einstellungen
 
   # #1166: mit IBAN braucht ein eigener Kontoinhaber Name, PLZ und Ort, die Strasse ist freiwillig. Die Seite speichert
   # dabei nichts
-  @wip
   Szenario: Eigener Kontoinhaber ohne Name, PLZ und Ort
     Wenn der Liegenschaftsverwalter folgende Einstellungen mit eigenem Kontoinhaber speichert:
       | IBAN                   | CH93 0076 2011 6238 5295 7 |
@@ -101,7 +100,7 @@ Funktionalität: Einstellungen
     Und kennzeichnen die Einstellungen Name, PLZ und Ort des Kontoinhabers als fehlend
 
   # #1166: wer den Absender wieder als Kontoinhaber angibt, löscht die Angaben des eigenen Kontoinhabers
-  @wip @einstellungen-global
+  @einstellungen-global
   Szenario: Den Absender wieder als Kontoinhaber angeben
     Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
     Wenn der Liegenschaftsverwalter in den Einstellungen den Absender als Kontoinhaber angibt und speichert

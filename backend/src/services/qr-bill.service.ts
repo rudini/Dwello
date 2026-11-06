@@ -87,6 +87,7 @@ export interface QRBillConfig {
 	city: string;
 	phone?: string; // #465: in the statement's letterhead
 	email?: string;
+	accountHolder?: { name: string; address: string; postalCode: string; city: string }; // #1166: when not the Absender
 }
 
 // Liechtenstein's postal codes lie within the Swiss range (#450)
@@ -342,8 +343,10 @@ export async function generateQRBillForStatement(
 	qrCodeImage: Buffer;
 	reference: string;
 }> {
-	// The landlord is the creditor: without name, postal code or town the tenant would pay to no one known (#450)
-	if (![config.companyName, config.postalCode, config.city].every((part) => part.trim()))
+	// The Kontoinhaber is the creditor (#1166), the Absender unless entered: without name, postal code or town the tenant
+	// would pay to no one known (#450)
+	const creditor = config.accountHolder ?? { name: config.companyName, address: config.address, postalCode: config.postalCode, city: config.city };
+	if (![creditor.name, creditor.postalCode, creditor.city].every((part) => part.trim()))
 		throw new CodedError('CREDITOR_ADDRESS_MISSING', 'Company name, postal code and town are required for the payment part');
 
 	// Validate IBAN
@@ -367,11 +370,11 @@ export async function generateQRBillForStatement(
 		coding: '1',
 
 		creditorIBAN: config.iban,
-		creditorName: permitted(config.companyName).slice(0, 70),
-		creditorStreet: text(config.address, 70),
-		creditorPostalCode: permitted(config.postalCode).slice(0, 16),
-		creditorCity: permitted(config.city).slice(0, 35),
-		creditorCountry: creditorCountry(config.postalCode),
+		creditorName: permitted(creditor.name).slice(0, 70),
+		creditorStreet: text(creditor.address, 70),
+		creditorPostalCode: permitted(creditor.postalCode).slice(0, 16),
+		creditorCity: permitted(creditor.city).slice(0, 35),
+		creditorCountry: creditorCountry(creditor.postalCode),
 
 		amount,
 		currency: 'CHF',

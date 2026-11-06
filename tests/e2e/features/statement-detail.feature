@@ -512,7 +512,7 @@ Funktionalität: Abrechnungsdetail
 
   # #1166: der Zahlteil nennt den Kontoinhaber der IBAN, der Kopf des Briefs weiter den Absender. Der Kontoinhaber gilt
   # für alle parallel laufenden Szenarien: das Szenario hat die Einstellungen für sich
-  @wip @einstellungen-global
+  @einstellungen-global
   Szenario: Der Zahlteil nennt einen eigenen Kontoinhaber
     Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

@@ -12,12 +12,12 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: #1166 Kontoinhaber for the QR payment part
 
-- [ ] `@wip` scenarios (settings.feature, statement-detail.feature) written, steps seen red
-- [ ] `fach-reviewer` round on scenarios and texts (de/fr/it/en), findings fixed before the first green test
-- [ ] Backend: keys `account_holder_*`, required name/PLZ/Ort with IBAN and separate holder (`config.service`), creditor from the Kontoinhaber (`qr-bill.service`, statement and reminder), data export labels
-- [ ] BFF and form: block «Konto» with IBAN, checkbox «Kontoinhaber ist der Absender», fields; re-check deletes the fields
-- [ ] Contract `tests/contracts/` for the config response; texts in `messages/{de,fr,it,en}.json`; `UBIQUITOUS_LANGUAGE.md` row «Kontoinhaber»
-- [ ] a11y/language screens: `config` states with the cleared checkbox and the refusal
+- [x] `@wip` scenarios (settings.feature, statement-detail.feature) written, steps seen red
+- [x] `fach-reviewer` round on scenarios and texts (de/fr/it/en), findings fixed before the first green test: `docs/reviews/1166-fachreview-1.md`; V-2 and the row «Absender» decided in #1166
+- [x] Backend: keys `account_holder_*`, required name/PLZ/Ort with IBAN and separate holder (`config.service`), creditor from the Kontoinhaber (`qr-bill.service`, statement and reminder), data export labels
+- [x] BFF and form: block «Konto» with IBAN, checkbox «Kontoinhaber ist der Absender», fields; re-check deletes the fields
+- [x] Contract `tests/contracts/` for the config response; texts in `messages/{de,fr,it,en}.json`; `UBIQUITOUS_LANGUAGE.md` row «Kontoinhaber»
+- [x] a11y/language screens: `config` states with the cleared checkbox and the refusal
 - [ ] Slice review (`code-reviewer`), feature review (persona, `fach-reviewer`, `daten-pruefer`)
 - [ ] Before marking complete: lint, check, fitness, backend type-check, affected tests, E2E, Prettier on new files
 - [ ] Archive session; PR `Fixes #1166`

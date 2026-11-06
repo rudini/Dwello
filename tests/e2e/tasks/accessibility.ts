@@ -292,10 +292,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// #718, part 3: «Neuer Wiederherstellungscode» signed in with a password (the account made by inTurn), with Google an
 	// hour ago, and with the new code shown, refused and confirmed
 	'backup-links': () => Wait.until(backupSettingsLink),
-	// #1166: the block «Konto» with the fields of a Kontoinhaber, and the refusal without them; nothing is saved
+	// #1166: the block «Konto» with the fields of a Kontoinhaber, and the refusal of an IBAN without them; nothing is saved
 	'account-holder': () => (actor) => actor.attemptsTo(giveOwnHolder, Wait.until(settingField('accountHolderName'))),
 	'account-holder-missing': () => (actor) =>
-		actor.attemptsTo(giveOwnHolder, Click.on(saveSettingsButton), Wait.until(settingsError)),
+		actor.attemptsTo(
+			giveOwnHolder,
+			Enter.theValue('CH93 0076 2011 6238 5295 7').into(settingField('iban')), // refused: nothing is saved
+			Click.on(saveSettingsButton),
+			Wait.until(settingsError)
+		),
 	'new-code-password': () => (actor) =>
 		actor.attemptsTo(
 			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),

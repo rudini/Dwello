@@ -244,8 +244,9 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Zahlteil** | Abtrennbarer Teil der QR-Rechnung mit QR-Code und Zahlungsinformationen. | PDF-Komponente |
 | **Empfangsschein** | Teil der QR-Rechnung links neben dem Zahlteil, den der Zahlende als Quittung behält (Begriff der SIX). | PDF-Komponente |
 | **QR-Referenz** | Eindeutige Referenznummer auf der QR-Rechnung zur Zahlungszuordnung. | `qr_bill_reference` |
-| **IBAN** | Internationale Bankkontonummer des Vermieters/Verwalters. | `iban` Config |
-| **Zahlungsempfänger** | Wer auf der QR-Rechnung unter «Konto / Zahlbar an» steht: der Liegenschaftsverwalter mit Firmenname und Firmenadresse; das Land folgt aus der PLZ (9485–9498 Liechtenstein, sonst Schweiz). | `creditor*` in `QRBillData` |
+| **IBAN** | Internationale Bankkontonummer des Kontos, auf das die Mieter Nachzahlungen überweisen; das Konto gehört dem Kontoinhaber. | `iban` Config |
+| **Zahlungsempfänger** | Wer auf der QR-Rechnung unter «Konto / Zahlbar an» steht: der Kontoinhaber; das Land folgt aus der PLZ (9485–9498 Liechtenstein, sonst Schweiz). | `creditor*` in `QRBillData` |
+| **Kontoinhaber** | Person oder Firma, der das Konto der IBAN gehört; steht auf der QR-Rechnung von Abrechnung und Mahnung unter «Konto / Zahlbar an» (Zahlteil und Empfangsschein) und im QR-Code als Zahlungsempfänger. Solange «Kontoinhaber ist der Absender» gesetzt ist, ist es der Absender mit seiner Firmenadresse. Sonst hat er eigene Angaben: Name, Strasse und Hausnummer, PLZ und Ort (Schweiz oder Liechtenstein, Land aus der PLZ). Mit einer IBAN sind dann Name, PLZ und Ort Pflicht. | `account_holder_name`, `account_holder_address`, `account_holder_postal_code`, `account_holder_city` Config |
 
 ---
 
@@ -292,7 +293,8 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Standard-Heizprofil** | Vorgeschlagenes Heizprofil für den Abrechnungslauf. | `default_heating_profile_id` Config |
 | **Standard-Verteilschlüssel** | Vorgeschlagener Verteilschlüssel für neue Rechnungen. | `default_distribution_key_id` Config |
 | **Firmenname** | Name des Liegenschaftsverwalters/der Verwaltungsfirma. | `company_name` Config |
-| **Firmenadresse** | Firmenname, Adresse, PLZ und Ort des Liegenschaftsverwalters für Korrespondenz und QR-Rechnung. Mit einer IBAN sind Firmenname, PLZ und Ort Pflicht. | `company_name`, `company_address`, `company_postal_code`, `company_city` Config |
+| **Firmenadresse** | Firmenname, Adresse, PLZ und Ort des Liegenschaftsverwalters für den Kopf von Abrechnungen und Mahnungen und, solange der Kontoinhaber der Absender ist, für die QR-Rechnung. Mit einer IBAN sind Firmenname, PLZ und Ort Pflicht. | `company_name`, `company_address`, `company_postal_code`, `company_city` Config |
+| **Absender** | Block «Absender» der Einstellungen: Firmenname, Firmenadresse, Telefon und E-Mail des Liegenschaftsverwalters; steht im Kopf und im Gruss jeder Abrechnung und jeder Mahnung. | `company_*` Config |
 | **Protokoll** | Liste unter «Einstellungen», die mit Datum und Uhrzeit Anmeldungen und Änderungen festhält, die Abrechnungen beeinflussen (Verwaltungspauschale, Umlagefähigkeit von Kategorien und Rechnungen, zurückgesetzte Zahlungen, berichtigte Abrechnungen), ausserdem jeden Wechsel der KI mit Anbieter und Land (#580), das Erstellen, Widerrufen und Ablaufen eines Zugangsschlüssels für KI-Programme und jeden Abruf eines KI-Programms mit der Art der abgefragten Daten und dem Namen des Schlüssels, ohne Inhalte (#817), ausserdem jeden Export aller Daten (#496). Einträge bleiben, bis der Liegenschaftsverwalter sie löscht. Nicht zu verwechseln mit dem Protokoll des Servers und dem Übergabeprotokoll. | `audit_log` Tabelle |
 
 ---
