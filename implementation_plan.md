@@ -18,6 +18,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] BFF and form: block «Konto» with IBAN, checkbox «Kontoinhaber ist der Absender», fields; re-check deletes the fields
 - [x] Contract `tests/contracts/` for the config response; texts in `messages/{de,fr,it,en}.json`; `UBIQUITOUS_LANGUAGE.md` row «Kontoinhaber»
 - [x] a11y/language screens: `config` states with the cleared checkbox and the refusal
-- [ ] Slice review (`code-reviewer`), feature review (persona, `fach-reviewer`, `daten-pruefer`)
+- [x] Slice review round 1: `docs/reviews/1166-review-1.md`
+- [x] Feature review: personas `docs/design/personas/helga-1166.md`, `docs/design/personas/marco-1166.md` (Minors only; two-persona Minor → #1175); `daten-pruefer` `docs/reviews/1166-datenpruefung-1.md` (no findings); Dr. Weber not run (no PDF text changed, only the creditor's data); no step-5 `fach-reviewer` (texts unchanged since its round read them in all four languages)
+- [x] Privacy statement question (Kontoinhaber in the mailed PDF) → #1176 (`needs-decision`)
+- [ ] Re-review of C-1 with the closing round
 - [ ] Before marking complete: lint, check, fitness, backend type-check, affected tests, E2E, Prettier on new files
 - [ ] Archive session; PR `Fixes #1166`

@@ -692,8 +692,10 @@ describe('Zahlteil der Mahnung', () => {
 		try {
 			const text = await reminderPdf(await statement('sent'));
 
+			const absender = await getConfig('company_name');
 			expect(text).toContain('Erika Muster\nSeeweg 5\n6003 Luzern');
-			expect(text).toContain(`Freundliche Grüsse\n${await getConfig('company_name')}`);
+			expect(text.startsWith(`${absender}\n`)).toBe(true); // the head (code review 1166 C-2)
+			expect(text).toContain(`Freundliche Grüsse\n${absender}`);
 		} finally {
 			for (const key of Object.keys(holder)) await deleteConfig(key as keyof typeof holder);
 		}

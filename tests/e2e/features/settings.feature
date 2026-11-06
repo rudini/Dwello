@@ -72,7 +72,7 @@ Funktionalität: Einstellungen
   @einstellungen-global
   Szenario: Ohne eigene Angaben ist der Absender der Kontoinhaber
     Dann ist in den Einstellungen angegeben, dass der Kontoinhaber der Absender ist
-    Und zeigen die Einstellungen keine Felder des Kontoinhabers
+    Und fragen die Einstellungen nicht nach einem eigenen Kontoinhaber
 
   @einstellungen-global
   Szenario: Eigenen Kontoinhaber hinterlegen

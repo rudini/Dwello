@@ -23,6 +23,14 @@ export function testData(api: CallTheApi) {
 	const remove = (path: string) => api.remove(path);
 	const extras: string[] = []; // invoices and configuration records, removed before their building
 	const restores: (() => Promise<unknown>)[] = []; // predefined records a scenario changed
+	// the IBAN with the Firmenadresse it needs (#450), the same in every scenario
+	const accountOf = (iban: string) => ({
+		company_name: 'Muster Immobilien AG',
+		company_address: 'Bahnhofstrasse 1',
+		company_postal_code: '8001',
+		company_city: 'Zürich',
+		iban: iban.replace(/\s/g, '')
+	});
 	// #1166: the Kontoinhaber a scenario saved, set back to the Absender
 	const restoreAccountHolder = () =>
 		restores.push(() =>
@@ -329,13 +337,7 @@ export function testData(api: CallTheApi) {
 		// Global setting: every scenario that needs one uses the same IBAN and Firmenadresse (the one of «Absender und
 		// Fristen hinterlegen»), so parallel runs agree; an IBAN is saved only with the Firmenadresse (#450)
 		async iban(iban: string) {
-			await withSettingsLock(() => put('config', {
-				company_name: 'Muster Immobilien AG',
-				company_address: 'Bahnhofstrasse 1',
-				company_postal_code: '8001',
-				company_city: 'Zürich',
-				iban: iban.replace(/\s/g, '')
-			}));
+			await withSettingsLock(() => put('config', accountOf(iban)));
 		},
 
 		// #1166: the Kontoinhaber of the IBAN, other than the Absender, for a scenario tagged @einstellungen-global (it holds
@@ -344,11 +346,7 @@ export function testData(api: CallTheApi) {
 			const [postalCode, ...city] = place.split(' ');
 			restoreAccountHolder();
 			await put('config', {
-				company_name: 'Muster Immobilien AG',
-				company_address: 'Bahnhofstrasse 1',
-				company_postal_code: '8001',
-				company_city: 'Zürich',
-				iban: iban.replace(/\s/g, ''),
+				...accountOf(iban),
 				account_holder_name: name,
 				account_holder_address: street,
 				account_holder_postal_code: postalCode,
