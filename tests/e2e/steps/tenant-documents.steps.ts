@@ -9,11 +9,13 @@ import {
 	deleteTenantConsequence,
 	deliveryStatesOf,
 	documentTitleEntered,
+	chosenFile,
 	duplicateFileWarning,
+	duplicateFileWarnings,
 	listedDocuments,
 	noDocumentsNote
 } from '../questions/tenant-documents';
-import { openDocuments, openDocumentsToSend, openTenantOf, showDocumentsOf } from '../tasks/documents';
+import { chooseView, openDocuments, openDocumentsToSend, openTenantOf, showDocumentsOf } from '../tasks/documents';
 import {
 	chooseFile,
 	confirmDeleting,
@@ -150,13 +152,14 @@ When('der Liegenschaftsverwalter das Dokument {string} herunterladen will', asyn
 	await verwalter.attemptsTo(requestDocument(title));
 });
 
-// #677 (Helga P-3, Marco P-5): two uploads of the same file differ in their time; the row names the file
+// #677 (Helga P-3, Marco P-5): two uploads of the same file differ in their time; the row names the file, on the tenant
+// page («Hochgeladen am») and in «Dokumente» («Zu …, hochgeladen am»)
 Then(
 	'nennt das Dokument {string} die Datei {string} und die Uhrzeit, zu der es heute hochgeladen wurde',
 	async ({ verwalter }, title: string, file: string) => {
 		await verwalter
 			.sees(documentFor(title, ''))
-			.toMatch(new RegExp(`Hochgeladen am ${swissDate(inDays(0)).replaceAll('.', '\\.')} um \\d{2}:\\d{2}, Datei «${file.replaceAll('.', '\\.')}»`));
+			.toMatch(new RegExp(`[Hh]ochgeladen am ${swissDate(inDays(0)).replaceAll('.', '\\.')} um \\d{2}:\\d{2}, Datei «${file.replaceAll('.', '\\.')}»`));
 	}
 );
 
@@ -193,4 +196,14 @@ When('der Liegenschaftsverwalter nur die Dokumente von {string} ansieht', async 
 
 Then('liegt kein Dokument zu {string} vor', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(documentsFor('', `Zu ${names.get(tenant) ?? tenant},`)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Ansicht {string} wählt', async ({ verwalter }, view: string) => {
+	await verwalter.attemptsTo(chooseView(view as 'Alle' | 'Zu versenden'));
+});
+
+// #677 (V-3): only this tenant's uploads count; the chosen file beside the button is the positive anchor
+Then('nennt das Feld «Datei» die gewählte Datei {string} ohne Warnung', async ({ verwalter }, file: string) => {
+	await verwalter.sees(chosenFile).toBe(file);
+	await verwalter.sees(duplicateFileWarnings).toBe(0);
 });

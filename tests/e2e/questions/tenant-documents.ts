@@ -1,5 +1,6 @@
 import { Count, Text, Value } from '../screenplay/questions';
 import {
+	chosenDocumentFile,
 	deleteDocumentButton,
 	deleteDocumentMessage,
 	deleteTenantMessage,
@@ -18,3 +19,5 @@ export const deleteOffersFor = (title: string) => Count.of(deleteDocumentButton(
 export const deleteTenantConsequence = Text.of(deleteTenantMessage);
 export const deleteDocumentConsequence = Text.of(deleteDocumentMessage);
 export const duplicateFileWarning = Text.of(duplicateFileNote);
+export const chosenFile = Text.of(chosenDocumentFile);
+export const duplicateFileWarnings = Count.of(duplicateFileNote);

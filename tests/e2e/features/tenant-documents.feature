@@ -90,14 +90,12 @@ Funktionalität: Dokumente eines Mieters
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lea Frei"
 
   # #677 (Helga P-3, Marco P-5): zwei Dokumente aus derselben Datei unterscheiden sich in der Uhrzeit
-  @wip
   Szenario: Ein hochgeladenes Dokument nennt seine Datei und die Uhrzeit
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochlädt
     Dann nennt das Dokument "Betreibungsauszug" die Datei "betreibung.pdf" und die Uhrzeit, zu der es heute hochgeladen wurde
 
   # #677 (Helga P-3, Marco P-5): Dwello warnt vor dem zweiten Hochladen einer Datei, verhindert es aber nicht
-  @wip
   Szenario: Vor dem zweiten Hochladen einer Datei warnt Dwello
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Uebergabeprotokoll"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
@@ -105,3 +103,11 @@ Funktionalität: Dokumente eines Mieters
     Dann warnt Dwello beim Feld «Datei», dass die Datei "Uebergabeprotokoll.pdf" heute schon als Dokument "Uebergabeprotokoll" hochgeladen wurde
     Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" als "Uebergabeprotokoll" hochlädt
     Dann liegen beim Mieter 2 Dokumente "Uebergabeprotokoll"
+
+  # #677 (V-3): nur die Dokumente dieses Mieters zählen
+  Szenario: Eine gleich benannte Datei eines anderen Mieters löst keine Warnung aus
+    Angenommen der Mieter "Beat Huber" existiert
+    Und "Beat Huber" hat das hochgeladene Dokument "Uebergabeprotokoll"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" zum Hochladen wählt
+    Dann nennt das Feld «Datei» die gewählte Datei "Uebergabeprotokoll.pdf" ohne Warnung

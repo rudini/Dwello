@@ -181,11 +181,12 @@ describe('Mieterdetail', () => {
 		expect(byTestId('document-delete-button')).toBeNull();
 	});
 
-	it('nennt ein hochgeladenes Dokument mit Datum, ohne Versandstatus', () => {
+	it('nennt ein hochgeladenes Dokument mit Datum, Uhrzeit und Datei, ohne Versandstatus', () => {
 		open([], null, [upload]);
 		const row = byTestId('document-row')!.textContent!.replace(/\s+/g, ' ');
 		expect(row).toContain('Ausweiskopie');
-		expect(row).toContain('Hochgeladen am 14.10.2026');
+		// #677 (decision 3): two uploads of the same file differ in their time
+		expect(row).toContain('Hochgeladen am 14.10.2026 um 00:30, Datei «ausweis.jpg»');
 		expect(byTestId('document-status')).toBeNull();
 		expect(byTestId('document-delete-button')!.getAttribute('aria-label')).toBe('Löschen: Ausweiskopie');
 	});
@@ -373,6 +374,30 @@ describe('Mieterdetail', () => {
 			'Die Datei ist grösser als 10 MB. Wählen Sie eine kleinere Datei oder verkleinern Sie den Scan.'
 		);
 		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
+	});
+
+	// #677 (decisions 1, 2, V-2): the same file name among this tenant's uploads; the hint names the newest of them
+	it('weist beim Wählen einer schon hochgeladenen Datei auf deren neuestes Dokument hin', () => {
+		open([], null, [
+			{ ...upload, id: 'u1', title: 'Ausweis alt', createdAt: '2026-01-05T09:00:00.000Z' },
+			{ ...upload, id: 'u2', title: 'Ausweis neu', createdAt: '2026-10-13T22:30:00.000Z' },
+			{ ...upload, id: 'u3', title: 'Ausweis mittel', createdAt: '2026-05-20T09:00:00.000Z' },
+			{ ...upload, id: 'u4', title: 'Mietvertrag', fileName: 'vertrag.pdf' }
+		]);
+		const input = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		const choose = (name: string) => {
+			Object.defineProperty(input, 'files', { value: [new File(['x'], name)], configurable: true });
+			input.dispatchEvent(new Event('change', { bubbles: true }));
+			flushSync();
+		};
+		choose('scan.pdf');
+		expect(byTestId('tenant-document-file-duplicate')).toBeNull();
+		choose('ausweis.jpg');
+		expect(text('tenant-document-file-duplicate')).toBe(
+			'Eine Datei «ausweis.jpg» haben Sie schon am 14.10.2026 hochgeladen, als Dokument «Ausweis neu». Laden Sie sie nur hoch, wenn es eine neue Fassung ist.'
+		);
+		// only a hint: the upload is still offered (decision 2)
+		expect(byTestId<HTMLButtonElement>('tenant-document-upload-button')!.disabled).toBe(false);
 	});
 
 	it('sendet eine Datei bis 10 MB', () => {

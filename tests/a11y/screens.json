@@ -23,6 +23,8 @@
 		"document-delete-dialog": "The confirmation dialog for deleting a document the property manager uploaded to the tenant, open.",
 		"anonymise-dialog": "A former tenant whose last contract ended in 2014 (#459): the confirmation of «Mieter anonymisieren» with its consequence, open (not confirmed, the record stays).",
 		"upload-refused": "A file Dwello does not take (a Word file) uploaded to the tenant: the refusal at the file field.",
+		"upload-duplicate": "A file chosen for upload whose name one of the tenant's uploaded documents already has: the hint at the file field naming that document (#677).",
+		"tenant-filtered": "«Dokumente» with the filter «Mieter» set to one tenant: only that tenant's documents (#677).",
 		"upload-dialog": "«Rechnungen hochladen» open with a building chosen, a PDF the KI stand-in read (deducted amounts, costs not allocable, an unsure Rechnungsdatum) opened for checking, and a refused Word file.",
 		"upload-discard-dialog": "«Rechnungen hochladen» with a file in it, cancelled: the confirmation that the files and entries are lost.",
 		"upload-partial": "«Rechnungen hochladen» after creating one of two invoices: the result naming the file still open, that file with its missing Kategorie, the button counting the incomplete one.",
@@ -354,6 +356,7 @@
 				"delete-dialog",
 				"document-delete-dialog",
 				"upload-refused",
+				"upload-duplicate",
 				"demo"
 			]
 		},
@@ -904,10 +907,12 @@
 				"default",
 				"empty",
 				"marked-sent",
-				"mark-sent-dialog"
+				"mark-sent-dialog",
+				"tenant-filtered"
 			],
 			"queries": {
-				"marked-sent": "?letter={remindedLetter}"
+				"marked-sent": "?letter={remindedLetter}",
+				"tenant-filtered": "?tenant={tenant}"
 			}
 		},
 		{

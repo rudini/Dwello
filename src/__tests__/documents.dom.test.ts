@@ -1,9 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+
+import { goto } from '$app/navigation';
 
 import DocumentsPage from '../routes/documents/+page.svelte';
-import { allByTestId, byTestId, click, show } from './helpers/dom';
+import { allByTestId, byTestId, click, fireEvent, show } from './helpers/dom';
 import documentList from '../../tests/contracts/documents.json';
 
 const letter = (overrides = {}) => ({
@@ -26,9 +29,34 @@ const letter = (overrides = {}) => ({
 const documents = (
 	list: ReturnType<typeof letter>[],
 	status: string | null = null,
-	form: object | null = null
+	form: object | null = null,
+	tenantId: string | null = null
 ) =>
-	show(DocumentsPage, { data: { documents: list, status }, form } as never);
+	show(DocumentsPage, {
+		data: {
+			documents: list,
+			status,
+			tenantId,
+			tenants: [
+				{ id: 't1', name: 'Anna Keller' },
+				{ id: 't2', name: 'Beat Huber' }
+			]
+		},
+		form
+	} as never);
+const upload = (overrides = {}) =>
+	letter({
+		type: 'upload',
+		title: 'Ausweiskopie',
+		fileName: 'ausweis.jpg',
+		channel: null,
+		status: null,
+		statementId: null,
+		statementNumber: null,
+		reminderLevel: null,
+		createdAt: '2025-03-01T09:05:00Z',
+		...overrides
+	});
 
 // #449 (V-2 A, N-1 A): a reminder of a statement paid or replaced since; no new Versandstatus, a derived row
 describe('Mahnung, die nicht mehr hinausgeht', () => {
@@ -159,6 +187,64 @@ describe('Dokumente', () => {
 		expect(byTestId('documents-empty')!.textContent).toContain(
 			'Briefe, die Sie ausdrucken und per Post schicken müssen, erscheinen hier.'
 		);
+	});
+
+	// #677 (decision 5): the page says where a document is uploaded
+	it('sagt, dass ein Dokument auf der Seite des Mieters hochgeladen wird', () => {
+		documents([]);
+		expect(document.body.textContent).toContain(
+			'Ein Dokument laden Sie auf der Seite des Mieters unter «Dokument hochladen» hoch.'
+		);
+	});
+
+	// #677 (decision 5, persona Anna P-4): the tenant's name in each row leads to the tenant
+	it('führt mit dem Namen des Mieters in jeder Zeile zum Mieter', () => {
+		documents([letter(), upload({ id: 'd2' })]);
+		for (const row of allByTestId('document-row')) {
+			const link = row.querySelector<HTMLAnchorElement>('[data-testid="document-tenant-link"]')!;
+			expect(link.textContent!.trim()).toBe('Anna Keller');
+			expect(link.getAttribute('href')).toBe('/tenants/t1');
+		}
+		expect(allByTestId('document-row')[1].textContent).toContain('Zu Anna Keller, hochgeladen am');
+	});
+
+	// #677 (decision 3, V-3): two uploads of the same file differ in time; the row names the file
+	it('nennt bei einem hochgeladenen Dokument Uhrzeit und Datei', () => {
+		documents([upload()]);
+		expect(byTestId('document-row')!.textContent).toContain(
+			'Zu Anna Keller, hochgeladen am 01.03.2025 um 10:05, Datei «ausweis.jpg»'
+		);
+	});
+
+	// #677 (decision 6): a filter «Mieter» with every tenant, the chosen one selected
+	it('bietet alle Mieter zum Filtern an und zeigt den gewählten', () => {
+		documents([], null, null, 't2');
+		const filter = byTestId<HTMLSelectElement>('documents-tenant-filter')!;
+		expect([...filter.options].map((option) => option.text)).toEqual([
+			'Alle Mieter',
+			'Anna Keller',
+			'Beat Huber'
+		]);
+		expect(filter.value).toBe('t2');
+	});
+
+	// #677 (decision 6, V-3): «Alle» and «Zu versenden» keep the chosen tenant
+	it('behält bei «Alle» und «Zu versenden» den gewählten Mieter', () => {
+		documents([], 'to_send', null, 't1');
+		expect(byTestId('documents-filter-all')!.getAttribute('href')).toBe('/documents?tenant=t1');
+		expect(byTestId('documents-filter-to-send')!.getAttribute('href')).toBe(
+			'/documents?status=to_send&tenant=t1'
+		);
+	});
+
+	// #677 (decision 6, #662): the filter applies on change, keeps «Zu versenden» and the focus on the filter
+	it('filtert beim Ändern des Mieters sofort und behält dabei «Zu versenden»', () => {
+		documents([], 'to_send');
+		fireEvent(byTestId<HTMLSelectElement>('documents-tenant-filter')!, 'change', 't2');
+		expect(goto).toHaveBeenCalledWith('/documents?status=to_send&tenant=t2', {
+			keepFocus: true,
+			noScroll: true
+		});
 	});
 
 	// #677 (persona Marco 2): whoever asks whether something is to be posted needs no way to the statements

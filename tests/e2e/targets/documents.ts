@@ -36,6 +36,12 @@ export const duplicateFileNote = target('Hinweis Datei schon hochgeladen', (page
 export const documentTenantLink = (title: string, tenantName: string) =>
 	target(`Mieter ${tenantName} bei «${title}»`, (page) => documentRow(title, tenantName).locate(page).getByTestId('document-tenant-link'));
 export const documentsTenantFilter = target('Filter Mieter der Dokumente', (page) => page.getByTestId('documents-tenant-filter'));
+export const documentsView = (view: 'Alle' | 'Zu versenden') =>
+	target(`Ansicht «${view}» der Dokumente`, (page) =>
+		page.getByTestId(view === 'Alle' ? 'documents-filter-all' : 'documents-filter-to-send')
+	);
+// the file chosen, said beside the button of the file field
+export const chosenDocumentFile = target('Gewählte Datei', (page) => page.getByTestId('tenant-document-file-chosen'));
 export const openDocumentLink = (title: string, tenantName = '') =>
 	target(`«${title}» ${tenantName}`.trim() + ' öffnen', (page) => documentRow(title, tenantName).locate(page).getByTestId('document-pdf-link'));
 export const deleteDocumentButton = (title: string) =>

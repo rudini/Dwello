@@ -10,14 +10,18 @@
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import FileInput from '$lib/ui/FileInput.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import type { StatementDocument } from '$lib/types';
+	import { formatDate } from '$lib/utils/format';
 
 	// Adds a file to the tenant: PDF, JPG or PNG up to 10 MB with a title; a refusal shows at its field
 	let {
 		form,
-		demo = false
+		demo = false,
+		uploads = []
 	}: {
 		form?: { title?: string; uploadError?: string; titleError?: string } | null;
 		demo?: boolean;
+		uploads?: StatementDocument[]; // this tenant's, to say that a file of the same name is already there (#677)
 	} = $props();
 
 	const MAX_MEGABYTES = 10; // as the backend counts them: 10 × 1024 × 1024 bytes
@@ -34,6 +38,25 @@
 	let fileInput = $state<HTMLInputElement>();
 	const chosen = $derived(chosenName || m.tenants_document_file_none());
 	const choose = () => (chosenName = fileInput?.files?.[0]?.name ?? '');
+	// only a hint, a new version is legitimate; of several, the newest (#677, Fachreview V-2)
+	const earlier = $derived(
+		uploads
+			.filter((d) => chosenName && d.fileName === chosenName)
+			.reduce<StatementDocument | undefined>(
+				(a, d) => (a && a.createdAt > d.createdAt ? a : d),
+				undefined
+			)
+	);
+	const duplicate = $derived(
+		earlier && {
+			text: m.tenants_document_file_duplicate({
+				file: chosenName,
+				date: formatDate(earlier.createdAt),
+				title: earlier.title
+			}),
+			testid: 'tenant-document-file-duplicate'
+		}
+	);
 
 	async function notAnswered() {
 		unanswered = true;
@@ -94,6 +117,7 @@
 		label={m.tenants_document_file_label()}
 		help={m.tenants_document_file_help()}
 		error={failed ?? form?.uploadError}
+		note={duplicate}
 	>
 		{#snippet children(control)}
 			<FileInput

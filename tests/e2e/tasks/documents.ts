@@ -5,6 +5,7 @@ import {
 	deliveryTenantLink,
 	documentTenantLink,
 	documentsTenantFilter,
+	documentsView,
 	feedbackDocumentsLink,
 	markSentButton,
 	confirmMarkSentButton,
@@ -17,9 +18,19 @@ import { openTenantDetail } from './tenant-detail';
 
 export const openDocumentsToSend = Navigate.to('/documents?status=to_send');
 export const openDocuments = Navigate.to('/documents');
-// #677: the filter applies on change (#662)
-export const showDocumentsOf = (tenantName: string) => Select.option({ label: tenantName }).from(documentsTenantFilter);
+// #677: the filter applies on change (#662); done once the address holds it
+export const showDocumentsOf = (tenantName: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Select.option({ label: tenantName }).from(documentsTenantFilter),
+		Wait.forUrl((url) => url.searchParams.has('tenant'))
+	);
 export const openTenantOf = (title: string, tenantName: string) => Click.on(documentTenantLink(title, tenantName));
+// done once the address shows the chosen view
+export const chooseView = (view: 'Alle' | 'Zu versenden'): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(documentsView(view)),
+		Wait.forUrl((url) => (url.searchParams.get('status') === 'to_send') === (view === 'Zu versenden'))
+	);
 
 // done once the statement reports how the reminder went
 export const sendReminder: Activity = (actor) =>
