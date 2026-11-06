@@ -1314,3 +1314,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1156 (the same heading for the other lists)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #1149 tenant list writes the apartment with ·
+
+- [x] No scenario (the issue's «Done means»: separator only); `tenant-list.test.ts` pins it, seen red
+- [x] `TenantRow.svelte`: « · » as on the contract pages; E2E step «wohnt … laut Mieterliste in der Wohnung …» checks the same with the new separator (no spec change)
+- [x] code-reviewer round 1 (`docs/reviews/1149-review-1.md`): C-1 Blocker («Wohnung Wohnung»), C-2 Major (test input not the load's) fixed, test seen red on the doubled word
+- [x] code-reviewer round 2 (`docs/reviews/1149-review-2.md`): C-1, C-2 closed
+- [x] No persona: only the separator changes, to the format personas read on the contract pages (#668)
+- [x] Checks: lint, check, fitness, vitest, E2E `tenants.feature` (8 passed), axe and language rows `tenants` (6 passed)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session
