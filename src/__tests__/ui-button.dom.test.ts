@@ -47,7 +47,8 @@ describe('Button', () => {
 		expect(link.textContent).toContain('(öffnet in neuem Tab)');
 	});
 
-	it('sagt während des Speicherns, dass es arbeitet, und lässt sich nicht erneut auslösen', () => {
+	// #677 (persona Sven P-3): a disabled button loses the focus to <body>; aria-disabled keeps it on the button
+	it('sagt während des Speicherns, dass es arbeitet, behält den Fokus und lässt sich nicht erneut auslösen', () => {
 		const onclick = vi.fn();
 		show(Button, {
 			children: label,
@@ -59,7 +60,30 @@ describe('Button', () => {
 		const button = byTestId<HTMLButtonElement>('save')!;
 		expect(button.textContent).toContain('Wird gespeichert …');
 		expect(button.getAttribute('aria-busy')).toBe('true');
-		expect(button.disabled).toBe(true);
+		expect(button.getAttribute('aria-disabled')).toBe('true');
+		expect(button.disabled).toBe(false);
+		click(button);
+		expect(onclick).not.toHaveBeenCalled();
+	});
+
+	// #677: the form is not sent a second time while the first sending runs
+	it('sendet sein Formular nicht ein zweites Mal, solange es arbeitet', () => {
+		const form = document.body.appendChild(document.createElement('form'));
+		const sent = vi.fn((event: Event) => event.preventDefault());
+		form.addEventListener('submit', sent);
+		show(Button, { children: label, type: 'submit', busy: true, testid: 'save' }, form);
+		click('save');
+		expect(sent).not.toHaveBeenCalled();
+	});
+
+	// #677 (persona Sven P-3): the sending is announced, not only shown on the button
+	it('kündigt das Arbeiten in einer Statusmeldung an, die schon vorher da ist', () => {
+		show(Button, { children: label, busyLabel: 'Wird gespeichert …', testid: 'idle' });
+		const status = byTestId('idle')!.parentElement!.querySelector('[role="status"]');
+		expect(status?.textContent?.trim()).toBe('');
+		show(Button, { children: label, busy: true, busyLabel: 'Wird gespeichert …', testid: 'save' });
+		expect(byTestId('save')!.nextElementSibling?.getAttribute('role')).toBe('status');
+		expect(byTestId('save')!.nextElementSibling!.textContent!.trim()).toBe('Wird gespeichert …');
 	});
 
 	it('zeigt ein Symbol vor der Beschriftung, ohne es vorzulesen', () => {

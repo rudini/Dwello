@@ -38,3 +38,28 @@ Funktionalität: Dokumente
   Szenario: Eine Mahnung lässt sich nicht löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Anna Keller"
     Dann kann der Liegenschaftsverwalter die "Zahlungserinnerung" nicht löschen
+
+  # #677 (Anna P-3): die Liste sagt, wo Dokumente hochgeladen werden
+  @wip
+  Szenario: Die Seite sagt, wo Dokumente hochgeladen werden
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Dann erklärt die Seite "Dokumente" "Ein Dokument laden Sie auf der Seite des Mieters hoch, unter «Dokument hochladen». Dorthin führt der Name des Mieters in der Liste."
+
+  # #677 (Anna P-4, Weber P-4): der Name des Mieters führt zum Mieter
+  @wip
+  Szenario: Vom Dokument zum Mieter
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter beim Dokument "Ausweiskopie" den Mieter "Anna Keller" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
+
+  # #677 (Anna P-4): ein altes Dokument eines Mieters ist schnell gefunden
+  @wip
+  Szenario: Nur die Dokumente eines Mieters ansehen
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Mieter "Beat Huber" existiert
+    Und "Beat Huber" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Und der Liegenschaftsverwalter nur die Dokumente von "Anna Keller" ansieht
+    Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller", heute hochgeladen, ohne Versandstatus vor
+    Und liegt kein Dokument zu "Beat Huber" vor

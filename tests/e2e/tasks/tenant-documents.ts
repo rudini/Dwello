@@ -37,6 +37,9 @@ export const uploadDocument = (file: File, title: string): Activity => (actor) =
 		Click.on(uploadDocumentButton)
 	);
 
+// #677: only chosen, not sent: a warning shows before the upload
+export const chooseFile = (file: File) => Upload.theFile(file).into(documentFileInput);
+
 export const startDeletingDocument = (title: string) => Click.on(deleteDocumentButton(title));
 // the open delete dialog, of a document or of the tenant
 export const confirmDeleting = Click.on(deleteConfirmButton);

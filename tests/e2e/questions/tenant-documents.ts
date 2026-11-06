@@ -6,6 +6,7 @@ import {
 	documentRow,
 	documentStatus,
 	documentTitleInput,
+	duplicateFileNote,
 	noDocumentsHint
 } from '../targets/documents';
 
@@ -16,3 +17,4 @@ export const deliveryStatesOf = (title: string) => Count.of(documentStatus(title
 export const deleteOffersFor = (title: string) => Count.of(deleteDocumentButton(title));
 export const deleteTenantConsequence = Text.of(deleteTenantMessage);
 export const deleteDocumentConsequence = Text.of(deleteDocumentMessage);
+export const duplicateFileWarning = Text.of(duplicateFileNote);

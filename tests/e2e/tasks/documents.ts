@@ -1,8 +1,10 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, Navigate, Wait } from '../screenplay/interactions';
+import { Click, DownloadFrom, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	confirmReminderButton,
 	deliveryTenantLink,
+	documentTenantLink,
+	documentsTenantFilter,
 	feedbackDocumentsLink,
 	markSentButton,
 	confirmMarkSentButton,
@@ -15,6 +17,9 @@ import { openTenantDetail } from './tenant-detail';
 
 export const openDocumentsToSend = Navigate.to('/documents?status=to_send');
 export const openDocuments = Navigate.to('/documents');
+// #677: the filter applies on change (#662)
+export const showDocumentsOf = (tenantName: string) => Select.option({ label: tenantName }).from(documentsTenantFilter);
+export const openTenantOf = (title: string, tenantName: string) => Click.on(documentTenantLink(title, tenantName));
 
 // done once the statement reports how the reminder went
 export const sendReminder: Activity = (actor) =>

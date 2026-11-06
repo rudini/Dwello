@@ -161,6 +161,13 @@ describe('Dokumente', () => {
 		);
 	});
 
+	// #677 (persona Marco 2): whoever asks whether something is to be posted needs no way to the statements
+	it('bietet unter «Zu versenden» ohne Briefe keinen Weg zu den Nebenkostenabrechnungen an', () => {
+		documents([], 'to_send');
+		expect(byTestId('documents-empty')!.textContent).toContain('Keine Briefe zu versenden');
+		expect(byTestId('documents-empty')!.querySelector('a[href="/statements"]')).toBeNull();
+	});
+
 	// #193: marked as sent, the letter leaves «Zu versenden»; its remade PDF is offered right there
 	it('bietet nach dem Markieren das neue PDF zum Ausdrucken an', () => {
 		documents([], 'to_send', {

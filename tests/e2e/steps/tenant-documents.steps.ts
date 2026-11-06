@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { documentFor } from '../questions/documents';
+import { documentFor, documentsFor } from '../questions/documents';
 import { downloadedFileMagic, downloadedFileName } from '../questions/download';
 import {
 	deleteDocumentConsequence,
@@ -9,11 +9,13 @@ import {
 	deleteTenantConsequence,
 	deliveryStatesOf,
 	documentTitleEntered,
+	duplicateFileWarning,
 	listedDocuments,
 	noDocumentsNote
 } from '../questions/tenant-documents';
-import { openDocuments, openDocumentsToSend } from '../tasks/documents';
+import { openDocuments, openDocumentsToSend, openTenantOf, showDocumentsOf } from '../tasks/documents';
 import {
+	chooseFile,
 	confirmDeleting,
 	imageFile,
 	openDocument,
@@ -146,4 +148,49 @@ Then('kann der Liegenschaftsverwalter die {string} nicht löschen', async ({ ver
 
 When('der Liegenschaftsverwalter das Dokument {string} herunterladen will', async ({ verwalter }, title: string) => {
 	await verwalter.attemptsTo(requestDocument(title));
+});
+
+// #677 (Helga P-3, Marco P-5): two uploads of the same file differ in their time; the row names the file
+Then(
+	'nennt das Dokument {string} die Datei {string} und die Uhrzeit, zu der es heute hochgeladen wurde',
+	async ({ verwalter }, title: string, file: string) => {
+		await verwalter
+			.sees(documentFor(title, ''))
+			.toMatch(new RegExp(`Hochgeladen am ${swissDate(inDays(0)).replaceAll('.', '\\.')} um \\d{2}:\\d{2}, Datei «${file.replaceAll('.', '\\.')}»`));
+	}
+);
+
+When('der Liegenschaftsverwalter die PDF-Datei {string} zum Hochladen wählt', async ({ verwalter }, file: string) => {
+	await verwalter.attemptsTo(chooseFile(pdfFile(file)));
+});
+
+Then(
+	'warnt Dwello beim Feld «Datei», dass die Datei {string} heute schon als Dokument {string} hochgeladen wurde',
+	async ({ verwalter }, file: string, title: string) => {
+		await verwalter
+			.sees(duplicateFileWarning)
+			.toBe(
+				`Eine Datei «${file}» haben Sie schon am ${swissDate(inDays(0))} hochgeladen, als Dokument «${title}». Laden Sie sie nur hoch, wenn es eine neue Fassung ist.`
+			);
+	}
+);
+
+Then('liegen beim Mieter {int} Dokumente {string}', async ({ verwalter }, count: number, title: string) => {
+	await verwalter.sees(documentsFor(title, '')).toBe(count);
+});
+
+// #677 (Anna P-4, Weber P-4): in «Dokumente» the tenant's name leads to the tenant, and a filter shows one tenant
+When(
+	'der Liegenschaftsverwalter beim Dokument {string} den Mieter {string} öffnet',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(openTenantOf(title, names.get(tenant) ?? tenant));
+	}
+);
+
+When('der Liegenschaftsverwalter nur die Dokumente von {string} ansieht', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.attemptsTo(showDocumentsOf(names.get(tenant) ?? tenant));
+});
+
+Then('liegt kein Dokument zu {string} vor', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(documentsFor('', `Zu ${names.get(tenant) ?? tenant},`)).toBe(0);
 });
