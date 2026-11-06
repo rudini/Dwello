@@ -17,7 +17,8 @@
 		values?: (string | undefined)[];
 	} = $props();
 	// without values each step as wide as its name (#667, W-10); with them the steps share the width
-	// whole words that do not fit in one row (a long building name) move the next steps to a second one (#1146)
+	// whole words that do not fit in one row (a long building name) move the next steps to a second one; a single
+	// word wider than the whole list still overflows (#1146, code review 1146-4 C-1)
 	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
 	const rows = $derived(values.length ? 'flex-wrap' : '');
 	// #673 (Helga P-6): from md the current step is named next to its number too; from xl all of them,
