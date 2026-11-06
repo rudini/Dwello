@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures } from '../questions/contract-form';
+import { apartmentHintAnnounced, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
-import { stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
+import { enterStartDate, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
 const { When, Then } = createBdd(test);
 
@@ -48,4 +48,13 @@ When('der Liegenschaftsverwalter {int} Sekunden auf «Meldung schliessen» bleib
 
 Then('steht die Erfolgsmeldung noch da', async ({ verwalter }) => {
 	await verwalter.sees(confirmationShown).toBe(true);
+});
+
+// #669 (Helga H-2): an overlap is bad news, said as a warning
+Then('warnt Dwello nach dem Laden mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(warning).toBe(text);
+});
+
+When('der Liegenschaftsverwalter den Vertragsbeginn leert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(enterStartDate(''));
 });

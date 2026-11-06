@@ -623,6 +623,38 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(document.activeElement).toBe(document.getElementById('startDate'));
 		});
 
+		// #669 (code review C-3): without a Vertragsbeginn nothing was checked for an overlap
+		it('sagt ohne Vertragsbeginn nur, dass die Mietverträge geladen sind', async () => {
+			await open();
+			type('start-date-input', '');
+			failing = false;
+			click('contracts-retry');
+			await settle();
+			expect(said()).toEqual([['success', 'Die Mietverträge der Wohnung sind geladen.']]);
+		});
+
+		// #669 (Persona Helga H-2): an overlap is bad news, said as a warning, not with the tick of a success
+		it('warnt, wenn sich der Zeitraum mit einem der geladenen Mietverträge überschneidet', async () => {
+			const before = {
+				...listed.contracts[0],
+				id: 'c0',
+				startDate: '2023-01-01',
+				endDate: '2024-03-31'
+			};
+			fakeBff(() => (failing ? [500, {}] : [200, { contracts: [before] }]));
+			await open();
+			type('start-date-input', '01.03.2024');
+			failing = false;
+			click('contracts-retry');
+			await settle();
+			expect(said()).toEqual([
+				[
+					'warning',
+					'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich».'
+				]
+			]);
+		});
+
 		// Review b15-merge M-1: the hint and its button stay while loading, so the focus does not fall to the page
 		it('behält den Knopf mit dem Fokus, solange geladen wird und wenn es wieder scheitert', async () => {
 			await open();

@@ -27,7 +27,7 @@ import {
 	agreedFromInput,
 	agreedFromToggle
 } from '../targets/contract-form';
-import { errorToast, errorToastClose, successToast, successToastClose } from '../targets/form';
+import { errorToast, errorToastClose, loadedToast, successToastClose } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -63,7 +63,7 @@ export const goToNextStep = Click.on(nextButton);
 export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to('/api/contracts', { apartmentId });
 export const contractsLoadAgain = FailRequests.noLonger;
 // waits for the confirmation that they are loaded (review #151 R-4)
-export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(successToast));
+export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(loadedToast));
 // still failing: waits for the message that says so
 export const retryContractsInVain: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(errorToast));
 // #669: on from the error message's close button with the Tab key

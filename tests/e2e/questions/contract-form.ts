@@ -32,7 +32,7 @@ import {
 	wizardText
 } from '../targets/contract-form';
 import { stepNames } from '../targets/wizard';
-import { errorToast, successToast } from '../targets/form';
+import { errorToast, successToast, warningToast } from '../targets/form';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
 export const chosenApartmentId = Value.of(apartmentSelect);
@@ -83,5 +83,6 @@ export const brokenStepNames = BrokenWords.in(stepNames);
 export const failures = Count.of(errorToast);
 export const failureOnTop = OnTop.of(errorToast);
 export const confirmationShown = Visibility.of(successToast);
+export const warning = Text.of(warningToast);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);

@@ -182,7 +182,16 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-01-01" einträgt
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
-    Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich»."
+    Dann warnt Dwello nach dem Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich»."
+
+  # #669 (code review C-3): ohne Vertragsbeginn ist nichts auf eine Überschneidung geprüft
+  Szenario: Die Meldung nach dem Laden ohne Vertragsbeginn sagt nur, dass die Mietverträge geladen sind
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn leert
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann bestätigt Dwello das Laden mit "Die Mietverträge der Wohnung sind geladen."
 
   # #669 (Persona Helga P-5): bei 150 % lag der Hinweis unter dem ersten Bildschirm
   Szenario: Der Hinweis oben im Formular steht bei 150 % im ersten Bildschirm

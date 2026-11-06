@@ -2,10 +2,11 @@
 	import { m } from '$lib/paraglide/messages';
 	import { addToast, dismissToast } from '$lib/stores';
 
-	let failed = 0; // the error of the last attempt: the next result replaces it (#669, Sven P-1)
+	let said = 0; // the result of the last attempt: the next one replaces it (#669, Sven P-1)
 
 	// whether the period overlaps one of them (#669, Helga P-2): `undefined` without a Vertragsbeginn; a wizard
-	// step other than 3 has no box «Zeitraum überschneidet sich», so it names the step (fach-review 669 V-1)
+	// step other than 3 has no box «Zeitraum überschneidet sich», so it names the step (fach-review 669 V-1);
+	// an overlap is a warning, not a success (Helga H-2)
 	const loaded = (overlap: object | null | undefined, step = 3) =>
 		overlap === undefined
 			? m.contracts_apartment_contracts_loaded()
@@ -22,12 +23,12 @@
 		overlap?: object | null,
 		step?: number
 	) {
-		dismissToast(failed);
+		dismissToast(said);
 		if (stillUnknown) {
-			failed = addToast('error', m.contracts_apartment_contracts_retry_failed());
+			said = addToast('error', m.contracts_apartment_contracts_retry_failed());
 			return;
 		}
-		addToast('success', loaded(overlap, step));
+		said = addToast(overlap ? 'warning' : 'success', loaded(overlap, step));
 		next?.focus();
 	}
 </script>
