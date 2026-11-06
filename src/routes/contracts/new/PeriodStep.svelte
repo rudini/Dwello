@@ -37,7 +37,7 @@
 		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
 		min?: string;
 		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
-		onretry?: () => void; // loads them again; without it the hint points to the apartment's
+		onretry?: () => void; // loads them again; without it the hint points to the one at the top
 		startPast: boolean; // the start lies before today, as the backend says (#815); the edit form: also before the saved one
 		overlap: Overlap | null;
 		overlapSaid?: boolean; // its words stand at the field already: only the link to the other contract (Weber b667 P-1)

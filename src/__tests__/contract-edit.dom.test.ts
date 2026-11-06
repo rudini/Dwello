@@ -506,7 +506,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten.'
 		);
 		expect(byTestId('start-contracts-unknown')!.textContent).toContain(
-			'«Erneut versuchen» steht oben bei der Wohnung.'
+			'«Erneut versuchen» steht oben auf der Seite.'
 		);
 		expect(document.querySelectorAll('[data-testid="contracts-retry"]')).toHaveLength(1);
 		// Review M3: the hint is read out when it appears; once only, not again at the start (Sven B-13 Minor 3)
@@ -521,7 +521,7 @@ describe('Mietvertrag bearbeiten', () => {
 		const ids = (byTestId('start-date-input')!.getAttribute('aria-describedby') ?? '').split(' ');
 		// the title too: it says what matters most (fach-reviewer b665 V-1)
 		expect(ids.map((id) => document.getElementById(id)?.textContent?.trim() ?? '').join(' ')).toContain(
-			'Dwello prüft beim Speichern, ob die Wohnung frei ist «Erneut versuchen» steht oben bei der Wohnung.'
+			'Dwello prüft beim Speichern, ob die Wohnung frei ist «Erneut versuchen» steht oben auf der Seite.'
 		);
 	});
 

@@ -29,7 +29,6 @@
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
-	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -264,6 +263,8 @@
 	novalidate
 	class="flex flex-col gap-6"
 >
+	<!-- at the top, on the first screen at 150 % (#669, Helga P-5) -->
+	<ContractsUnknown onretry={retry} shown={shownUnknown} testid="apartment-contracts-unknown" />
 	{#if running}
 		<!-- a rent increase per Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#66, #76),
 		     an increase it provides for still needs the official form (#388) -->
@@ -283,9 +284,6 @@
 				<dd class="text-ink" data-testid="contract-form-apartment">{apartment}</dd>
 			</div>
 		</dl>
-		<LiveRegion shown={shownUnknown}>
-			<ContractsUnknown onretry={retry} testid="apartment-contracts-unknown" />
-		</LiveRegion>
 		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
 			<p>
 				{contract.endDate

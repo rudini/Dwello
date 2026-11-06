@@ -1985,7 +1985,7 @@
 	"contracts_apartment_contracts_retry": "Erneut versuchen",
 	"contracts_apartment_contracts_loaded": "Die Mietverträge der Wohnung sind geladen.",
 	"contracts_apartment_contracts_retry_failed": "Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.",
-	"contracts_apartment_contracts_see_apartment": "«Erneut versuchen» steht oben bei der Wohnung.",
+	"contracts_apartment_contracts_see_top": "«Erneut versuchen» steht oben auf der Seite.",
 	"contracts_delete_draft_contracts_unknown": "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie bei der Wohnung «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern».",
 	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut.",
 	"contracts_notice_hint_title": "Hat der Mieter gekündigt?",
