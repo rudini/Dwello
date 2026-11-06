@@ -67,7 +67,6 @@
 	async function uploaded(title_: string) {
 		uploadForm?.reset();
 		title = '';
-		chosenName = '';
 		addToast('success', m.tenants_document_uploaded_toast({ title: title_ }));
 		await tick();
 		uploadForm?.querySelector<HTMLElement>('input[type="file"]')?.focus();
@@ -89,6 +88,8 @@
 			// the page could not answer: nothing was saved, the form keeps what was entered, and «Dokument hochladen»
 			// sends it again (an alert, not an error of the file)
 			if (result.type === 'error') return notAnswered();
+			// before the refreshed uploads hold the new document: its own file is no earlier one (code review C-6)
+			if (result.type === 'success') chosenName = '';
 			await update({ reset: false });
 			if (result.type === 'success') uploaded(String(result.data?.uploaded));
 			// a refusal is read out at its field; after saving the focus stays at the form, below the new document

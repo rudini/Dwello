@@ -20,6 +20,7 @@ import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
+import { reactiveProps } from './helpers/reactive-props.svelte';
 import documentList from '../../tests/contracts/documents.json';
 
 const tenant = {
@@ -72,7 +73,8 @@ function open(
 	anonymisableFrom: string | null = null,
 	anonymisable = false // whether that day has come, the backend says (#815)
 ) {
-	show(TenantPage, {
+	// reactive, as SvelteKit refreshes `data` after an action
+	const props = reactiveProps({
 		data: {
 			tenant: { ...tenant, anonymisableFrom, anonymisable },
 			rental: {
@@ -90,7 +92,9 @@ function open(
 			formerDocuments
 		},
 		form
-	} as never);
+	});
+	show(TenantPage, props as never);
+	return props;
 }
 
 const text = (testid: string) => byTestId(testid)!.textContent!.replace(/\s+/g, ' ').trim();
@@ -412,6 +416,36 @@ describe('Mieterdetail', () => {
 		flushSync();
 		expect(status.textContent!.trim()).toBe(text('tenant-document-file-duplicate'));
 		expect(status.textContent).toContain('«ausweis.jpg»');
+	});
+
+	// #677 (code review C-6): the uploads refreshed after saving hold the new document; its own file is no earlier one
+	it('sagt nach dem Hochladen keinen Hinweis zum gerade hochgeladenen Dokument an', async () => {
+		const props = open([], null, []);
+		const input = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		Object.defineProperty(input, 'files', {
+			value: [new File(['x'], 'ausweis.jpg')],
+			configurable: true
+		});
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+		const status = byTestId('tenant-document-file-duplicate-status')!;
+		const said: string[] = [];
+		new MutationObserver(() => said.push(status.textContent!.trim())).observe(status, {
+			childList: true,
+			characterData: true,
+			subtree: true
+		});
+		const after = actions.get('?/upload')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		const update = async () => {
+			props.data.documents = [upload];
+			flushSync();
+		};
+		await after({ update, result: { type: 'success', data: { uploaded: 'Ausweis' } } });
+		flushSync();
+		expect(said.filter(Boolean)).toEqual([]);
+		expect(status.textContent!.trim()).toBe('');
 	});
 
 	it('sendet eine Datei bis 10 MB', () => {
