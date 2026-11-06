@@ -43,6 +43,7 @@ import {
 	billedUntilAsked,
 	timesInWizard,
 	brokenStepNames,
+	brokenStepValues,
 	noticeHintText,
 	announcedTotal,
 	leaveQuestion
@@ -714,6 +715,11 @@ Then('steht im Assistenten {string} nur einmal', async ({ verwalter }, text: str
 // #667 (Dr. Weber W-10)
 Then('bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um', async ({ verwalter }) => {
 	await verwalter.sees(brokenStepNames).toEqual([]);
+});
+
+// #1146 (Dr. Weber P-1, Helga P-1)
+Then('bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um', async ({ verwalter }) => {
+	await verwalter.sees(brokenStepValues).toEqual([]);
 });
 
 // #668 (Persona Sven S-4): heading and page title name the tenant

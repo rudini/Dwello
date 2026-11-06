@@ -22,8 +22,9 @@
 	// unless the finished steps show values: next to them five names do not fit unbroken (#1146)
 	const wide = $derived(values.length ? '' : 'xl:not-sr-only');
 	const named = (number: number) => (number === current ? 'md:not-sr-only' : '');
-	// the current step keeps its longest word whole, unhyphenated, and takes the room from the others (#1146)
-	const shrink = (number: number) => (number === current ? '' : 'min-w-0');
+	// the current step keeps its longest word whole, unhyphenated, and takes the room from the others; with values
+	// every step keeps its words whole: the names but one are hidden, so the words fit (#1146, Dr. Weber P-1)
+	const shrink = (number: number) => (number === current || values.length ? '' : 'min-w-0');
 	const wrap = (number: number) => (number === current ? '' : 'min-w-0 hyphens-auto break-words');
 </script>
 
@@ -36,12 +37,12 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above,
-	     and from md next to its number);
+	<!-- Up to xl, and with values at every width, the numbers without names: five names do not fit next to the
+	     sidebar or the values (the current one is named above, and from md next to its number; #1146);
 	     a finished step shows its value at every width the list shows (#663).
-	     min-w-0 and hyphenation keep long names inside their step instead of widening the page; without values each
-	     step as wide as its name, so a long one is not cut inside the word next to short ones (#667, Dr. Weber W-10);
-	     with values the steps share the width, a long value would take it from the names -->
+	     Without values min-w-0 and hyphenation keep the other long names inside their step instead of widening the
+	     page, and each step is as wide as its name, so a long one is not cut inside the word next to short ones
+	     (#667, Dr. Weber W-10); with values the steps share the width and keep their words whole -->
 	<ol class="hidden gap-2 md:flex">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}

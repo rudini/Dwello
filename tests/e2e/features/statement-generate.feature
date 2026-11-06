@@ -911,8 +911,15 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
     Und der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Wenn der Liegenschaftsverwalter zum Schritt "Heizprofil und Verwaltungspauschale" zurückgeht
+    Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
 
     Beispiele:
       | Breite |
+      | 768    |
+      | 960    |
       | 1280   |
       | 1440   |
