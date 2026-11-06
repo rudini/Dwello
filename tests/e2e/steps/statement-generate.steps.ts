@@ -72,7 +72,7 @@ import {
 	runSummaryText,
 	wizardAnnouncement
 } from '../questions/statement-generate';
-import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
+import { currentStepNameText, currentStepNameWidth, restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
 	chooseAllBuildings,
 	chooseBuilding,
@@ -787,4 +787,10 @@ Then('nennt der erledigte Schritt {string} die Wahl {string}', async ({ verwalte
 
 Then('sagt der Assistent {string} an', async ({ verwalter }, text: string) => {
 	await verwalter.sees(wizardAnnouncement).toBe(text);
+});
+
+// #673 (Helga P-6): at 150 % zoom the step list names the current step next to its number, not only in the line above
+Then('zeigt die Schrittanzeige beim aktuellen Schritt den Namen {string}', async ({ verwalter }, name: string) => {
+	await verwalter.sees(currentStepNameText).toBe(name);
+	await verwalter.sees(currentStepNameWidth).toBeGreaterThan(1);
 });

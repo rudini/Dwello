@@ -33,6 +33,11 @@ Funktionalität: Nebenkostenabrechnungen
     Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
     Und die Abrechnungsliste enthält genau 1 Abrechnung
 
+  # #673 (Marco P-7): der gewählte Status ist nicht nur an der Farbe zu erkennen und sagt, was ein zweites Antippen tut
+  Szenario: Der gewählte Statusfilter sagt, wie er sich aufheben lässt
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Dann sagt der Statusfilter "Entwurf" "Filter aufheben"
+
   # #403 (2): ohne Akonto und ohne Kosten ist der Saldo 0.00; mit dem Versand ist die Abrechnung erledigt. Der Entwurf
   # von Anna Keller passt nicht zum Filter
   Szenario: Nur erledigte Abrechnungen anzeigen

@@ -13,3 +13,7 @@ export const saveStatusLine = target('Speicherstatus', (page) => page.getByTestI
 export const saveStatus = (text: string) =>
 	target(`Speicherstatus «${text}»`, (page) => page.getByTestId('save-status').getByText(text));
 export const stepNames = target('Namen der Schritte', (page) => page.getByTestId('wizard-step-label'));
+// #673: the name next to the current step's number in the step list, not the line above it
+export const currentStepName = target('Name des aktuellen Schritts', (page) =>
+	page.locator('[aria-current="step"]').getByTestId('wizard-step-label')
+);
