@@ -663,6 +663,23 @@ describe('Kategorie bearbeiten', () => {
 		);
 	});
 
+	// code review 672 C-1: «Neue Kategorie» names the check «Von der KI prüfen lassen» only with a KI
+	it('nennt bei einer neuen Kategorie die Prüfung durch die KI, wenn eine KI gewählt ist', () => {
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+
+		expect(descriptionHelp()).toBe(
+			'Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die KI liest die Beschreibung, wenn Sie «Von der KI prüfen lassen» wählen und wenn sie für eine Rechnung eine Kategorie vorschlägt. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht.'
+		);
+	});
+
+	it('nennt bei einer neuen Kategorie keine KI, wenn keine gewählt ist', () => {
+		show(NewCategoryPage, { data: { kiEnabled: false }, form: null } as never);
+
+		expect(descriptionHelp()).toBe(
+			'Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht.'
+		);
+	});
+
 	// Heizkosten folgen beim Mieterwechsel dem Heizprofil statt den Tagen; separates Warmwasser nicht
 	it('erfasst, ob eine Kategorie Heizkosten sind, und erklärt die Folge', () => {
 		const pellets = { ...category('c5', 'Pellets', true), isHeatingCost: true };

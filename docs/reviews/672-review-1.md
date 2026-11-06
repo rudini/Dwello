@@ -1,0 +1,16 @@
+# Code-Review #672, Runde 1 (a6690f2..3894cf5)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Minor | src/__tests__/categories-page.dom.test.ts:641–664 | Die Hilfe auf «Neue Kategorie» (`categories_description_ki_new`, mit KI und ohne KI) prüft nur E2E (`categories.feature:306`, `ki-einstellungen.feature:46`). Die DOM-Tests decken nur die Bearbeitungsseite ab, obwohl `CategoryForm` ohne `category` mit `ki: true/false` im DOM-Test zeigbar ist. Das ist nicht die tiefste Schicht, die das Verhalten zeigen kann. |
+| C-2 | Minor | tests/e2e/questions/categories.ts:389–393 | `listedBefore` antwortet mit ja/nein statt mit dem Wert. Schlägt die Prüfung fehl, steht dort nur `false` und nicht die Reihenfolge, die die Liste zeigt (z. B. die Position oder die Namensliste). «Vor X stehen» ist kein echter Zustand wie «sichtbar» oder «aktiviert». |
+
+Keine Blocker, keine Major.
+
+Geprüft: Die Texte in allen vier `messages/*.json` stimmen Wort für Wort mit `docs/reviews/672-1-fach-review.md` überein. `categories_sort_order_help` ist nach V-3 ohne den Satz zu gleichen Zahlen. Französisch hat U+00A0 in « … » und vor «:». Die Schaltfläche heisst in jeder Sprache so wie im Satz `_ki_new` (`categories_propose`). Die Sätze werden mit einem Leerzeichen verbunden, die Reihenfolge stimmt in allen drei Varianten. `ki` hat in `CategoryForm` den Default `false`. Die Bearbeitungsseite lädt `kiEnabled` schon (`[id]/edit/+page.server.ts:6`), «unbekannt = an» gilt wie auf «Neue Kategorie» (#219). `{#if ki && !category}` hält «Von der KI prüfen lassen» auf der Bearbeitungsseite fern (DOM-Test `category-propose-button` null). Zu `sortOrder`: `Number('')` = 0. Beim Erfassen ändert sich nichts, der Backend-Default ist ebenfalls 0 (`schema.ts:220`). Die angepasste Unit-Erwartung prüft strenger, nicht weniger. Vordefinierte Kategorien beginnen bei 1 (`0002_stammdaten.sql`), also stimmt «Zaunpflege vor Heizung». `updateCategory` lässt `sortOrder` auch bei vordefinierten Kategorien zu. Geänderte DOM-Tests: Der alte `not.toContain` ist jetzt ein exakter `toBe`, und `PREDEFINED_HELP` unterscheidet weiterhin zwischen eigener und vordefinierter Kategorie. Kein Test prüft weniger. Rot: Alle Szenarien und Tests scheitern ohne die Änderung (alter Text, fehlender `kiEnabled`-Pfad, `sortOrder` fehlte). Die Schritte rufen nur Tasks und Questions auf. `sees` wiederholt die Prüfung, bis sie gilt (`expect.poll`). Kein bestehender Schritt ohne `@wip` wurde geändert. Es gibt keinen neuen Bildschirm und keinen Zustand mit eigenen Bedienelementen. Die API-Antworten sind unverändert, ein Vertrag ist nicht betroffen. ponytail-review: nichts Ungenutztes, keine Kopie eines Helpers.
+
+## Nicht bestätigt
+
+- Lint, check, Backend-Type-Check, vitest (212 Dateien, 4236 Tests), `categories.feature` Chromium (40), das Szenario ohne KI, a11y- und Sprachzeilen «categor» (42), fitness, fallow, Prettier: vom Aufrufer gemeldet.
+- Rot gesehen (5 Szenarien und der Unit-Test in 1897008, 7 DOM/Unit-Tests per Stash, das Szenario ohne KI): vom Aufrufer gemeldet, von mir nur durch Lesen beurteilt.
+- Dass `Accessible.descriptionOf(sortOrderInput)` die Hilfe von `TextInput` über `aria-describedby` liest: nur aus dem grünen Lauf des Aufrufers erschlossen, `Field.svelte` nicht gelesen.
