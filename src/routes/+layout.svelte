@@ -105,6 +105,7 @@
 				</div>
 			</main>
 		</div>
+		<ToastRegion />
 		<Footer />
 	</div>
 	<MobileNav />
@@ -139,8 +140,7 @@
 				{@render children()}
 			</main>
 		{/if}
+		<ToastRegion />
 		<Footer />
 	</div>
 {/if}
-
-<ToastRegion />

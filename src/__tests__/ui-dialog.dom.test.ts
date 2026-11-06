@@ -122,6 +122,18 @@ describe('Dialog', () => {
 		expect(toastRegion.hasAttribute('inert')).toBe(false);
 	});
 
+	// #669 (Sven P-4): the toasts stand inside the page frame, before the footer; the rest of the frame goes inert
+	it('lässt die Meldungen im Seitenrahmen erreichbar und macht den Rest davon unerreichbar', () => {
+		const frame = document.createElement('div');
+		frame.innerHTML = '<main></main><div data-toast-region></div><footer></footer>';
+		document.body.append(frame);
+		openDialog();
+		expect(frame.querySelector('[data-toast-region]')!.closest('[inert]')).toBeNull();
+		expect(
+			[...frame.querySelectorAll('main, footer')].map((part) => part.hasAttribute('inert'))
+		).toEqual([true, true]);
+	});
+
 	it('setzt den Fokus auf "Abbrechen", damit nichts aus Versehen bestätigt wird', () => {
 		openDialog();
 		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
