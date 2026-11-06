@@ -89,8 +89,8 @@
 	let overlapSaid = ''; // the overlap at «Vertragsbeginn», which any period change may resolve
 	// the overlap the save was refused for: saving checked it, so the hint that saving will check goes (#667, W-03)
 	let refusal = $state<ReturnType<typeof overlapRefusal>>(null);
-	const refused = $derived(!!refusal && errors.form === refusal.text);
-	const refusedWith = $derived(refused ? refusal?.contract : undefined); // the other contract, linked
+	// the other contract, linked
+	const refusedWith = $derived(errors.form === refusal?.text ? refusal?.contract : undefined);
 	let saving = $state(false);
 	let savedAt = $state<Date | null>(null);
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
@@ -118,7 +118,7 @@
 	const loading = $derived(step === 2 && !contracts); // «Weiter» waits for the apartments' contracts (#468)
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapError(values, contracts?.get(values.apartmentId) ?? [], true));
-	const reviewUnknown = $derived(unknown && !refused);
+	const reviewUnknown = $derived(unknown && !refusedWith);
 	const overlapAtField = $derived(!!overlap && errors[overlap.field] === overlap.text);
 	// contracts of the chosen tenant without a Vertragsende (#156)
 	const openContracts = $derived(
@@ -236,8 +236,7 @@
 		if (id === 'startDate') startEdited = true;
 		delete errors[errorKey[id] ?? id];
 		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
-		for (const field of ['startDate', 'endDate'])
-			if (errors[field] === overlapSaid) delete errors[field];
+		for (const f of ['startDate', 'endDate']) if (errors[f] === overlapSaid) delete errors[f];
 	}
 
 	async function goTo(target: number) {
@@ -297,8 +296,7 @@
 	const savedFailed = (details?: Record<string, unknown>) =>
 		details?.code ? backendMessage(details, m.contracts_save_failed()) : m.contracts_save_failed();
 
-	// The overlap blocks, named as the save names it (fach review b667 V-1); a start in the past only asks once, so it
-	// is read out and can be confirmed
+	// The overlap blocks, worded as the refusal (b667 V-1); a start in the past asks once, to be read out and confirmed
 	function periodWarnings(): Record<string, string> {
 		overlapSaid = overlap?.text ?? '';
 		if (overlap) return { [overlap.field]: overlap.text };
