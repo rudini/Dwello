@@ -1233,6 +1233,22 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: full vitest, fitness `--base origin/main`, backend tests and p2 queries, fallow audit, Prettier on added files, lint, check, type-check, affected E2E with axe and language rows
 - [x] Closing code-reviewer round on the delta since 00709bc (`docs/reviews/b667-review-3.md`, no findings)
 - [x] Archive the session; PR (step 9 by the coordinator) pushed after this archive
+## Session: #669 contracts-retry toasts (personas B-15 round 3)
+
+- [x] Read #669; Helga's b15-3 report from history (`ebc0708`), Sven's not in the history (issue text used)
+- [x] @wip scenarios and failing steps (db9466c), seen red at the missing behaviour; Helga P-1 already fixed on main (#1096), pinned
+- [x] Product owner decided P-4 (toasts after `<main>`), P-5 (hint at the top, Spec change approved: #669 for three lines in contract-edit.feature), P-2 also in the wizard; recorded in #669
+- [x] fach-reviewer step 1, round 1 (`docs/reviews/669-1-fach-review.md`): V-1 to V-4 fixed
+- [x] Fixes P-1, P-3, P-4, P-5, P-2 (034c8db..5b569bc), each test seen red
+- [x] code-reviewer round 1 (`docs/reviews/669-review-1.md`): C-1 Major, C-2, C-3
+- [x] Feature review round 1: personas Sven and Helga (`docs/design/personas/sven-669.md`, `helga-669.md`): S-1, S-2/H-3, H-1 Major; S-3 rejected (decided P-3); S-4, S-5, H-4, H-5 stay
+- [x] fach-reviewer round 2 (`docs/reviews/669-2-fach-review.md`): texts for C-2, S-2/H-3, H-1 (V-5 to V-7)
+- [x] Fixes C-1/S-6, S-1, H-2, C-3, C-2, S-2/H-3, H-1 with new state `overlap-review` (dc51001..5af99a9), each test seen red
+- [x] code-reviewer round 2 (`docs/reviews/669-review-2.md`): C-1 to C-3 closed; C-4, C-5 Minor fixed (7b1dc69)
+- [x] Persona re-runs (`sven-669-2.md`, `helga-669-2.md`): S-1, S-2, H-1, H-3 fixed; S-6, H-2 partly, Minor, stay; S-7 = H-6 became #1153
+- [x] Issues opened: #1152 (overlap check loads at most 50 contracts), #1153 (name the blocking contract in step 2)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-669.md`
+- [x] Archive the session; PR pushed after this archive
 ## Session: #668 usability pass, contract edit form and rent step (personas B-15)
 
 - [x] Read #668 and the B-15 reports (`helga-b15*.md` from history at `c893731^`; no Sven B-15 report exists, the issue text names his findings)

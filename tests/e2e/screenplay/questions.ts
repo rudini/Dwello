@@ -263,6 +263,23 @@ export const Width = {
 		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox(quick))?.width ?? 0))
 };
 
+/** Whether the element is what the window shows at its centre, not covered by another (#669) */
+export const OnTop = {
+	of: (target: Target) =>
+		about(target, 'whether on top:', (element) =>
+			single(element, (one) =>
+				one.evaluate(
+					(node) => {
+						const box = node.getBoundingClientRect();
+						return node.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2));
+					},
+					undefined,
+					quick
+				)
+			)
+		)
+};
+
 /** The space in pixels from the bottom of one target down to the top of another, null when either is missing */
 export const Gap = {
 	between: (upper: Target, lower: Target) =>

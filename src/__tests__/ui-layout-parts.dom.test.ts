@@ -275,6 +275,50 @@ describe('Meldungen', () => {
 		row.remove();
 	});
 
+	// #669 (Persona Sven S-1, WCAG 2.2.1): the confirmation left while the focus was on «Meldung schliessen»
+	it('lässt die Erfolgsmeldung stehen, solange der Fokus in ihr ist, und zählt danach die Lesezeit neu', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		addToast('success', 'Mieter gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		const close = document.querySelector<HTMLElement>('[aria-label="Meldung schliessen"]')!;
+		close.focus();
+		vi.advanceTimersByTime(60_000);
+		flushSync();
+		expect(status().textContent).toContain('Mieter gespeichert');
+
+		close.blur();
+		vi.advanceTimersByTime(7000);
+		flushSync();
+		expect(status().textContent).toContain('Mieter gespeichert');
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(status().textContent).not.toContain('Mieter gespeichert');
+	});
+
+	it('lässt die Erfolgsmeldung stehen, solange der Zeiger auf ihr liegt', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		addToast('success', 'Mieter gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		const region = document.querySelector('[data-toast-region]')!;
+		region.dispatchEvent(new Event('pointerenter'));
+		vi.advanceTimersByTime(60_000);
+		flushSync();
+		expect(status().textContent).toContain('Mieter gespeichert');
+
+		region.dispatchEvent(new Event('pointerleave'));
+		vi.advanceTimersByTime(8000);
+		flushSync();
+		expect(status().textContent).not.toContain('Mieter gespeichert');
+	});
+
 	// The reading time starts when the confirmation appears, not while the next page loads
 	it('zählt die Lesezeit erst ab dem Erscheinen der Meldung', () => {
 		vi.useFakeTimers();

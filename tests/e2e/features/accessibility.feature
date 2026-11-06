@@ -104,6 +104,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | overlap-review      |
       | contract-new           | overlap-error       |
       | contract-new           | overlap-refused     |
       | contract-new           | agreed-costs-none        |

@@ -135,8 +135,11 @@ export const Wait = {
 	forValue: (target: Target, value: string) => on(target, (element) => expect(element).toHaveValue(value)),
 	/** until the target finds exactly that many elements */
 	forCount: (target: Target, count: number) => on(target, (elements) => expect(elements).toHaveCount(count)),
-	forUrl: (matches: (url: URL) => boolean): Activity => (actor) => pageOf(actor).waitForURL(matches)
+	forUrl: (matches: (url: URL) => boolean): Activity => (actor) => pageOf(actor).waitForURL(matches),
+	/** a fixed time, for what must still hold after it, e.g. a message that must not leave by itself (#669) */
+	forSeconds: (seconds: number): Activity => (actor) => pageOf(actor).waitForTimeout(seconds * 1000)
 };
+export const Focus = { on: (target: Target) => on(target, (element) => element.focus()) };
 
 /** Clicks a link that downloads a file and keeps the download for `DownloadedFile` */
 export const DownloadFrom = (target: Target): Activity => async (actor) => {

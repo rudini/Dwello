@@ -76,14 +76,14 @@ Funktionalität: Mietvertrag bearbeiten
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist"
-    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben bei der Wohnung."
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben auf der Seite."
 
   # #665 (Persona Sven B-13): wer mit der Tastatur zum Vertragsbeginn kommt, hört den Hinweis mit dem Feld
   Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Dann liest ein Screenreader beim Vertragsbeginn den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" vor
-    Und liest ein Screenreader beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben bei der Wohnung." vor
+    Und liest ein Screenreader beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben auf der Seite." vor
 
   # #666 (Personas Marco und Helga B-13): das Wichtigste zuerst, in einfachen Worten, kurz genug fürs Telefon
   Szenario: Der Hinweis auf nicht geladene Mietverträge sagt zuerst, dass Dwello beim Speichern prüft
@@ -91,7 +91,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist"
     Und sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten."
-    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben bei der Wohnung."
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "«Erneut versuchen» steht oben auf der Seite."
 
   # Statt die Seite neu zu laden, bleibt die Eingabe erhalten (#151)
   Szenario: Mietverträge der Wohnung erneut laden
@@ -109,6 +109,96 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
     Dann meldet Dwello den Fehler "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
+
+  # #669 (Persona Sven P-1): wer es nochmals versucht und Erfolg hat, sieht keine Fehlermeldung mehr
+  Szenario: Nach dem Laden bleibt keine Fehlermeldung eines früheren Versuchs stehen
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann zeigt Dwello keine Fehlermeldung mehr
+
+  # #669 (Persona Sven P-3): der Screenreader sagt den Hinweis, nicht den Namen der Schaltfläche dazu
+  Szenario: Der angekündigte Hinweis oben im Formular endet nicht mit «Erneut versuchen»
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann kündigt ein Screenreader bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" ohne "Erneut versuchen" an
+
+  # #669 (Persona Sven S-1, WCAG 2.2.1): wer die Meldung mit der Tastatur erreicht, kann sie lesen und schliessen
+  Szenario: Die Erfolgsmeldung bleibt stehen, solange der Fokus auf «Meldung schliessen» liegt
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Und der Liegenschaftsverwalter 10 Sekunden auf «Meldung schliessen» bleibt
+    Dann steht die Erfolgsmeldung noch da
+
+  # #669 (code review C-1, Persona Sven S-6): das offene Menü verdeckt die Meldungen nicht
+  Szenario: Die Fehlermeldung nach dem erneuten Versuch bleibt über dem offenen Menü sichtbar
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
+    Und der Liegenschaftsverwalter hat das Menü geöffnet
+    Dann liegt die Fehlermeldung über dem offenen Menü
+
+  # #669 (Persona Sven P-4): «Meldung schliessen» kommt mit der Tabulatortaste vor der Fusszeile, nicht erst danach
+  Szenario: Die Fehlermeldung nach dem erneuten Versuch lässt sich vor der Fusszeile schliessen
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
+    Und der Liegenschaftsverwalter von «Meldung schliessen» mit der Tabulatortaste weitergeht
+    Dann ist der Liegenschaftsverwalter in der Fusszeile bei "Datenschutz"
+
+  # #669 (Persona Helga P-1, U-8): die Meldung lag bei 150 % über dem Vertragsbeginn, wo der Fokus hinspringt
+  Szenariogrundriss: Die Meldung nach dem Laden verdeckt den Vertragsbeginn nicht
+    Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann verdeckt die Erfolgsmeldung nicht, was den Fokus hat
+
+    Beispiele:
+      | Breite | Höhe |
+      | 390    | 844  |
+      | 1024   | 768  |
+      | 960    | 600  |
+
+  # #669 (Persona Helga P-2): «geladen» sagte nicht, ob sich der Mietvertrag mit einem anderen überschneidet
+  Szenario: Die Meldung nach dem Laden sagt, dass sich nichts überschneidet
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon."
+
+  Szenario: Die Meldung nach dem Laden sagt, dass sich der Zeitraum überschneidet
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" befristet von "2022-01-01" bis "2024-03-31" für "900" Franken mit "100" Franken Akonto
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-01-01" einträgt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann warnt Dwello nach dem Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich»."
+
+  # #669 (code review C-3): ohne Vertragsbeginn ist nichts auf eine Überschneidung geprüft
+  Szenario: Die Meldung nach dem Laden ohne Vertragsbeginn sagt nur, dass die Mietverträge geladen sind
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn leert
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann bestätigt Dwello das Laden mit "Die Mietverträge der Wohnung sind geladen."
+
+  # #669 (Persona Helga P-5): bei 150 % lag der Hinweis unter dem ersten Bildschirm
+  Szenario: Der Hinweis oben im Formular steht bei 150 % im ersten Bildschirm
+    Angenommen das Browserfenster ist 960 auf 600 Pixel gross
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann steht der Hinweis oben im Formular ganz im ersten Bildschirm
 
   # #667 (Dr. Weber W-03, W-07): auch beim Bearbeiten nennt die Ablehnung den anderen Mietvertrag und sagt, was zu tun ist
   Szenario: Die Ablehnung beim Bearbeiten sagt, was zu tun ist
@@ -138,6 +228,15 @@ Funktionalität: Mietvertrag bearbeiten
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
     Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
+
+  # #669 (Code-Review C-2, Fachreview V-6): ohne die Mietverträge der Wohnung bleibt der Entwurf, «Erneut versuchen» steht oben
+  Szenario: Entwurf löschen, solange die Mietverträge der Wohnung nicht geladen sind
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern»."
 
   # #133 (Fachreview V-10): deckt «Abgerechnet bis» die ganze Periode des Entwurfs ab, entsteht keine neue Abrechnung
   Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt

@@ -122,6 +122,60 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" vor
     Und liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Die anderen Mietverträge dieser Wohnung liessen sich nicht laden." vor
 
+  # #669 (Persona Sven P-3): der Screenreader sagt den Hinweis, nicht den Namen der Schaltfläche dazu
+  Szenario: Der angekündigte Hinweis bei der Wohnungsauswahl endet nicht mit «Erneut versuchen»
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann kündigt ein Screenreader bei der Wohnung den Hinweis "Dwello prüft beim Speichern, ob die Wohnung frei ist" ohne "Erneut versuchen" an
+
+  # #669 (Persona Helga P-2): ohne Vertragsbeginn ist noch nichts zu prüfen
+  Szenario: Die Meldung nach dem Laden bei der Wohnungsauswahl sagt nur, dass die Mietverträge geladen sind
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann bestätigt Dwello das Laden mit "Die Mietverträge der Wohnung sind geladen."
+
+  # #669 (Personas Sven S-2, Helga H-3, fach-review V-5): eine Wohnung, die sich als nicht verfügbar zeigt, bleibt nicht gewählt
+  Szenario: Nach dem Laden hebt Dwello die Wahl einer nicht verfügbaren Wohnung auf
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann warnt Dwello nach dem Laden mit "Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar: Sie hat einen unbefristeten Mietvertrag, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
+    Und ist im Mietvertrag keine Wohnung gewählt
+
+  # #669 (Persona Helga P-2): mit einem Vertragsbeginn sagt die Meldung, ob sich der Zeitraum überschneidet
+  Szenario: Die Meldung nach dem Laden beim Vertragsbeginn sagt, dass sich nichts überschneidet
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter den Vertragsbeginn "2027-01-01" einträgt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon."
+
+  # #669 (Persona Helga H-1, fach-reviewer V-7): in der Prüfung bleibt der Kasten zur Überschneidung stehen, wenn die Meldung geht
+  Szenario: Nach dem Laden zeigt die Prüfung den Kasten zur Überschneidung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann warnt Dwello nach dem Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich»."
+    Und steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit "Der Zeitraum überschneidet sich mit dem Mietvertrag von Bruno Meier (seit 01.04.2024, unbefristet)."
+    Und steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit "Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt 3 «Vertragsdauer», die Wohnung im Schritt 2 «Wohnung»."
+
   Szenario: Der Vertragsbeginn nennt die nicht geladenen Mietverträge
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"

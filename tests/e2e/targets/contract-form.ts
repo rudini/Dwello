@@ -12,6 +12,10 @@ export const apartmentOption = (apartmentId: string) =>
 export const apartmentContractsUnknown = target('Hinweis bei der Wohnung', (page) =>
 	page.getByTestId('apartment-contracts-unknown')
 );
+// #669: what a screen reader announces when the hint appears (the status region around it)
+export const apartmentHintAnnouncement = target('Ansage des Hinweises bei der Wohnung', (page) =>
+	page.getByRole('status').filter({ has: page.getByTestId('apartment-contracts-unknown') })
+);
 export const retryContractsButton = target('Mietverträge erneut laden', (page) =>
 	page.getByTestId('contracts-retry')
 );
@@ -98,6 +102,8 @@ export const billedUntilError = target('Fehler bei «Abgerechnet bis»', (page) 
 // each element of the contract wizard that holds the text, also one only a screen reader reads (#667)
 export const wizardText = (text: string) =>
 	target(`«${text}» im Assistenten`, (page) => page.getByTestId('contract-wizard').getByText(text));
+// #669 (Helga H-1): the box «Zeitraum überschneidet sich», at «Vertragsdauer» and in «Prüfen»
+export const overlapBox = target('Hinweis «Zeitraum überschneidet sich»', (page) => page.getByTestId('overlap-warning'));
 // #668: the hint under «Befristet» for a contract saved open-ended, and «Monatlich total» in a live region
 export const noticeHint = target('Hinweis zum Vertragsende', (page) => page.getByTestId('contract-notice-hint'));
 export const announcedMonthlyTotal = target('Ansage des Monatlich total', (page) =>

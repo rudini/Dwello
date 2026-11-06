@@ -13,7 +13,7 @@ import {
 	validateContract,
 	type ContractFormValues
 } from './contract-form';
-import type { AvailabilityInfo } from './utils/contract-availability';
+import type { AvailabilityInfo, ContractForAvailability } from './utils/contract-availability';
 import type { RentalContract } from './types';
 import { formatCurrency, formatDateLong } from './utils/format';
 import { apiCall } from './api';
@@ -269,6 +269,19 @@ export function startValues(
 	if (!known.tenantIds.includes(values.tenantId)) values.tenantId = '';
 	if (!known.apartmentIds.includes(values.apartmentId)) values.apartmentId = '';
 	return { values, restored: !!draft, dropped };
+}
+
+/** The contracts of a tenant without a Vertragsende, with their apartment (#156) */
+export function openContractsOf<A extends { id: string }>(
+	apartments: A[],
+	contracts: Map<string, ContractForAvailability[] | null> | null,
+	tenantId: string
+) {
+	return apartments.flatMap((apartment) =>
+		(contracts?.get(apartment.id) ?? [])
+			.filter((c) => c.tenant_id === tenantId && !c.end_date)
+			.map((c) => ({ id: c.id, apartment }))
+	);
 }
 
 /** Apartments to choose from: free ones first, rented ones shown but not selectable */

@@ -508,7 +508,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Die anderen Mietverträge dieser Wohnung liessen sich nicht laden. Ihre Eingaben bleiben erhalten.'
 		);
 		expect(byTestId('start-contracts-unknown')!.textContent).toContain(
-			'«Erneut versuchen» steht oben bei der Wohnung.'
+			'«Erneut versuchen» steht oben auf der Seite.'
 		);
 		expect(document.querySelectorAll('[data-testid="contracts-retry"]')).toHaveLength(1);
 		// Review M3: the hint is read out when it appears; once only, not again at the start (Sven B-13 Minor 3)
@@ -523,7 +523,7 @@ describe('Mietvertrag bearbeiten', () => {
 		const ids = (byTestId('start-date-input')!.getAttribute('aria-describedby') ?? '').split(' ');
 		// the title too: it says what matters most (fach-reviewer b665 V-1)
 		expect(ids.map((id) => document.getElementById(id)?.textContent?.trim() ?? '').join(' ')).toContain(
-			'Dwello prüft beim Speichern, ob die Wohnung frei ist «Erneut versuchen» steht oben bei der Wohnung.'
+			'Dwello prüft beim Speichern, ob die Wohnung frei ist «Erneut versuchen» steht oben auf der Seite.'
 		);
 	});
 
@@ -618,8 +618,43 @@ describe('Mietvertrag bearbeiten', () => {
 			failing = false;
 			click('contracts-retry');
 			await settle();
-			expect(said()).toContainEqual(['success', 'Die Mietverträge der Wohnung sind geladen.']);
+			expect(said()).toContainEqual([
+				'success',
+				'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon.'
+			]);
 			expect(document.activeElement).toBe(document.getElementById('startDate'));
+		});
+
+		// #669 (code review C-3): without a Vertragsbeginn nothing was checked for an overlap
+		it('sagt ohne Vertragsbeginn nur, dass die Mietverträge geladen sind', async () => {
+			await open();
+			type('start-date-input', '');
+			failing = false;
+			click('contracts-retry');
+			await settle();
+			expect(said()).toEqual([['success', 'Die Mietverträge der Wohnung sind geladen.']]);
+		});
+
+		// #669 (Persona Helga H-2): an overlap is bad news, said as a warning, not with the tick of a success
+		it('warnt, wenn sich der Zeitraum mit einem der geladenen Mietverträge überschneidet', async () => {
+			const before = {
+				...listed.contracts[0],
+				id: 'c0',
+				startDate: '2023-01-01',
+				endDate: '2024-03-31'
+			};
+			fakeBff(() => (failing ? [500, {}] : [200, { contracts: [before] }]));
+			await open();
+			type('start-date-input', '01.03.2024');
+			failing = false;
+			click('contracts-retry');
+			await settle();
+			expect(said()).toEqual([
+				[
+					'warning',
+					'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich».'
+				]
+			]);
 		});
 
 		// Review b15-merge M-1: the hint and its button stay while loading, so the focus does not fall to the page
@@ -650,7 +685,12 @@ describe('Mietvertrag bearbeiten', () => {
 			late!();
 			await settle();
 			expect(byTestId('apartment-contracts-unknown')).toBeNull();
-			expect(said()).toEqual([['success', 'Die Mietverträge der Wohnung sind geladen.']]);
+			expect(said()).toEqual([
+				[
+					'success',
+					'Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon.'
+				]
+			]);
 		});
 
 		it('sagt, wenn es wieder nicht geklappt hat', async () => {
@@ -661,6 +701,16 @@ describe('Mietvertrag bearbeiten', () => {
 				'error',
 				'Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.'
 			]);
+		});
+
+		// #669 (Sven P-1): a later attempt replaces the error of the earlier one, so they do not stack
+		it('zeigt nach zwei vergeblichen Versuchen nur eine Fehlermeldung', async () => {
+			await open();
+			click('contracts-retry');
+			await settle();
+			click('contracts-retry');
+			await settle();
+			expect(said().filter(([type]) => type === 'error')).toHaveLength(1);
 		});
 	});
 
@@ -787,6 +837,10 @@ describe('Mietvertrag bearbeiten', () => {
 			// Haiku-Review N2: die Meldung sagt, was fehlt und was zu tun ist
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen.'
+			);
+			// #669 (code review C-2, fach-review V-6): «Erneut versuchen» stands at the top of the page now
+			expect(byTestId('form-error')!.textContent).toContain(
+				'Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern».'
 			);
 			// review #151 R-1: the text sends the landlord back to this button after «Erneut versuchen»
 			expect(byTestId('delete-draft-and-save')).not.toBeNull();

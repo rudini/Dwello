@@ -1,4 +1,4 @@
-import { Accessible, Attribute, BrokenWords, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, BrokenWords, Checked, Count, Enabled, OnTop, ShareInViewport, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedUntilError,
 	startDateNotice,
@@ -6,6 +6,8 @@ import {
 	startDateInput as startDateField,
 	advancePaymentInput,
 	apartmentContractsUnknown,
+	apartmentHintAnnouncement,
+	overlapBox,
 	apartmentOption,
 	apartmentSelect,
 	baseRentInput,
@@ -34,7 +36,7 @@ import {
 	leaveDialogTitle
 } from '../targets/contract-form';
 import { stepNames } from '../targets/wizard';
-import { errorToast, successToast } from '../targets/form';
+import { errorToast, successToast, warningToast } from '../targets/form';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
 export const chosenApartmentId = Value.of(apartmentSelect);
@@ -81,6 +83,14 @@ export const billedUntilAsked = Visibility.of(billedUntilField);
 export const billedUntilErrorText = Text.of(billedUntilError);
 export const timesInWizard = (text: string) => Count.of(wizardText(text));
 export const brokenStepNames = BrokenWords.in(stepNames);
+// #669: error messages left after a retry, what the hint's status region announces, and how much of the hint the window shows
+export const failures = Count.of(errorToast);
+export const failureOnTop = OnTop.of(errorToast);
+export const confirmationShown = Visibility.of(successToast);
+export const warning = Text.of(warningToast);
+export const overlapBoxText = Text.of(overlapBox);
+export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
+export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);
 export const noticeHintText = Text.of(noticeHint);
 export const announcedTotal = Text.of(announcedMonthlyTotal);
 export const leaveQuestion = Text.of(leaveDialogTitle);

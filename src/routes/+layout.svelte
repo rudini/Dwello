@@ -105,9 +105,11 @@
 				</div>
 			</main>
 		</div>
+		<!-- the menu before the toasts: on the same layer, the later one lies on top (#669, code review C-1) -->
+		<MobileNav />
+		<ToastRegion />
 		<Footer />
 	</div>
-	<MobileNav />
 {:else}
 	<div class="flex min-h-screen flex-col bg-canvas">
 		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages;
@@ -139,8 +141,7 @@
 				{@render children()}
 			</main>
 		{/if}
+		<ToastRegion />
 		<Footer />
 	</div>
 {/if}
-
-<ToastRegion />

@@ -9,3 +9,8 @@ export const formError = (text: string) =>
 export const deleteConfirmButton = target('Löschen bestätigen', (page) => page.getByTestId(/-delete-confirm$/));
 export const successToast = target('Erfolgsmeldung', (page) => page.getByTestId('toast-success'));
 export const errorToast = target('Fehlermeldung', (page) => page.getByTestId('toast-error'));
+export const errorToastClose = target('Meldung schliessen', (page) => errorToast.locate(page).getByRole('button'));
+export const successToastClose = target('Meldung schliessen der Erfolgsmeldung', (page) => successToast.locate(page).getByRole('button'));
+export const warningToast = target('Warnung', (page) => page.getByTestId('toast-warning'));
+// #669: what «Erneut versuchen» says once the contracts are loaded, a success or, for an overlap, a warning
+export const loadedToast = target('Meldung nach dem Laden', (page) => page.getByTestId(/^toast-(success|warning)$/));
