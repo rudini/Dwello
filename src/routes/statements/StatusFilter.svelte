@@ -4,12 +4,17 @@
 	import { statusLabels } from '$lib/statement';
 	import Icon from '$lib/ui/Icon.svelte';
 
-	// How many statements are in each status; a status is a filter that a second click switches off
+	// How many statements are in each status; a status is a filter that a second click switches off. Above it, which
+	// statements the list shows, the way to all of them and back to the contract it is filtered by (#673)
 	let {
+		scope = '',
+		contract = '',
 		counts,
 		active,
 		href
 	}: {
+		scope?: string;
+		contract?: string;
 		counts: StatementsListData['statusCounts'];
 		active: string;
 		href: (status: string) => string;
@@ -24,6 +29,24 @@
 		'overdue'
 	];
 </script>
+
+{#if scope}
+	<p class="text-ink" data-testid="statements-scope">
+		{scope}
+		<a
+			href="/statements"
+			class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
+			>{m.statements_scope_all()}</a
+		>
+		{#if contract}
+			<a
+				href="/contracts/{encodeURIComponent(contract)}"
+				class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
+				data-testid="statements-scope-contract-link">{m.statements_scope_contract_link()}</a
+			>
+		{/if}
+	</p>
+{/if}
 
 <nav aria-label={m.statements_filter_status()}>
 	<ul class="grid grid-cols-2 gap-4 md:grid-cols-5">

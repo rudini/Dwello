@@ -25,7 +25,6 @@
 	import PaidDateFields from './PaidDateFields.svelte';
 	import StatementRow from './StatementRow.svelte';
 	import StatementSearch from './StatementSearch.svelte';
-	import StatementsScope from './StatementsScope.svelte';
 	import StatusFilter from './StatusFilter.svelte';
 
 	let { data }: { data: StatementsListData } = $props();
@@ -151,11 +150,9 @@
 		{/snippet}
 	</PageHeader>
 
-	{#if data.scope}
-		<StatementsScope scope={data.scope} {contract} />
-	{/if}
-
 	<StatusFilter
+		scope={data.scope ?? ''}
+		{contract}
 		counts={data.statusCounts}
 		active={status}
 		href={(value) => linkWith({ status: value })}
