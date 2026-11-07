@@ -915,6 +915,7 @@
 	"statements_agreements_retry": "Réessayer",
 	"statements_agreements_wait": "Dwello continuera dès que les contrats de bail seront vérifiés.",
 	"statements_agreements_wait_failed": "Dwello n’a pas pu vérifier les contrats de bail. Choisissez « Réessayer ». Si la vérification réussit, vous passerez à la suite.",
+	"statements_agreements_wait_retry_failed": "Si la vérification réussit, vous passerez à la suite.",
 	"statements_agreements_retry_failed": "Dwello a réessayé et n’a de nouveau pas pu vérifier les contrats de bail. Sans cette vérification, vous ne pouvez pas continuer. Réessayez dans quelques minutes.",
 	"statements_agreements_checked": "Les contrats de bail sont vérifiés.",
 	"statements_agreement_question": "La catégorie « {category} » est-elle convenue dans le contrat de bail de {tenant} (appartement {apartment}) ?",

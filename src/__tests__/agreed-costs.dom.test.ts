@@ -185,6 +185,17 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 		expect(document.activeElement).toBe(byTestId('agreements-retry'));
 	});
 
+	// #1197 (Helga H-2, Sven S-2): after «Weiter», a failed retry leaves the advice to the alert alone
+	it('rät nach «Weiter» und einem erneut gescheiterten Versuch nur in der Meldung', async () => {
+		await agreedCosts(() => [500, {}], 'Weiter ohne Antwort');
+
+		click('agreements-retry');
+		await settle();
+
+		expect(byTestId('agreements-failed')!.textContent).toContain('Versuchen Sie es in einigen Minuten noch einmal.');
+		expect(byTestId('agreements-wait')!.textContent).toBe('Gelingt die Prüfung, geht es weiter.');
+	});
+
 	// #688 (Sven P-2, P-5): a successful retry says so in the check, and the focus goes there
 	it('meldet nach der gelungenen erneuten Prüfung, dass die Mietverträge geprüft sind, mit dem Fokus darauf', async () => {
 		let failing = true;

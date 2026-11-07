@@ -57,6 +57,11 @@ Then('erklärt der Assistent {string}', async ({ verwalter }, message: string) =
 	await verwalter.sees(agreementsWaiting).toContain(message);
 });
 
+// #1197: after a failed retry only the alert advises; the note below says no other step
+Then('rät der Assistent unter der Meldung nicht {string}', async ({ verwalter }, advice: string) => {
+	await verwalter.sees(agreementsWaiting).not.toContain(advice);
+});
+
 When('der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreementsCheckAgain);
 });
