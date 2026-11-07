@@ -131,7 +131,7 @@
 		"login-password": "Login page with a Konto mit Passwort: the form for e-mail address and password next to Google (#576).",
 		"login-password-error": "Login page after a wrong password: the hint that e-mail address or password are not correct (#576).",
 		"login-locked": "Login page after five failed attempts: the Sperre with the time until it ends (#576).",
-		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
+		"mobile-menu-open": "Navigation drawer open (mobile viewport; from 768 px the sidebar shows, #740).",
 		"user-menu-open": "User menu in the header open.",
 		"dialog-open": "A confirmation dialog of the page open.",
 		"busy-dialog-open": "A confirmation dialog open while its action is running.",
