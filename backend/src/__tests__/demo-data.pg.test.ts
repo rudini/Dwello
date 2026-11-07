@@ -115,6 +115,40 @@ describe('Demodaten', () => {
 		]);
 	});
 
+	// #707: der Verlauf zeigte «Erstellt» und «PDF erstellt» am Ladetag, nach «Versendet»
+	it('erstellt die versendeten Abrechnungen und ihr PDF spätestens am Tag des Versands', async () => {
+		const rows = await query(
+			name,
+			`SELECT count(*)::int AS sent, count(*) FILTER (WHERE created_at::date > statement_date OR pdf_generated_at::date > statement_date)::int AS later
+			FROM utility_statements WHERE status <> 'draft'`
+		);
+
+		expect(rows).toEqual([{ sent: 10, later: 0 }]);
+	});
+
+	// #707: «Wohnung EG, EG» nannte das Stockwerk zweimal
+	it('nennt in keiner Wohnungsnummer das Stockwerk', async () => {
+		const rows = await query(name, `SELECT number FROM apartments WHERE number ~* '(EG|OG|UG)'`);
+
+		expect(rows).toEqual([]);
+	});
+
+	// #707: eine Rechnung über den Jahreswechsel; jede Abrechnungsperiode trägt die Kosten ihrer Tage (730.00 für 365 Tage)
+	it('teilt die Gartenpflege von Seepark über den Jahreswechsel nach Tagen auf beide Jahre auf', async () => {
+		const rows = await query(
+			name,
+			`SELECT s.period_start::text AS period, array_agg(DISTINCT l.total_amount::text) AS amounts
+			FROM utility_statement_line_items l JOIN utility_statements s ON s.id = l.statement_id JOIN apartments a ON a.id = s.apartment_id
+			WHERE a.building_id = '22222222-2222-2222-2222-222222222222' AND l.category_id = (SELECT id FROM categories WHERE name_de = 'Gartenpflege')
+			GROUP BY 1 ORDER BY 1`
+		);
+
+		expect(rows).toEqual([
+			{ period: '2024-01-01', amounts: ['368.00'] },
+			{ period: '2025-01-01', amounts: ['362.00'] }
+		]);
+	});
+
 	// Ohne Adresse fehlte im PDF und auf der QR-Rechnung der Empfänger
 	it('gibt jedem Mieter eine Postadresse', async () => {
 		const [row] = await query(name, `SELECT COUNT(*)::int AS missing FROM tenants WHERE address IS NULL OR postal_code IS NULL OR city IS NULL`);

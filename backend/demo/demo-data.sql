@@ -34,9 +34,9 @@ INSERT INTO apartments (id, building_id, number, floor, area, rooms, status) VAL
 
 -- Building 3: Alpenblick (3 units, 255 m²)
 INSERT INTO apartments (id, building_id, number, floor, area, rooms, status) VALUES
-('aaaa3333-3333-3333-3333-111111111111', '33333333-3333-3333-3333-333333333333', 'EG', 0, 72.0, 3.0, 'vacant'),
-('aaaa3333-3333-3333-3333-222222222222', '33333333-3333-3333-3333-333333333333', 'OG1', 1, 98.0, 4.0, 'vacant'),
-('aaaa3333-3333-3333-3333-333333333333', '33333333-3333-3333-3333-333333333333', 'OG2', 2, 85.0, 3.5, 'vacant') ON CONFLICT (id) DO NOTHING;
+('aaaa3333-3333-3333-3333-111111111111', '33333333-3333-3333-3333-333333333333', '0.01', 0, 72.0, 3.0, 'vacant'),
+('aaaa3333-3333-3333-3333-222222222222', '33333333-3333-3333-3333-333333333333', '1.01', 1, 98.0, 4.0, 'vacant'),
+('aaaa3333-3333-3333-3333-333333333333', '33333333-3333-3333-3333-333333333333', '2.01', 2, 85.0, 3.5, 'vacant') ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- Tenants: the postal address is the rented apartment's (Sarah Meier moved out in 2025, Kevin Fischer
@@ -72,7 +72,7 @@ INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date,
 ('b0000002-0002-0002-0002-000000000003', 'aaaa2222-2222-2222-2222-222222222222', 'a0000001-0001-0001-0001-000000000010', '2025-07-01', NULL, 1620.00, 80.00, 240.00),
 ('b0000002-0002-0002-0002-000000000004', 'aaaa2222-2222-2222-2222-444444444444', 'a0000001-0001-0001-0001-000000000007', '2023-07-01', NULL, 1750.00, 100.00, 260.00) ON CONFLICT (id) DO NOTHING;
 
--- Building 3 contracts (OG2 is vacant)
+-- Building 3 contracts (2.01 is vacant)
 INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date, base_rent, additional_rent, monthly_advance_payment) VALUES
 ('b0000003-0003-0003-0003-000000000001', 'aaaa3333-3333-3333-3333-111111111111', 'a0000001-0001-0001-0001-000000000008', '2022-11-01', NULL, 1350.00, 50.00, 190.00),
 ('b0000003-0003-0003-0003-000000000002', 'aaaa3333-3333-3333-3333-222222222222', 'a0000001-0001-0001-0001-000000000009', '2021-05-01', NULL, 1800.00, 120.00, 250.00) ON CONFLICT (id) DO NOTHING;

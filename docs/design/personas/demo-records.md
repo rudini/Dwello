@@ -17,10 +17,10 @@ For the caller of a persona run, not for the persona: it reads only `README.md`,
 | | A2 | Nina Brunner | `b0000002-0002-0002-0002-000000000003` | open-ended since 01.07.2025; statement 2025 draft |
 | | B2 | Marco Bernasconi (it) | `b0000002-0002-0002-0002-000000000004` | open-ended since 01.07.2023; statement 2025 draft |
 | | B1 | – | – | vacant |
-| Alpenblick (`33333333-3333-3333-3333-333333333333`) | EG | Laura Keller | `b0000003-0003-0003-0003-000000000001` | open-ended since 01.11.2022; no statement 2025 (invoices missing on purpose) |
-| | OG1 | Kevin Fischer | `b0000003-0003-0003-0003-000000000002` | open-ended since 01.05.2021; no statement 2025 |
-| | OG2 | – | – | vacant |
+| Alpenblick (`33333333-3333-3333-3333-333333333333`) | 0.01 | Laura Keller | `b0000003-0003-0003-0003-000000000001` | open-ended since 01.11.2022; no statement 2025 (invoices missing on purpose) |
+| | 1.01 | Kevin Fischer | `b0000003-0003-0003-0003-000000000002` | open-ended since 01.05.2021; no statement 2025 |
+| | 2.01 | – | – | vacant |
 
-«Verwaltungspauschale vereinbart» (#89): every contract «Ja, zum Satz des Abrechnungslaufs», except Marco Bernasconi (B2, own rate 2.5 %) and Kevin Fischer in Alpenblick OG1 («Nein», 0 %).
+«Verwaltungspauschale vereinbart» (#89): every contract «Ja, zum Satz des Abrechnungslaufs», except Marco Bernasconi (B2, own rate 2.5 %) and Kevin Fischer in Alpenblick 1.01 («Nein», 0 %).
 
 Every contract that ran in 2024 has a paid statement 2024. There is no fixed-term contract and none that starts in the future: a task that needs one has the persona create it in its own building.
