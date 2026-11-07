@@ -58,6 +58,35 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche doppelt" mit der Formel "{area} 2" erfasst
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /, %), die Klammern und die Variablen {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
 
+  # #737: die Ablehnung steht am Feld Formel, in einem Satz und mit dem Wort «Baustein» wie auf der Seite
+  @wip
+  Szenario: Formel mit unbekanntem Baustein
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Personen" mit der Formel "{persons}" erfasst
+    Dann erfährt der Liegenschaftsverwalter bei der Formel "Unbekannter Baustein {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
+
+  # #737: ohne «%», das die Seite nicht erklärt, und ohne die Einleitung «Die Formel ist ungültig:»
+  @wip
+  Szenario: Gespeicherte Formel, die sich nicht berechnen lässt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche doppelt" mit der Formel "{area} 2" erfasst
+    Dann erfährt der Liegenschaftsverwalter bei der Formel "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Bausteine {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
+
+  # #737: ein Fehler, der von den Werten abhängt, steht einmal, nicht pro Beispielwohnung
+  @wip
+  Szenario: Formel testen, die für eine Wohnung keine Zahl ergibt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{area} / ({units} - 1)" testet
+    Dann zeigt der Test nur den Fehler "Die Formel kann für eine Wohnung nicht berechnet werden: Die Formel ergibt keine gültige Zahl."
+
+  # #737: «Formel testen» und das Speichern prüfen mit denselben vier Beispielwohnungen wie die Tabelle;
+  # die Formel teilt nur bei 3.5 Zimmern durch null, eine Zimmerzahl, die keine Beispielwohnung hat
+  @wip
+  Szenario: Der Test prüft mit den Beispielwohnungen seiner Tabelle
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))" testet
+    Dann trägt die Beispielwohnung mit "50 m², 2 Zimmer" "5.00%" der Kosten
+
   Szenario: Formel anpassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
     Wenn der Liegenschaftsverwalter die Formel des Verteilschlüssels "Fläche und Zimmer" auf "{area} * 0.5 + {rooms} * 0.5" ändert
