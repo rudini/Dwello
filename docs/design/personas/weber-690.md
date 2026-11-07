@@ -146,3 +146,72 @@ Skripte und Bildschirmfotos: `/tmp/claude-0/-home-user-Dwello/ced2483f-edfc-5afc
 - `s1-gen-click.png`: Detailseite mit Warnung und Meldung unten rechts;
 - `s1-refused.png`: Seite «PDF nicht verfügbar»;
 - `s2-save.png`: Fokus auf der leeren PLZ nach der Ablehnung.
+
+## Runde 3
+
+Desktop 1440 × 900, Maus, Persona-App auf :3300 (Branch w-690, 2b8b3a8). Die Datenbank war neu aufgesetzt, die Abrechnungen haben andere Kennungen als in Runde 2. Ausgangszustand der Tabelle `configuration`: `company_name` Muster Immobilien AG, `company_address` Bahnhofstrasse 1, `company_postal_code` 8001, `company_city` Zürich, `iban` CH4431999123000889012, keine Schlüssel `account_holder_*` (Häkchen «Kontoinhaber ist der Absender» gesetzt). Die Zustände habe ich per SQL hergestellt:
+
+- **Zustand 3:** `account_holder_name` Weber Treuhand GmbH, `_address` Löwenstrasse 10, `_postal_code` 8002, ohne `_city`, Absender vollständig.
+- **Zustand 2:** zusätzlich `account_holder_city` Zürich, `company_postal_code` gelöscht.
+
+Am Schluss habe ich die vier Zeilen `account_holder_*` gelöscht und `company_postal_code` 8001 wieder eingefügt. Die Schlüssel und Werte stimmen mit dem Ausgangszustand überein (mit `diff` geprüft). Die Einstellungen zeigen keine Markierung mehr, die Detailseiten keine Warnung.
+
+### Status der Befunde aus Runde 2
+
+| ID | Status | Was ich gesehen habe |
+|---|---|---|
+| W-1 | behoben | Zustand 3: Detailseite, Meldung nach «PDF erstellen» und «PDF nicht verfügbar» sagen jetzt alle: «Mit einer IBAN braucht es den Kontoinhaber. Erfassen Sie Name, PLZ und Ort des Kontoinhabers oder setzen Sie das Häkchen bei «Kontoinhaber ist der Absender».». Die Ablehnungsseite (`/documents/refused?code=ACCOUNT_HOLDER_MISSING&back=…`) verlinkt «Zu den Einstellungen» (`/config`) und «Zurück» zur Abrechnung. |
+| W-2 | behoben | Zustand 2: Die Einstellungen markieren die PLZ des Absenders und lehnen das Speichern ab. Jetzt warnen auch alle Nachzahlungen mit Zahlteil: die Entwürfe Bernasconi, Sarah Meier, Maria Rossi und Pierre Dubois sowie Hans Müller (überfällig), mit dem Text «Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.» und «Zu den Einstellungen». Die Rückerstattungen und die bezahlten Abrechnungen warnen nicht. Einstellungen und Detailseite widersprechen sich nicht mehr. Dass das PDF trotzdem erstellt wird, steht unter W-8. |
+| W-3 | teilweise behoben | Zustand 2: Ich lande auf `/config#sender`, der Fokus liegt auf der leeren PLZ des Absenders, und das Feld ist im Bild. Zustand 3: Ich lande beim Kontoinhaber, aber der Fokus liegt auf dem ausgefüllten «Name des Kontoinhabers», nicht auf dem leeren «Ort» (siehe W-7). Der Link der Detailseite heisst in beiden Zuständen `/config#sender`, auch wenn der Kontoinhaber gemeint ist. Am Ziel ändert das nichts. |
+| W-4 | offen | Zustand 2: Die korrekte IBAN ist weiter als fehlerhaft markiert, und die Meldung steht unter der IBAN statt bei der PLZ. Nach dem Sprung ist sie nicht im Bild. Zustand 3: Die Meldung hängt weiter am ausgefüllten Namen, der als fehlerhaft markiert ist. Das leere «Ort» hat nur einen roten Rahmen. |
+| W-5 | offen | Hans Müller (überfällig) warnt in beiden Zuständen. «PDF herunterladen» liefert aber weiter das gespeicherte PDF. Wofür die Warnung gilt, sagt sie nicht. |
+| W-6 | teilweise behoben | Zustand 3 spricht jetzt die Sprache der Einstellungen («Kontoinhaber», Häkchen beim Namen genannt). Zustand 2 sagt weiter «Firmenadresse» und «Name», die Einstellungen sagen «Absender» und «Firmenname». |
+
+### Neue Befunde
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| W-7 | Minor | Einstellungen nach «Zu den Einstellungen» (Zustand 3) | Der Fokus liegt auf dem ausgefüllten «Name des Kontoinhabers», nicht auf dem leeren «Ort», das zwei Felder tiefer liegt. Nach «PDF erstellen» bleibt die rote Meldung unten rechts auch nach dem Wechsel auf die Einstellungen stehen und verdeckt genau das leere Feld «Ort» (Bildschirmfoto `s3-gen-bern-landing.png`). Ich muss sie erst schliessen, um zu sehen, was fehlt. |
+| W-8 | Minor | Abrechnungsdetail, Nachzahlung im Entwurf (Zustand 2) | Die Seite warnt: «Mit einer IBAN braucht es die Firmenadresse.». «PDF erstellen» meldet trotzdem «PDF erstellt». Das PDF (Bernasconi, italienisch) hat im Kopf nur «Muster Immobilien AG / Bahnhofstrasse 1», die Zeile mit PLZ und Ort fehlt. Der Zahlteil ist korrekt (Weber Treuhand GmbH, Löwenstrasse 10, 8002 Zürich). Die Warnung sagt nicht, was die Folge ist: ein Schreiben mit unvollständigem Absender. Ich hatte nach dem Text eine Ablehnung erwartet. Als Grund nennt sie die IBAN, nicht den Kopf des Schreibens, der laut Entscheid der eigentliche Grund ist. So könnte ich ein Schreiben ohne vollständige Absenderadresse versenden und dabei meinen, die Warnung betreffe nur die Zahlung. |
+
+### Beobachtungen
+
+- Wer `/config` direkt öffnet, landet bei unvollständigen Einstellungen jetzt ebenfalls beim ersten markierten Feld (Zustand 2: PLZ, scrollY 1830). Bei vollständigen Einstellungen bleibt die Seite oben.
+- Zustand 2, Rückerstattungen (Nina Brunner, Thomas Weber, Anna Schmidt): Sie zeigen keine Warnung, obwohl ihr Kopf die PLZ ebenso braucht. Das entspricht dem Auftrag («eine Abrechnung mit Zahlteil warnt»), nicht aber dem Grund des Entscheids (Briefkopf).
+- Der Hilfetext unter «IBAN» lautet weiter «Mit einer IBAN braucht es Firmenname, PLZ und Ort». Er passt jetzt zu Einstellungen und Detailseite.
+- Die Meldung in Zustand 3 fordert «Name, PLZ und Ort des Kontoinhabers», obwohl nur der Ort fehlt. Das ist richtig, aber ungenau.
+- Nach der Ablehnung in Zustand 3 ist das frühere PDF der Entwürfe Bernasconi und Sarah Meier weg (wie in Runde 2). Bernasconi hat jetzt ein in Zustand 2 erstelltes PDF ohne PLZ im Kopf. Sarah Meier hat keines. Die Einstellungen habe ich wiederhergestellt, die PDFs nicht.
+
+### Aufgabe geschafft: ja
+
+### Aufwand
+
+Rund 12 Minuten, rund 20 Schritte: zwei Zustände mit je 10 Detailseiten, 1 bis 2 PDF-Versuchen, dem Sprung in die Einstellungen sowie einem abgelehnten Speichern in Zustand 2.
+
+### Ablauf
+
+- Zustand 3, «Zu den Einstellungen». Erwartet: Fokus auf dem leeren «Ort» des Kontoinhabers. Gesehen: Fokus auf dem ausgefüllten Namen, «Ort» unter der noch offenen Fehlermeldung (W-7).
+- Zustand 2, «PDF erstellen» bei Bernasconi (Entwurf). Erwartet: Ablehnung, weil die Seite «braucht es» sagt. Gesehen: «PDF erstellt», Kopf ohne PLZ und Ort (W-8).
+- Zustand 2, Einstellungen. Erwartet: die Meldung bei der PLZ. Gesehen: die Meldung unter der IBAN, die IBAN rot (W-4, offen).
+
+### Vorschläge
+
+- **W-7:**
+  - Nachstellen: Zustand 3, Nachzahlung im Entwurf, «PDF erstellen», dann «Zu den Einstellungen».
+  - Hilfreich: den Fokus auf das erste leere Feld setzen, nicht auf das erste markierte, und die Meldung beim Seitenwechsel schliessen.
+- **W-8:**
+  - Nachstellen: Zustand 2, Nachzahlung im Entwurf, «PDF erstellen», PDF öffnen.
+  - Hilfreich: Entweder lehnt das PDF ab, wie die Warnung es nahelegt, oder die Warnung nennt Grund und Folge, zum Beispiel «Beim Absender fehlt die PLZ. Sie fehlt im Kopf der Abrechnung. Ergänzen Sie sie unter «Einstellungen» › «Absender».». Dann sollte die Warnung auch bei Rückerstattungen erscheinen.
+
+### Nicht geprüft
+
+- **Mahnung in beiden Zuständen:** Mir war kein Gebäude zugeteilt, deshalb habe ich keine Mahnung gesendet.
+- **Neues PDF einer bezahlten Nachzahlung:** Die App liefert das gespeicherte PDF.
+- **Zustand 1** (nur Absender ohne PLZ, Häkchen gesetzt): Der Auftrag nannte ihn nicht.
+
+Skripte und Bildschirmfotos: `/tmp/claude-0/-home-user-Dwello/ced2483f-edfc-5afc-974d-77650a29fe78/scratchpad/weber-690-3/`. Darunter:
+- `s3-gen-bern-landing.png`: Einstellungen nach dem Sprung, Zustand 3, Meldung über «Ort»;
+- `s3-sarah-refused.png`: «PDF nicht verfügbar», Zustand 3;
+- `s2-gen-bern-landing.png`: Fokus auf der PLZ, Zustand 2;
+- `s2-bern.pdf`: PDF mit unvollständigem Kopf, Zustand 2;
+- `s2-config.png`, `s2-config-save.png`: Einstellungen und Ablehnung beim Speichern, Zustand 2.

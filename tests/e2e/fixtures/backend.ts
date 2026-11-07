@@ -363,13 +363,14 @@ export function testData(api: CallTheApi) {
 		},
 
 		// #690 (persona Weber 690 W-1, W-2): a part of the stored addresses removed since, which the save refuses with an
-		// IBAN; only for a scenario on the fresh installation (@frische-installation). The Absender's is set back, the
-		// Kontoinhaber by restoreAccountHolder of the step that stored him, the IBAN removed
+		// IBAN; only for a scenario on the fresh installation (@frische-installation). Afterwards the installation is as
+		// before the scenario (review 690-5 C-8): the Kontoinhaber cleared by restoreAccountHolder of the step that stored
+		// him, the IBAN and the Firmenadresse it was stored with (accountOf) removed
 		async withoutSetting(key: string) {
-			const { data } = await get('config');
 			await remove(`config/${key}`);
-			if (!key.startsWith('account_holder_')) restores.push(() => put('config', { [key]: data[key] }));
-			restores.push(() => remove('config/iban'));
+			restores.push(async () => {
+				for (const stored of Object.keys(accountOf(''))) await remove(`config/${stored}`);
+			});
 		},
 
 		// #1166: a scenario that saves a Kontoinhaber through the settings sets it back to the Absender afterwards
