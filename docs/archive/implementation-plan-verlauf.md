@@ -1474,3 +1474,12 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #697 CI screenshot job: mobile, dark mode, dialog and wizard states
+
+- [x] Read #697 and #1172 (same job; #1172 serves the base branch as a production build, whoever merges second merges `main` first); decisions in #697 «Decided (product owner)» with two follow-up comments
+- [x] Each changed page in desktop light, mobile (390 px) light and desktop dark; its dialog and `every-wizard-step` states of `tests/a11y/screens.json` via the axe check's `lookAt`; one seed per state for both branches, one test at a time, a fixed clock; upload states left out; comment from `ui-screenshots/shots.txt`, cut to GitHub's size (ea26370, 42577ff); unit tests seen red
+- [x] code-reviewer `docs/reviews/697-review-{1,2}.md`: C-1, C-2 Major fixed
+- [x] No scenario: CI tooling only; checks: lint, check, fitness, backend type-check, unit tests, axe and language examples after the `lookAt` change, the screenshot job locally against `main`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-697.md`
+- [x] Archive the session; PR pushed after this archive
