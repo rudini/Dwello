@@ -16,6 +16,7 @@ import {
 	overviewTaskText,
 	overviewTasksNaming,
 	rentedApartmentsOf,
+	statusExplained,
 	statusFilterShown
 } from '../questions/dashboard';
 import {
@@ -224,6 +225,10 @@ Then(
 );
 Then('nennt die Belegung von {string} {string}', async ({ verwalter, names }, building: string, text: string) => {
 	await verwalter.sees(occupancyText(names.get(building)!)).toContain(text);
+});
+
+Then('erklärt die Übersicht bei den Kennzahlen {string} mit {string}', async ({ verwalter }, label: string, help: string) => {
+	await verwalter.sees(statusExplained(label)).toEqual([label, help]);
 });
 
 Then('erklärt die Belegung {string}', async ({ verwalter }, help: string) => {

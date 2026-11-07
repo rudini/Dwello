@@ -31,10 +31,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
-	{#key $page.url.search}
-		<ApartmentFilters buildings={data.buildings} reset={filtered && data.apartments.length > 0} />
-	{/key}
+	<ApartmentFilters buildings={data.buildings} reset={filtered && data.apartments.length > 0} />
 
 	{#if data.apartments.length === 0}
 		<section class="rounded-panel border border-line bg-surface">
