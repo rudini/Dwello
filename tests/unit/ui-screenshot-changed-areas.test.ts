@@ -10,6 +10,14 @@ function image(width: number, height: number, ...black: [number, number][]) {
 	return PNG.sync.write(png);
 }
 
+// White image with one pixel a shade off white, as anti-aliasing draws the corner of a rounded card differently from one
+// screenshot to the next, even of the same page on the same server (#1172)
+function shaded(shade: number) {
+	const png = PNG.sync.read(image(64, 64));
+	png.data.fill(255 - shade, (40 * 64 + 20) * 4, (40 * 64 + 20) * 4 + 3);
+	return PNG.sync.write(png);
+}
+
 describe('changedAreas', () => {
 	it('finds nothing in identical screenshots', () => {
 		expect(changedAreas(image(64, 64, [5, 5]), image(64, 64, [5, 5]))).toEqual([]);
@@ -26,6 +34,14 @@ describe('changedAreas', () => {
 			{ x: 0, y: 0, width: 32, height: 32 },
 			{ x: 48, y: 48, width: 16, height: 16 }
 		]);
+	});
+
+	it('übersieht einen Pixel, der nur um eine Kantenglättung abweicht', () => {
+		expect(changedAreas(image(64, 64), shaded(2))).toEqual([]);
+	});
+
+	it('sieht einen Pixel, der um mehr als eine Kantenglättung abweicht', () => {
+		expect(changedAreas(image(64, 64), shaded(3))).toEqual([{ x: 16, y: 32, width: 16, height: 16 }]);
 	});
 
 	it('marks what a longer page adds below the end of the old one', () => {
@@ -58,6 +74,10 @@ describe('looksTheSame', () => {
 
 	it('sieht einen geänderten Pixel als Änderung', () => {
 		expect(looksTheSame(image(32, 32), image(32, 32, [10, 20]))).toBe(false);
+	});
+
+	it('sieht Screenshots, die nur um eine Kantenglättung abweichen, als gleich', () => {
+		expect(looksTheSame(image(64, 64), shaded(2))).toBe(true);
 	});
 
 	it('sieht eine kürzer gewordene Seite als Änderung', () => {
