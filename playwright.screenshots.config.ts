@@ -11,6 +11,8 @@ export default defineConfig({
 	...e2e,
 	testDir: 'tests/ui-screenshots',
 	reporter: 'list',
+	// one shot at a time: records another test seeds between the base's shot and the head's would show as changes
+	workers: 1,
 	webServer: process.env.UI_BASE_DIR
 		? [
 				...servers,
