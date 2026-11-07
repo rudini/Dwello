@@ -9,7 +9,12 @@ export const statesOf = (route: string, screens: Screen[]) =>
 		.filter((screen) => pattern(screen.path) === pattern(route))
 		.flatMap((screen) =>
 			screen.states
-				.filter((state) => state.includes('dialog') || state === 'every-wizard-step')
+				// an upload dialog's Beleg gets a new random name each time (tasks/accessibility.ts): its shot would always differ
+				.filter(
+					(state) =>
+						(state.includes('dialog') && !state.startsWith('upload-')) ||
+						state === 'every-wizard-step'
+				)
 				.map((state) => ({ screen: screen.name, state }))
 		);
 

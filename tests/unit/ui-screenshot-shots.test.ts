@@ -26,6 +26,13 @@ describe('statesOf', () => {
 		]);
 	});
 
+	it('leaves out the upload dialogs, whose Beleg gets a new random name each time', () => {
+		const invoices = [
+			{ name: 'invoices', path: '/invoices', states: ['upload-dialog', 'upload-discard-dialog'] }
+		];
+		expect(statesOf('/invoices', invoices)).toEqual([]);
+	});
+
 	it('takes nothing for a page without such states', () => {
 		expect(statesOf('/buildings', screens)).toEqual([]);
 	});

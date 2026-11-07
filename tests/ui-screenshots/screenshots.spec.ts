@@ -112,21 +112,22 @@ const screens: Parameters<typeof statesOf>[1] = JSON.parse(
 
 for (const route of routes) {
 	for (const { screen, state } of statesOf(route, screens)) {
-		test(`${route}, ${screen}, ${state}`, async ({ browser, request, baseURL }) => {
+		test(`${route}, ${screen}, ${state}`, async ({ browser, request, baseURL, locale }) => {
 			// the other instances of the stack (empty, fresh installation, demo) have no base branch to compare with
 			const path = screens.find((candidate) => candidate.name === screen)!.path;
 			test.skip(!!instanceOf({ state, path } as Example), 'state on another instance of the stack');
-			// its Beleg gets a new random name each time it is reached (tasks/accessibility.ts): it would always differ
-			test.skip(state === 'upload-discard-dialog', 'random file name');
 			test.setTimeout(180_000);
 			// The same records for both branches, so their names match; a state that changes them on the base branch
 			// would show that change on the head as well; none does: a state confirms its dialog only to be refused
 			const seed = testData(new CallTheApi(request, await sessionToken()));
 			const example = await exampleOf(seed, screen, state);
+			// the same time on both branches: a wizard shows when its draft was saved, to the minute
+			const now = new Date();
 			const shots = async (origin: string) => {
-				const context = await browser.newContext({ baseURL: origin });
+				const context = await browser.newContext({ baseURL: origin, locale });
 				if (!example.public) await context.addCookies(await sessionCookies(origin));
 				const page = await context.newPage();
+				await page.clock.setFixedTime(now);
 				const images: Buffer[] = []; // one per wizard step
 				await new Actor('Liegenschaftsverwalter')
 					.whoCan(new BrowseTheWeb(page))
