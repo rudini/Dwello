@@ -1465,6 +1465,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] code-reviewer (`docs/reviews/690-review-{1..5}.md`): C-1..C-4 fixed (49e4237, 8b4baa6); C-5 Major (focus after the link) fixed (5a5f610); closing C-6 Major (three scenarios), C-7, C-8 fixed (2b8b3a8, 50c2d12)
 - [x] Personas Helga, Weber (`docs/design/personas/{helga,weber}-690.md`), three rounds with states set by SQL: H-4 Major (link lands at the top) fixed; W-1 Major (Firmenadresse named for an incomplete Kontoinhaber), W-2 Major fixed; Minors that stay: H-1, H-2, H-5, H-6, W-4..W-8
 - [x] Workflow notes: a state the app refuses to save needs SQL setup before a persona run; say so in the persona prompt
+## Session: #687 «Nicht umlagefähig» shown neutrally; plain category reasons (personas on #292)
+
+- [x] Read #687; triage on main (`docs/reviews/687-triage.md`): list and detail badge, form note hold; Helga P-6 fixed by #672
+- [x] Product owner decisions recorded in #687: neutral in four places (the detail box «Nicht in der Nebenkostenabrechnung» too); Weber P-3 is #1195; Helga P-7 hard words replaced here; spec change `invoice-detail.feature:27`
+- [x] Neutral tone in list, detail, form note and detail box; DOM tests and three scenarios seen red (a5ff25b)
+- [x] fach-reviewer step 1 (`docs/reviews/687-1-fach-review.md`): V-1, V-2 Minor fixed; plain category reasons in four languages, «Vollservicevertrag» kept and explained (4fb8092)
+- [x] code-reviewer (`docs/reviews/687-review-{1,2}.md`): C-1 Minor fixed (23348e0)
+- [x] Persona Helga (`docs/design/personas/helga-687.md`): no warned feeling left; Minors that stay: H-1 (Lift: where to find the maintenance share), H-2 (Heizung: «anrechenbar» and «umlagefähig»)
+- [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 ## Session: #662 list filters: selects apply on change
 
@@ -1490,6 +1499,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1186 Statement list names the chosen status
+
+- [x] `@wip` scenarios (statements.feature) at 390 × 844 and 960 × 600, seen red at the missing line; DOM tests seen red
+- [x] `fach-reviewer` `docs/reviews/1186-fachreview-1.md`: the line under the tiles, the list headings with a status, the empty result, in de/fr/it/en (V-1, V-2 fixed; V-3 rejected: the empty list after a failed load is older)
+- [x] Line under the tiles, headings and empty text (`src/routes/statements/+page.svelte`, `messages/*.json`); screen state `statements status-empty`
+- [x] code-reviewer `docs/reviews/1186-review-1.md`: C-2, C-3 Minor fixed (1ef137b); C-1 Minor stays (an empty page past the last)
+- [x] Persona Marco `docs/design/personas/marco-1186.md`: no Blocker or Major; P-1 to P-3 Minors stay (P-1: the unsent building choice, #662)
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, statements E2E with its axe/language rows
+- [x] Archive the session; PR `Fixes #1186`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
