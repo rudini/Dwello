@@ -1430,3 +1430,4 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] C-1: record the tag's commit, not HEAD, in `.git/demo-deployed` (test seen red)
 - [x] closing code-reviewer round: `docs/reviews/demo-tag-review-2.md`
 - [x] PR: pushed after this archive
+- [x] Fallback review on #1190 (build from the tag's commit, `reset --keep`): closing round `docs/reviews/demo-tag-review-3.md`
