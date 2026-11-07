@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The merge queue: each queued pull request is tested on main with the ones before it, as a push to main is
+  # (every browser), so a merge to main no longer sends the other pull requests back to CI
+  merge_group:
   # Nightly: the full run on main again, for tests that depend on the date
   schedule:
     - cron: '17 2 * * *'
@@ -25,8 +28,8 @@ env:
 
 jobs:
   # On pull requests: which parts the change touches, so tests of untouched parts are skipped; a push that changes only
-  # documentation since a green run of its branch skips the tests that run passed. Pushes to main run everything: a pull
-  # request need not be up to date with main, so main is where pull requests merged side by side meet.
+  # documentation since a green run of its branch skips the tests that run passed. Pushes to main and the merge queue run
+  # everything: a pull request need not be up to date with main, so the queue and main are where pull requests meet.
   changes:
     name: Changes
     runs-on: ubuntu-latest
