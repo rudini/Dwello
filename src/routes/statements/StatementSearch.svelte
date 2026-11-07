@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { applyFilterChoice } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
@@ -35,6 +36,7 @@
 	method="GET"
 	action="/statements"
 	role="search"
+	onchange={applyFilterChoice}
 	aria-label={m.list_search_label()}
 	data-testid="statement-search-form"
 	data-focus-row
