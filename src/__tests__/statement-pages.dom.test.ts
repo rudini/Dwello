@@ -244,6 +244,79 @@ describe('Abrechnungsliste', () => {
 		expect(byTestId('filter-sent')?.querySelector('svg')).toBeNull();
 	});
 
+	// #1186 (Marco P-1, Helga P-2): under the tiles, still in view after a tap, a line says what the list below shows
+	it('sagt unter den Statusfiltern, wie viele Abrechnungen mit dem gewählten Status die Liste zeigt', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement(), statement({ id: 's2' }), statement({ id: 's3' })]);
+		expect(byTestId('status-filter-result')?.textContent?.trim()).toBe(
+			'Die Liste unten zeigt 3 Abrechnungen mit dem Status «Entwurf».'
+		);
+	});
+
+	// fach-review 1186-1 V-1: the list, not all statements: the other filters still apply
+	it('sagt unter den Statusfiltern, dass die Liste keine Abrechnung mit dem gewählten Status zeigt', () => {
+		url = new URL('http://localhost/statements?status=overdue');
+		show(StatementsPage, {
+			data: {
+				statements: [],
+				total: 0,
+				page: 1,
+				pageSize: 10,
+				buildings: [],
+				scope: null,
+				statusCounts: { ...counts, overdue: 0 }
+			}
+		} as never);
+		expect(byTestId('status-filter-result')?.textContent?.trim()).toBe(
+			'Die Liste unten zeigt keine Abrechnung mit dem Status «Überfällig».'
+		);
+	});
+
+	it('sagt ohne gewählten Status nichts unter den Statusfiltern', () => {
+		list([statement()]);
+		expect(byTestId('filter-draft')).not.toBeNull();
+		expect(byTestId('status-filter-result')).toBeNull();
+	});
+
+	// #1186 (Marco P-2, Helga P-1): at the list, where the tiles are out of view, the heading names the status
+	const heading = () => document.querySelector('[data-results]')!.textContent!.trim();
+	it('nennt den gewählten Status in der Überschrift der Liste', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement()]);
+		expect(heading()).toBe('1 Abrechnung mit dem Status «Entwurf»');
+	});
+
+	// code review 1186-1 C-2: the other two heading texts
+	it('nennt den gewählten Status bei mehreren Abrechnungen auf einer Seite in der Überschrift', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement(), statement({ id: 's2' })]);
+		expect(heading()).toBe('2 Abrechnungen mit dem Status «Entwurf»');
+	});
+
+	it('nennt den gewählten Status auf einer letzten Seite mit einer Abrechnung in der Überschrift', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement()], 11, 2);
+		expect(heading()).toBe('Abrechnung 11 von 11 mit dem Status «Entwurf», Seite 2 von 2');
+	});
+
+	it('nennt den gewählten Status auch über mehreren Seiten in der Überschrift', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list(
+			Array.from({ length: 10 }, (_, i) => statement({ id: `s${i}` })),
+			11
+		);
+		expect(heading()).toBe('Abrechnungen 1–10 von 11 mit dem Status «Entwurf», Seite 1 von 2');
+	});
+
+	it('nennt in der leeren Liste nach einem Status diesen Status statt «Filter anpassen»', () => {
+		url = new URL('http://localhost/statements?status=overdue');
+		list([]);
+		expect(byTestId('statements-empty')?.textContent).toContain(
+			'Die Liste enthält keine Abrechnung mit dem Status «Überfällig». Wählen Sie einen anderen Status oder setzen Sie die Filter zurück.'
+		);
+		expect(text()).not.toContain('Filter anzupassen');
+	});
+
 	// After a search the focus moves here, so the number of results is read out
 	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
 		list([statement()]);
