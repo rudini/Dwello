@@ -1418,3 +1418,15 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: lint, check, E2E chromium + api contracts, contract-new, contract-edit (139 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: demo deploys the newest tag on main (#1184)
+
+No scenario: the demo's update script runs on the VM outside the E2E stack; `tools/release/demo-update.test.ts` covers it.
+
+- [x] Test: a commit merged after the tag still builds the tag, once (seen red)
+- [x] `deploy/demo/update.sh`: newest version tag on `main` instead of an exact tag on its tip
+- [x] `deploy/demo/README.md`, "7. Automatic updates": what is deployed
+- [x] code-reviewer round 1: `docs/reviews/demo-tag-review-1.md`
+- [x] C-1: record the tag's commit, not HEAD, in `.git/demo-deployed` (test seen red)
+- [x] closing code-reviewer round: `docs/reviews/demo-tag-review-2.md`
+- [x] PR: pushed after this archive
