@@ -3,9 +3,10 @@ import { test } from '../fixtures/test';
 import { agreedCostsOfContract } from '../questions/contract-detail';
 import { noAgreedCostsTone, noAgreedCostsWarning, reviewed } from '../questions/contract-form';
 import { agreementQuestionsOf, agreementQuestionsShown, agreementsFailure, agreementsWaiting, notAgreedCostsOf } from '../questions/statement-generate';
+import { focusedText } from '../questions/navigation';
 import { openContract } from '../tasks/contract-detail';
 import { agreeCategoryFrom, leaveOutCategory, reviewContract, untickAllCategories } from '../tasks/contract-form';
-import { agreementsCannotBeChecked, agreementsCheckAgain, agreementsCannotBeSaved, answerAgreement, answerAgreementFrom, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
+import { agreementsCannotBeChecked, agreementsCheckAgain, agreementsCheckAgainInVain, agreementsCannotBeSaved, answerAgreement, answerAgreementFrom, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -58,6 +59,15 @@ Then('erklärt der Assistent {string}', async ({ verwalter }, message: string) =
 
 When('der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreementsCheckAgain);
+});
+
+When('der Liegenschaftsverwalter die Prüfung erneut versucht, während sie noch gestört ist', async ({ verwalter }) => {
+	await verwalter.attemptsTo(agreementsCheckAgainInVain);
+});
+
+// #688: the button the landlord used keeps the focus while Dwello tries again and after it failed again
+Then('steht der Fokus weiter auf «Erneut versuchen»', async ({ verwalter }) => {
+	await verwalter.sees(focusedText).toBe('Erneut versuchen');
 });
 
 Given('das Speichern der Antworten zum Mietvertrag von {string} ist gestört', async ({ verwalter, seed }, tenant: string) => {

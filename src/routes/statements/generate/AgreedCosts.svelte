@@ -71,7 +71,7 @@
 	});
 </script>
 
-<AgreementsCheck {status} {error} onretry={() => attempt++} />
+<AgreementsCheck {status} {attempt} {error} onretry={() => attempt++} />
 
 {#if asked.length}
 	<Alert tone="caution" title={m.statements_agreements_title()} testid="agreement-questions">

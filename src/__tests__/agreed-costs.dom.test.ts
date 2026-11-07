@@ -153,6 +153,52 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 		expect(props.blocking).toBe(false);
 	});
 
+	// #688 (Sven P-2): the button stays, busy, and keeps the focus while Dwello tries again
+	it('lässt «Erneut versuchen» mit dem Fokus stehen, solange Dwello erneut prüft', async () => {
+		await agreedCosts(() => [500, {}]);
+		const retry = byTestId('agreements-retry')!;
+		retry.focus();
+
+		globalThis.fetch = (() => new Promise<Response>(() => {})) as typeof fetch;
+		click(retry);
+		await settle();
+
+		expect(byTestId('agreements-retry')!.getAttribute('aria-disabled')).toBe('true');
+		expect(document.activeElement).toBe(byTestId('agreements-retry'));
+		// it has not failed again yet
+		expect(byTestId('agreements-failed')!.textContent).toContain('Dwello konnte nicht prüfen');
+	});
+
+	// #688 (Helga P-3): a failed retry says that Dwello tried again; the focus stays on the button
+	it('sagt nach einem erneut gescheiterten Versuch, dass Dwello es erneut versucht hat', async () => {
+		await agreedCosts(() => [500, {}]);
+		byTestId('agreements-retry')!.focus();
+
+		click('agreements-retry');
+		await settle();
+
+		expect(byTestId('agreements-failed')!.textContent).toContain(
+			'Dwello hat es erneut versucht und konnte die Mietverträge wieder nicht prüfen.'
+		);
+		expect(document.activeElement).toBe(byTestId('agreements-retry'));
+	});
+
+	// #688 (Sven P-2, P-5): a successful retry says so in the check, and the focus goes there
+	it('meldet nach der gelungenen erneuten Prüfung, dass die Mietverträge geprüft sind, mit dem Fokus darauf', async () => {
+		let failing = true;
+		await agreedCosts(() => (failing ? [500, {}] : [200, [anna]]));
+		byTestId('agreements-retry')!.focus();
+
+		failing = false;
+		click('agreements-retry');
+		await settle();
+
+		const checked = byTestId('agreements-checked')!;
+		expect(checked.textContent).toContain('Die Mietverträge sind geprüft.');
+		expect(checked.getAttribute('role')).toBe('status');
+		expect(document.activeElement).toBe(checked);
+	});
+
 	// #439: «Weiter» während der Prüfung bleibt nicht stumm
 	it('sagt nach «Weiter» während der Prüfung, worauf der Assistent wartet', async () => {
 		globalThis.fetch = (() => new Promise<Response>(() => {})) as typeof fetch;

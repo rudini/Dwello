@@ -80,6 +80,10 @@ export const generateBuilding = (buildingId: string) =>
 export const confirmMissingInvoices = byTestId('Fehlende Rechnungen bestätigen', 'confirm-missing-invoices');
 /** What shows that a state or a wizard step is reached, by its test id */
 export const shown = (testId: string) => bySelector(testId, `[data-testid="${testId}"]`);
+// #688: «Erneut versuchen» of the agreements check, no longer busy: the retry has answered
+export const agreementsRetryAnswered = target('«Erneut versuchen» beantwortet', (page) =>
+	page.getByTestId('agreements-retry').and(page.getByRole('button', { disabled: false }))
+);
 // #91: the first answer «Vereinbart» in the statement wizard's step 3
 export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) => page.getByTestId(/^agreement-.+-yes$/).first());
 export const firstAgreementFrom = target('Erste Antwort «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from$/).first());
