@@ -1418,3 +1418,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: lint, check, E2E chromium + api contracts, contract-new, contract-edit (139 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #682 list screens: filters, landmarks, headings (personas on #159)
+
+- [x] Read #682; triage on main (`docs/reviews/682-triage.md`): 7 findings hold, 4 and 5 partly fixed (#670), 10 mostly fixed (#681); only Sven's #159 report in the history
+- [x] Product owner decisions 1–10 recorded in #682
+- [x] Scenarios in buildings, apartments, contracts features and DOM tests, each seen red; search drops `page` (4825890); one search landmark, count heading, reset and labels on every list (1d179be)
+- [x] code-reviewer (`docs/reviews/682-review-{1,2}.md`): C-1, C-2 Minor fixed (2b58c0b), C-3 rejected (same address, nothing new to focus)
+- [x] Personas Sven, Marco (`docs/design/personas/{sven,marco}-682.md`): no finding of the change from Sven; Marco M-1 Minor stays (the building search finds neither a comma address nor the postcode)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
