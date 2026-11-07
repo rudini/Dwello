@@ -2030,7 +2030,7 @@
 	"contracts_overlap_review_where": "Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt {period} «{periodStep}», die Wohnung im Schritt {apartment} «{apartmentStep}».",
 	"contracts_apartment_contracts_retry_failed": "Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.",
 	"contracts_apartment_contracts_see_top": "«Erneut versuchen» steht oben auf der Seite.",
-	"contracts_delete_draft_contracts_unknown": "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern».",
+	"contracts_delete_draft_contracts_unknown": "Dwello hat den Entwurf nicht gelöscht: Die anderen Mietverträge dieser Wohnung liessen sich nicht laden, darum lässt sich nicht prüfen, ob die Wohnung frei ist. Laden Sie die Mietverträge oben auf der Seite mit «Erneut versuchen» und löschen Sie den Entwurf danach noch einmal.",
 	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut.",
 	"contracts_notice_hint_title": "Zieht der Mieter aus oder in eine andere Wohnung?",
 	"contracts_notice_hint_text": "Dann tragen Sie das Vertragsende auf der Seite des Mietvertrags mit «Enddatum erfassen» ein. So bleibt er unbefristet, und Dwello nennt die nächsten Schritte. Zieht der Mieter in eine andere Ihrer Wohnungen, erfassen Sie danach für diese Wohnung einen neuen Mietvertrag.",
