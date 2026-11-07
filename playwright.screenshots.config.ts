@@ -6,7 +6,8 @@ const servers = e2e.webServer as WebServer[];
 const frontend = servers.find((server) => server.port === 3100)!;
 
 // Screenshots of the pages a pull request changes (CI job ui-screenshots), on the same stack as the E2E tests.
-// With UI_BASE_DIR (a checkout of the base branch) its frontend runs on 3200 against the same backend, so changes can be marked.
+// With UI_BASE_DIR (a checkout of the base branch) its frontend runs on 3200 against the same backend, so changes can be marked;
+// built and started like the head's, as `bun run dev` showed its own port in the MCP address on /config/access-keys (#1172).
 export default defineConfig({
 	...e2e,
 	testDir: 'tests/ui-screenshots',
@@ -16,8 +17,10 @@ export default defineConfig({
 				...servers,
 				{
 					...frontend,
-					command: `cd "${process.env.UI_BASE_DIR}" && bun run dev -- --port 3200 --strictPort`,
-					port: 3200
+					command: `cd "${process.env.UI_BASE_DIR}" && bun run build && node build`,
+					port: 3200,
+					// the same ORIGIN as the head, so pages that show their own address look the same
+					env: { ...frontend.env, PORT: '3200' }
 				}
 			]
 		: servers,

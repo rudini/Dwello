@@ -20,6 +20,7 @@ import {
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
 	paymentDeadline,
+	paymentDeadlineHelp,
 	paymentSummary,
 	partialPaymentHint,
 	pdfChangedHint,
@@ -132,6 +133,7 @@ export const redeliverOffers = Count.of(redeliverButton);
 export const newPdfStillToSend = Visibility.of(newPdfToSend);
 export const replacedDone = Text.of(successToast);
 export const deadlineShown = Count.of(paymentDeadline);
+export const deadlineHelp = Text.of(paymentDeadlineHelp);
 export const paymentText = Text.of(paymentSummary);
 export const replacedStatementLink = Attribute.named('href').of(replacesLink);
 export const priorPaymentsAmount = question('the amount already paid on the replaced statement', async (actor) =>

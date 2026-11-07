@@ -863,6 +863,13 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann heisst das Gebäude "Lindenhof" bei der Wahl "Lindenhof Testweg 1, 8400 Winterthur"
     Und beschreibt die Wahl das Gebäude "Lindenhof" mit "Keine Rechnungen in der Abrechnungsperiode erfasst. 1 Wohnung"
 
+  # #686: die Wahl der Gebäude zählt die Rechnungen wie die Vorschau, nach dem Leistungszeitraum, sonst nach dem
+  # Rechnungsdatum
+  Szenario: Die Wahl der Gebäude zählt eine Rechnung in der Periode ihres Leistungszeitraums
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-01-15" für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann beschreibt die Wahl das Gebäude "Lindenhof" mit "1 Rechnung in der Abrechnungsperiode. 1 Wohnung"
+
   Szenario: Die Wahl der Gebäude passt in ein schmales Fenster
     Angenommen das Browserfenster ist 390 Pixel breit
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will

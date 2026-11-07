@@ -1457,6 +1457,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 
+## Session: #686 statement screens and PDF heating wording (Dr. Weber on #229)
+
+- [x] Read #686; triage on main (`docs/reviews/686-triage.md`): P-3 fixed by #685; heating share, «Liegenschaft», move-out date already fixed; P-4, the step 2 count, the first PDF click and the draft Zahlungsfrist hold
+- [x] Product owner decisions recorded in #686: «Wohnungsanteil» in the heating note, heading stays, step 2 counts like the preview, PDF button as a form action, draft deadline help; spec change `statement-detail.feature` (two lines)
+- [x] Step 2 count (4c454db), PDF form action (fac7f62); fach-reviewer step 1 (`docs/reviews/686-1-fach-review.md`): V-1, V-2 Major and V-3..V-5 fixed; texts applied (8671329)
+- [x] code-reviewer (`docs/reviews/686-review-{1,2,3}.md`): C-1..C-4 Minor fixed (4152a94); round 3 C-1 Major (edit-page scenario) and C-2 fixed (7d73d95)
+- [x] Personas Weber, Marco (`docs/design/personas/{weber,marco}-686.md`): Marco M-1 = Weber W-2 (help missing on the edit page) fixed (86c9066); Weber W-1 Minor stays (the help does not say a shorter date sent the same day moves too)
+- [x] daten-pruefer (`docs/reviews/686-datenpruefung-1.md`): no findings; six statements and two QR-bills to the Rappen
 ## Session: #687 «Nicht umlagefähig» shown neutrally; plain category reasons (personas on #292)
 
 - [x] Read #687; triage on main (`docs/reviews/687-triage.md`): list and detail badge, form note hold; Helga P-6 fixed by #672
@@ -1504,6 +1512,17 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-741.md`
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, contract-detail.feature, a11y and language rows missing-statements
 - [x] Archive session; PR `Fixes #741`: pushed after this archive
+
+## Session: #1172 screenshot job: no more untouched pages listed as changed
+
+- [x] Checked on main and on the CI images of #1187/#1192 (outside the red marks): `/config/access-keys` differs in the MCP address (the base ran `bun run dev` on its own port); `/config/categories` by 39 pixels of channel delta 1; the other flagged pages are identical
+- [x] Decided (#1172): the base as a production build like the head (`node build`, the head's environment but `PORT`); test seen red on the dev command and on ORIGIN 3200
+- [x] Differences remained: the same page shot twice from the same server differs at rounded card corners (Δ1); per the decision a tolerance of 2 per colour channel in `changed-areas.ts`; tests seen red
+- [x] Locally against a worktree of main, 7 routes, twice: no page listed; with one German text changed only that page listed
+- [x] code-reviewer round 1 (`docs/reviews/1172-screenshot-noise-review-1.md`): Minor C-1 (comment) fixed
+- [x] No scenario: CI tooling only; checks: lint, check, fitness, backend type-check, the two unit test files, Prettier
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR `Fixes #1172` pushed after this archive
 ## Session: #1186 Statement list names the chosen status
 
 - [x] `@wip` scenarios (statements.feature) at 390 × 844 and 960 × 600, seen red at the missing line; DOM tests seen red
