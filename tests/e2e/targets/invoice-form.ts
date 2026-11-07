@@ -17,6 +17,10 @@ export const overrideReasonInput = target('Grund der Änderung', (page) => page.
 export const invoiceSubmitButton = target('Rechnung speichern', (page) => page.getByTestId('submit-button'));
 export const invoiceNumberInput = target('Rechnungsnummer', (page) => page.getByTestId('invoice-number-input'));
 export const servicePeriodHelp = target('Hilfe zum Leistungszeitraum', (page) => page.getByTestId('invoice-service-period-help'));
+export const servicePeriodFirst = target('erster Absatz der Hilfe zum Leistungszeitraum', (page) =>
+	page.getByTestId('invoice-service-period-first')
+);
+export const servicePeriodMore = target('«Mehr dazu» beim Leistungszeitraum', (page) => page.getByTestId('invoice-service-period-more'));
 export const utilityCostHelp = target('Hilfe zu Umlagefähig', (page) => page.getByTestId('invoice-utility-cost-checkbox-help'));
 export const categoryLabel = target('Bezeichnung der Kategorie', (page) => page.getByTestId('invoice-category-label'));
 export const keySelect = target('Verteilschlüssel', (page) => page.getByTestId('invoice-distribution-key-select'));

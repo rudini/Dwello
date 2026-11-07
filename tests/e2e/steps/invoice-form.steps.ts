@@ -13,7 +13,10 @@ import {
 	keyHelpText,
 	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
+	servicePeriodFirstText,
 	servicePeriodHelpText,
+	servicePeriodMoreOpen,
+	servicePeriodMoreText,
 	utilityCostHelpText,
 	utilityCostMarkable
 } from '../questions/invoice-form';
@@ -27,6 +30,7 @@ import {
 	clearSupplier,
 	correctAmount,
 	correctInvoiceNumber,
+	saveSupplierOfLength,
 	enterInvoiceDate,
 	openInvoiceEdit,
 	openNewInvoice,
@@ -226,6 +230,22 @@ Then('ist im Rechnungsformular der Verteilschlüssel {string} gewählt', async (
 Then('erklärt das Formular beim Verteilschlüssel {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(keyHelpText).toContain(text);
 });
+
+Then('zeigt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodFirstText).toContain(text);
+});
+
+Then('steht beim Leistungszeitraum hinter «Mehr dazu» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodMoreText).toContain(text);
+	await verwalter.sees(servicePeriodMoreOpen).toBeNull();
+});
+
+When(
+	'der Liegenschaftsverwalter eine Rechnung mit einem Rechnungssteller von {int} Zeichen speichert',
+	async ({ verwalter }, length: number) => {
+		await verwalter.attemptsTo(saveSupplierOfLength(length));
+	}
+);
 
 Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(servicePeriodHelpText).not.toContain(text);

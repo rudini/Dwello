@@ -54,6 +54,9 @@ export const recategorize = (category: string): Activity => (actor) => actor.att
 export const overrideCategory = (category: string, reason: string): Activity => (actor) =>
 	actor.attemptsTo(chooseCategory(category), Enter.theValue(reason).into(overrideReasonInput), saveInvoice);
 
+// #743: a Rechnungssteller longer than its column
+export const saveSupplierOfLength = (length: number): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue('A'.repeat(length)).into(supplierInput), saveInvoice);
 export const clearSupplier: Activity = (actor) => actor.attemptsTo(Enter.theValue('').into(supplierInput), saveInvoice);
 
 // Types key by key, as a person on a phone's number pad does, then leaves the field

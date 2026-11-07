@@ -81,6 +81,13 @@ When(
 );
 
 When(
+	'der Liegenschaftsverwalter für das Gebäude {string} die Word-Datei {string} hochlädt',
+	async ({ verwalter, seed }, building: string, word: string) => {
+		await verwalter.attemptsTo(uploadBelege(seed.idOf(building)!, [wordFile(word)]));
+	}
+);
+
+When(
 	'der Liegenschaftsverwalter für das Gebäude {string} die PDF-Rechnung von {string} und die Word-Datei {string} hochlädt',
 	async ({ verwalter, seed, names }, building: string, supplier: string, word: string) => {
 		const files = [invoicePdf(pdfOf(supplierName(names, seed.unique, supplier))), wordFile(word)];
