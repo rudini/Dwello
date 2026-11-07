@@ -1474,3 +1474,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #737 Clearer formula errors in the Verteilschlüssel form
+
+- [x] Decisions in #737 («Decided (product owner)»): drop `%` from the message; a value-dependent error once, no sample apartment named; test and save check the same four sample apartments; spec change of the two formula scenarios (Spec change approved: #737); glossary rows «Eigener Verteilschlüssel» and «Baustein»; P-1 solved before the merge with cause and next step. Other «Problem» points moved to #1200
+- [x] `@wip` scenarios (distribution-keys.feature) and lower-layer tests, seen red
+- [x] `fach-reviewer` `docs/reviews/737-fachreview-1.md` (V-1 Major new test title, V-2, V-3 fixed; V-4 glossary decided) and `737-fachreview-2.md` (P-1 texts; V-1..V-3 fixed)
+- [x] Implementation: field error at «Formel» (`saveRecord` option `field`), one error per value-dependent failure, `SAMPLE_APARTMENTS` shared by test and save, texts in de/fr/it/en, axe/language state `formula-test-failed` (new and edit)
+- [x] code-reviewer `docs/reviews/737-review-{1,2,3,4}.md`: 737-1 C-1 Major and C-2..C-4 fixed; 737-3 C-1 Major (all_zero text unpinned) fixed
+- [x] Persona Helga `docs/design/personas/helga-737.md` (P-1 Major fixed, P-2 fixed; P-3..P-5 Minor stay, P-5 and P-3 in part in #1200) and `helga-737-2.md` (P-1 now Minor, stays)
+- [x] Issues opened: #1200 (totals buttons, error position, name refusal), #1221 (failing custom key splits a statement equally)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-737.md`
+- [x] Archive the session; PR `Fixes #737`: pushed after this archive
