@@ -334,8 +334,8 @@ describe('Rechnungsdetail', () => {
 	// OR ausgeschrieben: die Rechnung zeigt den Hinweis allein (#292, Fachreview V-10); ohne Umbruch im Verweis (#1028)
 	it.each([
 		['fr', 'assurance du bâtiment, impôt foncier', 'Pas dans le décompte des charges', '(art.\u00a0256,\u00a0al.\u00a01, 256b et 257a du Code des obligations,\u00a0CO)'],
-		['it', 'assicurazione dell’immobile, imposta immobiliare', 'Esclusa dal conteggio spese accessorie', '(art.\u00a0256 cpv.\u00a01, 256b e 257a del Codice delle obbligazioni,\u00a0CO)'],
-		['en', 'building insurance, property tax', 'Not in the utility cost statement', '(Art.\u00a0256 para.\u00a01, 256b and 257a Code of Obligations,\u00a0CO)']
+		['it', 'assicurazione dell’immobile, imposta immobiliare', 'Esclusa dal conteggio spese accessorie', '(art.\u00a0256\u00a0cpv.\u00a01, 256b e 257a del Codice delle obbligazioni,\u00a0CO)'],
+		['en', 'building insurance, property tax', 'Not in the utility cost statement', '(Art.\u00a0256\u00a0para.\u00a01, 256b and 257a Code of Obligations,\u00a0CO)']
 	] as const)('nennt auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, example, title, citation) => {
 		overwriteGetLocale(() => locale);
 		try {
@@ -357,7 +357,7 @@ describe('Rechnungsdetail', () => {
 		expect(byTestId('invoice-legal-note')!.textContent).toContain('Nicht in der Nebenkostenabrechnung');
 		expect(byTestId('invoice-legal-note')!.textContent).not.toContain('Schweizer Mietrecht');
 		expect(byTestId('invoice-legal-note')!.textContent).toContain(
-			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art.\u00a0256 Absatz\u00a01, 256b und 257a Obligationenrecht,\u00a0OR).'
+			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art.\u00a0256\u00a0Absatz\u00a01, 256b und 257a Obligationenrecht,\u00a0OR).'
 		);
 	});
 
