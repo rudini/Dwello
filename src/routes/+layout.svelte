@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import '@fontsource-variable/inter';
 	import '../styles/globals.css';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
@@ -57,6 +57,7 @@
 		setTimeout(() => (document.body.dataset.hydrated = 'true'));
 	});
 
+	let listResult = $state('');
 	// After a search on a list the focus goes to its results, so their number is read out
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
@@ -64,8 +65,13 @@
 		const keep =
 			document.activeElement instanceof HTMLSelectElement ||
 			document.activeElement?.closest('[data-sveltekit-keepfocus]');
-		if (isListNavigation(navigation) && !keep)
-			document.querySelector<HTMLElement>('main [data-results]')?.focus();
+		if (!isListNavigation(navigation)) return;
+		const results = document.querySelector<HTMLElement>('main [data-results]');
+		if (!keep) return results?.focus();
+		// the focus stays in the filter, so the result is read out instead (#662, persona Sven S-1); emptied first, so
+		// the same count after another choice is read out again
+		listResult = '';
+		tick().then(() => (listResult = results?.textContent?.trim() ?? ''));
 	});
 
 	// Derived state for showing authenticated layout
@@ -95,6 +101,9 @@
 		</p>
 	{/if}
 {/snippet}
+
+<!-- the result of a list filter that keeps the focus (#662) -->
+<div role="status" class="sr-only" data-testid="list-result-status">{listResult}</div>
 
 {#if showAuthenticatedLayout}
 	<div class="flex min-h-screen flex-col bg-canvas">

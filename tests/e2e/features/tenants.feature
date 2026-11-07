@@ -40,6 +40,7 @@ Funktionalität: Mieterliste
     Und der Liegenschaftsverwalter im Filter "Mieter" "Künftige Mieter" wählt
     Dann steht über der Liste "Keine Mieter gefunden"
     Und bleibt der Fokus im Filter "Mieter"
+    Und sagt die Seite das Ergebnis "Keine Mieter gefunden" an
 
   Szenario: Aktiver Mieter
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert

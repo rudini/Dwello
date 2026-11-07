@@ -151,7 +151,8 @@ describe('Filter der Wohnungsliste', () => {
 	});
 });
 
-// #662: a filter's choice applies at once with what the form holds, the typed text too; the focus stays in the filter
+// #662: a filter's choice applies at once with what the form holds, the typed text too; the focus stays in the filter,
+// and each choice replaces the address, so «Zurück» leads to the page before the filtering (persona Sven S-2)
 describe.each([
 	{ list: lists[0], select: 'apartments-status-filter', choice: 'status=vacant' },
 	{ list: lists[2], select: 'tenants-status-filter', choice: 'status=future' },
@@ -176,7 +177,8 @@ describe.each([
 
 		expect(goto).toHaveBeenCalledWith(`${list.path}?search=Huber&${choice}`, {
 			keepFocus: true,
-			noScroll: true
+			noScroll: true,
+			replaceState: true
 		});
 	});
 

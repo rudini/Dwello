@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createRawSnippet } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 import { afterNavigate } from '$app/navigation';
 import { show } from './helpers/dom';
 
@@ -52,6 +52,15 @@ describe('Fokus nach der Suche in einer Liste', () => {
 	it('behält den Fokus auf einem Filter, der ihn behalten will', async () => {
 		await navigate('tile');
 		expect(document.activeElement).toBe(document.querySelector('[data-sveltekit-keepfocus]'));
+	});
+
+	// #662 (persona Sven S-1): with the focus in the filter, the result is read out in a polite status
+	it('sagt das Ergebnis an, wenn der Fokus im Filter bleibt', async () => {
+		await navigate('select');
+		await tick();
+
+		const status = document.querySelector('[data-testid="list-result-status"]')!;
+		expect([status.getAttribute('role'), status.textContent]).toEqual(['status', '2 Ergebnisse']);
 	});
 
 	it('setzt den Fokus sonst auf die Ergebnisse', async () => {

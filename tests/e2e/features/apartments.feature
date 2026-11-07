@@ -60,6 +60,7 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter im Filter "Gebäude" "Ahornhof" wählt
     Dann die Wohnungsliste enthält genau 2 Wohnungen
     Und bleibt der Fokus im Filter "Gebäude"
+    Und sagt die Seite das Ergebnis "2 Wohnungen" an
     Wenn der Liegenschaftsverwalter die leeren Wohnungen wählt, ohne zu suchen
     Dann ist die Wohnung "2.01" "Leer"
     Und die Wohnungsliste enthält genau 1 Wohnung

@@ -11,3 +11,5 @@ export const listResultsHeading = target('Überschrift der Liste', (page) => pag
 export const listSearchField = target('Suche der Liste', (page) => listSearch.locate(page).getByLabel('Suche', { exact: true }));
 export const listFilter = (label: string) =>
 	target(`Filter «${label}»`, (page) => listSearch.locate(page).getByLabel(label, { exact: true }));
+// #662 (persona Sven S-1): what a screen reader hears after a choice that keeps the focus in the filter
+export const listResultStatus = target('Ansage des Ergebnisses', (page) => page.getByTestId('list-result-status'));

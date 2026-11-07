@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { focusedFilter, listHeading, offeredResets } from '../questions/list';
+import { announcedResult, focusedFilter, listHeading, offeredResets } from '../questions/list';
 import { chooseInListFilter, typeIntoListSearch } from '../tasks/list';
 
 const { When, Then } = createBdd(test);
@@ -33,4 +33,8 @@ Then('steht über der Liste {string}', async ({ verwalter }, heading: string) =>
 
 Then('bleibt der Fokus im Filter {string}', async ({ verwalter }, filter: string) => {
 	await verwalter.sees(focusedFilter).toBe(filter);
+});
+
+Then('sagt die Seite das Ergebnis {string} an', async ({ verwalter }, result: string) => {
+	await verwalter.sees(announcedResult).toBe(result);
 });
