@@ -81,6 +81,13 @@ const invoice = (overrides = {}) => ({
 const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
 const button = (label: string) =>
 	[...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
+// #687: «Nicht umlagefähig» is a correct state, shown without the yellow of a warning
+const cautionIn = (element: Element) =>
+	[element, ...element.querySelectorAll('*')].some((one) =>
+		one.getAttribute('class')?.includes('caution')
+	);
+const badgeOf = (element: Element, label: string) =>
+	[...element.querySelectorAll('span')].find((one) => one.textContent?.trim() === label)!;
 
 beforeEach(() => {
 	url = new URL('http://localhost/invoices?search=Hauswart');
@@ -160,6 +167,12 @@ describe('Rechnungsliste', () => {
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Manuell');
 		expect(byTestId('invoice-row-i2')!.textContent).toContain('Kategorie fehlt');
 		expect(byTestId('invoice-row-i2')!.textContent).toContain('Nicht umlagefähig');
+	});
+
+	it('zeigt «Nicht umlagefähig» in der Liste neutral, ohne Warnung (#687)', () => {
+		list([invoice({ isValidUtilityCost: false })]);
+
+		expect(cautionIn(badgeOf(byTestId('invoice-row-i1')!, 'Nicht umlagefähig'))).toBe(false);
 	});
 
 	it('übernimmt die Suche aus der Adresse und beginnt eine neue Suche auf Seite 1', () => {
@@ -359,6 +372,18 @@ describe('Rechnungsdetail', () => {
 		expect(byTestId('invoice-legal-note')!.textContent).toContain(
 			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art.\u00a0256\u00a0Absatz\u00a01, 256b und 257a Obligationenrecht,\u00a0OR).'
 		);
+	});
+
+	it('zeigt «Nicht umlagefähig» im Detail neutral, ohne Warnung (#687)', () => {
+		show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
+
+		expect(cautionIn(badgeOf(byTestId('invoice-utility-cost')!, 'Nicht umlagefähig'))).toBe(false);
+	});
+
+	it('zeigt den Hinweis «Nicht in der Nebenkostenabrechnung» neutral, ohne Warnung (#687)', () => {
+		show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
+
+		expect(cautionIn(byTestId('invoice-legal-note')!)).toBe(false);
 	});
 
 	// Der Grund der eigenen Kategorie statt der allgemeinen Liste, nicht als Warnung (#292, Entscheid #221 B)
@@ -822,6 +847,22 @@ describe('Rechnung erfassen', () => {
 		expect(byTestId('invoice-category-warning')!.textContent).toContain(
 			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
 		);
+	});
+
+	it('zeigt den Hinweis zur nicht umlagefähigen Kategorie neutral, ohne Warnung (#687)', async () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const category = byTestId<HTMLSelectElement>('invoice-category-select')!;
+
+		category.value = 'c2';
+		category.dispatchEvent(new Event('change'));
+		await settle();
+
+		const note = byTestId('invoice-category-warning')!;
+		expect(note.textContent).toContain('Nicht umlagefähige Kategorie');
+		expect(note.querySelector('#invoice-category-warning-text')!.textContent).toBe(
+			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+		);
+		expect(cautionIn(note)).toBe(false);
 	});
 
 	it('sagt bei „Umlagefähig“, was das Kästchen gerade bewirkt (Persona Marco)', async () => {
