@@ -3,11 +3,12 @@ import type { Activity, Actor, Question } from './actor';
 
 /** The UI protocol driver: a browser page */
 export class BrowseTheWeb {
-	/** What the browser logged and threw, shown when a page does not hydrate (#750) */
+	/** What the browser logged and threw since the page last navigated, shown when a page does not hydrate (#750) */
 	readonly console: string[] = [];
 
 	constructor(public readonly page: Page) {
 		page
+			.on('framenavigated', (frame) => frame === page.mainFrame() && this.console.splice(0))
 			.on('console', (message) => this.console.push(`${message.type()}: ${message.text()}`))
 			.on('pageerror', (error) => this.console.push(error.stack ?? `${error.name}: ${error.message}`));
 	}
