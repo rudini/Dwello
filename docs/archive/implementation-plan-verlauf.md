@@ -1488,6 +1488,7 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/750-review-1.md`: C-1 Major (console only in `message`, not in the stack the report shows) confirmed with real Playwright, fixed test-first; C-2 Minor with it
 - [x] Re-review `docs/reviews/750-review-2.md`: nothing open
 - [x] Checks: lint, check, fitness, backend type-check, vitest (new test, screenplay lint), E2E dashboard axe and language rows (79), a real Chromium page that throws shows its console in the stack
+- [x] Fallback review on PR #1223: console reset per document (Medium) and `cause` pinned (Low), fixed test-first; reviews `docs/reviews/750-review-{3,4,5}.md`, 750-4 C-1 Minor fixed, nothing open
 - [x] Archive session; PR `Fixes #750`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
