@@ -13,10 +13,12 @@ import {
 	keyHelpText,
 	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
+	invoiceNumberValue,
 	servicePeriodFirstText,
 	servicePeriodHelpText,
 	servicePeriodMoreOpen,
 	servicePeriodMoreText,
+	supplierValue,
 	utilityCostHelpText,
 	utilityCostMarkable
 } from '../questions/invoice-form';
@@ -246,6 +248,15 @@ When(
 		await verwalter.attemptsTo(saveSupplierOfLength(length));
 	}
 );
+
+// nothing cut silently (fach review 743-1 V-2)
+Then('zeigt das Formular die Rechnungsnummer {string}', async ({ verwalter }, number: string) => {
+	await verwalter.sees(invoiceNumberValue).toBe(number);
+});
+
+Then('zeigt das Formular einen Rechnungssteller von {int} Zeichen', async ({ verwalter }, length: number) => {
+	await verwalter.sees(supplierValue).toHaveLength(length);
+});
 
 Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(servicePeriodHelpText).not.toContain(text);

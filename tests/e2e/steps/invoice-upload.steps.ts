@@ -36,6 +36,7 @@ import {
 	chooseCategory,
 	chooseKey,
 	enterAmount,
+	enterInvoiceNumber,
 	chooseForCreating,
 	escapeFromCategory,
 	openUploadDialog,
@@ -167,6 +168,17 @@ When(
 		await verwalter.attemptsTo(enterAmount(names.get(supplier)!, amount));
 	}
 );
+
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} die Rechnungsnummer {string} eingibt',
+	async ({ verwalter, names }, supplier: string, number: string) => {
+		await verwalter.attemptsTo(enterInvoiceNumber(names.get(supplier)!, number));
+	}
+);
+
+Then('hat die Datei von {string} die Rechnungsnummer {string}', async ({ verwalter, names }, supplier: string, number: string) => {
+	await verwalter.sees(proposedInvoiceNumber(names.get(supplier)!)).toBe(number);
+});
 
 When(
 	'der Liegenschaftsverwalter bei der Datei von {string} den Verteilschlüssel {string} wählt',

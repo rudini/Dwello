@@ -728,7 +728,9 @@ describe('Rechnung erfassen', () => {
 
 		expect(byTestId('invoice-service-period-first')!.textContent).toContain('Für welche Zeit gilt die Rechnung?');
 		expect(more.open).toBe(false);
-		expect(more.querySelector('summary')!.textContent!.trim()).toBe('Mehr dazu');
+		expect(more.querySelector('summary')!.textContent!.trim()).toBe(
+			'Mehr dazu: Zeiträume, Kosten über mehrere Jahre, Entkalken'
+		);
 		expect(more.textContent).toContain('Kosten, die nur alle paar Jahre anfallen');
 		expect(more.textContent).toContain('Das Entkalken der zentralen Warmwasseranlage ist umlagefähig');
 		expect(more.textContent).not.toContain('Für welche Zeit gilt die Rechnung?');

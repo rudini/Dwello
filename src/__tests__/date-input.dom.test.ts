@@ -297,7 +297,7 @@ describe('Datumsfeld: Ansage eines Fehlers der Seite', () => {
 	};
 	const enter = () => {
 		field().focus();
-		field().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+		field().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 		flushSync();
 	};
 

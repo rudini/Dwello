@@ -15,6 +15,7 @@ import {
 	belegCategory,
 	belegDistributionKey,
 	belegInvoiceDate,
+	belegInvoiceNumber,
 	anyBelegRow,
 	belegeBeingRead,
 	belegRow,
@@ -104,6 +105,12 @@ export const chooseKey = (fileName: string, key: string): Activity => async (act
 export const enterAmount = (fileName: string, amount: string): Activity => async (actor) => {
 	if (!(await actor.answer(Visibility.of(belegAmount(fileName))))) await actor.attemptsTo(openBeleg(fileName));
 	await actor.attemptsTo(Enter.theValue(amount).into(belegAmount(fileName)));
+};
+
+// the Rechnungsnummer of the file (#743)
+export const enterInvoiceNumber = (fileName: string, number: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegInvoiceNumber(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(Enter.theValue(number).into(belegInvoiceNumber(fileName)));
 };
 
 export const createInvoices = Click.on(createInvoicesButton);

@@ -3,7 +3,7 @@
 	import Field from './Field.svelte';
 	import IconButton from './IconButton.svelte';
 	import { controlClass } from './field';
-	import { flushSync } from 'svelte';
+	import { flushSync, untrack } from 'svelte';
 	import { parseSwissDate } from '$lib/swiss-date';
 	import { formatDate, formatDateLong } from '$lib/utils/format';
 
@@ -85,18 +85,28 @@
 	const wordsId = $derived(`${id}-words`);
 	const helpText = $derived(help ? `${help} ${m.ui_date_format()}` : m.ui_date_format());
 	const words = $derived(value ? formatDateLong(value) : '');
-	// said when the field is left, and an error of the page, also when the field kept the focus (Enter)
-	const announced = $derived(invalid && left ? wrongDate : (error ?? ''));
 	// said once, then taken back: the error stays under the field, not twice in the accessibility tree (persona Anna)
 	let spoken = $state('');
+	let quiet: ReturnType<typeof setTimeout> | undefined;
+	const say = (text: string) => {
+		clearTimeout(quiet);
+		spoken = text;
+		quiet = setTimeout(() => (spoken = ''), 2000);
+	};
+	$effect(() => () => clearTimeout(quiet));
+	// the field's own check, said when the field is left; a change takes it back
+	const own = $derived(invalid && left ? wrongDate : '');
+	$effect(() => say(own));
+	// an error of the page only where the focus stayed in the field (Enter): where it jumps here, the field's
+	// description says it, and twice was once too often (#743, persona Sven P-1)
+	let kept = false;
 	$effect(() => {
-		spoken = announced;
-		const quiet = setTimeout(() => (spoken = ''), 2000);
-		return () => clearTimeout(quiet);
+		if (error && untrack(() => kept)) say(error);
 	});
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
+		say(''); // the field changed: no old error is said any more (#743, persona Sven P-2)
 		const input = event.currentTarget;
 		text = input.value;
 		// typing at the end: the dots come by themselves after day and month, so the number keypad is enough;
@@ -111,7 +121,15 @@
 
 	// Enter (in a dialog it confirms): the date counts as when the field is left, «01.01.25» as 2025
 	function onkeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter') flushSync(onblur);
+		if (event.key === 'Enter') {
+			kept = true;
+			flushSync(onblur);
+		}
+	}
+
+	function leave() {
+		kept = false;
+		onblur();
 	}
 
 	function onblur() {
@@ -143,7 +161,7 @@
 					autocomplete="off"
 					value={text}
 					{oninput}
-					{onblur}
+					onblur={leave}
 					{onkeydown}
 					aria-required={!optional}
 					aria-describedby={[control.describedBy, value && wordsId].filter(Boolean).join(' ')}

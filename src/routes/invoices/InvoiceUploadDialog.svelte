@@ -111,7 +111,10 @@
 	// the progress while files are read (with «Keine KI» nobody reads), then only what is to do (#773)
 	const status = $derived(
 		removed
-			? m.invoices_upload_removed({ name: removed })
+			? // the last one gone: the building is enabled again, which a screen reader does not see (#743)
+				(rows.length ? m.invoices_upload_removed : m.invoices_upload_removed_last)({
+					name: removed
+				})
 			: done < counted.length
 				? kiOff
 					? ''

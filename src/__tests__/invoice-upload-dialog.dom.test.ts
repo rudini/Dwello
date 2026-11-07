@@ -340,8 +340,10 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-create-button');
 		await settle();
 
-		const field = byTestId('invoice-upload-invoice-number-input')!.closest('[data-testid]:has(> label)')!;
-		expect(field.textContent).toContain('Höchstens 50 Zeichen. Kürzen Sie den Text.');
+		const field = byTestId<HTMLInputElement>('invoice-upload-invoice-number-input')!;
+		const description = field.getAttribute('aria-describedby')!.split(' ').map((id) => document.getElementById(id)?.textContent);
+		expect(description.join(' ')).toContain('Höchstens 50 Zeichen. Kürzen Sie den Text.');
+		expect(field.value).toBe('1'.repeat(51));
 		expect(calls.some((call) => call.path === '/invoices')).toBe(false);
 	});
 
