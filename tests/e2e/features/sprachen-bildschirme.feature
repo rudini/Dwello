@@ -159,6 +159,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
+      | invoices               | empty-year          |
       | invoices               | filtered-empty      |
       | invoices               | period-filter       |
       | invoices               | upload-dialog       |
