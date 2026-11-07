@@ -20,6 +20,6 @@ version=$(git describe --tags --abbrev=0 --match 'v*' origin/main 2>/dev/null) |
 echo "$(date -Is) updating to $version, $(git log -1 --format='%h %s' "$version")"
 git merge -q --ff-only "$version"
 APP_VERSION=$version docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
-echo "$(git rev-parse HEAD) $version" > .git/demo-deployed
+echo "$(git rev-parse "$version^{commit}") $version" > .git/demo-deployed
 docker image prune -f > /dev/null
 echo "$(date -Is) done"

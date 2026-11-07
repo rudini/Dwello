@@ -8,7 +8,8 @@ import { describe, expect, it } from 'vitest';
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), '../../deploy/demo/update.sh');
 
 /** The demo's clone of a remote main, with update.sh in place, `docker` as a stand-in that logs the version it builds
- * and `flock` as one that always locks; `dev` changes the remote (commits, tags) as merges and release runs do */
+ * and `flock` as one that always locks; `dev` changes the remote (commits, tags) as merges and release runs do,
+ * `demoGit` the demo's clone as an update by hand does */
 function demo() {
 	const dir = mkdtempSync(join(tmpdir(), 'demo-update-'));
 	const at = (name: string) => (...args: string[]) =>
@@ -42,7 +43,7 @@ function demo() {
 			return [];
 		}
 	};
-	return { dev, update, builds };
+	return { dev, demoGit: at('demo'), update, builds };
 }
 
 describe('demo update', () => {
@@ -78,5 +79,17 @@ describe('demo update', () => {
 		expect(builds()).toEqual(['v0.2.0']);
 		expect(update().status).toBe(0);
 		expect(builds()).toEqual(['v0.2.0']);
+	});
+
+	it('baut nur einmal, wenn der Klon von Hand über die neueste Version hinaus gezogen wurde', () => {
+		const { dev, demoGit, update, builds } = demo();
+		dev('tag', 'v0.3.0');
+		dev('push', '-q', 'origin', 'v0.3.0');
+		dev('commit', '-q', '--allow-empty', '-m', 'fix(tenants): merged after the release');
+		dev('push', '-q', 'origin', 'HEAD:main');
+		demoGit('pull', '-q', 'origin', 'main');
+		update();
+		update();
+		expect(builds()).toEqual(['v0.3.0']);
 	});
 });

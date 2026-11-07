@@ -17,5 +17,7 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Test: a commit merged after the tag still builds the tag, once (seen red)
 - [x] `deploy/demo/update.sh`: newest version tag on `main` instead of an exact tag on its tip
 - [x] `deploy/demo/README.md`, "7. Automatic updates": what is deployed
-- [ ] code-reviewer
+- [x] code-reviewer round 1: `docs/reviews/demo-tag-review-1.md`
+- [x] C-1: record the tag's commit, not HEAD, in `.git/demo-deployed` (test seen red)
+- [ ] closing code-reviewer round
 - [ ] PR
