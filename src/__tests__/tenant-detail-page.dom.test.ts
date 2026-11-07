@@ -295,6 +295,40 @@ describe('Mieterdetail', () => {
 		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-documents')));
 	});
 
+	// #1181 (Helga H-1, Sven S-4): two uploads with the same title, here of one file in one minute, differ by a running
+	// number in upload order: in the row, the names of its link and button, the delete question and the toast
+	it('nummeriert zwei Dokumente mit demselben Titel bis in die Löschfrage', async () => {
+		toasts.set([]);
+		const newer = {
+			...upload,
+			id: 'u2',
+			createdAt: upload.createdAt.replace(':00.000Z', ':59.000Z')
+		};
+		open([], null, [newer, upload]);
+		const [first, second] = allByTestId('document-row');
+		expect(first.querySelector('p')!.textContent).toBe('Ausweiskopie (2 von 2)');
+		expect(second.querySelector('p')!.textContent).toBe('Ausweiskopie (1 von 2)');
+		expect(allByTestId('document-pdf-link').map((link) => link.getAttribute('aria-label'))).toEqual(
+			['Datei herunterladen: Ausweiskopie (2 von 2)', 'Datei herunterladen: Ausweiskopie (1 von 2)']
+		);
+		expect(
+			allByTestId('document-delete-button').map((button) => button.getAttribute('aria-label'))
+		).toEqual(['Löschen: Ausweiskopie (2 von 2)', 'Löschen: Ausweiskopie (1 von 2)']);
+		allByTestId('document-delete-button')[0].click();
+		flushSync();
+		expect(text('document-delete-message')).toBe(
+			'Dokument «Ausweiskopie (2 von 2)» wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.'
+		);
+		const after = actions.get('?/deleteDocument')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		flushSync();
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Dokument «Ausweiskopie (2 von 2)» gelöscht'
+		]);
+	});
+
 	it('sagt, dass hochgeladene Dokumente mit dem Mieter gelöscht werden', () => {
 		open([], null, [upload]);
 		click('tenant-delete-button');

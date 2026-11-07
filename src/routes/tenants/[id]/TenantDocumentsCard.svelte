@@ -3,6 +3,7 @@
 	import { tick } from 'svelte';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
+	import { numberedUploads } from '$lib/document-status';
 	import { addToast } from '$lib/stores';
 	import type { StatementDocument } from '$lib/types';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -121,7 +122,7 @@
 			class="flex flex-col divide-y divide-line"
 			data-testid="tenant-documents"
 		>
-			{#each documents as document (document.id)}
+			{#each numberedUploads(documents) as document (document.id)}
 				<TenantDocumentRow
 					{document}
 					ondelete={() => {

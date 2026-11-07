@@ -2062,6 +2062,7 @@
 	"tenants_delete_text_with_documents": "L’inquilino {name} verrà eliminato definitivamente, insieme ai documenti caricati. L’operazione non può essere annullata.",
 	"documents_uploaded": "Caricato il {date} alle {time}, file «{file}»",
 	"documents_uploaded_to": "Per {name}, caricato il {date} alle {time}, file «{file}»",
+	"documents_upload_number": "{title} ({number} di {count})",
 	"documents_download_file": "Scaricare il file",
 	"documents_download_file_aria": "Scaricare il file: {title}",
 	"backend_document_too_large": "Il file supera {megabytes} MB. Scelga un file più piccolo o riduca le dimensioni della scansione.",
