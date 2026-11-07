@@ -166,7 +166,7 @@
 		{contract}
 		{periodStart}
 		{periodEnd}
-		{reset}
+		reset={data.statements.length ? reset : ''}
 		buildings={data.buildings}
 	/>
 
@@ -194,9 +194,13 @@
 	{:else}
 		<ResultList
 			id="statements-count"
-			heading={data.total === 1
-				? m.statements_count_one()
-				: m.statements_count_many({ count: data.total })}
+			counts={{
+				one: m.statements_count_one,
+				many: m.statements_count_many,
+				pageOne: m.statements_count_page_one,
+				pageMany: m.statements_count_page_many
+			}}
+			shown={data.statements.length}
 			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
 			url={$page.url}
 			page={data.page}

@@ -5,7 +5,13 @@
 	import { controlClass } from '$lib/ui/field';
 
 	// Search and status as a plain GET form: the address keeps them, and a choice made while loading counts
-	let { filters }: { filters: { search: string; status: string } } = $props();
+	let {
+		filters,
+		reset
+	}: {
+		filters: { search: string; status: string };
+		reset: boolean; // offer «Filter zurücksetzen»: the address has a filter and the list is not empty (#682)
+	} = $props();
 
 	// Aktiv: with a running rental contract; künftig: only a future one; ehemalig: all contracts ended (glossary "Mieter")
 	const statuses = [
@@ -13,13 +19,13 @@
 		{ value: 'future', label: m.tenants_future_filter() },
 		{ value: 'inactive', label: m.tenants_former_filter() }
 	];
-	const filtered = $derived(!!(filters.search || filters.status));
 </script>
 
 <form
 	method="GET"
 	action="/tenants"
 	role="search"
+	aria-label={m.list_search_label()}
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 lg:flex-row lg:items-end"
 >
 	<div class="lg:flex-1">
@@ -58,7 +64,6 @@
 		<Button type="submit" icon="search" testid="tenants-search-submit"
 			>{m.buildings_search_submit()}</Button
 		>
-		{#if filtered}<Button variant="ghost" href="/tenants">{m.buildings_reset_filters()}</Button
-			>{/if}
+		{#if reset}<Button variant="ghost" href="/tenants">{m.buildings_reset_filters()}</Button>{/if}
 	</div>
 </form>

@@ -32,7 +32,11 @@
 		{/snippet}
 	</PageHeader>
 
-	<ContractFilters {filters} buildings={data.buildings} />
+	<ContractFilters
+		{filters}
+		buildings={data.buildings}
+		reset={filtered && data.contracts.length > 0}
+	/>
 
 	{#if data.contracts.length === 0}
 		<div class="rounded-panel border border-line bg-surface">
@@ -59,9 +63,13 @@
 	{:else}
 		<ResultList
 			id="contracts-count"
-			heading={data.total === 1
-				? m.contracts_count_one({ count: data.total })
-				: m.contracts_count({ count: data.total })}
+			counts={{
+				one: m.contracts_count_one,
+				many: m.contracts_count,
+				pageOne: m.contracts_count_page_one,
+				pageMany: m.contracts_count_page_many
+			}}
+			shown={data.contracts.length}
 			url={$page.url}
 			page={data.page}
 			pageSize={data.pageSize}

@@ -34,6 +34,9 @@ export const showApartmentsOfBuildingWhileLoading = (buildingId: string): Activi
 		filteredBy(buildingId)
 	);
 
+// #682: a choice that is not searched yet
+export const chooseVacantApartments = Select.option('vacant').from(apartmentStatusFilter);
+
 export const searchApartments = (term: string, buildingId = ''): Activity => (actor) =>
 	actor.attemptsTo(
 		Enter.theValue(term).into(apartmentSearchInput),

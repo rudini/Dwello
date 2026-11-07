@@ -35,8 +35,8 @@ const building = (overrides: Record<string, unknown> = {}) => ({
 	},
 	...overrides
 });
-const list = (buildings: ReturnType<typeof building>[], total = buildings.length) =>
-	show(BuildingsPage, { data: { buildings, total, page: 1, pageSize: 10 } } as never);
+const list = (buildings: ReturnType<typeof building>[], total = buildings.length, page = 1) =>
+	show(BuildingsPage, { data: { buildings, total, page, pageSize: 10 } } as never);
 
 beforeEach(() => {
 	url = new URL('http://localhost/buildings');
@@ -51,6 +51,24 @@ describe('Gebäudeliste', () => {
 		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Gebäude');
 		expect(results.tabIndex).toBe(-1);
 	});
+	// #682: as the apartments (#670), over several pages the heading names the buildings shown and the page
+	it('nennt über mehreren Seiten oben die gezeigten Gebäude und die Seite', () => {
+		list(
+			Array.from({ length: 10 }, (_, i) => building({ id: `b${i}` })),
+			11
+		);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Gebäude 1–10 von 11, Seite 1 von 2'
+		);
+	});
+
+	it('nennt auf einer Seite mit nur einem Gebäude dieses in der Einzahl', () => {
+		list([building()], 11, 2);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Gebäude 11 von 11, Seite 2 von 2'
+		);
+	});
+
 	it('nennt Seite, Anzahl und den einen Hauptschritt', () => {
 		list([building()]);
 		expect(document.querySelector('h1')!.textContent).toBe('Gebäude');
@@ -64,7 +82,7 @@ describe('Gebäudeliste', () => {
 	it('macht die ganze Karte zum Link mit dem Namen als Linktext', () => {
 		list([building()]);
 		const card = byTestId('building-card-b1')!;
-		const open = card.querySelector('h2 a')!;
+		const open = card.querySelector('h3 a')!; // #682: an entry under the h2 that counts them
 		expect(open.textContent!.trim()).toBe('Lindenhof');
 		expect(open.getAttribute('href')).toBe('/buildings/b1');
 		const words = card.textContent!.replace(/\s+/g, ' ');
@@ -112,6 +130,17 @@ describe('Gebäudeliste', () => {
 		// a GET form to the list (#754): the browser or the router sends what it holds
 		const form = city.closest('form')!;
 		expect(Object.fromEntries(new FormData(form))).toEqual({ search: 'Linden', city: 'Winterthur' });
+	});
+
+	// #682 (Sven): what is typed counts only with «Suchen»; until then there is nothing to reset
+	it('bietet das Zurücksetzen erst für eine Suche der Adresse an', () => {
+		list([building()]);
+		fireEvent(byTestId<HTMLInputElement>('building-search-input')!, 'input', 'Linden');
+		expect(document.body.textContent).not.toContain('Filter zurücksetzen');
+
+		url = new URL('http://localhost/buildings?search=Linden');
+		list([building()]);
+		expect(document.body.textContent).toContain('Filter zurücksetzen');
 	});
 
 	it('bietet ohne Gebäude das erste Gebäude an', () => {

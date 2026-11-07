@@ -29,6 +29,18 @@ Funktionalität: Gebäudeliste
     Wenn der Liegenschaftsverwalter nach "Gibt es nicht" sucht
     Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
 
+  # #682 (Sven): ohne Treffer bietet nur der Hinweis an, die Filter zurückzusetzen
+  Szenario: Eine Suche ohne Treffer bietet nur einmal an, die Filter zurückzusetzen
+    Wenn der Liegenschaftsverwalter nach "Gibt es nicht" sucht
+    Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
+    Und bietet die Seite nur einmal an, die Filter zurückzusetzen
+
+  # #682 (Sven): die Hilfe steht sichtbar am Feld, nicht als Platzhalter; ein Filter heisst ohne «(optional)»
+  Szenario: Die Gebäudesuche erklärt, wonach sie sucht
+    Dann erklärt die Gebäudesuche "Suchen Sie nach Name oder Adresse des Gebäudes."
+    Und heisst die Gebäudesuche "Suche"
+    Und heisst der Ortsfilter "Ort"
+
   # #160, #373: jedes Wort muss zum Namen, zur Strasse oder zum Ort passen
   Szenario: Gebäude wortweise nach Name und Ort suchen
     Wenn der Liegenschaftsverwalter nach "Lindenhof Winterthur" sucht

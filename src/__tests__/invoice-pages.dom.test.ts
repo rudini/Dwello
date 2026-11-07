@@ -89,12 +89,12 @@ beforeEach(() => {
 });
 
 describe('Rechnungsliste', () => {
-	const list = (invoices: ReturnType<typeof invoice>[]) =>
+	const list = (invoices: ReturnType<typeof invoice>[], total = invoices.length, page = 1) =>
 		show(InvoicesPage, {
 			data: {
 				invoices,
-				total: invoices.length,
-				page: 1,
+				total,
+				page,
 				pageSize: 20,
 				buildings,
 				categories,
@@ -125,6 +125,24 @@ describe('Rechnungsliste', () => {
 		const results = document.querySelector<HTMLElement>('[data-results]')!;
 		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Rechnung');
 		expect(results.tabIndex).toBe(-1);
+	});
+
+	// #682: as the apartments (#670), over several pages the heading names the invoices shown and the page
+	it('nennt über mehreren Seiten oben die gezeigten Rechnungen und die Seite', () => {
+		list(
+			Array.from({ length: 20 }, (_, i) => invoice({ id: `i${i}` })),
+			21
+		);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Rechnungen 1–20 von 21, Seite 1 von 2'
+		);
+	});
+
+	it('nennt auf einer Seite mit nur einer Rechnung diese in der Einzahl', () => {
+		list([invoice()], 21, 2);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Rechnung 21 von 21, Seite 2 von 2'
+		);
 	});
 
 	it('zeigt Rechnungen mit Kategorie, Betrag und Status', () => {
@@ -184,6 +202,18 @@ describe('Rechnungsliste', () => {
 		list([invoice()]);
 		expect(text()).toContain('1 Rechnung');
 		expect(text()).not.toContain('1 Rechnungen');
+	});
+
+	// #682 (Sven): a choice counts only with «Suchen»; until then there is nothing to reset
+	it('bietet das Zurücksetzen erst für einen Filter der Adresse an', () => {
+		url = new URL('http://localhost/invoices');
+		list([invoice()]);
+		fireEvent(byTestId<HTMLSelectElement>('invoice-building-filter')!, 'change', 'b1');
+		expect(text()).not.toContain('Filter zurücksetzen');
+
+		url = new URL('http://localhost/invoices?building=b1');
+		list([invoice()]);
+		expect(text()).toContain('Filter zurücksetzen');
 	});
 
 	it('filtert nach dem Gebäude aus der Adresse und behält es in der Suche', () => {

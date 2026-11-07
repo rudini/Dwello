@@ -86,6 +86,7 @@ describe('Wohnungsliste', () => {
 		const links = card.querySelectorAll('a');
 		expect(links).toHaveLength(1);
 		expect(links[0].textContent!.trim()).toBe('Wohnung 2.01');
+		expect(links[0].parentElement!.tagName).toBe('H3'); // #682: an entry under the h2 that counts them
 		expect(links[0].getAttribute('href')).toBe('/apartments/a1');
 		expect(card.textContent).toContain('Ahornhof');
 		expect(card.textContent).toContain('2. OG');
