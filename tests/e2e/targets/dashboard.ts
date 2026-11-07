@@ -13,6 +13,9 @@ export const occupancyCount = (building: string) => inOccupancy(building, 'Vermi
 export const occupancyVacancyHelp = target('Hinweis zu leeren Wohnungen in der Belegung', (page) =>
 	page.getByTestId('occupancy-vacancy-help')
 );
+// #731: a status word below the counts and its sentence, as a term and its definition
+export const statHelp = (status: string, role: 'term' | 'definition') =>
+	target(`Erklärung ${status} bei den Kennzahlen`, (page) => page.getByTestId(`stat-help-${status}`).getByRole(role));
 export const statTile = (testId: string) => target(`Kennzahl ${testId}`, (page) => page.getByTestId(testId));
 export const statementsTile = (status: string) =>
 	target(`Abrechnungen ${status}`, (page) => page.getByTestId(`statements-${status}`));
