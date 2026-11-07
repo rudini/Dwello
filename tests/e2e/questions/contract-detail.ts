@@ -25,6 +25,7 @@ import {
 	deleteDialogStatementLink,
 	missingStatements,
 	missingStatementLink,
+	missingStatementLinks,
 	missingStatementInvoicesLink,
 	missingStatementPeriod,
 	fixedTermCheck,
@@ -60,6 +61,7 @@ export const missingStatementButtonsShortOfRow = (periodStart: string) =>
 		);
 		return buttons.map((width) => (row === null || width === null ? null : Math.round(row - width)));
 	});
+export const missingStatementLinkTexts = Text.ofAll(missingStatementLinks); // #741: in the order shown
 export const managementFeeOfContract = Text.of(contractManagementFee);
 export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);

@@ -305,7 +305,7 @@ describe('Mietvertragsdetail', () => {
 		);
 	});
 
-	// #142: every ended period without a statement, the newest first, each with its own way to the wizard
+	// #142: every ended period without a statement, the oldest first (#741), each with its own way to the wizard
 	it('nennt mehrere fehlende Abrechnungen, die älteste zuerst, je mit ihrem Weg zum Assistenten', () => {
 		const missing = [2025, 2023].map((y) => ({
 			start: `${y}-01-01`,
