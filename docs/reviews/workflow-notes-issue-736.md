@@ -1,6 +1,0 @@
-# Workflow notes: issue #736
-
-| Rule | What happened in this task | Proposed change |
-| --- | --- | --- |
-| `CLAUDE.md`, "Design-Regeln", "Process" (every state and variant with its own controls gets an axe and language row); `tests/e2e/CLAUDE.md` | The feedback after a refused reminder e-mail comes only from a successful `?/remind`. The backend refuses the next reminder on the same statement while the last one waits (#449). The check reaches every state once per view, scheme and language. I first left the row out, believing the extra records would be seeded for every example. The code review (736-2 C-2) pointed out that `exampleOf` seeds records for one state only. Nine statements, one per look, solved it. | Add to `tests/e2e/CLAUDE.md`, next to the screens fixture: an axe or language state that an action reaches once per record seeds its records per state in `exampleOf`, one per look. |
-| `CLAUDE.md`, "Done means" (a Blocker/Major on the base commit counts when a persona meets it in its task) | Helga's P-1 («Mahnung senden» offered while the last reminder waits) is older than #736. She met it because her task was about that reminder, so it had to be fixed here: the fix, its DOM test and a scenario (736-2 C-5). | None; worked as intended. A persona task near an older gap pulls that gap into the task. |
