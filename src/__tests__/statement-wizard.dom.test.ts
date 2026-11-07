@@ -784,7 +784,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('category-check')!.textContent).toContain(
 			'Erfassen oder prüfen Sie die Tankbestände'
 		);
-		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe(
+		expect(byTestId('category-check')!.querySelector('h2')!.textContent).toBe(
 			'Möglicherweise fehlen Rechnungen'
 		);
 	});
@@ -848,7 +848,7 @@ describe('Abrechnungen erstellen', () => {
 		});
 
 		const frame = byTestId('category-check')!;
-		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.querySelector('h2')!.textContent).toBe('Tankbestände prüfen');
 		expect(frame.textContent).not.toContain('Vorjahr');
 	});
 
@@ -880,7 +880,7 @@ describe('Abrechnungen erstellen', () => {
 		});
 
 		const frame = byTestId('category-check')!;
-		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.querySelector('h2')!.textContent).toBe('Tankbestände prüfen');
 		expect(frame.textContent).not.toContain('heisst nicht, dass etwas falsch ist');
 	});
 
@@ -914,7 +914,7 @@ describe('Abrechnungen erstellen', () => {
 		});
 
 		const frame = byTestId('category-check')!;
-		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.querySelector('h2')!.textContent).toBe('Tankbestände prüfen');
 		expect(frame.textContent).not.toContain('heisst nicht, dass etwas falsch ist');
 	});
 
@@ -1012,7 +1012,7 @@ describe('Abrechnungen erstellen', () => {
 			'Kaltwasser: Die Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
 			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		]);
-		expect(check.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
+		expect(check.querySelector('h2')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
 		// the findings of a building form one list named by the building
 		expect(check.querySelector('ul')!.getAttribute('aria-label')).toBe('Ahornhof');
 		// what a missing invoice means for the tenants
@@ -1056,7 +1056,7 @@ describe('Abrechnungen erstellen', () => {
 			]
 		});
 		expect(byTestId('category-finding')!.textContent).toContain('Heizung');
-		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe(
+		expect(byTestId('category-check')!.querySelector('h2')!.textContent).toBe(
 			'Kosten im Vergleich zum Vorjahr'
 		);
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
@@ -2171,6 +2171,6 @@ describe('Wahl der Gebäude, wenn eine Zählung fehlt, und wie ein Gebäude heis
 		open();
 		await settle();
 		expect(heading()).toBe('Gebäude');
-		expect(document.activeElement).toBe(document.querySelector('h2'));
+		expect(document.activeElement).toBe(document.getElementById('step-heading'));
 	});
 });

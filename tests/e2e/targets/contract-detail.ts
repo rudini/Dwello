@@ -112,3 +112,7 @@ export const moveOutHint = target('Hinweis auf den Auszug', (page) => page.getBy
 export const moveOutStatementLink = target('Schlussabrechnung erstellen', (page) =>
 	page.getByTestId('contract-move-out-link')
 );
+// #740: the title of an alert is a heading of level 2
+export const missingStatementsTitle = target('Titel der fehlenden Abrechnungen', (page) =>
+	page.getByTestId('contract-missing-statement').getByRole('heading', { level: 2 })
+);

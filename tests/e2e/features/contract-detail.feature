@@ -537,3 +537,14 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
     Dann nennt die Ablehnung den Entwurf für "Anna Keller", 2025
+
+  # #740: ein Screenreader findet den Titel eines Hinweises in der Liste der Überschriften
+  Szenario: Der Hinweis zu fehlenden Abrechnungen hat eine Überschrift
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann steht der Titel des Hinweises zu fehlenden Abrechnungen als Überschrift
+
+  # #740: im schmalen Fenster stehen die Aktionen untereinander als ein Block, statt «Löschen» allein über dem Hinweis
+  Szenario: Aktionen des Mietvertrags im schmalen Fenster
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann stehen die Aktionen des Mietvertrags als ein Block, alle gleich breit wie der Seitentitel

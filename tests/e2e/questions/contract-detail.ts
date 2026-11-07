@@ -1,5 +1,6 @@
 import { question } from '../screenplay/actor';
-import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareInViewport, Text, Visibility, Width } from '../screenplay/questions';
+import { pageTitle } from '../targets/app-frame';
 import {
 	contractEndInput,
 	moveOutHint,
@@ -28,7 +29,10 @@ import {
 	fixedTermError,
 	contractFlatRate,
 	deleteMistakeConfirmation,
-	dialogErrors
+	dialogErrors,
+	missingStatementsTitle,
+	contractEditButton,
+	deleteContractButton
 } from '../targets/contract-detail';
 
 export const apartmentOfContract = Text.of(contractApartment);
@@ -79,3 +83,13 @@ export const moveOutText = Text.of(moveOutHint);
 export const refusedStatementName = Text.of(refusedStatementLink);
 export const endActionLabel = Text.of(endContractButton);
 export const moveOutShown = Visibility.of(moveOutHint);
+
+export const missingStatementsTitleText = Text.of(missingStatementsTitle);
+
+// #740: how many pixels each page action is narrower than the page title (0: as wide)
+export const contractActionsNarrowerThanTitle = question('how much narrower the contract actions are than the page title', async (actor) => {
+	const [title, ...actions] = await Promise.all(
+		[pageTitle, contractEditButton, endContractButton, deleteContractButton].map(async (one) => Math.round((await actor.answer(Width.of(one))) ?? 0))
+	);
+	return actions.map((width) => title - width);
+});

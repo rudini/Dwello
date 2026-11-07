@@ -57,7 +57,7 @@
 <header class="sticky top-0 z-30 border-b border-line bg-surface">
 	<div class="flex h-16 items-center justify-between gap-4 px-4 lg:px-6">
 		<div class="flex items-center gap-2">
-			<span class="lg:hidden">
+			<span class="md:hidden">
 				<IconButton
 					icon="menu"
 					label={m.nav_open_menu()}
