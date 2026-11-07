@@ -124,6 +124,19 @@ export const HoldsFocus = {
 			single(element, (one) => one.evaluate((part) => part.contains(document.activeElement), undefined, quick))
 		)
 };
+/** The tones (Alert, Badge: data-tone) shown in the element and everything in it, e.g. [] for a plain note (#687) */
+export const Tones = {
+	in: (target: Target) =>
+		about(target, 'the tones shown in', (element) =>
+			single(element, (one) =>
+				one.evaluate(
+					(box) => [box, ...box.querySelectorAll('*')].flatMap((part) => part.getAttribute('data-tone') ?? []),
+					undefined,
+					quick
+				)
+			)
+		)
+};
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {
