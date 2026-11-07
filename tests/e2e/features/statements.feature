@@ -121,12 +121,12 @@ Funktionalität: Nebenkostenabrechnungen
     Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
 
   # #733 (#1096): die Meldung «… gelöscht» darf das Feld «Gebäude» kurz verdecken, solange es den Fokus nicht hat
-  Szenariogrundriss: Die Meldung nach dem Löschen eines Entwurfs gibt das Feld «Gebäude» frei, sobald es den Fokus hat
+  Szenariogrundriss: Die Meldung nach dem Löschen eines Entwurfs ist nicht im Weg, wenn der Liegenschaftsverwalter wieder nach Gebäude filtert
     Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
     Und der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
     Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
     Und der Liegenschaftsverwalter die Abrechnung löscht
-    Wenn der Liegenschaftsverwalter in das Feld «Gebäude» des Filters geht
+    Wenn der Liegenschaftsverwalter beginnt, die Liste nach einem anderen Gebäude zu filtern
     Dann verdeckt die Erfolgsmeldung nicht, was den Fokus hat
 
     Beispiele:

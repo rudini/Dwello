@@ -86,7 +86,7 @@ When('der Liegenschaftsverwalter zur nächsten Seite blättert', async ({ verwal
 	await verwalter.attemptsTo(turnToNextPage);
 });
 
-When('der Liegenschaftsverwalter in das Feld «Gebäude» des Filters geht', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter beginnt, die Liste nach einem anderen Gebäude zu filtern', async ({ verwalter }) => {
 	await verwalter.attemptsTo(focusBuildingFilter);
 });
 
