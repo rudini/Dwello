@@ -126,6 +126,19 @@ describe('Demodaten', () => {
 		expect(rows).toEqual([{ sent: 10, later: 0 }]);
 	});
 
+	// #707 (Persona Dr. Weber 707 P-2): die Rechnung hiess «Erfasst» am Ladetag, nach der Abrechnung von 2025, die sie verrechnet
+	it('erfasst und ändert jede Rechnung vor den Abrechnungen, die sie verrechnen', async () => {
+		const rows = await query(
+			name,
+			`SELECT count(*)::int AS billed, count(*) FILTER (WHERE i.created_at > s.created_at OR i.updated_at > s.created_at)::int AS later
+			FROM utility_statements s JOIN utility_statement_line_items l ON l.statement_id = s.id
+			CROSS JOIN jsonb_array_elements(l.invoices) AS billed(invoice) JOIN invoices i ON i.id::text = billed.invoice->>'id'`
+		);
+
+		expect(rows[0].billed).toBeGreaterThan(0);
+		expect(rows[0].later).toBe(0);
+	});
+
 	// #707: «Wohnung EG, EG» nannte das Stockwerk zweimal
 	it('nennt in keiner Wohnungsnummer das Stockwerk', async () => {
 		const rows = await query(name, `SELECT number FROM apartments WHERE number ~* '(EG|OG|UG)'`);
