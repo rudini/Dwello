@@ -36,3 +36,16 @@ Die Bestätigung nennt den Datensatz jetzt über `localName`. Das hatte Marco al
 - Ob `on.formProblem` (Zustand `ki-name-missing`) den Feldfehler am Namen erfasst, habe ich nicht gelesen. Gestützt ist das nur auf den gemeldeten grünen a11y-Lauf.
 
 Geprüft: Texte in allen vier Sprachen gleich wie die Tabelle der Fachreview 678-1 (M-1, V-1, V-3 inkl. U+00A0/U+2060), je drei `\n`-Absätze; V-2 umgesetzt; `kiEnabled` nur bei fehlender Wahl beim Erfassen (ein GET mehr nur bei Ablehnung, Fehler zählt als ein); `unsure` nur bei `KI_PROPOSAL_UNSURE`; Hinweis «geändert» mit allen drei Varianten; Textarea, Buttons und Links nativ; Ablauf mit `ask` (AllocabilityQuestion) über `requestSubmit`; neue a11y-Zustände in screens.json und in beiden Features; neue Szenarien und Tests ohne die Änderung rot; geänderte alte Tests prüfen nicht weniger als nötig (`calls` nur noch POST wegen des neuen GET); keine Schrittdefinition eines Szenarios ohne `@wip` geändert; Screenplay-Schichten eingehalten; Tokens; ponytail ohne Befund.
+
+# Runde 2 (7c24245..2cf3607, Worktree /home/user/w-672)
+
+Geschlossen: C-1, C-2, C-3, C-4
+
+Keine neuen Befunde.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet: lint, check, volle vitest-Suite (4301), Chromium categories, categories-ki, distribution-keys und heating-profiles 74 grün, a11y- und Sprachzeilen category- 44 grün, fitness exit 0, fallow sauber; die neuen Tests und Szenarien rot gegen 7c24245 bzw. 7c24245~1 gesehen.
+- Dass `names.get('Selon le volume')` den mit `seed.unique` erzeugten französischen Namen liefert, habe ich nicht bis in die Fixture verfolgt. Gestützt ist das nur auf den gemeldeten grünen Lauf.
+
+Geprüft: Bei laufendem `saving` setzt die Sperre trotzdem `preventDefault`. Enter auf Radio und Checkbox speichert jetzt, ein Enter mit `isComposing` wird ignoriert. Die drei DOM-Tests wären gegen 7c24245 rot. Das Szenario «Die Bestätigung nennt den Verteilschlüssel …» nennt den Namen in der Sprache der Oberfläche; die Frage `confirmedNames` liegt in der Fragen-Schicht und gibt die Werte selbst zurück. H-2: U+00A0 in «z. B.», «p. ex.», «p. es.» je zweimal in de, fr und it, mit einem Test pro Sprache.
