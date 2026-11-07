@@ -36,6 +36,7 @@ import {
 	openPrivacySectionFromTerms,
 	openSettingsFromUserMenu,
 	pressInUserMenu,
+	useAppearance,
 	useWindowWidth
 } from '../tasks/app-frame';
 
@@ -166,6 +167,10 @@ Then(
 
 Given('das Browserfenster ist {int} Pixel breit', async ({ verwalter }, width: number) => {
 	await verwalter.attemptsTo(useWindowWidth(width));
+});
+
+Given('der Liegenschaftsverwalter sieht Dwello in der Darstellung {string}', async ({ verwalter }, appearance: string) => {
+	await verwalter.attemptsTo(useAppearance(appearance));
 });
 
 Given('der Liegenschaftsverwalter hat das Menü geöffnet', async ({ verwalter }) => {

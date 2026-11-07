@@ -19,6 +19,8 @@ import {
 	listedDocuments,
 	noDocumentsNote,
 	tenantFilterFocused,
+	uploadButtonBackground,
+	uploadButtonContrast,
 	uploadButtonFocused,
 	uploadButtonStatus
 } from '../questions/tenant-documents';
@@ -243,6 +245,20 @@ Then('sagt Dwello bei «Dokument hochladen» {string} an, und der Fokus bleibt d
 Then('sagt Dwello bei «Dokument löschen» {string} an, und der Fokus bleibt dort', async ({ verwalter }, text: string) => {
 	await verwalter.sees(deleteConfirmStatus).toBe(text);
 	await verwalter.sees(deleteConfirmFocused).toBe(true);
+});
+
+// #1182 (persona Helga P-11): the label of the busy button, not the idle one: the status says it is busy
+Then(
+	'hebt sich {string} bei «Dokument hochladen» mindestens {float}:1 vom Hintergrund ab',
+	async ({ verwalter }, text: string, minimum: number) => {
+		await verwalter.sees(uploadButtonStatus).toBe(text);
+		await verwalter.sees(uploadButtonContrast).toBeGreaterThanOrEqual(minimum);
+	}
+);
+
+// `sunken`: the grey of a disabled field (docs/design/token-referenz.md)
+Then('«Dokument hochladen» ist grau wie ein gesperrtes Feld', async ({ verwalter }) => {
+	await verwalter.sees(uploadButtonBackground).toBe('sunken');
 });
 
 When('der Liegenschaftsverwalter das Dokument {string} ohne Datei hochladen will', async ({ verwalter }, title: string) => {

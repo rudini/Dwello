@@ -54,8 +54,11 @@
 		danger: 'bg-critical text-on-accent border-critical hover:opacity-90',
 		'danger-ghost': 'bg-transparent text-critical border-transparent hover:bg-critical-soft'
 	};
+	// #1182 (persona Helga P-11): the grey of a disabled field, not opacity, which left «Bitte warten …» hard to read at
+	// 150 % zoom; no hover, so it does not look pressable
+	const busyLook = 'bg-sunken text-ink-muted border-line-strong cursor-progress';
 	const classes = $derived(
-		`inline-flex min-h-12 items-center justify-center gap-2 rounded-control border-2 px-6 py-2 text-base font-semibold transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60 aria-disabled:cursor-not-allowed aria-disabled:opacity-60 ${variants[variant]} ${full ? 'w-full' : ''}`
+		`inline-flex min-h-12 items-center justify-center gap-2 rounded-control border-2 px-6 py-2 text-base font-semibold transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60 ${busy ? busyLook : variants[variant]} ${full ? 'w-full' : ''}`
 	);
 
 	// visible, as text right after the label so both wrap as one: a new tab can look as if Dwello had gone (personas

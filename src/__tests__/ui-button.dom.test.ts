@@ -68,6 +68,31 @@ describe('Button', () => {
 		expect(onclick).not.toHaveBeenCalled();
 	});
 
+	// #1182 (persona Helga P-11): opacity made «Bitte warten …» hard to read at 150 % zoom; the grey of a disabled field
+	// (ink-muted on sunken, ≥ 7:1 in tokens.test.ts) keeps it readable and still looks unavailable
+	it.each(['primary', 'secondary', 'ghost', 'danger', 'danger-ghost'] as const)(
+		'ist während des Arbeitens als %s grau wie ein gesperrtes Feld, ohne Transparenz und ohne Hover',
+		(variant) => {
+			show(Button, { children: label, variant, busy: true, testid: 'save' });
+			const classes = byTestId('save')!.className.split(/\s+/);
+			expect(classes).toEqual(
+				expect.arrayContaining([
+					'bg-sunken',
+					'text-ink-muted',
+					'border-line-strong',
+					'cursor-progress'
+				])
+			);
+			// disabled: does not apply, a busy button is not disabled (above)
+			expect(
+				classes.filter(
+					(name) =>
+						!name.startsWith('disabled:') && (name.includes('opacity') || name.startsWith('hover:'))
+				)
+			).toEqual([]);
+		}
+	);
+
 	// #677: the form is not sent a second time while the first sending runs
 	it('sendet sein Formular nicht ein zweites Mal, solange es arbeitet', () => {
 		const form = document.body.appendChild(document.createElement('form'));

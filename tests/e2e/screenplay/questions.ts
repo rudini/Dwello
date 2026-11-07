@@ -258,6 +258,59 @@ export const CutInChoice = {
 		)
 };
 
+/** What the eye sees of an element's colours, with its opacity and that of its ancestors over the page behind (#1182) */
+export const Colour = {
+	/** The contrast of its text against its background, as WCAG computes it, rounded to two decimals */
+	contrastOf: (target: Target) =>
+		about(target, 'the text contrast of', (element) =>
+			single(element, (one) =>
+				one.evaluate((shown) => {
+					const parts = (colour: string) => (colour.match(/[\d.]+/g) ?? []).map(Number);
+					const mix = (top: number[], alpha: number, base: number[]) => base.map((v, i) => top[i] * alpha + v * (1 - alpha));
+					let behind = [255, 255, 255];
+					for (let parent = shown.parentElement; parent; parent = parent.parentElement) {
+						const [r, g, b, a = 1] = parts(getComputedStyle(parent).backgroundColor);
+						if (a === 1) {
+							behind = [r, g, b];
+							break;
+						}
+					}
+					let opacity = 1;
+					for (let node: Element | null = shown; node; node = node.parentElement) opacity *= Number(getComputedStyle(node).opacity);
+					const style = getComputedStyle(shown);
+					const [br, bg, bb, ba = 1] = parts(style.backgroundColor);
+					const [tr, tg, tb, ta = 1] = parts(style.color);
+					const ownBackground = mix([br, bg, bb], ba, behind);
+					const background = mix(ownBackground, opacity, behind);
+					const text = mix(mix([tr, tg, tb], ta, ownBackground), opacity, behind);
+					const luminance = (rgb: number[]) => {
+						const [r, g, b] = rgb.map((v) => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4));
+						return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+					};
+					const [hi, lo] = [luminance(text), luminance(background)].sort((x, y) => y - x);
+					return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
+				}, undefined, quick)
+			)
+		),
+	/** The colour token its background shows (one of `tokens`), else the colour as the browser computes it */
+	backgroundOf: (target: Target, tokens: string[]) =>
+		about(target, 'the background colour token of', (element) =>
+			single(element, (one) =>
+				one.evaluate(
+					(shown, names) => {
+						const colour = getComputedStyle(shown).backgroundColor;
+						const hex = `#${(colour.match(/\d+/g) ?? []).slice(0, 3).map((part) => Number(part).toString(16).padStart(2, '0')).join('')}`;
+						const root = getComputedStyle(document.documentElement);
+						const token = names.find((name) => root.getPropertyValue(`--color-${name}`).trim().toLowerCase() === hex);
+						return token ?? colour;
+					},
+					tokens,
+					quick
+				)
+			)
+		)
+};
+
 export const Width = {
 	of: (target: Target) =>
 		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox(quick))?.width ?? 0))

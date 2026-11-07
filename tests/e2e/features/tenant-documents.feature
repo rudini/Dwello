@@ -119,6 +119,20 @@ Funktionalität: Dokumente eines Mieters
     Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
     Dann sagt Dwello bei «Dokument hochladen» "Bitte warten …" an, und der Fokus bleibt dort
 
+  # #1182 (Persona Helga P-11): bei 150 % Zoom war ein arbeitender Knopf so blass, dass «Bitte warten …» kaum lesbar war
+  Szenariogrundriss: Während des Hochladens ist «Dokument hochladen» gut lesbar und sieht gesperrt aus (<Darstellung>)
+    Angenommen der Liegenschaftsverwalter sieht Dwello in der Darstellung "<Darstellung>"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
+    Dann hebt sich "Bitte warten …" bei «Dokument hochladen» mindestens 4.5:1 vom Hintergrund ab
+    Und «Dokument hochladen» ist grau wie ein gesperrtes Feld
+
+    Beispiele:
+      | Darstellung |
+      | hell        |
+      | dunkel      |
+
   # #677 (Entscheid 10, Persona Sven P-3): im Dialog bleibt der Fokus auf der Bestätigung
   Szenario: Während des Löschens bleibt der Fokus auf der Bestätigung im Dialog
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"

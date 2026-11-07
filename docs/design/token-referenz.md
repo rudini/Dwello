@@ -59,7 +59,7 @@ Radii and shadows are replaced as well: only `rounded-control`, `rounded-panel`,
 | Area | Components |
 |---|---|
 | Page frame | `Header`, `Navigation`, `MobileNav`, `NavList`, `Footer`, `PageHeader` (breadcrumb, h1, purpose, actions), `Panel`, `Tabs` |
-| Actions | `Button` (primary, secondary, ghost, danger, danger-ghost; busy), `IconButton` |
+| Actions | `Button` (primary, secondary, ghost, danger, danger-ghost; busy: `sunken`, `ink-muted`, `line-strong` in every variant, no opacity, #1182), `IconButton` |
 | Forms | `Field` (label, help, example, error, optional), `TextInput`, `MoneyInput`, `Select`, `EarlySelect` (keeps a choice made before hydration), `Textarea`, `Checkbox`, `RadioGroup`; `focus-error.ts` (focus the first faulty field) |
 | Feedback | `Alert`, `Badge`, `EmptyState`, `ToastRegion` (live region, `addToast` in `$lib/stores`), `SaveStatus`, `ProgressBar`, `DraftNotice` |
 | Overlays | `Dialog` (focus trap, Escape, inert background), `ActionDialog` (dialog posting a form action) |
