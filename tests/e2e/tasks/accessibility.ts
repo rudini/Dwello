@@ -40,7 +40,7 @@ import { enterAmount, invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
 import { agreementsLoading, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
-import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } from '../targets/categories';
+import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposalOutdated, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
@@ -656,6 +656,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// chosen first: the stand-in finds stairwell cleaning umlagefähig, the own choice stays
 	'ki-proposal-kept': () => (actor) =>
 		actor.attemptsTo(Check.the(on.notAllowedOption), askKi('Treppenhausreinigung')),
+	// #678: the stand-in finds garden care umlagefähig, as chosen; it is not sure about guarding the building
+	'ki-proposal-agrees': () => (actor) => actor.attemptsTo(Check.the(on.allowedOption), askKi('Gartenpflege')),
+	'ki-unsure-kept': () => (actor) => actor.attemptsTo(Check.the(on.allowedOption), askKi('Bewachung')),
+	// #678: renamed after the check, the KI's choice goes and Dwello says so
+	'ki-outdated': () => (actor) =>
+		actor.attemptsTo(askKi('Dachsanierung'), Enter.theValue('Dachunterhalt').into(nameInput), Wait.until(proposalOutdated)),
+	'ki-name-missing': () => (actor) => actor.attemptsTo(Click.on(proposeButton), Wait.until(on.formProblem)),
 	// #100: «Brennstoff» is asked only for a heating cost
 	fuel: () => (actor) => actor.attemptsTo(Check.the(heatingCheckbox), Wait.until(fuelCheckbox)),
 	// #309: the question before the allocability of a category changes

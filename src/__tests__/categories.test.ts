@@ -179,13 +179,29 @@ describe('Neue Kategorie', () => {
 	// Eine Kategorie ist nie umlagefähig, nur weil niemand hingeschaut hat (#176)
 	it('verlangt die Wahl, ob die Kosten umlagefähig sind', async () => {
 		const { isAllowedUtilityCost: _, ...unchosen } = form;
-		const { calls, result } = runAction(newActions.save, '', 201, unchosen);
+		const { calls, result } = runAction(newActions.save, '', 200, unchosen, { ...recipient, enabled: false });
 
 		expect(await result).toMatchObject({
 			status: 400,
 			data: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		});
-		expect(calls).toEqual([]);
+		expect(calls.filter(({ method }) => method === 'POST')).toEqual([]);
+	});
+
+	// #678 (Helga P-6): mit eingeschalteter KI nennt die Ablehnung den Weg über die KI
+	it('weist ohne Wahl der Umlagefähigkeit auf die Prüfung durch die KI hin', async () => {
+		const { isAllowedUtilityCost: _, ...unchosen } = form;
+		const { result } = runAction(newActions.save, '', 200, unchosen, recipient);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: {
+					isAllowedUtilityCost:
+						'Wählen Sie, ob die Kosten umlagefähig sind. Sind Sie unsicher, wählen Sie «Von der KI prüfen lassen».'
+				}
+			}
+		});
 	});
 
 	it('zeigt die Meldung des Backends beim Namen, wenn der Name vergeben ist', async () => {
@@ -246,7 +262,8 @@ describe('Vorschlag der KI', () => {
 		const { result } = runAction(newActions.propose, '', 503, form, unsure);
 
 		expect(await result).toEqual({
-			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', error: UNSURE }
+			// #678 (Helga P-10): unsure, so the form can say that a choice made stays
+			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', error: UNSURE, unsure: true }
 		});
 	});
 
@@ -295,10 +312,14 @@ describe('Vorschlag der KI', () => {
 		expect(await hint(200, null)).toBe(UNAVAILABLE);
 	});
 
+	// #678 (Helga P-5): sagt, was die KI zum Prüfen braucht
 	it('verlangt zuerst einen Namen', async () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich.' } } });
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { name: 'Geben Sie zuerst den Namen ein. Die KI prüft die Kategorie nach Name und Beschreibung.' } }
+		});
 		expect(calls).toEqual([]);
 	});
 });

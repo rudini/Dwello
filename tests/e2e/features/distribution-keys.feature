@@ -20,7 +20,6 @@ Funktionalität: Verteilschlüssel
     Und verteilt der Verteilschlüssel "Nach Zimmern" nach der Formel "{rooms}"
 
   # #678 (entschieden): die Eingabetaste speichert, «Formel testen» läuft nur auf Wunsch
-  @wip
   Szenario: Die Eingabetaste speichert den Verteilschlüssel
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Zimmern" mit der Formel "{rooms}" mit der Eingabetaste speichert

@@ -168,6 +168,22 @@ describe('Kategorie erfassen', () => {
 		expect(toastTexts()).toEqual(['Kategorie «Gartenpflege» gespeichert']);
 	});
 
+	// #678 (Persona Marco): wie die Liste nennt die Bestätigung die Kategorie in der Sprache der Oberfläche
+	it('bestätigt das Speichern mit dem Namen in der Sprache der Oberfläche', async () => {
+		overwriteGetLocale(() => 'en');
+		try {
+			show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+			fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
+			fireEvent(document.querySelector<HTMLInputElement>('input[name="nameEN"]')!, 'input', 'Garden care');
+
+			await answer({ type: 'redirect' });
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+
+		expect(toastTexts()).toEqual(['Category «Garden care» saved']);
+	});
+
 	it('meldet, warum die Kategorie nicht gespeichert wurde', () => {
 		show(NewCategoryPage, {
 			data: { kiEnabled: true },
@@ -198,12 +214,34 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	it('erklärt, wann der Mieter umlagefähige Kosten bezahlt', () => {
 		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
-		// Wie der Vertragshinweis der Liste, OR ausgeschrieben (#292, Fachreview M-4)
-		expect(text()).toContain('(Art. 257a–257b Obligationenrecht, OR)');
-		expect(text()).toContain('wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art. 257a Absatz 2 OR)');
-		expect(text()).toContain('Gebäudeversicherung');
-		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8)
-		expect(text()).toContain('auch nicht die Gebühr für Regenwasser');
+		// Wie der Vertragshinweis der Liste, OR ausgeschrieben (#292, Fachreview M-4); #1028, Fachreview 678 V-3: die
+		// Angabe bricht nicht um, auch nicht nach dem Strich
+		const help = byTestId('category-allowance-help')!.textContent!;
+		expect(help).toContain('(Art.\u00a0257a–\u2060257b Obligationenrecht,\u00a0OR)');
+		expect(help).toContain('wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art.\u00a0257a Absatz\u00a02\u00a0OR)');
+		expect(help).toContain('Gebäudeversicherung');
+		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8); Fachreview 678 M-1: nach dem Wert
+		expect(help).toContain('Grundgebühren nicht, die sich nach dem Wert richten, z. B. nach dem Versicherungswert des Gebäudes');
+		expect(help).toContain('auch nicht die Gebühr für Regenwasser');
+	});
+
+	// #678 (Marco P-3), #1028: eine kurze Einleitung, dann jede Regel als eigener Absatz, zuletzt die Rolle der KI
+	it('erklärt die Umlagefähigkeit in kurzen Absätzen und zuletzt die Rolle der KI', () => {
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+
+		const paragraphs = [...byTestId('category-allowance-help')!.querySelectorAll('p')].map((p) => p.textContent!.trim());
+		expect(paragraphs).toHaveLength(5);
+		expect(paragraphs[0]).toMatch(/^Umlagefähig sind Kosten aus dem Gebrauch des Gebäudes/);
+		expect(paragraphs[1]).toBe('Bei Heizung und Lift zählen nur Betrieb und Wartung der Anlage.');
+		expect(paragraphs[4]).toMatch(/^Mit «Von der KI prüfen lassen» prüft die KI Name und Beschreibung/);
+	});
+
+	// #678: ohne KI und beim Bearbeiten gibt es «Von der KI prüfen lassen» nicht, also auch keinen Satz dazu
+	it('erwähnt die KI ohne KI nicht', () => {
+		show(NewCategoryPage, { data: { kiEnabled: false }, form: null } as never);
+
+		expect(byTestId('category-allowance-help')!.querySelectorAll('p')).toHaveLength(4);
+		expect(byTestId('category-allowance-help')!.textContent).not.toContain('KI');
 	});
 
 	// Fachreview #69 (V-8, V-11): wozu die Übersetzungen dienen, was die Reihenfolge ordnet
@@ -416,6 +454,20 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		flushSync();
 
 		expect(choice('Umlagefähig').checked).toBe(true);
+	});
+
+	// #678 (Helga P-10): ist schon gewählt, sagt Dwello nicht «Wählen Sie selbst», sondern dass die Wahl bleibt
+	it('sagt bei einer unsicheren KI, dass die eigene Wahl bleibt', () => {
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
+		show(NewCategoryPage, props as never);
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Bewachung');
+		click(choice('Nicht umlagefähig'));
+		props.form = { proposal: { name: 'Bewachung', description: '', error: 'Die KI ist sich nicht sicher.', unsure: true } };
+		flushSync();
+
+		expect(byTestId('category-proposal')!.textContent).toContain(
+			'Die KI ist sich nicht sicher. Ihre Wahl bleibt: «Nicht umlagefähig». Prüfen Sie sie mit den Regeln oben. Im Zweifel: nicht umlagefähig.'
+		);
 	});
 
 	// Screenreader hören den Vorschlag, ohne den Fokus zu verlieren (E-3)
@@ -701,9 +753,10 @@ describe('Grund der Umlagefähigkeit', () => {
 	it('grenzt im Hilfetext Wartung ein und nennt Kehricht', () => {
 		show(EditCategoryPage, { data: { category: lift }, form: null } as never);
 
-		expect(text()).toContain('bei Heizung und Lift zählen nur Betrieb und Wartung der Anlage');
+		expect(text()).toContain('Bei Heizung und Lift zählen nur Betrieb und Wartung der Anlage.');
+		// #678 (Fachreview M-1): nach einem Wert, nicht nur dem des Gebäudes
 		expect(text()).toContain(
-			'Bei Wasser, Abwasser und Kehricht zählen Grundgebühren nicht, die vom Wert der Liegenschaft abhängen; beim Abwasser auch nicht die Gebühr für Regenwasser.'
+			'Bei Wasser, Abwasser und Kehricht zählen Grundgebühren nicht, die sich nach dem Wert richten, z. B. nach dem Versicherungswert des Gebäudes; beim Abwasser auch nicht die Gebühr für Regenwasser.'
 		);
 	});
 });
