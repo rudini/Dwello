@@ -108,6 +108,12 @@ Funktionalität: Datenschutz
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "werden über den Mailserver von Muster Mail AG (Liechtenstein) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
+  # #1176: mit einem eigenen Kontoinhaber (#1166) steht dessen Name und Adresse auf dem Zahlteil des PDF, das der
+  # Mailserver erhält; mit einer IBAN tragen auch Zahlungserinnerung und Mahnung IBAN und Zahlungsreferenz (Fachreview
+  # 1176-1 R-1, R-3, R-4)
+  Szenario: Die Datenschutzerklärung nennt Kontoinhaber und IBAN der Mahnung beim Versand per E-Mail
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "der Saldo sowie IBAN und Zahlungsreferenz. Ist eine IBAN erfasst, enthalten auch Zahlungserinnerung und Mahnung IBAN und Zahlungsreferenz. Nennt die QR-Rechnung einen anderen Kontoinhaber als den Absender, enthält das PDF auch dessen Name und Adresse."
+
   # #671 (Fachreview 671-1): Zahlungserinnerung und Mahnung wie in docs/design/i18n-begriffe.md, nicht beide «rappel»/«reminder»
   Szenariogrundriss: Die Datenschutzerklärung nennt auf Französisch und Englisch Zahlungserinnerungen und Mahnungen
     Wenn der Liegenschaftsverwalter die Sprache "<Sprache>" wählt
@@ -128,9 +134,9 @@ Funktionalität: Datenschutz
   Szenario: Cookies im Browser ablehnen
     Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass er Cookies im Browser ablehnen kann, sich dann aber nicht anmelden kann
 
-  # #458 (#347)
+  # #458 (#347); #1176: Stand der Ergänzung zum Kontoinhaber
   Szenario: Stand der Datenschutzerklärung
-    Dann nennt die Seite den Stand "29. Oktober 2026"
+    Dann nennt die Seite den Stand "7. November 2026"
 
   # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes

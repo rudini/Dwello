@@ -1456,3 +1456,12 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] No scenario: CI tooling only; checks: lint, Prettier, the screenshot run locally (3 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #1176 Kontoinhaber in the privacy statement
+
+- [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
+- [x] `fach-reviewer` `docs/reviews/1176-fachreview-1.md`: the addition to `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider` in de/fr/it/en
+- [x] Texts in `messages/*.json` (with R-3, Variante B, decided in #1176); Stand of the privacy statement only (`LegalHeader.svelte` shared with the terms, which keep 29. Oktober 2026)
+- [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
+- [x] Archive session; PR `Fixes #1176`: pushed after this archive
