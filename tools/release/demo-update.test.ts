@@ -67,4 +67,16 @@ describe('demo update', () => {
 		expect(update().status).toBe(0);
 		expect(builds()).toEqual(['v0.5.0', 'v1.0.0']);
 	});
+
+	it('baut die neueste Version, auch wenn main nach dem Tag weitergeht', () => {
+		const { dev, update, builds } = demo();
+		dev('tag', 'v0.2.0');
+		dev('push', '-q', 'origin', 'v0.2.0');
+		dev('commit', '-q', '--allow-empty', '-m', 'fix(tenants): merged after the release');
+		dev('push', '-q', 'origin', 'HEAD:main');
+		expect(update().status).toBe(0);
+		expect(builds()).toEqual(['v0.2.0']);
+		expect(update().status).toBe(0);
+		expect(builds()).toEqual(['v0.2.0']);
+	});
 });

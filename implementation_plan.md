@@ -9,3 +9,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: demo deploys the newest tag on main (#1184)
+
+No scenario: the demo's update script runs on the VM outside the E2E stack; `tools/release/demo-update.test.ts` covers it.
+
+- [x] Test: a commit merged after the tag still builds the tag, once (seen red)
+- [x] `deploy/demo/update.sh`: newest version tag on `main` instead of an exact tag on its tip
+- [x] `deploy/demo/README.md`, "7. Automatic updates": what is deployed
+- [ ] code-reviewer
+- [ ] PR
