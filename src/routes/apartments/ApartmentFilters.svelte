@@ -10,7 +10,13 @@
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
-	let { buildings }: { buildings: { id: string; name: string }[] } = $props();
+	let {
+		buildings,
+		reset
+	}: {
+		buildings: { id: string; name: string }[];
+		reset: boolean; // offer «Filter zurücksetzen»: the address has a filter and the list is not empty (#682)
+	} = $props();
 
 	const fromUrl = () => ({
 		search: $page.url.searchParams.get('search') ?? '',
@@ -18,7 +24,6 @@
 		status: $page.url.searchParams.get('status') ?? ''
 	});
 	let filters = $state(untrack(fromUrl));
-	const filtered = $derived(Object.values(filters).some(Boolean));
 	// #670: by name, as the list (the backend gives the buildings by last change)
 	// ponytail: the list sorts by the database's collation; names that differ only in case or umlauts may sort otherwise
 	const buildingOptions = $derived(
@@ -41,6 +46,7 @@
 
 <form
 	role="search"
+	aria-label={m.list_search_label()}
 	onsubmit={search}
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
 >
@@ -51,7 +57,7 @@
 			bind:value={filters.search}
 			help={m.apartments_search_help()}
 			helpTestid="apartments-search-help"
-			optional
+			required={false}
 			testid="apartments-search-input"
 		/>
 		<EarlySelect
@@ -60,7 +66,7 @@
 			placeholder={m.apartments_all_buildings()}
 			options={buildingOptions}
 			value={filters.building}
-			optional
+			required={false}
 			testid="apartments-building-filter"
 			onchange={(value) => (filters.building = value)}
 		/>
@@ -70,7 +76,7 @@
 			placeholder={m.apartments_all_statuses()}
 			options={statusOptions}
 			value={filters.status}
-			optional
+			required={false}
 			testid="apartments-status-filter"
 			onchange={(value) => (filters.status = value)}
 		/>
@@ -79,7 +85,7 @@
 		<Button type="submit" icon="search" testid="apartments-search-submit"
 			>{m.buildings_search_submit()}</Button
 		>
-		{#if filtered}
+		{#if reset}
 			<Button variant="ghost" icon="close" onclick={clear}>{m.buildings_reset_filters()}</Button>
 		{/if}
 	</div>

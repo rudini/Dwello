@@ -25,6 +25,14 @@ Funktionalität: Mietvertragsliste
     Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "Laufend"
     Und die Mietvertragsliste enthält genau 1 Mietvertrag
 
+  # #682: wie die Wohnungsliste (#670) nennt die Überschrift die gezeigten Mietverträge und die Seite
+  Szenario: Die Überschrift nennt die gezeigten Mietverträge und die Seite
+    Angenommen im Gebäude "Ahornhof" gibt es 12 weitere vermietete Wohnungen
+    Wenn der Liegenschaftsverwalter die Mietverträge nach dem Gebäude "Ahornhof" filtert
+    Dann steht über der Mietvertragsliste "Mietverträge 1–12 von 13, Seite 1 von 2"
+    Wenn der Liegenschaftsverwalter zur nächsten Seite blättert
+    Dann steht über der Mietvertragsliste "Mietvertrag 13 von 13, Seite 2 von 2"
+
   Szenario: Beendete Mietverträge anzeigen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert

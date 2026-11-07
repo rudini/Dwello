@@ -2,14 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { isListNavigation, listPageUrl, listSearchUrl } from '../lib/list-url';
 
 describe('listSearchUrl', () => {
-	it('keeps only filled filters and starts at page 1', () => {
+	// #682: the first page without «page» in the address, as the lists with a plain GET form
+	it('keeps only filled filters and starts at the first page', () => {
 		expect(listSearchUrl('/contracts', { search: 'Keller', building: '', status: 'ended' })).toBe(
-			'/contracts?search=Keller&status=ended&page=1'
+			'/contracts?search=Keller&status=ended'
 		);
 	});
 
 	it('opens the first page without filters', () => {
-		expect(listSearchUrl('/tenants', { search: '', status: '' })).toBe('/tenants?page=1');
+		expect(listSearchUrl('/tenants', { search: '', status: '' })).toBe('/tenants');
 	});
 });
 
@@ -18,6 +19,13 @@ describe('listPageUrl', () => {
 		expect(listPageUrl(new URL('http://localhost/invoices?buildingId=b1&page=1'), 3)).toBe(
 			'/invoices?buildingId=b1&page=3'
 		);
+	});
+
+	it('leads to the first page without «page» in the address', () => {
+		expect(listPageUrl(new URL('http://localhost/invoices?buildingId=b1&page=2'), 1)).toBe(
+			'/invoices?buildingId=b1'
+		);
+		expect(listPageUrl(new URL('http://localhost/invoices?page=2'), 1)).toBe('/invoices');
 	});
 });
 

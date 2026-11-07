@@ -21,7 +21,7 @@
 		contract?: string;
 		periodStart?: string;
 		periodEnd?: string;
-		/** where «Filter zurücksetzen» leads, none while it would change nothing (#673) */
+		/** where «Filter zurücksetzen» leads, none while it would change nothing (#673) or the list is empty (#682) */
 		reset?: string;
 		buildings: { id: string; name: string }[];
 	} = $props();
@@ -30,7 +30,13 @@
 	let term = $derived(search);
 </script>
 
-<form method="GET" action="/statements" class="flex flex-col gap-4 md:flex-row md:items-end">
+<form
+	method="GET"
+	action="/statements"
+	role="search"
+	aria-label={m.list_search_label()}
+	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 md:flex-row md:items-end"
+>
 	{#if status}<input type="hidden" name="status" value={status} />{/if}
 	{#if contract}<input type="hidden" name="contract" value={contract} />{/if}
 	{#if periodStart}<input type="hidden" name="periodStart" value={periodStart} />{/if}
@@ -41,7 +47,7 @@
 			name="search"
 			label={m.buildings_search()}
 			help={m.statements_search_help()}
-			optional
+			required={false}
 			bind:value={term}
 			testid="statement-search-input"
 		/>
@@ -54,7 +60,7 @@
 				name="building"
 				label={m.apartments_building()}
 				placeholder={m.apartments_all_buildings()}
-				optional
+				required={false}
 				options={buildings.map((b) => ({ value: b.id, label: b.name }))}
 				value={building}
 				testid="statement-building-filter"

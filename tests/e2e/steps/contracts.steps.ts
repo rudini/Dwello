@@ -105,6 +105,19 @@ Then('die Mietvertragsliste enthält genau {int} Mietvertrag', async ({ verwalte
 	await verwalter.sees(listedContractCount).toBe(count);
 });
 
+// #682: each with its own Mieter, so the list has more than one page
+Given(
+	'im Gebäude {string} gibt es {int} weitere vermietete Wohnungen',
+	async ({ seed }, building: string, count: number) => {
+		for (let i = 1; i <= count; i++) {
+			const number = `9.${String(i).padStart(2, '0')}`;
+			await seed.apartment(building, number, 'vacant');
+			await seed.tenant(`Mieter ${number}`);
+			await seed.contract(`Mieter ${number}`, number, { startDate: '2024-04-01', baseRent: '900' });
+		}
+	}
+);
+
 When(
 	'der Liegenschaftsverwalter die Mietverträge nach dem Gebäude {string} filtert',
 	async ({ verwalter, seed }, building: string) => {

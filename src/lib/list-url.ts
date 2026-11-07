@@ -1,15 +1,20 @@
-/** URL of a list page filtered by the given values (empty ones left out), starting again at page 1 */
+const withParams = (path: string, params: URLSearchParams) =>
+	params.size ? `${path}?${params}` : path;
+
+/** URL of a list page filtered by the given values (empty ones left out), starting again at the first page */
 export function listSearchUrl(path: string, filters: Record<string, string>): string {
-	const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
-	params.set('page', '1');
-	return `${path}?${params}`;
+	return withParams(
+		path,
+		new URLSearchParams(Object.entries(filters).filter(([, value]) => value))
+	);
 }
 
-/** URL of another page of the current list, keeping its filters */
+/** URL of another page of the current list, keeping its filters; the first page without «page» (#682) */
 export function listPageUrl(url: URL, page: number): string {
 	const params = new URLSearchParams(url.searchParams);
-	params.set('page', String(page));
-	return `${url.pathname}?${params}`;
+	if (page > 1) params.set('page', String(page));
+	else params.delete('page');
+	return withParams(url.pathname, params);
 }
 
 type Navigation = { type: string; from: { url: URL } | null; to: { url: URL } | null };

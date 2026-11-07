@@ -15,6 +15,7 @@ import BuildingsPage from '../routes/buildings/+page.svelte';
 import TenantsPage from '../routes/tenants/+page.svelte';
 import ContractsPage from '../routes/contracts/+page.svelte';
 import InvoicesPage from '../routes/invoices/+page.svelte';
+import StatementsPage from '../routes/statements/+page.svelte';
 import { page } from '$app/stores';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
@@ -79,6 +80,49 @@ describe.each(lists)('Filter der Liste $path', (list) => {
 		goTo(`${list.path}?search=Ahorn`);
 
 		expect(valueOf(list.search)).toBe('Ahorn');
+	});
+});
+
+// #682 (Sven): the same search and filters on every list
+const statusCounts = { draft: 0, sent: 0, paid: 0, settled: 0, overdue: 0 };
+const statements = {
+	path: '/statements',
+	page: StatementsPage,
+	data: { statements: [], statusCounts, scope: null },
+	search: 'statement-search-input'
+};
+describe.each([...lists, statements])('Suche und Filter der Liste $path', (list) => {
+	const form = () => byTestId(list.search)!.closest('form')!;
+	const resets = (within: Element) =>
+		[...within.querySelectorAll('a, button')].filter(
+			(control) => control.textContent!.trim() === 'Filter zurücksetzen'
+		);
+	const open = (address: string) => {
+		goTo(address);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+	};
+
+	it('ist eine Suche namens «Suche und Filter» in einem Rahmen', () => {
+		open(list.path);
+
+		expect(form().getAttribute('role')).toBe('search');
+		expect(form().getAttribute('aria-label')).toBe('Suche und Filter');
+		expect(form().classList).toContain('rounded-panel');
+	});
+
+	// a filter is never required: no «(optional)», and not announced as required either
+	it('nennt kein Feld optional und keines als Pflichtfeld', () => {
+		open(list.path);
+
+		expect(form().textContent).not.toContain('(optional)');
+		expect(form().querySelectorAll('[aria-required="true"]')).toHaveLength(0);
+	});
+
+	it('bietet ohne Treffer nur im Hinweis an, die Filter zurückzusetzen', () => {
+		open(`${list.path}?search=Gibt+es+nicht`);
+
+		expect(resets(form())).toHaveLength(0);
+		expect(resets(document.body)).toHaveLength(1);
 	});
 });
 

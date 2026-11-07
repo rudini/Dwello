@@ -1,6 +1,15 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingCardText, buildingCount, buildingListed, emptyListHint, routeTo } from '../questions/buildings';
+import {
+	buildingCardText,
+	buildingCount,
+	buildingListed,
+	cityFilterLabel,
+	emptyListHint,
+	routeTo,
+	searchHelp,
+	searchLabel
+} from '../questions/buildings';
 import { pageAddress } from '../questions/navigation';
 import { filterByCity, openBuilding, openBuildingList, searchBuildings, startNewBuilding } from '../tasks/buildings';
 
@@ -72,4 +81,16 @@ Then(
 
 Then('nennt die Karte des Gebäudes {string} {string}', async ({ verwalter, names }, building: string, text: string) => {
 	await verwalter.sees(buildingCardText(names.get(building)!)).toContain(text);
+});
+
+Then('erklärt die Gebäudesuche {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(searchHelp).toBe(text);
+});
+
+Then('heisst die Gebäudesuche {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(searchLabel).toBe(label);
+});
+
+Then('heisst der Ortsfilter {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(cityFilterLabel).toBe(label);
 });

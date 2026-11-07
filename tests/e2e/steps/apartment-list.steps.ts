@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import { inDays, swissDate } from '../fixtures/dates';
 import { apartmentCount, apartmentEmptyHint, apartmentResults, filterOrderOf, apartmentSearchHelp, apartmentSearchTerm, occupancyOf, moveOutOf, moveOutShownOf } from '../questions/apartments';
 import {
+	chooseVacantApartments,
 	openApartment,
 	openApartmentList,
 	searchApartments,
@@ -31,6 +32,10 @@ When(
 		await verwalter.attemptsTo(showApartmentsOfBuilding(seed.idOf(building)!));
 	}
 );
+
+When('der Liegenschaftsverwalter die leeren Wohnungen wählt, ohne zu suchen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseVacantApartments);
+});
 
 When(
 	'der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude {string} anzeigt',

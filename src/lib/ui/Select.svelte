@@ -15,6 +15,7 @@
 		example,
 		error,
 		optional = false,
+		required,
 		disabled = false,
 		onchange,
 		note,
@@ -31,6 +32,7 @@
 		example?: string;
 		error?: string;
 		optional?: boolean;
+		required?: boolean; // announced as required; without it, unless optional (a filter is neither, #682)
 		disabled?: boolean;
 		onchange?: (value: string) => void;
 		note?: { text: string; testid: string }; // see Field
@@ -56,7 +58,7 @@
 			{name}
 			bind:value
 			{disabled}
-			aria-required={!optional}
+			aria-required={required ?? !optional}
 			onchange={() => onchange?.(value)}
 			aria-describedby={control.describedBy}
 			aria-invalid={control.invalid || undefined}
