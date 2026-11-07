@@ -8,6 +8,7 @@ import {
 	gapAboveCostBreakdown,
 	correctConfirmation,
 	deadlineShown,
+	deadlineHelp,
 	paymentText,
 	replacedDone,
 	priorPaymentsAmount,
@@ -674,6 +675,11 @@ Then('sagt die Abrechnung, dass der Übertrag heute von Hand ausgeglichen wurde'
 
 Then('nennt die Abrechnung keine Zahlungsfrist', async ({ verwalter }) => {
 	await verwalter.sees(deadlineShown).toBe(0);
+});
+
+// #686 O-6: a draft's Zahlungsfrist counts from the sending
+Then('erklärt die Abrechnung bei der Zahlungsfrist {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deadlineHelp).toBe(text);
 });
 
 When('der Liegenschaftsverwalter die ersetzte Abrechnung öffnet', async ({ verwalter }) => {
