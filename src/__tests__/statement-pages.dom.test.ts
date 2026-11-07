@@ -182,7 +182,7 @@ describe('Abrechnungsliste', () => {
 		const reset = [...document.querySelectorAll('a')].filter(
 			(a) => a.textContent?.trim() === 'Filter zurücksetzen'
 		);
-		expect(reset.length).toBe(2);
+		expect(reset.length).toBe(1); // #682: only in the hint, not in the search as well
 		expect(reset.every((a) => a.getAttribute('href') === '/statements?contract=c1')).toBe(true);
 	});
 
@@ -250,6 +250,24 @@ describe('Abrechnungsliste', () => {
 		const results = document.querySelector<HTMLElement>('[data-results]')!;
 		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Abrechnung');
 		expect(results.tabIndex).toBe(-1);
+	});
+
+	// #682: as the apartments (#670), over several pages the heading names the statements shown and the page
+	it('nennt über mehreren Seiten oben die gezeigten Abrechnungen und die Seite', () => {
+		list(
+			Array.from({ length: 10 }, (_, i) => statement({ id: `s${i}` })),
+			11
+		);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Abrechnungen 1–10 von 11, Seite 1 von 2'
+		);
+	});
+
+	it('nennt auf einer Seite mit nur einer Abrechnung diese in der Einzahl', () => {
+		list([statement()], 11, 2);
+		expect(document.querySelector('[data-results]')!.textContent!.trim()).toBe(
+			'Abrechnung 11 von 11, Seite 2 von 2'
+		);
 	});
 
 	it('setzt den Fokus nach einer Suche ohne Treffer auf die Meldung', () => {

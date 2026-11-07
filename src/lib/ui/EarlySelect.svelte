@@ -14,6 +14,7 @@
 		help,
 		error,
 		optional = false,
+		required,
 		testid,
 		onchange = () => {}
 	}: {
@@ -26,6 +27,7 @@
 		help?: string;
 		error?: string;
 		optional?: boolean;
+		required?: boolean; // announced as required; without it, unless optional (a filter is neither, #682)
 		testid: string;
 		onchange?: (value: string) => void;
 	} = $props();
@@ -38,7 +40,7 @@
 			{name}
 			use:keepEarlyChoice={onchange}
 			onchange={(e) => onchange(e.currentTarget.value)}
-			aria-required={!optional}
+			aria-required={required ?? !optional}
 			aria-describedby={control.describedBy}
 			aria-invalid={control.invalid || undefined}
 			class={controlClass(control.invalid)}

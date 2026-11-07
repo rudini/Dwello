@@ -7,10 +7,12 @@
 	// Search and filters as a plain GET form: the address keeps them, and a choice made while loading counts
 	let {
 		filters,
-		buildings
+		buildings,
+		reset
 	}: {
 		filters: { search: string; building: string; status: string };
 		buildings: { id: string; name: string; address: string }[];
+		reset: boolean; // offer «Filter zurücksetzen»: the address has a filter and the list is not empty (#682)
 	} = $props();
 
 	const statuses = [
@@ -18,7 +20,6 @@
 		{ value: 'future', label: m.contracts_filter_future() },
 		{ value: 'ended', label: m.contracts_filter_ended() }
 	];
-	const filtered = $derived(Object.values(filters).some(Boolean));
 </script>
 
 {#snippet choice(
@@ -46,6 +47,7 @@
 	method="GET"
 	action="/contracts"
 	role="search"
+	aria-label={m.list_search_label()}
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 lg:flex-row lg:items-end"
 >
 	<div class="lg:flex-1">
@@ -89,7 +91,6 @@
 		<Button type="submit" icon="search" testid="contract-search-submit"
 			>{m.buildings_search_submit()}</Button
 		>
-		{#if filtered}<Button variant="ghost" href="/contracts">{m.buildings_reset_filters()}</Button
-			>{/if}
+		{#if reset}<Button variant="ghost" href="/contracts">{m.buildings_reset_filters()}</Button>{/if}
 	</div>
 </form>

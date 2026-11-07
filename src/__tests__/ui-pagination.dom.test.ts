@@ -10,9 +10,7 @@ describe('Seitenwechsel', () => {
 		const nav = document.querySelector('nav')!;
 		expect(nav.getAttribute('aria-label')).toBe('Seiten');
 		expect(nav.textContent).toContain('Seite 2 von 3');
-		expect(byTestId('pagination-prev')!.getAttribute('href')).toBe(
-			'/apartments?building=b1&page=1'
-		);
+		expect(byTestId('pagination-prev')!.getAttribute('href')).toBe('/apartments?building=b1');
 		expect(byTestId('pagination-next')!.getAttribute('href')).toBe(
 			'/apartments?building=b1&page=3'
 		);

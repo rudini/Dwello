@@ -31,13 +31,13 @@
 	data-testid="apartment-card-{apartment.id}"
 >
 	<div class="flex flex-wrap items-start justify-between gap-2">
-		<h2 class="break-words text-lg font-semibold text-ink">
+		<h3 class="break-words text-lg font-semibold text-ink">
 			<a
 				href="/apartments/{apartment.id}"
 				class="text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
 				>{m.buildings_apartment_number({ number: apartment.number })}</a
 			>
-		</h2>
+		</h3>
 		<Badge
 			tone={statusTones[apartment.status]}
 			icon={statusIcons[apartment.status]}

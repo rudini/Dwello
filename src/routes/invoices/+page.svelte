@@ -88,6 +88,7 @@
 			buildings={data.buildings}
 			categories={data.categories}
 			years={data.years}
+			reset={filtered && data.invoices.length > 0}
 		/>
 	{/key}
 
@@ -125,7 +126,13 @@
 	{:else}
 		<ResultList
 			id="invoices-count"
-			heading={data.total === 1 ? m.invoices_count_one() : m.invoices_count({ count: data.total })}
+			counts={{
+				one: m.invoices_count_one,
+				many: m.invoices_count,
+				pageOne: m.invoices_count_page_one,
+				pageMany: m.invoices_count_page_many
+			}}
+			shown={data.invoices.length}
 			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
 			url={$page.url}
 			page={data.page}

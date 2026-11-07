@@ -12,6 +12,7 @@
 		example,
 		error,
 		optional = false,
+		required,
 		placeholder,
 		autocomplete,
 		inputmode,
@@ -33,6 +34,7 @@
 		example?: string;
 		error?: string;
 		optional?: boolean;
+		required?: boolean; // announced as required; without it, unless optional (a filter is neither, #682)
 		placeholder?: string;
 		autocomplete?: HTMLInputElement['autocomplete'];
 		inputmode?: 'decimal' | 'numeric' | 'tel' | 'email';
@@ -61,7 +63,7 @@
 			{max}
 			{disabled}
 			{onblur}
-			aria-required={!optional}
+			aria-required={required ?? !optional}
 			aria-describedby={control.describedBy}
 			aria-invalid={control.invalid || undefined}
 			class={controlClass(control.invalid)}
