@@ -40,7 +40,7 @@ When('der Liegenschaftsverwalter die Zahlungsfrist leert und speichert', async (
 	await verwalter.attemptsTo(clearPaymentDeadline);
 });
 
-Then('meldet das Feld «Zahlungsfrist» {string}', async ({ verwalter }, message: string) => {
+Then('meldet Dwello bei «Zahlungsfrist» {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(paymentDeadlineInvalid).toBe('true');
 	await verwalter.sees(paymentDeadlineProblem).toMatch(new RegExp(escapeRegExp(message)));
 });

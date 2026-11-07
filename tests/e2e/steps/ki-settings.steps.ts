@@ -87,7 +87,7 @@ Then('sagt die Seite "KI" {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(kiPageText).toContain(text);
 });
 
-Then('ist das Feld für den API-Schlüssel leer', async ({ verwalter }) => {
+Then('ist bei «API-Schlüssel» nichts eingetragen', async ({ verwalter }) => {
 	await verwalter.sees(enteredApiKey).toBe('');
 });
 

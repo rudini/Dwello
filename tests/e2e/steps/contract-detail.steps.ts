@@ -177,10 +177,6 @@ Then('sieht der Liegenschaftsverwalter die Wohnung {string} im Mietvertrag', asy
 	await verwalter.sees(apartmentOfContract).toContain(`Wohnung ${number}`);
 });
 
-Then('sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}', async ({ verwalter }, amount: string) => {
-	await verwalter.sees(totalRent).toBe(amount);
-});
-
 Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: string) => {
 	await verwalter.sees(statusOfContract).toBe(status);
 });
@@ -508,7 +504,7 @@ Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwal
 	await verwalter.sees(noticeReceivedHelp).toContain(text);
 });
 
-Then('steht der Fokus im Feld {string} des Dialogs', async ({ verwalter }, field: string) => {
+Then('steht der Fokus bei {string} des Dialogs', async ({ verwalter }, field: string) => {
 	await verwalter.sees(focusedEndDialogField).toBe(field);
 });
 
