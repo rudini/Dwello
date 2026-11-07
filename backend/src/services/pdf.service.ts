@@ -1019,8 +1019,7 @@ function costTable(page: Page, y: number) {
 	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
 	const totals = totalRows(data, t) * (doc.heightOfString(t.subtotal) + 8) + feeHeight;
 	const note = sharesNote(data, t);
-	doc.font(FONT.regular).fontSize(7.5);
-	const closing = totals + 4 + doc.heightOfString(note, { width: PAGE.right - PAGE.left });
+	const closing = totals + 4 + doc.font(FONT.regular).fontSize(7.5).heightOfString(note, { width: PAGE.right - PAGE.left });
 	let top = header(room(doc, heading(doc, `${t.costBreakdown} (CHF)`, y, 90), 60));
 	data.lineItems.forEach((item, i) => {
 		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
@@ -1033,8 +1032,7 @@ function costTable(page: Page, y: number) {
 		top = row(doc, cells, top, { header });
 		top = partsBelow(doc, parts, top);
 	});
-	top = room(doc, top, closing);
-	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
+	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), room(doc, top, closing) + 2, { bold: true, above: 0.5 });
 	if (feeHeight) {
 		doc.font(FONT.regular).fontSize(8.5);
 		doc.text(fee, PAGE.left, top, { width });
@@ -1150,9 +1148,7 @@ const PARTS_WIDTH = COLUMNS[4].x + COLUMNS[4].width - COLUMNS[0].x - 8;
 function positionHeight(doc: Doc, cells: string[], lines: string[]) {
 	doc.font(FONT.regular).fontSize(8.5);
 	const height = rowHeight(doc, cells) + 6;
-	if (!lines.length) return height;
-	doc.fontSize(7.5);
-	return height + doc.heightOfString(lines.join('\n'), { width: PARTS_WIDTH }) + 3;
+	return lines.length ? height + doc.fontSize(7.5).heightOfString(lines.join('\n'), { width: PARTS_WIDTH }) + 3 : height;
 }
 
 // #464: one indented line per Akonto amount and split month, its amount in the column «Ihr Anteil»; they add up to the
