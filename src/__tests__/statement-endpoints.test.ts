@@ -1,7 +1,6 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
 import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
-import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/+server';
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
 import { GET as getListPdf } from '../routes/api/statements/[id]/pdf/+server';
 import { GET as getBilled } from '../routes/api/statements/billed/+server';
@@ -101,15 +100,6 @@ describe('POST /statements/[id]/send-reminder', () => {
 		expect(await response.json()).toEqual({
 			error: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.'
 		});
-	});
-});
-
-describe('POST /api/statements/[id]/generate-pdf', () => {
-	it('sendet dem Backend einen JSON-Body, den es als Objekt validiert', async () => {
-		const { calls, result } = call(generatePdf, 200, { success: true });
-
-		expect((await result).status).toBe(200);
-		expect(calls).toEqual([{ method: 'POST', url: `${API}/generate-pdf`, body: {} }]);
 	});
 });
 

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { m } from '$lib/paraglide/messages';
+	import { addToast } from '$lib/stores';
 	import Button from '$lib/ui/Button.svelte';
 	import type { Tenant } from '$lib/types';
 
@@ -7,18 +9,16 @@
 	let {
 		id,
 		generated,
-		generating,
 		language = 'de',
-		ongenerate,
 		list = ''
 	}: {
 		id: string;
 		generated: boolean;
-		generating: boolean;
 		language?: Tenant['language'];
-		ongenerate: () => void;
 		list?: string; // the list it was opened from: the refusal page of the PDF leads back there (#1094)
 	} = $props();
+
+	let generating = $state(false);
 
 	const pdfIn = {
 		de: m.statements_pdf_in_de,
@@ -35,9 +35,28 @@
 		testid="statement-pdf-download">{m.documents_download()}</Button
 	>
 {:else}
-	<div class="flex flex-col gap-2">
+	<!-- #686: a form, so a click before the page has loaded its scripts makes the PDF too -->
+	<form
+		method="POST"
+		action="?/generatePdf"
+		class="flex flex-col gap-2"
+		use:enhance={() => {
+			generating = true;
+			return async ({ result, update }) => {
+				generating = false;
+				if (result.type === 'success') {
+					await update(); // the statement loaded again offers the PDF for download
+					addToast('success', m.statements_pdf_created());
+				} else
+					addToast(
+						'error',
+						result.type === 'failure' ? String(result.data?.actionError) : m.statements_pdf_failed()
+					);
+			};
+		}}
+	>
 		<Button
-			onclick={ongenerate}
+			type="submit"
 			busy={generating}
 			busyLabel={m.statements_pdf_creating()}
 			icon="document"
@@ -47,5 +66,5 @@
 		<p id="statement-pdf-language" class="text-ink-muted" data-testid="statement-pdf-language">
 			{pdfIn[language]()}
 		</p>
-	</div>
+	</form>
 {/if}

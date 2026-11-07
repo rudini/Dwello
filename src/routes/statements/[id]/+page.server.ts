@@ -6,6 +6,7 @@ import { loadDocuments } from '$lib/server/documents';
 import {
 	correctStatement,
 	declineCorrection,
+	generateStatementPdf,
 	markStatementPaid,
 	markNewPdfSent,
 	recalculateStatement,
@@ -99,6 +100,10 @@ export const actions: Actions = {
 	},
 	newPdfSent: async ({ request, fetch }) => {
 		const refused = await markNewPdfSent(fetch, String((await request.formData()).get('documentId')));
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	generatePdf: async ({ params, fetch }) => {
+		const refused = await generateStatementPdf(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	recalculate: async ({ params, fetch }) => {

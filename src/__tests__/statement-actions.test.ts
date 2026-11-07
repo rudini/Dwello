@@ -6,6 +6,8 @@ import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.j
 import correctionNotDue from '../../tests/contracts/statement-correction-not-due.json';
 import correctionRefused from '../../tests/contracts/statement-correction-refused.json';
 import sendRefused from '../../tests/contracts/statement-send-refused.json';
+import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
+import pdfRefused from '../../tests/contracts/statement-pdf-refused.json';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 const today = localToday(); // the day in Switzerland, as the app takes it
@@ -144,6 +146,38 @@ describe('Zahlungsdatum und Ende der Abrechnungsperiode', () => {
 			data: {
 				actionError:
 					'Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein.'
+			}
+		});
+	});
+});
+
+// #686 O-2: «PDF erstellen» als Formular, damit auch ein Klick vor dem Laden der Seite das PDF erstellt
+describe('PDF erstellen', () => {
+	it('sendet dem Backend einen JSON-Body, den es als Objekt validiert', async () => {
+		const { calls, result } = runAction(actions.generatePdf, 's1', 200, {}, { success: true });
+
+		expect(await result).toBeUndefined();
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/generate-pdf`, body: {} }]);
+	});
+
+	// code review C-2 (#125): «PDF konnte nicht erstellt werden: Das PDF konnte nicht erstellt werden …»
+	it('nennt den Grund ohne Wiederholung, wenn das PDF aus einem unerwarteten Grund nicht entsteht', async () => {
+		const { result } = runAction(actions.generatePdf, 's1', 500, {}, pdfFailed);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.' }
+		});
+	});
+
+	it('nennt den Grund des Backends nach dem Satz, dass das PDF nicht entstand', async () => {
+		const { result } = runAction(actions.generatePdf, 's1', 404, {}, pdfRefused);
+
+		expect(await result).toMatchObject({
+			status: 404,
+			data: {
+				actionError:
+					'PDF konnte nicht erstellt werden: Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.'
 			}
 		});
 	});
