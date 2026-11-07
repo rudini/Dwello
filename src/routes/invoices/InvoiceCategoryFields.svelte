@@ -133,7 +133,7 @@
 	<!-- Neutral: a non-allocable category is a correct choice, not a warning (#687) -->
 	<div data-testid="invoice-category-warning">
 		<p class="font-semibold text-ink">{m.invoices_category_not_allocable()}</p>
-		<p id="{idPrefix}invoice-category-warning-text" class="text-ink-muted">
+		<p id="{idPrefix}invoice-category-warning-text" class="text-ink-muted" data-testid="invoice-category-warning-text">
 			{m.invoices_category_not_allocable_text()}
 		</p>
 	</div>
