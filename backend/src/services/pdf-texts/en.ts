@@ -54,7 +54,7 @@ export const en: Record<string, string> = {
 	offsetWith: 'Already offset against {numbers}',
 	offsetShort: 'already offset',
 	and: 'and',
-	heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent} % of your apartment’s heating costs for the billing period',
+	heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent}\u00a0% of the apartment share of the heating costs for the billing period',
 	heatingNoteParts: 'Heating costs under the heating profile ‘{profile}’: {percent} % for an invoice without a service period. For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
 	heatingNoteOwn: 'Heating costs under the heating profile ‘{profile}’: For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
 	heatingMonths: 'Monthly shares in the heating profile during your tenancy (the profile spreads a year’s heating costs over the twelve months): {months}',

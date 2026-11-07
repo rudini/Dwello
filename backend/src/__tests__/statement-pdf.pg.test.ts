@@ -378,7 +378,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 
 	it('druckt den Anteil und die Monate, mit denen die Abrechnung gerechnet ist', () => {
 		expect(text).toContain('Heizung Pro Fläche (m²) 70.00 / 70.00 m² 1\'000.00 1\'000.00 50.00 % 500.00');
-		expect(text).toContain('50.00 % der Heizkosten');
+		expect(text).toContain('50.00 % des Wohnungsanteils an den Heizkosten');
 		expect(text).toContain('Okt 10.00 %, Nov 20.00 %, Dez 20.00 %');
 	});
 
@@ -398,7 +398,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		expect(summer).toContain('Leistungszeitraum 01.06.2025 – 31.08.2025: CHF 920.00, Ihre Mietstage 62 von 92 Tagen');
 		expect(summer).toContain('»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin');
 		expect(summer).not.toContain('für eine Rechnung ohne Leistungszeitraum');
-		expect(summer).not.toContain('67.39 % der Heizkosten');
+		expect(summer).not.toContain('67.39 % des Wohnungsanteils');
 		expect(summer).toContain('Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
 	});
 
@@ -443,7 +443,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await deleteHeatingProfile(own);
 
 		expect(rounded).toContain("1'000.00 1'000.00 70.98 %");
-		expect(rounded).toContain('70.98 % der Heizkosten');
+		expect(rounded).toContain('70.98 % des Wohnungsanteils an den Heizkosten');
 		// #465 (Fachreview 465-1 V-6): an own profile is the landlord's, whatever it describes
 		expect(rounded).toContain('Quelle der Monatsanteile: Eigenes Profil des Vermieters');
 	});
@@ -548,7 +548,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await feb.remove();
 		await deleteHeatingProfile(own);
 
-		expect(earlier).toContain('70.98 % der Heizkosten');
+		expect(earlier).toContain('70.98 % des Wohnungsanteils an den Heizkosten');
 	});
 
 	// F-1: ein eigenes Heizprofil lässt sich umbenennen und löschen, die Abrechnung nennt es weiter
@@ -570,7 +570,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await deleteStatement(statement.id);
 
 		expect(after).toContain(name);
-		expect(after).toContain('50.00 % der Heizkosten');
+		expect(after).toContain('50.00 % des Wohnungsanteils an den Heizkosten');
 	});
 
 });
