@@ -1,4 +1,4 @@
-import { Count, Text, Value, Visibility } from '../screenplay/questions';
+import { Attribute, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	invoiceBuildingFilter,
 	invoiceGroupOf,
@@ -10,13 +10,16 @@ import {
 	rowAmount,
 	rowCategory,
 	rowInPeriod,
-	rowStatus
+	rowStatus,
+	rowUtilityCost
 } from '../targets/invoices';
 
 export const listedInvoicesOf = (supplier: string) => Count.of(invoiceRow(supplier));
 export const listedInvoiceCount = Count.of(invoiceRows);
 export const amountOfListedInvoice = (supplier: string) => Text.of(rowAmount(supplier));
 export const categoryOfListedInvoice = (supplier: string) => Text.of(rowCategory(supplier));
+export const utilityCostOfListedInvoice = (supplier: string) => Text.of(rowUtilityCost(supplier));
+export const toneOfListedUtilityCost = (supplier: string) => Attribute.named('data-tone').of(rowUtilityCost(supplier));
 export const statusOfListedInvoice = (supplier: string) => Text.of(rowStatus(supplier));
 export const invoiceListEmpty = Visibility.of(invoicesEmptyNotice);
 export const chosenInvoiceBuilding = Value.chosenIn(invoiceBuildingFilter);
