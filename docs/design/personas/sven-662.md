@@ -55,3 +55,57 @@ Etwa 25 Minuten, 11 Skriptläufe. Rechnungen: 21 Tabs bis «Gebäude» (der ganz
 - Ein langsames Netz habe ich nicht simuliert. Die Ladevorgänge waren lokal schnell, deshalb habe ich keine Ladeanzeige während des Wechsels gesehen.
 
 Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/ced2483f-edfc-5afc-974d-77650a29fe78/scratchpad/sven-662/` (01-rechnungen.png bis 07-wohnungen-gefiltert.png). Der Screenshot 04-jahr-2021-leer.png zeigt den leeren Jahreszustand ohne «Filter zurücksetzen», 07-wohnungen-gefiltert.png die Liste mit «1 Wohnung» und dem Knopf «Filter zurücksetzen» unter «Suchen».
+
+## Runde 2
+
+Geprüft auf w-662 bei 6202bf9, wieder nur mit Tastatur und Accessibility-Tree (Desktop 1440 × 900). Seiten: Rechnungen, Wohnungen und neu Mietverträge. Gespeichert habe ich nichts.
+
+### Stand der Befunde aus Runde 1
+
+| ID  | Schwere | Stand | Was ich gesehen habe |
+| --- | --- | --- | --- |
+| S-1 | Major | behoben | Nach jeder Änderung im Auswahlfeld bekommt der `status`-Bereich im Formular die Überschrift der Liste, polite: «14 Rechnungen», «Rechnungen 1–20 von 30, Seite 1 von 2», «3 Wohnungen», «1 Wohnung», «2 Mietverträge», «1 Mietvertrag». Bei 0 Treffern kommt «Keine Rechnungen gefunden», «Keine Wohnungen gefunden» oder «Keine Mietverträge gefunden», im Jahr ohne Rechnungen «Für 2021 sind noch keine Rechnungen erfasst». Der Fokus bleibt im Feld. |
+| S-2 | Minor | behoben | Der Verlauf wächst beim Filtern nicht mehr: Bei Rechnungen blieb er nach 2 + 3 + 12 Pfeildrücken und End bei 3 Einträgen, bei Wohnungen und Mietverträgen nach je 6 Pfeildrücken auch. Ein «Zurück» führt direkt zur Übersicht, von der ich gekommen war. Geladen wird aber weiterhin bei jedem Pfeildruck (siehe S-5). |
+| S-3 | Minor | offen (war nicht Teil der Korrektur) | Komme ich über die Navigation auf die Liste, wird bei einer Filteränderung kein Seitentitel mehr angesagt. Lade ich die Seite direkt (Adresse, Neuladen), sagt die erste Änderung im Auswahlfeld wieder assertive «Rechnungen - Dwello», «Wohnungen - Dwello» bzw. «Mietverträge - Dwello» an. Danach kommt die Anzahl, polite. Ab der zweiten Änderung kommt nur noch die Anzahl. |
+| S-4 | Minor | behoben | `?year=2021` allein: Unter «Für 2021 sind noch keine Rechnungen erfasst» und «Rechnung erfassen» steht jetzt der Link «Filter zurücksetzen» (3 Tabs nach dem Feld «Jahr»). Enter führt zu `/invoices`, der Fokus steht auf «Rechnungen 1–20 von 83, Seite 1 von 5». Der Screenshot 02-jahr-2021-leer.png zeigt beide Links unter dem Hinweis. |
+
+### Neue Befunde
+
+| ID  | Schwere | Bildschirm | Befund |
+| --- | --- | --- | --- |
+| S-5 | Minor | Rechnungen, Wohnungen, Mietverträge (Auswahlfelder) | Jeder Pfeildruck lädt die Liste noch einzeln und schreibt sein Ergebnis in den `status`-Bereich. Bei 6 schnellen Pfeildrücken in «Kategorie» (100 ms Abstand) gab es 6 Ladevorgänge. Im `status` standen nacheinander «Keine Rechnungen gefunden», «2 Rechnungen» und zurück «Keine Rechnungen gefunden», «2 Rechnungen», «8 Rechnungen». Ein Screenreader, der polite-Ansagen in eine Warteschlange stellt, liest mir so Ergebnisse von Optionen vor, an denen ich nur vorbeigegangen bin. Wenn ich nicht bis zum Schluss zuhöre, kann ich «Keine Rechnungen gefunden» für das Ergebnis meiner Auswahl halten. |
+
+### Beobachtungen (Runde 2)
+
+- Mietverträge verhält sich wie die anderen Listen: «Gebäude» und «Vertragsstatus» wenden sofort an, die Anzahl wird angesagt, der Verlauf bleibt gleich, «Zurück» führt zur Übersicht. Ein Suchfeld gibt es hier nicht.
+- «Filter zurücksetzen» ist bei Wohnungen (mit Treffern) ein Knopf, bei Mietverträgen an derselben Stelle ein Link. Bei 0 Treffern ist es überall ein Link unter dem Hinweis. Beides erreiche ich mit 3 Tabs nach dem letzten Auswahlfeld, und danach steht der Fokus auf der Überschrift der Liste. Mich hat das nicht gestört. Mit der Linkliste des Screenreaders finde ich den Knopf aber nicht.
+- Ungesendeter Suchtext geht verloren, wie angekündigt: Bei «Hauswart» in der Adresse habe ich «Strom» ins Suchfeld getippt und dann das Gebäude gewechselt. Gesucht wurde weiter nach «Hauswart», und das Feld zeigte wieder «Hauswart». Ein geleertes, ungesendetes Feld kam ebenfalls mit «Hauswart» zurück. Das ist folgerichtig, wird aber nicht angesagt. Gemerkt habe ich es nur, weil ich zum Feld zurückgegangen bin.
+- Die Gebäude stehen weiterhin nicht überall in derselben Reihenfolge: Bei Rechnungen und Mietverträgen kommt Musterhaus Zentrum zuletzt, bei Wohnungen ist die Liste alphabetisch.
+- Der `status`-Bereich wird vor jeder neuen Ansage kurz geleert ("" und dann der Text). Das ist ein üblicher Weg, damit gleicher Text wieder angesagt wird.
+
+### Aufgabe geschafft (Runde 2): ja
+
+Rechnungen: Seepark Residenz, Hauswart ergab «8 Rechnungen», mit Jahr 2021 kam «Keine Rechnungen gefunden». Wohnungen: Seepark Residenz, Leer ergab «1 Wohnung». Mietverträge: Musterhaus Zentrum, Beendete Mietverträge ergab «1 Mietvertrag» (Kevin Fischer). Die Anzahl habe ich jedes Mal direkt im Auswahlfeld gehört, ohne die Überschrift zu suchen.
+
+### Aufwand (Runde 2)
+
+Etwa 15 Minuten, 8 Skriptläufe (2 davon wegen meiner eigenen Tab-Zählung wiederholt). Pro Liste: Tabs bis «Gebäude», 3 Pfeile, 1 Tab, 3 Pfeile.
+
+### Ablauf (Runde 2)
+
+1. Rechnungen direkt geladen, «Jahr», End. Erwartet: nur die Ansage des Ergebnisses. Gesehen: zuerst assertive «Rechnungen - Dwello», danach polite «Für 2021 sind noch keine Rechnungen erfasst» (S-3, wie bei Wohnungen und Mietverträgen).
+2. Rechnungen, «Kategorie», 6 schnelle Pfeildrücke. Erwartet: eine Ansage für die Option, bei der ich stehen bleibe. Gesehen: 6 Ladevorgänge und mehrere Ansagen für Zwischenstände (S-5).
+3. «Filter zurücksetzen» bei Mietverträgen. Erwartet: ein Knopf wie bei Wohnungen. Gesehen: ein Link mit demselben Namen. Funktioniert gleich.
+
+### Vorschläge (Runde 2)
+
+- **S-3:** `/apartments` direkt öffnen, mit Tab zu «Gebäude», Pfeil runter. Der assertive Bereich am Seitenende bekommt «Wohnungen - Dwello». Bleibt die Seite gleich und ändert sich nur die Abfrage, sollte der Seitentitel nicht angesagt werden, auch bei der ersten Änderung nach einem direkten Aufruf.
+- **S-5:** `/invoices`, Tab zu «Kategorie», 6 × Pfeil runter mit 100 ms Abstand, dabei den `status` im Formular beobachten: 6 Anfragen `__data.json`, mehrere Ansagen. Hilfreich wäre ein kurzes Warten nach dem letzten Tastendruck (etwa 300 bis 500 ms) vor dem Laden. Dann gibt es nur einen Ladevorgang und eine Ansage für die Option, bei der ich stehen bleibe. Mindestens sollte nur das Ergebnis der zuletzt gewählten Option in den `status` geschrieben werden.
+
+### Nicht geprüft (Runde 2)
+
+- Wieder kein echter Screenreader. Die Ansagen habe ich aus Änderungen in den Live-Regionen geschlossen (MutationObserver). Ob NVDA oder VoiceOver die Zwischenstände von S-5 wirklich alle vorlesen oder nur den letzten, konnte ich nicht hören.
+- Mieter und Nebenkostenabrechnungen habe ich nicht gefiltert, sie waren nicht Teil der Aufgabe.
+- Langsames Netz nicht simuliert. Ob bei einer langsamen Antwort eine ältere Antwort eine neuere im `status` überschreibt, weiss ich daher nicht. Lokal stimmten am Ende Auswahl, Adresse, Liste und Ansage überein.
+
+Skripte und Screenshots von Runde 2: `/tmp/claude-0/-home-user-Dwello/ced2483f-edfc-5afc-974d-77650a29fe78/scratchpad/sven-662-2/` (r1.mjs bis r5.mjs, 01-rechnungen-jahr-end.png, 02-jahr-2021-leer.png, wohnungen-gefiltert.png, vertraege-gefiltert.png).

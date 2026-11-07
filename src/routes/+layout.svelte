@@ -4,7 +4,7 @@
 	import '../styles/globals.css';
 	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Header from '$lib/ui/Header.svelte';
 	import Navigation from '$lib/ui/Navigation.svelte';
@@ -58,6 +58,7 @@
 	});
 
 	let listResult = $state('');
+	let navigations = 0;
 	// After a search on a list the focus goes to its results, so their number is read out
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
@@ -68,10 +69,18 @@
 		if (!isListNavigation(navigation)) return;
 		const results = document.querySelector<HTMLElement>('main [data-results]');
 		if (!keep) return results?.focus();
-		// the focus stays in the filter, so the result is read out instead (#662, persona Sven S-1); emptied first, so
-		// the same count after another choice is read out again
+		// the focus stays in the filter, so the result is read out instead (#662, persona Sven S-1), unless the next
+		// navigation has started meanwhile (S-5)
+		const turn = navigations;
+		tick().then(() => {
+			if (turn === navigations) listResult = results?.textContent?.trim() ?? '';
+		});
+	});
+	// every navigation empties the status: no earlier result is read on the next page or after «Suchen», and the same
+	// count after another choice is read out again (code review 662-2 C-5, C-6)
+	beforeNavigate(() => {
+		navigations++;
 		listResult = '';
-		tick().then(() => (listResult = results?.textContent?.trim() ?? ''));
 	});
 
 	// Derived state for showing authenticated layout

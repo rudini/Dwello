@@ -47,3 +47,56 @@ Etwa 20 Minuten, rund 15 Schritte für die Aufgabe selbst (mit dreimal Hochscrol
 - 200 % Zoom: nicht versucht, die Aufgabe nannte 150 %.
 - Mit echter Maus geöffnete Ausklapplisten: Ich habe die Einträge über die Auswahl des Browsers gewählt (gleiche Wirkung wie ein Klick); ob ein echter Mausklick den Rahmen um die Überschrift auch zeigt, habe ich nicht gesehen (nach «Filter zurücksetzen», per Mausklick, war kein Rahmen da).
 - Speichern: nicht Teil der Aufgabe, kein Gebäude zugeteilt.
+
+## Runde 2
+
+Persona: Helga, Desktop 1440 × 900 bei 150 % Zoom, Maus. App: Persona-Stack (:3300, Branch w-662 bei 6202bf9), Demo-Daten. Nichts gespeichert.
+Skripte und Bildschirmfotos: `/tmp/claude-0/-home-user-Dwello/ced2483f-edfc-5afc-974d-77650a29fe78/scratchpad/helga-662-r2/`
+
+### Status der Befunde aus Runde 1
+
+| ID | Schwere | Status | Was ich gesehen habe |
+|---|---|---|---|
+| H-1 | Major | behoben | Rechnungen: «Heizung Alpenblick 2025» getippt, nicht gesucht, dann Gebäude «Alpenblick» gewählt → «14 Rechnungen», das Suchfeld ist danach leer, in der Adresse steht nur das Gebäude. Danach «Heizung» → 2, «2025» → 1 Rechnung (Heizöl Oberland AG). Gegenprobe: «Heizöl» mit «Suchen» abgeschickt, dann Gebäude gewählt → «Heizöl» bleibt im Feld und wirkt weiter (2 Rechnungen). Danach «xyz» getippt, nicht gesucht, Jahr gewählt → im Feld steht wieder «Heizöl», die Liste passt dazu (1 Rechnung). Auf Wohnungen gleich: «3.0» getippt, Gebäude gewählt → Feld leer, 6 Wohnungen. |
+| H-2 | Minor | behoben (für die Auswahlfelder) | Gebäude, Kategorie und Jahr nacheinander gewählt: Die Seite bleibt oben stehen (Bildlauf 0), alle drei Felder bleiben im Bild. Auch wenn ich vorher etwas hinuntergescrollt hatte, blieb die Seite, wo sie war. Auf Wohnungen, Mieter, Mietverträge und Abrechnungen ebenfalls kein Sprung nach einer Auswahl. Aber: «Filter zurücksetzen» springt noch, siehe H-4. |
+| H-3 | Minor | offen (unverändert) | Beim Suchfeld steht weiterhin nur «Rechnungssteller oder Beschreibung», kein Hinweis, dass der Text «Suchen» braucht. «Suchen» liegt bei 150 % weiter unter dem Feld «Jahr», ausserhalb des Bildes, wenn ich oben im Suchfeld tippe. Weil der ungesendete Text jetzt nicht mehr still mitwirkt, ist das weniger gefährlich als in Runde 1. |
+
+### Neue Befunde
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| H-4 | Minor | Rechnungen, Mietverträge | «Filter zurücksetzen» springt weiterhin zur Überschrift der Liste. Ich stand oben bei den Filtern, klickte «Filter zurücksetzen» – danach stand «Rechnungen 1–20 von 83» oben im Bild, von den Feldern war nur noch «Jahr» und «Suchen» zu sehen, Gebäude und Kategorie waren unter der Kopfleiste. Wollte ich gleich neu wählen, musste ich wieder hochscrollen, wie in Runde 1 bei H-2. Bei Mietverträgen gleich (Sprung um gut eine Bildschirmhöhe), bei Wohnungen und Abrechnungen nicht. |
+
+### Beobachtungen
+
+- Dass mein getippter, nicht abgeschickter Text beim Wählen eines Gebäudes einfach verschwindet, hat mich kurz überrascht («Wo ist mein Text?»). Die Liste stimmte aber mit dem überein, was ich sah: leeres Suchfeld, nur das Gebäude gewählt. Das ist mir lieber als Runde 1.
+- Nach «Suchen» (Knopf oder Eingabetaste) springt die Seite ebenfalls zur Überschrift der Liste («4 Rechnungen» oben, Gebäude und Kategorie ausser Bild). Da habe ich bewusst gesucht, also stört es weniger; ein danach gewähltes Gebäude bleibt an der Stelle stehen. Ist es eine Auswahl nach einem solchen Sprung und die Liste wird kürzer, rückt die Seite etwas nach oben, weil weniger Inhalt da ist; die Filter sind dann nur teilweise im Bild.
+- Wohnungen: Musterhaus Zentrum + «Leer» → 2 Wohnungen (2.02 und 3.02), wie in Runde 1. Die Seite bleibt oben; die Überschrift «2 Wohnungen» und die erste Wohnung sehe ich bei 150 % erst nach etwas Scrollen.
+- Mieter: «Aktive Mieter» → 9 Mieter; «Filter zurücksetzen» bewegte die Seite nur wenig. Abrechnungen: Nach dem Zurücksetzen steht in der Adresse ein einzelnes «?» am Ende (`/statements?`); sehen tue ich davon sonst nichts.
+
+### Aufgabe geschafft: ja
+
+- Leere Wohnungen in Musterhaus Zentrum: 2.02 und 3.02.
+- Heizungsrechnungen 2025 von Alpenblick: 1 Rechnung (Heizöl Oberland AG).
+- Filter zurückgesetzt: wieder alle 83 Rechnungen.
+
+### Aufwand
+
+Etwa 10 Minuten, rund 12 Schritte für die Aufgabe; kein Hochscrollen zwischen den drei Auswahlen auf Rechnungen nötig (Runde 1: dreimal). Dazu Proben mit Suchfeld und «Filter zurücksetzen» auf allen fünf Listen.
+
+### Ablauf
+
+- Rechnungen, «Filter zurücksetzen» geklickt, oben bei den Filtern stehend. Erwartet: Die Seite bleibt bei den Filtern, wie jetzt nach einer Auswahl. Gesehen: Sprung zur Überschrift «Rechnungen 1–20 von 83»; Gebäude und Kategorie ausser Bild.
+- Mietverträge, «Filter zurücksetzen». Erwartet: kein Sprung. Gesehen: Sprung nach unten zur Liste.
+- Rechnungen, Text getippt und Gebäude gewählt. Erwartet (nach Runde 1 befürchtet): Der Text wirkt mit. Gesehen: Der Text ist weg, nur das Gebäude wirkt.
+
+### Vorschläge
+
+- **H-3:** wie in Runde 1: «Suchen» direkt neben oder unter das Suchfeld und ein Hilfetext beim Suchfeld («Geben Sie einen Begriff ein und klicken Sie auf Suchen. Die Auswahlfelder wirken sofort.»).
+- **H-4:** `/invoices` bei 150 % Zoom öffnen, ein Gebäude wählen (Seite bleibt oben), «Filter zurücksetzen» klicken → die Seite springt zur Überschrift der Liste, Gebäude und Kategorie sind nicht mehr im Bild. Gleich auf `/contracts`. Hilfreich wäre: beim Zurücksetzen gleich verhalten wie bei einer Auswahl, also an der Stelle bleiben und nur die Liste neu zeigen.
+
+### Nicht geprüft
+
+- 200 % Zoom: nicht versucht, die Aufgabe nannte 150 %.
+- Aufgeklappte Auswahllisten per echtem Mausklick auf einen Eintrag: Ich habe das Feld angeklickt und den Eintrag über die Auswahl des Browsers gesetzt (gleiche Wirkung wie ein Klick).
+- Speichern: nicht Teil der Aufgabe.
