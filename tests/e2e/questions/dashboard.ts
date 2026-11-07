@@ -5,6 +5,7 @@ import {
 	occupancyCount,
 	occupancyRow,
 	occupancyVacancyHelp,
+	statHelp,
 	overviewDeadline,
 	overviewTask,
 	outdatedDraftsTask,
@@ -31,6 +32,12 @@ const statuses: Record<string, string> = {
 export const rentedApartmentsOf = (building: string) => Text.of(occupancyCount(building));
 export const occupancyText = (building: string) => Text.of(occupancyRow(building));
 export const occupancyHelp = Text.of(occupancyVacancyHelp);
+/** The status word below the counts and its sentence (#731) */
+export const statusExplained = (label: string) =>
+	question(`the explanation of «${label}» below the counts`, async (actor) => [
+		await actor.answer(Text.of(statHelp(statuses[label], 'term'))),
+		await actor.answer(Text.of(statHelp(statuses[label], 'definition')))
+	]);
 export const occupancyShown = (building: string) => Visibility.of(occupancyRow(building));
 export const overviewTaskShown = (title: string) => Visibility.of(overviewTask(title));
 export const overviewTaskText = (title: string) => Text.of(overviewTask(title));
