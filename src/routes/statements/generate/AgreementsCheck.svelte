@@ -27,7 +27,7 @@
 <!-- while it loads, the wizard says so at the top of the step (#470) -->
 {#if shown}
 	<Alert tone="critical" title={m.statements_agreements_failed_title()} testid="agreements-failed">
-		<p>
+		<p data-testid={failedAgain ? 'agreements-retry-failed' : undefined}>
 			{failedAgain ? m.statements_agreements_retry_failed() : m.statements_agreements_failed_text()}
 		</p>
 		{#snippet action()}

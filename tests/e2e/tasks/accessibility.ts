@@ -581,7 +581,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Navigate.reload,
 			Wait.until(on.shown('agreements-failed')),
 			Click.on(agreementsRetry),
-			Wait.until(on.agreementsRetryAnswered)
+			Wait.until(on.shown('agreements-retry-failed'))
 		),
 	// #688: «Erneut versuchen» once the check works again: the line that the contracts are checked, with the focus
 	'agreements-checked': () => (actor) =>

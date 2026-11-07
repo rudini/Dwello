@@ -155,7 +155,7 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 
 	// #688 (Sven P-2): the button stays, busy, and keeps the focus while Dwello tries again
 	it('lässt «Erneut versuchen» mit dem Fokus stehen, solange Dwello erneut prüft', async () => {
-		await agreedCosts(() => [500, {}]);
+		const { props } = await agreedCosts(() => [500, {}]);
 		const retry = byTestId('agreements-retry')!;
 		retry.focus();
 
@@ -166,7 +166,9 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 		expect(byTestId('agreements-retry')!.getAttribute('aria-disabled')).toBe('true');
 		expect(document.activeElement).toBe(byTestId('agreements-retry'));
 		// it has not failed again yet
-		expect(byTestId('agreements-failed')!.textContent).toContain('Dwello konnte nicht prüfen');
+		expect(byTestId('agreements-failed')!.textContent).not.toContain('Dwello hat es erneut versucht');
+		// review 688 C-2: the alert stays, so the wizard still says above «Weiter» that it stands below
+		expect(props.noted).toBe(true);
 	});
 
 	// #688 (Helga P-3): a failed retry says that Dwello tried again; the focus stays on the button
