@@ -30,11 +30,14 @@
 	let term = $derived(search);
 </script>
 
+<!-- #733 (Helga P-1): one group for a confirmation (#1113), so it leaves «Suchen» clear while a field has the focus -->
 <form
 	method="GET"
 	action="/statements"
 	role="search"
 	aria-label={m.list_search_label()}
+	data-testid="statement-search-form"
+	data-focus-row
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 md:flex-row md:items-end"
 >
 	{#if status}<input type="hidden" name="status" value={status} />{/if}

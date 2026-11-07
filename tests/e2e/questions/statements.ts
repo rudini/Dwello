@@ -1,5 +1,6 @@
 import type { TestData } from '../fixtures/backend';
 import { question } from '../screenplay/actor';
+import { roomBesideConfirmation } from './app-frame';
 import { Attribute, Count, DownloadedFile, FocusedElement, ShareInViewport, Text, ThePage, Value, Visibility } from '../screenplay/questions';
 import {
 	draftFilter,
@@ -7,6 +8,7 @@ import {
 	statementBuildingFilter,
 	statementRow,
 	statementRowForYear,
+	statementSearchForm,
 	statementRows,
 	statementsEmptyNotice,
 	statementsScope,
@@ -49,6 +51,8 @@ export const downloadedFileNameByNumber = question('the downloaded file name by 
 });
 // #679: whether the filter «Entwurf» is the one shown, and the building the list is filtered by
 export const listStatusShown = Attribute.named('aria-current').of(draftFilter);
+/** #733: the room between the search form and the confirmation (negative: it covers it) */
+export const roomBesideSearchForm = roomBesideConfirmation(statementSearchForm);
 export const listBuildingShown = Value.chosenIn(statementBuildingFilter);
 // #673: what the list offers next to its filters, and what a status tab says
 export const resetFiltersShown = Visibility.of(resetFiltersButton);

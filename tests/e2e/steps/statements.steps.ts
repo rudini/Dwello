@@ -14,7 +14,8 @@ import {
 	statementPath,
 	statusFilterText,
 	statusFilterShareInWindow,
-	focusedElement
+	focusedElement,
+	roomBesideSearchForm
 } from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
@@ -88,6 +89,11 @@ When('der Liegenschaftsverwalter zur nächsten Seite blättert', async ({ verwal
 
 When('der Liegenschaftsverwalter beginnt, die Liste nach einem anderen Gebäude zu filtern', async ({ verwalter }) => {
 	await verwalter.attemptsTo(focusBuildingFilter);
+});
+
+// #733 (Helga P-1), #1113: the whole filter, so «Suchen» beside the focused field is free too
+Then('verdeckt die Erfolgsmeldung nichts, was zum Filter gehört', async ({ verwalter }) => {
+	await verwalter.sees(roomBesideSearchForm).toBeGreaterThanOrEqual(8);
 });
 
 When(
