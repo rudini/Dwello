@@ -139,6 +139,12 @@ Funktionalität: Kostenkategorien
     Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
     Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
 
+  Szenario: Die Eingabetaste auf der Wahl der Umlagefähigkeit speichert, ohne die KI zu fragen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" mit der Eingabetaste auf «Nicht umlagefähig» speichert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
+    Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
+
   Szenario: Die Eingabetaste ohne Wahl der Umlagefähigkeit fragt die KI nicht
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die Kategorie "Gartenpflege" mit der Eingabetaste speichert, ohne zu wählen, ob sie umlagefähig ist

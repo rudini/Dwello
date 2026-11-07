@@ -82,6 +82,13 @@ export const saveWithEnter = (name: string, allowed?: boolean): Activity => (act
 		Enter.theValue(name).into(nameInput),
 		Press.theKey('Enter').on(nameInput)
 	);
+// #678: the Enter key on a choice saves too; Chromium would press the first button, «Von der KI prüfen lassen»
+export const saveWithEnterOnChoice = (name: string, label: 'Umlagefähig' | 'Nicht umlagefähig'): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(name).into(nameInput),
+		Check.the(allowanceOption(label)),
+		Press.theKey('Enter').on(allowanceOption(label))
+	);
 export const askKiWithoutName = Click.on(proposeButton);
 export const chooseNotAllowed = Check.the(allowanceOption('Nicht umlagefähig'));
 export const rename = (name: string) => Enter.theValue(name).into(nameInput);

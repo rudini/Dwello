@@ -11,6 +11,7 @@ import {
 	shareOfSample
 } from '../questions/distribution-keys';
 import { pageTitle } from '../questions/navigation';
+import { confirmedNames } from '../questions/app-frame';
 import {
 	changeFormula,
 	createDistributionKey,
@@ -156,3 +157,8 @@ Then(
 		);
 	}
 );
+
+// #678: the confirmation names the key as the list does, in the UI language
+Then('nennt die Bestätigung den Verteilschlüssel {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(confirmedNames).toEqual([names.get(title)]);
+});

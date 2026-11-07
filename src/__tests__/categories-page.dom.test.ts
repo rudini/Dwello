@@ -184,6 +184,56 @@ describe('Kategorie erfassen', () => {
 		expect(toastTexts()).toEqual(['Category «Garden care» saved']);
 	});
 
+	// #678: Enter speichert; die Formulare, die der Browser abschickt, zählt der Test wie enhance
+	const submitters = () => {
+		const sent: (HTMLElement | null)[] = [];
+		server.form!.addEventListener('submit', (event) => {
+			event.preventDefault();
+			sent.push(event.submitter);
+		});
+		return sent;
+	};
+	const pressEnter = (field: HTMLElement, init: KeyboardEventInit = {}) =>
+		field.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, ...init })
+		);
+
+	it('speichert mit Enter im Namen nicht ein zweites Mal, solange das Speichern läuft', () => {
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+		const sent = submitters();
+		server.submit!({
+			formData: new FormData(server.form!),
+			submitter: byTestId('category-submit')
+		});
+		flushSync();
+
+		pressEnter(byTestId('category-name-input')!);
+		pressEnter(byTestId('category-name-input')!);
+
+		expect(sent).toEqual([]);
+	});
+
+	it('speichert mit Enter auf der Wahl der Umlagefähigkeit, ohne die KI zu fragen', () => {
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+		const sent = submitters();
+		const option = document.querySelector<HTMLInputElement>(
+			'[data-testid="category-allowance"] input'
+		)!;
+
+		const browserDefault = pressEnter(option);
+
+		expect({ browserDefault, sent }).toEqual({ browserDefault: false, sent: [null] });
+	});
+
+	it('speichert nicht, wenn Enter eine Eingabe mit dem Eingabesystem abschliesst', () => {
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+		const sent = submitters();
+
+		pressEnter(byTestId('category-name-input')!, { isComposing: true });
+
+		expect(sent).toEqual([]);
+	});
+
 	it('meldet, warum die Kategorie nicht gespeichert wurde', () => {
 		show(NewCategoryPage, {
 			data: { kiEnabled: true },
@@ -221,7 +271,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(help).toContain('wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art.\u00a0257a Absatz\u00a02\u00a0OR)');
 		expect(help).toContain('Gebäudeversicherung');
 		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8); Fachreview 678 M-1: nach dem Wert
-		expect(help).toContain('Grundgebühren nicht, die sich nach dem Wert richten, z. B. nach dem Versicherungswert des Gebäudes');
+		expect(help).toContain('Grundgebühren nicht, die sich nach dem Wert richten, z. B. nach dem Versicherungswert des Gebäudes');
 		expect(help).toContain('auch nicht die Gebühr für Regenwasser');
 	});
 
@@ -234,6 +284,24 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(paragraphs[0]).toMatch(/^Umlagefähig sind Kosten aus dem Gebrauch des Gebäudes/);
 		expect(paragraphs[1]).toBe('Bei Heizung und Lift zählen nur Betrieb und Wartung der Anlage.');
 		expect(paragraphs[4]).toMatch(/^Mit «Von der KI prüfen lassen» prüft die KI Name und Beschreibung/);
+	});
+
+	// #678 (Persona Helga H-2): «z. B.» bricht nicht zwischen «z.» und «B.» um, in der Einleitung und bei den Regeln
+	it.each([
+		['de', 'z. B.'],
+		['fr', 'p. ex.'],
+		['it', 'p. es.']
+	] as const)('bricht in der Sprache %s «%s» in der Hilfe nicht um', (locale, abbreviation) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+			const help = byTestId('category-allowance-help')!.textContent!;
+
+			expect(help.split(abbreviation.replace(' ', ' ')).length - 1).toBe(2);
+			expect(help).not.toContain(abbreviation);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 
 	// #678: ohne KI und beim Bearbeiten gibt es «Von der KI prüfen lassen» nicht, also auch keinen Satz dazu

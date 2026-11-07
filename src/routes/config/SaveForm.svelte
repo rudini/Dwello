@@ -83,10 +83,11 @@
 	// e.g. «Von der KI prüfen lassen», which runs only by its own button
 	const saveOnEnter = (event: KeyboardEvent) => {
 		const field = event.target;
-		if (event.key !== 'Enter' || !(field instanceof HTMLInputElement)) return;
-		if (field.type === 'checkbox' || field.type === 'radio') return;
+		// an Enter that ends an IME input saves nothing, as natively
+		if (event.key !== 'Enter' || event.isComposing || !(field instanceof HTMLInputElement)) return;
 		event.preventDefault();
-		form?.requestSubmit();
+		// requestSubmit() clicks no button, so the busy save button does not stop a second save (#677)
+		if (!saving) form?.requestSubmit();
 	};
 </script>
 

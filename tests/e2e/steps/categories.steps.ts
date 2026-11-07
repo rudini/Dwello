@@ -54,6 +54,7 @@ import {
 	saveFormAsNotAllowed,
 	saveWithoutChoice,
 	saveWithEnter,
+	saveWithEnterOnChoice,
 	askKiWithoutName,
 	chooseNotAllowed,
 	rename,
@@ -517,6 +518,13 @@ When(
 	'der Liegenschaftsverwalter die Kategorie {string} mit der Eingabetaste speichert, ohne zu wählen, ob sie umlagefähig ist',
 	async ({ verwalter, seed }, title: string) => {
 		await verwalter.attemptsTo(saveWithEnter(seed.unique(title)));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Kategorie {string} mit der Eingabetaste auf «Nicht umlagefähig» speichert',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(saveWithEnterOnChoice(seed.unique(title), 'Nicht umlagefähig'));
 	}
 );
 
