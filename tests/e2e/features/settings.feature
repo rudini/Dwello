@@ -203,6 +203,7 @@ Funktionalität: Einstellungen
     Wenn der Liegenschaftsverwalter die Einstellungen erneut öffnet
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
     Und kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend
+    Und steht der Fokus in den Einstellungen auf "Firmenname"
 
   # #690, Punkt 3 (Persona Helga 450): eine abgelehnte Speicherung speichert nichts, auch nicht die anderen Felder,
   # und die Seite sagt es. Abgelehnt speichert sie nichts: das Szenario braucht die Einstellungen nicht für sich

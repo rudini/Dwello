@@ -1,4 +1,4 @@
-import { Accessible, Attribute, Checked, Count, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, FocusedLabel, Value, Visibility } from '../screenplay/questions';
 import { exportAllDataButton, holderIsSenderBox, savedNotice, settingField } from '../targets/settings';
 
 export const settingsSaved = Visibility.of(savedNotice);
@@ -12,3 +12,5 @@ export const exportHelp = Accessible.descriptionOf(exportAllDataButton);
 export const settingCount = (name: string) => Count.of(settingField(name));
 /** #1166: whether «Kontoinhaber ist der Absender» is ticked */
 export const holderIsSender = Checked.of(holderIsSenderBox);
+/** #690 (persona Helga 690 H-4): the setting that has the focus, by its label */
+export const focusedSetting = FocusedLabel;

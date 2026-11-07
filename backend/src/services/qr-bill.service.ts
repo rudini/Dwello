@@ -332,9 +332,6 @@ async function generateQRCodeImage(
 }
 
 /**
- * Generate complete QR-bill data for a statement
- */
-/**
  * The creditor of the Zahlteil: the Kontoinhaber (#1166), the Absender unless entered; null without name, postal code
  * or town, as the tenant would pay to no one known (#450)
  */
@@ -343,6 +340,9 @@ export function creditorOf(config: QRBillConfig) {
 	return [creditor.name, creditor.postalCode, creditor.city].every((part) => part.trim()) ? creditor : null;
 }
 
+/**
+ * Generate complete QR-bill data for a statement
+ */
 export async function generateQRBillForStatement(
 	statement: StatementForQRBill,
 	config: QRBillConfig

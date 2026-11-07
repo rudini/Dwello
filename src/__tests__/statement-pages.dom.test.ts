@@ -1870,7 +1870,9 @@ describe('Abrechnungsdetail', () => {
 			expect(warning.textContent).toContain(
 				'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
 			);
-			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe('/config');
+			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe(
+				'/config#sender'
+			);
 		});
 
 		it('warnt nicht, wo das PDF keinen Zahlteil hat', () => {

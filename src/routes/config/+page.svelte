@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -39,6 +40,12 @@
 		);
 	let holderIsSender = $state(noHolderStored());
 	const saved = $derived(result?.saved === true);
+	// #690 (persona Helga 690 H-4): opened with fields the stored IBAN lacks, two screens down: the first gets the focus,
+	// as after a refused save
+	let settingsForm = $state<HTMLFormElement>();
+	onMount(() => {
+		if (data.missing.length) focusFirstError(settingsForm);
+	});
 	let saving = $state(false);
 </script>
 
@@ -129,6 +136,7 @@
 	</Panel>
 
 	<form
+		bind:this={settingsForm}
 		method="POST"
 		use:enhance={() => {
 			saving = true;
@@ -141,7 +149,7 @@
 		class="flex flex-col gap-8"
 		novalidate
 	>
-		<Panel title={m.settings_sender()}>
+		<Panel title={m.settings_sender()} id="sender">
 			<p class="text-ink-muted">
 				{m.settings_sender_text()}
 			</p>

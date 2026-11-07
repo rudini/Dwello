@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { ON_FRESH, test } from '../fixtures/test';
-import { holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
+import { focusedSetting, holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
 import { giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -91,6 +91,10 @@ Then('erklärt die Einstellung {string} {string}', async ({ verwalter }, label: 
 Then('kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend', async ({ verwalter }) => {
 	for (const label of ['Firmenname', 'PLZ', 'Ort']) await verwalter.sees(settingInvalid(FIELDS[label])).toBe('true');
 	await verwalter.sees(settingInvalid(FIELDS.Adresse)).toBeNull();
+});
+
+Then('steht der Fokus in den Einstellungen auf {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(focusedSetting).toBe(label);
 });
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {
