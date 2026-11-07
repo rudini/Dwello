@@ -20,7 +20,9 @@ import {
 	recategorizationFailure,
 	tenancyLawNote,
 	tenancyLawNotes,
-	utilityCostOfInvoice
+	utilityCostOfInvoice,
+	toneOfUtilityCost,
+	tonesInTenancyLawNote
 } from '../questions/invoice-detail';
 import { pageAddressInApp, statementPath } from '../questions/statements';
 import { thisYear } from '../fixtures/dates';
@@ -82,6 +84,20 @@ Then('ist die Rechnung umlagefähig', async ({ verwalter }) => {
 Then('ist die Rechnung nicht umlagefähig', async ({ verwalter }) => {
 	await verwalter.sees(utilityCostOfInvoice).toBe('Nicht umlagefähig');
 });
+
+// #687: «Nicht umlagefähig» is a correct state, shown without a warning
+Then('ist die Rechnung ohne Warnung als nicht umlagefähig bezeichnet', async ({ verwalter }) => {
+	await verwalter.sees(utilityCostOfInvoice).toBe('Nicht umlagefähig');
+	await verwalter.sees(toneOfUtilityCost).toBe('neutral');
+});
+
+Then(
+	'erklärt ein Hinweis ohne Warnung, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst',
+	async ({ verwalter }) => {
+		await verwalter.sees(tenancyLawNote).toContain('Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein.');
+		await verwalter.sees(tonesInTenancyLawNote).toEqual([]);
+	}
+);
 
 Then(
 	'erklärt ein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst',
