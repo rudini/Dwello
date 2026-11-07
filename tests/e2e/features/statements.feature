@@ -153,3 +153,19 @@ Funktionalität: Nebenkostenabrechnungen
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
     Und der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
     Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
+
+  # #1162 (Marco M-2, Helga H-1): auf dem Handy und bei 150 % Zoom bleibt der gewählte Filter im Bild
+  Szenariogrundriss: Der gewählte Statusfilter bleibt im Bild
+    Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Dann sagt der Statusfilter "Entwurf" "Filter aufheben"
+    Und ist der Statusfilter "Entwurf" ganz im Fenster zu sehen
+    Und steht der Fokus auf dem Statusfilter "Entwurf"
+    Wenn der Liegenschaftsverwalter den Statusfilter "Entwurf" wieder aufhebt
+    Dann ist der Statusfilter "Entwurf" ganz im Fenster zu sehen
+    Und steht der Fokus auf dem Statusfilter "Entwurf"
+
+    Beispiele:
+      | Breite | Höhe |
+      | 390    | 844  |
+      | 960    | 600  |

@@ -12,7 +12,9 @@ import {
 	resetFiltersShown,
 	statementOfYearListed,
 	statementPath,
-	statusFilterText
+	statusFilterText,
+	statusFilterShareInWindow,
+	focusedElement
 } from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
@@ -29,7 +31,8 @@ import {
 	showStatementsOfBuilding,
 	showStatementsOfBuildingWhileLoading,
 	startGeneratingStatements,
-	turnToNextPage
+	turnToNextPage,
+	clearDraftFilter
 } from '../tasks/statements';
 import { inDays } from '../fixtures/dates';
 
@@ -279,4 +282,17 @@ const STATUSES: Record<string, string> = { Entwurf: 'draft' };
 // #673 (Marco P-7): the chosen tab says so in words, not only by its colour
 Then('sagt der Statusfilter {string} {string}', async ({ verwalter }, status: string, text: string) => {
 	await verwalter.sees(statusFilterText(STATUSES[status])).toContain(text);
+});
+
+// #1162 (Marco M-2, Helga H-1)
+When('der Liegenschaftsverwalter den Statusfilter "Entwurf" wieder aufhebt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(clearDraftFilter);
+});
+
+Then('ist der Statusfilter {string} ganz im Fenster zu sehen', async ({ verwalter }, status: string) => {
+	await verwalter.sees(statusFilterShareInWindow(STATUSES[status])).toBeGreaterThan(0.99);
+});
+
+Then('steht der Fokus auf dem Statusfilter {string}', async ({ verwalter }, status: string) => {
+	await verwalter.sees(focusedElement).toBe(`filter-${STATUSES[status]}`);
 });

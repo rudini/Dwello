@@ -60,7 +60,11 @@
 	// After a search on a list the focus goes to its results, so their number is read out
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
-		if (isListNavigation(navigation) && !(document.activeElement instanceof HTMLSelectElement))
+		// a filter select, or a link that keeps the focus (the status tiles, #1162), stays where it is
+		const keep =
+			document.activeElement instanceof HTMLSelectElement ||
+			document.activeElement?.closest('[data-sveltekit-keepfocus]');
+		if (isListNavigation(navigation) && !keep)
 			document.querySelector<HTMLElement>('main [data-results]')?.focus();
 	});
 
