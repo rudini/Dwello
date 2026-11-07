@@ -18,6 +18,7 @@ import {
 } from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
+	focusBuildingFilter,
 	goToScopeContract,
 	requestStatementPdfFromList,
 	openStatement,
@@ -83,6 +84,10 @@ When('der Liegenschaftsverwalter die Abrechnungen von {string} sucht', async ({ 
 
 When('der Liegenschaftsverwalter zur nächsten Seite blättert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(turnToNextPage);
+});
+
+When('der Liegenschaftsverwalter in das Feld «Gebäude» des Filters geht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(focusBuildingFilter);
 });
 
 When(
