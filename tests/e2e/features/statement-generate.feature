@@ -903,3 +903,42 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann steht der Fokus auf dem Ergebnis "2 Nebenkostenabrechnungen sind als Entwurf erstellt."
     Und sagt der Assistent "2 Nebenkostenabrechnungen sind als Entwurf erstellt." an
+
+  # #1146: auch neben langen Angaben der fertigen Schritte stehen die Namen der Schritte ganz
+  Szenariogrundriss: Die Schrittanzeige trennt keinen Namen eines Schritts
+    Angenommen das Browserfenster ist <Breite> auf 900 Pixel gross
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Erstellen"
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
+    Wenn der Liegenschaftsverwalter zum Schritt "Heizprofil und Verwaltungspauschale" zurückgeht
+    Dann zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Heizprofil und Verwaltungspauschale"
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
+
+    Beispiele:
+      | Breite |
+      | 768    |
+      | 960    |
+      | 1280   |
+      | 1440   |
+
+  # #1146 (Fallback review): ein langer Gebäudename in einem Wort schiebt die Schrittanzeige nicht über den Rand
+  Szenario: Ein langer Gebäudename passt in die Schrittanzeige
+    Angenommen das Gebäude "Mehrfamilienhausüberbauung" in "Winterthur" existiert
+    Und im Gebäude "Mehrfamilienhausüberbauung" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Lea Gross" existiert
+    Und "Lea Gross" mietet die Wohnung "1.01" seit "2024-01-01" für "1200" Franken
+    Und das Browserfenster ist 768 auf 900 Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Mehrfamilienhausüberbauung" mit 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann nennt der erledigte Schritt "Gebäude" die Wahl "Mehrfamilienhausüberbauung"
+    Und scrollt die Seite nicht seitwärts

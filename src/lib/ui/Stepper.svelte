@@ -16,10 +16,19 @@
 		onselect: (step: number) => void;
 		values?: (string | undefined)[];
 	} = $props();
-	// without values each step as wide as its name (#667, W-10); with them the steps share the width (#1146)
+	// without values each step as wide as its name (#667, W-10); with them the steps share the width
+	// whole words that do not fit in one row (a long building name) move the next steps to a second one; a single
+	// word wider than the whole list still overflows (#1146, code review 1146-4 C-1)
 	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
-	// #673 (Helga P-6): from md the current step is named next to its number too
+	const rows = $derived(values.length ? 'flex-wrap' : '');
+	// #673 (Helga P-6): from md the current step is named next to its number too; from xl all of them,
+	// unless the finished steps show values: next to them five names do not fit unbroken (#1146)
+	const wide = $derived(values.length ? '' : 'xl:not-sr-only');
 	const named = (number: number) => (number === current ? 'md:not-sr-only' : '');
+	// the current step keeps its longest word whole, unhyphenated, and takes the room from the others; with values
+	// every step keeps its words whole: the names but one are hidden, so the words fit (#1146, Dr. Weber P-1)
+	const shrink = (number: number) => (number === current || values.length ? '' : 'min-w-0');
+	const wrap = (number: number) => (number === current ? '' : 'min-w-0 hyphens-auto break-words');
 </script>
 
 <nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
@@ -31,16 +40,16 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Up to xl the numbers without names: five names do not fit next to the sidebar (the current one is named above,
-	     and from md next to its number);
+	<!-- Up to xl, and with values at every width, the numbers without names: five names do not fit next to the
+	     sidebar or the values (the current one is named above, and from md next to its number; #1146);
 	     a finished step shows its value at every width the list shows (#663).
-	     min-w-0 and hyphenation keep long names inside their step instead of widening the page; without values each
-	     step as wide as its name, so a long one is not cut inside the word next to short ones (#667, Dr. Weber W-10);
-	     with values the steps share the width, a long value would take it from the names -->
-	<ol class="hidden gap-2 md:flex">
+	     Without values min-w-0 and hyphenation keep the other long names inside their step instead of widening the
+	     page, and each step is as wide as its name, so a long one is not cut inside the word next to short ones
+	     (#667, Dr. Weber W-10); with values the steps share the width and keep their words whole -->
+	<ol class="hidden gap-2 md:flex {rows}">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}
-			<li class="flex min-w-0 items-center gap-2 {width}">
+			<li class="flex items-center gap-2 {width} {shrink(number)}">
 				{#if number < current}
 					<button
 						type="button"
@@ -56,7 +65,7 @@
 						<span class="flex min-w-0 flex-col text-left">
 							<span
 								data-testid="wizard-step-label"
-								class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
+								class="sr-only min-w-0 hyphens-auto break-words {wide}">{step}</span
 							><span
 								data-testid="wizard-step-value"
 								class="min-w-0 break-words font-normal text-ink-muted"
@@ -67,7 +76,7 @@
 					</button>
 				{:else}
 					<span
-						class="flex min-h-12 min-w-0 items-center gap-2 px-2 {number === current
+						class="flex min-h-12 items-center gap-2 px-2 {shrink(number)} {number === current
 							? 'font-bold text-ink'
 							: 'text-ink-muted'}"
 						aria-current={number === current ? 'step' : undefined}
@@ -80,7 +89,7 @@
 						>
 						<span
 							data-testid="wizard-step-label"
-							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only {named(number)}"
+							class="sr-only {wrap(number)} {wide} {named(number)}"
 							>{step}</span
 						>
 					</span>

@@ -142,6 +142,8 @@
 		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the line of the demo notice at the top of the page (on the sign-in page the full notice); on the privacy statement and the terms also their section on the demo, on the help its section «Öffentliche Demo».",
 		"backup-error": "«Sicherung einrichten» (#718) with a code typed that is not the one shown: the refusal above the field. The screen runs on the fresh installation of the E2E stack, the only one with a folder for the Sicherung; its look first removes any confirmed code.",
 		"backup-stale": "The overview when no Sicherung succeeded for more than a day (#718, O1): the warning with the link to the installation guide. Seen on the fresh installation, whose look sets a code confirmed two days ago that cannot encrypt.",
+		"account-holder": "The settings with «Kontoinhaber ist der Absender» cleared (#1166): the four fields of the Kontoinhaber in the block «Konto»; nothing is saved.",
+		"account-holder-missing": "The settings after saving an IBAN with «Kontoinhaber ist der Absender» cleared and no Kontoinhaber entered (#1166): the refusal at the name, the missing fields marked; nothing is saved.",
 		"backup-links": "The settings of an installation with a folder for the Sicherung (the fresh installation): the link to «Neuer Wiederherstellungscode» (#718, part 3).",
 		"new-code-password": "«Neuer Wiederherstellungscode» (#718, part 3) signed in with a Konto mit Passwort: the password typed again. Its look makes a Konto mit Passwort on the fresh installation and removes it afterwards.",
 		"new-code-password-error": "«Neuer Wiederherstellungscode» after a wrong password: the refusal above the field.",
@@ -924,7 +926,9 @@
 			"path": "/config",
 			"states": [
 				"default",
-				"backup-links"
+				"backup-links",
+				"account-holder",
+				"account-holder-missing"
 			]
 		},
 		{

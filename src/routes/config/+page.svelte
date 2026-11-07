@@ -4,6 +4,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -20,7 +21,22 @@
 	const errors = $derived(result?.errors ?? {});
 	// empty fields of the Firmenadresse that the IBAN's error names (#450, persona Helga P-2)
 	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? []);
-	const namedBy = (field: string) => (missing.includes(field) ? 'iban-error' : undefined);
+	// the Kontoinhaber's (#1166) at the error of his name
+	const namedBy = (field: string) =>
+		missing.includes(field)
+			? field.startsWith('accountHolder')
+				? 'accountHolderName-error'
+				: 'iban-error'
+			: undefined;
+	// #1166: ticked while no Kontoinhaber of his own is stored; then as the landlord sets it
+	const noHolderStored = (stored = data.settings) =>
+		!(
+			stored.accountHolderName ||
+			stored.accountHolderAddress ||
+			stored.accountHolderPostalCode ||
+			stored.accountHolderCity
+		);
+	let holderIsSender = $state(noHolderStored());
 	const saved = $derived(result?.saved === true);
 	let saving = $state(false);
 </script>
@@ -178,6 +194,10 @@
 				help={m.settings_email_help()}
 				example="info@example.ch"
 			/>
+		</Panel>
+
+		<!-- #1166: the IBAN with its Kontoinhaber, the Absender unless the box is cleared -->
+		<Panel title={m.settings_account()}>
 			<SettingField
 				name="iban"
 				label="IBAN"
@@ -186,6 +206,48 @@
 				help={m.settings_iban_help()}
 				example="CH93 0076 2011 6238 5295 7"
 			/>
+			<Checkbox
+				id="accountHolderIsSender"
+				name="accountHolderIsSender"
+				label={m.settings_account_holder_is_sender()}
+				bind:checked={holderIsSender}
+				help={m.settings_account_holder_help()}
+				testid="setting-accountHolderIsSender"
+			/>
+			{#if !holderIsSender}
+				<fieldset class="flex flex-col gap-6">
+					<legend class="text-lg font-semibold text-ink">{m.settings_account_holder()}</legend>
+					<SettingField
+						name="accountHolderName"
+						label={m.settings_account_holder_name()}
+						value={settings.accountHolderName}
+						error={errors.accountHolderName}
+						invalidBy={namedBy('accountHolderName')}
+					/>
+					<SettingField
+						name="accountHolderAddress"
+						label={m.buildings_street()}
+						value={settings.accountHolderAddress}
+					/>
+					<div class="grid gap-6 sm:grid-cols-3">
+						<SettingField
+							name="accountHolderPostalCode"
+							label={m.buildings_postal_code()}
+							value={settings.accountHolderPostalCode}
+							error={errors.accountHolderPostalCode}
+							invalidBy={namedBy('accountHolderPostalCode')}
+						/>
+						<div class="sm:col-span-2">
+							<SettingField
+								name="accountHolderCity"
+								label={m.buildings_city()}
+								value={settings.accountHolderCity}
+								invalidBy={namedBy('accountHolderCity')}
+							/>
+						</div>
+					</div>
+				</fieldset>
+			{/if}
 		</Panel>
 
 		<Panel title={m.glossary_fee_term()}>

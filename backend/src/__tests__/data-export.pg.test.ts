@@ -321,6 +321,15 @@ describe('Alle Daten exportieren', () => {
 		expect(settings).toEqual(expect.arrayContaining(['Firmenname', 'IBAN', 'Zahlungsfrist (Tage)']));
 	});
 
+	// #1166: the Kontoinhaber of the IBAN, named as the export names the Absender (Fachreview 1166-1)
+	it('gibt die Angaben des Kontoinhabers mit ihren Namen heraus', async () => {
+		const settings = rowsOf(await exportIn(), 'tabellen/einstellungen.csv').map((row) => row.Einstellung);
+
+		expect(settings).toEqual(
+			expect.arrayContaining(['Name des Kontoinhabers', 'Strasse und Hausnummer des Kontoinhabers', 'PLZ des Kontoinhabers', 'Ort des Kontoinhabers'])
+		);
+	});
+
 	// #1088: die Abrechnungsperiode steht beim Gebäude, nicht mehr in den Einstellungen
 	it('nennt die Sprache und den Standard-Verteilschlüssel und das Standard-Heizprofil mit Namen wie das Formular (Fachreview 496-2 V-14)', async () => {
 		const [key, profile] = [await firstPredefined('distribution-keys'), await firstPredefined('heating-profiles')];

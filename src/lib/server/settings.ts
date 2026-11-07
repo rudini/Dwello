@@ -13,6 +13,10 @@ const KEYS = {
 	companyPhone: 'company_phone',
 	companyEmail: 'company_email',
 	iban: 'iban',
+	accountHolderName: 'account_holder_name',
+	accountHolderAddress: 'account_holder_address',
+	accountHolderPostalCode: 'account_holder_postal_code',
+	accountHolderCity: 'account_holder_city',
 	managementFeePercent: 'management_fee_pct',
 	defaultHeatingProfileId: 'default_heating_profile_id',
 	defaultDistributionKeyId: 'default_distribution_key_id',
@@ -41,9 +45,17 @@ const FIELDS: Record<string, string> = Object.fromEntries(Object.entries(KEYS).m
 /** Saves every field as typed; the backend checks them (H-28, #717) and resets the emptied ones to their default */
 export async function saveSettings(fetch: typeof globalThis.fetch, request: Request) {
 	const formData = await request.formData();
+	// #1166: while «Kontoinhaber ist der Absender» is ticked, a stored Kontoinhaber is deleted
+	const holderIsSender = formData.has('accountHolderIsSender');
 	const typed = Object.fromEntries(
-		Object.entries(KEYS).map(([field, key]) => [key, String(formData.get(field) ?? '').trim()])
+		Object.entries(KEYS).map(([field, key]) => [
+			key,
+			holderIsSender && key.startsWith('account_holder_')
+				? ''
+				: String(formData.get(field) ?? '').trim()
+		])
 	);
+	typed.account_holder_separate = holderIsSender ? '' : 'true';
 	const saved = await fetch(API, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
@@ -53,7 +65,7 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 
 	const refused = (await saved.json().catch(() => ({}))) as BackendError;
 	if (!refused.causes) return fail(400, { errors: { form: m.settings_save_failed() } as Record<string, string> });
-	// each at the field of its key; the Firmenadresse an IBAN needs (#450) marked where it is empty
+	// each at the field of its key; the Firmenadresse and the Kontoinhaber an IBAN needs (#450, #1166) marked where empty
 	const causes = refused.causes.map((cause) => ({
 		...cause,
 		params: { ...cause.params, field: FIELDS[String(cause.params?.field)] ?? 'form' }

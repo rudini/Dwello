@@ -1346,6 +1346,16 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Issue opened: #1162 (keep the chosen tile in view), #1163 (E2E contract row depends on the list page)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #1146 statement wizard step display keeps words whole
+
+- [x] Read #1146; layout by my recommendation (the issue's option «the numbers only as below xl»): with values only the current step is named, every step keeps its words whole
+- [x] #1143 needs a spec change (`contract-edit.feature:239` pins the text): proposed text in the issue, `needs-decision`
+- [x] Scenario «Die Schrittanzeige trennt keinen Namen eines Schritts» in `statement-generate.feature`, seen red (Abrechnungsperiode, Verwaltungspauschale); DOM test in `ui-navigation-parts.dom.test.ts`, seen red (cb86a4a)
+- [x] code-reviewer round 1 (`docs/reviews/1146-review-1.md`): C-1 Major (step 3 unchecked) fixed, seen red; C-2 fixed; C-3 rejected
+- [x] Personas Dr. Weber and Helga (`docs/design/personas/{weber,helga}-1146.md`): P-1 Major of both (values broken) fixed, seen red (1968f5c); the Minors that stay are in the reports; Helga P-2 (on `main` too) and the Minors two personas share became #1179
+- [x] code-reviewer round 2 (`docs/reviews/1146-review-2.md`): C-1, C-2 closed, C-3 rejection accepted; C-4 Major (negative checks without anchor) fixed, anchor seen red (3d87398)
+- [x] code-reviewer round 3, closing round (`docs/reviews/1146-review-3.md`): C-4 closed, no new findings
+- [x] Checks: lint, check, fitness, backend type-check, Prettier, vitest (ui-navigation-parts, open-work), E2E statement-generate + contract-new, axe and language rows of both wizards
 ## Session: #677 busy buttons, field errors and the document list (personas upload174)
 
 - [x] Read #677 and the upload174 reports (from PR #183); Sven 2 P-4 focus already fixed on main
@@ -1373,3 +1383,19 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Personas Helga, Sven (`docs/design/personas/{helga,sven}-678.md`): P-4..P-11 fixed; H-2 fixed; Minors that stay: Helga H-1, Sven S-1
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #1166 Kontoinhaber for the QR payment part
+
+- [x] `@wip` scenarios (settings.feature, statement-detail.feature) written, steps seen red
+- [x] `fach-reviewer` round on scenarios and texts (de/fr/it/en), findings fixed before the first green test: `docs/reviews/1166-fachreview-1.md`; V-2 and the row «Absender» decided in #1166
+- [x] Backend: keys `account_holder_*`, required name/PLZ/Ort with IBAN and separate holder (`config.service`), creditor from the Kontoinhaber (`qr-bill.service`, statement and reminder), data export labels
+- [x] BFF and form: block «Konto» with IBAN, checkbox «Kontoinhaber ist der Absender», fields; re-check deletes the fields
+- [x] Contract `tests/contracts/` for the config response; texts in `messages/{de,fr,it,en}.json`; `UBIQUITOUS_LANGUAGE.md` row «Kontoinhaber»
+- [x] a11y/language screens: `config` states with the cleared checkbox and the refusal
+- [x] Slice review round 1: `docs/reviews/1166-review-1.md`
+- [x] Feature review: personas `docs/design/personas/helga-1166.md`, `docs/design/personas/marco-1166.md` (Minors only; two-persona Minor → #1175); `daten-pruefer` `docs/reviews/1166-datenpruefung-1.md` (no findings); Dr. Weber not run (no PDF text changed, only the creditor's data); no step-5 `fach-reviewer` (texts unchanged since its round read them in all four languages)
+- [x] Privacy statement question (Kontoinhaber in the mailed PDF) → #1176 (`needs-decision`)
+- [x] Re-review of C-1 with the closing round: `docs/reviews/1166-review-2.md` (C-1 closed; Minor C-3 stays in the report)
+- [x] Before marking complete: lint, check, fitness, backend type-check, affected tests, E2E, Prettier on new files
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-1166.md`
+- [x] Archive session; PR `Fixes #1166`: pushed after this archive

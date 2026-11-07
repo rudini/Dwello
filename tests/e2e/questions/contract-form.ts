@@ -38,7 +38,7 @@ import {
 	apartmentClearedLink,
 	apartmentClearedText
 } from '../targets/contract-form';
-import { stepNames } from '../targets/wizard';
+import { stepNames, stepValues } from '../targets/wizard';
 import { errorToast, successToast, warningToast } from '../targets/form';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
@@ -86,6 +86,7 @@ export const billedUntilAsked = Visibility.of(billedUntilField);
 export const billedUntilErrorText = Text.of(billedUntilError);
 export const timesInWizard = (text: string) => Count.of(wizardText(text));
 export const brokenStepNames = BrokenWords.in(stepNames);
+export const brokenStepValues = BrokenWords.in(stepValues);
 // #669: error messages left after a retry, what the hint's status region announces, and how much of the hint the window shows
 export const failures = Count.of(errorToast);
 export const failureOnTop = OnTop.of(errorToast);

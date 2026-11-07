@@ -510,6 +510,20 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann nennt die Bestätigung die Korrespondenzadresse "Marktstätte 3, 78462 Konstanz, Deutschland"
 
+  # #1166: der Zahlteil nennt den Kontoinhaber der IBAN, der Kopf des Briefs weiter den Absender. Der Kontoinhaber gilt
+  # für alle parallel laufenden Szenarien: das Szenario hat die Einstellungen für sich
+  @einstellungen-global
+  Szenario: Der Zahlteil nennt einen eigenen Kontoinhaber
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im Zahlteil des PDF "Konto / Zahlbar an CH93 0076 2011 6238 5295 7 Erika Muster Seeweg 5 6003 Luzern"
+    Und steht im Zahlteil des PDF nicht "Zahlbar an CH93 0076 2011 6238 5295 7 Muster Immobilien"
+    Und steht im PDF "Melden Sie sich dafür bei Muster Immobilien AG, Bahnhofstrasse 1, 8001 Zürich"
+    Und steht im PDF ausserhalb des Zahlteils nicht "Erika Muster"
+
   # Ohne Korrespondenzadresse des Mieters hat der Zahlteil ein leeres Feld mit Eckmarken, in das der Mieter Name und
   # Adresse schreibt (SIX, Implementation Guidelines QR-Rechnung v2.4, Zahlteil und Empfangsschein) (#78)
   Szenario: Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse

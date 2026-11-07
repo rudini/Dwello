@@ -10,6 +10,10 @@
 		"company_phone": "044 123 45 67",
 		"company_email": "info@muster.ch",
 		"iban": "CH9300762011623852957",
+		"account_holder_name": "Erika Muster",
+		"account_holder_address": "Seeweg 5",
+		"account_holder_postal_code": "6003",
+		"account_holder_city": "Luzern",
 		"payment_deadline_days": "45",
 		"reminder_after_days": "10"
 	}

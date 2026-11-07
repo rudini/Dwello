@@ -55,7 +55,8 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	.put(
 		'/',
 		async ({ body, set }) => {
-			const refused = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
+			const { account_holder_separate: separate, ...typed } = body;
+			const refused = await setMultipleConfig(typed as Partial<Record<ConfigKey, string>>, separate === 'true');
 			if (refused.length) {
 				set.status = 400;
 				return fieldsRefused(refused);
@@ -79,6 +80,11 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 				company_phone: t.Optional(t.String()),
 				company_email: t.Optional(t.String()),
 				iban: t.Optional(t.String()),
+				account_holder_name: t.Optional(t.String()),
+				account_holder_address: t.Optional(t.String()),
+				account_holder_postal_code: t.Optional(t.String()),
+				account_holder_city: t.Optional(t.String()),
+				account_holder_separate: t.Optional(t.String()), // #1166: the form's checkbox cleared, not stored
 				payment_deadline_days: t.Optional(t.String()),
 				reminder_after_days: t.Optional(t.String()),
 				default_language: t.Optional(t.String())

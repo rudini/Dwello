@@ -9,6 +9,7 @@
  * - company_name: Property management company name
  * - company_address: Company address
  * - iban: IBAN from Switzerland or Liechtenstein for QR-bill generation
+ * - account_holder_name, _address, _postal_code, _city: the Kontoinhaber of the IBAN when not the Absender (#1166)
  * - payment_deadline_days: Days until payment is due (default 30)
  * - reminder_after_days: Days after deadline to send reminder (default 14)
  */
@@ -84,6 +85,16 @@ export const CONFIG_KEYS = {
 		default: '',
 		code: 'IBAN_ENTERED_INVALID'
 	},
+	// #1166: the Kontoinhaber of the IBAN in the payment part, when it is not the Absender; checked as the Absender
+	account_holder_name: { type: 'string', validator: (v: string) => v.length <= 255, default: '' },
+	account_holder_address: { type: 'string', validator: (v: string) => v.length <= 500, default: '' },
+	account_holder_postal_code: {
+		type: 'string',
+		validator: (v: string) => /^\d{4}$/.test(v),
+		default: '',
+		code: 'POSTAL_CODE_DIGITS'
+	},
+	account_holder_city: { type: 'string', validator: (v: string) => v.length <= 100, default: '' },
 	payment_deadline_days: {
 		type: 'number',
 		validator: (v: number) => Number.isInteger(v) && v >= 7 && v <= 90,
@@ -192,13 +203,22 @@ async function validateConfig(key: ConfigKey, value: string) {
  * landlord (#450). The form sends the IBAN it shows with every save; a save without it (the IBAN emptied, reset after)
  * stays possible (code review C-1)
  */
-async function creditorMissing(changes: Partial<Record<ConfigKey, string>>): Promise<ErrorCode[]> {
+async function creditorMissing(changes: Partial<Record<ConfigKey, string>>, separateHolder = false): Promise<ErrorCode[]> {
 	if (!changes.iban?.trim()) return [];
 	const stored = await getAllConfig();
 	const value = (key: ConfigKey) => (changes[key] ?? stored[key] ?? '').trim();
-	const missing = (['company_name', 'company_postal_code', 'company_city'] as const).filter((key) => !value(key));
-	return missing.length ? [{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: missing.join(',') } }] : [];
+	const absent = (keys: readonly ConfigKey[]) => keys.filter((key) => !value(key)).join(',');
+	const errors: ErrorCode[] = [];
+	const company = absent(['company_name', 'company_postal_code', 'company_city']);
+	if (company) errors.push({ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: company } });
+	// #1166: a Kontoinhaber other than the Absender, ticked off in the form or stored, needs his own (street optional)
+	const holder = absent(['account_holder_name', 'account_holder_postal_code', 'account_holder_city']);
+	if (holder && (separateHolder || ACCOUNT_HOLDER_KEYS.some(value)))
+		errors.push({ code: 'ACCOUNT_HOLDER_MISSING', params: { field: 'account_holder_name', missing: holder } });
+	return errors;
 }
+
+export const ACCOUNT_HOLDER_KEYS = ['account_holder_name', 'account_holder_address', 'account_holder_postal_code', 'account_holder_city'] as const;
 
 // As stored: a rate typed with a comma or «%» as a number with a point, an IBAN without its spaces (H-28, #717)
 function asStored(key: string, value: string) {
@@ -215,7 +235,7 @@ export async function setConfig(key: ConfigKey, typed: string): Promise<Configur
 	const value = asStored(key, typed);
 	await validateConfig(key, value);
 	const [missing] = await creditorMissing({ [key]: value });
-	if (missing) throw new CodedError(missing.code, 'An IBAN needs the company name, postal code and town', missing.params);
+	if (missing) throw new CodedError(missing.code, 'An IBAN needs the name, postal code and town of the Absender and the Kontoinhaber', missing.params);
 	return saveConfig(db, key, value);
 }
 
@@ -249,7 +269,8 @@ async function upsert(tx: Pick<typeof db, 'insert'>, key: string, value: string)
  * Set multiple configuration values at once, as the settings form sends them; the errors of those it refuses
  */
 export async function setMultipleConfig(
-	typed: Partial<Record<ConfigKey, string>>
+	typed: Partial<Record<ConfigKey, string>>,
+	separateHolder = false // #1166: «Kontoinhaber ist der Absender» cleared in the form
 ): Promise<ErrorCode[]> {
 	const configs = Object.fromEntries(
 		Object.entries(typed).map(([key, value]) => [key, value === undefined ? value : asStored(key, value)])
@@ -261,7 +282,7 @@ export async function setMultipleConfig(
 		if (error) errors.push(error);
 	}
 	// the Firmenadresse a valid IBAN needs, named with the form's other errors (code review h28g C-1)
-	if (!errors.some((error) => error.params.field === 'iban')) errors.push(...(await creditorMissing(configs)));
+	if (!errors.some((error) => error.params.field === 'iban')) errors.push(...(await creditorMissing(configs, separateHolder)));
 
 	// All or nothing: one invalid value, or a write that fails, keeps the others unsaved
 	if (errors.length === 0) {

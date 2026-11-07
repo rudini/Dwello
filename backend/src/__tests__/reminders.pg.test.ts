@@ -684,6 +684,23 @@ describe('Zahlteil der Mahnung', () => {
 		expect(after.status).toBe('to_send');
 	});
 
+	// #1166: der Zahlteil der Mahnung nennt den Kontoinhaber der IBAN, der Brief weiter den Absender
+	it('nennt im Zahlteil einen eigenen Kontoinhaber', async () => {
+		const holder = { account_holder_name: 'Erika Muster', account_holder_address: 'Seeweg 5', account_holder_postal_code: '6003', account_holder_city: 'Luzern' };
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		for (const [key, value] of Object.entries(holder)) await setConfig(key as keyof typeof holder, value);
+		try {
+			const text = await reminderPdf(await statement('sent'));
+
+			const absender = await getConfig('company_name');
+			expect(text).toContain('Erika Muster\nSeeweg 5\n6003 Luzern');
+			expect(text.startsWith(`${absender}\n`)).toBe(true); // the head (code review 1166 C-2)
+			expect(text).toContain(`Freundliche Grüsse\n${absender}`);
+		} finally {
+			for (const key of Object.keys(holder)) await deleteConfig(key as keyof typeof holder);
+		}
+	});
+
 	it('druckt ohne IBAN keinen Zahlteil', async () => {
 		await deleteConfig('iban');
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
