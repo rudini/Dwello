@@ -5,6 +5,7 @@
 		"empty": "A list with no records at all, on the empty instance of the E2E stack (second backend on an empty database).",
 		"first-use": "Overview without any building, on the empty instance of the E2E stack; its KI stand-in fails the model download, so the overview also shows that notice (#577).",
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
+		"status-empty": "Statement list filtered by a status no statement has (a tile with 0; here with a search that matches nothing): the line under the tiles and the empty result name the status (#1186).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"register-preview": "«Neues Gebäude» after choosing an address of the Gebäuderegister: the hints and the Wohnungen to check, some marked as missing in the register (#479).",
 		"register-submit-missing": "«Neues Gebäude» with the register's Wohnungen submitted while values the register lacks are still empty: their errors at the fields (#479).",
@@ -628,7 +629,8 @@
 			"queries": {
 				"mark-paid-dialog": "?status=open",
 				"list-scoped": "?contract={contract}",
-				"pdf-missing": "?status=draft&building={building}"
+				"pdf-missing": "?status=draft&building={building}",
+				"status-empty": "?status=overdue&search=xq-a11y-0"
 			},
 			"states": [
 				"default",
@@ -636,7 +638,8 @@
 				"filtered-empty",
 				"mark-paid-dialog",
 				"list-scoped",
-				"pdf-missing"
+				"pdf-missing",
+				"status-empty"
 			]
 		},
 		{
