@@ -7,7 +7,7 @@ const frontend = servers.find((server) => server.port === 3100)!;
 
 // Screenshots of the pages a pull request changes (CI job ui-screenshots), on the same stack as the E2E tests.
 // With UI_BASE_DIR (a checkout of the base branch) its frontend runs on 3200 against the same backend, so changes can be marked;
-// built and started like the head's, since `bun run dev` renders some corners differently on CI (#1172).
+// built and started like the head's, as `bun run dev` showed its own port in the MCP address on /config/access-keys (#1172).
 export default defineConfig({
 	...e2e,
 	testDir: 'tests/ui-screenshots',
