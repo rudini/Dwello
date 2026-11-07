@@ -58,7 +58,7 @@ export const missingStatementButtonsShortOfRow = (periodStart: string) =>
 		const [row, ...buttons] = await Promise.all(
 			[missingStatementPeriod, missingStatementLink, missingStatementInvoicesLink].map((part) => actor.answer(Width.of(part(periodStart))))
 		);
-		return buttons.map((width) => Math.round(row - width));
+		return buttons.map((width) => (row === null || width === null ? null : Math.round(row - width)));
 	});
 export const managementFeeOfContract = Text.of(contractManagementFee);
 export const billedUntilOfContract = Text.of(contractBilledUntil); // #133

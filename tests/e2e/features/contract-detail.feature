@@ -293,12 +293,11 @@ Funktionalität: Mietvertragsdetail
 
   # #741 (PO 07.11.2026, Persona Marco #142, Persona Helga P-8): auf dem Handy reichen die Knöpfe jeder fehlenden
   # Abrechnung über die volle Breite der Warnung; der kürzere Text nennt kein Bedienelement
-  @wip
   Szenario: Fehlende Abrechnungen auf dem Handy
     Angenommen das Browserfenster ist 390 auf 844 Pixel gross
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann reichen die Knöpfe der fehlenden Abrechnung 2024 über die volle Breite der Warnung
-    Und erklärt der Mietvertrag die fehlenden Abrechnungen mit "TEXT_FROM_FACH_REVIEW"
+    Und erklärt der Mietvertrag die fehlenden Abrechnungen mit "Beginnen Sie mit der ältesten Periode und erfassen Sie zuerst ihre Rechnungen. Abgerechnet werden alle Mietverträge des Gebäudes, die noch keine Abrechnung haben."
 
   # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode; #454 (#408 Punkt 1): gefiltert nach
   # der Abrechnungsperiode, wie eine Abrechnung sie nimmt

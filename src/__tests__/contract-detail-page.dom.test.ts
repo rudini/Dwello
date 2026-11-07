@@ -18,6 +18,7 @@ async function redirectAfter(action: string) {
 }
 
 import ContractPage from '../routes/contracts/[id]/+page.svelte';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
@@ -293,14 +294,14 @@ describe('Mietvertragsdetail', () => {
 			{ start: '2025-01-01', end: '2025-12-31', href }
 		]);
 		expect(text('contract-missing-statement')).toContain('Abrechnung 2025 fehlt');
-		// the wizard bills the whole building, the invoices come first (code review C-10)
+		// the invoices come first, the run bills every contract of the building without one (#741, Fachreview 741-1 V-4)
 		expect(text('contract-missing-statement')).toContain(
-			'Der Assistent erstellt die Abrechnungen für alle Mietverträge des Gebäudes. Erfassen Sie zuerst die Rechnungen der Periode.'
+			'Erfassen Sie zuerst die Rechnungen der Periode. Abgerechnet werden alle Mietverträge des Gebäudes, die noch keine Abrechnung haben.'
 		);
 		expect(byTestId('contract-missing-statement-link-2025-01-01')!.getAttribute('href')).toBe(href);
 		// #133: the way to «Abgerechnet bis» (fach review V-7)
 		expect(text('contract-missing-statement')).toContain(
-			'Haben Sie diese Periode ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
+			'Schon ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
 		);
 	});
 
@@ -313,9 +314,9 @@ describe('Mietvertragsdetail', () => {
 		}));
 		open('2022-04-01', null, null, '2026-10-10', false, missing);
 		expect(text('contract-missing-statement')).toContain('2 Abrechnungen fehlen');
-		// the wizard bills the whole building, the invoices come first, any order (personas Helga, Anna, Marco #142)
+		// the oldest first, for its Übertrag; no word for the control (#741, Fachreview 741-1 V-1, persona Helga P-8)
 		expect(text('contract-missing-statement')).toContain(
-			'Der Mietvertrag hat in diesen Abrechnungsperioden Mietstage ohne Nebenkostenabrechnung in Dwello. Jede Schaltfläche mit «abrechnen» öffnet den Assistenten für alle Mietverträge des Gebäudes in dieser Periode. Erfassen Sie zuerst die Rechnungen der Periode; mit welcher Periode Sie beginnen, spielt keine Rolle.'
+			'Beginnen Sie mit der ältesten Periode und erfassen Sie zuerst ihre Rechnungen. Abgerechnet werden alle Mietverträge des Gebäudes, die noch keine Abrechnung haben.'
 		);
 		// short labels side by side, each with its verb (personas Marco P-4, Helga P-6, code review C-8)
 		const links = [
@@ -332,8 +333,27 @@ describe('Mietvertragsdetail', () => {
 			'Rechnungen ansehen'
 		]);
 		expect(text('contract-missing-statement')).toContain(
-			'Haben Sie eine dieser Perioden ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
+			'Schon ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
 		);
+	});
+
+	// #741 (code review C-14, Fachreview 741-1 V-3): the label names its object, in the plural of the glossary
+	it.each([
+		['fr', 'Établir les décomptes 2023'],
+		['it', 'Allestire i conteggi 2023']
+	] as const)('nennt auf %s beim Abrechnen einer fehlenden Periode die Abrechnungen', (locale, label) => {
+		overwriteGetLocale(() => locale);
+		try {
+			const missing = [2025, 2023].map((y) => ({
+				start: `${y}-01-01`,
+				end: `${y}-12-31`,
+				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
+			}));
+			open('2022-04-01', null, null, '2026-10-10', false, missing);
+			expect(text('contract-missing-statement-link-2023-01-01').trim()).toBe(label);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 
 	// #211: each range leads to the building's invoices
