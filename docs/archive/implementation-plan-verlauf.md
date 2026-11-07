@@ -1474,3 +1474,17 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #1173 Do not announce the page title again after a form action
+
+Parallel session: checklist kept in the pull request.
+
+- [x] Decisions 1–3 recorded in #1173 under «Decided (product owner)»
+- [x] Scenarios in `tenant-documents.feature`: upload heard without the title (seen red: title «Lea Frei … - Dwello» heard), opening a tenant reads its title once (pins kept behaviour)
+- [x] Screen reader recorder for E2E (`ListenToAnnouncements`, `Announcements`)
+- [x] Root layout: SvelteKit's announcer muted and hidden, own announcer reads the title on a change of path; DOM tests in `layout-hydrated.dom.test.ts`, each seen red
+- [x] code-reviewer `docs/reviews/1173-review-1.md`: no findings
+- [x] Persona Sven `docs/design/personas/sven-1173.md`: no Blocker, Major or Minor; observation «title twice in the tree» caused by the change, fixed (aria-hidden, 0f2d074)
+- [x] Closing code-reviewer `docs/reviews/1173-review-2.md`
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, E2E tenant-documents/tenants/documents, axe and language rows of the tenant screens
+- [x] Archive the session; PR `Fixes #1173`: pushed after this archive
