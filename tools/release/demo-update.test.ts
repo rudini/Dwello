@@ -81,7 +81,7 @@ describe('demo update', () => {
 		expect(builds()).toEqual(['v0.2.0']);
 	});
 
-	it('baut nur einmal, wenn der Klon von Hand über die neueste Version hinaus gezogen wurde', () => {
+	it('baut die neueste Version nur einmal und aus ihrem Commit, wenn der Klon von Hand darüber hinaus gezogen wurde', () => {
 		const { dev, demoGit, update, builds } = demo();
 		dev('tag', 'v0.3.0');
 		dev('push', '-q', 'origin', 'v0.3.0');
@@ -91,5 +91,6 @@ describe('demo update', () => {
 		update();
 		update();
 		expect(builds()).toEqual(['v0.3.0']);
+		expect(demoGit('rev-parse', 'HEAD')).toBe(dev('rev-parse', 'v0.3.0'));
 	});
 });
