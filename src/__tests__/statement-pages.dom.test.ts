@@ -1679,7 +1679,7 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'sent' });
 
 		expect(help).toBe(
-			'Gilt ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versanddatum.'
+			'Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versand; eine längere Frist bleibt.'
 		);
 		expect(byTestId('statement-payment-deadline')).not.toBeNull();
 		expect(byTestId('statement-payment-deadline-help')).toBeNull();

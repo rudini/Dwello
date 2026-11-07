@@ -31,12 +31,21 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' '), abroad].filter(Boolean).join(', ');
 }
 
+// #686 O-6: the days sending gives a draft's Zahlungsfrist, said at its date; none when the settings do not load
+async function paymentDeadlineDays(fetch: typeof globalThis.fetch) {
+	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
+	if (!response?.ok) return undefined;
+	const days = Number((await response.json()).data?.payment_deadline_days);
+	return days > 0 ? days : undefined;
+}
+
 export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const statement = await loadStatement(fetch, params.id);
-	const [address, documents, later] = await Promise.all([
+	const [address, documents, later, days] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
-		laterChanges(fetch, params.id)
+		laterChanges(fetch, params.id),
+		paymentDeadlineDays(fetch)
 	]);
 	// the statement's own Dokument (sent by e-mail, #86) is no Mahnung: the next Mahnstufe counts these
 	return {
@@ -49,7 +58,8 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 			.at(-1) ?? null, // the first: the list is newest first, later sendings are `resent` (#534)
 		// set by the edit page after a change the sent PDF does not show (#524)
 		pdfChange: url.searchParams.get('pdf-change'),
-		later
+		later,
+		paymentDeadlineDays: days
 	};
 };
 

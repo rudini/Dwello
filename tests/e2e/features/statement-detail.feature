@@ -382,11 +382,11 @@ Funktionalität: Abrechnungsdetail
 
   # #686 O-6 (Entscheid des Product Owners): die Zahlungsfrist eines Entwurfs gilt ab dem Versand; die Einstellungen
   # haben die Vorgabe von 30 Tagen (global, daher @einstellungen-global)
-  @wip @einstellungen-global
+  @einstellungen-global
   Szenario: Ein Entwurf erklärt, ab wann seine Zahlungsfrist gilt
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Dann erklärt die Abrechnung bei der Zahlungsfrist "Gilt ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 30 Tage nach dem Versanddatum."
+    Dann erklärt die Abrechnung bei der Zahlungsfrist "Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 30 Tage nach dem Versand; eine längere Frist bleibt."
 
   Szenario: PDF erstellen und herunterladen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
@@ -397,8 +397,7 @@ Funktionalität: Abrechnungsdetail
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
 
   # #686 P-4 (Entscheid des Product Owners): der Anteil nach Heizprofil heisst wie die Spalte der Tabelle; der Wortlaut
-  # wartet auf das Fachreview (docs/reviews/686-wording.md)
-  @wip
+  # aus dem Fachreview 686-1
   Szenario: Das PDF nennt den Anteil nach Heizprofil mit dem Wort der Tabelle
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -654,7 +653,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "43.00 % der Heizkosten"
+    Dann steht im PDF "43.00 % des Wohnungsanteils an den Heizkosten"
     Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
     Und steht im PDF "43.00 % 430.00"
 
@@ -868,7 +867,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "70.98 % der Heizkosten"
+    Dann steht im PDF "70.98 % des Wohnungsanteils an den Heizkosten"
     Und steht im PDF "500.00 70.98 %"
 
   # #104: die Detailseite zeigt dieselben Angaben wie das PDF: die Mietstage der Abrechnung als Daten

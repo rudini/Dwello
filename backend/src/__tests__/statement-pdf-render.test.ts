@@ -762,7 +762,7 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 		const text = (await textOf(winter)).flowing;
 		expect(text).toContain('Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.');
 		expect(text).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten); bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
-		expect((await textOf(heated)).flowing).toContain('44.20 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+		expect((await textOf(heated)).flowing).toContain('44.20 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode');
 	});
 
 	// #509: hat keine Heizrechnung einen fehlenden Leistungszeitraum, nennt der Satz keinen Anteil für eine solche und

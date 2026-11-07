@@ -58,6 +58,7 @@
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
 			later?: ComponentProps<typeof LaterChanges>['later'] & { splitKeys: SplitKeyHint[] };
+			paymentDeadlineDays?: number; // a draft's: the days sending gives its Zahlungsfrist (#686)
 		};
 		form: ActionData;
 	} = $props();
@@ -254,7 +255,11 @@
 	</div>
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex min-w-0 flex-col gap-8 lg:col-span-2">
-			<PaymentPanel {statement} onsettle={() => (showCarrySettle = true)} />
+			<PaymentPanel
+				{statement}
+				deadlineDays={data.paymentDeadlineDays}
+				onsettle={() => (showCarrySettle = true)}
+			/>
 			<ReminderHistory reminders={data.reminders} />
 		</div>
 		<div class="flex min-w-0 flex-col gap-8">
