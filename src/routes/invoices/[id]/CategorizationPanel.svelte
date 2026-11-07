@@ -61,10 +61,11 @@
 			<dt class="text-ink-muted">{m.invoices_allocability()}</dt>
 			<dd data-testid="invoice-utility-cost">
 				<Badge
-					tone={invoice.isValidUtilityCost ? 'positive' : 'caution'}
+					tone={invoice.isValidUtilityCost ? 'positive' : 'neutral'}
 					label={invoice.isValidUtilityCost
 						? m.glossary_allocable_term()
 						: m.invoices_not_allocable()}
+					testid="invoice-utility-cost-badge"
 				/>
 			</dd>
 		</div>
