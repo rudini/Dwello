@@ -54,6 +54,9 @@ Funktionalität: Wohnungsliste
 
   # #662 (Sven in #682): eine Wahl im Filter gilt sofort, ohne «Suchen»; der Fokus bleibt im Filter
   Szenario: Eine Wahl im Filter zeigt die Liste sofort und bietet an, die Filter zurückzusetzen
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und im Gebäude "Birkenhof" gibt es die leere Wohnung "3.01"
+    Und der Liegenschaftsverwalter ist auf der Wohnungsliste
     Wenn der Liegenschaftsverwalter im Filter "Gebäude" "Ahornhof" wählt
     Dann die Wohnungsliste enthält genau 2 Wohnungen
     Und bleibt der Fokus im Filter "Gebäude"

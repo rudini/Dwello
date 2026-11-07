@@ -22,6 +22,7 @@ Funktionalität: Rechnungsliste
 
   # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
   Szenario: Eine Wahl im Filter zeigt die Rechnungen sofort
+    Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
     Wenn der Liegenschaftsverwalter "Hauswart Huber" in die Suche eingibt
     Und der Liegenschaftsverwalter im Filter "Umlagefähigkeit" "Nicht umlagefähig" wählt
     Dann steht über der Liste "Keine Rechnungen gefunden"

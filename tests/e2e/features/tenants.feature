@@ -32,6 +32,10 @@ Funktionalität: Mieterliste
 
   # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
   Szenario: Eine Wahl im Filter zeigt die Mieter sofort
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Lisa Graf" existiert
+    Und "Lisa Graf" mietet die Wohnung "2.01" ab morgen für "950" Franken
     Wenn der Liegenschaftsverwalter "Hans Müller" in die Suche eingibt
     Und der Liegenschaftsverwalter im Filter "Mieter" "Künftige Mieter" wählt
     Dann steht über der Liste "Keine Mieter gefunden"
