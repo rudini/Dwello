@@ -339,7 +339,7 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass Dwello sie bei jedem Mietvertrag unter {string} festhält',
+	'erfährt der Liegenschaftsverwalter, dass er sie in Dwello bei jedem Mietvertrag unter {string} festhält',
 	async ({ verwalter }, label: string) => {
 		await verwalter.sees(contractHint).toContain(`bei jedem Mietvertrag unter «${label}»`);
 	}

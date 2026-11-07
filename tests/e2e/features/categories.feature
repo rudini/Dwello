@@ -75,7 +75,7 @@ Funktionalität: Kostenkategorien
   Szenario: Der Hinweis zum Mietvertrag sagt, wo die vereinbarten Nebenkosten stehen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann erfährt der Liegenschaftsverwalter, dass er im unterschriebenen Mietvertrag nachsieht, welche Nebenkosten er nennt
-    Und erfährt der Liegenschaftsverwalter, dass Dwello sie bei jedem Mietvertrag unter "Vereinbarte Nebenkosten" festhält
+    Und erfährt der Liegenschaftsverwalter, dass er sie in Dwello bei jedem Mietvertrag unter "Vereinbarte Nebenkosten" festhält
 
   Szenario: Grund der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
