@@ -212,7 +212,7 @@
 	"apartments_floor_first": "1st floor",
 	"apartments_floor_upper": "{floor} floor",
 	"apartments_status_occupied": "Let",
-	"apartments_status_relet": "Let from …",
+	"apartments_status_relet": "Let from …",
 	"apartments_status_vacant": "Vacant",
 	"apartments_status_reserved": "Blocked",
 	"apartments_status_relet_from": "Let from {date}",

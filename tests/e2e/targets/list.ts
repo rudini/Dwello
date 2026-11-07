@@ -7,3 +7,9 @@ export const resetFilterControls = target('Filter zurücksetzen', (page) =>
 	page.getByRole('main').getByText('Filter zurücksetzen', { exact: true })
 );
 export const listResultsHeading = target('Überschrift der Liste', (page) => page.getByTestId('list-results'));
+// #662: the text search and a filter of a list, by their labels inside the list's search landmark
+export const listSearchField = target('Suche der Liste', (page) => listSearch.locate(page).getByLabel('Suche', { exact: true }));
+export const listFilter = (label: string) =>
+	target(`Filter «${label}»`, (page) => listSearch.locate(page).getByLabel(label, { exact: true }));
+// #662 (persona Sven S-1): what a screen reader hears after a choice that keeps the focus in the filter
+export const listResultStatus = target('Ansage des Ergebnisses', (page) => page.getByTestId('list-result-status'));
