@@ -10,7 +10,9 @@ import {
 	inPeriodOfListedInvoice,
 	invoicePeriodFilterText,
 	invoiceShown,
-	statusOfListedInvoice
+	statusOfListedInvoice,
+	toneOfListedUtilityCost,
+	utilityCostOfListedInvoice
 } from '../questions/invoices';
 import { pageAddress, pageTitle } from '../questions/navigation';
 import { editInvoice, filterInvoices, openInvoiceList, openInvoicesOfPeriod, searchInvoices, showAllInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
@@ -140,3 +142,13 @@ Then(
 Then('nennt die Rechnungsliste bei der Rechnung {string} {string}', async ({ verwalter }, description: string, text: string) => {
 	await verwalter.sees(inPeriodOfListedInvoice(description)).toBe(text);
 });
+
+// #687: «Nicht umlagefähig» is a correct state, shown without a warning
+Then(
+	'bezeichnet die Rechnungsliste die Rechnung von {string} ohne Warnung als nicht umlagefähig',
+	async ({ verwalter, names }, supplier: string) => {
+		const name = names.get(supplier) ?? supplier;
+		await verwalter.sees(utilityCostOfListedInvoice(name)).toBe('Nicht umlagefähig');
+		await verwalter.sees(toneOfListedUtilityCost(name)).toBe('neutral');
+	}
+);
