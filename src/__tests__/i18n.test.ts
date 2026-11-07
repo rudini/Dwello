@@ -68,21 +68,11 @@ describe('Sprachdateien', () => {
 	// #1028 (Marco P-6), Fachreview 678 V-3: U+00A0 in «Art. 257a», «Absatz 2» und vor OR, U+2060 nach dem Strich;
 	// Fachreview 1028 V-3, V-4: auch vor «OBLF» und nach dem Komma in «art. 257a, al. 2»
 	// Persona Helga 1028 P-1: auch zwischen «257a» und «Absatz»
-	// #687 schreibt diese sechs Gründe neu und setzt die Zeichen dort
-	const rewrittenBy687 = [
-		'heating',
-		'elevator',
-		'repairs',
-		'mortgage',
-		'administration',
-		'renovation'
-	];
 	const lawTexts = (key: string) =>
 		key === 'categories_contract_note' ||
 		key === 'invoices_legal_text' ||
 		key.startsWith('categories_allocable_') ||
-		(key.startsWith('categories_reason_') &&
-			!rewrittenBy687.includes(key.slice('categories_reason_'.length)));
+		key.startsWith('categories_reason_');
 	const breakable =
 		/\b[Aa]rt\. (?=\d)|\b(Absatz|Buchstabe|al\.|cpv\.|para\.|let\.|lett\.) (?=\w)| (OR|CO|VMWG|OBLF|OLAL)\b|, (?=(al|let)\.)|\d[a-z]? (?=(Absatz|Buchstabe|al\.|cpv\.|para\.|let\.|lett\.))|–(?=\d)/;
 	it.each(languages)(
