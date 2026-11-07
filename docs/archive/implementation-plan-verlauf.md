@@ -1499,6 +1499,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #739 E2E default Heizprofil per run
+
+- [x] Each point of #739 checked on main: the wizard preselects `default_heating_profile_id`, else the first complete profile, own ones first; the E2E data set no default
+- [x] Probe (not committed): an own complete profile listed first, all `statement-*.feature` on Chromium green (345): no amount depends on the preselection; decision written into #739 («Decided (product owner)»: a default per run, no scenario change)
+- [x] Throwaway `@wip` probe: the wizard proposed the probe profile without the change (red), «Heizung + Warmwasser» with it (green); No scenario: test data setup
+- [x] `backend/scripts/e2e-db.ts`, `playwright.config.ts` (main E2E instance only)
+- [x] code-reviewer `docs/reviews/739-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, E2E chromium+api (1537 of 1973 before the local time limit, then `statement-*.feature`)
+- [x] Archive session; PR `Fixes #739`: pushed after this archive
 
 ## Session: #1172 screenshot job: no more untouched pages listed as changed
 
