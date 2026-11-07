@@ -24,7 +24,7 @@ Funktionalität: Rechnungsdetail
     Und die Rechnung von "Dachdecker Meier" hat keinen Verteilschlüssel
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Dachdecker Meier"
     Dann ist die Rechnung nicht umlagefähig
-    Und nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie "Reparaturen sind mit dem Mietzins abgegolten, also nicht umlagefähig."
+    Und nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie "Reparaturen sind in der Nettomiete schon enthalten, also nicht umlagefähig."
     Und erklärt kein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
     Und sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde
 
