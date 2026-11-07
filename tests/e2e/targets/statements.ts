@@ -35,7 +35,6 @@ export const statementsScope = target('Auswahl der Abrechnungsliste', (page) => 
 export const statusCount = (status: string) =>
 	target(`Anzahl im Statusfilter ${status}`, (page) => page.getByTestId(`filter-${status}`).getByTestId('filter-count'));
 export const settledFilter = target('Filter Erledigt', (page) => page.getByTestId('filter-settled'));
-export const overdueFilter = target('Filter Überfällig', (page) => page.getByTestId('filter-overdue'));
 // #1186: the sentence under the status tiles, what the list below shows
 export const statusFilterResult = target('Satz unter den Statusfiltern', (page) => page.getByTestId('status-filter-result'));
 // #673: the way back to the contract a list is filtered by, the form's reset, and the status tabs by their label

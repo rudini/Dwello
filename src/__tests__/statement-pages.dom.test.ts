@@ -286,6 +286,19 @@ describe('Abrechnungsliste', () => {
 		expect(heading()).toBe('1 Abrechnung mit dem Status «Entwurf»');
 	});
 
+	// code review 1186-1 C-2: the other two heading texts
+	it('nennt den gewählten Status bei mehreren Abrechnungen auf einer Seite in der Überschrift', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement(), statement({ id: 's2' })]);
+		expect(heading()).toBe('2 Abrechnungen mit dem Status «Entwurf»');
+	});
+
+	it('nennt den gewählten Status auf einer letzten Seite mit einer Abrechnung in der Überschrift', () => {
+		url = new URL('http://localhost/statements?status=draft');
+		list([statement()], 11, 2);
+		expect(heading()).toBe('Abrechnung 11 von 11 mit dem Status «Entwurf», Seite 2 von 2');
+	});
+
 	it('nennt den gewählten Status auch über mehreren Seiten in der Überschrift', () => {
 		url = new URL('http://localhost/statements?status=draft');
 		list(

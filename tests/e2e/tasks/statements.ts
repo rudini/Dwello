@@ -4,7 +4,7 @@ import { statementStatus } from '../targets/statement-detail';
 import {
 	draftFilter,
 	settledFilter,
-	overdueFilter,
+	statusFilter,
 	generateStatementsButton,
 	emptyResetFiltersButton,
 	nextPageLink,
@@ -66,7 +66,7 @@ export const showSettledOfBuilding = (buildingId: string): Activity => (actor) =
 export const showOverdueOfBuilding = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(
 		showStatementsOfBuilding(buildingId),
-		Click.on(overdueFilter),
+		Click.on(statusFilter('overdue')),
 		filteredBy({ building: buildingId, status: 'overdue' })
 	);
 
