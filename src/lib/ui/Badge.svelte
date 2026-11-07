@@ -16,6 +16,7 @@
 <span
 	class="inline-flex items-center gap-1 whitespace-nowrap rounded-control border px-2 py-1 text-sm font-semibold {style.box} {style.text}"
 	data-testid={testid}
+	data-tone={tone}
 >
 	<Icon name={icon ?? style.icon} size={16} />
 	{label}

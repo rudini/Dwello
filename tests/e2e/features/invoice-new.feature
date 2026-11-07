@@ -31,6 +31,11 @@ Funktionalität: Neue Rechnung erfassen
     Und erklärt das Formular "Die Rechnung fliesst nicht in die Nebenkostenabrechnung ein."
     Und weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können
 
+  # #687: eine nicht umlagefähige Kategorie ist richtig gewählt, also keine Warnung
+  Szenario: Nicht umlagefähige Kategorie ohne Warnung wählen
+    Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
+    Dann weist ein Hinweis ohne Warnung darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können
+
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter die Rechnung ohne Angaben speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude."

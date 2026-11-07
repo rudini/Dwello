@@ -19,6 +19,7 @@ import {
 	servicePeriodMoreOpen,
 	servicePeriodMoreText,
 	supplierValue,
+	tonesInNonAllocableCategoryNote,
 	utilityCostHelpText,
 	utilityCostMarkable
 } from '../questions/invoice-form';
@@ -122,6 +123,15 @@ Then(
 	'weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
 	async ({ verwalter }) => {
 		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
+	}
+);
+
+// #687: a non-allocable category is a correct choice, so its note does not warn
+Then(
+	'weist ein Hinweis ohne Warnung darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
+	async ({ verwalter }) => {
+		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
+		await verwalter.sees(tonesInNonAllocableCategoryNote).toEqual([]);
 	}
 );
 
