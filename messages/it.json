@@ -212,7 +212,7 @@
 	"apartments_floor_first": "1° piano",
 	"apartments_floor_upper": "{floor}° piano",
 	"apartments_status_occupied": "Locato",
-	"apartments_status_relet": "Locato dal …",
+	"apartments_status_relet": "Locato dal …",
 	"apartments_status_vacant": "Sfitto",
 	"apartments_status_reserved": "Bloccato",
 	"apartments_status_relet_from": "Locato dal {date}",
