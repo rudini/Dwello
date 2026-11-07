@@ -318,7 +318,7 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-missing-statement')).toContain(
 			'Beginnen Sie mit der ältesten Periode und erfassen Sie zuerst ihre Rechnungen. Abgerechnet werden alle Mietverträge des Gebäudes, die noch keine Abrechnung haben.'
 		);
-		// short labels side by side, each with its verb (personas Marco P-4, Helga P-6, code review C-8)
+		// each label with its verb and period (personas Marco P-4, Helga P-6, code review C-8)
 		const links = [
 			...byTestId('contract-missing-statement')!.querySelectorAll(
 				'[data-testid^="contract-missing-statement-link-"]'

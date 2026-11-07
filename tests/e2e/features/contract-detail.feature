@@ -291,12 +291,12 @@ Funktionalität: Mietvertragsdetail
     Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2024 – 30.06.2025"
     Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2025 – 30.06.2026"
 
-  # #741 (PO 07.11.2026, Persona Marco #142, Persona Helga P-8): auf dem Handy reichen die Knöpfe jeder fehlenden
+  # #741 (PO 07.11.2026, Persona Marco #142, Persona Helga P-8): auf dem Handy reichen Abrechnen und Rechnungen jeder fehlenden
   # Abrechnung über die volle Breite der Warnung; der kürzere Text nennt kein Bedienelement
   Szenario: Fehlende Abrechnungen auf dem Handy
     Angenommen das Browserfenster ist 390 auf 844 Pixel gross
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Dann reichen die Knöpfe der fehlenden Abrechnung 2024 über die volle Breite der Warnung
+    Dann reichen Abrechnen und Rechnungen der fehlenden Abrechnung 2024 über die volle Breite der Warnung
     Und erklärt der Mietvertrag die fehlenden Abrechnungen mit "Beginnen Sie mit der ältesten Periode und erfassen Sie zuerst ihre Rechnungen. Abgerechnet werden alle Mietverträge des Gebäudes, die noch keine Abrechnung haben."
 
   # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode; #454 (#408 Punkt 1): gefiltert nach

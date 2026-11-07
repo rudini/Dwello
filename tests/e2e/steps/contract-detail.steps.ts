@@ -368,7 +368,7 @@ Then(
 );
 
 // #741: on a phone each button of a missing statement spans the warning, one below the other
-Then('reichen die Knöpfe der fehlenden Abrechnung {int} über die volle Breite der Warnung', async ({ verwalter }, year: number) => {
+Then('reichen Abrechnen und Rechnungen der fehlenden Abrechnung {int} über die volle Breite der Warnung', async ({ verwalter }, year: number) => {
 	await verwalter.sees(missingStatementButtonsShortOfRow(`${year}-01-01`)).toEqual([0, 0]);
 });
 
