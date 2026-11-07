@@ -240,7 +240,7 @@ export type CategoryWithUsage = Category & {
 
 /** The KI's proposal whether a new category is umlagefähig, or why there is none, for what it checked */
 export type Proposal = { name: string; description: string } & (
-	AllocabilityProposal | { error: string }
+	AllocabilityProposal | { error: string; unsure?: boolean }
 );
 
 type ApiDistributionKey = Json<DistributionKeyWithUsage>;

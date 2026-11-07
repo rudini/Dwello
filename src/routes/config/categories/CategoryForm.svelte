@@ -57,6 +57,7 @@
 	// sure answer, or once name or description change, a choice the KI made goes again
 	let kiChoice = $state('');
 	let applied = $state(false);
+	let withdrawn = $state(false); // the KI's choice went with a changed name or description
 	let checking = $state(false);
 	let answered = $state<Proposal>();
 	$effect.pre(() => {
@@ -71,11 +72,32 @@
 		const answer = current;
 		untrack(() => {
 			if (answer && 'reasoning' in answer) {
+				withdrawn = false;
 				applied = values.allowed === '' || values.allowed === kiChoice;
 				if (applied) values.allowed = kiChoice = String(answer.isAllowedUtilityCost);
-			} else if (values.allowed === kiChoice) values.allowed = kiChoice = '';
+			} else if (values.allowed === kiChoice) {
+				withdrawn = kiChoice !== '';
+				values.allowed = kiChoice = '';
+			}
 		});
 	});
+	// #678 (Sven P-11, Helga P-7, G-8): a proposal for another name or description does not go without a word
+	const outdated = $derived(
+		answered &&
+			!current &&
+			[
+				m.categories_proposal_outdated(),
+				values.allowed
+					? m.categories_proposal_outdated_kept()
+					: [
+							withdrawn && m.categories_proposal_outdated_reset(),
+							m.categories_proposal_outdated_choose()
+						]
+			]
+				.flat()
+				.filter(Boolean)
+				.join(' ')
+	);
 	// A choice made by hand is the Liegenschaftsverwalter's, also when it equals the KI's
 	$effect(() => {
 		if (values.allowed !== kiChoice) kiChoice = '';
@@ -96,6 +118,12 @@
 			.filter(Boolean)
 			.join(' ')
 	);
+	// #678, #1028: a short intro, the rules one paragraph each, then what «Von der KI prüfen lassen» does
+	const allocableHelp = $derived([
+		m.categories_allocable_help(),
+		...m.categories_allocable_rules().split('\n'),
+		...(ki && !category ? [m.categories_allocable_ki()] : [])
+	]);
 </script>
 
 <SaveForm
@@ -133,7 +161,7 @@
 		<RadioGroup
 			name="isAllowedUtilityCost"
 			legend={m.categories_allocable()}
-			help={m.categories_allocable_help()}
+			help={allocableHelp}
 			options={allowance}
 			bind:value={values.allowed}
 			error={values.allowed ? undefined : errors.isAllowedUtilityCost}
@@ -169,8 +197,11 @@
 							<CategoryProposal
 								proposal={current}
 								applied={applied && values.allowed === kiChoice}
+								choice={values.allowed}
 							/>
 						</div>
+					{:else if outdated}
+						<p class="mt-4 text-ink-muted" data-testid="category-proposal-outdated">{outdated}</p>
 					{/if}
 				</div>
 			</div>

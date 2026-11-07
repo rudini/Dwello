@@ -93,8 +93,10 @@ Then('bieten die Einstellungen keine Abrechnungsperiode an', async ({ verwalter 
 // #1166: the Kontoinhaber of the IBAN in the payment part; set back to the Absender afterwards
 When(
 	'der Liegenschaftsverwalter folgende Einstellungen mit eigenem Kontoinhaber speichert:',
-	async ({ verwalter, seed }, table: DataTable) => {
-		seed.restoreAccountHolder();
+	async ({ verwalter, seed, $tags }, table: DataTable) => {
+		// only a scenario holding the settings lock may set it back: an unlocked teardown would clear the Kontoinhaber
+		// a parallel locked scenario just saved (WebKit run of #1185); a refused save stores nothing to set back
+		if ($tags.includes('@einstellungen-global')) seed.restoreAccountHolder();
 		const fields = Object.entries(table.rowsHash()).map(([label, value]) => [FIELDS[label], value]);
 		await verwalter.attemptsTo(giveOwnHolder, saveSettings(Object.fromEntries(fields)));
 	}

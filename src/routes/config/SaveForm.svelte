@@ -2,12 +2,14 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
+	import { on } from 'svelte/events';
 	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { focusSavedRow } from '$lib/focus-after-action';
+	import { localName } from '$lib/names';
 
 	// Form of a master data record: the reason it was not saved on top, cancel and save at the bottom;
 	// once saved, a message names the kind of record (`record`) and the name the user gave it
@@ -55,13 +57,15 @@
 		const [nameFR, nameIT, nameEN] = ['nameFR', 'nameIT', 'nameEN'].map((key) =>
 			String(formData.get(key) ?? '')
 		);
+		const names = { name, nameFR, nameIT, nameEN };
 		return async ({ result, update, formElement }) => {
 			const focused = document.activeElement;
 			const formPage = location.pathname;
-			if (result.type === 'redirect') addToast('success', text.saved({ name }));
+			// #678: the confirmation names the record as the list does
+			if (result.type === 'redirect') addToast('success', text.saved({ name: localName(names) }));
 			await update({ reset: false });
 			// #1124, #1128: back on the list, the saved record's row has the focus, which the confirmation keeps clear of
-			if (result.type === 'redirect') focusSavedRow(formPage, { name, nameFR, nameIT, nameEN });
+			if (result.type === 'redirect') focusSavedRow(formPage, names);
 			if (check) checking = false;
 			else saving = false;
 			await focusFirstError(formElement);
@@ -74,6 +78,17 @@
 				)?.focus();
 		};
 	};
+
+	// #678: Enter in a field saves, as in every other form; the browser would send the form's first button,
+	// e.g. «Von der KI prüfen lassen», which runs only by its own button
+	const saveOnEnter = (event: KeyboardEvent) => {
+		const field = event.target;
+		// an Enter that ends an IME input saves nothing, as natively
+		if (event.key !== 'Enter' || event.isComposing || !(field instanceof HTMLInputElement)) return;
+		event.preventDefault();
+		// requestSubmit() clicks no button, so the busy save button does not stop a second save (#677)
+		if (!saving) form?.requestSubmit();
+	};
 </script>
 
 <form
@@ -81,6 +96,7 @@
 	method="POST"
 	{action}
 	use:enhance={submitted}
+	{@attach (node) => on(node, 'keydown', saveOnEnter)}
 	class="flex flex-col gap-8"
 	novalidate
 >

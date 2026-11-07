@@ -132,6 +132,68 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" speichert, ohne zu wählen, ob sie umlagefähig ist
     Dann erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind
 
+  # #678 (Sven P-5, entschieden): die Eingabetaste speichert, die KI prüft nur auf Wunsch
+  Szenario: Die Eingabetaste speichert die neue Kategorie
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die nicht umlagefähige Kategorie "Fassadenreinigung" mit der Eingabetaste speichert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
+    Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
+
+  Szenario: Die Eingabetaste auf der Wahl der Umlagefähigkeit speichert, ohne die KI zu fragen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" mit der Eingabetaste auf «Nicht umlagefähig» speichert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
+    Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
+
+  Szenario: Die Eingabetaste ohne Wahl der Umlagefähigkeit fragt die KI nicht
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die Kategorie "Gartenpflege" mit der Eingabetaste speichert, ohne zu wählen, ob sie umlagefähig ist
+    Dann erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind
+    Und ist weder umlagefähig noch nicht umlagefähig gewählt
+
+  # #678 (Marco P-3, Helga P-4): kurz, mit dem Wort der App, und was die KI tut
+  Szenario: Die Frage der Umlagefähigkeit erklärt die Regeln und die Rolle der KI
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Dann erklärt die Frage der Umlagefähigkeit "Umlagefähig sind Kosten aus dem Gebrauch des Gebäudes"
+    Und erklärt die Frage der Umlagefähigkeit "Mit «Von der KI prüfen lassen» prüft die KI Name und Beschreibung und schlägt mit Begründung vor, ob die Kosten umlagefähig sind. Ist sie sich nicht sicher, schlägt sie nichts vor. Haben Sie noch nicht gewählt, wählt Dwello den Vorschlag vor. Die Wahl treffen Sie."
+    Aber die Frage der Umlagefähigkeit nennt nicht "Liegenschaft"
+
+  # #678 (Helga P-5)
+  Szenario: Ohne Namen sagt Dwello, was die KI zum Prüfen braucht
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ohne einen Namen einzugeben
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Geben Sie zuerst den Namen ein. Die KI prüft die Kategorie nach Name und Beschreibung."
+
+  # #678 (Helga P-6)
+  Szenario: Ohne Wahl der Umlagefähigkeit weist Dwello auf die KI hin
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" speichert, ohne zu wählen, ob sie umlagefähig ist
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, ob die Kosten umlagefähig sind. Sind Sie unsicher, wählen Sie «Von der KI prüfen lassen»."
+
+  # #678 (Helga P-9, P-8): sagt, ob die KI es anders sieht
+  Szenario: Die KI sieht es anders als der Liegenschaftsverwalter
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Und der Liegenschaftsverwalter hat die Kategorie als nicht umlagefähig gewählt
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Gartenpflege" umlagefähig ist
+    Dann sagt Dwello zur Prüfung durch die KI "Die KI sieht es anders als Sie. Ihre Wahl bleibt: «Nicht umlagefähig»."
+    Und ist im Formular der Kategorie "Nicht umlagefähig" gewählt
+
+  # #678 (Helga P-10)
+  Szenario: Ist die KI unsicher, bleibt die eigene Wahl
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Und der Liegenschaftsverwalter hat die Kategorie als umlagefähig gewählt
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
+    Dann sagt Dwello zur Prüfung durch die KI "Die KI ist sich nicht sicher. Ihre Wahl bleibt: «Umlagefähig»."
+    Aber sagt Dwello zur Prüfung durch die KI nicht "Wählen Sie selbst"
+
+  # #678 (Sven P-11, Helga P-7, Code-Review G-8): ein Vorschlag gilt nur für den geprüften Namen, und das wird gesagt
+  Szenario: Nach dem Umbenennen bittet Dwello, die KI nochmals prüfen zu lassen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Und die KI hat geprüft, ob die Kategorie "Gartenpflege" umlagefähig ist
+    Wenn der Liegenschaftsverwalter die Kategorie in "Gartenunterhalt" umbenennt
+    Dann sagt Dwello zur Prüfung durch die KI "Name oder Beschreibung haben sich seit der Prüfung geändert. Dwello hat die Wahl der KI zurückgenommen. Wählen Sie selbst oder lassen Sie die KI nochmals prüfen."
+    Und ist weder umlagefähig noch nicht umlagefähig gewählt
+
   Szenario: Vordefinierte und eigene Kategorien sind gekennzeichnet
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann ist die vordefinierte Kategorie "Liegenschaftssteuer" als "Von Dwello" gekennzeichnet
