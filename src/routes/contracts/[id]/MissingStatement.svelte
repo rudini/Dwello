@@ -35,7 +35,8 @@
 		<p>{m.contracts_statement_missing_billed_elsewhere()}</p>
 		<!-- each period's links on their own row (personas Helga P-4, Anna P-5 #211), across its full width (#741) -->
 		<div class="flex flex-col gap-2">
-			{#each missing as period (period.start)}
+			<!-- the oldest first, as the text asks (#741, persona Marco P-1) -->
+			{#each missing.toReversed() as period (period.start)}
 				<div class="flex flex-col gap-2" data-testid="contract-missing-statement-period-{period.start}">
 					{#if period.href}
 						<Button

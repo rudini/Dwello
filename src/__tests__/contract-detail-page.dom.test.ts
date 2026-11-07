@@ -306,7 +306,7 @@ describe('Mietvertragsdetail', () => {
 	});
 
 	// #142: every ended period without a statement, the newest first, each with its own way to the wizard
-	it('nennt mehrere fehlende Abrechnungen, die neueste zuerst, je mit ihrem Weg zum Assistenten', () => {
+	it('nennt mehrere fehlende Abrechnungen, die älteste zuerst, je mit ihrem Weg zum Assistenten', () => {
 		const missing = [2025, 2023].map((y) => ({
 			start: `${y}-01-01`,
 			end: `${y}-12-31`,
@@ -324,8 +324,9 @@ describe('Mietvertragsdetail', () => {
 				'[data-testid^="contract-missing-statement-link-"]'
 			)
 		];
-		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025 abrechnen', '2023 abrechnen']);
-		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
+		// the oldest first, as the text asks (#741, persona Marco P-1)
+		expect(links.map((a) => a.textContent!.trim())).toEqual(['2023 abrechnen', '2025 abrechnen']);
+		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href).reverse());
 		// each period's links together, on their own row (personas Helga P-4, Anna P-5 #211)
 		const row = byTestId('contract-missing-statement-period-2023-01-01')!;
 		expect([...row.querySelectorAll('a')].map((a) => a.textContent!.trim())).toEqual([
