@@ -116,6 +116,28 @@ export async function recalculateStatement(fetch: Fetch, id: string): Promise<Re
 	};
 }
 
+/** The statement's PDF made (#686: a form action, so a click before the page has loaded works too); null, or what to tell the user */
+export async function generateStatementPdf(fetch: Fetch, id: string): Promise<Refusal | null> {
+	const response = await fetch(`${API}/${id}/generate-pdf`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: '{}' // the backend validates the body as an object; without one it answers 422
+	}).catch(() => null); // an unreachable backend gets the general sentence, as the former proxy did (#1212)
+	if (!response) return { status: 500, message: m.statements_pdf_failed() };
+	if (response.ok) return null;
+	const error = await response.json().catch(() => ({}));
+	return {
+		status: response.status,
+		// PDF_FAILED already says the PDF could not be made
+		message:
+			error.code === 'PDF_FAILED'
+				? backendMessage(error, m.statements_pdf_failed())
+				: m.statements_pdf_failed_reason({
+						reason: backendMessage(error, m.statements_unknown_error())
+					})
+	};
+}
+
 /** #534: «Erneut per Brief zustellen»: null, or what to tell the user */
 export async function redeliverStatement(fetch: Fetch, id: string): Promise<Refusal | null> {
 	const response = await fetch(`${API}/${id}/redeliver`, { method: 'POST' });

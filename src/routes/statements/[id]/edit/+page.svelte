@@ -13,14 +13,27 @@
 	import type { ActionData } from './$types';
 
 	// Only the deadline and the notes can change; the costs come from the generation run
-	let { data, form }: { data: { statement: StatementWithDetails }; form: ActionData } = $props();
+	let {
+		data,
+		form
+	}: {
+		data: { statement: StatementWithDetails; paymentDeadlineDays?: number }; // the days: a draft's (#686)
+		form: ActionData;
+	} = $props();
 
 	const statement = $derived(data.statement);
 	const refund = $derived(statement.balance < 0);
+	const draft = $derived(statement.status === 'draft'); // #686: its Zahlungsfrist moves when it is sent
+	// #686 (Persona Marco M-1, Weber W-2): where the date is entered, a draft says that sending moves it
+	const sending = $derived(
+		draft && data.paymentDeadlineDays
+			? ` ${m.statements_payment_deadline_draft_help({ n: data.paymentDeadlineDays })}`
+			: ''
+	);
 	const deadlineField = $derived(
 		refund
-			? { label: m.statements_refund_by(), help: m.statements_refund_by_help() }
-			: { label: m.glossary_deadline_term(), help: m.statements_deadline_help() }
+			? { label: m.statements_refund_by(), help: m.statements_refund_by_help() + sending }
+			: { label: m.glossary_deadline_term(), help: m.statements_deadline_help() + sending }
 	);
 	let saving = $state(false);
 	// Shown in words below the field: the browser may show the date in a foreign format

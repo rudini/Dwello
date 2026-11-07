@@ -181,7 +181,7 @@ export const closeRestoredNotice = Click.on(closeDraftNotice);
 export const openSkippedContract = (contractId: string) => Click.on(previewSkippedLink(contractId));
 
 // #738: step 2's counts fail (the BFF routes the browser calls)
-export const invoicesCannotBeCounted = FailRequests.to('/api/invoices', { isValidUtilityCost: 'true' });
+export const invoicesCannotBeCounted = FailRequests.to('/api/statements/invoices', {});
 export const billedCannotBeChecked = FailRequests.to('/api/statements/billed', {});
 export const waitForBuildingCounts = (buildingId: string) => Wait.until(buildingInvoiceCount(buildingId));
 
