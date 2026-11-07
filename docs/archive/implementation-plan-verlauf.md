@@ -1467,6 +1467,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga (`docs/design/personas/helga-687.md`): no warned feeling left; Minors that stay: H-1 (Lift: where to find the maintenance share), H-2 (Heizung: «anrechenbar» and «umlagefähig»)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #662 list filters: selects apply on change
+
+- [x] Read #662 (decided 2026-11-04); it contradicted the «Suchen» rule just merged with #682: the product owner confirmed #662; spec change of the #682 apartments scenario approved in #662
+- [x] Selects apply on change on apartments, tenants, contracts, invoices, statements; apartments and invoices work as plain GET forms; scenarios and DOM tests seen red (d7474ba)
+- [x] code-reviewer (`docs/reviews/662-review-{1,2,3}.md`): C-1..C-3 Minor fixed (609aaec); C-4 Major (axe and language state `empty-year`), C-5, C-6 fixed (219ab27); round 3 without findings
+- [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-662.md`), two rounds: Sven S-1 Major (no announcement of the result) and S-2, S-4, S-5 fixed (4dd4526, 219ab27); Helga H-1 Major (unsent text applied; decided: only the selects apply, per #680) and H-2 fixed (6202bf9); Minors that stay: Sven S-3 (#1173), Helga H-3, H-4
+- [x] Workflow notes: before asking a product question, search the open issues on the same behaviour (#662, #680 had decided what #682 asked again)
 ## Session: #688 agreements check retry: focus and announcement (personas on #439)
 
 - [x] Read #688; triage on main (`docs/reviews/688-triage.md`): P-2, P-5, Helga P-3 hold; the #439 reports are not in the shallow history, every point confirmed in the code
@@ -1484,3 +1491,11 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #731 Older persona observations on the Übersicht
+
+- [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
+- [x] Scenario «Kennzahl mit Mietstatus erklärt» (dashboard.feature) and i18n unit test, seen red; implemented (ceef116)
+- [x] code-reviewer `docs/reviews/731-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-731.md`): no Blocker or Major; Minors P-1..P-3 stay in the report (P-3 before the change)
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, dashboard E2E with its axe/language rows
+- [x] Archive session; PR `Fixes #731`: pushed after this archive
