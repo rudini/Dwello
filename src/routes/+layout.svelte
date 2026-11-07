@@ -2,9 +2,9 @@
 	import { m } from '$lib/paraglide/messages';
 	import '@fontsource-variable/inter';
 	import '../styles/globals.css';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Header from '$lib/ui/Header.svelte';
 	import Navigation from '$lib/ui/Navigation.svelte';
@@ -57,6 +57,8 @@
 		setTimeout(() => (document.body.dataset.hydrated = 'true'));
 	});
 
+	let listResult = $state('');
+	let navigations = 0;
 	// After a search on a list the focus goes to its results, so their number is read out
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
@@ -64,8 +66,21 @@
 		const keep =
 			document.activeElement instanceof HTMLSelectElement ||
 			document.activeElement?.closest('[data-sveltekit-keepfocus]');
-		if (isListNavigation(navigation) && !keep)
-			document.querySelector<HTMLElement>('main [data-results]')?.focus();
+		if (!isListNavigation(navigation)) return;
+		const results = document.querySelector<HTMLElement>('main [data-results]');
+		if (!keep) return results?.focus();
+		// the focus stays in the filter, so the result is read out instead (#662, persona Sven S-1), unless the next
+		// navigation has started meanwhile (S-5)
+		const turn = navigations;
+		tick().then(() => {
+			if (turn === navigations) listResult = results?.textContent?.trim() ?? '';
+		});
+	});
+	// every navigation empties the status: no earlier result is read on the next page or after «Suchen», and the same
+	// count after another choice is read out again (code review 662-2 C-5, C-6)
+	beforeNavigate(() => {
+		navigations++;
+		listResult = '';
 	});
 
 	// Derived state for showing authenticated layout
@@ -95,6 +110,9 @@
 		</p>
 	{/if}
 {/snippet}
+
+<!-- the result of a list filter that keeps the focus (#662) -->
+<div role="status" class="sr-only" data-testid="list-result-status">{listResult}</div>
 
 {#if showAuthenticatedLayout}
 	<div class="flex min-h-screen flex-col bg-canvas">
