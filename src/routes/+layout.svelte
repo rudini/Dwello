@@ -56,7 +56,10 @@
 	// SvelteKit's announcer is on the page by then; the layout reads the title out itself (#1173, below)
 	onMount(() => {
 		setTimeout(() => {
-			document.getElementById('svelte-announcer')?.setAttribute('aria-live', 'off');
+			// muted and hidden, so its copy of the title is not read a second time in browse mode (Sven 1173)
+			const announcer = document.getElementById('svelte-announcer');
+			announcer?.setAttribute('aria-live', 'off');
+			announcer?.setAttribute('aria-hidden', 'true');
 			document.body.dataset.hydrated = 'true';
 		});
 	});

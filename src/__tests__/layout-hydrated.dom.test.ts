@@ -82,7 +82,8 @@ describe('Ansage des Seitentitels', () => {
 	});
 
 	// SvelteKit's announcer reads the title also after a form action, when the page store changes
-	it('stellt die Ansage von SvelteKit stumm', async () => {
+	// Sven 1173: muted, its copy of the title would still be read a second time in browse mode
+	it('stellt die Ansage von SvelteKit stumm und verbirgt sie', async () => {
 		document.body.innerHTML = '<div id="svelte-announcer" aria-live="assertive"></div>';
 		const { default: Layout } = await import('../routes/+layout.svelte');
 		show(Layout, {
@@ -90,7 +91,11 @@ describe('Ansage des Seitentitels', () => {
 			children: createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }))
 		} as never);
 		await new Promise((resolve) => setTimeout(resolve));
-		expect(document.getElementById('svelte-announcer')!.getAttribute('aria-live')).toBe('off');
+		const announcer = document.getElementById('svelte-announcer')!;
+		expect([announcer.getAttribute('aria-live'), announcer.getAttribute('aria-hidden')]).toEqual([
+			'off',
+			'true'
+		]);
 	});
 
 	// a form action that sends the page to itself (a redirect) or a list search stays on the page
