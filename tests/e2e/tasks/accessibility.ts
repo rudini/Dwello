@@ -978,10 +978,10 @@ const leaveSessionFor =
 		if (example.public) await actor.attemptsTo(Cookies.clear);
 	};
 
-/** The language the app, its empty instance and the fresh installation (#690) show (the cookie the language selection sets) */
+/** The language the app and its empty instance show (the cookie the language selection sets) */
 const useLanguage = (language: string) =>
 	Cookies.add(
-		['http://localhost:3100', 'http://localhost:3102', FRESH_APP].map((url) => ({ name: 'PARAGLIDE_LOCALE', value: language, url }))
+		['http://localhost:3100', 'http://localhost:3102'].map((url) => ({ name: 'PARAGLIDE_LOCALE', value: language, url }))
 	);
 
 /** Opens the example's screen in its state for one viewport and colour scheme and notes what `look` finds there,

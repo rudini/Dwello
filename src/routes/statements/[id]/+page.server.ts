@@ -30,10 +30,11 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' '), abroad].filter(Boolean).join(', ');
 }
 
-// #690: what the stored IBAN lacks, by the backend's rule of the settings; no warning when they cannot be read
+// #690: the Zahlteil lacks its creditor's address, by the backend's rule of the QR-bill; no warning when the settings
+// cannot be read
 async function creditorMissing(fetch: typeof globalThis.fetch) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
-	return response?.ok === true && Boolean((await response.json()).creditorMissing?.length);
+	return response?.ok === true && (await response.json()).creditorAddressMissing === true;
 }
 
 export const load: PageServerLoad = async ({ params, fetch, url }) => {

@@ -17,5 +17,6 @@
 		"payment_deadline_days": "45",
 		"reminder_after_days": "10"
 	},
-	"creditorMissing": []
+	"creditorMissing": [],
+	"creditorAddressMissing": false
 }

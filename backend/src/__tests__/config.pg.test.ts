@@ -5,6 +5,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
+import { configuration } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 
@@ -171,6 +172,24 @@ describe('Einstellungen lesen', () => {
 			{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: 'company_name,company_city' } }
 		]);
 		expect(complete.creditorMissing).toEqual([]);
+	});
+
+	// review 690-1 C-1: the Zahlteil names the Kontoinhaber when one is entered (#1166), so only his address counts there
+	it('sagt beim Lesen, ob dem Zahlteil die Adresse des Zahlungsempfängers fehlt', async () => {
+		const read = async () => ((await (await callApi('/api/v1/config')).json()) as { creditorAddressMissing: unknown }).creditorAddressMissing;
+		for (const [key, value] of [['company_name', 'Muster Immobilien AG'], ['company_postal_code', '8001'], ['company_city', 'Zürich']] as const)
+			await setConfig(key, value);
+		await setConfig('iban', 'CH93 0076 2011 6238 5295 7');
+		await db.execute(sql`DELETE FROM configuration WHERE key = 'company_name'`);
+		const withoutHolder = await read();
+		for (const [key, value] of [['account_holder_name', 'Erika Muster'], ['account_holder_postal_code', '6003'], ['account_holder_city', 'Luzern']] as const)
+			await db.insert(configuration).values({ key, value });
+		const withHolder = await read();
+		await db.execute(sql`DELETE FROM configuration WHERE key LIKE 'account_holder_%'`);
+		await setConfig('company_name', 'Muster Immobilien AG');
+		const complete = await read();
+
+		expect([withoutHolder, withHolder, complete]).toEqual([true, false, false]);
 	});
 
 	it('nennt ohne IBAN nichts, was fehlt', async () => {

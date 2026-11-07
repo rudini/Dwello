@@ -319,7 +319,13 @@ describe('Abrechnung laden', () => {
 				} as never)) as { creditorMissing: boolean }
 			).creditorMissing;
 
-		expect([await loaded(missing), await loaded(complete)]).toEqual([true, false]);
+		// review 690-1 C-1: by the Zahlteil's rule, not the save's: a complete Kontoinhaber is the creditor
+		const holderComplete = { ...missing, creditorAddressMissing: false };
+		expect([await loaded(missing), await loaded(complete), await loaded(holderComplete)]).toEqual([
+			true,
+			false,
+			false
+		]);
 	});
 
 	// Eine Korrespondenzadresse im Ausland nennt ihr Land (#102)

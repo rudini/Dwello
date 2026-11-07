@@ -9,7 +9,7 @@ import { categories, distributionKeys, utilityStatements, type HeatingSources, t
 import { belowMinimum, roundToRappen } from './pdf-format';
 import { ACCOUNT_HOLDER_KEYS, getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
-import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
+import { creditorOf, isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { datedToday, getStatement, keyValuesOf, updateStatementStatus } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { refusal } from './coded-error';
@@ -30,6 +30,12 @@ export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const [name, address, postalCode, city] = await Promise.all(ACCOUNT_HOLDER_KEYS.map((key) => getTypedConfig(key)));
 	const accountHolder = name || address || postalCode || city ? { name, address, postalCode, city } : undefined;
 	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity, phone, email, accountHolder };
+}
+
+/** #690: a stored IBAN whose Zahlteil is refused for the creditor's address (CREDITOR_ADDRESS_MISSING) */
+export async function creditorAddressMissing() {
+	const config = await qrBillConfig();
+	return config !== null && !creditorOf(config);
 }
 
 // Name and postal address as stored; a statement without tenant prints no recipient

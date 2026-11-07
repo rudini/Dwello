@@ -17,5 +17,6 @@
 		"payment_deadline_days": "45",
 		"reminder_after_days": "10"
 	},
-	"creditorMissing": [{ "code": "IBAN_COMPANY_ADDRESS_MISSING", "params": { "field": "iban", "missing": "company_name,company_city" } }]
+	"creditorMissing": [{ "code": "IBAN_COMPANY_ADDRESS_MISSING", "params": { "field": "iban", "missing": "company_name,company_city" } }],
+	"creditorAddressMissing": true
 }
