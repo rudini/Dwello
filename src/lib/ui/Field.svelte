@@ -79,7 +79,14 @@
 	// the error first, heard right after the focus jump; then a caution about the value, a hint about it too: both are
 	// missed at the end of a long help (persona Sven, #677)
 	const describedBy = $derived(
-		[shown && errorId, flagged, note && noteId, describedby, hasHelp && helpId]
+		// a refusal that names this field's own error (#1166) adds no second reference to it
+		[
+			shown && errorId,
+			flagged !== errorId && flagged,
+			note && noteId,
+			describedby,
+			hasHelp && helpId
+		]
 			.filter(Boolean)
 			.join(' ') || undefined
 	);

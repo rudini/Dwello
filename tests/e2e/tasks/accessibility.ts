@@ -65,6 +65,9 @@ import {
 	signedInFreshWithGoogleAnHourAgo
 } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
+import { formErrors } from '../targets/form';
+import { settingField } from '../targets/settings';
+import { giveOwnHolder, saveSettings } from './settings';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
 import { userMenuButton } from '../targets/app-frame';
 import { passwordSubmitButton } from '../targets/authentication';
@@ -290,6 +293,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// #718, part 3: «Neuer Wiederherstellungscode» signed in with a password (the account made by inTurn), with Google an
 	// hour ago, and with the new code shown, refused and confirmed
 	'backup-links': () => Wait.until(backupSettingsLink),
+	// #1166: the block «Konto» with the fields of a Kontoinhaber, and the refusal of an IBAN without them; nothing is saved
+	'account-holder': () => (actor) => actor.attemptsTo(giveOwnHolder, Wait.until(settingField('accountHolderName'))),
+	// the fields entered empty: refused whatever a parallel scenario stored, so it writes nothing (code review 1166 C-1)
+	'account-holder-missing': () => (actor) =>
+		actor.attemptsTo(
+			giveOwnHolder,
+			saveSettings({ iban: 'CH93 0076 2011 6238 5295 7', accountHolderName: '', accountHolderPostalCode: '', accountHolderCity: '' }),
+			Wait.until(formErrors)
+		),
 	'new-code-password': () => (actor) =>
 		actor.attemptsTo(
 			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),

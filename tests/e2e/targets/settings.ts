@@ -7,3 +7,5 @@ export const masterDataLink = (label: string) =>
 	target(`Stammdaten «${label}»`, (page) => page.getByTestId('quick-links').getByRole('link').filter({ hasText: label }));
 // #496: the ZIP with all data
 export const exportAllDataButton = target('Alle Daten exportieren', (page) => page.getByTestId('config-export-button'));
+// #1166: «Kontoinhaber ist der Absender»
+export const holderIsSenderBox = target('Kontoinhaber ist der Absender', (page) => page.getByTestId('setting-accountHolderIsSender'));

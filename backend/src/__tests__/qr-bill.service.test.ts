@@ -175,4 +175,23 @@ describe('QR-Rechnung einer Abrechnung', () => {
 			}
 		}
 	});
+
+	// #1166: «Zahlbar an» ist der Kontoinhaber der IBAN (SIX); ein eigener Kontoinhaber ersetzt den Absender ganz
+	it('nennt einen eigenen Kontoinhaber als Zahlungsempfänger', async () => {
+		const accountHolder = { name: 'Erika Muster', address: 'Seeweg 5', postalCode: '9490', city: 'Vaduz' };
+		const { qrData } = await generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), { ...config, accountHolder });
+
+		expect([qrData.creditorName, qrData.creditorStreet, qrData.creditorPostalCode, qrData.creditorCity, qrData.creditorCountry]).toEqual(
+			['Erika Muster', 'Seeweg 5', '9490', 'Vaduz', 'LI']
+		);
+	});
+
+	it('lehnt einen Zahlteil ohne Name, PLZ oder Ort des eigenen Kontoinhabers ab', async () => {
+		for (const missing of ['name', 'postalCode', 'city'] as const) {
+			const accountHolder = { name: 'Erika Muster', address: '', postalCode: '6003', city: 'Luzern', [missing]: ' ' };
+			const bill = generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), { ...config, accountHolder });
+
+			await expect(bill).rejects.toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+		}
+	});
 });

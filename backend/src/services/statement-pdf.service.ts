@@ -7,7 +7,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, utilityStatements, type HeatingSources, type KeyValues } from '../db/schema';
 import { belowMinimum, roundToRappen } from './pdf-format';
-import { getTypedConfig } from './config.service';
+import { ACCOUNT_HOLDER_KEYS, getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { datedToday, getStatement, keyValuesOf, updateStatementStatus } from './statement.service';
@@ -26,7 +26,10 @@ export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	if (!iban) return null;
 
 	const [phone, email] = [await getTypedConfig('company_phone'), await getTypedConfig('company_email')];
-	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity, phone, email };
+	// #1166: a Kontoinhaber entered replaces the Absender in the payment part, as entered (an incomplete one is refused there)
+	const [name, address, postalCode, city] = await Promise.all(ACCOUNT_HOLDER_KEYS.map((key) => getTypedConfig(key)));
+	const accountHolder = name || address || postalCode || city ? { name, address, postalCode, city } : undefined;
+	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity, phone, email, accountHolder };
 }
 
 // Name and postal address as stored; a statement without tenant prints no recipient
