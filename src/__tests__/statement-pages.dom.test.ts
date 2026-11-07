@@ -2808,7 +2808,10 @@ describe('Abrechnung bearbeiten', () => {
 		} as never);
 		const draft = byTestId('payment-deadline-input-help')!.textContent!.replace(/\s+/g, ' ');
 		document.body.innerHTML = '';
-		edit({ status: 'sent' });
+		show(EditStatementPage, {
+			data: { statement: statement({ status: 'sent' }), paymentDeadlineDays: 45 },
+			form: null
+		} as never);
 
 		expect(draft).toContain(
 			'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung. Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versand; eine längere Frist bleibt.'
