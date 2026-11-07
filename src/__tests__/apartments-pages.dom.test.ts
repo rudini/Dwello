@@ -179,7 +179,7 @@ describe('Wohnungsliste', () => {
 		fireEvent(building, 'change', 'b1');
 		fireEvent(byTestId<HTMLSelectElement>('apartments-status-filter')!, 'change', 'vacant');
 		click('apartments-search-submit');
-		expect(goto).toHaveBeenCalledWith('/apartments?building=b1&status=vacant&page=1');
+		expect(goto).toHaveBeenCalledWith('/apartments?building=b1&status=vacant');
 	});
 
 	it('bietet ohne Wohnungen die erste Erfassung an', () => {

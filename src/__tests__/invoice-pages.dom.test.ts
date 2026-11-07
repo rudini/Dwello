@@ -149,7 +149,7 @@ describe('Rechnungsliste', () => {
 		expect(byTestId<HTMLInputElement>('invoice-search-input')!.value).toBe('Hauswart');
 
 		submit('invoice-search-submit');
-		expect(goto).toHaveBeenCalledWith('/invoices?search=Hauswart&page=1');
+		expect(goto).toHaveBeenCalledWith('/invoices?search=Hauswart');
 	});
 
 	it('öffnet eine Rechnung über eine ganze Zeile, die den Rechnungssteller nennt', () => {
@@ -192,7 +192,7 @@ describe('Rechnungsliste', () => {
 		expect(byTestId<HTMLSelectElement>('invoice-building-filter')!.value).toBe('b1');
 
 		submit('invoice-search-submit');
-		expect(goto).toHaveBeenCalledWith('/invoices?building=b1&page=1');
+		expect(goto).toHaveBeenCalledWith('/invoices?building=b1');
 	});
 
 	it('zeigt die Rechnungen eines Jahres, damit eine Abrechnungsperiode geprüft werden kann', () => {
@@ -203,7 +203,7 @@ describe('Rechnungsliste', () => {
 		expect([...year.options].map((o) => o.text)).toEqual(['Alle Jahre', '2026', '2025', '2024']);
 
 		submit('invoice-search-submit');
-		expect(goto).toHaveBeenCalledWith('/invoices?year=2025&page=1');
+		expect(goto).toHaveBeenCalledWith('/invoices?year=2025');
 	});
 
 	// #454 (#408 point 1): the list filtered by an Abrechnungsperiode names the filter and the rule
