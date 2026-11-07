@@ -16,7 +16,8 @@ export const variants = Object.keys(screenList.viewports).flatMap((viewport) =>
 const query: Record<string, string> = {
 	'filtered-empty': '?search=xq-a11y-0', // no German word: the apartment list repeats the term (#160)
 	'login-error': '?error=failed',
-	'login-not-allowed': '?error=not_allowed'
+	'login-not-allowed': '?error=not_allowed',
+	'empty-year': `?year=${new Date().getFullYear()}` // a year of the invoices' year filter (#662, S-4)
 };
 
 /** Path and query string of a screen in a state, ids still as {placeholders} */

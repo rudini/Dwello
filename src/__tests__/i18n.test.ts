@@ -38,6 +38,11 @@ describe('Typografie', () => {
 	it('en setzt Guillemets statt englischer Anführungszeichen', () => {
 		expect(texts('en').filter(([, text]) => /[“”]/.test(text)).map(([key]) => key)).toEqual([]);
 	});
+
+	// #731: «Vermietet ab …» broke before «…», which then stood alone on the second line of its tile
+	it.each(languages)('%s bricht «…» im Mietstatus nicht vom Wort davor ab', (locale) => {
+		expect(m.apartments_status_relet({}, { locale })).toMatch(/\S\u00a0…$/);
+	});
 });
 
 describe('Sprachdateien', () => {
