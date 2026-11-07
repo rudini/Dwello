@@ -1490,3 +1490,11 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Marco `docs/design/personas/marco-1186.md`: no Blocker or Major; P-1 to P-3 Minors stay (P-1: the unsent building choice, #662)
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, statements E2E with its axe/language rows
 - [x] Archive the session; PR `Fixes #1186`: pushed after this archive
+## Session: #731 Older persona observations on the Übersicht
+
+- [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
+- [x] Scenario «Kennzahl mit Mietstatus erklärt» (dashboard.feature) and i18n unit test, seen red; implemented (ceef116)
+- [x] code-reviewer `docs/reviews/731-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-731.md`): no Blocker or Major; Minors P-1..P-3 stay in the report (P-3 before the change)
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, dashboard E2E with its axe/language rows
+- [x] Archive session; PR `Fixes #731`: pushed after this archive
