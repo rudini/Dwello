@@ -403,7 +403,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition."
     Und steht im PDF nicht "ohne Leistungszeitraum"
-    Und steht im PDF nicht "Anteile der Monate Ihres Mietverhältnisses:"
+    Und steht im PDF nicht "Anteile der Monate Ihres Mietverhältnisses im Heizprofil"
 
   # #453 (#325): mit «Abgerechnet bis» in der Periode sagt das PDF, was schon abgerechnet ist und ab wann das Akonto
   # zählt; 01.03. bis 31.03.2024 = 31 Mietstage von 366 Tagen
@@ -649,7 +649,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten)."
-    Und steht im PDF "Anteile der Monate Ihres Mietverhältnisses im Heizprofil (die zwölf Monate ergeben zusammen 100 %): Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
+    Und steht im PDF "Anteile der Monate Ihres Mietverhältnisses im Heizprofil, das die Heizkosten eines Jahres auf die zwölf Monate verteilt: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
 
   # #685: der Anteil steht wie im PDF immer mit zwei Stellen; Lea Graf trägt die Hälfte der Heizkosten
   @wip
