@@ -1474,3 +1474,12 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1143 Draft refusal without the apartment's contracts
+
+- [x] Scenario line `contract-edit.feature:239` changed to the decided text (Spec change approved: #1143)
+- [x] `fach-reviewer` `docs/reviews/b1143-fachreview-1.md`: de checked, fr/it/en written; V-1 Minor («die Mietverträge» instead of «sie») taken
+- [x] DOM test and scenario seen red at the message, texts in `messages/*.json`, green (ea8df3c)
+- [x] code-reviewer `docs/reviews/b1143-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-b1143.md`): no Blocker or Major; P-1..P-3 Minor stay (P-1, P-3 on the base commit, P-2 the decided #666 hint and #1142)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1143.md`
+- [x] Archive the session; PR `Fixes #1143`: pushed after this archive
