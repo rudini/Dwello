@@ -4,6 +4,13 @@ import { BrowseTheWeb } from '../e2e/screenplay/abilities';
 import { Actor } from '../e2e/screenplay/actor';
 import { Navigate } from '../e2e/screenplay/interactions';
 
+// Playwright fixes the stack when it throws, and its report shows the stack, not the message (review 750 C-1)
+const timeout = () => {
+	const error = new Error('locator.waitFor: Timeout 10000ms exceeded.');
+	error.stack = `${error.message}\n    at Navigate.to`;
+	return error;
+};
+
 // #750: a page that never hydrated left an empty screenshot and no clue; the browser console names the render error
 const pageThatLogsAndNeverHydrates = () => {
 	const listeners: Record<string, (value: unknown) => void> = {};
@@ -13,7 +20,7 @@ const pageThatLogsAndNeverHydrates = () => {
 			listeners.console?.({ type: () => 'error', text: () => 'Failed to load module script' });
 			listeners.pageerror?.(new TypeError("Cannot read properties of undefined (reading 'buildings')"));
 		},
-		locator: () => ({ waitFor: () => Promise.reject(new Error('locator.waitFor: Timeout 10000ms exceeded.')) })
+		locator: () => ({ waitFor: () => Promise.reject(timeout()) })
 	};
 	return page as unknown as Page;
 };
@@ -25,8 +32,8 @@ describe('Seite ohne Hydrierung im E2E-Browser', () => {
 		const failure = await actor.attemptsTo(Navigate.to('/dashboard')).catch((error: Error) => error);
 
 		expect(failure).toBeInstanceOf(Error);
-		expect((failure as Error).message).toContain('Timeout 10000ms exceeded');
-		expect((failure as Error).message).toContain('error: Failed to load module script');
-		expect((failure as Error).message).toContain("TypeError: Cannot read properties of undefined (reading 'buildings')");
+		expect((failure as Error).stack).toContain('Timeout 10000ms exceeded');
+		expect((failure as Error).stack).toContain('error: Failed to load module script');
+		expect((failure as Error).stack).toContain("TypeError: Cannot read properties of undefined (reading 'buildings')");
 	});
 });

@@ -16,8 +16,9 @@ const hydrated = (actor: Actor) =>
 		.locator('body[data-hydrated]')
 		.waitFor({ state: 'attached' })
 		.catch((error: Error) => {
-			error.message += `\nBrowser console:\n${actor.abilityTo(BrowseTheWeb).console.join('\n') || '(empty)'}`;
-			throw error;
+			// a new error: Playwright's report shows the stack, fixed before a message added to it
+			const logged = actor.abilityTo(BrowseTheWeb).console.join('\n') || '(empty)';
+			throw new Error(`${error.message}\nBrowser console:\n${logged}`, { cause: error });
 		});
 const SCRIPTS_HELD_BACK = 'scripts held back';
 
