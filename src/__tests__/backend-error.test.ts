@@ -57,7 +57,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		);
 	});
 
-	it('nennt bei mehreren Formelfehlern jeden, auf Deutsch wie das Backend', () => {
+	it('nennt bei mehreren Formelfehlern jeden, auf Deutsch', () => {
 		const body = {
 			error:
 				'Unbekannter Baustein {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}. Zwei Rechenzeichen folgen direkt aufeinander.',

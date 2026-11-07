@@ -328,6 +328,7 @@ Funktionalität: Barrierefreiheit
       | distribution-key-new   | formula-test-failed |
       | distribution-key-edit  | default             |
       | distribution-key-edit  | submit-cleared      |
+      | distribution-key-edit  | formula-test-failed |
       | distribution-keys      | delete-dialog       |
       | heating-profiles       | default             |
       | heating-profile-new    | default             |

@@ -284,17 +284,8 @@ export function testFormulaWithSamples(formula: string): {
 		};
 	}
 
+	// valid: the validation calculated these sample apartments already (#737)
 	const distribution = calculateDistribution(formula, SAMPLE_APARTMENTS, 10000);
-
-	if (!distribution.isValid) {
-		return {
-			isValid: false,
-			results: [],
-			totalValue: 0,
-			errors: [distribution.error || 'Unknown error'],
-			errorCodes: [distribution.errorCode!]
-		};
-	}
 
 	const totalValue = distribution.distributions.reduce(
 		(sum, d) => sum + (d.amount / d.share) * d.share,

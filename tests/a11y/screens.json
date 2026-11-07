@@ -1070,7 +1070,8 @@
 			"path": "/config/distribution-keys/{distributionKey}/edit",
 			"states": [
 				"default",
-				"submit-cleared"
+				"submit-cleared",
+				"formula-test-failed"
 			]
 		},
 		{
