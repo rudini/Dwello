@@ -183,6 +183,17 @@ describe('Wohnungsliste', () => {
 		expect(goto).toHaveBeenCalledWith('/apartments?building=b1&status=vacant');
 	});
 
+	// #682 (Sven): a choice counts only with «Suchen»; until then there is nothing to reset
+	it('bietet das Zurücksetzen erst für einen Filter der Adresse an', () => {
+		list([apartment()]);
+		fireEvent(byTestId<HTMLSelectElement>('apartments-status-filter')!, 'change', 'vacant');
+		expect(document.body.textContent).not.toContain('Filter zurücksetzen');
+
+		url = new URL('http://localhost/apartments?status=vacant');
+		list([apartment()]);
+		expect(document.body.textContent).toContain('Filter zurücksetzen');
+	});
+
 	it('bietet ohne Wohnungen die erste Erfassung an', () => {
 		list([]);
 		const empty = byTestId('apartments-empty')!;
