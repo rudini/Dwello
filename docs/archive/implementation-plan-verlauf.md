@@ -1474,3 +1474,11 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #714 design guard: style shorthands and system colours
+
+- [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
+- [x] Rule «Farbe im style-Element» reads `border`, `outline` and their side shorthands, allows the CSS Color 4 system colours, CSS-wide and border keywords and `var(--x)`; pattern cases seen red; `token-referenz.md` aligned. No scenario: test-only source guard
+- [x] Slice review `docs/reviews/style-guard-714-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, design-guard test
+- [x] Archive session; PR `Fixes #714`: pushed after this archive
