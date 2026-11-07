@@ -639,6 +639,28 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
     Und steht im PDF "43.00 % 430.00"
 
+  # #685 (Persona Dr. Weber P-1, P-3): der Satz zu den Heizkosten verweist auf den Abschnitt «Heiz- und
+  # Warmwasserkosten», und die Monate von Eva Frei (Januar bis März) stehen als Anteile im Heizprofil
+  @wip
+  Szenario: Das PDF erklärt den Zeitanteil der Heizkosten mit dem Heizprofil und seinem Abschnitt
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten)."
+    Und steht im PDF "Anteile der Monate Ihres Mietverhältnisses im Heizprofil (die zwölf Monate ergeben zusammen 100 %): Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
+
+  # #685: der Anteil steht wie im PDF immer mit zwei Stellen; Lea Graf trägt die Hälfte der Heizkosten
+  @wip
+  Szenario: Die Abrechnung nennt den Anteil einer Position mit zwei Stellen
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Dann nennt die Position "Heizung" den Anteil "50.00 %"
+
   # #71: unter den Heizkosten steht jede Rechnung mit ihrem Anteil nach Heizprofil; eine mit Leistungszeitraum mit den
   # Monaten des Heizprofils darin, den Monaten des Mieters darin und der Teilung (nachrechenbar wie #232). Marc Huber
   # (ab Mai) trägt nichts von Januar bis März und 52 % der Rechnung über das ganze Jahr; der Satz zum Heizprofil gilt

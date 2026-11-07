@@ -99,6 +99,9 @@ export const sharesOfPosition = (category: string) =>
 		amount: await actor.answer(Text.of(lineItemAmount(category)))
 	}));
 
+// #685: the Anteil column as the page shows it («12.60 %»)
+export const shareOfPosition = (category: string) => Text.of(lineItemShare(category));
+
 type LineItem = { description: string; sharePercentage: string; tenantShare: string };
 
 // «50 %» → 50, «33.3 %» → 33.3; the text itself when it shows no share in that form (not «50.00 %»)

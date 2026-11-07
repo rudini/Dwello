@@ -1387,6 +1387,14 @@ describe('Abrechnungsdetail', () => {
 		expect(rowText()).toMatch(/CHF 900.00.*91\/366 Tage.*17.03 %.*CHF 306.52/);
 	});
 
+	// #685 (Persona Dr. Weber): «12.6 %» stood next to «12.92 %»; the Anteil always with two decimals, as the PDF
+	it('nennt den Anteil in Tabelle und Karte mit zwei Stellen', () => {
+		detail({ lineItems: [line({ percentage: 12.6 })] });
+		const share = byTestId('statement-line-item')!.querySelectorAll('td')[5];
+		expect(share.textContent!.trim()).toBe('12.60 %');
+		expect(byTestId('statement-line-card')!.textContent).toContain('12.60 %');
+	});
+
 	it('nennt den Zeitanteil in Prozent, wo er nicht in Tagen aufgeht', () => {
 		detail({ lineItems: [line()] });
 		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];

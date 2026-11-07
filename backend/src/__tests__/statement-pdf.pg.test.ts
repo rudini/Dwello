@@ -87,7 +87,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	it('nennt das Heizprofil und den Anteil der Heizkosten aus den Monaten der Mietdauer', () => {
 		expect(pdf.text).toContain('Heizung Mittelland');
 		expect(pdf.text).toContain('41.50 %');
-		expect(pdf.flowing).toContain('Anteile der Monate Ihres Mietverhältnisses: Jul 0.00 %, Aug 0.00 %, Sep 1.00 %, Okt 10.00 %, Nov 13.50 %, Dez 17.00 %');
+		expect(pdf.flowing).toContain('Anteile der Monate Ihres Mietverhältnisses im Heizprofil (die zwölf Monate ergeben zusammen 100 %): Jul 0.00 %, Aug 0.00 %, Sep 1.00 %, Okt 10.00 %, Nov 13.50 %, Dez 17.00 %');
 		expect(pdf.flowing).not.toContain('Die Monate der Abrechnungsperiode'); // a whole year: its months carry 100 % (#229, F-4)
 	});
 
@@ -529,7 +529,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		expect(older).toContain("Heizung Pro Fläche (m²) 70.00 / 70.00 m² 1'000.00 1'000.00 40.00 % 400.00");
 		expect(older).not.toContain('Heizkosten nach Heizprofil');
 		// the position's percent is still the profile's, not the days rented: the explanation says so (Fachprüfung M-5)
-		expect(older).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.');
+		expect(older).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten).');
 	});
 
 	// Unter #209 gespeichert: Anteil auf zwei Stellen gerundet (70.97 %), ohne Summe der Periode; die Erläuterung nimmt den
