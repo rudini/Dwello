@@ -81,3 +81,7 @@ const resetFrom = (button: typeof resetFiltersButton): Activity => (actor) =>
 	);
 export const resetStatementFilters = resetFrom(resetFiltersButton);
 export const resetStatementFiltersWithoutResults = resetFrom(emptyResetFiltersButton);
+
+// #1162: a second tap on the chosen tile shows every status again
+export const clearDraftFilter: Activity = (actor) =>
+	actor.attemptsTo(Click.on(draftFilter), Wait.forUrl((url) => !url.searchParams.has('status')));

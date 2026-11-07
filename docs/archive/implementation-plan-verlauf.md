@@ -1399,3 +1399,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Before marking complete: lint, check, fitness, backend type-check, affected tests, E2E, Prettier on new files
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-1166.md`
 - [x] Archive session; PR `Fixes #1166`: pushed after this archive
+## Session: #1162 statement list keeps the chosen status tile in view
+
+- [x] Read #1162; cause: the root layout focuses the list heading after every list navigation and scrolls the tiles away
+- [x] Scenario «Der gewählte Statusfilter bleibt im Bild» (390×844, 960×600), seen red; layout DOM test seen red
+- [x] Tiles keep focus and scroll (`data-sveltekit-keepfocus`, `-noscroll`, click focuses the link for WebKit); the layout leaves the focus on such a link (df1a2fa)
+- [x] code-reviewer round 1 (`docs/reviews/1162-review-1.md`): no findings; WebKit unconfirmed locally, `ci.yml` started on the branch
+- [x] Personas Marco and Helga (`docs/design/personas/{marco,helga}-1162.md`): no Blocker/Major; the Minors both met (no status at the list, the result below the window) became #1186
+- [x] Checks: lint, check, fitness, vitest (layout-hydrated, statement-pages), E2E statements.feature, axe and language rows `statements`
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive

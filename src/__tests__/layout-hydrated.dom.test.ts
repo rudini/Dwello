@@ -29,15 +29,16 @@ describe('Markierung «hydriert» für die Abnahmetests', () => {
 
 // After a search on a list the focus goes to its results; a filter select that applies on change keeps it (#677, S-1)
 describe('Fokus nach der Suche in einer Liste', () => {
-	async function navigate(focused: 'select' | 'body') {
+	async function navigate(focused: 'select' | 'tile' | 'body') {
 		const { default: Layout } = await import('../routes/+layout.svelte');
 		const children = createRawSnippet(() => ({
 			render: () =>
-				'<div><select><option>Alle</option></select><p data-results tabindex="-1">2 Ergebnisse</p></div>'
+				'<div><select><option>Alle</option></select><a href="?status=draft" data-sveltekit-keepfocus>Entwurf</a><p data-results tabindex="-1">2 Ergebnisse</p></div>'
 		}));
 		show(Layout, { data: { user: null }, children } as never);
 		const [callback] = vi.mocked(afterNavigate).mock.lastCall!;
 		if (focused === 'select') document.querySelector('select')!.focus();
+		if (focused === 'tile') document.querySelector<HTMLElement>('[data-sveltekit-keepfocus]')!.focus();
 		const url = new URL('http://localhost/buildings');
 		callback({ type: 'form', from: { url }, to: { url } } as never);
 	}
@@ -45,6 +46,12 @@ describe('Fokus nach der Suche in einer Liste', () => {
 	it('behält den Fokus auf einem Filter, der beim Ändern sucht', async () => {
 		await navigate('select');
 		expect(document.activeElement).toBe(document.querySelector('select'));
+	});
+
+	// #1162: the chosen status tile keeps the focus, so the page does not scroll it out of view
+	it('behält den Fokus auf einem Filter, der ihn behalten will', async () => {
+		await navigate('tile');
+		expect(document.activeElement).toBe(document.querySelector('[data-sveltekit-keepfocus]'));
 	});
 
 	it('setzt den Fokus sonst auf die Ergebnisse', async () => {

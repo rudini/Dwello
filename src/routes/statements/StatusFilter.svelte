@@ -20,6 +20,8 @@
 		href: (status: string) => string;
 	} = $props();
 
+	// #1162 (Marco M-2, Helga H-1): a tile keeps the focus and the page stays put, so the chosen filter stays in view on a
+	// phone and at 150 %; WebKit does not focus a link on a click, so the click does
 	// a replaced statement has no tab of its own: «Alle» lists it (#120)
 	const statuses: (keyof StatementsListData['statusCounts'])[] = [
 		'draft',
@@ -55,6 +57,9 @@
 				<a
 					href={href(active === status ? '' : status)}
 					aria-current={active === status ? 'true' : undefined}
+					data-sveltekit-keepfocus
+					data-sveltekit-noscroll
+					onclick={(event) => event.currentTarget.focus()}
 					class="flex min-h-12 flex-col rounded-panel border-2 p-4 {active === status
 						? 'border-accent bg-accent-soft'
 						: 'border-line bg-surface hover:border-line-strong'}"

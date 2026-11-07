@@ -1,6 +1,6 @@
 import type { TestData } from '../fixtures/backend';
 import { question } from '../screenplay/actor';
-import { Attribute, Count, DownloadedFile, Text, ThePage, Value, Visibility } from '../screenplay/questions';
+import { Attribute, Count, DownloadedFile, FocusedElement, ShareInViewport, Text, ThePage, Value, Visibility } from '../screenplay/questions';
 import {
 	draftFilter,
 	resetFiltersButton,
@@ -54,3 +54,7 @@ export const listBuildingShown = Value.chosenIn(statementBuildingFilter);
 export const resetFiltersShown = Visibility.of(resetFiltersButton);
 export const buildingChoiceShown = Visibility.of(statementBuildingFilter);
 export const statusFilterText = (status: string) => Text.of(statusFilter(status));
+
+// #1162: after filtering, the chosen tile stays in the window and keeps the focus
+export const statusFilterShareInWindow = (status: string) => ShareInViewport.of(statusFilter(status));
+export const focusedElement = FocusedElement;
