@@ -12,7 +12,7 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: #1176 Kontoinhaber in the privacy statement
 
-- [ ] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
-- [ ] `fach-reviewer`: the addition to `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider` in de/fr/it/en
-- [ ] Texts in `messages/*.json`; Stand of the privacy statement only (`LegalHeader.svelte` shared with the terms, which keep 29. Oktober 2026)
+- [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
+- [x] `fach-reviewer` `docs/reviews/1176-fachreview-1.md`: the addition to `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider` in de/fr/it/en
+- [x] Texts in `messages/*.json` (with R-3, Variante B, decided in #1176); Stand of the privacy statement only (`LegalHeader.svelte` shared with the terms, which keep 29. Oktober 2026)
 - [ ] Slice review, persona Dr. Weber (legal text), checks, archive, PR `Fixes #1176`

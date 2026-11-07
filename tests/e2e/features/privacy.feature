@@ -109,10 +109,10 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
   # #1176: mit einem eigenen Kontoinhaber (#1166) steht dessen Name und Adresse auf dem Zahlteil des PDF, das der
-  # Mailserver erhält
-  @wip
-  Szenario: Die Datenschutzerklärung nennt den Kontoinhaber beim Versand per E-Mail
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "sowie IBAN und Zahlungsreferenz und, wenn Sie einen eigenen Kontoinhaber erfasst haben, dessen Name und Adresse"
+  # Mailserver erhält; mit einer IBAN tragen auch Zahlungserinnerung und Mahnung IBAN und Zahlungsreferenz (Fachreview
+  # 1176-1 R-1, R-3, R-4)
+  Szenario: Die Datenschutzerklärung nennt Kontoinhaber und IBAN der Mahnung beim Versand per E-Mail
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "der Saldo sowie IBAN und Zahlungsreferenz. Ist eine IBAN erfasst, enthalten auch Zahlungserinnerung und Mahnung IBAN und Zahlungsreferenz. Nennt die QR-Rechnung einen anderen Kontoinhaber als den Absender, enthält das PDF auch dessen Name und Adresse."
 
   # #671 (Fachreview 671-1): Zahlungserinnerung und Mahnung wie in docs/design/i18n-begriffe.md, nicht beide «rappel»/«reminder»
   Szenariogrundriss: Die Datenschutzerklärung nennt auf Französisch und Englisch Zahlungserinnerungen und Mahnungen
