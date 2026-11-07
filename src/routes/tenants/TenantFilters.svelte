@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { applyFilterChoice } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
@@ -25,6 +26,7 @@
 	method="GET"
 	action="/tenants"
 	role="search"
+	onchange={applyFilterChoice}
 	aria-label={m.list_search_label()}
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 lg:flex-row lg:items-end"
 >

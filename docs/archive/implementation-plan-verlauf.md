@@ -1457,6 +1457,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 
+## Session: #662 list filters: selects apply on change
+
+- [x] Read #662 (decided 2026-11-04); it contradicted the «Suchen» rule just merged with #682: the product owner confirmed #662; spec change of the #682 apartments scenario approved in #662
+- [x] Selects apply on change on apartments, tenants, contracts, invoices, statements; apartments and invoices work as plain GET forms; scenarios and DOM tests seen red (d7474ba)
+- [x] code-reviewer (`docs/reviews/662-review-{1,2,3}.md`): C-1..C-3 Minor fixed (609aaec); C-4 Major (axe and language state `empty-year`), C-5, C-6 fixed (219ab27); round 3 without findings
+- [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-662.md`), two rounds: Sven S-1 Major (no announcement of the result) and S-2, S-4, S-5 fixed (4dd4526, 219ab27); Helga H-1 Major (unsent text applied; decided: only the selects apply, per #680) and H-2 fixed (6202bf9); Minors that stay: Sven S-3 (#1173), Helga H-3, H-4
+- [x] Workflow notes: before asking a product question, search the open issues on the same behaviour (#662, #680 had decided what #682 asked again)
 ## Session: #688 agreements check retry: focus and announcement (personas on #439)
 
 - [x] Read #688; triage on main (`docs/reviews/688-triage.md`): P-2, P-5, Helga P-3 hold; the #439 reports are not in the shallow history, every point confirmed in the code
