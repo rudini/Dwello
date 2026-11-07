@@ -212,7 +212,7 @@
 	"apartments_floor_first": "1. OG",
 	"apartments_floor_upper": "{floor}. OG",
 	"apartments_status_occupied": "Vermietet",
-	"apartments_status_relet": "Vermietet ab …",
+	"apartments_status_relet": "Vermietet ab …",
 	"apartments_status_vacant": "Leer",
 	"apartments_status_reserved": "Gesperrt",
 	"apartments_status_relet_from": "Vermietet ab {date}",
