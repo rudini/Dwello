@@ -1012,23 +1012,28 @@ const total = (label: string, amount: string) => [label, '', '', '', '', amount]
 function costTable(page: Page, y: number) {
 	const { doc, t, data } = page;
 	const header = (at: number) => tableHeader(page, at);
-	let top = header(room(doc, heading(doc, `${t.costBreakdown} (CHF)`, y, 90), 60));
-	for (const item of data.lineItems) {
-		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
-		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
-		const cells = [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)];
-		const parts = partLines(item, t);
-		// the invoices stay on the page of their position (#226)
-		if (parts.length) top = room(doc, top, positionHeight(doc, cells, parts), header);
-		top = row(doc, cells, top, { header });
-		top = partsBelow(doc, parts, top);
-	}
-	// Subtotal to balance stay on one page: the balance alone on the next page lost its derivation
+	// Subtotal to balance and the explanation stay on one page: the balance alone on the next page lost its derivation
 	const width = COLUMNS[4].x + COLUMNS[4].width - PAGE.left;
 	const fee = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
 	doc.font(FONT.bold).fontSize(8.5);
 	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
-	top = room(doc, top, totalRows(data, t) * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
+	const totals = totalRows(data, t) * (doc.heightOfString(t.subtotal) + 8) + feeHeight;
+	const note = sharesNote(data, t);
+	doc.font(FONT.regular).fontSize(7.5);
+	const closing = totals + 4 + doc.heightOfString(note, { width: PAGE.right - PAGE.left });
+	let top = header(room(doc, heading(doc, `${t.costBreakdown} (CHF)`, y, 90), 60));
+	data.lineItems.forEach((item, i) => {
+		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
+		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
+		const cells = [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)];
+		const parts = partLines(item, t);
+		// the invoices stay on the page of their position (#226); the last position goes with the totals (#685)
+		const last = i === data.lineItems.length - 1;
+		if (parts.length || last) top = room(doc, top, positionHeight(doc, cells, parts) + (last ? closing : 0), header);
+		top = row(doc, cells, top, { header });
+		top = partsBelow(doc, parts, top);
+	});
+	top = room(doc, top, closing);
 	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
 	if (feeHeight) {
 		doc.font(FONT.regular).fontSize(8.5);
@@ -1048,10 +1053,7 @@ function costTable(page: Page, y: number) {
 		top = row(doc, total(t.rounding, signed(rounding(data))), top);
 	}
 	top = row(doc, total(labelOf(data.balance, page.t), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 }); // the Saldo, also after a part payment (#1003)
-	const note = sharesNote(data, t);
-	doc.font(FONT.regular).fontSize(7.5);
-	const height = doc.heightOfString(note, { width: PAGE.right - PAGE.left });
-	doc.fillColor(COLORS.muted).text(note, PAGE.left, room(doc, top + 4, height), { width: PAGE.right - PAGE.left });
+	doc.font(FONT.regular).fontSize(7.5).fillColor(COLORS.muted).text(note, PAGE.left, top + 4, { width: PAGE.right - PAGE.left });
 	return doc.y + 18;
 }
 
@@ -1148,6 +1150,7 @@ const PARTS_WIDTH = COLUMNS[4].x + COLUMNS[4].width - COLUMNS[0].x - 8;
 function positionHeight(doc: Doc, cells: string[], lines: string[]) {
 	doc.font(FONT.regular).fontSize(8.5);
 	const height = rowHeight(doc, cells) + 6;
+	if (!lines.length) return height;
 	doc.fontSize(7.5);
 	return height + doc.heightOfString(lines.join('\n'), { width: PARTS_WIDTH }) + 3;
 }

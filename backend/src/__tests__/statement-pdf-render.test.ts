@@ -1138,7 +1138,7 @@ describe('Seitenwechsel vor den Summen im PDF', () => {
 
 			const last = new RegExp(`Kategorie ${n - 1}\\n`);
 			expect([last, /Nachzahlung\n\d/, /Kosten des Gebäudes: die/].map(pageOf), `${n} Positionen`).toEqual([totals, totals, totals]);
-			if (totals > 0) expect(pageTexts[totals], `${n} Positionen`).toContain('Kategorie Verteilschlüssel');
+			if (totals > 0) expect(pageTexts[totals].replace(/\s+/g, ' '), `${n} Positionen`).toContain('Kategorie Verteilschlüssel');
 		}
 		expect(moved.length).toBeGreaterThan(0);
 	});
