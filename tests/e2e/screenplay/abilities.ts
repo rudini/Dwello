@@ -3,7 +3,14 @@ import type { Activity, Actor, Question } from './actor';
 
 /** The UI protocol driver: a browser page */
 export class BrowseTheWeb {
-	constructor(public readonly page: Page) {}
+	/** What the browser logged and threw, shown when a page does not hydrate (#750) */
+	readonly console: string[] = [];
+
+	constructor(public readonly page: Page) {
+		page
+			.on('console', (message) => this.console.push(`${message.type()}: ${message.text()}`))
+			.on('pageerror', (error) => this.console.push(error.stack ?? `${error.name}: ${error.message}`));
+	}
 }
 
 const BACKEND_API = 'http://localhost:3101/api/v1'; // E2E backend (playwright.config.ts)
