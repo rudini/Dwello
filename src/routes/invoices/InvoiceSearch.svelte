@@ -13,12 +13,14 @@
 		params,
 		buildings,
 		categories,
-		years
+		years,
+		reset
 	}: {
 		params: URLSearchParams;
 		buildings: InvoicesListData['buildings'];
 		categories: InvoicesListData['categories'];
 		years: string[];
+		reset: boolean; // offer «Filter zurücksetzen»: the address has a filter and the list is not empty (#682)
 	} = $props();
 
 	// Starts from the URL; afterwards the fields hold what the user chooses until "Suchen"
@@ -31,7 +33,6 @@
 			year: params.get('year') || ''
 		}))
 	);
-	const filtered = $derived(Object.values(filters).some(Boolean));
 
 	function search(event: SubmitEvent) {
 		event.preventDefault();
@@ -44,12 +45,17 @@
 	}
 </script>
 
-<form onsubmit={search} class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+<form
+	role="search"
+	aria-label={m.list_search_label()}
+	onsubmit={search}
+	class="grid gap-4 rounded-panel border border-line bg-surface p-6 md:grid-cols-2 xl:grid-cols-4"
+>
 	<TextInput
 		id="search"
 		label={m.buildings_search()}
 		help={m.invoices_search_help()}
-		optional
+		required={false}
 		bind:value={filters.search}
 		testid="invoice-search-input"
 	/>
@@ -57,7 +63,7 @@
 		id="building"
 		label={m.apartments_building()}
 		placeholder={m.apartments_all_buildings()}
-		optional
+		required={false}
 		options={buildings.map((b) => ({ value: b.id, label: b.name || b.address }))}
 		bind:value={filters.building}
 		testid="invoice-building-filter"
@@ -66,7 +72,7 @@
 		id="category"
 		label={m.buildings_category()}
 		placeholder={m.invoices_all_categories()}
-		optional
+		required={false}
 		options={categories.map((c) => ({ value: c.id, label: c.name }))}
 		bind:value={filters.categoryId}
 		testid="invoice-category-filter"
@@ -75,7 +81,7 @@
 		id="validity"
 		label={m.invoices_allocability()}
 		placeholder={m.invoices_all()}
-		optional
+		required={false}
 		options={[
 			{ value: 'valid', label: m.glossary_allocable_term() },
 			{ value: 'invalid', label: m.invoices_not_allocable() }
@@ -88,7 +94,7 @@
 		label={m.invoices_year()}
 		help={m.invoices_year_help()}
 		placeholder={m.invoices_all_years()}
-		optional
+		required={false}
 		options={years.map((year) => ({ value: year, label: year }))}
 		bind:value={filters.year}
 		testid="invoice-year-filter"
@@ -97,7 +103,7 @@
 		<Button type="submit" icon="search" testid="invoice-search-submit"
 			>{m.buildings_search_submit()}</Button
 		>
-		{#if filtered}
+		{#if reset}
 			<Button variant="ghost" icon="close" onclick={clear}>{m.buildings_reset_filters()}</Button>
 		{/if}
 	</div>

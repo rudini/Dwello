@@ -45,6 +45,7 @@
 		method="GET"
 		action="/buildings"
 		role="search"
+		aria-label={m.list_search_label()}
 		class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
 	>
 		<div class="grid gap-4 md:grid-cols-2">
@@ -53,8 +54,8 @@
 				name="search"
 				label={m.buildings_search()}
 				bind:value={searchTerm}
-				placeholder={m.buildings_search_placeholder()}
-				optional
+				help={m.buildings_search_help()}
+				required={false}
 				testid="building-search-input"
 			/>
 			<TextInput
@@ -62,8 +63,7 @@
 				name="city"
 				label={m.buildings_city()}
 				bind:value={cityFilter}
-				placeholder={m.buildings_city_placeholder()}
-				optional
+				required={false}
 				testid="building-city-filter"
 			/>
 		</div>
@@ -71,7 +71,8 @@
 			<Button type="submit" icon="search" testid="building-search-submit"
 				>{m.buildings_search_submit()}</Button
 			>
-			{#if searchTerm || cityFilter}
+			<!-- #682: only for a filter of the address; an empty list offers it in its hint -->
+			{#if filtered && data.buildings.length}
 				<Button variant="ghost" icon="close" onclick={clearFilters}
 					>{m.buildings_reset_filters()}</Button
 				>
@@ -104,9 +105,13 @@
 	{:else}
 		<ResultList
 			id="buildings-count"
-			heading={(data.total === 1 ? m.buildings_count_one : m.buildings_count_many)({
-				count: data.total
-			})}
+			counts={{
+				one: m.buildings_count_one,
+				many: m.buildings_count_many,
+				pageOne: m.buildings_count_page_one,
+				pageMany: m.buildings_count_page_many
+			}}
+			shown={data.buildings.length}
 			listClass="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
 			url={$page.url}
 			page={data.page}

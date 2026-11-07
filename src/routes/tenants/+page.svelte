@@ -31,7 +31,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<TenantFilters {filters} />
+	<TenantFilters {filters} reset={filtered && data.tenants.length > 0} />
 
 	{#if data.tenants.length === 0}
 		<div class="rounded-panel border border-line bg-surface">
@@ -58,9 +58,13 @@
 	{:else}
 		<ResultList
 			id="tenants-count"
-			heading={(data.total === 1 ? m.tenants_count_one : m.tenants_count_many)({
-				count: data.total
-			})}
+			counts={{
+				one: m.tenants_count_one,
+				many: m.tenants_count_many,
+				pageOne: m.tenants_count_page_one,
+				pageMany: m.tenants_count_page_many
+			}}
+			shown={data.tenants.length}
 			url={$page.url}
 			page={data.page}
 			pageSize={data.pageSize}

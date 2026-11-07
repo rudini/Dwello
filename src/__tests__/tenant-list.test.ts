@@ -26,9 +26,13 @@ const tenant = (id: string, isActive: boolean, currentApartment: string | null =
 	isFuture: false
 });
 
-const list = (tenants: ReturnType<typeof tenant>[], url = 'http://localhost/tenants') => {
+const list = (
+	tenants: ReturnType<typeof tenant>[],
+	url = 'http://localhost/tenants',
+	{ total = tenants.length, page = 1 } = {}
+) => {
 	location.url = new URL(url);
-	const data = { tenants, total: tenants.length, page: 1, pageSize: 12 };
+	const data = { tenants, total, page, pageSize: 12 };
 	return withoutComments(render(TenantsPage, { props: { data } as never }).body).replace(
 		/\s+/g,
 		' '
@@ -45,6 +49,17 @@ describe('Mieterliste', () => {
 			/<h2[^>]*tabindex="-1"[^>]*data-results[^>]*> ?1 Mieter ?<\/h2>/
 		);
 	});
+	// #682: as the apartments (#670), over several pages the heading names the tenants shown and the page
+	it('nennt über mehreren Seiten oben die gezeigten Mieter und die Seite', () => {
+		const tenants = Array.from({ length: 12 }, (_, i) => tenant(`t${i}`, true));
+		expect(list(tenants, undefined, { total: 13 })).toMatch(
+			/data-results[^>]*> ?Mieter 1–12 von 13, Seite 1 von 2 ?<\/h2>/
+		);
+		expect(list([tenant('t1', true)], undefined, { total: 13, page: 2 })).toMatch(
+			/data-results[^>]*> ?Mieter 13 von 13, Seite 2 von 2 ?<\/h2>/
+		);
+	});
+
 	it('öffnet den Mieter über seinen Namen', () => {
 		const body = row(list([tenant('t1', true, 'Wohnung 2.01')]), 't1');
 

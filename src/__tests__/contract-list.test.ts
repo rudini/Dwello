@@ -36,14 +36,15 @@ const contract = (
 const list = (
 	contracts: (ReturnType<typeof contract> & { missingStatement?: boolean })[],
 	url = 'http://localhost/contracts',
-	today = '2026-10-10'
+	today = '2026-10-10',
+	{ total = contracts.length, page = 1 } = {}
 ) => {
 	location.url = new URL(url);
 	const data = {
 		today,
 		contracts,
-		total: contracts.length,
-		page: 1,
+		total,
+		page,
 		pageSize: 12,
 		buildings: [{ id: 'b1', name: 'Ahornhof', address: 'Ahornweg 1' }],
 		apartments: []
@@ -60,6 +61,20 @@ describe('Treffer der Suche', () => {
 	it('nennt die Treffer in einer Überschrift, die den Fokus nehmen kann', () => {
 		const body = list([contract('c1', 'Anna Keller', '2024-01-01', null)]);
 		expect(body).toMatch(/<h2[^>]*tabindex="-1"[^>]*data-results[^>]*>\s*1 Mietvertrag\s*<\/h2>/);
+	});
+
+	// #682: as the apartments (#670), over several pages the heading names the contracts shown and the page
+	it('nennt über mehreren Seiten oben die gezeigten Mietverträge und die Seite', () => {
+		const contracts = Array.from({ length: 12 }, (_, i) =>
+			contract(`c${i}`, 'Anna Keller', '2024-01-01', null)
+		);
+		expect(list(contracts, undefined, undefined, { total: 13 })).toMatch(
+			/data-results[^>]*>\s*Mietverträge 1–12 von 13, Seite 1 von 2\s*<\/h2>/
+		);
+		const last = [contract('c1', 'Anna Keller', '2024-01-01', null)];
+		expect(list(last, undefined, undefined, { total: 13, page: 2 })).toMatch(
+			/data-results[^>]*>\s*Mietvertrag 13 von 13, Seite 2 von 2\s*<\/h2>/
+		);
 	});
 });
 
