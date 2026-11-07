@@ -36,7 +36,6 @@ import type { StatementWithDetails } from '$lib/types';
 // the backend's answer for a Saldo that asks no payment (#815, `paymentOf`): its tests are statement-payment.test.ts
 const noPayment = { unpaid: true, claimed: false, paymentPart: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
-import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
 import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
 
 const text = () => document.body.textContent ?? '';
@@ -1742,6 +1741,31 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
 
+	// #686 O-6 (decided by the product owner): a draft's Zahlungsfrist counts from the sending, said at the date
+	it('erklärt bei einem Entwurf an der Zahlungsfrist, dass sie ab dem Versand gilt', () => {
+		show(StatementPage, {
+			data: { statement: statement({ status: 'draft' }), reminders: [], paymentDeadlineDays: 45 },
+			form: null
+		} as never);
+		const help = byTestId('statement-payment-deadline-help')?.textContent?.trim();
+		document.body.innerHTML = '';
+		detail({ status: 'sent' });
+
+		expect(help).toBe(
+			'Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versand; eine längere Frist bleibt.'
+		);
+		expect(byTestId('statement-payment-deadline')).not.toBeNull();
+		expect(byTestId('statement-payment-deadline-help')).toBeNull();
+	});
+
+	// code review 686-1 C-4: without the days of the settings the date shows without the help text
+	it('zeigt bei einem Entwurf ohne Zahlungsfrist in Tagen die Frist ohne Hilfetext', () => {
+		detail({ status: 'draft' });
+
+		expect(byTestId('statement-payment-deadline')).not.toBeNull();
+		expect(byTestId('statement-payment-deadline-help')).toBeNull();
+	});
+
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
 		detail();
 
@@ -2025,16 +2049,56 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-mark-paid-confirm')).not.toBeNull();
 	});
 
-	it('erstellt das PDF und bietet es danach zum Herunterladen an', async () => {
-		const calls = fakeBff(() => [200, { success: true }]);
+	// #686 O-2: ein Klick vor dem Laden der Seite tat nichts; als Formular erstellt er das PDF auch dann
+	it('sendet «PDF erstellen» als Formular an die Seite', () => {
 		detail();
+		const button = byTestId<HTMLButtonElement>('statement-generate-pdf-button')!;
+		const form = button.closest('form');
 
-		click('statement-generate-pdf-button');
+		expect([form?.method, form?.getAttribute('action'), button.type]).toEqual([
+			'post',
+			'?/generatePdf',
+			'submit'
+		]);
+	});
+
+	// the statement loaded again offers the PDF; one discarded later (a payment reset) is offered to be made again
+	it('erstellt das PDF und lädt danach die Abrechnung neu', async () => {
+		toasts.set([]);
+		detail();
+		let reloaded = false;
+
+		const after = actions.get('?/generatePdf')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => void (reloaded = true), result: { type: 'success' } });
 		await settle();
 
-		expect(calls).toEqual([
-			{ method: 'POST', path: '/statements/s1/generate-pdf', body: undefined }
-		]);
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['PDF erstellt']);
+		expect(reloaded).toBe(true);
+	});
+
+	// code review 686-1 C-2: while the statement loads again, a second click would send the action again
+	it('bleibt beim Erstellen des PDF beschäftigt, bis die Abrechnung neu geladen ist', async () => {
+		detail();
+		let reload = () => {};
+		const reloaded = new Promise<void>((resolve) => (reload = resolve));
+
+		const after = actions.get('?/generatePdf')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		const done = after({ update: () => reloaded, result: { type: 'success' } });
+		await settle();
+		const button = byTestId<HTMLButtonElement>('statement-generate-pdf-button')!;
+		const busy = [button.getAttribute('aria-disabled'), button.textContent!.trim()];
+		reload();
+		await done;
+
+		expect(busy).toEqual(['true', 'PDF wird erstellt …']);
+	});
+
+	it('bietet ein erstelltes PDF zum Herunterladen an', () => {
+		detail({ pdfGeneratedAt: '2025-01-16T08:00:00.000Z' });
 		expect(byTestId('statement-pdf-download')!.getAttribute('href')).toBe('/statements/s1/pdf');
 	});
 
@@ -2051,29 +2115,26 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-pdf-language')).toBeNull();
 	});
 
-	it('bleibt beim Erstellen-Button, wenn das PDF nicht erstellt werden kann', async () => {
-		fakeBff(() => [400, { error: 'IBAN not configured' }]);
-		detail();
-
-		click('statement-generate-pdf-button');
-		await settle();
-
-		expect(byTestId('statement-pdf-download')).toBeNull();
-		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
-	});
-
-	// code review C-2 (#125): «PDF konnte nicht erstellt werden: Das PDF konnte nicht erstellt werden …»
-	it('nennt den Grund ohne Wiederholung, wenn das PDF aus einem unerwarteten Grund nicht entsteht', async () => {
-		fakeBff(() => [500, pdfFailed]);
+	it('bleibt beim Erstellen-Button und nennt den Grund, wenn das PDF nicht erstellt werden kann', async () => {
 		toasts.set([]);
 		detail();
 
-		click('statement-generate-pdf-button');
+		const after = actions.get('?/generatePdf')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({
+			update: async () => {},
+			result: {
+				type: 'failure',
+				status: 500,
+				data: { actionError: 'Das PDF konnte nicht erstellt werden.' }
+			}
+		});
 		await settle();
 
-		expect(get(toasts).map((toast) => toast.message)).toEqual([
-			'Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.'
-		]);
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Das PDF konnte nicht erstellt werden.']);
+		expect(byTestId('statement-pdf-download')).toBeNull();
+		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
 	});
 
 	// #523, #959 (A; Fachreview 959-1 V-2): der Betrag ist, was für diese Abrechnung eingegangen ist; ein Teil lässt sie offen
@@ -2862,6 +2923,25 @@ describe('Abrechnung bearbeiten', () => {
 		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
 			'Rückerstattung bis'
 		);
+	});
+
+	// #686 (Persona Marco M-1, Weber W-2): where the date is entered, a draft says that sending moves it
+	it('erklärt bei einem Entwurf an der Frist, dass sie ab dem Versand läuft', () => {
+		show(EditStatementPage, {
+			data: { statement: statement({ status: 'draft' }), paymentDeadlineDays: 45 },
+			form: null
+		} as never);
+		const draft = byTestId('payment-deadline-input-help')!.textContent!.replace(/\s+/g, ' ');
+		document.body.innerHTML = '';
+		show(EditStatementPage, {
+			data: { statement: statement({ status: 'sent' }), paymentDeadlineDays: 45 },
+			form: null
+		} as never);
+
+		expect(draft).toContain(
+			'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung. Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versand; eine längere Frist bleibt.'
+		);
+		expect(byTestId('payment-deadline-input-help')!.textContent).not.toContain('Versand');
 	});
 
 	// #94 (Persona Marco P-1): ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, also keine Frist

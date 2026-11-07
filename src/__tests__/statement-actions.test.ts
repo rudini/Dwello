@@ -6,6 +6,8 @@ import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.j
 import correctionNotDue from '../../tests/contracts/statement-correction-not-due.json';
 import correctionRefused from '../../tests/contracts/statement-correction-refused.json';
 import sendRefused from '../../tests/contracts/statement-send-refused.json';
+import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
+import pdfRefused from '../../tests/contracts/statement-pdf-refused.json';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 const today = localToday(); // the day in Switzerland, as the app takes it
@@ -149,6 +151,56 @@ describe('Zahlungsdatum und Ende der Abrechnungsperiode', () => {
 	});
 });
 
+// #686 O-2: «PDF erstellen» als Formular, damit auch ein Klick vor dem Laden der Seite das PDF erstellt
+describe('PDF erstellen', () => {
+	it('sendet dem Backend einen JSON-Body, den es als Objekt validiert', async () => {
+		const { calls, result } = runAction(actions.generatePdf, 's1', 200, {}, { success: true });
+
+		expect(await result).toBeUndefined();
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/generate-pdf`, body: {} }]);
+	});
+
+	// code review C-2 (#125): «PDF konnte nicht erstellt werden: Das PDF konnte nicht erstellt werden …»
+	it('nennt den Grund ohne Wiederholung, wenn das PDF aus einem unerwarteten Grund nicht entsteht', async () => {
+		const { result } = runAction(actions.generatePdf, 's1', 500, {}, pdfFailed);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.' }
+		});
+	});
+
+	// fallback review on #1212: the proxy it replaced answered an unreachable backend with the general sentence
+	it('sagt den allgemeinen Satz, wenn das Backend nicht antwortet', async () => {
+		const fetch = async () => {
+			throw new TypeError('fetch failed');
+		};
+		const request = new Request('http://localhost:3000', { method: 'POST', body: new FormData() });
+		const result = (actions.generatePdf as (event: never) => Promise<unknown>)({
+			params: { id: 's1' },
+			fetch,
+			request
+		} as never);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'PDF konnte nicht erstellt werden. Versuchen Sie es erneut.' }
+		});
+	});
+
+	it('nennt den Grund des Backends nach dem Satz, dass das PDF nicht entstand', async () => {
+		const { result } = runAction(actions.generatePdf, 's1', 404, {}, pdfRefused);
+
+		expect(await result).toMatchObject({
+			status: 404,
+			data: {
+				actionError:
+					'PDF konnte nicht erstellt werden: Diese Abrechnung gibt es nicht mehr. Wahrscheinlich wurde sie gelöscht.'
+			}
+		});
+	});
+});
+
 // #506 (code review 506-1 C-4): einen offenen Übertrag von Hand ausgleichen
 describe('Übertrag als ausgeglichen markieren', () => {
 	it('lässt das Backend den Übertrag als ausgeglichen markieren', async () => {
@@ -280,6 +332,64 @@ describe('Abrechnung laden', () => {
 
 		const data = (await load({ params: { id: 's1' }, fetch, url: new URL('http://localhost/statements/s1') } as never)) as { reminders: { id: string }[] };
 		expect(data.reminders.map((document) => document.id)).toEqual(['d1']);
+	});
+
+	// #686 O-6: the help text at a draft's Zahlungsfrist names the days of the settings, which sending applies
+	it('liest für einen Entwurf die Zahlungsfrist in Tagen aus den Einstellungen', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const configJson = (await import('../../tests/contracts/config.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status: 'draft' });
+			if (url.endsWith('/api/v1/config')) return Response.json(configJson);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			params: { id: 's1' },
+			fetch,
+			url: new URL('http://localhost/statements/s1')
+		} as never)) as { paymentDeadlineDays?: number };
+		expect(data.paymentDeadlineDays).toBe(45);
+	});
+
+	// code review 686-1 C-4: without the settings the page still loads, only without the days
+	it.each([
+		['nicht laden', () => Response.json({}, { status: 500 })],
+		['einen ungültigen Wert liefern', () => Response.json({ data: { payment_deadline_days: 'abc' } })],
+		['nicht erreichbar sind', () => Promise.reject(new TypeError('fetch failed'))]
+	] as const)('lädt einen Entwurf ohne Zahlungsfrist in Tagen, wenn die Einstellungen %s', async (_, config) => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status: 'draft' });
+			if (url.endsWith('/api/v1/config')) return config();
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			params: { id: 's1' },
+			fetch,
+			url: new URL('http://localhost/statements/s1')
+		} as never)) as { statement: { id: string }; paymentDeadlineDays?: number };
+		expect([data.statement.id, data.paymentDeadlineDays]).toEqual([statementJson.id, undefined]);
+	});
+
+	// #686 (Persona Marco M-1, Weber W-2): the edit form names the same days at the date
+	it('liest auch für das Bearbeiten die Zahlungsfrist in Tagen aus den Einstellungen', async () => {
+		const { load } = await import('../routes/statements/[id]/edit/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const configJson = (await import('../../tests/contracts/config.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status: 'draft' });
+			if (url.endsWith('/api/v1/config')) return Response.json(configJson);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+			paymentDeadlineDays?: number;
+		};
+		expect(data.paymentDeadlineDays).toBe(45);
 	});
 
 	// The statement carries no tenant address; the send confirmation needs it for a letter

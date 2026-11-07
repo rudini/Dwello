@@ -1,10 +1,11 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
 import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
-import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/+server';
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
 import { GET as getListPdf } from '../routes/api/statements/[id]/pdf/+server';
 import { GET as getBilled } from '../routes/api/statements/billed/+server';
+import { GET as getRunInvoices } from '../routes/api/statements/invoices/+server';
+import forStatement from '../../tests/contracts/invoices-for-statement.json';
 import statementRun from '../../tests/contracts/statement-run.json';
 import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
@@ -99,15 +100,6 @@ describe('POST /statements/[id]/send-reminder', () => {
 		expect(await response.json()).toEqual({
 			error: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.'
 		});
-	});
-});
-
-describe('POST /api/statements/[id]/generate-pdf', () => {
-	it('sendet dem Backend einen JSON-Body, den es als Objekt validiert', async () => {
-		const { calls, result } = call(generatePdf, 200, { success: true });
-
-		expect((await result).status).toBe(200);
-		expect(calls).toEqual([{ method: 'POST', url: `${API}/generate-pdf`, body: {} }]);
 	});
 });
 
@@ -339,6 +331,29 @@ describe('GET /api/statements/billed', () => {
 		// an id goes into the backend address encoded, as in the preview (code review C-4)
 		expect(urls).toEqual([
 			'http://localhost:3001/api/v1/statements/run?buildingId=b%2F1&periodStart=2024-01-01&periodEnd=2024-12-31'
+		]);
+	});
+});
+
+// #686 O-1: step 2 counts the invoices the statement takes, as the preview does
+describe('GET /api/statements/invoices', () => {
+	it('gibt je Gebäude die Rechnungen, die die Abrechnung der Periode nimmt', async () => {
+		const urls: string[] = [];
+		const fetch = async (url: string) => {
+			urls.push(url);
+			return Response.json(url.includes('/b%2F1?') ? forStatement : []);
+		};
+		const response = await getRunInvoices({
+			url: new URL(
+				'http://localhost/api/statements/invoices?buildingIds=b%2F1,b2&periodStart=2024-01-01&periodEnd=2024-12-31'
+			),
+			fetch
+		} as never);
+
+		expect(await response.json()).toEqual({ invoices: forStatement });
+		expect(urls).toEqual([
+			'http://localhost:3001/api/v1/invoices/for-statement/b%2F1?periodStart=2024-01-01&periodEnd=2024-12-31',
+			'http://localhost:3001/api/v1/invoices/for-statement/b2?periodStart=2024-01-01&periodEnd=2024-12-31'
 		]);
 	});
 });

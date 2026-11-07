@@ -40,6 +40,17 @@ export function toSettings(stored: Record<string, string | null>): Settings {
 	return { ...settings, iban: groupIban(settings.iban) };
 }
 
+/**
+ * #686 O-6: the days sending gives a draft's Zahlungsfrist, said at its date (detail and edit page); none when the
+ * settings do not load
+ */
+export async function paymentDeadlineDays(fetch: typeof globalThis.fetch) {
+	const response = await fetch(API).catch(() => null);
+	if (!response?.ok) return undefined;
+	const days = Number(toSettings((await response.json()).data ?? {}).paymentDeadlineDays);
+	return days > 0 ? days : undefined;
+}
+
 const FIELDS: Record<string, string> = Object.fromEntries(Object.entries(KEYS).map(([field, key]) => [key, field]));
 
 /** Saves every field as typed; the backend checks them (H-28, #717) and resets the emptied ones to their default */
