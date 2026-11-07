@@ -37,8 +37,8 @@ import { setUpDwello } from './einrichtung';
 import { createAccessKey } from './access-keys';
 import { createAccessKeyRefusal, newAccessKey } from '../targets/access-keys';
 import { enterAmount, invoicePdf, uploadBelege } from './invoice-upload';
-import { goToGeneration } from './statement-generate';
-import { agreementsLoading, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
+import { agreementsCheckAgain, goToGeneration } from './statement-generate';
+import { agreementsLoading, agreementsRetry, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposalOutdated, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -573,6 +573,24 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.shown('agreements-failed')),
 			Click.on(nextButton),
 			Wait.until(on.shown('agreements-wait'))
+		),
+	// #688: «Erneut versuchen» while the check still fails: the alert says Dwello tried again
+	'agreements-retry-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/statements/agreements', {}),
+			Navigate.reload,
+			Wait.until(on.shown('agreements-failed')),
+			Click.on(agreementsRetry),
+			Wait.until(on.shown('agreements-retry-failed'))
+		),
+	// #688: «Erneut versuchen» once the check works again: the line that the contracts are checked, with the focus
+	'agreements-checked': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/statements/agreements', {}),
+			Navigate.reload,
+			Wait.until(on.shown('agreements-failed')),
+			agreementsCheckAgain,
+			Wait.until(on.shown('agreements-checked'))
 		),
 	// an answer that cannot be saved: the question's error (idempotent, nothing is stored)
 	'agreement-save-failed': () => (actor) =>
