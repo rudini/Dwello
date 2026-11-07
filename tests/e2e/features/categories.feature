@@ -71,6 +71,13 @@ Funktionalität: Kostenkategorien
     Und nennt die vordefinierte Kategorie "Liegenschaftssteuer" als Grund "also nicht umlagefähig."
     Und erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt
 
+  # Der Hinweis sagt, wo der Liegenschaftsverwalter nachsieht, was der Mietvertrag nennt (#1028)
+  @wip
+  Szenario: Der Hinweis zum Mietvertrag sagt, wo die vereinbarten Nebenkosten stehen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann erfährt der Liegenschaftsverwalter, dass er im unterschriebenen Mietvertrag nachsieht, welche Nebenkosten er nennt
+    Und erfährt der Liegenschaftsverwalter, dass Dwello sie bei jedem Mietvertrag unter "Vereinbarte Nebenkosten" festhält
+
   Szenario: Grund der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
     Dann nennt die Kategorie als Grund "umstritten"
