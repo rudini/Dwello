@@ -68,6 +68,7 @@ describe('pdfAffected', () => {
 		expect(pdfAffected(['backend/src/services/pdf.service.ts'])).toBe(true);
 		expect(pdfAffected(['src/routes/+page.svelte', 'backend/src/services/qr-bill.service.ts'])).toBe(true);
 		expect(pdfAffected(['backend/src/services/pdf-format.ts'])).toBe(true);
+		expect(pdfAffected(['backend/src/services/pdf-texts/fr.ts'])).toBe(true);
 	});
 
 	it('ignores other backend code and tests', () => {

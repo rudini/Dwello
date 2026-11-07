@@ -621,7 +621,7 @@
 	},
 	"fat": {
 		"files": {
-			"backend/src/services/pdf.service.ts": 1446,
+			"backend/src/services/pdf.service.ts": 898,
 			"backend/src/services/statement.service.ts": 1029,
 			"backend/src/db/schema.ts": 685,
 			"backend/src/services/data-export.service.ts": 645,

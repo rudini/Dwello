@@ -37,6 +37,7 @@ import {
 	recipient,
 	resetConfirmation,
 	sendConfirmation,
+	shareOfPosition,
 	sharesOfPosition,
 	statusOfStatement,
 	tenancyOfStatement,
@@ -411,6 +412,10 @@ Then(
 		await verwalter.sees(invoiceOfPosition(category, invoice)).toContain(text);
 	}
 );
+
+Then('nennt die Position {string} den Anteil {string}', async ({ verwalter }, category: string, share: string) => {
+	await verwalter.sees(shareOfPosition(category)).toBe(share);
+});
 
 Then('nennt die Position {string} {string}', async ({ verwalter }, category: string, text: string) => {
 	await verwalter.sees(invoicesOfPosition(category)).toContain(text);
