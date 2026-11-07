@@ -425,6 +425,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('invoice-list-period'), actual)).toEqual([]);
 	});
 
+	// #686: the invoices the statement takes, which wizard step 2 counts
+	it('GET /invoices/for-statement/:buildingId liefert die Felder von invoices-for-statement.json', async () => {
+		const actual = await (await callApi(`/api/v1/invoices/for-statement/${rental.building}?periodStart=2024-01-01&periodEnd=2024-12-31`)).json();
+		expect(drift(await sample('invoices-for-statement'), actual)).toEqual([]);
+	});
+
 	// #1088: what the form of a new building proposes
 	it('GET /buildings/new-defaults liefert die Felder von building-new-defaults.json', async () => {
 		const actual = await (await callApi('/api/v1/buildings/new-defaults')).json();
