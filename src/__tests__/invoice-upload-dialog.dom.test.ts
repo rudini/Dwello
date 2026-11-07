@@ -351,6 +351,41 @@ describe('Rechnungen hochladen', () => {
 		expect(date.getAttribute('aria-invalid')).toBe('true');
 	});
 
+	// code review 743-2 C-4: the errors were set before the complete files were created, the focus moved after: a create
+	// slower than the date field's wait (here one that fails, so nothing is created) said the date's error twice
+	it('sagt den Fehler des Datums einmal, auch wenn das Erstellen der übrigen Dateien dauert', async () => {
+		fakeBff((call) =>
+			call.path === '/invoices'
+				? [500, {}]
+				: (call.body as { fileName: string }).fileName === 'blitz.pdf'
+					? [200, read]
+					: [502, unreadable]
+		);
+		const answer = globalThis.fetch;
+		globalThis.fetch = (async (url: string, init?: RequestInit) => {
+			if (String(url).endsWith('/api/invoices')) await new Promise((resolve) => setTimeout(resolve, 400));
+			return answer(url, init);
+		}) as typeof fetch;
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
+			defaultDistributionKeyId: 'k1',
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), pdf('leer.pdf'));
+		click('invoice-upload-create-button');
+		await new Promise((resolve) => setTimeout(resolve, 1200));
+		flushSync();
+
+		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+		expect(document.activeElement).toBe(date);
+		const spoken = [...document.querySelectorAll('[aria-live="assertive"]')].map((region) => region.textContent);
+		expect(spoken.join(' ')).not.toContain('Bitte geben Sie ein Datum ein.');
+	});
+
 	// #743 (code review C-14): a Rechnungsnummer over 50 characters ended in the general error of creating
 	it('sagt bei einer zu langen Rechnungsnummer am Feld, was zu tun ist, und erstellt die Rechnung nicht', async () => {
 		const { calls } = open(() => [200, read]);

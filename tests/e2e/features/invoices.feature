@@ -113,6 +113,16 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
     Dann meldet Dwello "notizen.docx entfernt. Sie können das Gebäude wieder wählen."
 
+  # Persona Sven 743 P-1: ein Rechnungsdatum, das nach dem Fehler eingetippt und wieder gelöscht wird, nennt beim
+  # nächsten Erstellen wieder seinen Fehler
+  Szenario: Ein wieder gelöschtes Rechnungsdatum nennt beim nächsten Erstellen seinen Fehler
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" das Rechnungsdatum "2026-03-31" eingibt und wieder löscht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie ein Datum ein." nicht mehr
+    Wenn der Liegenschaftsverwalter die Rechnungen erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie ein Datum ein."
+
   # #743 (Fachreview 743-1 V-2): auch beim Hochladen hat die Rechnungsnummer höchstens 50 Zeichen; Dwello kürzt sie nicht
   # und erstellt die Rechnung nicht
   Szenario: Eine zu lange Rechnungsnummer beim Hochladen sagt am Feld, was zu tun ist

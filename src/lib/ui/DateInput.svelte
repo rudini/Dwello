@@ -97,14 +97,20 @@
 	// the field's own check, said when the field is left; a change takes it back
 	const own = $derived(invalid && left ? wrongDate : '');
 	$effect(() => say(own));
-	// an error of the page only where the focus does not land in the field: where it does (focusFirstError, also
-	// anew after Enter), the field's description says it, and twice was once too often (#743, persona Sven P-1);
-	// waited for past the page's focus move, and not over the field's own error, which the field shows
+	// an error of the page only where the focus does not land in a field with an error: where it lands here
+	// (focusFirstError, also anew after Enter) or in another one, that field's description is read, and twice was once
+	// too often (#743, persona Sven P-1, code review 743-2 C-5); waited for past the page's focus move, and not over
+	// the field's own error, which the field shows
 	let landed = false;
+	let input = $state<HTMLInputElement>();
 	$effect(() => {
 		if (!error) return;
 		landed = false;
-		const unless = setTimeout(() => !landed && !untrack(() => own) && say(error), 300);
+		const unless = setTimeout(() => {
+			const at = document.activeElement;
+			const elsewhere = at !== input && at?.getAttribute('aria-invalid') === 'true';
+			if (!landed && !elsewhere && !untrack(() => own)) say(error);
+		}, 300);
 		return () => clearTimeout(unless);
 	});
 
@@ -151,6 +157,7 @@
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input
+					bind:this={input}
 					id={control.id}
 					type="text"
 					inputmode="numeric"

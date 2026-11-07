@@ -325,6 +325,22 @@ describe('Datumsfeld: Ansage eines Fehlers der Seite', () => {
 		expect(spoken()).toBe('');
 	});
 
+	// code review 743-2 C-5: the focus landed in another field with an error, whose description is read; said here too,
+	// it broke into that one
+	it('sagt einen Fehler der Seite nicht an, wenn der Fokus in einem anderen Feld mit Fehler landet', async () => {
+		const props = page();
+		const other = document.createElement('input');
+		other.setAttribute('aria-invalid', 'true');
+		document.body.prepend(other);
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		flushSync();
+		other.focus();
+		await later();
+
+		expect(spoken()).toBe('');
+		other.remove();
+	});
+
 	// a page that leaves the focus where it was (on its button): only the live region says the field's error
 	it('sagt einen Fehler der Seite an, wenn der Fokus nicht ins Feld kommt', async () => {
 		const props = page();

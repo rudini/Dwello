@@ -36,6 +36,7 @@ import {
 	chooseCategory,
 	chooseKey,
 	enterAmount,
+	enterAndClearInvoiceDate,
 	enterInvoiceNumber,
 	chooseForCreating,
 	escapeFromCategory,
@@ -166,6 +167,13 @@ When(
 	'der Liegenschaftsverwalter bei der Datei von {string} den umlagefähigen Betrag {string} einträgt',
 	async ({ verwalter, names }, supplier: string, amount: string) => {
 		await verwalter.attemptsTo(enterAmount(names.get(supplier)!, amount));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} das Rechnungsdatum {string} eingibt und wieder löscht',
+	async ({ verwalter, names }, supplier: string, date: string) => {
+		await verwalter.attemptsTo(enterAndClearInvoiceDate(names.get(supplier)!, date));
 	}
 );
 
