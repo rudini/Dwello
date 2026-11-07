@@ -59,11 +59,17 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche doppelt" mit der Formel "{area} 2" erfasst
     Dann erfährt der Liegenschaftsverwalter bei der Formel "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Bausteine {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
 
-  # #737: ein Fehler, der von den Werten abhängt, steht einmal, nicht pro Beispielwohnung
+  # #737: ein Fehler, der von den Werten abhängt, steht einmal, nicht pro Beispielwohnung, mit Ursache und nächstem Schritt (Persona Helga P-1)
   Szenario: Formel testen, die für eine Wohnung keine Zahl ergibt
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter die Formel "{area} / ({units} - 1)" testet
-    Dann zeigt der Test nur den Fehler "Die Formel kann für eine Wohnung nicht berechnet werden: Die Formel ergibt keine gültige Zahl."
+    Dann zeigt der Test nur den Fehler "Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht."
+
+  # #737 (Persona Helga P-2): auch ein negativer Wert sagt seine Ursache und was zu prüfen ist
+  Szenario: Formel testen, die für eine Wohnung einen negativen Wert ergibt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{area} - 100" testet
+    Dann zeigt der Test nur den Fehler "Für eine Wohnung ergibt die Formel einen negativen Wert, meist weil sie dort zu viel abzieht. Prüfen Sie, was nach «-» steht."
 
   # #737: «Formel testen» und das Speichern prüfen mit denselben vier Beispielwohnungen wie die Tabelle;
   # die Formel teilt nur bei 80 m² durch null, einer Fläche, die keine Beispielwohnung hat

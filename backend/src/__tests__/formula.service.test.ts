@@ -282,7 +282,7 @@ describe('Formula Service', () => {
 		it('should handle division resulting in Infinity', () => {
 			const result = evaluateFormula('{area} / ({rooms} - {rooms})', { area: 100, rooms: 3 });
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('keine gültige Zahl');
+			expect(result.error).toContain('ergibt die Formel keine Zahl');
 		});
 
 		it('should handle very large numbers', () => {

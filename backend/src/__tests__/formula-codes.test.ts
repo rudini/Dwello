@@ -36,7 +36,9 @@ describe('Fehlercodes der Formel', () => {
 		const result = validateFormulaForDistribution('{area} - 100');
 
 		expect(result.errorCodes).toEqual([{ code: 'FORMULA_NEGATIVE', params: {} }]);
-		expect(result.errors).toEqual(['Die Formel ergibt einen negativen Wert.']);
+		expect(result.errors).toEqual([
+			'Für eine Wohnung ergibt die Formel einen negativen Wert, meist weil sie dort zu viel abzieht. Prüfen Sie, was nach «-» steht.'
+		]);
 	});
 
 	// #737: saving checked three sample apartments (one with 80 m²), «Formel testen» shows four

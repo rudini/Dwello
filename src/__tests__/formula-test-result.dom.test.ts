@@ -6,11 +6,11 @@ import { allByTestId, byTestId, show } from './helpers/dom';
 describe('Ergebnis von «Formel testen»', () => {
 	it('überschreibt einen Fehler mit dem Befund des Tests, nicht mit einem zweiten Satz über die Formel', () => {
 		const error =
-			'Die Formel kann für eine Wohnung nicht berechnet werden: Die Formel ergibt keine gültige Zahl.';
+			'Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht.';
 		show(FormulaTestResult, { test: { errors: [error], results: [] } });
 
 		expect(byTestId('formula-test-failed')?.textContent?.trim()).toMatch(
-			/^Der Test hat einen Fehler gefunden\s*Die Formel kann/
+			/^Der Test hat einen Fehler gefunden\s*Für eine Wohnung/
 		);
 		expect(allByTestId('formula-test-error').map((line) => line.textContent)).toEqual([error]);
 	});

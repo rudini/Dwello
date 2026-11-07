@@ -214,7 +214,7 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 			return {
 				isValid: false,
 				value: 0,
-				...coded('FORMULA_NOT_A_NUMBER', 'Die Formel ergibt keine gültige Zahl.')
+				...coded('FORMULA_NOT_A_NUMBER', 'Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht.')
 			};
 		}
 
@@ -277,7 +277,7 @@ export function calculateDistribution(
 			return {
 				isValid: false,
 				distributions: [],
-				...coded('FORMULA_APARTMENT_FAILED', `Die Formel kann für eine Wohnung nicht berechnet werden: ${result.error}`, {
+				...coded('FORMULA_APARTMENT_FAILED', result.error!, {
 					...result.errorCode!.params,
 					reason: result.errorCode!.code
 				})
@@ -288,7 +288,7 @@ export function calculateDistribution(
 			return {
 				isValid: false,
 				distributions: [],
-				...coded('FORMULA_NEGATIVE', 'Die Formel ergibt einen negativen Wert.')
+				...coded('FORMULA_NEGATIVE', 'Für eine Wohnung ergibt die Formel einen negativen Wert, meist weil sie dort zu viel abzieht. Prüfen Sie, was nach «-» steht.')
 			};
 		}
 
@@ -301,7 +301,7 @@ export function calculateDistribution(
 		return {
 			isValid: false,
 			distributions: [],
-			...coded('FORMULA_ALL_ZERO', 'Die Formel ergibt für alle Wohnungen null, so lassen sich keine Anteile berechnen.')
+			...coded('FORMULA_ALL_ZERO', 'Die Formel ergibt für alle Wohnungen null, so lassen sich keine Anteile berechnen. Prüfen Sie, ob sie mit 0 malnimmt oder {units} - 1 enthält ({units} ist für jede Wohnung 1).')
 		};
 	}
 

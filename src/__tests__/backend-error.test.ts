@@ -31,13 +31,14 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 	it('setzt Teile, die selbst Codes sind, in der gewählten Sprache ein', () => {
 		french();
 		const body = {
-			error: 'Die Formel kann für eine Wohnung nicht berechnet werden: Die Formel ergibt keine gültige Zahl.',
+			error:
+				'Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht.',
 			code: 'FORMULA_APARTMENT_FAILED',
 			params: { reason: 'FORMULA_NOT_A_NUMBER' }
 		};
 
 		expect(backendMessage(body, 'Repli')).toBe(
-			'La formule ne peut pas être calculée pour un appartement\u00a0: La formule ne donne pas de nombre valable.'
+			'Pour un appartement, la formule ne donne pas de nombre, généralement parce qu’elle y divise par zéro. Vérifiez ce qui se trouve après «\u00a0/\u00a0».'
 		);
 	});
 
@@ -51,9 +52,9 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 			}
 		};
 
-		// #737: only the cause, without «Die Formel ist ungültig:» before it
+		// #737: only the cause, without «Die Formel ist ungültig:» or «… für eine Wohnung …:» before it
 		expect(backendMessage(body, 'Ersatz')).toBe(
-			'Die Formel kann für eine Wohnung nicht berechnet werden: Die Formel ergibt keine gültige Zahl.'
+			'Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht.'
 		);
 	});
 
