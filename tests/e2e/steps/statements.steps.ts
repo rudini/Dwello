@@ -15,7 +15,10 @@ import {
 	statusFilterText,
 	statusFilterShareInWindow,
 	focusedElement,
-	roomBesideSearchForm
+	roomBesideSearchForm,
+	statusFilterResultText,
+	statusFilterResultShareInWindow,
+	emptyListText
 } from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
@@ -30,6 +33,7 @@ import {
 	searchStatements,
 	showDraftsOfBuilding,
 	showSettledOfBuilding,
+	showOverdueOfBuilding,
 	showStatementsOfBuilding,
 	showStatementsOfBuildingWhileLoading,
 	startGeneratingStatements,
@@ -37,6 +41,7 @@ import {
 	clearDraftFilter
 } from '../tasks/statements';
 import { inDays } from '../fixtures/dates';
+import { listHeading } from '../questions/list';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -289,7 +294,7 @@ Then(
 	}
 );
 
-const STATUSES: Record<string, string> = { Entwurf: 'draft' };
+const STATUSES: Record<string, string> = { Entwurf: 'draft', Überfällig: 'overdue' };
 // #673 (Marco P-7): the chosen tab says so in words, not only by its colour
 Then('sagt der Statusfilter {string} {string}', async ({ verwalter }, status: string, text: string) => {
 	await verwalter.sees(statusFilterText(STATUSES[status])).toContain(text);
@@ -306,4 +311,28 @@ Then('ist der Statusfilter {string} ganz im Fenster zu sehen', async ({ verwalte
 
 Then('steht der Fokus auf dem Statusfilter {string}', async ({ verwalter }, status: string) => {
 	await verwalter.sees(focusedElement).toBe(`filter-${STATUSES[status]}`);
+});
+
+// #1186 (Marco P-1, P-2, Helga P-1, P-2): what a status tile changed, said at the tiles and at the list
+When(
+	'der Liegenschaftsverwalter nur die überfälligen Abrechnungen im Gebäude {string} anzeigt',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(showOverdueOfBuilding(seed.idOf(building)!));
+	}
+);
+
+Then('steht unter den Statusfiltern {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(statusFilterResultText).toBe(text);
+});
+
+Then('ist der Satz unter den Statusfiltern ganz im Fenster zu sehen', async ({ verwalter }) => {
+	await verwalter.sees(statusFilterResultShareInWindow).toBeGreaterThan(0.99);
+});
+
+Then('steht über der Abrechnungsliste {string}', async ({ verwalter }, heading: string) => {
+	await verwalter.sees(listHeading).toBe(heading);
+});
+
+Then('sagt die leere Abrechnungsliste {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(emptyListText).toContain(text);
 });

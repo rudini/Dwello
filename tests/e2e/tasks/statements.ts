@@ -4,6 +4,7 @@ import { statementStatus } from '../targets/statement-detail';
 import {
 	draftFilter,
 	settledFilter,
+	statusFilter,
 	generateStatementsButton,
 	emptyResetFiltersButton,
 	nextPageLink,
@@ -62,6 +63,14 @@ export const showSettledOfBuilding = (buildingId: string): Activity => (actor) =
 		showStatementsOfBuilding(buildingId),
 		Click.on(settledFilter),
 		filteredBy({ building: buildingId, status: 'settled' })
+	);
+
+// #1186: a status no statement of the building has
+export const showOverdueOfBuilding = (buildingId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		showStatementsOfBuilding(buildingId),
+		Click.on(statusFilter('overdue')),
+		filteredBy({ building: buildingId, status: 'overdue' })
 	);
 
 export const turnToNextPage = Click.on(nextPageLink);
