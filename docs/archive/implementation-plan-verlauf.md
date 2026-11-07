@@ -1443,3 +1443,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] No scenario: CI tooling only; checks: lint, Prettier, the screenshot run locally (3 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #688 agreements check retry: focus and announcement (personas on #439)
+
+- [x] Read #688; triage on main (`docs/reviews/688-triage.md`): P-2, P-5, Helga P-3 hold; the #439 reports are not in the shallow history, every point confirmed in the code
+- [x] Coordinator decision: after a successful retry the focus goes to the check's status line
+- [x] Busy retry keeps the alert and the focus, a new text after a failed retry, a focused status line after success; DOM tests and two scenarios seen red; a11y and language rows (cc9b406)
+- [x] code-reviewer (`docs/reviews/688-review-{1,2}.md`): C-1..C-3 Minor fixed (0b4d981)
+- [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-688.md`): no Blocker or Major; Minors that stay: Helga H-1, Sven S-1, S-3; Helga H-2 = Sven S-2 (two alerts give opposite advice) is #1197
+- [x] Workflow notes: `git stash` is shared by all worktrees; parallel agents must not use it (one popped another's stash)
+- [x] Archive the session; PR pushed after this archive
