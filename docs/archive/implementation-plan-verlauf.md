@@ -1474,3 +1474,11 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #750 browser console when a page does not hydrate
+
+- [x] Check on main: the axe rows record no browser console (`lookAt` → `Navigate.to` → `hydrated`); decision written into #750
+- [x] Unit test `tests/unit/hydration-console.test.ts` seen red; `BrowseTheWeb` records console and page errors, `hydrated` adds them to its error
+- [x] Slice review `docs/reviews/750-review-1.md`: C-1 Major (console only in `message`, not in the stack the report shows) confirmed with real Playwright, fixed test-first; C-2 Minor with it
+- [x] Re-review `docs/reviews/750-review-2.md`: nothing open
+- [x] Checks: lint, check, fitness, backend type-check, vitest (new test, screenplay lint), E2E dashboard axe and language rows (79), a real Chromium page that throws shows its console in the stack
+- [x] Archive session; PR `Fixes #750`: pushed after this archive
