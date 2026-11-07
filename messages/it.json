@@ -1290,8 +1290,6 @@
 	"statements_uncategorized_title": "Fatture senza categoria",
 	"statements_uncategorized_text": "Queste fatture addebitabili non hanno una categoria. Dwello conteggia solo le spese accessorie pattuite nel contratto di locazione e lo verifica tramite la categoria. Assegni una categoria a ogni fattura o la imposti su «Non addebitabile». Poi può proseguire.",
 	"statements_uncategorized_error": "Alcune fatture addebitabili non hanno una categoria. Assegni una categoria a ogni fattura o la imposti su «Non addebitabile».",
-	"statements_whole_title": "Fatture senza periodo di prestazione",
-	"statements_whole_text": "Il periodo di conteggio è più breve di un anno. Queste fatture non hanno un periodo di prestazione e contano quindi con l’importo intero. Se una di esse vale per più di questo periodo di conteggio, per esempio per un anno intero, inserisca il suo periodo di prestazione. Conta allora solo la parte dell’importo che cade in questo periodo di conteggio.",
 	"statements_heating_whole_title": "Spese di riscaldamento: fatture senza periodo di prestazione",
 	"statements_heating_whole_text": "Queste fatture della categoria «{category}» non hanno un periodo di prestazione, altre della stessa categoria sì. Lo inserisca per ognuna affinché ogni inquilino sostenga le spese dei propri mesi. Se una fattura vale per l’intero periodo di conteggio, inserisca questo.",
 	"statements_heating_whole_text_many": "Queste fatture delle categorie {categories} non hanno un periodo di prestazione, altre della stessa categoria sì. Lo inserisca per ognuna affinché ogni inquilino sostenga le spese dei propri mesi. Se una fattura vale per l’intero periodo di conteggio, inserisca questo.",

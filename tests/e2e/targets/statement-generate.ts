@@ -86,8 +86,7 @@ export const feeNotAgreedLink = (contractId: string) =>
 	);
 // What the link that opened the wizard chose, and where its settings come from (A-10)
 export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page.getByTestId('wizard-preset'));
-// Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period, or counted
-// in full in a period under a year
+// Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period
 export const uncategorizedInvoices = target('Hinweis auf Rechnungen ohne Kategorie', (page) =>
 	page.getByTestId('uncategorized-invoices')
 );
