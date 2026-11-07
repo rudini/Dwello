@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { reletParts, statusLabels } from '$lib/apartment';
+	import { reletParts, statusHelp, statusLabels } from '$lib/apartment';
 	import { endedSince } from '$lib/contract-status';
 	import { formatCurrency } from '$lib/utils/format';
 	import type { PageData } from './$types';
@@ -87,6 +87,15 @@
 					</li>
 				{/each}
 			</ul>
+			<!-- #731: the two status words the counts do not explain themselves, in the words of the status legend -->
+			<dl class="flex flex-col gap-2">
+				{#each ['relet', 'reserved'] as const as status (status)}
+					<div data-testid="stat-help-{status}">
+						<dt class="font-semibold text-ink">{statusLabels[status]}</dt>
+						<dd class="text-ink-muted">{statusHelp[status]}</dd>
+					</div>
+				{/each}
+			</dl>
 		</Panel>
 
 		<Panel title={m.nav_statements()} level={3}>
