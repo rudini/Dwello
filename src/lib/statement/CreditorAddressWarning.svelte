@@ -7,6 +7,8 @@
 	// code (the Kontoinhaber's or the Absender's, persona Weber 690 W-1, W-2); the warning comes before the refusal and
 	// leads where to enter it
 	let { code }: { code: string | null } = $props();
+	// to the address the code names: the Kontoinhaber's, else the Absender's (persona Weber 690 W-7)
+	const section = $derived(code === 'ACCOUNT_HOLDER_MISSING' ? 'account-holder' : 'sender');
 </script>
 
 {#if code}
@@ -16,7 +18,7 @@
 		testid="statement-creditor-missing"
 	>
 		<a
-			href="/config#sender"
+			href="/config#{section}"
 			class="text-accent underline underline-offset-4 hover:text-accent-strong"
 			data-testid="statement-creditor-missing-settings">{m.documents_to_settings()}</a
 		>

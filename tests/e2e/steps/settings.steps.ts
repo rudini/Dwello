@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { ON_FRESH, test } from '../fixtures/test';
-import { focusedSetting, holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
+import { focusedSetting, focusedSettingField, holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
 import { giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -102,6 +102,11 @@ Then('kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend', async
 
 Then('steht der Fokus in den Einstellungen auf {string}', async ({ verwalter }, label: string) => {
 	await verwalter.sees(focusedSetting).toBe(label);
+});
+
+// persona Weber 690 W-7: «Ort» is the label of two fields
+Then('steht der Fokus in den Einstellungen auf dem Feld {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(focusedSettingField).toBe(`setting-${FIELDS[label]}`);
 });
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {

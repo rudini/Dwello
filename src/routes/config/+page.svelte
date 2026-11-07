@@ -45,7 +45,8 @@
 	// 690-3 C-5)
 	let settingsForm = $state<HTMLFormElement>();
 	afterNavigate(() => {
-		if (data.missing.length) focusFirstError(settingsForm);
+		// the empty field, not the Kontoinhaber's name that carries the refusal (persona Weber 690 W-7)
+		if (data.missing.length) focusFirstError(settingsForm, data.missing);
 	});
 	let saving = $state(false);
 </script>
@@ -225,7 +226,7 @@
 				testid="setting-accountHolderIsSender"
 			/>
 			{#if !holderIsSender}
-				<fieldset class="flex flex-col gap-6">
+				<fieldset class="flex flex-col gap-6" id="account-holder">
 					<legend class="text-lg font-semibold text-ink">{m.settings_account_holder()}</legend>
 					<SettingField
 						name="accountHolderName"

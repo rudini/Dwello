@@ -1594,6 +1594,8 @@ Funktionalität: Abrechnungsdetail
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es den Kontoinhaber."
+    Wenn der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt
+    Dann steht der Fokus in den Einstellungen auf dem Feld "Ort des Kontoinhabers"
 
   # #690 (Persona Weber 690 W-2, Entscheid Product Owner): mit einer IBAN braucht auch der Absender seine ganze Adresse,
   # der Kopf des PDF nennt sie, auch wenn ein vollständiger Kontoinhaber den Zahlteil bekommt

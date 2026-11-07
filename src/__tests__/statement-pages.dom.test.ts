@@ -1881,6 +1881,10 @@ describe('Abrechnungsdetail', () => {
 			expect(byTestId('statement-creditor-missing')!.textContent).toContain(
 				'Mit einer IBAN braucht es den Kontoinhaber.'
 			);
+			// persona Weber 690 W-7: to the Kontoinhaber, not to the Absender
+			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe(
+				'/config#account-holder'
+			);
 		});
 
 		it('nennt den Absender, wenn neben einem vollständigen Kontoinhaber seine Adresse fehlt', () => {

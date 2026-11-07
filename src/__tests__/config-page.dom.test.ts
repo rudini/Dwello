@@ -9,16 +9,18 @@ import { show } from './helpers/dom';
 import config from '../../tests/contracts/config.json';
 import { toSettings } from '$lib/server/settings';
 
-const open = (missing: string[]) =>
+const open = (missing: string[], stored: object = { company_city: null }, errors?: object) =>
 	show(SettingsPage, {
 		data: {
-			settings: toSettings({ ...config.data, company_city: null }),
+			settings: toSettings({ ...config.data, ...stored }),
 			heatingProfiles: [],
 			distributionKeys: [],
 			backup: 'off',
-			errors: missing.length
-				? { iban: 'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.' }
-				: {},
+			errors:
+				errors ??
+				(missing.length
+					? { iban: 'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.' }
+					: {}),
 			missing
 		},
 		form: null
@@ -32,6 +34,26 @@ describe('Einstellungen öffnen', () => {
 		await settle();
 
 		expect(document.activeElement?.getAttribute('name')).toBe('companyCity');
+	});
+
+	// persona Weber 690 W-7: the refusal stays at the Kontoinhaber's name, the focus goes to the empty field it names
+	it('setzt beim Öffnen den Fokus auf das leere Feld des Kontoinhabers, nicht auf seinen Namen', async () => {
+		open(
+			['accountHolderCity'],
+			{ account_holder_city: null },
+			{ accountHolderName: 'Mit einer IBAN braucht es den Kontoinhaber.' }
+		);
+		await settle();
+
+		expect(document.activeElement?.getAttribute('name')).toBe('accountHolderCity');
+	});
+
+	it('hat den Kontoinhaber als Sprungziel', () => {
+		open([], { account_holder_city: null });
+
+		expect(document.getElementById('account-holder')?.textContent).toContain(
+			'Name des Kontoinhabers'
+		);
 	});
 
 	it('setzt beim Öffnen ohne fehlende Felder keinen Fokus', async () => {
