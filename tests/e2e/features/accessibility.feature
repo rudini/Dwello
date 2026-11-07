@@ -185,6 +185,7 @@ Funktionalität: Barrierefreiheit
       | statements             | mark-paid-dialog    |
       | statements             | list-scoped         |
       | statements             | pdf-missing         |
+      | statements             | status-empty        |
       | statements-period      | default             |
       | statements-period      | list-scoped         |
       | statement-generate     | default             |
