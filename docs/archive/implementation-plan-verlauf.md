@@ -1481,3 +1481,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #740 Alert titles as headings; menu at zoom; contract page actions
+
+- [x] Checked each point on main: alert title a `<p>`; at 150 % zoom a 1280–1440 px laptop shows 853–960 px, the menu behind ☰; «Löschen» alone above the warning at 390 px; Helga's «Mietvertrag erfassen easy to hit» could not be reproduced (not in «Done means»)
+- [x] Decided (product owner, in #740): alert titles h2; sidebar from 768 px; page header actions one per row at full width below 640 px; the axe state `mobile-menu-open` mobile only (Spec change approved: #740)
+- [x] Three scenarios (navigation.feature, contract-detail.feature) and DOM tests seen red, then green (6336874)
+- [x] code-reviewer `docs/reviews/740-review-{1,2}.md`: C-1, C-2 Major and C-3 Minor fixed (049f985, f123b25); round 2 without findings
+- [x] Full E2E (chromium, api): 3 red on 6336874, all fixed (049f985, f123b25, 57d8c28: long words in the run summary beside the sidebar); reruns green
+- [x] Persona Helga `docs/design/personas/helga-740.md`: no Blocker or Major; Minors P-1..P-3 and the sidebar observation at 150 % stay in the report
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-740.md`
+- [x] Archive the session; PR `Fixes #740`: pushed after this archive
