@@ -8,7 +8,8 @@ export class BrowseTheWeb {
 
 	constructor(public readonly page: Page) {
 		page
-			.on('framenavigated', (frame) => frame === page.mainFrame() && this.console.splice(0))
+			// a new document, not a history change, which SvelteKit makes while it starts
+			.on('request', (request) => request.isNavigationRequest() && request.frame() === page.mainFrame() && this.console.splice(0))
 			.on('console', (message) => this.console.push(`${message.type()}: ${message.text()}`))
 			.on('pageerror', (error) => this.console.push(error.stack ?? `${error.name}: ${error.message}`));
 	}

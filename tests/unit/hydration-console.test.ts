@@ -16,7 +16,7 @@ const pageThatLogsAndNeverHydrates = () => {
 		on: (event: string, listener: (value: unknown) => void) => ((listeners[event] = listener), page),
 		mainFrame: () => mainFrame,
 		goto: async (path: string) => {
-			listeners.framenavigated?.(mainFrame);
+			listeners.request?.({ isNavigationRequest: () => true, frame: () => mainFrame });
 			listeners.console?.({ type: () => 'error', text: () => `Failed to load module script of ${path}` });
 			listeners.pageerror?.(new TypeError("Cannot read properties of undefined (reading 'buildings')"));
 		},
