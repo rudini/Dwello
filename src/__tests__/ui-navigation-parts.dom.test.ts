@@ -73,6 +73,27 @@ describe('Schrittanzeige', () => {
 			'Schritt 3 von 5: Vertragsdauer'
 		);
 	});
+
+	// #1146: next to the values five names do not fit unbroken, also at xl
+	it('nennt neben den Angaben der erledigten Schritte nur den aktuellen Schritt, auch in breiten Fenstern', () => {
+		show(Stepper, { steps, current: 3, onselect: vi.fn(), values: ['2025', 'Alpenblick'] });
+		const labels = [...document.querySelectorAll('[data-testid="wizard-step-label"]')];
+		expect(labels.map((label) => label.textContent)).toEqual(steps);
+		expect(labels.map((label) => label.className.split(/\s+/).includes('xl:not-sr-only'))).toEqual([
+			false,
+			false,
+			false,
+			false,
+			false
+		]);
+		expect(labels.map((label) => label.className.split(/\s+/).includes('md:not-sr-only'))).toEqual([
+			false,
+			false,
+			true,
+			false,
+			false
+		]);
+	});
 });
 
 describe('Wizard-Navigation', () => {
