@@ -109,10 +109,14 @@
 		<div class="flex flex-col gap-8">
 			<!-- Only where the categorisation names no reason: an own category, or an invoice excluded from its category -->
 			{#if !invoice.isValidUtilityCost && !reasonOf(reasonCategory(invoice))}
-				<div data-testid="invoice-legal-note">
-					<Alert tone="caution" title={m.invoices_legal_title()}>
-						<p>{m.invoices_legal_text()}</p>
-					</Alert>
+				<!-- Neutral: not allocable is a correct state, not a warning (#687) -->
+				<div
+					class="flex flex-col gap-2 rounded-panel bg-sunken p-4"
+					data-testid="invoice-legal-note"
+					data-tone="neutral"
+				>
+					<p class="font-semibold text-ink">{m.invoices_legal_title()}</p>
+					<p class="text-ink-muted">{m.invoices_legal_text()}</p>
 				</div>
 			{/if}
 			<InvoiceBeleg {invoice} billed={!!data.billedIn?.length} />

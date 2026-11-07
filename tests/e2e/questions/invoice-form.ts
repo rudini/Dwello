@@ -1,4 +1,4 @@
-import { Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedWarning,
 	categoryLabel,
@@ -16,6 +16,7 @@ import {
 export const markedAsUtilityCost = Checked.of(utilityCostCheckbox);
 export const utilityCostMarkable = Enabled.of(utilityCostCheckbox);
 export const nonAllocableCategoryWarning = Text.of(categoryWarning);
+export const toneOfNonAllocableCategoryNote = Attribute.named('data-tone').of(categoryWarning);
 export const invoiceDate = Value.of(invoiceDateInput);
 export const invoiceDateShown = Visibility.of(invoiceDateInput);
 export const invoiceDateInWords = Text.of(invoiceDateWords);

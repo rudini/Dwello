@@ -55,6 +55,12 @@ Funktionalität: Rechnungsliste
     Dann sieht der Liegenschaftsverwalter die Rechnung von "Dachdecker Meier" über "CHF 3’200.00" in der Kategorie "Reparaturen"
     Und die Rechnungsliste enthält genau 1 Rechnung
 
+  # #687: nicht umlagefähig ist kein Fehler, also keine Warnung
+  Szenario: Nicht umlagefähige Rechnung ohne Warnung in der Liste
+    Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
+    Wenn der Liegenschaftsverwalter nach dem Rechnungssteller "Dachdecker Meier" sucht
+    Dann bezeichnet die Rechnungsliste die Rechnung von "Dachdecker Meier" ohne Warnung als nicht umlagefähig
+
   Szenario: Manuell kategorisierte Rechnung
     Wenn der Liegenschaftsverwalter nach dem Rechnungssteller "Hauswart Huber" sucht
     Dann ist die Rechnung von "Hauswart Huber" als "Manuell" kategorisiert

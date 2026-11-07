@@ -44,6 +44,14 @@ Funktionalität: Rechnungsdetail
     Dann erklärt ein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
     Und nennt die Rechnung keinen Grund der Umlagefähigkeit
 
+  # #687: nicht umlagefähig ist kein Fehler, also keine Warnung
+  Szenario: Nicht umlagefähige Rechnung ohne Warnung im Detail
+    Angenommen es gibt die nicht umlagefähige Kategorie "Dachsanierung"
+    Und "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dach Nord" in der Kategorie "Dachsanierung" in Rechnung
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Dachdecker Meier"
+    Dann ist die Rechnung ohne Warnung als nicht umlagefähig bezeichnet
+    Und erklärt ein Hinweis ohne Warnung, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
+
   Szenario: Neu kategorisieren ohne laufende KI
     Wenn der Liegenschaftsverwalter die Rechnung neu kategorisieren lässt
     Dann erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist oder keine passende Kategorie geliefert hat

@@ -1,4 +1,4 @@
-import { Accessible, Count, ShareInViewport, Text } from '../screenplay/questions';
+import { Accessible, Attribute, Count, ShareInViewport, Text } from '../screenplay/questions';
 import {
 	invoiceNumber,
 	amount,
@@ -16,7 +16,8 @@ import {
 	missedWarning,
 	overrideReason,
 	recategorizeError,
-	utilityCost
+	utilityCost,
+	utilityCostBadge
 } from '../targets/invoice-detail';
 
 export const amountOfInvoice = Text.of(amount);
@@ -24,6 +25,9 @@ export const categoryOfInvoice = Text.of(category);
 export const distributionKeyOfInvoice = Text.of(distributionKey);
 export const utilityCostOfInvoice = Text.of(utilityCost);
 export const tenancyLawNote = Text.of(legalNote);
+// #687: «Nicht umlagefähig» is a correct state, not a warning
+export const toneOfUtilityCost = Attribute.named('data-tone').of(utilityCostBadge);
+export const toneOfTenancyLawNote = Attribute.named('data-tone').of(legalNote);
 export const recategorizationFailure = Text.of(recategorizeError);
 export const reasonForOverride = Text.of(overrideReason);
 export const numberOfInvoice = Text.of(invoiceNumber);
