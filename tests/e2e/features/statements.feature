@@ -172,7 +172,6 @@ Funktionalität: Nebenkostenabrechnungen
 
   # #1186 (Marco P-1, P-2, Helga P-1, P-2): nach dem Antippen eines Status sagt ein Satz unter den Statusfiltern, was die
   # Liste jetzt zeigt, und die Überschrift der Liste nennt den Status
-  @wip
   Szenariogrundriss: Nach der Wahl eines Status sieht der Liegenschaftsverwalter, was die Liste zeigt
     Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
     Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
@@ -186,15 +185,15 @@ Funktionalität: Nebenkostenabrechnungen
       | 390    | 844  |
       | 960    | 600  |
 
-  # #1186: ein Status ohne Abrechnungen sagt das unter den Statusfiltern und in der leeren Liste, nicht «Filter anpassen»
-  @wip
-  Szenariogrundriss: Ein Status ohne Abrechnungen sagt, dass keine Abrechnung diesen Status hat
+  # #1186: ein Status ohne Abrechnungen in der Liste sagt das unter den Statusfiltern und in der leeren Liste, nicht
+  # «Filter anpassen» (fach-review 1186-1 V-1: die Liste, nicht alle Abrechnungen)
+  Szenariogrundriss: Bei einem Status ohne Abrechnungen sagt die Liste, dass sie keine mit diesem Status zeigt
     Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
     Wenn der Liegenschaftsverwalter nur die überfälligen Abrechnungen im Gebäude "Ahornhof" anzeigt
-    Dann steht unter den Statusfiltern "Keine Abrechnung hat den Status «Überfällig»."
+    Dann steht unter den Statusfiltern "Die Liste unten zeigt keine Abrechnung mit dem Status «Überfällig»."
     Und ist der Satz unter den Statusfiltern ganz im Fenster zu sehen
     Und ist der Statusfilter "Überfällig" ganz im Fenster zu sehen
-    Und sagt die leere Abrechnungsliste "Keine Abrechnung hat den Status «Überfällig»."
+    Und sagt die leere Abrechnungsliste "Die Liste enthält keine Abrechnung mit dem Status «Überfällig»."
 
     Beispiele:
       | Breite | Höhe |

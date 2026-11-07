@@ -253,7 +253,8 @@ describe('Abrechnungsliste', () => {
 		);
 	});
 
-	it('sagt unter den Statusfiltern, dass keine Abrechnung den gewählten Status hat', () => {
+	// fach-review 1186-1 V-1: the list, not all statements: the other filters still apply
+	it('sagt unter den Statusfiltern, dass die Liste keine Abrechnung mit dem gewählten Status zeigt', () => {
 		url = new URL('http://localhost/statements?status=overdue');
 		show(StatementsPage, {
 			data: {
@@ -267,7 +268,7 @@ describe('Abrechnungsliste', () => {
 			}
 		} as never);
 		expect(byTestId('status-filter-result')?.textContent?.trim()).toBe(
-			'Keine Abrechnung hat den Status «Überfällig».'
+			'Die Liste unten zeigt keine Abrechnung mit dem Status «Überfällig».'
 		);
 	});
 
@@ -298,7 +299,7 @@ describe('Abrechnungsliste', () => {
 		url = new URL('http://localhost/statements?status=overdue');
 		list([]);
 		expect(byTestId('statements-empty')?.textContent).toContain(
-			'Keine Abrechnung hat den Status «Überfällig».'
+			'Die Liste enthält keine Abrechnung mit dem Status «Überfällig». Wählen Sie einen anderen Status oder setzen Sie die Filter zurück.'
 		);
 		expect(text()).not.toContain('Filter anzupassen');
 	});
