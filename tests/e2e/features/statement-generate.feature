@@ -929,6 +929,26 @@ Funktionalität: Nebenkostenabrechnungen erstellen
       | 1280   |
       | 1440   |
 
+  # #1179 (Dr. Weber P-4 bis P-6, Helga P-3, P-4): auf einem schmalen Bildschirm stehen alle Schritte mit Namen
+  # untereinander, die erledigten mit ihrer Wahl
+  @wip
+  Szenario: Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann nennt die Schrittanzeige untereinander die Schritte
+      | Abrechnungsperiode                  |
+      | Gebäude                             |
+      | Heizprofil und Verwaltungspauschale |
+      | Vorschau                            |
+      | Erstellen                           |
+    Und zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Erstellen"
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
+
   # #1146 (Fallback review): ein langer Gebäudename in einem Wort schiebt die Schrittanzeige nicht über den Rand
   Szenario: Ein langer Gebäudename passt in die Schrittanzeige
     Angenommen das Gebäude "Mehrfamilienhausüberbauung" in "Winterthur" existiert
