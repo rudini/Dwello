@@ -1418,3 +1418,14 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: lint, check, E2E chromium + api contracts, contract-new, contract-edit (139 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #685 statement PDF explanations of heating and time shares (Dr. Weber on #208)
+
+- [x] Read #685; triage on main (`docs/reviews/685-triage.md`): P-1, P-3, the percent precision and the page break hold; #325, the Zeitanteil column and #249 done
+- [x] Product owner decisions recorded in #685: 2 decimals, page break (last row and header with the totals, explanation with them); spec changes `percent()` 0–2 decimals and `statement-detail.feature` line 406
+- [x] Red tests and @wip scenarios (b13ad0d); fach-reviewer step 1 (`docs/reviews/685-1-fach-review.md`): V-1..V-3 Minor fixed
+- [x] PDF texts in four languages (379a795), page break (7214378), two decimals (692bdd5), scenarios run (bd83d34)
+- [x] code-reviewer (`docs/reviews/685-review-{1,2}.md`): C-1 fixed (6574fcd), C-2 fixed (f09db09); PDF texts moved to `pdf-texts/` to stay within the line cap (e975f66)
+- [x] Persona Dr. Weber (`docs/design/personas/weber-685.md`): W-1, W-2 Minor stay; daten-pruefer (`docs/reviews/685-datenpruefung-1.md`): no findings, 188 checks to the Rappen
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
