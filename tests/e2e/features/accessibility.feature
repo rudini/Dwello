@@ -158,6 +158,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
+      | invoices               | empty-year          |
       | invoices               | filtered-empty      |
       | invoices               | period-filter       |
       | invoices               | upload-dialog       |
@@ -184,6 +185,7 @@ Funktionalität: Barrierefreiheit
       | statements             | mark-paid-dialog    |
       | statements             | list-scoped         |
       | statements             | pdf-missing         |
+      | statements             | status-empty        |
       | statements-period      | default             |
       | statements-period      | list-scoped         |
       | statement-generate     | default             |
