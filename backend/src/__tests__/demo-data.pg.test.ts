@@ -46,7 +46,7 @@ describe('Demodaten', () => {
 				(SELECT COUNT(*) FROM tenants)::int AS tenants, (SELECT COUNT(*) FROM rental_contracts)::int AS contracts,
 				(SELECT COUNT(*) FROM invoices)::int AS invoices, (SELECT COUNT(*) FROM utility_statements)::int AS statements`
 			)
-		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 83, statements: 17 }]);
+		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 84, statements: 17 }]);
 	});
 
 	// Zeigt in der Demo, dass sich Dokumente zu einem Mieter ablegen lassen

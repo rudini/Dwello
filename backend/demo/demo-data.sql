@@ -103,7 +103,7 @@ WHERE cat.is_allowed_utility_cost AND c.id::text LIKE 'b000000_-000_-000_-000_-0
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
--- Invoices, dated at the end of the period they cover (the Rechnungsdatum decides the Abrechnungsperiode).
+-- Invoices: without a Leistungszeitraum the Rechnungsdatum decides the Abrechnungsperiode, with one its days in each period (Regel 1).
 -- Alpenblick lacks, on purpose, the chimney sweep and the water of the second half of 2025, so the check for
 -- missing invoices has something to show.
 -- ============================================================================
@@ -223,6 +223,11 @@ WHERE id = 'c0000002-2025-4000-8000-000000000029';
 UPDATE invoices SET service_period_start = make_date(EXTRACT(YEAR FROM invoice_date)::int, EXTRACT(MONTH FROM invoice_date)::int - 2, 1), service_period_end = invoice_date
 WHERE id IN ('c0000002-2024-4000-8000-000000000003', 'c0000002-2024-4000-8000-000000000007', 'c0000002-2024-4000-8000-000000000010',
 	'c0000002-2025-4000-8000-000000000018', 'c0000002-2025-4000-8000-000000000022', 'c0000002-2025-4000-8000-000000000025');
+
+-- A garden subscription paid in advance across the year end: its Leistungszeitraum splits it by days, 368.00 into 2024 and
+-- 362.00 into 2025 (#707)
+INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, description, category_id, distribution_key_id, amount, is_valid_utility_cost, invoice_date, due_date, service_period_start, service_period_end) VALUES
+('c0000002-2024-4000-8000-000000000016', '22222222-2222-2222-2222-222222222222', 'SR-2024-016', 'Grünwerk Gartenbau GmbH', 'Gartenpflege Jahresabonnement 07/2024–06/2025', (SELECT id FROM categories WHERE name_de = 'Gartenpflege'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 730.00, true, '2024-07-01', '2024-07-31', '2024-07-01', '2025-06-30') ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- Company for the statements and their QR-bill (QR-IBAN from the SIX examples)
