@@ -1648,6 +1648,7 @@
 	"settings_account_holder_help": "Der Kontoinhaber ist die Person oder Firma, der das Konto der IBAN gehört. Die QR-Rechnung nennt ihn unter «Konto / Zahlbar an»; der Kopf von Abrechnungen und Mahnungen nennt weiter den Absender. Entfernen Sie das Häkchen, wenn das Konto jemand anderem gehört oder unter einer anderen Adresse geführt wird. Mit einer IBAN braucht es dann Name, PLZ und Ort des Kontoinhabers.",
 	"settings_account_holder": "Kontoinhaber",
 	"settings_account_holder_name": "Name des Kontoinhabers",
+	"settings_account_holder_name_example": "Anna Keller",
 	"backend_account_holder_missing": "Mit einer IBAN braucht es den Kontoinhaber. Erfassen Sie Name, PLZ und Ort des Kontoinhabers oder setzen Sie das Häkchen bei «Kontoinhaber ist der Absender».",
 	"settings_company_name": "Firmenname",
 	"settings_company_name_example": "Muster Immobilien AG",

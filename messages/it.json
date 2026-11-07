@@ -1648,6 +1648,7 @@
 	"settings_account_holder_help": "Il titolare del conto è la persona o l’azienda a cui appartiene il conto dell’IBAN. La QR-fattura lo indica sotto «Conto / Pagabile a»; l’intestazione dei conteggi e dei solleciti continua a indicare il mittente. Tolga la spunta se il conto appartiene a un’altra persona o è registrato a un altro indirizzo. Con un IBAN servono allora il nome, il NPA e la località del titolare del conto.",
 	"settings_account_holder": "Titolare del conto",
 	"settings_account_holder_name": "Nome del titolare del conto",
+	"settings_account_holder_name_example": "Anna Bernasconi",
 	"backend_account_holder_missing": "Con un IBAN serve il titolare del conto. Registri il nome, il NPA e la località del titolare del conto, oppure metta la spunta su «Il titolare del conto è il mittente».",
 	"settings_company_name": "Nome dell’azienda",
 	"settings_company_name_example": "Immobili Modello SA",

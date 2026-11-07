@@ -10,6 +10,7 @@
 		help,
 		example,
 		invalidBy,
+		optional,
 		type = 'text'
 	}: {
 		name: string;
@@ -19,6 +20,7 @@
 		help?: string;
 		example?: string;
 		invalidBy?: string; // see Field
+		optional?: boolean;
 		type?: 'text' | 'decimal' | 'number' | 'tel' | 'email'; // decimal: a text field with the decimal keypad, takes a comma; number: whole numbers; tel, email: their keypads (#465)
 	} = $props();
 </script>
@@ -34,5 +36,6 @@
 	{help}
 	{example}
 	{invalidBy}
+	{optional}
 	testid="setting-{name}"
 />

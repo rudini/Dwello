@@ -1648,6 +1648,7 @@
 	"settings_account_holder_help": "Le titulaire du compte est la personne ou l’entreprise à qui appartient le compte de l’IBAN. La QR-facture l’indique sous « Compte / Payable à » ; l’en-tête des décomptes et des rappels continue d’indiquer l’expéditeur. Décochez la case si le compte appartient à quelqu’un d’autre ou est tenu à une autre adresse. Avec un IBAN, le nom, le NPA et la localité du titulaire du compte sont alors nécessaires.",
 	"settings_account_holder": "Titulaire du compte",
 	"settings_account_holder_name": "Nom du titulaire du compte",
+	"settings_account_holder_name_example": "Anne Rochat",
 	"backend_account_holder_missing": "Avec un IBAN, le titulaire du compte est nécessaire. Saisissez le nom, le NPA et la localité du titulaire du compte, ou cochez « Le titulaire du compte est l’expéditeur ».",
 	"settings_company_name": "Nom de l’entreprise",
 	"settings_company_name_example": "Immobilier Modèle SA",

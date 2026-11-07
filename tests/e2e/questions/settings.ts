@@ -12,3 +12,5 @@ export const exportHelp = Accessible.descriptionOf(exportAllDataButton);
 export const settingCount = (name: string) => Count.of(settingField(name));
 /** #1166: whether «Kontoinhaber ist der Absender» is ticked */
 export const holderIsSender = Checked.of(holderIsSenderBox);
+/** #1175: the field's name as a screen reader announces it, its label with «(optional)» */
+export const settingName = (name: string) => Accessible.nameOf(settingField(name));

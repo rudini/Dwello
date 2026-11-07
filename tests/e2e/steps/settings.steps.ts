@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
+import { holderIsSender, settingCount, settingHelp, settingInvalid, settingName, settingsSaved, storedSetting } from '../questions/settings';
 import { giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -152,4 +152,13 @@ Then('kennzeichnen die Einstellungen Name, PLZ und Ort des Kontoinhabers als feh
 Then('fragen die Einstellungen nicht nach einem eigenen Kontoinhaber', async ({ verwalter }) => {
 	for (const field of ['accountHolderName', 'accountHolderAddress', 'accountHolderPostalCode', 'accountHolderCity'])
 		await verwalter.sees(settingCount(field)).toBe(0);
+});
+
+// #1175: clears «Kontoinhaber ist der Absender» without saving
+When('der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber angibt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(giveOwnHolder);
+});
+
+Then('heisst das Feld {string} {string}', async ({ verwalter }, label: string, name: string) => {
+	await verwalter.sees(settingName(FIELDS[label])).toBe(name);
 });

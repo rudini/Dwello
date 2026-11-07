@@ -1648,6 +1648,7 @@
 	"settings_account_holder_help": "The account holder is the person or company the IBAN’s account belongs to. The QR-bill names them under «Account / Payable to»; the header of statements and reminders still names the sender. Untick the box if the account belongs to someone else or is held at another address. With an IBAN, the account holder’s name, postcode and town are then required.",
 	"settings_account_holder": "Account holder",
 	"settings_account_holder_name": "Account holder’s name",
+	"settings_account_holder_name_example": "Anna Meier",
 	"backend_account_holder_missing": "With an IBAN, the account holder is required. Enter the account holder’s name, postcode and town, or tick «The account holder is the sender».",
 	"settings_company_name": "Company name",
 	"settings_company_name_example": "Sample Properties AG",

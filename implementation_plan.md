@@ -9,3 +9,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
+## Session: #1175 examples at the Kontoinhaber fields
+
+- [x] Scenario «Die Felder des Kontoinhabers zeigen Beispiele» (`settings.feature`), seen red at the examples and at «(optional)»
+- [x] Examples at name (new `settings_account_holder_name_example`, four languages), street, PLZ, Ort; street marked optional (`SettingField` passes `optional`)
+- [x] Checks: lint, check, fitness, type-check, affected unit tests, a11y and language looks of `account-holder`, Prettier on added files
+- [ ] Slice review (`code-reviewer`)
+- [ ] Persona Marco (P-3 of #1166) on the Kontoinhaber fields
+- [ ] Archive session, PR (`Fixes #1175`)
