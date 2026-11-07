@@ -140,6 +140,19 @@ describe('Suche der Gebäudeliste', () => {
 	});
 });
 
+// persona Sven S-4 (#662): a year without invoices is reached with one choice now, and the way back is the same
+describe('Rechnungsliste eines Jahres ohne Rechnungen', () => {
+	it('bietet im Hinweis an, die Filter zurückzusetzen', () => {
+		goTo('/invoices?year=2024');
+		show(InvoicesPage, { data: { ...empty, invoices: [], years: ['2024'] } } as never);
+
+		const reset = [...document.querySelectorAll('a')].filter(
+			(link) => link.textContent!.trim() === 'Filter zurücksetzen'
+		);
+		expect(reset.map((link) => link.getAttribute('href'))).toEqual(['/invoices']);
+	});
+});
+
 describe('Filter der Wohnungsliste', () => {
 	it('zeigt nach «Filter zurücksetzen» wieder alle Status', () => {
 		goTo('/apartments?status=reserved');
@@ -151,7 +164,7 @@ describe('Filter der Wohnungsliste', () => {
 	});
 });
 
-// #662: a filter's choice applies at once with what the form holds, the typed text too; the focus stays in the filter,
+// #662: a filter's choice applies at once with the other choices and the search already made; the focus stays in the filter,
 // and each choice replaces the address, so «Zurück» leads to the page before the filtering (persona Sven S-2)
 describe.each([
 	{ list: lists[0], select: 'apartments-status-filter', choice: 'status=vacant' },
@@ -167,19 +180,34 @@ describe.each([
 		choice: 'building=b1'
 	}
 ])('Wahl im Filter der Liste $list.path', ({ list, select, choice }) => {
-	it('zeigt die Liste sofort mit dem eingegebenen Text, ohne «Suchen»', () => {
-		goTo(list.path);
+	// #662 (product owner after persona Helga H-1): a text not searched yet is not sent and gives way to the search
+	it('zeigt die Liste sofort mit der Wahl und der gesuchten Suche, ohne «Suchen»', () => {
+		history.replaceState(null, '', `${list.path}?search=Linde`);
+		goTo(`${list.path}?search=Linde`);
 		show(list.page as never, { data: { ...empty, ...list.data } });
 		fireEvent(byTestId<HTMLInputElement>(list.search)!, 'input', 'Huber');
 		vi.mocked(goto).mockClear();
 
 		fireEvent(byTestId<HTMLSelectElement>(select)!, 'change', choice.split('=')[1]);
 
-		expect(goto).toHaveBeenCalledWith(`${list.path}?search=Huber&${choice}`, {
+		expect(goto).toHaveBeenCalledWith(`${list.path}?search=Linde&${choice}`, {
 			keepFocus: true,
 			noScroll: true,
 			replaceState: true
 		});
+		expect(valueOf(list.search)).toBe('Linde');
+	});
+
+	// persona Helga H-2: a choice made without focusing the select (a mouse in some browsers) must not let the
+	// layout move the focus to the result, which scrolled the filters out of view
+	it('gibt dem Filter den Fokus, auch wenn er ihn bei der Wahl nicht hatte', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		(document.activeElement as HTMLElement | null)?.blur();
+
+		fireEvent(byTestId<HTMLSelectElement>(select)!, 'change', choice.split('=')[1]);
+
+		expect(document.activeElement).toBe(byTestId(select));
 	});
 
 	// a new form for the new address would take the focus away from the filter (#677)

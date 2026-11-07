@@ -39,8 +39,10 @@ export const chooseVacantApartments = Select.option('vacant').from(apartmentStat
 
 export const searchApartments = (term: string, buildingId = ''): Activity => (actor) =>
 	actor.attemptsTo(
-		Enter.theValue(term).into(apartmentSearchInput),
+		// the choice first: it applies at once and drops a text not searched yet (#662)
 		Select.option(buildingId).from(apartmentBuildingFilter),
+		Wait.forUrl((url) => (url.searchParams.get('building') ?? '') === buildingId),
+		Enter.theValue(term).into(apartmentSearchInput),
 		Click.on(apartmentSearchButton),
 		Wait.forUrl((url) => url.searchParams.get('search') === term)
 	);

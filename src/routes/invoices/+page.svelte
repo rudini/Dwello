@@ -101,6 +101,12 @@
 					actionLabel={m.dashboard_add_invoice()}
 					actionHref="/invoices/new"
 				/>
+				<!-- persona Sven S-4 (#662): the way back from a year chosen in the filter, as for the other filters -->
+				<div class="flex justify-center pb-8">
+					<Button variant="ghost" icon="close" href="/invoices" testid="invoices-show-all"
+						>{m.buildings_reset_filters()}</Button
+					>
+				</div>
 			{:else if filtered}
 				<EmptyState
 					illustration="no-results"

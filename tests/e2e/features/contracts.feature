@@ -25,14 +25,17 @@ Funktionalität: Mietvertragsliste
     Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "Laufend"
     Und die Mietvertragsliste enthält genau 1 Mietvertrag
 
-  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
-  Szenario: Eine Wahl im Filter zeigt die Mietverträge sofort
+  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen»; ein nicht gesuchter Text gilt nicht und weicht der Suche (#680)
+  Szenario: Eine Wahl im Filter zeigt die Mietverträge sofort, ohne den nicht gesuchten Text
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.02" von "2014-01-01" bis "2019-12-31" für "900" Franken
-    Wenn der Liegenschaftsverwalter "Anna Keller" in die Suche eingibt
+    Wenn der Liegenschaftsverwalter nach dem Mieter "Bruno Meier" sucht
+    Und der Liegenschaftsverwalter "Anna Keller" in die Suche eingibt
     Und der Liegenschaftsverwalter im Filter "Vertragsstatus" "Beendete Mietverträge" wählt
-    Dann steht über der Liste "Keine Mietverträge gefunden"
+    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Bruno Meier" mit dem Status "Beendet"
+    Und die Mietvertragsliste enthält genau 1 Mietvertrag
+    Und zeigt die Suche "Bruno Meier"
     Und bleibt der Fokus im Filter "Vertragsstatus"
 
   # #682: wie die Wohnungsliste (#670) nennt die Überschrift die gezeigten Mietverträge und die Seite

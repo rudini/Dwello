@@ -20,12 +20,15 @@ Funktionalität: Rechnungsliste
     Dann sieht der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "CHF 450.00" in der Kategorie "Hauswart"
     Und die Rechnungsliste enthält genau 1 Rechnung
 
-  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
-  Szenario: Eine Wahl im Filter zeigt die Rechnungen sofort
+  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen»; ein nicht gesuchter Text gilt nicht und weicht der Suche (#680)
+  Szenario: Eine Wahl im Filter zeigt die Rechnungen sofort, ohne den nicht gesuchten Text
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
-    Wenn der Liegenschaftsverwalter "Hauswart Huber" in die Suche eingibt
+    Wenn der Liegenschaftsverwalter nach dem Rechnungssteller "Dachdecker Meier" sucht
+    Und der Liegenschaftsverwalter "Hauswart Huber" in die Suche eingibt
     Und der Liegenschaftsverwalter im Filter "Umlagefähigkeit" "Nicht umlagefähig" wählt
-    Dann steht über der Liste "Keine Rechnungen gefunden"
+    Dann sieht der Liegenschaftsverwalter die Rechnung von "Dachdecker Meier" über "CHF 3’200.00" in der Kategorie "Reparaturen"
+    Und die Rechnungsliste enthält genau 1 Rechnung
+    Und zeigt die Suche "Dachdecker Meier"
     Und bleibt der Fokus im Filter "Umlagefähigkeit"
 
   Szenario: Rechnungen eines Jahres anzeigen
