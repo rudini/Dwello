@@ -18,6 +18,10 @@ export const rowInPeriod = (supplier: string) =>
 	target(`Teil in der Periode der Rechnung von ${supplier}`, (page) =>
 		invoiceRow(supplier).locate(page).getByTestId('invoice-in-period')
 	);
+export const rowUtilityCost = (supplier: string) =>
+	target(`Umlagefähigkeit der Rechnung von ${supplier}`, (page) =>
+		invoiceRow(supplier).locate(page).getByTestId('invoice-list-utility-cost')
+	);
 export const invoiceRows = target('Rechnungen in der Liste', (page) => page.getByTestId(/^invoice-row-/));
 export const invoiceSearchInput = target('Suche Rechnungen', (page) => page.getByTestId('invoice-search-input'));
 export const invoiceSearchButton = target('Suchen', (page) => page.getByTestId('invoice-search-submit'));
