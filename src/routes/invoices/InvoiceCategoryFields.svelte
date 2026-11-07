@@ -5,6 +5,7 @@
 	import type { Category, LatestKey } from '$lib/types';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import Field from '$lib/ui/Field.svelte';
+	import { reasonOf } from '../config/categories/CategoryReason.svelte';
 	import { controlClass } from '$lib/ui/field';
 	import Select from '$lib/ui/Select.svelte';
 
@@ -130,11 +131,12 @@
 />
 
 {#if nonAllocable}
-	<!-- Neutral: a non-allocable category is a correct choice, not a warning (#687) -->
+	<!-- Neutral: a non-allocable category is a correct choice, not a warning (#687); it names the category's reason,
+		the one of the category list, else a general sentence (#1195) -->
 	<div data-testid="invoice-category-warning">
 		<p class="font-semibold text-ink">{m.invoices_category_not_allocable()}</p>
 		<p id="{idPrefix}invoice-category-warning-text" class="text-ink-muted" data-testid="invoice-category-warning-text">
-			{m.invoices_category_not_allocable_text()}
+			{reasonOf(selectedCategory) ?? m.invoices_category_not_allocable_text()}
 		</p>
 	</div>
 {/if}

@@ -26,7 +26,6 @@ Funktionalität: Neue Rechnung erfassen
     Und warnt die Rechnung "Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung."
 
   # #1195: der Hinweis nennt die Begründung der Kategorie, wie die Liste der Kategorien
-  @wip
   Szenario: Nicht umlagefähige Kategorie wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
     Dann ist die Rechnung nicht als umlagefähig markiert
@@ -34,12 +33,11 @@ Funktionalität: Neue Rechnung erfassen
     Und erklärt der Hinweis zur Kategorie "Der Vermieter muss die Liegenschaft so erhalten, dass man sie wie vereinbart nutzen kann (Art. 256 Absatz 1 Obligationenrecht, OR). Reparaturen sind in der Nettomiete schon enthalten, also nicht umlagefähig."
 
   # #1195: eine eigene Kategorie hat keine feste Begründung, der allgemeine Satz bleibt
-  @wip
   Szenario: Nicht umlagefähige eigene Kategorie wählen
     Angenommen es gibt die nicht umlagefähige Kategorie "Dachsanierung"
     Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
     Wenn der Liegenschaftsverwalter die Kategorie "Dachsanierung" wählt
-    Dann erklärt der Hinweis zur Kategorie "Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden."
+    Dann erklärt der Hinweis zur Kategorie "Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter."
 
   # #687: eine nicht umlagefähige Kategorie ist richtig gewählt, also keine Warnung
   Szenario: Nicht umlagefähige Kategorie ohne Warnung wählen

@@ -843,9 +843,9 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
-		// Versicherungsprämien der Heizung sind umlagefähig (Art. 5 Abs. 2 Bst. h VMWG), nur die Gebäudeversicherung nicht (#185)
+		// eine eigene Kategorie hat keine Begründung: der allgemeine Satz nennt keine Beispiele (#1195, Fachreview V-1)
 		expect(byTestId('invoice-category-warning')!.textContent).toContain(
-			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+			'Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter.'
 		);
 	});
 
@@ -860,9 +860,19 @@ describe('Rechnung erfassen', () => {
 		const note = byTestId('invoice-category-warning')!;
 		expect(note.textContent).toContain('Nicht umlagefähige Kategorie');
 		expect(note.querySelector('#invoice-category-warning-text')!.textContent).toBe(
-			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+			'Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter.'
 		);
 		expect(cautionIn(note)).toBe(false);
+	});
+
+	it('nennt im Hinweis die Begründung einer vordefinierten Kategorie statt des allgemeinen Satzes (#1195)', async () => {
+		const repairs = { ...categories[1], id: 'c3', key: 'Repairs', predefined: true };
+		show(NewInvoicePage, { data: { ...data(false), categories: [...categories, repairs] } } as never);
+
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c3');
+		await settle();
+
+		expect(byTestId('invoice-category-warning-text')!.textContent!.trim()).toBe(m.categories_reason_repairs());
 	});
 
 	it('sagt bei „Umlagefähig“, was das Kästchen gerade bewirkt (Persona Marco)', async () => {
