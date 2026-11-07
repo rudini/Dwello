@@ -1481,6 +1481,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1186 Statement list names the chosen status
+
+- [x] `@wip` scenarios (statements.feature) at 390 × 844 and 960 × 600, seen red at the missing line; DOM tests seen red
+- [x] `fach-reviewer` `docs/reviews/1186-fachreview-1.md`: the line under the tiles, the list headings with a status, the empty result, in de/fr/it/en (V-1, V-2 fixed; V-3 rejected: the empty list after a failed load is older)
+- [x] Line under the tiles, headings and empty text (`src/routes/statements/+page.svelte`, `messages/*.json`); screen state `statements status-empty`
+- [x] code-reviewer `docs/reviews/1186-review-1.md`: C-2, C-3 Minor fixed (1ef137b); C-1 Minor stays (an empty page past the last)
+- [x] Persona Marco `docs/design/personas/marco-1186.md`: no Blocker or Major; P-1 to P-3 Minors stay (P-1: the unsent building choice, #662)
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, statements E2E with its axe/language rows
+- [x] Archive the session; PR `Fixes #1186`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
