@@ -1409,3 +1409,12 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Checks: lint, check, fitness, vitest (layout-hydrated, statement-pages), E2E statements.feature, axe and language rows `statements`
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #1163 E2E finds the own contract on any list page
+
+- [x] Read #1163; reproduced with a temporary precondition of 13 later contracts (timeout at «… ansieht», as in the issue), removed again
+- [x] `viewContract`/`editContract` search the list by the tenant's suffixed name when the open page lacks the row; only then, so a page that shows it keeps its address and history (an unconditional search broke contract-edit «Nach dem Verwerfen führt «Zurück» weiter zurück») (67c42ed)
+- [x] No scenario: test-only change; no persona: nothing a screen shows changed
+- [x] code-reviewer round 1 (`docs/reviews/1163-review-1.md`): no findings; the full parallel run is the pull request's CI
+- [x] Checks: lint, check, E2E chromium + api contracts, contract-new, contract-edit (139 passed)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive

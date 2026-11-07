@@ -1,7 +1,10 @@
 import type { Activity } from '../screenplay/actor';
 import { Click, Enter, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Visibility } from '../screenplay/questions';
 import {
 	contractBuildingFilter,
+	contractRow,
+	contractRows,
 	contractSearchButton,
 	contractSearchInput,
 	contractStatusFilter,
@@ -37,5 +40,15 @@ export const filterContracts =
 	};
 
 export const startNewContract = Click.on(newContractButton);
-export const viewContract = (tenantName: string) => Click.on(viewContractButton(tenantName));
-export const editContract = (tenantName: string) => Click.on(editContractButton(tenantName));
+// The list pages 12 contracts, newest start first: a scenario's own contract with an early start moves to page 2 once
+// parallel scenarios created later ones, so a row the open page lacks is found by the tenant's suffixed name (#1163);
+// only then, so a page that shows it keeps its address and history; the list has rows once it rendered (the own
+// contract exists), so the check waits for them first (Fallback review, Medium)
+const findContract = (tenantName: string): Activity => async (actor) => {
+	await actor.attemptsTo(Wait.until(contractRows));
+	if (!(await actor.answer(Visibility.of(contractRow(tenantName))))) await actor.attemptsTo(searchContracts(tenantName));
+};
+export const viewContract = (tenantName: string): Activity => (actor) =>
+	actor.attemptsTo(findContract(tenantName), Click.on(viewContractButton(tenantName)));
+export const editContract = (tenantName: string): Activity => (actor) =>
+	actor.attemptsTo(findContract(tenantName), Click.on(editContractButton(tenantName)));
