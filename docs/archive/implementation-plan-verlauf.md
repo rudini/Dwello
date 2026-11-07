@@ -1431,3 +1431,12 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] closing code-reviewer round: `docs/reviews/demo-tag-review-2.md`
 - [x] PR: pushed after this archive
 - [x] Fallback review on #1190 (build from the tag's commit, `reset --keep`): closing round `docs/reviews/demo-tag-review-3.md`
+## Session: #1172 UI screenshot job, the report page (part)
+
+- [x] Read #1172; reproduced locally with a worktree of main as UI_BASE_DIR: only `/reports/[buildingId]` came out as a new page
+- [x] Cause: no record and no period for `/reports` in `screenshots.spec.ts` (404 on both branches); it now opens the seeded Kostenabstimmung of Seeblick 2025 (194fbb3); `Refs #1172`
+- [x] The other pages differ only at a few corners of rounded cards (276–1116 pixels on PR #1187's images) and do not reproduce locally; findings and next steps in #1172, which stays open
+- [x] code-reviewer round 1 (`docs/reviews/1172-review-1.md`): no findings
+- [x] No scenario: CI tooling only; checks: lint, Prettier, the screenshot run locally (3 passed)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
