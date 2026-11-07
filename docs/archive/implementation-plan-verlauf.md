@@ -1474,3 +1474,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1181 Tell apart two uploads of the same file in one minute
+
+- [x] Every point of #1181 confirmed on main (75b78a9); decision written into the issue: a running number «(n von m)» after the title for uploads of one tenant with the same title, in upload order (not seconds: scenarios pin «um hh:mm»)
+- [x] Two `@wip` scenarios (tenant-documents.feature, documents.feature), seen red at the missing number; first upload seeded, two UI uploads in a row raced
+- [x] `numberedUploads` in `src/lib/document-status.ts`, used by the tenant's documents and «Dokumente»; DOM tests seen red (the tenant guard by taking it out) (8ab223a)
+- [x] code-reviewer `docs/reviews/1181-review-1.md`: C-2(a) fixed (4353783), C-1 rejected (the decision names the toast after deleting), C-2(b) stays
+- [x] Persona Sven `docs/design/personas/sven-1181.md`: no Blocker or Major; S-2 = C-2(a) fixed; S-1 = C-1, S-3, S-4 stay in the report
+- [x] Closing code-reviewer `docs/reviews/1181-review-2.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1181.md`
+- [x] Archive session; PR `Fixes #1181`: pushed after this archive
