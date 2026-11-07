@@ -141,6 +141,8 @@ jobs:
       - name: Update with a failing migration
         run: tools/fitness/compose-update-check.sh --broken latest
 
+  # The quick checks share one runner (#1240): runners are the bottleneck when many pull requests are open. Each check
+  # runs even after another failed, and the last step names the failed ones in the summary
   static-checks:
     name: Lint and types
     runs-on: ubuntu-latest
@@ -151,7 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # the scenario check diffs against the base branch
+          fetch-depth: 0 # the scenario check, Fallow, fitness, deepcheck and testcheck diff against the base
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -159,14 +161,28 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
+      # tsconfig.json extends .svelte-kit/tsconfig.json: without it Fallow cannot resolve $lib imports and the deepcheck
+      # import graph misses most imports
+      - id: deps
+        run: bunx svelte-kit sync
       # ESLint covers frontend and backend; svelte-check the frontend types, tsc the backend types
-      - run: bun run lint
-      - run: bun run check
-      - run: bun run type-check
+      - name: Lint
+        id: lint
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: bun run lint
+      - name: Frontend types
+        id: check
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: bun run check
+      - name: Backend types
+        id: type-check
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: bun run type-check
         working-directory: backend
       # An installation has applied every migration on the base branch and would not see a change to one (backend/CLAUDE.md)
       - name: Migrations unchanged
-        if: github.event_name == 'pull_request'
+        id: migrations
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' && github.event_name == 'pull_request' }}
         run: |
           changed=$(git diff --name-only --diff-filter=a "origin/${{ github.base_ref }}...HEAD" -- backend/migrations)
           if [ -n "$changed" ]; then
@@ -175,7 +191,8 @@ jobs:
           fi
       # Contributors have no commit hook: CI checks the subjects as .claude/hooks/commit-msg-gate.mjs does (Dependabot's are exempt)
       - name: Commit subjects
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+        id: commit-subjects
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' && github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]' }}
         run: |
           status=0
           while IFS= read -r subject; do
@@ -185,15 +202,55 @@ jobs:
           exit $status
       # New files are Prettier-clean; existing ones are not all, and .prettierignore limits Prettier to src/
       - name: Prettier on new files
-        if: github.event_name == 'pull_request'
+        id: prettier
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' && github.event_name == 'pull_request' }}
         run: git diff --name-only --diff-filter=A -z "origin/${{ github.base_ref }}...HEAD" | xargs -0 -r bunx prettier --check --ignore-unknown
       # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work"); a changed scenario without @wip is approved (Workflow 1)
-      - run: node tools/open-work/check-issues.mjs
+      - name: Open work
+        id: open-work
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: node tools/open-work/check-issues.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BODY: ${{ github.event.pull_request.body }}
           BASE_REF: ${{ github.base_ref }}
+      # Pull requests: changes against the target branch; pushes: changes of the pushed commits; the nightly and manual
+      # runs have no commits to compare
+      - name: Fallow audit
+        id: fallow
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' && (github.event_name == 'pull_request' || github.event_name == 'push') }}
+        run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+      # Architecture fitness functions (docs/architecture/fitness-functions.md): pull requests and main may not make a
+      # measured value worse than tools/fitness/ratchet.json; the nightly run reports the co-change coupling of 6 months
+      - name: Architecture fitness
+        id: fitness
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request) bun tools/fitness/fitness.ts --base "origin/${{ github.base_ref }}" --format github ;;
+            push) bun tools/fitness/fitness.ts --base "${{ github.event.before }}" --format github ;;
+            *) bun tools/fitness/fitness.ts --format github && bun tools/fitness/fitness.ts --cochange --format github ;;
+          esac
+      # New or worsened shallow modules in the changed code (tools/deepcheck), with annotations and a step summary
+      - name: Deep modules
+        id: deepcheck
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' && github.event_name == 'pull_request' }}
+        run: bun run deepcheck:ci -- "origin/${{ github.base_ref }}"
+      # Changed tests that can pass without checking what they claim (tools/testcheck), with annotations
+      - name: Test checks
+        id: testcheck
+        if: ${{ !cancelled() && steps.deps.outcome == 'success' && github.event_name == 'pull_request' }}
+        run: bun run testcheck:ci -- "origin/${{ github.base_ref }}"
+      - name: Failed checks
+        if: failure()
+        env:
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS" | while read -r check; do
+            echo "::error title=Check failed: $check::The step of check $check failed; its log in this job says why."
+            echo "- Check failed: \`$check\`" >> "$GITHUB_STEP_SUMMARY"
+          done
 
   unit-tests:
     name: Unit tests
@@ -349,51 +406,11 @@ jobs:
           done
           if [ "$passed" != "$SHARDS" ]; then echo "::error::$passed of $SHARDS shards passed."; exit 1; fi
 
-  fallow:
-    name: Fallow audit
-    # the nightly and manual runs have no commits to compare
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      # tsconfig.json extends .svelte-kit/tsconfig.json: without it Fallow cannot resolve $lib imports
-      - run: bunx svelte-kit sync
-      - name: Fallow audit
-        # Pull requests: changes against the target branch; pushes: changes of the pushed commits
-        run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
-
-  # Architecture fitness functions (docs/architecture/fitness-functions.md): pull requests and main may not make a
-  # measured value worse than tools/fitness/ratchet.json; the nightly run reports the co-change coupling of 6 months
-  fitness:
-    name: Architecture fitness
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: oven-sh/setup-bun@v2
-      - name: Fitness functions
-        run: |
-          case "${{ github.event_name }}" in
-            pull_request) bun tools/fitness/fitness.ts --base "origin/${{ github.base_ref }}" --format github ;;
-            push) bun tools/fitness/fitness.ts --base "${{ github.event.before }}" --format github ;;
-            *) bun tools/fitness/fitness.ts --format github && bun tools/fitness/fitness.ts --cochange --format github ;;
-          esac
-
   # T1: wall clock of this run from its start to its last result (target 15 min on pull requests and main), and on the
   # nightly run the share of green push runs on main over 7 days; a report, never a failure (one run's time is noisy)
   ci-duration:
     name: CI duration
-    needs: [changes, build, docker, static-checks, unit-tests, e2e-results, fallow, fitness]
+    needs: [changes, build, docker, static-checks, unit-tests, e2e-results]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
@@ -429,42 +446,6 @@ jobs:
       - uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
-
-  # New or worsened shallow modules in the changed code (tools/deepcheck), with annotations and a step summary
-  deepcheck:
-    name: Deep modules
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      # $lib comes from .svelte-kit/tsconfig.json; without it the import graph misses most imports
-      - run: bunx svelte-kit sync
-      - name: Deep-module gate
-        run: bun run deepcheck:ci -- "origin/${{ github.base_ref }}"
-
-  # Changed tests that can pass without checking what they claim (tools/testcheck), with annotations
-  testcheck:
-    name: Test checks
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - name: Test-check gate
-        run: bun run testcheck:ci -- "origin/${{ github.base_ref }}"
 
   ui-screenshots:
     name: UI screenshots
@@ -596,7 +577,7 @@ jobs:
   # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").
   main-status:
     name: Main status
-    needs: [changes, build, docker, static-checks, unit-tests, e2e-tests, e2e-results, fallow, fitness]
+    needs: [changes, build, docker, static-checks, unit-tests, e2e-tests, e2e-results]
     if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:

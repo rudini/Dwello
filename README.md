@@ -165,7 +165,7 @@ deepcheck finds shallow modules (A Philosophy of Software Design, ch. 4): an int
 It is a warning system, not a verdict on design quality.
 
 When it runs:
-- Before every `git commit` and `git push` (Claude Code hook) and in the CI job "Deep modules", on the changed modules only.
+- Before every `git commit` and `git push` (Claude Code hook) and in the CI step "Deep modules" (job "Lint and types"), on the changed modules only.
 - A changed module fails when it is new or got shallower, scores at least 65 and contains a pass-through (a function
   that only forwards its parameters) or classitis (one module cut into tiny files). An exception comment without a
   reason fails too.

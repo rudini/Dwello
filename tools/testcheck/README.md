@@ -54,7 +54,7 @@ Formats: human (default; failures, then `hint:` lines), `--format github` (`::er
 |---|---|---|
 | Claude Code hook `.claude/hooks/testcheck-gate.sh`, `PreToolUse` on Bash (`.claude/settings.json`, timeout 60 s) | before every `git commit` / `git push` (same matching and fail-open policy as `deepcheck-gate.sh`): `check --agent`, on push with `--changed-since` the upstream (else `origin/HEAD`, else `origin/main`); exit 2 with the findings on stderr when the gate fails | yes, the Bash call |
 | `CLAUDE.md` | the commit hook gates every commit; agents run `bun run testcheck:audit` to see findings before committing | — |
-| CI job "Test checks" (`.github/workflows/ci.yml`, pull requests) | `bun run testcheck:ci -- "origin/<base>"`: annotations | yes |
+| CI step "Test checks" of the job "Lint and types" (`.github/workflows/ci.yml`, pull requests) | `bun run testcheck:ci -- "origin/<base>"`: annotations | yes |
 
 Only a gate verdict blocks the hook; a crash, a tool error, or missing `jq` or `node` fail open with a single notice.
 
