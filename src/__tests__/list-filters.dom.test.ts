@@ -17,6 +17,7 @@ import ContractsPage from '../routes/contracts/+page.svelte';
 import InvoicesPage from '../routes/invoices/+page.svelte';
 import StatementsPage from '../routes/statements/+page.svelte';
 import { page } from '$app/stores';
+import { goto } from '$app/navigation';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
 const empty = { total: 0, page: 1, pageSize: 10, buildings: [], categories: [], years: [] };
@@ -139,6 +140,19 @@ describe('Suche der Gebäudeliste', () => {
 	});
 });
 
+// persona Sven S-4 (#662): a year without invoices is reached with one choice now, and the way back is the same
+describe('Rechnungsliste eines Jahres ohne Rechnungen', () => {
+	it('bietet im Hinweis an, die Filter zurückzusetzen', () => {
+		goTo('/invoices?year=2024');
+		show(InvoicesPage, { data: { ...empty, invoices: [], years: ['2024'] } } as never);
+
+		const reset = [...document.querySelectorAll('a')].filter(
+			(link) => link.textContent!.trim() === 'Filter zurücksetzen'
+		);
+		expect(reset.map((link) => link.getAttribute('href'))).toEqual(['/invoices']);
+	});
+});
+
 describe('Filter der Wohnungsliste', () => {
 	it('zeigt nach «Filter zurücksetzen» wieder alle Status', () => {
 		goTo('/apartments?status=reserved');
@@ -147,5 +161,72 @@ describe('Filter der Wohnungsliste', () => {
 		goTo('/apartments');
 
 		expect(byTestId<HTMLSelectElement>('apartments-status-filter')!.value).toBe('');
+	});
+});
+
+// #662: a filter's choice applies at once with the other choices and the search already made; the focus stays in the filter,
+// and each choice replaces the address, so «Zurück» leads to the page before the filtering (persona Sven S-2)
+describe.each([
+	{ list: lists[0], select: 'apartments-status-filter', choice: 'status=vacant' },
+	{ list: lists[2], select: 'tenants-status-filter', choice: 'status=future' },
+	{ list: lists[3], select: 'contract-status-filter', choice: 'status=ended' },
+	{ list: lists[4], select: 'invoice-validity-filter', choice: 'validity=invalid' },
+	{
+		list: {
+			...statements,
+			data: { ...statements.data, buildings: [{ id: 'b1', name: 'Ahornhof' }] }
+		},
+		select: 'statement-building-filter',
+		choice: 'building=b1'
+	}
+])('Wahl im Filter der Liste $list.path', ({ list, select, choice }) => {
+	// #662 (product owner after persona Helga H-1): a text not searched yet is not sent and gives way to the search
+	it('zeigt die Liste sofort mit der Wahl und der gesuchten Suche, ohne «Suchen»', () => {
+		history.replaceState(null, '', `${list.path}?search=Linde`);
+		goTo(`${list.path}?search=Linde`);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		fireEvent(byTestId<HTMLInputElement>(list.search)!, 'input', 'Huber');
+		vi.mocked(goto).mockClear();
+
+		fireEvent(byTestId<HTMLSelectElement>(select)!, 'change', choice.split('=')[1]);
+
+		expect(goto).toHaveBeenCalledWith(`${list.path}?search=Linde&${choice}`, {
+			keepFocus: true,
+			noScroll: true,
+			replaceState: true
+		});
+		expect(valueOf(list.search)).toBe('Linde');
+	});
+
+	// persona Helga H-2: a choice made without focusing the select (a mouse in some browsers) must not let the
+	// layout move the focus to the result, which scrolled the filters out of view
+	it('gibt dem Filter den Fokus, auch wenn er ihn bei der Wahl nicht hatte', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		(document.activeElement as HTMLElement | null)?.blur();
+
+		fireEvent(byTestId<HTMLSelectElement>(select)!, 'change', choice.split('=')[1]);
+
+		expect(document.activeElement).toBe(byTestId(select));
+	});
+
+	// a new form for the new address would take the focus away from the filter (#677)
+	it('behält den Filter mit dem Fokus, wenn die Liste die Wahl zeigt', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		const filter = byTestId<HTMLSelectElement>(select)!;
+
+		goTo(`${list.path}?${choice}`);
+
+		expect(byTestId(select)).toBe(filter);
+	});
+
+	// without the app's navigation «Suchen» sends the form itself
+	it('gibt jedem Feld einen Namen in der Adresse', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		const fields = [...byTestId(list.search)!.closest('form')!.querySelectorAll('input, select')];
+
+		expect(fields.filter((field) => !field.getAttribute('name'))).toEqual([]);
 	});
 });

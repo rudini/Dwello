@@ -20,8 +20,10 @@ export const openNewTenant = Navigate.to('/tenants/new');
 
 export const searchTenant = (name: string, status = ''): Activity => (actor) =>
 	actor.attemptsTo(
-		Enter.theValue(name).into(tenantSearchInput),
+		// the choice first: it applies at once and drops a text not searched yet (#662)
 		Select.option(status).from(tenantStatusFilter),
+		Wait.forUrl((url) => (url.searchParams.get('status') ?? '') === status),
+		Enter.theValue(name).into(tenantSearchInput),
 		Click.on(tenantSearchButton),
 		Wait.forUrl((url) => url.searchParams.get('search') === name)
 	);

@@ -272,6 +272,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'filtered-empty': () => Wait.until(on.emptyHint),
 	'status-empty': () => Wait.until(on.emptyHint),
 	empty: () => Wait.until(on.emptyHint),
+	'empty-year': () => Wait.until(on.emptyHint),
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
 	'login-error': () => Wait.until(on.loginError),
 	'login-not-allowed': () => Wait.until(on.loginError),
@@ -922,14 +923,14 @@ function draftOf(name: string, values: object) {
 	return kept;
 }
 
-// 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts);
+// 'empty', 'empty-year' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts);
 // 'demo' the instance with DEMO=on. Both start only for the features playwright.config.ts names in `usesExtraInstances`
 const EMPTY_INSTANCE = 'http://localhost:3102';
 // The setup (#577) needs no account and no provider: the empty instance has neither and never gets one, so it is
 // looked at there in every state, as is 'ki-model-failed' (its KI stand-in fails the download); 'ki-model-loading' on
 // the fresh installation, whose KI stand-in is still downloading
 const instanceOf = ({ state, path }: Example) =>
-	['empty', 'first-use', 'ki-model-failed'].includes(state) || path === '/setup'
+	['empty', 'empty-year', 'first-use', 'ki-model-failed'].includes(state) || path === '/setup'
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
