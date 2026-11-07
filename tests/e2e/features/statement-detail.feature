@@ -1542,14 +1542,14 @@ Funktionalität: Abrechnungsdetail
   # #690, Punkt 1 (Persona Weber 450): eine Nachzahlung bekommt einen Zahlteil, und der braucht die Firmenadresse; die
   # Detailseite warnt, bevor das PDF abgelehnt wird. Die Einstellungen gelten für alle parallel laufenden Szenarien:
   # die Szenarien ohne Firmenadresse laufen auf einer eigenen Installation
-  @wip @frische-installation
+  @frische-installation
   Szenario: Eine Nachzahlung warnt, wenn dem Zahlteil die Firmenadresse fehlt
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann warnt die Detailseite der Abrechnung "Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen»."
 
-  @wip @frische-installation
+  @frische-installation
   Szenario: Von der Warnung zur fehlenden Firmenadresse zu den Einstellungen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

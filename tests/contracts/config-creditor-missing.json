@@ -1,0 +1,21 @@
+{
+	"data": {
+		"management_fee_pct": "2.5",
+		"default_heating_profile_id": "hp1",
+		"default_distribution_key_id": "dk1",
+		"company_name": "",
+		"company_address": "Bahnhofstrasse 1",
+		"company_postal_code": "8001",
+		"company_city": "",
+		"company_phone": "044 123 45 67",
+		"company_email": "info@muster.ch",
+		"iban": "CH9300762011623852957",
+		"account_holder_name": "",
+		"account_holder_address": "",
+		"account_holder_postal_code": "",
+		"account_holder_city": "",
+		"payment_deadline_days": "45",
+		"reminder_after_days": "10"
+	},
+	"creditorMissing": [{ "code": "IBAN_COMPANY_ADDRESS_MISSING", "params": { "field": "iban", "missing": "company_name,company_city" } }]
+}

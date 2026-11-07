@@ -273,6 +273,7 @@ Funktionalität: Barrierefreiheit
       | config                 | backup-links        |
       | config                 | account-holder      |
       | config                 | account-holder-missing |
+      | config                 | save-refused        |
       | config-backup          | default             |
       | config-backup          | new-code-password   |
       | config-backup          | new-code-password-error |
@@ -346,3 +347,12 @@ Funktionalität: Barrierefreiheit
       | help-public            | default             |
       | privacy-public         | default             |
       | terms-public           | default             |
+
+    # #690: eine IBAN ohne Firmenadresse lehnte jedes PDF mit Zahlteil der parallel laufenden Szenarien ab: auf einer
+    # eigenen Installation
+    # title-format: <Bildschirm> <Zustand>
+    @frische-installation
+    Beispiele:
+      | Bildschirm             | Zustand             |
+      | config                 | creditor-missing    |
+      | statement-detail       | creditor-missing    |

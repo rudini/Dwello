@@ -75,10 +75,26 @@ export type Example = {
 	undeliveredStatements?: string[]; // #736: overdue statements of Hugo, one per look of the feedback state
 };
 
+// #690: on the fresh installation (@frische-installation), an IBAN without Firmenadresse, and on the statement page a
+// Nachzahlung: its PDF would get a Zahlteil
+async function creditorMissingFor(seed: TestData, path: string) {
+	await seed.ibanWithoutCompanyAddress('CH93 0076 2011 6238 5295 7');
+	if (!path.includes('{statement}')) return path;
+	await seed.building('Seeblick', 'Winterthur');
+	await seed.apartment('Seeblick', '1.01', 'vacant');
+	await seed.tenant('Anna');
+	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
+	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
+	await seed.heatingInvoice('Seeblick', '9000.00', 2025);
+	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
+	return path.replace('{statement}', seed.idOf('Abrechnung Anna 2025')!);
+}
+
 /** A screen in a state, with the records it needs */
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
 	const screen = screenList.screens.find((candidate) => candidate.name === name)!;
-	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
+	const path = state === 'creditor-missing' ? await creditorMissingFor(seed, address(screen, state)) : address(screen, state);
+	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, path, state)) };
 	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
 	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');
 	if (state === 'reminder-undelivered') return { ...example, undeliveredStatements: await undeliveredStatements(seed) };

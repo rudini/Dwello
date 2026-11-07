@@ -996,6 +996,20 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('config'), actual)).toEqual([]);
 	});
 
+	// #690: an IBAN stored before #450 without name and town of the Firmenadresse, what it lacks named
+	it('GET /config liefert ohne Firmenadresse der IBAN die Felder von config-creditor-missing.json', async () => {
+		const stored = await db.select().from(configuration).where(inArray(configuration.key, ['iban', 'company_name', 'company_city']));
+		await db.delete(configuration).where(inArray(configuration.key, ['company_name', 'company_city']));
+		await db.insert(configuration).values({ key: 'iban', value: 'CH9300762011623852957' }).onConflictDoNothing();
+		try {
+			const actual = await (await callApi('/api/v1/config')).json();
+			expect(drift(await sample('config-creditor-missing'), actual)).toEqual([]);
+		} finally {
+			await db.delete(configuration).where(inArray(configuration.key, ['iban', 'company_name', 'company_city']));
+			if (stored.length) await db.insert(configuration).values(stored);
+		}
+	});
+
 	// #817: the key itself only in the answer that creates it
 	it('POST und GET /access-keys liefern die Felder von access-key-created.json und access-keys.json', async () => {
 		const created = (await (await sendJson('POST', '/api/v1/access-keys', { name: `Vertrag ${crypto.randomUUID()}` })).json()) as { id: string };

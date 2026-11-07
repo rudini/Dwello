@@ -6,6 +6,7 @@
 import { Elysia, t } from 'elysia';
 import {
 	getAllConfig,
+	creditorMissing,
 	getConfig,
 	setConfig,
 	setMultipleConfig,
@@ -21,7 +22,9 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 		const config = await getAllConfig();
 		return {
 			data: config,
-			keys: Object.keys(CONFIG_KEYS)
+			keys: Object.keys(CONFIG_KEYS),
+			// #690: what the stored IBAN lacks, by the rule of the save; the settings mark it on opening
+			creditorMissing: await creditorMissing({ iban: config.iban ?? '' })
 		};
 	})
 

@@ -28,6 +28,8 @@ export function paymentOf(statement: Payment, today: string): StatementPayment {
 	return {
 		unpaid,
 		claimed: balance > 0 && !unpaid,
+		// #690: as `owed` in pdf.service.ts, an amount claimed and not paid gets a Zahlteil
+		paymentPart: balance > 0 && !unpaid && statement.status !== 'paid',
 		noPayment: paidNothing || unpaid,
 		waived: paidNothing && balance >= 0,
 		// already carried over: a settled Saldo other than 0.00, or a refund settled under #94 (448-3 V-25, 448-4 V-32)

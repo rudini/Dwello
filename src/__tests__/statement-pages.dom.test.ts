@@ -34,7 +34,7 @@ import { statement } from './helpers/statement';
 import type { StatementWithDetails } from '$lib/types';
 
 // the backend's answer for a Saldo that asks no payment (#815, `paymentOf`): its tests are statement-payment.test.ts
-const noPayment = { unpaid: true, claimed: false, noPayment: true };
+const noPayment = { unpaid: true, claimed: false, paymentPart: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
 import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
@@ -1853,6 +1853,37 @@ describe('Abrechnungsdetail', () => {
 			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
 		);
 		expect(byTestId('statement-send-confirm')).not.toBeNull();
+	});
+
+	// #690 (Persona Weber 450): nur wo das PDF oder eine Mahnung einen Zahlteil bekommt, warnt die Seite, dass ihm die
+	// Firmenadresse fehlt, bevor das PDF abgelehnt wird
+	describe('Firmenadresse des Zahlteils', () => {
+		const withoutAddress = (overrides = {}) =>
+			show(StatementPage, {
+				data: { statement: statement(overrides), reminders: [], creditorMissing: true },
+				form: null
+			} as never);
+
+		it('warnt bei einer Nachzahlung, dass dem Zahlteil die Firmenadresse fehlt, und führt zu den Einstellungen', () => {
+			withoutAddress({ status: 'sent' });
+			const warning = byTestId('statement-creditor-missing')!;
+			expect(warning.textContent).toContain(
+				'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
+			);
+			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe('/config');
+		});
+
+		it('warnt nicht, wo das PDF keinen Zahlteil hat', () => {
+			withoutAddress({ paymentPart: false });
+			expect(byTestId('statement-balance')).not.toBeNull();
+			expect(byTestId('statement-creditor-missing')).toBeNull();
+		});
+
+		it('warnt nicht, solange die Firmenadresse vollständig ist', () => {
+			detail();
+			expect(byTestId('statement-balance')).not.toBeNull();
+			expect(byTestId('statement-creditor-missing')).toBeNull();
+		});
 	});
 
 	// Persona W3c Anna P-2: schon auf der Seite des Entwurfs, nicht erst im Dialog; nach dem Versand nicht mehr

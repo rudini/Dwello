@@ -155,6 +155,34 @@ describe('Einstellungen speichern', () => {
 	});
 });
 
+// #690: what an IBAN stored before #450 lacks, by the rule of the save; the settings mark it on opening
+describe('Einstellungen lesen', () => {
+	it('nennt beim Lesen, was der gespeicherten IBAN von der Firmenadresse fehlt', async () => {
+		for (const [key, value] of [['company_name', 'Muster Immobilien AG'], ['company_postal_code', '8001'], ['company_city', 'Zürich']] as const)
+			await setConfig(key, value);
+		await setConfig('iban', 'CH93 0076 2011 6238 5295 7');
+		await db.execute(sql`DELETE FROM configuration WHERE key IN ('company_name', 'company_city')`);
+		const incomplete = (await (await callApi('/api/v1/config')).json()) as { creditorMissing: unknown };
+		await setConfig('company_name', 'Muster Immobilien AG');
+		await setConfig('company_city', 'Zürich');
+		const complete = (await (await callApi('/api/v1/config')).json()) as { creditorMissing: unknown };
+
+		expect(incomplete.creditorMissing).toEqual([
+			{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: 'company_name,company_city' } }
+		]);
+		expect(complete.creditorMissing).toEqual([]);
+	});
+
+	it('nennt ohne IBAN nichts, was fehlt', async () => {
+		await deleteConfig('iban');
+		await deleteConfig('company_name');
+		const config = (await (await callApi('/api/v1/config')).json()) as { creditorMissing: unknown };
+		await setConfig('company_name', 'Muster Immobilien AG');
+
+		expect(config.creditorMissing).toEqual([]);
+	});
+});
+
 // H-28 (#717): the settings form's checks are the backend's; each refused field with its code, all at once, as typed
 describe('Einstellungen prüfen', () => {
 	it('lehnt jedes ungültige Feld mit seinem Code ab und speichert nichts', async () => {

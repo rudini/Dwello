@@ -205,7 +205,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | → `{ data: { <key>: value }, keys: [...] }` (defaults filled in) |
+| GET | `/` | → `{ data: { <key>: value }, keys: [...], creditorMissing: [...] }` (defaults filled in); `creditorMissing`: the refusals a save of the stored IBAN would get now (`IBAN_COMPANY_ADDRESS_MISSING`, `ACCOUNT_HOLDER_MISSING`, each with `params.field` and `params.missing`), empty without an IBAN (#690) |
 | GET | `/:key` | → `{ key, value, type, default }`. 404 unknown key |
 | PUT | `/` | Body: any of the keys above, as typed: the fee may have a comma or «%», the IBAN spaces (stored without); an empty value resets its key to the default. → `{ message, data }`. 400 with the form checks (above), or 400 `IBAN_COMPANY_ADDRESS_MISSING` with `params.field` `iban` and `params.missing` (the keys, comma-separated) when the body has an IBAN and name, postal code or town of the Firmenadresse are missing, as sent, emptied or saved (#450); then nothing is saved or reset. Valid values are written in one transaction, so a failing write saves none (500) |
 | PUT | `/:key` | Body: `{ value }`. → `{ message, key, value }`. 404 unknown key; 400 invalid value, or `IBAN_COMPANY_ADDRESS_MISSING` for an IBAN without name, postal code or town of the Firmenadresse |

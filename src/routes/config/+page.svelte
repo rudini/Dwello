@@ -18,9 +18,10 @@
 
 	const settings = $derived(data.settings);
 	const result = $derived(form as { errors?: Record<string, string>; saved?: boolean } | null);
-	const errors = $derived(result?.errors ?? {});
+	// #690: before a save, what the stored IBAN lacks
+	const errors = $derived(result?.errors ?? data.errors);
 	// empty fields of the Firmenadresse that the IBAN's error names (#450, persona Helga P-2)
-	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? []);
+	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? data.missing);
 	// the Kontoinhaber's (#1166) at the error of his name
 	const namedBy = (field: string) =>
 		missing.includes(field)
@@ -287,9 +288,11 @@
 			distributionKeys={data.distributionKeys}
 		/>
 
-		{#if errors.form}
+		<!-- #690 (persona Helga 450): every refused save says that none of the fields was saved -->
+		{#if result?.errors}
 			<Alert tone="critical" title={m.settings_not_saved()} testid="form-error">
-				<p>{errors.form}</p>
+				{#if errors.form}<p>{errors.form}</p>{/if}
+				<p>{m.settings_not_saved_text()}</p>
 			</Alert>
 		{/if}
 		<LiveRegion shown={saved}>

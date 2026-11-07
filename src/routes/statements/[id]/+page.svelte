@@ -36,6 +36,7 @@
 	import type { ComponentProps } from 'svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
+	import CreditorAddressWarning from '$lib/statement/CreditorAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
 	import CarrySettleDialog from './CarrySettleDialog.svelte';
@@ -59,11 +60,14 @@
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
 			later?: ComponentProps<typeof LaterChanges>['later'] & { splitKeys: SplitKeyHint[] };
+			creditorMissing?: boolean; // #690: the stored IBAN lacks the Firmenadresse
 		};
 		form: ActionData;
 	} = $props();
 
 	const statement = $derived(data.statement);
+	// #690: its PDF or a Mahnung gets a Zahlteil, which the stored IBAN's Firmenadresse lacks
+	const creditorMissing = $derived(data.creditorMissing === true && statement.paymentPart);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
@@ -240,6 +244,7 @@
 
 	<Correction {statement} bind:open={showCorrect} />
 	<OldAddressWarning {statement} testid="statement-old-address" />
+	<CreditorAddressWarning shown={creditorMissing} />
 
 	<!-- a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120) -->
 	{#if data.later}

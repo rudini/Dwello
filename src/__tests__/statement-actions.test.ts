@@ -300,6 +300,28 @@ describe('Abrechnung laden', () => {
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
 	});
 
+	// #690: der Zahlteil braucht die Firmenadresse; die Einstellungen sagen, ob ihr etwas fehlt
+	it('weiss, ob dem Zahlteil die Firmenadresse fehlt', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const missing = (await import('../../tests/contracts/config-creditor-missing.json')).default;
+		const complete = (await import('../../tests/contracts/config.json')).default;
+		const loaded = async (config: object) =>
+			(
+				(await load({
+					params: { id: 's1' },
+					fetch: (async (url: string) => {
+						if (url.endsWith('/statements/s1')) return Response.json(statementJson);
+						if (url.endsWith('/config')) return Response.json(config);
+						return Response.json({ data: [] });
+					}) as typeof globalThis.fetch,
+					url: new URL('http://localhost/statements/s1')
+				} as never)) as { creditorMissing: boolean }
+			).creditorMissing;
+
+		expect([await loaded(missing), await loaded(complete)]).toEqual([true, false]);
+	});
+
 	// Eine Korrespondenzadresse im Ausland nennt ihr Land (#102)
 	it('nennt das Land einer Postadresse im Ausland', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');

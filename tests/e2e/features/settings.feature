@@ -197,7 +197,7 @@ Funktionalität: Einstellungen
   # #690, Punkt 1 (Persona Helga 450): eine IBAN, deren Firmenadresse unvollständig gespeichert ist (vor #450), zeigt
   # die Seite schon beim Öffnen, mit dem Text der abgelehnten Speicherung. Die Einstellungen gelten für alle parallel
   # laufenden Szenarien: das Szenario läuft auf einer eigenen Installation
-  @wip @frische-installation
+  @frische-installation
   Szenario: Eine IBAN ohne Firmenadresse ist schon beim Öffnen gekennzeichnet
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
     Wenn der Liegenschaftsverwalter die Einstellungen erneut öffnet
@@ -206,7 +206,6 @@ Funktionalität: Einstellungen
 
   # #690, Punkt 3 (Persona Helga 450): eine abgelehnte Speicherung speichert nichts, auch nicht die anderen Felder,
   # und die Seite sagt es. Abgelehnt speichert sie nichts: das Szenario braucht die Einstellungen nicht für sich
-  @wip
   Szenario: Eine abgelehnte Speicherung sagt, dass nichts gespeichert wurde
     Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
       | PLZ       | 84 |

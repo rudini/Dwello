@@ -65,16 +65,21 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 
 	const refused = (await saved.json().catch(() => ({}))) as BackendError;
 	if (!refused.causes) return fail(400, { errors: { form: m.settings_save_failed() } as Record<string, string> });
-	// each at the field of its key; the Firmenadresse and the Kontoinhaber an IBAN needs (#450, #1166) marked where empty
-	const causes = refused.causes.map((cause) => ({
+	return fail(400, atFields(refused.causes));
+}
+
+/** Each refusal at the field of its key; the Firmenadresse and the Kontoinhaber an IBAN needs (#450, #1166) marked
+ * where empty: of a refused save, or of the stored IBAN on opening (#690) */
+export function atFields(refusals: NonNullable<BackendError['causes']>) {
+	const causes = refusals.map((cause) => ({
 		...cause,
 		params: { ...cause.params, field: FIELDS[String(cause.params?.field)] ?? 'form' }
 	}));
-	const missing = refused.causes.flatMap((cause) =>
+	const missing = refusals.flatMap((cause) =>
 		String(cause.params?.missing ?? '')
 			.split(',')
 			.filter(Boolean)
 			.map((key) => FIELDS[key])
 	);
-	return fail(400, { errors: refusedFields({ causes }), missing });
+	return { errors: refusedFields({ causes }), missing };
 }

@@ -1658,6 +1658,7 @@
 	"settings_reminder_days_label": "Termine di sollecito (giorni)",
 	"settings_reminder_days_help": "Dopo quanti giorni dalla scadenza del termine di pagamento di un importo dovuto la panoramica propone un sollecito. Da 7 a 60 giorni, valore predefinito: 14 giorni. Il conteggio è scaduto già dal giorno dopo il termine di pagamento, e da allora può inviare un sollecito. Dopo un sollecito, la panoramica propone il successivo appena è scaduto il termine fissato in quel sollecito.",
 	"settings_not_saved": "Le impostazioni non sono state salvate",
+	"settings_not_saved_text": "Nessuna modifica è stata salvata, nemmeno negli altri campi.",
 	"settings_saved": "Impostazioni salvate",
 	"settings_saved_text": "Mittente, spese amministrative, termini e proposte salvati.",
 	"settings_save": "Salvare le impostazioni",

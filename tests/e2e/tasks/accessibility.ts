@@ -66,6 +66,7 @@ import {
 } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
 import { formErrors } from '../targets/form';
+import { creditorWarning } from '../targets/statement-detail';
 import { settingField } from '../targets/settings';
 import { giveOwnHolder, saveSettings } from './settings';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
@@ -302,6 +303,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			saveSettings({ iban: 'CH93 0076 2011 6238 5295 7', accountHolderName: '', accountHolderPostalCode: '', accountHolderCity: '' }),
 			Wait.until(formErrors)
 		),
+	// #690: an IBAN without Firmenadresse (on the fresh installation): the settings mark it, a Nachzahlung warns
+	'creditor-missing': (example) => Wait.until(example.path === '/config' ? formErrors : creditorWarning),
+	// #690: a refused save says that nothing was saved; refused, it writes nothing
+	'save-refused': () => (actor) => actor.attemptsTo(saveSettings({ companyPostalCode: '84' }), Wait.until(formErrors)),
 	'new-code-password': () => (actor) =>
 		actor.attemptsTo(
 			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),
@@ -973,10 +978,10 @@ const leaveSessionFor =
 		if (example.public) await actor.attemptsTo(Cookies.clear);
 	};
 
-/** The language the app and its empty instance show (the cookie the language selection sets) */
+/** The language the app, its empty instance and the fresh installation (#690) show (the cookie the language selection sets) */
 const useLanguage = (language: string) =>
 	Cookies.add(
-		['http://localhost:3100', 'http://localhost:3102'].map((url) => ({ name: 'PARAGLIDE_LOCALE', value: language, url }))
+		['http://localhost:3100', 'http://localhost:3102', FRESH_APP].map((url) => ({ name: 'PARAGLIDE_LOCALE', value: language, url }))
 	);
 
 /** Opens the example's screen in its state for one viewport and colour scheme and notes what `look` finds there,
