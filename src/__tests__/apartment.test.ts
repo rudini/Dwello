@@ -306,7 +306,7 @@ describe('Wohnungsstatus', () => {
 
 	// F-4 (#58): ohne Datum, etwa im Filter, steht der Mietstatus als «Vermietet ab …»
 	it('nennt den Mietstatus relet ohne Datum «Vermietet ab …»', () => {
-		expect(statusLabels.relet).toBe('Vermietet ab …');
+		expect(statusLabels.relet).toBe('Vermietet ab\u00a0…');
 	});
 
 	// P-18 (#145): leer seit dem Tag nach dem Ende des letzten Mietvertrags
