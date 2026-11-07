@@ -22,26 +22,31 @@ describe('Fehlercodes der Formel', () => {
 		expect(parseFormula(' ').errorCodes).toEqual([{ code: 'FORMULA_REQUIRED', params: {} }]);
 	});
 
-	it('nennt die Beispielwohnung, für die die Formel nicht rechnet', () => {
-		const result = validateFormulaForDistribution('{area} / ({rooms} - 2)');
+	// #737 (persona Helga): an error that depends on the values stood once per sample apartment and once more
+	it('nennt eine Formel, die für eine Wohnung keine Zahl ergibt, beim Prüfen nur einmal', () => {
+		const result = validateFormulaForDistribution('{area} / ({units} - 1)');
 
-		expect(result.errors[0]).toBe('Kleine Wohnung (50 m², 2 Zimmer): Die Formel ergibt keine gültige Zahl.');
-		expect(result.errorCodes[0]).toEqual({
-			code: 'FORMULA_SAMPLE_FAILED',
-			params: { sample: 'FORMULA_SAMPLE_SMALL', reason: 'FORMULA_NOT_A_NUMBER' }
-		});
-		expect(result.errorCodes).toHaveLength(result.errors.length);
+		expect(result.errorCodes).toEqual([
+			{ code: 'FORMULA_APARTMENT_FAILED', params: { reason: 'FORMULA_NOT_A_NUMBER' } }
+		]);
+		expect(result.errors).toHaveLength(1);
 	});
 
-	it('nennt einen negativen Anteil', () => {
+	it('nennt einen negativen Anteil nur einmal', () => {
 		const result = validateFormulaForDistribution('{area} - 100');
 
-		expect(result.errors).toContain('Die Formel ergibt für das Beispiel «Kleine Wohnung (50 m², 2 Zimmer)» einen negativen Wert.');
-		expect(result.errorCodes).toContainEqual({
-			code: 'FORMULA_SAMPLE_NEGATIVE',
-			params: { sample: 'FORMULA_SAMPLE_SMALL' }
-		});
-		expect(result.errorCodes).toHaveLength(result.errors.length);
+		expect(result.errorCodes).toEqual([{ code: 'FORMULA_NEGATIVE', params: {} }]);
+		expect(result.errors).toEqual(['Die Formel ergibt einen negativen Wert.']);
+	});
+
+	// #737: saving checked three sample apartments (one with 3.5 rooms), «Formel testen» shows four
+	it('prüft beim Speichern mit den vier Beispielwohnungen von «Formel testen»', () => {
+		const formula = '1 / (({rooms} - 3.5) * ({rooms} - 3.5))';
+
+		expect(validateFormulaForDistribution(formula).errorCodes).toEqual([]);
+		expect(validateFormulaForDistribution('{area} / (({rooms} - 3) * ({rooms} - 3))').errorCodes).toEqual([
+			{ code: 'FORMULA_APARTMENT_FAILED', params: { reason: 'FORMULA_NOT_A_NUMBER' } }
+		]);
 	});
 
 	// #128: the JavaScript engine's English message went into the params and on to the UI
