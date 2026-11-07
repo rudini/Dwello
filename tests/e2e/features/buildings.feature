@@ -49,6 +49,24 @@ Funktionalität: Gebäudeliste
     Wenn der Liegenschaftsverwalter nach "Lindenhof Uster" sucht
     Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
 
+  # #1193 (Marco): die Adresse, wie die Karte sie zeigt, und die Postleitzahl allein finden das Gebäude
+  Szenario: Gebäude nach der ganzen Adresse suchen
+    Angenommen das Gebäude "Seeblick" an der "Seeweg 15" in "6003 Luzern" existiert
+    Wenn der Liegenschaftsverwalter nach "Seeweg 15, 6003 Luzern" sucht
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Seeblick" in der Liste
+    Und die Liste enthält genau 1 Gebäude
+
+  Szenario: Gebäude nach der Postleitzahl suchen
+    Angenommen das Gebäude "Seeblick" an der "Seeweg 15" in "6003 Luzern" existiert
+    Wenn der Liegenschaftsverwalter nach "6003" sucht
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Seeblick" in der Liste
+
+  # #1193: der Ort einer Schweizer Adresse steht mit der Postleitzahl
+  Szenario: Gebäude im Ort nach der Postleitzahl filtern
+    Angenommen das Gebäude "Seeblick" an der "Seeweg 15" in "6003 Luzern" existiert
+    Wenn der Liegenschaftsverwalter die Gebäude nach dem Ort "6003 Luzern" filtert
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Seeblick" in der Liste
+
   Szenario: Gebäude nach Ort filtern
     Wenn der Liegenschaftsverwalter die Gebäude nach dem Ort "Winterthur" filtert
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
