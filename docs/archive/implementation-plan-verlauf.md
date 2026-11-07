@@ -1474,3 +1474,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #1193 building search finds the full address and the postcode
+
+- [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
+- [x] Backend tests (`building-search.pg.test.ts`) and three scenarios in `buildings.feature`, each seen red at its own step; search in name, street, postcode and place, commas separate words, «Ort» in postcode or place (95f8390)
+- [x] code-reviewer round 1 (`docs/reviews/1193-review-1.md`): no findings
+- [x] Persona Marco (`docs/design/personas/marco-1193.md`): task done; Minor P-1 («Ort» has no help text) stays, a new text the issue did not decide
+- [x] Checks: lint, check, fitness, backend type-check, backend search tests, buildings.feature (chromium)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR `Fixes #1193`: pushed after this archive
