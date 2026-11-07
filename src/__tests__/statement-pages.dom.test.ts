@@ -2800,6 +2800,22 @@ describe('Abrechnung bearbeiten', () => {
 		);
 	});
 
+	// #686 (Persona Marco M-1, Weber W-2): where the date is entered, a draft says that sending moves it
+	it('erklärt bei einem Entwurf an der Frist, dass sie ab dem Versand läuft', () => {
+		show(EditStatementPage, {
+			data: { statement: statement({ status: 'draft' }), paymentDeadlineDays: 45 },
+			form: null
+		} as never);
+		const draft = byTestId('payment-deadline-input-help')!.textContent!.replace(/\s+/g, ' ');
+		document.body.innerHTML = '';
+		edit({ status: 'sent' });
+
+		expect(draft).toContain(
+			'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung. Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versand; eine längere Frist bleibt.'
+		);
+		expect(byTestId('payment-deadline-input-help')!.textContent).not.toContain('Versand');
+	});
+
 	// #94 (Persona Marco P-1): ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, also keine Frist
 	it('fragt bei einem Saldo unter CHF 5 nach keiner Frist', () => {
 		edit({ balance: -2.5, ...noPayment });

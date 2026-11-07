@@ -357,6 +357,23 @@ describe('Abrechnung laden', () => {
 		expect([data.statement.id, data.paymentDeadlineDays]).toEqual([statementJson.id, undefined]);
 	});
 
+	// #686 (Persona Marco M-1, Weber W-2): the edit form names the same days at the date
+	it('liest auch für das Bearbeiten die Zahlungsfrist in Tagen aus den Einstellungen', async () => {
+		const { load } = await import('../routes/statements/[id]/edit/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const configJson = (await import('../../tests/contracts/config.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status: 'draft' });
+			if (url.endsWith('/api/v1/config')) return Response.json(configJson);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+			paymentDeadlineDays?: number;
+		};
+		expect(data.paymentDeadlineDays).toBe(45);
+	});
+
 	// The statement carries no tenant address; the send confirmation needs it for a letter
 	it('ergänzt die Postadresse des Mieters aus den Mieterdaten', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');

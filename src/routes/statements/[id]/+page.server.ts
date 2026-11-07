@@ -19,7 +19,7 @@ import {
 } from '$lib/server/statement-actions';
 import { countryName } from '$lib/tenant';
 import { localPath } from '$lib/invoice';
-import { toSettings } from '$lib/server/settings';
+import { paymentDeadlineDays } from '$lib/server/settings';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -30,14 +30,6 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	const { address, postalCode, city, country } = await response.json();
 	const abroad = country && country !== 'CH' && countryName(country);
 	return [address, [postalCode, city].filter(Boolean).join(' '), abroad].filter(Boolean).join(', ');
-}
-
-// #686 O-6: the days sending gives a draft's Zahlungsfrist, said at its date; none when the settings do not load
-async function paymentDeadlineDays(fetch: typeof globalThis.fetch) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
-	if (!response?.ok) return undefined;
-	const days = Number(toSettings((await response.json()).data ?? {}).paymentDeadlineDays);
-	return days > 0 ? days : undefined;
 }
 
 export const load: PageServerLoad = async ({ params, fetch, url }) => {
