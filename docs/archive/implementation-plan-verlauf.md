@@ -1519,3 +1519,10 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga (`docs/design/personas/helga-731.md`): no Blocker or Major; Minors P-1..P-3 stay in the report (P-3 before the change)
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, dashboard E2E with its axe/language rows
 - [x] Archive session; PR `Fixes #731`: pushed after this archive
+## Session: #1240 Bundle the quick CI checks into one job
+
+- [x] Baseline: 12 PR runs of 7.11.2026, 23 jobs each, median queue 9–20 min, max 20–35 min
+- [x] Tests `tools/deepcheck/test/workflows.test.ts`, `tools/testcheck/test/wiring.test.ts` seen red; Fallow, fitness, deepcheck, testcheck as steps of «Lint and types», each after a failed one too, «Failed checks» names them (6d42916)
+- [x] code-reviewer `docs/reviews/i1240-review-1.md`: no Blocker or Major; C-1, C-2 Minor (docs naming the old jobs) fixed
+- [x] Checks: lint, check, fitness, backend type-check, vitest tools/deepcheck/test, tools/testcheck/test, open-work
+- [x] Archive the session; PR `Fixes #1240`: pushed after this archive
