@@ -1474,3 +1474,12 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1182 busy button readable at 150 % zoom
+
+- [x] Checked on main: a busy `Button` drew its variant at 60 % opacity, «Bitte warten …» at 2.7:1 (light) and 3.57:1 (dark)
+- [x] Product owner decision in #1182: the grey of a disabled field (`sunken`, `ink-muted`, `line-strong`), no opacity, no hover, cursor `progress`
+- [x] Scenario «Während des Hochladens ist «Dokument hochladen» gut lesbar und sieht gesperrt aus» (hell, dunkel) seen red at both steps; DOM test for all five variants seen red; busy style in `Button.svelte` (a675d40)
+- [x] code-reviewer `docs/reviews/busy-button-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-busy-button.md`, 150 % zoom): readable at 7.8:1 / 7.6:1; Minors P-1, P-2 (busy looks pressable, next to a faded «Abbrechen») are #1209
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1182.md`
+- [x] Archive session; PR `Fixes #1182`: pushed after this archive
