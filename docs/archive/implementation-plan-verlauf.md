@@ -1474,3 +1474,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1197 one advice after a failed agreements retry
+
+- [x] Checked on main: after «Weiter» and a failed retry the alert says «in einigen Minuten», the note «Wählen Sie «Erneut versuchen»»; no open issue decides it
+- [x] Decided (product owner) in #1197: the note says only «Gelingt die Prüfung, geht es weiter.» after a failed retry
+- [x] Scenario and DOM test seen red; new text in de/fr/it/en; screen row `agreements-wait-retry-failed` (a11y, languages) (cea1e11)
+- [x] code-reviewer `docs/reviews/1197-review-1.md`: no findings
+- [x] Persona Helga `docs/design/personas/helga-1197.md`: P-1 Major (after «Weiter» the step seemed to do nothing, H-1 of #688 met in this task); fixed: the focus goes to «Erneut versuchen», DOM test and scenario seen red (ad1f192)
+- [x] code-reviewer closing round `docs/reviews/1197-review-2.md`: no findings; Helga round 2 `docs/design/personas/helga-1197-2.md`: P-1 fixed, no findings
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1197.md`
+- [x] Archive the session; PR pushed after this archive
