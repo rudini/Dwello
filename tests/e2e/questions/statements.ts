@@ -9,6 +9,7 @@ import {
 	statementRowForYear,
 	statementRows,
 	statementsEmptyNotice,
+	statusFilterResult,
 	statementsScope,
 	statusCount,
 	statusFilter
@@ -58,3 +59,7 @@ export const statusFilterText = (status: string) => Text.of(statusFilter(status)
 // #1162: after filtering, the chosen tile stays in the window and keeps the focus
 export const statusFilterShareInWindow = (status: string) => ShareInViewport.of(statusFilter(status));
 export const focusedElement = FocusedElement;
+// #1186: what the sentence under the tiles and the empty list say
+export const statusFilterResultText = Text.of(statusFilterResult);
+export const statusFilterResultShareInWindow = ShareInViewport.of(statusFilterResult);
+export const emptyListText = Text.of(statementsEmptyNotice);
