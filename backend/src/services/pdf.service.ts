@@ -1020,14 +1020,17 @@ function costTable(page: Page, y: number) {
 	const totals = totalRows(data, t) * (doc.heightOfString(t.subtotal) + 8) + feeHeight;
 	const note = sharesNote(data, t);
 	const closing = totals + 4 + doc.font(FONT.regular).fontSize(7.5).heightOfString(note, { width: PAGE.right - PAGE.left });
-	let top = header(room(doc, heading(doc, `${t.costBreakdown} (CHF)`, y, 90), 60));
-	data.lineItems.forEach((item, i) => {
+	const rows = data.lineItems.map((item) => {
 		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
 		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
-		const cells = [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)];
-		const parts = partLines(item, t);
+		return { cells: [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)], parts: partLines(item, t) };
+	});
+	// a single position is also the last: the heading and the table header go with it and the totals (#685, C-1)
+	const alone = rows.length === 1 ? positionHeight(doc, rows[0].cells, rows[0].parts) + closing : 0;
+	let top = header(room(doc, heading(doc, `${t.costBreakdown} (CHF)`, y, 90 + alone), 60));
+	rows.forEach(({ cells, parts }, i) => {
 		// the invoices stay on the page of their position (#226); the last position goes with the totals (#685)
-		const last = i === data.lineItems.length - 1;
+		const last = i === rows.length - 1;
 		if (parts.length || last) top = room(doc, top, positionHeight(doc, cells, parts) + (last ? closing : 0), header);
 		top = row(doc, cells, top, { header });
 		top = partsBelow(doc, parts, top);

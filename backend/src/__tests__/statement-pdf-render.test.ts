@@ -1142,4 +1142,14 @@ describe('Seitenwechsel vor den Summen im PDF', () => {
 		}
 		expect(moved.length).toBeGreaterThan(0);
 	});
+
+	// Code-Review 685-1 C-1: a single position is also the last; the heading and the table header went alone to the
+	// foot of page 1 (a long category makes the position tall)
+	it('nimmt bei einer einzigen Position die Überschrift und den Tabellenkopf mit auf die nächste Seite', async () => {
+		const tall = { ...refund.lineItems[0], category: `Hauswart${' Treppenhaus'.repeat(36)}` };
+		const { pageTexts } = await textOf({ ...due, lineItems: [tall] });
+		const pageOf = (text: string) => pageTexts.findIndex((page) => page.includes(text));
+
+		expect([pageOf('Kostenübersicht (CHF)'), pageOf('Hauswart')]).toEqual([pageOf('Zwischensumme'), pageOf('Zwischensumme')]);
+	});
 });
