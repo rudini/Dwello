@@ -145,7 +145,7 @@
 					<dt class="text-ink-muted">{m.statements_time_share()}</dt>
 					<dd class="whitespace-nowrap text-right text-ink">{timeShare(item)}</dd>
 					<dt class="text-ink-muted">{m.statements_share()}</dt>
-					<dd class="whitespace-nowrap text-right text-ink">{item.percentage} %</dd>
+					<dd class="whitespace-nowrap text-right text-ink">{item.percentage.toFixed(2)} %</dd>
 					<dt class="text-ink-muted">{m.invoices_amount()}</dt>
 					<dd class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</dd>
 				</dl>
@@ -163,7 +163,7 @@
 					<td class="text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
 					<td class="text-right text-ink-muted">{apartmentShare(item)}</td>
 					<td class="whitespace-nowrap text-right text-ink-muted">{timeShare(item)}</td>
-					<td class="whitespace-nowrap text-right text-ink-muted">{item.percentage} %</td>
+					<td class="whitespace-nowrap text-right text-ink-muted">{item.percentage.toFixed(2)} %</td>
 					<td class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</td>
 				</tr>
 				{#if item.invoices.length}

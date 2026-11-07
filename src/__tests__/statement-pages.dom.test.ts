@@ -1548,7 +1548,7 @@ describe('Abrechnungsdetail', () => {
 
 		expect(cards.map((card) => card.textContent)).toEqual([
 			expect.stringMatching(
-				/Heizung.*Verteilschlüssel.*Nach Fläche.*Kosten des Gebäudes.*CHF\s6.000.00.*Anteil.*25 %.*Betrag.*CHF\s1.500.00/
+				/Heizung.*Verteilschlüssel.*Nach Fläche.*Kosten des Gebäudes.*CHF\s6.000.00.*Anteil.*25.00 %.*Betrag.*CHF\s1.500.00/
 			),
 			expect.stringMatching(/Hauswartung.*Pro Wohnung/)
 		]);

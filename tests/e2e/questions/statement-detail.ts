@@ -104,8 +104,8 @@ export const shareOfPosition = (category: string) => Text.of(lineItemShare(categ
 
 type LineItem = { description: string; sharePercentage: string; tenantShare: string };
 
-// «50 %» → 50, «33.3 %» → 33.3; the text itself when it shows no share in that form (not «50.00 %»)
-const percent = (text: string | null) => (text?.match(/^\d+(?:\.\d*[1-9])? %$/) ? Number.parseFloat(text) : text);
+// «50 %», «50.00 %» → 50, «71.50 %» → 71.5 (0 to 2 decimals, #685); the text itself when it shows no share in that form
+const percent = (text: string | null) => (text?.match(/^\d+(?:\.\d{1,2})? %$/) ? Number.parseFloat(text) : text);
 
 /** The tenant's share of the heating costs and the amount it makes, in percent and francs: on the page, or in the
  * backend's statement */
