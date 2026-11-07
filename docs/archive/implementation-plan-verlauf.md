@@ -1502,6 +1502,17 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Checks: lint, check, fitness, backend type-check, form-selects/design-guard/open-work vitest, statements.feature in chromium
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-733.md`
 - [x] Archive session; PR `Fixes #733`: pushed after this archive
+
+## Session: #1172 screenshot job: no more untouched pages listed as changed
+
+- [x] Checked on main and on the CI images of #1187/#1192 (outside the red marks): `/config/access-keys` differs in the MCP address (the base ran `bun run dev` on its own port); `/config/categories` by 39 pixels of channel delta 1; the other flagged pages are identical
+- [x] Decided (#1172): the base as a production build like the head (`node build`, the head's environment but `PORT`); test seen red on the dev command and on ORIGIN 3200
+- [x] Differences remained: the same page shot twice from the same server differs at rounded card corners (Δ1); per the decision a tolerance of 2 per colour channel in `changed-areas.ts`; tests seen red
+- [x] Locally against a worktree of main, 7 routes, twice: no page listed; with one German text changed only that page listed
+- [x] code-reviewer round 1 (`docs/reviews/1172-screenshot-noise-review-1.md`): Minor C-1 (comment) fixed
+- [x] No scenario: CI tooling only; checks: lint, check, fitness, backend type-check, the two unit test files, Prettier
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR `Fixes #1172` pushed after this archive
 ## Session: #1186 Statement list names the chosen status
 
 - [x] `@wip` scenarios (statements.feature) at 390 × 844 and 960 × 600, seen red at the missing line; DOM tests seen red
