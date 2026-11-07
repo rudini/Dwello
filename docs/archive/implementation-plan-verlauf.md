@@ -1443,3 +1443,13 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] No scenario: CI tooling only; checks: lint, Prettier, the screenshot run locally (3 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #690 warn about a missing Firmenadresse before saving or opening a PDF (personas on #450)
+
+- [x] Read #690; triage on main (`docs/reviews/690-triage.md`): points 1 and 3 hold, point 2 fixed by #734
+- [x] Product owner decisions recorded in #690: mark missing fields on load, warn on statements with a Zahlteil, refused save says nothing was saved; W-2 (sender address stays required with an IBAN, the page warns too)
+- [x] `GET /config` sends the creditor state, `paymentPart` per statement, the warning and the refused-save text; scenarios on the fresh installation (`@frische-installation`) seen red (8477df9, 30e65d4)
+- [x] code-reviewer (`docs/reviews/690-review-{1..5}.md`): C-1..C-4 fixed (49e4237, 8b4baa6); C-5 Major (focus after the link) fixed (5a5f610); closing C-6 Major (three scenarios), C-7, C-8 fixed (2b8b3a8, 50c2d12)
+- [x] Personas Helga, Weber (`docs/design/personas/{helga,weber}-690.md`), three rounds with states set by SQL: H-4 Major (link lands at the top) fixed; W-1 Major (Firmenadresse named for an incomplete Kontoinhaber), W-2 Major fixed; Minors that stay: H-1, H-2, H-5, H-6, W-4..W-8
+- [x] Workflow notes: a state the app refuses to save needs SQL setup before a persona run; say so in the persona prompt
+- [x] Archive the session; PR pushed after this archive
