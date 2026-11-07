@@ -217,6 +217,10 @@
 	}
 
 	async function create() {
+		// a new check: an error the property manager had hidden by editing shows again (persona Sven 743 P-1), as a
+		// form's submit does it in Field
+		errors = {};
+		await tick();
 		errors = Object.fromEntries(chosen.map((row) => [row.key, checkRow(row)]));
 		creating = true;
 		for (const row of chosen.filter((one) => !Object.keys(errors[one.key]).length)) {

@@ -97,11 +97,15 @@
 	// the field's own check, said when the field is left; a change takes it back
 	const own = $derived(invalid && left ? wrongDate : '');
 	$effect(() => say(own));
-	// an error of the page only where the focus stayed in the field (Enter): where it jumps here, the field's
-	// description says it, and twice was once too often (#743, persona Sven P-1)
-	let kept = false;
+	// an error of the page only where the focus does not land in the field: where it does (focusFirstError, also
+	// anew after Enter), the field's description says it, and twice was once too often (#743, persona Sven P-1);
+	// waited for past the page's focus move, and not over the field's own error, which the field shows
+	let landed = false;
 	$effect(() => {
-		if (error && untrack(() => kept)) say(error);
+		if (!error) return;
+		landed = false;
+		const unless = setTimeout(() => !landed && !untrack(() => own) && say(error), 300);
+		return () => clearTimeout(unless);
 	});
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
@@ -121,15 +125,7 @@
 
 	// Enter (in a dialog it confirms): the date counts as when the field is left, «01.01.25» as 2025
 	function onkeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter') {
-			kept = true;
-			flushSync(onblur);
-		}
-	}
-
-	function leave() {
-		kept = false;
-		onblur();
+		if (event.key === 'Enter') flushSync(onblur);
 	}
 
 	function onblur() {
@@ -161,7 +157,8 @@
 					autocomplete="off"
 					value={text}
 					{oninput}
-					onblur={leave}
+					{onblur}
+					onfocus={() => (landed = true)}
 					{onkeydown}
 					aria-required={!optional}
 					aria-describedby={[control.describedBy, value && wordsId].filter(Boolean).join(' ')}

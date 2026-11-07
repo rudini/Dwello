@@ -330,6 +330,27 @@ describe('Rechnungen hochladen', () => {
 		expect(status()).toBe('blitz.pdf entfernt. Sie können das Gebäude wieder wählen.');
 	});
 
+	// persona Sven 743 P-1: the date's error of the first «Erstellen», hidden by typing and clearing, stayed hidden
+	// at the next one: the same error again showed nothing, said nothing and focused nothing
+	it('markiert beim nächsten Erstellen ein Rechnungsdatum, das nach dem Fehler eingetippt und wieder geleert wurde', async () => {
+		open(() => [502, unreadable]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+		expect(date.getAttribute('aria-invalid')).toBe('true');
+		fireEvent(date, 'input', '15.03.2025');
+		fireEvent(date, 'input', '');
+		flushSync();
+		expect(date.getAttribute('aria-invalid')).toBeNull();
+
+		click('invoice-upload-create-button');
+		await settle();
+
+		expect(date.getAttribute('aria-invalid')).toBe('true');
+	});
+
 	// #743 (code review C-14): a Rechnungsnummer over 50 characters ended in the general error of creating
 	it('sagt bei einer zu langen Rechnungsnummer am Feld, was zu tun ist, und erstellt die Rechnung nicht', async () => {
 		const { calls } = open(() => [200, read]);
