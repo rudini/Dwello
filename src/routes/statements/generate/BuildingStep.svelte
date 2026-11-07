@@ -23,7 +23,7 @@
 	} = $props();
 
 	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
-	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
+	// the ones the statement takes, as the preview counts them (#686), counted per building
 	let invoiceCounts = $state<Record<string, number>>({});
 	let billed = $state<Record<string, Billed>>({});
 	// #738: a count that failed is said, so no building reads as having no invoices or statements
@@ -44,11 +44,9 @@
 		loading = true;
 		let left = false; // an answer to a step left meanwhile must not unlock the one opened anew
 		Promise.all([
-			api.get<{ invoices: { buildingId: string }[] }>('/invoices', {
-				dateFrom: period.start,
-				dateTo: period.end,
-				isValidUtilityCost: 'true',
-				limit: '1000'
+			api.get<{ invoices: { buildingId: string }[] }>('/statements/invoices', {
+				buildingIds: ids.join(','),
+				...periodQuery(period)
 			}),
 			// Contracts with a statement in the period already get none from this run
 			api.get<(Billed & { buildingId: string })[]>('/statements/billed', {
