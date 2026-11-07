@@ -3,7 +3,6 @@
 	import { untrack, type Snippet } from 'svelte';
 	import { proposedKey } from '$lib/invoice';
 	import type { Category, LatestKey } from '$lib/types';
-	import Alert from '$lib/ui/Alert.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import { controlClass } from '$lib/ui/field';
@@ -131,9 +130,11 @@
 />
 
 {#if nonAllocable}
+	<!-- Neutral: a non-allocable category is a correct choice, not a warning (#687) -->
 	<div data-testid="invoice-category-warning">
-		<Alert tone="caution" title={m.invoices_category_not_allocable()}>
-			<p id="{idPrefix}invoice-category-warning-text">{m.invoices_category_not_allocable_text()}</p>
-		</Alert>
+		<p class="font-semibold text-ink">{m.invoices_category_not_allocable()}</p>
+		<p id="{idPrefix}invoice-category-warning-text" class="text-ink-muted">
+			{m.invoices_category_not_allocable_text()}
+		</p>
 	</div>
 {/if}
