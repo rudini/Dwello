@@ -641,7 +641,6 @@ Funktionalität: Abrechnungsdetail
 
   # #685 (Persona Dr. Weber P-1, P-3): der Satz zu den Heizkosten verweist auf den Abschnitt «Heiz- und
   # Warmwasserkosten», und die Monate von Eva Frei (Januar bis März) stehen als Anteile im Heizprofil
-  @wip
   Szenario: Das PDF erklärt den Zeitanteil der Heizkosten mit dem Heizprofil und seinem Abschnitt
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -652,7 +651,6 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Anteile der Monate Ihres Mietverhältnisses im Heizprofil, das die Heizkosten eines Jahres auf die zwölf Monate verteilt: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
 
   # #685: der Anteil steht wie im PDF immer mit zwei Stellen; Lea Graf trägt die Hälfte der Heizkosten
-  @wip
   Szenario: Die Abrechnung nennt den Anteil einer Position mit zwei Stellen
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
