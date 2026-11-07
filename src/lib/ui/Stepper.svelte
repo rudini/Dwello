@@ -26,7 +26,7 @@
 	const wide = $derived(values.length ? '' : 'xl:not-sr-only');
 	const named = (number: number) => (number === current ? '' : `md:sr-only ${wide}`);
 	// the current step keeps its longest word whole, unhyphenated, and takes the room from the others; with values
-	// every step keeps its words whole: the names but one are hidden, so the words fit (#1146, Dr. Weber P-1)
+	// every step keeps its words whole: from md the names but one are hidden, so the words fit (#1146, Dr. Weber P-1)
 	const shrink = (number: number) => (number === current || values.length ? '' : 'min-w-0');
 	const wrap = (number: number) => (number === current ? '' : 'min-w-0 hyphens-auto break-words');
 </script>
@@ -40,8 +40,8 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Below md the steps stand one below the other, each named (#1179). From md up to xl, and with values at every
-	     width, the numbers without names: five names do not fit next to the sidebar or the values (the current one is
+	<!-- Below md the steps stand one below the other, each named (#1179). From md up to xl, and with values from md
+	     at every width, the numbers without names: five names do not fit next to the sidebar or the values (the current one is
 	     named above, and next to its number; #1146);
 	     a finished step shows its value at every width the list shows (#663).
 	     Without values min-w-0 and hyphenation keep the other long names inside their step instead of widening the

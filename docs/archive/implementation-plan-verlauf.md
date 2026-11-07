@@ -1474,3 +1474,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #1179 name all wizard steps below md
+
+- [x] Read #1179; decided (product owner, in the issue): below md a vertical list of all steps with their names, from md as now, both wizards
+- [x] Two scenarios «Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte» (contract-new, statement-generate) with the new step «nennt die Schrittanzeige untereinander die Schritte», seen red as `@wip` (a962fb5)
+- [x] `Stepper.svelte`: below md `flex-col` with every name shown, from md the same classes as before; DOM test seen red (cc77116)
+- [x] No `fach-reviewer`: no text and no domain term changed
+- [x] code-reviewer round 1 (`docs/reviews/1179-review-1.md`): Minor C-1 (two comments) fixed
+- [x] Persona Marco (`docs/design/personas/marco-1179.md`): no Blocker or Major; Minors stay: P-1 and P-2 show on main too, P-3 (the list takes about 350 px on a phone) follows from the decision
+- [x] Checks: lint, check, fitness, backend type-check, the DOM tests, contract-new and statement-generate E2E, the stepper scenarios and the axe and language rows of both wizards
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
