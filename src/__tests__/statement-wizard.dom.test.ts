@@ -1626,17 +1626,14 @@ describe('Verwaltungspauschale', () => {
 
 describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 	it('sagt bei jedem Gebäude, ob für die Abrechnungsperiode Rechnungen erfasst sind', async () => {
-		// one request for the whole period, counted per building in the browser
+		// #686 O-1: the invoices the statement takes (by Leistungszeitraum, otherwise by Rechnungsdatum), as the preview
+		// counts them, not the list by Rechnungsdatum
 		const calls = fakeBff((call) =>
 			call.path.startsWith('/statements/billed')
 				? [200, []]
-				: [
-						200,
-						{
-							invoices: [{ buildingId: 'b1' }, { buildingId: 'b1' }, { buildingId: 'b1' }],
-							total: 3
-						}
-					]
+				: call.path.startsWith('/statements/invoices')
+					? [200, { invoices: [{ buildingId: 'b1' }, { buildingId: 'b1' }, { buildingId: 'b1' }] }]
+					: [200, { invoices: Array(4).fill({ buildingId: 'b1' }), total: 4 }]
 		);
 		open();
 		await settle();
@@ -1649,10 +1646,11 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 		expect(byTestId('generate-building-invoices-b2')!.textContent).toContain(
 			'Keine Rechnungen in der Abrechnungsperiode erfasst'
 		);
-		const invoiceCalls = calls.filter((call) => call.path.startsWith('/invoices'));
+		const invoiceCalls = calls.filter((call) => call.path.startsWith('/statements/invoices'));
 		expect(invoiceCalls).toHaveLength(1);
-		expect(invoiceCalls[0].path).toMatch(/dateFrom=\d{4}-\d{2}-\d{2}&dateTo=\d{4}-\d{2}-\d{2}/);
-		expect(invoiceCalls[0].path).not.toContain('buildingId');
+		expect(invoiceCalls[0].path).toMatch(
+			/buildingIds=b1%2Cb2&periodStart=\d{4}-\d{2}-\d{2}&periodEnd=\d{4}-\d{2}-\d{2}/
+		);
 		// the list stays inside its panel on phones (a fieldset is as wide as its content by default)
 		expect(document.querySelector('fieldset')!.className).toMatch(/(^| )min-w-0( |$)/);
 	});
