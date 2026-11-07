@@ -36,6 +36,16 @@ Funktionalität: Übersicht
     Dann nennt die Belegung von "Seeblick" "Wohnung 1.02 leer seit 01.04.2024"
     Und erklärt die Belegung "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
 
+  # #731 (Decided): die zwei unklaren Mietstatus sind bei den Kennzahlen erklärt, mit den Sätzen der Legende
+  Szenariogrundriss: Kennzahl mit Mietstatus erklärt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann erklärt die Übersicht bei den Kennzahlen "<Kennzahl>" mit "<Erklärung>"
+
+    Beispiele:
+      | Kennzahl       | Erklärung                                                                                                                         |
+      | Vermietet ab … | Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn vermietet, auch wenn sie bis dahin leer ist. |
+      | Gesperrt       | Sie haben die Wohnung von Hand gesperrt, zum Beispiel während einer Renovation.                                                   |
+
   Szenario: Gebäude aus der Belegung öffnen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter in der Belegung das Gebäude "Seeblick" öffnet
