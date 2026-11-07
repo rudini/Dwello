@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import '@fontsource-variable/inter';
 	import '../styles/globals.css';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
@@ -53,13 +53,23 @@
 
 	// Runs after every component below is mounted; SvelteKit starts its router later in the same task, and a submit
 	// before that is lost in Firefox (#869). One task later the page reacts to input (E2E tests wait for it)
+	// SvelteKit's announcer is on the page by then; the layout reads the title out itself (#1173, below)
 	onMount(() => {
-		setTimeout(() => (document.body.dataset.hydrated = 'true'));
+		setTimeout(() => {
+			document.getElementById('svelte-announcer')?.setAttribute('aria-live', 'off');
+			document.body.dataset.hydrated = 'true';
+		});
 	});
 
+	// #1173 (Sven 2 P-4): the title is read out when another page opens; SvelteKit's own announcer would also read it
+	// after a form action that stays on the page, so that one is silenced (onMount above)
+	let pageTitle = $state('');
 	// After a search on a list the focus goes to its results, so their number is read out
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
+		const { from, to } = navigation;
+		if (from && from.url.pathname !== to?.url.pathname)
+			tick().then(() => (pageTitle = document.title));
 		// a filter select, or a link that keeps the focus (the status tiles, #1162), stays where it is
 		const keep =
 			document.activeElement instanceof HTMLSelectElement ||
@@ -95,6 +105,10 @@
 		</p>
 	{/if}
 {/snippet}
+
+<div aria-live="assertive" aria-atomic="true" class="sr-only" data-testid="page-title-announcer">
+	{pageTitle}
+</div>
 
 {#if showAuthenticatedLayout}
 	<div class="flex min-h-screen flex-col bg-canvas">

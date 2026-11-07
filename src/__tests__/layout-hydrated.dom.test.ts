@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createRawSnippet } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 import { afterNavigate } from '$app/navigation';
 import { show } from './helpers/dom';
 
@@ -57,5 +57,48 @@ describe('Fokus nach der Suche in einer Liste', () => {
 	it('setzt den Fokus sonst auf die Ergebnisse', async () => {
 		await navigate('body');
 		expect(document.activeElement).toBe(document.querySelector('main [data-results]'));
+	});
+});
+
+// #1173 (Sven 2 P-4): a screen reader hears the title when another page opens, not after a form action that stays
+describe('Ansage des Seitentitels', () => {
+	async function navigate(from: string, to: string) {
+		const { default: Layout } = await import('../routes/+layout.svelte');
+		const children = createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }));
+		show(Layout, { data: { user: null }, children } as never);
+		document.title = 'Lea Frei - Dwello';
+		const [callback] = vi.mocked(afterNavigate).mock.lastCall!;
+		callback({ type: 'goto', from: { url: new URL(from) }, to: { url: new URL(to) } } as never);
+		await tick();
+		return document.querySelector('[data-testid="page-title-announcer"]')!;
+	}
+
+	it('sagt nach dem Wechsel auf eine andere Seite deren Titel an', async () => {
+		const announcer = await navigate('http://localhost/tenants', 'http://localhost/tenants/7');
+		expect([announcer.getAttribute('aria-live'), announcer.textContent]).toEqual([
+			'assertive',
+			'Lea Frei - Dwello'
+		]);
+	});
+
+	// SvelteKit's announcer reads the title also after a form action, when the page store changes
+	it('stellt die Ansage von SvelteKit stumm', async () => {
+		document.body.innerHTML = '<div id="svelte-announcer" aria-live="assertive"></div>';
+		const { default: Layout } = await import('../routes/+layout.svelte');
+		show(Layout, {
+			data: { user: null },
+			children: createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }))
+		} as never);
+		await new Promise((resolve) => setTimeout(resolve));
+		expect(document.getElementById('svelte-announcer')!.getAttribute('aria-live')).toBe('off');
+	});
+
+	// a form action that sends the page to itself (a redirect) or a list search stays on the page
+	it('sagt den Titel nicht an, wenn die Seite dieselbe bleibt', async () => {
+		const announcer = await navigate(
+			'http://localhost/tenants/7',
+			'http://localhost/tenants/7?tab=documents'
+		);
+		expect(announcer.textContent).toBe('');
 	});
 });
