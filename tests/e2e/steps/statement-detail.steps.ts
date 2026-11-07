@@ -43,6 +43,7 @@ import {
 	tenancyOfStatement,
 	totalLabelOfStatement,
 	oldAddressWarningText,
+	creditorWarningText,
 	advancePaidOfStatement,
 	advanceDiffersText,
 	partialPaymentAdvice,
@@ -88,6 +89,8 @@ import {
 	downloadStatementPdf,
 	requestStatementPdf,
 	leavePdfRefusal,
+	settingsFromCreditorWarning,
+	settingsFromPdfRefusal,
 	editStatementFromDetail,
 	generateStatementPdf,
 	markStatementPaid,
@@ -386,6 +389,19 @@ for (const step of ['der Liegenschaftsverwalter von dort zu den Nebenkostenabrec
 	When(step, async ({ verwalter }) => {
 		await verwalter.attemptsTo(leavePdfRefusal);
 	});
+
+// #690: the way the refusal page and the warning of the statement offer
+When('der Liegenschaftsverwalter von der Fehlerseite zu den Einstellungen wechselt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(settingsFromPdfRefusal);
+});
+
+When('der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(settingsFromCreditorWarning);
+});
+
+Then('warnt die Detailseite der Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(creditorWarningText).toContain(text);
+});
 
 Then('liest der Liegenschaftsverwalter auf der Fehlerseite {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(pdfRefusalText).toBe(text);

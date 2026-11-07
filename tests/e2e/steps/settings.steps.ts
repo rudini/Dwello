@@ -1,5 +1,5 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
-import { test } from '../fixtures/test';
+import { ON_FRESH, test } from '../fixtures/test';
 import { holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
 import { giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
@@ -25,6 +25,19 @@ const FIELDS: Record<string, string> = {
 };
 
 Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openSettings);
+});
+
+// #690: a setting the parallel scenarios would break on: only on the fresh installation
+Given(
+	'die Verwaltung hat die IBAN {string} ohne Firmenname, PLZ und Ort hinterlegt',
+	async ({ seed, $tags }, iban: string) => {
+		if (!$tags.includes(ON_FRESH)) throw new Error(`a scenario with this step runs on the fresh installation: tag it ${ON_FRESH}`);
+		await seed.ibanWithoutCompanyAddress(iban);
+	}
+);
+
+When('der Liegenschaftsverwalter die Einstellungen erneut öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openSettings);
 });
 

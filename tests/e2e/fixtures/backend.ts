@@ -354,6 +354,14 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
+		// #690: an IBAN stored before #450 required the Firmenadresse; only for a scenario on the fresh installation
+		// (@frische-installation): every PDF with a Zahlteil of the others would be refused
+		async ibanWithoutCompanyAddress(iban: string) {
+			await put('config', accountOf(iban));
+			for (const key of ['company_name', 'company_postal_code', 'company_city']) await remove(`config/${key}`);
+			restores.push(() => remove('config/iban'), () => remove('config/company_address'));
+		},
+
 		// #1166: a scenario that saves a Kontoinhaber through the settings sets it back to the Absender afterwards
 		restoreAccountHolder,
 

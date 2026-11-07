@@ -106,6 +106,12 @@ export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.ge
 export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));
+// #690: the Zahlteil lacks the Firmenadresse, with the way to the settings; and that way on the refusal page of the PDF
+export const creditorWarning = target('Warnung vor der fehlenden Firmenadresse', (page) => page.getByTestId('statement-creditor-missing'));
+export const creditorWarningSettingsLink = target('Zu den Einstellungen in der Warnung', (page) =>
+	page.getByTestId('statement-creditor-missing-settings')
+);
+export const pdfRefusalSettingsLink = target('Zu den Einstellungen auf der Fehlerseite', (page) => page.getByTestId('pdf-refusal-settings'));
 
 // #454 (persona Anna 454 P-1): «Abrechnung berichtigen» in the hint on what changed since
 export const laterCorrectButton = target('Abrechnung berichtigen im Hinweis', (page) => page.getByTestId('statement-later-correct-button'));

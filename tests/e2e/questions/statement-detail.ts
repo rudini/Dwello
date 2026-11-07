@@ -53,6 +53,7 @@ import {
 	statementTotalLabel,
 	statementStatus,
 	oldAddressWarning,
+	creditorWarning,
 	confirmSendButton,
 	letterInsteadLink,
 	openRest,
@@ -148,6 +149,7 @@ export const changeOffers = question('the offers to pay, remind, edit or correct
 	)
 );
 export const oldAddressWarningText = Text.of(oldAddressWarning);
+export const creditorWarningText = Text.of(creditorWarning);
 
 // #403
 export const carryOver = Text.of(carryOverRow);
