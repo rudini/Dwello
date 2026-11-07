@@ -380,6 +380,14 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
+  # #686 O-6 (Entscheid des Product Owners): die Zahlungsfrist eines Entwurfs gilt ab dem Versand; die Einstellungen
+  # haben die Vorgabe von 30 Tagen (global, daher @einstellungen-global)
+  @wip @einstellungen-global
+  Szenario: Ein Entwurf erklärt, ab wann seine Zahlungsfrist gilt
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann erklärt die Abrechnung bei der Zahlungsfrist "Gilt ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 30 Tage nach dem Versanddatum."
+
   Szenario: PDF erstellen und herunterladen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -387,6 +395,17 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
+
+  # #686 P-4 (Entscheid des Product Owners): der Anteil nach Heizprofil heisst wie die Spalte der Tabelle; der Wortlaut
+  # wartet auf das Fachreview (docs/reviews/686-wording.md)
+  @wip
+  Szenario: Das PDF nennt den Anteil nach Heizprofil mit dem Wort der Tabelle
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "43.00 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode"
 
   # #509 (Persona Dr. Weber P-8): hat jede Heizkostenrechnung ihren Leistungszeitraum, nennt das PDF keinen Anteil für
   # eine Rechnung ohne Leistungszeitraum; die Rechnung von 2024 aus der Grundlage zählt 2025 nicht, Lea Graf

@@ -1668,6 +1668,23 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
 
+	// #686 O-6 (decided by the product owner): a draft's Zahlungsfrist counts from the sending, said at the date
+	it('erklärt bei einem Entwurf an der Zahlungsfrist, dass sie ab dem Versand gilt', () => {
+		show(StatementPage, {
+			data: { statement: statement({ status: 'draft' }), reminders: [], paymentDeadlineDays: 45 },
+			form: null
+		} as never);
+		const help = byTestId('statement-payment-deadline-help')?.textContent?.trim();
+		document.body.innerHTML = '';
+		detail({ status: 'sent' });
+
+		expect(help).toBe(
+			'Gilt ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 45 Tage nach dem Versanddatum.'
+		);
+		expect(byTestId('statement-payment-deadline')).not.toBeNull();
+		expect(byTestId('statement-payment-deadline-help')).toBeNull();
+	});
+
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
 		detail();
 

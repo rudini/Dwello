@@ -949,6 +949,20 @@ describe('Abgerechnet bis im PDF', () => {
 	});
 });
 
+// #686 P-4 (decided by the product owner): the heating note names the table's column «Wohnungsanteil», not
+// «Heizkosten Ihrer Wohnung»; the wording waits for fach-reviewer (docs/reviews/686-wording.md)
+describe('Anteil nach Heizprofil mit dem Wort der Tabelle', () => {
+	it.each([
+		['de', 'Heizkosten nach Heizprofil «Heizung Mittelland»: 44.20 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode'],
+		['fr', 'Frais de chauffage selon le profil « Heizung Mittelland » : 44.20 % de la part du logement dans les frais de chauffage pour la période de décompte'],
+		['it', 'Spese di riscaldamento secondo il profilo «Heizung Mittelland»: 44.20 % della quota appartamento delle spese di riscaldamento nel periodo di conteggio'],
+		['en', 'Heating costs under the heating profile ‘Heizung Mittelland’: 44.20 % of the apartment share of the heating costs for the billing period']
+	] as const)('nennt auf %s den Anteil als Teil des Wohnungsanteils', async (language, note) => {
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(heated, config, language), 'base64'));
+		expect(pdf.flowing.replace(/\u00a0/g, ' ')).toContain(note);
+	});
+});
+
 describe('Verwaltungspauschale auf Französisch und Italienisch', () => {
 	// #405, #461: the words of Art. 4 al. 3 OBLF / cpv. 3 OLAL; «frais de gestion» are the costs of managing the property
 	it('nennt sie wie das Gesetz «frais d’administration» und «spese amministrative»', async () => {
