@@ -22,6 +22,13 @@ Funktionalität: Nebenkostenabrechnungen
     Dann sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller"
     Und die Abrechnungsliste enthält genau 1 Abrechnung
 
+  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
+  Szenario: Eine Wahl im Filter zeigt die Abrechnungen sofort
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter im Filter "Gebäude" "Ahornhof" wählt
+    Dann steht über der Liste "Keine Abrechnungen gefunden"
+    Und bleibt der Fokus im Filter "Gebäude"
+
   Szenario: Weitere Abrechnungen auf der nächsten Seite
     Angenommen für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnungen 2014 bis 2023
     Wenn der Liegenschaftsverwalter die Abrechnungen von "Anna Keller" sucht

@@ -1,20 +1,36 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { listHeading, listSearchShown, offeredResets } from '../questions/list';
+import { focusedFilter, listHeading, offeredResets } from '../questions/list';
+import { chooseInListFilter, typeIntoListSearch } from '../tasks/list';
 
-const { Then } = createBdd(test);
+const { When, Then } = createBdd(test);
 
 // #682: the filters or the hint of an empty list, not both
 Then('bietet die Seite nur einmal an, die Filter zurückzusetzen', async ({ verwalter }) => {
 	await verwalter.sees(offeredResets).toBe(1);
 });
 
-// after the search, so an error page does not pass
-Then('bietet die Seite nicht an, die Filter zurückzusetzen', async ({ verwalter }) => {
-	await verwalter.sees(listSearchShown).toBe(true);
-	await verwalter.sees(offeredResets).toBe(0);
-});
-
 Then('steht über der Mietvertragsliste {string}', async ({ verwalter }, heading: string) => {
 	await verwalter.sees(listHeading).toBe(heading);
+});
+
+// #662: typed into the search of the list shown, without «Suchen»
+When('der Liegenschaftsverwalter {string} in die Suche eingibt', async ({ verwalter, names }, term: string) => {
+	await verwalter.attemptsTo(typeIntoListSearch(names.get(term) ?? term));
+});
+
+// #662: the choice applies at once; a record's name (a building) with its test suffix
+When(
+	'der Liegenschaftsverwalter im Filter {string} {string} wählt',
+	async ({ verwalter, names }, filter: string, option: string) => {
+		await verwalter.attemptsTo(chooseInListFilter(filter, names.get(option) ?? option));
+	}
+);
+
+Then('steht über der Liste {string}', async ({ verwalter }, heading: string) => {
+	await verwalter.sees(listHeading).toBe(heading);
+});
+
+Then('bleibt der Fokus im Filter {string}', async ({ verwalter }, filter: string) => {
+	await verwalter.sees(focusedFilter).toBe(filter);
 });

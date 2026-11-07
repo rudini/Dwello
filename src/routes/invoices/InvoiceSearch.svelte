@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { applyFilterChoice } from '$lib/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
@@ -23,16 +24,21 @@
 		reset: boolean; // offer «Filter zurücksetzen»: the address has a filter and the list is not empty (#682)
 	} = $props();
 
-	// Starts from the URL; afterwards the fields hold what the user chooses until "Suchen"
-	let filters = $state(
-		untrack(() => ({
-			search: params.get('search') || '',
-			building: params.get('building') || '',
-			categoryId: params.get('categoryId') || '',
-			validity: params.get('validity') || '',
-			year: params.get('year') || ''
-		}))
-	);
+	// Starts from the URL; afterwards the fields hold what the user types until «Suchen», a select applies at once (#662)
+	const fromUrl = () => ({
+		search: params.get('search') || '',
+		building: params.get('building') || '',
+		categoryId: params.get('categoryId') || '',
+		validity: params.get('validity') || '',
+		year: params.get('year') || ''
+	});
+	let filters = $state(untrack(fromUrl));
+	// a new address (a link, back or forward) shows its filters (#159), in the same form: a filter keeps the focus (#662)
+	const address = $derived(params.toString());
+	$effect.pre(() => {
+		void address;
+		filters = untrack(fromUrl);
+	});
 
 	function search(event: SubmitEvent) {
 		event.preventDefault();
@@ -46,13 +52,17 @@
 </script>
 
 <form
+	method="GET"
+	action="/invoices"
 	role="search"
+	onchange={applyFilterChoice}
 	aria-label={m.list_search_label()}
 	onsubmit={search}
 	class="grid gap-4 rounded-panel border border-line bg-surface p-6 md:grid-cols-2 xl:grid-cols-4"
 >
 	<TextInput
 		id="search"
+		name="search"
 		label={m.buildings_search()}
 		help={m.invoices_search_help()}
 		required={false}
@@ -62,6 +72,7 @@
 	<Select
 		id="building"
 		label={m.apartments_building()}
+		name="building"
 		placeholder={m.apartments_all_buildings()}
 		required={false}
 		options={buildings.map((b) => ({ value: b.id, label: b.name || b.address }))}
@@ -70,6 +81,7 @@
 	/>
 	<Select
 		id="category"
+		name="categoryId"
 		label={m.buildings_category()}
 		placeholder={m.invoices_all_categories()}
 		required={false}
@@ -79,6 +91,7 @@
 	/>
 	<Select
 		id="validity"
+		name="validity"
 		label={m.invoices_allocability()}
 		placeholder={m.invoices_all()}
 		required={false}
@@ -91,6 +104,7 @@
 	/>
 	<Select
 		id="year"
+		name="year"
 		label={m.invoices_year()}
 		help={m.invoices_year_help()}
 		placeholder={m.invoices_all_years()}

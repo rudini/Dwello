@@ -34,7 +34,7 @@ export const showApartmentsOfBuildingWhileLoading = (buildingId: string): Activi
 		filteredBy(buildingId)
 	);
 
-// #682: a choice that is not searched yet
+// #662: applies at once, without «Suchen»
 export const chooseVacantApartments = Select.option('vacant').from(apartmentStatusFilter);
 
 export const searchApartments = (term: string, buildingId = ''): Activity => (actor) =>

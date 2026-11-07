@@ -52,10 +52,15 @@ Funktionalität: Wohnungsliste
     Dann ist die Wohnung "2.01" "Leer"
     Und die Wohnungsliste enthält genau 1 Wohnung
 
-  # #682 (Sven): die Filter gelten erst mit «Suchen»; erst dann gibt es etwas zurückzusetzen
-  Szenario: Eine Wahl vor dem Suchen bietet noch nicht an, die Filter zurückzusetzen
+  # #662 (Sven in #682): eine Wahl im Filter gilt sofort, ohne «Suchen»; der Fokus bleibt im Filter
+  Szenario: Eine Wahl im Filter zeigt die Liste sofort und bietet an, die Filter zurückzusetzen
+    Wenn der Liegenschaftsverwalter im Filter "Gebäude" "Ahornhof" wählt
+    Dann die Wohnungsliste enthält genau 2 Wohnungen
+    Und bleibt der Fokus im Filter "Gebäude"
     Wenn der Liegenschaftsverwalter die leeren Wohnungen wählt, ohne zu suchen
-    Dann bietet die Seite nicht an, die Filter zurückzusetzen
+    Dann ist die Wohnung "2.01" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+    Und bietet die Seite nur einmal an, die Filter zurückzusetzen
     Wenn der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann bietet die Seite nur einmal an, die Filter zurückzusetzen
 

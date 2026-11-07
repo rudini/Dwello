@@ -81,16 +81,13 @@
 		}}
 	/>
 
-	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
-	{#key $page.url.search}
-		<InvoiceSearch
-			params={$page.url.searchParams}
-			buildings={data.buildings}
-			categories={data.categories}
-			years={data.years}
-			reset={filtered && data.invoices.length > 0}
-		/>
-	{/key}
+	<InvoiceSearch
+		params={$page.url.searchParams}
+		buildings={data.buildings}
+		categories={data.categories}
+		years={data.years}
+		reset={filtered && data.invoices.length > 0}
+	/>
 
 	{#if period}<p class="text-ink" data-testid="invoice-period-filter">{period}</p>{/if}
 

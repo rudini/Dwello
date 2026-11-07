@@ -17,6 +17,7 @@ import ContractsPage from '../routes/contracts/+page.svelte';
 import InvoicesPage from '../routes/invoices/+page.svelte';
 import StatementsPage from '../routes/statements/+page.svelte';
 import { page } from '$app/stores';
+import { goto } from '$app/navigation';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
 const empty = { total: 0, page: 1, pageSize: 10, buildings: [], categories: [], years: [] };
@@ -147,5 +148,55 @@ describe('Filter der Wohnungsliste', () => {
 		goTo('/apartments');
 
 		expect(byTestId<HTMLSelectElement>('apartments-status-filter')!.value).toBe('');
+	});
+});
+
+// #662: a filter's choice applies at once with what the form holds, the typed text too; the focus stays in the filter
+describe.each([
+	{ list: lists[0], select: 'apartments-status-filter', choice: 'status=vacant' },
+	{ list: lists[2], select: 'tenants-status-filter', choice: 'status=future' },
+	{ list: lists[3], select: 'contract-status-filter', choice: 'status=ended' },
+	{ list: lists[4], select: 'invoice-validity-filter', choice: 'validity=invalid' },
+	{
+		list: {
+			...statements,
+			data: { ...statements.data, buildings: [{ id: 'b1', name: 'Ahornhof' }] }
+		},
+		select: 'statement-building-filter',
+		choice: 'building=b1'
+	}
+])('Wahl im Filter der Liste $list.path', ({ list, select, choice }) => {
+	it('zeigt die Liste sofort mit dem eingegebenen Text, ohne «Suchen»', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		fireEvent(byTestId<HTMLInputElement>(list.search)!, 'input', 'Huber');
+		vi.mocked(goto).mockClear();
+
+		fireEvent(byTestId<HTMLSelectElement>(select)!, 'change', choice.split('=')[1]);
+
+		expect(goto).toHaveBeenCalledWith(`${list.path}?search=Huber&${choice}`, {
+			keepFocus: true,
+			noScroll: true
+		});
+	});
+
+	// a new form for the new address would take the focus away from the filter (#677)
+	it('behält den Filter mit dem Fokus, wenn die Liste die Wahl zeigt', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		const filter = byTestId<HTMLSelectElement>(select)!;
+
+		goTo(`${list.path}?${choice}`);
+
+		expect(byTestId(select)).toBe(filter);
+	});
+
+	// without the app's navigation «Suchen» sends the form itself
+	it('gibt jedem Feld einen Namen in der Adresse', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		const fields = [...byTestId(list.search)!.closest('form')!.querySelectorAll('input, select')];
+
+		expect(fields.filter((field) => !field.getAttribute('name'))).toEqual([]);
 	});
 });

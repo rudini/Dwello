@@ -30,6 +30,13 @@ Funktionalität: Mieterliste
     Wenn der Liegenschaftsverwalter die aktiven Mieter mit dem Namen "Hans Müller" sucht
     Dann die Mieterliste enthält genau 0 Mieter
 
+  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
+  Szenario: Eine Wahl im Filter zeigt die Mieter sofort
+    Wenn der Liegenschaftsverwalter "Hans Müller" in die Suche eingibt
+    Und der Liegenschaftsverwalter im Filter "Mieter" "Künftige Mieter" wählt
+    Dann steht über der Liste "Keine Mieter gefunden"
+    Und bleibt der Fokus im Filter "Mieter"
+
   Szenario: Aktiver Mieter
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { applyFilterChoice } from '$lib/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { goto } from '$app/navigation';
@@ -24,6 +25,12 @@
 		status: $page.url.searchParams.get('status') ?? ''
 	});
 	let filters = $state(untrack(fromUrl));
+	// a new address (a link, back or forward) shows its filters (#159), in the same form: a filter keeps the focus (#662)
+	const address = $derived($page.url.search);
+	$effect.pre(() => {
+		void address;
+		filters = untrack(fromUrl);
+	});
 	// #670: by name, as the list (the backend gives the buildings by last change)
 	// ponytail: the list sorts by the database's collation; names that differ only in case or umlauts may sort otherwise
 	const buildingOptions = $derived(
@@ -45,7 +52,10 @@
 </script>
 
 <form
+	method="GET"
+	action="/apartments"
 	role="search"
+	onchange={applyFilterChoice}
 	aria-label={m.list_search_label()}
 	onsubmit={search}
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
@@ -53,6 +63,7 @@
 	<div class="grid gap-4 md:grid-cols-3">
 		<TextInput
 			id="search"
+			name="search"
 			label={m.buildings_search()}
 			bind:value={filters.search}
 			help={m.apartments_search_help()}
@@ -62,6 +73,7 @@
 		/>
 		<EarlySelect
 			id="building"
+			name="building"
 			label={m.apartments_building()}
 			placeholder={m.apartments_all_buildings()}
 			options={buildingOptions}
@@ -72,6 +84,7 @@
 		/>
 		<EarlySelect
 			id="status"
+			name="status"
 			label={m.apartments_status()}
 			placeholder={m.apartments_all_statuses()}
 			options={statusOptions}

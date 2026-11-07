@@ -20,6 +20,13 @@ Funktionalität: Rechnungsliste
     Dann sieht der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "CHF 450.00" in der Kategorie "Hauswart"
     Und die Rechnungsliste enthält genau 1 Rechnung
 
+  # #662: eine Wahl im Filter gilt sofort, ohne «Suchen», mit dem eingegebenen Namen; der Fokus bleibt im Filter
+  Szenario: Eine Wahl im Filter zeigt die Rechnungen sofort
+    Wenn der Liegenschaftsverwalter "Hauswart Huber" in die Suche eingibt
+    Und der Liegenschaftsverwalter im Filter "Umlagefähigkeit" "Nicht umlagefähig" wählt
+    Dann steht über der Liste "Keine Rechnungen gefunden"
+    Und bleibt der Fokus im Filter "Umlagefähigkeit"
+
   Szenario: Rechnungen eines Jahres anzeigen
     Angenommen im Gebäude "Seeblick" gibt es eine Heizkostenrechnung über "3600.00" Franken für 2024
     Und im Gebäude "Seeblick" gibt es eine Heizkostenrechnung über "4100.00" Franken für 2025
