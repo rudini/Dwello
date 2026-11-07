@@ -1426,5 +1426,12 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Scenarios in buildings, apartments, contracts features and DOM tests, each seen red; search drops `page` (4825890); one search landmark, count heading, reset and labels on every list (1d179be)
 - [x] code-reviewer (`docs/reviews/682-review-{1,2}.md`): C-1, C-2 Minor fixed (2b58c0b), C-3 rejected (same address, nothing new to focus)
 - [x] Personas Sven, Marco (`docs/design/personas/{sven,marco}-682.md`): no finding of the change from Sven; Marco M-1 Minor stays (the building search finds neither a comma address nor the postcode)
+## Session: #1172 UI screenshot job, the report page (part)
+
+- [x] Read #1172; reproduced locally with a worktree of main as UI_BASE_DIR: only `/reports/[buildingId]` came out as a new page
+- [x] Cause: no record and no period for `/reports` in `screenshots.spec.ts` (404 on both branches); it now opens the seeded Kostenabstimmung of Seeblick 2025 (194fbb3); `Refs #1172`
+- [x] The other pages differ only at a few corners of rounded cards (276–1116 pixels on PR #1187's images) and do not reproduce locally; findings and next steps in #1172, which stays open
+- [x] code-reviewer round 1 (`docs/reviews/1172-review-1.md`): no findings
+- [x] No scenario: CI tooling only; checks: lint, Prettier, the screenshot run locally (3 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive

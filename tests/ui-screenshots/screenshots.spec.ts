@@ -50,7 +50,10 @@ test.beforeAll(async ({ request }) => {
 		'/statements': seed.idOf('Abrechnung Anna 2025'),
 		'/config/heating-profiles': seed.idOf('Standard'),
 		'/config/categories': seed.idOf('Gartenpflege'),
-		'/config/distribution-keys': seed.idOf('Nach Wohnungen')
+		'/config/distribution-keys': seed.idOf('Nach Wohnungen'),
+		// the Kostenabstimmung of the building's billed period 2025 (#1172: without it the page answered 404 on both
+		// branches and was listed as a new page)
+		'/reports': `${seed.idOf('Seeblick')}?periodStart=2025-01-01&periodEnd=2025-12-31`
 	};
 });
 
