@@ -1419,6 +1419,19 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 
+## Session: demo deploys the newest tag on main (#1184)
+
+No scenario: the demo's update script runs on the VM outside the E2E stack; `tools/release/demo-update.test.ts` covers it.
+
+- [x] Test: a commit merged after the tag still builds the tag, once (seen red)
+- [x] `deploy/demo/update.sh`: newest version tag on `main` instead of an exact tag on its tip
+- [x] `deploy/demo/README.md`, "7. Automatic updates": what is deployed
+- [x] code-reviewer round 1: `docs/reviews/demo-tag-review-1.md`
+- [x] C-1: record the tag's commit, not HEAD, in `.git/demo-deployed` (test seen red)
+- [x] closing code-reviewer round: `docs/reviews/demo-tag-review-2.md`
+- [x] PR: pushed after this archive
+- [x] Fallback review on #1190 (build from the tag's commit, `reset --keep`): closing round `docs/reviews/demo-tag-review-3.md`
+
 ## Session: #685 statement PDF explanations of heating and time shares (Dr. Weber on #208)
 
 - [x] Read #685; triage on main (`docs/reviews/685-triage.md`): P-1, P-3, the percent precision and the page break hold; #325, the Zeitanteil column and #249 done
@@ -1453,3 +1466,11 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 - [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-688.md`): no Blocker or Major; Minors that stay: Helga H-1, Sven S-1, S-3; Helga H-2 = Sven S-2 (two alerts give opposite advice) is #1197
 - [x] Workflow notes: `git stash` is shared by all worktrees; parallel agents must not use it (one popped another's stash)
 - [x] Archive the session; PR pushed after this archive
+## Session: #1176 Kontoinhaber in the privacy statement
+
+- [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
+- [x] `fach-reviewer` `docs/reviews/1176-fachreview-1.md`: the addition to `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider` in de/fr/it/en
+- [x] Texts in `messages/*.json` (with R-3, Variante B, decided in #1176); Stand of the privacy statement only (`LegalHeader.svelte` shared with the terms, which keep 29. Oktober 2026)
+- [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
+- [x] Archive session; PR `Fixes #1176`: pushed after this archive
