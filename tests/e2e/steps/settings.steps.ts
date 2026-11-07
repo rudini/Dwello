@@ -37,6 +37,13 @@ Given(
 	}
 );
 
+// #690 (persona Weber 690 W-1, W-2): stored before the save required it; only on the fresh installation
+const STORED: Record<string, string> = { PLZ: 'company_postal_code', 'Ort des Kontoinhabers': 'account_holder_city' };
+Given('in den Einstellungen fehlt inzwischen {string}', async ({ seed, $tags }, label: string) => {
+	if (!$tags.includes(ON_FRESH)) throw new Error(`a scenario with this step runs on the fresh installation: tag it ${ON_FRESH}`);
+	await seed.withoutSetting(STORED[label]);
+});
+
 When('der Liegenschaftsverwalter die Einstellungen erneut öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openSettings);
 });

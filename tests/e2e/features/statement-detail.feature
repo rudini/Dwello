@@ -1571,3 +1571,36 @@ Funktionalität: Abrechnungsdetail
     Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen»."
     Wenn der Liegenschaftsverwalter von der Fehlerseite zu den Einstellungen wechselt
     Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+
+  # #690 (Persona Weber 690 W-1): fehlt dem eigenen Kontoinhaber der Ort, nennt die Ablehnung des PDF den Kontoinhaber,
+  # nicht die vollständige Firmenadresse, und führt zu den Einstellungen
+  @frische-installation
+  Szenario: Die Fehlerseite des PDF ohne Ort des Kontoinhabers nennt den Kontoinhaber
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und in den Einstellungen fehlt inzwischen "Ort des Kontoinhabers"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Mit einer IBAN braucht es den Kontoinhaber. Erfassen Sie Name, PLZ und Ort des Kontoinhabers oder setzen Sie das Häkchen bei «Kontoinhaber ist der Absender»."
+    Wenn der Liegenschaftsverwalter von der Fehlerseite zu den Einstellungen wechselt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+
+  # #690 (Persona Weber 690 W-1): die Warnung nennt den Kontoinhaber, dessen Adresse unvollständig ist
+  @frische-installation
+  Szenario: Eine Nachzahlung warnt, wenn dem Kontoinhaber der Ort fehlt
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und in den Einstellungen fehlt inzwischen "Ort des Kontoinhabers"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es den Kontoinhaber."
+
+  # #690 (Persona Weber 690 W-2, Entscheid Product Owner): mit einer IBAN braucht auch der Absender seine ganze Adresse,
+  # der Kopf des PDF nennt sie, auch wenn ein vollständiger Kontoinhaber den Zahlteil bekommt
+  @frische-installation
+  Szenario: Eine Nachzahlung warnt, wenn dem Absender neben dem Kontoinhaber die PLZ fehlt
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und in den Einstellungen fehlt inzwischen "PLZ"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
