@@ -1858,14 +1858,14 @@ describe('Abrechnungsdetail', () => {
 	// #690 (Persona Weber 450): nur wo das PDF oder eine Mahnung einen Zahlteil bekommt, warnt die Seite, dass ihm die
 	// Firmenadresse fehlt, bevor das PDF abgelehnt wird
 	describe('Firmenadresse des Zahlteils', () => {
-		const withoutAddress = (overrides = {}) =>
+		const withWarning = (creditorWarning: string | null, overrides = {}) =>
 			show(StatementPage, {
-				data: { statement: statement(overrides), reminders: [], creditorMissing: true },
+				data: { statement: statement(overrides), reminders: [], creditorWarning },
 				form: null
 			} as never);
 
 		it('warnt bei einer Nachzahlung, dass dem Zahlteil die Firmenadresse fehlt, und führt zu den Einstellungen', () => {
-			withoutAddress({ status: 'sent' });
+			withWarning('CREDITOR_ADDRESS_MISSING', { status: 'sent' });
 			const warning = byTestId('statement-creditor-missing')!;
 			expect(warning.textContent).toContain(
 				'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
@@ -1875,14 +1875,29 @@ describe('Abrechnungsdetail', () => {
 			);
 		});
 
+		// persona Weber 690 W-1, W-2 (product owner): the warning names whose address is incomplete
+		it('nennt den Kontoinhaber, wenn seine Adresse fehlt', () => {
+			withWarning('ACCOUNT_HOLDER_MISSING');
+			expect(byTestId('statement-creditor-missing')!.textContent).toContain(
+				'Mit einer IBAN braucht es den Kontoinhaber.'
+			);
+		});
+
+		it('nennt den Absender, wenn neben einem vollständigen Kontoinhaber seine Adresse fehlt', () => {
+			withWarning('IBAN_COMPANY_ADDRESS_MISSING');
+			expect(byTestId('statement-creditor-missing')!.textContent).toContain(
+				'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.'
+			);
+		});
+
 		it('warnt nicht, wo das PDF keinen Zahlteil hat', () => {
-			withoutAddress({ paymentPart: false });
+			withWarning('CREDITOR_ADDRESS_MISSING', { paymentPart: false });
 			expect(byTestId('statement-balance')).not.toBeNull();
 			expect(byTestId('statement-creditor-missing')).toBeNull();
 		});
 
-		it('warnt nicht, solange die Firmenadresse vollständig ist', () => {
-			detail();
+		it('warnt nicht, solange die Adressen vollständig sind', () => {
+			withWarning(null);
 			expect(byTestId('statement-balance')).not.toBeNull();
 			expect(byTestId('statement-creditor-missing')).toBeNull();
 		});

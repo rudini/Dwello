@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
+	import { afterNavigate } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import LiveRegion from '$lib/ui/LiveRegion.svelte';
@@ -41,9 +41,10 @@
 	let holderIsSender = $state(noHolderStored());
 	const saved = $derived(result?.saved === true);
 	// #690 (persona Helga 690 H-4): opened with fields the stored IBAN lacks, two screens down: the first gets the focus,
-	// as after a refused save
+	// as after a refused save; after the navigation, whose focus reset and scroll to «#sender» would take it (code review
+	// 690-3 C-5)
 	let settingsForm = $state<HTMLFormElement>();
-	onMount(() => {
+	afterNavigate(() => {
 		if (data.missing.length) focusFirstError(settingsForm);
 	});
 	let saving = $state(false);

@@ -1556,6 +1556,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt
     Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+    Und steht der Fokus in den Einstellungen auf "Firmenname"
 
   # #690, Punkt 2 (Persona Weber 450, behoben mit #734): fehlt die Firmenadresse erst nach dem letzten PDF, lehnt Dwello
   # das neue ab; die Fehlerseite nennt den Grund und führt zu den Einstellungen

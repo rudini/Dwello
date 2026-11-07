@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+// the page's first navigation is its mounting
+vi.mock('$app/navigation', async () => ({ afterNavigate: (await import('svelte')).onMount }));
 
 import SettingsPage from '../routes/config/+page.svelte';
 import { show } from './helpers/dom';

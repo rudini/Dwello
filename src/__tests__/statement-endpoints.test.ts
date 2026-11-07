@@ -183,7 +183,13 @@ describe('GET /statements/[id]/pdf', () => {
 		const pageFor = async (body: object, status = 400) =>
 			refusalOf(await get(async () => Response.json(body, { status })));
 
-		for (const code of ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID']) {
+		// persona Weber 690 W-1: also an incomplete Kontoinhaber
+		for (const code of [
+			'CREDITOR_ADDRESS_MISSING',
+			'ACCOUNT_HOLDER_MISSING',
+			'IBAN_MISSING',
+			'IBAN_INVALID'
+		]) {
 			expect({ code, settings: (await pageFor({ ...creditorRefused, code })).settings }).toEqual({
 				code,
 				settings: true

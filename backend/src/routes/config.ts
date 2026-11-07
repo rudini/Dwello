@@ -15,7 +15,7 @@ import {
 	type ConfigKey
 } from '../services/config.service';
 import { errorBody, fieldsRefused } from '../services/coded-error';
-import { creditorAddressMissing } from '../services/statement-pdf.service';
+import { paymentPartWarning } from '../services/statement-pdf.service';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values
@@ -26,8 +26,8 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 			keys: Object.keys(CONFIG_KEYS),
 			// #690: what the stored IBAN lacks, by the rule of the save; the settings mark it on opening
 			creditorMissing: await creditorMissing({ iban: config.iban ?? '' }),
-			// the Zahlteil's rule: the Kontoinhaber's address when one is entered (review 690-1 C-1)
-			creditorAddressMissing: await creditorAddressMissing()
+			// the warning of a statement with a Zahlteil: whose address is incomplete (review 690-1 C-1, Weber 690 W-1, W-2)
+			paymentPartWarning: await paymentPartWarning()
 		};
 	})
 

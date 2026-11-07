@@ -60,14 +60,14 @@
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
 			later?: ComponentProps<typeof LaterChanges>['later'] & { splitKeys: SplitKeyHint[] };
-			creditorMissing?: boolean; // #690: the stored IBAN lacks the Firmenadresse
+			creditorWarning?: string | null; // #690: the code of whose address a Zahlteil lacks
 		};
 		form: ActionData;
 	} = $props();
 
 	const statement = $derived(data.statement);
-	// #690: its PDF or a Mahnung gets a Zahlteil, which the stored IBAN's Firmenadresse lacks
-	const creditorMissing = $derived(data.creditorMissing === true && statement.paymentPart);
+	// #690: its PDF or a Mahnung gets a Zahlteil, and the settings lack an address it or the letterhead needs
+	const creditorWarning = $derived((statement.paymentPart && data.creditorWarning) || null);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
@@ -244,7 +244,7 @@
 
 	<Correction {statement} bind:open={showCorrect} />
 	<OldAddressWarning {statement} testid="statement-old-address" />
-	<CreditorAddressWarning shown={creditorMissing} />
+	<CreditorAddressWarning code={creditorWarning} />
 
 	<!-- a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120) -->
 	{#if data.later}

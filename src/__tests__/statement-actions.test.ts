@@ -300,8 +300,8 @@ describe('Abrechnung laden', () => {
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
 	});
 
-	// #690: der Zahlteil braucht die Firmenadresse; die Einstellungen sagen, ob ihr etwas fehlt
-	it('weiss, ob dem Zahlteil die Firmenadresse fehlt', async () => {
+	// #690: was einem Schreiben mit Zahlteil fehlt, sagt das Backend mit dem Code der Warnung (Weber 690 W-1, W-2)
+	it('weiss, wessen Adresse einem Schreiben mit Zahlteil fehlt', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');
 		const statementJson = (await import('../../tests/contracts/statement.json')).default;
 		const missing = (await import('../../tests/contracts/config-creditor-missing.json')).default;
@@ -316,15 +316,12 @@ describe('Abrechnung laden', () => {
 						return Response.json({ data: [] });
 					}) as typeof globalThis.fetch,
 					url: new URL('http://localhost/statements/s1')
-				} as never)) as { creditorMissing: boolean }
-			).creditorMissing;
+				} as never)) as { creditorWarning: unknown }
+			).creditorWarning;
 
-		// review 690-1 C-1: by the Zahlteil's rule, not the save's: a complete Kontoinhaber is the creditor
-		const holderComplete = { ...missing, creditorAddressMissing: false };
-		expect([await loaded(missing), await loaded(complete), await loaded(holderComplete)]).toEqual([
-			true,
-			false,
-			false
+		expect([await loaded(missing), await loaded(complete)]).toEqual([
+			'CREDITOR_ADDRESS_MISSING',
+			null
 		]);
 	});
 

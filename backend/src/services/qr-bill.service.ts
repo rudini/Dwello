@@ -332,13 +332,17 @@ async function generateQRCodeImage(
 }
 
 /**
- * The creditor of the Zahlteil: the Kontoinhaber (#1166), the Absender unless entered; null without name, postal code
- * or town, as the tenant would pay to no one known (#450)
+ * The creditor of the Zahlteil: the Kontoinhaber (#1166), the Absender unless entered; without name, postal code or
+ * town the tenant would pay to no one known (#450), refused naming whose address it is (persona Weber 690 W-1)
  */
-export function creditorOf(config: QRBillConfig) {
+function creditorOf(config: QRBillConfig) {
 	const creditor = config.accountHolder ?? { name: config.companyName, address: config.address, postalCode: config.postalCode, city: config.city };
-	return [creditor.name, creditor.postalCode, creditor.city].every((part) => part.trim()) ? creditor : null;
+	if ([creditor.name, creditor.postalCode, creditor.city].every((part) => part.trim())) return { creditor };
+	return { refused: config.accountHolder ? ('ACCOUNT_HOLDER_MISSING' as const) : ('CREDITOR_ADDRESS_MISSING' as const) };
 }
+
+/** #690: why a Zahlteil would be refused for its creditor's address, null when it would not */
+export const creditorRefusal = (config: QRBillConfig) => creditorOf(config).refused ?? null;
 
 /**
  * Generate complete QR-bill data for a statement
@@ -352,9 +356,8 @@ export async function generateQRBillForStatement(
 	qrCodeImage: Buffer;
 	reference: string;
 }> {
-	const creditor = creditorOf(config);
-	if (!creditor)
-		throw new CodedError('CREDITOR_ADDRESS_MISSING', 'Company name, postal code and town are required for the payment part');
+	const { creditor, refused } = creditorOf(config);
+	if (!creditor) throw new CodedError(refused, `${refused === 'ACCOUNT_HOLDER_MISSING' ? 'Account holder' : 'Company'} name, postal code and town are required for the payment part`);
 
 	// Validate IBAN
 	const ibanValidation = validateIBAN(config.iban);

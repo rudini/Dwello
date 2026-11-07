@@ -18,5 +18,5 @@
 		"reminder_after_days": "10"
 	},
 	"creditorMissing": [],
-	"creditorAddressMissing": false
+	"paymentPartWarning": null
 }
