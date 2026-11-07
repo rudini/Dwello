@@ -667,7 +667,11 @@ describe('Grund der Umlagefähigkeit', () => {
 		predefined: true
 	});
 	const lift = category('c3', 'Lift', true, 0, { key: 'Elevator', predefined: true });
-	const reasons = () => allByTestId('category-reason').map((reason) => reason.textContent!.trim());
+	// The wording; its protected spaces (#1028) are checked in i18n.test.ts
+	const reasons = () =>
+		allByTestId('category-reason').map((reason) =>
+			reason.textContent!.trim().replace(/\u00a0/g, ' ')
+		);
 
 	it('nennt in der Liste den Grund jeder vordefinierten Kategorie', () => {
 		show(CategoriesPage, { data: { categories: [fireExtinguisher, lift] }, form: null } as never);
@@ -755,14 +759,38 @@ describe('Grund der Umlagefähigkeit', () => {
 		expect(reasons()).toEqual([]);
 	});
 
-	// Art. 257a Abs. 2 OR, einmal für die ganze Liste (Fachreview H-14)
-	it('sagt in der Liste, dass der Mieter nur bezahlt, was der Mietvertrag nennt', () => {
-		show(CategoriesPage, { data: { categories: [lift] }, form: null } as never);
+	// Art. 257a Abs. 2 OR, einmal für die ganze Liste (Fachreview H-14); #1028 (Helga P-6): wo nachsehen,
+	// Wortlaut Fachreview 1028 (V-1: ohne die pauschal bezahlten, V-2), Verweis ohne Umbruch
+	it.each([
+		[
+			'de',
+			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art.\u00a0257a Absatz\u00a02 Obligationenrecht,\u00a0OR). Welche Kostenarten der Mietvertrag nennt, sehen Sie im unterschriebenen Mietvertrag. In Dwello halten Sie sie bei jedem Mietvertrag unter «Vereinbarte Nebenkosten» fest, ausser denen, die der Mieter mit einer Nebenkostenpauschale bezahlt.'
+		],
+		[
+			'fr',
+			'Le locataire ne paie les frais répercutables que si le contrat de bail mentionne chacun de ces types de frais séparément (art.\u00a0257a,\u00a0al.\u00a02, du Code des obligations,\u00a0CO). Vous trouvez les types de frais mentionnés dans le contrat de bail signé. Dans Dwello, vous les enregistrez pour chaque contrat de bail sous «\u00a0Frais accessoires convenus\u00a0», sauf ceux que le locataire paie par un forfait de frais accessoires.'
+		],
+		[
+			'it',
+			'L’inquilino paga i costi addebitabili solo se il contratto di locazione indica singolarmente ciascuno di questi tipi di costi (art.\u00a0257a cpv.\u00a02 del Codice delle obbligazioni,\u00a0CO). Trova i tipi di costi indicati nel contratto di locazione firmato. In Dwello li registra per ogni contratto di locazione in «Spese accessorie pattuite», tranne quelli che l’inquilino paga con un forfait per le spese accessorie.'
+		],
+		[
+			'en',
+			'The tenant pays allocable costs only if the rental contract names each of these cost types separately (Art.\u00a0257a para.\u00a02 Code of Obligations,\u00a0CO). You find the cost types it names in the signed rental contract. In Dwello, you record them for each rental contract under «Agreed utility costs», except those the tenant pays with a flat-rate utility charge.'
+		]
+	] as const)(
+		'sagt in der Liste (%s), wann der Mieter bezahlt und wo der Vertrag das nennt',
+		(locale, note) => {
+			overwriteGetLocale(() => locale);
+			try {
+				show(CategoriesPage, { data: { categories: [lift] }, form: null } as never);
 
-		expect(byTestId('category-contract-note')!.textContent).toContain(
-			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art. 257a Absatz 2 Obligationenrecht, OR).'
-		);
-	});
+				expect(byTestId('category-contract-note')!.textContent).toBe(note);
+			} finally {
+				overwriteGetLocale(() => baseLocale);
+			}
+		}
+	);
 
 	// Die Wahl im Formular zählt, nicht der gespeicherte Wert (Code-Review M-1)
 	it('nennt keinen festen Grund, sobald im Formular die andere Umlagefähigkeit gewählt ist', async () => {
