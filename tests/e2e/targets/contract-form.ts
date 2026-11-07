@@ -111,7 +111,7 @@ export const announcedMonthlyTotal = target('Ansage des Monatlich total', (page)
 );
 // #668 (Sven N-3): the question before leaving the edit form with unsaved changes
 export const leaveDialogTitle = target('Rückfrage vor dem Verlassen', (page) =>
-	page.getByRole('dialog').getByRole('heading')
+	page.getByRole('dialog').getByTestId('dialog-title')
 );
 export const discardChangesButton = target('Änderungen verwerfen', (page) =>
 	page.getByRole('dialog').getByTestId('contract-leave-confirm')
