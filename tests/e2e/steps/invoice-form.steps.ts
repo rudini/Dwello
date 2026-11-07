@@ -14,7 +14,7 @@ import {
 	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
 	servicePeriodHelpText,
-	toneOfNonAllocableCategoryNote,
+	tonesInNonAllocableCategoryNote,
 	utilityCostHelpText,
 	utilityCostMarkable
 } from '../questions/invoice-form';
@@ -125,7 +125,7 @@ Then(
 	'weist ein Hinweis ohne Warnung darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
 	async ({ verwalter }) => {
 		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
-		await verwalter.sees(toneOfNonAllocableCategoryNote).toBe('neutral');
+		await verwalter.sees(tonesInNonAllocableCategoryNote).toEqual([]);
 	}
 );
 

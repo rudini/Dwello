@@ -113,7 +113,6 @@
 				<div
 					class="flex flex-col gap-2 rounded-panel bg-sunken p-4"
 					data-testid="invoice-legal-note"
-					data-tone="neutral"
 				>
 					<p class="font-semibold text-ink">{m.invoices_legal_title()}</p>
 					<p class="text-ink-muted">{m.invoices_legal_text()}</p>

@@ -21,8 +21,8 @@ import {
 	tenancyLawNote,
 	tenancyLawNotes,
 	utilityCostOfInvoice,
-	toneOfTenancyLawNote,
-	toneOfUtilityCost
+	toneOfUtilityCost,
+	tonesInTenancyLawNote
 } from '../questions/invoice-detail';
 import { pageAddressInApp, statementPath } from '../questions/statements';
 import { thisYear } from '../fixtures/dates';
@@ -95,7 +95,7 @@ Then(
 	'erklärt ein Hinweis ohne Warnung, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst',
 	async ({ verwalter }) => {
 		await verwalter.sees(tenancyLawNote).toContain('Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein.');
-		await verwalter.sees(toneOfTenancyLawNote).toBe('neutral');
+		await verwalter.sees(tonesInTenancyLawNote).toEqual([]);
 	}
 );
 
