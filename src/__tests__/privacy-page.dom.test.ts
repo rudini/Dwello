@@ -459,11 +459,17 @@ describe('Datenschutzerklärung zu Kontoinhaber und IBAN im PDF', () => {
 	} as const;
 
 	for (const [locale, sentences] of Object.entries(SENTENCES))
-		for (const mail of ['smtp', 'resend'])
-			it(`nennt beides beim Versand über ${mail} auf ${locale}`, () => {
+		for (const [variant, mail, mailProvider] of [
+			['smtp', 'smtp', undefined],
+			['smtp mit Anbieter', 'smtp', { name: 'Muster Mail AG', country: 'Liechtenstein' }],
+			['resend', 'resend', undefined]
+		] as const)
+			it(`nennt beides beim Versand über ${variant} auf ${locale}`, () => {
 				overwriteGetLocale(() => locale as Locale);
 				try {
-					show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail } } as never);
+					show(PrivacyPage, {
+						data: { recipient: null, providers: ['Google'], mail, mailProvider }
+					} as never);
 
 					expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(sentences);
 				} finally {
