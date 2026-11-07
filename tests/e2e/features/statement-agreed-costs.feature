@@ -108,6 +108,14 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     # #439: «Weiter» ohne fertige Prüfung bleibt nicht stumm
     Und erklärt der Assistent "Dwello konnte die Mietverträge nicht prüfen. Wählen Sie «Erneut versuchen»."
 
+  # #1197 (Persona Helga P-1): «Weiter» bei gescheiterter Prüfung führt zu «Erneut versuchen», statt scheinbar nichts zu tun
+  Szenario: Nach «Weiter» bei gescheiterter Prüfung steht der Fokus auf «Erneut versuchen»
+    Angenommen das Prüfen der vereinbarten Nebenkosten ist gestört
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
+    Wenn der Liegenschaftsverwalter weitergeht
+    Dann bleibt der Assistent beim Schritt mit der Verwaltungspauschale
+    Und steht der Fokus auf «Erneut versuchen»
+
   # #439: nach «Weiter» geht der Assistent weiter, sobald die Prüfung gelingt
   Szenario: Nach erneuter Prüfung geht der Assistent zur Vorschau
     Angenommen das Prüfen der vereinbarten Nebenkosten ist gestört

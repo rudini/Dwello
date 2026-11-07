@@ -70,8 +70,9 @@ When('der Liegenschaftsverwalter die Prüfung erneut versucht, während sie noch
 	await verwalter.attemptsTo(agreementsCheckAgainInVain);
 });
 
-// #688: the button the landlord used keeps the focus while Dwello tries again and after it failed again
-Then('steht der Fokus weiter auf «Erneut versuchen»', async ({ verwalter }) => {
+// #688: the button the landlord used keeps the focus while Dwello tries again and after it failed again;
+// persona Helga 1197 P-1: «Weiter» after the check failed takes the focus there
+Then(/^steht der Fokus (?:weiter )?auf «Erneut versuchen»$/, async ({ verwalter }) => {
 	await verwalter.sees(focusedText).toBe('Erneut versuchen');
 });
 

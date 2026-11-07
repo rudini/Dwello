@@ -1338,6 +1338,22 @@ describe('Abrechnungen erstellen', () => {
 		expect(heading()).toBe('Vorschau');
 	});
 
+	// persona Helga 1197 P-1: «Weiter» after the check failed takes the focus to «Erneut versuchen», so the alert below scrolls into view
+	it('setzt nach «Weiter» bei gescheiterter Prüfung den Fokus auf «Erneut versuchen»', async () => {
+		globalThis.fetch = (async () => new Response('{}', { status: 500 })) as typeof fetch;
+		open();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+
+		next();
+		await settle();
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(document.activeElement).toBe(byTestId('agreements-retry'));
+	});
+
 	// #468: the agreed Nebenkosten and the contracts without a Verwaltungspauschale load after the step opens
 	it('lässt bei den Einstellungen erst weitergehen, wenn die Mietverträge geprüft sind', async () => {
 		const pending: Record<string, () => void> = {};
