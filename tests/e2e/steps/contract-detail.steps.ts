@@ -14,6 +14,7 @@ import {
 	endOfContract,
 	managementFeeOfContract,
 	missingStatementsText,
+	missingStatementButtonsShortOfRow,
 	missingStatementsShown,
 	billedUntilOfContract,
 	nextStepsText,
@@ -365,6 +366,15 @@ Then(
 		await verwalter.sees(missingStatementsText).toContain('«Abgerechnet bis» ein');
 	}
 );
+
+// #741: on a phone each button of a missing statement spans the warning, one below the other
+Then('reichen die Knöpfe der fehlenden Abrechnung {int} über die volle Breite der Warnung', async ({ verwalter }, year: number) => {
+	await verwalter.sees(missingStatementButtonsShortOfRow(`${year}-01-01`)).toEqual([0, 0]);
+});
+
+Then('erklärt der Mietvertrag die fehlenden Abrechnungen mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(missingStatementsText).toContain(text);
+});
 
 Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
 	await verwalter.sees(missingStatementsShown).toBe(false);
