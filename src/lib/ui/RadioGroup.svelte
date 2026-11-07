@@ -19,7 +19,7 @@
 		legend: string;
 		options: Option[];
 		value?: string;
-		help?: string;
+		help?: string | string[]; // several: one paragraph each
 		error?: string;
 		// the id of further text that explains the question, outside the group (#683)
 		describedby?: string;
@@ -51,9 +51,13 @@
 	{@attach sent.attach}
 >
 	<legend id="{name}-legend" class="mb-2 font-semibold text-ink">{legend}</legend>
-	{#if help}<p id="{name}-help" class="text-ink-muted" data-testid={testid && `${testid}-help`}>
-			{help}
-		</p>{/if}
+	{#if help}<div
+			id="{name}-help"
+			class="flex flex-col gap-2 text-ink-muted"
+			data-testid={testid && `${testid}-help`}
+		>
+			{#each [help].flat() as paragraph, i (i)}<p>{paragraph}</p>{/each}
+		</div>{/if}
 	{#each options as option, i (option.value)}
 		{@const id = `${name}-${i}`}
 		<label

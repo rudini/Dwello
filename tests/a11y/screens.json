@@ -116,7 +116,11 @@
 		"ki-unsure": "New category form after the KI was not sure: the hint to choose oneself, nothing preset (#176, #186).",
 		"ki-unavailable": "New category form after the KI could not be reached: the hint to try later or choose oneself, nothing preset (#186).",
 		"ki-checking": "New category form while the KI checks: the button busy, «Die KI prüft die Kategorie …» in the status region (#176, code review G-3).",
-		"ki-proposal-kept": "New category form where the Liegenschaftsverwalter chose before «Von der KI prüfen lassen»: the proposal says the own choice stays (#176, persona review).",
+		"ki-proposal-kept": "New category form where the Liegenschaftsverwalter chose before «Von der KI prüfen lassen»: the proposal says the KI sees it differently and the own choice stays (#176, persona review, #678).",
+		"ki-proposal-agrees": "New category form where the Liegenschaftsverwalter chose before «Von der KI prüfen lassen» as the KI does: the proposal says the KI sees it the same and the own choice stays (#678).",
+		"ki-unsure-kept": "New category form after the KI was not sure, with a choice made before: the hint that the own choice stays, checked against the rules (#678).",
+		"ki-outdated": "New category form renamed after «Von der KI prüfen lassen»: the proposal is gone, the KI's choice taken back, and the status region says so (#678).",
+		"ki-name-missing": "New category form after «Von der KI prüfen lassen» without a name: the refusal says the KI needs the name first (#678).",
 		"fuel-refused": "Edit form of a fuel category with a Tankbestand after saving it without «Brennstoff»: the refusal says both checkboxes stay and how to remove them (#100).",
 		"fuel": "New category form with «Heizkosten nach dem Heizprofil verteilen» ticked: the checkbox «Brennstoff» with its help (#100).",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
@@ -995,6 +999,10 @@
 				"ki-unsure",
 				"ki-unavailable",
 				"ki-proposal-kept",
+				"ki-proposal-agrees",
+				"ki-unsure-kept",
+				"ki-outdated",
+				"ki-name-missing",
 				"ki-checking",
 				"fuel"
 			]

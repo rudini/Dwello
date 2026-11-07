@@ -304,6 +304,10 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | category-new           | ki-unsure           |
       | category-new           | ki-unavailable      |
       | category-new           | ki-proposal-kept    |
+      | category-new           | ki-proposal-agrees  |
+      | category-new           | ki-unsure-kept      |
+      | category-new           | ki-outdated         |
+      | category-new           | ki-name-missing     |
       | category-new           | ki-checking         |
       | category-new           | fuel                |
       | category-edit          | default             |

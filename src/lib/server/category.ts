@@ -95,6 +95,9 @@ const options = {
 /** "Neue Kategorie": the German name also becomes the category's key */
 export async function createCategory(fetch: typeof globalThis.fetch, request: Request) {
 	const { body, errors } = parseCategory(await request.formData());
+	// #678 (Helga P-6): unsure which to choose, the KI can check it
+	if (errors.isAllowedUtilityCost && (await kiEnabled(fetch)))
+		errors.isAllowedUtilityCost = m.categories_error_allocable_required_ki();
 	return saveRecord(
 		fetch,
 		API,
@@ -107,7 +110,7 @@ export async function createCategory(fetch: typeof globalThis.fetch, request: Re
 /** "Von der KI prüfen lassen": asks the KI with the name and description the form holds */
 export async function proposeAllocability(fetch: typeof globalThis.fetch, request: Request) {
 	const { body, errors } = parseCategory(await request.formData());
-	if (errors.name) return fail(400, { errors: { name: errors.name } });
+	if (errors.name) return fail(400, { errors: { name: m.categories_error_name_required_ki() } });
 	const response = await fetch(`${API}/propose`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -118,6 +121,7 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 		})
 	});
 	const answer = await response.json().catch(() => null);
+	const unsure = answer?.code === 'KI_PROPOSAL_UNSURE';
 	// Without a proposal the backend says whether the KI is unsure or not reachable (#186); any other refusal, in its
 	// own words, counts as not reachable
 	const proposal: Proposal =
@@ -131,10 +135,8 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 			: {
 					name: body.nameDE,
 					description: body.description,
-					error:
-						answer?.code === 'KI_PROPOSAL_UNSURE'
-							? m.backend_ki_proposal_unsure()
-							: m.backend_ki_proposal_unavailable()
+					error: unsure ? m.backend_ki_proposal_unsure() : m.backend_ki_proposal_unavailable(),
+					...(unsure && { unsure }) // #678 (Helga P-10): a choice made stays, and the form says so
 				};
 	return { proposal };
 }

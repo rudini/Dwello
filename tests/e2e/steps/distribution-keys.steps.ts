@@ -11,10 +11,12 @@ import {
 	shareOfSample
 } from '../questions/distribution-keys';
 import { pageTitle } from '../questions/navigation';
+import { confirmedNames } from '../questions/app-frame';
 import {
 	changeFormula,
 	createDistributionKey,
 	createDistributionKeyInFrench,
+	createDistributionKeyWithEnter,
 	deleteDistributionKey,
 	openDistributionKeyEdit,
 	openDistributionKeys,
@@ -61,6 +63,13 @@ When(
 	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} erfasst',
 	async ({ verwalter, seed }, title: string, formula: string) => {
 		await verwalter.attemptsTo(createDistributionKey(seed.unique(title), formula));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} mit der Eingabetaste speichert',
+	async ({ verwalter, seed }, title: string, formula: string) => {
+		await verwalter.attemptsTo(createDistributionKeyWithEnter(seed.unique(title), formula));
 	}
 );
 
@@ -148,3 +157,8 @@ Then(
 		);
 	}
 );
+
+// #678: the confirmation names the key as the list does, in the UI language
+Then('nennt die Bestätigung den Verteilschlüssel {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(confirmedNames).toEqual([names.get(title)]);
+});

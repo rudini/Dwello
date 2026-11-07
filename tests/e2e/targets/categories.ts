@@ -16,6 +16,9 @@ export const heatingCheckbox = target('Heizkosten nach dem Heizprofil verteilen'
 export const fuelCheckbox = target('Brennstoff', (page) => page.getByTestId('category-fuel-checkbox'));
 export const proposeButton = target('Von der KI prüfen lassen', (page) => page.getByTestId('category-propose-button'));
 export const proposal = target('Vorschlag der KI', (page) => page.getByTestId('category-proposal'));
+// #678: what Dwello says about the KI's check, also once no proposal holds any more
+export const proposalRegion = target('Prüfung durch die KI', (page) => page.getByTestId('category-proposal-region'));
+export const proposalOutdated = target('Hinweis auf die geänderte Kategorie', (page) => page.getByTestId('category-proposal-outdated'));
 export const submitButton = target('Kategorie speichern', (page) => page.getByTestId('category-submit'));
 export const editButton = (name: string) =>
 	target(`Kategorie ${name} bearbeiten`, (page) => categoryRow(name).locate(page).getByTestId('category-edit-button'));

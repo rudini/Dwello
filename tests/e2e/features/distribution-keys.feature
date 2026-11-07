@@ -19,6 +19,13 @@ Funktionalität: Verteilschlüssel
     Dann ist der Liegenschaftsverwalter auf der Seite "Verteilschlüssel"
     Und verteilt der Verteilschlüssel "Nach Zimmern" nach der Formel "{rooms}"
 
+  # #678 (entschieden): die Eingabetaste speichert, «Formel testen» läuft nur auf Wunsch
+  Szenario: Die Eingabetaste speichert den Verteilschlüssel
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Zimmern" mit der Formel "{rooms}" mit der Eingabetaste speichert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Verteilschlüssel"
+    Und verteilt der Verteilschlüssel "Nach Zimmern" nach der Formel "{rooms}"
+
   # #461 (#345, 3b): ein eigener Verteilschlüssel bekommt seinen Namen auf Französisch, Italienisch und Englisch
   Szenario: Eigener Verteilschlüssel mit französischem Namen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
@@ -26,6 +33,13 @@ Funktionalität: Verteilschlüssel
     Dann ist der Liegenschaftsverwalter auf der Seite "Verteilschlüssel"
     Wenn der Liegenschaftsverwalter die Sprache "Français" wählt
     Dann zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Selon le volume"
+
+  # #678 (Persona Marco): wie die Liste nennt die Bestätigung den Verteilschlüssel in der Sprache der Oberfläche
+  Szenario: Die Bestätigung nennt den Verteilschlüssel in der Sprache der Oberfläche
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Sprache "Français" wählt
+    Und der Liegenschaftsverwalter den Verteilschlüssel "Nach Volumen" mit der Formel "{volume}" und dem französischen Namen "Selon le volume" erfasst
+    Dann nennt die Bestätigung den Verteilschlüssel "Selon le volume"
 
   # #655: die Ablehnung steht am Feld Name, wie bei den Kategorien
   Szenario: Name ist schon vergeben

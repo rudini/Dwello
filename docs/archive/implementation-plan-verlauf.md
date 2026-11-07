@@ -1373,6 +1373,16 @@ Branch `ccr-33d8e016-x8cm7h`. No scenario: test tooling of the axe and language 
 
 - [x] `README.md`: first paragraph says what Dwello is (English and the German sentence of dwello.ch), links to dwello.ch, the demo and the installation guide; the stale «Status» and «Version» lines are gone
 - [x] PR: pushed after this archive
+## Session: #678 category allocability help and KI check feedback (personas on #176)
+
+- [x] Read #678 (Enter decided by the product owner); Sven P-7, P-8, P-10 already fixed on main; E-12 (save during the KI check) kept as decided; only Sven's and Helga R2's #176 reports in the history
+- [x] @wip scenarios and red DOM tests (bb3c361); coordinator decisions F1, F2 (help part of #1028 here), F4–F7 recorded in #678; #1182, #1183 opened
+- [x] fach-reviewer step 1 (`docs/reviews/678-1-fach-review.md`): M-1, V-1..V-3 Minor fixed
+- [x] Enter submits the save action in SaveForm, help in paragraphs, KI feedback, toast in the UI language (7c24245)
+- [x] code-reviewer (`docs/reviews/678-review-1.md`): C-1..C-3 Major and C-4 fixed (2cf3607); round 2 without findings
+- [x] Personas Helga, Sven (`docs/design/personas/{helga,sven}-678.md`): P-4..P-11 fixed; H-2 fixed; Minors that stay: Helga H-1, Sven S-1
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
 
 ## Session: #1166 Kontoinhaber for the QR payment part
 

@@ -64,5 +64,9 @@ export const roomAroundConfirmation = roomBesideConfirmation(focusedPart);
 export const pageMovedUntilConfirmationLeft = ThePage.movedUntilGone(newestSuccessToast);
 /** #1096: every confirmation the page shows, oldest first */
 export const shownConfirmations = Text.ofAll(successToast);
+/** #678: the names of the records the confirmations name in «», e.g. in the UI language */
+export const confirmedNames = question('the names the confirmations give', async (actor) =>
+	(await shownConfirmations.answeredBy(actor)).map((text) => text.match(/«\s*(.+?)\s*»/)?.[1] ?? text)
+);
 /** #1096: what the part with the focus says, e.g. the name of a row's link */
 export const focusedText = Text.of(focusedPart);
