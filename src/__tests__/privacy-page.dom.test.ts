@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import PrivacyPage from '../routes/privacy/+page.svelte';
 import { byTestId, show } from './helpers/dom';
+import { baseLocale, overwriteGetLocale, type Locale } from '$lib/paraglide/runtime';
 import de from '../../messages/de.json';
 import en from '../../messages/en.json';
 import fr from '../../messages/fr.json';
@@ -447,6 +448,36 @@ describe('Datenschutzerklärung zum E-Mail-Versand', () => {
 	});
 });
 
+// #1176 (Fachreview 1176-1 R-1, R-3, R-5): every mail text, in every language, names the IBAN of the reminders and the
+// Kontoinhaber of the QR-bill
+describe('Datenschutzerklärung zu Kontoinhaber und IBAN im PDF', () => {
+	const SENTENCES = {
+		de: 'Ist eine IBAN erfasst, enthalten auch Zahlungserinnerung und Mahnung IBAN und Zahlungsreferenz. Nennt die QR-Rechnung einen anderen Kontoinhaber als den Absender, enthält das PDF auch dessen Name und Adresse.',
+		fr: 'Si un IBAN est saisi, le rappel de paiement et le rappel suivant contiennent eux aussi l’IBAN et la référence de paiement. Si la QR-facture indique un titulaire du compte autre que l’expéditeur, le PDF contient aussi son nom et son adresse.',
+		it: 'Se è registrato un IBAN, anche il promemoria e il sollecito contengono IBAN e riferimento di pagamento. Se la QR-fattura indica un titolare del conto diverso dal mittente, il PDF contiene anche il suo nome e indirizzo.',
+		en: 'If an IBAN is entered, payment reminders and further reminders also contain the IBAN and payment reference. If the QR-bill names an account holder other than the sender, the PDF also contains their name and address.'
+	} as const;
+
+	for (const [locale, sentences] of Object.entries(SENTENCES))
+		for (const [variant, mail, mailProvider] of [
+			['smtp', 'smtp', undefined],
+			['smtp mit Anbieter', 'smtp', { name: 'Muster Mail AG', country: 'Liechtenstein' }],
+			['resend', 'resend', undefined]
+		] as const)
+			it(`nennt beides beim Versand über ${variant} auf ${locale}`, () => {
+				overwriteGetLocale(() => locale as Locale);
+				try {
+					show(PrivacyPage, {
+						data: { recipient: null, providers: ['Google'], mail, mailProvider }
+					} as never);
+
+					expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(sentences);
+				} finally {
+					overwriteGetLocale(() => baseLocale);
+				}
+			});
+});
+
 // Persona Helga 458 P-1: the landlord can link his tenants to the sections the terms tell him to pass on
 describe('Sprungmarken der Datenschutzerklärung', () => {
 	it('gibt jedem Abschnitt eine Sprungmarke', () => {
@@ -469,7 +500,7 @@ describe('Stand der Datenschutzerklärung', () => {
 	it('nennt den Stand in der Sprache der Oberfläche', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
-		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 29. Oktober 2026');
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 7. November 2026');
 	});
 });
 

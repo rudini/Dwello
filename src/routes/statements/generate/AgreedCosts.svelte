@@ -56,7 +56,12 @@
 	const asked = $derived(contracts.filter((contract) => contract.open.length));
 	const notAgreed = $derived(contracts.filter((contract) => contract.notAgreed.length));
 	$effect(() => {
-		noted = status === 'failed' || asked.length > 0 || notAgreed.length > 0;
+		// a retry keeps the alert while it loads (#688, review C-2)
+		noted =
+			status === 'failed' ||
+			(attempt > 0 && status === 'loading') ||
+			asked.length > 0 ||
+			notAgreed.length > 0;
 	});
 	$effect(() => {
 		loading = status === 'loading';
@@ -71,7 +76,7 @@
 	});
 </script>
 
-<AgreementsCheck {status} {error} onretry={() => attempt++} />
+<AgreementsCheck {status} {attempt} {error} onretry={() => attempt++} />
 
 {#if asked.length}
 	<Alert tone="caution" title={m.statements_agreements_title()} testid="agreement-questions">

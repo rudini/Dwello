@@ -116,6 +116,21 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Und der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht
     Dann enthält die Vorschau die Abrechnung von "Anna Keller"
 
+  # #688 (Persona Helga P-3, Sven P-2): ein erneuter Fehlschlag sagt, dass Dwello es erneut versucht hat
+  Szenario: Auch die erneute Prüfung der vereinbarten Nebenkosten scheitert
+    Angenommen das Prüfen der vereinbarten Nebenkosten ist gestört
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
+    Wenn der Liegenschaftsverwalter die Prüfung erneut versucht, während sie noch gestört ist
+    Dann meldet der Assistent bei den vereinbarten Nebenkosten "Dwello hat es erneut versucht und konnte die Mietverträge wieder nicht prüfen."
+    Und steht der Fokus weiter auf «Erneut versuchen»
+
+  # #688 (Persona Sven P-2, P-5): die gelungene erneute Prüfung wird gemeldet, der Fokus fällt nicht auf die Seite
+  Szenario: Nach der erneuten Prüfung meldet der Assistent, dass die Mietverträge geprüft sind
+    Angenommen das Prüfen der vereinbarten Nebenkosten ist gestört
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
+    Wenn der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht
+    Dann steht der Fokus auf dem Status "Die Mietverträge sind geprüft."
+
   # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

@@ -168,6 +168,8 @@ export const openContractWithNotAgreedCosts = (contractId: string): Activity => 
 // saving an answer fails (the BFF route the browser calls)
 export const agreementsCannotBeChecked = FailRequests.to('/api/statements/agreements', {});
 export const agreementsCheckAgain: Activity = (actor) => actor.attemptsTo(FailRequests.noLonger, Click.on(agreementsRetry));
+// #688: while it still fails
+export const agreementsCheckAgainInVain = Click.on(agreementsRetry);
 export const agreementsCannotBeSaved = (contractId: string) => FailRequests.to(`/api/contracts/${contractId}/agreements`, {});
 
 export const chooseAllBuildings = Check.the(allBuildingsCheckbox);
