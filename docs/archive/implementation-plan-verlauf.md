@@ -1474,3 +1474,12 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #705 ponytail shortcut in missingByContract
+
+- [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
+- [x] Decision in #705 «Decided (product owner)»: fix now with `limit: null`; the other whole-list calls are #1229
+- [x] pg test «nennt auch bei über 1000 Mietverträgen und Abrechnungen …» seen red at each list (contract, then statement); `limit: null` in both lists, marker removed (c35d25c); `ANALYZE` in the test's cleanup against stale planner statistics
+- [x] code-reviewer `docs/reviews/705-review-1.md`: Minor C-1 (comment) fixed
+- [x] No scenario: backend only, nothing a screen shows changes under 1000 records; covered by the pg test
+- [x] Workflow note `docs/reviews/workflow-notes-issue-705.md`
+- [x] Archive the session; PR `Fixes #705`: pushed after this archive

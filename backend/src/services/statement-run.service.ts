@@ -118,7 +118,7 @@ export async function missingOfContract(id: string) {
 /** #211: per contract id, the ended periods without a statement, as on the contract page */
 export async function missingByContract(listed?: Awaited<ReturnType<typeof listContracts>>['contracts']) {
 	// every contract and statement, none dropped by a limit (#705); the Übersicht hands in the contracts it listed
-	// (#506: one query less for its open Überträge)
+	// (#506: one query less for its open Überträge), still limited there (#1229)
 	const [types, contracts, { statements }] = await Promise.all([
 		typesByBuilding(),
 		listed ?? listContracts({ limit: null }).then((list) => list.contracts),
