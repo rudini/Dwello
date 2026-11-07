@@ -270,7 +270,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
 
   # #1179 (Helga P-2): auf einem schmalen Bildschirm stehen alle Schritte mit Namen untereinander
-  @wip
   Szenario: Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte
     Angenommen das Browserfenster ist 390 auf 844 Pixel gross
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt

@@ -931,7 +931,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #1179 (Dr. Weber P-4 bis P-6, Helga P-3, P-4): auf einem schmalen Bildschirm stehen alle Schritte mit Namen
   # untereinander, die erledigten mit ihrer Wahl
-  @wip
   Szenario: Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte
     Angenommen das Browserfenster ist 390 auf 844 Pixel gross
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit 3 % Verwaltungspauschale öffnet
