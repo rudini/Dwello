@@ -1518,7 +1518,7 @@ The Abrechnungsperiode is no setting: it belongs to each building (building form
 
 **Internationalization (i18n)**
 
-**Library:** Paraglide JS (`@inlang/paraglide-js`, options in `paraglide.config.ts`) for the UI; the backend's own texts for the statement PDFs (`backend/src/services/pdf.service.ts`)
+**Library:** Paraglide JS (`@inlang/paraglide-js`, options in `paraglide.config.ts`) for the UI; the backend's own texts for the statement PDFs (`backend/src/services/pdf-texts/*.ts`)
 - **Purpose:** UI texts and tenant-facing statement PDFs
 - **Languages:** UI, statement PDFs and reminders in German, French, Italian, English
 - **Format:** one JSON file per language, `messages/{de,fr,it,en}.json` (German the base)
