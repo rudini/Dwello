@@ -71,6 +71,12 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter die Formel "{area} - 100" testet
     Dann zeigt der Test nur den Fehler "Für eine Wohnung ergibt die Formel einen negativen Wert, meist weil sie dort zu viel abzieht. Prüfen Sie, was nach «-» steht."
 
+  # #737 (Fachprüfung 737-2 V-3): auch null für alle Wohnungen sagt, was zu prüfen ist
+  Szenario: Formel testen, die für alle Wohnungen null ergibt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{units} - 1" testet
+    Dann zeigt der Test nur den Fehler "Die Formel ergibt für alle Wohnungen null, so lassen sich keine Anteile berechnen. Prüfen Sie, ob sie mit 0 malnimmt oder {units} - 1 enthält ({units} ist für jede Wohnung 1)."
+
   # #737: «Formel testen» und das Speichern prüfen mit denselben vier Beispielwohnungen wie die Tabelle;
   # die Formel teilt nur bei 80 m² durch null, einer Fläche, die keine Beispielwohnung hat
   Szenario: Der Test prüft mit den Beispielwohnungen seiner Tabelle

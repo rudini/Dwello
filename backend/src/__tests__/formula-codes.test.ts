@@ -41,6 +41,16 @@ describe('Fehlercodes der Formel', () => {
 		]);
 	});
 
+	// #737 (Fachprüfung 737-2 V-3): zero for every apartment says what to check
+	it('nennt eine Formel, die für alle Wohnungen null ergibt, mit dem, was zu prüfen ist', () => {
+		const result = validateFormulaForDistribution('{units} - 1');
+
+		expect(result.errorCodes).toEqual([{ code: 'FORMULA_ALL_ZERO', params: {} }]);
+		expect(result.errors).toEqual([
+			'Die Formel ergibt für alle Wohnungen null, so lassen sich keine Anteile berechnen. Prüfen Sie, ob sie mit 0 malnimmt oder {units} - 1 enthält ({units} ist für jede Wohnung 1).'
+		]);
+	});
+
 	// #737: saving checked three sample apartments (one with 80 m²), «Formel testen» shows four
 	it('prüft beim Speichern mit den vier Beispielwohnungen von «Formel testen»', () => {
 		const formula = '1 / (({area} - 80) * ({area} - 80))';
