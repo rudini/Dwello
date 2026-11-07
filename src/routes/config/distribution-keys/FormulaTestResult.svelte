@@ -9,7 +9,7 @@
 
 <div class="flex flex-col gap-4" role="status" data-testid="formula-test-result">
 	{#if test.errors.length}
-		<Alert tone="critical" title={m.keys_test_failed()}>
+		<Alert tone="critical" title={m.keys_test_failed_title()} titleId="formula-test-failed-title">
 			{#each test.errors as message (message)}
 				<p data-testid="formula-test-error">{message}</p>
 			{/each}

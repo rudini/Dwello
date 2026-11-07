@@ -128,7 +128,9 @@ describe('Neuer Verteilschlüssel', () => {
 			status: 400,
 			data: {
 				errors: {
-					formula: expect.stringContaining('{persons}') // TODO-737: exact text after the fach-reviewer round
+					// one sentence, without «La formule n’est pas valable :» before it (#737)
+					formula:
+						'Élément inconnu {persons}. Les éléments autorisés sont {area}, {rooms}, {volume}, {units} et leurs sommes comme {area_total}.'
 				}
 			}
 		});

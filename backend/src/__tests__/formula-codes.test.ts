@@ -39,9 +39,9 @@ describe('Fehlercodes der Formel', () => {
 		expect(result.errors).toEqual(['Die Formel ergibt einen negativen Wert.']);
 	});
 
-	// #737: saving checked three sample apartments (one with 3.5 rooms), «Formel testen» shows four
+	// #737: saving checked three sample apartments (one with 80 m²), «Formel testen» shows four
 	it('prüft beim Speichern mit den vier Beispielwohnungen von «Formel testen»', () => {
-		const formula = '1 / (({rooms} - 3.5) * ({rooms} - 3.5))';
+		const formula = '1 / (({area} - 80) * ({area} - 80))';
 
 		expect(validateFormulaForDistribution(formula).errorCodes).toEqual([]);
 		expect(validateFormulaForDistribution('{area} / (({rooms} - 3) * ({rooms} - 3))').errorCodes).toEqual([

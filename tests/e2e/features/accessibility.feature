@@ -325,6 +325,7 @@ Funktionalität: Barrierefreiheit
       | distribution-key-new   | default             |
       | distribution-key-new   | submit-empty        |
       | distribution-key-new   | formula-tested      |
+      | distribution-key-new   | formula-test-failed |
       | distribution-key-edit  | default             |
       | distribution-key-edit  | submit-cleared      |
       | distribution-keys      | delete-dialog       |

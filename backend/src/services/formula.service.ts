@@ -68,24 +68,6 @@ export interface EvaluationResult {
 const coded = (code: string, error: string, params: ErrorParams = {}) => ({ error, errorCode: { code, params } });
 
 /**
- * Test case for formula testing
- */
-interface FormulaTestCase {
-	label: string;
-	/** Code of the label, e.g. FORMULA_SAMPLE_SMALL */
-	sample: string;
-	variables: FormulaVariables;
-}
-
-/**
- * Result of formula test
- */
-interface FormulaTestResult {
-	testCase: FormulaTestCase;
-	result: EvaluationResult;
-}
-
-/**
  * Parse a formula and extract variables
  */
 export function parseFormula(formula: string): ParseResult {
@@ -251,38 +233,13 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 	}
 }
 
-/**
- * Test a formula against multiple test cases
- */
-function testFormula(formula: string, testCases: FormulaTestCase[]): FormulaTestResult[] {
-	return testCases.map((testCase) => ({
-		testCase,
-		result: evaluateFormula(formula, testCase.variables)
-	}));
-}
-
-/**
- * Default test cases for formula validation
- */
-function getDefaultTestCases(): FormulaTestCase[] {
-	return [
-		{
-			label: 'Kleine Wohnung (50 m², 2 Zimmer)',
-			sample: 'FORMULA_SAMPLE_SMALL',
-			variables: { area: 50, rooms: 2, volume: 125, units: 1 }
-		},
-		{
-			label: 'Mittlere Wohnung (80 m², 3.5 Zimmer)',
-			sample: 'FORMULA_SAMPLE_MEDIUM',
-			variables: { area: 80, rooms: 3.5, volume: 200, units: 1 }
-		},
-		{
-			label: 'Grosse Wohnung (120 m², 5 Zimmer)',
-			sample: 'FORMULA_SAMPLE_LARGE',
-			variables: { area: 120, rooms: 5, volume: 300, units: 1 }
-		}
-	];
-}
+/** The sample apartments of «Formel testen», which also stand for a building when a key is saved (#737) */
+export const SAMPLE_APARTMENTS: FormulaVariables[] = [
+	{ area: 50, rooms: 2, units: 1 },
+	{ area: 75, rooms: 3, units: 1 },
+	{ area: 100, rooms: 4, units: 1 },
+	{ area: 120, rooms: 5, units: 1 }
+];
 
 /** Each apartment with the building's sums of every variable (volume estimated from the area, 1 unit per apartment) */
 function withTotals(apartments: FormulaVariables[]): FormulaVariables[] {
@@ -365,64 +322,23 @@ export function calculateDistribution(
 }
 
 /**
- * Validate a formula is suitable for distribution calculations
+ * Validate a formula is suitable for distribution calculations: it reads, and it gives each sample apartment a share
  */
 export function validateFormulaForDistribution(formula: string): {
 	isValid: boolean;
 	errors: string[];
 	errorCodes: ErrorCode[];
-	warnings: string[];
 } {
-	const errors: string[] = [];
-	const errorCodes: ErrorCode[] = [];
-	const fail = ({ error, errorCode }: { error?: string; errorCode?: ErrorCode }) => {
-		errors.push(error!);
-		errorCodes.push(errorCode!);
-	};
-	const warnings: string[] = [];
-
-	// Parse formula
 	const parseResult = parseFormula(formula);
 	if (!parseResult.isValid) {
-		return { isValid: false, errors: parseResult.errors, errorCodes: parseResult.errorCodes, warnings };
+		return { isValid: false, errors: parseResult.errors, errorCodes: parseResult.errorCodes };
 	}
 
-	// Test with default cases, which together stand for a building
-	const cases = getDefaultTestCases();
-	const variables = withTotals(cases.map((tc) => tc.variables));
-	// A formula the engine cannot read fails for any values: say so once, not per sample apartment
-	const firstTry = evaluateFormula(formula, variables[0]);
-	if (firstTry.errorCode?.code === 'FORMULA_NOT_COMPUTABLE') {
-		fail(firstTry);
-		return { isValid: false, errors, errorCodes, warnings };
-	}
-	const testResults = testFormula(
-		formula,
-		variables.map((v, i) => ({ ...cases[i], variables: v }))
-	);
-
-	for (const testResult of testResults) {
-		const { label, sample } = testResult.testCase;
-		if (!testResult.result.isValid) {
-			const { code, params } = testResult.result.errorCode!;
-			fail(coded('FORMULA_SAMPLE_FAILED', `${label}: ${testResult.result.error}`, { ...params, sample, reason: code }));
-		} else if (testResult.result.value < 0) {
-			fail(coded('FORMULA_SAMPLE_NEGATIVE', `Die Formel ergibt für das Beispiel «${label}» einen negativen Wert.`, { sample }));
-		} else if (testResult.result.value === 0) {
-			warnings.push(`Die Formel ergibt für die ${testResult.testCase.label} null.`);
-		}
-	}
-
-	// Check if formula produces reasonable distribution
-	const testApts = getDefaultTestCases().map((tc) => tc.variables);
-	const distribution = calculateDistribution(formula, testApts, 1000);
-
-	if (!distribution.isValid) fail(distribution);
-
-	return {
-		isValid: errors.length === 0,
-		errors,
-		errorCodes,
-		warnings
-	};
+	// A formula the engine cannot read fails for any values: say so as it is, not as the failure of one apartment
+	const [sample] = withTotals(SAMPLE_APARTMENTS);
+	const firstTry = evaluateFormula(formula, sample);
+	const failure = firstTry.errorCode?.code === 'FORMULA_NOT_COMPUTABLE' ? firstTry : calculateDistribution(formula, SAMPLE_APARTMENTS, 1000);
+	// one error, also when it depends on the values and holds for several sample apartments (#737)
+	if (failure.errorCode) return { isValid: false, errors: [failure.error!], errorCodes: [failure.errorCode] };
+	return { isValid: true, errors: [], errorCodes: [] };
 }

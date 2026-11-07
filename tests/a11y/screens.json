@@ -114,6 +114,7 @@
 		"buildings-counts-failed": "Statement wizard step «Gebäude» when neither the invoice count nor the existing statements load: the note saying so (#738).",
 		"buildings-other-period": "Statement wizard step «Gebäude» with a building that bills another Abrechnungsperiode than the chosen one: the building cannot be chosen, the text names its period and what to choose in step 1 (#1088).",
 		"formula-tested": "Distribution key form after testing a formula.",
+		"formula-test-failed": "Distribution key form after testing a formula that gives no number for an apartment: one error under «Der Test hat einen Fehler gefunden» (#737).",
 		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
 		"ki-unsure": "New category form after the KI was not sure: the hint to choose oneself, nothing preset (#176, #186).",
 		"ki-unavailable": "New category form after the KI could not be reached: the hint to try later or choose oneself, nothing preset (#186).",
@@ -1060,7 +1061,8 @@
 			"states": [
 				"default",
 				"submit-empty",
-				"formula-tested"
+				"formula-tested",
+				"formula-test-failed"
 			]
 		},
 		{

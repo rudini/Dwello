@@ -234,13 +234,6 @@ describe('Formula Service', () => {
 			const result = validateFormulaForDistribution('not a formula');
 			expect(result.isValid).toBe(false);
 		});
-
-		it('should warn about zero results', () => {
-			// A formula that could give zero for some apartments
-			const result = validateFormulaForDistribution('{rooms} - 2');
-			expect(result.errors).toEqual([]);
-			expect(result.warnings).toEqual(['Die Formel ergibt für die Kleine Wohnung (50 m², 2 Zimmer) null.']);
-		});
 	});
 
 	describe('FORMULA_VARIABLES', () => {
