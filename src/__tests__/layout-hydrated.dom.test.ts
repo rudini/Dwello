@@ -81,9 +81,13 @@ describe('Ansage des Seitentitels', () => {
 		show(Layout, { data: { user: null }, children } as never);
 		document.title = 'Lea Frei - Dwello';
 		const [callback] = vi.mocked(afterNavigate).mock.lastCall!;
-		callback({ type: 'goto', from: { url: new URL(from) }, to: { url: new URL(to) } } as never);
-		await tick();
-		return document.querySelector('[data-testid="page-title-announcer"]')!;
+		const go = async (from: string, to: string) => {
+			callback({ type: 'goto', from: { url: new URL(from) }, to: { url: new URL(to) } } as never);
+			await tick();
+		};
+		await go(from, to);
+		const announcer = document.querySelector('[data-testid="page-title-announcer"]')!;
+		return Object.assign(announcer, { go });
 	}
 
 	it('sagt nach dem Wechsel auf eine andere Seite deren Titel an', async () => {
@@ -92,6 +96,20 @@ describe('Ansage des Seitentitels', () => {
 			'assertive',
 			'Lea Frei - Dwello'
 		]);
+	});
+
+	// fallback review of #1207: two tenants of the same name, the live region must change to be read
+	it('sagt den Titel auch an, wenn die andere Seite gleich heisst', async () => {
+		const announcer = await navigate('http://localhost/tenants', 'http://localhost/tenants/7');
+		const heard: string[] = [];
+		new MutationObserver(() => heard.push(announcer.textContent ?? '')).observe(announcer, {
+			childList: true,
+			characterData: true,
+			subtree: true
+		});
+		await announcer.go('http://localhost/tenants/7', 'http://localhost/tenants/8');
+		await tick();
+		expect(heard.at(-1)).toBe('Lea Frei - Dwello');
 	});
 
 	// SvelteKit's announcer reads the title also after a form action, when the page store changes

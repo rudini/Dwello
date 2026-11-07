@@ -73,8 +73,11 @@
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
 		const { from, to } = navigation;
-		if (from && from.url.pathname !== to?.url.pathname)
+		// emptied first, so a page of the same title is read out too (fallback review of #1207)
+		if (from && from.url.pathname !== to?.url.pathname) {
+			pageTitle = '';
 			tick().then(() => (pageTitle = document.title));
+		}
 		// a filter select, or a link that keeps the focus (the status tiles, #1162), stays where it is
 		const keep =
 			document.activeElement instanceof HTMLSelectElement ||
