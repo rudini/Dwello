@@ -19,7 +19,11 @@ const page = vi.hoisted(() => {
 	};
 });
 vi.mock('$app/stores', () => ({ page: page.store }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	afterNavigate: vi.fn(),
+	beforeNavigate: vi.fn()
+}));
 
 async function signedOut(path: string) {
 	const { default: Layout } = await import('../routes/+layout.svelte');

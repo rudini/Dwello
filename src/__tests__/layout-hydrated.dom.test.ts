@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createRawSnippet } from 'svelte';
-import { afterNavigate } from '$app/navigation';
+import { createRawSnippet, flushSync, tick } from 'svelte';
+import { afterNavigate, beforeNavigate } from '$app/navigation';
 import { show } from './helpers/dom';
 
 vi.mock('$app/stores', () => ({
@@ -11,7 +11,11 @@ vi.mock('$app/stores', () => ({
 		)
 	}
 }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	afterNavigate: vi.fn(),
+	beforeNavigate: vi.fn()
+}));
 
 // E2E steps type and click once body[data-hydrated] is set (tests/e2e/screenplay/interactions.ts). SvelteKit starts
 // its router after the root layout has mounted, in the same task: a submit before that is lost in Firefox (#869)
@@ -54,8 +58,78 @@ describe('Fokus nach der Suche in einer Liste', () => {
 		expect(document.activeElement).toBe(document.querySelector('[data-sveltekit-keepfocus]'));
 	});
 
+	// #662 (persona Sven S-1): with the focus in the filter, the result is read out in a polite status
+	it('sagt das Ergebnis an, wenn der Fokus im Filter bleibt', async () => {
+		await navigate('select');
+		await tick();
+
+		const status = document.querySelector('[data-testid="list-result-status"]')!;
+		expect([status.getAttribute('role'), status.textContent]).toEqual(['status', '2 Ergebnisse']);
+	});
+
 	it('setzt den Fokus sonst auf die Ergebnisse', async () => {
 		await navigate('body');
 		expect(document.activeElement).toBe(document.querySelector('main [data-results]'));
+	});
+});
+
+// #662 (code review 662-2 C-5, C-6; persona Sven S-5): what the status says belongs to the last navigation only
+describe('Ansage des Ergebnisses einer Liste', () => {
+	const url = new URL('http://localhost/buildings');
+	const settled = async () => (await tick(), flushSync());
+	const status = () => document.querySelector('[data-testid="list-result-status"]')!.textContent;
+	async function open() {
+		const { default: Layout } = await import('../routes/+layout.svelte');
+		const children = createRawSnippet(() => ({
+			render: () =>
+				'<div><select><option>Alle</option></select><button>Suchen</button><p data-results tabindex="-1">2 Ergebnisse</p></div>'
+		}));
+		show(Layout, { data: { user: null }, children } as never);
+		const [started] = vi.mocked(beforeNavigate).mock.lastCall!;
+		const [arrived] = vi.mocked(afterNavigate).mock.lastCall!;
+		return {
+			start: () => (started({} as never), flushSync()),
+			arrive: (focused: 'select' | 'button') => {
+				document.querySelector<HTMLElement>(focused)!.focus();
+				arrived({ type: 'goto', from: { url }, to: { url: new URL('?year=2025', url) } } as never);
+			}
+		};
+	}
+
+	it('sagt nach einer weiteren Wahl dieselbe Anzahl wieder an', async () => {
+		const list = await open();
+		list.start();
+		list.arrive('select');
+		await settled();
+
+		list.start();
+		const between = status();
+		list.arrive('select');
+		await settled();
+
+		expect([between, status()]).toEqual(['', '2 Ergebnisse']);
+	});
+
+	it('schweigt nach «Suchen», statt das frühere Ergebnis stehen zu lassen', async () => {
+		const list = await open();
+		list.start();
+		list.arrive('select');
+		await settled();
+
+		list.start();
+		list.arrive('button');
+		await settled();
+
+		expect(status()).toBe('');
+	});
+
+	it('sagt kein Ergebnis an, wenn schon die nächste Navigation läuft', async () => {
+		const list = await open();
+		list.start();
+		list.arrive('select');
+		list.start();
+		await settled();
+
+		expect(status()).toBe('');
 	});
 });
