@@ -19,6 +19,7 @@ const pageThatLogsAndNeverHydrates = () => {
 			listeners.request?.({ isNavigationRequest: () => true, frame: () => mainFrame });
 			listeners.console?.({ type: () => 'error', text: () => `Failed to load module script of ${path}` });
 			listeners.pageerror?.(new TypeError("Cannot read properties of undefined (reading 'buildings')"));
+			listeners.framenavigated?.(mainFrame); // a history change, as SvelteKit makes while it starts
 		},
 		locator: () => ({ waitFor: () => Promise.reject(timeout) })
 	};
