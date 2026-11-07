@@ -1456,3 +1456,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] No scenario: CI tooling only; checks: lint, Prettier, the screenshot run locally (3 passed)
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+
+## Session: #687 «Nicht umlagefähig» shown neutrally; plain category reasons (personas on #292)
+
+- [x] Read #687; triage on main (`docs/reviews/687-triage.md`): list and detail badge, form note hold; Helga P-6 fixed by #672
+- [x] Product owner decisions recorded in #687: neutral in four places (the detail box «Nicht in der Nebenkostenabrechnung» too); Weber P-3 is #1195; Helga P-7 hard words replaced here; spec change `invoice-detail.feature:27`
+- [x] Neutral tone in list, detail, form note and detail box; DOM tests and three scenarios seen red (a5ff25b)
+- [x] fach-reviewer step 1 (`docs/reviews/687-1-fach-review.md`): V-1, V-2 Minor fixed; plain category reasons in four languages, «Vollservicevertrag» kept and explained (4fb8092)
+- [x] code-reviewer (`docs/reviews/687-review-{1,2}.md`): C-1 Minor fixed (23348e0)
+- [x] Persona Helga (`docs/design/personas/helga-687.md`): no warned feeling left; Minors that stay: H-1 (Lift: where to find the maintenance share), H-2 (Heizung: «anrechenbar» and «umlagefähig»)
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
