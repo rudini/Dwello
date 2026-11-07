@@ -1474,3 +1474,19 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #1099 Remove the code paths for Abrechnungsperioden under a year
+
+No scenario: the preview hint on invoices that count in full in a period under a year is unreachable since #1088 (wizard step 2 and the backend refuse such a period, and correction and recalculation never showed it); the rest stays.
+
+- [x] Checked on `main`: the division by the period's months (`prorating.service.ts`, `periodSums` in `pdf.service.ts`) is not only for a period under a year; a custom Heizprofil may sum to 100 % ± 0.1, so a whole year divides too (#232 M-2, `prorating.pg.test.ts`): it stays, only its comments change
+- [x] fach-reviewer round 1 on the scope before implementing (`docs/reviews/1099-fachreview-1.md`)
+- [x] Keep `reason: 'noHeatingMonths'` and the division: a berichtigte Abrechnung keeps the period of a statement under a year from before #1088 (Fachreview 1099-1 V-1); pinned in `statement-correction.pg.test.ts`
+- [x] Remove `invoicesWithoutServicePeriod` (`invoice-completeness.service.ts`, contract, `docs/api-specification.md`), its hint in `PreviewChecks.svelte`, `statement-wizard.ts` and `statements_whole_*` in all four languages
+- [x] code-reviewer round 1 (`docs/reviews/1099-review-1.md`)
+- [x] daten-pruefer round 1 on two berichtigte Abrechnungen under a year in `dwello_persona` (`docs/reviews/1099-datenpruefung-1.md`)
+- [x] code-reviewer round 2, closing (`docs/reviews/1099-review-2.md`)
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-1099.md`)
+- [x] PR: pushed after this archive
+
+Files: `backend/src/services/{invoice-completeness,prorating,pdf}.service.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/PreviewChecks.svelte`, `messages/*.json`, `tests/contracts/invoice-completeness.json`, `tests/e2e/targets/statement-generate.ts`, `docs/{api-specification,data-model}.md`, tests.
