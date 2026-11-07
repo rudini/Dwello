@@ -1474,3 +1474,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #1028 category help: law references and contract note
+
+- [x] Checked on main: paragraphs of the allocability help (#678) and the description help (#672) already done; decisions recorded in #1028 (scope: category reasons, contract note, invoice note; contract note names the signed contract and «Vereinbarte Nebenkosten», no link); #687 asked to set the spaces in its six rewritten reasons
+- [x] Red scenario «Der Hinweis zum Mietvertrag sagt, wo die vereinbarten Nebenkosten stehen» and red i18n/DOM tests (0994e9213)
+- [x] `fach-reviewer` `docs/reviews/1028-fachreview-1.md` before implementing: texts of the contract note in four languages, rule extended (OBLF, comma before al./let.)
+- [x] Texts in `messages/*.json` (60f4a28bc); slice review `docs/reviews/1028-review-1.md` (Minors C-1, C-2 fixed)
+- [x] Persona Helga `docs/design/personas/helga-1028.md`: P-1 fixed (number and «Absatz» kept together, 62cf70155); P-2 rejected (decided: no link), P-3, P-4 Minor stay in the report
+- [x] Checks: lint, check, fitness, backend type-check, full vitest, `pdf-translations`, E2E `categories.feature` + `invoice-detail.feature`, axe/language rows of categories, category-new, category-edit-predefined, invoice-detail
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1028.md`
+- [x] Archive session; PR `Fixes #1028`: pushed after this archive
