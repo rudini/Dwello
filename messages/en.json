@@ -1514,6 +1514,7 @@
 	"statements_last_reminder": "Last reminder",
 	"statements_next_reminder": "Next reminder possible from",
 	"statements_refund_by": "Refund by",
+	"statements_payment_deadline_draft_help": "The deadline runs from the day the statement is sent. If you send it later, Dwello moves the deadline to {n} days after sending; a longer deadline stays.",
 	"statements_payment": "Payment",
 	"statements_notes": "Notes",
 	"statements_pdf_creating": "Creating PDF …",

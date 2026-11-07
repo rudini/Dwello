@@ -2,6 +2,14 @@ import { PNG } from 'pngjs';
 
 export type Area = { x: number; y: number; width: number; height: number };
 
+// Anti-aliasing draws the corners of rounded cards a shade differently from one screenshot to the next, even of the same
+// page on the same server (#1172); a colour channel that differs by no more than this is not a change
+const SHADE = 2;
+
+function differs(a: Buffer, i: number, b: Buffer, j: number) {
+	return [0, 1, 2, 3].some((channel) => Math.abs(a[i + channel] - b[j + channel]) > SHADE);
+}
+
 // Index (row * columns + column) of every cell with a pixel that differs, or that lies beyond the end of `a`
 function changedCells(a: PNG, b: PNG, cell: number, columns: number) {
 	const cells = new Set<number>();
@@ -10,7 +18,7 @@ function changedCells(a: PNG, b: PNG, cell: number, columns: number) {
 			const i = (y * b.width + x) * 4;
 			const j = (y * a.width + x) * 4;
 			const outside = x >= a.width || y >= a.height;
-			if (outside || a.data.readUInt32BE(j) !== b.data.readUInt32BE(i)) {
+			if (outside || differs(a.data, j, b.data, i)) {
 				cells.add(Math.floor(y / cell) * columns + Math.floor(x / cell));
 			}
 		}
@@ -43,7 +51,7 @@ function takeGroup(cells: Set<number>, start: number, columns: number) {
 
 /**
  * Areas where two screenshots differ, in pixels of `after`: the page is split into square cells,
- * every cell with a differing pixel (or beyond the end of `before`) is changed, and touching cells form one area.
+ * every cell with a pixel that differs by more than anti-aliasing (or beyond the end of `before`) is changed, and touching cells form one area.
  */
 export function changedAreas(before: Buffer, after: Buffer, cell = 16): Area[] {
 	const a = PNG.sync.read(before);
@@ -65,11 +73,13 @@ export function changedAreas(before: Buffer, after: Buffer, cell = 16): Area[] {
 	return areas;
 }
 
-/** Same size and the same pixels, however the PNG files are encoded: a page without any visible change */
+/** Same size and the same pixels but for anti-aliasing, however the PNG files are encoded: a page without any visible change */
 export function looksTheSame(a: Buffer, b: Buffer): boolean {
 	const before = PNG.sync.read(a);
 	const after = PNG.sync.read(b);
-	return before.width === after.width && before.height === after.height && before.data.equals(after.data);
+	if (before.width !== after.width || before.height !== after.height) return false;
+	for (let i = 0; i < after.data.length; i += 4) if (differs(before.data, i, after.data, i)) return false;
+	return true;
 }
 
 /**
