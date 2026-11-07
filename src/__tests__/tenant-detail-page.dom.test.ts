@@ -438,6 +438,21 @@ describe('Mieterdetail', () => {
 		expect(byTestId<HTMLButtonElement>('tenant-document-upload-button')!.disabled).toBe(false);
 	});
 
+	// #1181 (code review C-2): of two uploads with the same title, the hint names the newest as its row does
+	it('nennt im Hinweis auf eine schon hochgeladene Datei das Dokument mit seiner Nummer', () => {
+		open([], null, [{ ...upload, id: 'u1', createdAt: '2026-01-05T09:00:00.000Z' }, upload]);
+		const input = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		Object.defineProperty(input, 'files', {
+			value: [new File(['x'], upload.fileName)],
+			configurable: true
+		});
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+		expect(text('tenant-document-file-duplicate')).toContain(
+			'als Dokument «Ausweiskopie (2 von 2)»'
+		);
+	});
+
 	// #677 (persona Sven S-2): the hint appears while the focus is on the file field; a status there before says it
 	it('sagt den Hinweis auf eine schon hochgeladene Datei an', () => {
 		open([], null, [upload]);

@@ -137,7 +137,11 @@
 			{/each}
 		</ul>
 
-		<TenantDocumentUpload {form} {demo} uploads={documents.filter((d) => d.type === 'upload')} />
+		<TenantDocumentUpload
+			{form}
+			{demo}
+			uploads={numberedUploads(documents).filter((d) => d.type === 'upload')}
+		/>
 	</div>
 </Panel>
 
