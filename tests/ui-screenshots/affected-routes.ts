@@ -58,7 +58,7 @@ export function affectedRoutes(changed: string[], files: string[], read: (file: 
 }
 
 // The backend code that draws the statement PDF: its pages are captured on their own (statement-pdf.ts)
-const PDF_SOURCES = ['pdf.service.ts', 'pdf-format.ts', 'qr-bill.service.ts'].map((file) => `backend/src/services/${file}`);
+const PDF_SOURCES = ['pdf.service.ts', 'pdf-format.ts', 'qr-bill.service.ts', ...['de', 'fr', 'it', 'en'].map((l) => `pdf-texts/${l}.ts`)].map((file) => `backend/src/services/${file}`);
 
 /** Whether a change can alter how the statement PDF looks */
 export const pdfAffected = (changed: string[]) => changed.some((file) => PDF_SOURCES.includes(file));
