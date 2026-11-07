@@ -87,6 +87,8 @@
 		"agreement-from": "Statement wizard at the settings step (#368): the answer «Vereinbart ab» chosen without its day, then «Weiter»: the date field and the error asking for the day (nothing stored).",
 		"agreed-costs-none-advance": "Contract form at the step «Miete» with an Akonto and every Nebenkosten unticked (#444): the caution that Dwello bills no Nebenkosten and the Akonto is paid back (not saved).",
 		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
+		"agreements-retry-failed": "Statement wizard at the settings step (#688): «Erneut versuchen» chosen while whether the contracts agree the period's Nebenkosten still cannot be checked (that request answers an error): the alert saying Dwello tried again, the focus on «Erneut versuchen».",
+		"agreements-checked": "Statement wizard at the settings step (#688): «Erneut versuchen» chosen once the check whether the contracts agree the period's Nebenkosten works again: the line that the contracts are checked, with the focus, and the questions below it.",
 		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen», and after «Weiter» the note that the wizard waits for the check (#439).",
 		"agreement-save-failed": "Statement wizard at the settings step (#91): an answer whether a category is agreed that could not be saved (the save answers an error): the question's error.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
@@ -680,6 +682,8 @@
 				"agreement-from",
 				"agreement-from-refused",
 				"agreements-failed",
+				"agreements-retry-failed",
+				"agreements-checked",
 				"generation-result",
 				"preview-skipped"
 			],
@@ -689,7 +693,9 @@
 				"agreement-save-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
 				"agreement-from": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
 				"agreement-from-refused": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
-				"agreements-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31"
+				"agreements-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreements-retry-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreements-checked": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31"
 			}
 		},
 		{

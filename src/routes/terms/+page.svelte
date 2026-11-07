@@ -51,7 +51,7 @@
 </svelte:head>
 
 <div class="flex max-w-3xl flex-col gap-8">
-	<LegalHeader title={m.terms_title()} purpose={m.terms_purpose()} />
+	<LegalHeader title={m.terms_title()} purpose={m.terms_purpose()} asOf="2026-10-29" />
 
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">
