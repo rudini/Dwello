@@ -9,7 +9,11 @@ import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 
 vi.mock('$app/stores', () => ({ page: readable({ url: new URL('http://localhost/tenants') }) }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	afterNavigate: vi.fn(),
+	beforeNavigate: vi.fn()
+}));
 vi.mock('$lib/paraglide/runtime', async (original) => {
 	const real = await original<typeof import('$lib/paraglide/runtime')>();
 	return {
