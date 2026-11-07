@@ -950,7 +950,7 @@ describe('Abgerechnet bis im PDF', () => {
 });
 
 // #686 P-4 (decided by the product owner): the heating note names the table's column «Wohnungsanteil», not
-// «Heizkosten Ihrer Wohnung»; the wording waits for fach-reviewer (docs/reviews/686-wording.md)
+// «Heizkosten Ihrer Wohnung»; wording from fach-review 686-1 (docs/reviews/686-1-fach-review.md)
 describe('Anteil nach Heizprofil mit dem Wort der Tabelle', () => {
 	it.each([
 		['de', 'Heizkosten nach Heizprofil «Heizung Mittelland»: 44.20 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode'],

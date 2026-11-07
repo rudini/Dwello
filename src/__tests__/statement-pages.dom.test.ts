@@ -1685,6 +1685,14 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-payment-deadline-help')).toBeNull();
 	});
 
+	// code review 686-1 C-4: without the days of the settings the date shows without the help text
+	it('zeigt bei einem Entwurf ohne Zahlungsfrist in Tagen die Frist ohne Hilfetext', () => {
+		detail({ status: 'draft' });
+
+		expect(byTestId('statement-payment-deadline')).not.toBeNull();
+		expect(byTestId('statement-payment-deadline-help')).toBeNull();
+	});
+
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
 		detail();
 
@@ -1943,6 +1951,25 @@ describe('Abrechnungsdetail', () => {
 
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['PDF erstellt']);
 		expect(reloaded).toBe(true);
+	});
+
+	// code review 686-1 C-2: while the statement loads again, a second click would send the action again
+	it('bleibt beim Erstellen des PDF beschäftigt, bis die Abrechnung neu geladen ist', async () => {
+		detail();
+		let reload = () => {};
+		const reloaded = new Promise<void>((resolve) => (reload = resolve));
+
+		const after = actions.get('?/generatePdf')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		const done = after({ update: () => reloaded, result: { type: 'success' } });
+		await settle();
+		const button = byTestId<HTMLButtonElement>('statement-generate-pdf-button')!;
+		const busy = [button.getAttribute('aria-disabled'), button.textContent!.trim()];
+		reload();
+		await done;
+
+		expect(busy).toEqual(['true', 'PDF wird erstellt …']);
 	});
 
 	it('bietet ein erstelltes PDF zum Herunterladen an', () => {

@@ -19,6 +19,7 @@ import {
 } from '$lib/server/statement-actions';
 import { countryName } from '$lib/tenant';
 import { localPath } from '$lib/invoice';
+import { toSettings } from '$lib/server/settings';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -35,7 +36,7 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 async function paymentDeadlineDays(fetch: typeof globalThis.fetch) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
 	if (!response?.ok) return undefined;
-	const days = Number((await response.json()).data?.payment_deadline_days);
+	const days = Number(toSettings((await response.json()).data ?? {}).paymentDeadlineDays);
 	return days > 0 ? days : undefined;
 }
 

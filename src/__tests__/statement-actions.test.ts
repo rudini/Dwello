@@ -335,6 +335,28 @@ describe('Abrechnung laden', () => {
 		expect(data.paymentDeadlineDays).toBe(45);
 	});
 
+	// code review 686-1 C-4: without the settings the page still loads, only without the days
+	it.each([
+		['nicht laden', () => Response.json({}, { status: 500 })],
+		['einen ungültigen Wert liefern', () => Response.json({ data: { payment_deadline_days: 'abc' } })],
+		['nicht erreichbar sind', () => Promise.reject(new TypeError('fetch failed'))]
+	] as const)('lädt einen Entwurf ohne Zahlungsfrist in Tagen, wenn die Einstellungen %s', async (_, config) => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status: 'draft' });
+			if (url.endsWith('/api/v1/config')) return config();
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			params: { id: 's1' },
+			fetch,
+			url: new URL('http://localhost/statements/s1')
+		} as never)) as { statement: { id: string }; paymentDeadlineDays?: number };
+		expect([data.statement.id, data.paymentDeadlineDays]).toEqual([statementJson.id, undefined]);
+	});
+
 	// The statement carries no tenant address; the send confirmation needs it for a letter
 	it('ergänzt die Postadresse des Mieters aus den Mieterdaten', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');

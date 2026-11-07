@@ -43,11 +43,12 @@
 		use:enhance={() => {
 			generating = true;
 			return async ({ result, update }) => {
-				generating = false;
 				if (result.type === 'success') {
 					await update(); // the statement loaded again offers the PDF for download
 					addToast('success', m.statements_pdf_created());
-				} else
+				}
+				generating = false; // after the reload: a click meanwhile would send the action again (code review 686-1 C-2)
+				if (result.type !== 'success')
 					addToast(
 						'error',
 						result.type === 'failure' ? String(result.data?.actionError) : m.statements_pdf_failed()
