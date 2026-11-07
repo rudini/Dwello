@@ -469,7 +469,7 @@ describe('Stand der Datenschutzerklärung', () => {
 	it('nennt den Stand in der Sprache der Oberfläche', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
-		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 29. Oktober 2026');
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 7. November 2026');
 	});
 });
 
