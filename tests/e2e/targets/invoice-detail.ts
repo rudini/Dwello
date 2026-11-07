@@ -4,6 +4,9 @@ export const amount = target('Betrag', (page) => page.getByTestId('invoice-amoun
 export const category = target('Kategorie', (page) => page.getByTestId('invoice-category'));
 export const distributionKey = target('Verteilschlüssel', (page) => page.getByTestId('invoice-distribution-key'));
 export const utilityCost = target('Umlagefähigkeit', (page) => page.getByTestId('invoice-utility-cost'));
+export const utilityCostBadge = target('Umlagefähigkeit der Rechnung', (page) =>
+	page.getByTestId('invoice-utility-cost-badge')
+);
 export const legalNote = target('Hinweis Mietrecht', (page) => page.getByTestId('invoice-legal-note'));
 export const editButton = target('Rechnung bearbeiten', (page) => page.getByTestId('invoice-edit-button'));
 export const deleteButton = target('Rechnung löschen', (page) => page.getByTestId('invoice-delete-button'));

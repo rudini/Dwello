@@ -675,7 +675,7 @@ describe('Grund der Umlagefähigkeit', () => {
 		// «umstritten» mit dem Merkblatt als Quelle, der Wartungsanteil eines Vollservicevertrags (#292, Fachreview M-1, M-2)
 		expect(reasons()).toEqual([
 			'Ob die Wartung von Feuerlöschern mit dem Gebrauch zusammenhängt (Art. 257a Absatz 1 Obligationenrecht, OR), ist umstritten (Mieterinnen- und Mieterverband, Merkblatt «Zulässige und unzulässige Nebenkosten»). Nach dem Merkblatt gehört Brandschutz, der auch bei leerem Gebäude nötig ist, nicht zu den Nebenkosten. Dwello folgt dem Merkblatt: Die Wartung ist also nicht umlagefähig.',
-			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen (Art. 257a Absatz 1 Obligationenrecht, OR); Reparaturen und Ersatzteile trägt der Vermieter. Deckt ein Vollservicevertrag auch Reparaturen, ist nur sein Anteil für die Wartung umlagefähig: Erfassen Sie unter «Lift» nur diesen Anteil. Strom, Notruftelefon und Wartung sind also umlagefähig.'
+			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen (Art. 257a Absatz 1 Obligationenrecht, OR); Reparaturen und Ersatzteile trägt der Vermieter. Deckt der Vertrag mit der Liftfirma auch Reparaturen (Vollservicevertrag), ist nur sein Anteil für die Wartung umlagefähig: Erfassen Sie unter «Lift» nur diesen Anteil. Strom, Notruftelefon und Wartung sind also umlagefähig.'
 		]);
 	});
 
@@ -718,6 +718,20 @@ describe('Grund der Umlagefähigkeit', () => {
 			overwriteGetLocale(() => baseLocale);
 		}
 	};
+
+	// #687 (Helga P-7): plain words instead of «abgegolten», «gebrauchstauglich», «Verzinsung und Abschreibung»
+	// (wording: docs/reviews/687-1-fach-review.md)
+	it.each([
+		['de', /abgegolten|gebrauchstauglich|Verzinsung|Abschreibung/],
+		['fr', /couverte?s? par le loyer|état approprié|amortissement/],
+		['it', /copert[aeio] dalla pigione|stato idoneo|ammortamento/],
+		['en', /covered by the rent|fit for use|depreciation/]
+	] as const)('nennt die Gründe auf %s ohne schwere Wörter', (locale, hard) => {
+		const shown = allReasons(locale);
+
+		expect(shown).toHaveLength(PREDEFINED.length);
+		expect(shown.filter((reason) => hard.test(reason))).toEqual([]);
+	});
 
 	it('schliesst jeden Grund mit seiner Folgerung', () => {
 		const shown = allReasons('de');
