@@ -86,10 +86,10 @@ export const feeNotAgreedLink = (contractId: string) =>
 	);
 // What the link that opened the wizard chose, and where its settings come from (A-10)
 export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page.getByTestId('wizard-preset'));
-// Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period
 export const uncategorizedInvoices = target('Hinweis auf Rechnungen ohne Kategorie', (page) =>
 	page.getByTestId('uncategorized-invoices')
 );
+// Invoices the preview names because their Leistungszeitraum is missing and they are dated shortly after the period
 export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
 // Heating invoices without Leistungszeitraum next to ones with one, at a tenant change with a Heizprofil (#339)
 export const heatingWithoutServicePeriod = target('Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum', (page) =>

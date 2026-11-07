@@ -18,6 +18,6 @@ No scenario: the preview hint on invoices that count in full in a period under a
 - [x] fach-reviewer round 1 on the scope before implementing (`docs/reviews/1099-fachreview-1.md`)
 - [x] Keep `reason: 'noHeatingMonths'` and the division: a berichtigte Abrechnung keeps the period of a statement under a year from before #1088 (Fachreview 1099-1 V-1); pinned in `statement-correction.pg.test.ts`
 - [x] Remove `invoicesWithoutServicePeriod` (`invoice-completeness.service.ts`, contract, `docs/api-specification.md`), its hint in `PreviewChecks.svelte`, `statement-wizard.ts` and `statements_whole_*` in all four languages
-- [ ] code-reviewer round 1
+- [x] code-reviewer round 1 (`docs/reviews/1099-review-1.md`)
 - [ ] daten-pruefer after the change
 - [ ] PR
