@@ -3,14 +3,15 @@
 	import { flushSync, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { StatementsListData, StatementWithDetails } from '$lib/types';
+	import type { StatementsListData, StatementStatus, StatementWithDetails } from '$lib/types';
 	import {
 		balanceLabel,
 		earlyPaidDate,
 		isPartPayment,
 		openAmount,
 		paidDateError,
-		signedPaid
+		signedPaid,
+		statusLabels
 	} from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
@@ -38,6 +39,43 @@
 	const periodEnd = $derived(params.get('periodEnd') || '');
 	const filtered = $derived(
 		!!(search || building || status || contract || periodStart || periodEnd)
+	);
+	// #1186: a status the list knows is named under the tiles, in the list's heading and in its empty result
+	const chosen = $derived(
+		Object.hasOwn(statusLabels, status) ? statusLabels[status as StatementStatus] : ''
+	);
+	const shown = $derived(
+		data.total === 0
+			? m.statements_status_shown_none({ status: chosen })
+			: data.total === 1
+				? m.statements_status_shown_one({ status: chosen })
+				: m.statements_status_shown_many({ count: data.total, status: chosen })
+	);
+	const noneText = $derived(
+		chosen ? m.statements_none_with_status({ status: chosen }) : m.statements_adjust_filters()
+	);
+	const counts = $derived(
+		chosen
+			? {
+					one: () => m.statements_count_status_one({ status: chosen }),
+					many: (inputs: { count: number }) =>
+						m.statements_count_status_many({ ...inputs, status: chosen }),
+					pageOne: (inputs: { from: number; total: number; page: number; pages: number }) =>
+						m.statements_count_status_page_one({ ...inputs, status: chosen }),
+					pageMany: (inputs: {
+						from: number;
+						to: number;
+						total: number;
+						page: number;
+						pages: number;
+					}) => m.statements_count_status_page_many({ ...inputs, status: chosen })
+				}
+			: {
+					one: m.statements_count_one,
+					many: m.statements_count_many,
+					pageOne: m.statements_count_page_one,
+					pageMany: m.statements_count_page_many
+				}
 	);
 	// #673 (Marco P-4): a reset lifts search, building and status; the contract and the period stay
 	const reset = $derived(
@@ -152,13 +190,21 @@
 		{/snippet}
 	</PageHeader>
 
-	<StatusFilter
-		scope={data.scope ?? ''}
-		{contract}
-		counts={data.statusCounts}
-		active={status}
-		href={(value) => linkWith({ status: value })}
-	/>
+	<!-- #1186 (Marco P-1, Helga P-2): right under the tiles, still in view after a tap, what the list below shows -->
+	<div class="flex flex-col gap-4">
+		<StatusFilter
+			scope={data.scope ?? ''}
+			{contract}
+			counts={data.statusCounts}
+			active={status}
+			href={(value) => linkWith({ status: value })}
+		/>
+		{#if chosen}
+			<p class="text-ink" data-testid="status-filter-result">
+				{shown}
+			</p>
+		{/if}
+	</div>
 	<StatementSearch
 		{search}
 		{building}
@@ -176,7 +222,7 @@
 				<EmptyState
 					illustration="no-results"
 					title={m.statements_none_found()}
-					text={m.statements_adjust_filters()}
+					text={noneText}
 					actionLabel={m.buildings_reset_filters()}
 					actionHref={emptyReset}
 					actionTestid="statements-empty-reset"
@@ -194,12 +240,7 @@
 	{:else}
 		<ResultList
 			id="statements-count"
-			counts={{
-				one: m.statements_count_one,
-				many: m.statements_count_many,
-				pageOne: m.statements_count_page_one,
-				pageMany: m.statements_count_page_many
-			}}
+			{counts}
 			shown={data.statements.length}
 			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
 			url={$page.url}
