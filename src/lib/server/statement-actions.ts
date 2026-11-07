@@ -122,7 +122,8 @@ export async function generateStatementPdf(fetch: Fetch, id: string): Promise<Re
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: '{}' // the backend validates the body as an object; without one it answers 422
-	});
+	}).catch(() => null); // an unreachable backend gets the general sentence, as the former proxy did (#1212)
+	if (!response) return { status: 500, message: m.statements_pdf_failed() };
 	if (response.ok) return null;
 	const error = await response.json().catch(() => ({}));
 	return {

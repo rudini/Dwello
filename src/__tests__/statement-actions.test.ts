@@ -170,6 +170,24 @@ describe('PDF erstellen', () => {
 		});
 	});
 
+	// fallback review on #1212: the proxy it replaced answered an unreachable backend with the general sentence
+	it('sagt den allgemeinen Satz, wenn das Backend nicht antwortet', async () => {
+		const fetch = async () => {
+			throw new TypeError('fetch failed');
+		};
+		const request = new Request('http://localhost:3000', { method: 'POST', body: new FormData() });
+		const result = (actions.generatePdf as (event: never) => Promise<unknown>)({
+			params: { id: 's1' },
+			fetch,
+			request
+		} as never);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'PDF konnte nicht erstellt werden. Versuchen Sie es erneut.' }
+		});
+	});
+
 	it('nennt den Grund des Backends nach dem Satz, dass das PDF nicht entstand', async () => {
 		const { result } = runAction(actions.generatePdf, 's1', 404, {}, pdfRefused);
 
