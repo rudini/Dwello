@@ -118,6 +118,10 @@ Funktionalität: Einstellungen
     Und erklärt die Einstellung "Ort des Kontoinhabers" "Beispiel: Zürich"
     Und heisst das Feld "Adresse des Kontoinhabers" "Strasse und Hausnummer (optional)"
 
+  # #1175 (Persona Marco P-2): auch beim Absender ist die Strasse freiwillig (#450), wie beim Kontoinhaber
+  Szenario: Die Strasse des Absenders ist als freiwillig bezeichnet
+    Dann heisst das Feld "Adresse" "Strasse und Hausnummer (optional)"
+
   # #490 (Entscheid des Product Owners): die Hilfe sagt es vor dem Speichern
   Szenario: Die Einstellungen sagen, was eine IBAN braucht
     Dann erklären die Einstellungen bei der IBAN "Mit einer IBAN braucht es Firmenname, PLZ und Ort."

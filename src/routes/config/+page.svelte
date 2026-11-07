@@ -155,6 +155,7 @@
 				name="companyAddress"
 				label={m.buildings_street()}
 				value={settings.companyAddress}
+				optional
 				example={m.settings_example_street()}
 			/>
 			<div class="grid gap-6 sm:grid-cols-3">

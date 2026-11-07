@@ -15,6 +15,9 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] Scenario «Die Felder des Kontoinhabers zeigen Beispiele» (`settings.feature`), seen red at the examples and at «(optional)»
 - [x] Examples at name (new `settings_account_holder_name_example`, four languages), street, PLZ, Ort; street marked optional (`SettingField` passes `optional`)
 - [x] Checks: lint, check, fitness, type-check, affected unit tests, a11y and language looks of `account-holder`, Prettier on added files
-- [ ] Slice review (`code-reviewer`)
-- [ ] Persona Marco (P-3 of #1166) on the Kontoinhaber fields
+- [x] Slice review (`code-reviewer`): `docs/reviews/1175-review-1.md`
+- [x] Personas Marco and Helga on the Kontoinhaber fields: `docs/design/personas/marco-1175.md`, `helga-1175.md`
+- [x] Marco P-2 (street «(optional)» only at the Kontoinhaber): Absender street marked optional too, scenario «Die Strasse des Absenders ist als freiwillig bezeichnet», seen red
+- [x] Marco P-1 / Helga P-2 (entries lost on re-ticking, since #1166): issue #1202
+- [ ] Closing `code-reviewer` round
 - [ ] Archive session, PR (`Fixes #1175`)
