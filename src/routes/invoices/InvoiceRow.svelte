@@ -55,8 +55,9 @@
 	</p>
 	<div class="flex flex-wrap gap-2 xl:w-40 xl:shrink-0">
 		<Badge
-			tone={invoice.isValidUtilityCost ? 'positive' : 'caution'}
+			tone={invoice.isValidUtilityCost ? 'positive' : 'neutral'}
 			label={invoice.isValidUtilityCost ? m.glossary_allocable_term() : m.invoices_not_allocable()}
+			testid="invoice-list-utility-cost"
 		/>
 		<Badge tone={status.tone} label={status.label} testid="invoice-status" />
 	</div>

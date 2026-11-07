@@ -271,6 +271,7 @@ const newCodeShown: Activity = async (actor) => {
 const states: Record<string, (example: Example, viewport: Viewport) => Activity> = {
 	default: () => async () => {},
 	'filtered-empty': () => Wait.until(on.emptyHint),
+	'status-empty': () => Wait.until(on.emptyHint),
 	empty: () => Wait.until(on.emptyHint),
 	'empty-year': () => Wait.until(on.emptyHint),
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
