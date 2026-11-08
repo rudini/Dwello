@@ -152,6 +152,20 @@ describe('Heizprofil erfassen und bearbeiten', () => {
 		);
 	});
 
+	// #1201: a name in another language longer than its column, refused at its field
+	it('zeigt beim Bearbeiten den Fehler eines übersetzten Namens an seinem Feld', () => {
+		show(EditProfilePage, {
+			data: { profile: profile('custom') },
+			form: { errors: { nameFR: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } }
+		} as never);
+
+		const french = byTestId('heating-profile-name-fr-input')!;
+		expect(french.getAttribute('aria-invalid')).toBe('true');
+		expect(
+			document.getElementById(french.getAttribute('aria-describedby')!)!.textContent
+		).toContain('Höchstens 100 Zeichen. Kürzen Sie den Text.');
+	});
+
 	// #230: eine Abrechnung behält die Anteile, mit denen sie erstellt wurde; ein neues Profil hat noch keine Abrechnung
 	it('sagt beim Bearbeiten, dass bestehende Abrechnungen ihre Anteile behalten', () => {
 		show(EditProfilePage, { data: { profile: profile('custom') }, form: null } as never);

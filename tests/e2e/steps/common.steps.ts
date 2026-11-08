@@ -1,9 +1,9 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { dialogActions, dialogTitleText, errorMessageShown } from '../questions/form';
+import { dialogActions, dialogTitleText, errorMessageShown, fieldDescription, fieldValue } from '../questions/form';
 import { focusedPlace, focusedText, pageTitle } from '../questions/navigation';
 import { goBackInBrowser } from '../tasks/app-frame';
-import { cancelEditing, chooseBreadcrumb } from '../tasks/form';
+import { cancelEditing, chooseBreadcrumb, saveTextOfLength } from '../tasks/form';
 
 const { When, Then } = createBdd(test);
 
@@ -73,4 +73,20 @@ Then('steht der Fokus auf dem Ergebnis {string}', async ({ verwalter }, result: 
 // #653: after saving, the focus names what changed instead of announcing the page title again
 Then('steht der Fokus auf dem Status {string}', async ({ verwalter }, status: string) => {
 	await verwalter.sees(focusedText).toBe(status);
+});
+
+// #1201: a text longer than its database column says so at its field, nothing cut silently (as #743)
+When(
+	'der Liegenschaftsverwalter bei {string} einen Text von {int} Zeichen speichert',
+	async ({ verwalter }, label: string, length: number) => {
+		await verwalter.attemptsTo(saveTextOfLength(label, length));
+	}
+);
+
+Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter }, label: string, text: string) => {
+	await verwalter.sees(fieldDescription(label)).toContain(text);
+});
+
+Then('steht bei {string} noch der Text von {int} Zeichen', async ({ verwalter }, label: string, length: number) => {
+	await verwalter.sees(fieldValue(label)).toHaveLength(length);
 });
