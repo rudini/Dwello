@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, Navigate, Press } from '../screenplay/interactions';
+import { Click, Enter, Navigate, Press, TypeOn } from '../screenplay/interactions';
 import {
 	deleteButton,
 	editButton,
@@ -37,3 +37,4 @@ export const deleteDistributionKey = (name: string): Activity => (actor) =>
 
 export const enterFormula = (formula: string): Activity => Enter.theValue(formula).into(formulaInput);
 export const insertBlock = (block: string): Activity => Click.on(insertButton(block));
+export const typeOn = (text: string): Activity => TypeOn(text);

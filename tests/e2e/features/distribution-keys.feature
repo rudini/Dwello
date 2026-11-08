@@ -155,3 +155,10 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" noch einmal mit der Formel "({area}" erfasst
     Dann erfährt der Liegenschaftsverwalter beim Namen "Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits. Wählen Sie einen anderen Namen."
     Und erfährt der Liegenschaftsverwalter bei der Formel "Die Klammer am Anfang von «({area}» wird nicht geschlossen. Setzen Sie «)» dort, wo sie enden soll."
+
+  # #1200 (Persona Helga P-1): nach dem Übernehmen eines Bausteins schreibt der Liegenschaftsverwalter in der Formel weiter
+  Szenario: Nach einem Baustein in der Formel weiterschreiben
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Baustein "{rooms}" übernimmt
+    Und der Liegenschaftsverwalter " * 2" weiterschreibt
+    Dann steht in der Formel "{area}{rooms} * 2"

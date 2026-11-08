@@ -24,6 +24,7 @@ import {
 	deleteDistributionKey,
 	enterFormula,
 	insertBlock,
+	typeOn,
 	openDistributionKeyEdit,
 	openDistributionKeys,
 	openNewDistributionKey,
@@ -210,4 +211,13 @@ When(
 
 Then('erfährt der Liegenschaftsverwalter beim Namen {string}', async ({ verwalter, seed }, text: string) => {
 	await verwalter.sees(nameProblem).toContain(seed.withNames(text)); // the description also holds the example
+});
+
+// persona Helga P-1 (#1200): after an insert, typing goes on in the formula
+When('der Liegenschaftsverwalter den Baustein {string} übernimmt', async ({ verwalter }, block: string) => {
+	await verwalter.attemptsTo(insertBlock(block));
+});
+
+When('der Liegenschaftsverwalter {string} weiterschreibt', async ({ verwalter }, text: string) => {
+	await verwalter.attemptsTo(typeOn(text));
 });
