@@ -2034,7 +2034,7 @@
 	"contracts_overlap_review_where": "L’inizio e la fine del contratto si modificano nel passo {period} «{periodStep}», l’appartamento nel passo {apartment} «{apartmentStep}».",
 	"contracts_apartment_contracts_retry_failed": "Non è stato ancora possibile caricare i contratti di locazione dell’appartamento. Riprovi più tardi; i dati inseriti restano invariati.",
 	"contracts_apartment_contracts_see_top": "«Riprovare» si trova in alto nella pagina.",
-	"contracts_delete_draft_contracts_unknown": "Dwello non ha eliminato la bozza: senza i contratti di locazione di questo appartamento non si può escludere una sovrapposizione. Scelga «Riprovare» in alto nella pagina e poi di nuovo «Eliminare la bozza e salvare il contratto di locazione».",
+	"contracts_delete_draft_contracts_unknown": "Dwello non ha eliminato la bozza: non è stato possibile caricare gli altri contratti di locazione di questo appartamento, quindi non si può verificare se l’appartamento è libero. Li carichi in alto nella pagina con «Riprovare» e poi elimini di nuovo la bozza.",
 	"contracts_apartment_contracts_loading": "I contratti di locazione dell’appartamento sono ancora in caricamento. Riprovi tra un momento.",
 	"contracts_notice_hint_title": "L’inquilino trasloca o cambia appartamento?",
 	"contracts_notice_hint_text": "Allora inserisca la fine del contratto nella pagina del contratto di locazione con «Registrare la data di fine». Così resta a tempo indeterminato e Dwello indica i prossimi passi. Se l’inquilino passa a un altro dei Suoi appartamenti, registri poi un nuovo contratto di locazione per quell’appartamento.",

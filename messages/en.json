@@ -2034,7 +2034,7 @@
 	"contracts_overlap_review_where": "You change the contract start and contract end in step {period} «{periodStep}», the apartment in step {apartment} «{apartmentStep}».",
 	"contracts_apartment_contracts_retry_failed": "The apartment’s rental contracts still could not be loaded. Try again later; your entries are kept.",
 	"contracts_apartment_contracts_see_top": "«Try again» is at the top of the page.",
-	"contracts_delete_draft_contracts_unknown": "Dwello did not delete the draft: without the rental contracts for this apartment an overlap cannot be ruled out. Choose «Try again» at the top of the page, then «Delete draft and save rental contract» again.",
+	"contracts_delete_draft_contracts_unknown": "Dwello did not delete the draft: the other rental contracts for this apartment could not be loaded, so Dwello cannot check whether the apartment is free. Load them at the top of the page with «Try again», then delete the draft again.",
 	"contracts_apartment_contracts_loading": "The apartment’s rental contracts are still loading. Try again in a moment.",
 	"contracts_notice_hint_title": "Is the tenant moving out or to another apartment?",
 	"contracts_notice_hint_text": "Then enter the contract end on the rental contract page with «Enter end date». The contract stays open-ended, and Dwello shows the next steps. If the tenant moves to another of your apartments, then add a new rental contract for that apartment.",
