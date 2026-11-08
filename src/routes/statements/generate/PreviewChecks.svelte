@@ -122,7 +122,12 @@
 	testid="uncategorized-invoices"
 />
 {#if uncategorizedError}
-	<p class="font-semibold text-critical" role="alert" data-testid="form-error">
+	<p
+		class="scroll-mt-24 font-semibold text-critical"
+		role="alert"
+		tabindex="-1"
+		data-testid="form-error"
+	>
 		{uncategorizedError}
 	</p>
 {/if}
@@ -135,7 +140,12 @@
 	testid="uncalculable-keys"
 />
 {#if uncalculableError}
-	<p class="font-semibold text-critical" role="alert" data-testid="form-error">
+	<p
+		class="scroll-mt-24 font-semibold text-critical"
+		role="alert"
+		tabindex="-1"
+		data-testid="form-error"
+	>
 		{uncalculableError}
 	</p>
 {/if}

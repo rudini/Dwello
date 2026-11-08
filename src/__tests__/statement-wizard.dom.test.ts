@@ -1176,6 +1176,7 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Ordnen Sie jeder Rechnung eine Kategorie zu');
 		expect(heading()).toBe('Vorschau');
+		expect(document.activeElement).toBe(byTestId('form-error')); // persona Helga 1221 P-1
 	});
 
 	// #1221 (Entscheid PO): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt, hält den Lauf an
@@ -1194,6 +1195,8 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen.');
 		expect(heading()).toBe('Vorschau');
+		// persona Helga 1221 P-1: the message takes the focus, not the confirmation further down
+		expect(document.activeElement).toBe(byTestId('form-error'));
 	});
 
 	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {
