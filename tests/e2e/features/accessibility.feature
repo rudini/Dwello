@@ -335,6 +335,7 @@ Funktionalität: Barrierefreiheit
       | distribution-key-edit  | submit-cleared      |
       | distribution-key-edit  | formula-test-failed |
       | distribution-keys      | delete-dialog       |
+      | distribution-keys      | distribution-key-delete-refused |
       | heating-profiles       | default             |
       | heating-profile-new    | default             |
       | heating-profile-new    | profile-sum-invalid |

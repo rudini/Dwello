@@ -3,8 +3,13 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { invoices } from '../db/schema';
+import { deleteStatement, generateStatement } from '../services/statement.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
-import { apiRecords, expectRejection, firstPredefined, idOf, invoicedBuilding } from './helpers/records';
+import { apiRecords, expectRejection, firstPredefined, idOf, insertInvoice, invoicedBuilding } from './helpers/records';
+import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
 const keys = apiRecords('distribution-keys');
@@ -80,6 +85,61 @@ describe('Eigene Verteilschlüssel', () => {
 		await expectRejection(response, 409, 'Nach dem Verteilschlüssel wird 1 Rechnung verteilt, er kann nicht gelöscht werden.', 'DISTRIBUTION_KEY_IN_USE_ONE', {
 			count: 1
 		});
+	});
+
+	// #1255: eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit dem Verteilschlüssel jeder Position
+	it('behält Verteilschlüssel, die in einer Abrechnung stehen, auch ohne Rechnung', async () => {
+		const id = await idOf(await create('Waschküche'));
+		const rental = await createRental(`${token}-1255`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(rental.building, { distributionKeyId: id });
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31' });
+		await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+		try {
+			const response = await keys.send('DELETE', `/${id}`);
+
+			await expectRejection(response, 409, 'Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Verteilschlüsseln. Steht der Verteilschlüssel nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich der Verteilschlüssel löschen.', 'DISTRIBUTION_KEY_IN_STATEMENT');
+		} finally {
+			await deleteStatement(statement.id);
+			await rental.remove();
+		}
+	});
+
+	// #1255 (Fachreview V-2): a draft's Tankbestand position takes the default key; recalculating it would put the key back,
+	// so the default is named before the statement
+	it('nennt bei einem Standard-Verteilschlüssel in einer Abrechnung zuerst den Standard', async () => {
+		const id = await idOf(await create('Heizraum'));
+		const rental = await createRental(`${token}-1255-default`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(rental.building, { distributionKeyId: id });
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31' });
+		await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+		await setConfig('default_distribution_key_id', id);
+		try {
+			const response = await keys.send('DELETE', `/${id}`);
+
+			await expectRejection(response, 409, 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.', 'DISTRIBUTION_KEY_IS_DEFAULT');
+		} finally {
+			if (previousDefault) await setConfig('default_distribution_key_id', previousDefault);
+			else await deleteConfig('default_distribution_key_id');
+			await deleteStatement(statement.id);
+			await rental.remove();
+		}
+	});
+
+	// #1255: the refusal of a statement sends the landlord to the drafts; that holds only while invoices are named first
+	it('nennt bei einem Verteilschlüssel mit Rechnung und Abrechnung zuerst die Rechnung', async () => {
+		const id = await idOf(await create('Dachrinne'));
+		const rental = await createRental(`${token}-1255-in-use`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(rental.building, { distributionKeyId: id });
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31' });
+		try {
+			const response = await keys.send('DELETE', `/${id}`);
+
+			await expectRejection(response, 409, 'Nach dem Verteilschlüssel wird 1 Rechnung verteilt, er kann nicht gelöscht werden.', 'DISTRIBUTION_KEY_IN_USE_ONE', { count: 1 });
+		} finally {
+			await deleteStatement(statement.id);
+			await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+			await rental.remove();
+		}
 	});
 
 	it('behält den Standard-Verteilschlüssel der Einstellungen', async () => {

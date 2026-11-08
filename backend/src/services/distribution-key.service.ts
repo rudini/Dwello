@@ -5,7 +5,7 @@
 
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { distributionKeys, type DistributionKey, type NewDistributionKey } from '../db/schema';
+import { distributionKeys, utilityStatementLineItems, type DistributionKey, type NewDistributionKey } from '../db/schema';
 import {
 	SAMPLE_APARTMENTS,
 	validateFormulaForDistribution,
@@ -238,6 +238,23 @@ export async function deleteDistributionKey(
 			success: false,
 			conflict: true,
 			...refusal('DISTRIBUTION_KEY_IS_DEFAULT', 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.')
+		};
+	}
+
+	// #1255: a statement stays as the tenant received it, its positions with their key
+	const [billed] = await db
+		.select({ id: utilityStatementLineItems.id })
+		.from(utilityStatementLineItems)
+		.where(eq(utilityStatementLineItems.distributionKeyId, id))
+		.limit(1);
+	if (billed) {
+		return {
+			success: false,
+			conflict: true,
+			...refusal(
+				'DISTRIBUTION_KEY_IN_STATEMENT',
+				'Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Verteilschlüsseln. Steht der Verteilschlüssel nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich der Verteilschlüssel löschen.'
+			)
 		};
 	}
 

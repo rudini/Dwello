@@ -529,6 +529,7 @@
 	"backend_distribution_key_in_use_one": "{count} invoice is distributed by this distribution key, so it cannot be deleted.",
 	"backend_distribution_key_in_use": "{count} invoices are distributed by this distribution key, so it cannot be deleted.",
 	"backend_distribution_key_is_default": "The distribution key is set as the default in the settings.",
+	"backend_distribution_key_in_statement": "The distribution key is in a statement and cannot be deleted. A sent statement stays as the tenant received it, with its distribution keys. If the distribution key is only in drafts, recalculate them with «Recalculate» on their page or delete them. Then the distribution key can be deleted.",
 	"backend_heating_profile_predefined": "Predefined heating profiles cannot be deleted.",
 	"backend_heating_profile_is_default": "The heating profile is set as the default in the settings.",
 	"backend_statement_not_draft": "The statement is no longer a draft and cannot be deleted.",

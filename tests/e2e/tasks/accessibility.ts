@@ -42,6 +42,7 @@ import { agreementsCheckAgain, goToGeneration } from './statement-generate';
 import { agreementsLoading, agreementsRetry, buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { deleteButton, fuelCheckbox, heatingCheckbox, nameInput, proposal, proposalOutdated, proposeButton } from '../targets/categories';
+import { deleteButton as keyDeleteButton } from '../targets/distribution-keys';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
@@ -389,7 +390,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
 	// #1160: the own category a statement bills (fixtures/screens.ts), confirmed: the refusal in the dialog
 	'category-delete-refused': (example) => (actor) =>
-		actor.attemptsTo(openDialog(deleteButton(example.category!)), Click.on(on.dialogConfirm), Wait.until(on.formProblem)),
+		actor.attemptsTo(openDialog(deleteButton(example.billed!)), Click.on(on.dialogConfirm), Wait.until(on.formProblem)),
+	// #1255: the same for an own Verteilschlüssel
+	'distribution-key-delete-refused': (example) => (actor) =>
+		actor.attemptsTo(openDialog(keyDeleteButton(example.billed!)), Click.on(on.dialogConfirm), Wait.until(on.formProblem)),
 	// #817: the new key, shown once; the revoke dialog of the first key in the list
 	'key-created': (example) => (actor) => actor.attemptsTo(createAccessKey(example.accessKey!), Wait.until(newAccessKey)),
 	'key-create-refused': () => (actor) => actor.attemptsTo(createAccessKey(''), Wait.until(createAccessKeyRefusal)),

@@ -74,17 +74,20 @@ export type Example = {
 	accessKey?: string; // the name of a Zugangsschlüssel the key states create or revoke (#817)
 	account?: { email: string; password: string }; // a Konto mit Passwort for the login states (#576)
 	undeliveredStatements?: string[]; // #736: overdue statements of Hugo, one per look of the feedback state
-	category?: string; // #1160: the shown name of an own category a statement bills, without an invoice
+	billed?: string; // #1160, #1255: the shown name of an own category or key a statement bills, without an invoice
 };
 
-// #1160: an own category in a statement whose invoice was deleted afterwards; «Sauna» reads alike in every language
-async function billedCategory(seed: TestData) {
-	await seed.category('Sauna', true);
+// #1160, #1255: an own category or key in a statement whose invoice was deleted afterwards; «Sauna» reads alike in
+// every language
+async function billedRecord(seed: TestData, record: 'category' | 'key') {
+	if (record === 'category') await seed.category('Sauna', true);
+	else await seed.distributionKey('Sauna', '{area}');
 	await seed.building('Saunahof', 'Winterthur');
 	await seed.apartment('Saunahof', '1.01', 'vacant');
 	await seed.tenant('Selma');
 	await seed.contract('Selma', '1.01', { startDate: '2024-01-01', baseRent: '1000.00' });
-	await seed.invoiceInOwnCategory('Saunahof', 'Sauna', '450.00', '2025-03-31');
+	if (record === 'category') await seed.invoiceInOwnCategory('Saunahof', 'Sauna', '450.00', '2025-03-31');
+	else await seed.invoiceByKey('Saunahof', 'Sauna', '2025-03-31');
 	await seed.statement('Selma', 'Saunahof', 2025);
 	await seed.deleteInvoice('Rechnung Sauna 2025-03-31');
 	return seed.names.get('Sauna')!;
@@ -113,7 +116,8 @@ export async function exampleOf(seed: TestData, name: string, state: string): Pr
 	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
 	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');
 	if (state === 'reminder-undelivered') return { ...example, undeliveredStatements: await undeliveredStatements(seed) };
-	if (state === 'category-delete-refused') return { ...example, category: await billedCategory(seed) };
+	if (state === 'category-delete-refused') return { ...example, billed: await billedRecord(seed, 'category') };
+	if (state === 'distribution-key-delete-refused') return { ...example, billed: await billedRecord(seed, 'key') };
 	if (state.startsWith('key-')) return { ...example, accessKey: seed.unique('Claude Desktop') };
 	if (!state.startsWith('login-password') && state !== 'login-locked') return example;
 	await seed.localAccount();
