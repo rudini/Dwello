@@ -2,7 +2,7 @@ import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { dialogActions, dialogTitleText, errorMessageShown, fieldDescription, fieldValue } from '../questions/form';
 import { focusedPlace, focusedText, pageActionNames, pageTitle } from '../questions/navigation';
-import { goBackInBrowser } from '../tasks/app-frame';
+import { goBackInBrowser, openOtherPageByAddress } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb, saveTextOfLength } from '../tasks/form';
 
 const { When, Then } = createBdd(test);
@@ -58,6 +58,10 @@ Then(
 
 When('der Liegenschaftsverwalter im Browser zurückgeht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(goBackInBrowser);
+});
+
+When('der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openOtherPageByAddress);
 });
 
 // #681: after a search, a reset, a page of the list or the browser's back button

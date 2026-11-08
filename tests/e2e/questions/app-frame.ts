@@ -5,10 +5,12 @@ import {
 	bannerLink,
 	currentFooterLink,
 	draftNotice,
+	firstMobileNavLink,
 	focusedPart,
 	footerVersion,
 	glossaryExplanation,
 	legalAsOf,
+	mobileNavLink,
 	llmRecipient,
 	newestSuccessToast,
 	operatorNotice,
@@ -70,3 +72,6 @@ export const confirmedNames = question('the names the confirmations give', async
 );
 /** #1096: what the part with the focus says, e.g. the name of a row's link */
 export const focusedText = Text.of(focusedPart);
+/** #657: the first item of the menu in a narrow window, and how much of an item shows without scrolling (1: all) */
+export const firstMobileNavItem = Text.of(firstMobileNavLink);
+export const mobileNavItemShare = (label: string) => ShareInViewport.of(mobileNavLink(label));

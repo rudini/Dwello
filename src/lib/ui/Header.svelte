@@ -77,7 +77,8 @@
 		</div>
 
 		<div class="flex items-center gap-2">
-			<LanguageSwitcher />
+			<!-- where space runs short (below 768 px) the language choice stands in the menu (#657) -->
+			<div class="hidden md:block"><LanguageSwitcher /></div>
 			{#if user}
 				<div
 					class="relative"

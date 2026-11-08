@@ -82,6 +82,27 @@ describe('Sprachwahl', () => {
 		}
 	});
 
+	// #657 (Decided): in a narrow window the choice stands in the menu, the header's is hidden; after the reload the focus is on the menu
+	it('steht nach dem Wechsel im schmalen Fenster auf dem Menü', () => {
+		sessionStorage.clear();
+		sessionStorage.setItem('dwello-language-changed', '1');
+		const shown = (element: HTMLElement) => element.dataset.testid !== 'language-button';
+		Object.defineProperty(HTMLElement.prototype, 'checkVisibility', {
+			value: function (this: HTMLElement) {
+				return shown(this);
+			},
+			configurable: true
+		});
+		try {
+			show(Header, {
+				user: { id: 'u1', sub: 'u1', name: 'Vera Verwalter', email: 'vera@example.ch' }
+			});
+			expect(document.activeElement).toBe(byTestId('mobile-menu-button'));
+		} finally {
+			delete (HTMLElement.prototype as { checkVisibility?: unknown }).checkVisibility;
+		}
+	});
+
 	// persona Sven 656 P-1: the language already shown changes nothing, so the list closes like with Escape, and no reload names it
 	it('schliesst bei der Wahl der aktuellen Sprache und nennt sie beim nächsten Laden nicht', () => {
 		sessionStorage.clear();
