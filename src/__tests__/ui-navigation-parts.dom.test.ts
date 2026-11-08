@@ -51,23 +51,19 @@ describe('Schrittanzeige', () => {
 		expect(byTestId('wizard-step-value')!.className.split(/\s+/)).not.toContain('sr-only');
 	});
 
-	it('zeigt die Namen der Schritte erst ab breiten Fenstern, Screenreadern immer', () => {
+	it('zeigt ab mittleren Fenstern nur den Namen des aktuellen Schritts, ab breiten alle, Screenreadern immer', () => {
 		show(Stepper, { steps, current: 3, onselect: vi.fn() });
 		const labels = [...document.querySelectorAll('[data-testid="wizard-step-label"]')];
 		expect(labels.map((label) => label.textContent)).toEqual(steps);
-		for (const label of labels) {
-			expect(label.className.split(/\s+/)).toEqual(
-				expect.arrayContaining(['sr-only', 'xl:not-sr-only'])
-			);
-		}
-		// #673 (Helga P-6, code review C-1): from md only the current step is named next to its number
-		expect(labels.map((label) => label.className.split(/\s+/).includes('md:not-sr-only'))).toEqual([
-			false,
-			false,
-			true,
-			false,
-			false
-		]);
+		// #673 (Helga P-6, code review C-1): from md only the current step is named next to its number; from xl all
+		for (const shown of ['md:sr-only', 'xl:not-sr-only'])
+			expect(labels.map((label) => label.className.split(/\s+/).includes(shown))).toEqual([
+				true,
+				true,
+				false,
+				true,
+				true
+			]);
 		// the full name of the current step stays visible above
 		expect(document.querySelector('nav p')!.textContent).toContain(
 			'Schritt 3 von 5: Vertragsdauer'
@@ -86,14 +82,35 @@ describe('Schrittanzeige', () => {
 			false,
 			false
 		]);
-		expect(labels.map((label) => label.className.split(/\s+/).includes('md:not-sr-only'))).toEqual([
-			false,
-			false,
+		expect(labels.map((label) => label.className.split(/\s+/).includes('md:sr-only'))).toEqual([
+			true,
 			true,
 			false,
-			false
+			true,
+			true
 		]);
 	});
+
+	// #1179 (Decided): below md all steps stand one below the other, each named; from md as before
+	it.each([[[]], [['2025', 'Alpenblick']]])(
+		'nennt in schmalen Fenstern alle Schritte untereinander (Angaben: %j)',
+		(values) => {
+			show(Stepper, { steps, current: 3, onselect: vi.fn(), values });
+			const list = document.querySelector('ol')!.className.split(/\s+/);
+			expect(list).toEqual(expect.arrayContaining(['flex', 'flex-col', 'md:flex-row']));
+			expect(list).not.toContain('hidden');
+			const labels = [...document.querySelectorAll('[data-testid="wizard-step-label"]')];
+			for (const label of labels) expect(label.className.split(/\s+/)).not.toContain('sr-only');
+			// from md the names but the current one are hidden again
+			expect(labels.map((label) => label.className.split(/\s+/).includes('md:sr-only'))).toEqual([
+				true,
+				true,
+				false,
+				true,
+				true
+			]);
+		}
+	);
 });
 
 describe('Wizard-Navigation', () => {

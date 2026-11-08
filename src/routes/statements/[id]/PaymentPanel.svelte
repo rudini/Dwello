@@ -7,7 +7,15 @@
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Who pays whom by when; a refund has no Zahlungsfrist for the tenant
-	let { statement, onsettle }: { statement: StatementWithDetails; onsettle?: () => void } = $props();
+	let {
+		statement,
+		deadlineDays,
+		onsettle
+	}: {
+		statement: StatementWithDetails;
+		deadlineDays?: number; // a draft's: the days sending gives the Zahlungsfrist (#686)
+		onsettle?: () => void;
+	} = $props();
 
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
@@ -44,6 +52,7 @@
 		date: replaced || noPayment ? undefined : statement.paymentDeadline,
 		testid: 'statement-payment-deadline'
 	});
+	const draft = $derived(statement.status === 'draft'); // #686: its Zahlungsfrist moves when it is sent
 	const rows = $derived(
 		[
 			deadline,
@@ -73,6 +82,12 @@
 				<dd class="font-semibold text-ink" data-testid={'testid' in row ? row.testid : undefined}>
 					{formatDate(row.date!)}
 				</dd>
+				<!-- #686 O-6: a draft's Zahlungsfrist counts from the sending -->
+				{#if row === deadline && draft && deadlineDays}
+					<dd class="text-ink-muted" data-testid="statement-payment-deadline-help">
+						{m.statements_payment_deadline_draft_help({ n: deadlineDays })}
+					</dd>
+				{/if}
 			</div>
 		{/each}
 		{#if nextReminder}
