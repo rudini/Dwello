@@ -6,6 +6,7 @@ import { loadDocuments } from '$lib/server/documents';
 import {
 	correctStatement,
 	declineCorrection,
+	generateStatementPdf,
 	markStatementPaid,
 	markNewPdfSent,
 	recalculateStatement,
@@ -18,6 +19,7 @@ import {
 } from '$lib/server/statement-actions';
 import { countryName } from '$lib/tenant';
 import { localPath } from '$lib/invoice';
+import { paymentDeadlineDays } from '$lib/server/settings';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -32,10 +34,11 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 
 export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const statement = await loadStatement(fetch, params.id);
-	const [address, documents, later] = await Promise.all([
+	const [address, documents, later, days] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
-		laterChanges(fetch, params.id)
+		laterChanges(fetch, params.id),
+		paymentDeadlineDays(fetch)
 	]);
 	// the statement's own Dokument (sent by e-mail, #86) is no Mahnung: the next Mahnstufe counts these
 	return {
@@ -48,7 +51,8 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 			.at(-1) ?? null, // the first: the list is newest first, later sendings are `resent` (#534)
 		// set by the edit page after a change the sent PDF does not show (#524)
 		pdfChange: url.searchParams.get('pdf-change'),
-		later
+		later,
+		paymentDeadlineDays: days
 	};
 };
 
@@ -99,6 +103,10 @@ export const actions: Actions = {
 	},
 	newPdfSent: async ({ request, fetch }) => {
 		const refused = await markNewPdfSent(fetch, String((await request.formData()).get('documentId')));
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	generatePdf: async ({ params, fetch }) => {
+		const refused = await generateStatementPdf(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	recalculate: async ({ params, fetch }) => {
