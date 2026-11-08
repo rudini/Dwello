@@ -2077,6 +2077,7 @@
 	"tenants_document_title_label": "Title",
 	"tenants_document_title_help": "Without a title, the document is named after the file, without its extension.",
 	"tenants_document_upload": "Upload document",
+	"tenants_document_upload_busy_note": "The document is being uploaded. The file and title cannot be changed until the upload is finished.",
 	"tenants_document_demo": "Every visitor sees the files you upload here. Upload only made-up documents.",
 	"tenants_document_file_missing": "Choose a file.",
 	"tenants_document_upload_failed": "The document was not saved because Dwello did not respond. Choose «Upload document» again.",
