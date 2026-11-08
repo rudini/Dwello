@@ -1,7 +1,7 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { cellsOf, draftsNamed, helpOf, noteCount, notesOf, reportPeriodName, rowOf, shown, textOf } from '../questions/cost-reconciliation';
+import { cellsOf, draftsNamed, helpOf, noteCount, notesOf, reportPeriodName, rowOf, sentenceOf, shown, textOf } from '../questions/cost-reconciliation';
 import { invoicesOfBuilding } from '../questions/statement-generate';
 import { pageAddressInApp } from '../questions/statements';
 import { openStatementInReport, openReportOf, openReports } from '../tasks/cost-reconciliation';
@@ -32,6 +32,22 @@ Then(
 	'erklärt die Kostenabstimmung der Vorschau für {string} {string}',
 	async ({ verwalter, seed, names }, building: string, text: string) => {
 		await verwalter.sees(helpOf(inPreview(seed, names, building))).toBe(text);
+	}
+);
+
+// #1138: the sentences under the table, on the Tankbestand and on the Leerstand
+const topics = { Tankbestand: 'fuel-stock', Leerstand: 'vacancy' } as const;
+Then(
+	/^erklärt die Kostenabstimmung der Vorschau für "([^"]*)" den (Tankbestand|Leerstand) mit "([^"]*)"$/,
+	async ({ verwalter, seed, names }, building: string, topic: keyof typeof topics, text: string) => {
+		await verwalter.sees(sentenceOf(inPreview(seed, names, building), topics[topic])).toBe(text);
+	}
+);
+
+Then(
+	/^erklärt die Kostenabstimmung der Berichte den (Tankbestand|Leerstand) mit "([^"]*)"$/,
+	async ({ verwalter }, topic: keyof typeof topics, text: string) => {
+		await verwalter.sees(sentenceOf(inReport, topics[topic])).toBe(text);
 	}
 );
 

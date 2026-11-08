@@ -7,6 +7,7 @@ import {
 	reconciliationHelp,
 	reconciliationNotes,
 	reconciliationRowCells,
+	reconciliationSentence,
 	reportPeriod,
 	reportReconciliation
 } from '../targets/cost-reconciliation';
@@ -19,6 +20,10 @@ export const rowOf = (building: Place, label: string) => Text.ofAll(reconciliati
 export const textOf = (building: Place) => Text.of(scopeOf(building));
 export const shown = (building: Place) => Visibility.of(scopeOf(building));
 export const helpOf = (building: Place) => Text.of(reconciliationHelp(scopeOf(building)));
+export const sentenceOf = (building: Place, topic: 'fuel-stock' | 'vacancy') =>
+	question(`the sentences of ${scopeOf(building)} on ${topic}`, async (actor) =>
+		joined(await actor.answer(Text.ofAll(reconciliationSentence(scopeOf(building), topic))))
+	);
 const joined = (texts: string[]) => texts.join(' ');
 export const notesOf = (building: Place) =>
 	question(`the notes of ${scopeOf(building)}`, async (actor) => joined(await actor.answer(Text.ofAll(reconciliationNotes(scopeOf(building))))));
