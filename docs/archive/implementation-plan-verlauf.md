@@ -1457,6 +1457,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 
+## Session: #690 warn about a missing Firmenadresse before saving or opening a PDF (personas on #450)
+
+- [x] Read #690; triage on main (`docs/reviews/690-triage.md`): points 1 and 3 hold, point 2 fixed by #734
+- [x] Product owner decisions recorded in #690: mark missing fields on load, warn on statements with a Zahlteil, refused save says nothing was saved; W-2 (sender address stays required with an IBAN, the page warns too)
+- [x] `GET /config` sends the creditor state, `paymentPart` per statement, the warning and the refused-save text; scenarios on the fresh installation (`@frische-installation`) seen red (8477df9, 30e65d4)
+- [x] code-reviewer (`docs/reviews/690-review-{1..5}.md`): C-1..C-4 fixed (49e4237, 8b4baa6); C-5 Major (focus after the link) fixed (5a5f610); closing C-6 Major (three scenarios), C-7, C-8 fixed (2b8b3a8, 50c2d12)
+- [x] Personas Helga, Weber (`docs/design/personas/{helga,weber}-690.md`), three rounds with states set by SQL: H-4 Major (link lands at the top) fixed; W-1 Major (Firmenadresse named for an incomplete Kontoinhaber), W-2 Major fixed; Minors that stay: H-1, H-2, H-5, H-6, W-4..W-8
+- [x] Workflow notes: a state the app refuses to save needs SQL setup before a persona run; say so in the persona prompt
 ## Session: #686 statement screens and PDF heating wording (Dr. Weber on #229)
 
 - [x] Read #686; triage on main (`docs/reviews/686-triage.md`): P-3 fixed by #685; heating share, «Liegenschaft», move-out date already fixed; P-4, the step 2 count, the first PDF click and the draft Zahlungsfrist hold
@@ -1508,8 +1516,32 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga (`docs/design/personas/helga-b1143.md`): no Blocker or Major; P-1..P-3 Minor stay (P-1, P-3 on the base commit, P-2 the decided #666 hint and #1142)
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1143.md`
 - [x] Archive the session; PR `Fixes #1143`: pushed after this archive
+
+## Session: #1028 category help: law references and contract note
+
+- [x] Checked on main: paragraphs of the allocability help (#678) and the description help (#672) already done; decisions recorded in #1028 (scope: category reasons, contract note, invoice note; contract note names the signed contract and «Vereinbarte Nebenkosten», no link); #687 asked to set the spaces in its six rewritten reasons
+- [x] Red scenario «Der Hinweis zum Mietvertrag sagt, wo die vereinbarten Nebenkosten stehen» and red i18n/DOM tests (0994e9213)
+- [x] `fach-reviewer` `docs/reviews/1028-fachreview-1.md` before implementing: texts of the contract note in four languages, rule extended (OBLF, comma before al./let.)
+- [x] Texts in `messages/*.json` (60f4a28bc); slice review `docs/reviews/1028-review-1.md` (Minors C-1, C-2 fixed)
+- [x] Persona Helga `docs/design/personas/helga-1028.md`: P-1 fixed (number and «Absatz» kept together, 62cf70155); P-2 rejected (decided: no link), P-3, P-4 Minor stay in the report
+- [x] Checks: lint, check, fitness, backend type-check, full vitest, `pdf-translations`, E2E `categories.feature` + `invoice-detail.feature`, axe/language rows of categories, category-new, category-edit-predefined, invoice-detail
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1028.md`
+- [x] Archive session; PR `Fixes #1028`: pushed after this archive
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #1173 Do not announce the page title again after a form action
+
+Parallel session: checklist kept in the pull request.
+
+- [x] Decisions 1–3 recorded in #1173 under «Decided (product owner)»
+- [x] Scenarios in `tenant-documents.feature`: upload heard without the title (seen red: title «Lea Frei … - Dwello» heard), opening a tenant reads its title once (pins kept behaviour)
+- [x] Screen reader recorder for E2E (`ListenToAnnouncements`, `Announcements`)
+- [x] Root layout: SvelteKit's announcer muted and hidden, own announcer reads the title on a change of path; DOM tests in `layout-hydrated.dom.test.ts`, each seen red
+- [x] code-reviewer `docs/reviews/1173-review-1.md`: no findings
+- [x] Persona Sven `docs/design/personas/sven-1173.md`: no Blocker, Major or Minor; observation «title twice in the tree» caused by the change, fixed (aria-hidden, 0f2d074)
+- [x] Closing code-reviewer `docs/reviews/1173-review-2.md`
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, E2E tenant-documents/tenants/documents, axe and language rows of the tenant screens
+- [x] Archive the session; PR `Fixes #1173`: pushed after this archive
 - [x] Each point of #739 checked on main: the wizard preselects `default_heating_profile_id`, else the first complete profile, own ones first; the E2E data set no default
 - [x] Probe (not committed): an own complete profile listed first, all `statement-*.feature` on Chromium green (345): no amount depends on the preselection; decision written into #739 («Decided (product owner)»: a default per run, no scenario change)
 - [x] Throwaway `@wip` probe: the wizard proposed the probe profile without the change (red), «Heizung + Warmwasser» with it (green); No scenario: test data setup
