@@ -252,12 +252,11 @@ Funktionalität: Einstellungen
 
   # #1298 (Entscheid des Product Owners; Personas Marco und Helga in #1202): die Hilfe beim Häkchen sagt vor dem
   # Speichern, dass ein eigener Kontoinhaber gelöscht wird; es wird nichts gespeichert
-  @wip
   Szenario: Die Einstellungen sagen, dass das Häkchen einen eigenen Kontoinhaber löscht
     Dann erklärt die Einstellung "Kontoinhaber ist der Absender" "Mit Häkchen löscht Speichern einen eigenen Kontoinhaber."
 
   # #1298 (Entscheid des Product Owners; Persona Marco in #1202): die Bestätigung nennt auch das Konto mit dem Kontoinhaber
-  @wip @einstellungen-global
+  @einstellungen-global
   Szenario: Die Bestätigung nennt das Konto mit dem Kontoinhaber
     Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
       | Firmenname | Muster Immobilien AG       |

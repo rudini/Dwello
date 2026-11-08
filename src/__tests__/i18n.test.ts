@@ -205,6 +205,19 @@ describe('Sprachdateien', () => {
 		expect(messages.contracts_end_kind_agreement_help).toBe(text);
 	});
 
+	// #1298 (1298-fachreview-1): the help at «Kontoinhaber ist der Absender» says that saving with the box ticked deletes
+	// an own Kontoinhaber, and the saved notice names the Konto with the Kontoinhaber
+	it.each([
+		['de', 'Mit Häkchen löscht Speichern einen eigenen Kontoinhaber.', 'Absender, Konto mit Kontoinhaber, Verwaltungspauschale, Fristen und Vorschläge gespeichert.'],
+		['fr', 'Si la case est cochée, l’enregistrement supprime un titulaire du compte saisi séparément.', 'Expéditeur, compte avec le titulaire du compte, frais d’administration, délais et propositions enregistrés.'],
+		['it', 'Con la spunta, salvando si cancella un titolare del conto registrato a parte.', 'Mittente, conto con il titolare del conto, spese amministrative, termini e proposte salvati.'],
+		['en', 'With the box ticked, saving deletes a separately entered account holder.', 'Sender, account with account holder, management fee, deadlines and suggestions saved.']
+	])('%s: die Hilfe sagt, dass Speichern mit Häkchen einen eigenen Kontoinhaber löscht, und die Bestätigung nennt das Konto', (language, help, saved) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.settings_account_holder_help.endsWith(` ${help}`)).toBe(true);
+		expect(messages.settings_saved_text).toBe(saved);
+	});
+
 	// #501: the hint at a short Kündigungsfrist says the same as the glossary
 	it.each([
 		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor. Haben Sie das Ende mit dem Mieter vereinbart, wählen Sie «Aufhebungsvereinbarung».'],
