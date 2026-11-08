@@ -39,11 +39,13 @@ function repo(output: string, exit: number, changed: string): string {
 const FAILED = 'error [fat-file] src/a.ts has 501 lines, allowed 500\nFitness: 1 errors, 0 warnings';
 
 describe('fitness gate', () => {
-	it('blocks a commit that changes src/ when fitness reports an error, and shows the error', () => {
-		const result = hook(repo(FAILED, 1, 'src/a.ts'), 'git commit -am "feat: x"');
+	it('blocks a commit that changes src/ when fitness reports an error, shows the error, and runs without a base when the clone has no origin/main', () => {
+		const root = repo(FAILED, 1, 'src/a.ts');
+		const result = hook(root, 'git commit -am "feat: x"');
 		expect(result.status).toBe(2);
 		expect(result.stderr).toContain('fitness-gate: blocked');
 		expect(result.stderr).toContain('error [fat-file] src/a.ts has 501 lines, allowed 500');
+		expect(readFileSync(join(root, 'ran'), 'utf8')).toBe('');
 	});
 
 	it('runs fitness against origin/main when the clone has it, as CI does', () => {
