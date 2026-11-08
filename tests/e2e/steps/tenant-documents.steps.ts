@@ -261,7 +261,7 @@ Then(
 );
 
 // #1209 (persona Helga P-1): the status first, so the sign is checked while the request waits
-Then('zeigt «Dokument hochladen» vor {string} ein Fortschrittszeichen', async ({ verwalter }, text: string) => {
+Then('zeigt «Dokument hochladen» mit {string} ein Fortschrittszeichen', async ({ verwalter }, text: string) => {
 	await verwalter.sees(uploadButtonStatus).toBe(text);
 	await verwalter.sees(uploadProgressShown).toBe(true);
 });

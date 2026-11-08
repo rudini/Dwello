@@ -147,7 +147,7 @@ Funktionalität: Dokumente eines Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
     Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
-    Dann zeigt «Dokument hochladen» vor "Bitte warten …" ein Fortschrittszeichen
+    Dann zeigt «Dokument hochladen» mit "Bitte warten …" ein Fortschrittszeichen
 
   # #1209 (Persona Helga P-2): neben dem arbeitenden Knopf sieht «Abbrechen» aus wie sonst, ein Klick darauf tut nichts
   Szenario: Während des Löschens sieht «Abbrechen» aus wie sonst und tut nichts
