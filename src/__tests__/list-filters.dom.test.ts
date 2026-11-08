@@ -256,6 +256,26 @@ describe.each([...lists, statements])('Suche der Liste $path nach einer Navigati
 		expect(valueOf(list.search)).toBe('Ahorn');
 	});
 
+	// #754: the first view keeps what was typed before the app reacted; a reload or back and forward restored it
+	it.each([
+		['navigate', 'Gibt es nicht'],
+		['reload', 'Ahorn'],
+		['back_forward', 'Ahorn']
+	])('zeigt beim ersten Aufbau nach «%s» die Suche %s', (kind, shown) => {
+		typeUnsent();
+		// jsdom has no navigation timing: the browser's entry of this page load
+		Object.defineProperty(performance, 'getEntriesByType', {
+			value: () => [{ type: kind }],
+			configurable: true
+		});
+
+		for (const callback of navigated) callback({ type: 'enter' });
+		flushSync();
+		Reflect.deleteProperty(performance, 'getEntriesByType');
+
+		expect(valueOf(list.search)).toBe(shown);
+	});
+
 	it('zeigt die angewandte Suche, wenn der Browser die Seite wieder zeigt', () => {
 		typeUnsent();
 

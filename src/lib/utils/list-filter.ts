@@ -14,20 +14,21 @@ function showSearched(form: HTMLFormElement) {
 
 /**
  * The filter form shows exactly the filter the list applies (product owner, #680): after every navigation, also to
- * the same address, and when the browser shows the page again (from its cache, or a reload by back or forward that
- * restores typed text), a text typed but not searched is dropped. Called while the form's component starts.
+ * the same address, and when the browser shows the page again (from its cache, or a reload, also by back or
+ * forward, that restores typed text), a text typed but not searched is dropped. Called while the form's component starts.
  */
 export function showAppliedFilter(form: () => HTMLFormElement | undefined) {
 	const reset = () => {
 		const shown = form();
 		if (shown) showSearched(shown);
 	};
-	const backOrForward = () =>
+	// a reload or back and forward: the browser may have restored typed text (Firefox also on a reload)
+	const restored = () =>
 		(performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)
-			?.type === 'back_forward';
+			?.type !== 'navigate';
 	// the first view keeps a text typed before the app reacted (#754), unless the browser restored it
 	afterNavigate((navigation) => {
-		if (navigation.type !== 'enter' || backOrForward()) reset();
+		if (navigation.type !== 'enter' || restored()) reset();
 	});
 	onMount(() => on(window, 'pageshow', (event) => event.persisted && reset()));
 }
