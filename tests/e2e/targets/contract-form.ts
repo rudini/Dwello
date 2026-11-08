@@ -110,6 +110,7 @@ export const wizardText = (text: string) =>
 	target(`«${text}» im Assistenten`, (page) => page.getByTestId('contract-wizard').getByText(text));
 // #669 (Helga H-1): the box «Zeitraum überschneidet sich», at «Vertragsdauer» and in «Prüfen»
 export const overlapBox = target('Hinweis «Zeitraum überschneidet sich»', (page) => page.getByTestId('overlap-warning'));
+export const overlapLink = target('Link zum Mietvertrag, mit dem sich der Zeitraum überschneidet', (page) => page.getByTestId('overlap-contract-link'));
 // #668: the hint under «Befristet» for a contract saved open-ended, and «Monatlich total» in a live region
 export const noticeHint = target('Hinweis zum Vertragsende', (page) => page.getByTestId('contract-notice-hint'));
 export const announcedMonthlyTotal = target('Ansage des Monatlich total', (page) =>

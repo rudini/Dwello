@@ -224,7 +224,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Dann steht im Schritt «Wohnung» der Hinweis "Wohnung 2.01 · Ahornhof ist nicht verfügbar"
     Und erklärt der Hinweis im Schritt «Wohnung» "Für diese Wohnung ist ein Mietvertrag ohne Vertragsende erfasst. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
-    Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier"
+    Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier für Wohnung 2.01 · Ahornhof"
 
   # #1158 (Personas Sven P-1, Helga): nach dem Laden steht der Fokus auf dem Schritt, ohne Meldung dazwischen (#1289)
   Szenario: Nach dem Laden steht der Fokus auf dem Schritt «Wohnung»
@@ -276,6 +276,16 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon."
+
+  # #1295 (Personas Helga P-2, Sven P-1 in 1288): jeder Link zum anderen Mietvertrag nennt Mieter und Wohnung
+  @wip
+  Szenario: Der Link zum Mietvertrag, mit dem sich der Zeitraum überschneidet, nennt Mieter und Wohnung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-04-01" bis "2027-03-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter den Vertragsbeginn "2027-01-01" einträgt
+    Dann bietet Dwello beim Vertragsbeginn den Link "Zum Mietvertrag von Bruno Meier für Wohnung 2.01 · Ahornhof"
 
   # #669 (Persona Helga H-1, fach-reviewer V-7): in der Prüfung bleibt der Kasten zur Überschneidung stehen, wenn die Meldung geht
   Szenario: Nach dem Laden zeigt die Prüfung den Kasten zur Überschneidung

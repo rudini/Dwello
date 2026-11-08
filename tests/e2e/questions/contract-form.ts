@@ -24,6 +24,7 @@ import {
 	runningContractHintOf,
 	runningContractLinkOf,
 	apartmentClearedAnnouncement,
+	overlapLink,
 	startContractsUnknown,
 	tenantSelect,
 	withdrawNoticeOption,
@@ -105,6 +106,7 @@ export const toasts = Count.of(anyToast);
 export const runningContractHintTextOf = (tenant: string) => Text.of(runningContractHintOf(tenant));
 export const runningContractLinkTextOf = (tenant: string) => Text.of(runningContractLinkOf(tenant));
 export const overlapBoxText = Text.of(overlapBox);
+export const overlapLinkText = Text.of(overlapLink);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);
 export const apartmentSelectInWindow = ShareInViewport.of(apartmentSelect);

@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentSelectInWindow, apartmentClearedAnnounced, apartmentClearedExplanation, apartmentClearedHint, apartmentClearedHints, runningContractHintTextOf, runningContractLinkTextOf, toasts, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
+import { overlapLinkText, apartmentSelectInWindow, apartmentClearedAnnounced, apartmentClearedExplanation, apartmentClearedHint, apartmentClearedHints, runningContractHintTextOf, runningContractLinkTextOf, toasts, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
 import { enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
@@ -126,4 +126,9 @@ Then('erklärt der Hinweis auf den Mietvertrag von {string} {string}', async ({ 
 // #1296: the hint on the tenant's own contract does not push the field just used out of the window
 Then('ist die Wohnungsauswahl ganz im Fenster zu sehen', async ({ verwalter }) => {
 	await verwalter.sees(apartmentSelectInWindow).toBe(1);
+});
+
+// #1295: every link to the other contract names tenant and apartment
+Then('bietet Dwello beim Vertragsbeginn den Link {string}', async ({ verwalter, names }, label: string) => {
+	await verwalter.sees(overlapLinkText).toBe(named(names, label));
 });
