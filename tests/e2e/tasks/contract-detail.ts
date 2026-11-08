@@ -27,7 +27,8 @@ import {
 	continueOpenEndedButton,
 	movedOutButton,
 	confirmMovedOutButton,
-	deleteDraftAndContinueButton
+	deleteDraftAndContinueButton,
+	endKindAgreement
 } from '../targets/contract-detail';
 
 export const openContract = (contractId: string) => Navigate.to(`/contracts/${contractId}`);
@@ -50,6 +51,12 @@ export const fillEndWithNotice = (endDate: string, receivedOn: string): Activity
 		EnterDate.of(receivedOn).into(noticeReceivedInput)
 	);
 export const confirmEnd = Click.on(confirmEndContractButton);
+
+// #1148: the dialog opened with an Aufhebungsvereinbarung chosen; ended on the day typed, when one is given
+export const startEndingByAgreement: Activity = (actor) =>
+	actor.attemptsTo(Click.on(endContractButton), Click.on(endKindAgreement));
+export const endContractByAgreementOn = (isoDate: string): Activity => (actor) =>
+	actor.attemptsTo(startEndingByAgreement, EnterDate.of(isoDate).into(contractEndInput), Click.on(confirmEndContractButton));
 
 export const startEndingContract = Click.on(endContractButton);
 export const startDeletingContract = Click.on(deleteContractButton);

@@ -312,3 +312,44 @@ describe('Gekündigter Mietvertrag', () => {
 		expect(await response.json()).toMatchObject({ code: 'CONTRACT_NOTICE_WITHOUT_END' });
 	});
 });
+
+// #1148: Mieter und Vermieter beenden einen unbefristeten Mietvertrag im Einvernehmen, ohne Kündigung
+describe('Mietvertrag mit Aufhebungsvereinbarung', () => {
+	let rental: Awaited<ReturnType<typeof createRental>>;
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { ...body, confirmPastEnd: true });
+	const stored = async () => (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
+
+	beforeAll(async () => {
+		rental = await createRental(crypto.randomUUID(), { startDate: '2024-04-01', monthlyAdvancePayment: '100' });
+	});
+
+	afterAll(() => rental.remove());
+
+	it('gilt ohne Angabe als Kündigung', async () => {
+		expect((await put({ endDate: '2099-03-31', terminated: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ terminated: true, byAgreement: false });
+		await put({ endDate: null });
+	});
+
+	it('merkt sich die Aufhebungsvereinbarung ohne Eingang einer Kündigung', async () => {
+		const response = await put({ endDate: '2099-03-31', terminated: true, byAgreement: true, noticeReceivedOn: '2098-12-15' });
+		expect(response.status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-03-31', terminated: true, byAgreement: true, noticeReceivedOn: null });
+	});
+
+	it('bleibt eine Aufhebungsvereinbarung, wenn sich das Vertragsende verschiebt', async () => {
+		expect((await put({ endDate: '2099-04-30', terminated: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-04-30', byAgreement: true });
+	});
+
+	it('vergisst die Aufhebungsvereinbarung, wenn der Mietvertrag befristet wird', async () => {
+		expect((await put({ endDate: '2099-06-30', terminated: false })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-06-30', terminated: false, byAgreement: false });
+	});
+
+	it('vergisst die Aufhebungsvereinbarung, wenn das Vertragsende entfernt wird', async () => {
+		await put({ endDate: '2099-03-31', terminated: true, byAgreement: true });
+		expect((await put({ endDate: null })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false, byAgreement: false });
+	});
+});

@@ -123,3 +123,6 @@ export const moveOutStatementLink = target('Schlussabrechnung erstellen', (page)
 export const missingStatementsTitle = target('Titel der fehlenden Abrechnungen', (page) =>
 	page.getByTestId('contract-missing-statement').getByRole('heading', { level: 2 })
 );
+// #1148: whether the contract ends by a notice or by an Aufhebungsvereinbarung
+export const endKind = target('Art des Vertragsendes', (page) => page.getByTestId('contract-end-kind'));
+export const endKindAgreement = target('Aufhebungsvereinbarung', (page) => page.getByTestId('contract-end-kind-agreement'));
