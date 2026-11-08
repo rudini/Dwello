@@ -36,14 +36,14 @@ export async function createRental(token: string, contract: {
 		// a refused delete leaves records in dwello_test, so it fails the test (#684); one the test removed itself is fine
 		async remove() {
 			for (const [what, removed] of [
-				['contract', () => deleteContract(rental.id, true)],
-				['tenant', () => deleteTenant(tenant.id)],
-				// #1257: contracts a test added to the apartment go first, else the apartment stays
-				['apartment', async () => {
+				['contract', async () => {
+					// #1257: contracts a test added to the apartment go too, before the tenant and the apartment
 					const rest = await db.select({ id: rentalContracts.id }).from(rentalContracts).where(eq(rentalContracts.apartmentId, apartment.id));
-					for (const { id } of rest) await deleteContract(id, true);
-					return deleteApartment(apartment.id);
+					for (const { id } of rest.filter(({ id }) => id !== rental.id)) await deleteContract(id, true);
+					return deleteContract(rental.id, true);
 				}],
+				['tenant', () => deleteTenant(tenant.id)],
+				['apartment', () => deleteApartment(apartment.id)],
 				['building', () => deleteBuilding(building.id)]
 			] as const) {
 				const { success, error } = await removed();
