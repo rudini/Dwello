@@ -72,7 +72,11 @@ describe('Kostenabstimmung ohne Positionen', () => {
 			fuelStocks: [{ position: 'Heizung', opening: 600, closing: 100 }],
 			vacancies: [{ apartmentNumber: 'OG2', days: 30 }]
 		});
-		expect(document.querySelectorAll('[data-testid^="cost-reconciliation-fuel-stock"], [data-testid="cost-reconciliation-vacancy"]').length).toBe(0);
+		expect(
+			document.querySelectorAll(
+				'[data-testid^="cost-reconciliation-fuel-stock"], [data-testid="cost-reconciliation-vacancy"]'
+			).length
+		).toBe(0);
 	});
 });
 
