@@ -484,7 +484,7 @@ describe('Prüfungen im Mietvertrag', () => {
 	});
 
 	// #669 (Sven S-2, Helga H-3, fach-review V-5): the apartment chosen «(nicht geprüft)» turned out rented
-	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und sagt, warum', async () => {
+	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und warnt mit dem Ergebnis', async () => {
 		let failing = true;
 		fakeBff(({ path }) =>
 			failing && path.endsWith('=a2')
@@ -504,7 +504,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
 			[
 				'warning',
-				'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar: Sie hat einen unbefristeten Mietvertrag, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung.'
+				'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben.'
 			]
 		]);
 	});
@@ -954,14 +954,28 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await open();
 		select('contract-tenant-select', 't1');
 		next();
+		select('apartment-select', 'a1');
 		await settle();
 		const hint = byTestId('tenant-running-contract')!;
 		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
 		expect(hint.textContent).toContain('für die Wohnung 2.02 (Ahornhof)');
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c-a2');
-		select('apartment-select', 'a1');
 		next();
 		expect(heading()).toBe('Vertragsdauer');
+	});
+
+	// #1158 (Sven P-3): without an apartment, the hint would lead to another contract than a cleared choice's hint
+	it('wartet mit dem Hinweis auf den Mietvertrag des Mieters, bis der Schritt eine Wohnung hat', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
+		expect(byTestId('tenant-running-contract')).toBeNull();
+		select('apartment-select', 'a1');
+		await settle();
+		expect(byTestId('tenant-running-contract')).not.toBeNull();
 	});
 
 	it('schweigt bei einem Mietvertrag mit Vertragsende', async () => {
@@ -983,6 +997,7 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await open();
 		select('contract-tenant-select', 't1');
 		next();
+		select('apartment-select', 'a1');
 		await settle();
 		expect(byTestId('tenant-running-contract')!.closest('[role="status"]')).not.toBeNull();
 	});

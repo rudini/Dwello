@@ -171,7 +171,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier"
 
   # #1158 (Personas Sven P-1, Helga): nach «Meldung schliessen» steht der Fokus wieder dort, wo er vor der Meldung stand
-  @wip
   Szenario: Nach «Meldung schliessen» steht der Fokus wieder auf dem Schritt «Wohnung»
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
@@ -185,7 +184,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann steht der Fokus wieder auf dem Schritt «Wohnung»
 
   # #1158 (Personas Sven P-3, Helga): der Hinweis auf den eigenen Mietvertrag des Mieters wartet, bis der Schritt eine Wohnung hat
-  @wip
   Szenario: Nach dem Aufheben der Wahl steht im Schritt nur der Hinweis auf die nicht verfügbare Wohnung
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken

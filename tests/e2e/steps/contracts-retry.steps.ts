@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { apartmentClearedExplanation, apartmentClearedHint, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
-import { focusedPlace, focusedText } from '../questions/navigation';
+import { focusedText } from '../questions/navigation';
 import { closeWarning, closeWarningWithKeyboard, enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
 const { When, Then } = createBdd(test);
@@ -98,8 +98,7 @@ When('der Liegenschaftsverwalter die Warnung mit der Tastatur schliesst', async 
 });
 
 Then('steht der Fokus wieder auf dem Schritt «Wohnung»', async ({ verwalter }) => {
-	await verwalter.sees(focusedPlace).toBe('contract-step-heading');
-	await verwalter.sees(focusedText).toContain('Wohnung');
+	await verwalter.sees(focusedText).toMatch(/^Schritt 2 von \d: Wohnung$/);
 });
 
 // #1158 (Sven P-3): the hint on the tenant's own open-ended contract waits until the step has an apartment

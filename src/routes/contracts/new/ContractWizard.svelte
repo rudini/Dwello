@@ -123,7 +123,10 @@
 	const reviewUnknown = $derived(unknown && !refusedWith);
 	const reviewOverlap = $derived(refusedWith ? null : overlap); // found by «Erneut versuchen» there (#669)
 	const overlapAtField = $derived(!!overlap && errors[overlap.field] === overlap.text);
-	const openContracts = $derived(openContractsOf(apartments, contracts, values.tenantId));
+	// #1158 (Sven P-3): only next to a chosen apartment, never beside a cleared choice's hint
+	const openContracts = $derived(
+		values.apartmentId ? openContractsOf(apartments, contracts, values.tenantId) : []
+	);
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	const contractsOf = async (apartmentId: string) => {

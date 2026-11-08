@@ -2032,7 +2032,7 @@
 	"contracts_apartment_contracts_checked": "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon.",
 	"contracts_apartment_contracts_overlap": "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Welcher es ist, steht im Hinweis «Zeitraum überschneidet sich».",
 	"contracts_apartment_contracts_overlap_step": "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit einem davon. Ändern Sie den Vertragsbeginn oder das Vertragsende im Schritt {number} «{step}».",
-	"contracts_apartment_contracts_blocked": "Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar: Sie hat einen unbefristeten Mietvertrag, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung.",
+	"contracts_apartment_contracts_blocked": "Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben.",
 	"contracts_apartment_cleared_title": "{apartment} ist nicht verfügbar",
 	"contracts_apartment_cleared_text": "Für diese Wohnung ist ein unbefristeter Mietvertrag erfasst, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung.",
 	"contracts_overlap_review_where": "Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt {period} «{periodStep}», die Wohnung im Schritt {apartment} «{apartmentStep}».",
