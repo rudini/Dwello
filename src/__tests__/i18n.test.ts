@@ -65,6 +65,30 @@ describe('Sprachdateien', () => {
 		expect(wrong).toEqual([]);
 	});
 
+	// #1028 (Marco P-6), Fachreview 678 V-3: U+00A0 in «Art. 257a», «Absatz 2» und vor OR, U+2060 nach dem Strich;
+	// Fachreview 1028 V-3, V-4: auch vor «OBLF» und nach dem Komma in «art. 257a, al. 2»
+	// Persona Helga 1028 P-1: auch zwischen «257a» und «Absatz»
+	const lawTexts = (key: string) =>
+		key === 'categories_contract_note' ||
+		key === 'invoices_legal_text' ||
+		key.startsWith('categories_allocable_') ||
+		key.startsWith('categories_reason_');
+	const breakable =
+		/\b[Aa]rt\. (?=\d)|\b(Absatz|Buchstabe|al\.|cpv\.|para\.|let\.|lett\.) (?=\w)| (OR|CO|VMWG|OBLF|OLAL)\b|, (?=(al|let)\.)|\d[a-z]? (?=(Absatz|Buchstabe|al\.|cpv\.|para\.|let\.|lett\.))|–(?=\d)/;
+	it.each(languages)(
+		'%s bricht Gesetzesverweise der Kategorien und der Rechnung nicht um',
+		(language) => {
+			const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+			const checked = Object.entries(messages).filter(([key]) => lawTexts(key));
+			const wrong = checked
+				.filter(([, text]) => breakable.test(text as string))
+				.map(([key]) => key);
+
+			expect(checked.length).toBeGreaterThan(15);
+			expect(wrong).toEqual([]);
+		}
+	);
+
 	// «de« Saisir» once lost its space before « (review #57, C-1)
 	it('Französisch setzt vor « ein Leerzeichen', () => {
 		const messages = JSON.parse(readFileSync('messages/fr.json', 'utf8'));
