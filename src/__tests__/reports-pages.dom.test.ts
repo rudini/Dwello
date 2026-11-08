@@ -16,7 +16,9 @@ const reconciliation = {
 	notUpToDate: [
 		{ id: 's1', tenantName: 'Eva Frei' },
 		{ id: 's2', tenantName: 'Marc Huber' }
-	]
+	],
+	fuelStocks: [],
+	vacancies: []
 };
 
 describe('Berichte', () => {

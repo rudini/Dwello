@@ -8,13 +8,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
+	apartments,
 	categories,
 	distributionKeys,
+	fuelStocks,
 	invoices,
 	rentalContracts,
 	utilityStatements
 } from '../db/schema';
 import type { reportPeriods, reportReconciliation } from '../services/cost-reconciliation.service';
+import { createApartment, deleteApartment } from '../services/apartment.service';
+import { createContract, deleteContract } from '../services/contract.service';
 import { generateStatement } from '../services/statement.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -215,6 +219,91 @@ describe('Kostenabstimmung der Vorschau', () => {
 			total: { buildingCosts: 732, tenants: 182, landlord: 550 },
 			managementFee: 5.46
 		});
+	});
+});
+
+// #1138 (PO 06.11.2026): the apartments with Leerstand, each once with its vacant days, in both Kostenabstimmungen
+describe('Leerstand der Kostenabstimmung', () => {
+	it('nennt jede Wohnung mit ihren Tagen ohne Mietvertrag', async () => {
+		// 2.01 is let 1.1. to 31.3.2024: vacant from 1.4., 275 of 366 days
+		expect([(await report()).vacancies, (await run()).vacancies]).toEqual([
+			[{ apartmentNumber: '2.01', days: 275 }],
+			[{ apartmentNumber: '2.01', days: 275 }]
+		]);
+	});
+
+	// Fachreview 1138-1 V-2, V-4: the gaps of one apartment summed; ordered as on the building page, floor by floor, by number
+	it('zählt die Lücken einer Wohnung zusammen und nennt die Wohnungen nach Stockwerk und Nummer', async () => {
+		const later = await createContract({
+			apartmentId: rental.apartment,
+			tenantId: rental.tenant,
+			startDate: '2024-05-01',
+			endDate: '2024-10-31',
+			baseRent: '950',
+			monthlyAdvancePayment: '0'
+		});
+		const added = [];
+		for (const [number, floor] of [['10', 1], ['EG', 0], ['9', 1]] as const)
+			added.push(await createApartment({ buildingId: rental.building, number, floor, area: '40', rooms: '2' }));
+		const { vacancies } = await report();
+		for (const apartment of added) await deleteApartment(apartment.id);
+		await deleteContract(later.id, true);
+		// 2.01: April 30 + November and December 61 = 91
+		expect(vacancies).toEqual([
+			{ apartmentNumber: 'EG', days: 366 },
+			{ apartmentNumber: '9', days: 366 },
+			{ apartmentNumber: '10', days: 366 },
+			{ apartmentNumber: '2.01', days: 91 }
+		]);
+	});
+
+	it('zählt die Tage ab «Aufgehoben ab» nicht als Leerstand', async () => {
+		await db.update(apartments).set({ discontinuedFrom: '2024-07-01' }).where(eq(apartments.id, rental.apartment));
+		const { vacancies } = await report();
+		await db.update(apartments).set({ discontinuedFrom: null }).where(eq(apartments.id, rental.apartment));
+		// April to June: 91 days
+		expect(vacancies).toEqual([{ apartmentNumber: '2.01', days: 91 }]);
+	});
+
+	it('zählt die Tage bis «Abgerechnet bis» nicht als Leerstand', async () => {
+		await db.update(rentalContracts).set({ billedUntil: '2024-03-31' }).where(eq(rentalContracts.id, rental.contract));
+		const { vacancies } = await report();
+		await db.update(rentalContracts).set({ billedUntil: null }).where(eq(rentalContracts.id, rental.contract));
+		expect(vacancies).toEqual([{ apartmentNumber: '2.01', days: 275 }]);
+	});
+});
+
+// #1138 (PO 06.11.2026): a position that includes the change of the Tankbestand names its Anfangs- and Endbestand
+describe('Tankbestand der Kostenabstimmung', () => {
+	it('nennt bei der Position mit Tankbestand den Anfangs- und den Endbestand, bei den anderen keinen', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(fuelStocks).values([
+			{ buildingId: rental.building, readingDate: '2023-12-31', amount: '600.00', categoryId: heating.id },
+			{ buildingId: rental.building, readingDate: '2024-12-31', amount: '100.00', categoryId: heating.id }
+		]);
+		const [ofReport, ofRun] = [await report(), await run()];
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
+		const stocks = (body: Report) =>
+			body.positions.map((p) => [p.categoryId, p.buildingCosts, p.fuelStock ?? null]);
+		expect([stocks(ofReport), stocks(ofRun)]).toEqual([
+			expect.arrayContaining([
+				[heating.id, 500, { opening: 600, closing: 100 }],
+				[caretakerId, expect.any(Number), null]
+			]),
+			expect.arrayContaining([[heating.id, 500, { opening: 600, closing: 100 }]])
+		]);
+	});
+
+	// Fachreview 1138-1 V-1: a tank decommissioned, both readings 0, changes nothing to explain
+	it('nennt keinen Tankbestand, wenn Anfangs- und Endbestand 0 sind', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(fuelStocks).values([
+			{ buildingId: rental.building, readingDate: '2023-12-31', amount: '0.00', categoryId: heating.id },
+			{ buildingId: rental.building, readingDate: '2024-12-31', amount: '0.00', categoryId: heating.id }
+		]);
+		const { positions } = await report();
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
+		expect(positions.map((p) => p.fuelStock ?? null)).toEqual(positions.map(() => null));
 	});
 });
 
