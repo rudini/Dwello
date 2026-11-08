@@ -59,9 +59,7 @@
 			? [
 					{
 						testid: 'statement-offset',
-						label: m.statements_offset_with({
-							numbers: offsets.map((o) => o.statementNumber).join(', ')
-						}),
+						label: m.statements_offset_with({ numbers: offsets.map((o) => o.statementNumber).join(', ') }),
 						value: signed(offset < 0, offset)
 					}
 				]
@@ -98,8 +96,7 @@
 	const percent = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
 	// as the PDF: the days rented of the period where the share is exactly that (a tenant over the whole period)
 	const periodDays = $derived(
-		Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) +
-			1
+		Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1
 	);
 	const rentedShare = (item: Item) =>
 		!item.byProfile &&
@@ -108,11 +105,7 @@
 	const timeShare = (item: Item) => {
 		if (item.shareDays) return m.statements_share_days(item.shareDays);
 		// invoices summing to zero have no share of the building's costs (#237)
-		if (
-			item.periodShare == null ||
-			(item.totalAmount === 0 && item.invoices.some((invoice) => invoice.part))
-		)
-			return '–';
+		if (item.periodShare == null || (item.totalAmount === 0 && item.invoices.some((invoice) => invoice.part))) return '–';
 		if (rentedShare(item))
 			return m.statements_share_days({ days: statement.rentalDays, total: periodDays });
 		return item.byProfile

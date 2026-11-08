@@ -51,7 +51,7 @@
 {/if}
 
 <nav aria-label={m.statements_filter_status()}>
-	<ul class="grid grid-cols-2 gap-4 @lg:grid-cols-5">
+	<ul class="grid grid-cols-2 gap-4 @lg:grid-cols-3 @3xl:grid-cols-5">
 		{#each statuses as status (status)}
 			<li>
 				<a

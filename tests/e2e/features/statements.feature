@@ -257,3 +257,14 @@ Funktionalität: Nebenkostenabrechnungen
       | 1024   |
       | 1280   |
       | 1440   |
+
+  # #658 (Persona Helga 658 P-1): «Filter aufheben» bleibt in der Kachel des gewählten Status, auch in schmalen Spalten
+  Szenariogrundriss: Der gewählte Status zeigt alles innerhalb seiner Kachel
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Dann ragt nichts aus dem Statusfilter "Entwurf"
+
+    Beispiele:
+      | Breite |
+      | 640    |
+      | 960    |

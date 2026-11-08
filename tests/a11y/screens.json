@@ -153,6 +153,7 @@
 		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
 		"language-changed": "Right after a language change: the page reloaded in the chosen language, the focus on the language selection (below 768 px on the menu button, where the selection stands in the menu, #657) and a message naming the language (#656).",
+		"cost-table": "The statement detail in a window of 1600 px, where the panel of the Kostenaufstellung is 64rem or wider: the table of the positions instead of their cards (#658; below that width, as in every viewport of the check, the cards).",
 		"language-menu-open": "The language menu open: in the header, below 768 px in the open menu (#657).",
 		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the line of the demo notice at the top of the page (on the sign-in page the full notice); on the privacy statement and the terms also their section on the demo, on the help its section «Öffentliche Demo».",
 		"backup-error": "«Sicherung einrichten» (#718) with a code typed that is not the one shown: the refusal above the field. The screen runs on the fresh installation of the E2E stack, the only one with a folder for the Sicherung; its look first removes any confirmed code.",
@@ -754,7 +755,8 @@
 				"send-dialog",
 				"delete-dialog",
 				"recalculate-dialog",
-				"creditor-missing"
+				"creditor-missing",
+				"cost-table"
 			]
 		},
 		{

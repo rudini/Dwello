@@ -354,3 +354,14 @@ Funktionalität: Rechnungsliste
       | 1024   |
       | 1280   |
       | 1440   |
+
+  # #658 (Persona Helga 658 P-2): ein langer Kategoriename passt in die Wahl, auch wo die Filter zu zweit nebeneinander stehen
+  Szenariogrundriss: Eine Kategorie mit langem Namen ist in der Wahl ganz zu sehen
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Wenn der Liegenschaftsverwalter die Rechnungen der Kategorie "Wertvermehrende Investitionen" anzeigt
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 640    |
+      | 960    |

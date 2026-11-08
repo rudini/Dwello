@@ -16,6 +16,7 @@ import {
 	statusFilterShareInWindow,
 	focusedElement,
 	roomBesideSearchForm,
+	statusFilterOverflow,
 	statusFilterResultText,
 	statusFilterResultShareInWindow,
 	emptyListText
@@ -343,4 +344,8 @@ Then('steht über der Abrechnungsliste {string}', async ({ verwalter }, heading:
 
 Then('sagt die leere Abrechnungsliste {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(emptyListText).toContain(text);
+});
+
+Then('ragt nichts aus dem Statusfilter {string}', async ({ verwalter }, status: string) => {
+	await verwalter.sees(statusFilterOverflow(STATUSES[status])).toBe(0);
 });

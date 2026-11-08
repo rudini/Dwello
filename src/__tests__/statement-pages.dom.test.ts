@@ -2924,8 +2924,10 @@ describe('Abrechnung bearbeiten', () => {
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		// #691: the narrow form shows the lines one below the other at every width, the table never
 		expect(allByTestId('statement-line-card')).toHaveLength(2);
-		expect(byTestId('statement-line-card')!.closest('ul')!.className).not.toContain('md:hidden');
-		expect(allByTestId('statement-line-item')[0].closest('.hidden')!.className).not.toContain('md:block');
+		expect(byTestId('statement-line-card')!.closest('ul')!.className).not.toContain('@5xl:hidden');
+		expect(allByTestId('statement-line-item')[0].closest('.hidden')!.className).not.toContain(
+			'@5xl:block'
+		);
 		expect(byTestId('statement-recalculate-hint')).not.toBeNull();
 	});
 

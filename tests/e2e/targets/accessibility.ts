@@ -89,3 +89,4 @@ export const firstAgreementFrom = target('Erste Antwort «Vereinbart ab»', (pag
 export const firstAgreementFromDate = target('Erster Tag «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from-date$/).first());
 // #368: the first «Vereinbart ab» field of the contract form
 export const firstAgreedFromInput = target('Erstes Feld «Vereinbart ab»', (page) => page.getByTestId(/^contract-category-from-(?!.*-(field|help|calendar|words)$)/).first());
+export const costTableRow = target('Zeile der Kostenaufstellung', (page) => page.getByTestId('statement-line-item').first());
