@@ -51,7 +51,7 @@ export const predefinedHint = target('Hinweis auf eine vordefinierte Kategorie',
 export const heatingHelp = target('Hilfe zu Heizkosten', (page) => page.getByTestId('category-heating-checkbox-help'));
 // The question before the allocability of a category changes (#309)
 export const allocabilityQuestion = target('Rückfrage zur Umlagefähigkeit', (page) =>
-	page.getByRole('dialog').getByRole('heading')
+	page.getByRole('dialog').getByTestId('dialog-title')
 );
 export const allocabilityText = target('Folge der Umstellung', (page) => page.getByTestId('category-allocability-text'));
 export const allocabilityConfirm = target('Umstellen bestätigen', (page) => page.getByTestId('category-allocability-confirm'));

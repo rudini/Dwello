@@ -59,6 +59,12 @@ describe('Hinweis', () => {
 		show(Alert, { tone: 'info', title: 'Gut zu wissen', testid: 'info' });
 		expect(byTestId('info')!.getAttribute('role')).toBeNull();
 	});
+
+	// #740: ein Screenreader findet den Titel in der Liste der Überschriften
+	it('zeigt den Titel als Überschrift der Stufe 2', () => {
+		show(Alert, { tone: 'caution', title: 'Abrechnung 2025 fehlt', testid: 'missing' });
+		expect(byTestId('missing')!.querySelector('h2')?.textContent).toBe('Abrechnung 2025 fehlt');
+	});
 });
 
 describe('Statusmarke', () => {

@@ -45,10 +45,10 @@ const wide = vi.hoisted(() => {
 		}
 	};
 });
-// only the lg width of the main navigation (64rem) answers, so a query for another width fails the test
+// only the md width of the main navigation (48rem, #740) answers, so a query for another width fails the test
 vi.stubGlobal('matchMedia', (query: string) => ({
 	get matches() {
-		return wide.matches && query === '(min-width: 64rem)';
+		return wide.matches && query === '(min-width: 48rem)';
 	},
 	addEventListener: (_: string, listener: (event: Event) => void) => wide.listeners.add(listener),
 	removeEventListener: (_: string, listener: (event: Event) => void) =>

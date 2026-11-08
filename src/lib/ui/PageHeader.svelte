@@ -47,6 +47,9 @@
 					{purpose}
 				</p>{/if}
 		</div>
-		{#if action}<div class="flex flex-wrap gap-4">{@render action()}</div>{/if}
+		<!-- below 640 px one action per row, all as wide as the page: a block, no button alone on a line (#740) -->
+		{#if action}<div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+				{@render action()}
+			</div>{/if}
 	</div>
 </header>

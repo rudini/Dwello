@@ -397,7 +397,10 @@ describe('Seitenkopf', () => {
 		expect(classes(row)).toContain('md:flex-wrap');
 		// the title keeps a usable width (18rem) and only the actions give way
 		expect(classes(titleColumn)).toEqual(expect.arrayContaining(['md:grow', 'md:basis-72']));
-		expect(classes(actions)).toContain('flex-wrap');
+		// below 640 px one action per row, as one block (#740)
+		expect(classes(actions)).toEqual(
+			expect.arrayContaining(['flex-col', 'sm:flex-row', 'sm:flex-wrap'])
+		);
 		expect(classes(actions)).not.toContain('shrink-0');
 	});
 

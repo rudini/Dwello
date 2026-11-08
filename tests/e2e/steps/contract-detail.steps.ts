@@ -14,6 +14,8 @@ import {
 	endOfContract,
 	managementFeeOfContract,
 	missingStatementsText,
+	missingStatementsTitleText,
+	contractActionsNarrowerThanTitle,
 	missingStatementButtonsShortOfRow,
 	missingStatementLinkTexts,
 	missingStatementsShown,
@@ -563,3 +565,13 @@ Then(
 		await verwalter.sees(refusedStatementName).toContain(`Entwurf für ${names.get(tenant) ?? tenant}, ${year}`);
 	}
 );
+
+// #740: a screen reader finds the title of the warning in the list of headings
+Then('steht der Titel des Hinweises zu fehlenden Abrechnungen als Überschrift', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsTitleText).toContain('Abrechnung');
+});
+
+// #740: in a narrow window the actions stand one per row, each as wide as the page title
+Then('stehen die Aktionen des Mietvertrags als ein Block, alle gleich breit wie der Seitentitel', async ({ verwalter }) => {
+	await verwalter.sees(contractActionsNarrowerThanTitle).toEqual([0, 0, 0]);
+});

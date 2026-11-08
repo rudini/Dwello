@@ -30,7 +30,8 @@
 		{#each facts as [term, value] (term)}
 			<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
 				<dt class="text-ink-muted">{term}</dt>
-				<dd class="font-semibold text-ink">{value}</dd>
+				<!-- a long building name in one word breaks inside its column beside the sidebar (#740) -->
+				<dd class="hyphens-auto break-words font-semibold text-ink">{value}</dd>
 			</div>
 		{/each}
 	</dl>
