@@ -1,5 +1,6 @@
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { apartmentsOf } from './apartment.service';
+import { countingOn } from './prorating.service';
 import { getInvoice, getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 
@@ -16,12 +17,24 @@ export async function getUncategorizedInvoices(buildingId: string, periodStart: 
 
 // #1315 (product owner): why a key fails for the building, and for which apartment if it fails for one
 const REASONS: Record<string, string> = { FORMULA_NEGATIVE: 'NEGATIVE', FORMULA_ALL_ZERO: 'ALL_ZERO', FORMULA_NOT_A_NUMBER: 'DIVISION_BY_ZERO' };
-async function keyFailure(keyId: string, apartments: Awaited<ReturnType<typeof apartmentsOf>>) {
+type Apartments = Awaited<ReturnType<typeof apartmentsOf>>;
+async function failureAmong(keyId: string, apartments: Apartments) {
 	const result = await calculateBuildingDistribution(keyId, apartments, 1);
 	if (result.isValid) return null;
 	const code = result.errorCode?.code === 'FORMULA_APARTMENT_FAILED' ? String(result.errorCode.params.reason) : result.errorCode?.code;
 	const apartment = apartments.find((one) => one.id === result.apartmentId)?.number ?? null;
 	return { reason: `STATEMENT_KEY_REASON_${REASONS[code ?? ''] ?? 'OTHER'}`, apartment };
+}
+
+// #1336: over the apartments the calculation counts in each part of the period (#1284, «Aufgehoben ab»)
+async function keyFailure(keyId: string, apartments: Apartments, start: string, end: string) {
+	const cuts = apartments.flatMap((a) => (a.discontinuedFrom && a.discontinuedFrom > start && a.discontinuedFrom <= end ? [a.discontinuedFrom] : []));
+	for (const day of new Set([start, ...cuts])) {
+		const counted = apartments.filter(countingOn(day));
+		const failure = counted.length ? await failureAmong(keyId, counted) : null;
+		if (failure) return failure;
+	}
+	return null;
 }
 
 /**
@@ -40,7 +53,7 @@ export async function uncalculableKeyInvoices(buildingId: string, start: string,
 	const delivery = deliveryId && !bills.some((bill) => bill.id === deliveryId) ? await getInvoice(deliveryId) : null;
 	const all = [...bills, ...(delivery ? [{ ...delivery, fuelStock: true }] : [])];
 	const failures = new Map<string, Awaited<ReturnType<typeof keyFailure>>>();
-	for (const id of new Set(all.flatMap((bill) => bill.distributionKeyId ?? []))) failures.set(id, await keyFailure(id, apartments));
+	for (const id of new Set(all.flatMap((bill) => bill.distributionKeyId ?? []))) failures.set(id, await keyFailure(id, apartments, start, end));
 	return all
 		.filter((bill) => failures.get(bill.distributionKeyId!))
 		.map(({ id, billingEntityName, description, invoiceDate, amount, categoryId, distributionKeyId, distributionKey, building, ...rest }) => ({

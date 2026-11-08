@@ -5,9 +5,10 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { apartments, categories, distributionKeys, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { createApartment } from '../services/apartment.service';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -293,5 +294,51 @@ describe('Verteilschlüssel einer nicht vereinbarten Kategorie', () => {
 		const changes = (await (await callApi(`/api/v1/statements/${draft}/changed-invoices`)).json()) as Record<string, unknown>;
 
 		expect(changes).toEqual(expect.objectContaining({ invoiceIds: [], uncalculableKeys: [] }));
+	});
+});
+
+// #1336: the check counts the apartments the calculation counts in each part of the period (#1284, «Aufgehoben ab»)
+describe('Verteilschlüssel, wenn eine Wohnung aufgehoben ist', () => {
+	const fourth = crypto.randomUUID();
+	let gone: Awaited<ReturnType<typeof createRental>>;
+	const keys: string[] = [];
+	const period = { periodStart: '2025-01-01', periodEnd: '2025-12-31' };
+	const check = async () =>
+		((await (await callApi(`/api/v1/invoices/completeness/${gone.building}?periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`)).json()) as {
+			uncalculableKeys: { distributionKeyName: string; reason: string }[];
+		}).uncalculableKeys;
+	const keyed = async (title: string, formula: string, invoiceDate: string) => {
+		const keyName = `${title} ${fourth}`;
+		keys.push(await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: keyName, nameDE: keyName, formula })));
+		await insertInvoice(gone.building, { distributionKeyId: keys.at(-1), billingEntityName: 'Garten AG', amount: '100.00', invoiceDate });
+		return keyName;
+	};
+
+	beforeAll(async () => {
+		// 2.01 (3.5 Zimmer, rented until 2024) no longer exists from 2025; 1.01 with 2 Zimmer stays
+		gone = await createRental(fourth, { startDate: '2024-01-01', endDate: '2024-12-31', monthlyAdvancePayment: '100' });
+		await createApartment({ buildingId: gone.building, number: '1.01', floor: 1, area: '50', rooms: '2' });
+		await db.update(apartments).set({ discontinuedFrom: '2025-01-01' }).where(eq(apartments.id, gone.apartment));
+	});
+
+	afterAll(async () => {
+		await db.delete(invoices).where(eq(invoices.buildingId, gone.building));
+		await db.delete(apartments).where(and(eq(apartments.buildingId, gone.building), eq(apartments.number, '1.01')));
+		await gone.remove();
+		for (const id of keys) await db.delete(distributionKeys).where(eq(distributionKeys.id, id));
+	});
+
+	it('hält den Lauf nicht an, wenn die Formel nur für eine aufgehobene Wohnung scheitert', async () => {
+		await keyed('Nur 2.01', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))', '2025-05-31');
+
+		expect(await check()).toEqual([]);
+	});
+
+	it('hält den Lauf an, wenn die Formel für die Wohnungen scheitert, die noch zählen', async () => {
+		const keyName = await keyed('Ohne 2 Zimmer', '({rooms} - 2) * ({rooms} - 2)', '2025-06-30');
+
+		expect((await check()).map(({ distributionKeyName, reason }) => ({ distributionKeyName, reason }))).toEqual([
+			{ distributionKeyName: keyName, reason: 'STATEMENT_KEY_REASON_ALL_ZERO' }
+		]);
 	});
 });
