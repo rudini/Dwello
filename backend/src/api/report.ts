@@ -13,10 +13,16 @@ type Named = { id: string; tenantName: string };
 
 /** The Kostenabstimmung of a building's period; the notes only on «Berichte» */
 export type ReconciliationBody = {
-	positions: (Amounts & { categoryId: string | null; distributionKeyId: string | null; severalKeys: boolean })[];
+	positions: (Amounts & {
+		categoryId: string | null;
+		distributionKeyId: string | null;
+		severalKeys: boolean;
+		fuelStock: { opening: number; closing: number } | null; // #1138: the position includes the change of the Tankbestand
+	})[];
 	total: Amounts;
 	managementFee: number;
 	nonAllocable: number;
+	vacancies: { apartmentNumber: string; days: number }[]; // #1138: the apartments with Leerstand
 	withoutStatement?: number;
 	drafts?: Named[];
 	notUpToDate?: Named[];

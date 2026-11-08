@@ -354,6 +354,8 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /reports/reconciliation, /reports/reconciliations und /statements/run-reconciliation liefern die Felder von report-reconciliation.json, report-periods.json und statement-run-reconciliation.json', async () => {
 		const query = `buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`;
 		await insertInvoice(rental.building, { description: `Spät ${token}`, amount: '120.00', invoiceDate: '2024-11-30' });
+		// #1138: an apartment without a contract has Leerstand
+		const empty = await createApartment({ buildingId: rental.building, number: '2.04', floor: 2, area: '40', rooms: '1.5' });
 		try {
 			expect(drift(await sample('report-reconciliation'), await (await callApi(`/api/v1/reports/reconciliation?${query}`)).json())).toEqual([]);
 			expect(drift(await sample('report-periods'), await (await callApi('/api/v1/reports/reconciliations')).json())).toEqual([]);
@@ -361,6 +363,7 @@ describe('API-Verträge des Frontends', () => {
 			expect(drift(await sample('statement-run-reconciliation'), run)).toEqual([]);
 		} finally {
 			await db.delete(invoices).where(eq(invoices.description, `Spät ${token}`));
+			await deleteApartment(empty.id);
 		}
 	});
 
