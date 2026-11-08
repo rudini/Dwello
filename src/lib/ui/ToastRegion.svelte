@@ -26,7 +26,7 @@
 	const expire = (toast: Toast) =>
 		pointer || region?.contains(document.activeElement)
 			? expired.push(toast)
-			: dismissToast(toast.id);
+			: (delete before[toast.id], dismissToast(toast.id));
 	const resume = (into?: EventTarget | null) => {
 		if (pointer || region?.contains(into as Node | null)) return;
 		for (const toast of expired) setTimeout(() => expire(toast), toast.duration);

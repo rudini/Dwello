@@ -986,6 +986,7 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await open();
 		select('contract-tenant-select', 't1');
 		next();
+		select('apartment-select', 'a1');
 		await settle();
 		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
 		expect(byTestId('tenant-running-contract')).toBeNull();
@@ -1007,6 +1008,7 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await open();
 		select('contract-tenant-select', 't2');
 		next();
+		select('apartment-select', 'a1');
 		await settle();
 		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
 		expect(byTestId('tenant-running-contract')).toBeNull();
