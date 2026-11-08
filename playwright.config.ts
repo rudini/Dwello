@@ -131,6 +131,7 @@ export default defineConfig<{ driver: Driver }>({
 			env: {
 				PORT: '3101',
 				DATABASE_URL: E2E_DATABASE_URL,
+				E2E_DEFAULT_HEATING_PROFILE: '1', // #739: not the empty instance, whose first use has no settings
 				JWT_SECRET: E2E_JWT_SECRET,
 				MAIL_TRANSPORT: 'smtp',
 				MAIL_FROM: 'verwaltung@dwello.test',
