@@ -42,15 +42,15 @@ Funktionalität: Gebäudedetail
     Wenn der Liegenschaftsverwalter die Rechnungen des Gebäudes öffnet
     Dann zeigt die Rechnungsliste die Rechnungen im Gebäude "Birkenhof"
 
-  Szenario: Wohnung hinzufügen
+  Szenario: Vom Gebäude aus eine Wohnung erfassen
     Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
-    Wenn der Liegenschaftsverwalter eine Wohnung hinzufügen will
+    Wenn der Liegenschaftsverwalter eine Wohnung erfassen will
     Dann ist der Liegenschaftsverwalter auf der Seite "Neue Wohnung"
 
-  Szenario: Erste Wohnung erstellen
+  Szenario: Vom Gebäude aus die erste Wohnung erfassen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
-    Wenn der Liegenschaftsverwalter die erste Wohnung erstellen will
+    Wenn der Liegenschaftsverwalter die erste Wohnung erfassen will
     Dann ist der Liegenschaftsverwalter auf der Seite "Neue Wohnung"
 
   Szenario: Wohnung öffnen
