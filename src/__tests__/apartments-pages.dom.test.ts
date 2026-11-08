@@ -489,5 +489,7 @@ describe('Wohnungsdetail', () => {
 		expect(contract.getAttribute('href')).toBe('/contracts/new?apartment=a1');
 		expect(contract.className).toContain('bg-accent ');
 		expect(contract.textContent).toContain('Mietvertrag erfassen');
+		// #652: a screen reader hears the apartment the action is for
+		expect(contract.getAttribute('aria-label')).toBe('Mietvertrag erfassen: Wohnung 3.01');
 	});
 });

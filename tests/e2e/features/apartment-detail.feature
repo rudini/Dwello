@@ -143,3 +143,10 @@ Funktionalität: Wohnungsdetail
     Dann heisst der Dialog "Wohnung 3.02 kann nicht gelöscht werden"
     Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an
+
+  # #652: ein Screenreader hört bei jeder Aktion, für welche Wohnung sie gilt
+  Szenario: Die Aktionen der Detailseite nennen die Wohnung
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
+    Dann liest ein Screenreader die Aktionen der Seite so:
+      | Bearbeiten: Wohnung 3.01 |
+      | Löschen: Wohnung 3.01    |
