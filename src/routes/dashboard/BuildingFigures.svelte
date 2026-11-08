@@ -103,7 +103,7 @@
 					</li>
 				{/each}
 			</ul>
-			<!-- #731: the two status words the counts do not explain themselves, in the words of the status legend -->
+			<!-- #731: the status words the counts do not explain themselves (#1311: Aufgehoben where there are any), in the words of the status legend -->
 			<dl class="flex flex-col gap-2">
 				{#each explained as status (status)}
 					<div data-testid="stat-help-{status}">

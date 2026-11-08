@@ -383,3 +383,4 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann sind im Gebäude "Seeblick" "1/1" Wohnungen vermietet
     Aber nennt die Belegung von "Seeblick" nicht "Wohnung 1.02 leer"
+    Und erklärt die Übersicht bei den Kennzahlen "Aufgehoben" mit "Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden."

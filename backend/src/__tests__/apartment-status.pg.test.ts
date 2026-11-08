@@ -120,6 +120,7 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 	});
 
 	it('zählt Wohnungen im Dashboard wie in der Liste', async () => {
+		await updateApartment(await apartment('1.11'), { discontinuedFrom: day(-30) });
 		const relet = await listApartments({ status: 'relet', limit: 1000 });
 		const response = await callApi('/api/v1/dashboard');
 		const { portfolio } = (await response.json()) as { portfolio: Record<string, number> };
@@ -128,6 +129,9 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(portfolio.reservedApartments).toBe((await listApartments({ status: 'reserved', limit: 1000 })).total);
 		expect(portfolio.occupiedApartments).toBe((await listApartments({ status: 'occupied', limit: 1000 })).total);
 		expect(portfolio.discontinuedApartments).toBe((await listApartments({ status: 'discontinued', limit: 1000 })).total);
+		// code review 1311-2 C-8: the rate divides by the apartments that still exist, as «x/y vermietet»
+		const existing = portfolio.totalApartments - portfolio.discontinuedApartments;
+		expect(portfolio.occupancyRate).toBe(Math.round((portfolio.occupiedApartments / existing) * 1000) / 10);
 	});
 
 	// #1311: ab dem Tag «Aufgehoben ab» gibt es die Wohnung nicht mehr; sie ist weder leer noch vermietbar
@@ -141,7 +145,8 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(await statusOf(id)).toBe('discontinued');
 		expect((await getBuilding(rental.building))!.vacantCount).toBe(vacantBefore - 1);
 		const filtered = await listApartments({ buildingId: rental.building, status: 'discontinued' });
-		expect(filtered.apartments.map((a) => a.id)).toEqual([id]);
+		expect(filtered.apartments.map((a) => a.id)).toContain(id);
+		expect(filtered.apartments.every((a) => a.status === 'discontinued')).toBe(true);
 	});
 
 	// pins the status before the day, which the base already shows

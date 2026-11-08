@@ -37,6 +37,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | backup-confirmed    |
       | dashboard              | backup-stale        |
       | dashboard              | old-address-task    |
+      | dashboard              | discontinued-figure |
       | dashboard              | first-use           |
       | dashboard              | ki-model-loading    |
       | dashboard              | ki-model-failed     |
