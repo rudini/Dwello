@@ -4,7 +4,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
-	import { saveOnEnter } from '$lib/ui/save-on-enter';
+	import { saveOnEnter } from '$lib/save-on-enter';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';

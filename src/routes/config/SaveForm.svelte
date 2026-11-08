@@ -7,7 +7,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
-	import { saveOnEnter } from '$lib/ui/save-on-enter';
+	import { saveOnEnter } from '$lib/save-on-enter';
 	import { focusSavedRow } from '$lib/focus-after-action';
 	import { localName } from '$lib/names';
 
