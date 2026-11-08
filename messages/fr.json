@@ -2373,7 +2373,7 @@
 	"ai_keys_not_revoked": "La clé d’accès n’a pas été révoquée. Veuillez réessayer.",
 	"ai_keys_address": "Adresse pour le programme d’IA : {url}",
 	"backend_access_key_name_too_long": "Le nom peut comporter au plus 100 caractères.",
-	"backend_text_too_long": "{max} caractères au maximum. Raccourcissez le texte.",
+	"backend_text_too_long": "{max} caractères au maximum, vous en avez saisi {length}. Raccourcissez le texte.",
 	"ai_keys_copy": "Copier la clé",
 	"ai_keys_copy_address": "Copier l’adresse",
 	"ai_keys_copy_failed": "La copie n’a pas fonctionné. Sélectionnez le texte et copiez-le à la main.",

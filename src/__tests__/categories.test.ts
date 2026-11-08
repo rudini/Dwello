@@ -318,10 +318,10 @@ describe('Vorschlag der KI', () => {
 	});
 
 	// #1306: a name too long for its column is refused at «Name», not as «KI nicht erreichbar»
-	it('sagt bei einem zu langen Namen beim Namen, wie viele Zeichen er haben darf', async () => {
+	it('sagt bei einem zu langen Namen beim Namen, wie viele Zeichen er haben darf und wie viele er hat', async () => {
 		const { result } = runAction(newActions.propose, '', 400, form, proposalTooLong);
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } } });
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text.' } } });
 	});
 
 	// #678 (Helga P-5): sagt, was die KI zum Prüfen braucht
@@ -379,12 +379,12 @@ describe('Kategorie löschen', () => {
 	});
 
 	// #1201: the edit sends the German name as nameDE; the form calls its field «Name»
-	it('zeigt beim Namen, dass der deutsche Name länger ist, als Dwello ihn speichert', async () => {
+	it('zeigt beim Namen, dass der deutsche Name länger ist, als Dwello ihn speichert, und wie lang er ist', async () => {
 		const { result } = runAction(editActions.default, 'c1', 200, form, {}, { status: 400, answer: tooLong });
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { name: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } }
+			data: { errors: { name: 'Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text.' } }
 		});
 	});
 

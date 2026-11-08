@@ -84,8 +84,8 @@ describe('Einrichtung', () => {
 	it('lehnt eine zu lange E-Mail-Adresse bei ihrem Feld ab und legt kein Konto an', async () => {
 		const response = await setUp({ code: CODE, email: `${'a'.repeat(244)}@example.com`, password: account.password });
 
-		await expectRejection(response, 400, 'Some fields are not valid', 'TEXT_TOO_LONG', { field: 'email', max: 255 }, [
-			{ code: 'TEXT_TOO_LONG', params: { field: 'email', max: 255 } }
+		await expectRejection(response, 400, 'Some fields are not valid', 'TEXT_TOO_LONG', { field: 'email', max: 255, length: 256 }, [
+			{ code: 'TEXT_TOO_LONG', params: { field: 'email', max: 255, length: 256 } }
 		]);
 		expect(await db.select().from(localAccounts)).toEqual([]);
 	});
