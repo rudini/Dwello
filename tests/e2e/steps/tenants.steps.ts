@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { confirmation } from '../questions/contract-form';
 import { pageTitle } from '../questions/navigation';
-import { listedTenant, tenantCount, tenantListed, tenantStatus } from '../questions/tenants';
+import { emptyTenantListShown, listedTenant, tenantCount, tenantListed, tenantStatus } from '../questions/tenants';
 import {
 	createTenantByEmail,
 	openNewTenant,
@@ -52,6 +52,12 @@ When('der Liegenschaftsverwalter den Mieter ohne Namen erfassen will', async ({ 
 
 Then('sieht der Liegenschaftsverwalter den Mieter {string}', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(tenantListed(names.get(tenant) ?? tenant)).toBe(true);
+});
+
+// the hint of a search without results first, so the empty list is not an error page
+Then('zeigt die Mieterliste keinen Mieter', async ({ verwalter }) => {
+	await verwalter.sees(emptyTenantListShown).toBe(true);
+	await verwalter.sees(tenantCount).toBe(0);
 });
 
 Then('die Mieterliste enthält genau {int} Mieter', async ({ verwalter }, count: number) => {

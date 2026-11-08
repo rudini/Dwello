@@ -127,6 +127,16 @@ describe('Eigene Verteilschlüssel', () => {
 		expect(data.map((k) => k.name)).toEqual([`Mixed ${token}`]);
 	});
 
+	// #1316: % and _ in the search are characters, not wildcards
+	it('findet mit _ oder % keinen Verteilschlüssel, dessen Name dort ein anderes Zeichen hat', async () => {
+		await keys.create({ name: `Split C ${token}`, formula: '{area}' });
+
+		for (const term of [`Split_C ${token}`, `Split%${token}`]) {
+			const response = await keys.send('GET', `?search=${encodeURIComponent(term)}`);
+			expect(((await response.json()) as { data: unknown[] }).data).toEqual([]);
+		}
+	});
+
 	it('behält Verteilschlüssel, nach denen Rechnungen verteilt werden', async () => {
 		const id = await idOf(await create('Hauswart'));
 		removeBuilding = await invoicedBuilding(`Schlüsselhaus ${token}`, { distributionKeyId: id });

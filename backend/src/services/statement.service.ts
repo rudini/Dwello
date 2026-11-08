@@ -5,7 +5,7 @@
 
 import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { db } from '../db/connection';
+import { containing, db } from '../db/connection';
 import { recordAudit, recordStatementCorrection } from './audit-log.service';
 import {
 	utilityStatements,
@@ -132,8 +132,8 @@ function statementFilterConditions(filters: StatementFilters) {
 	return [
 		search &&
 			or(
-				ilike(utilityStatements.statementNumber, `%${search}%`),
-				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, `%${search}%`)
+				ilike(utilityStatements.statementNumber, containing(search)),
+				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, containing(search))
 			),
 		contractId && eq(utilityStatements.contractId, contractId),
 		apartmentId && eq(utilityStatements.apartmentId, apartmentId),
