@@ -1,0 +1,17 @@
+# Code-Review #1257, Runde 2 (737cc19..b67b82b, Code-Commit a64bceb)
+
+Geschlossen: C-1, C-2, C-4, C-5
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-3 | Minor | backend/src/services/apartment.service.ts:280-293 | Noch offen, wie in Runde 1: Prüfung und Löschen laufen ohne Transaktion. Wird dazwischen ein Mietvertrag erfasst, löscht `ON DELETE CASCADE` ihn mit der Wohnung. |
+| C-6 | Minor | tests/e2e/targets/apartment-detail.ts:14 | Kopie eines vorhandenen Helfers: `deletedToast` (`getByTestId('toast-success')`) ist dasselbe Target wie `successToast` in `tests/e2e/targets/form.ts:13`. Die anderen Features bauen ihre Frage darauf (`Text.of(successToast)`, z. B. `questions/tenant-detail.ts:21`, `questions/contract-form.ts:50`). |
+| C-7 | Minor | messages/de.json:225 (und fr/it/en) | Die neuen Sätze der Löschfolge aus V-3 prüft kein Test: «Steht sie nur leer, behalten Sie sie …», «Gibt es sie nach einem Umbau nicht mehr …», «… und deren Mieter bezahlen den Anteil dieser Wohnung mit» und «Versendete Abrechnungen bleiben unverändert …». Das Szenario «Der Dialog nennt die Folge des Löschens einer Wohnung» prüft nur den alten Satz «Nach dem Löschen verteilt Dwello …». Der DOM-Test (P-1) liest `m.apartments_delete_vacancy()` selbst und schreibt so keinen Wortlaut fest. CLAUDE.md, Workflow 1, verlangt das Festschreiben übernommener Fachreview-Texte («pin them in a test»). Der neue Ablehnungstext ist im BFF-Test festgeschrieben (`apartment.test.ts:472`), der neue Titel in den Szenarien. |
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run check`, `bun run lint`, vitest `apartment.test.ts`, `apartments-pages.dom.test.ts`, `i18n.test.ts`, `backend-codes.test.ts` (142 Tests), E2E chromium `apartment-detail.feature` und `building-detail.feature` (37 bestanden). Rot-Läufe: BFF-Test 404, DOM-Test Alert (Alert entfernt), Toast-Schritt (`addToast` entfernt), DOM-Test P-1. Noch nicht auf a64bceb gelaufen: volle Suites, a11y- und Sprachzeilen `apartment-detail*`, `fitness`, Backend-`type-check`, Prettier.
+- `No scenario` für den Alert ohne Code: Die Regel trägt ihn (`tests/e2e/CLAUDE.md:73` und «Failure states», Zeile 89: «A refusal an action builds from a failing backend call»). In `implementation_plan.md` fand ich zu #1257 keinen Eintrag (`grep -n "1257\|No scenario"` ohne Treffer). Ob der PR-Text das `No scenario: <reason>` trägt, liess sich vor dem Push nicht prüfen.
+- Ob der Alert die axe-Prüfung hell/dunkel besteht und in fr/it/en ohne Deutsch erscheint: Nach derselben Regel öffnet ihn das Screens-Fixture nicht (`FailRequests` antwortet dem Browser, die Action läuft nicht). Geprüft hat das niemand. Der Text `apartments_delete_failed` liegt in allen vier Sprachen vor.
+
+Geprüft: 404 führt zum Redirect samt Toast (`result.type === 'redirect'`), andere Fehler gehen weiter über `fail()`. Das neue Szenario scheitert ohne die Änderung am Schritt «ist … auf der Detailseite von "Lindenhof"», die Grundlage passt. Seed-Schritt `deleteApartment` über das API. `deleteDialogTitleText` wiederverwendet. Ein `<p>` mit `aria-describedby` (`Dialog.svelte:84,163`). Alle geänderten Texte stehen in allen vier `messages/*.json` und stimmen Wort für Wort mit `1257-fachreview-2.md` überein. `{number}` im Titel gibt es in allen Sprachen. Die Titel-Zeilen der Szenarien betreffen nur Szenarien, die auf diesem Branch neu sind. Screenplay-Schichten eingehalten. ponytail-review: ausser C-6 nichts.
