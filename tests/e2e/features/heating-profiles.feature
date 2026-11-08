@@ -87,3 +87,10 @@ Funktionalität: Heizprofile
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neues Heizprofil"
     Wenn der Liegenschaftsverwalter das Heizprofil "Bergtal" noch einmal erfasst
     Dann steht bei "Name" die Fehlermeldung "Ein Heizprofil mit dem Namen «Bergtal» existiert bereits. Wählen Sie einen anderen Namen."
+
+  # #652: ein Screenreader hört bei jeder Aktion, für welches Heizprofil sie gilt
+  Szenario: Die Aktionen der Detailseite nennen das Heizprofil
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Heizprofils "Bergtal"
+    Dann liest ein Screenreader die Aktionen der Seite so:
+      | Bearbeiten: Bergtal |
+      | Löschen: Bergtal    |

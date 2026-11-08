@@ -48,7 +48,10 @@
 				</p>{/if}
 		</div>
 		<!-- below 640 px one action per row, all as wide as the page: a block, no button alone on a line (#740) -->
-		{#if action}<div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+		{#if action}<div
+				class="flex flex-col gap-4 sm:flex-row sm:flex-wrap"
+				data-testid="page-header-actions"
+			>
 				{@render action()}
 			</div>{/if}
 	</div>

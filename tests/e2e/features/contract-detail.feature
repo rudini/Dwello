@@ -630,3 +630,11 @@ Funktionalität: Mietvertragsdetail
     Angenommen das Browserfenster ist 390 Pixel breit
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann stehen die Aktionen des Mietvertrags als ein Block, alle gleich breit wie der Seitentitel
+
+  # #652: ein Screenreader hört bei jeder Aktion, für welchen Mietvertrag sie gilt
+  Szenario: Die Aktionen der Detailseite nennen den Mietvertrag
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann liest ein Screenreader die Aktionen der Seite so:
+      | Bearbeiten: Mietvertrag von Anna Keller           |
+      | Enddatum erfassen: Mietvertrag von Anna Keller    |
+      | Löschen: Mietvertrag von Anna Keller              |

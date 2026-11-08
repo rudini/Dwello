@@ -175,6 +175,13 @@ export const Accessible = {
 				)
 			)
 		),
+	/** Of buttons and links: their aria-label, else their text */
+	namesOfAll: (target: Target) =>
+		about(target, 'the accessible names of', async (element) =>
+			(await element.evaluateAll((all) => all.map((one) => one.getAttribute('aria-label') ?? one.textContent ?? ''))).map(
+				normalized
+			)
+		),
 	descriptionOf: (target: Target) =>
 		about(target, 'the accessible description of', (element) =>
 			single(element, async (one) =>
