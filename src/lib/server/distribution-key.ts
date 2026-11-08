@@ -63,7 +63,12 @@ const options = {
 	failure: (_status: number, saved: BackendError) => backendMessage(saved, m.keys_save_failed()),
 	location: () => LIST,
 	conflict: 'name', // the backend refuses only a name another distribution key has
-	field: (saved: BackendError) => (saved.code?.startsWith('FORMULA_') ? 'formula' : undefined) // at «Formel» (#737)
+	field: (saved: BackendError) => (saved.code?.startsWith('FORMULA_') ? 'formula' : undefined), // at «Formel» (#737)
+	// a taken name names the errors of the formula saved with it, shown at «Formel» (#1200)
+	also: ({ code, causes }: BackendError): Record<string, string> =>
+		code === 'DISTRIBUTION_KEY_NAME_TAKEN' && causes
+			? { formula: backendMessage({ code: 'FORMULA_INVALID', causes }, m.keys_save_failed()) }
+			: {}
 };
 
 /** "Neuer Verteilschlüssel": the German name also becomes the key's name */

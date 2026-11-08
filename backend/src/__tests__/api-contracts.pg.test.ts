@@ -1348,6 +1348,15 @@ describe('API-Verträge der Ablehnungen mit Code', () => {
 		expect(drift(await sample('distribution-key-name-taken'), await response.json())).toEqual([]);
 	});
 
+	// #1200: with the errors of the formula of the same save
+	it('POST /distribution-keys mit einem vergebenen Namen und einer fehlerhaften Formel liefert die Felder von distribution-key-name-taken-formula.json', async () => {
+		const key = { name: `Lift ${token}`, nameDE: `Lift ${token}`, formula: '{rooms}' };
+		await keys.create(key);
+		const response = await keys.create({ ...key, formula: '({area}' });
+		expect(response.status).toBe(409);
+		expect(drift(await sample('distribution-key-name-taken-formula'), await response.json())).toEqual([]);
+	});
+
 	it('DELETE /documents/:id eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {
 		const response = await callApi(`/api/v1/documents/${crypto.randomUUID()}`, { method: 'DELETE' });
 		expect(response.status).toBe(404);

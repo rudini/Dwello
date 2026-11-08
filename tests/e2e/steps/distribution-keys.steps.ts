@@ -5,6 +5,7 @@ import {
 	formulaOf,
 	formulaProblem,
 	formulaTestErrors,
+	formulaValue,
 	invoicesBy,
 	keyActionCount,
 	keyDeletable,
@@ -21,6 +22,9 @@ import {
 	createDistributionKeyInFrench,
 	createDistributionKeyWithEnter,
 	deleteDistributionKey,
+	enterFormula,
+	insertBlock,
+	typeOn,
 	openDistributionKeyEdit,
 	openDistributionKeys,
 	openNewDistributionKey,
@@ -182,4 +186,38 @@ Then('erfährt der Liegenschaftsverwalter bei der Formel {string}', async ({ ver
 // #737: an error that depends on the values shows once, not once per sample apartment
 Then('zeigt der Test nur den Fehler {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(formulaTestErrors).toEqual([text]);
+});
+
+// #1200: the Summen des Gebäudes have insert buttons like the Bausteine
+When('der Liegenschaftsverwalter die Formel {string} eingibt', async ({ verwalter }, formula: string) => {
+	await verwalter.attemptsTo(enterFormula(formula));
+});
+
+When('der Liegenschaftsverwalter die Summe {string} einfügt', async ({ verwalter }, total: string) => {
+	await verwalter.attemptsTo(insertBlock(total));
+});
+
+Then('steht in der Formel {string}', async ({ verwalter }, formula: string) => {
+	await verwalter.sees(formulaValue).toBe(formula);
+});
+
+// #1200: a taken name and a broken formula of the same save, each at its field
+When(
+	'der Liegenschaftsverwalter den Verteilschlüssel {string} noch einmal mit der Formel {string} erfasst',
+	async ({ verwalter, names }, key: string, formula: string) => {
+		await verwalter.attemptsTo(createDistributionKey(names.get(key)!, formula));
+	}
+);
+
+Then('erfährt der Liegenschaftsverwalter beim Namen {string}', async ({ verwalter, seed }, text: string) => {
+	await verwalter.sees(nameProblem).toContain(seed.withNames(text)); // the description also holds the example
+});
+
+// persona Helga P-1 (#1200): after an insert, typing goes on in the formula
+When('der Liegenschaftsverwalter den Baustein {string} übernimmt', async ({ verwalter }, block: string) => {
+	await verwalter.attemptsTo(insertBlock(block));
+});
+
+When('der Liegenschaftsverwalter {string} weiterschreibt', async ({ verwalter }, text: string) => {
+	await verwalter.attemptsTo(typeOn(text));
 });

@@ -90,6 +90,9 @@ export const Enter = {
 	}
 };
 
+/** Types on where the focus is, as a user goes on typing without clicking a field first (#1200) */
+export const TypeOn = (text: string): Activity => (actor) => pageOf(actor).keyboard.type(text);
+
 /** Types a date the Swiss way (TT.MM.JJJJ) into a date field; scenarios keep JJJJ-MM-TT, or '' to empty the field */
 export const EnterDate = {
 	of: (isoDate: string) => ({

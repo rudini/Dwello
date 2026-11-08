@@ -61,7 +61,7 @@ describe('Formula Service', () => {
 		it('should detect consecutive operators', () => {
 			const result = parseFormula('{area} ++ {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('Zwei Rechenzeichen folgen direkt aufeinander'))).toBe(true);
+			expect(result.errors.some(e => e.includes('folgen zwei Rechenzeichen direkt aufeinander'))).toBe(true);
 		});
 
 		it('should normalize variable names to lowercase', () => {
