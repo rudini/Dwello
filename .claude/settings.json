@@ -169,6 +169,11 @@
           },
           {
             "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fitness-gate.sh",
+            "timeout": 120
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/commit-msg-gate.mjs"
           },
           {

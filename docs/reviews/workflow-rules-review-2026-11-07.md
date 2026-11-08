@@ -31,3 +31,7 @@ No proposal: `issue-664` third row (the commit subject length): skill `commit-ga
 ## Still open from earlier reviews, not repeated by a new note
 
 `2026-10-29`: 2 (word list of the German check); 3 is now in `tests/e2e/CLAUDE.md`, failure states («a form action never runs: the page shows its error handling, not the action's `fail()`»), and can be closed. `2026-10-31`: 2 (random values taken for German). `2026-11-01`: 2 (closing-round chain of Minor fixes), 4 (related issues in one pull request), 9 (checks only CI can run), 10 (editing a hook runs it), 11 (shell forms a hook follows). `2026-11-01-2`: 1 (a persona finding against an earlier decision), 2 (prepare the next issue on a local branch). `2026-11-04`: 5, the `seedFor` message (#1119). They stay as written there.
+
+## Decided (product owner), 08.11.2026
+
+Applied: 1 as a commit hook instead of a sentence in Workflow 4: `.claude/hooks/fitness-gate.sh` runs `bun run fitness -- --base origin/main` on each commit that changes `src/`, `backend/src/` or `tools/fitness/` and blocks on an error; «Before marking anything complete» names `--base origin/main` (five later notes repeat it: `issue-1158`, `-1183`, `-1221`, `-1284`, `-1288`). 2 in part: the run ends with «Fitness: N errors, M warnings»; the `fat-module` message is unchanged. 8 (with `2026-11-08`, 10): the step-1 hold covers only behaviours whose domain rules, terms or texts the review reads. The others stay open.

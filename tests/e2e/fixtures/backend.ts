@@ -1,4 +1,4 @@
-import { withSettingsLock } from './settings-lock';
+import { holdLock, withLock, withSettingsLock } from './settings-lock';
 import { execFileSync } from 'child_process';
 import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
@@ -757,10 +757,18 @@ export function testData(api: CallTheApi) {
 			const token = randomUUID().replaceAll('-', '').slice(0, 12);
 			const email = `konto-${token}@dwello.test`;
 			const password = `Passwort-${randomUUID()}`;
-			await put('local-accounts', { email, password });
+			await withLock('local-accounts', () => put('local-accounts', { email, password })); // not while a scenario needs none (#657)
 			names.set('E-Mail Konto', email);
 			names.set('Passwort Konto', password);
 			extras.push(`local-accounts/${encodeURIComponent(email)}`);
+		},
+
+		// #657: no local account, so the sign-in page offers only the providers: waits until the parallel scenarios removed
+		// theirs and holds new ones back until this scenario ends
+		async noLocalAccount() {
+			const release = await holdLock('local-accounts');
+			restores.push(async () => release());
+			while ((await get('auth/password')).available) await new Promise((resolve) => setTimeout(resolve, 200));
 		},
 
 		// A Zugangsschlüssel für KI-Programme (#817); the key itself is shown once, so the seed keeps it

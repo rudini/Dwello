@@ -2,6 +2,8 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	draftNoticeText,
+	firstMobileNavItem,
+	mobileNavItemShare,
 	footerVersionText,
 	glossaryExplanationText,
 	legalAsOfText,
@@ -400,3 +402,12 @@ Then(
 		await viewer.sees(linksInBanner(second)).toBe(1);
 	}
 );
+
+// #657: «Hilfe» stands at the top of the menu in a narrow window
+Then('nennt das Menü zuerst {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(firstMobileNavItem).toBe(label);
+});
+
+Then('sieht der Liegenschaftsverwalter {string} im Menü, ohne zu scrollen', async ({ verwalter }, label: string) => {
+	await verwalter.sees(mobileNavItemShare(label)).toBe(1);
+});

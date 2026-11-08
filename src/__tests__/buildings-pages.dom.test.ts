@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
 
 let url = new URL('http://localhost/buildings');
-vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }

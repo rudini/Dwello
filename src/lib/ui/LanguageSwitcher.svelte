@@ -39,7 +39,9 @@
 			return;
 		}
 		if (!after) return;
-		button?.focus();
+		// in a narrow window this button is hidden and the choice stands in the menu (#657): the focus goes to the menu's button
+		const menu = document.querySelector<HTMLElement>('[data-testid="mobile-menu-button"]');
+		(button?.checkVisibility?.() === false && menu ? menu : button)?.focus();
 		addToast('success', m.language_prefix() + names[current]);
 	});
 

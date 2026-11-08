@@ -14,7 +14,7 @@ import {
 	openTermsFromLogin
 } from '../tasks/app-frame';
 import { loseSession, signInAgain } from '../tasks/authentication';
-import { chooseLanguage, preferInTheBrowser } from '../tasks/language';
+import { chooseLanguage, chooseLanguageInMenu, preferInTheBrowser } from '../tasks/language';
 import { openPage, reloadPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -115,4 +115,13 @@ Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: 
 // #656: after the reload in the new language the focus is back where the landlord chose it
 Then('steht der Fokus auf der Sprachwahl', async ({ verwalter }) => {
 	await verwalter.sees(focusedPlace).toBe('language-button');
+});
+
+// #657: in a narrow window the language choice stands in the menu; after the reload the focus is on the menu
+When('der Liegenschaftsverwalter im Menü die Sprache {string} wählt', async ({ verwalter }, language: string) => {
+	await verwalter.attemptsTo(chooseLanguageInMenu(language));
+});
+
+Then('steht der Fokus auf dem Menü', async ({ verwalter }) => {
+	await verwalter.sees(focusedPlace).toBe('mobile-menu-button');
 });

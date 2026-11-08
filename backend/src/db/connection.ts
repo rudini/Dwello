@@ -5,6 +5,7 @@
 
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import type { PgSelect } from 'drizzle-orm/pg-core';
 import * as schema from './schema';
 
 // Database configuration from environment
@@ -27,6 +28,10 @@ export const db = drizzle(pool, { schema });
 // %, _ and \ in a text are characters, not wildcards of ilike (#1305, #1316)
 export const literal = (text: string) => text.replace(/[\\%_]/g, '\\$&');
 export const containing = (text: string) => `%${literal(text)}%`;
+
+/** A page of the query's rows; `limit` null or undefined: every row, for a service whose result needs them all (#705, #1229) */
+export const paged = <T extends PgSelect>(query: T, limit: number | null | undefined, offset: number) =>
+	(limit == null ? query : query.limit(limit)).offset(offset);
 
 /**
  * Test database connection

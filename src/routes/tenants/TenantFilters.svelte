@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applyFilterChoice } from '$lib/utils/list-filter';
+	import { applyFilterChoice, showAppliedFilter } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
@@ -20,9 +20,13 @@
 		{ value: 'future', label: m.tenants_future_filter() },
 		{ value: 'inactive', label: m.tenants_former_filter() }
 	];
+
+	let form = $state<HTMLFormElement>();
+	showAppliedFilter(() => form);
 </script>
 
 <form
+	bind:this={form}
 	method="GET"
 	action="/tenants"
 	role="search"

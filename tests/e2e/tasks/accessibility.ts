@@ -3,7 +3,7 @@ import { inDays } from '../fixtures/dates';
 import { type Example, type Viewport, variants, viewports, withSeedHint } from '../fixtures/screens';
 import { accessibilityViolations } from '../questions/accessibility';
 import { inPageLanguage, languageFindings, languageName, pageLanguage } from '../questions/language';
-import { chooseLanguage } from './language';
+import { chooseLanguage, openLanguageChoice } from './language';
 import { pageAddress } from '../questions/navigation';
 import type { Activity, Actor, Question } from '../screenplay/actor';
 import {
@@ -107,7 +107,6 @@ import {
 	tenantSelect
 } from '../targets/contract-form';
 import { cancelButton, errorToast } from '../targets/form';
-import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
@@ -383,7 +382,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// French chosen with the language selection (the page reloads); later viewports start in French already
 	'other-language': () => async (actor) => {
 		if ((await actor.answer(pageLanguage)) !== 'fr')
-			await actor.attemptsTo(Click.on(languageButton), Click.toReload(on.frenchOption));
+			await actor.attemptsTo(openLanguageChoice, Click.toReload(on.frenchOption));
 		await actor.attemptsTo(Wait.until(on.frenchPage));
 	},
 	// #656: the page reloaded after a language change, its message naming the language; the page's language stays, so the
@@ -776,7 +775,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Click.on(on.mobileMenuButton));
 		await actor.attemptsTo(Wait.until(on.mainNavigationDialog(await say(actor, 'Hauptnavigation'))));
 	},
-	'language-menu-open': () => (actor) => actor.attemptsTo(Click.on(languageButton), Wait.until(on.languageOptions)),
+	'language-menu-open': () => (actor) => actor.attemptsTo(openLanguageChoice, Wait.until(on.languageOptions)),
 	'user-menu-open': () => (actor) => actor.attemptsTo(Click.on(userMenuButton), Wait.until(on.userMenuSettings)),
 	'overlap-warning': () => (actor) =>
 		actor.attemptsTo(

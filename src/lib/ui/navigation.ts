@@ -133,6 +133,15 @@ export const navGroups: {
 	}
 ];
 
+/** The menu of a narrow window (☰): «Hilfe» first, shown without scrolling; the rest as in the sidebar (#657) */
+const help = navGroups.flatMap((group) => group.items).find((item) => item.href === '/help')!;
+export const mobileNavGroups: typeof navGroups = navGroups.map((group, index) => ({
+	get label() {
+		return group.label;
+	},
+	items: [...(index ? [] : [help]), ...group.items.filter((item) => item !== help)]
+}));
+
 const hrefs = navGroups.flatMap((group) => group.items.map((item) => item.href));
 
 /** The menu item a page belongs to: the longest item path the page lies under ("/" is the overview) */
