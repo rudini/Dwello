@@ -1457,6 +1457,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 
+## Session: #686 statement screens and PDF heating wording (Dr. Weber on #229)
+
+- [x] Read #686; triage on main (`docs/reviews/686-triage.md`): P-3 fixed by #685; heating share, «Liegenschaft», move-out date already fixed; P-4, the step 2 count, the first PDF click and the draft Zahlungsfrist hold
+- [x] Product owner decisions recorded in #686: «Wohnungsanteil» in the heating note, heading stays, step 2 counts like the preview, PDF button as a form action, draft deadline help; spec change `statement-detail.feature` (two lines)
+- [x] Step 2 count (4c454db), PDF form action (fac7f62); fach-reviewer step 1 (`docs/reviews/686-1-fach-review.md`): V-1, V-2 Major and V-3..V-5 fixed; texts applied (8671329)
+- [x] code-reviewer (`docs/reviews/686-review-{1,2,3}.md`): C-1..C-4 Minor fixed (4152a94); round 3 C-1 Major (edit-page scenario) and C-2 fixed (7d73d95)
+- [x] Personas Weber, Marco (`docs/design/personas/{weber,marco}-686.md`): Marco M-1 = Weber W-2 (help missing on the edit page) fixed (86c9066); Weber W-1 Minor stays (the help does not say a shorter date sent the same day moves too)
+- [x] daten-pruefer (`docs/reviews/686-datenpruefung-1.md`): no findings; six statements and two QR-bills to the Rappen
 ## Session: #687 «Nicht umlagefähig» shown neutrally; plain category reasons (personas on #292)
 
 - [x] Read #687; triage on main (`docs/reviews/687-triage.md`): list and detail badge, form note hold; Helga P-6 fixed by #672
@@ -1491,6 +1499,7 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #739 E2E default Heizprofil per run
 
 ## Session: #714 design guard: style shorthands and system colours
 
@@ -1499,6 +1508,25 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/style-guard-714-review-1.md`: no findings
 - [x] Checks: lint, check, fitness, backend type-check, design-guard test
 - [x] Archive session; PR `Fixes #714`: pushed after this archive
+- [x] Each point of #739 checked on main: the wizard preselects `default_heating_profile_id`, else the first complete profile, own ones first; the E2E data set no default
+- [x] Probe (not committed): an own complete profile listed first, all `statement-*.feature` on Chromium green (345): no amount depends on the preselection; decision written into #739 («Decided (product owner)»: a default per run, no scenario change)
+- [x] Throwaway `@wip` probe: the wizard proposed the probe profile without the change (red), «Heizung + Warmwasser» with it (green); No scenario: test data setup
+- [x] `backend/scripts/e2e-db.ts`, `playwright.config.ts` (main E2E instance only)
+- [x] code-reviewer `docs/reviews/739-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, E2E chromium+api (1537 of 1973 before the local time limit, then `statement-*.feature`)
+- [x] Archive session; PR `Fixes #739`: pushed after this archive
+
+## Session: #1179 name all wizard steps below md
+
+- [x] Read #1179; decided (product owner, in the issue): below md a vertical list of all steps with their names, from md as now, both wizards
+- [x] Two scenarios «Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte» (contract-new, statement-generate) with the new step «nennt die Schrittanzeige untereinander die Schritte», seen red as `@wip` (a962fb5)
+- [x] `Stepper.svelte`: below md `flex-col` with every name shown, from md the same classes as before; DOM test seen red (cc77116)
+- [x] No `fach-reviewer`: no text and no domain term changed
+- [x] code-reviewer round 1 (`docs/reviews/1179-review-1.md`): Minor C-1 (two comments) fixed
+- [x] Persona Marco (`docs/design/personas/marco-1179.md`): no Blocker or Major; Minors stay: P-1 and P-2 show on main too, P-3 (the list takes about 350 px on a phone) follows from the decision
+- [x] Checks: lint, check, fitness, backend type-check, the DOM tests, contract-new and statement-generate E2E, the stepper scenarios and the axe and language rows of both wizards
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
 ## Session: #1172 screenshot job: no more untouched pages listed as changed
 
 - [x] Checked on main and on the CI images of #1187/#1192 (outside the red marks): `/config/access-keys` differs in the MCP address (the base ran `bun run dev` on its own port); `/config/categories` by 39 pixels of channel delta 1; the other flagged pages are identical

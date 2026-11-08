@@ -54,7 +54,7 @@ export const de: Record<string, string> = {
 	offsetWith: 'Bereits verrechnet mit {numbers}',
 	offsetShort: 'bereits verrechnet',
 	and: 'und',
-	heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
+	heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent}\u00a0% des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode',
 	heatingNoteParts: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
 	heatingNoteOwn: 'Heizkosten nach Heizprofil «{profile}»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
 	heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses im Heizprofil, das die Heizkosten eines Jahres auf die zwölf Monate verteilt: {months}',
