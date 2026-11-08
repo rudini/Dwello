@@ -44,6 +44,14 @@ describe('GET /api/v1/statements?search', () => {
 
 		expect(result.data.map((s) => s.id)).toEqual([statementId]);
 	});
+
+	// #1316: % and _ in the search are characters, not wildcards
+	it('findet mit _ oder % keine Abrechnung, deren Mieter dort ein anderes Zeichen hat', async () => {
+		for (const term of [`Anna_Keller ${token}`, `Anna%${token}`]) {
+			const result = (await call(`?search=${encodeURIComponent(term)}`)) as { data: unknown[] };
+			expect(result.data).toEqual([]);
+		}
+	});
 });
 
 // The PDF needs an IBAN for the QR-bill; the previous value is restored afterwards

@@ -6,7 +6,7 @@
  */
 
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { containing, literal, db } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type MonthShare, type NewHeatingProfile } from '../db/schema';
 import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
@@ -43,7 +43,7 @@ export async function listHeatingProfiles(filters: HeatingProfileFilters = {}): 
 	const conditions = [];
 
 	if (search) {
-		conditions.push(ilike(heatingProfiles.name, `%${search}%`));
+		conditions.push(ilike(heatingProfiles.name, containing(search)));
 	}
 
 	if (type) {
@@ -97,7 +97,7 @@ export async function getHeatingProfileByName(name: string): Promise<HeatingProf
 	const [profile] = await db
 		.select()
 		.from(heatingProfiles)
-		.where(or(ilike(heatingProfiles.name, name), ilike(heatingProfiles.nameDE, name)))
+		.where(or(ilike(heatingProfiles.name, literal(name)), ilike(heatingProfiles.nameDE, literal(name))))
 		.limit(1);
 
 	return profile || null;

@@ -4,7 +4,7 @@
  */
 
 import { eq, ilike, or, sql, desc, and, inArray } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { containing, db } from '../db/connection';
 import {
 	tenants,
 	rentalContracts,
@@ -85,8 +85,8 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 	if (search) {
 		conditions.push(
 			or(
-				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, `%${search}%`),
-				ilike(tenants.email, `%${search}%`)
+				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, containing(search)),
+				ilike(tenants.email, containing(search))
 			)
 		);
 	}
