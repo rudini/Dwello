@@ -73,6 +73,72 @@ describe('Fokus nach der Suche in einer Liste', () => {
 	});
 });
 
+// #1173 (Sven 2 P-4): a screen reader hears the title when another page opens, not after a form action that stays
+describe('Ansage des Seitentitels', () => {
+	async function navigate(from: string, to: string) {
+		const { default: Layout } = await import('../routes/+layout.svelte');
+		const children = createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }));
+		show(Layout, { data: { user: null }, children } as never);
+		document.title = 'Lea Frei - Dwello';
+		const [callback] = vi.mocked(afterNavigate).mock.lastCall!;
+		const go = async (from: string, to: string) => {
+			callback({ type: 'goto', from: { url: new URL(from) }, to: { url: new URL(to) } } as never);
+			await tick();
+		};
+		await go(from, to);
+		const announcer = document.querySelector('[data-testid="page-title-announcer"]')!;
+		return Object.assign(announcer, { go });
+	}
+
+	it('sagt nach dem Wechsel auf eine andere Seite deren Titel an', async () => {
+		const announcer = await navigate('http://localhost/tenants', 'http://localhost/tenants/7');
+		expect([announcer.getAttribute('aria-live'), announcer.textContent]).toEqual([
+			'assertive',
+			'Lea Frei - Dwello'
+		]);
+	});
+
+	// fallback review of #1207: two tenants of the same name, the live region must change to be read
+	it('sagt den Titel auch an, wenn die andere Seite gleich heisst', async () => {
+		const announcer = await navigate('http://localhost/tenants', 'http://localhost/tenants/7');
+		const heard: string[] = [];
+		new MutationObserver(() => heard.push(announcer.textContent ?? '')).observe(announcer, {
+			childList: true,
+			characterData: true,
+			subtree: true
+		});
+		await announcer.go('http://localhost/tenants/7', 'http://localhost/tenants/8');
+		await tick();
+		expect(heard.at(-1)).toBe('Lea Frei - Dwello');
+	});
+
+	// SvelteKit's announcer reads the title also after a form action, when the page store changes
+	// Sven 1173: muted, its copy of the title would still be read a second time in browse mode
+	it('stellt die Ansage von SvelteKit stumm und verbirgt sie', async () => {
+		document.body.innerHTML = '<div id="svelte-announcer" aria-live="assertive"></div>';
+		const { default: Layout } = await import('../routes/+layout.svelte');
+		show(Layout, {
+			data: { user: null },
+			children: createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }))
+		} as never);
+		await new Promise((resolve) => setTimeout(resolve));
+		const announcer = document.getElementById('svelte-announcer')!;
+		expect([announcer.getAttribute('aria-live'), announcer.getAttribute('aria-hidden')]).toEqual([
+			'off',
+			'true'
+		]);
+	});
+
+	// a form action that sends the page to itself (a redirect) or a list search stays on the page
+	it('sagt den Titel nicht an, wenn die Seite dieselbe bleibt', async () => {
+		const announcer = await navigate(
+			'http://localhost/tenants/7',
+			'http://localhost/tenants/7?tab=documents'
+		);
+		expect(announcer.textContent).toBe('');
+	});
+});
+
 // #662 (code review 662-2 C-5, C-6; persona Sven S-5): what the status says belongs to the last navigation only
 describe('Ansage des Ergebnisses einer Liste', () => {
 	const url = new URL('http://localhost/buildings');

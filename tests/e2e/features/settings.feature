@@ -207,3 +207,23 @@ Funktionalität: Einstellungen
   # #1088: die Abrechnungsperiode steht beim Gebäude; die Einstellungen haben keine mehr
   Szenario: Die Einstellungen bieten keine Abrechnungsperiode an
     Dann bieten die Einstellungen keine Abrechnungsperiode an
+
+  # #690, Punkt 1 (Persona Helga 450): eine IBAN, deren Firmenadresse unvollständig gespeichert ist (vor #450), zeigt
+  # die Seite schon beim Öffnen, mit dem Text der abgelehnten Speicherung. Die Einstellungen gelten für alle parallel
+  # laufenden Szenarien: das Szenario läuft auf einer eigenen Installation
+  @frische-installation
+  Szenario: Eine IBAN ohne Firmenadresse ist schon beim Öffnen gekennzeichnet
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
+    Wenn der Liegenschaftsverwalter die Einstellungen erneut öffnet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
+    Und kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend
+    Und steht der Fokus in den Einstellungen auf "Firmenname"
+
+  # #690, Punkt 3 (Persona Helga 450): eine abgelehnte Speicherung speichert nichts, auch nicht die anderen Felder,
+  # und die Seite sagt es. Abgelehnt speichert sie nichts: das Szenario braucht die Einstellungen nicht für sich
+  Szenario: Eine abgelehnte Speicherung sagt, dass nichts gespeichert wurde
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | PLZ       | 84 |
+      | Mahnfrist | 20 |
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Einstellungen wurden nicht gespeichert"
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern."

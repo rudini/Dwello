@@ -19,7 +19,7 @@ const fetch = (async (url: string) => {
 	if (pathname.endsWith('/distribution-keys')) return Response.json({ data: keys.slice(0, limit) });
 	if (pathname.endsWith('/heating-profiles'))
 		return Response.json({ data: profiles.slice(0, limit) });
-	if (pathname.endsWith('/config')) return Response.json({ data: {} });
+	if (pathname.endsWith('/config')) return Response.json({ data: {}, creditorMissing: [] });
 	return Response.json({});
 }) as typeof globalThis.fetch;
 
