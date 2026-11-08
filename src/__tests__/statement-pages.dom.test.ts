@@ -1189,6 +1189,19 @@ describe('Abrechnungsdetail', () => {
 		expect(document.activeElement).toBe(button);
 	});
 
+	// Persona Marco 1221 P-2: a refused action closes its dialog; the focus goes to the message at the top of the page
+	it('setzt den Fokus nach einem abgelehnten Neuberechnen auf die Meldung', async () => {
+		detail({}, { actionError: 'Der Verteilschlüssel «Halbe Zimmer» lässt sich nicht berechnen.' });
+		click('statement-recalculate-button');
+		const after = actions.get('?/recalculate')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'failure' } });
+		await settle();
+
+		expect(document.activeElement).toBe(byTestId('form-error'));
+	});
+
 	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
 		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 0, balance: 0 });
 		click('statement-correct-button');
