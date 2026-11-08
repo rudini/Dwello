@@ -2400,7 +2400,7 @@
 	"contracts_end_kind_notice": "Notice of termination",
 	"contracts_end_kind_notice_help": "The tenant or you gave written notice of termination.",
 	"contracts_end_kind_agreement": "Termination by agreement",
-	"contracts_end_kind_agreement_help": "Tenant and landlord end the rental contract by mutual agreement on an agreed day, without notice of termination and without a notice period, for example when the tenant moves to another of your apartments. Put the agreement in writing, signed by you and all tenants. For a family home, the express consent of the spouse or registered partner is needed.",
+	"contracts_end_kind_agreement_help": "Tenant and landlord end the rental contract by mutual agreement on an agreed day, without notice of termination and without a notice period, for example when the tenant moves to another of your apartments. Put the agreement in writing as evidence, signed by you and all tenants. For a family home, the express consent of the spouse or registered partner is needed. If someone else takes over the rental contract, for example with your written consent for business premises or by a divorce judgment, no signed agreement is needed: your consent or the judgment is enough.",
 	"contracts_end_agreement_hint": "Enter the agreed day as the contract end. A new rental contract can start on the day after.",
 	"contracts_end_agreement": "Open-ended, ended effective {date} (termination agreement)",
 	"contracts_period_range_agreement": "{start} – {end}, by agreement",

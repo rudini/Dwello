@@ -2400,7 +2400,7 @@
 	"contracts_end_kind_notice": "Kündigung",
 	"contracts_end_kind_notice_help": "Der Mieter oder Sie haben den Mietvertrag schriftlich gekündigt.",
 	"contracts_end_kind_agreement": "Aufhebungsvereinbarung",
-	"contracts_end_kind_agreement_help": "Mieter und Vermieter beenden den Mietvertrag im Einvernehmen auf einen vereinbarten Tag, ohne Kündigung und ohne Kündigungsfrist, z.B. beim Wechsel in eine andere Ihrer Wohnungen. Halten Sie die Vereinbarung schriftlich fest, unterschrieben von Ihnen und allen Mietern. Bei einer Familienwohnung braucht es die ausdrückliche Zustimmung des Ehegatten oder eingetragenen Partners.",
+	"contracts_end_kind_agreement_help": "Mieter und Vermieter beenden den Mietvertrag im Einvernehmen auf einen vereinbarten Tag, ohne Kündigung und ohne Kündigungsfrist, z.B. beim Wechsel in eine andere Ihrer Wohnungen. Halten Sie die Vereinbarung als Beweis schriftlich fest, unterschrieben von Ihnen und allen Mietern. Bei einer Familienwohnung braucht es die ausdrückliche Zustimmung des Ehegatten oder eingetragenen Partners. Tritt jemand anders in den Mietvertrag ein, etwa mit Ihrer schriftlichen Zustimmung bei Geschäftsräumen oder durch ein Urteil bei der Scheidung, braucht es keine unterschriebene Vereinbarung: Es genügen Ihre Zustimmung oder das Urteil.",
 	"contracts_end_agreement_hint": "Tragen Sie als Vertragsende den vereinbarten Tag ein. Ein neuer Mietvertrag kann am Tag danach beginnen.",
 	"contracts_end_agreement": "Unbefristet, beendet auf den {date} (Aufhebungsvereinbarung)",
 	"contracts_period_range_agreement": "{start} – {end}, einvernehmlich",
