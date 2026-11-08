@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
+import { m } from '$lib/paraglide/messages';
 import {
 	apartmentOption,
 	impossibleYear,
@@ -90,5 +91,56 @@ describe('Mietverträge in der gewählten Sprache', () => {
 			apartments: { size: string; building: string }[];
 		};
 		expect(data.apartments[0]).toMatchObject({ size: '1 pièce, 40 m²', building: 'Inconnu' });
+	});
+});
+
+// #1264 (Helga P-3, Sven P-2): both hints of the step «Wohnung» say «Mietvertrag ohne Vertragsende»;
+// wording of fach review 1264-1, word for word
+describe('Hinweis auf die aufgehobene Wohnung', () => {
+	it.each([
+		[
+			'de',
+			'Für diese Wohnung ist ein Mietvertrag ohne Vertragsende erfasst. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung.'
+		],
+		[
+			'fr',
+			'Un contrat de bail sans fin du contrat est saisi pour cet appartement. Dwello a donc annulé la sélection. Si ce contrat de bail est résilié ou qu’une fin du contrat a été convenue, saisissez d’abord la fin du contrat sur sa page avec « Saisir la date de fin ». Sinon, choisissez un autre appartement.'
+		],
+		[
+			'it',
+			'Per questo appartamento è registrato un contratto di locazione senza fine del contratto. Dwello ha quindi annullato la selezione. Se questo contratto di locazione è disdetto o è stata pattuita una fine del contratto, inserisca prima la fine del contratto sulla sua pagina con «Registrare la data di fine». Altrimenti scelga un altro appartamento.'
+		],
+		[
+			'en',
+			'A rental contract without a contract end is recorded for this apartment. Dwello has therefore cleared the selection. If this rental contract was terminated by notice or a contract end was agreed, first enter the contract end on its page with «Enter end date». Otherwise choose another apartment.'
+		]
+	] as const)('nennt auf %s einen Mietvertrag ohne Vertragsende', (locale, text) => {
+		overwriteGetLocale(() => locale);
+		expect(m.contracts_apartment_cleared_text()).toBe(text);
+	});
+});
+
+// #1265 (Helga P-4, Sven P-5): «nicht geprüft» first in the option, and explained at the field; fach review 1264-1
+describe('Wohnung mit nicht geladenen Mietverträgen', () => {
+	it.each([
+		[
+			'fr',
+			'(non vérifié) Appartement 2.01 · Ahornhof',
+			'Les appartements marqués « non vérifié » peuvent être choisis, même si Dwello n’a pas pu charger leurs contrats de bail. Dwello vérifie à l’enregistrement si l’appartement choisi est libre.'
+		],
+		[
+			'it',
+			'(non verificato) Appartamento 2.01 · Ahornhof',
+			'Gli appartamenti contrassegnati con «non verificato» possono essere scelti, anche se Dwello non ha potuto caricare i loro contratti di locazione. Dwello verifica al salvataggio se l’appartamento scelto è libero.'
+		],
+		[
+			'en',
+			'(not checked) Apartment 2.01 · Ahornhof',
+			'Apartments marked «not checked» can be chosen, even though Dwello could not load their rental contracts. Dwello checks on saving whether the chosen apartment is free.'
+		]
+	] as const)('markiert und erklärt sie auf %s', (locale, label, help) => {
+		overwriteGetLocale(() => locale);
+		expect(apartmentOption({ unit: '2.01', building: 'Ahornhof' }, null, false).label).toBe(label);
+		expect(m.contracts_apartment_help_unchecked()).toBe(help);
 	});
 });

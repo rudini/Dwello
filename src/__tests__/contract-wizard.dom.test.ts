@@ -441,6 +441,25 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 	});
 
+	// #1265 (Helga P-4, Sven P-5): the help at the field says what «nicht geprüft» means, only while an option carries it
+	it('erklärt «nicht geprüft» in der Hilfe zur Wohnung, solange eine Wohnung so markiert ist', async () => {
+		const unchecked =
+			'Wohnungen mit «nicht geprüft» lassen sich wählen, obwohl Dwello ihre Mietverträge nicht laden konnte. Ob die gewählte Wohnung frei ist, prüft Dwello beim Speichern.';
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('apartment-select-help')!.textContent).toContain(unchecked);
+		fakeBff(({ path }) => [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]);
+		select('apartment-select', 'a3');
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('apartment-select-help')!.textContent).not.toContain('nicht geprüft');
+	});
+
 	// #665 (Sven B-13 1, 2): a keyboard user hears the hint with the field it is about
 	it('nennt den Hinweis auf nicht geladene Mietverträge mit der Wohnung und dem Vertragsbeginn', async () => {
 		fakeBff(({ path }) =>

@@ -266,15 +266,13 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann steht bei der Wohnung "2.01" in der Auswahl "(nicht geprüft)"
 
   # #1265 (Personas Helga P-4, Sven P-5): die Hilfe am Feld erklärt «nicht geprüft», solange eine Wohnung so markiert ist
-  @wip
   Szenario: Die Hilfe zur Wohnung erklärt «nicht geprüft»
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
-    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen. Wohnungen mit «nicht geprüft» lassen sich wählen: Ihre Mietverträge liessen sich nicht laden. Ob die Wohnung frei ist, prüft Dwello beim Speichern."
+    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen. Wohnungen mit «nicht geprüft» lassen sich wählen, obwohl Dwello ihre Mietverträge nicht laden konnte. Ob die gewählte Wohnung frei ist, prüft Dwello beim Speichern."
 
   # #1265 (Helga P-4): bei 150 % schneidet das Feld das Ende der Bezeichnung ab, darum steht «nicht geprüft» vorne
-  @wip
   Szenario: «nicht geprüft» steht vor der Bezeichnung der Wohnung
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
