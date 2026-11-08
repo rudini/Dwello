@@ -124,7 +124,7 @@
 		if (busy) return;
 		const focusable = [
 			...(panel?.querySelectorAll<HTMLElement>(
-				'button:not([disabled]), [href], input:not([tabindex="-1"]):not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+				'button:not([disabled]), [href], summary, input:not([tabindex="-1"]):not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
 			) ?? [])
 		];
 		const active = document.activeElement as HTMLElement;

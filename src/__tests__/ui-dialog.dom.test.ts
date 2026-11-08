@@ -180,6 +180,20 @@ describe('Dialog', () => {
 		expect(document.activeElement).toBe(byTestId('dialog-confirm'));
 	});
 
+	// #751 (persona Sven 743 P-2): «Mehr dazu» at «Leistungszeitraum» in «Rechnungen hochladen» was skipped by Tab
+	it('führt mit Tab auch zur Zusammenfassung eines Bereichs zum Aufklappen', () => {
+		openDialog({
+			children: markup(
+				'<div><button id="before">Kalender</button><details><summary id="more">Mehr dazu</summary><p>Text</p></details></div>'
+			)
+		});
+		document.getElementById('before')!.focus();
+		press('Tab');
+		expect(document.activeElement!.id).toBe('more');
+		press('Tab', true);
+		expect(document.activeElement!.id).toBe('before');
+	});
+
 	// Persona Sven K2 B1: eine Ablehnung mit Link und Formular, die erst nach dem Öffnen erscheint
 	it('führt mit Tab von einer Meldung weiter und überspringt verborgene Felder', () => {
 		openDialog({

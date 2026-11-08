@@ -746,6 +746,21 @@ describe('Rechnung erfassen', () => {
 		}
 	});
 
+	// #751 (persona Helga P-2 on #451): four paragraphs took about 650 px at 200 % zoom before «Beginn»
+	it('zeigt beim Leistungszeitraum den ersten Absatz und die übrigen zugeklappt hinter «Mehr dazu»', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const more = byTestId<HTMLDetailsElement>('invoice-service-period-more')!;
+
+		expect(byTestId('invoice-service-period-first')!.textContent).toContain('Für welche Zeit gilt die Rechnung?');
+		expect(more.open).toBe(false);
+		expect(more.querySelector('summary')!.textContent!.trim()).toBe(
+			'Mehr dazu: Zeiträume, Kosten über mehrere Jahre, Entkalken'
+		);
+		expect(more.textContent).toContain('Kosten, die nur alle paar Jahre anfallen');
+		expect(more.textContent).toContain('Das Entkalken der zentralen Warmwasseranlage ist umlagefähig');
+		expect(more.textContent).not.toContain('Für welche Zeit gilt die Rechnung?');
+	});
+
 	// Kosten über mehrere Jahre: das Entkalken eines Boilers in der Wohnung nur, wenn der Mietvertrag es nennt (#254)
 	it('erklärt beim Leistungszeitraum Kosten über mehrere Jahre und den Boiler in der Wohnung', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
