@@ -21,3 +21,7 @@ export const roundTo5Rappen = (amount: number) => Math.floor(Math.round(roundToR
 
 /** #94: a Saldo below CHF 5 (the stored, rounded one; 0 included) is neither claimed nor paid out */
 export const belowMinimum = (balance: number) => Math.abs(balance) < 5;
+
+/** A text with its {placeholders} filled in */
+export const fill = (text: string, values: Record<string, string | number>) =>
+	Object.entries(values).reduce((result, [key, value]) => result.split(`{${key}}`).join(String(value)), text);

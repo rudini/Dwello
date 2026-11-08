@@ -67,6 +67,7 @@ export const apartments = pgTable(
 		area: decimal('area', { precision: 8, scale: 2 }).notNull(), // m²
 		rooms: decimal('rooms', { precision: 3, scale: 1 }).notNull(), // e.g., 3.5
 		status: varchar('status', { length: 20 }).notNull().default('vacant'), // vacant, reserved; occupied is computed from the contracts (apartmentStatus)
+		discontinuedFrom: date('discontinued_from'), // «Aufgehoben ab» (#1284): no longer exists from that day
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -397,26 +398,9 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 // ============================================================================
 // Utility Statements Table
 // ============================================================================
-/** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
-export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
-
-// A month's share of the heating costs; a month split by a move-in or move-out with its share in the profile and its
-// days (#451), absent before
-export type MonthShare = { month: number; percentage: number; full?: number; days?: number; total?: number };
-
-// An invoice of a position over different days (#226): its days in the period, its amount for them, the tenant's days
-export type InvoicePart = {
-	start: string;
-	end: string;
-	amount: number;
-	days: number;
-	total: number;
-	noPeriod?: true; // an invoice without Leistungszeitraum: it bills the period (#241)
-	whole?: { start: string; end: string; amount: number }; // a Leistungszeitraum beyond the period, with the invoice's amount
-	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
-	// a heating invoice shared by the Heizprofil's months in its days (#71): the tenant's months, those days' months
-	profile?: { percent: number; months: MonthShare[]; periodMonths: MonthShare[] };
-};
+// the parts of a statement's positions, in a file of their own (#1284)
+import type { InvoicePart, KeyValues, LineSegment, MonthShare } from './statement-parts';
+export type { InvoicePart, KeyValues, LineSegment, MonthShare } from './statement-parts';
 
 /** One line of the Akonto on a statement (#464): whole months of one amount, or the days of a split month */
 export type AdvanceLine = { from: string; to: string; amount: number; total: number } & (
@@ -565,6 +549,7 @@ export const utilityStatementLineItems = pgTable(
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
+		segments: jsonb('segments').$type<LineSegment[]>(), // #1284: per part before and from «Aufgehoben ab»; null: not split
 		invoices: jsonb('invoices').$type<BilledInvoice[]>(), // the invoices it billed (#96); null: created before
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()

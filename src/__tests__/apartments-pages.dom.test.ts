@@ -319,9 +319,9 @@ describe('Wohnungsdetail', () => {
 		const dialog = document.querySelector('[role="dialog"]')!;
 		const description = document.getElementById(dialog.getAttribute('aria-describedby')!)!;
 		expect(description.textContent).toContain(m.apartments_delete_text({ number: '3.01' }));
-		// the wording of fach-reviewer 1257-2 (V-3), pinned
+		// the wording of fach-reviewer 1257-2 (V-3), since #1284 that of 1284-1 (e), pinned
 		expect(description.textContent).toContain(
-			'Löschen Sie die Wohnung nur, wenn sie irrtümlich erfasst wurde. Steht sie nur leer, behalten Sie sie: Ihren Anteil an den Nebenkosten tragen Sie als Vermieter. Gibt es sie nach einem Umbau nicht mehr, löschen Sie sie erst, wenn die Abrechnungen aller Abrechnungsperioden versendet sind, in denen es sie noch gab. Nach dem Löschen verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen, und deren Mieter bezahlen den Anteil dieser Wohnung mit. Versendete Abrechnungen bleiben unverändert; jede Abrechnung, die Sie danach erstellen, neu berechnen oder berichtigen, rechnet ohne diese Wohnung.'
+			'Löschen Sie die Wohnung nur, wenn sie irrtümlich erfasst wurde. Steht sie nur leer, behalten Sie sie: Ihren Anteil an den Nebenkosten tragen Sie als Vermieter. Gibt es sie nach einem Umbau nicht mehr, löschen Sie sie nicht, sondern erfassen Sie unter «Bearbeiten» im Feld «Aufgehoben ab» den Tag, ab dem es sie nicht mehr gibt. Nach dem Löschen verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen, und deren Mieter bezahlen den Anteil dieser Wohnung mit. Versendete Abrechnungen bleiben unverändert; jede Abrechnung, die Sie danach erstellen, neu berechnen oder berichtigen, rechnet ohne diese Wohnung.'
 		);
 	});
 	const trail = () =>
@@ -349,6 +349,16 @@ describe('Wohnungsdetail', () => {
 		expect(byTestId('apartment-info-rooms')!.textContent).toContain('3.5');
 		expect(byTestId('apartment-info-floor')!.textContent).toContain('3. OG');
 		expect(byTestId('apartment-info-area')!.textContent).toContain('82.5 m²');
+	});
+
+	// #1284: the day from which the apartment no longer exists, only where one is set
+	it('nennt bei den Angaben, ab wann es die Wohnung nicht mehr gibt', () => {
+		show(ApartmentPage, { data: { ...details(false), apartment: { ...details(false).apartment, discontinuedFrom: '2025-07-01' } } } as never);
+		expect(byTestId('apartment-info-discontinued')!.textContent!.replace(/\s+/g, ' ').trim()).toBe('Aufgehoben ab 01.07.2025');
+		document.body.innerHTML = '';
+		open(false);
+		expect(byTestId('apartment-info-area')).not.toBeNull();
+		expect(byTestId('apartment-info-discontinued')).toBeNull();
 	});
 
 	it('zeigt den Mieter und die Miete mit den Begriffen des Glossars', () => {

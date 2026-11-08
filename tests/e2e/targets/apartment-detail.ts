@@ -1,6 +1,6 @@
 import { target } from '../screenplay/target';
 
-export type ApartmentInfo = 'status' | 'rooms' | 'floor' | 'area';
+export type ApartmentInfo = 'status' | 'rooms' | 'floor' | 'area' | 'discontinued';
 
 export const infoCard = (info: ApartmentInfo) =>
 	target(`Angabe ${info} der Wohnung`, (page) => page.getByTestId(`apartment-info-${info}`));

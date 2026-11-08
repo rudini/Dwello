@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { floorLabel, statusHelp, statusText, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentStatus } from '$lib/types';
-	import { normalizeDecimal } from '$lib/utils/format';
+	import { formatDate, normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
@@ -18,13 +18,24 @@
 			rooms: string;
 			floor: number;
 			area: string;
+			discontinuedFrom?: string | null;
 		};
 	} = $props();
 
 	const facts = $derived([
 		{ key: 'rooms', label: m.apartments_rooms(), value: normalizeDecimal(apartment.rooms) },
 		{ key: 'floor', label: m.apartments_floor(), value: floorLabel(apartment.floor) },
-		{ key: 'area', label: m.apartments_area(), value: `${normalizeDecimal(apartment.area)} m²` }
+		{ key: 'area', label: m.apartments_area(), value: `${normalizeDecimal(apartment.area)} m²` },
+		// #1284: only where the apartment no longer exists from a day
+		...(apartment.discontinuedFrom
+			? [
+					{
+						key: 'discontinued',
+						label: m.apartments_fact_discontinued(),
+						value: formatDate(apartment.discontinuedFrom)
+					}
+				]
+			: [])
 	]);
 </script>
 

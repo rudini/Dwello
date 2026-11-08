@@ -91,12 +91,12 @@ describe('Neues Heizprofil', () => {
 	});
 
 	// #1201: before, the form showed only its general save error
-	it('zeigt am Feld, dass ein Name länger ist, als Dwello ihn speichert', async () => {
+	it('zeigt am Feld, dass ein Name länger ist, als Dwello ihn speichert, und wie lang er ist', async () => {
 		const { result } = runAction(newActions.default, '', 400, form(), tooLong);
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { nameFR: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } }
+			data: { errors: { nameFR: 'Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text.' } }
 		});
 	});
 });

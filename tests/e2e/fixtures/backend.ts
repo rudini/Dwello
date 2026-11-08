@@ -180,6 +180,11 @@ export function testData(api: CallTheApi) {
 			ids.set(number, apartment.id);
 		},
 
+		// #1284: the apartment no longer exists from that day
+		async discontinueApartment(number: string, discontinuedFrom: string) {
+			await put(`apartments/${ids.get(number)}`, { discontinuedFrom });
+		},
+
 		async tenant(title: string) {
 			const [, token] = unique(title).split(/ (?=[^ ]+$)/);
 			const tenant = await post('tenants', { firstName: title, lastName: token });

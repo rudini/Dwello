@@ -6,6 +6,7 @@
 	"area": "82.50",
 	"rooms": "3.5",
 	"status": "occupied",
+	"discontinuedFrom": "2099-07-01",
 	"building": {
 		"id": "b1",
 		"name": "Lindenhof",

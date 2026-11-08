@@ -78,6 +78,7 @@ Funktionalität: Barrierefreiheit
       | apartment-detail-free  | delete-dialog       |
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
+      | apartment-edit         | discontinue-refused |
       | tenants                | default             |
       | tenants                | empty               |
       | tenants                | filtered-empty      |

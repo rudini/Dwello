@@ -1167,3 +1167,39 @@ describe('Seitenwechsel vor den Summen im PDF', () => {
 		expect([pageOf('Kostenübersicht (CHF)'), pageOf('Hauswart')]).toEqual([pageOf('Zwischensumme'), pageOf('Zwischensumme')]);
 	});
 });
+
+// #1284 (Fachreview 1284-1 V-2, V-3): a position split at the day an apartment no longer exists shows each part's
+// calculation with the amounts it prints, the key column «je Zeitraum», and once the apartment above the costs
+describe('PDF mit aufgehobener Wohnung', () => {
+	const before = { start: '2025-01-01', end: '2025-06-30', count: 3, keyShare: '70.00 / 210.00 m²', costs: 1487.67, apartment: 495.89, periodShare: 1, days: 181, total: 181, share: 495.89 };
+	const from = { start: '2025-07-01', end: '2025-12-31', count: 2, keyShare: '70.00 / 140.00 m²', costs: 1512.33, apartment: 756.17, periodShare: 0.5, share: 378.09, discontinued: [{ number: '1.03', date: '2025-07-01' }] };
+	const line = { category: 'Hauswart', key: 'Pro Fläche (m²)', totalAmount: 3000, apartmentShare: 1252.06, periodShare: 0.6979, segments: [before, from], tenantShare: 873.98 };
+	const split = { ...refund, lineItems: [line] };
+
+	it('nennt die aufgehobene Wohnung über der Kostenaufstellung', async () => {
+		expect((await textOf(split)).flowing).toContain('Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; ihren Anteil trägt der Vermieter. Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.');
+	});
+
+	it('zeigt beim Verteilschlüssel «je Zeitraum» statt eines Bruchs', async () => {
+		expect((await textOf(split)).flowing).toContain('je Zeitraum, siehe unten');
+	});
+
+	it('rechnet jeden Zeitraum nach Tagen oder mit dem Zeitanteil vor', async () => {
+		const text = (await textOf(split)).flowing;
+		expect(text).toContain('01.01.2025 – 30.06.2025, 3 Wohnungen: 70.00 / 210.00 m² × CHF 1\'487.67 = CHF 495.89 × 181/181 Tage = CHF 495.89');
+		expect(text).toContain('01.07.2025 – 31.12.2025, 2 Wohnungen: 70.00 / 140.00 m² × CHF 1\'512.33 = CHF 756.17 × Zeitanteil 50.00 % = CHF 378.09');
+	});
+
+	// Code-Review 1284-2 C-3: a mixed key in brackets, as under the invoices of a position (keyFactor)
+	it('setzt einen gemischten Schlüssel in Klammern', async () => {
+		const mixed = { ...before, keyShare: '70 % × 70.00 / 210.00 m²\n+ 30 % × 1 / 3 Wohnungen' };
+		expect((await textOf({ ...split, lineItems: [{ ...line, segments: [mixed] }] })).flowing).toContain('3 Wohnungen: (70 % × 70.00 / 210.00 m² + 30 % × 1 / 3 Wohnungen) × CHF');
+	});
+
+	it('rechnet Heizkosten je Zeitraum nach dem Heizprofil vor', async () => {
+		const heating = { ...line, category: 'Heizung', heating: true, segments: [{ ...before, days: undefined, total: undefined, profileShare: 50, costs: 500, apartment: 166.67, share: 166.67 }] };
+		expect((await textOf({ ...split, lineItems: [heating] })).flowing).toContain(
+			'01.01.2025 – 30.06.2025, 3 Wohnungen, 50.00 % der Heizkosten nach Heizprofil: 70.00 / 210.00 m² × CHF 500.00 = CHF 166.67 × Anteil nach Heizprofil 100.00 % = CHF 166.67'
+		);
+	});
+});

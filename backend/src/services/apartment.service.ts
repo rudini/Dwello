@@ -14,9 +14,9 @@ import {
 	type NewApartment
 } from '../db/schema';
 import { everyWordIn, withoutApartmentWord } from './word-search';
-import { sqlToday, swissToday } from './today';
+import { daysAfter, sqlToday, swissToday } from './today';
 import type { ApartmentStatus, ApartmentWithDetails } from '../api/apartment';
-import { refusal, type Refusal } from './coded-error';
+import { CodedError, refusal, type Refusal } from './coded-error';
 
 /** First day of the next rental contract that has not started yet */
 export const nextContractStart = sql<string | null>`(
@@ -76,6 +76,7 @@ const apartmentFields = {
 	floor: apartments.floor,
 	area: apartments.area,
 	rooms: apartments.rooms,
+	discontinuedFrom: apartments.discontinuedFrom,
 	status: apartmentStatus,
 	nextContractStart,
 	currentContractEnd,
@@ -263,6 +264,7 @@ export async function updateApartment(
 	id: string,
 	data: Partial<NewApartment>
 ): Promise<Apartment | null> {
+	if (data.discontinuedFrom) await checkNoContractOn(id, data.discontinuedFrom);
 	const [apartment] = await db
 		.update(apartments)
 		.set({ ...data, updatedAt: new Date() })
@@ -270,6 +272,28 @@ export async function updateApartment(
 		.returning();
 
 	return apartment || null;
+}
+
+// #1284: an apartment no longer exists from a day only when no contract of it still runs on that day or later
+async function checkNoContractOn(id: string, date: string) {
+	const [contract] = await db
+		.select({ tenant: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}` })
+		.from(rentalContracts)
+		.innerJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
+		.where(and(eq(rentalContracts.apartmentId, id), sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${date})`))
+		.limit(1);
+	if (contract) throw new CodedError('APARTMENT_CONTRACT_RUNS', 'A contract still runs on that day', { date, tenant: contract.tenant });
+}
+
+// #1284: a contract of an apartment that no longer exists from a day ends at the latest the day before
+export async function checkDiscontinued(apartmentId: string, endDate: string | null, q: Pick<typeof db, 'select'> = db) {
+	const [apartment] = await q
+		.select({ number: apartments.number, date: apartments.discontinuedFrom })
+		.from(apartments)
+		.where(eq(apartments.id, apartmentId));
+	if (!apartment?.date || (endDate && endDate < apartment.date)) return;
+	const { number, date } = apartment;
+	throw new CodedError('CONTRACT_APARTMENT_DISCONTINUED', 'The apartment no longer exists from that day', { number, date, dayBefore: daysAfter(date, -1) });
 }
 
 /**
@@ -310,8 +334,8 @@ export async function apartmentExists(id: string): Promise<boolean> {
 	return !!result;
 }
 
-/** The building's apartments with the values a Verteilschlüssel reads */
+/** The building's apartments with the values a Verteilschlüssel reads, and from when they no longer count (#1284) */
 export async function apartmentsOf(buildingId: string) {
 	const { apartments } = await listApartments({ buildingId, limit: 1000 });
-	return apartments.map((a) => ({ id: a.id, number: a.number, area: parseFloat(a.area), rooms: parseFloat(a.rooms) }));
+	return apartments.map(({ id, number, area, rooms, discontinuedFrom }) => ({ id, number, area: parseFloat(area), rooms: parseFloat(rooms), discontinuedFrom }));
 }

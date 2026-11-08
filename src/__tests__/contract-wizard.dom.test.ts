@@ -20,6 +20,7 @@ import listed from '../../tests/contracts/contracts.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 import overlap from '../../tests/contracts/contract-overlap.json';
+import apartmentDiscontinued from '../../tests/contracts/contract-apartment-discontinued.json';
 
 const data = {
 	tenants: [
@@ -354,6 +355,17 @@ describe('Mietvertrag erfassen', () => {
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Abgerechnet bis liegt vor dem Vertragsbeginn 01.01.2024.'
+		);
+	});
+
+	// #1284 (fallback review): a new contract of an apartment that no longer exists from a day after its days
+	it('nennt beim Speichern den Tag, an dem der Mietvertrag einer aufgehobenen Wohnung spätestens endet', async () => {
+		await untilReview();
+		fakeBff(() => [400, apartmentDiscontinued]);
+		submit('submit-button');
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Die Wohnung 4.01 gibt es ab 01.07.2099 nicht mehr. Ein Mietvertrag dieser Wohnung muss spätestens am 30.06.2099 enden. Stimmt der Tag nicht, ändern Sie ihn bei der Wohnung unter «Bearbeiten».'
 		);
 	});
 

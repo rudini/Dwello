@@ -73,7 +73,8 @@ export interface RunDetails {
 	fuel?: StatementPDFData['fuel'];
 }
 
-type LineNames = { categoryNames: Map<string, Names>; keyNames: Map<string, Names>; keyShares: Map<string, string> };
+type KeyNames = Map<string, Names & { formula?: string | null }>;
+type LineNames = { categoryNames: Map<string, Names>; keyNames: KeyNames; keyShares: Map<string, string> };
 
 const amountOf = (value: string | null) => (value == null ? null : parseFloat(value));
 
@@ -114,6 +115,14 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, invoiceDate: item.invoices?.[i]?.invoiceDate, invoiceNumber: item.invoices?.[i]?.invoiceNumber })),
 		byProfile: heating && byProfile,
 		heating,
+		// #1284 (Fachreview 1284-1 V-2): each part with the fraction among the apartments that count in it
+		segments: item.segments?.map(({ keyValues, ...segment }) => ({
+			...segment,
+			keyShare:
+				keyShareOf(names.keyNames.get(item.distributionKeyId ?? '')?.formula ?? null, keyValues, language) ??
+				percentOf(segment.apartment, segment.costs) ??
+				'–'
+		})),
 		tenantShare: parseFloat(item.tenantShare)
 	};
 }
@@ -124,7 +133,7 @@ export function toPdfData(
 	categoryNames: Map<string, Names>,
 	language: Language,
 	run: RunDetails = { rentalStart: statement.periodStart, rentalEnd: statement.periodEnd },
-	keyNames = new Map<string, Names>(),
+	keyNames: KeyNames = new Map(),
 	keyShares = new Map<string, string>() // "75.50 / 492.50 m²" per simple key
 ): StatementPDFData {
 	const managementFee = parseFloat(statement.managementFee || '0');

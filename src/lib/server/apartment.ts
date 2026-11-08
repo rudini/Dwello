@@ -62,6 +62,7 @@ export async function fetchApartment(fetch: typeof globalThis.fetch, id: string)
 		nextContractStart: a.nextContractStart ?? null,
 		currentContractEnd: a.currentContractEnd ?? null,
 		lastContractEnd: a.lastContractEnd ?? null,
+		discontinuedFrom: a.discontinuedFrom ?? null, // «Aufgehoben ab» (#1284)
 		building: a.building! // GET /apartments/:id always names it
 	};
 }
