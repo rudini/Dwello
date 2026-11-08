@@ -423,7 +423,10 @@ describe('Mietvertrag bearbeiten', () => {
 			await open(endDate);
 			const help = byTestId('contract-parties-help')!.textContent!;
 			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht von selbst');
-			expect(help).toContain('erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben');
+			expect(help).toContain(
+				// #1267: or by an Aufhebungsvereinbarung with the heirs
+				'erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben oder wenn Sie mit den Erben eine Aufhebungsvereinbarung getroffen haben'
+			);
 			expect(help).toContain(
 				// Persona Weber P-1: der Abschnitt heisst im Mieterformular «Korrespondenzadresse» (#68)
 				'unter «Korrespondenzadresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
@@ -432,6 +435,9 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(help).toContain('mit Ihrer schriftlichen Zustimmung');
 			expect(help).toContain('bei der Scheidung die Wohnung der Familie'); // Persona Weber P-3
 			expect(help).toContain('am Tag vor dem Wechsel, ohne Kündigungsfrist');
+			// #1267 (Fachreview 1266-1 V-1, M-1): the end is an Aufhebungsvereinbarung, consent or judgment suffices
+			expect(help).toContain('Wählen Sie für das Vertragsende «Aufhebungsvereinbarung».');
+			expect(help).toContain('Es genügen Ihre Zustimmung oder das Urteil.');
 		}
 	);
 

@@ -272,7 +272,7 @@ describe('Mietvertragsdetail', () => {
 		click('contract-end-button');
 		// Fachreview W10-2 M-1: die Kündigung der Erben wird hier erfasst (Art. 266i OR)
 		expect(text('contract-end-death')).toContain(
-			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben.'
+			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben oder wenn Sie mit den Erben eine Aufhebungsvereinbarung getroffen haben.'
 		);
 		expect(text('contract-end-death')).toContain('unter «Korrespondenzadresse»'); // Persona Weber P-1
 	});
@@ -933,8 +933,16 @@ describe('Mietvertrag löschen', () => {
 		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
 		click('contract-delete-button');
 
+		// #1258: der Titel sagt die Absage, darunter der Grund und was zu tun ist
+		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
+			'Mietvertrag von Anna Keller kann nicht gelöscht werden'
+		);
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
-		expect(dialog).toContain('Seine Mietstage sind abgerechnet in:');
+		expect(dialog).toContain(
+			'Die 4 Nebenkostenabrechnungen unten rechnen die Mietstage dieses Mietvertrags ab'
+		);
+		// Fachreview 1258 V-8: neben einer gesperrten hilft das Löschen des Entwurfs nicht
+		expect(dialog).toContain('Einen Entwurf aus der Liste zu löschen, hilft hier nicht');
 		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
 		expect(text('contract-delete-statement-s1')).toBe('NK-2024-0001 (bezahlt)');
 		expect(byTestId('contract-delete-statement-s2')!.getAttribute('href')).toBe('/statements/s2');
@@ -962,7 +970,11 @@ describe('Mietvertrag löschen', () => {
 		click('contract-delete-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
-			'Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen.'
+			'Öffnen Sie jeden Entwurf oben und wählen Sie «Abrechnung löschen». Danach lässt sich der Mietvertrag löschen.'
+		);
+		// code review 1258 C-5: der Hinweis zum Entwurf neben einer gesperrten gilt nur dort
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain(
+			'Einen Entwurf aus der Liste'
 		);
 	});
 
@@ -1078,7 +1090,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		);
 		// #457 (#410 Punkt 3): nach längerer Annahme des Mietzinses läuft der Mietvertrag meist schon weiter
 		expect(text('contract-fixed-term-check')).toContain(
-			'Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung.'
+			'Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung oder einer Aufhebungsvereinbarung.'
 		);
 		const button = (testid: string) => [
 			byTestId(testid)!.textContent!.trim(),

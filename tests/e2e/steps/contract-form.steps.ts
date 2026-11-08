@@ -470,6 +470,24 @@ Then(
 	}
 );
 
+// #1267: the heirs, and a third party entering the contract, end it by an Aufhebungsvereinbarung too
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er das Vertragsende auch nach einer Aufhebungsvereinbarung mit den Erben erfasst',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain(
+			'erst, wenn die Erben oder Sie gekündigt haben oder wenn Sie mit den Erben eine Aufhebungsvereinbarung getroffen haben'
+		);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er beim Eintritt eines Dritten «Aufhebungsvereinbarung» wählt',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain('Wählen Sie für das Vertragsende «Aufhebungsvereinbarung».');
+		await verwalter.sees(partiesHelpText).toContain('Eine unterschriebene Vereinbarung braucht es dafür nicht: Es genügen Ihre Zustimmung oder das Urteil.');
+	}
+);
+
 When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(newContractAfterEnd);
 });

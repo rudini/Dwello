@@ -135,7 +135,7 @@ describe('Vertragsende', () => {
 
 	// #1148: eine Aufhebungsvereinbarung ist keine Kündigung
 	it('nennt bei einer Aufhebungsvereinbarung keine Kündigung', () => {
-		expect(contractEnd('2099-03-31', true, true)).toBe('Unbefristet, beendet auf den 31.03.2099');
+		expect(contractEnd('2099-03-31', true, true)).toBe('Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)');
 	});
 });
 
