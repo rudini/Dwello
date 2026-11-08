@@ -27,6 +27,7 @@
 		onretry,
 		startPast,
 		overlap,
+		apartment,
 		overlapSaid = false,
 		newTab = false,
 		beforeEnd,
@@ -46,6 +47,7 @@
 		onretry?: () => void; // loads them again; without it the hint points to the one at the top
 		startPast: boolean; // the start lies before today, as the backend says (#815); the edit form: also before the saved one
 		overlap: Overlap | null;
+		apartment: string; // the apartment being entered, named in the link to the other contract (#1295)
 		overlapSaid?: boolean; // its words stand at the field already: only the link to the other contract (Weber b667 P-1)
 		newTab?: boolean; // the link keeps the input of the edit form
 		errors: Record<string, string>;
@@ -169,8 +171,8 @@
 {#if overlap && !overlapSaid}
 	<Alert tone="caution" title={m.contracts_overlap_title()} testid="overlap-warning">
 		<p>{overlap.text}</p>
-		<OverlapLink contract={overlap.contract} {newTab} />
+		<OverlapLink contract={overlap.contract} {apartment} {newTab} />
 	</Alert>
 {:else if overlap}
-	<OverlapLink contract={overlap.contract} {newTab} />
+	<OverlapLink contract={overlap.contract} {apartment} {newTab} />
 {/if}

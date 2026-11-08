@@ -569,7 +569,7 @@ describe('Mietvertrag bearbeiten', () => {
 		expect([link.getAttribute('href'), link.target, text]).toEqual([
 			`/contracts/${overlap.params.contract}`,
 			'_blank',
-			'Zum Mietvertrag von Anna Keller (öffnet in neuem Tab)'
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.01 · Ahornhof (öffnet in neuem Tab)' // #1295
 		]);
 		expect(byTestId('overlap-warning')).toBeNull();
 	});

@@ -200,7 +200,22 @@ describe('Hinweis auf den eigenen Mietvertrag des Mieters', () => {
 		overwriteGetLocale(() => locale);
 		expect([
 			m.contracts_open_contract_text({ name: 'Anna Keller', apartment }),
-			m.contracts_open_contract_link({ name: 'Anna Keller', apartment })
+			m.contracts_overlap_link({ tenant: 'Anna Keller', apartment })
 		]).toEqual([text, link]);
+	});
+});
+
+// #1295 (1295-fachreview-1): every link to an overlapping or blocking contract names tenant and apartment
+describe('Link zum anderen Mietvertrag', () => {
+	it.each([
+		['de', 'Zum Mietvertrag des anonymisierten Mieters für Wohnung 2.01 · Ahornhof'],
+		['fr', 'Vers le contrat de bail du locataire anonymisé pour Wohnung 2.01 · Ahornhof'],
+		['it', 'Al contratto di locazione dell’inquilino anonimizzato per Wohnung 2.01 · Ahornhof'],
+		['en', 'Go to the rental contract of the anonymised tenant for Wohnung 2.01 · Ahornhof']
+	] as const)('nennt auf %s auch beim anonymisierten Mieter die Wohnung', (locale, text) => {
+		overwriteGetLocale(() => locale);
+		expect(m.contracts_overlap_link_anonymised({ apartment: 'Wohnung 2.01 · Ahornhof' })).toBe(
+			text
+		);
 	});
 });

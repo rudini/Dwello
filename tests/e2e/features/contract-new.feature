@@ -278,7 +278,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon."
 
   # #1295 (Personas Helga P-2, Sven P-1 in 1288): jeder Link zum anderen Mietvertrag nennt Mieter und Wohnung
-  @wip
   Szenario: Der Link zum Mietvertrag, mit dem sich der Zeitraum überschneidet, nennt Mieter und Wohnung
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-04-01" bis "2027-03-31" für "900" Franken

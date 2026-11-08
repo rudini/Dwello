@@ -556,7 +556,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		);
 		expect([link?.getAttribute('href'), link?.textContent?.trim()]).toEqual([
 			'/contracts/c9',
-			'Zum Mietvertrag von Eva Frei'
+			'Zum Mietvertrag von Eva Frei für Wohnung 2.02 · Ahornhof' // #1295: tenant and apartment
 		]);
 		select('apartment-select', 'a1');
 		await settle();
@@ -954,7 +954,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		const link = byTestId<HTMLAnchorElement>('overlap-contract-link')!;
 		expect([link.getAttribute('href'), link.textContent!.trim()]).toEqual([
 			'/contracts/c8',
-			'Zum Mietvertrag von Ueli Graf'
+			'Zum Mietvertrag von Ueli Graf für Wohnung 2.01 · Ahornhof' // #1295: tenant and apartment
 		]);
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
