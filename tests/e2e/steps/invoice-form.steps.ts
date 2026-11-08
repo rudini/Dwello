@@ -12,6 +12,7 @@ import {
 	invoiceDateShown,
 	keyHelpText,
 	markedAsUtilityCost,
+	nonAllocableCategoryNoteText,
 	nonAllocableCategoryWarning,
 	invoiceNumberValue,
 	servicePeriodFirstText,
@@ -70,8 +71,8 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter }, category: string) => {
-	await verwalter.attemptsTo(chooseCategory(category));
+When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter, names }, category: string) => {
+	await verwalter.attemptsTo(chooseCategory(names.get(category) ?? category));
 });
 
 When('der Liegenschaftsverwalter die Rechnung dem Gebäude {string} zuordnet', async ({ verwalter, seed }, building: string) => {
@@ -119,21 +120,16 @@ Then('lässt sich die Rechnung nicht als umlagefähig markieren', async ({ verwa
 	await verwalter.sees(utilityCostMarkable).toBe(false);
 });
 
-Then(
-	'weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
-	async ({ verwalter }) => {
-		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
-	}
-);
+// #1195: the note names the category's reason, or the general sentence for a category without one
+Then('erklärt der Hinweis zur Kategorie {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(nonAllocableCategoryNoteText).toBe(text);
+});
 
 // #687: a non-allocable category is a correct choice, so its note does not warn
-Then(
-	'weist ein Hinweis ohne Warnung darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
-	async ({ verwalter }) => {
-		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
-		await verwalter.sees(tonesInNonAllocableCategoryNote).toEqual([]);
-	}
-);
+Then('warnt der Hinweis zur Kategorie nicht', async ({ verwalter }) => {
+	await verwalter.sees(nonAllocableCategoryWarning).toContain('Nicht umlagefähige Kategorie');
+	await verwalter.sees(tonesInNonAllocableCategoryNote).toEqual([]);
+});
 
 When('der Liegenschaftsverwalter das Rechnungsdatum {string} einträgt', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(enterInvoiceDate(date));

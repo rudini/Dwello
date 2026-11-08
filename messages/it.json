@@ -1011,7 +1011,7 @@
 	"invoices_allocable_help": "La fattura confluisce nel conteggio spese accessorie.",
 	"invoices_not_allocable_help": "La fattura non confluisce nel conteggio spese accessorie.",
 	"invoices_category_not_allocable": "Categoria non addebitabile",
-	"invoices_category_not_allocable_text": "I costi di questa categoria (p. es. riparazioni, assicurazione dell’immobile) non possono essere addebitati agli inquilini.",
+	"invoices_category_not_allocable_text": "Questa categoria è definita come non addebitabile. I suoi costi sono a suo carico in quanto locatore.",
 	"invoices_billed_title": "Fattura già conteggiata",
 	"invoices_billed_in": "Contenuta nei conteggi",
 	"invoices_billed_in_none": "Nessuno",

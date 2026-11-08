@@ -1543,6 +1543,16 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
 - [x] Archive the session; PR pushed after this archive
 
+## Session: #1195 the category's reason in the invoice form note (Weber P-3 on #292)
+
+- [x] Read #1195 on main and on the branch of #1206 (#687), which this one builds on; product owner decisions in #1195: the note shows `reasonOf`, a category without a reason a general sentence; spec change of «Nicht umlagefähige Kategorie wählen»
+- [x] `@wip` scenarios (invoice-new.feature) seen red at the reason; the own-category scenario pinned kept behaviour (a3c6e84)
+- [x] fach-reviewer step 1 (`docs/reviews/1195-fachreview-1.md`): V-1 Minor, new general sentence in four languages, decided in #1195
+- [x] Reason in the note and the new sentence; DOM tests seen red (f37071e)
+- [x] code-reviewer (`docs/reviews/1195-review-1.md`): no findings
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-1195.md`): no Blocker or Major; Minors that stay: P-1 (locked checkbox not explained), P-2 (Reparaturen and small maintenance), both on the base too
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
 ## Session: #1193 building search finds the full address and the postcode
 
 - [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)

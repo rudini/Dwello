@@ -1011,7 +1011,7 @@
 	"invoices_allocable_help": "Die Rechnung fliesst in die Nebenkostenabrechnung ein.",
 	"invoices_not_allocable_help": "Die Rechnung fliesst nicht in die Nebenkostenabrechnung ein.",
 	"invoices_category_not_allocable": "Nicht umlagefähige Kategorie",
-	"invoices_category_not_allocable_text": "Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.",
+	"invoices_category_not_allocable_text": "Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter.",
 	"invoices_billed_title": "Rechnung schon abgerechnet",
 	"invoices_billed_in": "In Abrechnungen enthalten",
 	"invoices_billed_in_none": "Keine",

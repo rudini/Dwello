@@ -2,6 +2,7 @@ import { Attribute, Checked, Count, Tones, Enabled, Text, Value, Visibility } fr
 import {
 	billedWarning,
 	categoryLabel,
+	categoryNoteText,
 	categoryWarning,
 	invoiceDateInput,
 	invoiceDateWords,
@@ -20,6 +21,7 @@ import {
 export const markedAsUtilityCost = Checked.of(utilityCostCheckbox);
 export const utilityCostMarkable = Enabled.of(utilityCostCheckbox);
 export const nonAllocableCategoryWarning = Text.of(categoryWarning);
+export const nonAllocableCategoryNoteText = Text.of(categoryNoteText);
 export const tonesInNonAllocableCategoryNote = Tones.in(categoryWarning);
 export const invoiceDate = Value.of(invoiceDateInput);
 export const invoiceDateShown = Visibility.of(invoiceDateInput);
