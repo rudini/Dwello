@@ -1,11 +1,11 @@
 ---
 name: commit-gates
-description: What the four Dwello commit hooks (fallow, deepcheck, testcheck, commit subject) check and how to fix what they report. Load when one of them blocks a git commit or git push, before committing one slice while the next is in progress, or to check a commit subject first.
+description: What the five Dwello commit hooks (fallow, deepcheck, testcheck, fitness, commit subject) check and how to fix what they report. Load when one of them blocks a git commit or git push, before committing one slice while the next is in progress, or to check a commit subject first.
 ---
 
 # Commit gates
 
-Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate. The hooks find the git calls with one shared matcher (`.claude/hooks/git-calls.mjs`, #710): `git -C <dir>` (quoted, `-C/x`), `-c key=val`, a `cd` or subshell before the call; text in quotes or a heredoc body is no call (its header names what it does not follow). fallow, deepcheck and testcheck judge the project wherever the call runs, also a commit in a scratch repository.
+Five `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` and `git push` in a Bash command and block the whole command, so its edits and its `git add` are dropped too. Stage and commit in separate commands, and after a blocked commit check `git show --stat HEAD`. On push they also gate merge commits, which no commit hook sees. Fix the reported finding, never work around the gate. The hooks find the git calls with one shared matcher (`.claude/hooks/git-calls.mjs`, #710): `git -C <dir>` (quoted, `-C/x`), `-c key=val`, a `cd` or subshell before the call; text in quotes or a heredoc body is no call (its header names what it does not follow). fallow, deepcheck and testcheck judge the project wherever the call runs, also a commit in a scratch repository.
 
 ## Fallow (`.claude/hooks/fallow-gate.sh`)
 
@@ -24,6 +24,10 @@ Runs the changed-scope deepcheck (`bun run deepcheck:audit` shows it by hand) an
 ## Testcheck (`.claude/hooks/testcheck-gate.sh`)
 
 Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by hand) and blocks a test that can pass without checking what it claims (an empty test, `expect` without a called matcher, an unawaited `resolves`/`rejects`, a tautology, assertions only in a `catch`, a swallowing `try` or an unawaited callback) and two tests of one block with the same title or the same body; CI runs the same check (step "Test checks" of the job "Lint and types"). Fix the test as the finding says (`tools/testcheck/README.md`, "Rules"); a test that is right as it is gets `// testcheck-ignore <rule> -- <reason>` on the line above it, visible in the review.
+
+## Fitness (`.claude/hooks/fitness-gate.sh`)
+
+On a `git commit` while a file under `src/`, `backend/src/` or `tools/fitness/` is changed, runs `bun run fitness -- --base origin/main` as CI does and blocks on an error (a fat file or module, a dependency against the layer direction, a loosened ratchet); it prints the error lines. Fix it in the slice before its review: `docs/architecture/fitness-functions.md` names each check. New files count only once Git knows them (`git add` or `git add -N` before the commit command). A run that ends without its summary line («Fitness: N errors, M warnings») passes with a notice; a push is left to CI.
 
 ## Commit subject (`.claude/hooks/commit-msg-gate.mjs`)
 
