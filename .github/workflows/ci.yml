@@ -79,9 +79,10 @@ jobs:
           # files and the keys script, which backend tests compare (compose-images.test.ts, #578)
           echo "backend=$(grep -qE '^(backend|tests/contracts|docker)/|^(compose\.yaml|docker-compose\.prod\.yml)$|^tools/fitness/(upgrade-check\.sh|data-totals\.sh|restore-check\.ts|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the images and the compose update read (#1241): the Dockerfiles and ignore files of both build contexts,
-          # the dependencies, the compose files, the migrations and the start that applies them after a Sicherung, the update
-          # check; app code the Build and test jobs cover
-          echo "docker=$(grep -qE '^(Dockerfile[^/]*|\.dockerignore|compose[^/]*\.ya?ml|docker-compose[^/]*\.ya?ml|package\.json|bun\.lock|\.github/workflows/ci\.yml)$|^backend/(Dockerfile[^/]*|\.dockerignore|package\.json|bun\.lock|scripts/migrate\.ts|src/db/migrate\.ts|src/services/backup\.service\.ts)$|^(backend/migrations|docker)/|^tools/fitness/(compose-update-check|data-totals)\.sh$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # the dependencies, the frontend's build config (the image builds without install scripts, so Paraglide compiles
+          # only in its Vite plugin, #945), the compose files, the migrations and the start that applies them after a
+          # Sicherung, the update check; app code the Build and test jobs cover
+          echo "docker=$(grep -qE '^(Dockerfile[^/]*|\.dockerignore|compose[^/]*\.ya?ml|docker-compose[^/]*\.ya?ml|package\.json|bun\.lock|vite\.config\.ts|svelte\.config\.js|paraglide\.config\.ts|tsconfig\.json|src/lib/version\.ts|\.github/workflows/ci\.yml)$|^project\.inlang/|^backend/(Dockerfile[^/]*|\.dockerignore|package\.json|bun\.lock|scripts/migrate\.ts|src/db/migrate\.ts|src/services/backup\.service\.ts)$|^(backend/migrations|docker)/|^tools/fitness/(compose-update-check|data-totals)\.sh$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
