@@ -1,7 +1,8 @@
-import { Accessible, Attribute, Checked, Count, FocusedElement, FocusedLabel, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, FocusedElement, FocusedLabel, Text, Value, Visibility } from '../screenplay/questions';
 import { exportAllDataButton, holderIsSenderBox, savedNotice, settingField } from '../targets/settings';
 
 export const settingsSaved = Visibility.of(savedNotice);
+export const settingsSavedText = Text.of(savedNotice);
 export const storedSetting = (name: string) => Value.of(settingField(name));
 export const settingInvalid = (name: string) => Attribute.named('aria-invalid').of(settingField(name));
 /** The help a screen reader reads with the field, the same text shown under it */
