@@ -14,7 +14,7 @@ vi.mock('$app/forms', () => ({
 import { toasts } from '$lib/stores';
 import NewApartmentPage from '../routes/apartments/new/+page.svelte';
 import EditApartmentPage from '../routes/apartments/[id]/edit/+page.svelte';
-import { byTestId, fireEvent, show } from './helpers/dom';
+import { byTestId, fireEvent, settle, show } from './helpers/dom';
 
 const buildings = [
 	{ id: 'b1', name: 'Birkenhof', address: 'Birkenweg 2, 8400 Winterthur' },
@@ -157,7 +157,7 @@ describe('Wohnung bearbeiten', () => {
 	});
 	// #1284 (Code-Review 1284-2 C-2, fallback review): a day typed wrong is not sent as «empty», which would clear the
 	// saved one
-	it('sendet kein «Aufgehoben ab», solange der eingegebene Tag ungültig ist', () => {
+	it('sendet kein «Aufgehoben ab», solange der eingegebene Tag ungültig ist', async () => {
 		show(EditApartmentPage, {
 			data: { apartment: { ...apartment(), discontinuedFrom: '2025-07-01' } },
 			form: null
@@ -169,6 +169,9 @@ describe('Wohnung bearbeiten', () => {
 		const cancel = vi.fn();
 		submit({ formElement: input.form!, cancel } as never);
 		expect(cancel).toHaveBeenCalled();
+		// Code-Review 1284-4 C-1: the field with its error takes the focus, so the refusal is announced
+		await settle();
+		expect(document.activeElement).toBe(input);
 	});
 
 	// #1284, wording of Fachreview 1284-1 (a) and V-1 (b)
