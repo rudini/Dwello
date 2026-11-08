@@ -312,7 +312,7 @@ type Calculation<G, R> = {
 	shareOfGroup: (group: G, key: Share, run: R, rental: Range) => Promise<{ tenantShare: number; periodShare: number; shareDays: LineDays }>;
 };
 
-const countingOn = (day: string) => (apartment: { discontinuedFrom: string | null }) =>
+export const countingOn = (day: string) => (apartment: { discontinuedFrom: string | null }) =>
 	!apartment.discontinuedFrom || apartment.discontinuedFrom > day;
 
 /** #1301: the apartments that count on a day, each with its Fläche and Zimmeranzahl of that day */
