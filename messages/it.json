@@ -33,6 +33,7 @@
 	"ui_next_page": "Pagina successiva",
 	"ui_page_of": "Pagina {page} di {pages}",
 	"ui_please_wait": "Attendere, prego …",
+	"ui_dialog_busy_note": "Dwello sta eseguendo l’azione. Non è più possibile annullare.",
 	"ui_cancel": "Annullare",
 	"ui_close": "Chiudere",
 	"ui_action_failed": "Operazione non riuscita",

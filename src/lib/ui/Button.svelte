@@ -24,6 +24,7 @@
 		ariaLabel,
 		describedby,
 		expanded,
+		unavailable = false,
 		testid
 	}: {
 		children: Snippet;
@@ -43,6 +44,7 @@
 		ariaLabel?: string;
 		describedby?: string; // id of a text that says what the button does, e.g. its consequence
 		expanded?: boolean; // the button shows or hides a part of the page
+		unavailable?: boolean; // looks as always, but a screen reader hears it unavailable; its onclick decides (#1261)
 		testid?: string;
 	} = $props();
 
@@ -78,6 +80,10 @@
 
 {#snippet content()}
 	{#if busy}
+		<!-- #1209 (persona Helga P-1): moves, so the button looks at work at first sight; the status speaks -->
+		<span class="motion-safe:animate-spin" data-testid={testid && `${testid}-busy-indicator`}
+			><Icon name="loading" /></span
+		>
 		{busyLabel}
 	{:else}
 		{#if icon}<Icon name={icon} />{/if}
@@ -106,7 +112,7 @@
 		{formaction}
 		onclick={press}
 		{disabled}
-		aria-disabled={busy || undefined}
+		aria-disabled={busy || unavailable || undefined}
 		aria-busy={busy || undefined}
 		aria-label={ariaLabel}
 		aria-describedby={describedby}

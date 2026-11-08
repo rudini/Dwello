@@ -61,6 +61,8 @@ export const Click = {
 			await element.scrollIntoViewIfNeeded();
 			await element.click();
 		}),
+	// #1261: a mouse click reaches a control marked aria-disabled; Playwright would wait for it to become enabled
+	onUnavailable: (target: Target) => on(target, (element) => element.click({ force: true })),
 	// A click that loads the page anew (e.g. the language selection); waits until it is hydrated again
 	toReload: (target: Target): Activity => async (actor) => {
 		await Promise.all([pageOf(actor).waitForEvent('load'), locate(actor, target).click()]);

@@ -99,6 +99,13 @@
 		if (open && busy) panel?.querySelector<HTMLElement>('[aria-busy]')?.focus();
 	});
 
+	// While busy «Abbrechen» says why it does nothing (#1261); refused, it only closes (#1167)
+	const cancelNote = $derived(busy ? `${id}-busy-note` : undefined);
+	const cancelText = $derived(impossible ? m.ui_close() : cancelLabel);
+	function focusPressed(event: MouseEvent) {
+		if (!busy) (event.target as HTMLElement).closest('button')?.focus();
+	}
+
 	function keydown(event: KeyboardEvent) {
 		// a dialog opened above this one (e.g. its own confirmation) handles the keys
 		if (!open || panel?.closest('[inert]')) return;
@@ -159,18 +166,23 @@
 		>
 			<h2 id="{id}-title" data-testid="dialog-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>
+			{#if busy}
+				<!-- why «Abbrechen» does nothing now, also its description (#1261, Helga P-1, Sven P-1) -->
+				<p id="{id}-busy-note" data-testid="dialog-busy-note">{m.ui_dialog_busy_note()}</p>
+			{/if}
 			<!-- a press on a button keeps the focus in the field: leaving it would show its error, grow the dialog
 			     and move the button away before the release (R7-F2, #653); the click then leaves the field, so it
-			     takes its value (a two-digit year) before the button acts (code review 653-1 C-1) -->
+			     takes its value (a two-digit year) before the button acts (code review 653-1 C-1); while busy a click
+			     on «Abbrechen» is ignored, so the focus stays on the busy confirm (#1209) -->
 			<div
 				class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end"
 				role="presentation"
 				data-testid="dialog-actions"
 				onmousedown={(event) => event.preventDefault()}
-				onclickcapture={(event) => (event.target as HTMLElement).closest('button')?.focus()}
+				onclickcapture={focusPressed}
 			>
-				<Button onclick={close} testid="dialog-cancel" disabled={busy}>
-					{impossible ? m.ui_close() : cancelLabel}
+				<Button onclick={close} testid="dialog-cancel" unavailable={busy} describedby={cancelNote}>
+					{cancelText}
 				</Button>
 				{#if !impossible}
 					<Button

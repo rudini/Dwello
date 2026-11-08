@@ -33,6 +33,7 @@
 	"ui_next_page": "Nächste Seite",
 	"ui_page_of": "Seite {page} von {pages}",
 	"ui_please_wait": "Bitte warten …",
+	"ui_dialog_busy_note": "Dwello führt die Aktion gerade aus. Abbrechen ist nicht mehr möglich.",
 	"ui_cancel": "Abbrechen",
 	"ui_close": "Schliessen",
 	"ui_action_failed": "Das hat nicht geklappt",

@@ -11,8 +11,14 @@ import {
 	deliveryStatesOf,
 	documentTitleEntered,
 	chosenFile,
+	deleteCancelContrast,
+	deleteCancelDescription,
+	deleteCancelUnavailable,
 	deleteConfirmFocused,
 	deleteConfirmStatus,
+	deleteConfirmShown,
+	dialogBusyNoteText,
+	dialogText,
 	documentsEmptyNote,
 	duplicateFileWarning,
 	duplicateFileWarnings,
@@ -21,6 +27,7 @@ import {
 	noDocumentsNote,
 	tenantFilterFocused,
 	uploadButtonBackground,
+	uploadProgressShown,
 	uploadButtonContrast,
 	uploadButtonFocused,
 	uploadButtonStatus
@@ -34,6 +41,7 @@ import {
 	showDocumentsOf
 } from '../tasks/documents';
 import {
+	cancelDeleting,
 	chooseFile,
 	confirmDeleting,
 	deletingWaits,
@@ -256,6 +264,41 @@ Then(
 		await verwalter.sees(uploadButtonContrast).toBeGreaterThanOrEqual(minimum);
 	}
 );
+
+// #1209 (persona Helga P-1): the status first, so the sign is checked while the request waits
+Then('zeigt «Dokument hochladen» mit {string} ein Fortschrittszeichen', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadButtonStatus).toBe(text);
+	await verwalter.sees(uploadProgressShown).toBe(true);
+});
+
+// #1209 (persona Helga P-2): a disabled button fades to about 3:1; the cancel keeps the contrast of its normal look
+Then(
+	'hebt sich «Abbrechen» im Dialog mindestens {float}:1 vom Hintergrund ab, während Dwello {string} ansagt',
+	async ({ verwalter }, minimum: number, text: string) => {
+		await verwalter.sees(deleteConfirmStatus).toBe(text);
+		await verwalter.sees(deleteCancelContrast).toBeGreaterThanOrEqual(minimum);
+	}
+);
+
+// #1261 (Helga P-1, Sven P-1): the dialog says why «Abbrechen» does nothing
+Then('sagt der Dialog während des Löschens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(dialogBusyNoteText).toBe(text);
+});
+
+// the open dialog's confirm button first, so the missing sentence is not an error page
+Then('sagt der Dialog vor dem Bestätigen noch nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteConfirmShown).toBe(true);
+	await verwalter.sees(dialogText).not.toContain(text);
+});
+
+Then('liest ein Screenreader «Abbrechen» als nicht verfügbar vor, mit dem Satz {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteCancelUnavailable).toBe('true');
+	await verwalter.sees(deleteCancelDescription).toBe(text);
+});
+
+When('der Liegenschaftsverwalter im Dialog «Abbrechen» drückt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(cancelDeleting);
+});
 
 // `sunken`: the grey of a disabled field (docs/design/token-referenz.md)
 Then('«Dokument hochladen» ist ausgegraut', async ({ verwalter }) => {

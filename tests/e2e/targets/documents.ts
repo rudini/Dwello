@@ -37,6 +37,14 @@ export const deleteDocumentConfirm = target('Dokument löschen bestätigen', (pa
 export const deleteDocumentStatus = target('Status von «Dokument löschen»', (page) =>
 	page.getByTestId('document-delete-confirm-busy-status')
 );
+// #1209 (persona Helga P-1, P-2): the progress sign of a busy button and the dialog's cancel beside it
+export const uploadDocumentProgress = target('Fortschrittszeichen von «Dokument hochladen»', (page) =>
+	page.getByTestId('tenant-document-upload-button-busy-indicator')
+);
+export const deleteDocumentCancel = target('Löschen abbrechen', (page) => page.getByRole('dialog').getByTestId('dialog-cancel'));
+// #1261: why «Abbrechen» does nothing while the dialog works
+export const openDialog = target('offener Dialog', (page) => page.getByRole('dialog'));
+export const dialogBusyNote = target('Hinweis im arbeitenden Dialog', (page) => page.getByRole('dialog').getByTestId('dialog-busy-note'));
 export const documentsEmpty = target('Hinweis keine Dokumente in «Dokumente»', (page) => page.getByTestId('documents-empty'));
 export const noDocumentsHint = target('Hinweis keine Dokumente', (page) => page.getByTestId('tenant-documents-empty'));
 // #677: the caution at the file field when a file of that name is already uploaded to the tenant
