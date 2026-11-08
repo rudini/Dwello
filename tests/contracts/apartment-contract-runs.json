@@ -1,0 +1,8 @@
+{
+	"error": "A contract still runs on that day",
+	"code": "APARTMENT_CONTRACT_RUNS",
+	"params": {
+		"date": "2025-07-01",
+		"tenant": "Anna Keller"
+	}
+}

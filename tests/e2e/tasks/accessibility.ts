@@ -113,6 +113,7 @@ import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../ta
 import { DEMO_INSTANCE } from './demo';
 import { billedCannotBeChecked, invoicesCannotBeCounted, leaveSettings } from './statement-generate';
 import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
+import { discontinueApartment } from './apartment-form';
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { chooseFile, pdfFile, uploadDocument, uploadsWait, wordFile } from './tenant-documents';
 import { deleteDocumentButton, duplicateFileNote, uploadDocumentStatus } from '../targets/documents';
@@ -426,6 +427,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// from a day Anna's 2025 draft bills (fixtures/screens.ts)
 	'advance-refused': () => (actor) =>
 		actor.attemptsTo(changeAdvancePaymentFrom('2025-01-01', '230.00'), Wait.until(on.formProblem)),
+	// the rented apartment's contract still runs on that day: refused, nothing saved (#1284)
+	'discontinue-refused': () => (actor) => actor.attemptsTo(discontinueApartment('2025-07-01'), Wait.until(on.formProblem)),
 	// the tenant's uploaded document (fixtures/screens.ts)
 	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
 	// Emil's page (fixtures/screens.ts); not confirmed, so the record stays (#459)

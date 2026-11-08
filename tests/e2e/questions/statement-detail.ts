@@ -3,6 +3,7 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Gap, HoldsFocus, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
+	discontinuedNote,
 	type SplitKeysPlace,
 	splitKeysHint,
 	splitKeysLine,
@@ -192,3 +193,5 @@ export const openRestText = Text.of(openRest);
 
 // #959: what Dwello confirms after recording a payment
 export const paymentDone = Text.of(successToast);
+
+export const discontinuedNoteText = Text.of(discontinuedNote);

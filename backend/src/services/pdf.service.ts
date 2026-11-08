@@ -18,9 +18,10 @@ import {
 	type QRBillConfig,
 	type StatementForQRBill
 } from './qr-bill.service';
-import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { fill, formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { formatFloor, namedByFloor } from './pdf-floor';
+import { segmentIntros, segmentLine, type Segment } from './pdf-segments';
 import { CodedError } from './coded-error';
-import { daysAfter } from './today';
 import { countryLine, qrTown } from './postal-address';
 import { greetingWords } from './reminder-letter';
 import { de } from './pdf-texts/de';
@@ -60,22 +61,6 @@ export interface LineItem {
 	segments?: Segment[] | null; // #1284: its parts before and from the day an apartment no longer exists
 	tenantShare: number;
 }
-
-// #1284: a part of a position as stored (LineSegment), with the apartment's fraction by the key as printed
-export type Segment = {
-	start: string;
-	end: string;
-	count: number;
-	keyShare: string;
-	costs: number;
-	apartment: number;
-	periodShare: number;
-	days?: number;
-	total?: number;
-	profileShare?: number;
-	share: number;
-	discontinued?: { number: string; date: string }[];
-};
 
 /**
  * Full statement data for PDF generation
@@ -175,38 +160,6 @@ const qrAmount = (amount: number) => formatCHF(amount).replace(/'/g, ' ');
 
 /** 0.6694 → 66.94 % (always two places) */
 const formatShare = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
-
-// The floor as tenants write it: ground floor, above, below
-// English counts floors with ordinals: 1st, 2nd, 3rd, 4th (461-native-en, EN-32)
-const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' };
-const englishFloor = (word: string) => (n: number) =>
-	`${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]} ${word}`; // below ground too (#449)
-// the first floor below ground has no number, from the second on it is counted, as on the screens (#597)
-const FLOORS: Record<Language, [string, (n: number) => string, string, (n: number) => string]> = {
-	de: ['EG', (n) => `${n}. OG`, 'UG', (n) => `${n}. UG`],
-	fr: ['rez-de-chaussée', (n) => (n === 1 ? '1er étage' : `${n}e étage`), 'sous-sol', (n) => (n === 1 ? '1er sous-sol' : `${n}e sous-sol`)],
-	it: ['pianterreno', (n) => `${n}° piano`, 'piano interrato', (n) => `${n}° piano interrato`],
-	en: ['ground floor', englishFloor('floor'), 'basement', englishFloor('basement')]
-};
-
-function formatFloor(floor: number, lang: Language): string {
-	const [ground, above, basement, below] = FLOORS[lang];
-	return floor === 0 ? ground : floor > 0 ? above(floor) : floor === -1 ? basement : below(-floor);
-}
-
-// «EG», «eg» or «EG Links» on the ground floor already name the floor: the PDF does not print it twice (#500);
-// spaces and case do not count («1.OG»), a longer word does («EGG»)
-const startsWithFloor = (number: string, name: string) =>
-	new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s*')}(?=$|[\\s,-])`, 'i').test(number.trim());
-// the name of the floor as many levels below ground can start with it («1° piano interrato» on floor 1): a contradiction stays;
-// the first floor below ground typed with its count («1. UG») names it too (Fachreview 597-1 V-2)
-const counted = (floor: number, lang: Language) => FLOORS[lang][3](Math.abs(floor));
-const namedByFloor = (number: string, floor: number, lang: Language) =>
-	(startsWithFloor(number, formatFloor(floor, lang)) || (floor === -1 && startsWithFloor(number, counted(floor, lang)))) &&
-	!(floor > 0 && startsWithFloor(number, counted(floor, lang)));
-
-const fill = (text: string, values: Record<string, string | number>) =>
-	Object.entries(values).reduce((result, [key, value]) => result.split(`{${key}}`).join(String(value)), text);
 
 // The base of the management fee: the subtotal, the tenant's own costs
 const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
@@ -550,36 +503,9 @@ function partLines(item: LineItem, t: Record<string, string>) {
 	return [...lines, fill(t.partShareZero, { ...share, keyShare: keyFactor(item, parts) })];
 }
 
-// #1284 (Fachreview 1284-1 V-3): a part as the tenant recomputes it, by days, by the Zeitanteil or by the Heizprofil
-function segmentLine(segment: Segment, t: Record<string, string>) {
-	const text = segment.profileShare != null ? t.segmentLineProfile : segment.days != null ? t.segmentLineDays : t.segmentLinePercent;
-	return fill(text, {
-		start: formatDate(segment.start),
-		end: formatDate(segment.end),
-		count: segment.count,
-		colon: t.colon,
-		keyShare: segment.keyShare.replace(/\n/g, ' '),
-		costs: formatCHF(segment.costs),
-		apartment: formatCHF(segment.apartment),
-		days: segment.days ?? '',
-		total: segment.total ?? '',
-		percent: (segment.periodShare * 100).toFixed(2),
-		profileShare: segment.profileShare?.toFixed(2) ?? '',
-		share: formatCHF(segment.share)
-	});
-}
-
-// #1284: once per apartment that no longer exists from a day of the billed days, above the costs
-function segmentIntro({ doc, t, data }: Page, y: number) {
-	const gone = new Map(data.lineItems.flatMap((item) => item.segments ?? []).flatMap((segment) => segment.discontinued ?? []).map((a) => [a.number, a.date]));
-	let top = y;
-	for (const [number, date] of gone) {
-		const text = fill(t.segmentIntro, { number, date: formatDate(date), dayBefore: formatDate(daysAfter(date, -1)) });
-		doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(text, PAGE.left, room(doc, top, 30), { width: PAGE.right - PAGE.left });
-		top = doc.y + 8;
-	}
-	return top;
-}
+// Paragraphs over the width of the page, each kept on one page (#1284: the apartment no longer counting)
+const paragraphs = ({ doc }: Page, texts: string[], y: number) =>
+	texts.reduce((top, text) => doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(text, PAGE.left, room(doc, top, 30), { width: PAGE.right - PAGE.left }).y + 8, y);
 
 // The apartment's part by the key as printed with the key (a mixed key in brackets), else as a percentage of the sum
 function keyFactor(item: LineItem, parts: InvoicePart[]) {
@@ -997,7 +923,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 			const page: Page = { doc, t, data, config, language };
 			let y = title(page, addresses(page));
 			y = balanceBox(page, y);
-			y = costTable(page, segmentIntro(page, y));
+			y = costTable(page, paragraphs(page, segmentIntros(data.lineItems, t), y));
 			y = heatingSection(page, y);
 			y = notes(page, y);
 			let qrPage: number | null = null;

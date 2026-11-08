@@ -19,6 +19,7 @@ import { runAction } from './helpers/action';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import apartmentResponse from '../../tests/contracts/apartment.json';
 import deleteRefused from '../../tests/contracts/apartment-delete-refused.json';
+import contractRuns from '../../tests/contracts/apartment-contract-runs.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -88,7 +89,13 @@ describe('Wohnungsdetail', () => {
 		});
 	});
 
-	it('zeigt alle Verträge der Wohnung in der Vertragshistorie', async () => {
+	// #1284: «Aufgehoben ab» for the facts and the edit form
+	it('gibt den Tag weiter, ab dem es die Wohnung nicht mehr gibt', async () => {
+		const data = await loadApartment({ 'apartments/a1': apartment, contracts: { contracts } });
+		expect(data.apartment).toMatchObject({ discontinuedFrom: '2099-07-01' });
+	});
+
+		it('zeigt alle Verträge der Wohnung in der Vertragshistorie', async () => {
 		const data = await loadApartment({ 'apartments/a1': apartment, contracts: { contracts } });
 
 		expect(data.contractHistory).toEqual([
@@ -442,6 +449,30 @@ describe('Wohnung bearbeiten', () => {
 
 		await expect(result).rejects.toMatchObject({ status: 303 });
 		expect(calls[0].body).toEqual({ number: '4.01', floor: 4, area: '68', rooms: '2.5' });
+	});
+});
+
+// #1284: «Aufgehoben ab», empty: the apartment exists
+describe('Wohnung aufheben', () => {
+	it('speichert den Tag, ab dem es die Wohnung nicht mehr gibt, und leer keinen', async () => {
+		const day = runAction(editActions.default, 'a1', 200, { ...fields, discontinuedFrom: '2025-07-01' });
+		await expect(day.result).rejects.toMatchObject({ status: 303 });
+		expect(day.calls[0].body).toMatchObject({ discontinuedFrom: '2025-07-01' });
+		const none = runAction(editActions.default, 'a1', 200, { ...fields, discontinuedFrom: '' });
+		await expect(none.result).rejects.toMatchObject({ status: 303 });
+		expect(none.calls[0].body).toMatchObject({ discontinuedFrom: null });
+	});
+
+	it('nennt den Grund, wenn ein Mietvertrag an dem Tag noch läuft', async () => {
+		const { result } = runAction(editActions.default, 'a1', 409, { ...fields, discontinuedFrom: '2025-07-01' }, contractRuns);
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				errors: {
+					form: 'Die Wohnung kann nicht ab 01.07.2025 aufgehoben werden: Der Mietvertrag mit Anna Keller endet nicht vor diesem Tag. Erfassen Sie zuerst ein Vertragsende vor dem 01.07.2025, oder wählen Sie einen späteren Tag.'
+				}
+			}
+		});
 	});
 });
 

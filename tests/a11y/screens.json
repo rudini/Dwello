@@ -24,6 +24,7 @@
 		"end-dialog-advance-refused": "The end dialog refused because a later Akonto applies after the Vertragsende: the refusal names its day (#464).",
 		"advance-from-missing": "The contract form saved with a changed Akonto and an emptied «Gültig ab»: the error at the field (#464).",
 		"advance-refused": "The contract form saved with a new Akonto from a day a draft statement already bills: the refusal names the draft (#464).",
+		"discontinue-refused": "«Wohnung bearbeiten» of a rented apartment saved with «Aufgehoben ab» on a day its contract still runs: the refusal names the tenant and the day (#1284).",
 		"document-delete-dialog": "The confirmation dialog for deleting a document the property manager uploaded to the tenant, open.",
 		"anonymise-dialog": "A former tenant whose last contract ended in 2014 (#459): the confirmation of «Mieter anonymisieren» with its consequence, open (not confirmed, the record stays).",
 		"upload-refused": "A file Dwello does not take (a Word file) uploaded to the tenant: the refusal at the file field.",
@@ -357,7 +358,8 @@
 			"path": "/apartments/{apartment}/edit",
 			"states": [
 				"default",
-				"submit-cleared"
+				"submit-cleared",
+				"discontinue-refused"
 			]
 		},
 		{

@@ -17,7 +17,7 @@ import {
 } from '../db/schema';
 import { alignAdvances, currentAdvance, setAdvance } from './advance-payment.service';
 import { checkAgreedFrom, setAgreedCategories, setAgreedFrom } from './agreed-category.service';
-import { apartmentStatus } from './apartment.service';
+import { apartmentStatus, checkDiscontinued } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
 import { laterContract } from './later-contract';
@@ -252,7 +252,7 @@ async function checkContractOverlap(
 		.where(and(...conditions))
 		.orderBy(rentalContracts.startDate)
 		.limit(1);
-	if (!other) return;
+	if (!other) return checkDiscontinued(apartmentId, endDate, q); // #1284
 	throw new CodedError('CONTRACT_OVERLAP', `Contract overlaps with existing contract ${other.id}`, {
 		contract: other.id,
 		...(!other.anonymised && { tenant: other.tenant }),
@@ -353,17 +353,6 @@ function checkBilledUntil(startDate: string, billedUntil: string | null | undefi
 const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.managementFeeAgreed): T =>
 	agreed ? data : { ...data, managementFeePercent: null };
 
-// #1284: a contract of an apartment that no longer exists from a day ends at the latest the day before
-async function checkDiscontinued(apartmentId: string, endDate: string | null) {
-	const [apartment] = await db
-		.select({ number: apartments.number, date: apartments.discontinuedFrom })
-		.from(apartments)
-		.where(eq(apartments.id, apartmentId));
-	if (!apartment?.date || (endDate && endDate < apartment.date)) return;
-	const { number, date } = apartment;
-	throw new CodedError('CONTRACT_APARTMENT_DISCONTINUED', 'The apartment no longer exists from that day', { number, date, dayBefore: daysAfter(date, -1) });
-}
-
 /**
  * Create a new contract
  */
@@ -372,7 +361,6 @@ export async function createContract({ agreedCategoryIds, agreedFrom, ...data }:
 	checkAgreedFrom({ startDate: data.startDate, endDate: data.endDate ?? null }, Object.values(agreedFrom ?? {}));
 	checkBilledUntil(data.startDate, data.billedUntil, true);
 	await checkContractOverlap(data.apartmentId, data.startDate, data.endDate || null);
-	await checkDiscontinued(data.apartmentId, data.endDate || null);
 
 	// a new contract agrees every umlagefähige category unless the form names the agreed ones (#91)
 	return db.transaction(async (tx) => {
@@ -540,7 +528,6 @@ export async function updateContract(
 	const { startDate, billedUntil } = { ...current, ...newDates(data) };
 	const endDate = data.endDate === undefined ? current.endDate : data.endDate;
 	if (endDate) checkEnd(startDate, endDate, data.endDate !== undefined && endDate !== current.endDate && !confirmPastEnd);
-	if (endDate !== current.endDate) await checkDiscontinued(current.apartmentId, endDate);
 	checkAgreedFrom({ startDate, endDate: data.endDate === undefined ? current.endDate : data.endDate }, Object.values(agreedFrom ?? {}));
 	checkBilledUntil(startDate, billedUntil, data.billedUntil !== undefined || !!data.startDate);
 	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)

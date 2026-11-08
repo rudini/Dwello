@@ -23,6 +23,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
+	import DiscontinuedNotes from './DiscontinuedNotes.svelte';
 	import PaidDateFields from '../PaidDateFields.svelte';
 	import Correction from './Correction.svelte';
 	import FormDialog from './FormDialog.svelte';
@@ -54,7 +55,7 @@
 		form
 	}: {
 		data: {
-			statement: StatementWithDetails;
+			statement: StatementWithDetails & { discontinued?: { number: string; date: string }[] }; // #1284
 			reminders: StatementDocument[];
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
@@ -256,6 +257,7 @@
 	<div class="min-w-0">
 		<Panel title={m.statements_cost_breakdown()} testid="statement-cost-breakdown">
 			<CostTable {statement} />
+			<DiscontinuedNotes apartments={statement.discontinued} />
 		</Panel>
 	</div>
 	<div class="grid gap-8 lg:grid-cols-3">

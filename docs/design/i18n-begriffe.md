@@ -13,6 +13,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | eidgenössisches Gebäude- und Wohnungsregister (GWR) | Registre fédéral des bâtiments et des logements (RegBL) | Registro federale degli edifici e delle abitazioni (REA) | Federal Register of Buildings and Dwellings (RBD) |
 | PLZ / Ort / Kanton | NPA / localité / canton | NPA / località / cantone | postcode / town / canton |
 | Wohnung | appartement | appartamento | apartment |
+| Aufgehobene Wohnung / Aufgehoben ab {Datum} | appartement qui n’existe plus / n’existe plus dès le {date} | appartamento che non esiste più / non esiste più dal {date} | apartment that no longer exists / no longer exists from {date} |
 | Wohnungsnummer | numéro d’appartement | numero dell’appartamento | apartment number |
 | Stockwerk | étage | piano | floor |
 | EG (Stockwerk 0) | rez-de-chaussée | pianterreno | ground floor |

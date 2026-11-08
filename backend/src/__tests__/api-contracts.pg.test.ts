@@ -543,6 +543,18 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #1284: «Aufgehoben ab» while a contract still runs on that day
+	it('PUT /apartments/:id mit «Aufgehoben ab» während eines Mietvertrags liefert die Felder von apartment-contract-runs.json', async () => {
+		const rented = await createRental(`${token}-apartment-discontinued`, { startDate: '2019-01-01', monthlyAdvancePayment: '0' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/apartments/${rented.apartment}`, { discontinuedFrom: '2025-07-01' });
+			expect(response.status).toBe(409);
+			expect(drift(await sample('apartment-contract-runs'), await response.json())).toEqual([]);
+		} finally {
+			await rented.remove();
+		}
+	});
+
 	// #788 part 2: the uploads of a former tenant, decided in the backend (#178)
 	it('GET /tenants/:id/former-documents liefert die Felder von tenant-former-documents.json', async () => {
 		const ended = await createRental(`${token}-former`, { startDate: '2024-04-01', endDate: '2025-03-31', monthlyAdvancePayment: '0' });

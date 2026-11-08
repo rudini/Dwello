@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import ApartmentForm from '../../ApartmentForm.svelte';
@@ -38,6 +39,16 @@
 		>
 			{#snippet status()}
 				<StatusField {apartment} />
+				<!-- #1284: the day from which the apartment no longer exists; only here, a new one exists -->
+				<DateInput
+					id="discontinuedFrom"
+					name="discontinuedFrom"
+					label={m.apartments_form_discontinued_label()}
+					help="{m.apartments_form_discontinued_help()} {m.apartments_form_discontinued_merge_note()}"
+					value={apartment.discontinuedFrom ?? ''}
+					optional
+					testid="apartment-discontinued-input"
+				/>
 			{/snippet}
 		</ApartmentForm>
 	</Panel>
