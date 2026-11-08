@@ -239,6 +239,19 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 		);
 	});
 
+	// #1333 (product owner): a draft whose key cannot be calculated is neither sent nor marked as sent
+	it('versendet den Entwurf nicht und markiert ihn nicht als versendet, solange sich der Verteilschlüssel nicht berechnen lässt', async () => {
+		for (const response of [
+			await sendJson('POST', `/api/v1/statements/${draft}/send`, { byLetter: true }),
+			await sendJson('PUT', `/api/v1/statements/${draft}/status`, { status: 'sent' })
+		]) {
+			expect(((await response.json()) as { code: string }).code).toBe('STATEMENT_KEY_NOT_CALCULABLE');
+			expect(response.status).toBe(409);
+		}
+		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, draft));
+		expect(statement.status).toBe('draft');
+	});
+
 	// Fachreview 1309-1 V-1: replacing first would leave it «Ersetzt» without a berichtigte Abrechnung
 	it('ersetzt die versendete Abrechnung nicht, solange sich der Verteilschlüssel nicht berechnen lässt', async () => {
 		const response = await sendJson('POST', `/api/v1/statements/${sent}/replace`, {});
