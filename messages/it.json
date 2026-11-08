@@ -531,6 +531,7 @@
 	"backend_distribution_key_in_use_one": "Questa chiave di riparto è usata per ripartire {count} fattura e non può quindi essere eliminata.",
 	"backend_distribution_key_in_use": "Questa chiave di riparto è usata per ripartire {count} fatture e non può quindi essere eliminata.",
 	"backend_distribution_key_is_default": "La chiave di riparto è impostata come predefinita nelle impostazioni.",
+	"backend_distribution_key_in_statement": "La chiave di riparto figura in un conteggio e non può essere eliminata. Un conteggio inviato resta come l’ha ricevuto l’inquilino, con le sue chiavi di riparto. Se la chiave di riparto figura solo in bozze, le ricalcoli con «Ricalcolare» sulla loro pagina o le elimini. Dopo si potrà eliminare la chiave di riparto.",
 	"backend_heating_profile_predefined": "I profili di riscaldamento preimpostati non possono essere eliminati.",
 	"backend_heating_profile_is_default": "Il profilo di riscaldamento è impostato come predefinito nelle impostazioni.",
 	"backend_statement_not_draft": "Il conteggio non è più una bozza e non può essere eliminato.",

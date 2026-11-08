@@ -531,6 +531,7 @@
 	"backend_distribution_key_in_use_one": "Cette clé de répartition ne peut pas être supprimée : {count} facture est répartie selon elle.",
 	"backend_distribution_key_in_use": "Cette clé de répartition ne peut pas être supprimée : {count} factures sont réparties selon elle.",
 	"backend_distribution_key_is_default": "Cette clé de répartition est définie comme clé par défaut dans les paramètres.",
+	"backend_distribution_key_in_statement": "La clé de répartition figure dans un décompte et ne peut pas être supprimée. Un décompte envoyé reste tel que le locataire l’a reçu, avec ses clés de répartition. Si la clé de répartition ne figure que dans des brouillons, recalculez-les avec « Recalculer » sur leur page ou supprimez-les. La clé de répartition pourra ensuite être supprimée.",
 	"backend_heating_profile_predefined": "Les profils de chauffage prédéfinis ne peuvent pas être supprimés.",
 	"backend_heating_profile_is_default": "Ce profil de chauffage est défini comme profil par défaut dans les paramètres.",
 	"backend_statement_not_draft": "Le décompte n’est plus un brouillon et ne peut pas être supprimé.",

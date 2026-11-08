@@ -6,6 +6,7 @@ import { actions as editActions } from '../routes/config/distribution-keys/[id]/
 import { runAction } from './helpers/action';
 import formulaRefused from '../../tests/contracts/formula-refused.json';
 import keyDefault from '../../tests/contracts/distribution-key-default-refused.json';
+import inStatement from '../../tests/contracts/distribution-key-in-statement.json';
 import nameTaken from '../../tests/contracts/distribution-key-name-taken.json';
 
 const API = 'http://localhost:3001/api/v1/distribution-keys';
@@ -220,6 +221,16 @@ describe('Verteilschlüssel löschen', () => {
 		expect(await result).toMatchObject({
 			status: 409,
 			data: { error: 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.' }
+		});
+	});
+
+	// #1255
+	it('erklärt, warum ein Verteilschlüssel in einer Abrechnung bleibt', async () => {
+		const { result } = runAction(listActions.delete, '', 409, { id: 'k1' }, inStatement);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { error: 'Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Verteilschlüsseln. Steht der Verteilschlüssel nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich der Verteilschlüssel löschen.' }
 		});
 	});
 });

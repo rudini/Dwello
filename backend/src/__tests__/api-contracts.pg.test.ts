@@ -1287,6 +1287,22 @@ describe('API-Verträge der Ablehnungen mit Code', () => {
 		expect(drift(await sample('distribution-key-default-refused'), await response.json())).toEqual([]);
 	});
 
+	// #1255: a position of the statement of beforeAll by a key without invoices
+	it('DELETE /distribution-keys/:id eines Verteilschlüssels in einer Abrechnung liefert die Felder von distribution-key-in-statement.json', async () => {
+		const id = await idOf(await keys.create({ name: `Abgerechnet ${token}`, nameDE: `Abgerechnet ${token}`, formula: '{area}' }));
+		const [item] = await db
+			.insert(utilityStatementLineItems)
+			.values({ statementId, distributionKeyId: id, description: `Abgerechnet ${token}`, totalAmount: '0.00', tenantShare: '0.00' })
+			.returning();
+		try {
+			const response = await keys.send('DELETE', `/${id}`);
+			expect(response.status).toBe(409);
+			expect(drift(await sample('distribution-key-in-statement'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.id, item.id));
+		}
+	});
+
 	it('POST /distribution-keys mit einem vergebenen Namen liefert die Felder von distribution-key-name-taken.json', async () => {
 		const key = { name: `Zimmer ${token}`, nameDE: `Zimmer ${token}`, formula: '{rooms}' };
 		await keys.create(key);

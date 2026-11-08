@@ -43,6 +43,13 @@ Given(
 	}
 );
 
+Given(
+	'im Gebäude {string} gibt es eine Rechnung vom {string}, die nach dem Verteilschlüssel {string} verteilt wird',
+	async ({ seed }, building: string, date: string, key: string) => {
+		await seed.invoiceByKey(building, key, date);
+	}
+);
+
 Given('der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openDistributionKeys);
 });
