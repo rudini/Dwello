@@ -366,5 +366,5 @@ Funktionalität: Kostenkategorien
     Und die Rechnung "Treppenhausreinigung 2025-03-31" ist danach gelöscht
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" löscht
-    Dann erfährt der Liegenschaftsverwalter, dass sich die Kategorie nicht löschen lässt: "Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen."
     Und sieht der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung"
