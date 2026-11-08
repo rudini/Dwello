@@ -109,6 +109,7 @@ describe('Kostenkategorien', () => {
 
 		expect((await create('70% Lift')).status).toBe(201);
 		expect((await create('Garten_A')).status).toBe(201); // like the German name of another
+		expect((await create('70% lift')).status).toBe(409); // the same name still counts as taken
 	});
 
 	it('findet mit _ oder % keine Kategorie, deren Name dort ein anderes Zeichen hat', async () => {

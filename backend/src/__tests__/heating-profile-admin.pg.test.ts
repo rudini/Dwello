@@ -62,6 +62,7 @@ describe('Eigene Heizprofile', () => {
 
 		expect((await create('70% Winter')).status).toBe(201);
 		expect((await create('Tal_A')).status).toBe(201);
+		expect((await create('70% winter')).status).toBe(409); // the same name still counts as taken
 	});
 
 	it('findet mit _ oder % kein Heizprofil, dessen Name dort ein anderes Zeichen hat', async () => {
