@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { apartmentClearedAnnounced, apartmentClearedExplanation, apartmentClearedHint, apartmentClearedHints, runningContractHintTextOf, runningContractLinkTextOf, toasts, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
-import { closeWarning, closeWarningWithKeyboard, enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
+import { enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
 const { When, Then } = createBdd(test);
 
@@ -72,10 +72,6 @@ Then('steht in der Prüfung der Hinweis «Zeitraum überschneidet sich» mit {st
 });
 
 // #1153 (Personas Sven S-7, Helga H-6): the step «Wohnung» says which apartment the cleared choice was and which contract blocks it
-When('der Liegenschaftsverwalter die Warnung schliesst', async ({ verwalter }) => {
-	await verwalter.attemptsTo(closeWarning);
-});
-
 Then('steht im Schritt «Wohnung» der Hinweis {string}', async ({ verwalter, names }, title: string) => {
 	await verwalter.sees(apartmentClearedHint).toContain(named(names, title));
 });
@@ -90,11 +86,6 @@ Then('bietet der Hinweis im Schritt «Wohnung» den Link {string}', async ({ ver
 
 When('der Liegenschaftsverwalter im Hinweis im Schritt «Wohnung» den Mietvertrag öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openClearedApartmentContract);
-});
-
-// #1158 (Sven P-1): after «Meldung schliessen» the focus is back where it was before the message
-When('der Liegenschaftsverwalter die Warnung mit der Tastatur schliesst', async ({ verwalter }) => {
-	await verwalter.attemptsTo(closeWarningWithKeyboard);
 });
 
 Then('steht der Fokus wieder auf dem Schritt «Wohnung»', async ({ verwalter }) => {
