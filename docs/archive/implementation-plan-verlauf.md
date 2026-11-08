@@ -1647,18 +1647,6 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 
 ## Session: #739 E2E default Heizprofil per run
 
-## Session: #1175 examples at the Kontoinhaber fields
-
-- [x] Scenario «Die Felder des Kontoinhabers zeigen Beispiele» (`settings.feature`), seen red at the examples and at «(optional)»
-- [x] Examples at name (new `settings_account_holder_name_example`, four languages), street, PLZ, Ort; street marked optional (`SettingField` passes `optional`)
-- [x] Checks: lint, check, fitness, type-check, affected unit tests, a11y and language looks of `account-holder`, Prettier on added files
-- [x] Slice review (`code-reviewer`): `docs/reviews/1175-review-1.md`
-- [x] Personas Marco and Helga on the Kontoinhaber fields: `docs/design/personas/marco-1175.md`, `helga-1175.md`
-- [x] Marco P-2 (street «(optional)» only at the Kontoinhaber): Absender street marked optional too, scenario «Die Strasse des Absenders ist als freiwillig bezeichnet», seen red
-- [x] Marco P-1 / Helga P-2 (entries lost on re-ticking, since #1166): issue #1202
-- [x] Closing `code-reviewer` round: `docs/reviews/1175-review-2.md`
-- [x] Workflow note: persona re-run for a known text in a new place (`docs/reviews/workflow-notes-issue-1175.md`)
-- [x] Archive session, PR (`Fixes #1175`): pushed after this archive
 ## Session: #697 CI screenshot job: mobile, dark mode, dialog and wizard states
 
 - [x] Read #697 and #1172 (same job; #1172 serves the base branch as a production build, whoever merges second merges `main` first); decisions in #697 «Decided (product owner)» with two follow-up comments
@@ -1758,6 +1746,19 @@ Parallel session: checklist kept in the pull request.
 - [x] Checks: lint, check, fitness, backend type-check, vitest of the tests reading the features, E2E chromium of the 11 changed features (432 passed)
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-699.md`; collected review `docs/reviews/workflow-rules-review-2026-11-07.md`
 - [x] Archive session; PR `Fixes #699, #706, #708`: pushed after this archive
+## Session: #1175 examples at the Kontoinhaber fields
+
+- [x] Scenario «Die Felder des Kontoinhabers zeigen Beispiele» (`settings.feature`), seen red at the examples and at «(optional)»
+- [x] Examples at name (new `settings_account_holder_name_example`, four languages), street, PLZ, Ort; street marked optional (`SettingField` passes `optional`)
+- [x] Checks: lint, check, fitness, type-check, affected unit tests, a11y and language looks of `account-holder`, Prettier on added files
+- [x] Slice review (`code-reviewer`): `docs/reviews/1175-review-1.md`
+- [x] Personas Marco and Helga on the Kontoinhaber fields: `docs/design/personas/marco-1175.md`, `helga-1175.md`
+- [x] Marco P-2 (street «(optional)» only at the Kontoinhaber): Absender street marked optional too, scenario «Die Strasse des Absenders ist als freiwillig bezeichnet», seen red
+- [x] Marco P-1 / Helga P-2 (entries lost on re-ticking, since #1166): issue #1202
+- [x] Closing `code-reviewer` round: `docs/reviews/1175-review-2.md`
+- [x] Workflow note: persona re-run for a known text in a new place (`docs/reviews/workflow-notes-issue-1175.md`)
+- [x] Archive session, PR (`Fixes #1175`): pushed after this archive
+
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
