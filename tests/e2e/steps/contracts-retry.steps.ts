@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentClearedExplanation, apartmentClearedHint, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
-import { focusedText } from '../questions/navigation';
-import { closeWarning, enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
+import { apartmentClearedExplanation, apartmentClearedHint, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
+import { focusedPlace, focusedText } from '../questions/navigation';
+import { closeWarning, closeWarningWithKeyboard, enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
 const { When, Then } = createBdd(test);
 
@@ -90,4 +90,19 @@ Then('bietet der Hinweis im Schritt «Wohnung» den Link {string}', async ({ ver
 
 When('der Liegenschaftsverwalter im Hinweis im Schritt «Wohnung» den Mietvertrag öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openClearedApartmentContract);
+});
+
+// #1158 (Sven P-1): after «Meldung schliessen» the focus is back where it was before the message
+When('der Liegenschaftsverwalter die Warnung mit der Tastatur schliesst', async ({ verwalter }) => {
+	await verwalter.attemptsTo(closeWarningWithKeyboard);
+});
+
+Then('steht der Fokus wieder auf dem Schritt «Wohnung»', async ({ verwalter }) => {
+	await verwalter.sees(focusedPlace).toBe('contract-step-heading');
+	await verwalter.sees(focusedText).toContain('Wohnung');
+});
+
+// #1158 (Sven P-3): the hint on the tenant's own open-ended contract waits until the step has an apartment
+Then('zeigt der Schritt «Wohnung» keinen Hinweis auf einen Mietvertrag von {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(runningContractHintsOf(names.get(tenant) ?? tenant)).toBe(0);
 });

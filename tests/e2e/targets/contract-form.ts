@@ -68,6 +68,9 @@ export const feeRateInput = target('Eigener Satz der Verwaltungspauschale', (pag
 export const runningContractHint = target('Hinweis auf einen laufenden Mietvertrag des Mieters', (page) =>
 	page.getByTestId('tenant-running-contract')
 );
+// #1158: the hint on a contract of the named tenant
+export const runningContractHintOf = (tenant: string) =>
+	target(`Hinweis auf einen laufenden Mietvertrag von ${tenant}`, (page) => runningContractHint.locate(page).filter({ hasText: tenant }));
 export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (page) =>
 	runningContractHint.locate(page).getByRole('link')
 );
