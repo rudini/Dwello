@@ -1556,3 +1556,71 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Abgezogen sind die Akontobeiträge, die im Mietvertrag vereinbart sind."
     # #477 (Entscheid Product Owner 2026-10-19): die Zeile heisst «Akontobeiträge», nicht «Geleistete …»
     Und steht im PDF nicht "Geleistete"
+
+  # #690, Punkt 1 (Persona Weber 450): eine Nachzahlung bekommt einen Zahlteil, und der braucht die Firmenadresse; die
+  # Detailseite warnt, bevor das PDF abgelehnt wird. Die Einstellungen gelten für alle parallel laufenden Szenarien:
+  # die Szenarien ohne Firmenadresse laufen auf einer eigenen Installation
+  @frische-installation
+  Szenario: Eine Nachzahlung warnt, wenn dem Zahlteil die Firmenadresse fehlt
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann warnt die Detailseite der Abrechnung "Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen»."
+
+  @frische-installation
+  Szenario: Von der Warnung zur fehlenden Firmenadresse zu den Einstellungen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+    Und steht der Fokus in den Einstellungen auf "Firmenname"
+
+  # #690, Punkt 2 (Persona Weber 450, behoben mit #734): fehlt die Firmenadresse erst nach dem letzten PDF, lehnt Dwello
+  # das neue ab; die Fehlerseite nennt den Grund und führt zu den Einstellungen
+  @frische-installation
+  Szenario: Die Fehlerseite des PDF ohne Firmenadresse führt zu den Einstellungen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" ohne Firmenname, PLZ und Ort hinterlegt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen»."
+    Wenn der Liegenschaftsverwalter von der Fehlerseite zu den Einstellungen wechselt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+
+  # #690 (Persona Weber 690 W-1): fehlt dem eigenen Kontoinhaber der Ort, nennt die Ablehnung des PDF den Kontoinhaber,
+  # nicht die vollständige Firmenadresse, und führt zu den Einstellungen
+  @frische-installation
+  Szenario: Die Fehlerseite des PDF ohne Ort des Kontoinhabers nennt den Kontoinhaber
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und in den Einstellungen fehlt inzwischen "Ort des Kontoinhabers"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
+    Dann liest der Liegenschaftsverwalter auf der Fehlerseite "Mit einer IBAN braucht es den Kontoinhaber. Erfassen Sie Name, PLZ und Ort des Kontoinhabers oder setzen Sie das Häkchen bei «Kontoinhaber ist der Absender»."
+    Wenn der Liegenschaftsverwalter von der Fehlerseite zu den Einstellungen wechselt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
+
+  # #690 (Persona Weber 690 W-1): die Warnung nennt den Kontoinhaber, dessen Adresse unvollständig ist
+  @frische-installation
+  Szenario: Eine Nachzahlung warnt, wenn dem Kontoinhaber der Ort fehlt
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und in den Einstellungen fehlt inzwischen "Ort des Kontoinhabers"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es den Kontoinhaber."
+    Wenn der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt
+    Dann steht der Fokus in den Einstellungen auf dem Feld "Ort des Kontoinhabers"
+
+  # #690 (Persona Weber 690 W-2, Entscheid Product Owner): mit einer IBAN braucht auch der Absender seine ganze Adresse,
+  # der Kopf des PDF nennt sie, auch wenn ein vollständiger Kontoinhaber den Zahlteil bekommt
+  @frische-installation
+  Szenario: Eine Nachzahlung warnt, wenn dem Absender neben dem Kontoinhaber die PLZ fehlt
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Und in den Einstellungen fehlt inzwischen "PLZ"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."

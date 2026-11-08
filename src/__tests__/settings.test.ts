@@ -5,6 +5,7 @@ import config from '../../tests/contracts/config.json';
 import fieldsRefused from '../../tests/contracts/config-fields-refused.json';
 import ibanAddressMissing from '../../tests/contracts/config-iban-address-missing.json';
 import accountHolderMissing from '../../tests/contracts/config-account-holder-missing.json';
+import creditorMissing from '../../tests/contracts/config-creditor-missing.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -31,7 +32,7 @@ describe('Einstellungen laden', () => {
 	it('zeigt die gespeicherten Einstellungen', async () => {
 		const fetch = (async (url: string) =>
 			Response.json(
-				url.startsWith(`${API}/config`) ? { data: stored } : { data: [] }
+				url.startsWith(`${API}/config`) ? { ...config, data: stored } : { data: [] }
 			)) as typeof globalThis.fetch;
 
 		const data = (await load({ fetch } as never)) as { settings: Record<string, string> };
@@ -64,7 +65,7 @@ describe('Einstellungen laden', () => {
 		const fetch = (async (url: string) =>
 			Response.json(
 				url.startsWith(`${API}/config`)
-					? { data: stored }
+					? { ...config, data: stored }
 					: { data: url.includes('distribution-keys') ? keys : [] }
 			)) as typeof globalThis.fetch;
 
@@ -74,6 +75,23 @@ describe('Einstellungen laden', () => {
 			{ id: 'dk1', name: 'Pro Fläche (m²)' },
 			{ id: 'dk2', name: 'Eigener' }
 		]);
+	});
+
+	// #690: an IBAN stored before #450 without the Firmenadresse, marked on opening as after a refused save
+	it('markiert beim Öffnen die Felder der Firmenadresse, die der gespeicherten IBAN fehlen', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.startsWith(`${API}/config`) ? creditorMissing : { data: [] }
+			)) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { errors: unknown; missing: unknown };
+
+		expect(data).toMatchObject({
+			errors: {
+				iban: 'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.'
+			},
+			missing: ['companyName', 'companyCity']
+		});
 	});
 });
 

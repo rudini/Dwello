@@ -18,6 +18,7 @@ export const statement = (overrides: Partial<StatementWithDetails> = {}): Statem
 		// answer for its Saldo
 		unpaid: false,
 		claimed: true,
+		paymentPart: true,
 		noPayment: false,
 		waived: false,
 		carried: false,

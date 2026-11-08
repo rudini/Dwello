@@ -1669,6 +1669,7 @@
 	"settings_reminder_days_label": "Mahnfrist (Tage)",
 	"settings_reminder_days_help": "Wie viele Tage nach der Zahlungsfrist einer Nachzahlung die Übersicht eine Mahnung vorschlägt. Erlaubt sind 7 bis 60 Tage, Vorgabe: 14 Tage. Überfällig ist die Abrechnung schon ab dem Tag nach der Zahlungsfrist, und mahnen können Sie ab dann. Nach einer Mahnung schlägt die Übersicht die nächste vor, sobald die Frist in dieser Mahnung abgelaufen ist.",
 	"settings_not_saved": "Die Einstellungen wurden nicht gespeichert",
+	"settings_not_saved_text": "Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern.",
 	"settings_saved": "Einstellungen gespeichert",
 	"settings_saved_text": "Absender, Verwaltungspauschale, Fristen und Vorschläge gespeichert.",
 	"settings_save": "Einstellungen speichern",

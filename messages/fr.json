@@ -1669,6 +1669,7 @@
 	"settings_reminder_days_label": "Délai de rappel (jours)",
 	"settings_reminder_days_help": "Nombre de jours après l’échéance du délai de paiement d’un montant à payer au terme desquels la vue d’ensemble propose un rappel. Entre 7 et 60 jours, par défaut 14 jours. Le décompte est en retard dès le lendemain de l’échéance du délai de paiement, et vous pouvez envoyer un rappel dès ce jour-là. Après un rappel, la vue d’ensemble propose le suivant dès que le délai fixé dans ce rappel est échu.",
 	"settings_not_saved": "Les paramètres n’ont pas été enregistrés",
+	"settings_not_saved_text": "Aucune modification n’a été enregistrée, pas même dans les autres champs.",
 	"settings_saved": "Paramètres enregistrés",
 	"settings_saved_text": "Expéditeur, frais d’administration, délais et propositions enregistrés.",
 	"settings_save": "Enregistrer les paramètres",
