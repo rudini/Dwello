@@ -31,13 +31,14 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 	it('setzt Teile, die selbst Codes sind, in der gewählten Sprache ein', () => {
 		french();
 		const body = {
-			error: 'Kleine Wohnung (50 m², 2 Zimmer): Die Formel ergibt keine gültige Zahl.',
-			code: 'FORMULA_SAMPLE_FAILED',
-			params: { sample: 'FORMULA_SAMPLE_SMALL', reason: 'FORMULA_NOT_A_NUMBER' }
+			error:
+				'Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht.',
+			code: 'FORMULA_APARTMENT_FAILED',
+			params: { reason: 'FORMULA_NOT_A_NUMBER' }
 		};
 
 		expect(backendMessage(body, 'Repli')).toBe(
-			'Petit appartement (50 m², 2 pièces)\u00a0: La formule ne donne pas de nombre valable.'
+			'Pour un appartement, la formule ne donne pas de nombre, généralement parce qu’elle y divise par zéro. Vérifiez ce qui se trouve après «\u00a0/\u00a0».'
 		);
 	});
 
@@ -46,21 +47,21 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 			error: 'Die Formel ist ungültig: …',
 			code: 'FORMULA_INVALID',
 			params: {
-				cause: 'FORMULA_SAMPLE_FAILED',
-				sample: 'FORMULA_SAMPLE_SMALL',
+				cause: 'FORMULA_APARTMENT_FAILED',
 				reason: 'FORMULA_NOT_A_NUMBER'
 			}
 		};
 
+		// #737: only the cause, without «Die Formel ist ungültig:» or «… für eine Wohnung …:» before it
 		expect(backendMessage(body, 'Ersatz')).toBe(
-			'Die Formel ist ungültig: Kleine Wohnung (50 m², 2 Zimmer): Die Formel ergibt keine gültige Zahl.'
+			'Für eine Wohnung ergibt die Formel keine Zahl, meist weil sie dort durch null teilt. Prüfen Sie, was nach «/» steht.'
 		);
 	});
 
-	it('nennt bei mehreren Formelfehlern jeden, auf Deutsch wie das Backend', () => {
+	it('nennt bei mehreren Formelfehlern jeden, auf Deutsch', () => {
 		const body = {
 			error:
-				'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}. Zwei Rechenzeichen folgen direkt aufeinander.',
+				'Unbekannter Baustein {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}. Zwei Rechenzeichen folgen direkt aufeinander.',
 			code: 'FORMULA_INVALID',
 			params: {},
 			causes: [
@@ -153,7 +154,7 @@ describe('Formel, die sich nicht berechnen lässt', () => {
 		};
 
 		expect(backendMessage(body, '')).toBe(
-			'Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /, %), die Klammern und die Variablen {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.'
+			'Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Bausteine {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.' // #737: no %, «Bausteine»
 		);
 	});
 

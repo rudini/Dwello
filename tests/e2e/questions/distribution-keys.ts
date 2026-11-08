@@ -1,5 +1,16 @@
-import { Accessible, Count, Enabled, Text, Visibility } from '../screenplay/questions';
-import { deleteButton, formula, keyActions, keyRow, nameInput, sampleShare, usage } from '../targets/distribution-keys';
+import { Accessible, Attribute, Count, Enabled, Text, Visibility } from '../screenplay/questions';
+import {
+	deleteButton,
+	formula,
+	formulaError,
+	formulaInput,
+	keyActions,
+	keyRow,
+	nameInput,
+	sampleShare,
+	testErrors,
+	usage
+} from '../targets/distribution-keys';
 
 export const keyListed = (name: string) => Visibility.of(keyRow(name));
 export const listedKeysNamed = (name: string) => Count.of(keyRow(name));
@@ -9,3 +20,6 @@ export const keyDeletable = (name: string) => Enabled.of(deleteButton(name));
 export const keyActionCount = (name: string) => Count.of(keyActions(name));
 export const shareOfSample = (apartment: string) => Text.of(sampleShare(apartment));
 export const nameProblem = Accessible.descriptionOf(nameInput);
+export const formulaProblem = Text.of(formulaError);
+export const formulaMarkedInvalid = Attribute.named('aria-invalid').of(formulaInput);
+export const formulaTestErrors = Text.ofAll(testErrors);

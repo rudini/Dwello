@@ -73,6 +73,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Konfidenz | degré de confiance («fiabilité» only for the reliability of the KI overall) | grado di certezza | confidence |
 | Manuell überschrieben / Grund der Änderung | modifié manuellement / motif de la modification | modificato manualmente / motivo della modifica | manually overridden / reason for the change |
 | Verteilschlüssel / Eigener Verteilschlüssel | clé de répartition / clé de répartition personnalisée | chiave di riparto / chiave di riparto personalizzata | distribution key / custom distribution key |
+| Baustein (einer Formel, #737) | élément | elemento | building block |
 | Wohnungsanteil | part du logement | quota appartamento | apartment share |
 | Heizprofil / Standard-Heizprofil | profil de chauffage / profil de chauffage par défaut | profilo di riscaldamento / profilo di riscaldamento predefinito | heating profile / default heating profile |
 | Vordefiniert (nicht «Standard»; Kategorien, Verteilschlüssel, Heizprofile) | prédéfini | preimpostato / preimpostata (not «predefinito», which is «Standard») | predefined |
