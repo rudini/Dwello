@@ -63,7 +63,9 @@
 
 <form
 	method="POST"
-	use:enhance={() => {
+	use:enhance={({ formElement, cancel }) => {
+		// #1284: a day typed wrong in «Aufgehoben ab» would go out empty and clear the saved day
+		if (formElement?.querySelector('#discontinuedFrom[aria-invalid="true"]')) return cancel();
 		saving = true;
 		return async ({ result, update, formElement }) => {
 			if (result.type === 'redirect')
