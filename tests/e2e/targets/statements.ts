@@ -12,6 +12,8 @@ export const statementRowForYear = (tenantName: string, year: number) =>
 export const statementRows = target('Abrechnungen in der Liste', (page) => page.getByTestId(/^statement-row-/));
 export const statementSearchInput = target('Suche Abrechnungen', (page) => page.getByTestId('statement-search-input'));
 export const statementBuildingFilter = target('Filter Gebäude', (page) => page.getByTestId('statement-building-filter'));
+// #733: the search form, the group the confirmation keeps clear of while it has the focus (#1113)
+export const statementSearchForm = target('Filter der Abrechnungsliste', (page) => page.getByTestId('statement-search-form'));
 export const statementSearchButton = target('Suchen', (page) => page.getByTestId('statement-search-submit'));
 export const draftFilter = target('Filter Entwürfe', (page) => page.getByTestId('filter-draft'));
 export const nextPageLink = target('Nächste Seite', (page) => page.getByTestId('pagination-next'));

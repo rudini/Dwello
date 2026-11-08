@@ -1516,6 +1516,17 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] No scenario: backend only, nothing a screen shows changes under 1000 records; covered by the pg test
 - [x] Workflow note `docs/reviews/workflow-notes-issue-705.md`
 - [x] Archive the session; PR `Fixes #705`: pushed after this archive
+## Session: #733 Deletion toast and the statement filter
+
+- [x] Reproduced on `main`: the «… gelöscht» toast covers the «Gebäude» field at about 1030 px (focus on the page title); free at 1440 px (100–200 %) and 390 px
+- [x] Decision (#733, «Decided (product owner)» 2026-11-07): #1096 applies, the toast may cover the field while it has no focus
+- [x] Scenario pinning kept behaviour (field with the focus stays clear), checked by a mutation run at 1029×643 and 960×600 (3ba46e2)
+- [x] code-reviewer `docs/reviews/733-review-1.md`: Minor C-1 fixed (5118f9a)
+- [x] Persona Helga `docs/design/personas/helga-733.md`: P-1 Major (toast over «Suchen» at 150 %) fixed via #1113's group rule, `data-focus-row` on the search form, scenario seen red (7d6d4fb); P-2 Minor stays (the move to the top is #1096's decided behaviour)
+- [x] Closing round `docs/reviews/733-review-2.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, form-selects/design-guard/open-work vitest, statements.feature in chromium
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-733.md`
+- [x] Archive session; PR `Fixes #733`: pushed after this archive
 
 ## Session: #1028 category help: law references and contract note
 

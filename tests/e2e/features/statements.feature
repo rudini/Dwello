@@ -130,6 +130,34 @@ Funktionalität: Nebenkostenabrechnungen
     Und der Liegenschaftsverwalter die Abrechnung löscht
     Dann zeigt die Abrechnungsliste nur die Entwürfe im Gebäude "Ahornhof"
 
+  # #733 (#1096): die Meldung «… gelöscht» darf das Feld «Gebäude» kurz verdecken, solange es den Fokus nicht hat
+  Szenariogrundriss: Die Meldung nach dem Löschen eines Entwurfs ist nicht im Weg, wenn der Liegenschaftsverwalter wieder nach Gebäude filtert
+    Angenommen das Browserfenster ist <Breite> auf <Höhe> Pixel gross
+    Und der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
+    Und der Liegenschaftsverwalter die Abrechnung löscht
+    Wenn der Liegenschaftsverwalter beginnt, die Liste nach einem anderen Gebäude zu filtern
+    Dann verdeckt die Erfolgsmeldung nicht, was den Fokus hat
+
+    Beispiele:
+      | Breite | Höhe |
+      | 1029   | 643  |
+      | 960    | 600  |
+
+  # #733 (Persona Helga P-1): bei 150 % lag die Meldung über «Suchen» neben dem Feld «Gebäude» mit dem Fokus; #1113: sie lässt die Gruppe des Fokus frei
+  Szenariogrundriss: Die Meldung nach dem Löschen eines Entwurfs verdeckt den Filter nicht, während der Liegenschaftsverwalter ihn benutzt
+    Angenommen für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2023
+    Und das Browserfenster ist <Breite> auf <Höhe> Pixel gross
+    Und der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Und der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
+    Und der Liegenschaftsverwalter die Abrechnung löscht
+    Wenn der Liegenschaftsverwalter beginnt, die Liste nach einem anderen Gebäude zu filtern
+    Dann verdeckt die Erfolgsmeldung nichts, was zum Filter gehört
+
+    Beispiele:
+      | Breite | Höhe |
+      | 960    | 600  |
+
   # #1047: das Löschen ersetzt die Seite des Entwurfs im Verlauf, Zurück führt nicht auf eine Seite, die es nicht mehr gibt
   Szenario: Nach dem Löschen eines Entwurfs führt Zurück im Browser nicht auf den Entwurf
     Angenommen der Liegenschaftsverwalter ist auf der Abrechnungsliste
