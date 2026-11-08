@@ -206,6 +206,13 @@ Funktionalität: Mietvertragsdetail
     Dann sagen die nächsten Schritte "Der Mietvertrag endet mit einer Aufhebungsvereinbarung."
     Und sagen die nächsten Schritte nicht "gekündigt"
 
+  # #1277 (Fachreview 1277-1 M-1): beim Eintritt eines Dritten genügen die Zustimmung oder das Urteil (Art. 263 OR,
+  # Art. 121 ZGB)
+  Szenario: Die Aufhebungsvereinbarung beim Eintritt eines Dritten braucht keine Unterschriften
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung beenden will
+    Dann erklärt der Dialog die Aufhebungsvereinbarung "Tritt jemand anders in den Mietvertrag ein, etwa mit Ihrer schriftlichen Zustimmung bei Geschäftsräumen oder durch ein Urteil bei der Scheidung, braucht es keine unterschriebene Vereinbarung: Es genügen Ihre Zustimmung oder das Urteil."
+
   # #1277 (Personas Helga und Dr. Weber 1148): wer nicht liest, erfasste eine Aufhebungsvereinbarung als Kündigung
   Szenario: Der Dialog schlägt keine Art des Vertragsendes vor
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"

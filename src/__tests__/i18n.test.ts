@@ -194,6 +194,17 @@ describe('Sprachdateien', () => {
 		expect(messages.contracts_parties_fixed_transfer).toContain(transfer);
 	});
 
+	// #1277 (1277-fachreview-1 M-1): the help on an Aufhebungsvereinbarung names the third party entering the contract
+	it.each([
+		['de', 'Mieter und Vermieter beenden den Mietvertrag im Einvernehmen auf einen vereinbarten Tag, ohne Kündigung und ohne Kündigungsfrist, z.B. beim Wechsel in eine andere Ihrer Wohnungen. Halten Sie die Vereinbarung als Beweis schriftlich fest, unterschrieben von Ihnen und allen Mietern. Bei einer Familienwohnung braucht es die ausdrückliche Zustimmung des Ehegatten oder eingetragenen Partners. Tritt jemand anders in den Mietvertrag ein, etwa mit Ihrer schriftlichen Zustimmung bei Geschäftsräumen oder durch ein Urteil bei der Scheidung, braucht es keine unterschriebene Vereinbarung: Es genügen Ihre Zustimmung oder das Urteil.'],
+		['fr', 'Le locataire et le bailleur mettent fin au contrat de bail d’un commun accord à une date convenue, sans résiliation ni délai de congé, par exemple lorsque le locataire passe dans un autre de vos appartements. Consignez la convention par écrit comme preuve, signée par vous et par tous les locataires. Pour un logement de la famille, il faut le consentement exprès du conjoint ou du partenaire enregistré. Si une autre personne reprend le contrat de bail, par exemple avec votre consentement écrit pour des locaux commerciaux ou par un jugement lors du divorce, aucune convention signée n’est nécessaire : votre consentement ou le jugement suffit.'],
+		['it', 'Inquilino e locatore sciolgono il contratto di locazione di comune accordo a una data concordata, senza disdetta né termine di preavviso, per esempio quando l’inquilino passa a un altro dei Suoi appartamenti. Metta l’accordo per scritto come prova, firmato da Lei e da tutti gli inquilini. Per un’abitazione familiare serve il consenso espresso del coniuge o del partner registrato. Se un’altra persona subentra nel contratto di locazione, per esempio con il Suo consenso scritto per locali commerciali o con una sentenza di divorzio, non serve un accordo firmato: bastano il Suo consenso o la sentenza.'],
+		['en', 'Tenant and landlord end the rental contract by mutual agreement on an agreed day, without notice of termination and without a notice period, for example when the tenant moves to another of your apartments. Put the agreement in writing as evidence, signed by you and all tenants. For a family home, the express consent of the spouse or registered partner is needed. If someone else takes over the rental contract, for example with your written consent for business premises or by a divorce judgment, no signed agreement is needed: your consent or the judgment is enough.']
+	])('%s: die Hilfe zur Aufhebungsvereinbarung nennt den Eintritt eines Dritten', (language, text) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.contracts_end_kind_agreement_help).toBe(text);
+	});
+
 	// #501: the hint at a short Kündigungsfrist says the same as the glossary
 	it.each([
 		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor. Haben Sie das Ende mit dem Mieter vereinbart, wählen Sie «Aufhebungsvereinbarung».'],
