@@ -3,7 +3,16 @@ import type { Activity, Actor, Question } from './actor';
 
 /** The UI protocol driver: a browser page */
 export class BrowseTheWeb {
-	constructor(public readonly page: Page) {}
+	/** What the browser logged and threw since the page last navigated, shown when a page does not hydrate (#750) */
+	readonly console: string[] = [];
+
+	constructor(public readonly page: Page) {
+		page
+			// a new document, not a history change, which SvelteKit makes while it starts
+			.on('request', (request) => request.isNavigationRequest() && request.frame() === page.mainFrame() && this.console.splice(0))
+			.on('console', (message) => this.console.push(`${message.type()}: ${message.text()}`))
+			.on('pageerror', (error) => this.console.push(error.stack ?? `${error.name}: ${error.message}`));
+	}
 }
 
 const BACKEND_API = 'http://localhost:3101/api/v1'; // E2E backend (playwright.config.ts)

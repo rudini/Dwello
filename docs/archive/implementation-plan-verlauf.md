@@ -1538,6 +1538,16 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Checks: lint, check, fitness, backend type-check, full vitest, `pdf-translations`, E2E `categories.feature` + `invoice-detail.feature`, axe/language rows of categories, category-new, category-edit-predefined, invoice-detail
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1028.md`
 - [x] Archive session; PR `Fixes #1028`: pushed after this archive
+## Session: #750 browser console when a page does not hydrate
+
+- [x] Check on main: the axe rows record no browser console (`lookAt` → `Navigate.to` → `hydrated`); decision written into #750
+- [x] Unit test `tests/unit/hydration-console.test.ts` seen red; `BrowseTheWeb` records console and page errors, `hydrated` adds them to its error
+- [x] Slice review `docs/reviews/750-review-1.md`: C-1 Major (console only in `message`, not in the stack the report shows) confirmed with real Playwright, fixed test-first; C-2 Minor with it
+- [x] Re-review `docs/reviews/750-review-2.md`: nothing open
+- [x] Checks: lint, check, fitness, backend type-check, vitest (new test, screenplay lint), E2E dashboard axe and language rows (79), a real Chromium page that throws shows its console in the stack
+- [x] Fallback review on PR #1223: console reset per document (Medium) and `cause` pinned (Low), fixed test-first; reviews `docs/reviews/750-review-{3,4,5}.md`, 750-4 C-1 Minor fixed, nothing open
+- [x] Archive session; PR `Fixes #750`: pushed after this archive
+
 ## Session: #739 E2E default Heizprofil per run
 
 ## Session: #714 design guard: style shorthands and system colours
