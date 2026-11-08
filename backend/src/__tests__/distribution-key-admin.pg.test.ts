@@ -43,6 +43,23 @@ describe('Eigene Verteilschlüssel', () => {
 		});
 	});
 
+	// #1305: % and _ in a name are characters, not wildcards of the name check
+	it('nimmt einen Namen mit % an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('70 Prozent Fläche');
+
+		const response = await create('70% Fläche');
+
+		expect(response.status).toBe(201);
+	});
+
+	it('nimmt einen Namen mit _ an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('Haus A');
+
+		const response = await create('Haus_A');
+
+		expect(response.status).toBe(201);
+	});
+
 	it('lehnt beim Umbenennen einen vergebenen deutschen Namen ab', async () => {
 		await keys.create({ name: `Stairs ${token}`, nameDE: `Treppenhaus ${token}`, formula: '{units}' });
 		const id = await idOf(await create('Lift'));
