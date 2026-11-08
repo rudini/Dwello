@@ -188,6 +188,6 @@ When('der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber
 	await verwalter.attemptsTo(giveOwnHolder);
 });
 
-Then('heisst das Feld {string} {string}', async ({ verwalter }, label: string, name: string) => {
+Then('heisst die Einstellung {string} {string}', async ({ verwalter }, label: string, name: string) => {
 	await verwalter.sees(settingName(FIELDS[label])).toBe(name);
 });
