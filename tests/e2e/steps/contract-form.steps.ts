@@ -366,6 +366,14 @@ Then(
 	}
 );
 
+// #1265: the start of the label, which a narrow field does not cut
+Then(
+	'beginnt die Wohnung {string} in der Auswahl mit {string}',
+	async ({ verwalter, seed }, apartment: string, text: string) => {
+		await verwalter.sees(apartmentChoiceLabel(seed.idOf(apartment)!)).toMatch(new RegExp(`^${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+	}
+);
+
 Then('meldet Dwello den Fehler {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(failure).toContain(message);
 });
