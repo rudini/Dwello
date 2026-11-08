@@ -375,19 +375,16 @@ export async function invoiceSplitKeys(buildingId: string, { start, end }: Perio
 
 /**
  * The check for one building and period, with the period it was compared with; also the invoices without
- * Leistungszeitraum dated shortly after the period (they may belong to it) and, in a period under a year, those
- * that count in full (one for a whole year would be billed to the short period alone); the hints on heating invoices
- * by the Heizprofil (#335, #339)
+ * Leistungszeitraum dated shortly after the period (they may belong to it); the hints on heating invoices by the
+ * Heizprofil (#335, #339)
  */
 export async function checkBuildingInvoices(buildingId: string, period: Period) {
 	const comparedWith = yearBefore(period);
-	const underAYear = addDays(period.end, 1) < yearAfter(period.start);
-	const [current, previous, [{ first }], lateInvoices, invoicesWithoutServicePeriod] = await Promise.all([
+	const [current, previous, [{ first }], lateInvoices] = await Promise.all([
 		categoryInvoices(buildingId, period),
 		categoryInvoices(buildingId, comparedWith),
 		db.select({ first: min(invoices.invoiceDate) }).from(invoices).where(eq(invoices.buildingId, buildingId)),
-		withoutServicePeriod(buildingId, addDays(period.end, 1), addDays(period.end, LATE_INVOICE_DAYS)),
-		underAYear ? withoutServicePeriod(buildingId, period.start, period.end) : []
+		withoutServicePeriod(buildingId, addDays(period.end, 1), addDays(period.end, LATE_INVOICE_DAYS))
 	]);
 	const { hasComparison, findings } = checkCategories(current, previous, period, first ?? undefined);
 	const stock = await stockFinding(buildingId, period, current);
@@ -397,7 +394,6 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		hasComparison,
 		findings: [stock, keysFinding(current), ...findings].filter((finding) => finding !== null),
 		lateInvoices,
-		invoicesWithoutServicePeriod,
 		...(await heatingHintsOf(buildingId, period)),
 		splitKeys: await invoiceSplitKeys(buildingId, period)
 	};
