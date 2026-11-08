@@ -269,6 +269,20 @@ Funktionalität: Neuen Mietvertrag erfassen
     Angenommen das Browserfenster ist 1440 auf 900 Pixel gross
     Dann bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
 
+  # #1179 (Helga P-2): auf einem schmalen Bildschirm stehen alle Schritte mit Namen untereinander
+  Szenario: Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Dann nennt die Schrittanzeige untereinander die Schritte
+      | Mieter        |
+      | Wohnung       |
+      | Vertragsdauer |
+      | Miete         |
+      | Prüfen        |
+    Und zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Vertragsdauer"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
+
   # #57: «Entwurf» heisst nur der Abrechnungsstatus; die Eingaben im Assistenten sind «Ihre Angaben»
   Szenario: Angefangener Mietvertrag ist noch nicht gespeichert
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
