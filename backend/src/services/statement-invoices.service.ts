@@ -10,7 +10,7 @@ import { invoices, utilityStatements, type UtilityStatementLineItem } from '../d
 import { CodedError } from './coded-error';
 import { invoiceSplitKeys } from './invoice-completeness.service';
 import { getInvoicesForStatement } from './invoice.service';
-import { uncalculableKeyInvoices } from './held-invoices';
+import { agreedIn, uncalculableKeyInvoices } from './held-invoices';
 import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { olderThanFiveYears, swissToday } from './today';
@@ -32,8 +32,6 @@ const billedAsIs = (positions: Positions, invoice: PeriodInvoice) =>
 	);
 
 // The invoices of the categories its contract agreed when it was created; a statement before #91 billed every one
-const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCategoryIds: string[] | null }, list: T[]) =>
-	list.filter((invoice) => !statement.agreedCategoryIds || !invoice.categoryId || statement.agreedCategoryIds.includes(invoice.categoryId));
 
 // A statement created before #96 keeps no invoices: for it, as before, an invoice recorded after it is missing (V-15)
 const known = (positions: Positions) => positions.every((position) => position.invoices);

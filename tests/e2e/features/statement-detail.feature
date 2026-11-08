@@ -1094,7 +1094,6 @@ Funktionalität: Abrechnungsdetail
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
 
   # #1333 (Entscheid PO): solange sich ein Verteilschlüssel des Entwurfs nicht berechnen lässt, wird er nicht versendet
-  @wip
   Szenario: Ein Entwurf mit einem Verteilschlüssel, der sich nicht berechnen lässt, wird nicht versendet
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
@@ -1103,6 +1102,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung versendet
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen."
     Und hat die Abrechnung den Status "Entwurf"
 
   # Persona Anna 1309 P-1: vom Hinweis zur Rechnung, deren Verteilschlüssel sich nicht berechnen lässt

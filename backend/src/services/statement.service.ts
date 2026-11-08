@@ -26,7 +26,7 @@ import {
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, countingOn, generateStatementNumber, keyValuesAmong } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
-import { getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
+import { agreedIn, getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -755,6 +755,7 @@ export async function updateStatementStatus(
 		throw new Error(`Invalid status transition from ${existing.status} to ${status}`);
 	}
 
+	if (status === 'sent') await refuseUncalculableKeys(existing.building!.id, existing.periodStart, existing.periodEnd, 'STATEMENT_KEY_THEN_RECALCULATE', existing); // #1333
 	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.periodEnd);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
 	// A Saldo of 0.00, or one below CHF 5 carried over, is «Erledigt» once sent: no payment (#448); a Schlussabrechnung
@@ -944,8 +945,16 @@ async function refuseUncategorized(buildingId: string, periodStart: string, peri
 }
 
 // #1221 (product owner): a key that cannot be calculated for the building's apartments holds its invoices, one key at a time
-async function refuseUncalculableKeys(buildingId: string, periodStart: string, periodEnd: string) {
-	const failing = await uncalculableKeyInvoices(buildingId, periodStart, periodEnd);
+// #1333 (product owner): sending a draft refuses too, then says to recalculate it (Fachreview 1333-1 V-1)
+// of a statement only the invoices it bills (Fachreview 1333-1 V-2)
+export async function refuseUncalculableKeys(
+	buildingId: string,
+	periodStart: string,
+	periodEnd: string,
+	then = 'STATEMENT_KEY_THEN_RETRY',
+	statement: { agreedCategoryIds: string[] | null } = { agreedCategoryIds: null }
+) {
+	const failing = agreedIn(statement, await uncalculableKeyInvoices(buildingId, periodStart, periodEnd));
 	if (!failing.length) return;
 	const [{ distributionKeyName, buildingName, reason, apartment }] = failing;
 	const held = failing.filter((invoice) => invoice.distributionKeyName === distributionKeyName);
@@ -958,7 +967,8 @@ async function refuseUncalculableKeys(buildingId: string, periodStart: string, p
 			.join('; '),
 		reason, // #1315: why, and for which apartment
 		...(apartment && { apartment }),
-		...(delivery && { fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: delivery.invoiceDate })
+		...(delivery && { fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: delivery.invoiceDate }),
+		then
 	});
 }
 

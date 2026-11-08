@@ -15,6 +15,10 @@ export async function getUncategorizedInvoices(buildingId: string, periodStart: 
 		.map(({ billingEntityName, invoiceDate, amount }) => ({ billingEntityName, invoiceDate, amount }));
 }
 
+/** The invoices of the list a statement bills: of the categories its Mietvertrag agreed, and those without one */
+export const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCategoryIds: string[] | null }, list: T[]) =>
+	list.filter((invoice) => !statement.agreedCategoryIds || !invoice.categoryId || statement.agreedCategoryIds.includes(invoice.categoryId));
+
 // #1315 (product owner): why a key fails for the building, and for which apartment if it fails for one
 const REASONS: Record<string, string> = { FORMULA_NEGATIVE: 'NEGATIVE', FORMULA_ALL_ZERO: 'ALL_ZERO', FORMULA_NOT_A_NUMBER: 'DIVISION_BY_ZERO' };
 type Apartments = Awaited<ReturnType<typeof apartmentsOf>>;

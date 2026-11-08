@@ -921,12 +921,12 @@ describe('Abrechnungsdetail', () => {
 		later(0, 'draft', { uncalculableKeys: failing } as never);
 		expect(laterText()).toMatch(/^\s*Verteilschlüssel lässt sich nicht berechnen/);
 		expect(laterText()).toContain(
-			'Dieser Entwurf ist nicht aktuell: Der Verteilschlüssel einiger Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Die Formel von «Halbe Zimmer» teilt für die Wohnung 2.01 im Gebäude «Ahornhof» durch null. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist ihr Verteilschlüssel schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Wählen Sie danach «Neu berechnen».'
+			'Dieser Entwurf ist nicht aktuell: Der Verteilschlüssel einiger Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Die Formel von «Halbe Zimmer» teilt für die Wohnung 2.01 im Gebäude «Ahornhof» durch null. Solange sich der Verteilschlüssel nicht berechnen lässt, können Sie den Entwurf weder versenden noch als versendet markieren. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist ihr Verteilschlüssel schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Wählen Sie danach «Neu berechnen».'
 		);
 		expect(laterText()).not.toContain('Seit dem Erstellen');
 		click('statement-send-button');
 		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Der Verteilschlüssel einiger Rechnungen dieses Entwurfs lässt sich für die Wohnungen des Gebäudes nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel. Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen.'
+			'Der Verteilschlüssel einiger Rechnungen dieses Entwurfs lässt sich für die Wohnungen des Gebäudes nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel. Solange sich der Verteilschlüssel nicht berechnen lässt, können Sie den Entwurf weder versenden noch als versendet markieren. Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen.'
 		);
 	});
 

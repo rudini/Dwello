@@ -24,7 +24,7 @@ const reminderName = (level: number) =>
 
 // Params that carry a code (the cause of a formula error) show as its message; others are user data. A sentence added
 // to another (the Lieferung behind the Veränderung Tankbestand, #1323) comes with its space, or is empty
-const codeParams = ['cause', 'reason', 'fuelStock'];
+const codeParams = ['cause', 'reason', 'fuelStock', 'then']; // then: what to do once the key is fixed (#1333)
 const addedSentences = { fuelStock: '' };
 function render(message: (params: Params) => string, params: Params): string {
 	const shown = Object.entries(params).map(([key, value]) => {

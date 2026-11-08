@@ -41,7 +41,7 @@ const refusal = (invoices: string, failure: { reason: string; apartment?: string
 	[
 		'The distribution key cannot be calculated for the apartments of the building',
 		'STATEMENT_KEY_NOT_CALCULABLE',
-		{ key: name, building: `Ahornhof ${token}`, invoices, ...failure }
+		{ key: name, building: `Ahornhof ${token}`, invoices, ...failure, then: 'STATEMENT_KEY_THEN_RETRY' } // Fachreview 1333-1 V-1
 	] as const;
 
 describe('Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt', () => {
@@ -118,7 +118,8 @@ describe('Grund, warum sich ein Verteilschlüssel nicht berechnen lässt', () =>
 				key: keyName,
 				building: `Ahornhof ${token}`,
 				invoices: `Garten AG, 31.05.${year}, CHF 100.00`,
-				...failure
+				...failure,
+				then: 'STATEMENT_KEY_THEN_RETRY'
 			});
 		});
 });
@@ -246,8 +247,11 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 			await sendJson('POST', `/api/v1/statements/${draft}/send`, { byLetter: true }),
 			await sendJson('PUT', `/api/v1/statements/${draft}/status`, { status: 'sent' })
 		]) {
-			expect(((await response.json()) as { code: string }).code).toBe('STATEMENT_KEY_NOT_CALCULABLE');
-			expect(response.status).toBe(409);
+			// Fachreview 1333-1 V-1: recalculate after fixing the key, since a fixed formula leaves the draft looking current
+			expect((await response.json()) as unknown).toEqual(
+				expect.objectContaining({ code: 'STATEMENT_KEY_NOT_CALCULABLE', params: expect.objectContaining({ then: 'STATEMENT_KEY_THEN_RECALCULATE' }) })
+			);
+			expect(response.status).toBe(400);
 		}
 		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, draft));
 		expect(statement.status).toBe('draft');
@@ -294,6 +298,13 @@ describe('Verteilschlüssel einer nicht vereinbarten Kategorie', () => {
 		const changes = (await (await callApi(`/api/v1/statements/${draft}/changed-invoices`)).json()) as Record<string, unknown>;
 
 		expect(changes).toEqual(expect.objectContaining({ invoiceIds: [], uncalculableKeys: [] }));
+	});
+
+	// Fachreview 1333-1 V-2: the keys of the draft, not of every invoice of the building
+	it('markiert den Entwurf als versendet, wenn nur eine nicht vereinbarte Rechnung den Verteilschlüssel hat', async () => {
+		const response = await sendJson('PUT', `/api/v1/statements/${draft}/status`, { status: 'sent' });
+
+		expect(response.status).toBe(200);
 	});
 });
 

@@ -783,7 +783,8 @@
 			"name": "statement-uncalculable-draft-detail",
 			"path": "/statements/{uncalculableDraft}",
 			"states": [
-				"default"
+				"default",
+				"send-dialog"
 			]
 		},
 		{

@@ -47,8 +47,12 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		const refusal = (params: Record<string, string>) =>
 			backendMessage({ code: 'STATEMENT_KEY_NOT_CALCULABLE', params: { key: 'Halbe Zimmer', building: 'Ahornhof', invoices: 'Öl AG, 15.10.2024, CHF 800.00', ...params } }, 'Ersatz');
 
-		expect(refusal({ reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01', fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: '2024-10-15' })).toBe(
+		expect(refusal({ reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01', fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: '2024-10-15', then: 'STATEMENT_KEY_THEN_RETRY' })).toBe(
 			'Der Verteilschlüssel «Halbe Zimmer» lässt sich für die Wohnungen des Gebäudes «Ahornhof» nicht berechnen. Seine Formel teilt für die Wohnung 2.01 durch null. Er gilt für diese Rechnungen: Öl AG, 15.10.2024, CHF 800.00. Die Veränderung Tankbestand verteilt Dwello nach dem Verteilschlüssel der Lieferung vom 15.10.2024. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist «Halbe Zimmer» schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Versuchen Sie es danach noch einmal.'
+		);
+		// Fachreview 1333-1 V-1: sending refused, the draft is recalculated once the key is fixed
+		expect(refusal({ reason: 'STATEMENT_KEY_REASON_ALL_ZERO', then: 'STATEMENT_KEY_THEN_RECALCULATE' })).toMatch(
+			/vier Beispielwohnungen\. Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen\.$/
 		);
 		expect(refusal({ reason: 'STATEMENT_KEY_REASON_ALL_ZERO' })).toContain(
 			'nicht berechnen. Seine Formel ergibt für alle Wohnungen 0. Er gilt für diese Rechnungen: Öl AG, 15.10.2024, CHF 800.00. Wählen Sie'
