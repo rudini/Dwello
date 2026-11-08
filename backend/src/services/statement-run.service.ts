@@ -73,8 +73,8 @@ export const typesByBuilding = async () =>
  */
 export async function runPlan(buildingId: string, period: Range) {
 	const [{ contracts }, { statements }, type] = await Promise.all([
-		listContracts({ buildingId, limit: 1000 }),
-		listStatements({ buildingId, limit: 1000 }),
+		listContracts({ buildingId, limit: null }),
+		listStatements({ buildingId, limit: null }),
 		typeOf(buildingId)
 	]);
 	return { ...planRun(period, contracts, statements), otherPeriod: otherPeriod(type, period), overlap: overlapped(period, statements) };
@@ -87,7 +87,7 @@ export async function runPlan(buildingId: string, period: Range) {
  */
 export async function generateInPeriod(input: Parameters<typeof generateStatement>[0]) {
 	const run = { start: input.periodStart, end: input.periodEnd };
-	const [building, { statements }] = await Promise.all([buildingOf(input.buildingId), listStatements({ buildingId: input.buildingId, limit: 1000 })]);
+	const [building, { statements }] = await Promise.all([buildingOf(input.buildingId), listStatements({ buildingId: input.buildingId, limit: null })]);
 	if (!building) return generateStatement(input);
 	if (otherPeriod(building.type, run)) throw new CodedError('STATEMENT_PERIOD_OF_BUILDING', 'The period is no whole period of the building', { building: building.name });
 	const older = overlapped(run, statements);
@@ -107,8 +107,8 @@ export async function missingOfContract(id: string) {
 	if (!contract) return null;
 	const [type, { statements }, { statements: ofBuilding }] = await Promise.all([
 		typeOf(contract.buildingId),
-		listStatements({ contractId: id, limit: 1000 }),
-		listStatements({ buildingId: contract.buildingId, limit: 1000 })
+		listStatements({ contractId: id, limit: null }),
+		listStatements({ buildingId: contract.buildingId, limit: null })
 	]);
 	// code review 1088-3 C-9 (product owner 04.11.2026): a period an older statement of the building overlaps cannot
 	// be billed in Dwello (the run refuses it, C-7): named, to bill outside Dwello
@@ -118,7 +118,7 @@ export async function missingOfContract(id: string) {
 /** #211: per contract id, the ended periods without a statement, as on the contract page */
 export async function missingByContract(listed?: Awaited<ReturnType<typeof listContracts>>['contracts']) {
 	// every contract and statement, none dropped by a limit (#705); the Übersicht hands in the contracts it listed
-	// (#506: one query less for its open Überträge), still limited there (#1229)
+	// (#506: one query less for its open Überträge), every one of them too (#1229)
 	const [types, contracts, { statements }] = await Promise.all([
 		typesByBuilding(),
 		listed ?? listContracts({ limit: null }).then((list) => list.contracts),
@@ -199,8 +199,8 @@ export async function runDefaultsOf(query: { buildingId?: string; periodStart?: 
 	const real = (day?: string) => !!day && isRealDate(day);
 	if (!buildingId || !real(periodStart) || !real(periodEnd) || periodStart! > periodEnd!) return runDefaults(settings, null, [], []);
 	const [{ contracts }, { statements }] = await Promise.all([
-		listContracts({ buildingId, limit: 1000 }),
-		listStatements({ buildingId, limit: 1000 })
+		listContracts({ buildingId, limit: null }),
+		listStatements({ buildingId, limit: null })
 	]);
 	return runDefaults(settings, { buildingId, period: { start: periodStart!, end: periodEnd! } }, contracts, statements);
 }
@@ -267,9 +267,9 @@ export function runDifferences(
 /** The building's statements of the run's period that differ from the run's settings (#132, H-28) */
 export async function runDifferencesOf(buildingId: string, run: RunSettings) {
 	const [{ contracts }, { statements }, { heatingProfiles }] = await Promise.all([
-		listContracts({ buildingId, limit: 1000 }),
-		listStatements({ buildingId, periodStart: run.period.start, periodEnd: run.period.end, limit: 1000 }),
-		listHeatingProfiles({ limit: 1000 })
+		listContracts({ buildingId, limit: null }),
+		listStatements({ buildingId, periodStart: run.period.start, periodEnd: run.period.end, limit: null }),
+		listHeatingProfiles({ limit: null })
 	]);
 	const differing = runDifferences(run, statements, contracts, heatingProfiles);
 	// a draft is outdated by invoices or a Tankbestand changed since (#454, #408 point 8); a sent one is corrected instead
@@ -401,8 +401,8 @@ async function heatingSumsOf(run: { period: Range; heatingProfileId: string | nu
 /** The heating hints of the building's check for a run of the period with the Heizprofil (#335, #339, H-28, #508) */
 export async function runHeatingHintsOf(buildingId: string, run: { period: Range; heatingProfileId: string | null }) {
 	const [{ contracts }, { statements }, check] = await Promise.all([
-		listContracts({ buildingId, limit: 1000 }),
-		listStatements({ buildingId, limit: 1000 }),
+		listContracts({ buildingId, limit: null }),
+		listStatements({ buildingId, limit: null }),
 		heatingHintsOf(buildingId, run.period)
 	]);
 	const hints = runHeatingHints(run, contracts, statements, check);

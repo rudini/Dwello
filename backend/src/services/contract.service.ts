@@ -3,6 +3,7 @@
  * Business logic for rental contract operations
  */
 
+import { paged } from '../db/paged';
 import { eq, and, or, sql, desc, gte, lte, isNull, ilike, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
@@ -156,7 +157,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 		.where(whereClause)
 		.orderBy(desc(rentalContracts.startDate), desc(rentalContracts.id))
 		.$dynamic();
-	const results = await (limit == null ? ordered : ordered.limit(limit)).offset(offset);
+	const results = await paged(ordered, limit, offset);
 
 	// Get total count
 	const countQuery = db

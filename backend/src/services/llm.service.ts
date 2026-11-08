@@ -28,7 +28,7 @@ const promptFor = async (invoice: {
 	billingEntityName: string;
 	description: string;
 	amount: string | number;
-}) => buildCategorizationPrompt(invoice, (await listCategories({ limit: 1000 })).categories);
+}) => buildCategorizationPrompt(invoice, (await listCategories({ limit: null })).categories);
 
 /**
  * Check if cached result is still valid
@@ -226,7 +226,7 @@ export async function proposeAllocability(
 	category: Parameters<typeof buildAllocabilityPrompt>[0]
 ): Promise<AllocabilityProposal> {
 	if (await kiOff()) throw unavailable();
-	const { categories } = await listCategories({ limit: 1000 });
+	const { categories } = await listCategories({ limit: null });
 	const predefined = categories.filter((c) => c.type === 'predefined');
 	const response = await callLlm(buildAllocabilityPrompt(category, predefined)).catch((error) => {
 		console.warn('KI proposal for a category failed:', error);

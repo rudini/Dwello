@@ -3,6 +3,7 @@
  * Business logic for utility cost category operations
  */
 
+import { paged } from '../db/paged';
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, utilityStatementLineItems, type Category, type NewCategory } from '../db/schema';
@@ -15,7 +16,7 @@ import type { CategoryWithUsage } from '../api/category';
 export interface CategoryFilters {
 	search?: string;
 	isAllowedUtilityCost?: boolean;
-	limit?: number;
+	limit?: number | null; // null: every category (#1229)
 	offset?: number;
 }
 
@@ -62,14 +63,11 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 		})
 		.from(categories)
 		.orderBy(asc(categories.sortOrder), asc(categories.name))
-		.limit(limit)
-		.offset(offset);
+		.$dynamic();
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause
-		? await categoriesQuery.where(whereClause)
-		: await categoriesQuery;
+	const results = await paged(categoriesQuery.where(whereClause), limit, offset);
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(categories);

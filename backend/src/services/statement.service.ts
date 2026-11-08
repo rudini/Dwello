@@ -3,6 +3,7 @@
  * Business logic for utility statement operations
  */
 
+import { paged } from '../db/paged';
 import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
@@ -187,7 +188,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.where(whereClause)
 		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt), desc(utilityStatements.id))
 		.$dynamic();
-	const results = await (limit == null ? ordered : ordered.limit(limit)).offset(offset);
+	const results = await paged(ordered, limit, offset);
 
 	// Batch load all line items for the fetched statements (avoids N+1 query)
 	const statementIds = results.map((r) => r.statement.id);
@@ -716,7 +717,7 @@ const changesPdf = (data: Partial<NewUtilityStatement>, existing: StatementWithD
 /** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by; with a day
  * only the apartments that count on it (#1284, Fachreview 1284-1 V-2) */
 export async function keyValuesOf(buildingId: string, apartmentId: string, day?: string): Promise<KeyValues | null> {
-	const { apartments: all } = await listApartments({ buildingId, limit: 1000 });
+	const { apartments: all } = await listApartments({ buildingId, limit: null });
 	const counting = day ? all.filter(countingOn(day)) : all;
 	return keyValuesAmong(counting.map((a) => ({ id: a.id, area: parseFloat(a.area), rooms: parseFloat(a.rooms) })), apartmentId);
 }

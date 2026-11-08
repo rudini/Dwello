@@ -5,6 +5,7 @@
  * The predefined profiles (Heizung + Warmwasser, Mittelland, Bergregion, Tessin) come from migrations/0002_stammdaten.sql
  */
 
+import { paged } from '../db/paged';
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type MonthShare, type NewHeatingProfile } from '../db/schema';
@@ -18,7 +19,7 @@ import type { MonthlyPercentages } from '../api/heating-profile';
 export interface HeatingProfileFilters {
 	search?: string;
 	type?: MasterDataType;
-	limit?: number;
+	limit?: number | null; // null: every profile (#1229)
 	offset?: number;
 }
 
@@ -55,14 +56,11 @@ export async function listHeatingProfiles(filters: HeatingProfileFilters = {}): 
 		.select()
 		.from(heatingProfiles)
 		.orderBy(asc(heatingProfiles.type), asc(heatingProfiles.name))
-		.limit(limit)
-		.offset(offset);
+		.$dynamic();
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause
-		? await profilesQuery.where(whereClause)
-		: await profilesQuery;
+	const results = await paged(profilesQuery.where(whereClause), limit, offset);
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(heatingProfiles);
