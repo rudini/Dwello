@@ -103,7 +103,7 @@ const placeOf = ({ apartment, building }: Json<StatementResponse>) => ({
 type Discontinued = { number: string; date: string };
 export function toStatement(
 	data: Json<StatementResponse>
-): StatementWithDetails & { discontinued: Discontinued[] } {
+): StatementWithDetails & { discontinued: Discontinued[]; sizeChanges: Discontinued[] } {
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
@@ -169,17 +169,20 @@ export function toStatement(
 		lineItems: (data.lineItems || []).map((item) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		),
-		discontinued: discontinuedIn(data.lineItems || [])
+		discontinued: onceIn(data.lineItems || [], (part) => part.discontinued),
+		sizeChanges: onceIn(data.lineItems || [], (part) => part.changed) // #1301
 	};
 }
 
-// #1284: the apartments that no longer count from a day of the billed days, once each, from the positions' parts
-const discontinuedIn = (items: LineItem[]): Discontinued[] => [
+// #1284: the apartments that no longer count from a day of the billed days, or (#1301) have other values from one, once
+// each, from the positions' parts
+type Part = NonNullable<LineItem['segments']>[number];
+const onceIn = (items: LineItem[], of: (part: Part) => Discontinued[] | undefined): Discontinued[] => [
 	...new Map(
 		items
 			.flatMap((item) => item.segments ?? [])
-			.flatMap((part) => part.discontinued ?? [])
-			.map((a) => [a.number, a])
+			.flatMap((part) => of(part) ?? [])
+			.map(({ number, date }) => [`${number} ${date}`, { number, date }])
 	).values()
 ];
 

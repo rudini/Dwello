@@ -3,6 +3,7 @@
 	import type { Reconciliation } from '$lib/cost-reconciliation';
 	import Table from '$lib/ui/Table.svelte';
 	import ReconciliationNotes from './ReconciliationNotes.svelte';
+	import ReconciliationSentences from './ReconciliationSentences.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 
 	// #1126: the Kostenabstimmung of one building's period: per position the Kosten des Gebäudes against what the
@@ -24,6 +25,11 @@
 			{ label: m.reconciliation_not_allocable_row(), amount: reconciliation.nonAllocable }
 		].filter((extra) => extra.amount !== 0)
 	);
+	// #1138 (PO 06.11.2026): the total card on phones stands apart from the positions above it
+	const card = (row: (typeof rows)[number]) =>
+		'total' in row
+			? { card: 'bg-sunken', label: 'font-bold' }
+			: { card: '', label: 'font-semibold' };
 	const columns = [
 		{ label: m.reconciliation_col_position() },
 		{ label: m.statements_building_costs(), numeric: true },
@@ -37,10 +43,12 @@
 		<!-- Phones get the positions one below the other, every amount in view; the table from md -->
 		<ul class="flex flex-col gap-4 md:hidden" aria-label={caption}>
 			{#each rows as row, i (i)}
-				<li class="rounded-panel border border-line p-4">
+				<li class="rounded-panel border border-line p-4 {card(row).card}">
 					<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
 						<dt class="text-ink-muted">{columns[0].label}</dt>
-						<dd class="hyphens-auto break-words text-right font-semibold text-ink">{row.label}</dd>
+						<dd class="hyphens-auto break-words text-right text-ink {card(row).label}">
+							{row.label}
+						</dd>
 						<dt class="text-ink-muted">{columns[1].label}</dt>
 						<dd class="text-right text-ink">{formatCurrency(row.buildingCosts)}</dd>
 						<dt class="text-ink-muted">{columns[2].label}</dt>
@@ -95,6 +103,7 @@
 		<p class="text-ink-muted" data-testid="cost-reconciliation-help">
 			{m.reconciliation_landlord_help()}
 		</p>
+		<ReconciliationSentences {reconciliation} />
 	{/if}
 
 	<ReconciliationNotes {reconciliation} />

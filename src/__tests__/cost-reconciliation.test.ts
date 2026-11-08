@@ -56,6 +56,21 @@ describe('Kostenabstimmung im BFF', () => {
 		});
 	});
 
+	// #1138 (PO 06.11.2026): the sentences under the table name the position with its Tankbestand and the vacant apartments
+	it('nennt den Tankbestand einer Position mit ihrem Namen und die Wohnungen mit Leerstand', async () => {
+		const { fetch } = backend({ 'reports/reconciliation': report });
+		expect(await reportReconciliation(fetch, period)).toMatchObject({
+			fuelStocks: [{ position: 'Hauswart', opening: 1792, closing: 1494 }],
+			vacancies: [{ apartmentNumber: 'OG2', days: 30 }]
+		});
+	});
+
+	it('nennt keinen Tankbestand bei einer Position ohne', async () => {
+		const without = { ...report, positions: [{ ...report.positions[0], fuelStock: null }] };
+		const { fetch } = backend({ 'reports/reconciliation': without });
+		expect((await reportReconciliation(fetch, period)).fuelStocks).toEqual([]);
+	});
+
 	it('nennt bei einer Kategorie mit mehreren Verteilschlüsseln den Schlüssel', async () => {
 		const several = { ...report, positions: [{ ...report.positions[0], severalKeys: true }] };
 		const { fetch } = backend({ 'reports/reconciliation': several });
@@ -96,7 +111,14 @@ describe('Kostenabstimmung im BFF', () => {
 		);
 		expect(result).toMatchObject({
 			buildingId: 'b1',
-			reconciliation: { managementFee: 33.05, withoutStatement: 0, drafts: [], notUpToDate: [] }
+			reconciliation: {
+				managementFee: 33.05,
+				withoutStatement: 0,
+				drafts: [],
+				notUpToDate: [],
+				fuelStocks: [{ position: 'Hauswart', opening: 1792, closing: 1494 }],
+				vacancies: run.vacancies
+			}
 		});
 	});
 

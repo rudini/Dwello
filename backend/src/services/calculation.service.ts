@@ -18,7 +18,7 @@ import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
 import { calculateApartmentProrating, handleMidYearMoves, lineByParts } from './prorating.service';
-export { countingOn, keyValuesAmong } from './prorating.service'; // for the statement's key values (#1284)
+export { countingWith, keyValuesAmong } from './prorating.service'; // for the statement's key values (#1284)
 import { apartmentsOf, getApartment } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';

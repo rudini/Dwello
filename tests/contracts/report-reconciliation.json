@@ -6,12 +6,14 @@
 			"severalKeys": false,
 			"buildingCosts": 1200,
 			"tenants": 1101.64,
-			"landlord": 98.36
+			"landlord": 98.36,
+			"fuelStock": { "opening": 1792, "closing": 1494 }
 		}
 	],
 	"total": { "buildingCosts": 1200, "tenants": 1101.64, "landlord": 98.36 },
 	"managementFee": 33.05,
 	"nonAllocable": 500,
+	"vacancies": [{ "apartmentNumber": "OG2", "days": 30 }],
 	"withoutStatement": 1,
 	"drafts": [{ "id": "a0000000-0000-4000-8000-000000000001", "tenantName": "Eva Frei" }],
 	"notUpToDate": [{ "id": "a0000000-0000-4000-8000-000000000001", "tenantName": "Eva Frei" }]

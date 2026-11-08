@@ -25,7 +25,11 @@ export type LineSegment = {
 	profileShare?: number; // heating costs by the Heizprofil: the part's percentage of the position's costs
 	share: number;
 	discontinued?: { number: string; date: string }[]; // the apartments that no longer count from its start
+	changed?: SizeChange[]; // #1301: the apartments with other values from its start, kept for the PDF (Fachreview 1301-1 V-5)
 };
+
+/** #1301: an apartment's Fläche and Zimmeranzahl from a day and up to the day before */
+export type SizeChange = { number: string; date: string; area: number; rooms: number; earlierArea: number; earlierRooms: number };
 
 // An invoice of a position over different days (#226): its days in the period, its amount for them, the tenant's days
 export type InvoicePart = {
