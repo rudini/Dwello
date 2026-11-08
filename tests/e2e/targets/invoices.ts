@@ -27,7 +27,6 @@ export const invoiceSearchInput = target('Suche Rechnungen', (page) => page.getB
 export const invoiceSearchButton = target('Suchen', (page) => page.getByTestId('invoice-search-submit'));
 export const showAllInvoicesLink = target('Alle Rechnungen anzeigen', (page) => page.getByTestId('invoices-show-all'));
 export const invoiceBuildingFilter = target('Filter Gebäude', (page) => page.getByTestId('invoice-building-filter'));
-export const invoiceCategoryFilter = target('Filter Kategorie', (page) => page.getByTestId('invoice-category-filter'));
 export const invoiceYearFilter = target('Filter Jahr', (page) => page.getByTestId('invoice-year-filter'));
 export const invoiceValidityFilter = target('Filter Umlagefähigkeit', (page) =>
 	page.getByTestId('invoice-validity-filter')

@@ -15,7 +15,7 @@ import {
 	utilityCostOfListedInvoice
 } from '../questions/invoices';
 import { pageAddress, pageTitle } from '../questions/navigation';
-import { editInvoice, filterInvoices, filterInvoicesByCategory, openInvoiceList, openInvoicesOfPeriod, searchInvoices, showAllInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
+import { editInvoice, filterInvoices, openInvoiceList, openInvoicesOfPeriod, searchInvoices, showAllInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -152,7 +152,3 @@ Then(
 		await verwalter.sees(toneOfListedUtilityCost(name)).toBe('neutral');
 	}
 );
-
-When('der Liegenschaftsverwalter die Rechnungen der Kategorie {string} anzeigt', async ({ verwalter }, category: string) => {
-	await verwalter.attemptsTo(filterInvoicesByCategory(category));
-});

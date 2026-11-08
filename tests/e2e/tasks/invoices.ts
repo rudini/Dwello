@@ -3,7 +3,6 @@ import { Click, Enter, Navigate, Select, Wait } from '../screenplay/interactions
 import {
 	editInvoiceButton,
 	invoiceBuildingFilter,
-	invoiceCategoryFilter,
 	invoiceYearFilter,
 	invoiceSearchButton,
 	invoiceSearchInput,
@@ -34,10 +33,6 @@ export const filterInvoices =
 		if (filter.validity) await actor.attemptsTo(Select.option(filter.validity).from(invoiceValidityFilter));
 		await actor.attemptsTo(Click.on(invoiceSearchButton));
 	};
-
-// #658: the invoices of one category, chosen by its name
-export const filterInvoicesByCategory = (category: string): Activity => (actor) =>
-	actor.attemptsTo(Select.option({ label: category }).from(invoiceCategoryFilter), Click.on(invoiceSearchButton));
 
 export const startNewInvoice = Click.on(newInvoiceButton);
 export const viewInvoice = (supplier: string) => Click.on(viewInvoiceButton(supplier));
