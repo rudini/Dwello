@@ -30,8 +30,8 @@ Funktionalität: Gebäudedetail
     Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude löschen will
-    Dann heisst der Dialog "Gebäude kann nicht gelöscht werden"
-    Und nennt der Dialog "Es enthält noch Wohnungen."
+    Dann heisst der Dialog "Birkenhof kann nicht gelöscht werden"
+    Und nennt der Dialog "Das Gebäude enthält noch Wohnungen."
     Und nennt der Dialog "Löschen Sie zuerst seine Wohnungen. Danach lässt sich das Gebäude löschen."
     Und nennt der Dialog "Eine Wohnung mit Mietverträgen bleibt erhalten und mit ihr das Gebäude."
     Und bietet der Dialog nur "Schliessen" an

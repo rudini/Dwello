@@ -39,6 +39,22 @@
 	};
 	const statusOf = (status: string) => (labels[status] ?? m.contracts_billed_sent)();
 	const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));
+	// a draft beside a locked one does not free the contract (Fachreview 1258 V-8)
+	const withDraft = $derived(!!billedBy?.some((s) => s.status === 'draft'));
+	// the refusal: a reason that reads whole without the list (Sven 1258 P-1), then what to do
+	const billedReason = $derived(
+		billedBy?.length === 1
+			? m.contracts_delete_billed_one()
+			: m.contracts_delete_billed_many({ count: billedBy?.length ?? 0 })
+	);
+	const billedNext = $derived(
+		locked
+			? [
+					m.contracts_delete_billed_locked(),
+					...(withDraft ? [m.contracts_delete_billed_locked_drafts()] : [])
+				]
+			: [m.contracts_delete_billed_drafts()]
+	);
 	// what a started contract's deletion means: with an end there is no «Beenden» (Fachreview V-11); an ended one says
 	// when it has no statement, unknown is not none (A-8, review C-1)
 	const startedNotes = $derived([
@@ -67,7 +83,7 @@
 <ActionDialog
 	bind:open
 	action="?/delete"
-	title={billed ? m.contracts_delete_refused_title() : m.contracts_delete_title()}
+	title={billed ? m.contracts_delete_refused_title({ name }) : m.contracts_delete_title()}
 	confirmLabel={m.contracts_delete_confirm()}
 	danger
 	impossible={billed}
@@ -78,7 +94,7 @@
 	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
 >
 	{#if billed}
-		<p>{m.contracts_delete_billed()}</p>
+		<p>{billedReason}</p>
 		<ul class="flex flex-col gap-2">
 			{#each billedBy ?? [] as statement (statement.id)}
 				<li>
@@ -91,7 +107,7 @@
 				</li>
 			{/each}
 		</ul>
-		<p>{locked ? m.contracts_delete_billed_locked() : m.contracts_delete_billed_drafts()}</p>
+		{#each billedNext as note (note)}<p>{note}</p>{/each}
 	{:else if future}
 		<p>{m.contracts_delete_future_text({ name })}</p>
 	{:else}

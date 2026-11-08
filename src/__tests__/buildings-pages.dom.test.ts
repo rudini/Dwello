@@ -294,7 +294,7 @@ describe('Gebäudedetail', () => {
 		detail([flat('a1', '1.01', 1)]);
 		click('building-delete-button');
 		const dialog = document.querySelector('[role=dialog]')!.textContent;
-		expect(dialog).toContain('Es enthält noch Wohnungen.');
+		expect(dialog).toContain('Das Gebäude enthält noch Wohnungen.');
 		expect(dialog).toContain('Löschen Sie zuerst seine Wohnungen.');
 		expect(byTestId('building-delete-confirm')).toBeNull();
 		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
@@ -305,7 +305,7 @@ describe('Gebäudedetail', () => {
 		detail([flat('a1', '1.01', 1)]);
 		click('building-delete-button');
 		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
-			'Gebäude kann nicht gelöscht werden'
+			'Lindenhof kann nicht gelöscht werden'
 		);
 		expect(byTestId('form-error')).toBeNull();
 	});

@@ -935,10 +935,14 @@ describe('Mietvertrag löschen', () => {
 
 		// #1258: der Titel sagt die Absage, darunter der Grund und was zu tun ist
 		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
-			'Mietvertrag kann nicht gelöscht werden'
+			'Mietvertrag von Anna Keller kann nicht gelöscht werden'
 		);
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
-		expect(dialog).toContain('Seine Mietstage sind abgerechnet in:');
+		expect(dialog).toContain(
+			'Die 4 Nebenkostenabrechnungen unten rechnen die Mietstage dieses Mietvertrags ab'
+		);
+		// Fachreview 1258 V-8: neben einer gesperrten hilft das Löschen des Entwurfs nicht
+		expect(dialog).toContain('Einen Entwurf aus der Liste zu löschen, hilft hier nicht');
 		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
 		expect(text('contract-delete-statement-s1')).toBe('NK-2024-0001 (bezahlt)');
 		expect(byTestId('contract-delete-statement-s2')!.getAttribute('href')).toBe('/statements/s2');

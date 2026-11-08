@@ -33,7 +33,7 @@
 
 <Dialog
 	bind:open
-	title={hasApartments ? m.buildings_delete_refused_title() : m.buildings_delete_title()}
+	title={hasApartments ? m.buildings_delete_refused_title({ name }) : m.buildings_delete_title()}
 	confirmLabel={m.buildings_delete_confirm()}
 	danger
 	busy={deleting}
