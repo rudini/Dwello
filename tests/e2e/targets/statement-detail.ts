@@ -177,4 +177,4 @@ export const discontinuedNote = target('Hinweis aufgehobene Wohnung', (page) => 
 
 // #1309 (persona Anna 1309 P-1): an invoice whose key cannot be calculated, named in the hint by its date
 export const laterKeyInvoice = (date: string) =>
-	target(`Rechnung vom ${date} im Hinweis auf Änderungen`, (page) => page.getByTestId('statement-later-key-invoice').filter({ hasText: date }));
+	target(`Rechnung vom ${date} im Hinweis auf Änderungen`, (page) => page.getByTestId('statement-later-key-invoice').filter({ hasText: date }).getByRole('link'));

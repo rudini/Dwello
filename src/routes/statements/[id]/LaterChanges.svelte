@@ -8,10 +8,15 @@
 	import Button from '$lib/ui/Button.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
-	import KeyInvoices from './KeyInvoices.svelte';
+	import HintedInvoices from '$lib/statement-wizard/HintedInvoices.svelte';
 
 	// #1309: a key of its invoices that cannot be calculated for the building, with the invoices
-	type KeyFailure = { key: string; reason: string; apartment: string | null; invoices: HintedInvoice[] };
+	type KeyFailure = {
+		key: string;
+		reason: string;
+		apartment: string | null;
+		invoices: HintedInvoice[];
+	};
 
 	// What changed since the statement was created (#96, #454): a draft is recalculated (#338), a sent one corrected
 	// by a berichtigte Abrechnung, unless that changes nothing for the tenant or the landlord chose not to (V-17 A);
@@ -93,7 +98,13 @@
 {#if shown}
 	<Alert {tone} {title} testid="statement-later-invoices">
 		<p>{text}</p>
-		<KeyInvoices invoices={keyInvoices} back={`/statements/${statement.id}`} />
+		{#if keyInvoices.length}
+			<HintedInvoices
+				invoices={keyInvoices}
+				back="/statements/{statement.id}"
+				testid="statement-later-key-invoice"
+			/>
+		{/if}
 		{#if recalculated}<p data-testid="statement-later-recalculated">{recalculated}</p>{/if}
 		{#if later.correctionLowers}<p>
 				{m.statements_later_lowers({ tenant: statement.tenantName })}
