@@ -1529,6 +1529,20 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+
+## Session: #743 and #751 invoice forms: announcements, length limits, help at «Leistungszeitraum»
+
+- [x] Read #743 and #751 on main; no open `needs-decision` issue on the same behaviour; decisions recorded in both issues (date announcement revised after code review 743-2 C-5; summary of the disclosure names its content, fach review V-1)
+- [x] `@wip` scenarios (invoice-new, invoice-edit, invoices features) and the approved step change in invoices.feature (Spec change approved: #743), seen red; DOM and unit tests seen red
+- [x] `fach-reviewer` step 1 (`docs/reviews/743-fachreview-1.md`): texts in de/fr/it/en, V-1 decided, V-2 fixed with extra steps and an upload scenario
+- [x] Length limits (Rechnungsnummer 50, Rechnungssteller 255) at the field; upload status after the last file; first paragraph at «Leistungszeitraum», the rest behind a disclosure; date field announces a page error only where the focus does not land in a field with an error
+- [x] code-reviewer `docs/reviews/743-review-{1,2,3}.md`: C-1, C-2, C-4, C-5, C-6 fixed; C-3 answered in the commit message of 41fa74a
+- [x] Persona Sven (`docs/design/personas/sven-743{,-2}.md`): P-1 (pre-existing, met in the task) and P-2 fixed; Minors P-3 to P-6 stay in the report
+- [x] No scenario: the date field's live region (it empties itself after 2 s, so an E2E check of its emptiness passes on the base too; DOM tests in `date-input.dom.test.ts`)
+- [x] Split: length limits of the other forms in #1201
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
+- [x] Archive the session; PR pushed after this archive
+
 ## Session: #1193 building search finds the full address and the postcode
 
 - [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
@@ -1581,17 +1595,6 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 
 ## Session: #739 E2E default Heizprofil per run
 
-## Session: #743 and #751 invoice forms: announcements, length limits, help at «Leistungszeitraum»
-
-- [x] Read #743 and #751 on main; no open `needs-decision` issue on the same behaviour; decisions recorded in both issues (date announcement revised after code review 743-2 C-5; summary of the disclosure names its content, fach review V-1)
-- [x] `@wip` scenarios (invoice-new, invoice-edit, invoices features) and the approved step change in invoices.feature (Spec change approved: #743), seen red; DOM and unit tests seen red
-- [x] `fach-reviewer` step 1 (`docs/reviews/743-fachreview-1.md`): texts in de/fr/it/en, V-1 decided, V-2 fixed with extra steps and an upload scenario
-- [x] Length limits (Rechnungsnummer 50, Rechnungssteller 255) at the field; upload status after the last file; first paragraph at «Leistungszeitraum», the rest behind a disclosure; date field announces a page error only where the focus does not land in a field with an error
-- [x] code-reviewer `docs/reviews/743-review-{1,2,3}.md`: C-1, C-2, C-4, C-5, C-6 fixed; C-3 answered in the commit message of 41fa74a
-- [x] Persona Sven (`docs/design/personas/sven-743{,-2}.md`): P-1 (pre-existing, met in the task) and P-2 fixed; Minors P-3 to P-6 stay in the report
-- [x] No scenario: the date field's live region (it empties itself after 2 s, so an E2E check of its emptiness passes on the base too; DOM tests in `date-input.dom.test.ts`)
-- [x] Split: length limits of the other forms in #1201
-- [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
 ## Session: #697 CI screenshot job: mobile, dark mode, dialog and wizard states
 
 - [x] Read #697 and #1172 (same job; #1172 serves the base branch as a production build, whoever merges second merges `main` first); decisions in #697 «Decided (product owner)» with two follow-up comments
