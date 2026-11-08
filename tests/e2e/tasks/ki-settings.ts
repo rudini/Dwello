@@ -1,7 +1,7 @@
 import { EMPTY_APP, FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Cookies, Enter, Navigate, Wait } from '../screenplay/interactions';
+import { Check, Click, Cookies, Enter, Navigate, Press, Wait } from '../screenplay/interactions';
 import {
 	kiApiKeyInput,
 	kiBaseUrlInput,
@@ -62,6 +62,12 @@ export const saveProvider =
 	(provider: Provider): Activity =>
 	(actor) =>
 		actor.attemptsTo(openFreshKi, fillProvider(provider), Click.on(kiSaveButton), Wait.until(kiSaveAnswer));
+
+// #1183: the Enter key in a field saves, as in #678; «Verbindung prüfen» runs only by its button
+export const saveProviderWithEnter =
+	(provider: Provider): Activity =>
+	(actor) =>
+		actor.attemptsTo(openFreshKi, fillProvider(provider), Press.theKey('Enter').on(kiCountryInput), Wait.until(kiSaveAnswer));
 
 export const checkConnection =
 	(provider: Provider): Activity =>

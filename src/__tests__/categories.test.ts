@@ -12,6 +12,7 @@ import {
 import { runAction } from './helpers/action';
 import nameTaken from '../../tests/contracts/category-name-taken.json';
 import inUse from '../../tests/contracts/category-in-use.json';
+import inStatement from '../../tests/contracts/category-in-statement.json';
 import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import allowed from '../../tests/contracts/categories-allowed.json';
@@ -372,6 +373,16 @@ describe('Kategorie löschen', () => {
 		expect(await result).toMatchObject({
 			status: 409,
 			data: { error: 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.' }
+		});
+	});
+
+	// #1160
+	it('erklärt, warum eine Kategorie in einer Abrechnung bleibt', async () => {
+		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, inStatement);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { error: 'Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen.' }
 		});
 	});
 });

@@ -78,8 +78,7 @@
 		</select>
 	{/snippet}
 </Field>
-<!-- #659: whether this run suits the apartments at all, whatever the profile: right under the choice, not in its help;
-     «Zähler», «Zählerstand» and «Heizkostenverteiler» are not in the glossary yet: TODO(fachlich prüfen, #1130) -->
+<!-- #659: whether this run suits the apartments at all, whatever the profile: right under the choice, not in its help -->
 <Alert tone="caution" title={m.statements_heating_meters_title()} testid="heating-meter-warning">
 	<p>{m.statements_heating_meters()}</p>
 </Alert>

@@ -16,6 +16,7 @@ import {
 	readFreshPrivacy,
 	saveMode,
 	saveProvider,
+	saveProviderWithEnter,
 	stubProvider,
 	UNREACHABLE,
 	type Provider
@@ -40,6 +41,13 @@ When(
 	'der Liegenschaftsverwalter den Anbieter {string} in {string} mit geprüftem Datenschutz speichert',
 	async ({ verwalter }, provider: string, country: string) => {
 		await verwalter.attemptsTo(saveProvider(stubProvider(provider, country)));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Anbieter {string} in {string} mit geprüftem Datenschutz mit der Eingabetaste speichert',
+	async ({ verwalter }, provider: string, country: string) => {
+		await verwalter.attemptsTo(saveProviderWithEnter(stubProvider(provider, country)));
 	}
 );
 

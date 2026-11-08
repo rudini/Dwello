@@ -21,6 +21,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Fläche** | Nettowohnfläche in Quadratmetern (m²). Grundlage für flächenbasierte Verteilschlüssel. | `area` Feld |
 | **Zimmeranzahl** | Anzahl Zimmer (z.B. 3.5 Zimmer). Schweizer Konvention mit halben Zimmern. | `rooms` Feld |
 | **Mietstatus** | Status einer Wohnung: Vermietet (`occupied`, ein Vertrag läuft), Vermietet ab {Datum} (`relet`, nur ein künftiger Vertrag ist abgeschlossen), Leer (`vacant`), Gesperrt (`reserved`). «Vermietet bis {Datum}» ist kein eigener Mietstatus, sondern zeigt das Vertragsende des laufenden Mietvertrags an, solange kein Mietvertrag ab dem Tag danach erfasst ist. **Leer:** Es gibt keinen laufenden und keinen künftigen Mietvertrag; die Wohnung kann vermietet werden. **Gesperrt:** Der Vermieter hat die Wohnung gesperrt, z.B. während einer Renovation. | `status` Feld |
+| **frei (Wohnung)** | Für den Zeitraum eines Mietvertrags hat die Wohnung keinen anderen Mietvertrag. Nicht dasselbe wie der Mietstatus «Leer»: Eine vermietete Wohnung ist ab dem Tag nach dem Vertragsende frei. | Prüfung beim Speichern (`CONTRACT_OVERLAP`) |
 | **Mieter** | Person, die eine Wohnung mietet. Enthält Name, Kontaktdaten, Korrespondenzadresse, Korrespondenzkanal und Sprache. Aktiv mit laufendem Mietvertrag, künftig mit nur einem künftigen Mietvertrag, ehemalig, wenn alle seine Mietverträge beendet sind; ein Mieter ohne Mietvertrag hat keinen dieser Status. | `tenants` Tabelle |
 | **Mieter anonymisieren** | Entfernt bei einem ehemaligen Mieter nach Ablauf der Aufbewahrung Name, Kontaktdaten, Korrespondenzadresse und Dokumente; die Beträge seiner Abrechnungen bleiben (Art. 6 Abs. 4 DSG). | `anonymiseTenant` |
 | **Anonymisierter Mieter** | Ehemaliger Mieter, den der Vermieter nach Ablauf der Aufbewahrung anonymisiert hat; Dwello zeigt ihn ohne Namen, Kontaktdaten und Dokumente, mit den Beträgen seiner Abrechnungen. | `tenants.anonymised_on` |
@@ -159,6 +160,8 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Vordefinierte Heizprofile** | Mit Dwello gelieferte Heizprofile: Heizung Mittelland, Heizung Bergregion, Heizung Tessin, Heizung + Warmwasser. | `type = 'predefined'` |
 | **Eigenes Heizprofil** | Vom Liegenschaftsverwalter erfasstes Profil. | `type = 'custom'` |
 | **Quelle der Monatsanteile** | Woher die Monatsanteile eines Heizprofils stammen: bei einem vordefinierten Heizprofil Merkblatt, Herausgeber und Tabelle, bei einem eigenen «Eigenes Profil des Vermieters». Steht im PDF unter der Zeile zum Heizprofil, wie die Abrechnung erstellt wurde (#465). | `heating_profiles.source_de` … `source_en`; `utility_statements.heating_share` (`sources`) |
+| **Zähler (Heizung, Warmwasser)** | Gerät in der Wohnung, das den Verbrauch an Wärme oder Warmwasser misst; abgelesen ergibt es den **Zählerstand**. Dwello rechnet nicht nach Zählerständen ab. | — |
+| **Heizkostenverteiler** | Kleines Gerät an einem Heizkörper, das den Anteil der Wohnung am Wärmeverbrauch erfasst; kein Zähler. Wer solche Geräte hat, rechnet nach Verbrauch ab, nicht mit Dwello. | — |
 
 ---
 
