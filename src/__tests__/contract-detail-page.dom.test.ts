@@ -599,6 +599,10 @@ describe('Mietvertragsdetail', () => {
 		expect(dialog.textContent).toContain(
 			'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.2026.'
 		);
+		// #1277: nothing is preselected; the hint on the Kündigungsfrist belongs to a notice
+		expect(dialog.textContent).toContain('Wählen Sie, wie der Mietvertrag endet: mit einer Kündigung oder einer Aufhebungsvereinbarung.');
+		click('contract-end-kind-notice');
+		await settle();
 		const words = dialog.textContent!.replace(/\s+/g, ' ');
 		expect(words).toContain('Der letzte Tag des Mietverhältnisses: in der Regel der Kündigungstermin oder der mit dem Mieter vereinbarte Tag.');
 		expect(words).toContain('auch wenn der Mieter früher auszieht.');

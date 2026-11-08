@@ -82,6 +82,7 @@ import {
 	contractEndPastConfirm,
 	noticeReceivedInput,
 	endKindAgreement,
+	endKindNotice,
 	continueOpenEndedButton,
 	movedOutButton,
 	deleteContractButton,
@@ -201,6 +202,7 @@ const endWithPastDate: Activity = async (actor) => {
 		await actor.attemptsTo(
 			openDialog(endContractButton),
 			EnterDate.of(inDays(-30)).into(contractEndInput),
+			Click.on(endKindNotice),
 			Click.on(confirmEndContractButton)
 		);
 	}
@@ -408,6 +410,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			openDialog(endContractButton),
 			EnterDate.of('2098-12-31').into(contractEndInput),
+			Click.on(endKindNotice),
 			Click.on(confirmEndContractButton),
 			Wait.until(on.formProblem)
 		),
@@ -499,9 +502,18 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			openDialog(endContractButton),
 			EnterDate.of('2025-03-31').into(contractEndInput),
+			Click.on(endKindNotice),
 			Check.the(contractEndPastConfirm),
 			Click.on(confirmEndContractButton),
 			Wait.until(on.refusedStatements)
+		),
+	// #1277: a Vertragsende without its kind: the error at the choice
+	'end-dialog-kind-error': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of('2099-03-31').into(contractEndInput),
+			Click.on(confirmEndContractButton),
+			Wait.until(on.dialogError)
 		),
 	// #1148: an Aufhebungsvereinbarung chosen: no day the notice arrived, the hint on the agreed day instead
 	'end-dialog-agreement': () => (actor) =>
@@ -515,6 +527,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			openDialog(endContractButton),
 			EnterDate.of('2099-03-31').into(contractEndInput),
+			Click.on(endKindNotice),
 			EnterDate.of('2099-02-15').into(noticeReceivedInput),
 			Wait.until(on.shown('contract-notice-period-hint'))
 		),

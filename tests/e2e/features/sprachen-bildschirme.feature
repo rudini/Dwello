@@ -125,6 +125,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | end-dialog-advance-refused |
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | end-dialog-agreement |
+      | contract-detail        | end-dialog-kind-error |
       | contract-detail        | delete-dialog       |
       | contract-detail        | advance-delete-dialog |
       | contract-detail        | advance-delete-refused |

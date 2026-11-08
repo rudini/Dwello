@@ -43,6 +43,7 @@ import {
 	endKindText,
 	noticeReceivedShown,
 	noticeChosen,
+	agreementChosen,
 	noticeReceivedOnShown
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
@@ -80,7 +81,8 @@ import {
 	createFinalStatement,
 	endContractByAgreementOn,
 	startEndingByAgreement,
-	endByAgreementInstead
+	endByAgreementInstead,
+	endContractWithoutKind
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
@@ -627,8 +629,22 @@ Then('sagen die nächsten Schritte nicht {string}', async ({ verwalter }, text: 
 	await verwalter.sees(nextStepsText).not.toContain(text);
 });
 
-Then('ist im Dialog die Kündigung gewählt', async ({ verwalter }) => {
-	await verwalter.sees(noticeChosen).toBe(true);
+// #1277: no kind is preselected; anchored on the question the dialog asks
+Then('ist im Dialog weder die Kündigung noch die Aufhebungsvereinbarung gewählt', async ({ verwalter }) => {
+	await verwalter.sees(endKindText).toContain('Wie endet der Mietvertrag?');
+	await verwalter.sees(noticeChosen).toBe(false);
+	await verwalter.sees(agreementChosen).toBe(false);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will, ohne die Art zu wählen',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(endContractWithoutKind(date));
+	}
+);
+
+Then('meldet der Dialog bei der Art des Vertragsendes {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(endKindText).toContain(message);
 });
 
 When(

@@ -206,11 +206,17 @@ Funktionalität: Mietvertragsdetail
     Dann sagen die nächsten Schritte "Der Mietvertrag endet mit einer Aufhebungsvereinbarung."
     Und sagen die nächsten Schritte nicht "gekündigt"
 
-  # #1148 (Fachreview 1148-1): ein unbefristeter Mietvertrag endet in der Regel mit einer Kündigung (Art. 266a OR)
-  Szenario: Der Dialog schlägt die Kündigung vor
+  # #1277 (Personas Helga und Dr. Weber 1148): wer nicht liest, erfasste eine Aufhebungsvereinbarung als Kündigung
+  Szenario: Der Dialog schlägt keine Art des Vertragsendes vor
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
-    Dann ist im Dialog die Kündigung gewählt
+    Dann ist im Dialog weder die Kündigung noch die Aufhebungsvereinbarung gewählt
+
+  Szenario: Ohne die Art des Vertragsendes beendet der Dialog den Mietvertrag nicht
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beenden will, ohne die Art zu wählen
+    Dann meldet der Dialog bei der Art des Vertragsendes "Wählen Sie, wie der Mietvertrag endet: mit einer Kündigung oder einer Aufhebungsvereinbarung."
+    Und ist der Mietvertrag unbefristet
 
   # A-6 (#115): wie ein gekündigter läuft ein mit einer Aufhebungsvereinbarung beendeter Mietvertrag nicht weiter
   Szenario: Ein mit einer Aufhebungsvereinbarung beendeter Mietvertrag läuft nicht stillschweigend weiter
