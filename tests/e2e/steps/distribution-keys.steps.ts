@@ -48,6 +48,13 @@ Given(
 );
 
 Given(
+	'der Verteilschlüssel {string} rechnet danach mit der Formel {string}',
+	async ({ seed }, title: string, formula: string) => {
+		await seed.distributionKeyFormula(title, formula);
+	}
+);
+
+Given(
 	'im Gebäude {string} gibt es eine Rechnung vom {string}, die nach dem Verteilschlüssel {string} verteilt wird',
 	async ({ seed }, building: string, date: string, key: string) => {
 		await seed.invoiceByKey(building, key, date);

@@ -1079,6 +1079,33 @@ Funktionalität: Abrechnungsdetail
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
     Und steht der Fokus auf der Fehlermeldung
 
+  # #1309 (Entscheid PO): ein Entwurf mit einer Rechnung, deren Verteilschlüssel sich für die Wohnungen des Gebäudes
+  # nicht berechnen lässt, ist nicht aktuell (vor #1221 verteilte Dwello sie gleichmässig); «Neu berechnen» verweigert
+  # wie in #1221, bis der Verteilschlüssel stimmt
+  @wip
+  Szenario: Entwurf mit einem Verteilschlüssel, der sich nicht berechnen lässt, ist nicht aktuell
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Verteilschlüssel "Halbe Zimmer" rechnet danach mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "TEXT-ENTWURF"
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+
+  # #1309 (Entscheid PO): eine versendete Abrechnung mit einem solchen Verteilschlüssel ist zu berichtigen
+  @wip
+  Szenario: Versendete Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, ist zu berichtigen
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Verteilschlüssel "Halbe Zimmer" rechnet danach mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "TEXT-VERSENDET"
+    Wenn der Liegenschaftsverwalter die Abrechnung aus dem Hinweis berichtigen will
+    Dann sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt
+
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"

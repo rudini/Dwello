@@ -562,7 +562,7 @@ export function testData(api: CallTheApi) {
 		async invoiceOnByKey(buildingTitle: string, categoryName: string, amount: string, date: string, keyName: string) {
 			const category = await predefinedCategory(categoryName);
 			const key = (await get('distribution-keys?limit=100')).data.find((k: { nameDE: string }) => k.nameDE === keyName);
-			const id = await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: key.id }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: ids.get(keyName) ?? key.id }, `${categoryName} ${date}`, amount, date);
 			ids.set(`Rechnung ${categoryName} ${date}`, id);
 		},
 
@@ -726,6 +726,11 @@ export function testData(api: CallTheApi) {
 			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula });
 			ids.set(title, key.id);
 			extras.push(`distribution-keys/${key.id}`);
+		},
+
+		// A key's formula changed after statements were made with it, e.g. one that no longer fits the building (#1309)
+		async distributionKeyFormula(title: string, formula: string) {
+			await put(`distribution-keys/${ids.get(title)}`, { formula });
 		},
 
 		async invoiceByKey(buildingTitle: string, keyTitle: string, date = '2026-03-31') {

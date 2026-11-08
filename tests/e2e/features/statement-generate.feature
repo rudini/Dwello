@@ -313,16 +313,30 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #1221 (Entscheid PO): ein eigener Verteilschlüssel, der sich für die Wohnungen des Gebäudes nicht berechnen lässt,
   # verteilt nicht still zu gleichen Teilen, sondern hält den Lauf an wie eine Rechnung ohne Kategorie (#382); die Formel
   # besteht die vier Beispielwohnungen und teilt erst bei 3.5 Zimmern durch null
+  @wip
   Szenario: Ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt, hält die Vorschau an
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "30.09.2024" über "900.00"
-    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss für jede Wohnung eine Zahl von 0 oder mehr ergeben und für mindestens eine Wohnung mehr als 0."
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "«Halbe Zimmer» teilt für die Wohnung 3.01 durch null."
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist."
     Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen."
     Und steht der Fokus auf der Fehlermeldung
     Und ist der Assistent im Schritt "Vorschau"
+
+  # #1323: die Veränderung des Tankbestands nimmt den Verteilschlüssel der letzten Lieferung bis zum Ende der Periode,
+  # auch aus einer früheren Periode; lässt er sich nicht berechnen, hält er die Vorschau an wie eine Rechnung der Periode
+  @wip
+  Szenario: Der Verteilschlüssel einer früheren Lieferung hält die Vorschau an, wenn er den Tankbestand verteilt
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "800" Franken vom "2023-10-15" nach dem Verteilschlüssel "Halbe Zimmer"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "15.10.2023" über "800.00"
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "TEXT-TANKBESTAND"
 
   Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Vorschau öffnen
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
