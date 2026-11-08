@@ -14,7 +14,7 @@ Funktionalität: Mietvertragsdetail
   Szenario: Mietvertrag anzeigen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann sieht der Liegenschaftsverwalter die Wohnung "2.01" im Mietvertrag
-    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 950.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 950.00"
 
   Szenario: Mietvertrag beenden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -22,10 +22,10 @@ Funktionalität: Mietvertragsdetail
     Dann endet der Mietvertrag heute
 
   # #653: ein Dialog mit Feldern beginnt im ersten Feld, so folgt die Bestätigung erst nach den Feldern
-  Szenario: Der Dialog zum Beenden beginnt im Feld Vertragsende
+  Szenario: Der Dialog zum Beenden beginnt beim Vertragsende
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
-    Dann steht der Fokus im Feld "Vertragsende" des Dialogs
+    Dann steht der Fokus bei "Vertragsende" des Dialogs
 
   # #511 (Persona Dr. Weber 461, P-3, P-4): das Vertragsende ist nicht immer der Kündigungstermin; kündigt der
   # Vermieter, braucht es das amtliche Formular (Art. 266l bis 266o OR)

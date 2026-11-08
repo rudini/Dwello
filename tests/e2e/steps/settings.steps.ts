@@ -105,7 +105,7 @@ Then('steht der Fokus in den Einstellungen auf {string}', async ({ verwalter }, 
 });
 
 // persona Weber 690 W-7: «Ort» is the label of two fields
-Then('steht der Fokus in den Einstellungen auf dem Feld {string}', async ({ verwalter }, label: string) => {
+Then('steht der Fokus in den Einstellungen bei {string}', async ({ verwalter }, label: string) => {
 	await verwalter.sees(focusedSettingField).toBe(`setting-${FIELDS[label]}`);
 });
 
