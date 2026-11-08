@@ -1203,3 +1203,25 @@ describe('PDF mit aufgehobener Wohnung', () => {
 		);
 	});
 });
+
+// #1301: an apartment with other Fläche and Zimmeranzahl from a day, its values kept with the part (Fachreview 1301-1 V-5)
+describe('PDF mit neuer Fläche ab einem Tag', () => {
+	const changed = [{ number: '1.02', date: '2025-07-01', area: 140, rooms: 5.5, earlierArea: 70, earlierRooms: 3.5 }];
+	const before = { start: '2025-01-01', end: '2025-06-30', count: 3, keyShare: '70.00 / 210.00 m²', costs: 1487.67, apartment: 495.89, periodShare: 1, days: 181, total: 181, share: 495.89 };
+	const from = { start: '2025-07-01', end: '2025-12-31', count: 3, keyShare: '70.00 / 280.00 m²', costs: 1512.33, apartment: 378.08, periodShare: 1, days: 184, total: 184, share: 378.08, changed };
+	const line = { category: 'Hauswart', key: 'Pro Fläche (m²)', totalAmount: 3000, apartmentShare: 873.97, periodShare: 1, segments: [before, from], tenantShare: 873.97 };
+	const note = 'Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.';
+	const count = (text: string, part: string) => text.split(part).length - 1;
+
+	it('nennt die Wohnung mit ihren Werten vor und ab dem Tag über der Kostenaufstellung', async () => {
+		const text = (await textOf({ ...refund, lineItems: [line] })).flowing;
+		expect(text).toContain(`Wohnung 1.02 hat ab 01.07.2025 140.00 m² und 5.5 Zimmer, bis zum 30.06.2025 70.00 m² und 3.5 Zimmer. ${note}`);
+	});
+
+	// Fachreview 1301-1 V-4: the sentence about the parts once, also with an apartment that no longer exists
+	it('erklärt die Zeiträume einmal, auch neben einer aufgehobenen Wohnung', async () => {
+		const both = { ...line, segments: [before, { ...from, discontinued: [{ number: '1.03', date: '2025-07-01' }] }] };
+		const text = (await textOf({ ...refund, lineItems: [both] })).flowing;
+		expect([text.includes('Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr.'), text.includes('Wohnung 1.02 hat ab 01.07.2025'), count(text, note)]).toEqual([true, true, 1]);
+	});
+});

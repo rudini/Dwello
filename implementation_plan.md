@@ -11,8 +11,8 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 
 ## Session: #1301 «Fläche und Zimmeranzahl ab einem Tag»
 
-- [ ] @wip scenario `tests/e2e/features/apartment-size-from-day.feature` before the code
-- [ ] fach-reviewer step 1 (texts in four languages)
+- [x] @wip scenario `tests/e2e/features/apartment-size-from-day.feature` before the code (a90a731), seen red at the missing field and the amounts; the 2026 row already holds on the base
+- [x] fach-reviewer step 1 `docs/reviews/1301-fachreview-1.md`: every text in four languages; V-1 (remove the last change), V-2 (correction without a day), V-3, V-4, V-5, V-8, M-1 taken in with scenarios; V-6 → #1328 (sentence in the help text); V-7 rejected (the backup is a pg_dump of the whole database); terms → #1327
 - [ ] Backend: migration, values per day in the Verteilschlüssel, parts at the day, statement key values, refusals; pg tests seen red
 - [ ] code-reviewer round on the backend
 - [ ] PDF and statement page: the apartment with other values from a day

@@ -1,5 +1,5 @@
 # language: de
-@apartments @wip
+@apartments
 Funktionalität: Fläche und Zimmeranzahl ab einem Tag
   Als Liegenschaftsverwalter
   möchte ich erfassen, ab welchem Tag eine Wohnung nach einem Umbau eine andere Fläche und Zimmeranzahl hat
@@ -21,7 +21,7 @@ Funktionalität: Fläche und Zimmeranzahl ab einem Tag
     Und die Wohnung "4.01" hat ab "2025-07-01" "140" m² und "5.5" Zimmer
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
     Wenn der Liegenschaftsverwalter ab "2025-03-01" die Fläche "150" und die Zimmeranzahl "6" speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Fläche und die Zimmeranzahl gelten bereits ab 01.07.2025 neu. Neue Werte können erst ab einem späteren Tag gelten. Wählen Sie einen Tag nach dem 01.07.2025, oder lassen Sie das Feld leer, um die heutigen Werte zu korrigieren."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Fläche und die Zimmeranzahl gelten bereits ab 01.07.2025 neu. Neue Werte können erst ab einem späteren Tag gelten. Wählen Sie einen Tag nach dem 01.07.2025, oder lassen Sie das Feld leer, um die Werte ab dem 01.07.2025 zu korrigieren. Ist der 01.07.2025 falsch, entfernen Sie diese Änderung auf der Seite der Wohnung."
 
   Szenario: Ein Tag ohne neue Werte wird nicht gespeichert
     Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
@@ -29,6 +29,44 @@ Funktionalität: Fläche und Zimmeranzahl ab einem Tag
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
     Wenn der Liegenschaftsverwalter ab "2025-07-01" die Fläche "70" und die Zimmeranzahl "3.5" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Fläche und Zimmeranzahl sind unverändert. Ändern Sie die Fläche oder die Zimmeranzahl, oder lassen Sie das Feld leer."
+
+  # Fachreview 1301-1 V-3
+  Szenario: Neue Werte gelten nicht ab einem Tag nach heute
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
+    Wenn der Liegenschaftsverwalter ab "2099-07-01" die Fläche "140" und die Zimmeranzahl "5.5" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Neue Fläche und Zimmeranzahl können nicht ab einem Tag nach heute gelten. Erfassen Sie sie, sobald der Umbau fertig ist."
+
+  # Fachreview 1301-1 V-8
+  Szenario: Neue Werte gelten vor dem Tag, ab dem es die Wohnung nicht mehr gibt
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und die Wohnung "4.01" ist aufgehoben ab "2025-07-01"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
+    Wenn der Liegenschaftsverwalter ab "2025-08-01" die Fläche "140" und die Zimmeranzahl "5.5" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Wohnung gibt es ab 01.07.2025 nicht mehr. Neue Fläche und Zimmeranzahl müssen vor diesem Tag gelten."
+
+  # Fachreview 1301-1 V-2: ohne Tag gelten die Werte ab dem Tag der letzten Änderung
+  Szenario: Ohne Tag korrigiert der Liegenschaftsverwalter nur die Werte ab der letzten Änderung
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und die Wohnung "4.01" hat ab "2025-07-01" "140" m² und "5.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
+    Wenn der Liegenschaftsverwalter ohne Tag die Fläche "130" und die Zimmeranzahl "5.5" speichert
+    Dann hat die Wohnung "5.5" Zimmer und "130 m²" im Stockwerk "1. OG"
+    Und hatte die Wohnung bis "30.06.2025" "70 m²" und "3.5" Zimmer
+
+  # Fachreview 1301-1 V-1: ein falsch erfasster Tag lässt sich beheben
+  Szenario: Eine falsch erfasste Änderung entfernen
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und die Wohnung "4.01" hat ab "2025-08-01" "140" m² und "5.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "4.01"
+    Wenn der Liegenschaftsverwalter die Änderung ab "01.08.2025" entfernen will
+    Dann erklärt der Dialog "Ab dem 01.08.2025 gelten dann wieder 70 m² und 3.5 Zimmer. Abrechnungen, die Sie danach erstellen, neu berechnen oder berichtigen, rechnen damit. Versendete Abrechnungen bleiben unverändert."
+    Wenn der Liegenschaftsverwalter das Entfernen bestätigt
+    Dann hat die Wohnung "3.5" Zimmer und "70 m²" im Stockwerk "1. OG"
 
   # Das Beispiel aus #1301: drei Wohnungen zu 70 m², 1.03 wird ab 01.07.2025 mit 1.02 zusammengelegt (1.02 hat dann
   # 140 m²). Hauswart (nach Fläche) 3'000.00 über 2025: bis 30.06. (181 Tage) teilen drei Wohnungen 1'487.67 zu je
@@ -102,4 +140,4 @@ Funktionalität: Fläche und Zimmeranzahl ab einem Tag
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "3000" Franken vom "2025-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Eva Frei"
-    Dann nennt die Detailseite der Abrechnung "Wohnung 1.02 hat ab 01.07.2025 eine andere Fläche oder Zimmeranzahl. Abrechnungspositionen mit Kosten vor und ab diesem Tag sind je Zeitraum gerechnet; die Zeilen dazu stehen im PDF."
+    Dann nennt die Detailseite der Abrechnung zur neuen Fläche "Wohnung 1.02 hat ab 01.07.2025 eine andere Fläche oder Zimmeranzahl. Abrechnungspositionen mit Kosten vor und ab diesem Tag sind je Zeitraum gerechnet; die Zeilen dazu stehen im PDF."

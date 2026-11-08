@@ -74,7 +74,9 @@ export const it: Record<string, string> = {
 	partShare: 'La sua quota{colon}{apartment} × quota temporale ({sum}) / {costs} = {share}',
 	partShareZero: 'La sua quota{colon}({sum}) × {keyShare} (quota del suo appartamento secondo la chiave di riparto) = {share}',
 	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
-	segmentIntro: 'L’appartamento {number} non esiste più dal {date}. Fino al {dayBefore} conta nella chiave di riparto; la sua quota è a carico del locatore. Sotto le voci del conteggio interessate figura il calcolo per periodo.',
+	segmentIntro: 'L’appartamento {number} non esiste più dal {date}. Fino al {dayBefore} conta nella chiave di riparto; la sua quota è a carico del locatore.',
+	sizeChangeIntro: 'L’appartamento {number} ha dal {date} {area} m² e {rooms} locali; fino al {dayBefore} aveva {earlierArea} m² e {earlierRooms} locali.', // #1301
+	segmentNote: 'Sotto le voci del conteggio interessate figura il calcolo per periodo.', // once below the intros (Fachreview 1301-1 V-4)
 	keyShareSegments: 'per periodo, vedi sotto',
 	segmentLineDays: '{start} – {end}, {count} appartamenti{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} giorni = CHF {share}',
 	segmentLinePercent: '{start} – {end}, {count} appartamenti{colon}{keyShare} × CHF {costs} = CHF {apartment} × quota temporale {percent}\u00a0% = CHF {share}',

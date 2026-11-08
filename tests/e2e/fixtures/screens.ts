@@ -144,6 +144,10 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Seeblick', '1.02', 'vacant');
 	await seed.apartment('Seeblick', '1.03', 'vacant'); // free: never rented
 	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2099
+	// #1301: an apartment with a new Fläche and Zimmeranzahl from a day, in a building of its own
+	await seed.building('Umbauhof', 'Winterthur');
+	await seed.apartment('Umbauhof', 'U.01', 'vacant');
+	await seed.changeApartmentSize('U.01', '2025-07-01', '105', '4.5');
 	await seed.tenant('Anna');
 	await seed.tenant('Bruno');
 	await seed.tenant('Carla');
@@ -397,6 +401,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		undeliveredTenant: seed.idOf('Hugo'), // #736
 		undeliveredStatement: seed.idOf('Abrechnung Hugo 2023'),
 		freeApartment: seed.idOf('1.03'),
+		resizedApartment: seed.idOf('U.01'), // #1301
 		limitedApartment: seed.idOf('1.04'),
 		earlierContract: seed.idOf('Mietvertrag Vreni'),
 		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract

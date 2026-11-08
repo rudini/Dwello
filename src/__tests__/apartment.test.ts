@@ -20,6 +20,7 @@ import numberTaken from '../../tests/contracts/building-apartment-number-taken.j
 import apartmentResponse from '../../tests/contracts/apartment.json';
 import deleteRefused from '../../tests/contracts/apartment-delete-refused.json';
 import contractRuns from '../../tests/contracts/apartment-contract-runs.json';
+import sizeTooEarly from '../../tests/contracts/apartment-size-from-too-early.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -473,6 +474,36 @@ describe('Wohnung aufheben', () => {
 				}
 			}
 		});
+	});
+});
+
+// #1301: new Fläche and Zimmeranzahl from a day; empty: they correct those from the last change
+describe('Fläche und Zimmeranzahl ab einem Tag', () => {
+	it('sendet den Tag, ab dem die neuen Werte gelten, und leer keinen', async () => {
+		const day = runAction(editActions.default, 'a1', 200, { ...fields, sizeFrom: '2025-07-01' });
+		await expect(day.result).rejects.toMatchObject({ status: 303 });
+		expect(day.calls[0].body).toMatchObject({ area: '68', rooms: '2.5', sizeFrom: '2025-07-01' });
+		const none = runAction(editActions.default, 'a1', 200, { ...fields, sizeFrom: '' });
+		await expect(none.result).rejects.toMatchObject({ status: 303 });
+		expect(none.calls[0].body).not.toHaveProperty('sizeFrom');
+	});
+
+	it('nennt den Grund, wenn die Werte schon ab einem späteren Tag neu gelten', async () => {
+		const { result } = runAction(editActions.default, 'a1', 409, { ...fields, sizeFrom: '2025-03-01' }, sizeTooEarly);
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				errors: {
+					form: 'Die Fläche und die Zimmeranzahl gelten bereits ab 01.07.2025 neu. Neue Werte können erst ab einem späteren Tag gelten. Wählen Sie einen Tag nach dem 01.07.2025, oder lassen Sie das Feld leer, um die Werte ab dem 01.07.2025 zu korrigieren. Ist der 01.07.2025 falsch, entfernen Sie diese Änderung auf der Seite der Wohnung.'
+				}
+			}
+		});
+	});
+
+	it('entfernt die letzte Änderung und bleibt auf der Seite der Wohnung', async () => {
+		const { calls, result } = runAction(actions.removeSizeChange, 'a1', 200, {}, apartment);
+		expect(await result).toBeUndefined();
+		expect(calls).toEqual([{ method: 'DELETE', url: `${API}/apartments/a1/size-change`, body: undefined }]);
 	});
 });
 

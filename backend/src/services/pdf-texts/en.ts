@@ -74,7 +74,9 @@ export const en: Record<string, string> = {
 	partShare: 'Your share{colon}{apartment} × time share ({sum}) / {costs} = {share}',
 	partShareZero: 'Your share{colon}({sum}) × {keyShare} (your apartment’s share under the distribution key) = {share}',
 	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
-	segmentIntro: 'Apartment {number} no longer exists from {date}. Up to {dayBefore}, it counts in the distribution key; the landlord bears its share. Below the statement lines concerned, the calculation is shown per period.',
+	segmentIntro: 'Apartment {number} no longer exists from {date}. Up to {dayBefore}, it counts in the distribution key; the landlord bears its share.',
+	sizeChangeIntro: 'Apartment {number} has {area} m² and {rooms} rooms from {date}; up to {dayBefore}, it had {earlierArea} m² and {earlierRooms} rooms.', // #1301
+	segmentNote: 'Below the statement lines concerned, the calculation is shown per period.', // once below the intros (Fachreview 1301-1 V-4)
 	keyShareSegments: 'per period, see below',
 	segmentLineDays: '{start} – {end}, {count} apartments{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} days = CHF {share}',
 	segmentLinePercent: '{start} – {end}, {count} apartments{colon}{keyShare} × CHF {costs} = CHF {apartment} × time share {percent}\u00a0% = CHF {share}',

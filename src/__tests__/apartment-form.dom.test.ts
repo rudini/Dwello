@@ -174,8 +174,8 @@ describe('Wohnung bearbeiten', () => {
 		expect(document.activeElement).toBe(input);
 	});
 
-	// #1284, wording of Fachreview 1284-1 (a) and V-1 (b)
-	it('erklärt «Aufgehoben ab» am Feld, auch dass eine grössere Wohnung ihre Fläche noch nicht ab dem Tag erhält', () => {
+	// #1284, wording of Fachreview 1284-1 (a); #1301: a larger apartment gets its new values from the day (Fachreview 1301-1)
+	it('erklärt «Aufgehoben ab» am Feld, auch wo eine grössere Wohnung ihre neue Fläche ab dem Tag erhält', () => {
 		show(EditApartmentPage, {
 			data: { apartment: { ...apartment(), discontinuedFrom: '2025-07-01' } },
 			form: null
@@ -183,7 +183,31 @@ describe('Wohnung bearbeiten', () => {
 		expect(labelOf('apartment-discontinued-input')).toBe('Aufgehoben ab (optional)');
 		expect(byTestId<HTMLInputElement>('apartment-discontinued-input')!.value).toBe('01.07.2025');
 		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit, und ihren Anteil tragen Sie. Abrechnungen ab diesem Tag rechnen ohne sie. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, kann Dwello ihre neue Fläche noch nicht ab diesem Tag berücksichtigen.'
+			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit, und ihren Anteil tragen Sie. Abrechnungen ab diesem Tag rechnen ohne sie. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, erfassen Sie bei ihr unter «Bearbeiten» die neue Fläche und Zimmeranzahl ab demselben Tag.'
+		);
+	});
+
+	// #1301: a day typed wrong would go out empty and correct the values from the last change instead
+	it('sendet keine neuen Werte, solange der Tag, ab dem sie gelten, ungültig ist', async () => {
+		show(EditApartmentPage, { data: { apartment: apartment() }, form: null } as never);
+		const input = byTestId<HTMLInputElement>('apartment-size-from-input')!;
+		fireEvent(input, 'input', '31.13.2025');
+		input.dispatchEvent(new Event('blur'));
+		flushSync();
+		const cancel = vi.fn();
+		submit({ formElement: input.form!, cancel } as never);
+		expect(cancel).toHaveBeenCalled();
+		await settle();
+		expect(document.activeElement).toBe(input);
+	});
+
+	// #1301, wording of Fachreview 1301-1; empty on every visit: the day belongs to one save
+	it('bietet einen Tag an, ab dem neue Fläche und Zimmeranzahl gelten, und erklärt ihn am Feld', () => {
+		show(EditApartmentPage, { data: { apartment: apartment() }, form: null } as never);
+		expect(labelOf('apartment-size-from-input')).toBe('Neue Fläche und Zimmeranzahl gelten ab (optional)');
+		expect(byTestId<HTMLInputElement>('apartment-size-from-input')!.value).toBe('');
+		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nur ausfüllen, wenn die Wohnung nach einem Umbau ab diesem Tag eine andere Fläche oder Zimmeranzahl hat, zum Beispiel nach einer Zusammenlegung. Bis zum Tag davor rechnen die Abrechnungen mit den bisherigen Werten, ab diesem Tag mit den neuen. Wollen Sie nur einen Fehler korrigieren, lassen Sie das Feld leer: Die Werte gelten dann für alle Abrechnungen, und wenn schon ein Tag erfasst ist, ab diesem Tag. Entwürfe, die Sie schon erstellt haben, berechnen Sie danach neu. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit den Werten, die Sie hier speichern. Den Mietvertrag ändert Dwello dadurch nicht: Ist die Wohnung vermietet, passen Sie Nettomiete und Akonto dort an.'
 		);
 	});
 });
