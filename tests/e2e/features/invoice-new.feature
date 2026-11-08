@@ -94,7 +94,7 @@ Funktionalität: Neue Rechnung erfassen
     Und steht beim Leistungszeitraum hinter «Mehr dazu» "Für welche Zeit gilt die Rechnung?"
 
   # #743: der Rechnungssteller hat höchstens 255 Zeichen, wie in der Datenbank
-  Szenario: Ein zu langer Rechnungssteller sagt am Feld, was zu tun ist
+  Szenario: Bei einem zu langen Rechnungssteller sagt Dwello, was zu tun ist
     Wenn der Liegenschaftsverwalter eine Rechnung mit einem Rechnungssteller von 256 Zeichen speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
     Und zeigt das Formular einen Rechnungssteller von 256 Zeichen

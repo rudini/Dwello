@@ -142,7 +142,7 @@ Funktionalität: Rechnungsliste
 
   # #743 (Fachreview 743-1 V-2): auch beim Hochladen hat die Rechnungsnummer höchstens 50 Zeichen; Dwello kürzt sie nicht
   # und erstellt die Rechnung nicht
-  Szenario: Eine zu lange Rechnungsnummer beim Hochladen sagt am Feld, was zu tun ist
+  Szenario: Bei einer zu langen Rechnungsnummer beim Hochladen sagt Dwello, was zu tun ist
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Und der Liegenschaftsverwalter bei der Datei den Rechnungssteller "Elektro Blitz", die Beschreibung "Treppenhauslicht", den Betrag "180.00" und das Rechnungsdatum "2026-03-31" erfasst
     Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Kategorie "Allgemeinstrom" wählt
