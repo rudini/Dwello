@@ -833,7 +833,7 @@
 	"contracts_new_purpose": "Saisissez étape par étape qui loue quel appartement, à partir de quand et pour quel loyer.",
 	"contracts_unknown_building": "Inconnu",
 	"contracts_checking_apartments": "Vérification des appartements libres…",
-	"contracts_apartment_help": "Les appartements libres ou qui seront libres plus tard figurent en haut. Les appartements avec un contrat de bail de durée indéterminée non résilié sont marqués « non disponible » et ne peuvent pas être choisis.",
+	"contracts_apartment_help": "Les appartements libres ou qui seront libres plus tard figurent en haut. Les appartements avec un contrat de bail sans fin du contrat sont marqués « non disponible » et ne peuvent pas être choisis.",
 	"contracts_apartment_help_unchecked": "Les appartements marqués « non vérifié » peuvent être choisis, même si Dwello n’a pas pu charger leurs contrats de bail. Dwello vérifie à l’enregistrement si l’appartement choisi est libre.",
 	"contracts_choose_apartment": "Choisir un appartement",
 	"contracts_free_later": "L’appartement sera libre plus tard",

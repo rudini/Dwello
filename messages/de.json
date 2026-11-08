@@ -833,7 +833,7 @@
 	"contracts_new_purpose": "Erfassen Sie Schritt für Schritt, wer welche Wohnung ab wann zu welcher Miete mietet.",
 	"contracts_unknown_building": "Unbekannt",
 	"contracts_checking_apartments": "Es wird geprüft, welche Wohnungen frei sind …",
-	"contracts_apartment_help": "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen.",
+	"contracts_apartment_help": "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem Mietvertrag ohne Vertragsende sind mit «nicht verfügbar» markiert und lassen sich nicht wählen.",
 	"contracts_apartment_help_unchecked": "Wohnungen mit «nicht geprüft» lassen sich wählen, obwohl Dwello ihre Mietverträge nicht laden konnte. Ob die gewählte Wohnung frei ist, prüft Dwello beim Speichern.",
 	"contracts_choose_apartment": "Wohnung wählen",
 	"contracts_free_later": "Wohnung wird später frei",

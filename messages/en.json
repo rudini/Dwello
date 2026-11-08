@@ -833,7 +833,7 @@
 	"contracts_new_purpose": "Add step by step who rents which apartment, from when and at what rent.",
 	"contracts_unknown_building": "Unknown",
 	"contracts_checking_apartments": "Checking which apartments are free …",
-	"contracts_apartment_help": "Apartments that are free or become free later are listed first. Apartments with an open-ended rental contract that is not terminated are marked «not available» and cannot be chosen.",
+	"contracts_apartment_help": "Apartments that are free or become free later are listed first. Apartments with a rental contract without a contract end are marked «not available» and cannot be chosen.",
 	"contracts_apartment_help_unchecked": "Apartments marked «not checked» can be chosen, even though Dwello could not load their rental contracts. Dwello checks on saving whether the chosen apartment is free.",
 	"contracts_choose_apartment": "Choose apartment",
 	"contracts_free_later": "Apartment becomes free later",

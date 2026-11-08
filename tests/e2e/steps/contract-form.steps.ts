@@ -52,6 +52,7 @@ import { pageTitleText } from '../questions/app-frame';
 import { contractListed } from '../questions/contracts';
 import { pageAddress, pageTitle } from '../questions/navigation';
 import { restoredDraftText, saveStatusText, shownStepNameLines } from '../questions/wizard';
+import { escapeRegExp } from '../questions/pattern';
 import {
 	chooseFixedTerm,
 	discardChanges,
@@ -370,7 +371,7 @@ Then(
 Then(
 	'beginnt die Wohnung {string} in der Auswahl mit {string}',
 	async ({ verwalter, seed }, apartment: string, text: string) => {
-		await verwalter.sees(apartmentChoiceLabel(seed.idOf(apartment)!)).toMatch(new RegExp(`^${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+		await verwalter.sees(apartmentChoiceLabel(seed.idOf(apartment)!)).toMatch(new RegExp(`^${escapeRegExp(text)}`));
 	}
 );
 

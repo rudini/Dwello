@@ -144,3 +144,28 @@ describe('Wohnung mit nicht geladenen Mietverträgen', () => {
 		expect(m.contracts_apartment_help_unchecked()).toBe(help);
 	});
 });
+
+// #1287 (fach review 1264-1 M-1): the help names the contract that blocks like the hints of the step
+describe('Hilfe zur Wohnung', () => {
+	it.each([
+		[
+			'de',
+			'Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem Mietvertrag ohne Vertragsende sind mit «nicht verfügbar» markiert und lassen sich nicht wählen.'
+		],
+		[
+			'fr',
+			'Les appartements libres ou qui seront libres plus tard figurent en haut. Les appartements avec un contrat de bail sans fin du contrat sont marqués « non disponible » et ne peuvent pas être choisis.'
+		],
+		[
+			'it',
+			'Gli appartamenti liberi o che si liberano più tardi sono in cima. Gli appartamenti con un contratto di locazione senza fine del contratto sono contrassegnati con «non disponibile» e non possono essere scelti.'
+		],
+		[
+			'en',
+			'Apartments that are free or become free later are listed first. Apartments with a rental contract without a contract end are marked «not available» and cannot be chosen.'
+		]
+	] as const)('nennt auf %s einen Mietvertrag ohne Vertragsende', (locale, text) => {
+		overwriteGetLocale(() => locale);
+		expect(m.contracts_apartment_help()).toBe(text);
+	});
+});

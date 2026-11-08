@@ -833,7 +833,7 @@
 	"contracts_new_purpose": "Registri passo dopo passo chi ha in locazione quale appartamento, da quando e a quale pigione.",
 	"contracts_unknown_building": "Sconosciuto",
 	"contracts_checking_apartments": "Verifica degli appartamenti liberi …",
-	"contracts_apartment_help": "Gli appartamenti liberi o che si liberano più tardi sono in cima. Gli appartamenti con un contratto di locazione a tempo indeterminato non disdetto sono contrassegnati con «non disponibile» e non possono essere scelti.",
+	"contracts_apartment_help": "Gli appartamenti liberi o che si liberano più tardi sono in cima. Gli appartamenti con un contratto di locazione senza fine del contratto sono contrassegnati con «non disponibile» e non possono essere scelti.",
 	"contracts_apartment_help_unchecked": "Gli appartamenti contrassegnati con «non verificato» possono essere scelti, anche se Dwello non ha potuto caricare i loro contratti di locazione. Dwello verifica al salvataggio se l’appartamento scelto è libero.",
 	"contracts_choose_apartment": "Scegliere un appartamento",
 	"contracts_free_later": "L’appartamento si libera più tardi",

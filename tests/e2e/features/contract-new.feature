@@ -88,7 +88,7 @@ Funktionalität: Neuen Mietvertrag erfassen
   Szenario: Die Hilfe zur Wohnung sagt, welche Wohnungen sich wählen lassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
-    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen."
+    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem Mietvertrag ohne Vertragsende sind mit «nicht verfügbar» markiert und lassen sich nicht wählen."
 
   # B-16 (#156): wer «Beenden» beim alten Mietvertrag vergessen hat, erfährt es vor der Prüfung
   Szenario: Mieter hat noch einen Mietvertrag ohne Vertragsende
@@ -270,7 +270,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
-    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen. Wohnungen mit «nicht geprüft» lassen sich wählen, obwohl Dwello ihre Mietverträge nicht laden konnte. Ob die gewählte Wohnung frei ist, prüft Dwello beim Speichern."
+    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem Mietvertrag ohne Vertragsende sind mit «nicht verfügbar» markiert und lassen sich nicht wählen. Wohnungen mit «nicht geprüft» lassen sich wählen, obwohl Dwello ihre Mietverträge nicht laden konnte. Ob die gewählte Wohnung frei ist, prüft Dwello beim Speichern."
 
   # #1265 (Helga P-4): bei 150 % schneidet das Feld das Ende der Bezeichnung ab, darum steht «nicht geprüft» vorne
   Szenario: «nicht geprüft» steht vor der Bezeichnung der Wohnung
