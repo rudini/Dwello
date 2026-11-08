@@ -17,9 +17,9 @@ import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
-import { apartmentsOfParts, calculateApartmentProrating, handleMidYearMoves, lineByParts } from './prorating.service';
+import { calculateApartmentProrating, handleMidYearMoves, lineByParts } from './prorating.service';
 export { countingOn, keyValuesAmong } from './prorating.service'; // for the statement's key values (#1284)
-import { getApartment, listApartments } from './apartment.service';
+import { apartmentsOf, getApartment } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
 import { agreedCategoryIds, agreedFromDays } from './agreed-category.service';
@@ -364,8 +364,7 @@ export async function calculateStatementForContract(
 	const invoiceGroups = groupInvoicesByCategory(invoices).filter((group) => !group.categoryId || agreed.includes(group.categoryId));
 
 	// All apartments of the building share its costs according to the distribution key
-	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
-	const buildingApartments = apartmentsOfParts(buildingApartmentRows); // with «Aufgehoben ab» (#1284)
+	const buildingApartments = await apartmentsOf(buildingId); // with «Aufgehoben ab» (#1284)
 
 	// Calculate line items
 	const lineItems: CalculatedLineItem[] = [];

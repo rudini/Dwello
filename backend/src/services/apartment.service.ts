@@ -333,3 +333,9 @@ export async function apartmentExists(id: string): Promise<boolean> {
 
 	return !!result;
 }
+
+/** The building's apartments with the values a Verteilschlüssel reads, and from when they no longer count (#1284) */
+export async function apartmentsOf(buildingId: string) {
+	const { apartments } = await listApartments({ buildingId, limit: 1000 });
+	return apartments.map(({ id, number, area, rooms, discontinuedFrom }) => ({ id, number, area: parseFloat(area), rooms: parseFloat(rooms), discontinuedFrom }));
+}

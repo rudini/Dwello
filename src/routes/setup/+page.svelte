@@ -72,6 +72,7 @@
 				type="email"
 				label={m.login_email()}
 				value={form?.email ?? ''}
+				error={form?.errors?.email}
 				autocomplete="username"
 				testid="setup-email-input"
 			/>

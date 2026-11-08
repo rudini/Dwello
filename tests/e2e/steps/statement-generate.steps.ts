@@ -6,6 +6,8 @@ import {
 	proposedPeriodText,
 	allBuildingsNoteText,
 	currentStep,
+	uncalculableInvoiceOn,
+	uncalculableKeysText,
 	existingStatementsText,
 	akontoHintOf,
 	announcedFeeHint,
@@ -671,6 +673,19 @@ Then(
 
 Then('erklärt der Hinweis auf Rechnungen ohne Kategorie {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(uncategorizedInvoicesText).toContain(text);
+});
+
+Then(
+	'nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(uncalculableInvoiceOn(date)).toContain(amount);
+	}
+);
+
+// a seeded name in «» stands for its unique name (#1221)
+Then('erklärt der Hinweis auf nicht berechenbare Verteilschlüssel {string}', async ({ verwalter, names }, text: string) => {
+	const named = text.replace(/«([^»]+)»/g, (all, title: string) => (names.has(title) ? `«${names.get(title)}»` : all));
+	await verwalter.sees(uncalculableKeysText).toContain(named);
 });
 
 // #453 (#327): days, Akonto and «Abgerechnet bis» per contract; contracts «Abgerechnet bis» covers in full

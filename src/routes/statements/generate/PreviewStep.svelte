@@ -112,6 +112,7 @@
 		bind:confirmed
 		error={errors.confirm}
 		uncategorizedError={errors.uncategorized}
+		uncalculableError={errors.uncalculable}
 	/>
 {/if}
 

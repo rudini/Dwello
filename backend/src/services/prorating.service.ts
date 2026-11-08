@@ -311,10 +311,6 @@ type Calculation<G, R> = {
 	shareOfGroup: (group: G, key: Share, run: R, rental: Range) => Promise<{ tenantShare: number; periodShare: number; shareDays: LineDays }>;
 };
 
-/** The building's apartments as the Verteilschlüssel counts them, with their «Aufgehoben ab» */
-export const apartmentsOfParts = (rows: { id: string; number: string; area: string; rooms: string; discontinuedFrom: string | null }[]): CountedApartment[] =>
-	rows.map(({ id, number, area, rooms, discontinuedFrom }) => ({ id, number, area: parseFloat(area), rooms: parseFloat(rooms), discontinuedFrom }));
-
 export const countingOn = (day: string) => (apartment: { discontinuedFrom: string | null }) =>
 	!apartment.discontinuedFrom || apartment.discontinuedFrom > day;
 

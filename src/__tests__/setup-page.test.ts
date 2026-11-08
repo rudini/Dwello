@@ -8,6 +8,7 @@ import needed from '../../tests/contracts/setup-needed.json';
 import account from '../../tests/contracts/setup.json';
 import invalid from '../../tests/contracts/setup-code-invalid.json';
 import locked from '../../tests/contracts/setup-locked.json';
+import tooLong from '../../tests/contracts/setup-text-too-long.json';
 import done from '../../tests/contracts/setup-done.json';
 import available from '../../tests/contracts/auth-password-available.json';
 
@@ -218,6 +219,17 @@ describe('Einrichtung beim ersten Aufruf', () => {
 			data: { error: m.backend_setup_code_invalid(), email: account.email }
 		});
 		expect(jar.has('dwello_session')).toBe(false);
+	});
+
+	// #1306: as the forms since #1201, at the field, and the address stays to be shortened
+	it('sagt bei einer zu langen E-Mail-Adresse beim Feld, wie viele Zeichen sie haben darf', async () => {
+		const { result } = await setUp(fields, answering(400, tooLong));
+
+		expect(result).toMatchObject({
+			status: 400,
+			data: { errors: { email: 'Höchstens 255 Zeichen. Kürzen Sie den Text.' }, email: account.email }
+		});
+		expect((result as { data: object }).data).not.toHaveProperty('error');
 	});
 
 	// code review 577 C-4: the refusals no scenario reaches (the lock would hold the fresh installation for 15 minutes)

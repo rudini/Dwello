@@ -34,5 +34,16 @@
 		}
 	],
 	"oldHeatingRule": [],
-	"splitKeys": []
+	"splitKeys": [],
+	"uncalculableKeys": [
+		{
+			"id": "d0000000-0000-4000-8000-000000000003",
+			"billingEntityName": "Garten AG",
+			"description": "Gartenpflege 2025",
+			"invoiceDate": "2025-05-31",
+			"amount": "600.00",
+			"distributionKeyName": "Halbe Zimmer",
+			"buildingName": "Ahornhof"
+		}
+	]
 }

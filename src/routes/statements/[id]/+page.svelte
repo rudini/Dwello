@@ -235,7 +235,9 @@
 	{/if}
 	{#if form?.actionError}
 		<Alert tone="critical" title={m.ui_action_failed()}>
-			<p data-testid="form-error">{form.actionError}</p>
+			<p id="statement-action-error" class="scroll-mt-24" tabindex="-1" data-testid="form-error">
+				{form.actionError}
+			</p>
 		</Alert>
 	{/if}
 	<ReminderFeedback reminder={form?.reminder} />

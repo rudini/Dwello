@@ -1123,6 +1123,7 @@ describe('Abrechnungen erstellen', () => {
 						findings: [],
 						lateInvoices: [],
 						heatingWithoutServicePeriod: [],
+						uncalculableKeys: [],
 						...lists
 					}
 				}
@@ -1175,6 +1176,27 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Ordnen Sie jeder Rechnung eine Kategorie zu');
 		expect(heading()).toBe('Vorschau');
+		expect(document.activeElement).toBe(byTestId('form-error')); // persona Helga 1221 P-1
+	});
+
+	// #1221 (Entscheid PO): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt, hält den Lauf an
+	it('hält die Vorschau an, solange sich ein Verteilschlüssel für die Wohnungen eines Gebäudes nicht berechnen lässt', async () => {
+		const [failing] = completeness.uncalculableKeys;
+		open({ preview, invoices: [{ ...invoices[0], check: { ...completeness, buildingId: 'b1' } }] });
+		const hint = byTestId('uncalculable-keys')!;
+
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss'
+		);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/${failing.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+		);
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen.');
+		expect(heading()).toBe('Vorschau');
+		// persona Helga 1221 P-1: the message takes the focus, not the confirmation further down
+		expect(document.activeElement).toBe(byTestId('form-error'));
 	});
 
 	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {

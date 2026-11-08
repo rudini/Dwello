@@ -208,6 +208,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | old-address-preview |
       | statement-generate     | heating-hints       |
       | statement-generate     | split-keys          |
+      | statement-generate     | uncalculable-keys   |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |

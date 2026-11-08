@@ -70,6 +70,11 @@ Then('steht der Fokus auf dem Ergebnis {string}', async ({ verwalter }, result: 
 	await verwalter.sees(focusedText).toBe(result);
 });
 
+// Personas Helga and Marco 1221: a refusal said far from the button takes the focus, so it scrolls into view
+Then('steht der Fokus auf der Fehlermeldung', async ({ verwalter }) => {
+	await verwalter.sees(focusedPlace).toBe('form-error');
+});
+
 // #653: after saving, the focus names what changed instead of announcing the page title again
 Then('steht der Fokus auf dem Status {string}', async ({ verwalter }, status: string) => {
 	await verwalter.sees(focusedText).toBe(status);
@@ -83,8 +88,8 @@ When(
 	}
 );
 
-Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter }, label: string, text: string) => {
-	await verwalter.sees(fieldDescription(label)).toContain(text);
+Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter, seed }, label: string, text: string) => {
+	await verwalter.sees(fieldDescription(label)).toContain(seed.withNames(text)); // #1304: a seeded name as the page shows it
 });
 
 Then('steht bei {string} noch der Text von {int} Zeichen', async ({ verwalter }, label: string, length: number) => {

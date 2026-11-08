@@ -20,6 +20,7 @@ import {
 	heatingWithoutServicePeriod,
 	lateInvoices,
 	uncategorizedInvoices,
+	uncalculableKeys,
 	draftsOnlyNote,
 	feeNotAgreed,
 	lateChecksNote,
@@ -154,6 +155,8 @@ export const missingStockFindings = Count.of(categoryFinding('Ohne Anfangs- und 
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const uncategorizedInvoiceOn = (date: string) => Text.of(hintedInvoice(uncategorizedInvoices, date));
 export const uncategorizedInvoicesText = Text.of(uncategorizedInvoices);
+export const uncalculableInvoiceOn = (date: string) => Text.of(hintedInvoice(uncalculableKeys, date));
+export const uncalculableKeysText = Text.of(uncalculableKeys);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
 // the hint's invoices in order, each as the amount expected at its place when it names it, else as its whole text

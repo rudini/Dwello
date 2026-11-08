@@ -10,6 +10,7 @@ import { apartments, buildings, categories, fuelStocks, invoices, utilityStateme
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange, periodReadings } from './fuel-stock.service';
 import { splitKeysOf } from './split-keys';
+import { uncalculableKeyInvoices } from './held-invoices';
 import { swissToday } from './today';
 import type { CategoryFindingKind } from '../api/invoice';
 
@@ -395,6 +396,7 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		findings: [stock, keysFinding(current), ...findings].filter((finding) => finding !== null),
 		lateInvoices,
 		...(await heatingHintsOf(buildingId, period)),
-		splitKeys: await invoiceSplitKeys(buildingId, period)
+		splitKeys: await invoiceSplitKeys(buildingId, period),
+		uncalculableKeys: await uncalculableKeyInvoices(buildingId, period.start, period.end) // #1221: they hold the run
 	};
 }
