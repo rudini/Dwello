@@ -22,6 +22,9 @@ import {
 	reviewItem,
 	runningContractHint,
 	runningContractHintOf,
+	runningContractLinkOf,
+	apartmentClearedAnnouncement,
+	overlapLink,
 	startContractsUnknown,
 	tenantSelect,
 	withdrawNoticeOption,
@@ -40,7 +43,7 @@ import {
 	apartmentClearedText
 } from '../targets/contract-form';
 import { stepNames, stepValues } from '../targets/wizard';
-import { errorToast, successToast, warningToast } from '../targets/form';
+import { anyToast, errorToast, successToast, warningToast } from '../targets/form';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
 export const chosenApartmentId = Value.of(apartmentSelect);
@@ -97,9 +100,16 @@ export const warning = Text.of(warningToast);
 export const apartmentClearedHint = Text.of(apartmentCleared);
 export const apartmentClearedExplanation = Text.of(apartmentClearedText);
 export const apartmentClearedLinkText = Text.of(apartmentClearedLink);
+export const apartmentClearedAnnounced = Text.of(apartmentClearedAnnouncement);
+export const apartmentClearedHints = Count.of(apartmentCleared);
+export const toasts = Count.of(anyToast);
+export const runningContractHintTextOf = (tenant: string) => Text.of(runningContractHintOf(tenant));
+export const runningContractLinkTextOf = (tenant: string) => Text.of(runningContractLinkOf(tenant));
 export const overlapBoxText = Text.of(overlapBox);
+export const overlapLinkText = Text.of(overlapLink);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);
+export const apartmentSelectInWindow = ShareInViewport.of(apartmentSelect);
 export const noticeHintText = Text.of(noticeHint);
 export const announcedTotal = Text.of(announcedMonthlyTotal);
 export const leaveQuestion = Text.of(leaveDialogTitle);

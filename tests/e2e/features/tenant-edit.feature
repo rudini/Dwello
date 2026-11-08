@@ -40,3 +40,9 @@ Funktionalität: Mieter bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
+
+  # #1201: die Telefonnummer hat höchstens 30 Zeichen, wie in der Datenbank
+  Szenario: Bei einer zu langen Telefonnummer sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter bei "Telefon" einen Text von 31 Zeichen speichert
+    Dann steht bei "Telefon" die Fehlermeldung "Höchstens 30 Zeichen. Kürzen Sie den Text."
+    Und steht bei "Telefon" noch der Text von 31 Zeichen

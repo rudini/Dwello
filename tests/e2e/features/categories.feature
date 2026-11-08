@@ -368,3 +368,10 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" löscht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen."
     Und sieht der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung"
+
+  # #1201: der Name einer Kategorie hat höchstens 100 Zeichen, wie in der Datenbank
+  Szenario: Bei einem zu langen Namen einer Kategorie sagt Dwello, was zu tun ist
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie "Treppenhausreinigung"
+    Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert
+    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Und steht bei "Name" noch der Text von 101 Zeichen

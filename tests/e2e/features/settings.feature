@@ -118,6 +118,28 @@ Funktionalität: Einstellungen
     Und erklärt die Einstellung "Ort des Kontoinhabers" "Beispiel: Zürich"
     Und heisst die Einstellung "Adresse des Kontoinhabers" "Strasse und Hausnummer (optional)"
 
+  # #1202 (Personas Marco P-1 und Helga P-2 in #1175): wer das Häkchen setzt und wieder entfernt, findet die eingegebenen
+  # Angaben zum Kontoinhaber wieder; es wird nichts gespeichert
+  Szenario: Die eingegebenen Angaben zum Kontoinhaber bleiben bis zum Speichern erhalten
+    Wenn der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber angibt
+    Und folgende Angaben zum Kontoinhaber eingibt:
+      | Name des Kontoinhabers    | Hans Beispiel |
+      | Adresse des Kontoinhabers | Rainweg 7     |
+      | PLZ des Kontoinhabers     | 3011          |
+      | Ort des Kontoinhabers     | Bern          |
+    Und den Absender wieder als Kontoinhaber angibt, ohne zu speichern
+    Und doch einen eigenen Kontoinhaber angibt
+    Dann zeigen die Einstellungen den Kontoinhaber "Hans Beispiel", "Rainweg 7", "3011" "Bern"
+
+  # #1202 (Codereview 1202-1 C-2): gespeichert mit dem Absender als Kontoinhaber, sind die Angaben auch ohne erneutes
+  # Öffnen gelöscht
+  @einstellungen-global
+  Szenario: Gespeichert mit dem Absender als Kontoinhaber, kommen die gelöschten Angaben nicht zurück
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Wenn der Liegenschaftsverwalter in den Einstellungen den Absender als Kontoinhaber angibt und speichert
+    Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
+    Und ist kein eigener Kontoinhaber mehr hinterlegt
+
   # #1175 (Persona Marco P-2): auch beim Absender ist die Strasse freiwillig (#450), wie beim Kontoinhaber
   Szenario: Die Strasse des Absenders ist als freiwillig bezeichnet
     Dann heisst die Einstellung "Adresse" "Strasse und Hausnummer (optional)"
@@ -227,3 +249,18 @@ Funktionalität: Einstellungen
       | Mahnfrist | 20 |
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Einstellungen wurden nicht gespeichert"
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern."
+
+  # #1298 (Entscheid des Product Owners; Personas Marco und Helga in #1202): die Hilfe beim Häkchen sagt vor dem
+  # Speichern, dass ein eigener Kontoinhaber gelöscht wird; es wird nichts gespeichert
+  Szenario: Die Einstellungen sagen, dass das Häkchen einen eigenen Kontoinhaber löscht
+    Dann erklärt die Einstellung "Kontoinhaber ist der Absender" "Mit Häkchen löscht Speichern einen eigenen Kontoinhaber."
+
+  # #1298 (Entscheid des Product Owners; Persona Marco in #1202): die Bestätigung nennt auch das Konto mit dem Kontoinhaber
+  @einstellungen-global
+  Szenario: Die Bestätigung nennt das Konto mit dem Kontoinhaber
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname | Muster Immobilien AG       |
+      | PLZ        | 8001                       |
+      | Ort        | Zürich                     |
+      | IBAN       | CH93 0076 2011 6238 5295 7 |
+    Dann bestätigen die Einstellungen "Absender, Konto mit Kontoinhaber, Verwaltungspauschale, Fristen und Vorschläge gespeichert."

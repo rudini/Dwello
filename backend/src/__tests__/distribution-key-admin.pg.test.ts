@@ -43,6 +43,31 @@ describe('Eigene Verteilschlüssel', () => {
 		});
 	});
 
+	// #1305: % and _ in a name are characters, not wildcards of the name check
+	it('nimmt einen Namen mit % an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('70 Prozent Fläche');
+
+		const response = await create('70% Fläche');
+
+		expect(response.status).toBe(201);
+	});
+
+	it('nimmt einen Namen mit _ an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('Haus A');
+
+		const response = await create('Haus_A');
+
+		expect(response.status).toBe(201);
+	});
+
+	it('nimmt einen Namen mit \\ an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('Ost West');
+
+		const response = await create('Ost\\ West');
+
+		expect(response.status).toBe(201);
+	});
+
 	it('lehnt beim Umbenennen einen vergebenen deutschen Namen ab', async () => {
 		await keys.create({ name: `Stairs ${token}`, nameDE: `Treppenhaus ${token}`, formula: '{units}' });
 		const id = await idOf(await create('Lift'));
@@ -52,6 +77,34 @@ describe('Eigene Verteilschlüssel', () => {
 		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen «Treppenhaus ${token}» existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
 			name: `Treppenhaus ${token}`
 		});
+	});
+
+	// #1200: the name refusal no longer hides the formula error of the same save
+	it('nennt beim vergebenen Namen auch den Fehler der Formel', async () => {
+		await create('Treppe');
+
+		await expectRejection(
+			await create('Treppe', '({area}'),
+			409,
+			`Ein Verteilschlüssel mit dem Namen «Treppe ${token}» existiert bereits.`,
+			'DISTRIBUTION_KEY_NAME_TAKEN',
+			{ name: `Treppe ${token}` },
+			[{ code: 'FORMULA_UNCLOSED_PARENTHESIS', params: { part: '({area}' } }]
+		);
+	});
+
+	it('nennt beim Umbenennen auf einen vergebenen Namen auch den Fehler der Formel', async () => {
+		await create('Keller');
+		const id = await idOf(await create('Estrich'));
+
+		await expectRejection(
+			await keys.send('PUT', `/${id}`, { nameDE: `Keller ${token}`, formula: '{area} *' }),
+			409,
+			`Ein Verteilschlüssel mit dem Namen «Keller ${token}» existiert bereits.`,
+			'DISTRIBUTION_KEY_NAME_TAKEN',
+			{ name: `Keller ${token}` },
+			[{ code: 'FORMULA_MISSING_OPERAND', params: { part: '{area} *' } }]
+		);
 	});
 
 	it('erklärt, warum eine Formel ungültig ist', async () => {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { contractSummary } from '$lib/contract-wizard';
+	import { chosenApartmentName, contractSummary } from '$lib/contract-wizard';
 	import type { ContractFormValues, Overlap } from '$lib/contract-form';
 	import ContractsUnknown from './ContractsUnknown.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -44,7 +44,10 @@
 				apartmentStep: m.tenants_apartment()
 			})}
 		</p>
-		<OverlapLink contract={overlap.contract} />
+		<OverlapLink
+			contract={overlap.contract}
+			apartment={chosenApartmentName(apartments, values.apartmentId)}
+		/>
 	</Alert>
 {/if}
 

@@ -235,6 +235,31 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('building-fields-refused'), await response.json())).toEqual([]);
 	});
 
+	// #1201: a text longer than its column refused at its field; nothing is created
+	it('POST /heating-profiles liefert bei einem zu langen Text die Felder von heating-profile-text-too-long.json', async () => {
+		const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+		const response = await sendJson('POST', '/api/v1/heating-profiles', {
+			name: `Längentest ${token}`,
+			nameFR: 'A'.repeat(101),
+			...Object.fromEntries(months.map((month, i) => [`${month}Pct`, i < 4 ? 25 : 0]))
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('heating-profile-text-too-long'), await response.json())).toEqual([]);
+	});
+
+	// #1201: an edit sends only the German name, refused as `nameDE`; nothing is changed
+	it('PUT /categories liefert bei einem zu langen deutschen Namen die Felder von category-text-too-long.json', async () => {
+		const categories = apiRecords('categories');
+		try {
+			const id = await idOf(await categories.create({ name: `Längentest ${token}`, isAllowedUtilityCost: true }));
+			const response = await categories.send('PUT', `/${id}`, { nameDE: 'A'.repeat(101) });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('category-text-too-long'), await response.json())).toEqual([]);
+		} finally {
+			await categories.removeAll();
+		}
+	});
+
 	// H-28 (#717): the tenant form refused, every failed check with its field; nothing is created
 	it('POST /tenants liefert bei ungültigen Feldern die Felder von tenant-fields-refused.json', async () => {
 		const response = await sendJson('POST', '/api/v1/tenants', { firstName: '', lastName: `Feldtest ${token}`, email: 'anna@', postalCode: '84' });
@@ -1346,6 +1371,15 @@ describe('API-Verträge der Ablehnungen mit Code', () => {
 		const response = await keys.create(key);
 		expect(response.status).toBe(409);
 		expect(drift(await sample('distribution-key-name-taken'), await response.json())).toEqual([]);
+	});
+
+	// #1200: with the errors of the formula of the same save
+	it('POST /distribution-keys mit einem vergebenen Namen und einer fehlerhaften Formel liefert die Felder von distribution-key-name-taken-formula.json', async () => {
+		const key = { name: `Lift ${token}`, nameDE: `Lift ${token}`, formula: '{rooms}' };
+		await keys.create(key);
+		const response = await keys.create({ ...key, formula: '({area}' });
+		expect(response.status).toBe(409);
+		expect(drift(await sample('distribution-key-name-taken-formula'), await response.json())).toEqual([]);
 	});
 
 	it('DELETE /documents/:id eines gelöschten Dokuments liefert die Felder von document-not-found.json', async () => {

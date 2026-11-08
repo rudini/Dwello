@@ -99,6 +99,28 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Dann erfährt der Liegenschaftsverwalter, dass "Anna Keller" einen Mietvertrag ohne Vertragsende für die Wohnung "2.02" hat
 
+  # #1288 (Personas Helga P-2, Sven P-2): der Hinweis schreibt die Wohnung und nennt den Mietvertrag wie der Hinweis auf die nicht verfügbare Wohnung
+  Szenario: Der Hinweis auf den eigenen Mietvertrag nennt Wohnung und Mietvertrag wie die übrigen Hinweise
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann nennt der Hinweis auf den Mietvertrag von "Anna Keller" die Wohnung "Wohnung 2.02 · Ahornhof"
+    Und bietet der Hinweis auf den Mietvertrag von "Anna Keller" den Link "Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof"
+    Und erklärt der Hinweis auf den Mietvertrag von "Anna Keller" "Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende auf seiner Seite mit «Enddatum erfassen» ein."
+
+  # #1296 (Personas Helga P-4, Sven P-3 in 1288): bei 200 % Zoom zeigt das Fenster 720 auf 450 Pixel; die gewählte Wohnung bleibt im Bild
+  Szenario: Der Hinweis auf den eigenen Mietvertrag schiebt die Wohnungsauswahl nicht aus dem Bild
+    Angenommen das Browserfenster ist 720 auf 450 Pixel gross
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann erfährt der Liegenschaftsverwalter, dass "Anna Keller" einen Mietvertrag ohne Vertragsende für die Wohnung "2.02" hat
+    Und ist die Wohnungsauswahl ganz im Fenster zu sehen
+
   Szenario: Vom Hinweis zum laufenden Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
@@ -149,6 +171,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann bestätigt Dwello das Laden mit "Die Mietverträge der Wohnung sind geladen."
 
   # #669 (Personas Sven S-2, Helga H-3, fach-review V-5): eine Wohnung, die sich als nicht verfügbar zeigt, bleibt nicht gewählt
+  # #1289: keine Meldung, die das Feld verdeckt; der Hinweis im Schritt nennt die Wohnung und wird einmal angesagt
   Szenario: Nach dem Laden hebt Dwello die Wahl einer nicht verfügbaren Wohnung auf
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
@@ -158,8 +181,36 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
-    Dann warnt Dwello nach dem Laden mit "Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben."
+    Dann kündigt ein Screenreader im Schritt «Wohnung» den Hinweis "Wohnung 2.01 · Ahornhof ist nicht verfügbar" an
     Und ist im Mietvertrag keine Wohnung gewählt
+    Und zeigt Dwello nach dem Laden keine Meldung
+
+  # #1289 (Persona Sven P-2 in 1288): zurück bei der leeren Wohnungsauswahl hört der Screenreader, warum die Wahl weg ist
+  Szenario: Nach dem Aufheben der Wahl nennt die Wohnungsauswahl den Hinweis auf die nicht verfügbare Wohnung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Für diese Wohnung ist ein Mietvertrag ohne Vertragsende erfasst." vor
+
+  # #1289: der Hinweis gilt der aufgehobenen Wahl; mit einer anderen Wohnung ist er weg
+  Szenario: Mit einer anderen Wohnung verschwindet der Hinweis auf die nicht verfügbare Wohnung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.02" wählt
+    Dann ist im Mietvertrag die Wohnung "2.02" gewählt
+    Und zeigt der Schritt «Wohnung» keinen Hinweis auf eine nicht verfügbare Wohnung
 
   # #1153 (Personas Sven S-7, Helga H-6): nach dem Aufheben bleibt im Schritt stehen, welche Wohnung welcher Mietvertrag sperrt
   Szenario: Nach dem Aufheben der Wahl nennt der Schritt die Wohnung und ihren Mietvertrag
@@ -171,13 +222,12 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
-    Und der Liegenschaftsverwalter die Warnung schliesst
     Dann steht im Schritt «Wohnung» der Hinweis "Wohnung 2.01 · Ahornhof ist nicht verfügbar"
     Und erklärt der Hinweis im Schritt «Wohnung» "Für diese Wohnung ist ein Mietvertrag ohne Vertragsende erfasst. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
-    Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier"
+    Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier für Wohnung 2.01 · Ahornhof"
 
-  # #1158 (Personas Sven P-1, Helga): nach «Meldung schliessen» steht der Fokus wieder dort, wo er vor der Meldung stand
-  Szenario: Nach «Meldung schliessen» steht der Fokus wieder auf dem Schritt «Wohnung»
+  # #1158 (Personas Sven P-1, Helga): nach dem Laden steht der Fokus auf dem Schritt, ohne Meldung dazwischen (#1289)
+  Szenario: Nach dem Laden steht der Fokus auf dem Schritt «Wohnung»
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
     Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
@@ -186,7 +236,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
-    Und der Liegenschaftsverwalter die Warnung mit der Tastatur schliesst
     Dann steht der Fokus wieder auf dem Schritt «Wohnung»
 
   # #1158 (Personas Sven P-3, Helga): der Hinweis auf den eigenen Mietvertrag des Mieters wartet, bis der Schritt eine Wohnung hat
@@ -227,6 +276,15 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Dann bestätigt Dwello das Laden mit "Die anderen Mietverträge dieser Wohnung sind geladen. Der Zeitraum überschneidet sich mit keinem davon."
+
+  # #1295 (Personas Helga P-2, Sven P-1 in 1288): jeder Link zum anderen Mietvertrag nennt Mieter und Wohnung
+  Szenario: Der Link zum Mietvertrag, mit dem sich der Zeitraum überschneidet, nennt Mieter und Wohnung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-04-01" bis "2027-03-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter den Vertragsbeginn "2027-01-01" einträgt
+    Dann bietet Dwello beim Vertragsbeginn den Link "Zum Mietvertrag von Bruno Meier für Wohnung 2.01 · Ahornhof"
 
   # #669 (Persona Helga H-1, fach-reviewer V-7): in der Prüfung bleibt der Kasten zur Überschneidung stehen, wenn die Meldung geht
   Szenario: Nach dem Laden zeigt die Prüfung den Kasten zur Überschneidung

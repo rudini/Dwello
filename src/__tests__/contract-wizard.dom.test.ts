@@ -338,6 +338,10 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('overlap-contract-link')!.getAttribute('href')).toBe(
 			`/contracts/${overlap.params.contract}`
 		);
+		// #1295 (1295-review-1 C-1): the link names tenant and apartment
+		expect(byTestId('overlap-contract-link')!.textContent!.trim()).toBe(
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.01 · Ahornhof'
+		);
 		expect(error).not.toContain('Contract');
 		expect(goto).not.toHaveBeenCalled();
 	});
@@ -503,7 +507,8 @@ describe('Prüfungen im Mietvertrag', () => {
 	});
 
 	// #669 (Sven S-2, Helga H-3, fach-review V-5): the apartment chosen «(nicht geprüft)» turned out rented
-	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und warnt mit dem Ergebnis', async () => {
+	// #1289: no toast that covers the field; the hint in the step says it, in a status region a screen reader announces
+	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und sagt es nur im Schritt, angesagt', async () => {
 		let failing = true;
 		fakeBff(({ path }) =>
 			failing && path.endsWith('=a2')
@@ -520,12 +525,16 @@ describe('Prüfungen im Mietvertrag', () => {
 		click('contracts-retry');
 		await settle();
 		expect(byTestId<HTMLSelectElement>('apartment-select')!.value).toBe('');
-		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
-			[
-				'warning',
-				'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben.'
-			]
-		]);
+		expect(byTestId('apartment-cleared')!.closest('[role="status"]')).not.toBeNull();
+		expect(get(toasts)).toEqual([]);
+		// Sven 1288 P-2: back at the empty field, a screen reader hears why the choice is gone
+		const description = (byTestId('apartment-select')!.getAttribute('aria-describedby') ?? '')
+			.split(' ')
+			.map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
+			.join(' ');
+		expect(description).toContain(
+			'Wohnung 2.02 · Ahornhof ist nicht verfügbar Für diese Wohnung ist ein Mietvertrag'
+		);
 	});
 
 	// #1153 (Sven S-7, Helga H-6): the step keeps saying which apartment it was and which contract blocks it
@@ -551,7 +560,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		);
 		expect([link?.getAttribute('href'), link?.textContent?.trim()]).toEqual([
 			'/contracts/c9',
-			'Zum Mietvertrag von Eva Frei'
+			'Zum Mietvertrag von Eva Frei für Wohnung 2.02 · Ahornhof' // #1295: tenant and apartment
 		]);
 		select('apartment-select', 'a1');
 		await settle();
@@ -671,7 +680,10 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(box).toContain(
 			'Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt 3 «Vertragsdauer», die Wohnung im Schritt 2 «Wohnung».'
 		);
-		expect(byTestId('overlap-contract-link')).not.toBeNull();
+		// #1295 (1295-review-1 C-1): the link names tenant and apartment
+		expect(byTestId('overlap-contract-link')!.textContent!.trim()).toBe(
+			'Zum Mietvertrag von Ida Roth für Wohnung 2.03 · Ahornhof'
+		);
 		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
 			[
 				'warning',
@@ -949,7 +961,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		const link = byTestId<HTMLAnchorElement>('overlap-contract-link')!;
 		expect([link.getAttribute('href'), link.textContent!.trim()]).toEqual([
 			'/contracts/c8',
-			'Zum Mietvertrag von Ueli Graf'
+			'Zum Mietvertrag von Ueli Graf für Wohnung 2.01 · Ahornhof' // #1295: tenant and apartment
 		]);
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
@@ -977,8 +989,16 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await settle();
 		const hint = byTestId('tenant-running-contract')!;
 		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
-		expect(hint.textContent).toContain('für die Wohnung 2.02 (Ahornhof)');
-		expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c-a2');
+		// #1296 (Helga P-4, Sven P-3 in 1288): below the field, so at 200 % it does not push the field out of view
+		expect(
+			byTestId('apartment-select')!.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		// #1288: apartment and contract named like the hint on a cleared apartment
+		expect(hint.textContent).toContain('für Wohnung 2.02 · Ahornhof');
+		expect([
+			hint.querySelector('a')!.getAttribute('href'),
+			hint.querySelector('a')!.textContent?.trim()
+		]).toEqual(['/contracts/c-a2', 'Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof']);
 		next();
 		expect(heading()).toBe('Vertragsdauer');
 	});

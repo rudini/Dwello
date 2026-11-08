@@ -313,6 +313,7 @@
 
 	<Panel title={m.contracts_period()}>
 		<PeriodStep
+			{apartment}
 			bind:startDate={values.startDate}
 			bind:endDate={values.endDate}
 			bind:isUnlimited={values.isUnlimited}
@@ -366,7 +367,7 @@
 	{#if errors.form}
 		<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
-			{#if refusedOverlap && refusal}<OverlapLink contract={refusal.contract} newTab />{/if}
+			{#if refusedOverlap && refusal}<OverlapLink contract={refusal.contract} {apartment} newTab />{/if}
 		</Alert>
 		{#if refused.length}
 			<RefusedStatements statements={refused} {tenant} consequence={coveredConsequence}>

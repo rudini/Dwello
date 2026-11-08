@@ -169,17 +169,6 @@ describe('Sprachdateien', () => {
 		expect(messages.glossary_notice_period_text.endsWith(end)).toBe(true);
 	});
 
-	// #1158 (1158-fachreview-1): since the step names the apartment and its contract, the warning says only the result
-	it.each([
-		['de', 'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben.'],
-		['fr', 'Les contrats de bail de l’appartement sont chargés. L’appartement choisi n’est pas disponible\u00a0; Dwello a annulé la sélection.'],
-		['it', 'I contratti di locazione dell’appartamento sono caricati. L’appartamento scelto non è disponibile; Dwello ha annullato la selezione.'],
-		['en', 'The apartment’s rental contracts are loaded. The chosen apartment is not available; Dwello has cleared the selection.']
-	])('%s: die Warnung nach dem Laden sagt nur, dass Dwello die nicht verfügbare Wohnung abgewählt hat', (language, text) => {
-		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
-		expect(messages.contracts_apartment_contracts_blocked).toBe(text);
-	});
-
 	// #1278, #1267 (1266-fachreview-1): the contract page names the Aufhebungsvereinbarung; a third party entering the
 	// contract is ended as one
 	it.each([
@@ -203,6 +192,19 @@ describe('Sprachdateien', () => {
 	])('%s: die Hilfe zur Aufhebungsvereinbarung nennt den Eintritt eines Dritten', (language, text) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
 		expect(messages.contracts_end_kind_agreement_help).toBe(text);
+	});
+
+	// #1298 (1298-fachreview-1): the help at «Kontoinhaber ist der Absender» says that saving with the box ticked deletes
+	// an own Kontoinhaber, and the saved notice names the Konto with the Kontoinhaber
+	it.each([
+		['de', 'Mit Häkchen löscht Speichern einen eigenen Kontoinhaber.', 'Absender, Konto mit Kontoinhaber, Verwaltungspauschale, Fristen und Vorschläge gespeichert.'],
+		['fr', 'Si la case est cochée, l’enregistrement supprime un titulaire du compte saisi séparément.', 'Expéditeur, compte avec le titulaire du compte, frais d’administration, délais et propositions enregistrés.'],
+		['it', 'Con la spunta, salvando si cancella un titolare del conto registrato a parte.', 'Mittente, conto con il titolare del conto, spese amministrative, termini e proposte salvati.'],
+		['en', 'With the box ticked, saving deletes a separately entered account holder.', 'Sender, account with account holder, management fee, deadlines and suggestions saved.']
+	])('%s: die Hilfe sagt, dass Speichern mit Häkchen einen eigenen Kontoinhaber löscht, und die Bestätigung nennt das Konto', (language, help, saved) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.settings_account_holder_help.endsWith(` ${help}`)).toBe(true);
+		expect(messages.settings_saved_text).toBe(saved);
 	});
 
 	// #501: the hint at a short Kündigungsfrist says the same as the glossary

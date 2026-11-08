@@ -8,6 +8,7 @@ import formulaRefused from '../../tests/contracts/formula-refused.json';
 import keyDefault from '../../tests/contracts/distribution-key-default-refused.json';
 import inStatement from '../../tests/contracts/distribution-key-in-statement.json';
 import nameTaken from '../../tests/contracts/distribution-key-name-taken.json';
+import nameTakenFormula from '../../tests/contracts/distribution-key-name-taken-formula.json';
 
 const API = 'http://localhost:3001/api/v1/distribution-keys';
 
@@ -106,7 +107,22 @@ describe('Neuer Verteilschlüssel', () => {
 			status: 409,
 			data: {
 				errors: {
-					name: 'Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits.'
+					name: 'Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits. Wählen Sie einen anderen Namen.'
+				}
+			}
+		});
+	});
+
+	// #1200: the name refusal no longer hides the formula error of the same save
+	it('zeigt beim vergebenen Namen auch den Fehler der Formel an ihrem Feld', async () => {
+		const { result } = runAction(newActions.save, '', 409, { ...form, formula: '({area}' }, nameTakenFormula);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				errors: {
+					name: 'Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits. Wählen Sie einen anderen Namen.',
+					formula: 'Die Klammer am Anfang von «({area}» wird nicht geschlossen. Setzen Sie «)» dort, wo sie enden soll.'
 				}
 			}
 		});

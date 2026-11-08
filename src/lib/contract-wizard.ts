@@ -161,7 +161,6 @@ export function contractSummary(
 	apartments: { id: string; unit: string; building: string }[],
 	categories: { id: string; name: string }[] = [] // the umlagefähige ones the contract can agree (#91)
 ) {
-	const apartment = apartments.find((a) => a.id === values.apartmentId);
 	const flatRate = amount(values.flatRateUtilityCharge ?? '');
 	const gross =
 		amount(values.baseRent) +
@@ -177,7 +176,7 @@ export function contractSummary(
 		},
 		{
 			label: m.tenants_apartment(),
-			value: apartment ? apartmentName(apartment.unit, apartment.building) : '',
+			value: chosenApartmentName(apartments, values.apartmentId),
 			step: 2,
 			field: 'apartment'
 		},
@@ -302,7 +301,7 @@ export function openContractsOf<A extends { id: string }>(
 	return apartments.flatMap((apartment) =>
 		(contracts?.get(apartment.id) ?? [])
 			.filter((c) => c.tenant_id === tenantId && !c.end_date)
-			.map((c) => ({ id: c.id, apartment }))
+			.map((c) => ({ id: c.id, apartment, tenant: c.tenant_name ?? '' }))
 	);
 }
 
@@ -316,6 +315,15 @@ export function clearedApartment(
 		apartment: apartmentName(apartment.unit, apartment.building),
 		contract: open && { id: open.id, tenant: open.tenant_name }
 	};
+}
+
+/** The chosen apartment as the contract pages name it, empty before one is chosen */
+export function chosenApartmentName(
+	apartments: { id: string; unit: string; building: string }[],
+	apartmentId: string
+) {
+	const apartment = apartments.find((a) => a.id === apartmentId);
+	return apartment ? apartmentName(apartment.unit, apartment.building) : '';
 }
 
 /** Apartments to choose from: free ones first, rented ones shown but not selectable */

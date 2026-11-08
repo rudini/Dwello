@@ -3,6 +3,7 @@ import { Count } from '../screenplay/questions';
 import { Check, Click, Enter, EnterDate, FailRequests, Focus, Navigate, Press, Select, Uncheck, Wait } from '../screenplay/interactions';
 import {
 	agreedCategory,
+	retryResult,
 	agreedCategoryBoxAt,
 	agreedCategoryBoxes,
 	advancePaymentFromInput,
@@ -32,7 +33,7 @@ import {
 	noticeHintLink,
 	apartmentClearedLink
 } from '../targets/contract-form';
-import { errorToast, errorToastClose, loadedToast, successToastClose, warningToast, warningToastClose } from '../targets/form';
+import { errorToast, errorToastClose, successToastClose } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -68,7 +69,7 @@ export const goToNextStep = Click.on(nextButton);
 export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to('/api/contracts', { apartmentId });
 export const contractsLoadAgain = FailRequests.noLonger;
 // waits for the confirmation that they are loaded (review #151 R-4)
-export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(loadedToast));
+export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(retryResult));
 // still failing: waits for the message that says so
 export const retryContractsInVain: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(errorToast));
 // #669: on from the error message's close button with the Tab key
@@ -230,10 +231,5 @@ export const keepEditing = Click.on(keepEditingButton);
 export const openContractFromParties = Click.on(partiesContractLink);
 export const followNoticeHint = Click.on(noticeHintLink);
 
-// #1153: the warning after «Erneut versuchen» closed; the hint in the step stays
-// waits until it is gone, so what is checked next outlasted it (code review 1153 C-2)
-export const closeWarning: Activity = (actor) => actor.attemptsTo(Click.on(warningToastClose), Wait.forCount(warningToast, 0));
-// #1158 (Sven P-1): closed with the keyboard, where the focus goes next matters
-export const closeWarningWithKeyboard: Activity = (actor) =>
-	actor.attemptsTo(Press.theKey('Enter').on(warningToastClose), Wait.forCount(warningToast, 0));
+// #1153: the hint in the step names the contract that blocks the cleared choice
 export const openClearedApartmentContract: Activity = Click.on(apartmentClearedLink);

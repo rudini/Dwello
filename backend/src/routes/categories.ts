@@ -6,6 +6,8 @@
 import { Elysia, t } from 'elysia';
 import { codedBody, errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
+import { categories } from '../db/schema';
+import { refuseTooLong } from '../services/text-length';
 import {
 	listCategories,
 	getCategory,
@@ -27,7 +29,7 @@ const categoryQuerySchema = t.Object({
 });
 
 const categoryBodySchema = t.Object({
-	name: t.String({ minLength: 1, maxLength: 100 }),
+	name: t.String({ minLength: 1 }),
 	nameDE: t.Optional(t.Nullable(t.String())),
 	nameFR: t.Optional(t.Nullable(t.String())),
 	nameIT: t.Optional(t.Nullable(t.String())),
@@ -108,7 +110,8 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 			}
 		},
 		{
-			body: categoryBodySchema
+			body: categoryBodySchema,
+			beforeHandle: refuseTooLong(categories)
 		}
 	)
 	// Update category
@@ -128,7 +131,8 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 			}
 		},
 		{
-			body: categoryUpdateSchema
+			body: categoryUpdateSchema,
+			beforeHandle: refuseTooLong(categories)
 		}
 	)
 	// Delete category

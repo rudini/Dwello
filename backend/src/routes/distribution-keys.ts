@@ -6,6 +6,8 @@
 import { Elysia, t } from 'elysia';
 import { errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
+import { distributionKeys } from '../db/schema';
+import { refuseTooLong } from '../services/text-length';
 import { Conflict } from '../services/conflict';
 import {
 	listDistributionKeys,
@@ -134,6 +136,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 			}
 		},
 		{
+			beforeHandle: refuseTooLong(distributionKeys),
 			body: t.Object({
 				name: t.String({ minLength: 1 }),
 				nameDE: t.Optional(t.String()),
@@ -179,6 +182,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 			params: t.Object({
 				id: t.String()
 			}),
+			beforeHandle: refuseTooLong(distributionKeys),
 			body: t.Object({
 				name: t.Optional(t.String({ minLength: 1 })),
 				nameDE: t.Optional(t.String()),

@@ -58,6 +58,10 @@ export const showDraftsOfBuilding = (buildingId: string): Activity => (actor) =>
 		filteredBy({ building: buildingId, status: 'draft' })
 	);
 
+// #1237: an address of a page, as a bookmark or an old link keeps it
+export const openDraftsPageOfBuilding = (buildingId: string, page: number) =>
+	Navigate.to(`/statements?building=${buildingId}&status=draft&page=${page}`);
+
 export const showSettledOfBuilding = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(
 		showStatementsOfBuilding(buildingId),

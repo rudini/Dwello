@@ -1,8 +1,11 @@
 <script lang="ts">
+	import type { ComponentProps } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { apartmentChoices } from '$lib/contract-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
+	import OpenContracts from './OpenContracts.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import OverlapLink from '../OverlapLink.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import type { AvailabilityInfo } from '$lib/utils/contract-availability';
@@ -17,7 +20,8 @@
 		unknown = false,
 		onretry,
 		cleared = $bindable(),
-		error
+		error,
+		openContracts
 	}: {
 		apartmentId: string;
 		apartments: { id: string; unit: string; building: string; size?: string }[];
@@ -28,6 +32,7 @@
 		onretry: () => void; // loads them again
 		cleared?: { apartment: string; contract?: { id: string; tenant?: string } } | null; // a choice «Erneut versuchen» cleared (#1153)
 		error?: string;
+		openContracts: ComponentProps<typeof OpenContracts>['contracts'];
 	} = $props();
 	// the hint is for the cleared choice: once an apartment is chosen it is gone for good (code review 1153 C-1)
 	$effect(() => {
@@ -50,27 +55,40 @@
 		{error}
 		describedby={unknown
 			? 'apartment-contracts-unknown-title apartment-contracts-unknown-text'
-			: undefined}
+			: cleared
+				? 'apartment-cleared-title apartment-cleared-text' // why the choice is gone (Sven 1288 P-2)
+				: undefined}
 		testid="apartment-select"
 	/>
 {/if}
 
 <ContractsUnknown {onretry} shown={unknown} testid="apartment-contracts-unknown" />
 
-<!-- stays until an apartment is chosen: the toast that says so goes away (#1153, Sven S-7, Helga H-6) -->
-{#if cleared}
-	<Alert
-		tone="caution"
-		title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}
-		testid="apartment-cleared"
-	>
-		<p data-testid="apartment-cleared-text">{m.contracts_apartment_cleared_text()}</p>
-		{#if cleared.contract}<OverlapLink contract={cleared.contract} />{/if}
-	</Alert>
-{/if}
+<!-- stays until an apartment is chosen (#1153, Sven S-7, Helga H-6); the only word on it, announced once (#1289) -->
+<LiveRegion shown={!!cleared}>
+	{#if cleared}
+		<Alert
+			tone="caution"
+			title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}
+			titleId="apartment-cleared-title"
+			testid="apartment-cleared"
+		>
+			<p id="apartment-cleared-text" data-testid="apartment-cleared-text">
+				{m.contracts_apartment_cleared_text()}
+			</p>
+			{#if cleared.contract}<OverlapLink
+					contract={cleared.contract}
+					apartment={cleared.apartment}
+				/>{/if}
+		</Alert>
+	{/if}
+</LiveRegion>
 
 {#if notice}
 	<Alert title={m.contracts_free_later()} testid="availability-info">
 		<p>{m.contracts_free_later_text({ notice })}</p>
 	</Alert>
 {/if}
+
+<!-- below the field: at 200 % it would push the field just used out of view (#1296) -->
+<OpenContracts contracts={openContracts} />

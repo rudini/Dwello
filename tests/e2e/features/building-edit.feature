@@ -52,3 +52,10 @@ Funktionalität: Gebäude bearbeiten
     Und für "Lea Graf" gibt es die Abrechnung vom "2024-01-01" bis "2024-12-31" im Gebäude "Eichenhof"
     Wenn der Liegenschaftsverwalter die Abrechnungsperiode auf "Juli – Juni" ändert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Für dieses Gebäude gibt es inzwischen Abrechnungen. Die Abrechnungsperiode bleibt darum fest. Laden Sie die Seite neu."
+
+  # #1201: jedes Textfeld nimmt höchstens so viele Zeichen, wie die Datenbank speichert; das Feld sagt, was zu tun ist,
+  # statt eines allgemeinen Fehlers beim Speichern, und Dwello kürzt nichts (wie #743)
+  Szenario: Bei einem zu langen Gebäudenamen sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter bei "Gebäudename" einen Text von 256 Zeichen speichert
+    Dann steht bei "Gebäudename" die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
+    Und steht bei "Gebäudename" noch der Text von 256 Zeichen
