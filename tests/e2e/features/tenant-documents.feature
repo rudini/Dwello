@@ -151,16 +151,16 @@ Funktionalität: Dokumente eines Mieters
 
   # #1209 (Persona Helga P-2): neben dem arbeitenden Knopf sieht «Abbrechen» aus wie sonst, ein Klick darauf tut nichts;
   # #1261 (Helga P-1, Sven P-1): ein Satz sagt, warum, auch dem Screenreader
-  @wip
   Szenario: Während des Löschens sieht «Abbrechen» aus wie sonst und tut nichts
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Und Dwello antwortet beim Löschen von Dokumenten zu "Lea Frei" noch nicht
     Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
-    Und der Liegenschaftsverwalter das Löschen bestätigt
+    Dann sagt der Dialog vor dem Bestätigen noch nicht "Dwello führt die Aktion gerade aus. Abbrechen ist nicht mehr möglich."
+    Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann hebt sich «Abbrechen» im Dialog mindestens 4.5:1 vom Hintergrund ab, während Dwello "Bitte warten …" ansagt
-    Und sagt der Dialog während des Löschens "Dwello führt die Aktion aus. Sie lässt sich nicht mehr abbrechen."
-    Und liest ein Screenreader «Abbrechen» als nicht verfügbar vor, mit dem Satz "Dwello führt die Aktion aus. Sie lässt sich nicht mehr abbrechen."
+    Und sagt der Dialog während des Löschens "Dwello führt die Aktion gerade aus. Abbrechen ist nicht mehr möglich."
+    Und liest ein Screenreader «Abbrechen» als nicht verfügbar vor, mit dem Satz "Dwello führt die Aktion gerade aus. Abbrechen ist nicht mehr möglich."
     Wenn der Liegenschaftsverwalter im Dialog «Abbrechen» drückt
     Dann sagt Dwello bei «Dokument löschen» "Bitte warten …" an, und der Fokus bleibt dort
 

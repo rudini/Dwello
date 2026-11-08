@@ -33,6 +33,7 @@
 	"ui_next_page": "Next page",
 	"ui_page_of": "Page {page} of {pages}",
 	"ui_please_wait": "Please wait …",
+	"ui_dialog_busy_note": "Dwello is carrying out the action. Cancelling is no longer possible.",
 	"ui_cancel": "Cancel",
 	"ui_action_failed": "That did not work",
 	"ui_draft_restored": "Entries restored",

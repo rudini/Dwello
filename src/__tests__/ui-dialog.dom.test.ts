@@ -3,6 +3,9 @@ import { flushSync } from 'svelte';
 import Dialog from '$lib/ui/Dialog.svelte';
 import { byTestId, click, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
+import en from '../../messages/en.json';
+import fr from '../../messages/fr.json';
+import it_ from '../../messages/it.json';
 
 const consequence = markup('<p>Die Abrechnung wird als versendet markiert.</p>');
 const press = (key: string, shiftKey = false) => {
@@ -252,6 +255,33 @@ describe('Dialog', () => {
 		click(cancel);
 		expect(onclose).not.toHaveBeenCalled();
 		expect(document.activeElement).toBe(byTestId('dialog-confirm'));
+	});
+
+	// #1261 (Helga P-1, Sven P-1): a sentence says why «Abbrechen» does nothing; a screen reader hears it unavailable
+	it('sagt während der Arbeit, warum «Abbrechen» nichts tut, und meldet es einem Screenreader als nicht verfügbar', () => {
+		openDialog({ busy: true, busyLabel: 'Wird versendet …' });
+		const cancel = byTestId('dialog-cancel')!;
+		const note = byTestId('dialog-busy-note')!;
+		expect(cancel.getAttribute('aria-disabled')).toBe('true');
+		expect(cancel.getAttribute('aria-describedby')).toBe(note.id);
+		expect(note.textContent?.trim()).toBe(
+			'Dwello führt die Aktion gerade aus. Abbrechen ist nicht mehr möglich.'
+		);
+	});
+
+	// #1261: the wording of fach-review docs/reviews/1261-fachreview-1.md, in every language
+	it('sagt den Satz zur laufenden Aktion in jeder Sprache im Wortlaut der Fachprüfung', () => {
+		expect([fr, it_, en].map((messages) => messages.ui_dialog_busy_note)).toEqual([
+			'Dwello est en train d’exécuter l’action. Il n’est plus possible d’annuler.',
+			'Dwello sta eseguendo l’azione. Non è più possibile annullare.',
+			'Dwello is carrying out the action. Cancelling is no longer possible.'
+		]);
+	});
+
+	it('zeigt ohne Arbeit keinen Satz dazu und meldet «Abbrechen» als verfügbar', () => {
+		openDialog();
+		expect(byTestId('dialog-cancel')!.getAttribute('aria-disabled')).toBeNull();
+		expect(byTestId('dialog-busy-note')).toBeNull();
 	});
 
 	it('schliesst mit Escape auch, wenn der Fokus nicht im Dialog liegt', () => {

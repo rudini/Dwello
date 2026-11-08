@@ -43,6 +43,7 @@ export const uploadDocumentProgress = target('Fortschrittszeichen von «Dokument
 );
 export const deleteDocumentCancel = target('Löschen abbrechen', (page) => page.getByRole('dialog').getByTestId('dialog-cancel'));
 // #1261: why «Abbrechen» does nothing while the dialog works
+export const openDialog = target('offener Dialog', (page) => page.getByRole('dialog'));
 export const dialogBusyNote = target('Hinweis im arbeitenden Dialog', (page) => page.getByRole('dialog').getByTestId('dialog-busy-note'));
 export const documentsEmpty = target('Hinweis keine Dokumente in «Dokumente»', (page) => page.getByTestId('documents-empty'));
 export const noDocumentsHint = target('Hinweis keine Dokumente', (page) => page.getByTestId('tenant-documents-empty'));

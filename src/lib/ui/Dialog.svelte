@@ -157,6 +157,10 @@
 		>
 			<h2 id="{id}-title" data-testid="dialog-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>
+			{#if busy}
+				<!-- why «Abbrechen» does nothing now, also its description (#1261, Helga P-1, Sven P-1) -->
+				<p id="{id}-busy-note" data-testid="dialog-busy-note">{m.ui_dialog_busy_note()}</p>
+			{/if}
 			<!-- a press on a button keeps the focus in the field: leaving it would show its error, grow the dialog
 			     and move the button away before the release (R7-F2, #653); the click then leaves the field, so it
 			     takes its value (a two-digit year) before the button acts (code review 653-1 C-1); while busy a click
@@ -168,7 +172,12 @@
 				onclickcapture={(event) =>
 					!busy && (event.target as HTMLElement).closest('button')?.focus()}
 			>
-				<Button onclick={close} testid="dialog-cancel">{cancelLabel}</Button>
+				<Button
+					onclick={close}
+					testid="dialog-cancel"
+					unavailable={busy}
+					describedby={busy ? `${id}-busy-note` : undefined}>{cancelLabel}</Button
+				>
 				<Button
 					variant={danger ? 'danger' : 'primary'}
 					onclick={onconfirm}

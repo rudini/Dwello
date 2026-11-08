@@ -16,7 +16,9 @@ import {
 	deleteCancelUnavailable,
 	deleteConfirmFocused,
 	deleteConfirmStatus,
+	deleteConfirmShown,
 	dialogBusyNoteText,
+	dialogText,
 	documentsEmptyNote,
 	duplicateFileWarning,
 	duplicateFileWarnings,
@@ -281,6 +283,12 @@ Then(
 // #1261 (Helga P-1, Sven P-1): the dialog says why «Abbrechen» does nothing
 Then('sagt der Dialog während des Löschens {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(dialogBusyNoteText).toBe(text);
+});
+
+// the open dialog's confirm button first, so the missing sentence is not an error page
+Then('sagt der Dialog vor dem Bestätigen noch nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteConfirmShown).toBe(true);
+	await verwalter.sees(dialogText).not.toContain(text);
 });
 
 Then('liest ein Screenreader «Abbrechen» als nicht verfügbar vor, mit dem Satz {string}', async ({ verwalter }, text: string) => {

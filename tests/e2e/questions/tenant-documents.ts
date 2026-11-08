@@ -4,6 +4,7 @@ import {
 	deleteDocumentButton,
 	deleteDocumentCancel,
 	dialogBusyNote,
+	openDialog,
 	deleteDocumentConfirm,
 	deleteDocumentStatus,
 	documentFileInput,
@@ -45,6 +46,8 @@ export const uploadProgressShown = Visibility.of(uploadDocumentProgress);
 export const deleteCancelContrast = Colour.contrastOf(deleteDocumentCancel);
 // #1261 (Sven P-1): a screen reader hears «Abbrechen» as unavailable, with the reason
 export const dialogBusyNoteText = Text.of(dialogBusyNote);
+export const deleteConfirmShown = Visibility.of(deleteDocumentConfirm);
+export const dialogText = Text.of(openDialog);
 export const deleteCancelUnavailable = Attribute.named('aria-disabled').of(deleteDocumentCancel);
 export const deleteCancelDescription = Accessible.descriptionOf(deleteDocumentCancel);
 export const deleteConfirmFocused = HoldsFocus.of(deleteDocumentConfirm);
