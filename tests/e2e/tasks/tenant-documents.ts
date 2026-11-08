@@ -45,7 +45,7 @@ export const startDeletingDocument = (title: string) => Click.on(deleteDocumentB
 // the open delete dialog, of a document or of the tenant
 export const confirmDeleting = Click.on(deleteConfirmButton);
 // #1209: the cancel of the open delete dialog
-export const cancelDeleting = Click.on(deleteDocumentCancel);
+export const cancelDeleting = Click.onUnavailable(deleteDocumentCancel);
 
 export const openDocument = (title: string) => DownloadFrom(openDocumentLink(title));
 // a file the backend refuses opens the app's error page instead (#1093)

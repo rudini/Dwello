@@ -12,8 +12,11 @@ import {
 	documentTitleEntered,
 	chosenFile,
 	deleteCancelContrast,
+	deleteCancelDescription,
+	deleteCancelUnavailable,
 	deleteConfirmFocused,
 	deleteConfirmStatus,
+	dialogBusyNoteText,
 	documentsEmptyNote,
 	duplicateFileWarning,
 	duplicateFileWarnings,
@@ -274,6 +277,16 @@ Then(
 		await verwalter.sees(deleteCancelContrast).toBeGreaterThanOrEqual(minimum);
 	}
 );
+
+// #1261 (Helga P-1, Sven P-1): the dialog says why «Abbrechen» does nothing
+Then('sagt der Dialog während des Löschens {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(dialogBusyNoteText).toBe(text);
+});
+
+Then('liest ein Screenreader «Abbrechen» als nicht verfügbar vor, mit dem Satz {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteCancelUnavailable).toBe('true');
+	await verwalter.sees(deleteCancelDescription).toBe(text);
+});
 
 When('der Liegenschaftsverwalter im Dialog «Abbrechen» drückt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(cancelDeleting);

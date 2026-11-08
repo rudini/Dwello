@@ -3,6 +3,7 @@ import {
 	chosenDocumentFile,
 	deleteDocumentButton,
 	deleteDocumentCancel,
+	dialogBusyNote,
 	deleteDocumentConfirm,
 	deleteDocumentStatus,
 	documentFileInput,
@@ -42,6 +43,10 @@ export const uploadButtonBackground = Colour.backgroundOf(uploadDocumentButton, 
 // #1209 (persona Helga P-1, P-2): the progress sign shows, and the cancel beside the busy button keeps its look
 export const uploadProgressShown = Visibility.of(uploadDocumentProgress);
 export const deleteCancelContrast = Colour.contrastOf(deleteDocumentCancel);
+// #1261 (Sven P-1): a screen reader hears «Abbrechen» as unavailable, with the reason
+export const dialogBusyNoteText = Text.of(dialogBusyNote);
+export const deleteCancelUnavailable = Attribute.named('aria-disabled').of(deleteDocumentCancel);
+export const deleteCancelDescription = Accessible.descriptionOf(deleteDocumentCancel);
 export const deleteConfirmFocused = HoldsFocus.of(deleteDocumentConfirm);
 export const deleteConfirmStatus = Text.of(deleteDocumentStatus);
 // #677 (persona Sven P-7): what a screen reader says at the file field after its name
