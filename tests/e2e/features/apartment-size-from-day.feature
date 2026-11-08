@@ -5,14 +5,14 @@ Funktionalität: Fläche und Zimmeranzahl ab einem Tag
   möchte ich erfassen, ab welchem Tag eine Wohnung nach einem Umbau eine andere Fläche und Zimmeranzahl hat
   damit die Abrechnungen bis zum Tag davor mit den bisherigen Werten und ab dem Tag mit den neuen rechnen
 
-  # #1301: 4.01 wird ab 01.07.2025 durch einen Umbau grösser
+  # #1301: 4.01 wird ab 01.07.2025 durch einen Umbau grösser; mehr als 6.5 Zimmer (Personas Helga und Dr. Weber P-1)
   Szenario: Die neue Fläche ab einem Tag erfassen
     Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
     Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
-    Wenn der Liegenschaftsverwalter ab "2025-07-01" die Fläche "140" und die Zimmeranzahl "5.5" speichert
+    Wenn der Liegenschaftsverwalter ab "2025-07-01" die Fläche "140" und die Zimmeranzahl "7.5" speichert
     Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 4.01"
-    Und hat die Wohnung "5.5" Zimmer und "140 m²" im Stockwerk "1. OG"
+    Und hat die Wohnung "7.5" Zimmer und "140 m²" im Stockwerk "1. OG"
     Und hatte die Wohnung bis "30.06.2025" "70 m²" und "3.5" Zimmer
 
   Szenario: Neue Werte gelten erst nach dem Tag der letzten Änderung

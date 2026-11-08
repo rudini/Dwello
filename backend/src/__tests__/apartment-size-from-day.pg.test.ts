@@ -151,6 +151,11 @@ describe('Neue Werte ab einem Tag erfassen (#1301)', () => {
 		await deleteApartment(other.id); // its area must not count in the tests below
 	});
 
+	// Code-Review 1301-2 C-3: an apartment that does not exist (deleted in another tab)
+	it('meldet beim Entfernen einer Änderung eine Wohnung, die es nicht gibt', async () => {
+		expect((await sendJson('DELETE', `/api/v1/apartments/${crypto.randomUUID()}/size-change`)).status).toBe(404);
+	});
+
 	// Fachreview 1301-1 V-3
 	it('lehnt einen Tag nach heute ab', async () => {
 		const { status, saved } = await changeSize(ids.a, { area: '80', rooms: '3.5', sizeFrom: '2099-07-01' });
