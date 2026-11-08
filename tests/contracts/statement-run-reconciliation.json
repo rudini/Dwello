@@ -6,10 +6,12 @@
 			"severalKeys": false,
 			"buildingCosts": 1200,
 			"tenants": 1101.64,
-			"landlord": 98.36
+			"landlord": 98.36,
+			"fuelStock": { "opening": 1792, "closing": 1494 }
 		}
 	],
 	"total": { "buildingCosts": 1200, "tenants": 1101.64, "landlord": 98.36 },
 	"managementFee": 33.05,
-	"nonAllocable": 500
+	"nonAllocable": 500,
+	"vacancies": [{ "apartmentNumber": "OG2", "days": 30 }]
 }
