@@ -19,4 +19,5 @@ export const successToastClose = target('Meldung schliessen der Erfolgsmeldung',
 export const warningToast = target('Warnung', (page) => page.getByTestId('toast-warning'));
 // #669: what «Erneut versuchen» says once the contracts are loaded, a success or, for an overlap, a warning
 export const loadedToast = target('Meldung nach dem Laden', (page) => page.getByTestId(/^toast-(success|warning)$/));
+export const anyToast = target('Meldung', (page) => page.getByTestId(/^toast-/));
 export const warningToastClose = target('Meldung schliessen der Warnung', (page) => warningToast.locate(page).getByRole('button'));

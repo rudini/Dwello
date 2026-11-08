@@ -71,6 +71,8 @@ export const runningContractHint = target('Hinweis auf einen laufenden Mietvertr
 // #1158: the hint on a contract of the named tenant
 export const runningContractHintOf = (tenant: string) =>
 	target(`Hinweis auf einen laufenden Mietvertrag von ${tenant}`, (page) => runningContractHint.locate(page).filter({ hasText: tenant }));
+export const runningContractLinkOf = (tenant: string) =>
+	target(`Link im Hinweis auf einen laufenden Mietvertrag von ${tenant}`, (page) => runningContractHintOf(tenant).locate(page).getByRole('link'));
 export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (page) =>
 	runningContractHint.locate(page).getByRole('link')
 );
@@ -130,6 +132,10 @@ export const apartmentCleared = target('Hinweis auf die nicht verfügbare Wohnun
 );
 export const apartmentClearedText = target('Erklärung im Hinweis auf die nicht verfügbare Wohnung', (page) =>
 	page.getByTestId('apartment-cleared-text')
+);
+// #1289: the status region around it, so a screen reader hears it once when it appears
+export const apartmentClearedAnnouncement = target('Ansage des Hinweises auf die nicht verfügbare Wohnung', (page) =>
+	page.getByRole('status').filter({ has: page.getByTestId('apartment-cleared') })
 );
 export const apartmentClearedLink = target('Link zum Mietvertrag im Hinweis auf die nicht verfügbare Wohnung', (page) =>
 	apartmentCleared.locate(page).getByTestId('overlap-contract-link')

@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentClearedExplanation, apartmentClearedHint, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
+import { apartmentClearedAnnounced, apartmentClearedExplanation, apartmentClearedHint, apartmentClearedHints, runningContractHintTextOf, runningContractLinkTextOf, toasts, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
 import { closeWarning, closeWarningWithKeyboard, enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
@@ -104,4 +104,26 @@ Then('steht der Fokus wieder auf dem Schritt «Wohnung»', async ({ verwalter })
 // #1158 (Sven P-3): the hint on the tenant's own open-ended contract waits until the step has an apartment
 Then('zeigt der Schritt «Wohnung» keinen Hinweis auf einen Mietvertrag von {string}', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(runningContractHintsOf(names.get(tenant) ?? tenant)).toBe(0);
+});
+
+// #1289: no toast after «Erneut versuchen»; the hint in the step says it, announced once, and goes with another apartment
+Then('kündigt ein Screenreader im Schritt «Wohnung» den Hinweis {string} an', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(apartmentClearedAnnounced).toContain(named(names, title));
+});
+
+Then('zeigt Dwello nach dem Laden keine Meldung', async ({ verwalter }) => {
+	await verwalter.sees(toasts).toBe(0);
+});
+
+Then('zeigt der Schritt «Wohnung» keinen Hinweis auf eine nicht verfügbare Wohnung', async ({ verwalter }) => {
+	await verwalter.sees(apartmentClearedHints).toBe(0);
+});
+
+// #1288: the tenant's own contract is named like the one of the cleared apartment
+Then('nennt der Hinweis auf den Mietvertrag von {string} die Wohnung {string}', async ({ verwalter, names }, tenant: string, apartment: string) => {
+	await verwalter.sees(runningContractHintTextOf(names.get(tenant) ?? tenant)).toContain(named(names, apartment));
+});
+
+Then('bietet der Hinweis auf den Mietvertrag von {string} den Link {string}', async ({ verwalter, names }, tenant: string, label: string) => {
+	await verwalter.sees(runningContractLinkTextOf(names.get(tenant) ?? tenant)).toBe(named(names, label));
 });
