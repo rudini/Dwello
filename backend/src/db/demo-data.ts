@@ -53,6 +53,9 @@ async function generateDemoStatement(contractId: string, { buildingId, year, dat
 		await updateStatement(statement.id, { statementDate: date, paymentDeadline: addDays(date, 30) });
 	}
 	await generateStatementPdf(statement.id); // the PDF as sent, kept after paying
+	// made on the day it was sent, so the Verlauf does not show it made after its sending (#707)
+	const sentDay = new Date(`${date}T08:00:00Z`);
+	if (status !== 'draft') await db.update(utilityStatements).set({ createdAt: sentDay, pdfGeneratedAt: sentDay }).where(eq(utilityStatements.id, statement.id));
 	if (status === 'paid') await updateStatementStatus(statement.id, 'paid', { paidDate: addDays(date, 21) });
 }
 
