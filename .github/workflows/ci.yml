@@ -35,6 +35,7 @@ jobs:
       actions: read
     outputs:
       backend: ${{ steps.diff.outputs.backend }}
+      docker: ${{ steps.diff.outputs.docker }}
       app: ${{ steps.diff.outputs.app }}
       ui: ${{ steps.diff.outputs.ui }}
       playwright: ${{ steps.diff.outputs.playwright }}
@@ -64,7 +65,7 @@ jobs:
              | to_entries | map(.value + {shard: (.key + 1), shards: $e2e}))
             + [range(1; 5) | {name: "Accessibility (axe)", args: "--project=chromium --grep @a11y --shard=\(.)/4", reports: "a11y-reports", shard: ., shards: 4}]')" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" != pull_request ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && echo "docker=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
           green=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?event=pull_request&status=success&per_page=100" \
             -f branch="$HEAD_REF" -X GET --jq '.workflow_runs[].head_sha' || true)
@@ -77,6 +78,11 @@ jobs:
           # per route run with the backend steps, so a change to them or to their ratchet runs them too (#922); the compose
           # files and the keys script, which backend tests compare (compose-images.test.ts, #578)
           echo "backend=$(grep -qE '^(backend|tests/contracts|docker)/|^(compose\.yaml|docker-compose\.prod\.yml)$|^tools/fitness/(upgrade-check\.sh|data-totals\.sh|restore-check\.ts|p2-benchmark\.ts|ratchet\.json)$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # What the images and the compose update read (#1241): the Dockerfiles and ignore files of both build contexts,
+          # the dependencies, the frontend's build config (the image builds without install scripts, so Paraglide compiles
+          # only in its Vite plugin, #945), the compose files, the migrations and the start that applies them after a
+          # Sicherung, the update check; app code the Build and test jobs cover
+          echo "docker=$(grep -qE '^(Dockerfile[^/]*|\.dockerignore|compose[^/]*\.ya?ml|docker-compose[^/]*\.ya?ml|package\.json|bun\.lock|vite\.config\.ts|svelte\.config\.js|paraglide\.config\.ts|tsconfig\.json|src/lib/version\.ts|\.github/workflows/ci\.yml)$|^project\.inlang/|^backend/(Dockerfile[^/]*|\.dockerignore|package\.json|bun\.lock|scripts/migrate\.ts|src/db/migrate\.ts|src/services/backup\.service\.ts)$|^(backend/migrations|docker)/|^tools/fitness/(compose-update-check|data-totals)\.sh$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
@@ -102,11 +108,12 @@ jobs:
         working-directory: backend
 
   # Both images as the deployment builds them (docker-compose.prod.yml): a broken Dockerfile went unnoticed until the
-  # demo deployment (#727); nothing is pushed, the release publishes them (#578)
+  # demo deployment (#727); nothing is pushed, the release publishes them (#578). On pull requests only when a file they
+  # read changed (#1241); a skipped job passes as a required check
   docker:
     name: Docker images
     needs: changes
-    if: needs.changes.outputs.app == 'true'
+    if: needs.changes.outputs.docker == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
