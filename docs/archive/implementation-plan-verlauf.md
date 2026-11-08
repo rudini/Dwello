@@ -1499,6 +1499,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-688.md`): no Blocker or Major; Minors that stay: Helga H-1, Sven S-1, S-3; Helga H-2 = Sven S-2 (two alerts give opposite advice) is #1197
 - [x] Workflow notes: `git stash` is shared by all worktrees; parallel agents must not use it (one popped another's stash)
 - [x] Archive the session; PR pushed after this archive
+## Session: #1143 Draft refusal without the apartment's contracts
+
+- [x] Scenario line `contract-edit.feature:239` changed to the decided text (Spec change approved: #1143)
+- [x] `fach-reviewer` `docs/reviews/b1143-fachreview-1.md`: de checked, fr/it/en written; V-1 Minor («die Mietverträge» instead of «sie») taken
+- [x] DOM test and scenario seen red at the message, texts in `messages/*.json`, green (ea8df3c)
+- [x] code-reviewer `docs/reviews/b1143-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-b1143.md`): no Blocker or Major; P-1..P-3 Minor stay (P-1, P-3 on the base commit, P-2 the decided #666 hint and #1142)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1143.md`
+- [x] Archive the session; PR `Fixes #1143`: pushed after this archive
 ## Session: #1176 Kontoinhaber in the privacy statement
 
 - [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
@@ -1517,6 +1526,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Dr. Weber (`docs/design/personas/dr-weber-1195.md`): no Blocker or Major; Minors that stay: P-1 (locked checkbox not explained), P-2 (Reparaturen and small maintenance), both on the base too
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #1193 building search finds the full address and the postcode
+
+- [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
+- [x] Backend tests (`building-search.pg.test.ts`) and three scenarios in `buildings.feature`, each seen red at its own step; search in name, street, postcode and place, commas separate words, «Ort» in postcode or place (95f8390)
+- [x] code-reviewer round 1 (`docs/reviews/1193-review-1.md`): no findings
+- [x] Persona Marco (`docs/design/personas/marco-1193.md`): task done; Minor P-1 («Ort» has no help text) stays, a new text the issue did not decide
+- [x] Checks: lint, check, fitness, backend type-check, backend search tests, buildings.feature (chromium)
+- [x] Workflow notes: GitHub does not apply `merge=union` of `.gitattributes`, so an entry appended at the end of this archive conflicts with every later append on main; this entry sits after #1176 instead
+- [x] Archive the session; PR `Fixes #1193`: pushed after this archive
 ## Session: #705 ponytail shortcut in missingByContract
 
 - [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
@@ -1548,8 +1566,25 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Checks: lint, check, fitness, backend type-check, full vitest, `pdf-translations`, E2E `categories.feature` + `invoice-detail.feature`, axe/language rows of categories, category-new, category-edit-predefined, invoice-detail
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1028.md`
 - [x] Archive session; PR `Fixes #1028`: pushed after this archive
+## Session: #750 browser console when a page does not hydrate
+
+- [x] Check on main: the axe rows record no browser console (`lookAt` → `Navigate.to` → `hydrated`); decision written into #750
+- [x] Unit test `tests/unit/hydration-console.test.ts` seen red; `BrowseTheWeb` records console and page errors, `hydrated` adds them to its error
+- [x] Slice review `docs/reviews/750-review-1.md`: C-1 Major (console only in `message`, not in the stack the report shows) confirmed with real Playwright, fixed test-first; C-2 Minor with it
+- [x] Re-review `docs/reviews/750-review-2.md`: nothing open
+- [x] Checks: lint, check, fitness, backend type-check, vitest (new test, screenplay lint), E2E dashboard axe and language rows (79), a real Chromium page that throws shows its console in the stack
+- [x] Fallback review on PR #1223: console reset per document (Medium) and `cause` pinned (Low), fixed test-first; reviews `docs/reviews/750-review-{3,4,5}.md`, 750-4 C-1 Minor fixed, nothing open
+- [x] Archive session; PR `Fixes #750`: pushed after this archive
+
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #714 design guard: style shorthands and system colours
+
+- [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
+- [x] Rule «Farbe im style-Element» reads `border`, `outline` and their side shorthands, allows the CSS Color 4 system colours, CSS-wide and border keywords and `var(--x)`; pattern cases seen red; `token-referenz.md` aligned. No scenario: test-only source guard
+- [x] Slice review `docs/reviews/style-guard-714-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, design-guard test
+- [x] Archive session; PR `Fixes #714`: pushed after this archive
 ## Session: #1099 Remove the code paths for Abrechnungsperioden under a year
 
 No scenario: the preview hint on invoices that count in full in a period under a year is unreachable since #1088 (wizard step 2 and the backend refuse such a period, and correction and recalculation never showed it); the rest stays.
