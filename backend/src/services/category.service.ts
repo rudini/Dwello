@@ -5,7 +5,7 @@
 
 import { paged } from '../db/paged';
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { containing, literal, db } from '../db/connection';
 import { categories, invoices, utilityStatementLineItems, type Category, type NewCategory } from '../db/schema';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { recordAudit } from './audit-log.service';
@@ -33,7 +33,7 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		conditions.push(or(ilike(categories.name, `%${search}%`), ilike(categories.nameDE, `%${search}%`)));
+		conditions.push(or(ilike(categories.name, containing(search)), ilike(categories.nameDE, containing(search))));
 	}
 
 	if (isAllowedUtilityCost !== undefined) {
@@ -126,7 +126,7 @@ export async function getCategoryByName(name: string): Promise<Category | null> 
 	const [byEnglish] = await db
 		.select()
 		.from(categories)
-		.where(ilike(categories.name, name))
+		.where(ilike(categories.name, literal(name)))
 		.limit(1);
 
 	if (byEnglish) return byEnglish;
@@ -135,7 +135,7 @@ export async function getCategoryByName(name: string): Promise<Category | null> 
 	const [byGerman] = await db
 		.select()
 		.from(categories)
-		.where(ilike(categories.nameDE, name))
+		.where(ilike(categories.nameDE, literal(name)))
 		.limit(1);
 
 	return byGerman || null;

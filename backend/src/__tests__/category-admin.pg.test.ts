@@ -102,6 +102,25 @@ describe('Kostenkategorien', () => {
 		expect(found.map((c) => c.name)).toEqual([`Stairs ${token}`]);
 	});
 
+	// #1316: % and _ are characters, not wildcards of the name check or the search
+	it('nimmt einen Namen mit % oder _ an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('70 Prozent Lift');
+		await categories.create({ name: `Garden ${token}`, nameDE: `Garten A ${token}`, isAllowedUtilityCost: true });
+
+		expect((await create('70% Lift')).status).toBe(201);
+		expect((await create('Garten_A')).status).toBe(201); // like the German name of another
+		expect((await create('70% lift')).status).toBe(409); // the same name still counts as taken
+	});
+
+	it('findet mit _ oder % keine Kategorie, deren Name dort ein anderes Zeichen hat', async () => {
+		await create('Kehricht B');
+
+		for (const term of [`Kehricht_B ${token}`, `Kehricht%${token}`]) {
+			const response = await categories.send('GET', `?search=${encodeURIComponent(term)}`);
+			expect(((await response.json()) as { categories: unknown[] }).categories).toEqual([]);
+		}
+	});
+
 	it('behält Kategorien, denen Rechnungen zugeordnet sind', async () => {
 		const id = await idOf(await create('Hauswart'));
 		removeBuilding = await invoicedBuilding(`Kategorienhaus ${token}`, { categoryId: id });

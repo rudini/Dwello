@@ -6,7 +6,7 @@
 import { paged } from '../db/paged';
 import { eq, and, or, sql, desc, gte, lte, isNull, ilike, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { db } from '../db/connection';
+import { containing, db } from '../db/connection';
 import {
 	rentalContracts,
 	apartments,
@@ -125,7 +125,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	}
 
 	if (search) {
-		const pattern = `%${search}%`;
+		const pattern = containing(search);
 		conditions.push(
 			or(
 				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, pattern),
