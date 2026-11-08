@@ -19,3 +19,29 @@ export function documentStatus(document: Pick<StatementDocument, 'status' | 'not
 		return { label: m.tenants_document_to_send(), tone: 'caution' } as const;
 	return { label: m.statements_status_sent(), tone: 'positive' } as const;
 }
+
+/**
+ * The documents with a running number after the title of each upload whose tenant has another upload of that title,
+ * in upload order: «Ausweiskopie (1 von 2)», so rows, buttons and the delete question tell them apart (#1181)
+ */
+export function numberedUploads<
+	T extends Pick<StatementDocument, 'type' | 'tenantId' | 'title' | 'createdAt'>
+>(documents: T[]) {
+	const key = (d: T) => `${d.tenantId}\u0000${d.title}`;
+	const uploads = documents
+		.filter((d) => d.type === 'upload')
+		.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+	return documents.map((d) => {
+		const same = uploads.filter((u) => key(u) === key(d));
+		return d.type !== 'upload' || same.length < 2
+			? d
+			: {
+					...d,
+					title: m.documents_upload_number({
+						title: d.title,
+						number: same.indexOf(d) + 1,
+						count: same.length
+					})
+				};
+	});
+}

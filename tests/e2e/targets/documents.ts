@@ -53,6 +53,11 @@ export const documentsView = (view: 'Alle' | 'Zu versenden') =>
 export const chosenDocumentFile = target('Gewählte Datei', (page) => page.getByTestId('tenant-document-file-chosen'));
 export const openDocumentLink = (title: string, tenantName = '') =>
 	target(`«${title}» ${tenantName}`.trim() + ' öffnen', (page) => documentRow(title, tenantName).locate(page).getByTestId('document-pdf-link'));
+// #1181: what the download link and the delete button of a row are called for a screen reader
+export const documentRowControls = (title: string, tenantName = '') =>
+	target(`Schaltflächen von «${title}» ${tenantName}`.trim(), (page) =>
+		documentRow(title, tenantName).locate(page).getByTestId(/^document-(pdf-link|delete-button)$/)
+	);
 export const deleteDocumentButton = (title: string) =>
 	target(`«${title}» löschen`, (page) => documentRow(title).locate(page).getByTestId('document-delete-button'));
 export const deleteTenantMessage = target('Bestätigung Mieter löschen', (page) => page.getByTestId('delete-dialog-message'));

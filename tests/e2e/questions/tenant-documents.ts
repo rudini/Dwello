@@ -1,4 +1,4 @@
-import { Accessible, Count, HoldsFocus, Text, Value } from '../screenplay/questions';
+import { Accessible, Attribute, Count, HoldsFocus, Text, Value } from '../screenplay/questions';
 import {
 	chosenDocumentFile,
 	deleteDocumentButton,
@@ -10,6 +10,7 @@ import {
 	deleteDocumentMessage,
 	deleteTenantMessage,
 	documentRow,
+	documentRowControls,
 	documentStatus,
 	documentTitleInput,
 	duplicateFileNote,
@@ -22,6 +23,8 @@ export const documentTitleEntered = Value.of(documentTitleInput);
 export const noDocumentsNote = Text.of(noDocumentsHint);
 export const listedDocuments = Count.of(documentRow(''));
 export const deliveryStatesOf = (title: string) => Count.of(documentStatus(title));
+export const controlNamesOf = (title: string, tenantName = '') =>
+	Attribute.named('aria-label').ofAll(documentRowControls(title, tenantName));
 export const deleteOffersFor = (title: string) => Count.of(deleteDocumentButton(title));
 export const deleteTenantConsequence = Text.of(deleteTenantMessage);
 export const deleteDocumentConsequence = Text.of(deleteDocumentMessage);
