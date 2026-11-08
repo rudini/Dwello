@@ -88,7 +88,7 @@ Funktionalität: Neuen Mietvertrag erfassen
   Szenario: Die Hilfe zur Wohnung sagt, welche Wohnungen sich wählen lassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
-    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen."
+    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem Mietvertrag ohne Vertragsende sind mit «nicht verfügbar» markiert und lassen sich nicht wählen."
 
   # B-16 (#156): wer «Beenden» beim alten Mietvertrag vergessen hat, erfährt es vor der Prüfung
   Szenario: Mieter hat noch einen Mietvertrag ohne Vertragsende
@@ -173,7 +173,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Und der Liegenschaftsverwalter die Warnung schliesst
     Dann steht im Schritt «Wohnung» der Hinweis "Wohnung 2.01 · Ahornhof ist nicht verfügbar"
-    Und erklärt der Hinweis im Schritt «Wohnung» "Für diese Wohnung ist ein unbefristeter Mietvertrag erfasst, der nicht gekündigt ist. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
+    Und erklärt der Hinweis im Schritt «Wohnung» "Für diese Wohnung ist ein Mietvertrag ohne Vertragsende erfasst. Dwello hat die Auswahl darum aufgehoben. Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende zuerst auf seiner Seite mit «Enddatum erfassen» ein. Sonst wählen Sie eine andere Wohnung."
     Und bietet der Hinweis im Schritt «Wohnung» den Link "Zum Mietvertrag von Bruno Meier"
 
   # #1158 (Personas Sven P-1, Helga): nach «Meldung schliessen» steht der Fokus wieder dort, wo er vor der Meldung stand
@@ -264,6 +264,20 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann steht bei der Wohnung "2.01" in der Auswahl "(nicht geprüft)"
+
+  # #1265 (Personas Helga P-4, Sven P-5): die Hilfe am Feld erklärt «nicht geprüft», solange eine Wohnung so markiert ist
+  Szenario: Die Hilfe zur Wohnung erklärt «nicht geprüft»
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem Mietvertrag ohne Vertragsende sind mit «nicht verfügbar» markiert und lassen sich nicht wählen. Wohnungen mit «nicht geprüft» lassen sich wählen, obwohl Dwello ihre Mietverträge nicht laden konnte. Ob die gewählte Wohnung frei ist, prüft Dwello beim Speichern."
+
+  # #1265 (Helga P-4): bei 150 % schneidet das Feld das Ende der Bezeichnung ab, darum steht «nicht geprüft» vorne
+  Szenario: «nicht geprüft» steht vor der Bezeichnung der Wohnung
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Dann beginnt die Wohnung "2.01" in der Auswahl mit "(nicht geprüft)"
 
   # #667 (Dr. Weber W-03, W-04): ohne die Mietverträge der Wohnung prüft erst das Speichern; die Ablehnung nennt den
   # anderen Mietvertrag und rät, was bei ihm hilft; der Hinweis, dass Dwello beim Speichern prüft, ist dann erledigt

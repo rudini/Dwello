@@ -41,7 +41,9 @@
 	<Select
 		id="apartment"
 		label={m.tenants_apartment()}
-		help={m.contracts_apartment_help()}
+		help={[...availability.values()].includes(null)
+			? `${m.contracts_apartment_help()} ${m.contracts_apartment_help_unchecked()}`
+			: m.contracts_apartment_help()}
 		options={apartmentChoices(apartments, availability)}
 		bind:value={apartmentId}
 		placeholder={m.contracts_choose_apartment()}
