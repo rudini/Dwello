@@ -120,10 +120,12 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
  * Get distribution key by English or German name (for lookups)
  */
 export async function getDistributionKeyByName(name: string): Promise<DistributionKey | null> {
+	// % and _ in the name are characters, not wildcards (#1305)
+	const pattern = name.replace(/[\\%_]/g, '\\$&');
 	const [key] = await db
 		.select()
 		.from(distributionKeys)
-		.where(or(ilike(distributionKeys.name, name), ilike(distributionKeys.nameDE, name)))
+		.where(or(ilike(distributionKeys.name, pattern), ilike(distributionKeys.nameDE, pattern)))
 		.limit(1);
 
 	return key || null;
