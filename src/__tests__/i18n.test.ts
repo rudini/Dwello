@@ -169,17 +169,6 @@ describe('Sprachdateien', () => {
 		expect(messages.glossary_notice_period_text.endsWith(end)).toBe(true);
 	});
 
-	// #1158 (1158-fachreview-1): since the step names the apartment and its contract, the warning says only the result
-	it.each([
-		['de', 'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben.'],
-		['fr', 'Les contrats de bail de l’appartement sont chargés. L’appartement choisi n’est pas disponible\u00a0; Dwello a annulé la sélection.'],
-		['it', 'I contratti di locazione dell’appartamento sono caricati. L’appartamento scelto non è disponibile; Dwello ha annullato la selezione.'],
-		['en', 'The apartment’s rental contracts are loaded. The chosen apartment is not available; Dwello has cleared the selection.']
-	])('%s: die Warnung nach dem Laden sagt nur, dass Dwello die nicht verfügbare Wohnung abgewählt hat', (language, text) => {
-		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
-		expect(messages.contracts_apartment_contracts_blocked).toBe(text);
-	});
-
 	// #1278, #1267 (1266-fachreview-1): the contract page names the Aufhebungsvereinbarung; a third party entering the
 	// contract is ended as one
 	it.each([

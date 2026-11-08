@@ -563,13 +563,17 @@ describe('Mietvertrag bearbeiten', () => {
 		type('start-date-input', '01.06.2024');
 		await settle();
 		expect(byTestId('overlap-warning')!.textContent).toContain('Mietvertrag von Anna Keller');
+		// #1295 (1295-review-1 C-1): the link in the box names tenant and apartment
+		expect(byTestId('overlap-warning')!.textContent).toContain(
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.01 · Ahornhof'
+		);
 		await save();
 		const link = byTestId<HTMLAnchorElement>('overlap-contract-link')!;
 		const text = link.textContent!.replace(/\s+/g, ' ').trim();
 		expect([link.getAttribute('href'), link.target, text]).toEqual([
 			`/contracts/${overlap.params.contract}`,
 			'_blank',
-			'Zum Mietvertrag von Anna Keller (öffnet in neuem Tab)'
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.01 · Ahornhof (öffnet in neuem Tab)' // #1295
 		]);
 		expect(byTestId('overlap-warning')).toBeNull();
 	});

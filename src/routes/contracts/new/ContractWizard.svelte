@@ -18,6 +18,7 @@
 	import {
 		contractSteps,
 		firstStepWithError,
+		chosenApartmentName,
 		clearedApartment,
 		lastRent,
 		normalizeAmounts,
@@ -45,7 +46,6 @@
 	} from '$lib/utils/contract-availability';
 	import { browserStorage, clearDraft, writeDraft } from '$lib/wizard-draft';
 	import ApartmentStep from './ApartmentStep.svelte';
-	import OpenContracts from './OpenContracts.svelte';
 	import { retried } from './ContractsUnknown.svelte';
 	import OverlapLink from '../OverlapLink.svelte';
 	import PeriodStep from './PeriodStep.svelte';
@@ -124,7 +124,7 @@
 	const reviewOverlap = $derived(refusedWith ? null : overlap); // found by «Erneut versuchen» there (#669)
 	const overlapAtField = $derived(!!overlap && errors[overlap.field] === overlap.text);
 	const openContracts = $derived(openContractsOf(apartments, contracts, values));
-	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
+	const chosen = $derived(chosenApartmentName(apartments, values.apartmentId)); // in links (#1295)
 
 	const contractsOf = async (apartmentId: string) => {
 		const response = await apiCall<{ contracts: ListedContract[] }>(
@@ -355,7 +355,6 @@
 				error={errors.tenantId}
 			/>
 		{:else if step === 2}
-			<OpenContracts name={tenantName} contracts={openContracts} />
 			<ApartmentStep
 				bind:apartmentId={values.apartmentId}
 				{apartments}
@@ -366,6 +365,7 @@
 				onretry={retry}
 				bind:cleared
 				error={errors.apartmentId}
+				{openContracts}
 			/>
 		{:else if step === 3}
 			<PeriodStep
@@ -379,6 +379,7 @@
 				onretry={retry}
 				{startPast}
 				{overlap}
+				apartment={chosen}
 				overlapSaid={overlapAtField}
 				{errors}
 			/>
@@ -404,7 +405,7 @@
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>
-					{#if refusedWith}<OverlapLink contract={refusedWith} />{/if}
+					{#if refusedWith}<OverlapLink contract={refusedWith} apartment={chosen} />{/if}
 				</Alert>
 			{/if}
 		{/if}

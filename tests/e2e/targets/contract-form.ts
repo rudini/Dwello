@@ -1,4 +1,5 @@
 import { target } from '../screenplay/target';
+import { loadedToast } from './form';
 
 export const tenantSelect = target('Mieterauswahl', (page) => page.getByTestId('contract-tenant-select'));
 export const fixedTenant = target('Mieter des Mietvertrags', (page) => page.getByTestId('contract-form-tenant'));
@@ -71,6 +72,8 @@ export const runningContractHint = target('Hinweis auf einen laufenden Mietvertr
 // #1158: the hint on a contract of the named tenant
 export const runningContractHintOf = (tenant: string) =>
 	target(`Hinweis auf einen laufenden Mietvertrag von ${tenant}`, (page) => runningContractHint.locate(page).filter({ hasText: tenant }));
+export const runningContractLinkOf = (tenant: string) =>
+	target(`Link im Hinweis auf einen laufenden Mietvertrag von ${tenant}`, (page) => runningContractHintOf(tenant).locate(page).getByRole('link'));
 export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (page) =>
 	runningContractHint.locate(page).getByRole('link')
 );
@@ -107,6 +110,7 @@ export const wizardText = (text: string) =>
 	target(`«${text}» im Assistenten`, (page) => page.getByTestId('contract-wizard').getByText(text));
 // #669 (Helga H-1): the box «Zeitraum überschneidet sich», at «Vertragsdauer» and in «Prüfen»
 export const overlapBox = target('Hinweis «Zeitraum überschneidet sich»', (page) => page.getByTestId('overlap-warning'));
+export const overlapLink = target('Link zum Mietvertrag, mit dem sich der Zeitraum überschneidet', (page) => page.getByTestId('overlap-contract-link'));
 // #668: the hint under «Befristet» for a contract saved open-ended, and «Monatlich total» in a live region
 export const noticeHint = target('Hinweis zum Vertragsende', (page) => page.getByTestId('contract-notice-hint'));
 export const announcedMonthlyTotal = target('Ansage des Monatlich total', (page) =>
@@ -130,6 +134,12 @@ export const apartmentCleared = target('Hinweis auf die nicht verfügbare Wohnun
 );
 export const apartmentClearedText = target('Erklärung im Hinweis auf die nicht verfügbare Wohnung', (page) =>
 	page.getByTestId('apartment-cleared-text')
+);
+// #1289: what «Erneut versuchen» ends with: a message, or for a cleared choice only the hint in the step
+export const retryResult = target('Ergebnis nach dem Laden', (page) => loadedToast.locate(page).or(apartmentCleared.locate(page)));
+// #1289: the status region around it, so a screen reader hears it once when it appears
+export const apartmentClearedAnnouncement = target('Ansage des Hinweises auf die nicht verfügbare Wohnung', (page) =>
+	page.getByRole('status').filter({ has: page.getByTestId('apartment-cleared') })
 );
 export const apartmentClearedLink = target('Link zum Mietvertrag im Hinweis auf die nicht verfügbare Wohnung', (page) =>
 	apartmentCleared.locate(page).getByTestId('overlap-contract-link')
