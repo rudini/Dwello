@@ -33,3 +33,10 @@ Funktionalität: Wohnung bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 4.01"
+
+  # #1201: die Wohnungsnummer hat höchstens 20 Zeichen, wie in der Datenbank
+  @wip
+  Szenario: Bei einer zu langen Wohnungsnummer sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter bei "Wohnungsnummer" einen Text von 21 Zeichen speichert
+    Dann steht bei "Wohnungsnummer" die Fehlermeldung "Höchstens 20 Zeichen. Kürzen Sie den Text."
+    Und steht bei "Wohnungsnummer" noch der Text von 21 Zeichen

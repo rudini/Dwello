@@ -129,3 +129,11 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" löscht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Verteilschlüsseln. Steht der Verteilschlüssel nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich der Verteilschlüssel löschen."
     Und zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Fläche und Zimmer"
+
+  # #1201: der Name eines Verteilschlüssels hat höchstens 100 Zeichen, wie in der Datenbank
+  @wip
+  Szenario: Bei einem zu langen Namen eines Verteilschlüssels sagt Dwello, was zu tun ist
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels "Fläche und Zimmer"
+    Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert
+    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Und steht bei "Name" noch der Text von 101 Zeichen
