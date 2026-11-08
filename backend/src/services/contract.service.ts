@@ -92,7 +92,7 @@ export interface ContractFilters {
 	buildingId?: string;
 	status?: ContractStatus;
 	search?: string;
-	limit?: number;
+	limit?: number | null; // null: every contract (#705)
 	offset?: number;
 }
 
@@ -155,7 +155,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 		.where(whereClause)
 		.orderBy(desc(rentalContracts.startDate), desc(rentalContracts.id))
 		.$dynamic();
-	const results = await (limit === undefined ? ordered : ordered.limit(limit)).offset(offset);
+	const results = await (limit == null ? ordered : ordered.limit(limit)).offset(offset);
 
 	// Get total count
 	const countQuery = db
