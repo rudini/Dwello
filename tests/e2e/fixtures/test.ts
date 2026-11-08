@@ -1,15 +1,31 @@
+import type { TestInfo } from '@playwright/test';
 import { test as base } from 'playwright-bdd';
 import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi, CallTheMcp } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
-import { FRESH_API, FRESH_KI_STUB, freshInstallation, resetFreshBackup, type FreshInstallation } from './fresh-installation';
+import { FRESH_API, FRESH_APP, FRESH_KI_STUB, freshInstallation, resetFreshBackup, type FreshInstallation } from './fresh-installation';
 import { withLock, withSettingsLock } from './settings-lock';
 import { sessionCookies, sessionToken } from './session';
 
 // Protocol driver the scenarios talk to the system through (Dave Farley): the browser, or the backend API.
 // The Liegenschaftsverwalter gets the matching ability; the project "api" runs the @api scenarios with it.
 export type Driver = 'ui' | 'api';
+
+export const ON_FRESH = '@frische-installation';
+
+// The fresh installation has one account at most: its scenarios take turns; the turns of the others do not count
+// against this one's time
+async function inTurnOnFresh(testInfo: TestInfo, work: () => Promise<void>) {
+	const timeout = testInfo.timeout;
+	const waiting = Date.now();
+	testInfo.setTimeout(0);
+	await withLock('installation', async () => {
+		testInfo.setTimeout(timeout + Date.now() - waiting);
+		resetFreshBackup(); // a look of the axe check may have left a confirmed code (tasks/accessibility.ts)
+		await work();
+	});
+}
 
 // Define custom fixtures for Dwello E2E tests
 export const test = base.extend<{
@@ -23,6 +39,10 @@ export const test = base.extend<{
 	globalSettings: void;
 }>({
 	driver: ['ui', { option: true }],
+
+	// #690: a scenario tagged @frische-installation runs on the fresh installation, set up for it: a setting there that
+	// would break the scenarios running in parallel (an IBAN without Firmenadresse) breaks none
+	baseURL: async ({ baseURL, $tags }, use) => use($tags.includes(ON_FRESH) ? FRESH_APP : baseURL),
 
 	// Every page belongs to the signed-in Liegenschaftsverwalter
 	page: async ({ page, baseURL }, use) => {
@@ -48,10 +68,21 @@ export const test = base.extend<{
 	// An AI program the Liegenschaftsverwalter gave an access key (#817): it reaches only the MCP server
 	kiProgramm: async ({ request }, use) => use(new Actor('KI-Programm').whoCan(new CallTheMcp(request))),
 
-	seed: async ({ request }, use) => {
-		const data = testData(new CallTheApi(request, await sessionToken()));
-		await use(data);
-		await data.cleanUp();
+	seed: async ({ request, $tags }, use, testInfo) => {
+		if (!$tags.includes(ON_FRESH)) {
+			const data = testData(new CallTheApi(request, await sessionToken()));
+			await use(data);
+			return data.cleanUp();
+		}
+		const api = new CallTheApi(request, await sessionToken(), FRESH_API);
+		const installation = freshInstallation(api, new CallTheApi(request, '', FRESH_KI_STUB));
+		const data = testData(api);
+		await inTurnOnFresh(testInfo, async () => {
+			await installation.setUp();
+			await use(data);
+			await data.cleanUp();
+			await installation.cleanUp();
+		});
 	},
 
 	names: async ({ seed }, use) => use(seed.names),
@@ -62,13 +93,7 @@ export const test = base.extend<{
 			new CallTheApi(request, await sessionToken(), FRESH_API),
 			new CallTheApi(request, '', FRESH_KI_STUB)
 		);
-		// the turns of the other scenarios do not count against this one's time
-		const timeout = testInfo.timeout;
-		const waiting = Date.now();
-		testInfo.setTimeout(0);
-		await withLock('installation', async () => {
-			testInfo.setTimeout(timeout + Date.now() - waiting);
-			resetFreshBackup(); // a look of the axe check may have left a confirmed code (tasks/accessibility.ts)
+		await inTurnOnFresh(testInfo, async () => {
 			await use(installation);
 			await installation.cleanUp();
 		});
