@@ -483,6 +483,17 @@ describe('Rechnung prüfen', () => {
 			servicePeriodEnd: 'Das Ende darf nicht vor dem Beginn liegen.'
 		});
 	});
+
+	// #743 (code review C-14): longer than its database column, the save ended in the general error
+	it('nimmt Rechnungssteller und Rechnungsnummer nur so lang, wie die Datenbank sie speichert', () => {
+		const long = (billingEntity: string, invoiceNumber: string) => validateInvoice({ ...filled, billingEntity, invoiceNumber });
+
+		expect(long(`${'A'.repeat(255)} `, `${'1'.repeat(50)} `)).toEqual({});
+		expect(long('A'.repeat(256), '1'.repeat(51))).toEqual({
+			billingEntity: 'Höchstens 255 Zeichen. Kürzen Sie den Text.',
+			invoiceNumber: 'Höchstens 50 Zeichen. Kürzen Sie den Text.'
+		});
+	});
 });
 
 describe('Rücksprung nach dem Erfassen', () => {

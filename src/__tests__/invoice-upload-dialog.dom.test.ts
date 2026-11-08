@@ -87,19 +87,19 @@ describe('Verteilschlüssel beim Hochladen', () => {
 	});
 
 	// #548: the sentence went only with the next «Rechnungen erstellen», also after the Verteilschlüssel was chosen
-	it('nimmt «Füllen Sie die markierten Felder aus.» zurück, sobald der Verteilschlüssel gewählt ist', async () => {
+	it('nimmt «Füllen Sie die Felder mit einer Fehlermeldung aus.» zurück, sobald der Verteilschlüssel gewählt ist', async () => {
 		openWith('');
 		fireEvent(byTestId<HTMLSelectElement>('invoice-upload-building-select')!, 'change', 'b2'); // no Verteilschlüssel to propose
 		await upload(pdf('blitz.pdf'));
 		click('invoice-upload-create-button');
 		await settle();
 		const notes = () => byTestId('invoice-upload-row-message')?.textContent ?? '';
-		expect(notes()).toContain('Füllen Sie die markierten Felder aus.');
+		expect(notes()).toContain('Füllen Sie die Felder mit einer Fehlermeldung aus.');
 
 		fireEvent(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!, 'change', 'k1');
 		await settle();
 
-		expect(notes()).not.toContain('Füllen Sie die markierten Felder aus.');
+		expect(notes()).not.toContain('Füllen Sie die Felder mit einer Fehlermeldung aus.');
 	});
 
 	// #548 (persona Helga P-1): the Kategorie brings its Verteilschlüssel, so the field no longer asks for one
@@ -292,7 +292,7 @@ describe('Rechnungen hochladen', () => {
 	});
 
 	// #548 (code review 548-1 C-1): one of the marked fields filled, the others still empty
-	it('sagt «Füllen Sie die markierten Felder aus.» weiter, solange ein markiertes Feld leer ist', async () => {
+	it('sagt «Füllen Sie die Felder mit einer Fehlermeldung aus.» weiter, solange ein markiertes Feld leer ist', async () => {
 		open(() => [502, unreadable]);
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
@@ -303,7 +303,7 @@ describe('Rechnungen hochladen', () => {
 		await settle();
 
 		expect(byTestId('invoice-upload-row-message')!.textContent).toContain(
-			'Füllen Sie die markierten Felder aus.'
+			'Füllen Sie die Felder mit einer Fehlermeldung aus.'
 		);
 	});
 
@@ -326,7 +326,81 @@ describe('Rechnungen hochladen', () => {
 		expect(status()).toBe('notizen.docx entfernt.');
 		click('invoice-upload-row-remove');
 		await settle();
-		expect(status()).toBe('blitz.pdf entfernt.');
+		// #743: the building is enabled again, which a screen reader does not see change
+		expect(status()).toBe('blitz.pdf entfernt. Sie können das Gebäude wieder wählen.');
+	});
+
+	// persona Sven 743 P-1: the date's error of the first «Erstellen», hidden by typing and clearing, stayed hidden
+	// at the next one: the same error again showed nothing, said nothing and focused nothing
+	it('markiert beim nächsten Erstellen ein Rechnungsdatum, das nach dem Fehler eingetippt und wieder geleert wurde', async () => {
+		open(() => [502, unreadable]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+		expect(date.getAttribute('aria-invalid')).toBe('true');
+		fireEvent(date, 'input', '15.03.2025');
+		fireEvent(date, 'input', '');
+		flushSync();
+		expect(date.getAttribute('aria-invalid')).toBeNull();
+
+		click('invoice-upload-create-button');
+		await settle();
+
+		expect(date.getAttribute('aria-invalid')).toBe('true');
+	});
+
+	// code review 743-2 C-4: the errors were set before the complete files were created, the focus moved after: a create
+	// slower than the date field's wait (here one that fails, so nothing is created) said the date's error twice
+	it('sagt den Fehler des Datums einmal, auch wenn das Erstellen der übrigen Dateien dauert', async () => {
+		fakeBff((call) =>
+			call.path === '/invoices'
+				? [500, {}]
+				: (call.body as { fileName: string }).fileName === 'blitz.pdf'
+					? [200, read]
+					: [502, unreadable]
+		);
+		const answer = globalThis.fetch;
+		globalThis.fetch = (async (url: string, init?: RequestInit) => {
+			if (String(url).endsWith('/api/invoices')) await new Promise((resolve) => setTimeout(resolve, 400));
+			return answer(url, init);
+		}) as typeof fetch;
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
+			defaultDistributionKeyId: 'k1',
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), pdf('leer.pdf'));
+		click('invoice-upload-create-button');
+		await new Promise((resolve) => setTimeout(resolve, 1200));
+		flushSync();
+
+		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+		expect(document.activeElement).toBe(date);
+		const spoken = [...document.querySelectorAll('[aria-live="assertive"]')].map((region) => region.textContent);
+		expect(spoken.join(' ')).not.toContain('Bitte geben Sie ein Datum ein.');
+	});
+
+	// #743 (code review C-14): a Rechnungsnummer over 50 characters ended in the general error of creating
+	it('sagt bei einer zu langen Rechnungsnummer am Feld, was zu tun ist, und erstellt die Rechnung nicht', async () => {
+		const { calls } = open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLInputElement>('invoice-upload-invoice-number-input')!, 'input', '1'.repeat(51));
+		click('invoice-upload-create-button');
+		await settle();
+
+		const field = byTestId<HTMLInputElement>('invoice-upload-invoice-number-input')!;
+		const description = field.getAttribute('aria-describedby')!.split(' ').map((id) => document.getElementById(id)?.textContent);
+		expect(description.join(' ')).toContain('Höchstens 50 Zeichen. Kürzen Sie den Text.');
+		expect(field.value).toBe('1'.repeat(51));
+		expect(calls.some((call) => call.path === '/invoices')).toBe(false);
 	});
 
 	// dieselbe Hilfe wie im Formular «Neue Rechnung» (#254)
@@ -346,10 +420,11 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('heizoel.pdf'));
 		click('invoice-upload-row-toggle');
-		// the KI chose c1, the category of the tank in Seeblick
-		expect(byTestId('invoice-service-period-help')!.textContent).toContain(
+		// the KI chose c1, the category of the tank in Seeblick; the delivery is the paragraph shown at the field (#751)
+		expect(byTestId('invoice-service-period-first')!.textContent).toContain(
 			'Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.'
 		);
+		expect(byTestId('invoice-service-period-more')!.textContent).toContain('Für welche Zeit gilt die Rechnung?');
 	});
 
 	it('liest den Hinweis der KI vor der Hilfe des Feldes vor (Persona Sven)', async () => {

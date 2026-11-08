@@ -36,6 +36,8 @@ import {
 	chooseCategory,
 	chooseKey,
 	enterAmount,
+	enterAndClearInvoiceDate,
+	enterInvoiceNumber,
 	chooseForCreating,
 	escapeFromCategory,
 	openUploadDialog,
@@ -77,6 +79,13 @@ When(
 			invoicePhoto(`${supplierName(names, seed.unique, second)}.png`)
 		];
 		await verwalter.attemptsTo(uploadBelege(seed.idOf(building)!, files));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter für das Gebäude {string} die Word-Datei {string} hochlädt',
+	async ({ verwalter, seed }, building: string, word: string) => {
+		await verwalter.attemptsTo(uploadBelege(seed.idOf(building)!, [wordFile(word)]));
 	}
 );
 
@@ -160,6 +169,24 @@ When(
 		await verwalter.attemptsTo(enterAmount(names.get(supplier)!, amount));
 	}
 );
+
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} das Rechnungsdatum {string} eingibt und wieder löscht',
+	async ({ verwalter, names }, supplier: string, date: string) => {
+		await verwalter.attemptsTo(enterAndClearInvoiceDate(names.get(supplier)!, date));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} die Rechnungsnummer {string} eingibt',
+	async ({ verwalter, names }, supplier: string, number: string) => {
+		await verwalter.attemptsTo(enterInvoiceNumber(names.get(supplier)!, number));
+	}
+);
+
+Then('hat die Datei von {string} die Rechnungsnummer {string}', async ({ verwalter, names }, supplier: string, number: string) => {
+	await verwalter.sees(proposedInvoiceNumber(names.get(supplier)!)).toBe(number);
+});
 
 When(
 	'der Liegenschaftsverwalter bei der Datei von {string} den Verteilschlüssel {string} wählt',

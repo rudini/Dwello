@@ -1,4 +1,4 @@
-import { Checked, Count, Tones, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Attribute, Checked, Count, Tones, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedWarning,
 	categoryLabel,
@@ -6,10 +6,14 @@ import {
 	categoryWarning,
 	invoiceDateInput,
 	invoiceDateWords,
+	invoiceNumberInput,
 	keyHelp,
 	keySelect,
 	periodWarning,
+	servicePeriodFirst,
 	servicePeriodHelp,
+	servicePeriodMore,
+	supplierInput,
 	utilityCostCheckbox,
 	utilityCostHelp
 } from '../targets/invoice-form';
@@ -27,6 +31,12 @@ export const dateOutsidePeriodWarning = Text.of(periodWarning);
 export const dateOutsidePeriodWarnings = Count.of(periodWarning);
 export const utilityCostHelpText = Text.of(utilityCostHelp);
 export const servicePeriodHelpText = Text.of(servicePeriodHelp);
+export const invoiceNumberValue = Value.of(invoiceNumberInput);
+export const supplierValue = Value.of(supplierInput);
+export const servicePeriodFirstText = Text.of(servicePeriodFirst);
+export const servicePeriodMoreText = Text.of(servicePeriodMore);
+// null while «Mehr dazu» is closed
+export const servicePeriodMoreOpen = Attribute.named('open').of(servicePeriodMore);
 export const categoryLabelText = Text.of(categoryLabel);
 export const chosenKey = Value.chosenIn(keySelect);
 export const keyHelpText = Text.of(keyHelp);

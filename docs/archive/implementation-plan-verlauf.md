@@ -7,6 +7,19 @@
 - [x] Persona Helga: no findings; «Alpenblick» had no draft, she checked the same way on «Musterhaus Zentrum» (`docs/design/personas/helga-1094.md`); her note «Zurück sagt nicht wohin» is C-1
 - [x] PR: merge of origin/main clean
 
+## Session: #743 and #751 invoice forms: announcements, length limits, help at «Leistungszeitraum»
+
+- [x] Read #743 and #751 on main; no open `needs-decision` issue on the same behaviour; decisions recorded in both issues (date announcement revised after code review 743-2 C-5; summary of the disclosure names its content, fach review V-1)
+- [x] `@wip` scenarios (invoice-new, invoice-edit, invoices features) and the approved step change in invoices.feature (Spec change approved: #743), seen red; DOM and unit tests seen red
+- [x] `fach-reviewer` step 1 (`docs/reviews/743-fachreview-1.md`): texts in de/fr/it/en, V-1 decided, V-2 fixed with extra steps and an upload scenario
+- [x] Length limits (Rechnungsnummer 50, Rechnungssteller 255) at the field; upload status after the last file; first paragraph at «Leistungszeitraum», the rest behind a disclosure; date field announces a page error only where the focus does not land in a field with an error
+- [x] code-reviewer `docs/reviews/743-review-{1,2,3}.md`: C-1, C-2, C-4, C-5, C-6 fixed; C-3 answered in the commit message of 41fa74a
+- [x] Persona Sven (`docs/design/personas/sven-743{,-2}.md`): P-1 (pre-existing, met in the task) and P-2 fixed; Minors P-3 to P-6 stay in the report
+- [x] No scenario: the date field's live region (it empties itself after 2 s, so an E2E check of its emptiness passes on the base too; DOM tests in `date-input.dom.test.ts`)
+- [x] Split: length limits of the other forms in #1201
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
+- [x] Archive the session; PR pushed after this archive
+
 ## Session: #932 E2E purge after a berichtigte Abrechnung
 
 - [x] Cause: `createCorrection` only clicked «Berichtigte Abrechnung erstellen»; the next step could pass on the replaced statement (same Akonto) and the clean-up deleted it while the new one was still saved (FK `replaces_id`, CI run 40708772660)
@@ -1540,6 +1553,28 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Issues opened: #1200 (totals buttons, error position, name refusal), #1221 (failing custom key splits a statement equally)
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-737.md`
 - [x] Archive the session; PR `Fixes #737`: pushed after this archive
+## Session: #741 Missing-statements warning compact
+
+- [x] Issue read, every point checked on `main` (390 px: 804–936 px high with 3–4 periods; fr label without object, it already with one)
+- [x] Decisions (PO 07.11.2026) in #741: shorter texts, buttons stacked across the full width, no word for the control; later: the invoices link may wrap; oldest period first
+- [x] `@wip` scenario «Fehlende Abrechnungen auf dem Handy» seen red (5b2b844)
+- [x] `fach-reviewer` `docs/reviews/741-fachreview-1.md`: whole texts in de/fr/it/en; V-1 Major (start with the oldest period, Übertrag) and V-2..V-5 taken
+- [x] Texts, full-width links, fr/it labels; DOM tests seen red (0e046f6)
+- [x] code-reviewer `docs/reviews/741-review-1.md`: C-1, C-2 Minor fixed (22448b1)
+- [x] Persona Marco `docs/design/personas/marco-741.md` (one and three missing periods): P-1 Major fixed, oldest first (8729f6d); P-2, P-3, P-5 Minor stay (on `main` already); P-4 rejected (caused by the caller's seed)
+- [x] Closing review `docs/reviews/741-close-review-{1,2}.md`: C-1 Major (order not pinned by a scenario) and C-2 Minor fixed (4aa7948)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-741.md`
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, contract-detail.feature, a11y and language rows missing-statements
+- [x] Archive session; PR `Fixes #741`: pushed after this archive
+## Session: #1197 one advice after a failed agreements retry
+
+- [x] Checked on main: after «Weiter» and a failed retry the alert says «in einigen Minuten», the note «Wählen Sie «Erneut versuchen»»; no open issue decides it
+- [x] Decided (product owner) in #1197: the note says only «Gelingt die Prüfung, geht es weiter.» after a failed retry
+- [x] Scenario and DOM test seen red; new text in de/fr/it/en; screen row `agreements-wait-retry-failed` (a11y, languages) (cea1e11)
+- [x] code-reviewer `docs/reviews/1197-review-1.md`: no findings
+- [x] Persona Helga `docs/design/personas/helga-1197.md`: P-1 Major (after «Weiter» the step seemed to do nothing, H-1 of #688 met in this task); fixed: the focus goes to «Erneut versuchen», DOM test and scenario seen red (ad1f192)
+- [x] code-reviewer closing round `docs/reviews/1197-review-2.md`: no findings; Helga round 2 `docs/design/personas/helga-1197-2.md`: P-1 fixed, no findings
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1197.md`
 ## Session: #1195 the category's reason in the invoice form note (Weber P-3 on #292)
 
 - [x] Read #1195 on main and on the branch of #1206 (#687), which this one builds on; product owner decisions in #1195: the note shows `reasonOf`, a category without a reason a general sentence; spec change of «Nicht umlagefähige Kategorie wählen»
