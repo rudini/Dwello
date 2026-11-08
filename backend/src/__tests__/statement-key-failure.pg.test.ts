@@ -259,10 +259,16 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 
 	// #1333 (product owner, Fachreview 1333-1 V-3): the draft's PDF neither, until the key is fixed
 	it('erstellt kein PDF des Entwurfs, solange sich der Verteilschlüssel nicht berechnen lässt', async () => {
+		// Fachreview 1333-2 V-8: a PDF made before goes, so the page offers none that cannot be opened (#503)
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, draft));
 		for (const response of [await callApi(`/api/v1/statements/${draft}/pdf`), await sendJson('POST', `/api/v1/statements/${draft}/generate-pdf`, {})]) {
-			expect(((await response.json()) as { code: string }).code).toBe('STATEMENT_KEY_NOT_CALCULABLE');
+			expect((await response.json()) as unknown).toEqual(
+				expect.objectContaining({ code: 'STATEMENT_KEY_NOT_CALCULABLE', params: expect.objectContaining({ then: 'STATEMENT_KEY_THEN_RECALCULATE_PDF' }) })
+			);
 			expect(response.status).toBe(400);
 		}
+		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, draft));
+		expect({ pdfBlob: statement.pdfBlob, pdfGeneratedAt: statement.pdfGeneratedAt }).toEqual({ pdfBlob: null, pdfGeneratedAt: null });
 	});
 
 	// Fachreview 1309-1 V-1: replacing first would leave it «Ersetzt» without a berichtigte Abrechnung

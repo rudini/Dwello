@@ -1106,7 +1106,6 @@ Funktionalität: Abrechnungsdetail
     Und hat die Abrechnung den Status "Entwurf"
 
   # #1333 (Entscheid PO, Fachreview 1333-1 V-3): auch das PDF des Entwurfs, bis der Verteilschlüssel stimmt
-  @wip
   Szenario: Das PDF eines Entwurfs mit einem Verteilschlüssel, der sich nicht berechnen lässt, verweigert Dwello
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
@@ -1114,7 +1113,8 @@ Funktionalität: Abrechnungsdetail
     Und der Verteilschlüssel "Halbe Zimmer" rechnet danach mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung zu erstellen versucht
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Dann meldet Dwello den Fehler "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und meldet Dwello den Fehler "Berechnen Sie den Entwurf danach neu, bevor Sie sein PDF erstellen."
 
   # Persona Anna 1309 P-1: vom Hinweis zur Rechnung, deren Verteilschlüssel sich nicht berechnen lässt
   Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Abrechnung öffnen

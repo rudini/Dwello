@@ -54,6 +54,9 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		expect(refusal({ reason: 'STATEMENT_KEY_REASON_ALL_ZERO', then: 'STATEMENT_KEY_THEN_RECALCULATE' })).toMatch(
 			/vier Beispielwohnungen\. Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen\.$/
 		);
+		expect(refusal({ reason: 'STATEMENT_KEY_REASON_ALL_ZERO', then: 'STATEMENT_KEY_THEN_RECALCULATE_PDF' })).toMatch(
+			/Berechnen Sie den Entwurf danach neu, bevor Sie sein PDF erstellen\.$/
+		);
 		expect(refusal({ reason: 'STATEMENT_KEY_REASON_ALL_ZERO' })).toContain(
 			'nicht berechnen. Seine Formel ergibt für alle Wohnungen 0. Er gilt für diese Rechnungen: Öl AG, 15.10.2024, CHF 800.00. Wählen Sie'
 		);
