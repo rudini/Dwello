@@ -8,8 +8,8 @@ export const confirmDeleteButton = target('Gebäude löschen bestätigen', (page
 );
 export const editButton = target('Gebäude bearbeiten', (page) => page.getByTestId('building-edit-button'));
 export const invoicesButton = target('Rechnungen des Gebäudes', (page) => page.getByTestId('building-invoices-button'));
-export const addApartmentButton = target('Wohnung hinzufügen', (page) => page.getByTestId('apartment-add-button'));
-export const firstApartmentButton = target('Erste Wohnung erstellen', (page) =>
+export const addApartmentButton = target('Wohnung erfassen', (page) => page.getByTestId('apartment-add-button'));
+export const firstApartmentButton = target('Erste Wohnung erfassen', (page) =>
 	page.getByTestId('apartment-first-create-button')
 );
 export const addressLine = target('Adresse des Gebäudes', (page) => page.getByTestId('building-address'));
@@ -27,5 +27,5 @@ export const fuelStockCategories = target('Kategorien zur Wahl beim Tankbestand'
 );
 export const fuelStockRows = target('Tankbestände', (page) => page.getByTestId(/^fuel-stock-[0-9a-f-]{36}$/));
 export const fuelStocksHeading = target('Titel Tankbestand', (page) =>
-	page.getByTestId('fuel-stocks').getByRole('heading', { level: 2 })
+	page.getByTestId('fuel-stocks').getByRole('heading', { level: 2 }).first() // the panel title, before an alert's (#740)
 );

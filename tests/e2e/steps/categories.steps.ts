@@ -156,7 +156,7 @@ Given('der Liegenschaftsverwalter benutzt ein Telefon', async ({ verwalter }) =>
 	await verwalter.attemptsTo(usePhone);
 });
 
-Then('zeigt das Feld «Beschreibung» seinen ganzen Text', async ({ verwalter }) => {
+Then('zeigt Dwello bei «Beschreibung» den ganzen Text', async ({ verwalter }) => {
 	await verwalter.sees(hiddenDescription).toBe(0);
 });
 
@@ -493,11 +493,11 @@ Then('verdeckt die Erfolgsmeldung die Kategorie nicht, die den Fokus hat', async
 });
 
 // #672 (Helga P-3, P-5, P-6, P-9)
-Then('erklärt das Feld «Beschreibung» {string}', async ({ verwalter }, text: string) => {
+Then('erklärt Dwello bei «Beschreibung» {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(fieldHelp.Beschreibung).toContain(text);
 });
 
-Then('erklärt das Feld «Reihenfolge» {string}', async ({ verwalter }, text: string) => {
+Then('erklärt Dwello bei «Reihenfolge» {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(fieldHelp.Reihenfolge).toContain(text);
 });
 

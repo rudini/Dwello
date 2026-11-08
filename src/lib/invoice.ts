@@ -43,6 +43,7 @@ export function validateInvoice(invoice: {
 	buildingId: string;
 	invoiceDate: string;
 	billingEntity: string;
+	invoiceNumber?: string;
 	description: string;
 	amount: string;
 	servicePeriodStart?: string;
@@ -53,6 +54,9 @@ export function validateInvoice(invoice: {
 	if (!invoice.buildingId) errors.buildingId = m.invoices_error_building();
 	if (!invoice.invoiceDate) errors.invoiceDate = m.invoices_error_date();
 	if (!invoice.billingEntity.trim()) errors.billingEntity = m.invoices_error_billing_entity();
+	// as long as the database columns take them, else saving ends in the general error (#743)
+	if (invoice.billingEntity.trim().length > 255) errors.billingEntity = m.invoices_error_too_long({ max: 255 });
+	if ((invoice.invoiceNumber?.trim().length ?? 0) > 50) errors.invoiceNumber = m.invoices_error_too_long({ max: 50 });
 	if (!invoice.description.trim()) errors.description = m.invoices_error_description();
 	if (!(parseFloat(plainAmount(invoice.amount)) > 0)) errors.amount = m.invoices_error_amount();
 	// #379: every invoice says how its costs are shared

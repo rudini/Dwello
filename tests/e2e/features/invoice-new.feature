@@ -25,16 +25,24 @@ Funktionalität: Neue Rechnung erfassen
     Und warnt die Rechnung "gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon"
     Und warnt die Rechnung "Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung."
 
+  # #1195: der Hinweis nennt die Begründung der Kategorie, wie die Liste der Kategorien
   Szenario: Nicht umlagefähige Kategorie wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
     Dann ist die Rechnung nicht als umlagefähig markiert
     Und erklärt das Formular "Die Rechnung fliesst nicht in die Nebenkostenabrechnung ein."
-    Und weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können
+    Und erklärt der Hinweis zur Kategorie "Der Vermieter muss die Liegenschaft so erhalten, dass man sie wie vereinbart nutzen kann (Art. 256 Absatz 1 Obligationenrecht, OR). Reparaturen sind in der Nettomiete schon enthalten, also nicht umlagefähig."
+
+  # #1195: eine eigene Kategorie hat keine feste Begründung, der allgemeine Satz bleibt
+  Szenario: Nicht umlagefähige eigene Kategorie wählen
+    Angenommen es gibt die nicht umlagefähige Kategorie "Dachsanierung"
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Kategorie "Dachsanierung" wählt
+    Dann erklärt der Hinweis zur Kategorie "Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter."
 
   # #687: eine nicht umlagefähige Kategorie ist richtig gewählt, also keine Warnung
   Szenario: Nicht umlagefähige Kategorie ohne Warnung wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
-    Dann weist ein Hinweis ohne Warnung darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können
+    Dann warnt der Hinweis zur Kategorie nicht
 
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter die Rechnung ohne Angaben speichert
@@ -46,10 +54,10 @@ Funktionalität: Neue Rechnung erfassen
   # Datum als TT.MM.JJJJ, unabhängig von der Sprache des Browsers; die Punkte setzt das Feld selbst, getippte Punkte zählen nicht doppelt
   Szenario: Rechnungsdatum als TT.MM.JJJJ eintippen
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "31122025" eintippt
-    Dann zeigt das Feld Rechnungsdatum "31.12.2025"
+    Dann steht beim Rechnungsdatum "31.12.2025"
     Und steht unter dem Rechnungsdatum "Mittwoch, 31. Dezember 2025"
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "15.01.2026" eintippt
-    Dann zeigt das Feld Rechnungsdatum "15.01.2026"
+    Dann steht beim Rechnungsdatum "15.01.2026"
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "30022025" eintippt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
@@ -69,6 +77,27 @@ Funktionalität: Neue Rechnung erfassen
     Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
     Dann erklärt das Formular beim Leistungszeitraum "Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an"
     Aber erklärt das Formular beim Leistungszeitraum nicht "Tag der Lieferung"
+
+  # #751: am Feld steht nur der erste Absatz der Hilfe; die übrigen stehen unverändert hinter «Mehr dazu», anfangs zugeklappt
+  Szenario: Der Leistungszeitraum zeigt den ersten Absatz und den Rest hinter «Mehr dazu»
+    Dann zeigt das Formular beim Leistungszeitraum "Für welche Zeit gilt die Rechnung?"
+    Und steht beim Leistungszeitraum hinter «Mehr dazu» "Kosten, die nur alle paar Jahre anfallen"
+    Und steht beim Leistungszeitraum hinter «Mehr dazu» "Das Entkalken der zentralen Warmwasseranlage ist umlagefähig"
+
+  # #751: in der Kategorie des Tanks ist der erste Absatz die Lieferung
+  Szenario: In der Kategorie des Tanks zeigt der Leistungszeitraum zuerst die Lieferung
+    Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann zeigt das Formular beim Leistungszeitraum "Tragen Sie als Beginn und als Ende den Tag der Lieferung ein."
+    Und steht beim Leistungszeitraum hinter «Mehr dazu» "Für welche Zeit gilt die Rechnung?"
+
+  # #743: der Rechnungssteller hat höchstens 255 Zeichen, wie in der Datenbank
+  Szenario: Bei einem zu langen Rechnungssteller sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter eine Rechnung mit einem Rechnungssteller von 256 Zeichen speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
+    Und zeigt das Formular einen Rechnungssteller von 256 Zeichen
 
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre

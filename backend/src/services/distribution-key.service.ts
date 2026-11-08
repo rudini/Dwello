@@ -7,6 +7,7 @@ import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { distributionKeys, type DistributionKey, type NewDistributionKey } from '../db/schema';
 import {
+	SAMPLE_APARTMENTS,
 	validateFormulaForDistribution,
 	calculateDistribution,
 	type FormulaVariables
@@ -283,25 +284,8 @@ export function testFormulaWithSamples(formula: string): {
 		};
 	}
 
-	// Sample apartments for testing
-	const sampleApartments: FormulaVariables[] = [
-		{ area: 50, rooms: 2, units: 1 },
-		{ area: 75, rooms: 3, units: 1 },
-		{ area: 100, rooms: 4, units: 1 },
-		{ area: 120, rooms: 5, units: 1 }
-	];
-
-	const distribution = calculateDistribution(formula, sampleApartments, 10000);
-
-	if (!distribution.isValid) {
-		return {
-			isValid: false,
-			results: [],
-			totalValue: 0,
-			errors: [distribution.error || 'Unknown error'],
-			errorCodes: [distribution.errorCode!]
-		};
-	}
+	// valid: the validation calculated these sample apartments already (#737)
+	const distribution = calculateDistribution(formula, SAMPLE_APARTMENTS, 10000);
 
 	const totalValue = distribution.distributions.reduce(
 		(sum, d) => sum + (d.amount / d.share) * d.share,

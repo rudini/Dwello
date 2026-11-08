@@ -215,6 +215,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | agreement-from-refused |
       | statement-generate     | agreements-failed     |
       | statement-generate     | agreements-retry-failed |
+      | statement-generate     | agreements-wait-retry-failed |
       | statement-generate     | agreements-checked    |
       | statement-generate     | generation-result   |
       | statement-generate     | preview-skipped     |
@@ -329,8 +330,10 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | distribution-key-new   | default             |
       | distribution-key-new   | submit-empty        |
       | distribution-key-new   | formula-tested      |
+      | distribution-key-new   | formula-test-failed |
       | distribution-key-edit  | default             |
       | distribution-key-edit  | submit-cleared      |
+      | distribution-key-edit  | formula-test-failed |
       | distribution-keys      | delete-dialog       |
       | heating-profiles       | default             |
       | heating-profile-new    | default             |

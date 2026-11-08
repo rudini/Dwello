@@ -14,7 +14,7 @@ Funktionalität: Mietvertragsdetail
   Szenario: Mietvertrag anzeigen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann sieht der Liegenschaftsverwalter die Wohnung "2.01" im Mietvertrag
-    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 950.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 950.00"
 
   Szenario: Mietvertrag beenden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -22,10 +22,10 @@ Funktionalität: Mietvertragsdetail
     Dann endet der Mietvertrag heute
 
   # #653: ein Dialog mit Feldern beginnt im ersten Feld, so folgt die Bestätigung erst nach den Feldern
-  Szenario: Der Dialog zum Beenden beginnt im Feld Vertragsende
+  Szenario: Der Dialog zum Beenden beginnt beim Vertragsende
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
-    Dann steht der Fokus im Feld "Vertragsende" des Dialogs
+    Dann steht der Fokus bei "Vertragsende" des Dialogs
 
   # #511 (Persona Dr. Weber 461, P-3, P-4): das Vertragsende ist nicht immer der Kündigungstermin; kündigt der
   # Vermieter, braucht es das amtliche Formular (Art. 266l bis 266o OR)
@@ -291,6 +291,16 @@ Funktionalität: Mietvertragsdetail
     Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2024 – 30.06.2025"
     Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2025 – 30.06.2026"
 
+  # #741 (PO 07.11.2026, Persona Marco #142, Persona Helga P-8): auf dem Handy reichen Abrechnen und Rechnungen jeder fehlenden
+  # Abrechnung über die volle Breite der Warnung; der kürzere Text nennt kein Bedienelement; die älteste Periode
+  # steht zuerst, wie der Text verlangt (#741 Entscheid 4, Persona Marco P-1)
+  Szenario: Fehlende Abrechnungen auf dem Handy
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann reichen Abrechnen und Rechnungen der fehlenden Abrechnung 2024 über die volle Breite der Warnung
+    Und nennt der Mietvertrag die fehlenden Abrechnungen von 2024 bis zum letzten Jahr, die älteste zuerst
+    Und erklärt der Mietvertrag die fehlenden Abrechnungen mit "Beginnen Sie mit der ältesten Periode und erfassen Sie zuerst ihre Rechnungen. Abgerechnet werden alle Mietverträge des Gebäudes, die noch keine Abrechnung haben."
+
   # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode; #454 (#408 Punkt 1): gefiltert nach
   # der Abrechnungsperiode, wie eine Abrechnung sie nimmt
   Szenario: Rechnungen der fehlenden Periode anzeigen
@@ -537,3 +547,14 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
     Dann nennt die Ablehnung den Entwurf für "Anna Keller", 2025
+
+  # #740: ein Screenreader findet den Titel eines Hinweises in der Liste der Überschriften
+  Szenario: Der Hinweis zu fehlenden Abrechnungen hat eine Überschrift
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann steht der Titel des Hinweises zu fehlenden Abrechnungen als Überschrift
+
+  # #740: im schmalen Fenster stehen die Aktionen untereinander als ein Block, statt «Löschen» allein über dem Hinweis
+  Szenario: Aktionen des Mietvertrags im schmalen Fenster
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann stehen die Aktionen des Mietvertrags als ein Block, alle gleich breit wie der Seitentitel

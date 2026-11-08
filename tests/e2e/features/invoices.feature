@@ -124,6 +124,34 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
     Dann meldet Dwello "notizen.docx entfernt."
 
+  # #743: ist die letzte Datei entfernt, kann der Liegenschaftsverwalter das Gebäude wieder wählen; auch ein Screenreader hört es
+  Szenario: Nach der letzten entfernten Datei meldet Dwello, dass das Gebäude wieder wählbar ist
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die Word-Datei "notizen.docx" hochlädt
+    Und der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
+    Dann meldet Dwello "notizen.docx entfernt. Sie können das Gebäude wieder wählen."
+
+  # Persona Sven 743 P-1: ein Rechnungsdatum, das nach dem Fehler eingetippt und wieder gelöscht wird, nennt beim
+  # nächsten Erstellen wieder seinen Fehler
+  Szenario: Ein wieder gelöschtes Rechnungsdatum nennt beim nächsten Erstellen seinen Fehler
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" das Rechnungsdatum "2026-03-31" eingibt und wieder löscht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie ein Datum ein." nicht mehr
+    Wenn der Liegenschaftsverwalter die Rechnungen erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie ein Datum ein."
+
+  # #743 (Fachreview 743-1 V-2): auch beim Hochladen hat die Rechnungsnummer höchstens 50 Zeichen; Dwello kürzt sie nicht
+  # und erstellt die Rechnung nicht
+  Szenario: Bei einer zu langen Rechnungsnummer beim Hochladen sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
+    Und der Liegenschaftsverwalter bei der Datei den Rechnungssteller "Elektro Blitz", die Beschreibung "Treppenhauslicht", den Betrag "180.00" und das Rechnungsdatum "2026-03-31" erfasst
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Kategorie "Allgemeinstrom" wählt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Rechnungsnummer "R-12345678901234567890123456789012345678901234567890" eingibt
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Höchstens 50 Zeichen. Kürzen Sie den Text."
+    Und hat die Datei von "Elektro Blitz" die Rechnungsnummer "R-12345678901234567890123456789012345678901234567890"
+
   # #742: auch wer einen Screenreader nutzt, hört, wie viele Rechnungen Dwello erstellen wird
   Szenario: Dwello meldet, wie viele Rechnungen bereit zum Erstellen sind
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
@@ -136,7 +164,7 @@ Funktionalität: Rechnungsliste
     Dann zeigt ein neuer Tab die Datei als PDF
 
   # #245: der Hinweis sagt, dass die KI diese Datei nicht gelesen hat, und geht, sobald die Pflichtfelder ausgefüllt sind; die Felder in der Reihenfolge des Formulars
-  # #548: «Füllen Sie die markierten Felder aus.» geht mit dem Hinweis, sobald der Verteilschlüssel gewählt ist, nicht erst beim nächsten Erstellen
+  # #548: «Füllen Sie die Felder mit einer Fehlermeldung aus.» geht mit dem Hinweis, sobald der Verteilschlüssel gewählt ist, nicht erst beim nächsten Erstellen
   Szenario: Rechnung ohne KI aus einer Datei erfassen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Dann sagt die Datei von "Elektro Blitz" "Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus."
@@ -144,7 +172,7 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter bei der Datei den Rechnungssteller "Elektro Blitz", die Beschreibung "Treppenhauslicht", den Betrag "180.00" und das Rechnungsdatum "2026-03-31" erfasst
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt die Datei von "Elektro Blitz" "Wählen Sie eine Kategorie."
-    Und sagt die Datei von "Elektro Blitz" "Füllen Sie die markierten Felder aus."
+    Und sagt die Datei von "Elektro Blitz" "Füllen Sie die Felder mit einer Fehlermeldung aus."
     Und sagt die Datei von "Elektro Blitz" nicht "Die KI hat diese Datei nicht gelesen"
     Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Kategorie "Allgemeinstrom" wählt
     Dann sagt die Datei von "Elektro Blitz" nicht "Wählen Sie eine Kategorie."

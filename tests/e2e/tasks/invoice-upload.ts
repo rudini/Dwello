@@ -15,6 +15,7 @@ import {
 	belegCategory,
 	belegDistributionKey,
 	belegInvoiceDate,
+	belegInvoiceNumber,
 	anyBelegRow,
 	belegeBeingRead,
 	belegRow,
@@ -104,6 +105,18 @@ export const chooseKey = (fileName: string, key: string): Activity => async (act
 export const enterAmount = (fileName: string, amount: string): Activity => async (actor) => {
 	if (!(await actor.answer(Visibility.of(belegAmount(fileName))))) await actor.attemptsTo(openBeleg(fileName));
 	await actor.attemptsTo(Enter.theValue(amount).into(belegAmount(fileName)));
+};
+
+// typed and cleared again, as a property manager does who changes his mind (persona Sven 743 P-1)
+export const enterAndClearInvoiceDate = (fileName: string, date: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegInvoiceDate(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(EnterDate.of(date).into(belegInvoiceDate(fileName)), Enter.theValue('').into(belegInvoiceDate(fileName)));
+};
+
+// the Rechnungsnummer of the file (#743)
+export const enterInvoiceNumber = (fileName: string, number: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegInvoiceNumber(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(Enter.theValue(number).into(belegInvoiceNumber(fileName)));
 };
 
 export const createInvoices = Click.on(createInvoicesButton);

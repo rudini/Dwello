@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import DateInput from '$lib/ui/DateInput.svelte';
 import { byTestId, fireEvent, show } from './helpers/dom';
+import { reactiveProps } from './helpers/reactive-props.svelte';
+import { focusFirstError } from '$lib/ui/focus-error';
 
 // the example is the last day of this year: never in the past
 const example = `31.12.${new Date().getFullYear()}`;
@@ -193,25 +195,20 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		);
 	});
 
-	// ein Fehler, den die Seite beim Senden meldet, wird angesagt, auch wenn das Feld schon den Fokus hat (Enter)
-	it('sagt einen Fehler der Seite an', () => {
-		date('2024-01-31', { error: 'Das Vertragsende liegt vor heute.' });
-		expect(document.querySelector('[aria-live="assertive"]')!.textContent).toContain(
-			'Das Vertragsende liegt vor heute.'
-		);
-	});
-
 	// angesagt, danach steht der Fehler nur noch einmal da, unter dem Feld (Persona Anna)
 	it('nimmt die Ansage nach einem Moment zurück', () => {
 		vi.useFakeTimers();
 		try {
-			date('2024-01-31', { error: 'Bitte geben Sie ein Datum ein.' });
+			date();
+			type('30.02.2025');
+			field().dispatchEvent(new Event('blur'));
+			flushSync();
 			const spoken = () => document.querySelector('[aria-live="assertive"]')!.textContent;
-			expect(spoken()).toContain('Bitte geben Sie ein Datum ein.');
+			expect(spoken()).toContain('Dieses Datum gibt es nicht.');
 			vi.advanceTimersByTime(3000);
 			flushSync();
 			expect(spoken()).toBe('');
-			expect(document.body.textContent!.split('Bitte geben Sie ein Datum ein.').length).toBe(2);
+			expect(document.body.textContent!.split('Dieses Datum gibt es nicht.').length).toBe(2);
 		} finally {
 			vi.useRealTimers();
 		}
@@ -288,5 +285,99 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		fireEvent(calendar, 'input', '2025-03-15'); // a picker sends input, then change
 		expect(bound.value).toBe('2025-03-15');
 		expect(field().value).toBe('15.03.2025');
+	});
+});
+
+// #743: a page error is said once: by the field's description where the focus lands in it, else by the live region
+describe('Datumsfeld: Ansage eines Fehlers der Seite', () => {
+	const spoken = () => document.querySelector('[aria-live="assertive"]')!.textContent!.trim();
+	const later = () => new Promise((resolve) => setTimeout(resolve, 600)); // past the focus move of the page
+	const page = () => {
+		const props = reactiveProps({ id: 'invoiceDate', label: 'Rechnungsdatum', testid: 'date-input', value: '', error: '' });
+		show(DateInput, props);
+		return props;
+	};
+	const enter = () => {
+		field().focus();
+		field().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		flushSync();
+	};
+
+	// Persona Sven P-1: the live region and the field's description said «Bitte geben Sie ein Datum ein» twice
+	it('sagt einen Fehler der Seite nicht noch einmal an, wenn der Fokus ins Feld springt', async () => {
+		const props = page();
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		await focusFirstError(document.body);
+		await later();
+
+		expect(describedBy()).toContain('Bitte geben Sie ein Datum ein.');
+		expect(spoken()).toBe('');
+	});
+
+	// code review 743-1 C-1: after Enter the page focuses the field anew, so its description is read again
+	it('sagt einen Fehler der Seite nach Enter nicht noch einmal an, wenn die Seite den Fokus neu setzt', async () => {
+		const props = page();
+		enter();
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		await focusFirstError(document.body);
+		await later();
+
+		expect(spoken()).toBe('');
+	});
+
+	// code review 743-2 C-5: the focus landed in another field with an error, whose description is read; said here too,
+	// it broke into that one
+	it('sagt einen Fehler der Seite nicht an, wenn der Fokus in einem anderen Feld mit Fehler landet', async () => {
+		const props = page();
+		const other = document.createElement('input');
+		other.setAttribute('aria-invalid', 'true');
+		document.body.prepend(other);
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		flushSync();
+		other.focus();
+		await later();
+
+		expect(spoken()).toBe('');
+		other.remove();
+	});
+
+	// a page that leaves the focus where it was (on its button): only the live region says the field's error
+	it('sagt einen Fehler der Seite an, wenn der Fokus nicht ins Feld kommt', async () => {
+		const props = page();
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		flushSync();
+		await later();
+
+		expect(spoken()).toBe('Bitte geben Sie ein Datum ein.');
+	});
+
+	// code review 743-1 C-2: the field shows its own error, so the live region says that one, as on the base
+	it('sagt nach Enter auf einem falschen Datum den Fehler des Feldes an, nicht den der Seite', async () => {
+		const props = page();
+		type('30.02.2025');
+		enter();
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		flushSync();
+		await later();
+
+		expect(spoken()).toContain('Dieses Datum gibt es nicht.');
+	});
+
+	// Persona Sven P-2: after a wrong date was cleared, the live region said the old page error, the field none
+	it('sagt den alten Fehler der Seite nicht mehr an, sobald das Feld geändert ist', async () => {
+		const props = page();
+		props.error = 'Bitte geben Sie ein Datum ein.';
+		flushSync();
+		await later();
+		type('30.02.2025');
+		field().dispatchEvent(new Event('blur'));
+		flushSync();
+		expect(spoken()).toContain('Dieses Datum gibt es nicht.');
+
+		type('');
+		flushSync();
+
+		expect(byTestId('form-error')).toBeNull();
+		expect(spoken()).toBe('');
 	});
 });

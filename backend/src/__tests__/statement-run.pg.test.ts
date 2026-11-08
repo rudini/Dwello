@@ -4,9 +4,9 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { buildings, categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { buildings, categories, fuelStocks, heatingProfiles, invoices, rentalContracts, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -115,6 +115,46 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		expect(byContract[missing]).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 		expect(ofContract).toEqual([{ start: '2022-07-01', end: '2023-06-30', outside: false }]);
 	});
+
+	// #705: more than 1000 contracts and statements drop none of them, neither the oldest contract nor its statement
+	it('nennt auch bei über 1000 Mietverträgen und Abrechnungen jeden Mietvertrag mit seinen Abrechnungen', async () => {
+		const billed = await rent('2.04', 'Zbinden', '2000-01-01', '2000-12-31');
+		await generateStatement({ contractId: billed, buildingId, periodStart: '2000-01-01', periodEnd: '2000-12-31', managementFeePercent: 0 });
+		const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, billed));
+		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.contractId, billed));
+		const { id: _c, createdAt: _cc, ...contractRow } = contract;
+		const { id: _s, createdAt: _sc, ...statementRow } = statement;
+		// newer contracts, each with a newer statement of its own, so the old ones come last in both lists
+		const copies = await db
+			.insert(rentalContracts)
+			.values(
+				Array.from({ length: 1000 }, () => ({
+					...contractRow,
+					startDate: '2001-01-01',
+					endDate: '2001-12-31'
+				}))
+			)
+			.returning({ id: rentalContracts.id });
+		try {
+			await db.insert(utilityStatements).values(
+				copies.map(({ id }, i) => ({
+					...statementRow,
+					contractId: id,
+					statementNumber: `${token}-${i}`
+				}))
+			);
+
+			const byContract = (await (await sendJson('GET', '/api/v1/contracts/missing-statements')).json()) as Record<string, unknown>;
+
+			expect(byContract[billed]).toEqual([]);
+		} finally {
+			const ids = copies.map(({ id }) => id);
+			await db.delete(utilityStatements).where(inArray(utilityStatements.contractId, ids));
+			await db.delete(rentalContracts).where(inArray(rentalContracts.id, ids));
+			// fresh planner statistics: after the 1000 rows the later tests' queries take seconds
+			await db.execute(sql`ANALYZE rental_contracts, utility_statements`);
+		}
+	}, 30_000); // the 1000 rows take seconds
 });
 
 // #664: the move-out of an ended contract until its Schlussabrechnung exists, on the contract and per apartment of a list

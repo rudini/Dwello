@@ -34,9 +34,9 @@ INSERT INTO apartments (id, building_id, number, floor, area, rooms, status) VAL
 
 -- Building 3: Alpenblick (3 units, 255 m²)
 INSERT INTO apartments (id, building_id, number, floor, area, rooms, status) VALUES
-('aaaa3333-3333-3333-3333-111111111111', '33333333-3333-3333-3333-333333333333', 'EG', 0, 72.0, 3.0, 'vacant'),
-('aaaa3333-3333-3333-3333-222222222222', '33333333-3333-3333-3333-333333333333', 'OG1', 1, 98.0, 4.0, 'vacant'),
-('aaaa3333-3333-3333-3333-333333333333', '33333333-3333-3333-3333-333333333333', 'OG2', 2, 85.0, 3.5, 'vacant') ON CONFLICT (id) DO NOTHING;
+('aaaa3333-3333-3333-3333-111111111111', '33333333-3333-3333-3333-333333333333', '0.01', 0, 72.0, 3.0, 'vacant'),
+('aaaa3333-3333-3333-3333-222222222222', '33333333-3333-3333-3333-333333333333', '1.01', 1, 98.0, 4.0, 'vacant'),
+('aaaa3333-3333-3333-3333-333333333333', '33333333-3333-3333-3333-333333333333', '2.01', 2, 85.0, 3.5, 'vacant') ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
 -- Tenants: the postal address is the rented apartment's (Sarah Meier moved out in 2025, Kevin Fischer
@@ -72,7 +72,7 @@ INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date,
 ('b0000002-0002-0002-0002-000000000003', 'aaaa2222-2222-2222-2222-222222222222', 'a0000001-0001-0001-0001-000000000010', '2025-07-01', NULL, 1620.00, 80.00, 240.00),
 ('b0000002-0002-0002-0002-000000000004', 'aaaa2222-2222-2222-2222-444444444444', 'a0000001-0001-0001-0001-000000000007', '2023-07-01', NULL, 1750.00, 100.00, 260.00) ON CONFLICT (id) DO NOTHING;
 
--- Building 3 contracts (OG2 is vacant)
+-- Building 3 contracts (2.01 is vacant)
 INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date, base_rent, additional_rent, monthly_advance_payment) VALUES
 ('b0000003-0003-0003-0003-000000000001', 'aaaa3333-3333-3333-3333-111111111111', 'a0000001-0001-0001-0001-000000000008', '2022-11-01', NULL, 1350.00, 50.00, 190.00),
 ('b0000003-0003-0003-0003-000000000002', 'aaaa3333-3333-3333-3333-222222222222', 'a0000001-0001-0001-0001-000000000009', '2021-05-01', NULL, 1800.00, 120.00, 250.00) ON CONFLICT (id) DO NOTHING;
@@ -103,7 +103,7 @@ WHERE cat.is_allowed_utility_cost AND c.id::text LIKE 'b000000_-000_-000_-000_-0
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
--- Invoices, dated at the end of the period they cover (the Rechnungsdatum decides the Abrechnungsperiode).
+-- Invoices: without a Leistungszeitraum the Rechnungsdatum decides the Abrechnungsperiode, with one its days in each period (Regel 1).
 -- Alpenblick lacks, on purpose, the chimney sweep and the water of the second half of 2025, so the check for
 -- missing invoices has something to show.
 -- ============================================================================
@@ -223,6 +223,17 @@ WHERE id = 'c0000002-2025-4000-8000-000000000029';
 UPDATE invoices SET service_period_start = make_date(EXTRACT(YEAR FROM invoice_date)::int, EXTRACT(MONTH FROM invoice_date)::int - 2, 1), service_period_end = invoice_date
 WHERE id IN ('c0000002-2024-4000-8000-000000000003', 'c0000002-2024-4000-8000-000000000007', 'c0000002-2024-4000-8000-000000000010',
 	'c0000002-2025-4000-8000-000000000018', 'c0000002-2025-4000-8000-000000000022', 'c0000002-2025-4000-8000-000000000025');
+
+-- A garden subscription paid in advance across the year end: its Leistungszeitraum splits it by days, 368.00 into 2024 and
+-- 362.00 into 2025 (#707)
+INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, description, category_id, distribution_key_id, amount, is_valid_utility_cost, invoice_date, due_date, service_period_start, service_period_end) VALUES
+('c0000002-2024-4000-8000-000000000016', '22222222-2222-2222-2222-222222222222', 'SR-2024-016', 'Grünwerk Gartenbau GmbH', 'Gartenpflege Jahresabonnement 07/2024–06/2025', (SELECT id FROM categories WHERE name_de = 'Gartenpflege'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 730.00, true, '2024-07-01', '2024-07-31', '2024-07-01', '2025-06-30') ON CONFLICT (id) DO NOTHING;
+
+-- Recorded a week after their Rechnungsdatum, before the statements that bill them, not on the day the demo data is
+-- loaded (#707, Persona Dr. Weber 707 P-2); the trigger would set updated_at to now
+ALTER TABLE invoices DISABLE TRIGGER invoices_updated_at;
+UPDATE invoices SET created_at = invoice_date + interval '7 days 9 hours', updated_at = invoice_date + interval '7 days 9 hours' WHERE id::text LIKE 'c000000_-%';
+ALTER TABLE invoices ENABLE TRIGGER invoices_updated_at;
 
 -- ============================================================================
 -- Company for the statements and their QR-bill (QR-IBAN from the SIX examples)

@@ -57,6 +57,11 @@ Then('erklärt der Assistent {string}', async ({ verwalter }, message: string) =
 	await verwalter.sees(agreementsWaiting).toContain(message);
 });
 
+// #1197: after a failed retry only the alert advises; the note below says no other step
+Then('rät der Assistent unter der Meldung nicht {string}', async ({ verwalter }, advice: string) => {
+	await verwalter.sees(agreementsWaiting).not.toContain(advice);
+});
+
 When('der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreementsCheckAgain);
 });
@@ -65,8 +70,9 @@ When('der Liegenschaftsverwalter die Prüfung erneut versucht, während sie noch
 	await verwalter.attemptsTo(agreementsCheckAgainInVain);
 });
 
-// #688: the button the landlord used keeps the focus while Dwello tries again and after it failed again
-Then('steht der Fokus weiter auf «Erneut versuchen»', async ({ verwalter }) => {
+// #688: the button the landlord used keeps the focus while Dwello tries again and after it failed again;
+// persona Helga 1197 P-1: «Weiter» after the check failed takes the focus there
+Then(/^steht der Fokus (?:weiter )?auf «Erneut versuchen»$/, async ({ verwalter }) => {
 	await verwalter.sees(focusedText).toBe('Erneut versuchen');
 });
 

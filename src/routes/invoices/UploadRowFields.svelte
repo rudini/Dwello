@@ -72,6 +72,7 @@
 			label={m.invoices_invoice_number()}
 			optional
 			bind:value={row.values.invoiceNumber}
+			error={errors.invoiceNumber}
 			note={fieldNote(row, 'invoiceNumber')}
 			testid="invoice-upload-invoice-number-input"
 		/>

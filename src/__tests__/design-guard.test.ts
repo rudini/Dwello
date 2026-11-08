@@ -4,6 +4,9 @@ import { existsSync, readdirSync, readFileSync } from 'fs';
 /** Keeps the design system clean: only tokens and the new components, none of the forbidden patterns */
 const palette =
 	'gray|slate|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|black|white';
+// what a colour declaration in a <style> element may name besides lengths: CSS Color 4 system colours, CSS-wide and border keywords
+const cssKeywords =
+	'AccentColor|AccentColorText|ActiveText|ButtonBorder|ButtonFace|ButtonText|Canvas|CanvasText|Field|FieldText|GrayText|Highlight|HighlightText|LinkText|Mark|MarkText|SelectedItem|SelectedItemText|VisitedText|currentColor|transparent|inherit|initial|unset|revert|revert-layer|none|hidden|solid|dashed|dotted|double|groove|ridge|inset|outset|thin|medium|thick|auto';
 const end = `(?=[\\s"'\`}:=]|$)`;
 const rules: [string, RegExp][] = [
 	[
@@ -19,10 +22,13 @@ const rules: [string, RegExp][] = [
 		/#[0-9a-fA-F]{3,8}\b(?![-\w])|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb)\(/
 	],
 	['Farbe im style-Attribut', /style="[^"]*\b(?:color|background(?:-color)?|border-color)\s*:/],
-	// a <style> element (a page outside the app) may name only the browser's system colours
+	// a <style> element (a page outside the app) may name only the browser's system colours, also in a shorthand
 	[
 		'Farbe im style-Element',
-		/<style[^>]*>[^<]*\b(?:color|background(?:-color)?|border-color)\s*:\s*(?!(?:CanvasText|Canvas|LinkText|currentColor|inherit|transparent)\b)[a-z]/i
+		new RegExp(
+			`<style[^>]*>[^<]*\\b(?:color|background(?:-color)?|(?:border|outline)(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)\\s*:[^;}<]*?(?<![\\w-])(?!(?:${cssKeywords})(?![\\w-])|var\\()[a-z]`,
+			'i'
+		)
 	],
 	['SVG-Farbe ausserhalb der Tokens', /\b(?:fill|stroke)="(?!none"|currentColor"|var\()[^"]+"/],
 	['beliebiger Wert statt Token', /\b[a-z][a-z-]*-\[[^\]]+\]/],
@@ -82,6 +88,9 @@ describe('Wächter des Designsystems', () => {
 		'style="color: red"',
 		'style="color: oklch(50% 0.1 200)"',
 		'<style>\na { color: red }\n</style>',
+		'<style>a { border: 1px solid red }</style>',
+		'<style>a { outline: 2px dotted red }</style>',
+		'<style>a { border-top: thin solid red }</style>',
 		'<path fill="white" />',
 		'class="outline-primary"',
 		'class="divide-gray-200"',
@@ -108,7 +117,10 @@ describe('Wächter des Designsystems', () => {
 		'<!-- the region is there before the hint (#143) -->',
 		"/* see #143 */ const url = 'https://example.com/a#b';",
 		// a page outside the app uses the browser's system colours (docs/design/token-referenz.md)
-		'<style>\na { padding: 0; color: CanvasText }\n</style>'
+		'<style>\na { padding: 0; color: CanvasText }\n</style>',
+		'<style>a { color: ButtonText; background: ButtonFace }</style>',
+		'<style>a { border: 1px solid GrayText; outline: medium dotted currentColor }</style>',
+		'<style>a { color: var(--ink) }</style>'
 	])('lässt %s zu', (sample) => {
 		expect(findingsIn(sample)).toEqual([]);
 	});

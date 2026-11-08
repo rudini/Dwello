@@ -16,7 +16,7 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Mietzins auf "980" Franken ändert
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und sieht der Liegenschaftsverwalter die Bestätigung, dass der Mietvertrag von "Anna Keller" gespeichert ist
-    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 980.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 980.00"
 
   Szenario: Mietzins fehlt
     Wenn der Liegenschaftsverwalter den Mietzins leert
@@ -24,7 +24,7 @@ Funktionalität: Mietvertrag bearbeiten
 
   Szenario: Mietzins in Schweizer Schreibweise
     Wenn der Liegenschaftsverwalter den Mietzins auf "1'450" Franken ändert
-    Dann sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 1’450.00"
+    Dann zeigt der Mietvertrag das Monatlich total "CHF 1’450.00"
 
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
@@ -236,7 +236,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern»."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dwello hat den Entwurf nicht gelöscht: Die anderen Mietverträge dieser Wohnung liessen sich nicht laden, darum lässt sich nicht prüfen, ob die Wohnung frei ist. Laden Sie die Mietverträge oben auf der Seite mit «Erneut versuchen» und löschen Sie den Entwurf danach noch einmal."
 
   # #133 (Fachreview V-10): deckt «Abgerechnet bis» die ganze Periode des Entwurfs ab, entsteht keine neue Abrechnung
   Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt
@@ -287,16 +287,16 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: «Abgerechnet bis» über eine versendete Abrechnung
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-06-30" ausserhalb von Dwello abgerechnet sind
-    Dann sagt das Feld «Abgerechnet bis» "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Tragen Sie höchstens den Tag vor dem Beginn dieser Abrechnung ein: 31.12.2024."
-    Und nennt das Feld «Abgerechnet bis» die Abrechnung 2025 von "Anna Keller"
+    Dann sagt Dwello bei «Abgerechnet bis» "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Tragen Sie höchstens den Tag vor dem Beginn dieser Abrechnung ein: 31.12.2024."
+    Und nennt Dwello bei «Abgerechnet bis» die Abrechnung 2025 von "Anna Keller"
     Aber rät die Fehlermeldung nicht zum Berichtigen
 
   # #499 (Fachreview V-2): beginnt der Mietvertrag in der Periode der versendeten Abrechnung, bleibt kein Tag davor
   Szenario: «Abgerechnet bis» über eine versendete Abrechnung ab dem Vertragsbeginn
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2024 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2024-06-30" ausserhalb von Dwello abgerechnet sind
-    Dann sagt das Feld «Abgerechnet bis» "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Dwello rechnet diesen Mietvertrag ab Vertragsbeginn ab: Lassen Sie das Feld leer."
-    Und nennt das Feld «Abgerechnet bis» die Abrechnung 2024 von "Anna Keller"
+    Dann sagt Dwello bei «Abgerechnet bis» "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Dwello rechnet diesen Mietvertrag ab Vertragsbeginn ab: Lassen Sie das Feld leer."
+    Und nennt Dwello bei «Abgerechnet bis» die Abrechnung 2024 von "Anna Keller"
 
   Szenario: «Abgerechnet bis» bis zum Tag vor einer versendeten Abrechnung
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
@@ -437,7 +437,7 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
     Und der Liegenschaftsverwalter die Bearbeitung abbricht und die Änderungen verwirft
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
-    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 950.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 950.00"
 
   # #668
   Szenario: Nach der Rückfrage weiter bearbeiten
@@ -475,7 +475,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter sich im Benutzermenü abmelden will und weiter bearbeitet
     Und der Liegenschaftsverwalter den Mietvertrag speichert
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
-    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 980.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 980.00"
 
   # #668 (Fachreview 668-n3 V-2): nach dem Verwerfen geht Dwello dorthin, wohin der Liegenschaftsverwalter wollte
   Szenario: Nach dem Verwerfen öffnet Dwello die gewählte Seite

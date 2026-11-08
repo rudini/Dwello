@@ -22,8 +22,8 @@ const messageOf = (code: unknown) =>
 const reminderName = (level: number) =>
 	[m.documents_reminder_1, m.documents_reminder_2, m.documents_reminder_3][level - 1]?.() ?? String(level);
 
-// Params that carry a code (the cause of a formula error, a sample apartment) show as its message; others are user data
-const codeParams = ['cause', 'reason', 'sample'];
+// Params that carry a code (the cause of a formula error) show as its message; others are user data
+const codeParams = ['cause', 'reason'];
 function render(message: (params: Params) => string, params: Params): string {
 	const shown = Object.entries(params).map(([key, value]) => {
 		if (key === 'month') return [key, monthName(String(value))]; // the backend names a month by its key

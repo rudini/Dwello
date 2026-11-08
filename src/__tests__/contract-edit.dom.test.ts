@@ -836,11 +836,11 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
 			// Haiku-Review N2: die Meldung sagt, was fehlt und was zu tun ist
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen.'
+				'Dwello hat den Entwurf nicht gelöscht: Die anderen Mietverträge dieser Wohnung liessen sich nicht laden, darum lässt sich nicht prüfen, ob die Wohnung frei ist.'
 			);
-			// #669 (code review C-2, fach-review V-6): «Erneut versuchen» stands at the top of the page now
+			// #669 (code review C-2, fach-review V-6): «Erneut versuchen» stands at the top of the page now; #1143: words of the #666 hint
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern».'
+				'Laden Sie die Mietverträge oben auf der Seite mit «Erneut versuchen» und löschen Sie den Entwurf danach noch einmal.'
 			);
 			// review #151 R-1: the text sends the landlord back to this button after «Erneut versuchen»
 			expect(byTestId('delete-draft-and-save')).not.toBeNull();

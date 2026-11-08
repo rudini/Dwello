@@ -471,7 +471,7 @@ jobs:
     # Screenshots of every page a pull request changes, posted as a comment on the pull request
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40  # every page in three looks, and its dialog and wizard states (#697)
     permissions:
       contents: write
       pull-requests: write
@@ -522,7 +522,7 @@ jobs:
           cd ../base && bun install --frozen-lockfile
       - name: Take screenshots
         if: steps.routes.outputs.pages == 'true'
-        run: bunx playwright test -c playwright.screenshots.config.ts
+        run: bunx svelte-kit sync && bunx playwright test -c playwright.screenshots.config.ts
         env:
           UI_BASE_DIR: ${{ github.workspace }}/../base
       # The statement PDF is drawn by the backend: a fixed example in German and French, against the base branch's code
@@ -572,20 +572,28 @@ jobs:
               const [, language, page] = name.match(/^pdf_(\w+)_(\d+)/);
               return `Statement PDF (${language}), page ${page}`;
             };
-            // a page that looks the same as on the base branch has no screenshot (looksTheSame)
+            // every shot of a page, its looks and states (screenshots.spec.ts): <file>\t<title> per line;
+            // one that looks the same as on the base branch has no screenshot (looksTheSame)
             const unchanged = [];
-            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).flatMap((route) => {
-              if (route === 'pdf') {
-                unchanged.push(...samePdfPages.map(pdfTitle));
-                return pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', '')));
-              }
-              const name = route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home';
-              if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(`\`${route}\``), []);
-              return [shot(`\`${route}\``, name)];
+            const taken = fs.existsSync('ui-screenshots/shots.txt')
+              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).sort()
+              : [];
+            const shots = taken.flatMap((line) => {
+              const [name, title] = line.split('\t');
+              if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(title), []);
+              return [shot(title, name)];
             });
+            if (fs.readFileSync('ui-routes.txt', 'utf8').split('\n').includes('pdf')) {
+              unchanged.push(...samePdfPages.map(pdfTitle));
+              shots.push(...pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', ''))));
+            }
             const same = unchanged.length ? `\n\nLook the same as on ${pr.base.ref}: ${unchanged.join(', ')}.` : '';
+            // a comment holds 65536 characters: the shots that do not fit are only on the branch
+            let listed = shots.join('\n\n');
+            for (let count = shots.length; listed.length + same.length > 60000; count--)
+              listed = `${shots.slice(0, count).join('\n\n')}\n\n_${shots.length - count} more on [branch ui-screenshots](${base.replace('/blob/', '/tree/')})._`;
             const body = shots.length
-              ? `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${shots.join('\n\n')}${same}`
+              ? `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
               : `${marker}\n## UI screenshots\nNo visible changes as of ${pr.head.sha.slice(0, 7)}.${same}`;
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));

@@ -1,5 +1,5 @@
 /**
- * Building list search, word by word in name, street and place (real PostgreSQL database)
+ * Building list search, word by word in name, street, postcode and place (real PostgreSQL database)
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
@@ -9,8 +9,10 @@ import { callApi } from './helpers/auth';
 const token = crypto.randomUUID();
 const ids: string[] = [];
 
-const search = async (term: string) => {
-	const response = await callApi(`/api/v1/buildings?search=${encodeURIComponent(term)}`);
+const search = async (term: string, city = '') => {
+	const response = await callApi(
+		`/api/v1/buildings?search=${encodeURIComponent(term)}&city=${encodeURIComponent(city)}`
+	);
 	expect(response.status).toBe(200);
 	return ((await response.json()) as { buildings: { name: string }[] }).buildings.map(
 		(b) => b.name
@@ -18,16 +20,16 @@ const search = async (term: string) => {
 };
 
 beforeAll(async () => {
-	for (const [name, city] of [
-		['Lindenhof', 'Winterthur'],
-		['Birkenhof', 'Uster']
+	for (const [name, city, postalCode] of [
+		['Lindenhof', 'Winterthur', '8400'],
+		['Birkenhof', 'Uster', '8610']
 	]) {
 		ids.push(
 			(
 				await createBuilding({
 					name: `${name} ${token}`,
 					address: 'Testweg 1',
-					postalCode: '8400',
+					postalCode,
 					city,
 					canton: 'ZH'
 				})
@@ -45,5 +47,17 @@ describe('Gebäudesuche', () => {
 		expect(await search(`Lindenhof ${token} Winterthur Testweg`)).toEqual([`Lindenhof ${token}`]);
 		expect(await search(`${token} Uster`)).toEqual([`Birkenhof ${token}`]);
 		expect(await search(`Lindenhof ${token} Uster`)).toEqual([]);
+	});
+
+	// #1193 (Marco): the address pasted as the card shows it, «Strasse Nr, PLZ Ort», and the postcode alone
+	it('findet ein Gebäude nach der Adresse, wie die Karte sie zeigt, und nach der Postleitzahl', async () => {
+		expect(await search(`${token} Testweg 1, 8610 Uster`)).toEqual([`Birkenhof ${token}`]);
+		expect(await search(`${token} 8610`)).toEqual([`Birkenhof ${token}`]);
+	});
+
+	it('filtert im Ort auch nach der Postleitzahl', async () => {
+		expect(await search(token, '8610')).toEqual([`Birkenhof ${token}`]);
+		expect(await search(token, '8610 Uster')).toEqual([`Birkenhof ${token}`]);
+		expect(await search(token, '8400 Uster')).toEqual([]);
 	});
 });

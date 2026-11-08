@@ -746,6 +746,21 @@ describe('Rechnung erfassen', () => {
 		}
 	});
 
+	// #751 (persona Helga P-2 on #451): four paragraphs took about 650 px at 200 % zoom before «Beginn»
+	it('zeigt beim Leistungszeitraum den ersten Absatz und die übrigen zugeklappt hinter «Mehr dazu»', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const more = byTestId<HTMLDetailsElement>('invoice-service-period-more')!;
+
+		expect(byTestId('invoice-service-period-first')!.textContent).toContain('Für welche Zeit gilt die Rechnung?');
+		expect(more.open).toBe(false);
+		expect(more.querySelector('summary')!.textContent!.trim()).toBe(
+			'Mehr dazu: Zeiträume, Kosten über mehrere Jahre, Entkalken'
+		);
+		expect(more.textContent).toContain('Kosten, die nur alle paar Jahre anfallen');
+		expect(more.textContent).toContain('Das Entkalken der zentralen Warmwasseranlage ist umlagefähig');
+		expect(more.textContent).not.toContain('Für welche Zeit gilt die Rechnung?');
+	});
+
 	// Kosten über mehrere Jahre: das Entkalken eines Boilers in der Wohnung nur, wenn der Mietvertrag es nennt (#254)
 	it('erklärt beim Leistungszeitraum Kosten über mehrere Jahre und den Boiler in der Wohnung', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
@@ -843,9 +858,9 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
-		// Versicherungsprämien der Heizung sind umlagefähig (Art. 5 Abs. 2 Bst. h VMWG), nur die Gebäudeversicherung nicht (#185)
+		// eine eigene Kategorie hat keine Begründung: der allgemeine Satz nennt keine Beispiele (#1195, Fachreview V-1)
 		expect(byTestId('invoice-category-warning')!.textContent).toContain(
-			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+			'Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter.'
 		);
 	});
 
@@ -860,9 +875,19 @@ describe('Rechnung erfassen', () => {
 		const note = byTestId('invoice-category-warning')!;
 		expect(note.textContent).toContain('Nicht umlagefähige Kategorie');
 		expect(note.querySelector('#invoice-category-warning-text')!.textContent).toBe(
-			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+			'Diese Kategorie ist als nicht umlagefähig festgelegt. Ihre Kosten tragen Sie als Vermieter.'
 		);
 		expect(cautionIn(note)).toBe(false);
+	});
+
+	it('nennt im Hinweis die Begründung einer vordefinierten Kategorie statt des allgemeinen Satzes (#1195)', async () => {
+		const repairs = { ...categories[1], id: 'c3', key: 'Repairs', predefined: true };
+		show(NewInvoicePage, { data: { ...data(false), categories: [...categories, repairs] } } as never);
+
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c3');
+		await settle();
+
+		expect(byTestId('invoice-category-warning-text')!.textContent!.trim()).toBe(m.categories_reason_repairs());
 	});
 
 	it('sagt bei „Umlagefähig“, was das Kästchen gerade bewirkt (Persona Marco)', async () => {

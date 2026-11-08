@@ -12,8 +12,14 @@ import {
 	invoiceDateShown,
 	keyHelpText,
 	markedAsUtilityCost,
+	nonAllocableCategoryNoteText,
 	nonAllocableCategoryWarning,
+	invoiceNumberValue,
+	servicePeriodFirstText,
 	servicePeriodHelpText,
+	servicePeriodMoreOpen,
+	servicePeriodMoreText,
+	supplierValue,
 	tonesInNonAllocableCategoryNote,
 	utilityCostHelpText,
 	utilityCostMarkable
@@ -28,6 +34,7 @@ import {
 	clearSupplier,
 	correctAmount,
 	correctInvoiceNumber,
+	saveSupplierOfLength,
 	enterInvoiceDate,
 	openInvoiceEdit,
 	openNewInvoice,
@@ -64,8 +71,8 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter }, category: string) => {
-	await verwalter.attemptsTo(chooseCategory(category));
+When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter, names }, category: string) => {
+	await verwalter.attemptsTo(chooseCategory(names.get(category) ?? category));
 });
 
 When('der Liegenschaftsverwalter die Rechnung dem Gebäude {string} zuordnet', async ({ verwalter, seed }, building: string) => {
@@ -113,21 +120,16 @@ Then('lässt sich die Rechnung nicht als umlagefähig markieren', async ({ verwa
 	await verwalter.sees(utilityCostMarkable).toBe(false);
 });
 
-Then(
-	'weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
-	async ({ verwalter }) => {
-		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
-	}
-);
+// #1195: the note names the category's reason, or the general sentence for a category without one
+Then('erklärt der Hinweis zur Kategorie {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(nonAllocableCategoryNoteText).toBe(text);
+});
 
 // #687: a non-allocable category is a correct choice, so its note does not warn
-Then(
-	'weist ein Hinweis ohne Warnung darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
-	async ({ verwalter }) => {
-		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
-		await verwalter.sees(tonesInNonAllocableCategoryNote).toEqual([]);
-	}
-);
+Then('warnt der Hinweis zur Kategorie nicht', async ({ verwalter }) => {
+	await verwalter.sees(nonAllocableCategoryWarning).toContain('Nicht umlagefähige Kategorie');
+	await verwalter.sees(tonesInNonAllocableCategoryNote).toEqual([]);
+});
 
 When('der Liegenschaftsverwalter das Rechnungsdatum {string} einträgt', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(enterInvoiceDate(date));
@@ -146,7 +148,7 @@ When('der Liegenschaftsverwalter als Rechnungsdatum {string} eintippt', async ({
 	await verwalter.attemptsTo(typeInvoiceDate(text));
 });
 
-Then('zeigt das Feld Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
+Then('steht beim Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(invoiceDate).toBe(text);
 });
 
@@ -235,6 +237,31 @@ Then('ist im Rechnungsformular der Verteilschlüssel {string} gewählt', async (
 
 Then('erklärt das Formular beim Verteilschlüssel {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(keyHelpText).toContain(text);
+});
+
+Then('zeigt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodFirstText).toContain(text);
+});
+
+Then('steht beim Leistungszeitraum hinter «Mehr dazu» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodMoreText).toContain(text);
+	await verwalter.sees(servicePeriodMoreOpen).toBeNull();
+});
+
+When(
+	'der Liegenschaftsverwalter eine Rechnung mit einem Rechnungssteller von {int} Zeichen speichert',
+	async ({ verwalter }, length: number) => {
+		await verwalter.attemptsTo(saveSupplierOfLength(length));
+	}
+);
+
+// nothing cut silently (fach review 743-1 V-2)
+Then('zeigt das Formular die Rechnungsnummer {string}', async ({ verwalter }, number: string) => {
+	await verwalter.sees(invoiceNumberValue).toBe(number);
+});
+
+Then('zeigt das Formular einen Rechnungssteller von {int} Zeichen', async ({ verwalter }, length: number) => {
+	await verwalter.sees(supplierValue).toHaveLength(length);
 });
 
 Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {

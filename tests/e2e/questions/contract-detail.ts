@@ -1,5 +1,6 @@
 import { question } from '../screenplay/actor';
-import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareInViewport, Text, Visibility, Width } from '../screenplay/questions';
+import { pageTitle } from '../targets/app-frame';
 import {
 	contractEndInput,
 	moveOutHint,
@@ -24,11 +25,18 @@ import {
 	deleteDialog,
 	deleteDialogStatementLink,
 	missingStatements,
+	missingStatementLink,
+	missingStatementLinks,
+	missingStatementInvoicesLink,
+	missingStatementPeriod,
 	fixedTermCheck,
 	fixedTermError,
 	contractFlatRate,
 	deleteMistakeConfirmation,
-	dialogErrors
+	dialogErrors,
+	missingStatementsTitle,
+	contractEditButton,
+	deleteContractButton
 } from '../targets/contract-detail';
 
 export const apartmentOfContract = Text.of(contractApartment);
@@ -49,6 +57,15 @@ export const endConfirmationInWindow = question(
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
+// #741: how many pixels each button of a missing statement falls short of the width of its row
+export const missingStatementButtonsShortOfRow = (periodStart: string) =>
+	question(`how far the buttons of the missing statement from ${periodStart} fall short of its row`, async (actor) => {
+		const [row, ...buttons] = await Promise.all(
+			[missingStatementPeriod, missingStatementLink, missingStatementInvoicesLink].map((part) => actor.answer(Width.of(part(periodStart))))
+		);
+		return buttons.map((width) => (row === null || width === null ? null : Math.round(row - width)));
+	});
+export const missingStatementLinkTexts = Text.ofAll(missingStatementLinks); // #741: in the order shown
 export const managementFeeOfContract = Text.of(contractManagementFee);
 export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);
@@ -79,3 +96,13 @@ export const moveOutText = Text.of(moveOutHint);
 export const refusedStatementName = Text.of(refusedStatementLink);
 export const endActionLabel = Text.of(endContractButton);
 export const moveOutShown = Visibility.of(moveOutHint);
+
+export const missingStatementsTitleText = Text.of(missingStatementsTitle);
+
+// #740: how many pixels each page action is narrower than the page title (0: as wide)
+export const contractActionsNarrowerThanTitle = question('how much narrower the contract actions are than the page title', async (actor) => {
+	const [title, ...actions] = await Promise.all(
+		[pageTitle, contractEditButton, endContractButton, deleteContractButton].map(async (one) => Math.round((await actor.answer(Width.of(one))) ?? 0))
+	);
+	return actions.map((width) => title - width);
+});

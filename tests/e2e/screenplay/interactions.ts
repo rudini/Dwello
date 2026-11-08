@@ -1,4 +1,4 @@
-import { expect, type BrowserContext, type Locator, type Page } from '@playwright/test';
+import { expect, type BrowserContext, type Locator } from '@playwright/test';
 import type { Activity, Actor } from './actor';
 import { BrowseTheWeb } from './abilities';
 import type { Target } from './target';
@@ -10,13 +10,22 @@ const locate = (actor: Actor, target: Target) => target.locate(pageOf(actor));
 const on = (target: Target, act: (element: Locator) => Promise<unknown>): Activity => (actor) => act(locate(actor, target));
 
 // SSR pages only react to input once hydrated; hydration resets fields changed before it (seen on WebKit in CI)
-const hydrated = (page: Page) => page.locator('body[data-hydrated]').waitFor({ state: 'attached' });
+// A page that does not hydrate names why: the browser console joins the timeout (#750)
+const hydrated = (actor: Actor) =>
+	pageOf(actor)
+		.locator('body[data-hydrated]')
+		.waitFor({ state: 'attached' })
+		.catch((error: Error) => {
+			// a new error: Playwright's report shows the stack, fixed before a message added to it
+			const logged = actor.abilityTo(BrowseTheWeb).console.join('\n') || '(empty)';
+			throw new Error(`${error.message}\nBrowser console:\n${logged}`, { cause: error });
+		});
 const SCRIPTS_HELD_BACK = 'scripts held back';
 
 export const Navigate = {
 	to: (path: string): Activity => async (actor) => {
 		await pageOf(actor).goto(path);
-		await hydrated(pageOf(actor));
+		await hydrated(actor);
 	},
 	// An address outside the app (a stand-in's control), which never hydrates
 	outsideApp: (url: string): Activity => async (actor) => {
@@ -24,7 +33,7 @@ export const Navigate = {
 	},
 	reload: (async (actor) => {
 		await pageOf(actor).reload();
-		await hydrated(pageOf(actor));
+		await hydrated(actor);
 	}) as Activity,
 	// The page's client JS held back, so it stays server-rendered (not hydrated) until `releaseScripts`: what a user
 	// sees on a slow connection
@@ -40,7 +49,7 @@ export const Navigate = {
 	},
 	releaseScripts: (async (actor) => {
 		actor.recall<() => void>(SCRIPTS_HELD_BACK)();
-		await hydrated(pageOf(actor));
+		await hydrated(actor);
 	}) as Activity
 };
 
@@ -55,7 +64,7 @@ export const Click = {
 	// A click that loads the page anew (e.g. the language selection); waits until it is hydrated again
 	toReload: (target: Target): Activity => async (actor) => {
 		await Promise.all([pageOf(actor).waitForEvent('load'), locate(actor, target).click()]);
-		await hydrated(pageOf(actor));
+		await hydrated(actor);
 	}
 };
 

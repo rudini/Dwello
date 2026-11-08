@@ -34,7 +34,7 @@
 >
 	<span class={style.text}><Icon name={style.icon} size={24} /></span>
 	<div class="flex min-w-0 flex-col gap-2">
-		<p id={titleId} class="font-semibold {style.text}">{title}</p>
+		<h2 id={titleId} class="font-semibold {style.text}">{title}</h2>
 		{#if children}{@render children()}{/if}
 		{#if action}<div>{@render action()}</div>{/if}
 	</div>

@@ -135,3 +135,9 @@ Funktionalität: Navigation
       | /config/distribution-keys/abc/edit |
       | /config/heating-profiles/abc       |
       | /config/heating-profiles/abc/edit  |
+
+  # #740: ein Laptop mit 1280 Pixeln bei 150 % Zoom zeigt 853 Pixel; die Hauptnavigation bleibt sichtbar, ohne Menü
+  Szenario: Bereich über die Hauptnavigation bei 150 % Zoom öffnen
+    Angenommen das Browserfenster ist 853 Pixel breit
+    Wenn der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Mietverträge"

@@ -31,7 +31,7 @@ Funktionalität: KI in den Einstellungen wählen
     Angenommen Dwello ist eingerichtet
     Und der Anbieter "Muster KI AG" in "Deutschland" ist gespeichert
     Wenn der Liegenschaftsverwalter die KI der frischen Installation öffnet
-    Dann ist das Feld für den API-Schlüssel leer
+    Dann ist bei «API-Schlüssel» nichts eingetragen
     Und sagt die Seite "KI" "Ein API-Schlüssel ist gespeichert. Lassen Sie das Feld leer, um ihn zu behalten."
 
   Szenario: Keine KI wählen
@@ -47,7 +47,7 @@ Funktionalität: KI in den Einstellungen wählen
     Angenommen Dwello ist eingerichtet
     Und in der frischen Installation ist keine KI gewählt
     Wenn der Liegenschaftsverwalter in der frischen Installation "Neue Kategorie" öffnet
-    Dann erklärt das Feld «Beschreibung» "Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht."
+    Dann erklärt Dwello bei «Beschreibung» "Beschreiben Sie, welche Kosten zu dieser Kategorie gehören. Die Liste der Kategorien zeigt die Beschreibung unter dem Namen. Auf der Nebenkostenabrechnung steht sie nicht."
 
   # #626: ohne KI liest niemand die Dateien; der Dialog sagt es mit dem Begriff der Seite «KI»
   Szenario: Rechnungen hochladen, wenn keine KI gewählt ist
