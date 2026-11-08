@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { SETUP_CODE } from '../fixtures/fresh-installation';
 import { test } from '../fixtures/test';
 import { shownUserName } from '../questions/authentication';
+import { fieldDescription, fieldValue } from '../questions/form';
 import { enteredSetupPassword, kiModelHint, repeatedSetupPassword, setupHint } from '../questions/einrichtung';
 import { openFreshDwello, openFreshOverview, openKiFromFreshOverview, openOverviewWithFailedModel, openSetup, openSetupPrivacy, openSetupTerms, setUpDwello, setUpDwelloWithKi } from '../tasks/einrichtung';
 
@@ -103,4 +104,18 @@ Given('in der frischen Installation ist keine KI gewählt', async ({ frisch }) =
 
 When('der Liegenschaftsverwalter in der Übersicht der frischen Installation die KI öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openKiFromFreshOverview);
+});
+
+// #1306: an address longer than its column, refused at its field (as #1201); still a valid address for the browser
+When('der Besucher bei der Einrichtung eine E-Mail-Adresse von {int} Zeichen angibt', async ({ besucher, frisch }, length: number) => {
+	const domain = '@example.com';
+	await besucher.attemptsTo(setUpDwello(SETUP_CODE, { ...frisch.newAccount(), email: 'a'.repeat(length - domain.length) + domain }));
+});
+
+Then('steht in der Einrichtung bei {string} die Fehlermeldung {string}', async ({ besucher }, label: string, text: string) => {
+	await besucher.sees(fieldDescription(label)).toContain(text);
+});
+
+Then('steht in der Einrichtung bei {string} noch der Text von {int} Zeichen', async ({ besucher }, label: string, length: number) => {
+	await besucher.sees(fieldValue(label)).toHaveLength(length);
 });

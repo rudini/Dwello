@@ -86,7 +86,7 @@ describe('Neues Heizprofil', () => {
 
 		expect(await result).toMatchObject({
 			status: 409,
-			data: { errors: { name: 'Ein Heizprofil mit dem Namen «Bergtal» existiert bereits.' } }
+			data: { errors: { name: 'Ein Heizprofil mit dem Namen «Bergtal» existiert bereits. Wählen Sie einen anderen Namen.' } }
 		});
 	});
 

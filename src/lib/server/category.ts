@@ -121,6 +121,8 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 		})
 	});
 	const answer = await response.json().catch(() => null);
+	// #1306: a name longer than its column, refused at «Name» before the KI is asked
+	if (answer?.code === 'TEXT_TOO_LONG') return fail(400, { errors: { name: backendMessage(answer, '') } });
 	const unsure = answer?.code === 'KI_PROPOSAL_UNSURE';
 	// Without a proposal the backend says whether the KI is unsure or not reachable (#186); any other refusal, in its
 	// own words, counts as not reachable

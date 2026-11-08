@@ -18,6 +18,7 @@ import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import allowed from '../../tests/contracts/categories-allowed.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
+import proposalTooLong from '../../tests/contracts/category-proposal-text-too-long.json';
 import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
 import fuelRefused from '../../tests/contracts/category-fuel-refused.json';
@@ -213,7 +214,9 @@ describe('Neue Kategorie', () => {
 			expect.objectContaining({
 				status: 409,
 				data: {
-					errors: { name: 'Eine Kategorie mit dem Namen «Treppenhausreinigung» existiert bereits.' }
+					errors: {
+						name: 'Eine Kategorie mit dem Namen «Treppenhausreinigung» existiert bereits. Wählen Sie einen anderen Namen.'
+					}
 				}
 			})
 		);
@@ -312,6 +315,13 @@ describe('Vorschlag der KI', () => {
 
 	it('zeigt den Hinweis auch, wenn eine Antwort ohne Inhalt kommt', async () => {
 		expect(await hint(200, null)).toBe(UNAVAILABLE);
+	});
+
+	// #1306: a name too long for its column is refused at «Name», not as «KI nicht erreichbar»
+	it('sagt bei einem zu langen Namen beim Namen, wie viele Zeichen er haben darf', async () => {
+		const { result } = runAction(newActions.propose, '', 400, form, proposalTooLong);
+
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } } });
 	});
 
 	// #678 (Helga P-5): sagt, was die KI zum Prüfen braucht

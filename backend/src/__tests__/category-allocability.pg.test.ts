@@ -168,6 +168,21 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 		}
 	});
 
+	// #1306: a name longer than its column is refused at its field, without asking the KI; before, «KI nicht erreichbar»
+	it('lehnt einen zu langen Namen bei seinem Feld ab, ohne die KI zu fragen', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.9, reasoning: 'Betrieb' });
+		try {
+			const response = await sendJson('POST', '/api/v1/categories/propose', { name: 'A'.repeat(101) });
+
+			await expectRejection(response, 400, 'Some fields are not valid', 'TEXT_TOO_LONG', { field: 'name', max: 100 }, [
+				{ code: 'TEXT_TOO_LONG', params: { field: 'name', max: 100 } }
+			]);
+			expect(llm.prompts).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
 	it('schlägt nichts vor, wenn die KI nicht erreichbar ist', async () => {
 		await expectRejection(await propose(), 503, ...UNAVAILABLE);
 	});
