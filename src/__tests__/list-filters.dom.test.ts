@@ -4,7 +4,13 @@ import type { Writable } from 'svelte/store';
 
 // The address changes while the list stays mounted, as after a link, back or forward within the list
 vi.mock('$app/environment', () => ({ browser: true }));
-vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+// #680: the lists' callbacks after a navigation, called by the tests
+const navigated = vi.hoisted(() => [] as ((navigation: { type: string }) => void)[]);
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	invalidateAll: vi.fn(),
+	afterNavigate: (callback: (navigation: { type: string }) => void) => navigated.push(callback)
+}));
 vi.mock('$app/stores', async () => {
 	const { writable } = await import('svelte/store');
 	return { page: writable({ url: new URL('http://localhost/') }) };
@@ -228,5 +234,34 @@ describe.each([
 		const fields = [...byTestId(list.search)!.closest('form')!.querySelectorAll('input, select')];
 
 		expect(fields.filter((field) => !field.getAttribute('name'))).toEqual([]);
+	});
+});
+
+// #680 (product owner): the form shows exactly the filter the list applies; a text typed but not searched is dropped
+describe.each([...lists, statements])('Suche der Liste $path nach einer Navigation', (list) => {
+	const typeUnsent = () => {
+		navigated.length = 0;
+		history.replaceState(null, '', `${list.path}?search=Ahorn`);
+		goTo(`${list.path}?search=Ahorn`);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		fireEvent(byTestId<HTMLInputElement>(list.search)!, 'input', 'Gibt es nicht');
+	};
+
+	it('zeigt nach einer Navigation zur selben Adresse die angewandte Suche', () => {
+		typeUnsent();
+
+		for (const callback of navigated) callback({ type: 'link' });
+		flushSync();
+
+		expect(valueOf(list.search)).toBe('Ahorn');
+	});
+
+	it('zeigt die angewandte Suche, wenn der Browser die Seite wieder zeigt', () => {
+		typeUnsent();
+
+		window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
+		flushSync();
+
+		expect(valueOf(list.search)).toBe('Ahorn');
 	});
 });

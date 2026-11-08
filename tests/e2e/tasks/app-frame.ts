@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Click, FailRequests, Press, Wait } from '../screenplay/interactions';
+import { Browser, Click, FailRequests, Navigate, Press, Wait } from '../screenplay/interactions';
 import { mobileMenuButton, text } from '../targets/accessibility';
 import {
 	errorPageToOverview,
@@ -49,3 +49,5 @@ export const goToOverviewWhileItFails: Activity = (actor) =>
 		Wait.until(text('Versuchen Sie es später erneut.'))
 	);
 export const goBackInBrowser = Browser.back;
+// typed into the address bar: a full page load, so going back loads the page again or restores it (#680)
+export const openOtherPageByAddress = Navigate.to('/');

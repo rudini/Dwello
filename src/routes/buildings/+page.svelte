@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { showAppliedFilter } from '$lib/utils/list-filter';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { BuildingsListData } from '$lib/types';
@@ -25,6 +26,9 @@
 		cityFilter = '';
 		goto('/buildings');
 	}
+
+	let form = $state<HTMLFormElement>();
+	showAppliedFilter(() => form);
 </script>
 
 <svelte:head>
@@ -42,6 +46,7 @@
 
 	<!-- a plain GET form: the browser sends a search made before the app reacts, the router one made after (#754) -->
 	<form
+		bind:this={form}
 		method="GET"
 		action="/buildings"
 		role="search"
