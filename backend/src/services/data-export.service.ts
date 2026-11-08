@@ -85,6 +85,7 @@ const COLUMNS = {
 	startDate: ['Vertragsbeginn', 'Début du contrat', 'Inizio del contratto', 'Contract start'],
 	endDate: ['Vertragsende', 'Fin du contrat', 'Fine del contratto', 'Contract end'],
 	terminated: ['Gekündigt', 'Résilié', 'Disdetto', 'Terminated by notice'],
+	byAgreement: ['Aufhebungsvereinbarung', 'Convention de fin de bail', 'Accordo di scioglimento', 'Termination by agreement'],
 	noticeReceivedOn: ['Kündigung erhalten am', 'Résiliation reçue le', 'Disdetta ricevuta il', 'Notice received on'],
 	billedUntil: ['Abgerechnet bis', 'Décompté jusqu’au', 'Conteggiato fino al', 'Billed until'],
 	movedOut: ['Auszug bestätigt', 'Déménagement confirmé', 'Trasloco confermato', 'Move-out confirmed'],
@@ -436,7 +437,7 @@ export async function exportAllData(language: Language) {
 	);
 	table(
 		'contracts',
-		['id', 'apartmentId', 'building', 'apartment', 'tenantId', 'tenant', 'startDate', 'endDate', 'terminated', 'noticeReceivedOn', 'billedUntil', 'movedOut', 'documentsCheckedOn', 'baseRent', 'additionalRent', 'monthlyAdvancePayment', 'flatRateUtilityCharge', 'managementFeeAgreed', 'ownRate', 'contractFile', 'notes', 'createdAt', 'updatedAt'],
+		['id', 'apartmentId', 'building', 'apartment', 'tenantId', 'tenant', 'startDate', 'endDate', 'terminated', 'byAgreement', 'noticeReceivedOn', 'billedUntil', 'movedOut', 'documentsCheckedOn', 'baseRent', 'additionalRent', 'monthlyAdvancePayment', 'flatRateUtilityCharge', 'managementFeeAgreed', 'ownRate', 'contractFile', 'notes', 'createdAt', 'updatedAt'],
 		contractRows.map((contract) => {
 			const apartment = apartmentOf.get(contract.apartmentId);
 			return {
@@ -444,6 +445,8 @@ export async function exportAllData(language: Language) {
 				building: apartment && buildingOf.get(apartment.buildingId)?.name,
 				apartment: apartment?.number,
 				tenant: tenantName(contract.tenantId),
+				// an Aufhebungsvereinbarung is no notice (#1148)
+				terminated: contract.terminated && !contract.byAgreement,
 				// the choice of the contract form (V-4)
 				managementFeeAgreed: word(contract.managementFeeAgreed ? (contract.managementFeePercent ? 'feeOwn' : 'feeRun') : 'feeNone'),
 				ownRate: contract.managementFeePercent,

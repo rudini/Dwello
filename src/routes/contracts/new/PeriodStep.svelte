@@ -17,9 +17,11 @@
 		endDate = $bindable(),
 		isUnlimited = $bindable(),
 		terminated = $bindable(false),
+		byAgreement = $bindable(false),
 		billedUntil = $bindable(),
 		offerBilledUntil = false,
 		noticed = false,
+		agreed = false,
 		min,
 		unknown = false,
 		onretry,
@@ -34,9 +36,11 @@
 		endDate: string;
 		isUnlimited: boolean;
 		terminated?: boolean;
+		byAgreement?: boolean; // with terminated: an Aufhebungsvereinbarung (#1148)
 		billedUntil?: string;
 		offerBilledUntil?: boolean; // the wizard: «Abgerechnet bis» for a Vertragsbeginn before today (#453)
 		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
+		agreed?: boolean; // and the end is an Aufhebungsvereinbarung (#1148)
 		min?: string;
 		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
 		onretry?: () => void; // loads them again; without it the hint points to the one at the top
@@ -55,23 +59,35 @@
 		label: m.contracts_limited(),
 		description: m.contracts_limited_help()
 	};
-	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence and when it is
-	// possible (glossary «Kündigung aufheben»)
+	// a notice or an Aufhebungsvereinbarung keeps the contract open-ended (A-1, #1148): the saved kind first, then the
+	// other one to correct a wrong choice (fach review 1148-1 V-1); withdrawing it is a choice with its consequence and
+	// when it is possible (glossary «Kündigung aufheben»)
+	const notice = $derived({
+		value: 'terminated',
+		label: endDate ? contractEnd(endDate, true) : m.contracts_duration_terminated(),
+		description: m.contracts_duration_terminated_help()
+	});
+	const agreement = $derived({
+		value: 'agreement',
+		label: endDate ? contractEnd(endDate, true, true) : m.contracts_duration_agreement(),
+		description: m.contracts_duration_agreement_help()
+	});
+	const withdraw = $derived(
+		agreed
+			? {
+					value: 'unlimited',
+					label: m.contracts_withdraw_agreement(),
+					description: m.contracts_withdraw_agreement_help()
+				}
+			: {
+					value: 'unlimited',
+					label: m.contracts_withdraw_notice(),
+					description: m.contracts_withdraw_notice_help()
+				}
+	);
 	const durations = $derived(
 		noticed
-			? [
-					{
-						value: 'terminated',
-						label: endDate ? contractEnd(endDate, true) : m.contracts_duration_terminated(),
-						description: m.contracts_duration_terminated_help()
-					},
-					{
-						value: 'unlimited',
-						label: m.contracts_withdraw_notice(),
-						description: m.contracts_withdraw_notice_help()
-					},
-					limited
-				]
+			? [...(agreed ? [agreement, notice] : [notice, agreement]), withdraw, limited]
 			: [
 					{
 						value: 'unlimited',
@@ -81,8 +97,8 @@
 					limited
 				]
 	);
-	const duration = (unlimited: boolean, noticeGiven: boolean) =>
-		unlimited ? 'unlimited' : noticeGiven ? 'terminated' : 'limited';
+	const duration = (unlimited: boolean, noticeGiven: boolean, agreement: boolean) =>
+		unlimited ? 'unlimited' : noticeGiven ? (agreement ? 'agreement' : 'terminated') : 'limited';
 </script>
 
 <DateInput
@@ -114,8 +130,12 @@
 	legend={m.contracts_period()}
 	options={durations}
 	bind:value={
-		() => duration(isUnlimited, terminated),
-		(v) => ((isUnlimited = v === 'unlimited'), (terminated = v === 'terminated'))
+		() => duration(isUnlimited, terminated, byAgreement),
+		(v) => (
+			(isUnlimited = v === 'unlimited'),
+			(terminated = v === 'terminated' || v === 'agreement'),
+			(byAgreement = v === 'agreement')
+		)
 	}
 	testid="contract-duration"
 />

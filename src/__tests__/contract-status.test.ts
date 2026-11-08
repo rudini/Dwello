@@ -115,6 +115,13 @@ describe('Vertragsdauer in Worten', () => {
 			'01.04.2024 – 31.03.2099, gekündigt'
 		);
 	});
+
+	// #1148 (Fachreview 1148-1 V-3): «beendet» liesse einen laufenden Mietvertrag vorbei erscheinen
+	it('nennt bei einer Aufhebungsvereinbarung das Einvernehmen', () => {
+		expect(contractPeriod('2024-04-01', '2099-03-31', 'active', true, true)).toBe(
+			'01.04.2024 – 31.03.2099, einvernehmlich'
+		);
+	});
 });
 
 describe('Vertragsende', () => {
@@ -124,6 +131,11 @@ describe('Vertragsende', () => {
 		['2099-03-31', true, 'Unbefristet, gekündigt auf den 31.03.2099']
 	])('%s, gekündigt %s: «%s»', (endDate, terminated, text) => {
 		expect(contractEnd(endDate, terminated)).toBe(text);
+	});
+
+	// #1148: eine Aufhebungsvereinbarung ist keine Kündigung
+	it('nennt bei einer Aufhebungsvereinbarung keine Kündigung', () => {
+		expect(contractEnd('2099-03-31', true, true)).toBe('Unbefristet, beendet auf den 31.03.2099');
 	});
 });
 

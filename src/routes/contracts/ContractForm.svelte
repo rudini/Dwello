@@ -218,13 +218,16 @@
 			refused = Array.isArray(statements) ? (statements as RefusedStatement[]) : [];
 			return focusFirstError(form);
 		}
-		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
-		const saved =
-			contract.terminated && values.isUnlimited
-				? m.contracts_notice_withdrawn_toast({ name: tenant })
-				: m.contracts_saved_toast({ name: tenant });
-		addToast('success', saved, 10_000);
+		addToast('success', savedMessage(), 10_000);
 		await goto(next);
+	}
+
+	// a withdrawn notice or Aufhebungsvereinbarung says what changed, not only «gespeichert» (personas J1, #1148)
+	function savedMessage() {
+		if (!contract.terminated || !values.isUnlimited) return m.contracts_saved_toast({ name: tenant });
+		return contract.byAgreement
+			? m.contracts_agreement_withdrawn_toast({ name: tenant })
+			: m.contracts_notice_withdrawn_toast({ name: tenant });
 	}
 
 	async function save(event: SubmitEvent) {
@@ -314,7 +317,9 @@
 			bind:endDate={values.endDate}
 			bind:isUnlimited={values.isUnlimited}
 			bind:terminated={values.terminated}
+			bind:byAgreement={values.byAgreement}
 			noticed={contract.terminated}
+			agreed={contract.byAgreement}
 			unknown={shownUnknown}
 			{startPast}
 			overlap={overlap?.text === errors.form ? null : overlap}

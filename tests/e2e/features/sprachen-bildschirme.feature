@@ -124,6 +124,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | end-dialog-refused  |
       | contract-detail        | end-dialog-advance-refused |
       | contract-detail        | end-dialog-notice-hint |
+      | contract-detail        | end-dialog-agreement |
       | contract-detail        | delete-dialog       |
       | contract-detail        | advance-delete-dialog |
       | contract-detail        | advance-delete-refused |
@@ -156,6 +157,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail-expired | continue-refused   |
       | contract-edit-earlier  | default             |
       | contract-edit-earlier  | overlap-refused     |
+      | contract-edit-agreement | default            |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |

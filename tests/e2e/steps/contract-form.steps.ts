@@ -96,7 +96,8 @@ import {
 	enterStartAndBilledUntil,
 	saveContract,
 	changeAdvancePaymentFrom,
-	saveStartWithAdvance
+	saveStartWithAdvance,
+	saveDuration
 } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
@@ -805,3 +806,24 @@ When(
 When('der Liegenschaftsverwalter im Browser zurückgeht und die Änderungen verwirft', async ({ verwalter }) => {
 	await verwalter.attemptsTo(goBackInBrowser, discardChanges);
 });
+
+// #1148: an Aufhebungsvereinbarung is ended like a notice, by agreement only
+Given(
+	'der Mietvertrag von {string} ist mit einer Aufhebungsvereinbarung auf den {string} beendet',
+	async ({ seed }, tenant: string, date: string) => {
+		await seed.endByAgreement(tenant, date);
+	}
+);
+
+When('der Liegenschaftsverwalter als Vertragsdauer {string} speichert', async ({ verwalter }, label: string) => {
+	await verwalter.attemptsTo(saveDuration(label));
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter bei «Aufhebungsvereinbarung zurücknehmen», dass das nur gemeinsam geht',
+	async ({ verwalter }) => {
+		await verwalter.sees(withdrawNoticeHelp).toContain('Aufhebungsvereinbarung zurücknehmen');
+		await verwalter.sees(withdrawNoticeHelp).toContain('die Aufhebungsvereinbarung gemeinsam zurücknehmen');
+		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter');
+	}
+);

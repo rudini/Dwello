@@ -3,6 +3,8 @@ import { Accessible, Attribute, Checked, Count, FocusedLabel, OpenedPage, ShareI
 import { pageTitle } from '../targets/app-frame';
 import {
 	contractEndInput,
+	endKind,
+	endKindNotice,
 	moveOutHint,
 	refusedStatementLink,
 	endContractButton,
@@ -106,3 +108,8 @@ export const contractActionsNarrowerThanTitle = question('how much narrower the 
 	);
 	return actions.map((width) => title - width);
 });
+// #1148: the question of the end dialog, a notice or an Aufhebungsvereinbarung, with the help under each
+export const endKindText = Text.of(endKind);
+export const noticeReceivedShown = Visibility.of(noticeReceivedInput);
+export const noticeChosen = Checked.of(endKindNotice);
+export const noticeReceivedOnShown = Visibility.of(contractNoticeReceived);

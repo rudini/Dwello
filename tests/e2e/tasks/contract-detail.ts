@@ -27,14 +27,16 @@ import {
 	continueOpenEndedButton,
 	movedOutButton,
 	confirmMovedOutButton,
-	deleteDraftAndContinueButton
+	deleteDraftAndContinueButton,
+	endKindAgreement
 } from '../targets/contract-detail';
 
 export const openContract = (contractId: string) => Navigate.to(`/contracts/${contractId}`);
 
 // The tenant gave notice for a day: that day is typed in the dialog; a past day is confirmed with its consequence
-export const endContractOn = (isoDate: string, { confirmPast = false } = {}): Activity => async (actor) => {
+export const endContractOn = (isoDate: string, { confirmPast = false, byAgreement = false } = {}): Activity => async (actor) => {
 	await actor.attemptsTo(Click.on(endContractButton), EnterDate.of(isoDate).into(contractEndInput));
+	if (byAgreement) await actor.attemptsTo(Click.on(endKindAgreement));
 	if (confirmPast) await actor.attemptsTo(Check.the(contractEndPastConfirm));
 	await actor.attemptsTo(Click.on(confirmEndContractButton));
 };
@@ -50,6 +52,15 @@ export const fillEndWithNotice = (endDate: string, receivedOn: string): Activity
 		EnterDate.of(receivedOn).into(noticeReceivedInput)
 	);
 export const confirmEnd = Click.on(confirmEndContractButton);
+
+// #1148: the dialog opened with an Aufhebungsvereinbarung chosen; ended on the day typed, when one is given
+export const startEndingByAgreement: Activity = (actor) =>
+	actor.attemptsTo(Click.on(endContractButton), Click.on(endKindAgreement));
+export const endContractByAgreementOn = (isoDate: string, { confirmPast = false } = {}): Activity =>
+	endContractOn(isoDate, { confirmPast, byAgreement: true });
+// the dialog filled for a notice, then an Aufhebungsvereinbarung chosen instead
+export const endByAgreementInstead: Activity = (actor) =>
+	actor.attemptsTo(Click.on(endKindAgreement), Click.on(confirmEndContractButton));
 
 export const startEndingContract = Click.on(endContractButton);
 export const startDeletingContract = Click.on(deleteContractButton);

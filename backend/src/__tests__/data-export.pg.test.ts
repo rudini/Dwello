@@ -315,6 +315,17 @@ describe('Alle Daten exportieren', () => {
 		}
 	});
 
+	// #1148, Fachreview 1148-1 V-2: eine Aufhebungsvereinbarung ist keine Kündigung
+	it('nennt einen mit Aufhebungsvereinbarung beendeten Mietvertrag nicht gekündigt', async () => {
+		await db.update(rentalContracts).set({ endDate: '2099-03-31', terminated: true, byAgreement: true }).where(eq(rentalContracts.id, rental.contract));
+		try {
+			const row = rowsOf(await exportIn(), 'tabellen/mietverträge.csv').find((r) => r.ID === rental.contract);
+			expect(row).toMatchObject({ Gekündigt: 'nein', Aufhebungsvereinbarung: 'ja' });
+		} finally {
+			await db.update(rentalContracts).set({ endDate: null, terminated: false, byAgreement: false }).where(eq(rentalContracts.id, rental.contract));
+		}
+	});
+
 	it('gibt die Einstellungen mit den Namen des Formulars heraus', async () => {
 		const settings = rowsOf(await exportIn(), 'tabellen/einstellungen.csv').map((row) => row.Einstellung);
 

@@ -80,6 +80,7 @@ const contractUpdateSchema = t.Partial(
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		terminated: t.Boolean(),
 		noticeReceivedOn: t.Nullable(t.String({ format: 'date' })), // the day the notice arrived (A-3)
+		byAgreement: t.Boolean(), // with terminated: an Aufhebungsvereinbarung, not a notice (#1148)
 		billedUntil: t.Nullable(t.String({ format: 'date' })), // «Abgerechnet bis» (#133)
 		movedOut: t.Boolean(), // «Mieter ist ausgezogen» after an agreed end (A-6, #115)
 		documentsChecked: t.Literal(true), // «Als geprüft markieren»: a former tenant's documents, today (#459)

@@ -13,6 +13,12 @@ export const monthlyTotal = (c: Partial<ContractRow>) =>
 	amount(c.monthlyAdvancePayment) +
 	amount(c.flatRateUtilityCharge);
 
+/** How an ended contract ended: a notice or an Aufhebungsvereinbarung of an open-ended one (#1148), else agreed */
+export const endKind = (c: Partial<Pick<ContractRow, 'terminated' | 'byAgreement'>>) => ({
+	terminated: !!c.terminated,
+	byAgreement: !!c.byAgreement
+});
+
 /** One row of a contract history (apartment or tenant page) */
 export const toContractHistory = (
 	c: Pick<ContractRow, 'id' | 'startDate' | 'status'> & Partial<ContractRow>,
@@ -24,5 +30,5 @@ export const toContractHistory = (
 	status: c.status, // running today, ended or signed for later, by the Swiss day (H-28, #717)
 	startDate: c.startDate,
 	endDate: c.endDate ?? null,
-	terminated: !!c.terminated
+	...endKind(c)
 });

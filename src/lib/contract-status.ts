@@ -38,11 +38,13 @@ export function contractPeriod(
 	startDate: string,
 	endDate: string | null | undefined,
 	status: Status,
-	terminated = false
+	terminated = false,
+	byAgreement = false
 ) {
 	const start = formatDate(startDate);
 	if (endDate) {
 		const end = formatDate(endDate);
+		if (byAgreement) return m.contracts_period_range_agreement({ start, end });
 		return terminated
 			? m.contracts_period_range_terminated({ start, end })
 			: m.contracts_period_range_fixed({ start, end });
@@ -54,12 +56,20 @@ export function contractPeriod(
 
 /** The period of a row in a contract history (apartment or tenant page) */
 export const historyPeriod = (c: ContractHistory) =>
-	contractPeriod(c.startDate, c.endDate, c.status, c.terminated);
+	contractPeriod(c.startDate, c.endDate, c.status, c.terminated, c.byAgreement);
 
-/** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
-export function contractEnd(endDate: string | null | undefined, terminated = false) {
+/**
+ * The Vertragsende in words: agreed in a fixed-term contract, the Kündigungstermin of an open-ended one, or the day of
+ * its Aufhebungsvereinbarung (#1148)
+ */
+export function contractEnd(
+	endDate: string | null | undefined,
+	terminated = false,
+	byAgreement = false
+) {
 	if (!endDate) return m.contracts_unlimited();
 	const date = formatDate(endDate);
+	if (byAgreement) return m.contracts_end_agreement({ date });
 	return terminated ? m.contracts_end_terminated({ date }) : m.contracts_end_fixed({ date });
 }
 

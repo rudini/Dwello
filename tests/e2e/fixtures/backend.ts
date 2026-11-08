@@ -420,6 +420,16 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
+		// an open-ended contract ended by an Aufhebungsvereinbarung, as «Mietvertrag beenden» stores it (#1148)
+		async endByAgreement(tenantTitle: string, endDate: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, {
+				endDate,
+				terminated: true,
+				byAgreement: true,
+				confirmPastEnd: true
+			});
+		},
+
 		// the tenant left after an agreed end, as «Mieter ist ausgezogen» stores it (A-6, #115)
 		async movedOut(tenantTitle: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { movedOut: true });

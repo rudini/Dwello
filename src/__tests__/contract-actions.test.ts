@@ -315,6 +315,26 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
+	// #1148: eine Aufhebungsvereinbarung ist keine Kündigung
+	it('speichert eine Aufhebungsvereinbarung mit dem Vertragsende', async () => {
+		const { calls, result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-12-31', byAgreement: 'on' },
+			{ startDate: '2024-04-01' }
+		);
+		await result;
+
+		expect(calls.filter((call) => call.method === 'PUT')).toEqual([
+			{
+				method: 'PUT',
+				url: 'http://localhost:3001/api/v1/contracts/c1',
+				body: { endDate: '2099-12-31', terminated: true, byAgreement: true }
+			}
+		]);
+	});
+
 	// ein nachträglich erfasster Kündigungstermin braucht die Bestätigung seiner Folge; ob er vor heute liegt, entscheidet
 	// das Backend (#788), die Aktion zeigt seine Ablehnung (ein Formular ohne JavaScript)
 	it('zeigt die Ablehnung eines unbestätigten Vertragsendes vor heute', async () => {

@@ -6,7 +6,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 
 | ID | Anforderung | Priorität | Quelle | Issue |
 |---|---|---|---|---|
-| A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga | – |
+| A-1 | Befristung, Kündigung und Aufhebungsvereinbarung unterscheiden | umgesetzt | IF-4, Helga | #1148 |
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna | – |
 | A-3 | Hinweis auf die Kündigungsfrist | umgesetzt | IF-2 | #112 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
@@ -29,23 +29,23 @@ Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Da
 Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriffe bedeuten.
 
 1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP` in `contract.service.ts`; für neue Verträge belegt durch `contract-new.feature` und `backend/src/__tests__/contract-overlap.pg.test.ts`).
-2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist (A-1).
-3. **Kündigungsfrist.** Der Dialog «Mietvertrag beenden» nennt sie allgemein (3 Monate, sonst nächster Termin). Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Kalendermonate (Tag auf das Monatsende gekürzt), weist er darauf hin, ohne zu sperren (A-3, #112). Ortsübliche Termine, vertraglich längere Fristen und Formvorschriften prüft Dwello nicht.
+2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist. Endet er mit einer Aufhebungsvereinbarung, erfasst Dwello den vereinbarten Tag und merkt sich das (A-1, #1148). Beides bleibt unbefristet: Dwello fragt nach dem Ende nicht nach einer stillschweigenden Fortsetzung, und die nächsten Schritte gelten gleich.
+3. **Kündigungsfrist.** Der Dialog «Mietvertrag beenden» nennt sie allgemein, bei einer Kündigung (3 Monate, sonst nächster Termin). Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Kalendermonate (Tag auf das Monatsende gekürzt), weist er darauf hin, ohne zu sperren (A-3, #112). Ortsübliche Termine, vertraglich längere Fristen und Formvorschriften prüft Dwello nicht.
 4. **Vertrag, der von Gesetzes wegen weiterläuft** (#155, Entscheid Product Owner: nur beschreiben, kein eigener Grund für das Vertragsende). Stirbt der Mieter, geht der Mietvertrag auf die Erben über (Art. 560 ZGB); sie können ihn mit der gesetzlichen Frist auf den nächsten gesetzlichen Termin kündigen (Art. 266i OR). Der Mietvertrag bleibt erfasst, ohne neues Vertragsende, bis die Erben oder der Vermieter gekündigt haben; erst dann erfasst «Beenden» den Kündigungstermin; beim Mieter steht als Korrespondenzadresse (im Mieterformular «Korrespondenzadresse», bei Post per E-Mail auch «E-Mail») die Adresse, an die die Post für die Erben geht, der Name bleibt. Tritt ein Dritter in den Mietvertrag ein (Übertragung eines Mietvertrags für Geschäftsräume mit schriftlicher Zustimmung des Vermieters, Art. 263 OR; Zuweisung der Wohnung der Familie an einen Ehegatten durch das Scheidungsgericht, Art. 121 ZGB; nicht bei Eheschutzmassnahmen, Art. 176 ZGB, die nur die Benutzung regeln), bleibt es rechtlich derselbe Vertrag; Dwello erfasst ihn als Vertragsende am Tag vor dem Wechsel, ohne Kündigungsfrist, und einen neuen Mietvertrag mit denselben Bedingungen ab dem Tag des Wechsels, damit jeder nach seinen Miettagen abgerechnet wird. Das Vertragsende heisst dann *gekündigt*, obwohl niemand gekündigt hat. Der bisherige Mieter haftet höchstens zwei Jahre solidarisch weiter (Art. 263 Abs. 4 OR, Art. 121 Abs. 2 ZGB); Dwello bildet das nicht ab. Die Hilfe unter «Bearbeiten» (Mieter und Wohnung) und der Dialog «Mietvertrag beenden» sagen es.
 
 ---
 
 ## A-1 Befristung und Kündigung unterscheiden – umgesetzt
 
-**Umgesetzt** (Session 15): Spalte `rental_contracts.terminated` (*gekündigt*; sonst *vereinbart*), «Mietvertrag beenden» setzt sie. Die Detailseite zeigt «Befristet bis …» oder «Unbefristet, gekündigt auf den …», die Listen (Mietverträge, Wohnung, Mieter) hängen «befristet» oder «gekündigt» an den Zeitraum. Unter «Bearbeiten» bietet die Vertragsdauer bei einem gekündigten Vertrag «Unbefristet, gekündigt auf den …», «Kündigung aufheben» und «Befristet» an; die Hilfe bei «Kündigung aufheben» sagt, dass das nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht geht (#52). Offen bleiben Punkt 6 (Glossar, Product Owner) und die offene Frage zur Aufhebungsvereinbarung. Abweichung von Punkt 3, offen für den Product Owner: Im Assistenten (neuer Mietvertrag und «Bearbeiten») heisst die Option nur «Befristet», das Datum steht im Feld darunter; ein Name, der sich mit dem Datum ändert, wird nicht angesagt (Review J-1 J-7, J-2 J2-4, Sven J1 m1). Die Demo-Daten kennzeichnen die Vormieter als gekündigt; ältere Verträge gelten nach Punkt 5 als befristet.
+**Umgesetzt** (Session 15): Spalte `rental_contracts.terminated` (*gekündigt*; sonst *vereinbart*), «Mietvertrag beenden» setzt sie. Die Detailseite zeigt «Befristet bis …» oder «Unbefristet, gekündigt auf den …», die Listen (Mietverträge, Wohnung, Mieter) hängen «befristet» oder «gekündigt» an den Zeitraum. Unter «Bearbeiten» bietet die Vertragsdauer bei einem gekündigten Vertrag «Unbefristet, gekündigt auf den …», «Kündigung aufheben» und «Befristet» an; die Hilfe bei «Kündigung aufheben» sagt, dass das nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht geht (#52). Offen bleibt Punkt 6 (Glossar, Product Owner). Abweichung von Punkt 3, offen für den Product Owner: Im Assistenten (neuer Mietvertrag und «Bearbeiten») heisst die Option nur «Befristet», das Datum steht im Feld darunter; ein Name, der sich mit dem Datum ändert, wird nicht angesagt (Review J-1 J-7, J-2 J2-4, Sven J1 m1). Die Demo-Daten kennzeichnen die Vormieter als gekündigt; ältere Verträge gelten nach Punkt 5 als befristet. #1148 (Entscheid Product Owner): «Mietvertrag beenden» fragt «Wie endet der Mietvertrag?» mit «Kündigung» (vorausgewählt) und «Aufhebungsvereinbarung». Eine Aufhebungsvereinbarung setzt `terminated` und `by_agreement`, fragt nicht nach «Kündigung erhalten am» und nennt keine Kündigungsfrist. Detailseite «Unbefristet, beendet auf den …», Listen «…, einvernehmlich». Unter «Bearbeiten» lässt sich die Art wechseln (Fachreview 1148-1 V-1).
 
 
 **Problem.** Ein befristeter Mietvertrag endet am vereinbarten Tag ohne Kündigung. Ein unbefristeter endet erst durch eine Kündigung auf einen Kündigungstermin. Dwello speichert beides im selben Feld «Vertragsende». Nach «Beenden» zeigt der Assistent unter «Bearbeiten» einen gekündigten unbefristeten Vertrag als «Befristet: Der Mietvertrag endet an einem festen Tag, ohne Kündigung». Das ist rechtlich falsch, und wer «befristet» liest, prüft die Kündigung nicht mehr. Ausserdem passt die Definition im Glossar («leer bei unbefristeten Verträgen») nicht mehr.
 
 **Anforderungen**
 
-1. Dwello merkt sich, wie das Vertragsende entstanden ist: *vereinbart* (befristeter Vertrag) oder *gekündigt* (unbefristeter Vertrag).
-2. «Mietvertrag beenden» setzt immer *gekündigt*. Wer im Assistenten «Befristet» wählt, setzt *vereinbart*.
+1. Dwello merkt sich, wie das Vertragsende entstanden ist: *vereinbart* (befristeter Vertrag), *gekündigt* oder mit einer *Aufhebungsvereinbarung* (unbefristeter Vertrag, #1148).
+2. «Mietvertrag beenden» setzt *gekündigt* oder *Aufhebungsvereinbarung*, je nach Wahl. Wer im Assistenten «Befristet» wählt, setzt *vereinbart*.
 3. Die Detailseite, die Mietvertragsliste und der Assistent zeigen:
    - befristet: «Befristet bis TT.MM.JJJJ»,
    - gekündigt: «Unbefristet, gekündigt auf den TT.MM.JJJJ».
@@ -72,9 +72,9 @@ Szenario: Kündigung aufheben
   Dann ist der Mietvertrag unbefristet
 ```
 
-**Nicht dazu:** wer gekündigt hat (Mieter oder Vermieter), das Datum des Kündigungsschreibens (siehe A-3), Aufhebungsvereinbarungen als eigene Art.
+**Nicht dazu:** wer gekündigt hat (Mieter oder Vermieter), das Datum des Kündigungsschreibens (siehe A-3).
 
-**Offene Fragen:** Braucht es «Aufhebungsvereinbarung» (beide Parteien beenden im Einvernehmen) als dritte Art, oder genügt *gekündigt*?
+**Offene Fragen:** keine (#1148: Aufhebungsvereinbarung als eigene Art).
 
 ---
 

@@ -110,6 +110,7 @@ function toContract(
 		startDate: data.startDate,
 		...filled(data, { endDate: none, baseRent: '0', additionalRent: none, monthlyAdvancePayment: '0', flatRateUtilityCharge: '0' }),
 		terminated: !!data.terminated,
+		byAgreement: !!data.byAgreement,
 		status: data.status, // the backend decides it (#784, #815)
 		noticeReceivedOn: data.noticeReceivedOn ?? null,
 		billedUntil: data.billedUntil ?? null,
@@ -216,7 +217,7 @@ async function save(fetch: typeof globalThis.fetch, id: string, body: Record<str
 	};
 }
 
-// The contract ends by notice (A-1), with the day the notice arrived when known (A-3); a stored statement that
+// The contract ends by notice (A-1) or by an Aufhebungsvereinbarung (#1148), with the day the notice arrived when known (A-3); a stored statement that
 // already bills rent days after that day refuses it, unless it is the one draft named, which the backend then
 // deletes with the end, or keeps when it refuses (#141)
 async function endOn(
@@ -230,6 +231,7 @@ async function endOn(
 	const { response, refused } = await save(fetch, id, {
 		endDate,
 		terminated: true,
+		...(form.get('byAgreement') === 'on' && { byAgreement: true }), // an Aufhebungsvereinbarung, not a notice (#1148)
 		noticeReceivedOn,
 		confirmPastEnd: form.get('pastConfirmed') === 'on' || undefined,
 		deleteDraft: draft

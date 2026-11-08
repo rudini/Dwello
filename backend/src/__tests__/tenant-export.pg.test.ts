@@ -315,5 +315,17 @@ describe('Daten eines Mieters exportieren', () => {
 			await db.update(rentalContracts).set({ contractPdf: null }).where(contract);
 		}
 	});
-});
 
+	// #1148, Fachreview 1148-1 V-2: der Mieter bekommt keine falsche Angabe über eine Kündigung
+	it('nennt einen mit Aufhebungsvereinbarung beendeten Mietvertrag nicht gekündigt', async () => {
+		const contract = eq(rentalContracts.id, rental.contract);
+		await db.update(rentalContracts).set({ endDate: '2099-03-31', terminated: true, byAgreement: true }).where(contract);
+		try {
+			const { data } = await exportOf(rental.tenant);
+
+			expect(data.contracts[0]).toMatchObject({ terminated: false, byAgreement: true });
+		} finally {
+			await db.update(rentalContracts).set({ endDate: null, terminated: false, byAgreement: false }).where(contract);
+		}
+	});
+});

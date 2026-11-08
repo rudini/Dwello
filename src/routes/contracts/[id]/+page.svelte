@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { flushSync, tick, untrack } from 'svelte';
 	import {
+		contractEnd,
 		contractEndError,
 		pastEndConfirmation,
 		shortNoticePeriod,
@@ -20,6 +21,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
+	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import ContractParties from './ContractParties.svelte';
 	import DeleteContract from './DeleteContract.svelte';
 	import FixedTermCheck from './FixedTermCheck.svelte';
@@ -42,6 +44,22 @@
 	// the day the notice arrived (A-3): optional, no day proposed; a Kündigungsfrist under 3 months is pointed out,
 	// never refused (a Ersatzmieter or an agreed end are allowed)
 	let noticeReceivedOn = $state('');
+	// #1148: a notice, the usual end of an open-ended contract (Art. 266a OR), or an Aufhebungsvereinbarung; an
+	// agreement has no notice that arrived and no Kündigungsfrist
+	let endKind = $state('notice');
+	const byAgreement = $derived(endKind === 'agreement');
+	const endKinds = [
+		{
+			value: 'notice',
+			label: m.contracts_end_kind_notice(),
+			description: m.contracts_end_kind_notice_help()
+		},
+		{
+			value: 'agreement',
+			label: m.contracts_end_kind_agreement(),
+			description: m.contracts_end_kind_agreement_help()
+		}
+	];
 	const noticeNote = $derived(
 		shortNoticePeriod(noticeReceivedOn, endDate)
 			? { text: m.contracts_notice_period_short(), testid: 'contract-notice-period-hint' }
@@ -54,6 +72,7 @@
 	function startEnding() {
 		endDate = '';
 		noticeReceivedOn = '';
+		endKind = 'notice';
 		endError = '';
 		confirmedDay = '';
 		pastError = '';
@@ -148,6 +167,7 @@
 		tenantId={contract.tenantId}
 		contractId={contract.id}
 		{name}
+		byAgreement={contract.byAgreement}
 	/>
 	<FixedTermCheck shown={data.fixedTermCheck} endDate={contract.endDate} {name} {form} />
 	<MoveOut moveOut={data.moveOut} />
@@ -162,7 +182,7 @@
 		<ContractTerms
 			startDate={contract.startDate}
 			endDate={contract.endDate}
-			terminated={contract.terminated}
+			end={contractEnd(contract.endDate, contract.terminated, contract.byAgreement)}
 			noticeReceivedOn={contract.noticeReceivedOn}
 			billedUntil={contract.billedUntil}
 			{status}
@@ -199,7 +219,12 @@
 	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
 	error={refusal}
-	fields={{ endDate, noticeReceivedOn, pastConfirmed: pastConfirmed ? 'on' : '' }}
+	fields={{
+		endDate,
+		noticeReceivedOn,
+		byAgreement: byAgreement ? 'on' : '',
+		pastConfirmed: pastConfirmed ? 'on' : ''
+	}}
 	check={checkEndDate}
 	onsuccess={() => addToast('success', endedMessage())}
 >
@@ -218,6 +243,7 @@
 				>
 					<input type="hidden" name="endDate" value={endDate} />
 					<input type="hidden" name="noticeReceivedOn" value={noticeReceivedOn} />
+					<input type="hidden" name="byAgreement" value={byAgreement ? 'on' : ''} />
 					<input type="hidden" name="pastConfirmed" value={pastConfirmed ? 'on' : ''} />
 					<input type="hidden" name="statementId" value={draft.id} />
 					<Button
@@ -248,16 +274,29 @@
 		bind:confirmedDay
 		bind:error={pastError}
 	/>
-	<DateInput
-		id="noticeReceivedOn"
-		label={m.contracts_notice_received()}
-		help={m.contracts_notice_received_help()}
-		optional
-		note={noticeNote}
-		bind:value={noticeReceivedOn}
-		testid="contract-notice-received-input"
+	<RadioGroup
+		name="endKind"
+		legend={m.contracts_end_kind_legend()}
+		options={endKinds}
+		bind:value={endKind}
+		testid="contract-end-kind"
 	/>
-	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
+	{#if byAgreement}
+		<p class="text-ink-muted" data-testid="contract-end-agreement-hint">
+			{m.contracts_end_agreement_hint()}
+		</p>
+	{:else}
+		<DateInput
+			id="noticeReceivedOn"
+			label={m.contracts_notice_received()}
+			help={m.contracts_notice_received_help()}
+			optional
+			note={noticeNote}
+			bind:value={noticeReceivedOn}
+			testid="contract-notice-received-input"
+		/>
+		<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
+	{/if}
 	<!-- the contract passes to the heirs (#155): ending it would count the time after as Leerstand -->
 	<p class="text-ink-muted" data-testid="contract-end-death">{m.contracts_end_death()}</p>
 </ActionDialog>

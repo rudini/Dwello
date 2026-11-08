@@ -39,7 +39,11 @@ import {
 	endActionLabel,
 	moveOutText,
 	moveOutShown,
-	refusedStatementName
+	refusedStatementName,
+	endKindText,
+	noticeReceivedShown,
+	noticeChosen,
+	noticeReceivedOnShown
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -73,7 +77,10 @@ import {
 	continueOpenEnded,
 	confirmMovedOut,
 	deleteDraftAndContinue,
-	createFinalStatement
+	createFinalStatement,
+	endContractByAgreementOn,
+	startEndingByAgreement,
+	endByAgreementInstead
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
@@ -574,4 +581,68 @@ Then('steht der Titel des Hinweises zu fehlenden Abrechnungen als Überschrift',
 // #740: in a narrow window the actions stand one per row, each as wide as the page title
 Then('stehen die Aktionen des Mietvertrags als ein Block, alle gleich breit wie der Seitentitel', async ({ verwalter }) => {
 	await verwalter.sees(contractActionsNarrowerThanTitle).toEqual([0, 0, 0]);
+});
+
+// #1148: the end dialog asks whether a notice or an Aufhebungsvereinbarung ends the contract
+Then(
+	'fragt der Dialog, ob der Mietvertrag mit einer {string} oder einer {string} endet',
+	async ({ verwalter }, notice: string, agreement: string) => {
+		await verwalter.sees(endKindText).toContain(notice);
+		await verwalter.sees(endKindText).toContain(agreement);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den {string} beendet',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(endContractByAgreementOn(date));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung beenden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startEndingByAgreement);
+});
+
+Then('erklärt der Dialog die Aufhebungsvereinbarung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(endKindText).toContain(text);
+});
+
+// anchored on the choice made: an empty or broken dialog shows no field either
+Then('fragt der Dialog nicht nach dem Tag, an dem die Kündigung angekommen ist', async ({ verwalter }) => {
+	await verwalter.sees(endKindText).toContain('Aufhebungsvereinbarung');
+	await verwalter.sees(noticeReceivedShown).toBe(false);
+});
+
+Then('sagen die nächsten Schritte {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(nextStepsText).toContain(text);
+});
+
+// anchored on the address step every variant of «Nächste Schritte» asks for
+Then('sagen die nächsten Schritte nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(nextStepsText).toContain('um die neue Adresse');
+	await verwalter.sees(nextStepsText).not.toContain(text);
+});
+
+Then('ist im Dialog die Kündigung gewählt', async ({ verwalter }) => {
+	await verwalter.sees(noticeChosen).toBe(true);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den {string} beendet und die Folge bestätigt',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(endContractByAgreementOn(date, { confirmPast: true }));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter stattdessen eine Aufhebungsvereinbarung wählt und den Mietvertrag beendet',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(endByAgreementInstead);
+	}
+);
+
+// anchored on the Vertragsende the page shows
+Then('zeigt der Mietvertrag keinen Eingang einer Kündigung', async ({ verwalter }) => {
+	await verwalter.sees(endOfContract).toContain('Unbefristet');
+	await verwalter.sees(noticeReceivedOnShown).toBe(false);
 });

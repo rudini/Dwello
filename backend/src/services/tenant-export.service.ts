@@ -62,7 +62,8 @@ export async function exportTenant(id: string) {
 			},
 			startDate: contract.startDate,
 			endDate: contract.endDate,
-			terminated: contract.terminated,
+			terminated: contract.terminated && !contract.byAgreement, // an Aufhebungsvereinbarung is no notice (#1148)
+			byAgreement: contract.byAgreement,
 			noticeReceivedOn: contract.noticeReceivedOn,
 			movedOut: contract.movedOut,
 			billedUntil: contract.billedUntil,

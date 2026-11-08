@@ -40,6 +40,7 @@
 		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
 		"past-end-error": "A Vertragsende before today (end dialog or contract form) saved without the confirmation: the checkbox with its error.",
 		"delete-unconfirmed": "The delete dialog of a rental contract that has started, confirmed without confirming it was entered by mistake: the checkbox with its error (#116).",
+		"end-dialog-agreement": "The end dialog with «Aufhebungsvereinbarung» chosen: the hint on the agreed day instead of «Kündigung erhalten am» (#1148).",
 		"end-dialog-notice-hint": "The end dialog with a Vertragsende less than 3 months after the day the notice arrived: the hint on the Kündigungsfrist at the field (A-3, #112).",
 		"moved-out-dialog": "Contract page of an expired fixed-term contract: the dialog that confirms «Mieter ist ausgezogen» with its consequence (A-6, #115).",
 		"continue-refused": "Contract page of an expired fixed-term contract: «Unbefristet weiterführen» refused because a draft statement bills the time after the end as Leerstand; the message, the link to the draft and the offer to delete it (A-6, #115).",
@@ -473,6 +474,7 @@
 				"end-dialog-refused",
 				"end-dialog-advance-refused",
 				"end-dialog-notice-hint",
+				"end-dialog-agreement",
 				"delete-dialog",
 				"advance-delete-dialog",
 				"advance-delete-refused",
@@ -547,6 +549,13 @@
 			"states": [
 				"default",
 				"overlap-refused"
+			]
+		},
+		{
+			"name": "contract-edit-agreement",
+			"path": "/contracts/{agreedContract}/edit",
+			"states": [
+				"default"
 			]
 		},
 		{

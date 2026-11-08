@@ -16,6 +16,7 @@ export interface ContractFormValues {
 	endDate: string;
 	isUnlimited: boolean;
 	terminated?: boolean; // the end is a Kündigungstermin of an open-ended contract (A-1), only when editing
+	byAgreement?: boolean; // with terminated: the end is an Aufhebungsvereinbarung (#1148)
 	billedUntil?: string; // «Abgerechnet bis» (#133); in the wizard only for a Vertragsbeginn before today (#453); '' for none
 	baseRent: string;
 	additionalRent: string;
@@ -84,6 +85,7 @@ export function initialContractValues(
 		endDate: dateForInput(contract.endDate),
 		isUnlimited: !contract.endDate,
 		terminated: !!contract.terminated,
+		byAgreement: !!contract.byAgreement,
 		billedUntil: dateForInput(contract.billedUntil),
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
@@ -167,6 +169,8 @@ export const contractBody = (values: ContractFormValues, shown: { id: string }[]
 	startDate: values.startDate,
 	endDate: values.isUnlimited ? null : values.endDate,
 	terminated: !values.isUnlimited && !!values.terminated,
+	// only with an end of an open-ended contract: a notice and an Aufhebungsvereinbarung are told apart (#1148)
+	...(!values.isUnlimited && values.terminated && { byAgreement: !!values.byAgreement }),
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
 	...(advanceChanged(values) && {
@@ -215,6 +219,7 @@ export function forAvailability(response: {
 			tenantName?: string;
 			tenantAnonymised?: boolean;
 			terminated?: boolean;
+			byAgreement?: boolean;
 			status?: RentalContract['status'];
 		}[];
 	};
@@ -230,6 +235,7 @@ export function forAvailability(response: {
 		tenant_name: c.tenantName,
 		tenant_anonymised: c.tenantAnonymised,
 		terminated: c.terminated,
+		byAgreement: c.byAgreement,
 		contract_status: c.status
 	}));
 }
@@ -289,6 +295,7 @@ type Overlapped = {
 	start: string;
 	end?: string | null;
 	terminated?: boolean;
+	byAgreement?: boolean; // #1148
 	status?: RentalContract['status'];
 };
 
@@ -319,7 +326,13 @@ function adviceOf(other: Overlapped, values: ContractFormValues, wizard: boolean
 }
 
 function overlapOf(other: Overlapped, values: ContractFormValues, wizard: boolean): Overlap {
-	const period = contractPeriod(other.start, other.end, other.status ?? 'active', other.terminated);
+	const period = contractPeriod(
+		other.start,
+		other.end,
+		other.status ?? 'active',
+		other.terminated,
+		other.byAgreement
+	);
 	const said = other.tenant
 		? m.contracts_overlap_with({ tenant: other.tenant, period })
 		: m.contracts_overlap_with_anonymised({ period });
@@ -339,7 +352,7 @@ export function overlapRefusal(
 	wizard: boolean
 ): Overlap | null {
 	if (code !== 'CONTRACT_OVERLAP' || !params?.start) return null;
-	const { contract, tenant, start, end, terminated, status } = params;
+	const { contract, tenant, start, end, terminated, byAgreement, status } = params;
 	return overlapOf(
 		{
 			id: String(contract),
@@ -347,6 +360,7 @@ export function overlapRefusal(
 			start: String(start),
 			end: end ? String(end) : null,
 			terminated: terminated === 1,
+			byAgreement: byAgreement === 1,
 			status: status as RentalContract['status']
 		},
 		values,
@@ -373,6 +387,7 @@ export function overlapError(
 			start: String(other.start_date),
 			end: other.end_date && String(other.end_date),
 			terminated: other.terminated,
+			byAgreement: other.byAgreement,
 			status: other.contract_status
 		},
 		values,
