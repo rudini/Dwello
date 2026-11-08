@@ -1,0 +1,50 @@
+/**
+ * #1221: a custom Verteilschlüssel that cannot be calculated for the apartments of the building refuses the
+ * statement instead of splitting its invoices equally (real PostgreSQL database)
+ */
+
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { distributionKeys, invoices } from '../db/schema';
+import { sendJson } from './helpers/auth';
+import { expectRejection, idOf, insertInvoice } from './helpers/records';
+import { createRental } from './helpers/rental';
+
+let rental: Awaited<ReturnType<typeof createRental>>;
+let key: string;
+const name = `Halbe Zimmer ${crypto.randomUUID()}`;
+
+beforeAll(async () => {
+	// apartment 2.01 has 3.5 rooms: the formula divides by zero there; the four sample apartments all pass
+	rental = await createRental(crypto.randomUUID(), { startDate: '2025-01-01', monthlyAdvancePayment: '100' });
+	const created = await sendJson('POST', '/api/v1/distribution-keys', { name, nameDE: name, formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' });
+	expect(created.status).toBe(201); // saved: the formula passes the four sample apartments (#737)
+	key = await idOf(created);
+	await insertInvoice(rental.building, { distributionKeyId: key, billingEntityName: 'Garten AG', amount: '600.00', invoiceDate: '2025-05-31' });
+	await insertInvoice(rental.building, { amount: '1200.00', invoiceDate: '2025-03-31' });
+});
+
+afterAll(async () => {
+	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+	await rental.remove();
+	await db.delete(distributionKeys).where(eq(distributionKeys.id, key));
+});
+
+const run = { periodStart: '2025-01-01', periodEnd: '2025-12-31' };
+
+describe('Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt', () => {
+	it('verweigert Vorschau und Abrechnung und nennt Schlüssel und Rechnungen, statt gleich zu verteilen', async () => {
+		const refused = ['The distribution key cannot be calculated for the apartments of the building', 'STATEMENT_KEY_NOT_CALCULABLE', {
+			key: name,
+			invoices: 'Garten AG, 31.05.2025, CHF 600.00'
+		}] as const;
+
+		await expectRejection(await sendJson('POST', '/api/v1/statements/preview', { contractId: rental.contract, ...run }), 400, ...refused);
+		await expectRejection(
+			await sendJson('POST', '/api/v1/statements/generate', { contractId: rental.contract, buildingId: rental.building, ...run }),
+			400,
+			...refused
+		);
+	});
+});

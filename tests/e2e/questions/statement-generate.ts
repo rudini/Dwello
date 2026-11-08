@@ -52,7 +52,8 @@ import {
 	tankQuestion,
 	wizardChoices,
 	wizardPresetNotice,
-	runSummary
+	runSummary,
+	serverError
 } from '../targets/statement-generate';
 import { discardDraftMessage, finishedStep, nextButton } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
@@ -175,6 +176,7 @@ export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const existingStatementsText = Text.of(existingStatements);
 // the warnings the confirmation confirms, read with its checkbox
 export const currentStep = Text.of(stepLabel);
+export const serverErrorText = Text.of(serverError);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const lateChecksNoteText = Text.of(lateChecksNote);
 // null while the line is hidden; 0 or more when it stands above «Weiter» (#470)

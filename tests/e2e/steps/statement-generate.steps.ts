@@ -6,6 +6,7 @@ import {
 	proposedPeriodText,
 	allBuildingsNoteText,
 	currentStep,
+	serverErrorText,
 	existingStatementsText,
 	akontoHintOf,
 	announcedFeeHint,
@@ -74,6 +75,7 @@ import {
 } from '../questions/statement-generate';
 import { currentStepNameText, currentStepNameWidth, restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
+	attemptPreview,
 	chooseAllBuildings,
 	chooseBuilding,
 	chooseBuildingsFor,
@@ -636,6 +638,19 @@ When(
 
 Then('nennt die Vorschau die bestehenden Abrechnungen von {string}', async ({ verwalter, names }, building: string) => {
 	await verwalter.sees(existingStatementsText).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
+});
+
+When(
+	'der Liegenschaftsverwalter versucht, die Vorschau der Abrechnungen {int} für das Gebäude {string} zu öffnen',
+	async ({ verwalter, seed }, year: number, building: string) => {
+		await verwalter.attemptsTo(attemptPreview(year, seed.idOf(building)!));
+	}
+);
+
+// a seeded name in «» stands for its unique name (#1221)
+Then('meldet der Assistent {string}', async ({ verwalter, names }, text: string) => {
+	const named = text.replace(/«([^»]+)»/g, (all, title: string) => (names.has(title) ? `«${names.get(title)}»` : all));
+	await verwalter.sees(serverErrorText).toContain(named);
 });
 
 Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
