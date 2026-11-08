@@ -100,7 +100,7 @@ Funktionalität: Dokumente eines Mieters
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Uebergabeprotokoll"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" zum Hochladen wählt
-    Dann warnt Dwello beim Feld «Datei», dass die Datei "Uebergabeprotokoll.pdf" heute schon als Dokument "Uebergabeprotokoll" hochgeladen wurde
+    Dann warnt Dwello bei «Datei», dass die Datei "Uebergabeprotokoll.pdf" heute schon als Dokument "Uebergabeprotokoll" hochgeladen wurde
     Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" als "Uebergabeprotokoll" hochlädt
     Dann liegen beim Mieter 2 Dokumente "Uebergabeprotokoll"
 
@@ -110,7 +110,7 @@ Funktionalität: Dokumente eines Mieters
     Und "Beat Huber" hat das hochgeladene Dokument "Uebergabeprotokoll"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" zum Hochladen wählt
-    Dann nennt das Feld «Datei» die gewählte Datei "Uebergabeprotokoll.pdf" ohne Warnung
+    Dann nennt Dwello bei «Datei» die gewählte Datei "Uebergabeprotokoll.pdf" ohne Warnung
 
   # #677 (Entscheid 9, Persona Sven P-3): während Dwello sendet, bleibt der Fokus auf der Schaltfläche, und Dwello sagt es an
   Szenario: Während des Hochladens bleibt der Fokus auf «Dokument hochladen»
@@ -143,10 +143,10 @@ Funktionalität: Dokumente eines Mieters
     Dann sagt Dwello bei «Dokument löschen» "Bitte warten …" an, und der Fokus bleibt dort
 
   # #677 (Persona Sven P-7): der Fehler kommt vor der Hilfe, sonst geht er am Ende einer langen Hilfe unter
-  Szenario: Ein Screenreader liest beim Feld «Datei» zuerst den Fehler
+  Szenario: Ein Screenreader liest bei «Datei» zuerst den Fehler
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter das Dokument "Notizen" ohne Datei hochladen will
-    Dann liest ein Screenreader beim Feld «Datei» zuerst den Fehler "Wählen Sie eine Datei aus." und danach den Hinweis "PDF, JPG oder PNG, höchstens 10 MB." vor
+    Dann liest ein Screenreader bei «Datei» zuerst den Fehler "Wählen Sie eine Datei aus." und danach den Hinweis "PDF, JPG oder PNG, höchstens 10 MB." vor
 
   # #1181 (Helga H-1, Sven S-4): zwei Dokumente mit demselben Titel lassen sich unterscheiden, auch beim Löschen
   Szenario: Zwei Dokumente mit demselben Titel tragen eine Nummer

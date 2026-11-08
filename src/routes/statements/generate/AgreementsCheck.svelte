@@ -53,6 +53,11 @@
 {#if error && status !== 'loaded'}
 	<!-- «Weiter» before the check is done: no question to show the error at; the wizard goes on once it is (#439) -->
 	<p role="alert" class="font-semibold text-ink" data-testid="agreements-wait">
-		{status === 'failed' ? m.statements_agreements_wait_failed() : m.statements_agreements_wait()}
+		<!-- #1197: after a failed retry the alert alone gives the advice -->
+		{status !== 'failed'
+			? m.statements_agreements_wait()
+			: failedAgain
+				? m.statements_agreements_wait_retry_failed()
+				: m.statements_agreements_wait_failed()}
 	</p>
 {/if}

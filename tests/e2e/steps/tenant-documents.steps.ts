@@ -188,7 +188,7 @@ When('der Liegenschaftsverwalter die PDF-Datei {string} zum Hochladen wählt', a
 });
 
 Then(
-	'warnt Dwello beim Feld «Datei», dass die Datei {string} heute schon als Dokument {string} hochgeladen wurde',
+	'warnt Dwello bei «Datei», dass die Datei {string} heute schon als Dokument {string} hochgeladen wurde',
 	async ({ verwalter }, file: string, title: string) => {
 		await verwalter
 			.sees(duplicateFileWarning)
@@ -223,7 +223,7 @@ When('der Liegenschaftsverwalter die Ansicht {string} wählt', async ({ verwalte
 });
 
 // #677 (V-3): only this tenant's uploads count; the chosen file beside the button is the positive anchor
-Then('nennt das Feld «Datei» die gewählte Datei {string} ohne Warnung', async ({ verwalter }, file: string) => {
+Then('nennt Dwello bei «Datei» die gewählte Datei {string} ohne Warnung', async ({ verwalter }, file: string) => {
 	await verwalter.sees(chosenFile).toBe(file);
 	await verwalter.sees(duplicateFileWarnings).toBe(0);
 });
@@ -268,7 +268,7 @@ When('der Liegenschaftsverwalter das Dokument {string} ohne Datei hochladen will
 
 // #677 (persona Sven P-7): the error comes right after the field's name, the help after it
 Then(
-	'liest ein Screenreader beim Feld «Datei» zuerst den Fehler {string} und danach den Hinweis {string} vor',
+	'liest ein Screenreader bei «Datei» zuerst den Fehler {string} und danach den Hinweis {string} vor',
 	async ({ verwalter }, error: string, help: string) => {
 		const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 		await verwalter.sees(fileFieldDescription).toMatch(new RegExp(`^${escaped(error)} .*${escaped(help)}`));
