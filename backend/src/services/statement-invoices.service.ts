@@ -31,8 +31,6 @@ const billedAsIs = (positions: Positions, invoice: PeriodInvoice) =>
 			)
 	);
 
-// The invoices of the categories its contract agreed when it was created; a statement before #91 billed every one
-
 // A statement created before #96 keeps no invoices: for it, as before, an invoice recorded after it is missing (V-15)
 const known = (positions: Positions) => positions.every((position) => position.invoices);
 const recordedAfter = (invoice: { createdAt: Date }, statement: { createdAt: Date }) => invoice.createdAt > statement.createdAt;

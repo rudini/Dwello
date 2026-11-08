@@ -336,6 +336,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "15.10.2023" über "800.00"
     Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Lieferung aus einer anderen Abrechnungsperiode: Nach ihrem Verteilschlüssel verteilt Dwello die Veränderung Tankbestand."
 
+  # #1336: die Prüfung zählt die Wohnungen, die die Berechnung zählt; eine Wohnung, die vor der Periode aufgehoben
+  # ist, hält den Lauf nicht an (#1284)
+  Szenario: Ein Verteilschlüssel, der nur für eine aufgehobene Wohnung nicht aufgeht, hält die Vorschau nicht an
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02" mit 55 m²
+    Und die Wohnung "3.02" ist aufgehoben ab "2024-01-01"
+    Und es gibt den Verteilschlüssel "Ohne 3.02" mit der Formel "1 / (({area} - 55) * ({area} - 55))"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Ohne 3.02" verteilt wird
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann ist der Assistent im Schritt "Erstellen"
+
   Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Vorschau öffnen
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird

@@ -15,7 +15,8 @@ export async function getUncategorizedInvoices(buildingId: string, periodStart: 
 		.map(({ billingEntityName, invoiceDate, amount }) => ({ billingEntityName, invoiceDate, amount }));
 }
 
-/** The invoices of the list a statement bills: of the categories its Mietvertrag agreed, and those without one */
+/** The invoices of the list a statement bills: of the categories its Mietvertrag agreed when it was created, and those
+ * without one; a statement before #91 billed every one */
 export const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCategoryIds: string[] | null }, list: T[]) =>
 	list.filter((invoice) => !statement.agreedCategoryIds || !invoice.categoryId || statement.agreedCategoryIds.includes(invoice.categoryId));
 

@@ -353,6 +353,21 @@ describe('Verteilschlüssel, wenn eine Wohnung aufgehoben ist', () => {
 		expect(await check()).toEqual([]);
 	});
 
+	// code review 1309-3 C-8: an apartment «aufgehoben ab» within the period counts in the part before that day only
+	it('hält den Lauf an, wenn die Formel erst nach dem Tag scheitert, ab dem eine Wohnung aufgehoben ist', async () => {
+		const later = await createApartment({ buildingId: gone.building, number: '3.01', floor: 3, area: '80', rooms: '3.5' });
+		await db.update(apartments).set({ discontinuedFrom: '2026-07-01' }).where(eq(apartments.id, later.id));
+		const keyName = await keyed('Ab Juli', '({rooms} - 2) * ({rooms} - 2)', '2026-03-31');
+		const failing = ((await (await callApi(`/api/v1/invoices/completeness/${gone.building}?periodStart=2026-01-01&periodEnd=2026-12-31`)).json()) as {
+			uncalculableKeys: { distributionKeyName: string; reason: string }[];
+		}).uncalculableKeys;
+		await db.delete(apartments).where(eq(apartments.id, later.id));
+
+		expect(failing.map(({ distributionKeyName, reason }) => ({ distributionKeyName, reason }))).toEqual([
+			{ distributionKeyName: keyName, reason: 'STATEMENT_KEY_REASON_ALL_ZERO' }
+		]);
+	});
+
 	it('hält den Lauf an, wenn die Formel für die Wohnungen scheitert, die noch zählen', async () => {
 		const keyName = await keyed('Ohne 2 Zimmer', '({rooms} - 2) * ({rooms} - 2)', '2025-06-30');
 
