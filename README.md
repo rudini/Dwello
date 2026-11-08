@@ -276,7 +276,7 @@ docker-compose -f docker-compose.dev.yml up
 curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
 docker compose up -d                          # update: docker compose pull && docker compose up -d
 ```
-`DWELLO_VERSION` in `.env` fixes a version. CI starts `compose.yaml` with the images of each pull request (job «Docker images»). On a server, `COMPOSE_PROFILES=https` and `DWELLO_DOMAIN` in `.env` start Caddy with it, which gets the certificate itself (`docs/installation.md`, section 7, #722).
+`DWELLO_VERSION` in `.env` fixes a version. CI starts `compose.yaml` with the images of each pull request that changes what they read (job «Docker images», #1241). On a server, `COMPOSE_PROFILES=https` and `DWELLO_DOMAIN` in `.env` start Caddy with it, which gets the certificate itself (`docs/installation.md`, section 7, #722).
 
 **Production, built from a clone:**
 ```bash
