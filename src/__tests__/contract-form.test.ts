@@ -226,6 +226,13 @@ describe('contractBody', () => {
 		expect(edited('2024-04-01', null).advancePaymentFrom).toBe('2031-05-01');
 	});
 
+	// #1148 (code review 1148-1 C-1): back from an Aufhebungsvereinbarung to a notice, the flag goes too
+	it('sendet bei einer Kündigung, dass sie keine Aufhebungsvereinbarung ist', () => {
+		const ended = { ...edited('2024-04-01', null), isUnlimited: false, endDate: '2099-03-31', terminated: true };
+		expect(contractBody({ ...ended, byAgreement: false }, [])).toMatchObject({ terminated: true, byAgreement: false });
+		expect(contractBody({ ...ended, byAgreement: true }, [])).toMatchObject({ terminated: true, byAgreement: true });
+	});
+
 	it('sendet Akonto und «Gültig ab» nur, wenn sich der Betrag geändert hat', () => {
 		const values = edited('2024-04-01', null);
 

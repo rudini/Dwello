@@ -44,8 +44,8 @@ Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriff
 
 **Anforderungen**
 
-1. Dwello merkt sich, wie das Vertragsende entstanden ist: *vereinbart* (befristeter Vertrag) oder *gekündigt* (unbefristeter Vertrag).
-2. «Mietvertrag beenden» setzt immer *gekündigt*. Wer im Assistenten «Befristet» wählt, setzt *vereinbart*.
+1. Dwello merkt sich, wie das Vertragsende entstanden ist: *vereinbart* (befristeter Vertrag), *gekündigt* oder mit einer *Aufhebungsvereinbarung* (unbefristeter Vertrag, #1148).
+2. «Mietvertrag beenden» setzt *gekündigt* oder *Aufhebungsvereinbarung*, je nach Wahl. Wer im Assistenten «Befristet» wählt, setzt *vereinbart*.
 3. Die Detailseite, die Mietvertragsliste und der Assistent zeigen:
    - befristet: «Befristet bis TT.MM.JJJJ»,
    - gekündigt: «Unbefristet, gekündigt auf den TT.MM.JJJJ».
