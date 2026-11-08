@@ -1,7 +1,7 @@
-import { createBdd } from 'playwright-bdd';
+import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { dialogActions, dialogTitleText, errorMessageShown, fieldDescription, fieldValue } from '../questions/form';
-import { focusedPlace, focusedText, pageTitle } from '../questions/navigation';
+import { focusedPlace, focusedText, pageActionNames, pageTitle } from '../questions/navigation';
 import { goBackInBrowser } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb, saveTextOfLength } from '../tasks/form';
 
@@ -94,4 +94,8 @@ Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter, seed }
 
 Then('steht bei {string} noch der Text von {int} Zeichen', async ({ verwalter }, label: string, length: number) => {
 	await verwalter.sees(fieldValue(label)).toHaveLength(length);
+});
+
+Then('liest ein Screenreader die Aktionen der Seite so:', async ({ verwalter, seed }, table: DataTable) => {
+	await verwalter.sees(pageActionNames).toEqual(table.raw().map(([name]) => seed.withNames(name)));
 });

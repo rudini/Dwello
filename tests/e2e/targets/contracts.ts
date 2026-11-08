@@ -14,10 +14,8 @@ export const viewContractButton = (tenantName: string) =>
 	target(`Mietvertrag von ${tenantName} ansehen`, (page) =>
 		contractRow(tenantName).locate(page).getByTestId('contract-view-button')
 	);
-export const editContractButton = (tenantName: string) =>
-	target(`Mietvertrag von ${tenantName} bearbeiten`, (page) =>
-		contractRow(tenantName).locate(page).getByTestId('contract-edit-button')
-	);
+export const contractRowLinks = (tenantName: string) =>
+	target(`Links in der Zeile des Mietvertrags von ${tenantName}`, (page) => contractRow(tenantName).locate(page).locator('a'));
 export const contractsEmptyNotice = target('Hinweis keine Mietverträge', (page) => page.getByTestId('contracts-empty'));
 // An amount of a listed contract by its label ("Nettomiete", "Monatlich total")
 export const contractAmount = (tenantName: string, label: string) =>

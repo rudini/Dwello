@@ -86,3 +86,11 @@ Funktionalität: Mieterdetail
     Angenommen "Lea Frei" mietete die Wohnung "1.01" von "2020-01-01" bis "2025-12-31" für "700" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Dann kann der Liegenschaftsverwalter den Mieter erst ab dem "01.01.2036" anonymisieren
+
+  # #652: ein Screenreader hört bei jeder Aktion, für welchen Mieter sie gilt
+  Szenario: Die Aktionen der Detailseite nennen den Mieter
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Dann liest ein Screenreader die Aktionen der Seite so:
+      | Bearbeiten: Lea Frei |
+      | Mietvertrag erfassen |
+      | Löschen: Lea Frei    |

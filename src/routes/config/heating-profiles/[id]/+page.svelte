@@ -40,12 +40,14 @@
 				<Button
 					href="/config/heating-profiles/{profile.id}/edit"
 					icon="edit"
+					ariaLabel={m.common_action_of_aria({ action: m.buildings_edit(), record: name })}
 					testid="heating-profile-edit-button">{m.buildings_edit()}</Button
 				>
 				<Button
 					variant="danger-ghost"
 					icon="delete"
 					onclick={() => (deleting = true)}
+					ariaLabel={m.common_action_of_aria({ action: m.buildings_delete(), record: name })}
 					testid="heating-profile-delete-button">{m.buildings_delete()}</Button
 				>
 			{/if}

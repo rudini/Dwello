@@ -117,3 +117,11 @@ Funktionalität: Gebäudedetail
       | im Kalenderjahr          | 31.12. |
       | von Juli bis Juni        | 30.06. |
       | von November bis Oktober | 31.10. |
+
+  # #652: ein Screenreader hört bei jeder Aktion, für welches Gebäude sie gilt
+  Szenario: Die Aktionen der Detailseite nennen das Gebäude
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
+    Dann liest ein Screenreader die Aktionen der Seite so:
+      | Rechnungen ansehen     |
+      | Bearbeiten: Birkenhof  |
+      | Löschen: Birkenhof     |

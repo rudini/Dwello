@@ -3,7 +3,6 @@
 	import { contractPeriod, statusBadges } from '$lib/contract-status';
 	import type { ContractWithDetails } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
-	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 
 	// One contract in the list: the tenant's name opens it, the whole row is its link; its status from the backend
@@ -51,13 +50,4 @@
 			<dd class="text-ink">{formatCurrency(contract.totalRent)}</dd>
 		</div>
 	</dl>
-	<div class="relative self-start md:self-auto">
-		<Button
-			variant="ghost"
-			href="/contracts/{contract.id}/edit"
-			icon="edit"
-			ariaLabel={m.contracts_edit_aria({ name: contract.tenantName })}
-			testid="contract-edit-button">{m.buildings_edit()}</Button
-		>
-	</div>
 </li>
