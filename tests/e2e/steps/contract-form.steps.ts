@@ -1,4 +1,4 @@
-import { createBdd } from 'playwright-bdd';
+import { createBdd, type DataTable } from 'playwright-bdd';
 import { cancelEditing } from '../tasks/form';
 import { chooseInMainNav, goBackInBrowser } from '../tasks/app-frame';
 import { chooseSignOut } from '../tasks/authentication';
@@ -51,7 +51,7 @@ import {
 import { pageTitleText } from '../questions/app-frame';
 import { contractListed } from '../questions/contracts';
 import { pageAddress, pageTitle } from '../questions/navigation';
-import { restoredDraftText, saveStatusText } from '../questions/wizard';
+import { restoredDraftText, saveStatusText, shownStepNameLines } from '../questions/wizard';
 import {
 	chooseFixedTerm,
 	discardChanges,
@@ -715,6 +715,11 @@ Then('steht im Assistenten {string} nur einmal', async ({ verwalter }, text: str
 // #667 (Dr. Weber W-10)
 Then('bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um', async ({ verwalter }) => {
 	await verwalter.sees(brokenStepNames).toEqual([]);
+});
+
+// #1179: each step on a line of its own, named on screen, in both wizards
+Then('nennt die Schrittanzeige untereinander die Schritte', async ({ verwalter }, table: DataTable) => {
+	await verwalter.sees(shownStepNameLines).toEqual(table.raw().map(([name]) => name));
 });
 
 // #1146 (Dr. Weber P-1, Helga P-1)
