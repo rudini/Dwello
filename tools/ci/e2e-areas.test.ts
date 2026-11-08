@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -22,7 +22,7 @@ function imports(file: string): string[] {
 	return [...text.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)].flatMap(([, spec]) => {
 		const base = spec.startsWith('$lib/') ? join('src/lib', spec.slice(5)) : spec.startsWith('.') ? join(dirname(file), spec) : null;
 		if (base === null) return [];
-		const found = ['', '.ts', '.js', '.svelte', '/index.ts'].map((ext) => base + ext).find((path) => existsSync(join(ROOT, path)) && !path.endsWith('/'));
+		const found = ['', '.ts', '.js', '.svelte', '/index.ts'].map((ext) => base + ext).find((path) => existsSync(join(ROOT, path)) && statSync(join(ROOT, path)).isFile());
 		return found ? [relative(ROOT, join(ROOT, found))] : [];
 	});
 }
