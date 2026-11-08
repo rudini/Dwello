@@ -8,9 +8,12 @@
 	import { formatDate } from '$lib/utils/format';
 	import ApartmentFacts from './ApartmentFacts.svelte';
 	import ContractHistory from './ContractHistory.svelte';
-	import type { PageData } from './$types';
+	import DeleteApartmentDialog from './DeleteApartmentDialog.svelte';
+	import type { ActionData, PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let deleting = $state(false);
 
 	const apartment = $derived(data.apartment);
 	const building = $derived(apartment.building);
@@ -45,6 +48,12 @@
 					testid="apartment-new-contract">{m.dashboard_add_contract()}</Button
 				>
 			{/if}
+			<Button
+				variant="danger-ghost"
+				icon="delete"
+				onclick={() => (deleting = true)}
+				testid="apartment-delete-button">{m.buildings_delete()}</Button
+			>
 		{/snippet}
 	</PageHeader>
 
@@ -80,3 +89,12 @@
 		</div>
 	</div>
 </div>
+
+<DeleteApartmentDialog
+	bind:open={deleting}
+	number={apartment.number}
+	buildingId={building.id}
+	hasContracts={data.contractHistory.length > 0}
+	serverError={form?.deleteError}
+	refused={form?.deleteImpossible}
+/>

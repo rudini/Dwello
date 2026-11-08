@@ -1,3 +1,6 @@
+import { eq } from 'drizzle-orm';
+import { db } from '../../db/connection';
+import { rentalContracts } from '../../db/schema';
 import { createBuilding, deleteBuilding } from '../../services/building.service';
 import { createApartment, deleteApartment } from '../../services/apartment.service';
 import { createTenant, deleteTenant } from '../../services/tenant.service';
@@ -35,7 +38,12 @@ export async function createRental(token: string, contract: {
 			for (const [what, removed] of [
 				['contract', () => deleteContract(rental.id, true)],
 				['tenant', () => deleteTenant(tenant.id)],
-				['apartment', () => deleteApartment(apartment.id)],
+				// #1257: contracts a test added to the apartment go first, else the apartment stays
+				['apartment', async () => {
+					const rest = await db.select({ id: rentalContracts.id }).from(rentalContracts).where(eq(rentalContracts.apartmentId, apartment.id));
+					for (const { id } of rest) await deleteContract(id, true);
+					return deleteApartment(apartment.id);
+				}],
 				['building', () => deleteBuilding(building.id)]
 			] as const) {
 				const { success, error } = await removed();

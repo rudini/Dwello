@@ -33,7 +33,6 @@ Funktionalität: Gebäudedetail
     Und bietet der Dialog nur "Schliessen" an
 
   # #1257: der Rat «Löschen Sie zuerst seine Wohnungen» führt zum Ziel
-  @wip
   Szenario: Gebäude löschen, nachdem seine Wohnung gelöscht ist
     Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "1.01"

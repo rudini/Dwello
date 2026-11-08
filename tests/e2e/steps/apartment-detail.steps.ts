@@ -6,6 +6,7 @@ import {
 	contractHistoryNaming,
 	currentContractsListed,
 	currentTenant,
+	deleteDialogHeading,
 	earlierContractShown,
 	earlierContractsListed,
 	monthlyTotalOfApartment,
@@ -41,6 +42,10 @@ When('der Liegenschaftsverwalter die Wohnung löscht', async ({ verwalter }) => 
 
 When('der Liegenschaftsverwalter die Wohnung löschen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(startDeletingApartment);
+});
+
+Then('heisst der Dialog {string}', async ({ verwalter }, title: string) => {
+	await verwalter.sees(deleteDialogHeading).toBe(title);
 });
 
 // a negative check: the step before it names an apartment the building page lists

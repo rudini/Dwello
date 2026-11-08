@@ -88,7 +88,6 @@ Funktionalität: Wohnungsdetail
     Dann beträgt das Monatlich total der Wohnung "CHF 1’050.00"
 
   # #1257: eine Wohnung ohne Mietverträge lässt sich löschen, danach auch ihr Gebäude
-  @wip
   Szenario: Wohnung ohne Mietverträge löschen
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
@@ -97,38 +96,39 @@ Funktionalität: Wohnungsdetail
     Und sieht der Liegenschaftsverwalter die Wohnung "3.01" mit dem Status "Vermietet"
     Und zeigt die Gebäudeseite die Wohnung "3.02" nicht mehr
 
-  @wip
   Szenario: Der Dialog nennt die Folge des Löschens einer Wohnung
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
     Wenn der Liegenschaftsverwalter die Wohnung löschen will
-    Dann nennt der Dialog "Die Wohnung 3.02 wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
+    Dann heisst der Dialog "Wohnung 3.02 löschen?"
+    Und nennt der Dialog "Die Wohnung 3.02 wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
+    Und nennt der Dialog "Nach dem Löschen verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen"
 
-  @wip
   Szenario: Wohnung mit Mietverträgen kann nicht gelöscht werden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Wenn der Liegenschaftsverwalter die Wohnung löschen will
-    Dann nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
+    Dann heisst der Dialog "Wohnung kann nicht gelöscht werden"
+    Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an
 
   # #1257: auch ein beendeter Mietvertrag bleibt als Historie der Wohnung erhalten
-  @wip
   Szenario: Leere Wohnung mit früherem Mietvertrag kann nicht gelöscht werden
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietete die Wohnung "3.02" von "2019-01-01" bis "2024-03-31" für "900" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
     Wenn der Liegenschaftsverwalter die Wohnung löschen will
-    Dann nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
+    Dann heisst der Dialog "Wohnung kann nicht gelöscht werden"
+    Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an
 
   # #1257: ein Mietvertrag, erfasst während die Seite offen ist: das Backend lehnt ab
-  @wip
   Szenario: Wohnung erhält einen Mietvertrag, während ihre Seite offen ist
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
     Und der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "3.02" seit "2099-11-01" für "900" Franken
     Wenn der Liegenschaftsverwalter die Wohnung löscht
-    Dann nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
+    Dann heisst der Dialog "Wohnung kann nicht gelöscht werden"
+    Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an

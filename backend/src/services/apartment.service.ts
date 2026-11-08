@@ -16,6 +16,7 @@ import {
 import { everyWordIn, withoutApartmentWord } from './word-search';
 import { sqlToday, swissToday } from './today';
 import type { ApartmentStatus, ApartmentWithDetails } from '../api/apartment';
+import { refusal, type Refusal } from './coded-error';
 
 /** First day of the next rental contract that has not started yet */
 export const nextContractStart = sql<string | null>`(
@@ -273,26 +274,19 @@ export async function updateApartment(
 
 /**
  * Delete an apartment
- * Returns false if apartment has active contracts
+ * #1257: refused while it has a rental contract, an ended one included: it stays as the apartment's history
  */
-export async function deleteApartment(id: string): Promise<{ success: boolean; error?: string }> {
-	// Check for active contracts
-	const today = swissToday();
-	const [activeContract] = await db
+export async function deleteApartment(id: string): Promise<{ success: boolean } & Partial<Refusal>> {
+	const [contract] = await db
 		.select({ id: rentalContracts.id })
 		.from(rentalContracts)
-		.where(
-			and(
-				eq(rentalContracts.apartmentId, id),
-				sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${today})`
-			)
-		)
+		.where(eq(rentalContracts.apartmentId, id))
 		.limit(1);
 
-	if (activeContract) {
+	if (contract) {
 		return {
 			success: false,
-			error: 'Cannot delete apartment with active contract'
+			...refusal('APARTMENT_HAS_CONTRACTS', 'The apartment has rental contracts: it stays as their history')
 		};
 	}
 
