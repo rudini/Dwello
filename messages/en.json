@@ -2072,6 +2072,7 @@
 	"tenants_delete_text_with_documents": "{name} will be deleted permanently, together with the uploaded documents. This cannot be undone.",
 	"documents_uploaded": "Uploaded on {date} at {time}, file «{file}»",
 	"documents_uploaded_to": "For {name}, uploaded on {date} at {time}, file «{file}»",
+	"documents_upload_number": "{title} ({number} of {count})",
 	"documents_download_file": "Download file",
 	"documents_download_file_aria": "Download file: {title}",
 	"backend_document_too_large": "The file is larger than {megabytes} MB. Choose a smaller file or reduce the size of the scan.",

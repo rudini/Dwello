@@ -2072,6 +2072,7 @@
 	"tenants_delete_text_with_documents": "{name} wird endgültig gelöscht, zusammen mit den hochgeladenen Dokumenten. Das lässt sich nicht rückgängig machen.",
 	"documents_uploaded": "Hochgeladen am {date} um {time}, Datei «{file}»",
 	"documents_uploaded_to": "Zu {name}, hochgeladen am {date} um {time}, Datei «{file}»",
+	"documents_upload_number": "{title} ({number} von {count})",
 	"documents_download_file": "Datei herunterladen",
 	"documents_download_file_aria": "Datei herunterladen: {title}",
 	"backend_document_too_large": "Die Datei ist grösser als {megabytes} MB. Wählen Sie eine kleinere Datei oder verkleinern Sie den Scan.",

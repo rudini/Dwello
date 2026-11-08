@@ -1582,6 +1582,16 @@ Parallel session: checklist kept in the pull request.
 - [x] Persona Marco `docs/design/personas/marco-1186.md`: no Blocker or Major; P-1 to P-3 Minors stay (P-1: the unsent building choice, #662)
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, statements E2E with its axe/language rows
 - [x] Archive the session; PR `Fixes #1186`: pushed after this archive
+## Session: #1181 Tell apart two uploads of the same file in one minute
+
+- [x] Every point of #1181 confirmed on main (75b78a9); decision written into the issue: a running number «(n von m)» after the title for uploads of one tenant with the same title, in upload order (not seconds: scenarios pin «um hh:mm»)
+- [x] Two `@wip` scenarios (tenant-documents.feature, documents.feature), seen red at the missing number; first upload seeded, two UI uploads in a row raced
+- [x] `numberedUploads` in `src/lib/document-status.ts`, used by the tenant's documents and «Dokumente»; DOM tests seen red (the tenant guard by taking it out) (8ab223a)
+- [x] code-reviewer `docs/reviews/1181-review-1.md`: C-2(a) fixed (4353783), C-1 rejected (the decision names the toast after deleting), C-2(b) stays
+- [x] Persona Sven `docs/design/personas/sven-1181.md`: no Blocker or Major; S-2 = C-2(a) fixed; S-1 = C-1, S-3, S-4 stay in the report
+- [x] Closing code-reviewer `docs/reviews/1181-review-2.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1181.md`
+- [x] Archive session; PR `Fixes #1181`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
