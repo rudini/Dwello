@@ -1336,6 +1336,7 @@
 	"statements_scope_contract_link": "Vers le contrat de bail",
 	"statements_filter_clear": "Retirer le filtre",
 	"statements_none_found": "Aucun décompte trouvé",
+	"statements_list_load_failed": "Les décomptes n’ont pas pu être chargés.",
 	"statements_adjust_filters": "Essayez d’adapter vos filtres.",
 	"statements_empty_title": "Pas encore de décomptes",
 	"statements_empty_text": "Établissez votre premier décompte des charges.",

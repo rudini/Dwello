@@ -1336,6 +1336,7 @@
 	"statements_scope_contract_link": "Al contratto di locazione",
 	"statements_filter_clear": "Rimuovere il filtro",
 	"statements_none_found": "Nessun conteggio trovato",
+	"statements_list_load_failed": "Non è stato possibile caricare i conteggi.",
 	"statements_adjust_filters": "Provi ad adattare i suoi filtri.",
 	"statements_empty_title": "Ancora nessun conteggio",
 	"statements_empty_text": "Allestisca il suo primo conteggio spese accessorie.",
