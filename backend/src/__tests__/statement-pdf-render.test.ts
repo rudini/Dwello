@@ -1196,10 +1196,11 @@ describe('PDF mit aufgehobener Wohnung', () => {
 		expect((await textOf({ ...split, lineItems: [{ ...line, segments: [mixed] }] })).flowing).toContain('3 Wohnungen: (70 % × 70.00 / 210.00 m² + 30 % × 1 / 3 Wohnungen) × CHF');
 	});
 
+	// Fachreview 1301-2 V-1 (persona Dr. Weber P-2): how the part's heating costs come about, as the invoices bill them
 	it('rechnet Heizkosten je Zeitraum nach dem Heizprofil vor', async () => {
 		const heating = { ...line, category: 'Heizung', heating: true, segments: [{ ...before, days: undefined, total: undefined, profileShare: 50, costs: 500, apartment: 166.67, share: 166.67 }] };
 		expect((await textOf({ ...split, lineItems: [heating] })).flowing).toContain(
-			'01.01.2025 – 30.06.2025, 3 Wohnungen, 50.00 % der Heizkosten nach Heizprofil: 70.00 / 210.00 m² × CHF 500.00 = CHF 166.67 × Anteil nach Heizprofil 100.00 % = CHF 166.67'
+			'01.01.2025 – 30.06.2025, 3 Wohnungen, 50.00 % der Heizkosten (Rechnungen für diese Tage; eine Rechnung, die auch andere Tage betrifft, nach den Monaten des Heizprofils geteilt): 70.00 / 210.00 m² × CHF 500.00 = CHF 166.67 × Anteil nach Heizprofil 100.00 % = CHF 166.67'
 		);
 	});
 });
