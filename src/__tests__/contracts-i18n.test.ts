@@ -104,7 +104,7 @@ describe('Hinweis auf die aufgehobene Wohnung', () => {
 		],
 		[
 			'fr',
-			'Un contrat de bail sans fin du contrat est saisi pour cet appartement. Dwello a donc annulé la sélection. Si ce contrat de bail est résilié ou qu’une fin du contrat a été convenue, saisissez d’abord la fin du contrat sur sa page avec « Saisir la date de fin ». Sinon, choisissez un autre appartement.'
+			'Un contrat de bail sans fin du contrat est saisi pour cet appartement. Dwello a donc annulé la sélection. Si ce contrat de bail est résilié ou qu’une fin du contrat a été convenue, saisissez d’abord la fin du contrat sur sa page avec « Saisir la date de fin ». Sinon, choisissez un autre appartement.'
 		],
 		[
 			'it',
@@ -126,7 +126,7 @@ describe('Wohnung mit nicht geladenen Mietverträgen', () => {
 		[
 			'fr',
 			'(non vérifié) Appartement 2.01 · Ahornhof',
-			'Les appartements marqués « non vérifié » peuvent être choisis, même si Dwello n’a pas pu charger leurs contrats de bail. Dwello vérifie à l’enregistrement si l’appartement choisi est libre.'
+			'Les appartements marqués « non vérifié » peuvent être choisis, même si Dwello n’a pas pu charger leurs contrats de bail. Dwello vérifie à l’enregistrement si l’appartement choisi est libre.'
 		],
 		[
 			'it',
@@ -154,7 +154,7 @@ describe('Hilfe zur Wohnung', () => {
 		],
 		[
 			'fr',
-			'Les appartements libres ou qui seront libres plus tard figurent en haut. Les appartements avec un contrat de bail sans fin du contrat sont marqués « non disponible » et ne peuvent pas être choisis.'
+			'Les appartements libres ou qui seront libres plus tard figurent en haut. Les appartements avec un contrat de bail sans fin du contrat sont marqués « non disponible » et ne peuvent pas être choisis.'
 		],
 		[
 			'it',
