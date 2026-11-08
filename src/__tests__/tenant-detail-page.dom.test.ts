@@ -250,6 +250,24 @@ describe('Mieterdetail', () => {
 		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-upload-button')));
 	});
 
+	// #1262 (Sven P-3, Helga): eine Änderung während des Hochladens käme nicht mehr mit
+	it('sperrt Datei und Titel während des Hochladens, mit dem Fokus auf dem Knopf, und gibt sie danach frei', async () => {
+		open([], null, []);
+		const title = byTestId<HTMLInputElement>('tenant-document-title-input')!;
+		const file = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		title.focus(); // sent with Enter in the title
+		const after = actions.get('?/upload')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		flushSync();
+		expect([title.disabled, file.disabled]).toEqual([true, true]);
+		// not lost with the locked field (code review 1262 C-1)
+		expect(document.activeElement).toBe(byTestId('tenant-document-upload-button'));
+		await after({ update: vi.fn(), result: { type: 'error', error: new Error('500') } });
+		flushSync();
+		expect([title.disabled, file.disabled]).toEqual([false, false]);
+	});
+
 	// #489 (#455): der Knopf des Browsers spricht die Sprache des Browsers; ein eigener Knopf spricht die der Oberfläche
 	it('bietet die Datei des Dokuments mit einem eigenen Knopf an und nennt die gewählte Datei', () => {
 		open();

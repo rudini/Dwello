@@ -58,10 +58,12 @@
 		}
 	);
 
+	const focusSend = () => uploadForm?.querySelector<HTMLElement>('button[type="submit"]')?.focus();
+
 	async function notAnswered() {
 		unanswered = true;
 		await tick();
-		uploadForm?.querySelector<HTMLElement>('button[type="submit"]')?.focus();
+		focusSend();
 	}
 
 	async function uploaded(title_: string) {
@@ -82,6 +84,7 @@
 			focusFirstError(uploadForm);
 			return cancel();
 		}
+		focusSend(); // sent with Enter in a field: the focus would go with the field it locks (code review 1262 C-1)
 		uploading = true;
 		return async ({ result, update }) => {
 			uploading = false;
