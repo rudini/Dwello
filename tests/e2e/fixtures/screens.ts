@@ -320,6 +320,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.building('Ahornweg', 'Winterthur');
 	await seed.accountingPeriod('Ahornweg', 'november-october');
 	await seed.apartment('Ahornweg', '4.01', 'vacant');
+	// #1311: no longer exists since 01.01.2026: its pages show «Aufgehoben seit …» without «Mietvertrag erfassen» and a fixed status
+	await seed.apartment('Ahornweg', '8.01', 'vacant');
+	await seed.discontinueApartment('8.01', '2026-01-01');
 	await seed.tenant('Vera');
 	await seed.contract('Vera', '4.01', { startDate: '2019-11-01', baseRent: '1100.00' });
 	await seed.statement('Vera', 'Ahornweg', 2020, 'Standard', ['2019-11-01', '2020-10-31']);
@@ -397,6 +400,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		undeliveredTenant: seed.idOf('Hugo'), // #736
 		undeliveredStatement: seed.idOf('Abrechnung Hugo 2023'),
 		freeApartment: seed.idOf('1.03'),
+		discontinuedApartment: seed.idOf('8.01'),
 		limitedApartment: seed.idOf('1.04'),
 		earlierContract: seed.idOf('Mietvertrag Vreni'),
 		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract

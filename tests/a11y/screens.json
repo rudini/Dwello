@@ -355,6 +355,20 @@
 			]
 		},
 		{
+			"name": "apartment-detail-discontinued",
+			"path": "/apartments/{discontinuedApartment}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "apartment-edit-discontinued",
+			"path": "/apartments/{discontinuedApartment}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "apartment-edit",
 			"path": "/apartments/{apartment}/edit",
 			"states": [

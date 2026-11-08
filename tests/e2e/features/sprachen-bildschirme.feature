@@ -80,6 +80,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | apartment-edit         | discontinue-refused |
+      | apartment-detail-discontinued | default     |
+      | apartment-edit-discontinued | default       |
       | tenants                | default             |
       | tenants                | empty               |
       | tenants                | filtered-empty      |
