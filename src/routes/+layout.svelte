@@ -53,15 +53,31 @@
 
 	// Runs after every component below is mounted; SvelteKit starts its router later in the same task, and a submit
 	// before that is lost in Firefox (#869). One task later the page reacts to input (E2E tests wait for it)
+	// SvelteKit's announcer is on the page by then; the layout reads the title out itself (#1173, below)
 	onMount(() => {
-		setTimeout(() => (document.body.dataset.hydrated = 'true'));
+		setTimeout(() => {
+			// muted and hidden, so its copy of the title is not read a second time in browse mode (Sven 1173)
+			const announcer = document.getElementById('svelte-announcer');
+			announcer?.setAttribute('aria-live', 'off');
+			announcer?.setAttribute('aria-hidden', 'true');
+			document.body.dataset.hydrated = 'true';
+		});
 	});
 
+	// #1173 (Sven 2 P-4): the title is read out when another page opens; SvelteKit's own announcer would also read it
+	// after a form action that stays on the page, so that one is silenced (onMount above)
+	let pageTitle = $state('');
 	let listResult = $state('');
 	let navigations = 0;
 	// After a search on a list the focus goes to its results, so their number is read out
 	// a filter that applies on change keeps the focus, so the arrow keys go on through its choices (persona Sven S-1, #677)
 	afterNavigate((navigation) => {
+		const { from, to } = navigation;
+		// emptied first, so a page of the same title is read out too (fallback review of #1207)
+		if (from && from.url.pathname !== to?.url.pathname) {
+			pageTitle = '';
+			tick().then(() => (pageTitle = document.title));
+		}
 		// a filter select, or a link that keeps the focus (the status tiles, #1162), stays where it is
 		const keep =
 			document.activeElement instanceof HTMLSelectElement ||
@@ -111,6 +127,9 @@
 	{/if}
 {/snippet}
 
+<div aria-live="assertive" aria-atomic="true" class="sr-only" data-testid="page-title-announcer">
+	{pageTitle}
+</div>
 <!-- the result of a list filter that keeps the focus (#662) -->
 <div role="status" class="sr-only" data-testid="list-result-status">{listResult}</div>
 
