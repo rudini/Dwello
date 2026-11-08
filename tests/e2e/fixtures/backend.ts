@@ -354,6 +354,25 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
+		// #690: an IBAN stored before #450 required the Firmenadresse; only for a scenario on the fresh installation
+		// (@frische-installation): every PDF with a Zahlteil of the others would be refused
+		async ibanWithoutCompanyAddress(iban: string) {
+			await put('config', accountOf(iban));
+			for (const key of ['company_name', 'company_postal_code', 'company_city']) await remove(`config/${key}`);
+			restores.push(() => remove('config/iban'), () => remove('config/company_address'));
+		},
+
+		// #690 (persona Weber 690 W-1, W-2): a part of the stored addresses removed since, which the save refuses with an
+		// IBAN; only for a scenario on the fresh installation (@frische-installation). Afterwards the installation is as
+		// before the scenario (review 690-5 C-8): the Kontoinhaber cleared by restoreAccountHolder of the step that stored
+		// him, the IBAN and the Firmenadresse it was stored with (accountOf) removed
+		async withoutSetting(key: string) {
+			await remove(`config/${key}`);
+			restores.push(async () => {
+				for (const stored of Object.keys(accountOf(''))) await remove(`config/${stored}`);
+			});
+		},
+
 		// #1166: a scenario that saves a Kontoinhaber through the settings sets it back to the Absender afterwards
 		restoreAccountHolder,
 
