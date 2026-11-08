@@ -16,7 +16,10 @@
 <div role="status" class="flex flex-col gap-4">
 	{#each contracts as open (open.id)}
 		<!-- the apartment and the contract named like the hint on a cleared apartment (#1288) -->
-		{@const names = { name, apartment: apartmentName(open.apartment.unit, open.apartment.building) }}
+		{@const names = {
+			name,
+			apartment: apartmentName(open.apartment.unit, open.apartment.building)
+		}}
 		<Alert
 			tone="info"
 			title={m.contracts_open_contract_title({ name })}

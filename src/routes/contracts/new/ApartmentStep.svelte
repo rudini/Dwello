@@ -51,7 +51,9 @@
 		{error}
 		describedby={unknown
 			? 'apartment-contracts-unknown-title apartment-contracts-unknown-text'
-			: undefined}
+			: cleared
+				? 'apartment-cleared-title apartment-cleared-text' // why the choice is gone (Sven 1288 P-2)
+				: undefined}
 		testid="apartment-select"
 	/>
 {/if}
@@ -64,9 +66,12 @@
 		<Alert
 			tone="caution"
 			title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}
+			titleId="apartment-cleared-title"
 			testid="apartment-cleared"
 		>
-			<p data-testid="apartment-cleared-text">{m.contracts_apartment_cleared_text()}</p>
+			<p id="apartment-cleared-text" data-testid="apartment-cleared-text">
+				{m.contracts_apartment_cleared_text()}
+			</p>
 			{#if cleared.contract}<OverlapLink contract={cleared.contract} />{/if}
 		</Alert>
 	{/if}

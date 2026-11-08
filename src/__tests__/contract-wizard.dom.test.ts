@@ -523,6 +523,14 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId<HTMLSelectElement>('apartment-select')!.value).toBe('');
 		expect(byTestId('apartment-cleared')!.closest('[role="status"]')).not.toBeNull();
 		expect(get(toasts)).toEqual([]);
+		// Sven 1288 P-2: back at the empty field, a screen reader hears why the choice is gone
+		const description = (byTestId('apartment-select')!.getAttribute('aria-describedby') ?? '')
+			.split(' ')
+			.map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
+			.join(' ');
+		expect(description).toContain(
+			'Wohnung 2.02 · Ahornhof ist nicht verfügbar Für diese Wohnung ist ein Mietvertrag'
+		);
 	});
 
 	// #1153 (Sven S-7, Helga H-6): the step keeps saying which apartment it was and which contract blocks it
