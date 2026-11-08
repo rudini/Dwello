@@ -338,6 +338,10 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('overlap-contract-link')!.getAttribute('href')).toBe(
 			`/contracts/${overlap.params.contract}`
 		);
+		// #1295 (1295-review-1 C-1): the link names tenant and apartment
+		expect(byTestId('overlap-contract-link')!.textContent!.trim()).toBe(
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.01 · Ahornhof'
+		);
 		expect(error).not.toContain('Contract');
 		expect(goto).not.toHaveBeenCalled();
 	});
@@ -676,7 +680,10 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(box).toContain(
 			'Den Vertragsbeginn und das Vertragsende ändern Sie im Schritt 3 «Vertragsdauer», die Wohnung im Schritt 2 «Wohnung».'
 		);
-		expect(byTestId('overlap-contract-link')).not.toBeNull();
+		// #1295 (1295-review-1 C-1): the link names tenant and apartment
+		expect(byTestId('overlap-contract-link')!.textContent!.trim()).toBe(
+			'Zum Mietvertrag von Ida Roth für Wohnung 2.03 · Ahornhof'
+		);
 		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
 			[
 				'warning',
@@ -988,10 +995,10 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		).toBeTruthy();
 		// #1288: apartment and contract named like the hint on a cleared apartment
 		expect(hint.textContent).toContain('für Wohnung 2.02 · Ahornhof');
-		expect([hint.querySelector('a')!.getAttribute('href'), hint.querySelector('a')!.textContent?.trim()]).toEqual([
-			'/contracts/c-a2',
-			'Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof'
-		]);
+		expect([
+			hint.querySelector('a')!.getAttribute('href'),
+			hint.querySelector('a')!.textContent?.trim()
+		]).toEqual(['/contracts/c-a2', 'Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof']);
 		next();
 		expect(heading()).toBe('Vertragsdauer');
 	});
