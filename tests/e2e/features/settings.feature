@@ -123,13 +123,22 @@ Funktionalität: Einstellungen
   Szenario: Die eingegebenen Angaben zum Kontoinhaber bleiben bis zum Speichern erhalten
     Wenn der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber angibt
     Und folgende Angaben zum Kontoinhaber eingibt:
-      | Name des Kontoinhabers    | Erika Muster |
-      | Adresse des Kontoinhabers | Seeweg 5     |
-      | PLZ des Kontoinhabers     | 6003         |
-      | Ort des Kontoinhabers     | Luzern       |
+      | Name des Kontoinhabers    | Hans Beispiel |
+      | Adresse des Kontoinhabers | Rainweg 7     |
+      | PLZ des Kontoinhabers     | 3011          |
+      | Ort des Kontoinhabers     | Bern          |
     Und den Absender wieder als Kontoinhaber angibt, ohne zu speichern
     Und doch einen eigenen Kontoinhaber angibt
-    Dann zeigen die Einstellungen den Kontoinhaber "Erika Muster", "Seeweg 5", "6003" "Luzern"
+    Dann zeigen die Einstellungen den Kontoinhaber "Hans Beispiel", "Rainweg 7", "3011" "Bern"
+
+  # #1202 (Codereview 1202-1 C-2): gespeichert mit dem Absender als Kontoinhaber, sind die Angaben auch ohne erneutes
+  # Öffnen gelöscht
+  @einstellungen-global
+  Szenario: Gespeichert mit dem Absender als Kontoinhaber, kommen die gelöschten Angaben nicht zurück
+    Angenommen das Konto der IBAN "CH93 0076 2011 6238 5295 7" gehört "Erika Muster", "Seeweg 5", "6003 Luzern"
+    Wenn der Liegenschaftsverwalter in den Einstellungen den Absender als Kontoinhaber angibt und speichert
+    Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
+    Und ist kein eigener Kontoinhaber mehr hinterlegt
 
   # #1175 (Persona Marco P-2): auch beim Absender ist die Strasse freiwillig (#450), wie beim Kontoinhaber
   Szenario: Die Strasse des Absenders ist als freiwillig bezeichnet

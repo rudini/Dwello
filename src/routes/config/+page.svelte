@@ -40,7 +40,7 @@
 		);
 	let holderIsSender = $state(noHolderStored());
 	// #1202: what the landlord types into the Kontoinhaber, kept while ticking the checkbox unmounts the fields; from the
-	// stored settings as they were when the page opened
+	// stored settings when the page opens and after a save
 	const typedFrom = (stored = data.settings) => ({ ...stored });
 	const holder = $state(typedFrom());
 	const saved = $derived(result?.saved === true);
@@ -146,8 +146,10 @@
 		method="POST"
 		use:enhance={() => {
 			saving = true;
-			return async ({ update, formElement }) => {
+			return async ({ update, formElement, result }) => {
 				await update({ reset: false });
+				// #1202 (code review 1202-1 C-2): once saved, the Kontoinhaber is what is stored
+				if (result.type === 'success') Object.assign(holder, data.settings);
 				saving = false;
 				focusFirstError(formElement);
 			};

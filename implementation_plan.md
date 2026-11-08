@@ -17,6 +17,6 @@ Open work: GitHub issues (non-functional ones with an `nfr:` category label), se
 - [x] `@wip` scenario «Die eingegebenen Angaben zum Kontoinhaber bleiben bis zum Speichern erhalten» (`settings.feature`), seen red at its `Dann` step
 - [x] DOM test reproducing the loss (`config-page.dom.test.ts`), seen red (empty fields)
 - [x] Fix in `src/routes/config/+page.svelte` and `SettingField.svelte` (typed values held in the page), scenario green without `@wip` (`settings.feature` 30 passed)
-- [ ] Slice review (`code-reviewer`)
-- [ ] Feature review: personas Marco and Helga
+- [x] Slice review round 1 (`docs/reviews/1202-review-1.md`); C-1 and C-2 fixed, C-2 with the scenario «Gespeichert mit dem Absender als Kontoinhaber, kommen die gelöschten Angaben nicht zurück» (seen red)
+- [x] Feature review: personas Marco and Helga (`docs/design/personas/marco-1202.md`, `helga-1202.md`), no findings; shared observation → #1298
 - [ ] Merge `origin/main`, closing round, archive in `docs/archive/sessions/1202.md`, PR with `Fixes #1202`
