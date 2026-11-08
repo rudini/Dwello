@@ -1009,7 +1009,7 @@
 	"invoices_allocable_help": "The invoice goes into the utility cost statement.",
 	"invoices_not_allocable_help": "The invoice does not go into the utility cost statement.",
 	"invoices_category_not_allocable": "Non-allocable category",
-	"invoices_category_not_allocable_text": "Costs in this category (e.g. repairs, building insurance) cannot be passed on to tenants.",
+	"invoices_category_not_allocable_text": "This category is set as non-allocable. As the landlord, you bear its costs.",
 	"invoices_billed_title": "Invoice already in a statement",
 	"invoices_billed_in": "In statements",
 	"invoices_billed_in_none": "None",

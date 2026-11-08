@@ -1009,7 +1009,7 @@
 	"invoices_allocable_help": "La facture entre dans le décompte des charges.",
 	"invoices_not_allocable_help": "La facture n’entre pas dans le décompte des charges.",
 	"invoices_category_not_allocable": "Catégorie non répercutable",
-	"invoices_category_not_allocable_text": "Les coûts de cette catégorie (p. ex. réparations, assurance du bâtiment) ne peuvent pas être répercutés sur les locataires.",
+	"invoices_category_not_allocable_text": "Cette catégorie est définie comme non répercutable. En tant que bailleur, vous en supportez les coûts.",
 	"invoices_billed_title": "Facture déjà décomptée",
 	"invoices_billed_in": "Contenue dans les décomptes",
 	"invoices_billed_in_none": "Aucun",

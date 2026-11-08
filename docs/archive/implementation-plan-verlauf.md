@@ -1529,6 +1529,16 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #1195 the category's reason in the invoice form note (Weber P-3 on #292)
+
+- [x] Read #1195 on main and on the branch of #1206 (#687), which this one builds on; product owner decisions in #1195: the note shows `reasonOf`, a category without a reason a general sentence; spec change of «Nicht umlagefähige Kategorie wählen»
+- [x] `@wip` scenarios (invoice-new.feature) seen red at the reason; the own-category scenario pinned kept behaviour (a3c6e84)
+- [x] fach-reviewer step 1 (`docs/reviews/1195-fachreview-1.md`): V-1 Minor, new general sentence in four languages, decided in #1195
+- [x] Reason in the note and the new sentence; DOM tests seen red (f37071e)
+- [x] code-reviewer (`docs/reviews/1195-review-1.md`): no findings
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-1195.md`): no Blocker or Major; Minors that stay: P-1 (locked checkbox not explained), P-2 (Reparaturen and small maintenance), both on the base too
+- [x] Workflow notes: nothing came up
+- [x] Archive the session; PR pushed after this archive
 ## Session: #1193 building search finds the full address and the postcode
 
 - [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
