@@ -581,6 +581,26 @@ describe('Mietvertragsdetail', () => {
 	});
 
 	// kein Vorschlag: ein schnelles Bestätigen soll den Mietvertrag nicht aus Versehen heute beenden
+	// #1277 (code review 1277-1 C-1, C-2): no kind preselected, a day alone is not enough, the notice field only
+	// with «Kündigung»
+	it('beendet erst mit gewählter Art und fragt erst bei einer Kündigung nach ihrem Eingang', async () => {
+		open();
+		click('contract-end-button');
+		expect(byTestId<HTMLInputElement>('contract-end-kind-notice')!.checked).toBe(false);
+		expect(byTestId<HTMLInputElement>('contract-end-kind-agreement')!.checked).toBe(false);
+		expect(byTestId('contract-notice-received-input')).toBeNull();
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2099');
+		const submitted = vi.fn();
+		document.querySelector('form[action="?/end"]')!.addEventListener('submit', submitted);
+		click('contract-end-confirm');
+		await settle();
+		expect(submitted).not.toHaveBeenCalled();
+		expect(text('contract-end-kind')).toContain('Wählen Sie, wie der Mietvertrag endet');
+		click('contract-end-kind-notice');
+		await settle();
+		expect(byTestId('contract-notice-received-input')).not.toBeNull();
+	});
+
 	it('fragt beim Beenden nach dem Vertragsende, ohne einen Tag vorzuschlagen', async () => {
 		open();
 		click('contract-end-button');
@@ -599,6 +619,10 @@ describe('Mietvertragsdetail', () => {
 		expect(dialog.textContent).toContain(
 			'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.2026.'
 		);
+		// #1277: nothing is preselected; the hint on the Kündigungsfrist belongs to a notice
+		expect(dialog.textContent).toContain('Wählen Sie, wie der Mietvertrag endet: mit einer Kündigung oder einer Aufhebungsvereinbarung.');
+		click('contract-end-kind-notice');
+		await settle();
 		const words = dialog.textContent!.replace(/\s+/g, ' ');
 		expect(words).toContain('Der letzte Tag des Mietverhältnisses: in der Regel der Kündigungstermin oder der mit dem Mieter vereinbarte Tag.');
 		expect(words).toContain('auch wenn der Mieter früher auszieht.');

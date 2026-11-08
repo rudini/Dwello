@@ -5,6 +5,7 @@ import {
 	contractEndInput,
 	endKind,
 	endKindNotice,
+	endKindAgreement,
 	moveOutHint,
 	refusedStatementLink,
 	endContractButton,
@@ -112,4 +113,5 @@ export const contractActionsNarrowerThanTitle = question('how much narrower the 
 export const endKindText = Text.of(endKind);
 export const noticeReceivedShown = Visibility.of(noticeReceivedInput);
 export const noticeChosen = Checked.of(endKindNotice);
+export const agreementChosen = Checked.of(endKindAgreement);
 export const noticeReceivedOnShown = Visibility.of(contractNoticeReceived);

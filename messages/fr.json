@@ -2417,7 +2417,7 @@
 	"contracts_end_kind_notice": "Résiliation",
 	"contracts_end_kind_notice_help": "Le locataire ou vous avez résilié le contrat de bail par écrit.",
 	"contracts_end_kind_agreement": "Convention de fin de bail",
-	"contracts_end_kind_agreement_help": "Le locataire et le bailleur mettent fin au contrat de bail d’un commun accord à une date convenue, sans résiliation ni délai de congé, par exemple lorsque le locataire passe dans un autre de vos appartements. Consignez la convention par écrit, signée par vous et par tous les locataires. Pour un logement de la famille, il faut le consentement exprès du conjoint ou du partenaire enregistré.",
+	"contracts_end_kind_agreement_help": "Le locataire et le bailleur mettent fin au contrat de bail d’un commun accord à une date convenue, sans résiliation ni délai de congé, par exemple lorsque le locataire passe dans un autre de vos appartements. Consignez la convention par écrit comme preuve, signée par vous et par tous les locataires. Pour un logement de la famille, il faut le consentement exprès du conjoint ou du partenaire enregistré. Si une autre personne reprend le contrat de bail, par exemple avec votre consentement écrit pour des locaux commerciaux ou par un jugement lors du divorce, aucune convention signée n’est nécessaire : votre consentement ou le jugement suffit.",
 	"contracts_end_agreement_hint": "Saisissez comme fin du contrat le jour convenu. Un nouveau contrat de bail peut commencer le jour suivant.",
 	"contracts_end_agreement": "Durée indéterminée, fin convenue au {date} (convention de fin de bail)",
 	"contracts_period_range_agreement": "{start} – {end}, d’un commun accord",
@@ -2427,5 +2427,6 @@
 	"contracts_duration_agreement_help": "Le contrat de bail prend fin avec la convention de fin de bail. Si vous avez convenu d’un autre jour avec le locataire, modifiez la fin du contrat.",
 	"contracts_withdraw_agreement": "Annuler la convention de fin de bail",
 	"contracts_withdraw_agreement_help": "Le contrat de bail court alors sans date de fin. Ce n’est possible que si le locataire et le bailleur annulent ensemble la convention de fin de bail. Ni le locataire ni le bailleur ne peut l’annuler seul.",
-	"contracts_agreement_withdrawn_toast": "Convention de fin de bail avec {name} annulée. Le contrat de bail court sans date de fin."
+	"contracts_agreement_withdrawn_toast": "Convention de fin de bail avec {name} annulée. Le contrat de bail court sans date de fin.",
+	"contracts_end_kind_required": "Choisissez comment le contrat de bail prend fin : par une résiliation ou par une convention de fin de bail."
 }

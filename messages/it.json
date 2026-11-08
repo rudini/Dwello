@@ -2417,7 +2417,7 @@
 	"contracts_end_kind_notice": "Disdetta",
 	"contracts_end_kind_notice_help": "L’inquilino o Lei ha disdetto il contratto di locazione per scritto.",
 	"contracts_end_kind_agreement": "Accordo di scioglimento",
-	"contracts_end_kind_agreement_help": "Inquilino e locatore sciolgono il contratto di locazione di comune accordo a una data concordata, senza disdetta né termine di preavviso, per esempio quando l’inquilino passa a un altro dei Suoi appartamenti. Metta l’accordo per scritto, firmato da Lei e da tutti gli inquilini. Per un’abitazione familiare serve il consenso espresso del coniuge o del partner registrato.",
+	"contracts_end_kind_agreement_help": "Inquilino e locatore sciolgono il contratto di locazione di comune accordo a una data concordata, senza disdetta né termine di preavviso, per esempio quando l’inquilino passa a un altro dei Suoi appartamenti. Metta l’accordo per scritto come prova, firmato da Lei e da tutti gli inquilini. Per un’abitazione familiare serve il consenso espresso del coniuge o del partner registrato. Se un’altra persona subentra nel contratto di locazione, per esempio con il Suo consenso scritto per locali commerciali o con una sentenza di divorzio, non serve un accordo firmato: bastano il Suo consenso o la sentenza.",
 	"contracts_end_agreement_hint": "Inserisca come fine del contratto il giorno concordato. Un nuovo contratto di locazione può iniziare il giorno dopo.",
 	"contracts_end_agreement": "A tempo indeterminato, fine concordata al {date} (accordo di scioglimento)",
 	"contracts_period_range_agreement": "{start} – {end}, di comune accordo",
@@ -2427,5 +2427,6 @@
 	"contracts_duration_agreement_help": "Il contratto di locazione termina con l’accordo di scioglimento. Se ha concordato un altro giorno con l’inquilino, modifichi la fine del contratto.",
 	"contracts_withdraw_agreement": "Annullare l’accordo di scioglimento",
 	"contracts_withdraw_agreement_help": "Il contratto di locazione prosegue allora a tempo indeterminato. È possibile solo se inquilino e locatore annullano insieme l’accordo di scioglimento. Né l’inquilino né il locatore può annullarlo da solo.",
-	"contracts_agreement_withdrawn_toast": "Accordo di scioglimento con {name} annullato. Il contratto di locazione prosegue a tempo indeterminato."
+	"contracts_agreement_withdrawn_toast": "Accordo di scioglimento con {name} annullato. Il contratto di locazione prosegue a tempo indeterminato.",
+	"contracts_end_kind_required": "Scelga come termina il contratto di locazione: con una disdetta o con un accordo di scioglimento."
 }

@@ -28,15 +28,18 @@ import {
 	movedOutButton,
 	confirmMovedOutButton,
 	deleteDraftAndContinueButton,
-	endKindAgreement
+	endKindAgreement,
+	endKindNotice
 } from '../targets/contract-detail';
 
 export const openContract = (contractId: string) => Navigate.to(`/contracts/${contractId}`);
 
 // The tenant gave notice for a day: that day is typed in the dialog; a past day is confirmed with its consequence
-export const endContractOn = (isoDate: string, { confirmPast = false, byAgreement = false } = {}): Activity => async (actor) => {
+// #1277: nothing is preselected, the kind is chosen (a notice unless said otherwise; none to see the refusal)
+type EndKind = 'notice' | 'agreement' | null;
+export const endContractOn = (isoDate: string, { confirmPast = false, kind = 'notice' as EndKind } = {}): Activity => async (actor) => {
 	await actor.attemptsTo(Click.on(endContractButton), EnterDate.of(isoDate).into(contractEndInput));
-	if (byAgreement) await actor.attemptsTo(Click.on(endKindAgreement));
+	if (kind) await actor.attemptsTo(Click.on(kind === 'agreement' ? endKindAgreement : endKindNotice));
 	if (confirmPast) await actor.attemptsTo(Check.the(contractEndPastConfirm));
 	await actor.attemptsTo(Click.on(confirmEndContractButton));
 };
@@ -49,6 +52,7 @@ export const fillEndWithNotice = (endDate: string, receivedOn: string): Activity
 	actor.attemptsTo(
 		Click.on(endContractButton),
 		EnterDate.of(endDate).into(contractEndInput),
+		Click.on(endKindNotice),
 		EnterDate.of(receivedOn).into(noticeReceivedInput)
 	);
 export const confirmEnd = Click.on(confirmEndContractButton);
@@ -57,7 +61,8 @@ export const confirmEnd = Click.on(confirmEndContractButton);
 export const startEndingByAgreement: Activity = (actor) =>
 	actor.attemptsTo(Click.on(endContractButton), Click.on(endKindAgreement));
 export const endContractByAgreementOn = (isoDate: string, { confirmPast = false } = {}): Activity =>
-	endContractOn(isoDate, { confirmPast, byAgreement: true });
+	endContractOn(isoDate, { confirmPast, kind: 'agreement' });
+export const endContractWithoutKind = (isoDate: string): Activity => endContractOn(isoDate, { kind: null });
 // the dialog filled for a notice, then an Aufhebungsvereinbarung chosen instead
 export const endByAgreementInstead: Activity = (actor) =>
 	actor.attemptsTo(Click.on(endKindAgreement), Click.on(confirmEndContractButton));
