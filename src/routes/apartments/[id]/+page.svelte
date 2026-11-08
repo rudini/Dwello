@@ -47,6 +47,7 @@
 					href="/contracts/new?apartment={apartment.id}"
 					variant={next ? 'secondary' : 'primary'}
 					icon="contract"
+					ariaLabel={m.common_action_of_aria({ action: m.dashboard_add_contract(), record: title })}
 					testid="apartment-new-contract">{m.dashboard_add_contract()}</Button
 				>
 			{/if}

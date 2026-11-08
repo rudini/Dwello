@@ -47,6 +47,7 @@
 				href="/contracts/new?tenant={tenant.id}"
 				variant="primary"
 				icon="contract"
+				ariaLabel={m.common_action_of_aria({ action: m.dashboard_add_contract(), record: name })}
 				testid="tenant-new-contract-button">{m.dashboard_add_contract()}</Button
 			>
 			<Button

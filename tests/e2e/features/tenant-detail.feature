@@ -91,6 +91,6 @@ Funktionalität: Mieterdetail
   Szenario: Die Aktionen der Detailseite nennen den Mieter
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Dann liest ein Screenreader die Aktionen der Seite so:
-      | Bearbeiten: Lea Frei |
-      | Mietvertrag erfassen |
-      | Löschen: Lea Frei    |
+      | Bearbeiten: Lea Frei           |
+      | Mietvertrag erfassen: Lea Frei |
+      | Löschen: Lea Frei              |

@@ -34,6 +34,7 @@
 			<Button
 				href="/invoices?building={building.id}"
 				icon="invoice"
+				ariaLabel={m.common_action_of_aria({ action: m.dashboard_invoices(), record: name })}
 				testid="building-invoices-button">{m.dashboard_invoices()}</Button
 			>
 			<Button

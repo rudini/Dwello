@@ -15,7 +15,7 @@ export const viewContractButton = (tenantName: string) =>
 		contractRow(tenantName).locate(page).getByTestId('contract-view-button')
 	);
 export const contractRowLinks = (tenantName: string) =>
-	target(`Links in der Zeile des Mietvertrags von ${tenantName}`, (page) => contractRow(tenantName).locate(page).locator('a'));
+	target(`Links in der Zeile des Mietvertrags von ${tenantName}`, (page) => contractRow(tenantName).locate(page).getByRole('link'));
 export const contractsEmptyNotice = target('Hinweis keine Mietverträge', (page) => page.getByTestId('contracts-empty'));
 // An amount of a listed contract by its label ("Nettomiete", "Monatlich total")
 export const contractAmount = (tenantName: string, label: string) =>

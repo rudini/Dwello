@@ -122,6 +122,6 @@ Funktionalität: Gebäudedetail
   Szenario: Die Aktionen der Detailseite nennen das Gebäude
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann liest ein Screenreader die Aktionen der Seite so:
-      | Rechnungen ansehen     |
-      | Bearbeiten: Birkenhof  |
-      | Löschen: Birkenhof     |
+      | Rechnungen ansehen: Birkenhof |
+      | Bearbeiten: Birkenhof         |
+      | Löschen: Birkenhof            |
