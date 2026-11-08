@@ -64,6 +64,14 @@ Funktionalität: Sprache der Oberfläche
     Dann steht der Fokus auf der Sprachwahl
     Und bestätigt Dwello "Langue : Français"
 
+  # #657 (Decided): wo der Platz knapp wird, steht die Sprachwahl im Menü; nach dem Neuladen steht der Fokus auf dem Menü
+  Szenario: Im schmalen Fenster die Sprache im Menü wechseln
+    Angenommen der Liegenschaftsverwalter liest die Hilfe
+    Und das Browserfenster ist 360 Pixel breit
+    Wenn der Liegenschaftsverwalter im Menü die Sprache "Français" wählt
+    Dann ist die Seite auf "Français"
+    Und steht der Fokus auf dem Menü
+
   # #656: die Links vor der Anmeldung gehören zum Kopfbereich der Seite, nicht neben die Bereiche
   Szenario: Die Links zu Anmeldung und Hilfe stehen im Kopfbereich
     Angenommen ein Besucher hat die Seite "/privacy" geöffnet
