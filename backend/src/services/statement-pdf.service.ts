@@ -46,10 +46,12 @@ export async function paymentPartWarning() {
 // Name and postal address as stored; a statement without tenant prints no recipient
 const tenantOf = (tenant: StatementWithDetails['tenant']) => tenant ?? { firstName: '', lastName: '' };
 
-const apartmentOf = (apartment: StatementWithDetails['apartment']) => ({
+// the Fläche the statement calculated with on the tenant's first billed day (#1301, Code-Review 1301-1 C-1); a statement
+// without them (created before they were stored): the apartment's
+const apartmentOf = ({ apartment, keyValues }: StatementWithDetails) => ({
 	number: apartment?.number || '',
 	floor: apartment?.floor || 0,
-	area: apartment?.area || '0'
+	area: keyValues ? keyValues.area[0].toFixed(2) : apartment?.area || '0'
 });
 
 const buildingOf = (building: StatementWithDetails['building']) => ({
@@ -148,7 +150,7 @@ export function toPdfData(
 		periodEnd: statement.periodEnd,
 		rentalDays: statement.rentalDays,
 		tenant: tenantOf(statement.tenant),
-		apartment: apartmentOf(statement.apartment),
+		apartment: apartmentOf(statement),
 		building: buildingOf(statement.building),
 		...run,
 		periodDays,

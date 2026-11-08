@@ -38,7 +38,7 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Position | Kosten des Gebäudes | davon Mieter | davon tragen Sie |
       | Hauswart | CHF 1’200.00        | CHF 1’101.64 | CHF 98.36        |
       | Total    | CHF 1’200.00        | CHF 1’101.64 | CHF 98.36        |
-    Und nennt die Kostenabstimmung der Vorschau für "Lindenhof" "Verwaltungspauschale (bezahlen die Mieter zusätzlich)" mit "CHF 33.05"
+    Und nennt die Kostenabstimmung der Vorschau für "Lindenhof" "Verwaltungspauschale (bezahlen die Mieter zusätzlich zu «davon Mieter», sie steht Ihnen zu)" mit "CHF 33.05"
 
   Szenario: Die Vorschau nennt die nicht umlagefähigen Rechnungen neben der Kostenabstimmung
     Angenommen im Gebäude "Lindenhof" gibt es eine nicht umlagefähige Rechnung der Kategorie "Reparaturen" über "500" Franken vom "2024-08-20"
@@ -86,3 +86,34 @@ Funktionalität: Kostenabstimmung in der Vorschau
       | Position | Kosten des Gebäudes | davon Mieter | davon tragen Sie |
       | Hauswart | CHF 1’200.00        | CHF 1’101.64 | CHF 98.36        |
       | Total    | CHF 1’200.00        | CHF 1’101.64 | CHF 98.36        |
+
+  # #1138 (PO 06.11.2026): ein Satz unter der Tabelle nennt die Position mit Tankbestand; Heizung 1'000.00 +
+  # Anfangsbestand 600.00 − Endbestand 100.00 = 1'500.00
+  Szenario: Die Kostenabstimmung der Vorschau nennt den Tankbestand einer Position
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Kostenabstimmung der Vorschau für "Lindenhof" "Heizung" mit "CHF 1’500.00"
+    Und erklärt die Kostenabstimmung der Vorschau für "Lindenhof" den Tankbestand mit "In «Heizung» ist die Veränderung des Tankbestands enthalten: Anfangsbestand CHF 600.00, Endbestand CHF 100.00."
+
+  Szenario: Ohne Tankbestand nennt die Kostenabstimmung der Vorschau keinen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Kostenabstimmung der Vorschau für "Lindenhof" "Total" mit "CHF 1’200.00"
+    Aber nennt die Kostenabstimmung der Vorschau für "Lindenhof" nicht "Tankbestand"
+
+  # #1138 (PO 06.11.2026): Wohnung 3.01 ist im April 2024 30 Tage ohne Mietvertrag
+  Szenario: Die Kostenabstimmung der Vorschau nennt die Wohnungen mit Leerstand
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann erklärt die Kostenabstimmung der Vorschau für "Lindenhof" den Leerstand mit "Leerstand in dieser Abrechnungsperiode: Wohnung 3.01 (30 Tage)."
+
+  Szenario: Ohne Leerstand nennt die Kostenabstimmung der Vorschau keinen
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "1.01" seit "2024-01-01" für "900" Franken
+    Und im Gebäude "Birkenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "1200" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Birkenhof" öffnet
+    Dann nennt die Kostenabstimmung der Vorschau für "Birkenhof" "Total" mit "CHF 1’200.00"
+    Aber nennt die Kostenabstimmung der Vorschau für "Birkenhof" nicht "Leerstand in dieser"

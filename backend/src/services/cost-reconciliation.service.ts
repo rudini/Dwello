@@ -4,17 +4,19 @@
  * landlord bears the difference. The Verwaltungspauschale and the non-allocable invoices stand beside it
  */
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { buildings, invoices } from '../db/schema';
+import { apartments, buildings, invoices, rentalContracts } from '../db/schema';
 import { calculateStatementForContract, groupInvoicesByCategory } from './calculation.service';
 import { counting } from './counting-statements';
 import { fuelStockChange } from './fuel-stock.service';
 import { getInvoicesForStatement, inPeriod, inPeriodOf } from './invoice.service';
 import { roundToRappen } from './pdf-format';
+import { countingOn } from './prorating.service';
 import { notUpToDate } from './statement-invoices.service';
 import { runPlan } from './statement-run.service';
 import { listStatements } from './statement.service';
+import { daysAfter } from './today';
 import type { ReconciliationBody, ReportPeriod } from '../api/report';
 
 type Range = { start: string; end: string };
@@ -33,10 +35,18 @@ const keyOf = (line: { categoryId: string | null; distributionKeyId: string | nu
 const cents = (amount: number) => roundToRappen(amount);
 
 async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
+	const stocks = await fuelStockChange(buildingId, period.start, period.end);
 	const groups = groupInvoicesByCategory([
 		...(await getInvoicesForStatement(buildingId, period.start, period.end)),
-		...(await fuelStockChange(buildingId, period.start, period.end))
+		...stocks
 	]);
+	// #1138: the Anfangs- and Endbestand of the position the change of the Tankbestand is in; none of a tank at 0 and 0
+	// (Fachreview 1138-1 V-1)
+	const tanks = new Map(
+		stocks
+			.map((s) => [keyOf(s), { opening: Number(s.stock.opening), closing: Number(s.stock.closing) }] as const)
+			.filter(([, { opening, closing }]) => opening || closing)
+	);
 	const positions = new Map(
 		groups.map((group) => [
 			keyOf(group),
@@ -64,7 +74,8 @@ async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 				[...positions.values()].filter((other) => other.categoryId === categoryId).length > 1,
 			buildingCosts,
 			tenants,
-			landlord: cents(buildingCosts - tenants)
+			landlord: cents(buildingCosts - tenants),
+			fuelStock: tanks.get(keyOf({ categoryId, distributionKeyId })) ?? null
 		})
 	);
 	const sum = (field: 'buildingCosts' | 'tenants') =>
@@ -76,8 +87,40 @@ async function reconcile(buildingId: string, period: Range, billed: Billed[]) {
 		managementFee: cents(
 			billed.reduce((total, statement) => total + Number(statement.managementFee ?? 0), 0)
 		),
-		nonAllocable: await nonAllocableInPeriod(buildingId, period)
+		nonAllocable: await nonAllocableInPeriod(buildingId, period),
+		vacancies: await vacanciesInPeriod(buildingId, period)
 	};
+}
+
+/**
+ * #1138 (Fachreview 1138-1): per apartment the days of the period on which it still counts (before «Aufgehoben ab») and
+ * no Mietvertrag runs, from Vertragsbeginn to Vertragsende («Abgerechnet bis» leaves the days rented); ordered as on
+ * the building page, floor by floor, by number
+ */
+async function vacanciesInPeriod(buildingId: string, period: Range) {
+	const flats = await db
+		.select({ id: apartments.id, number: apartments.number, floor: apartments.floor, discontinuedFrom: apartments.discontinuedFrom })
+		.from(apartments)
+		.where(eq(apartments.buildingId, buildingId));
+	const leases = flats.length
+		? await db
+				.select({ apartmentId: rentalContracts.apartmentId, start: rentalContracts.startDate, end: rentalContracts.endDate })
+				.from(rentalContracts)
+				.where(inArray(rentalContracts.apartmentId, flats.map((f) => f.id)))
+		: [];
+	const days: string[] = [];
+	for (let day = period.start; day <= period.end; day = daysAfter(day, 1)) days.push(day);
+	return flats
+		.sort((a, b) => a.floor - b.floor || a.number.localeCompare(b.number, 'de', { numeric: true }))
+		.map((flat) => ({
+			apartmentNumber: flat.number,
+			days: days.filter(
+				(day) =>
+					countingOn(day)(flat) &&
+					!leases.some((l) => l.apartmentId === flat.id && l.start <= day && (!l.end || l.end >= day))
+			).length
+		}))
+		.filter((vacancy) => vacancy.days > 0);
 }
 
 /** What the non-allocable invoices of a building cost in a period, counted like the allocable ones (Rule 1) */

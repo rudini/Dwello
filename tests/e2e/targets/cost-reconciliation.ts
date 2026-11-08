@@ -25,6 +25,11 @@ export const reconciliationRowCells = (scope: Target, label: string) =>
 	);
 export const reconciliationHelp = (scope: Target) =>
 	target(`Hilfetext der ${scope}`, (page) => scope.locate(page).getByTestId('cost-reconciliation-help'));
+// #1138: the sentences under the table on the Tankbestand and the Leerstand of the period
+export const reconciliationSentence = (scope: Target, topic: 'fuel-stock' | 'vacancy') =>
+	target(`Satz zum ${topic === 'fuel-stock' ? 'Tankbestand' : 'Leerstand'} der ${scope}`, (page) =>
+		scope.locate(page).getByTestId(`cost-reconciliation-${topic}`)
+	);
 export const reconciliationNotes = (scope: Target) =>
 	target(`Hinweise der ${scope}`, (page) => scope.locate(page).getByTestId('cost-reconciliation-note'));
 export const reconciliationStatement = (scope: Target, tenantName: string) =>

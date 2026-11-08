@@ -24,12 +24,12 @@ import {
 	rentalContracts
 } from '../db/schema';
 import { agreementsInPeriod } from './agreed-category.service';
-import { calculateBalance, calculateStatementForContract, countingOn, generateStatementNumber, keyValuesAmong } from './calculation.service';
+import { calculateBalance, calculateStatementForContract, countingWith, generateStatementNumber, keyValuesAmong } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
-import { listApartments } from './apartment.service';
+import { apartmentsOf } from './apartment.service';
 import { splitKeysOf } from './split-keys';
 import { keepPdfBeforeChange, sendingsOf, sinceDelivery, toldDeadline } from './delivery';
 import { CodedError, refusal, type Refusal } from './coded-error';
@@ -716,9 +716,8 @@ const changesPdf = (data: Partial<NewUtilityStatement>, existing: StatementWithD
 /** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by; with a day
  * only the apartments that count on it (#1284, Fachreview 1284-1 V-2) */
 export async function keyValuesOf(buildingId: string, apartmentId: string, day?: string): Promise<KeyValues | null> {
-	const { apartments: all } = await listApartments({ buildingId, limit: null });
-	const counting = day ? all.filter(countingOn(day)) : all;
-	return keyValuesAmong(counting.map((a) => ({ id: a.id, area: parseFloat(a.area), rooms: parseFloat(a.rooms) })), apartmentId);
+	const all = await apartmentsOf(buildingId);
+	return keyValuesAmong(day ? countingWith(all, day) : all, apartmentId); // with the values of that day (#1301)
 }
 
 /** A statement goes out dated on the day it is sent (Swiss time), with the full payment deadline, never a shorter one */

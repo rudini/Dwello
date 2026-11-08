@@ -57,7 +57,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<ApartmentFacts {apartment} />
+	<ApartmentFacts {apartment} sizeChangeError={form?.sizeChangeError} />
 
 	<div class="grid gap-8 lg:grid-cols-5">
 		<div class="flex flex-col gap-8 lg:col-span-2">

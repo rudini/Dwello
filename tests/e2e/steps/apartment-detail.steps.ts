@@ -11,6 +11,7 @@ import {
 	earlierContractsListed,
 	monthlyTotalOfApartment,
 	nextTenant,
+	sizeChangeDialogText,
 	vacancyShown
 } from '../questions/apartment-detail';
 import { listedApartmentCount } from '../questions/building-detail';
@@ -19,8 +20,10 @@ import {
 	editApartment,
 	openApartmentDetail,
 	openContractFromHistory,
+	confirmRemovingSizeChange,
 	openTenantProfile,
-	startDeletingApartment
+	startDeletingApartment,
+	startRemovingSizeChange
 } from '../tasks/apartment-detail';
 
 const { Given, When, Then } = createBdd(test);
@@ -82,6 +85,36 @@ Then('hat die Wohnung den Status {string}', async ({ verwalter }, status: string
 
 Given('die Wohnung {string} ist aufgehoben ab {string}', async ({ seed }, number: string, date: string) => {
 	await seed.discontinueApartment(number, date);
+});
+
+// #1301
+Given(
+	'die Wohnung {string} hat ab {string} {string} m² und {string} Zimmer',
+	async ({ seed }, number: string, date: string, area: string, rooms: string) => {
+		await seed.changeApartmentSize(number, date, area, rooms);
+	}
+);
+
+Then(
+	'hatte die Wohnung bis {string} {string} und {string} Zimmer',
+	async ({ verwalter }, day: string, area: string, rooms: string) => {
+		await verwalter.sees(apartmentInfo('earlier-size')).toContain(day);
+		await verwalter.sees(apartmentInfo('earlier-size')).toContain(area);
+		await verwalter.sees(apartmentInfo('earlier-size')).toContain(rooms);
+	}
+);
+
+When('der Liegenschaftsverwalter die Änderung ab {string} entfernen will', async ({ verwalter }, date: string) => {
+	await verwalter.sees(apartmentInfo('earlier-size')).toContain(date);
+	await verwalter.attemptsTo(startRemovingSizeChange);
+});
+
+Then('erklärt der Dialog {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(sizeChangeDialogText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Entfernen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmRemovingSizeChange);
 });
 
 Then('ist die Wohnung aufgehoben ab {string}', async ({ verwalter }, date: string) => {

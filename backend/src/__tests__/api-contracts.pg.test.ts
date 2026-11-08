@@ -354,6 +354,8 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /reports/reconciliation, /reports/reconciliations und /statements/run-reconciliation liefern die Felder von report-reconciliation.json, report-periods.json und statement-run-reconciliation.json', async () => {
 		const query = `buildingId=${rental.building}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`;
 		await insertInvoice(rental.building, { description: `Spät ${token}`, amount: '120.00', invoiceDate: '2024-11-30' });
+		// #1138: an apartment without a contract has Leerstand
+		const empty = await createApartment({ buildingId: rental.building, number: '2.04', floor: 2, area: '40', rooms: '1.5' });
 		try {
 			expect(drift(await sample('report-reconciliation'), await (await callApi(`/api/v1/reports/reconciliation?${query}`)).json())).toEqual([]);
 			expect(drift(await sample('report-periods'), await (await callApi('/api/v1/reports/reconciliations')).json())).toEqual([]);
@@ -361,6 +363,7 @@ describe('API-Verträge des Frontends', () => {
 			expect(drift(await sample('statement-run-reconciliation'), run)).toEqual([]);
 		} finally {
 			await db.delete(invoices).where(eq(invoices.description, `Spät ${token}`));
+			await deleteApartment(empty.id);
 		}
 	});
 
@@ -501,6 +504,8 @@ describe('API-Verträge des Frontends', () => {
 
 	// H-28 (#717): the apartment names its current and its next contract
 	it('GET /apartments/:id liefert die Felder von apartment.json', async () => {
+		// #1301: an earlier Fläche and Zimmeranzahl, so its fields are compared too
+		await db.update(apartments).set({ earlierSizes: [{ until: '2025-06-30', area: '70.00', rooms: '3.5' }] }).where(eq(apartments.id, rental.apartment));
 		const actual = await (await callApi(`/api/v1/apartments/${rental.apartment}`)).json();
 		expect(drift(await sample('apartment'), actual)).toEqual([]);
 	});
@@ -590,6 +595,19 @@ describe('API-Verträge des Frontends', () => {
 			const response = await sendJson('PUT', `/api/v1/apartments/${rented.apartment}`, { discontinuedFrom: '2025-07-01' });
 			expect(response.status).toBe(409);
 			expect(drift(await sample('apartment-contract-runs'), await response.json())).toEqual([]);
+		} finally {
+			await rented.remove();
+		}
+	});
+
+	// #1301: new Fläche and Zimmeranzahl from a day not after the last change
+	it('PUT /apartments/:id mit neuen Werten vor der letzten Änderung liefert die Felder von apartment-size-from-too-early.json', async () => {
+		const rented = await createRental(`${token}-apartment-size`, { startDate: '2019-01-01', monthlyAdvancePayment: '0' });
+		try {
+			await db.update(apartments).set({ earlierSizes: [{ until: '2025-06-30', area: '70.00', rooms: '3.5' }] }).where(eq(apartments.id, rented.apartment));
+			const response = await sendJson('PUT', `/api/v1/apartments/${rented.apartment}`, { area: '150', rooms: '6', sizeFrom: '2025-03-01' });
+			expect(response.status).toBe(409);
+			expect(drift(await sample('apartment-size-from-too-early'), await response.json())).toEqual([]);
 		} finally {
 			await rented.remove();
 		}
