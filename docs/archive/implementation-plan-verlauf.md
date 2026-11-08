@@ -1516,6 +1516,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga (`docs/design/personas/helga-busy-button.md`, 150 % zoom): readable at 7.8:1 / 7.6:1; Minors P-1, P-2 (busy looks pressable, next to a faded «Abbrechen») are #1209
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1182.md`
 - [x] Archive session; PR `Fixes #1182`: pushed after this archive
+## Session: #705 ponytail shortcut in missingByContract
+
+- [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
+- [x] Decision in #705 «Decided (product owner)»: fix now with `limit: null`; the other whole-list calls are #1229
+- [x] pg test «nennt auch bei über 1000 Mietverträgen und Abrechnungen …» seen red at each list (contract, then statement); `limit: null` in both lists, marker removed (c35d25c); `ANALYZE` in the test's cleanup against stale planner statistics
+- [x] code-reviewer `docs/reviews/705-review-1.md`: Minor C-1 (comment) fixed
+- [x] No scenario: backend only, nothing a screen shows changes under 1000 records; covered by the pg test
+- [x] Workflow note `docs/reviews/workflow-notes-issue-705.md`
+- [x] Archive the session; PR `Fixes #705`: pushed after this archive
 ## Session: #733 Deletion toast and the statement filter
 
 - [x] Reproduced on `main`: the «… gelöscht» toast covers the «Gebäude» field at about 1030 px (focus on the page title); free at 1440 px (100–200 %) and 390 px
@@ -1538,8 +1547,25 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Checks: lint, check, fitness, backend type-check, full vitest, `pdf-translations`, E2E `categories.feature` + `invoice-detail.feature`, axe/language rows of categories, category-new, category-edit-predefined, invoice-detail
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1028.md`
 - [x] Archive session; PR `Fixes #1028`: pushed after this archive
+## Session: #750 browser console when a page does not hydrate
+
+- [x] Check on main: the axe rows record no browser console (`lookAt` → `Navigate.to` → `hydrated`); decision written into #750
+- [x] Unit test `tests/unit/hydration-console.test.ts` seen red; `BrowseTheWeb` records console and page errors, `hydrated` adds them to its error
+- [x] Slice review `docs/reviews/750-review-1.md`: C-1 Major (console only in `message`, not in the stack the report shows) confirmed with real Playwright, fixed test-first; C-2 Minor with it
+- [x] Re-review `docs/reviews/750-review-2.md`: nothing open
+- [x] Checks: lint, check, fitness, backend type-check, vitest (new test, screenplay lint), E2E dashboard axe and language rows (79), a real Chromium page that throws shows its console in the stack
+- [x] Fallback review on PR #1223: console reset per document (Medium) and `cause` pinned (Low), fixed test-first; reviews `docs/reviews/750-review-{3,4,5}.md`, 750-4 C-1 Minor fixed, nothing open
+- [x] Archive session; PR `Fixes #750`: pushed after this archive
+
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #714 design guard: style shorthands and system colours
+
+- [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
+- [x] Rule «Farbe im style-Element» reads `border`, `outline` and their side shorthands, allows the CSS Color 4 system colours, CSS-wide and border keywords and `var(--x)`; pattern cases seen red; `token-referenz.md` aligned. No scenario: test-only source guard
+- [x] Slice review `docs/reviews/style-guard-714-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, design-guard test
+- [x] Archive session; PR `Fixes #714`: pushed after this archive
 ## Session: #1099 Remove the code paths for Abrechnungsperioden under a year
 
 No scenario: the preview hint on invoices that count in full in a period under a year is unreachable since #1088 (wizard step 2 and the backend refuse such a period, and correction and recalculation never showed it); the rest stays.
