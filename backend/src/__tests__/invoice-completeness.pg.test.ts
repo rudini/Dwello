@@ -94,8 +94,8 @@ describe('Rechnungen ohne Leistungszeitraum', () => {
 	let other: Awaited<ReturnType<typeof createRental>>;
 	const listed = async (start: string, end: string) => {
 		const response = await callApi(`/api/v1/invoices/completeness/${other.building}?periodStart=${start}&periodEnd=${end}`);
-		const body = (await response.json()) as Record<'lateInvoices' | 'invoicesWithoutServicePeriod', { billingEntityName: string; invoiceDate: string; amount: string }[]>;
-		return { late: body.lateInvoices.map((i) => i.billingEntityName), whole: body.invoicesWithoutServicePeriod.map((i) => i.billingEntityName) };
+		const body = (await response.json()) as Record<string, { billingEntityName: string }[]>;
+		return { late: body.lateInvoices.map((i) => i.billingEntityName), body };
 	};
 
 	beforeAll(async () => {
@@ -127,12 +127,10 @@ describe('Rechnungen ohne Leistungszeitraum', () => {
 		expect((await listed('2024-01-01', '2025-01-01')).late).toEqual(['Kaminfeger Keller', 'Nach dem Fenster']);
 	});
 
-	it('nennt in einer Abrechnungsperiode unter einem Jahr die Rechnungen ohne Leistungszeitraum, die ganz zählen', async () => {
-		expect((await listed('2024-01-01', '2024-06-30')).whole).toEqual(['Lift Jahresabo']);
-	});
-
-	it('nennt in einer Abrechnungsperiode von einem Jahr keine Rechnungen ohne Leistungszeitraum', async () => {
-		expect((await listed('2024-01-01', '2024-12-31')).whole).toEqual([]);
+	// #1099: since #1088 no statement has a period under a year, so no list of the invoices that would count in full
+	// there; «Lift Jahresabo» would be one in the first half of 2024
+	it('liefert keine Liste von Rechnungen ohne Leistungszeitraum, die in einer Periode unter einem Jahr ganz zählten', async () => {
+		expect((await listed('2024-01-01', '2024-06-30')).body).not.toHaveProperty('invoicesWithoutServicePeriod');
 	});
 
 	// Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung, nicht in der, in der die Datenbank sie gespeichert hat (#770)
