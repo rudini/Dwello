@@ -435,3 +435,8 @@ export const MailsTo = (address: string) =>
 			(mail) => mail.to === address
 		)
 	);
+
+/** What a screen reader announced since `ListenToAnnouncements`, in order (#1173) */
+export const Announcements = question('what a screen reader announced', (actor) =>
+	pageOf(actor).evaluate(() => (window as unknown as { announced?: string[] }).announced ?? [])
+);
