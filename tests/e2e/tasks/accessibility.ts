@@ -591,6 +591,17 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(agreementsRetry),
 			Wait.until(on.shown('agreements-retry-failed'))
 		),
+	// #1197: «Weiter», then «Erneut versuchen» while the check still fails: the note below the alert gives no advice of its own
+	'agreements-wait-retry-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/statements/agreements', {}),
+			Navigate.reload,
+			Wait.until(on.shown('agreements-failed')),
+			Click.on(nextButton),
+			Wait.until(on.shown('agreements-wait')),
+			Click.on(agreementsRetry),
+			Wait.until(on.shown('agreements-retry-failed'))
+		),
 	// #688: «Erneut versuchen» once the check works again: the line that the contracts are checked, with the focus
 	'agreements-checked': () => (actor) =>
 		actor.attemptsTo(

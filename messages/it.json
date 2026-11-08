@@ -915,6 +915,7 @@
 	"statements_agreements_retry": "Riprovare",
 	"statements_agreements_wait": "Dwello proseguirà non appena i contratti di locazione saranno verificati.",
 	"statements_agreements_wait_failed": "Dwello non ha potuto verificare i contratti di locazione. Scelga «Riprovare». Se la verifica riesce, si prosegue.",
+	"statements_agreements_wait_retry_failed": "Se la verifica riesce, si prosegue.",
 	"statements_agreements_retry_failed": "Dwello ha riprovato e di nuovo non ha potuto verificare i contratti di locazione. Senza questa verifica non si può proseguire. Riprovi tra qualche minuto.",
 	"statements_agreements_checked": "I contratti di locazione sono verificati.",
 	"statements_agreement_question": "«{category}» è pattuita nel contratto di locazione di {tenant} (appartamento {apartment})?",
