@@ -29,11 +29,16 @@ Funktionalität: Mieterdetail
     Dann ist der Liegenschaftsverwalter auf der Mieterliste
     Und findet der Liegenschaftsverwalter den Mieter "Lea Frei" nicht mehr
 
+  # #1258: die drei Absagen beim Löschen sind gleich gebaut: Titel, Grund, was zu tun ist
+  @wip
   Szenario: Mieter mit Mietverträgen bleibt erhalten
     Angenommen "Lea Frei" mietete die Wohnung "1.01" von "2015-01-01" bis "2019-12-31" für "700" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter den Mieter löschen will
-    Dann bietet der Dialog nur "Schliessen" an
+    Dann heisst der Dialog "Lea Frei kann nicht gelöscht werden"
+    Und nennt der Dialog "Zu diesem Mieter gibt es Mietverträge. Abrechnungen und Dokumente verweisen auf sie, deshalb bleibt der Mieter erhalten."
+    Und nennt der Dialog "Sie müssen nichts tun."
+    Und bietet der Dialog nur "Schliessen" an
 
   Szenario: Mieter bearbeiten
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

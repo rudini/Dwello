@@ -25,11 +25,15 @@ Funktionalität: Gebäudedetail
     Dann ist der Liegenschaftsverwalter auf der Gebäudeliste
     Und das Gebäude "Birkenhof" ist nicht mehr in der Liste
 
+  # #1258: die drei Absagen beim Löschen sind gleich gebaut: Titel, Grund, was zu tun ist
+  @wip
   Szenario: Gebäude mit Wohnungen kann nicht gelöscht werden
     Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude löschen will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Gebäude kann nicht gelöscht werden"
+    Dann heisst der Dialog "Gebäude kann nicht gelöscht werden"
+    Und nennt der Dialog "Es enthält noch Wohnungen."
+    Und nennt der Dialog "Löschen Sie zuerst seine Wohnungen. Danach lässt sich das Gebäude löschen."
     Und bietet der Dialog nur "Schliessen" an
 
   Szenario: Zur Bearbeitung des Gebäudes wechseln

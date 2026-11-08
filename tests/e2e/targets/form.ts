@@ -10,6 +10,8 @@ export const deleteConfirmButton = target('Löschen bestätigen', (page) => page
 export const dialogActionButtons = target('Schaltflächen des Dialogs', (page) =>
 	page.getByRole('dialog').getByTestId('dialog-actions').getByRole('button')
 );
+// the title of the open dialog
+export const dialogTitle = target('Titel des Dialogs', (page) => page.getByRole('dialog').getByTestId('dialog-title'));
 export const successToast = target('Erfolgsmeldung', (page) => page.getByTestId('toast-success'));
 export const errorToast = target('Fehlermeldung', (page) => page.getByTestId('toast-error'));
 export const errorToastClose = target('Meldung schliessen', (page) => errorToast.locate(page).getByRole('button'));
