@@ -3,10 +3,9 @@
  * Business logic for utility statement operations
  */
 
-import { paged } from '../db/paged';
 import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { containing, db } from '../db/connection';
+import { containing, db, paged } from '../db/connection';
 import { recordAudit, recordStatementCorrection } from './audit-log.service';
 import {
 	utilityStatements,

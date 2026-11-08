@@ -3,9 +3,8 @@
  * Business logic for apartment operations
  */
 
-import { paged } from '../db/paged';
 import { eq, and, sql, desc } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { db, paged } from '../db/connection';
 import {
 	apartments,
 	buildings,

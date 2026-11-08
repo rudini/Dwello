@@ -3,10 +3,9 @@
  * Business logic for rental contract operations
  */
 
-import { paged } from '../db/paged';
 import { eq, and, or, sql, desc, gte, lte, isNull, ilike, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { containing, db } from '../db/connection';
+import { containing, db, paged } from '../db/connection';
 import {
 	rentalContracts,
 	apartments,

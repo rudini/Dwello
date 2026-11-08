@@ -3,9 +3,8 @@
  * Business logic for utility cost category operations
  */
 
-import { paged } from '../db/paged';
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
-import { containing, literal, db } from '../db/connection';
+import { containing, literal, db, paged } from '../db/connection';
 import { categories, invoices, utilityStatementLineItems, type Category, type NewCategory } from '../db/schema';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { recordAudit } from './audit-log.service';

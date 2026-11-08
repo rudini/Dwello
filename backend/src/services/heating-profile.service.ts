@@ -5,9 +5,8 @@
  * The predefined profiles (Heizung + Warmwasser, Mittelland, Bergregion, Tessin) come from migrations/0002_stammdaten.sql
  */
 
-import { paged } from '../db/paged';
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
-import { containing, literal, db } from '../db/connection';
+import { containing, literal, db, paged } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type MonthShare, type NewHeatingProfile } from '../db/schema';
 import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
