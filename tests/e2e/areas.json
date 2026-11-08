@@ -1,0 +1,189 @@
+{
+	"about": "E2E selection on pull requests (#845, tools/ci/e2e-areas.mjs): a pull request whose changed files all belong to areas (the pages of one part of the app; the BFF modules, the API routes and the backend serve several, so a change to them runs everything) runs those areas' features plus «always»; any other changed file runs every scenario. «ignore» lists files no scenario runs; «fullRunOnly» names the cross-cutting features that only a full run runs (every feature file is in an area, «always» or «fullRunOnly»). Paths are regular expressions; features are Playwright file filters (regular expressions matched against the generated spec path, without shell characters: they go into the command line unquoted). main and the nightly run run everything. The selection sees imports, not navigation: a scenario that opens a page of another area is not selected for a change of that page; main shows it.",
+	"always": [
+		"features/sprachen-bildschirme.feature",
+		"features/demo.feature"
+	],
+	"fullRunOnly": [
+		"features/accessibility.feature",
+		"features/authentication.feature",
+		"features/breadcrumb.feature",
+		"features/hydration.feature",
+		"features/navigation.feature",
+		"features/sprachen.feature"
+	],
+	"ignore": [
+		"\\.test\\.ts$",
+		"\\.md$",
+		"^docs/",
+		"^\\.claude/",
+		"^tools/(?!ci/e2e-areas\\.mjs$|e2e/)"
+	],
+	"areas": {
+		"buildings": {
+			"paths": [
+				"^src/routes/buildings/"
+			],
+			"features": [
+				"features/building"
+			]
+		},
+		"apartments": {
+			"paths": [
+				"^src/routes/apartments/(?!StatusLegend\\.svelte$)"
+			],
+			"features": [
+				"features/apartment"
+			]
+		},
+		"tenants": {
+			"paths": [
+				"^src/routes/tenants/"
+			],
+			"features": [
+				"features/tenant"
+			]
+		},
+		"contracts": {
+			"paths": [
+				"^src/routes/contracts/"
+			],
+			"features": [
+				"features/contract"
+			]
+		},
+		"invoices": {
+			"paths": [
+				"^src/routes/invoices/"
+			],
+			"features": [
+				"features/invoice"
+			]
+		},
+		"statements": {
+			"paths": [
+				"^src/routes/statements/"
+			],
+			"features": [
+				"features/statement"
+			]
+		},
+		"categories": {
+			"paths": [
+				"^src/routes/config/categories/(?!CategoryReason\\.svelte$)"
+			],
+			"features": [
+				"features/categories"
+			]
+		},
+		"distribution-keys": {
+			"paths": [
+				"^src/routes/config/distribution-keys/"
+			],
+			"features": [
+				"features/distribution-keys.feature"
+			]
+		},
+		"heating-profiles": {
+			"paths": [
+				"^src/routes/config/heating-profiles/"
+			],
+			"features": [
+				"features/heating-profiles.feature"
+			]
+		},
+		"documents": {
+			"paths": [
+				"^src/routes/documents/(?!(DeliveryFailure|DocumentItem)\\.svelte$)"
+			],
+			"features": [
+				"features/documents.feature",
+				"features/tenant-documents.feature"
+			]
+		},
+		"dashboard": {
+			"paths": [
+				"^src/routes/dashboard/(?!KiModelNotice\\.svelte$)"
+			],
+			"features": [
+				"features/dashboard.feature"
+			]
+		},
+		"reports": {
+			"paths": [
+				"^src/routes/reports/"
+			],
+			"features": [
+				"features/reports.feature"
+			]
+		},
+		"help": {
+			"paths": [
+				"^src/routes/help/"
+			],
+			"features": [
+				"features/help.feature"
+			]
+		},
+		"legal": {
+			"paths": [
+				"^src/routes/(privacy|terms|analytics)/"
+			],
+			"features": [
+				"features/privacy.feature",
+				"features/terms.feature",
+				"features/analytics.feature"
+			]
+		},
+		"backup": {
+			"paths": [
+				"^src/routes/config/backup/",
+				"^src/routes/backup/"
+			],
+			"features": [
+				"features/sicherung.feature"
+			]
+		},
+		"access-keys": {
+			"paths": [
+				"^src/routes/config/access-keys/"
+			],
+			"features": [
+				"features/zugangsschluessel.feature"
+			]
+		},
+		"data-export": {
+			"paths": [
+				"^src/routes/config/export/"
+			],
+			"features": [
+				"features/datenexport.feature"
+			]
+		},
+		"ki-settings": {
+			"paths": [
+				"^src/routes/config/ki/"
+			],
+			"features": [
+				"features/ki-einstellungen.feature",
+				"features/categories-ki.feature"
+			]
+		},
+		"setup": {
+			"paths": [
+				"^src/routes/setup/"
+			],
+			"features": [
+				"features/einrichtung.feature"
+			]
+		},
+		"settings": {
+			"paths": [
+				"^src/routes/config/(\\+page\\.svelte|\\+page\\.server\\.ts|ConfigLinks\\.svelte|DefaultsSection\\.svelte|SettingField\\.svelte)$"
+			],
+			"features": [
+				"features/settings.feature"
+			]
+		}
+	}
+}

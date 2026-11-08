@@ -57,10 +57,18 @@ jobs:
           # (sprachen-bildschirme.feature, one block per browser) filled three of twelve shards (16-18 min against 4-7):
           # on main they get six shards of their own and the other tests six (#838). The axe check runs Chromium only, in four (#840)
           e2e=$([ "${{ github.event_name }}" = pull_request ] && echo 5 || echo 12)
+          filter=
+          # A pull request whose changes all belong to areas of tests/e2e/areas.json runs only their features and the
+          # cross-area checks, in two shards (#845); any other change runs everything, and main always does
+          if [ "${{ github.event_name }}" = pull_request ]; then
+            git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" > changed.txt
+            filter=$(node tools/ci/e2e-areas.mjs < changed.txt)
+            [ -n "$filter" ] && e2e=2 && echo "::notice::E2E tests of the changed areas only: $filter"
+          fi
           echo "shards=$(jq -nc --argjson e2e "$e2e" '{"E2E tests": $e2e, "Accessibility (axe)": 4}')" >> "$GITHUB_OUTPUT"
-          echo "matrix=$(jq -nc --argjson e2e "$e2e" '
+          echo "matrix=$(jq -nc --argjson e2e "$e2e" --arg filter "$filter" '
             def e2e(n; grep): [range(1; n + 1) | {name: "E2E tests", args: "\(grep) --shard=\(.)/\(n)", reports: "e2e-reports"}];
-            (if $e2e == 5 then e2e(5; "--grep-invert @a11y")
+            (if $e2e < 12 then e2e($e2e; "--grep-invert @a11y \($filter)")
              else e2e(6; "--grep-invert '\''@a11y|sprachen-bildschirme'\''") + e2e(6; "--grep sprachen-bildschirme") end
              | to_entries | map(.value + {shard: (.key + 1), shards: $e2e}))
             + [range(1; 5) | {name: "Accessibility (axe)", args: "--project=chromium --grep @a11y --shard=\(.)/4", reports: "a11y-reports", shard: ., shards: 4}]')" >> "$GITHUB_OUTPUT"
@@ -73,7 +81,7 @@ jobs:
             echo "::notice::Only documentation changed since the last green run of this branch, so its tests are skipped."
             echo "backend=false" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
           fi
-          git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
+          cat changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts); the upgrade check and the queries
           # per route run with the backend steps, so a change to them or to their ratchet runs them too (#922); the compose
           # files and the keys script, which backend tests compare (compose-images.test.ts, #578)
@@ -322,7 +330,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # From the job Changes: E2E in five shards on a pull request and twelve on main, the axe check in four; each
+        # From the job Changes: E2E in five shards on a pull request (two for the features of its areas, #845) and twelve
+        # on main, the axe check in four; each
         # entry names its Playwright filter and shard in args
         include: ${{ fromJSON(needs.changes.outputs.matrix) }}
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
