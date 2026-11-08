@@ -253,3 +253,23 @@ export const PostFormAction = (action: string, fields: Record<string, string> = 
 		},
 		{ action, fields }
 	);
+
+// #1173: what a screen reader announces from now on, for `Announcements`: the text added to a live region (all of
+// it in an atomic region), as the page changes it; a removal is not read out
+export const ListenToAnnouncements = (async (actor) =>
+	pageOf(actor).evaluate(() => {
+		const heard: string[] = [];
+		Object.assign(window, { announced: heard });
+		const live = '[aria-live], [role="status"], [role="alert"], [role="log"]';
+		const said = (text: string | null | undefined) => text?.replace(/\s+/g, ' ').trim();
+		new MutationObserver((records) => {
+			for (const { target, type, addedNodes } of records) {
+				const region = (target instanceof Element ? target : target.parentElement)?.closest(live);
+				if (!region || region.getAttribute('aria-live') === 'off') continue;
+				const atomic = region.getAttribute('aria-atomic') === 'true';
+				const added = type === 'characterData' ? [target] : [...addedNodes];
+				const text = said(atomic && added.length ? region.textContent : added.map((node) => node.textContent).join(' '));
+				if (text) heard.push(text);
+			}
+		}).observe(document.body, { childList: true, subtree: true, characterData: true });
+	})) as Activity;

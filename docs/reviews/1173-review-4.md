@@ -1,0 +1,15 @@
+# Review 1173, Runde 4: Schlussrunde (b871e8c..07a5f5c)
+
+Umfang: `git diff b871e8c 07a5f5c -- src` (`src/routes/+layout.svelte`, `src/__tests__/layout-hydrated.dom.test.ts`), dazu `tests/e2e/screenplay/interactions.ts:250-266` (ListenToAnnouncements) und `tests/e2e/features/tenant-documents.feature:137-151`.
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | src/routes/+layout.svelte:78-79 | Leeren und Füllen geschehen im selben Task (zwei Microtasks). Das DOM ändert sich zweimal, aber Chromium baut seinen Accessibility-Baum erst im nächsten Lifecycle-Update neu auf und erzeugt Live-Region-Ereignisse aus dem Vergleich zweier Stände. Der leere Zwischenstand kommt dort also kaum an, der Endtext ist derselbe wie vorher, und Chromium sagt dann wahrscheinlich nichts an. Der DOM-Test und der E2E-Recorder sehen nur DOM-Mutationen und können das nicht zeigen. Üblich ist, das Füllen auf einen späteren Frame zu verschieben (`requestAnimationFrame` oder `setTimeout`). Im Browser mit Screenreader nicht belegt (siehe "Nicht bestätigt"). |
+
+Geprüft: Es gibt zwei Flushes. Svelte 5 `tick()` wartet einen Microtask ab und ruft dann `flushSync()` auf. Damit steht `''` im DOM, bevor `.then` den Titel setzt, und dieser Titel wird im nächsten Microtask geflusht. Ohne den Fix bleibt der Wert gleich, es gibt keine Mutation, `heard` ist leer, und `heard.at(-1)` ist `undefined`: Der Test ist rot. Mit dem Fix ist er grün. Er ist also aussagekräftig. Der Recorder lässt den leeren Zwischenstand aus, weil `said('')` falsy ist, und das gilt auch für einen entfernten Textknoten (`addedNodes` ist leer). Die Szenarien in `tenant-documents.feature:146` («nur den Seitentitel», einmal) und `:138` (Aktion ohne Pfadwechsel, Zweig unverändert) bleiben deshalb gültig. Einen leeren assertiven Inhalt sagen Screenreader nicht an. Schnelle Navigationen A→B→C enden beim Titel von C. Der übrige `afterNavigate`-Code ist unverändert. Ausserhalb der Anforderung wurde nichts geändert, und der Fix fügt keine neuen Texte, Testids oder Screens hinzu.
+
+## Nicht bestätigt
+
+- bun run lint, bun run check, vitest `layout-hydrated.dom.test.ts` (12) und E2E chromium tenant-documents + tenants (28 bestanden) auf 07a5f5c: vom Aufrufer gemeldet.
+- Ob NVDA, JAWS oder VoiceOver mit Chromium, Firefox oder Safari den gleichnamigen Titel nach dem Fix wirklich vorlesen (C-1). Ich habe nur den Code gelesen und nichts im Browser beobachtet. Die Einschätzung zu Chromium stützt sich auf sein Modell, Accessibility-Updates pro Lifecycle zu bündeln, nicht auf einen Lauf.
+- Szenario: Der Fix hat kein E2E-Szenario, und der Commit nennt kein `No scenario: <reason>`. In der App habe ich keinen direkten Übergang zwischen zwei Pfaden mit gleichem Titel gefunden. Gesucht habe ich in `tenants/[id]`, `contracts/[id]`, `invoices/[id]`, `buildings/[id]` und `reports`: Zwischen zwei gleichnamigen Mietern liegt immer die Mieterliste mit eigenem Titel. Mit App-Aktivitäten ist der Fall in E2E deshalb kaum herzustellen. Der Pull-Request-Text braucht dann `No scenario: <reason>`. Den Text habe ich nicht gesehen.
