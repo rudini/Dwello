@@ -896,6 +896,34 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('send-recalculate')).toBeNull();
 	});
 
+	// #1309 (Entscheid PO, Fachreview 1309-1): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt
+	const failing = [{ key: 'Halbe Zimmer', reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01' }];
+	it('nennt beim Entwurf den Verteilschlüssel, der sich nicht berechnen lässt, und sagt, was zu tun ist', () => {
+		later(0, 'draft', { uncalculableKeys: failing } as never);
+		expect(laterText()).toMatch(/^\s*Verteilschlüssel lässt sich nicht berechnen/);
+		expect(laterText()).toContain(
+			'Dieser Entwurf ist nicht aktuell: Der Verteilschlüssel einiger Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Die Formel von «Halbe Zimmer» teilt für die Wohnung 2.01 im Gebäude «Ahornhof» durch null. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist ihr Verteilschlüssel schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Wählen Sie danach «Neu berechnen».'
+		);
+		expect(laterText()).not.toContain('Seit dem Erstellen');
+		click('statement-send-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Der Verteilschlüssel einiger Rechnungen dieses Entwurfs lässt sich für die Wohnungen des Gebäudes nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel. Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen.'
+		);
+	});
+
+	it('nennt beim Entwurf auch danach geänderte Rechnungen', () => {
+		later(1, 'draft', { uncalculableKeys: failing } as never);
+		expect(laterText()).toContain('Wählen Sie danach «Neu berechnen». Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung');
+	});
+
+	// Fachreview 1309-1 V-1: ohne «Abrechnung berichtigen», solange Dwello nicht neu berechnen kann
+	it('bietet bei einer versendeten Abrechnung mit einem solchen Verteilschlüssel kein Berichtigen im Hinweis an', () => {
+		later(0, 'sent', { uncalculableKeys: failing, correctionDue: true } as never);
+		expect(laterText()).toContain('durch null. Dwello kann die Abrechnung deshalb nicht neu berechnen.');
+		expect(byTestId('statement-later-correct-button')).toBeNull();
+		expect(byTestId('statement-decline-correction-button')).toBeNull();
+	});
+
 	// #454 (#408 point 8): the Tankbestand changed since; titles decided 2026-10-20 (Fachreview 454-1 E-4)
 	it('weist auf einen danach geänderten Tankbestand hin', () => {
 		later(0, 'draft', { fuelStock: true });

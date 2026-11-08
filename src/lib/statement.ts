@@ -133,3 +133,25 @@ export function recalculatedText(tenant: string, before: number, recalculated: R
 	const text = now === before ? m.statements_later_now_same({ tenant }) : NOW_WAS[`${kindOf(now)}_${kindOf(before)}`](amounts);
 	return recalculated.belowMinimum ? `${text} ${m.statements_later_below_minimum()}` : text;
 }
+
+/** A key that cannot be calculated for a building: why, and for which apartment if for one (#1315) */
+export type KeyFailure = { key: string; reason: string; apartment: string | null; building: string };
+const failureTexts: Record<string, (params: { key: string; apartment: string; building: string }) => string> = {
+	STATEMENT_KEY_REASON_DIVISION_BY_ZERO: m.statements_key_failure_division_by_zero,
+	STATEMENT_KEY_REASON_NEGATIVE: m.statements_key_failure_negative,
+	STATEMENT_KEY_REASON_ALL_ZERO: m.statements_key_failure_all_zero
+};
+
+/** One sentence per key and building, the buildings as given, in each the keys by name (Fachreview 1309-1) */
+export function keyFailuresText(failures: KeyFailure[]) {
+	const once = new Map(failures.map((failure) => [`${failure.building}\n${failure.key}`, failure]));
+	const buildings = [...new Set(failures.map((failure) => failure.building))];
+	return buildings
+		.flatMap((building) =>
+			[...once.values()].filter((failure) => failure.building === building).sort((a, b) => a.key.localeCompare(b.key))
+		)
+		.map(({ reason, key, apartment, building }) =>
+			(failureTexts[reason] ?? m.statements_key_failure_other)({ key, apartment: apartment ?? '', building })
+		)
+		.join(' ');
+}

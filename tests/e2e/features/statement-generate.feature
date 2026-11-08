@@ -313,7 +313,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #1221 (Entscheid PO): ein eigener Verteilschlüssel, der sich für die Wohnungen des Gebäudes nicht berechnen lässt,
   # verteilt nicht still zu gleichen Teilen, sondern hält den Lauf an wie eine Rechnung ohne Kategorie (#382); die Formel
   # besteht die vier Beispielwohnungen und teilt erst bei 3.5 Zimmern durch null
-  @wip
   Szenario: Ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt, hält die Vorschau an
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
@@ -328,7 +327,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #1323: die Veränderung des Tankbestands nimmt den Verteilschlüssel der letzten Lieferung bis zum Ende der Periode,
   # auch aus einer früheren Periode; lässt er sich nicht berechnen, hält er die Vorschau an wie eine Rechnung der Periode
-  @wip
   Szenario: Der Verteilschlüssel einer früheren Lieferung hält die Vorschau an, wenn er die Veränderung Tankbestand verteilt
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "800" Franken vom "2023-10-15" nach dem Verteilschlüssel "Halbe Zimmer"

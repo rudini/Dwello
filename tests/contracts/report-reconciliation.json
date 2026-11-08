@@ -14,5 +14,6 @@
 	"nonAllocable": 500,
 	"withoutStatement": 1,
 	"drafts": [{ "id": "a0000000-0000-4000-8000-000000000001", "tenantName": "Eva Frei" }],
-	"notUpToDate": [{ "id": "a0000000-0000-4000-8000-000000000001", "tenantName": "Eva Frei" }]
+	"notUpToDate": [{ "id": "a0000000-0000-4000-8000-000000000001", "tenantName": "Eva Frei" }],
+	"keyNotCalculable": []
 }

@@ -180,6 +180,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	const changed: {
 		invoiceIds?: string[];
 		fuelStockChanged?: boolean;
+		uncalculableKeys?: { key: string; reason: string; apartment: string | null }[];
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
@@ -190,6 +191,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	return {
 		invoices: changed.invoiceIds?.length ?? 0,
 		fuelStock: !!changed.fuelStockChanged,
+		uncalculableKeys: changed.uncalculableKeys ?? [], // #1309: they hold the recalculation
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,

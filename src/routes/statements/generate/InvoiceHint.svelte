@@ -41,6 +41,7 @@
 								amount: formatCurrency(parseFloat(invoice.amount))
 							})}</a
 						>
+						{#if invoice.note}<p>{invoice.note}</p>{/if}
 					</li>
 				{/each}
 			</ul>

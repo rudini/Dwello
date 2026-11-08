@@ -778,6 +778,20 @@
 			]
 		},
 		{
+			"name": "statement-uncalculable-draft-detail",
+			"path": "/statements/{uncalculableDraft}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-uncalculable-sent-detail",
+			"path": "/statements/{uncalculableSent}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-unaffected-detail",
 			"path": "/statements/{unaffectedStatement}",
 			"states": [

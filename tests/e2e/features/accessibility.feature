@@ -250,6 +250,8 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | decline-dialog      |
       | statement-sent-detail  | redeliver-dialog    |
       | statement-sent-detail  | new-pdf-sent-dialog |
+      | statement-uncalculable-draft-detail | default |
+      | statement-uncalculable-sent-detail | default |
       | statement-unaffected-detail | default        |
       | statement-declined-detail | default          |
       | statement-lowered-detail | default           |

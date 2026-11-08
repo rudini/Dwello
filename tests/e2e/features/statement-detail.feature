@@ -1082,7 +1082,6 @@ Funktionalität: Abrechnungsdetail
   # #1309 (Entscheid PO): ein Entwurf mit einer Rechnung, deren Verteilschlüssel sich für die Wohnungen des Gebäudes
   # nicht berechnen lässt, ist nicht aktuell (vor #1221 verteilte Dwello sie gleichmässig); «Neu berechnen» verweigert
   # wie in #1221, bis der Verteilschlüssel stimmt
-  @wip
   Szenario: Entwurf mit einem Verteilschlüssel, der sich nicht berechnen lässt, ist nicht aktuell
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
@@ -1095,7 +1094,6 @@ Funktionalität: Abrechnungsdetail
 
   # #1309 (Entscheid PO): eine versendete Abrechnung mit einem solchen Verteilschlüssel ist zu berichtigen, sobald der
   # Verteilschlüssel stimmt; bis dahin wird sie nicht ersetzt (Fachreview 1309-1 V-1)
-  @wip
   Szenario: Versendete Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, wird nicht ersetzt
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird

@@ -130,18 +130,24 @@ export async function statementChanges(statementId: string) {
 	return { ...changes, carryOverChanged: !!statement!.carryChanged, splitKeys: await invoiceSplitKeys(statement!.building!.id, period) }; // #506 C
 }
 
+// Whether correcting a statement a berichtigte Abrechnung would replace is due, and the recalculation that says so
+async function correction(statement: Located, load: Loaders, changed: boolean, keyFails: boolean) {
+	const correctable = CORRECTED.includes(statement.status) && (changed || keyFails);
+	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
+	const full = correctable && !keyFails ? await load.full(statement) : null;
+	const check = full ? await recalculation(full) : null;
+	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
+	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
+	return { due, check };
+}
+
 async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
 	if (!statement?.building) return null;
 	const located = statement as Located;
 	const invoiceIds = await changedInvoices(located, load);
 	const fuelStock = await fuelStockChanged(located, load);
 	const keys = await uncalculableKeys(located, load);
-	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock || keys.length > 0);
-	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
-	const full = correctable && !keys.length ? await load.full(located) : null;
-	const check = full ? await recalculation(full) : null;
-	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
-	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
+	const { due, check } = await correction(located, load, invoiceIds.length > 0 || fuelStock, keys.length > 0);
 	return {
 		invoiceIds,
 		fuelStockChanged: fuelStock,
@@ -169,16 +175,23 @@ export async function declineCorrection(statementId: string) {
 	return (await getStatement(statementId))!;
 }
 
-/** #1126: the listed statements whose invoices or Tankbestand changed since they were created («Nicht aktuelle Abrechnung») */
+/**
+ * #1126: the listed statements whose invoices or Tankbestand changed since they were created («Nicht aktuelle
+ * Abrechnung»), and apart from them those that bill a key that cannot be calculated for the building (#1309)
+ */
 export async function notUpToDate<S extends StatementWithDetails>(statements: S[]) {
 	const load = perPeriod();
-	const changed = async (s: S) =>
-		!!s.building &&
-		((await changedInvoices(s as Located, load)).length > 0 ||
-			(await fuelStockChanged(s as Located, load)) ||
-			(await uncalculableKeys(s as Located, load)).length > 0);
-	const flags = await Promise.all(statements.map(changed));
-	return statements.filter((_, i) => flags[i]);
+	const why = async (s: S) => {
+		if (!s.building) return null;
+		if ((await uncalculableKeys(s as Located, load)).length) return 'key';
+		const changed = (await changedInvoices(s as Located, load)).length > 0 || (await fuelStockChanged(s as Located, load));
+		return changed ? 'changed' : null;
+	};
+	const reasons = await Promise.all(statements.map(why));
+	return {
+		changed: statements.filter((_, i) => reasons[i] === 'changed'),
+		keyNotCalculable: statements.filter((_, i) => reasons[i] === 'key')
+	};
 }
 
 /** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */

@@ -8,4 +8,5 @@ export type Reconciliation = {
 	withoutStatement: number; // «Berichte» only: contracts of the period without a statement
 	drafts: { id: string; tenantName: string }[];
 	notUpToDate: { id: string; tenantName: string }[];
+	keyNotCalculable?: { id: string; tenantName: string }[]; // #1309: a key of theirs cannot be calculated
 };

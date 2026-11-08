@@ -42,6 +42,19 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		);
 	});
 
+	// #1315, #1323 (Fachreview 1309-1): warum die Formel scheitert, und die Lieferung, deren Verteilschlüssel den Tankbestand verteilt
+	it('nennt beim nicht berechenbaren Verteilschlüssel Grund, Wohnung und die Lieferung einer anderen Periode', () => {
+		const refusal = (params: Record<string, string>) =>
+			backendMessage({ code: 'STATEMENT_KEY_NOT_CALCULABLE', params: { key: 'Halbe Zimmer', building: 'Ahornhof', invoices: 'Öl AG, 15.10.2024, CHF 800.00', ...params } }, 'Ersatz');
+
+		expect(refusal({ reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01', fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: '2024-10-15' })).toBe(
+			'Der Verteilschlüssel «Halbe Zimmer» lässt sich für die Wohnungen des Gebäudes «Ahornhof» nicht berechnen. Seine Formel teilt für die Wohnung 2.01 durch null. Er gilt für diese Rechnungen: Öl AG, 15.10.2024, CHF 800.00. Die Veränderung Tankbestand verteilt Dwello nach dem Verteilschlüssel der Lieferung vom 15.10.2024. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist «Halbe Zimmer» schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Versuchen Sie es danach noch einmal.'
+		);
+		expect(refusal({ reason: 'STATEMENT_KEY_REASON_ALL_ZERO' })).toContain(
+			'nicht berechnen. Seine Formel ergibt für alle Wohnungen 0. Er gilt für diese Rechnungen: Öl AG, 15.10.2024, CHF 800.00. Wählen Sie'
+		);
+	});
+
 	it('setzt auch verschachtelte Codes ein', () => {
 		const body = {
 			error: 'Die Formel ist ungültig: …',
