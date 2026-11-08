@@ -26,7 +26,7 @@
 	const expire = (toast: Toast) =>
 		pointer || region?.contains(document.activeElement)
 			? expired.push(toast)
-			: dismissToast(toast.id);
+			: (delete before[toast.id], dismissToast(toast.id));
 	const resume = (into?: EventTarget | null) => {
 		if (pointer || region?.contains(into as Node | null)) return;
 		for (const toast of expired) setTimeout(() => expire(toast), toast.duration);
@@ -48,13 +48,36 @@
 			refocus();
 			// the reading time starts now that the confirmation is shown
 			for (const toast of $toasts)
-				if (toast.type !== 'error' && toast.id > shownUpTo && toast.duration)
-					setTimeout(() => expire(toast), toast.duration);
+				if (toast.type !== 'error' && toast.id > shownUpTo) {
+					noteBefore(toast.id);
+					if (toast.duration) setTimeout(() => expire(toast), toast.duration);
+				}
 			shownUpTo = newest;
 		}, 500);
 		return () => clearTimeout(timer);
 	});
 	const errors = $derived($toasts.filter((toast) => toast.type === 'error'));
+	// #1158 (Sven P-1): «Meldung schliessen» gives the focus back to what had it when the toast appeared,
+	// without it to the heading of the step or the page
+	const before: Record<number, Element | null> = {}; // no state: read only on closing
+	const noteBefore = (id: number) => {
+		const part = document.activeElement;
+		if (!(id in before))
+			before[id] = part === document.body || region?.contains(part) ? null : part;
+	};
+	$effect(() => errors.forEach((toast) => noteBefore(toast.id)));
+	const close = (id: number) => {
+		const part = before[id];
+		const left =
+			document.activeElement === document.body || region?.contains(document.activeElement);
+		delete before[id];
+		dismissToast(id);
+		if (!left) return;
+		const back = part?.isConnected
+			? part
+			: (document.getElementById('step-heading') ?? document.querySelector('h1[tabindex="-1"]'));
+		(back as HTMLElement | null)?.focus();
+	};
 	const confirmations = $derived(
 		$toasts.filter((toast) => toast.type !== 'error' && toast.id <= shownUpTo)
 	);
@@ -105,7 +128,7 @@
 	>
 		<span class={style.text}><Icon name={style.icon} size={24} /></span>
 		<p class="flex-1 font-semibold">{toast.message}</p>
-		<IconButton icon="close" label={m.ui_close_message()} onclick={() => dismissToast(toast.id)} />
+		<IconButton icon="close" label={m.ui_close_message()} onclick={() => close(toast.id)} />
 	</div>
 {/snippet}
 

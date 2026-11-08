@@ -21,6 +21,7 @@ import {
 	reviewContractsUnknown,
 	reviewItem,
 	runningContractHint,
+	runningContractHintOf,
 	startContractsUnknown,
 	tenantSelect,
 	withdrawNoticeOption,
@@ -65,6 +66,7 @@ export const partiesHelpText = Text.of(partiesHelp);
 export const billedUntilHelpText = Text.of(billedUntilHelp);
 export const feeHelpText = Text.of(feeHelp);
 export const runningContractHintText = Text.of(runningContractHint);
+export const runningContractHintsOf = (tenant: string) => Count.of(runningContractHintOf(tenant));
 export const enteredAdvancePayment = Value.of(advancePaymentInput);
 export const rentTakenOverText = Text.of(rentTakenOver);
 export const withdrawNoticeHelp = Text.of(withdrawNoticeOption);

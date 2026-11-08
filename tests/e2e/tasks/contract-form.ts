@@ -233,4 +233,7 @@ export const followNoticeHint = Click.on(noticeHintLink);
 // #1153: the warning after «Erneut versuchen» closed; the hint in the step stays
 // waits until it is gone, so what is checked next outlasted it (code review 1153 C-2)
 export const closeWarning: Activity = (actor) => actor.attemptsTo(Click.on(warningToastClose), Wait.forCount(warningToast, 0));
+// #1158 (Sven P-1): closed with the keyboard, where the focus goes next matters
+export const closeWarningWithKeyboard: Activity = (actor) =>
+	actor.attemptsTo(Press.theKey('Enter').on(warningToastClose), Wait.forCount(warningToast, 0));
 export const openClearedApartmentContract: Activity = Click.on(apartmentClearedLink);

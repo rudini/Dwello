@@ -275,6 +275,63 @@ describe('Meldungen', () => {
 		row.remove();
 	});
 
+	// #1158 (Persona Sven P-1): «Meldung schliessen» leaves the focus where the landlord can continue, not on the page
+	const closeWithKeyboard = (type: 'success' | 'error', message: string) => {
+		addToast(type, message);
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		const close = document.querySelector<HTMLElement>('[aria-label="Meldung schliessen"]')!;
+		close.focus();
+		click(close);
+		flushSync();
+	};
+
+	it.each(['success', 'error'] as const)(
+		'setzt den Fokus nach «Meldung schliessen» (%s) zurück auf das, was ihn vor der Meldung hatte',
+		(type) => {
+			vi.useFakeTimers();
+			toasts.set([]);
+			show(ToastRegion, {});
+			document.body.insertAdjacentHTML(
+				'beforeend',
+				'<h1 tabindex="-1">Neuer Mietvertrag</h1><button data-testid="before">Weiter</button>'
+			);
+			byTestId('before')!.focus();
+			closeWithKeyboard(type, 'Mieter gespeichert');
+			expect(document.activeElement).toBe(byTestId('before'));
+		}
+	);
+
+	it('setzt den Fokus nach «Meldung schliessen» auf den Schritt, wenn das Element davor weg ist', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		document.body.insertAdjacentHTML(
+			'beforeend',
+			'<h1 tabindex="-1">Neuer Mietvertrag</h1><h2 id="step-heading" tabindex="-1">Wohnung</h2><button data-testid="before">Erneut versuchen</button>'
+		);
+		byTestId('before')!.focus();
+		addToast('warning', 'Wohnung abgewählt');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		byTestId('before')!.remove();
+		document.querySelector<HTMLElement>('[aria-label="Meldung schliessen"]')!.focus();
+		click(document.querySelector<HTMLElement>('[aria-label="Meldung schliessen"]')!);
+		flushSync();
+		expect(document.activeElement!.textContent).toBe('Wohnung');
+	});
+
+	it('setzt den Fokus nach «Meldung schliessen» auf den Seitentitel, wenn es keinen Schritt gibt', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		document.body.insertAdjacentHTML('beforeend', '<h1 tabindex="-1">Mieter</h1>');
+		closeWithKeyboard('success', 'Mieter gespeichert');
+		expect(document.activeElement).toBe(document.querySelector('h1'));
+	});
+
 	// #669 (Persona Sven S-1, WCAG 2.2.1): the confirmation left while the focus was on «Meldung schliessen»
 	it('lässt die Erfolgsmeldung stehen, solange der Fokus in ihr ist, und zählt danach die Lesezeit neu', () => {
 		vi.useFakeTimers();

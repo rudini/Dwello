@@ -295,8 +295,10 @@ export function restoredDraft(
 export function openContractsOf<A extends { id: string }>(
 	apartments: A[],
 	contracts: Map<string, ContractForAvailability[] | null> | null,
-	tenantId: string
+	{ tenantId, apartmentId }: { tenantId: string; apartmentId: string }
 ) {
+	// #1158 (Sven P-3): only next to a chosen apartment, never beside a cleared choice's hint
+	if (!apartmentId) return [];
 	return apartments.flatMap((apartment) =>
 		(contracts?.get(apartment.id) ?? [])
 			.filter((c) => c.tenant_id === tenantId && !c.end_date)

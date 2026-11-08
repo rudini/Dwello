@@ -123,7 +123,7 @@
 	const reviewUnknown = $derived(unknown && !refusedWith);
 	const reviewOverlap = $derived(refusedWith ? null : overlap); // found by «Erneut versuchen» there (#669)
 	const overlapAtField = $derived(!!overlap && errors[overlap.field] === overlap.text);
-	const openContracts = $derived(openContractsOf(apartments, contracts, values.tenantId));
+	const openContracts = $derived(openContractsOf(apartments, contracts, values));
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	const contractsOf = async (apartmentId: string) => {
