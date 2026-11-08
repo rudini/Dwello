@@ -1501,6 +1501,19 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #1173 Do not announce the page title again after a form action
+
+Parallel session: checklist kept in the pull request.
+
+- [x] Decisions 1–3 recorded in #1173 under «Decided (product owner)»
+- [x] Scenarios in `tenant-documents.feature`: upload heard without the title (seen red: title «Lea Frei … - Dwello» heard), opening a tenant reads its title once (pins kept behaviour)
+- [x] Screen reader recorder for E2E (`ListenToAnnouncements`, `Announcements`)
+- [x] Root layout: SvelteKit's announcer muted and hidden, own announcer reads the title on a change of path; DOM tests in `layout-hydrated.dom.test.ts`, each seen red
+- [x] code-reviewer `docs/reviews/1173-review-1.md`: no findings
+- [x] Persona Sven `docs/design/personas/sven-1173.md`: no Blocker, Major or Minor; observation «title twice in the tree» caused by the change, fixed (aria-hidden, 0f2d074)
+- [x] Closing code-reviewer `docs/reviews/1173-review-2.md`
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, E2E tenant-documents/tenants/documents, axe and language rows of the tenant screens
+- [x] Archive the session; PR `Fixes #1173`: pushed after this archive
 - [x] Each point of #739 checked on main: the wizard preselects `default_heating_profile_id`, else the first complete profile, own ones first; the E2E data set no default
 - [x] Probe (not committed): an own complete profile listed first, all `statement-*.feature` on Chromium green (345): no amount depends on the preselection; decision written into #739 («Decided (product owner)»: a default per run, no scenario change)
 - [x] Throwaway `@wip` probe: the wizard proposed the probe profile without the change (red), «Heizung + Warmwasser» with it (green); No scenario: test data setup

@@ -14,6 +14,7 @@ import {
 	Enter,
 	EnterDate,
 	FailRequests,
+	ListenToAnnouncements,
 	Navigate,
 	PostFormAction,
 	Press,
@@ -1041,3 +1042,6 @@ export const checkLanguagesOf = (example: Example, userData: string[]): Activity
 		for (const language of example.state === 'other-language' ? ['fr'] : ['fr', 'it', 'en'])
 			await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', languageFindings(language, userData)));
 	});
+
+// #1173: from now on note what a screen reader hears
+export const listenLikeAScreenReader = ListenToAnnouncements;
