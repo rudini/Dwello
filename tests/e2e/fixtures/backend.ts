@@ -151,11 +151,13 @@ export function testData(api: CallTheApi) {
 				.sort((a, b) => b.length - a.length)
 				.reduce((term, title) => term.replace(title, names.get(title)!), text),
 
-		async building(title: string, city: string, street?: string) {
+		// «6003 Luzern» gives the building its own postcode, a place alone 8400
+		async building(title: string, place: string, street?: string) {
+			const [, postalCode = '8400', city] = place.match(/^(?:(\d{4}) )?(.+)$/)!;
 			const building = await post('buildings', {
 				name: unique(title),
 				address: street ? unique(street) : 'Testweg 1',
-				postalCode: '8400',
+				postalCode,
 				city,
 				canton: 'ZH'
 			});
