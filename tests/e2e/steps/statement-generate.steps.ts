@@ -227,7 +227,7 @@ Then('nennt die Vorschau eine Verwaltungspauschale von {string}', async ({ verwa
 	await verwalter.sees(feeOfRun).toContain(text);
 });
 
-Then('steht im Feld der Verwaltungspauschale {string}', async ({ verwalter }, text: string) => {
+Then('steht bei der Verwaltungspauschale {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(feeFieldValue).toBe(text);
 });
 
@@ -465,7 +465,7 @@ Then('sieht der Liegenschaftsverwalter keinen Hinweis auf wiederhergestellte Ang
 	await verwalter.sees(restoredDraftShown).toBe(false);
 });
 
-Then('meldet das Feld der Verwaltungspauschale {string}', async ({ verwalter }, message: string) => {
+Then('meldet Dwello bei der Verwaltungspauschale {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(feeFieldDescription).toContain(message);
 });
 

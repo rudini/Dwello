@@ -915,6 +915,7 @@
 	"statements_agreements_retry": "Erneut versuchen",
 	"statements_agreements_wait": "Dwello geht weiter, sobald die Mietverträge geprüft sind.",
 	"statements_agreements_wait_failed": "Dwello konnte die Mietverträge nicht prüfen. Wählen Sie «Erneut versuchen». Gelingt die Prüfung, geht es weiter.",
+	"statements_agreements_wait_retry_failed": "Gelingt die Prüfung, geht es weiter.",
 	"statements_agreements_retry_failed": "Dwello hat es erneut versucht und konnte die Mietverträge wieder nicht prüfen. Ohne diese Prüfung geht es nicht weiter. Versuchen Sie es in einigen Minuten noch einmal.",
 	"statements_agreements_checked": "Die Mietverträge sind geprüft.",
 	"statements_agreement_question": "Ist «{category}» im Mietvertrag von {tenant} (Wohnung {apartment}) vereinbart?",

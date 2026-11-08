@@ -1,0 +1,12 @@
+# Code-Review 699/706/708, Runde 1 (75b78a9..95220e2)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| – | – | – | Keine Befunde |
+
+Geprüft: alle 24 geänderten Dateien gelesen. #699: Szenarionamen und Schritte wörtlich wie entschieden, Schrittdefinitionen umbenannt, die Target-Beschreibungen nennen jetzt den Knopftext `buildings_add_apartment` («Wohnung erfassen»). #706: alle fünf Stellen (contract-detail.feature:17, contract-edit.feature:19, 27, 440, 478) nutzen «zeigt der Mietvertrag das Monatlich total», das wie der gelöschte Schritt `verwalter.sees(totalRent).toBe(amount)` prüft; `totalRent` bleibt benutzt, die alte Definition ist entfernt. #708: alle Muster und die vier Szenarionamen wörtlich wie entschieden (bei «Beschreibung» "seinen" → "den" aus Grammatikgründen; «beim Feld «Datei»» → «bei «Datei»» passend zum entschiedenen Szenarionamen); die Rümpfe der Schrittdefinitionen sind unverändert. Keine verwaisten oder doppelten Schritte: jeder alte Text kommt in `tests/e2e` nicht mehr vor, und die neuen Ausdrücke kollidieren nicht mit «sagt/meldet/erklärt Dwello {string}» (Cucumber-Ausdrücke sind verankert, `{string}` verlangt ein Anführungszeichen direkt danach). Wortwahl-Test: auf dem Basiscommit findet dieselbe Logik genau 27 Stellen (nachgezählt), auf 95220e2 keine; auch Komposita mit «feld», «klick», «Button», «Knopf» oder «Schaltfläche» kommen ausserhalb von Zitaten und Kommentaren nicht vor; `tests/e2e/features` hat keine Unterordner; der Hilfstest prüft Kommentar, Zitat, Szenarioname und Schritt. Kein App-Code, keine Texte, keine Formatierungsänderungen ausserhalb des Auftrags; ponytail-review ohne Befund.
+
+## Nicht bestätigt
+
+- `bun run lint`, `bun run check`, `bun run fitness`, `cd backend && bun run type-check`, `bunx vitest run src/__tests__/feature-wording.test.ts src/__tests__/e2e-screenplay-lint.test.ts tools/open-work/check-issues.test.ts` (75 bestanden), E2E chromium der 11 geänderten Feature-Dateien (432 bestanden), Prettier auf der neuen Datei: vom Aufrufer gemeldet.
+- `Spec change approved: #699`, `#706`, `#708` im Text des Pull Requests: Die Änderungen betreffen Szenarien, die auf `main` kein `@wip` haben, und `tools/open-work/check-issues.mjs` verlangt dafür den Vermerk. Der Commit nennt ihn nicht, und einen Pull Request gibt es noch nicht. Ob die Prüfung mehrere Issues in einem Pull Request annimmt, habe ich nicht getestet.

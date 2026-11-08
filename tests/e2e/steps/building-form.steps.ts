@@ -81,7 +81,7 @@ Given('der Liegenschaftsverwalter ist zum Inhalt der Seite "Neues Gebäude" gesp
 	await verwalter.attemptsTo(openNewBuildingAtContent);
 });
 
-Then('steht der Fokus im Feld {string}', async ({ verwalter }, field: string) => {
+Then('steht der Fokus bei {string}', async ({ verwalter }, field: string) => {
 	await verwalter.sees(focusedField).toBe(field);
 });
 

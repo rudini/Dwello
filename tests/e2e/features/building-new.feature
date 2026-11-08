@@ -25,10 +25,10 @@ Funktionalität: Neues Gebäude erfassen
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Kanton ist erforderlich."
 
   # Persona Sven #479 P-2: nach «Zum Inhalt springen» fiel der Fokus auf die Seite statt auf das Feld
-  Szenario: Nach dem Sprung zum Inhalt führt eine Fehlermeldung zum Feld
+  Szenario: Nach dem Sprung zum Inhalt führt eine Fehlermeldung zur fehlenden Angabe
     Angenommen der Liegenschaftsverwalter ist zum Inhalt der Seite "Neues Gebäude" gesprungen
     Wenn der Liegenschaftsverwalter das Gebäude ohne Angaben speichert
-    Dann steht der Fokus im Feld "Gebäudename"
+    Dann steht der Fokus bei "Gebäudename"
 
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

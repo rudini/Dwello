@@ -75,11 +75,11 @@ Then('zeigt die Rechnungsliste die Rechnungen im Gebäude {string}', async ({ ve
 	await verwalter.sees(chosenInvoiceBuilding).toBe(names.get(building)!);
 });
 
-When('der Liegenschaftsverwalter eine Wohnung hinzufügen will', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter eine Wohnung erfassen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(startNewApartment);
 });
 
-When('der Liegenschaftsverwalter die erste Wohnung erstellen will', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter die erste Wohnung erfassen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(startFirstApartment);
 });
 

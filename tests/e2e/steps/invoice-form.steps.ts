@@ -142,7 +142,7 @@ When('der Liegenschaftsverwalter als Rechnungsdatum {string} eintippt', async ({
 	await verwalter.attemptsTo(typeInvoiceDate(text));
 });
 
-Then('zeigt das Feld Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
+Then('steht beim Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(invoiceDate).toBe(text);
 });
 

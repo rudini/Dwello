@@ -54,10 +54,10 @@ Funktionalität: Neue Rechnung erfassen
   # Datum als TT.MM.JJJJ, unabhängig von der Sprache des Browsers; die Punkte setzt das Feld selbst, getippte Punkte zählen nicht doppelt
   Szenario: Rechnungsdatum als TT.MM.JJJJ eintippen
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "31122025" eintippt
-    Dann zeigt das Feld Rechnungsdatum "31.12.2025"
+    Dann steht beim Rechnungsdatum "31.12.2025"
     Und steht unter dem Rechnungsdatum "Mittwoch, 31. Dezember 2025"
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "15.01.2026" eintippt
-    Dann zeigt das Feld Rechnungsdatum "15.01.2026"
+    Dann steht beim Rechnungsdatum "15.01.2026"
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "30022025" eintippt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
