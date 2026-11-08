@@ -53,11 +53,11 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Personen" mit der Formel "{persons}" erfasst
     Dann erfährt der Liegenschaftsverwalter bei der Formel "Unbekannter Baustein {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
 
-  # #737: ohne «%», das die Seite nicht erklärt, und ohne die Einleitung «Die Formel ist ungültig:»
+  # #737: ohne «%», das die Seite nicht erklärt, und ohne die Einleitung «Die Formel ist ungültig:»; #1200 (entschieden): nennt die Stelle
   Szenario: Gespeicherte Formel, die sich nicht berechnen lässt
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche doppelt" mit der Formel "{area} 2" erfasst
-    Dann erfährt der Liegenschaftsverwalter bei der Formel "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Bausteine {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
+    Dann erfährt der Liegenschaftsverwalter bei der Formel "Bei «{area} 2» fehlt ein Rechenzeichen zwischen zwei Werten. Setzen Sie +, -, * oder / dazwischen."
 
   # #737: ein Fehler, der von den Werten abhängt, steht einmal, nicht pro Beispielwohnung, mit Ursache und nächstem Schritt (Persona Helga P-1)
   Szenario: Formel testen, die für eine Wohnung keine Zahl ergibt
@@ -136,3 +136,36 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert
     Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
     Und steht bei "Name" noch der Text von 101 Zeichen
+
+  # #1200 (Persona Helga, #128): die Summen des Gebäudes lassen sich wie die Bausteine per Knopf einfügen
+  Szenario: Eine Summe des Gebäudes in die Formel übernehmen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{area} / " eingibt
+    Und der Liegenschaftsverwalter die Summe "{area_total}" einfügt
+    Dann steht in der Formel "{area} / {area_total}"
+
+  # #1200: ein Fehler im Aufbau der Formel nennt die Stelle, an der sie bricht
+  Szenario: Gespeicherte Formel mit offener Klammer
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Gemischt" mit der Formel "0.7 * ({area} / {area_total} + 0.3" erfasst
+    Dann erfährt der Liegenschaftsverwalter bei der Formel "Die Klammer am Anfang von «({area} / {area_total} + 0.3» wird nicht geschlossen. Setzen Sie «)» dort, wo sie enden soll."
+
+  # #1200: auch der Test nennt die Stelle
+  Szenario: Formel testen mit zwei Rechenzeichen hintereinander
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{area} * / {rooms}" testet
+    Dann zeigt der Test nur den Fehler "Bei «{area} * / {rooms}» folgen zwei Rechenzeichen direkt aufeinander. Löschen Sie eines oder setzen Sie eine Zahl oder einen Baustein dazwischen."
+
+  # #1200: der vergebene Name sagt, was zu tun ist, und verdeckt den Fehler der Formel nicht
+  Szenario: Vergebener Name und fehlerhafte Formel beim selben Speichern
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" noch einmal mit der Formel "({area}" erfasst
+    Dann erfährt der Liegenschaftsverwalter beim Namen "Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits. Wählen Sie einen anderen Namen."
+    Und erfährt der Liegenschaftsverwalter bei der Formel "Die Klammer am Anfang von «({area}» wird nicht geschlossen. Setzen Sie «)» dort, wo sie enden soll."
+
+  # #1200 (Persona Helga P-1): nach dem Übernehmen eines Bausteins schreibt der Liegenschaftsverwalter in der Formel weiter
+  Szenario: Nach einem Baustein in der Formel weiterschreiben
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Baustein "{rooms}" übernimmt
+    Und der Liegenschaftsverwalter " * 2" weiterschreibt
+    Dann steht in der Formel "{area}{rooms} * 2"

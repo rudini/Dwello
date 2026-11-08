@@ -1,10 +1,11 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, Navigate, Press } from '../screenplay/interactions';
+import { Click, Enter, Navigate, Press, TypeOn } from '../screenplay/interactions';
 import {
 	deleteButton,
 	editButton,
 	formulaInput,
 	frenchNameInput,
+	insertButton,
 	nameInput,
 	submitButton,
 	testButton
@@ -33,3 +34,7 @@ export const changeFormula = (name: string, formula: string): Activity => (actor
 
 export const deleteDistributionKey = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));
+
+export const enterFormula = (formula: string): Activity => Enter.theValue(formula).into(formulaInput);
+export const insertBlock = (block: string): Activity => Click.on(insertButton(block));
+export const typeOn = (text: string): Activity => TypeOn(text);

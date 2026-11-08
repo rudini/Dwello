@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
-import { backendMessage, deliveryErrorText } from '$lib/backend-error';
+import { backendMessage, deliveryErrorText, type BackendError } from '$lib/backend-error';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
@@ -59,14 +59,14 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 	});
 
 	it('nennt bei mehreren Formelfehlern jeden, auf Deutsch', () => {
-		const body = {
+		const body: BackendError = {
 			error:
-				'Unbekannter Baustein {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}. Zwei Rechenzeichen folgen direkt aufeinander.',
+				'Unbekannter Baustein {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}. Bei «{persons} + * 2» folgen zwei Rechenzeichen direkt aufeinander. Löschen Sie eines oder setzen Sie eine Zahl oder einen Baustein dazwischen.',
 			code: 'FORMULA_INVALID',
 			params: {},
 			causes: [
 				{ code: 'FORMULA_UNKNOWN_VARIABLE', params: { variable: 'persons' } },
-				{ code: 'FORMULA_CONSECUTIVE_OPERATORS' }
+				{ code: 'FORMULA_CONSECUTIVE_OPERATORS', params: { part: '{persons} + * 2' } } // #1200: with the place
 			]
 		};
 
