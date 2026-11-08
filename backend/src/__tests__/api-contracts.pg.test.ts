@@ -432,10 +432,18 @@ describe('API-Verträge des Frontends', () => {
 
 	// The caretaker costs of 2025 against 2024: a finding with all its fields
 	it('GET /invoices/completeness/:buildingId liefert die Felder von invoice-completeness.json', async () => {
-		const actual = await (
-			await callApi(`/api/v1/invoices/completeness/${rental.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)
-		).json();
-		expect(drift(await sample('invoice-completeness'), actual)).toEqual([]);
+		// #1221: a key that cannot be calculated for the building's apartments, only for this check
+		const key = await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: `Halbe Zimmer ${crypto.randomUUID()}`, formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' }));
+		await insertInvoice(rental.building, { distributionKeyId: key, billingEntityName: 'Garten AG', amount: '600.00', invoiceDate: '2025-05-31' });
+		try {
+			const actual = await (
+				await callApi(`/api/v1/invoices/completeness/${rental.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)
+			).json();
+			expect(drift(await sample('invoice-completeness'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.billingEntityName, 'Garten AG')));
+			await sendJson('DELETE', `/api/v1/distribution-keys/${key}`, {});
+		}
 	});
 
 	it('POST /statements/preview liefert die Felder von statement-preview.json', async () => {

@@ -185,11 +185,12 @@
 
 	// in the whole form: step 3's questions are below «Weiter» (#470, code review 470-1 C-1);
 	// a failed agreements check has no question, its «Erneut versuchen» takes the focus (persona Helga 1197 P-1)
+	// a message that holds the preview takes it before the confirmation further down (persona Helga 1221 P-1)
 	async function showErrors() {
 		await tick();
 		wizard
 			?.querySelector<HTMLElement>(
-				':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input, [data-testid="confirm-missing-invoices"], [data-testid="agreements-retry"]'
+				':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input, [data-testid="form-error"][tabindex="-1"], [data-testid="confirm-missing-invoices"], [data-testid="agreements-retry"]'
 			)
 			?.focus();
 	}
@@ -230,6 +231,8 @@
 		if (previewRows.length === 0) return { preview: NOTHING };
 		if (invoices.some((row) => row.uncategorized?.length))
 			return { uncategorized: m.statements_uncategorized_error() };
+		if (invoices.some((row) => row.check?.uncalculableKeys?.length))
+			return { uncalculable: m.statements_key_not_calculable_error() }; // #1221
 		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};
 	}
 

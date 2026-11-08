@@ -59,6 +59,11 @@
 				if (document.activeElement === document.body)
 					document.getElementById('statement-status-line')?.focus();
 			}
+			// a refusal is said at the top of the page, out of view (persona Marco 1221 P-2)
+			if (result.type === 'failure') {
+				await tick();
+				document.getElementById('statement-action-error')?.focus();
+			}
 		},
 		() => ondone?.(),
 		true // only the delete leads to another page

@@ -89,6 +89,8 @@ export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page
 export const uncategorizedInvoices = target('Hinweis auf Rechnungen ohne Kategorie', (page) =>
 	page.getByTestId('uncategorized-invoices')
 );
+// #1221: invoices whose Verteilschlüssel cannot be calculated for the building's apartments
+export const uncalculableKeys = target('Hinweis auf nicht berechenbare Verteilschlüssel', (page) => page.getByTestId('uncalculable-keys'));
 // Invoices the preview names because their Leistungszeitraum is missing and they are dated shortly after the period
 export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
 // Heating invoices without Leistungszeitraum next to ones with one, at a tenant change with a Heizprofil (#339)

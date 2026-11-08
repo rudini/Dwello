@@ -26,7 +26,7 @@ import {
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
-import { getUncategorizedInvoices } from './invoice.service';
+import { getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -478,6 +478,7 @@ export const agreedStock = async (input: { buildingId: string; periodStart: stri
 
 // The columns and positions a calculation gives a statement: shared by a new draft and a recalculated one (#338)
 async function calculatedRows(input: StatementInput & { buildingId: string }) {
+	await refuseUncalculableKeys(input.buildingId, input.periodStart, input.periodEnd);
 	const calculation = await calculateStatement(input);
 	const values = {
 		tenantId: calculation.tenantId,
@@ -935,6 +936,21 @@ async function refuseUncategorized(buildingId: string, periodStart: string, peri
 	if (!uncategorized.length) return;
 	throw new CodedError(code, 'Allocable invoices of the period have no category', {
 		invoices: uncategorized
+			.map((invoice) => `${invoice.billingEntityName}, ${formatSwissDate(invoice.invoiceDate)}, CHF ${formatCHF(Number(invoice.amount))}`)
+			.join('; ')
+	});
+}
+
+// #1221 (product owner): a key that cannot be calculated for the building's apartments holds its invoices, one key at a time
+async function refuseUncalculableKeys(buildingId: string, periodStart: string, periodEnd: string) {
+	const failing = await uncalculableKeyInvoices(buildingId, periodStart, periodEnd);
+	if (!failing.length) return;
+	const [{ distributionKeyName, buildingName }] = failing;
+	throw new CodedError('STATEMENT_KEY_NOT_CALCULABLE', 'The distribution key cannot be calculated for the apartments of the building', {
+		key: distributionKeyName,
+		building: buildingName,
+		invoices: failing
+			.filter((invoice) => invoice.distributionKeyName === distributionKeyName)
 			.map((invoice) => `${invoice.billingEntityName}, ${formatSwissDate(invoice.invoiceDate)}, CHF ${formatCHF(Number(invoice.amount))}`)
 			.join('; ')
 	});

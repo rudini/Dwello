@@ -21,7 +21,7 @@ import {
 	calculateApartmentProrating,
 	handleMidYearMoves
 } from './prorating.service';
-import { getApartment, listApartments } from './apartment.service';
+import { apartmentsOf, getApartment } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
 import { agreedCategoryIds, agreedFromDays } from './agreed-category.service';
@@ -365,12 +365,7 @@ export async function calculateStatementForContract(
 	const invoiceGroups = groupInvoicesByCategory(invoices).filter((group) => !group.categoryId || agreed.includes(group.categoryId));
 
 	// All apartments of the building share its costs according to the distribution key
-	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
-	const buildingApartments = buildingApartmentRows.map((a) => ({
-		id: a.id,
-		area: parseFloat(a.area),
-		rooms: parseFloat(a.rooms)
-	}));
+	const buildingApartments = await apartmentsOf(buildingId);
 
 	// Calculate line items
 	const lineItems: CalculatedLineItem[] = [];
