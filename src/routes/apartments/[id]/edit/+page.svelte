@@ -38,8 +38,8 @@
 			submitLabel={m.buildings_save_changes()}
 		>
 			{#snippet status()}
-				<!-- #1301: the day from which the Fläche and Zimmeranzahl above apply; empty on every visit, the day belongs to one
-				save. TODO(fachlich prüfen, #1327) -->
+				<!-- #1301: the day from which the Fläche and Zimmeranzahl above apply («Gültig ab»); empty on every visit,
+				the day belongs to one save -->
 				<DateInput
 					id="sizeFrom"
 					name="sizeFrom"
