@@ -44,9 +44,10 @@
 	// the day the notice arrived (A-3): optional, no day proposed; a Kündigungsfrist under 3 months is pointed out,
 	// never refused (a Ersatzmieter or an agreed end are allowed)
 	let noticeReceivedOn = $state('');
-	// #1148: a notice, the usual end of an open-ended contract (Art. 266a OR), or an Aufhebungsvereinbarung; an
-	// agreement has no notice that arrived and no Kündigungsfrist
-	let endKind = $state('notice');
+	// #1148: a notice or an Aufhebungsvereinbarung; an agreement has no notice that arrived and no Kündigungsfrist;
+	// nothing preselected, the landlord chooses (#1277)
+	let endKind = $state('');
+	let endKindError = $state('');
 	const byAgreement = $derived(endKind === 'agreement');
 	const endKinds = [
 		{
@@ -72,7 +73,8 @@
 	function startEnding() {
 		endDate = '';
 		noticeReceivedOn = '';
-		endKind = 'notice';
+		endKind = '';
+		endKindError = '';
 		endError = '';
 		confirmedDay = '';
 		pastError = '';
@@ -87,12 +89,13 @@
 	});
 	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
 	function checkEndDate() {
-		endError = pastError = '';
+		endError = pastError = endKindError = '';
 		flushSync(); // cleared first: the same error set again shows again
 		endError = contractEndError(endDate, contract.startDate, data.today) ?? '';
 		if (!endError && !pastConfirmed) pastError = pastEndConfirmation(endDate, data.today) ?? '';
-		if (endError || pastError) focusFirstError(document.querySelector('[role="dialog"]'));
-		return !endError && !pastError;
+		if (!endKind) endKindError = m.contracts_end_kind_required();
+		if (endError || pastError || endKindError) focusFirstError(document.querySelector('[role="dialog"]'));
+		return !endError && !pastError && !endKindError;
 	}
 	// the toast names the day the tenancy ends, or since when it has ended
 	// the statements that refused the end, to open or to delete one (A-10)
@@ -279,13 +282,14 @@
 		legend={m.contracts_end_kind_legend()}
 		options={endKinds}
 		bind:value={endKind}
+		error={endKindError}
 		testid="contract-end-kind"
 	/>
 	{#if byAgreement}
 		<p class="text-ink-muted" data-testid="contract-end-agreement-hint">
 			{m.contracts_end_agreement_hint()}
 		</p>
-	{:else}
+	{:else if endKind === 'notice'}
 		<DateInput
 			id="noticeReceivedOn"
 			label={m.contracts_notice_received()}
