@@ -32,6 +32,12 @@ Funktionalität: Abrechnung bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Nina Brunner"
     Dann zeigt die Bearbeitungsseite die ganze Kostenaufstellung, ohne seitlich zu verschieben
 
+  # #686 (Persona Marco M-1, Weber W-2): wo der Liegenschaftsverwalter die Frist eines Entwurfs eingibt, sagt die Seite,
+  # dass der Versand sie verschiebt; die Einstellungen haben die Vorgabe von 30 Tagen (global, daher @einstellungen-global)
+  @einstellungen-global
+  Szenario: Beim Bearbeiten eines Entwurfs erklärt die Zahlungsfrist, ab wann sie läuft
+    Dann erklärt die Bearbeitungsseite bei der Zahlungsfrist "Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf 30 Tage nach dem Versand; eine längere Frist bleibt."
+
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"

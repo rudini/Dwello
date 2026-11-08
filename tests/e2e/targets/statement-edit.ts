@@ -1,6 +1,8 @@
 import { target } from '../screenplay/target';
 
 export const paymentDeadlineInput = target('Zahlungsfrist', (page) => page.getByTestId('payment-deadline-input'));
+// #686: the help below the field, a draft's says that sending moves the date
+export const paymentDeadlineHelp = target('Hilfetext zur Zahlungsfrist', (page) => page.getByTestId('payment-deadline-input-help'));
 export const notesInput = target('Bemerkung', (page) => page.getByTestId('statement-notes-input'));
 export const saveStatementButton = target('Speichern', (page) => page.getByTestId('statement-save-button'));
 export const recalculateHint = target('Hinweis Neuerstellen', (page) => page.getByTestId('statement-recalculate-hint'));
