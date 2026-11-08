@@ -7,6 +7,7 @@ import {
 	floorSelect,
 	numberInput,
 	roomsSelect,
+	sizeFromInput,
 	statusSelect,
 	submitButton
 } from '../targets/apartment-form';
@@ -43,3 +44,16 @@ export const blockApartment: Activity = (actor) =>
 // #1284: the day from which the apartment no longer exists
 export const discontinueApartment = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(discontinuedInput), saveApartment);
+
+// #1301: a new Fläche and Zimmeranzahl from a day, the earlier ones up to the day before
+export const changeSizeFrom = (isoDate: string, area: string, rooms: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(area).into(areaInput),
+		Select.option(rooms).from(roomsSelect),
+		EnterDate.of(isoDate).into(sizeFromInput),
+		saveApartment
+	);
+
+// #1301: without a day the values replace those from the last change
+export const changeSize = (area: string, rooms: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(area).into(areaInput), Select.option(rooms).from(roomsSelect), saveApartment);

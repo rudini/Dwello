@@ -76,6 +76,8 @@ Funktionalität: Barrierefreiheit
       | apartment-detail-vacant | default            |
       | apartment-detail-free  | default             |
       | apartment-detail-free  | delete-dialog       |
+      | apartment-detail-resized | default           |
+      | apartment-detail-resized | size-change-dialog |
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | apartment-edit         | discontinue-refused |

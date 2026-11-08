@@ -4,7 +4,7 @@
  */
 
 import { eq, sql, desc, and, gte, lte, ilike, isNotNull, isNull, or } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { containing, db } from '../db/connection';
 import { recordAudit } from './audit-log.service';
 import {
 	invoices,
@@ -110,9 +110,9 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	if (search) {
 		conditions.push(
 			or(
-				ilike(invoices.billingEntityName, `%${search}%`),
-				ilike(invoices.description, `%${search}%`),
-				ilike(invoices.invoiceNumber, `%${search}%`)
+				ilike(invoices.billingEntityName, containing(search)),
+				ilike(invoices.description, containing(search)),
+				ilike(invoices.invoiceNumber, containing(search))
 			)
 		);
 	}

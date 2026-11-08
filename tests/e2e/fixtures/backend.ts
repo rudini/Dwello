@@ -185,6 +185,11 @@ export function testData(api: CallTheApi) {
 			await put(`apartments/${ids.get(number)}`, { discontinuedFrom });
 		},
 
+		// #1301: a new Fläche and Zimmeranzahl from that day
+		async changeApartmentSize(number: string, sizeFrom: string, area: string, rooms: string) {
+			await put(`apartments/${ids.get(number)}`, { area, rooms, sizeFrom });
+		},
+
 		async tenant(title: string) {
 			const [, token] = unique(title).split(/ (?=[^ ]+$)/);
 			const tenant = await post('tenants', { firstName: title, lastName: token });

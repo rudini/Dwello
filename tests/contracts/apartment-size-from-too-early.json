@@ -1,0 +1,7 @@
+{
+	"error": "New values only after the last change",
+	"code": "APARTMENT_SIZE_FROM_TOO_EARLY",
+	"params": {
+		"date": "2025-07-01"
+	}
+}

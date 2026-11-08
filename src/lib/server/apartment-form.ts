@@ -22,7 +22,7 @@ function parseApartmentForm(formData: FormData, isNew: boolean) {
 	// A new apartment starts vacant; contracts make it occupied
 	const body = isNew
 		? { buildingId: field('buildingId'), ...apartment, status: 'vacant' }
-		: { ...apartment, status: field('status') || undefined, ...discontinued(formData) };
+		: { ...apartment, status: field('status') || undefined, ...discontinued(formData), ...sizeFrom(formData) };
 	return { body, errors };
 }
 
@@ -31,6 +31,12 @@ const discontinued = (formData: FormData) =>
 	formData.has('discontinuedFrom') && {
 		discontinuedFrom: String(formData.get('discontinuedFrom')).trim() || null
 	};
+
+// #1301: the day from which area and rooms apply; empty: they correct those from the last change
+const sizeFrom = (formData: FormData) => {
+	const day = String(formData.get('sizeFrom') ?? '').trim();
+	return day ? { sizeFrom: day } : {};
+};
 
 /** Form action body shared by "Neue Wohnung" (POST) and "Wohnung bearbeiten" (PUT) */
 export async function saveApartment(fetch: typeof globalThis.fetch, request: Request, id?: string) {

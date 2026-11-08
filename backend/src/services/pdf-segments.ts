@@ -1,10 +1,12 @@
 /**
- * #1284 (Fachreview 1284-1 V-2, V-3): a position split at the day an apartment no longer exists, as the statement PDF
+ * #1284 (Fachreview 1284-1 V-2, V-3): a position split at the day an apartment no longer exists (or, #1301, has other
+ * values), as the statement PDF
  * prints it: the apartment once above the costs, under the position one row per part with the amounts it calculates with
  */
 
 import { fill, formatCHF, formatSwissDate } from './pdf-format';
 import { daysAfter } from './today';
+import type { SizeChange } from '../db/schema';
 
 // a part of a position as stored (LineSegment), with the apartment's fraction by the key as printed
 export type Segment = {
@@ -20,6 +22,7 @@ export type Segment = {
 	profileShare?: number;
 	share: number;
 	discontinued?: { number: string; date: string }[];
+	changed?: SizeChange[]; // #1301
 };
 
 /** A part as the tenant recomputes it: by days, by the Zeitanteil or by the Heizprofil */
@@ -46,19 +49,18 @@ export function segmentLine(segment: Segment, t: Record<string, string>) {
 	});
 }
 
-/** Once per apartment that no longer exists from a day of the billed days: what it means, for above the costs */
+/** Once per apartment that no longer exists or has other values (#1301) from a day of the billed days: what it means, for
+ * above the costs, and once how the parts below are shown (Fachreview 1301-1 V-4) */
 export function segmentIntros(items: { segments?: Segment[] | null }[], t: Record<string, string>) {
-	const gone = new Map(
-		items
-			.flatMap((item) => item.segments ?? [])
-			.flatMap((segment) => segment.discontinued ?? [])
-			.map((a) => [a.number, a.date])
-	);
-	return [...gone].map(([number, date]) =>
-		fill(t.segmentIntro, {
-			number,
-			date: formatSwissDate(date),
-			dayBefore: formatSwissDate(daysAfter(date, -1))
-		})
-	);
+	const segments = items.flatMap((item) => item.segments ?? []);
+	const once = <T extends { number: string; date: string }>(rows: T[]) => [...new Map(rows.map((row) => [`${row.number} ${row.date}`, row])).values()];
+	const days = (date: string) => ({ date: formatSwissDate(date), dayBefore: formatSwissDate(daysAfter(date, -1)) });
+	const area = (value: number) => value.toFixed(2);
+	const intros = [
+		...once(segments.flatMap((segment) => segment.discontinued ?? [])).map(({ number, date }) => fill(t.segmentIntro, { number, ...days(date) })),
+		...once(segments.flatMap((segment) => segment.changed ?? [])).map((change) =>
+			fill(t.sizeChangeIntro, { ...change, ...days(change.date), area: area(change.area), earlierArea: area(change.earlierArea) })
+		)
+	];
+	return intros.length ? [...intros, t.segmentNote] : [];
 }

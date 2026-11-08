@@ -52,6 +52,9 @@ export const buildingsRelations = relations(buildings, ({ many }) => ({
 	invoices: many(invoices)
 }));
 
+/** #1301: an apartment's Fläche and Zimmeranzahl up to and including `until` (after the earlier entry's) */
+export type EarlierSize = { until: string; area: string; rooms: string };
+
 // ============================================================================
 // Apartments Table
 // ============================================================================
@@ -68,6 +71,7 @@ export const apartments = pgTable(
 		rooms: decimal('rooms', { precision: 3, scale: 1 }).notNull(), // e.g., 3.5
 		status: varchar('status', { length: 20 }).notNull().default('vacant'), // vacant, reserved; occupied is computed from the contracts (apartmentStatus)
 		discontinuedFrom: date('discontinued_from'), // «Aufgehoben ab» (#1284): no longer exists from that day
+		earlierSizes: jsonb('earlier_sizes').$type<EarlierSize[]>().notNull().default([]), // #1301: values up to a day, oldest first
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -400,7 +404,7 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 // ============================================================================
 // the parts of a statement's positions, in a file of their own (#1284)
 import type { InvoicePart, KeyValues, LineSegment, MonthShare } from './statement-parts';
-export type { InvoicePart, KeyValues, LineSegment, MonthShare } from './statement-parts';
+export type { InvoicePart, KeyValues, LineSegment, MonthShare, SizeChange } from './statement-parts';
 
 /** One line of the Akonto on a statement (#464): whole months of one amount, or the days of a split month */
 export type AdvanceLine = { from: string; to: string; amount: number; total: number } & (

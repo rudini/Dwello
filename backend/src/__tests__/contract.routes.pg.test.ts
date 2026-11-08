@@ -37,6 +37,14 @@ describe('GET /api/v1/contracts?search', () => {
 
 		expect(result.contracts.map((c) => c.id)).toEqual([rental.contract]);
 	});
+
+	// #1316: % and _ in the search are characters, not wildcards
+	it('findet mit _ oder % keinen Mietvertrag, dessen Mieter dort ein anderes Zeichen hat', async () => {
+		for (const term of [`Anna_Keller ${token}`, `Anna%${token}`]) {
+			const result = (await get(`?search=${encodeURIComponent(term)}`)) as { contracts: unknown[] };
+			expect(result.contracts).toEqual([]);
+		}
+	});
 });
 
 describe('GET /api/v1/contracts/:id', () => {
