@@ -34,6 +34,8 @@ import {
 	downloadPdfLink,
 	sentPdfLink,
 	pdfRefusalBackLink,
+	pdfRefusalSettingsLink,
+	creditorWarningSettingsLink,
 	generatePdfButton,
 	lineItemInvoiceLink,
 	markPaidButton,
@@ -108,6 +110,8 @@ export const downloadPdfBeforeChange = DownloadFrom(pdfBeforeChangeLink);
 /** Follows the PDF link in the tab, as a browser does when the answer is no PDF */
 export const requestStatementPdf = Click.on(downloadPdfLink);
 export const leavePdfRefusal = Click.on(pdfRefusalBackLink);
+export const settingsFromPdfRefusal = Click.on(pdfRefusalSettingsLink);
+export const settingsFromCreditorWarning = Click.on(creditorWarningSettingsLink);
 
 export const openInvoiceOfPosition = (category: string, description: string) => Click.on(lineItemInvoiceLink(category, description));
 export const openResetPaymentConfirmation = Click.on(resetPaymentButton);

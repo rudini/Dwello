@@ -34,7 +34,7 @@ import { statement } from './helpers/statement';
 import type { StatementWithDetails } from '$lib/types';
 
 // the backend's answer for a Saldo that asks no payment (#815, `paymentOf`): its tests are statement-payment.test.ts
-const noPayment = { unpaid: true, claimed: false, noPayment: true };
+const noPayment = { unpaid: true, claimed: false, paymentPart: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
 
@@ -1950,6 +1950,58 @@ describe('Abrechnungsdetail', () => {
 			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
 		);
 		expect(byTestId('statement-send-confirm')).not.toBeNull();
+	});
+
+	// #690 (Persona Weber 450): nur wo das PDF oder eine Mahnung einen Zahlteil bekommt, warnt die Seite, dass ihm die
+	// Firmenadresse fehlt, bevor das PDF abgelehnt wird
+	describe('Firmenadresse des Zahlteils', () => {
+		const withWarning = (creditorWarning: string | null, overrides = {}) =>
+			show(StatementPage, {
+				data: { statement: statement(overrides), reminders: [], creditorWarning },
+				form: null
+			} as never);
+
+		it('warnt bei einer Nachzahlung, dass dem Zahlteil die Firmenadresse fehlt, und führt zu den Einstellungen', () => {
+			withWarning('CREDITOR_ADDRESS_MISSING', { status: 'sent' });
+			const warning = byTestId('statement-creditor-missing')!;
+			expect(warning.textContent).toContain(
+				'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
+			);
+			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe(
+				'/config#sender'
+			);
+		});
+
+		// persona Weber 690 W-1, W-2 (product owner): the warning names whose address is incomplete
+		it('nennt den Kontoinhaber, wenn seine Adresse fehlt', () => {
+			withWarning('ACCOUNT_HOLDER_MISSING');
+			expect(byTestId('statement-creditor-missing')!.textContent).toContain(
+				'Mit einer IBAN braucht es den Kontoinhaber.'
+			);
+			// persona Weber 690 W-7: to the Kontoinhaber, not to the Absender
+			expect(byTestId('statement-creditor-missing-settings')!.getAttribute('href')).toBe(
+				'/config#account-holder'
+			);
+		});
+
+		it('nennt den Absender, wenn neben einem vollständigen Kontoinhaber seine Adresse fehlt', () => {
+			withWarning('IBAN_COMPANY_ADDRESS_MISSING');
+			expect(byTestId('statement-creditor-missing')!.textContent).toContain(
+				'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.'
+			);
+		});
+
+		it('warnt nicht, wo das PDF keinen Zahlteil hat', () => {
+			withWarning('CREDITOR_ADDRESS_MISSING', { paymentPart: false });
+			expect(byTestId('statement-balance')).not.toBeNull();
+			expect(byTestId('statement-creditor-missing')).toBeNull();
+		});
+
+		it('warnt nicht, solange die Adressen vollständig sind', () => {
+			withWarning(null);
+			expect(byTestId('statement-balance')).not.toBeNull();
+			expect(byTestId('statement-creditor-missing')).toBeNull();
+		});
 	});
 
 	// Persona W3c Anna P-2: schon auf der Seite des Entwurfs, nicht erst im Dialog; nach dem Versand nicht mehr
