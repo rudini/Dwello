@@ -29,8 +29,6 @@ export const buildingBilled = (buildingId: string) =>
 	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));
 export const generateButton = target('Abrechnungen erstellen', (page) => page.getByTestId('generate-statements-button'));
 export const previewCount = target('Anzahl in der Vorschau', (page) => page.getByTestId('preview-count'));
-// a refusal of the server, e.g. of the preview (#1221)
-export const serverError = target('Meldung des Servers', (page) => page.getByTestId('server-error'));
 export const previewFee = target('Verwaltungspauschale der Vorschau', (page) => page.getByTestId('preview-fee'));
 export const previewRows = target('Zeilen der Vorschau', (page) => page.getByTestId('preview-row'));
 export const previewRow = (tenantName: string) =>
@@ -91,6 +89,8 @@ export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page
 export const uncategorizedInvoices = target('Hinweis auf Rechnungen ohne Kategorie', (page) =>
 	page.getByTestId('uncategorized-invoices')
 );
+// #1221: invoices whose Verteilschlüssel cannot be calculated for the building's apartments
+export const uncalculableKeys = target('Hinweis auf nicht berechenbare Verteilschlüssel', (page) => page.getByTestId('uncalculable-keys'));
 // Invoices the preview names because their Leistungszeitraum is missing and they are dated shortly after the period
 export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
 // Heating invoices without Leistungszeitraum next to ones with one, at a tenant change with a Heizprofil (#339)

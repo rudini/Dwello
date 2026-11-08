@@ -310,15 +310,27 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt die Vorschau die Rechnung "Hauswart 2024-12-31" mit "Pro Einheit"
     Und verlangt die Vorschau keine Bestätigung
 
-  # #1221: ein eigener Verteilschlüssel, der sich für die Wohnungen des Gebäudes nicht berechnen lässt, verteilt nicht
-  # still zu gleichen Teilen; die Formel besteht die vier Beispielwohnungen und teilt erst bei 3.5 Zimmern durch null
+  # #1221 (Entscheid PO): ein eigener Verteilschlüssel, der sich für die Wohnungen des Gebäudes nicht berechnen lässt,
+  # verteilt nicht still zu gleichen Teilen, sondern hält den Lauf an wie eine Rechnung ohne Kategorie (#382); die Formel
+  # besteht die vier Beispielwohnungen und teilt erst bei 3.5 Zimmern durch null
   @wip
   Szenario: Ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt, hält die Vorschau an
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
-    Wenn der Liegenschaftsverwalter versucht, die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" zu öffnen
-    Dann meldet der Assistent "Der Verteilschlüssel «Halbe Zimmer» lässt sich für die Wohnungen von «Lindenhof» nicht berechnen. Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00. Korrigieren Sie die Formel unter «Einstellungen» › «Verteilschlüssel» oder wählen Sie bei diesen Rechnungen einen anderen Verteilschlüssel. Danach geht es weiter."
-    Und ist der Assistent im Schritt "Heizprofil und Verwaltungspauschale"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "30.09.2024" über "900.00"
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "TEXT"
+    Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "FEHLER"
+    Und ist der Assistent im Schritt "Vorschau"
+
+  @wip
+  Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Vorschau öffnen
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "30.09.2024" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
   # #770: Rechnungen vom selben Tag stehen in der Reihenfolge ihrer Erfassung, auch wenn eine danach geändert wurde
   Szenario: Der Hinweis auf Rechnungen nach der Abrechnungsperiode nennt Rechnungen vom selben Tag in der Reihenfolge ihrer Erfassung

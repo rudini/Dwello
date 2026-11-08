@@ -1,13 +1,14 @@
 /**
- * #1221: a custom Verteilschlüssel that cannot be calculated for the apartments of the building refuses the
- * statement instead of splitting its invoices equally (real PostgreSQL database)
+ * #1221 (decided by the product owner): a custom Verteilschlüssel that cannot be calculated for the apartments of the
+ * building holds the run instead of splitting its invoices equally; the wizard's check names the invoices, generation
+ * and «Neu berechnen» refuse (real PostgreSQL database)
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { distributionKeys, invoices, utilityStatements } from '../db/schema';
-import { sendJson } from './helpers/auth';
+import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -38,14 +39,16 @@ const refusal = (invoices: string) =>
 	['The distribution key cannot be calculated for the apartments of the building', 'STATEMENT_KEY_NOT_CALCULABLE', { key: name, building: `Ahornhof ${token}`, invoices }] as const;
 
 describe('Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt', () => {
-	it('verweigert Vorschau und Abrechnung und nennt Schlüssel und Rechnungen, statt gleich zu verteilen', async () => {
-		const refused = refusal('Garten AG, 31.05.2025, CHF 600.00');
+	it('nennt die Rechnungen in der Prüfung der Rechnungen und verweigert die Abrechnung, statt gleich zu verteilen', async () => {
+		const check = await callApi(`/api/v1/invoices/completeness/${rental.building}?periodStart=${run.periodStart}&periodEnd=${run.periodEnd}`);
+		expect(((await check.json()) as { uncalculableKeys: unknown }).uncalculableKeys).toEqual([
+			expect.objectContaining({ billingEntityName: 'Garten AG', invoiceDate: '2025-05-31', amount: '600.00', distributionKeyName: name })
+		]);
 
-		await expectRejection(await sendJson('POST', '/api/v1/statements/preview', { contractId: rental.contract, ...run }), 400, ...refused);
 		await expectRejection(
 			await sendJson('POST', '/api/v1/statements/generate', { contractId: rental.contract, buildingId: rental.building, ...run }),
 			400,
-			...refused
+			...refusal('Garten AG, 31.05.2025, CHF 600.00')
 		);
 	});
 

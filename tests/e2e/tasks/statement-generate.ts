@@ -26,7 +26,6 @@ import {
 	existingStatementLink,
 	periodStartInput,
 	previewCount,
-	serverError,
 	showStatementsButton,
 	downloadZipButton,
 	previewSkippedLink,
@@ -78,7 +77,7 @@ export const openSettingsFor = (year: number, buildingId: string, percent: numbe
 export const typeManagementFee = (buildingId: string, text: string): Activity => (actor) =>
 	actor.attemptsTo(chooseBuilding(buildingId), goToNextStep, Enter.keyByKey(text).into(managementFeeInput));
 
-const requestPreview =
+const openPreviewThroughUi =
 	(year: number, buildingId: string, options: RunOptions): Activity =>
 	async (actor) => {
 		await actor.attemptsTo(
@@ -90,16 +89,8 @@ const requestPreview =
 		if (options.heatingProfileId) await actor.attemptsTo(Select.option(options.heatingProfileId).from(heatingProfileSelect));
 		if (options.managementFeePercent !== undefined)
 			await actor.attemptsTo(Enter.theValue(String(options.managementFeePercent)).into(managementFeeInput));
-		await actor.attemptsTo(leaveSettings);
+		await actor.attemptsTo(leaveSettings, Wait.until(previewCount)); // the preview is calculated on the server
 	};
-
-// the preview is calculated on the server
-const openPreviewThroughUi = (year: number, buildingId: string, options: RunOptions): Activity => (actor) =>
-	actor.attemptsTo(requestPreview(year, buildingId, options), Wait.until(previewCount));
-
-// #1221: the server refuses the preview, the wizard stays on the settings step
-export const attemptPreview = (year: number, buildingId: string): Activity => (actor) =>
-	actor.attemptsTo(requestPreview(year, buildingId, {}), Wait.until(serverError));
 
 export const openPreview = (year: number, buildingId: string, options: RunOptions = {}) =>
 	throughUiOrApi(openPreviewThroughUi(year, buildingId, options), openPreviewViaApi(year, buildingId, options));

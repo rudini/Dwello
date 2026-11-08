@@ -208,7 +208,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | old-address-preview |
       | statement-generate     | heating-hints       |
       | statement-generate     | split-keys          |
-      | statement-generate     | key-not-calculable  |
+      | statement-generate     | uncalculable-keys   |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |

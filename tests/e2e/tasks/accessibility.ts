@@ -892,8 +892,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// 2024 in Bergsicht: Ida and Kurt moved out, a heating invoice without Leistungszeitraum beside one with (#339)
 	'heating-hints': (example) => previewOf('2024', 'heating-without-service-period')(example, example.tankBuilding),
 	'split-keys': (example) => previewOf('2024', 'statement-preview-split-keys')(example, example.splitBuilding),
-	// 2025 in Kreuzweg: its custom key cannot be calculated, the preview is refused (#1221)
-	'key-not-calculable': (example) => previewOf('2025', 'server-error')(example, example.splitBuilding),
+	// 2025 in Kreuzweg: its custom key cannot be calculated, the preview holds the run (#1221)
+	'uncalculable-keys': (example) => previewOf('2025', 'uncalculable-keys')(example, example.splitBuilding),
 	// 2014: Emil's contract in the second building is billed outside Dwello up to its end (#453)
 	'preview-skipped': (example) =>
 		previewOf('2014', `preview-all-skipped-${example.tankBuilding}`)(example, example.tankBuilding),

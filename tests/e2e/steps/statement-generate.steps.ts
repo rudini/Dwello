@@ -6,7 +6,8 @@ import {
 	proposedPeriodText,
 	allBuildingsNoteText,
 	currentStep,
-	serverErrorText,
+	uncalculableInvoiceOn,
+	uncalculableKeysText,
 	existingStatementsText,
 	akontoHintOf,
 	announcedFeeHint,
@@ -75,7 +76,6 @@ import {
 } from '../questions/statement-generate';
 import { currentStepNameText, currentStepNameWidth, restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
-	attemptPreview,
 	chooseAllBuildings,
 	chooseBuilding,
 	chooseBuildingsFor,
@@ -640,19 +640,6 @@ Then('nennt die Vorschau die bestehenden Abrechnungen von {string}', async ({ ve
 	await verwalter.sees(existingStatementsText).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
 });
 
-When(
-	'der Liegenschaftsverwalter versucht, die Vorschau der Abrechnungen {int} für das Gebäude {string} zu öffnen',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(attemptPreview(year, seed.idOf(building)!));
-	}
-);
-
-// a seeded name in «» stands for its unique name (#1221)
-Then('meldet der Assistent {string}', async ({ verwalter, names }, text: string) => {
-	const named = text.replace(/«([^»]+)»/g, (all, title: string) => (names.has(title) ? `«${names.get(title)}»` : all));
-	await verwalter.sees(serverErrorText).toContain(named);
-});
-
 Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
 	await verwalter.sees(currentStep).toBe(step);
 });
@@ -686,6 +673,19 @@ Then(
 
 Then('erklärt der Hinweis auf Rechnungen ohne Kategorie {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(uncategorizedInvoicesText).toContain(text);
+});
+
+Then(
+	'nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(uncalculableInvoiceOn(date)).toContain(amount);
+	}
+);
+
+// a seeded name in «» stands for its unique name (#1221)
+Then('erklärt der Hinweis auf nicht berechenbare Verteilschlüssel {string}', async ({ verwalter, names }, text: string) => {
+	const named = text.replace(/«([^»]+)»/g, (all, title: string) => (names.has(title) ? `«${names.get(title)}»` : all));
+	await verwalter.sees(uncalculableKeysText).toContain(named);
 });
 
 // #453 (#327): days, Akonto and «Abgerechnet bis» per contract; contracts «Abgerechnet bis» covers in full
