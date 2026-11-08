@@ -3,6 +3,7 @@ import { Count } from '../screenplay/questions';
 import { Check, Click, Enter, EnterDate, FailRequests, Focus, Navigate, Press, Select, Uncheck, Wait } from '../screenplay/interactions';
 import {
 	agreedCategory,
+	retryResult,
 	agreedCategoryBoxAt,
 	agreedCategoryBoxes,
 	advancePaymentFromInput,
@@ -32,7 +33,7 @@ import {
 	noticeHintLink,
 	apartmentClearedLink
 } from '../targets/contract-form';
-import { errorToast, errorToastClose, loadedToast, successToastClose, warningToast, warningToastClose } from '../targets/form';
+import { errorToast, errorToastClose, successToastClose, warningToast, warningToastClose } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -68,7 +69,7 @@ export const goToNextStep = Click.on(nextButton);
 export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to('/api/contracts', { apartmentId });
 export const contractsLoadAgain = FailRequests.noLonger;
 // waits for the confirmation that they are loaded (review #151 R-4)
-export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(loadedToast));
+export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(retryResult));
 // still failing: waits for the message that says so
 export const retryContractsInVain: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(errorToast));
 // #669: on from the error message's close button with the Tab key

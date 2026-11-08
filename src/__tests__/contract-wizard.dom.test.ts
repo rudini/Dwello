@@ -503,7 +503,8 @@ describe('Prüfungen im Mietvertrag', () => {
 	});
 
 	// #669 (Sven S-2, Helga H-3, fach-review V-5): the apartment chosen «(nicht geprüft)» turned out rented
-	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und warnt mit dem Ergebnis', async () => {
+	// #1289: no toast that covers the field; the hint in the step says it, in a status region a screen reader announces
+	it('hebt nach dem Laden die Wahl einer nicht verfügbaren Wohnung auf und sagt es nur im Schritt, angesagt', async () => {
 		let failing = true;
 		fakeBff(({ path }) =>
 			failing && path.endsWith('=a2')
@@ -520,12 +521,8 @@ describe('Prüfungen im Mietvertrag', () => {
 		click('contracts-retry');
 		await settle();
 		expect(byTestId<HTMLSelectElement>('apartment-select')!.value).toBe('');
-		expect(get(toasts).map((t) => [t.type, t.message])).toEqual([
-			[
-				'warning',
-				'Die Mietverträge der Wohnung sind geladen. Die gewählte Wohnung ist nicht verfügbar; Dwello hat die Auswahl aufgehoben.'
-			]
-		]);
+		expect(byTestId('apartment-cleared')!.closest('[role="status"]')).not.toBeNull();
+		expect(get(toasts)).toEqual([]);
 	});
 
 	// #1153 (Sven S-7, Helga H-6): the step keeps saying which apartment it was and which contract blocks it
@@ -977,8 +974,12 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await settle();
 		const hint = byTestId('tenant-running-contract')!;
 		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
-		expect(hint.textContent).toContain('für die Wohnung 2.02 (Ahornhof)');
-		expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c-a2');
+		// #1288: apartment and contract named like the hint on a cleared apartment
+		expect(hint.textContent).toContain('für Wohnung 2.02 · Ahornhof');
+		expect([hint.querySelector('a')!.getAttribute('href'), hint.querySelector('a')!.textContent?.trim()]).toEqual([
+			'/contracts/c-a2',
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof'
+		]);
 		next();
 		expect(heading()).toBe('Vertragsdauer');
 	});

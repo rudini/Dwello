@@ -100,7 +100,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann erfährt der Liegenschaftsverwalter, dass "Anna Keller" einen Mietvertrag ohne Vertragsende für die Wohnung "2.02" hat
 
   # #1288 (Personas Helga P-2, Sven P-2): der Hinweis schreibt die Wohnung und nennt den Mietvertrag wie der Hinweis auf die nicht verfügbare Wohnung
-  @wip
   Szenario: Der Hinweis auf den eigenen Mietvertrag nennt Wohnung und Mietvertrag wie die übrigen Hinweise
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
@@ -108,7 +107,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Dann nennt der Hinweis auf den Mietvertrag von "Anna Keller" die Wohnung "Wohnung 2.02 · Ahornhof"
-    Und bietet der Hinweis auf den Mietvertrag von "Anna Keller" den Link "Zum Mietvertrag von Anna Keller"
+    Und bietet der Hinweis auf den Mietvertrag von "Anna Keller" den Link "Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof"
 
   Szenario: Vom Hinweis zum laufenden Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
@@ -161,7 +160,6 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   # #669 (Personas Sven S-2, Helga H-3, fach-review V-5): eine Wohnung, die sich als nicht verfügbar zeigt, bleibt nicht gewählt
   # #1289: keine Meldung, die das Feld verdeckt; der Hinweis im Schritt nennt die Wohnung und wird einmal angesagt
-  @wip
   Szenario: Nach dem Laden hebt Dwello die Wahl einer nicht verfügbaren Wohnung auf
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
@@ -176,7 +174,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und zeigt Dwello nach dem Laden keine Meldung
 
   # #1289: der Hinweis gilt der aufgehobenen Wahl; mit einer anderen Wohnung ist er weg
-  @wip
   Szenario: Mit einer anderen Wohnung verschwindet der Hinweis auf die nicht verfügbare Wohnung
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken

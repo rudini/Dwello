@@ -1,4 +1,5 @@
 import { target } from '../screenplay/target';
+import { loadedToast } from './form';
 
 export const tenantSelect = target('Mieterauswahl', (page) => page.getByTestId('contract-tenant-select'));
 export const fixedTenant = target('Mieter des Mietvertrags', (page) => page.getByTestId('contract-form-tenant'));
@@ -133,6 +134,8 @@ export const apartmentCleared = target('Hinweis auf die nicht verfügbare Wohnun
 export const apartmentClearedText = target('Erklärung im Hinweis auf die nicht verfügbare Wohnung', (page) =>
 	page.getByTestId('apartment-cleared-text')
 );
+// #1289: what «Erneut versuchen» ends with: a message, or for a cleared choice only the hint in the step
+export const retryResult = target('Ergebnis nach dem Laden', (page) => loadedToast.locate(page).or(apartmentCleared.locate(page)));
 // #1289: the status region around it, so a screen reader hears it once when it appears
 export const apartmentClearedAnnouncement = target('Ansage des Hinweises auf die nicht verfügbare Wohnung', (page) =>
 	page.getByRole('status').filter({ has: page.getByTestId('apartment-cleared') })

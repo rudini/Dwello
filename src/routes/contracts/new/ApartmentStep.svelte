@@ -3,6 +3,7 @@
 	import { apartmentChoices } from '$lib/contract-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
 	import ContractsUnknown from './ContractsUnknown.svelte';
+	import LiveRegion from '$lib/ui/LiveRegion.svelte';
 	import OverlapLink from '../OverlapLink.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import type { AvailabilityInfo } from '$lib/utils/contract-availability';
@@ -57,17 +58,19 @@
 
 <ContractsUnknown {onretry} shown={unknown} testid="apartment-contracts-unknown" />
 
-<!-- stays until an apartment is chosen: the toast that says so goes away (#1153, Sven S-7, Helga H-6) -->
-{#if cleared}
-	<Alert
-		tone="caution"
-		title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}
-		testid="apartment-cleared"
-	>
-		<p data-testid="apartment-cleared-text">{m.contracts_apartment_cleared_text()}</p>
-		{#if cleared.contract}<OverlapLink contract={cleared.contract} />{/if}
-	</Alert>
-{/if}
+<!-- stays until an apartment is chosen (#1153, Sven S-7, Helga H-6); the only word on it, announced once (#1289) -->
+<LiveRegion shown={!!cleared}>
+	{#if cleared}
+		<Alert
+			tone="caution"
+			title={m.contracts_apartment_cleared_title({ apartment: cleared.apartment })}
+			testid="apartment-cleared"
+		>
+			<p data-testid="apartment-cleared-text">{m.contracts_apartment_cleared_text()}</p>
+			{#if cleared.contract}<OverlapLink contract={cleared.contract} />{/if}
+		</Alert>
+	{/if}
+</LiveRegion>
 
 {#if notice}
 	<Alert title={m.contracts_free_later()} testid="availability-info">

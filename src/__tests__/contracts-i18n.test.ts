@@ -169,3 +169,37 @@ describe('Hilfe zur Wohnung', () => {
 		expect(m.contracts_apartment_help()).toBe(text);
 	});
 });
+
+// #1288 (1288-fachreview-1 V-1, M-1): the hint on the tenant's own contract writes the apartment like the cleared hint
+// and names the contract by tenant and apartment; a move does not end the contract (Art. 266a Abs. 1 OR)
+describe('Hinweis auf den eigenen Mietvertrag des Mieters', () => {
+	const apartment = 'Wohnung 2.02 · Ahornhof';
+	it.each([
+		[
+			'de',
+			'Für Anna Keller ist ein Mietvertrag für Wohnung 2.02 · Ahornhof ohne Vertragsende erfasst. Zieht Anna Keller um, endet dieser Mietvertrag nicht von selbst. Ist er gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende auf seiner Seite mit «Enddatum erfassen» ein. Mietet Anna Keller beide Wohnungen, machen Sie hier weiter.',
+			'Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof'
+		],
+		[
+			'fr',
+			'Pour Anna Keller, un contrat de bail sans fin du contrat est saisi pour Wohnung 2.02 · Ahornhof. Si Anna Keller déménage, ce contrat de bail ne prend pas fin de lui-même. S’il est résilié ou qu’une fin du contrat a été convenue, saisissez la fin du contrat sur sa page avec « Saisir la date de fin ». Si Anna Keller loue les deux appartements, continuez ici.',
+			'Vers le contrat de bail de Anna Keller pour Wohnung 2.02 · Ahornhof'
+		],
+		[
+			'it',
+			'Per Anna Keller è registrato un contratto di locazione senza fine del contratto per Wohnung 2.02 · Ahornhof. Se Anna Keller trasloca, questo contratto di locazione non termina da sé. Se è disdetto o è stata pattuita una fine del contratto, inserisca la fine del contratto sulla sua pagina con «Registrare la data di fine». Se Anna Keller prende in locazione entrambi gli appartamenti, continui qui.',
+			'Al contratto di locazione di Anna Keller per Wohnung 2.02 · Ahornhof'
+		],
+		[
+			'en',
+			'A rental contract for Wohnung 2.02 · Ahornhof without a contract end is recorded for Anna Keller. If Anna Keller moves, this rental contract does not end by itself. If it was terminated by notice or a contract end was agreed, enter the contract end on its page with «Enter end date». If Anna Keller rents both apartments, continue here.',
+			'Go to the rental contract of Anna Keller for Wohnung 2.02 · Ahornhof'
+		]
+	] as const)('nennt auf %s Wohnung und Mietvertrag wie der Hinweis auf die nicht verfügbare Wohnung', (locale, text, link) => {
+		overwriteGetLocale(() => locale);
+		expect([
+			m.contracts_open_contract_text({ name: 'Anna Keller', apartment }),
+			m.contracts_open_contract_link({ name: 'Anna Keller', apartment })
+		]).toEqual([text, link]);
+	});
+});
