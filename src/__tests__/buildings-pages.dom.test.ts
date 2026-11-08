@@ -177,7 +177,7 @@ describe('Gebäudedetail', () => {
 		rooms: '3.5',
 		status
 	});
-	const detail = (apartments: ReturnType<typeof flat>[], counts = {}) =>
+	const detail = (apartments: ReturnType<typeof flat>[], counts = {}, form: unknown = null) =>
 		show(BuildingPage, {
 			data: {
 				building: building({ apartmentCount: apartments.length, ...counts }),
@@ -185,7 +185,7 @@ describe('Gebäudedetail', () => {
 				fuelStocks: [],
 				heatingCategories: []
 			},
-			form: null
+			form
 		} as never);
 
 	it('nennt ein Gebäude ohne Tank oder mit stillgelegtem Tank als solches (#72)', () => {
@@ -293,11 +293,29 @@ describe('Gebäudedetail', () => {
 	it('sagt vor dem Bestätigen, warum ein Gebäude mit Wohnungen nicht gelöscht werden kann', () => {
 		detail([flat('a1', '1.01', 1)]);
 		click('building-delete-button');
-		expect(byTestId('form-error')!.textContent).toContain(
-			'Dieses Gebäude kann nicht gelöscht werden'
-		);
+		const dialog = document.querySelector('[role=dialog]')!.textContent;
+		expect(dialog).toContain('Das Gebäude enthält noch Wohnungen.');
+		expect(dialog).toContain('Löschen Sie zuerst seine Wohnungen.');
 		expect(byTestId('building-delete-confirm')).toBeNull();
 		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
+	});
+
+	// #1258: der Titel sagt die Absage, der Grund steht als Text darunter, nicht noch einmal als Fehlermeldung
+	it('sagt die Absage im Titel und zeigt keine Fehlermeldung dazu', () => {
+		detail([flat('a1', '1.01', 1)]);
+		click('building-delete-button');
+		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
+			'Lindenhof kann nicht gelöscht werden'
+		);
+		expect(byTestId('form-error')).toBeNull();
+	});
+
+	// code review 1258 C-2: ein gescheiterter Aufruf ist keine Absage, er meldet sich wie in jedem Dialog
+	it('meldet ein gescheitertes Löschen mit «Das hat nicht geklappt»', () => {
+		detail([], {}, { deleteError: 'Gebäude konnte nicht gelöscht werden.' });
+		click('building-delete-button');
+		expect(byTestId('form-error')!.textContent).toContain('Das hat nicht geklappt');
+		expect(byTestId('form-error')!.textContent).toContain('Gebäude konnte nicht gelöscht werden.');
 	});
 });
 

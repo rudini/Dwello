@@ -1,0 +1,17 @@
+# Code-Review #1258, Runde 2 (9fc09bd .. 0909afe)
+
+Geschlossen: C-1, C-2
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-3 | Minor | tests/e2e/targets/form.ts:14, tests/e2e/questions/form.ts:8 | Bleibt offen: `dialogTitle`/`dialogTitleText` kopieren das vorhandene `deleteDialogTitle`/`deleteDialogTitleText` (`targets/invoice-detail.ts:40`, `questions/invoice-detail.ts:43`). |
+| C-4 | Minor | messages/de.json:388 (`buildings_delete_has_apartments_next`, alle vier Sprachen) | Bleibt offen: «Danach lässt sich das Gebäude löschen.» stimmt ganz erst mit #1257. Laut Aufrufer steht das im Pull Request; den Text habe ich nicht gesehen. |
+| C-5 | Minor | src/routes/contracts/[id]/DeleteContract.svelte:43,54 | Kein Test zeigt die Bedingung `withDraft`. Die Fachvorgabe V-8 lautet «nur wenn `locked` und mindestens ein Eintrag … `draft`». Nimmt man die Bedingung heraus (`...[m.contracts_delete_billed_locked_drafts()]` immer), bleiben alle Tests grün. Kein DOM-Test und kein Szenario prüft einen gesperrten Löschdialog ohne Entwurf darauf, dass der Absatz fehlt. Der DOM-Test (Zeile 927) und das neue Szenario prüfen nur den Fall mit Entwurf. Abhilfe: im Test «führt bei Entwürfen allein …» oder in einem Test nur mit versendeter Abrechnung `not.toContain('Einen Entwurf aus der Liste zu löschen')`. |
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`, `bun run check`, `bun run fitness`, Backend-`type-check` und fallow audit auf 0909afe. Ebenso vitest: die DOM-Tests der drei Seiten (156), die Tests, die `messages/` lesen, mit design-guard und open-work (1137), und `fitness.test.ts` (42). E2E chromium building-detail, tenant-detail und contract-detail (107) und die axe- und Sprachzeilen der Löschdialoge (12) liefen vor dem Umbau in `$derived`. Nach dem Umbau liefen nur die DOM-Tests noch einmal.
+- Die Rot-Läufe habe ich nur durch Lesen geprüft, nicht ausgeführt. Das neue Szenario «Löschdialog erklärt den Entwurf neben einer versendeten Abrechnung» schlägt auf der Basis am Pluralschritt fehl, denn dort steht «Seine Mietstage sind abgerechnet in:». Ohne den neuen Absatz schlägt es am Schritt zu V-8 fehl. Der C-2-Test schlägt mit dem alten Titel «Löschen nicht möglich» fehl. Ob die E2E-Ausführung nach dem `$derived`-Umbau noch gleich ist, habe ich aus dem Code geschlossen (gleiche Texte, gleiche Reihenfolge) und nicht laufen lassen.
+- Geändert ist auch `contract-detail.feature:430`, ein Szenario ohne `@wip` auf `main`. Es ist durch `Spec change approved: #1258` in 0909afe und durch die Szenariozeilen in `1258-fachreview-2.md` gedeckt. Den Pull-Request-Text und den Beschluss im Issue selbst habe ich nicht gesehen.
+
+Geprüft: C-1 ist geschlossen. Mit dem Zurücknehmen von V-4 ist `settled` wieder wie auf `main`, der Schlüssel ist in allen vier Dateien entfernt und wird nirgends mehr benutzt, und die DOM-Zeile s5 ist weg. Alle neuen und geänderten Texte stimmen in allen vier Sprachen wörtlich mit `1258-fachreview-2.md` überein. `contracts_delete_billed` ist überall entfernt. Die Titel nennen jetzt den Datensatz (`name` ist schon eine Prop beider Dialoge). Die Absätze stehen in der Reihenfolge, die der Fachreview vorgibt. Der Schritt «die Abrechnung {int} von {string} ist versendet» existiert. Der Eintrag in `ratchet.json` folgt dem vorhandenen Muster. Neue Bildschirmzeilen braucht es nicht: Es kommt nur Text dazu, keine Steuerelemente.
