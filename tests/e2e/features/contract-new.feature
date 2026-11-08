@@ -84,6 +84,12 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann kann der Liegenschaftsverwalter die Wohnung "2.02" nicht auswählen
 
+  # #1142: «frei (Wohnung)» im Glossar; eine vermietete Wohnung mit Vertragsende wird später frei (fach-review 1130 V-1)
+  Szenario: Die Hilfe zur Wohnung sagt, welche Wohnungen sich wählen lassen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Dann sagt die Hilfe zur Wohnung nur "Wohnungen, die frei sind oder später frei werden, stehen zuoberst. Wohnungen mit einem unbefristeten Mietvertrag, der nicht gekündigt ist, sind mit «nicht verfügbar» markiert und lassen sich nicht wählen."
+
   # B-16 (#156): wer «Beenden» beim alten Mietvertrag vergessen hat, erfährt es vor der Prüfung
   Szenario: Mieter hat noch einen Mietvertrag ohne Vertragsende
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
