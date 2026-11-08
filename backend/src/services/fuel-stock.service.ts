@@ -63,7 +63,7 @@ export async function periodReadings(buildingId: string, periodStart: string, pe
 async function keyFor(buildingId: string, categoryId: string, periodEnd: string) {
 	const latest = (upTo?: string) =>
 		db
-			.select({ id: invoices.distributionKeyId })
+			.select({ id: invoices.distributionKeyId, deliveryId: invoices.id })
 			.from(invoices)
 			.where(
 				and(
@@ -80,7 +80,7 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 	const id = bill?.id ?? (await getTypedConfig('default_distribution_key_id'));
 	if (!id) return null;
 	const [key] = await db.select({ id: distributionKeys.id, name: distributionKeys.name, nameDE: distributionKeys.nameDE }).from(distributionKeys).where(eq(distributionKeys.id, id));
-	return key ?? null;
+	return key ? { ...key, deliveryId: bill?.deliveryId } : null; // the delivery whose key it is, if any (#1323)
 }
 
 /**

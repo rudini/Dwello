@@ -343,6 +343,8 @@ export async function calculateBuildingDistribution(
 		amount: number;
 	}>;
 	error?: string;
+	errorCode?: ErrorCode;
+	apartmentId?: string; // where the formula fails, if it fails for one apartment (#1315)
 }> {
 	const key = await getDistributionKey(distributionKeyId);
 	if (!key) {
@@ -364,7 +366,8 @@ export async function calculateBuildingDistribution(
 	const result = calculateDistribution(key.formula, aptVariables, totalAmount);
 
 	if (!result.isValid) {
-		return { isValid: false, distributions: [], error: result.error };
+		const apartmentId = result.apartmentIndex === undefined ? undefined : apartments[result.apartmentIndex].id;
+		return { isValid: false, distributions: [], error: result.error, errorCode: result.errorCode, apartmentId };
 	}
 
 	return {

@@ -10,6 +10,7 @@ import { invoices, utilityStatements, type UtilityStatementLineItem } from '../d
 import { CodedError } from './coded-error';
 import { invoiceSplitKeys } from './invoice-completeness.service';
 import { getInvoicesForStatement } from './invoice.service';
+import { uncalculableKeyInvoices } from './held-invoices';
 import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { olderThanFiveYears, swissToday } from './today';
@@ -49,12 +50,14 @@ type Loaders = {
 	invoices: (s: Located) => Promise<PeriodInvoice[]>;
 	stock: (s: Located) => Promise<Stock>;
 	full: (s: Located) => Promise<StatementWithDetails | null>;
+	keys: (s: Located) => Promise<Awaited<ReturnType<typeof uncalculableKeyInvoices>>>;
 };
 const periodOf = (s: Located) => ({ buildingId: s.building.id, periodStart: s.periodStart, periodEnd: s.periodEnd });
 const direct: Loaders = {
 	invoices: (s) => getInvoicesForStatement(s.building.id, s.periodStart, s.periodEnd),
 	stock: (s) => agreedStock(periodOf(s), s.agreedCategoryIds),
-	full: async (s) => s
+	full: async (s) => s,
+	keys: (s) => uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd)
 };
 function perPeriod(): Loaders {
 	const memo = new Map<string, Promise<unknown>>();
@@ -66,7 +69,8 @@ function perPeriod(): Loaders {
 	return {
 		invoices: (s) => once(`invoices ${key(s)}`, () => direct.invoices(s)),
 		stock: (s) => once(`stock ${key(s)} ${JSON.stringify(s.agreedCategoryIds)}`, () => direct.stock(s)),
-		full: (s) => getStatement(s.id) // a listed statement lacks what the recalculation reads
+		full: (s) => getStatement(s.id), // a listed statement lacks what the recalculation reads
+		keys: (s) => once(`keys ${key(s)}`, () => direct.keys(s))
 	};
 }
 
@@ -98,6 +102,14 @@ const sameStock = (a: Stock, b: Stock) =>
 // take now, also for a statement before migration 0014
 const fuelStockChanged = async (statement: Located, load: Loaders) => !sameStock(statement.fuelStock, await load.stock(statement));
 
+// #1309 (product owner): the keys of the invoices it bills (and of its Veränderung Tankbestand) that cannot be
+// calculated for the building; before #1221 Dwello split them equally (Fachreview 1309-1 V-2, V-3)
+async function uncalculableKeys(statement: Located, load: Loaders) {
+	const failing = agreedIn(statement, await load.keys(statement));
+	const keys = new Map(failing.map(({ distributionKeyName: key, reason, apartment }) => [key, { key, reason, apartment }]));
+	return [...keys.values()];
+}
+
 const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte Abrechnung replaces (Fachreview 454-2 V-23); overdue: sent, past its Zahlungsfrist
 
 /**
@@ -123,14 +135,17 @@ async function changesOf(statement: StatementWithDetails | null, load: Loaders) 
 	const located = statement as Located;
 	const invoiceIds = await changedInvoices(located, load);
 	const fuelStock = await fuelStockChanged(located, load);
-	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock);
-	const full = correctable ? await load.full(located) : null;
+	const keys = await uncalculableKeys(located, load);
+	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock || keys.length > 0);
+	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
+	const full = correctable && !keys.length ? await load.full(located) : null;
 	const check = full ? await recalculation(full) : null;
 	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
 	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
 	return {
 		invoiceIds,
 		fuelStockChanged: fuelStock,
+		uncalculableKeys: keys,
 		correctionDue: due,
 		correctionDeclinable: due && !!check?.raises,
 		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
@@ -158,14 +173,17 @@ export async function declineCorrection(statementId: string) {
 export async function notUpToDate<S extends StatementWithDetails>(statements: S[]) {
 	const load = perPeriod();
 	const changed = async (s: S) =>
-		!!s.building && ((await changedInvoices(s as Located, load)).length > 0 || (await fuelStockChanged(s as Located, load)));
+		!!s.building &&
+		((await changedInvoices(s as Located, load)).length > 0 ||
+			(await fuelStockChanged(s as Located, load)) ||
+			(await uncalculableKeys(s as Located, load)).length > 0);
 	const flags = await Promise.all(statements.map(changed));
 	return statements.filter((_, i) => flags[i]);
 }
 
 /** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
 export const draftOutdated = (changes: Awaited<ReturnType<typeof changesOf>>) =>
-	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged);
+	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged || changes.uncalculableKeys.length > 0);
 
 /** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
 export async function draftsToSend() {
@@ -201,6 +219,7 @@ export async function outdatedStatements() {
 							periodEnd: s.periodEnd,
 							invoices: changes!.invoiceIds.length,
 							fuelStock: changes!.fuelStockChanged,
+							uncalculableKeys: changes!.uncalculableKeys.length > 0, // #1309: the task says why
 							// PO 2026-10-20 (Fachreview 454-1 E-5): the overview adds the sentence on the Verjährung
 							olderThanFiveYears: olderThanFiveYears(s.periodEnd, swissToday())
 						}

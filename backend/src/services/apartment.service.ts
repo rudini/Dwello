@@ -313,5 +313,5 @@ export async function apartmentExists(id: string): Promise<boolean> {
 /** The building's apartments with the values a Verteilschlüssel reads */
 export async function apartmentsOf(buildingId: string) {
 	const { apartments } = await listApartments({ buildingId, limit: 1000 });
-	return apartments.map((a) => ({ id: a.id, area: parseFloat(a.area), rooms: parseFloat(a.rooms) }));
+	return apartments.map((a) => ({ id: a.id, number: a.number, area: parseFloat(a.area), rooms: parseFloat(a.rooms) }));
 }

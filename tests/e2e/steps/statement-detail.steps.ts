@@ -21,6 +21,7 @@ import {
 	invoicesOfPosition,
 	laterInvoicesHint,
 	laterInvoicesHints,
+	correctionFromHintOffered,
 	declineCorrectionOffered,
 	declineCorrectionQuestion,
 	languageOfPdf,
@@ -482,6 +483,10 @@ When('der Liegenschaftsverwalter die Abrechnung nicht berichtigt', async ({ verw
 // after a positive check on the same page
 Then('bietet die Abrechnung «Nicht berichtigen» nicht mehr an', async ({ verwalter }) => {
 	await verwalter.sees(declineCorrectionOffered).toBe(0);
+});
+
+Then('bietet der Hinweis auf Änderungen seit dem Erstellen das Berichtigen nicht an', async ({ verwalter }) => {
+	await verwalter.sees(correctionFromHintOffered).toBe(0);
 });
 
 

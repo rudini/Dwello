@@ -1,6 +1,7 @@
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { apartmentsOf } from './apartment.service';
-import { getInvoicesForStatement } from './invoice.service';
+import { getInvoice, getInvoicesForStatement } from './invoice.service';
+import { fuelStockChange } from './fuel-stock.service';
 
 // The invoices of a building's period that hold its statement run: the run waits until they are fixed
 /**
@@ -13,25 +14,45 @@ export async function getUncategorizedInvoices(buildingId: string, periodStart: 
 		.map(({ billingEntityName, invoiceDate, amount }) => ({ billingEntityName, invoiceDate, amount }));
 }
 
+// #1315 (product owner): why a key fails for the building, and for which apartment if it fails for one
+const REASONS: Record<string, string> = { FORMULA_NEGATIVE: 'NEGATIVE', FORMULA_ALL_ZERO: 'ALL_ZERO', FORMULA_NOT_A_NUMBER: 'DIVISION_BY_ZERO' };
+async function keyFailure(keyId: string, apartments: Awaited<ReturnType<typeof apartmentsOf>>) {
+	const result = await calculateBuildingDistribution(keyId, apartments, 1);
+	if (result.isValid) return null;
+	const code = result.errorCode?.code === 'FORMULA_APARTMENT_FAILED' ? String(result.errorCode.params.reason) : result.errorCode?.code;
+	const apartment = apartments.find((one) => one.id === result.apartmentId)?.number ?? null;
+	return { reason: `STATEMENT_KEY_REASON_${REASONS[code ?? ''] ?? 'OTHER'}`, apartment };
+}
+
 /**
- * #1221 (product owner): the period's invoices whose Verteilschlüssel cannot be calculated for the building's
- * apartments, with the key's name; the run holds them instead of splitting them equally
+ * #1221 (product owner): the invoices whose Verteilschlüssel cannot be calculated for the building's apartments, with
+ * the key's name and why (#1315); the run holds them instead of splitting them equally. The period's invoices and the
+ * delivery whose key distributes the Veränderung Tankbestand, also of another period (#1323, marked fuelStock)
  */
 export async function uncalculableKeyInvoices(buildingId: string, start: string, end: string) {
-	const [bills, apartments] = await Promise.all([getInvoicesForStatement(buildingId, start, end), apartmentsOf(buildingId)]);
+	const [bills, apartments, [stock]] = await Promise.all([
+		getInvoicesForStatement(buildingId, start, end),
+		apartmentsOf(buildingId),
+		fuelStockChange(buildingId, start, end)
+	]);
 	if (!apartments.length) return [];
-	const failing: string[] = [];
-	for (const id of new Set(bills.flatMap((bill) => bill.distributionKeyId ?? [])))
-		if (!(await calculateBuildingDistribution(id, apartments, 1)).isValid) failing.push(id);
-	return bills
-		.filter((bill) => failing.includes(bill.distributionKeyId!))
-		.map(({ id, billingEntityName, description, invoiceDate, amount, distributionKey, building }) => ({
+	const deliveryId = stock?.distributionKey?.deliveryId;
+	const delivery = deliveryId && !bills.some((bill) => bill.id === deliveryId) ? await getInvoice(deliveryId) : null;
+	const all = [...bills, ...(delivery ? [{ ...delivery, fuelStock: true }] : [])];
+	const failures = new Map<string, Awaited<ReturnType<typeof keyFailure>>>();
+	for (const id of new Set(all.flatMap((bill) => bill.distributionKeyId ?? []))) failures.set(id, await keyFailure(id, apartments));
+	return all
+		.filter((bill) => failures.get(bill.distributionKeyId!))
+		.map(({ id, billingEntityName, description, invoiceDate, amount, categoryId, distributionKeyId, distributionKey, building, ...rest }) => ({
 			id,
 			billingEntityName,
 			description,
 			invoiceDate,
 			amount,
+			categoryId,
 			distributionKeyName: distributionKey!.nameDE || distributionKey!.name,
-			buildingName: building!.name
+			buildingName: building!.name,
+			...failures.get(distributionKeyId!)!,
+			...('fuelStock' in rest && { fuelStock: true })
 		}));
 }

@@ -17,6 +17,7 @@ import {
 	redeliverButton,
 	newPdfToSend,
 	declineCorrectionButton,
+	laterCorrectButton,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
 	paymentDeadline,
@@ -173,6 +174,7 @@ export const letterInsteadOffers = Count.of(letterInsteadLink);
 
 // #454 (Fachreview 454-1 E-6)
 export const declineCorrectionOffered = Count.of(declineCorrectionButton);
+export const correctionFromHintOffered = Count.of(laterCorrectButton); // #1309: not while a key cannot be calculated
 
 // what «Als bezahlt markieren» says about a part paid (#523)
 export const partialPaymentAdvice = Text.of(partialPaymentHint);

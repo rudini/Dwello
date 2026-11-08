@@ -1089,22 +1089,25 @@ Funktionalität: Abrechnungsdetail
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Verteilschlüssel "Halbe Zimmer" rechnet danach mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Dann weist die Abrechnung darauf hin: "TEXT-ENTWURF"
+    Dann weist die Abrechnung darauf hin: "Dieser Entwurf ist nicht aktuell: Der Verteilschlüssel einiger Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen."
     Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
 
-  # #1309 (Entscheid PO): eine versendete Abrechnung mit einem solchen Verteilschlüssel ist zu berichtigen
+  # #1309 (Entscheid PO): eine versendete Abrechnung mit einem solchen Verteilschlüssel ist zu berichtigen, sobald der
+  # Verteilschlüssel stimmt; bis dahin wird sie nicht ersetzt (Fachreview 1309-1 V-1)
   @wip
-  Szenario: Versendete Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, ist zu berichtigen
+  Szenario: Versendete Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, wird nicht ersetzt
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Verteilschlüssel "Halbe Zimmer" rechnet danach mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Dann weist die Abrechnung darauf hin: "TEXT-VERSENDET"
-    Wenn der Liegenschaftsverwalter die Abrechnung aus dem Hinweis berichtigen will
-    Dann sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt
+    Dann weist die Abrechnung darauf hin: "Dwello kann die Abrechnung deshalb nicht neu berechnen."
+    Und bietet der Hinweis auf Änderungen seit dem Erstellen das Berichtigen nicht an
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und hat die Abrechnung den Status "Versendet"
 
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin

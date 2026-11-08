@@ -846,6 +846,8 @@ export async function replaceStatement(id: string, paidAmount?: string): Promise
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!['sent', 'overdue', 'paid', 'settled'].includes(existing.status))
 		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
+	// Fachreview 1309-1 V-1: else it would stay «Ersetzt» without a berichtigte Abrechnung until the key is fixed
+	await refuseUncalculableKeys(existing.building!.id, existing.periodStart, existing.periodEnd);
 	const entered = paidAmount === undefined ? undefined : { paidAmount: paidOn(existing, paidAmount) };
 	await db.transaction(async (tx) => {
 		const paid = entered ?? (await offsetOf(existing, tx));
@@ -945,14 +947,18 @@ async function refuseUncategorized(buildingId: string, periodStart: string, peri
 async function refuseUncalculableKeys(buildingId: string, periodStart: string, periodEnd: string) {
 	const failing = await uncalculableKeyInvoices(buildingId, periodStart, periodEnd);
 	if (!failing.length) return;
-	const [{ distributionKeyName, buildingName }] = failing;
+	const [{ distributionKeyName, buildingName, reason, apartment }] = failing;
+	const held = failing.filter((invoice) => invoice.distributionKeyName === distributionKeyName);
+	const delivery = held.find((invoice) => invoice.fuelStock); // of another period, it distributes the Veränderung Tankbestand (#1323)
 	throw new CodedError('STATEMENT_KEY_NOT_CALCULABLE', 'The distribution key cannot be calculated for the apartments of the building', {
 		key: distributionKeyName,
 		building: buildingName,
-		invoices: failing
-			.filter((invoice) => invoice.distributionKeyName === distributionKeyName)
+		invoices: held
 			.map((invoice) => `${invoice.billingEntityName}, ${formatSwissDate(invoice.invoiceDate)}, CHF ${formatCHF(Number(invoice.amount))}`)
-			.join('; ')
+			.join('; '),
+		reason, // #1315: why, and for which apartment
+		...(apartment && { apartment }),
+		...(delivery && { fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: delivery.invoiceDate })
 	});
 }
 

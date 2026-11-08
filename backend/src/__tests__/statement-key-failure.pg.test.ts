@@ -36,7 +36,7 @@ afterAll(async () => {
 
 const run = { periodStart: '2025-01-01', periodEnd: '2025-12-31' };
 // #1315 (product owner): the refusal names where the formula fails and why
-const refusal = (invoices: string, failure: { reason: string; apartment?: string } = { reason: 'STATEMENT_KEY_DIVISION_BY_ZERO', apartment: '2.01' }) =>
+const refusal = (invoices: string, failure: { reason: string; apartment?: string } = { reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01' }) =>
 	[
 		'The distribution key cannot be calculated for the apartments of the building',
 		'STATEMENT_KEY_NOT_CALCULABLE',
@@ -52,7 +52,7 @@ describe('Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt',
 				invoiceDate: '2025-05-31',
 				amount: '600.00',
 				distributionKeyName: name,
-				reason: 'STATEMENT_KEY_DIVISION_BY_ZERO', // #1315: the apartment where the formula fails, and why
+				reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', // #1315: the apartment where the formula fails, and why
 				apartment: '2.01'
 			})
 		]);
@@ -88,8 +88,8 @@ describe('Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt',
 // #1315 (product owner): the hint and the refusal say why the formula fails, for which apartment if it is one
 describe('Grund, warum sich ein Verteilschlüssel nicht berechnen lässt', () => {
 	const cases = [
-		['negativ', '({rooms} - 3.5) * ({rooms} - 3.5) - 0.1', '2030', { reason: 'STATEMENT_KEY_NEGATIVE', apartment: '2.01' }],
-		['null für alle', '({rooms} - 3.5) * ({rooms} - 3.5)', '2031', { reason: 'STATEMENT_KEY_ALL_ZERO' }]
+		['negativ', '({rooms} - 3.5) * ({rooms} - 3.5) - 0.1', '2030', { reason: 'STATEMENT_KEY_REASON_NEGATIVE', apartment: '2.01' }],
+		['null für alle', '({rooms} - 3.5) * ({rooms} - 3.5)', '2031', { reason: 'STATEMENT_KEY_REASON_ALL_ZERO' }]
 	] as const;
 	const keys: string[] = [];
 
@@ -145,6 +145,27 @@ describe('Verteilschlüssel der Veränderung des Tankbestands', () => {
 		await heated.remove();
 	});
 
+	// Fachreview 1309-1 V-2: a statement whose Veränderung Tankbestand was split equally is outdated like one of an invoice
+	it('nennt eine versendete Abrechnung als zu berichtigen, wenn nur der Verteilschlüssel der Veränderung Tankbestand scheitert', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		const [profile] = await db.select().from(heatingProfiles).limit(1);
+		const later = { periodStart: '2026-01-01', periodEnd: '2026-12-31' };
+		const formulaKey = `Später ${other}`;
+		const changing = await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: formulaKey, nameDE: formulaKey, formula: '{rooms}' }));
+		await insertInvoice(heated.building, { categoryId: heating.id, distributionKeyId: changing, billingEntityName: 'Öl AG', amount: '500.00', invoiceDate: '2025-12-20' });
+		expect((await sendJson('POST', `/api/v1/buildings/${heated.building}/fuel-stocks`, { readingDate: '2026-12-31', amount: '50.00', categoryId: heating.id })).status).toBe(201);
+		await insertInvoice(heated.building, { amount: '1200.00', invoiceDate: '2026-03-31' });
+		const sent = await idOf(await sendJson('POST', '/api/v1/statements/generate', { contractId: heated.contract, buildingId: heated.building, ...later, heatingProfileId: profile.id }));
+		await sendJson('PUT', `/api/v1/statements/${sent}/status`, { status: 'sent' });
+		await sendJson('PUT', `/api/v1/distribution-keys/${changing}`, { formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' });
+
+		const changes = (await (await callApi(`/api/v1/statements/${sent}/changed-invoices`)).json()) as Record<string, unknown>;
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, sent));
+		await db.delete(invoices).where(eq(invoices.distributionKeyId, changing));
+		await db.delete(distributionKeys).where(eq(distributionKeys.id, changing));
+		expect(changes).toEqual(expect.objectContaining({ invoiceIds: [], fuelStockChanged: false, correctionDue: true, uncalculableKeys: [expect.objectContaining({ key: formulaKey })] }));
+	});
+
 	it('nennt die frühere Lieferung in der Prüfung der Rechnungen und verweigert die Abrechnung', async () => {
 		const check = await callApi(`/api/v1/invoices/completeness/${heated.building}?periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`);
 		expect(((await check.json()) as { uncalculableKeys: unknown }).uncalculableKeys).toEqual([
@@ -154,8 +175,9 @@ describe('Verteilschlüssel der Veränderung des Tankbestands', () => {
 		const [profile] = await db.select().from(heatingProfiles).limit(1);
 		const response = await sendJson('POST', '/api/v1/statements/generate', { contractId: heated.contract, buildingId: heated.building, ...period, heatingProfileId: profile.id });
 		expect(response.status).toBe(400);
+		// Fachreview 1309-1: the refusal says the delivery of another period distributes the Veränderung Tankbestand
 		expect(((await response.json()) as { params: unknown }).params).toEqual(
-			expect.objectContaining({ key: name, invoices: 'Öl AG, 15.10.2024, CHF 800.00' })
+			expect.objectContaining({ key: name, invoices: 'Öl AG, 15.10.2024, CHF 800.00', fuelStock: 'STATEMENT_KEY_FUEL_STOCK', date: '2024-10-15' })
 		);
 	});
 });
@@ -189,7 +211,9 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 	});
 
 	it('nennt beim Entwurf den Verteilschlüssel, ohne geänderte Rechnungen', async () => {
-		expect(await changes(draft)).toEqual(expect.objectContaining({ invoiceIds: [], uncalculableKeys: [changingName] }));
+		expect(await changes(draft)).toEqual(
+			expect.objectContaining({ invoiceIds: [], uncalculableKeys: [{ key: changingName, reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01' }] })
+		);
 	});
 
 	it('nennt den Entwurf als nicht aktuell und die versendete Abrechnung als zu berichtigen in der Übersicht', async () => {
@@ -200,7 +224,50 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 
 	it('verlangt bei der versendeten Abrechnung das Berichtigen, ohne neu gerechneten Saldo und ohne «Nicht berichtigen»', async () => {
 		expect(await changes(sent)).toEqual(
-			expect.objectContaining({ uncalculableKeys: [changingName], correctionDue: true, correctionDeclinable: false, recalculated: null })
+			expect.objectContaining({ uncalculableKeys: [expect.objectContaining({ key: changingName })], correctionDue: true, correctionDeclinable: false, recalculated: null })
 		);
+	});
+
+	// Fachreview 1309-1 V-1: replacing first would leave it «Ersetzt» without a berichtigte Abrechnung
+	it('ersetzt die versendete Abrechnung nicht, solange sich der Verteilschlüssel nicht berechnen lässt', async () => {
+		const response = await sendJson('POST', `/api/v1/statements/${sent}/replace`, {});
+
+		expect(response.status).toBe(409);
+		expect(((await response.json()) as { code: string }).code).toBe('STATEMENT_KEY_NOT_CALCULABLE');
+		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, sent));
+		expect(statement.status).toBe('sent');
+	});
+});
+
+// Fachreview 1309-1 V-3: only what the statement bills counts, the categories its Mietvertrag agreed
+describe('Verteilschlüssel einer nicht vereinbarten Kategorie', () => {
+	const third = crypto.randomUUID();
+	let lift: Awaited<ReturnType<typeof createRental>>;
+	let changing: string;
+	let draft: string;
+
+	beforeAll(async () => {
+		const [elevator] = await db.select().from(categories).where(eq(categories.name, 'Elevator'));
+		lift = await createRental(third, { startDate: '2024-01-01', monthlyAdvancePayment: '100' });
+		const keyName = `Lift ${third}`;
+		changing = await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: keyName, nameDE: keyName, formula: '{rooms}' }));
+		await insertInvoice(lift.building, { amount: '1200.00', invoiceDate: '2024-03-31' });
+		await insertInvoice(lift.building, { categoryId: elevator.id, distributionKeyId: changing, amount: '400.00', invoiceDate: '2024-06-30' });
+		await sendJson('PUT', `/api/v1/contracts/${lift.contract}/agreements`, { categoryId: elevator.id, agreed: false });
+		draft = await idOf(await sendJson('POST', '/api/v1/statements/generate', { contractId: lift.contract, buildingId: lift.building, periodStart: '2024-01-01', periodEnd: '2024-12-31' }));
+		await sendJson('PUT', `/api/v1/distribution-keys/${changing}`, { formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' });
+	});
+
+	afterAll(async () => {
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, lift.contract));
+		await db.delete(invoices).where(eq(invoices.buildingId, lift.building));
+		await lift.remove();
+		await db.delete(distributionKeys).where(eq(distributionKeys.id, changing));
+	});
+
+	it('nennt den Entwurf nicht, wenn nur eine nicht vereinbarte Rechnung den Verteilschlüssel hat', async () => {
+		const changes = (await (await callApi(`/api/v1/statements/${draft}/changed-invoices`)).json()) as Record<string, unknown>;
+
+		expect(changes).toEqual(expect.objectContaining({ invoiceIds: [], uncalculableKeys: [] }));
 	});
 });
