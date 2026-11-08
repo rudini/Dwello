@@ -249,6 +249,19 @@
 - [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
 - [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
 
+## Session: #707 Demo data: paid amounts, year end, apartment numbers, dates
+
+- [x] Checked on main: `paid_amount` already set for the 9 paid statements (existing test); no invoice across the year end; «Wohnung EG, EG» (Alpenblick EG/OG1/OG2); sent statements `created_at` on the loading day, after «Versendet»
+- [x] Decisions in #707 «Decided (product owner)» (coordinator, on recommendation)
+- [x] No scenario: the demo data is loaded by a CLI script; tests in `backend/src/__tests__/demo-data.pg.test.ts`, each seen red
+- [x] Sent statements and their PDF made on their statement date; Alpenblick 0.01/1.01/2.01 (691d717)
+- [x] `fach-reviewer` `docs/reviews/707-fachreview-1.md`: no Blocker/Major, V-1 comment fixed; Seepark SR-2024-016 Gartenpflege 01.07.2024–30.06.2025, 368.00 + 362.00 (ea0f7a0)
+- [x] code-reviewer `docs/reviews/707-review-1.md`: no findings
+- [x] daten-pruefer `docs/reviews/707-datenpruefung-1.md`: no findings
+- [x] Persona Dr. Weber `docs/design/personas/weber-707.md`: P-2 fixed (invoices recorded before the statements that bill them, 3ec954f); P-1 Minor stays in the report
+- [x] Closing code-reviewer round `docs/reviews/707close-review-1.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-707.md` (persona build in a fresh container)
+- [x] Archive the session; PR `Fixes #707`: pushed after this archive
 ## Session: #523 partial payment hint in «Als bezahlt markieren» (2026-10-31)
 
 - [x] Scenario «Der Zahlungseingang sagt, was bei einer Teilzahlung gilt» (`statement-detail.feature`, seen red as @wip)
@@ -1499,6 +1512,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-688.md`): no Blocker or Major; Minors that stay: Helga H-1, Sven S-1, S-3; Helga H-2 = Sven S-2 (two alerts give opposite advice) is #1197
 - [x] Workflow notes: `git stash` is shared by all worktrees; parallel agents must not use it (one popped another's stash)
 - [x] Archive the session; PR pushed after this archive
+## Session: #1143 Draft refusal without the apartment's contracts
+
+- [x] Scenario line `contract-edit.feature:239` changed to the decided text (Spec change approved: #1143)
+- [x] `fach-reviewer` `docs/reviews/b1143-fachreview-1.md`: de checked, fr/it/en written; V-1 Minor («die Mietverträge» instead of «sie») taken
+- [x] DOM test and scenario seen red at the message, texts in `messages/*.json`, green (ea8df3c)
+- [x] code-reviewer `docs/reviews/b1143-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-b1143.md`): no Blocker or Major; P-1..P-3 Minor stay (P-1, P-3 on the base commit, P-2 the decided #666 hint and #1142)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1143.md`
+- [x] Archive the session; PR `Fixes #1143`: pushed after this archive
 ## Session: #1176 Kontoinhaber in the privacy statement
 
 - [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
@@ -1516,6 +1538,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Checks: lint, check, fitness, backend type-check, vitest of the tests reading the features, E2E chromium of the 11 changed features (432 passed)
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-699.md`; collected review `docs/reviews/workflow-rules-review-2026-11-07.md`
 - [x] Archive session; PR `Fixes #699, #706, #708`: pushed after this archive
+## Session: #1193 building search finds the full address and the postcode
+
+- [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
+- [x] Backend tests (`building-search.pg.test.ts`) and three scenarios in `buildings.feature`, each seen red at its own step; search in name, street, postcode and place, commas separate words, «Ort» in postcode or place (95f8390)
+- [x] code-reviewer round 1 (`docs/reviews/1193-review-1.md`): no findings
+- [x] Persona Marco (`docs/design/personas/marco-1193.md`): task done; Minor P-1 («Ort» has no help text) stays, a new text the issue did not decide
+- [x] Checks: lint, check, fitness, backend type-check, backend search tests, buildings.feature (chromium)
+- [x] Workflow notes: GitHub does not apply `merge=union` of `.gitattributes`, so an entry appended at the end of this archive conflicts with every later append on main; this entry sits after #1176 instead
+- [x] Archive the session; PR `Fixes #1193`: pushed after this archive
 ## Session: #705 ponytail shortcut in missingByContract
 
 - [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
@@ -1559,6 +1590,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #697 CI screenshot job: mobile, dark mode, dialog and wizard states
+
+- [x] Read #697 and #1172 (same job; #1172 serves the base branch as a production build, whoever merges second merges `main` first); decisions in #697 «Decided (product owner)» with two follow-up comments
+- [x] Each changed page in desktop light, mobile (390 px) light and desktop dark; its dialog and `every-wizard-step` states of `tests/a11y/screens.json` via the axe check's `lookAt`; one seed per state for both branches, one test at a time, a fixed clock; upload states left out; comment from `ui-screenshots/shots.txt`, cut to GitHub's size (ea26370, 42577ff); unit tests seen red
+- [x] code-reviewer `docs/reviews/697-review-{1,2}.md`: C-1, C-2 Major fixed
+- [x] No scenario: CI tooling only; checks: lint, check, fitness, backend type-check, unit tests, axe and language examples after the `lookAt` change, the screenshot job locally against `main`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-697.md`
 ## Session: #714 design guard: style shorthands and system colours
 
 - [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue

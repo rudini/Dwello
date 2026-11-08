@@ -236,7 +236,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie oben auf der Seite «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern»."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dwello hat den Entwurf nicht gelöscht: Die anderen Mietverträge dieser Wohnung liessen sich nicht laden, darum lässt sich nicht prüfen, ob die Wohnung frei ist. Laden Sie die Mietverträge oben auf der Seite mit «Erneut versuchen» und löschen Sie den Entwurf danach noch einmal."
 
   # #133 (Fachreview V-10): deckt «Abgerechnet bis» die ganze Periode des Entwurfs ab, entsteht keine neue Abrechnung
   Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt

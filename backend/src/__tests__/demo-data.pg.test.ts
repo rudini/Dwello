@@ -46,7 +46,7 @@ describe('Demodaten', () => {
 				(SELECT COUNT(*) FROM tenants)::int AS tenants, (SELECT COUNT(*) FROM rental_contracts)::int AS contracts,
 				(SELECT COUNT(*) FROM invoices)::int AS invoices, (SELECT COUNT(*) FROM utility_statements)::int AS statements`
 			)
-		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 83, statements: 17 }]);
+		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 84, statements: 17 }]);
 	});
 
 	// Zeigt in der Demo, dass sich Dokumente zu einem Mieter ablegen lassen
@@ -112,6 +112,53 @@ describe('Demodaten', () => {
 		expect(rows).toEqual([
 			{ status: 'paid', date: '2025-04-14', paid_after: true },
 			{ status: 'sent', date: '2026-09-28', paid_after: true }
+		]);
+	});
+
+	// #707: der Verlauf zeigte «Erstellt» und «PDF erstellt» am Ladetag, nach «Versendet»
+	it('erstellt die versendeten Abrechnungen und ihr PDF spätestens am Tag des Versands', async () => {
+		const rows = await query(
+			name,
+			`SELECT count(*)::int AS sent, count(*) FILTER (WHERE created_at::date > statement_date OR pdf_generated_at::date > statement_date)::int AS later
+			FROM utility_statements WHERE status <> 'draft'`
+		);
+
+		expect(rows).toEqual([{ sent: 10, later: 0 }]);
+	});
+
+	// #707 (Persona Dr. Weber 707 P-2): die Rechnung hiess «Erfasst» am Ladetag, nach der Abrechnung von 2025, die sie verrechnet
+	it('erfasst und ändert jede Rechnung vor den Abrechnungen, die sie verrechnen', async () => {
+		const rows = await query(
+			name,
+			`SELECT count(*)::int AS billed, count(*) FILTER (WHERE i.created_at > s.created_at OR i.updated_at > s.created_at)::int AS later
+			FROM utility_statements s JOIN utility_statement_line_items l ON l.statement_id = s.id
+			CROSS JOIN jsonb_array_elements(l.invoices) AS billed(invoice) JOIN invoices i ON i.id::text = billed.invoice->>'id'`
+		);
+
+		expect(rows[0].billed).toBeGreaterThan(0);
+		expect(rows[0].later).toBe(0);
+	});
+
+	// #707: «Wohnung EG, EG» nannte das Stockwerk zweimal
+	it('nennt in keiner Wohnungsnummer das Stockwerk', async () => {
+		const rows = await query(name, `SELECT number FROM apartments WHERE number ~* '(EG|OG|UG)'`);
+
+		expect(rows).toEqual([]);
+	});
+
+	// #707: eine Rechnung über den Jahreswechsel; jede Abrechnungsperiode trägt die Kosten ihrer Tage (730.00 für 365 Tage)
+	it('teilt die Gartenpflege von Seepark über den Jahreswechsel nach Tagen auf beide Jahre auf', async () => {
+		const rows = await query(
+			name,
+			`SELECT s.period_start::text AS period, array_agg(DISTINCT l.total_amount::text) AS amounts
+			FROM utility_statement_line_items l JOIN utility_statements s ON s.id = l.statement_id JOIN apartments a ON a.id = s.apartment_id
+			WHERE a.building_id = '22222222-2222-2222-2222-222222222222' AND l.category_id = (SELECT id FROM categories WHERE name_de = 'Gartenpflege')
+			GROUP BY 1 ORDER BY 1`
+		);
+
+		expect(rows).toEqual([
+			{ period: '2024-01-01', amounts: ['368.00'] },
+			{ period: '2025-01-01', amounts: ['362.00'] }
 		]);
 	});
 
