@@ -1,6 +1,6 @@
 import { target } from '../screenplay/target';
 
-export type ApartmentInfo = 'status' | 'rooms' | 'floor' | 'area' | 'discontinued';
+export type ApartmentInfo = 'status' | 'rooms' | 'floor' | 'area' | 'discontinued' | 'earlier-size';
 
 export const infoCard = (info: ApartmentInfo) =>
 	target(`Angabe ${info} der Wohnung`, (page) => page.getByTestId(`apartment-info-${info}`));
@@ -28,3 +28,9 @@ export const historyLink = (label: string) =>
 		page.getByTestId('contract-history-link').filter({ hasText: label })
 	);
 export const newContractButton = target('Mietvertrag erfassen', (page) => page.getByTestId('apartment-new-contract'));
+// #1301: the last change of Fläche and Zimmeranzahl, removed after a confirmation
+export const removeSizeChangeButton = target('Änderung entfernen', (page) => page.getByTestId('apartment-size-change-remove'));
+export const confirmRemoveSizeChangeButton = target('Entfernen bestätigen', (page) =>
+	page.getByTestId('apartment-size-change-remove-confirm')
+);
+export const sizeChangeDialog = target('Dialog Änderung entfernen', (page) => page.getByRole('dialog'));

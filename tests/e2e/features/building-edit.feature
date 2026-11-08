@@ -57,5 +57,5 @@ Funktionalität: Gebäude bearbeiten
   # statt eines allgemeinen Fehlers beim Speichern, und Dwello kürzt nichts (wie #743)
   Szenario: Bei einem zu langen Gebäudenamen sagt Dwello, was zu tun ist
     Wenn der Liegenschaftsverwalter bei "Gebäudename" einen Text von 256 Zeichen speichert
-    Dann steht bei "Gebäudename" die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
+    Dann steht bei "Gebäudename" die Fehlermeldung "Höchstens 255 Zeichen, Sie haben 256 eingegeben. Kürzen Sie den Text."
     Und steht bei "Gebäudename" noch der Text von 256 Zeichen

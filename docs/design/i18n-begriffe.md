@@ -14,6 +14,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | PLZ / Ort / Kanton | NPA / localité / canton | NPA / località / cantone | postcode / town / canton |
 | Wohnung | appartement | appartamento | apartment |
 | Aufgehobene Wohnung / Aufgehoben ab {Datum} | appartement qui n’existe plus / n’existe plus dès le {date} | appartamento che non esiste più / non esiste più dal {date} | apartment that no longer exists / no longer exists from {date} |
+| Gültig ab (Fläche und Zimmeranzahl) | valable dès le | valido dal | apply from |
+| Zusammenlegung | réunion avec un autre appartement | unione con un altro appartamento | merged with another apartment |
 | Wohnungsnummer | numéro d’appartement | numero dell’appartamento | apartment number |
 | Stockwerk | étage | piano | floor |
 | EG (Stockwerk 0) | rez-de-chaussée | pianterreno | ground floor |

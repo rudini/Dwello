@@ -61,4 +61,12 @@ describe('Rechnungen', () => {
 		expect(response.status).toBe(201);
 		expect(await response.json()).toMatchObject({ llmCategoryId: existing.categoryId, llmConfidence: '0.9200' });
 	});
+
+	// #1316: % and _ in the search are characters, not wildcards
+	it('findet mit _ oder % keine Rechnung, deren Text dort ein anderes Zeichen hat', async () => {
+		for (const term of [`Hauswart_${token}`, `Haus%${token}`]) {
+			const { invoices } = (await (await callApi(`/api/v1/invoices?search=${encodeURIComponent(term)}`)).json()) as { invoices: unknown[] };
+			expect(invoices).toEqual([]);
+		}
+	});
 });

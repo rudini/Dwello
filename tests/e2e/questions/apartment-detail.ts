@@ -11,6 +11,7 @@ import {
 	monthlyTotal,
 	newContractButton,
 	nextTenantNote,
+	sizeChangeDialog,
 	vacancyNote
 } from '../targets/apartment-detail';
 import { successToast } from '../targets/form';
@@ -34,3 +35,4 @@ export const contractHistoryNaming = (...expected: string[]) =>
 		(await actor.answer(Text.ofAll(historyRows))).map((row, i) => (expected[i] && row.includes(expected[i]) ? expected[i] : row))
 	);
 export const newContractOffers = Count.of(newContractButton);
+export const sizeChangeDialogText = Text.of(sizeChangeDialog); // #1301

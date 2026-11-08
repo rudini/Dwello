@@ -38,13 +38,24 @@
 			submitLabel={m.buildings_save_changes()}
 		>
 			{#snippet status()}
+				<!-- #1301: the day from which the Fläche and Zimmeranzahl above apply («Gültig ab»); empty on every visit,
+				the day belongs to one save -->
+				<DateInput
+					id="sizeFrom"
+					name="sizeFrom"
+					label={m.apartments_form_size_from_label()}
+					help={m.apartments_form_size_from_help()}
+					value=""
+					optional
+					testid="apartment-size-from-input"
+				/>
 				<StatusField {apartment} />
 				<!-- #1284: the day from which the apartment no longer exists; only here, a new one exists -->
 				<DateInput
 					id="discontinuedFrom"
 					name="discontinuedFrom"
 					label={m.apartments_form_discontinued_label()}
-					help="{m.apartments_form_discontinued_help()} {m.apartments_form_discontinued_merge_note()} {m.apartments_form_discontinued_own_use_note()}"
+					help="{m.apartments_form_discontinued_help()} {m.apartments_form_discontinued_merge_enter()} {m.apartments_form_discontinued_own_use_note()}"
 					value={apartment.discontinuedFrom ?? ''}
 					optional
 					testid="apartment-discontinued-input"

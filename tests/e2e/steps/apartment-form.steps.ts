@@ -6,6 +6,8 @@ import {
 	blockApartment,
 	changeArea,
 	changeNumber,
+	changeSize,
+	changeSizeFrom,
 	chooseBuilding,
 	discontinueApartment,
 	enterNumber,
@@ -71,6 +73,20 @@ When('der Liegenschaftsverwalter die Fläche auf {string} ändert', async ({ ver
 When('der Liegenschaftsverwalter die Wohnung ab {string} aufhebt', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(discontinueApartment(date));
 });
+
+When(
+	'der Liegenschaftsverwalter ab {string} die Fläche {string} und die Zimmeranzahl {string} speichert',
+	async ({ verwalter }, date: string, area: string, rooms: string) => {
+		await verwalter.attemptsTo(changeSizeFrom(date, area, rooms));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter ohne Tag die Fläche {string} und die Zimmeranzahl {string} speichert',
+	async ({ verwalter }, area: string, rooms: string) => {
+		await verwalter.attemptsTo(changeSize(area, rooms));
+	}
+);
 
 When('der Liegenschaftsverwalter die Wohnung sperrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(blockApartment);

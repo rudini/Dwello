@@ -113,5 +113,5 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher bei der Einrichtung eine E-Mail-Adresse von 256 Zeichen angibt
-    Dann steht in der Einrichtung bei "E-Mail-Adresse" die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
+    Dann steht in der Einrichtung bei "E-Mail-Adresse" die Fehlermeldung "Höchstens 255 Zeichen, Sie haben 256 eingegeben. Kürzen Sie den Text."
     Und steht in der Einrichtung bei "E-Mail-Adresse" noch der Text von 256 Zeichen

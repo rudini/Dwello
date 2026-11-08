@@ -714,6 +714,14 @@ describe('Abrechnungsdetail', () => {
 	const detail = (overrides = {}, form: object | null = null, reminders: unknown[] = []) =>
 		show(StatementPage, { data: { statement: statement(overrides), reminders }, form } as never);
 
+	// #1301, wording of Fachreview 1301-1
+	it('nennt die Wohnung, die ab einem Tag eine andere Fläche hat', () => {
+		detail({ discontinued: [], sizeChanges: [{ number: '1.02', date: '2025-07-01' }] });
+		expect(byTestId('statement-size-change-note')!.textContent!.trim()).toBe(
+			'Wohnung 1.02 hat ab 01.07.2025 eine andere Fläche oder Zimmeranzahl. Abrechnungspositionen mit Kosten vor und ab diesem Tag sind je Zeitraum gerechnet; die Zeilen dazu stehen im PDF.'
+		);
+	});
+
 	it('zeigt die Kostenpositionen mit ihrem Verteilschlüssel und den Saldo in Worten', () => {
 		detail();
 

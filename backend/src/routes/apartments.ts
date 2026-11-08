@@ -14,6 +14,7 @@ import {
 	getApartmentWithHistory,
 	createApartment,
 	updateApartment,
+	removeSizeChange,
 	deleteApartment
 } from '../services/apartment.service';
 import { buildingExists } from '../services/building.service';
@@ -59,7 +60,8 @@ const apartmentUpdateSchema = t.Partial(
 		area: t.String(),
 		rooms: t.String(),
 		status: t.Optional(manualStatus),
-		discontinuedFrom: t.Union([t.String({ format: 'date' }), t.Null()]) // «Aufgehoben ab» (#1284); null: it exists
+		discontinuedFrom: t.Union([t.String({ format: 'date' }), t.Null()]), // «Aufgehoben ab» (#1284); null: it exists
+		sizeFrom: t.String({ format: 'date' }) // #1301: the day from which area and rooms apply; without: they correct the last ones
 	})
 );
 
@@ -157,6 +159,12 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 			beforeHandle: refuseTooLong(apartments)
 		}
 	)
+	// #1301: remove the last change of Fläche and Zimmeranzahl
+	.delete('/:id/size-change', async ({ params, set }) => {
+		const apartment = await removeSizeChange(params.id);
+		if (!apartment) set.status = 404;
+		return apartment ?? { error: 'Apartment not found' };
+	})
 	// Delete apartment
 	.delete('/:id', async ({ params, set }) => {
 		const result = await deleteApartment(params.id);

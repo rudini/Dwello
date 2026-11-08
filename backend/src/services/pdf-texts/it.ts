@@ -74,11 +74,13 @@ export const it: Record<string, string> = {
 	partShare: 'La sua quota{colon}{apartment} × quota temporale ({sum}) / {costs} = {share}',
 	partShareZero: 'La sua quota{colon}({sum}) × {keyShare} (quota del suo appartamento secondo la chiave di riparto) = {share}',
 	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
-	segmentIntro: 'L’appartamento {number} non esiste più dal {date}. Fino al {dayBefore} conta nella chiave di riparto; finché è sfitto, la sua quota è a carico del locatore. Dal {date} le spese accessorie dell’immobile sono ripartite solo sugli altri appartamenti. Sotto le voci del conteggio interessate figura il calcolo per periodo.',
+	segmentIntro: 'L’appartamento {number} non esiste più dal {date}. Fino al {dayBefore} conta nella chiave di riparto; finché è sfitto, la sua quota è a carico del locatore. Dal {date} le spese accessorie dell’immobile sono ripartite solo sugli altri appartamenti.',
+	sizeChangeIntro: 'L’appartamento {number} ha dal {date} {area} m² e {rooms} locali; fino al {dayBefore} aveva {earlierArea} m² e {earlierRooms} locali.', // #1301
+	segmentNote: 'Sotto le voci del conteggio interessate figura il calcolo per periodo.', // once below the intros (Fachreview 1301-1 V-4)
 	keyShareSegments: 'per periodo, vedi sotto',
 	segmentLineDays: '{start} – {end}, {count} appartamenti{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} giorni = CHF {share}',
 	segmentLinePercent: '{start} – {end}, {count} appartamenti{colon}{keyShare} × CHF {costs} = CHF {apartment} × quota temporale {percent}\u00a0% = CHF {share}',
-	segmentLineProfile: '{start} – {end}, {count} appartamenti, {profileShare}\u00a0% delle spese di riscaldamento secondo il profilo di riscaldamento{colon}{keyShare} × CHF {costs} = CHF {apartment} × quota secondo il profilo di riscaldamento {percent}\u00a0% = CHF {share}',
+	segmentLineProfile: '{start} – {end}, {count} appartamenti, {profileShare}\u00a0% delle spese di riscaldamento (fatture per questi giorni; una fattura che riguarda anche altri giorni, ripartita secondo i mesi del profilo di riscaldamento){colon}{keyShare} × CHF {costs} = CHF {apartment} × quota secondo il profilo di riscaldamento {percent}\u00a0% = CHF {share}', // Fachreview 1301-2 V-1
 	partProfile: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi della sua locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 	partProfileBilled: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi conteggiati del suo rapporto di locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 	partProfileRun: ', quota secondo il profilo di riscaldamento: {percent}\u00a0% (vedi «Spese di riscaldamento e acqua calda»)',
