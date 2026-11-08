@@ -1517,6 +1517,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Dr. Weber (`docs/design/personas/dr-weber-1195.md`): no Blocker or Major; Minors that stay: P-1 (locked checkbox not explained), P-2 (Reparaturen and small maintenance), both on the base too
 - [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
+## Session: #705 ponytail shortcut in missingByContract
+
+- [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
+- [x] Decision in #705 «Decided (product owner)»: fix now with `limit: null`; the other whole-list calls are #1229
+- [x] pg test «nennt auch bei über 1000 Mietverträgen und Abrechnungen …» seen red at each list (contract, then statement); `limit: null` in both lists, marker removed (c35d25c); `ANALYZE` in the test's cleanup against stale planner statistics
+- [x] code-reviewer `docs/reviews/705-review-1.md`: Minor C-1 (comment) fixed
+- [x] No scenario: backend only, nothing a screen shows changes under 1000 records; covered by the pg test
+- [x] Workflow note `docs/reviews/workflow-notes-issue-705.md`
+- [x] Archive the session; PR `Fixes #705`: pushed after this archive
 ## Session: #733 Deletion toast and the statement filter
 
 - [x] Reproduced on `main`: the «… gelöscht» toast covers the «Gebäude» field at about 1030 px (focus on the page title); free at 1440 px (100–200 %) and 390 px
@@ -1541,6 +1550,21 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Archive session; PR `Fixes #1028`: pushed after this archive
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #1099 Remove the code paths for Abrechnungsperioden under a year
+
+No scenario: the preview hint on invoices that count in full in a period under a year is unreachable since #1088 (wizard step 2 and the backend refuse such a period, and correction and recalculation never showed it); the rest stays.
+
+- [x] Checked on `main`: the division by the period's months (`prorating.service.ts`, `periodSums` in `pdf.service.ts`) is not only for a period under a year; a custom Heizprofil may sum to 100 % ± 0.1, so a whole year divides too (#232 M-2, `prorating.pg.test.ts`): it stays, only its comments change
+- [x] fach-reviewer round 1 on the scope before implementing (`docs/reviews/1099-fachreview-1.md`)
+- [x] Keep `reason: 'noHeatingMonths'` and the division: a berichtigte Abrechnung keeps the period of a statement under a year from before #1088 (Fachreview 1099-1 V-1); pinned in `statement-correction.pg.test.ts`
+- [x] Remove `invoicesWithoutServicePeriod` (`invoice-completeness.service.ts`, contract, `docs/api-specification.md`), its hint in `PreviewChecks.svelte`, `statement-wizard.ts` and `statements_whole_*` in all four languages
+- [x] code-reviewer round 1 (`docs/reviews/1099-review-1.md`)
+- [x] daten-pruefer round 1 on two berichtigte Abrechnungen under a year in `dwello_persona` (`docs/reviews/1099-datenpruefung-1.md`)
+- [x] code-reviewer round 2, closing (`docs/reviews/1099-review-2.md`)
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-1099.md`)
+- [x] PR: pushed after this archive
+
+Files: `backend/src/services/{invoice-completeness,prorating,pdf}.service.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/PreviewChecks.svelte`, `messages/*.json`, `tests/contracts/invoice-completeness.json`, `tests/e2e/targets/statement-generate.ts`, `docs/{api-specification,data-model}.md`, tests.
 ## Session: #1173 Do not announce the page title again after a form action
 
 Parallel session: checklist kept in the pull request.
@@ -1592,6 +1616,16 @@ Parallel session: checklist kept in the pull request.
 - [x] Persona Marco `docs/design/personas/marco-1186.md`: no Blocker or Major; P-1 to P-3 Minors stay (P-1: the unsent building choice, #662)
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, statements E2E with its axe/language rows
 - [x] Archive the session; PR `Fixes #1186`: pushed after this archive
+## Session: #1181 Tell apart two uploads of the same file in one minute
+
+- [x] Every point of #1181 confirmed on main (75b78a9); decision written into the issue: a running number «(n von m)» after the title for uploads of one tenant with the same title, in upload order (not seconds: scenarios pin «um hh:mm»)
+- [x] Two `@wip` scenarios (tenant-documents.feature, documents.feature), seen red at the missing number; first upload seeded, two UI uploads in a row raced
+- [x] `numberedUploads` in `src/lib/document-status.ts`, used by the tenant's documents and «Dokumente»; DOM tests seen red (the tenant guard by taking it out) (8ab223a)
+- [x] code-reviewer `docs/reviews/1181-review-1.md`: C-2(a) fixed (4353783), C-1 rejected (the decision names the toast after deleting), C-2(b) stays
+- [x] Persona Sven `docs/design/personas/sven-1181.md`: no Blocker or Major; S-2 = C-2(a) fixed; S-1 = C-1, S-3, S-4 stay in the report
+- [x] Closing code-reviewer `docs/reviews/1181-review-2.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-1181.md`
+- [x] Archive session; PR `Fixes #1181`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
