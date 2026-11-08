@@ -915,6 +915,7 @@
 	"statements_agreements_retry": "Try again",
 	"statements_agreements_wait": "Dwello will continue as soon as the rental contracts are checked.",
 	"statements_agreements_wait_failed": "Dwello could not check the rental contracts. Choose «Try again». If the check succeeds, Dwello continues.",
+	"statements_agreements_wait_retry_failed": "If the check succeeds, Dwello continues.",
 	"statements_agreements_retry_failed": "Dwello tried again and still could not check the rental contracts. You cannot continue without this check. Try again in a few minutes.",
 	"statements_agreements_checked": "The rental contracts are checked.",
 	"statements_agreement_question": "Is «{category}» agreed in the rental contract of {tenant} (apartment {apartment})?",

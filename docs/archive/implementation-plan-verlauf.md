@@ -1543,6 +1543,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
 - [x] Archive the session; PR pushed after this archive
 
+## Session: #1197 one advice after a failed agreements retry
+
+- [x] Checked on main: after «Weiter» and a failed retry the alert says «in einigen Minuten», the note «Wählen Sie «Erneut versuchen»»; no open issue decides it
+- [x] Decided (product owner) in #1197: the note says only «Gelingt die Prüfung, geht es weiter.» after a failed retry
+- [x] Scenario and DOM test seen red; new text in de/fr/it/en; screen row `agreements-wait-retry-failed` (a11y, languages) (cea1e11)
+- [x] code-reviewer `docs/reviews/1197-review-1.md`: no findings
+- [x] Persona Helga `docs/design/personas/helga-1197.md`: P-1 Major (after «Weiter» the step seemed to do nothing, H-1 of #688 met in this task); fixed: the focus goes to «Erneut versuchen», DOM test and scenario seen red (ad1f192)
+- [x] code-reviewer closing round `docs/reviews/1197-review-2.md`: no findings; Helga round 2 `docs/design/personas/helga-1197-2.md`: P-1 fixed, no findings
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1197.md`
 ## Session: #1195 the category's reason in the invoice form note (Weber P-3 on #292)
 
 - [x] Read #1195 on main and on the branch of #1206 (#687), which this one builds on; product owner decisions in #1195: the note shows `reasonOf`, a category without a reason a general sentence; spec change of «Nicht umlagefähige Kategorie wählen»
@@ -1695,6 +1704,15 @@ Parallel session: checklist kept in the pull request.
 - [x] Closing code-reviewer `docs/reviews/1181-review-2.md`
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1181.md`
 - [x] Archive session; PR `Fixes #1181`: pushed after this archive
+## Session: #699, #706, #708 scenarios in domain language
+
+- [x] Checked on `main`: the master data part of #699 is done by migration 0027 (#461); #706 has five uses, not three; «Feld» at 27 places in 11 feature files
+- [x] Decisions of the product owner recorded in #699, #706, #708 («Decided (product owner)»; Spec change approved: #699, #706, #708)
+- [x] `src/__tests__/feature-wording.test.ts` seen red (27 places), then scenarios and steps reworded; the step definitions check the same
+- [x] Slice review `docs/reviews/699-review-1.md`: no findings; no persona (no screen changes), no `fach-reviewer` (no domain rule, term or text of the app changes)
+- [x] Checks: lint, check, fitness, backend type-check, vitest of the tests reading the features, E2E chromium of the 11 changed features (432 passed)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-699.md`; collected review `docs/reviews/workflow-rules-review-2026-11-07.md`
+- [x] Archive session; PR `Fixes #699, #706, #708`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
