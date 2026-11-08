@@ -249,6 +249,19 @@
 - [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
 - [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
 
+## Session: #707 Demo data: paid amounts, year end, apartment numbers, dates
+
+- [x] Checked on main: `paid_amount` already set for the 9 paid statements (existing test); no invoice across the year end; «Wohnung EG, EG» (Alpenblick EG/OG1/OG2); sent statements `created_at` on the loading day, after «Versendet»
+- [x] Decisions in #707 «Decided (product owner)» (coordinator, on recommendation)
+- [x] No scenario: the demo data is loaded by a CLI script; tests in `backend/src/__tests__/demo-data.pg.test.ts`, each seen red
+- [x] Sent statements and their PDF made on their statement date; Alpenblick 0.01/1.01/2.01 (691d717)
+- [x] `fach-reviewer` `docs/reviews/707-fachreview-1.md`: no Blocker/Major, V-1 comment fixed; Seepark SR-2024-016 Gartenpflege 01.07.2024–30.06.2025, 368.00 + 362.00 (ea0f7a0)
+- [x] code-reviewer `docs/reviews/707-review-1.md`: no findings
+- [x] daten-pruefer `docs/reviews/707-datenpruefung-1.md`: no findings
+- [x] Persona Dr. Weber `docs/design/personas/weber-707.md`: P-2 fixed (invoices recorded before the statements that bill them, 3ec954f); P-1 Minor stays in the report
+- [x] Closing code-reviewer round `docs/reviews/707close-review-1.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-707.md` (persona build in a fresh container)
+- [x] Archive the session; PR `Fixes #707`: pushed after this archive
 ## Session: #523 partial payment hint in «Als bezahlt markieren» (2026-10-31)
 
 - [x] Scenario «Der Zahlungseingang sagt, was bei einer Teilzahlung gilt» (`statement-detail.feature`, seen red as @wip)
@@ -1527,6 +1540,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Issues opened: #1200 (totals buttons, error position, name refusal), #1221 (failing custom key splits a statement equally)
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-737.md`
 - [x] Archive the session; PR `Fixes #737`: pushed after this archive
+## Session: #1193 building search finds the full address and the postcode
+
+- [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
+- [x] Backend tests (`building-search.pg.test.ts`) and three scenarios in `buildings.feature`, each seen red at its own step; search in name, street, postcode and place, commas separate words, «Ort» in postcode or place (95f8390)
+- [x] code-reviewer round 1 (`docs/reviews/1193-review-1.md`): no findings
+- [x] Persona Marco (`docs/design/personas/marco-1193.md`): task done; Minor P-1 («Ort» has no help text) stays, a new text the issue did not decide
+- [x] Checks: lint, check, fitness, backend type-check, backend search tests, buildings.feature (chromium)
+- [x] Workflow notes: GitHub does not apply `merge=union` of `.gitattributes`, so an entry appended at the end of this archive conflicts with every later append on main; this entry sits after #1176 instead
+- [x] Archive the session; PR `Fixes #1193`: pushed after this archive
 ## Session: #705 ponytail shortcut in missingByContract
 
 - [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`

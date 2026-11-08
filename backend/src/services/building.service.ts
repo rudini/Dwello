@@ -3,7 +3,7 @@
  * Business logic for building operations
  */
 
-import { eq, ilike, sql, desc, and, inArray } from 'drizzle-orm';
+import { eq, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, type Building, type NewApartment, type NewBuilding } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
@@ -33,11 +33,14 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		conditions.push(everyWordIn(search, [buildings.name, buildings.address, buildings.city]));
+		conditions.push(
+			everyWordIn(search, [buildings.name, buildings.address, buildings.postalCode, buildings.city])
+		);
 	}
 
+	// «6003 Luzern»: a Swiss address writes the place with its postcode (#1193)
 	if (city) {
-		conditions.push(ilike(buildings.city, `%${city}%`));
+		conditions.push(everyWordIn(city, [buildings.postalCode, buildings.city]));
 	}
 
 	if (canton) {
