@@ -11,7 +11,7 @@ import { join } from 'path';
 import { generateCode, recipientOf } from '../services/backup-crypto';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { auditLog, backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
+import { auditLog, backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatementLineItems, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -1246,6 +1246,22 @@ describe('API-Verträge der Ablehnungen mit Code', () => {
 		const response = await callApi(`/api/v1/categories/${id}`, { method: 'DELETE' });
 		expect(response.status).toBe(409);
 		expect(drift(await sample('category-in-use'), await response.json())).toEqual([]);
+	});
+
+	// #1160: a position of the statement of beforeAll in a category without invoices
+	it('DELETE /categories/:id einer Kategorie in einer Abrechnung liefert die Felder von category-in-statement.json', async () => {
+		const id = await idOf(await category(`Abgerechnet ${token}`));
+		const [item] = await db
+			.insert(utilityStatementLineItems)
+			.values({ statementId, categoryId: id, description: `Abgerechnet ${token}`, totalAmount: '0.00', tenantShare: '0.00' })
+			.returning();
+		try {
+			const response = await callApi(`/api/v1/categories/${id}`, { method: 'DELETE' });
+			expect(response.status).toBe(409);
+			expect(drift(await sample('category-in-statement'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.id, item.id));
+		}
 	});
 
 	it('POST /heating-profiles mit einem vergebenen Namen liefert die Felder von heating-profile-name-taken.json', async () => {

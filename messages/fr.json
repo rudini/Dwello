@@ -524,6 +524,7 @@
 	"backend_category_in_use_one": "La catégorie est utilisée par {count} facture et ne peut pas être supprimée.",
 	"backend_category_in_use": "La catégorie est utilisée par {count} factures et ne peut pas être supprimée.",
 	"backend_category_predefined": "Les catégories « De Dwello » ne peuvent pas être supprimées.",
+	"backend_category_in_statement": "La catégorie figure dans un décompte et ne peut pas être supprimée. Un décompte envoyé reste tel que le locataire l’a reçu, avec ses catégories. Si la catégorie ne figure que dans des brouillons, recalculez-les avec « Recalculer » sur leur page ou supprimez-les. La catégorie pourra ensuite être supprimée.",
 	"backend_distribution_key_predefined": "Les clés de répartition prédéfinies ne peuvent pas être supprimées.",
 	"backend_distribution_key_in_use_one": "Cette clé de répartition ne peut pas être supprimée : {count} facture est répartie selon elle.",
 	"backend_distribution_key_in_use": "Cette clé de répartition ne peut pas être supprimée : {count} factures sont réparties selon elle.",

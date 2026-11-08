@@ -524,6 +524,7 @@
 	"backend_category_in_use_one": "La categoria è usata da {count} fattura e non può essere eliminata.",
 	"backend_category_in_use": "La categoria è usata da {count} fatture e non può essere eliminata.",
 	"backend_category_predefined": "Le categorie «Da Dwello» non si possono eliminare.",
+	"backend_category_in_statement": "La categoria figura in un conteggio e non può essere eliminata. Un conteggio inviato resta come l’ha ricevuto l’inquilino, con le sue categorie. Se la categoria figura solo in bozze, le ricalcoli con «Ricalcolare» sulla loro pagina o le elimini. Dopo si potrà eliminare la categoria.",
 	"backend_distribution_key_predefined": "Le chiavi di riparto preimpostate non possono essere eliminate.",
 	"backend_distribution_key_in_use_one": "Questa chiave di riparto è usata per ripartire {count} fattura e non può quindi essere eliminata.",
 	"backend_distribution_key_in_use": "Questa chiave di riparto è usata per ripartire {count} fatture e non può quindi essere eliminata.",
