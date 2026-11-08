@@ -1171,6 +1171,65 @@ Funktionalität: Abrechnungsdetail
     Dann hat die Abrechnung den Status "Entwurf"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
 
+  # #1328: «Neu berechnen» würde den Entwurf nach einer danach geänderten Wohnung anders verteilen; die Heizkosten
+  # verteilen sich nach der Fläche, 3.01 und 3.02 haben je 70 m²
+  @wip
+  Szenario: Entwurf weist auf eine danach korrigierte Fläche hin
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Wohnung "3.02" hat danach "140" m² und "3.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs haben sich Werte geändert, mit denen er rechnet, zum Beispiel einer Wohnung oder eines Verteilschlüssels."
+    Und nennt der Hinweis auf Änderungen seit dem Erstellen den Titel "Werte seit der Abrechnung geändert"
+
+  @wip
+  Szenario: Entwurf weist auf eine danach erfasste neue Fläche ab einem Tag der Periode hin
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Wohnung "3.02" hat ab "2024-02-01" "140" m² und "3.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs haben sich Werte geändert, mit denen er rechnet, zum Beispiel einer Wohnung oder eines Verteilschlüssels."
+
+  @wip
+  Szenario: Entwurf weist auf eine danach aufgehobene Wohnung hin
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Wohnung "3.02" ist aufgehoben ab "2024-02-01"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs haben sich Werte geändert, mit denen er rechnet, zum Beispiel einer Wohnung oder eines Verteilschlüssels."
+
+  # #1328 (Kommentar aus #1309): eine danach geänderte Formel zählt wie eine geänderte Wohnung
+  @wip
+  Szenario: Entwurf weist auf eine danach geänderte Formel seines Verteilschlüssels hin
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02" mit 140 m²
+    Und es gibt den Verteilschlüssel "Eigene Einheiten" mit der Formel "{units}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-02-15", die nach dem Verteilschlüssel "Eigene Einheiten" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Verteilschlüssel "Eigene Einheiten" hat danach die Formel "{area}"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs haben sich Werte geändert, mit denen er rechnet, zum Beispiel einer Wohnung oder eines Verteilschlüssels."
+
+  # #1328: eine Fläche, die erst nach der Abrechnungsperiode gilt, ändert am Entwurf nichts
+  @wip
+  Szenario: Kein Hinweis, wenn eine Wohnung erst nach der Periode eine neue Fläche hat
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Wohnung "3.02" hat ab "2025-07-01" "140" m² und "3.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann hat die Abrechnung den Status "Entwurf"
+    Und weist die Abrechnung auf keine Änderung seit dem Erstellen hin
+
+  # #1328: der Versand eines Entwurfs mit geänderten Werten rät zum Neu berechnen wie bei geänderten Rechnungen (#547)
+  @wip
+  Szenario: Der Versand eines Entwurfs mit danach geänderten Werten rät zum Neu berechnen
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Wohnung "3.02" hat danach "140" m² und "3.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
+    Dann sagt die Bestätigung vor dem Versand "Dieser Entwurf ist nicht aktuell"
+    Und sagt die Bestätigung vor dem Versand "Seit dem Erstellen dieses Entwurfs haben sich Werte geändert, mit denen er rechnet, zum Beispiel einer Wohnung oder eines Verteilschlüssels. Berechnen Sie ihn neu, bevor Sie ihn zustellen."
+
   # #120, #358 (A-11): eine versendete Abrechnung wird ersetzt und bleibt unverändert; die berichtigte Abrechnung
   # bekommt eine neue Nummer und nennt die ersetzte
   Szenario: Versendete Abrechnung berichtigen

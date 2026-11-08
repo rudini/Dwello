@@ -40,6 +40,14 @@ Given(
 	}
 );
 
+// #1328
+Given(
+	'der Verteilschlüssel {string} hat danach die Formel {string}',
+	async ({ seed }, title: string, formula: string) => {
+		await seed.keyFormula(title, formula);
+	}
+);
+
 Given(
 	'eine Rechnung des Gebäudes {string} wird nach dem Verteilschlüssel {string} verteilt',
 	async ({ seed }, building: string, key: string) => {
