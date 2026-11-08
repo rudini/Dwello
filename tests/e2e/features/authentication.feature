@@ -134,3 +134,10 @@ Funktionalität: Anmeldung
     Wenn ein Besucher die Anmeldeseite öffnet
     Dann muss der Besucher auf der Anmeldeseite nicht scrollen
     Und sieht der Besucher die Anmeldung mit "Google", ohne zu scrollen
+
+  # #657: mit einem Konto mit Passwort ist die Seite länger; das Anmelden steht trotzdem ohne Scrollen im Bild
+  Szenario: Mit einem Konto mit Passwort ist das Anmelden auf dem Telefon ohne Scrollen sichtbar
+    Angenommen ein Konto mit Passwort ist eingerichtet
+    Und das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn ein Besucher die Anmeldeseite öffnet
+    Dann sieht der Besucher das Anmelden mit Passwort, ohne zu scrollen

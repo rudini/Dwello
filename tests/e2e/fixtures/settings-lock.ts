@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, statSync } from 'fs';
+import { mkdirSync, rmSync, statSync, utimesSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -23,11 +23,16 @@ const tryLock = (lock: string) => {
 	}
 };
 
-/** Takes the lock and answers its release, for a lock held across the steps of a scenario (#657) */
+/** Takes the lock and answers its release, for a lock held across the steps of a scenario (#657); while held it is
+ * touched, so a scenario longer than STALE_MS does not lose it */
 export async function holdLock(name: string): Promise<() => void> {
 	const lock = lockOf(name);
 	while (!tryLock(lock)) await new Promise((resolve) => setTimeout(resolve, 100));
-	return () => rmSync(lock, { recursive: true, force: true });
+	const fresh = setInterval(() => utimesSync(lock, new Date(), new Date()), STALE_MS / 3);
+	return () => {
+		clearInterval(fresh);
+		rmSync(lock, { recursive: true, force: true });
+	};
 }
 
 export async function withLock<T>(name: string, work: () => Promise<T>): Promise<T> {

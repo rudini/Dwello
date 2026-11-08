@@ -39,10 +39,12 @@
 
 	function keydown(event: KeyboardEvent) {
 		if (!$mobileNavOpen) return;
-		if (event.key === 'Escape') closeMobileNav();
+		// Escape in the open language list closes only the list (#657); this handler runs before the list's own
+		if (event.key === 'Escape' && !drawer?.querySelector('#language-menu')) closeMobileNav();
 		if (event.key !== 'Tab' || !drawer) return;
 		event.preventDefault();
-		const focusable = [...drawer.querySelectorAll<HTMLElement>('a, button')];
+		// without the layer behind an open list, which closes it on a click (#657)
+		const focusable = [...drawer.querySelectorAll<HTMLElement>('a, button:not([tabindex="-1"])')];
 		const at = focusable.indexOf(document.activeElement as HTMLElement);
 		const next = (at + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
 		focusable[next]?.focus();

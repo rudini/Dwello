@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, loginPageOverflow, passwordSignInOffered, shownUserName, signInOffered, signInOptions, signInShownShare } from '../questions/authentication';
+import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, loginPageOverflow, passwordSignInOffered, passwordSignInShownShare, shownUserName, signInOffered, signInOptions, signInShownShare } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
 import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
@@ -163,4 +163,8 @@ Then('muss der Besucher auf der Anmeldeseite nicht scrollen', async ({ besucher 
 
 Then('sieht der Besucher die Anmeldung mit {string}, ohne zu scrollen', async ({ besucher }, provider: string) => {
 	await besucher.sees(signInShownShare(provider)).toBe(1);
+});
+
+Then('sieht der Besucher das Anmelden mit Passwort, ohne zu scrollen', async ({ besucher }) => {
+	await besucher.sees(passwordSignInShownShare).toBe(1);
 });

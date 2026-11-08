@@ -192,6 +192,30 @@ describe('Menü für kleine Bildschirme', () => {
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
 
+	// #657: the language choice stands in the menu; Escape in its open list closes only the list, as in the header
+	it('schliesst mit Escape in der offenen Sprachwahl nur die Liste', () => {
+		show(MobileNav, {});
+		mobileNavOpen.set(true);
+		flushSync();
+		click(byTestId('language-button')!);
+		press('Escape');
+		expect(byTestId('language-option')).toBeNull();
+		expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+		closeMobileNav();
+	});
+
+	// #657: Tab goes from the language button to the next control, not to the hidden layer behind the open list
+	it('führt mit Tab bei offener Sprachwahl nur durch sichtbare Bedienelemente', () => {
+		show(MobileNav, {});
+		mobileNavOpen.set(true);
+		flushSync();
+		click(byTestId('language-button')!);
+		byTestId('language-button')!.focus();
+		press('Tab');
+		expect(document.activeElement?.getAttribute('aria-hidden')).toBeNull();
+		closeMobileNav();
+	});
+
 	// #651: a screen reader's browse mode stays in the open menu; the scrim still closes it, toasts stay readable
 	it('macht die Seite dahinter unerreichbar, solange es offen ist', () => {
 		document.body.innerHTML =

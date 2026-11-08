@@ -24,3 +24,4 @@ export const googleSignInParameter = (name: string) =>
 /** #657: how far the sign-in page scrolls, and how much of a provider's sign-in shows in the window (1: all) */
 export const loginPageOverflow = ThePage.downwardOverflow;
 export const signInShownShare = (provider: string) => ShareInViewport.of(loginButton(provider));
+export const passwordSignInShownShare = ShareInViewport.of(passwordSubmitButton);
