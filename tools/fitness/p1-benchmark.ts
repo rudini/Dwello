@@ -2,7 +2,7 @@
 // bun run fitness:p1 fills a database dwello_bench through the backend's services (as p2-benchmark.ts), starts the real
 // backend and the production build of the frontend, posts the wizard's form action «generate» with a session as
 // tests/e2e/fixtures/session.ts signs it, then downloads the run's PDFs as the wizard's ZIP. It prints both times
-// (#934: measured by hand, no CI gate while A4 is open). PostgreSQL on localhost:5432, user and password dwello.
+// and fails when they miss the target (#934: CI runs it). PostgreSQL on localhost:5432, user and password dwello.
 import { execFileSync, spawn } from 'node:child_process';
 import { copyFileSync, rmSync, symlinkSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { setTimeout } from 'node:timers/promises';
 import { unzipSync } from 'fflate';
 import { E2E_JWT_SECRET, sessionToken } from '../../tests/e2e/fixtures/session';
+import { missesTarget, P1_TARGET_MS } from './p1-target';
 
 const APARTMENTS = 50;
 // ports of its own: 3300/3301 are the persona stack's, 3100 to 3106 the E2E stack's (code review 934-1 C-1)
@@ -144,7 +145,8 @@ try {
 	console.log(`| Step | Statements | Time |\n|---|---|---|`);
 	console.log(`| Run (form action «generate») | ${created.length} | ${s(runTime)} |`);
 	console.log(`| PDFs (ZIP of the run) | ${files.length} | ${s(pdfTime)} |`);
-	console.log(`| Together | | ${s(runTime + pdfTime)} (target P1: ≤ 30 s) |`);
+	console.log(`| Together | | ${s(runTime + pdfTime)} (target P1: ≤ ${s(P1_TARGET_MS)}) |`);
+	if (missesTarget(runTime, pdfTime)) throw new Error(`P1 missed: ${s(runTime + pdfTime)}, target ${s(P1_TARGET_MS)}`);
 } finally {
 	stop();
 }
