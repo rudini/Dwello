@@ -4,7 +4,7 @@ import {
 	type ApartmentInfo,
 	currentContracts,
 	currentTenantName,
-	deleteDialogTitle,
+	deletedToast,
 	earlierContract,
 	earlierContracts,
 	historyRows,
@@ -20,7 +20,7 @@ export const currentTenant = Text.of(currentTenantName);
 export const monthlyTotalOfApartment = Text.of(monthlyTotal);
 export const vacancyShown = Visibility.of(vacancyNote);
 export const nextTenant = Text.of(nextTenantNote);
-export const deleteDialogHeading = Text.of(deleteDialogTitle);
+export const deletedMessage = Text.of(deletedToast);
 export const currentContractsListed = Text.of(currentContracts);
 export const earlierContractsListed = Text.of(earlierContracts);
 export const earlierContractShown = (name: string) => Text.of(earlierContract(name));

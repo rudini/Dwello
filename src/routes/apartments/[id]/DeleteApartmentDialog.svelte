@@ -46,7 +46,7 @@
 <Dialog
 	bind:open
 	title={impossible
-		? m.apartments_delete_impossible_title()
+		? m.apartments_delete_impossible_title({ number })
 		: m.apartments_delete_title({ number })}
 	confirmLabel={m.apartments_delete_confirm()}
 	danger
@@ -59,8 +59,8 @@
 	{#if impossible}
 		<p>{hasContracts ? m.apartments_delete_has_contracts() : serverError}</p>
 	{:else}
-		<p>{m.apartments_delete_text({ number })}</p>
-		<p>{m.apartments_delete_vacancy()}</p>
+		<!-- one paragraph: the dialog announces its first one, and the vacancy is part of the consequence (Sven 1257 P-1) -->
+		<p>{m.apartments_delete_text({ number })} {m.apartments_delete_vacancy()}</p>
 		{#if serverError}
 			<Alert tone="critical" title={serverError} testid="form-error" />
 		{/if}

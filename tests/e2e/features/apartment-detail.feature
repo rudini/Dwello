@@ -93,6 +93,17 @@ Funktionalität: Wohnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
     Wenn der Liegenschaftsverwalter die Wohnung löscht
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lindenhof"
+    Und bestätigt Dwello das Löschen mit "Wohnung 3.02 gelöscht"
+    Und sieht der Liegenschaftsverwalter die Wohnung "3.01" mit dem Status "Vermietet"
+    Und zeigt die Gebäudeseite die Wohnung "3.02" nicht mehr
+
+  # #1257 (Code-Review C-2): in einem anderen Fenster schon gelöscht; die Wohnung ist weg, wie gewünscht
+  Szenario: Wohnung löschen, die inzwischen schon gelöscht ist
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
+    Und die Wohnung "3.02" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter die Wohnung löscht
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lindenhof"
     Und sieht der Liegenschaftsverwalter die Wohnung "3.01" mit dem Status "Vermietet"
     Und zeigt die Gebäudeseite die Wohnung "3.02" nicht mehr
 
@@ -107,7 +118,7 @@ Funktionalität: Wohnungsdetail
   Szenario: Wohnung mit Mietverträgen kann nicht gelöscht werden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Wenn der Liegenschaftsverwalter die Wohnung löschen will
-    Dann heisst der Dialog "Wohnung kann nicht gelöscht werden"
+    Dann heisst der Dialog "Wohnung 3.01 kann nicht gelöscht werden"
     Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an
 
@@ -118,7 +129,7 @@ Funktionalität: Wohnungsdetail
     Und "Carla Rossi" mietete die Wohnung "3.02" von "2019-01-01" bis "2024-03-31" für "900" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
     Wenn der Liegenschaftsverwalter die Wohnung löschen will
-    Dann heisst der Dialog "Wohnung kann nicht gelöscht werden"
+    Dann heisst der Dialog "Wohnung 3.02 kann nicht gelöscht werden"
     Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an
 
@@ -129,6 +140,6 @@ Funktionalität: Wohnungsdetail
     Und der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "3.02" seit "2099-11-01" für "900" Franken
     Wenn der Liegenschaftsverwalter die Wohnung löscht
-    Dann heisst der Dialog "Wohnung kann nicht gelöscht werden"
+    Dann heisst der Dialog "Wohnung 3.02 kann nicht gelöscht werden"
     Und nennt der Dialog "Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat."
     Und bietet der Dialog nur "Schliessen" an

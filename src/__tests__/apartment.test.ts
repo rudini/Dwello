@@ -469,18 +469,25 @@ describe('Wohnung löschen', () => {
 			status: 409,
 			data: {
 				deleteError:
-					'Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat. Auch ein beendeter Mietvertrag bleibt als Historie der Wohnung erhalten. Wurde ein Mietvertrag irrtümlich erfasst, löschen Sie ihn auf seiner Seite. Hat die Wohnung danach keine Mietverträge mehr, lässt sie sich löschen.',
+					'Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat. Auch ein beendeter Mietvertrag bleibt als Historie der Wohnung erhalten. Löschen Sie einen Mietvertrag auf seiner Seite nur, wenn er irrtümlich erfasst wurde, nicht damit sich die Wohnung löschen lässt. Hat er eine versendete oder bezahlte Abrechnung, bleiben er und die Wohnung erhalten.',
 				deleteImpossible: true
 			}
 		});
 	});
 
-	// in einem anderen Fenster gelöscht: der eigene Text, nicht die englische Meldung des Backends ohne Code
-	it('meldet eine Wohnung, die es nicht mehr gibt, als nicht gelöscht', async () => {
+	// #1257 (Code-Review C-2): in einem anderen Fenster gelöscht; die Wohnung ist weg, wie gewünscht
+	it('kehrt zum Gebäude zurück, wenn es die Wohnung schon nicht mehr gibt', async () => {
 		const { result } = runAction(actions.delete, 'a1', 404, { buildingId: building }, { error: 'Apartment not found' });
 
+		await expect(result).rejects.toMatchObject({ status: 303, location: `/buildings/${building}` });
+	});
+
+	// ein Fehler ohne Code: der eigene Text, nicht die englische Meldung des Backends
+	it('meldet einen Fehler ohne Code als nicht gelöscht', async () => {
+		const { result } = runAction(actions.delete, 'a1', 500, { buildingId: building }, { error: 'Internal error' });
+
 		expect(await result).toMatchObject({
-			status: 404,
+			status: 500,
 			data: {
 				deleteError: 'Die Wohnung konnte nicht gelöscht werden. Versuchen Sie es erneut.',
 				deleteImpossible: false

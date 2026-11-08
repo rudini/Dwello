@@ -109,7 +109,8 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 export async function deleteApartment(fetch: typeof globalThis.fetch, id: string, request: Request) {
 	const buildingId = String((await request.formData()).get('buildingId'));
 	const response = await fetch(`${API}/apartments/${id}`, { method: 'DELETE' });
-	if (!response.ok) {
+	// gone already (another tab): what the landlord wanted (code review 1257-1 C-2)
+	if (!response.ok && response.status !== 404) {
 		const refused = (await response.json().catch(() => null)) as BackendError | null;
 		return fail(response.status, {
 			deleteError: backendMessage(refused, m.apartments_delete_failed()),

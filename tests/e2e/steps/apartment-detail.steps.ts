@@ -6,7 +6,7 @@ import {
 	contractHistoryNaming,
 	currentContractsListed,
 	currentTenant,
-	deleteDialogHeading,
+	deletedMessage,
 	earlierContractShown,
 	earlierContractsListed,
 	monthlyTotalOfApartment,
@@ -14,6 +14,7 @@ import {
 	vacancyShown
 } from '../questions/apartment-detail';
 import { listedApartmentCount } from '../questions/building-detail';
+import { deleteDialogTitleText } from '../questions/invoice-detail';
 import {
 	deleteApartment,
 	editApartment,
@@ -45,7 +46,15 @@ When('der Liegenschaftsverwalter die Wohnung löschen will', async ({ verwalter 
 });
 
 Then('heisst der Dialog {string}', async ({ verwalter }, title: string) => {
-	await verwalter.sees(deleteDialogHeading).toBe(title);
+	await verwalter.sees(deleteDialogTitleText).toBe(title);
+});
+
+Then('bestätigt Dwello das Löschen mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deletedMessage).toBe(text);
+});
+
+Given('die Wohnung {string} wurde inzwischen gelöscht', async ({ seed }, number: string) => {
+	await seed.deleteApartment(number);
 });
 
 // a negative check: the step before it names an apartment the building page lists
