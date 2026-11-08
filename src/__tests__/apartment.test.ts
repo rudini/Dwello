@@ -95,7 +95,7 @@ describe('Wohnungsdetail', () => {
 		expect(data.apartment).toMatchObject({ discontinuedFrom: '2099-07-01' });
 	});
 
-		it('zeigt alle Verträge der Wohnung in der Vertragshistorie', async () => {
+	it('zeigt alle Verträge der Wohnung in der Vertragshistorie', async () => {
 		const data = await loadApartment({ 'apartments/a1': apartment, contracts: { contracts } });
 
 		expect(data.contractHistory).toEqual([

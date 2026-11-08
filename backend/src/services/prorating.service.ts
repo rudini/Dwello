@@ -12,6 +12,7 @@
 
 import type { HeatingProfile, InvoicePart, KeyValues, LineSegment } from '../db/schema';
 import { roundToRappen } from './pdf-format';
+import { daysAfter } from './today';
 import { getHeatingProfile, calculateHeatingShare } from './heating-profile.service';
 import { billingStart, getContractsByPeriod, type ContractWithDetails } from './contract.service';
 
@@ -333,7 +334,7 @@ const earlier = (a: string, b: string) => (a < b ? a : b);
 // the period's parts, split at each day from which an apartment no longer exists that falls into the tenant's days
 function partsOf(all: CountedApartment[], period: Range, rental: Range) {
 	const cuts = [...new Set(all.map((a) => a.discontinuedFrom).filter((day): day is string => !!day && day > rental.start && day <= rental.end))].sort();
-	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? isoDay(new Date(Date.parse(cuts[i]) - 86_400_000)) : period.end }));
+	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? daysAfter(cuts[i], -1) : period.end }));
 }
 
 // A group's invoices in one part: each with its amount for its days there, heating costs by the Heizprofil's months

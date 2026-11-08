@@ -237,7 +237,6 @@ describe('Verteilschlüssel im PDF', () => {
 	});
 });
 
-
 // #1284 (Fachreview 1284-1 V-2): a part of a position prints the fraction among the apartments that count in it
 describe('Zeiträume einer aufgehobenen Wohnung im PDF', () => {
 	const segment = { start: '2025-01-01', end: '2025-06-30', count: 3, keyValues: { area: [70, 210], units: [1, 3], rooms: [3.5, 10.5] }, costs: 1487.67, apartment: 495.89, periodShare: 1, days: 181, total: 181, share: 495.89 };

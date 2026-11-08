@@ -1,7 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { manualStatusChoices, numberTaken, statusFromContracts } from '../questions/apartment-form';
-import { errorMessageShown } from '../questions/form';
+import { errorMessage } from '../questions/form';
 import {
 	blockApartment,
 	changeArea,
@@ -95,6 +95,6 @@ Then(
 Then(
 	'sieht der Liegenschaftsverwalter die Fehlermeldung {string} zum Mietvertrag von {string}',
 	async ({ verwalter, names }, text: string, tenant: string) => {
-		await verwalter.sees(errorMessageShown(text.replace(tenant, names.get(tenant) ?? tenant))).toBe(true);
+		await verwalter.sees(errorMessage).toContain(text.replace(tenant, names.get(tenant) ?? tenant));
 	}
 );

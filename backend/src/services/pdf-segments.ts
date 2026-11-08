@@ -35,7 +35,7 @@ export function segmentLine(segment: Segment, t: Record<string, string>) {
 		end: formatSwissDate(segment.end),
 		count: segment.count,
 		colon: t.colon,
-		keyShare: segment.keyShare.replace(/\n/g, ' '),
+		keyShare: segment.keyShare.includes('+') ? `(${segment.keyShare.replace(/\n/g, ' ')})` : segment.keyShare, // a mixed key in brackets
 		costs: formatCHF(segment.costs),
 		apartment: formatCHF(segment.apartment),
 		days: segment.days ?? '',

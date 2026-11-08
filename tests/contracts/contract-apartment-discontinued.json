@@ -1,0 +1,5 @@
+{
+	"error": "The apartment no longer exists from that day",
+	"code": "CONTRACT_APARTMENT_DISCONTINUED",
+	"params": { "number": "4.01", "date": "2099-07-01", "dayBefore": "2099-06-30" }
+}

@@ -10,6 +10,7 @@ import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
 import endPast from '../../tests/contracts/contract-end-past.json';
 import endBeforeStart from '../../tests/contracts/contract-end-before-start.json';
+import apartmentDiscontinued from '../../tests/contracts/contract-apartment-discontinued.json';
 import deleteStarted from '../../tests/contracts/contract-delete-started.json';
 import endAdvanceRefused from '../../tests/contracts/contract-end-advance-refused.json';
 import advanceDeleteRefused from '../../tests/contracts/contract-advance-delete-refused.json';
@@ -472,6 +473,28 @@ describe('Mietvertrag beenden', () => {
 		});
 		// the backend decides it, the action does not compare the dates itself
 		expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1);
+	});
+});
+
+// #1284 (Code-Review 1284-2 C-1): the apartment no longer exists from a day after the new Vertragsende
+describe('Vertragsende einer aufgehobenen Wohnung', () => {
+	it('nennt den Tag, an dem der Mietvertrag spätestens enden muss', async () => {
+		const { result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-12-31' },
+			{ startDate: '2020-01-01' },
+			{ status: 400, answer: apartmentDiscontinued }
+		);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				endError:
+					'Die Wohnung 4.01 gibt es ab 01.07.2099 nicht mehr. Ein Mietvertrag dieser Wohnung muss spätestens am 30.06.2099 enden. Stimmt der Tag nicht, ändern Sie ihn bei der Wohnung unter «Bearbeiten».'
+			}
+		});
 	});
 });
 

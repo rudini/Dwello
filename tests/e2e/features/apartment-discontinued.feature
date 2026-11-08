@@ -112,3 +112,14 @@ Funktionalität: Aufgehobene Wohnung
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Eva Frei"
     Dann nennt die Detailseite der Abrechnung "Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Abrechnungspositionen mit Kosten vor und ab diesem Tag sind je Zeitraum gerechnet; die Zeilen dazu stehen im PDF."
+
+  # Code-Review 1284-2 C-1: ein Mietvertrag der aufgehobenen Wohnung endet spätestens am Tag davor
+  Szenario: Ein Mietvertrag endet spätestens am Tag vor der Aufhebung
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietete die Wohnung "4.01" von "2020-01-01" bis "2099-03-31" für "950" Franken
+    Und die Wohnung "4.01" ist aufgehoben ab "2099-07-01"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das Vertragsende "2099-12-31" speichern will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Wohnung 4.01 gibt es ab 01.07.2099 nicht mehr. Ein Mietvertrag dieser Wohnung muss spätestens am 30.06.2099 enden. Stimmt der Tag nicht, ändern Sie ihn bei der Wohnung unter «Bearbeiten»."

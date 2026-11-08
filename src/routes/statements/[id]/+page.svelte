@@ -23,7 +23,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
-	import DiscontinuedNotes from './DiscontinuedNotes.svelte';
+	import DiscontinuedNotes from '$lib/statement/DiscontinuedNotes.svelte';
 	import PaidDateFields from '../PaidDateFields.svelte';
 	import Correction from './Correction.svelte';
 	import FormDialog from './FormDialog.svelte';

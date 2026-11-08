@@ -1190,6 +1190,12 @@ describe('PDF mit aufgehobener Wohnung', () => {
 		expect(text).toContain('01.07.2025 – 31.12.2025, 2 Wohnungen: 70.00 / 140.00 m² × CHF 1\'512.33 = CHF 756.17 × Zeitanteil 50.00 % = CHF 378.09');
 	});
 
+	// Code-Review 1284-2 C-3: a mixed key in brackets, as under the invoices of a position (keyFactor)
+	it('setzt einen gemischten Schlüssel in Klammern', async () => {
+		const mixed = { ...before, keyShare: '70 % × 70.00 / 210.00 m²\n+ 30 % × 1 / 3 Wohnungen' };
+		expect((await textOf({ ...split, lineItems: [{ ...line, segments: [mixed] }] })).flowing).toContain('3 Wohnungen: (70 % × 70.00 / 210.00 m² + 30 % × 1 / 3 Wohnungen) × CHF');
+	});
+
 	it('rechnet Heizkosten je Zeitraum nach dem Heizprofil vor', async () => {
 		const heating = { ...line, category: 'Heizung', heating: true, segments: [{ ...before, days: undefined, total: undefined, profileShare: 50, costs: 500, apartment: 166.67, share: 166.67 }] };
 		expect((await textOf({ ...split, lineItems: [heating] })).flowing).toContain(

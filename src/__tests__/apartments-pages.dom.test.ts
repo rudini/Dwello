@@ -361,7 +361,7 @@ describe('Wohnungsdetail', () => {
 		expect(byTestId('apartment-info-discontinued')).toBeNull();
 	});
 
-		it('zeigt den Mieter und die Miete mit den Begriffen des Glossars', () => {
+	it('zeigt den Mieter und die Miete mit den Begriffen des Glossars', () => {
 		open();
 		expect(byTestId('current-tenant-name')!.textContent!.trim()).toBe('Beat Huber');
 		expect(byTestId('tenant-email-link')!.getAttribute('href')).toBe(
