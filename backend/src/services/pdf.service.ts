@@ -20,6 +20,7 @@ import {
 } from './qr-bill.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
+import { daysAfter } from './today';
 import { countryLine, qrTown } from './postal-address';
 import { greetingWords } from './reminder-letter';
 import { de } from './pdf-texts/de';
@@ -573,13 +574,12 @@ function segmentIntro({ doc, t, data }: Page, y: number) {
 	const gone = new Map(data.lineItems.flatMap((item) => item.segments ?? []).flatMap((segment) => segment.discontinued ?? []).map((a) => [a.number, a.date]));
 	let top = y;
 	for (const [number, date] of gone) {
-		const text = fill(t.segmentIntro, { number, date: formatDate(date), dayBefore: formatDate(daysBefore(date)) });
+		const text = fill(t.segmentIntro, { number, date: formatDate(date), dayBefore: formatDate(daysAfter(date, -1)) });
 		doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(text, PAGE.left, room(doc, top, 30), { width: PAGE.right - PAGE.left });
 		top = doc.y + 8;
 	}
 	return top;
 }
-const daysBefore = (day: string) => new Date(Date.parse(day) - 86_400_000).toISOString().slice(0, 10);
 
 // The apartment's part by the key as printed with the key (a mixed key in brackets), else as a percentage of the sum
 function keyFactor(item: LineItem, parts: InvoicePart[]) {

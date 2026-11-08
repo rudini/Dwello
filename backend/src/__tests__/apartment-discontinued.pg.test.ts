@@ -117,6 +117,16 @@ describe('Aufgehobene Wohnung im Verteilschlüssel (#1284)', () => {
 		expect((await line(tenantA, 2024, 'Caretaker')).tenantShare).toBe(1400);
 	});
 
+	// Fachreview 1284-1 V-6: jeder Zeitraum für sich, auch eine Gutschrift nur ab dem Tag: 300 × 70/150 = 140.00 und
+	// −300 × 70/120 = −175.00
+	it('rechnet eine Gutschrift im Zeitraum ab dem Tag mit dessen Bruch', async () => {
+		const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
+		const service = (start: string, end: string) => ({ categoryId: chimney.id, invoiceDate: end, servicePeriodStart: start, servicePeriodEnd: end });
+		await insertInvoice(created.building, { ...service('2025-01-01', '2025-06-30'), description: 'Kaminfeger', amount: '300.00' });
+		await insertInvoice(created.building, { ...service('2025-07-01', '2025-12-31'), description: 'Gutschrift Kaminfeger', amount: '-300.00' });
+		expect((await line(tenantA, 2025, 'Chimney Sweep')).tenantShare).toBe(-35);
+	});
+
 	// Januar bis Juni 50 % des Heizprofils, davon 70/150 = 233.33; Juli bis Dezember 50 %, davon 70/120 = 291.67
 	it('teilt Heizkosten mit Heizprofil nach dessen Monatsanteilen auf die Zeit vor und ab dem Tag', async () => {
 		expect((await line(tenantA, 2025, 'Heating', created.profile)).tenantShare).toBe(525);
@@ -153,6 +163,17 @@ describe('Aufheben und Mietverträge (#1284)', () => {
 		const response = await sendJson('POST', '/api/v1/contracts', contract);
 		expect(response.status).toBe(400);
 		expect(((await response.json()) as { code: string }).code).toBe('CONTRACT_APARTMENT_DISCONTINUED');
+	});
+
+	// C-1 (Code-Review 1284-1): ein Mietvertrag endet spätestens am Tag davor
+	it('nimmt beim Ändern ein Vertragsende am Tag davor an und lehnt eines am Tag selbst ab', async () => {
+		const tenant = await createTenant({ firstName: 'Bis Juni', lastName: token });
+		created.tenants.push(tenant.id);
+		const contract = await createContract({ apartmentId: ids.c, tenantId: tenant.id, startDate: '2025-02-01', endDate: '2025-03-31', baseRent: '900', monthlyAdvancePayment: '100' });
+		created.contracts.push(contract.id);
+		const end = async (endDate: string) => (await sendJson('PUT', `/api/v1/contracts/${contract.id}`, { endDate, confirmPastEnd: true })).json() as Promise<{ code?: string; endDate?: string }>;
+		expect((await end('2025-06-30')).endDate).toBe('2025-06-30');
+		expect((await end('2025-07-01')).code).toBe('CONTRACT_APARTMENT_DISCONTINUED');
 	});
 
 	it('nimmt «aufgehoben ab» mit leerem Datum zurück', async () => {

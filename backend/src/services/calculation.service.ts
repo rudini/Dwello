@@ -29,6 +29,7 @@ import { calculateHeatingShare, getHeatingProfile, sourcesOf } from './heating-p
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { groupBy } from './split-keys';
+import { daysAfter } from './today';
 
 /**
  * Line item for statement
@@ -301,9 +302,8 @@ const earlier = (a: string, b: string) => (a < b ? a : b);
 // #1284: the period's parts, split at each day from which an apartment no longer exists that falls into the tenant's days
 function partsOf(all: BuildingApartment[], period: { start: string; end: string }, rental: { start: string; end: string }) {
 	const cuts = [...new Set(all.map((a) => a.discontinuedFrom).filter((day): day is string => !!day && day > rental.start && day <= rental.end))].sort();
-	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? daysBefore(cuts[i]) : period.end }));
+	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? daysAfter(cuts[i], -1) : period.end }));
 }
-const daysBefore = (day: string) => isoDay(new Date(Date.parse(day) - 86_400_000));
 
 // A group's invoices in one part: each with its amount for its days there, heating costs by the Heizprofil's months
 // (Fachreview 1284-1, Art. 7 Abs. 1 VMWG), else by days; the part's costs rounded as printed (V-3)
