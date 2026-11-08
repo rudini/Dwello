@@ -1,0 +1,15 @@
+# Code-Review #1277, Runde 1 (Commit 253ce68, Diff 370f9c6..253ce68)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | src/routes/contracts/[id]/+page.svelte:292 | «Kündigung erhalten am» und seine Hinweise erscheinen jetzt erst, wenn «Kündigung» gewählt ist (`{:else if endKind === 'notice'}`). Kein Test prüft, dass sie ohne gewählte Art fehlen. Der DOM-Test `contract-detail-page.dom.test.ts:602` kündigt das im Kommentar an («the hint on the Kündigungsfrist belongs to a notice»), prüft vor dem Klick auf `contract-end-kind-notice` aber nur die Fehlermeldung. Mit `{:else}` statt `{:else if …}` bleiben DOM-Test und E2E grün (`fillEndWithNotice` wählt zuerst «Kündigung»). |
+| C-2 | Minor | src/__tests__/contract-detail-page.dom.test.ts:602 | Die Weigerung bei gesetztem Vertragsende ohne Art ist im DOM-Test nicht für sich gezeigt: `submitted` wird nur bei leerem Vertragsende geprüft, und das blockiert allein schon. Nur das E2E-Szenario zeigt, dass ein Vertragsende ohne Art nicht gesendet wird. Ebenso fehlt im DOM-Test die Prüfung, dass anfangs keine Art gewählt ist. Beides könnte der DOM-Test zeigen, die tiefste Schicht dafür. |
+| C-3 | Minor | docs/archive/sessions/1277.md:10-11 | Das Archiv hakt «code-reviewer `docs/reviews/1277-review-1.md`» und «PR … pushed after this archive» als erledigt ab. Beim Commit 253ce68 lief diese Runde noch nicht, und gepusht war nichts. Beide Punkte melden etwas Falsches. |
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`, `check`, `fitness`, backend `type-check`, `bunx vitest run` (4579 passed), E2E chromium (187 bzw. 104 passed), die Rot-Läufe (Vorauswahl: Checked true; ohne Art: Dialog geschlossen; Hilfe-Szenario und i18n-Pin vor dem Text) sowie die Persona-Läufe von Helga und Sven.
+- `Spec change approved: #1277` im Text des Pull Requests: Es gibt noch keinen PR. Geprüft habe ich nur, dass «Decided (product owner)» in #1277 den Ersatz des Szenarios «Der Dialog schlägt die Kündigung vor» und die Schritte deckt, die jetzt die Art wählen (`endContractOn`, `fillEndWithNotice`, die Axe-Zustände).
+- Ohne Lauf nicht zu prüfen: Zeigt der bestehende Zustand `end-dialog-error` (Bestätigen ohne Vertragsende) jetzt zusätzlich den Fehler bei der Art, ist er weiterhin frei von Axe-Verstössen? Ich habe nur `tests/e2e/tasks/accessibility.ts:477` gelesen.
+
+Geprüft: Prüflogik und Fokus in `checkEndDate` (`focusFirstError` findet `[role="radiogroup"][aria-invalid="true"] input`; `sentError` nimmt den Fehler bei einer Änderung der Wahl zurück). Den Wegfall der BFF-Schranke trägt der hidden-Wert `byAgreement`. Die Texte in allen vier `messages/*.json` stimmen wortgleich mit `docs/reviews/1277-fachreview-1.md` (fr mit U+00A0 vor «:»). Geprüft sind auch die neuen und geänderten Szenarien samt Steps, Tasks und Questions (Screenplay-Schichten, Rot ohne die Änderung nach Lesart gegeben), `screens.json` mit `stateMeanings`, `accessibility.feature` und `sprachen-bildschirme.feature`. Nichts Unbenutztes oder Fremdes im Diff.
