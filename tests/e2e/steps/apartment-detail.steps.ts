@@ -80,6 +80,14 @@ Then('hat die Wohnung den Status {string}', async ({ verwalter }, status: string
 	await verwalter.sees(apartmentInfo('status')).toContain(status);
 });
 
+Given('die Wohnung {string} ist aufgehoben ab {string}', async ({ seed }, number: string, date: string) => {
+	await seed.discontinueApartment(number, date);
+});
+
+Then('ist die Wohnung aufgehoben ab {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(apartmentInfo('discontinued')).toContain(date);
+});
+
 Then(
 	'hat die Wohnung {string} Zimmer und {string} im Stockwerk {string}',
 	async ({ verwalter }, rooms: string, area: string, floor: string) => {

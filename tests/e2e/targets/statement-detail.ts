@@ -172,3 +172,5 @@ export const carrySettleButton = target('Übertrag als ausgeglichen markieren', 
 export const confirmCarrySettleButton = target('Ausgleich des Übertrags bestätigen', (page) =>
 	page.getByTestId('statement-carry-settle-confirm')
 );
+// #1284: the note on an apartment that no longer exists from a day in the billed days
+export const discontinuedNote = target('Hinweis aufgehobene Wohnung', (page) => page.getByTestId('statement-discontinued-note'));

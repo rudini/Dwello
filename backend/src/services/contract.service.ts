@@ -17,7 +17,7 @@ import {
 } from '../db/schema';
 import { alignAdvances, currentAdvance, setAdvance } from './advance-payment.service';
 import { checkAgreedFrom, setAgreedCategories, setAgreedFrom } from './agreed-category.service';
-import { apartmentStatus } from './apartment.service';
+import { apartmentStatus, checkDiscontinued } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
 import { laterContract } from './later-contract';
@@ -252,7 +252,7 @@ async function checkContractOverlap(
 		.where(and(...conditions))
 		.orderBy(rentalContracts.startDate)
 		.limit(1);
-	if (!other) return;
+	if (!other) return checkDiscontinued(apartmentId, endDate, q); // #1284
 	throw new CodedError('CONTRACT_OVERLAP', `Contract overlaps with existing contract ${other.id}`, {
 		contract: other.id,
 		...(!other.anonymised && { tenant: other.tenant }),

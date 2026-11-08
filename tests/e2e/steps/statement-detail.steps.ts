@@ -60,7 +60,8 @@ import {
 	splitKeysText,
 	redeliverConfirmation,
 	redeliverOffers,
-	newPdfStillToSend
+	newPdfStillToSend,
+	discontinuedNoteText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -988,4 +989,8 @@ Given('der Liegenschaftsverwalter ist bei den weiteren Aktionen der Abrechnung',
 // #1096: the control the landlord used keeps the focus; the page stays where it was
 Then('steht der Fokus wieder auf «Neu berechnen»', async ({ verwalter }) => {
 	await verwalter.sees(focusedText).toBe('Neu berechnen');
+});
+
+Then('nennt die Detailseite der Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(discontinuedNoteText).toBe(text);
 });

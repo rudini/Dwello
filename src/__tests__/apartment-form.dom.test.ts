@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { get } from 'svelte/store';
+import { flushSync } from 'svelte';
 import type { SubmitFunction } from '@sveltejs/kit';
 
 let submit: SubmitFunction;
@@ -13,7 +14,7 @@ vi.mock('$app/forms', () => ({
 import { toasts } from '$lib/stores';
 import NewApartmentPage from '../routes/apartments/new/+page.svelte';
 import EditApartmentPage from '../routes/apartments/[id]/edit/+page.svelte';
-import { byTestId, fireEvent, show } from './helpers/dom';
+import { byTestId, fireEvent, settle, show } from './helpers/dom';
 
 const buildings = [
 	{ id: 'b1', name: 'Birkenhof', address: 'Birkenweg 2, 8400 Winterthur' },
@@ -153,5 +154,36 @@ describe('Wohnung bearbeiten', () => {
 		open();
 		await saved();
 		expect(get(toasts).map((toast) => toast.message)).toContain('Wohnung 4.01 gespeichert');
+	});
+	// #1284 (Code-Review 1284-2 C-2, fallback review): a day typed wrong is not sent as «empty», which would clear the
+	// saved one
+	it('sendet kein «Aufgehoben ab», solange der eingegebene Tag ungültig ist', async () => {
+		show(EditApartmentPage, {
+			data: { apartment: { ...apartment(), discontinuedFrom: '2025-07-01' } },
+			form: null
+		} as never);
+		const input = byTestId<HTMLInputElement>('apartment-discontinued-input')!;
+		fireEvent(input, 'input', '31.13.2025');
+		input.dispatchEvent(new Event('blur'));
+		flushSync();
+		const cancel = vi.fn();
+		submit({ formElement: input.form!, cancel } as never);
+		expect(cancel).toHaveBeenCalled();
+		// Code-Review 1284-4 C-1: the field with its error takes the focus, so the refusal is announced
+		await settle();
+		expect(document.activeElement).toBe(input);
+	});
+
+	// #1284, wording of Fachreview 1284-1 (a) and V-1 (b)
+	it('erklärt «Aufgehoben ab» am Feld, auch dass eine grössere Wohnung ihre Fläche noch nicht ab dem Tag erhält', () => {
+		show(EditApartmentPage, {
+			data: { apartment: { ...apartment(), discontinuedFrom: '2025-07-01' } },
+			form: null
+		} as never);
+		expect(labelOf('apartment-discontinued-input')).toBe('Aufgehoben ab (optional)');
+		expect(byTestId<HTMLInputElement>('apartment-discontinued-input')!.value).toBe('01.07.2025');
+		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit, und ihren Anteil tragen Sie. Abrechnungen ab diesem Tag rechnen ohne sie. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, kann Dwello ihre neue Fläche noch nicht ab diesem Tag berücksichtigen.'
+		);
 	});
 });
