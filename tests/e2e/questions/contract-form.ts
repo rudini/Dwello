@@ -107,6 +107,7 @@ export const runningContractLinkTextOf = (tenant: string) => Text.of(runningCont
 export const overlapBoxText = Text.of(overlapBox);
 export const apartmentHintAnnounced = Text.of(apartmentHintAnnouncement);
 export const apartmentHintInWindow = ShareInViewport.of(apartmentContractsUnknown);
+export const apartmentSelectInWindow = ShareInViewport.of(apartmentSelect);
 export const noticeHintText = Text.of(noticeHint);
 export const announcedTotal = Text.of(announcedMonthlyTotal);
 export const leaveQuestion = Text.of(leaveDialogTitle);

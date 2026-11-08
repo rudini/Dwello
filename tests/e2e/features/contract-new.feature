@@ -110,6 +110,17 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und bietet der Hinweis auf den Mietvertrag von "Anna Keller" den Link "Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof"
     Und erklärt der Hinweis auf den Mietvertrag von "Anna Keller" "Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende auf seiner Seite mit «Enddatum erfassen» ein."
 
+  # #1296 (Personas Helga P-4, Sven P-3 in 1288): bei 200 % Zoom zeigt das Fenster 720 auf 450 Pixel; die gewählte Wohnung bleibt im Bild
+  Szenario: Der Hinweis auf den eigenen Mietvertrag schiebt die Wohnungsauswahl nicht aus dem Bild
+    Angenommen das Browserfenster ist 720 auf 450 Pixel gross
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Dann erfährt der Liegenschaftsverwalter, dass "Anna Keller" einen Mietvertrag ohne Vertragsende für die Wohnung "2.02" hat
+    Und ist die Wohnungsauswahl ganz im Fenster zu sehen
+
   Szenario: Vom Hinweis zum laufenden Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken

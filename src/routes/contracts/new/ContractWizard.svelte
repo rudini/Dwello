@@ -355,7 +355,6 @@
 				error={errors.tenantId}
 			/>
 		{:else if step === 2}
-			<OpenContracts name={tenantName} contracts={openContracts} />
 			<ApartmentStep
 				bind:apartmentId={values.apartmentId}
 				{apartments}
@@ -367,6 +366,8 @@
 				bind:cleared
 				error={errors.apartmentId}
 			/>
+			<!-- below the field: at 200 % it would push the field just used out of view (#1296) -->
+			<OpenContracts name={tenantName} contracts={openContracts} />
 		{:else if step === 3}
 			<PeriodStep
 				bind:startDate={values.startDate}

@@ -982,6 +982,10 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await settle();
 		const hint = byTestId('tenant-running-contract')!;
 		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
+		// #1296 (Helga P-4, Sven P-3 in 1288): below the field, so at 200 % it does not push the field out of view
+		expect(
+			byTestId('apartment-select')!.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
 		// #1288: apartment and contract named like the hint on a cleared apartment
 		expect(hint.textContent).toContain('für Wohnung 2.02 · Ahornhof');
 		expect([hint.querySelector('a')!.getAttribute('href'), hint.querySelector('a')!.textContent?.trim()]).toEqual([

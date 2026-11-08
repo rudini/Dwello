@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentClearedAnnounced, apartmentClearedExplanation, apartmentClearedHint, apartmentClearedHints, runningContractHintTextOf, runningContractLinkTextOf, toasts, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
+import { apartmentSelectInWindow, apartmentClearedAnnounced, apartmentClearedExplanation, apartmentClearedHint, apartmentClearedHints, runningContractHintTextOf, runningContractLinkTextOf, toasts, apartmentClearedLinkText, apartmentHintAnnounced, chosenApartmentId, apartmentHintInWindow, runningContractHintsOf, confirmation, confirmationShown, failureOnTop, failures, overlapBoxText, warning } from '../questions/contract-form';
 import { focusedText } from '../questions/navigation';
 import { enterStartDate, openClearedApartmentContract, stayOnConfirmationClose, tabOnFromErrorMessage } from '../tasks/contract-form';
 
@@ -121,4 +121,9 @@ Then('bietet der Hinweis auf den Mietvertrag von {string} den Link {string}', as
 
 Then('erklärt der Hinweis auf den Mietvertrag von {string} {string}', async ({ verwalter, names }, tenant: string, text: string) => {
 	await verwalter.sees(runningContractHintTextOf(names.get(tenant) ?? tenant)).toContain(text);
+});
+
+// #1296: the hint on the tenant's own contract does not push the field just used out of the window
+Then('ist die Wohnungsauswahl ganz im Fenster zu sehen', async ({ verwalter }) => {
+	await verwalter.sees(apartmentSelectInWindow).toBe(1);
 });
