@@ -522,7 +522,7 @@ jobs:
           cd ../base && bun install --frozen-lockfile
       - name: Take screenshots
         if: steps.routes.outputs.pages == 'true'
-        run: bunx playwright test -c playwright.screenshots.config.ts
+        run: bunx svelte-kit sync && bunx playwright test -c playwright.screenshots.config.ts
         env:
           UI_BASE_DIR: ${{ github.workspace }}/../base
       # The statement PDF is drawn by the backend: a fixed example in German and French, against the base branch's code
