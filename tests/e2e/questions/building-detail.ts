@@ -15,6 +15,7 @@ import {
 } from '../targets/building-detail';
 
 export const listedApartment = (number: string) => Text.of(apartmentRow(number));
+export const listedApartmentCount = (number: string) => Count.of(apartmentRow(number));
 export const yearBuilt = Text.of(yearBuiltValue);
 export const buildingAddress = Text.of(addressLine);
 export const shownMaps = Count.of(buildingMap);
