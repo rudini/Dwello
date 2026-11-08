@@ -56,8 +56,25 @@ export interface LineItem {
 	invoiceParts?: Part[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
+	segments?: Segment[] | null; // #1284: its parts before and from the day an apartment no longer exists
 	tenantShare: number;
 }
+
+// #1284: a part of a position as stored (LineSegment), with the apartment's fraction by the key as printed
+export type Segment = {
+	start: string;
+	end: string;
+	count: number;
+	keyShare: string;
+	costs: number;
+	apartment: number;
+	periodShare: number;
+	days?: number;
+	total?: number;
+	profileShare?: number;
+	share: number;
+	discontinued?: { number: string; date: string }[];
+};
 
 /**
  * Full statement data for PDF generation
@@ -199,6 +216,7 @@ const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
 // that (a contract over the whole period bears every day), else the percentage; the heating profile's share as one
 function timeShare(item: LineItem, data: StatementPDFData, t: Record<string, string>) {
 	if (item.periodShare == null) return '–';
+	if (item.segments) return formatShare(item.periodShare); // the parts below show their days (#1284)
 	if (!item.byProfile && item.shareDays) return fill(t.days, item.shareDays);
 	// the invoices under it give the share (#226, C-5); summing to zero they have none (#237)
 	if (item.invoiceParts) return item.totalAmount === 0 ? '–' : formatShare(item.periodShare);
@@ -471,7 +489,7 @@ function costTable(page: Page, y: number) {
 	const note = sharesNote(data, t);
 	const closing = totals + 4 + doc.font(FONT.regular).fontSize(7.5).heightOfString(note, { width: PAGE.right - PAGE.left });
 	const rows = data.lineItems.map((item) => {
-		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
+		const key = [item.key ?? '–', item.segments ? t.keyShareSegments : item.keyShare].filter(Boolean).join('\n');
 		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
 		return { cells: [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)], parts: partLines(item, t) };
 	});
@@ -512,6 +530,7 @@ function costTable(page: Page, y: number) {
 // the Zeitanteil, and «Ihr Anteil» as Wohnungsanteil × that sum; invoices summing to zero by the apartment's share by
 // the key (#237). A negative amount stands with a minus, not «+ -300.00» (#257)
 function partLines(item: LineItem, t: Record<string, string>) {
+	if (item.segments) return item.segments.map((segment) => segmentLine(segment, t));
 	const parts = item.invoiceParts;
 	if (!parts || item.apartmentShare == null) return [];
 	// a line without a Leistungszeitraum begins with its invoice; one the same as another's gets it in front (V-8)
@@ -529,6 +548,38 @@ function partLines(item: LineItem, t: Record<string, string>) {
 	if (item.totalAmount !== 0) return [...lines, fill(t.partShare, share)];
 	return [...lines, fill(t.partShareZero, { ...share, keyShare: keyFactor(item, parts) })];
 }
+
+// #1284 (Fachreview 1284-1 V-3): a part as the tenant recomputes it, by days, by the Zeitanteil or by the Heizprofil
+function segmentLine(segment: Segment, t: Record<string, string>) {
+	const text = segment.profileShare != null ? t.segmentLineProfile : segment.days != null ? t.segmentLineDays : t.segmentLinePercent;
+	return fill(text, {
+		start: formatDate(segment.start),
+		end: formatDate(segment.end),
+		count: segment.count,
+		colon: t.colon,
+		keyShare: segment.keyShare.replace(/\n/g, ' '),
+		costs: formatCHF(segment.costs),
+		apartment: formatCHF(segment.apartment),
+		days: segment.days ?? '',
+		total: segment.total ?? '',
+		percent: (segment.periodShare * 100).toFixed(2),
+		profileShare: segment.profileShare?.toFixed(2) ?? '',
+		share: formatCHF(segment.share)
+	});
+}
+
+// #1284: once per apartment that no longer exists from a day of the billed days, above the costs
+function segmentIntro({ doc, t, data }: Page, y: number) {
+	const gone = new Map(data.lineItems.flatMap((item) => item.segments ?? []).flatMap((segment) => segment.discontinued ?? []).map((a) => [a.number, a.date]));
+	let top = y;
+	for (const [number, date] of gone) {
+		const text = fill(t.segmentIntro, { number, date: formatDate(date), dayBefore: formatDate(daysBefore(date)) });
+		doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(text, PAGE.left, room(doc, top, 30), { width: PAGE.right - PAGE.left });
+		top = doc.y + 8;
+	}
+	return top;
+}
+const daysBefore = (day: string) => new Date(Date.parse(day) - 86_400_000).toISOString().slice(0, 10);
 
 // The apartment's part by the key as printed with the key (a mixed key in brackets), else as a percentage of the sum
 function keyFactor(item: LineItem, parts: InvoicePart[]) {
@@ -946,7 +997,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 			const page: Page = { doc, t, data, config, language };
 			let y = title(page, addresses(page));
 			y = balanceBox(page, y);
-			y = costTable(page, y);
+			y = costTable(page, segmentIntro(page, y));
 			y = heatingSection(page, y);
 			y = notes(page, y);
 			let qrPage: number | null = null;

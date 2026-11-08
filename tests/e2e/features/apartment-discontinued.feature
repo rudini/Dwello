@@ -102,8 +102,8 @@ Funktionalität: Aufgehobene Wohnung
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; ihren Anteil trägt der Vermieter."
     Und steht im PDF "je Zeitraum, siehe unten"
-    Und steht im PDF "01.01.2025 – 30.06.2025, 3 Wohnungen: 70.00 / 210.00 m² × CHF 1’487.67 = CHF 495.89 × 181/181 Tage = CHF 495.89"
-    Und steht im PDF "01.07.2025 – 31.12.2025, 2 Wohnungen: 70.00 / 140.00 m² × CHF 1’512.33 = CHF 756.17 × 184/184 Tage = CHF 756.17"
+    Und steht im PDF "01.01.2025 – 30.06.2025, 3 Wohnungen: 70.00 / 210.00 m² × CHF 1'487.67 = CHF 495.89 × 181/181 Tage = CHF 495.89"
+    Und steht im PDF "01.07.2025 – 31.12.2025, 2 Wohnungen: 70.00 / 140.00 m² × CHF 1'512.33 = CHF 756.17 × 184/184 Tage = CHF 756.17"
 
   @wip
   Szenario: Die Abrechnung nennt die aufgehobene Wohnung

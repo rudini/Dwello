@@ -74,6 +74,12 @@ export const de: Record<string, string> = {
 	partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre\u00a0Mietstage {days} von {total} Tagen',
 	partShare: 'Ihr Anteil{colon}{apartment} × Zeitanteil ({sum}) / {costs} = {share}',
 	partShareZero: 'Ihr Anteil{colon}({sum}) × {keyShare} (Anteil Ihrer Wohnung nach dem Verteilschlüssel) = {share}',
+	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
+	segmentIntro: 'Wohnung {number} gibt es ab {date} nicht mehr. Bis zum {dayBefore} zählt sie im Verteilschlüssel mit; ihren Anteil trägt der Vermieter. Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.',
+	keyShareSegments: 'je Zeitraum, siehe unten',
+	segmentLineDays: '{start} – {end}, {count} Wohnungen{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} Tage = CHF {share}',
+	segmentLinePercent: '{start} – {end}, {count} Wohnungen{colon}{keyShare} × CHF {costs} = CHF {apartment} × Zeitanteil {percent}\u00a0% = CHF {share}',
+	segmentLineProfile: '{start} – {end}, {count} Wohnungen, {profileShare}\u00a0% der Heizkosten nach Heizprofil{colon}{keyShare} × CHF {costs} = CHF {apartment} × Anteil nach Heizprofil {percent}\u00a0% = CHF {share}',
 	partProfile: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 	partProfileBilled: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der abgerechneten Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 	partProfileRun: ', Anteil nach Heizprofil: {percent}\u00a0% (siehe Heiz- und Warmwasserkosten)',
