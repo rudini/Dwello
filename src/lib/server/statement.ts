@@ -196,7 +196,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	const changed: {
 		invoiceIds?: string[];
 		fuelStockChanged?: boolean;
-		uncalculableKeys?: { key: string; reason: string; apartment: string | null; invoices: HintedInvoice[] }[];
+		uncalculableKeys?: { key: string; reason: string; apartment: string | null; invoices: (HintedInvoice & { fuelStock: boolean })[] }[];
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;

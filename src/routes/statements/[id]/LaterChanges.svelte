@@ -15,7 +15,7 @@
 		key: string;
 		reason: string;
 		apartment: string | null;
-		invoices: HintedInvoice[];
+		invoices: (HintedInvoice & { fuelStock: boolean })[];
 	};
 
 	// What changed since the statement was created (#96, #454): a draft is recalculated (#338), a sent one corrected
@@ -52,7 +52,14 @@
 	const changed = $derived(laterText(later.invoices, later.fuelStock));
 	const keys = $derived(later.uncalculableKeys ?? []);
 	// persona Anna 1309 P-1: the invoices to change
-	const keyInvoices = $derived(keys.flatMap((key) => key.invoices));
+	const keyInvoices = $derived(
+		keys.flatMap((key) =>
+			key.invoices.map((invoice) => ({
+				...invoice,
+				note: invoice.fuelStock ? m.statements_key_not_calculable_fuel_stock() : undefined
+			}))
+		)
+	);
 	const failures = $derived(
 		keyFailuresText(keys.map((key) => ({ ...key, building: statement.buildingName })))
 	);

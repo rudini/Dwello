@@ -198,6 +198,19 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #1309: a key of its invoices that cannot be calculated for the building, with those invoices
+	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices-key.json', async () => {
+		const key = await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: `Halbe Zimmer ${crypto.randomUUID()}`, formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' }));
+		await insertInvoice(rental.building, { distributionKeyId: key, billingEntityName: 'Garten AG', amount: '600.00', invoiceDate: '2024-05-31' });
+		try {
+			const actual = await (await callApi(`/api/v1/statements/${statementId}/changed-invoices`)).json();
+			expect(drift(await sample('statement-changed-invoices-key'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.billingEntityName, 'Garten AG')));
+			await sendJson('DELETE', `/api/v1/distribution-keys/${key}`, {});
+		}
+	});
+
 	// #454: the statements no longer current, for the Übersicht (a draft with an invoice recorded after it)
 	it('GET /statements/outdated liefert die Felder von statements-outdated.json', async () => {
 		await insertInvoice(rental.building, { amount: '80.00', invoiceDate: '2024-11-30', description: `Nachzügler ${token}` });

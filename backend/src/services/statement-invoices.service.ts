@@ -110,7 +110,15 @@ async function uncalculableKeys(statement: Located, load: Loaders) {
 	return [...new Set(failing.map((bill) => bill.distributionKeyName))].map((key) => {
 		const held = failing.filter((bill) => bill.distributionKeyName === key);
 		const [{ reason, apartment }] = held;
-		const invoices = held.map(({ id, billingEntityName, description, invoiceDate, amount }) => ({ id, billingEntityName, description, invoiceDate, amount }));
+		// a delivery of another period whose key distributes the Veränderung Tankbestand says so (code review 1309-2 C-4)
+		const invoices = held.map(({ id, billingEntityName, description, invoiceDate, amount, ...rest }) => ({
+			id,
+			billingEntityName,
+			description,
+			invoiceDate,
+			amount,
+			fuelStock: 'fuelStock' in rest
+		}));
 		return { key, reason, apartment, invoices };
 	});
 }

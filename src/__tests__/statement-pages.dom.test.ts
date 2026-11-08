@@ -37,6 +37,7 @@ import type { StatementWithDetails } from '$lib/types';
 const noPayment = { unpaid: true, claimed: false, paymentPart: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
+import keyChanges from '../../tests/contracts/statement-changed-invoices-key.json';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, settled: 4, overdue: 1 };
@@ -897,20 +898,24 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// #1309 (Entscheid PO, Fachreview 1309-1): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt
-	const failing = [
-		{
-			key: 'Halbe Zimmer',
-			reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO',
-			apartment: '2.01',
-			invoices: [{ id: 'i7', billingEntityName: 'Garten AG', description: 'Gartenpflege', invoiceDate: '2024-09-30', amount: '900.00' }]
-		}
-	];
+	const failing = keyChanges.uncalculableKeys; // code review 1309-2 C-5: as the backend sends it
 	// Persona Anna 1309 P-1, Dr. Weber 1309 P-2: der Hinweis nennt die Rechnungen und führt zu ihnen, zurück zur Abrechnung
 	it('nennt die Rechnungen mit dem Verteilschlüssel, der sich nicht berechnen lässt, und führt zu ihnen', () => {
 		later(0, 'sent', { uncalculableKeys: failing, correctionDue: true } as never);
 		const link = byTestId('statement-later-invoices')!.querySelector('a')!;
-		expect(link.textContent!.replace(/\s+/g, ' ')).toBe('Garten AG: Gartenpflege. Rechnungsdatum 30.09.2024, CHF 900.00');
-		expect(link.getAttribute('href')).toBe(`/invoices/i7/edit?returnTo=${encodeURIComponent('/statements/s1')}`);
+		expect(link.textContent!.replace(/\s+/g, ' ')).toBe('Garten AG: Gartenpflege 2024. Rechnungsdatum 31.05.2024, CHF 600.00');
+		expect(link.getAttribute('href')).toBe(
+			`/invoices/${failing[0].invoices[0].id}/edit?returnTo=${encodeURIComponent('/statements/s1')}`
+		);
+	});
+
+	// code review 1309-2 C-4: the delivery of another period whose key distributes the Veränderung Tankbestand, as in the preview
+	it('sagt bei einer Lieferung aus einer anderen Abrechnungsperiode, dass sie die Veränderung Tankbestand verteilt', () => {
+		const delivery = [{ ...failing[0], invoices: [{ ...failing[0].invoices[0], fuelStock: true }] }];
+		later(0, 'draft', { uncalculableKeys: delivery } as never);
+		expect(laterText()).toContain(
+			'Lieferung aus einer anderen Abrechnungsperiode: Nach ihrem Verteilschlüssel verteilt Dwello die Veränderung Tankbestand.'
+		);
 	});
 	it('nennt beim Entwurf den Verteilschlüssel, der sich nicht berechnen lässt, und sagt, was zu tun ist', () => {
 		later(0, 'draft', { uncalculableKeys: failing } as never);
