@@ -293,11 +293,21 @@ describe('Gebäudedetail', () => {
 	it('sagt vor dem Bestätigen, warum ein Gebäude mit Wohnungen nicht gelöscht werden kann', () => {
 		detail([flat('a1', '1.01', 1)]);
 		click('building-delete-button');
-		expect(byTestId('form-error')!.textContent).toContain(
-			'Dieses Gebäude kann nicht gelöscht werden'
-		);
+		const dialog = document.querySelector('[role=dialog]')!.textContent;
+		expect(dialog).toContain('Es enthält noch Wohnungen.');
+		expect(dialog).toContain('Löschen Sie zuerst seine Wohnungen.');
 		expect(byTestId('building-delete-confirm')).toBeNull();
 		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
+	});
+
+	// #1258: der Titel sagt die Absage, der Grund steht als Text darunter, nicht noch einmal als Fehlermeldung
+	it('sagt die Absage im Titel und zeigt keine Fehlermeldung dazu', () => {
+		detail([flat('a1', '1.01', 1)]);
+		click('building-delete-button');
+		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
+			'Gebäude kann nicht gelöscht werden'
+		);
+		expect(byTestId('form-error')).toBeNull();
 	});
 });
 

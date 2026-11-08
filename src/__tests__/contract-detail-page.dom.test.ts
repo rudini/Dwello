@@ -928,11 +928,16 @@ describe('Mietvertrag löschen', () => {
 			{ id: 's1', statementNumber: 'NK-2024-0001', status: 'paid' },
 			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' },
 			{ id: 's3', statementNumber: 'NK-2023-0003', status: 'replaced' },
-			{ id: 's4', statementNumber: 'NK-2022-0004', status: 'overdue' }
+			{ id: 's4', statementNumber: 'NK-2022-0004', status: 'overdue' },
+			{ id: 's5', statementNumber: 'NK-2021-0005', status: 'settled' }
 		];
 		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
 		click('contract-delete-button');
 
+		// #1258: der Titel sagt die Absage, darunter der Grund und was zu tun ist
+		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
+			'Mietvertrag kann nicht gelöscht werden'
+		);
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
 		expect(dialog).toContain('Seine Mietstage sind abgerechnet in:');
 		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
@@ -942,6 +947,8 @@ describe('Mietvertrag löschen', () => {
 		expect(text('contract-delete-statement-s3')).toBe('NK-2023-0003 (ersetzt)');
 		// review p5a C-1: any other status is a sent one
 		expect(text('contract-delete-statement-s4')).toBe('NK-2022-0004 (versendet)');
+		// Fachreview 1258 V-4: eine erledigte ist keine versendete
+		expect(text('contract-delete-statement-s5')).toBe('NK-2021-0005 (erledigt)');
 		// #120: eine Abrechnung, die nicht stimmt, wird berichtigt, nicht ausserhalb von Dwello
 		expect(dialog).toContain('Stimmt eine Abrechnung nicht, öffnen Sie sie und wählen Sie «Abrechnung berichtigen».');
 		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
@@ -962,7 +969,7 @@ describe('Mietvertrag löschen', () => {
 		click('contract-delete-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
-			'Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen.'
+			'Öffnen Sie jeden Entwurf oben und wählen Sie «Abrechnung löschen». Danach lässt sich der Mietvertrag löschen.'
 		);
 	});
 

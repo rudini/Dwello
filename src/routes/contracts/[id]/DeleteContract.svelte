@@ -35,7 +35,8 @@
 	const labels: Record<string, () => string> = {
 		draft: m.statements_status_draft,
 		paid: m.contracts_billed_paid,
-		replaced: m.contracts_billed_replaced
+		replaced: m.contracts_billed_replaced,
+		settled: m.contracts_billed_settled
 	};
 	const statusOf = (status: string) => (labels[status] ?? m.contracts_billed_sent)();
 	const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));
@@ -67,7 +68,7 @@
 <ActionDialog
 	bind:open
 	action="?/delete"
-	title={m.contracts_delete_title()}
+	title={billed ? m.contracts_delete_refused_title() : m.contracts_delete_title()}
 	confirmLabel={m.contracts_delete_confirm()}
 	danger
 	impossible={billed}

@@ -157,8 +157,14 @@ describe('Mieterdetail', () => {
 		click('tenant-delete-button');
 		expect(byTestId('tenant-delete-confirm')).toBeNull();
 		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
-		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
-			'Abrechnungen und Dokumente auf sie verweisen'
+		// #1258: der Titel sagt die Absage, darunter der Grund und was zu tun ist
+		expect(document.querySelector('[role=dialog] h2')!.textContent).toBe(
+			'Lea Frei kann nicht gelöscht werden'
+		);
+		const dialog = document.querySelector('[role=dialog]')!.textContent;
+		expect(dialog).toContain('Zu diesem Mieter ist mindestens ein Mietvertrag erfasst.');
+		expect(dialog).toContain(
+			'Wurde ein Mietvertrag irrtümlich erfasst, löschen Sie ihn auf seiner Seite.'
 		);
 	});
 
@@ -522,8 +528,8 @@ describe('Mieterdetail', () => {
 	it('sagt bei einem Mieter mit Mietverträgen, dass hochgeladene Dokumente einzeln gelöscht werden', () => {
 		open([history('c1', 'Wohnung 1.01', '2015-01-01', '2019-12-31', 'ended')], null, [upload]);
 		click('tenant-delete-button');
-		expect(text('delete-dialog-message')).toContain(
-			'Auch die Dokumente, die Sie zu diesem Mieter hochgeladen haben, bleiben gespeichert. Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.'
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
+			'Auch die Dokumente, die Sie zu diesem Mieter hochgeladen haben, bleiben bis dahin gespeichert. Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.'
 		);
 	});
 

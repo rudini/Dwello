@@ -104,14 +104,13 @@ Funktionalität: Mietvertragsdetail
 
   # Die Abrechnung braucht seine Mietstage: er bleibt
   # #1258: die drei Absagen beim Löschen sind gleich gebaut: Titel, Grund, was zu tun ist
-  @wip
   Szenario: Mietvertrag mit Abrechnung kann nicht gelöscht werden
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
     Dann heisst der Dialog "Mietvertrag kann nicht gelöscht werden"
     Und nennt der Dialog "Seine Mietstage sind abgerechnet in:"
-    Und nennt der Dialog "Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen."
+    Und nennt der Dialog "Öffnen Sie jeden Entwurf oben und wählen Sie «Abrechnung löschen». Danach lässt sich der Mietvertrag löschen."
     Und bietet der Dialog nur "Schliessen" an
     Und ist der Mietvertrag unbefristet
 
