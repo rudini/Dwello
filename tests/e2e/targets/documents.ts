@@ -28,6 +28,8 @@ export const markSentButton = (title: string, tenantName: string) =>
 	);
 export const documentFileInput = target('Datei des Dokuments', (page) => page.getByTestId('tenant-document-file-input'));
 export const documentTitleInput = target('Titel des Dokuments', (page) => page.getByTestId('tenant-document-title-input'));
+// #1262: the button that opens the file choice, what the eye sees of the file field
+export const documentFileButton = target('Datei auswählen', (page) => page.getByTestId('tenant-document-file-button'));
 export const uploadDocumentButton = target('Dokument hochladen', (page) => page.getByTestId('tenant-document-upload-button'));
 // #677 (decision 9): what a busy button says, next to it
 export const uploadDocumentStatus = target('Status von «Dokument hochladen»', (page) =>

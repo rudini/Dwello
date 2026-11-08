@@ -30,7 +30,11 @@ import {
 	uploadProgressShown,
 	uploadButtonContrast,
 	uploadButtonFocused,
-	uploadButtonStatus
+	uploadButtonStatus,
+	fileButtonBackground,
+	fileFieldChangeable,
+	titleFieldBackground,
+	titleFieldChangeable
 } from '../questions/tenant-documents';
 import {
 	chooseView,
@@ -342,3 +346,19 @@ Then(
 		}
 	}
 );
+
+// #1262 (persona Sven P-3, Helga): a disabled field is what a screen reader reads as unavailable
+Then('sind «Datei» und «Titel» gesperrt, auch für einen Screenreader', async ({ verwalter }) => {
+	await verwalter.sees(fileFieldChangeable).toBe(false);
+	await verwalter.sees(titleFieldChangeable).toBe(false);
+});
+
+Then('sehen «Datei» und «Titel» ausgegraut aus', async ({ verwalter }) => {
+	await verwalter.sees(fileButtonBackground).toBe('sunken');
+	await verwalter.sees(titleFieldBackground).toBe('sunken');
+});
+
+Then('lassen sich «Datei» und «Titel» wieder ändern', async ({ verwalter }) => {
+	await verwalter.sees(fileFieldChangeable).toBe(true);
+	await verwalter.sees(titleFieldChangeable).toBe(true);
+});

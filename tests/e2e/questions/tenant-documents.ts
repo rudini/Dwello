@@ -1,4 +1,4 @@
-import { Accessible, Attribute, Colour, Count, HoldsFocus, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Colour, Count, Enabled, HoldsFocus, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	chosenDocumentFile,
 	deleteDocumentButton,
@@ -7,6 +7,7 @@ import {
 	openDialog,
 	deleteDocumentConfirm,
 	deleteDocumentStatus,
+	documentFileButton,
 	documentFileInput,
 	documentsEmpty,
 	documentsTenantFilter,
@@ -57,3 +58,8 @@ export const fileFieldDescription = Accessible.descriptionOf(documentFileInput);
 // #677 (persona Sven S-1): in «Dokumente»
 export const tenantFilterFocused = HoldsFocus.of(documentsTenantFilter);
 export const documentsEmptyNote = Text.of(documentsEmpty);
+// #1262 (persona Sven P-3, Helga): while an upload runs its fields take no change, for the eye and the screen reader
+export const fileFieldChangeable = Enabled.of(documentFileInput);
+export const titleFieldChangeable = Enabled.of(documentTitleInput);
+export const fileButtonBackground = Colour.backgroundOf(documentFileButton, ['sunken', 'surface']);
+export const titleFieldBackground = Colour.backgroundOf(documentTitleInput, ['sunken', 'surface']);

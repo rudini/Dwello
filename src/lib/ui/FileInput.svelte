@@ -4,7 +4,8 @@
 
 	// A file field whose button speaks the language of the interface: the browser's own one speaks the browser's
 	// («Choose Files / No file chosen», #268). The input stays the control, visually hidden; the button is a second
-	// label, so the name holds what it shows (WCAG 2.5.3)
+	// label, so the name holds what it shows (WCAG 2.5.3). Disabled it greys like a disabled field, not by opacity, which
+	// left the text hard to read (#1182, #1262)
 	let {
 		input = $bindable(),
 		control,
@@ -24,7 +25,7 @@
 		multiple?: boolean;
 		disabled?: boolean;
 		onchange?: (event: Event) => void;
-		testid: string; // of the input `<testid>-input`, the button `<testid>-choose`, the file chosen `<testid>-chosen`
+		testid: string; // of the input `<testid>-input`, the button `<testid>-button`, its text `<testid>-choose`, the file chosen `<testid>-chosen`
 	} = $props();
 </script>
 
@@ -45,7 +46,10 @@
 	/>
 	<label
 		for={control.id}
-		class="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-control border-2 bg-surface px-6 py-2 font-semibold text-accent hover:bg-accent-soft peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus peer-disabled:cursor-not-allowed peer-disabled:opacity-60 {control.invalid
+		data-testid="{testid}-button"
+		class="inline-flex min-h-12 items-center gap-2 rounded-control border-2 px-6 py-2 font-semibold peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus {disabled
+			? 'cursor-not-allowed bg-sunken text-ink-muted'
+			: 'cursor-pointer bg-surface text-accent hover:bg-accent-soft'} {control.invalid
 			? 'border-critical'
 			: 'border-line-strong'}"
 	>
