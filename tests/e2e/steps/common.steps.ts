@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { dialogActions, errorMessageShown } from '../questions/form';
+import { dialogActions, dialogTitleText, errorMessageShown } from '../questions/form';
 import { focusedPlace, focusedText, pageTitle } from '../questions/navigation';
 import { goBackInBrowser } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb } from '../tasks/form';
@@ -37,6 +37,12 @@ Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string}', async ({ ver
 // a negative check: the step before it names what the page shows instead
 Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string} nicht mehr', async ({ verwalter }, text: string) => {
 	await verwalter.sees(errorMessageShown(text)).toBe(false);
+});
+
+// the title may name a record: by its seeded name
+Then('heisst der Dialog {string}', async ({ verwalter, names }, title: string) => {
+	const named = [...names.entries()].reduce((text, [written, stored]) => text.replaceAll(written, stored), title);
+	await verwalter.sees(dialogTitleText).toBe(named);
 });
 
 Then('bietet der Dialog nur {string} an', async ({ verwalter }, action: string) => {

@@ -426,6 +426,8 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(endDialogDeathText).toContain('Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst');
 		await verwalter.sees(endDialogDeathText).toContain('erst, wenn die Erben oder Sie gekündigt haben');
+		// #1267: or the landlord and the heirs end it by agreement
+		await verwalter.sees(endDialogDeathText).toContain('oder wenn Sie mit den Erben eine Aufhebungsvereinbarung getroffen haben');
 	}
 );
 
@@ -447,6 +449,8 @@ Then(
 		await verwalter.sees(noticePeriodHintText).toContain('Zwischen Eingang und Vertragsende liegen weniger als 3 Monate.');
 		await verwalter.sees(noticePeriodHintText).toContain('erst auf den nächsten Kündigungstermin');
 		await verwalter.sees(noticePeriodHintText).toContain('Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor');
+		// #1282: an end agreed with the tenant is an Aufhebungsvereinbarung
+		await verwalter.sees(noticePeriodHintText).toContain('Haben Sie das Ende mit dem Mieter vereinbart, wählen Sie «Aufhebungsvereinbarung».');
 	}
 );
 

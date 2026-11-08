@@ -103,14 +103,26 @@ Funktionalität: Mietvertragsdetail
     Und der Mietvertrag von "Bruno Meier" ist nicht mehr auffindbar
 
   # Die Abrechnung braucht seine Mietstage: er bleibt
+  # #1258: die drei Absagen beim Löschen sind gleich gebaut: Titel, Grund, was zu tun ist
   Szenario: Mietvertrag mit Abrechnung kann nicht gelöscht werden
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
-    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
-    Und nennt der Dialog "Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen."
+    Dann heisst der Dialog "Mietvertrag von Anna Keller kann nicht gelöscht werden"
+    Und nennt der Dialog "Die Nebenkostenabrechnung unten rechnet die Mietstage dieses Mietvertrags ab, also die Tage, an denen er in der Abrechnungsperiode lief."
+    Und nennt der Dialog "Öffnen Sie jeden Entwurf oben und wählen Sie «Abrechnung löschen». Danach lässt sich der Mietvertrag löschen."
     Und bietet der Dialog nur "Schliessen" an
     Und ist der Mietvertrag unbefristet
+
+  # #1258 (Fachreview V-8): neben einer versendeten Abrechnung hilft das Löschen des Entwurfs nicht
+  Szenario: Löschdialog erklärt den Entwurf neben einer versendeten Abrechnung
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2024 im Gebäude "Ahornhof"
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Dann nennt der Dialog "Die 2 Nebenkostenabrechnungen unten rechnen die Mietstage dieses Mietvertrags ab"
+    Und nennt der Dialog "Einen Entwurf aus der Liste zu löschen, hilft hier nicht: Der Mietvertrag bleibt wegen der versendeten oder bezahlten Abrechnung erhalten."
 
   # Irrtümlich erfasst, noch nicht begonnen: er hat keine Mietstage
   Szenario: Künftigen Mietvertrag löschen
@@ -189,9 +201,9 @@ Funktionalität: Mietvertragsdetail
   Szenario: Mietvertrag mit einer Aufhebungsvereinbarung beenden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2099-03-31" beendet
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
     Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
-    Dann zeigt die Vertragsdauer "Unbefristet, beendet auf den 31.03.2099"
+    Dann zeigt die Vertragsdauer "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
     Und nennt die Mietvertragsliste den Mietvertrag von "Anna Keller" "einvernehmlich"
 
   Szenario: Bei einer Aufhebungsvereinbarung fragt der Dialog nicht nach dem Eingang der Kündigung
@@ -216,14 +228,14 @@ Funktionalität: Mietvertragsdetail
   Szenario: Ein mit einer Aufhebungsvereinbarung beendeter Mietvertrag läuft nicht stillschweigend weiter
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2025-03-31" beendet und die Folge bestätigt
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2025"
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2025 (Aufhebungsvereinbarung)"
     Und fragt der Mietvertrag nicht, ob der Mieter noch in der Wohnung wohnt
 
   Szenario: Der Eingang einer Kündigung gilt nicht für eine Aufhebungsvereinbarung
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beenden will und die Kündigung am "2098-12-15" erhalten hat
     Und der Liegenschaftsverwalter stattdessen eine Aufhebungsvereinbarung wählt und den Mietvertrag beendet
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
     Und zeigt der Mietvertrag keinen Eingang einer Kündigung
 
   Szenario: Befristeter Mietvertrag
@@ -415,7 +427,7 @@ Funktionalität: Mietvertragsdetail
     Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
-    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
+    Dann nennt der Dialog "Die Nebenkostenabrechnung unten rechnet die Mietstage dieses Mietvertrags ab, also die Tage, an denen er in der Abrechnungsperiode lief."
     Und verlinkt der Dialog die Abrechnung 2025 von "Bruno Meier"
 
   Szenario: Abrechnung aus dem Löschdialog öffnen
@@ -453,7 +465,7 @@ Funktionalität: Mietvertragsdetail
     Und der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
-    Dann sagt der Hinweis zum abgelaufenen Mietvertrag "Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung."
+    Dann sagt der Hinweis zum abgelaufenen Mietvertrag "Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung oder einer Aufhebungsvereinbarung."
 
   Szenario: Mieter ist nach dem befristeten Mietvertrag ausgezogen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
