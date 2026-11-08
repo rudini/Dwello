@@ -4,11 +4,12 @@ import { exportAllDataButton, holderIsSenderBox, masterDataLink, saveSettingsBut
 
 export const openSettings = Navigate.to('/config');
 
+/** #1202: types the settings without saving them */
+export const enterSettings = (fields: Record<string, string>): Activity => (actor) =>
+	actor.attemptsTo(...Object.entries(fields).map(([name, value]) => Enter.theValue(value).into(settingField(name))));
+
 export const saveSettings = (fields: Record<string, string>): Activity => (actor) =>
-	actor.attemptsTo(
-		...Object.entries(fields).map(([name, value]) => Enter.theValue(value).into(settingField(name))),
-		Click.on(saveSettingsButton)
-	);
+	actor.attemptsTo(enterSettings(fields), Click.on(saveSettingsButton));
 
 export const openMasterData = (label: string) => Click.on(masterDataLink(label));
 
