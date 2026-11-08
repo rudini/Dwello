@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { documentFor, documentsFor } from '../questions/documents';
 import { downloadedFileMagic, downloadedFileName } from '../questions/download';
 import {
+	controlNamesOf,
 	deleteDocumentConsequence,
 	deleteOffersFor,
 	deleteTenantConsequence,
@@ -283,3 +284,18 @@ Then('zeigt «Dokumente» {string}, und der Fokus bleibt im Filter «Mieter»', 
 	await verwalter.sees(documentsEmptyNote).toContain(text);
 	await verwalter.sees(tenantFilterFocused).toBe(true);
 });
+
+// #1181 (Helga H-1, Sven S-4): two uploads of one tenant with the same title differ by a running number, in the row and
+// in the names of its link and button (on «Dokumente» there is no delete button)
+Then(
+	/^heissen die Dokumente (?:beim Mieter|zu "([^"]+)") "([^"]+)" und "([^"]+)", auch auf ihren Schaltflächen$/,
+	async ({ verwalter, names }, tenant: string | undefined, first: string, second: string) => {
+		const tenantName = tenant ? (names.get(tenant) ?? tenant) : '';
+		for (const title of [first, second]) {
+			await verwalter.sees(documentsFor(title, tenantName)).toBe(1);
+			await verwalter
+				.sees(controlNamesOf(title, tenantName))
+				.toEqual(tenant ? [`Datei herunterladen: ${title}`] : [`Datei herunterladen: ${title}`, `Löschen: ${title}`]);
+		}
+	}
+);

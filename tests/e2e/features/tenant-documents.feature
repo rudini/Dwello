@@ -148,6 +148,15 @@ Funktionalität: Dokumente eines Mieters
     Wenn der Liegenschaftsverwalter das Dokument "Notizen" ohne Datei hochladen will
     Dann liest ein Screenreader beim Feld «Datei» zuerst den Fehler "Wählen Sie eine Datei aus." und danach den Hinweis "PDF, JPG oder PNG, höchstens 10 MB." vor
 
+  # #1181 (Helga H-1, Sven S-4): zwei Dokumente mit demselben Titel lassen sich unterscheiden, auch beim Löschen
+  Szenario: Zwei Dokumente mit demselben Titel tragen eine Nummer
+    Angenommen "Lea Frei" hat das hochgeladene Dokument "Uebergabeprotokoll"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" ohne Titel hochlädt
+    Dann heissen die Dokumente beim Mieter "Uebergabeprotokoll (1 von 2)" und "Uebergabeprotokoll (2 von 2)", auch auf ihren Schaltflächen
+    Wenn der Liegenschaftsverwalter das Dokument "Uebergabeprotokoll (2 von 2)" löschen will
+    Dann sagt die Bestätigung "Dokument «Uebergabeprotokoll (2 von 2)» wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
+
   # #1173 (Sven 2 P-4): eine Aktion, die auf der Seite bleibt, sagt nur ihr Ergebnis an, nicht noch einmal den Seitentitel
   Szenario: Nach dem Hochladen sagt der Screenreader nur die Bestätigung an
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
