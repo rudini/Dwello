@@ -1206,6 +1206,15 @@ describe('Abrechnungsdetail', () => {
 		expect(document.activeElement).toBe(button);
 	});
 
+	// #1328 (Fachreview 1328-1 V-6): «Neu berechnen» takes the apartments and keys as they are now, too
+	it('sagt vor dem Neuberechnen, dass Dwello mit Rechnungen, Tankbestand, Wohnungen und Verteilschlüsseln von jetzt rechnet', () => {
+		detail({});
+		click('statement-recalculate-button');
+		expect(byTestId('statement-recalculate-confirm')!.closest('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'mit den Rechnungen, dem Tankbestand, den Wohnungen und den Verteilschlüsseln, wie sie jetzt sind.'
+		);
+	});
+
 	// Persona Marco 1221 P-2: a refused action closes its dialog; the focus goes to the message at the top of the page
 	it('setzt den Fokus nach einem abgelehnten Neuberechnen auf die Meldung', async () => {
 		detail({}, { actionError: 'Der Verteilschlüssel «Halbe Zimmer» lässt sich nicht berechnen.' });

@@ -52,20 +52,23 @@ type Loaders = {
 	valuesChangedAt: (s: Located) => Promise<Date>;
 };
 
-// #1328 (PO A'): when an apartment of the building or a Verteilschlüssel was last changed
-async function lastValueChange(buildingId: string) {
-	const [[apartment], [key]] = await Promise.all([
-		db.select({ at: max(apartments.updatedAt) }).from(apartments).where(eq(apartments.buildingId, buildingId)),
-		db.select({ at: max(distributionKeys.updatedAt) }).from(distributionKeys)
-	]);
-	return new Date(Math.max(apartment?.at?.getTime() ?? 0, key?.at?.getTime() ?? 0));
+// #1328 (PO A'): when an apartment of the building was last changed, and when each Verteilschlüssel was
+const apartmentsChangedAt = async (buildingId: string) =>
+	(await db.select({ at: max(apartments.updatedAt) }).from(apartments).where(eq(apartments.buildingId, buildingId)))[0]?.at ?? null;
+const keysChangedAt = async () =>
+	new Map((await db.select({ id: distributionKeys.id, at: distributionKeys.updatedAt }).from(distributionKeys)).map(({ id, at }) => [id, at]));
+
+// the last change of an apartment of its building or of a key its positions split by (Code-Review 1328-1 C-2)
+function lastValueChange(s: Located, apartmentsAt: Date | null, keysAt: Map<string, Date>) {
+	const times = [apartmentsAt, ...s.lineItems.map((item) => keysAt.get(item.distributionKeyId ?? ''))];
+	return new Date(Math.max(0, ...times.map((at) => at?.getTime() ?? 0)));
 }
 const periodOf = (s: Located) => ({ buildingId: s.building.id, periodStart: s.periodStart, periodEnd: s.periodEnd });
 const direct: Loaders = {
 	invoices: (s) => getInvoicesForStatement(s.building.id, s.periodStart, s.periodEnd),
 	stock: (s) => agreedStock(periodOf(s), s.agreedCategoryIds),
 	full: async (s) => s,
-	valuesChangedAt: (s) => lastValueChange(s.building.id)
+	valuesChangedAt: async (s) => lastValueChange(s, await apartmentsChangedAt(s.building.id), await keysChangedAt())
 };
 function perPeriod(): Loaders {
 	const memo = new Map<string, Promise<unknown>>();
@@ -78,7 +81,8 @@ function perPeriod(): Loaders {
 		invoices: (s) => once(`invoices ${key(s)}`, () => direct.invoices(s)),
 		stock: (s) => once(`stock ${key(s)} ${JSON.stringify(s.agreedCategoryIds)}`, () => direct.stock(s)),
 		full: (s) => getStatement(s.id), // a listed statement lacks what the recalculation reads
-		valuesChangedAt: (s) => once(`values ${s.building.id}`, () => direct.valuesChangedAt(s))
+		valuesChangedAt: async (s) =>
+			lastValueChange(s, await once(`apartments ${s.building.id}`, () => apartmentsChangedAt(s.building.id)), await once('keys', keysChangedAt))
 	};
 }
 

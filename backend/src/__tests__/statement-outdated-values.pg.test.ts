@@ -11,6 +11,7 @@ import { db } from '../db/connection';
 import { apartments, categories, invoices } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
+import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
 import { deleteStatement, generateStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { perAreaKey } from './helpers/records';
@@ -80,6 +81,15 @@ describe('Entwurf mit danach geänderten Werten', () => {
 		expect(await changes(id)).toMatchObject({ invoiceIds: [], valuesChanged: true });
 	});
 
+	// Fachreview 1328-1 V-1: an edit of the draft since does not make it current
+	it('meldet die korrigierte Fläche auch, nachdem die Bemerkung des Entwurfs bearbeitet wurde', async () => {
+		const id = await draft();
+		await otherApartment({ area: '140', rooms: '3.5' });
+		expect((await sendJson('PUT', `/api/v1/statements/${id}`, { notes: 'Danke' })).status).toBe(200);
+
+		expect((await changes(id)).valuesChanged).toBe(true);
+	});
+
 	it('meldet nichts, wenn die neue Fläche erst nach der Abrechnungsperiode gilt', async () => {
 		const id = await draft();
 		await otherApartment({ area: '140', rooms: '3.5', sizeFrom: '2025-07-01' });
@@ -95,6 +105,47 @@ describe('Entwurf mit danach geänderten Werten', () => {
 		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
 
 		expect((await changes(id)).valuesChanged).toBe(true);
+	});
+});
+
+// #1328 (Code-Review 1328-1 C-2): another key saved since says nothing about the draft
+describe('Entwurf mit danach bearbeitetem Heizprofil', () => {
+	const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+	const sharesOf = (pct: number[]) => Object.fromEntries(months.map((month, i) => [`${month}Pct`, String(pct[i])]));
+
+	it('meldet keine geänderte Wohnung, wenn danach nur ein Verteilschlüssel gespeichert wurde, den der Entwurf nicht verwendet', async () => {
+		const profile = await createHeatingProfile({ name: `Winter ${token}`, type: 'custom', ...sharesOf([18, 14, 11, 5, 2, 0, 0, 0, 2, 8, 14, 26]) } as Parameters<typeof createHeatingProfile>[0]);
+		const unused = await createDistributionKey({ name: `Andere ${token}`, nameDE: `Andere ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(unused.id);
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(invoices).values({
+			buildingId: rental.building,
+			categoryId: heating.id,
+			distributionKeyId: await perAreaKey(),
+			billingEntityName: 'Energie AG',
+			description: `Heizöl ${token}`,
+			amount: '1000.00',
+			invoiceDate: '2024-12-31',
+			servicePeriodStart: '2024-01-01',
+			servicePeriodEnd: '2024-12-31',
+			isValidUtilityCost: true
+		});
+		const created = await generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31',
+			managementFeePercent: 0,
+			heatingProfileId: profile.id
+		});
+		statements.push(created.id);
+		await updateHeatingProfile(profile.id, sharesOf([8, 14, 11, 5, 2, 0, 0, 0, 2, 8, 14, 36]));
+		await sendJson('PUT', `/api/v1/distribution-keys/${unused.id}`, { formula: '{rooms}' });
+
+		const valuesChanged = (await changes(created.id)).valuesChanged;
+		await clear();
+		await deleteHeatingProfile(profile.id);
+		expect(valuesChanged).toBe(false);
 	});
 });
 

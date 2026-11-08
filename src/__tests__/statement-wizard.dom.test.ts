@@ -740,6 +740,16 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('existing-statement-2')).toBeNull();
 	});
 
+	// #1328 (Code-Review 1328-1 C-1): auch der Entwurf, den eine geänderte Wohnung oder ein Verteilschlüssel veralten liess
+	it('nennt bei einer leeren Vorschau den Entwurf mit geänderter Wohnung oder geändertem Verteilschlüssel', () => {
+		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: false, fuelStock: false, values: true, profile: null, profileEdited: null, fee: null };
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2, changed: [draft] }] });
+
+		expect(byTestId('existing-statement-notes-1')!.textContent!.trim()).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe.'
+		);
+	});
+
 	// #65: ohne Vorjahr kein Hinweis auf Monate ohne Rechnung; eine Rechnung im Jahr kann vollständig sein
 	it('weist nicht auf Monate ohne Rechnung am Anfang oder Ende der Periode hin', () => {
 		open({

@@ -16,10 +16,10 @@
 		explained?: boolean; // #453: every building says itself why it has no contract to bill
 		error?: string;
 	} = $props();
-	// the run creates nothing: only drafts missing invoices matter, not settings of new statements (#132)
+	// the run creates nothing: only outdated drafts matter (#132, #1328), not settings of new statements
 	const outdated = (changed: ChangedStatement[]) =>
 		changed
-			.filter((s) => s.outdated || s.fuelStock)
+			.filter((s) => s.outdated || s.fuelStock || s.values)
 			.map((s) => ({ ...s, profile: null, profileEdited: null, fee: null }));
 </script>
 
