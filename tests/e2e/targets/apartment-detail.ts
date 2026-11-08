@@ -27,3 +27,4 @@ export const historyLink = (label: string) =>
 	target(`Mietvertrag «${label}» in der Historie`, (page) =>
 		page.getByTestId('contract-history-link').filter({ hasText: label })
 	);
+export const newContractButton = target('Mietvertrag erfassen', (page) => page.getByTestId('apartment-new-contract'));

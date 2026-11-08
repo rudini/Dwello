@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { Text, Visibility } from '../screenplay/questions';
+import { Count, Text, Visibility } from '../screenplay/questions';
 import {
 	type ApartmentInfo,
 	currentContracts,
@@ -9,6 +9,7 @@ import {
 	historyRows,
 	infoCard,
 	monthlyTotal,
+	newContractButton,
 	nextTenantNote,
 	vacancyNote
 } from '../targets/apartment-detail';
@@ -32,3 +33,4 @@ export const contractHistoryNaming = (...expected: string[]) =>
 	question(`the contract history, expecting ${expected.join(', ')}`, async (actor) =>
 		(await actor.answer(Text.ofAll(historyRows))).map((row, i) => (expected[i] && row.includes(expected[i]) ? expected[i] : row))
 	);
+export const newContractOffers = Count.of(newContractButton);

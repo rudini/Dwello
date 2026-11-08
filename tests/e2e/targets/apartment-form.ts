@@ -10,3 +10,4 @@ export const statusSelect = target('Statusauswahl', (page) => page.getByTestId('
 export const numberTakenWarning = target('Warnung Nummer vergeben', (page) => page.getByTestId('apartment-number-taken'));
 export const submitButton = target('Wohnung speichern', (page) => page.getByTestId('apartment-submit'));
 export const rentedStatus = target('Status aus den Mietverträgen', (page) => page.getByTestId('apartment-status-rented'));
+export const discontinuedHelp = target('Hilfe zu «Aufgehoben ab»', (page) => page.getByTestId('apartment-discontinued-input-help'));

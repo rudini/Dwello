@@ -96,7 +96,7 @@ Funktionalität: Aufgehobene Wohnung
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Eva Frei"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; ihren Anteil trägt der Vermieter."
+    Dann steht im PDF "Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; solange sie leer steht, trägt der Vermieter ihren Anteil. Ab 01.07.2025 teilen die übrigen Wohnungen alle Kosten des Gebäudes."
     Und steht im PDF "je Zeitraum, siehe unten"
     Und steht im PDF "01.01.2025 – 30.06.2025, 3 Wohnungen: 70.00 / 210.00 m² × CHF 1'487.67 = CHF 495.89 × 181/181 Tage = CHF 495.89"
     Und steht im PDF "01.07.2025 – 31.12.2025, 2 Wohnungen: 70.00 / 140.00 m² × CHF 1'512.33 = CHF 756.17 × 184/184 Tage = CHF 756.17"
@@ -123,3 +123,42 @@ Funktionalität: Aufgehobene Wohnung
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter das Vertragsende "2099-12-31" speichern will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Wohnung 4.01 gibt es ab 01.07.2099 nicht mehr. Ein Mietvertrag dieser Wohnung muss spätestens am 30.06.2099 enden. Stimmt der Tag nicht, ändern Sie ihn bei der Wohnung unter «Bearbeiten»."
+
+  # #1311 (Decided): ab dem Tag gibt es die Wohnung nicht mehr; sie ist weder leer noch vermietbar
+  @wip
+  Szenario: Ab dem Tag ist die Wohnung aufgehoben, nicht leer
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und die Wohnung "4.01" ist aufgehoben ab "2025-07-01"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "4.01"
+    Dann hat die Wohnung den Status "Aufgehoben seit 01.07.2025"
+    Und erklärt die Wohnungsseite beim Mietstatus "Die Wohnung gibt es nicht mehr; sie kann nicht vermietet werden."
+    Und bietet die Wohnungsseite keinen neuen Mietvertrag an
+
+  # #1311: vor dem Tag steht die Wohnung noch leer
+  @wip
+  Szenario: Vor dem Tag steht die aufgehobene Wohnung noch leer
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und die Wohnung "4.01" ist aufgehoben ab "2099-07-01"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "4.01"
+    Dann hat die Wohnung den Status "Leer"
+
+  # #1311: das Gebäude zählt die aufgehobene Wohnung nicht als leer
+  @wip
+  Szenario: Die Gebäudekarte zählt die aufgehobene Wohnung nicht als leer
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.02"
+    Und die Wohnung "4.01" ist aufgehoben ab "2025-07-01"
+    Und der Liegenschaftsverwalter ist auf der Gebäudeliste
+    Dann nennt die Karte des Gebäudes "Erlenhof" "1 leer"
+    Und nennt die Karte des Gebäudes "Erlenhof" "1 aufgehoben"
+
+  # #1312 (Decided): die Hilfe nennt, wann Sie den Anteil tragen und wer ab dem Tag die Kosten teilt
+  @wip
+  Szenario: Die Hilfe zu «Aufgehoben ab» nennt, wann Sie den Anteil tragen
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
+    Dann erklärt die Bearbeitungsseite der Wohnung zu «Aufgehoben ab» "Bis zum Tag davor zählt sie in den Abrechnungen mit. Solange sie leer steht, tragen Sie ihren Anteil. Ab diesem Tag teilen die übrigen Wohnungen alle Kosten des Gebäudes."

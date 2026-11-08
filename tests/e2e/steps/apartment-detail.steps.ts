@@ -10,6 +10,7 @@ import {
 	earlierContractShown,
 	earlierContractsListed,
 	monthlyTotalOfApartment,
+	newContractOffers,
 	nextTenant,
 	vacancyShown
 } from '../questions/apartment-detail';
@@ -153,3 +154,8 @@ Given(
 		await seed.apartment(building, number, 'vacant', '70', floor);
 	}
 );
+
+// a negative check: the step before it reads the apartment's Mietstatus on the same page
+Then('bietet die Wohnungsseite keinen neuen Mietvertrag an', async ({ verwalter }) => {
+	await verwalter.sees(newContractOffers).toBe(0);
+});
