@@ -1195,6 +1195,14 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe."
 
+  # #1328 (Entscheid PO): eine danach gelöschte leere Wohnung zählt als Änderung ihres Gebäudes
+  Szenario: Entwurf weist auf eine danach gelöschte Wohnung hin
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Wohnung "3.02" wurde inzwischen gelöscht
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe."
+
   # #1328 (Kommentar aus #1309): eine danach geänderte Formel zählt wie eine geänderte Wohnung
   Szenario: Entwurf weist auf eine danach geänderte Formel seines Verteilschlüssels hin
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02" mit 140 m²

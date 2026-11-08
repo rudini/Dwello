@@ -338,7 +338,7 @@ export async function checkDiscontinued(apartmentId: string, endDate: string | n
 export async function deleteApartment(id: string): Promise<{ success: boolean } & Partial<Refusal>> {
 	// the apartment's row locked first: a contract recorded meanwhile waits, then fails, or is seen (fallback review #1286)
 	return db.transaction(async (tx) => {
-		const [apartment] = await tx.select({ id: apartments.id }).from(apartments).where(eq(apartments.id, id)).for('update');
+		const [apartment] = await tx.select({ id: apartments.id, buildingId: apartments.buildingId }).from(apartments).where(eq(apartments.id, id)).for('update');
 		if (!apartment) return { success: false, error: 'Apartment not found' };
 		const [contract] = await tx
 			.select({ id: rentalContracts.id })
@@ -352,6 +352,8 @@ export async function deleteApartment(id: string): Promise<{ success: boolean } 
 			};
 		}
 		await tx.delete(apartments).where(eq(apartments.id, id));
+		// #1328 (PO): a change of its building, which makes its drafts outdated when they split otherwise now
+		await tx.update(buildings).set({ updatedAt: new Date() }).where(eq(buildings.id, apartment.buildingId));
 		return { success: true };
 	});
 }

@@ -90,6 +90,15 @@ describe('Entwurf mit danach geänderten Werten', () => {
 		expect((await changes(id)).valuesChanged).toBe(true);
 	});
 
+	// #1328 (PO): deleting an apartment counts as a change of its building
+	it('meldet eine danach gelöschte leere Wohnung des Gebäudes', async () => {
+		const gone = (await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '70', rooms: '3.5' })).id;
+		const id = await draft();
+		expect((await callApi(`/api/v1/apartments/${gone}`, { method: 'DELETE' })).ok).toBe(true);
+
+		expect((await changes(id)).valuesChanged).toBe(true);
+	});
+
 	it('meldet nichts, wenn die neue Fläche erst nach der Abrechnungsperiode gilt', async () => {
 		const id = await draft();
 		await otherApartment({ area: '140', rooms: '3.5', sizeFrom: '2025-07-01' });
@@ -140,7 +149,7 @@ describe('Entwurf mit danach bearbeitetem Heizprofil', () => {
 		});
 		statements.push(created.id);
 		await updateHeatingProfile(profile.id, sharesOf([8, 14, 11, 5, 2, 0, 0, 0, 2, 8, 14, 36]));
-		await sendJson('PUT', `/api/v1/distribution-keys/${unused.id}`, { formula: '{rooms}' });
+		expect((await sendJson('PUT', `/api/v1/distribution-keys/${unused.id}`, { formula: '{rooms}' })).status).toBe(200);
 
 		const valuesChanged = (await changes(created.id)).valuesChanged;
 		await clear();
