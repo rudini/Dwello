@@ -131,7 +131,7 @@ Funktionalität: Verteilschlüssel
     Und zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Fläche und Zimmer"
 
   # #1200 (Persona Helga, #128): die Summen des Gebäudes lassen sich wie die Bausteine per Knopf einfügen
-  Szenario: Summe des Gebäudes per Knopf einfügen
+  Szenario: Eine Summe des Gebäudes in die Formel übernehmen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter die Formel "{area} / " eingibt
     Und der Liegenschaftsverwalter die Summe "{area_total}" einfügt

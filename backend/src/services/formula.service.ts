@@ -177,7 +177,7 @@ const BREAK_AFTER: Record<Kind, Partial<Record<After, [string, number]>>> = {
 };
 const kindOf = (text: string): Kind =>
 	/^[\d.{]/.test(text) ? 'value' : '+-'.includes(text) ? 'sign' : '*/'.includes(text) ? 'times' : (text as Kind);
-const AFTER: Record<Kind, After> = { value: 'value', ')': 'value', '(': 'start', sign: 'operator', times: 'operator', '%': 'value' };
+const AFTER: Record<Exclude<Kind, '%'>, After> = { value: 'value', ')': 'value', '(': 'start', sign: 'operator', times: 'operator' };
 
 /**
  * Where the formula's structure breaks (#1200): brackets, Rechenzeichen and values in the wrong order, each kind once,
@@ -200,12 +200,13 @@ function syntaxErrors(formula: string) {
 	const open: number[] = [];
 	let after = 'start' as After; // widened: the loop below changes it
 	tokens.forEach((token, i) => {
-		const kind = kindOf(token.text);
+		// after a bracket the engine reads % as the remainder of a division, elsewhere as per cent of the number before
+		const kind = token.text === '%' && tokens[i - 1]?.text === ')' ? 'times' : kindOf(token.text);
 		if (kind === '(') open.push(i);
 		const unopened = kind === ')' && open.pop() === undefined;
 		const rule = unopened ? (['FORMULA_UNOPENED_PARENTHESIS', 0] as const) : BREAK_AFTER[kind][after];
 		if (rule) add(rule[0], around(i - rule[1], i));
-		after = AFTER[kind];
+		if (kind !== '%') after = AFTER[kind]; // a per cent ends the value before it, or is the error itself
 	});
 	if (after === 'operator') add('FORMULA_MISSING_OPERAND', around(tokens.length - 1, tokens.length - 1));
 	const unclosed = open.at(-1); // the last one: the shortest place

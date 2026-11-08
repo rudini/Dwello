@@ -122,6 +122,19 @@ describe('Fehlercodes der Formel', () => {
 				expect(errorOf(formula)).toEqual([]);
 		});
 
+		// code review formula-form-1 C-1: each rule of where a value is missing
+		it('bei * oder / am Anfang, % ohne Wert davor und leerer Klammer nach einem Rechenzeichen', () => {
+			expect(errorOf('* {area}')).toEqual([{ code: 'FORMULA_MISSING_OPERAND', params: { part: '* {area}' } }]);
+			expect(errorOf('%{area}')).toEqual([{ code: 'FORMULA_MISSING_OPERAND', params: { part: '%{area}' } }]);
+			expect(errorOf('{area} * % 2')).toEqual([{ code: 'FORMULA_MISSING_OPERAND', params: { part: '* % 2' } }]);
+			expect(errorOf('({area} +)')).toEqual([{ code: 'FORMULA_MISSING_OPERAND', params: { part: '{area} +)' } }]);
+		});
+
+		// code review formula-form-1: after a bracket the engine reads % as remainder, as before #1200
+		it('lässt % nach einer Klammer als Rest einer Division zu', () => {
+			expect(errorOf('({area} + 1) % 2')).toEqual([]);
+		});
+
 		it('nennt bei mehreren offenen Klammern die letzte und schneidet die Stelle aus dem eingegebenen Text', () => {
 			expect(errorOf('({AREA}  + ({rooms} * 2')).toEqual([
 				{ code: 'FORMULA_UNCLOSED_PARENTHESIS', params: { part: '({rooms} * 2' } }
