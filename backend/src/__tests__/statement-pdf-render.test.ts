@@ -762,7 +762,7 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 		const text = (await textOf(winter)).flowing;
 		expect(text).toContain('Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.');
 		expect(text).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil (siehe Heiz- und Warmwasserkosten); bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
-		expect((await textOf(heated)).flowing).toContain('44.20 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+		expect((await textOf(heated)).flowing).toContain('44.20 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode');
 	});
 
 	// #509: hat keine Heizrechnung einen fehlenden Leistungszeitraum, nennt der Satz keinen Anteil für eine solche und
@@ -946,6 +946,20 @@ describe('Abgerechnet bis im PDF', () => {
 	] as const)('nennt auf %s auf Seite 2 die abgerechneten Monate des Mietverhältnisses als Anteile im Heizprofil', async (language, months) => {
 		const heatedBilled = { ...billed, heating: { profile: 'Winter', percent: 11, months: [{ month: 3, percentage: 11 }] } };
 		expect(await textIn(heatedBilled, language)).toContain(months);
+	});
+});
+
+// #686 P-4 (decided by the product owner): the heating note names the table's column «Wohnungsanteil», not
+// «Heizkosten Ihrer Wohnung»; wording from fach-review 686-1 (docs/reviews/686-1-fach-review.md)
+describe('Anteil nach Heizprofil mit dem Wort der Tabelle', () => {
+	it.each([
+		['de', 'Heizkosten nach Heizprofil «Heizung Mittelland»: 44.20 % des Wohnungsanteils an den Heizkosten in der Abrechnungsperiode'],
+		['fr', 'Frais de chauffage selon le profil « Heizung Mittelland » : 44.20 % de la part du logement dans les frais de chauffage pour la période de décompte'],
+		['it', 'Spese di riscaldamento secondo il profilo «Heizung Mittelland»: 44.20 % della quota appartamento delle spese di riscaldamento nel periodo di conteggio'],
+		['en', 'Heating costs under the heating profile ‘Heizung Mittelland’: 44.20 % of the apartment share of the heating costs for the billing period']
+	] as const)('nennt auf %s den Anteil als Teil des Wohnungsanteils', async (language, note) => {
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(heated, config, language), 'base64'));
+		expect(pdf.flowing.replace(/\u00a0/g, ' ')).toContain(note);
 	});
 });
 

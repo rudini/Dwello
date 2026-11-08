@@ -4,6 +4,7 @@ import {
 	costsAreRecalculated,
 	costsHiddenSideways,
 	deadlineFields,
+	deadlineHelp,
 	notes,
 	notesField,
 	notesHelp,
@@ -79,6 +80,11 @@ Given(
 // #403 (6): visible help at the field, not a tooltip
 Then('erklärt die Bearbeitungsseite die Bemerkung mit {string}', async ({ verwalter }, help: string) => {
 	await verwalter.sees(notesHelp).toBe(help);
+});
+
+// #686 (Persona Marco M-1, Weber W-2): where the date is entered
+Then('erklärt die Bearbeitungsseite bei der Zahlungsfrist {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(deadlineHelp).toContain(help);
 });
 
 Then('zeigt die Bearbeitungsseite die ganze Kostenaufstellung, ohne seitlich zu verschieben', async ({ verwalter }) => {
