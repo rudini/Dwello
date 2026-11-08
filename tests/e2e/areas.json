@@ -1,5 +1,5 @@
 {
-	"about": "E2E selection on pull requests (#845, tools/ci/e2e-areas.mjs): a pull request whose changed files all belong to areas runs those areas' features plus «always»; any other changed file runs every scenario. «ignore» lists files no scenario runs; «fullRunOnly» names the cross-cutting features that only a full run runs (every feature file is in an area, «always» or «fullRunOnly»). Paths are regular expressions; features are Playwright file filters (regular expressions matched against the generated spec path, without shell characters: they go into the command line unquoted). main and the nightly run run everything.",
+	"about": "E2E selection on pull requests (#845, tools/ci/e2e-areas.mjs): a pull request whose changed files all belong to areas (the pages of one part of the app; the BFF modules, the API routes and the backend serve several, so a change to them runs everything) runs those areas' features plus «always»; any other changed file runs every scenario. «ignore» lists files no scenario runs; «fullRunOnly» names the cross-cutting features that only a full run runs (every feature file is in an area, «always» or «fullRunOnly»). Paths are regular expressions; features are Playwright file filters (regular expressions matched against the generated spec path, without shell characters: they go into the command line unquoted). main and the nightly run run everything.",
 	"always": [
 		"features/sprachen-bildschirme.feature",
 		"features/demo.feature"
@@ -13,21 +13,16 @@
 		"features/sprachen.feature"
 	],
 	"ignore": [
-		"(^|/)__tests__/",
 		"\\.test\\.ts$",
 		"\\.md$",
 		"^docs/",
 		"^\\.claude/",
-		"^tools/(?!ci/e2e-areas\\.mjs$)",
-		"^tests/contracts/"
+		"^tools/(?!ci/e2e-areas\\.mjs$)"
 	],
 	"areas": {
 		"buildings": {
 			"paths": [
-				"^src/routes/(api/)?buildings/",
-				"^src/lib/server/building(-form|-register)?\\.ts$",
-				"^backend/src/routes/buildings\\.ts$",
-				"^backend/src/services/building(\\.service|-fields)\\.ts$"
+				"^src/routes/buildings/"
 			],
 			"features": [
 				"features/building"
@@ -35,10 +30,7 @@
 		},
 		"apartments": {
 			"paths": [
-				"^src/routes/(api/)?apartments/",
-				"^src/lib/server/apartment(-form)?\\.ts$",
-				"^backend/src/routes/apartments\\.ts$",
-				"^backend/src/services/apartment\\.service\\.ts$"
+				"^src/routes/apartments/(?!StatusLegend\\.svelte$)"
 			],
 			"features": [
 				"features/apartment"
@@ -46,10 +38,7 @@
 		},
 		"tenants": {
 			"paths": [
-				"^src/routes/(api/)?tenants/",
-				"^src/lib/server/tenant(-form)?\\.ts$",
-				"^backend/src/routes/tenants\\.ts$",
-				"^backend/src/services/tenant(\\.service|-fields|-anonymise\\.service|-export\\.service)\\.ts$"
+				"^src/routes/tenants/"
 			],
 			"features": [
 				"features/tenant"
@@ -57,10 +46,7 @@
 		},
 		"contracts": {
 			"paths": [
-				"^src/routes/(api/)?contracts/",
-				"^src/lib/server/contract-history\\.ts$",
-				"^backend/src/routes/contracts\\.ts$",
-				"^backend/src/services/contract(\\.service|-tasks\\.service)\\.ts$"
+				"^src/routes/contracts/"
 			],
 			"features": [
 				"features/contract"
@@ -68,10 +54,7 @@
 		},
 		"invoices": {
 			"paths": [
-				"^src/routes/(api/)?invoices/",
-				"^src/lib/server/invoice\\.ts$",
-				"^backend/src/routes/invoices\\.ts$",
-				"^backend/src/services/invoice(\\.service|-completeness\\.service)\\.ts$"
+				"^src/routes/invoices/"
 			],
 			"features": [
 				"features/invoice"
@@ -79,10 +62,7 @@
 		},
 		"statements": {
 			"paths": [
-				"^src/routes/(api/)?statements/",
-				"^src/lib/server/(statement|statement-actions|statement-generation|cost-reconciliation|missing-statements)\\.ts$",
-				"^backend/src/routes/statements\\.ts$",
-				"^backend/src/services/statement(\\.service|-invoices\\.service|-payment|-pdf\\.service|-run\\.service|-send\\.service)\\.ts$"
+				"^src/routes/statements/"
 			],
 			"features": [
 				"features/statement"
@@ -90,11 +70,7 @@
 		},
 		"categories": {
 			"paths": [
-				"^src/routes/config/categories/",
-				"^src/routes/api/categories/",
-				"^src/lib/server/category\\.ts$",
-				"^backend/src/routes/categories\\.ts$",
-				"^backend/src/services/category\\.service\\.ts$"
+				"^src/routes/config/categories/(?!CategoryReason\\.svelte$)"
 			],
 			"features": [
 				"features/categories"
@@ -102,11 +78,7 @@
 		},
 		"distribution-keys": {
 			"paths": [
-				"^src/routes/config/distribution-keys/",
-				"^src/routes/api/distribution-keys/",
-				"^src/lib/server/distribution-key\\.ts$",
-				"^backend/src/routes/distribution-keys\\.ts$",
-				"^backend/src/services/distribution-key\\.service\\.ts$"
+				"^src/routes/config/distribution-keys/"
 			],
 			"features": [
 				"features/distribution-keys.feature"
@@ -114,10 +86,7 @@
 		},
 		"heating-profiles": {
 			"paths": [
-				"^src/routes/config/heating-profiles/",
-				"^src/lib/server/heating-profile\\.ts$",
-				"^backend/src/routes/heating-profiles\\.ts$",
-				"^backend/src/services/heating-profile\\.service\\.ts$"
+				"^src/routes/config/heating-profiles/"
 			],
 			"features": [
 				"features/heating-profiles.feature"
@@ -125,10 +94,7 @@
 		},
 		"documents": {
 			"paths": [
-				"^src/routes/documents/",
-				"^src/lib/server/documents\\.ts$",
-				"^backend/src/routes/documents\\.ts$",
-				"^backend/src/services/document\\.service\\.ts$"
+				"^src/routes/documents/(?!(DeliveryFailure|DocumentItem)\\.svelte$)"
 			],
 			"features": [
 				"features/documents.feature",
@@ -137,9 +103,7 @@
 		},
 		"dashboard": {
 			"paths": [
-				"^src/routes/(api/)?dashboard/",
-				"^backend/src/routes/dashboard\\.ts$",
-				"^backend/src/services/overview-deadlines\\.ts$"
+				"^src/routes/dashboard/(?!KiModelNotice\\.svelte$)"
 			],
 			"features": [
 				"features/dashboard.feature"
@@ -147,8 +111,7 @@
 		},
 		"reports": {
 			"paths": [
-				"^src/routes/reports/",
-				"^backend/src/routes/reports\\.ts$"
+				"^src/routes/reports/"
 			],
 			"features": [
 				"features/reports.feature"
@@ -175,10 +138,7 @@
 		"backup": {
 			"paths": [
 				"^src/routes/config/backup/",
-				"^src/routes/backup/",
-				"^src/lib/server/backup\\.ts$",
-				"^backend/src/routes/backup\\.ts$",
-				"^backend/src/services/(backup\\.service|backup-crypto|emergency-sheet|new-backup-code\\.service)\\.ts$"
+				"^src/routes/backup/"
 			],
 			"features": [
 				"features/sicherung.feature"
@@ -186,9 +146,7 @@
 		},
 		"access-keys": {
 			"paths": [
-				"^src/routes/config/access-keys/",
-				"^backend/src/routes/access-keys\\.ts$",
-				"^backend/src/services/access-key\\.service\\.ts$"
+				"^src/routes/config/access-keys/"
 			],
 			"features": [
 				"features/zugangsschluessel.feature"
@@ -196,10 +154,7 @@
 		},
 		"data-export": {
 			"paths": [
-				"^src/routes/config/export/",
-				"^backend/src/routes/data-export\\.ts$",
-				"^backend/src/services/data-export\\.service\\.ts$",
-				"^src/lib/server/zip-download\\.ts$"
+				"^src/routes/config/export/"
 			],
 			"features": [
 				"features/datenexport.feature"
@@ -207,10 +162,7 @@
 		},
 		"ki-settings": {
 			"paths": [
-				"^src/routes/config/ki/",
-				"^src/lib/server/ki-settings\\.ts$",
-				"^backend/src/routes/ki-settings\\.ts$",
-				"^backend/src/services/(ki-settings\\.service|ki-model\\.service)\\.ts$"
+				"^src/routes/config/ki/"
 			],
 			"features": [
 				"features/ki-einstellungen.feature",
@@ -219,8 +171,7 @@
 		},
 		"setup": {
 			"paths": [
-				"^src/routes/setup/",
-				"^backend/src/services/setup\\.service\\.ts$"
+				"^src/routes/setup/"
 			],
 			"features": [
 				"features/einrichtung.feature"
@@ -228,11 +179,7 @@
 		},
 		"settings": {
 			"paths": [
-				"^src/routes/config/[^/]+$",
-				"^src/routes/api/config/",
-				"^src/lib/server/settings\\.ts$",
-				"^backend/src/routes/config\\.ts$",
-				"^backend/src/services/(config\\.service|default-setting|export-settings)\\.ts$"
+				"^src/routes/config/(\\+page\\.svelte|\\+page\\.server\\.ts|ConfigLinks\\.svelte|DefaultsSection\\.svelte|SettingField\\.svelte)$"
 			],
 			"features": [
 				"features/settings.feature"
