@@ -271,7 +271,7 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('contract-fee-rate-input')).toBeNull();
 		// a new fee: form, reasons, ten days before the notice period, next possible Kündigungstermin (Art. 269d Abs. 1 OR, #77)
 		expect(document.body.textContent).toContain(
-			'mit dem amtlichen Formular mitteilen und begründen, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR).'
+			'mit dem amtlichen Formular mitteilen und begründen, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art.\u00a0269d\u00a0OR).'
 		);
 		chooseFee('own');
 		await settle();

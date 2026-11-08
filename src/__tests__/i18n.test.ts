@@ -67,24 +67,18 @@ describe('Sprachdateien', () => {
 
 	// #1028 (Marco P-6), Fachreview 678 V-3: U+00A0 in «Art. 257a», «Absatz 2» und vor OR, U+2060 nach dem Strich;
 	// Fachreview 1028 V-3, V-4: auch vor «OBLF» und nach dem Komma in «art. 257a, al. 2»
-	// Persona Helga 1028 P-1: auch zwischen «257a» und «Absatz»
-	const lawTexts = (key: string) =>
-		key === 'categories_contract_note' ||
-		key === 'invoices_legal_text' ||
-		key.startsWith('categories_allocable_') ||
-		key.startsWith('categories_reason_');
+	// Persona Helga 1028 P-1: auch zwischen «257a» und «Absatz»;
+	// #1217: in allen Texten, auch «Abs.», «Bst.», «Ziff.» und vor DSG/LPD/FADP
 	const breakable =
-		/\b[Aa]rt\. (?=\d)|\b(Absatz|Buchstabe|al\.|cpv\.|para\.|let\.|lett\.) (?=\w)| (OR|CO|VMWG|OBLF|OLAL)\b|, (?=(al|let)\.)|\d[a-z]? (?=(Absatz|Buchstabe|al\.|cpv\.|para\.|let\.|lett\.))|–(?=\d)/;
+		/\b[Aa]rt\. (?=\d)|\b(Absatz|Abs\.|Buchstabe|Bst\.|Ziff\.|al\.|cpv\.|para\.|let\.|lett\.) (?=\w)|\b(ch|n|No)\. (?=\d)| (OR|CO|VMWG|OBLF|OLAL|DSG|LPD|FADP)\b|, (?=(al|let)\.)|\d[a-z]? (?=(Absatz|Abs\.|Buchstabe|Bst\.|Ziff\.|ch\.|n\.|No\.|al\.|cpv\.|para\.|let\.|lett\.))|–(?=\d)/;
 	it.each(languages)(
-		'%s bricht Gesetzesverweise der Kategorien und der Rechnung nicht um',
+		'%s bricht keinen Gesetzesverweis um',
 		(language) => {
 			const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
-			const checked = Object.entries(messages).filter(([key]) => lawTexts(key));
-			const wrong = checked
+			const wrong = Object.entries(messages)
 				.filter(([, text]) => breakable.test(text as string))
 				.map(([key]) => key);
 
-			expect(checked.length).toBeGreaterThan(15);
 			expect(wrong).toEqual([]);
 		}
 	);
