@@ -321,6 +321,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss für jede Wohnung eine Zahl von 0 oder mehr ergeben und für mindestens eine Wohnung mehr als 0."
     Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen."
+    Und steht der Fokus auf der Fehlermeldung
     Und ist der Assistent im Schritt "Vorschau"
 
   Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Vorschau öffnen

@@ -1077,6 +1077,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und steht der Fokus auf der Fehlermeldung
 
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
