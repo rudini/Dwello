@@ -1529,15 +1529,6 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
-## Session: #699, #706, #708 scenarios in domain language
-
-- [x] Checked on `main`: the master data part of #699 is done by migration 0027 (#461); #706 has five uses, not three; «Feld» at 27 places in 11 feature files
-- [x] Decisions of the product owner recorded in #699, #706, #708 («Decided (product owner)»; Spec change approved: #699, #706, #708)
-- [x] `src/__tests__/feature-wording.test.ts` seen red (27 places), then scenarios and steps reworded; the step definitions check the same
-- [x] Slice review `docs/reviews/699-review-1.md`: no findings; no persona (no screen changes), no `fach-reviewer` (no domain rule, term or text of the app changes)
-- [x] Checks: lint, check, fitness, backend type-check, vitest of the tests reading the features, E2E chromium of the 11 changed features (432 passed)
-- [x] Workflow notes `docs/reviews/workflow-notes-issue-699.md`; collected review `docs/reviews/workflow-rules-review-2026-11-07.md`
-- [x] Archive session; PR `Fixes #699, #706, #708`: pushed after this archive
 ## Session: #1193 building search finds the full address and the postcode
 
 - [x] Read #1193 on main: the search did not look in the postcode, and «15,» with its comma matched nothing; decisions written into the issue («Ort» also takes the postcode, no text changes)
@@ -1680,6 +1671,15 @@ Parallel session: checklist kept in the pull request.
 - [x] Closing code-reviewer `docs/reviews/1181-review-2.md`
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1181.md`
 - [x] Archive session; PR `Fixes #1181`: pushed after this archive
+## Session: #699, #706, #708 scenarios in domain language
+
+- [x] Checked on `main`: the master data part of #699 is done by migration 0027 (#461); #706 has five uses, not three; «Feld» at 27 places in 11 feature files
+- [x] Decisions of the product owner recorded in #699, #706, #708 («Decided (product owner)»; Spec change approved: #699, #706, #708)
+- [x] `src/__tests__/feature-wording.test.ts` seen red (27 places), then scenarios and steps reworded; the step definitions check the same
+- [x] Slice review `docs/reviews/699-review-1.md`: no findings; no persona (no screen changes), no `fach-reviewer` (no domain rule, term or text of the app changes)
+- [x] Checks: lint, check, fitness, backend type-check, vitest of the tests reading the features, E2E chromium of the 11 changed features (432 passed)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-699.md`; collected review `docs/reviews/workflow-rules-review-2026-11-07.md`
+- [x] Archive session; PR `Fixes #699, #706, #708`: pushed after this archive
 ## Session: #731 Older persona observations on the Übersicht
 
 - [x] Each point checked on `main`; decisions in #731 «Decided (product owner, 07.11.2026)»: explain «Vermietet ab …» and «Gesperrt» at the tile; the tab title keeps its hyphen on all pages; 1280 px no longer touches, the lone «…» is fixed by a non-breaking space
