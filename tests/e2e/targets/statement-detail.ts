@@ -104,6 +104,8 @@ export const replacedContractLink = target('Mietvertrag der ersetzten Abrechnung
 );
 export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.getByTestId('statement-payment-summary'));
 export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
+// #686 O-6: the help text at a draft's Zahlungsfrist
+export const paymentDeadlineHelp = target('Hilfetext zur Zahlungsfrist', (page) => page.getByTestId('statement-payment-deadline-help'));
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));
 

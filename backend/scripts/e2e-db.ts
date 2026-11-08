@@ -27,5 +27,12 @@ maintenance.pathname = '/postgres';
 await run(maintenance.href, `DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`, `CREATE DATABASE "${database}"`);
 
 const applied = await migrate(url.href, migrations);
+// #739: the statement wizard preselects the default heating profile, else the first complete one, and own profiles
+// come first: without a default it would take whatever own profile a parallel scenario has just created
+if (process.env.E2E_DEFAULT_HEATING_PROFILE)
+	await run(
+		url.href,
+		`INSERT INTO configuration (key, value) SELECT 'default_heating_profile_id', id FROM heating_profiles WHERE name_de = 'Heizung + Warmwasser'`
+	);
 
 console.log(`Datenbank ${database} neu aufgesetzt (${applied.length} Migrationen)`);

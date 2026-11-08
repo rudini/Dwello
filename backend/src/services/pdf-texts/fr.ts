@@ -54,7 +54,7 @@ export const fr: Record<string, string> = {
 	offsetWith: 'Déjà compensé avec {numbers}',
 	offsetShort: 'déjà compensé',
 	and: 'et',
-	heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% des frais de chauffage de votre logement pour la période de décompte',
+	heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% de la part du logement dans les frais de chauffage pour la période de décompte',
 	heatingNoteParts: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture sans période de prestation. Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
 	heatingNoteOwn: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
 	heatingMonths: 'Parts des mois de votre bail dans le profil de chauffage, qui répartit les frais de chauffage d’une année sur les douze mois\u00a0: {months}',
