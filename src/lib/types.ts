@@ -58,6 +58,7 @@ export interface BuildingWithStats
 	extends Building, Pick<ApiBuilding, 'apartmentCount' | 'occupiedCount' | 'vacantCount'> {
 	reletStarts?: string[]; // Vertragsbeginn of each relet apartment, from the BFF: the backend counts only occupied and vacant
 	reservedCount?: number;
+	discontinuedCount?: number; // #1311, counted from the apartment list like reservedCount
 }
 
 // What the Gebäude- und Wohnungsregister (GWR) knows of an address, read by the BFF (#479)
@@ -92,8 +93,7 @@ export interface BuildingsListData {
 	pageSize: number;
 }
 
-// Apartment status values (match backend)
-// occupied and relet follow from the rental contracts; vacant and reserved are set by hand
+// Apartment status values (match backend): occupied and relet follow from the contracts, discontinued from its day (#1311)
 export type { ApartmentStatus, LatestKey };
 export type { MoveOut } from '../../backend/src/api/apartment';
 
@@ -169,7 +169,7 @@ export interface MonthlyCosts {
 }
 
 // A row of GET /apartments as the list shows it (#837, ADR 0005)
-export type ApartmentListItem = Apartment & Pick<ApiApartment, 'buildingName'>;
+export type ApartmentListItem = Apartment & Pick<ApiApartment, 'buildingName' | 'discontinuedFrom'>;
 
 // Apartments list response
 export interface ApartmentsListData {

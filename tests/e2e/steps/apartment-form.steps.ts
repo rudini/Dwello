@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { manualStatusChoices, numberTaken, statusFromContracts } from '../questions/apartment-form';
+import { discontinuedHelpText, manualStatusChoices, numberTaken, statusFromContracts } from '../questions/apartment-form';
 import { errorMessage } from '../questions/form';
 import {
 	blockApartment,
@@ -114,3 +114,7 @@ Then(
 		await verwalter.sees(errorMessage).toContain(text.replace(tenant, names.get(tenant) ?? tenant));
 	}
 );
+
+Then('erklärt die Bearbeitungsseite der Wohnung zu «Aufgehoben ab» {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(discontinuedHelpText).toContain(help);
+});

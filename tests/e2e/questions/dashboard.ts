@@ -22,6 +22,7 @@ const statuses: Record<string, string> = {
 	'Vermietet ab …': 'relet',
 	Leer: 'vacant',
 	Gesperrt: 'reserved',
+	Aufgehoben: 'discontinued',
 	Entwürfe: 'draft',
 	Versendet: 'sent',
 	Bezahlt: 'paid',

@@ -161,6 +161,17 @@ Funktionalität: Wohnungsliste
     Dann ist die Wohnung "2.01" "Leer seit 01.07.2025"
     Und nennt die Wohnungsliste bei der Wohnung "2.01" keinen Auszug
 
+  # #1311 (Decided, Fachreview 1311-1 V-6): die aufgehobene Wohnung ist nicht leer, der Statusfilter «Aufgehoben» zeigt sie
+  Szenario: Die aufgehobene Wohnung steht nicht unter den leeren Wohnungen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.03"
+    Und die Wohnung "2.03" ist aufgehoben ab "2025-07-01"
+    Wenn der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann ist die Wohnung "2.01" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+    Wenn der Liegenschaftsverwalter nur die aufgehobenen Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann ist die Wohnung "2.03" "Aufgehoben seit 01.07.2025"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+
   # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
   Szenario: Ein nicht gesuchter Text fällt weg, wenn die Wohnungsliste über die Hauptnavigation wieder geöffnet wird
     Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt

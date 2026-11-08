@@ -120,6 +120,7 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 	});
 
 	it('zählt Wohnungen im Dashboard wie in der Liste', async () => {
+		await updateApartment(await apartment('1.11'), { discontinuedFrom: day(-30) });
 		const relet = await listApartments({ status: 'relet', limit: 1000 });
 		const response = await callApi('/api/v1/dashboard');
 		const { portfolio } = (await response.json()) as { portfolio: Record<string, number> };
@@ -127,6 +128,53 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(portfolio.reletApartments).toBe(relet.total);
 		expect(portfolio.reservedApartments).toBe((await listApartments({ status: 'reserved', limit: 1000 })).total);
 		expect(portfolio.occupiedApartments).toBe((await listApartments({ status: 'occupied', limit: 1000 })).total);
+		expect(portfolio.discontinuedApartments).toBe((await listApartments({ status: 'discontinued', limit: 1000 })).total);
+		// code review 1311-2 C-8: the rate divides by the apartments that still exist, as «x/y vermietet»
+		const existing = portfolio.totalApartments - portfolio.discontinuedApartments;
+		expect(portfolio.occupancyRate).toBe(Math.round((portfolio.occupiedApartments / existing) * 1000) / 10);
+	});
+
+	// #1311: ab dem Tag «Aufgehoben ab» gibt es die Wohnung nicht mehr; sie ist weder leer noch vermietbar
+	it('ist ab dem Tag «Aufgehoben ab» aufgehoben statt leer', async () => {
+		const id = await apartment('1.08');
+		await contractFor(id, day(-90), day(-31));
+		const vacantBefore = (await getBuilding(rental.building))!.vacantCount;
+
+		await updateApartment(id, { discontinuedFrom: day(-30) });
+
+		expect(await statusOf(id)).toBe('discontinued');
+		expect((await getBuilding(rental.building))!.vacantCount).toBe(vacantBefore - 1);
+		const filtered = await listApartments({ buildingId: rental.building, status: 'discontinued' });
+		expect(filtered.apartments.map((a) => a.id)).toContain(id);
+		expect(filtered.apartments.every((a) => a.status === 'discontinued')).toBe(true);
+	});
+
+	// pins the status before the day, which the base already shows
+	it('steht vor dem Tag «Aufgehoben ab» noch leer', async () => {
+		const id = await apartment('1.09');
+		await updateApartment(id, { discontinuedFrom: day(30) });
+
+		expect(await statusOf(id)).toBe('vacant');
+	});
+
+	// #1311: in der Belegung «x/y vermietet» zählt eine aufgehobene Wohnung nicht mit; bei den Wohnungen wie in der Liste (Persona Helga 1311 P-1)
+	it('zählt eine aufgehobene Wohnung in der Belegung der Übersicht nicht, bei den Wohnungen schon', async () => {
+		const id = await apartment('1.10');
+		const occupancyOfBuilding = async () => {
+			const response = await callApi('/api/v1/dashboard');
+			const { buildingOccupancy } = (await response.json()) as { buildingOccupancy: { buildingId: string; totalApartments: number }[] };
+			return buildingOccupancy.find((b) => b.buildingId === rental.building)!.totalApartments;
+		};
+		const portfolioTotal = async () => {
+			const response = await callApi('/api/v1/dashboard');
+			return ((await response.json()) as { portfolio: { totalApartments: number } }).portfolio.totalApartments;
+		};
+		const before = await occupancyOfBuilding();
+
+		await updateApartment(id, { discontinuedFrom: day(-30) });
+
+		expect(await occupancyOfBuilding()).toBe(before - 1);
+		expect(await portfolioTotal()).toBe((await listApartments({ limit: 1000 })).total);
 	});
 
 	it('wird vom Ändern der Wohnung nicht überschrieben', async () => {

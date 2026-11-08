@@ -1176,8 +1176,19 @@ describe('PDF mit aufgehobener Wohnung', () => {
 	const line = { category: 'Hauswart', key: 'Pro Fläche (m²)', totalAmount: 3000, apartmentShare: 1252.06, periodShare: 0.6979, segments: [before, from], tenantShare: 873.98 };
 	const split = { ...refund, lineItems: [line] };
 
+	// #1312 (Fachreview 1311-1, Wortlaut): ihren Anteil trägt der Vermieter nur, solange sie leer steht; ab dem Tag teilen die übrigen Wohnungen
+	// Fachreview 1311-2 V-1: «Berechnung», nicht die Rechnung eines Lieferanten
 	it('nennt die aufgehobene Wohnung über der Kostenaufstellung', async () => {
-		expect((await textOf(split)).flowing).toContain('Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; ihren Anteil trägt der Vermieter. Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.');
+		expect((await textOf(split)).flowing).toContain('Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; solange sie leer steht, trägt der Vermieter ihren Anteil. Ab 01.07.2025 werden die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen verteilt. Unter den betroffenen Abrechnungspositionen steht die Berechnung je Zeitraum.');
+	});
+
+	it.each([
+		['fr', 'L’appartement 1.03 n’existe plus dès le 01.07.2025. Jusqu’au 30.06.2025, il compte dans la clé de répartition\u00a0; tant qu’il est vacant, sa part est à la charge du bailleur. Dès le 01.07.2025, les frais accessoires de l’immeuble sont répartis uniquement sur les autres appartements.'],
+		['it', 'L’appartamento 1.03 non esiste più dal 01.07.2025. Fino al 30.06.2025 conta nella chiave di riparto; finché è sfitto, la sua quota è a carico del locatore. Dal 01.07.2025 le spese accessorie dell’immobile sono ripartite solo sugli altri appartamenti.'],
+		['en', 'Apartment 1.03 no longer exists from 01.07.2025. Up to 30.06.2025, it counts in the distribution key; while it is vacant, the landlord bears its share. From 01.07.2025, the building’s utility costs are distributed only over the other apartments.']
+	] as const)('nennt die aufgehobene Wohnung auf %s mit derselben Bedingung', async (language, text) => {
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(split, config, language), 'base64'));
+		expect(pdf.flowing.replace(/\s+/g, ' ')).toContain(text.replace(/\s+/g, ' '));
 	});
 
 	it('zeigt beim Verteilschlüssel «je Zeitraum» statt eines Bruchs', async () => {
@@ -1211,7 +1222,7 @@ describe('PDF mit neuer Fläche ab einem Tag', () => {
 	const before = { start: '2025-01-01', end: '2025-06-30', count: 3, keyShare: '70.00 / 210.00 m²', costs: 1487.67, apartment: 495.89, periodShare: 1, days: 181, total: 181, share: 495.89 };
 	const from = { start: '2025-07-01', end: '2025-12-31', count: 3, keyShare: '70.00 / 280.00 m²', costs: 1512.33, apartment: 378.08, periodShare: 1, days: 184, total: 184, share: 378.08, changed };
 	const line = { category: 'Hauswart', key: 'Pro Fläche (m²)', totalAmount: 3000, apartmentShare: 873.97, periodShare: 1, segments: [before, from], tenantShare: 873.97 };
-	const note = 'Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.';
+	const note = 'Unter den betroffenen Abrechnungspositionen steht die Berechnung je Zeitraum.';
 	const count = (text: string, part: string) => text.split(part).length - 1;
 
 	it('nennt die Wohnung mit ihren Werten vor und ab dem Tag über der Kostenaufstellung', async () => {

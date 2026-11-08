@@ -27,6 +27,7 @@ export const historyLink = (label: string) =>
 	target(`Mietvertrag «${label}» in der Historie`, (page) =>
 		page.getByTestId('contract-history-link').filter({ hasText: label })
 	);
+export const newContractButton = target('Mietvertrag erfassen', (page) => page.getByTestId('apartment-new-contract'));
 // #1301: the last change of Fläche and Zimmeranzahl, removed after a confirmation
 export const removeSizeChangeButton = target('Änderung entfernen', (page) => page.getByTestId('apartment-size-change-remove'));
 export const confirmRemoveSizeChangeButton = target('Entfernen bestätigen', (page) =>

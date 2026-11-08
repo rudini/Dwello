@@ -167,6 +167,16 @@ describe('Übersicht', () => {
 		expect(body).toMatch(/data-testid="statements-settled-count"[^>]*>3</); // «Erledigt» (#448)
 	});
 
+	// #1311 (Fachreview 1311-2 V-2): die Kennzahlen gehen mit den aufgehobenen Wohnungen auf, die es gibt
+	it('zählt aufgehobene Wohnungen als eigene Kennzahl und erklärt sie, nur wenn es welche gibt', () => {
+		const body = page({ portfolio: { ...data.portfolio, totalApartments: 9, discontinuedApartments: 1 } });
+		expect(body).toMatch(/<a[^>]*href="\/apartments\?status=discontinued"[^>]*data-testid="stat-discontinued"[\s\S]*?>1<[\s\S]*?Aufgehoben/);
+		expect(body).toContain('data-testid="stat-help-discontinued"');
+		const none = page();
+		expect(none).not.toContain('stat-discontinued');
+		expect(none).not.toContain('stat-help-discontinued');
+	});
+
 	// F-1 (#55): nur «x/y vermietet», ohne Anteil in Prozent
 	it('zeigt die Belegung pro Gebäude', () => {
 		const row = page().match(/data-testid="occupancy-row"[\s\S]*?<\/li>/)![0];

@@ -204,6 +204,21 @@ describe('Wohnungsliste', () => {
 		expect(data.apartments[0].lastContractEnd).toBe('2024-03-31');
 	});
 
+	// #1311: «Aufgehoben seit» in the list too
+	it('gibt den Tag weiter, ab dem es die Wohnung nicht mehr gibt', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/apartments')
+					? { apartments: [{ ...apartment, status: 'discontinued', discontinuedFrom: '2025-07-01' }], total: 1 }
+					: { buildings: [] }
+			)) as typeof globalThis.fetch;
+		const data = (await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
+			apartments: { discontinuedFrom: string | null }[];
+		};
+
+		expect(data.apartments[0].discontinuedFrom).toBe('2025-07-01');
+	});
+
 	// #664: the backend decides the move-out until the Schlussabrechnung exists, on its own route (P2)
 	const withMoveOuts = (moveOuts: () => Response) =>
 		(async (url: string) =>
@@ -327,6 +342,17 @@ describe('Wohnungsstatus', () => {
 		expect(statusText({ status: 'reserved', lastContractEnd: '2024-03-31' })).toBe('Gesperrt');
 	});
 
+	// #1311: ab dem Tag «Aufgehoben ab» gibt es die Wohnung nicht mehr (Fachreview 1311-1, Wortlaut)
+	it('zeigt eine aufgehobene Wohnung «Aufgehoben seit» dem Tag', () => {
+		expect(statusText({ status: 'discontinued', discontinuedFrom: '2025-07-01' })).toBe(
+			'Aufgehoben seit 01.07.2025'
+		);
+		expect(statusLabels.discontinued).toBe('Aufgehoben');
+		expect(statusHelp.discontinued).toBe(
+			'Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden.'
+		);
+	});
+
 	it('zeigt bei einem Vertrag mit Ende, bis wann die Wohnung vermietet ist', () => {
 		expect(statusText({ status: 'occupied', currentContractEnd: '2099-03-31' })).toBe(
 			'Vermietet bis 31.03.2099'
@@ -356,6 +382,17 @@ describe('Belegung eines Gebäudes', () => {
 				vacantCount: 0
 			})
 		).toEqual(['1 vermietet', '2 vermietet ab 01.11.2099', '1 vermietet ab 01.12.2099', '0 leer']);
+	});
+});
+
+// #1311: eine aufgehobene Wohnung ist nicht leer; sie steht als eigener Teil
+describe('Belegung mit aufgehobener Wohnung', () => {
+	it('nennt die aufgehobene Wohnung als eigenen Teil', () => {
+		expect(occupancyParts({ occupiedCount: 0, vacantCount: 1, discontinuedCount: 1 })).toEqual([
+			'0 vermietet',
+			'1 leer',
+			'1 aufgehoben'
+		]);
 	});
 });
 

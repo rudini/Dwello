@@ -96,7 +96,7 @@ CHECK (status IN ('vacant', 'reserved'))
 Indexes: `apartments_building_id_idx (building_id)`, unique `apartments_building_number_idx (building_id, number)`.
 
 Only the manually set Mietstatus is stored (`vacant` = Leer, `reserved` = Gesperrt). `occupied` and `relet`
-are derived from the rental contracts and never stored.
+are derived from the rental contracts and never stored, `discontinued` (Aufgehoben, #1311) from `discontinued_from` on.
 
 `discontinued_from` (migration `0044`, #1284, «Aufgehobene Wohnung»): the apartment counts in the Verteilschlüssel on the days before it and not from it; a statement whose billed days it falls into calculates the positions per part (`utility_statement_line_items.segments`). It is refused while a contract of the apartment has no end or ends on or after it, and a contract of such an apartment must end before it.
 

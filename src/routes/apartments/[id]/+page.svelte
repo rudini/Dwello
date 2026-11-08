@@ -41,7 +41,8 @@
 				ariaLabel={m.common_action_of_aria({ action: m.buildings_edit(), record: title })}
 				testid="apartment-edit-button">{m.buildings_edit()}</Button
 			>
-			{#if !data.currentContract}
+			<!-- an apartment that no longer exists cannot be let (#1311) -->
+			{#if !data.currentContract && apartment.status !== 'discontinued'}
 				<!-- a relet apartment is rented from a date on: another contract is no longer the next step -->
 				<Button
 					href="/contracts/new?apartment={apartment.id}"

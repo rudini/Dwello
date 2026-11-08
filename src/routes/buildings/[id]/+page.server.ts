@@ -98,6 +98,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 		);
 		building.reletStarts = reletStarts(apartments);
 		building.reservedCount = countStatus(apartments, 'reserved');
+		building.discontinuedCount = countStatus(apartments, 'discontinued');
 
 		return { building, apartments, ...fuel };
 	} catch (err) {

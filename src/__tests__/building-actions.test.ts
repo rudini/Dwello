@@ -265,11 +265,12 @@ describe('Gebäudedetail', () => {
 		expect(data.apartments[0].moveOut).toEqual(moveOuts.moveOuts[0].moveOut);
 	});
 
-	it('zählt künftig vermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
+	it('zählt künftig vermietete, gesperrte und aufgehobene Wohnungen und nennt den Einzugstag', async () => {
 		const apartments = [
 			{ id: 'a1', status: 'relet', nextContractStart: '2099-11-01' },
 			{ id: 'a2', status: 'reserved', nextContractStart: null, lastContractEnd: '2024-03-31' },
-			{ id: 'a3', status: 'occupied', nextContractStart: null }
+			{ id: 'a3', status: 'occupied', nextContractStart: null },
+			{ id: 'a4', status: 'discontinued', nextContractStart: null }
 		];
 		const fetch = (async (url: string) =>
 			Response.json(
@@ -281,7 +282,7 @@ describe('Gebäudedetail', () => {
 			fetch
 		} as never)) as BuildingDetailsData;
 
-		expect(data.building).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 1 });
+		expect(data.building).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 1, discontinuedCount: 1 });
 		expect(data.apartments[0]).toMatchObject({ status: 'relet', nextContractStart: '2099-11-01' });
 		// «Leer seit» on the floor plan too (#145, review C-2)
 		expect(data.apartments[1]).toMatchObject({ lastContractEnd: '2024-03-31' });
@@ -309,11 +310,12 @@ describe('Gebäudeliste', () => {
 		});
 	});
 
-	it('zählt die künftig vermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
+	it('zählt die künftig vermieteten, gesperrten und aufgehobenen Wohnungen jedes Gebäudes', async () => {
 		const apartments = [
 			{ buildingId: 'b1', status: 'relet', nextContractStart: '2099-11-01' },
 			{ buildingId: 'b1', status: 'occupied' },
-			{ buildingId: 'b2', status: 'reserved' }
+			{ buildingId: 'b2', status: 'reserved' },
+			{ buildingId: 'b1', status: 'discontinued' }
 		];
 		const urls: string[] = [];
 		const fetch = (async (url: string) => {
@@ -324,10 +326,10 @@ describe('Gebäudeliste', () => {
 		const data = (await listLoad({
 			url: new URL('http://localhost/buildings'),
 			fetch
-		} as never)) as { buildings: { reletStarts: string[]; reservedCount: number }[] };
+		} as never)) as { buildings: { reletStarts: string[]; reservedCount: number; discontinuedCount: number }[] };
 
 		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
-		expect(data.buildings[0]).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 0 });
+		expect(data.buildings[0]).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 0, discontinuedCount: 1 });
 	});
 
 	// The counts are an addition: without them the buildings still show
