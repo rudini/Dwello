@@ -5,6 +5,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
+import { configuration } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 
@@ -152,6 +153,64 @@ describe('Einstellungen speichern', () => {
 		} finally {
 			if (name) await setConfig('company_name', name);
 		}
+	});
+});
+
+// #690: what an IBAN stored before #450 lacks, by the rule of the save; the settings mark it on opening
+describe('Einstellungen lesen', () => {
+	it('nennt beim Lesen, was der gespeicherten IBAN von der Firmenadresse fehlt', async () => {
+		for (const [key, value] of [['company_name', 'Muster Immobilien AG'], ['company_postal_code', '8001'], ['company_city', 'Zürich']] as const)
+			await setConfig(key, value);
+		await setConfig('iban', 'CH93 0076 2011 6238 5295 7');
+		await db.execute(sql`DELETE FROM configuration WHERE key IN ('company_name', 'company_city')`);
+		const incomplete = (await (await callApi('/api/v1/config')).json()) as { creditorMissing: unknown };
+		await setConfig('company_name', 'Muster Immobilien AG');
+		await setConfig('company_city', 'Zürich');
+		const complete = (await (await callApi('/api/v1/config')).json()) as { creditorMissing: unknown };
+
+		expect(incomplete.creditorMissing).toEqual([
+			{ code: 'IBAN_COMPANY_ADDRESS_MISSING', params: { field: 'iban', missing: 'company_name,company_city' } }
+		]);
+		expect(complete.creditorMissing).toEqual([]);
+	});
+
+	// the warning of a statement with a Zahlteil, by the address that is incomplete: the Kontoinhaber's (persona Weber
+	// 690 W-1), else the Absender's, which the letterhead needs also with a complete Kontoinhaber (W-2, product owner)
+	it('nennt beim Lesen, wessen Adresse einem Schreiben mit Zahlteil fehlt', async () => {
+		const read = async () => ((await (await callApi('/api/v1/config')).json()) as { paymentPartWarning: unknown }).paymentPartWarning;
+		const holder = async (entries: [string, string][]) => {
+			await db.execute(sql`DELETE FROM configuration WHERE key LIKE 'account_holder_%'`);
+			if (entries.length) await db.insert(configuration).values(entries.map(([key, value]) => ({ key, value })));
+		};
+		for (const [key, value] of [['company_name', 'Muster Immobilien AG'], ['company_postal_code', '8001'], ['company_city', 'Zürich']] as const)
+			await setConfig(key, value);
+		await setConfig('iban', 'CH93 0076 2011 6238 5295 7');
+		const complete = await read();
+		await holder([['account_holder_name', 'Erika Muster'], ['account_holder_postal_code', '6003']]);
+		const holderWithoutTown = await read();
+		await db.execute(sql`DELETE FROM configuration WHERE key = 'company_name'`);
+		await holder([]);
+		const senderOnly = await read();
+		await holder([['account_holder_name', 'Erika Muster'], ['account_holder_postal_code', '6003'], ['account_holder_city', 'Luzern']]);
+		const holderComplete = await read();
+		await holder([]);
+		await setConfig('company_name', 'Muster Immobilien AG');
+
+		expect({ complete, holderWithoutTown, senderOnly, holderComplete }).toEqual({
+			complete: null,
+			holderWithoutTown: 'ACCOUNT_HOLDER_MISSING',
+			senderOnly: 'CREDITOR_ADDRESS_MISSING',
+			holderComplete: 'IBAN_COMPANY_ADDRESS_MISSING'
+		});
+	});
+
+	it('nennt ohne IBAN nichts, was fehlt', async () => {
+		await deleteConfig('iban');
+		await deleteConfig('company_name');
+		const config = (await (await callApi('/api/v1/config')).json()) as { creditorMissing: unknown };
+		await setConfig('company_name', 'Muster Immobilien AG');
+
+		expect(config.creditorMissing).toEqual([]);
 	});
 });
 

@@ -3,7 +3,12 @@ import { m } from '$lib/paraglide/messages';
 import { listOfGone } from '$lib/server/statement';
 import type { PageServerLoad } from './$types';
 
-const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID'];
+const SETTINGS_CODES = [
+	'CREDITOR_ADDRESS_MISSING',
+	'ACCOUNT_HOLDER_MISSING',
+	'IBAN_MISSING',
+	'IBAN_INVALID'
+]; // the Kontoinhaber's too (Weber 690 W-1)
 
 /** #734: a PDF or file the backend refused (`pdfRefusal`): what its code says, and the way back */
 export const load: PageServerLoad = ({ url }) => {

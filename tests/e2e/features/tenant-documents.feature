@@ -133,3 +133,20 @@ Funktionalität: Dokumente eines Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter das Dokument "Notizen" ohne Datei hochladen will
     Dann liest ein Screenreader bei «Datei» zuerst den Fehler "Wählen Sie eine Datei aus." und danach den Hinweis "PDF, JPG oder PNG, höchstens 10 MB." vor
+
+  # #1173 (Sven 2 P-4): eine Aktion, die auf der Seite bleibt, sagt nur ihr Ergebnis an, nicht noch einmal den Seitentitel
+  Szenario: Nach dem Hochladen sagt der Screenreader nur die Bestätigung an
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und ein Screenreader hört mit
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochlädt
+    Dann liegt beim Mieter das Dokument "Betreibungsauszug", heute hochgeladen
+    Und sagt der Screenreader "Dokument «Betreibungsauszug» hochgeladen" an
+    Aber sagt der Screenreader den Seitentitel nicht noch einmal an
+
+  # #1173: ein Wechsel auf eine andere Seite sagt deren Titel weiterhin an, einmal
+  Szenario: Beim Öffnen eines Mieters sagt der Screenreader seinen Seitentitel an
+    Angenommen der Liegenschaftsverwalter ist auf der Mieterliste
+    Und der Liegenschaftsverwalter den Mieter "Lea Frei" sucht
+    Und ein Screenreader hört mit
+    Wenn der Liegenschaftsverwalter den Mieter "Lea Frei" öffnet
+    Dann sagt der Screenreader nur den Seitentitel des Mieters "Lea Frei" an

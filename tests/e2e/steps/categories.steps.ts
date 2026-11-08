@@ -331,6 +331,20 @@ Then(
 	}
 );
 
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er im unterschriebenen Mietvertrag nachsieht, welche Nebenkosten er nennt',
+	async ({ verwalter }) => {
+		await verwalter.sees(contractHint).toContain('im unterschriebenen Mietvertrag');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er sie in Dwello bei jedem Mietvertrag unter {string} festhält',
+	async ({ verwalter }, label: string) => {
+		await verwalter.sees(contractHint).toContain(`bei jedem Mietvertrag unter «${label}»`);
+	}
+);
+
 Given(
 	'die vordefinierte Kategorie {string} ist als nicht umlagefähig gespeichert',
 	async ({ seed }, name: string) => {
