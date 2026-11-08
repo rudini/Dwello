@@ -21,12 +21,12 @@
 	// word wider than the whole list still overflows (#1146, code review 1146-4 C-1)
 	const width = $derived(values.length ? 'flex-1' : 'flex-auto');
 	const rows = $derived(values.length ? 'flex-wrap' : '');
-	// #673 (Helga P-6): from md the current step is named next to its number too; from xl all of them,
-	// unless the finished steps show values: next to them five names do not fit unbroken (#1146)
+	// below md every step is named on a line of its own (#1179); from md only the current one (#673, Helga P-6),
+	// from xl all of them, unless the finished steps show values: next to them five names do not fit unbroken (#1146)
 	const wide = $derived(values.length ? '' : 'xl:not-sr-only');
-	const named = (number: number) => (number === current ? 'md:not-sr-only' : '');
+	const named = (number: number) => (number === current ? '' : `md:sr-only ${wide}`);
 	// the current step keeps its longest word whole, unhyphenated, and takes the room from the others; with values
-	// every step keeps its words whole: the names but one are hidden, so the words fit (#1146, Dr. Weber P-1)
+	// every step keeps its words whole: from md the names but one are hidden, so the words fit (#1146, Dr. Weber P-1)
 	const shrink = (number: number) => (number === current || values.length ? '' : 'min-w-0');
 	const wrap = (number: number) => (number === current ? '' : 'min-w-0 hyphens-auto break-words');
 </script>
@@ -40,13 +40,14 @@
 		max={steps.length}
 		label={m.ui_step_of({ current, total: steps.length })}
 	/>
-	<!-- Up to xl, and with values at every width, the numbers without names: five names do not fit next to the
-	     sidebar or the values (the current one is named above, and from md next to its number; #1146);
+	<!-- Below md the steps stand one below the other, each named (#1179). From md up to xl, and with values from md
+	     at every width, the numbers without names: five names do not fit next to the sidebar or the values (the current one is
+	     named above, and next to its number; #1146);
 	     a finished step shows its value at every width the list shows (#663).
 	     Without values min-w-0 and hyphenation keep the other long names inside their step instead of widening the
 	     page, and each step is as wide as its name, so a long one is not cut inside the word next to short ones
 	     (#667, Dr. Weber W-10); with values the steps share the width and keep their words whole -->
-	<ol class="hidden gap-2 md:flex {rows}">
+	<ol class="flex flex-col gap-2 md:flex-row {rows}">
 		{#each steps as step, i (i)}
 			{@const number = i + 1}
 			<li class="flex items-center gap-2 {width} {shrink(number)}">
@@ -65,7 +66,7 @@
 						<span class="flex min-w-0 flex-col text-left">
 							<span
 								data-testid="wizard-step-label"
-								class="sr-only min-w-0 hyphens-auto break-words {wide}">{step}</span
+								class="min-w-0 hyphens-auto break-words {named(number)}">{step}</span
 							><span
 								data-testid="wizard-step-value"
 								class="min-w-0 break-words font-normal text-ink-muted"
@@ -87,9 +88,7 @@
 								? 'border-accent bg-accent text-on-accent'
 								: 'border-line-strong'}">{number}</span
 						>
-						<span
-							data-testid="wizard-step-label"
-							class="sr-only {wrap(number)} {wide} {named(number)}"
+						<span data-testid="wizard-step-label" class="{wrap(number)} {named(number)}"
 							>{step}</span
 						>
 					</span>

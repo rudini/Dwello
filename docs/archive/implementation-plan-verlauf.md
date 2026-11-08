@@ -1499,6 +1499,7 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #739 E2E default Heizprofil per run
 
 ## Session: #743 and #751 invoice forms: announcements, length limits, help at «Leistungszeitraum»
 
@@ -1511,6 +1512,24 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] No scenario: the date field's live region (it empties itself after 2 s, so an E2E check of its emptiness passes on the base too; DOM tests in `date-input.dom.test.ts`)
 - [x] Split: length limits of the other forms in #1201
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
+- [x] Each point of #739 checked on main: the wizard preselects `default_heating_profile_id`, else the first complete profile, own ones first; the E2E data set no default
+- [x] Probe (not committed): an own complete profile listed first, all `statement-*.feature` on Chromium green (345): no amount depends on the preselection; decision written into #739 («Decided (product owner)»: a default per run, no scenario change)
+- [x] Throwaway `@wip` probe: the wizard proposed the probe profile without the change (red), «Heizung + Warmwasser» with it (green); No scenario: test data setup
+- [x] `backend/scripts/e2e-db.ts`, `playwright.config.ts` (main E2E instance only)
+- [x] code-reviewer `docs/reviews/739-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, E2E chromium+api (1537 of 1973 before the local time limit, then `statement-*.feature`)
+- [x] Archive session; PR `Fixes #739`: pushed after this archive
+
+## Session: #1179 name all wizard steps below md
+
+- [x] Read #1179; decided (product owner, in the issue): below md a vertical list of all steps with their names, from md as now, both wizards
+- [x] Two scenarios «Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte» (contract-new, statement-generate) with the new step «nennt die Schrittanzeige untereinander die Schritte», seen red as `@wip` (a962fb5)
+- [x] `Stepper.svelte`: below md `flex-col` with every name shown, from md the same classes as before; DOM test seen red (cc77116)
+- [x] No `fach-reviewer`: no text and no domain term changed
+- [x] code-reviewer round 1 (`docs/reviews/1179-review-1.md`): Minor C-1 (two comments) fixed
+- [x] Persona Marco (`docs/design/personas/marco-1179.md`): no Blocker or Major; Minors stay: P-1 and P-2 show on main too, P-3 (the list takes about 350 px on a phone) follows from the decision
+- [x] Checks: lint, check, fitness, backend type-check, the DOM tests, contract-new and statement-generate E2E, the stepper scenarios and the axe and language rows of both wizards
+- [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 ## Session: #1172 screenshot job: no more untouched pages listed as changed
 
