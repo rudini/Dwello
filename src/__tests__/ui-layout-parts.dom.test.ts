@@ -329,7 +329,7 @@ describe('Meldungen', () => {
 		show(ToastRegion, {});
 		document.body.insertAdjacentHTML('beforeend', '<h1 tabindex="-1">Mieter</h1>');
 		closeWithKeyboard('success', 'Mieter gespeichert');
-		expect(document.activeElement!.textContent).toBe('Mieter');
+		expect(document.activeElement).toBe(document.querySelector('h1'));
 	});
 
 	// #669 (Persona Sven S-1, WCAG 2.2.1): the confirmation left while the focus was on «Meldung schliessen»
