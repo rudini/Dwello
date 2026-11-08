@@ -524,6 +524,7 @@
 	"backend_category_in_use_one": "The category is used by {count} invoice and cannot be deleted.",
 	"backend_category_in_use": "The category is used by {count} invoices and cannot be deleted.",
 	"backend_category_predefined": "Categories «From Dwello» cannot be deleted.",
+	"backend_category_in_statement": "The category is in a statement and cannot be deleted. A sent statement stays as the tenant received it, with its categories. If the category is only in drafts, recalculate them with «Recalculate» on their page or delete them. Then the category can be deleted.",
 	"backend_distribution_key_predefined": "Predefined distribution keys cannot be deleted.",
 	"backend_distribution_key_in_use_one": "{count} invoice is distributed by this distribution key, so it cannot be deleted.",
 	"backend_distribution_key_in_use": "{count} invoices are distributed by this distribution key, so it cannot be deleted.",

@@ -326,6 +326,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | category-edit-fuel     | default             |
       | category-edit-fuel     | fuel-refused        |
       | categories             | delete-dialog       |
+      | categories             | category-delete-refused |
       | distribution-keys      | default             |
       | distribution-key-new   | default             |
       | distribution-key-new   | submit-empty        |

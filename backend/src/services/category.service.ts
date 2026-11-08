@@ -5,7 +5,7 @@
 
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, invoices, type Category, type NewCategory } from '../db/schema';
+import { categories, invoices, utilityStatementLineItems, type Category, type NewCategory } from '../db/schema';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { recordAudit } from './audit-log.service';
 import { Conflict } from './conflict';
@@ -253,6 +253,18 @@ export async function deleteCategory(id: string): Promise<{ success: boolean; co
 				count === 1 ? 'CATEGORY_IN_USE_ONE' : 'CATEGORY_IN_USE',
 				`Die Kategorie wird von ${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'} verwendet und kann nicht gelöscht werden.`,
 				{ count }
+			)
+		};
+	}
+	// #1160: a statement stays as the tenant received it, its positions with their category
+	const [billed] = await db.select({ id: utilityStatementLineItems.id }).from(utilityStatementLineItems).where(eq(utilityStatementLineItems.categoryId, id)).limit(1);
+	if (billed) {
+		return {
+			success: false,
+			conflict: true,
+			...refusal(
+				'CATEGORY_IN_STATEMENT',
+				'Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen.'
 			)
 		};
 	}
