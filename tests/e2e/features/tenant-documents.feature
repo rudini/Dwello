@@ -126,7 +126,7 @@ Funktionalität: Dokumente eines Mieters
     Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
     Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
     Dann hebt sich "Bitte warten …" bei «Dokument hochladen» mindestens 4.5:1 vom Hintergrund ab
-    Und «Dokument hochladen» ist grau wie ein gesperrtes Feld
+    Und «Dokument hochladen» ist ausgegraut
 
     Beispiele:
       | Darstellung |

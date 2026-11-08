@@ -258,7 +258,7 @@ Then(
 );
 
 // `sunken`: the grey of a disabled field (docs/design/token-referenz.md)
-Then('«Dokument hochladen» ist grau wie ein gesperrtes Feld', async ({ verwalter }) => {
+Then('«Dokument hochladen» ist ausgegraut', async ({ verwalter }) => {
 	await verwalter.sees(uploadButtonBackground).toBe('sunken');
 });
 
