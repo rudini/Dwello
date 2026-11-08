@@ -17,6 +17,7 @@ export type PdfChange = 'notes' | 'deadline' | 'refund_by';
 export interface StatementPayment {
 	unpaid: boolean;
 	claimed: boolean;
+	paymentPart: boolean; // #690: its PDF and a Mahnung get a Zahlteil, which needs the Firmenadresse
 	noPayment: boolean;
 	waived: boolean;
 	carried: boolean;

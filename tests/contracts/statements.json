@@ -34,6 +34,7 @@
 			"reminderDue": null,
 			"unpaid": false,
 			"claimed": true,
+			"paymentPart": true,
 			"noPayment": false,
 			"waived": false,
 			"carried": false,
