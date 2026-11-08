@@ -28,7 +28,7 @@ beforeAll(async () => {
 afterAll(async () => {
 	if (previousDefault) await setConfig('default_heating_profile_id', previousDefault);
 	else await deleteConfig('default_heating_profile_id');
-	for (const name of ['Bergtal', 'Hochtal', 'Standard', 'Winterhalbjahr', 'Talboden']) {
+	for (const name of ['Bergtal', 'Hochtal', 'Standard', 'Winterhalbjahr', 'Talboden', '70% Winter', '70 Prozent Winter', 'Tal A', 'Tal_A', 'Hang B']) {
 		const profile = await getHeatingProfileByName(`${name} ${token}`);
 		if (profile) await deleteHeatingProfile(profile.id);
 	}
@@ -53,6 +53,25 @@ describe('Eigene Heizprofile', () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toMatchObject({ code: 'HEATING_PROFILE_NAME_TAKEN' });
+	});
+
+	// #1316: % and _ are characters, not wildcards of the name check or the search
+	it('nimmt einen Namen mit % oder _ an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('70 Prozent Winter');
+		await create('Tal A');
+
+		expect((await create('70% Winter')).status).toBe(201);
+		expect((await create('Tal_A')).status).toBe(201);
+		expect((await create('70% winter')).status).toBe(409); // the same name still counts as taken
+	});
+
+	it('findet mit _ oder % kein Heizprofil, dessen Name dort ein anderes Zeichen hat', async () => {
+		await create('Hang B');
+
+		for (const term of [`Hang_B ${token}`, `Hang%${token}`]) {
+			const response = await send('GET', `?search=${encodeURIComponent(term)}`);
+			expect(((await response.json()) as { data: unknown[] }).data).toEqual([]);
+		}
 	});
 
 	it('verlangt, dass die Monatsanteile 100 % ergeben', async () => {
