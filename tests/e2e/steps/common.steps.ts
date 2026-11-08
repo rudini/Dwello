@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { deletionConfirmable, errorMessageShown } from '../questions/form';
+import { dialogActions, errorMessageShown } from '../questions/form';
 import { focusedPlace, focusedText, pageTitle } from '../questions/navigation';
 import { goBackInBrowser } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb } from '../tasks/form';
@@ -39,8 +39,8 @@ Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string} nicht mehr', a
 	await verwalter.sees(errorMessageShown(text)).toBe(false);
 });
 
-Then('kann der Liegenschaftsverwalter das Löschen nicht bestätigen', async ({ verwalter }) => {
-	await verwalter.sees(deletionConfirmable).toBe(false);
+Then('bietet der Dialog nur {string} an', async ({ verwalter }, action: string) => {
+	await verwalter.sees(dialogActions).toEqual([action]);
 });
 
 Then(

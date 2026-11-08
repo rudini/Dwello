@@ -34,6 +34,7 @@
 	"ui_page_of": "Seite {page} von {pages}",
 	"ui_please_wait": "Bitte warten …",
 	"ui_cancel": "Abbrechen",
+	"ui_close": "Schliessen",
 	"ui_action_failed": "Das hat nicht geklappt",
 	"ui_draft_restored": "Angaben wiederhergestellt",
 	"ui_draft_back": "Ihre Angaben, zuletzt am {date} um {time} bearbeitet, sind wieder da. Sie sind nur in diesem Browser aufbewahrt und noch nicht gespeichert.",

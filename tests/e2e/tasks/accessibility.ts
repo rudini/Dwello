@@ -135,7 +135,7 @@ const note =
 const say = (actor: Actor, text: string) => actor.answer(inPageLanguage(text));
 const clickOnShown = async (actor: Actor, text: string, place: (shown: string) => Target) =>
 	actor.attemptsTo(Click.on(place(await say(actor, text))));
-const openDialog = (button: Target): Activity => (actor) => actor.attemptsTo(Click.on(button), Wait.until(on.dialogConfirm));
+const openDialog = (button: Target): Activity => (actor) => actor.attemptsTo(Click.on(button), Wait.until(on.dialogButtons));
 const askKi = (name: string): Activity => (actor) =>
 	actor.attemptsTo(
 		Enter.theValue(name).into(nameInput),

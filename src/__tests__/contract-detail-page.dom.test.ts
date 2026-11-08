@@ -945,7 +945,8 @@ describe('Mietvertrag löschen', () => {
 		// #120: eine Abrechnung, die nicht stimmt, wird berichtigt, nicht ausserhalb von Dwello
 		expect(dialog).toContain('Stimmt eine Abrechnung nicht, öffnen Sie sie und wählen Sie «Abrechnung berichtigen».');
 		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
-		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
+		expect(byTestId('contract-delete-confirm')).toBeNull();
+		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
 	});
 
 	it('führt bei Entwürfen allein zum Löschen der Entwürfe', () => {

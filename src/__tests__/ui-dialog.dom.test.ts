@@ -259,6 +259,18 @@ describe('Dialog', () => {
 		expect(onclose).toHaveBeenCalledOnce();
 	});
 
+	// #1167: a refused action shows no faded button, which a beginner reads as «not yet»
+	it('bietet nur «Schliessen» an, wenn die Aktion nicht möglich ist', () => {
+		const { onconfirm, onclose } = openDialog({ impossible: true, children: markup('<input id="x" />') });
+		expect(byTestId('dialog-confirm')).toBeNull();
+		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
+		document.getElementById('x')!.focus();
+		press('Enter');
+		expect(onconfirm).not.toHaveBeenCalled();
+		click('dialog-cancel');
+		expect(onclose).toHaveBeenCalledOnce();
+	});
+
 	it('zeigt nichts, solange er geschlossen ist', () => {
 		openDialog({ open: false });
 		expect(document.querySelector('[role=dialog]')).toBeNull();

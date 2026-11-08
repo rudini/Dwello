@@ -1,0 +1,13 @@
+# Code-Review 1167, Runde 1 (5af16a0..332131e)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| – | – | – | Keine Befunde |
+
+Geprüft: alle 22 geänderten Dateien; `Dialog.svelte` (`impossible` blendet die Bestätigung aus, «Schliessen» statt `cancelLabel`, Enter im Feld bestätigt nicht, Anfangsfokus fällt ohne Feld auf `dialog-cancel`); `ActionDialog` mit `impossible` statt `disabled`, kein Aufrufer übergibt noch `disabled`; alle drei Dialoge mit diesem Muster (Gebäude, Mieter, Mietvertrag) umgestellt. `confirmDisabled` hat nur noch einen Nutzer, `InvoiceUploadDialog` («noch nicht», nicht «nicht möglich»), und dazu den richtiggestellten Kommentar. `ui_close` steht in allen vier `messages/*.json` und entspricht `gallery_close`/`ai_keys_close` (Fermer/Chiudere/Close). Der neue Schritt fragt nach dem Wert (die Beschriftungen der Schaltflächen als Liste, `Text.ofAll`), ist strenger als der alte Schritt (der prüfte nur «nicht aktiviert»), und der Schritt in Steps ruft nur eine Question auf. `Spec change approved: #1167` steht in der Commit-Nachricht. Rot ohne die Änderung: der Dialog-Unit-Test (die Bestätigung ist vorhanden und die Beschriftung lautet «Abbrechen»; ohne den Guard `!impossible` schlägt auch die Enter-Prüfung fehl), der Test in ActionDialog und die drei DOM-Seitentests (`toBeNull`) sowie die drei Szenarien (`toEqual(["Schliessen"])` gegenüber zwei Schaltflächen). Der Wait in `openDialog` greift für jeden Opener in `tasks/accessibility.ts`, weil alle Dialog.svelte verwenden. ponytail-review: kein ungenutzter Code und keine Kopie eines vorhandenen Helfers; `deleteConfirmButton` wird weiterhin von drei Tasks verwendet.
+
+## Nicht bestätigt
+
+- vom Aufrufer gemeldet: `bun run lint`, `bun run check`, `bun run fitness`, backend type-check, `bunx vitest run` komplett (4546 grün), E2E chromium von building-detail, tenant-detail und contract-detail (99 grün), axe- und Sprachzeilen «delete-dialog» der drei Detailseiten, rote Läufe der drei Szenarien und des Dialog-Unit-Tests vor dem Code. Selbst habe ich nichts ausgeführt.
+- Dass die Zeilen «delete-dialog» in `tests/a11y/screens.json` (Gebäude-, Mieter- und Vertragsdetail) die abgelehnte Variante öffnen, habe ich nicht in den Seed-Daten von `tests/e2e/fixtures/screens.ts` nachgelesen. Ich stütze mich dafür auf die Angabe des Aufrufers.
+- Die Dialogtitel bleiben Fragen («Gebäude löschen?», «{name} löschen?», «Mietvertrag löschen?»), obwohl die einzige Antwort jetzt «Schliessen» ist (`messages/de.json:387, 696, 817`). Das war schon vor der Änderung so, und die Issue regelt den Titel nicht. Ob das für Einsteiger widersprüchlich wirkt, sollte die Persona-Runde in Schritt 5 beurteilen; hier ist es kein Befund.

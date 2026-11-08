@@ -33,7 +33,7 @@ Funktionalität: Mieterdetail
     Angenommen "Lea Frei" mietete die Wohnung "1.01" von "2015-01-01" bis "2019-12-31" für "700" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter den Mieter löschen will
-    Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Dann bietet der Dialog nur "Schliessen" an
 
   Szenario: Mieter bearbeiten
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

@@ -13,7 +13,7 @@
 		title,
 		confirmLabel,
 		danger = false,
-		disabled = false,
+		impossible = false,
 		confirmTestid,
 		error,
 		onsuccess,
@@ -27,7 +27,7 @@
 		title: string;
 		confirmLabel: string;
 		danger?: boolean;
-		disabled?: boolean;
+		impossible?: boolean; // the action is not possible: the content says why, only «Schliessen» is offered
 		confirmTestid: string;
 		error?: string;
 		onsuccess?: () => void;
@@ -79,7 +79,7 @@
 	{danger}
 	{busy}
 	busyLabel={m.ui_please_wait()}
-	confirmDisabled={disabled}
+	{impossible}
 	{confirmTestid}
 	onconfirm={() => check() && form?.requestSubmit()}
 >
