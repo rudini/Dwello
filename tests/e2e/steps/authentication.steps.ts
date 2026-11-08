@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, passwordSignInOffered, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
+import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, loginPageOverflow, passwordSignInOffered, shownUserName, signInOffered, signInOptions, signInShownShare } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
 import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
@@ -150,4 +150,17 @@ Given('der Besucher hat sich mit der E-Mail-Adresse und dem Passwort des Kontos 
 
 When('der Besucher sich abmeldet', async ({ besucher }) => {
 	await besucher.attemptsTo(signOut);
+});
+
+Given('es ist kein Konto mit Passwort eingerichtet', async ({ seed }) => {
+	await seed.noLocalAccount();
+});
+
+// #657: the sign-in page fits a phone of 390 × 844
+Then('muss der Besucher auf der Anmeldeseite nicht scrollen', async ({ besucher }) => {
+	await besucher.sees(loginPageOverflow).toBeLessThanOrEqual(0);
+});
+
+Then('sieht der Besucher die Anmeldung mit {string}, ohne zu scrollen', async ({ besucher }, provider: string) => {
+	await besucher.sees(signInShownShare(provider)).toBe(1);
 });

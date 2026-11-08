@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
-	import { navGroups } from './navigation';
+	import { mobileNavGroups } from './navigation';
 	import IconButton from '$lib/ui/IconButton.svelte';
+	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import NavList from '$lib/ui/NavList.svelte';
 	import { makeInert } from '$lib/inert';
 	import { MediaQuery } from 'svelte/reactivity';
@@ -69,8 +70,12 @@
 				<span class="text-xl font-bold text-ink">Dwello</span>
 				<IconButton icon="close" label={m.nav_close_menu()} onclick={closeMobileNav} />
 			</div>
+			<!-- the header has no room for the language choice below 768 px (#657) -->
+			<nav class="flex justify-end border-b border-line px-4 py-2" aria-label={m.language_choice()}>
+				<LanguageSwitcher />
+			</nav>
 			<nav class="flex-1 overflow-y-auto px-4 py-6" aria-label={m.nav_main()}>
-				<NavList groups={navGroups} onnavigate={closeMobileNav} />
+				<NavList groups={mobileNavGroups} onnavigate={closeMobileNav} />
 			</nav>
 		</div>
 	</div>

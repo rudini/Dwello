@@ -126,3 +126,11 @@ Funktionalität: Anmeldung
     Und der Besucher hat sich mit der E-Mail-Adresse und dem Passwort des Kontos angemeldet
     Wenn der Besucher sich abmeldet
     Dann ist der Besucher auf der Seite "Anmelden"
+
+  # #657 (Decided): auf dem Telefon passt die Anmeldeseite ohne Scrollen, das Anmelden ist sichtbar
+  Szenario: Die Anmeldeseite passt aufs Telefon
+    Angenommen es ist kein Konto mit Passwort eingerichtet
+    Und das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn ein Besucher die Anmeldeseite öffnet
+    Dann muss der Besucher auf der Anmeldeseite nicht scrollen
+    Und sieht der Besucher die Anmeldung mit "Google", ohne zu scrollen

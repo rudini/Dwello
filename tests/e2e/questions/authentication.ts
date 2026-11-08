@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { Count, FocusedElement, RequestedUrl, Text, Value, Visibility } from '../screenplay/questions';
+import { Count, FocusedElement, RequestedUrl, ShareInViewport, Text, ThePage, Value, Visibility } from '../screenplay/questions';
 import { loginButton, loginError, loginLegalNote, passwordInput, passwordSubmitButton, userName } from '../targets/authentication';
 import { GOOGLE_SIGN_IN } from '../tasks/authentication';
 
@@ -21,3 +21,6 @@ export const googleSignInParameter = (name: string) =>
 	question(`the parameter ${name} of the Google sign-in`, async (actor) =>
 		(await actor.answer(RequestedUrl(GOOGLE_SIGN_IN)))?.searchParams.get(name) ?? null
 	);
+/** #657: how far the sign-in page scrolls, and how much of a provider's sign-in shows in the window (1: all) */
+export const loginPageOverflow = ThePage.downwardOverflow;
+export const signInShownShare = (provider: string) => ShareInViewport.of(loginButton(provider));

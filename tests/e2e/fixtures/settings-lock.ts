@@ -23,13 +23,19 @@ const tryLock = (lock: string) => {
 	}
 };
 
-export async function withLock<T>(name: string, work: () => Promise<T>): Promise<T> {
+/** Takes the lock and answers its release, for a lock held across the steps of a scenario (#657) */
+export async function holdLock(name: string): Promise<() => void> {
 	const lock = lockOf(name);
 	while (!tryLock(lock)) await new Promise((resolve) => setTimeout(resolve, 100));
+	return () => rmSync(lock, { recursive: true, force: true });
+}
+
+export async function withLock<T>(name: string, work: () => Promise<T>): Promise<T> {
+	const release = await holdLock(name);
 	try {
 		return await work();
 	} finally {
-		rmSync(lock, { recursive: true, force: true });
+		release();
 	}
 }
 
