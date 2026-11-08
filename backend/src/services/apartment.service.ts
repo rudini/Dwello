@@ -16,7 +16,7 @@ import {
 import { everyWordIn, withoutApartmentWord } from './word-search';
 import { sqlToday, swissToday } from './today';
 import type { ApartmentStatus, ApartmentWithDetails } from '../api/apartment';
-import { refusal, type Refusal } from './coded-error';
+import { CodedError, refusal, type Refusal } from './coded-error';
 
 /** First day of the next rental contract that has not started yet */
 export const nextContractStart = sql<string | null>`(
@@ -76,6 +76,7 @@ const apartmentFields = {
 	floor: apartments.floor,
 	area: apartments.area,
 	rooms: apartments.rooms,
+	discontinuedFrom: apartments.discontinuedFrom,
 	status: apartmentStatus,
 	nextContractStart,
 	currentContractEnd,
@@ -263,6 +264,7 @@ export async function updateApartment(
 	id: string,
 	data: Partial<NewApartment>
 ): Promise<Apartment | null> {
+	if (data.discontinuedFrom) await checkNoContractOn(id, data.discontinuedFrom);
 	const [apartment] = await db
 		.update(apartments)
 		.set({ ...data, updatedAt: new Date() })
@@ -270,6 +272,17 @@ export async function updateApartment(
 		.returning();
 
 	return apartment || null;
+}
+
+// #1284: an apartment no longer exists from a day only when no contract of it still runs on that day or later
+async function checkNoContractOn(id: string, date: string) {
+	const [contract] = await db
+		.select({ tenant: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}` })
+		.from(rentalContracts)
+		.innerJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
+		.where(and(eq(rentalContracts.apartmentId, id), sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${date})`))
+		.limit(1);
+	if (contract) throw new CodedError('APARTMENT_CONTRACT_RUNS', 'A contract still runs on that day', { date, tenant: contract.tenant });
 }
 
 /**

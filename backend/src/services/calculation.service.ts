@@ -12,7 +12,7 @@
 
 import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { statementNumbers, utilityStatements, type AdvanceLine, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type AdvanceLine, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart, type KeyValues, type LineSegment } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -48,6 +48,7 @@ export interface CalculatedLineItem {
 	invoiceParts: InvoicePart[] | null; // invoices over different days: each with its days, for the weighted share (#226)
 	invoices: BilledInvoice[]; // the invoices it bills (#96)
 	isHeatingCost: boolean;
+	segments: LineSegment[] | null; // #1284: per part before and from «Aufgehoben ab», when it splits the tenant's days
 }
 
 /**
@@ -281,6 +282,77 @@ async function calculateApartmentShare(
 	};
 }
 
+// #1284: an apartment counts on the days before «Aufgehoben ab»
+type BuildingApartment = { id: string; number: string; area: number; rooms: number; discontinuedFrom: string | null };
+export const countingOn = (day: string) => (apartment: { discontinuedFrom: string | null }) =>
+	!apartment.discontinuedFrom || apartment.discontinuedFrom > day;
+
+/** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
+export function keyValuesAmong(all: Array<{ id: string; area: number; rooms: number }>, apartmentId: string): KeyValues | null {
+	const own = all.find((apartment) => apartment.id === apartmentId);
+	if (!own) return null;
+	const pair = (value: (apartment: (typeof all)[number]) => number): [number, number] => [value(own), all.reduce((sum, apartment) => sum + value(apartment), 0)];
+	return { area: pair((a) => a.area), units: pair(() => 1), rooms: pair((a) => a.rooms) };
+}
+
+const later = (a: string, b: string) => (a > b ? a : b);
+const earlier = (a: string, b: string) => (a < b ? a : b);
+
+// #1284: the period's parts, split at each day from which an apartment no longer exists that falls into the tenant's days
+function partsOf(all: BuildingApartment[], period: { start: string; end: string }, rental: { start: string; end: string }) {
+	const cuts = [...new Set(all.map((a) => a.discontinuedFrom).filter((day): day is string => !!day && day > rental.start && day <= rental.end))].sort();
+	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? daysBefore(cuts[i]) : period.end }));
+}
+const daysBefore = (day: string) => isoDay(new Date(Date.parse(day) - 86_400_000));
+
+// A group's invoices in one part: each with its amount for its days there, heating costs by the Heizprofil's months
+// (Fachreview 1284-1, Art. 7 Abs. 1 VMWG), else by days; the part's costs rounded as printed (V-3)
+function groupIn(group: InvoiceGroup, part: { start: string; end: string }, profile: HeatingProfile | null): InvoiceGroup {
+	const weight = (start: string, end: string) =>
+		profile ? calculateHeatingShare(profile, new Date(start), new Date(end), 100).percentage : days(start, end);
+	const invoices = group.invoices.flatMap((invoice) => {
+		const [start, end] = [later(invoice.start, part.start), earlier(invoice.end, part.end)];
+		if (start > end) return [];
+		const whole = weight(invoice.start, invoice.end);
+		const share = whole > 0 ? weight(start, end) / whole : days(start, end) / days(invoice.start, invoice.end);
+		return [{ ...invoice, start, end, amount: invoice.amount * share }];
+	});
+	return { ...group, invoices, totalAmount: roundToRappen(invoices.reduce((sum, invoice) => sum + invoice.amount, 0)) };
+}
+
+// #1284: the tenant's share of a group whose days a day of «Aufgehoben ab» splits: per part the costs, the apartment's
+// share of them among the apartments that count, the tenant's share of that, each as printed (Fachreview 1284-1 V-3)
+async function shareByParts(group: InvoiceGroup, all: BuildingApartment[], apartmentId: string, run: GroupRun, rental: { start: string; end: string }) {
+	const period = { start: isoDay(run.periodStart), end: isoDay(run.periodEnd) };
+	const profile = group.isHeatingCost && run.heatingProfileId ? await getHeatingProfile(run.heatingProfileId) : null;
+	const segments: LineSegment[] = [];
+	for (const part of partsOf(all, period, rental)) {
+		const partGroup = groupIn(group, part, profile);
+		if (!partGroup.invoices.length) continue;
+		const counting = all.filter(countingOn(later(part.start, rental.start)));
+		const key = await calculateApartmentShare(counting, apartmentId, partGroup.totalAmount, group.distributionKeyId);
+		const partRental = { start: later(part.start, rental.start), end: earlier(part.end, rental.end) };
+		const partRun = { ...run, periodStart: new Date(part.start), periodEnd: new Date(part.end), wholePeriod: partRental.start === part.start && partRental.end === part.end };
+		const { tenantShare, periodShare, shareDays } = await shareOfGroup(partGroup, key, partRun, partRental);
+		const discontinued = all.filter((a) => a.discontinuedFrom === part.start).map((a) => ({ number: a.number, date: part.start }));
+		segments.push({
+			...part,
+			count: counting.length,
+			keyValues: keyValuesAmong(counting, apartmentId)!,
+			costs: partGroup.totalAmount,
+			apartment: key.share,
+			periodShare: Math.round(periodShare * 10000) / 10000,
+			...(shareDays.billedDays && { days: shareDays.positionRentalDays!, total: shareDays.billedDays }),
+			...(profile && group.totalAmount && { profileShare: roundToRappen((partGroup.totalAmount / group.totalAmount) * 100) }),
+			share: tenantShare,
+			...(discontinued.length && { discontinued })
+		});
+	}
+	const tenantShare = roundToRappen(segments.reduce((sum, segment) => sum + segment.share, 0));
+	const apartmentShare = roundToRappen(segments.reduce((sum, segment) => sum + segment.apartment, 0));
+	return { tenantShare, apartmentShare, periodShare: apartmentShare ? tenantShare / apartmentShare : 0, segments };
+}
+
 /**
  * Calculate management fee
  */
@@ -309,6 +381,17 @@ async function feePercentOf(
 	if (!contract.managementFeeAgreed) return 0;
 	if (contract.managementFeePercent !== null) return parseFloat(contract.managementFeePercent);
 	return runPercent ?? (await getTypedConfig('management_fee_pct'));
+}
+
+// A position of the tenant: by the apartments that count on his days (#1284), split into parts when a day of
+// «Aufgehoben ab» falls into them
+async function lineOf(group: InvoiceGroup, all: BuildingApartment[], apartmentId: string, run: GroupRun, rental: { start: string; end: string }) {
+	if (partsOf(all, { start: isoDay(run.periodStart), end: isoDay(run.periodEnd) }, rental).length > 1) {
+		const parts = await shareByParts(group, all, apartmentId, run, rental);
+		return { ...parts, shareDays: noDays };
+	}
+	const key = await calculateApartmentShare(all.filter(countingOn(rental.start)), apartmentId, group.totalAmount, group.distributionKeyId);
+	return { ...(await shareOfGroup(group, key, run, rental)), apartmentShare: key.share, segments: null };
 }
 
 /**
@@ -366,10 +449,12 @@ export async function calculateStatementForContract(
 
 	// All apartments of the building share its costs according to the distribution key
 	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
-	const buildingApartments = buildingApartmentRows.map((a) => ({
+	const buildingApartments: BuildingApartment[] = buildingApartmentRows.map((a) => ({
 		id: a.id,
+		number: a.number,
 		area: parseFloat(a.area),
-		rooms: parseFloat(a.rooms)
+		rooms: parseFloat(a.rooms),
+		discontinuedFrom: a.discontinuedFrom
 	}));
 
 	// Calculate line items
@@ -386,15 +471,8 @@ export async function calculateStatementForContract(
 		const days = fromDay(group.categoryId ? agreedFrom[group.categoryId] : undefined, run, rental);
 		if (!days) continue;
 
-		// Calculate apartment's share of building costs
-		const apartmentShareResult = await calculateApartmentShare(
-			buildingApartments,
-			apartment.id,
-			group.totalAmount,
-			group.distributionKeyId
-		);
-
-		const { tenantShare, periodShare, shareDays } = await shareOfGroup(group, apartmentShareResult, days.run, days.rental);
+		const line = await lineOf(group, buildingApartments, apartment.id, days.run, days.rental);
+		const { tenantShare, periodShare, shareDays, segments } = line;
 
 		lineItems.push({
 			categoryId: group.categoryId,
@@ -403,7 +481,7 @@ export async function calculateStatementForContract(
 			distributionKeyName: group.distributionKeyName,
 			description: group.categoryName,
 			totalBuildingAmount: group.totalAmount,
-			apartmentShare: apartmentShareResult.share,
+			apartmentShare: line.apartmentShare,
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
@@ -417,7 +495,8 @@ export async function calculateStatementForContract(
 				end,
 				...(fuelStock && { fuelStock })
 			})),
-			isHeatingCost: group.isHeatingCost
+			isHeatingCost: group.isHeatingCost,
+			segments
 		});
 
 		subtotal += tenantShare;

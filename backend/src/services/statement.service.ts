@@ -24,7 +24,7 @@ import {
 	rentalContracts
 } from '../db/schema';
 import { agreementsInPeriod } from './agreed-category.service';
-import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { calculateBalance, calculateStatementForContract, countingOn, generateStatementNumber, keyValuesAmong } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { getUncategorizedInvoices } from './invoice.service';
 import { getTypedConfig } from './config.service';
@@ -498,7 +498,7 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 		fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
 		agreedCategoryIds: calculation.agreedCategoryIds,
 		agreedFrom: calculation.agreedFrom,
-		keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
+		keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId, calculation.rentalStart),
 		balance: String(calculation.balance),
 		replacesId: calculation.replacesId,
 		priorPayments: String(calculation.priorPayments),
@@ -518,6 +518,7 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 		billedDays: item.billedDays,
 		invoiceParts: item.invoiceParts,
 		invoices: item.invoices,
+		segments: item.segments,
 		sortOrder: index
 	}));
 	return { values, lineItems, carryOver: calculation.carryOver };
@@ -711,13 +712,12 @@ const changesPdf = (data: Partial<NewUtilityStatement>, existing: StatementWithD
 		(field) => data[field] !== undefined && (data[field] ?? '') !== (existing[field] ?? '')
 	);
 
-/** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
-export async function keyValuesOf(buildingId: string, apartmentId: string): Promise<KeyValues | null> {
+/** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by; with a day
+ * only the apartments that count on it (#1284, Fachreview 1284-1 V-2) */
+export async function keyValuesOf(buildingId: string, apartmentId: string, day?: string): Promise<KeyValues | null> {
 	const { apartments: all } = await listApartments({ buildingId, limit: 1000 });
-	const own = all.find((apartment) => apartment.id === apartmentId);
-	if (!own) return null;
-	const pair = (value: (apartment: (typeof all)[number]) => number): [number, number] => [value(own), all.reduce((sum, apartment) => sum + value(apartment), 0)];
-	return { area: pair((a) => parseFloat(a.area)), units: pair(() => 1), rooms: pair((a) => parseFloat(a.rooms)) };
+	const counting = day ? all.filter(countingOn(day)) : all;
+	return keyValuesAmong(counting.map((a) => ({ id: a.id, area: parseFloat(a.area), rooms: parseFloat(a.rooms) })), apartmentId);
 }
 
 /** A statement goes out dated on the day it is sent (Swiss time), with the full payment deadline, never a shorter one */

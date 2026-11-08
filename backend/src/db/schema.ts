@@ -67,6 +67,7 @@ export const apartments = pgTable(
 		area: decimal('area', { precision: 8, scale: 2 }).notNull(), // m²
 		rooms: decimal('rooms', { precision: 3, scale: 1 }).notNull(), // e.g., 3.5
 		status: varchar('status', { length: 20 }).notNull().default('vacant'), // vacant, reserved; occupied is computed from the contracts (apartmentStatus)
+		discontinuedFrom: date('discontinued_from'), // «Aufgehoben ab» (#1284): no longer exists from that day
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -404,6 +405,23 @@ export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
 // days (#451), absent before
 export type MonthShare = { month: number; percentage: number; full?: number; days?: number; total?: number };
 
+// #1284: a position's part before or from the day an apartment no longer exists, calculated with the amounts it prints:
+// the building's costs in the part, the apartment's share of them among the apartments that count, the tenant's share
+export type LineSegment = {
+	start: string;
+	end: string;
+	count: number; // the apartments that count
+	keyValues: KeyValues;
+	costs: number;
+	apartment: number;
+	periodShare: number;
+	days?: number; // the share as days, when it is one
+	total?: number;
+	profileShare?: number; // heating costs by the Heizprofil: the part's percentage of the position's costs
+	share: number;
+	discontinued?: { number: string; date: string }[]; // the apartments that no longer count from its start
+};
+
 // An invoice of a position over different days (#226): its days in the period, its amount for them, the tenant's days
 export type InvoicePart = {
 	start: string;
@@ -565,6 +583,7 @@ export const utilityStatementLineItems = pgTable(
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
+		segments: jsonb('segments').$type<LineSegment[]>(), // #1284: per part before and from «Aufgehoben ab»; null: not split
 		invoices: jsonb('invoices').$type<BilledInvoice[]>(), // the invoices it billed (#96); null: created before
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
