@@ -123,7 +123,7 @@ const FINDINGS = 'findings';
 
 /** Adds what the actor finds on the page now to the findings of the check (`findings` in questions/accessibility.ts) */
 const note =
-	(look: Question<string[]>, prefix: string): Activity =>
+	(look: Question<string[]>, prefix = ''): Activity =>
 	async (actor) =>
 		actor.remember(FINDINGS, [
 			...(actor.recall<string[]>(FINDINGS) ?? []),
@@ -946,7 +946,7 @@ const EMPTY_INSTANCE = 'http://localhost:3102';
 // The setup (#577) needs no account and no provider: the empty instance has neither and never gets one, so it is
 // looked at there in every state, as is 'ki-model-failed' (its KI stand-in fails the download); 'ki-model-loading' on
 // the fresh installation, whose KI stand-in is still downloading
-const instanceOf = ({ state, path }: Example) =>
+export const instanceOf = ({ state, path }: Example) =>
 	['empty', 'empty-year', 'first-use', 'ki-model-failed'].includes(state) || path === '/setup'
 		? EMPTY_INSTANCE
 		: state === 'demo'
@@ -1016,10 +1016,10 @@ const useLanguage = (language: string) =>
 		['http://localhost:3100', 'http://localhost:3102'].map((url) => ({ name: 'PARAGLIDE_LOCALE', value: language, url }))
 	);
 
-/** Opens the example's screen in its state for one viewport and colour scheme and notes what `look` finds there,
- * at every step of a wizard for 'every-wizard-step' */
-const lookAt =
-	(example: Example, viewport: Viewport, scheme: 'light' | 'dark', look: Question<string[]>, prefix = ''): Activity =>
+/** Opens the example's screen in its state for one viewport and colour scheme and does `look` there, at every step
+ * of a wizard for 'every-wizard-step'; also the screenshot job's dialog and wizard shots (#697) */
+export const lookAt =
+	(example: Example, viewport: Viewport, scheme: 'light' | 'dark', look: Activity): Activity =>
 	async (actor) => {
 		await actor.attemptsTo(
 			Browser.resizeTo(viewports[viewport]),
@@ -1027,17 +1027,16 @@ const lookAt =
 			Browser.clearLocalStorage, // no draft from the previous viewport
 			Navigate.to(instanceOf(example) + example.path)
 		);
-		const noted = note(look, prefix);
 		if (example.state !== 'every-wizard-step') {
 			const reachState = states[example.state]; // a lookup, then a call: lint refuses calls by computed name
 			await actor.attemptsTo(reachState(example, viewport)).catch((error: unknown) => {
 				throw withSeedHint(example, error);
 			});
-			return actor.attemptsTo(noted);
+			return actor.attemptsTo(look);
 		}
 		const wizard = new URL(example.path, 'http://x').pathname;
 		await actor.attemptsTo(
-			wizard === '/contracts/new' ? contractWizardSteps(noted) : statementWizardSteps(noted, example)
+			wizard === '/contracts/new' ? contractWizardSteps(look) : statementWizardSteps(look, example)
 		);
 	};
 
@@ -1046,7 +1045,7 @@ export const checkAccessibilityOf = (example: Example): Activity =>
 	inTurn(example, async (actor) => {
 		await actor.attemptsTo(leaveSessionFor(example));
 		for (const { viewport, scheme } of variants)
-			await actor.attemptsTo(lookAt(example, viewport, scheme, accessibilityViolations, `${viewport}, ${scheme}: `));
+			await actor.attemptsTo(lookAt(example, viewport, scheme, note(accessibilityViolations, `${viewport}, ${scheme}: `)));
 	});
 
 /** The example on a phone in French, Italian and English: German left and text that does not fit; scenario records
@@ -1056,7 +1055,7 @@ export const checkLanguagesOf = (example: Example, userData: string[]): Activity
 		await actor.attemptsTo(leaveSessionFor(example));
 		// 'other-language' chooses French itself
 		for (const language of example.state === 'other-language' ? ['fr'] : ['fr', 'it', 'en'])
-			await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', languageFindings(language, userData)));
+			await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', note(languageFindings(language, userData))));
 	});
 
 // #1173: from now on note what a screen reader hears

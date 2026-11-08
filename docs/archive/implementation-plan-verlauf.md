@@ -1538,6 +1538,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga `docs/design/personas/helga-1197.md`: P-1 Major (after «Weiter» the step seemed to do nothing, H-1 of #688 met in this task); fixed: the focus goes to «Erneut versuchen», DOM test and scenario seen red (ad1f192)
 - [x] code-reviewer closing round `docs/reviews/1197-review-2.md`: no findings; Helga round 2 `docs/design/personas/helga-1197-2.md`: P-1 fixed, no findings
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1197.md`
+## Session: #1195 the category's reason in the invoice form note (Weber P-3 on #292)
+
+- [x] Read #1195 on main and on the branch of #1206 (#687), which this one builds on; product owner decisions in #1195: the note shows `reasonOf`, a category without a reason a general sentence; spec change of «Nicht umlagefähige Kategorie wählen»
+- [x] `@wip` scenarios (invoice-new.feature) seen red at the reason; the own-category scenario pinned kept behaviour (a3c6e84)
+- [x] fach-reviewer step 1 (`docs/reviews/1195-fachreview-1.md`): V-1 Minor, new general sentence in four languages, decided in #1195
+- [x] Reason in the note and the new sentence; DOM tests seen red (f37071e)
+- [x] code-reviewer (`docs/reviews/1195-review-1.md`): no findings
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-1195.md`): no Blocker or Major; Minors that stay: P-1 (locked checkbox not explained), P-2 (Reparaturen and small maintenance), both on the base too
+- [x] Workflow notes: nothing came up
 - [x] Archive the session; PR pushed after this archive
 ## Session: #1193 building search finds the full address and the postcode
 
@@ -1591,6 +1600,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #697 CI screenshot job: mobile, dark mode, dialog and wizard states
+
+- [x] Read #697 and #1172 (same job; #1172 serves the base branch as a production build, whoever merges second merges `main` first); decisions in #697 «Decided (product owner)» with two follow-up comments
+- [x] Each changed page in desktop light, mobile (390 px) light and desktop dark; its dialog and `every-wizard-step` states of `tests/a11y/screens.json` via the axe check's `lookAt`; one seed per state for both branches, one test at a time, a fixed clock; upload states left out; comment from `ui-screenshots/shots.txt`, cut to GitHub's size (ea26370, 42577ff); unit tests seen red
+- [x] code-reviewer `docs/reviews/697-review-{1,2}.md`: C-1, C-2 Major fixed
+- [x] No scenario: CI tooling only; checks: lint, check, fitness, backend type-check, unit tests, axe and language examples after the `lookAt` change, the screenshot job locally against `main`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-697.md`
 ## Session: #714 design guard: style shorthands and system colours
 
 - [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
