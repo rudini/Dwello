@@ -7,6 +7,19 @@
 - [x] Persona Helga: no findings; «Alpenblick» had no draft, she checked the same way on «Musterhaus Zentrum» (`docs/design/personas/helga-1094.md`); her note «Zurück sagt nicht wohin» is C-1
 - [x] PR: merge of origin/main clean
 
+## Session: #743 and #751 invoice forms: announcements, length limits, help at «Leistungszeitraum»
+
+- [x] Read #743 and #751 on main; no open `needs-decision` issue on the same behaviour; decisions recorded in both issues (date announcement revised after code review 743-2 C-5; summary of the disclosure names its content, fach review V-1)
+- [x] `@wip` scenarios (invoice-new, invoice-edit, invoices features) and the approved step change in invoices.feature (Spec change approved: #743), seen red; DOM and unit tests seen red
+- [x] `fach-reviewer` step 1 (`docs/reviews/743-fachreview-1.md`): texts in de/fr/it/en, V-1 decided, V-2 fixed with extra steps and an upload scenario
+- [x] Length limits (Rechnungsnummer 50, Rechnungssteller 255) at the field; upload status after the last file; first paragraph at «Leistungszeitraum», the rest behind a disclosure; date field announces a page error only where the focus does not land in a field with an error
+- [x] code-reviewer `docs/reviews/743-review-{1,2,3}.md`: C-1, C-2, C-4, C-5, C-6 fixed; C-3 answered in the commit message of 41fa74a
+- [x] Persona Sven (`docs/design/personas/sven-743{,-2}.md`): P-1 (pre-existing, met in the task) and P-2 fixed; Minors P-3 to P-6 stay in the report
+- [x] No scenario: the date field's live region (it empties itself after 2 s, so an E2E check of its emptiness passes on the base too; DOM tests in `date-input.dom.test.ts`)
+- [x] Split: length limits of the other forms in #1201
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-743.md`
+- [x] Archive the session; PR pushed after this archive
+
 ## Session: #932 E2E purge after a berichtigte Abrechnung
 
 - [x] Cause: `createCorrection` only clicked «Berichtigte Abrechnung erstellen»; the next step could pass on the replaced statement (same Akonto) and the clean-up deleted it while the new one was still saved (FK `replaces_id`, CI run 40708772660)
@@ -1538,6 +1551,40 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga (`docs/design/personas/helga-busy-button.md`, 150 % zoom): readable at 7.8:1 / 7.6:1; Minors P-1, P-2 (busy looks pressable, next to a faded «Abbrechen») are #1209
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-1182.md`
 - [x] Archive session; PR `Fixes #1182`: pushed after this archive
+## Session: #737 Clearer formula errors in the Verteilschlüssel form
+
+- [x] Decisions in #737 («Decided (product owner)»): drop `%` from the message; a value-dependent error once, no sample apartment named; test and save check the same four sample apartments; spec change of the two formula scenarios (Spec change approved: #737); glossary rows «Eigener Verteilschlüssel» and «Baustein»; P-1 solved before the merge with cause and next step. Other «Problem» points moved to #1200
+- [x] `@wip` scenarios (distribution-keys.feature) and lower-layer tests, seen red
+- [x] `fach-reviewer` `docs/reviews/737-fachreview-1.md` (V-1 Major new test title, V-2, V-3 fixed; V-4 glossary decided) and `737-fachreview-2.md` (P-1 texts; V-1..V-3 fixed)
+- [x] Implementation: field error at «Formel» (`saveRecord` option `field`), one error per value-dependent failure, `SAMPLE_APARTMENTS` shared by test and save, texts in de/fr/it/en, axe/language state `formula-test-failed` (new and edit)
+- [x] code-reviewer `docs/reviews/737-review-{1,2,3,4}.md`: 737-1 C-1 Major and C-2..C-4 fixed; 737-3 C-1 Major (all_zero text unpinned) fixed
+- [x] Persona Helga `docs/design/personas/helga-737.md` (P-1 Major fixed, P-2 fixed; P-3..P-5 Minor stay, P-5 and P-3 in part in #1200) and `helga-737-2.md` (P-1 now Minor, stays)
+- [x] Issues opened: #1200 (totals buttons, error position, name refusal), #1221 (failing custom key splits a statement equally)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-737.md`
+- [x] Archive the session; PR `Fixes #737`: pushed after this archive
+## Session: #740 Alert titles as headings; menu at zoom; contract page actions
+
+- [x] Checked each point on main: alert title a `<p>`; at 150 % zoom a 1280–1440 px laptop shows 853–960 px, the menu behind ☰; «Löschen» alone above the warning at 390 px; Helga's «Mietvertrag erfassen easy to hit» could not be reproduced (not in «Done means»)
+- [x] Decided (product owner, in #740): alert titles h2; sidebar from 768 px; page header actions one per row at full width below 640 px; the axe state `mobile-menu-open` mobile only (Spec change approved: #740)
+- [x] Three scenarios (navigation.feature, contract-detail.feature) and DOM tests seen red, then green (6336874)
+- [x] code-reviewer `docs/reviews/740-review-{1,2}.md`: C-1, C-2 Major and C-3 Minor fixed (049f985, f123b25); round 2 without findings
+- [x] Full E2E (chromium, api): 3 red on 6336874, all fixed (049f985, f123b25, 57d8c28: long words in the run summary beside the sidebar); reruns green
+- [x] Persona Helga `docs/design/personas/helga-740.md`: no Blocker or Major; Minors P-1..P-3 and the sidebar observation at 150 % stay in the report
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-740.md`
+- [x] Archive the session; PR `Fixes #740`: pushed after this archive
+## Session: #741 Missing-statements warning compact
+
+- [x] Issue read, every point checked on `main` (390 px: 804–936 px high with 3–4 periods; fr label without object, it already with one)
+- [x] Decisions (PO 07.11.2026) in #741: shorter texts, buttons stacked across the full width, no word for the control; later: the invoices link may wrap; oldest period first
+- [x] `@wip` scenario «Fehlende Abrechnungen auf dem Handy» seen red (5b2b844)
+- [x] `fach-reviewer` `docs/reviews/741-fachreview-1.md`: whole texts in de/fr/it/en; V-1 Major (start with the oldest period, Übertrag) and V-2..V-5 taken
+- [x] Texts, full-width links, fr/it labels; DOM tests seen red (0e046f6)
+- [x] code-reviewer `docs/reviews/741-review-1.md`: C-1, C-2 Minor fixed (22448b1)
+- [x] Persona Marco `docs/design/personas/marco-741.md` (one and three missing periods): P-1 Major fixed, oldest first (8729f6d); P-2, P-3, P-5 Minor stay (on `main` already); P-4 rejected (caused by the caller's seed)
+- [x] Closing review `docs/reviews/741-close-review-{1,2}.md`: C-1 Major (order not pinned by a scenario) and C-2 Minor fixed (4aa7948)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-741.md`
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, contract-detail.feature, a11y and language rows missing-statements
+- [x] Archive session; PR `Fixes #741`: pushed after this archive
 ## Session: #1197 one advice after a failed agreements retry
 
 - [x] Checked on main: after «Weiter» and a failed retry the alert says «in einigen Minuten», the note «Wählen Sie «Erneut versuchen»»; no open issue decides it

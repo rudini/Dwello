@@ -14,7 +14,12 @@ import {
 	markedAsUtilityCost,
 	nonAllocableCategoryNoteText,
 	nonAllocableCategoryWarning,
+	invoiceNumberValue,
+	servicePeriodFirstText,
 	servicePeriodHelpText,
+	servicePeriodMoreOpen,
+	servicePeriodMoreText,
+	supplierValue,
 	tonesInNonAllocableCategoryNote,
 	utilityCostHelpText,
 	utilityCostMarkable
@@ -29,6 +34,7 @@ import {
 	clearSupplier,
 	correctAmount,
 	correctInvoiceNumber,
+	saveSupplierOfLength,
 	enterInvoiceDate,
 	openInvoiceEdit,
 	openNewInvoice,
@@ -231,6 +237,31 @@ Then('ist im Rechnungsformular der Verteilschlüssel {string} gewählt', async (
 
 Then('erklärt das Formular beim Verteilschlüssel {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(keyHelpText).toContain(text);
+});
+
+Then('zeigt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodFirstText).toContain(text);
+});
+
+Then('steht beim Leistungszeitraum hinter «Mehr dazu» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodMoreText).toContain(text);
+	await verwalter.sees(servicePeriodMoreOpen).toBeNull();
+});
+
+When(
+	'der Liegenschaftsverwalter eine Rechnung mit einem Rechnungssteller von {int} Zeichen speichert',
+	async ({ verwalter }, length: number) => {
+		await verwalter.attemptsTo(saveSupplierOfLength(length));
+	}
+);
+
+// nothing cut silently (fach review 743-1 V-2)
+Then('zeigt das Formular die Rechnungsnummer {string}', async ({ verwalter }, number: string) => {
+	await verwalter.sees(invoiceNumberValue).toBe(number);
+});
+
+Then('zeigt das Formular einen Rechnungssteller von {int} Zeichen', async ({ verwalter }, length: number) => {
+	await verwalter.sees(supplierValue).toHaveLength(length);
 });
 
 Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {

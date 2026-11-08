@@ -111,7 +111,10 @@
 	// the progress while files are read (with «Keine KI» nobody reads), then only what is to do (#773)
 	const status = $derived(
 		removed
-			? m.invoices_upload_removed({ name: removed })
+			? // the last one gone: the building is enabled again, which a screen reader does not see (#743)
+				(rows.length ? m.invoices_upload_removed : m.invoices_upload_removed_last)({
+					name: removed
+				})
 			: done < counted.length
 				? kiOff
 					? ''
@@ -214,13 +217,20 @@
 	}
 
 	async function create() {
-		errors = Object.fromEntries(chosen.map((row) => [row.key, checkRow(row)]));
+		// a new check: an error the property manager had hidden by editing shows again (persona Sven 743 P-1), as a
+		// form's submit does it in Field
+		errors = {};
+		const found = Object.fromEntries(chosen.map((row) => [row.key, checkRow(row)]));
 		creating = true;
-		for (const row of chosen.filter((one) => !Object.keys(errors[one.key]).length)) {
+		for (const row of chosen.filter((one) => !Object.keys(found[one.key]).length)) {
 			update(row.key, (one) => ({ ...one, createError: undefined }));
 			await createOne(row);
 		}
 		creating = false;
+		// shown once the others are created, right before the focus moves: a date field waits only that long to see
+		// where the focus lands (code review 743-2 C-4)
+		await tick();
+		errors = found;
 		if (!rows.length) return finish();
 		// what stays in the dialog: the result first, else the first field to fill in
 		await tick();

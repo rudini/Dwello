@@ -54,6 +54,13 @@ export const missingStatementLink = (periodStart: string) =>
 	target(`Fehlende Abrechnung ab ${periodStart} erstellen`, (page) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
+// The row of one Abrechnungsperiode without a statement in the warning, by its first day (#741)
+export const missingStatementPeriod = (periodStart: string) =>
+	target(`Fehlende Abrechnung ab ${periodStart}`, (page) => page.getByTestId(`contract-missing-statement-period-${periodStart}`));
+// Every link into the wizard of the warning, in the order shown (#741)
+export const missingStatementLinks = target('Fehlende Abrechnungen erstellen', (page) =>
+	page.getByTestId(/^contract-missing-statement-link-/)
+);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
 // One link per Abrechnungsperiode without a statement to the building's invoices of that period, by its first day (#211)
 export const missingStatementInvoicesLink = (periodStart: string) =>
@@ -111,4 +118,8 @@ export const confirmAdvanceDeleteButton = target('Akonto löschen bestätigen', 
 export const moveOutHint = target('Hinweis auf den Auszug', (page) => page.getByTestId('contract-move-out'));
 export const moveOutStatementLink = target('Schlussabrechnung erstellen', (page) =>
 	page.getByTestId('contract-move-out-link')
+);
+// #740: the title of an alert is a heading of level 2
+export const missingStatementsTitle = target('Titel der fehlenden Abrechnungen', (page) =>
+	page.getByTestId('contract-missing-statement').getByRole('heading', { level: 2 })
 );

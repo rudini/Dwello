@@ -54,7 +54,13 @@
 		bind:value={description}
 	/>
 
-	<Field id="formula" label={m.keys_formula()} help={m.keys_formula_help()} error={errors.formula}>
+	<Field
+		id="formula"
+		label={m.keys_formula()}
+		help={m.keys_formula_help()}
+		error={errors.formula}
+		testid="distribution-key-formula-field"
+	>
 		{#snippet children(control)}
 			<input
 				id={control.id}

@@ -1,0 +1,6 @@
+# Workflow notes: #743 and #751 (invoice forms)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 1 (until `fach-reviewer` reports: tests red, no production code) against skill `tdd` («one test at a time», no horizontal slicing) | The step-1 review covered four texts, but the rule held back every behaviour of the two issues, also the date field's announcement, which has no text and no domain term. All tests were written red in one batch (horizontal), and turned green one by one only after the review. | Limit the hold to the behaviours whose texts or domain rules the review reads; the others follow `tdd` at once. |
+| `CLAUDE.md`, "When to ask" / skill `issue-work`: decisions recorded before the work | The first «Decided» bullet on the date announcement («only when the field kept the focus, Enter») rested on an assumption about the code (that the focus stays after Enter) that `focusFirstError` contradicts; code review 743-1 and 743-2 found it, and the product owner had to decide again. | Before a decision about what a screen reader hears, name in the question how the page moves the focus today (the helper and the forms that use it), so the options match the code. |

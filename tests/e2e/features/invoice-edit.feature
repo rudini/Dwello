@@ -71,6 +71,13 @@ Funktionalität: Rechnung bearbeiten
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
     Und sieht der Liegenschaftsverwalter die Rechnungsnummer "R-1002"
 
+  # #743: die Rechnungsnummer hat höchstens 50 Zeichen, wie in der Datenbank; das Feld sagt, was zu tun ist, statt eines
+  # allgemeinen Fehlers beim Speichern
+  Szenario: Bei einer zu langen Rechnungsnummer sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter die Rechnungsnummer auf "R-12345678901234567890123456789012345678901234567890" korrigiert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Höchstens 50 Zeichen. Kürzen Sie den Text."
+    Und zeigt das Formular die Rechnungsnummer "R-12345678901234567890123456789012345678901234567890"
+
   # #452 Punkt 7 (#379): eine alte Rechnung ohne Verteilschlüssel bekommt den Vorschlag, gespeichert wird sie nur mit einem
   Szenario: Eine Rechnung ohne Verteilschlüssel bekommt den Verteilschlüssel der letzten Rechnung ihrer Kategorie vorgeschlagen
     Angenommen "Hauswart Meier" stellt dem Gebäude "Seeblick" "300.00" Franken für "Umgebungsarbeiten" in der Kategorie "Hauswart" in Rechnung

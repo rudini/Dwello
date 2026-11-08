@@ -143,6 +143,7 @@
 			label={m.invoices_invoice_number()}
 			optional
 			bind:value={values.invoiceNumber}
+			error={errors.invoiceNumber}
 			testid="invoice-number-input"
 		/>
 		<InvoiceDataFields

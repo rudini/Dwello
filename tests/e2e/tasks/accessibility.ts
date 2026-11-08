@@ -690,6 +690,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(on.formulaTestButton),
 			Wait.until(on.formulaTestOutcome)
 		),
+	// #737: an error that depends on the values, shown once
+	'formula-test-failed': () => (actor) =>
+		actor.attemptsTo(
+			Enter.theValue('{area} / ({units} - 1)').into(on.formulaInput),
+			Click.on(on.formulaTestButton),
+			Wait.until(on.formulaTestOutcome)
+		),
 	// The KI stand-in (backend/scripts/llm-stub.ts) is sure about a renovation, not about guarding the building
 	'ki-proposal': () => askKi('Dachsanierung'),
 	'ki-unsure': () => askKi('Bewachung'),
@@ -724,7 +731,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'profile-sum-invalid': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
 	'mobile-menu-open': (_, viewport) => async (actor) => {
-		if (viewport === 'desktop') return; // the sidebar is always open from 1024 px
+		if (viewport !== 'mobile') return; // the sidebar is always open from 768 px (#740), also on the tablet (820 px)
 		await actor.attemptsTo(Click.on(on.mobileMenuButton));
 		await actor.attemptsTo(Wait.until(on.mainNavigationDialog(await say(actor, 'Hauptnavigation'))));
 	},

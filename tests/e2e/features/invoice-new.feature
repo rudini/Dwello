@@ -78,6 +78,27 @@ Funktionalität: Neue Rechnung erfassen
     Dann erklärt das Formular beim Leistungszeitraum "Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an"
     Aber erklärt das Formular beim Leistungszeitraum nicht "Tag der Lieferung"
 
+  # #751: am Feld steht nur der erste Absatz der Hilfe; die übrigen stehen unverändert hinter «Mehr dazu», anfangs zugeklappt
+  Szenario: Der Leistungszeitraum zeigt den ersten Absatz und den Rest hinter «Mehr dazu»
+    Dann zeigt das Formular beim Leistungszeitraum "Für welche Zeit gilt die Rechnung?"
+    Und steht beim Leistungszeitraum hinter «Mehr dazu» "Kosten, die nur alle paar Jahre anfallen"
+    Und steht beim Leistungszeitraum hinter «Mehr dazu» "Das Entkalken der zentralen Warmwasseranlage ist umlagefähig"
+
+  # #751: in der Kategorie des Tanks ist der erste Absatz die Lieferung
+  Szenario: In der Kategorie des Tanks zeigt der Leistungszeitraum zuerst die Lieferung
+    Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann zeigt das Formular beim Leistungszeitraum "Tragen Sie als Beginn und als Ende den Tag der Lieferung ein."
+    Und steht beim Leistungszeitraum hinter «Mehr dazu» "Für welche Zeit gilt die Rechnung?"
+
+  # #743: der Rechnungssteller hat höchstens 255 Zeichen, wie in der Datenbank
+  Szenario: Bei einem zu langen Rechnungssteller sagt Dwello, was zu tun ist
+    Wenn der Liegenschaftsverwalter eine Rechnung mit einem Rechnungssteller von 256 Zeichen speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
+    Und zeigt das Formular einen Rechnungssteller von 256 Zeichen
+
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
     Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."

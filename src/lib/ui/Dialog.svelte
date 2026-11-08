@@ -124,7 +124,7 @@
 		if (busy) return;
 		const focusable = [
 			...(panel?.querySelectorAll<HTMLElement>(
-				'button:not([disabled]), [href], input:not([tabindex="-1"]):not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+				'button:not([disabled]), [href], summary, input:not([tabindex="-1"]):not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
 			) ?? [])
 		];
 		const active = document.activeElement as HTMLElement;
@@ -155,7 +155,7 @@
 			tabindex="-1"
 			class="flex max-h-full w-full {wide ? 'max-w-4xl' : 'max-w-lg'} flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>
-			<h2 id="{id}-title" class="text-xl font-bold leading-tight">{title}</h2>
+			<h2 id="{id}-title" data-testid="dialog-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>
 			<!-- a press on a button keeps the focus in the field: leaving it would show its error, grow the dialog
 			     and move the button away before the release (R7-F2, #653); the click then leaves the field, so it

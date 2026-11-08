@@ -1,7 +1,10 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
+	formulaMarkedInvalid,
 	formulaOf,
+	formulaProblem,
+	formulaTestErrors,
 	invoicesBy,
 	keyActionCount,
 	keyDeletable,
@@ -161,4 +164,15 @@ Then(
 // #678: the confirmation names the key as the list does, in the UI language
 Then('nennt die Bestätigung den Verteilschlüssel {string}', async ({ verwalter, names }, title: string) => {
 	await verwalter.sees(confirmedNames).toEqual([names.get(title)]);
+});
+
+// #737: the refusal stands at the Formel field, which is marked invalid (red border, aria-invalid)
+Then('erfährt der Liegenschaftsverwalter bei der Formel {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(formulaProblem).toBe(text);
+	await verwalter.sees(formulaMarkedInvalid).toBe('true');
+});
+
+// #737: an error that depends on the values shows once, not once per sample apartment
+Then('zeigt der Test nur den Fehler {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(formulaTestErrors).toEqual([text]);
 });

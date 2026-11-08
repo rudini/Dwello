@@ -135,7 +135,8 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Pro Zimmer** | Verteilung proportional zur Zimmeranzahl. | Vordefiniert, `{rooms}` |
 | **Pro Einheit** | Gleichmässige Verteilung auf alle Wohnungen. | Vordefiniert, `{units}` |
 | **Heizung (Fläche 70 % / Einheit 30 %)** | Gemischter Schlüssel für Heizkosten: 70 % nach Fläche, 30 % zu gleichen Teilen pro Wohnung. | Vordefiniert, `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` |
-| **Eigener Verteilschlüssel** | Eigene Formel mit den Variablen `{area}`, `{rooms}`, `{units}`, `{volume}` und ihren Summen über alle Wohnungen des Gebäudes (`{area_total}`, `{rooms_total}`, `{units_total}`, `{volume_total}`). | `formula` Feld |
+| **Eigener Verteilschlüssel** | Eigene Formel aus den Bausteinen `{area}`, `{rooms}`, `{units}`, `{volume}` und ihren Summen über alle Wohnungen des Gebäudes (`{area_total}`, `{rooms_total}`, `{units_total}`, `{volume_total}`). | `formula` Feld |
+| **Baustein** | Platzhalter in der Formel eines eigenen Verteilschlüssels für einen Wert der Wohnung: `{area}` (Wohnfläche), `{rooms}` (Zimmeranzahl), `{volume}` (Raumvolumen), `{units}` (1 je Wohnung). Die Summen über das Gebäude (`{area_total}` …) heissen «Summen des Gebäudes» (#737). | `FORMULA_VARIABLES` |
 | **Gleichmässig pro Wohnung** | Verteilung einer Rechnung ohne Verteilschlüssel: gleiche Anteile für alle Wohnungen des Gebäudes (wie „Pro Einheit“). | Berechnung |
 | **Wohnungsanteil** | Anteil einer Wohnung an den Gebäudekosten gemäss Verteilschlüssel. | Berechnung |
 

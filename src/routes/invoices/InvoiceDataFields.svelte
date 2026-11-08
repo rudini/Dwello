@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
@@ -86,10 +87,24 @@
 		{m.invoices_service_period()} <span class="font-normal text-ink-muted">{m.ui_optional()}</span>
 	</legend>
 	<div class="flex flex-col gap-2 text-ink-muted" data-testid="invoice-service-period-help">
-		{#if fuel}<p>{m.invoices_service_period_fuel()}</p>{/if}
-		<p>{m.invoices_service_period_help({ year })}</p>
-		<p>{m.invoices_service_period_years({ year, end: year + 5 })}</p>
-		<p>{m.invoices_service_period_boiler()}</p>
+		<!-- the first paragraph at the field, the others behind a disclosure: four took about 650 px at 200 % (#751) -->
+		<p data-testid="invoice-service-period-first">
+			{fuel ? m.invoices_service_period_fuel() : m.invoices_service_period_help({ year })}
+		</p>
+		<details class="group" data-testid="invoice-service-period-more">
+			<summary
+				class="flex min-h-12 cursor-pointer items-center gap-2 font-semibold text-accent-strong underline"
+			>
+				<!-- the browser's own triangle goes with display: flex -->
+				<span class="transition-transform group-open:rotate-90"><Icon name="chevron-right" /></span>
+				{m.invoices_service_period_more()}
+			</summary>
+			<div class="flex flex-col gap-2">
+				{#if fuel}<p>{m.invoices_service_period_help({ year })}</p>{/if}
+				<p>{m.invoices_service_period_years({ year, end: year + 5 })}</p>
+				<p>{m.invoices_service_period_boiler()}</p>
+			</div>
+		</details>
 	</div>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput
