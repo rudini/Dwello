@@ -272,7 +272,7 @@ export async function runDifferencesOf(buildingId: string, run: RunSettings) {
 		listHeatingProfiles({ limit: 1000 })
 	]);
 	const differing = runDifferences(run, statements, contracts, heatingProfiles);
-	// a draft is outdated by invoices or a Tankbestand changed since (#454, #408 point 8); a sent one is corrected instead
+	// a draft is outdated by invoices, a Tankbestand (#454, #408 point 8) or values (#1328) changed since; a sent one is corrected instead
 	const later = await Promise.all(
 		statements.filter((s) => s.status === 'draft').map(async (s) => ({ id: s.id, changes: await statementChanges(s.id) }))
 	);
@@ -288,7 +288,8 @@ export async function runDifferencesOf(buildingId: string, run: RunSettings) {
 				profileEdited: differs?.profileEdited ?? null,
 				fee: differs?.fee ?? null,
 				outdated: !!changes?.invoiceIds.length,
-				fuelStock: !!changes?.fuelStockChanged
+				fuelStock: !!changes?.fuelStockChanged,
+				values: !!changes?.valuesChanged // #1328: an apartment or a key changed what it splits
 			};
 		})
 	};

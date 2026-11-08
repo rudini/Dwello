@@ -198,6 +198,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	const changed: {
 		invoiceIds?: string[];
 		fuelStockChanged?: boolean;
+		valuesChanged?: boolean;
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
@@ -208,6 +209,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	return {
 		invoices: changed.invoiceIds?.length ?? 0,
 		fuelStock: !!changed.fuelStockChanged,
+		values: !!changed.valuesChanged, // #1328: a draft an apartment or a key changed since
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,

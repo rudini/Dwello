@@ -21,6 +21,7 @@
 		later: {
 			invoices: number;
 			fuelStock: boolean;
+			values?: boolean; // #1328: an apartment or a key changed what «Neu berechnen» would bill
 			correctionDue: boolean;
 			correctionDeclinable: boolean;
 			correctionLowers: boolean;
@@ -37,13 +38,15 @@
 			: null
 	);
 	const declineCosts = $derived(later.recalculated?.declineCosts && francs(Number(later.recalculated.declineCosts)));
-	const changed = $derived(laterText(later.invoices, later.fuelStock));
+	const changed = $derived(laterText(later.invoices, later.fuelStock, later.values));
 	const title = $derived(
-		!later.fuelStock
-			? m.statements_later_title()
-			: later.invoices
-				? m.statements_later_title_both()
-				: m.statements_later_title_fuel_stock()
+		!later.fuelStock && !later.invoices && later.values
+			? m.statements_later_title_values()
+			: !later.fuelStock
+				? m.statements_later_title()
+				: later.invoices
+					? m.statements_later_title_both()
+					: m.statements_later_title_fuel_stock()
 	);
 	const declined = $derived(statement.correctionDeclined);
 	// a warning only while something is to do (persona Anna 454 P-7)
@@ -59,7 +62,7 @@
 	);
 </script>
 
-{#if statement.editable && (later.invoices || later.fuelStock)}
+{#if statement.editable && (later.invoices || later.fuelStock || later.values)}
 	<Alert {tone} {title} testid="statement-later-invoices">
 		<p>{text}</p>
 		{#if recalculated}<p data-testid="statement-later-recalculated">{recalculated}</p>{/if}

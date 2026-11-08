@@ -451,16 +451,17 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		data: object[],
 		changed: Record<string, string[]> = {},
 		asked: string[] = [],
-		fuelStock: string[] = []
+		fuelStock: string[] = [],
+		values: string[] = []
 	) =>
 		(async (url: string) => {
 			asked.push(url);
 			// H-28 (#717): the backend names the drafts invoices or the Tankbestand changed since
 			if (url.includes('/statements/run-differences?')) {
-				const ids = [...new Set([...Object.keys(changed), ...fuelStock])];
+				const ids = [...new Set([...Object.keys(changed), ...fuelStock, ...values])];
 				const none = { profile: null, profileEdited: null, fee: null };
 				return Response.json({
-					statements: ids.map((id) => ({ ...runDifferences.statements[0], ...none, id, outdated: !!changed[id]?.length, fuelStock: fuelStock.includes(id) }))
+					statements: ids.map((id) => ({ ...runDifferences.statements[0], ...none, id, outdated: !!changed[id]?.length, fuelStock: fuelStock.includes(id), values: values.includes(id) }))
 				});
 			}
 			if (url.includes('/statements?')) return Response.json({ ...statements, data });
@@ -474,6 +475,7 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		tenantName: 'Nina Brunner',
 		outdated: false,
 		fuelStock: false,
+		values: false,
 		profile: null,
 		profileEdited: null,
 		fee: null,
@@ -494,6 +496,13 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')], {}, [], ['1']);
 
 		expect(await changedOf(fetch)).toEqual([named('1', { fuelStock: true })]);
+	});
+
+	// #1328 (PO A')
+	it('nennt einen Entwurf, dessen Wohnungen oder Verteilschlüssel sich seither geändert haben', async () => {
+		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')], {}, [], [], ['1']);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { values: true })]);
 	});
 
 	// H-28 (#717): only a draft is outdated, sent and paid ones are corrected (#120): the backend decides

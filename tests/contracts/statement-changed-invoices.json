@@ -1,6 +1,7 @@
 {
 	"invoiceIds": ["i2"],
 	"fuelStockChanged": false,
+	"valuesChanged": false,
 	"carryOverChanged": false,
 	"correctionDue": false,
 	"correctionDeclinable": false,

@@ -836,7 +836,7 @@ describe('Abrechnungsdetail', () => {
 	const later = (
 		invoices: number,
 		status: 'draft' | 'sent' = 'draft',
-		more: { fuelStock?: boolean; correctionDue?: boolean; correctionDeclinable?: boolean; correctionLowers?: boolean } = {},
+		more: { fuelStock?: boolean; values?: boolean; correctionDue?: boolean; correctionDeclinable?: boolean; correctionLowers?: boolean } = {},
 		overrides: object = {}
 	) =>
 		show(StatementPage, {
@@ -996,7 +996,16 @@ describe('Abrechnungsdetail', () => {
 		later(2);
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			// Fachreview 454-2 V-20: also after a change of the Tankbestand
-			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Wählen Sie «Neu berechnen», dann rechnet er mit den Rechnungen und dem Tankbestand, wie sie jetzt sind.'
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Wählen Sie «Neu berechnen», dann rechnet er mit den Rechnungen, dem Tankbestand, den Wohnungen und den Verteilschlüsseln, wie sie jetzt sind.'
+		);
+	});
+
+	// #1328 (PO A', Fachreview 1328-1): an apartment or a key changed what «Neu berechnen» would bill
+	it('weist beim Entwurf auf eine danach geänderte Wohnung oder einen Verteilschlüssel hin', () => {
+		later(0, 'draft', { values: true });
+		expect(laterText()).toContain('Wohnung oder Verteilschlüssel seit der Abrechnung geändert');
+		expect(laterText()).toContain(
+			'Seit dem Erstellen dieses Entwurfs wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass «Neu berechnen» einen anderen Saldo oder eine andere Position ergäbe.'
 		);
 	});
 
