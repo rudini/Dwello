@@ -69,3 +69,4 @@ export const titleFieldBackground = Colour.backgroundOf(documentTitleInput, ['su
 export const uploadBusyNoteText = Text.of(uploadBusyNote);
 export const uploadBusyNoteRole = Attribute.named('role').of(uploadBusyNote);
 export const uploadButtonShown = Visibility.of(uploadDocumentButton);
+export const uploadButtonDescription = Accessible.descriptionOf(uploadDocumentButton);

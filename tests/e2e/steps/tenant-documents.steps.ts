@@ -33,6 +33,7 @@ import {
 	uploadButtonStatus,
 	uploadBusyNoteRole,
 	uploadButtonShown,
+	uploadButtonDescription,
 	uploadBusyNoteText,
 	fileButtonBackground,
 	fileFieldChangeable,
@@ -375,4 +376,6 @@ Then('sagt Dwello vor dem Hochladen noch nicht {string}', async ({ verwalter }, 
 Then('sagt Dwello beim Hochladen {string}, auch einem Screenreader', async ({ verwalter }, text: string) => {
 	await verwalter.sees(uploadBusyNoteText).toBe(text);
 	await verwalter.sees(uploadBusyNoteRole).toBe('status');
+	// also when the focused button is read again (persona Sven 1290 P-1)
+	await verwalter.sees(uploadButtonDescription).toBe(text);
 });
