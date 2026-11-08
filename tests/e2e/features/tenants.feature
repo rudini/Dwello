@@ -93,3 +93,16 @@ Funktionalität: Mieterliste
     Dann enthält der Export Name und Kontaktdaten, den Mietvertrag, die Abrechnung und die Zahlungserinnerung von "Hans Müller"
     Und enthält der Export das Dokument "Übergabeprotokoll", das PDF der Abrechnung und die Zahlungserinnerung von "Hans Müller"
     Und enthält der Export keine Daten von "Anna Keller"
+
+  # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn die Mieterliste über die Hauptnavigation wieder geöffnet wird
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Mieter" wählt
+    Dann zeigt die Suche ""
+
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn der Browser die Mieterliste wieder zeigt
+    Wenn der Liegenschaftsverwalter den Mieter "Hans Müller" sucht
+    Und der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann zeigt die Suche "Hans Müller"

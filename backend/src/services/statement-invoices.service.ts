@@ -169,7 +169,7 @@ export const draftOutdated = (changes: Awaited<ReturnType<typeof changesOf>>) =>
 
 /** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
 export async function draftsToSend() {
-	const { statements } = await listStatements({ status: 'draft', limit: 1000 });
+	const { statements } = await listStatements({ status: 'draft', limit: null });
 	const load = perPeriod();
 	// a draft that would count another Übertrag now is not to send either (Fachreview 506-1 V-8)
 	const outdated = await Promise.all(statements.map(async (s) => s.carryChanged || draftOutdated(await changesOf(s, load))));
@@ -181,7 +181,7 @@ export async function draftsToSend() {
  * building, period and what changed
  */
 export async function outdatedStatements() {
-	const { statements } = await listStatements({ limit: 1000 });
+	const { statements } = await listStatements({ limit: null });
 	const load = perPeriod();
 	const listed = await Promise.all(
 		counting(statements)
@@ -238,7 +238,7 @@ export async function invoiceStatements(
 ): Promise<{ billedIn: Period[]; missedIn: Period[]; statements: Billing[] } | null> {
 	const [invoice] = await db.select({ buildingId: invoices.buildingId }).from(invoices).where(eq(invoices.id, invoiceId));
 	if (!invoice) return null;
-	const { statements } = await listStatements({ buildingId: invoice.buildingId, limit: 1000 });
+	const { statements } = await listStatements({ buildingId: invoice.buildingId, limit: null });
 	const billedIn = new Map<string, Period>();
 	const missedIn = new Map<string, Period>();
 	const billing: Billing[] = [];

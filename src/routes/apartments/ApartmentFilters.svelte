@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { applyFilterChoice } from '$lib/utils/list-filter';
+	import { applyFilterChoice, showAppliedFilter } from '$lib/utils/list-filter';
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { goto } from '$app/navigation';
@@ -49,9 +49,13 @@
 		filters = { search: '', building: '', status: '' };
 		goto('/apartments');
 	}
+
+	let form = $state<HTMLFormElement>();
+	showAppliedFilter(() => form);
 </script>
 
 <form
+	bind:this={form}
 	method="GET"
 	action="/apartments"
 	role="search"

@@ -3,7 +3,7 @@
 Stand: 23.10.2026, Basis `origin/main` 868aef9; Spalte «Aktueller Wert» vom 28.10.2026 (`bun run fitness` und `ratchet.json` auf e9950ebb). Die Checks prüfen die Szenarien aus `utility-tree.md` (H/H und H/M) automatisch. Sie messen mit den Skripten aus Phase 0 (`tools/arch-baseline/`), damit jede Zahl dieselbe Definition hat wie in `baseline.md`.
 
 - **Code:** `tools/fitness/fitness.ts` (Checks, Ratchet, `--update`), `tools/fitness/ratchet.json` (Schwellen und Ausnahmen), `tools/fitness/upgrade-check.sh` und `tools/fitness/compose-update-check.sh` (U1, Zeilen und Summen gemeinsam in `tools/fitness/data-totals.sh`), Tests in `tools/fitness/fitness.test.ts`
-- **Lokal:** `bun run fitness` (neue Dateien vorher `git add -N`, die Skripte sehen nur Dateien, die Git kennt), `bun run fitness -- --base origin/main` wie in CI, `tools/fitness/upgrade-check.sh` (braucht PostgreSQL und die Tags), `tools/fitness/compose-update-check.sh <Image-Tag>` (braucht Docker, die Tags und Images unter `ghcr.io/rudini/dwello-*:<Image-Tag>`, z. B. mit `docker build` gebaut)
+- **Lokal:** der Commit-Hook `.claude/hooks/fitness-gate.sh` (bei Änderungen unter `src/`, `backend/src/`, `tools/fitness/`), `bun run fitness` (neue Dateien vorher `git add -N`, die Skripte sehen nur Dateien, die Git kennt), `bun run fitness -- --base origin/main` wie in CI, `tools/fitness/upgrade-check.sh` (braucht PostgreSQL und die Tags), `tools/fitness/compose-update-check.sh <Image-Tag>` (braucht Docker, die Tags und Images unter `ghcr.io/rudini/dwello-*:<Image-Tag>`, z. B. mit `docker build` gebaut)
 
 ## 1. Übersicht
 

@@ -4,7 +4,7 @@
  */
 
 import { eq, and, sql, desc } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { db, paged } from '../db/connection';
 import {
 	apartments,
 	buildings,
@@ -94,7 +94,7 @@ export interface ApartmentFilters {
 	buildingId?: string;
 	status?: ApartmentStatus;
 	floor?: number;
-	limit?: number;
+	limit?: number | null; // null: every apartment (#1229)
 	offset?: number;
 }
 
@@ -129,14 +129,17 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	const whereClause = and(...conditions);
 
 	// Query with building name and current tenant
-	const results = await db
-		.select(apartmentFields)
-		.from(apartments)
-		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
-		.where(whereClause)
-		.orderBy(buildings.name, apartments.floor, apartments.number)
-		.limit(limit)
-		.offset(offset);
+	const results = await paged(
+		db
+			.select(apartmentFields)
+			.from(apartments)
+			.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
+			.where(whereClause)
+			.orderBy(buildings.name, apartments.floor, apartments.number)
+			.$dynamic(),
+		limit,
+		offset
+	);
 
 	// Get total count
 	const [{ count: total }] = await db
@@ -372,7 +375,7 @@ export async function apartmentExists(id: string): Promise<boolean> {
 /** The building's apartments with the values a Verteilschlüssel reads, from when they no longer count (#1284) and their
  * earlier values (#1301) */
 export async function apartmentsOf(buildingId: string) {
-	const { apartments } = await listApartments({ buildingId, limit: 1000 });
+	const { apartments } = await listApartments({ buildingId, limit: null });
 	const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row, area: parseFloat(row.area), rooms: parseFloat(row.rooms) });
 	return apartments.map(({ id, number, area, rooms, discontinuedFrom, earlierSizes }) => ({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) }));
 }

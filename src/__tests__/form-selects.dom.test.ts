@@ -1,4 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// the list filters follow navigations (#680) through Svelte's lifecycle, which this server render runs on the client's
+vi.mock('$lib/utils/list-filter', async (original) => ({
+	...(await original<typeof import('$lib/utils/list-filter')>()),
+	showAppliedFilter: vi.fn()
+}));
 import BuildingField from '../routes/apartments/new/BuildingField.svelte';
 import StatusField from '../routes/apartments/[id]/edit/StatusField.svelte';
 import DefaultsSection from '../routes/config/DefaultsSection.svelte';
