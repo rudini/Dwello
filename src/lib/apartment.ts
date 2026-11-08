@@ -41,7 +41,7 @@ export const floorOptions = (current?: number | null) =>
 export const roomOptions = (current?: string) =>
 	[
 		...new Set([
-			...['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'],
+			...Array.from({ length: 19 }, (_, i) => String(1 + i / 2)), // 1 to 10 in halves (#1301: joined apartments)
 			...(current ? [current] : [])
 		])
 	]

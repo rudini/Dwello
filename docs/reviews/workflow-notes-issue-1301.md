@@ -1,0 +1,7 @@
+# Workflow notes #1301
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, "Done means" (a base-commit Blocker/Major «one a persona meets in its task on this change counts as more visible») | The Zimmeranzahl list ending at 6.5 is older than #1301; it became a Major of this task only because the caller's persona task asked for 7.5 and 8 Zimmer. What counts as «more visible» depends on how the caller words the task. | Say whether a finding a persona meets only through values the caller chose counts, or only one the change's own screens lead to. |
+| `CLAUDE.md`, Workflow 2 (a test written after the code shows its red by taking the code out) | Tests added after the step-1 review but before the code needed a run on the base commit: a worktree of it with `node_modules` linked in and the test file copied over, then cleaned up again. | Name that way (or `git show <base>:<file>` into a scratch worktree) in skill `tdd`, so a session does not rebuild it. |
+| `tests/e2e/CLAUDE.md`, "Rules" (a step definition that checks something else is a spec change) | The step «nennt die Detailseite der Abrechnung {string}» of #1284 reads only the note of an aufgehobene Wohnung; the note of #1301 needed a second step with its own wording («… zur neuen Fläche …») instead of widening the first. | As before; consider naming in a step text which note it reads when it is added, so later notes on the same page need no workaround. |

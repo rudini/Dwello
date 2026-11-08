@@ -64,8 +64,9 @@
 <form
 	method="POST"
 	use:enhance={({ formElement, cancel }) => {
-		// #1284: a day typed wrong in «Aufgehoben ab» would go out empty and clear the saved day
-		if (formElement?.querySelector('#discontinuedFrom[aria-invalid="true"]'))
+		// #1284: a day typed wrong in «Aufgehoben ab» would go out empty and clear the saved day; #1301: one in «gelten ab»
+		// would correct the values from the last change instead
+		if (formElement?.querySelector('#discontinuedFrom[aria-invalid="true"], #sizeFrom[aria-invalid="true"]'))
 			return (focusFirstError(formElement), cancel());
 		saving = true;
 		return async ({ result, update, formElement }) => {

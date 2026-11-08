@@ -247,3 +247,16 @@ describe('Zeiträume einer aufgehobenen Wohnung im PDF', () => {
 		expect(toPdfData(split, categories, 'de', undefined, keys).lineItems[0].segments?.[0]).toMatchObject({ keyShare: '70.00 / 210.00 m²', costs: 1487.67, days: 181 });
 	});
 });
+
+// #1301 (Code-Review 1301-1 C-1): the head prints the Fläche the statement calculated with on the tenant's first billed
+// day, not the apartment's of today
+describe('Fläche im Kopf des PDFs', () => {
+	it('druckt die Fläche, mit der die Abrechnung rechnet', () => {
+		const earlier = { ...statement, keyValues: { area: [70, 210], units: [1, 3], rooms: [3.5, 10.5] } } as unknown as StatementWithDetails;
+		expect(toPdfData(earlier, categories, 'de').apartment.area).toBe('70.00');
+	});
+
+	it('druckt ohne gespeicherte Werte die Fläche der Wohnung', () => {
+		expect(toPdfData({ ...statement, keyValues: null } as unknown as StatementWithDetails, categories, 'de').apartment.area).toBe('85.00');
+	});
+});

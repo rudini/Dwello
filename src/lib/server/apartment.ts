@@ -63,6 +63,7 @@ export async function fetchApartment(fetch: typeof globalThis.fetch, id: string)
 		currentContractEnd: a.currentContractEnd ?? null,
 		lastContractEnd: a.lastContractEnd ?? null,
 		discontinuedFrom: a.discontinuedFrom ?? null, // «Aufgehoben ab» (#1284)
+		earlierSizes: a.earlierSizes ?? [], // #1301
 		building: a.building! // GET /apartments/:id always names it
 	};
 }
@@ -119,4 +120,10 @@ export async function deleteApartment(fetch: typeof globalThis.fetch, id: string
 		});
 	}
 	throw redirect(303, `/buildings/${encodeURIComponent(buildingId)}`); // a posted id, no path of its own
+}
+
+/** #1301: the last change of Fläche and Zimmeranzahl removed; the page loads its values again */
+export async function removeSizeChange(fetch: typeof globalThis.fetch, id: string) {
+	const response = await fetch(`${API}/apartments/${id}/size-change`, { method: 'DELETE' });
+	if (!response.ok) return fail(response.status, { sizeChangeError: m.apartments_save_failed() });
 }
