@@ -134,7 +134,7 @@ Funktionalität: Verteilschlüssel
   Szenario: Bei einem zu langen Namen eines Verteilschlüssels sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels "Fläche und Zimmer"
     Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert
-    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text."
     Und steht bei "Name" noch der Text von 101 Zeichen
 
   # #1200 (Persona Helga, #128): die Summen des Gebäudes lassen sich wie die Bausteine per Knopf einfügen

@@ -79,7 +79,7 @@ Funktionalität: Heizprofile
   Szenario: Bei einem zu langen französischen Namen eines Heizprofils sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Heizprofils "Bergtal"
     Wenn der Liegenschaftsverwalter bei "Französisch" einen Text von 101 Zeichen speichert
-    Dann steht bei "Französisch" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Dann steht bei "Französisch" die Fehlermeldung "Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text."
     Und steht bei "Französisch" noch der Text von 101 Zeichen
 
   # #1304: der vergebene Name sagt auch, was zu tun ist, wie beim Verteilschlüssel (#1200)
