@@ -16,3 +16,5 @@ export const holderIsSender = Checked.of(holderIsSenderBox);
 export const focusedSetting = FocusedLabel;
 /** persona Weber 690 W-7: the setting that has the focus, by its field */
 export const focusedSettingField = FocusedElement;
+/** #1175: the field's name as a screen reader announces it, its label with «(optional)» */
+export const settingName = (name: string) => Accessible.nameOf(settingField(name));

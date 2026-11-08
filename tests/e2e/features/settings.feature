@@ -108,6 +108,20 @@ Funktionalität: Einstellungen
     Und nach erneutem Öffnen der Einstellungen ist angegeben, dass der Kontoinhaber der Absender ist
     Und ist kein eigener Kontoinhaber mehr hinterlegt
 
+  # #1175 (Personas Marco P-3 und Helga in #1166): die Felder des Kontoinhabers zeigen Beispiele wie die des Absenders,
+  # und die Strasse ist als freiwillig bezeichnet; es wird nichts gespeichert
+  Szenario: Die Angaben zum Kontoinhaber zeigen Beispiele
+    Wenn der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber angibt
+    Dann erklärt die Einstellung "Name des Kontoinhabers" "Beispiel: Anna Keller"
+    Und erklärt die Einstellung "Adresse des Kontoinhabers" "Beispiel: Bahnhofstrasse 1"
+    Und erklärt die Einstellung "PLZ des Kontoinhabers" "Beispiel: 8001"
+    Und erklärt die Einstellung "Ort des Kontoinhabers" "Beispiel: Zürich"
+    Und heisst die Einstellung "Adresse des Kontoinhabers" "Strasse und Hausnummer (optional)"
+
+  # #1175 (Persona Marco P-2): auch beim Absender ist die Strasse freiwillig (#450), wie beim Kontoinhaber
+  Szenario: Die Strasse des Absenders ist als freiwillig bezeichnet
+    Dann heisst die Einstellung "Adresse" "Strasse und Hausnummer (optional)"
+
   # #490 (Entscheid des Product Owners): die Hilfe sagt es vor dem Speichern
   Szenario: Die Einstellungen sagen, was eine IBAN braucht
     Dann erklären die Einstellungen bei der IBAN "Mit einer IBAN braucht es Firmenname, PLZ und Ort."

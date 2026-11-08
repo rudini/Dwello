@@ -166,6 +166,7 @@
 				name="companyAddress"
 				label={m.buildings_street()}
 				value={settings.companyAddress}
+				optional
 				example={m.settings_example_street()}
 			/>
 			<div class="grid gap-6 sm:grid-cols-3">
@@ -234,11 +235,14 @@
 						value={settings.accountHolderName}
 						error={errors.accountHolderName}
 						invalidBy={namedBy('accountHolderName')}
+						example={m.settings_account_holder_name_example()}
 					/>
 					<SettingField
 						name="accountHolderAddress"
 						label={m.buildings_street()}
 						value={settings.accountHolderAddress}
+						optional
+						example={m.settings_example_street()}
 					/>
 					<div class="grid gap-6 sm:grid-cols-3">
 						<SettingField
@@ -247,6 +251,7 @@
 							value={settings.accountHolderPostalCode}
 							error={errors.accountHolderPostalCode}
 							invalidBy={namedBy('accountHolderPostalCode')}
+							example="8001"
 						/>
 						<div class="sm:col-span-2">
 							<SettingField
@@ -254,6 +259,7 @@
 								label={m.buildings_city()}
 								value={settings.accountHolderCity}
 								invalidBy={namedBy('accountHolderCity')}
+								example={m.settings_city_example()}
 							/>
 						</div>
 					</div>
