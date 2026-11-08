@@ -37,17 +37,29 @@ const occupancyRate = (occupied: number, total: number) => (total > 0 ? Math.rou
 
 async function portfolio() {
 	const [totalBuildings] = await db.select({ count: count() }).from(buildings);
-	const totalApartments = await countApartments();
-	const occupiedApartments = await countApartments(sql`${apartmentStatus} = 'occupied'`);
+	// one query for all Mietstatus counts (P2 «Wartezeit nach einem Klick»)
+	const ofStatus = (status: string) => sql<number>`count(*) filter (where ${apartmentStatus} = ${status})`;
+	const [counts] = await db
+		.select({
+			total: count(),
+			existing: sql<number>`count(*) filter (where ${existing})`,
+			occupied: ofStatus('occupied'),
+			vacant: ofStatus('vacant'),
+			relet: ofStatus('relet'),
+			reserved: ofStatus('reserved'),
+			discontinued: ofStatus('discontinued')
+		})
+		.from(apartments);
+	const occupiedApartments = Number(counts?.occupied ?? 0);
 	return {
 		totalBuildings: Number(totalBuildings?.count ?? 0),
-		totalApartments,
+		totalApartments: Number(counts?.total ?? 0),
 		occupiedApartments,
-		vacantApartments: await countApartments(sql`${apartmentStatus} = 'vacant'`),
-		reletApartments: await countApartments(sql`${apartmentStatus} = 'relet'`),
-		reservedApartments: await countApartments(sql`${apartmentStatus} = 'reserved'`),
-		discontinuedApartments: await countApartments(sql`${apartmentStatus} = 'discontinued'`),
-		occupancyRate: occupancyRate(occupiedApartments, await countApartments(existing))
+		vacantApartments: Number(counts?.vacant ?? 0),
+		reletApartments: Number(counts?.relet ?? 0),
+		reservedApartments: Number(counts?.reserved ?? 0),
+		discontinuedApartments: Number(counts?.discontinued ?? 0),
+		occupancyRate: occupancyRate(occupiedApartments, Number(counts?.existing ?? 0))
 	};
 }
 
