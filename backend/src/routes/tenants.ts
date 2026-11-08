@@ -6,6 +6,8 @@
 import { Elysia, t } from 'elysia';
 import { swissToday } from '../services/today';
 import { fieldsRefused } from '../services/coded-error';
+import { tenants } from '../db/schema';
+import { withTooLong } from '../services/text-length';
 import { newTenantFieldErrors, tenantFieldErrors } from '../services/tenant-fields';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -117,7 +119,7 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 	.post(
 		'/',
 		async ({ body, set }) => {
-			const invalid = newTenantFieldErrors(body);
+			const invalid = withTooLong(newTenantFieldErrors(body), tenants, body);
 			if (invalid.length) {
 				set.status = 400;
 				return fieldsRefused(invalid);
@@ -139,7 +141,7 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 	.put(
 		'/:id',
 		async ({ params, body, set }) => {
-			const invalid = tenantFieldErrors(body);
+			const invalid = withTooLong(tenantFieldErrors(body), tenants, body);
 			if (invalid.length) {
 				set.status = 400;
 				return fieldsRefused(invalid);

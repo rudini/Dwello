@@ -1,4 +1,4 @@
-import { backendMessage, type BackendError } from '$lib/backend-error';
+import { backendMessage, refusedFields, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import { error, fail, redirect } from '@sveltejs/kit';
 
@@ -8,8 +8,8 @@ type Saved = { id?: string } & BackendError;
  * Form action body: reports the form's errors, or sends the record to the backend
  * (POST creates it, PUT with an id updates it) and opens the saved record.
  * A refusal is shown for the whole form, for `options.conflict` when the backend answers 409 (e.g. a name taken),
- * or for the field `options.field` names after the refusal's code (e.g. a formula error at «Formel»);
- * `options.also` adds the errors of other fields the same refusal names (#1200).
+ * for the field `options.field` names after the refusal's code (e.g. a formula error at «Formel»), or each at the
+ * field its cause names; `options.also` adds the errors of other fields the same refusal names (#1200).
  */
 export async function saveRecord(
 	fetch: typeof globalThis.fetch,
@@ -33,6 +33,14 @@ export async function saveRecord(
 	});
 	const saved: Saved = await response.json().catch(() => ({}));
 	if (!response.ok) {
+		// refused fields, e.g. a text longer than its column (#1201): each message at its field; the German name an
+		// edit sends as nameDE is the form's «Name»
+		if (saved.causes?.every((cause) => cause.params?.field)) {
+			const { nameDE, ...errors } = refusedFields(saved);
+			return fail(response.status, {
+				errors: { ...(nameDE && { name: nameDE }), ...errors } as Record<string, string>
+			});
+		}
 		const key = (response.status === 409 && options.conflict) || options.field?.(saved) || 'form';
 		const message = options.failure(response.status, saved);
 		return fail(response.status, {

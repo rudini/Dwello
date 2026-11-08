@@ -10,6 +10,7 @@ import { profileTotal } from '../lib/heating-profile';
 import { runAction } from './helpers/action';
 import profileDefault from '../../tests/contracts/heating-profile-default-refused.json';
 import nameTaken from '../../tests/contracts/heating-profile-name-taken.json';
+import tooLong from '../../tests/contracts/heating-profile-text-too-long.json';
 
 const API = 'http://localhost:3001/api/v1/heating-profiles';
 const months = [
@@ -86,6 +87,16 @@ describe('Neues Heizprofil', () => {
 		expect(await result).toMatchObject({
 			status: 409,
 			data: { errors: { name: 'Ein Heizprofil mit dem Namen «Bergtal» existiert bereits.' } }
+		});
+	});
+
+	// #1201: before, the form showed only its general save error
+	it('zeigt am Feld, dass ein Name länger ist, als Dwello ihn speichert', async () => {
+		const { result } = runAction(newActions.default, '', 400, form(), tooLong);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { nameFR: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } }
 		});
 	});
 });

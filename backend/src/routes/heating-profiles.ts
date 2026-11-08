@@ -6,6 +6,8 @@
 import { Elysia, t } from 'elysia';
 import { errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
+import { heatingProfiles } from '../db/schema';
+import { refuseTooLong } from '../services/text-length';
 import {
 	listHeatingProfiles,
 	getHeatingProfile,
@@ -105,6 +107,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 			}
 		},
 		{
+			beforeHandle: refuseTooLong(heatingProfiles),
 			body: t.Object({
 				name: t.String({ minLength: 1 }),
 				nameDE: t.Optional(t.String()),
@@ -172,6 +175,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 			params: t.Object({
 				id: t.String()
 			}),
+			beforeHandle: refuseTooLong(heatingProfiles),
 			body: t.Object({
 				name: t.Optional(t.String({ minLength: 1 })),
 				nameDE: t.Optional(t.String()),

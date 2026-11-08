@@ -1,7 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { ON_FRESH, test } from '../fixtures/test';
 import { focusedSetting, focusedSettingField, holderIsSender, settingCount, settingHelp, settingInvalid, settingName, settingsSaved, storedSetting } from '../questions/settings';
-import { giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
+import { enterSettings, giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -187,6 +187,31 @@ Then('fragen die Einstellungen nicht nach einem eigenen Kontoinhaber', async ({ 
 When('der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber angibt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(giveOwnHolder);
 });
+
+// #1202: types the Kontoinhaber, ticks the checkbox and clears it again, all without saving
+When('folgende Angaben zum Kontoinhaber eingibt:', async ({ verwalter }, table: DataTable) => {
+	await verwalter.attemptsTo(
+		enterSettings(Object.fromEntries(Object.entries(table.rowsHash()).map(([label, value]) => [FIELDS[label], value])))
+	);
+});
+
+When('den Absender wieder als Kontoinhaber angibt, ohne zu speichern', async ({ verwalter }) => {
+	await verwalter.attemptsTo(giveSenderAsHolder);
+});
+
+When('doch einen eigenen Kontoinhaber angibt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(giveOwnHolder);
+});
+
+Then(
+	'zeigen die Einstellungen den Kontoinhaber {string}, {string}, {string} {string}',
+	async ({ verwalter }, name: string, street: string, postalCode: string, city: string) => {
+		await verwalter.sees(storedSetting('accountHolderName')).toBe(name);
+		await verwalter.sees(storedSetting('accountHolderAddress')).toBe(street);
+		await verwalter.sees(storedSetting('accountHolderPostalCode')).toBe(postalCode);
+		await verwalter.sees(storedSetting('accountHolderCity')).toBe(city);
+	}
+);
 
 Then('heisst die Einstellung {string} {string}', async ({ verwalter }, label: string, name: string) => {
 	await verwalter.sees(settingName(FIELDS[label])).toBe(name);

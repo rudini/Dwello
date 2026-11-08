@@ -115,7 +115,7 @@
 		{/if}
 	</div>
 
-	<NameTranslations names={key} help={m.keys_translations_help()} testid="distribution-key" />
+	<NameTranslations names={key} help={m.keys_translations_help()} testid="distribution-key" {errors} />
 
 	<FormulaHelp />
 </SaveForm>

@@ -6,6 +6,8 @@
 import { Elysia, t } from 'elysia';
 import { fieldsRefused, refusal, refusedWith } from '../services/coded-error';
 import { apartmentFieldErrors, buildingFieldErrors, decimalOf } from '../services/building-fields';
+import { apartments as apartmentsTable, buildings } from '../db/schema';
+import { withTooLong } from '../services/text-length';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listBuildings,
@@ -60,7 +62,7 @@ const buildingUpdateSchema = t.Partial(buildingBodySchema);
 
 // A new building may bring its Wohnungen along (taken from the Gebäuderegister, #479), all created or none
 const newApartmentSchema = t.Object({
-	number: t.String({ maxLength: 20 }),
+	number: t.String(),
 	floor: t.Union([t.Number(), t.String()]), // as entered in the form
 	area: t.String(),
 	rooms: t.String()
@@ -113,7 +115,10 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 	.post(
 		'/',
 		async ({ body: { apartments = [], ...body }, set }) => {
-			const invalid = [...buildingFieldErrors(body), ...apartmentFieldErrors(apartments)];
+			const invalid = apartments.reduce(
+				(errors, a, i) => withTooLong(errors, apartmentsTable, a, (key) => `apartments.${i}.${key}`),
+				withTooLong([...buildingFieldErrors(body), ...apartmentFieldErrors(apartments)], buildings, body)
+			);
 			if (invalid.length) {
 				set.status = 400;
 				return fieldsRefused(invalid);
@@ -141,7 +146,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 	.put(
 		'/:id',
 		async ({ params, body, set }) => {
-			const invalid = buildingFieldErrors(body);
+			const invalid = withTooLong(buildingFieldErrors(body), buildings, body);
 			if (invalid.length) {
 				set.status = 400;
 				return fieldsRefused(invalid);
