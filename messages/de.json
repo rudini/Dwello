@@ -2077,6 +2077,7 @@
 	"tenants_document_title_label": "Titel",
 	"tenants_document_title_help": "Ohne Titel heisst das Dokument wie die Datei, ohne Endung.",
 	"tenants_document_upload": "Dokument hochladen",
+	"tenants_document_upload_busy_note": "Das Dokument wird hochgeladen. Bis das Hochladen fertig ist, lassen sich Datei und Titel nicht ändern.",
 	"tenants_document_demo": "Alle Besucher sehen die Dateien, die Sie hier hochladen. Laden Sie nur erfundene Dokumente hoch.",
 	"tenants_document_file_missing": "Wählen Sie eine Datei aus.",
 	"tenants_document_upload_failed": "Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen».",

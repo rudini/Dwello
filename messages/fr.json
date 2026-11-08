@@ -2077,6 +2077,7 @@
 	"tenants_document_title_label": "Titre",
 	"tenants_document_title_help": "Sans titre, le document porte le nom du fichier, sans extension.",
 	"tenants_document_upload": "Téléverser le document",
+	"tenants_document_upload_busy_note": "Le document est en cours de téléversement. Le fichier et le titre ne peuvent pas être modifiés avant la fin du téléversement.",
 	"tenants_document_demo": "Tous les visiteurs voient les fichiers que vous téléversez ici. Ne téléversez que des documents fictifs.",
 	"tenants_document_file_missing": "Choisissez un fichier.",
 	"tenants_document_upload_failed": "Le document n’a pas été enregistré, car Dwello n’a pas répondu. Choisissez à nouveau « Téléverser le document ».",

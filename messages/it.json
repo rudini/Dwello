@@ -2077,6 +2077,7 @@
 	"tenants_document_title_label": "Titolo",
 	"tenants_document_title_help": "Senza titolo, il documento porta il nome del file, senza estensione.",
 	"tenants_document_upload": "Caricare il documento",
+	"tenants_document_upload_busy_note": "Il documento è in fase di caricamento. File e titolo non si possono modificare finché il caricamento non è terminato.",
 	"tenants_document_demo": "Tutti i visitatori vedono i file che carica qui. Carichi solo documenti fittizi.",
 	"tenants_document_file_missing": "Scelga un file.",
 	"tenants_document_upload_failed": "Il documento non è stato salvato perché Dwello non ha risposto. Scelga di nuovo «Caricare il documento».",

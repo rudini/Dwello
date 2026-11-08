@@ -160,5 +160,9 @@
 		<Button type="submit" icon="add" busy={uploading} testid="tenant-document-upload-button"
 			>{m.tenants_document_upload()}</Button
 		>
+		<!-- why file and title are locked, and until when; a live region before its text, so it is announced (#1290) -->
+		<p role="status" class={uploading ? 'mt-2' : ''} data-testid="tenant-document-upload-busy-note">
+			{uploading ? m.tenants_document_upload_busy_note() : ''}
+		</p>
 	</div>
 </form>
