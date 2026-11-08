@@ -32,12 +32,20 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' '), abroad].filter(Boolean).join(', ');
 }
 
+// #690: the code of the warning of a statement with a Zahlteil, by the backend's rule: whose address is incomplete;
+// none when the settings cannot be read
+async function creditorWarning(fetch: typeof globalThis.fetch): Promise<string | null> {
+	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
+	return (response?.ok && (await response.json()).paymentPartWarning) || null;
+}
+
 export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const statement = await loadStatement(fetch, params.id);
-	const [address, documents, later, days] = await Promise.all([
+	const [address, documents, later, warning, days] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
 		laterChanges(fetch, params.id),
+		creditorWarning(fetch),
 		paymentDeadlineDays(fetch)
 	]);
 	// the statement's own Dokument (sent by e-mail, #86) is no Mahnung: the next Mahnstufe counts these
@@ -52,6 +60,7 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 		// set by the edit page after a change the sent PDF does not show (#524)
 		pdfChange: url.searchParams.get('pdf-change'),
 		later,
+		creditorWarning: warning,
 		paymentDeadlineDays: days
 	};
 };

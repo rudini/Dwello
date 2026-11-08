@@ -28,6 +28,16 @@ describe('Was der Saldo einer Nebenkostenabrechnung verlangt', () => {
 		expect(of({ balance: '-120.00' })).toMatchObject({ unpaid: false, claimed: false });
 	});
 
+	// #690: the PDF and a Mahnung of an amount still due get a Zahlteil (`owed` in pdf.service.ts): not a paid one
+	it('gibt dem PDF einer Nachzahlung einen Zahlteil, solange sie nicht bezahlt ist', () => {
+		expect(of({}).paymentPart).toBe(true);
+		expect(of({ status: 'overdue' }).paymentPart).toBe(true);
+		expect(of({ status: 'paid', paidAmount: '120.00' }).paymentPart).toBe(false);
+		expect(of({ balance: '-120.00' }).paymentPart).toBe(false);
+		expect(of({ balance: '4.95' }).paymentPart).toBe(false);
+		expect(of({ status: 'settled' }).paymentPart).toBe(false);
+	});
+
 	it('verlangt bei einem Saldo von 0.00 und einer verrechneten nichts', () => {
 		expect(of({ balance: '0.00', final: true })).toMatchObject({ unpaid: true, claimed: false });
 		expect(of({ status: 'settled' })).toMatchObject({ unpaid: true, claimed: false });

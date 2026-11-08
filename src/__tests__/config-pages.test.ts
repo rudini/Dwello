@@ -36,10 +36,13 @@ const months = (pct: number) =>
 		].map((m) => [m, pct])
 	);
 
-const settingsPage = (form: object | null = null) =>
+const settingsPage = (form: object | null = null, stored: object = {}) =>
 	render(SettingsPage, {
 		props: {
 			data: {
+				errors: {},
+				missing: [],
+				...stored,
 				settings,
 				heatingProfiles: [
 					{
@@ -116,6 +119,35 @@ describe('Einstellungen', () => {
 			expect(inputOf(name)).toContain('iban-error');
 		}
 		expect(inputOf('companyPostalCode')).not.toContain('aria-invalid');
+	});
+
+	// #690: an IBAN stored before #450 without the Firmenadresse, marked on opening, without a save to refuse
+	it('kennzeichnet beim Öffnen die leeren Felder, die der gespeicherten IBAN fehlen', () => {
+		const body = settingsPage(null, {
+			errors: {
+				iban: 'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.'
+			},
+			missing: ['companyName']
+		});
+		const inputOf = (name: string) =>
+			body.match(new RegExp(`<input[^>]*name="${name}"[^>]*>`))?.[0] ?? '';
+
+		expect(body).toContain(
+			'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.'
+		);
+		expect(inputOf('companyName')).toContain('aria-invalid="true"');
+		expect(body).not.toContain('Die Einstellungen wurden nicht gespeichert');
+	});
+
+	// #690 (persona Helga 450): a refused field, and the page says that none of the others was saved either
+	it('sagt bei einer abgelehnten Speicherung, dass kein Feld gespeichert wurde', () => {
+		const body = settingsPage({
+			errors: { companyPostalCode: 'Die PLZ hat 4 Ziffern.' },
+			missing: []
+		});
+
+		expect(body).toContain('Die Einstellungen wurden nicht gespeichert');
+		expect(body).toContain('Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern.');
 	});
 
 	it('bestätigt das Speichern und nennt, was gespeichert ist', () => {
