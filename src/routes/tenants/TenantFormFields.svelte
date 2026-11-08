@@ -80,6 +80,8 @@
 	value={value('phone')}
 	optional
 	example="079 123 45 67"
+	error={errors.phone}
+	testid="tenant-phone-input"
 />
 
 <Select

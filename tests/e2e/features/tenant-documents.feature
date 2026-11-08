@@ -142,6 +142,14 @@ Funktionalität: Dokumente eines Mieters
     Und sind «Datei» und «Titel» gesperrt, auch für einen Screenreader
     Und sehen «Datei» und «Titel» ausgegraut aus
 
+  # #1290 (Persona Sven P-1, Helga): ein Satz sagt, warum Datei und Titel gesperrt sind und bis wann
+  Szenario: Während des Hochladens sagt Dwello, warum sich Datei und Titel nicht ändern lassen
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
+    Dann sagt Dwello vor dem Hochladen noch nicht "Das Dokument wird hochgeladen."
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
+    Dann sagt Dwello beim Hochladen "Das Dokument wird hochgeladen. Bis das Hochladen fertig ist, lassen sich Datei und Titel nicht ändern.", auch einem Screenreader
+
   # #1262: nach dem Fehler sind die Felder wieder frei und halten, was gewählt war
   Szenario: Nach einem gescheiterten Hochladen lassen sich Datei und Titel wieder ändern
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

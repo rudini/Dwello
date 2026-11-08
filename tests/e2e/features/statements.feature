@@ -237,3 +237,11 @@ Funktionalität: Nebenkostenabrechnungen
       | Breite | Höhe |
       | 390    | 844  |
       | 960    | 600  |
+
+  # #1237: eine Seite nach der letzten (eine alte Adresse, ein Lesezeichen) zeigt die letzte Seite mit Abrechnungen,
+  # damit der Satz unter den Statusfiltern und die Liste übereinstimmen
+  Szenario: Eine Seite nach der letzten zeigt die letzte Seite der Liste
+    Angenommen für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnungen 2014 bis 2023
+    Wenn der Liegenschaftsverwalter die Seite 5 der Entwürfe im Gebäude "Ahornhof" aufruft
+    Dann steht unter den Statusfiltern "Die Liste unten zeigt 11 Abrechnungen mit dem Status «Entwurf»."
+    Und steht über der Abrechnungsliste "Abrechnung 11 von 11 mit dem Status «Entwurf», Seite 2 von 2"

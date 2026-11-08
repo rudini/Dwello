@@ -39,6 +39,10 @@
 			stored.accountHolderCity
 		);
 	let holderIsSender = $state(noHolderStored());
+	// #1202: what the landlord types into the Kontoinhaber, kept while ticking the checkbox unmounts the fields; from the
+	// stored settings when the page opens and after a save
+	const typedFrom = (stored = data.settings) => ({ ...stored });
+	const holder = $state(typedFrom());
 	const saved = $derived(result?.saved === true);
 	// #690 (persona Helga 690 H-4): opened with fields the stored IBAN lacks, two screens down: the first gets the focus,
 	// as after a refused save; after the navigation, whose focus reset and scroll to «#sender» would take it (code review
@@ -142,8 +146,10 @@
 		method="POST"
 		use:enhance={() => {
 			saving = true;
-			return async ({ update, formElement }) => {
+			return async ({ update, formElement, result }) => {
 				await update({ reset: false });
+				// #1202 (code review 1202-1 C-2): once saved, the Kontoinhaber is what is stored
+				if (result.type === 'success') Object.assign(holder, data.settings);
 				saving = false;
 				focusFirstError(formElement);
 			};
@@ -232,7 +238,7 @@
 					<SettingField
 						name="accountHolderName"
 						label={m.settings_account_holder_name()}
-						value={settings.accountHolderName}
+						bind:value={holder.accountHolderName}
 						error={errors.accountHolderName}
 						invalidBy={namedBy('accountHolderName')}
 						example={m.settings_account_holder_name_example()}
@@ -240,7 +246,7 @@
 					<SettingField
 						name="accountHolderAddress"
 						label={m.buildings_street()}
-						value={settings.accountHolderAddress}
+						bind:value={holder.accountHolderAddress}
 						optional
 						example={m.settings_example_street()}
 					/>
@@ -248,7 +254,7 @@
 						<SettingField
 							name="accountHolderPostalCode"
 							label={m.buildings_postal_code()}
-							value={settings.accountHolderPostalCode}
+							bind:value={holder.accountHolderPostalCode}
 							error={errors.accountHolderPostalCode}
 							invalidBy={namedBy('accountHolderPostalCode')}
 							example="8001"
@@ -257,7 +263,7 @@
 							<SettingField
 								name="accountHolderCity"
 								label={m.buildings_city()}
-								value={settings.accountHolderCity}
+								bind:value={holder.accountHolderCity}
 								invalidBy={namedBy('accountHolderCity')}
 								example={m.settings_city_example()}
 							/>

@@ -8,11 +8,13 @@
 	let {
 		names,
 		help,
-		testid
+		testid,
+		errors = {}
 	}: {
 		names?: { nameFR?: string | null; nameIT?: string | null; nameEN?: string | null };
 		help: string;
 		testid?: string;
+		errors?: Record<string, string>; // e.g. a name too long for its column (#1201)
 	} = $props();
 
 	const translations = [
@@ -39,6 +41,7 @@
 				name={key}
 				{label}
 				optional
+				error={errors[key]}
 				bind:value={values[key]}
 				testid={testid && `${testid}-name-${code}-input`}
 			/>

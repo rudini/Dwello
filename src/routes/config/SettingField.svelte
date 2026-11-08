@@ -5,7 +5,7 @@
 	let {
 		name,
 		label,
-		value,
+		value = $bindable(),
 		error,
 		help,
 		example,
@@ -31,7 +31,7 @@
 	{label}
 	type="text"
 	inputmode={type === 'text' ? undefined : type === 'number' ? 'numeric' : type}
-	{value}
+	bind:value
 	{error}
 	{help}
 	{example}
