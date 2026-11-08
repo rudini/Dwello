@@ -375,3 +375,18 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert
     Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
     Und steht bei "Name" noch der Text von 101 Zeichen
+
+  # #1304: der vergebene Name sagt auch, was zu tun ist, wie beim Verteilschlüssel (#1200)
+  @wip
+  Szenario: Bei einem vergebenen Namen einer Kategorie sagt Dwello, was zu tun ist
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die umlagefähige Kategorie "Treppenhausreinigung" erfasst
+    Dann steht bei "Name" die Fehlermeldung "Eine Kategorie mit dem Namen «Treppenhausreinigung» existiert bereits. Wählen Sie einen anderen Namen."
+
+  # #1306: auch die Prüfung durch die KI lehnt einen zu langen Namen beim Namen ab, ohne die KI zu fragen
+  @wip
+  Szenario: Bei einem zu langen Namen für die Prüfung durch die KI sagt Dwello, was zu tun ist
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter einen Namen von 101 Zeichen von der KI prüfen lässt
+    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Und steht bei "Name" noch der Text von 101 Zeichen

@@ -83,8 +83,8 @@ When(
 	}
 );
 
-Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter }, label: string, text: string) => {
-	await verwalter.sees(fieldDescription(label)).toContain(text);
+Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter, seed }, label: string, text: string) => {
+	await verwalter.sees(fieldDescription(label)).toContain(seed.withNames(text)); // #1304: a seeded name as the page shows it
 });
 
 Then('steht bei {string} noch der Text von {int} Zeichen', async ({ verwalter }, label: string, length: number) => {
