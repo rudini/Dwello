@@ -17,6 +17,9 @@ import { getTypedConfig } from '../services/config.service';
 import { listContracts } from '../services/contract.service';
 import { listStatements } from '../services/statement.service';
 
+// an apartment that no longer exists (#1311) is not vermietbar: it counts in no total
+const existing = sql`${apartmentStatus} <> 'discontinued'`;
+
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
 
@@ -34,7 +37,7 @@ const occupancyRate = (occupied: number, total: number) => (total > 0 ? Math.rou
 
 async function portfolio() {
 	const [totalBuildings] = await db.select({ count: count() }).from(buildings);
-	const totalApartments = await countApartments();
+	const totalApartments = await countApartments(existing);
 	const occupiedApartments = await countApartments(sql`${apartmentStatus} = 'occupied'`);
 	return {
 		totalBuildings: Number(totalBuildings?.count ?? 0),
@@ -52,7 +55,7 @@ async function buildingOccupancy() {
 	return Promise.all(
 		buildingList.map(async (building) => {
 			const inBuilding = eq(apartments.buildingId, building.id);
-			const total = await countApartments(inBuilding);
+			const total = await countApartments(and(inBuilding, existing));
 			const occupied = await countApartments(and(inBuilding, sql`${apartmentStatus} = 'occupied'`));
 			return {
 				buildingId: building.id,

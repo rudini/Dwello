@@ -42,7 +42,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 			occupiedCount: Number(b.occupiedCount) || 0,
 			vacantCount: Number(b.vacantCount) || 0,
 			reletStarts: reletStarts(inBuilding(b.id)),
-			reservedCount: countStatus(inBuilding(b.id), 'reserved')
+			reservedCount: countStatus(inBuilding(b.id), 'reserved'),
+			discontinuedCount: countStatus(inBuilding(b.id), 'discontinued')
 		}));
 
 		return {

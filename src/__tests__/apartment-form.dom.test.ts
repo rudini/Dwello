@@ -99,6 +99,19 @@ describe('Neue Wohnung', () => {
 		expect(errors).toEqual(['Bitte wählen Sie ein Gebäude aus.', 'Fläche ist erforderlich.']);
 	});
 
+	// #1311: der Mietstatus einer aufgehobenen Wohnung folgt aus «Aufgehoben ab» (Fachreview 1311-1, Wortlaut)
+	it('zeigt den Mietstatus einer aufgehobenen Wohnung, ohne ihn ändern zu lassen', () => {
+		show(EditApartmentPage, {
+			data: { apartment: { ...apartment('discontinued'), discontinuedFrom: '2025-07-01' } },
+			form: null
+		} as never);
+		expect(byTestId('apartment-status-rented')!.textContent!.trim()).toBe('Aufgehoben seit 01.07.2025');
+		expect(byTestId('apartment-status-select')).toBeNull();
+		expect(document.body.textContent).toContain(
+			'Der Mietstatus ergibt sich aus dem Feld «Aufgehoben ab» und lässt sich hier nicht ändern.'
+		);
+	});
+
 	it('bestätigt das Speichern mit der Wohnungsnummer', async () => {
 		open('b1');
 		fireEvent(byTestId<HTMLInputElement>('apartment-number-input')!, 'input', '2.01');
@@ -175,7 +188,7 @@ describe('Wohnung bearbeiten', () => {
 	});
 
 	// #1284, wording of Fachreview 1284-1 (a) and V-1 (b)
-	it('erklärt «Aufgehoben ab» am Feld, auch dass eine grössere Wohnung ihre Fläche noch nicht ab dem Tag erhält', () => {
+	it('erklärt «Aufgehoben ab» am Feld: wann Sie den Anteil tragen, wer ab dem Tag die Kosten teilt und dass eine grössere Wohnung ihre Fläche noch nicht ab dem Tag erhält', () => {
 		show(EditApartmentPage, {
 			data: { apartment: { ...apartment(), discontinuedFrom: '2025-07-01' } },
 			form: null
@@ -183,7 +196,7 @@ describe('Wohnung bearbeiten', () => {
 		expect(labelOf('apartment-discontinued-input')).toBe('Aufgehoben ab (optional)');
 		expect(byTestId<HTMLInputElement>('apartment-discontinued-input')!.value).toBe('01.07.2025');
 		expect(document.body.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit, und ihren Anteil tragen Sie. Abrechnungen ab diesem Tag rechnen ohne sie. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, kann Dwello ihre neue Fläche noch nicht ab diesem Tag berücksichtigen.'
+			'Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit. Solange sie leer steht, tragen Sie ihren Anteil. Ab diesem Tag verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer. Wird eine andere Wohnung dadurch grösser, kann Dwello ihre neue Fläche noch nicht ab diesem Tag berücksichtigen.'
 		);
 	});
 });

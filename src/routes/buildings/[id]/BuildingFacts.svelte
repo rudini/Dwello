@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
-	import { occupancyParts } from '$lib/apartment';
+	import { existingCount, occupancyParts } from '$lib/apartment';
 	import { buildingTypeLabel } from '$lib/building-type';
 	import { accountingPeriods } from '$lib/accounting-period';
 	import type { BuildingWithStats } from '$lib/types';
@@ -58,7 +58,7 @@
 		<div>
 			<dt class="text-ink-muted">{m.nav_apartments()}</dt>
 			<dd class="font-semibold tabular-nums text-ink">
-				{m.buildings_apartments_of({ count: building.apartmentCount, occupancy })}
+				{m.buildings_apartments_of({ count: existingCount(building), occupancy })}
 			</dd>
 		</div>
 	</dl>

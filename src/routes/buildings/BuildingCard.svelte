@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { occupancyParts } from '$lib/apartment';
+	import { existingCount, occupancyParts } from '$lib/apartment';
 	import { buildingTypeLabel } from '$lib/building-type';
 	import type { BuildingWithStats } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -43,8 +43,8 @@
 	<ul class="flex flex-wrap gap-x-6 gap-y-2 text-ink">
 		<li class="flex items-center gap-2">
 			<span class="text-ink-muted"><Icon name="apartment" /></span>
-			{building.apartmentCount}
-			{building.apartmentCount === 1 ? m.buildings_apartment_one() : m.buildings_apartment_many()}
+			{existingCount(building)}
+			{existingCount(building) === 1 ? m.buildings_apartment_one() : m.buildings_apartment_many()}
 		</li>
 		{#each occupancyParts(building) as part (part)}<li>{part}</li>{/each}
 	</ul>

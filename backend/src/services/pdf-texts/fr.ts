@@ -74,7 +74,7 @@ export const fr: Record<string, string> = {
 	partShare: 'Votre part{colon}{apartment} × part temporelle ({sum}) / {costs} = {share}',
 	partShareZero: 'Votre part{colon}({sum}) × {keyShare} (part de votre logement selon la clé de répartition) = {share}',
 	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
-	segmentIntro: 'L’appartement {number} n’existe plus dès le {date}. Jusqu’au {dayBefore}, il compte dans la clé de répartition\u00a0; sa part est à la charge du bailleur. Sous les postes du décompte concernés figure le calcul par période.',
+	segmentIntro: 'L’appartement {number} n’existe plus dès le {date}. Jusqu’au {dayBefore}, il compte dans la clé de répartition\u00a0; tant qu’il est vacant, sa part est à la charge du bailleur. Dès le {date}, les frais accessoires de l’immeuble sont répartis uniquement sur les autres appartements. Sous les postes du décompte concernés figure le calcul par période.',
 	keyShareSegments: 'par période, voir ci-dessous',
 	segmentLineDays: '{start} – {end}, {count} appartements{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} jours = CHF {share}',
 	segmentLinePercent: '{start} – {end}, {count} appartements{colon}{keyShare} × CHF {costs} = CHF {apartment} × part temporelle {percent}\u00a0% = CHF {share}',

@@ -255,6 +255,19 @@ describe('Alle Daten exportieren', () => {
 		}
 	});
 
+	// #1311 (Fachreview 1311-1 V-4): der Export hat keine Spalte «Aufgehoben ab», der Mietstatus nennt den Tag
+	it('nennt eine aufgehobene Wohnung «Aufgehoben seit» dem Tag', async () => {
+		const gone = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', endDate: '2024-12-31', monthlyAdvancePayment: '100' });
+		try {
+			await db.update(apartments).set({ discontinuedFrom: '2025-07-01' }).where(eq(apartments.id, gone.apartment));
+			const exported = await exportIn();
+
+			expect(rowsOf(exported, 'tabellen/wohnungen.csv').find((row) => row.ID === gone.apartment)).toMatchObject({ Mietstatus: 'Aufgehoben seit 2025-07-01' });
+		} finally {
+			await gone.remove();
+		}
+	});
+
 	it('nennt Sprache, Korrespondenzkanal, Art und Status eines Dokuments und die Verwaltungspauschale mit den Wörtern der Oberfläche (Fachreview 496-2 V-4, V-14)', async () => {
 		const [reminder, sent] = await db
 			.insert(documents)

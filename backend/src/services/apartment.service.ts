@@ -52,12 +52,13 @@ const availableFrom = sql<string | null>`(
 )`;
 
 /**
- * Occupied while a rental contract runs today; relet when only a future contract is signed;
- * otherwise as the property manager set it (vacant or reserved).
+ * Discontinued from its «Aufgehoben ab» on (#1311; no contract runs then, #1284); occupied while a rental contract runs
+ * today; relet when only a future contract is signed; otherwise as the property manager set it (vacant or reserved).
  * Computed on every read, so it is right on the day a contract starts or ends.
  * The outer columns are named explicitly: drizzle leaves them unqualified in single-table selects.
  */
 export const apartmentStatus = sql<ApartmentStatus>`(case
+	when "apartments"."discontinued_from" <= ${sqlToday} then 'discontinued'
 	when exists (
 		select 1 from rental_contracts c
 		where c.apartment_id = "apartments"."id"

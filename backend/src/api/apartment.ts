@@ -6,7 +6,7 @@
 import type { Apartment, Building } from '../db/schema';
 
 /** An apartment's Belegung, as the backend decides it by the Swiss day */
-export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
+export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved' | 'discontinued';
 
 /** #664: an ended contract's move-out until its Schlussabrechnung exists, `due` after the end of its period */
 export type MoveOut = { endDate: string; tenantName: string; period: { start: string; end: string }; due: boolean; outside: boolean };

@@ -107,6 +107,15 @@ describe('Gebäudeliste', () => {
 		expect(words).toContain('1 gesperrt');
 	});
 
+	// #1311: eine aufgehobene Wohnung zählt nicht bei den Wohnungen, steht aber als eigener Teil (Fachreview 1311-1 V-5)
+	it('zählt eine aufgehobene Wohnung nicht als leer und nicht bei den Wohnungen', () => {
+		list([building({ apartmentCount: 3, occupiedCount: 1, vacantCount: 1, discontinuedCount: 1 })]);
+		const words = byTestId('building-card-b1')!.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain('2 Wohnungen');
+		expect(words).toContain('1 leer');
+		expect(words).toContain('1 aufgehoben');
+	});
+
 	it('plant die Route in Google Maps mit sichtbarer Beschriftung', () => {
 		list([building()]);
 		const route = byTestId('building-card-b1')!.querySelector<HTMLAnchorElement>(

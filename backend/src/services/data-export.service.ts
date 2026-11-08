@@ -218,6 +218,7 @@ const WORDS = {
 	relet: ['Vermietet ab {date}', 'Loué dès le {date}', 'Locato dal {date}', 'Let from {date}'],
 	vacant: ['Leer', 'Vacant', 'Sfitto', 'Vacant'],
 	reserved: ['Gesperrt', 'Bloqué', 'Bloccato', 'Blocked'],
+	discontinued: ['Aufgehoben seit {date}', 'N’existe plus depuis le {date}', 'Non esiste più dal {date}', 'No longer exists since {date}'],
 	feeRun: ['Ja, zum Satz des Abrechnungslaufs', 'Oui, au taux de l’établissement des décomptes', 'Sì, all’aliquota dell’allestimento dei conteggi', 'Yes, at the rate of the statement run'],
 	feeOwn: ['Ja, mit eigenem Satz', 'Oui, avec un taux propre', 'Sì, con un’aliquota propria', 'Yes, with its own rate'],
 	feeNone: ['Nein', 'Non', 'No', 'No'],
@@ -419,7 +420,7 @@ export async function exportAllData(language: Language) {
 		allApartments.map((apartment) => ({
 			...apartment,
 			building: buildingOf.get(apartment.buildingId)?.name,
-			rentalStatus: word(apartment.rentalStatus).replace('{date}', apartment.nextContractStart ?? '')
+			rentalStatus: word(apartment.rentalStatus).replace('{date}', apartment.nextContractStart ?? apartment.discontinuedFrom ?? '')
 		}))
 	);
 	table(
