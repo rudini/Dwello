@@ -189,9 +189,9 @@ Funktionalität: Mietvertragsdetail
   Szenario: Mietvertrag mit einer Aufhebungsvereinbarung beenden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2099-03-31" beendet
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
     Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
-    Dann zeigt die Vertragsdauer "Unbefristet, beendet auf den 31.03.2099"
+    Dann zeigt die Vertragsdauer "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
     Und nennt die Mietvertragsliste den Mietvertrag von "Anna Keller" "einvernehmlich"
 
   Szenario: Bei einer Aufhebungsvereinbarung fragt der Dialog nicht nach dem Eingang der Kündigung
@@ -216,14 +216,14 @@ Funktionalität: Mietvertragsdetail
   Szenario: Ein mit einer Aufhebungsvereinbarung beendeter Mietvertrag läuft nicht stillschweigend weiter
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2025-03-31" beendet und die Folge bestätigt
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2025"
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2025 (Aufhebungsvereinbarung)"
     Und fragt der Mietvertrag nicht, ob der Mieter noch in der Wohnung wohnt
 
   Szenario: Der Eingang einer Kündigung gilt nicht für eine Aufhebungsvereinbarung
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beenden will und die Kündigung am "2098-12-15" erhalten hat
     Und der Liegenschaftsverwalter stattdessen eine Aufhebungsvereinbarung wählt und den Mietvertrag beendet
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
     Und zeigt der Mietvertrag keinen Eingang einer Kündigung
 
   Szenario: Befristeter Mietvertrag
@@ -453,7 +453,7 @@ Funktionalität: Mietvertragsdetail
     Und der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
-    Dann sagt der Hinweis zum abgelaufenen Mietvertrag "Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung."
+    Dann sagt der Hinweis zum abgelaufenen Mietvertrag "Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung oder einer Aufhebungsvereinbarung."
 
   Szenario: Mieter ist nach dem befristeten Mietvertrag ausgezogen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

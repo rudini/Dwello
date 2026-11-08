@@ -272,7 +272,7 @@ describe('Mietvertragsdetail', () => {
 		click('contract-end-button');
 		// Fachreview W10-2 M-1: die Kündigung der Erben wird hier erfasst (Art. 266i OR)
 		expect(text('contract-end-death')).toContain(
-			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben.'
+			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben oder wenn Sie mit den Erben eine Aufhebungsvereinbarung getroffen haben.'
 		);
 		expect(text('contract-end-death')).toContain('unter «Korrespondenzadresse»'); // Persona Weber P-1
 	});
@@ -1078,7 +1078,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		);
 		// #457 (#410 Punkt 3): nach längerer Annahme des Mietzinses läuft der Mietvertrag meist schon weiter
 		expect(text('contract-fixed-term-check')).toContain(
-			'Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung.'
+			'Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung oder einer Aufhebungsvereinbarung.'
 		);
 		const button = (testid: string) => [
 			byTestId(testid)!.textContent!.trim(),
