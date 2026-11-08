@@ -18,6 +18,7 @@ import {
 	documentStatus,
 	documentTitleInput,
 	duplicateFileNote,
+	uploadBusyNote,
 	noDocumentsHint,
 	uploadDocumentButton,
 	uploadDocumentProgress,
@@ -63,3 +64,8 @@ export const fileFieldChangeable = Enabled.of(documentFileInput);
 export const titleFieldChangeable = Enabled.of(documentTitleInput);
 export const fileButtonBackground = Colour.backgroundOf(documentFileButton, ['sunken', 'surface']);
 export const titleFieldBackground = Colour.backgroundOf(documentTitleInput, ['sunken', 'surface']);
+
+// #1290: the sentence and its role, `status` being announced when its text changes
+export const uploadBusyNoteText = Text.of(uploadBusyNote);
+export const uploadBusyNoteRole = Attribute.named('role').of(uploadBusyNote);
+export const uploadButtonShown = Visibility.of(uploadDocumentButton);
