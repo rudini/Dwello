@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readable } from 'svelte/store';
 import Navigation from '$lib/ui/Navigation.svelte';
-import { activeHref, navGroups } from '$lib/ui/navigation';
+import { activeHref, mobileNavGroups, navGroups } from '$lib/ui/navigation';
 import { show } from './helpers/dom';
 
 vi.mock('$app/stores', () => ({
@@ -34,6 +34,19 @@ describe('Hauptnavigation', () => {
 			['Heizprofile', '/config/heating-profiles'],
 			['Hilfe', '/help']
 		]);
+	});
+
+	// #657: im Menü des schmalen Fensters steht «Hilfe» zuoberst, die übrigen Bereiche wie in der Hauptnavigation
+	it('stellt im Menü «Hilfe» vor alle anderen Bereiche', () => {
+		const items = (groups: typeof navGroups) =>
+			groups.flatMap((group) => group.items.map((item) => item.href));
+		expect(items(mobileNavGroups)).toEqual([
+			'/help',
+			...items(navGroups).filter((href) => href !== '/help')
+		]);
+		expect(mobileNavGroups.map((group) => group.label)).toEqual(
+			navGroups.map((group) => group.label)
+		);
 	});
 
 	it('wählt den genauesten Bereich der Seite', () => {

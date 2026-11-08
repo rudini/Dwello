@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, structureItems, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
 
@@ -468,5 +470,13 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 		expect(loosened(longer, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.unstableDependencies grew from 1 to 2.']);
 		expect(tighten(m([]), r).exceptions.unstableDependencies).toEqual([]);
 		expect(tighten(m([{ from: 'be:middleware', to: 'be:services/local-account', gap: 0.34 }]), r).exceptions.unstableDependencies).toEqual([listed]);
+	});
+});
+
+// workflow-rules-review-2026-11-07.md, 2: the commit hook (.claude/hooks/fitness-gate.sh) and a reader grep this line
+describe('Abschluss des Laufs', () => {
+	it('endet mit einer Zeile, die Fehler und Warnungen zählt', () => {
+		const run = spawnSync('bun', [fileURLToPath(new URL('./fitness.ts', import.meta.url))], { encoding: 'utf8', timeout: 120_000 });
+		expect(run.stdout.trimEnd().split('\n').at(-1)).toMatch(/^Fitness: \d+ errors, \d+ warnings$/);
 	});
 });

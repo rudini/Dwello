@@ -5,7 +5,7 @@
 
 import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { containing, db } from '../db/connection';
+import { containing, db, paged } from '../db/connection';
 import { recordAudit, recordStatementCorrection } from './audit-log.service';
 import {
 	utilityStatements,
@@ -187,7 +187,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.where(whereClause)
 		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt), desc(utilityStatements.id))
 		.$dynamic();
-	const results = await (limit == null ? ordered : ordered.limit(limit)).offset(offset);
+	const results = await paged(ordered, limit, offset);
 
 	// Batch load all line items for the fetched statements (avoids N+1 query)
 	const statementIds = results.map((r) => r.statement.id);

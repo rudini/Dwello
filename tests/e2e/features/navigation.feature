@@ -141,3 +141,15 @@ Funktionalität: Navigation
     Angenommen das Browserfenster ist 853 Pixel breit
     Wenn der Liegenschaftsverwalter in der Hauptnavigation "Mietverträge" wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Mietverträge"
+
+  # #657 (Decided): 360 Pixel ist die schmalste Breite; bis dahin ragt nichts aus der Kopfzeile
+  Szenario: Die Kopfzeile passt in ein 360 Pixel schmales Fenster
+    Angenommen das Browserfenster ist 360 Pixel breit
+    Dann scrollt die Seite nicht seitwärts
+
+  # #657 (Decided): «Hilfe» steht zuoberst im Menü, ohne Scrollen sichtbar; die Hauptnavigation bleibt, wie sie ist
+  Szenario: Im Menü steht «Hilfe» zuoberst
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Und der Liegenschaftsverwalter hat das Menü geöffnet
+    Dann nennt das Menü zuerst "Hilfe"
+    Und sieht der Liegenschaftsverwalter "Hilfe" im Menü, ohne zu scrollen

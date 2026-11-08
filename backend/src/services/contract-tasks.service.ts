@@ -13,7 +13,7 @@ import { openCarryOvers } from './carry-over';
  * Vertragsende, until «Als geprüft markieren» (#178, #459)
  */
 export async function contractTasks() {
-	const { contracts } = await listContracts({ limit: 1000 });
+	const { contracts } = await listContracts({ limit: null });
 	const noticedContracts = [];
 	const expiredContracts = [];
 	for (const c of contracts)
@@ -49,7 +49,7 @@ export async function contractTasks() {
 
 // Drafts that would go to the apartment a moved-out tenant left, once per tenant (A-5, #114)
 async function oldAddresses() {
-	const { statements } = await listStatements({ status: 'draft', limit: 1000 });
+	const { statements } = await listStatements({ status: 'draft', limit: null });
 	const byTenant = new Map<string, { tenantId: string; tenantName: string }>();
 	for (const s of statements)
 		if (s.oldAddress && s.tenant) byTenant.set(s.tenantId, { tenantId: s.tenantId, tenantName: `${s.tenant.firstName} ${s.tenant.lastName}` });

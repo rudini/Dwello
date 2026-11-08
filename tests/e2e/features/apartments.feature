@@ -160,3 +160,16 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann ist die Wohnung "2.01" "Leer seit 01.07.2025"
     Und nennt die Wohnungsliste bei der Wohnung "2.01" keinen Auszug
+
+  # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn die Wohnungsliste über die Hauptnavigation wieder geöffnet wird
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Wohnungen" wählt
+    Dann zeigt die Suche ""
+
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn der Browser die Wohnungsliste wieder zeigt
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Ahornhof" sucht
+    Und der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann zeigt die Suche "Ahornhof"

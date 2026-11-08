@@ -146,7 +146,7 @@ async function validStatements(buildingId: string, period: Range) {
 		buildingId,
 		periodStart: period.start,
 		periodEnd: period.end,
-		limit: 1000
+		limit: null
 	});
 	return counting(statements).filter(
 		(s) => s.periodStart === period.start && s.periodEnd === period.end
@@ -210,7 +210,7 @@ export async function runReconciliation(
 
 /** The periods of «Berichte»: each building and period with a valid statement, the latest first */
 export async function reportPeriods() {
-	const { statements } = await listStatements({ limit: 10000 });
+	const { statements } = await listStatements({ limit: null });
 	const periods = new Map<string, Omit<ReportPeriod, 'buildingName'>>();
 	for (const s of counting(statements)) {
 		if (s.building)
