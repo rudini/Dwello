@@ -14,6 +14,8 @@ import {
 	endOfContract,
 	managementFeeOfContract,
 	missingStatementsText,
+	missingStatementButtonsShortOfRow,
+	missingStatementLinkTexts,
 	missingStatementsShown,
 	billedUntilOfContract,
 	nextStepsText,
@@ -361,6 +363,24 @@ Then(
 		await verwalter.sees(missingStatementsText).toContain('«Abgerechnet bis» ein');
 	}
 );
+
+// #741: on a phone each button of a missing statement spans the warning, one below the other
+Then('reichen Abrechnen und Rechnungen der fehlenden Abrechnung {int} über die volle Breite der Warnung', async ({ verwalter }, year: number) => {
+	await verwalter.sees(missingStatementButtonsShortOfRow(`${year}-01-01`)).toEqual([0, 0]);
+});
+
+// #741 (persona Marco P-1): the oldest first, as the warning asks
+Then(
+	'nennt der Mietvertrag die fehlenden Abrechnungen von {int} bis zum letzten Jahr, die älteste zuerst',
+	async ({ verwalter }, first: number) => {
+		const years = Array.from({ length: lastYear - first + 1 }, (_, i) => first + i);
+		await verwalter.sees(missingStatementLinkTexts).toEqual(years.map((year) => `${year} abrechnen`));
+	}
+);
+
+Then('erklärt der Mietvertrag die fehlenden Abrechnungen mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(missingStatementsText).toContain(text);
+});
 
 Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
 	await verwalter.sees(missingStatementsShown).toBe(false);

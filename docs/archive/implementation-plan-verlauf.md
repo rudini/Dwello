@@ -1529,6 +1529,19 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
+## Session: #741 Missing-statements warning compact
+
+- [x] Issue read, every point checked on `main` (390 px: 804–936 px high with 3–4 periods; fr label without object, it already with one)
+- [x] Decisions (PO 07.11.2026) in #741: shorter texts, buttons stacked across the full width, no word for the control; later: the invoices link may wrap; oldest period first
+- [x] `@wip` scenario «Fehlende Abrechnungen auf dem Handy» seen red (5b2b844)
+- [x] `fach-reviewer` `docs/reviews/741-fachreview-1.md`: whole texts in de/fr/it/en; V-1 Major (start with the oldest period, Übertrag) and V-2..V-5 taken
+- [x] Texts, full-width links, fr/it labels; DOM tests seen red (0e046f6)
+- [x] code-reviewer `docs/reviews/741-review-1.md`: C-1, C-2 Minor fixed (22448b1)
+- [x] Persona Marco `docs/design/personas/marco-741.md` (one and three missing periods): P-1 Major fixed, oldest first (8729f6d); P-2, P-3, P-5 Minor stay (on `main` already); P-4 rejected (caused by the caller's seed)
+- [x] Closing review `docs/reviews/741-close-review-{1,2}.md`: C-1 Major (order not pinned by a scenario) and C-2 Minor fixed (4aa7948)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-741.md`
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, contract-detail.feature, a11y and language rows missing-statements
+- [x] Archive session; PR `Fixes #741`: pushed after this archive
 ## Session: #1197 one advice after a failed agreements retry
 
 - [x] Checked on main: after «Weiter» and a failed retry the alert says «in einigen Minuten», the note «Wählen Sie «Erneut versuchen»»; no open issue decides it
