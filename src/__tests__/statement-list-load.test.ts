@@ -130,7 +130,18 @@ describe('Abrechnungsliste laden', () => {
 				Promise.resolve(
 					url.includes('/counts') ? Response.json({}, { status: 500 }) : Response.json(statusCounts)
 				)
-		]
+		],
+		[
+			'die Gebäude nicht liefert',
+			(url: string) =>
+				Promise.resolve(
+					url.includes('/buildings')
+						? Response.json({}, { status: 500 })
+						: Response.json(statusCounts)
+				)
+		],
+		// fallback review PR #1299: eine Antwort, die kein JSON ist (etwa die Seite eines Proxys)
+		['kein JSON liefert', () => Promise.resolve(new Response('<html>Bad Gateway</html>'))]
 	])('sagt, dass die Abrechnungen nicht geladen wurden, wenn das Backend %s', async (_, answer) => {
 		const result = load({
 			url: new URL('http://localhost/statements?status=overdue'),

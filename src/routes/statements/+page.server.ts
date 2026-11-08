@@ -77,7 +77,7 @@ function scopeSentence(
 async function backendJson(fetch: typeof globalThis.fetch, url: string) {
 	const response = await fetch(url).catch((failure) => console.error(failure));
 	if (!response?.ok) error(502, m.statements_list_load_failed());
-	return response.json();
+	return response.json().catch(() => error(502, m.statements_list_load_failed()));
 }
 
 export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsListData> => {
