@@ -20,6 +20,7 @@ interface DashboardData {
 		reletApartments: number;
 		vacantApartments: number;
 		reservedApartments: number;
+		discontinuedApartments?: number; // #1311
 		occupancyRate: number;
 	};
 	financial: {

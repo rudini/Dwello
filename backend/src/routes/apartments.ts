@@ -37,7 +37,7 @@ const apartmentQuerySchema = t.Object({
 	search: t.Optional(t.String()),
 	buildingId: t.Optional(t.String()),
 	status: t.Optional(
-		t.Union([t.Literal('occupied'), t.Literal('relet'), t.Literal('vacant'), t.Literal('reserved')])
+		t.Union([t.Literal('occupied'), t.Literal('relet'), t.Literal('vacant'), t.Literal('reserved'), t.Literal('discontinued')])
 	),
 	floor: t.Optional(t.String()),
 	limit: t.Optional(t.String()),

@@ -376,3 +376,11 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
     Aber nicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Anna Keller"
+
+  # #1311 (Decided): eine aufgehobene Wohnung ist nicht mehr vermietbar und zählt in der Belegung nicht mit
+  Szenario: Aufgehobene Wohnung in der Belegung
+    Angenommen die Wohnung "1.02" ist aufgehoben ab "2025-07-01"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann sind im Gebäude "Seeblick" "1/1" Wohnungen vermietet
+    Aber nennt die Belegung von "Seeblick" nicht "Wohnung 1.02 leer"
+    Und erklärt die Übersicht bei den Kennzahlen "Aufgehoben" mit "Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden."

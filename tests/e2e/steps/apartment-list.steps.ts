@@ -45,6 +45,13 @@ When(
 );
 
 When(
+	'der Liegenschaftsverwalter nur die aufgehobenen Wohnungen im Gebäude {string} anzeigt',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(showApartmentsOfBuilding(seed.idOf(building)!, 'discontinued'));
+	}
+);
+
+When(
 	'der Liegenschaftsverwalter das Gebäude {string} wählt, bevor die Wohnungsliste fertig geladen ist, und sucht',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.attemptsTo(showApartmentsOfBuildingWhileLoading(seed.idOf(building)!));

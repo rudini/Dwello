@@ -23,7 +23,8 @@ export const toApartmentRow = (a: Json<ApartmentWithDetails>): ApartmentListItem
 	buildingName: a.buildingName || '',
 	nextContractStart: a.nextContractStart ?? null,
 	currentContractEnd: a.currentContractEnd ?? null,
-	lastContractEnd: a.lastContractEnd ?? null
+	lastContractEnd: a.lastContractEnd ?? null,
+	discontinuedFrom: a.discontinuedFrom ?? null // «Aufgehoben seit» (#1311)
 });
 
 /**
