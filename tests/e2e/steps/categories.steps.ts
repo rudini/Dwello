@@ -254,6 +254,11 @@ When(
 	}
 );
 
+// #1306: a name longer than its column, refused at the field before the KI is asked
+When('der Liegenschaftsverwalter einen Namen von {int} Zeichen von der KI prüfen lässt', async ({ verwalter }, length: number) => {
+	await verwalter.attemptsTo(askKi('A'.repeat(length)));
+});
+
 Given('die KI hat geprüft, ob die Kategorie {string} umlagefähig ist', async ({ verwalter, seed }, title: string) => {
 	await verwalter.attemptsTo(askKi(seed.unique(title)));
 	await verwalter.sees(proposalText).toContain('Vorschlag der KI');

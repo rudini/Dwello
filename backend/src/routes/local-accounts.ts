@@ -5,7 +5,9 @@
 
 import { Elysia, t } from 'elysia';
 import { llmConfig } from '../config/llm';
+import { localAccounts } from '../db/schema';
 import { refusedWith } from '../services/coded-error';
+import { refuseTooLong } from '../services/text-length';
 import { checkPassword, deleteLocalAccount, hasLocalAccount, setLocalAccount } from '../services/local-account.service';
 import { setUpFirstAccount } from '../services/setup.service';
 
@@ -55,9 +57,10 @@ export const setupRoutes = new Elysia({ prefix: '/api/v1/setup' })
 		},
 		{
 			body: t.Composite([
-				credentials,
+				t.Object({ email: t.String({ minLength: 1 }), password: credentials.properties.password }),
 				t.Object({ code: t.String({ maxLength: 64 }), ki: t.Optional(t.Union([t.Literal('local'), t.Literal('none')])) })
-			])
+			]),
+			beforeHandle: refuseTooLong(localAccounts) // #1306: an address longer than its column, at its field
 		}
 	);
 

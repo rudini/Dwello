@@ -107,3 +107,11 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Und in der frischen Installation ist keine KI gewählt
     Wenn der Liegenschaftsverwalter in der Übersicht der frischen Installation die KI öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "KI"
+
+  # #1306: die E-Mail-Adresse hat höchstens 255 Zeichen, wie in der Datenbank; die Meldung steht beim Feld wie seit #1201
+  Szenario: Einrichtung mit einer zu langen E-Mail-Adresse
+    Angenommen Dwello ist frisch installiert
+    Und ein Besucher hat die Einrichtung geöffnet
+    Wenn der Besucher bei der Einrichtung eine E-Mail-Adresse von 256 Zeichen angibt
+    Dann steht in der Einrichtung bei "E-Mail-Adresse" die Fehlermeldung "Höchstens 255 Zeichen. Kürzen Sie den Text."
+    Und steht in der Einrichtung bei "E-Mail-Adresse" noch der Text von 256 Zeichen

@@ -100,6 +100,8 @@ export async function setUpDwello(fetch: Fetch, cookies: Cookies, form: FormData
 	if (response.status !== 201) {
 		const refusal = (await response.json().catch(() => ({}))) as BackendError;
 		if (refusal.code === 'SETUP_DONE') redirect(303, '/login');
+		// #1306: an address longer than its column, at its field as the forms since #1201
+		if (refusal.code === 'TEXT_TOO_LONG') return fail(400, { email, errors: { email: backendMessage(refusal, '') } });
 		const error =
 			refusal.code === 'SETUP_LOCKED'
 				? m.setup_error_locked({ time: swissTime(String(refusal.params?.until)) })
