@@ -221,7 +221,6 @@ describe('Einrichtung beim ersten Aufruf', () => {
 		expect(jar.has('dwello_session')).toBe(false);
 	});
 
-	// code review 577 C-4: the refusals no scenario reaches (the lock would hold the fresh installation for 15 minutes)
 	// #1306: as the forms since #1201, at the field, and the address stays to be shortened
 	it('sagt bei einer zu langen E-Mail-Adresse beim Feld, wie viele Zeichen sie haben darf', async () => {
 		const { result } = await setUp(fields, answering(400, tooLong));
@@ -233,6 +232,7 @@ describe('Einrichtung beim ersten Aufruf', () => {
 		expect((result as { data: object }).data).not.toHaveProperty('error');
 	});
 
+	// code review 577 C-4: the refusals no scenario reaches (the lock would hold the fresh installation for 15 minutes)
 	it('nennt bei einer Sperre der Einrichtung die Uhrzeit in der Schweiz', async () => {
 		const { result } = await setUp(fields, answering(423, locked));
 
