@@ -972,6 +972,10 @@ describe('Mietvertrag löschen', () => {
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
 			'Öffnen Sie jeden Entwurf oben und wählen Sie «Abrechnung löschen». Danach lässt sich der Mietvertrag löschen.'
 		);
+		// code review 1258 C-5: der Hinweis zum Entwurf neben einer gesperrten gilt nur dort
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain(
+			'Einen Entwurf aus der Liste'
+		);
 	});
 
 	// Fachreview V-11: mit Vertragsende gibt es kein «Enddatum erfassen»
