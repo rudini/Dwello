@@ -14,6 +14,7 @@
 		busy = false,
 		busyLabel,
 		confirmDisabled = false,
+		impossible = false,
 		onconfirm,
 		onclose,
 		confirmTestid = 'dialog-confirm',
@@ -30,7 +31,8 @@
 		danger?: boolean;
 		busy?: boolean;
 		busyLabel?: string;
-		confirmDisabled?: boolean; // the action is not possible; the content says why
+		confirmDisabled?: boolean; // the action is not possible yet; the content says what it needs
+		impossible?: boolean; // the action is not possible; the content says why, only «Schliessen» is offered (#1167)
 		onconfirm: () => void;
 		onclose?: () => void;
 		confirmTestid?: string;
@@ -97,6 +99,13 @@
 		if (open && busy) panel?.querySelector<HTMLElement>('[aria-busy]')?.focus();
 	});
 
+	// While busy «Abbrechen» says why it does nothing (#1261); refused, it only closes (#1167)
+	const cancelNote = $derived(busy ? `${id}-busy-note` : undefined);
+	const cancelText = $derived(impossible ? m.ui_close() : cancelLabel);
+	function focusPressed(event: MouseEvent) {
+		if (!busy) (event.target as HTMLElement).closest('button')?.focus();
+	}
+
 	function keydown(event: KeyboardEvent) {
 		// a dialog opened above this one (e.g. its own confirmation) handles the keys
 		if (!open || panel?.closest('[inert]')) return;
@@ -114,7 +123,7 @@
 		const target = event.target as HTMLElement;
 		if (!target.matches?.('input') || !panel?.contains(target)) return;
 		event.preventDefault();
-		if (!busy && !confirmDisabled) onconfirm();
+		if (!busy && !confirmDisabled && !impossible) onconfirm();
 	}
 
 	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays where it is.
@@ -168,26 +177,25 @@
 			<div
 				class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end"
 				role="presentation"
+				data-testid="dialog-actions"
 				onmousedown={(event) => event.preventDefault()}
-				onclickcapture={(event) =>
-					!busy && (event.target as HTMLElement).closest('button')?.focus()}
+				onclickcapture={focusPressed}
 			>
-				<Button
-					onclick={close}
-					testid="dialog-cancel"
-					unavailable={busy}
-					describedby={busy ? `${id}-busy-note` : undefined}>{cancelLabel}</Button
-				>
-				<Button
-					variant={danger ? 'danger' : 'primary'}
-					onclick={onconfirm}
-					disabled={confirmDisabled}
-					{busy}
-					{busyLabel}
-					testid={confirmTestid}
-				>
-					{confirmLabel}
+				<Button onclick={close} testid="dialog-cancel" unavailable={busy} describedby={cancelNote}>
+					{cancelText}
 				</Button>
+				{#if !impossible}
+					<Button
+						variant={danger ? 'danger' : 'primary'}
+						onclick={onconfirm}
+						disabled={confirmDisabled}
+						{busy}
+						{busyLabel}
+						testid={confirmTestid}
+					>
+						{confirmLabel}
+					</Button>
+				{/if}
 			</div>
 		</div>
 	</div>

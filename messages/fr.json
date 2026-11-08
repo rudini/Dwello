@@ -35,6 +35,7 @@
 	"ui_please_wait": "Veuillez patienter…",
 	"ui_dialog_busy_note": "Dwello est en train d’exécuter l’action. Il n’est plus possible d’annuler.",
 	"ui_cancel": "Annuler",
+	"ui_close": "Fermer",
 	"ui_action_failed": "Cela n’a pas fonctionné",
 	"ui_draft_restored": "Saisies restaurées",
 	"ui_draft_back": "Vos saisies, modifiées pour la dernière fois le {date} à {time}, ont été restaurées. Elles sont conservées uniquement dans ce navigateur et pas encore enregistrées.",

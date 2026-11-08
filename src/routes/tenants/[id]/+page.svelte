@@ -88,7 +88,7 @@
 	title={m.tenants_delete_title({ name })}
 	confirmLabel={m.tenants_delete_confirm()}
 	danger
-	disabled={hasContracts}
+	impossible={hasContracts}
 	confirmTestid="tenant-delete-confirm"
 	error={form?.error}
 	onsuccess={() => addToast('success', m.tenants_deleted_toast({ name }))}
