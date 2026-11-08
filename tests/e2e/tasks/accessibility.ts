@@ -14,6 +14,7 @@ import {
 	Enter,
 	EnterDate,
 	FailRequests,
+	ListenToAnnouncements,
 	Navigate,
 	PostFormAction,
 	Press,
@@ -66,6 +67,7 @@ import {
 } from './sicherung';
 import { withLock } from '../fixtures/settings-lock';
 import { formErrors } from '../targets/form';
+import { creditorWarning } from '../targets/statement-detail';
 import { settingField } from '../targets/settings';
 import { giveOwnHolder, saveSettings } from './settings';
 import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
@@ -304,6 +306,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			saveSettings({ iban: 'CH93 0076 2011 6238 5295 7', accountHolderName: '', accountHolderPostalCode: '', accountHolderCity: '' }),
 			Wait.until(formErrors)
 		),
+	// #690: an IBAN without Firmenadresse (on the fresh installation): the settings mark it, a Nachzahlung warns
+	'creditor-missing': (example) => Wait.until(example.path === '/config' ? formErrors : creditorWarning),
+	// #690: a refused save says that nothing was saved; refused, it writes nothing
+	'save-refused': () => (actor) => actor.attemptsTo(saveSettings({ companyPostalCode: '84' }), Wait.until(formErrors)),
 	'new-code-password': () => (actor) =>
 		actor.attemptsTo(
 			signInFreshWithPassword(FRESH_ACCOUNT.email, FRESH_ACCOUNT.password),
@@ -1052,3 +1058,6 @@ export const checkLanguagesOf = (example: Example, userData: string[]): Activity
 		for (const language of example.state === 'other-language' ? ['fr'] : ['fr', 'it', 'en'])
 			await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', languageFindings(language, userData)));
 	});
+
+// #1173: from now on note what a screen reader hears
+export const listenLikeAScreenReader = ListenToAnnouncements;

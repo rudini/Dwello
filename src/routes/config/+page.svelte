@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { afterNavigate } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import LiveRegion from '$lib/ui/LiveRegion.svelte';
@@ -18,9 +19,10 @@
 
 	const settings = $derived(data.settings);
 	const result = $derived(form as { errors?: Record<string, string>; saved?: boolean } | null);
-	const errors = $derived(result?.errors ?? {});
+	// #690: before a save, what the stored IBAN lacks
+	const errors = $derived(result?.errors ?? data.errors);
 	// empty fields of the Firmenadresse that the IBAN's error names (#450, persona Helga P-2)
-	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? []);
+	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? data.missing);
 	// the Kontoinhaber's (#1166) at the error of his name
 	const namedBy = (field: string) =>
 		missing.includes(field)
@@ -38,6 +40,14 @@
 		);
 	let holderIsSender = $state(noHolderStored());
 	const saved = $derived(result?.saved === true);
+	// #690 (persona Helga 690 H-4): opened with fields the stored IBAN lacks, two screens down: the first gets the focus,
+	// as after a refused save; after the navigation, whose focus reset and scroll to «#sender» would take it (code review
+	// 690-3 C-5)
+	let settingsForm = $state<HTMLFormElement>();
+	afterNavigate(() => {
+		// the empty field, not the Kontoinhaber's name that carries the refusal (persona Weber 690 W-7)
+		if (data.missing.length) focusFirstError(settingsForm, data.missing);
+	});
 	let saving = $state(false);
 </script>
 
@@ -128,6 +138,7 @@
 	</Panel>
 
 	<form
+		bind:this={settingsForm}
 		method="POST"
 		use:enhance={() => {
 			saving = true;
@@ -140,7 +151,7 @@
 		class="flex flex-col gap-8"
 		novalidate
 	>
-		<Panel title={m.settings_sender()}>
+		<Panel title={m.settings_sender()} id="sender">
 			<p class="text-ink-muted">
 				{m.settings_sender_text()}
 			</p>
@@ -215,7 +226,7 @@
 				testid="setting-accountHolderIsSender"
 			/>
 			{#if !holderIsSender}
-				<fieldset class="flex flex-col gap-6">
+				<fieldset class="flex flex-col gap-6" id="account-holder">
 					<legend class="text-lg font-semibold text-ink">{m.settings_account_holder()}</legend>
 					<SettingField
 						name="accountHolderName"
@@ -287,9 +298,11 @@
 			distributionKeys={data.distributionKeys}
 		/>
 
-		{#if errors.form}
+		<!-- #690 (persona Helga 450): every refused save says that none of the fields was saved -->
+		{#if result?.errors}
 			<Alert tone="critical" title={m.settings_not_saved()} testid="form-error">
-				<p>{errors.form}</p>
+				{#if errors.form}<p>{errors.form}</p>{/if}
+				<p>{m.settings_not_saved_text()}</p>
 			</Alert>
 		{/if}
 		<LiveRegion shown={saved}>
