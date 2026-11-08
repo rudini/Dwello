@@ -1819,6 +1819,8 @@
 	"categories_sort_order": "Order",
 	"categories_sort_order_help": "Position in the selection lists and in the list of categories: smaller numbers appear higher up. Without a number, the category appears at the top, as with the number 0.",
 	"categories_translations": "Translations",
+	"config_translated": "Translated: {languages}",
+	"config_not_translated": "No translation",
 	"categories_translations_help": "The category’s name in French, Italian and English. It appears on the utility cost statement of a tenant who uses that language, and in Dwello when Dwello is set to that language. If it is missing, the German name appears.",
 	"keys_translations_help": "The distribution key’s name in French, Italian and English. It appears on the utility cost statement of a tenant who uses that language, and in Dwello when Dwello is set to that language. If it is missing, the German name appears.",
 	"profiles_translations_help": "The heating profile’s name in French, Italian and English. It appears in Dwello when Dwello is set to that language, and on the utility cost statement of a tenant who uses that language and moves in or out during the billing period. If it is missing, the German name appears.",

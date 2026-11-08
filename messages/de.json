@@ -1819,6 +1819,8 @@
 	"categories_sort_order": "Reihenfolge",
 	"categories_sort_order_help": "Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben. Ohne Zahl steht die Kategorie ganz oben, wie mit der Zahl 0.",
 	"categories_translations": "Übersetzungen",
+	"config_translated": "Übersetzt: {languages}",
+	"config_not_translated": "Keine Übersetzung",
 	"categories_translations_help": "Der Name der Kategorie auf Französisch, Italienisch und Englisch. Ihn zeigt die Nebenkostenabrechnung eines Mieters mit dieser Sprache, ebenso Dwello in dieser Sprache. Fehlt er, steht der deutsche Name.",
 	"keys_translations_help": "Der Name des Verteilschlüssels auf Französisch, Italienisch und Englisch. Ihn zeigt die Nebenkostenabrechnung eines Mieters mit dieser Sprache, ebenso Dwello in dieser Sprache. Fehlt er, steht der deutsche Name.",
 	"profiles_translations_help": "Der Name des Heizprofils auf Französisch, Italienisch und Englisch. Ihn zeigt Dwello in dieser Sprache, ebenso die Nebenkostenabrechnung eines Mieters mit dieser Sprache, wenn er während der Abrechnungsperiode ein- oder auszieht. Fehlt er, steht der deutsche Name.",

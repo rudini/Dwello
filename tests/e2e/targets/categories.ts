@@ -60,3 +60,6 @@ export const allocabilityCancel = target('Umstellen abbrechen', (page) => page.g
 export const focusedCategoryRow = target('Kategorie mit dem Fokus', (page) =>
 	page.getByTestId('category-row').filter({ has: page.locator(':focus') })
 );
+// #689: whether and in which languages an own category is translated
+export const translations = (name: string) =>
+	target(`Übersetzungen der Kategorie ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-translations'));

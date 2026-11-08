@@ -1819,6 +1819,8 @@
 	"categories_sort_order": "Ordre",
 	"categories_sort_order_help": "Position dans les listes de choix et dans la liste des catégories : les petits nombres figurent plus haut. Sans nombre, la catégorie figure tout en haut, comme avec le nombre 0.",
 	"categories_translations": "Traductions",
+	"config_translated": "Nom traduit : {languages}",
+	"config_not_translated": "Aucune traduction",
 	"categories_translations_help": "Le nom de la catégorie en français, en italien et en anglais. Il s’affiche dans Dwello dans la langue correspondante et sur le décompte des charges des locataires qui ont choisi cette langue. S’il manque, le nom allemand s’affiche.",
 	"keys_translations_help": "Le nom de la clé de répartition en français, en italien et en anglais. Il s’affiche dans Dwello dans la langue correspondante et sur le décompte des charges des locataires qui ont choisi cette langue. S’il manque, le nom allemand s’affiche.",
 	"profiles_translations_help": "Le nom du profil de chauffage en français, en italien et en anglais. Il s’affiche dans Dwello dans la langue correspondante et sur le décompte des charges des locataires qui ont choisi cette langue et qui emménagent ou déménagent pendant la période de décompte. S’il manque, le nom allemand s’affiche.",

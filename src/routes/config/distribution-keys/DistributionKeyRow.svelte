@@ -4,6 +4,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 
 	let { key, ondelete }: { key: DistributionKey; ondelete: () => void } = $props();
 
@@ -27,6 +28,7 @@
 				><span data-testid="distribution-key-name">{name}</span></a
 			>
 			{#if key.description}<p class="text-ink-muted">{key.description}</p>{/if}
+			<TranslationMarker names={key} testid="distribution-key-translations" />
 		{:else}
 			<span class="font-semibold text-ink" data-testid="distribution-key-name">{name}</span>
 		{/if}

@@ -45,3 +45,8 @@ export const insertButton = (block: string) =>
 	target(`Knopf ${block}`, (page) =>
 		page.getByTestId('distribution-key-insert-button').filter({ has: page.getByText(block, { exact: true }) })
 	);
+// #689: whether and in which languages an own key is translated
+export const translations = (name: string) =>
+	target(`Übersetzungen des Verteilschlüssels ${name}`, (page) =>
+		keyRow(name).locate(page).getByTestId('distribution-key-translations')
+	);
