@@ -35,6 +35,7 @@
 
 	const contract = $derived(data.contract);
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
+	const title = $derived(m.apartments_contract_of({ name }));
 	const status = $derived(contract.status);
 	let ending = $state(false);
 	// the last day of the tenancy, the Kündigungstermin; typed on purpose, no day proposed (a quick confirm must not
@@ -140,17 +141,24 @@
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title={m.apartments_contract_of({ name })}
+		{title}
 		purpose="{m.buildings_apartment_number({ number: contract.apartment.number })} · {contract
 			.building.name || contract.building.address}"
 		trail={[{ href: '/contracts', label: m.nav_contracts() }]}
 	>
 		{#snippet action()}
-			<Button href="/contracts/{contract.id}/edit" icon="edit" testid="contract-edit-button"
-				>{m.buildings_edit()}</Button
+			<Button
+				href="/contracts/{contract.id}/edit"
+				icon="edit"
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_edit(), record: title })}
+				testid="contract-edit-button">{m.buildings_edit()}</Button
 			>
 			{#if !contract.endDate}
-				<Button onclick={startEnding} icon="calendar-busy" testid="contract-end-button"
+				<Button
+					onclick={startEnding}
+					icon="calendar-busy"
+					ariaLabel={m.common_action_of_aria({ action: m.contracts_end_action(), record: title })}
+					testid="contract-end-button"
 					>{m.contracts_end_action()}</Button
 				>
 			{/if}
@@ -158,6 +166,7 @@
 				variant="danger-ghost"
 				onclick={() => (deleting = true)}
 				icon="delete"
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_delete(), record: title })}
 				testid="contract-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}

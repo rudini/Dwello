@@ -34,15 +34,20 @@
 			<Button
 				href="/invoices?building={building.id}"
 				icon="invoice"
+				ariaLabel={m.common_action_of_aria({ action: m.dashboard_invoices(), record: name })}
 				testid="building-invoices-button">{m.dashboard_invoices()}</Button
 			>
-			<Button href="/buildings/{building.id}/edit" icon="edit" testid="building-edit-button"
-				>{m.buildings_edit()}</Button
+			<Button
+				href="/buildings/{building.id}/edit"
+				icon="edit"
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_edit(), record: name })}
+				testid="building-edit-button">{m.buildings_edit()}</Button
 			>
 			<Button
 				variant="danger-ghost"
 				icon="delete"
 				onclick={() => (deleting = true)}
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_delete(), record: name })}
 				testid="building-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}
