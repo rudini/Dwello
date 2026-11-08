@@ -115,3 +115,18 @@ Funktionalität: Verteilschlüssel
   Szenario: Die Seite sagt, dass jede Rechnung einen Verteilschlüssel hat
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
     Dann erklärt die Seite "Verteilschlüssel" "Jede Rechnung hat einen Verteilschlüssel; Sie wählen ihn beim Erfassen der Rechnung."
+
+  # #1255: eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat; ohne ihren Verteilschlüssel stünde eine Abrechnungsposition im neu erstellten PDF anders da
+  @wip
+  Szenario: Verteilschlüssel in einer Abrechnung bleiben erhalten
+    Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2024-01-01" für "950" Franken
+    Und im Gebäude "Seeblick" gibt es eine Rechnung vom "2025-03-31", die nach dem Verteilschlüssel "Fläche und Zimmer" verteilt wird
+    Und für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Seeblick"
+    Und die Rechnung "Fläche und Zimmer 2025-03-31" ist danach gelöscht
+    Und der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" löscht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden."
+    Und sieht der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer"

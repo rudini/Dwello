@@ -43,6 +43,13 @@ Given(
 	}
 );
 
+Given(
+	'im Gebäude {string} gibt es eine Rechnung vom {string}, die nach dem Verteilschlüssel {string} verteilt wird',
+	async ({ seed }, building: string, date: string, key: string) => {
+		await seed.invoiceByKey(building, key, date);
+	}
+);
+
 Given('der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openDistributionKeys);
 });
@@ -115,6 +122,10 @@ Then(
 		await verwalter.sees(listedKeysNamed(names.get(title)!)).toBe(0);
 	}
 );
+
+Then('sieht der Liegenschaftsverwalter den Verteilschlüssel {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(listedKeysNamed(names.get(title)!)).toBe(1);
+});
 
 Then(
 	'zeigt die Seite "Verteilschlüssel" den Verteilschlüssel {string}',

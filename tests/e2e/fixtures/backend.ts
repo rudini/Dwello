@@ -713,8 +713,8 @@ export function testData(api: CallTheApi) {
 			extras.push(`distribution-keys/${key.id}`);
 		},
 
-		async invoiceByKey(buildingTitle: string, keyTitle: string) {
-			await invoice(buildingTitle, { distributionKeyId: ids.get(keyTitle) }, 'Hauswart Q1', '900.00', '2026-03-31');
+		async invoiceByKey(buildingTitle: string, keyTitle: string, date = '2026-03-31') {
+			ids.set(`Rechnung ${keyTitle} ${date}`, await invoice(buildingTitle, { distributionKeyId: ids.get(keyTitle) }, 'Hauswart Q1', '900.00', date));
 		},
 
 		// A local account with e-mail and password (#576); several scenarios hold one each, so each has its own address
