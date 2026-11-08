@@ -148,6 +148,8 @@
 		"backup-error": "«Sicherung einrichten» (#718) with a code typed that is not the one shown: the refusal above the field. The screen runs on the fresh installation of the E2E stack, the only one with a folder for the Sicherung; its look first removes any confirmed code.",
 		"backup-stale": "The overview when no Sicherung succeeded for more than a day (#718, O1): the warning with the link to the installation guide. Seen on the fresh installation, whose look sets a code confirmed two days ago that cannot encrypt.",
 		"account-holder": "The settings with «Kontoinhaber ist der Absender» cleared (#1166): the four fields of the Kontoinhaber in the block «Konto»; nothing is saved.",
+		"save-refused": "The settings after a save the backend refused (#690): the refusal at its field and, above the button, «Die Einstellungen wurden nicht gespeichert» with «Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern.»; nothing is saved.",
+		"creditor-missing": "An IBAN stored without name, postal code and town of the Firmenadresse, on the fresh installation (#690, @frische-installation): the settings mark the empty fields on opening with the refusal's text at the IBAN; the page of a Nachzahlung warns that its Zahlteil lacks the Firmenadresse, with «Zu den Einstellungen».",
 		"account-holder-missing": "The settings after saving an IBAN with «Kontoinhaber ist der Absender» cleared and no Kontoinhaber entered (#1166): the refusal at the name, the missing fields marked; nothing is saved.",
 		"backup-links": "The settings of an installation with a folder for the Sicherung (the fresh installation): the link to «Neuer Wiederherstellungscode» (#718, part 3).",
 		"new-code-password": "«Neuer Wiederherstellungscode» (#718, part 3) signed in with a Konto mit Passwort: the password typed again. Its look makes a Konto mit Passwort on the fresh installation and removes it afterwards.",
@@ -709,7 +711,8 @@
 				"default",
 				"send-dialog",
 				"delete-dialog",
-				"recalculate-dialog"
+				"recalculate-dialog",
+				"creditor-missing"
 			]
 		},
 		{
@@ -940,7 +943,9 @@
 				"default",
 				"backup-links",
 				"account-holder",
-				"account-holder-missing"
+				"account-holder-missing",
+				"save-refused",
+				"creditor-missing"
 			]
 		},
 		{
