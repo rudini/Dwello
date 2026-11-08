@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { ON_FRESH, test } from '../fixtures/test';
-import { focusedSetting, focusedSettingField, holderIsSender, settingCount, settingHelp, settingInvalid, settingName, settingsSaved, storedSetting } from '../questions/settings';
+import { focusedSetting, focusedSettingField, holderIsSender, settingCount, settingHelp, settingInvalid, settingName, settingsSaved, settingsSavedText, storedSetting } from '../questions/settings';
 import { enterSettings, giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -14,6 +14,7 @@ const FIELDS: Record<string, string> = {
 	Telefon: 'companyPhone',
 	'E-Mail': 'companyEmail',
 	IBAN: 'iban',
+	'Kontoinhaber ist der Absender': 'accountHolderIsSender',
 	'Name des Kontoinhabers': 'accountHolderName',
 	'Adresse des Kontoinhabers': 'accountHolderAddress',
 	'PLZ des Kontoinhabers': 'accountHolderPostalCode',
@@ -63,6 +64,11 @@ When('der Liegenschaftsverwalter die Stammdaten {string} öffnet', async ({ verw
 
 Then('bestätigt die Seite, dass die Einstellungen gespeichert sind', async ({ verwalter }) => {
 	await verwalter.sees(settingsSaved).toBe(true);
+});
+
+// #1298: what the saved notice says was saved
+Then('bestätigen die Einstellungen {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(settingsSavedText).toContain(text);
 });
 
 Then(

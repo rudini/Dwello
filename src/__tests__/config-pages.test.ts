@@ -153,7 +153,7 @@ describe('Einstellungen', () => {
 	it('bestätigt das Speichern und nennt, was gespeichert ist', () => {
 		const saved = settingsPage({ saved: true });
 		expect(saved).toContain('data-testid="settings-saved"');
-		expect(saved).toContain('Absender, Verwaltungspauschale, Fristen und Vorschläge gespeichert');
+		expect(saved).toContain('Absender, Konto mit Kontoinhaber, Verwaltungspauschale, Fristen und Vorschläge gespeichert');
 		expect(settingsPage()).not.toContain('data-testid="settings-saved"');
 	});
 

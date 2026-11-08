@@ -249,3 +249,18 @@ Funktionalität: Einstellungen
       | Mahnfrist | 20 |
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Einstellungen wurden nicht gespeichert"
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Keine Änderung wurde gespeichert, auch nicht in den anderen Feldern."
+
+  # #1298 (Entscheid des Product Owners; Personas Marco und Helga in #1202): die Hilfe beim Häkchen sagt vor dem
+  # Speichern, dass ein eigener Kontoinhaber gelöscht wird; es wird nichts gespeichert
+  Szenario: Die Einstellungen sagen, dass das Häkchen einen eigenen Kontoinhaber löscht
+    Dann erklärt die Einstellung "Kontoinhaber ist der Absender" "Mit Häkchen löscht Speichern einen eigenen Kontoinhaber."
+
+  # #1298 (Entscheid des Product Owners; Persona Marco in #1202): die Bestätigung nennt auch das Konto mit dem Kontoinhaber
+  @einstellungen-global
+  Szenario: Die Bestätigung nennt das Konto mit dem Kontoinhaber
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname | Muster Immobilien AG       |
+      | PLZ        | 8001                       |
+      | Ort        | Zürich                     |
+      | IBAN       | CH93 0076 2011 6238 5295 7 |
+    Dann bestätigen die Einstellungen "Absender, Konto mit Kontoinhaber, Verwaltungspauschale, Fristen und Vorschläge gespeichert."
