@@ -230,6 +230,8 @@
 		if (previewRows.length === 0) return { preview: NOTHING };
 		if (invoices.some((row) => row.uncategorized?.length))
 			return { uncategorized: m.statements_uncategorized_error() };
+		if (invoices.some((row) => row.check?.uncalculableKeys?.length))
+			return { uncalculable: m.statements_key_not_calculable_error() }; // #1221
 		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};
 	}
 

@@ -60,4 +60,15 @@ describe('Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt',
 
 		await expectRejection(await sendJson('POST', `/api/v1/statements/${draft}/recalculation`, {}), 409, ...refusal('Garten AG, 31.05.2026, CHF 300.00'));
 	});
+
+	it('erstellt keine berichtigte Abrechnung, sondern nennt Schlüssel und Rechnungen', async () => {
+		const period = { periodStart: '2027-01-01', periodEnd: '2027-12-31' };
+		await insertInvoice(rental.building, { amount: '1200.00', invoiceDate: '2027-03-31' });
+		const sent = await idOf(await sendJson('POST', '/api/v1/statements/generate', { contractId: rental.contract, buildingId: rental.building, ...period }));
+		await sendJson('PUT', `/api/v1/statements/${sent}/status`, { status: 'sent' });
+		await sendJson('POST', `/api/v1/statements/${sent}/replace`, {});
+		await insertInvoice(rental.building, { distributionKeyId: key, billingEntityName: 'Garten AG', amount: '150.00', invoiceDate: '2027-05-31' });
+
+		await expectRejection(await sendJson('POST', `/api/v1/statements/${sent}/correction`, {}), 409, ...refusal('Garten AG, 31.05.2027, CHF 150.00'));
+	});
 });

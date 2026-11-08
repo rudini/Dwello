@@ -286,8 +286,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	}
 	await seed.statement('Pia', 'Kreuzweg', 2023);
 	// #1221: in 2025 a custom key divides by zero at K1's 3.5 rooms; the wizard's preview refuses
-	await seed.distributionKey('Halbe Zimmer', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
-	await seed.invoiceByKey('Kreuzweg', 'Halbe Zimmer', '2025-06-30');
+	await seed.distributionKey('Zimmerformel', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
+	await seed.invoiceOnByKey('Kreuzweg', 'Hauswart', '900.00', '2025-06-30', seed.names.get('Zimmerformel')!);
 	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
 	await seed.apartment('Bergsicht', '2.02', 'vacant');
 	await seed.tenant('Emil');

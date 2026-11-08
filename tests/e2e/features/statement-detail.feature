@@ -1068,6 +1068,16 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "berechnen Sie den Entwurf dann neu"
 
+  # #1221 (Entscheid PO): ein Verteilschlüssel, der sich für die Wohnungen des Gebäudes nicht berechnen lässt, verteilt
+  # beim Neuberechnen nicht gleichmässig, sondern nennt Schlüssel und Rechnungen
+  Szenario: Kein Neuberechnen, solange sich ein Verteilschlüssel für das Gebäude nicht berechnen lässt
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"

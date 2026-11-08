@@ -313,18 +313,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #1221 (Entscheid PO): ein eigener Verteilschlüssel, der sich für die Wohnungen des Gebäudes nicht berechnen lässt,
   # verteilt nicht still zu gleichen Teilen, sondern hält den Lauf an wie eine Rechnung ohne Kategorie (#382); die Formel
   # besteht die vier Beispielwohnungen und teilt erst bei 3.5 Zimmern durch null
-  @wip
   Szenario: Ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt, hält die Vorschau an
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt der Hinweis auf nicht berechenbare Verteilschlüssel die Rechnung vom "30.09.2024" über "900.00"
-    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "TEXT"
+    Und erklärt der Hinweis auf nicht berechenbare Verteilschlüssel "Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss für jede Wohnung eine Zahl von 0 oder mehr ergeben und für mindestens eine Wohnung mehr als 0."
     Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "FEHLER"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen."
     Und ist der Assistent im Schritt "Vorschau"
 
-  @wip
   Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Vorschau öffnen
     Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird

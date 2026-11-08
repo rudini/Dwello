@@ -24,6 +24,7 @@
 		confirmed = $bindable(),
 		error,
 		uncategorizedError,
+		uncalculableError,
 		running
 	}: {
 		rows: ReturnType<typeof invoiceRows>;
@@ -31,6 +32,7 @@
 		confirmed: boolean;
 		error?: string;
 		uncategorizedError?: string; // «Weiter» while an invoice without category holds the run (#382)
+		uncalculableError?: string; // «Weiter» while a key that cannot be calculated holds the run (#1221)
 		running: boolean; // the backend says the period is not over; repeated from step 1, where it may have been overlooked (#815)
 	} = $props();
 
@@ -45,10 +47,20 @@
 	// a statement named as outdated or other is a warning (#132, V-6)
 	const existingTone = $derived(existing.some((row) => row.changed.length) ? 'caution' : 'info');
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized') =>
+	const hinted = (
+		list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized' | 'uncalculableKeys'
+	) =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
 	const uncategorized = $derived(hinted('uncategorized'));
+	const uncalculable = $derived(hinted('uncalculableKeys'));
+	const uncalculableNames = $derived(
+		[
+			...new Set(
+				rows.flatMap((row) => row.uncalculableKeys.map((i) => `«${i.distributionKeyName}»`))
+			)
+		].join(', ')
+	);
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	const heating = $derived(hinted('heatingWithoutServicePeriod'));
 	// #528: a Kategorie the statements will bill by several Verteilschlüssel; a hint, no confirmation
@@ -112,6 +124,19 @@
 {#if uncategorizedError}
 	<p class="font-semibold text-critical" role="alert" data-testid="form-error">
 		{uncategorizedError}
+	</p>
+{/if}
+
+<InvoiceHint
+	buildings={uncalculable}
+	title={m.statements_key_not_calculable_title()}
+	text={m.statements_key_not_calculable_text({ keys: uncalculableNames })}
+	tone="critical"
+	testid="uncalculable-keys"
+/>
+{#if uncalculableError}
+	<p class="font-semibold text-critical" role="alert" data-testid="form-error">
+		{uncalculableError}
 	</p>
 {/if}
 
