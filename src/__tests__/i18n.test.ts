@@ -180,12 +180,25 @@ describe('Sprachdateien', () => {
 		expect(messages.contracts_apartment_contracts_blocked).toBe(text);
 	});
 
+	// #1278, #1267 (1266-fachreview-1): the contract page names the Aufhebungsvereinbarung; a third party entering the
+	// contract is ended as one
+	it.each([
+		['de', 'Unbefristet, beendet auf den {date} (Aufhebungsvereinbarung)', 'Wählen Sie für das Vertragsende «Aufhebungsvereinbarung».'],
+		['fr', 'Durée indéterminée, fin convenue au {date} (convention de fin de bail)', 'Pour la fin du contrat, choisissez « Convention de fin de bail ».'],
+		['it', 'A tempo indeterminato, fine concordata al {date} (accordo di scioglimento)', 'Per la fine del contratto scelga «Accordo di scioglimento».'],
+		['en', 'Open-ended, ended effective {date} (termination agreement)', 'For the contract end, choose «Termination by agreement».']
+	])('%s: der Mietvertrag nennt die Aufhebungsvereinbarung, auch beim Eintritt eines Dritten', (language, end, transfer) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.contracts_end_agreement).toBe(end);
+		expect(messages.contracts_parties_fixed_transfer).toContain(transfer);
+	});
+
 	// #501: the hint at a short Kündigungsfrist says the same as the glossary
 	it.each([
-		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor, oder Sie haben das Ende mit dem Mieter vereinbart.'],
-		['fr', 'Exception : le locataire vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser, ou vous avez convenu de la fin avec le locataire.'],
-		['it', 'Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non possa ragionevolmente rifiutare, oppure Lei ha concordato la fine con l’inquilino.'],
-		['en', 'Exception: the tenant proposes a replacement tenant you cannot reasonably refuse, or you agreed on the end with the tenant.']
+		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor. Haben Sie das Ende mit dem Mieter vereinbart, wählen Sie «Aufhebungsvereinbarung».'],
+		['fr', 'Exception : le locataire vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser. Si vous avez convenu de la fin avec le locataire, choisissez « Convention de fin de bail ».'],
+		['it', 'Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non possa ragionevolmente rifiutare. Se ha concordato la fine con l’inquilino, scelga «Accordo di scioglimento».'],
+		['en', 'Exception: the tenant proposes a replacement tenant you cannot reasonably refuse. If you agreed on the end with the tenant, choose «Termination by agreement».'],
 	])('%s: der Hinweis zur kurzen Kündigungsfrist nennt den vorgeschlagenen Ersatzmieter', (language, end) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
 		expect(messages.contracts_notice_period_short.endsWith(end)).toBe(true);

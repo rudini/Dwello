@@ -224,8 +224,8 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Eine Kündigung als Aufhebungsvereinbarung korrigieren
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter als Vertragsdauer "Unbefristet, beendet auf den 31.03.2099" speichert
-    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+    Wenn der Liegenschaftsverwalter als Vertragsdauer "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)" speichert
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099 (Aufhebungsvereinbarung)"
 
   Szenario: Aufhebungsvereinbarung zurücknehmen
     Angenommen der Mietvertrag von "Anna Keller" ist mit einer Aufhebungsvereinbarung auf den "2099-03-31" beendet
