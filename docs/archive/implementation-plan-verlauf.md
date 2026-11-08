@@ -249,6 +249,19 @@
 - [x] code-reviewer round 1 (`docs/reviews/953-review-1.md`)
 - [x] PR pushed after this archive (No scenario: the restore is a Betreiber command outside the E2E stack)
 
+## Session: #707 Demo data: paid amounts, year end, apartment numbers, dates
+
+- [x] Checked on main: `paid_amount` already set for the 9 paid statements (existing test); no invoice across the year end; «Wohnung EG, EG» (Alpenblick EG/OG1/OG2); sent statements `created_at` on the loading day, after «Versendet»
+- [x] Decisions in #707 «Decided (product owner)» (coordinator, on recommendation)
+- [x] No scenario: the demo data is loaded by a CLI script; tests in `backend/src/__tests__/demo-data.pg.test.ts`, each seen red
+- [x] Sent statements and their PDF made on their statement date; Alpenblick 0.01/1.01/2.01 (691d717)
+- [x] `fach-reviewer` `docs/reviews/707-fachreview-1.md`: no Blocker/Major, V-1 comment fixed; Seepark SR-2024-016 Gartenpflege 01.07.2024–30.06.2025, 368.00 + 362.00 (ea0f7a0)
+- [x] code-reviewer `docs/reviews/707-review-1.md`: no findings
+- [x] daten-pruefer `docs/reviews/707-datenpruefung-1.md`: no findings
+- [x] Persona Dr. Weber `docs/design/personas/weber-707.md`: P-2 fixed (invoices recorded before the statements that bill them, 3ec954f); P-1 Minor stays in the report
+- [x] Closing code-reviewer round `docs/reviews/707close-review-1.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-707.md` (persona build in a fresh container)
+- [x] Archive the session; PR `Fixes #707`: pushed after this archive
 ## Session: #523 partial payment hint in «Als bezahlt markieren» (2026-10-31)
 
 - [x] Scenario «Der Zahlungseingang sagt, was bei einer Teilzahlung gilt» (`statement-detail.feature`, seen red as @wip)
@@ -1507,19 +1520,6 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
 - [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
 - [x] Archive session; PR `Fixes #1176`: pushed after this archive
-## Session: #707 Demo data: paid amounts, year end, apartment numbers, dates
-
-- [x] Checked on main: `paid_amount` already set for the 9 paid statements (existing test); no invoice across the year end; «Wohnung EG, EG» (Alpenblick EG/OG1/OG2); sent statements `created_at` on the loading day, after «Versendet»
-- [x] Decisions in #707 «Decided (product owner)» (coordinator, on recommendation)
-- [x] No scenario: the demo data is loaded by a CLI script; tests in `backend/src/__tests__/demo-data.pg.test.ts`, each seen red
-- [x] Sent statements and their PDF made on their statement date; Alpenblick 0.01/1.01/2.01 (691d717)
-- [x] `fach-reviewer` `docs/reviews/707-fachreview-1.md`: no Blocker/Major, V-1 comment fixed; Seepark SR-2024-016 Gartenpflege 01.07.2024–30.06.2025, 368.00 + 362.00 (ea0f7a0)
-- [x] code-reviewer `docs/reviews/707-review-1.md`: no findings
-- [x] daten-pruefer `docs/reviews/707-datenpruefung-1.md`: no findings
-- [x] Persona Dr. Weber `docs/design/personas/weber-707.md`: P-2 fixed (invoices recorded before the statements that bill them, 3ec954f); P-1 Minor stays in the report
-- [x] Closing code-reviewer round `docs/reviews/707close-review-1.md`
-- [x] Workflow note: `docs/reviews/workflow-notes-issue-707.md` (persona build in a fresh container)
-- [x] Archive the session; PR `Fixes #707`: pushed after this archive
 ## Session: #705 ponytail shortcut in missingByContract
 
 - [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
