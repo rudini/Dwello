@@ -183,13 +183,14 @@ describe('Sprachdateien', () => {
 	// #1278, #1267 (1266-fachreview-1): the contract page names the Aufhebungsvereinbarung; a third party entering the
 	// contract is ended as one
 	it.each([
-		['de', 'Unbefristet, beendet auf den {date} (Aufhebungsvereinbarung)', 'Wählen Sie für das Vertragsende «Aufhebungsvereinbarung».'],
-		['fr', 'Durée indéterminée, fin convenue au {date} (convention de fin de bail)', 'Pour la fin du contrat, choisissez « Convention de fin de bail ».'],
-		['it', 'A tempo indeterminato, fine concordata al {date} (accordo di scioglimento)', 'Per la fine del contratto scelga «Accordo di scioglimento».'],
-		['en', 'Open-ended, ended effective {date} (termination agreement)', 'For the contract end, choose «Termination by agreement».']
-	])('%s: der Mietvertrag nennt die Aufhebungsvereinbarung, auch beim Eintritt eines Dritten', (language, end, transfer) => {
+		['de', 'Unbefristet, beendet auf den {date} (Aufhebungsvereinbarung)', 'Unbefristet, beendet (Aufhebungsvereinbarung)', 'Wählen Sie für das Vertragsende «Aufhebungsvereinbarung».'],
+		['fr', 'Durée indéterminée, fin convenue au {date} (convention de fin de bail)', 'Durée indéterminée, fin convenue (convention de fin de bail)', 'Pour la fin du contrat, choisissez « Convention de fin de bail ».'],
+		['it', 'A tempo indeterminato, fine concordata al {date} (accordo di scioglimento)', 'A tempo indeterminato, fine concordata (accordo di scioglimento)', 'Per la fine del contratto scelga «Accordo di scioglimento».'],
+		['en', 'Open-ended, ended effective {date} (termination agreement)', 'Open-ended, ended (termination agreement)', 'For the contract end, choose «Termination by agreement».']
+	])('%s: der Mietvertrag nennt die Aufhebungsvereinbarung, auch beim Eintritt eines Dritten', (language, end, duration, transfer) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
 		expect(messages.contracts_end_agreement).toBe(end);
+		expect(messages.contracts_duration_agreement).toBe(duration); // without a date (code review 1266-1 C-2)
 		expect(messages.contracts_parties_fixed_transfer).toContain(transfer);
 	});
 

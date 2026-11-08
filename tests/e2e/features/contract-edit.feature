@@ -329,6 +329,14 @@ Funktionalität: Mietvertrag bearbeiten
     Dann erfährt der Liegenschaftsverwalter, dass der Mietvertrag beim Tod des Mieters weiterläuft
     Und erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt
 
+  # #1267: die Erben können kündigen oder mit dem Vermieter eine Aufhebungsvereinbarung treffen
+  Szenario: Nach dem Tod des Mieters endet der Mietvertrag auch mit einer Aufhebungsvereinbarung
+    Dann erfährt der Liegenschaftsverwalter, dass er das Vertragsende auch nach einer Aufhebungsvereinbarung mit den Erben erfasst
+
+  # #1267 (Fachreview 1266-1 V-1, M-1): der Eintritt eines Dritten wird als Aufhebungsvereinbarung erfasst
+  Szenario: Beim Eintritt eines Dritten endet der Mietvertrag mit einer Aufhebungsvereinbarung
+    Dann erfährt der Liegenschaftsverwalter, dass er beim Eintritt eines Dritten «Aufhebungsvereinbarung» wählt
+
   # B-16 (#156): der neue Mietvertrag desselben Mieters beginnt frühestens am Tag nach dem Vertragsende
   Szenario: Neuer Mietvertrag nach dem Vertragsende
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
