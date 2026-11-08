@@ -175,6 +175,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoices               | upload-discard-created |
       | invoices               | upload-unreadable   |
       | invoices               | upload-ki-none      |
+      | invoices               | upload-no-building  |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |
