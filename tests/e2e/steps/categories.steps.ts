@@ -578,3 +578,8 @@ Then('sagt Dwello zur Prüfung durch die KI nicht {string}', async ({ verwalter 
 When('der Liegenschaftsverwalter die Kategorie in {string} umbenennt', async ({ verwalter, seed }, title: string) => {
 	await verwalter.attemptsTo(rename(seed.unique(title)));
 });
+
+// #1160: the refusal in the delete dialog
+Then('erfährt der Liegenschaftsverwalter, dass sich die Kategorie nicht löschen lässt: {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(errorMessageShown(text)).toBe(true);
+});
