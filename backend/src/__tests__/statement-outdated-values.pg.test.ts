@@ -8,7 +8,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { apartments, categories, invoices } from '../db/schema';
+import { apartments, categories, distributionKeys, invoices } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
 import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
@@ -96,6 +96,20 @@ describe('Entwurf mit danach geänderten Werten', () => {
 		const id = await draft();
 		expect((await callApi(`/api/v1/apartments/${gone}`, { method: 'DELETE' })).ok).toBe(true);
 
+		expect((await changes(id)).valuesChanged).toBe(true);
+	});
+
+	// #1309 comment in #1328: a draft that split equally while its key could not be calculated; fixing the formula
+	// makes it outdated, and as long as it cannot be recalculated this rule names nothing (Fachreview 1328-1 V-8)
+	it('meldet einen Entwurf, dessen nicht berechenbarer Verteilschlüssel danach korrigiert wurde', async () => {
+		await otherApartment({ area: '70', rooms: '5.5' });
+		const key = await createDistributionKey({ name: `Kaputt ${token}`, nameDE: `Kaputt ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const id = await draft(key.id); // split equally, as a key that could not be calculated did before #1221
+		await db.update(distributionKeys).set({ formula: '1 / ({rooms} - 3.5)', updatedAt: new Date() }).where(eq(distributionKeys.id, key.id));
+		expect((await changes(id)).valuesChanged).toBe(false);
+
+		expect((await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' })).status).toBe(200);
 		expect((await changes(id)).valuesChanged).toBe(true);
 	});
 
