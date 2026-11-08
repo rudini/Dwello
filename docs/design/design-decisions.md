@@ -25,7 +25,7 @@ Target users: private landlords with little experience who use Dwello a few time
 | # | Decision | Why |
 |---|---|---|
 | D11 | Labels above fields, help text with an example below the label, errors below the field and tied to it; "(optional)" in words. After a failed save the first faulty field gets the focus; a corrected field drops its error. | Users read top-down; help before input prevents errors; screen reader users hear what to fix. |
-| D12 | One navigation level, grouped (Verwalten · Nebenkosten · Einstellungen und Hilfe); sidebar from 1024 px, drawer below; skip link. | Max. two levels. |
+| D12 | One navigation level, grouped (Verwalten · Nebenkosten · Einstellungen und Hilfe); sidebar from 768 px (#740: it stays at 150 % zoom on a laptop), drawer below; skip link. | Max. two levels. |
 | D13 | Page anatomy: breadcrumb → title + one-sentence purpose → one primary action → content. Lists are rows or cards whose whole area is one link named by the record; no sideways scrolling on phones. | One primary action per screen; findable rows for touch and screen readers. |
 | D14 | The Übersicht answers "Was ist jetzt zu tun?": tasks with reason, deadline and one button, then deadlines, then a compact building status – all from existing endpoints. | Anna's task: knowing what to do after months away. |
 | D15, D15a | Guided wizards for Mietvertrag erfassen (Mieter → Wohnung → Vertragsdauer → Miete → Prüfen) and Abrechnungen erstellen (Abrechnungsperiode → Gebäude → Heizprofil und Verwaltungspauschale → Vorschau → Erstellen); back without loss, browser draft with visible save status, sensible prefilling. | Rare, high-stakes tasks need guidance; no backend draft entity may be added. |

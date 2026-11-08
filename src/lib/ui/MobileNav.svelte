@@ -7,7 +7,7 @@
 	import { makeInert } from '$lib/inert';
 	import { MediaQuery } from 'svelte/reactivity';
 
-	// The main menu below 1024 px: a modal drawer that holds the focus while open;
+	// The main menu below 768 px (#740): a modal drawer that holds the focus while open;
 	// the page behind it is inert (#651), its scrim not, so a click on it still closes the menu
 	let modal = $state<HTMLElement>();
 	let drawer = $state<HTMLElement>();
@@ -30,8 +30,8 @@
 		};
 	});
 
-	// at lg (64rem, 1024 px at the default font size) the main navigation shows and the drawer hides: a menu left open would keep the page inert
-	const wide = new MediaQuery('min-width: 64rem');
+	// at md (48rem, 768 px at the default font size, #740) the main navigation shows and the drawer hides: a menu left open would keep the page inert
+	const wide = new MediaQuery('min-width: 48rem');
 	$effect(() => {
 		if (wide.current) closeMobileNav();
 	});
@@ -53,14 +53,14 @@
 {#if $mobileNavOpen}
 	<div bind:this={modal}>
 		<div
-			class="fixed inset-0 z-40 bg-scrim lg:hidden"
+			class="fixed inset-0 z-40 bg-scrim md:hidden"
 			data-testid="mobile-nav-scrim"
 			aria-hidden="true"
 			onclick={closeMobileNav}
 		></div>
 		<div
 			bind:this={drawer}
-			class="fixed inset-y-0 left-0 z-50 flex w-80 max-w-full flex-col bg-surface shadow-overlay lg:hidden"
+			class="fixed inset-y-0 left-0 z-50 flex w-80 max-w-full flex-col bg-surface shadow-overlay md:hidden"
 			role="dialog"
 			aria-modal="true"
 			aria-label={m.nav_main()}
