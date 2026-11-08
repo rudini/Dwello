@@ -23,6 +23,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Zimmeranzahl | nombre de pièces | numero di locali | number of rooms |
 | Mietstatus | statut de location | stato di locazione | rental status |
 | Vermietet / Vermietet ab {Datum} / Vermietet bis {Datum} / Leer / Leer seit {Datum} / Gesperrt | loué / loué dès le {date} / loué jusqu’au {date} / vacant / vacant depuis le {date} / bloqué | locato / locato dal {date} / locato fino al {date} / sfitto / sfitto dal {date} / bloccato | let / let from {date} / let until {date} / vacant / vacant since {date} / blocked |
+| frei (Wohnung) / wird später frei | libre / sera libre plus tard | libero / si libera più tardi | free / becomes free later |
 | Mieter | locataire | inquilino | tenant |
 | Mieter: aktiv / künftig / ehemalig | actif / futur / ancien | attivo / futuro / ex | active / future / former |
 | Mieter anonymisieren | anonymiser le locataire | anonimizzare l’inquilino | anonymise the tenant |
@@ -77,6 +78,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Baustein (einer Formel, #737) | élément | elemento | building block |
 | Wohnungsanteil | part du logement | quota appartamento | apartment share |
 | Heizprofil / Standard-Heizprofil | profil de chauffage / profil de chauffage par défaut | profilo di riscaldamento / profilo di riscaldamento predefinito | heating profile / default heating profile |
+| Zähler (Heizung, Warmwasser) / Zählerstand | compteur (de chauffage, d’eau chaude) / relevé de compteur | contatore (del riscaldamento, dell’acqua calda) / lettura del contatore | meter (heating, hot water) / meter reading |
+| Heizkostenverteiler | répartiteur de frais de chauffage | ripartitore delle spese di riscaldamento | heat cost allocator |
 | Vordefiniert (nicht «Standard»; Kategorien, Verteilschlüssel, Heizprofile) | prédéfini | preimpostato / preimpostata (not «predefinito», which is «Standard») | predefined |
 | Nebenkosten | frais accessoires | spese accessorie | utility costs |
 | Nebenkostenabrechnung | décompte des charges | conteggio spese accessorie | utility cost statement |

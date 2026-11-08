@@ -7,8 +7,10 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { invoices } from '../db/schema';
 import { createBuilding, deleteBuilding } from '../services/building.service';
+import { deleteStatement, generateStatement } from '../services/statement.service';
 import { callApi } from './helpers/auth';
 import { apiRecords, expectRejection, idOf, insertInvoice, invoicedBuilding } from './helpers/records';
+import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
 const categories = apiRecords('categories');
@@ -111,6 +113,41 @@ describe('Kostenkategorien', () => {
 		await expectRejection(response, 409, 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.', 'CATEGORY_IN_USE_ONE', {
 			count: 1
 		});
+	});
+
+	// #1160: eine Abrechnung geht an den Mieter; ohne ihre Kategorie stünde ein Posten anders da als versendet
+	it('behält Kategorien, die in einer Abrechnung stehen, auch ohne Rechnung', async () => {
+		const id = await idOf(await create('Treppenhausreinigung'));
+		const rental = await createRental(`${token}-1160`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(rental.building, { categoryId: id });
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31' });
+		await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+		try {
+			const response = await categories.send('DELETE', `/${id}`);
+
+			await expectRejection(response, 409, 'Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen.', 'CATEGORY_IN_STATEMENT');
+		} finally {
+			await deleteStatement(statement.id);
+			await rental.remove();
+		}
+	});
+
+	// #1160 (Fachreview V-1): the refusal of a statement says the category goes once the drafts are recalculated; that
+	// holds only while invoices are named first
+	it('nennt bei einer Kategorie mit Rechnung und Abrechnung zuerst die Rechnung', async () => {
+		const id = await idOf(await create('Dachreinigung'));
+		const rental = await createRental(`${token}-1160-in-use`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(rental.building, { categoryId: id });
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31' });
+		try {
+			const response = await categories.send('DELETE', `/${id}`);
+
+			await expectRejection(response, 409, 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.', 'CATEGORY_IN_USE_ONE', { count: 1 });
+		} finally {
+			await deleteStatement(statement.id);
+			await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+			await rental.remove();
+		}
 	});
 });
 

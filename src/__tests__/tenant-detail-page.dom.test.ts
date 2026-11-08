@@ -155,7 +155,8 @@ describe('Mieterdetail', () => {
 	it('lässt einen Mieter mit Mietverträgen nicht löschen und sagt warum', () => {
 		open([history('c1', 'Wohnung 1.01', '2015-01-01', '2019-12-31', 'ended')]);
 		click('tenant-delete-button');
-		expect(byTestId<HTMLButtonElement>('tenant-delete-confirm')!.disabled).toBe(true);
+		expect(byTestId('tenant-delete-confirm')).toBeNull();
+		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
 			'Abrechnungen und Dokumente auf sie verweisen'
 		);

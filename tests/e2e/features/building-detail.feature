@@ -30,7 +30,7 @@ Funktionalität: Gebäudedetail
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude löschen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Gebäude kann nicht gelöscht werden"
-    Und kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Und bietet der Dialog nur "Schliessen" an
 
   Szenario: Zur Bearbeitung des Gebäudes wechseln
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"

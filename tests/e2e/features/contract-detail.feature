@@ -109,7 +109,7 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
     Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
     Und nennt der Dialog "Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen."
-    Und kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Und bietet der Dialog nur "Schliessen" an
     Und ist der Mietvertrag unbefristet
 
   # Irrtümlich erfasst, noch nicht begonnen: er hat keine Mietstage

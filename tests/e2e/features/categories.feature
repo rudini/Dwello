@@ -354,3 +354,17 @@ Funktionalität: Kostenkategorien
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie "Zaunpflege"
     Wenn der Liegenschaftsverwalter die Kategorie ohne Reihenfolge speichert
     Dann steht die Kategorie "Zaunpflege" in der Liste vor der vordefinierten Kategorie "Heizung"
+
+  # #1160: eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat; ohne ihre Kategorie stünde eine Abrechnungsposition im neu erstellten PDF anders da
+  Szenario: Kategorien in einer Abrechnung bleiben erhalten
+    Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2024-01-01" für "950" Franken
+    Und im Gebäude "Seeblick" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "450.00" Franken vom "2025-03-31"
+    Und für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Seeblick"
+    Und die Rechnung "Treppenhausreinigung 2025-03-31" ist danach gelöscht
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" löscht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Kategorie steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Kategorien. Steht die Kategorie nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich die Kategorie löschen."
+    Und sieht der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung"

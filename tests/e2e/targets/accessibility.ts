@@ -29,6 +29,8 @@ export const firstRevokeButton = bySelector('Ersten Zugangsschlüssel widerrufen
 export const firstFuelStockDelete = bySelector('Ersten Tankbestand löschen', '[data-testid^="fuel-stock-delete-"]');
 // Confirmation dialogs end with a button whose test id ends in -confirm
 export const dialogConfirm = bySelector('Bestätigen im Dialog', '[data-testid$="-confirm"]');
+// a dialog's buttons; a refused one offers only «Schliessen», no confirm button (#1167)
+export const dialogButtons = bySelector('Schaltflächen im Dialog', '[data-testid="dialog-actions"], [data-testid$="-confirm"]');
 export const galleryDialogButton = byTestId('Dialog öffnen', 'gallery-open-dialog');
 export const galleryBusyDialogButton = byTestId('Dialog mit Ladezustand öffnen', 'gallery-open-busy-dialog');
 export const dialog = bySelector('Dialog', '[role="dialog"]');

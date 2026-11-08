@@ -48,7 +48,7 @@
 		$props();
 </script>
 
-<!-- the title says what matters most: saving checks it (#666); TODO(fachlich prüfen, #1142): «frei (Wohnung)» -->
+<!-- the title says what matters most: saving checks it (#666) -->
 {#snippet hint()}
 	<Alert
 		tone="caution"

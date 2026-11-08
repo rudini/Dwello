@@ -315,6 +315,11 @@ When('der Liegenschaftsverwalter in der Auswahl die Wohnung {string} wählt', as
 	await verwalter.attemptsTo(chooseApartment(seed.idOf(apartment)!));
 });
 
+// #1142: the help says which apartments can be chosen, in the words of «frei (Wohnung)»
+Then('sagt die Hilfe zur Wohnung nur {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(apartmentSelectDescription).toBe(text);
+});
+
 Then(
 	'liest ein Screenreader bei der Wohnungsauswahl den Hinweis {string} vor',
 	async ({ verwalter }, text: string) => {

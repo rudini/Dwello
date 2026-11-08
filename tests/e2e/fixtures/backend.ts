@@ -633,7 +633,7 @@ export function testData(api: CallTheApi) {
 
 		// Invoice in an own category, distributed by area
 		async invoiceInOwnCategory(buildingTitle: string, categoryTitle: string, amount: string, date: string) {
-			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, `${categoryTitle} ${date}`, amount, date);
+			ids.set(`Rechnung ${categoryTitle} ${date}`, await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, `${categoryTitle} ${date}`, amount, date));
 		},
 
 		// Invoice of a supplier, in an own category the scenario created or a predefined one given by its German name,
