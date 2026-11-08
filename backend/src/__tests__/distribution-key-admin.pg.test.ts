@@ -60,6 +60,14 @@ describe('Eigene Verteilschlüssel', () => {
 		expect(response.status).toBe(201);
 	});
 
+	it('nimmt einen Namen mit \\ an, wenn nur ein ähnlicher Name vergeben ist', async () => {
+		await create('Ost West');
+
+		const response = await create('Ost\\ West');
+
+		expect(response.status).toBe(201);
+	});
+
 	it('lehnt beim Umbenennen einen vergebenen deutschen Namen ab', async () => {
 		await keys.create({ name: `Stairs ${token}`, nameDE: `Treppenhaus ${token}`, formula: '{units}' });
 		const id = await idOf(await create('Lift'));
