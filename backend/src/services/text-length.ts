@@ -11,9 +11,8 @@ export function tooLongErrors(table: Table, entered: object, field = (key: strin
 	return Object.entries(getTableColumns(table)).flatMap(([key, column]) => {
 		const max = (column as { length?: number }).length;
 		const value = values[key];
-		return max && typeof value === 'string' && [...value].length > max
-			? [{ code: 'TEXT_TOO_LONG', params: { field: field(key), max } }]
-			: [];
+		const length = typeof value === 'string' ? [...value].length : 0;
+		return max && length > max ? [{ code: 'TEXT_TOO_LONG', params: { field: field(key), max, length } }] : []; // #1318: and the entered length
 	});
 }
 
