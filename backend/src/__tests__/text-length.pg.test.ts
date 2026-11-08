@@ -7,7 +7,8 @@ import { apiRecords, idOf } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 const long = (length: number) => 'A'.repeat(length);
-const tooLong = (field: string, max: number) => ({ code: 'TEXT_TOO_LONG', params: { field, max } });
+// #1318: every text below is entered one character over its limit
+const tooLong = (field: string, max: number) => ({ code: 'TEXT_TOO_LONG', params: { field, max, length: max + 1 } });
 
 async function expectTooLong(response: Response, ...causes: ReturnType<typeof tooLong>[]) {
 	expect(response.status).toBe(400);

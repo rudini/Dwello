@@ -1,6 +1,6 @@
 {
 	"error": "Some fields are not valid",
 	"code": "TEXT_TOO_LONG",
-	"params": { "field": "email", "max": 255 },
-	"causes": [{ "code": "TEXT_TOO_LONG", "params": { "field": "email", "max": 255 } }]
+	"params": { "field": "email", "max": 255, "length": 256 },
+	"causes": [{ "code": "TEXT_TOO_LONG", "params": { "field": "email", "max": 255, "length": 256 } }]
 }

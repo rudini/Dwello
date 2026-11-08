@@ -2386,7 +2386,7 @@
 	"ai_keys_not_revoked": "The access key was not revoked. Please try again.",
 	"ai_keys_address": "Address for the AI program: {url}",
 	"backend_access_key_name_too_long": "The name can be at most 100 characters long.",
-	"backend_text_too_long": "At most {max} characters. Shorten the text.",
+	"backend_text_too_long": "At most {max} characters; you entered {length}. Shorten the text.",
 	"ai_keys_copy": "Copy key",
 	"ai_keys_copy_address": "Copy address",
 	"ai_keys_copy_failed": "Copying did not work. Select the text and copy it by hand.",

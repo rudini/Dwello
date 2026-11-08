@@ -166,3 +166,21 @@ describe('Formel, die sich nicht berechnen lässt', () => {
 		expect(backendMessage({ code: 'REMINDER_PREVIOUS_NOT_SENT', params: { reminderLevel: 2 } }, '')).toContain('Die 2. Mahnung ist noch nicht versendet.');
 	});
 });
+
+describe('Zu langer Text', () => {
+	// #1318: the refusal says how many characters were entered, worded by fach-reviewer (docs/reviews/1318-fachreview-1.md)
+	it('nennt in jeder Sprache die Grenze und wie viele Zeichen eingegeben sind', () => {
+		const body = { code: 'TEXT_TOO_LONG', params: { field: 'name', max: 100, length: 137 } };
+		const shown = (['de', 'fr', 'it', 'en'] as const).map((locale) => {
+			overwriteGetLocale(() => locale);
+			return backendMessage(body, '');
+		});
+
+		expect(shown).toEqual([
+			'Höchstens 100 Zeichen, Sie haben 137 eingegeben. Kürzen Sie den Text.',
+			'100 caractères au maximum, vous en avez saisi 137. Raccourcissez le texte.',
+			'Al massimo 100 caratteri, ne ha inseriti 137. Accorci il testo.',
+			'At most 100 characters; you entered 137. Shorten the text.'
+		]);
+	});
+});
