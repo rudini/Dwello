@@ -8,6 +8,7 @@
 			"endDate": null,
 			"billedUntil": null,
 			"terminated": false,
+			"byAgreement": false,
 			"oldAddress": false,
 			"tenantName": "Eva Frei",
 			"apartmentNumber": "3.01",

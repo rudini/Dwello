@@ -2,7 +2,7 @@ import type { ContractsListData, ContractWithDetails } from '$lib/types';
 import type { ContractStatus } from '../../../backend/src/api/contract';
 import type { PageServerLoad } from './$types';
 import { missingByContract } from '$lib/server/missing-statements';
-import { monthlyTotal, type ContractRow } from '$lib/server/contract-history';
+import { endKind, monthlyTotal, type ContractRow } from '$lib/server/contract-history';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 			tenantId: c.tenantId,
 			startDate: c.startDate,
 			endDate: c.endDate,
-			terminated: c.terminated,
+			...endKind(c),
 			status: c.status, // the backend decides it (#784, #815)
 			baseRent: c.baseRent,
 			additionalRent: c.additionalRent,

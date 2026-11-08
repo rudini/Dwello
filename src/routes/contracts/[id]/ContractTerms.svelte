@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { contractEnd, statusBadges } from '$lib/contract-status';
+	import { statusBadges } from '$lib/contract-status';
 	import type { ContractHistory } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -11,7 +11,7 @@
 	let {
 		startDate,
 		endDate,
-		terminated,
+		end,
 		noticeReceivedOn,
 		billedUntil,
 		status,
@@ -23,7 +23,7 @@
 	}: {
 		startDate: string;
 		endDate?: string | null;
-		terminated?: boolean;
+		end: string; // the Vertragsende in words: fixed term, notice or Aufhebungsvereinbarung (#1148)
 		noticeReceivedOn?: string | null;
 		billedUntil?: string | null; // «Abgerechnet bis» (#133)
 		status: ContractHistory['status'];
@@ -60,7 +60,7 @@
 		<div>
 			<dt class="text-ink-muted">{m.dashboard_kind_contract_end()}</dt>
 			<dd class="font-semibold text-ink" data-testid="contract-end-date">
-				{contractEnd(endDate, terminated)}
+				{end}
 			</dd>
 		</div>
 		{#if noticeReceivedOn}

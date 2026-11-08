@@ -122,8 +122,9 @@ apartment_id            UUID NOT NULL REFERENCES apartments ON DELETE CASCADE
 tenant_id               UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
-terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
+terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date ends an open-ended contract (Kündigungstermin, or with by_agreement the agreed day), not a fixed-term end
 notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
+by_agreement            BOOLEAN NOT NULL DEFAULT FALSE -- with terminated: the end is an Aufhebungsvereinbarung, not a notice (#1148)
 billed_until            DATE              -- «Abgerechnet bis» (#133), optional: billed outside Dwello up to this day; Mietstage and Akonto count from the day after
 moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezogen» after an agreed end (A-6, #115); cleared when end_date changes
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
@@ -138,6 +139,7 @@ notes                   TEXT
 CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
 CONSTRAINT contracts_terminated_check CHECK (NOT terminated OR end_date IS NOT NULL)
 CONSTRAINT contracts_notice_received_check CHECK (notice_received_on IS NULL OR terminated)
+CONSTRAINT contracts_by_agreement_check CHECK (NOT by_agreement OR (terminated AND notice_received_on IS NULL))
 ```
 
 Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end_date_idx (end_date)`,

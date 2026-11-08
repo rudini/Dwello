@@ -7,6 +7,7 @@
 			"endDate": "2024-03-31",
 			"billedUntil": null,
 			"terminated": true,
+			"byAgreement": false,
 			"oldAddress": false,
 			"tenantName": "Eva Frei",
 			"apartmentNumber": "3.01",

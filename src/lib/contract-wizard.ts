@@ -337,6 +337,7 @@ export type ListedContract = {
 	startDate: string;
 	endDate: string | null;
 	terminated?: boolean;
+	byAgreement?: boolean; // #1148
 	status: RentalContract['status'];
 	baseRent: string;
 	additionalRent?: string | null;
@@ -369,6 +370,7 @@ export function lastRent(
 		startDate: last.startDate,
 		endDate: last.endDate,
 		terminated: !!last.terminated,
+		byAgreement: !!last.byAgreement,
 		status: last.status
 	};
 }

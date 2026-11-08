@@ -181,34 +181,50 @@ Funktionalität: Mietvertragsdetail
 
   # #1148: Mieter und Vermieter beenden einen unbefristeten Mietvertrag im Einvernehmen, ohne Kündigung, z.B. beim
   # Wechsel in eine andere Wohnung desselben Vermieters (Aufhebungsvereinbarung)
-  @wip
   Szenario: Der Dialog fragt, ob gekündigt oder eine Aufhebungsvereinbarung getroffen wurde
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
     Dann fragt der Dialog, ob der Mietvertrag mit einer "Kündigung" oder einer "Aufhebungsvereinbarung" endet
 
-  @wip
   Szenario: Mietvertrag mit einer Aufhebungsvereinbarung beenden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2099-03-31" beendet
     Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
     Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
     Dann zeigt die Vertragsdauer "Unbefristet, beendet auf den 31.03.2099"
-    Und nennt die Mietvertragsliste den Mietvertrag von "Anna Keller" "beendet"
+    Und nennt die Mietvertragsliste den Mietvertrag von "Anna Keller" "einvernehmlich"
 
-  @wip
   Szenario: Bei einer Aufhebungsvereinbarung fragt der Dialog nicht nach dem Eingang der Kündigung
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung beenden will
     Dann erklärt der Dialog die Aufhebungsvereinbarung "im Einvernehmen"
     Und fragt der Dialog nicht nach dem Tag, an dem die Kündigung angekommen ist
 
-  @wip
   Szenario: Nächste Schritte nach einer Aufhebungsvereinbarung
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2099-03-31" beendet
     Dann sagen die nächsten Schritte "Der Mietvertrag endet mit einer Aufhebungsvereinbarung."
     Und sagen die nächsten Schritte nicht "gekündigt"
+
+  # #1148 (Fachreview 1148-1): ein unbefristeter Mietvertrag endet in der Regel mit einer Kündigung (Art. 266a OR)
+  Szenario: Der Dialog schlägt die Kündigung vor
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
+    Dann ist im Dialog die Kündigung gewählt
+
+  # A-6 (#115): wie ein gekündigter läuft ein mit einer Aufhebungsvereinbarung beendeter Mietvertrag nicht weiter
+  Szenario: Ein mit einer Aufhebungsvereinbarung beendeter Mietvertrag läuft nicht stillschweigend weiter
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den "2025-03-31" beendet und die Folge bestätigt
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2025"
+    Und fragt der Mietvertrag nicht, ob der Mieter noch in der Wohnung wohnt
+
+  Szenario: Der Eingang einer Kündigung gilt nicht für eine Aufhebungsvereinbarung
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beenden will und die Kündigung am "2098-12-15" erhalten hat
+    Und der Liegenschaftsverwalter stattdessen eine Aufhebungsvereinbarung wählt und den Mietvertrag beendet
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+    Und zeigt der Mietvertrag keinen Eingang einer Kündigung
 
   Szenario: Befristeter Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

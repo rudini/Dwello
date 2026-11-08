@@ -285,6 +285,12 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		await seed.buildingAddress(tenant, 'Bergsicht');
 	}
 	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard');
+	// #1148: open-ended and ended by an Aufhebungsvereinbarung, in 2099 outside every statement period: the form offers
+	// the other kind and to withdraw it
+	await seed.apartment('Bergsicht', '2.06', 'vacant');
+	await seed.tenant('Lea');
+	await seed.contract('Lea', '2.06', { startDate: '2099-01-01', baseRent: '1300.00' });
+	await seed.endByAgreement('Lea', '2099-03-31');
 	// #339: 2024 heating invoices with and without a Leistungszeitraum at the move-outs: the wizard names the one without
 	await seed.invoiceOn('Bergsicht', 'Heizung', '800.00', '2024-03-31');
 	await seed.invoiceOn('Bergsicht', 'Heizung', '700.00', '2025-01-10', ['2024-10-01', '2024-12-31']);
@@ -334,6 +340,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		tenant: seed.idOf('Anna'), // rents 1.01 without an end: the contract wizard's step «Wohnung» names it (#156)
 		contract: seed.idOf('Mietvertrag Anna'),
 		noticedContract: seed.idOf('Mietvertrag Dora'),
+		agreedContract: seed.idOf('Mietvertrag Lea'),
 		vacantApartment: seed.idOf('2.02'),
 		endedContract: seed.idOf('Mietvertrag Emil'),
 		endedTenant: seed.idOf('Emil'), // ended 2014: «Mieter anonymisieren» is offered (#459)

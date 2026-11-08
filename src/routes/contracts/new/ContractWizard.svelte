@@ -136,7 +136,7 @@
 	const taken = $derived(lastRent(listed.get(values.apartmentId) ?? {}, values.startDate));
 	const takenFrom = $derived(
 		taken && rentTakenOver(values, taken)
-			? contractPeriod(taken.startDate, taken.endDate, taken.status, taken.terminated)
+			? contractPeriod(taken.startDate, taken.endDate, taken.status, taken.terminated, taken.byAgreement)
 			: null
 	);
 

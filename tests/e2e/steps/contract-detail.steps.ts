@@ -41,7 +41,9 @@ import {
 	moveOutShown,
 	refusedStatementName,
 	endKindText,
-	noticeReceivedShown
+	noticeReceivedShown,
+	noticeChosen,
+	noticeReceivedOnShown
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -77,7 +79,8 @@ import {
 	deleteDraftAndContinue,
 	createFinalStatement,
 	endContractByAgreementOn,
-	startEndingByAgreement
+	startEndingByAgreement,
+	endByAgreementInstead
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays, swissDate } from '../fixtures/dates';
@@ -618,4 +621,28 @@ Then('sagen die nächsten Schritte {string}', async ({ verwalter }, text: string
 Then('sagen die nächsten Schritte nicht {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(nextStepsText).toContain('um die neue Adresse');
 	await verwalter.sees(nextStepsText).not.toContain(text);
+});
+
+Then('ist im Dialog die Kündigung gewählt', async ({ verwalter }) => {
+	await verwalter.sees(noticeChosen).toBe(true);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag mit einer Aufhebungsvereinbarung auf den {string} beendet und die Folge bestätigt',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(endContractByAgreementOn(date, { confirmPast: true }));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter stattdessen eine Aufhebungsvereinbarung wählt und den Mietvertrag beendet',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(endByAgreementInstead);
+	}
+);
+
+// anchored on the Vertragsende the page shows
+Then('zeigt der Mietvertrag keinen Eingang einer Kündigung', async ({ verwalter }) => {
+	await verwalter.sees(endOfContract).toContain('Unbefristet');
+	await verwalter.sees(noticeReceivedOnShown).toBe(false);
 });

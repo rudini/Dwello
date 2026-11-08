@@ -39,6 +39,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Nachmieter / Mieterwechsel | nouveau locataire / changement de locataire | nuovo inquilino / cambio d’inquilino | new tenant / change of tenant |
 | Ersatzmieter | locataire de remplacement | inquilino sostitutivo (BGE 117 II 156 «conduttore sostitutivo»; «nuovo inquilino» is the Nachmieter) | replacement tenant |
 | Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de congé / annuler la résiliation | disdetta / disdetto / scadenza di disdetta / annullare la disdetta | notice of termination / terminated by notice / termination date / withdraw notice |
+| Aufhebungsvereinbarung / einvernehmlich | convention de fin de bail / d’un commun accord | accordo di scioglimento / di comune accordo | termination agreement / by agreement |
 | Kündigungsfrist | délai de congé | termine di preavviso | notice period |
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |

@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { tenants } from '../db/schema';
+import { rentalContracts, tenants } from '../db/schema';
 import { apiRecords } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -103,6 +103,16 @@ describe('POST /api/v1/contracts', () => {
 		const response = await letTo('2014-06-01', '2014-06-30');
 
 		expect(((await response.json()) as { params: object }).params).toMatchObject({ terminated: 1 });
+	});
+
+	// #1148: a contract ended by an Aufhebungsvereinbarung is not said to be gekündigt
+	it('sagt, dass der andere Mietvertrag mit einer Aufhebungsvereinbarung endet', async () => {
+		const agreed = (await (await letTo('2013-01-01', '2013-12-31')).json()) as { id: string };
+		await db.update(rentalContracts).set({ terminated: true, byAgreement: true }).where(eq(rentalContracts.id, agreed.id));
+
+		const response = await letTo('2013-06-01', '2013-06-30');
+
+		expect(((await response.json()) as { params: object }).params).toMatchObject({ terminated: 1, byAgreement: 1 });
 	});
 
 	// fach review b667 V-4: Dwello shows an anonymised tenant without a name

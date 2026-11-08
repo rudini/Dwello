@@ -11,26 +11,33 @@
 		apartmentId,
 		tenantId,
 		contractId,
-		name
+		name,
+		byAgreement = false
 	}: {
 		shown: { successor: boolean; ended: boolean } | null;
 		apartmentId: string;
 		tenantId: string;
 		contractId: string; // the new contract of the same tenant takes its agreed Nebenkosten (#368)
 		name: string;
+		byAgreement?: boolean; // ended by an Aufhebungsvereinbarung, not a notice (#1148)
 	} = $props();
+
+	const text = $derived.by(() => {
+		if (!shown || shown.ended) return m.contracts_next_steps_address({ name });
+		if (byAgreement)
+			return shown.successor
+				? m.contracts_next_steps_text_agreement_successor({ name })
+				: m.contracts_next_steps_text_agreement({ name });
+		return shown.successor
+			? m.contracts_next_steps_text_successor({ name })
+			: m.contracts_next_steps_text({ name });
+	});
 </script>
 
 {#if shown}
 	<Panel title={m.contracts_next_steps()}>
 		<div class="flex flex-col gap-4" data-testid="contract-next-steps">
-			<p class="text-ink">
-				{shown.ended
-					? m.contracts_next_steps_address({ name })
-					: shown.successor
-						? m.contracts_next_steps_text_successor({ name })
-						: m.contracts_next_steps_text({ name })}
-			</p>
+			<p class="text-ink">{text}</p>
 			<div class="flex flex-wrap gap-4">
 				{#if !shown.successor && !shown.ended}
 					<Button href="/contracts/new?apartment={apartmentId}" icon="contract"

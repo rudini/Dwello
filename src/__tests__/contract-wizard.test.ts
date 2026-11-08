@@ -300,6 +300,7 @@ describe('Beträge des letzten Mietvertrags', () => {
 			startDate: '2024-04-01',
 			endDate: '2099-03-31',
 			terminated: true,
+			byAgreement: false,
 			status: 'active' // as the backend decides it (#815): the wizard names its period with it
 		});
 	});

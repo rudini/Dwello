@@ -40,6 +40,7 @@ const contractFields = {
 	startDate: rentalContracts.startDate,
 	endDate: rentalContracts.endDate,
 	terminated: rentalContracts.terminated,
+	byAgreement: rentalContracts.byAgreement,
 	noticeReceivedOn: rentalContracts.noticeReceivedOn,
 	billedUntil: rentalContracts.billedUntil,
 	movedOut: rentalContracts.movedOut,
@@ -243,6 +244,7 @@ async function checkContractOverlap(
 			start: rentalContracts.startDate,
 			end: rentalContracts.endDate,
 			terminated: rentalContracts.terminated,
+			byAgreement: rentalContracts.byAgreement,
 			status: contractFields.status // by the Swiss day: «seit» or «ab» (#815)
 		})
 		.from(rentalContracts)
@@ -257,6 +259,7 @@ async function checkContractOverlap(
 		start: other.start,
 		...(other.end && { end: other.end }),
 		terminated: other.terminated ? 1 : 0,
+		...(other.byAgreement && { byAgreement: 1 }), // #1148
 		status: other.status
 	});
 }
@@ -540,7 +543,9 @@ export async function updateContract(
 				...confirmedForEnd(data.endDate, current.endDate, documentsChecked),
 				...feeRate(data, data.managementFeeAgreed ?? current.managementFeeAgreed),
 				...(data.endDate === null && { terminated: false }),
-				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),
+				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null, byAgreement: false }),
+				// an Aufhebungsvereinbarung has no notice that arrived (#1148)
+				...(data.byAgreement && { noticeReceivedOn: null }),
 				updatedAt: new Date()
 			})
 			.where(eq(rentalContracts.id, id))

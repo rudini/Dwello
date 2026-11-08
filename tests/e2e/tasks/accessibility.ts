@@ -80,6 +80,7 @@ import {
 	contractEndInput,
 	contractEndPastConfirm,
 	noticeReceivedInput,
+	endKindAgreement,
 	continueOpenEndedButton,
 	movedOutButton,
 	deleteContractButton,
@@ -494,6 +495,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Check.the(contractEndPastConfirm),
 			Click.on(confirmEndContractButton),
 			Wait.until(on.refusedStatements)
+		),
+	// #1148: an Aufhebungsvereinbarung chosen: no day the notice arrived, the hint on the agreed day instead
+	'end-dialog-agreement': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			Click.on(endKindAgreement),
+			Wait.until(on.shown('contract-end-agreement-hint'))
 		),
 	// A-3 (#112): the notice arrived six weeks before the Vertragsende: the hint at the field, saving still possible
 	'end-dialog-notice-hint': () => (actor) =>

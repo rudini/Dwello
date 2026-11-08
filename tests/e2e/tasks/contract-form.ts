@@ -170,8 +170,10 @@ export const saveEndDate = (isoDate: string, { confirmPast = false } = {}): Acti
 };
 
 // «Bearbeiten»: the contract runs on without end
-export const withdrawNotice: Activity = (actor) =>
-	actor.attemptsTo(Click.on(durationChoice('Kündigung aufheben')), Click.on(contractSubmitButton));
+export const withdrawNotice: Activity = (actor) => actor.attemptsTo(saveDuration('Kündigung aufheben'));
+// «Bearbeiten»: another choice of «Vertragsdauer», e.g. the other kind of end of an open-ended contract (#1148)
+export const saveDuration = (label: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(durationChoice(label)), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: another Vertragsbeginn
 export const saveStartDate = (isoDate: string): Activity => (actor) =>

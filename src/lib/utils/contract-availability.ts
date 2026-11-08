@@ -35,6 +35,7 @@ export interface ContractForAvailability {
 	tenant_name?: string;
 	tenant_anonymised?: boolean;
 	terminated?: boolean;
+	byAgreement?: boolean; // #1148
 	contract_status?: RentalContract['status']; // by the Swiss day, as the backend says (#815)
 }
 

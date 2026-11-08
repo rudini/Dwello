@@ -81,6 +81,7 @@ describe('initialContractValues', () => {
 			endDate: '2026-03-31',
 			isUnlimited: false,
 			terminated: false,
+			byAgreement: false,
 			billedUntil: '',
 			baseRent: '950.00',
 			additionalRent: '',
@@ -341,6 +342,12 @@ describe('overlapRefusal', () => {
 		expect(textOf(refused({ ...overlap.params, terminated: 1 }), start2025, true)).toContain(
 			'(01.01.2024 – 31.12.2024, gekündigt)'
 		);
+	});
+
+	// #1148: eine Aufhebungsvereinbarung ist keine Kündigung
+	it('nennt einen mit Aufhebungsvereinbarung beendeten Mietvertrag einvernehmlich', () => {
+		const params = { ...overlap.params, terminated: 1, byAgreement: 1 };
+		expect(textOf(refused(params), start2025, true)).toContain('(01.01.2024 – 31.12.2024, einvernehmlich)');
 	});
 
 	it('rät im Assistenten nach einem früheren Mietvertrag ohne Vertragsende zu dessen Vertragsende oder einer anderen Wohnung', () => {

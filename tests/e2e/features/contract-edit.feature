@@ -220,6 +220,21 @@ Funktionalität: Mietvertrag bearbeiten
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und ist der Mietvertrag unbefristet
 
+  # #1148 (Fachreview 1148-1 V-1): eine falsch gewählte Art des Vertragsendes lässt sich korrigieren
+  Szenario: Eine Kündigung als Aufhebungsvereinbarung korrigieren
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter als Vertragsdauer "Unbefristet, beendet auf den 31.03.2099" speichert
+    Dann zeigt der Mietvertrag "Unbefristet, beendet auf den 31.03.2099"
+
+  Szenario: Aufhebungsvereinbarung zurücknehmen
+    Angenommen der Mietvertrag von "Anna Keller" ist mit einer Aufhebungsvereinbarung auf den "2099-03-31" beendet
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann erfährt der Liegenschaftsverwalter bei «Aufhebungsvereinbarung zurücknehmen», dass das nur gemeinsam geht
+    Wenn der Liegenschaftsverwalter als Vertragsdauer "Aufhebungsvereinbarung zurücknehmen" speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und ist der Mietvertrag unbefristet
+
   # A-10: auch unter «Bearbeiten» führt der Weg über das Löschen des Entwurfs
   Szenario: Entwurf löschen und Mietvertrag speichern
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"

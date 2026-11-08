@@ -1128,7 +1128,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		await answer('?/continueOpenEnded', 'success');
 		// Fachreview A-6 V-15: die Folge des Weiterführens
 		expect(get(toasts).map((t) => t.message)).toContain(
-			'Der Mietvertrag von Anna Keller läuft unbefristet weiter. Er endet erst mit einer Kündigung.'
+			'Der Mietvertrag von Anna Keller läuft unbefristet weiter. Er endet erst mit einer Kündigung oder einer Aufhebungsvereinbarung.'
 		);
 		// #1096: a new confirmation replaces the older one
 		await answer('?/movedOut', 'success');

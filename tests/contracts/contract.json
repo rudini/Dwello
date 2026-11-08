@@ -8,6 +8,7 @@
 	"oldAddress": false,
 	"tenantAnonymised": false,
 	"terminated": true,
+	"byAgreement": false,
 	"movedOut": false,
 	"documentsCheckedOn": null,
 	"noticeReceivedOn": "2098-12-15",

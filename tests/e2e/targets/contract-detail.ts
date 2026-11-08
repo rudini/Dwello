@@ -125,4 +125,5 @@ export const missingStatementsTitle = target('Titel der fehlenden Abrechnungen',
 );
 // #1148: whether the contract ends by a notice or by an Aufhebungsvereinbarung
 export const endKind = target('Art des Vertragsendes', (page) => page.getByTestId('contract-end-kind'));
+export const endKindNotice = target('Kündigung', (page) => page.getByTestId('contract-end-kind-notice'));
 export const endKindAgreement = target('Aufhebungsvereinbarung', (page) => page.getByTestId('contract-end-kind-agreement'));

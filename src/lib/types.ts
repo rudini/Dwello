@@ -130,6 +130,7 @@ export type RentalContract = Pick<
 			ApiContract,
 			| 'endDate'
 			| 'terminated' // endDate is a Kündigungstermin of an open-ended contract, not agreed
+			| 'byAgreement' // with terminated: the end is an Aufhebungsvereinbarung (#1148)
 			| 'noticeReceivedOn' // A-3
 			| 'billedUntil' // «Abgerechnet bis» (#133)
 			| 'additionalRent'
@@ -151,7 +152,7 @@ export type RentalContract = Pick<
 // One row of a contract history (apartment or tenant page)
 export type ContractHistory = Pick<
 	ApiContract,
-	'id' | 'status' | 'startDate' | 'endDate' | 'terminated'
+	'id' | 'status' | 'startDate' | 'endDate' | 'terminated' | 'byAgreement'
 > & {
 	tenantName: string;
 	monthlyTotal: number; // in CHF

@@ -144,6 +144,7 @@ export const rentalContracts = pgTable(
 		endDate: date('end_date'), // null = ongoing
 		terminated: boolean('terminated').default(false).notNull(), // endDate is a Kündigungstermin, not agreed
 		noticeReceivedOn: date('notice_received_on'), // the day the notice arrived (A-3), only with terminated
+		byAgreement: boolean('by_agreement').default(false).notNull(), // with terminated: ended by an Aufhebungsvereinbarung (#1148)
 		billedUntil: date('billed_until'), // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 		movedOut: boolean('moved_out').default(false).notNull(), // «Mieter ist ausgezogen» after this end (A-6)
 		documentsCheckedOn: date('documents_checked_on'), // «Als geprüft markieren» for this end (#459)
