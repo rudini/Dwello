@@ -14,7 +14,6 @@ import {
 	vacancyShown
 } from '../questions/apartment-detail';
 import { listedApartmentCount } from '../questions/building-detail';
-import { deleteDialogTitleText } from '../questions/invoice-detail';
 import {
 	deleteApartment,
 	editApartment,
@@ -43,10 +42,6 @@ When('der Liegenschaftsverwalter die Wohnung löscht', async ({ verwalter }) => 
 
 When('der Liegenschaftsverwalter die Wohnung löschen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(startDeletingApartment);
-});
-
-Then('heisst der Dialog {string}', async ({ verwalter }, title: string) => {
-	await verwalter.sees(deleteDialogTitleText).toBe(title);
 });
 
 Then('bestätigt Dwello das Löschen mit {string}', async ({ verwalter }, text: string) => {
