@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, Enter, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Click, DownloadFrom, Enter, Focus, Navigate, Select, Wait } from '../screenplay/interactions';
 import { statementStatus } from '../targets/statement-detail';
 import {
 	draftFilter,
@@ -47,6 +47,9 @@ export const showStatementsOfBuildingWhileLoading = (buildingId: string): Activi
 		Click.on(statementSearchButton),
 		filteredBy({ building: buildingId })
 	);
+
+// #733: the field the confirmation after a deletion stood over (persona Helga, Marco, #125)
+export const focusBuildingFilter = Focus.on(statementBuildingFilter);
 
 export const showDraftsOfBuilding = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(
