@@ -13,6 +13,9 @@ export const utilityCostCheckbox = target('Umlagefähig', (page) => page.getByTe
 export const categoryWarning = target('Warnung nicht umlagefähige Kategorie', (page) =>
 	page.getByTestId('invoice-category-warning')
 );
+export const categoryNoteText = target('Text zur nicht umlagefähigen Kategorie', (page) =>
+	page.getByTestId('invoice-category-warning-text')
+);
 export const overrideReasonInput = target('Grund der Änderung', (page) => page.getByTestId('invoice-override-reason-input'));
 export const invoiceSubmitButton = target('Rechnung speichern', (page) => page.getByTestId('submit-button'));
 export const invoiceNumberInput = target('Rechnungsnummer', (page) => page.getByTestId('invoice-number-input'));
