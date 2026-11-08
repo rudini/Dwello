@@ -85,7 +85,7 @@
 <ActionDialog
 	bind:open={deleting}
 	action="?/delete"
-	title={m.tenants_delete_title({ name })}
+	title={hasContracts ? m.tenants_delete_refused_title({ name }) : m.tenants_delete_title({ name })}
 	confirmLabel={m.tenants_delete_confirm()}
 	danger
 	impossible={hasContracts}
@@ -93,13 +93,16 @@
 	error={form?.error}
 	onsuccess={() => addToast('success', m.tenants_deleted_toast({ name }))}
 >
-	<p data-testid="delete-dialog-message">
-		{hasContracts
-			? hasUploads
+	{#if hasContracts}
+		<p>{m.tenants_delete_has_contracts()}</p>
+		<p>
+			{hasUploads
 				? m.tenants_delete_has_contracts_documents()
-				: m.tenants_delete_has_contracts()
-			: hasDocuments
-				? m.tenants_delete_text_with_documents({ name })
-				: m.tenants_delete_text({ name })}
-	</p>
+				: m.tenants_delete_has_contracts_next()}
+		</p>
+	{:else}
+		<p data-testid="delete-dialog-message">
+			{hasDocuments ? m.tenants_delete_text_with_documents({ name }) : m.tenants_delete_text({ name })}
+		</p>
+	{/if}
 </ActionDialog>

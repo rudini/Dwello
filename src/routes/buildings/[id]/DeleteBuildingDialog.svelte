@@ -15,7 +15,6 @@
 
 	let form = $state<HTMLFormElement>();
 	let deleting = $state(false);
-	const error = $derived(hasApartments ? m.buildings_delete_has_apartments() : serverError);
 </script>
 
 <form
@@ -34,7 +33,7 @@
 
 <Dialog
 	bind:open
-	title={m.buildings_delete_title()}
+	title={hasApartments ? m.buildings_delete_refused_title({ name }) : m.buildings_delete_title()}
 	confirmLabel={m.buildings_delete_confirm()}
 	danger
 	busy={deleting}
@@ -43,15 +42,18 @@
 	confirmTestid="building-delete-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
-	{#if !hasApartments}
+	{#if hasApartments}
+		<p>{m.buildings_delete_has_apartments()}</p>
+		<p>{m.buildings_delete_has_apartments_next()}</p>
+	{:else}
 		<p>
 			{m.buildings_delete_text_before()} <strong>{name}</strong>
 			{m.buildings_delete_text_after()}
 		</p>
 	{/if}
-	{#if error}
-		<Alert tone="critical" title={m.buildings_delete_impossible()} testid="form-error">
-			<p>{error}</p>
+	{#if serverError}
+		<Alert tone="critical" title={m.ui_action_failed()} testid="form-error">
+			<p>{serverError}</p>
 		</Alert>
 	{/if}
 </Dialog>

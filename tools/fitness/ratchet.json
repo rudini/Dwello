@@ -188,6 +188,11 @@
 			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
 		},
 		{
+			"path": "src/routes/contracts/[id]/DeleteContract.svelte",
+			"line": "const withDraft = $derived(!!billedBy?.some((s) => s.status === 'draft'));",
+			"reason": "status display: branches on the status value alone (#815, decided 25.10.2026)"
+		},
+		{
 			"path": "src/routes/contracts/[id]/FixedTermCheck.svelte",
 			"line": "busy={busy === 'draft'}",
 			"reason": "not a status: which button of the form is busy (a UI state)"
