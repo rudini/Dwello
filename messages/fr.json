@@ -1941,7 +1941,6 @@
 	"contracts_list_and": "{rest} et {last}",
 	"contracts_billed_paid": "payé",
 	"contracts_billed_replaced": "remplacé",
-	"contracts_billed_settled": "clôturé",
 	"contracts_billed_sent": "envoyé",
 	"contracts_billed_locked_one": "Le décompte des charges {numbers} a été calculé avec les données précédentes du contrat.",
 	"contracts_billed_locked_many": "Les décomptes des charges {numbers} ont été calculés avec les données précédentes du contrat.",

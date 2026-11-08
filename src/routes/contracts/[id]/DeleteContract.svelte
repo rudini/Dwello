@@ -35,8 +35,7 @@
 	const labels: Record<string, () => string> = {
 		draft: m.statements_status_draft,
 		paid: m.contracts_billed_paid,
-		replaced: m.contracts_billed_replaced,
-		settled: m.contracts_billed_settled
+		replaced: m.contracts_billed_replaced
 	};
 	const statusOf = (status: string) => (labels[status] ?? m.contracts_billed_sent)();
 	const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));

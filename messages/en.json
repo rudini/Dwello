@@ -1941,7 +1941,6 @@
 	"contracts_list_and": "{rest} and {last}",
 	"contracts_billed_paid": "paid",
 	"contracts_billed_replaced": "replaced",
-	"contracts_billed_settled": "closed",
 	"contracts_billed_sent": "sent",
 	"contracts_billed_locked_one": "The utility cost statement {numbers} was calculated with the previous contract dates.",
 	"contracts_billed_locked_many": "The utility cost statements {numbers} were calculated with the previous contract dates.",

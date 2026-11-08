@@ -1941,7 +1941,6 @@
 	"contracts_list_and": "{rest} und {last}",
 	"contracts_billed_paid": "bezahlt",
 	"contracts_billed_replaced": "ersetzt",
-	"contracts_billed_settled": "erledigt",
 	"contracts_billed_sent": "versendet",
 	"contracts_billed_locked_one": "Die Nebenkostenabrechnung {numbers} wurde mit den bisherigen Vertragsdaten berechnet.",
 	"contracts_billed_locked_many": "Die Nebenkostenabrechnungen {numbers} wurden mit den bisherigen Vertragsdaten berechnet.",

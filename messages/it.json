@@ -1941,7 +1941,6 @@
 	"contracts_list_and": "{rest} e {last}",
 	"contracts_billed_paid": "pagato",
 	"contracts_billed_replaced": "sostituito",
-	"contracts_billed_settled": "chiuso",
 	"contracts_billed_sent": "inviato",
 	"contracts_billed_locked_one": "Il conteggio spese accessorie {numbers} è stato calcolato con le date di contratto precedenti.",
 	"contracts_billed_locked_many": "I conteggi spese accessorie {numbers} sono stati calcolati con le date di contratto precedenti.",

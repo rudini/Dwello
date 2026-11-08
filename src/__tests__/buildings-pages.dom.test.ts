@@ -177,7 +177,7 @@ describe('Gebäudedetail', () => {
 		rooms: '3.5',
 		status
 	});
-	const detail = (apartments: ReturnType<typeof flat>[], counts = {}) =>
+	const detail = (apartments: ReturnType<typeof flat>[], counts = {}, form: unknown = null) =>
 		show(BuildingPage, {
 			data: {
 				building: building({ apartmentCount: apartments.length, ...counts }),
@@ -185,7 +185,7 @@ describe('Gebäudedetail', () => {
 				fuelStocks: [],
 				heatingCategories: []
 			},
-			form: null
+			form
 		} as never);
 
 	it('nennt ein Gebäude ohne Tank oder mit stillgelegtem Tank als solches (#72)', () => {
@@ -308,6 +308,14 @@ describe('Gebäudedetail', () => {
 			'Gebäude kann nicht gelöscht werden'
 		);
 		expect(byTestId('form-error')).toBeNull();
+	});
+
+	// code review 1258 C-2: ein gescheiterter Aufruf ist keine Absage, er meldet sich wie in jedem Dialog
+	it('meldet ein gescheitertes Löschen mit «Das hat nicht geklappt»', () => {
+		detail([], {}, { deleteError: 'Gebäude konnte nicht gelöscht werden.' });
+		click('building-delete-button');
+		expect(byTestId('form-error')!.textContent).toContain('Das hat nicht geklappt');
+		expect(byTestId('form-error')!.textContent).toContain('Gebäude konnte nicht gelöscht werden.');
 	});
 });
 
