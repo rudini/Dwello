@@ -342,3 +342,15 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter nach dem Rechnungssteller "Gibt es nicht" sucht
     Und der Liegenschaftsverwalter wieder alle Rechnungen anzeigt
     Dann steht der Fokus auf dem Ergebnis der Liste
+
+  # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
+  Szenariogrundriss: Die Rechnungsliste zeigt bei jeder Breite alles ganz
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 853    |
+      | 1024   |
+      | 1280   |
+      | 1440   |

@@ -13,10 +13,10 @@
 </script>
 
 <li
-	class="relative flex flex-col gap-2 px-6 py-4 hover:bg-sunken md:flex-row md:items-center md:gap-6"
+	class="relative flex flex-col gap-2 px-6 py-4 hover:bg-sunken @2xl:flex-row @2xl:items-center @2xl:gap-6"
 	data-testid="contract-row-{contract.id}"
 >
-	<div class="flex flex-col gap-1 md:w-1/4">
+	<div class="flex flex-col gap-1 @2xl:w-1/4">
 		<a
 			href="/contracts/{contract.id}"
 			class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
@@ -26,7 +26,7 @@
 			>{m.buildings_apartment_number({ number: contract.apartmentNumber })} · {contract.buildingName}</span
 		>
 	</div>
-	<div class="flex flex-col items-start gap-1 md:flex-1">
+	<div class="flex flex-col items-start gap-1 @2xl:flex-1">
 		<Badge tone={badge.tone} label={badge.label} />
 		<span class="tabular-nums text-ink"
 			>{contractPeriod(contract.startDate, contract.endDate, status, contract.terminated, contract.byAgreement)}</span
@@ -40,7 +40,7 @@
 			/>
 		{/if}
 	</div>
-	<dl class="flex flex-col gap-1 tabular-nums md:items-end">
+	<dl class="flex flex-col gap-1 tabular-nums @2xl:items-end">
 		<div class="flex gap-2">
 			<dt class="text-ink-muted">{m.common_net_rent()}</dt>
 			<dd class="font-semibold text-ink">{formatCurrency(Number(contract.baseRent))}</dd>

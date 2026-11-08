@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Gap, HoldsFocus, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, HiddenSideways, HoldsFocus, Text, Value, ValueColumn, Visibility } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
 	discontinuedNote,
@@ -197,3 +197,5 @@ export const paymentDone = Text.of(successToast);
 
 export const discontinuedNoteText = Text.of(discontinuedNote);
 export const sizeChangeNoteText = Text.of(sizeChangeNote); // #1301
+/** #658: what the detail page's cost breakdown hides sideways; 0 when every column shows */
+export const detailCostsHiddenSideways = HiddenSideways.within(costBreakdown);

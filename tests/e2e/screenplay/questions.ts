@@ -447,6 +447,21 @@ export const ThePage = {
 			return found;
 		})
 	),
+	/** The selects on the page whose chosen text is cut off, as «chosen text» lines; [] when every choice shows whole (#658) */
+	cutChoices: question('choices cut off on the page', (actor) =>
+		pageOf(actor).evaluate(() => {
+			const pen = document.createElement('canvas').getContext('2d')!;
+			return [...document.querySelectorAll('select')].flatMap((select) => {
+				const style = getComputedStyle(select);
+				if (!select.offsetParent) return [];
+				pen.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+				const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+				const text = select.selectedOptions[0]?.text ?? '';
+				const cut = Math.ceil(pen.measureText(text).width - room);
+				return cut > 0 ? [`«${text}» cut by ${cut} px`] : [];
+			});
+		})
+	),
 	/** Rule violations axe finds on the page as it is now, as readable lines; [] when none */
 	accessibilityViolations: (tags: string[]) =>
 		question('the accessibility violations on the page', async (actor) => {

@@ -62,7 +62,8 @@ import {
 	redeliverOffers,
 	newPdfStillToSend,
 	discontinuedNoteText,
-	sizeChangeNoteText
+	sizeChangeNoteText,
+	detailCostsHiddenSideways
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -998,4 +999,9 @@ Then('nennt die Detailseite der Abrechnung {string}', async ({ verwalter }, text
 
 Then('nennt die Detailseite der Abrechnung zur neuen Fläche {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(sizeChangeNoteText).toBe(text);
+});
+
+// #658: the cost table switches to the line cards by the width of its region, so no column is cut
+Then('zeigt die Detailseite die ganze Kostenaufstellung, ohne seitlich zu verschieben', async ({ verwalter }) => {
+	await verwalter.sees(detailCostsHiddenSideways).toBe(0);
 });

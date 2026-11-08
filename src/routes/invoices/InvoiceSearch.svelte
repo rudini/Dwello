@@ -58,7 +58,7 @@
 	onchange={applyFilterChoice}
 	aria-label={m.list_search_label()}
 	onsubmit={search}
-	class="grid gap-4 rounded-panel border border-line bg-surface p-6 md:grid-cols-2 xl:grid-cols-4"
+	class="grid gap-4 rounded-panel border border-line bg-surface p-6 @xl:grid-cols-2 @4xl:grid-cols-4"
 >
 	<TextInput
 		id="search"
@@ -113,7 +113,7 @@
 		bind:value={filters.year}
 		testid="invoice-year-filter"
 	/>
-	<div class="flex flex-wrap gap-4 md:col-span-2 xl:col-span-4">
+	<div class="flex flex-wrap gap-4 @xl:col-span-2 @4xl:col-span-4">
 		<Button type="submit" icon="search" testid="invoice-search-submit"
 			>{m.buildings_search_submit()}</Button
 		>

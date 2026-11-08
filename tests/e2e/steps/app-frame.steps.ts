@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
+	cutOffOnPage,
 	draftNoticeText,
 	firstMobileNavItem,
 	mobileNavItemShare,
@@ -410,4 +411,9 @@ Then('nennt das Menü zuerst {string}', async ({ verwalter }, label: string) => 
 
 Then('sieht der Liegenschaftsverwalter {string} im Menü, ohne zu scrollen', async ({ verwalter }, label: string) => {
 	await verwalter.sees(mobileNavItemShare(label)).toBe(1);
+});
+
+// #658: lists, filters and tables switch by the width of their region; nothing is cut at any width
+Then('zeigt die Seite nichts abgeschnitten', async ({ verwalter }) => {
+	await verwalter.sees(cutOffOnPage).toEqual([]);
 });

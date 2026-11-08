@@ -178,7 +178,8 @@
 	<title>{m.nav_statements()} - Dwello</title>
 </svelte:head>
 
-<div class="flex flex-col gap-8" data-testid="statements-page">
+<!-- @container: filters and rows switch by the width of the page's column, not the window's (#658) -->
+<div class="@container flex flex-col gap-8" data-testid="statements-page">
 	<PageHeader title={m.nav_statements()} purpose={m.statements_purpose()}>
 		{#snippet action()}
 			<Button

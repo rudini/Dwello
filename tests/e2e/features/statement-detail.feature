@@ -1635,3 +1635,12 @@ Funktionalität: Abrechnungsdetail
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
+
+  # #658 (Decided): die Kostenaufstellung wechselt nach der Breite ihres Bereichs zu den Karten der Positionen, wie die
+  # Bearbeitungsseite seit #691; vorher war sie auch bei 1440 Pixeln abgeschnitten
+  Szenario: Die Kostenaufstellung zeigt im breiten Fenster jeden Betrag ganz
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "TV/Kabelanschluss" über "480" Franken vom "2024-06-30"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und das Browserfenster ist 1440 auf 900 Pixel gross
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Dann zeigt die Detailseite die ganze Kostenaufstellung, ohne seitlich zu verschieben

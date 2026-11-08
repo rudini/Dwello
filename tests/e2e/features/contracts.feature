@@ -96,3 +96,16 @@ Funktionalität: Mietvertragsliste
   # #652: die Zeile ist der eine Link zum Mietvertrag, «Bearbeiten» steht auf dessen Detailseite
   Szenario: Eine Zeile der Mietvertragsliste hat nur einen Link
     Dann führt die Zeile des Mietvertrags von "Anna Keller" nur mit dem Link "Anna Keller" weiter
+
+  # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
+  Szenariogrundriss: Die Mietvertragsliste zeigt bei jeder Breite alles ganz
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Und der Liegenschaftsverwalter ist auf der Mietvertragsliste
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 853    |
+      | 1024   |
+      | 1280   |
+      | 1440   |

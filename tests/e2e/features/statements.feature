@@ -245,3 +245,15 @@ Funktionalität: Nebenkostenabrechnungen
     Wenn der Liegenschaftsverwalter die Seite 5 der Entwürfe im Gebäude "Ahornhof" aufruft
     Dann steht unter den Statusfiltern "Die Liste unten zeigt 11 Abrechnungen mit dem Status «Entwurf»."
     Und steht über der Abrechnungsliste "Abrechnung 11 von 11 mit dem Status «Entwurf», Seite 2 von 2"
+
+  # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
+  Szenariogrundriss: Die Abrechnungsliste zeigt bei jeder Breite alles ganz
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 853    |
+      | 1024   |
+      | 1280   |
+      | 1440   |

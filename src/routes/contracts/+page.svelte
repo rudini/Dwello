@@ -23,7 +23,8 @@
 	<title>{m.nav_contracts()} - Dwello</title>
 </svelte:head>
 
-<div class="flex flex-col gap-8" data-testid="contracts-page">
+<!-- @container: filters and rows switch by the width of the page's column, not the window's (#658) -->
+<div class="@container flex flex-col gap-8" data-testid="contracts-page">
 	<PageHeader title={m.nav_contracts()} purpose={m.contracts_list_purpose()}>
 		{#snippet action()}
 			<Button href="/contracts/new" variant="primary" icon="contract" testid="contract-new-button"

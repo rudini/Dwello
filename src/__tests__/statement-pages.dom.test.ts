@@ -672,9 +672,9 @@ describe('Abrechnungsliste', () => {
 		const actions = row.querySelector('[data-testid="statement-row-mark-paid"]')!.parentElement!;
 
 		expect(row.className).not.toMatch(/col-span|grid-cols/);
-		expect(actions.className).toMatch(/(^| )xl:shrink-0( |$)/);
+		expect(actions.className).toMatch(/(^| )@4xl:shrink-0( |$)/);
 		// the same width in every row, with or without "PDF", so amount and status line up
-		expect(actions.className).toMatch(/(^| )xl:w-64( |$)/);
+		expect(actions.className).toMatch(/(^| )@4xl:w-64( |$)/);
 	});
 
 	it('schaltet einen Statusfilter ein und wieder aus, und behält die übrigen Filter', () => {
@@ -1663,9 +1663,14 @@ describe('Abrechnungsdetail', () => {
 			),
 			expect.stringMatching(/Hauswartung.*Pro Wohnung/)
 		]);
-		// one copy per screen size: the list below md, the table from md
-		expect(cards[0].closest('.md\\:hidden')).not.toBeNull();
-		expect(document.querySelector('[role="region"]')!.closest('.hidden.md\\:block')).not.toBeNull();
+		// one copy per width of the region (#658): the list below 64rem, the table from there, inside a container
+		expect(cards[0].closest('.\\@5xl\\:hidden')?.closest('.\\@container')).toBeTruthy();
+		expect(
+			document
+				.querySelector('[role="region"]')!
+				.closest('.hidden.\\@5xl\\:block')
+				?.closest('.\\@container')
+		).toBeTruthy();
 	});
 
 	it('bricht weder Prozente noch ein Minus von seinem Betrag um', () => {

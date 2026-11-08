@@ -11,9 +11,10 @@
 	// stacked: the lines one below the other at every width, for a page too narrow for the table (the edit page, #691)
 	let { statement, stacked = false }: { statement: StatementWithDetails; stacked?: boolean } =
 		$props();
-	// the list below md, the table from md; stacked keeps the list
+	// the list where its region is narrower than the table needs (64rem), else the table: by the region's width, not the
+	// window's (#658); stacked keeps the list
 	const shown = $derived(
-		stacked ? { list: '', table: 'hidden' } : { list: 'md:hidden', table: 'hidden md:block' }
+		stacked ? { list: '', table: 'hidden' } : { list: '@5xl:hidden', table: 'hidden @5xl:block' }
 	);
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
@@ -58,7 +59,9 @@
 			? [
 					{
 						testid: 'statement-offset',
-						label: m.statements_offset_with({ numbers: offsets.map((o) => o.statementNumber).join(', ') }),
+						label: m.statements_offset_with({
+							numbers: offsets.map((o) => o.statementNumber).join(', ')
+						}),
 						value: signed(offset < 0, offset)
 					}
 				]
@@ -95,7 +98,8 @@
 	const percent = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
 	// as the PDF: the days rented of the period where the share is exactly that (a tenant over the whole period)
 	const periodDays = $derived(
-		Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1
+		Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) +
+			1
 	);
 	const rentedShare = (item: Item) =>
 		!item.byProfile &&
@@ -104,7 +108,11 @@
 	const timeShare = (item: Item) => {
 		if (item.shareDays) return m.statements_share_days(item.shareDays);
 		// invoices summing to zero have no share of the building's costs (#237)
-		if (item.periodShare == null || (item.totalAmount === 0 && item.invoices.some((invoice) => invoice.part))) return '–';
+		if (
+			item.periodShare == null ||
+			(item.totalAmount === 0 && item.invoices.some((invoice) => invoice.part))
+		)
+			return '–';
 		if (rentedShare(item))
 			return m.statements_share_days({ days: statement.rentalDays, total: periodDays });
 		return item.byProfile
@@ -125,54 +133,58 @@
 {#if statement.lineItems.length === 0}
 	<p class="text-ink-muted">{m.statements_no_lines()}</p>
 {:else}
-	<!-- Phones (and stacked pages at every width) get the lines one below the other, every amount in view; the table from md -->
-	<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
-		{#each statement.lineItems as item (item.id)}
-			<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
-				<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
-					<dt class="text-ink-muted">{m.buildings_category()}</dt>
-					<dd class="hyphens-auto break-words text-right font-semibold text-ink">
-						{item.categoryName}
-					</dd>
-					<dt class="text-ink-muted">{m.glossary_key_term()}</dt>
-					<dd class="hyphens-auto break-words text-right text-ink">
-						{item.distributionKeyName}
-					</dd>
-					<dt class="text-ink-muted">{m.statements_building_costs()}</dt>
-					<dd class="text-right text-ink">{formatCurrency(item.totalAmount)}</dd>
-					<dt class="text-ink-muted">{m.statements_apartment_share()}</dt>
-					<dd class="text-right text-ink">{apartmentShare(item)}</dd>
-					<dt class="text-ink-muted">{m.statements_time_share()}</dt>
-					<dd class="whitespace-nowrap text-right text-ink">{timeShare(item)}</dd>
-					<dt class="text-ink-muted">{m.statements_share()}</dt>
-					<dd class="whitespace-nowrap text-right text-ink">{item.percentage.toFixed(2)} %</dd>
-					<dt class="text-ink-muted">{m.invoices_amount()}</dt>
-					<dd class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</dd>
-				</dl>
-				<div class="mt-4"><LineInvoices {item} /></div>
-			</li>
-		{/each}
-	</ul>
-
-	<div class={shown.table}>
-		<Table caption={m.statements_lines()} captionHidden {columns}>
+	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view -->
+	<div class="@container">
+		<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
 			{#each statement.lineItems as item (item.id)}
-				<tr data-testid="statement-line-item">
-					<td class="text-ink">{item.categoryName}</td>
-					<td class="text-ink-muted">{item.distributionKeyName}</td>
-					<td class="text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
-					<td class="text-right text-ink-muted">{apartmentShare(item)}</td>
-					<td class="whitespace-nowrap text-right text-ink-muted">{timeShare(item)}</td>
-					<td class="whitespace-nowrap text-right text-ink-muted">{item.percentage.toFixed(2)} %</td>
-					<td class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</td>
-				</tr>
-				{#if item.invoices.length}
-					<tr>
-						<td colspan={columns.length}><LineInvoices {item} /></td>
-					</tr>
-				{/if}
+				<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
+					<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
+						<dt class="text-ink-muted">{m.buildings_category()}</dt>
+						<dd class="hyphens-auto break-words text-right font-semibold text-ink">
+							{item.categoryName}
+						</dd>
+						<dt class="text-ink-muted">{m.glossary_key_term()}</dt>
+						<dd class="hyphens-auto break-words text-right text-ink">
+							{item.distributionKeyName}
+						</dd>
+						<dt class="text-ink-muted">{m.statements_building_costs()}</dt>
+						<dd class="text-right text-ink">{formatCurrency(item.totalAmount)}</dd>
+						<dt class="text-ink-muted">{m.statements_apartment_share()}</dt>
+						<dd class="text-right text-ink">{apartmentShare(item)}</dd>
+						<dt class="text-ink-muted">{m.statements_time_share()}</dt>
+						<dd class="whitespace-nowrap text-right text-ink">{timeShare(item)}</dd>
+						<dt class="text-ink-muted">{m.statements_share()}</dt>
+						<dd class="whitespace-nowrap text-right text-ink">{item.percentage.toFixed(2)} %</dd>
+						<dt class="text-ink-muted">{m.invoices_amount()}</dt>
+						<dd class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</dd>
+					</dl>
+					<div class="mt-4"><LineInvoices {item} /></div>
+				</li>
 			{/each}
-		</Table>
+		</ul>
+
+		<div class={shown.table}>
+			<Table caption={m.statements_lines()} captionHidden {columns}>
+				{#each statement.lineItems as item (item.id)}
+					<tr data-testid="statement-line-item">
+						<td class="text-ink">{item.categoryName}</td>
+						<td class="text-ink-muted">{item.distributionKeyName}</td>
+						<td class="text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
+						<td class="text-right text-ink-muted">{apartmentShare(item)}</td>
+						<td class="whitespace-nowrap text-right text-ink-muted">{timeShare(item)}</td>
+						<td class="whitespace-nowrap text-right text-ink-muted"
+							>{item.percentage.toFixed(2)} %</td
+						>
+						<td class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</td>
+					</tr>
+					{#if item.invoices.length}
+						<tr>
+							<td colspan={columns.length}><LineInvoices {item} /></td>
+						</tr>
+					{/if}
+				{/each}
+			</Table>
+		</div>
 	</div>
 {/if}
 
