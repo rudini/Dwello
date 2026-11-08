@@ -83,7 +83,6 @@ Funktionalität: Heizprofile
     Und steht bei "Französisch" noch der Text von 101 Zeichen
 
   # #1304: der vergebene Name sagt auch, was zu tun ist, wie beim Verteilschlüssel (#1200)
-  @wip
   Szenario: Bei einem vergebenen Namen eines Heizprofils sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neues Heizprofil"
     Wenn der Liegenschaftsverwalter das Heizprofil "Bergtal" noch einmal erfasst

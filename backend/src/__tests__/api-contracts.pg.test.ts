@@ -247,6 +247,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('heating-profile-text-too-long'), await response.json())).toEqual([]);
 	});
 
+	// #1306: the KI's check refuses a name longer than its column at its field, without asking the KI
+	it('POST /categories/propose liefert bei einem zu langen Namen die Felder von category-proposal-text-too-long.json', async () => {
+		const response = await sendJson('POST', '/api/v1/categories/propose', { name: 'A'.repeat(101) });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('category-proposal-text-too-long'), await response.json())).toEqual([]);
+	});
+
 	// #1201: an edit sends only the German name, refused as `nameDE`; nothing is changed
 	it('PUT /categories liefert bei einem zu langen deutschen Namen die Felder von category-text-too-long.json', async () => {
 		const categories = apiRecords('categories');
@@ -1192,6 +1199,15 @@ describe('API-Verträge der Berichtigung', () => {
 		try {
 			expect(drift(await sample('setup-needed'), await (await app.handle(new Request('http://localhost/api/v1/setup'))).json())).toEqual([]);
 			expect(drift(await sample('setup-code-invalid'), await (await post('FALS-CHER')).json())).toEqual([]);
+			// #1306: an address longer than its column, refused at its field
+			const long = await app.handle(
+				new Request('http://localhost/api/v1/setup', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ code: 'VERT-RAG1', email: `${'a'.repeat(244)}@dwello.test`, password: 'Vertrags-Passwort' })
+				})
+			);
+			expect(drift(await sample('setup-text-too-long'), await long.json())).toEqual([]);
 			expect(drift(await sample('setup'), await (await post('VERT-RAG1')).json())).toEqual([]);
 			expect(drift(await sample('setup-done'), await (await post('VERT-RAG1')).json())).toEqual([]);
 			await db.delete(localAccounts);

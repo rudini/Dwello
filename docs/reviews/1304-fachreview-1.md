@@ -1,0 +1,21 @@
+# Fach-Review #1304 / #1306, Runde 1 (Commit 6acb5cc)
+
+| ID | Rolle | Schwere | Befund |
+|---|---|---|---|
+| V-1 | Verwalter | Minor | Der Bezugstext fehlt noch: Auf `origin/main` und im Commit sagt `backend_distribution_key_name_taken` noch ohne «Wählen Sie einen anderen Namen.» (messages/de.json:533). #1200 (Branch `ccr-153ae8d3-conoid-1200`) ist nicht gemergt. Wird #1304 zuerst gemergt, sagen Kategorie und Heizprofil etwas anderes als der Verteilschlüssel. Fix: #1200 zuerst mergen oder V-6 aus #1200 im selben Pull Request übernehmen. |
+| V-2 | Verwalter | Minor | Das Szenario «Bei einem zu langen Namen für die Prüfung durch die KI …» (categories.feature:388–392) prüft nur, dass die neue Meldung erscheint. Dass die falsche Meldung «KI nicht erreichbar» nicht mehr erscheint, prüft es nicht, obwohl gerade sie der Fehler aus #1306 ist. Fix: Zeile ergänzen `Aber sagt Dwello zur Prüfung durch die KI nicht "KI nicht erreichbar"` (der Schritt steht schon so in categories.feature:193). |
+
+Geprüft: Die Begriffe der neuen Szenarien stehen in UBIQUITOUS_LANGUAGE.md (Liegenschaftsverwalter, Kategorie, umlagefähig, Heizprofil, KI, Einrichtung, Besucher Z. 272). «Prüfung durch die KI» und «von der KI prüfen lassen» sind so schon in categories.feature:177/193 verwendet. Die vorgeschlagenen Texte in de/fr/it/en folgen V-6 aus #1200 Wort für Wort (fr mit U+00A0 in « », Genus «nommé»/«nommée» stimmt, it in der Höflichkeitsform «Scelga»), bestätigt in der Tabelle unten. Die bestehenden Szenarien «Name ist schon vergeben» (categories.feature:24, heating-profiles.feature:40) prüfen nur den Anfang der Meldung und gelten weiter. Die Längen 100 (Name, schema.ts:228, Route `/propose` categories.ts:84) und 255 (E-Mail-Adresse, schema.ts:663) entsprechen den Spalten. Die Meldung zur zu langen E-Mail-Adresse gehört zum Feld «E-Mail-Adresse»: «Kürzen Sie den Text» ist nur mit einem bestimmten Feld verständlich. Die übrigen Ablehnungen der Einrichtung stehen zu Recht über dem Formular, weil sie das ganze Formular betreffen und nicht ein Feld, das man kürzen kann: falscher Einrichtungscode, Sperre, schon eingerichtet, leere Felder, ungleiche Passwörter. Nach dem Absenden muss der Fokus dann auf dieses Feld gehen (+page.svelte:57 `focusFirstError`); das prüft der code-reviewer. Rechtsfragen (OR/VMWG/DSG) und Formeln berührt der Gegenstand nicht.
+
+| key | de | fr | it | en |
+|---|---|---|---|---|
+| backend_category_name_taken | Eine Kategorie mit dem Namen «{name}» existiert bereits. Wählen Sie einen anderen Namen. | Une catégorie nommée « {name} » existe déjà. Choisissez un autre nom. | Esiste già una categoria con il nome «{name}». Scelga un altro nome. | A category named «{name}» already exists. Choose another name. |
+| backend_heating_profile_name_taken | Ein Heizprofil mit dem Namen «{name}» existiert bereits. Wählen Sie einen anderen Namen. | Un profil de chauffage nommé « {name} » existe déjà. Choisissez un autre nom. | Esiste già un profilo di riscaldamento con il nome «{name}». Scelga un altro nome. | A heating profile named «{name}» already exists. Choose another name. |
+
+(In fr steht zwischen « und {name} sowie zwischen {name} und » je ein U+00A0, wie in den bestehenden Texten.)
+
+## Nicht bestätigt
+
+- Ob das Backend eine E-Mail-Adresse von 256 Zeichen bei der Einrichtung ohne eigene Formatprüfung bis zur Längenprüfung durchlässt: Ich habe nur `backend/src/routes/local-accounts.ts:42–60` gelesen, nicht das Schema `credentials`, und keine Tests laufen lassen. Fachlich ist eine solche Adresse ohnehin ungültig: Nach RFC 5321 hat eine Adresse höchstens 254 Zeichen und ihr lokaler Teil höchstens 64. Der Testfall mit einem lokalen Teil von 244 Zeichen ist also nur künstlich. «Kürzen Sie den Text» ist dafür trotzdem die richtige Anweisung.
+- Ob die Ablehnung «Kategorie vergeben» heute schon beim Feld «Name» steht: Das bestehende Szenario prüft sie irgendwo im Formular (categories.steps.ts:222, `errorMessageShown`), das neue Szenario beim Feld. In `src/lib/server/save-form.ts:43` ordnet `options.conflict` die Antwort 409 einem Feld zu; ob das für die Kategorie gesetzt ist, habe ich nicht nachgesehen.
+- Der Wortlaut der Issues #1304 und #1306 auf GitHub: Ich habe nur die Zusammenfassung des Aufrufers gelesen.

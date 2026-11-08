@@ -15,7 +15,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 			params: { name: 'Lift' }
 		};
 
-		expect(backendMessage(body, 'Repli')).toBe('Une catégorie nommée «\u00a0Lift\u00a0» existe déjà.');
+		expect(backendMessage(body, 'Repli')).toBe('Une catégorie nommée «\u00a0Lift\u00a0» existe déjà. Choisissez un autre nom.');
 	});
 
 	it('zeigt auf Deutsch denselben Text wie das Backend', () => {
@@ -88,7 +88,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 			params: { name: 'KI_UNAVAILABLE' }
 		};
 
-		expect(backendMessage(body, 'Ersatz')).toBe(body.error);
+		expect(backendMessage(body, 'Ersatz')).toBe(`${body.error} Wählen Sie einen anderen Namen.`);
 	});
 
 	it('zeigt bei einem Fehler ohne Code den Ersatz', () => {

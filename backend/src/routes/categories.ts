@@ -80,8 +80,9 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 			}
 		},
 		{
+			beforeHandle: refuseTooLong(categories), // #1306: at «Name», without asking the KI
 			body: t.Object({
-				name: t.String({ minLength: 1, maxLength: 100 }),
+				name: t.String({ minLength: 1 }),
 				description: t.Optional(t.Nullable(t.String())),
 				language: t.Optional(t.UnionEnum(['de', 'fr', 'it', 'en']))
 			})

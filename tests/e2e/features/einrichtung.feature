@@ -109,7 +109,6 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Dann ist der Liegenschaftsverwalter auf der Seite "KI"
 
   # #1306: die E-Mail-Adresse hat höchstens 255 Zeichen, wie in der Datenbank; die Meldung steht beim Feld wie seit #1201
-  @wip
   Szenario: Einrichtung mit einer zu langen E-Mail-Adresse
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet

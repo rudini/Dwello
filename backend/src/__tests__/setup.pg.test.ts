@@ -9,6 +9,7 @@ import { sql } from 'drizzle-orm';
 import { llmConfig } from '../config/llm';
 import { newSetupCode, resetSetupAttempts } from '../services/setup.service';
 import { callApi } from './helpers/auth';
+import { expectRejection } from './helpers/records';
 import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
 
@@ -76,6 +77,16 @@ describe('Einrichtung', () => {
 
 		expect(response.status).toBe(400);
 		expect(await codeOf(response)).toBe('EMAIL_UNUSABLE');
+		expect(await db.select().from(localAccounts)).toEqual([]);
+	});
+
+	// #1306: an address longer than its column is refused at its field, as the forms since #1201, not as a general 422
+	it('lehnt eine zu lange E-Mail-Adresse bei ihrem Feld ab und legt kein Konto an', async () => {
+		const response = await setUp({ code: CODE, email: `${'a'.repeat(244)}@example.com`, password: account.password });
+
+		await expectRejection(response, 400, 'Some fields are not valid', 'TEXT_TOO_LONG', { field: 'email', max: 255 }, [
+			{ code: 'TEXT_TOO_LONG', params: { field: 'email', max: 255 } }
+		]);
 		expect(await db.select().from(localAccounts)).toEqual([]);
 	});
 
