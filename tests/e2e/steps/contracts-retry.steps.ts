@@ -118,3 +118,7 @@ Then('nennt der Hinweis auf den Mietvertrag von {string} die Wohnung {string}', 
 Then('bietet der Hinweis auf den Mietvertrag von {string} den Link {string}', async ({ verwalter, names }, tenant: string, label: string) => {
 	await verwalter.sees(runningContractLinkTextOf(names.get(tenant) ?? tenant)).toBe(named(names, label));
 });
+
+Then('erklärt der Hinweis auf den Mietvertrag von {string} {string}', async ({ verwalter, names }, tenant: string, text: string) => {
+	await verwalter.sees(runningContractHintTextOf(names.get(tenant) ?? tenant)).toContain(text);
+});

@@ -231,6 +231,5 @@ export const keepEditing = Click.on(keepEditingButton);
 export const openContractFromParties = Click.on(partiesContractLink);
 export const followNoticeHint = Click.on(noticeHintLink);
 
-// #1153: the warning after «Erneut versuchen» closed; the hint in the step stays
-// waits until it is gone, so what is checked next outlasted it (code review 1153 C-2)
+// #1153: the hint in the step names the contract that blocks the cleared choice
 export const openClearedApartmentContract: Activity = Click.on(apartmentClearedLink);

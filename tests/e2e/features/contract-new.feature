@@ -108,6 +108,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
     Dann nennt der Hinweis auf den Mietvertrag von "Anna Keller" die Wohnung "Wohnung 2.02 · Ahornhof"
     Und bietet der Hinweis auf den Mietvertrag von "Anna Keller" den Link "Zum Mietvertrag von Anna Keller für Wohnung 2.02 · Ahornhof"
+    Und erklärt der Hinweis auf den Mietvertrag von "Anna Keller" "Ist dieser Mietvertrag gekündigt oder ein Vertragsende vereinbart, tragen Sie das Vertragsende auf seiner Seite mit «Enddatum erfassen» ein."
 
   Szenario: Vom Hinweis zum laufenden Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
@@ -172,6 +173,18 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann kündigt ein Screenreader im Schritt «Wohnung» den Hinweis "Wohnung 2.01 · Ahornhof ist nicht verfügbar" an
     Und ist im Mietvertrag keine Wohnung gewählt
     Und zeigt Dwello nach dem Laden keine Meldung
+
+  # #1289 (Persona Sven P-2 in 1288): zurück bei der leeren Wohnungsauswahl hört der Screenreader, warum die Wahl weg ist
+  Szenario: Nach dem Aufheben der Wahl nennt die Wohnungsauswahl den Hinweis auf die nicht verfügbare Wohnung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2024-04-01" für "900" Franken
+    Und die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter in der Auswahl die Wohnung "2.01" wählt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann liest ein Screenreader bei der Wohnungsauswahl den Hinweis "Für diese Wohnung ist ein Mietvertrag ohne Vertragsende erfasst." vor
 
   # #1289: der Hinweis gilt der aufgehobenen Wahl; mit einer anderen Wohnung ist er weg
   Szenario: Mit einer anderen Wohnung verschwindet der Hinweis auf die nicht verfügbare Wohnung
