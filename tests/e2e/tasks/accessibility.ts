@@ -31,6 +31,8 @@ import {
 	cancelUploadButton,
 	createInvoicesButton,
 	discardMessage,
+	uploadBuildingSelect,
+	uploadInvoicesButton,
 	uploadPurpose,
 	uploadResult
 } from '../targets/invoice-upload';
@@ -442,6 +444,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// the list filtered to Anna by the screen's query (#677)
 	'tenant-filtered': () => Wait.until(on.shown('document-tenant-link')),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
+	// several buildings, none chosen yet: «Dateien auswählen» locked (fallback review of #1292)
+	'upload-no-building': () => (actor) => actor.attemptsTo(Click.on(uploadInvoicesButton), Wait.until(uploadBuildingSelect)),
 	'upload-dialog': (example) => (actor) => {
 		// the stand-in finds deducted amounts and costs that are not allocable in a file so named; the UUID marks it user data
 		const read = `Werke Schlussrechnung Reparatur ${randomUUID()}.pdf`;
