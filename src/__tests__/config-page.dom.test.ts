@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { flushSync } from 'svelte';
 
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 // the page's first navigation is its mounting
@@ -68,5 +69,40 @@ describe('Einstellungen öffnen', () => {
 		open([]);
 
 		expect(document.getElementById('sender')?.textContent).toContain('Absender');
+	});
+});
+
+// #1202 (personas Marco P-1, Helga P-2 in #1175): ticking the checkbox unmounts the fields; clearing it again shows them
+describe('Kontoinhaber vor dem Speichern', () => {
+	const box = () => document.getElementById('accountHolderIsSender') as HTMLInputElement;
+	const field = (name: string) => document.getElementById(name) as HTMLInputElement;
+
+	it('zeigt die eingegebenen Angaben wieder, wenn das Häkchen gesetzt und wieder entfernt wird', () => {
+		const noHolder = {
+			account_holder_name: null,
+			account_holder_address: null,
+			account_holder_postal_code: null,
+			account_holder_city: null
+		};
+		open([], noHolder);
+		box().click();
+		flushSync();
+		const typed = {
+			accountHolderName: 'Erika Muster',
+			accountHolderAddress: 'Seeweg 5',
+			accountHolderPostalCode: '6003',
+			accountHolderCity: 'Luzern'
+		};
+		for (const [name, value] of Object.entries(typed)) {
+			field(name).value = value;
+			field(name).dispatchEvent(new Event('input', { bubbles: true }));
+		}
+
+		box().click();
+		flushSync();
+		box().click();
+		flushSync();
+
+		for (const [name, value] of Object.entries(typed)) expect(field(name).value).toBe(value);
 	});
 });

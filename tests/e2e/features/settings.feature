@@ -118,6 +118,19 @@ Funktionalität: Einstellungen
     Und erklärt die Einstellung "Ort des Kontoinhabers" "Beispiel: Zürich"
     Und heisst die Einstellung "Adresse des Kontoinhabers" "Strasse und Hausnummer (optional)"
 
+  # #1202 (Personas Marco P-1 und Helga P-2 in #1175): wer das Häkchen setzt und wieder entfernt, findet die eingegebenen
+  # Angaben zum Kontoinhaber wieder; es wird nichts gespeichert
+  Szenario: Die eingegebenen Angaben zum Kontoinhaber bleiben bis zum Speichern erhalten
+    Wenn der Liegenschaftsverwalter in den Einstellungen einen eigenen Kontoinhaber angibt
+    Und folgende Angaben zum Kontoinhaber eingibt:
+      | Name des Kontoinhabers    | Erika Muster |
+      | Adresse des Kontoinhabers | Seeweg 5     |
+      | PLZ des Kontoinhabers     | 6003         |
+      | Ort des Kontoinhabers     | Luzern       |
+    Und den Absender wieder als Kontoinhaber angibt, ohne zu speichern
+    Und doch einen eigenen Kontoinhaber angibt
+    Dann zeigen die Einstellungen den Kontoinhaber "Erika Muster", "Seeweg 5", "6003" "Luzern"
+
   # #1175 (Persona Marco P-2): auch beim Absender ist die Strasse freiwillig (#450), wie beim Kontoinhaber
   Szenario: Die Strasse des Absenders ist als freiwillig bezeichnet
     Dann heisst die Einstellung "Adresse" "Strasse und Hausnummer (optional)"

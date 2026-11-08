@@ -9,3 +9,14 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
 
+
+## Session
+
+#1202: Kontoinhaber entries kept when «Kontoinhaber ist der Absender» is ticked and cleared again (branch `ccr-153ae8d3-conoid-1202`).
+
+- [x] `@wip` scenario «Die eingegebenen Angaben zum Kontoinhaber bleiben bis zum Speichern erhalten» (`settings.feature`), seen red at its `Dann` step
+- [x] DOM test reproducing the loss (`config-page.dom.test.ts`), seen red (empty fields)
+- [x] Fix in `src/routes/config/+page.svelte` and `SettingField.svelte` (typed values held in the page), scenario green without `@wip` (`settings.feature` 30 passed)
+- [ ] Slice review (`code-reviewer`)
+- [ ] Feature review: personas Marco and Helga
+- [ ] Merge `origin/main`, closing round, archive in `docs/archive/sessions/1202.md`, PR with `Fixes #1202`
