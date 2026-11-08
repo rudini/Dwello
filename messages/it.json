@@ -1812,6 +1812,8 @@
 	"categories_sort_order": "Ordine",
 	"categories_sort_order_help": "Posizione negli elenchi di scelta e nell’elenco delle categorie: i numeri più piccoli stanno più in alto. Senza numero la categoria sta in cima, come con il numero 0.",
 	"categories_translations": "Traduzioni",
+	"config_translated": "Nome tradotto: {languages}",
+	"config_not_translated": "Nessuna traduzione",
 	"categories_translations_help": "Il nome della categoria in francese, italiano e inglese. Figura sul conteggio spese accessorie di un inquilino di questa lingua e in Dwello in questa lingua. Se manca, appare il nome tedesco.",
 	"keys_translations_help": "Il nome della chiave di riparto in francese, italiano e inglese. Figura sul conteggio spese accessorie di un inquilino di questa lingua e in Dwello in questa lingua. Se manca, appare il nome tedesco.",
 	"profiles_translations_help": "Il nome del profilo di riscaldamento in francese, italiano e inglese. Appare in Dwello in questa lingua e sul conteggio spese accessorie di un inquilino di questa lingua che entra nell’appartamento o lo lascia durante il periodo di conteggio. Se manca, appare il nome tedesco.",

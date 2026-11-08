@@ -14,6 +14,7 @@ import {
 	listedKeysNamed,
 	nameProblem,
 	shareOfSample,
+	translationMarkers,
 	translationsOf
 } from '../questions/distribution-keys';
 import { pageTitle } from '../questions/navigation';
@@ -234,3 +235,12 @@ Given(
 Then('steht beim Verteilschlüssel {string} {string}', async ({ verwalter, names }, title: string, text: string) => {
 	await verwalter.sees(translationsOf(names.get(title)!)).toBe(text);
 });
+
+// A predefined key has its names in every language: the list says nothing about them
+Then(
+	'steht beim vordefinierten Verteilschlüssel {string} nichts zur Übersetzung',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(keyListed(name)).toBe(true);
+		await verwalter.sees(translationMarkers(name)).toBe(0);
+	}
+);

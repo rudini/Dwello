@@ -26,3 +26,4 @@ export const formulaMarkedInvalid = Attribute.named('aria-invalid').of(formulaIn
 export const formulaTestErrors = Text.ofAll(testErrors);
 export const formulaValue = Value.of(formulaInput);
 export const translationsOf = (name: string) => Text.of(translations(name));
+export const translationMarkers = (name: string) => Count.of(translations(name));

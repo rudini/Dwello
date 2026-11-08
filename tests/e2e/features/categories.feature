@@ -16,12 +16,12 @@ Funktionalität: Kostenkategorien
     Aber nicht die Kategorie "Dachsanierung"
 
   # #689: die Liste sagt, in welchen Sprachen eine eigene Kategorie übersetzt ist, ohne die Namen zu nennen
-  @wip
   Szenario: Die Liste zeigt, ob eine eigene Kategorie übersetzt ist
     Angenommen es gibt die umlagefähige Kategorie "Gartenpflege" mit einem italienischen Namen
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann steht bei der Kategorie "Gartenpflege" "Übersetzt: IT"
     Und steht bei der Kategorie "Treppenhausreinigung" "Keine Übersetzung"
+    Aber steht bei der vordefinierten Kategorie "Hauswart" nichts zur Übersetzung
 
   Szenario: Kategorie erfassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"

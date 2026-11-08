@@ -3,12 +3,14 @@ import { test } from '../fixtures/test';
 import { translationsIn } from '../fixtures/translations';
 import {
 	listedProfilesNamed,
+	listedTranslationMarkers,
 	listedTranslationsOf,
 	nameProblem,
 	profileActionCount,
 	shareOf,
 	sharesHelpText,
 	totalShare,
+	translationMarkersOnDetail,
 	translationsOnDetail
 } from '../questions/heating-profiles';
 import { pageTitle } from '../questions/navigation';
@@ -122,4 +124,14 @@ Then('steht beim Heizprofil {string} {string}', async ({ verwalter, names }, tit
 
 Then('steht auf der Detailseite des Heizprofils {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(translationsOnDetail).toBe(text);
+});
+
+// A predefined profile has its names in every language: list and detail page say nothing about them
+Then('steht beim vordefinierten Heizprofil {string} nichts zur Übersetzung', async ({ verwalter }, name: string) => {
+	await verwalter.sees(listedProfilesNamed(name)).toBe(1);
+	await verwalter.sees(listedTranslationMarkers(name)).toBe(0);
+});
+
+Then('steht auf der Detailseite des Heizprofils nichts zur Übersetzung', async ({ verwalter }) => {
+	await verwalter.sees(translationMarkersOnDetail).toBe(0);
 });

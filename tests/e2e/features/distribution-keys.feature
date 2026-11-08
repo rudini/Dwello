@@ -35,12 +35,12 @@ Funktionalität: Verteilschlüssel
     Dann zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Selon le volume"
 
   # #689: die Liste sagt, in welchen Sprachen ein eigener Verteilschlüssel übersetzt ist, ohne die Namen zu nennen
-  @wip
   Szenario: Die Liste zeigt, ob ein eigener Verteilschlüssel übersetzt ist
     Angenommen es gibt den Verteilschlüssel "Nach Volumen" mit der Formel "{volume}" und Namen auf Französisch und Englisch
     Und der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
     Dann steht beim Verteilschlüssel "Nach Volumen" "Übersetzt: FR, EN"
     Und steht beim Verteilschlüssel "Fläche und Zimmer" "Keine Übersetzung"
+    Aber steht beim vordefinierten Verteilschlüssel "Pro Fläche (m²)" nichts zur Übersetzung
 
   # #678 (Persona Marco): wie die Liste nennt die Bestätigung den Verteilschlüssel in der Sprache der Oberfläche
   Szenario: Die Bestätigung nennt den Verteilschlüssel in der Sprache der Oberfläche

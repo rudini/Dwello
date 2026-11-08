@@ -34,6 +34,7 @@ import {
 	deleteQuestionText,
 	fieldHelp,
 	listedBefore,
+	translationMarkers,
 	translationsOf
 } from '../questions/categories';
 import {
@@ -595,4 +596,10 @@ Given(
 
 Then('steht bei der Kategorie {string} {string}', async ({ verwalter, names }, title: string, text: string) => {
 	await verwalter.sees(translationsOf(names.get(title)!)).toBe(text);
+});
+
+// A predefined category has its names in every language: the list says nothing about them
+Then('steht bei der vordefinierten Kategorie {string} nichts zur Übersetzung', async ({ verwalter }, name: string) => {
+	await verwalter.sees(categoryListed(name)).toBe(true);
+	await verwalter.sees(translationMarkers(name)).toBe(0);
 });

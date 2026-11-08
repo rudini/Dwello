@@ -66,3 +66,4 @@ export const listedBefore = (first: string, second: string) =>
 		return listed.includes(first) && listed.indexOf(first) < listed.indexOf(second);
 	});
 export const translationsOf = (name: string) => Text.of(translations(name));
+export const translationMarkers = (name: string) => Count.of(translations(name));
