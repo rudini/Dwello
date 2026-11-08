@@ -93,7 +93,7 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 		);
 		// PO on Fachreview 458-1 R-2: the sections do not name the landlord (Art. 19 Abs. 2 Bst. a DSG)
 		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
-			'Nennen Sie dabei Ihren Namen und wie Ihre Mieter Sie erreichen, und sagen Sie dazu, dass mit «Sie» dort der Vermieter gemeint ist (Art. 19 Abs. 2 DSG).'
+			'Nennen Sie dabei Ihren Namen und wie Ihre Mieter Sie erreichen, und sagen Sie dazu, dass mit «Sie» dort der Vermieter gemeint ist (Art.\u00a019\u00a0Abs.\u00a02\u00a0DSG).'
 		);
 	});
 
@@ -122,7 +122,7 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 		expect(text).toContain(
 			'Geben Sie diese Angaben Ihren Mietern, wenn Sie ihre Daten erhalten, meist beim Abschluss des Mietvertrags, auf Papier oder per E-Mail.'
 		);
-		expect(text).toContain('spätestens einen Monat danach (Art. 19 Abs. 5 DSG)');
+		expect(text).toContain('spätestens einen Monat danach (Art.\u00a019\u00a0Abs.\u00a05\u00a0DSG)');
 		expect(text).toContain('Ihren heutigen Mietern schicken Sie die Angaben einmal nach.');
 	});
 

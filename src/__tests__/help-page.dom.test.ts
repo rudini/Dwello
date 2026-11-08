@@ -101,7 +101,7 @@ describe('Hilfe', () => {
 			'Zieht ein Mieter während der Abrechnungsperiode ein oder aus, teilt Dwello seine Heizkosten so nach Monaten',
 			'bei Heizkosten mit Heizprofil den Anteil seiner Monate',
 			'Bei einer Rückerstattung ist es das Datum, bis zu dem Sie ihm den Betrag überweisen («Rückerstattung bis»).',
-			'Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art. 4 Absatz 3 VMWG).',
+			'Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art.\u00a04\u00a0Absatz\u00a03\u00a0VMWG).',
 			// #447 (decided in #402, point 6): the Saldo of a berichtigte Abrechnung, as the glossary row
 			'minus seine Akontobeiträge, plus eine übertragene Nachzahlung bzw. minus eine übertragene Rückerstattung der vorherigen Abrechnung; bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat (plus, was Sie ihm schon zurückerstattet haben).'
 		])

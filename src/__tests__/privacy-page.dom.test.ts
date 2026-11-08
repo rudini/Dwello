@@ -285,7 +285,7 @@ describe('Datenschutzerklärung nach #82', () => {
 		page();
 
 		expect(section('Verantwortlich')?.textContent).toContain(
-			'Ihre Mieter und andere Personen, deren Daten Sie erfassen, etwa Rechnungssteller, können bei Ihnen kostenlos Auskunft darüber verlangen, ob und welche Daten über sie bearbeitet werden, Sie selbst beim Betreiber (Art. 25 DSG).'
+			'Ihre Mieter und andere Personen, deren Daten Sie erfassen, etwa Rechnungssteller, können bei Ihnen kostenlos Auskunft darüber verlangen, ob und welche Daten über sie bearbeitet werden, Sie selbst beim Betreiber (Art.\u00a025\u00a0DSG).'
 		);
 	});
 
@@ -295,10 +295,10 @@ describe('Datenschutzerklärung nach #82', () => {
 
 		const text = section('Verantwortlich')?.textContent;
 		expect(text).toContain('Ebenso können diese Personen bei Ihnen und Sie beim Betreiber verlangen');
-		expect(text).toContain('dass unrichtige Daten berichtigt werden (Art. 32 Abs. 1 DSG)');
-		expect(text).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art. 28 DSG)');
-		expect(text).toContain('die Daten gelöscht werden (Art. 32 Abs. 2 DSG)');
-		expect(text).toContain('(EDÖB) anzeigen (Art. 49 DSG)');
+		expect(text).toContain('dass unrichtige Daten berichtigt werden (Art.\u00a032\u00a0Abs.\u00a01\u00a0DSG)');
+		expect(text).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art.\u00a028\u00a0DSG)');
+		expect(text).toContain('die Daten gelöscht werden (Art.\u00a032\u00a0Abs.\u00a02\u00a0DSG)');
+		expect(text).toContain('(EDÖB) anzeigen (Art.\u00a049\u00a0DSG)');
 	});
 
 	it('sagt ohne eingetragenen Betreiber, wer verantwortlich ist und was zu tun ist', () => {
@@ -348,7 +348,7 @@ describe('Datenschutzerklärung nach #82', () => {
 		expect(text).toContain('Ausser in der öffentlichen Demo löscht Dwello keine gespeicherten Daten von selbst.');
 		expect(text).toContain('Nicht einzeln löschen lassen sich versendete Abrechnungen, alle Mahnungen sowie Mieter und Mietverträge, zu denen es Abrechnungen gibt.');
 		expect(text).toContain('Wer zur Buchführung verpflichtet ist');
-		expect(text).toContain('10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR)');
+		expect(text).toContain('10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art.\u00a0958f\u00a0OR)');
 		expect(text).toContain('Hat der letzte Mietvertrag eines Mieters geendet');
 	});
 
@@ -384,7 +384,7 @@ describe('Datenschutzerklärung nach #82', () => {
 
 		expect(section('Weitergabe an Dritte')?.textContent).toContain('über Resend (Resend, Inc., USA) zugestellt');
 		// the safeguard itself, not a referral (Art. 19 Abs. 4 DSG, review W9c-2 R-5)
-		expect(section('Weitergabe an Dritte')?.textContent).toContain('(Art. 16 Abs. 2 Bst. d DSG)');
+		expect(section('Weitergabe an Dritte')?.textContent).toContain('(Art.\u00a016\u00a0Abs.\u00a02\u00a0Bst.\u00a0d\u00a0DSG)');
 		expect(links('Weitergabe an Dritte')).toContain('https://resend.com/legal/privacy-policy');
 	});
 
