@@ -39,7 +39,7 @@
 	danger
 	busy={deleting}
 	busyLabel={m.buildings_deleting()}
-	confirmDisabled={hasApartments}
+	impossible={hasApartments}
 	confirmTestid="building-delete-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >

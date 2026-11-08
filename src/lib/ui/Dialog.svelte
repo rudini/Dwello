@@ -14,6 +14,7 @@
 		busy = false,
 		busyLabel,
 		confirmDisabled = false,
+		impossible = false,
 		onconfirm,
 		onclose,
 		confirmTestid = 'dialog-confirm',
@@ -30,7 +31,8 @@
 		danger?: boolean;
 		busy?: boolean;
 		busyLabel?: string;
-		confirmDisabled?: boolean; // the action is not possible; the content says why
+		confirmDisabled?: boolean; // the action is not possible yet; the content says what it needs
+		impossible?: boolean; // the action is not possible; the content says why, only «Schliessen» is offered (#1167)
 		onconfirm: () => void;
 		onclose?: () => void;
 		confirmTestid?: string;
@@ -114,7 +116,7 @@
 		const target = event.target as HTMLElement;
 		if (!target.matches?.('input') || !panel?.contains(target)) return;
 		event.preventDefault();
-		if (!busy && !confirmDisabled) onconfirm();
+		if (!busy && !confirmDisabled && !impossible) onconfirm();
 	}
 
 	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays where it is.
@@ -163,20 +165,25 @@
 			<div
 				class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end"
 				role="presentation"
+				data-testid="dialog-actions"
 				onmousedown={(event) => event.preventDefault()}
 				onclickcapture={(event) => (event.target as HTMLElement).closest('button')?.focus()}
 			>
-				<Button onclick={close} testid="dialog-cancel" disabled={busy}>{cancelLabel}</Button>
-				<Button
-					variant={danger ? 'danger' : 'primary'}
-					onclick={onconfirm}
-					disabled={confirmDisabled}
-					{busy}
-					{busyLabel}
-					testid={confirmTestid}
-				>
-					{confirmLabel}
+				<Button onclick={close} testid="dialog-cancel" disabled={busy}>
+					{impossible ? m.ui_close() : cancelLabel}
 				</Button>
+				{#if !impossible}
+					<Button
+						variant={danger ? 'danger' : 'primary'}
+						onclick={onconfirm}
+						disabled={confirmDisabled}
+						{busy}
+						{busyLabel}
+						testid={confirmTestid}
+					>
+						{confirmLabel}
+					</Button>
+				{/if}
 			</div>
 		</div>
 	</div>

@@ -70,7 +70,7 @@
 	title={m.contracts_delete_title()}
 	confirmLabel={m.contracts_delete_confirm()}
 	danger
-	disabled={billed}
+	impossible={billed}
 	confirmTestid="contract-delete-confirm"
 	{error}
 	fields={{ mistakeConfirmed: mistakeConfirmed ? 'on' : '' }}

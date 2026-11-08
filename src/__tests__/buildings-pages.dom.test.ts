@@ -296,7 +296,8 @@ describe('Gebäudedetail', () => {
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Dieses Gebäude kann nicht gelöscht werden'
 		);
-		expect(byTestId<HTMLButtonElement>('building-delete-confirm')!.disabled).toBe(true);
+		expect(byTestId('building-delete-confirm')).toBeNull();
+		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
 	});
 });
 
