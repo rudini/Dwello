@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages';
+	import { numberedUploads } from '$lib/document-status';
 	import type { StatementDocument } from '$lib/types';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import Field from '$lib/ui/Field.svelte';
@@ -121,7 +122,7 @@
 
 	{#if data.documents.length}
 		<ul class="divide-y divide-line rounded-panel border border-line bg-surface px-6">
-			{#each data.documents as document (document.id)}
+			{#each numberedUploads(data.documents) as document (document.id)}
 				<DocumentItem {document} showTenant>
 					<MarkSentButton {document} error={form?.actionError} />
 				</DocumentItem>

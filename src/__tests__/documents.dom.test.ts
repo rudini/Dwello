@@ -216,6 +216,24 @@ describe('Dokumente', () => {
 		);
 	});
 
+	// #1181: two uploads of one tenant with the same title differ by a running number in upload order; another
+	// tenant's upload of that title keeps its plain title
+	it('nummeriert zwei Dokumente eines Mieters mit demselben Titel', () => {
+		documents([
+			upload({ id: 'u2', createdAt: '2025-03-01T09:05:30Z' }),
+			upload({ id: 'u3', tenantId: 't2', tenantName: 'Beat Huber' }),
+			upload()
+		]);
+		expect(allByTestId('document-row').map((row) => row.querySelector('p')!.textContent)).toEqual([
+			'Ausweiskopie (2 von 2)',
+			'Ausweiskopie',
+			'Ausweiskopie (1 von 2)'
+		]);
+		expect(allByTestId('document-pdf-link')[0].getAttribute('aria-label')).toBe(
+			'Datei herunterladen: Ausweiskopie (2 von 2)'
+		);
+	});
+
 	// #677 (decision 6): a filter «Mieter» with every tenant, the chosen one selected
 	it('bietet alle Mieter zum Filtern an und zeigt den gewählten', () => {
 		documents([], null, null, 't2');
