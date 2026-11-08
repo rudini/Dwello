@@ -1,5 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { translationsIn } from '../fixtures/translations';
 import { errorMessageShown } from '../questions/form';
 import { pageTitle } from '../questions/navigation';
 import { focusedText, shownConfirmations } from '../questions/app-frame';
@@ -32,7 +33,8 @@ import {
 	roomBesideFocusedCategory,
 	deleteQuestionText,
 	fieldHelp,
-	listedBefore
+	listedBefore,
+	translationsOf
 } from '../questions/categories';
 import {
 	askKi,
@@ -582,4 +584,15 @@ Then('sagt Dwello zur Prüfung durch die KI nicht {string}', async ({ verwalter 
 
 When('der Liegenschaftsverwalter die Kategorie in {string} umbenennt', async ({ verwalter, seed }, title: string) => {
 	await verwalter.attemptsTo(rename(seed.unique(title)));
+});
+
+Given(
+	'es gibt die umlagefähige Kategorie {string} mit einem italienischen Namen',
+	async ({ seed }, title: string) => {
+		await seed.category(title, true, translationsIn('Italienisch', title));
+	}
+);
+
+Then('steht bei der Kategorie {string} {string}', async ({ verwalter, names }, title: string, text: string) => {
+	await verwalter.sees(translationsOf(names.get(title)!)).toBe(text);
 });

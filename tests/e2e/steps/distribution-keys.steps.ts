@@ -1,5 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { translationsIn } from '../fixtures/translations';
 import {
 	formulaMarkedInvalid,
 	formulaOf,
@@ -12,7 +13,8 @@ import {
 	keyListed,
 	listedKeysNamed,
 	nameProblem,
-	shareOfSample
+	shareOfSample,
+	translationsOf
 } from '../questions/distribution-keys';
 import { pageTitle } from '../questions/navigation';
 import { confirmedNames } from '../questions/app-frame';
@@ -220,4 +222,15 @@ When('der Liegenschaftsverwalter den Baustein {string} übernimmt', async ({ ver
 
 When('der Liegenschaftsverwalter {string} weiterschreibt', async ({ verwalter }, text: string) => {
 	await verwalter.attemptsTo(typeOn(text));
+});
+
+Given(
+	'es gibt den Verteilschlüssel {string} mit der Formel {string} und Namen auf {word} und {word}',
+	async ({ seed }, title: string, formula: string, first: string, second: string) => {
+		await seed.distributionKey(title, formula, translationsIn(`${first} und ${second}`, title));
+	}
+);
+
+Then('steht beim Verteilschlüssel {string} {string}', async ({ verwalter, names }, title: string, text: string) => {
+	await verwalter.sees(translationsOf(names.get(title)!)).toBe(text);
 });

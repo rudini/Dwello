@@ -9,6 +9,7 @@ import {
 	nameInput,
 	sampleShare,
 	testErrors,
+	translations,
 	usage
 } from '../targets/distribution-keys';
 
@@ -24,3 +25,4 @@ export const formulaProblem = Text.of(formulaError);
 export const formulaMarkedInvalid = Attribute.named('aria-invalid').of(formulaInput);
 export const formulaTestErrors = Text.ofAll(testErrors);
 export const formulaValue = Value.of(formulaInput);
+export const translationsOf = (name: string) => Text.of(translations(name));

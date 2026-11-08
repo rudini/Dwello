@@ -1,6 +1,16 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { listedProfilesNamed, nameProblem, profileActionCount, shareOf, sharesHelpText, totalShare } from '../questions/heating-profiles';
+import { translationsIn } from '../fixtures/translations';
+import {
+	listedProfilesNamed,
+	listedTranslationsOf,
+	nameProblem,
+	profileActionCount,
+	shareOf,
+	sharesHelpText,
+	totalShare,
+	translationsOnDetail
+} from '../questions/heating-profiles';
 import { pageTitle } from '../questions/navigation';
 import {
 	changeShares,
@@ -55,8 +65,9 @@ When('der Liegenschaftsverwalter das Heizprofil löscht', async ({ verwalter }) 
 	await verwalter.attemptsTo(deleteHeatingProfile);
 });
 
-When('der Liegenschaftsverwalter das Heizprofil {string} öffnet', async ({ verwalter }, name: string) => {
-	await verwalter.attemptsTo(openHeatingProfile(name));
+// A profile of the scenario by its seeded name, or a predefined one by its German name
+When('der Liegenschaftsverwalter das Heizprofil {string} öffnet', async ({ verwalter, names }, name: string) => {
+	await verwalter.attemptsTo(openHeatingProfile(names.get(name) ?? name));
 });
 
 Then('trägt der Januar im Heizprofil {string} der Heizkosten', async ({ verwalter }, share: string) => {
@@ -100,3 +111,15 @@ Then(
 		await verwalter.sees(nameProblem).toContain(`Ein Heizprofil mit dem Namen «${name}» existiert bereits.`);
 	}
 );
+
+Given('das Heizprofil {string} hat Namen auf Französisch, Italienisch und Englisch', async ({ seed }, title: string) => {
+	await seed.translateHeatingProfile(title, translationsIn('Französisch, Italienisch und Englisch', title));
+});
+
+Then('steht beim Heizprofil {string} {string}', async ({ verwalter, names }, title: string, text: string) => {
+	await verwalter.sees(listedTranslationsOf(names.get(title)!)).toBe(text);
+});
+
+Then('steht auf der Detailseite des Heizprofils {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(translationsOnDetail).toBe(text);
+});

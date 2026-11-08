@@ -510,6 +510,11 @@ export function testData(api: CallTheApi) {
 			extras.push(`heating-profiles/${profile.id}`);
 		},
 
+		// The landlord saves names in other languages for an own profile later, e.g. { nameFR: '…' } (#689)
+		async translateHeatingProfile(title: string, translations: object) {
+			await put(`heating-profiles/${ids.get(title)}`, translations);
+		},
+
 		// The landlord renames an own profile later (#229)
 		async renameHeatingProfile(title: string, newTitle: string) {
 			await put(`heating-profiles/${ids.get(title)}`, { name: unique(newTitle) });
@@ -608,7 +613,8 @@ export function testData(api: CallTheApi) {
 			restores.push(() => put(`categories/${category.id}`, { isAllowedUtilityCost: category.isAllowedUtilityCost }));
 		},
 
-		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
+		category: (title: string, isAllowedUtilityCost: boolean, translations: object = {}) =>
+			addCategory(title, () => ({ isAllowedUtilityCost, ...translations })),
 		categoryWithSortOrder: (title: string, sortOrder: number) => addCategory(title, () => ({ isAllowedUtilityCost: true, sortOrder })),
 		// #1123: an allocable category the list shows right after another one, whatever other workers add or remove:
 		// its name is the other's with the rest of its title, and only names that begin with the other's sort in between
@@ -731,9 +737,10 @@ export function testData(api: CallTheApi) {
 			await put(`invoices/${id}`, { llmCategoryId: categoryId, llmConfidence: '0.9' });
 		},
 
-		async distributionKey(title: string, formula: string) {
+		// translations: e.g. { nameFR: 'Selon le volume' } (#689)
+		async distributionKey(title: string, formula: string, translations: object = {}) {
 			const name = unique(title);
-			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula });
+			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula, ...translations });
 			ids.set(title, key.id);
 			extras.push(`distribution-keys/${key.id}`);
 		},

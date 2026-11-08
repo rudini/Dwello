@@ -18,3 +18,11 @@ export const confirmDeleteButton = target('Löschen des Heizprofils bestätigen'
 	page.getByTestId('heating-profile-delete-confirm')
 );
 export const sharesHelp = target('Hilfe zu den Monatsanteilen', (page) => page.getByTestId('heating-profile-shares-help'));
+// #689: whether and in which languages an own profile is translated, in the list and on its detail page
+export const cardTranslations = (name: string) =>
+	target(`Übersetzungen des Heizprofils ${name}`, (page) =>
+		profileCard(name).locate(page).getByTestId('heating-profile-translations')
+	);
+export const detailTranslations = target('Übersetzungen des Heizprofils', (page) =>
+	page.getByTestId('heating-profile-detail-page').getByTestId('heating-profile-translations')
+);

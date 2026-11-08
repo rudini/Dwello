@@ -25,6 +25,7 @@ import {
 	proposal,
 	proposalRegion,
 	reason,
+	translations,
 	usage
 } from '../targets/categories';
 
@@ -64,3 +65,4 @@ export const listedBefore = (first: string, second: string) =>
 		const listed = await actor.answer(Text.ofAll(categoryNames));
 		return listed.includes(first) && listed.indexOf(first) < listed.indexOf(second);
 	});
+export const translationsOf = (name: string) => Text.of(translations(name));
