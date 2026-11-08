@@ -115,5 +115,5 @@
 
 	<HeatingProfileChart {shares} />
 
-	<NameTranslations names={profile} help={m.profiles_translations_help()} testid="heating-profile" />
+	<NameTranslations names={profile} help={m.profiles_translations_help()} testid="heating-profile" {errors} />
 </SaveForm>

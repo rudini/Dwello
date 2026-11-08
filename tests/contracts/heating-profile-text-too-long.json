@@ -1,0 +1,6 @@
+{
+	"error": "Some fields are not valid",
+	"code": "TEXT_TOO_LONG",
+	"params": { "field": "nameFR", "max": 100 },
+	"causes": [{ "code": "TEXT_TOO_LONG", "params": { "field": "nameFR", "max": 100 } }]
+}

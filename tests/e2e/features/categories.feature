@@ -370,7 +370,6 @@ Funktionalität: Kostenkategorien
     Und sieht der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung"
 
   # #1201: der Name einer Kategorie hat höchstens 100 Zeichen, wie in der Datenbank
-  @wip
   Szenario: Bei einem zu langen Namen einer Kategorie sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie "Treppenhausreinigung"
     Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert

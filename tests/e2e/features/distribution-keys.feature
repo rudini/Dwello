@@ -131,7 +131,6 @@ Funktionalität: Verteilschlüssel
     Und zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Fläche und Zimmer"
 
   # #1201: der Name eines Verteilschlüssels hat höchstens 100 Zeichen, wie in der Datenbank
-  @wip
   Szenario: Bei einem zu langen Namen eines Verteilschlüssels sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels "Fläche und Zimmer"
     Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert

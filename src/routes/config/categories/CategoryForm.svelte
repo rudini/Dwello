@@ -220,7 +220,7 @@
 		bind:value={values.sortOrder}
 	/>
 
-	<NameTranslations names={category} help={m.categories_translations_help()} />
+	<NameTranslations names={category} help={m.categories_translations_help()} {errors} />
 </SaveForm>
 
 <AllocabilityQuestion {category} bind:allowed={values.allowed} bind:ask onconfirm={submitAgain} />

@@ -22,6 +22,17 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 	});
 });
 
+// #1201: a phone number longer than its column, refused at its field
+it('zeigt den Fehler der Telefonnummer an ihrem Feld', () => {
+	show(TenantFormFields, { errors: { phone: 'Höchstens 30 Zeichen. Kürzen Sie den Text.' } });
+
+	const phone = byTestId('tenant-phone-input')!;
+	expect(phone.getAttribute('aria-invalid')).toBe('true');
+	expect(
+		document.getElementById(phone.getAttribute('aria-describedby')!.split(' ')[0])!.textContent
+	).toContain('Höchstens 30 Zeichen. Kürzen Sie den Text.');
+});
+
 // #63, #105, #106: die Sprache gilt für Abrechnung und Mahnungen; Rätoromanisch gibt es nicht mehr
 it('bietet die Sprache für Abrechnung und Mahnungen auf Deutsch, Französisch, Italienisch und Englisch an', () => {
 	show(TenantFormFields, {});

@@ -13,6 +13,7 @@ import { runAction } from './helpers/action';
 import nameTaken from '../../tests/contracts/category-name-taken.json';
 import inUse from '../../tests/contracts/category-in-use.json';
 import inStatement from '../../tests/contracts/category-in-statement.json';
+import tooLong from '../../tests/contracts/category-text-too-long.json';
 import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import allowed from '../../tests/contracts/categories-allowed.json';
@@ -364,6 +365,16 @@ describe('Kategorie löschen', () => {
 					form: 'Die Kategorie hat Tankbestände. Deshalb bleiben die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff» gesetzt. Wenn Sie sie entfernen möchten, löschen Sie zuerst die Tankbestände auf der Seite des Gebäudes.'
 				}
 			}
+		});
+	});
+
+	// #1201: the edit sends the German name as nameDE; the form calls its field «Name»
+	it('zeigt beim Namen, dass der deutsche Name länger ist, als Dwello ihn speichert', async () => {
+		const { result } = runAction(editActions.default, 'c1', 200, form, {}, { status: 400, answer: tooLong });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { name: 'Höchstens 100 Zeichen. Kürzen Sie den Text.' } }
 		});
 	});
 
