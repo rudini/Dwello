@@ -1499,6 +1499,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-688.md`): no Blocker or Major; Minors that stay: Helga H-1, Sven S-1, S-3; Helga H-2 = Sven S-2 (two alerts give opposite advice) is #1197
 - [x] Workflow notes: `git stash` is shared by all worktrees; parallel agents must not use it (one popped another's stash)
 - [x] Archive the session; PR pushed after this archive
+## Session: #1143 Draft refusal without the apartment's contracts
+
+- [x] Scenario line `contract-edit.feature:239` changed to the decided text (Spec change approved: #1143)
+- [x] `fach-reviewer` `docs/reviews/b1143-fachreview-1.md`: de checked, fr/it/en written; V-1 Minor («die Mietverträge» instead of «sie») taken
+- [x] DOM test and scenario seen red at the message, texts in `messages/*.json`, green (ea8df3c)
+- [x] code-reviewer `docs/reviews/b1143-review-1.md`: no findings
+- [x] Persona Helga (`docs/design/personas/helga-b1143.md`): no Blocker or Major; P-1..P-3 Minor stay (P-1, P-3 on the base commit, P-2 the decided #666 hint and #1142)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-1143.md`
+- [x] Archive the session; PR `Fixes #1143`: pushed after this archive
 ## Session: #1176 Kontoinhaber in the privacy statement
 
 - [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
