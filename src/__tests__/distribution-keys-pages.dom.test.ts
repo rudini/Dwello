@@ -141,6 +141,17 @@ describe('Verteilschlüssel erfassen', () => {
 		expect(formula.value).toBe('{area}{units_total}');
 	});
 
+	// persona Helga P-1 (#1200): the focus stayed on the button, so a space typed next inserted the Baustein again
+	it('setzt nach dem Einfügen den Cursor ans Ende der Formel', async () => {
+		show(NewKeyPage, { form: null } as never);
+		const formula = byTestId<HTMLInputElement>('distribution-key-formula-input')!;
+
+		click(allByTestId('distribution-key-insert-button').find((b) => b.textContent?.includes('{rooms}'))!);
+		await settle();
+		expect(document.activeElement).toBe(formula);
+		expect(formula.selectionStart).toBe('{area}{rooms}'.length);
+	});
+
 	it('zeigt das Ergebnis des Formeltests mit Fehlern und Anteilen', () => {
 		const test = {
 			errors: ['Unbekannte Variable {persons}'],

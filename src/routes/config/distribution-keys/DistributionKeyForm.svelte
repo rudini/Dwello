@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { BUILDING_TOTALS, FORMULA_VARIABLES, type FormulaTest } from '$lib/distribution-key';
 	import type { DistributionKey } from '$lib/types';
 	import { m } from '$lib/paraglide/messages';
@@ -27,6 +27,15 @@
 	let name = $state(untrack(() => key?.name ?? ''));
 	let description = $state(untrack(() => key?.description ?? ''));
 	let formula = $state(untrack(() => key?.formula ?? '{area}'));
+	let formulaInput: HTMLInputElement;
+
+	// persona Helga P-1 (#1200): back in the formula after the inserted block, so typing goes on there
+	async function insertBlock(name: string) {
+		formula += `{${name}}`;
+		await tick();
+		formulaInput.focus();
+		formulaInput.setSelectionRange(formula.length, formula.length);
+	}
 </script>
 
 {#snippet insert(title: string, variables: typeof FORMULA_VARIABLES)}
@@ -34,10 +43,7 @@
 		<p class="font-semibold text-ink">{title}</p>
 		<div class="flex flex-wrap gap-2">
 			{#each variables as variable (variable.name)}
-				<Button
-					onclick={() => (formula += `{${variable.name}}`)}
-					testid="distribution-key-insert-button"
-				>
+				<Button onclick={() => insertBlock(variable.name)} testid="distribution-key-insert-button">
 					<span class="font-mono">{`{${variable.name}}`}</span>
 					<span class="font-normal">{variable.description()}</span>
 				</Button>
@@ -82,6 +88,7 @@
 			<input
 				id={control.id}
 				name="formula"
+				bind:this={formulaInput}
 				bind:value={formula}
 				autocomplete="off"
 				spellcheck="false"
