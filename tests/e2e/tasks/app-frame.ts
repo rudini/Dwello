@@ -29,6 +29,8 @@ export const openUserMenuByKey = (key: string) => Press.theKey(key).on(userMenuB
 export const pressInUserMenu = (key: string) => Press.theKey(key).on(focusedUserMenuItem);
 export const chooseInFooter = (label: string) => Click.on(footerLink(label));
 export const useWindowWidth = (width: number) => Browser.resizeTo({ width, height: 768 });
+// #1182: «hell» or «dunkel», as the system setting asks the page
+export const useAppearance = (appearance: string) => Browser.useColorScheme(appearance === 'dunkel' ? 'dark' : 'light');
 export const openMobileMenu = Click.on(mobileMenuButton);
 export const openTermsFromLogin = Click.on(termsLinkOnLogin);
 export const openPrivacySectionFromTerms = (heading: string) => Click.on(privacySectionLinkInTerms(heading));
