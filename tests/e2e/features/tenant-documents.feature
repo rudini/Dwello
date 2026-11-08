@@ -142,3 +142,20 @@ Funktionalität: Dokumente eines Mieters
     Dann heissen die Dokumente beim Mieter "Uebergabeprotokoll (1 von 2)" und "Uebergabeprotokoll (2 von 2)", auch auf ihren Schaltflächen
     Wenn der Liegenschaftsverwalter das Dokument "Uebergabeprotokoll (2 von 2)" löschen will
     Dann sagt die Bestätigung "Dokument «Uebergabeprotokoll (2 von 2)» wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
+
+  # #1173 (Sven 2 P-4): eine Aktion, die auf der Seite bleibt, sagt nur ihr Ergebnis an, nicht noch einmal den Seitentitel
+  Szenario: Nach dem Hochladen sagt der Screenreader nur die Bestätigung an
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und ein Screenreader hört mit
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochlädt
+    Dann liegt beim Mieter das Dokument "Betreibungsauszug", heute hochgeladen
+    Und sagt der Screenreader "Dokument «Betreibungsauszug» hochgeladen" an
+    Aber sagt der Screenreader den Seitentitel nicht noch einmal an
+
+  # #1173: ein Wechsel auf eine andere Seite sagt deren Titel weiterhin an, einmal
+  Szenario: Beim Öffnen eines Mieters sagt der Screenreader seinen Seitentitel an
+    Angenommen der Liegenschaftsverwalter ist auf der Mieterliste
+    Und der Liegenschaftsverwalter den Mieter "Lea Frei" sucht
+    Und ein Screenreader hört mit
+    Wenn der Liegenschaftsverwalter den Mieter "Lea Frei" öffnet
+    Dann sagt der Screenreader nur den Seitentitel des Mieters "Lea Frei" an

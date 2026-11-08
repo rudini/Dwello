@@ -154,6 +154,7 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		// what the Saldo asks of whom, by the Swiss day (#815)
 		unpaid: data.unpaid === true,
 		claimed: data.claimed === true,
+		paymentPart: data.paymentPart === true, // #690
 		noPayment: data.noPayment === true,
 		waived: data.waived === true,
 		carried: data.carried === true,

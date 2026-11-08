@@ -35,6 +35,7 @@
 	import type { ComponentProps } from 'svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
+	import CreditorAddressWarning from '$lib/statement/CreditorAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
 	import CarrySettleDialog from './CarrySettleDialog.svelte';
@@ -58,12 +59,15 @@
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
 			later?: ComponentProps<typeof LaterChanges>['later'] & { splitKeys: SplitKeyHint[] };
+			creditorWarning?: string | null; // #690: the code of whose address a Zahlteil lacks
 			paymentDeadlineDays?: number; // a draft's: the days sending gives its Zahlungsfrist (#686)
 		};
 		form: ActionData;
 	} = $props();
 
 	const statement = $derived(data.statement);
+	// #690: its PDF or a Mahnung gets a Zahlteil, and the settings lack an address it or the letterhead needs
+	const creditorWarning = $derived((statement.paymentPart && data.creditorWarning) || null);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
@@ -209,6 +213,7 @@
 
 	<Correction {statement} bind:open={showCorrect} />
 	<OldAddressWarning {statement} testid="statement-old-address" />
+	<CreditorAddressWarning code={creditorWarning} />
 
 	<!-- a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120) -->
 	{#if data.later}

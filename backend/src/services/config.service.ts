@@ -203,7 +203,7 @@ async function validateConfig(key: ConfigKey, value: string) {
  * landlord (#450). The form sends the IBAN it shows with every save; a save without it (the IBAN emptied, reset after)
  * stays possible (code review C-1)
  */
-async function creditorMissing(changes: Partial<Record<ConfigKey, string>>, separateHolder = false): Promise<ErrorCode[]> {
+export async function creditorMissing(changes: Partial<Record<ConfigKey, string>>, separateHolder = false): Promise<ErrorCode[]> {
 	if (!changes.iban?.trim()) return [];
 	const stored = await getAllConfig();
 	const value = (key: ConfigKey) => (changes[key] ?? stored[key] ?? '').trim();
