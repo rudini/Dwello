@@ -8,8 +8,8 @@ export const confirmDeleteButton = target('Gebäude löschen bestätigen', (page
 );
 export const editButton = target('Gebäude bearbeiten', (page) => page.getByTestId('building-edit-button'));
 export const invoicesButton = target('Rechnungen des Gebäudes', (page) => page.getByTestId('building-invoices-button'));
-export const addApartmentButton = target('Wohnung hinzufügen', (page) => page.getByTestId('apartment-add-button'));
-export const firstApartmentButton = target('Erste Wohnung erstellen', (page) =>
+export const addApartmentButton = target('Wohnung erfassen', (page) => page.getByTestId('apartment-add-button'));
+export const firstApartmentButton = target('Erste Wohnung erfassen', (page) =>
 	page.getByTestId('apartment-first-create-button')
 );
 export const addressLine = target('Adresse des Gebäudes', (page) => page.getByTestId('building-address'));

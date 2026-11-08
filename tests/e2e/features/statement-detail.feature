@@ -170,7 +170,7 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung als am "2024-12-30" bezahlt markiert
-    Dann meldet das Feld «Bezahlt am» "Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein."
+    Dann meldet Dwello bei «Bezahlt am» "Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein."
     Und hat die Abrechnung den Status "Versendet"
 
   Szenario: Kein Zahlungseingang in der Zukunft
@@ -178,7 +178,7 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung als am "2099-01-01" bezahlt markiert
-    Dann meldet das Feld «Bezahlt am» "Das Zahlungsdatum liegt in der Zukunft."
+    Dann meldet Dwello bei «Bezahlt am» "Das Zahlungsdatum liegt in der Zukunft."
     Und hat die Abrechnung den Status "Versendet"
 
   # #92: eine Zahlung auf der falschen Abrechnung oder mit falschem Datum lässt sich zurücksetzen; der Verlauf hält das
@@ -544,7 +544,7 @@ Funktionalität: Abrechnungsdetail
 
   # Ohne Korrespondenzadresse des Mieters hat der Zahlteil ein leeres Feld mit Eckmarken, in das der Mieter Name und
   # Adresse schreibt (SIX, Implementation Guidelines QR-Rechnung v2.4, Zahlteil und Empfangsschein) (#78)
-  Szenario: Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse
+  Szenario: Der Zahlteil ohne Korrespondenzadresse lässt Platz für Name und Adresse
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" ist keine Korrespondenzadresse erfasst
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -1613,7 +1613,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann warnt die Detailseite der Abrechnung "Mit einer IBAN braucht es den Kontoinhaber."
     Wenn der Liegenschaftsverwalter von der Warnung zu den Einstellungen wechselt
-    Dann steht der Fokus in den Einstellungen auf dem Feld "Ort des Kontoinhabers"
+    Dann steht der Fokus in den Einstellungen bei "Ort des Kontoinhabers"
 
   # #690 (Persona Weber 690 W-2, Entscheid Product Owner): mit einer IBAN braucht auch der Absender seine ganze Adresse,
   # der Kopf des PDF nennt sie, auch wenn ein vollständiger Kontoinhaber den Zahlteil bekommt

@@ -16,6 +16,8 @@ import {
 	missingStatementsText,
 	missingStatementsTitleText,
 	contractActionsNarrowerThanTitle,
+	missingStatementButtonsShortOfRow,
+	missingStatementLinkTexts,
 	missingStatementsShown,
 	billedUntilOfContract,
 	nextStepsText,
@@ -177,10 +179,6 @@ When('der Liegenschaftsverwalter die Rechnungen des Gebäudes anzeigt', async ({
 
 Then('sieht der Liegenschaftsverwalter die Wohnung {string} im Mietvertrag', async ({ verwalter }, number: string) => {
 	await verwalter.sees(apartmentOfContract).toContain(`Wohnung ${number}`);
-});
-
-Then('sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}', async ({ verwalter }, amount: string) => {
-	await verwalter.sees(totalRent).toBe(amount);
 });
 
 Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: string) => {
@@ -368,6 +366,24 @@ Then(
 	}
 );
 
+// #741: on a phone each button of a missing statement spans the warning, one below the other
+Then('reichen Abrechnen und Rechnungen der fehlenden Abrechnung {int} über die volle Breite der Warnung', async ({ verwalter }, year: number) => {
+	await verwalter.sees(missingStatementButtonsShortOfRow(`${year}-01-01`)).toEqual([0, 0]);
+});
+
+// #741 (persona Marco P-1): the oldest first, as the warning asks
+Then(
+	'nennt der Mietvertrag die fehlenden Abrechnungen von {int} bis zum letzten Jahr, die älteste zuerst',
+	async ({ verwalter }, first: number) => {
+		const years = Array.from({ length: lastYear - first + 1 }, (_, i) => first + i);
+		await verwalter.sees(missingStatementLinkTexts).toEqual(years.map((year) => `${year} abrechnen`));
+	}
+);
+
+Then('erklärt der Mietvertrag die fehlenden Abrechnungen mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(missingStatementsText).toContain(text);
+});
+
 Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
 	await verwalter.sees(missingStatementsShown).toBe(false);
 });
@@ -510,7 +526,7 @@ Then('erklärt der Dialog beim Eingang der Kündigung {string}', async ({ verwal
 	await verwalter.sees(noticeReceivedHelp).toContain(text);
 });
 
-Then('steht der Fokus im Feld {string} des Dialogs', async ({ verwalter }, field: string) => {
+Then('steht der Fokus bei {string} des Dialogs', async ({ verwalter }, field: string) => {
 	await verwalter.sees(focusedEndDialogField).toBe(field);
 });
 

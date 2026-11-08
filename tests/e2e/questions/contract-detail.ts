@@ -25,6 +25,10 @@ import {
 	deleteDialog,
 	deleteDialogStatementLink,
 	missingStatements,
+	missingStatementLink,
+	missingStatementLinks,
+	missingStatementInvoicesLink,
+	missingStatementPeriod,
 	fixedTermCheck,
 	fixedTermError,
 	contractFlatRate,
@@ -53,6 +57,15 @@ export const endConfirmationInWindow = question(
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
+// #741: how many pixels each button of a missing statement falls short of the width of its row
+export const missingStatementButtonsShortOfRow = (periodStart: string) =>
+	question(`how far the buttons of the missing statement from ${periodStart} fall short of its row`, async (actor) => {
+		const [row, ...buttons] = await Promise.all(
+			[missingStatementPeriod, missingStatementLink, missingStatementInvoicesLink].map((part) => actor.answer(Width.of(part(periodStart))))
+		);
+		return buttons.map((width) => (row === null || width === null ? null : Math.round(row - width)));
+	});
+export const missingStatementLinkTexts = Text.ofAll(missingStatementLinks); // #741: in the order shown
 export const managementFeeOfContract = Text.of(contractManagementFee);
 export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);
