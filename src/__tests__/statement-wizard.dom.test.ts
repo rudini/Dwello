@@ -1110,7 +1110,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	const withInvoices = (
-		lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod' | 'splitKeys', unknown[]>>
+		lists: Partial<Record<'lateInvoices' | 'splitKeys', unknown[]>>
 	) =>
 		open({
 			preview,
@@ -1122,7 +1122,6 @@ describe('Abrechnungen erstellen', () => {
 						buildingId: 'b1',
 						findings: [],
 						lateInvoices: [],
-						invoicesWithoutServicePeriod: [],
 						heatingWithoutServicePeriod: [],
 						...lists
 					}
@@ -1176,16 +1175,6 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Ordnen Sie jeder Rechnung eine Kategorie zu');
 		expect(heading()).toBe('Vorschau');
-	});
-
-	// In einer Periode unter einem Jahr zählt eine Jahresrechnung ohne Leistungszeitraum ganz (#134)
-	it('nennt Rechnungen ohne Leistungszeitraum einer kurzen Abrechnungsperiode', () => {
-		withInvoices({ invoicesWithoutServicePeriod: completeness.lateInvoices });
-
-		expect(byTestId('invoices-without-service-period')!.textContent).toContain(
-			'Die Abrechnungsperiode ist kürzer als ein Jahr.'
-		);
-		expect(byTestId('late-invoices')).toBeNull();
 	});
 
 	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {

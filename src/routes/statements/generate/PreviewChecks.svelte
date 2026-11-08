@@ -45,11 +45,10 @@
 	// a statement named as outdated or other is a warning (#132, V-6)
 	const existingTone = $derived(existing.some((row) => row.changed.length) ? 'caution' : 'info');
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod' | 'heatingWithoutServicePeriod' | 'uncategorized') =>
+	const hinted = (list: 'lateInvoices' | 'heatingWithoutServicePeriod' | 'uncategorized') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
 	const uncategorized = $derived(hinted('uncategorized'));
-	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	const heating = $derived(hinted('heatingWithoutServicePeriod'));
 	// #528: a Kategorie the statements will bill by several Verteilschlüssel; a hint, no confirmation
@@ -121,13 +120,6 @@
 {/if}
 
 {#if tankQuestions.length}<TankQuestion buildings={tankQuestions} />{/if}
-
-<InvoiceHint
-	buildings={whole}
-	title={m.statements_whole_title()}
-	text={m.statements_whole_text()}
-	testid="invoices-without-service-period"
-/>
 
 <InvoiceHint
 	buildings={heating}
