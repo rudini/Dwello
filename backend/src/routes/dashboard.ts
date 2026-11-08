@@ -46,6 +46,7 @@ async function portfolio() {
 		vacantApartments: await countApartments(sql`${apartmentStatus} = 'vacant'`),
 		reletApartments: await countApartments(sql`${apartmentStatus} = 'relet'`),
 		reservedApartments: await countApartments(sql`${apartmentStatus} = 'reserved'`),
+		discontinuedApartments: await countApartments(sql`${apartmentStatus} = 'discontinued'`),
 		occupancyRate: occupancyRate(occupiedApartments, totalApartments)
 	};
 }

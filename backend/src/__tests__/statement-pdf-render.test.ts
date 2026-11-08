@@ -1177,8 +1177,9 @@ describe('PDF mit aufgehobener Wohnung', () => {
 	const split = { ...refund, lineItems: [line] };
 
 	// #1312 (Fachreview 1311-1, Wortlaut): ihren Anteil trägt der Vermieter nur, solange sie leer steht; ab dem Tag teilen die übrigen Wohnungen
+	// Fachreview 1311-2 V-1: «Berechnung», nicht die Rechnung eines Lieferanten
 	it('nennt die aufgehobene Wohnung über der Kostenaufstellung', async () => {
-		expect((await textOf(split)).flowing).toContain('Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; solange sie leer steht, trägt der Vermieter ihren Anteil. Ab 01.07.2025 werden die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen verteilt. Unter den betroffenen Abrechnungspositionen steht die Rechnung je Zeitraum.');
+		expect((await textOf(split)).flowing).toContain('Wohnung 1.03 gibt es ab 01.07.2025 nicht mehr. Bis zum 30.06.2025 zählt sie im Verteilschlüssel mit; solange sie leer steht, trägt der Vermieter ihren Anteil. Ab 01.07.2025 werden die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen verteilt. Unter den betroffenen Abrechnungspositionen steht die Berechnung je Zeitraum.');
 	});
 
 	it.each([

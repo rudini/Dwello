@@ -45,7 +45,23 @@
 			value: data.portfolio.reservedApartments,
 			href: '/apartments?status=reserved',
 			testid: 'stat-reserved'
-		}
+		},
+		// #1311: only where there are any, so that the counts add up to the apartments
+		...(data.portfolio.discontinuedApartments
+			? [
+					{
+						label: statusLabels.discontinued,
+						value: data.portfolio.discontinuedApartments,
+						href: '/apartments?status=discontinued',
+						testid: 'stat-discontinued'
+					}
+				]
+			: [])
+	]);
+	const explained = $derived([
+		'relet' as const,
+		'reserved' as const,
+		...(data.portfolio.discontinuedApartments ? ['discontinued' as const] : [])
 	]);
 	// The relet apartments as the building cards count them, and each empty one, since when if it had a contract (#145)
 	const occupancyNotes = (building: PageData['buildingOccupancy'][number]) =>
@@ -89,7 +105,7 @@
 			</ul>
 			<!-- #731: the two status words the counts do not explain themselves, in the words of the status legend -->
 			<dl class="flex flex-col gap-2">
-				{#each ['relet', 'reserved'] as const as status (status)}
+				{#each explained as status (status)}
 					<div data-testid="stat-help-{status}">
 						<dt class="font-semibold text-ink">{statusLabels[status]}</dt>
 						<dd class="text-ink-muted">{statusHelp[status]}</dd>

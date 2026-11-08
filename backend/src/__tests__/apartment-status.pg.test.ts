@@ -127,6 +127,7 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(portfolio.reletApartments).toBe(relet.total);
 		expect(portfolio.reservedApartments).toBe((await listApartments({ status: 'reserved', limit: 1000 })).total);
 		expect(portfolio.occupiedApartments).toBe((await listApartments({ status: 'occupied', limit: 1000 })).total);
+		expect(portfolio.discontinuedApartments).toBe((await listApartments({ status: 'discontinued', limit: 1000 })).total);
 	});
 
 	// #1311: ab dem Tag «Aufgehoben ab» gibt es die Wohnung nicht mehr; sie ist weder leer noch vermietbar
