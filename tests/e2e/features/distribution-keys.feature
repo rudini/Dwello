@@ -129,3 +129,33 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" löscht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Verteilschlüsseln. Steht der Verteilschlüssel nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich der Verteilschlüssel löschen."
     Und zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Fläche und Zimmer"
+
+  # #1200 (Persona Helga, #128): die Summen des Gebäudes lassen sich wie die Bausteine per Knopf einfügen
+  @wip
+  Szenario: Summe des Gebäudes per Knopf einfügen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{area} / " eingibt
+    Und der Liegenschaftsverwalter die Summe "{area_total}" einfügt
+    Dann steht in der Formel "{area} / {area_total}"
+
+  # #1200: ein Fehler im Aufbau der Formel nennt die Stelle, an der sie bricht
+  @wip
+  Szenario: Gespeicherte Formel mit offener Klammer
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Gemischt" mit der Formel "0.7 * ({area} / {area_total} + 0.3" erfasst
+    Dann erfährt der Liegenschaftsverwalter bei der Formel "In der Formel fehlt die schliessende Klammer zu «({area} / {area_total} + 0.3»."
+
+  # #1200: auch der Test nennt die Stelle
+  @wip
+  Szenario: Formel testen mit zwei Rechenzeichen hintereinander
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter die Formel "{area} * / {rooms}" testet
+    Dann zeigt der Test nur den Fehler "Bei «{area} * / {rooms}» folgen zwei Rechenzeichen direkt aufeinander."
+
+  # #1200: der vergebene Name sagt, was zu tun ist, und verdeckt den Fehler der Formel nicht
+  @wip
+  Szenario: Vergebener Name und fehlerhafte Formel beim selben Speichern
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" noch einmal mit der Formel "({area}" erfasst
+    Dann erfährt der Liegenschaftsverwalter beim Namen "Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer» existiert bereits. Wählen Sie einen anderen Namen."
+    Und erfährt der Liegenschaftsverwalter bei der Formel "In der Formel fehlt die schliessende Klammer zu «({area}»."

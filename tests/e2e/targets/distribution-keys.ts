@@ -40,3 +40,8 @@ export const usage = (name: string) =>
 	target(`Verwendung des Verteilschlüssels ${name}`, (page) =>
 		keyRow(name).locate(page).getByTestId('distribution-key-usage')
 	);
+// #1200: the buttons that insert a Baustein or a Summe des Gebäudes into the formula
+export const insertButton = (block: string) =>
+	target(`Knopf ${block}`, (page) =>
+		page.getByTestId('distribution-key-insert-button').filter({ has: page.getByText(block, { exact: true }) })
+	);

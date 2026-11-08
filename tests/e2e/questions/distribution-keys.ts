@@ -1,4 +1,4 @@
-import { Accessible, Attribute, Count, Enabled, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	deleteButton,
 	formula,
@@ -23,3 +23,4 @@ export const nameProblem = Accessible.descriptionOf(nameInput);
 export const formulaProblem = Text.of(formulaError);
 export const formulaMarkedInvalid = Attribute.named('aria-invalid').of(formulaInput);
 export const formulaTestErrors = Text.ofAll(testErrors);
+export const formulaValue = Value.of(formulaInput);
