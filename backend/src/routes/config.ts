@@ -6,6 +6,7 @@
 import { Elysia, t } from 'elysia';
 import {
 	getAllConfig,
+	creditorMissing,
 	getConfig,
 	setConfig,
 	setMultipleConfig,
@@ -14,6 +15,7 @@ import {
 	type ConfigKey
 } from '../services/config.service';
 import { errorBody, fieldsRefused } from '../services/coded-error';
+import { paymentPartWarning } from '../services/statement-pdf.service';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values
@@ -21,7 +23,11 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 		const config = await getAllConfig();
 		return {
 			data: config,
-			keys: Object.keys(CONFIG_KEYS)
+			keys: Object.keys(CONFIG_KEYS),
+			// #690: what the stored IBAN lacks, by the rule of the save; the settings mark it on opening
+			creditorMissing: await creditorMissing({ iban: config.iban ?? '' }),
+			// the warning of a statement with a Zahlteil: whose address is incomplete (review 690-1 C-1, Weber 690 W-1, W-2)
+			paymentPartWarning: await paymentPartWarning()
 		};
 	})
 
