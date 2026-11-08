@@ -1,6 +1,6 @@
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { apartmentsOf } from './apartment.service';
-import { countingOn } from './prorating.service';
+import { countingWith, cutDays } from './prorating.service';
 import { getInvoice, getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 
@@ -23,7 +23,7 @@ export const agreedIn = <T extends { categoryId: string | null }>(statement: { a
 // #1315 (product owner): why a key fails for the building, and for which apartment if it fails for one
 const REASONS: Record<string, string> = { FORMULA_NEGATIVE: 'NEGATIVE', FORMULA_ALL_ZERO: 'ALL_ZERO', FORMULA_NOT_A_NUMBER: 'DIVISION_BY_ZERO' };
 type Apartments = Awaited<ReturnType<typeof apartmentsOf>>;
-async function failureAmong(keyId: string, apartments: Apartments) {
+async function failureAmong(keyId: string, apartments: { id: string; number: string; area: number; rooms: number }[]) {
 	const result = await calculateBuildingDistribution(keyId, apartments, 1);
 	if (result.isValid) return null;
 	const code = result.errorCode?.code === 'FORMULA_APARTMENT_FAILED' ? String(result.errorCode.params.reason) : result.errorCode?.code;
@@ -31,11 +31,11 @@ async function failureAmong(keyId: string, apartments: Apartments) {
 	return { reason: `STATEMENT_KEY_REASON_${REASONS[code ?? ''] ?? 'OTHER'}`, apartment };
 }
 
-// #1336: over the apartments the calculation counts in each part of the period (#1284, «Aufgehoben ab»)
+// #1336: over the apartments the calculation counts in each part of the period, with their values of that day (#1284,
+// «Aufgehoben ab»; #1301, code review 1309-5 C-1)
 async function keyFailure(keyId: string, apartments: Apartments, start: string, end: string) {
-	const cuts = apartments.flatMap((a) => (a.discontinuedFrom && a.discontinuedFrom > start && a.discontinuedFrom <= end ? [a.discontinuedFrom] : []));
-	for (const day of new Set([start, ...cuts])) {
-		const counted = apartments.filter(countingOn(day));
+	for (const day of [start, ...cutDays(apartments, start, end)]) {
+		const counted = countingWith(apartments, day);
 		const failure = counted.length ? await failureAmong(keyId, counted) : null;
 		if (failure) return failure;
 	}

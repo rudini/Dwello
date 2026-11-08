@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { apartments, categories, distributionKeys, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
-import { createApartment } from '../services/apartment.service';
+import { createApartment, updateApartment } from '../services/apartment.service';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -380,5 +380,53 @@ describe('Verteilschlüssel, wenn eine Wohnung aufgehoben ist', () => {
 		expect((await check()).map(({ distributionKeyName, reason }) => ({ distributionKeyName, reason }))).toEqual([
 			{ distributionKeyName: keyName, reason: 'STATEMENT_KEY_REASON_ALL_ZERO' }
 		]);
+	});
+});
+
+// code review 1309-5 C-1: the check takes each apartment's Fläche and Zimmeranzahl of the day, as the calculation (#1301)
+describe('Verteilschlüssel, wenn eine Wohnung ab einem Tag eine andere Fläche hat', () => {
+	const fifth = crypto.randomUUID();
+	const sixth = crypto.randomUUID();
+	let growing: Awaited<ReturnType<typeof createRental>>;
+	let shrinking: Awaited<ReturnType<typeof createRental>>;
+	const keys: string[] = [];
+	const check = async (building: string, year: string) =>
+		((await (await callApi(`/api/v1/invoices/completeness/${building}?periodStart=${year}-01-01&periodEnd=${year}-12-31`)).json()) as {
+			uncalculableKeys: { distributionKeyName: string; reason: string }[];
+		}).uncalculableKeys.map(({ distributionKeyName, reason }) => ({ distributionKeyName, reason }));
+	// an apartment of 40 m² beside the rented 2.01 (70 m²), with other m² from 01.07.2025; the formula fails below 45 m²
+	const withSize = async (rental: Awaited<ReturnType<typeof createRental>>, before: string, after: string, title: string, invoiceDate: string) => {
+		const added = await createApartment({ buildingId: rental.building, number: '1.01', floor: 1, area: before, rooms: '2' });
+		await updateApartment(added.id, { area: after, sizeFrom: '2025-07-01' });
+		const keyName = `${title} ${rental === growing ? fifth : sixth}`;
+		keys.push(await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: keyName, nameDE: keyName, formula: '{area} - 45' })));
+		await insertInvoice(rental.building, { distributionKeyId: keys.at(-1), billingEntityName: 'Garten AG', amount: '100.00', invoiceDate });
+		return keyName;
+	};
+
+	beforeAll(async () => {
+		growing = await createRental(fifth, { startDate: '2024-01-01', monthlyAdvancePayment: '100' });
+		shrinking = await createRental(sixth, { startDate: '2024-01-01', monthlyAdvancePayment: '100' });
+	});
+
+	afterAll(async () => {
+		for (const rental of [growing, shrinking]) {
+			await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+			await db.delete(apartments).where(and(eq(apartments.buildingId, rental.building), eq(apartments.number, '1.01')));
+			await rental.remove();
+		}
+		for (const id of keys) await db.delete(distributionKeys).where(eq(distributionKeys.id, id));
+	});
+
+	it('hält den Lauf an, wenn die Formel nur mit der früheren Fläche scheitert', async () => {
+		const keyName = await withSize(growing, '40', '60', 'Früher 40', '2025-03-31');
+
+		expect(await check(growing.building, '2025')).toEqual([{ distributionKeyName: keyName, reason: 'STATEMENT_KEY_REASON_NEGATIVE' }]);
+	});
+
+	it('hält den Lauf nicht an, wenn die Formel nur mit der späteren Fläche scheitert', async () => {
+		await withSize(shrinking, '60', '40', 'Später 40', '2024-03-31');
+
+		expect(await check(shrinking.building, '2024')).toEqual([]);
 	});
 });
