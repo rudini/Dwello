@@ -16,8 +16,8 @@ function dockerPattern(): string {
 const buildsImages = (...files: string[]) =>
 	spawnSync('grep', ['-qE', dockerPattern()], { input: files.join('\n') + '\n' }).status === 0;
 
-describe('Docker images on pull requests (#1241)', () => {
-	it('skips the images when only app code, tests or texts changed', () => {
+describe('Docker-Images bei Pull Requests (#1241)', () => {
+	it('lässt die Images aus, wenn nur App-Code, Tests oder Texte geändert sind', () => {
 		expect(
 			buildsImages(
 				'src/routes/buildings/+page.svelte',
@@ -55,11 +55,11 @@ describe('Docker images on pull requests (#1241)', () => {
 		'tools/fitness/compose-update-check.sh',
 		'tools/fitness/data-totals.sh',
 		'.github/workflows/ci.yml'
-	])('builds the images when %s changed', (file) => {
+	])('baut die Images, wenn %s geändert ist', (file) => {
 		expect(buildsImages('src/routes/+page.svelte', file)).toBe(true);
 	});
 
-	it('builds them on every push to main, nightly and by hand, and gates the job on the output', () => {
+	it('baut sie bei jedem Push auf main, nachts und von Hand, und der Job hängt an der Ausgabe', () => {
 		expect(ci).toMatch(/if \[ "\$\{\{ github\.event_name \}\}" != pull_request \]; then\n\s+echo "backend=true".*echo "docker=true" >> "\$GITHUB_OUTPUT" && exit 0/);
 		const docker = ci.slice(ci.indexOf('\n  docker:\n'), ci.indexOf('\n  static-checks:\n'));
 		expect(docker).toContain("if: needs.changes.outputs.docker == 'true'");
