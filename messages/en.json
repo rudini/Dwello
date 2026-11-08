@@ -34,6 +34,7 @@
 	"ui_page_of": "Page {page} of {pages}",
 	"ui_please_wait": "Please wait …",
 	"ui_cancel": "Cancel",
+	"ui_close": "Close",
 	"ui_action_failed": "That did not work",
 	"ui_draft_restored": "Entries restored",
 	"ui_draft_back": "Your entries, last edited on {date} at {time}, are back. They are kept only in this browser and not saved yet.",

@@ -112,8 +112,9 @@ describe('Bestätigung einer Seitenaktion', () => {
 		}
 	});
 
-	it('lässt nicht bestätigen, was nicht möglich ist', () => {
-		open({ disabled: true });
-		expect(byTestId<HTMLButtonElement>('tenant-delete-confirm')!.disabled).toBe(true);
+	it('bietet nur «Schliessen» an, wenn die Aktion nicht möglich ist', () => {
+		open({ impossible: true });
+		expect(byTestId('tenant-delete-confirm')).toBeNull();
+		expect(byTestId('dialog-cancel')!.textContent!.trim()).toBe('Schliessen');
 	});
 });
