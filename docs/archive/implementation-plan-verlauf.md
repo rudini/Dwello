@@ -1581,6 +1581,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #697 CI screenshot job: mobile, dark mode, dialog and wizard states
+
+- [x] Read #697 and #1172 (same job; #1172 serves the base branch as a production build, whoever merges second merges `main` first); decisions in #697 «Decided (product owner)» with two follow-up comments
+- [x] Each changed page in desktop light, mobile (390 px) light and desktop dark; its dialog and `every-wizard-step` states of `tests/a11y/screens.json` via the axe check's `lookAt`; one seed per state for both branches, one test at a time, a fixed clock; upload states left out; comment from `ui-screenshots/shots.txt`, cut to GitHub's size (ea26370, 42577ff); unit tests seen red
+- [x] code-reviewer `docs/reviews/697-review-{1,2}.md`: C-1, C-2 Major fixed
+- [x] No scenario: CI tooling only; checks: lint, check, fitness, backend type-check, unit tests, axe and language examples after the `lookAt` change, the screenshot job locally against `main`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-697.md`
 ## Session: #714 design guard: style shorthands and system colours
 
 - [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
