@@ -3,6 +3,10 @@ import { actions } from '../routes/tenants/[id]/+page.server';
 import uploaded from '../../tests/contracts/document-uploaded.json';
 import refused from '../../tests/contracts/document-refused.json';
 import notDeletable from '../../tests/contracts/document-not-deletable.json';
+import de from '../../messages/de.json';
+import en from '../../messages/en.json';
+import fr from '../../messages/fr.json';
+import it_ from '../../messages/it.json';
 
 const API = 'http://localhost:3001/api/v1';
 type Call = { method?: string; url: string; body?: unknown };
@@ -98,5 +102,17 @@ describe('Dokument löschen', () => {
 			status: 409,
 			data: { deleteError: 'Mahnungen bleiben erhalten, weil sie belegen, dass der Mieter gemahnt wurde.' }
 		});
+	});
+});
+
+// #1290: the wording of fach-review docs/reviews/1290-fachreview-1.md, in every language
+describe('Satz beim Hochladen', () => {
+	it('sagt in jeder Sprache im Wortlaut der Fachprüfung, warum Datei und Titel gesperrt sind', () => {
+		expect([de, fr, it_, en].map((messages) => messages.tenants_document_upload_busy_note)).toEqual([
+			'Das Dokument wird hochgeladen. Bis das Hochladen fertig ist, lassen sich Datei und Titel nicht ändern.',
+			'Le document est en cours de téléversement. Le fichier et le titre ne peuvent pas être modifiés avant la fin du téléversement.',
+			'Il documento è in fase di caricamento. File e titolo non si possono modificare finché il caricamento non è terminato.',
+			'The document is being uploaded. The file and title cannot be changed until the upload is finished.'
+		]);
 	});
 });

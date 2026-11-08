@@ -31,6 +31,10 @@ import {
 	uploadButtonContrast,
 	uploadButtonFocused,
 	uploadButtonStatus,
+	uploadBusyNoteRole,
+	uploadButtonShown,
+	uploadButtonDescription,
+	uploadBusyNoteText,
 	fileButtonBackground,
 	fileFieldChangeable,
 	titleFieldBackground,
@@ -361,4 +365,17 @@ Then('sehen «Datei» und «Titel» ausgegraut aus', async ({ verwalter }) => {
 Then('lassen sich «Datei» und «Titel» wieder ändern', async ({ verwalter }) => {
 	await verwalter.sees(fileFieldChangeable).toBe(true);
 	await verwalter.sees(titleFieldChangeable).toBe(true);
+});
+
+// #1290 (persona Sven P-1, Helga): why file and title are locked; the button first, so the missing sentence is no error page
+Then('sagt Dwello vor dem Hochladen noch nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadButtonShown).toBe(true);
+	await verwalter.sees(uploadBusyNoteText).not.toContain(text);
+});
+
+Then('sagt Dwello beim Hochladen {string}, auch einem Screenreader', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadBusyNoteText).toBe(text);
+	await verwalter.sees(uploadBusyNoteRole).toBe('status');
+	// also when the focused button is read again (persona Sven 1290 P-1)
+	await verwalter.sees(uploadButtonDescription).toBe(text);
 });

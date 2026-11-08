@@ -6,6 +6,8 @@
 import { Elysia, t } from 'elysia';
 import { refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
+import { apartments } from '../db/schema';
+import { refuseTooLong } from '../services/text-length';
 import {
 	listApartments,
 	getApartment,
@@ -127,7 +129,8 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 			}
 		},
 		{
-			body: apartmentBodySchema
+			body: apartmentBodySchema,
+			beforeHandle: refuseTooLong(apartments)
 		}
 	)
 	// Update apartment
@@ -149,7 +152,8 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 			return apartment;
 		},
 		{
-			body: apartmentUpdateSchema
+			body: apartmentUpdateSchema,
+			beforeHandle: refuseTooLong(apartments)
 		}
 	)
 	// Delete apartment

@@ -20,3 +20,8 @@ export const warningToast = target('Warnung', (page) => page.getByTestId('toast-
 // #669: what «Erneut versuchen» says once the contracts are loaded, a success or, for an overlap, a warning
 export const loadedToast = target('Meldung nach dem Laden', (page) => page.getByTestId(/^toast-(success|warning)$/));
 export const anyToast = target('Meldung', (page) => page.getByTestId(/^toast-/));
+// a field by its label as the page shows it, with «optional» after it or not (#1201)
+export const fieldLabelled = (label: string) =>
+	target(`Feld «${label}»`, (page) =>
+		page.getByLabel(new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`))
+	);
