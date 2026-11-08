@@ -24,7 +24,7 @@ export interface UtilityCostRules {
  * Get Swiss utility cost compliance rules; the categories as the master data holds them
  */
 export async function getUtilityCostRules(): Promise<UtilityCostRules> {
-	const { categories } = await listCategories({ limit: 1000 });
+	const { categories } = await listCategories({ limit: null });
 	const names = (allowed: boolean) =>
 		categories.filter((c) => c.isAllowedUtilityCost === allowed).map((c) => c.nameDE || c.name);
 	return {
