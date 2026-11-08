@@ -608,13 +608,3 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 			inPeriod: delivery(row.invoice) ? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount) } : inPeriod(row.invoice, periodStart, periodEnd)
 		}));
 }
-
-/**
- * The building's invoices the period would bill without a category (#382): Dwello checks the agreement of the
- * Mietvertrag through the category, so the run waits until each has one or is not allocable
- */
-export async function getUncategorizedInvoices(buildingId: string, periodStart: string, periodEnd: string) {
-	return (await getInvoicesForStatement(buildingId, periodStart, periodEnd))
-		.filter((invoice) => !invoice.categoryId)
-		.map(({ billingEntityName, invoiceDate, amount }) => ({ billingEntityName, invoiceDate, amount }));
-}

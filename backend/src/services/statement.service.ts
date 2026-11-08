@@ -25,9 +25,8 @@ import {
 } from '../db/schema';
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
-import { uncalculableKeyInvoices } from './uncalculable-keys';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
-import { getUncategorizedInvoices } from './invoice.service';
+import { getUncategorizedInvoices, uncalculableKeyInvoices } from './held-invoices';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';

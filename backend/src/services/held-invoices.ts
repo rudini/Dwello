@@ -1,11 +1,16 @@
 import { calculateBuildingDistribution } from './distribution-key.service';
-import { listApartments } from './apartment.service';
+import { apartmentsOf } from './apartment.service';
 import { getInvoicesForStatement } from './invoice.service';
 
-/** The building's apartments with the values a Verteilschlüssel reads */
-export async function apartmentsOf(buildingId: string) {
-	const { apartments } = await listApartments({ buildingId, limit: 1000 });
-	return apartments.map((a) => ({ id: a.id, area: parseFloat(a.area), rooms: parseFloat(a.rooms) }));
+// The invoices of a building's period that hold its statement run: the run waits until they are fixed
+/**
+ * The building's invoices the period would bill without a category (#382): Dwello checks the agreement of the
+ * Mietvertrag through the category, so the run waits until each has one or is not allocable
+ */
+export async function getUncategorizedInvoices(buildingId: string, periodStart: string, periodEnd: string) {
+	return (await getInvoicesForStatement(buildingId, periodStart, periodEnd))
+		.filter((invoice) => !invoice.categoryId)
+		.map(({ billingEntityName, invoiceDate, amount }) => ({ billingEntityName, invoiceDate, amount }));
 }
 
 /**

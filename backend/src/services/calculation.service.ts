@@ -21,8 +21,7 @@ import {
 	calculateApartmentProrating,
 	handleMidYearMoves
 } from './prorating.service';
-import { getApartment } from './apartment.service';
-import { apartmentsOf } from './uncalculable-keys';
+import { apartmentsOf, getApartment } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
 import { agreedCategoryIds, agreedFromDays } from './agreed-category.service';
