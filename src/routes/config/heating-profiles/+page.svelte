@@ -7,7 +7,7 @@
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import { help } from '../help';
-	import TranslationMarker from '../TranslationMarker.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

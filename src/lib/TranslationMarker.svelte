@@ -4,20 +4,15 @@
 
 	// Whether an own category, distribution key or heating profile has names in other languages (#689): the codes
 	// on screen, the language names for a screen reader
-	let {
-		names,
-		testid
-	}: {
-		names: { nameFR?: string | null; nameIT?: string | null; nameEN?: string | null };
-		testid: string;
-	} = $props();
+	let { names, testid }: { names: Parameters<typeof translatedLanguages>[0]; testid: string } =
+		$props();
 
 	const spoken = {
 		FR: m.tenants_language_fr,
 		IT: m.tenants_language_it,
 		EN: m.tenants_language_en
 	};
-	const languages = $derived(translatedLanguages({ name: '', ...names }));
+	const languages = $derived(translatedLanguages(names));
 </script>
 
 <p class="text-ink-muted">

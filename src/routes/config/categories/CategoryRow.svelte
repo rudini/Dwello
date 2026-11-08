@@ -5,7 +5,7 @@
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import CategoryReason from './CategoryReason.svelte';
-	import TranslationMarker from '../TranslationMarker.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 
 	let { category, ondelete }: { category: CategoryWithUsage; ondelete: () => void } = $props();
 

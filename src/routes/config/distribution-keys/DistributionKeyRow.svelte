@@ -4,7 +4,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import TranslationMarker from '../TranslationMarker.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 
 	let { key, ondelete }: { key: DistributionKey; ondelete: () => void } = $props();
 

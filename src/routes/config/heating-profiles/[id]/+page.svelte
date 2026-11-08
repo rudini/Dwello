@@ -9,7 +9,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import DeleteDialog from '../../DeleteDialog.svelte';
-	import TranslationMarker from '../../TranslationMarker.svelte';
+	import TranslationMarker from '$lib/TranslationMarker.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

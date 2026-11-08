@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
-import TranslationMarker from '../routes/config/TranslationMarker.svelte';
+import TranslationMarker from '$lib/TranslationMarker.svelte';
 import { byTestId, show } from './helpers/dom';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
 const mark = (names: object) => {
-	show(TranslationMarker, { names, testid: 'marker' });
+	show(TranslationMarker, { names: { name: 'Eigener Name', ...names }, testid: 'marker' });
 	return byTestId('marker')!.parentElement!;
 };
 

@@ -1,0 +1,13 @@
+# Code-Review #689, Runde 1 (23e679bd..6a2d80e3)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| – | – | – | Keine Befunde |
+
+Geprüft: alle 27 Dateien des Diffs. Die Markierung erscheint nur bei eigenen Datensätzen (CategoryRow `!category.predefined`, DistributionKeyRow im Zweig `custom`, Heizprofil-Liste `type === 'custom'`, Detailseite `custom`). Ein leerer Name zählt als keine Sprache, gleich wie bei `localName` (V-3, names.test.ts). Die Texte stimmen in de/fr/it/en Wort für Wort mit 689-fachreview-1.md überein. Die Kürzel sind `aria-hidden`, daneben steht die Langfassung `sr-only` mit `tenants_language_*`, ohne `aria-label`. Das `data-testid` sitzt am sichtbaren Element. Nur Token-Klassen (`text-ink-muted`). Die Testids heissen `category-translations`, `distribution-key-translations` und `heating-profile-translations`. Das Backend nimmt `nameFR/IT/EN` bei POST und PUT von Kategorien, Verteilschlüsseln und Heizprofilen an. Die vordefinierten Namen aus den Szenarien (Hauswart, Pro Fläche (m²), Heizung Mittelland) gibt es in 0002_stammdaten.sql. Die Negativprüfungen sehen zuerst die Zeile bzw. die geladene Detailseite und zählen dann 0, und jede würde ohne ihre Bedingung rot. Steps rufen nur Questions, Tasks und den Seed auf. Die Szenarien beschreiben, was der Verwalter will, nicht wie er klickt. Der geänderte Step «das Heizprofil {string} öffnet» prüft dasselbe wie vorher: Der einzige frühere Aufruf («Heizung Bergregion», vordefiniert) läuft weiter über `?? name`. Die neuen Unit-, DOM- und E2E-Tests würden ohne die Änderung fehlschlagen. ponytail-review ergab nichts Unbenutztes und keine Kopie eines vorhandenen Helpers.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet: `bunx vitest run --changed origin/main` (53 Dateien, 1556 Tests), `bun run lint`, `bun run check`, Prettier auf neuen Dateien, E2E chromium für categories.feature, distribution-keys.feature und heating-profiles.feature (97 bestanden), axe- und Sprachzeilen der Screens categories, distribution-keys, heating-profiles und heating-profile-detail (18 bestanden). Das Rot der neuen Szenarien und der vier Negativprüfungen ohne Guard ist ebenfalls nur vom Aufrufer gemeldet.
+- Ob die Screens-Fixture auf den Bildschirmen distribution-keys, heating-profiles und heating-profile-detail einen eigenen Datensatz zeigt, damit axe und die Sprachprüfung die Markierung überhaupt sehen. Für categories legt `tests/e2e/fixtures/screens.ts:339` die eigene Kategorie «Gartenpflege» an. Für die anderen drei habe ich das Seeding nicht verfolgt.
+- Ob die BFF-Mapper `nameFR/IT/EN` an die Listen und die Heizprofil-Detailseite weitergeben. Den Code habe ich nicht gelesen. Die Szenarien hängen davon ab, und der Aufrufer meldet sie als grün.
