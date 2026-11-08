@@ -81,7 +81,7 @@ async function backendJson(fetch: typeof globalThis.fetch, url: string) {
 }
 
 export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsListData> => {
-	const page = parseInt(url.searchParams.get('page') || '1');
+	const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '') || 1);
 	const pageSize = 10;
 	const contractId = url.searchParams.get('contract');
 

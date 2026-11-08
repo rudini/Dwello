@@ -92,7 +92,9 @@ describe('Abrechnungsliste laden', () => {
 	// #1237: eine Seite nach der letzten widerspricht sonst der Zahl unter den Statusfiltern
 	it('führt von einer Seite nach der letzten auf die letzte Seite mit Abrechnungen', async () => {
 		const fetch = (async (url: string) =>
-			Response.json(url.includes('/statements?') ? { total: 11, data: [] } : {})) as typeof globalThis.fetch;
+			Response.json(
+				url.includes('/statements?') ? { total: 11, data: [] } : {}
+			)) as typeof globalThis.fetch;
 
 		const result = load({
 			url: new URL('http://localhost/statements?building=b1&status=draft&page=5'),
@@ -103,6 +105,19 @@ describe('Abrechnungsliste laden', () => {
 			status: 307,
 			location: '/statements?building=b1&status=draft&page=2'
 		});
+	});
+
+	// code review 1236-1 C-1: eine Seite vor der ersten fragt die erste ab, statt das Backend scheitern zu lassen
+	it.each(['0', '-3', 'abc'])('fragt bei der Seite %s die erste Seite ab', async (pageParam) => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json(url.includes('/statements?') ? listedStatements : {});
+		}) as typeof globalThis.fetch;
+
+		await load({ url: new URL(`http://localhost/statements?page=${pageParam}`), fetch } as never);
+
+		expect(urls[0]).toBe(`${API}/statements?limit=10&offset=0`);
 	});
 
 	// #1236: eine leere Liste mit lauter 0 hiesse «nichts ist überfällig», obwohl nichts geladen wurde
