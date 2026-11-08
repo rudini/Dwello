@@ -863,6 +863,13 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann heisst das Gebäude "Lindenhof" bei der Wahl "Lindenhof Testweg 1, 8400 Winterthur"
     Und beschreibt die Wahl das Gebäude "Lindenhof" mit "Keine Rechnungen in der Abrechnungsperiode erfasst. 1 Wohnung"
 
+  # #686: die Wahl der Gebäude zählt die Rechnungen wie die Vorschau, nach dem Leistungszeitraum, sonst nach dem
+  # Rechnungsdatum
+  Szenario: Die Wahl der Gebäude zählt eine Rechnung in der Periode ihres Leistungszeitraums
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-01-15" für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann beschreibt die Wahl das Gebäude "Lindenhof" mit "1 Rechnung in der Abrechnungsperiode. 1 Wohnung"
+
   Szenario: Die Wahl der Gebäude passt in ein schmales Fenster
     Angenommen das Browserfenster ist 390 Pixel breit
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
@@ -928,6 +935,25 @@ Funktionalität: Nebenkostenabrechnungen erstellen
       | 960    |
       | 1280   |
       | 1440   |
+
+  # #1179 (Dr. Weber P-4 bis P-6, Helga P-3, P-4): auf einem schmalen Bildschirm stehen alle Schritte mit Namen
+  # untereinander, die erledigten mit ihrer Wahl
+  Szenario: Auf einem schmalen Bildschirm nennt die Schrittanzeige alle Schritte
+    Angenommen das Browserfenster ist 390 auf 844 Pixel gross
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann nennt die Schrittanzeige untereinander die Schritte
+      | Abrechnungsperiode                  |
+      | Gebäude                             |
+      | Heizprofil und Verwaltungspauschale |
+      | Vorschau                            |
+      | Erstellen                           |
+    Und zeigt die Schrittanzeige beim aktuellen Schritt den Namen "Erstellen"
+    Und nennt der erledigte Schritt "Gebäude" die Wahl "Lindenhof"
+    Und bricht die Schrittanzeige keinen Namen eines Schritts mitten im Wort um
+    Und bricht die Schrittanzeige keine Angabe eines erledigten Schritts mitten im Wort um
+    Und scrollt die Seite nicht seitwärts
 
   # #1146 (Fallback review): ein langer Gebäudename in einem Wort schiebt die Schrittanzeige nicht über den Rand
   Szenario: Ein langer Gebäudename passt in die Schrittanzeige

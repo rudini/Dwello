@@ -2,7 +2,6 @@
 	import { m } from '$lib/paraglide/messages';
 	import { flushSync } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { backendMessage } from '$lib/backend-error';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import { laterText } from '$lib/overview';
@@ -59,6 +58,7 @@
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
 			later?: ComponentProps<typeof LaterChanges>['later'] & { splitKeys: SplitKeyHint[] };
+			paymentDeadlineDays?: number; // a draft's: the days sending gives its Zahlungsfrist (#686)
 		};
 		form: ActionData;
 	} = $props();
@@ -97,7 +97,6 @@
 	let showResetPayment = $state(false);
 	let showCarrySettle = $state(false);
 	let showCorrect = $state(false);
-	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
 	// #448: a day before the Abrechnungsdatum is saved after the landlord confirmed that very day
@@ -137,35 +136,7 @@
 		earlyFor = paidDate;
 		return false;
 	}
-	let pdfGeneratedAt = $derived(data.statement.pdfGeneratedAt); // set here after «PDF erstellen», else as the server has it
-
-	async function generatePdf() {
-		generatingPdf = true;
-		try {
-			const response = await fetch(`/api/statements/${statement.id}/generate-pdf`, {
-				method: 'POST'
-			});
-			if (response.ok) {
-				pdfGeneratedAt = new Date().toISOString();
-				addToast('success', m.statements_pdf_created());
-			} else {
-				const error = await response.json();
-				// PDF_FAILED already says the PDF could not be made
-				addToast(
-					'error',
-					error.code === 'PDF_FAILED'
-						? backendMessage(error, m.statements_pdf_failed())
-						: m.statements_pdf_failed_reason({
-								reason: backendMessage(error, m.statements_unknown_error())
-							})
-				);
-			}
-		} catch {
-			addToast('error', m.statements_pdf_failed());
-		} finally {
-			generatingPdf = false;
-		}
-	}
+	const pdfGeneratedAt = $derived(data.statement.pdfGeneratedAt);
 
 	const period = $derived(
 		`${formatDate(statement.periodStart)} – ${formatDate(statement.periodEnd)}`
@@ -197,9 +168,7 @@
 			<PdfAction
 				id={statement.id}
 				generated={!!pdfGeneratedAt}
-				generating={generatingPdf}
 				language={statement.tenantLanguage}
-				ongenerate={generatePdf}
 				{list}
 			/>
 			<StatusActions
@@ -286,7 +255,11 @@
 	</div>
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex min-w-0 flex-col gap-8 lg:col-span-2">
-			<PaymentPanel {statement} onsettle={() => (showCarrySettle = true)} />
+			<PaymentPanel
+				{statement}
+				deadlineDays={data.paymentDeadlineDays}
+				onsettle={() => (showCarrySettle = true)}
+			/>
 			<ReminderHistory reminders={data.reminders} />
 		</div>
 		<div class="flex min-w-0 flex-col gap-8">

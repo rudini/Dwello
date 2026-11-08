@@ -1515,6 +1515,7 @@
 	"statements_last_reminder": "Letzte Mahnung",
 	"statements_next_reminder": "Nächste Mahnung möglich ab",
 	"statements_refund_by": "Rückerstattung bis",
+	"statements_payment_deadline_draft_help": "Die Frist läuft ab dem Versand. Versenden Sie später, verschiebt Dwello sie auf {n} Tage nach dem Versand; eine längere Frist bleibt.",
 	"statements_payment": "Zahlung",
 	"statements_notes": "Bemerkungen",
 	"statements_pdf_creating": "PDF wird erstellt …",

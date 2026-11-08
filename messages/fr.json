@@ -1515,6 +1515,7 @@
 	"statements_last_reminder": "Dernier rappel",
 	"statements_next_reminder": "Prochain rappel possible dès le",
 	"statements_refund_by": "Remboursement au plus tard le",
+	"statements_payment_deadline_draft_help": "Le délai court à partir de l’envoi. Si vous envoyez le décompte plus tard, Dwello le reporte à {n} jours après l’envoi ; un délai plus long reste inchangé.",
 	"statements_payment": "Paiement",
 	"statements_notes": "Remarques",
 	"statements_pdf_creating": "Création du PDF…",
