@@ -130,6 +130,17 @@ describe('Verteilschlüssel erfassen', () => {
 		expect(formula.value).toBe('{area}{rooms}');
 	});
 
+	// #1200 (persona Helga, #128): the Summen des Gebäudes have buttons like the Bausteine
+	it('fügt eine Summe des Gebäudes per Klick an', () => {
+		show(NewKeyPage, { form: null } as never);
+		const formula = byTestId<HTMLInputElement>('distribution-key-formula-input')!;
+
+		click(
+			allByTestId('distribution-key-insert-button').find((b) => b.textContent?.includes('{units_total}'))!
+		);
+		expect(formula.value).toBe('{area}{units_total}');
+	});
+
 	it('zeigt das Ergebnis des Formeltests mit Fehlern und Anteilen', () => {
 		const test = {
 			errors: ['Unbekannte Variable {persons}'],

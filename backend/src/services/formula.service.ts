@@ -130,24 +130,7 @@ export function parseFormula(formula: string): ParseResult {
 		});
 	}
 
-	// Check for balanced parentheses
-	let parenCount = 0;
-	for (const char of normalizedFormula) {
-		if (char === '(') parenCount++;
-		if (char === ')') parenCount--;
-		if (parenCount < 0) {
-			fail('FORMULA_UNOPENED_PARENTHESIS', 'Die Formel schliesst eine Klammer, die nicht geöffnet wurde.');
-			break;
-		}
-	}
-	if (parenCount > 0) {
-		fail('FORMULA_UNCLOSED_PARENTHESIS', 'In der Formel fehlt eine schliessende Klammer.');
-	}
-
-	// Check for consecutive operators
-	if (/[+\-*/]{2,}/.test(formulaWithoutVars.replace(/\s/g, ''))) {
-		fail('FORMULA_CONSECUTIVE_OPERATORS', 'Zwei Rechenzeichen folgen direkt aufeinander.');
-	}
+	for (const { code, error, params } of syntaxErrors(normalizedFormula)) fail(code, error, params);
 
 	// Check for division by zero potential (literal /0)
 	if (/\/\s*0(?!\.)/.test(formulaWithoutVars)) {
@@ -166,6 +149,68 @@ export function parseFormula(formula: string): ParseResult {
 		errorCodes,
 		normalizedFormula
 	};
+}
+
+/** The backend's own text of each break, for the log; the UI shows the message of its code */
+const BREAKS: Record<string, (part: string) => string> = {
+	FORMULA_UNOPENED_PARENTHESIS: (part) => `Bei «${part}» schliesst die Formel eine Klammer, die nicht geöffnet wurde.`,
+	FORMULA_UNCLOSED_PARENTHESIS: (part) => `Die Klammer am Anfang von «${part}» wird nicht geschlossen.`,
+	FORMULA_CONSECUTIVE_OPERATORS: (part) => `Bei «${part}» folgen zwei Rechenzeichen direkt aufeinander.`,
+	FORMULA_MISSING_OPERAND: (part) => `Bei «${part}» fehlt eine Zahl oder eine Variable.`,
+	FORMULA_MISSING_OPERATOR: (part) => `Bei «${part}» fehlt ein Rechenzeichen.`
+};
+
+type Kind = 'value' | '(' | ')' | '%' | 'sign' | 'times';
+type After = 'start' | 'value' | 'operator';
+
+/**
+ * Which kind of token may not follow which (#1200): the code of the break and how many tokens before it its place starts;
+ * a sign (+, -) may open the formula or a bracket, * and / need a value before them, a % ends a value
+ */
+const BREAK_AFTER: Record<Kind, Partial<Record<After, [string, number]>>> = {
+	value: { value: ['FORMULA_MISSING_OPERATOR', 1] },
+	'(': { value: ['FORMULA_MISSING_OPERATOR', 1] },
+	')': { start: ['FORMULA_MISSING_OPERAND', 1], operator: ['FORMULA_MISSING_OPERAND', 1] },
+	sign: { operator: ['FORMULA_CONSECUTIVE_OPERATORS', 1] },
+	times: { start: ['FORMULA_MISSING_OPERAND', 0], operator: ['FORMULA_CONSECUTIVE_OPERATORS', 1] },
+	'%': { start: ['FORMULA_MISSING_OPERAND', 0], operator: ['FORMULA_MISSING_OPERAND', 0] }
+};
+const kindOf = (text: string): Kind =>
+	/^[\d.{]/.test(text) ? 'value' : '+-'.includes(text) ? 'sign' : '*/'.includes(text) ? 'times' : (text as Kind);
+const AFTER: Record<Kind, After> = { value: 'value', ')': 'value', '(': 'start', sign: 'operator', times: 'operator', '%': 'value' };
+
+/**
+ * Where the formula's structure breaks (#1200): brackets, Rechenzeichen and values in the wrong order, each kind once,
+ * with `part`, the formula's own text around the break, so the landlord finds the place in the field
+ */
+function syntaxErrors(formula: string) {
+	// values ({…}, numbers), Rechenzeichen, brackets and a postfix %; other characters have their own check
+	const tokens = [...formula.matchAll(/\{[^}]*\}|\d+(?:\.\d+)?|\.\d+|[+\-*/()%]/g)].map((match) => ({
+		text: match[0],
+		start: match.index,
+		end: match.index + match[0].length
+	}));
+	const around = (from: number, to: number) =>
+		formula.slice(tokens[Math.max(from - 1, 0)].start, tokens[Math.min(to + 1, tokens.length - 1)].end);
+	const found = new Map<string, ErrorCode & { error: string }>();
+	const add = (code: string, part: string) => {
+		if (!found.has(code)) found.set(code, { code, error: BREAKS[code](part), params: { part } });
+	};
+
+	const open: number[] = [];
+	let after = 'start' as After; // widened: the loop below changes it
+	tokens.forEach((token, i) => {
+		const kind = kindOf(token.text);
+		if (kind === '(') open.push(i);
+		const unopened = kind === ')' && open.pop() === undefined;
+		const rule = unopened ? (['FORMULA_UNOPENED_PARENTHESIS', 0] as const) : BREAK_AFTER[kind][after];
+		if (rule) add(rule[0], around(i - rule[1], i));
+		after = AFTER[kind];
+	});
+	if (after === 'operator') add('FORMULA_MISSING_OPERAND', around(tokens.length - 1, tokens.length - 1));
+	const unclosed = open.at(-1); // the last one: the shortest place
+	if (unclosed !== undefined) add('FORMULA_UNCLOSED_PARENTHESIS', formula.slice(tokens[unclosed].start));
+	return [...found.values()];
 }
 
 /**

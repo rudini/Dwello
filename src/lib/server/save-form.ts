@@ -8,7 +8,8 @@ type Saved = { id?: string } & BackendError;
  * Form action body: reports the form's errors, or sends the record to the backend
  * (POST creates it, PUT with an id updates it) and opens the saved record.
  * A refusal is shown for the whole form, for `options.conflict` when the backend answers 409 (e.g. a name taken),
- * or for the field `options.field` names after the refusal's code (e.g. a formula error at «Formel»).
+ * or for the field `options.field` names after the refusal's code (e.g. a formula error at «Formel»);
+ * `options.also` adds the errors of other fields the same refusal names (#1200).
  */
 export async function saveRecord(
 	fetch: typeof globalThis.fetch,
@@ -20,6 +21,7 @@ export async function saveRecord(
 		location: (id: string) => string;
 		conflict?: string;
 		field?: (saved: Saved) => string | undefined;
+		also?: (saved: Saved) => Record<string, string>;
 	}
 ) {
 	if (Object.keys(errors).length > 0) return fail(400, { errors });
@@ -33,7 +35,9 @@ export async function saveRecord(
 	if (!response.ok) {
 		const key = (response.status === 409 && options.conflict) || options.field?.(saved) || 'form';
 		const message = options.failure(response.status, saved);
-		return fail(response.status, { errors: { [key]: message } as Record<string, string> });
+		return fail(response.status, {
+			errors: { ...options.also?.(saved), [key]: message } as Record<string, string>
+		});
 	}
 	throw redirect(303, options.location(id ?? saved.id!));
 }

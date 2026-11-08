@@ -54,6 +54,34 @@ describe('Eigene Verteilschlüssel', () => {
 		});
 	});
 
+	// #1200: the name refusal no longer hides the formula error of the same save
+	it('nennt beim vergebenen Namen auch den Fehler der Formel', async () => {
+		await create('Treppe');
+
+		await expectRejection(
+			await create('Treppe', '({area}'),
+			409,
+			`Ein Verteilschlüssel mit dem Namen «Treppe ${token}» existiert bereits.`,
+			'DISTRIBUTION_KEY_NAME_TAKEN',
+			{ name: `Treppe ${token}` },
+			[{ code: 'FORMULA_UNCLOSED_PARENTHESIS', params: { part: '({area}' } }]
+		);
+	});
+
+	it('nennt beim Umbenennen auf einen vergebenen Namen auch den Fehler der Formel', async () => {
+		await create('Keller');
+		const id = await idOf(await create('Estrich'));
+
+		await expectRejection(
+			await keys.send('PUT', `/${id}`, { nameDE: `Keller ${token}`, formula: '{area} *' }),
+			409,
+			`Ein Verteilschlüssel mit dem Namen «Keller ${token}» existiert bereits.`,
+			'DISTRIBUTION_KEY_NAME_TAKEN',
+			{ name: `Keller ${token}` },
+			[{ code: 'FORMULA_MISSING_OPERAND', params: { part: '{area} *' } }]
+		);
+	});
+
 	it('erklärt, warum eine Formel ungültig ist', async () => {
 		await expectRejection(
 			await create('Personen', '{persons} * 2'),

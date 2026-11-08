@@ -129,17 +129,19 @@ export async function getDistributionKeyByName(name: string): Promise<Distributi
 	return key || null;
 }
 
-/** English and German names identify a distribution key, so both stay unique */
-async function ensureNameIsFree(name: string, id?: string) {
+type FormulaValidation = ReturnType<typeof validateFormulaForDistribution>;
+
+/** English and German names identify a distribution key, so both stay unique; the refusal also names the errors of the formula saved with it (#1200) */
+async function ensureNameIsFree(name: string, id?: string, formula?: FormulaValidation) {
 	const existing = await getDistributionKeyByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict('DISTRIBUTION_KEY_NAME_TAKEN', `Ein Verteilschlüssel mit dem Namen «${name}» existiert bereits.`, { name });
+		const causes = formula?.isValid === false ? formula.errorCodes : undefined;
+		throw new Conflict('DISTRIBUTION_KEY_NAME_TAKEN', `Ein Verteilschlüssel mit dem Namen «${name}» existiert bereits.`, { name }, causes);
 	}
 }
 
-function ensureValidFormula(formula: string) {
-	const validation = validateFormulaForDistribution(formula);
-	if (!validation.isValid) {
+function ensureValidFormula(validation: FormulaValidation | undefined) {
+	if (validation && !validation.isValid) {
 		// The UI names every error in its language, in the order of the text
 		throw new CodedError('FORMULA_INVALID', `Die Formel ist ungültig: ${validation.errors.join(' ')}`, {}, validation.errorCodes);
 	}
@@ -149,14 +151,15 @@ function ensureValidFormula(formula: string) {
  * Create a new distribution key
  */
 export async function createDistributionKey(data: NewDistributionKey): Promise<DistributionKey> {
-	await ensureNameIsFree(data.name);
-	if (data.nameDE) await ensureNameIsFree(data.nameDE);
+	const formula = data.formula ? validateFormulaForDistribution(data.formula) : undefined;
+	await ensureNameIsFree(data.name, undefined, formula);
+	if (data.nameDE) await ensureNameIsFree(data.nameDE, undefined, formula);
 
 	// Validate formula if provided (required for custom keys)
 	if (data.type === 'custom' && !data.formula) {
 		throw new CodedError('FORMULA_REQUIRED', 'Bitte geben Sie eine Formel ein.');
 	}
-	if (data.formula) ensureValidFormula(data.formula);
+	ensureValidFormula(formula);
 
 	const [key] = await db.insert(distributionKeys).values(data).returning();
 	return key;
@@ -185,9 +188,10 @@ export async function updateDistributionKey(
 		throw new CodedError('DISTRIBUTION_KEY_FORMULA_FIXED', 'Die Formel vordefinierter Verteilschlüssel kann nicht geändert werden.');
 	}
 
-	if (data.name) await ensureNameIsFree(data.name, id);
-	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
-	if (data.formula && data.formula !== existing.formula) ensureValidFormula(data.formula);
+	const formula = data.formula && data.formula !== existing.formula ? validateFormulaForDistribution(data.formula) : undefined;
+	if (data.name) await ensureNameIsFree(data.name, id, formula);
+	if (data.nameDE) await ensureNameIsFree(data.nameDE, id, formula);
+	ensureValidFormula(formula);
 
 	const [key] = await db
 		.update(distributionKeys)
