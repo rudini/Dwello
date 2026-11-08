@@ -1520,6 +1520,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Closing code-reviewer round `docs/reviews/707close-review-1.md`
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-707.md` (persona build in a fresh container)
 - [x] Archive the session; PR `Fixes #707`: pushed after this archive
+## Session: #705 ponytail shortcut in missingByContract
+
+- [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
+- [x] Decision in #705 «Decided (product owner)»: fix now with `limit: null`; the other whole-list calls are #1229
+- [x] pg test «nennt auch bei über 1000 Mietverträgen und Abrechnungen …» seen red at each list (contract, then statement); `limit: null` in both lists, marker removed (c35d25c); `ANALYZE` in the test's cleanup against stale planner statistics
+- [x] code-reviewer `docs/reviews/705-review-1.md`: Minor C-1 (comment) fixed
+- [x] No scenario: backend only, nothing a screen shows changes under 1000 records; covered by the pg test
+- [x] Workflow note `docs/reviews/workflow-notes-issue-705.md`
+- [x] Archive the session; PR `Fixes #705`: pushed after this archive
 ## Session: #733 Deletion toast and the statement filter
 
 - [x] Reproduced on `main`: the «… gelöscht» toast covers the «Gebäude» field at about 1030 px (focus on the page title); free at 1440 px (100–200 %) and 390 px
