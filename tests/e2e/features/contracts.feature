@@ -77,10 +77,6 @@ Funktionalität: Mietvertragsliste
     Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" ansieht
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
 
-  Szenario: Mietvertrag aus der Liste bearbeiten
-    Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" bearbeiten will
-    Dann heisst die Bearbeitungsseite "Mietvertrag von Anna Keller bearbeiten"
-
   # #211: die Liste zeigt, welchem Mietvertrag eine Abrechnung fehlt, ohne jeden Vertrag zu öffnen
   Szenario: Mietvertragsliste zeigt eine fehlende Abrechnung
     Dann zeigt die Mietvertragsliste beim Mietvertrag von "Anna Keller" "Abrechnung fehlt"
@@ -96,3 +92,7 @@ Funktionalität: Mietvertragsliste
   Szenario: Ausserhalb von Dwello abgerechneter Mietvertrag ohne Hinweis in der Liste
     Angenommen der Mietvertrag von "Anna Keller" ist bis Ende des letzten Jahres ausserhalb von Dwello abgerechnet
     Dann zeigt die Mietvertragsliste beim Mietvertrag von "Anna Keller" keine fehlende Abrechnung
+
+  # #652: die Zeile ist der eine Link zum Mietvertrag, «Bearbeiten» steht auf dessen Detailseite
+  Szenario: Eine Zeile der Mietvertragsliste hat nur einen Link
+    Dann führt die Zeile des Mietvertrags von "Anna Keller" nur mit dem Link "Anna Keller" weiter

@@ -60,4 +60,10 @@ describe('Gebäudesuche', () => {
 		expect(await search(token, '8610 Uster')).toEqual([`Birkenhof ${token}`]);
 		expect(await search(token, '8400 Uster')).toEqual([]);
 	});
+
+	// #1316: % and _ in a word are characters, not wildcards
+	it('findet mit _ oder % kein Gebäude, dessen Name dort ein anderes Zeichen hat', async () => {
+		expect(await search(`Lindenhof_${token}`)).toEqual([]);
+		expect(await search(`Linden%${token}`)).toEqual([]);
+	});
 });

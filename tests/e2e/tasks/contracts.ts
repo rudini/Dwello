@@ -8,7 +8,6 @@ import {
 	contractSearchButton,
 	contractSearchInput,
 	contractStatusFilter,
-	editContractButton,
 	newContractButton,
 	viewContractButton
 } from '../targets/contracts';
@@ -50,5 +49,3 @@ const findContract = (tenantName: string): Activity => async (actor) => {
 };
 export const viewContract = (tenantName: string): Activity => (actor) =>
 	actor.attemptsTo(findContract(tenantName), Click.on(viewContractButton(tenantName)));
-export const editContract = (tenantName: string): Activity => (actor) =>
-	actor.attemptsTo(findContract(tenantName), Click.on(editContractButton(tenantName)));

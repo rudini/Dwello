@@ -22,15 +22,23 @@ async function toReconciliation(fetch: Fetch, body: Body): Promise<Reconciliatio
 	const name = (id: string | null, names: Map<string, string>) => (id && names.get(id)) || '';
 	// code review 1126-1: without a Kategorie (or with a deleted one) the position still has a name
 	const category = (id: string | null) => name(id, categories) || m.invoices_no_category();
-	return {
-		positions: body.positions.map(({ categoryId, distributionKeyId, severalKeys, ...amounts }) => ({
+	const positions = body.positions.map(
+		({ categoryId, distributionKeyId, severalKeys, fuelStock, ...amounts }) => ({
 			// code review 1126-2 C-3: a deleted key leaves the Kategorie alone
 			label:
 				severalKeys && name(distributionKeyId, keys)
 					? `${category(categoryId)} (${name(distributionKeyId, keys)})`
 					: category(categoryId),
-			...amounts
-		})),
+			amounts,
+			fuelStock
+		})
+	);
+	return {
+		positions: positions.map(({ label, amounts }) => ({ label, ...amounts })),
+		fuelStocks: positions.flatMap(({ label, fuelStock }) =>
+			fuelStock ? [{ position: label, ...fuelStock }] : []
+		),
+		vacancies: body.vacancies,
 		total: body.total,
 		managementFee: body.managementFee,
 		nonAllocable: body.nonAllocable,

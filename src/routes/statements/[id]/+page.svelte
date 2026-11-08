@@ -50,12 +50,13 @@
 	import StatusActions from './StatusActions.svelte';
 	import type { ActionData } from './$types';
 
+	type Dated = { number: string; date: string };
 	let {
 		data,
 		form
 	}: {
 		data: {
-			statement: StatementWithDetails & { discontinued?: { number: string; date: string }[] }; // #1284
+			statement: StatementWithDetails & { discontinued?: Dated[]; sizeChanges?: Dated[] }; // #1284, #1301
 			reminders: StatementDocument[];
 			delivery?: Delivery | null;
 			pdfChange?: string | null;
@@ -263,7 +264,7 @@
 	<div class="min-w-0">
 		<Panel title={m.statements_cost_breakdown()} testid="statement-cost-breakdown">
 			<CostTable {statement} />
-			<DiscontinuedNotes apartments={statement.discontinued} />
+			<DiscontinuedNotes apartments={statement.discontinued} sizeChanges={statement.sizeChanges} />
 		</Panel>
 	</div>
 	<div class="grid gap-8 lg:grid-cols-3">

@@ -1,10 +1,15 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { inDays } from '../fixtures/dates';
-import { listedAmount, listedContract, listedContractCount, missingStatementOfContract } from '../questions/contracts';
+import {
+	linksOfListedContract,
+	listedAmount,
+	listedContract,
+	listedContractCount,
+	missingStatementOfContract
+} from '../questions/contracts';
 import { pageAddress, pageTitle } from '../questions/navigation';
 import {
-	editContract,
 	filterContracts,
 	openContractList,
 	searchContracts,
@@ -140,13 +145,6 @@ When('der Liegenschaftsverwalter den Mietvertrag von {string} ansieht', async ({
 	await verwalter.attemptsTo(viewContract(names.get(tenant) ?? tenant));
 });
 
-When(
-	'der Liegenschaftsverwalter den Mietvertrag von {string} bearbeiten will',
-	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.attemptsTo(editContract(names.get(tenant) ?? tenant));
-	}
-);
-
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von {string}',
 	async ({ verwalter, names }, tenant: string) => {
@@ -189,5 +187,12 @@ Given(
 	'{string} mietet die Wohnung {string} ab morgen für {string} Franken',
 	async ({ seed }, tenant: string, apartment: string, baseRent: string) => {
 		await seed.contract(tenant, apartment, { startDate: inDays(1), baseRent });
+	}
+);
+
+Then(
+	'führt die Zeile des Mietvertrags von {string} nur mit dem Link {string} weiter',
+	async ({ verwalter, names }, tenant: string, link: string) => {
+		await verwalter.sees(linksOfListedContract(names.get(tenant) ?? tenant)).toEqual([names.get(link) ?? link]);
 	}
 );

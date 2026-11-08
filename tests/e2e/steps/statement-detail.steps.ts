@@ -63,7 +63,8 @@ import {
 	redeliverConfirmation,
 	redeliverOffers,
 	newPdfStillToSend,
-	discontinuedNoteText
+	discontinuedNoteText,
+	sizeChangeNoteText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -1016,4 +1017,8 @@ Then('steht der Fokus wieder auf «Neu berechnen»', async ({ verwalter }) => {
 
 Then('nennt die Detailseite der Abrechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(discontinuedNoteText).toBe(text);
+});
+
+Then('nennt die Detailseite der Abrechnung zur neuen Fläche {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(sizeChangeNoteText).toBe(text);
 });

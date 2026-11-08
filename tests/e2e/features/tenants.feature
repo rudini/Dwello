@@ -14,6 +14,11 @@ Funktionalität: Mieterliste
     Dann sieht der Liegenschaftsverwalter den Mieter "Hans Müller"
     Und die Mieterliste enthält genau 1 Mieter
 
+  # #1316: «_» und «%» in der Suche sind Zeichen, keine Platzhalter; «Hans_Müller» findet «Hans Müller» nicht
+  Szenario: Ein Unterstrich in der Suche steht für sich selbst
+    Wenn der Liegenschaftsverwalter den Mieter "Hans_Müller" sucht
+    Dann zeigt die Mieterliste keinen Mieter
+
   Szenario: Aktuelle Wohnung des Mieters
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"

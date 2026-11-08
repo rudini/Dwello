@@ -5,11 +5,14 @@
 	import { formatDate, normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import SizeChanges from './SizeChanges.svelte';
 
 	// The apartment's Mietstatus, explained, and its size and floor
 	let {
-		apartment
+		apartment,
+		sizeChangeError
 	}: {
+		sizeChangeError?: string; // #1301: removing the last change failed
 		apartment: {
 			status: ApartmentStatus;
 			nextContractStart: string | null;
@@ -19,6 +22,7 @@
 			floor: number;
 			area: string;
 			discontinuedFrom?: string | null;
+			earlierSizes?: { until: string; area: string; rooms: string }[];
 		};
 	} = $props();
 
@@ -62,4 +66,7 @@
 			</div>
 		{/each}
 	</dl>
+	{#if apartment.earlierSizes?.length}
+		<SizeChanges sizes={apartment.earlierSizes} serverError={sizeChangeError} />
+	{/if}
 </Panel>

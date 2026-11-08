@@ -4,7 +4,7 @@
  */
 
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { containing, literal, db } from '../db/connection';
 import { distributionKeys, utilityStatementLineItems, type DistributionKey, type NewDistributionKey } from '../db/schema';
 import {
 	SAMPLE_APARTMENTS,
@@ -37,7 +37,7 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 	const conditions = [];
 
 	if (search) {
-		conditions.push(or(ilike(distributionKeys.name, `%${search}%`), ilike(distributionKeys.nameDE, `%${search}%`)));
+		conditions.push(or(ilike(distributionKeys.name, containing(search)), ilike(distributionKeys.nameDE, containing(search))));
 	}
 
 	if (type) {
@@ -120,12 +120,10 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
  * Get distribution key by English or German name (for lookups)
  */
 export async function getDistributionKeyByName(name: string): Promise<DistributionKey | null> {
-	// % and _ in the name are characters, not wildcards (#1305)
-	const pattern = name.replace(/[\\%_]/g, '\\$&');
 	const [key] = await db
 		.select()
 		.from(distributionKeys)
-		.where(or(ilike(distributionKeys.name, pattern), ilike(distributionKeys.nameDE, pattern)))
+		.where(or(ilike(distributionKeys.name, literal(name)), ilike(distributionKeys.nameDE, literal(name))))
 		.limit(1);
 
 	return key || null;

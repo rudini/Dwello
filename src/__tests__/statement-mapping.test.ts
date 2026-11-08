@@ -15,6 +15,13 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement({ ...backendStatement, lineItems: [{ ...backendStatement.lineItems[0], segments: null }] }).discontinued).toEqual([]);
 	});
 
+	// #1301: the apartments with other values from a day of its billed days, once each
+	it('nennt die Wohnungen mit neuer Fläche aus den Zeiträumen der Positionen', () => {
+		const twice = { ...backendStatement, lineItems: [backendStatement.lineItems[0], backendStatement.lineItems[0]] };
+		expect(toStatement(twice).sizeChanges).toEqual([{ number: '1.02', date: '2024-07-01' }]);
+		expect(toStatement({ ...backendStatement, lineItems: [{ ...backendStatement.lineItems[0], segments: null }] }).sizeChanges).toEqual([]);
+	});
+
 	// #788, review p3a C-2: what the statement allows comes from the backend; an answer without it allows nothing
 	it('übernimmt, was die Abrechnung erlaubt', () => {
 		const { editable, correctable, asksPayment, superseded } = toStatement(backendStatement);

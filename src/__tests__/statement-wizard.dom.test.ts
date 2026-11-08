@@ -466,7 +466,9 @@ describe('Abrechnungen erstellen', () => {
 			nonAllocable: 0,
 			withoutStatement: 0,
 			drafts: [],
-			notUpToDate: []
+			notUpToDate: [],
+			fuelStocks: [],
+			vacancies: []
 		};
 		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
 		const table = byTestId(`preview-reconciliation-${invoices[0].buildingId}`)!;
@@ -484,7 +486,9 @@ describe('Abrechnungen erstellen', () => {
 			nonAllocable: 500,
 			withoutStatement: 0,
 			drafts: [],
-			notUpToDate: []
+			notUpToDate: [],
+			fuelStocks: [],
+			vacancies: []
 		};
 		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
 		const shown = byTestId(`preview-reconciliation-${invoices[0].buildingId}`)!;
@@ -503,7 +507,9 @@ describe('Abrechnungen erstellen', () => {
 			nonAllocable: 0,
 			withoutStatement: 0,
 			drafts: [],
-			notUpToDate: []
+			notUpToDate: [],
+			fuelStocks: [],
+			vacancies: []
 		};
 		open({ preview, invoices: invoices.map((row) => ({ ...row, reconciliation })) });
 		expect(byTestId('preview-row')).not.toBeNull(); // anchor: the preview shows

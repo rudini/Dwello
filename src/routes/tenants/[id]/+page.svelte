@@ -37,19 +37,24 @@
 		trail={[{ href: '/tenants', label: m.nav_tenants() }]}
 	>
 		{#snippet action()}
-			<Button href="/tenants/{tenant.id}/edit" icon="edit" testid="tenant-edit-button"
-				>{m.buildings_edit()}</Button
+			<Button
+				href="/tenants/{tenant.id}/edit"
+				icon="edit"
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_edit(), record: name })}
+				testid="tenant-edit-button">{m.buildings_edit()}</Button
 			>
 			<Button
 				href="/contracts/new?tenant={tenant.id}"
 				variant="primary"
 				icon="contract"
+				ariaLabel={m.common_action_of_aria({ action: m.dashboard_add_contract(), record: name })}
 				testid="tenant-new-contract-button">{m.dashboard_add_contract()}</Button
 			>
 			<Button
 				variant="danger-ghost"
 				onclick={() => (deleting = true)}
 				icon="delete"
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_delete(), record: name })}
 				testid="tenant-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}

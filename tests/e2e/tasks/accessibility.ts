@@ -394,6 +394,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(chooseLanguage(languageName(shown === 'de' ? 'fr' : shown!)), Wait.until(on.savedToast));
 	},
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
+	'size-change-dialog': () => openDialog(on.sizeChangeRemoveButton), // #1301
 	// #1160: the own category a statement bills (fixtures/screens.ts), confirmed: the refusal in the dialog
 	'category-delete-refused': (example) => (actor) =>
 		actor.attemptsTo(openDialog(deleteButton(example.billed!)), Click.on(on.dialogConfirm), Wait.until(on.formProblem)),

@@ -77,6 +77,7 @@ const apartmentFields = {
 	area: apartments.area,
 	rooms: apartments.rooms,
 	discontinuedFrom: apartments.discontinuedFrom,
+	earlierSizes: apartments.earlierSizes,
 	status: apartmentStatus,
 	nextContractStart,
 	currentContractEnd,
@@ -262,16 +263,50 @@ export async function createApartment(data: NewApartment): Promise<Apartment> {
  */
 export async function updateApartment(
 	id: string,
-	data: Partial<NewApartment>
+	{ sizeFrom, ...data }: Partial<NewApartment> & { sizeFrom?: string }
 ): Promise<Apartment | null> {
 	if (data.discontinuedFrom) await checkNoContractOn(id, data.discontinuedFrom);
+	const earlier = sizeFrom ? await earlierSizesWith(id, sizeFrom, data) : undefined;
 	const [apartment] = await db
 		.update(apartments)
-		.set({ ...data, updatedAt: new Date() })
+		.set({ ...data, ...(earlier && { earlierSizes: earlier }), updatedAt: new Date() })
 		.where(eq(apartments.id, id))
 		.returning();
 
 	return apartment || null;
+}
+
+// #1301: new values from a day keep the ones before as earlier values up to the day before; only after the last change,
+// not after today and before «Aufgehoben ab» (Fachreview 1301-1 V-3, V-8)
+async function earlierSizesWith(id: string, sizeFrom: string, data: Partial<NewApartment>) {
+	const [current] = await db.select().from(apartments).where(eq(apartments.id, id));
+	if (!current) return undefined;
+	checkSizeFrom(sizeFrom, data, current);
+	return [...current.earlierSizes, { until: daysAfter(sizeFrom, -1), area: current.area, rooms: current.rooms }];
+}
+
+const same = (value: string | undefined, saved: string) => value === undefined || parseFloat(value) === parseFloat(saved);
+
+function checkSizeFrom(sizeFrom: string, data: Partial<NewApartment>, current: Apartment) {
+	if (same(data.area, current.area) && same(data.rooms, current.rooms)) throw new CodedError('APARTMENT_SIZE_UNCHANGED', 'Area and rooms are unchanged');
+	if (sizeFrom > swissToday()) throw new CodedError('APARTMENT_SIZE_FROM_FUTURE', 'New values cannot apply from a day after today');
+	const gone = data.discontinuedFrom === undefined ? current.discontinuedFrom : data.discontinuedFrom;
+	if (gone && sizeFrom >= gone) throw new CodedError('APARTMENT_SIZE_AFTER_DISCONTINUED', 'The apartment no longer exists from that day', { date: gone });
+	const lastChange = current.earlierSizes.length ? daysAfter(current.earlierSizes.at(-1)!.until, 1) : null;
+	if (lastChange && sizeFrom <= lastChange) throw new CodedError('APARTMENT_SIZE_FROM_TOO_EARLY', 'New values only after the last change', { date: lastChange });
+}
+
+/** #1301 (Fachreview 1301-1 V-1): the last change of Fläche and Zimmeranzahl removed, its earlier values apply again */
+export async function removeSizeChange(id: string): Promise<Apartment | null> {
+	const [current] = await db.select().from(apartments).where(eq(apartments.id, id));
+	const last = current?.earlierSizes.at(-1);
+	if (!last) return current ?? null;
+	const [apartment] = await db
+		.update(apartments)
+		.set({ area: last.area, rooms: last.rooms, earlierSizes: current.earlierSizes.slice(0, -1), updatedAt: new Date() })
+		.where(eq(apartments.id, id))
+		.returning();
+	return apartment;
 }
 
 // #1284: an apartment no longer exists from a day only when no contract of it still runs on that day or later
@@ -334,8 +369,10 @@ export async function apartmentExists(id: string): Promise<boolean> {
 	return !!result;
 }
 
-/** The building's apartments with the values a Verteilschlüssel reads, and from when they no longer count (#1284) */
+/** The building's apartments with the values a Verteilschlüssel reads, from when they no longer count (#1284) and their
+ * earlier values (#1301) */
 export async function apartmentsOf(buildingId: string) {
 	const { apartments } = await listApartments({ buildingId, limit: 1000 });
-	return apartments.map(({ id, number, area, rooms, discontinuedFrom }) => ({ id, number, area: parseFloat(area), rooms: parseFloat(rooms), discontinuedFrom }));
+	const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row, area: parseFloat(row.area), rooms: parseFloat(row.rooms) });
+	return apartments.map(({ id, number, area, rooms, discontinuedFrom, earlierSizes }) => ({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) }));
 }

@@ -361,6 +361,34 @@ describe('Wohnungsdetail', () => {
 		expect(byTestId('apartment-info-discontinued')).toBeNull();
 	});
 
+	// #1301: the earlier Fläche and Zimmeranzahl with their last day; only the last change can be removed, after a
+	// confirmation with its consequence (Fachreview 1301-1 V-1)
+	it('nennt die früheren Werte und entfernt die letzte Änderung erst nach einer Bestätigung', async () => {
+		const earlierSizes = [
+			{ until: '2024-12-31', area: '50.00', rooms: '2.5' },
+			{ until: '2025-06-30', area: '70.00', rooms: '3.5' }
+		];
+		show(ApartmentPage, { data: { ...details(false), apartment: { ...details(false).apartment, earlierSizes } } } as never);
+		const fact = byTestId('apartment-info-earlier-size')!;
+		expect([...fact.querySelectorAll('dt, dd')].map((line) => line.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
+			'Frühere Fläche und Zimmeranzahl',
+			'bis 31.12.2024: 50 m², 2.5 Zimmer',
+			'bis 30.06.2025: 70 m², 3.5 Zimmer',
+			'Änderung ab 01.07.2025 entfernen'
+		]);
+		click('apartment-size-change-remove');
+		await settle();
+		expect(byTestId('dialog-title')!.textContent!.trim()).toBe('Änderung ab 01.07.2025 entfernen?');
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Ab dem 01.07.2025 gelten dann wieder 70 m² und 3.5 Zimmer. Abrechnungen, die Sie danach erstellen, neu berechnen oder berichtigen, rechnen damit. Versendete Abrechnungen bleiben unverändert.'
+		);
+		expect(byTestId('apartment-size-change-remove-confirm')!.textContent!.trim()).toBe('Änderung entfernen');
+		document.body.innerHTML = '';
+		open(false);
+		expect(byTestId('apartment-info-area')).not.toBeNull();
+		expect(byTestId('apartment-info-earlier-size')).toBeNull();
+	});
+
 	it('zeigt den Mieter und die Miete mit den Begriffen des Glossars', () => {
 		open();
 		expect(byTestId('current-tenant-name')!.textContent!.trim()).toBe('Beat Huber');
@@ -461,5 +489,7 @@ describe('Wohnungsdetail', () => {
 		expect(contract.getAttribute('href')).toBe('/contracts/new?apartment=a1');
 		expect(contract.className).toContain('bg-accent ');
 		expect(contract.textContent).toContain('Mietvertrag erfassen');
+		// #652: a screen reader hears the apartment the action is for
+		expect(contract.getAttribute('aria-label')).toBe('Mietvertrag erfassen: Wohnung 3.01');
 	});
 });

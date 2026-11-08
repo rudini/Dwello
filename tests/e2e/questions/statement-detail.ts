@@ -4,6 +4,7 @@ import { Accessible, Attribute, Count, Gap, HoldsFocus, Text, Value, ValueColumn
 import { successToast } from '../targets/form';
 import {
 	discontinuedNote,
+	sizeChangeNote,
 	type SplitKeysPlace,
 	splitKeysHint,
 	splitKeysLine,
@@ -198,4 +199,5 @@ export const openRestText = Text.of(openRest);
 export const paymentDone = Text.of(successToast);
 
 export const discontinuedNoteText = Text.of(discontinuedNote);
+export const sizeChangeNoteText = Text.of(sizeChangeNote); // #1301
 export const laterKeyInvoiceText = (date: string) => Text.of(laterKeyInvoice(date)); // #1309

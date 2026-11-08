@@ -18,17 +18,16 @@
 	const apartment = $derived(data.apartment);
 	const building = $derived(apartment.building);
 	const next = $derived(data.nextContract);
+	const title = $derived(m.buildings_apartment_number({ number: apartment.number }));
 </script>
 
 <svelte:head>
-	<title
-		>{m.buildings_apartment_number({ number: apartment.number })}, {building.name} - Dwello</title
-	>
+	<title>{title}, {building.name} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title={m.buildings_apartment_number({ number: apartment.number })}
+		{title}
 		purpose="{building.address}, {building.postalCode} {building.city}"
 		trail={[
 			{ href: '/apartments', label: m.nav_apartments() },
@@ -36,8 +35,11 @@
 		]}
 	>
 		{#snippet action()}
-			<Button href="/apartments/{apartment.id}/edit" icon="edit" testid="apartment-edit-button"
-				>{m.buildings_edit()}</Button
+			<Button
+				href="/apartments/{apartment.id}/edit"
+				icon="edit"
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_edit(), record: title })}
+				testid="apartment-edit-button">{m.buildings_edit()}</Button
 			>
 			{#if !data.currentContract}
 				<!-- a relet apartment is rented from a date on: another contract is no longer the next step -->
@@ -45,6 +47,7 @@
 					href="/contracts/new?apartment={apartment.id}"
 					variant={next ? 'secondary' : 'primary'}
 					icon="contract"
+					ariaLabel={m.common_action_of_aria({ action: m.dashboard_add_contract(), record: title })}
 					testid="apartment-new-contract">{m.dashboard_add_contract()}</Button
 				>
 			{/if}
@@ -52,12 +55,13 @@
 				variant="danger-ghost"
 				icon="delete"
 				onclick={() => (deleting = true)}
+				ariaLabel={m.common_action_of_aria({ action: m.buildings_delete(), record: title })}
 				testid="apartment-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}
 	</PageHeader>
 
-	<ApartmentFacts {apartment} />
+	<ApartmentFacts {apartment} sizeChangeError={form?.sizeChangeError} />
 
 	<div class="grid gap-8 lg:grid-cols-5">
 		<div class="flex flex-col gap-8 lg:col-span-2">

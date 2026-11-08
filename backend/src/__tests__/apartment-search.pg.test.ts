@@ -102,4 +102,10 @@ describe('Wohnungssuche', () => {
 		expect(result.apartments).toHaveLength(1);
 		expect(result.total).toBe(3);
 	});
+
+	// #1316: % and _ in a word are characters, not wildcards
+	it('findet mit _ oder % keine Wohnung, deren Nummer dort ein anderes Zeichen hat', async () => {
+		expect((await search(`buildingId=${buildingId}&search=2_01`)).apartments).toEqual([]);
+		expect((await search(`buildingId=${buildingId}&search=2%25`)).apartments).toEqual([]);
+	});
 });

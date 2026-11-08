@@ -24,6 +24,10 @@ const pool = new Pool({
 // Create Drizzle ORM instance
 export const db = drizzle(pool, { schema });
 
+// %, _ and \ in a text are characters, not wildcards of ilike (#1305, #1316)
+export const literal = (text: string) => text.replace(/[\\%_]/g, '\\$&');
+export const containing = (text: string) => `%${literal(text)}%`;
+
 /**
  * Test database connection
  * Call this on startup to verify database connectivity
