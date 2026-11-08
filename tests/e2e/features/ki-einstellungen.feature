@@ -20,6 +20,14 @@ Funktionalität: KI in den Einstellungen wählen
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Muster KI AG (Deutschland)"
 
+  # #1183 (entschieden, wie #678): die Eingabetaste speichert, «Verbindung prüfen» läuft nur auf Wunsch
+  Szenario: Die Eingabetaste speichert die KI-Einstellung
+    Angenommen Dwello ist eingerichtet
+    Wenn der Liegenschaftsverwalter den Anbieter "Muster KI AG" in "Deutschland" mit geprüftem Datenschutz mit der Eingabetaste speichert
+    Dann sieht der Liegenschaftsverwalter auf der Seite "KI" die Meldung "Die KI-Einstellung ist gespeichert. Die nächste Rechnung verwendet sie."
+    Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Muster KI AG (Deutschland)"
+
   # Fachreview 580 F-4: wer wann welche Rechnungen erhielt, bleibt für die Auskunft nach Art. 25 DSG nachvollziehbar
   Szenario: Der Wechsel der KI steht im Protokoll
     Angenommen Dwello ist eingerichtet

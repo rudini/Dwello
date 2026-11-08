@@ -2,12 +2,12 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
-	import { on } from 'svelte/events';
 	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
+	import { saveOnEnter } from '$lib/ui/save-on-enter';
 	import { focusSavedRow } from '$lib/focus-after-action';
 	import { localName } from '$lib/names';
 
@@ -78,17 +78,6 @@
 				)?.focus();
 		};
 	};
-
-	// #678: Enter in a field saves, as in every other form; the browser would send the form's first button,
-	// e.g. «Von der KI prüfen lassen», which runs only by its own button
-	const saveOnEnter = (event: KeyboardEvent) => {
-		const field = event.target;
-		// an Enter that ends an IME input saves nothing, as natively
-		if (event.key !== 'Enter' || event.isComposing || !(field instanceof HTMLInputElement)) return;
-		event.preventDefault();
-		// requestSubmit() clicks no button, so the busy save button does not stop a second save (#677)
-		if (!saving) form?.requestSubmit();
-	};
 </script>
 
 <form
@@ -96,7 +85,7 @@
 	method="POST"
 	{action}
 	use:enhance={submitted}
-	{@attach (node) => on(node, 'keydown', saveOnEnter)}
+	{@attach saveOnEnter(() => saving)}
 	class="flex flex-col gap-8"
 	novalidate
 >

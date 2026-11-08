@@ -95,6 +95,44 @@ describe('Seite KI', () => {
 		expect(document.activeElement).toBe(button);
 	});
 
+	// #1183 (wie #678): Enter speichert; die Formulare, die der Browser abschickt, zählt der Test wie enhance
+	const submitters = () => {
+		const sent: (HTMLElement | null)[] = [];
+		server.form!.addEventListener('submit', (event) => {
+			event.preventDefault();
+			sent.push(event.submitter);
+		});
+		return sent;
+	};
+	const pressEnter = (field: HTMLElement) =>
+		field.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+		);
+
+	it('speichert mit Enter in einem Feld, ohne die Verbindung zu prüfen', () => {
+		page({ mode: 'provider' });
+		const sent = submitters();
+
+		const browserDefault = pressEnter(byTestId('ki-country-input')!);
+
+		expect({ browserDefault, sent }).toEqual({ browserDefault: false, sent: [null] });
+	});
+
+	it('speichert mit Enter nicht ein zweites Mal, solange das Speichern läuft', () => {
+		page({ mode: 'provider' });
+		const sent = submitters();
+		server.submit!({
+			formData: new FormData(server.form!),
+			action: new URL('http://localhost/config/ki?/save'),
+			submitter: byTestId('ki-save-button')
+		});
+		flushSync();
+
+		pressEnter(byTestId('ki-model-input')!);
+
+		expect(sent).toEqual([]);
+	});
+
 	// Persona Anna 580 P-1: antwortet die lokale KI nicht, hilft kein Download; der Hinweis sagt, was das für die
 	// Rechnungen heisst und wer etwas tun kann
 	it('sagt ohne Download-Knopf, was zu tun ist, wenn die lokale KI nicht antwortet', () => {
