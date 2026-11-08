@@ -111,8 +111,8 @@ import { DEMO_INSTANCE } from './demo';
 import { billedCannotBeChecked, invoicesCannotBeCounted, leaveSettings } from './statement-generate';
 import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
-import { chooseFile, pdfFile, uploadDocument, wordFile } from './tenant-documents';
-import { deleteDocumentButton, duplicateFileNote } from '../targets/documents';
+import { chooseFile, pdfFile, uploadDocument, uploadsWait, wordFile } from './tenant-documents';
+import { deleteDocumentButton, duplicateFileNote, uploadDocumentStatus } from '../targets/documents';
 import { anonymiseTenantButton } from '../targets/tenant-detail';
 import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
 import { registerNotice } from '../targets/building-register';
@@ -431,6 +431,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// the file of the tenant's uploaded document (fixtures/screens.ts) chosen again: the hint names it (#677)
 	'upload-duplicate': () => (actor) =>
 		actor.attemptsTo(chooseFile(pdfFile(`${UPLOADED}.pdf`)), Wait.until(duplicateFileNote)),
+	// the upload gets no answer: «Dokument hochladen» busy, the file and title fields locked (#1262)
+	'upload-busy': () => async (actor) => {
+		const tenantId = new URL(await pageAddress.answeredBy(actor)).pathname.split('/').pop()!;
+		return actor.attemptsTo(uploadsWait(tenantId), uploadDocument(pdfFile('notes.pdf'), ''), Wait.until(uploadDocumentStatus));
+	},
 	// the list filtered to Anna by the screen's query (#677)
 	'tenant-filtered': () => Wait.until(on.shown('document-tenant-link')),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),

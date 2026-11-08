@@ -30,7 +30,7 @@
 	// a refusal comes with the title that was sent; a request that failed keeps what the form holds
 	let title = $state(untrack(() => form?.title ?? ''));
 	let failed = $state<string>();
-	let uploading = $state(false);
+	let uploading = $state(false); // also locks file and title: a change then would not be sent (#1262)
 	let uploadForm = $state<HTMLFormElement>();
 
 	let unanswered = $state(false);
@@ -128,6 +128,7 @@
 				choose={m.tenants_document_file_choose()}
 				{chosen}
 				onchange={choose}
+				disabled={uploading}
 				testid="tenant-document-file"
 			/>
 		{/snippet}
@@ -144,6 +145,7 @@
 		optional
 		error={form?.titleError}
 		bind:value={title}
+		disabled={uploading}
 		testid="tenant-document-title-input"
 	/>
 	{#if unanswered}

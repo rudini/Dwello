@@ -133,6 +133,25 @@ Funktionalität: Dokumente eines Mieters
       | hell        |
       | dunkel      |
 
+  # #1262 (Persona Sven P-3, Helga): eine Änderung während des Hochladens käme nicht mehr mit
+  Szenario: Während des Hochladens lassen sich Datei und Titel nicht ändern
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
+    Dann sagt Dwello bei «Dokument hochladen» "Bitte warten …" an, und der Fokus bleibt dort
+    Und sind «Datei» und «Titel» gesperrt, auch für einen Screenreader
+    Und sehen «Datei» und «Titel» ausgegraut aus
+
+  # #1262: nach dem Fehler sind die Felder wieder frei und halten, was gewählt war
+  Szenario: Nach einem gescheiterten Hochladen lassen sich Datei und Titel wieder ändern
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und das Hochladen von Dokumenten zu "Lea Frei" ist gestört
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen»."
+    Und lassen sich «Datei» und «Titel» wieder ändern
+    Und nennt Dwello bei «Datei» die gewählte Datei "betreibung.pdf" ohne Warnung
+    Und steht als Titel des Dokuments weiterhin "Betreibungsauszug"
+
   # #677 (Entscheid 10, Persona Sven P-3): im Dialog bleibt der Fokus auf der Bestätigung
   Szenario: Während des Löschens bleibt der Fokus auf der Bestätigung im Dialog
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
