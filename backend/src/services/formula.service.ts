@@ -160,24 +160,45 @@ const BREAKS: Record<string, (part: string) => string> = {
 	FORMULA_MISSING_OPERATOR: (part) => `Bei «${part}» fehlt ein Rechenzeichen.`
 };
 
-type Kind = 'value' | '(' | ')' | '%' | 'sign' | 'times';
-type After = 'start' | 'value' | 'operator';
+type Kind = 'value' | '(' | ')' | '%' | 'sign' | 'times' | 'remainder';
+// 'closed': a value the engine reads in brackets (after «)» or a postfix %), so a % after it is a remainder (#1308)
+type After = 'start' | 'value' | 'closed' | 'operator' | 'remainder';
 
 /**
  * Which kind of token may not follow which (#1200): the code of the break and how many tokens before it its place starts;
- * a sign (+, -) may open the formula or a bracket, * and / need a value before them, a % ends a value
+ * a sign (+, -) may open the formula or a bracket or follow a remainder, * and / need a value before them, a % ends a value
  */
 const BREAK_AFTER: Record<Kind, Partial<Record<After, [string, number]>>> = {
-	value: { value: ['FORMULA_MISSING_OPERATOR', 1] },
-	'(': { value: ['FORMULA_MISSING_OPERATOR', 1] },
-	')': { start: ['FORMULA_MISSING_OPERAND', 1], operator: ['FORMULA_MISSING_OPERAND', 1] },
+	value: { value: ['FORMULA_MISSING_OPERATOR', 1], closed: ['FORMULA_MISSING_OPERATOR', 1] },
+	'(': { value: ['FORMULA_MISSING_OPERATOR', 1], closed: ['FORMULA_MISSING_OPERATOR', 1] },
+	')': {
+		start: ['FORMULA_MISSING_OPERAND', 1],
+		operator: ['FORMULA_MISSING_OPERAND', 1],
+		remainder: ['FORMULA_MISSING_OPERAND', 1]
+	},
 	sign: { operator: ['FORMULA_CONSECUTIVE_OPERATORS', 1] },
-	times: { start: ['FORMULA_MISSING_OPERAND', 0], operator: ['FORMULA_CONSECUTIVE_OPERATORS', 1] },
-	'%': { start: ['FORMULA_MISSING_OPERAND', 0], operator: ['FORMULA_MISSING_OPERAND', 0] }
+	times: {
+		start: ['FORMULA_MISSING_OPERAND', 0],
+		operator: ['FORMULA_CONSECUTIVE_OPERATORS', 1],
+		remainder: ['FORMULA_CONSECUTIVE_OPERATORS', 1]
+	},
+	'%': {
+		start: ['FORMULA_MISSING_OPERAND', 0],
+		operator: ['FORMULA_MISSING_OPERAND', 0],
+		remainder: ['FORMULA_MISSING_OPERAND', 0]
+	},
+	remainder: {}
 };
 const kindOf = (text: string): Kind =>
 	/^[\d.{]/.test(text) ? 'value' : '+-'.includes(text) ? 'sign' : '*/'.includes(text) ? 'times' : (text as Kind);
-const AFTER: Record<Exclude<Kind, '%'>, After> = { value: 'value', ')': 'value', '(': 'start', sign: 'operator', times: 'operator' };
+const AFTER: Record<Exclude<Kind, '%'>, After> = {
+	value: 'value',
+	')': 'closed',
+	'(': 'start',
+	sign: 'operator',
+	times: 'operator',
+	remainder: 'remainder'
+};
 
 /**
  * Where the formula's structure breaks (#1200): brackets, Rechenzeichen and values in the wrong order, each kind once,
@@ -200,15 +221,17 @@ function syntaxErrors(formula: string) {
 	const open: number[] = [];
 	let after = 'start' as After; // widened: the loop below changes it
 	tokens.forEach((token, i) => {
-		// after a bracket the engine reads % as the remainder of a division, elsewhere as per cent of the number before
-		const kind = token.text === '%' && tokens[i - 1]?.text === ')' ? 'times' : kindOf(token.text);
+		// after a bracketed value the engine reads % as the remainder of a division, elsewhere as per cent of the number before
+		const kind: Kind = token.text === '%' && after === 'closed' ? 'remainder' : kindOf(token.text);
 		if (kind === '(') open.push(i);
 		const unopened = kind === ')' && open.pop() === undefined;
 		const rule = unopened ? (['FORMULA_UNOPENED_PARENTHESIS', 0] as const) : BREAK_AFTER[kind][after];
 		if (rule) add(rule[0], around(i - rule[1], i));
-		if (kind !== '%') after = AFTER[kind]; // a per cent ends the value before it, or is the error itself
+		// a per cent ends the value before it (the engine brackets it), or is the error itself
+		if (kind !== '%') after = AFTER[kind];
+		else if (after === 'value') after = 'closed';
 	});
-	if (after === 'operator') add('FORMULA_MISSING_OPERAND', around(tokens.length - 1, tokens.length - 1));
+	if (after === 'operator' || after === 'remainder') add('FORMULA_MISSING_OPERAND', around(tokens.length - 1, tokens.length - 1));
 	const unclosed = open.at(-1); // the last one: the shortest place
 	if (unclosed !== undefined) add('FORMULA_UNCLOSED_PARENTHESIS', formula.slice(tokens[unclosed].start));
 	return [...found.values()];

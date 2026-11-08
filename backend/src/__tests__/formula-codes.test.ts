@@ -135,6 +135,15 @@ describe('Fehlercodes der Formel', () => {
 			expect(errorOf('({area} + 1) % 2')).toEqual([]);
 		});
 
+		// fallback review of #1308: a remainder may take a signed number, as on main; a postfix % ends a value like «)»
+		it('lässt nach dem Rest einer Division ein Vorzeichen zu und liest % nach einem Prozent als Rest', () => {
+			for (const formula of ['({area} + 1) % -2', '({area} + 1) % +2', '{area}% % 2']) expect(errorOf(formula)).toEqual([]);
+		});
+
+		it('nennt bei zwei % am Ende die fehlende Zahl', () => {
+			expect(errorOf('{area}%%')).toEqual([{ code: 'FORMULA_MISSING_OPERAND', params: { part: '%%' } }]);
+		});
+
 		it('nennt bei mehreren offenen Klammern die letzte und schneidet die Stelle aus dem eingegebenen Text', () => {
 			expect(errorOf('({AREA}  + ({rooms} * 2')).toEqual([
 				{ code: 'FORMULA_UNCLOSED_PARENTHESIS', params: { part: '({rooms} * 2' } }
