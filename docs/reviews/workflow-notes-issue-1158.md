@@ -1,0 +1,6 @@
+# Workflow notes: #1158
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 1 («Changing it needs my approval: an issue whose «Decided (product owner)» decides the change»); skill `issue-work` | Point 3 («the box of the tenant's own contract waits until the step has an apartment») decided a behaviour that two non-`@wip` scenarios contradicted («Mieter hat noch einen Mietvertrag ohne Vertragsende», «Vom Hinweis zum laufenden Mietvertrag»), but only point 2 named a scenario step. I read the behaviour decision as approving the added step in both and told the orchestrating session; code-reviewer read it the same way. | Say whether a decided behaviour approves the scenario lines it cannot hold without, or ask `grill-me` to name every affected non-`@wip` scenario in «Decided (product owner)». |
+| `bun run fitness`, fat-file limit (`docs/architecture/fitness-functions.md`) | `ContractWizard.svelte` was 2 lines under its limit; a `data-testid` on the step heading (Prettier splits the tag into 6 lines) pushed it over, so the E2E step checks the heading by its text instead. | None needed; a file at its limit makes even a test hook cost a workaround, which `structure:report` already flags. |
