@@ -8,3 +8,16 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and write the session to its own archive file at the end. A session that appears on `main` after this one started makes this one parallel from then on: at the merge before the push take `main`'s plan and move this checklist into the pull request.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History: `docs/archive/implementation-plan-verlauf.md` (phases 0–22 and the sessions up to 2026-11-08, closed: add nothing) and `docs/archive/sessions/` (one file per later session).
+
+## Session: #1301 «Fläche und Zimmeranzahl ab einem Tag»
+
+- [ ] @wip scenario `tests/e2e/features/apartment-size-from-day.feature` before the code
+- [ ] fach-reviewer step 1 (texts in four languages)
+- [ ] Backend: migration, values per day in the Verteilschlüssel, parts at the day, statement key values, refusals; pg tests seen red
+- [ ] code-reviewer round on the backend
+- [ ] PDF and statement page: the apartment with other values from a day
+- [ ] UI: «gelten ab» in «Wohnung bearbeiten», earlier values on the apartment page; merge note of #1284 removed
+- [ ] code-reviewer round on the UI
+- [ ] Personas, fach-reviewer step 5 if texts changed, daten-pruefer
+- [ ] Merge of `origin/main`, closing code-reviewer round
+- [ ] Archive the session in `docs/archive/sessions/1301.md`; PR with `Fixes #1301`
