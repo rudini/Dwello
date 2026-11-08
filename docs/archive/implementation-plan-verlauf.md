@@ -1540,6 +1540,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Archive session; PR `Fixes #1028`: pushed after this archive
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #714 design guard: style shorthands and system colours
+
+- [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
+- [x] Rule «Farbe im style-Element» reads `border`, `outline` and their side shorthands, allows the CSS Color 4 system colours, CSS-wide and border keywords and `var(--x)`; pattern cases seen red; `token-referenz.md` aligned. No scenario: test-only source guard
+- [x] Slice review `docs/reviews/style-guard-714-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, design-guard test
+- [x] Archive session; PR `Fixes #714`: pushed after this archive
 ## Session: #1099 Remove the code paths for Abrechnungsperioden under a year
 
 No scenario: the preview hint on invoices that count in full in a period under a year is unreachable since #1088 (wizard step 2 and the backend refuse such a period, and correction and recalculation never showed it); the rest stays.
