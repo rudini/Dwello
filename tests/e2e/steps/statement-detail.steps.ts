@@ -120,7 +120,8 @@ import {
 	redeliverByLetter,
 	markNewPdfSent,
 	stayAtMoreActions,
-	editLaterKeyInvoice
+	editLaterKeyInvoice,
+	tryToGenerateStatementPdf
 } from '../tasks/statement-detail';
 import { focusedText } from '../questions/app-frame';
 import { inDays, swissDate } from '../fixtures/dates';
@@ -304,6 +305,10 @@ Then(
 
 When('der Liegenschaftsverwalter das PDF der Abrechnung erstellt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(generateStatementPdf);
+});
+
+When('der Liegenschaftsverwalter das PDF der Abrechnung zu erstellen versucht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(tryToGenerateStatementPdf);
 });
 
 When('der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt', async ({ verwalter }) => {

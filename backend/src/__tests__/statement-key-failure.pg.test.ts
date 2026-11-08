@@ -257,6 +257,14 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 		expect(statement.status).toBe('draft');
 	});
 
+	// #1333 (product owner, Fachreview 1333-1 V-3): the draft's PDF neither, until the key is fixed
+	it('erstellt kein PDF des Entwurfs, solange sich der Verteilschlüssel nicht berechnen lässt', async () => {
+		for (const response of [await callApi(`/api/v1/statements/${draft}/pdf`), await sendJson('POST', `/api/v1/statements/${draft}/generate-pdf`, {})]) {
+			expect(((await response.json()) as { code: string }).code).toBe('STATEMENT_KEY_NOT_CALCULABLE');
+			expect(response.status).toBe(400);
+		}
+	});
+
 	// Fachreview 1309-1 V-1: replacing first would leave it «Ersetzt» without a berichtigte Abrechnung
 	it('ersetzt die versendete Abrechnung nicht, solange sich der Verteilschlüssel nicht berechnen lässt', async () => {
 		const response = await sendJson('POST', `/api/v1/statements/${sent}/replace`, {});
