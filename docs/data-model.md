@@ -285,7 +285,8 @@ last reading lies before the period (tank retired) needs none.
 Rounding in a statement: each invoice's part in the period (Leistungszeitraum) and each apartment's share of a group
 are rounded to the Rappen first, then the tenant's part of the days or of the heating profile; the subtotal is the
 sum of the rounded lines. A heating profile share is the profile percentage of the tenant's months divided by that of
-the period's months (a period under a year). A heating invoice with its own days in the period (a Leistungszeitraum)
+the period's months (they carry 100 % unless the Heizprofil sums to 100 % ± 0.1, or the statement is under a year from before #1088 or
+corrects one). A heating invoice with its own days in the period (a Leistungszeitraum)
 counts only the profile's months in those days, normalised to 100 %, and the group's share is weighted by amount; days
 whose months carry 0 % in the profile are shared by days; a category of the building's Tankbestand keeps the profile
 over the whole period (#71, review B CR2-N2). `utility_statement_line_items.invoice_parts[].profile` stores each such

@@ -680,8 +680,8 @@ function heatingLines({ t, data }: Page) {
 	return [note, fill(t.heatingMonths, { months: monthList(months, t) }) + periodSums(data.heating, shown, t), ...source];
 }
 
-// a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
-// period's months and the division the share comes from
+// months that do not carry 100 % (a Heizprofil of 100 % ± 0.1, a statement under a year from before #1088, #1099):
+// both sums, from the printed months (#229); since #232 the period's months and the division the share comes from
 function periodSums({ months, periodPercent, periodMonths }: NonNullable<StatementPDFData['heating']>, shown: string, t: Record<string, string>) {
 	if (periodPercent == null || periodPercent === 100) return '';
 	const [tenant, period] = [monthSum(months!), periodPercent.toFixed(2)];
