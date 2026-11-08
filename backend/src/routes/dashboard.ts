@@ -175,8 +175,8 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 
 // The overview's Zahlungsfristen and Vertragsenden (#815): a contract with a task is named by it, not twice (A-4.4)
 async function deadlines(noticed: { id: string }[]) {
-	const { statements } = await listStatements({ status: 'open', limit: 1000 });
-	const { contracts } = await listContracts({ status: 'active', limit: 1000 });
+	const { statements } = await listStatements({ status: 'open', limit: null });
+	const { contracts } = await listContracts({ status: 'active', limit: null });
 	return deadlinesOf({
 		today: swissToday(),
 		dueStatements: statements.map((s) => ({

@@ -81,3 +81,16 @@ Funktionalität: Gebäudeliste
 
   Szenario: Route zum Gebäude planen
     Dann führt die Route in Google Maps von der Liste zu "Lindenhof" an "Testweg 1, 8400 Winterthur"
+
+  # #680: die Suche zeigt immer genau, wonach die Liste gefiltert ist; ein nicht gesuchter Text fällt weg
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn die Gebäudeliste über die Hauptnavigation wieder geöffnet wird
+    Wenn der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter in der Hauptnavigation "Gebäude" wählt
+    Dann zeigt die Suche ""
+
+  Szenario: Ein nicht gesuchter Text fällt weg, wenn der Browser die Gebäudeliste wieder zeigt
+    Wenn der Liegenschaftsverwalter nach "Lindenhof" sucht
+    Und der Liegenschaftsverwalter "Gibt es nicht" in die Suche eingibt
+    Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
+    Und der Liegenschaftsverwalter im Browser zurückgeht
+    Dann zeigt die Suche "Lindenhof"

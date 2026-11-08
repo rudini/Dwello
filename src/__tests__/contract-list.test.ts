@@ -117,13 +117,14 @@ describe('Mietvertragsliste', () => {
 		expect(body).toMatch(/Monatlich total[^]*CHF 1’100\.00/);
 	});
 
-	it('öffnet den Mietvertrag über den Namen des Mieters', () => {
+	// #652: the row is the one link; «Bearbeiten» stands on the contract page
+	it('öffnet den Mietvertrag über den Namen des Mieters, den einzigen Link der Zeile', () => {
 		const body = row(list([contract('c1', 'Anna Keller', '2024-04-01', null)]), 'c1');
 
 		expect(body).toMatch(
 			/<a[^>]*href="\/contracts\/c1"[^>]*data-testid="contract-view-button"[^>]*>Anna Keller<\/a>/
 		);
-		expect(body).toMatch(/aria-label="Mietvertrag von Anna Keller bearbeiten"/);
+		expect(body.match(/<a\b/g)).toHaveLength(1);
 	});
 
 	// #211: a missing statement shows in the list, not only on the contract page; in words, not colour alone

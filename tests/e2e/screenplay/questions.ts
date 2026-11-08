@@ -175,6 +175,13 @@ export const Accessible = {
 				)
 			)
 		),
+	/** Of buttons and links: their aria-label, else their text */
+	namesOfAll: (target: Target) =>
+		about(target, 'the accessible names of', async (element) =>
+			(await element.evaluateAll((all) => all.map((one) => one.getAttribute('aria-label') ?? one.textContent ?? ''))).map(
+				normalized
+			)
+		),
 	descriptionOf: (target: Target) =>
 		about(target, 'the accessible description of', (element) =>
 			single(element, async (one) =>
@@ -401,6 +408,10 @@ export const ThePage = {
 	/** How much wider the page is than the window: more than 0 means it scrolls sideways */
 	sidewaysOverflow: question('how far the page scrolls sideways', (actor) =>
 		pageOf(actor).evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+	),
+	/** How much taller the page is than the window: more than 0 means it scrolls (#657) */
+	downwardOverflow: question('how far the page scrolls down', (actor) =>
+		pageOf(actor).evaluate(() => document.documentElement.scrollHeight - document.documentElement.clientHeight)
 	),
 	/** Everything the page says to a reader: text, also hidden for screen readers, and labelling attributes */
 	texts: question('the texts of the page', (actor) =>

@@ -1,8 +1,8 @@
-import { createBdd } from 'playwright-bdd';
+import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { dialogActions, dialogTitleText, errorMessageShown, fieldDescription, fieldValue } from '../questions/form';
-import { focusedPlace, focusedText, pageTitle } from '../questions/navigation';
-import { goBackInBrowser } from '../tasks/app-frame';
+import { focusedPlace, focusedText, pageActionNames, pageTitle } from '../questions/navigation';
+import { goBackInBrowser, openOtherPageByAddress } from '../tasks/app-frame';
 import { cancelEditing, chooseBreadcrumb, saveTextOfLength } from '../tasks/form';
 
 const { When, Then } = createBdd(test);
@@ -60,6 +60,10 @@ When('der Liegenschaftsverwalter im Browser zurückgeht', async ({ verwalter }) 
 	await verwalter.attemptsTo(goBackInBrowser);
 });
 
+When('der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openOtherPageByAddress);
+});
+
 // #681: after a search, a reset, a page of the list or the browser's back button
 Then('steht der Fokus auf dem Ergebnis der Liste', async ({ verwalter }) => {
 	await verwalter.sees(focusedPlace).toBe('list-results');
@@ -94,4 +98,8 @@ Then('steht bei {string} die Fehlermeldung {string}', async ({ verwalter, seed }
 
 Then('steht bei {string} noch der Text von {int} Zeichen', async ({ verwalter }, label: string, length: number) => {
 	await verwalter.sees(fieldValue(label)).toHaveLength(length);
+});
+
+Then('liest ein Screenreader die Aktionen der Seite so:', async ({ verwalter, seed }, table: DataTable) => {
+	await verwalter.sees(pageActionNames).toEqual(table.raw().map(([name]) => seed.withNames(name)));
 });

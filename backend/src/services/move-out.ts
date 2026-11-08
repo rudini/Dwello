@@ -68,7 +68,7 @@ const statementsOf = (buildingId?: string) =>
 /** #664: the move-out hint of an ended contract, loaded once per call */
 export async function moveOutOf(contract: ContractWithDetails) {
 	const [{ contracts }, type, statements] = await Promise.all([
-		listContracts({ buildingId: contract.buildingId, limit: 1000 }),
+		listContracts({ buildingId: contract.buildingId, limit: null }),
 		typeOf(contract.buildingId),
 		statementsOf(contract.buildingId)
 	]);
@@ -78,7 +78,7 @@ export async function moveOutOf(contract: ContractWithDetails) {
 /** #664: the apartments with a move-out, of one building or all, loaded once for the list, not per row (P2) */
 export async function moveOutsByApartment(buildingId?: string) {
 	const [{ contracts }, statements, types] = await Promise.all([
-		listContracts({ buildingId, limit: 1000 }),
+		listContracts({ buildingId, limit: null }),
 		statementsOf(buildingId),
 		typesByBuilding()
 	]);

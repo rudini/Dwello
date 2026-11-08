@@ -1,14 +1,14 @@
 import { readFileSync } from 'fs';
 import { question } from '../screenplay/actor';
 import { Attribute, Text, ThePage } from '../screenplay/questions';
-import { documentRoot, languageButton } from '../targets/language';
+import { documentRoot, headerLanguageButton } from '../targets/language';
 
 const codes: Record<string, string> = { Deutsch: 'de', Français: 'fr', Italiano: 'it', English: 'en' };
 export const languageCode = (language: string) => codes[language];
 export const languageName = (code: string) => Object.keys(codes).find((name) => codes[name] === code)!;
 
 export const pageLanguage = Attribute.named('lang').of(documentRoot);
-export const shownLanguage = Text.of(languageButton);
+export const shownLanguage = Text.of(headerLanguageButton);
 
 const messagesOf = (language: string): Record<string, string> =>
 	JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));

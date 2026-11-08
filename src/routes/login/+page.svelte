@@ -21,7 +21,8 @@
 	<title>{m.login_title()} - Dwello</title>
 </svelte:head>
 
-<div class="flex flex-1 items-center justify-center px-4 py-12">
+<!-- on a phone less space around the box, so the page fits 390 × 844 without scrolling (#657) -->
+<div class="flex flex-1 items-center justify-center px-4 py-4 sm:py-12">
 	<div class="flex w-full max-w-md flex-col gap-6 rounded-panel border border-line bg-surface p-8">
 		<div class="flex flex-col items-center gap-4 text-center">
 			<Illustration name="building" />

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
-	import { navGroups } from './navigation';
+	import { mobileNavGroups } from './navigation';
 	import IconButton from '$lib/ui/IconButton.svelte';
+	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import NavList from '$lib/ui/NavList.svelte';
 	import { makeInert } from '$lib/inert';
 	import { MediaQuery } from 'svelte/reactivity';
@@ -38,10 +39,12 @@
 
 	function keydown(event: KeyboardEvent) {
 		if (!$mobileNavOpen) return;
-		if (event.key === 'Escape') closeMobileNav();
+		// Escape in the open language list closes only the list (#657); this handler runs before the list's own
+		if (event.key === 'Escape' && !drawer?.querySelector('#language-menu')) closeMobileNav();
 		if (event.key !== 'Tab' || !drawer) return;
 		event.preventDefault();
-		const focusable = [...drawer.querySelectorAll<HTMLElement>('a, button')];
+		// without the layer behind an open list, which closes it on a click (#657)
+		const focusable = [...drawer.querySelectorAll<HTMLElement>('a, button:not([tabindex="-1"])')];
 		const at = focusable.indexOf(document.activeElement as HTMLElement);
 		const next = (at + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
 		focusable[next]?.focus();
@@ -69,8 +72,12 @@
 				<span class="text-xl font-bold text-ink">Dwello</span>
 				<IconButton icon="close" label={m.nav_close_menu()} onclick={closeMobileNav} />
 			</div>
+			<!-- the header has no room for the language choice below 768 px (#657) -->
+			<nav class="flex justify-end border-b border-line px-4 py-2" aria-label={m.language_choice()}>
+				<LanguageSwitcher />
+			</nav>
 			<nav class="flex-1 overflow-y-auto px-4 py-6" aria-label={m.nav_main()}>
-				<NavList groups={navGroups} onnavigate={closeMobileNav} />
+				<NavList groups={mobileNavGroups} onnavigate={closeMobileNav} />
 			</nav>
 		</div>
 	</div>

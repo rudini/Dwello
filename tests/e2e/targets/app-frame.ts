@@ -13,6 +13,10 @@ export const mobileNavLink = (label: string) =>
 			.getByTestId('main-nav-link')
 			.filter({ has: page.getByText(label, { exact: true }) })
 	);
+/** #657: the first item of the menu in a narrow window */
+export const firstMobileNavLink = target('Erster Eintrag des Menüs', (page) =>
+	page.getByRole('dialog', { name: 'Hauptnavigation' }).getByTestId('main-nav-link').first()
+);
 export const currentNavItem = target('Markierter Eintrag der Hauptnavigation', (page) =>
 	page.getByRole('navigation', { name: 'Hauptnavigation' }).locator('[aria-current="page"]')
 );

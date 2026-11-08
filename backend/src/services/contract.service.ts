@@ -5,7 +5,7 @@
 
 import { eq, and, or, sql, desc, gte, lte, isNull, ilike, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { containing, db } from '../db/connection';
+import { containing, db, paged } from '../db/connection';
 import {
 	rentalContracts,
 	apartments,
@@ -156,7 +156,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 		.where(whereClause)
 		.orderBy(desc(rentalContracts.startDate), desc(rentalContracts.id))
 		.$dynamic();
-	const results = await (limit == null ? ordered : ordered.limit(limit)).offset(offset);
+	const results = await paged(ordered, limit, offset);
 
 	// Get total count
 	const countQuery = db

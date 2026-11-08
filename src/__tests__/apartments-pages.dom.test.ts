@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
 
 let url = new URL('http://localhost/apartments');
-vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), afterNavigate: vi.fn() }));
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
@@ -500,5 +500,7 @@ describe('Wohnungsdetail', () => {
 		expect(contract.getAttribute('href')).toBe('/contracts/new?apartment=a1');
 		expect(contract.className).toContain('bg-accent ');
 		expect(contract.textContent).toContain('Mietvertrag erfassen');
+		// #652: a screen reader hears the apartment the action is for
+		expect(contract.getAttribute('aria-label')).toBe('Mietvertrag erfassen: Wohnung 3.01');
 	});
 });
