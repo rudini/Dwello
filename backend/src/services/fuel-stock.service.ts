@@ -79,7 +79,7 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 	const [bill] = [...(await latest(periodEnd)), ...(await latest())];
 	const id = bill?.id ?? (await getTypedConfig('default_distribution_key_id'));
 	if (!id) return null;
-	const [key] = await db.select({ id: distributionKeys.id, name: distributionKeys.name, nameDE: distributionKeys.nameDE }).from(distributionKeys).where(eq(distributionKeys.id, id));
+	const [key] = await db.select({ id: distributionKeys.id, name: distributionKeys.name, nameDE: distributionKeys.nameDE, formula: distributionKeys.formula }).from(distributionKeys).where(eq(distributionKeys.id, id));
 	return key ? { ...key, deliveryId: bill?.deliveryId } : null; // the delivery whose key it is, if any (#1323)
 }
 
@@ -87,8 +87,13 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
  * The change of the stock in the period as one more invoice of its category over the whole period; none while the
  * reading at the start (the day before) or at the end is missing (the check for missing invoices reports that)
  */
-export async function fuelStockChange(buildingId: string, periodStart: string, periodEnd: string) {
-	const readings = await periodReadings(buildingId, periodStart, periodEnd);
+export async function fuelStockChange(
+	buildingId: string,
+	periodStart: string,
+	periodEnd: string,
+	read = periodReadings(buildingId, periodStart, periodEnd) // a list shares them with getInvoicesForStatement (#922)
+) {
+	const readings = await read;
 	if (!readings?.opening || !readings.closing) return [];
 	const [category] = await db
 		.select({ id: categories.id, name: categories.name, nameDE: categories.nameDE, isAllowedUtilityCost: categories.isAllowedUtilityCost, isHeatingCost: categories.isHeatingCost })

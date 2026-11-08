@@ -11,7 +11,9 @@ import { CodedError } from './coded-error';
 import { invoiceSplitKeys } from './invoice-completeness.service';
 import { getInvoicesForStatement } from './invoice.service';
 import { agreedIn, uncalculableKeyInvoices } from './held-invoices';
-import { agreedStock, getStatement, listStatements, recalculation } from './statement.service';
+import { agreedStock, agreedStockOf, getStatement, listStatements, recalculation } from './statement.service';
+import { apartmentsByBuilding } from './apartment.service';
+import { fuelStockChange, periodReadings } from './fuel-stock.service';
 import type { StatementWithDetails } from '../api/statement';
 import { olderThanFiveYears, swissToday } from './today';
 import { counting, isReplaced } from './counting-statements';
@@ -62,11 +64,19 @@ function perPeriod(): Loaders {
 		return memo.get(key) as Promise<T>;
 	};
 	const key = (s: Located) => `${s.building.id} ${s.periodStart} ${s.periodEnd}`;
+	const readings = (s: Located) => once(`readings ${key(s)}`, () => periodReadings(s.building.id, s.periodStart, s.periodEnd));
+	const invoices = (s: Located) => once(`invoices ${key(s)}`, () => getInvoicesForStatement(s.building.id, s.periodStart, s.periodEnd, readings(s)));
+	const change = (s: Located) => once(`change ${key(s)}`, () => fuelStockChange(s.building.id, s.periodStart, s.periodEnd, readings(s)));
+	// the key check shares what the list loads anyway, and the apartments once per building (P2, #922)
+	const apartments = async (s: Located) => (await once('apartments', apartmentsByBuilding)).get(s.building.id) ?? [];
 	return {
-		invoices: (s) => once(`invoices ${key(s)}`, () => direct.invoices(s)),
-		stock: (s) => once(`stock ${key(s)} ${JSON.stringify(s.agreedCategoryIds)}`, () => direct.stock(s)),
+		invoices,
+		stock: async (s) => agreedStockOf(await change(s), s.agreedCategoryIds),
 		full: (s) => getStatement(s.id), // a listed statement lacks what the recalculation reads
-		keys: (s) => once(`keys ${key(s)}`, () => direct.keys(s))
+		keys: (s) =>
+			once(`keys ${key(s)}`, async () =>
+				uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd, { bills: await invoices(s), change: await change(s), apartments: () => apartments(s) })
+			)
 	};
 }
 

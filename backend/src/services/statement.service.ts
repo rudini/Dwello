@@ -471,10 +471,11 @@ async function openReplaced({ contractId, periodStart, periodEnd }: StatementInp
 
 // The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3); a
 // statement from before #91 (agreed: null) billed every category
-export const agreedStock = async (input: { buildingId: string; periodStart: string; periodEnd: string }, agreedCategoryIds: string[] | null) => {
-	const [change] = await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd);
-	return change && (!agreedCategoryIds || agreedCategoryIds.includes(change.categoryId)) ? change.stock : null;
-};
+export const agreedStock = async (input: { buildingId: string; periodStart: string; periodEnd: string }, agreedCategoryIds: string[] | null) =>
+	agreedStockOf(await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd), agreedCategoryIds);
+/** The readings of a period's change of the Tankbestand, if its category is agreed */
+export const agreedStockOf = ([change]: Awaited<ReturnType<typeof fuelStockChange>>, agreedCategoryIds: string[] | null) =>
+	change && (!agreedCategoryIds || agreedCategoryIds.includes(change.categoryId)) ? change.stock : null;
 
 // The columns and positions a calculation gives a statement: shared by a new draft and a recalculated one (#338)
 async function calculatedRows(input: StatementInput & { buildingId: string }) {
