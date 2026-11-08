@@ -70,7 +70,7 @@ describe('E2E-Auswahl nach Bereich (#845)', () => {
 		);
 	});
 
-	it.each(['src/lib/api.ts', 'src/lib/server/missing-statements.ts', 'src/routes/api/invoices/+server.ts', 'backend/src/services/invoice.service.ts', 'backend/src/routes/invoices.ts', 'backend/src/__tests__/helpers/pdf-text.ts', 'src/routes/config/DeleteDialog.svelte', 'src/routes/+layout.svelte', 'backend/src/services/today.ts', 'backend/migrations/0042_x.sql', 'messages/de.json', 'tests/e2e/steps/common.steps.ts', 'playwright.config.ts', '.github/workflows/ci.yml', 'package.json'])(
+	it.each(['src/lib/api.ts', 'src/lib/server/missing-statements.ts', 'src/routes/api/invoices/+server.ts', 'backend/src/services/invoice.service.ts', 'backend/src/routes/invoices.ts', 'backend/src/__tests__/helpers/pdf-text.ts', 'src/routes/config/DeleteDialog.svelte', 'tools/e2e/build-if-changed.mjs', 'src/routes/+layout.svelte', 'backend/src/services/today.ts', 'backend/migrations/0042_x.sql', 'messages/de.json', 'tests/e2e/steps/common.steps.ts', 'playwright.config.ts', '.github/workflows/ci.yml', 'package.json'])(
 		'führt alle Szenarien aus, sobald %s geändert ist, das keinem Bereich gehört',
 		(file) => {
 			expect(filters('src/routes/invoices/+page.svelte', file)).toEqual([]);

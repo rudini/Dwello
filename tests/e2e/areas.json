@@ -17,7 +17,7 @@
 		"\\.md$",
 		"^docs/",
 		"^\\.claude/",
-		"^tools/(?!ci/e2e-areas\\.mjs$)"
+		"^tools/(?!ci/e2e-areas\\.mjs$|e2e/)"
 	],
 	"areas": {
 		"buildings": {
