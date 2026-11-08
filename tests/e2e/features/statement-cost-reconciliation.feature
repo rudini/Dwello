@@ -89,7 +89,6 @@ Funktionalität: Kostenabstimmung in der Vorschau
 
   # #1138 (PO 06.11.2026): ein Satz unter der Tabelle nennt die Position mit Tankbestand; Heizung 1'000.00 +
   # Anfangsbestand 600.00 − Endbestand 100.00 = 1'500.00
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau nennt den Tankbestand einer Position
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -98,19 +97,16 @@ Funktionalität: Kostenabstimmung in der Vorschau
     Dann nennt die Kostenabstimmung der Vorschau für "Lindenhof" "Heizung" mit "CHF 1’500.00"
     Und erklärt die Kostenabstimmung der Vorschau für "Lindenhof" den Tankbestand mit "In «Heizung» ist die Veränderung des Tankbestands enthalten: Anfangsbestand CHF 600.00, Endbestand CHF 100.00."
 
-  @wip
   Szenario: Ohne Tankbestand nennt die Kostenabstimmung der Vorschau keinen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt die Kostenabstimmung der Vorschau für "Lindenhof" "Total" mit "CHF 1’200.00"
     Aber nennt die Kostenabstimmung der Vorschau für "Lindenhof" nicht "Tankbestand"
 
   # #1138 (PO 06.11.2026): Wohnung 3.01 ist im April 2024 30 Tage ohne Mietvertrag
-  @wip
   Szenario: Die Kostenabstimmung der Vorschau nennt die Wohnungen mit Leerstand
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann erklärt die Kostenabstimmung der Vorschau für "Lindenhof" den Leerstand mit "Leerstand in dieser Abrechnungsperiode: Wohnung 3.01 (30 Tage)."
 
-  @wip
   Szenario: Ohne Leerstand nennt die Kostenabstimmung der Vorschau keinen
     Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
     Und im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"

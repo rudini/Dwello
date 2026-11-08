@@ -17,6 +17,8 @@ import {
 	utilityStatements
 } from '../db/schema';
 import type { reportPeriods, reportReconciliation } from '../services/cost-reconciliation.service';
+import { createApartment, deleteApartment } from '../services/apartment.service';
+import { createContract, deleteContract } from '../services/contract.service';
 import { generateStatement } from '../services/statement.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -230,6 +232,31 @@ describe('Leerstand der Kostenabstimmung', () => {
 		]);
 	});
 
+	// Fachreview 1138-1 V-2, V-4: the gaps of one apartment summed; ordered as on the building page, floor by floor, by number
+	it('zählt die Lücken einer Wohnung zusammen und nennt die Wohnungen nach Stockwerk und Nummer', async () => {
+		const later = await createContract({
+			apartmentId: rental.apartment,
+			tenantId: rental.tenant,
+			startDate: '2024-05-01',
+			endDate: '2024-10-31',
+			baseRent: '950',
+			monthlyAdvancePayment: '0'
+		});
+		const added = [];
+		for (const [number, floor] of [['10', 1], ['EG', 0], ['9', 1]] as const)
+			added.push(await createApartment({ buildingId: rental.building, number, floor, area: '40', rooms: '2' }));
+		const { vacancies } = await report();
+		for (const apartment of added) await deleteApartment(apartment.id);
+		await deleteContract(later.id, true);
+		// 2.01: April 30 + November and December 61 = 91
+		expect(vacancies).toEqual([
+			{ apartmentNumber: 'EG', days: 366 },
+			{ apartmentNumber: '9', days: 366 },
+			{ apartmentNumber: '10', days: 366 },
+			{ apartmentNumber: '2.01', days: 91 }
+		]);
+	});
+
 	it('zählt die Tage ab «Aufgehoben ab» nicht als Leerstand', async () => {
 		await db.update(apartments).set({ discontinuedFrom: '2024-07-01' }).where(eq(apartments.id, rental.apartment));
 		const { vacancies } = await report();
@@ -265,6 +292,18 @@ describe('Tankbestand der Kostenabstimmung', () => {
 			]),
 			expect.arrayContaining([[heating.id, 500, { opening: 600, closing: 100 }]])
 		]);
+	});
+
+	// Fachreview 1138-1 V-1: a tank decommissioned, both readings 0, changes nothing to explain
+	it('nennt keinen Tankbestand, wenn Anfangs- und Endbestand 0 sind', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(fuelStocks).values([
+			{ buildingId: rental.building, readingDate: '2023-12-31', amount: '0.00', categoryId: heating.id },
+			{ buildingId: rental.building, readingDate: '2024-12-31', amount: '0.00', categoryId: heating.id }
+		]);
+		const { positions } = await report();
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
+		expect(positions.map((p) => p.fuelStock ?? null)).toEqual(positions.map(() => null));
 	});
 });
 

@@ -113,7 +113,6 @@ Funktionalität: Berichte
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Eva Frei"
 
   # #1138 (PO 06.11.2026): die Sätze zum Tankbestand und zum Leerstand stehen auch in den Berichten
-  @wip
   Szenario: Die Kostenabstimmung der Berichte nennt den Tankbestand einer Position
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -122,7 +121,6 @@ Funktionalität: Berichte
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
     Dann erklärt die Kostenabstimmung der Berichte den Tankbestand mit "In «Heizung» ist die Veränderung des Tankbestands enthalten: Anfangsbestand CHF 600.00, Endbestand CHF 100.00."
 
-  @wip
   Szenario: Die Kostenabstimmung der Berichte nennt die Wohnungen mit Leerstand
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet

@@ -63,6 +63,19 @@ describe('Kostenabstimmung: Leerstand', () => {
 	});
 });
 
+// Fachreview 1138-1 V-3: like the help text, only beside a table of positions
+describe('Kostenabstimmung ohne Positionen', () => {
+	it('nennt weder Tankbestand noch Leerstand', () => {
+		render({
+			positions: [],
+			nonAllocable: 500,
+			fuelStocks: [{ position: 'Heizung', opening: 600, closing: 100 }],
+			vacancies: [{ apartmentNumber: 'OG2', days: 30 }]
+		});
+		expect(document.querySelectorAll('[data-testid^="cost-reconciliation-fuel-stock"], [data-testid="cost-reconciliation-vacancy"]').length).toBe(0);
+	});
+});
+
 describe('Kostenabstimmung auf dem Telefon', () => {
 	it('hebt die Karte «Total» mit gedämpftem Hintergrund und fetter Überschrift hervor', () => {
 		render();
