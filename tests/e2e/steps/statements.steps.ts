@@ -33,6 +33,7 @@ import {
 	searchStatements,
 	showDraftsOfBuilding,
 	showSettledOfBuilding,
+	openDraftsPageOfBuilding,
 	showOverdueOfBuilding,
 	showStatementsOfBuilding,
 	showStatementsOfBuildingWhileLoading,
@@ -105,6 +106,13 @@ When(
 	'der Liegenschaftsverwalter nur die Entwürfe im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.attemptsTo(showDraftsOfBuilding(seed.idOf(building)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Seite {int} der Entwürfe im Gebäude {string} aufruft',
+	async ({ verwalter, seed }, page: number, building: string) => {
+		await verwalter.attemptsTo(openDraftsPageOfBuilding(seed.idOf(building)!, page));
 	}
 );
 

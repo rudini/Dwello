@@ -1,3 +1,4 @@
+import { error, redirect } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import { formatDate } from '$lib/utils/format';
 import { toStatement } from '$lib/server/statement';
@@ -72,68 +73,63 @@ function scopeSentence(
 	return `${named} ${m.statements_scope_status({ status: statusLabels[status as keyof typeof statusLabels] })}`;
 }
 
+// #1236: a list that did not load says so, never an empty list with every count 0
+async function backendJson(fetch: typeof globalThis.fetch, url: string) {
+	const response = await fetch(url).catch((failure) => console.error(failure));
+	if (!response?.ok) error(502, m.statements_list_load_failed());
+	return response.json();
+}
+
 export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const pageSize = 10;
 	const contractId = url.searchParams.get('contract');
 
-	try {
-		const params = backendQuery(url, page, pageSize);
-		// the status tabs count over the same filters as the list, all but the status itself
-		const counted = new URLSearchParams(params);
-		for (const key of ['limit', 'offset', 'status']) counted.delete(key);
-		const [statementsRes, countsRes, buildingsRes, scope] = await Promise.all([
-			fetch(`${BACKEND_URL}/api/v1/statements?${params}`),
-			fetch(`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`),
-			fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`),
-			contractId ? contractScope(fetch, contractId) : null
-		]);
+	const params = backendQuery(url, page, pageSize);
+	// the status tabs count over the same filters as the list, all but the status itself
+	const counted = new URLSearchParams(params);
+	for (const key of ['limit', 'offset', 'status']) counted.delete(key);
+	const [statementsData, countsData, buildingsData, scope] = await Promise.all([
+		backendJson(fetch, `${BACKEND_URL}/api/v1/statements?${params}`),
+		backendJson(
+			fetch,
+			`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`
+		),
+		backendJson(fetch, `${BACKEND_URL}/api/v1/buildings?limit=1000`),
+		// without the sentence the list still shows, as when the contract is gone
+		contractId ? contractScope(fetch, contractId).catch(() => null) : null
+	]);
 
-		const statementsData = await statementsRes.json();
-		const countsData = await countsRes.json();
-		const buildingsData = await buildingsRes.json();
-
-		const statements = (statementsData.data || []).map(toStatement);
-
-		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
-			(b: Record<string, unknown>) => ({
-				id: b.id,
-				name: b.name
-			})
-		);
-
-		return {
-			statements,
-			total: statementsData.total || 0,
-			page,
-			pageSize,
-			buildings,
-			scope: scopeSentence(url, buildings, scope),
-			statusCounts: {
-				draft: countsData.draft || 0,
-				sent: countsData.sent || 0,
-				paid: countsData.paid || 0,
-				settled: countsData.settled || 0,
-				overdue: countsData.overdue || 0
-			}
-		};
-	} catch (error) {
-		console.error('Failed to fetch statements:', error);
-		// Return empty data on error
-		return {
-			statements: [],
-			total: 0,
-			page,
-			pageSize,
-			buildings: [],
-			scope: null,
-			statusCounts: {
-				draft: 0,
-				sent: 0,
-				paid: 0,
-				settled: 0,
-				overdue: 0
-			}
-		};
+	// #1237: a page past the last one (an old address) shows the last one, so the list agrees with the count
+	const last = Math.max(1, Math.ceil((statementsData.total || 0) / pageSize));
+	if (page > last) {
+		const next = new URL(url);
+		next.searchParams.set('page', String(last));
+		redirect(307, `${next.pathname}${next.search}`);
 	}
+
+	const statements = (statementsData.data || []).map(toStatement);
+
+	const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+		(b: Record<string, unknown>) => ({
+			id: b.id,
+			name: b.name
+		})
+	);
+
+	return {
+		statements,
+		total: statementsData.total || 0,
+		page,
+		pageSize,
+		buildings,
+		scope: scopeSentence(url, buildings, scope),
+		statusCounts: {
+			draft: countsData.draft || 0,
+			sent: countsData.sent || 0,
+			paid: countsData.paid || 0,
+			settled: countsData.settled || 0,
+			overdue: countsData.overdue || 0
+		}
+	};
 };

@@ -1336,6 +1336,7 @@
 	"statements_scope_contract_link": "Go to the rental contract",
 	"statements_filter_clear": "Remove filter",
 	"statements_none_found": "No statements found",
+	"statements_list_load_failed": "The statements could not be loaded.",
 	"statements_adjust_filters": "Try adjusting your filters.",
 	"statements_empty_title": "No statements yet",
 	"statements_empty_text": "Create your first utility cost statement.",

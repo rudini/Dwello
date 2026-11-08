@@ -89,17 +89,43 @@ describe('Abrechnungsliste laden', () => {
 		expect(data.statements[0].asksPayment).toBe(true);
 	});
 
-	it('zeigt eine leere Liste, wenn das Backend nicht erreichbar ist', async () => {
-		const fetch = (async () => {
-			throw new Error('ECONNREFUSED');
-		}) as typeof globalThis.fetch;
+	// #1237: eine Seite nach der letzten widerspricht sonst der Zahl unter den Statusfiltern
+	it('führt von einer Seite nach der letzten auf die letzte Seite mit Abrechnungen', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(url.includes('/statements?') ? { total: 11, data: [] } : {})) as typeof globalThis.fetch;
 
-		const data = (await load({
-			url: new URL('http://localhost/statements'),
+		const result = load({
+			url: new URL('http://localhost/statements?building=b1&status=draft&page=5'),
 			fetch
-		} as never)) as StatementsListData;
+		} as never);
 
-		expect(data).toMatchObject({ statements: [], total: 0, page: 1 });
+		await expect(result).rejects.toMatchObject({
+			status: 307,
+			location: '/statements?building=b1&status=draft&page=2'
+		});
+	});
+
+	// #1236: eine leere Liste mit lauter 0 hiesse «nichts ist überfällig», obwohl nichts geladen wurde
+	it.each([
+		['nicht erreichbar ist', () => Promise.reject(new Error('ECONNREFUSED'))],
+		['mit einem Fehler antwortet', () => Promise.resolve(Response.json({}, { status: 500 }))],
+		[
+			'die Statuszahlen nicht liefert',
+			(url: string) =>
+				Promise.resolve(
+					url.includes('/counts') ? Response.json({}, { status: 500 }) : Response.json(statusCounts)
+				)
+		]
+	])('sagt, dass die Abrechnungen nicht geladen wurden, wenn das Backend %s', async (_, answer) => {
+		const result = load({
+			url: new URL('http://localhost/statements?status=overdue'),
+			fetch: answer as typeof globalThis.fetch
+		} as never);
+
+		await expect(result).rejects.toMatchObject({
+			status: 502,
+			body: { message: 'Die Abrechnungen konnten nicht geladen werden.' }
+		});
 	});
 });
 
