@@ -1499,14 +1499,6 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Personas Sven, Helga (`docs/design/personas/{sven,helga}-688.md`): no Blocker or Major; Minors that stay: Helga H-1, Sven S-1, S-3; Helga H-2 = Sven S-2 (two alerts give opposite advice) is #1197
 - [x] Workflow notes: `git stash` is shared by all worktrees; parallel agents must not use it (one popped another's stash)
 - [x] Archive the session; PR pushed after this archive
-## Session: #1176 Kontoinhaber in the privacy statement
-
-- [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
-- [x] `fach-reviewer` `docs/reviews/1176-fachreview-1.md`: the addition to `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider` in de/fr/it/en
-- [x] Texts in `messages/*.json` (with R-3, Variante B, decided in #1176); Stand of the privacy statement only (`LegalHeader.svelte` shared with the terms, which keep 29. Oktober 2026)
-- [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
-- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
-- [x] Archive session; PR `Fixes #1176`: pushed after this archive
 ## Session: #1143 Draft refusal without the apartment's contracts
 
 - [x] Scenario line `contract-edit.feature:239` changed to the decided text (Spec change approved: #1143)
@@ -1516,6 +1508,14 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Persona Helga (`docs/design/personas/helga-b1143.md`): no Blocker or Major; P-1..P-3 Minor stay (P-1, P-3 on the base commit, P-2 the decided #666 hint and #1142)
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1143.md`
 - [x] Archive the session; PR `Fixes #1143`: pushed after this archive
+## Session: #1176 Kontoinhaber in the privacy statement
+
+- [x] `@wip` scenario (privacy.feature) and the changed «Stand der Datenschutzerklärung» (Spec change approved: #1176), seen red
+- [x] `fach-reviewer` `docs/reviews/1176-fachreview-1.md`: the addition to `privacy_mail_smtp`, `privacy_mail_resend`, `privacy_mail_smtp_provider` in de/fr/it/en
+- [x] Texts in `messages/*.json` (with R-3, Variante B, decided in #1176); Stand of the privacy statement only (`LegalHeader.svelte` shared with the terms, which keep 29. Oktober 2026)
+- [x] Slice review `docs/reviews/1176-review-1.md` (Minor C-1 fixed in tests); no persona and no step-5 `fach-reviewer`: the legal texts are word for word from the `fach-reviewer` round, which read them in all four languages
+- [x] Checks: lint, check, fitness, backend type-check, vitest --changed, privacy/terms E2E and their axe/language rows
+- [x] Archive session; PR `Fixes #1176`: pushed after this archive
 ## Session: #733 Deletion toast and the statement filter
 
 - [x] Reproduced on `main`: the «… gelöscht» toast covers the «Gebäude» field at about 1030 px (focus on the page title); free at 1440 px (100–200 %) and 390 px
