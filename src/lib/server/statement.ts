@@ -99,7 +99,11 @@ const placeOf = ({ apartment, building }: Json<StatementResponse>) => ({
 });
 
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
-export function toStatement(data: Json<StatementResponse>): StatementWithDetails {
+// #1284: an apartment that no longer counts from a day of the statement's billed days
+type Discontinued = { number: string; date: string };
+export function toStatement(
+	data: Json<StatementResponse>
+): StatementWithDetails & { discontinued: Discontinued[] } {
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
@@ -164,9 +168,20 @@ export function toStatement(data: Json<StatementResponse>): StatementWithDetails
 		advanceChanged: data.advanceChanged === true,
 		lineItems: (data.lineItems || []).map((item) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
-		)
+		),
+		discontinued: discontinuedIn(data.lineItems || [])
 	};
 }
+
+// #1284: the apartments that no longer count from a day of the billed days, once each, from the positions' parts
+const discontinuedIn = (items: LineItem[]): Discontinued[] => [
+	...new Map(
+		items
+			.flatMap((item) => item.segments ?? [])
+			.flatMap((part) => part.discontinued ?? [])
+			.map((a) => [a.number, a])
+	).values()
+];
 
 /** What changed since the statement was created: how many invoices of its period were recorded, changed or deleted
  *  (#96), whether its Tankbestand changed, and whether correcting it is due and may be declined (#454); only a hint:

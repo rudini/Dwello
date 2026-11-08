@@ -73,6 +73,12 @@ export const fr: Record<string, string> = {
 	partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, {days}\u00a0jours\u00a0de\u00a0location sur {total}',
 	partShare: 'Votre part{colon}{apartment} × part temporelle ({sum}) / {costs} = {share}',
 	partShareZero: 'Votre part{colon}({sum}) × {keyShare} (part de votre logement selon la clé de répartition) = {share}',
+	// #1284: a position split at the day an apartment no longer exists (Fachreview 1284-1)
+	segmentIntro: 'L’appartement {number} n’existe plus dès le {date}. Jusqu’au {dayBefore}, il compte dans la clé de répartition\u00a0; sa part est à la charge du bailleur. Sous les postes du décompte concernés figure le calcul par période.',
+	keyShareSegments: 'par période, voir ci-dessous',
+	segmentLineDays: '{start} – {end}, {count} appartements{colon}{keyShare} × CHF {costs} = CHF {apartment} × {days}/{total} jours = CHF {share}',
+	segmentLinePercent: '{start} – {end}, {count} appartements{colon}{keyShare} × CHF {costs} = CHF {apartment} × part temporelle {percent}\u00a0% = CHF {share}',
+	segmentLineProfile: '{start} – {end}, {count} appartements, {profileShare}\u00a0% des frais de chauffage selon le profil de chauffage{colon}{keyShare} × CHF {costs} = CHF {apartment} × part selon le profil de chauffage {percent}\u00a0% = CHF {share}',
 	partProfile: ', parts des mois dans le profil de chauffage\u00a0: {periodMonths}\u00a0; au total {period}\u00a0%. Parts des mois de votre bail dans cette période\u00a0: {months}\u00a0; au total {tenant}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 	partProfileBilled: ', parts des mois dans le profil de chauffage\u00a0: {periodMonths}\u00a0; au total {period}\u00a0%. Parts des mois de votre bail compris dans ce décompte\u00a0: {months}\u00a0; au total {tenant}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 	partProfileRun: ', part selon le profil de chauffage\u00a0: {percent}\u00a0% (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»)',

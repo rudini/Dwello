@@ -12,15 +12,13 @@
 
 import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { statementNumbers, utilityStatements, type AdvanceLine, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type AdvanceLine, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart, type LineSegment } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
-import {
-	calculateApartmentProrating,
-	handleMidYearMoves
-} from './prorating.service';
+import { calculateApartmentProrating, handleMidYearMoves, lineByParts } from './prorating.service';
+export { countingOn, keyValuesAmong } from './prorating.service'; // for the statement's key values (#1284)
 import { apartmentsOf, getApartment } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
@@ -48,6 +46,7 @@ export interface CalculatedLineItem {
 	invoiceParts: InvoicePart[] | null; // invoices over different days: each with its days, for the weighted share (#226)
 	invoices: BilledInvoice[]; // the invoices it bills (#96)
 	isHeatingCost: boolean;
+	segments: LineSegment[] | null; // #1284: per part before and from «Aufgehoben ab», when it splits the tenant's days
 }
 
 /**
@@ -365,7 +364,7 @@ export async function calculateStatementForContract(
 	const invoiceGroups = groupInvoicesByCategory(invoices).filter((group) => !group.categoryId || agreed.includes(group.categoryId));
 
 	// All apartments of the building share its costs according to the distribution key
-	const buildingApartments = await apartmentsOf(buildingId);
+	const buildingApartments = await apartmentsOf(buildingId); // with «Aufgehoben ab» (#1284)
 
 	// Calculate line items
 	const lineItems: CalculatedLineItem[] = [];
@@ -381,15 +380,8 @@ export async function calculateStatementForContract(
 		const days = fromDay(group.categoryId ? agreedFrom[group.categoryId] : undefined, run, rental);
 		if (!days) continue;
 
-		// Calculate apartment's share of building costs
-		const apartmentShareResult = await calculateApartmentShare(
-			buildingApartments,
-			apartment.id,
-			group.totalAmount,
-			group.distributionKeyId
-		);
-
-		const { tenantShare, periodShare, shareDays } = await shareOfGroup(group, apartmentShareResult, days.run, days.rental);
+		const line = await lineByParts(group, buildingApartments, apartment.id, days, { keyShare: calculateApartmentShare, shareOfGroup });
+		const { tenantShare, periodShare, shareDays, segments } = line;
 
 		lineItems.push({
 			categoryId: group.categoryId,
@@ -398,7 +390,7 @@ export async function calculateStatementForContract(
 			distributionKeyName: group.distributionKeyName,
 			description: group.categoryName,
 			totalBuildingAmount: group.totalAmount,
-			apartmentShare: apartmentShareResult.share,
+			apartmentShare: line.apartmentShare,
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
@@ -412,7 +404,8 @@ export async function calculateStatementForContract(
 				end,
 				...(fuelStock && { fuelStock })
 			})),
-			isHeatingCost: group.isHeatingCost
+			isHeatingCost: group.isHeatingCost,
+			segments
 		});
 
 		subtotal += tenantShare;

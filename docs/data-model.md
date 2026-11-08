@@ -88,6 +88,7 @@ floor       INTEGER      NOT NULL DEFAULT 0 -- Stockwerk: -1 = UG, 0 = EG
 area        DECIMAL(8,2) NOT NULL           -- Fläche in m²
 rooms       DECIMAL(3,1) NOT NULL           -- Zimmeranzahl, e.g. 3.5
 status      VARCHAR(20)  NOT NULL DEFAULT 'vacant'
+discontinued_from DATE                      -- «Aufgehoben ab» (#1284): no longer exists from that day; null: it exists
 CHECK (status IN ('vacant', 'reserved'))
 ```
 
@@ -95,6 +96,8 @@ Indexes: `apartments_building_id_idx (building_id)`, unique `apartments_building
 
 Only the manually set Mietstatus is stored (`vacant` = Leer, `reserved` = Gesperrt). `occupied` and `relet`
 are derived from the rental contracts and never stored.
+
+`discontinued_from` (migration `0044`, #1284, «Aufgehobene Wohnung»): the apartment counts in the Verteilschlüssel on the days before it and not from it; a statement whose billed days it falls into calculates the positions per part (`utility_statement_line_items.segments`). It is refused while a contract of the apartment has no end or ends on or after it, and a contract of such an apartment must end before it.
 
 ### tenants (Mieter)
 
@@ -399,10 +402,13 @@ position_rental_days INTEGER                -- the tenant's days in the days bil
 billed_days         INTEGER                 -- the days the position's invoices bill in the period
 invoice_parts       JSONB                   -- invoices over different days: [{start, end, amount, days, total, noPeriod?, whole?, fuelStock?}] (null: none)
 invoices            JSONB                   -- the invoices it billed: [{id, description, amount, start, end, fuelStock?}] (null: created before #96)
+segments            JSONB                   -- #1284: per part before and from «Aufgehoben ab»: [{start, end, count, keyValues, costs, apartment, periodShare, days?, total?, profileShare?, share, discontinued?}] (null: not split)
 sort_order          INTEGER DEFAULT 0
 ```
 
 `apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty. `invoice_parts` (migration `0006`, #226) holds, for a position whose invoices bill different days, each invoice's days in the period (`start`, `end`, `total`), its amount for them and the tenant's days in them (`days`); the PDF lists them under the position with the weighted share. `noPeriod` marks an invoice without Leistungszeitraum, `whole` holds the whole Leistungszeitraum and the invoice's amount when it reaches beyond the period (#241), `fuelStock` marks the change of the Tankbestand (#239); parts stored before have neither. It stays empty when the tenant rents the whole period or the invoices sum to zero.
+
+`segments` (migration `0044`, #1284) holds, for a position whose billed days a day of «Aufgehoben ab» of another apartment splits, each part of the period: its costs (each invoice by its days in the part, heating costs with a Heizprofil by its months), the apartments that count (`count`, `keyValues`), the apartment's share of the costs by the key, the tenant's share of that (as days `days`/`total`, else `periodShare`; `profileShare`: the part's percentage of the heating costs), each rounded to the Rappen as the PDF prints it (Fachreview 1284-1 V-3); `discontinued` names the apartments that no longer count from the part's start. The position's `apartment_share` and `tenant_share` are the sums of the parts. `utility_statements.key_values` counts the apartments that count on the tenant's first billed day.
 
 `invoices` (migration `0014`, #96) holds every invoice the position billed, in the order of `invoice_parts`: its id, its description, its amount in the period and the days it bills there (`start`, `end`); the change of the Tankbestand is stored with `fuelStock` and the id `fuel-stock-<period end>`, it is no invoice. It is the link from a statement to its invoices: an invoice of the period that no position holds with its current amount, days, category and distribution key, or a held invoice that left the period (deleted, made non-allocable), was recorded or changed after the statement (`GET /statements/:id/changed-invoices`, `GET /invoices/:id/statements`); the statement detail links each position to its invoices. Statements created before keep it empty; for them, as before, an invoice of the period recorded after the statement counts as missing. No foreign key: a deleted invoice stays in the statement that billed it.
 

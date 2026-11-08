@@ -7,9 +7,12 @@
  * - Multiple contracts within a single period
  * - Mid-year moves with heating profile adjustments
  * - Vacancy cost allocation
+ * - Parts before and from «Aufgehoben ab» (#1284)
  */
 
+import type { HeatingProfile, InvoicePart, KeyValues, LineSegment } from '../db/schema';
 import { roundToRappen } from './pdf-format';
+import { daysAfter } from './today';
 import { getHeatingProfile, calculateHeatingShare } from './heating-profile.service';
 import { billingStart, getContractsByPeriod, type ContractWithDetails } from './contract.service';
 
@@ -290,4 +293,110 @@ export async function calculateApartmentProrating(
 		occupiedDays,
 		occupancyRate: totalPeriodDays > 0 ? occupiedDays / totalPeriodDays : 0
 	};
+}
+
+// ============================================================================
+// #1284 «Aufgehobene Wohnung»: an apartment counts in the Verteilschlüssel on the days before «Aufgehoben ab»
+// ============================================================================
+
+export type CountedApartment = { id: string; number: string; area: number; rooms: number; discontinuedFrom: string | null };
+type Range = { start: string; end: string };
+type Share = { share: number; percentage: number };
+type PartGroup = { invoices: (Range & { amount: number })[]; totalAmount: number; isHeatingCost: boolean; distributionKeyId: string | null };
+type PartRun = { periodStart: Date; periodEnd: Date; heatingProfileId?: string; wholePeriod: boolean };
+type LineDays = { positionRentalDays: number | null; billedDays: number | null; invoiceParts: InvoicePart[] | null };
+// what the calculation does for one group: the apartment's share by the key, the tenant's part of it
+type Calculation<G, R> = {
+	keyShare: (apartments: CountedApartment[], apartmentId: string, total: number, keyId: string | null) => Promise<Share>;
+	shareOfGroup: (group: G, key: Share, run: R, rental: Range) => Promise<{ tenantShare: number; periodShare: number; shareDays: LineDays }>;
+};
+
+export const countingOn = (day: string) => (apartment: { discontinuedFrom: string | null }) =>
+	!apartment.discontinuedFrom || apartment.discontinuedFrom > day;
+
+/** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
+export function keyValuesAmong(all: Array<{ id: string; area: number; rooms: number }>, apartmentId: string): KeyValues | null {
+	const own = all.find((apartment) => apartment.id === apartmentId);
+	if (!own) return null;
+	const pair = (value: (apartment: (typeof all)[number]) => number): [number, number] => [value(own), all.reduce((sum, apartment) => sum + value(apartment), 0)];
+	return { area: pair((a) => a.area), units: pair(() => 1), rooms: pair((a) => a.rooms) };
+}
+
+const isoDay = (date: Date) => date.toISOString().slice(0, 10);
+const dayCount = (start: string, end: string) => (Date.parse(end) - Date.parse(start)) / 86_400_000 + 1;
+const later = (a: string, b: string) => (a > b ? a : b);
+const earlier = (a: string, b: string) => (a < b ? a : b);
+
+// the period's parts, split at each day from which an apartment no longer exists that falls into the tenant's days
+function partsOf(all: CountedApartment[], period: Range, rental: Range) {
+	const cuts = [...new Set(all.map((a) => a.discontinuedFrom).filter((day): day is string => !!day && day > rental.start && day <= rental.end))].sort();
+	return [period.start, ...cuts].map((start, i) => ({ start, end: i < cuts.length ? daysAfter(cuts[i], -1) : period.end }));
+}
+
+// A group's invoices in one part: each with its amount for its days there, heating costs by the Heizprofil's months
+// (Fachreview 1284-1, Art. 7 Abs. 1 VMWG), else by days; the part's costs rounded as printed (V-3)
+function groupIn<G extends PartGroup>(group: G, part: Range, profile: HeatingProfile | null): G {
+	const weight = (start: string, end: string) => (profile ? calculateHeatingShare(profile, new Date(start), new Date(end), 100).percentage : dayCount(start, end));
+	const invoices = group.invoices.flatMap((invoice) => {
+		const [start, end] = [later(invoice.start, part.start), earlier(invoice.end, part.end)];
+		if (start > end) return [];
+		const whole = weight(invoice.start, invoice.end);
+		const share = whole > 0 ? weight(start, end) / whole : dayCount(start, end) / dayCount(invoice.start, invoice.end);
+		return [{ ...invoice, start, end, amount: invoice.amount * share }];
+	});
+	return { ...group, invoices, totalAmount: roundToRappen(invoices.reduce((sum, invoice) => sum + invoice.amount, 0)) };
+}
+
+// a part as stored for the PDF: its costs, the apartments that count, the apartment's and the tenant's share
+const segmentOf = (part: Range, counting: CountedApartment[], apartmentId: string, costs: number, key: Share, result: { tenantShare: number; periodShare: number; shareDays: LineDays }): LineSegment => ({
+	...part,
+	count: counting.length,
+	keyValues: keyValuesAmong(counting, apartmentId)!,
+	costs,
+	apartment: key.share,
+	periodShare: Math.round(result.periodShare * 10000) / 10000,
+	...(result.shareDays.billedDays && { days: result.shareDays.positionRentalDays!, total: result.shareDays.billedDays }),
+	share: result.tenantShare
+});
+
+// the tenant's share of a group whose days a day of «Aufgehoben ab» splits: per part the costs, the apartment's share of
+// them among the apartments that count, the tenant's share of that, each as printed (Fachreview 1284-1 V-3)
+async function shareByParts<G extends PartGroup, R extends PartRun>(group: G, all: CountedApartment[], apartmentId: string, days: { run: R; rental: Range }, calc: Calculation<G, R>) {
+	const { run, rental } = days;
+	const profile = group.isHeatingCost && run.heatingProfileId ? await getHeatingProfile(run.heatingProfileId) : null;
+	const parts = partsOf(all, { start: isoDay(run.periodStart), end: isoDay(run.periodEnd) }, rental);
+	const segments = (await Promise.all(parts.map((part) => partShare(part, { group, all, apartmentId, days, profile }, calc)))).filter((segment) => !!segment);
+	const tenantShare = roundToRappen(segments.reduce((sum, segment) => sum + segment.share, 0));
+	const apartmentShare = roundToRappen(segments.reduce((sum, segment) => sum + segment.apartment, 0));
+	return { tenantShare, apartmentShare, periodShare: apartmentShare ? tenantShare / apartmentShare : 0, segments };
+}
+
+// one part: none where no invoice bills a day of it
+type PartOf<G, R> = { group: G; all: CountedApartment[]; apartmentId: string; days: { run: R; rental: Range }; profile: HeatingProfile | null };
+async function partShare<G extends PartGroup, R extends PartRun>(part: Range, { group, all, apartmentId, days, profile }: PartOf<G, R>, calc: Calculation<G, R>) {
+	const { run, rental } = days;
+	const partGroup = groupIn(group, part, profile);
+	if (!partGroup.invoices.length) return null;
+	const counting = all.filter(countingOn(later(part.start, rental.start)));
+	const key = await calc.keyShare(counting, apartmentId, partGroup.totalAmount, group.distributionKeyId);
+	const partRental = { start: later(part.start, rental.start), end: earlier(part.end, rental.end) };
+	const partRun = { ...run, periodStart: new Date(part.start), periodEnd: new Date(part.end), wholePeriod: partRental.start === part.start && partRental.end === part.end };
+	const result = await calc.shareOfGroup(partGroup, key, partRun, partRental);
+	const discontinued = all.filter((a) => a.discontinuedFrom === part.start).map((a) => ({ number: a.number, date: part.start }));
+	const profileShare = profile && group.totalAmount ? roundToRappen((partGroup.totalAmount / group.totalAmount) * 100) : undefined;
+	return { ...segmentOf(part, counting, apartmentId, partGroup.totalAmount, key, result), ...(profileShare != null && { profileShare }), ...(discontinued.length && { discontinued }) };
+}
+
+/**
+ * A position of the tenant: by the apartments that count on his days, split into parts when a day of «Aufgehoben ab»
+ * falls into them
+ */
+export async function lineByParts<G extends PartGroup, R extends PartRun>(group: G, all: CountedApartment[], apartmentId: string, days: { run: R; rental: Range }, calc: Calculation<G, R>) {
+	const { run, rental } = days;
+	if (partsOf(all, { start: isoDay(run.periodStart), end: isoDay(run.periodEnd) }, rental).length > 1) {
+		const parts = await shareByParts(group, all, apartmentId, days, calc);
+		return { ...parts, shareDays: { positionRentalDays: null, billedDays: null, invoiceParts: null } as LineDays };
+	}
+	const key = await calc.keyShare(all.filter(countingOn(rental.start)), apartmentId, group.totalAmount, group.distributionKeyId);
+	return { ...(await calc.shareOfGroup(group, key, run, rental)), apartmentShare: key.share, segments: null };
 }

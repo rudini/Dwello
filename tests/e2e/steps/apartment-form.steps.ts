@@ -1,11 +1,13 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { manualStatusChoices, numberTaken, statusFromContracts } from '../questions/apartment-form';
+import { errorMessage } from '../questions/form';
 import {
 	blockApartment,
 	changeArea,
 	changeNumber,
 	chooseBuilding,
+	discontinueApartment,
 	enterNumber,
 	openApartmentEdit,
 	openNewApartment,
@@ -66,6 +68,10 @@ When('der Liegenschaftsverwalter die Fläche auf {string} ändert', async ({ ver
 	await verwalter.attemptsTo(changeArea(area));
 });
 
+When('der Liegenschaftsverwalter die Wohnung ab {string} aufhebt', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(discontinueApartment(date));
+});
+
 When('der Liegenschaftsverwalter die Wohnung sperrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(blockApartment);
 });
@@ -82,5 +88,13 @@ Then(
 	async ({ verwalter }, status: string) => {
 		await verwalter.sees(statusFromContracts).toBe(status);
 		await verwalter.sees(manualStatusChoices).toBe(0);
+	}
+);
+
+// #1284: the refusal names the tenant of the contract that still runs, with the scenario's unique name
+Then(
+	'sieht der Liegenschaftsverwalter die Fehlermeldung {string} zum Mietvertrag von {string}',
+	async ({ verwalter, names }, text: string, tenant: string) => {
+		await verwalter.sees(errorMessage).toContain(text.replace(tenant, names.get(tenant) ?? tenant));
 	}
 );

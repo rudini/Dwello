@@ -77,7 +77,11 @@
 			"positionRentalDays": 366,
 			"billedDays": 366,
 			"invoiceParts": null,
-			"invoices": [{ "id": "i1", "description": "Heizöl 2024", "amount": 1000, "start": "2024-01-01", "end": "2024-12-31" }]
+			"invoices": [{ "id": "i1", "description": "Heizöl 2024", "amount": 1000, "start": "2024-01-01", "end": "2024-12-31" }],
+			"segments": [
+				{ "start": "2024-01-01", "end": "2024-06-30", "count": 3, "keyValues": { "area": [70, 210], "units": [1, 3], "rooms": [3.5, 10.5] }, "costs": 500, "apartment": 166.67, "periodShare": 1, "days": 182, "total": 182, "share": 166.67 },
+				{ "start": "2024-07-01", "end": "2024-12-31", "count": 2, "keyValues": { "area": [70, 140], "units": [1, 2], "rooms": [3.5, 7] }, "costs": 500, "apartment": 250, "periodShare": 1, "days": 184, "total": 184, "share": 250, "discontinued": [{ "number": "1.03", "date": "2024-07-01" }] }
+			]
 		}
 	],
 	"heatingProfile": { "id": "h1", "name": "Standard" },

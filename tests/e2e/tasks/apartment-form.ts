@@ -1,8 +1,9 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, Navigate, Select } from '../screenplay/interactions';
+import { Click, Enter, EnterDate, Navigate, Select } from '../screenplay/interactions';
 import {
 	areaInput,
 	buildingSelect,
+	discontinuedInput,
 	floorSelect,
 	numberInput,
 	roomsSelect,
@@ -38,3 +39,7 @@ export const changeArea = (area: string): Activity => (actor) =>
 
 export const blockApartment: Activity = (actor) =>
 	actor.attemptsTo(Select.option('reserved').from(statusSelect), saveApartment);
+
+// #1284: the day from which the apartment no longer exists
+export const discontinueApartment = (isoDate: string): Activity => (actor) =>
+	actor.attemptsTo(EnterDate.of(isoDate).into(discontinuedInput), saveApartment);

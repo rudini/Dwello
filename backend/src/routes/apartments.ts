@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { refusal } from '../services/coded-error';
+import { CodedError, errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import { apartments } from '../db/schema';
 import { refuseTooLong } from '../services/text-length';
@@ -58,7 +58,8 @@ const apartmentUpdateSchema = t.Partial(
 		floor: t.Number(),
 		area: t.String(),
 		rooms: t.String(),
-		status: t.Optional(manualStatus)
+		status: t.Optional(manualStatus),
+		discontinuedFrom: t.Union([t.String({ format: 'date' }), t.Null()]) // «Aufgehoben ab» (#1284); null: it exists
 	})
 );
 
@@ -141,9 +142,9 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 			try {
 				apartment = await updateApartment(params.id, body);
 			} catch (error) {
-				if (!numberTaken(error)) throw error;
+				if (!(error instanceof CodedError) && !numberTaken(error)) throw error;
 				set.status = 409;
-				return numberTakenError(body.number!);
+				return error instanceof CodedError ? errorBody(error, 'Apartment not updated') : numberTakenError(body.number!); // #1284
 			}
 			if (!apartment) {
 				set.status = 404;

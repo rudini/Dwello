@@ -11,7 +11,7 @@ import { join } from 'path';
 import { generateCode, recipientOf } from '../services/backup-crypto';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { auditLog, backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatementLineItems, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
+import { apartments, auditLog, backupCodes, buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatementLineItems, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
@@ -578,6 +578,31 @@ describe('API-Verträge des Frontends', () => {
 			const response = await callApi(`/api/v1/apartments/${rented.apartment}`, { method: 'DELETE' });
 			expect(response.status).toBe(409);
 			expect(drift(await sample('apartment-delete-refused'), await response.json())).toEqual([]);
+		} finally {
+			await rented.remove();
+		}
+	});
+
+	// #1284: «Aufgehoben ab» while a contract still runs on that day
+	it('PUT /apartments/:id mit «Aufgehoben ab» während eines Mietvertrags liefert die Felder von apartment-contract-runs.json', async () => {
+		const rented = await createRental(`${token}-apartment-discontinued`, { startDate: '2019-01-01', monthlyAdvancePayment: '0' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/apartments/${rented.apartment}`, { discontinuedFrom: '2025-07-01' });
+			expect(response.status).toBe(409);
+			expect(drift(await sample('apartment-contract-runs'), await response.json())).toEqual([]);
+		} finally {
+			await rented.remove();
+		}
+	});
+
+	// #1284 (Code-Review 1284-2 C-1): a contract of an apartment that no longer exists from a day ends before it
+	it('PUT /contracts/:id mit einem Vertragsende nach «Aufgehoben ab» liefert die Felder von contract-apartment-discontinued.json', async () => {
+		const rented = await createRental(`${token}-contract-discontinued`, { startDate: '2020-01-01', endDate: '2099-03-31', monthlyAdvancePayment: '0' });
+		try {
+			await db.update(apartments).set({ discontinuedFrom: '2099-07-01' }).where(eq(apartments.id, rented.apartment));
+			const response = await sendJson('PUT', `/api/v1/contracts/${rented.contract}`, { endDate: '2099-12-31' });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('contract-apartment-discontinued'), await response.json())).toEqual([]);
 		} finally {
 			await rented.remove();
 		}

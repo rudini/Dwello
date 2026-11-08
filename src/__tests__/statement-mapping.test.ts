@@ -8,6 +8,13 @@ import resetStatement from '../../tests/contracts/statement-payment-reset.json';
 const toStatement = (answer: object) => mapped(answer as Parameters<typeof mapped>[0]);
 
 describe('Abrechnung aus dem Backend', () => {
+	// #1284: the apartments that no longer count from a day of its billed days, once each, for the note on the page
+	it('nennt die aufgehobenen Wohnungen aus den Zeiträumen der Positionen', () => {
+		const twice = { ...backendStatement, lineItems: [backendStatement.lineItems[0], backendStatement.lineItems[0]] };
+		expect(toStatement(twice).discontinued).toEqual([{ number: '1.03', date: '2024-07-01' }]);
+		expect(toStatement({ ...backendStatement, lineItems: [{ ...backendStatement.lineItems[0], segments: null }] }).discontinued).toEqual([]);
+	});
+
 	// #788, review p3a C-2: what the statement allows comes from the backend; an answer without it allows nothing
 	it('übernimmt, was die Abrechnung erlaubt', () => {
 		const { editable, correctable, asksPayment, superseded } = toStatement(backendStatement);

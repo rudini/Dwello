@@ -18,7 +18,9 @@ import {
 	type QRBillConfig,
 	type StatementForQRBill
 } from './qr-bill.service';
-import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { fill, formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { formatFloor, namedByFloor } from './pdf-floor';
+import { segmentIntros, segmentLine, type Segment } from './pdf-segments';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
 import { greetingWords } from './reminder-letter';
@@ -56,6 +58,7 @@ export interface LineItem {
 	invoiceParts?: Part[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
+	segments?: Segment[] | null; // #1284: its parts before and from the day an apartment no longer exists
 	tenantShare: number;
 }
 
@@ -158,38 +161,6 @@ const qrAmount = (amount: number) => formatCHF(amount).replace(/'/g, ' ');
 /** 0.6694 → 66.94 % (always two places) */
 const formatShare = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
 
-// The floor as tenants write it: ground floor, above, below
-// English counts floors with ordinals: 1st, 2nd, 3rd, 4th (461-native-en, EN-32)
-const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' };
-const englishFloor = (word: string) => (n: number) =>
-	`${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]} ${word}`; // below ground too (#449)
-// the first floor below ground has no number, from the second on it is counted, as on the screens (#597)
-const FLOORS: Record<Language, [string, (n: number) => string, string, (n: number) => string]> = {
-	de: ['EG', (n) => `${n}. OG`, 'UG', (n) => `${n}. UG`],
-	fr: ['rez-de-chaussée', (n) => (n === 1 ? '1er étage' : `${n}e étage`), 'sous-sol', (n) => (n === 1 ? '1er sous-sol' : `${n}e sous-sol`)],
-	it: ['pianterreno', (n) => `${n}° piano`, 'piano interrato', (n) => `${n}° piano interrato`],
-	en: ['ground floor', englishFloor('floor'), 'basement', englishFloor('basement')]
-};
-
-function formatFloor(floor: number, lang: Language): string {
-	const [ground, above, basement, below] = FLOORS[lang];
-	return floor === 0 ? ground : floor > 0 ? above(floor) : floor === -1 ? basement : below(-floor);
-}
-
-// «EG», «eg» or «EG Links» on the ground floor already name the floor: the PDF does not print it twice (#500);
-// spaces and case do not count («1.OG»), a longer word does («EGG»)
-const startsWithFloor = (number: string, name: string) =>
-	new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s*')}(?=$|[\\s,-])`, 'i').test(number.trim());
-// the name of the floor as many levels below ground can start with it («1° piano interrato» on floor 1): a contradiction stays;
-// the first floor below ground typed with its count («1. UG») names it too (Fachreview 597-1 V-2)
-const counted = (floor: number, lang: Language) => FLOORS[lang][3](Math.abs(floor));
-const namedByFloor = (number: string, floor: number, lang: Language) =>
-	(startsWithFloor(number, formatFloor(floor, lang)) || (floor === -1 && startsWithFloor(number, counted(floor, lang)))) &&
-	!(floor > 0 && startsWithFloor(number, counted(floor, lang)));
-
-const fill = (text: string, values: Record<string, string | number>) =>
-	Object.entries(values).reduce((result, [key, value]) => result.split(`{${key}}`).join(String(value)), text);
-
 // The base of the management fee: the subtotal, the tenant's own costs
 const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
 	fill(t.feeOwn, { percent: data.managementFeePercent, base: formatCHF(data.subtotal) });
@@ -199,6 +170,7 @@ const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
 // that (a contract over the whole period bears every day), else the percentage; the heating profile's share as one
 function timeShare(item: LineItem, data: StatementPDFData, t: Record<string, string>) {
 	if (item.periodShare == null) return '–';
+	if (item.segments) return formatShare(item.periodShare); // the parts below show their days (#1284)
 	if (!item.byProfile && item.shareDays) return fill(t.days, item.shareDays);
 	// the invoices under it give the share (#226, C-5); summing to zero they have none (#237)
 	if (item.invoiceParts) return item.totalAmount === 0 ? '–' : formatShare(item.periodShare);
@@ -471,7 +443,7 @@ function costTable(page: Page, y: number) {
 	const note = sharesNote(data, t);
 	const closing = totals + 4 + doc.font(FONT.regular).fontSize(7.5).heightOfString(note, { width: PAGE.right - PAGE.left });
 	const rows = data.lineItems.map((item) => {
-		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
+		const key = [item.key ?? '–', item.segments ? t.keyShareSegments : item.keyShare].filter(Boolean).join('\n');
 		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
 		return { cells: [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)], parts: partLines(item, t) };
 	});
@@ -512,6 +484,7 @@ function costTable(page: Page, y: number) {
 // the Zeitanteil, and «Ihr Anteil» as Wohnungsanteil × that sum; invoices summing to zero by the apartment's share by
 // the key (#237). A negative amount stands with a minus, not «+ -300.00» (#257)
 function partLines(item: LineItem, t: Record<string, string>) {
+	if (item.segments) return item.segments.map((segment) => segmentLine(segment, t));
 	const parts = item.invoiceParts;
 	if (!parts || item.apartmentShare == null) return [];
 	// a line without a Leistungszeitraum begins with its invoice; one the same as another's gets it in front (V-8)
@@ -529,6 +502,10 @@ function partLines(item: LineItem, t: Record<string, string>) {
 	if (item.totalAmount !== 0) return [...lines, fill(t.partShare, share)];
 	return [...lines, fill(t.partShareZero, { ...share, keyShare: keyFactor(item, parts) })];
 }
+
+// Paragraphs over the width of the page, each kept on one page (#1284: the apartment no longer counting)
+const paragraphs = ({ doc }: Page, texts: string[], y: number) =>
+	texts.reduce((top, text) => doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(text, PAGE.left, room(doc, top, 30), { width: PAGE.right - PAGE.left }).y + 8, y);
 
 // The apartment's part by the key as printed with the key (a mixed key in brackets), else as a percentage of the sum
 function keyFactor(item: LineItem, parts: InvoicePart[]) {
@@ -946,7 +923,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 			const page: Page = { doc, t, data, config, language };
 			let y = title(page, addresses(page));
 			y = balanceBox(page, y);
-			y = costTable(page, y);
+			y = costTable(page, paragraphs(page, segmentIntros(data.lineItems, t), y));
 			y = heatingSection(page, y);
 			y = notes(page, y);
 			let qrPage: number | null = null;
