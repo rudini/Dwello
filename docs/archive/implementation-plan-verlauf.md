@@ -1517,6 +1517,15 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] code-reviewer closing round `docs/reviews/1197-review-2.md`: no findings; Helga round 2 `docs/design/personas/helga-1197-2.md`: P-1 fixed, no findings
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-1197.md`
 - [x] Archive the session; PR pushed after this archive
+## Session: #705 ponytail shortcut in missingByContract
+
+- [x] Checked on main 75b78a9: the marker at `statement-run.service.ts:120`, `listContracts`/`listStatements` cut at `limit: 1000`
+- [x] Decision in #705 «Decided (product owner)»: fix now with `limit: null`; the other whole-list calls are #1229
+- [x] pg test «nennt auch bei über 1000 Mietverträgen und Abrechnungen …» seen red at each list (contract, then statement); `limit: null` in both lists, marker removed (c35d25c); `ANALYZE` in the test's cleanup against stale planner statistics
+- [x] code-reviewer `docs/reviews/705-review-1.md`: Minor C-1 (comment) fixed
+- [x] No scenario: backend only, nothing a screen shows changes under 1000 records; covered by the pg test
+- [x] Workflow note `docs/reviews/workflow-notes-issue-705.md`
+- [x] Archive the session; PR `Fixes #705`: pushed after this archive
 ## Session: #733 Deletion toast and the statement filter
 
 - [x] Reproduced on `main`: the «… gelöscht» toast covers the «Gebäude» field at about 1030 px (focus on the page title); free at 1440 px (100–200 %) and 390 px
@@ -1541,6 +1550,13 @@ No scenario: the demo's update script runs on the VM outside the E2E stack; `too
 - [x] Archive session; PR `Fixes #1028`: pushed after this archive
 ## Session: #739 E2E default Heizprofil per run
 
+## Session: #714 design guard: style shorthands and system colours
+
+- [x] Read #714 on main (75b78a9): no source has a `<style>` element any more (`pdfRefusal` redirects since #734); decided to implement now, recorded in the issue
+- [x] Rule «Farbe im style-Element» reads `border`, `outline` and their side shorthands, allows the CSS Color 4 system colours, CSS-wide and border keywords and `var(--x)`; pattern cases seen red; `token-referenz.md` aligned. No scenario: test-only source guard
+- [x] Slice review `docs/reviews/style-guard-714-review-1.md`: no findings
+- [x] Checks: lint, check, fitness, backend type-check, design-guard test
+- [x] Archive session; PR `Fixes #714`: pushed after this archive
 ## Session: #1099 Remove the code paths for Abrechnungsperioden under a year
 
 No scenario: the preview hint on invoices that count in full in a period under a year is unreachable since #1088 (wizard step 2 and the backend refuse such a period, and correction and recalculation never showed it); the rest stays.

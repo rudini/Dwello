@@ -52,7 +52,7 @@ export interface StatementFilters {
 	status?: string;
 	periodStart?: string;
 	periodEnd?: string;
-	limit?: number;
+	limit?: number | null; // null: every statement (#705)
 	offset?: number;
 }
 
@@ -159,7 +159,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	const whereClause = and(...conditions);
 
 	// Build the query with joins
-	const results = await db
+	const ordered = db
 		.select({
 			statement: statementColumns,
 			tenant: {
@@ -186,8 +186,8 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause)
 		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt), desc(utilityStatements.id))
-		.limit(limit)
-		.offset(offset);
+		.$dynamic();
+	const results = await (limit == null ? ordered : ordered.limit(limit)).offset(offset);
 
 	// Batch load all line items for the fetched statements (avoids N+1 query)
 	const statementIds = results.map((r) => r.statement.id);
