@@ -54,7 +54,7 @@ export const it: Record<string, string> = {
 	offsetWith: 'Già compensato con {numbers}',
 	offsetShort: 'già compensato',
 	and: 'e',
-	heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
+	heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent}\u00a0% della quota appartamento delle spese di riscaldamento nel periodo di conteggio',
 	heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
 	heatingNoteOwn: 'Spese di riscaldamento secondo il profilo «{profile}»: per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
 	heatingMonths: 'Quote dei mesi del suo rapporto di locazione nel profilo di riscaldamento, che ripartisce le spese di riscaldamento di un anno sui dodici mesi: {months}',

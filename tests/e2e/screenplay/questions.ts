@@ -253,6 +253,24 @@ export const BrokenWords = {
 		)
 };
 
+/** The texts the target shows on screen, one entry per line from top to bottom (texts on one line joined by a space);
+ *  a text hidden for screen readers only (sr-only, one pixel wide) does not count (#1179) */
+export const ShownLines = {
+	of: (target: Target) =>
+		about(target, 'the lines shown of', (element) =>
+			element.evaluateAll((all) => {
+				const lines = new Map<number, string[]>();
+				for (const one of all) {
+					const box = one.getBoundingClientRect();
+					if (box.width <= 1) continue;
+					const top = Math.round(box.top);
+					lines.set(top, [...(lines.get(top) ?? []), (one.textContent ?? '').trim().replace(/\s+/g, ' ')]);
+				}
+				return [...lines].sort(([a], [b]) => a - b).map(([, texts]) => texts.join(' '));
+			})
+		)
+};
+
 /** How many pixels of the chosen option's text a select cuts off: a select clips its text instead of wrapping (#1089) */
 export const CutInChoice = {
 	of: (target: Target) =>
