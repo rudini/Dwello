@@ -144,10 +144,12 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Seeblick', '1.02', 'vacant');
 	await seed.apartment('Seeblick', '1.03', 'vacant'); // free: never rented
 	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2099
-	// #1301: an apartment with a new Fläche and Zimmeranzahl from a day, in a building of its own
-	await seed.building('Umbauhof', 'Winterthur');
-	await seed.apartment('Umbauhof', 'U.01', 'vacant');
-	await seed.changeApartmentSize('U.01', '2025-07-01', '105', '4.5');
+	// #1301: an apartment with a new Fläche and Zimmeranzahl from a day, in a building of its own, only for its screen
+	if (path.includes('{resizedApartment}')) {
+		await seed.building('Umbauhof', 'Winterthur');
+		await seed.apartment('Umbauhof', 'U.01', 'vacant');
+		await seed.changeApartmentSize('U.01', '2025-07-01', '105', '4.5');
+	}
 	await seed.tenant('Anna');
 	await seed.tenant('Bruno');
 	await seed.tenant('Carla');

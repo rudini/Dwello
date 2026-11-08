@@ -7,6 +7,7 @@ import { monthlyTotal } from '../lib/server/contract-history';
 import {
 	floorLabel,
 	floorOptions,
+	roomOptions,
 	moveOutText,
 	occupancyParts,
 	statusHelp,
@@ -377,6 +378,14 @@ describe('Auswahl der Stockwerke', () => {
 	});
 });
 
+// #1301 (personas Helga and Dr. Weber P-1): an apartment joined with another one has more rooms than 6.5
+describe('Auswahl der Zimmeranzahl', () => {
+	it('bietet bis 10 Zimmer in halben Schritten an', () => {
+		const values = roomOptions().map((option) => option.value);
+		expect([values[0], values.at(-1), values.includes('7.5'), values.length]).toEqual(['1', '10', true, 19]);
+	});
+});
+
 const fields = { buildingId: 'b1', number: ' 4.01 ', floor: '4', area: '68', rooms: '2.5' };
 
 describe('Neue Wohnung', () => {
@@ -498,6 +507,12 @@ describe('Fläche und Zimmeranzahl ab einem Tag', () => {
 				}
 			}
 		});
+	});
+
+	// Code-Review 1301-1 C-3: a failure only between BFF and backend (no scenario) keeps the dialog with its reason
+	it('meldet ein misslungenes Entfernen', async () => {
+		const { result } = runAction(actions.removeSizeChange, 'a1', 500, {}, { error: 'Internal error' });
+		expect(await result).toMatchObject({ status: 500, data: { sizeChangeError: 'Wohnung konnte nicht gespeichert werden.' } });
 	});
 
 	it('entfernt die letzte Änderung und bleibt auf der Seite der Wohnung', async () => {

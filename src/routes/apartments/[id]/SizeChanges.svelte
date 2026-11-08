@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
+	import { dayAfter } from '$lib/swiss-date';
 	import { formatDate, normalizeDecimal } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -17,9 +18,7 @@
 	let removing = $state(false);
 	let form = $state<HTMLFormElement>();
 	const last = $derived(sizes.at(-1)!);
-	const dayAfter = $derived(
-		new Date(Date.parse(last.until) + 86_400_000).toISOString().slice(0, 10)
-	);
+	const changed = $derived(dayAfter(last.until)); // the day of the last change
 	const values = (size: { area: string; rooms: string }) => ({
 		area: normalizeDecimal(size.area),
 		rooms: normalizeDecimal(size.rooms)
@@ -40,7 +39,7 @@
 			icon="delete"
 			onclick={() => (open = true)}
 			testid="apartment-size-change-remove"
-			>{m.apartments_size_change_remove({ date: formatDate(dayAfter) })}</Button
+			>{m.apartments_size_change_remove({ date: formatDate(changed) })}</Button
 		>
 	</dd>
 </dl>
@@ -61,7 +60,7 @@
 
 <Dialog
 	bind:open
-	title={m.apartments_size_change_remove_title({ date: formatDate(dayAfter) })}
+	title={m.apartments_size_change_remove_title({ date: formatDate(changed) })}
 	confirmLabel={m.apartments_size_change_remove_confirm()}
 	danger
 	busy={removing}
@@ -69,7 +68,7 @@
 	confirmTestid="apartment-size-change-remove-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
-	<p>{m.apartments_size_change_remove_text({ date: formatDate(dayAfter), ...values(last) })}</p>
+	<p>{m.apartments_size_change_remove_text({ date: formatDate(changed), ...values(last) })}</p>
 	{#if serverError}
 		<Alert tone="critical" title={serverError} testid="form-error" />
 	{/if}
