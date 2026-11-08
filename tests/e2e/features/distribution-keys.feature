@@ -128,4 +128,4 @@ Funktionalität: Verteilschlüssel
     Und der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" löscht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Der Verteilschlüssel steht in einer Abrechnung und kann nicht gelöscht werden. Eine versendete Abrechnung bleibt, wie der Mieter sie erhalten hat, mit ihren Verteilschlüsseln. Steht der Verteilschlüssel nur in Entwürfen, berechnen Sie diese mit «Neu berechnen» auf ihrer Seite neu oder löschen Sie sie. Danach lässt sich der Verteilschlüssel löschen."
-    Und sieht der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer"
+    Und zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Fläche und Zimmer"

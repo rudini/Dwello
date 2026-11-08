@@ -123,10 +123,6 @@ Then(
 	}
 );
 
-Then('sieht der Liegenschaftsverwalter den Verteilschlüssel {string}', async ({ verwalter, names }, title: string) => {
-	await verwalter.sees(listedKeysNamed(names.get(title)!)).toBe(1);
-});
-
 Then(
 	'zeigt die Seite "Verteilschlüssel" den Verteilschlüssel {string}',
 	async ({ verwalter, names }, title: string) => {
