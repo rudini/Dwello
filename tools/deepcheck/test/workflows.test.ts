@@ -14,23 +14,33 @@ function job(workflow: string, name: string): string {
 }
 
 describe('GitHub Actions wiring', () => {
-	it('adds one blocking deepcheck job to the PR workflow, set up like the Fallow job', () => {
-		const deepcheck = job(read('.github/workflows/ci.yml'), 'deepcheck');
-		expect(deepcheck).toContain('name: Deep modules');
-		expect(deepcheck).toContain("if: github.event_name == 'pull_request'");
-		expect(deepcheck).toContain('runs-on: ubuntu-latest');
-		expect(deepcheck).toContain('fetch-depth: 0');
-		expect(deepcheck).toContain('node-version: ${{ env.NODE_VERSION }}');
-		expect(deepcheck).toContain('bun install --frozen-lockfile');
-		expect(deepcheck).toContain('bunx svelte-kit sync');
-		expect(deepcheck).toContain('bun run deepcheck:ci -- "origin/${{ github.base_ref }}"');
-		expect(deepcheck).not.toContain('continue-on-error');
+	it('runs the deepcheck gate as a blocking step of the quick-checks job, on pull requests', () => {
+		const quick = job(read('.github/workflows/ci.yml'), 'static-checks');
+		expect(quick).toContain('runs-on: ubuntu-latest');
+		expect(quick).toContain('fetch-depth: 0');
+		expect(quick).toContain('node-version: ${{ env.NODE_VERSION }}');
+		expect(quick).toContain('bun install --frozen-lockfile');
+		expect(quick).toContain('bunx svelte-kit sync');
+		expect(quick).toMatch(/- name: Deep modules\n {8}id: deepcheck\n {8}if: \$\{\{ !cancelled\(\) && steps\.deps\.outcome == 'success' && github\.event_name == 'pull_request' \}\}\n {8}run: bun run deepcheck:ci -- "origin\/\$\{\{ github\.base_ref \}\}"\n/);
+		expect(quick).not.toContain('continue-on-error');
 	});
 
-	it('leaves the existing jobs as they were', () => {
+	it('bundles the quick checks into one job, each in a step that runs after another one failed', () => {
 		const ci = read('.github/workflows/ci.yml');
-		for (const name of ['changes', 'build', 'static-checks', 'unit-tests', 'e2e-tests', 'fallow', 'ui-screenshots']) job(ci, name);
-		expect(job(ci, 'fallow')).toContain('run: bunx fallow audit --base');
+		for (const name of ['changes', 'build', 'static-checks', 'unit-tests', 'e2e-tests', 'ui-screenshots']) job(ci, name);
+		for (const name of ['fallow', 'fitness', 'deepcheck', 'testcheck']) expect(ci).not.toContain(`\n  ${name}:\n`);
+		const quick = job(ci, 'static-checks');
+		for (const run of ['bun run lint', 'bun run check', 'bun run type-check', 'bunx fallow audit --base', 'bun tools/fitness/fitness.ts', 'bun run deepcheck:ci', 'bun run testcheck:ci', 'node tools/open-work/check-issues.mjs'])
+			expect(quick).toContain(run);
+		const checks = quick.slice(quick.indexOf('id: deps'));
+		expect(checks.split('\n      - ').length - 1).toBe(checks.split("if: ${{ !cancelled() && steps.deps.outcome == 'success'").length);
+	});
+
+	it('names each failed quick check in the run summary', () => {
+		const quick = job(read('.github/workflows/ci.yml'), 'static-checks');
+		expect(quick).toMatch(/- name: Failed checks\n {8}if: failure\(\)\n {8}env:\n {10}STEPS: \$\{\{ toJSON\(steps\) \}\}\n/);
+		expect(quick).toContain('select(.value.outcome == "failure")');
+		expect(quick).toContain('$GITHUB_STEP_SUMMARY');
 	});
 
 	it('ships a manual, never-blocking scan workflow with a report summary and artifacts', () => {

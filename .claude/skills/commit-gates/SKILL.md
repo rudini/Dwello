@@ -19,11 +19,11 @@ Four `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit` 
 
 ## Deepcheck (`.claude/hooks/deepcheck-gate.sh`)
 
-Runs the changed-scope deepcheck (`bun run deepcheck:audit` shows it by hand) and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (job "Deep modules"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
+Runs the changed-scope deepcheck (`bun run deepcheck:audit` shows it by hand) and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (step "Deep modules" of the job "Lint and types"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
 
 ## Testcheck (`.claude/hooks/testcheck-gate.sh`)
 
-Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by hand) and blocks a test that can pass without checking what it claims (an empty test, `expect` without a called matcher, an unawaited `resolves`/`rejects`, a tautology, assertions only in a `catch`, a swallowing `try` or an unawaited callback) and two tests of one block with the same title or the same body; CI runs the same check (job "Test checks"). Fix the test as the finding says (`tools/testcheck/README.md`, "Rules"); a test that is right as it is gets `// testcheck-ignore <rule> -- <reason>` on the line above it, visible in the review.
+Runs testcheck on the changed test files (`bun run testcheck:audit` shows it by hand) and blocks a test that can pass without checking what it claims (an empty test, `expect` without a called matcher, an unawaited `resolves`/`rejects`, a tautology, assertions only in a `catch`, a swallowing `try` or an unawaited callback) and two tests of one block with the same title or the same body; CI runs the same check (step "Test checks" of the job "Lint and types"). Fix the test as the finding says (`tools/testcheck/README.md`, "Rules"); a test that is right as it is gets `// testcheck-ignore <rule> -- <reason>` on the line above it, visible in the review.
 
 ## Commit subject (`.claude/hooks/commit-msg-gate.mjs`)
 

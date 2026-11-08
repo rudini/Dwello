@@ -6,12 +6,12 @@ import { HINT_RULES, RULES } from '../src/gate.ts';
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../../../${path}`, import.meta.url)), 'utf8');
 
 describe('testcheck wiring', () => {
-	it('runs as a blocking pull request job on the changes since the base branch', () => {
+	it('runs as a blocking pull request step of the quick-checks job on the changes since the base branch', () => {
 		const ci = read('.github/workflows/ci.yml');
-		const job = ci.slice(ci.indexOf('\n  testcheck:\n'), ci.indexOf('\n  ui-screenshots:\n'));
-		expect(job).toContain("if: github.event_name == 'pull_request'");
+		const job = ci.slice(ci.indexOf('\n  static-checks:\n'), ci.indexOf('\n  unit-tests:\n'));
 		expect(job).toContain('fetch-depth: 0');
-		expect(job).toContain('bun run testcheck:ci -- "origin/${{ github.base_ref }}"');
+		expect(job).toContain('if: ${{ !cancelled() && steps.deps.outcome == \'success\' && github.event_name == \'pull_request\' }}\n        run: bun run testcheck:ci -- "origin/${{ github.base_ref }}"');
+		expect(job).not.toContain('continue-on-error');
 		expect(JSON.parse(read('package.json')).scripts['testcheck:ci']).toBe('node tools/testcheck/src/cli.ts check --format github --changed-since');
 	});
 
