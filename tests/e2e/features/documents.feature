@@ -80,3 +80,10 @@ Funktionalität: Dokumente
     Wenn der Liegenschaftsverwalter alle Dokumente ansieht
     Und der Liegenschaftsverwalter im Filter «Mieter» mit der Tastatur "Beat Huber" wählt
     Dann zeigt «Dokumente» "Noch keine Dokumente", und der Fokus bleibt im Filter «Mieter»
+
+  # #1181 (Helga H-1, Sven S-4): auch in «Dokumente» unterscheiden sich zwei Dokumente eines Mieters mit demselben Titel
+  Szenario: In «Dokumente» tragen zwei Dokumente mit demselben Titel eine Nummer
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Und "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Dann heissen die Dokumente zu "Anna Keller" "Ausweiskopie (1 von 2)" und "Ausweiskopie (2 von 2)", auch auf ihren Schaltflächen
