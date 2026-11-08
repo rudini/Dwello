@@ -99,6 +99,14 @@ describe('Neue Wohnung', () => {
 		expect(errors).toEqual(['Bitte wählen Sie ein Gebäude aus.', 'Fläche ist erforderlich.']);
 	});
 
+	// #1312 (Decided, Fachreview 1311-1 M-1): wer die Räume selbst nutzt, hebt die Wohnung nicht auf
+	it('rät bei «Aufgehoben ab», eigene Räume nicht aufzuheben, sondern zu sperren', () => {
+		show(EditApartmentPage, { data: { apartment: apartment() }, form: null } as never);
+		expect(helpOf('apartment-discontinued-input')).toContain(
+			'Nutzen Sie die Räume danach selbst, zum Beispiel als Büro, lassen Sie das Feld leer und wählen Sie den Mietstatus «Gesperrt»: Ihren Anteil an den Nebenkosten tragen dann weiterhin Sie, nicht die übrigen Mieter.'
+		);
+	});
+
 	// #1311: der Mietstatus einer aufgehobenen Wohnung folgt aus «Aufgehoben ab» (Fachreview 1311-1, Wortlaut)
 	it('zeigt den Mietstatus einer aufgehobenen Wohnung, ohne ihn ändern zu lassen', () => {
 		show(EditApartmentPage, {

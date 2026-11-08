@@ -44,7 +44,7 @@
 					id="discontinuedFrom"
 					name="discontinuedFrom"
 					label={m.apartments_form_discontinued_label()}
-					help="{m.apartments_form_discontinued_help()} {m.apartments_form_discontinued_merge_note()}"
+					help="{m.apartments_form_discontinued_help()} {m.apartments_form_discontinued_merge_note()} {m.apartments_form_discontinued_own_use_note()}"
 					value={apartment.discontinuedFrom ?? ''}
 					optional
 					testid="apartment-discontinued-input"

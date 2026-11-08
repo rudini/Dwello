@@ -228,6 +228,7 @@
 	"apartments_form_discontinued_label": "Aufgehoben ab",
 	"apartments_form_discontinued_help": "Nur ausfüllen, wenn es die Wohnung nach einem Umbau ab diesem Tag nicht mehr gibt. Bis zum Tag davor zählt sie in den Abrechnungen mit. Solange sie leer steht, tragen Sie ihren Anteil. Ab diesem Tag verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen. Versendete Abrechnungen bleiben unverändert; eine berichtigte Abrechnung rechnet mit diesem Tag. Solange es die Wohnung gibt, lassen Sie das Feld leer.",
 	"apartments_form_discontinued_merge_note": "Wird eine andere Wohnung dadurch grösser, kann Dwello ihre neue Fläche noch nicht ab diesem Tag berücksichtigen.",
+	"apartments_form_discontinued_own_use_note": "Nutzen Sie die Räume danach selbst, zum Beispiel als Büro, lassen Sie das Feld leer und wählen Sie den Mietstatus «Gesperrt»: Ihren Anteil an den Nebenkosten tragen dann weiterhin Sie, nicht die übrigen Mieter.",
 	"apartments_fact_discontinued": "Aufgehoben ab",
 	"statements_detail_discontinued_note": "Wohnung {number} gibt es ab {date} nicht mehr. Abrechnungspositionen mit Kosten vor und ab diesem Tag sind je Zeitraum gerechnet; die Zeilen dazu stehen im PDF.",
 	"apartments_delete_confirm": "Wohnung löschen",

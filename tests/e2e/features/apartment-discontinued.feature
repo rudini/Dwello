@@ -158,3 +158,4 @@ Funktionalität: Aufgehobene Wohnung
     Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
     Dann erklärt die Bearbeitungsseite der Wohnung zu «Aufgehoben ab» "Bis zum Tag davor zählt sie in den Abrechnungen mit. Solange sie leer steht, tragen Sie ihren Anteil. Ab diesem Tag verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen."
+    Und erklärt die Bearbeitungsseite der Wohnung zu «Aufgehoben ab» "Nutzen Sie die Räume danach selbst, zum Beispiel als Büro, lassen Sie das Feld leer und wählen Sie den Mietstatus «Gesperrt»: Ihren Anteil an den Nebenkosten tragen dann weiterhin Sie, nicht die übrigen Mieter."
