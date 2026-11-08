@@ -159,14 +159,16 @@
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>
 			<!-- a press on a button keeps the focus in the field: leaving it would show its error, grow the dialog
 			     and move the button away before the release (R7-F2, #653); the click then leaves the field, so it
-			     takes its value (a two-digit year) before the button acts (code review 653-1 C-1) -->
+			     takes its value (a two-digit year) before the button acts (code review 653-1 C-1); while busy a click
+			     on «Abbrechen» is ignored, so the focus stays on the busy confirm (#1209) -->
 			<div
 				class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end"
 				role="presentation"
 				onmousedown={(event) => event.preventDefault()}
-				onclickcapture={(event) => (event.target as HTMLElement).closest('button')?.focus()}
+				onclickcapture={(event) =>
+					!busy && (event.target as HTMLElement).closest('button')?.focus()}
 			>
-				<Button onclick={close} testid="dialog-cancel" disabled={busy}>{cancelLabel}</Button>
+				<Button onclick={close} testid="dialog-cancel">{cancelLabel}</Button>
 				<Button
 					variant={danger ? 'danger' : 'primary'}
 					onclick={onconfirm}

@@ -93,6 +93,17 @@ describe('Button', () => {
 		}
 	);
 
+	// #1209 (persona Helga P-1): the label alone did not show it is locked; the sign is decorative, the status speaks
+	it('zeigt während des Arbeitens vor der Beschriftung ein Fortschrittszeichen, das sich nur ohne reduzierte Bewegung dreht', () => {
+		show(Button, { children: label, busy: true, busyLabel: 'Wird gespeichert …', testid: 'save' });
+		const button = byTestId('save')!;
+		const sign = byTestId('save-busy-indicator')!;
+		expect(button.firstElementChild).toBe(sign);
+		expect(sign.nextSibling?.textContent?.trim()).toBe('Wird gespeichert …');
+		expect(sign.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+		expect(sign.className.split(/\s+/)).toContain('motion-safe:animate-spin');
+	});
+
 	// #677: the form is not sent a second time while the first sending runs
 	it('sendet sein Formular nicht ein zweites Mal, solange es arbeitet', () => {
 		const form = document.body.appendChild(document.createElement('form'));

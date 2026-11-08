@@ -3,6 +3,7 @@ import { Click, DownloadFrom, Enter, FailRequests, HoldRequests, Upload } from '
 import { deleteConfirmButton } from '../targets/form';
 import {
 	deleteDocumentButton,
+	deleteDocumentCancel,
 	documentFileInput,
 	documentTitleInput,
 	openDocumentLink,
@@ -43,6 +44,8 @@ export const chooseFile = (file: File) => Upload.theFile(file).into(documentFile
 export const startDeletingDocument = (title: string) => Click.on(deleteDocumentButton(title));
 // the open delete dialog, of a document or of the tenant
 export const confirmDeleting = Click.on(deleteConfirmButton);
+// #1209: the cancel of the open delete dialog
+export const cancelDeleting = Click.on(deleteDocumentCancel);
 
 export const openDocument = (title: string) => DownloadFrom(openDocumentLink(title));
 // a file the backend refuses opens the app's error page instead (#1093)

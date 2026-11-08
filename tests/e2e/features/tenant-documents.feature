@@ -142,6 +142,24 @@ Funktionalität: Dokumente eines Mieters
     Und der Liegenschaftsverwalter das Löschen bestätigt
     Dann sagt Dwello bei «Dokument löschen» "Bitte warten …" an, und der Fokus bleibt dort
 
+  # #1209 (Persona Helga P-1): ein arbeitender Knopf sieht auf den ersten Blick gesperrt aus
+  Szenario: Während des Hochladens zeigt «Dokument hochladen» ein Fortschrittszeichen
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Hochladen von Dokumenten zu "Lea Frei" noch nicht
+    Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
+    Dann zeigt «Dokument hochladen» vor "Bitte warten …" ein Fortschrittszeichen
+
+  # #1209 (Persona Helga P-2): neben dem arbeitenden Knopf sieht «Abbrechen» aus wie sonst, ein Klick darauf tut nichts
+  Szenario: Während des Löschens sieht «Abbrechen» aus wie sonst und tut nichts
+    Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Und Dwello antwortet beim Löschen von Dokumenten zu "Lea Frei" noch nicht
+    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
+    Und der Liegenschaftsverwalter das Löschen bestätigt
+    Dann hebt sich «Abbrechen» im Dialog mindestens 4.5:1 vom Hintergrund ab, während Dwello "Bitte warten …" ansagt
+    Wenn der Liegenschaftsverwalter im Dialog «Abbrechen» drückt
+    Dann sagt Dwello bei «Dokument löschen» "Bitte warten …" an, und der Fokus bleibt dort
+
   # #677 (Persona Sven P-7): der Fehler kommt vor der Hilfe, sonst geht er am Ende einer langen Hilfe unter
   Szenario: Ein Screenreader liest bei «Datei» zuerst den Fehler
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

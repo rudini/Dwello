@@ -78,6 +78,10 @@
 
 {#snippet content()}
 	{#if busy}
+		<!-- #1209 (persona Helga P-1): moves, so the button looks at work at first sight; the status speaks -->
+		<span class="motion-safe:animate-spin" data-testid={testid && `${testid}-busy-indicator`}
+			><Icon name="loading" /></span
+		>
 		{busyLabel}
 	{:else}
 		{#if icon}<Icon name={icon} />{/if}

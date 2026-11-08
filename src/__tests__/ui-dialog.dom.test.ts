@@ -244,6 +244,16 @@ describe('Dialog', () => {
 		expect(onclose).not.toHaveBeenCalled();
 	});
 
+	// #1209 (persona Helga P-2): a disabled cancel faded beside the busy confirm and made that one look pressable
+	it('lässt «Abbrechen» während der Arbeit aussehen wie sonst, ein Klick darauf tut nichts', () => {
+		const { onclose } = openDialog({ busy: true, busyLabel: 'Wird versendet …' });
+		const cancel = byTestId<HTMLButtonElement>('dialog-cancel')!;
+		expect(cancel.disabled).toBe(false);
+		click(cancel);
+		expect(onclose).not.toHaveBeenCalled();
+		expect(document.activeElement).toBe(byTestId('dialog-confirm'));
+	});
+
 	it('schliesst mit Escape auch, wenn der Fokus nicht im Dialog liegt', () => {
 		const { onclose } = openDialog();
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
