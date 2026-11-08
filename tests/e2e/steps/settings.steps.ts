@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
-import { test } from '../fixtures/test';
-import { holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
+import { ON_FRESH, test } from '../fixtures/test';
+import { focusedSetting, focusedSettingField, holderIsSender, settingCount, settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
 import { giveOwnHolder, giveSenderAsHolder, openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -25,6 +25,26 @@ const FIELDS: Record<string, string> = {
 };
 
 Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openSettings);
+});
+
+// #690: a setting the parallel scenarios would break on: only on the fresh installation
+Given(
+	'die Verwaltung hat die IBAN {string} ohne Firmenname, PLZ und Ort hinterlegt',
+	async ({ seed, $tags }, iban: string) => {
+		if (!$tags.includes(ON_FRESH)) throw new Error(`a scenario with this step runs on the fresh installation: tag it ${ON_FRESH}`);
+		await seed.ibanWithoutCompanyAddress(iban);
+	}
+);
+
+// #690 (persona Weber 690 W-1, W-2): stored before the save required it; only on the fresh installation
+const STORED: Record<string, string> = { PLZ: 'company_postal_code', 'Ort des Kontoinhabers': 'account_holder_city' };
+Given('in den Einstellungen fehlt inzwischen {string}', async ({ seed, $tags }, label: string) => {
+	if (!$tags.includes(ON_FRESH)) throw new Error(`a scenario with this step runs on the fresh installation: tag it ${ON_FRESH}`);
+	await seed.withoutSetting(STORED[label]);
+});
+
+When('der Liegenschaftsverwalter die Einstellungen erneut öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openSettings);
 });
 
@@ -78,6 +98,15 @@ Then('erklärt die Einstellung {string} {string}', async ({ verwalter }, label: 
 Then('kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend', async ({ verwalter }) => {
 	for (const label of ['Firmenname', 'PLZ', 'Ort']) await verwalter.sees(settingInvalid(FIELDS[label])).toBe('true');
 	await verwalter.sees(settingInvalid(FIELDS.Adresse)).toBeNull();
+});
+
+Then('steht der Fokus in den Einstellungen auf {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(focusedSetting).toBe(label);
+});
+
+// persona Weber 690 W-7: «Ort» is the label of two fields
+Then('steht der Fokus in den Einstellungen auf dem Feld {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(focusedSettingField).toBe(`setting-${FIELDS[label]}`);
 });
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {

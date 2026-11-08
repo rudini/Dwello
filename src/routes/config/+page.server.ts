@@ -1,7 +1,7 @@
 import { localName } from '$lib/names';
 import { backupState } from '$lib/server/backup';
 import { toHeatingProfile } from '$lib/server/heating-profile';
-import { saveSettings, toSettings } from '$lib/server/settings';
+import { atFields, saveSettings, toSettings } from '$lib/server/settings';
 import type { DistributionKeyRow } from '$lib/server/distribution-key';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -18,6 +18,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	return {
 		settings: toSettings(config.data),
+		// #690: what the stored IBAN lacks, marked as after a refused save
+		...atFields(config.creditorMissing),
 		heatingProfiles: heatingProfiles.data.map(toHeatingProfile),
 		distributionKeys: distributionKeys.data.map((key: DistributionKeyRow) => ({
 			id: key.id,

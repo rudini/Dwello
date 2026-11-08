@@ -186,12 +186,13 @@ describe('QR-Rechnung einer Abrechnung', () => {
 		);
 	});
 
+	// persona Weber 690 W-1: the refusal names the Kontoinhaber, not the Firmenadresse that is complete
 	it('lehnt einen Zahlteil ohne Name, PLZ oder Ort des eigenen Kontoinhabers ab', async () => {
 		for (const missing of ['name', 'postalCode', 'city'] as const) {
 			const accountHolder = { name: 'Erika Muster', address: '', postalCode: '6003', city: 'Luzern', [missing]: ' ' };
 			const bill = generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), { ...config, accountHolder });
 
-			await expect(bill).rejects.toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+			await expect(bill).rejects.toMatchObject({ code: 'ACCOUNT_HOLDER_MISSING' });
 		}
 	});
 });
