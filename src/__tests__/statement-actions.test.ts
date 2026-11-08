@@ -410,6 +410,31 @@ describe('Abrechnung laden', () => {
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
 	});
 
+	// #690: was einem Schreiben mit Zahlteil fehlt, sagt das Backend mit dem Code der Warnung (Weber 690 W-1, W-2)
+	it('weiss, wessen Adresse einem Schreiben mit Zahlteil fehlt', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const missing = (await import('../../tests/contracts/config-creditor-missing.json')).default;
+		const complete = (await import('../../tests/contracts/config.json')).default;
+		const loaded = async (config: object) =>
+			(
+				(await load({
+					params: { id: 's1' },
+					fetch: (async (url: string) => {
+						if (url.endsWith('/statements/s1')) return Response.json(statementJson);
+						if (url.endsWith('/config')) return Response.json(config);
+						return Response.json({ data: [] });
+					}) as typeof globalThis.fetch,
+					url: new URL('http://localhost/statements/s1')
+				} as never)) as { creditorWarning: unknown }
+			).creditorWarning;
+
+		expect([await loaded(missing), await loaded(complete)]).toEqual([
+			'CREDITOR_ADDRESS_MISSING',
+			null
+		]);
+	});
+
 	// Eine Korrespondenzadresse im Ausland nennt ihr Land (#102)
 	it('nennt das Land einer Postadresse im Ausland', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');

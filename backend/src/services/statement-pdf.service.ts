@@ -9,7 +9,7 @@ import { categories, distributionKeys, utilityStatements, type HeatingSources, t
 import { belowMinimum, roundToRappen } from './pdf-format';
 import { ACCOUNT_HOLDER_KEYS, getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
-import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
+import { creditorRefusal, isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { datedToday, getStatement, keyValuesOf, updateStatementStatus } from './statement.service';
 import type { StatementWithDetails } from '../api/statement';
 import { refusal } from './coded-error';
@@ -30,6 +30,17 @@ export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const [name, address, postalCode, city] = await Promise.all(ACCOUNT_HOLDER_KEYS.map((key) => getTypedConfig(key)));
 	const accountHolder = name || address || postalCode || city ? { name, address, postalCode, city } : undefined;
 	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity, phone, email, accountHolder };
+}
+
+/**
+ * #690: the code of the warning on a statement with a Zahlteil, null without one: the Zahlteil's refusal for its
+ * creditor's address, else the Absender's address the letterhead needs with an IBAN (W-2, product owner)
+ */
+export async function paymentPartWarning() {
+	const config = await qrBillConfig();
+	if (!config) return null;
+	const senderComplete = [config.companyName, config.postalCode, config.city].every((part) => part.trim());
+	return creditorRefusal(config) ?? (senderComplete ? null : 'IBAN_COMPANY_ADDRESS_MISSING');
 }
 
 // Name and postal address as stored; a statement without tenant prints no recipient
