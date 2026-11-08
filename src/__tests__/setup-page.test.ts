@@ -222,12 +222,12 @@ describe('Einrichtung beim ersten Aufruf', () => {
 	});
 
 	// #1306: as the forms since #1201, at the field, and the address stays to be shortened
-	it('sagt bei einer zu langen E-Mail-Adresse beim Feld, wie viele Zeichen sie haben darf', async () => {
+	it('sagt bei einer zu langen E-Mail-Adresse beim Feld, wie viele Zeichen sie haben darf und wie viele sie hat', async () => {
 		const { result } = await setUp(fields, answering(400, tooLong));
 
 		expect(result).toMatchObject({
 			status: 400,
-			data: { errors: { email: 'Höchstens 255 Zeichen. Kürzen Sie den Text.' }, email: account.email }
+			data: { errors: { email: 'Höchstens 255 Zeichen, Sie haben 256 eingegeben. Kürzen Sie den Text.' }, email: account.email }
 		});
 		expect((result as { data: object }).data).not.toHaveProperty('error');
 	});

@@ -1,6 +1,6 @@
 {
 	"error": "Some fields are not valid",
 	"code": "TEXT_TOO_LONG",
-	"params": { "field": "name", "max": 100 },
-	"causes": [{ "code": "TEXT_TOO_LONG", "params": { "field": "name", "max": 100 } }]
+	"params": { "field": "name", "max": 100, "length": 101 },
+	"causes": [{ "code": "TEXT_TOO_LONG", "params": { "field": "name", "max": 100, "length": 101 } }]
 }

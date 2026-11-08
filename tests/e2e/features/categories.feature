@@ -373,7 +373,7 @@ Funktionalität: Kostenkategorien
   Szenario: Bei einem zu langen Namen einer Kategorie sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie "Treppenhausreinigung"
     Wenn der Liegenschaftsverwalter bei "Name" einen Text von 101 Zeichen speichert
-    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text."
     Und steht bei "Name" noch der Text von 101 Zeichen
 
   # #1304: der vergebene Name sagt auch, was zu tun ist, wie beim Verteilschlüssel (#1200)
@@ -386,6 +386,6 @@ Funktionalität: Kostenkategorien
   Szenario: Bei einem zu langen Namen für die Prüfung durch die KI sagt Dwello, was zu tun ist
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter einen Namen von 101 Zeichen von der KI prüfen lässt
-    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen. Kürzen Sie den Text."
+    Dann steht bei "Name" die Fehlermeldung "Höchstens 100 Zeichen, Sie haben 101 eingegeben. Kürzen Sie den Text."
     Aber sagt Dwello zur Prüfung durch die KI nicht "nicht erreichbar"
     Und steht bei "Name" noch der Text von 101 Zeichen
