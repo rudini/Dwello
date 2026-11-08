@@ -3,10 +3,15 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import { laterText } from '$lib/overview';
 	import { francs, keyFailuresText, recalculatedText, type Recalculated } from '$lib/statement';
+	import type { HintedInvoice } from '$lib/statement-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
+	import KeyInvoices from './KeyInvoices.svelte';
+
+	// #1309: a key of its invoices that cannot be calculated for the building, with the invoices
+	type KeyFailure = { key: string; reason: string; apartment: string | null; invoices: HintedInvoice[] };
 
 	// What changed since the statement was created (#96, #454): a draft is recalculated (#338), a sent one corrected
 	// by a berichtigte Abrechnung, unless that changes nothing for the tenant or the landlord chose not to (V-17 A);
@@ -26,7 +31,7 @@
 			correctionLowers: boolean;
 			recalculated?: Recalculated | null; // #546
 			// #1309: keys of its invoices that cannot be calculated for the building; recalculating waits for them
-			uncalculableKeys?: { key: string; reason: string; apartment: string | null }[];
+			uncalculableKeys?: KeyFailure[];
 			carryOver?: boolean; // #506 C: said in the send dialog, not here
 		};
 	} = $props();
@@ -41,6 +46,8 @@
 	const declineCosts = $derived(later.recalculated?.declineCosts && francs(Number(later.recalculated.declineCosts)));
 	const changed = $derived(laterText(later.invoices, later.fuelStock));
 	const keys = $derived(later.uncalculableKeys ?? []);
+	// persona Anna 1309 P-1: the invoices to change
+	const keyInvoices = $derived(keys.flatMap((key) => key.invoices));
 	const failures = $derived(
 		keyFailuresText(keys.map((key) => ({ ...key, building: statement.buildingName })))
 	);
@@ -86,6 +93,7 @@
 {#if shown}
 	<Alert {tone} {title} testid="statement-later-invoices">
 		<p>{text}</p>
+		<KeyInvoices invoices={keyInvoices} back={`/statements/${statement.id}`} />
 		{#if recalculated}<p data-testid="statement-later-recalculated">{recalculated}</p>{/if}
 		{#if later.correctionLowers}<p>
 				{m.statements_later_lowers({ tenant: statement.tenantName })}

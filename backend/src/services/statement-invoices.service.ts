@@ -106,8 +106,13 @@ const fuelStockChanged = async (statement: Located, load: Loaders) => !sameStock
 // calculated for the building; before #1221 Dwello split them equally (Fachreview 1309-1 V-2, V-3)
 async function uncalculableKeys(statement: Located, load: Loaders) {
 	const failing = agreedIn(statement, await load.keys(statement));
-	const keys = new Map(failing.map(({ distributionKeyName: key, reason, apartment }) => [key, { key, reason, apartment }]));
-	return [...keys.values()];
+	// with their invoices, for the hint to name (persona Anna 1309 P-1)
+	return [...new Set(failing.map((bill) => bill.distributionKeyName))].map((key) => {
+		const held = failing.filter((bill) => bill.distributionKeyName === key);
+		const [{ reason, apartment }] = held;
+		const invoices = held.map(({ id, billingEntityName, description, invoiceDate, amount }) => ({ id, billingEntityName, description, invoiceDate, amount }));
+		return { key, reason, apartment, invoices };
+	});
 }
 
 const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte Abrechnung replaces (Fachreview 454-2 V-23); overdue: sent, past its Zahlungsfrist

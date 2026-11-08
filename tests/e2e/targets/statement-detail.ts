@@ -172,3 +172,7 @@ export const carrySettleButton = target('Übertrag als ausgeglichen markieren', 
 export const confirmCarrySettleButton = target('Ausgleich des Übertrags bestätigen', (page) =>
 	page.getByTestId('statement-carry-settle-confirm')
 );
+
+// #1309 (persona Anna 1309 P-1): an invoice whose key cannot be calculated, named in the hint by its date
+export const laterKeyInvoice = (date: string) =>
+	target(`Rechnung vom ${date} im Hinweis auf Änderungen`, (page) => page.getByTestId('statement-later-key-invoice').filter({ hasText: date }));

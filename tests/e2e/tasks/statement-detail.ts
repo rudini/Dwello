@@ -4,6 +4,7 @@ import { successToast } from '../targets/form';
 import { Click, DownloadFrom, Enter, EnterDate, Navigate, Scroll, Wait } from '../screenplay/interactions';
 import { goBackInBrowser } from './app-frame';
 import {
+	laterKeyInvoice,
 	carrySettleButton,
 	confirmCarrySettleButton,
 	confirmCorrectButton,
@@ -164,3 +165,7 @@ export const correctStatementPaid = (amount: string): Activity => (actor) =>
 export const settleCarryOver: Activity = (actor) => actor.attemptsTo(Click.on(carrySettleButton), Click.on(confirmCarrySettleButton));
 /** #1096: the landlord is at the statement's further actions; the page's movement is noted from there */
 export const stayAtMoreActions: Activity = (actor) => actor.attemptsTo(Scroll.toMiddle(recalculateButton), Scroll.watch);
+
+// #1309: from the hint to the invoice whose key cannot be calculated
+export const editLaterKeyInvoice = (date: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(laterKeyInvoice(date)), Wait.forUrl((url) => /\/invoices\/[^/]+\/edit/.test(url.href)));

@@ -18,6 +18,7 @@ import {
 	newPdfToSend,
 	declineCorrectionButton,
 	laterCorrectButton,
+	laterKeyInvoice,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
 	paymentDeadline,
@@ -194,3 +195,5 @@ export const openRestText = Text.of(openRest);
 
 // #959: what Dwello confirms after recording a payment
 export const paymentDone = Text.of(successToast);
+
+export const laterKeyInvoiceText = (date: string) => Text.of(laterKeyInvoice(date)); // #1309

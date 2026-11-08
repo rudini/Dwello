@@ -212,7 +212,18 @@ describe('Abrechnung mit einem Verteilschlüssel, der sich nicht (mehr) berechne
 
 	it('nennt beim Entwurf den Verteilschlüssel, ohne geänderte Rechnungen', async () => {
 		expect(await changes(draft)).toEqual(
-			expect.objectContaining({ invoiceIds: [], uncalculableKeys: [{ key: changingName, reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01' }] })
+			expect.objectContaining({
+				invoiceIds: [],
+				uncalculableKeys: [
+					{
+						key: changingName,
+						reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO',
+						apartment: '2.01',
+						// persona Anna 1309 P-1: the hint names the invoices to change
+						invoices: [expect.objectContaining({ billingEntityName: 'Garten AG', invoiceDate: '2032-05-31', amount: '400.00' })]
+					}
+				]
+			})
 		);
 	});
 

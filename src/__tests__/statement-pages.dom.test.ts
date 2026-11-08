@@ -897,7 +897,21 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// #1309 (Entscheid PO, Fachreview 1309-1): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt
-	const failing = [{ key: 'Halbe Zimmer', reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO', apartment: '2.01' }];
+	const failing = [
+		{
+			key: 'Halbe Zimmer',
+			reason: 'STATEMENT_KEY_REASON_DIVISION_BY_ZERO',
+			apartment: '2.01',
+			invoices: [{ id: 'i7', billingEntityName: 'Garten AG', description: 'Gartenpflege', invoiceDate: '2024-09-30', amount: '900.00' }]
+		}
+	];
+	// Persona Anna 1309 P-1, Dr. Weber 1309 P-2: der Hinweis nennt die Rechnungen und führt zu ihnen, zurück zur Abrechnung
+	it('nennt die Rechnungen mit dem Verteilschlüssel, der sich nicht berechnen lässt, und führt zu ihnen', () => {
+		later(0, 'sent', { uncalculableKeys: failing, correctionDue: true } as never);
+		const link = byTestId('statement-later-invoices')!.querySelector('a')!;
+		expect(link.textContent!.replace(/\s+/g, ' ')).toBe('Garten AG: Gartenpflege. Rechnungsdatum 30.09.2024, CHF 900.00');
+		expect(link.getAttribute('href')).toBe(`/invoices/i7/edit?returnTo=${encodeURIComponent('/statements/s1')}`);
+	});
 	it('nennt beim Entwurf den Verteilschlüssel, der sich nicht berechnen lässt, und sagt, was zu tun ist', () => {
 		later(0, 'draft', { uncalculableKeys: failing } as never);
 		expect(laterText()).toMatch(/^\s*Verteilschlüssel lässt sich nicht berechnen/);
