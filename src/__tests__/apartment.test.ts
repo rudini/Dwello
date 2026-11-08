@@ -5,7 +5,6 @@ import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { monthlyTotal } from '../lib/server/contract-history';
 import {
-	existingCount,
 	floorLabel,
 	floorOptions,
 	moveOutText,
@@ -384,7 +383,7 @@ describe('Belegung eines Gebäudes', () => {
 	});
 });
 
-// #1311: eine aufgehobene Wohnung ist nicht leer; sie steht als eigener Teil und zählt bei den Wohnungen nicht (Fachreview 1311-1 V-5)
+// #1311: eine aufgehobene Wohnung ist nicht leer; sie steht als eigener Teil
 describe('Belegung mit aufgehobener Wohnung', () => {
 	it('nennt die aufgehobene Wohnung als eigenen Teil', () => {
 		expect(occupancyParts({ occupiedCount: 0, vacantCount: 1, discontinuedCount: 1 })).toEqual([
@@ -392,11 +391,6 @@ describe('Belegung mit aufgehobener Wohnung', () => {
 			'1 leer',
 			'1 aufgehoben'
 		]);
-	});
-
-	it('zählt die aufgehobene Wohnung bei den Wohnungen des Gebäudes nicht', () => {
-		expect(existingCount({ apartmentCount: 3, discontinuedCount: 1 })).toBe(2);
-		expect(existingCount({ apartmentCount: 3 })).toBe(3);
 	});
 });
 

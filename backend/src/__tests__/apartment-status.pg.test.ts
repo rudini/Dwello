@@ -151,19 +151,24 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(await statusOf(id)).toBe('vacant');
 	});
 
-	// #1311: in der Belegung der Übersicht zählt eine aufgehobene Wohnung nicht mit
-	it('zählt eine aufgehobene Wohnung in der Übersicht nicht', async () => {
+	// #1311: in der Belegung «x/y vermietet» zählt eine aufgehobene Wohnung nicht mit; bei den Wohnungen wie in der Liste (Persona Helga 1311 P-1)
+	it('zählt eine aufgehobene Wohnung in der Belegung der Übersicht nicht, bei den Wohnungen schon', async () => {
 		const id = await apartment('1.10');
 		const occupancyOfBuilding = async () => {
 			const response = await callApi('/api/v1/dashboard');
 			const { buildingOccupancy } = (await response.json()) as { buildingOccupancy: { buildingId: string; totalApartments: number }[] };
 			return buildingOccupancy.find((b) => b.buildingId === rental.building)!.totalApartments;
 		};
+		const portfolioTotal = async () => {
+			const response = await callApi('/api/v1/dashboard');
+			return ((await response.json()) as { portfolio: { totalApartments: number } }).portfolio.totalApartments;
+		};
 		const before = await occupancyOfBuilding();
 
 		await updateApartment(id, { discontinuedFrom: day(-30) });
 
 		expect(await occupancyOfBuilding()).toBe(before - 1);
+		expect(await portfolioTotal()).toBe((await listApartments({ limit: 1000 })).total);
 	});
 
 	it('wird vom Ändern der Wohnung nicht überschrieben', async () => {

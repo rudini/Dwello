@@ -115,11 +115,7 @@ export const reletStarts = (apartments: { status?: unknown; nextContractStart?: 
 		.map((a) => String(a.nextContractStart))
 		.sort();
 
-/** A building's apartments that still exist: one that no longer does (#1311) counts in no total */
-export const existingCount = (b: { apartmentCount: number; discontinuedCount?: number }) =>
-	b.apartmentCount - (b.discontinuedCount ?? 0);
-
-/** A building's apartments per Mietstatus so that the existing ones add up; relet, reserved and discontinued only when there are any */
+/** A building's apartments per Mietstatus so that they add up; relet, reserved and discontinued only when there are any */
 export function occupancyParts(b: {
 	occupiedCount: number;
 	reletStarts?: string[];

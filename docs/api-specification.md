@@ -71,7 +71,7 @@ Sicherung (#718): `GET /api/v1/backup` → the state as `/health` names it; whil
 
 ## 4. Apartments `/api/v1/apartments`
 
-Apartment `status` is `discontinued` from its `discontinuedFrom` on (#1311, before every other status; it counts in no dashboard total); otherwise it is derived from rental contracts: `occupied` (a contract runs today), `relet` (no contract today, but a future one is signed), otherwise the manually set `vacant` or `reserved`. Only `vacant` and `reserved` can be set manually.
+Apartment `status` is `discontinued` from its `discontinuedFrom` on (#1311, before every other status; it counts in no Belegung «occupied/total» of the dashboard); otherwise it is derived from rental contracts: `occupied` (a contract runs today), `relet` (no contract today, but a future one is signed), otherwise the manually set `vacant` or `reserved`. Only `vacant` and `reserved` can be set manually.
 
 | Method | Path | Notes |
 |---|---|---|

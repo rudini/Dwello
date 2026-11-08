@@ -134,6 +134,14 @@ Funktionalität: Aufgehobene Wohnung
     Und erklärt die Wohnungsseite beim Mietstatus "Die Wohnung gibt es ab dem Tag unter «Aufgehoben ab» nicht mehr; ab diesem Tag kann sie nicht vermietet werden."
     Und bietet die Wohnungsseite keinen neuen Mietvertrag an
 
+  # #1311, Code-Review 1311-1 C-2: den Mietstatus der aufgehobenen Wohnung ändern Sie nicht von Hand
+  Szenario: Der Mietstatus der aufgehobenen Wohnung lässt sich nicht von Hand ändern
+    Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert
+    Und im Gebäude "Erlenhof" gibt es die leere Wohnung "4.01"
+    Und die Wohnung "4.01" ist aufgehoben ab "2025-07-01"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.01"
+    Dann kann der Liegenschaftsverwalter den Status "Aufgehoben seit 01.07.2025" nicht von Hand ändern
+
   # #1311: vor dem Tag steht die Wohnung noch leer
   Szenario: Vor dem Tag steht die aufgehobene Wohnung noch leer
     Angenommen das Gebäude "Erlenhof" in "Winterthur" existiert

@@ -7,6 +7,7 @@
 			"floor": 1,
 			"area": "65.00",
 			"rooms": "2.5",
+			"discontinuedFrom": null,
 			"status": "occupied",
 			"nextContractStart": "2099-11-01",
 			"currentContractEnd": "2099-03-31",
