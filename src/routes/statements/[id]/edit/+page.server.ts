@@ -2,13 +2,18 @@ import { fail, redirect } from '@sveltejs/kit';
 import { backendMessage, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
+import { paymentDeadlineDays } from '$lib/server/settings';
 import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load: PageServerLoad = async ({ params, fetch }) => ({
-	statement: await loadStatement(fetch, params.id)
-});
+export const load: PageServerLoad = async ({ params, fetch }) => {
+	const [statement, days] = await Promise.all([
+		loadStatement(fetch, params.id),
+		paymentDeadlineDays(fetch) // #686: said at a draft's date
+	]);
+	return { statement, paymentDeadlineDays: days };
+};
 
 // One error per field, or for the whole form
 const failed = (status: number, errors: Record<string, string>) => fail(status, { errors });
