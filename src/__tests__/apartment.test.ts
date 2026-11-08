@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { load } from '../routes/apartments/[id]/+page.server';
+import { actions, load } from '../routes/apartments/[id]/+page.server';
 import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
@@ -18,6 +18,7 @@ import moveOutsResponse from '../../tests/contracts/apartment-move-outs.json';
 import { runAction } from './helpers/action';
 import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import apartmentResponse from '../../tests/contracts/apartment.json';
+import deleteRefused from '../../tests/contracts/apartment-delete-refused.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -441,5 +442,56 @@ describe('Wohnung bearbeiten', () => {
 
 		await expect(result).rejects.toMatchObject({ status: 303 });
 		expect(calls[0].body).toEqual({ number: '4.01', floor: 4, area: '68', rooms: '2.5' });
+	});
+});
+
+describe('Wohnung löschen', () => {
+	const building = '7d9f3c1e-2b4a-4c8d-9e6f-1a2b3c4d5e6f';
+
+	it('löscht eine Wohnung und kehrt zur Seite ihres Gebäudes zurück', async () => {
+		const { calls, result } = runAction(actions.delete, 'a1', 204, { buildingId: building });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: `/buildings/${building}` });
+		expect(calls).toEqual([{ method: 'DELETE', url: `${API}/apartments/a1`, body: undefined }]);
+	});
+
+	it('leitet nur auf eine Gebäudeseite weiter, auch mit einem fremden Gebäude im Formular', async () => {
+		const { result } = runAction(actions.delete, 'a1', 204, { buildingId: '../config' });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/buildings/..%2Fconfig' });
+	});
+
+	// #1257: ein Mietvertrag kam nach dem Laden der Seite dazu; das Backend lehnt mit Code ab
+	it('nennt den Grund, wenn das Backend eine Wohnung mit Mietverträgen ablehnt', async () => {
+		const { result } = runAction(actions.delete, 'a1', 409, { buildingId: building }, deleteRefused);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				deleteError:
+					'Diese Wohnung kann nicht gelöscht werden, weil sie Mietverträge hat. Auch ein beendeter Mietvertrag bleibt als Historie der Wohnung erhalten. Löschen Sie einen Mietvertrag auf seiner Seite nur, wenn er irrtümlich erfasst wurde, nicht damit sich die Wohnung löschen lässt. Hat er eine versendete oder bezahlte Abrechnung, bleiben er und die Wohnung erhalten.',
+				deleteImpossible: true
+			}
+		});
+	});
+
+	// #1257 (Code-Review C-2): in einem anderen Fenster gelöscht; die Wohnung ist weg, wie gewünscht
+	it('kehrt zum Gebäude zurück, wenn es die Wohnung schon nicht mehr gibt', async () => {
+		const { result } = runAction(actions.delete, 'a1', 404, { buildingId: building }, { error: 'Apartment not found' });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: `/buildings/${building}` });
+	});
+
+	// ein Fehler ohne Code: der eigene Text, nicht die englische Meldung des Backends
+	it('meldet einen Fehler ohne Code als nicht gelöscht', async () => {
+		const { result } = runAction(actions.delete, 'a1', 500, { buildingId: building }, { error: 'Internal error' });
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: {
+				deleteError: 'Die Wohnung konnte nicht gelöscht werden. Versuchen Sie es erneut.',
+				deleteImpossible: false
+			}
+		});
 	});
 });

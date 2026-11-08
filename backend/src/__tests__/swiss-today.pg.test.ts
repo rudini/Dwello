@@ -7,8 +7,8 @@ import { afterAll, beforeAll, describe, expect, it, setSystemTime } from 'bun:te
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, invoices, utilityStatements } from '../db/schema';
-import { createApartment, deleteApartment, getApartment } from '../services/apartment.service';
-import { createContract, listContracts } from '../services/contract.service';
+import { getApartment } from '../services/apartment.service';
+import { listContracts } from '../services/contract.service';
 import {
 	createStatement,
 	deleteStatement,
@@ -137,26 +137,6 @@ describe('Heute ist der Schweizer Tag, auch kurz nach Mitternacht', () => {
 		expect((await callApi(`/api/v1/contracts/apartment/${rental.apartment}/active`)).status).toBe(
 			404
 		);
-	});
-
-	it('löscht eine Wohnung, deren Vertrag am Vortag endete', async () => {
-		const apartment = await createApartment({
-			buildingId: rental.building,
-			number: '3.01',
-			floor: 3,
-			area: '50',
-			rooms: '2'
-		});
-		await createContract({
-			apartmentId: apartment.id,
-			tenantId: rental.tenant,
-			startDate: '2026-01-01',
-			endDate: utcDay,
-			baseRent: '900',
-			monthlyAdvancePayment: '100'
-		});
-
-		expect(await deleteApartment(apartment.id)).toEqual({ success: true });
 	});
 
 	it('zählt eine am letzten Tag des Vormonats bezahlte Abrechnung nicht zu den Zahlungen dieses Monats', async () => {

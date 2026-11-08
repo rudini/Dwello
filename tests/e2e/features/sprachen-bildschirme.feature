@@ -73,7 +73,10 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
+      | apartment-detail       | delete-dialog       |
       | apartment-detail-vacant | default            |
+      | apartment-detail-free  | default             |
+      | apartment-detail-free  | delete-dialog       |
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | tenants                | default             |

@@ -12,6 +12,7 @@ import {
 	nextTenantNote,
 	vacancyNote
 } from '../targets/apartment-detail';
+import { successToast } from '../targets/form';
 import { breadcrumbLink } from '../targets/navigation';
 
 export const apartmentInfo = (info: ApartmentInfo) => Text.of(infoCard(info));
@@ -19,6 +20,7 @@ export const currentTenant = Text.of(currentTenantName);
 export const monthlyTotalOfApartment = Text.of(monthlyTotal);
 export const vacancyShown = Visibility.of(vacancyNote);
 export const nextTenant = Text.of(nextTenantNote);
+export const deletedMessage = Text.of(successToast);
 export const currentContractsListed = Text.of(currentContracts);
 export const earlierContractsListed = Text.of(earlierContracts);
 export const earlierContractShown = (name: string) => Text.of(earlierContract(name));

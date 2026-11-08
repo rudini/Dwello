@@ -16,6 +16,7 @@ import {
 import { everyWordIn, withoutApartmentWord } from './word-search';
 import { sqlToday, swissToday } from './today';
 import type { ApartmentStatus, ApartmentWithDetails } from '../api/apartment';
+import { refusal, type Refusal } from './coded-error';
 
 /** First day of the next rental contract that has not started yet */
 export const nextContractStart = sql<string | null>`(
@@ -273,36 +274,27 @@ export async function updateApartment(
 
 /**
  * Delete an apartment
- * Returns false if apartment has active contracts
+ * #1257: refused while it has a rental contract, an ended one included: it stays as the apartment's history
  */
-export async function deleteApartment(id: string): Promise<{ success: boolean; error?: string }> {
-	// Check for active contracts
-	const today = swissToday();
-	const [activeContract] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(
-			and(
-				eq(rentalContracts.apartmentId, id),
-				sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${today})`
-			)
-		)
-		.limit(1);
-
-	if (activeContract) {
-		return {
-			success: false,
-			error: 'Cannot delete apartment with active contract'
-		};
-	}
-
-	const result = await db.delete(apartments).where(eq(apartments.id, id)).returning();
-
-	if (result.length === 0) {
-		return { success: false, error: 'Apartment not found' };
-	}
-
-	return { success: true };
+export async function deleteApartment(id: string): Promise<{ success: boolean } & Partial<Refusal>> {
+	// the apartment's row locked first: a contract recorded meanwhile waits, then fails, or is seen (fallback review #1286)
+	return db.transaction(async (tx) => {
+		const [apartment] = await tx.select({ id: apartments.id }).from(apartments).where(eq(apartments.id, id)).for('update');
+		if (!apartment) return { success: false, error: 'Apartment not found' };
+		const [contract] = await tx
+			.select({ id: rentalContracts.id })
+			.from(rentalContracts)
+			.where(eq(rentalContracts.apartmentId, id))
+			.limit(1);
+		if (contract) {
+			return {
+				success: false,
+				...refusal('APARTMENT_HAS_CONTRACTS', 'The apartment has rental contracts: it stays as their history')
+			};
+		}
+		await tx.delete(apartments).where(eq(apartments.id, id));
+		return { success: true };
+	});
 }
 
 /**

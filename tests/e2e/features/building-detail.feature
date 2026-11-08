@@ -36,6 +36,15 @@ Funktionalität: Gebäudedetail
     Und nennt der Dialog "Eine Wohnung mit Mietverträgen bleibt erhalten und mit ihr das Gebäude."
     Und bietet der Dialog nur "Schliessen" an
 
+  # #1257: der Rat «Löschen Sie zuerst seine Wohnungen» führt zum Ziel
+  Szenario: Gebäude löschen, nachdem seine Wohnung gelöscht ist
+    Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "1.01"
+    Wenn der Liegenschaftsverwalter die Wohnung löscht
+    Und der Liegenschaftsverwalter das Gebäude löscht
+    Dann ist der Liegenschaftsverwalter auf der Gebäudeliste
+    Und das Gebäude "Birkenhof" ist nicht mehr in der Liste
+
   Szenario: Zur Bearbeitung des Gebäudes wechseln
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude bearbeiten will

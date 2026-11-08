@@ -1,3 +1,6 @@
+import { eq } from 'drizzle-orm';
+import { db } from '../../db/connection';
+import { rentalContracts } from '../../db/schema';
 import { createBuilding, deleteBuilding } from '../../services/building.service';
 import { createApartment, deleteApartment } from '../../services/apartment.service';
 import { createTenant, deleteTenant } from '../../services/tenant.service';
@@ -33,7 +36,12 @@ export async function createRental(token: string, contract: {
 		// a refused delete leaves records in dwello_test, so it fails the test (#684); one the test removed itself is fine
 		async remove() {
 			for (const [what, removed] of [
-				['contract', () => deleteContract(rental.id, true)],
+				['contract', async () => {
+					// #1257: contracts a test added to the apartment go too, before the tenant and the apartment
+					const rest = await db.select({ id: rentalContracts.id }).from(rentalContracts).where(eq(rentalContracts.apartmentId, apartment.id));
+					for (const { id } of rest.filter(({ id }) => id !== rental.id)) await deleteContract(id, true);
+					return deleteContract(rental.id, true);
+				}],
 				['tenant', () => deleteTenant(tenant.id)],
 				['apartment', () => deleteApartment(apartment.id)],
 				['building', () => deleteBuilding(building.id)]

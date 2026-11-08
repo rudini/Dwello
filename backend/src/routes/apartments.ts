@@ -156,8 +156,8 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 	.delete('/:id', async ({ params, set }) => {
 		const result = await deleteApartment(params.id);
 		if (!result.success) {
-			set.status = result.error === 'Apartment not found' ? 404 : 400;
-			return { error: result.error };
+			set.status = result.code ? 409 : 404;
+			return result.code ? refusal(result.code, result.error!) : { error: result.error };
 		}
 		set.status = 204;
 		return null;

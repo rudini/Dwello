@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import { error } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
+import { backendMessage, type BackendError } from '$lib/backend-error';
 import type { ApartmentListItem, Json } from '$lib/types';
 import type {
 	ApartmentWithDetails,
@@ -102,4 +103,19 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 		},
 		contractHistory: contracts.map((c) => toContractHistory(c, c.tenantName))
 	};
+}
+
+/** #1257: deletes an apartment, back to its building; the backend refuses one with rental contracts */
+export async function deleteApartment(fetch: typeof globalThis.fetch, id: string, request: Request) {
+	const buildingId = String((await request.formData()).get('buildingId'));
+	const response = await fetch(`${API}/apartments/${id}`, { method: 'DELETE' });
+	// gone already (another tab): what the landlord wanted (code review 1257-1 C-2)
+	if (!response.ok && response.status !== 404) {
+		const refused = (await response.json().catch(() => null)) as BackendError | null;
+		return fail(response.status, {
+			deleteError: backendMessage(refused, m.apartments_delete_failed()),
+			deleteImpossible: refused?.code === 'APARTMENT_HAS_CONTRACTS'
+		});
+	}
+	throw redirect(303, `/buildings/${encodeURIComponent(buildingId)}`); // a posted id, no path of its own
 }

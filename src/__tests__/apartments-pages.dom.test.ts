@@ -10,7 +10,8 @@ vi.mock('$app/stores', () => ({
 import { goto } from '$app/navigation';
 import ApartmentsPage from '../routes/apartments/+page.svelte';
 import ApartmentPage from '../routes/apartments/[id]/+page.svelte';
-import { byTestId, click, fireEvent, show } from './helpers/dom';
+import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
+import { m } from '$lib/paraglide/messages';
 import { icons } from '$lib/ui/icons';
 
 const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
@@ -294,6 +295,35 @@ describe('Wohnungsdetail', () => {
 		contractHistory: rented ? history : []
 	});
 	const open = (rented = true) => show(ApartmentPage, { data: details(rented) } as never);
+
+	// code review 1257-1 C-1: a failure without a code (only between BFF and backend, no scenario) keeps the
+	// confirmation open with its reason, so the landlord can try again
+	it('zeigt im Löschdialog den Fehler eines misslungenen Löschens und bietet es wieder an', async () => {
+		show(ApartmentPage, {
+			data: details(false),
+			form: { deleteError: m.apartments_delete_failed(), deleteImpossible: false }
+		} as never);
+		click('apartment-delete-button');
+		await settle();
+
+		expect(byTestId('form-error')!.textContent).toContain(m.apartments_delete_failed());
+		expect(byTestId('apartment-delete-confirm')).not.toBeNull();
+	});
+
+	// Sven 1257 P-1: the dialog opens with the whole consequence, the costs of the other apartments included
+	it('sagt beim Öffnen des Löschdialogs auch, wem die Nebenkosten der Wohnung danach zufallen', async () => {
+		open(false);
+		click('apartment-delete-button');
+		await settle();
+
+		const dialog = document.querySelector('[role="dialog"]')!;
+		const description = document.getElementById(dialog.getAttribute('aria-describedby')!)!;
+		expect(description.textContent).toContain(m.apartments_delete_text({ number: '3.01' }));
+		// the wording of fach-reviewer 1257-2 (V-3), pinned
+		expect(description.textContent).toContain(
+			'Löschen Sie die Wohnung nur, wenn sie irrtümlich erfasst wurde. Steht sie nur leer, behalten Sie sie: Ihren Anteil an den Nebenkosten tragen Sie als Vermieter. Gibt es sie nach einem Umbau nicht mehr, löschen Sie sie erst, wenn die Abrechnungen aller Abrechnungsperioden versendet sind, in denen es sie noch gab. Nach dem Löschen verteilt Dwello die Nebenkosten des Gebäudes nur noch auf die übrigen Wohnungen, und deren Mieter bezahlen den Anteil dieser Wohnung mit. Versendete Abrechnungen bleiben unverändert; jede Abrechnung, die Sie danach erstellen, neu berechnen oder berichtigen, rechnet ohne diese Wohnung.'
+		);
+	});
 	const trail = () =>
 		[...document.querySelectorAll('[data-testid="breadcrumb-link"]')].map((link) => [
 			link.textContent,

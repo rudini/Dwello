@@ -571,6 +571,11 @@ export function testData(api: CallTheApi) {
 			await remove(`invoices/${ids.get(key)}`);
 		},
 
+		// An apartment deleted in another tab while its page is open (#1257)
+		async deleteApartment(number: string) {
+			await remove(`apartments/${ids.get(number)}`);
+		},
+
 		// A recorded invoice that costs another amount afterwards
 		async invoiceAmount(key: string, amount: string) {
 			await put(`invoices/${ids.get(key)}`, { amount });

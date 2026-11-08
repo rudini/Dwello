@@ -6,17 +6,21 @@ import {
 	contractHistoryNaming,
 	currentContractsListed,
 	currentTenant,
+	deletedMessage,
 	earlierContractShown,
 	earlierContractsListed,
 	monthlyTotalOfApartment,
 	nextTenant,
 	vacancyShown
 } from '../questions/apartment-detail';
+import { listedApartmentCount } from '../questions/building-detail';
 import {
+	deleteApartment,
 	editApartment,
 	openApartmentDetail,
 	openContractFromHistory,
-	openTenantProfile
+	openTenantProfile,
+	startDeletingApartment
 } from '../tasks/apartment-detail';
 
 const { Given, When, Then } = createBdd(test);
@@ -30,6 +34,27 @@ Given(
 
 When('der Liegenschaftsverwalter die Wohnung bearbeiten will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(editApartment);
+});
+
+When('der Liegenschaftsverwalter die Wohnung löscht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(deleteApartment);
+});
+
+When('der Liegenschaftsverwalter die Wohnung löschen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startDeletingApartment);
+});
+
+Then('bestätigt Dwello das Löschen mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deletedMessage).toBe(text);
+});
+
+Given('die Wohnung {string} wurde inzwischen gelöscht', async ({ seed }, number: string) => {
+	await seed.deleteApartment(number);
+});
+
+// a negative check: the step before it names an apartment the building page lists
+Then('zeigt die Gebäudeseite die Wohnung {string} nicht mehr', async ({ verwalter }, number: string) => {
+	await verwalter.sees(listedApartmentCount(number)).toBe(0);
 });
 
 When('der Liegenschaftsverwalter das Profil des Mieters öffnet', async ({ verwalter }) => {

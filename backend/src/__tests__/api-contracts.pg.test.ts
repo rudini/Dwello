@@ -531,6 +531,18 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #1257: an apartment with a rental contract, an ended one included, stays
+	it('DELETE /apartments/:id einer Wohnung mit Mietvertrag liefert die Felder von apartment-delete-refused.json', async () => {
+		const rented = await createRental(`${token}-apartment-delete`, { startDate: '2019-01-01', endDate: '2024-03-31', monthlyAdvancePayment: '0' });
+		try {
+			const response = await callApi(`/api/v1/apartments/${rented.apartment}`, { method: 'DELETE' });
+			expect(response.status).toBe(409);
+			expect(drift(await sample('apartment-delete-refused'), await response.json())).toEqual([]);
+		} finally {
+			await rented.remove();
+		}
+	});
+
 	// #788 part 2: the uploads of a former tenant, decided in the backend (#178)
 	it('GET /tenants/:id/former-documents liefert die Felder von tenant-former-documents.json', async () => {
 		const ended = await createRental(`${token}-former`, { startDate: '2024-04-01', endDate: '2025-03-31', monthlyAdvancePayment: '0' });

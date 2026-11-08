@@ -331,7 +331,8 @@
 			"name": "apartment-detail",
 			"path": "/apartments/{apartment}",
 			"states": [
-				"default"
+				"default",
+				"delete-dialog"
 			]
 		},
 		{
@@ -339,6 +340,14 @@
 			"path": "/apartments/{vacantApartment}",
 			"states": [
 				"default"
+			]
+		},
+		{
+			"name": "apartment-detail-free",
+			"path": "/apartments/{freeApartment}",
+			"states": [
+				"default",
+				"delete-dialog"
 			]
 		},
 		{

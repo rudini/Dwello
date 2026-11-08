@@ -1,0 +1,5 @@
+{
+	"error": "The apartment has rental contracts: it stays as their history",
+	"code": "APARTMENT_HAS_CONTRACTS",
+	"params": {}
+}

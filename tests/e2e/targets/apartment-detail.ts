@@ -10,6 +10,10 @@ export const monthlyTotal = target('Monatlich total', (page) => page.getByTestId
 export const vacancyNote = target('Hinweis nicht vermietet', (page) => page.getByTestId('apartment-vacant'));
 export const nextTenantNote = target('Hinweis nächster Mieter', (page) => page.getByTestId('apartment-next-tenant'));
 export const editButton = target('Wohnung bearbeiten', (page) => page.getByTestId('apartment-edit-button'));
+export const deleteButton = target('Wohnung löschen', (page) => page.getByTestId('apartment-delete-button'));
+export const confirmDeleteButton = target('Wohnung löschen bestätigen', (page) =>
+	page.getByTestId('apartment-delete-confirm')
+);
 export const currentContracts = target('Laufende und künftige Mietverträge', (page) =>
 	page.getByTestId('contract-history-current')
 );
