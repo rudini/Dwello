@@ -2410,5 +2410,6 @@
 	"contracts_duration_agreement_help": "Il contratto di locazione termina con l’accordo di scioglimento. Se ha concordato un altro giorno con l’inquilino, modifichi la fine del contratto.",
 	"contracts_withdraw_agreement": "Annullare l’accordo di scioglimento",
 	"contracts_withdraw_agreement_help": "Il contratto di locazione prosegue allora a tempo indeterminato. È possibile solo se inquilino e locatore annullano insieme l’accordo di scioglimento. Né l’inquilino né il locatore può annullarlo da solo.",
-	"contracts_agreement_withdrawn_toast": "Accordo di scioglimento con {name} annullato. Il contratto di locazione prosegue a tempo indeterminato."
+	"contracts_agreement_withdrawn_toast": "Accordo di scioglimento con {name} annullato. Il contratto di locazione prosegue a tempo indeterminato.",
+	"contracts_end_kind_required": "Scelga come termina il contratto di locazione: con una disdetta o con un accordo di scioglimento."
 }

@@ -2410,5 +2410,6 @@
 	"contracts_duration_agreement_help": "The rental contract ends with the termination agreement. If you agreed on another day with the tenant, change the contract end.",
 	"contracts_withdraw_agreement": "Withdraw termination agreement",
 	"contracts_withdraw_agreement_help": "The rental contract then runs on without an end. This is only possible if tenant and landlord withdraw the termination agreement together. Neither the tenant nor the landlord can withdraw it alone.",
-	"contracts_agreement_withdrawn_toast": "Termination agreement with {name} withdrawn. The rental contract runs on without an end."
+	"contracts_agreement_withdrawn_toast": "Termination agreement with {name} withdrawn. The rental contract runs on without an end.",
+	"contracts_end_kind_required": "Choose how the rental contract ends: with a notice of termination or a termination agreement."
 }
