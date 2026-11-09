@@ -52,6 +52,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | buildings              | default             |
       | buildings              | empty               |
       | buildings              | filtered-empty      |
+      | buildings              | paged               |
       | building-new           | default             |
       | building-new           | submit-empty        |
       | building-new           | register-preview    |
@@ -71,6 +72,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | apartments             | default             |
       | apartments             | empty               |
       | apartments             | filtered-empty      |
+      | apartments             | paged               |
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
@@ -88,6 +90,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | tenants                | default             |
       | tenants                | empty               |
       | tenants                | filtered-empty      |
+      | tenants                | paged               |
       | tenant-new             | default             |
       | tenant-new             | submit-empty        |
       | tenant-detail          | default             |
@@ -106,6 +109,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contracts              | default             |
       | contracts              | empty               |
       | contracts              | filtered-empty      |
+      | contracts              | paged               |
       | contract-new           | default             |
       | contract-new           | submit-empty        |
       | contract-new           | every-wizard-step   |
@@ -183,6 +187,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoices               | upload-unreadable   |
       | invoices               | upload-ki-none      |
       | invoices               | upload-no-building  |
+      | invoices               | paged               |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |
@@ -201,6 +206,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statements             | list-scoped         |
       | statements             | pdf-missing         |
       | statements             | status-empty        |
+      | statements             | paged               |
       | statements-period      | default             |
       | statements-period      | list-scoped         |
       | statement-generate     | default             |

@@ -17,7 +17,10 @@ const query: Record<string, string> = {
 	'filtered-empty': '?search=xq-a11y-0', // no German word: the apartment list repeats the term (#160)
 	'login-error': '?error=failed',
 	'login-not-allowed': '?error=not_allowed',
-	'empty-year': `?year=${new Date().getFullYear()}` // a year of the invoices' year filter (#662, S-4)
+	'empty-year': `?year=${new Date().getFullYear()}`, // a year of the invoices' year filter (#662, S-4)
+	// #1413: one record a page, so the records of seedFor fill more than one; the audit log and the statements keep their
+	// fixed page sizes (50, 10) and ignore it
+	paged: '?pageSize=1'
 };
 
 /** Path and query string of a screen in a state, ids still as {placeholders} */
@@ -117,7 +120,7 @@ export async function exampleOf(seed: TestData, name: string, state: string): Pr
 	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
 	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');
 	// #746: more entries than one page holds; a key's name, not a German word the language check would flag
-	if (state.startsWith('paged')) await seed.oldAuditEntries('Claude Desktop', 50);
+	if (name === 'audit-log' && state.startsWith('paged')) await seed.oldAuditEntries('Claude Desktop', 50);
 	if (state === 'reminder-undelivered') return { ...example, undeliveredStatements: await undeliveredStatements(seed) };
 	if (state === 'category-delete-refused') return { ...example, billed: await billedRecord(seed, 'category') };
 	if (state === 'distribution-key-delete-refused') return { ...example, billed: await billedRecord(seed, 'key') };
@@ -141,7 +144,9 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'discontinued-figure', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'uncalculable-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
+	// #1413: a paged list gets the records below; the audit log's would come before its old entries on its first page
+	const pagedList = state === 'paged' && !path.startsWith('/config/audit-log');
+	if (!path.includes('{') && !pagedList && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-other-period', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-mixed-rest', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'discontinued-figure', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices', 'split-keys', 'uncalculable-keys', 'mark-sent-dialog'].includes(state)) return { path, building: '', tankBuilding: '', splitBuilding: '', otherPeriodBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');

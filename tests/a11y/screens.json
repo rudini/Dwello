@@ -271,7 +271,8 @@
 			"states": [
 				"default",
 				"empty",
-				"filtered-empty"
+				"filtered-empty",
+				"paged"
 			]
 		},
 		{
@@ -326,7 +327,8 @@
 			"states": [
 				"default",
 				"empty",
-				"filtered-empty"
+				"filtered-empty",
+				"paged"
 			]
 		},
 		{
@@ -397,7 +399,8 @@
 			"states": [
 				"default",
 				"empty",
-				"filtered-empty"
+				"filtered-empty",
+				"paged"
 			]
 		},
 		{
@@ -457,7 +460,8 @@
 			"states": [
 				"default",
 				"empty",
-				"filtered-empty"
+				"filtered-empty",
+				"paged"
 			]
 		},
 		{
@@ -630,7 +634,8 @@
 				"upload-mixed-rest",
 				"upload-discard-created",
 				"upload-unreadable",
-				"upload-ki-none"
+				"upload-ki-none",
+				"paged"
 			]
 		},
 		{
@@ -702,7 +707,8 @@
 				"mark-paid-dialog",
 				"list-scoped",
 				"pdf-missing",
-				"status-empty"
+				"status-empty",
+				"paged"
 			]
 		},
 		{
