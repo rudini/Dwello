@@ -9,13 +9,9 @@ import { db } from '../db/connection';
 import { documents, invoices, utilityStatements } from '../db/schema';
 import { getApartment } from '../services/apartment.service';
 import { listContracts } from '../services/contract.service';
-import {
-	createStatement,
-	deleteStatement,
-	generateStatement,
-	getStatement,
-	listStatements
-} from '../services/statement.service';
+import { getStatement, listStatements } from '../services/statement-query.service';
+import { createStatement, generateStatement } from '../services/statement-generation.service';
+import { deleteStatement } from '../services/statement.service';
 import { markDocumentPosted, sendReminder } from '../services/reminder.service';
 import { getTenant, getTenantWithHistory, listTenants } from '../services/tenant.service';
 import { callApi } from './helpers/auth';

@@ -13,7 +13,8 @@ import { categories, contractAdvancePayments, heatingProfiles, invoices, rentalC
 import { daysAfter, swissToday } from '../services/today';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
-import { correctStatement, generateStatement, replaceStatement, updateStatementStatus } from '../services/statement.service';
+import { correctStatement, generateStatement } from '../services/statement-generation.service';
+import { replaceStatement, updateStatementStatus } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { readPdf } from './helpers/pdf-text';
 import { insertInvoice } from './helpers/records';

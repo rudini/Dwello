@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
-import { generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';

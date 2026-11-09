@@ -4,7 +4,7 @@ import { apartments, buildings, categories, documents, rentalContracts, tenants,
 import { advancesOf } from './advance-payment.service';
 import { agreedCategoryIds } from './agreed-category.service';
 import { recordedPayments } from './payment-entry';
-import { getStatement } from './statement.service';
+import { getStatement } from './statement-query.service';
 import { swissToday } from './today';
 
 // Folder and file names in the tenant's language: the tenant receives the ZIP, and its PDFs are in that language

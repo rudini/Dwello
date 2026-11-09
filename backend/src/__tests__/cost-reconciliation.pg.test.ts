@@ -19,7 +19,7 @@ import {
 import type { reportPeriods, reportReconciliation } from '../services/cost-reconciliation.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
-import { generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 

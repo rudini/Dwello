@@ -22,7 +22,7 @@ import {
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { generateStatementPdf, qrBillConfig } from './statement-pdf.service';
-import { getStatement } from './statement.service';
+import { getStatement } from './statement-query.service';
 import { getTenant } from './tenant.service';
 import { belowMinimum, formatSwissDate, roundToRappen } from './pdf-format';
 import { daysAfter, swissToday } from './today';

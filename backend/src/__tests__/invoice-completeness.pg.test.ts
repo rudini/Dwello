@@ -9,7 +9,7 @@ import { apartments, categories, distributionKeys, fuelStocks, invoices, rentalC
 import { setAgreedCategories } from '../services/agreed-category.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
-import { generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';

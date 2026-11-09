@@ -1,6 +1,6 @@
 import type { StatementWithDetails } from '$lib/types';
 
-// what the backend allows for a status (#788, `allowed` in backend/src/services/statement.service.ts); a test about
+// what the backend allows for a status (#788, `allowed` in backend/src/services/statement-query.service.ts); a test about
 // the fields themselves overrides them
 const allowedFor = (status = 'draft') => ({
 	editable: status !== 'replaced',

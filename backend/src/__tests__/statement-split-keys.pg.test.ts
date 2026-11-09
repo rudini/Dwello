@@ -9,7 +9,9 @@ import { db } from '../db/connection';
 import { categories, distributionKeys, invoices } from '../db/schema';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { statementChanges } from '../services/statement-invoices.service';
-import { deleteStatement, generateStatement, getStatement } from '../services/statement.service';
+import { getStatement } from '../services/statement-query.service';
+import { generateStatement } from '../services/statement-generation.service';
+import { deleteStatement } from '../services/statement.service';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 

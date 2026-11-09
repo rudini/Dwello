@@ -10,7 +10,7 @@ import { categories, invoices } from '../db/schema';
 import { createContract, deleteContract } from '../services/contract.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
-import { calculateStatement } from '../services/statement.service';
+import { calculateStatement } from '../services/statement-generation.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice, perAreaKey } from './helpers/records';
 import { createRental } from './helpers/rental';

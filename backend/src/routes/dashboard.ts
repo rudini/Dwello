@@ -9,13 +9,12 @@ import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
 import { apartmentStatus } from '../services/apartment.service';
 import { draftsToSend } from '../services/statement-invoices.service';
-import { statusCondition } from '../services/statement.service';
+import { listStatements, statusCondition } from '../services/statement-query.service';
 import { swissToday } from '../services/today';
 import { contractTasks } from '../services/contract-tasks.service';
 import { deadlinesOf } from '../services/overview-deadlines';
 import { getTypedConfig } from '../services/config.service';
 import { listContracts } from '../services/contract.service';
-import { listStatements } from '../services/statement.service';
 
 // an apartment that no longer exists (#1311) is not vermietbar: it counts in no Belegung «x/y vermietet»
 const existing = sql`${apartmentStatus} <> 'discontinued'`;

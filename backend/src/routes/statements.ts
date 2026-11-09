@@ -4,19 +4,15 @@ import { Elysia, t } from 'elysia';
 import { swissToday } from '../services/today';
 import { CodedError, codedBody, errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
+import { listStatements, getStatement, getStatementCountsByStatus } from '../services/statement-query.service';
+import { calculateStatement, correctStatement, recalculateStatement } from '../services/statement-generation.service';
 import {
-	listStatements,
-	getStatement,
 	updateStatement,
 	deleteStatement,
 	addLineItems,
-	getStatementCountsByStatus,
-	calculateStatement,
 	resetPayment,
 	settleCarryOver,
-	replaceStatement,
-	correctStatement,
-	recalculateStatement
+	replaceStatement
 } from '../services/statement.service';
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
