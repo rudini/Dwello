@@ -155,3 +155,21 @@ export function keyFailuresText(failures: KeyFailure[]) {
 		)
 		.join(' ');
 }
+
+/**
+ * A key per position of a statement that outlasts a recalculation, which gives the positions new ids (#1366): its
+ * category and key, and how many positions of that pair came before it (a category or key deleted before
+ * #1160/#1255 is null; positions saved through the API may repeat a pair, fallback review of #1369)
+ */
+export const withPositionKeys = <
+	P extends { categoryId?: string | null; distributionKeyId?: string | null }
+>(
+	positions: P[]
+) =>
+	positions.map((item, index) => {
+		const pair = `${item.categoryId}/${item.distributionKeyId}`;
+		const before = positions
+			.slice(0, index)
+			.filter((other) => `${other.categoryId}/${other.distributionKeyId}` === pair);
+		return { item, key: `${pair}/${before.length}` };
+	});

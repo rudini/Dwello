@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel } from '$lib/statement';
+	import { balanceLabel, withPositionKeys } from '$lib/statement';
 	import Table from '$lib/ui/Table.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -16,6 +16,9 @@
 	const shown = $derived(
 		stacked ? { list: '', table: 'hidden' } : { list: '@5xl:hidden', table: 'hidden @5xl:block' }
 	);
+
+	// keyed so that a recalculation updates each position instead of replacing it (#1366: WebKit moved the page)
+	const keyed = $derived(withPositionKeys(statement.lineItems));
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
 	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
@@ -129,7 +132,7 @@
 	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view -->
 	<div class="@container">
 		<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
-			{#each statement.lineItems as item (item.id)}
+			{#each keyed as { item, key } (key)}
 				<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
 					<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
 						<dt class="text-ink-muted">{m.buildings_category()}</dt>
@@ -158,7 +161,7 @@
 
 		<div class={shown.table}>
 			<Table caption={m.statements_lines()} captionHidden {columns}>
-				{#each statement.lineItems as item (item.id)}
+				{#each keyed as { item, key } (key)}
 					<tr data-testid="statement-line-item">
 						<td class="text-ink">{item.categoryName}</td>
 						<td class="text-ink-muted">{item.distributionKeyName}</td>
