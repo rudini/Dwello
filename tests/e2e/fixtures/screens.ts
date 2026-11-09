@@ -50,6 +50,7 @@ async function correctionStates(seed: TestData) {
 	await seed.statement('Rita', 'Kirchhof', 2025, 'Standard');
 	await seed.sendStatement('Rita', 2025);
 	await seed.markPaid('Rita', 2025, 'Abrechnung', '10.00');
+	await seed.paymentDeadline('Rita', 2025, inDays(-30)); // overdue: her Mahnung dialog without a correction due (#1403)
 	// a billed invoice deleted afterwards: Olga's Saldo would fall, so «Nicht berichtigen» is missing (code review 454-2 C-9)
 	await seed.building('Ried', 'Winterthur');
 	await seed.apartment('Ried', '6.01', 'vacant');

@@ -2,16 +2,23 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Dialog from '$lib/ui/Dialog.svelte';
-	import { openAmount } from '$lib/statement';
+	import { openAmount, reminderCorrectionText } from '$lib/statement';
 	import { formatCurrency } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
 
-	// Before a Mahnung: which one comes next, how it reaches the tenant, and the amount still open
+	// Before a Mahnung: which one comes next, how it reaches the tenant, and the amount still open; while a correction
+	// is due, a warning with what correcting would claim (#1403)
 	let {
 		open = $bindable(),
 		statement,
-		sentReminders
-	}: { open: boolean; statement: StatementWithDetails; sentReminders: number } = $props();
+		sentReminders,
+		later
+	}: {
+		open: boolean;
+		statement: StatementWithDetails;
+		sentReminders: number;
+		later?: Parameters<typeof reminderCorrectionText>[2];
+	} = $props();
 
 	const TITLES = [m.documents_reminder_1(), m.documents_reminder_2(), m.documents_reminder_3()];
 	const LANGUAGES = {
@@ -24,6 +31,9 @@
 	// the language Dwello writes the reminder in, named in the UI's language (#449, decided in #404, point 4)
 	const language = $derived(LANGUAGES[statement.tenantLanguage ?? 'de']());
 	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	const correction = $derived(
+		later && reminderCorrectionText(statement.tenantName, openAmount(statement), later)
+	);
 </script>
 
 {#if next}
@@ -34,6 +44,15 @@
 		confirmLabel={m.statements_send_next({ next })}
 		confirmTestid="statement-reminder-confirm"
 	>
+		{#if correction}
+			<!-- the sentence says it is a warning, the colour only marks it -->
+			<p
+				class="rounded-control border-l-4 border-caution bg-caution-soft p-4 text-ink"
+				data-testid="reminder-correction"
+			>
+				{correction}
+			</p>
+		{/if}
 		<p data-testid="reminder-delivery-info">
 			{#if byEmail && statement.tenantEmail}
 				{m.statements_reminder_by_email({ next, language, email: statement.tenantEmail })}

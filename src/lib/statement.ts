@@ -108,7 +108,14 @@ export async function periodRunning(periodEnd: string): Promise<boolean> {
 }
 
 /** #546: what the backend says the recalculation of a sent statement gives (`recalculation()`) */
-export type Recalculated = { balance: string; difference: string; belowMinimum: boolean; declineCosts: string | null };
+// open (#1403): what the berichtigte Abrechnung would claim after what was paid, 0 when it claims nothing
+export type Recalculated = {
+	balance: string;
+	difference: string;
+	belowMinimum: boolean;
+	declineCosts: string | null;
+	open: string;
+};
 
 // the amount the texts put after «CHF», without a sign
 export const francs = (amount: number) => formatCurrency(Math.abs(amount)).replace(/^CHF\s*/, '');
@@ -132,6 +139,24 @@ export function recalculatedText(tenant: string, before: number, recalculated: R
 	const amounts = { tenant, now: francs(now), before: francs(before) };
 	const text = now === before ? m.statements_later_now_same({ tenant }) : NOW_WAS[`${kindOf(now)}_${kindOf(before)}`](amounts);
 	return recalculated.belowMinimum ? `${text} ${m.statements_later_below_minimum()}` : text;
+}
+
+/** #1403 (Fachreview 1403-1 V-2): the warning before a Mahnung while a correction is due, against the open amount
+ *  `before` the dialog names; without the amount correcting would claim, or with the same one, it points to the hint */
+export function reminderCorrectionText(
+	tenant: string,
+	before: number,
+	later: {
+		correctionDue: boolean;
+		recalculated?: Recalculated | null;
+		uncalculableKeys?: unknown[];
+	}
+): string | null {
+	if (!later.correctionDue) return null;
+	const open = later.recalculated && !later.uncalculableKeys?.length ? Number(later.recalculated.open) : before;
+	if (open === before) return m.statements_reminder_correction_unquantified();
+	if (!open) return m.statements_reminder_correction_nothing_due({ tenant, before: francs(before) });
+	return m.statements_reminder_correction_due({ tenant, now: francs(open), before: francs(before) });
 }
 
 /** A key that cannot be calculated for a building: why, and for which apartment if for one (#1315) */

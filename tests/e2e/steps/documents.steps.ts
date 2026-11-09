@@ -14,6 +14,7 @@ import {
 	reminderOffers,
 	reminderDatesShown,
 	reminderDelivery,
+	reminderCorrectionText,
 	reminderOwedText,
 	reminderOutcome
 } from '../questions/documents';
@@ -27,6 +28,7 @@ import {
 	markLetterSent,
 	openDocuments,
 	openDocumentsToSend,
+	confirmReminder,
 	openReminder,
 	sendReminder
 } from '../tasks/documents';
@@ -188,6 +190,16 @@ When('der Liegenschaftsverwalter eine Mahnung senden will', async ({ verwalter }
 
 Then('sagt die Mahnung vor dem Senden {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(reminderDelivery).toContain(text);
+});
+
+// #1403: the warning while a correction is due, with the tenants' names as seeded
+Then('warnt die Mahnung vor dem Senden {string}', async ({ verwalter, names }, text: string) => {
+	const named = [...names].reduce((said, [name, seeded]) => said.replaceAll(name, seeded), text);
+	await verwalter.sees(reminderCorrectionText).toBe(named);
+});
+
+When('der Liegenschaftsverwalter die Mahnung trotzdem sendet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmReminder);
 });
 
 // #959: after a part payment the rest

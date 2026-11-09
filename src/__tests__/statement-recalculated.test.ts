@@ -6,7 +6,8 @@ const now = (balance: string, belowMinimum = false): Recalculated => ({
 	balance,
 	difference: '0.00',
 	belowMinimum,
-	declineCosts: null
+	declineCosts: null,
+	open: '0.00'
 });
 
 describe('Neu berechneter Saldo im Hinweis zum Berichtigen', () => {
