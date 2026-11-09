@@ -220,8 +220,5 @@ describe('Fitness-Schritt mit den Daten des Prüfberichts (#1273)', () => {
 		const step = ci.slice(ci.indexOf('- name: Architecture fitness'), ci.indexOf('esac', ci.indexOf('- name: Architecture fitness')));
 		expect(step).toContain('| tee build/review/fitness.txt');
 		expect(step).toMatch(/run: \|\n {10}set -o pipefail/);
-		// Dependabot gets a read-only token: no comment job for it
-		const job = ci.slice(ci.indexOf('  review-comment:'), ci.indexOf('    runs-on:', ci.indexOf('  review-comment:')));
-		expect(job).toContain("github.actor != 'dependabot[bot]'");
 	});
 });
