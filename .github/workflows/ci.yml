@@ -491,7 +491,7 @@ jobs:
     # What the pull request changed, with diagrams (#1273): an HTML artifact and a sticky comment, updated on every push.
     # Never a gate. Pull requests from forks: #1274
     needs: static-checks
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

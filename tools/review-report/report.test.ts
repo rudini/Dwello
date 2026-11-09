@@ -187,6 +187,11 @@ describe('Kommentar des Prüfberichts (#1273)', () => {
 		expect(many).not.toContain('```mermaid\nsequenceDiagram');
 	});
 
+	it('nennt eine neue Migration auch ohne geänderte Tabelle', () => {
+		const text = comment({ ...input, er: { mermaid: '', nodes: [], notes: ['New migration: backend/migrations/0042_data.sql'] } });
+		expect(text).toContain('### Data model\n\n_Not touched._\n\n- New migration: backend/migrations/0042_data.sql');
+	});
+
 	it('erkennt dieselben Prüfdateien wie die Prüfung «Gate change approved» (check-issues.mjs)', () => {
 		const script = readFileSync(new URL('../open-work/check-issues.mjs', import.meta.url), 'utf8');
 		expect(script).toContain(`const gateFile =\n\t${GATE_FILE.toString()};`);
@@ -204,6 +209,8 @@ describe('HTML-Bericht (#1273)', () => {
 		expect(page).toContain('flowchart LR\\n  n0[\\"m0\\"]');
 		expect(page).not.toContain('too many for the comment');
 		expect(page).toContain('| fe:d | fe:a | 0 | 1 |');
+		// HTML in the pull request text stays text: marked renders raw HTML escaped
+		expect(page).toContain("marked.use({ renderer: { html: (html) => html.replace(/</g, '&lt;') } });");
 	});
 });
 
@@ -213,5 +220,8 @@ describe('Fitness-Schritt mit den Daten des Prüfberichts (#1273)', () => {
 		const step = ci.slice(ci.indexOf('- name: Architecture fitness'), ci.indexOf('esac', ci.indexOf('- name: Architecture fitness')));
 		expect(step).toContain('| tee build/review/fitness.txt');
 		expect(step).toMatch(/run: \|\n {10}set -o pipefail/);
+		// Dependabot gets a read-only token: no comment job for it
+		const job = ci.slice(ci.indexOf('  review-comment:'), ci.indexOf('    runs-on:', ci.indexOf('  review-comment:')));
+		expect(job).toContain("github.actor != 'dependabot[bot]'");
 	});
 });

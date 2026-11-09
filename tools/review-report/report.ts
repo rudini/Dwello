@@ -169,7 +169,7 @@ function flows(all: Report['flows'], full: boolean, diagram: (title: string, d: 
 
 /** The sticky comment; `full` (the HTML report) shows every diagram whatever its size */
 export function comment(r: Report, full = false): string {
-	const diagram = (title: string, d: Diagram) => (d.nodes.length ? (full ? `### ${title}\n\n\`\`\`mermaid\n${d.mermaid}\n\`\`\`\n${d.notes.map((n) => `\n- ${n}`).join('')}\n` : inComment(title, d)) : `### ${title}\n\n_Not touched._\n`);
+	const diagram = (title: string, d: Diagram) => (d.nodes.length ? (full ? `### ${title}\n\n\`\`\`mermaid\n${d.mermaid}\n\`\`\`\n${d.notes.map((n) => `\n- ${n}`).join('')}\n` : inComment(title, d)) : `### ${title}\n\n_Not touched._\n${d.notes.map((n) => `\n- ${n}`).join('')}\n`);
 	return [
 		'<!-- review-report -->\n## Reviewer report',
 		`**Type:** ${given(section(r.body, 'Type'))} · **Issue label:** ${r.labels.join(', ') || '–'}`,
@@ -205,6 +205,7 @@ export function html(r: Report): string {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script></head><body><main id="report"></main><script>
 const report = document.getElementById('report');
+marked.use({ renderer: { html: (html) => html.replace(/</g, '&lt;') } });
 report.innerHTML = marked.parse(${JSON.stringify(markdown).replace(/</g, '\\u003c')});
 for (const code of report.querySelectorAll('code.language-mermaid')) { const div = document.createElement('div'); div.className = 'mermaid'; div.textContent = code.textContent; code.parentElement.replaceWith(div); }
 mermaid.run();
