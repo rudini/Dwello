@@ -193,3 +193,15 @@ Funktionalität: Mahnungen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Dann nennt die Abrechnung keine letzte Mahnung
     Und sagt die Abrechnung nicht, dass die Mahnung noch zu versenden ist
+
+  # #1403 (PO 9.11.2026, Persona Dr. Weber 1395 P-1): ist die Abrechnung zu berichtigen, warnt die Mahnung vor dem
+  # Senden mit dem neu berechneten Betrag; senden lässt sie sich trotzdem
+  @wip
+  Szenario: Vor einer Mahnung warnt Dwello, wenn die Abrechnung zu berichtigen ist
+    Angenommen "Anna Keller" wünscht Korrespondenz per Brief
+    Und im Gebäude "Ahornhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung senden will
+    Dann warnt die Mahnung vor dem Senden "Diese Abrechnung ist zu berichtigen: neu berechnet schuldet Anna Keller CHF 3’073.95 statt CHF 2’320.00. Berichtigen Sie sie, bevor Sie mahnen."
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Dann die Abrechnung führt die "Zahlungserinnerung" als "Zu versenden"
