@@ -140,8 +140,8 @@ export function entityFiles(files: Map<string, string[]>): Map<string, string[]>
 	return new Map([...files].map(([field, paths]) => [field, paths.filter((p) => count.get(p)! > 1)]));
 }
 
-/** Drizzle tables of a schema.ts text and their fields (05-knowledge, tools/fitness). */
-export function tablesOf(schema: string): { table: string; fields: string[] }[] {
+/** Drizzle tables of a schema.ts text, their fields and the tables they reference (05-knowledge, tools/fitness, tools/review-report). */
+export function tablesOf(schema: string): { table: string; fields: string[]; refs: string[] }[] {
 	return [...schema.matchAll(/export const (\w+) = pgTable\(\s*'(\w+)',\s*\{/g)].map((m) => {
 		let depth = 1;
 		let i = m.index! + m[0].length;
@@ -152,6 +152,6 @@ export function tablesOf(schema: string): { table: string; fields: string[] }[] 
 			i++;
 		}
 		const body = schema.slice(start, i - 1);
-		return { table: m[1], fields: [...body.matchAll(/^\t{1,3}(\w+):\s*\w+\(/gm)].map((f) => f[1]) };
+		return { table: m[1], fields: [...body.matchAll(/^\t{1,3}(\w+):\s*\w+\(/gm)].map((f) => f[1]), refs: [...new Set([...body.matchAll(/references\(\(\) => (\w+)\./g)].map((r) => r[1]))] };
 	});
 }
