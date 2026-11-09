@@ -5,6 +5,10 @@ import { getLocale } from '$lib/paraglide/runtime';
  * Helper functions for normalizing and formatting values
  */
 
+/** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
+export const plainAmount = (value: string) =>
+	value.replace(/['’\s]/g, '').replace(',', '.').replace(/\.[-–—]+$/, ''); // «1'450.-»: whole francs
+
 /**
  * Normalize a decimal string by removing trailing ".0".
  * PostgreSQL decimal columns return values like "3.0" which

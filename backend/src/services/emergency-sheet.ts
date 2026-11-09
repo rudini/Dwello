@@ -5,7 +5,8 @@
 
 import { once } from 'events';
 import PDFDocument from 'pdfkit';
-import { embedFonts, FONT, type Language } from './pdf.service';
+import { embedFonts, FONT } from './pdf-layout';
+import type { Language } from '../db/schema';
 
 const GUIDE = 'https://github.com/rudini/Dwello/blob/main/docs/installation.md';
 
