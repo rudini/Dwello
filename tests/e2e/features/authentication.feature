@@ -79,6 +79,13 @@ Funktionalität: Anmeldung
     Wenn der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet
     Dann ist der Besucher auf der Seite "Übersicht"
 
+  # #1374: ein Tabulator nach dem ersten Schrägstrich machte aus dem Ziel eine fremde Seite
+  Szenario: Ein Link mit verstecktem fremdem Ziel führt nach der Anmeldung in die App
+    Angenommen ein Konto mit Passwort ist eingerichtet
+    Und ein Besucher hat die Anmeldeseite über einen Link mit verstecktem fremdem Ziel geöffnet
+    Wenn der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet
+    Dann ist der Besucher auf der Seite "Übersicht"
+
   Szenario: Anmeldung mit falschem Passwort
     Angenommen ein Konto mit Passwort ist eingerichtet
     Und ein Besucher hat die Anmeldeseite geöffnet

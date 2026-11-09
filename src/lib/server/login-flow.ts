@@ -25,9 +25,13 @@ export const LOGIN_ERRORS = {
 
 export const loginPage = (error: keyof typeof LOGIN_ERRORS) => `/login?error=${error}`;
 
-/** Only pages of this app: a relative path, never "//host" or "/\host" */
-export const safeTarget = (target: string | null) =>
-	target && /^\/(?![/\\])/.test(target) ? target : '/dashboard';
+const BASE = 'http://dwello.invalid';
+/** Only pages of this app: resolved as the browser does, which drops tab and newlines (#1374), and kept on its origin */
+export const safeTarget = (target: string | null) => {
+	// URL.canParse, not URL.parse: Node 20 has only the first (as in statement.ts); "//x" leaves the origin
+	const url = new URL(URL.canParse(String(target), BASE) ? target || '/dashboard' : '//x', BASE);
+	return url.origin === BASE ? url.pathname + url.search + url.hash : '/dashboard';
+};
 
 export function rememberLoginFlow(
 	cookies: Cookies,
