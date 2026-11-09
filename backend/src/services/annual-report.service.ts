@@ -9,7 +9,7 @@
 import { and, asc, eq, gte, isNull, lte, min, ne, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { apartments, buildings, categories, invoices, rentalContracts } from '../db/schema';
-import { advanceLines } from './advance-payment.service';
+import { incomeOf } from './annual-income';
 import { reportReconciliation, validStatements } from './cost-reconciliation.service';
 import { roundToRappen } from './pdf-format';
 import { lastCompletedPeriod } from './period-types';
@@ -35,42 +35,6 @@ export async function annualReport(buildingId: string, year: number): Promise<An
 		firstYear(buildingId, year)
 	]);
 	return { year, firstYear: first, income, costs };
-}
-
-async function incomeOf(buildingId: string, start: string, end: string) {
-	const contracts = await db
-		.select({
-			startDate: rentalContracts.startDate,
-			endDate: rentalContracts.endDate,
-			baseRent: rentalContracts.baseRent,
-			additionalRent: rentalContracts.additionalRent,
-			flatRateUtilityCharge: rentalContracts.flatRateUtilityCharge
-		})
-		.from(rentalContracts)
-		.innerJoin(apartments, eq(apartments.id, rentalContracts.apartmentId))
-		.where(
-			and(
-				eq(apartments.buildingId, buildingId),
-				lte(rentalContracts.startDate, end),
-				or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, start))
-			)
-		);
-	const over = (amount: (contract: (typeof contracts)[number]) => string | null) =>
-		sum(
-			contracts.flatMap((contract) =>
-				advanceLines(
-					[{ validFrom: contract.startDate, amount: parseFloat(amount(contract) ?? '0') }],
-					new Date(contract.startDate > start ? contract.startDate : start),
-					new Date(contract.endDate && contract.endDate < end ? contract.endDate : end)
-				).map(({ total }) => total)
-			)
-		);
-	const amounts = {
-		netRent: over((c) => c.baseRent),
-		additionalRent: over((c) => c.additionalRent),
-		flatRateUtilityCharge: over((c) => c.flatRateUtilityCharge)
-	};
-	return { ...amounts, total: sum(Object.values(amounts)) };
 }
 
 async function costsOf(buildingId: string, start: string, end: string) {
