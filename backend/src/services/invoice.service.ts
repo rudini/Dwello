@@ -69,7 +69,8 @@ function selectWithDetails() {
 				id: distributionKeys.id,
 				name: distributionKeys.name,
 				nameDE: distributionKeys.nameDE,
-				formula: distributionKeys.formula // whether it can be calculated for the building, without a query of its own (#1309)
+				formula: distributionKeys.formula, // whether it can be calculated for the building, without a query of its own (#1309)
+				updatedAt: distributionKeys.updatedAt // when it last changed, for a list of statements without a query of its own (#1395)
 			},
 			beleg: {
 				fileName: invoiceDocuments.fileName,

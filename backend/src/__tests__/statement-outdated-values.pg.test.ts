@@ -306,4 +306,16 @@ describe('Versendete Abrechnung mit danach geänderten Werten', () => {
 		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
 		expect(listed.find((one) => one.id === id)).toMatchObject({ status: 'sent', invoices: 0, values: true });
 	});
+	// #1395 (PO, P2): the Übersicht takes the key's change time from the invoices it loads anyway
+	it('nennt in der Übersicht die Aufgabe auch nach einer danach geänderten Formel des Verteilschlüssels', async () => {
+		await otherApartment({ area: '70', rooms: '5.5' });
+		const key = await createDistributionKey({ name: `Liste ${token}`, nameDE: `Liste ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const id = await sent(key.id);
+		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
+
+		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+		expect(listed.find((one) => one.id === id)).toMatchObject({ status: 'sent', invoices: 0, values: true });
+	});
+
 });

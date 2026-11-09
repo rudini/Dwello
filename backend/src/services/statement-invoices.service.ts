@@ -54,18 +54,14 @@ type Loaders = {
 	valuesChangedAt: (s: Located) => Promise<Date>;
 };
 
-// #1328 (PO A'): when an apartment of a building was last changed or deleted (its building's updated_at, PO), for one
-// building or, for a list, all at once (#1395: the Übersicht reads it for sent statements too, P2), and when each
-// Verteilschlüssel was
-async function apartmentsChangedAt(buildingId?: string) {
-	const rows = await db
-		.select({ id: buildings.id, building: buildings.updatedAt, apartment: max(apartments.updatedAt) })
-		.from(buildings)
-		.leftJoin(apartments, eq(apartments.buildingId, buildings.id))
-		.where(buildingId ? eq(buildings.id, buildingId) : undefined)
-		.groupBy(buildings.id);
-	const at = new Map(rows.map(({ id, building, apartment }) => [id, Math.max(building.getTime(), apartment?.getTime() ?? 0)]));
-	return (id: string) => new Date(at.get(id) ?? 0);
+// #1328 (PO A'): when an apartment of the building was last changed or deleted (its building's updated_at, PO), and
+// when each Verteilschlüssel was
+async function apartmentsChangedAt(buildingId: string) {
+	const [[apartment], [building]] = await Promise.all([
+		db.select({ at: max(apartments.updatedAt) }).from(apartments).where(eq(apartments.buildingId, buildingId)),
+		db.select({ at: buildings.updatedAt }).from(buildings).where(eq(buildings.id, buildingId))
+	]);
+	return new Date(Math.max(apartment?.at?.getTime() ?? 0, building?.at.getTime() ?? 0));
 }
 const keysChangedAt = async () =>
 	new Map((await db.select({ id: distributionKeys.id, at: distributionKeys.updatedAt }).from(distributionKeys)).map(({ id, at }) => [id, at]));
@@ -81,7 +77,7 @@ const direct: Loaders = {
 	stock: (s) => agreedStock(periodOf(s), s.agreedCategoryIds),
 	full: async (s) => s,
 	keys: (s) => uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd),
-	valuesChangedAt: async (s) => lastValueChange(s, (await apartmentsChangedAt(s.building.id))(s.building.id), await keysChangedAt())
+	valuesChangedAt: async (s) => lastValueChange(s, await apartmentsChangedAt(s.building.id), await keysChangedAt())
 };
 function perPeriod(): Loaders {
 	const memo = new Map<string, Promise<unknown>>();
@@ -94,7 +90,8 @@ function perPeriod(): Loaders {
 	const invoices = (s: Located) => once(`invoices ${key(s)}`, () => getInvoicesForStatement(s.building.id, s.periodStart, s.periodEnd, readings(s)));
 	const change = (s: Located) => once(`change ${key(s)}`, () => fuelStockChange(s.building.id, s.periodStart, s.periodEnd, readings(s)));
 	// the key check shares what the list loads anyway, and the apartments once per building (P2, #922)
-	const apartments = async (s: Located) => (await once('apartments', apartmentsByBuilding)).get(s.building.id) ?? [];
+	const byBuilding = () => once('apartments', apartmentsByBuilding);
+	const apartments = async (s: Located) => (await byBuilding()).byBuilding.get(s.building.id) ?? [];
 	return {
 		invoices,
 		stock: async (s) => agreedStockOf(await change(s), s.agreedCategoryIds),
@@ -103,8 +100,13 @@ function perPeriod(): Loaders {
 			once(`keys ${key(s)}`, async () =>
 				uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd, { bills: await invoices(s), change: await change(s), apartments: () => apartments(s) })
 			),
-		valuesChangedAt: async (s) =>
-			lastValueChange(s, (await once('apartments changed', () => apartmentsChangedAt()))(s.building.id), await once('keys', keysChangedAt))
+		// #1395 (PO, P2): from the apartments and the period's invoices it loads anyway; a key only a delivery of another
+		// period bills (#1323) counts as unchanged here, the statement page still names it
+		valuesChangedAt: async (s) => {
+			const at = (await byBuilding()).changedAt.get(s.building.id);
+			const keys = new Map((await invoices(s)).flatMap((bill) => (bill.distributionKey?.updatedAt ? [[bill.distributionKey.id, bill.distributionKey.updatedAt] as const] : [])));
+			return lastValueChange(s, at === undefined ? null : new Date(at), keys);
+		}
 	};
 }
 
