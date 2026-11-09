@@ -5,7 +5,7 @@ import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ANCHORED_RE, ARCH_LAYERS, ROOT, STATUS_CMP, changedFiles, classify, git, median, quantile, tablesOf } from '../arch-baseline/lib';
-import { LIMITS, analyze, type Input } from '../arch-baseline/structure';
+import { LIMITS, analyze, type Input, type Kpi } from '../arch-baseline/structure';
 
 type Spread = { median: number; p90: number; max: number };
 type Exception = { reason: string; scenario: string };
@@ -48,6 +48,8 @@ export type Ratchet = {
 		moduleCycles: ({ modules: string } & Exception)[];
 		/** Module dependencies against stability found when the check came; shrink with the code */
 		unstableDependencies?: ({ from: string; to: string } & Exception)[];
+		/** #1272: new files allowed below the green maintainability of LIMITS */
+		newFiles?: ({ path: string } & Exception)[];
 	};
 	prSizeWarn: { files: number; modules: number; layers: number };
 	coChangeWarn: number;
@@ -208,6 +210,61 @@ export function advise(
 	return findings;
 }
 
+/** #1272: the structure report's indicators and each production file's maintainability index (fallow), on one commit */
+export type Structure = { kpis: Kpi[]; maintainability: Record<string, number> };
+/** Files of the pull request: changed ones as [base path, head path] (a rename included), added ones by their path */
+export type FileChanges = { changed: [string, string][]; added: string[] };
+
+/** #1272: red when a changed file's maintainability drops */
+export function structureFindings(base: Structure, head: Structure, files: FileChanges, r: Ratchet): Finding[] {
+	const findings: Finding[] = [];
+	for (const [was, is] of files.changed) {
+		const [before, after] = [base.maintainability[was], head.maintainability[is]];
+		if (before !== undefined && after !== undefined && after < before)
+			findings.push({ check: 'structure-maintainability', message: `Ä1: ${is}: maintainability ${before} → ${after} (fallow). Fix: split long or deeply nested functions of the file until it is back at ${before}.` });
+	}
+	const [b, h] = [values(base), values(head)];
+	const kpi = (check: string, worse: boolean, message: string) => worse && findings.push({ check, message: `Ä1: ${message} Fix: ${FIX[check]}` });
+	kpi('structure-health', h.health < b.health, `the fallow health score drops from ${b.health} to ${h.health}.`);
+	const allowed = new Set((r.exceptions.newFiles ?? []).map((e) => e.path));
+	for (const path of files.added) {
+		const mi = head.maintainability[path];
+		if (mi !== undefined && mi < LIMITS.maintainability[0] && !allowed.has(path))
+			findings.push({ check: 'structure-new-file', message: `Ä1: the new file ${path} has maintainability ${mi} (green from ${LIMITS.maintainability[0]}, LIMITS in tools/arch-baseline/structure.ts). Fix: split long or deeply nested functions; an exception is an entry in \`exceptions.newFiles\` of tools/fitness/ratchet.json with its reason, only for a file this pull request adds, with \`Gate change approved: #n\` in the pull request text.` });
+	}
+	kpi('structure-xs', h.xs > b.xs, `XS (excess of fat and tangled code, in % of code lines) rises from ${b.xs} to ${h.xs}.`);
+	return findings;
+}
+
+/** #1272: the pull request's files from `git diff --name-status -M` */
+export function fileChanges(nameStatus: string): FileChanges {
+	const rows = nameStatus.split('\n').filter(Boolean).map((l) => l.split('\t'));
+	return {
+		changed: rows.filter(([s]) => s === 'M' || s.startsWith('R')).map(([, was, is]) => [was, is ?? was]),
+		added: rows.filter(([s]) => s === 'A').map(([, path]) => path)
+	};
+}
+
+const values = (s: Structure) => Object.fromEntries(s.kpis.map((k) => [k.key, k.value]));
+/** Indicators whose rise (XS) or drop (health score) makes the pull request red; the others are hints */
+const GATED: Record<string, 1 | -1> = { xs: 1, health: -1 };
+
+/** #1272: every indicator of the structure report as base → pull request, as a markdown table */
+export function structureTable(base: Structure, head: Structure): string {
+	const b = values(base);
+	const rows = head.kpis.map(({ key, label, value }) => {
+		const was = b[key];
+		const mark = was === undefined || was === value ? '' : GATED[key] && Math.sign(value - was) === GATED[key] ? ' (red)' : GATED[key] ? '' : ' (hint)';
+		return `| ${label} | ${was ?? '–'} | ${value}${mark} |`;
+	});
+	return ['| Indicator | Base | Pull request |', '|---|---|---|', ...rows].join('\n');
+}
+
+const FIX: Record<string, string> = {
+	'structure-health': 'run `bunx fallow health` and remove what it penalises (dead code, complex or long functions, duplication) in the changed code.',
+	'structure-xs': 'keep files under 400 lines, functions under fallow\'s thresholds and modules out of cycles (`bun run structure:report` shows where).'
+};
+
 /** #922 (P2): a route that needs more database queries than the ratchet allows, e.g. one query per statement (#919) */
 export function queryFindings(counts: Record<string, number>, r: Ratchet): Finding[] {
 	return Object.entries(counts)
@@ -237,7 +294,7 @@ const exceptionSizes = ({ exceptions: x }: Ratchet) => ({
  * Ratchet rule: a threshold never rises and an exception list never grows, compared with the base branch's file. An
  * entry may change (a renamed file, a reformatted line) as long as its list does not grow.
  */
-export function loosened(working: Ratchet, base: Ratchet): Finding[] {
+export function loosened(working: Ratchet, base: Ratchet, added: (path: string) => boolean = () => false): Finding[] {
 	const findings: Finding[] = [];
 	const loose = (message: string) =>
 		findings.push({ check: 'ratchet', message: `tools/fitness/ratchet.json: ${message} The ratchet only tightens; fix the code instead.` });
@@ -254,7 +311,16 @@ export function loosened(working: Ratchet, base: Ratchet): Finding[] {
 		if (before[k] !== undefined && now[k] === undefined) loose(`exceptions.${k} was removed; keep it, empty, so it cannot come back with entries unseen.`);
 		else if (before[k] !== undefined && (now[k] ?? 0) > before[k]) loose(`exceptions.${k} grew from ${before[k]} to ${now[k]}.`);
 	loosenedFat(working.fat, base.fat).forEach(loose);
+	loosenedNewFiles(working.exceptions.newFiles, base.exceptions.newFiles, added).forEach(loose);
 	return findings;
+}
+
+/** #1272 (decided 2026-11-09): an entry may come only with the file the pull request adds */
+function loosenedNewFiles(w: Ratchet['exceptions']['newFiles'], b: Ratchet['exceptions']['newFiles'], added: (path: string) => boolean): string[] {
+	if (b && !w) return ['exceptions.newFiles was removed; keep it, empty, so it cannot come back with entries unseen.'];
+	return unlisted(w ?? [], b ?? [], (x) => x.path)
+		.filter((e) => !added(e.path))
+		.map((e) => `exceptions.newFiles lists ${e.path}, which this pull request does not add; only a file it adds may be listed.`);
 }
 
 /** A fat entry the base does not have (a renamed file included) or one with a higher limit loosens the ratchet. */
@@ -303,6 +369,7 @@ export function tighten(m: Measured, r: Ratchet): Ratchet {
 				.filter((e) => e.paths.length > 0),
 			moduleCycles: x.moduleCycles.filter((c) => m.moduleCycles.includes(c.modules)),
 			...(x.unstableDependencies && { unstableDependencies: x.unstableDependencies.filter((u) => m.unstable?.some((v) => v.from === u.from && v.to === u.to)) }),
+			...(x.newFiles && { newFiles: x.newFiles }),
 			...(x.bffDates && { bffDates: x.bffDates.filter((d) => !staleDates.includes(d)) }),
 			...(x.frontendDecisions && { frontendDecisions: x.frontendDecisions.filter((d) => !staleFrontend.includes(d)) })
 		}
@@ -329,8 +396,10 @@ function unlisted<T, L>(items: T[], listed: L[], key: (x: T | L) => string): T[]
 }
 
 // ---------------------------------------------------------------- measuring (the phase 0 scripts) and the command line
-// bun tools/fitness/fitness.ts [--base <ref>] [--update] [--cochange] [--format github]
+// bun tools/fitness/fitness.ts [--base <ref>] [--structure] [--update] [--cochange] [--format github]
 //   --base      compare the ratchet with the merge-base's file and report the change size against it
+//   --structure with --base: the structure report's indicators and changed files' maintainability, base → HEAD (#1272;
+//               committed state only, each measured in a worktree)
 //   --update    write improved values into ratchet.json (the ratchet only tightens)
 //   --cochange  co-change coupling of the last 6 months (needs the full git history; nightly)
 
@@ -451,6 +520,28 @@ export function addedAllowed(working: Ratchet, base: Ratchet): number {
 	return unlisted(all(working), all(base), (t) => `${t.path}\t${t.line}`).length;
 }
 
+/** #1272: the structure report's indicators and the production files' maintainability on one commit (measure.sh) */
+function structureAt(commit: string): Structure {
+	const out = mkdtempSync(join(tmpdir(), 'structure-'));
+	try {
+		return structureIn(out, commit);
+	} finally {
+		rmSync(out, { recursive: true, force: true });
+	}
+}
+
+function structureIn(out: string, commit: string): Structure {
+	const p = spawnSync(join(ROOT, 'tools/arch-baseline/measure.sh'), [commit, out], { encoding: 'utf8' });
+	if (p.status !== 0) throw new Error(`measure.sh ${commit}: ${p.stderr}`);
+	const json = (name: string) => JSON.parse(readFileSync(join(out, name), 'utf8') || 'null');
+	const health = json('fallow-health.json');
+	if (!health) throw new Error(`fallow health gave no result on ${commit} (run it there by hand to see why)`);
+	const a = analyze({ edges: json('imports-module.csv.json'), cycles: json('cycles-module.csv.json'), files: json('files.csv.json'), health, gaps: json('fallow-gaps.json')?.coverage_gaps });
+	const prod = new Set(a.files.map((f) => f.path));
+	const scores: { path: string; maintainability_index: number }[] = health.file_scores;
+	return { kpis: a.kpis, maintainability: Object.fromEntries(scores.filter((f) => prod.has(f.path)).map((f) => [f.path, f.maintainability_index])) };
+}
+
 function coChange(out: string) {
 	const since = new Date(Date.now() - 183 * 864e5).toISOString().slice(0, 10);
 	const read = scripts(out, ['02-imports.ts', '03-history.ts', '04-metrics.ts'], { ARCH_SINCE: since, ARCH_BASE: 'HEAD' });
@@ -475,7 +566,14 @@ if (import.meta.main) {
 			// the base has no ratchet yet: this change introduces it
 		}
 	}
-	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet) : [])];
+	const errors = [...(m ? judge(m, ratchet) : []), ...(base && baseRatchet ? loosened(ratchet, baseRatchet, (path) => git(['diff', '--name-only', '--diff-filter=A', base, 'HEAD', '--', path]).trim() === path) : [])];
+	if (base && args.includes('--structure')) {
+		const [before, after] = [structureAt(base), structureAt('HEAD')];
+		errors.push(...structureFindings(before, after, fileChanges(git(['diff', '--name-status', '-M', base, 'HEAD'])), ratchet));
+		const table = `### Structure: base → pull request\n\n${structureTable(before, after)}\n`;
+		console.log(table);
+		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, table);
+	}
 	const pairs = cochange ? coChange(out) : undefined;
 	const technicalAdded = baseRatchet ? addedTechnical(ratchet, baseRatchet) : 0;
 	const allowedAdded = baseRatchet ? addedAllowed(ratchet, baseRatchet) : 0;

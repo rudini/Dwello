@@ -589,7 +589,8 @@
 			}
 		],
 		"bffDates": [],
-		"frontendDecisions": []
+		"frontendDecisions": [],
+		"newFiles": []
 	},
 	"prSizeWarn": {
 		"files": 31,

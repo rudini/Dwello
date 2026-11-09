@@ -1,7 +1,8 @@
 import { spawnSync } from 'node:child_process';
+import type { Kpi } from '../arch-baseline/structure';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, structureItems, judge, loosened, newFields, queryFindings, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
+import { addedAllowed, addedTechnical, advise, crossesBoundary, decides, isFrontendFile, structureItems, judge, loosened, newFields, queryFindings, fileChanges, structureFindings, structureTable, tighten, tightenQueries, type Measured, type Ratchet } from './fitness';
 
 const ratchet: Ratchet = {
 	fieldSpread: { median: 6, p90: 19, max: 60 },
@@ -470,6 +471,70 @@ describe('Abhängigkeiten gegen die Stabilität', () => {
 		expect(loosened(longer, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.unstableDependencies grew from 1 to 2.']);
 		expect(tighten(m([]), r).exceptions.unstableDependencies).toEqual([]);
 		expect(tighten(m([{ from: 'be:middleware', to: 'be:services/local-account', gap: 0.34 }]), r).exceptions.unstableDependencies).toEqual([listed]);
+	});
+});
+
+describe('Strukturkennzahlen pro Pull Request (#1272)', () => {
+	const LABEL: Record<string, string> = { xs: 'XS: excess (fat and tangles) in % of code lines', health: 'fallow health score (A)', duplication: 'Duplication in %' };
+	const kpis = (values: Record<string, number>): Kpi[] => Object.entries(values).map(([key, value]) => ({ key, label: LABEL[key], value, light: 'green' }));
+	const base = { kpis: kpis({ xs: 4, health: 87 }), maintainability: { 'src/lib/a.ts': 90 } };
+
+	it('meldet eine geänderte Datei, deren Wartbarkeit sinkt', () => {
+		const head = { ...base, maintainability: { 'src/lib/a.ts': 89.5 } };
+		const findings = structureFindings(base, head, { changed: [['src/lib/a.ts', 'src/lib/a.ts']], added: [] }, ratchet);
+		expect(findings.map((f) => f.check)).toEqual(['structure-maintainability']);
+		expect(findings[0].message).toContain('src/lib/a.ts: maintainability 90 → 89.5');
+	});
+
+	it('meldet einen sinkenden Health-Score und ein steigendes XS, andere Kennzahlen nicht', () => {
+		const head = { ...base, kpis: kpis({ xs: 4.1, health: 86.9, duplication: 9 }) };
+		const findings = structureFindings({ ...base, kpis: kpis({ xs: 4, health: 87, duplication: 1 }) }, head, { changed: [], added: [] }, ratchet);
+		expect(findings.map((f) => f.message.split(' Fix')[0])).toEqual(['Ä1: the fallow health score drops from 87 to 86.9.', 'Ä1: XS (excess of fat and tangled code, in % of code lines) rises from 4 to 4.1.']);
+	});
+
+	it('verlangt von einer neuen Datei die grüne Wartbarkeit, ausser sie steht mit Grund in der Ausnahmeliste', () => {
+		const head = { ...base, maintainability: { 'src/lib/b.ts': 84.9, 'src/lib/c.ts': 85, 'src/lib/d.ts': 70 } };
+		const r: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, newFiles: [{ path: 'src/lib/d.ts', reason: 'r', scenario: 'Ä1' }] } };
+		const findings = structureFindings(base, head, { changed: [], added: ['src/lib/b.ts', 'src/lib/c.ts', 'src/lib/d.ts'] }, r);
+		expect(findings.map((f) => f.check)).toEqual(['structure-new-file']);
+		expect(findings[0].message).toContain('the new file src/lib/b.ts has maintainability 84.9 (green from 85');
+	});
+
+	it('zeigt jede Kennzahl als Basis → Pull Request und markiert, was rot macht', () => {
+		const head = { kpis: kpis({ xs: 5, health: 87, duplication: 2 }), maintainability: {} };
+		expect(structureTable({ ...base, kpis: kpis({ xs: 4, health: 87, duplication: 1 }) }, head).split('\n')).toEqual([
+			'| Indicator | Base | Pull request |',
+			'|---|---|---|',
+			'| XS: excess (fat and tangles) in % of code lines | 4 | 5 (red) |',
+			'| fallow health score (A) | 87 | 87 |',
+			'| Duplication in % | 1 | 2 (hint) |'
+		]);
+	});
+
+	it('liest geänderte, umbenannte und neue Dateien aus git diff --name-status, gelöschte nicht', () => {
+		expect(fileChanges('M\tsrc/a.ts\nR087\tsrc/b.ts\tsrc/c.ts\nA\tsrc/d.ts\nD\tsrc/e.ts\n')).toEqual({
+			changed: [
+				['src/a.ts', 'src/a.ts'],
+				['src/b.ts', 'src/c.ts']
+			],
+			added: ['src/d.ts']
+		});
+	});
+
+	it('behält die Ausnahmeliste neuer Dateien beim Verschärfen', () => {
+		const listed: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, newFiles: [{ path: 'src/lib/d.ts', reason: 'r', scenario: 'Ä1' }] } };
+		expect(tighten(clean, listed).exceptions.newFiles).toEqual(listed.exceptions.newFiles);
+	});
+
+	it('erlaubt einen neuen Eintrag nur für eine Datei, die der Pull Request hinzufügt', () => {
+		const r: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, newFiles: [] } };
+		const entry = (path: string) => ({ path, reason: 'r', scenario: 'Ä1' });
+		const longer: Ratchet = { ...r, exceptions: { ...r.exceptions, newFiles: [entry('src/lib/new.ts'), entry('src/lib/old.ts'), entry('src/lib/typo.ts')] } };
+		expect(loosened(longer, r, (path) => path === 'src/lib/new.ts').map((f) => f.message.split(' The')[0])).toEqual([
+			'tools/fitness/ratchet.json: exceptions.newFiles lists src/lib/old.ts, which this pull request does not add; only a file it adds may be listed.',
+			'tools/fitness/ratchet.json: exceptions.newFiles lists src/lib/typo.ts, which this pull request does not add; only a file it adds may be listed.'
+		]);
+		expect(loosened(ratchet, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.newFiles was removed; keep it, empty, so it cannot come back with entries unseen.']);
 	});
 });
 
