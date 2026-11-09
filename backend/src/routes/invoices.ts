@@ -29,6 +29,7 @@ import { getUtilityCostRules } from '../services/utility-validation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { buildingExists } from '../services/building.service';
 import { invoiceStatements } from '../services/statement-invoices.service';
+import { expiredInvoicePeriods, keepInvoicePeriod } from '../services/invoice-retention';
 
 // Validation schemas
 const invoiceQuerySchema = t.Object({
@@ -126,6 +127,22 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		};
 	})
 	// The key the invoice form proposes per building and category (#379)
+	// #1410: the Abrechnungsperioden whose invoices may be deleted, and «Behalten» of one
+	.get('/retention', () => expiredInvoicePeriods())
+	.post(
+		'/retention/kept',
+		async ({ body, set }) => {
+			if (!(await buildingExists(body.buildingId))) {
+				set.status = 404;
+				return refusal('BUILDING_NOT_FOUND', 'Building not found');
+			}
+			await keepInvoicePeriod(body.buildingId, body.periodStart);
+			return { success: true };
+		},
+		{
+			body: t.Object({ buildingId: t.String({ format: 'uuid' }), periodStart: t.String({ format: 'date' }) })
+		}
+	)
 	.get('/latest-keys', () => latestKeys())
 	// Get Swiss utility cost rules
 	.get('/utility-rules', async () => {

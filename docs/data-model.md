@@ -75,6 +75,7 @@ building_type VARCHAR(50)            -- Gebäudetyp
 year_built    INTEGER                -- Baujahr
 no_tank       BOOLEAN      NOT NULL DEFAULT false -- kein Tank oder Tank stillgelegt: no Tankbestand asked for periods without readings (#72)
 accounting_period VARCHAR(20) NOT NULL DEFAULT 'calendar' -- Abrechnungsperiode: calendar | july-june | november-october, fixed from the building's first statement (#1088)
+kept_invoice_periods JSONB NOT NULL DEFAULT '[]' -- starts of Abrechnungsperioden whose invoices the landlord keeps after their Aufbewahrungsfrist («Behalten», #1410)
 ```
 
 Index: `buildings_city_idx (city)`.
