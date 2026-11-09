@@ -140,6 +140,6 @@ describe('Demo mit deploy/demo/docker-compose.yml', () => {
 	// #1372: on the demo every Google account signs in; the operator's LLM_* lock keeps visitors from choosing the address
 	it('legt die KI der Demo fest, so dass Besucher keine Adresse der KI wählen', () => {
 		const settings = readFileSync(join(root, 'deploy/demo/.env.example'), 'utf8');
-		expect(settings).toMatch(/^LLM_[A-Z_]+=\S+$/m);
+		expect(settings).toMatch(/^LLM_ENABLED=true$/m);
 	});
 });
