@@ -279,6 +279,43 @@ describe('Kosten, die der Vermieter trägt', () => {
 		}
 	});
 
+	// code review 1409-5 C-2, C-3: only a contract with days in the period counts, not one that ended before it or starts
+	// after it, whatever its «Abgerechnet bis»
+	it('nennt keinen Mietvertrag ohne Tage in der Periode', async () => {
+		const flat = await createApartment({
+			buildingId: rental.building,
+			number: '2.03',
+			floor: 2,
+			area: '40',
+			rooms: '1.5'
+		});
+		const ids: string[] = [];
+		try {
+			for (const [startDate, endDate, billedUntil] of [
+				['2023-01-01', '2024-06-30', '2025-03-31'],
+				['2026-02-01', null, '2026-03-31']
+			] as const) {
+				const created = await createContract({
+					apartmentId: flat.id,
+					tenantId: extra.tenant,
+					startDate,
+					endDate: endDate ?? undefined,
+					baseRent: '500',
+					monthlyAdvancePayment: '0'
+				});
+				ids.push(created.id);
+				await db
+					.update(rentalContracts)
+					.set({ billedUntil })
+					.where(eq(rentalContracts.id, created.id));
+			}
+			expect((await report()).costs.utility.outside).toBe(false);
+		} finally {
+			for (const id of ids) await deleteContract(id, true);
+			await deleteApartment(flat.id);
+		}
+	});
+
 	// fallback review of #1421: billed outside Dwello up to a day after the period covers the whole period
 	it('sagt es auch, wenn «Abgerechnet bis» nach dem Ende der Periode liegt', async () => {
 		await db

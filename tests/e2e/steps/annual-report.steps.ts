@@ -67,3 +67,12 @@ Then('nennt der Jahresbericht die Gebäude {string} und {string} in dieser Reihe
 	const named = [first, second].map((building) => names.get(building)!);
 	await verwalter.sees(buildingsInOrder(named)).toEqual(named);
 });
+
+// fallback review of #1421: a name a spreadsheet would run as a formula begins with «'»
+Then(
+	'steht in der CSV-Datei des Jahresberichts vor der Position {string} ein Apostroph, mit {string}',
+	async ({ verwalter, names }, category: string, amount: string) => {
+		const position = `'${names.get(category) ?? category}`;
+		await verwalter.sees(csvAmountsOf([position])).toEqual([`${position} ${amount}`]);
+	}
+);

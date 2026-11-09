@@ -113,7 +113,8 @@ async function billedOutside(buildingId: string, period: { start: string; end: s
 			and(
 				eq(apartments.buildingId, buildingId),
 				gte(rentalContracts.billedUntil, period.start),
-				lte(rentalContracts.startDate, period.end)
+				lte(rentalContracts.startDate, period.end),
+				or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, period.start))
 			)
 		)
 		.limit(1);

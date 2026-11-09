@@ -101,3 +101,17 @@ Funktionalität: Auswertungen
     Wenn der Liegenschaftsverwalter für den Jahresbericht das Gebäude "Waldhof" wählt
     Dann heisst der angezeigte Jahresbericht "Jahresbericht Seeblick 2025"
     Aber bietet der Jahresbericht keine Datei zum Herunterladen an
+
+  # Fachreview 1409-2 V-14, Fallback-Review von #1421: auch ein «Abgerechnet bis» nach dem Ende der Periode
+  Szenario: Der Jahresbericht nennt Tage, die ausserhalb von Dwello abgerechnet sind
+    Angenommen für "Anna Meier" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung 2025
+    Und der Mietvertrag von "Ben Keller" ist bis "2026-01-31" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter den Jahresbericht 2025 des Gebäudes "Seeblick" öffnet
+    Dann nennt der Jahresbericht "Ein Mietvertrag ist bis in diese Abrechnungsperiode ausserhalb von Dwello abgerechnet. Ihr Anteil enthält diese Tage; ziehen Sie ab, was Sie dafür den Mietern belastet haben."
+
+  # Fallback-Review von #1421: Excel führte einen Namen wie eine Formel aus; er beginnt mit einem Apostroph
+  Szenario: Die CSV-Datei des Jahresberichts schützt Namen, die wie eine Formel aussehen
+    Angenommen es gibt die nicht umlagefähige Kategorie "=Sonderreinigung"
+    Und im Gebäude "Seeblick" gibt es eine Rechnung der eigenen Kategorie "=Sonderreinigung" über "120" Franken vom "2025-05-10"
+    Wenn der Liegenschaftsverwalter den Jahresbericht 2025 des Gebäudes "Seeblick" als CSV herunterlädt
+    Dann steht in der CSV-Datei des Jahresberichts vor der Position "=Sonderreinigung" ein Apostroph, mit "120.00"
