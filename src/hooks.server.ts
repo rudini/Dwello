@@ -34,6 +34,14 @@ export const init: ServerInit = () => {
 		);
 };
 
+// Every route param but the EGID (a number for the Gebäuderegister) is the UUID of a record and goes into a backend
+// address: anything else («x%2Fexport», «..») would point the signed-in request at another path there (#1377)
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const foreignId = (params: Partial<Record<string, string>> = {}) =>
+	Object.entries(params).some(([name, value]) => name !== 'egid' && !UUID.test(value ?? ''));
+const notFound = () =>
+	json({ error: { code: 'NOT_FOUND', message: 'Not found' } }, { status: 404 });
+
 const redirectTo = (location: string) => new Response(null, { status: 303, headers: { location } });
 
 // Every page needs a valid session; without one, pages lead to the login page and API calls get 401.
@@ -50,6 +58,7 @@ const session: Handle = async ({ event, resolve }) => {
 		// einrichten»; help, the legal pages and the API stay reachable
 		if (!isPublic(pathname) && !pathname.startsWith('/api/') && !pathname.startsWith('/backup') && (await backupState(event.fetch)).backup === 'setup')
 			return redirectTo('/backup');
+		if (pathname.startsWith('/api/') && foreignId(event.params)) return notFound();
 		return resolve(event);
 	}
 	if (isPublic(pathname)) return resolve(event);
@@ -75,6 +84,8 @@ export const handle: Handle = ({ event, resolve }) =>
 				response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 				// Private and changing data: back, forward and another tab load it anew, never a deleted record (#679)
 				response.headers.set('Cache-Control', 'no-store');
+				// a file (a Beleg, an export) is shown only as the kind it is sent with (#1377)
+				response.headers.set('X-Content-Type-Options', 'nosniff');
 				return response;
 			}
 		});
@@ -83,7 +94,9 @@ export const handle: Handle = ({ event, resolve }) =>
 // Server-side loads and actions call the backend directly; forward the session JWT, but only to the backend.
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const jwt = event.cookies.get(cookieConfig.sessionName);
-	if (jwt && new URL(request.url).origin === BACKEND_ORIGIN) {
+	const toBackend = new URL(request.url).origin === BACKEND_ORIGIN;
+	if (toBackend && foreignId(event.params)) return notFound();
+	if (jwt && toBackend) {
 		request.headers.set('Authorization', `Bearer ${jwt}`);
 	}
 	return fetch(request);

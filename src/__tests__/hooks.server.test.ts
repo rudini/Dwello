@@ -133,3 +133,68 @@ describe('Browser-Cache (#679)', () => {
 		expect(response.headers.get('cache-control')).toBe('no-store');
 	});
 });
+
+describe('Dateien der App (#1377)', () => {
+	it('lässt den Browser die Art einer Datei nicht erraten', async () => {
+		const url = new URL('http://localhost/help');
+		const response = await handle({
+			event: { url, request: new Request(url), cookies: { get: () => undefined }, locals: {} },
+			resolve: async () =>
+				new Response('<p>', { headers: { 'content-type': 'application/octet-stream' } })
+		} as never);
+
+		expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+	});
+});
+
+// #1377: a decoded «%2F» or «..» in an address would point the signed-in request at another path of the backend
+describe('Adresse mit einer ID, die keine ist', () => {
+	const id = '3f2a7c1e-9b4d-4e8a-a1c2-5d6e7f809a1b';
+
+	async function fetched(params: Record<string, string>) {
+		let sent = false;
+		const response = await handleFetch({
+			event: { params, cookies: { get: () => 'jwt-123' } },
+			request: new Request('http://localhost:3001/api/v1/tenants/x'),
+			fetch: async () => {
+				sent = true;
+				return new Response('{}');
+			}
+		} as never);
+		return { sent, status: response.status };
+	}
+
+	it('fragt das Backend aus einer Seite nicht an', async () => {
+		expect(await fetched({ id: '../buildings' })).toEqual({ sent: false, status: 404 });
+	});
+
+	it('fragt das Backend mit einer echten ID an', async () => {
+		expect(await fetched({ id })).toEqual({ sent: true, status: 200 });
+	});
+
+	it('beantwortet einen API-Aufruf mit 404, ohne ihn weiterzugeben', async () => {
+		const jwt = await generateJwt({
+			sub: 's-1',
+			email: 'verwalter@example.com',
+			name: 'Vera',
+			provider: 'google'
+		});
+		const url = new URL('http://localhost/api/tenants/x%2Fexport');
+		let resolved = false;
+		const response = await handle({
+			event: {
+				url,
+				params: { id: 'x/export' },
+				request: new Request(url),
+				cookies: { get: () => jwt },
+				locals: {}
+			},
+			resolve: async () => {
+				resolved = true;
+				return new Response('{}');
+			}
+		} as never);
+
+		expect({ resolved, status: response.status }).toEqual({ resolved: false, status: 404 });
+	});
+});
