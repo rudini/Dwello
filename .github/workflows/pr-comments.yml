@@ -18,6 +18,7 @@ jobs:
     name: Comments and gate check
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       actions: read # the artifacts of the CI run
       contents: write # the branch ui-screenshots
@@ -127,7 +128,7 @@ jobs:
               return `### ${title}\n![${title}](${base}/${name}.png?raw=true)${before}`;
             };
             // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
-            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
+            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort().slice(0, 300);
             // PDF pages that look the same (statement-pdf.ts): pdf_<language>_<page>
             const samePdfPages = fs.existsSync('ui-screenshots/unchanged.txt')
               ? fs.readFileSync('ui-screenshots/unchanged.txt', 'utf8').split('\n').filter(Boolean).sort()

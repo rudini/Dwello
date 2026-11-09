@@ -71,6 +71,9 @@ describe('Kommentare aus Daten eines Forks (Fallback-Review von #1386)', () => {
 	it('liest höchstens 300 Screenshots und kürzt den fertigen Kommentar unter die Grenze von GitHub (Fallback-Review von #1391)', () => {
 		expect(comments).toMatch(/fs\.readFileSync\('ui-screenshots\/shots\.txt', 'utf8'\)\.split\('\\n'\)\.filter\(Boolean\)\.slice\(0, 300\)/);
 		expect(comments).toContain(").replace(/@(?=[\\w-])/g, '@\\u200b').slice(0, 65000);");
+		// the PDF pages come from the artifact too, and the job ends after 10 minutes whatever it reads (review 1274b-review-3 C-3)
+		expect(comments).toMatch(/const pdfPages = fs\.readdirSync\('ui-screenshots'\)\.filter\(.*\)\.sort\(\)\.slice\(0, 300\);/);
+		expect(comments).toMatch(/runs-on: ubuntu-latest\n {4}timeout-minutes: 10\n/);
 	});
 
 	it('macht @-Erwähnungen in beiden Kommentaren unwirksam', () => {
