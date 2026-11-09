@@ -42,6 +42,7 @@ export const pageOverflowsSideways = question(
 );
 export const userMenuCount = Count.of(userMenuButton);
 export const tabIcon = ThePage.tabIcon;
+export const homeScreenIcons = ThePage.homeScreenIcons;
 export const footerVersionText = Text.of(footerVersion);
 export const glossaryExplanationText = (term: string) => Text.of(glossaryExplanation(term));
 /** The anchor of the page address, e.g. «#glossary», or '' without one */
