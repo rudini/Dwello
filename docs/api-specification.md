@@ -236,7 +236,7 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | → `{ data: [entry] }`, newest first |
+| GET | `/` | Query: `limit`, `offset` (#746: the page «Protokoll» reads 50 a page; without `limit` every entry). → `{ data: [entry], total }`, newest first |
 | POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
 | POST | `/exports` | 201, no body (#496) |
 | DELETE | `/:id` | 204. 404 |

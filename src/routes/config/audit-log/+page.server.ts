@@ -5,10 +5,15 @@ import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/audit-log`;
 
-export const load: PageServerLoad = async ({ fetch }) => {
-	const response = await fetch(API);
+// #746: every login adds an entry; the newest first, 50 a page
+const pageSize = 50;
+
+export const load: PageServerLoad = async ({ fetch, url }) => {
+	const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '') || 1);
+	const response = await fetch(`${API}?limit=${pageSize}&offset=${(page - 1) * pageSize}`);
 	if (!response.ok) throw error(response.status, m.record_not_loaded({ record: m.audit_title() }));
-	return { entries: toAuditEntries((await response.json()).data) };
+	const { data, total } = await response.json();
+	return { entries: toAuditEntries(data), page, pageSize, total };
 };
 
 export const actions: Actions = {

@@ -115,6 +115,8 @@ export async function exampleOf(seed: TestData, name: string, state: string): Pr
 	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, path, state)) };
 	// #817: a key to revoke, and the name of the one the state creates (removed with the scenario's records)
 	if (state === 'key-revoke-dialog') await seed.accessKey('Claude Desktop');
+	// #746: more entries than one page holds; a key's name, not a German word the language check would flag
+	if (state === 'paged') await seed.oldAuditEntries('Claude Desktop', 50);
 	if (state === 'reminder-undelivered') return { ...example, undeliveredStatements: await undeliveredStatements(seed) };
 	if (state === 'category-delete-refused') return { ...example, billed: await billedRecord(seed, 'category') };
 	if (state === 'distribution-key-delete-refused') return { ...example, billed: await billedRecord(seed, 'key') };

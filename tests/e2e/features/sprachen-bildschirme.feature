@@ -322,6 +322,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | audit-log              | default             |
       | audit-log              | empty               |
       | audit-log              | delete-dialog       |
+      | audit-log              | paged               |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |

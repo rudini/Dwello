@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import DeleteDialog from '../DeleteDialog.svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -52,6 +54,8 @@
 				</li>
 			{/each}
 		</ul>
+		<!-- #746: the newest entries first, the older ones on the next pages -->
+		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 	{/if}
 </div>
 
