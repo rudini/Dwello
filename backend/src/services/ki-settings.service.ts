@@ -11,7 +11,6 @@ import { db } from '../db/connection';
 import { kiSettings } from '../db/schema';
 import { recordAudit } from './audit-log.service';
 import { CodedError } from './coded-error';
-import { checkAddress } from './ki-address';
 import { loadModel, modelStarted } from './ki-model.service';
 
 type Mode = 'local' | 'provider' | 'none';
@@ -115,7 +114,7 @@ export async function kiSettingsView() {
 	return { ...shown, apiKeyStored: apiKey !== '' };
 }
 
-const trimmed = (input: KiInput) => ({
+export const trimmed = (input: KiInput) => ({
 	baseUrl: input.baseUrl?.trim().replace(/\/$/, '') ?? '',
 	apiKey: input.apiKey?.trim() ?? '',
 	model: input.model?.trim() ?? '',
@@ -124,7 +123,7 @@ const trimmed = (input: KiInput) => ({
 });
 
 /** The key to send to `baseUrl`: the one entered, else the stored one, but only to the address it was saved for */
-async function keyFor(baseUrl: string, entered: string) {
+export async function keyFor(baseUrl: string, entered: string) {
 	if (entered) return entered;
 	const row = await stored();
 	if (row?.mode !== 'provider' || !row.apiKeyEncrypted) return '';
@@ -136,7 +135,28 @@ async function keyFor(baseUrl: string, entered: string) {
 	return decrypt(row.apiKeyEncrypted);
 }
 
-const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');
+// The landlord's own network, which may answer over http (#580): private and loopback addresses and names without a
+// dot, such as a compose service; a provider on the internet gets the key only over https (decided in #1372)
+const OWN_NETWORK =
+	/^((10|127)(\.\d+){3}|192\.168(\.\d+){2}|172\.(1[6-9]|2\d|3[01])(\.\d+){2}|\[::1\]|\[f[cd][\da-f]{2}:[^\]]*\]|[^.[]+)$/i;
+
+// Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
+// elsewhere (#1372); the code says what does not fit (persona Anna 1372 P-1)
+function addressProblem(baseUrl: string) {
+	const url = URL.parse(baseUrl);
+	if (!url || !['http:', 'https:'].includes(url.protocol)) return 'KI_ADDRESS_INVALID';
+	if (/[?#]/.test(baseUrl)) return 'KI_ADDRESS_SUFFIX';
+	if (url.username || url.password) return 'KI_ADDRESS_CREDENTIALS';
+	if (url.protocol === 'http:' && !OWN_NETWORK.test(url.hostname)) return 'KI_ADDRESS_NOT_HTTPS';
+	return null;
+}
+
+export function checkAddress(baseUrl: string) {
+	const problem = addressProblem(baseUrl);
+	if (problem) throw new CodedError(problem, 'Diese Adresse kann Dwello nicht verwenden.');
+}
+
+export const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');
 
 export async function saveKiSettings(input: KiInput) {
 	if (llmConfig.byOperator) throw locked();
@@ -173,38 +193,4 @@ export async function saveKiSettings(input: KiInput) {
 	});
 	void loadModel({ ...llmConfig, local: false });
 	return kiSettingsView();
-}
-
-// «Verbindung prüfen» sends only this text and this image (a 1×1 PNG), never recorded data (domain review 580 F-3)
-const CHECK_TEXT = 'Verbindungstest von Dwello: Antworten Sie nur mit OK.';
-const CHECK_IMAGE =
-	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-
-// The check's one request: the fixed text and image to the entered address; null when nobody answers
-const sendCheck = (baseUrl: string, model: string, apiKey: string) =>
-	fetch(new URL('chat/completions', `${baseUrl}/`), {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json', ...(apiKey && { Authorization: `Bearer ${apiKey}` }) },
-		body: JSON.stringify({
-			model,
-			messages: [{ role: 'user', content: [{ type: 'text', text: CHECK_TEXT }, { type: 'image_url', image_url: { url: CHECK_IMAGE } }] }]
-		}),
-		signal: AbortSignal.timeout(llmConfig.timeout),
-		redirect: 'error'
-	}).catch(() => null);
-
-/** Whether the entered provider answers, accepts the key and reads images; nothing is saved */
-export async function checkKiConnection(
-	input: KiInput
-): Promise<{ result: 'ok' | 'wrong-key' | 'unreachable' | 'no-images' }> {
-	if (llmConfig.byOperator) throw locked();
-	const { baseUrl, model, apiKey: entered } = trimmed(input);
-	checkAddress(baseUrl);
-	const response = await sendCheck(baseUrl, model, await keyFor(baseUrl, entered));
-	if (!response) return { result: 'unreachable' };
-	if (response.status === 401 || response.status === 403) return { result: 'wrong-key' };
-	if (response.ok) return { result: 'ok' };
-	// only a refused request is about the image; a wrong address or model (404), no credit or too many requests, or a
-	// server error say nothing about it (code review 580 C-7, domain review 580 F-24)
-	return { result: response.status === 400 ? 'no-images' : 'unreachable' };
 }

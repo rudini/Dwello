@@ -7,8 +7,8 @@ import { Elysia, t } from 'elysia';
 import { llmConfig } from '../config/llm';
 import { CodedError, refusedWith } from '../services/coded-error';
 import { loadModel, modelStarted, modelState } from '../services/ki-model.service';
+import { checkKiConnection } from '../services/ki-check.service';
 import {
-	checkKiConnection,
 	currentKi,
 	kiSettingsView,
 	saveKiSettings
