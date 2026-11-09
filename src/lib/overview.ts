@@ -39,7 +39,7 @@ export interface OverviewInput {
 		periodEnd: string;
 		invoices: number; // recorded, changed or deleted since
 		fuelStock: boolean; // the Tankbestand changed since
-		uncalculableKeys?: boolean; // a key of its invoices cannot be calculated for the building (#1309)
+		uncalculableKeys?: boolean; values?: boolean; // a key cannot be calculated (#1309), an apartment or a key changed (#1328)
 		olderThanFiveYears: boolean; // the period ended more than five years ago, by the Swiss day (#788)
 	}[];
 	// moved out with a draft statement, still at the building's address (A-5, #114)
@@ -195,8 +195,8 @@ function outdatedDraftsText(drafts: Outdated) {
 }
 
 // What changed since a statement, as the statement page says it (#454, Fachreview 454-1 V-8)
-export function laterText(invoices: number, fuelStock: boolean, values = false) {
-	if (!invoices && !fuelStock && values) return m.statements_later_values(); // #1328: an apartment or a key
+export function laterText(invoices: number, fuelStock: boolean, values = false, draft = true) {
+	if (!invoices && !fuelStock && values) return draft ? m.statements_later_values() : m.statements_later_values_sent(); // #1328, #1395 V-1
 	const changed = invoices === 1 ? m.statements_later_one() : m.statements_later_many({ count: invoices });
 	if (!fuelStock) return changed;
 	return invoices ? m.statements_later_and_fuel_stock({ later: changed }) : m.statements_later_fuel_stock();
@@ -210,7 +210,7 @@ const correctTasks = (statements: Outdated): Task[] =>
 		text: [
 			s.uncalculableKeys
 				? m.dashboard_task_correct_key_text({ number: s.statementNumber, tenant: s.tenantName }) // #1309
-				: m.dashboard_task_correct_text({ number: s.statementNumber, tenant: s.tenantName, later: laterText(s.invoices, s.fuelStock) }),
+				: m.dashboard_task_correct_text({ number: s.statementNumber, tenant: s.tenantName, later: laterText(s.invoices, s.fuelStock, s.values, false) }),
 			s.olderThanFiveYears && m.dashboard_task_correct_old()
 		]
 			.filter(Boolean)

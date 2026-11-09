@@ -34,7 +34,8 @@
 		"id": "k1",
 		"name": "Per Area (m²)",
 		"nameDE": "Pro Fläche (m²)",
-		"formula": "{area}"
+		"formula": "{area}",
+		"updatedAt": "2026-01-01T00:00:00.000Z"
 	},
 	"llmCategory": {
 		"id": "c1",

@@ -386,11 +386,23 @@ const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row,
 const keyValues = ({ id, number, area, rooms, discontinuedFrom, earlierSizes }: { id: string; number: string; area: string; rooms: string; discontinuedFrom: string | null; earlierSizes: { until: string; area: string; rooms: string }[] }) =>
 	({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) });
 
-/** As apartmentsOf, for every building in one query: a list of statements checks their keys without a query per row (#922) */
+/**
+ * As apartmentsOf, for every building in one query: a list of statements checks their keys without a query per row
+ * (#922); with when an apartment of each building was last changed or deleted (the building's updated_at), for #1328
+ * and #1395 without a query of its own (P2)
+ */
 export async function apartmentsByBuilding() {
-	const { id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes } = apartments;
-	const rows = await db.select({ id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes }).from(apartments);
+	const { id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes, updatedAt } = apartments;
+	const rows = await db
+		.select({ id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes, updatedAt, buildingUpdatedAt: buildings.updatedAt })
+		.from(apartments)
+		.innerJoin(buildings, eq(buildings.id, buildingId));
 	const byBuilding = new Map<string, ReturnType<typeof keyValues>[]>();
-	for (const row of rows) byBuilding.set(row.buildingId, [...(byBuilding.get(row.buildingId) ?? []), keyValues(row)]);
-	return byBuilding;
+	const changedAt = new Map<string, number>();
+	for (const row of rows) {
+		byBuilding.set(row.buildingId, [...(byBuilding.get(row.buildingId) ?? []), keyValues(row)]);
+		const at = Math.max(row.updatedAt.getTime(), row.buildingUpdatedAt.getTime(), changedAt.get(row.buildingId) ?? 0);
+		changedAt.set(row.buildingId, at);
+	}
+	return { byBuilding, changedAt };
 }

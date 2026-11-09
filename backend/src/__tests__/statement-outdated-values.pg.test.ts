@@ -8,7 +8,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { apartments, categories, distributionKeys, invoices } from '../db/schema';
+import { apartments, buildings, categories, distributionKeys, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
 import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
@@ -42,7 +42,10 @@ afterAll(async () => {
 const otherApartment = (values: object) => sendJson('PUT', `/api/v1/apartments/${other}`, values);
 
 async function clear() {
-	for (const id of statements.splice(0)) await deleteStatement(id);
+	for (const id of statements.splice(0)) {
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id)); // deletable again
+		await deleteStatement(id);
+	}
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await db.update(apartments).set({ area: '70', rooms: '3.5', earlierSizes: [], discontinuedFrom: null }).where(eq(apartments.id, other));
 }
@@ -209,5 +212,153 @@ describe('Entwürfe mit geänderten Werten beim Erstellen und Versenden', () => 
 		const query = `buildingId=${rental.building}&periodStart=2024-01-01&periodEnd=2024-12-31&managementFeePercent=0`;
 		const { statements: differing } = (await (await callApi(`/api/v1/statements/run-differences?${query}`)).json()) as { statements: { id: string }[] };
 		expect(differing.find((one) => one.id === id)).toMatchObject({ outdated: false, fuelStock: false, values: true });
+	});
+});
+
+// #1395 (PO): the same rule for a sent statement, through its correction (Berichtigung)
+describe('Versendete Abrechnung mit danach geänderten Werten', () => {
+	type Correction = { invoiceIds: string[]; valuesChanged: boolean; correctionDue: boolean };
+	async function sent(distributionKeyId?: string, paymentDeadline = '2099-12-31') {
+		const id = await draft(distributionKeyId);
+		await db.update(utilityStatements).set({ status: 'sent', paymentDeadline }).where(eq(utilityStatements.id, id));
+		return id;
+	}
+
+	it('verlangt nach einer danach korrigierten Fläche eine Berichtigung, mit dem Grund', async () => {
+		const id = await sent();
+		await otherApartment({ area: '140', rooms: '3.5' });
+
+		expect((await changes(id)) as Correction).toMatchObject({ invoiceIds: [], valuesChanged: true, correctionDue: true });
+	});
+
+	it('verlangt auch bei einer überfälligen Abrechnung eine Berichtigung', async () => {
+		const id = await sent(undefined, '2025-01-31');
+		await otherApartment({ area: '140', rooms: '3.5' });
+
+		expect((await changes(id)) as Correction).toMatchObject({ valuesChanged: true, correctionDue: true });
+	});
+
+	it('verlangt nach einer danach gelöschten leeren Wohnung des Gebäudes eine Berichtigung', async () => {
+		const gone = (await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '70', rooms: '3.5' })).id;
+		const id = await sent();
+		expect((await callApi(`/api/v1/apartments/${gone}`, { method: 'DELETE' })).ok).toBe(true);
+
+		expect(((await changes(id)) as Correction).correctionDue).toBe(true);
+	});
+
+	it('verlangt nach einer danach geänderten Formel des Verteilschlüssels eine Berichtigung', async () => {
+		await otherApartment({ area: '70', rooms: '5.5' });
+		const key = await createDistributionKey({ name: `Versandt ${token}`, nameDE: `Versandt ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const id = await sent(key.id);
+		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
+
+		expect(((await changes(id)) as Correction).correctionDue).toBe(true);
+	});
+
+	it('verlangt keine Berichtigung, wenn die neue Fläche erst nach der Abrechnungsperiode gilt', async () => {
+		const id = await sent();
+		await otherApartment({ area: '140', rooms: '3.5', sizeFrom: '2025-07-01' });
+
+		expect((await changes(id)) as Correction).toMatchObject({ valuesChanged: false, correctionDue: false });
+	});
+
+	// Code-Review 1395-4 C-1: with #1410, an invoice deleted after its Aufbewahrungsfrist no longer makes a statement
+	// «nicht aktuell»; recalculating without it must not count as a change of an apartment or a key either
+	it('verlangt keine Berichtigung, wenn nur eine Rechnung nach ihrer Aufbewahrungsfrist gelöscht wurde', async () => {
+		const old = await createRental(`${token}-2014`, { startDate: '2014-01-01', endDate: '2014-12-31', monthlyAdvancePayment: '0' });
+		const [caretaker] = await db.select().from(categories).where(eq(categories.name, 'Caretaker'));
+		const [invoice] = await db
+			.insert(invoices)
+			.values({
+				buildingId: old.building,
+				categoryId: caretaker.id,
+				distributionKeyId: await perAreaKey(),
+				billingEntityName: 'Muster AG',
+				description: `Hauswart ${token}`,
+				amount: '732.00',
+				invoiceDate: '2014-12-31',
+				isValidUtilityCost: true
+			})
+			.returning();
+		const created = await generateStatement({
+			contractId: old.contract,
+			buildingId: old.building,
+			periodStart: '2014-01-01',
+			periodEnd: '2014-12-31',
+			managementFeePercent: 0
+		});
+		await db.update(utilityStatements).set({ status: 'sent', paymentDeadline: '2015-03-31' }).where(eq(utilityStatements.id, created.id));
+		await db.delete(invoices).where(eq(invoices.id, invoice.id));
+		await db.update(buildings).set({ updatedAt: new Date() }).where(eq(buildings.id, old.building));
+
+		const found = (await changes(created.id)) as Correction;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, created.id));
+		await deleteStatement(created.id);
+		await old.remove();
+		expect(found).toMatchObject({ invoiceIds: [], valuesChanged: false, correctionDue: false });
+	});
+
+	it('nennt in der Übersicht die Aufgabe «Abrechnung berichtigen» mit dem Grund', async () => {
+		const id = await sent();
+		await otherApartment({ area: '140', rooms: '3.5' });
+
+		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+		expect(listed.find((one) => one.id === id)).toMatchObject({ status: 'sent', invoices: 0, values: true });
+	});
+	// #1395 (PO, P2): the Übersicht takes the key's change time from the invoices it loads anyway
+	it('nennt in der Übersicht die Aufgabe auch nach einer danach geänderten Formel des Verteilschlüssels', async () => {
+		await otherApartment({ area: '70', rooms: '5.5' });
+		const key = await createDistributionKey({ name: `Liste ${token}`, nameDE: `Liste ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const id = await sent(key.id);
+		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
+
+		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+		expect(listed.find((one) => one.id === id)).toMatchObject({ status: 'sent', invoices: 0, values: true });
+	});
+
+});
+
+// Code-Review 1395-6 C-1: the key of the Veränderung Tankbestand, from a delivery of an earlier period (#1323), counts
+// in the Übersicht as on the statement page
+describe('Entwurf nach geänderter Formel des Verteilschlüssels der Veränderung Tankbestand', () => {
+	it('nennt den Entwurf in der Übersicht als nicht aktuell', async () => {
+		const heated = await createRental(`${token}-tank`, { startDate: '2025-01-01', monthlyAdvancePayment: '0' });
+		const second = (await createApartment({ buildingId: heated.building, number: '9.02', floor: 9, area: '70', rooms: '5.5' })).id;
+		const key = await createDistributionKey({ name: `Tank ${token}`, nameDE: `Tank ${token}`, type: 'custom', formula: '{units}' });
+		keys.push(key.id);
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		const [profile] = await db.select().from(heatingProfiles).limit(1);
+		await db.insert(invoices).values({
+			buildingId: heated.building,
+			categoryId: heating.id,
+			distributionKeyId: key.id,
+			billingEntityName: 'Öl AG',
+			description: `Heizöl ${token}`,
+			amount: '800.00',
+			invoiceDate: '2024-10-15',
+			isValidUtilityCost: true
+		});
+		for (const [readingDate, amount] of [['2024-12-31', '600.00'], ['2025-12-31', '100.00']])
+			expect((await sendJson('POST', `/api/v1/buildings/${heated.building}/fuel-stocks`, { readingDate, amount, categoryId: heating.id })).status).toBe(201);
+		const created = await generateStatement({
+			contractId: heated.contract,
+			buildingId: heated.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			managementFeePercent: 0,
+			heatingProfileId: profile.id
+		});
+		await sendJson('PUT', `/api/v1/distribution-keys/${key.id}`, { formula: '{rooms}' });
+
+		const { statements: listed } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+		const found = listed.find((one) => one.id === created.id);
+		await deleteStatement(created.id);
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, heated.building));
+		await db.delete(invoices).where(eq(invoices.buildingId, heated.building));
+		await deleteApartment(second);
+		await heated.remove();
+		expect(found).toMatchObject({ status: 'draft', invoices: 0, fuelStock: false, values: true });
 	});
 });

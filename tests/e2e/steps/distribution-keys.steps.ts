@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import { translationsIn } from '../fixtures/translations';
 import {
 	formulaMarkedInvalid,
+	formulaHelpText,
 	formulaOf,
 	formulaProblem,
 	formulaTestErrors,
@@ -252,3 +253,7 @@ Then(
 		await verwalter.sees(translationMarkers(name)).toBe(0);
 	}
 );
+
+Then('erklärt die Bearbeitungsseite des Verteilschlüssels zur Formel {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(formulaHelpText).toContain(help);
+});

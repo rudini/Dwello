@@ -51,6 +51,8 @@
 	);
 	const declineCosts = $derived(later.recalculated?.declineCosts && francs(Number(later.recalculated.declineCosts)));
 	const changed = $derived(laterText(later.invoices, later.fuelStock, later.values));
+	// a sent one has no «Neu berechnen» (#1395, Fachreview 1395-1 V-1)
+	const changedSent = $derived(laterText(later.invoices, later.fuelStock, later.values, false));
 	const keys = $derived(later.uncalculableKeys ?? []);
 	// persona Anna 1309 P-1: the invoices to change
 	const keyInvoices = $derived(
@@ -93,10 +95,15 @@
 			: keys.length
 				? [keyText(m.statements_later_key_sent)]
 				: later.correctionDue
-					? [m.statements_later_sent({ later: changed })]
+					? [m.statements_later_sent({ later: changedSent })]
 					: declined
-						? [m.statements_later_sent_declined({ later: changed, date: formatDate(declined.on) })]
-						: [m.statements_later_sent_none({ later: changed, tenant: statement.tenantName })]
+						? [
+								m.statements_later_sent_declined({
+									later: changedSent,
+									date: formatDate(declined.on)
+								})
+							]
+						: [m.statements_later_sent_none({ later: changedSent, tenant: statement.tenantName })]
 	);
 	const text = $derived(parts.filter(Boolean).join(' '));
 	const shown = $derived(

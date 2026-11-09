@@ -300,7 +300,7 @@ describe('Aufgaben der Übersicht', () => {
 
 	// #454 (#408 point 7, #386): drafts that miss what changed since are no drafts to send
 	describe('Abrechnungen, die nicht aktuell sind', () => {
-		type Changed = { invoices: number; fuelStock: boolean; olderThanFiveYears?: boolean; uncalculableKeys?: boolean };
+		type Changed = { invoices: number; fuelStock: boolean; olderThanFiveYears?: boolean; uncalculableKeys?: boolean; values?: boolean };
 		// what changed since: the count of invoices, and whether the Tankbestand did (#307)
 		const outdated = (
 			id: string,
@@ -418,6 +418,13 @@ describe('Aufgaben der Übersicht', () => {
 		it('nennt einen geänderten Tankbestand', () => {
 			expect(correctText({ invoices: 0, fuelStock: true })).toContain(
 				'von Mieter s5 wurde der Tankbestand der Abrechnungsperiode geändert. Berichtigen Sie'
+			);
+		});
+
+		// #1395 (Fachreview 1395-1 V-1): a sent statement has no «Neu berechnen»
+		it('nennt eine danach geänderte Wohnung oder einen Verteilschlüssel', () => {
+			expect(correctText({ invoices: 0, fuelStock: false, values: true })).toContain(
+				'von Mieter s5 wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass die Abrechnung neu berechnet einen anderen Saldo oder eine andere Position ergäbe. Berichtigen Sie'
 			);
 		});
 

@@ -98,6 +98,11 @@ Funktionalität: Verteilschlüssel
     Dann ist der Liegenschaftsverwalter auf der Seite "Verteilschlüssel"
     Und verteilt der Verteilschlüssel "Fläche und Zimmer" nach der Formel "{area} * 0.5 + {rooms} * 0.5"
 
+  # #1395 (Fachreview 1395-1 M-1): eine geänderte Formel gilt für alle Abrechnungsperioden, auch für versendete Abrechnungen
+  Szenario: Beim Bearbeiten erklärt die Formel, dass sie für alle Abrechnungsperioden gilt
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels "Fläche und Zimmer"
+    Dann erklärt die Bearbeitungsseite des Verteilschlüssels zur Formel "Ändern Sie die Formel nur, um einen Fehler zu korrigieren. Die neue Formel gilt dann für alle Abrechnungsperioden: Entwürfe rechnen nach «Neu berechnen» mit ihr, und versendete Abrechnungen, deren Saldo oder Position sich dadurch ändert, schlägt Dwello Ihnen zum Berichtigen vor."
+
   Szenario: Bearbeitung abbrechen
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels "Fläche und Zimmer"
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

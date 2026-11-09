@@ -271,3 +271,22 @@ describe('Sprache der Seite', () => {
 		expect((await renderLogin('fr-CH')).headers.get('vary')).toContain('Accept-Language');
 	});
 });
+
+// #1395: the wording of Fachreview 1395-1 (V-1, M-1) in every language
+describe('Berichtigung nach geänderter Wohnung oder Verteilschlüssel (#1395)', () => {
+	it.each([
+		['fr', 'un appartement de l’immeuble ou une clé de répartition a changé, si bien que le décompte, recalculé, donnerait un autre solde ou un autre poste'],
+		['it', 'è stato modificato un appartamento dell’immobile o una chiave di riparto, così che il conteggio, ricalcolato, darebbe un altro saldo o un’altra voce'],
+		['en', 'an apartment of the building or a distribution key has been changed so that recalculating the statement would give a different balance or a different statement line']
+	] as const)('nennt den Grund einer versendeten Abrechnung auf %s', (locale, text) => {
+		expect(m.statements_later_values_sent({}, { locale })).toBe(text);
+	});
+
+	it.each([
+		['fr', 'Ne modifiez la formule que pour corriger une erreur. La nouvelle formule vaut alors pour toutes les périodes de décompte\u00a0: les brouillons la reprennent avec «\u00a0Recalculer\u00a0», et Dwello vous propose de rectifier les décomptes envoyés dont le solde ou un poste change de ce fait. Si une autre clé de répartition doit s’appliquer à partir d’une période de décompte, saisissez une nouvelle clé de répartition et choisissez-la pour les factures de cette période. Convenez au préalable d’une autre clé de répartition avec les locataires.'],
+		['it', 'Modifichi la formula solo per correggere un errore. La nuova formula vale allora per tutti i periodi di conteggio: le bozze la riprendono con «Ricalcolare», e Dwello Le propone di rettificare i conteggi inviati il cui saldo o una cui voce cambia di conseguenza. Se a partire da un periodo di conteggio deve valere un’altra chiave di riparto, registri una nuova chiave di riparto e la scelga per le fatture di quel periodo. Concordi prima un’altra chiave di riparto con gli inquilini.'],
+		['en', 'Only change the formula to correct an error. The new formula then applies to all billing periods: drafts use it after «Recalculate», and Dwello suggests correcting sent statements whose balance or a statement line changes as a result. If a different distribution key is to apply from a billing period onwards, add a new distribution key and choose it for the invoices of that period. Agree on a different distribution key with the tenants beforehand.']
+	] as const)('erklärt beim Bearbeiten einer Formel auf %s, dass sie für alle Abrechnungsperioden gilt', (locale, text) => {
+		expect(m.keys_formula_change_help({}, { locale })).toBe(text);
+	});
+});

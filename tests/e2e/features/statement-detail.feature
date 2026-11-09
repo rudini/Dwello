@@ -1284,6 +1284,53 @@ Funktionalität: Abrechnungsdetail
     Dann hat die Abrechnung den Status "Entwurf"
     Und weist die Abrechnung auf keine Änderung seit dem Erstellen hin
 
+  # #1395 (Entscheid PO, A' von #1328): auch eine versendete Abrechnung rechnet nach einer danach korrigierten Fläche
+  # anders; 3.02 hat neu 140 statt 70 m², Eva Frei trägt weniger Heizkosten: 1000 × 70/210 × 43 % = 143.33, × 1.03 =
+  # 147.63, zugunsten der Mieterin 147.60 statt 221.45; der Saldo sinkt, also wird die Abrechnung berichtigt
+  Szenario: Eine versendete Abrechnung nach geänderter Fläche braucht eine Berichtigung
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Wohnung "3.02" hat danach "140" m² und "3.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieser Abrechnung wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass die Abrechnung neu berechnet einen anderen Saldo oder eine andere Position ergäbe. Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung."
+    Und nennt der Hinweis auf Änderungen seit dem Erstellen den Titel "Wohnung oder Verteilschlüssel seit der Abrechnung geändert"
+    Und weist die Abrechnung darauf hin: "eine Nachzahlung von CHF 147.60 statt CHF 221.45."
+    Und bietet die Abrechnung «Nicht berichtigen» nicht mehr an
+    Wenn der Liegenschaftsverwalter die Abrechnung aus dem Hinweis berichtigen will
+    Dann sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt
+
+  # #1395: die Übersicht nennt die Aufgabe mit demselben Grund
+  Szenario: Aufgabe «Abrechnung berichtigen» nach geänderter Fläche
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Wohnung "3.02" hat danach "140" m² und "3.5" Zimmer
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann sagt die Aufgabe "Abrechnung berichtigen" für "Eva Frei" "wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass die Abrechnung neu berechnet einen anderen Saldo oder eine andere Position ergäbe. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen»."
+
+  # #1395 (Entscheid PO, Fachreview 1395-1 V-4): eine danach gelöschte leere Wohnung zählt auch bei einer versendeten
+  # Abrechnung; ohne 3.02 trägt Eva Frei alle Heizkosten, der Saldo steigt von 221.45 auf 442.90
+  Szenario: Vor «Nicht berichtigen» einer versendeten Abrechnung nach gelöschter Wohnung nennt Dwello den Unterschied
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Wohnung "3.02" wurde inzwischen gelöscht
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "eine Nachzahlung von CHF 442.90 statt CHF 221.45."
+    Wenn der Liegenschaftsverwalter die Abrechnung nicht berichtigen will
+    Dann fragt Dwello vor «Nicht berichtigen» "Den Unterschied von CHF 221.45 tragen Sie selbst."
+
+  # #1395: eine Fläche, die erst nach der Abrechnungsperiode gilt, ändert an der versendeten Abrechnung nichts
+  Szenario: Keine Berichtigung, wenn eine Wohnung erst nach der Periode eine neue Fläche hat
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Wohnung "3.02" hat ab "2025-07-01" "140" m² und "3.5" Zimmer
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann hat die Abrechnung den Status "Versendet"
+    Und weist die Abrechnung auf keine Änderung seit dem Erstellen hin
+
   # #1328: der Versand eines Entwurfs mit geänderten Werten rät zum Neu berechnen wie bei geänderten Rechnungen (#547)
   Szenario: Der Versand eines Entwurfs mit danach geänderten Werten rät zum Neu berechnen
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"

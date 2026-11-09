@@ -79,7 +79,9 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 	const [bill] = [...(await latest(periodEnd)), ...(await latest())];
 	const id = bill?.id ?? (await getTypedConfig('default_distribution_key_id'));
 	if (!id) return null;
-	const [key] = await db.select({ id: distributionKeys.id, name: distributionKeys.name, nameDE: distributionKeys.nameDE, formula: distributionKeys.formula }).from(distributionKeys).where(eq(distributionKeys.id, id));
+	// updatedAt: a list of statements sees a changed formula without a query of its own (#1395)
+	const { name, nameDE, formula, updatedAt } = distributionKeys;
+	const [key] = await db.select({ id: distributionKeys.id, name, nameDE, formula, updatedAt }).from(distributionKeys).where(eq(distributionKeys.id, id));
 	return key ? { ...key, deliveryId: bill?.deliveryId } : null; // the delivery whose key it is, if any (#1323)
 }
 
