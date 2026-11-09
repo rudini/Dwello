@@ -4,6 +4,7 @@
  * left the period was deleted or made non-allocable
  */
 
+import { deletedWithinRetention } from './invoice-retention';
 import { eq, max } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { apartments, buildings, distributionKeys, invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
@@ -115,9 +116,8 @@ async function changedInvoices(statement: Located, load: Loaders): Promise<strin
 	const changed = now.filter((invoice) => !billedAsIs(positions, invoice)).map((invoice) => invoice.id);
 	const gone = positions
 		.flatMap((position) => position.invoices ?? [])
-		.filter((billed) => !billed.fuelStock && !now.some((invoice) => invoice.id === billed.id))
-		.map((billed) => billed.id);
-	return [...changed, ...gone];
+		.filter((billed) => !billed.fuelStock && !now.some((invoice) => invoice.id === billed.id));
+	return [...changed, ...(await deletedWithinRetention(statement.building.id, gone)).map((billed) => billed.id)];
 }
 
 type Stock = { categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string } | null;

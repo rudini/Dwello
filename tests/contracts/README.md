@@ -16,6 +16,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement.json` | `GET /api/v1/statements/:id` |
 | `invoices-for-statement.json` | `GET /api/v1/invoices/for-statement/:buildingId` (die Rechnungen, die die Abrechnung nimmt, Schritt 2 des Assistenten, #686) |
 | `report-reconciliation.json` | `GET /api/v1/reports/reconciliation` (Kostenabstimmung einer Periode, #1126) |
+| `report-annual.json` | `GET /api/v1/reports/annual` (Jahresbericht eines Gebäudes und Kalenderjahres, #1409) |
 | `report-periods.json` | `GET /api/v1/reports/reconciliations` (die Perioden der Berichte, #1126) |
 | `statement-run-reconciliation.json` | `GET /api/v1/statements/run-reconciliation` (Kostenabstimmung der Vorschau, #1126) |
 | `auth-password-available.json` | `GET /api/v1/auth/password` (gibt es ein Konto mit Passwort, #576) |

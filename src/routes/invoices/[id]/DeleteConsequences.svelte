@@ -3,6 +3,7 @@
 	import type { BilledStatement, InvoiceWithDetails } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/format';
 	import BilledWarning from '../BilledWarning.svelte';
+	import RetentionNote from './RetentionNote.svelte';
 
 	// What deleting the invoice does: it and its Beleg go, and statements that billed it are wrong afterwards
 	let {
@@ -16,7 +17,8 @@
 	} = $props();
 </script>
 
-<p>{m.invoices_delete_text({ name: invoice.billingEntity, amount: formatCurrency(invoice.amount) })}</p>
+<p id="invoice-delete-text">{m.invoices_delete_text({ name: invoice.billingEntity, amount: formatCurrency(invoice.amount) })}</p>
+<RetentionNote keepUntil={invoice.keepUntil} />
 {#if invoice.beleg}
 	<p data-testid="invoice-delete-document-note">{m.invoices_delete_beleg()}</p>
 {/if}

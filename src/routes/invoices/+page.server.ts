@@ -1,7 +1,8 @@
 import type { InvoicesListData } from '$lib/types';
 import { invoiceChoices, tankCategories, toInvoice, type InvoiceRow } from '$lib/server/invoice';
 import { kiOff } from '$lib/server/ki-settings';
-import type { PageServerLoad } from './$types';
+import { expiredPeriod, keepInvoices } from '$lib/server/invoice-retention';
+import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -36,7 +37,10 @@ const filterYears = () => {
 	return Array.from({ length: 6 }, (_, i) => String(thisYear - i));
 };
 
-export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesListData> => {
+export const load: PageServerLoad = async ({
+	url,
+	fetch
+}): Promise<InvoicesListData & { retention: Awaited<ReturnType<typeof expiredPeriod>> }> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '20', 10);
 	const years = filterYears();
@@ -44,11 +48,12 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 	try {
 		const params = invoiceQuery(url, page, pageSize);
 
-		const [invoicesRes, buildingsRes, choices, noKi] = await Promise.all([
+		const [invoicesRes, buildingsRes, choices, noKi, retention] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/invoices?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=all`),
 			invoiceChoices(fetch),
-			kiOff(fetch)
+			kiOff(fetch),
+			expiredPeriod(fetch, url)
 		]);
 
 		const invoicesData = await invoicesRes.json();
@@ -81,7 +86,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			distributionKeys: choices.distributionKeys,
 			defaultDistributionKeyId: choices.defaultDistributionKeyId,
 			latestKeys: choices.latestKeys,
-			kiOff: noKi
+			kiOff: noKi,
+			retention
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -96,7 +102,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			distributionKeys: [],
 			defaultDistributionKeyId: '',
 			latestKeys: [],
-			kiOff: false
+			kiOff: false,
+			retention: null
 		};
 	}
 };
+
+// #1410: «Behalten» of the building's invoices of the period; the overview no longer names them
+export const actions: Actions = { keep: keepInvoices };

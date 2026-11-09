@@ -30,7 +30,11 @@ export interface InvoiceWithDetails extends Invoice {
 	llmCategory: Pick<Category, Names> | null;
 	beleg: Pick<InvoiceDocument, 'fileName' | 'mimeType' | 'deductedAmount' | 'nonAllocableItems'> | null;
 	inPeriod?: InPeriod; // only in a list filtered by an Abrechnungsperiode (#454)
+	keepUntil: string | 'sale' | null; // the end of its Aufbewahrungsfrist while it runs, a wertvermehrende Investition until the sale (#1410)
 }
+
+/** #1410: a building's invoices of an Abrechnungsperiode whose Aufbewahrungsfrist has passed (`GET /invoices/retention`) */
+export type ExpiredInvoicePeriod = { buildingId: string; building: string; start: string; end: string; keepUntil: string; count: number };
 
 /** The kinds of finding of the check for missing invoices per category (`GET /invoices/completeness`); the UI names each */
 export type CategoryFindingKind = 'stock' | 'tank' | 'consumption' | 'keys' | 'missing' | 'gap' | 'new' | 'deviation';

@@ -49,3 +49,6 @@ export const rowCategory = (supplier: string) =>
 export const rowStatus = (supplier: string) =>
 	target(`Status der Rechnung von ${supplier}`, (page) => invoiceRow(supplier).locate(page).getByTestId('invoice-status'));
 export const invoicesEmptyNotice = target('Hinweis keine Rechnungen', (page) => page.getByTestId('invoices-empty'));
+// #1410: the invoices of a period whose Aufbewahrungsfrist has passed, and keeping them
+export const retentionHint = target('Hinweis Aufbewahrungsfrist', (page) => page.getByTestId('invoice-retention-hint'));
+export const keepInvoicesButton = target('Rechnungen behalten', (page) => page.getByTestId('invoice-retention-keep'));

@@ -14,7 +14,7 @@ import {
 } from '../targets/documents';
 import { paymentSummary } from '../targets/statement-detail';
 import { statementRow } from '../targets/statements';
-import { reminderDeliveryInfo, reminderOwed } from '../targets/documents';
+import { reminderCorrection, reminderDeliveryInfo, reminderOwed } from '../targets/documents';
 
 export const reminderOutcome = Text.of(reminderFeedback);
 export const reminderOffers = Count.of(reminderButton);
@@ -51,3 +51,4 @@ export const mailsTo = (address: string) =>
 	);
 export const reminderDelivery = Text.of(reminderDeliveryInfo);
 export const reminderOwedText = Text.of(reminderOwed);
+export const reminderCorrectionText = Text.of(reminderCorrection); // #1403

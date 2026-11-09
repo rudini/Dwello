@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { load as listLoad } from '../routes/invoices/+page.server';
+import { load as listLoad, actions as listActions } from '../routes/invoices/+page.server';
 import { load as detailLoad } from '../routes/invoices/[id]/+page.server';
 import { load as editLoad } from '../routes/invoices/[id]/edit/+page.server';
 import { load as newLoad } from '../routes/invoices/new/+page.server';
@@ -9,6 +9,7 @@ import { invoiceRow } from './helpers/invoice';
 import backendInvoice from '../../tests/contracts/invoice.json';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 import periodList from '../../tests/contracts/invoice-list-period.json';
+import retention from '../../tests/contracts/invoice-retention.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 import categoryList from '../../tests/contracts/categories.json';
 import kiSettings from '../../tests/contracts/ki-settings.json';
@@ -69,6 +70,63 @@ describe('Rechnungsliste', () => {
 		const thisYear = new Date().getFullYear();
 		expect(data.years[0]).toBe(String(thisYear));
 		expect(data.years).toContain(String(thisYear - 5));
+	});
+
+	// #1410: die Liste einer Abrechnungsperiode, deren Aufbewahrungsfrist vorbei ist, sagt es und bietet «Behalten» an
+	it('nennt bei einer Abrechnungsperiode nach Ablauf der Aufbewahrungsfrist deren Rechnungen', async () => {
+		const { fetch } = backend({ '/invoices/retention': retention });
+		const of = async (query: string) =>
+			(
+				(await listLoad({
+					url: new URL(`http://localhost/invoices?${query}`),
+					fetch
+				} as never)) as { retention: unknown }
+			).retention;
+
+		expect(await of('building=b1&periodStart=2014-01-01&periodEnd=2014-12-31')).toEqual({
+			...retention.periods[0],
+			period: '2014'
+		});
+		expect(await of('building=b1&periodStart=2015-01-01&periodEnd=2015-12-31')).toBeNull();
+		expect(await of('building=b2&periodStart=2014-01-01&periodEnd=2014-12-31')).toBeNull();
+	});
+
+	// code review 1410-7 C-1: ohne Antwort zur Aufbewahrungsfrist zeigt die Liste ihre Rechnungen, ohne Hinweis
+	it('zeigt die Rechnungen auch, wenn die Aufbewahrungsfristen nicht zu laden sind', async () => {
+		const answers = backend({ '/invoices': { invoices: [invoice()], total: 1 } });
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/retention')
+				? new Response(null, { status: 500 })
+				: answers.fetch(url)) as typeof globalThis.fetch;
+		const data = (await listLoad({
+			url: new URL(
+				'http://localhost/invoices?building=b1&periodStart=2014-01-01&periodEnd=2014-12-31'
+			),
+			fetch
+		} as never)) as { invoices: unknown[]; retention: unknown };
+		expect(data.invoices).toHaveLength(1);
+		expect(data.retention).toBeNull();
+	});
+
+	it('behält die Rechnungen des Gebäudes und der Abrechnungsperiode', async () => {
+		const sent: { url: string; body: unknown }[] = [];
+		const fetch = (async (url: string, init?: RequestInit) => {
+			sent.push({ url, body: init?.body && JSON.parse(String(init.body)) });
+			return Response.json({ success: true });
+		}) as typeof globalThis.fetch;
+		const request = new Request('http://localhost/invoices?/keep', {
+			method: 'POST',
+			body: new URLSearchParams({ buildingId: 'b1', periodStart: '2014-01-01' })
+		});
+
+		await listActions.keep({ fetch, request } as never);
+
+		expect(sent).toEqual([
+			{
+				url: `${API}/invoices/retention/kept`,
+				body: { buildingId: 'b1', periodStart: '2014-01-01' }
+			}
+		]);
 	});
 
 	// #454 (#408 point 1): the period goes to the backend as such, independent of the years offered (older than five

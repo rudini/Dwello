@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { page } from '$app/stores';
 	import { invalidateAll } from '$app/navigation';
-	import type { InvoicesListData } from '$lib/types';
+	import type { PageData } from './$types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -10,10 +10,11 @@
 	import InvoiceItems from './InvoiceItems.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import InvoiceSearch from './InvoiceSearch.svelte';
+	import RetentionHint from './RetentionHint.svelte';
 	import UploadResult from './UploadResult.svelte';
 	import InvoiceUploadDialog, { type Created } from './InvoiceUploadDialog.svelte';
 
-	let { data }: { data: InvoicesListData } = $props();
+	let { data, form = null }: { data: PageData; form?: { keepError?: string } | null } = $props();
 
 	// open at once when the Übersicht's «Rechnungen hochladen» led here
 	let uploading = $state($page.url.searchParams.has('upload'));
@@ -89,6 +90,7 @@
 	/>
 
 	{#if period}<p class="text-ink" data-testid="invoice-period-filter">{period}</p>{/if}
+	{#if data.retention}<RetentionHint retention={data.retention} error={form?.keepError} />{/if}
 
 	{#if data.invoices.length === 0}
 		<div data-testid="invoices-empty">

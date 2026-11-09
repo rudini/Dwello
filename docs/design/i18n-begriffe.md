@@ -54,6 +54,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
+| Aufbewahrungsfrist (Rechnung, #1410) | délai de conservation | termine di conservazione | retention period |
+| Behalten (Rechnungen nach der Aufbewahrungsfrist, #1410) | conserver | conservare | keep |
 | Gutschrift (eines Rechnungsstellers) | note de crédit | nota di credito | credit note |
 | Akontorechnung (eines Rechnungsstellers) | facture d’acompte | fattura d’acconto | advance invoice |
 | Schlussrechnung (eines Rechnungsstellers) | facture finale | fattura finale | final invoice |
@@ -70,6 +72,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Akonto verrechnen | imputer (never for «umlagefähig») | compensare | set off |
 | abgerechnet (Rechnung, #409) | décomptée | conteggiata | in a statement |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
+| Unterhalt (Steuer, Jahresbericht #1409) | entretien | manutenzione (auch für «Wartung» oben) | maintenance |
 | Vollservicevertrag (Lift) | contrat de maintenance complet | contratto di manutenzione completo | full-service contract |
 | Verordnung über die Miete (VMWG) | ordonnance sur le bail (OBLF) | ordinanza concernente la locazione (OLAL) | Tenancy Ordinance (VMWG) |
 | Kategorie / Kategorisierung | catégorie / catégorisation | categoria / categorizzazione | category / categorisation |

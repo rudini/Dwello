@@ -10,7 +10,8 @@ import { apartments, buildings, invoices, rentalContracts } from '../db/schema';
 import { calculateStatementForContract, groupInvoicesByCategory } from './calculation.service';
 import { counting } from './counting-statements';
 import { fuelStockChange } from './fuel-stock.service';
-import { getInvoicesForStatement, inPeriod, inPeriodOf } from './invoice.service';
+import { getInvoicesForStatement } from './invoice.service';
+import { inPeriod, inPeriodOf } from './invoice-period';
 import { roundToRappen } from './pdf-format';
 import { countingOn } from './prorating.service';
 import { notUpToDate } from './statement-invoices.service';
@@ -141,7 +142,7 @@ async function nonAllocableInPeriod(buildingId: string, period: Range) {
 }
 
 // the statements of the building that count in exactly this period: drafts included, a replaced one not
-async function validStatements(buildingId: string, period: Range) {
+export async function validStatements(buildingId: string, period: Range) {
 	const { statements } = await listStatements({
 		buildingId,
 		periodStart: period.start,

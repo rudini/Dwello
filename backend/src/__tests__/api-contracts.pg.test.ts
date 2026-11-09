@@ -198,6 +198,20 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #1403: a sent statement an invoice recorded after it makes due for correcting, with what correcting would claim
+	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices-due.json', async () => {
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, statementId));
+		await insertInvoice(rental.building, { amount: '80.00', invoiceDate: '2024-11-30', description: `Nachzügler ${token}` });
+		try {
+			const actual = await (await callApi(`/api/v1/statements/${statementId}/changed-invoices`)).json();
+			expect(drift(await sample('statement-changed-invoices-due'), actual)).toEqual([]);
+			expect(actual).toMatchObject({ correctionDue: true, recalculated: { open: expect.any(String) } }); // drift skips a null
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Nachzügler ${token}`));
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId));
+		}
+	});
+
 	// #1309: a key of its invoices that cannot be calculated for the building, with those invoices
 	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices-key.json', async () => {
 		const key = await idOf(await sendJson('POST', '/api/v1/distribution-keys', { name: `Halbe Zimmer ${crypto.randomUUID()}`, formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' }));
@@ -226,6 +240,20 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /statements/counts liefert die Felder von statement-counts.json', async () => {
 		const actual = await (await callApi('/api/v1/statements/counts')).json();
 		expect(drift(await sample('statement-counts'), actual)).toEqual([]);
+	});
+
+	// #1410: an invoice of 2014 is past its Aufbewahrungsfrist
+	it('GET /invoices/retention liefert die Felder von invoice-retention.json', async () => {
+		const [expired] = await db
+			.insert(invoices)
+			.values({ buildingId: rental.building, billingEntityName: 'Alt AG', description: 'Hauswart 2014', amount: '100.00', invoiceDate: '2014-03-31', isValidUtilityCost: false })
+			.returning();
+		try {
+			const actual = await (await callApi('/api/v1/invoices/retention')).json();
+			expect(drift(await sample('invoice-retention'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.id, expired.id));
+		}
 	});
 
 	it('GET /invoices/:id/statements liefert die Felder von invoice-statements.json', async () => {
@@ -377,6 +405,22 @@ describe('API-Verträge des Frontends', () => {
 		} finally {
 			await db.delete(invoices).where(eq(invoices.description, `Spät ${token}`));
 			await deleteApartment(empty.id);
+		}
+	});
+
+	const categoryNamed = async (name: string) => (await db.select().from(categories).where(eq(categories.name, name)))[0].id;
+	// #1409: an invoice after the statement of 2024 leaves a share with the landlord; a repair and an investment fill the groups
+	it('GET /reports/annual liefert die Felder von report-annual.json', async () => {
+		const own = { description: `Jahresbericht ${token}`, invoiceDate: '2024-05-31', isValidUtilityCost: false };
+		await insertInvoice(rental.building, { ...own, categoryId: await categoryNamed('Repairs') });
+		await insertInvoice(rental.building, { ...own, categoryId: await categoryNamed('Capital Improvements') });
+		// recorded after the statement: the landlord bears it in the Kostenabstimmung
+		await insertInvoice(rental.building, { description: `Jahresbericht ${token}`, amount: '120.00', invoiceDate: '2024-11-30' });
+		try {
+			const actual = await (await callApi(`/api/v1/reports/annual?buildingId=${rental.building}&year=2024`)).json();
+			expect(drift(await sample('report-annual'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Jahresbericht ${token}`));
 		}
 	});
 

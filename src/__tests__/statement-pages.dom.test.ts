@@ -38,6 +38,8 @@ const noPayment = { unpaid: true, claimed: false, paymentPart: false, noPayment:
 import { localToday } from '$lib/contract-status';
 import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
 import keyChanges from '../../tests/contracts/statement-changed-invoices-key.json';
+import dueChanges from '../../tests/contracts/statement-changed-invoices-due.json';
+import notDueChanges from '../../tests/contracts/statement-changed-invoices.json';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, settled: 4, overdue: 1 };
@@ -2336,6 +2338,46 @@ describe('Abrechnungsdetail', () => {
 		click('statement-reminder-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain('schuldet noch CHF 165.80');
+	});
+
+	// #1403 (PO 9.11.2026, Fachreview 1403-1): while a correction is due, the Mahnung warns with what correcting claims
+	describe('Mahnung bei fälliger Berichtigung', () => {
+		const warning = (later: object) => {
+			show(StatementPage, {
+				data: { statement: statement({ status: 'overdue', balance: 2320, paidAmount: 50, claimed: true, tenantName: 'Anna Keller' }), reminders: [], later },
+				form: null
+			} as never);
+			click('statement-reminder-button');
+			return byTestId('reminder-correction')?.textContent?.replace(/\s+/g, ' ').trim() ?? null;
+		};
+
+		it('nennt den offenen Betrag, den die berichtigte Abrechnung verlangt, statt des offenen Betrags von jetzt', () => {
+			expect(warning(dueChanges)).toBe(
+				'Diese Abrechnung ist zu berichtigen: Neu berechnet ergibt sich für Anna Keller ein offener Betrag von CHF 3’073.95 statt CHF 2’270.00. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen», bevor Sie mahnen.'
+			);
+			expect(byTestId('statement-reminder-confirm')).not.toBeNull(); // sending stays possible
+		});
+
+		it('sagt, dass nichts mehr einzufordern ist, wenn die berichtigte Abrechnung nichts verlangt', () => {
+			expect(warning({ ...dueChanges, recalculated: { ...dueChanges.recalculated, open: '0.00' } })).toBe(
+				'Diese Abrechnung ist zu berichtigen: Neu berechnet ist von Anna Keller statt CHF 2’270.00 nichts mehr einzufordern. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen», statt zu mahnen.'
+			);
+		});
+
+		const unquantified = 'Diese Abrechnung ist zu berichtigen. Was sich geändert hat und was zu tun ist, sagt der Hinweis auf dieser Seite. Berichtigen Sie die Abrechnung, bevor Sie mahnen.';
+		it.each([
+			['ohne Neuberechnung', { ...dueChanges, recalculated: null }],
+			['bei gleichem offenem Betrag', { ...dueChanges, recalculated: { ...dueChanges.recalculated, open: '2270.00' } }],
+			['solange ein Schlüssel nicht berechenbar ist', { ...dueChanges, uncalculableKeys: keyChanges.uncalculableKeys }]
+		])('warnt %s ohne Betrag', (_, later) => {
+			expect(warning(later)).toBe(unquantified);
+		});
+
+		// Fachreview 1403-1 V-3: without a correction due the dialog stays as it was
+		it('warnt nicht, solange keine Berichtigung fällig ist', () => {
+			expect(warning(notDueChanges)).toBeNull();
+			expect(byTestId('reminder-owed')).not.toBeNull();
+		});
 	});
 
 	it('sendet eine Rückerstattung als negativen Betrag', () => {

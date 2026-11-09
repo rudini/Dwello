@@ -13,6 +13,7 @@ import {
 	distributionKeyRow,
 	distributionKey,
 	legalNote,
+	retentionNote,
 	missedWarning,
 	overrideReason,
 	recategorizeError,
@@ -43,3 +44,5 @@ export const billedWarningOnDelete = Text.of(deleteDialogWarning);
 export const deleteDialogTitleText = Text.of(deleteDialogTitle);
 export const deleteDialogDescription = Accessible.descriptionOf(deleteDialog);
 export const deleteDialogTitleShare = ShareInViewport.of(deleteDialogTitle);
+
+export const retentionOnDelete = Text.of(retentionNote);

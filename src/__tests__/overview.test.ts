@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { overviewDeadlines, overviewTasks, type BackendDeadline, type OverviewInput } from '$lib/overview';
 // What GET /api/v1/dashboard answers, checked against the real API (backend api-contracts.pg.test.ts)
 import dashboard from '../../tests/contracts/dashboard.json';
+// What GET /api/v1/invoices/retention answers (#1410)
+import retention from '../../tests/contracts/invoice-retention.json';
 
 const portfolio = {
 	totalBuildings: 1,
@@ -80,6 +82,20 @@ describe('Aufgaben der Übersicht', () => {
 		);
 		expect(tasks).toContainEqual(
 			expect.objectContaining({ id: 'former-documents-t2', text: expect.stringContaining('2 hochgeladene Dokumente stammen') })
+		);
+	});
+
+	// #1410 (Entscheid PO): je Gebäude und Abrechnungsperiode, deren Aufbewahrungsfrist vorbei ist, zur gefilterten Rechnungsliste
+	it('nennt die Rechnungen einer Abrechnungsperiode nach Ablauf der Aufbewahrungsfrist', () => {
+		const tasks = overviewTasks(input({ expiredInvoices: retention.periods }));
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'retention-b1-2014-01-01',
+				title: 'Rechnungen 2014 von Seeblick können gelöscht werden',
+				text: 'Die Aufbewahrungsfrist von 2 Rechnungen dieser Abrechnungsperiode endete am 31.12.2024. Löschen Sie, was Sie nicht mehr brauchen. Rechnungen für wertvermehrende Investitionen zählt Dwello hier nicht: Behalten Sie sie, bis Sie das Gebäude verkaufen. Muss eine Rechnung der Liste länger aufbewahrt werden, nennt Dwello das beim Löschen.',
+				href: '/invoices?building=b1&periodStart=2014-01-01&periodEnd=2014-12-31',
+				action: 'Rechnungen ansehen'
+			})
 		);
 	});
 

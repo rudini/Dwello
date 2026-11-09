@@ -380,3 +380,15 @@ Funktionalität: Rechnungsliste
       | 960    |
       | 1440   |
       | 1920   |
+
+  # #1410 (Entscheid PO): «Behalten» beendet die Aufgabe für dieses Gebäude und diese Abrechnungsperiode, wie «Als geprüft markieren» (#459)
+  Szenario: Rechnungen nach Ablauf der Aufbewahrungsfrist behalten
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und die Rechnung von "Hauswart Huber" ist vom "2014-03-31"
+    Wenn der Liegenschaftsverwalter die Rechnungen der Abrechnungsperiode vom "2014-01-01" bis "2014-12-31" im Gebäude "Seeblick" anzeigt
+    Dann sagt die Rechnungsliste zur Aufbewahrungsfrist "Die Aufbewahrungsfrist von 1 Rechnung dieser Abrechnungsperiode endete am 31.12.2024."
+    Wenn der Liegenschaftsverwalter die Rechnungen dieser Abrechnungsperiode behält
+    Dann bestätigt Dwello das Behalten mit "Sie behalten die Rechnungen 2014 von Seeblick. Dwello nennt sie in der Übersicht nicht mehr."
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann sind im Gebäude "Seeblick" "0/1" Wohnungen vermietet
+    Und nennt die Übersicht keine Aufgabe "Rechnungen 2014 von Seeblick können gelöscht werden"

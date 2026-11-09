@@ -17,6 +17,7 @@ import {
 	reasonForOverride,
 	reasonOfCategory,
 	reasonsOfCategory,
+	retentionOnDelete,
 	recategorizationFailure,
 	tenancyLawNote,
 	tenancyLawNotes,
@@ -27,6 +28,7 @@ import {
 import { pageAddressInApp, statementPath } from '../questions/statements';
 import { thisYear } from '../fixtures/dates';
 import {
+	confirmDeletingInvoice,
 	deleteInvoice,
 	openStatementOfInvoice,
 	openBuildingOfInvoice,
@@ -251,7 +253,21 @@ Then('ist der Titel der Bestätigung {string} ganz zu sehen', async ({ verwalter
 	await verwalter.sees(deleteDialogTitleShare).toBe(1);
 });
 
-// #653: the confirmation describes itself with its first paragraph, not with its whole content
+// #653: the confirmation describes itself with its first paragraph, not with its whole content; #1410: and the
+// Aufbewahrungsfrist of an invoice of today (Spec change approved: #1410)
 Then('beschreibt sich die Bestätigung mit {string}', async ({ verwalter, seed }, text: string) => {
-	await verwalter.sees(deleteDialogDescription).toBe(seed.withNames(text));
+	await verwalter.sees(deleteDialogDescription).toBe(seed.withNames(text).replace('<Jahr in 10 Jahren>', String(thisYear() + 10)));
+});
+
+// #1410: the retention period in the confirmation, and deleting still goes through
+Then('nennt die Bestätigung zum Löschen der Rechnung die Aufbewahrungsfrist {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(retentionOnDelete).toBe(text);
+});
+
+Then('nennt die Bestätigung zum Löschen der Rechnung keine Aufbewahrungsfrist', async ({ verwalter }) => {
+	await verwalter.sees(retentionOnDelete).toBeNull();
+});
+
+When('der Liegenschaftsverwalter das Löschen der Rechnung bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmDeletingInvoice);
 });
