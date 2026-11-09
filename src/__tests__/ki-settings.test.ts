@@ -4,6 +4,7 @@ import { runAction } from './helpers/action';
 import settings from '../../tests/contracts/ki-settings.json';
 import incomplete from '../../tests/contracts/ki-settings-incomplete.json';
 import checked from '../../tests/contracts/ki-settings-check.json';
+import addressInvalid from '../../tests/contracts/ki-settings-address-invalid.json';
 import loading from '../../tests/contracts/ki-model-loading.json';
 
 const API = 'http://localhost:3001/api/v1';
@@ -113,6 +114,30 @@ describe('KI speichern', () => {
 				}
 			}
 		});
+	});
+
+	// #1372, Persona Anna 1372 P-1: was an der Adresse nicht passt, beim Feld der Adresse
+	it.each([
+		[
+			'KI_ADDRESS_INVALID',
+			'Dwello kann diese Adresse nicht lesen. Prüfen Sie sie auf Tippfehler: Sie beginnt mit https://, für eine KI im eigenen Netz auch mit http://, zum Beispiel https://api.anbieter.ch/v1 oder http://192.168.1.10:11434/v1.'
+		],
+		[
+			'KI_ADDRESS_SUFFIX',
+			'Die Adresse enthält einen Zusatz ab «?» oder «#». Löschen Sie ihn; die Adresse der KI endet davor, zum Beispiel https://api.anbieter.ch/v1.'
+		],
+		[
+			'KI_ADDRESS_CREDENTIALS',
+			'Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie den Teil zwischen «://» und «@» samt dem «@», zum Beispiel https://api.anbieter.ch/v1. Den API-Schlüssel finden Sie in Ihrem Konto beim Anbieter; geben Sie ihn im Feld «API-Schlüssel» ein.'
+		],
+		[
+			'KI_ADDRESS_NOT_HTTPS',
+			'Ein Anbieter im Internet erhält die Daten nur verschlüsselt. Schreiben Sie https:// statt http:// an den Anfang der Adresse.'
+		]
+	])('nennt bei %s beim Feld der Adresse, was nicht passt', async (code, text) => {
+		const { result } = runAction(actions.save, '', 422, provider, { ...addressInvalid, code });
+
+		expect(await result).toMatchObject({ data: { errors: { baseUrl: text } } });
 	});
 
 	it('sagt, wenn der Betreiber die KI festgelegt hat', async () => {

@@ -18,6 +18,7 @@ jobs:
     name: Comments and gate check
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       actions: read # the artifacts of the CI run
       contents: write # the branch ui-screenshots
@@ -75,7 +76,8 @@ jobs:
           PR: ${{ steps.pr.outputs.number }}
         with:
           script: |
-            const body = require('fs').readFileSync('artifacts/review-report/comment.md', 'utf8');
+            // text of the pull request's run: no @mention under the bot's name (review of #1386)
+            const body = require('fs').readFileSync('artifacts/review-report/comment.md', 'utf8').replace(/@(?=[\w-])/g, '@\u200b');
             const marker = '<!-- review-report -->';
             if (!body.startsWith(marker)) throw new Error('comment.md does not start with the report marker');
             const issue_number = Number(process.env.PR);
@@ -126,7 +128,7 @@ jobs:
               return `### ${title}\n![${title}](${base}/${name}.png?raw=true)${before}`;
             };
             // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
-            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
+            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort().slice(0, 300);
             // PDF pages that look the same (statement-pdf.ts): pdf_<language>_<page>
             const samePdfPages = fs.existsSync('ui-screenshots/unchanged.txt')
               ? fs.readFileSync('ui-screenshots/unchanged.txt', 'utf8').split('\n').filter(Boolean).sort()
@@ -139,10 +141,10 @@ jobs:
             // one that looks the same as on the base branch has no screenshot (looksTheSame)
             const unchanged = [];
             const taken = fs.existsSync('ui-screenshots/shots.txt')
-              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).sort()
+              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).slice(0, 300).sort()
               : [];
             const shots = taken.flatMap((line) => {
-              const [name, title] = line.split('\t');
+              const [name, title] = line.split('\t').map((part) => part.slice(0, 200));
               if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(title), []);
               return [shot(title, name)];
             });
@@ -150,14 +152,17 @@ jobs:
               unchanged.push(...samePdfPages.map(pdfTitle));
               shots.push(...pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', ''))));
             }
-            const same = unchanged.length ? `\n\nLook the same as on ${pr.base.ref}: ${unchanged.join(', ')}.` : '';
+            // the titles come from the artifact: capped, so the shortening below always ends
+            const same = unchanged.length ? `\n\nLook the same as on ${pr.base.ref}: ${unchanged.join(', ').slice(0, 2000)}.` : '';
             // a comment holds 65536 characters: the shots that do not fit are only on the branch
             let listed = shots.join('\n\n');
-            for (let count = shots.length; listed.length + same.length > 60000; count--)
+            for (let count = shots.length; count > 0 && listed.length + same.length > 60000; count--)
               listed = `${shots.slice(0, count).join('\n\n')}\n\n_${shots.length - count} more on [branch ui-screenshots](${base.replace('/blob/', '/tree/')})._`;
-            const body = shots.length
+            const body = (
+              shots.length
               ? `${marker}\n## UI screenshots\nChanged pages as of ${process.env.SHA.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
-              : `${marker}\n## UI screenshots\nNo visible changes as of ${process.env.SHA.slice(0, 7)}.${same}`;
+              : `${marker}\n## UI screenshots\nNo visible changes as of ${process.env.SHA.slice(0, 7)}.${same}`
+            ).replace(/@(?=[\w-])/g, '@\u200b').slice(0, 65000);
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });

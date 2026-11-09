@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { auditLog } from '../db/schema';
+import { auditLog, kiSettings } from '../db/schema';
 import { modelState } from '../services/ki-model.service';
 import { callApi, sendJson } from './helpers/auth';
 
@@ -23,9 +23,11 @@ const requests: {
 	image: string;
 }[] = [];
 type Part = { type: string; text?: string; image_url?: { url: string } };
+let modelsAsked = 0; // GET /models, whether the KI answers (#1372)
 const provider = Bun.serve({
 	port: 0,
 	fetch: async (request) => {
+		if (request.method === 'GET') return (modelsAsked++, Response.json({ data: [] }));
 		const { model, messages } = (await request.json()) as {
 			model: string;
 			messages: { content: string | Part[] }[];
@@ -202,6 +204,44 @@ describe('KI in den Einstellungen', () => {
 		]);
 	});
 
+	// #1372: auch Kategorisieren und die Frage, ob die KI antwortet, folgen keiner Umleitung mit dem Schlüssel
+	it('folgt mit dem gespeicherten Anbieter keiner Umleitung', async () => {
+		const forwarded: string[] = [];
+		const target = Bun.serve({ port: 0, fetch: (request) => (forwarded.push(request.url), new Response('{}')) });
+		const redirecting = Bun.serve({
+			port: 0,
+			fetch: (request) => Response.redirect(`http://127.0.0.1:${target.port}${new URL(request.url).pathname}`, 307)
+		});
+		try {
+			await save({ ...muster, baseUrl: `http://127.0.0.1:${redirecting.port}/v1` });
+
+			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung', description: '' });
+			const status = await (await callApi('/api/v1/invoices/llm-status')).json();
+
+			expect(forwarded).toEqual([]);
+			expect(status).toMatchObject({ llmAvailable: false });
+		} finally {
+			redirecting.stop(true);
+			target.stop(true);
+		}
+	});
+
+	// Entschieden in #1372: ein vor dem Update gespeicherter Anbieter mit einer Adresse, die die Regel verweigert, erhält
+	// nichts, auch keinen Schlüssel; die KI gilt als nicht erreichbar
+	it('schickt nichts an eine früher gespeicherte Adresse, die Dwello heute verweigert', async () => {
+		for (const baseUrl of [`${address}?x=1`, address.replace('://', '://nutzer:geheim@')]) {
+			await db.execute(sql`DELETE FROM ki_settings`);
+			await db.insert(kiSettings).values({ mode: 'provider', baseUrl, model: 'bild-modell', provider: 'Alt AG', providerCountry: 'Schweiz' });
+
+			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung', description: '' });
+			const status = await (await callApi('/api/v1/invoices/llm-status')).json();
+
+			expect(requests).toEqual([]);
+			expect(modelsAsked).toBe(0);
+			expect(status).toMatchObject({ llmAvailable: false });
+		}
+	});
+
 	it('fragt mit «Keine KI» niemanden und nennt keinen Empfänger', async () => {
 		await save(muster);
 		await save({ mode: 'none' });
@@ -234,6 +274,48 @@ describe('KI in den Einstellungen', () => {
 			params: { missing: 'baseUrl,model,provider,providerCountry,confirmed' }
 		});
 		expect(await settings()).toMatchObject({ mode: 'local' });
+	});
+
+	// #1372: Dwello hängt den Pfad an die Adresse selbst; Anmeldedaten, Abfrage oder Sprungmarke darin lenken die Anfrage um.
+	// Ein Anbieter im Internet bekommt den Schlüssel nur verschlüsselt (entschieden in #1372); Persona Anna 1372 P-1: der
+	// Code sagt, was an der Adresse nicht passt
+	it('verweigert eine Adresse mit Anmeldedaten, Abfrage, Sprungmarke oder ohne https im Internet beim Speichern und Prüfen', async () => {
+		const refused: [string, string][] = [
+			[`${address}?x=1`, 'KI_ADDRESS_SUFFIX'],
+			[`${address}#x`, 'KI_ADDRESS_SUFFIX'],
+			[address.replace('://', '://nutzer:geheim@'), 'KI_ADDRESS_CREDENTIALS'],
+			['http://api.example.ch/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://8.8.8.8/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://172.32.0.1/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://[2001:db8::1]/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			// Codereview 1372-2 C-1: ein Name im Internet, der wie eine private Adresse beginnt
+			['http://10.example.com/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://192.168.1.10.example.com/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['http://[fc::1]/v1', 'KI_ADDRESS_NOT_HTTPS'],
+			['kein url', 'KI_ADDRESS_INVALID'],
+			['file:///etc/passwd', 'KI_ADDRESS_INVALID']
+		];
+		for (const [baseUrl, code] of refused) {
+			for (const send of [save, check]) {
+				const response = await send({ ...muster, baseUrl });
+
+				expect(response.status).toBe(422);
+				expect(await response.json()).toMatchObject({ code });
+			}
+		}
+		expect(requests).toEqual([]);
+		expect(await settings()).toMatchObject({ mode: 'local' });
+	});
+
+	// #580, entschieden in #1372: eine KI im eigenen Netz antwortet auch ohne https (pinnt bestehendes Verhalten)
+	it('speichert einen Anbieter im eigenen Netz auch mit http', async () => {
+		const own = ['http://192.168.1.10:11434/v1', 'http://10.0.0.5/v1', 'http://172.20.0.3/v1', 'http://[fd00::1]/v1', 'http://ki-server:8080/v1', 'http://localhost/v1'];
+		for (const baseUrl of own) {
+			const response = await save({ ...muster, baseUrl });
+
+			expect(response.status).toBe(200);
+		}
+		expect(await settings()).toMatchObject({ baseUrl: 'http://localhost/v1' });
 	});
 
 	it('verweigert einen Schlüssel, solange der Server keinen Schlüssel zum Verschlüsseln hat', async () => {
@@ -398,6 +480,17 @@ describe('Vom Betreiber festgelegte KI', () => {
 		expect(await response.json()).toMatchObject({ code: 'KI_SET_BY_OPERATOR' });
 	});
 
+	// #1372: auch die Prüfung schickt keine Anfrage an eine Adresse, die der Betreiber nicht festgelegt hat
+	it('verweigert die Prüfung einer Verbindung, solange der Betreiber die KI festlegt', async () => {
+		llmConfig.byOperator = true;
+
+		const response = await check(muster);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'KI_SET_BY_OPERATOR' });
+		expect(requests).toEqual([]);
+	});
+
 	// llm:eval setzt nur Adresse, Schlüssel und Modell; den Anbieter verlangt erst der Start des Servers
 	it('fragt die KI des Betreibers auch ohne Namen und Land des Anbieters', async () => {
 		Object.assign(llmConfig, {
@@ -456,6 +549,22 @@ describe('Verbindung prüfen', () => {
 			} finally {
 				failing.stop(true);
 			}
+		}
+	});
+
+	// #1372: der gespeicherte Schlüssel geht nie über eine Umleitung an eine andere Adresse
+	it('folgt keiner Umleitung und meldet die Adresse als nicht erreichbar', async () => {
+		const redirecting = Bun.serve({
+			port: 0,
+			fetch: () => Response.redirect(`${address}/chat/completions`, 307)
+		});
+		try {
+			const result = await check({ ...muster, baseUrl: `http://127.0.0.1:${redirecting.port}/v1` });
+
+			expect(await result.json()).toEqual({ result: 'unreachable' });
+			expect(requests).toEqual([]);
+		} finally {
+			redirecting.stop(true);
 		}
 	});
 
