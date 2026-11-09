@@ -266,7 +266,6 @@ Funktionalität: Einstellungen
     Dann bestätigen die Einstellungen "Absender, Konto mit Kontoinhaber, Verwaltungspauschale, Fristen und Vorschläge gespeichert."
 
   # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
-  @wip
   Szenario: Die Einstellung «Verwaltungspauschale» erklärt den Begriff wie die Hilfe
     Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Verwaltungspauschale" heisst
     Und der Liegenschaftsverwalter ist auf den Einstellungen

@@ -49,6 +49,8 @@ const dateForInput = (date: string | null | undefined) =>
 	date ? new Date(date).toISOString().split('T')[0] : '';
 
 // A date field typed over can end up in year 12026; such a date is surely a typing mistake
+/** The help at «Akonto»: the glossary's text and what the field adds (#698) */
+export const advanceHelp = () => `${m.glossary_advance_text()} ${m.contracts_advance_help_more()}`;
 export const impossibleYear = () => m.common_error_impossible_year();
 export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 

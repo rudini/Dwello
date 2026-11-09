@@ -69,4 +69,70 @@ describe('Begriffe der Hilfe am Feld', () => {
 		show(TenantFormFields, {});
 		expect(description('tenant-channel-select').startsWith(m.glossary_channel_text())).toBe(true);
 	});
+
+	// The field's own sentences, word for word from fachreview 698-1 (V-2)
+	it.each([
+		[
+			'settings_fee_suggestion',
+			'de',
+			'Dort schlägt Dwello den Satz vor, den Sie hier eintragen; Dwello nimmt höchstens 10 % an.'
+		],
+		[
+			'settings_fee_suggestion',
+			'fr',
+			'Dwello y propose le taux que vous saisissez ici\u00a0; Dwello accepte au plus 10\u00a0%.'
+		],
+		[
+			'settings_fee_suggestion',
+			'it',
+			'Lì Dwello propone la percentuale che inserisce qui; Dwello accetta al massimo il 10 %.'
+		],
+		[
+			'settings_fee_suggestion',
+			'en',
+			'There, Dwello suggests the rate you enter here; Dwello accepts at most 10 %.'
+		],
+		[
+			'contracts_advance_help_more',
+			'de',
+			'Das Akonto leistet der Mieter nur für die im Mietvertrag vereinbarten Nebenkosten, zum Beispiel Heizung und Wasser.'
+		],
+		[
+			'contracts_advance_help_more',
+			'fr',
+			'Le locataire ne verse l’acompte que pour les frais accessoires convenus dans le contrat de bail, par exemple le chauffage et l’eau.'
+		],
+		[
+			'contracts_advance_help_more',
+			'it',
+			'L’inquilino versa l’acconto solo per le spese accessorie pattuite nel contratto di locazione, per esempio riscaldamento e acqua.'
+		],
+		[
+			'contracts_advance_help_more',
+			'en',
+			'The tenant pays the advance payment only for the utility costs agreed in the rental contract, for example heating and water.'
+		],
+		[
+			'tenants_channel_help_more',
+			'de',
+			'Für einen Brief braucht es eine vollständige Adresse. Der Korrespondenzkanal gilt zum Beispiel für Abrechnungen und Mahnungen.'
+		],
+		[
+			'tenants_channel_help_more',
+			'fr',
+			'Une lettre nécessite une adresse postale complète. Le canal de correspondance s’applique par exemple aux décomptes et aux rappels.'
+		],
+		[
+			'tenants_channel_help_more',
+			'it',
+			'Per una lettera serve un indirizzo postale completo. Il canale di corrispondenza vale per esempio per i conteggi e i solleciti.'
+		],
+		[
+			'tenants_channel_help_more',
+			'en',
+			'A letter needs a complete postal address. The correspondence channel applies, for example, to statements and reminders.'
+		]
+	] as const)('sagt bei %s auf %s, was das Feld ergänzt', (key, locale, text) => {
+		expect(m[key]({}, { locale })).toBe(text);
+	});
 });

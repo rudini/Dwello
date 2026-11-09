@@ -27,7 +27,6 @@ Funktionalität: Neuer Mieter
     Dann ist der Liegenschaftsverwalter auf der Mieterliste
 
   # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
-  @wip
   Szenario: Die Hilfe zum Korrespondenzkanal erklärt den Begriff wie die Hilfe
     Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Korrespondenzkanal" heisst
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mieter"

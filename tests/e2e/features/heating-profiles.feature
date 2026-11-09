@@ -119,7 +119,6 @@ Funktionalität: Heizprofile
       | Löschen: Bergtal    |
 
   # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
-  @wip
   Szenario: Die Seite «Heizprofile» erklärt das Heizprofil wie die Hilfe
     Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Heizprofil" heisst
     Und der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
