@@ -206,3 +206,12 @@ describe('HTML-Bericht (#1273)', () => {
 		expect(page).toContain('| fe:d | fe:a | 0 | 1 |');
 	});
 });
+
+describe('Fitness-Schritt mit den Daten des Prüfberichts (#1273)', () => {
+	it('behält den Exit-Code der Fitness, obwohl tee ihre Ausgabe mitschreibt', () => {
+		const ci = readFileSync(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+		const step = ci.slice(ci.indexOf('- name: Architecture fitness'), ci.indexOf('esac', ci.indexOf('- name: Architecture fitness')));
+		expect(step).toContain('| tee build/review/fitness.txt');
+		expect(step).toMatch(/run: \|\n {10}set -o pipefail/);
+	});
+});
