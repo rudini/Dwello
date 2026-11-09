@@ -1,4 +1,7 @@
 import { spawnSync } from 'node:child_process';
+import { copyFileSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { Kpi } from '../arch-baseline/structure';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -560,6 +563,26 @@ describe('Abschluss des Laufs', () => {
 		const run = spawnSync('bun', [fileURLToPath(new URL('./fitness.ts', import.meta.url))], { encoding: 'utf8', timeout: 120_000 });
 		expect(run.stdout.trimEnd().split('\n').at(-1)).toMatch(/^Fitness: \d+ errors, \d+ warnings$/);
 	});
+
+	it('senkt mit --update die Grenze einer Datei, die erst im Arbeitsbaum kürzer ist, und keine andere (#1411)', () => {
+		const root = fileURLToPath(new URL('../..', import.meta.url));
+		const tree = mkdtempSync(join(tmpdir(), 'fitness-update-'));
+		const git = (...args: string[]) => spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+		git('worktree', 'add', '--detach', tree, 'HEAD');
+		try {
+			copyFileSync(join(root, 'tools/fitness/fitness.ts'), join(tree, 'tools/fitness/fitness.ts'));
+			symlinkSync(join(root, 'node_modules'), join(tree, 'node_modules'));
+			const routes = join(tree, 'backend/src/routes/statements.ts');
+			writeFileSync(routes, readFileSync(routes, 'utf8').split('\n').slice(0, 500).join('\n'));
+			const before: Ratchet = JSON.parse(readFileSync(join(tree, 'tools/fitness/ratchet.json'), 'utf8'));
+			spawnSync('bun', ['tools/fitness/fitness.ts', '--base', 'HEAD', '--update'], { cwd: tree, encoding: 'utf8', timeout: 120_000 });
+			const after: Ratchet = JSON.parse(readFileSync(join(tree, 'tools/fitness/ratchet.json'), 'utf8'));
+			expect(after.fat!.files['backend/src/routes/statements.ts']).toBeLessThan(before.fat!.files['backend/src/routes/statements.ts']);
+			expect({ ...after.fat!.files, 'backend/src/routes/statements.ts': 0 }).toEqual({ ...before.fat!.files, 'backend/src/routes/statements.ts': 0 });
+		} finally {
+			git('worktree', 'remove', '--force', tree);
+		}
+	}, 120_000);
 
 	it('verweigert --update ohne --base, damit es keine Grenze einer Datei senkt, die der Branch nicht ändert (#1411)', () => {
 		const run = spawnSync('bun', [fileURLToPath(new URL('./fitness.ts', import.meta.url)), '--update'], { encoding: 'utf8', timeout: 120_000 });

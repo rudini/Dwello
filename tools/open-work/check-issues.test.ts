@@ -278,8 +278,11 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 	});
 
 	it('lässt einen geänderten Importpfad in tools/ ohne Freigabe durch, eine Änderung daneben nicht (#1411)', async () => {
-		const base = { 'tools/a.ts': "import { x } from '../src/old';\nrun(x);\n" };
-		expect(await changeGate({ 'tools/a.ts': "import { x } from '../src/new';\nrun(x);\n" }, '', base)).toMatchObject({ code: 0 });
+		const base = { 'tools/a.ts': "import { x } from '../src/old';\nrun(x);\n", 'src/old.ts': 'export const x = 1;\n', 'src/other.ts': 'export const x = 2;\n' };
+		const moved = { 'src/old.ts': null, 'src/new.ts': 'export const x = 1;\n' };
+		expect(await changeGate({ ...moved, 'tools/a.ts': "import { x } from '../src/new';\nrun(x);\n" }, '', base)).toMatchObject({ code: 0 });
+		// a target the change did not move is another implementation, not a moved one
+		expect((await changeGate({ 'tools/a.ts': "import { x } from '../src/other';\nrun(x);\n" }, '', base)).out).toContain('tools/a.ts changes a check');
 		const result = await changeGate({ 'tools/a.ts': "import { x } from '../src/new';\nrun(x, 1);\n" }, '', base);
 		expect(result.out).toContain('tools/a.ts changes a check');
 	});

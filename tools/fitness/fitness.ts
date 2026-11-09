@@ -610,7 +610,7 @@ if (import.meta.main) {
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Architecture fitness\n\n${values}\n`);
 	}
 	if (args.includes('--update') && !errors.length) {
-		const next = m ? tighten(m, ratchet, git(['diff', '--name-only', '--no-renames', base!, 'HEAD']).split('\n')) : ratchet;
+		const next = m ? tighten(m, ratchet, git(['diff', '--name-only', '--no-renames', base!]).split('\n')) : ratchet;
 		next.coChangeWarn = Math.min(pairs ?? Infinity, ratchet.coChangeWarn);
 		writeFileSync(file, JSON.stringify(next, null, '\t') + '\n');
 		console.log('ratchet.json tightened to the measured values');
