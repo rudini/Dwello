@@ -282,7 +282,7 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 		const moved = { 'src/old.ts': null, 'src/new.ts': 'export const x = 1;\n' };
 		expect(await changeGate({ ...moved, 'tools/a.ts': "import { x } from '../src/new';\nrun(x);\n" }, '', base)).toMatchObject({ code: 0 });
 		// a target the change did not move is another implementation, not a moved one
-		expect((await changeGate({ 'tools/a.ts': "import { x } from '../src/other';\nrun(x);\n" }, '', base)).out).toContain('tools/a.ts changes a check');
+		expect((await changeGate({ 'tools/a.ts': "import { x } from '../src/other';\nrun(x);\n", 'src/other.test.ts': 'test\n' }, '', base)).out).toContain('tools/a.ts changes a check');
 		const result = await changeGate({ 'tools/a.ts': "import { x } from '../src/new';\nrun(x, 1);\n" }, '', base);
 		expect(result.out).toContain('tools/a.ts changes a check');
 	});

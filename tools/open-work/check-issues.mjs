@@ -154,7 +154,8 @@ const onlyImports = (file) => {
 	const newFiles = git('diff', '--name-only', '--no-renames', '--diff-filter=A', from, 'HEAD').split('\n');
 	const moved = (line) => {
 		const path = posix.join(posix.dirname(file), target(line));
-		return /^\.\.?\//.test(target(line)) && newFiles.some((f) => f === path || f.startsWith(`${path}.`) || f.startsWith(`${path}/`));
+		const files = [path, ...['ts', 'js', 'mjs', 'svelte'].map((ext) => `${path}.${ext}`), ...['ts', 'js', 'mjs'].map((ext) => `${path}/index.${ext}`)];
+		return /^\.\.?\//.test(target(line)) && newFiles.some((f) => files.includes(f));
 	};
 	const targets = lines.filter((line) => line.startsWith('+'));
 	return removed.length > 0 && removed.length === added.length && removed.every((line, i) => line && line === added[i]) && targets.every(moved);
