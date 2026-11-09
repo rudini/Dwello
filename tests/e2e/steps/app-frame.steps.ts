@@ -5,6 +5,7 @@ import {
 	draftNoticeText,
 	firstMobileNavItem,
 	mobileNavItemShare,
+	reachableAroundMobileNav,
 	footerVersionText,
 	glossaryExplanationText,
 	legalAsOfText,
@@ -410,6 +411,11 @@ Then(
 );
 
 // #657: «Hilfe» stands at the top of the menu in a narrow window
+// #651: the page behind the open menu is inert, so the keyboard and a screen reader's browse mode stay in the menu
+Then('erreichen Tastatur und Bildschirmleser ausserhalb des Menüs nichts', async ({ verwalter }) => {
+	await verwalter.sees(reachableAroundMobileNav).toEqual([]);
+});
+
 Then('nennt das Menü zuerst {string}', async ({ verwalter }, label: string) => {
 	await verwalter.sees(firstMobileNavItem).toBe(label);
 });

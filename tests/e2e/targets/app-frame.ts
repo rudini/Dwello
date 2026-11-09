@@ -17,6 +17,8 @@ export const mobileNavLink = (label: string) =>
 export const firstMobileNavLink = target('Erster Eintrag des Menüs', (page) =>
 	page.getByRole('dialog', { name: 'Hauptnavigation' }).getByTestId('main-nav-link').first()
 );
+/** #651: the open menu of a narrow window */
+export const mobileNav = target('Menü', (page) => page.getByRole('dialog', { name: 'Hauptnavigation' }));
 export const currentNavItem = target('Markierter Eintrag der Hauptnavigation', (page) =>
 	page.getByRole('navigation', { name: 'Hauptnavigation' }).locator('[aria-current="page"]')
 );
