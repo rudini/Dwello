@@ -114,4 +114,20 @@ describe('Signatur der Sicherung', () => {
 			decryptFile(file, code, join(dir, 'changed-unsigned'), () => true)
 		).rejects.toThrow('Die Sicherung ist beschädigt');
 	});
+
+	// 1373 review 4 C-1: kept behaviour, pinned after the reading of the file was rewritten
+	it('lehnt eine leere, eine fremde und eine abgeschnittene signierte Datei als keine Sicherung ab', async () => {
+		const code = generateCode();
+		const signed = await readFile(await encrypted(code));
+		for (const [name, bytes] of [
+			['leer', Buffer.alloc(0)],
+			['fremd', Buffer.concat([Buffer.from('PK'), signed.subarray(2)])],
+			['abgeschnitten', signed.subarray(0, 150)]
+		] as const) {
+			await writeFile(join(dir, name), bytes);
+			await expect(decryptFile(join(dir, name), code, join(dir, `${name}.out`))).rejects.toThrow(
+				'Die Datei ist keine Sicherung von Dwello.'
+			);
+		}
+	});
 });
