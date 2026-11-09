@@ -1,9 +1,9 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { annualReportCellsOf, annualReportHelpOf, annualReportNotesText, csvAmountsOf } from '../questions/annual-report';
+import { annualReportCellsOf, annualReportDownloadCount, annualReportHelpOf, annualReportNotesText, annualReportTitle, csvAmountsOf } from '../questions/annual-report';
 import { downloadedFileName, downloadedPdfText } from '../questions/download';
-import { downloadAnnualReport, openAnnualReport } from '../tasks/annual-report';
+import { chooseReportBuilding, downloadAnnualReport, openAnnualReport } from '../tasks/annual-report';
 
 const { When, Then } = createBdd(test);
 
@@ -49,4 +49,16 @@ Then('enthält die CSV-Datei des Jahresberichts die Zeilen:', async ({ verwalter
 
 Then('enthält das PDF des Jahresberichts {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(downloadedPdfText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter für den Jahresbericht das Gebäude {string} wählt', async ({ verwalter, seed }, building: string) => {
+	await verwalter.attemptsTo(chooseReportBuilding(seed.idOf(building)!));
+});
+
+Then('heisst der angezeigte Jahresbericht {string}', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(annualReportTitle).toBe(title.replace('Seeblick', names.get('Seeblick')!));
+});
+
+Then('bietet der Jahresbericht keine Datei zum Herunterladen an', async ({ verwalter }) => {
+	await verwalter.sees(annualReportDownloadCount).toBe(0);
 });

@@ -58,7 +58,11 @@
 		</form>
 
 		<section aria-labelledby="annual-report-heading" class="flex flex-col gap-8">
-			<h2 id="annual-report-heading" class="text-xl font-bold text-ink">
+			<h2
+				id="annual-report-heading"
+				class="text-xl font-bold text-ink"
+				data-testid="annual-report-heading"
+			>
 				{m.analytics_report_heading({ building: data.buildingName, year: data.report.year })}
 			</h2>
 			{#if data.report.year >= data.currentYear}

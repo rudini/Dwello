@@ -221,4 +221,15 @@ describe('Hinweise zum Anteil an den Nebenkosten', () => {
 			'Total Kosten ohne wertvermehrende Investitionen'
 		);
 	});
+
+	// code review 1409-2 C-11: an invoice without a Kategorie still names its row
+	it('nennt eine Rechnung ohne Kategorie «Ohne Kategorie»', async () => {
+		const maintenance = { categories: [{ categoryId: null, amount: 50 }], total: 50 };
+		const body = { ...report, costs: { ...report.costs, maintenance } } as unknown as Body;
+		const loaded = await loadAnnualReport(
+			backend(2024, body).fetch,
+			page('?building=b1&year=2025')
+		);
+		expect(loaded.report!.sections[1].rows).toContainEqual({ label: 'Ohne Kategorie', amount: 50 });
+	});
 });

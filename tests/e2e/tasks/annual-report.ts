@@ -20,3 +20,9 @@ export const downloadAnnualReport =
 	(buildingId: string, year: number, kind: 'csv' | 'pdf'): Activity =>
 	(actor) =>
 		actor.attemptsTo(openAnnualReport(buildingId, year), DownloadFrom(annualReportDownload(kind)));
+
+// a building chosen, the report not shown yet
+export const chooseReportBuilding =
+	(buildingId: string): Activity =>
+	(actor) =>
+		actor.attemptsTo(Select.option(buildingId).from(annualReportBuilding));

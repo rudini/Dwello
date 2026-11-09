@@ -1,9 +1,11 @@
 import { question } from '../screenplay/actor';
-import { DownloadedFile, Text } from '../screenplay/questions';
-import { annualReportCells, annualReportHelp, annualReportNotes, annualReportPart } from '../targets/annual-report';
+import { Count, DownloadedFile, Text } from '../screenplay/questions';
+import { annualReportCells, annualReportDownloads, annualReportHeading, annualReportHelp, annualReportNotes, annualReportPart } from '../targets/annual-report';
 
 // #1409: what the Jahresbericht shows, and what its CSV says
 export const annualReportCellsOf = (part: 'income' | 'costs') => Text.ofAll(annualReportCells(annualReportPart(part)));
+export const annualReportTitle = Text.of(annualReportHeading);
+export const annualReportDownloadCount = Count.of(annualReportDownloads);
 export const annualReportNotesText = Text.ofAll(annualReportNotes);
 export const annualReportHelpOf = (part: 'income' | 'costs') => Text.of(annualReportHelp(annualReportPart(part)));
 

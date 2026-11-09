@@ -83,6 +83,7 @@
 	"help_statements_3": "I conteggi sono poi disponibili come bozza. Può adattare il termine di pagamento e le osservazioni; per correggere costi errati allestisca di nuovo i conteggi.",
 	"help_statements_4": "Se l’inquilino desidera la corrispondenza per e-mail, Dwello invia il conteggio in PDF con «Inviare per e-mail» e lo archivia in «Documenti». Per una lettera recapiti personalmente il PDF all’inquilino e scelga lo stesso giorno «Segnare come inviato». Dal giorno dell’invio decorre il termine di pagamento.",
 	"help_statements_5": "In «Rapporti» trova, per ogni periodo di conteggio di un immobile con conteggi, la riconciliazione dei costi: quale parte dei costi dell’immobile i conteggi pongono a carico degli inquilini e quale parte sostiene Lei stesso. L’anteprima mostra già la stessa riconciliazione dei costi.",
+	"help_statements_6": "In «Analisi» trova il rapporto annuale per immobile e anno civile: il reddito locativo pattuito e i costi che sostiene Lei stesso, in PDF e CSV per la sua dichiarazione d’imposta o la sua fiduciaria. Dwello non verifica se gli inquilini hanno pagato.",
 	"help_payments_title": "Pagamenti e solleciti",
 	"help_payments_1": "La «Panoramica» le mostra i conteggi scaduti e le scadenze imminenti.",
 	"help_payments_2": "Quando arriva un pagamento, scelga «Segnare come pagato» nel conteggio.",

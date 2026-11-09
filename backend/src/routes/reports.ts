@@ -14,6 +14,15 @@ const period = {
 	periodStart: t.String({ format: 'date' }),
 	periodEnd: t.String({ format: 'date' })
 };
+// #1409: the texts and the amounts of a report as the BFF shows them
+const text = (maxLength: number) => t.String({ maxLength });
+const reportRow = t.Object({ label: text(300), amount: text(40), total: t.Optional(t.Boolean()) });
+const reportSection = t.Object({ heading: text(300), help: text(2000), rows: t.Array(reportRow, { maxItems: 500 }) });
+const reportDocument = t.Object({
+	title: text(300),
+	lines: t.Array(text(1000), { maxItems: 10 }),
+	sections: t.Array(reportSection, { maxItems: 10 })
+});
 const notFound = (set: { status?: number | string }) => {
 	set.status = 404;
 	return refusal('BUILDING_NOT_FOUND', 'Building not found');
@@ -62,17 +71,6 @@ export const reportRoutes = new Elysia({ prefix: '/api/v1' })
 			return renderReportPdf(body);
 		},
 		{
-			body: t.Object({
-				title: t.String({ maxLength: 300 }),
-				lines: t.Array(t.String({ maxLength: 1000 }), { maxItems: 10 }),
-				sections: t.Array(
-					t.Object({
-						heading: t.String({ maxLength: 300 }),
-						help: t.String({ maxLength: 2000 }),
-						rows: t.Array(t.Object({ label: t.String({ maxLength: 300 }), amount: t.String({ maxLength: 40 }), total: t.Optional(t.Boolean()) }), { maxItems: 500 })
-					}),
-					{ maxItems: 10 }
-				)
-			})
+			body: reportDocument
 		}
 	);

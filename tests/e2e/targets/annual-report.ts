@@ -15,3 +15,6 @@ export const annualReportDownload = (kind: 'csv' | 'pdf') =>
 export const runningYearNote = target('Hinweis zum laufenden Jahr', (page) => page.getByTestId('annual-report-current-year'));
 // #1409: the notes on the landlord's share of the Nebenkosten: its Abrechnungsperiode, missing statements, notes
 export const annualReportNotes = target('Hinweise des Jahresberichts', (page) => page.getByTestId('annual-report-note'));
+// the heading of the report shown, and its download links
+export const annualReportHeading = target('Überschrift des Jahresberichts', (page) => page.getByTestId('annual-report-heading'));
+export const annualReportDownloads = target('Dateien des Jahresberichts', (page) => page.getByTestId(/^annual-report-(csv|pdf)$/));

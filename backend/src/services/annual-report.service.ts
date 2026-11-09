@@ -111,50 +111,61 @@ async function costsOf(buildingId: string, start: string, end: string) {
  * without rows of 0.00; none without valid statements of that period (Fachreview 1409-2 V-14)
  */
 async function utilityOf(buildingId: string, yearEnd: string) {
-	const [{ type }] = await db
-		.select({ type: buildings.accountingPeriod })
-		.from(buildings)
-		.where(eq(buildings.id, buildingId));
-	const period = lastCompletedPeriod(type, `${Number(yearEnd.slice(0, 4)) + 1}-01-01`);
+	const period = await periodEndingIn(buildingId, yearEnd);
 	const [statements, outside] = await Promise.all([
 		validStatements(buildingId, period),
-		db
-			.select({ id: rentalContracts.id })
-			.from(rentalContracts)
-			.innerJoin(apartments, eq(apartments.id, rentalContracts.apartmentId))
-			.where(
-				and(
-					eq(apartments.buildingId, buildingId),
-					gte(rentalContracts.billedUntil, period.start),
-					lte(rentalContracts.billedUntil, period.end)
-				)
-			)
-			.limit(1)
+		billedOutside(buildingId, period)
 	]);
-	const base = { period, billed: statements.length > 0, notes: false, outside: outside.length > 0 };
+	const base = { period, billed: statements.length > 0, notes: false, outside };
 	if (!base.billed) return { ...base, outside: false, ...group([]) };
 	const reconciliation = await reportReconciliation(buildingId, period);
+	const { drafts, notUpToDate, keyNotCalculable, withoutStatement } = reconciliation;
 	const notes =
-		[reconciliation.drafts, reconciliation.notUpToDate, reconciliation.keyNotCalculable].some(
-			(list) => list?.length
-		) || !!reconciliation.withoutStatement;
-	// in the order of the categories, as the other groups; a row without a Kategorie last
-	const order = new Map(
-		(
-			await db
-				.select({ id: categories.id })
-				.from(categories)
-				.orderBy(asc(categories.sortOrder), asc(categories.name))
-		).map(({ id }, i) => [id, i])
-	);
-	const rank = ({ categoryId }: Row) =>
-		categoryId === null ? Infinity : (order.get(categoryId) ?? Infinity);
+		[drafts, notUpToDate, keyNotCalculable].some((list) => list?.length) || !!withoutStatement;
+	const rank = await categoryRank();
 	const rows = byCategory(
 		reconciliation.positions.map(({ categoryId, landlord }) => ({ categoryId, amount: landlord }))
 	)
 		.filter(({ amount }) => amount !== 0)
 		.sort((a, b) => rank(a) - rank(b));
 	return { ...base, notes, ...group(rows) };
+}
+
+/** The building's Abrechnungsperiode that ends in the year of `yearEnd` */
+async function periodEndingIn(buildingId: string, yearEnd: string) {
+	const [{ type }] = await db
+		.select({ type: buildings.accountingPeriod })
+		.from(buildings)
+		.where(eq(buildings.id, buildingId));
+	return lastCompletedPeriod(type, `${Number(yearEnd.slice(0, 4)) + 1}-01-01`);
+}
+
+/** Whether a contract of the building is billed outside Dwello up to a day of the period («Abgerechnet bis») */
+async function billedOutside(buildingId: string, period: { start: string; end: string }) {
+	const found = await db
+		.select({ id: rentalContracts.id })
+		.from(rentalContracts)
+		.innerJoin(apartments, eq(apartments.id, rentalContracts.apartmentId))
+		.where(
+			and(
+				eq(apartments.buildingId, buildingId),
+				gte(rentalContracts.billedUntil, period.start),
+				lte(rentalContracts.billedUntil, period.end)
+			)
+		)
+		.limit(1);
+	return found.length > 0;
+}
+
+/** The place of a row in the order of the categories, as the other groups; a row without a Kategorie last */
+async function categoryRank() {
+	const ordered = await db
+		.select({ id: categories.id })
+		.from(categories)
+		.orderBy(asc(categories.sortOrder), asc(categories.name));
+	const order = new Map(ordered.map(({ id }, i) => [id, i]));
+	return ({ categoryId }: Row) =>
+		categoryId === null ? Infinity : (order.get(categoryId) ?? Infinity);
 }
 
 /** The year of the building's first contract or invoice, also one after the year asked; without any, the year asked */
