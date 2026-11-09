@@ -40,7 +40,8 @@ import {
 	showStatementsOfBuildingWhileLoading,
 	startGeneratingStatements,
 	turnToNextPage,
-	clearDraftFilter
+	clearDraftFilter,
+	markPaidInList
 } from '../tasks/statements';
 import { inDays } from '../fixtures/dates';
 import { listHeading } from '../questions/list';
@@ -71,6 +72,13 @@ Given(
 Given('der Liegenschaftsverwalter ist auf der Abrechnungsliste', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openStatementList);
 });
+
+When(
+	'der Liegenschaftsverwalter in der Liste festhält, dass {string} die Abrechnung bezahlt hat',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.attemptsTo(markPaidInList(names.get(tenant) ?? tenant));
+	}
+);
 
 Then(
 	'sieht der Liegenschaftsverwalter die Abrechnung von {string} mit dem Status {string}',
