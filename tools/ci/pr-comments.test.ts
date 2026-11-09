@@ -48,6 +48,12 @@ describe('Kommentare zu Pull Requests aus Forks (#1274)', () => {
 
 	it('prüft Änderungen an Prüfdateien mit dem Skript von main und setzt dafür einen Status am Pull Request', () => {
 		expect(comments).toContain('-f context="Gate check (main)"');
-		expect(comments).toMatch(/git -C trusted fetch origin "pull\/\$PR\/head"/);
+		// exactly the commit the status goes on, not the pull request's head at the time of the job (review 1274-review-1 C-1)
+		expect(comments).toContain('git -C trusted fetch origin "$SHA"');
+		expect(comments).toContain('git -C trusted worktree add --detach ../pr "$SHA"');
+		// run from trusted/, so the script resolves its packages only from main's node_modules; git works on the pull request's tree (C-3)
+		expect(comments).toMatch(/\(cd trusted && GIT_DIR="\$\(git -C \.\.\/pr rev-parse --absolute-git-dir\)" GIT_WORK_TREE="\$GITHUB_WORKSPACE\/pr" /);
+		// the screenshot comment names the commit of the run, whose files it published (C-2)
+		expect(comments).not.toContain('pr.head.sha');
 	});
 });

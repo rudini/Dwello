@@ -45,18 +45,19 @@ jobs:
       - run: bun install --frozen-lockfile
         if: steps.pr.outputs.number != ''
         working-directory: trusted
-      # main's script on the pull request's commits: they are only read with git diff and git show
+      # main's script on exactly the commit of the run (the status goes on it): it reads that tree only through git
+      # (diff, show, grep), and runs from trusted/, so it loads packages only from main's node_modules
       - name: Gate check (main)
         if: steps.pr.outputs.number != ''
         env:
           PR: ${{ steps.pr.outputs.number }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git -C trusted fetch origin "pull/$PR/head"
-          git -C trusted worktree add --detach ../pr FETCH_HEAD
+          git -C trusted fetch origin "$SHA"
+          git -C trusted worktree add --detach ../pr "$SHA"
           base=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .base.ref)
           state=success
-          (cd pr && BASE_REF="$base" PR_NUMBER="$PR" PR_BODY="$(gh api "repos/$GH_REPO/pulls/$PR" --jq .body)" node "$GITHUB_WORKSPACE/trusted/tools/open-work/check-issues.mjs") || state=failure
+          (cd trusted && GIT_DIR="$(git -C ../pr rev-parse --absolute-git-dir)" GIT_WORK_TREE="$GITHUB_WORKSPACE/pr" BASE_REF="$base" PR_NUMBER="$PR" PR_BODY="$(gh api "repos/$GH_REPO/pulls/$PR" --jq .body)" node "$GITHUB_WORKSPACE/trusted/tools/open-work/check-issues.mjs") || state=failure
           gh api "repos/$GH_REPO/statuses/$SHA" -f state="$state" -f context="Gate check (main)" -f description="tools/open-work/check-issues.mjs of main" -f target_url="${{ github.server_url }}/$GH_REPO/actions/runs/${{ github.run_id }}"
       - uses: actions/download-artifact@v7
         id: report
@@ -116,7 +117,7 @@ jobs:
             // the artifact of the CI run: ui-routes.txt and ui-screenshots/, read as data
             process.chdir('artifacts/ui-screenshots');
             const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: Number(process.env.PR) });
-            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${pr.head.sha}`;
+            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${process.env.SHA}`;
             const marker = '<!-- ui-screenshots -->';
             const shot = (title, name) => {
               const before = fs.existsSync(`ui-screenshots/${name}.before.png`)
@@ -155,8 +156,8 @@ jobs:
             for (let count = shots.length; listed.length + same.length > 60000; count--)
               listed = `${shots.slice(0, count).join('\n\n')}\n\n_${shots.length - count} more on [branch ui-screenshots](${base.replace('/blob/', '/tree/')})._`;
             const body = shots.length
-              ? `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
-              : `${marker}\n## UI screenshots\nNo visible changes as of ${pr.head.sha.slice(0, 7)}.${same}`;
+              ? `${marker}\n## UI screenshots\nChanged pages as of ${process.env.SHA.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
+              : `${marker}\n## UI screenshots\nNo visible changes as of ${process.env.SHA.slice(0, 7)}.${same}`;
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
