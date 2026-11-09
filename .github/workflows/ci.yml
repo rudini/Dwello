@@ -220,11 +220,19 @@ jobs:
         id: prettier
         if: ${{ !cancelled() && steps.deps.outcome == 'success' && github.event_name == 'pull_request' }}
         run: git diff --name-only --diff-filter=A -z "origin/${{ github.base_ref }}...HEAD" | xargs -0 -r bunx prettier --check --ignore-unknown
-      # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work"); a changed scenario without @wip is approved (Workflow 1)
+      # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work"); a changed scenario without @wip
+      # and a changed gate file are approved (Workflow 1, #1269). A pull request runs the target branch's copy of the
+      # script, so it cannot loosen the check that judges it; its own changes to the script count from the merge on
       - name: Open work
         id: open-work
         if: ${{ !cancelled() && steps.deps.outcome == 'success' }}
-        run: node tools/open-work/check-issues.mjs
+        run: |
+          script=tools/open-work/check-issues.mjs
+          if [ -n "$BASE_REF" ]; then
+            git show "origin/$BASE_REF:$script" > "$RUNNER_TEMP/check-issues.mjs"
+            script="$RUNNER_TEMP/check-issues.mjs"
+          fi
+          node "$script"
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

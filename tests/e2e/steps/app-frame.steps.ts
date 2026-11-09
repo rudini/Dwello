@@ -22,7 +22,8 @@ import {
 	sectionShareInWindow,
 	sectionShown,
 	sectionText,
-	tabIcon
+	tabIcon,
+	homeScreenIcons
 } from '../questions/app-frame';
 import { focusedText } from '../questions/navigation';
 import { openPage } from '../tasks/navigation';
@@ -206,6 +207,10 @@ Then(
 
 Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
 	await verwalter.sees(tabIcon).toBe('image/svg+xml');
+});
+
+Then('bietet die Seite das Dwello-Symbol für den Startbildschirm an', async ({ verwalter }) => {
+	await verwalter.sees(homeScreenIcons).toEqual({ touchIcon: 'image/png', manifestIcons: ['image/png', 'image/png'] });
 });
 
 Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {

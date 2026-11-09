@@ -149,7 +149,7 @@ No date library; formatting uses the built-in `Intl` APIs / `Date`.
 
 ### Address Lookup: Gebäuderegister (geo.admin.ch)
 
-The address search of «Neues Gebäude» asks the BFF (`/api/addresses`), which calls `https://api3.geo.admin.ch` (swisstopo; the federal Gebäude- und Wohnungsregister) in `src/lib/server/building-register.ts`: addresses with house number, then the building's type, year and Wohnungen (#479). The browser never calls it. `GEO_ADMIN_URL` points elsewhere; E2E uses the stand-in `backend/scripts/gwr-stub.ts` on 2529. The frontend server needs direct internet access for it: Node's `fetch` ignores `HTTPS_PROXY` unless started with `NODE_USE_ENV_PROXY=1` (Node 22.21+, not the Node 20 image; O-42).
+The address search of «Neues Gebäude» asks the BFF (`/api/addresses`), which calls `https://api3.geo.admin.ch` (swisstopo; the federal Gebäude- und Wohnungsregister) in `src/lib/server/building-register.ts`: addresses with house number, then the building's type, year and Wohnungen (#479). The browser never calls it. `GEO_ADMIN_URL` points elsewhere; E2E uses the stand-in `backend/scripts/gwr-stub.ts` on 2529. The frontend server reaches it directly or, when `HTTPS_PROXY` is set, through that proxy: the image (Node 26) sets `NODE_USE_ENV_PROXY=1`, without which Node's `fetch` ignores `HTTPS_PROXY` (#749). Docker passes the proxy into the container from its client settings (`proxies` in `~/.docker/config.json`), or the frontend's `environment` in `docker-compose.prod.yml` names it. `HTTPS_PROXY` covers only HTTPS requests; an `HTTP_PROXY` would also catch the calls to the backend unless `NO_PROXY` names it.
 
 ### Build & Tooling
 
@@ -321,7 +321,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 - `docker-compose.prod.yml`: production
 
 **Services in `docker-compose.prod.yml`:**
-1. **frontend** (SvelteKit BFF, Node 20, port 3000, root `Dockerfile`)
+1. **frontend** (SvelteKit BFF, Node 26, port 3000, root `Dockerfile`; an outgoing proxy through `HTTPS_PROXY`)
 2. **backend** (ElysiaJS on Bun, port 3001, `backend/Dockerfile`)
 3. **postgres** (`postgres:16-alpine`)
 4. **ollama** (LLM service; not needed with an external provider)

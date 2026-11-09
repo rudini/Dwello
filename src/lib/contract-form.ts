@@ -48,6 +48,9 @@ const feeChoice = (contract: RentalContract): ContractFormValues['managementFee'
 const dateForInput = (date: string | null | undefined) =>
 	date ? new Date(date).toISOString().split('T')[0] : '';
 
+/** The help at «Akonto»: the glossary's text and what the field adds (#698) */
+export const advanceHelp = () => `${m.glossary_advance_text()} ${m.contracts_advance_help_more()}`;
+
 // A date field typed over can end up in year 12026; such a date is surely a typing mistake
 export const impossibleYear = () => m.common_error_impossible_year();
 export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);

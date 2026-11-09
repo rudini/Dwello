@@ -405,6 +405,26 @@ export const ThePage = {
 		const response = await page.request.get(new URL(href!, page.url()).href);
 		return response.ok() ? response.headers()['content-type'] : `HTTP ${response.status()}`;
 	}),
+	/** The types of the icons the page names for a home-screen shortcut: its touch icon and its manifest's icons (#730) */
+	homeScreenIcons: question('the icons for the home screen', async (actor) => {
+		const page = pageOf(actor);
+		const typeOf = async (href: string | null, base: string) => {
+			if (!href) return 'missing';
+			const response = await page.request.get(new URL(href, base).href);
+			return response.ok() ? response.headers()['content-type'] : `HTTP ${response.status()}`;
+		};
+		const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href', quick).catch(() => null);
+		const manifestUrl = manifestHref && new URL(manifestHref, page.url()).href;
+		const manifest = manifestUrl ? await (await page.request.get(manifestUrl)).json().catch(() => ({})) : {};
+		const icons: { src: string }[] = manifest.icons ?? [];
+		return {
+			touchIcon: await typeOf(
+				await page.locator('link[rel="apple-touch-icon"]').getAttribute('href', quick).catch(() => null),
+				page.url()
+			),
+			manifestIcons: await Promise.all(icons.map((icon) => typeOf(icon.src, manifestUrl!)))
+		};
+	}),
 	/** How much wider the page is than the window: more than 0 means it scrolls sideways */
 	sidewaysOverflow: question('how far the page scrolls sideways', (actor) =>
 		pageOf(actor).evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
