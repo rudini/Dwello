@@ -97,8 +97,6 @@
 	"Installer in einem Schritt": "Installazione in un passo",
 	"MCP-Server": "Server MCP",
 	"Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.": "Dwello come strumento per il Suo assistente IA, in locale e con la Sua autorizzazione.",
-	"Berichte und Auswertungen": "Rapporti e analisi",
-	"Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.": "Entrate, uscite e spese accessorie negli anni, per la dichiarazione d’imposta e la fiduciaria.",
 	"Häufige Fragen.": "Domande frequenti.",
 	"Kostet Dwello wirklich nichts?": "Dwello è davvero gratuito?",
 	"Brauche ich technische Kenntnisse?": "Mi servono conoscenze tecniche?",
@@ -255,5 +253,7 @@
 	"Die Bildschirmfotos und Beispiele auf dieser Seite stammen aus der echten App mit den Demodaten: drei Gebäude in Zürich, Luzern und Interlaken.": "Le schermate e gli esempi di questa pagina provengono dall’applicazione vera con i dati dimostrativi: tre immobili a Zurigo, Lucerna e Interlaken.",
 	"Geplant": "Previsto",
 	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa den Lift, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Il conteggio 2025 di Maria Rossi, appartamento 3.01 del Musterhaus Zentrum: per ogni categoria, ad esempio l’ascensore, i costi dell’immobile e la quota del suo appartamento.",
-	"code:# Eine Datei in einen leeren Ordner; unter Windows curl.exe": "# Un file in una cartella vuota; su Windows curl.exe"
+	"code:# Eine Datei in einen leeren Ordner; unter Windows curl.exe": "# Un file in una cartella vuota; su Windows curl.exe",
+	"Jahresbericht für Steuer und Treuhand": "Rapporto annuale per le imposte e la fiduciaria",
+	"Pro Gebäude und Kalenderjahr: der vereinbarte Mietertrag und die Kosten, die Sie selbst tragen, als PDF und CSV.": "Per immobile e anno civile: il reddito locativo pattuito e i costi che sostiene lei stesso, in PDF e in CSV."
 }

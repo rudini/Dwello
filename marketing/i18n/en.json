@@ -96,8 +96,6 @@
 	"Installer in einem Schritt": "One-step installer",
 	"MCP-Server": "MCP server",
 	"Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.": "Dwello as a tool for your AI assistant, local and with your permission.",
-	"Berichte und Auswertungen": "Reports and analysis",
-	"Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.": "Income, expenses and utility costs over the years, for your tax return and your accountant.",
 	"Häufige Fragen.": "Frequently asked questions.",
 	"Kostet Dwello wirklich nichts?": "Is Dwello really free?",
 	"Brauche ich technische Kenntnisse?": "Do I need technical knowledge?",
@@ -252,5 +250,7 @@
 	"Die Bildschirmfotos und Beispiele auf dieser Seite stammen aus der echten App mit den Demodaten: drei Gebäude in Zürich, Luzern und Interlaken.": "The screenshots and examples on this page come from the real app with its demo data: three buildings in Zurich, Lucerne and Interlaken.",
 	"Geplant": "Planned",
 	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa den Lift, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "The 2025 statement of Nina Brunner, apartment A2 in Seepark Residenz: for each category, such as TV/cable, the building’s costs and her apartment’s share.",
-	"code:# Eine Datei in einen leeren Ordner; unter Windows curl.exe": "# One file into an empty folder; on Windows curl.exe"
+	"code:# Eine Datei in einen leeren Ordner; unter Windows curl.exe": "# One file into an empty folder; on Windows curl.exe",
+	"Jahresbericht für Steuer und Treuhand": "Annual report for tax and accountant",
+	"Pro Gebäude und Kalenderjahr: der vereinbarte Mietertrag und die Kosten, die Sie selbst tragen, als PDF und CSV.": "Per building and calendar year: the agreed rental income and the costs you bear yourself, as PDF and CSV."
 }
