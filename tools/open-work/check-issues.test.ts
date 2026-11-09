@@ -284,6 +284,13 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 		expect(result.out).toContain('tools/a.ts changes a check');
 	});
 
+	it('verlangt eine Freigabe für eine andere Bindung oder einen neuen Import in tools/ (#1411)', async () => {
+		const base = { 'tools/a.ts': "import { a as x } from '../src/m';\nrun(x);\n" };
+		expect((await changeGate({ 'tools/a.ts': "import { b as x } from '../src/m';\nrun(x);\n" }, '', base)).out).toContain('tools/a.ts changes a check');
+		const added = "import { a as x } from '../src/m';\nimport '../src/side';\nrun(x);\n";
+		expect((await changeGate({ 'tools/a.ts': added }, '', base)).out).toContain('tools/a.ts changes a check');
+	});
+
 	it('meldet eine gelöschte und eine umbenannte Prüfdatei', async () => {
 		const base = { 'tools/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': '{}\n' };
 		const result = await changeGate({ 'tools/a.ts': null, 'lib/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': null }, '', base);

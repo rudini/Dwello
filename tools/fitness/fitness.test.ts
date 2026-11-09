@@ -560,4 +560,10 @@ describe('Abschluss des Laufs', () => {
 		const run = spawnSync('bun', [fileURLToPath(new URL('./fitness.ts', import.meta.url))], { encoding: 'utf8', timeout: 120_000 });
 		expect(run.stdout.trimEnd().split('\n').at(-1)).toMatch(/^Fitness: \d+ errors, \d+ warnings$/);
 	});
+
+	it('verweigert --update ohne --base, damit es keine Grenze einer Datei senkt, die der Branch nicht ändert (#1411)', () => {
+		const run = spawnSync('bun', [fileURLToPath(new URL('./fitness.ts', import.meta.url)), '--update'], { encoding: 'utf8', timeout: 120_000 });
+		expect(run.status).toBe(1);
+		expect(run.stdout).toContain('--update needs --base origin/main');
+	});
 });

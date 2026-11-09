@@ -410,7 +410,7 @@ function unlisted<T, L>(items: T[], listed: L[], key: (x: T | L) => string): T[]
 //   --base      compare the ratchet with the merge-base's file and report the change size against it
 //   --structure with --base: the structure report's indicators and changed files' maintainability, base → HEAD (#1272;
 //               committed state only, each measured in a worktree)
-//   --update    write improved values into ratchet.json (the ratchet only tightens; with --base, fat limits only of
+//   --update    with --base: write improved values into ratchet.json (the ratchet only tightens; fat limits only of
 //               the files and modules the branch changes, #1411)
 //   --cochange  co-change coupling of the last 6 months (needs the full git history; nightly)
 
@@ -564,6 +564,11 @@ if (import.meta.main) {
 	const args = process.argv.slice(2);
 	const opt = (name: string) => (args.includes(name) ? (args[args.indexOf(name) + 1] ?? '') : undefined);
 	const github = opt('--format') === 'github';
+	if (args.includes('--update') && !opt('--base')) {
+		// without a base every fat limit would drop, also of files a parallel pull request grows (#1411)
+		console.log('--update needs --base origin/main\nFitness: 1 errors, 0 warnings');
+		process.exit(1);
+	}
 	const file = join(ROOT, 'tools/fitness/ratchet.json');
 	const ratchet: Ratchet = JSON.parse(readFileSync(file, 'utf8'));
 	const out = mkdtempSync(join(tmpdir(), 'fitness-'));
@@ -605,7 +610,7 @@ if (import.meta.main) {
 		if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Architecture fitness\n\n${values}\n`);
 	}
 	if (args.includes('--update') && !errors.length) {
-		const next = m ? tighten(m, ratchet, base ? changedFiles(base, 'HEAD').map((f) => f.path) : undefined) : ratchet;
+		const next = m ? tighten(m, ratchet, git(['diff', '--name-only', '--no-renames', base!, 'HEAD']).split('\n')) : ratchet;
 		next.coChangeWarn = Math.min(pairs ?? Infinity, ratchet.coChangeWarn);
 		writeFileSync(file, JSON.stringify(next, null, '\t') + '\n');
 		console.log('ratchet.json tightened to the measured values');

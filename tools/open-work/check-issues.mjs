@@ -140,13 +140,16 @@ if (!approvals.length)
 const gateApprovals = [...prBody.matchAll(/\bgate change approved:\s*#(\d+)/gi)].map(([, n]) => n);
 const gateFile =
 	/^(\.github\/workflows\/|tools\/|\.claude\/(hooks|skills)\/)|(^|\/)CLAUDE\.md$|^(\.fallowrc\.json|deepcheck\.config\.json|\.(deepcheck|testcheck)-baseline\.json|vitest\.config\.ts|backend\/scripts\/coverage-check\.ts|backend\/bunfig\.toml)$/;
-// an import path in tools/ that follows a moved function changes no check (#1411)
-const onlyImports = (file) =>
-	file.startsWith('tools/') &&
-	git('diff', '-U0', '--no-renames', from, 'HEAD', '--', file)
-		.split('\n')
-		.filter((line) => /^[-+](?![-+]{2} )/.test(line))
-		.every((line) => /^[-+]\s*import\b.*\bfrom\s+['"][^'"]+['"];?\s*$/.test(line));
+// an import path in tools/ that follows a moved function changes no check (#1411): each removed line has its added
+// twin that differs only in the path after `from`
+const withoutPath = (line) => /^\s*import\s[^;'"]*\sfrom\s+['"][^'"]+['"];?\s*$/.test(line) && line.replace(/['"][^'"]+['"]/, "''");
+const onlyImports = (file) => {
+	if (!file.startsWith('tools/')) return false;
+	const lines = git('diff', '-U0', '--no-renames', from, 'HEAD', '--', file).split('\n');
+	const side = (sign) => lines.filter((line) => line.startsWith(sign) && !line.startsWith(sign.repeat(3) + ' ')).map((line) => withoutPath(line.slice(1)));
+	const [removed, added] = [side('-'), side('+')];
+	return removed.length > 0 && removed.length === added.length && removed.every((line, i) => line && line === added[i]);
+};
 const gateChanges = base
 	? git('diff', '--name-only', '--no-renames', from, 'HEAD')
 			.split('\n')
