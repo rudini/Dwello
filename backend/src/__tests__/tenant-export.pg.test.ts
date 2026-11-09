@@ -32,9 +32,19 @@ type Export = {
 	};
 	files: { path: string; content: string }[];
 };
+type Listed = Omit<Export, 'files'> & { files: { path: string; source: string; content?: string }[] };
 
 const pdf = (text: string) => Buffer.from(`%PDF-1.4 ${text}\n%%EOF\n`).toString('base64');
-const exportOf = async (tenant: string) => (await (await callApi(`/api/v1/tenants/${tenant}/export`)).json()) as Export;
+const listOf = async (tenant: string) => (await (await callApi(`/api/v1/tenants/${tenant}/export`)).json()) as Listed;
+const fileOf = (tenant: string, source: string) => callApi(`/api/v1/tenants/${tenant}/export/files/${source}`);
+// #748: the export names its files, each one comes on its own
+const exportOf = async (tenant: string): Promise<Export> => {
+	const listed = await listOf(tenant);
+	const files = [];
+	for (const { path, source } of listed.files)
+		files.push({ path, content: Buffer.from(await (await fileOf(tenant, source)).arrayBuffer()).toString('base64') });
+	return { ...listed, files };
+};
 
 let rental: Awaited<ReturnType<typeof createRental>>;
 let statementNumber: string;
@@ -115,6 +125,38 @@ describe('Daten eines Mieters exportieren', () => {
 		expect(Buffer.from(files.find((file) => file.path.startsWith('abrechnungen/'))!.content, 'base64').toString()).toContain(
 			'statement'
 		);
+	});
+
+	// #748: one large answer with every file made a memory peak on both servers
+	it('nennt die Dateien ohne ihren Inhalt und gibt jede einzeln heraus', async () => {
+		const { files } = await listOf(rental.tenant);
+		const upload = files.find((file) => file.path.startsWith('dokumente/'))!;
+
+		expect(files.every((file) => file.content === undefined)).toBe(true);
+		const response = await fileOf(rental.tenant, upload.source);
+		expect(response.status).toBe(200);
+		expect(Buffer.from(await response.arrayBuffer()).toString()).toContain('upload');
+	});
+
+	it('gibt keine Datei eines anderen Mieters heraus (Art. 26 und 29 DSG)', async () => {
+		// a document, a statement and the contract PDF of the Vormieter (code review 748-1 C-2)
+		const contract = eq(rentalContracts.id, former.contract);
+		await db.update(rentalContracts).set({ contractPdf: pdf('former contract') }).where(contract);
+		try {
+			const { files } = await listOf(former.tenant);
+
+			expect(files.map(({ source }) => source.split('/')[0]).sort()).toEqual(['contract', 'document', 'statement']);
+			for (const { source } of files) expect((await fileOf(rental.tenant, source)).status).toBe(404);
+		} finally {
+			await db.update(rentalContracts).set({ contractPdf: null }).where(contract);
+		}
+	});
+
+	// code review 748-1 C-3: only the three kinds of files, no other name
+	it('lehnt eine unbekannte Art von Datei ab', async () => {
+		const { files } = await listOf(rental.tenant);
+
+		expect((await fileOf(rental.tenant, `valueOf/${files[0].source.split('/')[1]}`)).status).toBe(422);
 	});
 
 	it('gibt keine Daten des Vormieters derselben Wohnung heraus (Art. 26 und 29 DSG)', async () => {

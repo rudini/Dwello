@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from 'drizzle-orm';
+import { asc, eq, getTableColumns, inArray, isNotNull, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { apartments, buildings, categories, documents, rentalContracts, tenants, utilityStatements } from '../db/schema';
 import { advancesOf } from './advance-payment.service';
@@ -31,6 +31,10 @@ export function zipFiles() {
 	return { files, file };
 }
 
+// without the files' contents, which exportFile reads one at a time (#748)
+const { contractPdf: _contractPdf, ...contractColumns } = getTableColumns(rentalContracts);
+const { content: _content, ...documentColumns } = getTableColumns(documents);
+
 /**
  * Everything Dwello holds about one tenant, for the right to data handover (#435, Art. 28 DSG; domain review
  * docs/reviews/435-fachreview-1.md): the data without internal ids, and the files as the tenant received them. Reads
@@ -46,13 +50,13 @@ export async function exportTenant(id: string) {
 	const contracts = await Promise.all(
 		(
 			await db
-				.select({ contract: rentalContracts, apartment: apartments, building: buildings })
+				.select({ contract: contractColumns, hasPdf: isNotNull(rentalContracts.contractPdf), apartment: apartments, building: buildings })
 				.from(rentalContracts)
 				.innerJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
 				.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
 				.where(eq(rentalContracts.tenantId, id))
 				.orderBy(asc(rentalContracts.startDate))
-		).map(async ({ contract, apartment, building }) => ({
+		).map(async ({ contract, hasPdf, apartment, building }) => ({
 			apartment: {
 				number: apartment.number,
 				floor: apartment.floor,
@@ -77,33 +81,32 @@ export async function exportTenant(id: string) {
 			agreedCategories: await categoryNames(await agreedCategoryIds(contract.id)),
 			notes: contract.notes,
 			// the signed contract, if one was stored (domain review F-18)
-			file: contract.contractPdf
-				? file(names.documents, `${contract.startDate} ${names.contract} ${apartment.number}`, contract.contractPdf)
-				: null
+			file: hasPdf ? file(names.documents, `${contract.startDate} ${names.contract} ${apartment.number}`, `contract/${contract.id}`) : null
 		}))
 	);
 
-	const tenantDocuments = await db.select().from(documents).where(eq(documents.tenantId, id)).orderBy(asc(documents.createdAt));
+	const tenantDocuments = await db.select(documentColumns).from(documents).where(eq(documents.tenantId, id)).orderBy(asc(documents.createdAt));
 	const ofType = (type: string) => tenantDocuments.filter((document) => document.type === type);
 	// the copy sent by e-mail is exactly what the tenant received; the stored PDF otherwise
-	const mailed = new Map(ofType('statement').map((copy) => [copy.statementId, copy.content]));
+	const mailed = new Map(ofType('statement').map((copy) => [copy.statementId, `document/${copy.id}`]));
 	// sent without a Dokument: the PDF before the first change, rather than the one made after it (#969, Fachreview 969-1 V-7)
-	const keptFirst = new Map(ofType('pdf_before_change').reverse().map((copy) => [copy.statementId, copy.content]));
+	const keptFirst = new Map(ofType('pdf_before_change').reverse().map((copy) => [copy.statementId, `document/${copy.id}`]));
 	const numbers = new Map<string, string>();
 
 	const statementRows = await db
-		.select({ id: utilityStatements.id, pdfBlob: utilityStatements.pdfBlob })
+		// its stored PDF by its source, without the PDF (#748)
+		.select({ id: utilityStatements.id, stored: sql<string | null>`case when ${utilityStatements.pdfBlob} is not null then 'statement/' || ${utilityStatements.id} end` })
 		.from(utilityStatements)
 		.where(eq(utilityStatements.tenantId, id))
 		.orderBy(asc(utilityStatements.periodStart), asc(utilityStatements.createdAt));
 	const statements = [];
-	for (const { id: statementId, pdfBlob } of statementRows) {
+	for (const { id: statementId, stored } of statementRows) {
 		const statement = (await getStatement(statementId))!;
 		numbers.set(statementId, statement.statementNumber);
 		// a draft's PDF would carry a payment slip the tenant never received: the draft only as data, without the dates
 		// it would be sent with (persona Dr. Weber 435 P-1)
 		const draft = statement.status === 'draft';
-		const pdf = draft ? null : (mailed.get(statementId) ?? keptFirst.get(statementId) ?? pdfBlob);
+		const pdf = draft ? null : (mailed.get(statementId) ?? keptFirst.get(statementId) ?? stored);
 		statements.push({
 			number: statement.statementNumber,
 			status: statement.status,
@@ -145,7 +148,7 @@ export async function exportTenant(id: string) {
 		const date = document.createdAt.toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 		return {
 			date,
-			file: file(names.documents, `${date} ${document.title}`, document.content, EXTENSIONS[document.mimeType] ?? 'pdf')
+			file: file(names.documents, `${date} ${document.title}`, `document/${document.id}`, EXTENSIONS[document.mimeType] ?? 'pdf')
 		};
 	};
 
@@ -180,7 +183,8 @@ export async function exportTenant(id: string) {
 			})),
 			documents: ofType('upload').map((upload) => ({ title: upload.title, ...documentFile(upload) }))
 		},
-		files
+		// #748: each file by its source, which exportFile hands out on its own
+		files: files.map(({ path, content }) => ({ path, source: content }))
 	};
 }
 

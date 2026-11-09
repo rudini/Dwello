@@ -5,5 +5,5 @@
 		"exportedOn": "2026-10-19",
 		"tenant": { "firstName": "Hans", "lastName": "Müller" }
 	},
-	"files": [{ "path": "dokumente/2026-10-19 Übergabeprotokoll.pdf", "content": "JVBERi0xLjQK" }]
+	"files": [{ "path": "dokumente/2026-10-19 Übergabeprotokoll.pdf", "source": "document/0b4c6c0e-5d0b-4d2a-9c1e-2f1a3b4c5d6e" }]
 }
