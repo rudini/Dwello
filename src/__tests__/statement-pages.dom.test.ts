@@ -428,23 +428,34 @@ describe('Abrechnungsliste', () => {
 		expect(invalidateAll).toHaveBeenCalled();
 	});
 
-	// #1375: die Route prüft das Token, sonst lehnt sie den Zahlungseingang ab
-	it('schickt beim Zahlungseingang aus der Liste das XSRF-Token mit', async () => {
+	// #1375: nur ein Formular prüft SvelteKit auf die eigene Seite; die Route lehnt anderes ab
+	it('schickt den Zahlungseingang aus der Liste als Formular', async () => {
 		fakeBff();
 		const bff = globalThis.fetch;
-		const tokens: (string | null)[] = [];
+		const bodies: unknown[] = [];
 		globalThis.fetch = ((url: string, init?: RequestInit) => {
-			tokens.push(new Headers(init?.headers).get('X-XSRF-TOKEN'));
+			bodies.push(init?.body);
 			return bff(url, init);
 		}) as typeof fetch;
-		document.cookie = 'dwello_xsrf=x1';
 		list([statement({ status: 'sent' })]);
 
 		click('statement-row-mark-paid');
 		click('statement-list-mark-paid-confirm');
 		await settle();
 
-		expect(tokens).toEqual(['x1']);
+		expect(bodies).toEqual([expect.any(URLSearchParams)]);
+	});
+
+	// #94: unter dem Mindestbetrag fliesst kein Geld; das Formular nennt keinen Betrag (#1375)
+	it('schickt aus der Liste keinen Betrag, wenn bei der Abrechnung kein Geld fliesst', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent', unpaid: true })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(calls.map(({ body }) => body)).toEqual([{ paidDate: localToday(), periodEnd: '2024-12-31' }]);
 	});
 
 	// #448 (4), Code-Review 448-1 C-6: ein Tag vor dem Abrechnungsdatum wird nach der Frage gespeichert

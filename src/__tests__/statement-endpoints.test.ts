@@ -14,9 +14,6 @@ import { localToday } from '$lib/contract-status';
 import { load as refusedPage } from '../routes/documents/refused/+page.server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
-// the double-submit pair the app's own button sends (#1375)
-const cookies = { get: (name: string) => (name === 'dwello_xsrf' ? 'x1' : undefined) };
-const XSRF = { 'X-XSRF-TOKEN': 'x1' };
 
 /** The app's refusal page a refused PDF leads to in its tab (#734) */
 function refusalOf(response: Response) {
@@ -35,8 +32,8 @@ function call(handler: unknown, status: number, answer: object) {
 	const result = (handler as (event: never) => Promise<Response>)({
 		params: { id: 's1' },
 		fetch,
-		cookies,
-		request: new Request('http://localhost/', { method: 'POST', headers: XSRF }) // no body: the defaults apply
+		// an empty form, as the list posts it (#1375): the defaults apply
+		request: new Request('http://localhost/', { method: 'POST', body: new URLSearchParams() })
 	} as never);
 	return { calls, result };
 }
@@ -48,13 +45,11 @@ describe('POST /statements/[id]/mark-paid', () => {
 		const fetch = async (url: string) => (calls.push(url), Response.json({}));
 		const request = new Request('http://localhost/', {
 			method: 'POST',
-			headers: XSRF,
-			body: JSON.stringify({ paidDate: '2024-12-30', periodEnd: '2024-12-31' })
+			body: new URLSearchParams({ paidDate: '2024-12-30', periodEnd: '2024-12-31' })
 		});
 		const response = await (markPaid as (event: never) => Promise<Response>)({
 			params: { id: 's1' },
 			fetch,
-			cookies,
 			request
 		} as never);
 
@@ -90,19 +85,22 @@ describe('POST /statements/[id]/mark-paid (Ablehnung)', () => {
 });
 
 describe('POST /statements/[id]/mark-paid (fremde Seite)', () => {
-	// #1375: another page can post without the content type the origin check covers, but not with the token
-	it('lehnt eine Anfrage ohne XSRF-Token ab, ohne die Zahlung zu speichern', async () => {
+	// #1375: SvelteKit's origin check covers only form posts; another page can post JSON without it
+	it('lehnt eine Anfrage ohne Formular ab, ohne die Zahlung zu speichern', async () => {
 		const calls: unknown[] = [];
 		const fetch = async (url: string) => (calls.push(url), Response.json({}));
-		const request = new Request('http://localhost/', { method: 'POST', body: '{}' });
-		const response = await (markPaid as (event: never) => Promise<Response>)({
+		const request = new Request('http://localhost/', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ paidDate: '2025-01-10', periodEnd: '2024-12-31' })
+		});
+		const answer = (markPaid as (event: never) => Promise<Response>)({
 			params: { id: 's1' },
 			fetch,
-			cookies,
 			request
 		} as never);
 
-		expect(response.status).toBe(403);
+		await expect(answer).rejects.toMatchObject({ status: 415 });
 		expect(calls).toEqual([]);
 	});
 });

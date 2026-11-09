@@ -15,7 +15,6 @@
 	} from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
-	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
@@ -137,14 +136,15 @@
 		saving = true;
 		payError = '';
 		const failed = m.statements_mark_paid_failed();
+		const amount = signedPaid(paying!, paidAmount);
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
-				headers: { 'X-XSRF-TOKEN': getXsrfTokenFromCookie() ?? '' },
-				body: JSON.stringify({
+				// a form, so SvelteKit's origin check covers it (#1375); no amount: all of it
+				body: new URLSearchParams({
 					paidDate,
 					periodEnd: paying!.periodEnd,
-					paidAmount: signedPaid(paying!, paidAmount)
+					...(amount && { paidAmount: amount })
 				})
 			});
 			if (!response.ok) {
