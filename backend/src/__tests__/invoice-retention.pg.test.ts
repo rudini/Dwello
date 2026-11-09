@@ -171,6 +171,21 @@ describe('Rechnungen nach Ablauf der Aufbewahrungsfrist', () => {
 			]);
 		});
 
+		// code review 1410-5 C-1: das Datum ist das späteste Ende der Rechnungen der Periode
+		it('nennt das späteste Ende der Aufbewahrungsfrist der Rechnungen einer Periode', async () => {
+			setSystemTime(new Date('2027-01-15T12:00:00Z'));
+			const { id } = await building();
+			await insertInvoice(id, { invoiceDate: '2015-06-30' });
+			await insertInvoice(id, {
+				invoiceDate: '2016-02-15',
+				servicePeriodStart: '2015-01-01',
+				servicePeriodEnd: '2015-12-31'
+			});
+			expect((await expired(id)).map((p) => [p.start, p.keepUntil, p.count])).toEqual([
+				['2015-01-01', '2026-12-31', 2]
+			]);
+		});
+
 		// code review 1410-3 C-1
 		it('antwortet auch am 29. Februar', async () => {
 			setSystemTime(new Date('2028-02-29T12:00:00Z'));
