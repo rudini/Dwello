@@ -20,6 +20,7 @@ import {
 import { buildingExists } from '../services/building.service';
 import { moveOutsByApartment } from '../services/move-out';
 import type { MoveOutsResponse } from '../api/apartment';
+import { pageLimit } from './page-limit';
 
 // Apartment numbers are unique per building (apartments_building_number_idx)
 // Drizzle wraps the PostgreSQL error (DrizzleQueryError.cause)
@@ -76,7 +77,7 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 				buildingId: query.buildingId,
 				status: query.status,
 				floor: query.floor ? parseInt(query.floor, 10) : undefined,
-				limit: query.limit ? parseInt(query.limit, 10) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};
 			return await listApartments(filters);

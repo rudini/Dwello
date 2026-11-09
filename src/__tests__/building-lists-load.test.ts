@@ -22,7 +22,7 @@ const loads = {
 // Only the requests count: the backend refuses everything, the answers carry no data
 describe('Gebäudelisten', () => {
 	it.each(Object.entries(loads))(
-		'%s bietet bis zu 1000 Gebäude an, nicht nur die ersten 20 des Backends',
+		'%s bietet jedes Gebäude an, nicht nur die ersten 20 des Backends',
 		async (_, load) => {
 			const urls: string[] = [];
 			const fetch = (async (input: string) => {
@@ -36,7 +36,7 @@ describe('Gebäudelisten', () => {
 				fetch
 			}).catch(() => {});
 
-			expect(urls).toContain('http://localhost:3001/api/v1/buildings?limit=1000');
+			expect(urls).toContain('http://localhost:3001/api/v1/buildings?limit=all');
 		}
 	);
 });

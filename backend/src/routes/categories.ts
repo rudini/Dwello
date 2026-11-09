@@ -19,6 +19,7 @@ import {
 import { Conflict } from '../services/conflict';
 import { proposeAllocability } from '../services/llm.service';
 import { deleteResponse } from './delete-response';
+import { pageLimit } from './page-limit';
 
 // Validation schemas
 const categoryQuerySchema = t.Object({
@@ -55,7 +56,7 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 					query.isAllowedUtilityCost !== undefined
 						? query.isAllowedUtilityCost === 'true'
 						: undefined,
-				limit: query.limit ? parseInt(query.limit, 10) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};
 			return await listCategories(filters);

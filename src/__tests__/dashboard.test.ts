@@ -7,6 +7,7 @@ import statementList from '../../tests/contracts/statements.json';
 import outdatedStatements from '../../tests/contracts/statements-outdated.json';
 import kiModelLoading from '../../tests/contracts/ki-model-loading.json';
 import kiSettings from '../../tests/contracts/ki-settings.json';
+import { overLimit, page } from './helpers/paged-list';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -109,7 +110,7 @@ function backend(
 ) {
 	const answers: Record<string, unknown> = {
 		// overdue and sent in one read (#605)
-		'/statements?status=open&limit=1000': {
+		'/statements?status=open&limit=all': {
 			data: [
 				{
 					id: 's1',
@@ -131,7 +132,7 @@ function backend(
 		},
 		'/documents?status=to_send': { data: [{ id: 'd1' }, { id: 'd2' }] },
 		'/statements/outdated': { statements: [] },
-		'/apartments?limit=1000': {
+		'/apartments?limit=all': {
 			apartments: [
 				apartment('b1', 'relet', { nextContractStart: '2026-12-01' }),
 				apartment('b1', 'relet', { nextContractStart: '2026-11-01' }),
@@ -232,7 +233,7 @@ describe('Übersicht laden', () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const overdue = (reminderDue: boolean) =>
 			backend(200, [], {
-				'/statements?status=open&limit=1000': {
+				'/statements?status=open&limit=all': {
 					data: [
 						{
 							...statementList.data[0],
@@ -249,6 +250,29 @@ describe('Übersicht laden', () => {
 
 		expect(due.tasks.map((task) => task.id)).toContain('overdue');
 		expect(waiting.tasks.map((task) => task.id)).not.toContain('overdue');
+	});
+
+	// #1337: an overdue statement without a Mahnung due is left out of «Überfällig» also above 1000 open statements
+	it('zählt keine der 1001 offenen Abrechnungen ohne fällige Mahnung als überfällig', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const open = overLimit((i) => ({
+			...statementList.data[0],
+			id: `s${i}`,
+			status: 'overdue',
+			paymentDeadline: '2026-10-05',
+			reminderDue: false
+		}));
+		const base = backend();
+		const fetch = (async (url: string) =>
+			url === `${API}/dashboard`
+				? Response.json({ ...figures, statements: { ...figures.statements, overdue: 1001 } })
+				: url.startsWith(`${API}/statements?status=open&`)
+					? Response.json({ data: page(url, open) })
+					: base(url)) as typeof globalThis.fetch;
+
+		const data = await load({ fetch } as never);
+
+		expect(data.tasks.map((task) => task.id)).not.toContain('overdue');
 	});
 
 	// #454 (#408 point 7): the statements no longer current, from the backend; a sent one to correct (Fachreview 454-1 E-3)

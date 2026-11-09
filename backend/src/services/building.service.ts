@@ -4,7 +4,7 @@
  */
 
 import { eq, sql, desc, and, inArray } from 'drizzle-orm';
-import { db } from '../db/connection';
+import { db, paged } from '../db/connection';
 import { buildings, apartments, utilityStatements, type Building, type NewApartment, type NewBuilding } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { everyWordIn } from './word-search';
@@ -16,7 +16,7 @@ export interface BuildingFilters {
 	search?: string;
 	city?: string;
 	canton?: string;
-	limit?: number;
+	limit?: number | null; // null: every record (#1337)
 	offset?: number;
 }
 
@@ -52,14 +52,11 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 		.select()
 		.from(buildings)
 		.orderBy(desc(buildings.updatedAt), desc(buildings.id))
-		.limit(limit)
-		.offset(offset);
+		.$dynamic();
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const buildingResults = whereClause
-		? await buildingsQuery.where(whereClause)
-		: await buildingsQuery;
+	const buildingResults = await paged(buildingsQuery.where(whereClause), limit, offset);
 
 	// Get apartment counts for all buildings
 	const buildingIds = buildingResults.map((b) => b.id);

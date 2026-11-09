@@ -23,6 +23,7 @@ import type { TenantResponse } from '../api/tenant';
 import { exportTenant } from '../services/tenant-export.service';
 import { anonymisableFrom, anonymiseTenant } from '../services/tenant-anonymise.service';
 import { errorBody } from '../services/coded-error';
+import { pageLimit } from './page-limit';
 
 // Validation schemas
 const tenantQuerySchema = t.Object({
@@ -59,7 +60,7 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 				search: query.search,
 				language: query.language,
 				status: query.status,
-				limit: query.limit ? parseInt(query.limit, 10) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};
 			return await listTenants(filters);

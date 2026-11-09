@@ -289,7 +289,7 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 						fetch,
 						`invoices/for-statement/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`
 					),
-					call(fetch, `statements?buildingId=${building}&limit=1000`),
+					call(fetch, `statements?buildingId=${building}&limit=all`),
 					// a hint only: without it the preview still shows
 					call(
 						fetch,

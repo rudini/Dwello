@@ -12,6 +12,7 @@ import periodList from '../../tests/contracts/invoice-list-period.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 import categoryList from '../../tests/contracts/categories.json';
 import kiSettings from '../../tests/contracts/ki-settings.json';
+import { overLimit, page } from './helpers/paged-list';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -272,21 +273,20 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		'/config/default_distribution_key_id': { value: 'k1' }
 	};
 
-	// #583: the backend sends at most as many categories as asked for, counting the non-umlagefähige ones too
-	it('bietet jede Kategorie an, auch mit mehr als 100 Kategorien', async () => {
-		const many = Array.from({ length: 150 }, (_, i) => ({
+	// #583, #1337: the backend sends at most as many categories as asked for, counting the non-umlagefähige ones too
+	it('bietet jede Kategorie an, auch mit mehr als 1000 Kategorien', async () => {
+		const many = overLimit((i) => ({
 			...categoryList.categories[0],
 			id: `c${i}`,
 			nameDE: `Kategorie ${i}`
 		}));
 		const fetch = (async (url: string) => {
-			const { pathname, searchParams } = new URL(url);
-			if (!pathname.endsWith('/categories')) return Response.json({});
-			return Response.json({ categories: many.slice(0, Number(searchParams.get('limit') ?? 100)) });
+			if (!new URL(url).pathname.endsWith('/categories')) return Response.json({});
+			return Response.json({ categories: page(url, many) });
 		}) as typeof globalThis.fetch;
 		const url = new URL('http://localhost/invoices/new');
 		const data = (await newLoad({ url, fetch } as never)) as { categories: unknown[] };
-		expect(data.categories).toHaveLength(150);
+		expect(data.categories).toHaveLength(1001);
 	});
 
 	// Wer eine schon abgerechnete Rechnung ändert oder löscht, verschiebt Kosten zwischen den Perioden; welche

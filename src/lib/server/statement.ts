@@ -235,7 +235,7 @@ export function localSplitKeys(splitKeys: SplitKey[] = [], categories: Map<strin
 
 /** Names of categories or distribution keys in the UI language by id; the backend's lists only carry ids and the English or German name */
 export async function namesById(fetch: typeof globalThis.fetch, list: string) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/${list}?limit=1000`).catch(() => null); // all of them (#585)
+	const response = await fetch(`${BACKEND_URL}/api/v1/${list}?limit=all`).catch(() => null); // all of them (#585)
 	const body = response?.ok ? await response.json() : {};
 	const records: (Parameters<typeof localName>[0] & { id: string })[] =
 		body.categories ?? body.data ?? [];

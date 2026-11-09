@@ -14,8 +14,8 @@ describe('Neuer Mietvertrag laden', () => {
 		}) as typeof globalThis.fetch;
 		await load({ fetch } as never);
 		expect(urls).toEqual([
-			'http://localhost:3001/api/v1/tenants?limit=1000',
-			'http://localhost:3001/api/v1/apartments?limit=1000',
+			'http://localhost:3001/api/v1/tenants?limit=all',
+			'http://localhost:3001/api/v1/apartments?limit=all',
 			'http://localhost:3001/api/v1/categories/allowed' // the boxes of the agreed Nebenkosten (#91), all of them (#522)
 		]);
 	});

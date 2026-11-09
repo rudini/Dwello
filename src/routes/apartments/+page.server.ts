@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 
 		const [apartmentsRes, buildingsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/apartments?${params}`),
-			fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`)
+			fetch(`${BACKEND_URL}/api/v1/buildings?limit=all`)
 		]);
 
 		const apartmentsData = await apartmentsRes.json();

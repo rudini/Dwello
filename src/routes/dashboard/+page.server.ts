@@ -107,9 +107,9 @@ export const load = async ({
 		) as Promise<DashboardData>,
 		// overdue and sent in one read: read apart, a Zahlungsfrist changed in between listed one statement twice (its
 		// duplicate key stopped the page) or not at all (#605)
-		list(fetch, 'statements?status=open&limit=1000', 'data'),
+		list(fetch, 'statements?status=open&limit=all', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
-		list(fetch, 'apartments?limit=1000', 'apartments'),
+		list(fetch, 'apartments?limit=all', 'apartments'),
 		list(fetch, 'statements/outdated', 'statements') // #454
 	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);

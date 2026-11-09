@@ -19,6 +19,7 @@ import {
 import { Conflict } from '../services/conflict';
 import type { MasterDataType } from '../api/distribution-key';
 import type { HeatingProfileDetails } from '../api/heating-profile';
+import { pageLimit } from './page-limit';
 
 export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profiles' })
 	// List all heating profiles
@@ -28,14 +29,14 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 			const { heatingProfiles, total } = await listHeatingProfiles({
 				search: query.search,
 				type: query.type as MasterDataType | undefined,
-				limit: query.limit ? parseInt(query.limit) : undefined,
+				limit: pageLimit(query.limit),
 				offset: query.offset ? parseInt(query.offset) : undefined
 			});
 
 			return {
 				data: heatingProfiles,
 				total,
-				limit: query.limit ? parseInt(query.limit) : 100,
+				limit: query.limit ? pageLimit(query.limit) : 100,
 				offset: query.offset ? parseInt(query.offset) : 0
 			};
 		},
