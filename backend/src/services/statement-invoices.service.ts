@@ -53,14 +53,18 @@ type Loaders = {
 	valuesChangedAt: (s: Located) => Promise<Date>;
 };
 
-// #1328 (PO A'): when an apartment of the building was last changed or deleted (its building's updated_at, PO), and
-// when each Verteilschlüssel was
-async function apartmentsChangedAt(buildingId: string) {
-	const [[apartment], [building]] = await Promise.all([
-		db.select({ at: max(apartments.updatedAt) }).from(apartments).where(eq(apartments.buildingId, buildingId)),
-		db.select({ at: buildings.updatedAt }).from(buildings).where(eq(buildings.id, buildingId))
-	]);
-	return new Date(Math.max(apartment?.at?.getTime() ?? 0, building?.at.getTime() ?? 0));
+// #1328 (PO A'): when an apartment of a building was last changed or deleted (its building's updated_at, PO), for one
+// building or, for a list, all at once (#1395: the Übersicht reads it for sent statements too, P2), and when each
+// Verteilschlüssel was
+async function apartmentsChangedAt(buildingId?: string) {
+	const rows = await db
+		.select({ id: buildings.id, building: buildings.updatedAt, apartment: max(apartments.updatedAt) })
+		.from(buildings)
+		.leftJoin(apartments, eq(apartments.buildingId, buildings.id))
+		.where(buildingId ? eq(buildings.id, buildingId) : undefined)
+		.groupBy(buildings.id);
+	const at = new Map(rows.map(({ id, building, apartment }) => [id, Math.max(building.getTime(), apartment?.getTime() ?? 0)]));
+	return (id: string) => new Date(at.get(id) ?? 0);
 }
 const keysChangedAt = async () =>
 	new Map((await db.select({ id: distributionKeys.id, at: distributionKeys.updatedAt }).from(distributionKeys)).map(({ id, at }) => [id, at]));
@@ -76,7 +80,7 @@ const direct: Loaders = {
 	stock: (s) => agreedStock(periodOf(s), s.agreedCategoryIds),
 	full: async (s) => s,
 	keys: (s) => uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd),
-	valuesChangedAt: async (s) => lastValueChange(s, await apartmentsChangedAt(s.building.id), await keysChangedAt())
+	valuesChangedAt: async (s) => lastValueChange(s, (await apartmentsChangedAt(s.building.id))(s.building.id), await keysChangedAt())
 };
 function perPeriod(): Loaders {
 	const memo = new Map<string, Promise<unknown>>();
@@ -99,7 +103,7 @@ function perPeriod(): Loaders {
 				uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd, { bills: await invoices(s), change: await change(s), apartments: () => apartments(s) })
 			),
 		valuesChangedAt: async (s) =>
-			lastValueChange(s, await once(`apartments ${s.building.id}`, () => apartmentsChangedAt(s.building.id)), await once('keys', keysChangedAt))
+			lastValueChange(s, (await once('apartments changed', () => apartmentsChangedAt()))(s.building.id), await once('keys', keysChangedAt))
 	};
 }
 
