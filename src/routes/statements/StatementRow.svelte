@@ -26,12 +26,12 @@
 	const nextReminder = $derived(statement.reminderWaitsUntil);
 </script>
 
-<!-- Stacked up to xl; side by side only where all columns fit, the actions never shrink -->
+<!-- Stacked while the column is narrower than 56rem (#658); side by side only where all columns fit, the actions never shrink -->
 <li
-	class="relative flex flex-col gap-2 p-4 hover:bg-sunken xl:flex-row xl:items-center xl:gap-4"
+	class="relative flex flex-col gap-2 p-4 hover:bg-sunken @4xl:flex-row @4xl:items-center @4xl:gap-4"
 	data-testid="statement-row-{statement.id}"
 >
-	<div class="flex min-w-0 flex-col gap-2 break-words xl:flex-1">
+	<div class="flex min-w-0 flex-col gap-2 break-words @4xl:flex-1">
 		<a
 			href="/statements/{statement.id}"
 			class="flex flex-col after:absolute after:inset-0"
@@ -55,7 +55,9 @@
 			>
 		</p>
 	</div>
-	<p class="flex gap-2 tabular-nums xl:w-40 xl:shrink-0 xl:flex-col xl:gap-0 xl:text-right">
+	<p
+		class="flex gap-2 tabular-nums @4xl:w-40 @4xl:shrink-0 @4xl:flex-col @4xl:gap-0 @4xl:text-right"
+	>
 		<span class="text-ink-muted">{balanceLabel(statement.balance)}</span>
 		<span class="font-semibold text-ink">{formatCurrency(Math.abs(statement.balance))}</span>
 		{#if partPaid(statement)}
@@ -64,7 +66,7 @@
 			>
 		{/if}
 	</p>
-	<div class="flex flex-col items-start gap-1 xl:w-40 xl:shrink-0">
+	<div class="flex flex-col items-start gap-1 @4xl:w-40 @4xl:shrink-0">
 		<Badge
 			tone={statusTones[statement.status]}
 			icon={statementIcons[statement.status]}
@@ -87,7 +89,7 @@
 		{/if}
 	</div>
 	<!-- Above the row link, so these stay their own buttons -->
-	<div class="relative flex flex-wrap gap-2 xl:w-64 xl:shrink-0 xl:flex-col xl:items-end">
+	<div class="relative flex flex-wrap gap-2 @4xl:w-64 @4xl:shrink-0 @4xl:flex-col @4xl:items-end">
 		{#if statement.pdfGeneratedAt}
 			<Button
 				href="/api/statements/{statement.id}/pdf"

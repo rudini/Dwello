@@ -109,3 +109,16 @@ Funktionalität: Mietvertragsliste
     Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
     Und der Liegenschaftsverwalter im Browser zurückgeht
     Dann zeigt die Suche "Anna Keller"
+
+  # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
+  Szenariogrundriss: Die Mietvertragsliste zeigt bei jeder Breite alles ganz
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Und der Liegenschaftsverwalter ist auf der Mietvertragsliste
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 853    |
+      | 1024   |
+      | 1280   |
+      | 1440   |

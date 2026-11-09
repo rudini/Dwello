@@ -52,7 +52,8 @@
 	<title>{m.nav_invoices()} - Dwello</title>
 </svelte:head>
 
-<div class="flex flex-col gap-8">
+<!-- @container: filters and rows switch by the width of the page's column, not the window's (#658) -->
+<div class="@container flex flex-col gap-8">
 	<PageHeader title={m.nav_invoices()} purpose={m.invoices_purpose()}>
 		{#snippet action()}
 			<!-- a link to the address that opens the dialog: a click before the page's scripts run works too (#268) -->

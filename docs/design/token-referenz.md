@@ -54,6 +54,8 @@ Font: Inter Variable (`@fontsource-variable/inter`, bundled). Line height 1.5 fo
 
 Radii and shadows are replaced as well: only `rounded-control`, `rounded-panel`, `shadow-raised`, `shadow-overlay` (and `shadow-none`) exist.
 
+Rows, filters and tables that switch layout do so by the width of their own region, not the window's (#658): `@container` on the page column or the panel, and Tailwind's container sizes (`@lg`, `@2xl`, `@3xl`, `@4xl`, `@5xl`) instead of `md:`/`lg:`/`xl:`. The window breakpoints stay for the app frame (sidebar, menu, header).
+
 ## Components (`src/lib/ui`)
 
 | Area | Components |

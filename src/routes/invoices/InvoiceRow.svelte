@@ -20,14 +20,14 @@
 	const status = $derived(statusBadges[invoice.categorizationStatus]);
 </script>
 
-<!-- Stacked up to xl; side by side only where all columns fit, "Bearbeiten" never shrinks -->
+<!-- Stacked while the column is narrower than 56rem (#658); side by side only where all columns fit, "Bearbeiten" never shrinks -->
 <li
-	class="relative flex flex-col gap-2 p-4 hover:bg-sunken xl:flex-row xl:items-center xl:gap-4"
+	class="relative flex flex-col gap-2 p-4 hover:bg-sunken @4xl:flex-row @4xl:items-center @4xl:gap-4"
 	data-testid="invoice-row-{invoice.id}"
 >
 	<a
 		href="/invoices/{invoice.id}"
-		class="flex min-w-0 flex-col break-words after:absolute after:inset-0 xl:flex-1"
+		class="flex min-w-0 flex-col break-words after:absolute after:inset-0 @4xl:flex-1"
 		data-testid="invoice-view-button"
 	>
 		<span class="font-semibold text-accent underline underline-offset-4"
@@ -36,7 +36,7 @@
 		<span class="truncate text-ink">{invoice.description}</span>
 		<span class="text-ink-muted">{invoice.buildingName}, {formatDate(invoice.invoiceDate)}</span>
 	</a>
-	<p class="break-words text-ink xl:w-40 xl:shrink-0">
+	<p class="break-words text-ink @4xl:w-40 @4xl:shrink-0">
 		<span class="sr-only">{m.invoices_category_label()}</span>
 		{#if invoice.category}
 			<span data-testid="invoice-category">{invoice.category.name}</span>
@@ -44,7 +44,7 @@
 			<span class="text-ink-muted">{m.invoices_no_category()}</span>
 		{/if}
 	</p>
-	<p class="font-semibold tabular-nums text-ink xl:w-32 xl:shrink-0 xl:text-right">
+	<p class="font-semibold tabular-nums text-ink @4xl:w-32 @4xl:shrink-0 @4xl:text-right">
 		<span data-testid="invoice-amount">{formatCurrency(invoice.amount)}</span>
 		<!-- a Leistungszeitraum beyond the Abrechnungsperiode counts with its days in it (Fachreview 454-1 V-11) -->
 		{#if invoice.inPeriodAmount !== undefined && invoice.inPeriodAmount !== invoice.amount}
@@ -53,7 +53,7 @@
 			>
 		{/if}
 	</p>
-	<div class="flex flex-wrap gap-2 xl:w-40 xl:shrink-0">
+	<div class="flex flex-wrap gap-2 @4xl:w-40 @4xl:shrink-0">
 		<Badge
 			tone={invoice.isValidUtilityCost ? 'positive' : 'neutral'}
 			label={invoice.isValidUtilityCost ? m.glossary_allocable_term() : m.invoices_not_allocable()}
@@ -62,7 +62,7 @@
 		<Badge tone={status.tone} label={status.label} testid="invoice-status" />
 	</div>
 	<!-- Above the row link, so it stays a button of its own -->
-	<div class="relative xl:shrink-0">
+	<div class="relative @4xl:shrink-0">
 		<Button
 			href="/invoices/{invoice.id}/edit"
 			variant="ghost"

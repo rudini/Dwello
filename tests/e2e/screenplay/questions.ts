@@ -76,6 +76,13 @@ export const HiddenSideways = {
 			)
 		)
 };
+/** How many pixels the box itself scrolls sideways (not its parts); null when it is not there (#658) */
+export const ScrollsSideways = {
+	by: (target: Target) =>
+		about(target, 'how far it scrolls sideways:', (element) =>
+			single(element, (one) => one.evaluate((box) => box.scrollWidth - box.clientWidth, undefined, quick))
+		)
+};
 /** How many pixels the farthest part of a box reaches beyond the box's sides, or the box beyond the window's; 0 when
  *  everything shows within. Measured by bounding rectangles, so it reads alike in every browser (#1071) */
 export const ReachingOut = {
@@ -278,21 +285,24 @@ export const ShownLines = {
 		)
 };
 
-/** How many pixels of the chosen option's text a select cuts off: a select clips its text instead of wrapping (#1089) */
+/** How many pixels of each select's chosen text it cuts off: a select clips its text instead of wrapping (#1089). Runs
+ * in the page, so it uses nothing outside itself */
+function choiceCuts(selects: HTMLSelectElement[]) {
+	const pen = document.createElement('canvas').getContext('2d')!;
+	return selects.map((select) => {
+		const style = getComputedStyle(select);
+		// from its parts: Firefox may answer the shorthand empty, and the canvas would measure 10px sans-serif (code review 1089 C-2)
+		pen.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+		const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+		const text = select.selectedOptions[0]?.text ?? '';
+		return { text, cut: Math.max(0, Math.ceil(pen.measureText(text).width - room)) };
+	});
+}
+
 export const CutInChoice = {
 	of: (target: Target) =>
 		about(target, 'how much of the chosen text is cut in', (element) =>
-			single(element, (one) =>
-				one.evaluate((select: HTMLSelectElement) => {
-					const style = getComputedStyle(select);
-					const pen = document.createElement('canvas').getContext('2d')!;
-					// from its parts: Firefox may answer the shorthand empty, and the canvas would measure 10px sans-serif (code review 1089 C-2)
-					pen.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-					const room = select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-					const text = select.selectedOptions[0]?.text ?? '';
-					return Math.max(0, Math.ceil(pen.measureText(text).width - room));
-				}, undefined, quick)
-			)
+			single(element, async (one) => (await one.evaluateAll(choiceCuts))[0].cut)
 		)
 };
 
@@ -466,6 +476,12 @@ export const ThePage = {
 			}
 			return found;
 		})
+	),
+	/** The shown selects whose chosen text is cut off, as «chosen text» lines; [] when every choice shows whole (#658) */
+	cutChoices: question('choices cut off on the page', async (actor) =>
+		(await pageOf(actor).locator('select').filter({ visible: true }).evaluateAll(choiceCuts))
+			.filter((choice) => choice.cut > 0)
+			.map((choice) => `«${choice.text}» cut by ${choice.cut} px`)
 	),
 	/** Rule violations axe finds on the page as it is now, as readable lines; [] when none */
 	accessibilityViolations: (tags: string[]) =>

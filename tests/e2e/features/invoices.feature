@@ -355,3 +355,28 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter über die Adresszeile eine andere Seite öffnet
     Und der Liegenschaftsverwalter im Browser zurückgeht
     Dann zeigt die Suche "Hauswart Huber"
+
+  # #658 (Decided): Filter und Zeilen richten sich nach der Breite ihres Bereichs, nicht des Fensters; nichts ist abgeschnitten
+  Szenariogrundriss: Die Rechnungsliste zeigt bei jeder Breite alles ganz
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 853    |
+      | 1024   |
+      | 1280   |
+      | 1440   |
+
+  # #658 (Persona Helga 658 P-2): ein langer Kategoriename passt in die Wahl, auch wo die Filter zu zweit nebeneinander stehen
+  Szenariogrundriss: Eine Kategorie mit langem Namen ist in der Wahl ganz zu sehen
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Wenn der Liegenschaftsverwalter im Filter "Kategorie" "Wertvermehrende Investitionen" wählt
+    Dann zeigt die Seite nichts abgeschnitten
+
+    Beispiele:
+      | Breite |
+      | 640    |
+      | 960    |
+      | 1440   |
+      | 1920   |
