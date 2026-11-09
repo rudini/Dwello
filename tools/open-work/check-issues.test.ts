@@ -296,3 +296,85 @@ describe('Coverage-Untergrenzen sinken nie (#1269)', () => {
 		expect(await changeGate(head, approved, floors)).toMatchObject({ code: 0 });
 	});
 });
+
+describe('Geänderte Schrittdefinitionen sind eine Änderung der Spezifikation (#1270)', () => {
+	const steps = `import { createBdd } from 'playwright-bdd';
+const { Given, When, Then } = createBdd(test);
+
+Given('eine Liegenschaft {string}', async ({ verwalter }, name: string) => {
+	await verwalter.creates(name);
+});
+
+Then(
+	/^sieht der Liegenschaftsverwalter "([^"]+)"$/,
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(name);
+	}
+);
+
+Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
+	await verwalter.seesNothing();
+});
+`;
+	const usage = `Funktionalität: Liegenschaften
+
+  Szenario: Liste zeigt Liegenschaften
+    Angenommen eine Liegenschaft "Seeblick"
+    Dann sieht der Liegenschaftsverwalter "Seeblick"
+
+  @wip
+  Szenario: Neue Anforderung
+    Dann sieht der Liegenschaftsverwalter nichts
+`;
+	const base = { 'tests/e2e/steps/buildings.steps.ts': steps, 'tests/e2e/features/buildings.feature': usage };
+	const changeSteps = (text: string, body = '') =>
+		changeGate({ 'tests/e2e/steps/buildings.steps.ts': text }, body, base);
+
+	it('meldet einen geänderten Schritt, den ein Szenario ohne @wip braucht, mit Schritt und Szenario', async () => {
+		const result = await changeSteps(steps.replace('verwalter.sees(name)', 'verwalter.seesSomething()'));
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('tests/e2e/steps/buildings.steps.ts:8 step «/^sieht der Liegenschaftsverwalter "([^"]+)"$/»');
+		expect(result.out).toContain('used by tests/e2e/features/buildings.feature:3 «Liste zeigt Liegenschaften»');
+		expect(result.out).toContain('changes the specification');
+	});
+
+	it('lässt denselben Schritt mit Freigabe durch', async () => {
+		const changed = steps.replace('verwalter.sees(name)', 'verwalter.seesSomething()');
+		expect(await changeSteps(changed, 'Spec change approved: #1270')).toMatchObject({ code: 0 });
+	});
+
+	it('lässt einen Schritt durch, den nur Szenarien mit @wip brauchen', async () => {
+		expect(await changeSteps(steps.replace('seesNothing()', 'seesAnything()'))).toMatchObject({ code: 0 });
+	});
+
+	it('lässt einen neuen Schritt und Änderungen ausserhalb der Schritte durch', async () => {
+		const added = `${steps}\nWhen('der Liegenschaftsverwalter sucht', async ({ verwalter }) => {\n\tawait verwalter.searches();\n});\n`;
+		expect(await changeSteps(added.replace("from 'playwright-bdd';", "from 'playwright-bdd';\n// a note"))).toMatchObject({
+			code: 0
+		});
+	});
+
+	it('meldet einen gelöschten Schritt und einen eingefügten Befehl, auch in der Grundlage', async () => {
+		const removed = await changeSteps(steps.replace(/Given\('eine Liegenschaft[^]*?\n\}\);\n/, ''));
+		expect(removed.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
+		const background = usage.replace('  Szenario: Liste', '  Grundlage:\n    Angenommen eine Liegenschaft "Lindenhof"\n\n  Szenario: Liste');
+		const cwd = gateRepo(
+			{ 'tests/e2e/steps/buildings.steps.ts': steps.replace('\tawait verwalter.creates(name);\n', '\tawait verwalter.creates(name);\n\treturn;\n') },
+			{ ...base, 'tests/e2e/features/buildings.feature': background }
+		);
+		const inserted = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(inserted.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
+		expect(inserted.out).toContain('buildings.feature:1 «Funktionalität und Grundlage»');
+	});
+
+	it('meldet einen Schritt, den ein Szenariogrundriss mit Platzhaltern braucht', async () => {
+		const period = "Given(/^das Gebäude rechnet (\\d{4}) ab$/, async ({ verwalter }, year: string) => {\n\tawait verwalter.bills(year);\n});\n";
+		const outline = `${usage}\n  Szenariogrundriss: Abrechnung <Periode>\n    Angenommen das Gebäude rechnet <Periode> ab\n\n    Beispiele:\n      | Periode |\n      | 2025    |\n`;
+		const cwd = gateRepo(
+			{ 'tests/e2e/steps/buildings.steps.ts': `${steps}\n${period.replace('bills(year)', 'bills(2024)')}` },
+			{ 'tests/e2e/steps/buildings.steps.ts': `${steps}\n${period}`, 'tests/e2e/features/buildings.feature': outline }
+		);
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.out).toContain('used by tests/e2e/features/buildings.feature:11 «Abrechnung <Periode>»');
+	});
+});
