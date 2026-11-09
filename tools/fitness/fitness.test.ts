@@ -521,11 +521,19 @@ describe('Strukturkennzahlen pro Pull Request (#1272)', () => {
 		});
 	});
 
-	it('lässt die Ausnahmeliste neuer Dateien nur schrumpfen', () => {
+	it('behält die Ausnahmeliste neuer Dateien beim Verschärfen', () => {
+		const listed: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, newFiles: [{ path: 'src/lib/d.ts', reason: 'r', scenario: 'Ä1' }] } };
+		expect(tighten(clean, listed).exceptions.newFiles).toEqual(listed.exceptions.newFiles);
+	});
+
+	it('erlaubt einen neuen Eintrag nur für eine Datei, die der Pull Request hinzufügt', () => {
 		const r: Ratchet = { ...ratchet, exceptions: { ...ratchet.exceptions, newFiles: [] } };
-		const longer: Ratchet = { ...r, exceptions: { ...r.exceptions, newFiles: [{ path: 'src/lib/d.ts', reason: 'r', scenario: 'Ä1' }] } };
-		expect(loosened(longer, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.newFiles grew from 0 to 1.']);
-		expect(tighten(clean, longer).exceptions.newFiles).toEqual(longer.exceptions.newFiles);
+		const entry = (path: string) => ({ path, reason: 'r', scenario: 'Ä1' });
+		const longer: Ratchet = { ...r, exceptions: { ...r.exceptions, newFiles: [entry('src/lib/new.ts'), entry('src/lib/old.ts')] } };
+		expect(loosened(longer, r, (path) => path === 'src/lib/old.ts').map((f) => f.message.split(' The')[0])).toEqual([
+			'tools/fitness/ratchet.json: exceptions.newFiles lists src/lib/old.ts, which the merge base already has; only a file this pull request adds may be listed.'
+		]);
+		expect(loosened(ratchet, r).map((f) => f.message.split(' The')[0])).toEqual(['tools/fitness/ratchet.json: exceptions.newFiles was removed; keep it, empty, so it cannot come back with entries unseen.']);
 	});
 });
 
