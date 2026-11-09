@@ -27,10 +27,10 @@ describe('JWT-Geheimnis beim Start', () => {
 	});
 
 	it('bricht das Laden der Anmeldeprüfung im Betrieb ohne JWT_SECRET ab', () => {
-		const { JWT_SECRET: _, ...env } = process.env;
 		const run = Bun.spawnSync(['bun', '-e', "await import('./src/middleware/auth')"], {
 			cwd: `${import.meta.dir}/../..`,
-			env: { ...env, NODE_ENV: 'production' }
+			// empty, not removed: Bun would fill a missing one from a developer's backend/.env
+			env: { ...process.env, NODE_ENV: 'production', JWT_SECRET: '' }
 		});
 		expect(run.exitCode).not.toBe(0);
 		expect(run.stderr.toString()).toContain('JWT_SECRET environment variable is required');

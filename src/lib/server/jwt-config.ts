@@ -12,7 +12,7 @@ const MIN_SECRET_LENGTH = 32;
  * @throws Error if JWT_SECRET is not set or too short
  */
 function getJwtSecret(): string {
-	// development without a JWT_SECRET uses the backend's fallback (backend/src/middleware/auth.ts); an installation
+	// development without a JWT_SECRET uses the backend's fallback (backend/src/config/jwt.ts); an installation
 	// makes its own (docker/init-secrets.sh, #577)
 	const secret =
 		env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'development-secret-key-change-in-production');
