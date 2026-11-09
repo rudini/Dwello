@@ -20,7 +20,8 @@ import {
 	tenantExists
 } from '../services/tenant.service';
 import type { TenantResponse } from '../api/tenant';
-import { exportFile, exportTenant } from '../services/tenant-export.service';
+import { exportTenant } from '../services/tenant-export.service';
+import { exportFile } from '../services/tenant-export-file.service';
 import { anonymisableFrom, anonymiseTenant } from '../services/tenant-anonymise.service';
 import { errorBody } from '../services/coded-error';
 import { pageLimit } from './page-limit';
