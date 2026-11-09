@@ -246,3 +246,18 @@ Funktionalität: Saldo unter CHF 5
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Dann weist die Abrechnung darauf hin: "Berichtigen Sie die Abrechnung, sonst verlangen Sie mehr als die tatsächlichen Kosten."
     Und bietet die Abrechnung «Nicht berichtigen» nicht mehr an
+
+  # #1403 (Datenprüfung 1403-1): 2024 wird erst nach dem Versand von 2025 erledigt, Nachzahlung 3.00. Die berichtigte
+  # Abrechnung 2025 rechnet sie dazu: Nebenkosten 1'250.00 + 100.00 – Akonto 1'200.00 + Übertrag 3.00 = 153.00
+  Szenario: Vor einer Mahnung nennt Dwello den offenen Betrag mit dem Übertrag, den die Berichtigung verrechnet
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1250" Franken für 2025
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2025
+    Und die Abrechnung 2025 von "Anna Keller" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2025 von "Anna Keller" ist abgelaufen
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "100" Franken vom "2025-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung senden will
+    Dann warnt die Mahnung vor dem Senden "Diese Abrechnung ist zu berichtigen: Neu berechnet ergibt sich für Anna Keller ein offener Betrag von CHF 153.00 statt CHF 50.00. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen», bevor Sie mahnen."
