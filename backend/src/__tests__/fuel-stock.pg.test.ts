@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, it, setSystemTime } from 'bun:te
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, categories, distributionKeys, invoices } from '../db/schema';
-import { calculateStatement } from '../services/statement.service';
+import { calculateStatement } from '../services/statement-generation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice, perAreaKey } from './helpers/records';

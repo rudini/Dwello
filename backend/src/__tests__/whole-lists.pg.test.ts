@@ -16,7 +16,7 @@ import { categorizeInvoice, proposeAllocability } from '../services/llm.service'
 import { moveOutOf, moveOutsByApartment } from '../services/move-out';
 import { draftsToSend, invoiceStatements, outdatedStatements } from '../services/statement-invoices.service';
 import { generateInPeriod, missingOfContract, runDefaultsOf, runDifferencesOf, runHeatingHintsOf, runPlan } from '../services/statement-run.service';
-import { generateStatement, keyValuesOf } from '../services/statement.service';
+import { generateStatement, keyValuesOf } from '../services/statement-generation.service';
 import { createTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
 import { getUtilityCostRules } from '../services/utility-validation.service';

@@ -12,7 +12,8 @@ import { apartments, categories, distributionKeys, invoices } from '../db/schema
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createDistributionKey, deleteDistributionKey } from '../services/distribution-key.service';
 import { createHeatingProfile, deleteHeatingProfile, updateHeatingProfile } from '../services/heating-profile.service';
-import { deleteStatement, generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
+import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { perAreaKey } from './helpers/records';
 import { createRental } from './helpers/rental';

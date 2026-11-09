@@ -14,8 +14,8 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, categories, utilityStatementLineItems } from '../db/schema';
 import { formatSwissDate, roundToRappen } from './pdf-format';
-import type { CalculatedLineItem } from './calculation.service';
-import { calculateStatement, generateStatement, listStatements } from './statement.service';
+import { listStatements } from './statement-query.service';
+import { calculateStatement, generateStatement } from './statement-generation.service';
 import { swissToday } from './today';
 import { CodedError } from './coded-error';
 import { counting, isReplaced } from './counting-statements';
@@ -383,7 +383,7 @@ async function heatingSumsOf(run: { period: Range; heatingProfileId: string | nu
 			// per heating category the apartment's share, from any contract that agrees it (Fachreview 508-1 V-3, code review 508-1 C-3)
 			// and per distribution key: a category's invoices under two keys are two positions (#528, code review 508b-1 C-6)
 			const shares = new Map(rented.flatMap(({ items }) => items.map((item) => [`${item.categoryId ?? item.description}/${item.distributionKeyId}`, item.apartmentShare] as const)));
-			const categoriesOf = (items: CalculatedLineItem[]) => new Set(items.map((item) => item.categoryId ?? item.description));
+			const categoriesOf = (items: { categoryId: string | null; description: string }[]) => new Set(items.map((item) => item.categoryId ?? item.description));
 			const heated = categoriesOf(rented.flatMap(({ items }) => items));
 			const tenants = rented.reduce((sum, { items }) => sum + sumOf(items, 'tenantShare'), 0);
 			return {

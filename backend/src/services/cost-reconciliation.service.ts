@@ -15,7 +15,7 @@ import { roundToRappen } from './pdf-format';
 import { countingOn } from './prorating.service';
 import { notUpToDate } from './statement-invoices.service';
 import { runPlan } from './statement-run.service';
-import { listStatements } from './statement.service';
+import { listStatements } from './statement-query.service';
 import { daysAfter } from './today';
 import type { ReconciliationBody, ReportPeriod } from '../api/report';
 

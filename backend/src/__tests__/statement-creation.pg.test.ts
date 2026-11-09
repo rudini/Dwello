@@ -7,12 +7,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { invoices } from '../db/schema';
-import {
-	createStatement,
-	deleteStatement,
-	generateStatement,
-	listStatements
-} from '../services/statement.service';
+import { listStatements } from '../services/statement-query.service';
+import { createStatement, generateStatement } from '../services/statement-generation.service';
+import { deleteStatement } from '../services/statement.service';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 

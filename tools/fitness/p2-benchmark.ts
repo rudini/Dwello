@@ -32,7 +32,8 @@ const { createBuilding } = await import(join(backend, 'src/services/building.ser
 const { createApartment } = await import(join(backend, 'src/services/apartment.service.ts'));
 const { createTenant } = await import(join(backend, 'src/services/tenant.service.ts'));
 const { createContract } = await import(join(backend, 'src/services/contract.service.ts'));
-const { generateStatement, updateStatementStatus } = await import(join(backend, 'src/services/statement.service.ts'));
+const { generateStatement } = await import(join(backend, 'src/services/statement-generation.service.ts'));
+const { updateStatementStatus } = await import(join(backend, 'src/services/statement.service.ts'));
 const { callApi } = await import(join(backend, 'src/__tests__/helpers/auth.ts'));
 
 const YEARS = [2021, 2022, 2023, 2024, 2025];

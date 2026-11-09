@@ -11,7 +11,9 @@ import { createApartment, deleteApartment } from '../services/apartment.service'
 import { createFuelStock } from '../services/fuel-stock.service';
 import { createHeatingProfile, deleteHeatingProfile, getHeatingProfileByName, updateHeatingProfile } from '../services/heating-profile.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
-import { deleteStatement, generateStatement, getStatement, updateStatementStatus } from '../services/statement.service';
+import { getStatement } from '../services/statement-query.service';
+import { generateStatement } from '../services/statement-generation.service';
+import { deleteStatement, updateStatementStatus } from '../services/statement.service';
 import { readPdf } from './helpers/pdf-text';
 import { sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';

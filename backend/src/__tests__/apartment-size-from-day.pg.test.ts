@@ -15,7 +15,7 @@ import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { createContract, deleteContract } from '../services/contract.service';
-import { generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 

@@ -2,7 +2,7 @@ import { fixedTermCheck, listContracts } from './contract.service';
 import { formerTenantDocuments } from './document.service';
 import type { Range } from './accounting-period';
 import { laterContract } from './later-contract';
-import { listStatements } from './statement.service';
+import { listStatements } from './statement-query.service';
 import { missingByContract } from './statement-run.service';
 import { openCarryOvers } from './carry-over';
 

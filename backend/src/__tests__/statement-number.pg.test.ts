@@ -3,7 +3,8 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { deleteStatement, generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
+import { deleteStatement } from '../services/statement.service';
 import { createRental } from './helpers/rental';
 
 let rental: Awaited<ReturnType<typeof createRental>>;

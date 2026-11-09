@@ -17,10 +17,22 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { validateIBAN } from './qr-bill.service';
-import { configuration, distributionKeys, type Configuration } from '../db/schema';
-import { heatingProfileExists } from './heating-profile.service';
+import { configuration, distributionKeys, heatingProfiles, type Configuration } from '../db/schema';
 import { recordAudit } from './audit-log.service';
 import { CodedError, type ErrorCode } from './coded-error';
+
+/**
+ * Check if a heating profile exists
+ */
+async function heatingProfileExists(id: string): Promise<boolean> {
+	const [result] = await db
+		.select({ id: heatingProfiles.id })
+		.from(heatingProfiles)
+		.where(eq(heatingProfiles.id, id))
+		.limit(1);
+
+	return !!result;
+}
 
 /**
  * Check if a distribution key exists

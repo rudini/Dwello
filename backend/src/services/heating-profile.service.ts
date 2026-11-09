@@ -259,19 +259,6 @@ export async function deleteHeatingProfile(
 }
 
 /**
- * Check if a heating profile exists
- */
-export async function heatingProfileExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: heatingProfiles.id })
-		.from(heatingProfiles)
-		.where(eq(heatingProfiles.id, id))
-		.limit(1);
-
-	return !!result;
-}
-
-/**
  * Get monthly percentage for a specific month
  */
 export function getMonthlyPercentage(profile: HeatingProfile, month: number): number {

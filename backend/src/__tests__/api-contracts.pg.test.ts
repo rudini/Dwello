@@ -17,7 +17,7 @@ import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { loadModel } from '../services/ki-model.service';
 import { resetSetupAttempts } from '../services/setup.service';
-import { generateStatement } from '../services/statement.service';
+import { generateStatement } from '../services/statement-generation.service';
 import { recordStatementCorrection } from '../services/audit-log.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { app } from '../app';

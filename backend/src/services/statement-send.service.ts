@@ -14,7 +14,9 @@ import { db } from '../db/connection';
 import { documents, utilityStatements, type Language } from '../db/schema';
 import { newPdfTitle, statementMail, statementTitle } from './reminder-letter';
 import { changeStatementStatus, generateStatementPdf, qrBillConfig } from './statement-pdf.service';
-import { datedToday, getStatement, refuseUncalculableKeys } from './statement.service';
+import { getStatement } from './statement-query.service';
+import { refuseUncalculableKeys } from './statement-refusals';
+import { datedToday } from './statement.service';
 import { fileNameOf, keepPdfBeforeChange } from './delivery';
 import { getTenant } from './tenant.service';
 
