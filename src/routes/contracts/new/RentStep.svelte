@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { advancePaymentNotice, flatRateNotice, normalizeAmounts } from '$lib/contract-wizard';
-	import type { ContractFormValues } from '$lib/contract-form';
+	import { advanceHelp as glossaryAdvanceHelp, type ContractFormValues } from '$lib/contract-form';
 	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
@@ -18,7 +18,7 @@
 		takenFrom = null,
 		categories,
 		agreedHelp = m.contracts_agreed_costs_help(),
-		advanceHelp = m.contracts_advance_help()
+		advanceHelp = glossaryAdvanceHelp()
 	}: {
 		values: ContractFormValues;
 		errors: Record<string, string>;

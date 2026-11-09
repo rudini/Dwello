@@ -117,3 +117,9 @@ Funktionalität: Heizprofile
     Dann liest ein Screenreader die Aktionen der Seite so:
       | Bearbeiten: Bergtal |
       | Löschen: Bergtal    |
+
+  # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
+  Szenario: Die Seite «Heizprofile» erklärt das Heizprofil wie die Hilfe
+    Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Heizprofil" heisst
+    Und der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
+    Dann beginnt die Hilfe zu "der Seite «Heizprofile»" mit der Erklärung aus der Hilfe
