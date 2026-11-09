@@ -371,6 +371,7 @@ Funktionalität: Barrierefreiheit
       | terms                  | default             |
       | terms                  | demo                |
       | analytics              | default             |
+      | analytics              | running-year        |
       | analytics              | empty               |
       | reports                | default             |
       | reports                | empty               |

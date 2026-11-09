@@ -7,7 +7,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, contractAdvancePayments, invoices } from '../db/schema';
+import { categories, contractAdvancePayments, invoices, rentalContracts } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
@@ -174,10 +174,31 @@ describe('Jahre des Jahresberichts', () => {
 		expect([report.year, report.firstYear]).toEqual([2025, 2024]);
 	});
 
+	it('nennt das erste Jahr des Gebäudes auch, wenn es nach dem gefragten Jahr liegt', async () => {
+		const report = (await (await reportOf(2023)).json()) as Report;
+		expect([report.year, report.firstYear]).toEqual([2023, 2024]);
+	});
+
 	it('lehnt ein unbekanntes Gebäude ab', async () => {
 		const response = await reportOf(2025, crypto.randomUUID());
 		expect(response.status).toBe(404);
 		expect(((await response.json()) as { code: string }).code).toBe('BUILDING_NOT_FOUND');
+	});
+});
+
+// review 1409-1 C-6: a contract from before #464 may have no Akonto row; its monthly_advance_payment applies, as in
+// the statement (calculation.service.ts). Last of the amount tests: it changes Ben Keller's contract
+describe('Akonto ohne Verlauf', () => {
+	it('zählt das Akonto des Mietvertrags, wenn er keinen Betrag mit «Gültig ab» hat', async () => {
+		await db
+			.delete(contractAdvancePayments)
+			.where(eq(contractAdvancePayments.contractId, extra.contract));
+		await db
+			.update(rentalContracts)
+			.set({ monthlyAdvancePayment: '30' })
+			.where(eq(rentalContracts.id, extra.contract));
+		// 990 and 16/31 × 30 = 15.48 + 9 × 30
+		expect((await report2025()).income.advancePayments).toBe(1275.48);
 	});
 });
 

@@ -90,4 +90,20 @@ describe('Jahresbericht zum Herunterladen', () => {
 			}
 		]);
 	});
+
+	// review 1409-1 C-9: the PDF of the running year says it is not over, as the page does
+	it('sagt im PDF des laufenden Jahres, dass es noch nicht vorbei ist', async () => {
+		vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-09T12:00:00Z') });
+		const { fetch, posted } = backend(2024);
+		await annualReportPdf(fetch, page('?building=b1&year=2026'));
+		expect(posted).toMatchObject([
+			{
+				lines: [
+					'Seeblick, Seestrasse 12, 8002 Zürich',
+					'Zeitraum: 01.01.2026 bis 31.12.2026',
+					expect.stringContaining('Das Jahr 2026 ist noch nicht vorbei')
+				]
+			}
+		]);
+	});
 });

@@ -22,7 +22,8 @@ export async function annualReport(buildingId: string, year: number): Promise<An
 			endDate: rentalContracts.endDate,
 			baseRent: rentalContracts.baseRent,
 			additionalRent: rentalContracts.additionalRent,
-			flatRateUtilityCharge: rentalContracts.flatRateUtilityCharge
+			flatRateUtilityCharge: rentalContracts.flatRateUtilityCharge,
+			monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment
 		})
 		.from(rentalContracts)
 		.innerJoin(apartments, eq(apartments.id, rentalContracts.apartmentId))
@@ -31,6 +32,13 @@ export async function annualReport(buildingId: string, year: number): Promise<An
 		? await db.select().from(contractAdvancePayments).where(inArray(contractAdvancePayments.contractId, contracts.map(({ id }) => id)))
 		: [];
 
+	// a contract without an Akonto row (from before #464): its monthly amount, as the statement (review 1409-1 C-6)
+	const advancesOf = (contract: (typeof contracts)[number]): Amounts => {
+		const own = advances.filter(({ contractId }) => contractId === contract.id);
+		return own.length
+			? own.map(({ validFrom, amount }) => ({ validFrom, amount: parseFloat(amount) }))
+			: [{ validFrom: contract.startDate, amount: parseFloat(contract.monthlyAdvancePayment) }];
+	};
 	const income = { netRent: [] as number[], additionalRent: [] as number[], advancePayments: [] as number[], flatRateUtilityCharge: [] as number[] };
 	for (const contract of contracts) {
 		const from = new Date(contract.startDate > start ? contract.startDate : start);
@@ -41,7 +49,7 @@ export async function annualReport(buildingId: string, year: number): Promise<An
 		income.additionalRent.push(fixed(contract.additionalRent));
 		income.flatRateUtilityCharge.push(fixed(contract.flatRateUtilityCharge));
 		income.advancePayments.push(
-			over(advances.filter(({ contractId }) => contractId === contract.id).map(({ validFrom, amount }) => ({ validFrom, amount: parseFloat(amount) })))
+			over(advancesOf(contract))
 		);
 	}
 	const totals = {
@@ -53,7 +61,7 @@ export async function annualReport(buildingId: string, year: number): Promise<An
 	return { year, firstYear: await firstYear(buildingId, year), income: { ...totals, total: sum(Object.values(totals)) } };
 }
 
-/** The year of the building's first contract or invoice; without any, the year asked */
+/** The year of the building's first contract or invoice, also one after the year asked; without any, the year asked */
 async function firstYear(buildingId: string, year: number) {
 	const [[contract], [invoice]] = await Promise.all([
 		db
@@ -64,5 +72,5 @@ async function firstYear(buildingId: string, year: number) {
 		db.select({ first: min(invoices.invoiceDate) }).from(invoices).where(eq(invoices.buildingId, buildingId))
 	]);
 	const years = [contract?.first, invoice?.first].filter(Boolean).map((day) => Number(day!.slice(0, 4)));
-	return Math.min(year, ...years);
+	return years.length ? Math.min(...years) : year;
 }
