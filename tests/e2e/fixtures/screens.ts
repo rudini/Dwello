@@ -305,7 +305,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		await seed.statement('Ruth', 'Lärchenweg', year);
 	}
 	await seed.sendStatement('Ruth', 2024);
-	await seed.distributionKeyFormula('Raumformel', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
+	await seed.keyFormula('Raumformel', '1 / (({rooms} - 3.5) * ({rooms} - 3.5))');
 	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
 	await seed.apartment('Bergsicht', '2.02', 'vacant');
 	await seed.tenant('Emil');

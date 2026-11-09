@@ -15,7 +15,8 @@
 			"profileEdited": null,
 			"fee": { "used": 3, "now": 4.5, "source": "run" },
 			"outdated": false,
-			"fuelStock": false
+			"fuelStock": false,
+			"values": false
 		}
 	]
 }

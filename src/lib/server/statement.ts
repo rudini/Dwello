@@ -200,6 +200,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		invoiceIds?: string[];
 		fuelStockChanged?: boolean;
 		uncalculableKeys?: { key: string; reason: string; apartment: string | null; invoices: (HintedInvoice & { fuelStock: boolean })[] }[];
+		valuesChanged?: boolean;
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
 		correctionLowers?: boolean;
@@ -211,6 +212,7 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		invoices: changed.invoiceIds?.length ?? 0,
 		fuelStock: !!changed.fuelStockChanged,
 		uncalculableKeys: changed.uncalculableKeys ?? [], // #1309: they hold the recalculation
+		values: !!changed.valuesChanged, // #1328: a draft an apartment or a key changed since
 		correctionDue: !!changed.correctionDue,
 		correctionDeclinable: !!changed.correctionDeclinable,
 		correctionLowers: !!changed.correctionLowers,

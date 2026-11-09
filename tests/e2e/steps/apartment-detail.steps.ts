@@ -96,6 +96,14 @@ Given(
 	}
 );
 
+// #1328
+Given(
+	'die Wohnung {string} hat danach {string} m² und {string} Zimmer',
+	async ({ seed }, number: string, area: string, rooms: string) => {
+		await seed.correctApartmentSize(number, area, rooms);
+	}
+);
+
 Then(
 	'hatte die Wohnung bis {string} {string} und {string} Zimmer',
 	async ({ verwalter }, day: string, area: string, rooms: string) => {

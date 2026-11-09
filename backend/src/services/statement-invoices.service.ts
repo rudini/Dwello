@@ -4,9 +4,9 @@
  * left the period was deleted or made non-allocable
  */
 
-import { eq } from 'drizzle-orm';
+import { eq, max } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
+import { apartments, buildings, distributionKeys, invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
 import { CodedError } from './coded-error';
 import { invoiceSplitKeys } from './invoice-completeness.service';
 import { getInvoicesForStatement } from './invoice.service';
@@ -49,13 +49,33 @@ type Loaders = {
 	stock: (s: Located) => Promise<Stock>;
 	full: (s: Located) => Promise<StatementWithDetails | null>;
 	keys: (s: Located) => Promise<Awaited<ReturnType<typeof uncalculableKeyInvoices>>>;
+	valuesChangedAt: (s: Located) => Promise<Date>;
 };
+
+// #1328 (PO A'): when an apartment of the building was last changed or deleted (its building's updated_at, PO), and
+// when each Verteilschlüssel was
+async function apartmentsChangedAt(buildingId: string) {
+	const [[apartment], [building]] = await Promise.all([
+		db.select({ at: max(apartments.updatedAt) }).from(apartments).where(eq(apartments.buildingId, buildingId)),
+		db.select({ at: buildings.updatedAt }).from(buildings).where(eq(buildings.id, buildingId))
+	]);
+	return new Date(Math.max(apartment?.at?.getTime() ?? 0, building?.at.getTime() ?? 0));
+}
+const keysChangedAt = async () =>
+	new Map((await db.select({ id: distributionKeys.id, at: distributionKeys.updatedAt }).from(distributionKeys)).map(({ id, at }) => [id, at]));
+
+// the last change of an apartment of its building or of a key its positions split by (Code-Review 1328-1 C-2)
+function lastValueChange(s: Located, apartmentsAt: Date | null, keysAt: Map<string, Date>) {
+	const times = [apartmentsAt, ...s.lineItems.map((item) => keysAt.get(item.distributionKeyId ?? ''))];
+	return new Date(Math.max(0, ...times.map((at) => at?.getTime() ?? 0)));
+}
 const periodOf = (s: Located) => ({ buildingId: s.building.id, periodStart: s.periodStart, periodEnd: s.periodEnd });
 const direct: Loaders = {
 	invoices: (s) => getInvoicesForStatement(s.building.id, s.periodStart, s.periodEnd),
 	stock: (s) => agreedStock(periodOf(s), s.agreedCategoryIds),
 	full: async (s) => s,
-	keys: (s) => uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd)
+	keys: (s) => uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd),
+	valuesChangedAt: async (s) => lastValueChange(s, await apartmentsChangedAt(s.building.id), await keysChangedAt())
 };
 function perPeriod(): Loaders {
 	const memo = new Map<string, Promise<unknown>>();
@@ -76,7 +96,9 @@ function perPeriod(): Loaders {
 		keys: (s) =>
 			once(`keys ${key(s)}`, async () =>
 				uncalculableKeyInvoices(s.building.id, s.periodStart, s.periodEnd, { bills: await invoices(s), change: await change(s), apartments: () => apartments(s) })
-			)
+			),
+		valuesChangedAt: async (s) =>
+			lastValueChange(s, await once(`apartments ${s.building.id}`, () => apartmentsChangedAt(s.building.id)), await once('keys', keysChangedAt))
 	};
 }
 
@@ -149,15 +171,22 @@ export async function statementChanges(statementId: string) {
 	return { ...changes, carryOverChanged: !!statement!.carryChanged, splitKeys: await invoiceSplitKeys(statement!.building!.id, period) }; // #506 C
 }
 
-// Whether correcting a statement a berichtigte Abrechnung would replace is due, and the recalculation that says so
-async function correction(statement: Located, load: Loaders, changed: boolean, keyFails: boolean) {
-	const correctable = CORRECTED.includes(statement.status) && (changed || keyFails);
-	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
-	const full = correctable && !keyFails ? await load.full(statement) : null;
-	const check = full ? await recalculation(full) : null;
+// #1328 (PO A'): a draft, current by its Übertrag, of a building whose apartments or a key changed since it was created
+const valuesTouched = async (statement: Located, load: Loaders) =>
+	statement.status === 'draft' && !statement.carryChanged && (await load.valuesChangedAt(statement)) > statement.createdAt;
+
+type Check = Awaited<ReturnType<typeof recalculation>>;
+
+// whether correcting a statement the hint names a change of is due, and may be declined
+function correctionOf(statement: StatementWithDetails, correctable: boolean, check: Check) {
 	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
-	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
-	return { due, check };
+	const due = correctable && (check ? check.changes && check.result !== statement.correctionDeclined?.result : true);
+	return {
+		correctionDue: due,
+		correctionDeclinable: due && !!check?.raises,
+		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
+		recalculated: (due && check?.now) || null // #546: the Saldo the recalculation gives, for the hint and «Nicht berichtigen»
+	};
 }
 
 async function changesOf(statement: StatementWithDetails | null, load: Loaders) {
@@ -166,15 +195,17 @@ async function changesOf(statement: StatementWithDetails | null, load: Loaders) 
 	const invoiceIds = await changedInvoices(located, load);
 	const fuelStock = await fuelStockChanged(located, load);
 	const keys = await uncalculableKeys(located, load);
-	const { due, check } = await correction(located, load, invoiceIds.length > 0 || fuelStock, keys.length > 0);
+	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock || keys.length > 0);
+	const touched = !invoiceIds.length && !fuelStock && !keys.length && (await valuesTouched(located, load));
+	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
+	const full = (correctable || touched) && !keys.length ? await load.full(located) : null;
+	const check = full ? await recalculation(full) : null;
 	return {
 		invoiceIds,
 		fuelStockChanged: fuelStock,
 		uncalculableKeys: keys,
-		correctionDue: due,
-		correctionDeclinable: due && !!check?.raises,
-		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
-		recalculated: (due && check?.now) || null, // #546: the Saldo the recalculation gives, for the hint and «Nicht berichtigen»
+		valuesChanged: touched && !!check?.changes, // «Neu berechnen» would split it otherwise
+		...correctionOf(statement, correctable, check),
 		result: check?.result
 	};
 }
@@ -195,15 +226,19 @@ export async function declineCorrection(statementId: string) {
 }
 
 /**
- * #1126: the listed statements whose invoices or Tankbestand changed since they were created («Nicht aktuelle
- * Abrechnung»), and apart from them those that bill a key that cannot be calculated for the building (#1309)
+ * #1126: the listed statements whose invoices or Tankbestand changed since they were created, and the drafts whose
+ * values did (#1328) («Nicht aktuelle Abrechnung»), and apart from them those that bill a key that cannot be calculated
+ * for the building (#1309)
  */
 export async function notUpToDate<S extends StatementWithDetails>(statements: S[]) {
 	const load = perPeriod();
 	const why = async (s: S) => {
 		if (!s.building) return null;
 		if ((await uncalculableKeys(s as Located, load)).length) return 'key';
-		const changed = (await changedInvoices(s as Located, load)).length > 0 || (await fuelStockChanged(s as Located, load));
+		const changed =
+			(await changedInvoices(s as Located, load)).length > 0 ||
+			(await fuelStockChanged(s as Located, load)) ||
+			(s.status === 'draft' && draftOutdated(await changesOf(s, load)));
 		return changed ? 'changed' : null;
 	};
 	const reasons = await Promise.all(statements.map(why));
@@ -213,9 +248,9 @@ export async function notUpToDate<S extends StatementWithDetails>(statements: S[
 	};
 }
 
-/** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8) */
+/** A draft outdated by invoices or a Tankbestand changed since its creation (#454, #408 point 8), or by values (#1328) */
 export const draftOutdated = (changes: Awaited<ReturnType<typeof changesOf>>) =>
-	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged || changes.uncalculableKeys.length > 0);
+	!!changes && (changes.invoiceIds.length > 0 || changes.fuelStockChanged || changes.uncalculableKeys.length > 0 || changes.valuesChanged);
 
 /** The drafts to send: the current ones (#454); the overview takes the number (H-28, #717) */
 export async function draftsToSend() {
@@ -252,6 +287,7 @@ export async function outdatedStatements() {
 							invoices: changes!.invoiceIds.length,
 							fuelStock: changes!.fuelStockChanged,
 							uncalculableKeys: changes!.uncalculableKeys.length > 0, // #1309: the task says why
+							values: changes!.valuesChanged,
 							// PO 2026-10-20 (Fachreview 454-1 E-5): the overview adds the sentence on the Verjährung
 							olderThanFiveYears: olderThanFiveYears(s.periodEnd, swissToday())
 						}

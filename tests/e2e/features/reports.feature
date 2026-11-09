@@ -90,7 +90,15 @@ Funktionalität: Berichte
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-11-30"
     Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
     Dann nennt die Kostenabstimmung der Berichte "Hauswart" mit "CHF 1’500.00", "CHF 1’101.64" und "CHF 398.36"
-    Und nennt die Kostenabstimmung der Berichte den Hinweis "2 Abrechnungen dieser Abrechnungsperiode sind nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht oder der Tankbestand geändert. Öffnen Sie sie, um zu sehen, ob Sie sie neu berechnen oder berichtigen müssen:"
+    Und nennt die Kostenabstimmung der Berichte den Hinweis "2 Abrechnungen dieser Abrechnungsperiode sind nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht, der Tankbestand geändert oder bei einem Entwurf eine Wohnung oder ein Verteilschlüssel so geändert, dass «Neu berechnen» ein anderes Ergebnis ergäbe. Öffnen Sie sie, um zu sehen, ob Sie sie neu berechnen oder berichtigen müssen:"
+
+  # #1328 (Entscheid PO): auch ein Entwurf, den eine danach geänderte Wohnung anders verteilen liesse
+  Szenario: Die Kostenabstimmung nennt einen Entwurf nach einer geänderten Wohnung als nicht aktuell
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Wohnung "3.02" hat danach "140" m² und "3.5" Zimmer
+    Wenn der Liegenschaftsverwalter die Kostenabstimmung 2024 von "Lindenhof" öffnet
+    Dann nennt die Kostenabstimmung der Berichte den Hinweis "1 Abrechnung dieser Abrechnungsperiode ist nicht aktuell: Seit ihrem Erstellen wurden Rechnungen erfasst, geändert oder gelöscht, der Tankbestand geändert oder bei einem Entwurf eine Wohnung oder ein Verteilschlüssel so geändert, dass «Neu berechnen» ein anderes Ergebnis ergäbe."
 
   # Fachreview 1126-1 M-1: nach dem Löschen einer Rechnung verrechnen die Abrechnungen mehr als die Kosten des Gebäudes;
   # Hauswart 1'500.00 beim Erstellen: Eva 372.95, Marc 1'004.10 = 1'377.05 gegen 1'200.00

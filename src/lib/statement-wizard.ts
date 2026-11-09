@@ -116,6 +116,7 @@ export interface ChangedStatement {
 	tenantName: string;
 	outdated: boolean; // a draft that misses invoices of its period as they are now (#96)
 	fuelStock: boolean; // a draft whose Tankbestand changed since (#454)
+	values: boolean; // a draft an apartment or a key changed since (#1328)
 	profile: { used: string; run: string } | null;
 	profileEdited: string | null; // its Heizprofil, edited after it was created
 	fee: { used: number; now: number; source: 'run' | 'contract' | 'none' } | null;
@@ -369,8 +370,19 @@ const feeNotes = {
 };
 
 /** What changed since an existing statement was made, or what it does differently from the run, in words (#132) */
-export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee, oldRule, heatingSum, tenantName }: ChangedStatement) =>
+export const changedNotes = ({
+	outdated,
+	fuelStock,
+	values,
+	profile,
+	profileEdited,
+	fee,
+	oldRule,
+	heatingSum,
+	tenantName
+}: ChangedStatement) =>
 	[
+		values && !outdated && !fuelStock && m.statements_existing_values(),
 		outdated && !fuelStock && m.statements_existing_outdated(),
 		fuelStock && (outdated ? m.statements_existing_outdated_fuel_stock() : m.statements_existing_fuel_stock()),
 		profile && m.statements_existing_profile(profile),

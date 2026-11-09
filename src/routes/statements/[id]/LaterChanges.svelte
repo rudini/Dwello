@@ -31,6 +31,7 @@
 		later: {
 			invoices: number;
 			fuelStock: boolean;
+			values?: boolean; // #1328: an apartment or a key changed what «Neu berechnen» would bill
 			correctionDue: boolean;
 			correctionDeclinable: boolean;
 			correctionLowers: boolean;
@@ -49,7 +50,7 @@
 			: null
 	);
 	const declineCosts = $derived(later.recalculated?.declineCosts && francs(Number(later.recalculated.declineCosts)));
-	const changed = $derived(laterText(later.invoices, later.fuelStock));
+	const changed = $derived(laterText(later.invoices, later.fuelStock, later.values));
 	const keys = $derived(later.uncalculableKeys ?? []);
 	// persona Anna 1309 P-1: the invoices to change
 	const keyInvoices = $derived(
@@ -66,11 +67,13 @@
 	const title = $derived(
 		keys.length
 			? m.statements_key_not_calculable_title()
-			: !later.fuelStock
-				? m.statements_later_title()
-				: later.invoices
-					? m.statements_later_title_both()
-					: m.statements_later_title_fuel_stock()
+			: !later.fuelStock && !later.invoices && later.values
+				? m.statements_later_title_values()
+				: !later.fuelStock
+					? m.statements_later_title()
+					: later.invoices
+						? m.statements_later_title_both()
+						: m.statements_later_title_fuel_stock()
 	);
 	const declined = $derived(statement.correctionDeclined);
 	// a warning only while something is to do (persona Anna 454 P-7)
@@ -79,7 +82,8 @@
 	// not, as its correcting waits for the key
 	const keyText = (text: (params: { failures: string }) => string) =>
 		keys.length ? text({ failures }) : '';
-	const changedText = (text: string) => (later.invoices || later.fuelStock ? text : '');
+	const changedText = (text: string) =>
+		later.invoices || later.fuelStock || later.values ? text : '';
 	const parts = $derived(
 		statement.status === 'draft'
 			? [
@@ -96,7 +100,7 @@
 	);
 	const text = $derived(parts.filter(Boolean).join(' '));
 	const shown = $derived(
-		statement.editable && (later.invoices || later.fuelStock || keys.length > 0)
+		statement.editable && (later.invoices || later.fuelStock || later.values || keys.length > 0)
 	);
 	// «Abrechnung berichtigen» waits for a key that cannot be calculated (Fachreview 1309-1 V-1)
 	const correctable = $derived(statement.correctable && later.correctionDue && !keys.length);
