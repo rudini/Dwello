@@ -37,7 +37,6 @@ jobs:
       backend: ${{ steps.diff.outputs.backend }}
       docker: ${{ steps.diff.outputs.docker }}
       app: ${{ steps.diff.outputs.app }}
-      ui: ${{ steps.diff.outputs.ui }}
       playwright: ${{ steps.diff.outputs.playwright }}
       shards: ${{ steps.diff.outputs.shards }}
       matrix: ${{ steps.diff.outputs.matrix }}
@@ -58,28 +57,33 @@ jobs:
           # on main they get six shards of their own and the other tests six (#838). The axe check runs Chromium only, in four (#840)
           e2e=$([ "${{ github.event_name }}" = pull_request ] && echo 5 || echo 12)
           filter=
+          ui=true
           # A pull request whose changes all belong to areas of tests/e2e/areas.json runs only their features and the
           # cross-area checks, in two shards (#845); any other change runs everything, and main always does
           if [ "${{ github.event_name }}" = pull_request ]; then
             git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" > changed.txt
             filter=$(node tools/ci/e2e-areas.mjs < changed.txt)
             [ -n "$filter" ] && e2e=2 && echo "::notice::E2E tests of the changed areas only: $filter"
+            # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
+            ui_files=$(grep -vE '(^|/)__tests__/|\.(test|spec)\.ts$|\.md$|^tests/e2e/features/' changed.txt | grep -E '^(src|messages|static|project\.inlang|tests/a11y|tests/e2e)/|^(tailwind|postcss|svelte|vite|playwright)\.config\.(js|ts)$|^(package\.json|bun\.lock|tsconfig\.json|\.github/workflows/ci\.yml)$' || true)
+            ui=$([ -n "$ui_files" ] || grep -qx tests/e2e/features/accessibility.feature changed.txt && echo true || echo false)
           fi
-          echo "shards=$(jq -nc --argjson e2e "$e2e" '{"E2E tests": $e2e, "Accessibility (axe)": 4}')" >> "$GITHUB_OUTPUT"
-          echo "matrix=$(jq -nc --argjson e2e "$e2e" --arg filter "$filter" '
+          # Without such a change no runner starts for the axe shards, and "Accessibility (axe)" expects none (#1252)
+          echo "shards=$(jq -nc --argjson e2e "$e2e" --argjson ui "$ui" '{"E2E tests": $e2e, "Accessibility (axe)": (if $ui then 4 else 0 end)}')" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(jq -nc --argjson e2e "$e2e" --argjson ui "$ui" --arg filter "$filter" '
             def e2e(n; grep): [range(1; n + 1) | {name: "E2E tests", args: "\(grep) --shard=\(.)/\(n)", reports: "e2e-reports"}];
             (if $e2e < 12 then e2e($e2e; "--grep-invert @a11y \($filter)")
              else e2e(6; "--grep-invert '\''@a11y|sprachen-bildschirme'\''") + e2e(6; "--grep sprachen-bildschirme") end
              | to_entries | map(.value + {shard: (.key + 1), shards: $e2e}))
-            + [range(1; 5) | {name: "Accessibility (axe)", args: "--project=chromium --grep @a11y --shard=\(.)/4", reports: "a11y-reports", shard: ., shards: 4}]')" >> "$GITHUB_OUTPUT"
+            + [range(1; 5) | select($ui) | {name: "Accessibility (axe)", args: "--project=chromium --grep @a11y --shard=\(.)/4", reports: "a11y-reports", shard: ., shards: 4}]')" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" != pull_request ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && echo "docker=true" >> "$GITHUB_OUTPUT" && exit 0
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "docker=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
           green=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?event=pull_request&status=success&per_page=100" \
             -f branch="$HEAD_REF" -X GET --jq '.workflow_runs[].head_sha' || true)
           if node tools/ci/docs-only-since.mjs "${{ github.event.pull_request.head.sha }}" $green; then
             echo "::notice::Only documentation changed since the last green run of this branch, so its tests are skipped."
-            echo "backend=false" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
+            echo "backend=false" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && exit 0
           fi
           cat changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts); the upgrade check and the queries
@@ -93,9 +97,6 @@ jobs:
           echo "docker=$(grep -qE '^(Dockerfile[^/]*|\.dockerignore|compose[^/]*\.ya?ml|docker-compose[^/]*\.ya?ml|package\.json|bun\.lock|vite\.config\.ts|svelte\.config\.js|paraglide\.config\.ts|tsconfig\.json|src/lib/version\.ts|\.github/workflows/ci\.yml)$|^project\.inlang/|^backend/(Dockerfile[^/]*|\.dockerignore|package\.json|bun\.lock|scripts/migrate\.ts|src/db/migrate\.ts|src/services/backup\.service\.ts)$|^(backend/migrations|docker)/|^tools/fitness/(compose-update-check|data-totals)\.sh$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
-          ui_files=$(grep -vE '(^|/)__tests__/|\.(test|spec)\.ts$|\.md$|^tests/e2e/features/' changed.txt | grep -E '^(src|messages|static|project\.inlang|tests/a11y|tests/e2e)/|^(tailwind|postcss|svelte|vite|playwright)\.config\.(js|ts)$|^(package\.json|bun\.lock|tsconfig\.json|\.github/workflows/ci\.yml)$' || true)
-          echo "ui=$([ -n "$ui_files" ] || grep -qx tests/e2e/features/accessibility.feature changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build
@@ -354,12 +355,10 @@ jobs:
       fail-fast: false
       matrix:
         # From the job Changes: E2E in five shards on a pull request (two for the features of its areas, #845) and twelve
-        # on main, the axe check in four; each
+        # on main, the axe check in four (none on a pull request that changes nothing it sees, #1252); each
         # entry names its Playwright filter and shard in args
         include: ${{ fromJSON(needs.changes.outputs.matrix) }}
-    # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
-      SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
       # Pull requests: Chromium and the API driver; else the E2E tests in every browser (the axe check picks Chromium)
       PROJECTS: ${{ matrix.reports == 'e2e-reports' && github.event_name == 'pull_request' && '--project=api --project=chromium' || '' }}
       # inside the container the database is the service, not localhost
@@ -379,28 +378,19 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - name: No UI change
-        if: env.SKIP == 'true'
-        run: echo "::notice::No file the axe check sees changed, so it is skipped."
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: env.SKIP != 'true'
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        if: env.SKIP != 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
       # setup-bun unpacks with unzip, which the Playwright image lacks; npm brings Bun without apt (review i777 C-1)
       - name: Install Bun
-        if: env.SKIP != 'true'
         run: |
           npm install --global --prefix "$HOME/.local" bun
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - run: bun install --frozen-lockfile
-        if: env.SKIP != 'true'
       - run: bun install --frozen-lockfile
-        if: env.SKIP != 'true'
         working-directory: backend
       - name: ${{ matrix.name }}
-        if: env.SKIP != 'true'
         run: bun run test:e2e -- ${{ matrix.args }} ${{ env.PROJECTS }}
       - name: Upload reports
         if: ${{ failure() }}
