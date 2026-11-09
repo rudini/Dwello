@@ -91,6 +91,23 @@ describe('Rechnungsliste', () => {
 		expect(await of('building=b2&periodStart=2014-01-01&periodEnd=2014-12-31')).toBeNull();
 	});
 
+	// code review 1410-7 C-1: ohne Antwort zur Aufbewahrungsfrist zeigt die Liste ihre Rechnungen, ohne Hinweis
+	it('zeigt die Rechnungen auch, wenn die Aufbewahrungsfristen nicht zu laden sind', async () => {
+		const answers = backend({ '/invoices': { invoices: [invoice()], total: 1 } });
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/retention')
+				? new Response(null, { status: 500 })
+				: answers.fetch(url)) as typeof globalThis.fetch;
+		const data = (await listLoad({
+			url: new URL(
+				'http://localhost/invoices?building=b1&periodStart=2014-01-01&periodEnd=2014-12-31'
+			),
+			fetch
+		} as never)) as { invoices: unknown[]; retention: unknown };
+		expect(data.invoices).toHaveLength(1);
+		expect(data.retention).toBeNull();
+	});
+
 	it('behält die Rechnungen des Gebäudes und der Abrechnungsperiode', async () => {
 		const sent: { url: string; body: unknown }[] = [];
 		const fetch = (async (url: string, init?: RequestInit) => {
