@@ -7,7 +7,7 @@
 
 import { spawn } from 'child_process';
 import { createReadStream } from 'fs';
-import { chmod, mkdtemp, open, readdir, rename, rm, unlink, writeFile } from 'fs/promises';
+import { chmod, copyFile, mkdtemp, open, readdir, rename, rm, unlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
@@ -56,9 +56,13 @@ const confirmedCode = (client: Queryable) =>
 			rows[0].t
 				? ((
 						await client.query(
-							'SELECT public_key, salt, confirmed_at FROM backup_codes WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 1'
+							// mac_key read only where 0046 made it: the Sicherung before that migration runs without it
+							`SELECT public_key, salt, to_jsonb(b) ->> 'mac_key' AS mac_key, confirmed_at FROM backup_codes b
+								WHERE confirmed_at IS NOT NULL ORDER BY confirmed_at DESC LIMIT 1`
 						)
-					).rows[0] as { public_key: string; salt: string; confirmed_at: Date } | undefined)
+					).rows[0] as
+						| { public_key: string; salt: string; mac_key: string | null; confirmed_at: Date }
+						| undefined)
 				: undefined
 		);
 
@@ -135,7 +139,8 @@ async function backUp(url: string, dir: string, secrets: Secrets, now: Date) {
 			);
 			await encryptStream(payload, `${file}.part`, {
 				publicKey: Buffer.from(code.public_key, 'base64'),
-				salt: Buffer.from(code.salt, 'base64')
+				salt: Buffer.from(code.salt, 'base64'),
+				macKey: code.mac_key ? Buffer.from(code.mac_key, 'base64') : undefined
 			});
 			if ((await exited) !== 0) throw new Error(`pg_dump: ${stderr.trim()}`);
 			await rename(`${file}.part`, file);
@@ -166,11 +171,15 @@ export async function restoreBackup(
 	code: string,
 	url: string,
 	secretsDir: string,
-	migrations: string
+	migrations: string,
+	confirmUnsigned?: (warning: string) => boolean
 ) {
 	const work = await mkdtemp(join(tmpdir(), 'dwello-restore-'));
 	try {
-		await decryptFile(file, code, join(work, 'plain'));
+		// check and decryption read this private copy: the file in the folder cannot be swapped in between (#1373)
+		await copyFile(file, join(work, 'backup'));
+		await decryptFile(join(work, 'backup'), code, join(work, 'plain'), confirmUnsigned);
+		await rm(join(work, 'backup'));
 		const handle = await open(join(work, 'plain'));
 		const length = Buffer.alloc(4);
 		await handle.read(length, 0, 4, 0);
@@ -212,8 +221,8 @@ export async function restoreBackup(
 		if (inForce)
 			await withClient(url, (client) =>
 				client.query(
-					'INSERT INTO backup_codes (public_key, salt, confirmed_at) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at >= $3)',
-					[inForce.public_key, inForce.salt, inForce.confirmed_at]
+					'INSERT INTO backup_codes (public_key, salt, mac_key, confirmed_at) SELECT $1, $2, $3, $4 WHERE NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at >= $4)',
+					[inForce.public_key, inForce.salt, inForce.mac_key, inForce.confirmed_at]
 				)
 			);
 	} finally {
@@ -307,13 +316,15 @@ export async function backupBeforeMigration(
 const pendingCode = async () =>
 	(
 		await pool.query(
-			`SELECT id, pending_code, created_at,
+			`SELECT id, pending_code, salt, created_at,
 				EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at IS NOT NULL) AS replacing
 			FROM backup_codes WHERE confirmed_at IS NULL AND pending_code IS NOT NULL
 				AND (created_at > now() - interval '30 minutes' OR NOT EXISTS (SELECT 1 FROM backup_codes WHERE confirmed_at IS NOT NULL))
 			ORDER BY created_at DESC LIMIT 1`
 		)
-	).rows[0] as { id: string; pending_code: string; created_at: Date; replacing: boolean } | undefined;
+	).rows[0] as
+		| { id: string; pending_code: string; salt: string; created_at: Date; replacing: boolean }
+		| undefined;
 
 async function savePendingCode() {
 	const code = generateCode();
@@ -359,9 +370,11 @@ export async function confirmBackupCode(typed: string) {
 	if (code.length < shown.length)
 		throw new CodedError('BACKUP_CODE_INCOMPLETE', 'The code is incomplete', { typed: code.length, of: shown.length });
 	if (!pending || code !== shown) throw new CodedError('BACKUP_CODE_MISMATCH', 'The code does not match the one shown');
+	// the key that signs the Sicherungen (#1373), made here: also for a code shown before 0046
+	const { macKey } = await recipientOf(pending.pending_code, Buffer.from(pending.salt, 'base64'));
 	await pool.query(
-		'UPDATE backup_codes SET confirmed_at = now(), pending_code = NULL WHERE id = $1',
-		[pending.id]
+		'UPDATE backup_codes SET confirmed_at = now(), pending_code = NULL, mac_key = $2 WHERE id = $1',
+		[pending.id, macKey.toString('base64')]
 	);
 	await pool.query('DELETE FROM backup_codes WHERE confirmed_at IS NULL');
 	// the first Sicherung with this code right away, not at the next night's run (fach review 718c V-1)

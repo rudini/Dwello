@@ -108,7 +108,9 @@ if (phase === 'backup') {
 		await readFile(join(dir, 'code'), 'utf8'),
 		server.href,
 		keys,
-		join(repo, 'backend/migrations')
+		join(repo, 'backend/migrations'),
+		// the previous release's Sicherung may be unsigned: the operator's typed confirmation (Decided (product owner) #1373)
+		() => true
 	);
 	const seconds = Math.round((Date.now() - start) / 1000);
 	const [before, after] = [await snapshot(url), await snapshot(server.href)];
