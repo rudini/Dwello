@@ -13,6 +13,28 @@ describe('classify', () => {
 		expect(classify('src/routes/auth/login/+server.ts').module).toBe('bff:auth');
 	});
 
+	// #1052: a fat module splits along the folders or families that already group it
+	it('teilt die Seiten der Abrechnungen und der Einstellungen nach ihren Ordnern in eigene Module', () => {
+		expect(
+			[
+				'src/routes/statements/+page.svelte',
+				'src/routes/statements/[id]/+page.svelte',
+				'src/routes/statements/generate/+page.svelte',
+				'src/routes/config/+page.svelte',
+				'src/routes/config/categories/+page.svelte'
+			].map((p) => classify(p).module)
+		).toEqual(['fe:routes/statements', 'fe:routes/statements/[id]', 'fe:routes/statements/generate', 'fe:routes/config', 'fe:routes/config/categories']);
+	});
+
+	it('teilt die UI-Komponenten in Formular, Navigation und Grundbausteine', () => {
+		expect(['src/lib/ui/TextInput.svelte', 'src/lib/ui/field.ts', 'src/lib/ui/NavList.svelte', 'src/lib/ui/Button.svelte'].map((p) => classify(p).module)).toEqual([
+			'fe:ui/form',
+			'fe:ui/form',
+			'fe:ui/navigation',
+			'fe:ui'
+		]);
+	});
+
 	it('zählt die Demo-Daten zum Tooling, nicht zur Datenbank-Schicht', () => {
 		expect(classify('backend/src/db/demo-data.ts')).toEqual({
 			layer: 'Tooling',

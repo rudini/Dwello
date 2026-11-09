@@ -3,14 +3,13 @@
 	import { m } from '$lib/paraglide/messages';
 	import { advancePaymentNotice, flatRateNotice, normalizeAmounts } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
-	import { plainAmount } from '$lib/invoice';
 	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import AgreedCategories from '../AgreedCategories.svelte';
 	import AdvanceFrom from './AdvanceFrom.svelte';
-	import { formatCurrency, isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
+	import { formatCurrency, isFeeRate, parsePercent, plainAmount, USUAL_MAXIMUM } from '$lib/utils/format';
 
 	// Step 4: the monthly amounts, each explained with the glossary's words, and their total
 	let {
