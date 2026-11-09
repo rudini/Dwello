@@ -59,6 +59,9 @@ Funktionalität: Navigation
   Szenario: Das Browser-Tab zeigt das Dwello-Symbol
     Dann zeigt das Browser-Tab das Dwello-Symbol
 
+  Szenario: Eine Verknüpfung auf dem Startbildschirm zeigt das Dwello-Symbol
+    Dann bietet die Seite das Dwello-Symbol für den Startbildschirm an
+
   Szenario: Einstellungen über das Benutzermenü öffnen
     Wenn der Liegenschaftsverwalter im Benutzermenü die Einstellungen wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
