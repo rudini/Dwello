@@ -29,6 +29,7 @@ async function check(
 		sections?: string;
 		user?: string;
 		fork?: boolean;
+		issueStatus?: number;
 	}
 ) {
 	// the answer per path: the pull request (its text with the required sections unless a test sets them), the list of
@@ -47,7 +48,7 @@ async function check(
 			];
 		}
 		if (path.endsWith('/issues')) return [listStatus, page === 1 ? open : []];
-		return [200, pull?.issue ?? { state: 'open' }];
+		return [pull?.issueStatus ?? 200, pull?.issue ?? { state: 'open' }];
 	};
 	const server = createServer((request, response) => {
 		const url = new URL(request.url ?? '/', 'http://localhost');
@@ -510,6 +511,13 @@ describe('Der Text des Pull Requests nennt Typ, Entscheide und Risiken (#1271)',
 		expect(result.out).toContain('«Type» names none of domain, product, bug or an nfr: category');
 	});
 
+	// review 1271-review-1 C-1: one category, so the order of words cannot decide whether a fork's Type matches
+	it('meldet einen Typ mit mehr als einer Kategorie', async () => {
+		const result = await own(sections('bug, nfr:security'));
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('«Type» names more than one category: bug, nfr:security');
+	});
+
 	it('lässt Pull Requests von Dependabot ohne Abschnitte durch', async () => {
 		expect(await own('', { user: 'dependabot[bot]' })).toMatchObject({ code: 0 });
 	});
@@ -526,6 +534,11 @@ describe('Der Text des Pull Requests nennt Typ, Entscheide und Risiken (#1271)',
 		expect((await fork('Closes #7', closed)).out).toContain('#7 is not ready: it is closed');
 		const two = { state: 'open', labels: [{ name: 'bug' }, { name: 'nfr:security' }] };
 		expect((await fork('Closes #7', two)).out).toContain('#7 is not ready: it has 2 type labels, not one');
+		// review 1271-review-1 C-2, C-3: a pull request is no issue, and a missing issue is named
+		const pr = { state: 'open', labels: [{ name: 'bug' }], pull_request: {} };
+		expect((await fork('Closes #7', pr)).out).toContain('#7 is not ready: it is a pull request');
+		const missing = await check([], 200, { number: 5, body: 'Closes #7', cwd: process.cwd(), sections: sections('bug'), fork: true, issueStatus: 404, issue: {} });
+		expect(missing.out).toContain('#7 is not ready: it is missing (HTTP 404)');
 	});
 
 	it('meldet einen Fork, dessen Typ nicht zum Label des Issues passt, und lässt den passenden durch', async () => {

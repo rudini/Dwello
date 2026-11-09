@@ -76,8 +76,10 @@ if (pull.user && pull.user.login !== 'dependabot[bot]') {
 		if (sections[name] === undefined) failures.push(`The pull request text lacks the section «${name}» (.github/pull_request_template.md)`);
 		else if (!sections[name]) failures.push(`The section «${name}» of the pull request text is empty`);
 	}
-	const type = (sections.Type ?? '').match(/\b(?:domain|product|bug|nfr:[a-z]+)\b/g)?.find((word) => typeLabel.test(word));
-	if (sections.Type && !type) failures.push('«Type» names none of domain, product, bug or an nfr: category (ISO 25010)');
+	const types = [...new Set((sections.Type ?? '').match(/\b(?:domain|product|bug|nfr:[a-z]+)\b/g) ?? [])].filter((word) => typeLabel.test(word));
+	const type = types.length === 1 ? types[0] : undefined;
+	if (sections.Type && !types.length) failures.push('«Type» names none of domain, product, bug or an nfr: category (ISO 25010)');
+	if (types.length > 1) failures.push(`«Type» names more than one category: ${types.join(', ')}`);
 	if (pull.head?.repo?.full_name !== pull.base?.repo?.full_name) {
 		if (!closing.length) failures.push('A pull request from a fork closes an issue (Closes #<n>) that is ready');
 		for (const [, n] of closing) failures.push(...(await readiness(n, type)));
@@ -234,6 +236,7 @@ async function readiness(n, type) {
 	const issue = await response.json();
 	const names = (issue.labels ?? []).map((label) => label.name);
 	const types = names.filter((name) => typeLabel.test(name));
+	if (issue.pull_request) return [`#${n} is not ready: it is a pull request`];
 	if (issue.state !== 'open') return [`#${n} is not ready: it is ${issue.state}`];
 	if (names.includes('needs-decision')) return [`#${n} is not ready: it is labelled needs-decision`];
 	if (types.length !== 1) return [`#${n} is not ready: it has ${types.length} type labels, not one`];
