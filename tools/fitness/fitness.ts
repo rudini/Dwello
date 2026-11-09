@@ -566,7 +566,7 @@ if (import.meta.main) {
 			// the base has no ratchet yet: this change introduces it
 		}
 	}
-	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet, (path) => git(['diff', '--name-only', '--diff-filter=A', base, 'HEAD', '--', path]).trim() === path) : [])];
+	const errors = [...(m ? judge(m, ratchet) : []), ...(base && baseRatchet ? loosened(ratchet, baseRatchet, (path) => git(['diff', '--name-only', '--diff-filter=A', base, 'HEAD', '--', path]).trim() === path) : [])];
 	if (base && args.includes('--structure')) {
 		const [before, after] = [structureAt(base), structureAt('HEAD')];
 		errors.push(...structureFindings(before, after, fileChanges(git(['diff', '--name-status', '-M', base, 'HEAD'])), ratchet));
