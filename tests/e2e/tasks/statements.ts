@@ -6,6 +6,8 @@ import {
 	settledFilter,
 	statusFilter,
 	generateStatementsButton,
+	listMarkPaidButton,
+	listMarkPaidConfirm,
 	emptyResetFiltersButton,
 	nextPageLink,
 	openStatementLink,
@@ -19,6 +21,8 @@ import {
 } from '../targets/statements';
 
 export const openStatementList = Navigate.to('/statements');
+export const markPaidInList = (tenantName: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(listMarkPaidButton(tenantName)), Click.on(listMarkPaidConfirm));
 
 // Filters navigate on the client; the list is filtered once the URL carries them
 const filteredBy = (filters: Record<string, string>) =>

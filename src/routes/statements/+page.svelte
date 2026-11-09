@@ -136,13 +136,15 @@
 		saving = true;
 		payError = '';
 		const failed = m.statements_mark_paid_failed();
+		const amount = signedPaid(paying!, paidAmount);
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
-				body: JSON.stringify({
+				// a form, so SvelteKit's origin check covers it (#1375); no amount: all of it
+				body: new URLSearchParams({
 					paidDate,
 					periodEnd: paying!.periodEnd,
-					paidAmount: signedPaid(paying!, paidAmount)
+					...(amount !== undefined && { paidAmount: amount })
 				})
 			});
 			if (!response.ok) {

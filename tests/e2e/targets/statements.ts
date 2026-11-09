@@ -9,6 +9,14 @@ export const statementRowForYear = (tenantName: string, year: number) =>
 		// the year of the period is in the statement number (NK-<building>-<year>-0001); the row's dates are the tenancy's
 		statementRow(tenantName).locate(page).filter({ hasText: new RegExp(`NK-[0-9A-F]{8}-${year}-`) })
 	);
+// #1375: a payment recorded from the list goes through the list's own route
+export const listMarkPaidButton = (tenantName: string) =>
+	target(`Als bezahlt markieren bei ${tenantName}`, (page) =>
+		statementRow(tenantName).locate(page).getByTestId('statement-row-mark-paid')
+	);
+export const listMarkPaidConfirm = target('Bezahlt bestätigen', (page) =>
+	page.getByTestId('statement-list-mark-paid-confirm')
+);
 export const statementRows = target('Abrechnungen in der Liste', (page) => page.getByTestId(/^statement-row-/));
 export const statementSearchInput = target('Suche Abrechnungen', (page) => page.getByTestId('statement-search-input'));
 export const statementBuildingFilter = target('Filter Gebäude', (page) => page.getByTestId('statement-building-filter'));
