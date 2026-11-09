@@ -11,6 +11,7 @@ import {
 import { reletStarts } from '$lib/apartment';
 import type { BackupState, KiModel } from '$lib/types';
 import { backupState } from '$lib/server/backup';
+import { expiredPeriods } from '$lib/server/invoice-retention';
 
 interface DashboardData {
 	portfolio: {
@@ -99,7 +100,7 @@ export const load = async ({
 	const kiModel: Promise<KiModel> = Promise.all([answer('ki-settings'), answer('ki/model')]).then(([ki, model]) =>
 		ki?.mode === 'none' && !ki.byOperator ? { state: 'none' } : (model ?? { state: 'unknown' })
 	);
-	const [figures, open, letters, apartments, outdated] = await Promise.all([
+	const [figures, open, letters, apartments, outdated, expired] = await Promise.all([
 		fetchRecord(
 			fetch,
 			`${BACKEND_URL}/api/v1/dashboard`,
@@ -110,7 +111,8 @@ export const load = async ({
 		list(fetch, 'statements?status=open&limit=all', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'apartments?limit=all', 'apartments'),
-		list(fetch, 'statements/outdated', 'statements') // #454
+		list(fetch, 'statements/outdated', 'statements'), // #454
+		expiredPeriods(fetch) // #1410
 	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
@@ -145,6 +147,7 @@ export const load = async ({
 		lettersToSend: letters.length,
 		missingStatements,
 		outdatedStatements: outdated as OverviewInput['outdatedStatements'],
+		expiredInvoices: expired,
 		noticedContracts,
 		oldAddresses,
 		expiredContracts,

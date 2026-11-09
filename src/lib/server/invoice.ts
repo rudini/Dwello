@@ -89,6 +89,7 @@ export function toInvoice(r: InvoiceRow, names: Named[] = []): InvoiceWithDetail
 		invoiceNumber: r.invoiceNumber,
 		servicePeriodStart: r.servicePeriodStart,
 		servicePeriodEnd: r.servicePeriodEnd,
+		keepUntil: r.keepUntil, // #1410
 		billingEntity: r.billingEntityName,
 		description: r.description,
 		amount: Number(r.amount),

@@ -1,3 +1,4 @@
+import { successToast } from '../targets/form';
 import { Attribute, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	invoiceBuildingFilter,
@@ -11,7 +12,8 @@ import {
 	rowCategory,
 	rowInPeriod,
 	rowStatus,
-	rowUtilityCost
+	rowUtilityCost,
+	retentionHint
 } from '../targets/invoices';
 
 export const listedInvoicesOf = (supplier: string) => Count.of(invoiceRow(supplier));
@@ -28,3 +30,5 @@ export const invoicePeriodFilterText = Text.of(invoicePeriodFilter);
 export const groupOfListedInvoice = (supplier: string) => Text.of(invoiceGroupOf(supplier));
 export const inPeriodOfListedInvoice = (supplier: string) => Text.of(rowInPeriod(supplier));
 export const invoiceShown = (description: string) => Visibility.of(invoiceRow(description));
+export const retentionHintText = Text.of(retentionHint);
+export const keptMessage = Text.of(successToast);

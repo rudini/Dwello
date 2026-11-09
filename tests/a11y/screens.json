@@ -73,6 +73,7 @@
 		"carry-settle-dialog": "The confirmation before an open Übertrag is marked as settled by hand open, with what it means and that it cannot be undone (#506).",
 		"decline-dialog": "Sent statement with an invoice recorded after it that raises the Saldo, «Nicht berichtigen» chosen (#454): the confirmation that the statement stays as it is and the task returns after a further change.",
 		"period-filter": "Invoice list filtered by an Abrechnungsperiode, as the warnings on missing statements link to it (#454): the filter named with its building and rule, the invoices grouped by allocability.",
+		"retention-passed": "Invoice list filtered by an Abrechnungsperiode whose Aufbewahrungsfrist has passed (the seeded 2014 invoice), as the overview task links to it (#1410): the hint that its invoices may be deleted, with «Behalten».",
 		"correct-dialog": "The confirmation before a sent, paid or settled statement is replaced by a berichtigte Abrechnung open, with the amount it offsets, on a sent one the field «Bereits bezahlt» (#448), and the limitation (#120).",
 		"generation-result": "«Abrechnungen erstellen» after creating the drafts of a year without invoices: how many were created, «Entwürfe ansehen», «Alle als ZIP herunterladen» (#356) and «Weitere Abrechnungen erstellen».",
 		"period-locked-refused": "Building edit form posted with another Abrechnungsperiode after the building has statements (as from a tab opened before them): the refusal BUILDING_PERIOD_LOCKED at the top of the form (#1088).",
@@ -619,7 +620,8 @@
 			"name": "invoices",
 			"path": "/invoices",
 			"queries": {
-				"period-filter": "?building={building}&periodStart=2025-01-01&periodEnd=2025-12-31"
+				"period-filter": "?building={building}&periodStart=2025-01-01&periodEnd=2025-12-31",
+				"retention-passed": "?building={building}&periodStart=2014-01-01&periodEnd=2014-12-31"
 			},
 			"states": [
 				"default",
@@ -627,6 +629,7 @@
 				"empty-year",
 				"filtered-empty",
 				"period-filter",
+				"retention-passed",
 				"upload-no-building",
 				"upload-dialog",
 				"upload-discard-dialog",

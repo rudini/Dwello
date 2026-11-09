@@ -1,3 +1,4 @@
+import type { ExpiredInvoicePeriod } from '../../backend/src/api/invoice';
 import type { IconName } from './ui/icons';
 import type { IllustrationName } from './ui/illustrations';
 import { formatDate } from './utils/format';
@@ -25,6 +26,7 @@ export interface OverviewInput {
 	// per building the parts of ended Abrechnungsperioden without a statement, the latest first (#211)
 	// `outside`: an older statement of the building overlaps it, to bill outside Dwello (code review 1088-4 C-11)
 	missingStatements?: { building: string; buildingId: string; periods: { start: string; end: string; outside?: boolean }[] }[];
+	expiredInvoices?: ExpiredInvoicePeriod[]; // per building and Abrechnungsperiode, past the Aufbewahrungsfrist, not kept (#1410)
 	// drafts with a change since and sent, paid or settled statements due for correcting, with what changed (#454)
 	outdatedStatements?: {
 		id: string;
@@ -345,6 +347,19 @@ const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
 		icon: 'document'
 	}));
 
+// #1410: may be deleted, else «Behalten» on the list it links to; ends once deleted or kept (as #459)
+const retentionTasks = ({ expiredInvoices = [] }: OverviewInput): Task[] =>
+	expiredInvoices.map((p) => ({
+		id: `retention-${p.buildingId}-${p.start}`,
+		title: m.dashboard_task_retention({ period: periodName(p), building: p.building }),
+		text: (p.count === 1
+			? m.dashboard_task_retention_text_one
+			: m.dashboard_task_retention_text_many)({ count: p.count, date: formatDate(p.keepUntil) }),
+		href: invoicesOf(p, p.buildingId).href,
+		action: m.dashboard_task_retention_action(),
+		icon: 'document'
+	}));
+
 // #506: the landlord claims, waives or pays out the Übertrag himself, then marks it on the statement
 const carryTasks = ({ openCarryOvers = [] }: OverviewInput): Task[] =>
 	openCarryOvers.map((c) => {
@@ -369,6 +384,7 @@ export function overviewTasks(input: OverviewInput): Task[] {
 		...successorTasks(input),
 		...fixedTermTasks(input),
 		...formerDocumentTasks(input),
+		...retentionTasks(input),
 		...carryTasks(input)
 	];
 }

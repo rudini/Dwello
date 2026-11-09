@@ -8,6 +8,7 @@
 	"invoiceDate": "2026-03-31",
 	"servicePeriodStart": "2026-01-01",
 	"servicePeriodEnd": "2026-03-31",
+	"keepUntil": "2036-12-31",
 	"isValidUtilityCost": true,
 	"categoryId": "c1",
 	"distributionKeyId": "k1",

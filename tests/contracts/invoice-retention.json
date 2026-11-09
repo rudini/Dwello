@@ -1,0 +1,12 @@
+{
+	"periods": [
+		{
+			"buildingId": "b1",
+			"building": "Seeblick",
+			"start": "2014-01-01",
+			"end": "2014-12-31",
+			"keepUntil": "2024-12-31",
+			"count": 2
+		}
+	]
+}

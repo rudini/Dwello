@@ -7,6 +7,7 @@ import {
 	invoiceSearchButton,
 	invoiceSearchInput,
 	invoiceValidityFilter,
+	keepInvoicesButton,
 	newInvoiceButton,
 	showAllInvoicesLink,
 	viewInvoiceButton
@@ -40,3 +41,5 @@ export const editInvoice = (supplier: string) => Click.on(editInvoiceButton(supp
 
 export const showAllInvoices: Activity = (actor) =>
 	actor.attemptsTo(Click.on(showAllInvoicesLink), Wait.forUrl((url) => url.search === ''));
+// #1410: keep the invoices of the period the list is filtered by
+export const keepInvoices = Click.on(keepInvoicesButton);

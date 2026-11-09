@@ -41,6 +41,7 @@ export const buildings = pgTable(
 		yearBuilt: integer('year_built'),
 		noTank: boolean('no_tank').notNull().default(false), // no tank or decommissioned: no Tankbestand asked (#72)
 		accountingPeriod: varchar('accounting_period', { length: 20 }).$type<import('../services/period-types').AccountingPeriodType>().notNull().default('calendar'), // fixed from the first statement (#1088)
+		keptInvoicePeriods: jsonb('kept_invoice_periods').$type<string[]>().notNull().default([]), // «Behalten» after the Aufbewahrungsfrist: period starts (#1410)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -51,9 +52,6 @@ export const buildingsRelations = relations(buildings, ({ many }) => ({
 	apartments: many(apartments),
 	invoices: many(invoices)
 }));
-
-/** #1301: an apartment's Fläche and Zimmeranzahl up to and including `until` (after the earlier entry's) */
-export type EarlierSize = { until: string; area: string; rooms: string };
 
 // ============================================================================
 // Apartments Table
@@ -71,7 +69,7 @@ export const apartments = pgTable(
 		rooms: decimal('rooms', { precision: 3, scale: 1 }).notNull(), // e.g., 3.5
 		status: varchar('status', { length: 20 }).notNull().default('vacant'), // vacant, reserved; occupied is computed from the contracts (apartmentStatus)
 		discontinuedFrom: date('discontinued_from'), // «Aufgehoben ab» (#1284): no longer exists from that day
-		earlierSizes: jsonb('earlier_sizes').$type<EarlierSize[]>().notNull().default([]), // #1301: values up to a day, oldest first
+		earlierSizes: jsonb('earlier_sizes').$type<{ until: string; area: string; rooms: string }[]>().notNull().default([]), // #1301: Fläche and Zimmeranzahl up to and including `until` (after the earlier entry's), oldest first
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},

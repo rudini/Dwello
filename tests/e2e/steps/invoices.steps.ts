@@ -10,12 +10,24 @@ import {
 	inPeriodOfListedInvoice,
 	invoicePeriodFilterText,
 	invoiceShown,
+	keptMessage,
+	retentionHintText,
 	statusOfListedInvoice,
 	toneOfListedUtilityCost,
 	utilityCostOfListedInvoice
 } from '../questions/invoices';
 import { pageAddress, pageTitle } from '../questions/navigation';
-import { editInvoice, filterInvoices, openInvoiceList, openInvoicesOfPeriod, searchInvoices, showAllInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
+import {
+	editInvoice,
+	filterInvoices,
+	keepInvoices,
+	openInvoiceList,
+	openInvoicesOfPeriod,
+	searchInvoices,
+	showAllInvoices,
+	startNewInvoice,
+	viewInvoice
+} from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -152,3 +164,16 @@ Then(
 		await verwalter.sees(toneOfListedUtilityCost(name)).toBe('neutral');
 	}
 );
+
+// #1410: the list filtered by a period whose Aufbewahrungsfrist has passed, and keeping its invoices
+Then('sagt die Rechnungsliste zur Aufbewahrungsfrist {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(retentionHintText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Rechnungen dieser Abrechnungsperiode behält', async ({ verwalter }) => {
+	await verwalter.attemptsTo(keepInvoices);
+});
+
+Then('bestätigt Dwello das Behalten mit {string}', async ({ verwalter, seed }, text: string) => {
+	await verwalter.sees(keptMessage).toBe(seed.withNames(text));
+});

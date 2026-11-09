@@ -179,6 +179,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoices               | empty-year          |
       | invoices               | filtered-empty      |
       | invoices               | period-filter       |
+      | invoices               | retention-passed    |
       | invoices               | upload-dialog       |
       | invoices               | upload-discard-dialog |
       | invoices               | upload-partial      |

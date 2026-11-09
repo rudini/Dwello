@@ -242,6 +242,20 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-counts'), actual)).toEqual([]);
 	});
 
+	// #1410: an invoice of 2014 is past its Aufbewahrungsfrist
+	it('GET /invoices/retention liefert die Felder von invoice-retention.json', async () => {
+		const [expired] = await db
+			.insert(invoices)
+			.values({ buildingId: rental.building, billingEntityName: 'Alt AG', description: 'Hauswart 2014', amount: '100.00', invoiceDate: '2014-03-31', isValidUtilityCost: false })
+			.returning();
+		try {
+			const actual = await (await callApi('/api/v1/invoices/retention')).json();
+			expect(drift(await sample('invoice-retention'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.id, expired.id));
+		}
+	});
+
 	it('GET /invoices/:id/statements liefert die Felder von invoice-statements.json', async () => {
 		const [billed] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.invoiceDate, '2024-03-31')));
 		const actual = await (await callApi(`/api/v1/invoices/${billed.id}/statements`)).json();

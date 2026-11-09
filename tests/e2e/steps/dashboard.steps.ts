@@ -319,3 +319,21 @@ Then(
 		await verwalter.sees(pageAddress).toMatch(new RegExp(`/statements/${seed.idOf(`Abrechnung ${tenant} ${lastYear}`)}$`));
 	}
 );
+
+// #1410: the task names the building by its seeded name
+Then('sagt die Aufgabe {string} {string}', async ({ verwalter, seed }, title: string, text: string) => {
+	await verwalter.sees(overviewTaskText(seed.withNames(title))).toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Rechnungen der Aufgabe {string} ansieht', async ({ verwalter, seed }, title: string) => {
+	await verwalter.attemptsTo(startOverviewTask(seed.withNames(title)));
+});
+
+// after a positive check on the overview: it has loaded its tasks
+Then('nennt die Übersicht keine Aufgabe {string}', async ({ verwalter, seed }, title: string) => {
+	await verwalter.sees(overviewTaskShown(seed.withNames(title))).toBe(false);
+});
+
+When('die Rechnung von {string} inzwischen gelöscht ist', async ({ seed }, supplier: string) => {
+	await seed.deleteInvoice(`Rechnung ${supplier}`);
+});
