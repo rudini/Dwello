@@ -10,6 +10,7 @@
 // With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { posix } from 'node:path';
 
 const repo = process.env.GITHUB_REPOSITORY ?? 'rudini/Dwello';
 const api = process.env.GITHUB_API_URL ?? 'https://api.github.com';
@@ -140,10 +141,29 @@ if (!approvals.length)
 const gateApprovals = [...prBody.matchAll(/\bgate change approved:\s*#(\d+)/gi)].map(([, n]) => n);
 const gateFile =
 	/^(\.github\/workflows\/|tools\/|\.claude\/(hooks|skills)\/)|(^|\/)CLAUDE\.md$|^(\.fallowrc\.json|deepcheck\.config\.json|\.(deepcheck|testcheck)-baseline\.json|vitest\.config\.ts|backend\/scripts\/coverage-check\.ts|backend\/bunfig\.toml)$/;
+// an import path in tools/ that follows a moved function changes no check (#1411): each removed line has its added
+// twin that differs only in the path after `from`, and the new path leads to a file the change added (the moved code)
+const withoutPath = (line) => /^\s*import\s[^;'"]*\sfrom\s+['"][^'"]+['"];?\s*$/.test(line) && line.replace(/['"][^'"]+['"]/, "''");
+const target = (line) => /['"]([^'"]+)['"]/.exec(line)[1];
+const onlyImports = (file) => {
+	if (!file.startsWith('tools/')) return false;
+	const diff = git('diff', '-U0', '--no-renames', from, 'HEAD', '--', file).split('\n');
+	const lines = diff.slice(diff.findIndex((line) => line.startsWith('@@'))); // the file header ends at the first hunk
+	const side = (sign) => lines.filter((line) => line.startsWith(sign)).map((line) => withoutPath(line.slice(1)));
+	const [removed, added] = [side('-'), side('+')];
+	const newFiles = git('diff', '--name-only', '--no-renames', '--diff-filter=A', from, 'HEAD').split('\n');
+	const moved = (line) => {
+		const path = posix.join(posix.dirname(file), target(line));
+		const files = [path, ...['ts', 'js', 'mjs', 'svelte'].map((ext) => `${path}.${ext}`), ...['ts', 'js', 'mjs'].map((ext) => `${path}/index.${ext}`)];
+		return /^\.\.?\//.test(target(line)) && newFiles.some((f) => files.includes(f));
+	};
+	const targets = lines.filter((line) => line.startsWith('+'));
+	return removed.length > 0 && removed.length === added.length && removed.every((line, i) => line && line === added[i]) && targets.every(moved);
+};
 const gateChanges = base
 	? git('diff', '--name-only', '--no-renames', from, 'HEAD')
 			.split('\n')
-			.filter((file) => gateFile.test(file) || (/^(backend\/)?package\.json$/.test(file) && scriptsChanged(file)))
+			.filter((file) => (gateFile.test(file) && !onlyImports(file)) || (/^(backend\/)?package\.json$/.test(file) && scriptsChanged(file)))
 	: [];
 // a lowered coverage floor stays red with approval too: a ratchet against the merge base, as tools/fitness/ratchet.json
 const floorsOf = (rev, file) => {
