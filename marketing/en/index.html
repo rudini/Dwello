@@ -119,7 +119,6 @@ p { margin: 0; }
 .badge .ic { width: 14px; height: 14px; stroke-width: 2; }
 .badge.info { background: var(--accent-soft); color: var(--accent); }
 .badge.caution { background: var(--caution-soft); color: var(--caution); }
-.badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
 
 /* Header: the app's header */
@@ -270,6 +269,9 @@ section { padding-block: 96px; }
 .term-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-bottom: 1px solid #2a3238; font-size: 0.875rem; color: var(--term-muted); }
 .term-bar button { min-height: 36px; border: 1px solid #3a444c; background: transparent; color: var(--term-ink); border-radius: var(--radius-control); padding: 0 12px; font: 600 0.875rem var(--font); cursor: pointer; }
 .term pre { margin: 0; padding: 20px; overflow-x: auto; font: 500 0.875rem/1.85 var(--mono); }
+.terms { display: grid; gap: 16px; min-width: 0; }
+.term-bar span { margin-right: auto; }
+.term-bar a { color: var(--term-ink); }
 .term .c { color: var(--term-muted); }
 .term .p { color: #86bfda; user-select: none; }
 .term .ok { color: #8fd1a5; }
@@ -295,13 +297,6 @@ section { padding-block: 96px; }
 .oss-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
 .price { font-size: clamp(4.5rem, 12vw, 8rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
 .price small { font-size: 0.26em; letter-spacing: -0.01em; font-weight: 600; color: var(--ink-muted); }
-
-/* Roadmap */
-.road { list-style: none; margin: 0; padding: 0; max-width: 860px; }
-.road li { display: grid; gap: 4px; padding-block: 14px; border-top: 1px solid var(--line); }
-.road li:last-child { border-bottom: 1px solid var(--line); }
-.road a, .road b { font-weight: 600; }
-.road span { color: var(--ink-muted); }
 
 /* FAQ */
 .faq { max-width: 860px; }
@@ -559,6 +554,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><h3>Annual report for tax and your accountant</h3><p>Per building and calendar year: the agreed rental income and the costs you bear yourself, as PDF and CSV.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><h3>Cost reconciliation</h3><p>Under «Reports» you see, for each billing period you have created statements for, which part of the costs the tenants bear and which part you bear yourself, for example for vacancy.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><h3>AI programs with an access key</h3><p>With an access key, an AI program of your choice reads your data in Dwello, including your tenants’ data (MCP). It cannot change anything or open documents. The program processes the data under its own rules. Each key expires after 90 days, and you can revoke it at any time.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg><h3>One-step installer</h3><p>One line to paste installs Docker and Dwello; the rest happens in the browser.</p></article>
 		</div>
 	</div>
 </section>
@@ -572,7 +568,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. Dwello backs up your data every day in encrypted form; you print the recovery code for it on the emergency sheet when you first sign in. That person does the updates and regularly copies the backups to another device; the guide describes both. On your own PC Dwello runs only while it is switched on; on a home server or a server in the cloud it is always reachable, from your phone too.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide to hand on</a></div>
 		</div>
-		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Sign-in with password</b>During setup, an account with email address and password is created. If you prefer, sign in with your Google account instead; the guide shows both. A one-step installer is planned (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 on GitHub: one-step installer">#579</a>).</span></div>
+		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Sign-in with password</b>During setup, an account with email address and password is created. If you prefer, sign in with your Google account instead; the guide shows both.</span></div>
 		<details class="helper">
 			<summary class="btn btn-secondary">For the person who sets it up: PC, home server or cloud, and the commands</summary>
 			<div class="helper-body">
@@ -583,23 +579,24 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</div>
 
 		<div class="install" id="panel-pc" role="tabpanel" aria-labelledby="tab-pc">
-			<div class="term">
-				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copy</button></div>
-<pre id="code-pc" tabindex="0"><span class="c"># 1. Download Dwello</span>
-<span class="c"># One file into an empty folder; on Windows curl.exe</span>
-<span class="p">$ </span>mkdir dwello
-<span class="p">$ </span>cd dwello
-<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
-<span class="c"># 2. Start: app, database and local AI, which downloads its model itself</span>
-<span class="p">$ </span>docker compose up -d
-<span class="c"># 3. Show the setup code, then «Set up Dwello» in the browser</span>
-<span class="p">$ </span>docker logs dwello-backend
-<span class="ok">✓ Dwello is running at http://localhost:3000</span></pre>
+			<div class="terms">
+				<div class="term">
+					<div class="term-bar"><span>Windows · PowerShell</span><a href="https://github.com/rudini/Dwello/blob/main/install/windows.ps1" rel="noopener" aria-label="Source of windows.ps1 on GitHub">Source</a><button type="button" data-copy="code-windows">Copy</button></div>
+<pre id="code-windows" tabindex="0"><span class="p">$ </span>irm https://raw.githubusercontent.com/rudini/Dwello/main/install/windows.ps1 | iex</pre>
+				</div>
+				<div class="term">
+					<div class="term-bar"><span>macOS · Terminal</span><a href="https://github.com/rudini/Dwello/blob/main/install/macos.sh" rel="noopener" aria-label="Source of macos.sh on GitHub">Source</a><button type="button" data-copy="code-macos">Copy</button></div>
+<pre id="code-macos" tabindex="0"><span class="p">$ </span>/bin/bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/macos.sh)&quot;</pre>
+				</div>
+				<div class="term">
+					<div class="term-bar"><span>Linux · Terminal</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Source of linux.sh on GitHub">Source</a><button type="button" data-copy="code-linux">Copy</button></div>
+<pre id="code-linux" tabindex="0"><span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;</pre>
+				</div>
 			</div>
 			<div class="panel needs">
 				<h3>Ideal to get started</h3>
 				<dl>
-					<div><dt>You need</dt><dd>Docker Desktop and 16 GB of memory for the local AI. With less memory, enter an external AI.</dd></div>
+					<div><dt>You need</dt><dd>A PC with Windows 10 or 11, macOS or Linux, administrator rights and about 10 GB of free disk space. For the local AI: 16 GB of memory. With less, later choose «AI of a provider» under «Settings» › «AI». The line also installs Docker if it is missing.</dd></div>
 					<div><dt>Time needed</dt><dd>About an hour, including the download of the AI model.</dd></div>
 					<div><dt>Good to know</dt><dd>Dwello only runs while your PC is on. For access from your phone, a home server is a better fit.</dd></div>
 				</dl>
@@ -608,23 +605,16 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 
 		<div class="install" id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
 			<div class="term">
-				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><button type="button" data-copy="code-home">Copy</button></div>
-<pre id="code-home" tabindex="0"><span class="c"># On the home server, over SSH</span>
-<span class="p">$ </span>mkdir dwello &amp;&amp; cd dwello
-<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
-<span class="p">$ </span>curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
-<span class="c"># Without powerful hardware: set an external AI</span>
-<span class="c"># LLM_BASE_URL=https://your-ai-provider.example/v1</span>
-<span class="p">$ </span>docker compose up -d
-<span class="c"># Show the setup code, then «Set up Dwello» in the browser</span>
-<span class="p">$ </span>docker logs dwello-backend
-<span class="c"># HTTPS with your domain: see the guide</span>
+				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Source of linux.sh on GitHub">Source</a><button type="button" data-copy="code-home">Copy</button></div>
+<pre id="code-home" tabindex="0"><span class="c"># First, put Dwello’s address into ~/dwello/.env: guide, section 7</span>
+<span class="c"># Then, over SSH: install Docker (if needed) and Dwello</span>
+<span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
 				<h3>Always reachable, in your own home</h3>
 				<dl>
-					<div><dt>You need</dt><dd>A NAS or mini PC with Docker. Recommended for access from other devices: your own domain with HTTPS. For the local AI, 16 GB of memory.</dd></div>
+					<div><dt>You need</dt><dd>A mini PC with Linux, or a NAS that already runs Docker. Recommended for access from other devices: a domain of your own with HTTPS. For the local AI, 16 GB of memory.</dd></div>
 					<div><dt>Access on the go</dt><dd>Through your VPN or a tunnel such as Tailscale. Dwello does not need to face the open internet.</dd></div>
 					<div><dt>Good to know</dt><dd>Small devices are better off with an external AI. What then goes out is listed under Privacy.</dd></div>
 				</dl>
@@ -633,21 +623,16 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 
 		<div class="install" id="panel-cloud" role="tabpanel" aria-labelledby="tab-cloud" hidden>
 			<div class="term">
-				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><button type="button" data-copy="code-cloud">Copy</button></div>
-<pre id="code-cloud" tabindex="0"><span class="c"># On a fresh Linux server with Docker</span>
-<span class="p">$ </span>mkdir dwello &amp;&amp; cd dwello
-<span class="p">$ </span>curl -fsSLO https://raw.githubusercontent.com/rudini/Dwello/main/compose.yaml
-<span class="p">$ </span>curl -fsSL -o .env https://raw.githubusercontent.com/rudini/Dwello/main/.env.example
-<span class="p">$ </span>docker compose up -d
-<span class="c"># Show the setup code, then «Set up Dwello» in the browser</span>
-<span class="p">$ </span>docker logs dwello-backend
-<span class="c"># HTTPS with Caddy: see the guide</span>
+				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><a href="https://github.com/rudini/Dwello/blob/main/install/linux.sh" rel="noopener" aria-label="Source of linux.sh on GitHub">Source</a><button type="button" data-copy="code-cloud">Copy</button></div>
+<pre id="code-cloud" tabindex="0"><span class="c"># First, put the domain and HTTPS into ~/dwello/.env: guide, section 7</span>
+<span class="c"># Then, on the fresh Linux server: install Docker and Dwello</span>
+<span class="p">$ </span>bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/rudini/Dwello/main/install/linux.sh)&quot;
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
 				<h3>Reachable from anywhere</h3>
 				<dl>
-					<div><dt>You need</dt><dd>A Linux server with Docker and a domain of your own.</dd></div>
+					<div><dt>You need</dt><dd>A Linux server and a domain of your own. The line also installs Docker.</dd></div>
 					<div><dt>Data in Switzerland</dt><dd>Choose a data centre in Switzerland. Our demo runs in Zurich.</dd></div>
 					<div><dt>Good to know</dt><dd>The guide shows how Caddy sets up HTTPS automatically.</dd></div>
 				</dl>
@@ -742,20 +727,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	</div>
 </section>
 
-<!-- ROADMAP -->
-<section id="roadmap">
-	<div class="wrap">
-		<div class="sec-head">
-			<span class="kicker">Roadmap</span>
-			<h2>What comes next.</h2>
-			<p>Dwello is developed in the open. These points are planned; most have an issue on GitHub where you can have your say.</p>
-		</div>
-		<ul class="road">
-			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">One-step installer</a><span>One line to paste installs Docker and Dwello; the rest happens in the browser.</span></li>
-		</ul>
-	</div>
-</section>
-
 <!-- FINAL -->
 <section style="padding-block:0">
 	<div class="wrap">
@@ -780,7 +751,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="logo" href="#top" aria-label="Dwello, to the home page"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><svg class="wm" viewBox="0 0 6488 1512" aria-hidden="true"><use href="#wm"/></svg></a>
 				<p style="max-width:24em">Open-source software for private landlords in Switzerland.</p>
 			</div>
-			<div><h2>Product</h2><ul><li><a href="#funktionen">Features</a></li><li><a href="#datenschutz">Privacy</a></li><li><a href="#roadmap">Roadmap</a></li></ul></div>
+			<div><h2>Product</h2><ul><li><a href="#funktionen">Features</a></li><li><a href="#datenschutz">Privacy</a></li></ul></div>
 			<div><h2>Get started</h2><ul><li><a href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Setup guide</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Demo</a></li><li><a href="#faq">FAQ</a></li></ul></div>
 			<div><h2>Community</h2><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Report a bug</a></li><li><a href="../brand.html">Brand manual</a></li></ul></div>
 		</div>
