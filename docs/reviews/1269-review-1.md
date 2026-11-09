@@ -1,0 +1,15 @@
+# Review #1269, Runde 1 (347c8bf9..09321283)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-1 | Minor | tools/open-work/check-issues.mjs:104-105 | Die Liste der Prüfdateien lässt Konfiguration aus, über die CI die Prüfungen aufruft: `package.json` (`deepcheck:ci`, `testcheck:ci`, `test:coverage`), `backend/package.json` (`"test": "bun test --coverage && bun scripts/coverage-check.ts"`, über diese Zeile setzt CI die Backend-Untergrenze durch) und `backend/bunfig.toml` (Coverage-Konfiguration). Ein Pull Request, der zum Beispiel `&& bun scripts/coverage-check.ts` entfernt oder `testcheck:ci` auf `true` setzt, schaltet die Untergrenze bzw. testcheck ohne `Gate change approved` ab, und die Prüfung bleibt grün. Ob «testcheck/deepcheck config, coverage floors» diese Dateien meint, entscheidet der Product Owner; im Diff gilt nur die Datei als Prüfdatei, in der der Zahlenwert steht. |
+
+Keine Blocker, keine Majors.
+
+Geprüft: CI-Schritt lädt das Skript per `git show <merge-base>:tools/open-work/check-issues.mjs` nach `$RUNNER_TEMP` (das Skript importiert nur `node:child_process` und braucht keine relativen Pfade, läuft also auch ausserhalb von `tools/`; bash `-e` bricht ab, wenn `git show` scheitert). `--no-renames` meldet umbenannte und gelöschte Prüfdateien. Die Regex deckt alle Arten aus «Decided» ab, auch verschachtelte `CLAUDE.md`, und lässt `docs/CLAUDE-notes.md` durch. Die Untergrenzen-Sperre greift auch mit Freigabe; eine entfernte oder nicht mehr lesbare Untergrenze ergibt «to none» und bleibt rot (ebenso eine gelöschte Datei). Die Freigabe wird wie `Spec change approved` gegen das Issue geprüft. Jeder neue Test schlägt ohne den Code fehl, den er prüft (ohne Prüfdatei-Erkennung Exit 0; ohne `--no-renames` fehlt `tools/a.ts`; ohne Ratchet Exit 0 mit Freigabe). CLAUDE.md-Zeile und Kommentar in ci.yml stimmen mit dem Code überein. Keine fremden Änderungen im Diff.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: `bun run lint`, `bun run check`, `bun run fitness -- --base origin/main`, Backend-Type-Check, `bunx vitest run tools/open-work tools/ci tools/deepcheck/test tools/claude-hooks tools/testcheck/test/wiring.test.ts src/__tests__/open-work.test.ts` und weitere Tests, die CLAUDE.md/ci.yml lesen; Prettier; Commit-Hooks; der Rot-Lauf der Freigabe-Sperre (`if (true)`).
+- Ob der Schritt «Open work» in der Branch-Protection von `main` ein Pflicht-Check ist: Das steht nicht im Repository. Ist er es nicht, sperrt ein roter Lauf das Mergen nicht.
+- Dass ein Pull Request ci.yml so ändern kann, dass der Schritt gar nicht läuft, ist bekannt und nach #1274 verschoben (eine solche Änderung an ci.yml ist selbst eine Prüfdatei-Änderung und wird rot, solange der Schritt noch läuft). Folge von «Applies to all pull requests»: Die wöchentlichen Dependabot-Pull-Requests für `github-actions` (`.github/dependabot.yml`) ändern `.github/workflows/*` und werden ohne Freigabe im Text immer rot. Das ist so entschieden; ich melde es nur, damit es bekannt ist.
