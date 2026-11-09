@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel, withPositionKeys } from '$lib/statement';
+	import { balanceLabel } from '$lib/statement';
+	import { withPositionKeys } from '$lib/position-keys';
 	import Table from '$lib/ui/Table.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { getLocale } from '$lib/paraglide/runtime';
