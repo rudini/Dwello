@@ -147,7 +147,7 @@ function addressProblem(baseUrl: string) {
 	const url = URL.parse(baseUrl);
 	if (!url || !['http:', 'https:'].includes(url.protocol)) return 'KI_ADDRESS_INVALID';
 	if (/[?#]/.test(baseUrl)) return 'KI_ADDRESS_SUFFIX';
-	if (url.username || url.password) return 'KI_ADDRESS_CREDENTIALS';
+	if (`${url.username}${url.password}`) return 'KI_ADDRESS_CREDENTIALS';
 	if (url.protocol === 'http:' && !OWN_NETWORK.test(url.hostname)) return 'KI_ADDRESS_NOT_HTTPS';
 	return null;
 }
@@ -235,7 +235,7 @@ export async function checkKiConnection(
 	} catch {
 		return { result: 'unreachable' };
 	}
-	if (response.status === 401 || response.status === 403) return { result: 'wrong-key' };
+	if ([401, 403].includes(response.status)) return { result: 'wrong-key' };
 	if (response.ok) return { result: 'ok' };
 	// only a refused request is about the image; a wrong address or model (404), no credit or too many requests, or a
 	// server error say nothing about it (code review 580 C-7, domain review 580 F-24)
