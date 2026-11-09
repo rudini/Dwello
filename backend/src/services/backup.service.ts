@@ -24,7 +24,7 @@ import {
 } from './backup-crypto';
 import { CodedError } from './coded-error';
 import { renderEmergencySheet } from './emergency-sheet';
-import type { Language } from './pdf.service';
+import type { Language } from '../db/schema';
 
 const DAY = 24 * 3600_000;
 type Secrets = { encryption_key?: string; jwt_secret?: string };

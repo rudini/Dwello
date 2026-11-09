@@ -10,7 +10,7 @@ import { createMailTransport, MailConfigError } from '../mail';
 import { getTypedConfig } from './config.service';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
+import { utilityStatements, type Language } from '../db/schema';
 import { CodedError, type ErrorParams } from './coded-error';
 import {
 	createDocument,
@@ -19,7 +19,6 @@ import {
 	markDocumentSent,
 	recordDeliveryError
 } from './document.service';
-import type { Language } from './pdf.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { generateStatementPdf, qrBillConfig } from './statement-pdf.service';

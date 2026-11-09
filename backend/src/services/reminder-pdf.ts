@@ -1,6 +1,8 @@
 import { once } from 'events';
 import PDFDocument from 'pdfkit';
-import { addPaymentPart, embedFonts, FONT, type Language } from './pdf.service';
+import { addPaymentPart } from './pdf-payment-part';
+import { embedFonts, FONT } from './pdf-layout';
+import type { Language } from '../db/schema';
 import type { QRBillConfig } from './qr-bill.service';
 import { countryLine } from './postal-address';
 import type { reminderLetter } from './reminder-letter';
