@@ -9,14 +9,26 @@ import type { ExpiredInvoicePeriod } from '../../../backend/src/api/invoice';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
+/**
+ * The one reading of GET /invoices/retention, for the overview and the list (one mapper per response); a failed read
+ * only hides the tasks, as the overview's other lists do
+ */
+export async function expiredPeriods(
+	fetch: typeof globalThis.fetch
+): Promise<ExpiredInvoicePeriod[]> {
+	const response = await fetch(`${BACKEND_URL}/api/v1/invoices/retention`).catch(() => null);
+	return response?.ok
+		? ((await response.json()) as { periods: ExpiredInvoicePeriod[] }).periods
+		: [];
+}
+
 /** #1410: the list's building and period when their Aufbewahrungsfrist has passed and they are not kept, else null */
 export async function expiredPeriod(fetch: typeof globalThis.fetch, url: URL) {
 	const [building, start] = [url.searchParams.get('building'), url.searchParams.get('periodStart')];
 	if (!building || !start) return null;
-	const { periods = [] } = (await (
-		await fetch(`${BACKEND_URL}/api/v1/invoices/retention`)
-	).json()) as { periods?: ExpiredInvoicePeriod[] };
-	const found = periods.find((p) => p.buildingId === building && p.start === start);
+	const found = (await expiredPeriods(fetch)).find(
+		(p) => p.buildingId === building && p.start === start
+	);
 	return found ? { ...found, period: periodName(found) } : null;
 }
 

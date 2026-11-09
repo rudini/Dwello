@@ -11,6 +11,7 @@ import {
 import { reletStarts } from '$lib/apartment';
 import type { BackupState, KiModel } from '$lib/types';
 import { backupState } from '$lib/server/backup';
+import { expiredPeriods } from '$lib/server/invoice-retention';
 
 interface DashboardData {
 	portfolio: {
@@ -111,7 +112,7 @@ export const load = async ({
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'apartments?limit=all', 'apartments'),
 		list(fetch, 'statements/outdated', 'statements'), // #454
-		list(fetch, 'invoices/retention', 'periods') // #1410
+		expiredPeriods(fetch) // #1410
 	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
@@ -146,7 +147,7 @@ export const load = async ({
 		lettersToSend: letters.length,
 		missingStatements,
 		outdatedStatements: outdated as OverviewInput['outdatedStatements'],
-		expiredInvoices: expired as OverviewInput['expiredInvoices'],
+		expiredInvoices: expired,
 		noticedContracts,
 		oldAddresses,
 		expiredContracts,
