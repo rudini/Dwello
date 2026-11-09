@@ -3,6 +3,8 @@
 // issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
 // waits for a decision («Proposed (confirm before starting)») without the label `needs-decision` (skill `issue-work`), and when
 // it changes a scenario that is not @wip on the base branch without `Spec change approved: #n` (CLAUDE.md, Workflow 1).
+// It also fails when it changes a gate file (a check, its config or the rules) without `Gate change approved: #n`, and
+// when it lowers a coverage floor, approved or not (#1269). CI runs the merge base's copy, so a pull request cannot switch it off.
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 // With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
 import { execFileSync } from 'node:child_process';
@@ -59,6 +61,9 @@ for (const [, n] of closing) {
 
 // `No scenario: <reason>` in the pull request text where none applies, e.g. a refactoring without new behaviour
 const base = process.env.BASE_REF;
+const git = (...args) => execFileSync('git', args, { encoding: 'utf8' });
+const from = base && git('merge-base', `origin/${base}`, 'HEAD').trim();
+const show = (rev, file) => (git('ls-tree', '--name-only', rev, file).trim() ? git('show', `${rev}:${file}`) : '');
 if (base && closing.length && !/\bno scenario:/i.test(prBody)) {
 	const changed = execFileSync('git', ['diff', '--name-only', `origin/${base}...HEAD`], { encoding: 'utf8' }).split('\n');
 	const app = changed.some((file) => /^(src\/(routes|lib)|backend\/src)\//.test(file) && !/__tests__|\.test\.ts$/.test(file));
@@ -73,9 +78,6 @@ if (base && closing.length && !/\bno scenario:/i.test(prBody)) {
 const approvals = [...prBody.matchAll(/\bspec change approved:\s*#(\d+)/gi)].map(([, n]) => n);
 const specChanges = [];
 if (base) {
-	const git = (...args) => execFileSync('git', args, { encoding: 'utf8' });
-	const from = git('merge-base', `origin/${base}`, 'HEAD').trim();
-	const show = (rev, file) => (git('ls-tree', '--name-only', rev, file).trim() ? git('show', `${rev}:${file}`) : '');
 	for (const file of git('diff', '--name-only', '--no-renames', from, 'HEAD', '--', 'tests/e2e/features/').split('\n')) {
 		if (!file.endsWith('.feature')) continue;
 		const [before, after] = [show(from, file), show('HEAD', file)];
@@ -97,6 +99,30 @@ if (!approvals.length)
 			`${place} changes the specification; fix the code, or ask the product owner and say "Spec change approved: #<issue>" in the pull request text`
 		);
 
+// A pull request may not loosen the checks that judge it: a changed gate file needs `Gate change approved: #n` (#1269)
+const gateApprovals = [...prBody.matchAll(/\bgate change approved:\s*#(\d+)/gi)].map(([, n]) => n);
+const gateFile =
+	/^(\.github\/workflows\/|tools\/|\.claude\/(hooks|skills)\/)|(^|\/)CLAUDE\.md$|^(\.fallowrc\.json|deepcheck\.config\.json|\.(deepcheck|testcheck)-baseline\.json|vitest\.config\.ts|backend\/scripts\/coverage-check\.ts)$/;
+const gateChanges = base
+	? git('diff', '--name-only', '--no-renames', from, 'HEAD')
+			.split('\n')
+			.filter((file) => gateFile.test(file))
+	: [];
+// a lowered coverage floor stays red with approval too: a ratchet against the merge base, as tools/fitness/ratchet.json
+const floorsOf = (rev, file) => {
+	const text = show(rev, file);
+	const [, list = ''] = /(?:thresholds:|MINIMUM =)\s*\{([^}]*)\}/.exec(text) ?? [];
+	return Object.fromEntries([...list.matchAll(/(\w+):\s*([\d.]+)/g)].map(([, key, value]) => [key, +value]));
+};
+for (const file of gateChanges.filter((file) => /^(vitest\.config|backend\/scripts\/coverage-check)\.ts$/.test(file))) {
+	const after = floorsOf('HEAD', file);
+	for (const [key, value] of Object.entries(floorsOf(from, file)))
+		if (!(after[key] >= value)) failures.push(`${file} lowers the coverage floor ${key} from ${value} to ${after[key] ?? 'none'}`);
+}
+if (!gateApprovals.length)
+	for (const file of gateChanges)
+		failures.push(`${file} changes a check; ask the product owner and say "Gate change approved: #<issue>" in the pull request text`);
+
 if (!process.env.GITHUB_TOKEN) {
 	console.log(`Skipped the issue lookup: GITHUB_TOKEN is not set (CI sets it); ${refs.size} issues named by markers`);
 } else {
@@ -106,8 +132,12 @@ if (!process.env.GITHUB_TOKEN) {
 		const state = !issue ? `missing (HTTP ${response.status})` : issue.pull_request ? 'a pull request' : issue.state;
 		if (state !== 'open') failures.push(`#${n} is ${state}; remove or repoint these markers: ${places.join(', ')}`);
 	}
-	// the approval is an issue whose «Decided (product owner)» holds the change (skill `issue-work`)
-	for (const n of specChanges.length ? approvals : []) {
+	// an approval is an issue whose «Decided (product owner)» holds the change (skill `issue-work`)
+	const asked = [
+		...(specChanges.length ? approvals : []).map((n) => [n, 'specification']),
+		...(gateChanges.length ? gateApprovals : []).map((n) => [n, 'gate'])
+	];
+	for (const [n, kind] of asked) {
 		const response = await get(`issues/${n}`);
 		const issue = response.ok ? await response.json() : null;
 		const why = !issue
@@ -119,7 +149,7 @@ if (!process.env.GITHUB_TOKEN) {
 					: issue.labels?.some((label) => label.name === 'needs-decision')
 						? 'it is still labelled needs-decision'
 						: '';
-		if (why) failures.push(`#${n} does not approve a specification change: ${why}`);
+		if (why) failures.push(`#${n} does not approve a ${kind} change: ${why}`);
 	}
 	for (let page = 1; ; page++) {
 		const response = await get(`issues?state=open&per_page=100&page=${page}`);
