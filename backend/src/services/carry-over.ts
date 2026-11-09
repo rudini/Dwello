@@ -30,14 +30,15 @@ const countedByOf = (t: string) =>
  * the contract ends in its period (b), or after it the contract pays a Nebenkostenpauschale only, without Akonto
  * above 0 and without agreed costs (c, Fachreview 506-1 V-3)
  */
-const unreachableOf = (t: string) =>
-	sql.raw(`(
+const unreachableOf = (t: string, replacing: SQL) =>
+	sql`(
 		exists (
 			select 1 from utility_statements later
-			where later.contract_id = ${t}.contract_id and later.status not in ('draft', 'replaced')
-				and later.period_start > ${t}.period_end and later.carried_from_id is distinct from ${t}.id
+			where ${sql.raw(`later.contract_id = ${t}.contract_id and later.status not in ('draft', 'replaced')
+				and later.period_start > ${t}.period_end and later.carried_from_id is distinct from ${t}.id`)}
+				and later.id is distinct from ${replacing}
 		)
-		or exists (
+		or ${sql.raw(`exists (
 			select 1 from rental_contracts c
 			where c.id = ${t}.contract_id and (
 				c.end_date <= ${t}.period_end
@@ -54,12 +55,14 @@ const unreachableOf = (t: string) =>
 					and not exists (select 1 from contract_categories k where k.contract_id = c.id and k.agreed)
 				)
 			)
-		)
-	)`);
+		)`)}
+	)`;
 
-// #506: an Übertrag no statement counts and none will, not settled by hand: the landlord settles it himself
-const openOf = (t: string) =>
-	sql`coalesce(${carriableOf(t)} and ${sql.raw(`${t}.carry_settled_on is null`)} and ${countedByOf(t)} is null and ${unreachableOf(t)}, false)`;
+// #506: an Übertrag no statement counts and none will, not settled by hand: the landlord settles it himself; a
+// statement being replaced counts as gone (#1403: its berichtigte Abrechnung may count it)
+const none = sql`null::uuid`;
+const openOf = (t: string, replacing = none) =>
+	sql`coalesce(${carriableOf(t)} and ${sql.raw(`${t}.carry_settled_on is null`)} and ${countedByOf(t)} is null and ${unreachableOf(t, replacing)}, false)`;
 
 export const carriable = carriableOf(T);
 export const countedBy = sql<string | null>`${countedByOf(T)}`;
@@ -70,10 +73,10 @@ export const openCarry = sql<boolean>`${openOf(T)}`;
  * a Saldo carried over, not open or settled by hand (#506, Fachreview 506-1 V-1), that no statement of another period
  * counts yet; one rule for the calculation and for a draft's check (code review 506-2 C-7)
  */
-const carriedNow = (contract: SQL, start: SQL, end: SQL) => sql`(
+const carriedNow = (contract: SQL, start: SQL, end: SQL, replacing = none) => sql`(
 	select prev.id from utility_statements prev
 	where prev.contract_id = ${contract} and ${carriableOf('prev')} and prev.carry_settled_on is null
-		and not ${openOf('prev')} and prev.period_end < ${start}
+		and not ${openOf('prev', replacing)} and prev.period_end < ${start}
 		and not exists (
 			select 1 from utility_statements counting
 			where counting.carried_from_id = prev.id and (counting.period_start <> ${start} or counting.period_end <> ${end})
@@ -81,9 +84,10 @@ const carriedNow = (contract: SQL, start: SQL, end: SQL) => sql`(
 	order by prev.period_end desc limit 1
 )`;
 
-/** The id of the Übertrag a new statement of the contract and period counts */
-export const carriedOverId = (contractId: string, periodStart: string, periodEnd: string) =>
-	carriedNow(sql`${contractId}::uuid`, sql`${periodStart}::date`, sql`${periodEnd}::date`);
+/** The id of the Übertrag a new statement of the contract and period counts; with `replacing`, as its berichtigte
+ *  Abrechnung would (#1403) */
+export const carriedOverId = (contractId: string, periodStart: string, periodEnd: string, replacing?: string) =>
+	carriedNow(sql`${contractId}::uuid`, sql`${periodStart}::date`, sql`${periodEnd}::date`, replacing ? sql`${replacing}::uuid` : none);
 
 // #506 C: a draft that would count another Übertrag now than the one it counts (Fachreview 448-3 V-23)
 const row = (column: string) => sql.raw(`${T}.${column}`);
