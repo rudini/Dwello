@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import { plainAmount, servicePeriodOf, suggestionProvenance, validateInvoice, type Suggestion } from '$lib/invoice';
-import { formatCurrency } from '$lib/utils/format';
+import { servicePeriodOf, suggestionProvenance, validateInvoice, type Suggestion } from '$lib/invoice';
+import { formatCurrency, plainAmount } from '$lib/utils/format';
 
 /** What the backend proposes for an uploaded file (POST /invoices/extract, tests/contracts/invoice-extraction.json) */
 export type Proposal = {
