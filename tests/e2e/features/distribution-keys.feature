@@ -177,3 +177,10 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Baustein "{rooms}" übernimmt
     Und der Liegenschaftsverwalter " * 2" weiterschreibt
     Dann steht in der Formel "{area}{rooms} * 2"
+
+  # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
+  @wip
+  Szenario: Die Seite «Verteilschlüssel» erklärt den Verteilschlüssel wie die Hilfe
+    Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Verteilschlüssel" heisst
+    Und der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
+    Dann beginnt die Hilfe zu "der Seite «Verteilschlüssel»" mit der Erklärung aus der Hilfe

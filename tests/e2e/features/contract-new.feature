@@ -545,3 +545,11 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
     Und der Liegenschaftsverwalter alle Nebenkosten abwählt
     Dann weist das Formular ohne Warnung darauf hin, dass keine Nebenkosten vereinbart sind
+
+  # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
+  @wip
+  Szenario: Die Hilfe zum Akonto erklärt den Begriff wie die Hilfe
+    Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Akonto" heisst
+    Und der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann beginnt die Hilfe zu "dem Akonto" mit der Erklärung aus der Hilfe

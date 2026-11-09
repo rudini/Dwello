@@ -25,3 +25,10 @@ Funktionalität: Neuer Mieter
   Szenario: Erfassen abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Mieterliste
+
+  # #698: ein Begriff aus der Hilfe wird am Feld mit demselben Text erklärt
+  @wip
+  Szenario: Die Hilfe zum Korrespondenzkanal erklärt den Begriff wie die Hilfe
+    Angenommen der Liegenschaftsverwalter hat in der Hilfe gelesen, was "Korrespondenzkanal" heisst
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mieter"
+    Dann beginnt die Hilfe zu "dem Korrespondenzkanal" mit der Erklärung aus der Hilfe
