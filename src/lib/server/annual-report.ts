@@ -35,11 +35,14 @@ async function reportBuildings(
 		buildings
 	}: { buildings: Record<'id' | 'name' | 'address' | 'postalCode' | 'city', string>[] } =
 		await response.json();
-	return buildings.map(({ id, name, address, postalCode, city }) => ({
-		value: id,
-		label: name,
-		address: `${name}, ${address}, ${postalCode} ${city}`
-	}));
+	// by name, as the landlord looks for them (persona Marco 1409-2 P-5)
+	return buildings
+		.toSorted((a, b) => a.name.localeCompare(b.name, 'de'))
+		.map(({ id, name, address, postalCode, city }) => ({
+			value: id,
+			label: name,
+			address: `${name}, ${address}, ${postalCode} ${city}`
+		}));
 }
 
 type ReportRow = { label: string; amount: number; total?: boolean };

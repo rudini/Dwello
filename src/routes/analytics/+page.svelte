@@ -9,6 +9,13 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+	// the building and year chosen, reset by each loaded report; while they differ from the report shown, no download
+	// of it (personas Helga P-1, Sven P-3, Marco P-5, 1409-2)
+	let building = $derived(data.buildingId ?? '');
+	let year = $derived(String(data.report?.year ?? ''));
+	const shown = $derived(
+		building === (data.buildingId ?? '') && year === String(data.report?.year ?? '')
+	);
 </script>
 
 <svelte:head>
@@ -33,7 +40,7 @@
 				name="building"
 				label={m.analytics_building_label()}
 				options={data.buildings}
-				value={data.buildingId}
+				bind:value={building}
 				testid="annual-report-building"
 			/>
 			<Select
@@ -42,7 +49,7 @@
 				label={m.analytics_year_label()}
 				help={m.analytics_year_help()}
 				options={data.years.map((year) => ({ value: year, label: year }))}
-				value={String(data.report.year)}
+				bind:value={year}
 				testid="annual-report-year"
 			/>
 			<Button type="submit" variant="primary" testid="annual-report-show"
@@ -65,7 +72,7 @@
 				<ReportSection {section} />
 			{/each}
 			<div class="flex flex-col gap-4 sm:flex-row">
-				{#each ['csv', 'pdf'] as kind (kind)}
+				{#each shown ? ['csv', 'pdf'] : [] as kind (kind)}
 					<Button
 						href="/analytics/{kind}?building={data.buildingId}&year={data.report.year}"
 						download

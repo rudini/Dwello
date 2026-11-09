@@ -18,12 +18,12 @@ const categories = {
 type Body = typeof report;
 
 // #1409: which Jahresbericht «Auswertungen» shows first, and the years to choose from
-function backend(firstYear: number, body: Body = report) {
+function backend(firstYear: number, body: Body = report, list: unknown = buildings) {
 	const asked: string[] = [];
 	const posted: unknown[] = [];
 	const fetch = (async (url: string, init?: RequestInit) => {
 		const { pathname, searchParams } = new URL(url);
-		if (pathname.endsWith('/buildings')) return Response.json(buildings);
+		if (pathname.endsWith('/buildings')) return Response.json(list);
 		if (pathname.endsWith('/categories')) return Response.json(categories);
 		if (pathname.endsWith('/reports/pdf')) {
 			posted.push(JSON.parse(String(init?.body)));
@@ -53,6 +53,23 @@ describe('Jahresbericht beim Öffnen von «Auswertungen»', () => {
 		const loaded = await loadAnnualReport(fetch, page());
 		expect(asked).toEqual(['2025', '2026']);
 		expect(loaded.report?.year).toBe(2026);
+	});
+
+	// persona Marco 1409-2 P-5: the buildings by name, the first of them preselected
+	it('nennt die Gebäude nach Namen und wählt ohne Wahl das erste', async () => {
+		const [one] = buildings.buildings;
+		const list = {
+			...buildings,
+			buildings: [
+				{ ...one, id: 'b2', name: 'Talhof' },
+				{ ...one, id: 'b3', name: 'Alpenhof' }
+			]
+		};
+		const loaded = await loadAnnualReport(backend(2024, report, list).fetch, page());
+		expect([loaded.buildings.map(({ label }) => label), loaded.buildingId]).toEqual([
+			['Alpenhof', 'Talhof'],
+			'b3'
+		]);
 	});
 
 	it('zeigt das gewählte Jahr auch vor dem ersten Jahr des Gebäudes', async () => {
