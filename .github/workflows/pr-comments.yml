@@ -36,12 +36,12 @@ jobs:
         run: |
           pr=$(gh api "repos/$GH_REPO/pulls?state=open&per_page=100" --paginate --jq '.[] | select(.head.sha == env.SHA) | .number' | head -1)
           echo "number=$pr" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: steps.pr.outputs.number != ''
         with:
           path: trusted # main's code: the scripts this workflow runs
           fetch-depth: 0
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         if: steps.pr.outputs.number != ''
       - run: bun install --frozen-lockfile
         if: steps.pr.outputs.number != ''
@@ -60,7 +60,7 @@ jobs:
           state=success
           (cd trusted && GIT_DIR="$(git -C ../pr rev-parse --absolute-git-dir)" GIT_WORK_TREE="$GITHUB_WORKSPACE/pr" BASE_REF="$base" PR_NUMBER="$PR" PR_BODY="$(gh api "repos/$GH_REPO/pulls/$PR" --jq .body)" node "$GITHUB_WORKSPACE/trusted/tools/open-work/check-issues.mjs") || state=failure
           gh api "repos/$GH_REPO/statuses/$SHA" -f state="$state" -f context="Gate check (main)" -f description="tools/open-work/check-issues.mjs of main" -f target_url="${{ github.server_url }}/$GH_REPO/actions/runs/${{ github.run_id }}"
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         id: report
         if: steps.pr.outputs.number != ''
         continue-on-error: true # no report: the job «Reviewer report» failed or did not run
@@ -71,7 +71,7 @@ jobs:
           github-token: ${{ github.token }}
       - name: Reviewer report
         if: steps.report.outcome == 'success'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR: ${{ steps.pr.outputs.number }}
         with:
@@ -85,7 +85,7 @@ jobs:
             const old = comments.find((c) => c.user.type === 'Bot' && c.body.startsWith(marker));
             if (old) await github.rest.issues.updateComment({ ...context.repo, comment_id: old.id, body });
             else await github.rest.issues.createComment({ ...context.repo, issue_number, body });
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         id: shots
         if: steps.pr.outputs.number != ''
         continue-on-error: true # no artifact: the pull request changes no page
@@ -110,7 +110,7 @@ jobs:
           for attempt in 1 2 3; do git push origin ui-screenshots && break; git pull --rebase origin ui-screenshots; done
       - name: Screenshots
         if: steps.shots.outcome == 'success'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR: ${{ steps.pr.outputs.number }}
         with:

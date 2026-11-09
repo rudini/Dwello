@@ -54,7 +54,7 @@ describe('GitHub Actions wiring', () => {
 		expect(scan).toContain('--format markdown');
 		expect(scan).toContain('--format json');
 		expect(scan).toContain('$GITHUB_STEP_SUMMARY');
-		expect(scan).toMatch(/uses: actions\/upload-artifact@v\d+/); // the version is Dependabot's
+		expect(scan).toMatch(/uses: actions\/upload-artifact@[0-9a-f]{40} # v\d+\.\d+\.\d+/); // the version is Dependabot's, pinned by commit (#1378)
 		expect(scan).not.toContain('--fail-on-score');
 		// the path input goes after `--`, so a value like --output=... cannot become an option
 		expect(scan).toContain('-- "$SCAN_PATH"');
