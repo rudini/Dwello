@@ -147,11 +147,11 @@ jobs:
           # the reviewer report (#1273); the review compares it and the PR text's Type, Decisions and Risks with the
           # diff (#1275). «Pull request comments» writes it after the same CI run, often later than this: up to 4
           # minutes for one updated since that run finished, not an older run's
-          for _ in $(seq 5); do
+          for try in 1 2 3 4 5; do
             gh api --paginate "repos/$GH_REPO/issues/$PR/comments" | jq -rs --arg since "$CI_DONE" '[.[][] |
               select(.user.type == "Bot" and (.body | startswith("<!-- review-report -->")) and .updated_at >= $since)
               ][-1].body // empty' > report.md
-            if [ -s report.md ] || [ -z "$CI_DONE" ]; then break; fi
+            if [ -s report.md ] || [ -z "$CI_DONE" ] || [ "$try" = 5 ]; then break; fi
             sleep 60
           done
           [ -s report.md ] || echo "(no reviewer report)" > report.md
