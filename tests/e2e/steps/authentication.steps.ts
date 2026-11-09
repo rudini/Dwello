@@ -107,6 +107,11 @@ Then('kann sich der Besucher mit E-Mail-Adresse und Passwort anmelden', async ({
 	await besucher.sees(passwordSignInOffered).toBe(true);
 });
 
+// #1374: "/", a tab and "/evil.example", which the browser reads as "//evil.example"
+Given('ein Besucher hat die Anmeldeseite über einen Link mit verstecktem fremdem Ziel geöffnet', async ({ besucher }) => {
+	await besucher.attemptsTo(openPage('/login?redirectTo=%2F%09%2Fevil.example'));
+});
+
 When('der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet', async ({ besucher, names }) => {
 	await besucher.attemptsTo(signInWithPassword(names.get('E-Mail Konto')!, names.get('Passwort Konto')!));
 });

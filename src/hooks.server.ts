@@ -34,6 +34,13 @@ export const init: ServerInit = () => {
 		);
 };
 
+// Every route param but the EGID (a number for the Gebäuderegister) is the UUID of a record and goes into a backend
+// address: anything else («x%2Fexport», «..») would point the signed-in request at another path there (#1377)
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const foreignId = ({ egid: _egid, ...ids }: Partial<Record<string, string>>) =>
+	!Object.values(ids).map(String).every(UUID.test, UUID);
+const NOT_FOUND = { error: { code: 'NOT_FOUND', message: 'Not found' } };
+
 const redirectTo = (location: string) => new Response(null, { status: 303, headers: { location } });
 
 // Every page needs a valid session; without one, pages lead to the login page and API calls get 401.
@@ -66,15 +73,20 @@ export const handle: Handle = ({ event, resolve }) =>
 		return session({
 			event,
 			resolve: async (event) => {
-				const response = await resolve(event, {
-					transformPageChunk: ({ html }) => html.replace('%lang%', locale)
-				});
+				const response =
+					event.url.pathname.startsWith('/api/') && foreignId(event.params)
+						? json(NOT_FOUND, { status: 404 })
+						: await resolve(event, {
+								transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+							});
 				// Without a cookie the answer depends on the browser language: no cache may hand it to another
 				response.headers.append('Vary', 'Accept-Language');
 				// A landlord's own app: no page of it (the sign-in page included) belongs in a search engine
 				response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 				// Private and changing data: back, forward and another tab load it anew, never a deleted record (#679)
 				response.headers.set('Cache-Control', 'no-store');
+				// a file (a Beleg, an export) is shown only as the kind it is sent with (#1377)
+				response.headers.set('X-Content-Type-Options', 'nosniff');
 				return response;
 			}
 		});
@@ -82,9 +94,9 @@ export const handle: Handle = ({ event, resolve }) =>
 
 // Server-side loads and actions call the backend directly; forward the session JWT, but only to the backend.
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
+	if (new URL(request.url).origin !== BACKEND_ORIGIN) return fetch(request);
+	if (foreignId(event.params)) return json(NOT_FOUND, { status: 404 });
 	const jwt = event.cookies.get(cookieConfig.sessionName);
-	if (jwt && new URL(request.url).origin === BACKEND_ORIGIN) {
-		request.headers.set('Authorization', `Bearer ${jwt}`);
-	}
+	if (jwt) request.headers.set('Authorization', `Bearer ${jwt}`);
 	return fetch(request);
 };

@@ -114,12 +114,13 @@ export async function kiSettingsView() {
 	return { ...shown, apiKeyStored: apiKey !== '' };
 }
 
+const trim = (value = '') => value.trim();
 const trimmed = (input: KiInput) => ({
-	baseUrl: input.baseUrl?.trim().replace(/\/$/, '') ?? '',
-	apiKey: input.apiKey?.trim() ?? '',
-	model: input.model?.trim() ?? '',
-	provider: input.provider?.trim() ?? '',
-	providerCountry: input.providerCountry?.trim() ?? ''
+	baseUrl: trim(input.baseUrl).replace(/\/$/, ''),
+	apiKey: trim(input.apiKey),
+	model: trim(input.model),
+	provider: trim(input.provider),
+	providerCountry: trim(input.providerCountry)
 });
 
 /** The key to send to `baseUrl`: the one entered, else the stored one, but only to the address it was saved for */
@@ -133,6 +134,27 @@ async function keyFor(baseUrl: string, entered: string) {
 			'Für eine neue Adresse ist der API-Schlüssel erneut einzugeben.'
 		);
 	return decrypt(row.apiKeyEncrypted);
+}
+
+// The landlord's own network, which may answer over http (#580): private and loopback addresses and names without a
+// dot, such as a compose service; a provider on the internet gets the key only over https (decided in #1372)
+const OWN_NETWORK =
+	/^((10|127)(\.\d+){3}|192\.168(\.\d+){2}|172\.(1[6-9]|2\d|3[01])(\.\d+){2}|\[::1\]|\[f[cd][\da-f]{2}:[^\]]*\]|[^.[]+)$/i;
+
+// Dwello appends the path to the address itself: credentials, a query or a fragment in it would send the request
+// elsewhere (#1372); the code says what does not fit (persona Anna 1372 P-1)
+export function addressProblem(baseUrl: string) {
+	const url = URL.parse(baseUrl);
+	if (!url || !['http:', 'https:'].includes(url.protocol)) return 'KI_ADDRESS_INVALID';
+	if (/[?#]/.test(baseUrl)) return 'KI_ADDRESS_SUFFIX';
+	if (`${url.username}${url.password}`) return 'KI_ADDRESS_CREDENTIALS';
+	if (url.protocol === 'http:' && !OWN_NETWORK.test(url.hostname)) return 'KI_ADDRESS_NOT_HTTPS';
+	return null;
+}
+
+function checkAddress(baseUrl: string) {
+	const problem = addressProblem(baseUrl);
+	if (problem) throw new CodedError(problem, 'Diese Adresse kann Dwello nicht verwenden.');
 }
 
 const locked = () => new CodedError('KI_SET_BY_OPERATOR', 'Die KI ist vom Betreiber festgelegt.');
@@ -161,6 +183,7 @@ export async function saveKiSettings(input: KiInput) {
 		throw new CodedError('KI_PROVIDER_INCOMPLETE', 'Es fehlen Angaben zum Anbieter der KI.', {
 			missing: missing.join(',')
 		});
+	checkAddress(values.baseUrl);
 	const apiKey = await keyFor(values.baseUrl, values.apiKey);
 	const apiKeyEncrypted = apiKey ? await encrypt(apiKey) : null;
 	const { provider, providerCountry: country } = values;
@@ -182,11 +205,13 @@ const CHECK_IMAGE =
 export async function checkKiConnection(
 	input: KiInput
 ): Promise<{ result: 'ok' | 'wrong-key' | 'unreachable' | 'no-images' }> {
+	if (llmConfig.byOperator) throw locked();
 	const { baseUrl, model, apiKey: entered } = trimmed(input);
+	checkAddress(baseUrl);
 	const apiKey = await keyFor(baseUrl, entered);
 	let response: Response;
 	try {
-		response = await fetch(`${baseUrl}/chat/completions`, {
+		response = await fetch(new URL('chat/completions', `${baseUrl}/`), {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -204,12 +229,13 @@ export async function checkKiConnection(
 					}
 				]
 			}),
-			signal: AbortSignal.timeout(llmConfig.timeout)
+			signal: AbortSignal.timeout(llmConfig.timeout),
+			redirect: 'error'
 		});
 	} catch {
 		return { result: 'unreachable' };
 	}
-	if (response.status === 401 || response.status === 403) return { result: 'wrong-key' };
+	if ([401, 403].includes(response.status)) return { result: 'wrong-key' };
 	if (response.ok) return { result: 'ok' };
 	// only a refused request is about the image; a wrong address or model (404), no credit or too many requests, or a
 	// server error say nothing about it (code review 580 C-7, domain review 580 F-24)

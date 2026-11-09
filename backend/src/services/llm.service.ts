@@ -15,7 +15,7 @@ import {
 	type LLMCategorizationResult
 } from '../config/llm';
 import { getCategoryByName, listCategories } from './category.service';
-import { currentKi } from './ki-settings.service';
+import { addressProblem, currentKi, type Ki } from './ki-settings.service';
 import { CodedError } from './coded-error';
 import type { Category } from '../db/schema';
 import type { AllocabilityProposal } from '../api/category';
@@ -75,16 +75,21 @@ const kiOff = async () => (await currentKi()).mode === 'none';
 // A prompt, or a prompt followed by images (data URLs) for a model that reads them
 type Content = string | ({ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } })[];
 
+// A provider address saved before the address rule that the rule now refuses gets nothing, no key either; the KI counts
+// as not answering (decided in #1372)
+const sendable = (ki: Ki) => ki.byOperator || !addressProblem(ki.baseUrl);
+
 /**
  * Call the OpenAI-compatible chat completions API
  */
 async function callLlm(prompt: Content): Promise<string> {
 	const ki = await currentKi();
+	if (!sendable(ki)) throw new Error('The stored KI address is refused by the address rule (#1372)');
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), llmConfig.timeout);
 
 	try {
-		const response = await fetch(`${ki.baseUrl}/chat/completions`, {
+		const response = await fetch(new URL('chat/completions', `${ki.baseUrl}/`), {
 			method: 'POST',
 			headers: llmHeaders(ki.apiKey),
 			body: JSON.stringify({
@@ -92,7 +97,9 @@ async function callLlm(prompt: Content): Promise<string> {
 				// No max_tokens or temperature: reasoning models reject both; the prompt asks for short JSON
 				messages: [{ role: 'user', content: prompt }]
 			}),
-			signal: controller.signal
+			signal: controller.signal,
+			// a stored API key never goes on to another address (#1372)
+			redirect: 'error'
 		});
 
 		clearTimeout(timeoutId);
@@ -119,13 +126,14 @@ async function callLlm(prompt: Content): Promise<string> {
  */
 export async function isLlmAvailable(): Promise<boolean> {
 	const ki = await currentKi();
-	if (ki.mode === 'none') return false;
+	if (ki.mode === 'none' || !sendable(ki)) return false;
 
 	try {
-		const response = await fetch(`${ki.baseUrl}/models`, {
+		const response = await fetch(new URL('models', `${ki.baseUrl}/`), {
 			method: 'GET',
 			headers: llmHeaders(ki.apiKey),
-			signal: AbortSignal.timeout(5000)
+			signal: AbortSignal.timeout(5000),
+			redirect: 'error'
 		});
 		return response.ok;
 	} catch {

@@ -143,7 +143,8 @@ describe('Auth Routes Integration Tests', () => {
 			expect(JSON.parse(cookies._store.get('dwello_login')!)).toEqual({ provider: 'google', redirectTo: '/buildings?search=See' });
 		});
 
-		it.each(['//evil.example/phish', 'https://evil.example', '/\\evil.example'])(
+		// #1374: the URL parser drops tab and newlines, so "/<tab>/host" is "//host"
+		it.each(['//evil.example/phish', 'https://evil.example', '/\\evil.example', '/\t/evil.example', '/\n/evil.example', '/\r/evil.example'])(
 			'führt nach der Anmeldung nie auf eine fremde Seite (%s)',
 			async (target) => {
 				const { GET } = await import('$lib/../routes/auth/login/+server');
@@ -158,6 +159,26 @@ describe('Auth Routes Integration Tests', () => {
 				expect(JSON.parse(cookies._store.get('dwello_login')!).redirectTo).toBe('/dashboard');
 			}
 		);
+
+		// code review 1374-1 C-1: Node 20, which README and package.json still name, has no URL.parse (as #1095)
+		it('merkt sich die verlangte Seite auch ohne URL.parse', async () => {
+			const parse = URL.parse;
+			Reflect.deleteProperty(URL, 'parse');
+			try {
+				const { GET } = await import('$lib/../routes/auth/login/+server');
+				const cookies = createMockCookies();
+				const event = createMockRequestEvent({
+					url: 'http://localhost:3000/auth/login?provider=google&redirectTo=%2Fbuildings',
+					cookies
+				});
+
+				await Promise.resolve(GET(event as never)).catch(() => {});
+
+				expect(JSON.parse(cookies._store.get('dwello_login')!).redirectTo).toBe('/buildings');
+			} finally {
+				URL.parse = parse;
+			}
+		});
 
 		it('zeigt die Anmeldeseite mit Hinweis, wenn der Anbieter nicht eingerichtet ist', async () => {
 			vi.mocked(oauthModule.validateProviderConfig).mockReturnValueOnce(false);

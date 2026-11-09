@@ -21,6 +21,11 @@
 			"reason": "UUID of the record id a form posts, checked before it goes into a backend URL (technical)"
 		},
 		{
+			"path": "src/hooks.server.ts",
+			"line": "const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;",
+			"reason": "UUID of a route param, checked before it goes into a backend URL (technical, #1377)"
+		},
+		{
 			"path": "src/routes/invoices/+page.server.ts",
 			"line": "const day = /^\\d{4}-\\d{2}-\\d{2}$/;",
 			"reason": "ISO date or year of a filter query parameter (technical)"
