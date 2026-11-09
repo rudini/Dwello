@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel } from '$lib/statement';
+	import { balanceLabel, withPositionKeys } from '$lib/statement';
 	import Table from '$lib/ui/Table.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -17,16 +17,7 @@
 		stacked ? { list: '', table: 'hidden' } : { list: '@5xl:hidden', table: 'hidden @5xl:block' }
 	);
 
-	// A position's key outlasts a recalculation, which gives new ids (#1366): its category and key (the id for one
-	// deleted before #1160/#1255), and how many positions of that pair came before it, as positions saved through the
-	// API may repeat a pair (fallback review of #1369)
-	const pair = (item: Item) => `${item.categoryId ?? item.id}/${item.distributionKeyId ?? item.id}`;
-	const keyed = $derived(
-		statement.lineItems.map((item, index, all) => ({
-			item,
-			key: `${pair(item)}/${all.slice(0, index).filter((other) => pair(other) === pair(item)).length}`
-		}))
-	);
+	const keyed = $derived(withPositionKeys(statement.lineItems));
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
 	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
