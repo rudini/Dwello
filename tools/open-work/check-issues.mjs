@@ -70,7 +70,7 @@ if (pull.user && pull.user.login !== 'dependabot[bot]') {
 		prBody
 			.split(/^##[ \t]+/m)
 			.slice(1)
-			.map((part) => [part.split('\n')[0].trim(), part.slice(part.indexOf('\n') + 1).replace(/<!--[^]*?-->/g, '').trim()])
+			.map((part) => [part.split('\n')[0].trim(), withoutHints(part.slice(part.indexOf('\n') + 1)).trim()])
 	);
 	for (const name of ['Type', 'Decisions', 'Risks']) {
 		if (sections[name] === undefined) failures.push(`The pull request text lacks the section «${name}» (.github/pull_request_template.md)`);
@@ -227,6 +227,16 @@ function examplesOnly(lines, after, body) {
 	while (/^\s*\|/.test(lines[row])) row--;
 	const [heading, ...rows] = /^\s*Beispiele:/.test(body[0]) ? body : [lines[row], ...body];
 	return /^\s*Beispiele:/.test(heading) && rows.every((line) => /^\s*\|/.test(line));
+}
+
+/** A section's text without the template's HTML hints, removed until none is left, so a nested one goes too */
+function withoutHints(text) {
+	let before;
+	do {
+		before = text;
+		text = text.replace(/<!--[^]*?-->/g, '');
+	} while (text !== before);
+	return text;
 }
 
 /** Why issue `n` is no ready issue for a pull request from a fork whose «Type» is `type` (#1271) */

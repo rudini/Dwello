@@ -506,6 +506,12 @@ describe('Der Text des Pull Requests nennt Typ, Entscheide und Risiken (#1271)',
 		expect(result.out).toContain('The section «Decisions» of the pull request text is empty');
 	});
 
+	// CodeQL on #1384: a hint hidden in a nested comment is removed too, so the section still counts as empty
+	it('meldet einen Abschnitt als leer, der nur verschachtelte Hinweise enthält', async () => {
+		const result = await own(sections('bug', '<!-<!-- a -->- b -->'));
+		expect(result.out).toContain('The section «Decisions» of the pull request text is empty');
+	});
+
 	it('meldet einen Typ, der keine Kategorie nennt', async () => {
 		const result = await own(sections('a refactoring'));
 		expect(result.out).toContain('«Type» names none of domain, product, bug or an nfr: category');
