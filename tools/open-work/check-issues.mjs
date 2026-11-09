@@ -258,8 +258,12 @@ function test(literal) {
 		return (text) => regex.test(text);
 	}
 	const { CucumberExpression, ParameterTypeRegistry } = cucumber();
-	const expression = new CucumberExpression(literal.slice(1, -1).replace(/\\(.)/g, '$1'), new ParameterTypeRegistry());
-	return (text) => expression.match(text) !== null;
+	try {
+		const expression = new CucumberExpression(literal.slice(1, -1).replace(/\\(.)/g, '$1'), new ParameterTypeRegistry());
+		return (text) => expression.match(text) !== null;
+	} catch {
+		return () => true; // a parameter type this check does not know: fails closed
+	}
 }
 
 /** The Cucumber expressions of the repository: CI runs this script from outside it, so it is looked up from both places */

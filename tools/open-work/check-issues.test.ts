@@ -417,4 +417,13 @@ Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
 		expect(result.out).toContain('buildings.steps.ts:19 step «sieht der Liegenschaftsverwalter {string} | sieht der Liegenschaftsverwalter nichts», used by');
 		expect(result.out).toContain('buildings.feature:3 «Liste zeigt Liegenschaften»');
 	});
+
+	// fallback review of #1365: a parameter type the check does not know matches every step instead of stopping the check
+	it('meldet einen Schritt mit unbekanntem Parametertyp mit Schritt und Szenario', async () => {
+		const custom = steps.replace("Given('eine Liegenschaft {string}'", "Given('eine Liegenschaft {liegenschaft}'");
+		const cwd = gateRepo({ 'tests/e2e/steps/buildings.steps.ts': custom.replace('creates(name)', 'creates()') }, { ...base, 'tests/e2e/steps/buildings.steps.ts': custom });
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {liegenschaft}», used by tests/e2e/features/buildings.feature:3');
+	});
 });
