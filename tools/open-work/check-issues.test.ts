@@ -200,3 +200,93 @@ describe('Szenarien ohne @wip sind die Spezifikation (CLAUDE.md, Workflow 1)', (
 		expect((await check([], 200, { number: 5, body: '', cwd: retagged, base: 'main' })).out).toContain('«Danach» changes');
 	});
 });
+
+/** A git repository whose `origin/main` holds the files `base` and whose HEAD holds `head` on top (null removes one) */
+function gateRepo(head: Record<string, string | null>, base: Record<string, string> = { 'README.md': 'base\n' }) {
+	const cwd = mkdtempSync(`${tmpdir()}/check-gates-`);
+	const git = (...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd });
+	const write = (files: Record<string, string | null>) => {
+		for (const [file, text] of Object.entries(files)) {
+			if (text === null) git('rm', '-q', file);
+			else {
+				mkdirSync(join(cwd, file, '..'), { recursive: true });
+				writeFileSync(join(cwd, file), text);
+			}
+		}
+		git('add', '-A');
+	};
+	git('init', '-q');
+	write(base);
+	git('commit', '-qm', 'base');
+	git('update-ref', 'refs/remotes/origin/main', 'HEAD');
+	write(head);
+	git('commit', '-qm', 'head');
+	return cwd;
+}
+
+const changeGate = (head: Record<string, string | null>, body = '', base?: Record<string, string>, issue?: object) =>
+	check([], 200, { number: 5, body, cwd: gateRepo(head, base), base: 'main', issue });
+
+describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
+	it.each([
+		'.github/workflows/ci.yml',
+		'tools/fitness/fitness.ts',
+		'.claude/hooks/commit-msg-gate.mjs',
+		'.claude/skills/tdd/SKILL.md',
+		'CLAUDE.md',
+		'backend/CLAUDE.md',
+		'.fallowrc.json',
+		'deepcheck.config.json',
+		'.deepcheck-baseline.json',
+		'.testcheck-baseline.json',
+		'vitest.config.ts',
+		'backend/scripts/coverage-check.ts'
+	])('meldet eine Änderung an %s ohne Freigabe', async (file) => {
+		const result = await changeGate({ [file]: 'changed\n' });
+		expect(result.code).toBe(1);
+		expect(result.out).toContain(`${file} changes a check; ask the product owner and say "Gate change approved: #<issue>"`);
+	});
+
+	it('lässt eine Änderung mit Freigabe und Änderungen an anderen Dateien durch', async () => {
+		expect(await changeGate({ 'tools/fitness/fitness.ts': 'changed\n' }, 'Gate change approved: #1269')).toMatchObject({ code: 0 });
+		expect(await changeGate({ 'src/lib/a.ts': 'a\n', 'docs/CLAUDE-notes.md': 'b\n' })).toMatchObject({ code: 0 });
+	});
+
+	it('meldet eine gelöschte und eine umbenannte Prüfdatei', async () => {
+		const base = { 'tools/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': '{}\n' };
+		const result = await changeGate({ 'tools/a.ts': null, 'lib/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': null }, '', base);
+		expect(result.out).toContain('tools/a.ts changes a check');
+		expect(result.out).toContain('.fallowrc.json changes a check');
+	});
+
+	it('meldet eine Freigabe durch ein Issue, das noch entschieden werden muss', async () => {
+		const deciding = { state: 'open', labels: [{ name: 'needs-decision' }] };
+		const result = await changeGate({ 'CLAUDE.md': 'changed\n' }, 'Gate change approved: #1269', undefined, deciding);
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('#1269 does not approve a gate change: it is still labelled needs-decision');
+	});
+});
+
+describe('Coverage-Untergrenzen sinken nie (#1269)', () => {
+	const floors = {
+		'vitest.config.ts': 'coverage: { thresholds: { statements: 71, branches: 60, functions: 76, lines: 66 } }\n',
+		'backend/scripts/coverage-check.ts': 'const MINIMUM = { lines: 82, functions: 85 };\n'
+	};
+	const approved = 'Gate change approved: #1269';
+
+	it('meldet eine gesenkte Untergrenze im Frontend und im Backend auch mit Freigabe', async () => {
+		const head = {
+			'vitest.config.ts': floors['vitest.config.ts'].replace('branches: 60', 'branches: 59.5'),
+			'backend/scripts/coverage-check.ts': 'const MINIMUM = { lines: 82 };\n'
+		};
+		const result = await changeGate(head, approved, floors);
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('vitest.config.ts lowers the coverage floor branches from 60 to 59.5');
+		expect(result.out).toContain('backend/scripts/coverage-check.ts lowers the coverage floor functions from 85 to none');
+	});
+
+	it('lässt eine gehobene Untergrenze mit Freigabe durch', async () => {
+		const head = { 'vitest.config.ts': floors['vitest.config.ts'].replace('lines: 66', 'lines: 70') };
+		expect(await changeGate(head, approved, floors)).toMatchObject({ code: 0 });
+	});
+});

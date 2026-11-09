@@ -30,7 +30,7 @@ describe('GitHub Actions wiring', () => {
 		for (const name of ['changes', 'build', 'static-checks', 'unit-tests', 'e2e-tests', 'ui-screenshots']) job(ci, name);
 		for (const name of ['fallow', 'fitness', 'deepcheck', 'testcheck']) expect(ci).not.toContain(`\n  ${name}:\n`);
 		const quick = job(ci, 'static-checks');
-		for (const run of ['bun run lint', 'bun run check', 'bun run type-check', 'bunx fallow audit --base', 'bun tools/fitness/fitness.ts', 'bun run deepcheck:ci', 'bun run testcheck:ci', 'node tools/open-work/check-issues.mjs'])
+		for (const run of ['bun run lint', 'bun run check', 'bun run type-check', 'bunx fallow audit --base', 'bun tools/fitness/fitness.ts', 'bun run deepcheck:ci', 'bun run testcheck:ci', 'script=tools/open-work/check-issues.mjs', 'git show "$(git merge-base "origin/$BASE_REF" HEAD):$script"'])
 			expect(quick).toContain(run);
 		const checks = quick.slice(quick.indexOf('id: deps'));
 		expect(checks.split('\n      - ').length - 1).toBe(checks.split("if: ${{ !cancelled() && steps.deps.outcome == 'success'").length);
