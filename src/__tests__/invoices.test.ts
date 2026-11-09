@@ -72,8 +72,6 @@ describe('Rechnungsliste', () => {
 		expect(data.years).toContain(String(thisYear - 5));
 	});
 
-	// #454 (#408 point 1): the period goes to the backend as such, independent of the years offered (older than five
-	// years and across the turn of the year)
 	// #1410: die Liste einer Abrechnungsperiode, deren Aufbewahrungsfrist vorbei ist, sagt es und bietet «Behalten» an
 	it('nennt bei einer Abrechnungsperiode nach Ablauf der Aufbewahrungsfrist deren Rechnungen', async () => {
 		const { fetch } = backend({ '/invoices/retention': retention });
@@ -114,6 +112,8 @@ describe('Rechnungsliste', () => {
 		]);
 	});
 
+	// #454 (#408 point 1): the period goes to the backend as such, independent of the years offered (older than five
+	// years and across the turn of the year)
 	it('filtert nach der Abrechnungsperiode aus der Adresse', async () => {
 		const { urls, fetch } = backend({});
 

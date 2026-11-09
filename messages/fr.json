@@ -1217,6 +1217,7 @@
 	"dashboard_task_retention_text_many": "Le délai de conservation de {count} factures de cette période de décompte a pris fin le {date}. Supprimez ce dont vous n’avez plus besoin. Dwello ne compte pas ici les factures d’investissements créant une plus-value : conservez-les jusqu’à la vente de l’immeuble. Si une facture de la liste doit être conservée plus longtemps, Dwello vous l’indique lors de la suppression.",
 	"dashboard_task_retention_action": "Voir les factures",
 	"dashboard_task_retention_keep": "Conserver",
+	"dashboard_task_retention_keep_help": "Avec « Conserver », la vue d’ensemble ne mentionne plus ces factures. Dwello ne supprime rien ; vous pouvez toujours supprimer des factures une à une.",
 	"dashboard_task_retention_kept": "Vous conservez les factures {period} de {building}. Dwello ne les mentionne plus dans la vue d’ensemble.",
 	"invoices_date_decides": "Détermine dans quelle période de décompte tombe la facture.",
 	"invoices_service_period_days": "Seuls les jours compris dans la période de décompte comptent.",

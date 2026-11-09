@@ -126,7 +126,6 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			cache: cacheStats
 		};
 	})
-	// The key the invoice form proposes per building and category (#379)
 	// #1410: the Abrechnungsperioden whose invoices may be deleted, and «Behalten» of one
 	.get('/retention', async () => ({ periods: await expiredInvoicePeriods() }))
 	.post(
@@ -143,6 +142,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			body: t.Object({ buildingId: t.String({ format: 'uuid' }), periodStart: t.String({ format: 'date' }) })
 		}
 	)
+	// The key the invoice form proposes per building and category (#379)
 	.get('/latest-keys', () => latestKeys())
 	// Get Swiss utility cost rules
 	.get('/utility-rules', async () => {

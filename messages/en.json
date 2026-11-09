@@ -1217,6 +1217,7 @@
 	"dashboard_task_retention_text_many": "The retention period of {count} invoices of this billing period ended on {date}. Delete what you no longer need. Dwello does not count invoices for value-enhancing investments here: keep them until you sell the building. If an invoice in the list must be kept longer, Dwello tells you when you delete it.",
 	"dashboard_task_retention_action": "View invoices",
 	"dashboard_task_retention_keep": "Keep",
+	"dashboard_task_retention_keep_help": "With «Keep», the overview no longer lists these invoices. Dwello deletes nothing; you can still delete individual invoices.",
 	"dashboard_task_retention_kept": "You are keeping the invoices for {period} of {building}. Dwello no longer lists them in the overview.",
 	"invoices_date_decides": "Decides which billing period the invoice falls into.",
 	"invoices_service_period_days": "Only the days within the billing period count.",

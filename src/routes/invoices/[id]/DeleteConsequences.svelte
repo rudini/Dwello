@@ -14,17 +14,17 @@
 		billedIn?: { start: string; end: string }[];
 		statements?: BilledStatement[];
 	} = $props();
+
+	// #1410: until when to keep it and why; a wertvermehrende Investition until the sale (Fachreview 1410-1 V-2)
+	const retention = $derived(
+		invoice.keepUntil === 'sale'
+			? m.invoices_delete_retention_investment()
+			: invoice.keepUntil && m.invoices_delete_retention({ date: formatDate(invoice.keepUntil) })
+	);
 </script>
 
 <p>{m.invoices_delete_text({ name: invoice.billingEntity, amount: formatCurrency(invoice.amount) })}</p>
-<!-- #1410: until when to keep it and why; a wertvermehrende Investition until the sale (Fachreview 1410-1 V-2) -->
-{#if invoice.keepUntil}
-	<p data-testid="invoice-delete-retention-note">
-		{invoice.keepUntil === 'sale'
-			? m.invoices_delete_retention_investment()
-			: m.invoices_delete_retention({ date: formatDate(invoice.keepUntil) })}
-	</p>
-{/if}
+{#if retention}<p data-testid="invoice-delete-retention-note">{retention}</p>{/if}
 {#if invoice.beleg}
 	<p data-testid="invoice-delete-document-note">{m.invoices_delete_beleg()}</p>
 {/if}

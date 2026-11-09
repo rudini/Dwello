@@ -34,11 +34,19 @@
 			date: formatDate(retention.keepUntil)
 		})}
 	</p>
+	<!-- what the button does (personas 1410: Helga P-1, Marco P-2, Anna P-3, Sven P-2), as at #459 -->
+	<p id="invoice-retention-keep-help" data-testid="invoice-retention-keep-help">
+		{m.dashboard_task_retention_keep_help()}
+	</p>
 	<form method="POST" action="?/keep" use:enhance={keep}>
 		<input type="hidden" name="buildingId" value={retention.buildingId} />
 		<input type="hidden" name="periodStart" value={retention.start} />
-		<Button type="submit" icon="check" busy={keeping} testid="invoice-retention-keep"
-			>{m.dashboard_task_retention_keep()}</Button
+		<Button
+			type="submit"
+			icon="check"
+			busy={keeping}
+			describedby="invoice-retention-keep-help"
+			testid="invoice-retention-keep">{m.dashboard_task_retention_keep()}</Button
 		>
 	</form>
 	{#if error}

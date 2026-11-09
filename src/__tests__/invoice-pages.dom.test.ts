@@ -153,6 +153,16 @@ describe('Rechnungsliste', () => {
 			});
 		});
 
+		// Persona Helga 1410 P-1, Marco P-2, Anna P-3, Sven P-2/P-3: was der Knopf tut, wie bei #459
+		it('sagt beim Knopf, was «Behalten» tut', () => {
+			withRetention();
+			const help = byTestId('invoice-retention-keep-help')!;
+			expect(help.textContent).toBe(
+				'Mit «Behalten» nennt die Übersicht diese Rechnungen nicht mehr. Dwello löscht nichts; einzelne Rechnungen können Sie weiterhin löschen.'
+			);
+			expect(byTestId('invoice-retention-keep')!.getAttribute('aria-describedby')).toBe(help.id);
+		});
+
 		it('sagt, wenn das Behalten nicht gespeichert wurde', () => {
 			withRetention({
 				keepError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.'

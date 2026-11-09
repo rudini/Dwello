@@ -1217,6 +1217,7 @@
 	"dashboard_task_retention_text_many": "Die Aufbewahrungsfrist von {count} Rechnungen dieser Abrechnungsperiode endete am {date}. Löschen Sie, was Sie nicht mehr brauchen. Rechnungen für wertvermehrende Investitionen zählt Dwello hier nicht: Behalten Sie sie, bis Sie das Gebäude verkaufen. Muss eine Rechnung der Liste länger aufbewahrt werden, nennt Dwello das beim Löschen.",
 	"dashboard_task_retention_action": "Rechnungen ansehen",
 	"dashboard_task_retention_keep": "Behalten",
+	"dashboard_task_retention_keep_help": "Mit «Behalten» nennt die Übersicht diese Rechnungen nicht mehr. Dwello löscht nichts; einzelne Rechnungen können Sie weiterhin löschen.",
 	"dashboard_task_retention_kept": "Sie behalten die Rechnungen {period} von {building}. Dwello nennt sie in der Übersicht nicht mehr.",
 	"invoices_date_decides": "Bestimmt, in welche Abrechnungsperiode die Rechnung fällt.",
 	"invoices_service_period_days": "Nur die Tage in der Abrechnungsperiode zählen.",
