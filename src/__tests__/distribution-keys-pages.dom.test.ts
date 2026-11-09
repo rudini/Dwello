@@ -119,6 +119,13 @@ describe('Verteilschlüssel', () => {
 });
 
 describe('Verteilschlüssel erfassen', () => {
+	// #1395 (Fachreview 1395-1 M-1): a new key changes no statement yet
+	it('erklärt beim Erfassen die Formel ohne den Hinweis auf eine Änderung', () => {
+		show(NewKeyPage, { form: null } as never);
+		expect(byTestId('distribution-key-formula-help')!.textContent).toContain('Bestimmt den Anteil jeder Wohnung');
+		expect(byTestId('distribution-key-formula-help')!.textContent).not.toContain('Ändern Sie die Formel nur');
+	});
+
 	it('beginnt mit der Formel nach Fläche und fügt Variablen per Klick an', () => {
 		show(NewKeyPage, { form: null } as never);
 		const formula = byTestId<HTMLInputElement>('distribution-key-formula-input')!;
@@ -192,5 +199,13 @@ describe('Verteilschlüssel bearbeiten', () => {
 		expect(byTestId<HTMLInputElement>('distribution-key-name-it-input')!.value).toBe('');
 		expect(byTestId<HTMLInputElement>('distribution-key-name-en-input')!.value).toBe('Own');
 		expect(text()).toContain('Fehlt er, steht der deutsche Name.');
+	});
+
+	// #1395 (Fachreview 1395-1 M-1): a changed formula applies to every period, sent statements included
+	it('erklärt beim Bearbeiten, dass eine geänderte Formel für alle Abrechnungsperioden gilt', () => {
+		show(EditKeyPage, { data: { key: { ...key('k2', 'Eigener', 'custom'), formula: '{rooms}' } }, form: null } as never);
+		expect(byTestId('distribution-key-formula-help')!.textContent).toContain(
+			`Ändern Sie die Formel nur, um einen Fehler zu korrigieren. Die neue Formel gilt dann für alle Abrechnungsperioden: Entwürfe rechnen nach «Neu berechnen» mit ihr, und versendete Abrechnungen, deren Saldo oder Position sich dadurch ändert, schlägt Dwello Ihnen zum Berichtigen vor. Soll ab einer Abrechnungsperiode ein anderer Verteilschlüssel gelten, erfassen Sie einen neuen Verteilschlüssel und wählen Sie ihn bei den Rechnungen dieser Periode. Einen anderen Verteilschlüssel vereinbaren Sie vorher mit den Mietern.`
+		);
 	});
 });

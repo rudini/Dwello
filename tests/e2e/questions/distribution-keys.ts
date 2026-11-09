@@ -3,6 +3,7 @@ import {
 	deleteButton,
 	formula,
 	formulaError,
+	formulaHelp,
 	formulaInput,
 	keyActions,
 	keyRow,
@@ -25,5 +26,6 @@ export const formulaProblem = Text.of(formulaError);
 export const formulaMarkedInvalid = Attribute.named('aria-invalid').of(formulaInput);
 export const formulaTestErrors = Text.ofAll(testErrors);
 export const formulaValue = Value.of(formulaInput);
+export const formulaHelpText = Text.of(formulaHelp);
 export const translationsOf = (name: string) => Text.of(translations(name));
 export const translationMarkers = (name: string) => Count.of(translations(name));

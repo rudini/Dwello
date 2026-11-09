@@ -80,7 +80,8 @@
 	<Field
 		id="formula"
 		label={m.keys_formula()}
-		help={m.keys_formula_help()}
+		help={key ? `${m.keys_formula_help()} ${m.keys_formula_change_help()}` : m.keys_formula_help()}
+		helpTestid="distribution-key-formula-help"
 		error={errors.formula}
 		testid="distribution-key-formula-field"
 	>

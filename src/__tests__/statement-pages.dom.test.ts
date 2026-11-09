@@ -1101,6 +1101,16 @@ describe('Abrechnungsdetail', () => {
 		);
 	});
 
+	// #1395 (PO, Fachreview 1395-1 V-1): the same for a sent statement, which is corrected, not recalculated
+	it('verlangt bei einer versendeten Abrechnung nach einer geänderten Wohnung oder einem Verteilschlüssel das Berichtigen', () => {
+		later(0, 'sent', { values: true, correctionDue: true });
+		expect(laterText()).toContain('Wohnung oder Verteilschlüssel seit der Abrechnung geändert');
+		expect(laterText()).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurde eine Wohnung des Gebäudes oder ein Verteilschlüssel so geändert, dass die Abrechnung neu berechnet einen anderen Saldo oder eine andere Position ergäbe. Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen»'
+		);
+		expect(byTestId('statement-later-correct-button')).not.toBeNull();
+	});
+
 	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
 		later(1);
 		expect(byTestId('statement-later-invoices')!.textContent).toContain('Rechnungen seit der Abrechnung geändert');

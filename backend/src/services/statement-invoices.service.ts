@@ -172,9 +172,11 @@ export async function statementChanges(statementId: string) {
 	return { ...changes, carryOverChanged: !!statement!.carryChanged, splitKeys: await invoiceSplitKeys(statement!.building!.id, period) }; // #506 C
 }
 
-// #1328 (PO A'): a draft, current by its Übertrag, of a building whose apartments or a key changed since it was created
+// #1328 (PO A'): a draft, current by its Übertrag, or (#1395) a statement a berichtigte Abrechnung would replace, of a
+// building whose apartments or a key changed since it was created (not sent: what changed before is in what it bills too)
 const valuesTouched = async (statement: Located, load: Loaders) =>
-	statement.status === 'draft' && !statement.carryChanged && (await load.valuesChangedAt(statement)) > statement.createdAt;
+	(statement.status === 'draft' ? !statement.carryChanged : CORRECTED.includes(statement.status)) &&
+	(await load.valuesChangedAt(statement)) > statement.createdAt;
 
 type Check = Awaited<ReturnType<typeof recalculation>>;
 
@@ -201,12 +203,13 @@ async function changesOf(statement: StatementWithDetails | null, load: Loaders) 
 	// a key that cannot be calculated: recalculating would split equally, so there is no Saldo to show (#1309)
 	const full = (correctable || touched) && !keys.length ? await load.full(located) : null;
 	const check = full ? await recalculation(full) : null;
+	const valuesChanged = touched && !!check?.changes; // «Neu berechnen» would split it otherwise
 	return {
 		invoiceIds,
 		fuelStockChanged: fuelStock,
 		uncalculableKeys: keys,
-		valuesChanged: touched && !!check?.changes, // «Neu berechnen» would split it otherwise
-		...correctionOf(statement, correctable, check),
+		valuesChanged,
+		...correctionOf(statement, correctable || (valuesChanged && statement.status !== 'draft'), check),
 		result: check?.result
 	};
 }

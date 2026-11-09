@@ -9,6 +9,7 @@ export const keyRow = (name: string) =>
 export const nameInput = target('Name', (page) => page.getByTestId('distribution-key-name-input'));
 export const frenchNameInput = target('Name auf Französisch', (page) => page.getByTestId('distribution-key-name-fr-input'));
 export const formulaInput = target('Formel', (page) => page.getByTestId('distribution-key-formula-input'));
+export const formulaHelp = target('Hilfe zur Formel', (page) => page.getByTestId('distribution-key-formula-help'));
 // #737: the error of the Formel field itself, not of the whole form
 export const formulaError = target('Fehlermeldung der Formel', (page) =>
 	page.getByTestId('distribution-key-formula-field').getByTestId('form-error')
