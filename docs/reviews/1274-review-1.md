@@ -1,0 +1,28 @@
+# Review #1274 (f75f26ff..dc3b286e), Runde 1
+
+| ID | Schwere | Ort | Befund |
+|----|---------|-----|--------|
+| C-1 | Major | .github/workflows/pr-comments.yml:54-60 | Der Status «Gate check (main)» wird an `$SHA` (`workflow_run.head_sha`) gesetzt, geprüft wird aber `pull/$PR/head` zum Zeitpunkt des Laufs. Hat der PR inzwischen einen neueren Kopf, trägt der alte Commit das Ergebnis eines anderen Commits. |
+| C-2 | Minor | .github/workflows/pr-comments.yml:117-118, 157 | Der Screenshot-Kommentar baut Bild-URLs und «as of …» aus `pr.head.sha` (aktueller Kopf laut API), veröffentlicht werden die Bilder aber unter `pr-N/$SHA` (Z. 96). Kommt zwischen CI-Lauf und diesem Job ein Push, zeigen die Links auf einen Ordner, den es noch nicht gibt, und der Kommentar nennt den falschen Stand. Vorher kamen beide Werte aus demselben Event. |
+| C-3 | Minor | tools/open-work/check-issues.mjs:330; pr-comments.yml:47 | `cucumber()` fällt auf `createRequire(process.cwd())` zurück, und cwd ist hier der Baum `pr/`, den der PR kontrolliert. Ein Fork kann dort `node_modules/@cucumber/cucumber-expressions/` committen. Heute erreicht der Lauf diesen Pfad nicht (direkte Abhängigkeit in `package.json:50`, `bun install` in `trusted/` muss gelingen, sonst bricht der Job ab). Der Schutz hängt aber an dieser stillen Bedingung. Der Kommentar Z. 47 («only read with git diff and git show») ist unvollständig: Das Skript macht auch `git grep` im ausgecheckten Baum und löst Module von dort auf. Den Fallback braucht es nur, wenn dieser Workflow ihn ausschliesst, sonst sollte er weg (z. B. nur `import.meta.url`, weil `ci.yml` seine Kopie unter `$RUNNER_TEMP` aus dem Repo-Root mit cwd = Repo startet). Kein Test in `pr-comments.test.ts` erkennt das. |
+
+## C-1: Gate-Status hängt am falschen Commit
+
+`pr-comments.yml:54` holt `pull/$PR/head` und legt den Worktree auf `FETCH_HEAD` an. Z. 60 setzt den Status auf `repos/$GH_REPO/statuses/$SHA`. Zwischen dem Abschluss des CI-Laufs für `$SHA` und diesem Fetch kann der Fork weiter pushen (der neue CI-Lauf bricht den alten nicht mehr ab, wenn dieser schon fertig ist). Dann:
+
+- Fork pusht B (ändert eine Prüfdatei ohne `Gate change approved`), CI für B läuft durch.
+- Bevor `pr-comments` für B fetcht, pusht der Fork C (sauber).
+- Der Lauf für B prüft C, Ergebnis `success`, gesetzt auf B.
+- Ein Force-Push zurück auf B macht B wieder zum Kopf, mit grünem «Gate check (main)», bis ein neuer Lauf das überschreibt. Das hängt vom Timing ab, aber der Status beschreibt nachweislich einen anderen Commit.
+
+Für einen Gate-Status, der Pflicht werden soll (#1269/#1274: «a fork cannot switch them off»), reicht das nicht. Nachweis: im Step `git rev-parse FETCH_HEAD` neben `$SHA` ausgeben. Nach einem zweiten Push während des Laufs unterscheiden sie sich. Abhilfe: `$SHA` holen (`git fetch origin "$SHA"`, GitHub liefert Commits des PR-Netzwerks über `pull/N/head` oder per SHA) oder nach dem Fetch `[ "$(git -C trusted rev-parse FETCH_HEAD)" = "$SHA" ]` prüfen und sonst `failure`/`error` setzen. Ein Test in `tools/ci/pr-comments.test.ts` sollte festhalten, dass der Worktree auf `$SHA` steht.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet: `bunx vitest run tools/ci tools/review-report tools/deepcheck/test/workflows.test.ts tools/testcheck/test/wiring.test.ts tools/open-work` (153 grün, `pr-comments.test.ts` vorher rot gesehen), ESLint, Prettier auf neuen Dateien, YAML-Parse beider Workflows. Selbst nichts ausgeführt. Rot vorher ist durch Lesen plausibel: Ohne `pr-comments.yml` wirft `read()` beim Laden, und `job('ui-screenshots')` enthielt auf der Basis die Fork-Bedingung und `: write`.
+- Ob die Workflows wirklich laufen (Ausdrücke, `download-artifact` mit `run-id` über einen Fork-Lauf, `--orphan`-Worktree), lässt sich nur auf `main` belegen. `workflow_run` startet nur vom Default-Branch, actionlint gab es nicht.
+- Dependabot-PRs: Ich konnte nicht klären, ob ein `workflow_run`, den ein Dependabot-Lauf auslöst, ein Nur-Lese-Token bekommt. Wenn ja, scheitert `gh api …/statuses` (Z. 60) und damit der ganze Job. Dann fehlt «Gate check (main)», und sobald er Pflicht ist, bleiben Dependabot-PRs hängen. Die bisherige Ausnahme `github.actor != 'dependabot[bot]'` (entfernt in `ci.yml` und `report.test.ts`) galt dem alten Kommentar-Job. Gesucht habe ich nur im Repo, nicht in der GitHub-Doku.
+- Ein Fork kann `name: CI` in seiner `ci.yml` ändern. Dann startet `pr-comments` nicht, und der Status fehlt. Schutz gibt es erst, wenn der Product Owner «Gate check (main)» zur Pflicht macht (laut Aufrufer separat angefragt). Ob die PR-Beschreibung `Gate change approved: #<n>` trägt (Änderung an `.github/workflows/` und `tools/`), habe ich nicht gesehen.
+- Ungeprüft bleibt der Inhalt der Artefakt-Dateien. Ein Fork kann beliebige Blobs mit Endung `.png` in beliebiger Grösse über den Bot in den Branch `ui-screenshots` schreiben lassen (Z. 101). Ob #1378 oder der Product Owner das hinnimmt, ist hier nicht festgelegt.
+
+Geprüft: `check-issues.mjs` führt im Baum `pr/` nur `git` (diff/show/ls-tree/grep/merge-base, ohne Hooks: kein `core.hooksPath` im Repo) und die GitHub-API aus. Ausnahme ist der Fallback aus C-3. `origin/<base>` ist in `trusted/` dank `fetch-depth: 0` vorhanden. Die PR-Nummer kommt aus `head_sha`, nicht aus dem Artefakt. `comment.md` wird auf den Marker geprüft. Ausdrücke in `run:` enthalten nur vertrauenswürdige Werte. `ci.yml`: beide Jobs ohne Schreibrecht, `persist-credentials: false`, kein `git push`/`createComment` mehr. Doku in `tech-stack.md` und `fitness-functions.md` passt zum Code. Der Test in `report.test.ts` wurde zu Recht entfernt. Ponytail: nichts zu streichen ausser dem Fallback aus C-3.

@@ -1,0 +1,164 @@
+name: Pull request comments
+
+# Comments from the CI run of a pull request, forks included (#1274): that run builds the reviewer report (#1273) and the
+# screenshots with the pull request's code but without secrets or a write token, and uploads them as artifacts. This
+# workflow runs from main, reads only those artifacts as data (text and PNG files; nothing of them is executed), publishes
+# the screenshots to the branch ui-screenshots and writes both comments. It also runs main's check of changed gate files
+# (#1269, tools/open-work/check-issues.mjs) against the pull request, so a fork cannot switch it off in its own ci.yml,
+# and sets its result as the commit status «Gate check (main)».
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  comment:
+    name: Comments and gate check
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read # the artifacts of the CI run
+      contents: write # the branch ui-screenshots
+      issues: read
+      pull-requests: write
+      statuses: write # «Gate check (main)»
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      # the pull request by the run's head commit (a fork's run lists none), never by a number an artifact could claim
+      - name: Find the pull request
+        id: pr
+        run: |
+          pr=$(gh api "repos/$GH_REPO/pulls?state=open&per_page=100" --paginate --jq '.[] | select(.head.sha == env.SHA) | .number' | head -1)
+          echo "number=$pr" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v7
+        if: steps.pr.outputs.number != ''
+        with:
+          path: trusted # main's code: the scripts this workflow runs
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        if: steps.pr.outputs.number != ''
+      - run: bun install --frozen-lockfile
+        if: steps.pr.outputs.number != ''
+        working-directory: trusted
+      # main's script on exactly the commit of the run (the status goes on it): it reads that tree only through git
+      # (diff, show, grep), and runs from trusted/, so it loads packages only from main's node_modules
+      - name: Gate check (main)
+        if: steps.pr.outputs.number != ''
+        env:
+          PR: ${{ steps.pr.outputs.number }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git -C trusted fetch origin "$SHA"
+          git -C trusted worktree add --detach ../pr "$SHA"
+          base=$(gh api "repos/$GH_REPO/pulls/$PR" --jq .base.ref)
+          state=success
+          (cd trusted && GIT_DIR="$(git -C ../pr rev-parse --absolute-git-dir)" GIT_WORK_TREE="$GITHUB_WORKSPACE/pr" BASE_REF="$base" PR_NUMBER="$PR" PR_BODY="$(gh api "repos/$GH_REPO/pulls/$PR" --jq .body)" node "$GITHUB_WORKSPACE/trusted/tools/open-work/check-issues.mjs") || state=failure
+          gh api "repos/$GH_REPO/statuses/$SHA" -f state="$state" -f context="Gate check (main)" -f description="tools/open-work/check-issues.mjs of main" -f target_url="${{ github.server_url }}/$GH_REPO/actions/runs/${{ github.run_id }}"
+      - uses: actions/download-artifact@v7
+        id: report
+        if: steps.pr.outputs.number != ''
+        continue-on-error: true # no report: the job «Reviewer report» failed or did not run
+        with:
+          name: review-report
+          path: artifacts/review-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Reviewer report
+        if: steps.report.outcome == 'success'
+        uses: actions/github-script@v9
+        env:
+          PR: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const body = require('fs').readFileSync('artifacts/review-report/comment.md', 'utf8');
+            const marker = '<!-- review-report -->';
+            if (!body.startsWith(marker)) throw new Error('comment.md does not start with the report marker');
+            const issue_number = Number(process.env.PR);
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number });
+            const old = comments.find((c) => c.user.type === 'Bot' && c.body.startsWith(marker));
+            if (old) await github.rest.issues.updateComment({ ...context.repo, comment_id: old.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number, body });
+      - uses: actions/download-artifact@v7
+        id: shots
+        if: steps.pr.outputs.number != ''
+        continue-on-error: true # no artifact: the pull request changes no page
+        with:
+          name: ui-screenshots
+          path: artifacts/ui-screenshots
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      # only the artifact's PNG files reach the branch ui-screenshots
+      - name: Publish screenshots to branch ui-screenshots
+        if: steps.shots.outcome == 'success'
+        env:
+          DIR: pr-${{ steps.pr.outputs.number }}/${{ github.event.workflow_run.head_sha }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # every affected page looks as on the base branch: nothing to publish
+          ls artifacts/ui-screenshots/ui-screenshots/*.png >/dev/null 2>&1 || exit 0
+          if git -C trusted fetch origin ui-screenshots; then git -C trusted worktree add -B ui-screenshots ../shots FETCH_HEAD; else git -C trusted worktree add --orphan -b ui-screenshots ../shots; fi
+          mkdir -p "shots/$DIR" && cp artifacts/ui-screenshots/ui-screenshots/*.png "shots/$DIR/"
+          cd shots && git add . && git commit -m "chore(ci): screenshots for $DIR"
+          for attempt in 1 2 3; do git push origin ui-screenshots && break; git pull --rebase origin ui-screenshots; done
+      - name: Screenshots
+        if: steps.shots.outcome == 'success'
+        uses: actions/github-script@v9
+        env:
+          PR: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const fs = require('fs');
+            // the artifact of the CI run: ui-routes.txt and ui-screenshots/, read as data
+            process.chdir('artifacts/ui-screenshots');
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: Number(process.env.PR) });
+            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${process.env.SHA}`;
+            const marker = '<!-- ui-screenshots -->';
+            const shot = (title, name) => {
+              const before = fs.existsSync(`ui-screenshots/${name}.before.png`)
+                ? `\n<details><summary>Before</summary>\n\n![${title} before](${base}/${name}.before.png?raw=true)\n</details>`
+                : '\n_New page, nothing to compare with._';
+              return `### ${title}\n![${title}](${base}/${name}.png?raw=true)${before}`;
+            };
+            // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
+            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
+            // PDF pages that look the same (statement-pdf.ts): pdf_<language>_<page>
+            const samePdfPages = fs.existsSync('ui-screenshots/unchanged.txt')
+              ? fs.readFileSync('ui-screenshots/unchanged.txt', 'utf8').split('\n').filter(Boolean).sort()
+              : [];
+            const pdfTitle = (name) => {
+              const [, language, page] = name.match(/^pdf_(\w+)_(\d+)/);
+              return `Statement PDF (${language}), page ${page}`;
+            };
+            // every shot of a page, its looks and states (screenshots.spec.ts): <file>\t<title> per line;
+            // one that looks the same as on the base branch has no screenshot (looksTheSame)
+            const unchanged = [];
+            const taken = fs.existsSync('ui-screenshots/shots.txt')
+              ? fs.readFileSync('ui-screenshots/shots.txt', 'utf8').split('\n').filter(Boolean).sort()
+              : [];
+            const shots = taken.flatMap((line) => {
+              const [name, title] = line.split('\t');
+              if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(title), []);
+              return [shot(title, name)];
+            });
+            if (fs.readFileSync('ui-routes.txt', 'utf8').split('\n').includes('pdf')) {
+              unchanged.push(...samePdfPages.map(pdfTitle));
+              shots.push(...pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', ''))));
+            }
+            const same = unchanged.length ? `\n\nLook the same as on ${pr.base.ref}: ${unchanged.join(', ')}.` : '';
+            // a comment holds 65536 characters: the shots that do not fit are only on the branch
+            let listed = shots.join('\n\n');
+            for (let count = shots.length; listed.length + same.length > 60000; count--)
+              listed = `${shots.slice(0, count).join('\n\n')}\n\n_${shots.length - count} more on [branch ui-screenshots](${base.replace('/blob/', '/tree/')})._`;
+            const body = shots.length
+              ? `${marker}\n## UI screenshots\nChanged pages as of ${process.env.SHA.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${listed}${same}`
+              : `${marker}\n## UI screenshots\nNo visible changes as of ${process.env.SHA.slice(0, 7)}.${same}`;
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
+            const existing = comments.find((comment) => comment.body?.startsWith(marker));
+            if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
