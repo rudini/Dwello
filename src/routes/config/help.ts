@@ -1,14 +1,14 @@
 import { m } from '$lib/paraglide/messages';
 
-// Plain-language explanations of the settings' domain terms, from UBIQUITOUS_LANGUAGE.md (docs/archive/redesign/01-plan.md §7)
+// The settings' domain terms, explained with the glossary's own text and what the field adds (#698)
 export const help = {
 	get heatingProfile() {
-		return m.config_help_heating_profile();
+		return m.glossary_profile_text();
 	},
 	get distributionKey() {
-		return m.config_help_distribution_key();
+		return `${m.glossary_key_text()} ${m.config_help_distribution_key_more()}`;
 	},
 	get managementFee() {
-		return m.config_help_management_fee();
+		return m.glossary_fee_text();
 	}
 };

@@ -161,10 +161,14 @@ describe('Einstellungen', () => {
 		const body = settingsPage().replace(/\s+/g, ' ');
 
 		expect(body).toContain(
-			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters, für dessen Mietvertrag eine Verwaltungspauschale vereinbart ist. Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art. 4 Absatz 3 VMWG). Dwello nimmt höchstens 10 % an.'
+			// #698: the glossary's text, then what the field adds (fachreview 698-1, V-2)
+			'Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art. 4 Absatz 3 VMWG). Den Satz wählen Sie beim Erstellen der Abrechnungen, ausser der Mietvertrag nennt einen eigenen. Dort schlägt Dwello den Satz vor, den Sie hier eintragen; Dwello nimmt höchstens 10 % an.'
 		);
 		expect(body).toContain('Verteilt die Heizkosten in Prozent auf die 12 Monate');
-		expect(body).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');
+		// #698: the glossary's text, then the field's own sentence (#452, point 7)
+		expect(body).toContain(
+			'auf die Wohnungen aufgeteilt werden, zum Beispiel nach Fläche, nach Zimmern oder gleich viel pro Wohnung. Jede Rechnung hat einen Verteilschlüssel; Sie wählen ihn beim Erfassen der Rechnung.'
+		);
 		// Fachreview #69 (V-7, V-10, V-12)
 		for (const said of [
 			'Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen.',
