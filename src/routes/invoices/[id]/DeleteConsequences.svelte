@@ -17,7 +17,7 @@
 	} = $props();
 </script>
 
-<p>{m.invoices_delete_text({ name: invoice.billingEntity, amount: formatCurrency(invoice.amount) })}</p>
+<p id="invoice-delete-text">{m.invoices_delete_text({ name: invoice.billingEntity, amount: formatCurrency(invoice.amount) })}</p>
 <RetentionNote keepUntil={invoice.keepUntil} />
 {#if invoice.beleg}
 	<p data-testid="invoice-delete-document-note">{m.invoices_delete_beleg()}</p>

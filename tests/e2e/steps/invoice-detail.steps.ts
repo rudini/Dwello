@@ -253,9 +253,10 @@ Then('ist der Titel der Bestätigung {string} ganz zu sehen', async ({ verwalter
 	await verwalter.sees(deleteDialogTitleShare).toBe(1);
 });
 
-// #653: the confirmation describes itself with its first paragraph, not with its whole content
+// #653: the confirmation describes itself with its first paragraph, not with its whole content; #1410: and the
+// Aufbewahrungsfrist of an invoice of today (Spec change approved: #1410)
 Then('beschreibt sich die Bestätigung mit {string}', async ({ verwalter, seed }, text: string) => {
-	await verwalter.sees(deleteDialogDescription).toBe(seed.withNames(text));
+	await verwalter.sees(deleteDialogDescription).toBe(seed.withNames(text).replace('<Jahr in 10 Jahren>', String(thisYear() + 10)));
 });
 
 // #1410: the retention period in the confirmation, and deleting still goes through

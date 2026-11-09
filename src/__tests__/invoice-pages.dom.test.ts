@@ -1395,6 +1395,18 @@ describe('Beleg einer Rechnung', () => {
 		);
 	});
 
+	// Persona Sven 1410 P-1 (Entscheid PO in #1410): die Beschreibung der Bestätigung ist ihr erster Absatz und die Frist
+	it('beschreibt die Bestätigung zum Löschen mit ihrem ersten Absatz und der Aufbewahrungsfrist', () => {
+		show(InvoicePage, { data: { invoice: toInvoice(invoiceRow(invoiceContract)) } } as never);
+		click('invoice-delete-button');
+		const ids = document.querySelector('[role="dialog"]')!.getAttribute('aria-describedby')!.split(' ');
+		const said = (id: string) => document.getElementById(id)!.textContent!.replace(/\s+/g, ' ').trim();
+		expect(ids.map(said)).toEqual([
+			'Die Rechnung von Hauswart Huber über CHF 450.00 wird gelöscht. Sie fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen.',
+			said('invoice-delete-retention-note')
+		]);
+	});
+
 	it('nennt beim Löschen nach Ablauf der Aufbewahrungsfrist keine Frist', () => {
 		show(InvoicePage, {
 			data: { invoice: toInvoice(invoiceRow({ ...invoiceContract, keepUntil: null })) }

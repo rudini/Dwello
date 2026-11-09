@@ -169,7 +169,8 @@ Funktionalität: Rechnungsdetail
     Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
-    Dann beschreibt sich die Bestätigung mit "Die Rechnung von Hauswart Huber über CHF 450.00 wird gelöscht. Sie fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen."
+    # #1410 (Entscheid PO, Persona Sven 1410 P-1): mit der Aufbewahrungsfrist; die Rechnung ist von heute
+    Dann beschreibt sich die Bestätigung mit "Die Rechnung von Hauswart Huber über CHF 450.00 wird gelöscht. Sie fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen. Bewahren Sie die Originalrechnung bis zum 31.12.<Jahr in 10 Jahren> auf, auf Papier oder als Datei. Wer zur Buchführung verpflichtet ist, muss Buchungsbelege 10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR). Auch als Privatperson brauchen Sie die Rechnung bis dann: Die Steuerbehörde kann bis 10 Jahre nach Ende der Steuerperiode ein Nachsteuerverfahren einleiten (Art. 152 DBG)."
 
   # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter
   Szenario: Abgezogene Akontorechnungen beim Betrag

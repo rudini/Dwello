@@ -140,6 +140,7 @@
 	busyLabel={m.buildings_deleting()}
 	confirmTestid="invoice-delete-confirm"
 	onconfirm={remove}
+	describedby={invoice.keepUntil ? 'invoice-delete-text invoice-delete-retention-note' : undefined}
 >
 	<!-- after its Aufbewahrungsfrist no statement is to correct (Fachreview 1410-1 V-3) -->
 	<DeleteConsequences

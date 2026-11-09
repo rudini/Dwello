@@ -8,7 +8,7 @@
 </script>
 
 {#if keepUntil}
-	<p data-testid="invoice-delete-retention-note">
+	<p id="invoice-delete-retention-note" data-testid="invoice-delete-retention-note">
 		{keepUntil === 'sale'
 			? m.invoices_delete_retention_investment()
 			: m.invoices_delete_retention({ date: formatDate(keepUntil) })}
