@@ -5,5 +5,7 @@ Worker of the request «work through the open issues of rudini/Dwello». No scen
 - [x] `pr-comments.yml`: the «look the same» list from a fork's artifact is capped and the shortening loop stops at 0 shots; each shot's name and title is capped at 200 characters; @mentions in both bot comments are neutralised; pins in `tools/ci/pr-comments.test.ts` seen red
 - [x] code-reviewer `docs/reviews/1274b-review-1.md`: no Blocker/Major; C-1 Minor (one long title could still fill the comment) fixed
 - [x] code-reviewer `docs/reviews/1274b-review-2.md` (closing round on that fix): C-1 closed; C-2 Minor (neutralised @ adds characters after the length check, only a crafted fork title fails its own comment) stays in the report
+- [x] Fallback review of PR #1391: at most 300 lines of `shots.txt` and 300 PDF pages are read, the finished comment is cut to 65000 characters (closes C-2), the job stops after 10 minutes; pins seen red
+- [x] code-reviewer `docs/reviews/1274b-review-3.md` and `1274b-review-4.md` (closing rounds on those fixes): C-3 Minor (PDF pages) fixed, no other findings
 - [x] Workflow note: with auto-merge on, a pull request merges as soon as the status «Outside review» arrives, which comes with the review itself, so the review is answered only after the merge (PR #1386, merged 10 s after its fallback review); the skill `pull-request` asks to answer it first
 - [x] Archive the session; PR pushed after this archive
