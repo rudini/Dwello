@@ -301,6 +301,7 @@ describe('Sicherung', () => {
 		// the content of a real Sicherung: without the signature check the restore would go through
 		const content = join(await folder(), 'content');
 		await decryptFile(file, code, content);
+		await query(name, `UPDATE buildings SET name = 'Neuer Stand'`);
 		const forged = join(await folder(), 'forged.backup');
 		await encryptStream(createReadStream(content), forged, {
 			salt: real.subarray(16, 32),
@@ -310,7 +311,7 @@ describe('Sicherung', () => {
 		await expect(
 			restoreBackup(forged, code, `${server}/${name}`, await folder(), migrations)
 		).rejects.toThrow('nicht von Ihrer Dwello-Installation erstellt');
-		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
+		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Neuer Stand' }]);
 	}, 60_000);
 
 	// Decided (product owner) #1373: a code confirmed before the signature keeps writing unsigned Sicherungen
