@@ -29,9 +29,18 @@ export type ReconciliationBody = {
 	keyNotCalculable?: Named[]; // #1309
 };
 
+type AnnualCosts = { categories: { categoryId: string | null; amount: number }[]; total: number };
+
 /** #1409: the Jahresbericht of a building and a calendar year (`GET /reports/annual`, tests/contracts/report-annual.json) */
 export type AnnualReportBody = {
 	year: number;
 	firstYear: number; // the year of the building's first contract or invoice
-	income: { netRent: number; additionalRent: number; advancePayments: number; flatRateUtilityCharge: number; total: number };
+	income: { netRent: number; additionalRent: number; flatRateUtilityCharge: number; total: number };
+	costs: {
+		// «davon tragen Sie» of the Kostenabstimmung of the period ending in the year; billed: it has valid statements
+		utility: AnnualCosts & { period: { start: string; end: string }; billed: boolean; notes: boolean; outside: boolean };
+		maintenance: AnnualCosts; // the non-allocable invoices without Hypothekarzinsen and capital improvements
+		totalWithoutCapital: number;
+		capital: AnnualCosts; // «Wertvermehrende Investitionen»
+	};
 };

@@ -380,9 +380,20 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	const categoryNamed = async (name: string) => (await db.select().from(categories).where(eq(categories.name, name)))[0].id;
+	// #1409: an invoice after the statement of 2024 leaves a share with the landlord; a repair and an investment fill the groups
 	it('GET /reports/annual liefert die Felder von report-annual.json', async () => {
-		const actual = await (await callApi(`/api/v1/reports/annual?buildingId=${rental.building}&year=2024`)).json();
-		expect(drift(await sample('report-annual'), actual)).toEqual([]);
+		const own = { description: `Jahresbericht ${token}`, invoiceDate: '2024-05-31', isValidUtilityCost: false };
+		await insertInvoice(rental.building, { ...own, categoryId: await categoryNamed('Repairs') });
+		await insertInvoice(rental.building, { ...own, categoryId: await categoryNamed('Capital Improvements') });
+		// recorded after the statement: the landlord bears it in the Kostenabstimmung
+		await insertInvoice(rental.building, { description: `Jahresbericht ${token}`, amount: '120.00', invoiceDate: '2024-11-30' });
+		try {
+			const actual = await (await callApi(`/api/v1/reports/annual?buildingId=${rental.building}&year=2024`)).json();
+			expect(drift(await sample('report-annual'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Jahresbericht ${token}`));
+		}
 	});
 
 	// H-28: a run of 2025 with a move-in names the heating invoice without Leistungszeitraum beside one with

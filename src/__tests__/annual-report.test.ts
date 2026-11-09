@@ -2,20 +2,35 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { annualReportCsv, annualReportPdf, loadAnnualReport } from '$lib/server/annual-report';
 import report from '../../tests/contracts/report-annual.json';
 import buildings from '../../tests/contracts/buildings.json';
+import categoryList from '../../tests/contracts/categories.json';
+
+// the report's categories by their names, in the shape of the category list
+const names = ['Heizung', 'Hauswart', 'Reparaturen', 'Wertvermehrende Investitionen'];
+const categories = {
+	...categoryList,
+	categories: names.map((name, i) => ({
+		...categoryList.categories[0],
+		id: `c0000000-0000-4000-8000-00000000000${i + 1}`,
+		name,
+		nameDE: name
+	}))
+};
+type Body = typeof report;
 
 // #1409: which Jahresbericht «Auswertungen» shows first, and the years to choose from
-function backend(firstYear: number) {
+function backend(firstYear: number, body: Body = report) {
 	const asked: string[] = [];
 	const posted: unknown[] = [];
 	const fetch = (async (url: string, init?: RequestInit) => {
 		const { pathname, searchParams } = new URL(url);
 		if (pathname.endsWith('/buildings')) return Response.json(buildings);
+		if (pathname.endsWith('/categories')) return Response.json(categories);
 		if (pathname.endsWith('/reports/pdf')) {
 			posted.push(JSON.parse(String(init?.body)));
 			return new Response('%PDF-');
 		}
 		asked.push(searchParams.get('year')!);
-		return Response.json({ ...report, year: Number(searchParams.get('year')), firstYear });
+		return Response.json({ ...body, year: Number(searchParams.get('year')), firstYear });
 	}) as typeof globalThis.fetch;
 	return { fetch, asked, posted };
 }
@@ -61,12 +76,28 @@ describe('Jahresbericht zum Herunterladen', () => {
 		const lines = new TextDecoder('utf-8', { ignoreBOM: true })
 			.decode(await response.arrayBuffer())
 			.split('\r\n');
-		expect(lines.slice(0, 3)).toEqual([
+		const income = 'Mietertrag laut Mietverträgen';
+		const costs = 'Kosten, die Sie selbst tragen';
+		expect(lines.filter(Boolean)).toEqual([
 			'\ufeffBereich;Position;Betrag CHF',
-			'Mietertrag laut Mietverträgen;Nettomiete;29800.00',
-			'Mietertrag laut Mietverträgen;Zusatzmiete;0.00'
+			`${income};Nettomiete;29800.00`,
+			`${income};Zusatzmiete;0.00`,
+			`${income};Nebenkostenpauschale;475.81`,
+			`${income};Total Mietertrag;30275.81`,
+			expect.stringMatching(
+				new RegExp(
+					`^${costs};Ihr Anteil an den Nebenkosten der Abrechnungsperiode 01\\.01\\.2025 – 31\\.12\\.2025, .*;$`
+				)
+			),
+			`${costs};Heizung;920.00`,
+			`${costs};Hauswart;121.64`,
+			`${costs};Total Nebenkosten, die Sie tragen;1041.64`,
+			`${costs};Reparaturen;800.00`,
+			`${costs};Total Unterhalt und Verwaltung;800.00`,
+			`${costs};Total Kosten ohne wertvermehrende Investitionen;1841.64`,
+			`${costs};Wertvermehrende Investitionen;15000.00`,
+			`${costs};Total wertvermehrende Investitionen;15000.00`
 		]);
-		expect(lines).toContain('Mietertrag laut Mietverträgen;Total Mietertrag;32675.81');
 	});
 
 	it('lässt das PDF mit Titel, Gebäude, Zeitraum und den Beträgen der Seite machen', async () => {
@@ -83,7 +114,21 @@ describe('Jahresbericht zum Herunterladen', () => {
 					{
 						heading: 'Mietertrag laut Mietverträgen',
 						rows: expect.arrayContaining([
-							{ label: 'Total Mietertrag', amount: 'CHF 32’675.81', total: true }
+							{ label: 'Total Mietertrag', amount: 'CHF 30’275.81', total: true }
+						])
+					},
+					{
+						heading: 'Kosten, die Sie selbst tragen',
+						// the note on the Abrechnungsperiode under the help text (Fachreview 1409-2 V-17)
+						help: expect.stringMatching(
+							/Steuererklärung\.\n\nIhr Anteil an den Nebenkosten der Abrechnungsperiode 01\.01\.2025 – 31\.12\.2025/
+						),
+						rows: expect.arrayContaining([
+							{
+								label: 'Total Kosten ohne wertvermehrende Investitionen',
+								amount: 'CHF 1’841.64',
+								total: true
+							}
 						])
 					}
 				]
@@ -105,5 +150,56 @@ describe('Jahresbericht zum Herunterladen', () => {
 				]
 			}
 		]);
+	});
+});
+
+// #1409 (Fachreview 1409-2 V-14): what the report says about the landlord's share of the Nebenkosten
+describe('Hinweise zum Anteil an den Nebenkosten', () => {
+	const notesOf = async (utility: Partial<Body['costs']['utility']>) => {
+		const body = {
+			...report,
+			costs: { ...report.costs, utility: { ...report.costs.utility, ...utility } }
+		};
+		const loaded = await loadAnnualReport(
+			backend(2024, body).fetch,
+			page('?building=b1&year=2025')
+		);
+		const costs = loaded.report!.sections[1];
+		return { notes: costs.notes, labels: costs.rows.map(({ label }) => label) };
+	};
+
+	it('sagt ohne Abrechnungen der Periode, dass der Anteil fehlt, und zeigt keine Nebenkosten', async () => {
+		const { notes, labels } = await notesOf({ billed: false, categories: [], total: 0 });
+		expect(notes).toEqual([
+			expect.stringContaining(
+				'Für die Abrechnungsperiode 01.01.2025 – 31.12.2025 gibt es noch keine Abrechnungen.'
+			)
+		]);
+		expect(labels).not.toContain('Total Nebenkosten, die Sie tragen');
+		expect(labels).toContain('Total Kosten ohne wertvermehrende Investitionen');
+	});
+
+	it('nennt die Hinweise der Kostenabstimmung und Tage ausserhalb von Dwello', async () => {
+		const { notes } = await notesOf({ notes: true, outside: true });
+		expect(notes).toEqual([
+			expect.stringContaining(
+				'Ihr Anteil an den Nebenkosten der Abrechnungsperiode 01.01.2025 – 31.12.2025'
+			),
+			expect.stringContaining(
+				'Die Kostenabstimmung der Abrechnungsperiode 01.01.2025 – 31.12.2025 hat Hinweise'
+			),
+			expect.stringContaining('ausserhalb von Dwello abgerechnet')
+		]);
+	});
+
+	it('zeigt die wertvermehrenden Investitionen nur, wenn es welche gibt', async () => {
+		const body = { ...report, costs: { ...report.costs, capital: { categories: [], total: 0 } } };
+		const loaded = await loadAnnualReport(
+			backend(2024, body).fetch,
+			page('?building=b1&year=2025')
+		);
+		expect(loaded.report!.sections[1].rows.map(({ label }) => label).at(-1)).toBe(
+			'Total Kosten ohne wertvermehrende Investitionen'
+		);
 	});
 });

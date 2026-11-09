@@ -1,9 +1,10 @@
 import { question } from '../screenplay/actor';
 import { DownloadedFile, Text } from '../screenplay/questions';
-import { annualReportCells, annualReportHelp, annualReportPart } from '../targets/annual-report';
+import { annualReportCells, annualReportHelp, annualReportNotes, annualReportPart } from '../targets/annual-report';
 
 // #1409: what the Jahresbericht shows, and what its CSV says
 export const annualReportCellsOf = (part: 'income' | 'costs') => Text.ofAll(annualReportCells(annualReportPart(part)));
+export const annualReportNotesText = Text.ofAll(annualReportNotes);
 export const annualReportHelpOf = (part: 'income' | 'costs') => Text.of(annualReportHelp(annualReportPart(part)));
 
 /** The amounts of the named positions in the downloaded CSV, «Position Betrag»; the cells split at «;», the

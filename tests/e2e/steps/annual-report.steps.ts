@@ -1,7 +1,7 @@
 import type { DataTable } from 'playwright-bdd';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { annualReportCellsOf, annualReportHelpOf, csvAmountsOf } from '../questions/annual-report';
+import { annualReportCellsOf, annualReportHelpOf, annualReportNotesText, csvAmountsOf } from '../questions/annual-report';
 import { downloadedFileName, downloadedPdfText } from '../questions/download';
 import { downloadAnnualReport, openAnnualReport } from '../tasks/annual-report';
 
@@ -30,6 +30,10 @@ Then(
 		await verwalter.sees(annualReportHelpOf(parts[part])).toBe(text);
 	}
 );
+
+Then('nennt der Jahresbericht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(annualReportNotesText).toContain(text);
+});
 
 Then(
 	'ist die heruntergeladene Datei der Jahresbericht {int} von {string} als {string}',

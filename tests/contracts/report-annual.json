@@ -4,8 +4,29 @@
 	"income": {
 		"netRent": 29800,
 		"additionalRent": 0,
-		"advancePayments": 2400,
 		"flatRateUtilityCharge": 475.81,
-		"total": 32675.81
+		"total": 30275.81
+	},
+	"costs": {
+		"utility": {
+			"period": { "start": "2025-01-01", "end": "2025-12-31" },
+			"billed": true,
+			"notes": false,
+			"outside": false,
+			"categories": [
+				{ "categoryId": "c0000000-0000-4000-8000-000000000001", "amount": 920 },
+				{ "categoryId": "c0000000-0000-4000-8000-000000000002", "amount": 121.64 }
+			],
+			"total": 1041.64
+		},
+		"maintenance": {
+			"categories": [{ "categoryId": "c0000000-0000-4000-8000-000000000003", "amount": 800 }],
+			"total": 800
+		},
+		"totalWithoutCapital": 1841.64,
+		"capital": {
+			"categories": [{ "categoryId": "c0000000-0000-4000-8000-000000000004", "amount": 15000 }],
+			"total": 15000
+		}
 	}
 }

@@ -19,6 +19,7 @@ const data = (year: number, currentYear: number) => ({
 				key: 'income' as const,
 				heading: 'Mietertrag',
 				help: 'Hilfe',
+				notes: [],
 				rows: [{ label: 'Nettomiete', amount: 1500 }]
 			}
 		]
