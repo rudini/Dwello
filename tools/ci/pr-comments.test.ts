@@ -21,7 +21,7 @@ describe('Kommentare zu Pull Requests aus Forks (#1274)', () => {
 			expect(text).not.toContain('createComment');
 		}
 		expect(job('ui-screenshots')).toContain('persist-credentials: false');
-		expect(job('ui-screenshots')).toMatch(/uses: actions\/upload-artifact@[0-9a-f]{40} # v7[.\d]*\n {8}with:\n {10}name: ui-screenshots/);
+		expect(job('ui-screenshots')).toMatch(/uses: actions\/upload-artifact@[0-9a-f]{40} # v7\.\d+\.\d+\n {8}with:\n {10}name: ui-screenshots/);
 	});
 
 	const comments = read('.github/workflows/pr-comments.yml');
