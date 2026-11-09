@@ -784,6 +784,13 @@ export function testData(api: CallTheApi) {
 			names.set(`Zugangsschlüssel ${title}`, created.key);
 		},
 
+		// #746: the Protokoll entry of the key «title» from 2001, with `newer` entries after it
+		async oldAuditEntries(title: string, newer: number) {
+			const name = unique(title);
+			e2eScript('e2e-old-audit-entries', ['add', name, String(newer)]);
+			restores.push(async () => e2eScript('e2e-old-audit-entries', ['remove', name]));
+		},
+
 		async cleanUp() {
 			for (const restore of restores) await restore();
 			// keys created through the UI carry a scenario name as well

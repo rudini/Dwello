@@ -5,10 +5,22 @@
 import { Elysia, t } from 'elysia';
 import { auditLogWithExpiries } from '../services/access-key.service';
 import { deleteAuditEntry, recordAudit } from '../services/audit-log.service';
+import { pageLimit } from './page-limit';
 
 export const auditLogRoutes = new Elysia({ prefix: '/api/v1/audit-log' })
-	// a Zugangsschlüssel that ran out shows up here even when nobody used it again (#817)
-	.get('/', async () => ({ data: await auditLogWithExpiries() }))
+	// a Zugangsschlüssel that ran out shows up here even when nobody used it again (#817); #746: a page of them, without
+	// `limit` every entry
+	// ponytail: pages in memory; page in SQL once the Protokoll holds more entries than one read should load
+	.get(
+		'/',
+		async ({ query }) => {
+			const entries = await auditLogWithExpiries();
+			const limit = pageLimit(query.limit);
+			const offset = query.offset ? parseInt(query.offset, 10) : 0;
+			return { data: limit == null ? entries : entries.slice(offset, offset + limit), total: entries.length };
+		},
+		{ query: t.Object({ limit: t.Optional(t.String()), offset: t.Optional(t.String()) }) }
+	)
 
 	// Only the provider: no name, e-mail address or IP (data minimisation, fach review of #357)
 	.post(

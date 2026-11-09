@@ -36,5 +36,6 @@
 			"action": "statement_corrected",
 			"details": { "statementId": "s2", "number": "NK-2025-0002" }
 		}
-	]
+	],
+	"total": 6
 }

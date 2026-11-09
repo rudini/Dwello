@@ -280,6 +280,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'filtered-empty': () => Wait.until(on.emptyHint),
 	'status-empty': () => Wait.until(on.emptyHint),
 	empty: () => Wait.until(on.emptyHint),
+	paged: () => Wait.until(on.nextPageLink), // #746
+	'paged-older': () => async (actor) => actor.attemptsTo(Click.on(on.nextPageLink), Wait.until(on.previousPageLink)),
 	'empty-year': () => Wait.until(on.emptyHint),
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
 	'login-error': () => Wait.until(on.loginError),

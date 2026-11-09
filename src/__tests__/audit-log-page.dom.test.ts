@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+vi.mock('$app/stores', () => ({
+	page: {
+		subscribe: (run: (value: unknown) => void) => (
+			run({ url: new URL('http://localhost/config/audit-log') }),
+			() => {}
+		)
+	}
+}));
 
 import AuditLogPage from '../routes/config/audit-log/+page.svelte';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
@@ -15,6 +23,16 @@ describe('Protokoll unter den Einstellungen', () => {
 		expect(allByTestId('audit-entry')).toHaveLength(1);
 		expect(byTestId('audit-entry-date')?.textContent).toBe('17.10.2026, 14:05');
 		expect(byTestId('audit-entry-text')?.textContent).toBe('Anmeldung mit Google');
+	});
+
+	// #746: 50 entries a page; the older ones on the next
+	it('führt zu den älteren Einträgen, wenn es mehr gibt, als eine Seite zeigt', () => {
+		show(AuditLogPage, {
+			data: { entries: [entry], page: 1, pageSize: 50, total: 51 },
+			form: null
+		} as never);
+
+		expect(byTestId('pagination-next')?.getAttribute('href')).toBe('/config/audit-log?page=2');
 	});
 
 	it('sagt, was hier erscheint, solange es keine Einträge gibt', () => {

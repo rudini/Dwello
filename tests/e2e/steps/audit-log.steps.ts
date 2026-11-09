@@ -3,7 +3,7 @@ import { swissDate, inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
 import { auditEntryCount, auditEntryDay, auditLogDescription, deleteAuditEntryConsequence } from '../questions/audit-log';
 import { pageTitle } from '../questions/navigation';
-import { goToAuditLog, openAuditLog, startDeletingAuditEntry } from '../tasks/audit-log';
+import { goToAuditLog, openAuditLog, startDeletingAuditEntry, turnToLastAuditPage } from '../tasks/audit-log';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -56,4 +56,21 @@ Then('warnt das Protokoll, der Eintrag von heute {string}', async ({ verwalter, 
 Then('nennt das Protokoll {string} nicht mehr', async ({ verwalter, names }, text: string) => {
 	await verwalter.sees(pageTitle).toBe('Protokoll - Dwello');
 	await verwalter.sees(auditEntryCount(named(names, text))).toBe(0);
+});
+
+Given('das Protokoll hat aus dem Jahr 2001 den Eintrag zum Zugangsschlüssel {string} und {int} neuere', async ({ seed }, title: string, newer: number) => {
+	await seed.oldAuditEntries(title, newer);
+});
+
+When('der Liegenschaftsverwalter zur letzten Seite des Protokolls blättert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(turnToLastAuditPage);
+});
+
+Then('nennt die erste Seite des Protokolls {string} nicht', async ({ verwalter, names }, text: string) => {
+	await verwalter.sees(pageTitle).toBe('Protokoll - Dwello');
+	await verwalter.sees(auditEntryCount(named(names, text))).toBe(0);
+});
+
+Then('nennt das Protokoll {string}', async ({ verwalter, names }, text: string) => {
+	await verwalter.sees(auditEntryCount(named(names, text))).toBe(1);
 });

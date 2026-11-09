@@ -1,7 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { auditEntryCountOn } from '../questions/audit-log';
+import { countedAuditEntries } from '../questions/audit-log';
 import {
 	downloadedFileName,
 	exportedApartmentCell,
@@ -118,7 +118,9 @@ Then('führt die Tabelle {string} des Exports keine Rechnung von {string}', asyn
 });
 
 Then('nennt das Protokoll heute öfter {string} als vor dem Export', async ({ verwalter }, text: string) => {
-	await verwalter.sees(auditEntryCountOn(text, swissDate(inDays(0)))).toBeGreaterThan(verwalter.recall<number>(AUDIT_COUNT));
+	// #746: on all pages; a parallel scenario's export may have moved to the next one
+	await verwalter.attemptsTo(countAuditEntriesOf(text, swissDate(inDays(0)), 'auditCountAfter'));
+	await verwalter.sees(countedAuditEntries('auditCountAfter')).toBeGreaterThan(verwalter.recall<number>(AUDIT_COUNT));
 });
 
 // positive anchor: the Beleg of the scenario's other supplier in the same folder

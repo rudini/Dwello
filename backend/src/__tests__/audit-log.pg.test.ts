@@ -4,9 +4,9 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories as categoriesTable, invoices, utilityStatements } from '../db/schema';
+import { auditLog, categories as categoriesTable, invoices, utilityStatements } from '../db/schema';
 import { recordStatementCorrection } from '../services/audit-log.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
@@ -254,6 +254,28 @@ describe('Protokoll der Anmeldungen', () => {
 		const response = await sendJson('POST', '/api/v1/audit-log/logins', { provider: `x-${token}` });
 
 		expect(response.status).toBe(422);
+	});
+});
+
+// #746: the page asks for one page of entries; without a limit every entry, as the data export and the E2E fixtures read it
+describe('Seiten des Protokolls', () => {
+	const oldest = ['C', 'B', 'A'].map((letter) => `Schlüssel ${token} ${letter}`);
+	const page = async (query: string) =>
+		(await (await callApi(`/api/v1/audit-log?${query}`)).json()) as { data: Entry[]; total: number };
+
+	it('nennt eine Seite der Einträge, die neuesten zuerst, und wie viele es gibt', async () => {
+		await db.insert(auditLog).values(
+			oldest.map((name, day) => ({ action: 'access_key_created', details: { name }, occurredAt: new Date(`2001-01-0${3 - day}T12:00:00Z`) }))
+		);
+		cleanUps.push(() => db.delete(auditLog).where(sql`${auditLog.details}->>'name' like ${`Schlüssel ${token}%`}`));
+		const { total } = await page('limit=2');
+
+		const last = await page(`limit=2&offset=${total - 2}`);
+
+		expect(last.total).toBe(total);
+		expect(last.data.map((entry) => entry.details.name)).toEqual(oldest.slice(1));
+		expect((await page('limit=2')).data).toHaveLength(2);
+		expect((await entries()).length).toBe(total);
 	});
 });
 

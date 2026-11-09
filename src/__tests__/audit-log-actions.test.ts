@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { actions, load } from '../routes/config/audit-log/+page.server';
 import { runAction } from './helpers/action';
+import auditLog from '../../tests/contracts/audit-log.json';
 
 const API = 'http://localhost:3001/api/v1/audit-log';
 
@@ -43,9 +44,42 @@ describe('Protokoll laden', () => {
 	it('meldet, dass das Protokoll nicht geladen werden konnte', async () => {
 		const fetch = async () => new Response(JSON.stringify({}), { status: 404 });
 
-		await expect(load({ fetch } as never)).rejects.toMatchObject({
+		await expect(
+			load({ fetch, url: new URL('http://localhost/config/audit-log') } as never)
+		).rejects.toMatchObject({
 			status: 404,
 			body: { message: 'Protokoll konnte nicht geladen werden' }
 		});
+	});
+
+	// #746: 50 entries a page, the newest first; the page in the address
+	it('lädt die Einträge der Seite aus der Adresse und nennt, wie viele es gibt', async () => {
+		const asked: string[] = [];
+		const fetch = (async (url: string) => {
+			asked.push(url);
+			return Response.json(auditLog);
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			fetch,
+			url: new URL('http://localhost/config/audit-log?page=2')
+		} as never)) as {
+			entries: unknown[];
+			page: number;
+			pageSize: number;
+			total: number;
+		};
+
+		expect(asked).toEqual([`${API}?limit=50&offset=50`]);
+		expect([data.entries.length, data.page, data.pageSize, data.total]).toEqual([6, 2, 50, 6]);
+	});
+
+	// Code review 746-1 C-3: past the last page, e.g. after deleting its only entry in another tab
+	it('zeigt die erste Seite statt einer Seite nach der letzten', async () => {
+		const fetch = (async () => Response.json({ ...auditLog, data: [] })) as typeof globalThis.fetch;
+
+		await expect(
+			load({ fetch, url: new URL('http://localhost/config/audit-log?page=3') } as never)
+		).rejects.toMatchObject({ status: 303, location: '/config/audit-log' });
 	});
 });

@@ -196,6 +196,14 @@ Funktionalität: Einstellungen
     Wenn der Liegenschaftsverwalter das Protokoll öffnet
     Dann erklärt die Seite "Protokoll" "Anmeldungen und Änderungen, die Ihre Abrechnungen beeinflussen, mit Datum und Uhrzeit. Dazu jeder Wechsel der KI, das Erstellen, Widerrufen und Ablaufen eines Zugangsschlüssels für KI-Programme und jeder Abruf eines KI-Programms. Die Einträge bleiben, bis Sie sie löschen."
 
+  # #746: jede Anmeldung schreibt einen Eintrag; das Protokoll zeigt die neuesten 50, die älteren auf weiteren Seiten
+  Szenario: Ältere Einträge des Protokolls auf weiteren Seiten finden
+    Angenommen das Protokoll hat aus dem Jahr 2001 den Eintrag zum Zugangsschlüssel "Altschlüssel" und 50 neuere
+    Wenn der Liegenschaftsverwalter das Protokoll öffnet
+    Dann nennt die erste Seite des Protokolls "Zugangsschlüssel «Altschlüssel» erstellt" nicht
+    Wenn der Liegenschaftsverwalter zur letzten Seite des Protokolls blättert
+    Dann nennt das Protokoll "Zugangsschlüssel «Altschlüssel» erstellt"
+
   Szenario: Änderungen im Protokoll sehen
     Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Nord"
     Und die Kategorie "Gartenpflege Nord" ist inzwischen nicht umlagefähig
