@@ -515,12 +515,20 @@ export function addedAllowed(working: Ratchet, base: Ratchet): number {
 /** #1272: the structure report's indicators and the production files' maintainability on one commit (measure.sh) */
 function structureAt(commit: string): Structure {
 	const out = mkdtempSync(join(tmpdir(), 'structure-'));
+	try {
+		return structureIn(out, commit);
+	} finally {
+		rmSync(out, { recursive: true, force: true });
+	}
+}
+
+function structureIn(out: string, commit: string): Structure {
 	const p = spawnSync(join(ROOT, 'tools/arch-baseline/measure.sh'), [commit, out], { encoding: 'utf8' });
 	if (p.status !== 0) throw new Error(`measure.sh ${commit}: ${p.stderr}`);
 	const json = (name: string) => JSON.parse(readFileSync(join(out, name), 'utf8') || 'null');
 	const health = json('fallow-health.json');
+	if (!health) throw new Error(`fallow health gave no result on ${commit} (run it there by hand to see why)`);
 	const a = analyze({ edges: json('imports-module.csv.json'), cycles: json('cycles-module.csv.json'), files: json('files.csv.json'), health, gaps: json('fallow-gaps.json')?.coverage_gaps });
-	rmSync(out, { recursive: true, force: true });
 	const prod = new Set(a.files.map((f) => f.path));
 	const scores: { path: string; maintainability_index: number }[] = health.file_scores;
 	return { kpis: a.kpis, maintainability: Object.fromEntries(scores.filter((f) => prod.has(f.path)).map((f) => [f.path, f.maintainability_index])) };
