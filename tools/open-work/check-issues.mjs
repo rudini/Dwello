@@ -209,7 +209,12 @@ function changedSteps(file) {
 	const lines = ['', ...show(from, file).split('\n')];
 	const defs = [];
 	lines.forEach((line, i) => {
-		if (/^(Given|When|Then)\(/.test(line)) defs.push({ line: i, end: endOf(lines, i) });
+		const [, indent] = /^(\s*)(?:Given|When|Then)\(/.exec(line) ?? [];
+		if (indent === undefined) return;
+		// an indented one is the body of a loop over its patterns: the definition starts at the loop
+		let start = i;
+		while (indent && start > 1 && !/^\S/.test(lines[start])) start--;
+		defs.push({ line: start, call: i, end: endOf(lines, i, indent) });
 	});
 	const touched = new Set();
 	for (const [, start, count = '1'] of git('diff', '-U0', from, 'HEAD', '--', file).matchAll(/^@@ -(\d+)(?:,(\d+))? /gm)) {
@@ -217,28 +222,43 @@ function changedSteps(file) {
 		const [first, last] = count === '0' ? [+start + 0.5, +start + 0.5] : [+start, +start + +count - 1];
 		for (const def of defs) if (def.line <= last && first <= def.end) touched.add(def);
 	}
-	return [...touched].map((def) => ({ ...def, ...matcher(lines.slice(def.line, def.end + 1).join('\n')) }));
+	return [...touched].map((def) => ({
+		...def,
+		...matcher(lines.slice(def.line, def.call).join('\n'), lines.slice(def.call, def.end + 1).join('\n'))
+	}));
 }
 
-/** The last line of the step definition that starts at line `start`: its own line for a one-liner, else the closing one */
-function endOf(lines, start) {
+/** The last line of the step definition called at line `start`: its own line for a one-liner, else the closing one */
+function endOf(lines, start, indent) {
 	if (/\);\s*$/.test(lines[start])) return start;
 	let end = start + 1;
-	while (end < lines.length - 1 && !/^[)}]/.test(lines[end])) end++;
+	while (end < lines.length - 1 && !lines[end].startsWith(`${indent})`) && !lines[end].startsWith(`${indent}}`)) end++;
 	return end;
 }
 
-/** The pattern of a step definition, a Cucumber expression or a regular expression, and whether a step text matches it */
-function matcher(definition) {
-	const [, literal = ''] = /^(?:Given|When|Then)\(\s*('(?:[^'\\]|\\.)*'|\/(?:[^/\\\n]|\\.)+\/[a-z]*)/.exec(definition) ?? [];
+/**
+ * The patterns of a step definition, Cucumber or regular expressions, and whether a step text matches one: the literal it
+ * is called with, else the strings of the loop around it; a pattern it cannot read matches every step (fails closed)
+ */
+function matcher(loop, call) {
+	const literal = /^\s*(?:Given|When|Then)\(\s*('(?:[^'\\]|\\.)*'|\/(?:[^/\\\n]|\\.)+\/[a-z]*)/.exec(call)?.[1];
+	const literals = literal ? [literal] : (loop.match(/'(?:[^'\\]|\\.)*'/g) ?? []);
+	const tests = literals.map(test);
+	return {
+		pattern: literals.map((text) => (text.startsWith('/') ? text : text.slice(1, -1))).join(' | ') || call.split('\n')[0].trim(),
+		matches: (text) => !tests.length || tests.some((matches) => matches(text))
+	};
+}
+
+/** Whether a step text matches one pattern literal */
+function test(literal) {
 	if (literal.startsWith('/')) {
 		const regex = new RegExp(literal.slice(1, literal.lastIndexOf('/')), literal.slice(literal.lastIndexOf('/') + 1));
-		return { pattern: literal, matches: (text) => regex.test(text) };
+		return (text) => regex.test(text);
 	}
-	const pattern = literal.slice(1, -1).replace(/\\(.)/g, '$1');
 	const { CucumberExpression, ParameterTypeRegistry } = cucumber();
-	const expression = new CucumberExpression(pattern, new ParameterTypeRegistry());
-	return { pattern, matches: (text) => expression.match(text) !== null };
+	const expression = new CucumberExpression(literal.slice(1, -1).replace(/\\(.)/g, '$1'), new ParameterTypeRegistry());
+	return (text) => expression.match(text) !== null;
 }
 
 /** The Cucumber expressions of the repository: CI runs this script from outside it, so it is looked up from both places */

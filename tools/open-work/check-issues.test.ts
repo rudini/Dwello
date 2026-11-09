@@ -1,5 +1,5 @@
 import { execFile, execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
@@ -17,7 +17,7 @@ afterEach(() => close());
 async function check(
 	open: object[],
 	listStatus = 200,
-	pull?: { number: number; body: string; cwd: string; status?: number; base?: string; issue?: object }
+	pull?: { number: number; body: string; cwd: string; status?: number; base?: string; issue?: object; script?: string }
 ) {
 	// the answer per path: the pull request's text, the list of open issues (one page), else an open issue
 	const answer = (path: string, page: number): [number, unknown] => {
@@ -42,7 +42,7 @@ async function check(
 		PR_NUMBER: pull ? String(pull.number) : '',
 		BASE_REF: pull?.base ?? ''
 	};
-	return promisify(execFile)('node', [SCRIPT], { env, cwd: pull?.cwd }).then(
+	return promisify(execFile)('node', [pull?.script ?? SCRIPT], { env, cwd: pull?.cwd }).then(
 		({ stdout }) => ({ code: 0, out: stdout }),
 		(error) => ({ code: error.code as number, out: `${error.stdout}${error.stderr}` })
 	);
@@ -376,5 +376,31 @@ Then('sieht der Liegenschaftsverwalter nichts', async ({ verwalter }) => {
 		);
 		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
 		expect(result.out).toContain('used by tests/e2e/features/buildings.feature:11 «Abrechnung <Periode>»');
+	});
+
+	// review 1270-review-1 C-1: a step defined in a loop over its patterns
+	it('meldet einen Schritt aus einer Schleife, den ein Szenario ohne @wip braucht', async () => {
+		const loop = "for (const step of ['sieht der Liegenschaftsverwalter nichts', 'sieht der Liegenschaftsverwalter {string}'])\n\tThen(step, async ({ verwalter }) => {\n\t\tawait verwalter.seesNothing();\n\t});\n";
+		const before = `${steps}\n${loop}\nThen('danach', async () => {});\n`;
+		const cwd = gateRepo({ 'tests/e2e/steps/buildings.steps.ts': before.replace('\t\tawait verwalter.seesNothing();\n\t', '\t') }, { ...base, 'tests/e2e/steps/buildings.steps.ts': before });
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main' });
+		expect(result.out).toContain('buildings.steps.ts:19 step «sieht der Liegenschaftsverwalter nichts | sieht der Liegenschaftsverwalter {string}», used by');
+		expect(result.out).toContain('buildings.feature:3 «Liste zeigt Liegenschaften»');
+	});
+
+	// review 1270-review-1 C-2: a step added right after a used one leaves that one unchanged
+	it('lässt einen neuen Schritt direkt nach einem gebrauchten durch', async () => {
+		const added = steps.replace("\tawait verwalter.creates(name);\n});\n", "\tawait verwalter.creates(name);\n});\nWhen('neu', async () => {});\n");
+		expect(await changeSteps(added)).toMatchObject({ code: 0 });
+	});
+
+	// review 1270-review-1 C-3: CI runs a copy from outside the repository, which finds the package from the repository
+	it('liest Cucumber-Ausdrücke auch aus einer Kopie ausserhalb des Repositorys', async () => {
+		const cwd = gateRepo({ 'tests/e2e/steps/buildings.steps.ts': steps.replace('creates(name)', 'creates()') }, base);
+		symlinkSync(join(process.cwd(), 'node_modules'), join(cwd, 'node_modules'));
+		const script = join(mkdtempSync(`${tmpdir()}/check-copy-`), 'check-issues.mjs');
+		copyFileSync(SCRIPT, script);
+		const result = await check([], 200, { number: 5, body: '', cwd, base: 'main', script });
+		expect(result.out).toContain('buildings.steps.ts:4 step «eine Liegenschaft {string}», used by');
 	});
 });
