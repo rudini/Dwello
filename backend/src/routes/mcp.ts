@@ -123,7 +123,7 @@ const refusedWith = (refusal: unknown) => ({ content: [{ type: 'text', text: JSO
 /** The tool's answer: the API's JSON and the page in Dwello, or the API's refusal as the tool's error */
 async function callTool(keyId: string, tool: Tool, args: Args) {
 	// an ID goes into the API's path: «..» or «export» would reach another route; the API's answer to an unknown ID (#1377)
-	if (args.id !== undefined && !UUID.test(args.id)) return refusedWith({ error: 'Not found', code: 'NOT_FOUND', params: {} });
+	if (args.id !== undefined && !UUID.test(args.id)) return refusedWith(refusal('NOT_FOUND', 'Not found'));
 	const paths = tool.paths(args);
 	const authorization = `Bearer ${await accessKeyToken(keyId)}`;
 	const get = (path: string) => api(new Request(`http://localhost${path}`, { headers: { authorization } }));
