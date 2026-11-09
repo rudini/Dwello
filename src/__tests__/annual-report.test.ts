@@ -93,7 +93,7 @@ describe('Jahresbericht zum Herunterladen', () => {
 	it('gibt als CSV jede Zeile mit Bereich, Position und Betrag als Zahl, unter dem Namen des Berichts', async () => {
 		const response = await annualReportCsv(backend(2024).fetch, chosen);
 		expect(response.headers.get('content-disposition')).toContain(
-			`filename*=UTF-8''${encodeURIComponent('Jahresbericht Seeblick 2025.csv')}`
+			`filename*=UTF-8''${encodeURIComponent('Jahresbericht-Seeblick-2025.csv')}`
 		);
 		const lines = new TextDecoder('utf-8', { ignoreBOM: true })
 			.decode(await response.arrayBuffer())
@@ -137,7 +137,7 @@ describe('Jahresbericht zum Herunterladen', () => {
 		const { fetch, posted } = backend(2024);
 		const response = await annualReportPdf(fetch, chosen);
 		expect(response.headers.get('content-disposition')).toContain(
-			encodeURIComponent('Jahresbericht Seeblick 2025.pdf')
+			encodeURIComponent('Jahresbericht-Seeblick-2025.pdf')
 		);
 		expect(posted).toMatchObject([
 			{
