@@ -4,6 +4,7 @@
  */
 
 import { app } from './app';
+import { checkJwtSecret } from './config/jwt';
 import { checkLocalKi, llmConfig, llmRecipient } from './config/llm';
 import { DATABASE_URL, testConnection } from './db/connection';
 import { startBackups } from './services/backup.service';
@@ -11,6 +12,8 @@ import { loadModel } from './services/ki-model.service';
 import { currentKi } from './services/ki-settings.service';
 import { announceSetupCode } from './services/setup.service';
 
+// Refuse to start in production with the public development secret, as the BFF does (#1376)
+checkJwtSecret();
 // Refuse to start with an external LLM the privacy statement could not name
 if (llmConfig.byOperator) llmRecipient();
 else checkLocalKi(llmConfig.baseUrl);
