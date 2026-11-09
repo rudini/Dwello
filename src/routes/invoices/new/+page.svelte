@@ -6,12 +6,12 @@
 	import { api } from '$lib/api';
 	import {
 		deliversToTank,
-		plainAmount,
 		servicePeriodOf,
 		suggestionProvenance,
 		validateInvoice,
 		type Suggestion
 	} from '$lib/invoice';
+	import { plainAmount } from '$lib/utils/format';
 	import { addToast } from '$lib/stores';
 	import type { Category, LatestKey } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';

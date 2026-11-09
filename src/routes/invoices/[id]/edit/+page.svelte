@@ -4,7 +4,8 @@
 	import { untrack } from 'svelte';
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
-	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { deliversToTank, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { plainAmount } from '$lib/utils/format';
 	import type { LatestKey } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import type { BilledStatement, Category, DistributionKey, InvoiceWithDetails } from '$lib/types';
