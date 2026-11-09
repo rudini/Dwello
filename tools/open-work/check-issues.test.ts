@@ -277,6 +277,31 @@ describe('Änderungen an Prüfungen brauchen eine Freigabe (#1269)', () => {
 		expect(await changeGate({ 'src/lib/a.ts': 'a\n', 'docs/CLAUDE-notes.md': 'b\n' })).toMatchObject({ code: 0 });
 	});
 
+	it('lässt einen geänderten Importpfad in tools/ ohne Freigabe durch, eine Änderung daneben nicht (#1411)', async () => {
+		const base = { 'tools/a.ts': "import { x } from '../src/old';\nrun(x);\n", 'src/old.ts': 'export const x = 1;\n', 'src/other.ts': 'export const x = 2;\n' };
+		const moved = { 'src/old.ts': null, 'src/new.ts': 'export const x = 1;\n' };
+		expect(await changeGate({ ...moved, 'tools/a.ts': "import { x } from '../src/new';\nrun(x);\n" }, '', base)).toMatchObject({ code: 0 });
+		// a target the change did not move is another implementation, not a moved one
+		expect((await changeGate({ 'tools/a.ts': "import { x } from '../src/other';\nrun(x);\n", 'src/other.test.ts': 'test\n' }, '', base)).out).toContain('tools/a.ts changes a check');
+		const result = await changeGate({ 'tools/a.ts': "import { x } from '../src/new';\nrun(x, 1);\n" }, '', base);
+		expect(result.out).toContain('tools/a.ts changes a check');
+	});
+
+	it('verlangt eine Freigabe für eine andere Bindung oder einen neuen Import in tools/ (#1411)', async () => {
+		const base = { 'tools/a.ts': "import { a as x } from '../src/m';\nrun(x);\n" };
+		expect((await changeGate({ 'tools/a.ts': "import { b as x } from '../src/m';\nrun(x);\n" }, '', base)).out).toContain('tools/a.ts changes a check');
+		const added = "import { a as x } from '../src/m';\nimport '../src/side';\nrun(x);\n";
+		expect((await changeGate({ 'tools/a.ts': added }, '', base)).out).toContain('tools/a.ts changes a check');
+		const dashes = { 'tools/a.ts': "import { a as x } from '../src/n';\n++ run(x);\n" };
+		expect((await changeGate(dashes, '', { 'tools/a.ts': "import { a as x } from '../src/m';\n-- run(y);\n" })).out).toContain('tools/a.ts changes a check');
+	});
+
+	it('verlangt eine Freigabe für eine Datei in tools/, deren Diff keine Zeile ändert (#1411)', async () => {
+		const cwd = gateRepo({ 'README.md': 'head\n' }, { 'tools/a.sh': 'echo a\n' });
+		execFileSync('sh', ['-c', 'chmod +x tools/a.sh && git -c user.name=t -c user.email=t@t commit -qam mode'], { cwd });
+		expect((await check([], 200, { number: 5, body: '', cwd, base: 'main' })).out).toContain('tools/a.sh changes a check');
+	});
+
 	it('meldet eine gelöschte und eine umbenannte Prüfdatei', async () => {
 		const base = { 'tools/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': '{}\n' };
 		const result = await changeGate({ 'tools/a.ts': null, 'lib/a.ts': 'one\ntwo\nthree\n', '.fallowrc.json': null }, '', base);
