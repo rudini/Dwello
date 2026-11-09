@@ -70,6 +70,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Akonto verrechnen | imputer (never for «umlagefähig») | compensare | set off |
 | abgerechnet (Rechnung, #409) | décomptée | conteggiata | in a statement |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
+| Unterhalt (Steuer, Jahresbericht #1409) | entretien | manutenzione (auch für «Wartung» oben) | maintenance |
 | Vollservicevertrag (Lift) | contrat de maintenance complet | contratto di manutenzione completo | full-service contract |
 | Verordnung über die Miete (VMWG) | ordonnance sur le bail (OBLF) | ordinanza concernente la locazione (OLAL) | Tenancy Ordinance (VMWG) |
 | Kategorie / Kategorisierung | catégorie / catégorisation | categoria / categorizzazione | category / categorisation |

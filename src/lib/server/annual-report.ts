@@ -84,7 +84,6 @@ function sectionsOf(report: AnnualReportBody, categories: Map<string, string>): 
 	return [
 		{
 			key: 'income',
-			// TODO(fachlich prüfen, #1415): the term «Mietertrag»
 			heading: m.analytics_income_heading(),
 			help: m.analytics_income_help(),
 			notes: [],
