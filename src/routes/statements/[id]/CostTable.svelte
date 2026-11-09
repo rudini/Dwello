@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel } from '$lib/statement';
-	import { withPositionKeys } from '$lib/position-keys';
+	import { balanceLabel, withPositionKeys } from '$lib/statement';
 	import Table from '$lib/ui/Table.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -18,6 +17,7 @@
 		stacked ? { list: '', table: 'hidden' } : { list: '@5xl:hidden', table: 'hidden @5xl:block' }
 	);
 
+	// keyed so that a recalculation updates each position instead of replacing it (#1366: WebKit moved the page)
 	const keyed = $derived(withPositionKeys(statement.lineItems));
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
@@ -129,9 +129,7 @@
 {#if statement.lineItems.length === 0}
 	<p class="text-ink-muted">{m.statements_no_lines()}</p>
 {:else}
-	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view;
-	     keyed so that a recalculation updates each card instead of replacing it: WebKit, without a scroll anchor,
-	     moved the page by a replaced card for a moment (#1366) -->
+	<!-- A narrow region (and stacked pages at every width) gets the lines one below the other, every amount in view -->
 	<div class="@container">
 		<ul class="flex flex-col gap-4 {shown.list}" aria-label={m.statements_lines()}>
 			{#each keyed as { item, key } (key)}
