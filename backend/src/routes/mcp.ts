@@ -30,13 +30,16 @@ const PAGES =
 	'Eine Liste kommt seitenweise: ohne «limit» höchstens 20 Einträge (Wohnungen, Mieter, Mietverträge: 50) ab «offset». «total» nennt, wie viele es gibt; ist «total» grösser, holen Sie die nächsten mit «offset», bevor Sie zählen oder summieren.';
 const PAGE = { limit: 'Wie viele Einträge diese Seite hat', offset: 'Ab welchem Eintrag, 0 für den ersten' };
 const PAGED = ['limit', 'offset'];
+// An ID goes into the API's path: one that is no UUID («..», «latest-keys») would reach another route, so it goes as
+// «no-record», which the API refuses as it refuses every ID that is no UUID (#1377)
+const NOT_UUID = /^(?![0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$).*$/is;
 
 const query = (args: Args, names: string[]) => {
 	const set = names.filter((name) => args[name]).map((name): [string, string] => [name, args[name]!]);
 	return set.length ? `?${new URLSearchParams(set)}` : '';
 };
 const one = (path: string, args: Args, names: string[] = []) =>
-	args.id ? `/api/v1/${path}/${encodeURIComponent(args.id)}` : `/api/v1/${path}${query(args, names)}`;
+	args.id ? `/api/v1/${path}/${String(args.id).replace(NOT_UUID, 'no-record')}` : `/api/v1/${path}${query(args, names)}`;
 const pageOf = (path: string) => (args: Args) => `/${path}${args.id ? `/${encodeURIComponent(args.id)}` : ''}`;
 
 // In the landlord's words (#817); the glossary terms of UBIQUITOUS_LANGUAGE.md
@@ -161,7 +164,8 @@ export const mcpRoutes = new Elysia().post('/mcp', async ({ headers, body, set }
 		if (method === 'ping') return answer({});
 		if (method === 'tools/list') return answer({ tools: toolList });
 		if (method !== 'tools/call') return error(-32601, `Unknown method ${method}`);
-		const tool = TOOLS[params.name ?? ''];
+		const name = String(params.name);
+		const tool = Object.hasOwn(TOOLS, name) ? TOOLS[name] : undefined; // not «constructor» of every object (#1377)
 		if (!tool) return error(-32602, `Unknown tool ${params.name}: Dwello offers only reading tools`);
 		await recordAudit('mcp_call', { tool: params.name, name: key.name });
 		return answer(await callTool(key.id, tool, params.arguments ?? {}));

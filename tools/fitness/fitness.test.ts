@@ -479,10 +479,20 @@ describe('Strukturkennzahlen pro Pull Request (#1272)', () => {
 	const kpis = (values: Record<string, number>): Kpi[] => Object.entries(values).map(([key, value]) => ({ key, label: LABEL[key], value, light: 'green' }));
 	const base = { kpis: kpis({ xs: 4, health: 87 }), maintainability: { 'src/lib/a.ts': 90 } };
 
-	it('meldet eine geänderte Datei, deren Wartbarkeit sinkt', () => {
-		const head = { ...base, maintainability: { 'src/lib/a.ts': 89.5 } };
+	it('meldet eine geänderte Datei, deren Wartbarkeit um mehr als 1 Punkt sinkt, als Fehler (#1396)', () => {
+		const head = { ...base, maintainability: { 'src/lib/a.ts': 88.5 } };
 		const findings = structureFindings(base, head, { changed: [['src/lib/a.ts', 'src/lib/a.ts']], added: [] }, ratchet);
-		expect(findings.map((f) => f.check)).toEqual(['structure-maintainability']);
+		expect(findings.map((f) => [f.check, f.hint])).toEqual([['structure-maintainability', undefined]]);
+		expect(findings[0].message).toContain('src/lib/a.ts: maintainability 90 → 88.5');
+	});
+
+	it('meldet einen Rückgang um höchstens 1 Punkt nur als Hinweis (#1396)', () => {
+		const head = { ...base, maintainability: { 'src/lib/a.ts': 89.5, 'src/lib/e.ts': 86.1 } };
+		const findings = structureFindings({ ...base, maintainability: { 'src/lib/a.ts': 90, 'src/lib/e.ts': 87.1 } }, head, { changed: [['src/lib/a.ts', 'src/lib/a.ts'], ['src/lib/e.ts', 'src/lib/e.ts']], added: [] }, ratchet);
+		expect(findings.map((f) => [f.check, f.hint])).toEqual([
+			['structure-maintainability', true],
+			['structure-maintainability', true]
+		]);
 		expect(findings[0].message).toContain('src/lib/a.ts: maintainability 90 → 89.5');
 	});
 

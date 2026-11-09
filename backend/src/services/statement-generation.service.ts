@@ -34,6 +34,7 @@ export interface StatementInput {
 	periodEnd: string;
 	heatingProfileId?: string;
 	managementFeePercent?: number;
+	replacing?: string; // #1403: the statement a recalculation would replace, for the Übertrag it would count
 }
 
 /**
@@ -60,11 +61,11 @@ export async function calculateStatement(input: StatementInput) {
  * The Übertrag (#448): the latest earlier statement of the Mietvertrag with a Saldo carried over that no statement of
  * another period counts yet; not an open one (#506, Fachreview 506-1 V-1) or one settled by hand
  */
-async function carriedOver({ contractId, periodStart, periodEnd }: Pick<StatementInput, 'contractId' | 'periodStart' | 'periodEnd'>) {
+async function carriedOver({ contractId, periodStart, periodEnd, replacing }: Pick<StatementInput, 'contractId' | 'periodStart' | 'periodEnd' | 'replacing'>) {
 	const [carried] = await db
 		.select({ id: utilityStatements.id, balance: utilityStatements.balance })
 		.from(utilityStatements)
-		.where(sql`${utilityStatements.id} = ${carriedOverId(contractId, periodStart, periodEnd)}`);
+		.where(sql`${utilityStatements.id} = ${carriedOverId(contractId, periodStart, periodEnd, replacing)}`);
 	return carried;
 }
 
@@ -178,7 +179,8 @@ async function recalculated(statement: StatementWithDetails) {
 		periodStart,
 		periodEnd,
 		heatingProfileId: heatingProfileId ?? undefined,
-		managementFeePercent: managementFeePercent === null ? undefined : Number(managementFeePercent)
+		managementFeePercent: managementFeePercent === null ? undefined : Number(managementFeePercent),
+		replacing: statement.id
 	});
 	const { totalCosts, totalAdvancePayments } = rows.values;
 	const balance = calculateBalance(Number(totalCosts) + rows.carryOver, Number(totalAdvancePayments) + Number(statement.priorPayments));
@@ -212,7 +214,11 @@ export async function recalculation(statement: StatementWithDetails) {
 	const difference = roundToRappen(Number(now.balance) - Number(statement.balance)).toFixed(2);
 	const small = (value: number) => value !== 0 && belowMinimum(value); // either Saldo (code review 546-1 C-2)
 	const belowMin = !statement.final && (small(Number(now.balance)) || small(Number(statement.balance)));
-	return { changes, result, raises: after >= before, lowers: after < before, now: { balance, difference, belowMinimum: belowMin, declineCosts: after >= before && Number(difference) > 0 ? difference : null } };
+	// #1403 (Fachreview 1403-1 V-1, V-2): what the berichtigte Abrechnung would claim after what was paid on this one,
+	// 0 for a refund or a Saldo it carries over
+	const owed = calculateBalance(Number(now.values.totalCosts) + now.carryOver, Number(now.values.totalAdvancePayments) + paidSoFar(statement));
+	const open = (owed > 0 && (statement.final || !belowMinimum(owed)) ? owed : 0).toFixed(2);
+	return { changes, result, raises: after >= before, lowers: after < before, now: { balance, difference, belowMinimum: belowMin, declineCosts: after >= before && Number(difference) > 0 ? difference : null, open } };
 }
 
 /**

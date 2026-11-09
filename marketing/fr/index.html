@@ -119,7 +119,6 @@ p { margin: 0; }
 .badge .ic { width: 14px; height: 14px; stroke-width: 2; }
 .badge.info { background: var(--accent-soft); color: var(--accent); }
 .badge.caution { background: var(--caution-soft); color: var(--caution); }
-.badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
 
 /* Header: the app's header */
@@ -299,13 +298,6 @@ section { padding-block: 96px; }
 .price { font-size: clamp(4.5rem, 12vw, 8rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
 .price small { font-size: 0.26em; letter-spacing: -0.01em; font-weight: 600; color: var(--ink-muted); }
 
-/* Roadmap */
-.road { list-style: none; margin: 0; padding: 0; max-width: 860px; }
-.road li { display: grid; gap: 4px; padding-block: 14px; border-top: 1px solid var(--line); }
-.road li:last-child { border-bottom: 1px solid var(--line); }
-.road a, .road b { font-weight: 600; }
-.road span { color: var(--ink-muted); }
-
 /* FAQ */
 .faq { max-width: 860px; }
 .faq details { border-top: 1px solid var(--line); }
@@ -421,7 +413,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">Voir la démo <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
 				<a class="btn btn-secondary" href="#installieren">Comment obtenir Dwello</a>
 			</div>
-			<p class="hero-note">Gratuit et sans abonnement. L’installation, les mises à jour et les sauvegardes sont faites par quelqu’un qui s’y connaît en informatique ; pour travailler avec Dwello, vous n’avez besoin d’aucune connaissance technique.</p>
+			<p class="hero-note">Gratuit et sans abonnement. L’installation et les mises à jour sont faites par quelqu’un qui s’y connaît en informatique ; pour travailler avec Dwello, vous n’avez besoin d’aucune connaissance technique.</p>
 		</div>
 	</div>
 </section>
@@ -559,6 +551,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><h3>Contrats de bail et fin du contrat</h3><p>À durée déterminée ou indéterminée. À la fin, Dwello indique le délai de congé et demande la nouvelle adresse.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><h3>Documents par locataire</h3><p>Lettres, décomptes et rappels au même endroit.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><h3>Immeuble depuis le registre des bâtiments</h3><p>Reprendre immeubles et appartements avec surface, étage et pièces du registre fédéral.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><h3>Rapport annuel pour les impôts et la fiduciaire</h3><p>Par immeuble et année civile : le revenu locatif convenu et les coûts que vous supportez vous-même, en PDF et en CSV.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><h3>Rapprochement des coûts</h3><p>Sous « Rapports », vous voyez, pour chaque période de décompte pour laquelle vous avez établi des décomptes, quelle part des coûts les locataires supportent et quelle part vous supportez vous-même, par exemple pour la vacance.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><h3>Programmes d’IA avec clé d’accès</h3><p>Avec une clé d’accès, un programme d’IA de votre choix lit vos données dans Dwello, y compris celles de vos locataires (MCP). Il ne peut rien modifier ni ouvrir de documents. Le programme traite les données selon ses propres règles. Chaque clé expire après 90 jours, et vous pouvez la révoquer à tout moment.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg><h3>Installateur en une étape</h3><p>Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.</p></article>
 		</div>
 	</div>
 </section>
@@ -569,7 +565,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Installer</span>
 			<h2>Faire installer, puis travailler dans le navigateur.</h2>
-			<p>L’installation est faite une fois par quelqu’un qui s’y connaît en informatique : un membre de la famille, une connaissance ou votre service informatique. Donnez-lui le guide ; il faut environ une heure. Ensuite, vous travaillez dans le navigateur, sans connaissances techniques. Cette personne fait les mises à jour et les sauvegardes régulières ; le guide les décrit. Sur votre propre PC, Dwello ne tourne que tant qu’il est allumé ; sur un serveur domestique ou un serveur dans le cloud, il est toujours accessible, aussi depuis le téléphone.</p>
+			<p>L’installation est faite une fois par quelqu’un qui s’y connaît en informatique : un membre de la famille, une connaissance ou votre service informatique. Donnez-lui le guide ; il faut environ une heure. Ensuite, vous travaillez dans le navigateur, sans connaissances techniques. Dwello sauvegarde vos données chaque jour sous forme chiffrée ; vous imprimez le code de restauration sur la fiche d’urgence lors de votre première connexion. Cette personne fait les mises à jour et copie régulièrement les sauvegardes sur un autre appareil ; le guide décrit les deux. Sur votre propre PC, Dwello ne tourne que tant qu’il est allumé ; sur un serveur domestique ou un serveur dans le cloud, il est toujours accessible, aussi depuis le téléphone.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide à transmettre (en anglais)</a></div>
 		</div>
 		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Connexion avec mot de passe</b>Lors de l’installation, un compte avec adresse e-mail et mot de passe est créé. Qui le souhaite se connecte plutôt avec son compte Google ; le guide montre les deux.</span></div>
@@ -655,7 +651,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Protection des données</span>
 				<h2>Conçu selon la loi suisse sur la protection des données.</h2>
-				<p>Les données des locataires sont des données personnelles. Dwello les traite ainsi : elles restent sur votre serveur, rien ne nous parvient, et vous pouvez renseigner à tout moment. Ne sort que ce qu’une tâche exige : la connexion via Google, si vous l’utilisez, la recherche d’adresse dans le registre des bâtiments de la Confédération, vos e-mails aux locataires et, si vous le configurez ainsi, les factures vers une IA externe. Vous restez responsable des données de vos locataires.</p>
+				<p>Les données des locataires sont des données personnelles. Dwello les traite ainsi : elles restent sur votre serveur, rien ne nous parvient, et vous pouvez renseigner à tout moment. Ne sort que ce qu’une tâche exige : la connexion via Google ou Microsoft, si vous l’utilisez, la recherche d’adresse dans le registre des bâtiments de la Confédération, vos e-mails aux locataires et, si vous le configurez ainsi, les factures vers une IA externe ainsi que vos données vers les programmes d’IA auxquels vous donnez une clé d’accès. Vous restez responsable des données de vos locataires.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Une maison avec un serveur à l’intérieur" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -675,7 +671,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<li><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span><b>Les pièces justificatives restent à la maison</b>L’IA tourne avec Ollama sur votre serveur. Aucune facture ne part vers un service cloud, sauf si vous le voulez.</span></li>
 			<li><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span><b>Remise des données en un clic</b><span class="ref">Art. 28 LPD.</span> Toutes les données d’une locataire ou d’un locataire en ZIP, avec des dossiers dans sa langue.</span></li>
 			<li><svg class="ic" aria-hidden="true"><use href="#i-eye-off"/></svg><span><b>Aucun suivi</b>Pas de publicité, pas de cookies d’analyse. Nous ne savons pas que vous utilisez Dwello.</span></li>
-			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Journal et déclaration de protection des données</b>Chaque modification des données de décompte est journalisée. Une déclaration de protection des données pour vos locataires est incluse.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Journal et déclaration de protection des données</b>Dwello consigne avec la date les connexions, les modifications qui influencent les décomptes et chaque consultation par un programme d’IA. Une déclaration de protection des données pour vos locataires est incluse.</span></li>
 		</ul>
 	</div>
 </section>
@@ -705,7 +701,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Questions fréquentes.</h2>
 		</div>
 		<div class="faq">
-			<details open><summary>Ai-je besoin de connaissances techniques ?</summary><p>Pour l’installation, puis pour les mises à jour et les sauvegardes régulières. Demandez à quelqu’un qui s’y connaît en informatique et donnez-lui le guide. Pour travailler avec Dwello, aucune connaissance préalable n’est nécessaire : chaque terme est expliqué au champ.</p></details>
+			<details open><summary>Ai-je besoin de connaissances techniques ?</summary><p>Pour l’installation, puis pour les mises à jour et pour copier les sauvegardes quotidiennes sur un autre appareil. Demandez à quelqu’un qui s’y connaît en informatique et donnez-lui le guide. Pour travailler avec Dwello, aucune connaissance préalable n’est nécessaire : chaque terme est expliqué au champ.</p></details>
 			<details><summary>Dwello est-il vraiment gratuit ?</summary><p>Oui. Dwello est open source et gratuit. Vous payez tout au plus votre propre serveur ou l’électricité de votre PC, et l’affranchissement des lettres. Si vous utilisez une IA externe au lieu de l’IA locale, vous la payez directement au fournisseur.</p></details>
 			<details><summary>Pour combien d’appartements Dwello convient-il ?</summary><p>Pour les bailleresses et bailleurs privés avec un à cinq immeubles et jusqu’à 50 appartements. Dwello n’est pas fait pour les grandes gérances avec des équipes.</p></details>
 			<details><summary>Que se passe-t-il si l’IA lit mal une facture ?</summary><p>Rien sans votre confirmation. L’IA propose les indications et Dwello vous dit lesquelles vérifier. La facture n’est créée que lorsque vous confirmez. Vous pouvez aussi saisir chaque facture vous-même.</p></details>
@@ -728,21 +724,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="btn btn-secondary" href="https://github.com/rudini/Dwello/issues" rel="noopener">Signaler une idée ou une erreur</a>
 			</div>
 		</div>
-	</div>
-</section>
-
-<!-- ROADMAP -->
-<section id="roadmap">
-	<div class="wrap">
-		<div class="sec-head">
-			<span class="kicker">Feuille de route</span>
-			<h2>Ce qui vient ensuite.</h2>
-			<p>Dwello est développé ouvertement. Ces points sont prévus. Là où un ticket GitHub est lié, vous pouvez y donner votre avis.</p>
-		</div>
-		<ul class="road">
-			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">Serveur MCP</a><span>Dwello comme outil pour votre assistant IA, en local et avec votre autorisation.</span></li>
-			<li><span class="badge plan">Prévu</span><b>Rapports et analyses</b><span>Recettes, dépenses et frais accessoires au fil des ans, pour la déclaration d’impôt et la fiduciaire.</span></li>
-		</ul>
 	</div>
 </section>
 
@@ -770,7 +751,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="logo" href="#top" aria-label="Dwello, vers la page d’accueil"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><svg class="wm" viewBox="0 0 6488 1512" aria-hidden="true"><use href="#wm"/></svg></a>
 				<p style="max-width:24em">Logiciel open source pour les bailleresses et bailleurs privés en Suisse.</p>
 			</div>
-			<div><h2>Produit</h2><ul><li><a href="#funktionen">Fonctions</a></li><li><a href="#datenschutz">Protection des données</a></li><li><a href="#roadmap">Feuille de route</a></li></ul></div>
+			<div><h2>Produit</h2><ul><li><a href="#funktionen">Fonctions</a></li><li><a href="#datenschutz">Protection des données</a></li></ul></div>
 			<div><h2>Commencer</h2><ul><li><a href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide d’installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Démo</a></li><li><a href="#faq">Questions fréquentes</a></li></ul></div>
 			<div><h2>Communauté</h2><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Signaler une erreur</a></li><li><a href="../brand.html">Manuel de marque</a></li></ul></div>
 		</div>

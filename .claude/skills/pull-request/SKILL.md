@@ -13,6 +13,7 @@ description: Push, open, drive to green and merge the pull request of a finished
 - An issue the product owner allows to be split gets one pull request per part: `Refs #n`, the last one `Fixes #n`.
 - A Blocker/Major whose fix is the decided text of another ready issue is fixed in the same pull request, which then closes both.
 - A glossary term the product owner decided in the issue the task closes: when its «Decided (product owner)» names the rows, the task writes them into `UBIQUITOUS_LANGUAGE.md` and the pull request says so; otherwise the task finishes with that edit under "Blocked on me" (a marker would make CI refuse the pull request), and the pull request is merged only after the product owner made the edit.
+- A pull request that ships a feature the marketing page lists as planned (its «Roadmap»), or that changes what the page claims, updates `marketing/index.html` and its translations in the same pull request (`marketing/README.md`).
 
 ## Before each push
 

@@ -299,4 +299,24 @@ describe('MCP-Server', () => {
 		const answer = await mcp(key, 'tools/call', { name: 'delete_building', arguments: { id: crypto.randomUUID() } });
 		expect(answer.body.error.code).toBe(-32602);
 	});
+
+	// #1377: «..» or «export» as an ID would reach another path of the API, a name of every object a tool that is none
+	it('lehnt eine ID ab, die keine ist, wie die API jede ID, die keine ist', async () => {
+		const { key } = await createKey('Keine ID');
+		const answer = await callTool(key, 'invoices', { id: 'latest-keys' });
+		const api = (await (await callApi('/api/v1/buildings/kein-gebaeude')).json()) as { code: string };
+		expect({ isError: answer.isError, code: dataOf(answer).code }).toEqual({ isError: true, code: api.code });
+	});
+
+	it('lehnt eine ID, die eine Zahl ist, wie die API ab, statt abzustürzen', async () => {
+		const { key } = await createKey('Zahl als ID');
+		const answer = await callTool(key, 'tenants', { id: 5 });
+		expect({ isError: answer.isError, code: dataOf(answer).code }).toEqual({ isError: true, code: 'NOT_FOUND' });
+	});
+
+	it('kennt kein Werkzeug, das jedes Objekt hat', async () => {
+		const { key } = await createKey('Kein constructor');
+		const answer = await mcp(key, 'tools/call', { name: 'constructor', arguments: {} });
+		expect({ status: answer.status, code: answer.body.error.code }).toEqual({ status: 200, code: -32602 });
+	});
 });

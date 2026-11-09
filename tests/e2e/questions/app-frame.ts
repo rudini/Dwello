@@ -1,11 +1,12 @@
 import { question } from '../screenplay/actor';
 import type { Target } from '../screenplay/target';
-import { Attribute, Count, Gap, ShareInViewport, Text, ThePage, Visibility, Width } from '../screenplay/questions';
+import { Attribute, Count, Gap, ReachableAround, ShareInViewport, Text, ThePage, Visibility, Width } from '../screenplay/questions';
 import {
 	bannerLink,
 	currentFooterLink,
 	draftNotice,
 	firstMobileNavLink,
+	mobileNav,
 	focusedPart,
 	footerVersion,
 	glossaryExplanation,
@@ -75,6 +76,7 @@ export const confirmedNames = question('the names the confirmations give', async
 export const focusedText = Text.of(focusedPart);
 /** #657: the first item of the menu in a narrow window, and how much of an item shows without scrolling (1: all) */
 export const firstMobileNavItem = Text.of(firstMobileNavLink);
+export const reachableAroundMobileNav = ReachableAround.of(mobileNav);
 export const mobileNavItemShare = (label: string) => ShareInViewport.of(mobileNavLink(label));
 /** #658: text and choices the page cuts off; [] when everything shows whole */
 export const cutOffOnPage = question('what the page cuts off', async (actor) => [

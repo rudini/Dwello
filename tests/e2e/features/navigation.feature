@@ -23,6 +23,7 @@ Funktionalität: Navigation
       | Nebenkostenabrechnungen | Nebenkostenabrechnungen |
       | Dokumente               | Dokumente               |
       | Berichte                | Berichte                |
+      | Auswertungen            | Auswertungen            |
       | Einstellungen           | Einstellungen           |
       | Kategorien              | Kategorien              |
       | Verteilschlüssel        | Verteilschlüssel        |
@@ -46,6 +47,7 @@ Funktionalität: Navigation
       | Nebenkostenabrechnungen | Nebenkostenabrechnungen |
       | Dokumente               | Dokumente               |
       | Berichte                | Berichte                |
+      | Auswertungen            | Auswertungen            |
       | Einstellungen           | Einstellungen           |
       | Kategorien              | Kategorien              |
       | Verteilschlüssel        | Verteilschlüssel        |
@@ -149,6 +151,13 @@ Funktionalität: Navigation
   Szenario: Die Kopfzeile passt in ein 360 Pixel schmales Fenster
     Angenommen das Browserfenster ist 360 Pixel breit
     Dann scrollt die Seite nicht seitwärts
+
+  # #651: solange das Menü offen ist, bleiben Tastatur und Bildschirmleser darin; die Seite dahinter ist unerreichbar
+  Szenario: Hinter dem offenen Menü ist die Seite nicht erreichbar
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Und der Liegenschaftsverwalter hat das Menü geöffnet
+    Dann nennt das Menü zuerst "Hilfe"
+    Und erreichen Tastatur und Bildschirmleser ausserhalb des Menüs nichts
 
   # #657 (Decided): «Hilfe» steht zuoberst im Menü, ohne Scrollen sichtbar; die Hauptnavigation bleibt, wie sie ist
   Szenario: Im Menü steht «Hilfe» zuoberst

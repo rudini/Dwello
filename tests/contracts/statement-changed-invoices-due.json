@@ -1,0 +1,18 @@
+{
+	"invoiceIds": ["i2"],
+	"fuelStockChanged": false,
+	"uncalculableKeys": [],
+	"valuesChanged": false,
+	"carryOverChanged": false,
+	"correctionDue": true,
+	"correctionDeclinable": true,
+	"correctionLowers": false,
+	"recalculated": {
+		"balance": "3073.95",
+		"difference": "753.95",
+		"belowMinimum": false,
+		"declineCosts": "753.95",
+		"open": "3073.95"
+	},
+	"splitKeys": []
+}

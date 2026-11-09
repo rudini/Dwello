@@ -240,5 +240,22 @@ describe('Datei zum Herunterladen', () => {
 
 		expect(response.headers.get('content-type')).toBe('image/jpeg');
 		expect(response.headers.get('content-disposition')).toBe('inline; filename="ausweis.jpg"');
+		expect(response.headers.get('content-security-policy')).toBe('sandbox');
+	});
+
+	// #1377: a row with another kind (a restore, a hand edit) never runs as a page of the app
+	it('wird als Beleg einer anderen Art als PDF, JPEG oder PNG nur gespeichert', async () => {
+		const page = (async () =>
+			new Response('<script>alert(1)</script>', {
+				headers: {
+					'content-type': 'text/html',
+					'content-disposition': 'attachment; filename="x.html"'
+				}
+			})) as typeof fetch;
+
+		const response = await proxyFile(page, request, 'http://api/x', true);
+
+		expect(response.headers.get('content-type')).toBe('application/octet-stream');
+		expect(response.headers.get('content-disposition')).toBe('attachment; filename="x.html"');
 	});
 });

@@ -131,6 +131,29 @@ export const HoldsFocus = {
 			single(element, (one) => one.evaluate((part) => part.contains(document.activeElement), undefined, quick))
 		)
 };
+/** #651: what keyboard and screen reader reach outside the element (controls, landmarks, anything with text of its
+ *  own), as texts; [] when everything around it is inert */
+export const ReachableAround = {
+	of: (target: Target) =>
+		about(target, 'what is reachable around', (element) =>
+			single(element, (one) =>
+				one.evaluate(
+					(inside) =>
+						[...document.body.querySelectorAll<HTMLElement>(':not(script, style, template, noscript)')]
+							.filter(
+								(part) =>
+									(part.matches('a[href], button, input, select, textarea, iframe, [tabindex], [contenteditable], header, nav, main, footer') ||
+										[...part.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())) &&
+									!inside.contains(part) &&
+									!part.closest('[inert]')
+							)
+							.map((part) => `${part.localName}: ${(part.getAttribute('aria-label') ?? part.textContent ?? '').replace(/\s+/g, ' ').trim()}`),
+					undefined,
+					quick
+				)
+			)
+		)
+};
 /** The tones (Alert, Badge: data-tone) shown in the element and everything in it, e.g. [] for a plain note (#687) */
 export const Tones = {
 	in: (target: Target) =>
