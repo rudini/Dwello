@@ -442,7 +442,7 @@ describe('Aufgaben der Übersicht', () => {
 
 		it('nennt bei Entwürfen beide Gründe, wenn es beide gibt', () => {
 			expect(draftsText(key, { invoices: 1, fuelStock: false })).toBe(
-				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, der Tankbestand wurde geändert, oder es hat sich geändert, welchen Übertrag aus einer früheren Abrechnung sie verrechnen. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen. Bei einigen lässt sich der Verteilschlüssel einer Rechnung für die Wohnungen des Gebäudes nicht berechnen: Wählen Sie dort vorher bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel.'
+				'Seit dem Erstellen hat sich etwas geändert, womit sie rechnen: die Rechnungen oder der Tankbestand ihrer Abrechnungsperiode, der Übertrag aus einer früheren Abrechnung, eine Wohnung oder ein Verteilschlüssel. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen. Bei einigen lässt sich der Verteilschlüssel einer Rechnung für die Wohnungen des Gebäudes nicht berechnen: Wählen Sie dort vorher bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel.'
 			);
 		});
 
