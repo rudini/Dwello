@@ -143,7 +143,8 @@ describe('Auth Routes Integration Tests', () => {
 			expect(JSON.parse(cookies._store.get('dwello_login')!)).toEqual({ provider: 'google', redirectTo: '/buildings?search=See' });
 		});
 
-		it.each(['//evil.example/phish', 'https://evil.example', '/\\evil.example'])(
+		// #1374: the URL parser drops tab and newlines, so "/<tab>/host" is "//host"
+		it.each(['//evil.example/phish', 'https://evil.example', '/\\evil.example', '/\t/evil.example', '/\n/evil.example', '/\r/evil.example'])(
 			'führt nach der Anmeldung nie auf eine fremde Seite (%s)',
 			async (target) => {
 				const { GET } = await import('$lib/../routes/auth/login/+server');
