@@ -47,14 +47,6 @@ export async function deleteLocalAccount(email: string): Promise<boolean> {
 	return (await db.delete(localAccounts).where(eq(localAccounts.email, normal(email))).returning()).length > 0;
 }
 
-/** A session of a Konto mit Passwort holds while the account exists and its password was not set again after it began */
-export async function localSessionHolds(sub: string, issuedAt: number): Promise<boolean> {
-	const id = sub.replace(/^local:/, '');
-	if (!/^[0-9a-f-]{36}$/i.test(id)) return false;
-	const [account] = await db.select({ changed: localAccounts.passwordChangedAt }).from(localAccounts).where(eq(localAccounts.id, id));
-	return !!account && Math.floor(account.changed.getTime() / 1000) <= issuedAt;
-}
-
 export async function hasLocalAccount(executor: Executor = db): Promise<boolean> {
 	return (await executor.select({ id: localAccounts.id }).from(localAccounts).limit(1)).length > 0;
 }
