@@ -8,7 +8,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
 import { randomBytes } from 'crypto';
-import { createReadStream } from 'fs';
+import { copyFileSync, createReadStream } from 'fs';
 import { migrate } from '../db/migrate';
 import { decryptFile, encryptStream, generateCode, recipientOf } from '../services/backup-crypto';
 import {
@@ -326,6 +326,21 @@ describe('Sicherung', () => {
 		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Neuer Stand' }]);
 
 		await restoreBackup(file, code, `${server}/${name}`, await folder(), migrations, () => true);
+		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
+	}, 60_000);
+
+	// Decided (product owner) #1373: check and decryption read one private copy, so the file cannot be swapped in between
+	it('stellt die geprüfte Sicherung wieder her, auch wenn die Datei danach ausgetauscht wird', async () => {
+		const { name, code } = await secured();
+		await query(name, 'UPDATE backup_codes SET mac_key = NULL');
+		const file = await createBackup(`${server}/${name}`, await folder(), secrets);
+		await query(name, `UPDATE buildings SET name = 'Zweiter Stand'`);
+		const other = await createBackup(`${server}/${name}`, await folder(), secrets);
+
+		await restoreBackup(file, code, `${server}/${name}`, await folder(), migrations, () => {
+			copyFileSync(other, file); // between the check (here: the confirmation) and the decryption
+			return true;
+		});
 		expect(await query(name, 'SELECT name FROM buildings')).toEqual([{ name: 'Lindenhof' }]);
 	}, 60_000);
 

@@ -7,7 +7,7 @@
 
 import { spawn } from 'child_process';
 import { createReadStream } from 'fs';
-import { chmod, mkdtemp, open, readdir, rename, rm, unlink, writeFile } from 'fs/promises';
+import { chmod, copyFile, mkdtemp, open, readdir, rename, rm, unlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import pg from 'pg';
@@ -176,7 +176,10 @@ export async function restoreBackup(
 ) {
 	const work = await mkdtemp(join(tmpdir(), 'dwello-restore-'));
 	try {
-		await decryptFile(file, code, join(work, 'plain'), confirmUnsigned);
+		// check and decryption read this private copy: the file in the folder cannot be swapped in between (#1373)
+		await copyFile(file, join(work, 'backup'));
+		await decryptFile(join(work, 'backup'), code, join(work, 'plain'), confirmUnsigned);
+		await rm(join(work, 'backup'));
 		const handle = await open(join(work, 'plain'));
 		const length = Buffer.alloc(4);
 		await handle.read(length, 0, 4, 0);
