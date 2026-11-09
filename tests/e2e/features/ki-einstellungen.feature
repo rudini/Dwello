@@ -159,7 +159,7 @@ Funktionalität: KI in den Einstellungen wählen
       | Zusatz           | Fehler                                                                                                                                                                                                                                      |
       | Abfrage          | Die Adresse enthält einen Zusatz ab «?» oder «#». Löschen Sie ihn; die Adresse der KI endet davor, zum Beispiel https://api.anbieter.ch/v1.                                                                                                 |
       | Sprungmarke      | Die Adresse enthält einen Zusatz ab «?» oder «#». Löschen Sie ihn; die Adresse der KI endet davor, zum Beispiel https://api.anbieter.ch/v1.                                                                                                 |
-      | Anmeldedaten     | Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie alles nach «https://» bis und mit «@», zum Beispiel https://api.anbieter.ch/v1. Den API-Schlüssel finden Sie in Ihrem Konto beim Anbieter; geben Sie ihn im Feld «API-Schlüssel» ein. |
+      | Anmeldedaten     | Die Adresse enthält vor «@» Anmeldedaten. Löschen Sie den Teil zwischen «://» und «@» samt dem «@», zum Beispiel https://api.anbieter.ch/v1. Den API-Schlüssel finden Sie in Ihrem Konto beim Anbieter; geben Sie ihn im Feld «API-Schlüssel» ein. |
       # entschieden in #1372: im Internet nur verschlüsselt; im eigenen Netz auch http (#580)
       | http im Internet | Ein Anbieter im Internet erhält die Daten nur verschlüsselt. Schreiben Sie https:// statt http:// an den Anfang der Adresse.                                                                                                                |
 
