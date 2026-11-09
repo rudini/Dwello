@@ -1391,7 +1391,7 @@ describe('Beleg einer Rechnung', () => {
 		show(InvoicePage, { data: { invoice: toInvoice(invoiceRow(invoiceContract)) } } as never);
 		click('invoice-delete-button');
 		expect(byTestId('invoice-delete-retention-note')!.textContent).toBe(
-			'Bewahren Sie die Originalrechnung bis zum 31.12.2036 auf, auf Papier oder als Datei. Wer zur Buchführung verpflichtet ist, muss Buchungsbelege 10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR). Auch als Privatperson brauchen Sie die Rechnung bis dann: Die Steuerbehörde kann bis 10 Jahre nach Ende der Steuerperiode ein Nachsteuerverfahren einleiten (Art. 152 DBG).'
+			'Bewahren Sie die Originalrechnung bis zum 31.12.2036 auf, auf Papier oder als Datei. Wer zur Buchführung verpflichtet ist, muss Buchungsbelege 10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art.\u00a0958f\u00a0OR). Auch als Privatperson brauchen Sie die Rechnung bis dann: Die Steuerbehörde kann bis 10 Jahre nach Ende der Steuerperiode ein Nachsteuerverfahren einleiten (Art.\u00a0152\u00a0DBG).'
 		);
 	});
 

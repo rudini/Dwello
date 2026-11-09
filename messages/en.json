@@ -1210,7 +1210,7 @@
 	"invoices_beleg_how_replace": "Choose the new file, then «Replace the supporting document».",
 	"invoices_beleg_how_add": "Choose the file, then «Add the supporting document».",
 	"invoices_delete_beleg": "The supporting document is deleted as well.",
-	"invoices_delete_retention": "Keep the original invoice until {date}, on paper or as a file. Anyone required to keep accounts must keep accounting vouchers for 10 years from the end of the financial year (Art. 958f CO). As a private person you also need it until then: the tax authority can open back-tax proceedings up to 10 years after the end of the tax period (Art. 152 DBG).",
+	"invoices_delete_retention": "Keep the original invoice until {date}, on paper or as a file. Anyone required to keep accounts must keep accounting vouchers for 10 years from the end of the financial year (Art. 958f CO). As a private person you also need it until then: the tax authority can open back-tax proceedings up to 10 years after the end of the tax period (Art. 152 DBG).",
 	"invoices_delete_retention_investment": "Keep invoices for value-enhancing investments until you sell the building: they prove the investment costs for the property gains tax.",
 	"dashboard_task_retention": "Invoices for {period} of {building} can be deleted",
 	"dashboard_task_retention_text_one": "The retention period of {count} invoice of this billing period ended on {date}. Delete what you no longer need. Dwello does not count invoices for value-enhancing investments here: keep them until you sell the building. If an invoice in the list must be kept longer, Dwello tells you when you delete it.",
