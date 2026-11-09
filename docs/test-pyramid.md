@@ -53,7 +53,7 @@ Target coverage:
 
 Bun measures only lines and functions in the backend.
 
-A floor applies: today's coverage, rounded down to whole percent. If coverage drops below it, the run fails locally and in CI. As coverage grows, the floor is raised. The backend floor (82 % lines, 85 % functions) is already above the target; the frontend floor is still below it.
+A floor applies: today's coverage, rounded down to whole percent. If coverage drops below it, the run fails locally and in CI. As coverage grows, the floor is raised. The backend floor (82 % lines, 85 % functions) and the frontend floor (93 % statements, 86 % branches, 94 % functions, 92 % lines) are above the target.
 
 | Area | Measured by | Floor stored in |
 |---|---|---|
@@ -105,7 +105,3 @@ UI behavior that is not business behavior lives in its own features: `breadcrumb
 E2E selection on pull requests (#845): an area is the pages of one part of the app under `src/routes/`; the BFF modules in `src/lib/server`, the API routes, the backend, steps, fixtures and shared components serve several, so a change to them runs everything; `*.test.ts`, `*.md`, `docs/`, `.claude/` and `tools/` (but the selection script and `tools/e2e/`, which builds the app for every E2E run) are left out. `e2e-areas.test.ts` checks that no file outside an area imports one of its files, that no file the app or the E2E tests import is left out, and that every feature file is in an area, `always` or `fullRunOnly`. It sees imports, not navigation: a scenario of one area that opens a page of another (a statement sent, then the tenant's page) is not selected for a change of that other page, and only the run on `main` shows it.
 
 Local prerequisite: PostgreSQL on port 5432 with user `dwello`; how the test databases are recreated and the development database stays untouched: `backend/CLAUDE.md` (`dwello_test`) and `tests/e2e/CLAUDE.md`, "Run" (`dwello_e2e`).
-
-## Open
-
-Raising frontend coverage to the target: #700.
