@@ -341,13 +341,24 @@ export async function calculateBuildingDistribution(
 		amount: number;
 	}>;
 	error?: string;
+	errorCode?: ErrorCode;
+	apartmentId?: string; // where the formula fails, if it fails for one apartment (#1315)
 }> {
 	const key = await getDistributionKey(distributionKeyId);
 	if (!key) {
 		return { isValid: false, distributions: [], error: 'Distribution key not found' };
 	}
 
-	if (!key.formula) {
+	return distributionAmong(key.formula, apartments, totalAmount);
+}
+
+/** A formula's distribution over the building's apartments; none without a formula */
+export function distributionAmong(
+	formula: string | null,
+	apartments: Array<{ id: string; area: number; rooms: number }>,
+	totalAmount: number
+): Awaited<ReturnType<typeof calculateBuildingDistribution>> {
+	if (!formula) {
 		return { isValid: false, distributions: [], error: 'Distribution key has no formula' };
 	}
 
@@ -359,10 +370,11 @@ export async function calculateBuildingDistribution(
 		volume: apt.area * 2.5 // Estimate ceiling height
 	}));
 
-	const result = calculateDistribution(key.formula, aptVariables, totalAmount);
+	const result = calculateDistribution(formula, aptVariables, totalAmount);
 
 	if (!result.isValid) {
-		return { isValid: false, distributions: [], error: result.error };
+		const apartmentId = result.apartmentIndex === undefined ? undefined : apartments[result.apartmentIndex].id;
+		return { isValid: false, distributions: [], error: result.error, errorCode: result.errorCode, apartmentId };
 	}
 
 	return {

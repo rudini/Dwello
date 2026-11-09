@@ -92,7 +92,11 @@
 	);
 	// the backend says it of a draft only
 	const outdated = $derived(
-		[invoicesOutdated, later?.carryOver && m.statements_send_outdated_carry()]
+		[
+			later?.uncalculableKeys?.length && m.statements_send_outdated_key(), // #1309: only a draft is sent from here
+			invoicesOutdated,
+			later?.carryOver && m.statements_send_outdated_carry()
+		]
 			.filter(Boolean)
 			.join(' ') || undefined
 	);

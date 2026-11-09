@@ -582,7 +582,7 @@ export function testData(api: CallTheApi) {
 		async invoiceOnByKey(buildingTitle: string, categoryName: string, amount: string, date: string, keyName: string) {
 			const category = await predefinedCategory(categoryName);
 			const key = (await get('distribution-keys?limit=100')).data.find((k: { nameDE: string }) => k.nameDE === keyName);
-			const id = await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: key.id }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId: category.id, distributionKeyId: ids.get(keyName) ?? key.id }, `${categoryName} ${date}`, amount, date);
 			ids.set(`Rechnung ${categoryName} ${date}`, id);
 		},
 

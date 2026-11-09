@@ -336,3 +336,50 @@ describe('Perioden der Berichte', () => {
 		]);
 	});
 });
+
+// #1309 (Fachreview 1309-1): a statement with an invoice whose Verteilschlüssel cannot be calculated for the building is
+// not up to date for that reason alone; the note names it on its own line, not among the changed ones
+describe('Kostenabstimmung mit einem Verteilschlüssel, der sich nicht berechnen lässt', () => {
+	const other = crypto.randomUUID();
+	let keyed: Awaited<ReturnType<typeof createRental>>;
+	let keyId: string;
+	let created: string;
+
+	beforeAll(async () => {
+		keyed = await createRental(other, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		[{ id: keyId }] = await db
+			.insert(distributionKeys)
+			.values({ name: `Zimmer ${other}`, nameDE: `Zimmer ${other}`, type: 'custom', formula: '{rooms}' })
+			.returning();
+		await db.insert(invoices).values({
+			buildingId: keyed.building,
+			categoryId: caretakerId,
+			distributionKeyId: keyId,
+			billingEntityName: 'Muster AG',
+			description: `Hauswart ${other}`,
+			amount: '400.00',
+			invoiceDate: '2024-06-30',
+			isValidUtilityCost: true
+		});
+		created = (await generateStatement({ contractId: keyed.contract, buildingId: keyed.building, periodStart: '2024-01-01', periodEnd: '2024-12-31', managementFeePercent: 0 })).id;
+		await db.update(distributionKeys).set({ formula: '1 / (({rooms} - 3.5) * ({rooms} - 3.5))' }).where(eq(distributionKeys.id, keyId));
+	});
+
+	afterAll(async () => {
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, created));
+		await db.delete(invoices).where(eq(invoices.buildingId, keyed.building));
+		await keyed.remove();
+		await db.delete(distributionKeys).where(eq(distributionKeys.id, keyId));
+	});
+
+	it('nennt die Abrechnung als eine mit einem Verteilschlüssel, der sich nicht berechnen lässt', async () => {
+		const body = (await (
+			await callApi(`/api/v1/reports/reconciliation?buildingId=${keyed.building}&${period}`)
+		).json()) as Report;
+
+		expect({ notUpToDate: body.notUpToDate, keyNotCalculable: body.keyNotCalculable }).toEqual({
+			notUpToDate: [],
+			keyNotCalculable: [{ id: created, tenantName: `Anna Keller ${other}` }]
+		});
+	});
+});

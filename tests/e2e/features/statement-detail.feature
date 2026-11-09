@@ -1079,6 +1079,68 @@ Funktionalität: Abrechnungsdetail
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
     Und steht der Fokus auf der Fehlermeldung
 
+  # #1309 (Entscheid PO): ein Entwurf mit einer Rechnung, deren Verteilschlüssel sich für die Wohnungen des Gebäudes
+  # nicht berechnen lässt, ist nicht aktuell (vor #1221 verteilte Dwello sie gleichmässig); «Neu berechnen» verweigert
+  # wie in #1221, bis der Verteilschlüssel stimmt
+  Szenario: Entwurf mit einem Verteilschlüssel, der sich nicht berechnen lässt, ist nicht aktuell
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Verteilschlüssel "Halbe Zimmer" hat danach die Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Dieser Entwurf ist nicht aktuell: Der Verteilschlüssel einiger Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen."
+    Und nennt der Hinweis auf Änderungen seit dem Erstellen die Rechnung vom "30.09.2024" über "900.00"
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+
+  # #1333 (Entscheid PO): solange sich ein Verteilschlüssel des Entwurfs nicht berechnen lässt, wird er nicht versendet
+  Szenario: Ein Entwurf mit einem Verteilschlüssel, der sich nicht berechnen lässt, wird nicht versendet
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Verteilschlüssel "Halbe Zimmer" hat danach die Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung versendet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen."
+    Und hat die Abrechnung den Status "Entwurf"
+
+  # #1333 (Entscheid PO, Fachreview 1333-1 V-3): auch das PDF des Entwurfs, bis der Verteilschlüssel stimmt
+  Szenario: Das PDF eines Entwurfs mit einem Verteilschlüssel, der sich nicht berechnen lässt, verweigert Dwello
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Verteilschlüssel "Halbe Zimmer" hat danach die Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung zu erstellen versucht
+    Dann meldet Dwello den Fehler "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und meldet Dwello den Fehler "Berechnen Sie den Entwurf danach neu, bevor Sie sein PDF erstellen."
+
+  # Persona Anna 1309 P-1: vom Hinweis zur Rechnung, deren Verteilschlüssel sich nicht berechnen lässt
+  Szenario: Rechnung mit einem nicht berechenbaren Verteilschlüssel aus der Abrechnung öffnen
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Verteilschlüssel "Halbe Zimmer" hat danach die Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Rechnung vom "30.09.2024" aus dem Hinweis auf der Abrechnung bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
+  # #1309 (Entscheid PO): eine versendete Abrechnung mit einem solchen Verteilschlüssel ist zu berichtigen, sobald der
+  # Verteilschlüssel stimmt; bis dahin wird sie nicht ersetzt (Fachreview 1309-1 V-1)
+  Szenario: Versendete Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, wird nicht ersetzt
+    Angenommen es gibt den Verteilschlüssel "Halbe Zimmer" mit der Formel "{rooms}"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung vom "2024-09-30", die nach dem Verteilschlüssel "Halbe Zimmer" verteilt wird
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Verteilschlüssel "Halbe Zimmer" hat danach die Formel "1 / (({rooms} - 3.5) * ({rooms} - 3.5))"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Dwello kann die Abrechnung deshalb nicht neu berechnen."
+    Und bietet der Hinweis auf Änderungen seit dem Erstellen das Berichtigen nicht an
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Er gilt für diese Rechnungen: Muster AG, 30.09.2024, CHF 900.00."
+    Und hat die Abrechnung den Status "Versendet"
+
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"

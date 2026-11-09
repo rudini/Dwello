@@ -110,6 +110,15 @@ describe('Fehlerseite eines abgelehnten PDF', () => {
 		expect(pageOf('code=IBAN_MISSING&back=%2Fstatements%2Fs-1')).toMatchObject({ way: 'Zurück' });
 	});
 
+	// #1333 (Fachreview 1333-2): the page knows only the code, so the refusal of a draft's key has a sentence of its own
+	it('sagt beim PDF eines Entwurfs, dessen Verteilschlüssel sich nicht berechnen lässt, was zu tun ist', () => {
+		for (const query of ['code=STATEMENT_KEY_NOT_CALCULABLE', 'code=STATEMENT_KEY_NOT_CALCULABLE&view'])
+			expect(pageOf(query)).toMatchObject({
+				title: 'PDF nicht verfügbar',
+				sentence: 'Der Verteilschlüssel einiger Rechnungen eines Entwurfs lässt sich für die Wohnungen des Gebäudes nicht berechnen. Deshalb erstellt Dwello das PDF dieses Entwurfs nicht. Die Seite des Entwurfs nennt diese Rechnungen und sagt, was zu tun ist. Sobald sich der Verteilschlüssel berechnen lässt, ist das PDF wieder verfügbar. Wählen Sie dann «Neu berechnen», bevor Sie das PDF erstellen.'
+			});
+	});
+
 	// code review 734 C-3
 	it('nennt ein PDF, das nicht erstellt werden kann, im Titel und sagt beim Ansehen, den Tab zu schliessen', () => {
 		expect(pageOf('view').title).toBe('PDF nicht verfügbar');

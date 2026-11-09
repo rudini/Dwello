@@ -37,6 +37,7 @@ import type { StatementWithDetails } from '$lib/types';
 const noPayment = { unpaid: true, claimed: false, paymentPart: false, noPayment: true };
 import { localToday } from '$lib/contract-status';
 import undeliveredReminder from '../../tests/contracts/reminder-undelivered.json';
+import keyChanges from '../../tests/contracts/statement-changed-invoices-key.json';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, settled: 4, overdue: 1 };
@@ -902,6 +903,52 @@ describe('Abrechnungsdetail', () => {
 		click('statement-send-button');
 		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain('nicht aktuell');
 		expect(byTestId('send-recalculate')).toBeNull();
+	});
+
+	// #1309 (Entscheid PO, Fachreview 1309-1): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt
+	const failing = keyChanges.uncalculableKeys; // code review 1309-2 C-5: as the backend sends it
+	// Persona Anna 1309 P-1, Dr. Weber 1309 P-2: der Hinweis nennt die Rechnungen und führt zu ihnen, zurück zur Abrechnung
+	it('nennt die Rechnungen mit dem Verteilschlüssel, der sich nicht berechnen lässt, und führt zu ihnen', () => {
+		later(0, 'sent', { uncalculableKeys: failing, correctionDue: true } as never);
+		const link = byTestId('statement-later-invoices')!.querySelector('a')!;
+		expect(link.textContent!.replace(/\s+/g, ' ')).toBe('Garten AG: Gartenpflege 2024. Rechnungsdatum 31.05.2024, CHF 600.00');
+		expect(link.getAttribute('href')).toBe(
+			`/invoices/${failing[0].invoices[0].id}/edit?returnTo=${encodeURIComponent('/statements/s1')}`
+		);
+	});
+
+	// code review 1309-2 C-4: the delivery of another period whose key distributes the Veränderung Tankbestand, as in the preview
+	it('sagt bei einer Lieferung aus einer anderen Abrechnungsperiode, dass sie die Veränderung Tankbestand verteilt', () => {
+		const delivery = [{ ...failing[0], invoices: [{ ...failing[0].invoices[0], fuelStock: true }] }];
+		later(0, 'draft', { uncalculableKeys: delivery } as never);
+		expect(laterText()).toContain(
+			'Lieferung aus einer anderen Abrechnungsperiode: Nach ihrem Verteilschlüssel verteilt Dwello die Veränderung Tankbestand.'
+		);
+	});
+	it('nennt beim Entwurf den Verteilschlüssel, der sich nicht berechnen lässt, und sagt, was zu tun ist', () => {
+		later(0, 'draft', { uncalculableKeys: failing } as never);
+		expect(laterText()).toMatch(/^\s*Verteilschlüssel lässt sich nicht berechnen/);
+		expect(laterText()).toContain(
+			'Dieser Entwurf ist nicht aktuell: Der Verteilschlüssel einiger Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Die Formel von «Halbe Zimmer» teilt für die Wohnung 2.01 im Gebäude «Ahornhof» durch null. Solange sich der Verteilschlüssel nicht berechnen lässt, können Sie den Entwurf weder versenden noch als versendet markieren, und Dwello erstellt kein PDF des Entwurfs. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist ihr Verteilschlüssel schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Sobald sich der Verteilschlüssel berechnen lässt, ist auch das PDF wieder verfügbar. Wählen Sie dann «Neu berechnen», bevor Sie das PDF erstellen oder den Entwurf zustellen.'
+		);
+		expect(laterText()).not.toContain('Seit dem Erstellen');
+		click('statement-send-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Der Verteilschlüssel einiger Rechnungen dieses Entwurfs lässt sich für die Wohnungen des Gebäudes nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel. Solange sich der Verteilschlüssel nicht berechnen lässt, können Sie den Entwurf weder versenden noch als versendet markieren, und Dwello erstellt kein PDF des Entwurfs. Berechnen Sie den Entwurf danach neu, bevor Sie ihn zustellen.'
+		);
+	});
+
+	it('nennt beim Entwurf auch danach geänderte Rechnungen', () => {
+		later(1, 'draft', { uncalculableKeys: failing } as never);
+		expect(laterText()).toContain('bevor Sie das PDF erstellen oder den Entwurf zustellen. Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung');
+	});
+
+	// Fachreview 1309-1 V-1: ohne «Abrechnung berichtigen», solange Dwello nicht neu berechnen kann
+	it('bietet bei einer versendeten Abrechnung mit einem solchen Verteilschlüssel kein Berichtigen im Hinweis an', () => {
+		later(0, 'sent', { uncalculableKeys: failing, correctionDue: true } as never);
+		expect(laterText()).toContain('durch null. Dwello kann die Abrechnung deshalb nicht neu berechnen.');
+		expect(byTestId('statement-later-correct-button')).toBeNull();
+		expect(byTestId('statement-decline-correction-button')).toBeNull();
 	});
 
 	// #454 (#408 point 8): the Tankbestand changed since; titles decided 2026-10-20 (Fachreview 454-1 E-4)

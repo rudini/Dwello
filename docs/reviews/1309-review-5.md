@@ -1,0 +1,21 @@
+# Code-Review 1309, Runde 5 (Merge e6c00695 von origin/main in 9d49161)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|---|---|---|---|
+| C-1 | Major | backend/src/services/held-invoices.ts:35-43 | `keyFailure` prüft den Verteilschlüssel nach dem Merge von #1301 mit der heutigen Fläche und Zimmeranzahl und teilt die Periode nur an «Aufgehoben ab». Die Berechnung (`prorating.service.ts` `partsOf`/`countingWith`) nimmt aber die Werte des jeweiligen Tages und teilt auch an jedem Tag mit neuen Werten. Rechnungen werden deshalb falsch angehalten oder nicht angehalten. |
+
+## C-1: Die Prüfung des Verteilschlüssels kennt die früheren Werte von #1301 nicht
+
+Der Fehler entsteht erst durch den Merge. Jede Seite für sich ist in Ordnung. #1336 auf diesem Branch rechnet die Schlüssel «over the apartments the calculation counts in each part of the period» (so der Kommentar in Zeile 34). Seit #1301 zählt eine Wohnung in der Berechnung aber mit `sizeOn(apartment, day)`, also mit den Werten aus `earlierSizes`, und `partsOf` schneidet an `changeDays`. `keyFailure` macht dagegen weiter `apartments.filter(countingOn(day))` und schneidet nur an `discontinuedFrom`. `apartmentsOf` liefert dabei `area`/`rooms` von heute. Damit stimmt der Kommentar in Zeile 34 nicht mehr, und #1221 (Entscheid des Product Owners: anhalten statt gleich verteilen) wird in beide Richtungen verletzt:
+
+1. **Keine Rechnung angehalten, still gleich verteilt.** Ein Beispiel: Gebäude mit Wohnung A und Wohnung B mit 50 m². A hatte 40 m² bis 30.06.2025 und hat 60 m² ab 01.07.2025. Dazu ein Formelschlüssel `Fläche − 45` und eine Rechnung 2025 mit diesem Schlüssel. `uncalculableKeyInvoices(…, '2025-01-01', '2025-12-31')` prüft nur am 01.01. und mit A = 60 (15, 5), meldet also nichts. Die Berechnung rechnet den Teil Januar bis Juni mit A = 40 (−5), `calculateApartmentShare` scheitert (`calculation.service.ts:262`), und der Fallback verteilt gleich. Die Prüfung der Rechnungen, die Weigerung des Laufs, `keyNotCalculable` in der Übersicht und der Abgleich schweigen.
+2. **Rechnung angehalten, obwohl die Berechnung gelingt.** Umgekehrter Fall: A hatte 60 m² bis 30.06.2025 und hat 40 m² ab 01.07.2025, abgerechnet wird die Periode 2024. Die Berechnung nimmt für 2024 A = 60 und gelingt. `keyFailure` rechnet mit A = 40 und hält die Rechnung als «nicht berechenbar» an. Der Lauf wird verweigert, und eine versendete Abrechnung 2024 erscheint als zu berichtigen (`statement-invoices.service.ts:202`, Abgleich `keyNotCalculable`).
+
+So lässt es sich zeigen: Ein `*.pg.test.ts` neben `describe('Verteilschlüssel, wenn eine Wohnung aufgehoben ist')` in `backend/src/__tests__/statement-key-failure.pg.test.ts` legt mit `updateApartment(id, { area, sizeFrom })` eine Änderung der Fläche an und prüft beide Fälle oben. Heute fallen beide rot aus. Kein Test deckt die Prüfung mit `earlierSizes` ab: `apartment-size-from-day.pg.test.ts` prüft nur die Berechnung, `statement-key-failure.pg.test.ts` nur `discontinuedFrom`. Behebung: In `keyFailure` mit `countingWith(apartments, day)` rechnen und auch an `daysAfter(earlier.until, 1)` jeder Wohnung schneiden. Das entspricht `partsOf` über die ganze Periode.
+
+## Nicht bestätigt
+
+- Vom Aufrufer gemeldet, nicht selbst ausgeführt: lint, check, fitness und Backend-type-check bestanden; ganzes vitest (4699) bestanden; Backend `bun run test` (2213, mit Coverage) bestanden; E2E chromium statement-detail, statement-generate, reports und die Zeilen in accessibility/sprachen für deren Bildschirme (291) bestanden.
+- Ob die E2E-Szenarien von #1309 bei einer Wohnung mit geänderter Fläche (#1301) anders ausgehen, habe ich nicht geprüft. Kein Szenario verbindet die beiden.
+
+Geprüft: Konfliktlösung (`git show --remerge-diff e6c00695`). Kein Konfliktblock wurde verloren: Bei `Reconciliation` sind `fuelStocks`/`vacancies` und `keyNotCalculable` beide drin, `sizeChangeNote`/`laterKeyInvoice` sind als Target und als Question samt Imports und Steps beide drin. `tests/contracts/report-reconciliation.json` und `backend/src/api/report.ts` führen `fuelStock`, `vacancies` und `keyNotCalculable` zusammen. Mapper und `ReconciliationNotes.svelte` passen zu den Feldern von #1138. Der Import von `countingOn` aus `prorating.service` in held-invoices.ts und im Abgleich passt zu e4c3b346.

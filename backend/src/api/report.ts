@@ -26,4 +26,5 @@ export type ReconciliationBody = {
 	withoutStatement?: number;
 	drafts?: Named[];
 	notUpToDate?: Named[];
+	keyNotCalculable?: Named[]; // #1309
 };

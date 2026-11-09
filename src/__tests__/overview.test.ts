@@ -284,7 +284,7 @@ describe('Aufgaben der Übersicht', () => {
 
 	// #454 (#408 point 7, #386): drafts that miss what changed since are no drafts to send
 	describe('Abrechnungen, die nicht aktuell sind', () => {
-		type Changed = { invoices: number; fuelStock: boolean; olderThanFiveYears?: boolean };
+		type Changed = { invoices: number; fuelStock: boolean; olderThanFiveYears?: boolean; uncalculableKeys?: boolean };
 		// what changed since: the count of invoices, and whether the Tankbestand did (#307)
 		const outdated = (
 			id: string,
@@ -420,6 +420,30 @@ describe('Aufgaben der Übersicht', () => {
 				new RegExp(`${old}$`)
 			);
 			expect(correctText({ invoices: 1, fuelStock: false })).not.toContain(old);
+		});
+
+		// #1309 (Fachreview 1309-1): ein Verteilschlüssel, der sich für das Gebäude nicht berechnen lässt
+		const key = { invoices: 0, fuelStock: false, uncalculableKeys: true };
+		it('sagt bei einer versendeten Abrechnung mit einem solchen Verteilschlüssel, was zuerst zu tun ist', () => {
+			expect(correctText(key)).toBe(
+				'Der Verteilschlüssel einiger Rechnungen der Abrechnung NK-s5 von Mieter s5 lässt sich für die Wohnungen des Gebäudes nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel. Ändert die Neuberechnung danach den Saldo oder eine Position, berichtigen Sie die Abrechnung mit «Abrechnung berichtigen».'
+			);
+		});
+
+		const draftsText = (...changed: Changed[]) =>
+			overviewTasks(
+				input({ outdatedStatements: changed.map((one, i) => outdated(`d${i}`, 'draft', 'b1', 'Seeblick', '2025-01-01', '2025-12-31', one)) })
+			).find((one) => one.id === 'outdated-drafts')!.text;
+		it('sagt bei Entwürfen, die nur ein solcher Verteilschlüssel nicht aktuell macht, nur diesen Grund', () => {
+			expect(draftsText(key)).toBe(
+				'Der Verteilschlüssel einiger ihrer Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel. Berechnen Sie die Entwürfe danach neu, bevor Sie sie zustellen.'
+			);
+		});
+
+		it('nennt bei Entwürfen beide Gründe, wenn es beide gibt', () => {
+			expect(draftsText(key, { invoices: 1, fuelStock: false })).toBe(
+				'Seit dem Erstellen hat sich etwas geändert, womit sie rechnen: die Rechnungen oder der Tankbestand ihrer Abrechnungsperiode, der Übertrag aus einer früheren Abrechnung, eine Wohnung oder ein Verteilschlüssel. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen. Bei einigen lässt sich der Verteilschlüssel einer Rechnung für die Wohnungen des Gebäudes nicht berechnen: Wählen Sie dort vorher bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel.'
+			);
 		});
 
 		// Fachreview 454-2 V-23: also an erledigte Abrechnung (#448) is corrected

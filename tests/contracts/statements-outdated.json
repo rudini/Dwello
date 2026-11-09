@@ -11,6 +11,7 @@
 			"periodEnd": "2025-12-31",
 			"invoices": 1,
 			"fuelStock": false,
+			"uncalculableKeys": false,
 			"values": false,
 			"olderThanFiveYears": false
 		}

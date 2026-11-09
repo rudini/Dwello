@@ -379,6 +379,18 @@ export async function apartmentExists(id: string): Promise<boolean> {
  * earlier values (#1301) */
 export async function apartmentsOf(buildingId: string) {
 	const { apartments } = await listApartments({ buildingId, limit: null });
-	const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row, area: parseFloat(row.area), rooms: parseFloat(row.rooms) });
-	return apartments.map(({ id, number, area, rooms, discontinuedFrom, earlierSizes }) => ({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) }));
+	return apartments.map(keyValues);
+}
+
+const values = <T extends { area: string; rooms: string }>(row: T) => ({ ...row, area: parseFloat(row.area), rooms: parseFloat(row.rooms) });
+const keyValues = ({ id, number, area, rooms, discontinuedFrom, earlierSizes }: { id: string; number: string; area: string; rooms: string; discontinuedFrom: string | null; earlierSizes: { until: string; area: string; rooms: string }[] }) =>
+	({ ...values({ id, number, area, rooms }), discontinuedFrom, earlierSizes: earlierSizes.map(values) });
+
+/** As apartmentsOf, for every building in one query: a list of statements checks their keys without a query per row (#922) */
+export async function apartmentsByBuilding() {
+	const { id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes } = apartments;
+	const rows = await db.select({ id, buildingId, number, area, rooms, discontinuedFrom, earlierSizes }).from(apartments);
+	const byBuilding = new Map<string, ReturnType<typeof keyValues>[]>();
+	for (const row of rows) byBuilding.set(row.buildingId, [...(byBuilding.get(row.buildingId) ?? []), keyValues(row)]);
+	return byBuilding;
 }

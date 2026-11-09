@@ -42,8 +42,11 @@
 			"description": "Gartenpflege 2025",
 			"invoiceDate": "2025-05-31",
 			"amount": "600.00",
+			"categoryId": "c0000000-0000-4000-8000-000000000001",
 			"distributionKeyName": "Halbe Zimmer",
-			"buildingName": "Ahornhof"
+			"buildingName": "Ahornhof",
+			"reason": "STATEMENT_KEY_REASON_DIVISION_BY_ZERO",
+			"apartment": "2.01"
 		}
 	]
 }

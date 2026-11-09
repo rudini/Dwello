@@ -4,6 +4,7 @@ import { successToast } from '../targets/form';
 import { Click, DownloadFrom, Enter, EnterDate, Navigate, Scroll, Wait } from '../screenplay/interactions';
 import { goBackInBrowser } from './app-frame';
 import {
+	laterKeyInvoice,
 	carrySettleButton,
 	confirmCarrySettleButton,
 	confirmCorrectButton,
@@ -104,6 +105,8 @@ export const openStatementApartment = Click.on(statementApartmentLink);
 // done once the PDF is made: the Verlauf may already name a new PDF (#968), and the page renders it again when made
 export const generateStatementPdf: Activity = (actor) =>
 	actor.attemptsTo(Click.on(generatePdfButton), Wait.until(successToast));
+// #1333: a refused PDF shows no success, the refusal is what the next step asks for
+export const tryToGenerateStatementPdf = Click.on(generatePdfButton);
 export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 export const downloadSentPdf = DownloadFrom(sentPdfLink);
 export const downloadPdfBeforeChange = DownloadFrom(pdfBeforeChangeLink);
@@ -164,3 +167,7 @@ export const correctStatementPaid = (amount: string): Activity => (actor) =>
 export const settleCarryOver: Activity = (actor) => actor.attemptsTo(Click.on(carrySettleButton), Click.on(confirmCarrySettleButton));
 /** #1096: the landlord is at the statement's further actions; the page's movement is noted from there */
 export const stayAtMoreActions: Activity = (actor) => actor.attemptsTo(Scroll.toMiddle(recalculateButton), Scroll.watch);
+
+// #1309: from the hint to the invoice whose key cannot be calculated
+export const editLaterKeyInvoice = (date: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(laterKeyInvoice(date)), Wait.forUrl((url) => /\/invoices\/[^/]+\/edit/.test(url.href)));

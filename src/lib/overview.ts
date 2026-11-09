@@ -37,6 +37,7 @@ export interface OverviewInput {
 		periodEnd: string;
 		invoices: number; // recorded, changed or deleted since
 		fuelStock: boolean; // the Tankbestand changed since
+		uncalculableKeys?: boolean; // a key of its invoices cannot be calculated for the building (#1309)
 		olderThanFiveYears: boolean; // the period ended more than five years ago, by the Swiss day (#788)
 	}[];
 	// moved out with a draft statement, still at the building's address (A-5, #114)
@@ -173,12 +174,22 @@ function outdatedDraftsTask(drafts: Outdated): Task | false {
 	return {
 		id: 'outdated-drafts',
 		title: count(drafts.length, m.dashboard_task_outdated_drafts_one, m.dashboard_task_outdated_drafts_many),
-		text: m.dashboard_task_outdated_drafts_text(),
+		text: outdatedDraftsText(drafts),
 		href: '/statements?status=draft',
 		action: m.dashboard_task_drafts_action(),
 		icon: 'statement',
 		links: [...ways.values()]
 	};
+}
+
+// #1309 (Fachreview 1309-1): a key that cannot be calculated, alone or besides the other reasons
+function outdatedDraftsText(drafts: Outdated) {
+	const keyed = drafts.some((d) => d.uncalculableKeys);
+	if (!keyed) return m.dashboard_task_outdated_drafts_text();
+	const other = drafts.some((d) => !d.uncalculableKeys || d.invoices || d.fuelStock);
+	return other
+		? `${m.dashboard_task_outdated_drafts_text()} ${m.dashboard_task_outdated_drafts_and_key()}`
+		: m.dashboard_task_outdated_drafts_key();
 }
 
 // What changed since a statement, as the statement page says it (#454, Fachreview 454-1 V-8)
@@ -195,7 +206,9 @@ const correctTasks = (statements: Outdated): Task[] =>
 		id: `correct-${s.id}`,
 		title: m.statements_correct(),
 		text: [
-			m.dashboard_task_correct_text({ number: s.statementNumber, tenant: s.tenantName, later: laterText(s.invoices, s.fuelStock) }),
+			s.uncalculableKeys
+				? m.dashboard_task_correct_key_text({ number: s.statementNumber, tenant: s.tenantName }) // #1309
+				: m.dashboard_task_correct_text({ number: s.statementNumber, tenant: s.tenantName, later: laterText(s.invoices, s.fuelStock) }),
 			s.olderThanFiveYears && m.dashboard_task_correct_old()
 		]
 			.filter(Boolean)

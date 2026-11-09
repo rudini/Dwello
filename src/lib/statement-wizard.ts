@@ -92,6 +92,7 @@ export interface HintedInvoice {
 	invoiceDate: string;
 	amount: string;
 	categoryName?: string; // a heating invoice's category in the UI language (#339)
+	note?: string; // a remark the hint adds to the invoice (#1323)
 }
 
 export interface InvoiceCheck {
@@ -104,7 +105,8 @@ export interface InvoiceCheck {
 	heatingWithoutServicePeriod?: (HintedInvoice & { categoryId: string | null })[];
 	oldHeatingRule?: string[]; // sent statements sharing the heating costs over the period although an invoice has one (#335)
 	splitKeys?: SplitKeyHint[]; // #528: invoices whose key differs from their Kategorie's, names in the UI language
-	uncalculableKeys?: (HintedInvoice & { distributionKeyName: string })[]; // #1221: they hold the run
+	// #1221: they hold the run; why, where (#1315) and whether the invoice is the delivery whose key the Tankbestand takes (#1323)
+	uncalculableKeys?: (HintedInvoice & { distributionKeyName: string; reason: string; apartment: string | null; fuelStock?: boolean })[];
 }
 
 /** An existing statement of the run's period that misses invoices or was made with other settings (#132) */

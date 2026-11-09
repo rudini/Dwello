@@ -10,4 +10,5 @@ export type Reconciliation = {
 	notUpToDate: { id: string; tenantName: string }[];
 	fuelStocks: { position: string; opening: number; closing: number }[]; // #1138: the positions with a Tankbestand
 	vacancies: { apartmentNumber: string; days: number }[]; // #1138: the apartments with Leerstand
+	keyNotCalculable?: { id: string; tenantName: string }[]; // #1309: a key of theirs cannot be calculated
 };

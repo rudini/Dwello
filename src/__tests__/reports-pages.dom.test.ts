@@ -86,4 +86,16 @@ describe('Kostenabstimmung der Berichte', () => {
 			'/statements/s2'
 		]);
 	});
+
+	// #1309 (Fachreview 1309-1): eine Abrechnung mit einem Verteilschlüssel, der sich nicht berechnen lässt, in einer eigenen Zeile
+	it('nennt Abrechnungen mit einem Verteilschlüssel, der sich nicht berechnen lässt, in einer eigenen Zeile', () => {
+		show(ReconciliationPage, {
+			data: { title: 'Kostenabstimmung', reconciliation: { ...reconciliation, keyNotCalculable: [{ id: 's4', tenantName: 'Ina Roth' }] } }
+		} as never);
+		const note = allByTestId('cost-reconciliation-note').at(-1)!;
+		expect(text(note)).toBe(
+			'1 Abrechnung dieser Abrechnungsperiode ist nicht aktuell: Der Verteilschlüssel einiger ihrer Rechnungen lässt sich für die Wohnungen des Gebäudes nicht berechnen. Öffnen Sie sie, um zu sehen, was Sie tun müssen: Ina Roth.'
+		);
+		expect(note.querySelector('a')?.getAttribute('href')).toBe('/statements/s4');
+	});
 });

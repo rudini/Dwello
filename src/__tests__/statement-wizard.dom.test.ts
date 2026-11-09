@@ -1126,7 +1126,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	const withInvoices = (
-		lists: Partial<Record<'lateInvoices' | 'splitKeys', unknown[]>>
+		lists: Partial<Record<'lateInvoices' | 'splitKeys' | 'uncalculableKeys', unknown[]>>
 	) =>
 		open({
 			preview,
@@ -1176,6 +1176,32 @@ describe('Abrechnungen erstellen', () => {
 		expect(heading()).toBe('Erstellen');
 	});
 
+	// #1315 (Fachreview 1309-1): je Verteilschlüssel und Gebäude ein Satz mit dem Grund, auch ohne einzelne Wohnung
+	it('nennt jeden Verteilschlüssel, der sich nicht berechnen lässt, mit seinem Grund', () => {
+		const [failing] = completeness.uncalculableKeys;
+		withInvoices({
+			uncalculableKeys: [
+				{ ...failing, distributionKeyName: 'Ohne Lift', reason: 'STATEMENT_KEY_REASON_ALL_ZERO', apartment: null },
+				{ ...failing, id: 'i2', reason: 'STATEMENT_KEY_REASON_NEGATIVE' },
+				{ ...failing, id: 'i3', reason: 'STATEMENT_KEY_REASON_NEGATIVE' }
+			]
+		});
+
+		expect(byTestId('uncalculable-keys')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'lässt. Die Formel von «Halbe Zimmer» ergibt für die Wohnung 2.01 im Gebäude «Ahornhof» einen negativen Wert. Die Formel von «Ohne Lift» ergibt für alle Wohnungen des Gebäudes «Ahornhof» 0. Wählen Sie'
+		);
+	});
+
+	// #1323 (Fachreview 1309-1): die Lieferung einer anderen Periode, deren Verteilschlüssel die Veränderung Tankbestand verteilt
+	it('sagt bei einer Lieferung aus einer anderen Abrechnungsperiode, dass sie die Veränderung Tankbestand verteilt', () => {
+		const [failing] = completeness.uncalculableKeys;
+		withInvoices({ uncalculableKeys: [{ ...failing, fuelStock: true }] });
+
+		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Lieferung aus einer anderen Abrechnungsperiode: Nach ihrem Verteilschlüssel verteilt Dwello die Veränderung Tankbestand. Ändern Sie ihn, kann das auch Abrechnungen ihrer Abrechnungsperiode betreffen.'
+		);
+	});
+
 	// #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; ohne sie geht es nicht weiter
 	it('hält die Vorschau an, solange eine umlagefähige Rechnung keine Kategorie hat', async () => {
 		const late = completeness.lateInvoices[0];
@@ -1201,15 +1227,18 @@ describe('Abrechnungen erstellen', () => {
 		open({ preview, invoices: [{ ...invoices[0], check: { ...completeness, buildingId: 'b1' } }] });
 		const hint = byTestId('uncalculable-keys')!;
 
+		// #1315 (Entscheid PO, Fachreview 1309-1): wo und warum die Formel scheitert, und zuerst die Rechnung
 		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt: «Halbe Zimmer». Die Formel muss'
+			'Diese Rechnungen haben einen Verteilschlüssel, der sich für die Wohnungen ihres Gebäudes nicht berechnen lässt. Die Formel von «Halbe Zimmer» teilt für die Wohnung 2.01 im Gebäude «Ahornhof» durch null. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist. Ist ihr Verteilschlüssel schon der vereinbarte, korrigieren Sie seine Formel unter «Einstellungen» › «Verteilschlüssel». Das ändert sie für alle Gebäude. «Formel testen» rechnet nur mit vier Beispielwohnungen. Danach geht es weiter.'
 		);
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
 			`/invoices/${failing.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
 		);
 		next();
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen.');
+		expect(byTestId('form-error')!.textContent).toBe(
+			'Der Verteilschlüssel einiger Rechnungen lässt sich nicht berechnen. Wählen Sie bei diesen Rechnungen den Verteilschlüssel, der mit den Mietern vereinbart ist, oder korrigieren Sie seine Formel.'
+		);
 		expect(heading()).toBe('Vorschau');
 		// persona Helga 1221 P-1: the message takes the focus, not the confirmation further down
 		expect(document.activeElement).toBe(byTestId('form-error'));

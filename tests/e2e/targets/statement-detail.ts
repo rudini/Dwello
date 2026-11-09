@@ -175,3 +175,7 @@ export const confirmCarrySettleButton = target('Ausgleich des Übertrags bestät
 // #1284: the note on an apartment that no longer exists from a day in the billed days
 export const discontinuedNote = target('Hinweis aufgehobene Wohnung', (page) => page.getByTestId('statement-discontinued-note'));
 export const sizeChangeNote = target('Hinweis neue Fläche', (page) => page.getByTestId('statement-size-change-note')); // #1301
+
+// #1309 (persona Anna 1309 P-1): an invoice whose key cannot be calculated, named in the hint by its date
+export const laterKeyInvoice = (date: string) =>
+	target(`Rechnung vom ${date} im Hinweis auf Änderungen`, (page) => page.getByTestId('statement-later-key-invoice').filter({ hasText: date }).getByRole('link'));
